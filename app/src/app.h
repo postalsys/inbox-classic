@@ -44,6 +44,9 @@ struct FormField {
     int chosen = -1;
 };
 
+// a column of a report list view, `width` at 96 DPI
+void AddColumn(HWND list, int index, const wchar_t* name, int width, int format = LVCFMT_LEFT);
+
 // a flat toolbar of text buttons, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles
 HWND CreateBar(HWND hwnd, DWORD style, int id);
 // a button with a text on a bar of CreateBar; id 0 is a separator
@@ -52,7 +55,7 @@ void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON);
 // a modal form with a label and an input for each field; true with the values filled in when OK was clicked.
 // `validate` gets the values and returns an error to show, or an empty string to accept them.
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
-                bool (*validate)(const std::vector<FormField>&, std::wstring& error) = nullptr);
+                bool (*validate)(const std::vector<FormField>&, std::wstring& error) = nullptr, const wchar_t* okLabel = L"OK");
 // a dialog window centered on the window of `owner`, owned by it, with this client size; RunModal shows it, runs it
 // until `done` and destroys it, the owner disabled meanwhile
 HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight);

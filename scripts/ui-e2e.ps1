@@ -50,14 +50,14 @@ public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr par
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
 $WM_KEYUP = 0x0101; $BM_CLICK = 0x00F5; $CB_SETCURSEL = 0x014E; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
-$VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28
+$VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
 $IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDC_SEND_LATER = 308; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
-$IDC_SEND = 300; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
+$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
@@ -490,11 +490,27 @@ try {
     }
     Check ([bool](WaitFor { [Native.Win]::IsWindow($compose) -and [Native.Win]::FindWindow('#32770', 'PostalExpress') -eq [IntPtr]::Zero })) 'and the message stays open to fix it'
     SetText $compose $IDC_TO 'Dave <dave@example.com>'
+    # two files attached, one taken off again with Delete
+    $files = Join-Path $env:TEMP 'pe-ui-attach'
+    New-Item -ItemType Directory -Force $files | Out-Null
+    Set-Content (Join-Path $files 'keep-me.txt') 'the attachment that goes'
+    Set-Content (Join-Path $files 'wrong-file.txt') 'attached by mistake'
+    foreach ($file in 'keep-me.txt', 'wrong-file.txt') {
+        Command $compose $IDC_ATTACH
+        [void](AnswerFileDialog 'Insert Attachment' (Join-Path $files $file) $null)
+    }
+    $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
+    $count = { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    Check ([bool](WaitFor { (& $count) -eq 2 } 10)) 'Attach adds the files to the Attach row'
     Shot $compose 'write-5-new'
+    [void][Native.Win]::SendMessage($attached, $LB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
+    Key $attached $VK_DELETE
+    Check ([bool](WaitFor { (& $count) -eq 1 } 10)) 'Delete in the Attach row takes one off'
     Command $compose $IDC_SEND
     $new = WaitFor { Find 'INBOX' 'Subject: A new message from the UI test' } 30
     Check ($null -ne $new) 'the new message was sent'
     Check ($new -and (RawText $new) -match 'Hello Dave, written from scratch') 'with what was typed'
+    Check ($new -and (RawText $new) -match 'keep-me\.txt' -and (RawText $new) -notmatch 'wrong-file') 'with only the file left attached'
 
     Step 'Send Later and the Outbox'
     Command $main $IDM_NEW_MAIL
@@ -510,7 +526,7 @@ try {
     $outbox = WaitWindow 'PostalExpressOutbox' 'Outbox'
     Check ($null -ne $outbox) 'Tools > Outbox lists what waits'
     if ($outbox) {
-        $waiting = [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+        $waiting = [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
         Check ($waiting -eq 1) 'the message is in it'
         Shot $outbox 'write-7-outbox'
         Click $outbox 451

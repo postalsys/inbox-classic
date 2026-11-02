@@ -257,7 +257,7 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
     };
     if (!FormDialog(owner, L"Add Mail Account",
                     L"Your name as others see it, your e-mail address and its password. The servers are looked up next.",
-                    first, ValidFirst)) {
+                    first, ValidFirst, L"Next >")) {
         return 0;
     }
     std::wstring email = first[1].value;
@@ -305,7 +305,7 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
         {L"SMTP security:", info ? SecurityName(info->smtp_security) : kSecurity[0], Kind::Choice, security},
     };
     SecureZeroMemory(first[2].value.data(), first[2].value.size() * sizeof(wchar_t));
-    while (FormDialog(owner, L"Add Mail Account", intro, fields, Validate)) {
+    while (FormDialog(owner, L"Add Mail Account", intro, fields, Validate, L"Finish")) {
         if (!AcceptPlain(owner, fields, L"Add Mail Account")) {
             continue;
         }

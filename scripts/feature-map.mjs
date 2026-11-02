@@ -20,7 +20,7 @@ const sections = [
                 shot: 'account-1-form',
                 name: 'Step 1: name, address, password',
                 what: 'Three fields, nothing technical. The servers are looked up from the address after OK.',
-                how: 'First start, or File > New Account, or New Account on the toolbar.',
+                how: 'First start, or File > New Account.',
                 checked: ['The form opens on the first start']
             },
             {
@@ -255,9 +255,9 @@ const sections = [
             {
                 shot: 'write-5-new',
                 name: 'A new message',
-                what: 'To, Cc, Bcc, Subject, the text and attached files (Attach). Several addresses are separated with commas; names with commas go in quotes.',
+                what: 'To, Cc, Bcc, Subject, the text and attached files (Attach, or dragged from Explorer), listed with their size; Delete or a right-click takes one off. Several addresses are separated with commas; names with commas go in quotes.',
                 how: 'Create Mail on the toolbar, Message > New Message, or Ctrl+N.',
-                checked: ['The message is sent and arrives']
+                checked: ['Attach adds the files', 'Delete takes one off', 'The message is sent and arrives with only the file left']
             },
             {
                 shot: 'write-3b-select-all',

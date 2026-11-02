@@ -68,15 +68,6 @@ HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPAR
     return TreeView_InsertItem(tree, &insert);
 }
 
-void AddColumn(HWND list, int index, const wchar_t* name, int width, int format = LVCFMT_LEFT) {
-    LVCOLUMNW column = {};
-    column.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
-    column.fmt = format;
-    column.pszText = const_cast<wchar_t*>(name);
-    column.cx = Scale(width);
-    ListView_InsertColumn(list, index, &column);
-}
-
 }  // namespace
 
 void Mailbox::Create(HWND parent, PeCore* core) {
@@ -97,7 +88,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     AddColumn(list_, COL_RECEIVED, L"Received", 130);
     AddColumn(list_, COL_SIZE, L"Size", 70, LVCFMT_RIGHT);
 
-    header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
+    header_ = CreateChild(parent, L"STATIC", L" No message is selected.", SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
     attachments_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP, IDC_ATTACHMENTS, {});
     pictures_ = CreateChild(parent, L"BUTTON", L"Download pictures", WS_TABSTOP, IDC_PICTURES, {});
     ShowWindow(attachments_, SW_HIDE);
@@ -370,7 +361,8 @@ void Mailbox::ClearReader() {
     KillTimer(parent_, TIMER_MARK_READ);
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
-    SetWindowTextW(header_, L"");
+    // says so rather than a blank pane; a selected message replaces it with "Loading..."
+    SetWindowTextW(header_, L" No message is selected.");
     preview_.Clear();
 }
 

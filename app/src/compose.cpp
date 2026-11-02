@@ -6,7 +6,10 @@
 #include "editor.h"
 
 #include <commdlg.h>
+#include <shellapi.h>
+#include <windowsx.h>
 
+#include <algorithm>
 #include <utility>
 
 namespace {
@@ -59,7 +62,12 @@ struct Compose {
     std::string inReplyTo;
     std::string references;
     std::string quote;
-    std::vector<std::wstring> files;
+    // the attached files, with what the Attach row shows for each: the name and the size when it was added
+    struct File {
+        std::wstring path;
+        std::wstring label;
+    };
+    std::vector<File> files;
     // the Message-ID of the draft saved in Drafts, empty before the first save
     std::string messageId;
     Editor editor;
@@ -95,6 +103,14 @@ Compose* StateOf(HWND hwnd) {
     return reinterpret_cast<Compose*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
 }
 
+// the columns of the Attach row narrower as there are more files, down to a readable width
+void FitFiles(Compose* state) {
+    RECT row;
+    GetClientRect(state->attached, &row);
+    int each = state->files.empty() ? row.right : static_cast<int>(row.right / static_cast<LONG>(state->files.size()));
+    SendMessageW(state->attached, LB_SETCOLUMNWIDTH, std::clamp(each, Scale(120), Scale(240)), 0);
+}
+
 void Layout(HWND hwnd, Compose* state) {
     RECT client;
     GetClientRect(hwnd, &client);
@@ -120,22 +136,101 @@ void Layout(HWND hwnd, Compose* state) {
     MoveWindow(state->formatBar, x, y - Scale(1), client.right - x - pad, Scale(26), TRUE);
     y += Scale(28);
     state->editor.Resize({pad, y, client.right - pad, std::max(y, static_cast<int>(client.bottom) - pad)});
+    FitFiles(state);
 }
 
+
+// the attached files in the Attach row, side by side
 void ShowFiles(Compose* state) {
-    std::wstring list;
-    for (const std::wstring& file : state->files) {
-        size_t slash = file.find_last_of(L"\\/");
-        list += (list.empty() ? L"" : L"; ") + (slash == std::wstring::npos ? file : file.substr(slash + 1));
+    SendMessageW(state->attached, LB_RESETCONTENT, 0, 0);
+    for (const Compose::File& file : state->files) {
+        SendMessageW(state->attached, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(file.label.c_str()));
     }
-    SetWindowTextW(state->attached, list.c_str());
+    FitFiles(state);
+}
+
+// adds a file that is there (not a folder); false otherwise
+bool AddFile(Compose* state, const std::wstring& path) {
+    WIN32_FILE_ATTRIBUTE_DATA data;
+    if (!GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &data) || (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+        return false;
+    }
+    size_t slash = path.find_last_of(L"\\/");
+    std::wstring name = slash == std::wstring::npos ? path : path.substr(slash + 1);
+    uint64_t size = (static_cast<uint64_t>(data.nFileSizeHigh) << 32) | data.nFileSizeLow;
+    state->files.push_back({path, name + L" (" + FormatSize(size) + L")"});
+    return true;
+}
+
+void AddFiles(Compose* state, const std::vector<std::wstring>& files) {
+    for (const std::wstring& file : files) {
+        if (AddFile(state, file)) {
+            state->dirty = true;
+        }
+    }
+    ShowFiles(state);
 }
 
 void Attach(HWND hwnd, Compose* state) {
-    for (const std::wstring& file : OpenFilesDialog(hwnd, L"Insert Attachment", L"All files (*.*)\0*.*\0")) {
-        state->files.push_back(file);
+    AddFiles(state, OpenFilesDialog(hwnd, L"Insert Attachment", L"All files (*.*)\0*.*\0"));
+}
+
+// files dragged from Explorer onto the window
+void DropFiles(Compose* state, HDROP drop) {
+    std::vector<std::wstring> files;
+    UINT count = DragQueryFileW(drop, 0xFFFFFFFF, nullptr, 0);
+    for (UINT i = 0; i < count; i++) {
+        std::wstring path(DragQueryFileW(drop, i, nullptr, 0), L'\0');
+        DragQueryFileW(drop, i, path.data(), static_cast<UINT>(path.size() + 1));
+        files.push_back(path);
     }
+    DragFinish(drop);
+    AddFiles(state, files);
+}
+
+// the selected file of the Attach row taken off the message
+void RemoveSelectedFile(Compose* state) {
+    LRESULT index = SendMessageW(state->attached, LB_GETCURSEL, 0, 0);
+    if (index < 0 || static_cast<size_t>(index) >= state->files.size()) {
+        return;
+    }
+    state->files.erase(state->files.begin() + index);
+    state->dirty = true;
     ShowFiles(state);
+    size_t left = state->files.size();
+    if (left > 0) {
+        SendMessageW(state->attached, LB_SETCURSEL, std::min(static_cast<size_t>(index), left - 1), 0);
+    }
+}
+
+// right-click on a file of the Attach row: Remove
+void FileMenu(HWND hwnd, Compose* state, LPARAM at) {
+    POINT point;
+    if (at == static_cast<LPARAM>(-1)) {
+        // from the keyboard (Shift+F10): at the field
+        RECT bounds;
+        GetWindowRect(state->attached, &bounds);
+        point = {bounds.left, bounds.bottom};
+    } else {
+        point = {GET_X_LPARAM(at), GET_Y_LPARAM(at)};
+        POINT client = point;
+        ScreenToClient(state->attached, &client);
+        LRESULT hit = SendMessageW(state->attached, LB_ITEMFROMPOINT, 0, MAKELPARAM(client.x, client.y));
+        if (HIWORD(hit)) {
+            return;
+        }
+        SendMessageW(state->attached, LB_SETCURSEL, LOWORD(hit), 0);
+    }
+    if (SendMessageW(state->attached, LB_GETCURSEL, 0, 0) < 0) {
+        return;
+    }
+    HMENU menu = CreatePopupMenu();
+    AppendMenuW(menu, MF_STRING, 1, L"&Remove\tDel");
+    UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, point.x, point.y, 0, hwnd, nullptr);
+    DestroyMenu(menu);
+    if (chosen == 1) {
+        RemoveSelectedFile(state);
+    }
 }
 
 // the message as the core takes it, from the fields and the editor's HTML; `outgoing` points into the strings here
@@ -151,8 +246,8 @@ struct Fields {
           bcc(core::Narrow(GetWindowString(state->bcc))),
           subject(core::Narrow(GetWindowString(state->subject))),
           body(core::Narrow(html)) {
-        for (const std::wstring& file : state->files) {
-            paths.push_back(core::Narrow(file));
+        for (const Compose::File& file : state->files) {
+            paths.push_back(core::Narrow(file.path));
         }
         for (const std::string& path : paths) {
             attachments.push_back(path.c_str());
@@ -350,7 +445,9 @@ void CreateFields(HWND hwnd, Compose* state) {
     state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0);
     AddButton(state->toolbar, IDC_SEND, L"Send");
     AddButton(state->toolbar, IDC_SEND_LATER, L"Send Later");
+    AddButton(state->toolbar, 0, nullptr);
     AddButton(state->toolbar, IDC_SAVE, L"Save");
+    AddButton(state->toolbar, 0, nullptr);
     AddButton(state->toolbar, IDC_ATTACH, L"Attach");
     const wchar_t* labels[] = {L"To:", L"Cc:", L"Bcc:", L"Subject:", L"Attach:"};
     for (int i = 0; i < 5; i++) {
@@ -360,7 +457,9 @@ void CreateFields(HWND hwnd, Compose* state) {
     state->cc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_CC, {}, WS_EX_CLIENTEDGE);
     state->bcc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_BCC, {}, WS_EX_CLIENTEDGE);
     state->subject = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_SUBJECT, {}, WS_EX_CLIENTEDGE);
-    state->attached = CreateChild(hwnd, L"EDIT", L"", ES_AUTOHSCROLL | ES_READONLY, IDC_FILES, {}, WS_EX_CLIENTEDGE);
+    // the files side by side; Delete or a right-click takes one off
+    state->attached = CreateChild(hwnd, L"LISTBOX", L"", WS_TABSTOP | LBS_MULTICOLUMN | LBS_NOINTEGRALHEIGHT | LBS_WANTKEYBOARDINPUT,
+                                  IDC_FILES, {}, WS_EX_CLIENTEDGE);
     CreateFormatBar(hwnd, state);
 }
 
@@ -462,6 +561,24 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             }
         }
         return 0;
+    case WM_VKEYTOITEM:
+        // Delete in the Attach row takes the file off
+        if (state && reinterpret_cast<HWND>(lParam) == state->attached && LOWORD(wParam) == VK_DELETE) {
+            RemoveSelectedFile(state);
+            return -2;
+        }
+        return -1;
+    case WM_CONTEXTMENU:
+        if (state && reinterpret_cast<HWND>(wParam) == state->attached) {
+            FileMenu(hwnd, state, lParam);
+            return 0;
+        }
+        break;
+    case WM_DROPFILES:
+        if (state) {
+            DropFiles(state, reinterpret_cast<HDROP>(wParam));
+        }
+        return 0;
     case WM_CTLCOLORSTATIC:
         return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
     case WM_CLOSE:
@@ -519,6 +636,8 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
     auto* state = new Compose{core, account};
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
     CreateFields(hwnd, state);
+    // files dropped from Explorer are attached
+    DragAcceptFiles(hwnd, TRUE);
     if (draft) {
         SetWindowTextW(state->to, Text(draft->to).c_str());
         SetWindowTextW(state->cc, Text(draft->cc).c_str());
@@ -530,7 +649,7 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
         // a saved draft opened again: its files, and its Message-ID so the next save replaces it
         state->messageId = draft->message_id ? draft->message_id : "";
         for (size_t i = 0; i < draft->attachment_count; i++) {
-            state->files.push_back(Text(draft->attachments[i]));
+            AddFile(state, Text(draft->attachments[i]));
         }
         ShowFiles(state);
     }

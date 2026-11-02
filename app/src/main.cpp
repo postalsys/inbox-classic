@@ -221,8 +221,12 @@ void CreateToolbar(HWND hwnd) {
         WORD id;
         const wchar_t* text;
     };
-    Button buttons[] = {{IDM_NEW_MAIL, L"Create Mail"}, {IDM_REPLY, L"Reply"}, {IDM_REPLY_ALL, L"Reply All"},
-                        {IDM_FORWARD, L"Forward"}, {IDM_DELETE, L"Delete"}, {IDM_SYNC, L"Send/Recv"}, {IDM_MARK_READ, L"Mark Read"}, {IDM_MARK_UNREAD, L"Mark Unread"}, {IDM_NEW_ACCOUNT, L"New Account"}};
+    // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state (0 separates)
+    Button buttons[] = {{IDM_NEW_MAIL, L"Create Mail"}, {0, nullptr},          {IDM_REPLY, L"Reply"},
+                        {IDM_REPLY_ALL, L"Reply All"},  {IDM_FORWARD, L"Forward"}, {0, nullptr},
+                        {IDM_PRINT, L"Print"},          {IDM_DELETE, L"Delete"},   {0, nullptr},
+                        {IDM_SYNC, L"Send/Recv"},       {0, nullptr},              {IDM_MARK_READ, L"Mark Read"},
+                        {IDM_MARK_UNREAD, L"Mark Unread"}};
     for (const Button& button : buttons) {
         AddButton(g_toolbar, button.id, button.text);
     }

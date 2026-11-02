@@ -178,7 +178,7 @@ LRESULT ButtonFaceColor(HDC dc) {
 }
 
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
-                bool (*validate)(const std::vector<FormField>&, std::wstring&)) {
+                bool (*validate)(const std::vector<FormField>&, std::wstring&), const wchar_t* okLabel) {
     RegisterFormClass();
     int pad = Scale(10);
     int labelWidth = Scale(130);
@@ -205,7 +205,7 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     }
     int buttonWidth = Scale(80);
     int buttonTop = clientHeight - pad - Scale(25);
-    CreateChild(dialog, L"BUTTON", L"OK", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
+    CreateChild(dialog, L"BUTTON", okLabel, WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
                 {clientWidth - pad - 2 * buttonWidth - Scale(6), buttonTop, clientWidth - pad - buttonWidth - Scale(6),
                  buttonTop + Scale(25)});
     CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL,
@@ -243,6 +243,15 @@ bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size) 
     std::ofstream stream(path, std::ios::binary | std::ios::trunc);
     stream.write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));
     return stream.good();
+}
+
+void AddColumn(HWND list, int index, const wchar_t* name, int width, int format) {
+    LVCOLUMNW column = {};
+    column.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
+    column.fmt = format;
+    column.pszText = const_cast<wchar_t*>(name);
+    column.cx = Scale(width);
+    ListView_InsertColumn(list, index, &column);
 }
 
 // ---- toolbars ----

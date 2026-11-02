@@ -102,12 +102,9 @@
         </ol>
 
         <h2>1. Adding an account</h2>
-        <p>
-            The first time PostalExpress starts it asks for an account. To add another one later, choose <b>File &gt; New Account</b> or click
-            <b>New Account</b> on the toolbar.
-        </p>
+        <p>The first time PostalExpress starts it asks for an account. To add another one later, choose <b>File &gt; New Account</b>.</p>
         <ol>
-            <li>Type your name as others should see it, your e-mail address and your password, and click <b>OK</b>.</li>
+            <li>Type your name as others should see it, your e-mail address and your password, and click <b>Next</b>.</li>
             <li>
                 PostalExpress looks up the settings of your mail provider: from the provider that handles your domain's mail, your domain's DNS records, your
                 provider's settings file, Thunderbird's list of providers and, for Exchange, Microsoft Autodiscover. This takes a few seconds;
@@ -115,7 +112,7 @@
             </li>
             <li>If your provider wants an app password instead of your normal one, PostalExpress says so and offers to open its instructions.</li>
             <li>
-                Check the server settings it found and click <b>OK</b>. If it found nothing it fills in the usual names (<code>imap.</code> and
+                Check the server settings it found and click <b>Finish</b>. If it found nothing it fills in the usual names (<code>imap.</code> and
                 <code>smtp.</code> followed by your domain); compare them with what your provider tells you.
             </li>
         </ol>
@@ -261,7 +258,11 @@
                 <code>"Smith, Mary" &lt;mary@example.com&gt;</code>.
             </li>
             <li>People in <b>Bcc</b> get the message, but the other recipients do not see them.</li>
-            <li><b>Attach</b> adds files; the files are read when the message is sent.</li>
+            <li>
+                <b>Attach</b> adds files, and so does dragging them from Explorer onto the address fields. They are listed in the <b>Attach</b> row with their
+                size; to take one off, select it and press <kbd>Delete</kbd>, or right-click it and choose <b>Remove</b>. The files are read when the message is
+                sent.
+            </li>
             <li>
                 <b>Send</b> puts the message in the <b>Outbox</b> and sends it right away. When it can not go (no connection, the server refuses it) it stays in
                 the Outbox and goes with the next <b>Send/Recv</b>; nothing you wrote is lost. <b>Send Later</b> only puts it in the Outbox. The status bar says
