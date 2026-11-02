@@ -9,7 +9,10 @@ use std::path::PathBuf;
 use pe_imap::{Client, Credentials, ErrorKind, Event as ImapEvent};
 use pe_net::Trust;
 use pe_store::{AccountId, FolderId, Store};
-use pe_sync::{Change, apply_event, fetch_source, imap_config, set_seen, smtp_config, sync_folder, sync_folders};
+use pe_sync::{
+    Change, apply_event, expunge_message, fetch_source, imap_config, move_message, set_flag, smtp_config, sync_folder,
+    sync_folders,
+};
 use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 
 use crate::{Event, EventSink, FailureKind, Secrets};
@@ -17,8 +20,28 @@ use crate::{Event, EventSink, FailureKind, Secrets};
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum Command {
     Sync,
-    FetchSource { folder: FolderId, uid: u64 },
-    SetSeen { folder: FolderId, uid: u64, seen: bool },
+    FetchSource {
+        folder: FolderId,
+        uid: u64,
+    },
+    SetFlag {
+        folder: FolderId,
+        uid: u64,
+        flag: &'static str,
+        on: bool,
+    },
+    /// `removed` is the row taken out of the store, put back when the server does not do it
+    Move {
+        folder: FolderId,
+        uid: u64,
+        to: FolderId,
+        removed: Box<pe_store::MessageInfo>,
+    },
+    Expunge {
+        folder: FolderId,
+        uid: u64,
+        removed: Box<pe_store::MessageInfo>,
+    },
     Send(Box<crate::Outgoing>),
 }
 
@@ -182,11 +205,53 @@ impl Worker {
                 self.emit(Event::MessageReady { folder, uid });
                 Ok(())
             }
-            Command::SetSeen { folder, uid, seen } => {
-                Ok(set_seen(self.client(store).await?, store, folder, uid, seen).await?)
+            Command::SetFlag { folder, uid, flag, on } => {
+                Ok(set_flag(self.client(store).await?, store, folder, uid, flag, on).await?)
+            }
+            Command::Move {
+                folder,
+                uid,
+                to,
+                removed,
+            } => {
+                let moved = match self.client(store).await {
+                    Ok(client) => move_message(client, store, folder, uid, to)
+                        .await
+                        .map_err(Failure::from),
+                    Err(failure) => Err(failure),
+                };
+                self.restore_on_failure(store, folder, *removed, moved)?;
+                // the message shows up in the folder it went to
+                self.sync_one(store, to).await
+            }
+            Command::Expunge { folder, uid, removed } => {
+                let expunged = match self.client(store).await {
+                    Ok(client) => expunge_message(client, store, folder, uid).await.map_err(Failure::from),
+                    Err(failure) => Err(failure),
+                };
+                self.restore_on_failure(store, folder, *removed, expunged)
             }
             Command::Send(outgoing) => self.send(store, *outgoing).await,
         }
+    }
+
+    /// A message the windows took out of a folder before the server moved or deleted it: back in when the server did
+    /// not (offline, refused), so it is not lost from view while it is still on the server
+    fn restore_on_failure(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        removed: pe_store::MessageInfo,
+        outcome: Outcome,
+    ) -> Outcome {
+        if outcome.is_err() {
+            store.add_messages(folder, &[removed])?;
+            self.emit(Event::FolderChanged {
+                account: self.account,
+                folder,
+            });
+        }
+        outcome
     }
 
     /// Sends over SMTP, then puts a copy in the Sent folder

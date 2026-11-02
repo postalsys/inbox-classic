@@ -504,15 +504,86 @@ impl Core {
 
     /// Marks a message read or unread: in the store now, on the server in the background
     pub fn set_seen(&self, folder: FolderId, uid: u64, seen: bool) -> Result<()> {
+        self.set_flag(folder, uid, "\\Seen", seen)
+    }
+
+    /// Flags a message or takes its flag away: in the store now, on the server in the background
+    pub fn set_flagged(&self, folder: FolderId, uid: u64, flagged: bool) -> Result<()> {
+        self.set_flag(folder, uid, "\\Flagged", flagged)
+    }
+
+    fn set_flag(&self, folder: FolderId, uid: u64, flag: &'static str, on: bool) -> Result<()> {
         let (account, changed) = {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
-            (account, store.set_flag(folder, uid, "\\Seen", seen)?)
+            (account, store.set_flag(folder, uid, flag, on)?)
         };
         if changed {
             self.post(Event::FolderChanged { account, folder })?;
         }
-        self.send_command(account, Command::SetSeen { folder, uid, seen })
+        self.send_command(account, Command::SetFlag { folder, uid, flag, on })
+    }
+
+    /// Moves a message to another folder of its account: out of the store now, on the server in the background,
+    /// which then syncs the folder it went to. When the server does not move it, it comes back into the folder.
+    pub fn move_message(&self, folder: FolderId, uid: u64, to: FolderId) -> Result<()> {
+        {
+            let store = self.store();
+            let target = store.folder(to)?;
+            if target.account_id != store.folder(folder)?.account_id || !target.info.selectable || to == folder {
+                return Err(Error::NotFound);
+            }
+        }
+        self.remove_then(folder, uid, |removed| Command::Move {
+            folder,
+            uid,
+            to,
+            removed,
+        })
+    }
+
+    /// Deletes a message as Outlook Express does: into Deleted Items (the account's `\\Trash`), or for good when it
+    /// is in there already or the account has none ([`Core::deletes_for_good`]). Out of the store now, on the server
+    /// in the background.
+    pub fn delete_message(&self, folder: FolderId, uid: u64) -> Result<()> {
+        match self.trash_for(folder)? {
+            Some(trash) => self.move_message(folder, uid, trash),
+            None => self.remove_then(folder, uid, |removed| Command::Expunge { folder, uid, removed }),
+        }
+    }
+
+    /// Whether deleting from `folder` removes a message for good: it is Deleted Items, or the account has none
+    pub fn deletes_for_good(&self, folder: FolderId) -> Result<bool> {
+        Ok(self.trash_for(folder)?.is_none())
+    }
+
+    /// The Deleted Items folder a message of `folder` goes to, None when it is that folder or there is none
+    fn trash_for(&self, folder: FolderId) -> Result<Option<FolderId>> {
+        let store = self.store();
+        let account = store.folder(folder)?.account_id;
+        Ok(store
+            .special_folder(account, "\\Trash")?
+            .map(|trash| trash.id)
+            .filter(|&trash| trash != folder))
+    }
+
+    /// Takes a message out of the store, tells the windows, and hands the server the work `command` makes of the row
+    /// (put back when the server does not do it)
+    fn remove_then(
+        &self,
+        folder: FolderId,
+        uid: u64,
+        command: impl FnOnce(Box<pe_store::MessageInfo>) -> Command,
+    ) -> Result<()> {
+        let (account, removed) = {
+            let store = self.store();
+            let account = store.folder(folder)?.account_id;
+            let removed = store.message(folder, uid)?.ok_or(Error::NotFound)?.info;
+            store.remove_messages(folder, &[uid])?;
+            (account, removed)
+        };
+        self.post(Event::FolderChanged { account, folder })?;
+        self.send_command(account, command(Box::new(removed)))
     }
 
     fn send_command(&self, account: AccountId, command: Command) -> Result<()> {

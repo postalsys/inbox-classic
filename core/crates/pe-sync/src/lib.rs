@@ -303,13 +303,50 @@ async fn ensure_selected(client: &mut Client, path: &str) -> Result<()> {
     Ok(())
 }
 
-/// Marks a message read or unread on the server. The store is the caller's to change, so the
-/// windows show it before the server has it.
-pub async fn set_seen(client: &mut Client, store: &mut Store, folder: FolderId, uid: u64, seen: bool) -> Result<()> {
+/// Sets or clears a flag (`\\Seen`, `\\Flagged`) of a message on the server. The store is the caller's to change,
+/// so the windows show it before the server has it.
+pub async fn set_flag(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uid: u64,
+    flag: &str,
+    on: bool,
+) -> Result<()> {
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
-    let action = if seen { StoreAction::Add } else { StoreAction::Remove };
-    client.store(&Messages::uid(uid), action, &["\\Seen"]).await?;
+    let action = if on { StoreAction::Add } else { StoreAction::Remove };
+    client.store(&Messages::uid(uid), action, &[flag]).await?;
+    Ok(())
+}
+
+/// Moves a message to another folder of the account on the server (MOVE, or COPY and expunge where the server has
+/// no MOVE). The store is the caller's to change; the folder it went to is the caller's to sync.
+pub async fn move_message(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uid: u64,
+    to: FolderId,
+) -> Result<()> {
+    let (from, to) = (store.folder(folder)?.info.path, store.folder(to)?.info.path);
+    ensure_selected(client, &from).await?;
+    client.move_messages(&Messages::uid(uid), &to).await?;
+    Ok(())
+}
+
+/// Deletes a message for good on the server: `\\Deleted`, then expunged. With UIDPLUS only this message is
+/// expunged; without it, EXPUNGE takes every message of the folder marked deleted, as other mail programs do too.
+pub async fn expunge_message(client: &mut Client, store: &mut Store, folder: FolderId, uid: u64) -> Result<()> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let message = Messages::uid(uid);
+    client.store(&message, StoreAction::Add, &["\\Deleted"]).await?;
+    let only = pe_imap::SequenceSet::range(uid, Some(uid));
+    match client.expunge(Some(&only)).await {
+        Err(pe_imap::Error::Unsupported(_)) => client.expunge(None).await?,
+        other => other?,
+    }
     Ok(())
 }
 
@@ -352,6 +389,6 @@ fn futures_are_send(client: &mut Client, store: &mut Store, event: &Event) {
     send(sync_folders(&mut *client, &mut *store, 1));
     send(sync_folder(&mut *client, &mut *store, 1));
     send(fetch_source(&mut *client, &mut *store, 1, 1));
-    send(set_seen(&mut *client, &mut *store, 1, 1, true));
+    send(set_flag(&mut *client, &mut *store, 1, 1, "\\Seen", true));
     let _ = apply_event(store, 1, event);
 }

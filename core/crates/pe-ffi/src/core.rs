@@ -788,6 +788,51 @@ pub unsafe extern "C" fn pe_message_set_seen(core: *const PeCore, folder: i64, u
     unsafe { with(core, false, |core| core.set_seen(folder, uid, seen).is_ok()) }
 }
 
+/// Flags a message or takes its flag away: in the store now (`FolderChanged` follows), on the server in the
+/// background
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_set_flagged(core: *const PeCore, folder: i64, uid: u64, flagged: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_flagged(folder, uid, flagged).is_ok()) }
+}
+
+/// Moves a message to another folder of its account: out of the list now (`FolderChanged`), into the other
+/// folder once the server has it (`FolderChanged` of that folder). False for a folder of another account, the
+/// folder it is in, or one that holds no messages.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_move(core: *const PeCore, folder: i64, uid: u64, to: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.move_message(folder, uid, to).is_ok()) }
+}
+
+/// Whether deleting a message of `folder` removes it for good (it is Deleted Items, or the account has none), so the
+/// window can ask first
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_deletes_for_good(core: *const PeCore, folder: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.deletes_for_good(folder).unwrap_or(false)) }
+}
+
+/// Deletes a message: into Deleted Items, or for good when it is in there or the account has none. Out of the list
+/// now (`FolderChanged`), on the server in the background.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_delete(core: *const PeCore, folder: i64, uid: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.delete_message(folder, uid).is_ok()) }
+}
+
 // ---- the message view ----
 
 #[repr(C)]

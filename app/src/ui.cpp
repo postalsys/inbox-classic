@@ -39,6 +39,9 @@ LRESULT CALLBACK FormProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             std::vector<FormField> values = *state->fields;
             for (size_t i = 0; i < values.size(); i++) {
                 values[i].value = InputValue(values[i], state->inputs[i]);
+                if (values[i].kind == FormField::Kind::Choice) {
+                    values[i].chosen = static_cast<int>(SendMessageW(state->inputs[i], CB_GETCURSEL, 0, 0));
+                }
             }
             std::wstring error;
             if (state->validate && !state->validate(values, error)) {

@@ -460,6 +460,75 @@ void Mailbox::MarkSelected(bool seen) {
     }
 }
 
+// after a message left the list: the one that took its place selected, or the last one
+void Mailbox::SelectAfterRemoval(int index) {
+    ReloadList(false);
+    if (index >= 0 && total_ > 0) {
+        int next = std::min(index, static_cast<int>(std::min<uint64_t>(total_, INT_MAX)) - 1);
+        ListView_SetItemState(list_, next, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+        ListView_EnsureVisible(list_, next, FALSE);
+    }
+}
+
+void Mailbox::DeleteSelected() {
+    int index = ListView_GetNextItem(list_, -1, LVNI_SELECTED);
+    const PeMessage* row = Row(index);
+    if (!row) {
+        return;
+    }
+    uint64_t uid = row->uid;
+    // from Deleted Items, or an account without one, it is gone for good: asked first, as Outlook Express does
+    if (pe_folder_deletes_for_good(core_, folder_) &&
+        MessageBoxW(parent_, L"This message will be deleted for good. Delete it?", L"PostalExpress",
+                    MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+        return;
+    }
+    if (pe_message_delete(core_, folder_, uid)) {
+        SelectAfterRemoval(index);
+    }
+}
+
+void Mailbox::MoveSelected(HWND owner) {
+    int index = ListView_GetNextItem(list_, -1, LVNI_SELECTED);
+    const PeMessage* row = Row(index);
+    if (!row) {
+        return;
+    }
+    uint64_t uid = row->uid;
+    // the other folders of the account that hold messages
+    std::vector<int64_t> ids;
+    FormField field{L"Folder:", L"", FormField::Kind::Choice};
+    core::FolderList folders(pe_folders(core_, CurrentAccount()));
+    for (size_t i = 0; i < pe_folder_list_count(folders.get()); i++) {
+        const PeFolder* folder = pe_folder_list_get(folders.get(), i);
+        if (folder && folder->selectable && folder->id != folder_) {
+            ids.push_back(folder->id);
+            // a special folder by its usual name, the others by their whole path: two folders 2024 in Work and
+            // in Personal are not the same
+            field.choices.push_back(folder->special_use != PE_SPECIAL_USE_NONE ? FolderName(*folder) : Text(folder->path));
+        }
+    }
+    if (ids.empty()) {
+        return;
+    }
+    field.value = field.choices[0];
+    std::vector<FormField> fields = {field};
+    if (!FormDialog(owner, L"Move", L"Move the selected message to the folder:", fields)) {
+        return;
+    }
+    int chosen = fields[0].chosen;
+    if (chosen >= 0 && static_cast<size_t>(chosen) < ids.size() && pe_message_move(core_, folder_, uid, ids[chosen])) {
+        SelectAfterRemoval(index);
+    }
+}
+
+void Mailbox::FlagSelected() {
+    const PeMessage* row = SelectedRow();
+    if (row) {
+        pe_message_set_flagged(core_, folder_, row->uid, !row->flagged);
+    }
+}
+
 std::wstring Mailbox::Counts() const {
     if (!folder_) {
         return L"";
@@ -492,6 +561,12 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
     case LVN_ITEMCHANGED:
         if (!reloading_ && (reinterpret_cast<NMLISTVIEW*>(header)->uChanged & LVIF_STATE)) {
             OnSelectionChanged();
+        }
+        return true;
+    case LVN_KEYDOWN:
+        // Delete in the list, not as a shortcut of the window: in a text field it deletes text
+        if (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey == VK_DELETE) {
+            DeleteSelected();
         }
         return true;
     case LVN_COLUMNCLICK: {

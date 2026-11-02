@@ -150,9 +150,14 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_STRING, IDM_REPLY, L"&Reply to Sender\tCtrl+R");
     AppendMenuW(compose, MF_STRING, IDM_REPLY_ALL, L"Reply to &All\tCtrl+Shift+R");
     AppendMenuW(compose, MF_STRING, IDM_FORWARD, L"&Forward\tCtrl+F");
+    AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(compose, MF_STRING, IDM_FLAG, L"F&lag Message");
     HMENU edit = CreatePopupMenu();
     AppendMenuW(edit, MF_STRING, IDM_MARK_READ, L"Mark as &Read\tCtrl+Q");
     AppendMenuW(edit, MF_STRING, IDM_MARK_UNREAD, L"Mark as &Unread");
+    AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(edit, MF_STRING, IDM_MOVE, L"Mo&ve to Folder...\tCtrl+Shift+V");
+    AppendMenuW(edit, MF_STRING, IDM_DELETE, L"&Delete Message\tDel");
     HMENU view = CreatePopupMenu();
     AppendMenuW(view, MF_STRING, IDM_PICTURES, L"Download &Pictures");
     HMENU tools = CreatePopupMenu();
@@ -174,12 +179,12 @@ HMENU BuildMenu() {
 HACCEL BuildAccelerators() {
     ACCEL keys[] = {
         {FVIRTKEY, VK_F5, IDM_SYNC},
-        {FVIRTKEY, VK_F1, IDM_HELP},
         {FVIRTKEY | FCONTROL, 'Q', IDM_MARK_READ},
         {FVIRTKEY | FCONTROL, 'N', IDM_NEW_MAIL},
         {FVIRTKEY | FCONTROL, 'R', IDM_REPLY},
         {FVIRTKEY | FCONTROL | FSHIFT, 'R', IDM_REPLY_ALL},
         {FVIRTKEY | FCONTROL, 'F', IDM_FORWARD},
+        {FVIRTKEY | FCONTROL | FSHIFT, 'V', IDM_MOVE},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -191,7 +196,7 @@ void CreateToolbar(HWND hwnd) {
         const wchar_t* text;
     };
     Button buttons[] = {{IDM_NEW_MAIL, L"Create Mail"}, {IDM_REPLY, L"Reply"}, {IDM_REPLY_ALL, L"Reply All"},
-                        {IDM_FORWARD, L"Forward"}, {IDM_SYNC, L"Send/Recv"}, {IDM_MARK_READ, L"Mark Read"}, {IDM_MARK_UNREAD, L"Mark Unread"}, {IDM_NEW_ACCOUNT, L"New Account"}};
+                        {IDM_FORWARD, L"Forward"}, {IDM_DELETE, L"Delete"}, {IDM_SYNC, L"Send/Recv"}, {IDM_MARK_READ, L"Mark Read"}, {IDM_MARK_UNREAD, L"Mark Unread"}, {IDM_NEW_ACCOUNT, L"New Account"}};
     for (const Button& button : buttons) {
         AddButton(g_toolbar, button.id, button.text);
     }
@@ -377,6 +382,15 @@ void OnCommand(WORD id) {
     case IDM_MARK_UNREAD:
         g_mailbox.MarkSelected(false);
         return;
+    case IDM_DELETE:
+        g_mailbox.DeleteSelected();
+        return;
+    case IDM_MOVE:
+        g_mailbox.MoveSelected(g_main);
+        return;
+    case IDM_FLAG:
+        g_mailbox.FlagSelected();
+        return;
     case IDM_PICTURES:
         g_mailbox.LoadPictures();
         return;
@@ -537,7 +551,13 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
 
     MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
-        if (TranslateAcceleratorW(hwnd, g_accelerators, &msg)) {
+        // F1 is the help from every window
+        if (msg.message == WM_KEYDOWN && msg.wParam == VK_F1) {
+            OpenHelp();
+            continue;
+        }
+        // the main window's shortcuts in the main window only: Ctrl+F in a compose window is not Forward
+        if (GetAncestor(msg.hwnd, GA_ROOT) == hwnd && TranslateAcceleratorW(hwnd, g_accelerators, &msg)) {
             continue;
         }
         // Tab moves between the panes of the main window and the fields of a compose window

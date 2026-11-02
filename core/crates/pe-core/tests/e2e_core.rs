@@ -351,3 +351,127 @@ fn signs_in_with_oauth() {
     core.sign_in_cancel(cancelled);
     assert!(core.sign_in_result(cancelled).is_err());
 }
+
+#[test]
+fn flags_moves_and_deletes_messages() {
+    let Some(s) = setup() else { return };
+    let flag = s.server.add_message("INBOX", &rfc822("Flag me", "1"), &[]);
+    let archive = s.server.add_message("INBOX", &rfc822("Archive me", "2"), &[]);
+    let delete = s.server.add_message("INBOX", &rfc822("Delete me", "3"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive_folder, trash) = (id("INBOX"), id("Archive"), id("Trash"));
+    let in_store = |folder| -> Vec<String> {
+        let mut subjects: Vec<String> = s
+            .core
+            .messages(folder, Sort::default(), 0, 100)
+            .unwrap()
+            .into_iter()
+            .map(|m| m.info.subject)
+            .collect();
+        subjects.sort();
+        subjects
+    };
+    // waits for the server to have what `done` checks
+    let eventually = |done: &dyn Fn() -> bool| {
+        for _ in 0..200 {
+            if done() {
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(25));
+        }
+        panic!("the server did not get there");
+    };
+
+    // a flag: in the store at once, on the server soon
+    s.core.set_flagged(inbox, flag, true).unwrap();
+    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
+    let row = s.core.messages(inbox, Sort::default(), 0, 100).unwrap();
+    assert!(row.iter().find(|m| m.info.uid == flag).unwrap().info.flagged());
+    eventually(&|| s.server.flags("INBOX", flag).contains(&"\\Flagged".to_string()));
+    s.core.set_flagged(inbox, flag, false).unwrap();
+    eventually(&|| !s.server.flags("INBOX", flag).contains(&"\\Flagged".to_string()));
+
+    // a move: gone from the list at once, in the other folder once the server has it
+    s.core.move_message(inbox, archive, archive_folder).unwrap();
+    assert_eq!(in_store(inbox), ["Delete me", "Flag me"]);
+    s.wait(|e| {
+        *e == Event::FolderChanged {
+            account,
+            folder: archive_folder,
+        }
+    });
+    assert_eq!(in_store(archive_folder), ["Archive me"]);
+    assert_eq!(s.server.subjects("Archive"), ["Archive me"]);
+    // not into a folder of another account, nor into the folder it is in
+    assert!(s.core.move_message(inbox, flag, inbox).is_err());
+
+    // deleting: into Deleted Items, and from there for good (which the window asks about first)
+    assert!(!s.core.deletes_for_good(inbox).unwrap());
+    assert!(s.core.deletes_for_good(trash).unwrap());
+    s.core.delete_message(inbox, delete).unwrap();
+    s.wait(|e| *e == Event::FolderChanged { account, folder: trash });
+    assert_eq!(in_store(trash), ["Delete me"]);
+    assert_eq!(s.server.subjects("Trash"), ["Delete me"]);
+    let in_trash = s.core.messages(trash, Sort::default(), 0, 10).unwrap()[0].info.uid;
+    s.core.delete_message(trash, in_trash).unwrap();
+    assert!(in_store(trash).is_empty());
+    eventually(&|| s.server.subjects("Trash").is_empty());
+    assert_eq!(s.server.subjects("INBOX"), ["Flag me"]);
+
+    // a sync agrees with all of it
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    assert_eq!(in_store(inbox), ["Flag me"]);
+    assert!(in_store(trash).is_empty());
+}
+
+#[test]
+fn a_move_or_delete_the_server_does_not_do_comes_back() {
+    let Some(s) = setup() else { return };
+    let first = s.server.add_message("INBOX", &rfc822("First", "1"), &[]);
+    let second = s.server.add_message("INBOX", &rfc822("Second", "2"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive, trash) = (id("INBOX"), id("Archive"), id("Trash"));
+    let Setup {
+        server,
+        core,
+        events,
+        _dir,
+    } = s;
+    // the server goes away: nothing it was asked can happen
+    drop(server);
+    core.move_message(inbox, first, archive).unwrap();
+    core.delete_message(inbox, second).unwrap();
+    // out of the list at once
+    let mut changes = 0;
+    let mut failures = 0;
+    while failures < 2 || changes < 4 {
+        match events.recv_timeout(Duration::from_secs(20)).expect("events") {
+            Event::FolderChanged { folder, .. } if folder == inbox => changes += 1,
+            Event::Failed { kind, .. } => {
+                assert_ne!(kind, FailureKind::Authentication);
+                failures += 1;
+            }
+            _ => {}
+        }
+    }
+    // and back in once the server did not take them, not in Archive or Deleted Items
+    let mut uids_now: Vec<u64> = core
+        .messages(inbox, Sort::default(), 0, 10)
+        .unwrap()
+        .iter()
+        .map(|m| m.info.uid)
+        .collect();
+    uids_now.sort();
+    assert_eq!(uids_now, [first, second]);
+    assert!(core.messages(archive, Sort::default(), 0, 10).unwrap().is_empty());
+    assert!(core.messages(trash, Sort::default(), 0, 10).unwrap().is_empty());
+}

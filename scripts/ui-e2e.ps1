@@ -53,6 +53,7 @@ $VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
+$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
 $IDC_SEND = 300; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
 
@@ -320,9 +321,17 @@ try {
     Check ($null -ne $menu) 'Attachments offers the files to save'
     if ($menu) {
         Shot $main 'read-3-attachments' $menu
-        Key $menu $VK_DOWN
-        Key $menu $VK_RETURN
-        $save = WaitWindow '#32770' 'Save Attachment As' 10
+        # the keys once the menu takes them: on a slow machine it appears before it does
+        $save = $null
+        for ($try = 0; $try -lt 3 -and -not $save; $try++) {
+            Start-Sleep -Milliseconds 500
+            $menu = [Native.Win]::FindWindow('#32768', [NullString]::Value)
+            if ($menu -ne [IntPtr]::Zero) {
+                Key $menu $VK_DOWN
+                Key $menu $VK_RETURN
+            }
+            $save = WaitWindow '#32770' 'Save Attachment As' 5
+        }
         Check ($null -ne $save) 'choosing one asks where to save it'
         if ($save) {
             # the file name box: the edit field that holds the suggested name (Explorer may hide the extension)
@@ -456,6 +465,49 @@ try {
     Check ($null -ne (WaitFor { if ((Rows) -ge 2) { Rows } })) 'Sent Items has what was sent'
     SelectRow 0
     Shot $main 'main-3-sent-items'
+    SelectFolder 0
+
+    # ---- flag, delete, move ----
+
+    Step 'flagging, deleting and moving'
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 7) { Rows } })
+    # the newest message, "One more thing"
+    SelectRow 0
+    Command $main $IDM_FLAG
+    Check ([bool](WaitFor { (Find 'INBOX' 'Subject: One more thing').flags -contains '\Flagged' })) 'Flag Message flags it on the server'
+    Shot $main 'organize-1-flagged'
+    Command $main $IDM_DELETE
+    Check ($null -ne (WaitFor { Find 'Trash' 'Subject: One more thing' } 20)) 'Delete puts it in Deleted Items'
+    Check ($null -eq (Find 'INBOX' 'Subject: One more thing')) 'and takes it out of the Inbox'
+    Check ([bool](WaitFor { (Rows) -eq 6 })) 'the list has one less'
+    # the next one is selected: move it to Archive through the dialog
+    Command $main $IDM_MOVE
+    $move = WaitFor {
+        $f = [Native.Win]::FindWindow('PostalExpressForm', 'Move')
+        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 100) -ne [IntPtr]::Zero) { $f }
+    }
+    Check ($null -ne $move) 'Move to Folder asks where'
+    if ($move) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($move, 100), $CB_SELECTSTRING, [IntPtr](-1), 'Archive')
+        Shot $move 'organize-2-move'
+        Click $move 1
+        Check ($null -ne (WaitFor { Find 'Archive' 'Subject: A new message from the UI test' } 20)) 'the selected message is in Archive'
+        Check ([bool](WaitFor { (Rows) -eq 5 })) 'and out of the list'
+    }
+    Shot $main 'organize-3-after'
+    # from Deleted Items it is gone for good, after asking
+    SelectFolder 5
+    [void](WaitFor { if ((Rows) -ge 1) { Rows } })
+    SelectRow 0
+    Command $main $IDM_DELETE
+    $sure = WaitWindow '#32770' 'PostalExpress' 10
+    Check ($null -ne $sure) 'deleting for good asks first'
+    if ($sure) {
+        Shot $sure 'organize-4-for-good'
+        Click $sure 6
+    }
+    Check ([bool](WaitFor { -not (Find 'Trash' 'Subject: One more thing') } 20)) 'and then it is gone from the server'
     SelectFolder 0
 
     Step 'closing a message that was written'

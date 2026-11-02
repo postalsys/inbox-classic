@@ -7,7 +7,9 @@
 use pe_imap::{Client, Event};
 use pe_net::Security;
 use pe_store::{AccountId, AccountSettings, FolderId, Sort, Store};
-use pe_sync::{Change, Report, apply_event, fetch_source, sync_folder, sync_folders};
+use pe_sync::{
+    Change, Report, apply_event, expunge_message, fetch_source, move_message, set_flag, sync_folder, sync_folders,
+};
 use pe_testkit::{ImapKit, USER, password, rfc822, wait_for};
 use serde_json::{Value, json};
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -269,4 +271,51 @@ async fn large_folders_arrive_in_batches() {
     s.server.expunge("INBOX", &uids[3..5]);
     let report = s.sync(inbox).await;
     assert_eq!((report.flags_changed, report.removed), (3, 2), "{report:?}");
+}
+
+/// Flagging, moving and deleting on the server, as the windows ask for them
+async fn message_actions(config: Value) {
+    let mut s = setup!(config);
+    let keep = s.server.add_message("INBOX", &rfc822("Keep", "1"), &[]);
+    let moved = s.server.add_message("INBOX", &rfc822("Move me", "2"), &[]);
+    let deleted = s.server.add_message("INBOX", &rfc822("Delete me", "3"), &[]);
+    let inbox = s.folder("INBOX").await;
+    let archive = s.folder("Archive").await;
+    s.sync(inbox).await;
+
+    set_flag(&mut s.client, &mut s.store, inbox, keep, "\\Flagged", true)
+        .await
+        .unwrap();
+    assert!(s.server.flags("INBOX", keep).contains(&"\\Flagged".to_string()));
+    set_flag(&mut s.client, &mut s.store, inbox, keep, "\\Flagged", false)
+        .await
+        .unwrap();
+    assert!(!s.server.flags("INBOX", keep).contains(&"\\Flagged".to_string()));
+
+    move_message(&mut s.client, &mut s.store, inbox, moved, archive)
+        .await
+        .unwrap();
+    assert_eq!(s.server.subjects("Archive"), ["Move me"]);
+    assert_eq!(s.server.subjects("INBOX"), ["Keep", "Delete me"]);
+
+    expunge_message(&mut s.client, &mut s.store, inbox, deleted)
+        .await
+        .unwrap();
+    assert_eq!(s.server.subjects("INBOX"), ["Keep"]);
+    // the sync agrees with the server
+    s.sync(inbox).await;
+    s.sync(archive).await;
+    assert_eq!(s.subjects(inbox), ["Keep"]);
+    assert_eq!(s.subjects(archive), ["Move me"]);
+}
+
+#[tokio::test]
+async fn message_actions_with_move_and_uidplus() {
+    message_actions(json!({})).await;
+}
+
+#[tokio::test]
+async fn message_actions_without_move_and_uidplus() {
+    // COPY and EXPUNGE, as on servers that have neither
+    message_actions(json!({ "plugins": ["SPECIAL-USE"] })).await;
 }

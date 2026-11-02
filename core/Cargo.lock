@@ -827,6 +827,7 @@ dependencies = [
 name = "pe-testkit"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "pe-imap",
  "pe-net",
  "pe-store",

@@ -331,6 +331,10 @@ fn null_and_bad_arguments() {
         assert!(!pe_sync(core, 42));
         assert!(pe_message_view(core, 1, 1, false).is_null());
         assert_eq!(pe_message_view_start(std::ptr::null(), 1, 1, false), 0);
+        assert!(!pe_message_set_flagged(std::ptr::null(), 1, 1, true));
+        assert!(!pe_message_move(core, 1, 1, 2));
+        assert!(!pe_message_delete(core, 1, 1));
+        assert!(!pe_folder_deletes_for_good(core, 1));
         assert!(pe_message_view_result(core, 12345).is_null());
         pe_message_view_cancel(core, 12345);
         let empty = pe_folders(core, 42);

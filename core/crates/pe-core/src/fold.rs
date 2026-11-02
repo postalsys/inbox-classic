@@ -100,6 +100,24 @@ fn folded(message: &Message, representation: Representation) -> Option<String> {
             .map(|s| (s.source.start, s.source.end)),
         source,
     );
+    // a range of the HTML can start or end inside an element: only whole elements fold
+    let ranges: Vec<(usize, usize)> = match representation {
+        Representation::Html => ranges
+            .into_iter()
+            .filter_map(|(start, end)| {
+                whole_elements(source, start, end).or_else(|| {
+                    // the range ends inside its elements: to where they close, when nothing on the way is shown
+                    let to = closing_point(source, start, end)?;
+                    let all_folded = segments
+                        .iter()
+                        .filter(|s| s.source.start < to && s.source.end > end)
+                        .all(|s| s.visibility != Visibility::Show);
+                    all_folded.then(|| whole_elements(source, start, to)).flatten()
+                })
+            })
+            .collect(),
+        Representation::Text => ranges,
+    };
     if ranges.is_empty() {
         return None;
     }
@@ -129,6 +147,117 @@ fn folded(message: &Message, representation: Representation) -> Option<String> {
     }
     out.push_str(&piece(&source[at..]));
     Some(out)
+}
+
+/// A tag of the HTML
+struct Tag {
+    /// Where its `<` is
+    start: usize,
+    /// Just after its `>`
+    end: usize,
+    /// In lowercase
+    name: String,
+    closing: bool,
+}
+
+/// The tags of `html[start..end]` that open or close an element: not void elements, not comments
+fn tags(html: &str, start: usize, end: usize) -> Vec<Tag> {
+    const VOID: [&str; 14] = [
+        "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr",
+    ];
+    let mut tags = Vec::new();
+    let mut at = start;
+    while let Some(offset) = html[at..end].find('<') {
+        let open = at + offset;
+        let rest = &html[open..end];
+        if rest.starts_with("<!--") {
+            at = open + rest.find("-->").map_or(rest.len(), |close| close + 3);
+            continue;
+        }
+        let Some(length) = rest.find('>') else { break };
+        let inner = &rest[1..length];
+        let closing = inner.starts_with('/');
+        let name: String = inner
+            .trim_start_matches('/')
+            .chars()
+            .take_while(|c| c.is_ascii_alphanumeric())
+            .collect::<String>()
+            .to_ascii_lowercase();
+        if !name.is_empty() && !inner.ends_with('/') && !VOID.contains(&name.as_str()) {
+            tags.push(Tag {
+                start: open,
+                end: open + length + 1,
+                name,
+                closing,
+            });
+        }
+        at = open + length + 1;
+    }
+    tags
+}
+
+/// Where the elements that are open at `end`, of those opened from `start` on, have all closed again; None when an
+/// end tag closes one from before `start` first
+fn closing_point(html: &str, start: usize, end: usize) -> Option<usize> {
+    let mut open: Vec<String> = Vec::new();
+    for tag in tags(html, start, html.len()) {
+        if tag.start >= end && open.is_empty() {
+            return Some(tag.start);
+        }
+        if !tag.closing {
+            open.push(tag.name);
+        } else if open.last() == Some(&tag.name) {
+            open.pop();
+        } else if !open.is_empty() {
+            return None;
+        }
+        if tag.end > end && open.is_empty() {
+            return Some(tag.end);
+        }
+    }
+    None
+}
+
+/// The elements that start and end in `html[start..end]`: the end tags of elements that began before the range are
+/// left out at its start and at its end, so a `<details>` around it nests. None when it does not nest even then (an
+/// element of the range left open, an end tag in its middle that closes one from before).
+fn whole_elements(html: &str, start: usize, end: usize) -> Option<(usize, usize)> {
+    let tags = tags(html, start, end);
+    // end tags (and the space between them) at the start belong to the elements before
+    let mut first = start;
+    let mut skip = 0;
+    for tag in &tags {
+        if !tag.closing || !html[first..tag.start].trim().is_empty() {
+            break;
+        }
+        first = tag.end;
+        skip += 1;
+    }
+    let mut open: Vec<&str> = Vec::new();
+    let mut last = end;
+    for (index, tag) in tags.iter().enumerate().skip(skip) {
+        if !tag.closing {
+            open.push(&tag.name);
+        } else if open.last() == Some(&tag.name.as_str()) {
+            open.pop();
+        } else if open.is_empty() {
+            // closes an element from before the range: allowed only when nothing but such end tags follow
+            let rest = &tags[index..];
+            let only_closes = rest.iter().all(|t| t.closing)
+                && rest
+                    .windows(2)
+                    .all(|pair| html[pair[0].end..pair[1].start].trim().is_empty())
+                && html[rest[rest.len() - 1].end..end].trim().is_empty();
+            if !only_closes {
+                return None;
+            }
+            last = tag.start;
+            break;
+        } else {
+            return None;
+        }
+    }
+    (open.is_empty() && !html[first..last].trim().is_empty()).then_some((first, last))
 }
 
 /// The ranges in order, the ones only whitespace apart joined, each within `source` and on character boundaries
@@ -213,6 +342,88 @@ mod tests {
             key_of(&message, Representation::Html, "a"),
             key_of(&message, Representation::Text, "a")
         );
+    }
+
+    #[test]
+    fn folds_whole_elements_of_our_own_replies() {
+        // what the editor sends: the quote's range starts at the end tag of the paragraph before it
+        let raw = "From: UI Test <t@x.test>\r\nSubject: Re: Hello\r\nIn-Reply-To: <a@x>\r\nContent-Type: text/html\r\n\r\n\
+                   <div><b>Thanks.</b></div><div><br></div><blockquote type=\"cite\"><div>----- Original Message -----</div>\
+                   <div><b>From:</b> Ann &lt;ann@example.com&gt;</div><div><br></div><div>Hi, this was the question.</div>\
+                   </blockquote>\r\n";
+        let html = body_of(raw);
+        let fold = html.find("<details").expect(&html);
+        assert!(html[..fold].contains("Thanks."), "{html}");
+        // the quote is inside the fold, whole
+        let inside = &html[fold..html.rfind("</details>").expect(&html)];
+        assert!(
+            inside.contains("<blockquote") && inside.contains("</blockquote>") && inside.contains("the question"),
+            "{html}"
+        );
+    }
+
+    #[test]
+    fn whole_elements_only() {
+        let html = "<div><p>new</p><br></div><blockquote><p>old</p></blockquote></div>";
+        let quote = html.find("<blockquote").unwrap();
+        // from inside the div before to the end of an outer div: only the blockquote
+        let start = html.find("<br>").unwrap() + 4;
+        let (from, to) = whole_elements(html, start, html.len()).unwrap();
+        assert_eq!(&html[from..to], "<blockquote><p>old</p></blockquote>");
+        assert_eq!(from, quote);
+        // an element left open, or one closed in the middle that began before: not folded
+        assert_eq!(whole_elements(html, quote, quote + 15), None);
+        let middle = "<div>a</div></td><p>b</p>";
+        assert_eq!(whole_elements(middle, 0, middle.len()), None);
+        // comments and void elements do not count
+        let other = "<!-- <div> --><p>a<br><img src=x></p>";
+        assert_eq!(whole_elements(other, 0, other.len()), Some((0, other.len())));
+        // nothing but end tags: nothing to fold
+        assert_eq!(whole_elements("</div></div>", 0, 12), None);
+    }
+
+    #[test]
+    fn ranges_that_end_inside_their_elements() {
+        let html = "<p>new</p><div class=q><p>old</p><p>footer</p></div><p>after</p>";
+        let start = html.find("<div").unwrap();
+        let inside = html.find("<p>footer").unwrap();
+        // the div closes after the footer: the range can go there, not further
+        let to = closing_point(html, start, inside).unwrap();
+        assert_eq!(&html[start..to], "<div class=q><p>old</p><p>footer</p></div>");
+        assert_eq!(whole_elements(html, start, to), Some((start, to)));
+        // an element of the range left open to the end of the document
+        assert_eq!(closing_point("<div><p>a", 0, 6), None);
+    }
+
+    /// Every HTML body of pe-content's conformance fixtures (email-content's test inputs and fixtures): no panic,
+    /// and every fold added is still a whole fold after the sanitizer
+    #[test]
+    fn folds_nest_on_every_fixture() {
+        let cases: serde_json::Value =
+            serde_json::from_str(include_str!("../../pe-content/tests/fixtures/cases.json")).unwrap();
+        let mut folded = 0;
+        for case in cases.as_array().unwrap() {
+            let content = &case["content"];
+            let Some(html) = content["html"].as_str() else { continue };
+            let subject = content["subject"]
+                .as_str()
+                .unwrap_or_default()
+                .replace(['\r', '\n'], " ");
+            let raw = format!(
+                "From: someone@example.com\r\nSubject: {subject}\r\nIn-Reply-To: <x@example.com>\r\n\
+                 Content-Type: text/html; charset=utf-8\r\n\r\n{html}"
+            );
+            let document = crate::view::build(raw.as_bytes(), false).document;
+            let opened = document.matches("<details class=\"pe-fold\">").count();
+            if opened > 0 {
+                folded += 1;
+                assert_eq!(opened, document.matches("</details>").count(), "{}", case["name"]);
+                let with_summary = document.matches("<details class=\"pe-fold\"><summary").count();
+                assert_eq!(opened, with_summary, "{}", case["name"]);
+            }
+        }
+        // the HTML bodies email-content folds (hidden, or collapsed history and forwards): all of them
+        assert_eq!(folded, 8);
     }
 
     #[test]

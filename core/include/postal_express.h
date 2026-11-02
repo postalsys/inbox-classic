@@ -470,6 +470,44 @@ bool pe_message_open(const struct PeCore *core, int64_t folder, uint64_t uid);
 // `core` must be a live handle.
 bool pe_message_set_seen(const struct PeCore *core, int64_t folder, uint64_t uid, bool seen);
 
+// Flags a message or takes its flag away: in the store now (`FolderChanged` follows), on the server in the
+// background
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_set_flagged(const struct PeCore *core,
+                            int64_t folder,
+                            uint64_t uid,
+                            bool flagged);
+
+// Moves a message to another folder of its account: out of the list now (`FolderChanged`), into the other
+// folder once the server has it (`FolderChanged` of that folder). False for a folder of another account, the
+// folder it is in, or one that holds no messages.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_move(const struct PeCore *core,
+                     int64_t folder,
+                     uint64_t uid,
+                     int64_t to);
+
+// Whether deleting a message of `folder` removes it for good (it is Deleted Items, or the account has none), so the
+// window can ask first
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_folder_deletes_for_good(const struct PeCore *core,
+                                int64_t folder);
+
+// Deletes a message: into Deleted Items, or for good when it is in there or the account has none. Out of the list
+// now (`FolderChanged`), on the server in the background.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_delete(const struct PeCore *core,
+                       int64_t folder,
+                       uint64_t uid);
+
 // The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the
 // calling thread; the app's windows use `pe_message_view_start`, which builds it on a worker.
 //

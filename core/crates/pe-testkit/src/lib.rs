@@ -13,6 +13,7 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
+use base64::Engine;
 use pe_imap::client::Timeouts;
 use pe_imap::{Config, Credentials, Event};
 use pe_net::{Security, Trust};
@@ -125,6 +126,26 @@ impl ImapKit {
             Value::Array(messages) => messages,
             other => panic!("not a message list: {other}"),
         }
+    }
+
+    /// The subjects of the messages of a mailbox, in the order the server keeps them
+    pub fn subjects(&self, mailbox: &str) -> Vec<String> {
+        self.messages(mailbox)
+            .iter()
+            .map(|message| {
+                raw_text(message)
+                    .lines()
+                    .find_map(|line| line.strip_prefix("Subject: "))
+                    .unwrap_or_default()
+                    .to_string()
+            })
+            .collect()
+    }
+
+    /// The flags of a message
+    pub fn flags(&self, mailbox: &str, uid: u64) -> Vec<String> {
+        let message = self.messages(mailbox).into_iter().find(|m| m["uid"] == json!(uid));
+        serde_json::from_value(message.expect("message")["flags"].clone()).unwrap_or_default()
     }
 
     /// One request to the REST API, panics on an error answer
@@ -332,6 +353,17 @@ fn encode_path(path: &str) -> String {
             _ => format!("%{c:02X}"),
         })
         .collect()
+}
+
+/// The source of a message of [`ImapKit::messages`] (the REST API gives it base64 encoded)
+pub fn raw_text(message: &Value) -> String {
+    let raw = message["raw"].as_str().unwrap_or_default();
+    String::from_utf8_lossy(
+        &base64::engine::general_purpose::STANDARD
+            .decode(raw)
+            .unwrap_or_default(),
+    )
+    .into_owned()
 }
 
 /// A simple RFC 5322 message, as imapflow's tests build them

@@ -133,6 +133,40 @@ const sections = [
         ]
     },
     {
+        title: 'Organizing mail',
+        intro: 'What is done to a message is done on the server too, so webmail and your other mail programs agree.',
+        features: [
+            {
+                shot: 'organize-1-flagged',
+                name: 'Flag Message',
+                what: 'Flags a message (! in the list) or takes the flag away.',
+                how: 'Message > Flag Message.',
+                checked: ['The server has \\Flagged on it']
+            },
+            {
+                shot: 'organize-2-move',
+                name: 'Move to Folder',
+                what: 'Moves the selected message to another folder of the account. The next message is selected, as in Outlook Express.',
+                how: 'Edit > Move to Folder, or Ctrl+Shift+V.',
+                checked: ['The message is in Archive on the server', 'and out of the list']
+            },
+            {
+                shot: 'organize-3-after',
+                name: 'Delete',
+                what: 'Moves the message to Deleted Items; deleting it there removes it for good. Works on servers without the IMAP MOVE and UIDPLUS extensions too.',
+                how: 'Delete on the toolbar, Edit > Delete Message, or the Del key in the list.',
+                checked: ['The message is in Deleted Items on the server', 'and out of the Inbox and the list']
+            },
+            {
+                shot: 'organize-4-for-good',
+                name: 'Deleting for good asks first',
+                what: 'From Deleted Items, or on an account that has none, Delete removes a message for good, so it asks first. A move or delete the server does not do (offline, refused) puts the message back where it was.',
+                how: 'Delete in Deleted Items.',
+                checked: ['The question appears', 'Yes removes the message from the server']
+            }
+        ]
+    },
+    {
         title: 'Writing mail',
         intro: 'A compose window per message. Sending goes over SMTP from the account the message belongs to; problems are reported before anything is sent.',
         features: [
@@ -228,7 +262,6 @@ const behind = [
 ];
 
 const missing = [
-    'Delete or move messages, or flag them (the flag is shown, not set)',
     'Search',
     'Edit or remove an account (the core can, the window for it is missing)',
     'Save drafts, or send later',

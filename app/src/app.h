@@ -37,8 +37,10 @@ struct FormField {
     std::wstring label;
     std::wstring value;
     Kind kind = Kind::Text;
-    // for Choice: the options; `value` is the chosen one
+    // for Choice: the options; `value` is the chosen one, `chosen` its position (-1 for none), which tells apart
+    // options that read the same
     std::vector<std::wstring> choices;
+    int chosen = -1;
 };
 
 // a flat toolbar of text buttons, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles
@@ -104,6 +106,12 @@ public:
     // the accounts changed: builds the tree again
     void Reload();
     void MarkSelected(bool seen);
+    // the selected message into Deleted Items (for good when it is in there), the next one selected
+    void DeleteSelected();
+    // asks for a folder of the account and moves the selected message there
+    void MoveSelected(HWND owner);
+    // flags the selected message, or takes its flag away
+    void FlagSelected();
     void LoadPictures();
     // "12 message(s), 3 unread" for the status bar
     std::wstring Counts() const;
@@ -128,6 +136,7 @@ private:
     const PeMessage* Row(int index);
     const PeMessage* SelectedRow();
     void ClearReader();
+    void SelectAfterRemoval(int index);
     void OnSelectionChanged();
     void OnFolderSelected(LPARAM folder);
     // asks the core for the view of the selected message, built on a worker; ShowView() shows it when it comes
@@ -191,6 +200,9 @@ enum CommandId : WORD {
     IDM_REPLY_ALL,
     IDM_FORWARD,
     IDM_HELP,
+    IDM_DELETE,
+    IDM_MOVE,
+    IDM_FLAG,
     IDC_TREE = 200,
     IDC_LIST,
     IDC_ATTACHMENTS,
