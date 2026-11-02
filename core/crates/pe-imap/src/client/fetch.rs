@@ -195,9 +195,11 @@ pub(crate) fn parse_fetch(seq: u32, response: Response) -> FetchedMessage {
 fn item<'a>(response: &'a Response, name: &str) -> Option<&'a Token> {
     let items = response.attributes.get(1)?.as_list()?;
     items
-        .chunks_exact(2)
-        .find(|pair| pair[0].is_atom(name))
-        .map(|pair| &pair[1])
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .find(|[key, _]| key.is_atom(name))
+        .map(|[_, value]| value)
 }
 
 /// UID, flags and MODSEQ of a FETCH that reports a flag change, None when it has no flags

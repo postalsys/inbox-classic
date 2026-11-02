@@ -247,7 +247,7 @@ impl Client {
         let list = completion
             .untagged("STATUS")
             .find_map(|r| r.attributes.get(1).and_then(Token::as_list));
-        for pair in list.unwrap_or_default().chunks_exact(2) {
+        for pair in list.unwrap_or_default().as_chunks::<2>().0 {
             let value = pair[1].number();
             match pair[0].text().unwrap_or_default().to_ascii_uppercase().as_str() {
                 "MESSAGES" => status.messages = value,

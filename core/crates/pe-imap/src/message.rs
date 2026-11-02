@@ -124,7 +124,13 @@ fn params(token: Option<&Token>) -> BTreeMap<String, String> {
         return BTreeMap::new();
     };
     let values: Vec<String> = list.iter().map(|t| t.text().unwrap_or_default()).collect();
-    decode_params(values.chunks_exact(2).map(|pair| (pair[0].as_str(), pair[1].as_str())))
+    decode_params(
+        values
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .map(|[key, value]| (key.as_str(), value.as_str())),
+    )
 }
 
 pub fn parse_body_structure(node: &[Token]) -> BodyStructure {
