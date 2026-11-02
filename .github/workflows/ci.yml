@@ -89,7 +89,9 @@ jobs:
             - uses: Swatinem/rust-cache@v2
               with:
                   workspaces: core/fuzz
-            - uses: taiki-e/install-action@cargo-fuzz
+            - uses: taiki-e/install-action@v2
+              with:
+                  tool: cargo-fuzz
             # the corpus grows from run to run instead of starting empty every time
             - uses: actions/cache@v4
               with:
@@ -98,7 +100,10 @@ jobs:
                   restore-keys: fuzz-corpus-
             - name: Run every target for a minute
               run: |
-                  for target in $(cargo fuzz list); do
+                  # a failing `cargo fuzz list` inside the for line would not fail the step
+                  targets=$(cargo fuzz list)
+                  test -n "$targets"
+                  for target in $targets; do
                       cargo fuzz run "$target" -- -max_total_time=60 -rss_limit_mb=2048
                   done
             - uses: actions/upload-artifact@v7
