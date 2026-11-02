@@ -26,7 +26,7 @@ const sections = [
             {
                 shot: 'account-3-servers',
                 name: 'Step 2: the servers, looked up',
-                what: "PostalExpress looks up the provider's settings the way Thunderbird does: the provider's own autoconfig file, then Mozilla's ISPDB, then the usual imap. and smtp. names. Only over HTTPS, and it never picks a server without encryption. Gmail and Outlook.com accounts are offered sign-in through the browser (OAuth) when the build has client IDs.",
+                what: "Inbox Classic looks up the provider's settings the way Thunderbird does: the provider's own autoconfig file, then Mozilla's ISPDB, then the usual imap. and smtp. names. Only over HTTPS, and it never picks a server without encryption. Gmail and Outlook.com accounts are offered sign-in through the browser (OAuth) when the build has client IDs.",
                 how: 'Follows step 1 automatically. Cancel on the lookup skips it.',
                 checked: ['The lookup runs and fills in the guessed names (imap.postalexpress.test for the test address)']
             },
@@ -40,7 +40,7 @@ const sections = [
             {
                 shot: 'account-5-app-password',
                 name: 'App passwords explained',
-                what: "Gmail, iCloud, Yahoo, AOL and T-Online do not take the normal password from mail programs. PostalExpress says so before the server form and offers to open the provider's own instructions. For Outlook.com and Microsoft 365 it shows Microsoft's note that password sign-in is off.",
+                what: "Gmail, iCloud, Yahoo, AOL and T-Online do not take the normal password from mail programs. Inbox Classic says so before the server form and offers to open the provider's own instructions. For Outlook.com and Microsoft 365 it shows Microsoft's note that password sign-in is off.",
                 how: 'Shown after the lookup when the provider needs one.',
                 checked: ['The note appears for a Gmail address']
             },
@@ -309,7 +309,7 @@ const sections = [
             {
                 shot: 'trouble-1-password',
                 name: 'A refused password',
-                what: 'The status bar says what the server answered and PostalExpress asks for the password again (for a browser sign-in account it offers to sign in again). A server that only takes the password over an encrypted connection is reported as that, not as a wrong password.',
+                what: 'The status bar says what the server answered and Inbox Classic asks for the password again (for a browser sign-in account it offers to sign in again). A server that only takes the password over an encrypted connection is reported as that, not as a wrong password.',
                 how: 'Happens on its own when a server refuses the login.',
                 checked: ['The Logon prompt appears', 'The status bar keeps the reason']
             }
@@ -329,7 +329,7 @@ const sections = [
                 shot: 'help-1-about',
                 name: 'About',
                 what: 'The version of the program and of its Rust core.',
-                how: 'Help > About PostalExpress.',
+                how: 'Help > About Inbox Classic.',
                 checked: ['It opens']
             }
         ]
@@ -337,8 +337,8 @@ const sections = [
 ];
 
 const behind = [
-    ['Passwords', 'Kept in the Windows Credential Manager (under "PostalExpress"), encrypted for your Windows account; never in the mail store.'],
-    ['Offline reading', 'Messages are cached in %LOCALAPPDATA%\\PostalExpress\\store.db, so what was downloaded can be read without a connection.'],
+    ['Passwords', 'Kept in the Windows Credential Manager (under "Inbox Classic"), encrypted for your Windows account; never in the mail store.'],
+    ['Offline reading', 'Messages are cached in %LOCALAPPDATA%\\InboxClassic\\store.db, so what was downloaded can be read without a connection.'],
     [
         'Security model',
         'Everything a server or sender writes is parsed in Rust (IMAP, MIME, HTML sanitizing, attachment names, autoconfig XML). The Windows UI only shows values the core has checked. The reading pane has scripts, remote requests and navigation turned off.'
@@ -389,7 +389,7 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PostalExpress Features</title>
+<title>Inbox Classic Features</title>
 <style>
 :root { --bg: #f6f5f1; --card: #ffffff; --ink: #1d232b; --muted: #5c6670; --line: #e2dfd7; --accent: #0b4f8a; --ok: #1d7a46; --chip: #eef3f8; }
 @media (prefers-color-scheme: dark) {
@@ -429,7 +429,7 @@ footer { color: var(--muted); font-size: 13px; padding-top: 30px; padding-bottom
 </head>
 <body>
 <header>
-<h1>PostalExpress ${esc(version)}: what it can do</h1>
+<h1>Inbox Classic ${esc(version)}: what it can do</h1>
 <p class="lead">Every feature of the app, with a screenshot of it running. The screenshots come from the UI end-to-end test, which drives the real program against a test mail server and checks each effect on the server. Click a screenshot to enlarge it.</p>
 <nav>${sections.map((s, i) => `<a href="#s${i}">${esc(s.title)}</a>`).join('')}<a href="#behind">Behind the scenes</a><a href="#missing">Not there yet</a></nav>
 </header>

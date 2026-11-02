@@ -10,7 +10,7 @@
 namespace {
 
 HWND g_scaleWindow = nullptr;
-const wchar_t* kFormClass = L"PostalExpressForm";
+const wchar_t* kFormClass = L"InboxClassicForm";
 
 struct FormState {
     std::vector<FormField>* fields;
@@ -46,7 +46,7 @@ LRESULT CALLBACK FormProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             std::wstring error;
             if (state->validate && !state->validate(values, error)) {
-                MessageBoxW(hwnd, error.c_str(), L"PostalExpress", MB_OK | MB_ICONWARNING);
+                MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
                 return 0;
             }
             // moved, so no copy of a password is left behind

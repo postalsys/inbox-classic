@@ -1,4 +1,4 @@
-// PostalExpress: the main window in the Outlook Express layout, folders on the left, the message list on the top
+// Inbox Classic: the main window in the Outlook Express layout, folders on the left, the message list on the top
 // right and the reading pane below it, with splitters between them. All mail data comes from the Rust core
 // (core.h); this file draws the frame and hands the core's events to the panes.
 #include <objbase.h>
@@ -17,8 +17,8 @@
 
 namespace {
 
-const wchar_t* kMainClass = L"PostalExpressMain";
-const wchar_t* kTitle = L"PostalExpress";
+const wchar_t* kMainClass = L"InboxClassicMain";
+const wchar_t* kTitle = L"Inbox Classic";
 // sync every account this often, in milliseconds
 constexpr UINT kSyncInterval = 10 * 60 * 1000;
 constexpr UINT_PTR TIMER_SYNC = 2;
@@ -190,7 +190,7 @@ HMENU BuildMenu() {
     HMENU help = CreatePopupMenu();
     AppendMenuW(help, MF_STRING, IDM_HELP, L"&Contents\tF1");
     AppendMenuW(help, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(help, MF_STRING, IDM_ABOUT, L"&About PostalExpress");
+    AppendMenuW(help, MF_STRING, IDM_ABOUT, L"&About Inbox Classic");
     HMENU bar = CreateMenu();
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(file), L"&File");
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(edit), L"&Edit");
@@ -317,7 +317,7 @@ std::wstring StorePath() {
     PWSTR base = nullptr;
     std::wstring dir;
     if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &base))) {
-        dir = std::wstring(base) + L"\\PostalExpress";
+        dir = std::wstring(base) + L"\\InboxClassic";
     }
     CoTaskMemFree(base);
     CreateDirectoryW(dir.c_str(), nullptr);
@@ -372,8 +372,8 @@ void AddAccount() {
 }
 
 void ShowAbout() {
-    std::wstring text = std::wstring(L"PostalExpress ") + APP_VERSION_W + L"\nCore " + core::Version() + L"\n\nPostal Systems OÜ";
-    MessageBoxW(g_main, text.c_str(), L"About PostalExpress", MB_OK | MB_ICONINFORMATION);
+    std::wstring text = std::wstring(L"Inbox Classic ") + APP_VERSION_W + L"\nCore " + core::Version() + L"\n\nPostal Systems OÜ";
+    MessageBoxW(g_main, text.c_str(), L"About Inbox Classic", MB_OK | MB_ICONINFORMATION);
 }
 
 void NewMessage() {

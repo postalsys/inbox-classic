@@ -27,9 +27,9 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Postal Systems OÜ"
-            VALUE "FileDescription", "PostalExpress"
+            VALUE "FileDescription", "Inbox Classic"
             VALUE "FileVersion", APP_VERSION
-            VALUE "ProductName", "PostalExpress"
+            VALUE "ProductName", "Inbox Classic"
             VALUE "ProductVersion", APP_VERSION
         END
     END

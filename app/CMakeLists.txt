@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(PostalExpress LANGUAGES CXX)
+project(InboxClassic LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -36,7 +36,7 @@ endif()
 
 set_property(SOURCE res/app.rc APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/res/help.html)
 
-add_executable(PostalExpress WIN32
+add_executable(InboxClassic WIN32
     src/main.cpp
     src/accounts.cpp
     src/compose.cpp
@@ -50,13 +50,13 @@ add_executable(PostalExpress WIN32
     src/webview.cpp
     res/app.rc
 )
-add_dependencies(PostalExpress pe_core_cargo)
+add_dependencies(InboxClassic pe_core_cargo)
 
-target_include_directories(PostalExpress PRIVATE src ${CORE_DIR}/include ${WEBVIEW2_DIR}/build/native/include)
-target_compile_definitions(PostalExpress PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX
+target_include_directories(InboxClassic PRIVATE src ${CORE_DIR}/include ${WEBVIEW2_DIR}/build/native/include)
+target_compile_definitions(InboxClassic PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX
     APP_VERSION="${APP_VERSION}" APP_VERSION_COMMAS=${APP_VERSION_COMMAS})
-target_compile_options(PostalExpress PRIVATE /W4 /utf-8 /permissive-)
-target_link_libraries(PostalExpress PRIVATE
+target_compile_options(InboxClassic PRIVATE /W4 /utf-8 /permissive-)
+target_link_libraries(InboxClassic PRIVATE
     ${PE_CORE_LIB}
     # what the Rust standard library needs on Windows (cargo rustc -p pe-ffi -- --print native-static-libs)
     kernel32 advapi32 ntdll userenv ws2_32 dbghelp bcrypt
@@ -64,4 +64,4 @@ target_link_libraries(PostalExpress PRIVATE
     comctl32 comdlg32 shlwapi shell32 ole32 version
 )
 # the manifest comes from app.rc
-target_link_options(PostalExpress PRIVATE /MANIFEST:NO)
+target_link_options(InboxClassic PRIVATE /MANIFEST:NO)

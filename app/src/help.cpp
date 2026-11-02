@@ -4,7 +4,7 @@
 
 namespace {
 
-const wchar_t* kHelpClass = L"PostalExpressHelp";
+const wchar_t* kHelpClass = L"InboxClassicHelp";
 constexpr int IDR_HELP = 2;
 
 HWND g_help = nullptr;
@@ -16,7 +16,7 @@ std::wstring HelpDocument() {
     HGLOBAL loaded = found ? LoadResource(nullptr, found) : nullptr;
     const char* data = loaded ? static_cast<const char*>(LockResource(loaded)) : nullptr;
     if (!data) {
-        return L"<p>The help is missing from this copy of PostalExpress.</p>";
+        return L"<p>The help is missing from this copy of Inbox Classic.</p>";
     }
     return core::Widen(std::string_view(data, SizeofResource(nullptr, found)));
 }
@@ -70,7 +70,7 @@ void OpenHelp() {
         registered = true;
     }
     // not owned by the main window: the help stays usable while a dialog of the main window is open
-    g_help = CreateWindowExW(0, kHelpClass, L"PostalExpress Help", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT,
+    g_help = CreateWindowExW(0, kHelpClass, L"Inbox Classic Help", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT,
                              CW_USEDEFAULT, Scale(820), Scale(700), nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!g_help) {
         return;

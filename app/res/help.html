@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'" />
         <meta name="color-scheme" content="light" />
-        <title>PostalExpress Help</title>
+        <title>Inbox Classic Help</title>
         <style>
             html {
                 background: #fff;
@@ -83,9 +83,9 @@
         </style>
     </head>
     <body>
-        <h1>PostalExpress Help</h1>
+        <h1>Inbox Classic Help</h1>
         <p>
-            PostalExpress reads and sends e-mail from IMAP and SMTP accounts: Gmail, Outlook.com, Fastmail, your company's mail server and most others. It keeps
+            Inbox Classic reads and sends e-mail from IMAP and SMTP accounts: Gmail, Outlook.com, Fastmail, your company's mail server and most others. It keeps
             a copy of your mail on this computer, so you can read what was already downloaded without a connection.
         </p>
 
@@ -102,15 +102,15 @@
         </ol>
 
         <h2>1. Adding an account</h2>
-        <p>The first time PostalExpress starts it asks for an account. To add another one later, choose <b>File &gt; New Account</b>.</p>
+        <p>The first time Inbox Classic starts it asks for an account. To add another one later, choose <b>File &gt; New Account</b>.</p>
         <ol>
             <li>Type your name as others should see it, your e-mail address and your password, and click <b>Next</b>.</li>
             <li>
-                PostalExpress looks up the settings of your mail provider: from the provider that handles your domain's mail, your domain's DNS records, your
+                Inbox Classic looks up the settings of your mail provider: from the provider that handles your domain's mail, your domain's DNS records, your
                 provider's settings file, Thunderbird's list of providers and, for Exchange, Microsoft Autodiscover. This takes a few seconds;
                 <b>Cancel</b> skips it. Your password is sent only to an Exchange server of your own domain that asks for it, over an encrypted connection.
             </li>
-            <li>If your provider wants an app password instead of your normal one, PostalExpress says so and offers to open its instructions.</li>
+            <li>If your provider wants an app password instead of your normal one, Inbox Classic says so and offers to open its instructions.</li>
             <li>
                 Check the server settings it found and click <b>Finish</b>. If it found nothing it fills in the usual names (<code>imap.</code> and
                 <code>smtp.</code> followed by your domain); compare them with what your provider tells you.
@@ -119,14 +119,14 @@
         <h3>Changing or removing an account</h3>
         <p>
             <b>File &gt; Accounts</b> lists your accounts. <b>Properties</b> (or a double click) changes the name, address, servers and password of one; leave
-            the password empty to keep it. <b>Remove</b> (or the <kbd>Delete</kbd> key) takes the account out of PostalExpress with the mail downloaded for it
+            the password empty to keep it. <b>Remove</b> (or the <kbd>Delete</kbd> key) takes the account out of Inbox Classic with the mail downloaded for it
             and its saved password; the mail on the server stays. <b>Add</b> adds another account.
         </p>
         <h3>Gmail and Outlook.com</h3>
         <p>These providers do not take your normal password from mail programs. Either:</p>
         <ul>
             <li>
-                sign in through your web browser, when PostalExpress offers it: your password is typed into Google's or Microsoft's own page and PostalExpress
+                sign in through your web browser, when Inbox Classic offers it: your password is typed into Google's or Microsoft's own page and Inbox Classic
                 never sees it; or
             </li>
             <li>
@@ -147,14 +147,14 @@
             <tr>
                 <td>STARTTLS</td>
                 <td>
-                    The connection is encrypted right after it opens. Usually port 143 for IMAP and 587 for SMTP. PostalExpress refuses to continue if the
+                    The connection is encrypted right after it opens. Usually port 143 for IMAP and 587 for SMTP. Inbox Classic refuses to continue if the
                     server does not offer encryption.
                 </td>
             </tr>
             <tr>
                 <td>None (unencrypted)</td>
                 <td>
-                    Your password and mail travel readable by anyone on the network. Use it only for a server on your own computer or network; PostalExpress
+                    Your password and mail travel readable by anyone on the network. Use it only for a server on your own computer or network; Inbox Classic
                     warns before using it.
                 </td>
             </tr>
@@ -196,7 +196,7 @@
 
         <h3>Earlier messages in replies</h3>
         <p>
-            A reply often carries the messages before it. PostalExpress folds them away behind a <b>&bull;&bull;&bull;</b> button under what the sender wrote;
+            A reply often carries the messages before it. Inbox Classic folds them away behind a <b>&bull;&bull;&bull;</b> button under what the sender wrote;
             click it to see them. Only text that is clearly an earlier message is folded, anything uncertain stays in view.
         </p>
 
@@ -209,12 +209,12 @@
         </p>
         <h3>Links and scripts</h3>
         <p>
-            Scripts in messages never run. Clicking a link opens it in your web browser, never inside PostalExpress. Before you type a password on a page you
+            Scripts in messages never run. Clicking a link opens it in your web browser, never inside Inbox Classic. Before you type a password on a page you
             reached from an e-mail, check the address in your browser.
         </p>
         <h3>Attachments</h3>
         <p>
-            When a message has attachments, an <b>Attachments</b> button appears next to the message header. Click it and choose the file to save. PostalExpress
+            When a message has attachments, an <b>Attachments</b> button appears next to the message header. Click it and choose the file to save. Inbox Classic
             suggests a safe file name: folder names, characters Windows does not allow and characters that can make a name look different from what it is are
             removed.
         </p>
@@ -281,14 +281,14 @@
                 <kbd>Enter</kbd>): it opens with its recipients, text and attached files. Once it is sent, the draft is removed from Drafts.
             </li>
             <li>
-                <b>Send</b> sends the message. If an address is mistyped or a file is gone, PostalExpress says so and keeps the message open so you can fix it.
+                <b>Send</b> sends the message. If an address is mistyped or a file is gone, Inbox Classic says so and keeps the message open so you can fix it.
                 A copy of each sent message is kept in <b>Sent Items</b>.
             </li>
         </ul>
 
         <h2>5. Getting new mail</h2>
         <p>
-            PostalExpress checks every account when it starts and every ten minutes after that. Click <b>Send/Recv</b> or press <kbd>F5</kbd> to check now. The
+            Inbox Classic checks every account when it starts and every ten minutes after that. Click <b>Send/Recv</b> or press <kbd>F5</kbd> to check now. The
             status bar at the bottom shows what it is doing and the last problem it had.
         </p>
 
@@ -361,15 +361,15 @@
         </table>
 
         <h2>7. When something does not work</h2>
-        <h3>"authentication failed" or PostalExpress asks for the password again</h3>
+        <h3>"authentication failed" or Inbox Classic asks for the password again</h3>
         <p>
             The server refused the password. Type it again; for Gmail and Outlook.com use an app password or sign in through the browser (see
             <i>Adding an account</i>). If your provider asks for a second step when you log in on the web, it needs an app password for mail programs too. For
-            an account that signs in through the browser, PostalExpress offers to sign in again.
+            an account that signs in through the browser, Inbox Classic offers to sign in again.
         </p>
         <h3>"TLS error" or a certificate error</h3>
         <p>
-            PostalExpress could not confirm that it is talking to the real server, so it did not send your password. Check the server name in the account
+            Inbox Classic could not confirm that it is talking to the real server, so it did not send your password. Check the server name in the account
             settings: it has to be the name the server's certificate is made for (often <code>imap.provider.com</code>, not your own domain). On a network that
             inspects encrypted traffic, ask its administrator.
         </p>
@@ -386,25 +386,25 @@
         <h3>"connection error" or "the server did not answer in time"</h3>
         <p>
             Check your internet connection, the server name and the port. Firewalls sometimes block the mail ports, port 25 in particular; use 465 or 587 for
-            sending. PostalExpress tries again at the next check.
+            sending. Inbox Classic tries again at the next check.
         </p>
         <h3>A message that cannot be shown</h3>
         <p>
-            Some messages are damaged or built in ways no mail program can read. PostalExpress shows a note instead of the message; the rest of your mail is not
+            Some messages are damaged or built in ways no mail program can read. Inbox Classic shows a note instead of the message; the rest of your mail is not
             affected.
         </p>
 
         <h2>8. Where your mail and passwords are kept</h2>
         <ul>
             <li>
-                Downloaded mail and account settings: <code>%LOCALAPPDATA%\PostalExpress\store.db</code>. Your mail stays on the server too; the copy here is
+                Downloaded mail and account settings: <code>%LOCALAPPDATA%\InboxClassic\store.db</code>. Your mail stays on the server too; the copy here is
                 for reading quickly and offline.
             </li>
-            <li>Passwords and browser sign-ins: the Windows Credential Manager, under <b>PostalExpress</b>. They are encrypted for your Windows account.</li>
-            <li>Uninstalling PostalExpress asks whether to remove the mail it downloaded. The mail on your servers is never removed.</li>
+            <li>Passwords and browser sign-ins: the Windows Credential Manager, under <b>Inbox Classic</b>. They are encrypted for your Windows account.</li>
+            <li>Uninstalling Inbox Classic asks whether to remove the mail it downloaded. The mail on your servers is never removed.</li>
         </ul>
         <p>
-            For testing, <code>PostalExpress.exe --store &lt;file&gt;</code> uses another mail store, <code>--memory-passwords</code> keeps passwords for the
+            For testing, <code>InboxClassic.exe --store &lt;file&gt;</code> uses another mail store, <code>--memory-passwords</code> keeps passwords for the
             current run only, and <code>--pin-certificate &lt;file&gt;</code> accepts only the server certificate in that file (PEM or DER) instead of the ones
             Windows trusts, for a test server with a self-signed certificate.
         </p>

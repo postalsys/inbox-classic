@@ -1,5 +1,5 @@
 {
-    "name": "postal-express-e2e",
+    "name": "inbox-classic-e2e",
     "private": true,
     "description": "ImapKit and its SMTP server for the end-to-end tests of the Rust core, started by pe-testkit",
     "type": "module",

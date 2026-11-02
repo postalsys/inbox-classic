@@ -1,4 +1,4 @@
-//! The C API that the C++ app links (`pe_ffi.lib`, header `core/include/postal_express.h`).
+//! The C API that the C++ app links (`pe_ffi.lib`, header `core/include/inbox_classic.h`).
 //!
 //! Rules for every export:
 //! - Coarse calls on opaque handles; the C++ side never sees Rust types or does parsing of its own.

@@ -13,8 +13,8 @@ SIGN_WIN_ACCOUNT="${SIGN_WIN_ACCOUNT:-}"
 SIGN_WIN_PROFILE="${SIGN_WIN_PROFILE:-}"
 SIGN_WIN_ENDPOINT="${SIGN_WIN_ENDPOINT:-neu.codesigning.azure.net}"
 SIGN_WIN_KEYCHAIN="azure-artifact-signing"
-PRODUCT="PostalExpress"
-HOMEPAGE="https://github.com/postalsys/postal-express"
+PRODUCT="Inbox Classic"
+HOMEPAGE="https://inboxclassic.com"
 
 if [ -z "$SIGN_WIN_ACCOUNT" ] || [ -z "$SIGN_WIN_PROFILE" ]; then
     echo "NOTE: Windows signing is not configured, leaving $* unsigned" >&2

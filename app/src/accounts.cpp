@@ -61,7 +61,7 @@ struct {
     bool done = false;
 } g_wait;
 
-const wchar_t* kWaitClass = L"PostalExpressWait";
+const wchar_t* kWaitClass = L"InboxClassicWait";
 
 LRESULT CALLBACK WaitProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     if ((message == WM_COMMAND && LOWORD(wParam) == IDCANCEL) || message == WM_CLOSE) {
@@ -149,7 +149,7 @@ std::wstring FoundIntro(const PeAutoconfigInfo* info) {
     case PE_AUTOCONFIG_SOURCE_GUESS:
         return L"No settings were found for this address: these are the usual names, check them with your provider.";
     case PE_AUTOCONFIG_SOURCE_MX:
-        return std::wstring(L"Your mail is handled by a provider PostalExpress knows; these are its servers.") + change;
+        return std::wstring(L"Your mail is handled by a provider Inbox Classic knows; these are its servers.") + change;
     case PE_AUTOCONFIG_SOURCE_SRV:
         return std::wstring(L"These settings were found in the DNS records of your domain.") + change;
     case PE_AUTOCONFIG_SOURCE_AUTODISCOVER:
@@ -232,7 +232,7 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, c
     // the core makes the page; only an https page is opened
     std::wstring address = url ? Text(url.get()) : L"";
     if (!request || address.rfind(L"https://", 0) != 0) {
-        MessageBoxW(owner, L"Signing in through the browser could not start.", L"PostalExpress", MB_OK | MB_ICONERROR);
+        MessageBoxW(owner, L"Signing in through the browser could not start.", L"Inbox Classic", MB_OK | MB_ICONERROR);
         return 0;
     }
     ShellExecuteW(owner, L"open", address.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
@@ -244,7 +244,7 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, c
     if (!pe_sign_in_result(core, request, &why)) {
         core::String reason(why);
         std::wstring text = L"Signing in did not work: " + (reason ? Text(reason.get()) : L"unknown reason");
-        MessageBoxW(owner, text.c_str(), L"PostalExpress", MB_OK | MB_ICONWARNING);
+        MessageBoxW(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
         return 0;
     }
     return request;
@@ -270,7 +270,7 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
     PeOAuthProvider provider = info ? pe_oauth_provider_for(core, info->imap_host) : PE_O_AUTH_PROVIDER_NONE;
     if (provider != PE_O_AUTH_PROVIDER_NONE &&
         MessageBoxW(owner,
-                    L"This provider lets you sign in through your web browser, without giving PostalExpress your "
+                    L"This provider lets you sign in through your web browser, without giving Inbox Classic your "
                     L"password.\n\nSign in with the browser?",
                     L"Add Mail Account", MB_YESNO | MB_ICONQUESTION) == IDYES) {
         uint64_t request = SignInWithBrowser(owner, core, provider, email);
@@ -341,7 +341,7 @@ bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& passw
 
 namespace {
 
-const wchar_t* kAccountsClass = L"PostalExpressAccounts";
+const wchar_t* kAccountsClass = L"InboxClassicAccounts";
 
 enum AccountsId : WORD { IDC_ACCOUNT_LIST = 400, IDC_ACCOUNT_ADD, IDC_ACCOUNT_PROPERTIES, IDC_ACCOUNT_REMOVE, IDC_ACCOUNT_CLOSE };
 
@@ -475,7 +475,7 @@ void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id) {
         return;
     case IDC_ACCOUNT_REMOVE:
         if (account && MessageBoxW(hwnd,
-                                   L"Remove this account from PostalExpress? Its mail stays on the server; the copy on this "
+                                   L"Remove this account from Inbox Classic? Its mail stays on the server; the copy on this "
                                    L"computer and the saved password are removed.",
                                    L"Remove Account", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
             pe_account_remove(state->core, account);

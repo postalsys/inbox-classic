@@ -53,11 +53,11 @@ fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
     a.len() == b.len() && a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
 }
 
-const DONE: &str = "<!doctype html><title>PostalExpress</title><p>You are signed in. You can close this page and go back to PostalExpress.</p>";
+const DONE: &str = "<!doctype html><title>Inbox Classic</title><p>You are signed in. You can close this page and go back to Inbox Classic.</p>";
 const DENIED: &str =
-    "<!doctype html><title>PostalExpress</title><p>Signing in was cancelled. You can close this page.</p>";
+    "<!doctype html><title>Inbox Classic</title><p>Signing in was cancelled. You can close this page.</p>";
 const OTHER: &str =
-    "<!doctype html><title>PostalExpress</title><p>This page is not part of signing in to PostalExpress.</p>";
+    "<!doctype html><title>Inbox Classic</title><p>This page is not part of signing in to Inbox Classic.</p>";
 
 async fn answer(mut socket: TcpStream, page: &str) {
     let response = format!(

@@ -200,7 +200,7 @@ fn build(
             let domain = account
                 .email
                 .rsplit_once('@')
-                .map_or("postalexpress.invalid", |(_, d)| d);
+                .map_or("inboxclassic.invalid", |(_, d)| d);
             let (html, pictures) = pe_html::outgoing_html(written, outgoing.quote.as_deref(), domain);
             attachments.extend(pictures.into_iter().map(|picture| Attachment {
                 filename: String::new(),

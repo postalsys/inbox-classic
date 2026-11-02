@@ -86,8 +86,8 @@ jobs:
               run: scripts\win-build.cmd
             - uses: actions/upload-artifact@v7
               with:
-                  name: PostalExpress-win-x64
-                  path: build/PostalExpress.exe
+                  name: InboxClassic-win-x64
+                  path: build/InboxClassic.exe
                   if-no-files-found: error
             - uses: actions/setup-node@v6
               with:

@@ -1653,7 +1653,7 @@ pub enum PeAutoconfigSource {
     Ispdb = 1,
     /// Nothing was found: `imap.` and `smtp.` the domain
     Guess = 2,
-    /// The provider that receives the domain's mail (its MX), a provider PostalExpress knows
+    /// The provider that receives the domain's mail (its MX), a provider Inbox Classic knows
     Mx = 3,
     /// The domain's SRV records (RFC 6186)
     Srv = 4,

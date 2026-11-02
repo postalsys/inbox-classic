@@ -6,7 +6,7 @@
 
 namespace {
 
-const wchar_t* kOutboxClass = L"PostalExpressOutbox";
+const wchar_t* kOutboxClass = L"InboxClassicOutbox";
 
 enum OutboxId : WORD { IDC_OUTBOX_LIST = 450, IDC_OUTBOX_SEND, IDC_OUTBOX_DELETE, IDC_OUTBOX_CLOSE };
 

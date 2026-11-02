@@ -31,7 +31,7 @@ mod windows {
     use keyring_core::api::CredentialStoreApi;
     use pe_store::AccountId;
 
-    /// The Credential Manager, generic credentials named `PostalExpress` / `<profile>/<account>`
+    /// The Credential Manager, generic credentials named `InboxClassic` / `<profile>/<account>`
     pub(super) struct CredentialManager {
         store: Arc<windows_native_keyring_store::Store>,
         profile: String,
@@ -47,7 +47,7 @@ mod windows {
 
         fn entry(&self, account: AccountId) -> Option<keyring_core::Entry> {
             self.store
-                .build("PostalExpress", &format!("{}/{account}", self.profile), None)
+                .build("InboxClassic", &format!("{}/{account}", self.profile), None)
                 .ok()
         }
     }

@@ -4,8 +4,8 @@
   classic 3D style, which is the Outlook Express look this app goes for.
 -->
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
-  <assemblyIdentity type="win32" name="Postalsys.PostalExpress" version="0.1.0.0" processorArchitecture="amd64" />
-  <description>PostalExpress</description>
+  <assemblyIdentity type="win32" name="Postalsys.InboxClassic" version="0.1.0.0" processorArchitecture="amd64" />
+  <description>Inbox Classic</description>
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges>

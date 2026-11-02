@@ -1,4 +1,4 @@
-// The editor of the compose window. The only script PostalExpress runs: the page allows it by a nonce, nothing else
+// The editor of the compose window. The only script Inbox Classic runs: the page allows it by a nonce, nothing else
 // can run (the CSP has no other script source; the quoted message was sanitized in Rust and waits in an inert
 // template until it is put into the text). The host calls window.pe; the page answers with plain strings over
 // postMessage, which the host never parses beyond their prefix:

@@ -10,9 +10,9 @@ using Microsoft::WRL::ComPtr;
 
 namespace {
 
-const wchar_t* kHostClass = L"PostalExpressEditor";
+const wchar_t* kHostClass = L"InboxClassicEditor";
 // where the page is served from memory (webview.h); .invalid never resolves, nothing else is served for it
-const wchar_t* kPageUrl = L"https://compose.postalexpress.invalid/";
+const wchar_t* kPageUrl = L"https://compose.inboxclassic.invalid/";
 
 // `value` as a JavaScript string literal: everything but plain letters and digits escaped, so no value can end the
 // string

@@ -15,7 +15,7 @@
 
 namespace {
 
-const wchar_t* kComposeClass = L"PostalExpressCompose";
+const wchar_t* kComposeClass = L"InboxClassicCompose";
 
 enum ComposeId : WORD {
     IDC_SEND = 300,
@@ -279,7 +279,7 @@ struct Fields {
 void ShowRefusal(HWND hwnd, char* reason, const wchar_t* fallback) {
     core::String error(reason);
     std::wstring why = error ? Text(error.get()) : fallback;
-    MessageBoxW(hwnd, why.c_str(), L"PostalExpress", MB_OK | MB_ICONWARNING);
+    MessageBoxW(hwnd, why.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
 // sends with the HTML the editor gave, now or with the next Send/Recv
@@ -516,7 +516,7 @@ void ChooseFrom(Compose* state) {
 void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
     core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded, draft ? draft->body : nullptr));
     Editor::Handlers handlers;
-    handlers.error = [hwnd](const std::wstring& error) { MessageBoxW(hwnd, error.c_str(), L"PostalExpress", MB_OK | MB_ICONERROR); };
+    handlers.error = [hwnd](const std::wstring& error) { MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
     handlers.html = [hwnd, state](const std::wstring& html, bool full) {
         state->html = html;
         state->quoteInText = full;
@@ -535,7 +535,7 @@ bool MayClose(HWND hwnd, Compose* state) {
     if (!state->dirty) {
         return true;
     }
-    switch (MessageBoxW(hwnd, L"Do you want to save changes to this message in Drafts?", L"PostalExpress", MB_YESNOCANCEL | MB_ICONQUESTION)) {
+    switch (MessageBoxW(hwnd, L"Do you want to save changes to this message in Drafts?", L"Inbox Classic", MB_YESNOCANCEL | MB_ICONQUESTION)) {
     case IDYES:
         Request(state, Compose::Pending::SaveAndClose);
         return false;

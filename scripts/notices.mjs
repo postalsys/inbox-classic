@@ -1,5 +1,5 @@
 // Writes THIRD-PARTY-NOTICES.txt into the staging folder: the license texts of everything compiled into
-// PostalExpress.exe. The Rust crates the core links (from cargo metadata, for the Windows target, normal
+// InboxClassic.exe. The Rust crates the core links (from cargo metadata, for the Windows target, normal
 // dependencies of pe-ffi only) with the license files each crate ships, and the WebView2 SDK loader.
 //
 //   node scripts/notices.mjs <staging folder> <CMake build folder>
@@ -68,12 +68,12 @@ function webview2Notice() {
         throw new Error(`The WebView2 SDK is not in ${buildDir}, build the app first`);
     }
     const license = path.join(buildDir, dir, 'LICENSE.txt');
-    return section(`Microsoft Edge WebView2 SDK loader (${dir}), compiled into PostalExpress.exe`, read(license));
+    return section(`Microsoft Edge WebView2 SDK loader (${dir}), compiled into InboxClassic.exe`, read(license));
 }
 
 const list = crates();
 const notices =
-    'PostalExpress includes the software below. Each part keeps its own license, given here in full.\n\n' +
+    'Inbox Classic includes the software below. Each part keeps its own license, given here in full.\n\n' +
     webview2Notice() +
     section('Fluent UI System Icons (toolbar pictures, from app/res/icons)', read(path.join(root, 'app', 'res', 'icons', 'LICENSE'))) +
     list.map(crateNotice).join('');

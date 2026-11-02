@@ -470,12 +470,12 @@ void Mailbox::ChooseAttachment() {
     uint8_t* data = pe_attachment_data(core_, folder_, uid_, static_cast<size_t>(chosen - 1), &length, &name);
     core::String safeName(name);
     if (!data) {
-        MessageBoxW(parent_, L"The attachment could not be read.", L"PostalExpress", MB_OK | MB_ICONERROR);
+        MessageBoxW(parent_, L"The attachment could not be read.", L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
     }
     std::wstring path = SaveFileDialog(parent_, Text(safeName.get()));
     if (!path.empty() && !WriteFileBytes(path, data, length)) {
-        MessageBoxW(parent_, L"The attachment could not be saved.", L"PostalExpress", MB_OK | MB_ICONERROR);
+        MessageBoxW(parent_, L"The attachment could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
     }
     pe_bytes_free(data, length);
 }
@@ -512,7 +512,7 @@ void Mailbox::DeleteSelected() {
     uint64_t uid = row->uid;
     // from Deleted Items, or an account without one, it is gone for good: asked first, as Outlook Express does
     if (pe_folder_deletes_for_good(core_, folder_) &&
-        MessageBoxW(parent_, L"This message will be deleted for good. Delete it?", L"PostalExpress",
+        MessageBoxW(parent_, L"This message will be deleted for good. Delete it?", L"Inbox Classic",
                     MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
@@ -604,7 +604,7 @@ std::wstring AskFolderName(HWND owner, const wchar_t* title, const std::wstring&
 void ShowRefusal(HWND owner, char* reason, const wchar_t* fallback) {
     core::String why(reason);
     std::wstring text = why ? Text(why.get()) : fallback;
-    MessageBoxW(owner, text.c_str(), L"PostalExpress", MB_OK | MB_ICONWARNING);
+    MessageBoxW(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
 void Mailbox::NewFolder(HWND owner) {
@@ -647,7 +647,7 @@ void Mailbox::DeleteFolder(HWND owner) {
         return;
     }
     std::wstring question = L"Delete the folder \"" + name + L"\" with its messages and the folders in it? It is deleted on the server too.";
-    if (MessageBoxW(owner, question.c_str(), L"PostalExpress", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+    if (MessageBoxW(owner, question.c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
     char* reason = nullptr;
@@ -734,13 +734,13 @@ void Mailbox::SaveShownAs(HWND owner) {
     uint8_t* data = pe_message_source(core_, folder_, uid_, &length, &name);
     core::String safeName(name);
     if (!data) {
-        MessageBoxW(owner, L"The message is not downloaded yet.", L"PostalExpress", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     std::wstring path = SaveFileDialog(owner, Text(safeName.get()), L"Save Message As", L"Mail messages (*.eml)\0*.eml\0All files (*.*)\0*.*\0",
                                        L"eml");
     if (!path.empty() && !WriteFileBytes(path, data, length)) {
-        MessageBoxW(owner, L"The message could not be saved.", L"PostalExpress", MB_OK | MB_ICONERROR);
+        MessageBoxW(owner, L"The message could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
     }
     pe_bytes_free(data, length);
 }

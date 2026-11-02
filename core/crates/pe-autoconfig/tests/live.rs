@@ -30,9 +30,9 @@ async fn guesses_for_a_domain_nobody_knows() {
         return;
     }
     // .invalid never resolves (RFC 2606)
-    let unknown = discover("someone@postalexpress.invalid", None).await.unwrap();
+    let unknown = discover("someone@inboxclassic.invalid", None).await.unwrap();
     assert_eq!(unknown.source, Source::Guess);
-    assert_eq!(unknown.imap.host, "imap.postalexpress.invalid");
+    assert_eq!(unknown.imap.host, "imap.inboxclassic.invalid");
 }
 
 #[tokio::test]

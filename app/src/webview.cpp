@@ -14,7 +14,7 @@ std::wstring UserDataFolder() {
     PWSTR local = nullptr;
     std::wstring folder;
     if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &local))) {
-        folder = std::wstring(local) + L"\\PostalExpress\\WebView2";
+        folder = std::wstring(local) + L"\\InboxClassic\\WebView2";
     }
     CoTaskMemFree(local);
     return folder;

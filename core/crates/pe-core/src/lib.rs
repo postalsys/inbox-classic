@@ -633,7 +633,7 @@ impl Core {
                 .duration_since(std::time::UNIX_EPOCH)
                 .map_or(0, |d| d.as_nanos());
             let base = std::env::temp_dir()
-                .join("PostalExpress")
+                .join("InboxClassic")
                 .join(format!("draft-{folder}-{uid}-{nanos}"));
             draft.attachments = write_out(&base, files).map_err(|error| {
                 Error::Unavailable(format!("an attachment of the draft could not be kept: {error}"))

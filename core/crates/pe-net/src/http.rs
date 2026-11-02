@@ -302,7 +302,7 @@ fn request_bytes(url: &Url, method: Method, headers: &[(&str, &str)], body: &[u8
     };
     let host = url.authority();
     let mut head = format!(
-        "{method_name} {} HTTP/1.0\r\nHost: {host}\r\nUser-Agent: PostalExpress\r\n",
+        "{method_name} {} HTTP/1.0\r\nHost: {host}\r\nUser-Agent: InboxClassic\r\n",
         url.path
     );
     if !headers.iter().any(|(name, _)| name.eq_ignore_ascii_case("accept")) {
@@ -407,18 +407,18 @@ mod tests {
         let form = [("Content-Type", "application/x-www-form-urlencoded")];
         assert_eq!(
             request_bytes(&url, Method::Post, &form, b"a=1"),
-            b"POST /token HTTP/1.0\r\nHost: example.com\r\nUser-Agent: PostalExpress\r\nAccept: */*\r\nConnection: close\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 3\r\n\r\na=1"
+            b"POST /token HTTP/1.0\r\nHost: example.com\r\nUser-Agent: InboxClassic\r\nAccept: */*\r\nConnection: close\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 3\r\n\r\na=1"
         );
         assert_eq!(
             request_bytes(&url, Method::Get, &[], b"ignored"),
-            b"GET /token HTTP/1.0\r\nHost: example.com\r\nUser-Agent: PostalExpress\r\nAccept: */*\r\nConnection: close\r\n\r\n"
+            b"GET /token HTTP/1.0\r\nHost: example.com\r\nUser-Agent: InboxClassic\r\nAccept: */*\r\nConnection: close\r\n\r\n"
         );
         // another Accept replaces the default, a port that is not the default is part of Host
         let other = parse_url("https://example.com:8443/q").unwrap();
         let doh = request_bytes(&other, Method::Get, &[("accept", "application/dns-json")], b"");
         assert_eq!(
             doh,
-            b"GET /q HTTP/1.0\r\nHost: example.com:8443\r\nUser-Agent: PostalExpress\r\nConnection: close\r\naccept: application/dns-json\r\n\r\n"
+            b"GET /q HTTP/1.0\r\nHost: example.com:8443\r\nUser-Agent: InboxClassic\r\nConnection: close\r\naccept: application/dns-json\r\n\r\n"
         );
     }
 

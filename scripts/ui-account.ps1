@@ -1,4 +1,4 @@
-# Fills both steps of the Add Mail Account form of a running PostalExpress, for testing on the build machine:
+# Fills both steps of the Add Mail Account form of a running Inbox Classic, for testing on the build machine:
 #   powershell -File ui-account.ps1 <email> <password> <imap host> <imap port> <smtp host> <smtp port> <smtp security>
 # Security is the index of the choice: 0 SSL/TLS, 1 STARTTLS, 2 None. The IMAP security is SSL/TLS. The user name
 # is the address. scripts/ui-e2e.ps1 goes through the same form with checks.
@@ -24,7 +24,7 @@ $WM_SETTEXT = 0x000C; $BM_CLICK = 0x00F5; $CB_SETCURSEL = 0x014E
 # the account form, or the server settings form when $Second (it has the SMTP security choice, id 109)
 function WaitForForm([bool]$Second) {
     for ($i = 0; $i -lt 200; $i++) {
-        $form = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+        $form = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
         if ($form -ne [IntPtr]::Zero -and (-not $Second -or [Native.Win]::GetDlgItem($form, 109) -ne [IntPtr]::Zero)) { return $form }
         Start-Sleep -Milliseconds 200
     }

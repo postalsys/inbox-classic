@@ -1,7 +1,7 @@
 # Saves a screenshot as PNG: of the app window (made topmost for a moment, so other windows do not cover it and the
 # WebView2 content is on screen), or of the whole desktop with -Desktop. At full resolution also on scaled displays
 param([string]$Path, [switch]$Desktop)
-$Title = 'PostalExpress'
+$Title = 'Inbox Classic'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 Add-Type -Namespace Native -Name User32 -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();

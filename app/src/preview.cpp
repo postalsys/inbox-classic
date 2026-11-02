@@ -14,7 +14,7 @@ using webview::StartsWith;
 namespace {
 
 // where the documents are served from memory (webview.h); .invalid never resolves
-const wchar_t* kPageUrl = L"https://preview.postalexpress.invalid/";
+const wchar_t* kPageUrl = L"https://preview.inboxclassic.invalid/";
 
 void OpenExternally(const wchar_t* uri) {
     if (StartsWith(uri, L"http://") || StartsWith(uri, L"https://") || StartsWith(uri, L"mailto:")) {

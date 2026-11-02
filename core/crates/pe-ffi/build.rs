@@ -1,4 +1,4 @@
-// Writes the C header of the exports to core/include/postal_express.h. The header is committed, so changes to the
+// Writes the C header of the exports to core/include/inbox_classic.h. The header is committed, so changes to the
 // API show up in diffs; cbindgen only rewrites it when its content changes.
 use std::path::PathBuf;
 
@@ -10,7 +10,7 @@ fn main() {
         .with_config(config)
         .generate()
         .expect("generating the C header")
-        .write_to_file(crate_dir.join("../../include/postal_express.h"));
+        .write_to_file(crate_dir.join("../../include/inbox_classic.h"));
     println!("cargo:rerun-if-changed=src");
     println!("cargo:rerun-if-changed=cbindgen.toml");
 }

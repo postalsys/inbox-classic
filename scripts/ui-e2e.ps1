@@ -4,13 +4,13 @@
 # replying, replying to all, forwarding, writing a new message (and a mistyped address), Send/Recv, Sent Items,
 # About and the help. A screenshot of each step goes to -Out (scripts/feature-map.mjs builds a page from them).
 #
-#   powershell -ExecutionPolicy Bypass -File scripts\ui-e2e.ps1 [-Exe build\PostalExpress.exe] [-Out build\ui-e2e]
+#   powershell -ExecutionPolicy Bypass -File scripts\ui-e2e.ps1 [-Exe build\InboxClassic.exe] [-Out build\ui-e2e]
 #
 # Needs a desktop (a logged in session, or a CI runner), Node.js and `npm ci` in core\e2e. The app runs with a
 # store of its own and --memory-passwords, so nothing of the user's is touched. The control and command ids are those
 # of app/src/app.h, accounts.cpp and compose.cpp.
 param(
-    [string]$Exe = (Join-Path $PSScriptRoot '..\build\PostalExpress.exe'),
+    [string]$Exe = (Join-Path $PSScriptRoot '..\build\InboxClassic.exe'),
     [string]$Out = (Join-Path $PSScriptRoot '..\build\ui-e2e')
 )
 $ErrorActionPreference = 'Stop'
@@ -252,7 +252,7 @@ $app = $null
 try {
     # ---- adding the account ----
 
-    Step 'starting PostalExpress with a store of its own'
+    Step 'starting Inbox Classic with a store of its own'
     $store = Join-Path $Out 'store.db'
     Remove-Item -Force -ErrorAction SilentlyContinue "$store*", (Join-Path $Out '*.png'), (Join-Path $Out 'report*.pdf')
     # ImapKit's certificate is self-signed: the app trusts it, and only it, for this run
@@ -263,7 +263,7 @@ try {
     function AddAccount([string]$name, [string]$user, [string]$password, [bool]$shots) {
         # the window, once its fields are there
         $first = WaitFor {
-            $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 102) -ne [IntPtr]::Zero) { $f }
         }
         Check ($null -ne $first) "the account form opens ($name)"
@@ -273,12 +273,12 @@ try {
         if ($shots) { Shot $first 'account-1-form' }
         Click $first 1
         if ($shots) {
-            $wait = WaitWindow 'PostalExpressWait' $null 5
+            $wait = WaitWindow 'InboxClassicWait' $null 5
             if ($wait) { Shot $wait 'account-2-lookup' }
         }
         # the lookup finds nothing for this domain: the second form comes with the usual names to correct
         $second = WaitFor {
-            $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
         } 40
         Check ($null -ne $second) 'the server settings form follows the lookup'
@@ -309,7 +309,7 @@ try {
     # ---- reading ----
 
     Step 'syncing'
-    $main = [Native.Win]::FindWindow('PostalExpressMain', [NullString]::Value)
+    $main = [Native.Win]::FindWindow('InboxClassicMain', [NullString]::Value)
     $tree = [Native.Win]::GetDlgItem($main, $IDC_TREE)
     $list = [Native.Win]::GetDlgItem($main, $IDC_LIST)
     $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
@@ -412,7 +412,7 @@ try {
     # a compose window, once its fields are there (the window exists a moment before them)
     function WaitCompose {
         WaitFor {
-            $c = [Native.Win]::FindWindow('PostalExpressCompose', [NullString]::Value)
+            $c = [Native.Win]::FindWindow('InboxClassicCompose', [NullString]::Value)
             if ($c -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($c, $IDC_BODY) -ne [IntPtr]::Zero) { $c }
         }
     }
@@ -489,13 +489,13 @@ try {
     SetText $compose $IDC_SUBJECT 'A new message from the UI test'
     Check (TypeInEditor $compose 'Hello Dave, written from scratch.') 'the editor of a new message takes typing'
     Command $compose $IDC_SEND
-    $problem = WaitWindow '#32770' 'PostalExpress' 10
+    $problem = WaitWindow '#32770' 'Inbox Classic' 10
     Check ($null -ne $problem) 'a mistyped address is pointed out before sending'
     if ($problem) {
         Shot $problem 'write-4-bad-address'
         [void][Native.Win]::PostMessage($problem, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
     }
-    Check ([bool](WaitFor { [Native.Win]::IsWindow($compose) -and [Native.Win]::FindWindow('#32770', 'PostalExpress') -eq [IntPtr]::Zero })) 'and the message stays open to fix it'
+    Check ([bool](WaitFor { [Native.Win]::IsWindow($compose) -and [Native.Win]::FindWindow('#32770', 'Inbox Classic') -eq [IntPtr]::Zero })) 'and the message stays open to fix it'
     SetText $compose $IDC_TO 'Dave <dave@example.com>'
     # two files attached, one taken off again with Delete
     $files = Join-Path $env:TEMP 'pe-ui-attach'
@@ -536,7 +536,7 @@ try {
     Start-Sleep -Seconds 2
     Check ($null -eq (Find 'INBOX' 'Subject: Sent later from the UI test')) 'and does not send it yet'
     Command $main $IDM_OUTBOX
-    $outbox = WaitWindow 'PostalExpressOutbox' 'Outbox'
+    $outbox = WaitWindow 'InboxClassicOutbox' 'Outbox'
     Check ($null -ne $outbox) 'Tools > Outbox lists what waits'
     if ($outbox) {
         $waiting = [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
@@ -554,7 +554,7 @@ try {
     [void](TypeInEditor $compose 'Half written.')
     # closing what was written asks whether to keep it; Yes saves it in Drafts
     [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-    $ask = WaitWindow '#32770' 'PostalExpress' 10
+    $ask = WaitWindow '#32770' 'Inbox Classic' 10
     Check ($null -ne $ask) 'closing a written message asks to save it'
     if ($ask) {
         Shot $ask 'write-8-save-draft'
@@ -658,7 +658,7 @@ try {
     # the next one is selected: move it to Archive through the dialog
     Command $main $IDM_MOVE
     $move = WaitFor {
-        $f = [Native.Win]::FindWindow('PostalExpressForm', 'Move')
+        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Move')
         if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 100) -ne [IntPtr]::Zero) { $f }
     }
     Check ($null -ne $move) 'Move to Folder asks where'
@@ -676,7 +676,7 @@ try {
     [void](WaitFor { if ((Rows) -ge 1) { Rows } })
     SelectRow 0
     Command $main $IDM_DELETE
-    $sure = WaitWindow '#32770' 'PostalExpress' 10
+    $sure = WaitWindow '#32770' 'Inbox Classic' 10
     Check ($null -ne $sure) 'deleting for good asks first'
     if ($sure) {
         Shot $sure 'organize-4-for-good'
@@ -692,7 +692,7 @@ try {
     # a folder of the form that asks for a name: its name typed and OK clicked
     function AnswerName([string]$title, [string]$name, [string]$shot) {
         $form = WaitFor {
-            $f = [Native.Win]::FindWindow('PostalExpressForm', $title)
+            $f = [Native.Win]::FindWindow('InboxClassicForm', $title)
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 100) -ne [IntPtr]::Zero) { $f }
         }
         Check ($null -ne $form) "$title asks for a name"
@@ -725,7 +725,7 @@ try {
         $plans = WaitFor { ArchiveChild }
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $plans)
         Command $main $IDM_DELETE_FOLDER
-        $sure = WaitWindow '#32770' 'PostalExpress' 10
+        $sure = WaitWindow '#32770' 'Inbox Classic' 10
         Check ($null -ne $sure) 'deleting a folder asks first'
         if ($sure) {
             Shot $sure 'folders-3-delete'
@@ -737,12 +737,12 @@ try {
     SelectFolder 0
     Command $main $IDM_RENAME_FOLDER
     AnswerName 'Rename Folder' 'Mail' $null
-    $refused = WaitWindow '#32770' 'PostalExpress' 10
+    $refused = WaitWindow '#32770' 'Inbox Classic' 10
     Check ($null -ne $refused) 'renaming the Inbox is refused with the reason'
     if ($refused) {
         Shot $refused 'folders-4-inbox'
         [void][Native.Win]::PostMessage($refused, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        [void](WaitFor { [Native.Win]::FindWindow('#32770', 'PostalExpress') -eq [IntPtr]::Zero })
+        [void](WaitFor { [Native.Win]::FindWindow('#32770', 'Inbox Classic') -eq [IntPtr]::Zero })
     }
 
     Step 'closing a message that was written'
@@ -750,7 +750,7 @@ try {
     $compose = WaitCompose
     [void](TypeInEditor $compose 'Never mind.')
     [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-    $ask = WaitWindow '#32770' 'PostalExpress' 10
+    $ask = WaitWindow '#32770' 'Inbox Classic' 10
     Check ($null -ne $ask) 'closing asks before throwing the text away'
     if ($ask) {
         Shot $ask 'write-6-close'
@@ -766,7 +766,7 @@ try {
     Step 'a Gmail address'
     Command $main $IDM_NEW_ACCOUNT
     $first = WaitFor {
-        $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
         if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 102) -ne [IntPtr]::Zero) { $f }
     }
     SetText $first 100 'Gmail Test'
@@ -781,7 +781,7 @@ try {
         Click $hint 7
     }
     $servers = WaitFor {
-        $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
         if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
     } 20
     Check ($servers -and (GetText $servers 104) -eq 'imap.gmail.com' -and (GetText $servers 107) -eq 'smtp.gmail.com') 'its servers were found'
@@ -796,7 +796,7 @@ try {
     Step 'a wrong password'
     Command $main $IDM_NEW_ACCOUNT
     AddAccount 'Wrong Password' 'testuser2' 'not-the-password' $false
-    $logon = WaitWindow 'PostalExpressForm' 'Logon' 30
+    $logon = WaitWindow 'InboxClassicForm' 'Logon' 30
     Check ($null -ne $logon) 'a refused password is asked for again'
     if ($logon) {
         $status = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
@@ -810,7 +810,7 @@ try {
 
     Step 'accounts'
     Command $main $IDM_ACCOUNTS
-    $accounts = WaitWindow 'PostalExpressAccounts' 'Accounts'
+    $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
     Check ($null -ne $accounts) 'File > Accounts lists the accounts'
     if ($accounts) {
         $listBox = [Native.Win]::GetDlgItem($accounts, 400)
@@ -820,7 +820,7 @@ try {
         # the first account is selected when the list opens, and stays so after a change
         Click $accounts 402
         $properties = WaitFor {
-            $f = [Native.Win]::FindWindow('PostalExpressForm', 'Properties')
+            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
         }
         Check ($null -ne $properties) 'Properties shows the settings'
@@ -840,7 +840,7 @@ try {
         # the first account is selected when the list opens, and stays so after a change
         Click $accounts 402
         $again = WaitFor {
-            $f = [Native.Win]::FindWindow('PostalExpressForm', 'Properties')
+            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
         }
         Check ($again -and (GetText $again 100) -eq 'UI Test Renamed') 'the new name is saved'
@@ -869,17 +869,17 @@ try {
 
     Step 'about'
     Command $main $IDM_ABOUT
-    $about = WaitWindow '#32770' 'About PostalExpress'
+    $about = WaitWindow '#32770' 'About Inbox Classic'
     Check ($null -ne $about) 'About shows the version'
     if ($about) {
         Shot $about 'help-1-about'
         [void][Native.Win]::PostMessage($about, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        [void](WaitFor { [Native.Win]::FindWindow('#32770', 'About PostalExpress') -eq [IntPtr]::Zero })
+        [void](WaitFor { [Native.Win]::FindWindow('#32770', 'About Inbox Classic') -eq [IntPtr]::Zero })
     }
 
     Step 'help'
     Command $main $IDM_HELP
-    $help = WaitWindow 'PostalExpressHelp'
+    $help = WaitWindow 'InboxClassicHelp'
     Check ($null -ne $help) 'F1 opens the help'
     if ($help) {
         Start-Sleep -Seconds 3

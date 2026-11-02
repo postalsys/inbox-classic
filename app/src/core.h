@@ -1,4 +1,4 @@
-// C++ side of the Rust core (core/include/postal_express.h): owns the strings it returns and converts UTF-8 to the
+// C++ side of the Rust core (core/include/inbox_classic.h): owns the strings it returns and converts UTF-8 to the
 // UTF-16 of the Windows API. Nothing here parses data, that is the job of the core.
 #pragma once
 
@@ -6,7 +6,7 @@
 #include <string>
 #include <string_view>
 
-#include "postal_express.h"
+#include "inbox_classic.h"
 
 namespace core {
 

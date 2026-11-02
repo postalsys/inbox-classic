@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-PostalExpress is a Windows email client that looks like Outlook Express. It is a sibling of ImapKit Desktop (`../imapkit-win`), which has the same classic Win32 look but runs a Node.js sidecar. PostalExpress has no sidecar: IMAP, SMTP and MIME run in-process in a Rust core.
+Inbox Classic is a Windows email client that looks like Outlook Express. It is a sibling of ImapKit Desktop (`../imapkit-win`), which has the same classic Win32 look but runs a Node.js sidecar. Inbox Classic has no sidecar: IMAP, SMTP and MIME run in-process in a Rust core.
 
 ## Security model (the reason for the architecture)
 
@@ -32,7 +32,7 @@ A Cargo workspace in `core/` (edition 2024, `rustfmt.toml` sets 120 columns). Th
 ### The C ABI (`pe-ffi`)
 
 - Built as `staticlib` (`pe_ffi.lib`) and linked into the exe, not as a DLL: one signed exe, no DLL search-order risk.
-- `build.rs` runs cbindgen and writes `core/include/postal_express.h`. The header is committed so API changes show up in diffs; rebuild the crate after changing an export and commit the header with it.
+- `build.rs` runs cbindgen and writes `core/include/inbox_classic.h`. The header is committed so API changes show up in diffs; rebuild the crate after changing an export and commit the header with it.
 - Calls are coarse, on opaque handles. Strings go both ways as UTF-8; strings returned to C++ are allocated by Rust and released with `pe_string_free` (in C++, `core::String`, a `unique_ptr` with that deleter, see `app/src/core.h`).
 - Lists and views are opaque handles holding `repr(C)` rows whose strings they own (`pe_folders`, `pe_folder_list_get`, `pe_folder_list_free`). No JSON: C++ parses nothing. Enum constants are qualified (`PE_SORT_FIELD_DATE`) by `cbindgen.toml`.
 - Work that touches the network runs on the workers and reports through the event callback, on a worker thread: the C++ callback copies the event, posts it to the window thread, and must not throw.
@@ -64,7 +64,7 @@ cargo fmt --all
 The app only builds on Windows. The build machine is `andri@10.8.0.8` (Windows 11, VS 2022 Build Tools, Rust via rustup); the sources live at `C:\Users\andri\src\postal-express`. From the Mac:
 
 ```
-scripts/win-build.sh                  # copy the working tree over (tar, no .git or build outputs) and build build\PostalExpress.exe
+scripts/win-build.sh                  # copy the working tree over (tar, no .git or build outputs) and build build\InboxClassic.exe
 scripts/win-test.sh [cargo args]      # copy and run cargo test on Windows
 scripts/win-run.sh                    # start the app on the interactive desktop (scheduled task; SSH has no desktop)
 scripts/win-screenshot.sh out.png     # screenshot of the window, DESKTOP=1 for the whole screen
@@ -77,12 +77,12 @@ To drive the UI for a check, run these on the build machine through a scheduled 
 
 `PE_NETWORK_TESTS=1` enables the tests that need the internet (`pe-autoconfig/tests/live.rs`); CI sets it on Linux.
 
-`scripts/build-installer.sh` builds `dist/PostalExpress-Setup.exe` (NSIS, `installer/postal-express.nsi`, per user, no admin rights) with `THIRD-PARTY-NOTICES.txt` from `scripts/notices.mjs`; it signs the exe, the uninstaller and the installer with Azure Artifact Signing (`scripts/sign-win.sh`) when `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` are set.
+`scripts/build-installer.sh` builds `dist/InboxClassic-Setup.exe` (NSIS, `installer/inbox-classic.nsi`, per user, no admin rights) with `THIRD-PARTY-NOTICES.txt` from `scripts/notices.mjs`; it signs the exe, the uninstaller and the installer with Azure Artifact Signing (`scripts/sign-win.sh`) when `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` are set.
 
 On Windows itself: `scripts\win-build.cmd` and `scripts\win-test.cmd`. Both call `scripts\vcvars.cmd`, which finds Visual Studio with vswhere and puts cargo on PATH.
 
 Screenshots need a logged-in desktop session that is not disconnected or locked; check with `ssh andri@10.8.0.8 query user` (`Active`, not `Disc`). In a disconnected session they come out blank white.
 
-CI (`.github/workflows/ci.yml`) runs fmt, clippy with `-D warnings`, a check that the committed C header matches the build, the Rust tests on Linux, Windows and macOS, and the app build on Windows (artifact `PostalExpress-win-x64`). Markdown and YAML are formatted with prettier (`npx prettier --write`, config in `.prettierrc.json`).
+CI (`.github/workflows/ci.yml`) runs fmt, clippy with `-D warnings`, a check that the committed C header matches the build, the Rust tests on Linux, Windows and macOS, and the app build on Windows (artifact `InboxClassic-win-x64`). Markdown and YAML are formatted with prettier (`npx prettier --write`, config in `.prettierrc.json`).
 
 For test IMAP and SMTP accounts use Ethereal (see the global instructions) or ImapKit (`../imapkit`, `../imapkit-win`).

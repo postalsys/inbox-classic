@@ -1,4 +1,4 @@
-# Selects a folder and a message in a running PostalExpress, for testing on the build machine:
+# Selects a folder and a message in a running Inbox Classic, for testing on the build machine:
 #   powershell -File ui-select.ps1 <folder> <message>
 # <folder> is the position of the folder under the first account (0 is the first folder), <message> the row in the
 # message list, reached with the arrow keys as a user would.
@@ -13,8 +13,8 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $TVGN_ROOT = 0; $TVGN_NEXT = 1; $TVGN_CHILD = 4; $TVGN_CARET = 9
 $WM_SETFOCUS = 0x0007; $WM_KEYDOWN = 0x0100; $WM_KEYUP = 0x0101; $VK_HOME = 0x24; $VK_DOWN = 0x28
 
-$main = [Native.Win]::FindWindow('PostalExpressMain', [NullString]::Value)
-if ($main -eq [IntPtr]::Zero) { throw 'PostalExpress is not running' }
+$main = [Native.Win]::FindWindow('InboxClassicMain', [NullString]::Value)
+if ($main -eq [IntPtr]::Zero) { throw 'Inbox Classic is not running' }
 # control ids of app/src/app.h
 $tree = [Native.Win]::GetDlgItem($main, 200)
 $list = [Native.Win]::GetDlgItem($main, 201)

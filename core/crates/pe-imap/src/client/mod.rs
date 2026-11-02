@@ -76,7 +76,7 @@ pub struct Config {
     pub security: Security,
     pub trust: Trust,
     pub credentials: Credentials,
-    /// Sent with ID, `("name", "PostalExpress")`
+    /// Sent with ID, `("name", "Inbox Classic")`
     pub client_id: Vec<(String, String)>,
     pub timeouts: Timeouts,
     pub limits: FrameLimits,
@@ -91,7 +91,7 @@ impl Config {
             security,
             trust: Trust::Platform,
             credentials,
-            client_id: vec![("name".into(), "PostalExpress".into())],
+            client_id: vec![("name".into(), "Inbox Classic".into())],
             timeouts: Timeouts::default(),
             limits: FrameLimits::default(),
             wire_log: None,

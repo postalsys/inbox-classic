@@ -1,15 +1,15 @@
-; The installer of PostalExpress, built with NSIS 3.08 or newer (makensis runs on Windows, macOS and Linux):
+; The installer of Inbox Classic, built with NSIS 3.08 or newer (makensis runs on Windows, macOS and Linux):
 ;
-;   makensis -NOCD -DVERSION=0.1.0 -DSTAGING=dist/PostalExpress -DOUTFILE=dist/PostalExpress-Setup.exe \
-;            [-DSIGN] installer/postal-express.nsi
+;   makensis -NOCD -DVERSION=0.1.0 -DSTAGING=dist/InboxClassic -DOUTFILE=dist/InboxClassic-Setup.exe \
+;            [-DSIGN] installer/inbox-classic.nsi
 ;
 ; Run it from the root of the repository, -NOCD keeps the relative paths there. STAGING holds what gets installed:
-; PostalExpress.exe and THIRD-PARTY-NOTICES.txt (scripts/win-package.cmd makes it).
+; InboxClassic.exe and THIRD-PARTY-NOTICES.txt (scripts/win-package.cmd makes it).
 ; With SIGN the uninstaller and the installer are signed while they are built, with scripts/sign-win.sh.
 ;
 ; Updates: every version installs to the same per-user folder and registry keys, so running the installer of a
 ; newer version upgrades in place. A running copy is closed first, and the mail store in
-; %LOCALAPPDATA%\PostalExpress stays.
+; %LOCALAPPDATA%\InboxClassic stays.
 
 Unicode true
 ManifestDPIAware true
@@ -27,16 +27,16 @@ SetCompressor /SOLID lzma
     !error "STAGING is not defined, pass -DSTAGING=<folder with the files to install>"
 !endif
 !ifndef OUTFILE
-    !define OUTFILE "PostalExpress-Setup.exe"
+    !define OUTFILE "InboxClassic-Setup.exe"
 !endif
 
-!define PRODUCT "PostalExpress"
-!define EXE "PostalExpress.exe"
+!define PRODUCT "Inbox Classic"
+!define EXE "InboxClassic.exe"
 !define PUBLISHER "Postal Systems OÜ"
-!define HOMEPAGE "https://github.com/postalsys/postal-express"
+!define HOMEPAGE "https://inboxclassic.com"
 ; the same keys for every version, this is how a newer installer finds the installed one
-!define REGKEY "Software\Postal Systems\PostalExpress"
-!define UNINSTKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\PostalExpress"
+!define REGKEY "Software\Postal Systems\InboxClassic"
+!define UNINSTKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\InboxClassic"
 ; forward slashes work for makensis on every platform, and for the shell that runs the signing script
 !define ROOT "${__FILEDIR__}/.."
 
@@ -83,7 +83,7 @@ Var WelcomeText
 
 !insertmacro MUI_LANGUAGE "English"
 
-; Closes a running PostalExpress of this user. taskkill without /f sends WM_CLOSE, so the app closes its store
+; Closes a running Inbox Classic of this user. taskkill without /f sends WM_CLOSE, so the app closes its store
 ; and logs out of its servers. A running exe can not be opened for writing (it can be renamed, so that is no test);
 ; after 15 seconds it is ended forcefully
 !macro CLOSE_APP prefix
@@ -192,9 +192,9 @@ Section "Uninstall"
     DeleteRegKey /ifempty HKCU "Software\Postal Systems"
 
     ; the cache of the message preview (app/src/preview.cpp)
-    RMDir /r "$LOCALAPPDATA\PostalExpress\WebView2"
-    ; the saved passwords stay in the Credential Manager under "PostalExpress", named after a random ID of the
+    RMDir /r "$LOCALAPPDATA\InboxClassic\WebView2"
+    ; the saved passwords stay in the Credential Manager under "InboxClassic", named after a random ID of the
     ; removed store: no other store can use them
-    MessageBox MB_YESNO|MB_ICONQUESTION "Also remove the accounts and the mail PostalExpress keeps on this computer? The mail on the servers stays." /SD IDNO IDNO +2
-    RMDir /r "$LOCALAPPDATA\PostalExpress"
+    MessageBox MB_YESNO|MB_ICONQUESTION "Also remove the accounts and the mail Inbox Classic keeps on this computer? The mail on the servers stays." /SD IDNO IDNO +2
+    RMDir /r "$LOCALAPPDATA\InboxClassic"
 SectionEnd
