@@ -1057,6 +1057,8 @@ pub struct PeMessageInfo {
     /// The sanitized document for the preview, with its CSP
     pub document: *const c_char,
     pub attachment_count: usize,
+    /// The message has pictures on the internet, blocked until it is shown again with remote images allowed
+    pub remote_images: bool,
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
@@ -1088,6 +1090,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         has_date: view.date.is_some(),
         document: strings.add(&view.document),
         attachment_count: attachments.len(),
+        remote_images: view.remote_images,
     };
     handed(PeMessageView {
         info,

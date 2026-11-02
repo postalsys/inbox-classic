@@ -24,6 +24,8 @@ pub struct MessageView {
     pub date: Option<i64>,
     /// The body for WebView2: a complete document with a CSP
     pub document: String,
+    /// The message has pictures on the internet (shown or not, as the view was asked for)
+    pub remote_images: bool,
     pub attachments: Vec<AttachmentView>,
 }
 
@@ -78,14 +80,15 @@ pub(crate) fn build_unless(
         ("Cc", cc.as_str()),
         ("Subject", subject.as_str()),
     ];
-    let document = pe_html::render_message_with_header(&body, &options, &images, &header);
+    let rendered = pe_html::render_view(&body, &options, &images, &header);
     Some(MessageView {
         subject,
         from,
         to,
         cc,
         date: message.timestamp,
-        document,
+        document: rendered.document,
+        remote_images: rendered.remote_images,
         attachments: listed(&message.attachments)
             .map(|a| AttachmentView {
                 safe_filename: a.safe_filename(),
@@ -162,6 +165,13 @@ mod tests {
             view.document
         );
         assert!(!view.document.contains("script") && !view.document.contains("onclick"));
+        // no pictures on the internet to offer to download
+        assert!(!view.remote_images);
+        let remote = build(
+            b"Content-Type: text/html\r\n\r\n<img src=\"https://example.com/x.png\">\r\n",
+            false,
+        );
+        assert!(remote.remote_images);
         assert_eq!(
             view.attachments,
             [AttachmentView {

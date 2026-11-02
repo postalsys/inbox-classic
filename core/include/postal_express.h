@@ -223,6 +223,8 @@ typedef struct PeMessageInfo {
   // The sanitized document for the preview, with its CSP
   const char *document;
   size_t attachment_count;
+  // The message has pictures on the internet, blocked until it is shown again with remote images allowed
+  bool remote_images;
 } PeMessageInfo;
 
 typedef struct PeAttachment {

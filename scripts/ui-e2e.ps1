@@ -638,6 +638,7 @@ try {
     [void](WaitFor { if ((Rows) -ge 7) { Rows } })
     # the newest message, "One more thing"
     SelectRow 0
+    Check (-not (Visible $main $IDC_PICTURES)) 'a plain text message does not offer Download pictures'
     Command $main $IDM_FLAG
     Check ([bool](WaitFor { (Find 'INBOX' 'Subject: One more thing').flags -contains '\Flagged' })) 'Flag Message flags it on the server'
     Shot $main 'organize-1-flagged'

@@ -183,12 +183,59 @@ pub fn render_message_with_header(
     images: &[InlineImage],
     header: &[(&str, &str)],
 ) -> String {
+    render_view(html, options, images, header).document
+}
+
+/// A message rendered for the preview
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Rendered {
+    pub document: String,
+    /// The message has pictures on the internet, which the preview shows only after Download pictures
+    pub remote_images: bool,
+}
+
+/// [`render_message_with_header`], and whether the message has pictures on the internet
+pub fn render_view(html: &str, options: &RenderOptions, images: &[InlineImage], header: &[(&str, &str)]) -> Rendered {
+    let body = builder(images).clean(html).to_string();
+    Rendered {
+        remote_images: refers_to_remote_images(&body),
+        document: wrap(&body, options, header),
+    }
+}
+
+/// Whether sanitized `body` loads pictures from the network: an `img` src (the sanitizer drops srcset), a `background` attribute or a
+/// CSS `url()` / `image-set()` with an http(s) or protocol-relative address. Only for offering Download pictures: a
+/// picture this misses (CSS escapes) stays blocked all the same.
+fn refers_to_remote_images(body: &str) -> bool {
+    let lower = body.to_ascii_lowercase();
+    let remote = |rest: &str| {
+        // what may come before the address: spaces and quotes, raw or as the entities ammonia writes
+        let mut rest = rest.trim_start();
+        while let Some(next) = ["\"", "'", "&quot;", "&#39;", "&#x27;"]
+            .iter()
+            .find_map(|quote| rest.strip_prefix(quote))
+        {
+            rest = next.trim_start();
+        }
+        rest.starts_with("http:") || rest.starts_with("https:") || rest.starts_with("//")
+    };
+    let after = |pattern: &str| {
+        lower
+            .match_indices(pattern)
+            .any(|(at, _)| remote(&lower[at + pattern.len()..]))
+    };
+    [" src=\"", " background=\"", "url(", "image-set("]
+        .iter()
+        .any(|p| after(p))
+}
+
+/// The preview document around a sanitized body
+fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)]) -> String {
     let image_sources = if options.allow_remote_images {
         "data: http: https:"
     } else {
         "data:"
     };
-    let body = builder(images).clean(html).to_string();
     // the header of a printout, under a class and in a cascade layer the message can not guess: an important rule
     // of the first layer beats any important rule of the message's own style elements, whatever their selector, and
     // a message can not add rules to a layer it can not name. Its lines have inline important styles, which beat
@@ -236,6 +283,32 @@ pub fn render_message_with_header(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn tells_whether_a_message_has_pictures_on_the_internet() {
+        let options = RenderOptions::default();
+        let remote = |html: &str| render_view(html, &options, &[], &[]).remote_images;
+        for html in [
+            "<img src=\"https://example.com/a.png\">",
+            "<img src=\"HTTP://example.com/a.png\">",
+            "<img src=\"//example.com/a.png\">",
+            "<table background=\"http://example.com/bg.gif\"><tr><td>x</td></tr></table>",
+            "<div style=\"background-image: url('https://example.com/bg.png')\">x</div>",
+            "<div style='background:url(\"//example.com/bg.png\")'>x</div>",
+            "<style>p { background: URL( http://example.com/p.png ) }</style><p>x</p>",
+        ] {
+            assert!(remote(html), "{html}");
+        }
+        for html in [
+            "<p>Plain text with a link to https://example.com and <a href=\"https://example.com\">a link</a></p>",
+            "<img src=\"data:image/png;base64,AAAA\">",
+            "<img src=\"cid:logo@x\">",
+            "<p>src=\"https://example.com\" written as text</p>",
+            "<div style=\"color:red\">url( is only text here</div>",
+        ] {
+            assert!(!remote(html), "{html}");
+        }
+    }
 
     #[test]
     fn embeds_inline_images() {

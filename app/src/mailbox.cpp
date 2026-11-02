@@ -419,7 +419,8 @@ void Mailbox::ShowView() {
     }
     ShowHeader(info);
     preview_.Show(Text(info->document), remoteImages_);
-    ShowWindow(pictures_, remoteImages_ ? SW_HIDE : SW_SHOW);
+    // offered only for a message with pictures on the internet, until they are shown
+    ShowWindow(pictures_, info->remote_images && !remoteImages_ ? SW_SHOW : SW_HIDE);
     // read after a moment on screen, not while the user moves through the list
     SetTimer(parent_, TIMER_MARK_READ, 1000, nullptr);
 }
