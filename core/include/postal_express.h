@@ -35,6 +35,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_SIGN_IN_DONE = 9,
   // The view `uid` of `pe_message_view_start` is built: `pe_message_view_result`
   PE_EVENT_KIND_VIEW_READY = 10,
+  // The Outbox of `account` changed: a message went in or out, or did not go: `pe_outbox`
+  PE_EVENT_KIND_OUTBOX_CHANGED = 11,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -129,6 +131,9 @@ typedef struct PeMessageList PeMessageList;
 
 // A message as the preview shows it; free with `pe_message_view_free`
 typedef struct PeMessageView PeMessageView;
+
+// The Outbox; free with `pe_outbox_free`
+typedef struct PeOutbox PeOutbox;
 
 // An event; valid only during the callback
 typedef struct PeEvent {
@@ -249,6 +254,18 @@ typedef struct PeOutgoing {
   const char *const *attachments;
   size_t attachment_count;
 } PeOutgoing;
+
+// A message waiting in the Outbox
+typedef struct PeQueued {
+  int64_t id;
+  int64_t account;
+  const char *subject;
+  const char *recipients;
+  // Seconds since the Unix epoch
+  int64_t created;
+  // Why the last try did not work, NULL before the first
+  const char *problem;
+} PeQueued;
 
 // The fields a compose window starts with
 typedef struct PeDraftInfo {
@@ -635,22 +652,79 @@ uint8_t *pe_attachment_data(const struct PeCore *core,
                             size_t *len,
                             char **filename);
 
-// Frees bytes from `pe_attachment_data`
+// The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).
+// `len` gets its length and `filename` a name to save it under made from its subject (`.eml`; free it with
+// `pe_string_free`). Free the bytes with `pe_bytes_free`.
+//
+// # Safety
+// `core` must be a live handle; `len` and `filename` must be valid pointers.
+uint8_t *pe_message_source(const struct PeCore *core,
+                           int64_t folder,
+                           uint64_t uid,
+                           size_t *len,
+                           char **filename);
+
+// Puts the message saved in the file at `path` (UTF-8, an `.eml`) into a folder: `FolderChanged` follows once the
+// server has it. False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`)
+// for a file that can not be read, is not a message or is too large.
+//
+// # Safety
+// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+bool pe_message_import(const struct PeCore *core,
+                       int64_t folder,
+                       const char *path,
+                       char **error);
+
+// Frees bytes from `pe_attachment_data` and `pe_message_source`
 //
 // # Safety
 // `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
 void pe_bytes_free(uint8_t *data, size_t len);
 
-// Sends a message from an account in the background: `MessageSent`, or `Failed` with the server's
-// answer. A recipient that is no address or a file that is not there fails right away: false,
-// with the reason in `error` when it is not NULL (free it with `pe_string_free`).
+// Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now, or
+// with the next Send/Recv when `later`. `MessageSent` when the server took it; `Failed` with the server's answer
+// when it did not, the message waiting in the Outbox. A recipient that is no address or a file that is not there
+// fails right away: false, with the reason in `error` when it is not NULL (free it with `pe_string_free`).
 //
 // # Safety
 // `core` must be a live handle, `message` a valid message, `error` NULL or a valid pointer.
 bool pe_message_send(const struct PeCore *core,
                      int64_t account,
                      const struct PeOutgoing *message,
+                     bool later,
                      char **error);
+
+// What waits in the Outbox, of every account, oldest first; NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeOutbox *pe_outbox(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_outbox_count(const struct PeOutbox *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeQueued *pe_outbox_get(const struct PeOutbox *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_outbox_free(struct PeOutbox *list);
+
+// Takes a message out of the Outbox without sending it: `OutboxChanged`
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_outbox_delete(const struct PeCore *core, int64_t id);
+
+// Sends what waits in the Outbox now
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_outbox_send(const struct PeCore *core);
 
 // A reply, a reply to all or a forward of a message whose source is in the store (after
 // `MessageReady`), NULL otherwise

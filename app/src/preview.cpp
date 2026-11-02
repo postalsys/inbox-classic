@@ -109,6 +109,13 @@ void Preview::Show(const std::wstring& html, bool remoteImages) {
     view_->Navigate(url.c_str());
 }
 
+void Preview::Print() {
+    ComPtr<ICoreWebView2_16> printing;
+    if (view_ && SUCCEEDED(view_.As(&printing))) {
+        printing->ShowPrintUI(COREWEBVIEW2_PRINT_DIALOG_KIND_BROWSER);
+    }
+}
+
 void Preview::Clear() {
     // white like the documents of messages, also when Windows uses dark mode
     Show(L"<!doctype html><html><head><meta name=\"color-scheme\" content=\"light\"><style>html{background:#fff}</style></head><body></body></html>");

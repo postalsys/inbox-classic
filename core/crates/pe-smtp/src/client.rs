@@ -573,6 +573,8 @@ impl Client {
 
         let response = self.command("DATA").await?;
         if response.code != 354 {
+            // close the transaction so the next message of the session starts clean
+            let _ = self.command("RSET").await;
             return Err(Error::Refused {
                 command: "DATA".into(),
                 response,
@@ -583,6 +585,7 @@ impl Client {
         self.write(&data).await?;
         let response = self.read_response(self.config.timeouts.data).await?;
         if response.code != 250 {
+            let _ = self.command("RSET").await;
             return Err(Error::Refused {
                 command: "the message".into(),
                 response,

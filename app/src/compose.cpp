@@ -22,6 +22,7 @@ enum ComposeId : WORD {
     IDC_SUBJECT,
     IDC_BODY,
     IDC_FILES,
+    IDC_SEND_LATER,
     IDC_FONT = 320,
     IDC_FONT_SIZE,
     IDC_FORMATBAR,
@@ -61,7 +62,11 @@ struct Compose {
     Editor editor;
     // the editor's HTML was asked for, the message goes when it comes
     bool sending = false;
+    // Send Later: into the Outbox, sent with the next Send/Recv
+    bool later = false;
     std::wstring html;
+    // the quote was unfolded into the text: it goes as the user left it, not added again
+    bool quoteInText = false;
     // something was typed: closing asks first
     bool dirty = false;
     bool filling = true;
@@ -125,27 +130,8 @@ void ShowFiles(Compose* state) {
 }
 
 void Attach(HWND hwnd, Compose* state) {
-    std::vector<wchar_t> buffer(32768, L'\0');
-    OPENFILENAMEW dialog = {sizeof(dialog)};
-    dialog.hwndOwner = hwnd;
-    dialog.lpstrFilter = L"All files (*.*)\0*.*\0";
-    dialog.lpstrFile = buffer.data();
-    dialog.nMaxFile = static_cast<DWORD>(buffer.size());
-    dialog.lpstrTitle = L"Insert Attachment";
-    dialog.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_NOCHANGEDIR;
-    if (!GetOpenFileNameW(&dialog)) {
-        return;
-    }
-    // one file is a full path, several are the directory followed by the names
-    std::vector<std::wstring> parts;
-    for (const wchar_t* part = buffer.data(); *part; part += wcslen(part) + 1) {
-        parts.push_back(part);
-    }
-    if (parts.size() == 1) {
-        state->files.push_back(parts[0]);
-    }
-    for (size_t i = 1; i < parts.size(); i++) {
-        state->files.push_back(parts[0] + L"\\" + parts[i]);
+    for (const std::wstring& file : OpenFilesDialog(hwnd, L"Insert Attachment", L"All files (*.*)\0*.*\0")) {
+        state->files.push_back(file);
     }
     ShowFiles(state);
 }
@@ -172,13 +158,13 @@ void Send(HWND hwnd, Compose* state, const std::wstring& html) {
     outgoing.bcc = bcc.c_str();
     outgoing.subject = subject.c_str();
     outgoing.html = body.c_str();
-    outgoing.quote = state->quote.empty() ? nullptr : state->quote.c_str();
+    outgoing.quote = state->quote.empty() || state->quoteInText ? nullptr : state->quote.c_str();
     outgoing.in_reply_to = state->inReplyTo.empty() ? nullptr : state->inReplyTo.c_str();
     outgoing.references = state->references.c_str();
     outgoing.attachments = attachments.data();
     outgoing.attachment_count = attachments.size();
     char* reason = nullptr;
-    if (!pe_message_send(state->core, state->account, &outgoing, &reason)) {
+    if (!pe_message_send(state->core, state->account, &outgoing, state->later, &reason)) {
         // a typo in an address or a file that is gone: the message stays open to fix it
         core::String error(reason);
         std::wstring why = error ? Text(error.get()) : L"The message could not be sent.";
@@ -191,9 +177,10 @@ void Send(HWND hwnd, Compose* state, const std::wstring& html) {
 }
 
 // Send: the editor's HTML is asked for first, Send() follows when it comes
-void RequestSend(Compose* state) {
+void RequestSend(Compose* state, bool later = false) {
     if (!state->sending) {
         state->sending = true;
+        state->later = later;
         state->editor.Html();
     }
 }
@@ -326,6 +313,7 @@ void CreateFormatBar(HWND hwnd, Compose* state) {
 void CreateFields(HWND hwnd, Compose* state) {
     state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0);
     AddButton(state->toolbar, IDC_SEND, L"Send");
+    AddButton(state->toolbar, IDC_SEND_LATER, L"Send Later");
     AddButton(state->toolbar, IDC_ATTACH, L"Attach");
     const wchar_t* labels[] = {L"To:", L"Cc:", L"Bcc:", L"Subject:", L"Attach:"};
     for (int i = 0; i < 5; i++) {
@@ -344,8 +332,9 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
     core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded));
     Editor::Handlers handlers;
     handlers.error = [hwnd](const std::wstring& error) { MessageBoxW(hwnd, error.c_str(), L"PostalExpress", MB_OK | MB_ICONERROR); };
-    handlers.html = [hwnd, state](const std::wstring& html) {
+    handlers.html = [hwnd, state](const std::wstring& html, bool full) {
         state->html = html;
+        state->quoteInText = full;
         PostMessageW(hwnd, WM_SEND_HTML, 0, 0);
     };
     handlers.state = [state](const std::wstring& flags) { ShowState(state, flags); };
@@ -374,6 +363,10 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         if (LOWORD(wParam) == IDC_SEND) {
             RequestSend(state);
+            return 0;
+        }
+        if (LOWORD(wParam) == IDC_SEND_LATER) {
+            RequestSend(state, true);
             return 0;
         }
         if (LOWORD(wParam) == IDC_ATTACH) {

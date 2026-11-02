@@ -43,6 +43,7 @@ add_executable(PostalExpress WIN32
     src/editor.cpp
     src/core.cpp
     src/help.cpp
+    src/outbox.cpp
     src/mailbox.cpp
     src/ui.cpp
     src/preview.cpp

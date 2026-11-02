@@ -105,6 +105,8 @@ pub enum PeEventKind {
     SignInDone = 9,
     /// The view `uid` of `pe_message_view_start` is built: `pe_message_view_result`
     ViewReady = 10,
+    /// The Outbox of `account` changed: a message went in or out, or did not go: `pe_outbox`
+    OutboxChanged = 11,
 }
 
 #[repr(C)]
@@ -171,6 +173,7 @@ impl Callback {
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
             Event::ViewReady { request } => (PeEventKind::ViewReady, 0, 0, *request),
+            Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
         };
         let (failure, message) = match event {
             Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message))),
@@ -1211,7 +1214,61 @@ pub unsafe extern "C" fn pe_attachment_data(
     Box::into_raw(data).cast()
 }
 
-/// Frees bytes from `pe_attachment_data`
+/// The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).
+/// `len` gets its length and `filename` a name to save it under made from its subject (`.eml`; free it with
+/// `pe_string_free`). Free the bytes with `pe_bytes_free`.
+///
+/// # Safety
+/// `core` must be a live handle; `len` and `filename` must be valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_source(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    len: *mut usize,
+    filename: *mut *mut c_char,
+) -> *mut u8 {
+    if len.is_null() || filename.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let found = unsafe { with(core, None, |core| core.message_source(folder, uid).ok().flatten()) };
+    let Some((name, data)) = found else {
+        return null_mut();
+    };
+    let data = data.into_boxed_slice();
+    // SAFETY: the caller gave valid pointers
+    unsafe {
+        *len = data.len();
+        *filename = into_c_string(name);
+    }
+    Box::into_raw(data).cast()
+}
+
+/// Puts the message saved in the file at `path` (UTF-8, an `.eml`) into a folder: `FolderChanged` follows once the
+/// server has it. False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`)
+/// for a file that can not be read, is not a message or is too large.
+///
+/// # Safety
+/// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_import(
+    core: *const PeCore,
+    folder: i64,
+    path: *const c_char,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let path = unsafe { arg(path) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        folder_change(core, error, |core| {
+            core.import_message(folder, std::path::Path::new(&path))
+        })
+    }
+}
+
+/// Frees bytes from `pe_attachment_data` and `pe_message_source`
 ///
 /// # Safety
 /// `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
@@ -1288,9 +1345,10 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
     })
 }
 
-/// Sends a message from an account in the background: `MessageSent`, or `Failed` with the server's
-/// answer. A recipient that is no address or a file that is not there fails right away: false,
-/// with the reason in `error` when it is not NULL (free it with `pe_string_free`).
+/// Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now, or
+/// with the next Send/Recv when `later`. `MessageSent` when the server took it; `Failed` with the server's answer
+/// when it did not, the message waiting in the Outbox. A recipient that is no address or a file that is not there
+/// fails right away: false, with the reason in `error` when it is not NULL (free it with `pe_string_free`).
 ///
 /// # Safety
 /// `core` must be a live handle, `message` a valid message, `error` NULL or a valid pointer.
@@ -1299,12 +1357,22 @@ pub unsafe extern "C" fn pe_message_send(
     core: *const PeCore,
     account: i64,
     message: *const PeOutgoing,
+    later: bool,
     error: *mut *mut c_char,
 ) -> bool {
     // SAFETY: as the caller guarantees
     let result = match unsafe { outgoing(message) } {
         // SAFETY: as the caller guarantees
-        Some(message) => unsafe { with(core, Err(None), |core| core.send(account, message).map_err(Some)) },
+        Some(message) => unsafe {
+            with(core, Err(None), |core| {
+                if later {
+                    core.send_later(account, message)
+                } else {
+                    core.send(account, message)
+                }
+                .map_err(Some)
+            })
+        },
         None => Err(None),
     };
     match result {
@@ -1318,6 +1386,94 @@ pub unsafe extern "C" fn pe_message_send(
             false
         }
     }
+}
+
+// ---- the Outbox ----
+
+/// A message waiting in the Outbox
+#[repr(C)]
+pub struct PeQueued {
+    pub id: i64,
+    pub account: i64,
+    pub subject: *const c_char,
+    pub recipients: *const c_char,
+    /// Seconds since the Unix epoch
+    pub created: i64,
+    /// Why the last try did not work, NULL before the first
+    pub problem: *const c_char,
+}
+
+/// The Outbox; free with `pe_outbox_free`
+pub struct PeOutbox(Rows<PeQueued>);
+
+/// What waits in the Outbox, of every account, oldest first; NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_outbox(core: *const PeCore) -> *mut PeOutbox {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(queued) = core.outbox() else {
+                return null_mut();
+            };
+            handed(PeOutbox(Rows::new(&queued, |q, strings| PeQueued {
+                id: q.id,
+                account: q.account_id,
+                subject: strings.add(&q.subject),
+                recipients: strings.add(&q.recipients),
+                created: q.created,
+                problem: q.problem.as_deref().map_or(null(), |p| strings.add(p)),
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_outbox_count(list: *const PeOutbox) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_outbox_get(list: *const PeOutbox, index: usize) -> *const PeQueued {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_outbox_free(list: *mut PeOutbox) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+/// Takes a message out of the Outbox without sending it: `OutboxChanged`
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_outbox_delete(core: *const PeCore, id: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.outbox_delete(id).is_ok()) }
+}
+
+/// Sends what waits in the Outbox now
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_outbox_send(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.outbox_send().is_ok()) }
 }
 
 #[repr(C)]

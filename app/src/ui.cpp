@@ -1,6 +1,7 @@
 // DPI scaling, child controls, formatting and the modal form the dialogs are built from
 #include "app.h"
 
+#include <cderr.h>
 #include <commdlg.h>
 #include <shlobj.h>
 
@@ -214,16 +215,19 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     return state.accepted;
 }
 
-std::wstring SaveFileDialog(HWND owner, const std::wstring& name) {
+std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title, const wchar_t* filter,
+                           const wchar_t* extension) {
     // the core made the name safe to save under; the user may still pick another
     wchar_t buffer[MAX_PATH] = L"";
     wcsncpy_s(buffer, name.c_str(), _TRUNCATE);
     OPENFILENAMEW dialog = {sizeof(dialog)};
     dialog.hwndOwner = owner;
-    dialog.lpstrFilter = L"All files (*.*)\0*.*\0";
+    dialog.lpstrFilter = filter;
     dialog.lpstrFile = buffer;
     dialog.nMaxFile = MAX_PATH;
-    dialog.lpstrTitle = L"Save Attachment As";
+    dialog.lpstrTitle = title;
+    // added to a name typed without an extension
+    dialog.lpstrDefExt = extension;
     // Downloads the first time; after that Windows starts where the user saved last
     PWSTR downloads = nullptr;
     if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Downloads, 0, nullptr, &downloads))) {
@@ -309,4 +313,34 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     if (wasEnabled) {
         SetActiveWindow(root);
     }
+}
+
+std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter) {
+    std::vector<wchar_t> buffer(65536, L'\0');
+    OPENFILENAMEW dialog = {sizeof(dialog)};
+    dialog.hwndOwner = owner;
+    dialog.lpstrFilter = filter;
+    dialog.lpstrFile = buffer.data();
+    dialog.nMaxFile = static_cast<DWORD>(buffer.size());
+    dialog.lpstrTitle = title;
+    dialog.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_NOCHANGEDIR;
+    if (!GetOpenFileNameW(&dialog)) {
+        if (CommDlgExtendedError() == FNERR_BUFFERTOOSMALL) {
+            MessageBoxW(owner, L"Too many files at once: choose fewer.", title, MB_OK | MB_ICONWARNING);
+        }
+        return {};
+    }
+    // one file is a full path, several are the directory followed by the names
+    std::vector<std::wstring> parts;
+    for (const wchar_t* part = buffer.data(); *part; part += wcslen(part) + 1) {
+        parts.push_back(part);
+    }
+    if (parts.size() == 1) {
+        return parts;
+    }
+    std::vector<std::wstring> files;
+    for (size_t i = 1; i < parts.size(); i++) {
+        files.push_back(parts[0] + L"\\" + parts[i]);
+    }
+    return files;
 }

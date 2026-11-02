@@ -226,6 +226,16 @@
             <code>.bat</code>, <code>.scr</code>) or a document that asks you to "enable content" can take over your computer.
         </div>
 
+        <h3>Saving, printing and importing messages</h3>
+        <ul>
+            <li><b>File &gt; Save As</b> saves the message shown as an <code>.eml</code> file, which other mail programs open.</li>
+            <li>
+                <b>File &gt; Import Messages</b> puts <code>.eml</code> files into the selected folder, on the server too. A file that is not a message is not
+                imported.
+            </li>
+            <li><b>File &gt; Print</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) prints the message shown, with its sender, date, recipients and subject.</li>
+        </ul>
+
         <h2>4. Writing, replying and forwarding</h2>
         <ul>
             <li><b>Create Mail</b> (<kbd>Ctrl</kbd>+<kbd>N</kbd>) starts a new message from the account of the selected folder.</li>
@@ -235,7 +245,8 @@
             </li>
             <li>
                 In a reply the original message is folded away behind a <b>&bull;&bull;&bull;</b> button under your text, so you see only what you write. Click
-                it to see the original; it is sent with your answer either way. In a forward the original is shown, since it is what you send.
+                it (or select all with <kbd>Ctrl</kbd>+<kbd>A</kbd>) to put it into your text, where you can shorten it; it is sent with your answer either way.
+                In a forward the original is in the text from the start, since it is what you send.
             </li>
             <li>
                 The bar above the text formats it: the font and its size, <b>B</b>old, <b>I</b>talic, <b>U</b>nderline (or <kbd>Ctrl</kbd>+<kbd>B</kbd>,
@@ -251,7 +262,12 @@
             </li>
             <li>People in <b>Bcc</b> get the message, but the other recipients do not see them.</li>
             <li><b>Attach</b> adds files; the files are read when the message is sent.</li>
-            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> sends from the text. Closing a message you wrote asks first, as nothing is saved.</li>
+            <li>
+                <b>Send</b> puts the message in the <b>Outbox</b> and sends it right away. When it can not go (no connection, the server refuses it) it stays in
+                the Outbox and goes with the next <b>Send/Recv</b>; nothing you wrote is lost. <b>Send Later</b> only puts it in the Outbox. The status bar says
+                how many wait there; <b>Tools &gt; Outbox</b> lists them, with why they did not go, and sends or deletes them.
+            </li>
+            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> sends from the text. Closing a message you wrote asks first.</li>
             <li>
                 <b>Send</b> sends the message. If an address is mistyped or a file is gone, PostalExpress says so and keeps the message open so you can fix it.
                 A copy of each sent message is kept in <b>Sent Items</b>.
@@ -297,6 +313,10 @@
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
                 <td>Find messages in the folder</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>P</kbd></td>
+                <td>Print the message</td>
             </tr>
             <tr>
                 <td><kbd>Del</kbd></td>

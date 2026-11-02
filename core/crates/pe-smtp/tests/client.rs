@@ -304,6 +304,25 @@ async fn refusals_and_temporary_failures() {
         Say("354 go"),
         Data,
         Say("554 5.7.1 message looks like spam"),
+        // reset, so the next message of the session (the next of an Outbox) is a transaction of its own
+        Expect("RSET"),
+        Say("250 ok"),
+        Expect("MAIL FROM"),
+        Say("250 ok"),
+        Expect("RCPT TO"),
+        Say("250 ok"),
+        Expect("DATA"),
+        Say("451 4.3.0 try again later"),
+        Expect("RSET"),
+        Say("250 ok"),
+        Expect("MAIL FROM"),
+        Say("250 ok"),
+        Expect("RCPT TO"),
+        Say("250 ok"),
+        Expect("DATA"),
+        Say("354 go"),
+        Data,
+        Say("250 queued"),
     ])
     .await;
     let mut client = Client::connect(config(port, None)).await.unwrap();
@@ -311,6 +330,10 @@ async fn refusals_and_temporary_failures() {
     assert_eq!(error.kind(), ErrorKind::Refused);
     assert!(!error.is_temporary());
     assert!(error.to_string().contains("spam"));
+    let error = client.send(&envelope(&["a@example.com"]), b"x\r\n").await.unwrap_err();
+    assert!(error.is_temporary(), "{error}");
+    let report = client.send(&envelope(&["a@example.com"]), b"x\r\n").await.unwrap();
+    assert_eq!(report.accepted, ["a@example.com"]);
 
     // too large for the server's SIZE
     let (port, _handle) = server(vec![Say("220 hi"), Expect("EHLO"), Say("250-hi\n250 SIZE 10")]).await;

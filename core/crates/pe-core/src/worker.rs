@@ -42,6 +42,12 @@ pub(crate) enum Command {
         uid: u64,
         removed: Box<pe_store::MessageInfo>,
     },
+    /// A message from a file into a folder, read
+    Append {
+        folder: FolderId,
+        raw: Vec<u8>,
+        date: Option<i64>,
+    },
     CreateFolder {
         parent: Option<FolderId>,
         name: String,
@@ -53,7 +59,12 @@ pub(crate) enum Command {
     DeleteFolder {
         folder: FolderId,
     },
-    Send(Box<crate::Outgoing>),
+    /// Into the Outbox, and sent from there now unless it is for later
+    Send {
+        outgoing: Box<crate::Outgoing>,
+        now: bool,
+    },
+    SendOutbox,
 }
 
 /// A failed command, for [`Event::Failed`]
@@ -120,6 +131,19 @@ impl From<pe_store::Error> for Failure {
 }
 
 type Outcome = Result<(), Failure>;
+
+/// A send that did not go: the reason, and that the message waits in the Outbox
+fn kept(failure: Failure, waiting: usize) -> Failure {
+    let note = if waiting == 1 {
+        "the message waits in the Outbox and is sent with the next Send/Recv".to_string()
+    } else {
+        format!("{waiting} messages wait in the Outbox and are sent with the next Send/Recv")
+    };
+    Failure {
+        kind: failure.kind,
+        message: format!("{} ({note})", failure.message),
+    }
+}
 
 pub(crate) struct Worker {
     account: AccountId,
@@ -208,7 +232,14 @@ impl Worker {
 
     async fn handle(&mut self, store: &mut Store, command: Command) -> Outcome {
         match command {
-            Command::Sync => self.sync_all(store).await,
+            Command::Sync => {
+                // what waits in the Outbox goes first; a send that fails does not stop the sync
+                if let Err(failure) = self.send_outbox(store).await {
+                    self.fail(failure);
+                }
+                self.sync_all(store).await
+            }
+            Command::SendOutbox => self.send_outbox(store).await,
             Command::FetchSource { folder, uid } => {
                 if !store.has_source(folder, uid)? {
                     fetch_source(self.client(store).await?, store, folder, uid).await?;
@@ -242,6 +273,11 @@ impl Worker {
                 };
                 self.restore_on_failure(store, folder, *removed, expunged)
             }
+            Command::Append { folder, raw, date } => {
+                let path = store.folder(folder)?.info.path;
+                self.client(store).await?.append(&path, &raw, &["\\Seen"], date).await?;
+                self.sync_one(store, folder).await
+            }
             Command::CreateFolder { parent, name } => {
                 let client = self.client(store).await?;
                 let namespace = client.namespace().cloned();
@@ -262,7 +298,7 @@ impl Worker {
                 pe_sync::delete_folder(self.client(store).await?, store, folder).await?;
                 self.sync_folder_list(store).await
             }
-            Command::Send(outgoing) => self.send(store, *outgoing).await,
+            Command::Send { outgoing, now } => self.queue(store, *outgoing, now).await,
         }
     }
 
@@ -285,36 +321,117 @@ impl Worker {
         outcome
     }
 
-    /// Sends over SMTP, then puts a copy in the Sent folder
-    async fn send(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
+    /// Builds a message (its attachments read now) and puts it in the Outbox; sends the Outbox when `now`
+    async fn queue(&mut self, store: &mut Store, outgoing: crate::Outgoing, now: bool) -> Outcome {
         let account = store.account(self.account)?;
-        let now = std::time::SystemTime::now()
+        let time = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(0, |d| d.as_secs() as i64);
+        let recipients = [outgoing.to.as_str(), outgoing.cc.as_str()]
+            .iter()
+            .filter(|list| !list.trim().is_empty())
+            .copied()
+            .collect::<Vec<_>>()
+            .join(", ");
+        let subject = outgoing.subject.clone();
         // reads the attachments: off the threads that run the network
         let settings = account.settings.clone();
         let built = tokio::task::spawn_blocking(move || {
-            crate::compose::message(&settings, &outgoing, now).map(|message| pe_smtp::build(&message))
+            crate::compose::message(&settings, &outgoing, time).map(|message| pe_smtp::build(&message))
         })
         .await
         .map_err(|_| Failure {
             kind: FailureKind::Other,
             message: "the message could not be built".into(),
         })??;
+        store.queue(
+            &pe_store::Queued {
+                id: 0,
+                account_id: self.account,
+                envelope_from: built.envelope.from,
+                envelope_to: built.envelope.to,
+                subject,
+                recipients,
+                created: time,
+                problem: None,
+            },
+            &built.raw,
+        )?;
+        self.emit(Event::OutboxChanged { account: self.account });
+        if now { self.send_outbox(store).await } else { Ok(()) }
+    }
+
+    /// Sends what the Outbox has for this account, oldest first: each one the server takes leaves the Outbox and gets
+    /// its copy in Sent. One it refuses stays with the reason; when the network fails the rest wait for the next try.
+    /// A message went out, but something after it did not work
+    fn sent_but(&self, problem: String) {
+        self.emit(Event::Failed {
+            account: self.account,
+            kind: FailureKind::Other,
+            message: format!("the message was sent, but {problem}"),
+        });
+    }
+
+    async fn send_outbox(&mut self, store: &mut Store) -> Outcome {
+        let queued = store.outbox(Some(self.account))?;
+        if queued.is_empty() {
+            return Ok(());
+        }
+        let account = store.account(self.account)?;
         let mut config = smtp_config(&account, self.credentials(&account).await?);
         config.trust = self.trust.clone();
-        let mut smtp = pe_smtp::Client::connect(config).await?;
-        smtp.send(&built.envelope, &built.raw).await?;
+        let mut smtp = match pe_smtp::Client::connect(config).await {
+            Ok(smtp) => smtp,
+            Err(error) => {
+                let failure = Failure::from(error);
+                for message in &queued {
+                    store.set_problem(message.id, &failure.message)?;
+                }
+                self.emit(Event::OutboxChanged { account: self.account });
+                return Err(kept(failure, queued.len()));
+            }
+        };
+        let mut failed = None;
+        for message in queued {
+            // deleted from the Outbox meanwhile
+            let Some(raw) = store.queued_raw(message.id)? else {
+                continue;
+            };
+            let envelope = pe_smtp::Envelope {
+                from: message.envelope_from,
+                to: message.envelope_to,
+            };
+            match smtp.send(&envelope, &raw).await {
+                Ok(_) => {
+                    // sent: whatever happens next, the others still go and this one is not counted as failed
+                    let unqueued = store.unqueue(message.id);
+                    self.emit(Event::MessageSent { account: self.account });
+                    self.emit(Event::OutboxChanged { account: self.account });
+                    if let Err(error) = unqueued {
+                        self.sent_but(format!("it is still in the Outbox: {error}"));
+                    }
+                    if let Err(failure) = self.save_sent(store, &raw, message.created).await {
+                        self.sent_but(format!("no copy could be saved in Sent: {}", failure.message));
+                    }
+                }
+                Err(error) => {
+                    let network = error.is_temporary() && matches!(error.kind(), pe_smtp::ErrorKind::Network);
+                    let failure = Failure::from(error);
+                    store.set_problem(message.id, &failure.message)?;
+                    self.emit(Event::OutboxChanged { account: self.account });
+                    failed = Some(failure);
+                    // the connection is gone: the others wait for the next try
+                    if network {
+                        break;
+                    }
+                }
+            }
+        }
         smtp.quit().await;
-        // sent: whatever happens to the copy, sending it again would send it twice
-        self.emit(Event::MessageSent { account: self.account });
-        self.save_sent(store, &built.raw, now).await.map_err(|failure| Failure {
-            kind: FailureKind::Other,
-            message: format!(
-                "the message was sent, but no copy could be saved in Sent: {}",
-                failure.message
-            ),
-        })
+        match failed {
+            Some(failure) => Err(kept(failure, store.outbox_count(Some(self.account))?)),
+            None => Ok(()),
+        }
     }
 
     async fn save_sent(&mut self, store: &mut Store, raw: &[u8], date: i64) -> Outcome {

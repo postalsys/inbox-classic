@@ -9,6 +9,7 @@
 mod accounts;
 mod folders;
 mod messages;
+mod outbox;
 mod schema;
 
 use std::path::Path;
@@ -16,6 +17,7 @@ use std::path::Path;
 pub use accounts::{Account, AccountId, AccountSettings, Auth, Security};
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use messages::{Message, MessageInfo, Sort, SortField};
+pub use outbox::Queued;
 pub use rusqlite::Error;
 
 pub type Result<T> = std::result::Result<T, Error>;

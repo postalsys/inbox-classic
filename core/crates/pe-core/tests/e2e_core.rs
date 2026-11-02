@@ -516,3 +516,112 @@ fn creates_renames_and_deletes_folders() {
     let refused = s.core.create_folder(account, None, "a/b").unwrap_err();
     assert!(refused.to_string().contains("\"/\""), "{refused}");
 }
+
+#[test]
+fn saves_and_imports_messages_as_files() {
+    let Some(s) = setup() else { return };
+    let uid = s
+        .server
+        .add_message("INBOX", &rfc822("Quarterly / report?", "the numbers"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive) = (id("INBOX"), id("Archive"));
+
+    // not fetched yet: nothing to save
+    assert!(s.core.message_source(inbox, uid).unwrap().is_none());
+    s.core.open_message(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    let (name, source) = s.core.message_source(inbox, uid).unwrap().unwrap();
+    // a name made safe: no path, no characters Windows refuses
+    assert_eq!(name, "Quarterly - report.eml");
+    assert!(String::from_utf8_lossy(&source).contains("the numbers"));
+
+    // back in, into another folder
+    let dir = TempDir::new("eml");
+    let file = dir.path().join(&name);
+    std::fs::write(&file, &source).unwrap();
+    s.core.import_message(archive, &file).unwrap();
+    s.wait(|e| {
+        *e == Event::FolderChanged {
+            account,
+            folder: archive,
+        }
+    });
+    assert_eq!(s.server.subjects("Archive"), ["Quarterly / report?"]);
+
+    // what is not a message is refused now
+    let text = dir.path().join("notes.txt");
+    std::fs::write(&text, "just some notes\nnothing else\n").unwrap();
+    let refused = s.core.import_message(archive, &text).unwrap_err();
+    assert!(refused.to_string().contains("not an e-mail message"), "{refused}");
+    assert!(s.core.import_message(archive, &dir.path().join("missing.eml")).is_err());
+}
+
+#[test]
+fn the_outbox_keeps_what_did_not_go() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let message = |subject: &str| pe_core::Outgoing {
+        to: "Ann <ann@example.com>".into(),
+        subject: subject.into(),
+        text: "x".into(),
+        ..Default::default()
+    };
+
+    // Send Later: into the Outbox, not to the server
+    s.core.send_later(account, message("Later")).unwrap();
+    s.wait(|e| *e == Event::OutboxChanged { account });
+    let queued = s.core.outbox().unwrap();
+    assert_eq!(queued.len(), 1);
+    assert_eq!(
+        (queued[0].subject.as_str(), queued[0].problem.as_deref()),
+        ("Later", None)
+    );
+    assert_eq!(queued[0].recipients, "Ann <ann@example.com>");
+    std::thread::sleep(Duration::from_millis(300));
+    assert!(s.server.subjects("INBOX").is_empty());
+
+    // then sent, and out of the Outbox, with its copy in Sent
+    s.core.outbox_send().unwrap();
+    s.wait(|e| *e == Event::MessageSent { account });
+    assert!(s.core.outbox().unwrap().is_empty());
+    assert_eq!(s.server.subjects("INBOX"), ["Later"]);
+
+    // deleted without sending
+    s.core.send_later(account, message("Never")).unwrap();
+    let queued = loop {
+        s.wait(|e| *e == Event::OutboxChanged { account });
+        let queued = s.core.outbox().unwrap();
+        if !queued.is_empty() {
+            break queued;
+        }
+    };
+    let id = queued[0].id;
+    s.core.outbox_delete(id).unwrap();
+    assert!(s.core.outbox().unwrap().is_empty());
+
+    // the server gone: a send waits in the Outbox with the reason, not lost
+    let Setup {
+        server,
+        core,
+        events,
+        _dir,
+    } = s;
+    drop(server);
+    core.send(account, message("Offline")).unwrap();
+    let failed = loop {
+        if let Event::Failed { message, .. } = events.recv_timeout(Duration::from_secs(20)).expect("an event") {
+            break message;
+        }
+    };
+    assert!(failed.contains("waits in the Outbox"), "{failed}");
+    let queued = core.outbox().unwrap();
+    assert_eq!(queued.len(), 1);
+    assert_eq!(queued[0].subject, "Offline");
+    assert!(queued[0].problem.is_some());
+}

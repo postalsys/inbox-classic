@@ -61,7 +61,15 @@ void SetStatus(const std::wstring& text) {
 
 void ShowCounts() {
     std::wstring counts = g_mailbox.Counts();
-    SendMessageW(g_status, SB_SETTEXTW, 1, reinterpret_cast<LPARAM>(counts.c_str()));
+    SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
+}
+
+// how many messages wait in the Outbox, in the status bar: none says nothing
+void ShowOutbox() {
+    core::Outbox outbox(pe_outbox(g_core.get()));
+    size_t waiting = pe_outbox_count(outbox.get());
+    std::wstring text = waiting == 0 ? L"" : waiting == 1 ? L"1 message in the Outbox" : std::to_wstring(waiting) + L" messages in the Outbox";
+    SendMessageW(g_status, SB_SETTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
 }
 
 void SyncAll() {
@@ -123,6 +131,9 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_MESSAGE_SENT:
         SetStatus(L"Message sent.");
         break;
+    case PE_EVENT_KIND_OUTBOX_CHANGED:
+        ShowOutbox();
+        break;
     case PE_EVENT_KIND_FAILED:
         g_failing.insert(event.account);
         SetStatus(g_mailbox.AccountName(event.account) + L": " + event.message);
@@ -149,6 +160,10 @@ HMENU BuildMenu() {
     AppendMenuW(folder, MF_STRING, IDM_DELETE_FOLDER, L"&Delete");
     AppendMenuW(file, MF_POPUP, reinterpret_cast<UINT_PTR>(folder), L"&Folder");
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(file, MF_STRING, IDM_SAVE_AS, L"&Save As...");
+    AppendMenuW(file, MF_STRING, IDM_IMPORT, L"&Import Messages...");
+    AppendMenuW(file, MF_STRING, IDM_PRINT, L"&Print...\tCtrl+P");
+    AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_EXIT, L"E&xit");
     HMENU compose = CreatePopupMenu();
     AppendMenuW(compose, MF_STRING, IDM_NEW_MAIL, L"&New Message\tCtrl+N");
@@ -170,6 +185,7 @@ HMENU BuildMenu() {
     AppendMenuW(view, MF_STRING, IDM_PICTURES, L"Download &Pictures");
     HMENU tools = CreatePopupMenu();
     AppendMenuW(tools, MF_STRING, IDM_SYNC, L"Send and Recei&ve All\tF5");
+    AppendMenuW(tools, MF_STRING, IDM_OUTBOX, L"&Outbox...");
     HMENU help = CreatePopupMenu();
     AppendMenuW(help, MF_STRING, IDM_HELP, L"&Contents\tF1");
     AppendMenuW(help, MF_SEPARATOR, 0, nullptr);
@@ -194,6 +210,7 @@ HACCEL BuildAccelerators() {
         {FVIRTKEY | FCONTROL, 'F', IDM_FORWARD},
         {FVIRTKEY | FCONTROL | FSHIFT, 'V', IDM_MOVE},
         {FVIRTKEY | FCONTROL | FSHIFT, 'F', IDM_FIND},
+        {FVIRTKEY | FCONTROL, 'P', IDM_PRINT},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -254,8 +271,9 @@ void Layout() {
     RECT list = {right, area.top, area.right, area.top + panes.listHeight};
     RECT reader = {right, list.bottom + gap, area.right, area.bottom};
     g_mailbox.Layout(tree, list, reader);
-    int parts[] = {std::max(0, static_cast<int>(area.right - area.left) - Scale(220)), -1};
-    SendMessageW(g_status, SB_SETPARTS, 2, reinterpret_cast<LPARAM>(parts));
+    int width = static_cast<int>(area.right - area.left);
+    int parts[] = {std::max(0, width - Scale(400)), std::max(0, width - Scale(220)), -1};
+    SendMessageW(g_status, SB_SETPARTS, 3, reinterpret_cast<LPARAM>(parts));
 }
 
 // which splitter is under a point of the client area: 0 none, 1 beside the tree, 2 below the list
@@ -370,6 +388,19 @@ void OnCommand(WORD id, WORD code) {
     case IDM_FIND:
         g_mailbox.FocusFind();
         return;
+    case IDM_SAVE_AS:
+        g_mailbox.SaveShownAs(g_main);
+        return;
+    case IDM_PRINT:
+        g_mailbox.PrintShown();
+        return;
+    case IDM_IMPORT:
+        g_mailbox.Import(g_main);
+        return;
+    case IDM_OUTBOX:
+        OutboxDialog(g_main, g_core.get());
+        ShowOutbox();
+        return;
     case IDCANCEL:
         // Esc: the search goes first
         if (g_mailbox.ClearFind()) {
@@ -463,6 +494,8 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             return -1;
         }
         CreateChildren(hwnd);
+        // what waits from the last run
+        ShowOutbox();
         SetTimer(hwnd, TIMER_SYNC, kSyncInterval, nullptr);
         return 0;
     case WM_SIZE:

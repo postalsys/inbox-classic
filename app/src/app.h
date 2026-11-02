@@ -57,7 +57,10 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
 HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight);
 void RunModal(HWND dialog, HWND focus, const bool& done);
 // the path to save an attachment to, starting from the safe name the core made; empty when cancelled
-std::wstring SaveFileDialog(HWND owner, const std::wstring& name);
+std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title = L"Save Attachment As",
+                           const wchar_t* filter = L"All files (*.*)\0*.*\0", const wchar_t* extension = nullptr);
+// the files chosen in an Open dialog that takes several, none when cancelled
+std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter);
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
 
 // ---- accounts.cpp ----
@@ -72,6 +75,11 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, c
 bool AccountsDialog(HWND owner, PeCore* core);
 // asks for the password of an account; false when cancelled
 bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password);
+
+// ---- outbox.cpp ----
+
+// Tools > Outbox: what waits to be sent, to send now or delete
+void OutboxDialog(HWND owner, PeCore* core);
 
 // ---- help.cpp ----
 
@@ -110,6 +118,10 @@ public:
     // the Find box: placed at the right of the toolbar row, focused (Ctrl+Shift+F), cleared (Esc)
     void PlaceFind(const RECT& row);
     void FocusFind();
+    // File > Save As (the message shown, as an .eml), Print (the message shown), Import Messages (into the folder)
+    void SaveShownAs(HWND owner);
+    void PrintShown();
+    void Import(HWND owner);
     bool ClearFind();
     void ResetFind();
     void OnTimer(UINT_PTR id);
@@ -241,6 +253,10 @@ enum CommandId : WORD {
     IDC_PICTURES,
     IDC_FIND,
     IDM_FIND = 120,
+    IDM_SAVE_AS,
+    IDM_PRINT,
+    IDM_IMPORT,
+    IDM_OUTBOX,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

@@ -202,6 +202,32 @@ const sections = [
         ]
     },
     {
+        title: 'Files and printing',
+        features: [
+            {
+                shot: 'files-1-save-as',
+                name: 'Save As (.eml)',
+                what: 'Saves the message shown as an .eml file, named after its subject with what Windows does not allow taken out.',
+                how: 'File > Save As.',
+                checked: ['The Save dialog suggests the subject as the name', 'The file is the message as it came']
+            },
+            {
+                shot: 'files-2-import',
+                name: 'Import Messages',
+                what: 'Puts .eml files into the selected folder, on the server too. Files that are not messages, or larger than 50 MB, are named and left out.',
+                how: 'File > Import Messages.',
+                checked: ['The saved message is in Archive on the server']
+            },
+            {
+                shot: 'files-3-print',
+                name: 'Print',
+                what: 'The print preview of the message shown, with its sender, date, recipients and subject on top, and a destination to print to or save as PDF.',
+                how: 'File > Print, or Ctrl+P.',
+                checked: ['The print preview opens with the header of the message']
+            }
+        ]
+    },
+    {
         title: 'Writing mail',
         intro: 'A compose window per message. Sending goes over SMTP from the account the message belongs to; problems are reported before anything is sent.',
         features: [
@@ -232,6 +258,20 @@ const sections = [
                 what: 'To, Cc, Bcc, Subject, the text and attached files (Attach). Several addresses are separated with commas; names with commas go in quotes.',
                 how: 'Create Mail on the toolbar, Message > New Message, or Ctrl+N.',
                 checked: ['The message is sent and arrives']
+            },
+            {
+                shot: 'write-3b-select-all',
+                name: 'Select All takes the quote',
+                what: 'Ctrl+A unfolds the quoted message into the text and selects all of it, to copy or cut; unfolded, the quote can be shortened before sending, and it is sent once.',
+                how: 'Ctrl+A in the text, or the ••• button.',
+                checked: ['The quote is selected with the text', 'The sent reply has the quote once']
+            },
+            {
+                shot: 'write-7-outbox',
+                name: 'Outbox and Send Later',
+                what: 'Every message goes through the Outbox: one that can not go (offline, refused) waits there with the reason and goes with the next Send/Recv, so nothing is lost. Send Later only queues it. The status bar counts what waits.',
+                how: 'Send Later in the compose window; Tools > Outbox to send now or delete.',
+                checked: ['Send Later does not send yet', 'The Outbox lists the message', 'Send All Now sends it']
             },
             {
                 shot: 'write-6-close',
@@ -296,11 +336,7 @@ const behind = [
     ]
 ];
 
-const missing = [
-    'Save drafts, or send later',
-    'Print, and .eml import and export',
-    'Gmail and Outlook.com browser sign-in in released builds: works, but needs the OAuth client IDs at build time'
-];
+const missing = ['Save drafts, or send later', 'Gmail and Outlook.com browser sign-in in released builds: works, but needs the OAuth client IDs at build time'];
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const image = name => {

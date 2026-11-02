@@ -125,7 +125,9 @@ void Editor::Configure() {
             std::wstring message = text;
             CoTaskMemFree(text);
             if (message.rfind(L"html:", 0) == 0) {
-                handlers_.html(message.substr(5));
+                handlers_.html(message.substr(5), false);
+            } else if (message.rfind(L"full:", 0) == 0) {
+                handlers_.html(message.substr(5), true);
             } else if (message.rfind(L"state:", 0) == 0) {
                 handlers_.state(message.substr(6));
             } else if (message == L"dirty") {

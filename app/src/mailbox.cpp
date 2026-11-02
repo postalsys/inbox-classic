@@ -3,6 +3,8 @@
 // sanitized document the core made, shown in the WebView2 as it is.
 #include "app.h"
 
+#include <commdlg.h>
+
 #include <algorithm>
 
 namespace {
@@ -699,6 +701,53 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
     }
     }
     return false;
+}
+
+// ---- files and printing ----
+
+void Mailbox::SaveShownAs(HWND owner) {
+    if (!uid_) {
+        return;
+    }
+    size_t length = 0;
+    char* name = nullptr;
+    uint8_t* data = pe_message_source(core_, folder_, uid_, &length, &name);
+    core::String safeName(name);
+    if (!data) {
+        MessageBoxW(owner, L"The message is not downloaded yet.", L"PostalExpress", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    std::wstring path = SaveFileDialog(owner, Text(safeName.get()), L"Save Message As", L"Mail messages (*.eml)\0*.eml\0All files (*.*)\0*.*\0",
+                                       L"eml");
+    if (!path.empty() && !WriteFileBytes(path, data, length)) {
+        MessageBoxW(owner, L"The message could not be saved.", L"PostalExpress", MB_OK | MB_ICONERROR);
+    }
+    pe_bytes_free(data, length);
+}
+
+void Mailbox::PrintShown() {
+    if (uid_ && view_) {
+        preview_.Print();
+    }
+}
+
+void Mailbox::Import(HWND owner) {
+    if (!folder_) {
+        MessageBoxW(owner, L"Choose the folder to put the messages in first.", L"Import Messages", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    std::vector<std::wstring> files = OpenFilesDialog(owner, L"Import Messages", L"Mail messages (*.eml)\0*.eml\0All files (*.*)\0*.*\0");
+    std::wstring problems;
+    for (const std::wstring& file : files) {
+        char* reason = nullptr;
+        if (!pe_message_import(core_, folder_, core::Narrow(file).c_str(), &reason)) {
+            core::String why(reason);
+            problems += (why ? Text(why.get()) : file) + L"\n";
+        }
+    }
+    if (!problems.empty()) {
+        MessageBoxW(owner, (L"These were not imported:\n\n" + problems).c_str(), L"Import Messages", MB_OK | MB_ICONWARNING);
+    }
 }
 
 // ---- the Find box ----

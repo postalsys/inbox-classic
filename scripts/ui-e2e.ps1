@@ -54,7 +54,7 @@ $VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
-$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118;
+$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDC_SEND_LATER = 308;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
 $IDC_SEND = 300; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
@@ -147,6 +147,27 @@ function TypeInEditor([IntPtr]$compose, [string]$text) {
     Start-Sleep -Milliseconds 500
     return $true
 }
+# a file dialog answered: the path typed into its name box (characters, as the dialog keeps its own copy) and Enter
+function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]$suggested = $null) {
+    $dialog = WaitWindow '#32770' $title 15
+    if (-not $dialog) { return $false }
+    # the name box: the one with the suggested name in a Save dialog, the one in the name combo box (1148) otherwise
+    $name = WaitFor {
+        if ($suggested) {
+            [Native.Win]::FindDescendants($dialog, 'Edit') | Where-Object { (WindowText $_) -like $suggested } | Select-Object -First 1
+        } else {
+            $combo = [Native.Win]::GetDlgItem($dialog, 1148)
+            if ($combo -ne [IntPtr]::Zero) { [Native.Win]::FindDescendants($combo, 'Edit') | Select-Object -First 1 }
+        }
+    } 10
+    if (-not $name) { return $false }
+    if ($shot) { Shot $dialog $shot }
+    [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
+    foreach ($c in $path.ToCharArray()) { [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
+    Start-Sleep -Milliseconds 800
+    Key $name $VK_RETURN
+    return [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
+}
 # whether a button of the format bar is pressed
 function Pressed([IntPtr]$compose, [int]$id) {
     $bar = [Native.Win]::GetDlgItem($compose, 322)
@@ -171,7 +192,10 @@ function Messages([string]$mailbox) {
     @(Invoke-RestMethod "$rest/$([uri]::EscapeDataString($mailbox))/messages?raw=true")
 }
 # the REST API gives the source base64 encoded
-function RawText($message) { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($message.raw)) }
+function RawText($message) {
+    try { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($message.raw)) }
+    catch { "UNDECODED(" + ([string]$message.raw).Substring(0, [Math]::Min(80, ([string]$message.raw).Length)) + ")" }
+}
 function Find([string]$mailbox, [string]$pattern) { (Messages $mailbox) | Where-Object { (RawText $_) -match $pattern } | Select-Object -First 1 }
 function Seen([string]$pattern) { (Find 'INBOX' $pattern).flags -contains '\Seen' }
 function AddMessage([string]$raw, [string[]]$flags = @()) {
@@ -425,6 +449,14 @@ try {
     Check ([bool](WaitFor { Pressed $compose $IDF_BOLD } 10)) 'B shows bold is on'
     Check (TypeInEditor $compose 'Thanks, Ann. Answered by the UI test.') 'the editor takes typing'
     Shot $compose 'write-3-reply'
+    # Select All unfolds the quote and selects it along with the text
+    [void][Native.Win]::SetForegroundWindow($compose)
+    [void](ClickEditor $compose)
+    [System.Windows.Forms.SendKeys]::SendWait('^a')
+    Start-Sleep -Milliseconds 800
+    Shot $compose 'write-3b-select-all'
+    # the cursor back to the end, so nothing selected is typed over
+    [System.Windows.Forms.SendKeys]::SendWait('^{END}')
     Command $compose $IDC_SEND
     # ImapKit's SMTP server delivers to its INBOX
     $answer = WaitFor { Find 'INBOX' "Subject: Re: $subject" } 30
@@ -436,6 +468,8 @@ try {
         Check ($text -match 'Content-Type: text/html' -and $text -match 'Content-Type: text/plain') 'it is HTML with a text part'
         Check ($text -match '<b>Thanks, Ann') 'what was typed in bold is bold'
         Check ($text -match 'Original Message' -and $text -match 'this message was put here') 'the folded quote is sent along'
+        # once in the HTML part and once in the text part: unfolded into the text, it is not added a second time
+        Check ((([regex]::Matches($text, 'this message was put here')).Count) -eq 2) 'the quote is sent once'
     }
     Check ($null -ne (WaitFor { Find 'Sent' "Subject: Re: $subject" })) 'a copy of the reply is in Sent'
 
@@ -460,6 +494,27 @@ try {
     $new = WaitFor { Find 'INBOX' 'Subject: A new message from the UI test' } 30
     Check ($null -ne $new) 'the new message was sent'
     Check ($new -and (RawText $new) -match 'Hello Dave, written from scratch') 'with what was typed'
+
+    Step 'Send Later and the Outbox'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_TO 'Erin <erin@example.com>'
+    SetText $compose $IDC_SUBJECT 'Sent later from the UI test'
+    [void](TypeInEditor $compose 'This waited in the Outbox.')
+    Command $compose $IDC_SEND_LATER
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'Send Later closes the message'
+    Start-Sleep -Seconds 2
+    Check ($null -eq (Find 'INBOX' 'Subject: Sent later from the UI test')) 'and does not send it yet'
+    Command $main $IDM_OUTBOX
+    $outbox = WaitWindow 'PostalExpressOutbox' 'Outbox'
+    Check ($null -ne $outbox) 'Tools > Outbox lists what waits'
+    if ($outbox) {
+        $waiting = [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ($waiting -eq 1) 'the message is in it'
+        Shot $outbox 'write-7-outbox'
+        Click $outbox 451
+    }
+    Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Sent later from the UI test' } 30)) 'Send All Now sends it'
 
     # ---- getting new mail ----
 
@@ -493,6 +548,24 @@ try {
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
     Check ([bool](WaitFor { (Rows) -eq $all })) 'clearing it shows the whole folder again'
 
+    # ---- files ----
+
+    Step 'saving and importing a message as a file'
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 7) { Rows } })
+    # Carol's reply, the last row (the oldest)
+    SelectRow ((Rows) - 1)
+    $eml = Join-Path (Resolve-Path $Out) 'saved-message.eml'
+    Remove-Item -Force -ErrorAction SilentlyContinue $eml
+    Command $main $IDM_SAVE_AS
+    Check (AnswerFileDialog 'Save Message As' $eml 'files-1-save-as' 'Re*Lunch on Friday*') 'Save As asks where, with the subject as the name'
+    Check ([bool](WaitFor { (Test-Path $eml) -and (Get-Content -Raw $eml) -match 'Subject: Re: Lunch on Friday' } 10)) 'and saves the message as it came'
+    SelectFolder 3
+    Command $main $IDM_IMPORT
+    Check (AnswerFileDialog 'Import Messages' $eml 'files-2-import') 'Import Messages asks for files'
+    Check ($null -ne (WaitFor { Find 'Archive' 'Subject: Re: Lunch on Friday' } 20)) 'and puts the message in the folder, on the server'
+    SelectFolder 0
+
     # ---- flag, delete, move ----
 
     Step 'flagging, deleting and moving'
@@ -503,10 +576,11 @@ try {
     Command $main $IDM_FLAG
     Check ([bool](WaitFor { (Find 'INBOX' 'Subject: One more thing').flags -contains '\Flagged' })) 'Flag Message flags it on the server'
     Shot $main 'organize-1-flagged'
+    $listed = Rows
     Command $main $IDM_DELETE
     Check ($null -ne (WaitFor { Find 'Trash' 'Subject: One more thing' } 20)) 'Delete puts it in Deleted Items'
     Check ($null -eq (Find 'INBOX' 'Subject: One more thing')) 'and takes it out of the Inbox'
-    Check ([bool](WaitFor { (Rows) -eq 6 })) 'the list has one less'
+    Check ([bool](WaitFor { (Rows) -eq $listed - 1 })) 'the list has one less'
     # the next one is selected: move it to Archive through the dialog
     Command $main $IDM_MOVE
     $move = WaitFor {
@@ -518,8 +592,9 @@ try {
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($move, 100), $CB_SELECTSTRING, [IntPtr](-1), 'Archive')
         Shot $move 'organize-2-move'
         Click $move 1
-        Check ($null -ne (WaitFor { Find 'Archive' 'Subject: A new message from the UI test' } 20)) 'the selected message is in Archive'
-        Check ([bool](WaitFor { (Rows) -eq 5 })) 'and out of the list'
+        # the one selected after the delete: the newest, the message sent later
+        Check ($null -ne (WaitFor { Find 'Archive' 'Subject: Sent later from the UI test' } 20)) 'the selected message is in Archive'
+        Check ([bool](WaitFor { (Rows) -eq $listed - 2 })) 'and out of the list'
     }
     Shot $main 'organize-3-after'
     # from Deleted Items it is gone for good, after asking
@@ -732,6 +807,17 @@ try {
         Shot $help 'help-2-contents'
         [void][Native.Win]::PostMessage($help, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
     }
+
+    Step 'printing'
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 1) { Rows } })
+    SelectRow 1
+    Command $main $IDM_PRINT
+    Start-Sleep -Seconds 4
+    Shot $main 'files-3-print'
+    [void][Native.Win]::SetForegroundWindow($main)
+    [System.Windows.Forms.SendKeys]::SendWait('{ESC}')
+    Start-Sleep -Seconds 1
 
     Step 'closing'
     [void][Native.Win]::PostMessage($main, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)

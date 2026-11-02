@@ -81,6 +81,22 @@ INSERT INTO settings (key, value) VALUES ('profile', lower(hex(randomblob(16))))
 -- how the account signs in: 'password', or 'oauth2:<provider>'
 ALTER TABLE accounts ADD COLUMN auth TEXT NOT NULL DEFAULT 'password';
 "#,
+    r#"
+-- messages waiting to be sent, built as they go over SMTP: until the server takes them, they are not lost
+CREATE TABLE outbox (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    envelope_from TEXT NOT NULL,
+    -- the recipients of the envelope, one per line
+    envelope_to TEXT NOT NULL,
+    raw BLOB NOT NULL,
+    subject TEXT NOT NULL,
+    recipients TEXT NOT NULL,
+    created INTEGER NOT NULL,
+    -- why the last try did not work
+    problem TEXT
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

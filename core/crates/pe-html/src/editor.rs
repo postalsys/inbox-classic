@@ -2,9 +2,9 @@
 //! and the HTML that is sent.
 //!
 //! The editor is the one page with a script: `editor.js`, allowed by a random nonce in the CSP, so nothing else can
-//! run. The quoted message is never part of the editable page. It sits in a sandboxed frame without scripts, folded
-//! behind "..." in a reply, and is added back when the message is sent, so its styles can not change the editor and
-//! the editor script never handles it.
+//! run. The quoted message waits in an inert template, without style elements, folded behind "..." in a reply; the
+//! page puts it into the text when unfolded (or on Select All), inside a paint-contained block so its inline styles
+//! can not cover the rest of the editor. Folded, it is added back when the message is sent.
 
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -26,25 +26,20 @@ const MAX_PICTURE_BYTES: usize = 25 * 1024 * 1024;
 /// The page of the editor. `quote` is HTML from [`quote_html`] (already sanitized), shown folded when `folded`.
 pub fn editor_document(quote: Option<&str>, folded: bool) -> String {
     let nonce = nonce();
+    // the quote waits in a template, which the page does not show, load or run: the editor's "..." (or Select All)
+    // puts it into the text, where it is edited and selected like the rest. Sanitized again here, so whatever the
+    // caller hands in, it is markup without scripts or handlers, and no `</template>` of it can end the template.
     let quote = quote.filter(|q| !q.trim().is_empty()).map_or(String::new(), |quote| {
-        // the frame document: sanitized again, it is a document of its own; links can not leave it (the host
-        // cancels frame navigations) and nothing in it runs
-        let document = format!(
-            "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"color-scheme\" content=\"light\">\
-             <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:0 8px 8px}}</style></head>\
-             <body>{}</body></html>",
-            builder(&[]).clean(quote)
-        );
         format!(
-            "<div id=\"fold\"><button id=\"more\" type=\"button\" aria-expanded=\"false\">&#8226;&#8226;&#8226;</button></div>\
-             <iframe id=\"quote\" sandbox=\"allow-same-origin\" title=\"The quoted message\" data-folded=\"{}\" srcdoc=\"{}\"></iframe>",
+            "<div id=\"fold\"><button id=\"more\" type=\"button\" title=\"Show the quoted message\">&#8226;&#8226;&#8226;</button></div>\
+             <template id=\"quote\" data-folded=\"{}\">{}</template>",
             if folded { "1" } else { "0" },
-            attribute(&document)
+            quote_sanitizer(&[]).clean(quote)
         )
     });
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
-         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'nonce-{nonce}'; style-src 'unsafe-inline'; img-src data:; font-src data:; frame-src 'self' about:\">\
+         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'nonce-{nonce}'; style-src 'unsafe-inline'; img-src data:; font-src data:\">\
          <meta name=\"color-scheme\" content=\"light\">\
          <style>\
          html{{background:#fff}}\
@@ -52,17 +47,25 @@ pub fn editor_document(quote: Option<&str>, folded: bool) -> String {
          #body{{min-height:4.5em;padding:8px;outline:none;word-wrap:break-word}}\
          #body img{{max-width:100%}}\
          blockquote{{margin:0 0 0 .8ex;border-left:2px solid #036;padding-left:1ex}}\
+         .quoted{{contain:paint}}\
          #fold{{padding:0 8px 4px}}\
+         #fold[hidden]{{display:none}}\
          #more{{font:bold 9pt Arial,sans-serif;letter-spacing:1px;color:#555;background:#eee;border:1px solid #ccc;\
          border-radius:9px;padding:0 9px;height:17px;line-height:13px;cursor:pointer}}\
          #more:hover{{background:#e2e2e2;color:#000}}\
          #more:focus-visible{{outline:2px solid #036;outline-offset:1px}}\
-         #quote{{display:block;width:100%;border:0;min-height:40px}}\
-         #quote[hidden]{{display:none}}\
          </style></head>\
          <body><div id=\"body\" contenteditable=\"true\" role=\"textbox\" aria-multiline=\"true\" aria-label=\"Message\"><div><br></div></div>\
          {quote}<script nonce=\"{nonce}\">{EDITOR_SCRIPT}</script></body></html>"
     )
+}
+
+/// The sanitizer of a quoted message: without style elements, which would restyle the whole page (the editor's, or
+/// the sent message above the quote); inline styles stay
+fn quote_sanitizer(images: &[InlineImage]) -> ammonia::Builder<'static> {
+    let mut sanitizer = builder(images);
+    sanitizer.rm_tags(["style"]).add_clean_content_tags(["style"]);
+    sanitizer
 }
 
 /// The quoted message of a reply or forward for the editor and for sending: the header block in the manner of
@@ -77,11 +80,7 @@ pub fn quote_html(header: &[(&str, String)], html: &str, images: &[InlineImage],
         ));
     }
     block.push_str("<div><br></div>");
-    // without its style elements: in the sent message they would restyle what the user wrote above the quote, which
-    // the editor, showing the quote apart, never shows; inline styles stay
-    let mut sanitizer = builder(images);
-    sanitizer.rm_tags(["style"]).add_clean_content_tags(["style"]);
-    block.push_str(&sanitizer.clean(html).to_string());
+    block.push_str(&quote_sanitizer(images).clean(html).to_string());
     if reply {
         format!(
             "<blockquote type=\"cite\" style=\"margin:0 0 0 .8ex;border-left:2px solid #036;padding-left:1ex\">{block}</blockquote>"
@@ -196,7 +195,7 @@ pub fn picture_uri(data: &[u8]) -> Option<String> {
 
 /// 128 random bits as hex, for the script nonce and Content-IDs. Should the system have no randomness to give, the
 /// clock and a counter make it unique at least: the nonce adds to the sanitizer and the CSP, it is not the only guard.
-fn nonce() -> String {
+pub(crate) fn nonce() -> String {
     static COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let mut bytes = [0u8; 16];
     if getrandom::fill(&mut bytes).is_err() {
@@ -211,13 +210,8 @@ fn nonce() -> String {
 }
 
 /// Text in HTML
-fn text(value: &str) -> String {
+pub(crate) fn text(value: &str) -> String {
     value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;")
-}
-
-/// Text in a double quoted attribute
-fn attribute(value: &str) -> String {
-    text(value).replace('"', "&quot;")
 }
 
 /// The tags an editor body is allowed to keep, for tests
@@ -237,17 +231,31 @@ mod tests {
 
     #[test]
     fn the_editor_runs_only_its_own_script() {
-        let page = editor_document(Some("<p>quoted<script>alert(1)</script></p>"), true);
+        let page = editor_document(
+            Some("<p>quoted<script>alert(1)</script></p></template><img src=x onerror=alert(2)>"),
+            true,
+        );
         let nonce = page.split("'nonce-").nth(1).unwrap().split('\'').next().unwrap();
         assert_eq!(nonce.len(), 32);
         assert!(page.contains(&format!("<script nonce=\"{nonce}\">")));
-        // one script element, the editor's
+        // one script element, the editor's: the quote's own is gone, and so are its handlers
         assert_eq!(page.matches("<script").count(), 1, "{page}");
-        // the quote is in a sandboxed frame without scripts, escaped into its attribute
-        assert!(page.contains("sandbox=\"allow-same-origin\""));
-        assert!(!page.contains("allow-scripts"));
-        assert!(page.contains("data-folded=\"1\""));
-        assert!(page.contains("&lt;p&gt;quoted&lt;/p&gt;"), "{page}");
+        assert!(!page.contains("onerror"), "{page}");
+        // the quote waits in a template, folded; a `</template>` in it is text, not the end of the template
+        assert!(
+            page.contains("<template id=\"quote\" data-folded=\"1\"><p>quoted</p>"),
+            "{page}"
+        );
+        assert_eq!(page.matches("</template>").count(), 1, "{page}");
+        // its style elements would style the whole editor once it is unfolded
+        let page = editor_document(
+            Some("<style>body{display:none}</style><p style=\"color:red\">q</p>"),
+            true,
+        );
+        assert!(
+            page.contains("data-folded=\"1\"><p style=\"color:red\">q</p></template>"),
+            "{page}"
+        );
         // two pages have different nonces
         assert_ne!(
             editor_document(None, false).split("'nonce-").nth(1),
@@ -258,9 +266,9 @@ mod tests {
     #[test]
     fn a_new_message_has_no_quote() {
         let page = editor_document(None, false);
-        assert!(!page.contains("<iframe") && !page.contains("id=\"more\""));
+        assert!(!page.contains("<template") && !page.contains("id=\"more\""));
         assert!(page.contains("contenteditable=\"true\""));
-        assert!(!editor_document(Some("  "), true).contains("<iframe"));
+        assert!(!editor_document(Some("  "), true).contains("<template"));
     }
 
     #[test]

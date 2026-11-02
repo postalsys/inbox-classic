@@ -172,12 +172,46 @@ fn content_id(value: &str) -> String {
 
 /// A message for the preview: sanitized, its `cid:` images embedded, in a document with a CSP
 pub fn render_message(html: &str, options: &RenderOptions, images: &[InlineImage]) -> String {
+    render_message_with_header(html, options, images, &[])
+}
+
+/// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows:
+/// on screen the window shows them above the message
+pub fn render_message_with_header(
+    html: &str,
+    options: &RenderOptions,
+    images: &[InlineImage],
+    header: &[(&str, &str)],
+) -> String {
     let image_sources = if options.allow_remote_images {
         "data: http: https:"
     } else {
         "data:"
     };
     let body = builder(images).clean(html).to_string();
+    // the header of a printout, under a class and in a cascade layer the message can not guess: an important rule
+    // of the first layer beats any important rule of the message's own style elements, whatever their selector, and
+    // a message can not add rules to a layer it can not name. Its lines have inline important styles, which beat
+    // the message's too. (The header the window shows is outside the message and can not be touched.)
+    let class = format!("pe-print-{}", editor::nonce());
+    let shown = "display:block!important;visibility:visible!important;opacity:1!important;position:static!important;\
+                 color:#000!important;font:10pt Arial,sans-serif!important";
+    let printed: String = header
+        .iter()
+        .filter(|(_, value)| !value.is_empty())
+        .map(|(name, value)| {
+            format!(
+                "<div style=\"{shown}\"><span style=\"font-weight:bold!important\">{}:</span> {}</div>",
+                editor::text(name),
+                editor::text(value)
+            )
+        })
+        .collect();
+    let printed = if printed.is_empty() {
+        String::new()
+    } else {
+        format!("<div class=\"{class}\">{printed}</div>")
+    };
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
@@ -190,8 +224,12 @@ pub fn render_message(html: &str, options: &RenderOptions, images: &[InlineImage
          details.pe-fold>summary::-webkit-details-marker{{display:none}}\
          details.pe-fold>summary::marker{{content:\"\"}}\
          details.pe-fold>summary:hover{{background:#e2e2e2;color:#000}}\
+         @page{{margin:0}}\
+         @media print{{body{{margin:15mm}}}}\
+         @layer {class}{{.{class}{{display:none}}\
+         @media print{{.{class}{{{shown};border-bottom:1px solid #999!important;padding-bottom:6px!important;margin-bottom:10px!important}}}}}}\
          </style>\
-         </head><body>{body}</body></html>"
+         </head><body>{printed}{body}</body></html>"
     )
 }
 

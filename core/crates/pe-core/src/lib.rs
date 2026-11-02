@@ -71,6 +71,10 @@ pub enum Event {
     ViewReady {
         request: u64,
     },
+    /// A message went into the Outbox, left it, or got a reason why it did not go
+    OutboxChanged {
+        account: AccountId,
+    },
     /// Work for an account failed; `kind` says what to do about it
     Failed {
         account: AccountId,
@@ -515,6 +519,54 @@ impl Core {
         self.views.cancel(request);
     }
 
+    /// The source of a message for File > Save As, with a name to save it under made from its subject (`.eml`);
+    /// None when it is not in the store yet
+    pub fn message_source(&self, folder: FolderId, uid: u64) -> Result<Option<(String, Vec<u8>)>> {
+        let store = self.store();
+        let Some(source) = store.source(folder, uid)? else {
+            return Ok(None);
+        };
+        let subject = store.message(folder, uid)?.map(|m| m.info.subject).unwrap_or_default();
+        // the subject made safe first, the extension after: a subject of only `???` is not left without one
+        let stem = pe_mime::parser::safe_filename(Some(&subject.replace(['/', '\\'], "-")), "message/rfc822");
+        let stem = if stem.starts_with("attachment.") {
+            "message".to_string()
+        } else {
+            stem
+        };
+        Ok(Some((format!("{stem}.eml"), source)))
+    }
+
+    /// Puts a message saved as a file (`.eml`) into a folder: on the server in the background, then
+    /// [`Event::FolderChanged`]. A file that is not a message, or is too large, is refused now.
+    pub fn import_message(&self, folder: FolderId, path: &std::path::Path) -> Result<()> {
+        const LIMIT: u64 = 50 * 1024 * 1024;
+        let account = self.store().folder(folder)?.account_id;
+        let not_one = |why: &str| Error::Unavailable(format!("{} {why}", path.display()));
+        // opened once, read up to just past the limit: a file that grows meanwhile is still refused
+        let file = std::fs::File::open(path).map_err(|e| not_one(&format!("can not be read: {e}")))?;
+        let mut raw = Vec::new();
+        std::io::Read::read_to_end(&mut std::io::Read::take(file, LIMIT + 1), &mut raw)
+            .map_err(|e| not_one(&format!("can not be read: {e}")))?;
+        if raw.len() as u64 > LIMIT {
+            return Err(not_one("is larger than 50 MB"));
+        }
+        let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one("is not an e-mail message"))?;
+        // a message has headers a mail program wrote; a text file parsed as one has none of these
+        let looks_like_one = parsed.from.is_some() || parsed.message_id.is_some() || parsed.timestamp.is_some();
+        if !looks_like_one {
+            return Err(not_one("is not an e-mail message"));
+        }
+        self.send_command(
+            account,
+            Command::Append {
+                folder,
+                raw,
+                date: parsed.timestamp,
+            },
+        )
+    }
+
     /// The content of the `index`th attachment of [`MessageView::attachments`], with the name to
     /// save it under
     pub fn attachment(&self, folder: FolderId, uid: u64, index: usize) -> Result<Option<(String, Vec<u8>)>> {
@@ -525,9 +577,49 @@ impl Core {
     /// Sends a message from an account in the background: [`Event::MessageSent`] or [`Event::Failed`] follows.
     /// Recipients that are no addresses and attachments that are not there fail right away.
     pub fn send(&self, account: AccountId, outgoing: Outgoing) -> Result<()> {
+        self.queue(account, outgoing, true)
+    }
+
+    /// Puts a message in the Outbox; it goes with the next Send/Recv (Send Later)
+    pub fn send_later(&self, account: AccountId, outgoing: Outgoing) -> Result<()> {
+        self.queue(account, outgoing, false)
+    }
+
+    fn queue(&self, account: AccountId, outgoing: Outgoing, now: bool) -> Result<()> {
         // a typo in an address is told now, while the message is still open in its window
         compose::check(&outgoing).map_err(Error::Compose)?;
-        self.send_command(account, Command::Send(Box::new(outgoing)))
+        self.send_command(
+            account,
+            Command::Send {
+                outgoing: Box::new(outgoing),
+                now,
+            },
+        )
+    }
+
+    /// The messages waiting in the Outbox, of every account, oldest first
+    pub fn outbox(&self) -> Result<Vec<pe_store::Queued>> {
+        Ok(self.store().outbox(None)?)
+    }
+
+    /// Takes a message out of the Outbox without sending it
+    pub fn outbox_delete(&self, id: i64) -> Result<()> {
+        let account = {
+            let store = self.store();
+            let queued = store.queued(id)?.ok_or(Error::NotFound)?;
+            store.unqueue(id)?;
+            queued.account_id
+        };
+        self.post(Event::OutboxChanged { account })
+    }
+
+    /// Sends what waits in the Outbox now, for each account that has something there
+    pub fn outbox_send(&self) -> Result<()> {
+        let accounts = self.store().outbox_accounts()?;
+        for account in accounts {
+            self.send_command(account, Command::SendOutbox)?;
+        }
+        Ok(())
     }
 
     /// A reply, a reply to all or a forward of a message whose source is in the store

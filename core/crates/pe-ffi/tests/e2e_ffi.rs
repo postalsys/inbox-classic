@@ -261,7 +261,7 @@ fn reads_mail_through_the_c_api() {
         attachments: attachments.as_ptr(),
         attachment_count: 1,
     };
-    assert!(unsafe { pe_message_send(core, account, &outgoing, null_mut()) });
+    assert!(unsafe { pe_message_send(core, account, &outgoing, false, null_mut()) });
     unsafe { pe_draft_free(draft) };
     wait(&events, |e| e.kind == PeEventKind::MessageSent && e.account == account);
     let delivered = server.messages("INBOX");
@@ -280,7 +280,7 @@ fn reads_mail_through_the_c_api() {
         raw.contains("Content-Type: text/plain") && !raw.contains("<script"),
         "{raw}"
     );
-    assert!(!unsafe { pe_message_send(core, account, std::ptr::null(), null_mut()) });
+    assert!(!unsafe { pe_message_send(core, account, std::ptr::null(), false, null_mut()) });
     // a typo in the address: refused right away, with the reason
     let bad = c("not an address");
     // its own strings: the draft the first message came from is freed
@@ -298,7 +298,7 @@ fn reads_mail_through_the_c_api() {
         attachment_count: 0,
     };
     let mut reason: *mut c_char = null_mut();
-    assert!(!unsafe { pe_message_send(core, account, &typo, &mut reason) });
+    assert!(!unsafe { pe_message_send(core, account, &typo, false, &mut reason) });
     assert!(text(reason).contains("not an e-mail address"), "{}", text(reason));
     unsafe { pe_string_free(reason) };
 
@@ -370,6 +370,10 @@ fn null_and_bad_arguments() {
         pe_string_free(reason);
         assert!(!pe_folder_rename(core, 1, bad.as_ptr(), null_mut()));
         assert!(!pe_folder_delete(std::ptr::null(), 1, null_mut()));
+        let (mut len, mut name) = (0usize, null_mut());
+        assert!(pe_message_source(core, 1, 1, &mut len, &mut name).is_null());
+        let missing = CString::new("/no/such/file.eml").unwrap();
+        assert!(!pe_message_import(core, 1, missing.as_ptr(), null_mut()));
         assert!(pe_message_view_result(core, 12345).is_null());
         pe_message_view_cancel(core, 12345);
         let empty = pe_folders(core, 42);

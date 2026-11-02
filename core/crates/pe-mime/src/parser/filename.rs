@@ -7,7 +7,7 @@ const MAX_CHARS: usize = 200;
 
 const RESERVED: [&str; 4] = ["CON", "PRN", "AUX", "NUL"];
 
-pub(crate) fn safe_filename(name: Option<&str>, mime_type: &str) -> String {
+pub fn safe_filename(name: Option<&str>, mime_type: &str) -> String {
     let base = name.unwrap_or_default().rsplit(['/', '\\']).next().unwrap_or_default();
     let cleaned: String = base.chars().filter(|c| !is_unsafe(*c)).collect();
     let cleaned = cleaned.trim_matches(|c: char| c.is_whitespace() || c == '.');

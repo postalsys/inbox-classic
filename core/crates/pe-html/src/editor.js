@@ -1,8 +1,9 @@
 // The editor of the compose window. The only script PostalExpress runs: the page allows it by a nonce, nothing else
-// can run (the CSP has no other script source, and the quoted message sits in a sandboxed frame without scripts).
-// The host calls window.pe; the page answers with plain strings over postMessage, which the host never parses
-// beyond their prefix:
-//   "html:<the body>"   the HTML of what was written, after pe.send()
+// can run (the CSP has no other script source; the quoted message was sanitized in Rust and waits in an inert
+// template until it is put into the text). The host calls window.pe; the page answers with plain strings over
+// postMessage, which the host never parses beyond their prefix:
+//   "html:<the body>"   the HTML of what was written, after pe.send(); the quote still folded, for the core to add
+//   "full:<the body>"   the same with the quote in it already (unfolded): nothing to add
 //   "state:<flags>"     one 0 or 1 per command of STATE, for the format bar
 //   "dirty"             the first change, so closing can ask before throwing the text away
 (() => {
@@ -10,8 +11,6 @@
     // the order of the flags of "state:", which kStateButtons in app/src/compose.cpp follows
     const STATE = ['bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList', 'justifyLeft', 'justifyCenter', 'justifyRight'];
     const body = document.getElementById('body');
-    const quote = document.getElementById('quote');
-    const more = document.getElementById('more');
     const post = message => {
         if (window.chrome && window.chrome.webview) {
             window.chrome.webview.postMessage(message);
@@ -40,30 +39,46 @@
         }
     });
 
-    // the quoted message: folded behind "..." in a reply, shown in a forward; its frame grows with its content
-    const fit = () => {
-        if (quote && !quote.hidden && quote.contentDocument) {
-            quote.style.height = quote.contentDocument.documentElement.scrollHeight + 'px';
+    // the quoted message: folded behind "..." in a reply, in the text from the start in a forward. Unfolded it is
+    // part of the text, to read, trim, select and copy like the rest; it does not fold again.
+    const quote = document.getElementById('quote');
+    const fold = document.getElementById('fold');
+    const more = document.getElementById('more');
+    let unfolded = false;
+    const unfold = () => {
+        if (!quote || unfolded) {
+            return;
         }
-    };
-    const fold = folded => {
-        quote.hidden = folded;
-        more.setAttribute('aria-expanded', String(!folded));
-        more.title = folded ? 'Show the quoted message' : 'Hide the quoted message';
-        fit();
+        unfolded = true;
+        const block = document.createElement('div');
+        block.className = 'quoted';
+        block.appendChild(document.importNode(quote.content, true));
+        body.appendChild(document.createElement('div')).appendChild(document.createElement('br'));
+        body.appendChild(block);
+        fold.hidden = true;
     };
     if (quote) {
-        quote.addEventListener('load', () => {
-            fit();
-            // pictures in the quote change its height as they load
-            for (const image of quote.contentDocument.images) {
-                image.addEventListener('load', fit);
-            }
+        more.addEventListener('click', () => {
+            unfold();
+            body.focus();
         });
-        more.addEventListener('click', () => fold(!quote.hidden));
-        window.addEventListener('resize', fit);
-        fold(quote.dataset.folded === '1');
+        if (quote.dataset.folded !== '1') {
+            unfold();
+        }
     }
+    // Select All takes the quote too: unfolded first, then everything selected
+    document.addEventListener('keydown', event => {
+        if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === 'a') {
+            event.preventDefault();
+            unfold();
+            body.focus();
+            const range = document.createRange();
+            range.selectNodeContents(body);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    });
 
     window.pe = {
         // a formatting command of the format bar: bold, fontName, foreColor, insertImage, ...
@@ -86,7 +101,7 @@
             }
         },
         send() {
-            post('html:' + body.innerHTML);
+            post((unfolded ? 'full:' : 'html:') + body.innerHTML);
         },
         focus() {
             body.focus();

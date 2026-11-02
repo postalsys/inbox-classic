@@ -17,6 +17,8 @@ public:
     // remoteImages lets images from the network load, for this document only
     void Show(const std::wstring& html, bool remoteImages = false);
     void Clear();
+    // the print dialog of the document shown (its printout has the message's header fields)
+    void Print();
     // closes the WebView2 and lets go of it, before COM is shut down
     void Close();
     void Resize(const RECT& bounds);

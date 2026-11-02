@@ -73,13 +73,29 @@ pub(crate) fn build_unless(
     if dropped() {
         return None;
     }
+    let (from, to, cc) = (
+        text_addresses(message.from.as_slice()),
+        text_addresses(&message.to),
+        text_addresses(&message.cc),
+    );
+    let subject = message.subject.clone().unwrap_or_default();
+    let date = message.timestamp.map(pe_smtp::message::format_date).unwrap_or_default();
+    // for a printout: on screen the window shows these above the message
+    let header = [
+        ("From", from.as_str()),
+        ("Date", date.as_str()),
+        ("To", to.as_str()),
+        ("Cc", cc.as_str()),
+        ("Subject", subject.as_str()),
+    ];
+    let document = pe_html::render_message_with_header(&body, &options, &images, &header);
     Some(MessageView {
-        subject: message.subject.clone().unwrap_or_default(),
-        from: text_addresses(message.from.as_slice()),
-        to: text_addresses(&message.to),
-        cc: text_addresses(&message.cc),
+        subject,
+        from,
+        to,
+        cc,
         date: message.timestamp,
-        document: pe_html::render_message(&body, &options, &images),
+        document,
         attachments: listed(&message.attachments)
             .map(|a| AttachmentView {
                 safe_filename: a.safe_filename(),
@@ -125,6 +141,31 @@ mod tests {
         assert_eq!(view.to, "a@example.com, Team:b@example.com;");
         assert_eq!(view.date, Some(1_759_744_800));
         assert!(view.document.contains("Content-Security-Policy"));
+        // the header for a printout, escaped, shown only in print
+        assert!(
+            view.document
+                .contains(":</span> Andris &lt;andris@example.com&gt;</div>"),
+            "{}",
+            view.document
+        );
+        // under a class the message can not know
+        assert!(view.document.contains("<div class=\"pe-print-"), "{}", view.document);
+        assert!(view.document.contains("@media print"));
+        // its rules in a layer as unguessable as the class: the message's important rules can not hide it
+        let class = view
+            .document
+            .split("<div class=\"")
+            .nth(1)
+            .unwrap()
+            .split('"')
+            .next()
+            .unwrap();
+        assert!(
+            view.document
+                .contains(&format!("@layer {class}{{.{class}{{display:none}}")),
+            "{}",
+            view.document
+        );
         assert!(
             view.document.contains("data:image/png;base64,iVBORw=="),
             "{}",
