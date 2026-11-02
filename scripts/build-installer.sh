@@ -6,9 +6,9 @@
 #   3. signs InboxClassic.exe, then makensis builds the installer and signs the uninstaller and the installer
 #
 # Signing uses scripts/sign-win.sh, it needs SIGN_WIN_ACCOUNT and SIGN_WIN_PROFILE (unset: an unsigned build).
-# Sign-in through the browser needs the OAuth client IDs at build time: PE_GOOGLE_CLIENT_ID (and
-# PE_GOOGLE_CLIENT_SECRET) and PE_MICROSOFT_CLIENT_ID in the environment of the Windows build; without them the app
-# offers passwords only. Needs makensis 3.08 or newer (brew install makensis)
+# Sign-in through the browser: Google's Desktop App client is built in (pe-oauth); PE_GOOGLE_CLIENT_ID and
+# PE_GOOGLE_CLIENT_SECRET replace it, and PE_MICROSOFT_CLIENT_ID in the environment of the Windows build adds
+# Outlook.com; without that one Outlook.com accounts use passwords. Needs makensis 3.08 or newer (brew install makensis)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 . scripts/win-env.sh

@@ -785,8 +785,17 @@ try {
     SetText $first 101 'postalexpress.test@gmail.com'
     SetText $first 102 'not-used'
     Click $first 1
+    # Gmail can sign in through the browser (the Google client is built in): offered first; No here, the test can not
+    # sign in to Google, so the password way follows
+    $browser = WaitWindow '#32770' 'Add Mail Account' 40
+    Check ($browser -and (WindowText ([Native.Win]::FindDescendants($browser, 'Static') | Where-Object { (WindowText $_) -match 'browser' } | Select-Object -First 1)) -match 'web browser') 'Gmail offers signing in through the browser'
+    if ($browser) {
+        Shot $browser 'account-5b-browser-sign-in'
+        Click $browser 7
+        [void](WaitFor { -not [Native.Win]::IsWindow($browser) } 10)
+    }
     $hint = WaitWindow '#32770' 'Add Mail Account' 40
-    Check ($null -ne $hint) 'Gmail wants an app password, and that is said'
+    Check ($null -ne $hint) 'without it, Gmail wants an app password, and that is said'
     if ($hint) {
         Shot $hint 'account-5-app-password'
         # No: not now to the instructions

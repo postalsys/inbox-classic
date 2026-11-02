@@ -38,6 +38,13 @@ const sections = [
                 checked: ['A Gmail address gets imap.gmail.com and smtp.gmail.com, found by its MX']
             },
             {
+                shot: 'account-5b-browser-sign-in',
+                name: 'Gmail sign-in through the browser',
+                what: "For a Gmail or Google Workspace address Inbox Classic offers to sign in on Google's own page in the web browser (OAuth 2.0 with PKCE, Google's Desktop App flow): the password and any second step are typed there, never into Inbox Classic, and the account then signs in with tokens kept in the Windows Credential Manager. Outlook.com works the same once a Microsoft client ID is configured.",
+                how: 'Answer Yes when it is offered after the lookup; the browser opens, and the account is added once Google sends you back.',
+                checked: ['The offer appears for a Gmail address', 'No goes on to the password way']
+            },
+            {
                 shot: 'account-5-app-password',
                 name: 'App passwords explained',
                 what: "Gmail, iCloud, Yahoo, AOL and T-Online do not take the normal password from mail programs. Inbox Classic says so before the server form and offers to open the provider's own instructions. For Outlook.com and Microsoft 365 it shows Microsoft's note that password sign-in is off.",

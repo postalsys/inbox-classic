@@ -41,4 +41,4 @@ From a Mac, `scripts/win-build.sh` copies the working tree to the Windows build 
 
 `scripts/build-installer.sh` builds `dist/InboxClassic-Setup.exe` from a Mac: the app is built and staged on the Windows build machine, then NSIS (`brew install makensis`) packs it. The installer works per user without administrator rights and upgrades in place. With `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` set, the exe, the uninstaller and the installer are signed with Azure Artifact Signing (`scripts/sign-win.sh`, needs `jsign`).
 
-Signing in to Gmail and Outlook.com through the browser (OAuth 2.0) needs the client IDs Postal Systems registered with Google and Microsoft in the environment of the build: `PE_GOOGLE_CLIENT_ID`, `PE_GOOGLE_CLIENT_SECRET` and `PE_MICROSOFT_CLIENT_ID`. Without them those accounts use passwords (app passwords).
+Signing in to Gmail through the browser (OAuth 2.0, Google's Desktop App flow with PKCE) works in every build: the Google client is built in, and `PE_GOOGLE_CLIENT_ID` / `PE_GOOGLE_CLIENT_SECRET` replace it. Outlook.com needs `PE_MICROSOFT_CLIENT_ID` in the environment of the build; without it those accounts use passwords (app passwords).

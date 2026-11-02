@@ -3,8 +3,9 @@
 //! tokens, with PKCE (RFC 7636) so a code caught on the way is of no use. The refresh token is the account's
 //! secret; access tokens are made from it when needed.
 //!
-//! The client IDs are those Postal Systems registered with the providers, given at build time
-//! (`PE_GOOGLE_CLIENT_ID`, `PE_MICROSOFT_CLIENT_ID`); a provider without one is not offered.
+//! The client IDs are those Postal Systems registered with the providers. Google's Desktop App client is built in
+//! ([`GOOGLE_CLIENT_ID`]); `PE_GOOGLE_CLIENT_ID` and `PE_GOOGLE_CLIENT_SECRET` at build time replace it, and
+//! `PE_MICROSOFT_CLIENT_ID` gives Microsoft's. A provider without one is not offered.
 #![forbid(unsafe_code)]
 
 mod redirect;
@@ -77,6 +78,18 @@ pub struct Provider {
     pub client_secret: Option<String>,
 }
 
+/// The Desktop App ("installed") client of the inbox-classic project in Google Cloud: a loopback redirect to
+/// 127.0.0.1 on any port, with PKCE
+pub const GOOGLE_CLIENT_ID: &str = "442308651621-5je5iul1c07rg8gse9gpr12difuusmmr.apps.googleusercontent.com";
+/// Google gives every Desktop App client a "secret" and wants it with each token request, but it is not one: it ships
+/// in every copy of the app, where nobody can keep it (RFC 8252 8.5). PKCE, not this, keeps a caught code useless.
+pub const GOOGLE_CLIENT_SECRET: &str = "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";
+
+/// A build-time override, when it is there and not empty
+fn configured(value: Option<&'static str>) -> Option<&'static str> {
+    value.filter(|value| !value.trim().is_empty())
+}
+
 impl Provider {
     /// The provider with the client ID this build has for it; None without one
     pub fn builtin(kind: ProviderKind) -> Option<Provider> {
@@ -96,8 +109,14 @@ impl Provider {
                 authorize_url: "https://accounts.google.com/o/oauth2/v2/auth".into(),
                 token_url: "https://oauth2.googleapis.com/token".into(),
                 scopes: vec!["https://mail.google.com/".into()],
-                client_id: option_env!("PE_GOOGLE_CLIENT_ID").filter(|id| !id.is_empty())?.into(),
-                client_secret: option_env!("PE_GOOGLE_CLIENT_SECRET").map(str::to_string),
+                client_id: configured(option_env!("PE_GOOGLE_CLIENT_ID"))
+                    .unwrap_or(GOOGLE_CLIENT_ID)
+                    .into(),
+                client_secret: Some(
+                    configured(option_env!("PE_GOOGLE_CLIENT_SECRET"))
+                        .unwrap_or(GOOGLE_CLIENT_SECRET)
+                        .into(),
+                ),
             }),
             ProviderKind::Microsoft => Some(Provider {
                 kind,
@@ -120,9 +139,7 @@ impl Provider {
                 ]
                 .map(String::from)
                 .to_vec(),
-                client_id: option_env!("PE_MICROSOFT_CLIENT_ID")
-                    .filter(|id| !id.is_empty())?
-                    .into(),
+                client_id: configured(option_env!("PE_MICROSOFT_CLIENT_ID"))?.into(),
                 client_secret: None,
             }),
         }
@@ -325,6 +342,15 @@ pub fn parse_tokens(status: u16, body: &[u8], refreshed: Option<&str>, now: i64)
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn google_is_built_in_with_its_desktop_client() {
+        let google = Provider::builtin(ProviderKind::Google).unwrap();
+        assert!(google.client_id.ends_with(".apps.googleusercontent.com"));
+        assert!(google.client_secret.as_deref().is_some_and(|secret| !secret.is_empty()));
+        assert_eq!(configured(Some("  ")), None);
+        assert_eq!(configured(Some("x")), Some("x"));
+    }
 
     #[test]
     fn pkce() {
