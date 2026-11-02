@@ -629,6 +629,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         if (GetAncestor(msg.hwnd, GA_ROOT) == hwnd && TranslateAcceleratorW(hwnd, g_accelerators, &msg)) {
             continue;
         }
+        if (ComposeKey(msg)) {
+            continue;
+        }
         // Tab moves between the panes of the main window and the fields of a compose window
         HWND active = GetActiveWindow();
         if (active && IsDialogMessageW(active, &msg)) {

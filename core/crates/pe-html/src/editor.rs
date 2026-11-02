@@ -23,9 +23,15 @@ const PICTURE_TYPES: [&str; 4] = ["image/png", "image/jpeg", "image/gif", "image
 /// The most bytes of pictures a message carries in its HTML, all together
 const MAX_PICTURE_BYTES: usize = 25 * 1024 * 1024;
 
-/// The page of the editor. `quote` is HTML from [`quote_html`] (already sanitized), shown folded when `folded`.
-pub fn editor_document(quote: Option<&str>, folded: bool) -> String {
+/// The page of the editor. `quote` is HTML from [`quote_html`] (already sanitized), shown folded when `folded`;
+/// `body` what was written so far, from [`draft_body`] for a saved draft opened again, or empty.
+pub fn editor_document(quote: Option<&str>, folded: bool, body: &str) -> String {
     let nonce = nonce();
+    // sanitized again, as the quote is
+    let body = match draft_body(body, &[]) {
+        body if body.trim().is_empty() => "<div><br></div>".to_string(),
+        body => body,
+    };
     // the quote waits in a template, which the page does not show, load or run: the editor's "..." (or Select All)
     // puts it into the text, where it is edited and selected like the rest. Sanitized again here, so whatever the
     // caller hands in, it is markup without scripts or handlers, and no `</template>` of it can end the template.
@@ -55,7 +61,7 @@ pub fn editor_document(quote: Option<&str>, folded: bool) -> String {
          #more:hover{{background:#e2e2e2;color:#000}}\
          #more:focus-visible{{outline:2px solid #036;outline-offset:1px}}\
          </style></head>\
-         <body><div id=\"body\" contenteditable=\"true\" role=\"textbox\" aria-multiline=\"true\" aria-label=\"Message\"><div><br></div></div>\
+         <body><div id=\"body\" contenteditable=\"true\" role=\"textbox\" aria-multiline=\"true\" aria-label=\"Message\">{body}</div>\
          {quote}<script nonce=\"{nonce}\">{EDITOR_SCRIPT}</script></body></html>"
     )
 }
@@ -66,6 +72,12 @@ fn quote_sanitizer(images: &[InlineImage]) -> ammonia::Builder<'static> {
     let mut sanitizer = builder(images);
     sanitizer.rm_tags(["style"]).add_clean_content_tags(["style"]);
     sanitizer
+}
+
+/// What was written in a saved draft, to edit again: sanitized as a quote is, its `cid:` pictures as `data:` URIs,
+/// which [`outgoing_html`] turns back into attachments when it is sent
+pub fn draft_body(html: &str, images: &[InlineImage]) -> String {
+    quote_sanitizer(images).clean(html).to_string()
 }
 
 /// The quoted message of a reply or forward for the editor and for sending: the header block in the manner of
@@ -234,6 +246,7 @@ mod tests {
         let page = editor_document(
             Some("<p>quoted<script>alert(1)</script></p></template><img src=x onerror=alert(2)>"),
             true,
+            "",
         );
         let nonce = page.split("'nonce-").nth(1).unwrap().split('\'').next().unwrap();
         assert_eq!(nonce.len(), 32);
@@ -251,6 +264,7 @@ mod tests {
         let page = editor_document(
             Some("<style>body{display:none}</style><p style=\"color:red\">q</p>"),
             true,
+            "",
         );
         assert!(
             page.contains("data-folded=\"1\"><p style=\"color:red\">q</p></template>"),
@@ -258,17 +272,42 @@ mod tests {
         );
         // two pages have different nonces
         assert_ne!(
-            editor_document(None, false).split("'nonce-").nth(1),
+            editor_document(None, false, "").split("'nonce-").nth(1),
             page.split("'nonce-").nth(1)
         );
     }
 
     #[test]
     fn a_new_message_has_no_quote() {
-        let page = editor_document(None, false);
+        let page = editor_document(None, false, "");
         assert!(!page.contains("<template") && !page.contains("id=\"more\""));
         assert!(page.contains("contenteditable=\"true\""));
-        assert!(!editor_document(Some("  "), true).contains("<template"));
+        assert!(!editor_document(Some("  "), true, "").contains("<template"));
+        // an empty body is one empty line to write on
+        assert!(page.contains("aria-label=\"Message\"><div><br></div></div>"), "{page}");
+    }
+
+    #[test]
+    fn a_draft_goes_on_where_it_was_left() {
+        let page = editor_document(
+            None,
+            false,
+            "<p>half <b>written</b></p><script>bad()</script><style>body{display:none}</style><img src=x onerror=y()>",
+        );
+        assert!(
+            page.contains("aria-label=\"Message\"><p>half <b>written</b></p>"),
+            "{page}"
+        );
+        assert_eq!(page.matches("<script").count(), 1, "{page}");
+        assert!(!page.contains("onerror") && !page.contains("bad()"), "{page}");
+        // its pictures come in as data: URIs, which sending turns back into attachments
+        let image = InlineImage {
+            content_id: "pic@x",
+            mime_type: "image/png",
+            data: b"png",
+        };
+        let body = draft_body("<p><img src=\"cid:pic@x\"></p><style>p{}</style>", &[image]);
+        assert_eq!(body, "<p><img src=\"data:image/png;base64,cG5n\"></p>");
     }
 
     #[test]

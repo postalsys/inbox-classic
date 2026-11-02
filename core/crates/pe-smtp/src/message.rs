@@ -40,6 +40,8 @@ pub struct Message {
     pub date: i64,
     /// With or without angle brackets; made up when empty
     pub message_id: String,
+    /// Bcc as a header too, for a draft kept to be finished later (nodemailer's `keepBcc`)
+    pub keep_bcc: bool,
 }
 
 /// Who a message goes from and to in the SMTP transaction
@@ -461,10 +463,16 @@ pub fn build_with(message: &Message, boundary_base: &str) -> Built {
     }
     .compose();
     let from_list = [ParsedAddress::Mailbox(message.from.clone())];
-    let fields: [(&str, String); 9] = [
+    let bcc = if message.keep_bcc {
+        format_addresses(&message.bcc)
+    } else {
+        String::new()
+    };
+    let fields: [(&str, String); 10] = [
         ("From", format_addresses(&from_list)),
         ("To", format_addresses(&message.to)),
         ("Cc", format_addresses(&message.cc)),
+        ("Bcc", bcc),
         ("Reply-To", format_addresses(&message.reply_to)),
         ("In-Reply-To", message.in_reply_to.clone().unwrap_or_default()),
         (
@@ -560,5 +568,15 @@ mod tests {
         assert!(!raw.contains("secret"), "{raw}");
         assert_eq!(built.envelope.to, ["b@example.com", "secret@example.com"]);
         assert!(raw.contains("line\r\nbreaks\r\nhere\r\n"), "{raw}");
+        // a draft keeps it, after Cc as nodemailer puts it
+        let kept = build(&Message {
+            keep_bcc: true,
+            ..message
+        });
+        let raw = String::from_utf8(kept.raw).unwrap();
+        assert!(
+            raw.contains("To: b@example.com\r\nBcc: secret@example.com\r\n"),
+            "{raw}"
+        );
     }
 }

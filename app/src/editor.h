@@ -1,7 +1,7 @@
 // The editor of the compose window: a WebView2 with the page of pe_editor_document, whose own script (allowed by a
 // nonce, nothing else can run) makes the message editable. The page talks back with plain strings: "html:<body>" or
 // "full:<body>" (the quote unfolded into it) after Html(), "state:<flags>" for the format bar and "dirty" on the
-// first change. Network requests are refused and nothing navigates, as in the preview.
+// first change (after Clean(), the first change since). Network requests are refused and nothing navigates, as in the preview.
 #pragma once
 
 #include <windows.h>
@@ -24,6 +24,8 @@ public:
         std::function<void()> dirty;
         // Ctrl+Enter
         std::function<void()> send;
+        // Ctrl+S
+        std::function<void()> save;
     };
 
     // creates the host window, a child of `parent` with the control id `id`, and the WebView2 in it
@@ -35,6 +37,8 @@ public:
     void Link(const std::wstring& url);
     // asks the page for the body; it comes to Handlers::html
     void Html();
+    // the body was saved: the next change is reported as "dirty" again
+    void Clean();
     void Focus();
 
 private:

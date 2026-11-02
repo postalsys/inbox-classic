@@ -959,15 +959,25 @@ unsafe fn folder_change(
 ) -> bool {
     // SAFETY: as the caller guarantees
     let outcome = unsafe { with(core, Err(None), |core| change(core).map_err(Some)) };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the folder could not be changed") }.is_some()
+}
+
+/// The value of `outcome`, or None with the reason in `error` when it is not NULL: the core's, or `fallback` when
+/// there is none (a NULL handle, an argument that is not UTF-8)
+///
+/// # Safety
+/// `error` must be NULL or a valid pointer.
+unsafe fn refused<T>(error: *mut *mut c_char, outcome: Result<T, Option<pe_core::Error>>, fallback: &str) -> Option<T> {
     match outcome {
-        Ok(()) => true,
+        Ok(value) => Some(value),
         Err(reason) => {
             if !error.is_null() {
-                let text = reason.map_or_else(|| "the folder could not be changed".to_string(), |e| e.to_string());
+                let text = reason.map_or_else(|| fallback.to_string(), |e| e.to_string());
                 // SAFETY: the caller gave a valid pointer
                 unsafe { *error = into_c_string(text) };
             }
-            false
+            None
         }
     }
 }
@@ -1302,6 +1312,8 @@ pub struct PeOutgoing {
     /// Paths of files to attach
     pub attachments: *const *const c_char,
     pub attachment_count: usize,
+    /// The Message-ID of the draft it was saved as (from `pe_draft_save` or PeDraftInfo), or NULL
+    pub message_id: *const c_char,
 }
 
 /// # Safety
@@ -1342,6 +1354,7 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         attachments,
         in_reply_to: Some(text(o.in_reply_to)?).filter(|r| !r.is_empty()),
         references: text(o.references)?.split_whitespace().map(str::to_string).collect(),
+        message_id: Some(text(o.message_id)?).filter(|id| !id.is_empty()),
     })
 }
 
@@ -1375,17 +1388,8 @@ pub unsafe extern "C" fn pe_message_send(
         },
         None => Err(None),
     };
-    match result {
-        Ok(()) => true,
-        Err(reason) => {
-            if !error.is_null() {
-                let text = reason.map_or_else(|| "the message could not be sent".to_string(), |e| e.to_string());
-                // SAFETY: the caller gave a valid pointer
-                unsafe { *error = into_c_string(text) };
-            }
-            false
-        }
-    }
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, result, "the message could not be sent") }.is_some()
 }
 
 // ---- the Outbox ----
@@ -1498,12 +1502,51 @@ pub struct PeDraftInfo {
     pub in_reply_to: *const c_char,
     /// For PeOutgoing, space separated
     pub references: *const c_char,
+    pub bcc: *const c_char,
+    /// What was written, for `pe_editor_document`: a saved draft opened again; empty otherwise
+    pub body: *const c_char,
+    /// The files of a saved draft opened again, written out to the temporary folder, to attach again
+    pub attachments: *const *const c_char,
+    pub attachment_count: usize,
+    /// For PeOutgoing: a saved draft opened again; NULL otherwise
+    pub message_id: *const c_char,
 }
 
 /// A draft; free with `pe_draft_free`
 pub struct PeDraft {
     info: PeDraftInfo,
     _strings: Strings,
+    _attachments: Vec<*const c_char>,
+}
+
+/// A draft handed to C
+fn draft_handle(draft: &pe_core::Draft) -> *mut PeDraft {
+    let mut strings = Strings::default();
+    let attachments: Vec<*const c_char> = draft
+        .attachments
+        .iter()
+        .map(|path| strings.add(&path.to_string_lossy()))
+        .collect();
+    let info = PeDraftInfo {
+        to: strings.add(&draft.to),
+        cc: strings.add(&draft.cc),
+        subject: strings.add(&draft.subject),
+        quote: strings.add(&draft.quote),
+        quote_folded: draft.quote_folded,
+        in_reply_to: draft.in_reply_to.as_deref().map_or(null(), |r| strings.add(r)),
+        references: strings.add(&draft.references.join(" ")),
+        bcc: strings.add(&draft.bcc),
+        body: strings.add(&draft.body),
+        // the pointers are into the Vec's buffer on the heap, which moving the Vec does not move
+        attachments: attachments.as_ptr(),
+        attachment_count: attachments.len(),
+        message_id: draft.message_id.as_deref().map_or(null(), |id| strings.add(id)),
+    };
+    handed(PeDraft {
+        info,
+        _strings: strings,
+        _attachments: attachments,
+    })
 }
 
 /// A reply, a reply to all or a forward of a message whose source is in the store (after
@@ -1525,26 +1568,59 @@ pub unsafe extern "C" fn pe_message_draft(
     };
     // SAFETY: as the caller guarantees
     unsafe {
-        with(core, null_mut(), |core| {
-            let Ok(Some(draft)) = core.draft(folder, uid, kind) else {
-                return null_mut();
-            };
-            let mut strings = Strings::default();
-            let info = PeDraftInfo {
-                to: strings.add(&draft.to),
-                cc: strings.add(&draft.cc),
-                subject: strings.add(&draft.subject),
-                quote: strings.add(&draft.quote),
-                quote_folded: draft.quote_folded,
-                in_reply_to: draft.in_reply_to.as_deref().map_or(null(), |r| strings.add(r)),
-                references: strings.add(&draft.references.join(" ")),
-            };
-            handed(PeDraft {
-                info,
-                _strings: strings,
-            })
+        with(core, null_mut(), |core| match core.draft(folder, uid, kind) {
+            Ok(Some(draft)) => draft_handle(&draft),
+            _ => null_mut(),
         })
     }
+}
+
+/// A saved draft of the Drafts folder (its source in the store, after `MessageReady`) to go on writing, NULL
+/// otherwise
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_open(core: *const PeCore, folder: i64, uid: u64) -> *mut PeDraft {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.reopen_draft(folder, uid) {
+            Ok(Some(draft)) => draft_handle(&draft),
+            _ => null_mut(),
+        })
+    }
+}
+
+/// Saves a message being written in the Drafts folder of `account`, in place of the copy saved before (the one with
+/// `message->message_id`), in the background: `Failed` when that does not work. True with the draft's Message-ID in
+/// `message_id`, to pass in PeOutgoing from then on; false with the reason in `error` (an account without a Drafts
+/// folder). Free both with `pe_string_free`; either may be NULL when not wanted.
+///
+/// # Safety
+/// `core` must be a live handle, `message` a valid message, `message_id` and `error` NULL or valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_save(
+    core: *const PeCore,
+    account: i64,
+    message: *const PeOutgoing,
+    message_id: *mut *mut c_char,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let result = match unsafe { outgoing(message) } {
+        // SAFETY: as the caller guarantees
+        Some(message) => unsafe { with(core, Err(None), |core| core.save_draft(account, message).map_err(Some)) },
+        None => Err(None),
+    };
+    // SAFETY: as the caller guarantees
+    let Some(id) = (unsafe { refused(error, result, "the message could not be saved") }) else {
+        return false;
+    };
+    if !message_id.is_null() {
+        // SAFETY: the caller gave a valid pointer
+        unsafe { *message_id = into_c_string(id) };
+    }
+    true
 }
 
 /// # Safety

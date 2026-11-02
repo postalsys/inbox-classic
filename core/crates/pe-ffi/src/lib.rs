@@ -61,19 +61,24 @@ pub unsafe extern "C" fn pe_html_render(html: *const u8, len: usize, allow_remot
 }
 
 /// The page of the compose window's editor, with the quoted message `quote` (from the draft, or NULL for a new
-/// message) folded behind "..." when `folded`. NULL on failure. Free with `pe_string_free`.
+/// message) folded behind "..." when `folded`, and `body` (the draft's, or NULL) as what is written so far. NULL on
+/// failure. Free with `pe_string_free`.
 ///
 /// # Safety
-/// `quote` must be NULL or a NUL-terminated string.
+/// `quote` and `body` must be NULL or NUL-terminated strings.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_editor_document(quote: *const c_char, folded: bool) -> *mut c_char {
+pub unsafe extern "C" fn pe_editor_document(quote: *const c_char, folded: bool, body: *const c_char) -> *mut c_char {
     // SAFETY: as the caller guarantees
-    let quote = if quote.is_null() {
-        None
-    } else {
-        Some(unsafe { std::ffi::CStr::from_ptr(quote) }.to_string_lossy())
-    };
-    guard(|| into_c_string(pe_html::editor_document(quote.as_deref(), folded))).unwrap_or(null_mut())
+    let text = |p: *const c_char| (!p.is_null()).then(|| unsafe { std::ffi::CStr::from_ptr(p) }.to_string_lossy());
+    let (quote, body) = (text(quote), text(body));
+    guard(|| {
+        into_c_string(pe_html::editor_document(
+            quote.as_deref(),
+            folded,
+            body.as_deref().unwrap_or_default(),
+        ))
+    })
+    .unwrap_or(null_mut())
 }
 
 /// The picture file at `path` (UTF-8) as a `data:` URI for the editor's Insert Picture, NULL when it can not be
@@ -118,14 +123,14 @@ mod tests {
     #[test]
     fn editor_pages_and_pictures() {
         let quote = CString::new("<p>old</p>").unwrap();
-        let page = unsafe { pe_editor_document(quote.as_ptr(), true) };
+        let page = unsafe { pe_editor_document(quote.as_ptr(), true, std::ptr::null()) };
         let text = unsafe { CStr::from_ptr(page) }.to_str().unwrap().to_string();
         unsafe { pe_string_free(page) };
         assert!(
             text.contains("contenteditable") && text.contains("data-folded=\"1\""),
             "{text}"
         );
-        let page = unsafe { pe_editor_document(std::ptr::null(), false) };
+        let page = unsafe { pe_editor_document(std::ptr::null(), false, std::ptr::null()) };
         assert!(!unsafe { CStr::from_ptr(page) }.to_str().unwrap().contains("<iframe"));
         unsafe { pe_string_free(page) };
 

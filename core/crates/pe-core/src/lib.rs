@@ -597,6 +597,51 @@ impl Core {
         )
     }
 
+    /// Saves a message being written in the Drafts folder of the account, in place of the copy saved before (the one
+    /// with `outgoing.message_id`), in the background; [`Event::Failed`] when it did not work. The Message-ID of the
+    /// draft, to pass in `outgoing` from then on, so the next save replaces this one and sending removes it.
+    pub fn save_draft(&self, account: AccountId, mut outgoing: Outgoing) -> Result<String> {
+        let email = self.store().account(account)?.settings.email;
+        if compose::drafts_folder(&self.store(), account)?.is_none() {
+            return Err(Error::Unavailable(compose::NO_DRAFTS.into()));
+        }
+        // an ID that does not tell this draft apart is replaced: the copy saved under it stays
+        let message_id = outgoing
+            .message_id
+            .as_deref()
+            .and_then(compose::draft_id)
+            .unwrap_or_else(|| pe_smtp::message::new_message_id(&email));
+        outgoing.message_id = Some(message_id.clone());
+        self.send_command(
+            account,
+            Command::SaveDraft {
+                outgoing: Box::new(outgoing),
+            },
+        )?;
+        Ok(message_id)
+    }
+
+    /// A saved draft (a message of the Drafts folder whose source is in the store) to go on writing; its attachments
+    /// are written out to a folder of their own under the system's temporary folder, to be attached again
+    pub fn reopen_draft(&self, folder: FolderId, uid: u64) -> Result<Option<Draft>> {
+        let Some(source) = self.store().source(folder, uid)? else {
+            return Ok(None);
+        };
+        let (mut draft, files) = compose::reopen(&source);
+        if !files.is_empty() {
+            let nanos = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map_or(0, |d| d.as_nanos());
+            let base = std::env::temp_dir()
+                .join("PostalExpress")
+                .join(format!("draft-{folder}-{uid}-{nanos}"));
+            draft.attachments = write_out(&base, files).map_err(|error| {
+                Error::Unavailable(format!("an attachment of the draft could not be kept: {error}"))
+            })?;
+        }
+        Ok(Some(draft))
+    }
+
     /// The messages waiting in the Outbox, of every account, oldest first
     pub fn outbox(&self) -> Result<Vec<pe_store::Queued>> {
         Ok(self.store().outbox(None)?)
@@ -789,6 +834,21 @@ impl Core {
         // dropping the sender ends the worker once its current command is done
         self.workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
     }
+}
+
+/// Writes files (name, content) under `base`, each in a folder of its own so two of one name stay apart; their paths
+fn write_out(base: &std::path::Path, files: Vec<(String, Vec<u8>)>) -> std::io::Result<Vec<PathBuf>> {
+    files
+        .into_iter()
+        .enumerate()
+        .map(|(index, (name, content))| {
+            let dir = base.join(index.to_string());
+            std::fs::create_dir_all(&dir)?;
+            let path = dir.join(name);
+            std::fs::write(&path, content)?;
+            Ok(path)
+        })
+        .collect()
 }
 
 fn store_security(security: pe_net::Security) -> pe_store::Security {

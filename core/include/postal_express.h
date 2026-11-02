@@ -253,6 +253,8 @@ typedef struct PeOutgoing {
   // Paths of files to attach
   const char *const *attachments;
   size_t attachment_count;
+  // The Message-ID of the draft it was saved as (from `pe_draft_save` or PeDraftInfo), or NULL
+  const char *message_id;
 } PeOutgoing;
 
 // A message waiting in the Outbox
@@ -280,6 +282,14 @@ typedef struct PeDraftInfo {
   const char *in_reply_to;
   // For PeOutgoing, space separated
   const char *references;
+  const char *bcc;
+  // What was written, for `pe_editor_document`: a saved draft opened again; empty otherwise
+  const char *body;
+  // The files of a saved draft opened again, written out to the temporary folder, to attach again
+  const char *const *attachments;
+  size_t attachment_count;
+  // For PeOutgoing: a saved draft opened again; NULL otherwise
+  const char *message_id;
 } PeDraftInfo;
 
 // The servers found for an address
@@ -319,12 +329,14 @@ char *pe_html_render(const uint8_t *html,
                      bool allow_remote_images);
 
 // The page of the compose window's editor, with the quoted message `quote` (from the draft, or NULL for a new
-// message) folded behind "..." when `folded`. NULL on failure. Free with `pe_string_free`.
+// message) folded behind "..." when `folded`, and `body` (the draft's, or NULL) as what is written so far. NULL on
+// failure. Free with `pe_string_free`.
 //
 // # Safety
-// `quote` must be NULL or a NUL-terminated string.
+// `quote` and `body` must be NULL or NUL-terminated strings.
 char *pe_editor_document(const char *quote,
-                         bool folded);
+                         bool folded,
+                         const char *body);
 
 // The picture file at `path` (UTF-8) as a `data:` URI for the editor's Insert Picture, NULL when it can not be
 // read or is not a PNG, JPEG or GIF picture (by its content, not its name). Free with `pe_string_free`.
@@ -735,6 +747,28 @@ struct PeDraft *pe_message_draft(const struct PeCore *core,
                                  int64_t folder,
                                  uint64_t uid,
                                  enum PeDraftKind kind);
+
+// A saved draft of the Drafts folder (its source in the store, after `MessageReady`) to go on writing, NULL
+// otherwise
+//
+// # Safety
+// `core` must be a live handle.
+struct PeDraft *pe_draft_open(const struct PeCore *core,
+                              int64_t folder,
+                              uint64_t uid);
+
+// Saves a message being written in the Drafts folder of `account`, in place of the copy saved before (the one with
+// `message->message_id`), in the background: `Failed` when that does not work. True with the draft's Message-ID in
+// `message_id`, to pass in PeOutgoing from then on; false with the reason in `error` (an account without a Drafts
+// folder). Free both with `pe_string_free`; either may be NULL when not wanted.
+//
+// # Safety
+// `core` must be a live handle, `message` a valid message, `message_id` and `error` NULL or valid pointers.
+bool pe_draft_save(const struct PeCore *core,
+                   int64_t account,
+                   const struct PeOutgoing *message,
+                   char **message_id,
+                   char **error);
 
 // # Safety
 // `draft` must be NULL or live.

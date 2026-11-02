@@ -6,6 +6,7 @@
 #include <commdlg.h>
 
 #include <algorithm>
+#include <utility>
 
 namespace {
 
@@ -148,6 +149,7 @@ void Mailbox::Reload() {
     accountNames_.clear();
     folderAccounts_.clear();
     folderNames_.clear();
+    draftFolders_.clear();
     firstAccount_ = 0;
     core::AccountList accounts(pe_accounts(core_));
     size_t count = pe_account_list_count(accounts.get());
@@ -187,6 +189,9 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
         items_[folder->id] = item;
         folderAccounts_[folder->id] = account;
         folderNames_[folder->id] = {FolderName(*folder), folder->fixed};
+        if (folder->special_use == PE_SPECIAL_USE_DRAFTS) {
+            draftFolders_.insert(folder->id);
+        }
         parents.resize(depth + 1);
         parents.push_back(item);
     }
@@ -235,6 +240,19 @@ int64_t Mailbox::CurrentAccount() const {
         return account->second;
     }
     return selectedAccount_ ? selectedAccount_ : firstAccount_;
+}
+
+void Mailbox::OpenSelected() {
+    if (!uid_ || !draftFolders_.contains(folder_)) {
+        return;
+    }
+    core::Draft draft(pe_draft_open(core_, folder_, uid_));
+    if (!draft) {
+        // not fetched yet: MessageReady follows
+        openWhenReady_ = true;
+        return;
+    }
+    OpenCompose(parent_, core_, CurrentAccount(), pe_draft_info(draft.get()));
 }
 
 core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
@@ -346,6 +364,7 @@ void Mailbox::ClearReader() {
         viewRequest_ = 0;
     }
     uid_ = 0;
+    openWhenReady_ = false;
     remoteImages_ = false;
     view_.reset();
     KillTimer(parent_, TIMER_MARK_READ);
@@ -384,6 +403,10 @@ void Mailbox::OnFolderSelected(LPARAM folder) {
 }
 
 void Mailbox::ShowMessage() {
+    // fetched now: a draft that was double-clicked before opens
+    if (std::exchange(openWhenReady_, false)) {
+        OpenSelected();
+    }
     // parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
@@ -685,6 +708,10 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
             OnSelectionChanged();
         }
         return true;
+    case LVN_ITEMACTIVATE:
+        // double-click; Enter comes as IDOK of the window (OnCommand)
+        OpenSelected();
+        return true;
     case LVN_KEYDOWN:
         // Delete in the list, not as a shortcut of the window: in a text field it deletes text
         if (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey == VK_DELETE) {
@@ -790,6 +817,10 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
             // a moment after the last key, not for each
             SetTimer(parent_, TIMER_FIND, 250, nullptr);
         }
+        return true;
+    }
+    if (id == IDOK && GetFocus() == list_) {
+        OpenSelected();
         return true;
     }
     switch (id) {

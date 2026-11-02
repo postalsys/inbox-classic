@@ -9,6 +9,44 @@ use pe_mime::parser::{self, ParsedAddress, html_to_text, parse_addresses, text_a
 use pe_smtp::{Attachment, Message};
 use pe_store::AccountSettings;
 
+/// Why a draft can not be saved
+pub(crate) const NO_DRAFTS: &str = "the account has no Drafts folder to save the message in";
+
+/// The Drafts folder of an account, where drafts are saved
+pub(crate) fn drafts_folder(
+    store: &pe_store::Store,
+    account: pe_store::AccountId,
+) -> pe_store::Result<Option<pe_store::Folder>> {
+    store.special_folder(account, "\\Drafts")
+}
+
+/// `value` when it is one Message-ID of the form `<local@domain>`, as drafts are told apart by: anything looser
+/// (a draft from elsewhere with `Message-ID: <`) would match other drafts
+pub(crate) fn draft_id(value: &str) -> Option<String> {
+    let value = value.trim();
+    let [id] = parser::message_ids(value).try_into().ok()?;
+    let inner = id.strip_prefix('<')?.strip_suffix('>')?;
+    let well_formed = inner
+        .split_once('@')
+        .is_some_and(|(local, domain)| !local.is_empty() && !domain.is_empty() && !domain.contains('@'));
+    (id == value && well_formed && !inner.chars().any(|c| c.is_whitespace() || c.is_control())).then_some(id)
+}
+
+/// The images of a message its HTML shows by `cid:`
+pub(crate) fn inline_images(message: &parser::Message) -> Vec<InlineImage<'_>> {
+    message
+        .attachments
+        .iter()
+        .filter_map(|a| {
+            Some(InlineImage {
+                content_id: a.content_id.as_deref()?,
+                mime_type: &a.mime_type,
+                data: &a.content,
+            })
+        })
+        .collect()
+}
+
 /// What the compose window sends
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Outgoing {
@@ -27,6 +65,9 @@ pub struct Outgoing {
     pub attachments: Vec<PathBuf>,
     pub in_reply_to: Option<String>,
     pub references: Vec<String>,
+    /// The Message-ID of the draft this was saved as before (see [`Draft::message_id`]): it keeps the ID, and the
+    /// saved copy is replaced on the next save and removed once the message is sent
+    pub message_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -48,6 +89,13 @@ pub struct Draft {
     pub quote_folded: bool,
     pub in_reply_to: Option<String>,
     pub references: Vec<String>,
+    pub bcc: String,
+    /// What was written, as sanitized HTML, for a saved draft opened again; empty for a new message
+    pub body: String,
+    /// The files of a saved draft opened again, written out to be attached again
+    pub attachments: Vec<PathBuf>,
+    /// The Message-ID of a saved draft opened again, for [`Outgoing::message_id`]
+    pub message_id: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -115,6 +163,24 @@ pub fn message(account: &AccountSettings, outgoing: &Outgoing, now: i64) -> Resu
     if to.iter().chain(&cc).chain(&bcc).all(|a| a.mailboxes().is_empty()) {
         return Err(ComposeError::NoRecipients);
     }
+    build(account, outgoing, now, [to, cc, bcc])
+}
+
+/// A draft to keep in the Drafts folder: as [`message`], with the recipients as far as they are typed (none, or
+/// not yet addresses) and Bcc kept in the header, to be there when the draft is opened again
+pub fn draft_message(account: &AccountSettings, outgoing: &Outgoing, now: i64) -> Result<Message, ComposeError> {
+    let lists = [&outgoing.to, &outgoing.cc, &outgoing.bcc].map(|list| parse_addresses(list));
+    let mut message = build(account, outgoing, now, lists)?;
+    message.keep_bcc = true;
+    Ok(message)
+}
+
+fn build(
+    account: &AccountSettings,
+    outgoing: &Outgoing,
+    now: i64,
+    [to, cc, bcc]: [Vec<ParsedAddress>; 3],
+) -> Result<Message, ComposeError> {
     let mut attachments = Vec::new();
     for path in &outgoing.attachments {
         let content = std::fs::read(path).map_err(|e| ComposeError::Attachment(path.clone(), e.to_string()))?;
@@ -161,8 +227,45 @@ pub fn message(account: &AccountSettings, outgoing: &Outgoing, now: i64) -> Resu
         in_reply_to: outgoing.in_reply_to.clone(),
         references: outgoing.references.clone(),
         date: now,
+        message_id: outgoing.message_id.clone().unwrap_or_default(),
         ..Default::default()
     })
+}
+
+/// A saved draft to go on writing: its fields, what was written as the body, and its attachments (name to save
+/// them under, content) for the caller to write out
+pub fn reopen(source: &[u8]) -> (Draft, Vec<(String, Vec<u8>)>) {
+    let Ok(message) = parser::parse(source) else {
+        return (Draft::default(), Vec::new());
+    };
+    let images = inline_images(&message);
+    let body = match (&message.html, &message.text) {
+        (Some(html), _) => pe_html::draft_body(html, &images),
+        (None, Some(text)) => text_to_html(text),
+        (None, None) => String::new(),
+    };
+    let draft = Draft {
+        to: editable(&message.to),
+        cc: editable(&message.cc),
+        bcc: editable(&message.bcc),
+        subject: message.subject.clone().unwrap_or_default(),
+        body,
+        in_reply_to: message
+            .in_reply_to
+            .as_deref()
+            .and_then(|r| parser::message_ids(r).pop()),
+        references: message.reference_ids(),
+        message_id: message.message_id.as_deref().and_then(draft_id),
+        ..Default::default()
+    };
+    // the pictures of the HTML are in the body already
+    let files = message
+        .attachments
+        .into_iter()
+        .filter(|a| !a.related)
+        .map(|a| (a.safe_filename(), a.content))
+        .collect();
+    (draft, files)
 }
 
 /// An address list to edit: what parses back into the same addresses. A name with anything but letters, digits
@@ -222,17 +325,7 @@ pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Dr
         &message.reply_to
     };
     let reply = kind != DraftKind::Forward;
-    let images: Vec<InlineImage> = message
-        .attachments
-        .iter()
-        .filter_map(|a| {
-            Some(InlineImage {
-                content_id: a.content_id.as_deref()?,
-                mime_type: &a.mime_type,
-                data: &a.content,
-            })
-        })
-        .collect();
+    let images = inline_images(&message);
     let body = match (&message.html, &message.text) {
         (Some(html), _) => html.clone(),
         (None, Some(text)) => text_to_html(text),
@@ -292,6 +385,65 @@ mod tests {
             smtp_security: pe_store::Security::Tls,
             auth: pe_store::Auth::Password,
         }
+    }
+
+    #[test]
+    fn drafts_are_told_apart_by_a_whole_message_id() {
+        assert_eq!(draft_id(" <a.b@example.com> ").as_deref(), Some("<a.b@example.com>"));
+        for loose in [
+            "<",
+            "<>",
+            "@",
+            "<@>",
+            "<a@>",
+            "<@b>",
+            "a@b",
+            "<a@b> <c@d>",
+            "<a b@c>",
+            "x<a@b>",
+            "<a@b@c>",
+        ] {
+            assert_eq!(draft_id(loose), None, "{loose}");
+        }
+        // one from elsewhere opens with a new ID on its first save
+        let (draft, _) = reopen(b"Message-ID: <\r\nSubject: planted\r\n\r\nx\r\n");
+        assert_eq!(draft.message_id, None);
+    }
+
+    #[test]
+    fn a_draft_is_kept_as_far_as_it_is_written() {
+        let outgoing = Outgoing {
+            to: "ann@".into(),
+            bcc: "Boss <boss@example.com>".into(),
+            subject: "Half".into(),
+            text: "not done".into(),
+            message_id: Some("<d1@example.com>".into()),
+            ..Default::default()
+        };
+        // not to send like this, but to keep
+        assert_eq!(
+            message(&account(), &outgoing, 0).unwrap_err(),
+            ComposeError::BadAddress("ann@".into())
+        );
+        assert_eq!(
+            message(&account(), &Outgoing::default(), 0).unwrap_err(),
+            ComposeError::NoRecipients
+        );
+        let built = pe_smtp::build(&draft_message(&account(), &outgoing, 0).unwrap());
+        let raw = String::from_utf8(built.raw).unwrap();
+        assert!(raw.contains("Bcc: Boss <boss@example.com>\r\n"), "{raw}");
+        assert!(raw.contains("Message-ID: <d1@example.com>\r\n"), "{raw}");
+        assert!(draft_message(&account(), &Outgoing::default(), 0).is_ok());
+
+        // opened again
+        let (draft, files) = reopen(raw.as_bytes());
+        assert_eq!(
+            (draft.to.as_str(), draft.bcc.as_str(), draft.subject.as_str()),
+            ("ann@", "Boss <boss@example.com>", "Half")
+        );
+        assert!(draft.body.contains("not done"), "{}", draft.body);
+        assert_eq!(draft.message_id.as_deref(), Some("<d1@example.com>"));
+        assert!(files.is_empty());
     }
 
     #[test]

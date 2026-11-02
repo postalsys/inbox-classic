@@ -143,9 +143,13 @@ void Editor::Configure() {
             UINT key = 0;
             args->get_KeyEventKind(&kind);
             args->get_VirtualKey(&key);
-            if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && key == VK_RETURN && (GetKeyState(VK_CONTROL) & 0x8000)) {
+            bool control = GetKeyState(VK_CONTROL) & 0x8000;
+            if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == VK_RETURN) {
                 args->put_Handled(TRUE);
                 handlers_.send();
+            } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == 'S') {
+                args->put_Handled(TRUE);
+                handlers_.save();
             }
             return S_OK;
         }).Get(),
@@ -177,6 +181,10 @@ void Editor::Link(const std::wstring& url) {
 
 void Editor::Html() {
     Script(L"pe.send()");
+}
+
+void Editor::Clean() {
+    Script(L"pe.clean()");
 }
 
 void Editor::Focus() {

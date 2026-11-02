@@ -267,7 +267,13 @@
                 the Outbox and goes with the next <b>Send/Recv</b>; nothing you wrote is lost. <b>Send Later</b> only puts it in the Outbox. The status bar says
                 how many wait there; <b>Tools &gt; Outbox</b> lists them, with why they did not go, and sends or deletes them.
             </li>
-            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> sends from the text. Closing a message you wrote asks first.</li>
+            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> sends from the text.</li>
+            <li>
+                <b>Save</b> (or <kbd>Ctrl</kbd>+<kbd>S</kbd>) keeps the message in the <b>Drafts</b> folder of the account, on the server, to finish later;
+                saving again replaces the copy saved before. Closing a message with changes asks whether to save them: <b>Yes</b> saves it in Drafts,
+                <b>No</b> throws it away, <b>Cancel</b> goes back to it. To go on writing, double-click the draft in Drafts (or select it and press
+                <kbd>Enter</kbd>): it opens with its recipients, text and attached files. Once it is sent, the draft is removed from Drafts.
+            </li>
             <li>
                 <b>Send</b> sends the message. If an address is mistyped or a file is gone, PostalExpress says so and keeps the message open so you can fix it.
                 A copy of each sent message is kept in <b>Sent Items</b>.
@@ -329,6 +335,10 @@
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td>
                 <td>Send the message being written</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
+                <td>Save the message being written in Drafts</td>
             </tr>
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd></td>

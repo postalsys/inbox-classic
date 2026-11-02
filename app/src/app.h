@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "core.h"
@@ -91,6 +92,8 @@ void CloseHelp();
 
 // opens a window to write a message from `account`, with the fields of `draft` (NULL for a new message)
 void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* draft);
+// Ctrl+S in a compose window (its fields; the editor has its own): saves the message in Drafts; true when handled
+bool ComposeKey(const MSG& msg);
 
 // ---- mailbox.cpp ----
 
@@ -150,6 +153,9 @@ public:
     int64_t CurrentAccount() const;
     // a reply, reply to all or forward of the message shown, empty when no message is shown
     core::Draft DraftOfShown(PeDraftKind kind) const;
+    // the selected message of a Drafts folder in a compose window, to go on writing it (double-click or Enter); once
+    // it is fetched when it is not yet
+    void OpenSelected();
 
 private:
     struct Page {
@@ -197,6 +203,10 @@ private:
     std::unordered_map<int64_t, int64_t> folderAccounts_;
     // the name of each folder in the tree, and whether it is the Inbox or a special folder
     std::unordered_map<int64_t, std::pair<std::wstring, bool>> folderNames_;
+    // the Drafts folders, whose messages open in a compose window
+    std::unordered_set<int64_t> draftFolders_;
+    // the selected draft opens once its source is fetched
+    bool openWhenReady_ = false;
     int64_t firstAccount_ = 0;
     // the account whose own item is selected in the tree, 0 when a folder is
     int64_t selectedAccount_ = 0;

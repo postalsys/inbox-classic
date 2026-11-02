@@ -274,11 +274,25 @@ const sections = [
                 checked: ['Send Later does not send yet', 'The Outbox lists the message', 'Send All Now sends it']
             },
             {
+                shot: 'write-8-save-draft',
+                name: 'Drafts',
+                what: 'Save keeps the message in the Drafts folder on the server, in place of the copy saved before. Closing a message with changes asks: Yes saves it in Drafts, No throws it away, Cancel goes back to it.',
+                how: 'Save or Ctrl+S in the compose window, or close it and answer Yes.',
+                checked: ['Closing asks to save', 'Yes saves the draft on the server, marked as a draft']
+            },
+            {
+                shot: 'write-9-draft-reopened',
+                name: 'Finishing a draft',
+                what: 'A draft opens again with its recipients, text and attached files. Sending it removes it from Drafts.',
+                how: 'Double-click the draft in Drafts, or select it and press Enter.',
+                checked: ['The draft opens with its subject and recipient', 'Save replaces it', 'Sent, it arrives and leaves Drafts']
+            },
+            {
                 shot: 'write-6-close',
                 name: 'Nothing written is lost by accident',
-                what: 'Closing a message you wrote in asks first, since drafts are not saved yet.',
+                what: 'Closing a message with changes asks whether to save them in Drafts, throw them away or go back.',
                 how: 'Close the compose window.',
-                checked: ['Closing asks', 'Yes closes it']
+                checked: ['Closing asks', 'No closes it without saving']
             },
             {
                 shot: 'write-4-bad-address',
@@ -336,7 +350,7 @@ const behind = [
     ]
 ];
 
-const missing = ['Save drafts, or send later', 'Gmail and Outlook.com browser sign-in in released builds: works, but needs the OAuth client IDs at build time'];
+const missing = ['Gmail and Outlook.com browser sign-in in released builds: works, but needs the OAuth client IDs at build time'];
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const image = name => {

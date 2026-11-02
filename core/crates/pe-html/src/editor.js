@@ -5,7 +5,7 @@
 //   "html:<the body>"   the HTML of what was written, after pe.send(); the quote still folded, for the core to add
 //   "full:<the body>"   the same with the quote in it already (unfolded): nothing to add
 //   "state:<flags>"     one 0 or 1 per command of STATE, for the format bar
-//   "dirty"             the first change, so closing can ask before throwing the text away
+//   "dirty"             the first change (since pe.clean(), after a save), so closing can ask before throwing it away
 (() => {
     'use strict';
     // the order of the flags of "state:", which kStateButtons in app/src/compose.cpp follows
@@ -102,6 +102,10 @@
         },
         send() {
             post((unfolded ? 'full:' : 'html:') + body.innerHTML);
+        },
+        // saved: the next change is a change again
+        clean() {
+            dirty = false;
         },
         focus() {
             body.focus();

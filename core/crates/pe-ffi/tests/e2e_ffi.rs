@@ -260,6 +260,7 @@ fn reads_mail_through_the_c_api() {
         references: info.references,
         attachments: attachments.as_ptr(),
         attachment_count: 1,
+        message_id: std::ptr::null(),
     };
     assert!(unsafe { pe_message_send(core, account, &outgoing, false, null_mut()) });
     unsafe { pe_draft_free(draft) };
@@ -296,6 +297,7 @@ fn reads_mail_through_the_c_api() {
         references: std::ptr::null(),
         attachments: std::ptr::null(),
         attachment_count: 0,
+        message_id: std::ptr::null(),
     };
     let mut reason: *mut c_char = null_mut();
     assert!(!unsafe { pe_message_send(core, account, &typo, false, &mut reason) });
@@ -374,6 +376,12 @@ fn null_and_bad_arguments() {
         assert!(pe_message_source(core, 1, 1, &mut len, &mut name).is_null());
         let missing = CString::new("/no/such/file.eml").unwrap();
         assert!(!pe_message_import(core, 1, missing.as_ptr(), null_mut()));
+        // drafts: nothing to open, no account to save in
+        assert!(pe_draft_open(core, 1, 1).is_null());
+        assert!(pe_draft_open(std::ptr::null(), 1, 1).is_null());
+        let mut id: *mut c_char = null_mut();
+        assert!(!pe_draft_save(core, 42, std::ptr::null(), &mut id, null_mut()));
+        assert!(id.is_null());
         assert!(pe_message_view_result(core, 12345).is_null());
         pe_message_view_cancel(core, 12345);
         let empty = pe_folders(core, 42);

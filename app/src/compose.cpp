@@ -23,6 +23,7 @@ enum ComposeId : WORD {
     IDC_BODY,
     IDC_FILES,
     IDC_SEND_LATER,
+    IDC_SAVE,
     IDC_FONT = 320,
     IDC_FONT_SIZE,
     IDC_FORMATBAR,
@@ -59,11 +60,12 @@ struct Compose {
     std::string references;
     std::string quote;
     std::vector<std::wstring> files;
+    // the Message-ID of the draft saved in Drafts, empty before the first save
+    std::string messageId;
     Editor editor;
-    // the editor's HTML was asked for, the message goes when it comes
-    bool sending = false;
-    // Send Later: into the Outbox, sent with the next Send/Recv
-    bool later = false;
+    // what to do with the editor's HTML once it comes: send now, send later (into the Outbox), save in Drafts, or save
+    // and close the window
+    enum class Pending { None, Send, SendLater, Save, SaveAndClose } pending = Pending::None;
     std::wstring html;
     // the quote was unfolded into the text: it goes as the user left it, not added again
     bool quoteInText = false;
@@ -136,39 +138,55 @@ void Attach(HWND hwnd, Compose* state) {
     ShowFiles(state);
 }
 
-// sends with the HTML the editor gave
-void Send(HWND hwnd, Compose* state, const std::wstring& html) {
-    state->sending = false;
-    std::string to = core::Narrow(GetWindowString(state->to));
-    std::string cc = core::Narrow(GetWindowString(state->cc));
-    std::string bcc = core::Narrow(GetWindowString(state->bcc));
-    std::string subject = core::Narrow(GetWindowString(state->subject));
-    std::string body = core::Narrow(html);
+// the message as the core takes it, from the fields and the editor's HTML; `outgoing` points into the strings here
+struct Fields {
+    std::string to, cc, bcc, subject, body;
     std::vector<std::string> paths;
-    for (const std::wstring& file : state->files) {
-        paths.push_back(core::Narrow(file));
-    }
     std::vector<const char*> attachments;
-    for (const std::string& path : paths) {
-        attachments.push_back(path.c_str());
-    }
     PeOutgoing outgoing = {};
-    outgoing.to = to.c_str();
-    outgoing.cc = cc.c_str();
-    outgoing.bcc = bcc.c_str();
-    outgoing.subject = subject.c_str();
-    outgoing.html = body.c_str();
-    outgoing.quote = state->quote.empty() || state->quoteInText ? nullptr : state->quote.c_str();
-    outgoing.in_reply_to = state->inReplyTo.empty() ? nullptr : state->inReplyTo.c_str();
-    outgoing.references = state->references.c_str();
-    outgoing.attachments = attachments.data();
-    outgoing.attachment_count = attachments.size();
+
+    Fields(const Compose* state, const std::wstring& html)
+        : to(core::Narrow(GetWindowString(state->to))),
+          cc(core::Narrow(GetWindowString(state->cc))),
+          bcc(core::Narrow(GetWindowString(state->bcc))),
+          subject(core::Narrow(GetWindowString(state->subject))),
+          body(core::Narrow(html)) {
+        for (const std::wstring& file : state->files) {
+            paths.push_back(core::Narrow(file));
+        }
+        for (const std::string& path : paths) {
+            attachments.push_back(path.c_str());
+        }
+        outgoing.to = to.c_str();
+        outgoing.cc = cc.c_str();
+        outgoing.bcc = bcc.c_str();
+        outgoing.subject = subject.c_str();
+        outgoing.html = body.c_str();
+        outgoing.quote = state->quote.empty() || state->quoteInText ? nullptr : state->quote.c_str();
+        outgoing.in_reply_to = state->inReplyTo.empty() ? nullptr : state->inReplyTo.c_str();
+        outgoing.references = state->references.c_str();
+        outgoing.attachments = attachments.data();
+        outgoing.attachment_count = attachments.size();
+        outgoing.message_id = state->messageId.empty() ? nullptr : state->messageId.c_str();
+    }
+    Fields(const Fields&) = delete;
+    Fields& operator=(const Fields&) = delete;
+};
+
+// the reason the core gave, or `fallback`
+void ShowRefusal(HWND hwnd, char* reason, const wchar_t* fallback) {
+    core::String error(reason);
+    std::wstring why = error ? Text(error.get()) : fallback;
+    MessageBoxW(hwnd, why.c_str(), L"PostalExpress", MB_OK | MB_ICONWARNING);
+}
+
+// sends with the HTML the editor gave, now or with the next Send/Recv
+void Send(HWND hwnd, Compose* state, const std::wstring& html, bool later) {
+    Fields fields(state, html);
     char* reason = nullptr;
-    if (!pe_message_send(state->core, state->account, &outgoing, state->later, &reason)) {
+    if (!pe_message_send(state->core, state->account, &fields.outgoing, later, &reason)) {
         // a typo in an address or a file that is gone: the message stays open to fix it
-        core::String error(reason);
-        std::wstring why = error ? Text(error.get()) : L"The message could not be sent.";
-        MessageBoxW(hwnd, why.c_str(), L"PostalExpress", MB_OK | MB_ICONWARNING);
+        ShowRefusal(hwnd, reason, L"The message could not be sent.");
         return;
     }
     // the main window shows whether the server took it
@@ -176,11 +194,29 @@ void Send(HWND hwnd, Compose* state, const std::wstring& html) {
     DestroyWindow(hwnd);
 }
 
-// Send: the editor's HTML is asked for first, Send() follows when it comes
-void RequestSend(Compose* state, bool later = false) {
-    if (!state->sending) {
-        state->sending = true;
-        state->later = later;
+// saves in Drafts with the HTML the editor gave, in place of the copy saved before; closes the window after when
+// `close`
+void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
+    Fields fields(state, html);
+    char* messageId = nullptr;
+    char* reason = nullptr;
+    if (!pe_draft_save(state->core, state->account, &fields.outgoing, &messageId, &reason)) {
+        ShowRefusal(hwnd, reason, L"The message could not be saved.");
+        return;
+    }
+    core::String id(messageId);
+    state->messageId = id ? id.get() : "";
+    state->dirty = false;
+    state->editor.Clean();
+    if (close) {
+        DestroyWindow(hwnd);
+    }
+}
+
+// the editor's HTML is asked for first, the action follows when it comes
+void Request(Compose* state, Compose::Pending action) {
+    if (state->pending == Compose::Pending::None) {
+        state->pending = action;
         state->editor.Html();
     }
 }
@@ -314,6 +350,7 @@ void CreateFields(HWND hwnd, Compose* state) {
     state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0);
     AddButton(state->toolbar, IDC_SEND, L"Send");
     AddButton(state->toolbar, IDC_SEND_LATER, L"Send Later");
+    AddButton(state->toolbar, IDC_SAVE, L"Save");
     AddButton(state->toolbar, IDC_ATTACH, L"Attach");
     const wchar_t* labels[] = {L"To:", L"Cc:", L"Bcc:", L"Subject:", L"Attach:"};
     for (int i = 0; i < 5; i++) {
@@ -329,7 +366,7 @@ void CreateFields(HWND hwnd, Compose* state) {
 
 // the editor with the quote of the draft; its messages come back to the window
 void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
-    core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded));
+    core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded, draft ? draft->body : nullptr));
     Editor::Handlers handlers;
     handlers.error = [hwnd](const std::wstring& error) { MessageBoxW(hwnd, error.c_str(), L"PostalExpress", MB_OK | MB_ICONERROR); };
     handlers.html = [hwnd, state](const std::wstring& html, bool full) {
@@ -339,14 +376,26 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
     };
     handlers.state = [state](const std::wstring& flags) { ShowState(state, flags); };
     handlers.dirty = [state] { state->dirty = true; };
-    handlers.send = [state] { RequestSend(state); };
+    handlers.send = [state] { Request(state, Compose::Pending::Send); };
+    handlers.save = [state] { Request(state, Compose::Pending::Save); };
     state->body = state->editor.Create(hwnd, IDC_BODY, page ? Text(page.get()) : L"", std::move(handlers));
 }
 
-// whether the window may close: after asking, when something was written and not sent
+// whether the window may close now: when nothing changed since it was sent or saved, or the user does not want it
+// saved. Yes saves it in Drafts and closes the window after.
 bool MayClose(HWND hwnd, Compose* state) {
-    return !state->dirty || MessageBoxW(hwnd, L"Close this message without sending it? What you wrote will be lost.", L"PostalExpress",
-                                        MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES;
+    if (!state->dirty) {
+        return true;
+    }
+    switch (MessageBoxW(hwnd, L"Do you want to save changes to this message in Drafts?", L"PostalExpress", MB_YESNOCANCEL | MB_ICONQUESTION)) {
+    case IDYES:
+        Request(state, Compose::Pending::SaveAndClose);
+        return false;
+    case IDNO:
+        return true;
+    default:
+        return false;
+    }
 }
 
 LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -362,11 +411,15 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             break;
         }
         if (LOWORD(wParam) == IDC_SEND) {
-            RequestSend(state);
+            Request(state, Compose::Pending::Send);
             return 0;
         }
         if (LOWORD(wParam) == IDC_SEND_LATER) {
-            RequestSend(state, true);
+            Request(state, Compose::Pending::SendLater);
+            return 0;
+        }
+        if (LOWORD(wParam) == IDC_SAVE) {
+            Request(state, Compose::Pending::Save);
             return 0;
         }
         if (LOWORD(wParam) == IDC_ATTACH) {
@@ -392,8 +445,21 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         break;
     case WM_SEND_HTML:
-        if (state && state->sending) {
-            Send(hwnd, state, std::exchange(state->html, {}));
+        if (state) {
+            std::wstring html = std::exchange(state->html, {});
+            using Pending = Compose::Pending;
+            switch (Pending pending = std::exchange(state->pending, Pending::None)) {
+            case Pending::Send:
+            case Pending::SendLater:
+                Send(hwnd, state, html, pending == Pending::SendLater);
+                break;
+            case Pending::Save:
+            case Pending::SaveAndClose:
+                Save(hwnd, state, html, pending == Pending::SaveAndClose);
+                break;
+            case Pending::None:
+                break;
+            }
         }
         return 0;
     case WM_CTLCOLORSTATIC:
@@ -417,6 +483,19 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 }
 
 }  // namespace
+
+bool ComposeKey(const MSG& msg) {
+    if (msg.message != WM_KEYDOWN || msg.wParam != 'S' || !(GetKeyState(VK_CONTROL) & 0x8000)) {
+        return false;
+    }
+    HWND root = GetAncestor(msg.hwnd, GA_ROOT);
+    wchar_t className[64] = L"";
+    if (!root || !GetClassNameW(root, className, static_cast<int>(std::size(className))) || wcscmp(className, kComposeClass) != 0) {
+        return false;
+    }
+    PostMessageW(root, WM_COMMAND, MAKEWPARAM(IDC_SAVE, 0), 0);
+    return true;
+}
 
 void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* draft) {
     static bool registered = false;
@@ -443,10 +522,17 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
     if (draft) {
         SetWindowTextW(state->to, Text(draft->to).c_str());
         SetWindowTextW(state->cc, Text(draft->cc).c_str());
+        SetWindowTextW(state->bcc, Text(draft->bcc).c_str());
         SetWindowTextW(state->subject, Text(draft->subject).c_str());
         state->inReplyTo = draft->in_reply_to ? draft->in_reply_to : "";
         state->references = draft->references ? draft->references : "";
         state->quote = draft->quote ? draft->quote : "";
+        // a saved draft opened again: its files, and its Message-ID so the next save replaces it
+        state->messageId = draft->message_id ? draft->message_id : "";
+        for (size_t i = 0; i < draft->attachment_count; i++) {
+            state->files.push_back(Text(draft->attachments[i]));
+        }
+        ShowFiles(state);
     }
     CreateEditor(hwnd, state, draft);
     state->filling = false;

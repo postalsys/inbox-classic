@@ -393,14 +393,83 @@ pub async fn move_message(
 pub async fn expunge_message(client: &mut Client, store: &mut Store, folder: FolderId, uid: u64) -> Result<()> {
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
-    let message = Messages::uid(uid);
-    client.store(&message, StoreAction::Add, &["\\Deleted"]).await?;
-    let only = pe_imap::SequenceSet::range(uid, Some(uid));
-    match client.expunge(Some(&only)).await {
+    expunge_uids(client, &[uid]).await
+}
+
+/// Removes these messages of the selected folder for good
+async fn expunge_uids(client: &mut Client, uids: &[u64]) -> Result<()> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(());
+    };
+    client
+        .store(&Messages::Uids(set.clone()), StoreAction::Add, &["\\Deleted"])
+        .await?;
+    match client.expunge(Some(&set)).await {
         Err(pe_imap::Error::Unsupported(_)) => client.expunge(None).await?,
         other => other?,
     }
     Ok(())
+}
+
+/// The drafts of the selected folder with this Message-ID. SEARCH HEADER matches any part of the header, so what it
+/// finds is checked: the same ID (case aside) and the \\Draft flag. A draft opened again whose ID is `<` must not
+/// take the others with it.
+async fn with_message_id(client: &mut Client, message_id: &str) -> Result<Vec<u64>> {
+    let found = client
+        .search(&SearchKey::Header("Message-ID".into(), message_id.into()))
+        .await?;
+    let Some(set) = SequenceSet::from_numbers(&found) else {
+        return Ok(Vec::new());
+    };
+    let query = FetchQuery {
+        flags: true,
+        envelope: true,
+        ..Default::default()
+    };
+    let fetched = client.fetch(&Messages::Uids(set), &query).await?;
+    Ok(fetched
+        .into_iter()
+        .filter(|m| is_draft_with_id(m, message_id))
+        .filter_map(|m| m.uid)
+        .collect())
+}
+
+fn is_draft_with_id(message: &pe_imap::client::FetchedMessage, message_id: &str) -> bool {
+    let same_id = message
+        .envelope
+        .as_ref()
+        .and_then(|e| e.message_id.as_deref())
+        .is_some_and(|id| id.eq_ignore_ascii_case(message_id));
+    let draft = message
+        .flags
+        .as_ref()
+        .is_some_and(|flags| flags.iter().any(|f| f.eq_ignore_ascii_case("\\Draft")));
+    same_id && draft
+}
+
+/// Saves a draft in the Drafts folder `folder` in place of its earlier copies, the ones with its Message-ID. They
+/// are looked up before the new copy goes in and removed after it is there, so a save that fails keeps the last one.
+pub async fn save_draft(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    raw: &[u8],
+    message_id: &str,
+    date: i64,
+) -> Result<()> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let earlier = with_message_id(client, message_id).await?;
+    client.append(&path, raw, &["\\Draft", "\\Seen"], Some(date)).await?;
+    expunge_uids(client, &earlier).await
+}
+
+/// Removes the drafts with this Message-ID from the Drafts folder `folder`: the message was sent
+pub async fn remove_drafts(client: &mut Client, store: &mut Store, folder: FolderId, message_id: &str) -> Result<()> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let drafts = with_message_id(client, message_id).await?;
+    expunge_uids(client, &drafts).await
 }
 
 /// Why a folder name or a folder can not be used

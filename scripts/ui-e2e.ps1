@@ -54,7 +54,7 @@ $VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
-$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDC_SEND_LATER = 308;
+$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDC_SEND_LATER = 308; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
 $IDC_SEND = 300; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
@@ -189,7 +189,8 @@ $harness.StandardInput.WriteLine('{}')
 $ports = $harness.StandardOutput.ReadLine() | ConvertFrom-Json
 $rest = "http://127.0.0.1:$($ports.rest)/v1/mailboxes"
 function Messages([string]$mailbox) {
-    @(Invoke-RestMethod "$rest/$([uri]::EscapeDataString($mailbox))/messages?raw=true")
+    # through the pipeline, which unrolls the array: Windows PowerShell hands an empty one on as one object
+    @(Invoke-RestMethod "$rest/$([uri]::EscapeDataString($mailbox))/messages?raw=true" | ForEach-Object { $_ })
 }
 # the REST API gives the source base64 encoded
 function RawText($message) {
@@ -516,6 +517,49 @@ try {
     }
     Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Sent later from the UI test' } 30)) 'Send All Now sends it'
 
+    Step 'Drafts'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_TO 'Fay <fay@example.com>'
+    SetText $compose $IDC_SUBJECT 'Draft from the UI test'
+    [void](TypeInEditor $compose 'Half written.')
+    # closing what was written asks whether to keep it; Yes saves it in Drafts
+    [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+    $ask = WaitWindow '#32770' 'PostalExpress' 10
+    Check ($null -ne $ask) 'closing a written message asks to save it'
+    if ($ask) {
+        Shot $ask 'write-8-save-draft'
+        Click $ask 6
+    }
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'Yes saves it and closes the window'
+    $draft = WaitFor { Find 'Drafts' 'Subject: Draft from the UI test' } 30
+    Check ($null -ne $draft) 'the draft is in Drafts on the server'
+    Check ($draft -and $draft.flags -contains '\Draft') 'marked as a draft'
+    # Drafts is the third folder; Enter on the draft opens it to go on writing
+    SelectFolder 2
+    Check ($null -ne (WaitFor { if ((Rows) -ge 1) { Rows } })) 'Drafts lists it'
+    SelectRow 0
+    Key $list $VK_RETURN
+    $compose = WaitCompose
+    Check ($null -ne $compose) 'opening the draft opens a compose window'
+    if ($compose) {
+        Check ((GetText $compose $IDC_SUBJECT) -eq 'Draft from the UI test') 'with its subject'
+        Check ((GetText $compose $IDC_TO) -like '*fay@example.com*') 'and its recipient'
+        [void][Native.Win]::SetForegroundWindow($compose)
+        [System.Windows.Forms.SendKeys]::SendWait('^{END}')
+        [void](TypeInEditor $compose 'Now finished. ')
+        Shot $compose 'write-9-draft-reopened'
+        # saved again: one draft, the new one
+        Command $compose $IDC_SAVE
+        Check ($null -ne (WaitFor { $d = @(Messages 'Drafts'); if ($d.Count -eq 1 -and (RawText $d[0]) -match 'Now finished') { $d } } 30)) 'Save replaces the draft'
+        Command $compose $IDC_SEND
+        $finished = WaitFor { Find 'INBOX' 'Subject: Draft from the UI test' } 30
+        Check ($null -ne $finished) 'the finished draft is sent'
+        Check ($finished -and (RawText $finished) -match 'Half written' -and (RawText $finished) -match 'Now finished') 'with all that was written'
+        Check ([bool](WaitFor { @(Messages 'Drafts').Count -eq 0 } 30)) 'and its draft is gone'
+    }
+    SelectFolder 0
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'
@@ -593,7 +637,7 @@ try {
         Shot $move 'organize-2-move'
         Click $move 1
         # the one selected after the delete: the newest, the message sent later
-        Check ($null -ne (WaitFor { Find 'Archive' 'Subject: Sent later from the UI test' } 20)) 'the selected message is in Archive'
+        Check ($null -ne (WaitFor { Find 'Archive' 'Subject: Draft from the UI test' } 20)) 'the selected message is in Archive'
         Check ([bool](WaitFor { (Rows) -eq $listed - 2 })) 'and out of the list'
     }
     Shot $main 'organize-3-after'
@@ -680,9 +724,12 @@ try {
     Check ($null -ne $ask) 'closing asks before throwing the text away'
     if ($ask) {
         Shot $ask 'write-6-close'
-        Click $ask 6
+        # No: closed without saving
+        Click $ask 7
     }
-    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'Yes closes it'
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'No closes it'
+    Start-Sleep -Seconds 1
+    Check ($null -eq (Find 'Drafts' 'Never mind')) 'without saving it'
 
     # ---- a provider found by its MX, one that wants an app password ----
 

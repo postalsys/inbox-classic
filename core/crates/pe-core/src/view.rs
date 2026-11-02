@@ -1,7 +1,7 @@
 //! A message as the preview shows it: the header fields as text, the body as a sanitized
 //! document with its inline images, and the attachments with names that are safe to save under
 
-use pe_html::{InlineImage, RenderOptions};
+use pe_html::RenderOptions;
 use pe_mime::parser::{self, Attachment, text_addresses, text_to_html};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -54,17 +54,7 @@ pub(crate) fn build_unless(
             });
         }
     };
-    let images: Vec<InlineImage> = message
-        .attachments
-        .iter()
-        .filter_map(|a| {
-            Some(InlineImage {
-                content_id: a.content_id.as_deref()?,
-                mime_type: &a.mime_type,
-                data: &a.content,
-            })
-        })
-        .collect();
+    let images = crate::compose::inline_images(&message);
     if dropped() {
         return None;
     }

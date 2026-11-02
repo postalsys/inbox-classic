@@ -65,6 +65,10 @@ pub(crate) enum Command {
         now: bool,
     },
     SendOutbox,
+    /// Into the Drafts folder, in place of the earlier copy; `outgoing` has its Message-ID
+    SaveDraft {
+        outgoing: Box<crate::Outgoing>,
+    },
 }
 
 /// A failed command, for [`Event::Failed`]
@@ -131,6 +135,29 @@ impl From<pe_store::Error> for Failure {
 }
 
 type Outcome = Result<(), Failure>;
+
+/// Builds a message from an account with `compose` (its attachments read now, off the threads that run the network)
+async fn build(
+    settings: pe_store::AccountSettings,
+    outgoing: crate::Outgoing,
+    time: i64,
+    compose: fn(&pe_store::AccountSettings, &crate::Outgoing, i64) -> Result<pe_smtp::Message, crate::ComposeError>,
+) -> Result<pe_smtp::Built, Failure> {
+    tokio::task::spawn_blocking(move || compose(&settings, &outgoing, time).map(|message| pe_smtp::build(&message)))
+        .await
+        .map_err(|_| Failure {
+            kind: FailureKind::Other,
+            message: "the message could not be built".into(),
+        })?
+        .map_err(Failure::from)
+}
+
+/// Seconds since the Unix epoch
+fn unix_now() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs() as i64)
+}
 
 /// A send that did not go: the reason, and that the message waits in the Outbox
 fn kept(failure: Failure, waiting: usize) -> Failure {
@@ -299,6 +326,7 @@ impl Worker {
                 self.sync_folder_list(store).await
             }
             Command::Send { outgoing, now } => self.queue(store, *outgoing, now).await,
+            Command::SaveDraft { outgoing } => self.save_draft(store, *outgoing).await,
         }
     }
 
@@ -323,10 +351,7 @@ impl Worker {
 
     /// Builds a message (its attachments read now) and puts it in the Outbox; sends the Outbox when `now`
     async fn queue(&mut self, store: &mut Store, outgoing: crate::Outgoing, now: bool) -> Outcome {
-        let account = store.account(self.account)?;
-        let time = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map_or(0, |d| d.as_secs() as i64);
+        let time = unix_now();
         let recipients = [outgoing.to.as_str(), outgoing.cc.as_str()]
             .iter()
             .filter(|list| !list.trim().is_empty())
@@ -334,16 +359,14 @@ impl Worker {
             .collect::<Vec<_>>()
             .join(", ");
         let subject = outgoing.subject.clone();
-        // reads the attachments: off the threads that run the network
-        let settings = account.settings.clone();
-        let built = tokio::task::spawn_blocking(move || {
-            crate::compose::message(&settings, &outgoing, time).map(|message| pe_smtp::build(&message))
-        })
-        .await
-        .map_err(|_| Failure {
-            kind: FailureKind::Other,
-            message: "the message could not be built".into(),
-        })??;
+        let draft = outgoing.message_id.as_deref().and_then(crate::compose::draft_id);
+        let built = build(
+            store.account(self.account)?.settings,
+            outgoing,
+            time,
+            crate::compose::message,
+        )
+        .await?;
         store.queue(
             &pe_store::Queued {
                 id: 0,
@@ -358,11 +381,50 @@ impl Worker {
             &built.raw,
         )?;
         self.emit(Event::OutboxChanged { account: self.account });
+        // the Outbox has it now: its draft goes, whether it is sent now or later
+        if let Some(message_id) = draft
+            && let Err(failure) = self.remove_drafts(store, &message_id).await
+        {
+            self.fail(Failure {
+                kind: failure.kind,
+                message: format!(
+                    "the draft of the message could not be removed from Drafts: {}",
+                    failure.message
+                ),
+            });
+        }
         if now { self.send_outbox(store).await } else { Ok(()) }
     }
 
-    /// Sends what the Outbox has for this account, oldest first: each one the server takes leaves the Outbox and gets
-    /// its copy in Sent. One it refuses stays with the reason; when the network fails the rest wait for the next try.
+    /// Saves a draft in the Drafts folder, in place of the copy saved before
+    async fn save_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
+        let drafts = crate::compose::drafts_folder(store, self.account)?.ok_or_else(|| Failure {
+            kind: FailureKind::Other,
+            message: crate::compose::NO_DRAFTS.into(),
+        })?;
+        let message_id = outgoing.message_id.clone().unwrap_or_default();
+        let time = unix_now();
+        let built = build(
+            store.account(self.account)?.settings,
+            outgoing,
+            time,
+            crate::compose::draft_message,
+        )
+        .await?;
+        let client = self.client(store).await?;
+        pe_sync::save_draft(client, store, drafts.id, &built.raw, &message_id, time).await?;
+        self.sync_one(store, drafts.id).await
+    }
+
+    async fn remove_drafts(&mut self, store: &mut Store, message_id: &str) -> Outcome {
+        let Some(drafts) = crate::compose::drafts_folder(store, self.account)? else {
+            return Ok(());
+        };
+        let client = self.client(store).await?;
+        pe_sync::remove_drafts(client, store, drafts.id, message_id).await?;
+        self.sync_one(store, drafts.id).await
+    }
+
     /// A message went out, but something after it did not work
     fn sent_but(&self, problem: String) {
         self.emit(Event::Failed {
@@ -372,6 +434,8 @@ impl Worker {
         });
     }
 
+    /// Sends what the Outbox has for this account, oldest first: each one the server takes leaves the Outbox and gets
+    /// its copy in Sent. One it refuses stays with the reason; when the network fails the rest wait for the next try.
     async fn send_outbox(&mut self, store: &mut Store) -> Outcome {
         let queued = store.outbox(Some(self.account))?;
         if queued.is_empty() {

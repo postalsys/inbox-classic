@@ -625,3 +625,89 @@ fn the_outbox_keeps_what_did_not_go() {
     assert_eq!(queued[0].subject, "Offline");
     assert!(queued[0].problem.is_some());
 }
+
+#[test]
+fn drafts_are_saved_reopened_and_gone_once_sent() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let drafts = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "Drafts")
+        .unwrap()
+        .id;
+    let changed = |e: &Event| {
+        *e == Event::FolderChanged {
+            account,
+            folder: drafts,
+        }
+    };
+    let dir = TempDir::new("draft");
+    let file = dir.path().join("plan.txt");
+    std::fs::write(&file, "the plan").unwrap();
+
+    // half written: no recipients yet, an address half typed in Bcc
+    let mut outgoing = pe_core::Outgoing {
+        bcc: "Boss <boss@example.com>".into(),
+        subject: "Plans".into(),
+        html: Some("<p>first <b>try</b></p>".into()),
+        attachments: vec![file.clone()],
+        ..Default::default()
+    };
+    let message_id = s.core.save_draft(account, outgoing.clone()).unwrap();
+    s.wait(changed);
+    assert_eq!(s.server.subjects("Drafts"), ["Plans"]);
+    let first = s.server.messages("Drafts")[0]["uid"].as_u64().unwrap();
+    assert!(s.server.flags("Drafts", first).contains(&"\\Draft".to_string()));
+
+    // saved again: the new copy in place of the old
+    outgoing.message_id = Some(message_id.clone());
+    outgoing.to = "Ann <ann@example.com>".into();
+    outgoing.html = Some("<p>second <b>try</b></p>".into());
+    assert_eq!(s.core.save_draft(account, outgoing.clone()).unwrap(), message_id);
+    s.wait(changed);
+    let saved = s.server.messages("Drafts");
+    assert_eq!(saved.len(), 1, "{saved:?}");
+    let uid = saved[0]["uid"].as_u64().unwrap();
+    assert_ne!(uid, first);
+
+    // opened again: where it was left, with its file and its Bcc
+    s.core.open_message(drafts, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: drafts, uid });
+    let draft = s.core.reopen_draft(drafts, uid).unwrap().unwrap();
+    assert_eq!(
+        (draft.to.as_str(), draft.bcc.as_str(), draft.subject.as_str()),
+        ("Ann <ann@example.com>", "Boss <boss@example.com>", "Plans")
+    );
+    assert!(draft.body.contains("second <b>try</b>"), "{}", draft.body);
+    assert_eq!(draft.message_id.as_deref(), Some(message_id.as_str()));
+    assert_eq!(draft.attachments.len(), 1);
+    assert!(draft.attachments[0].ends_with("plan.txt"));
+    assert_eq!(std::fs::read(&draft.attachments[0]).unwrap(), b"the plan");
+
+    // saved once more as it was opened, then sent right away: the draft goes
+    let reopened = pe_core::Outgoing {
+        to: draft.to,
+        bcc: draft.bcc,
+        subject: draft.subject,
+        html: Some(draft.body + "<p>done</p>"),
+        attachments: draft.attachments,
+        message_id: draft.message_id,
+        ..Default::default()
+    };
+    s.core.save_draft(account, reopened.clone()).unwrap();
+    s.core.send(account, reopened).unwrap();
+    s.wait(|e| *e == Event::MessageSent { account });
+    assert!(s.server.subjects("Drafts").is_empty());
+    assert_eq!(s.server.subjects("INBOX"), ["Plans"]);
+    let sent = pe_testkit::raw_text(&s.server.messages("INBOX")[0]);
+    // the Bcc of the draft is not in what was sent
+    assert!(
+        !sent.contains("Bcc:") && sent.contains(&format!("Message-ID: {message_id}")),
+        "{sent}"
+    );
+}
