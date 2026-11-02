@@ -62,4 +62,6 @@ On Windows itself: `scripts\win-build.cmd` and `scripts\win-test.cmd`. Both call
 
 Screenshots need a logged-in desktop session that is not disconnected or locked; check with `ssh andri@10.8.0.8 query user` (`Active`, not `Disc`). In a disconnected session they come out blank white.
 
+CI (`.github/workflows/ci.yml`) runs fmt, clippy with `-D warnings`, a check that the committed C header matches the build, the Rust tests on Linux, Windows and macOS, and the app build on Windows (artifact `PostalExpress-win-x64`). Markdown and YAML are formatted with prettier (`npx prettier --write`, config in `.prettierrc.json`).
+
 For test IMAP and SMTP accounts use Ethereal (see the global instructions) or ImapKit (`../imapkit`, `../imapkit-win`).
