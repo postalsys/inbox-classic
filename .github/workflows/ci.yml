@@ -67,9 +67,12 @@ jobs:
               run: npm ci --no-audit --no-fund
               working-directory: core/e2e
             - run: cargo test --workspace --locked
+              env:
+                  # the autoconfig lookups against the real ISPDB and providers, once is enough
+                  PE_NETWORK_TESTS: ${{ matrix.os == 'ubuntu-24.04' && '1' || '' }}
 
     windows:
-        name: Build the Windows app
+        name: Build and test the Windows app
         runs-on: windows-latest
         timeout-minutes: 30
         steps:
@@ -86,6 +89,26 @@ jobs:
                   name: PostalExpress-win-x64
                   path: build/PostalExpress.exe
                   if-no-files-found: error
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: npm
+                  cache-dependency-path: core/e2e/package-lock.json
+            - name: ImapKit for the UI test
+              run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
+            # the app driven through its windows against ImapKit: account form, sync, reading, reply, help
+            - name: UI end-to-end test
+              shell: powershell
+              run: scripts\ui-e2e.ps1
+            - uses: actions/upload-artifact@v7
+              if: always()
+              with:
+                  name: ui-e2e
+                  path: |
+                      build/ui-e2e/*.png
+                      build/ui-e2e/log.txt
+                  if-no-files-found: ignore
 
     fuzz:
         name: Fuzz the parsers

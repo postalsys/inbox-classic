@@ -153,12 +153,32 @@ async fn authenticates_with_what_the_server_offers() {
         Say("535 5.7.8 bad credentials"),
     ])
     .await;
-    let error = Client::connect(config(port, Some(credentials))).await.err().unwrap();
+    let error = Client::connect(config(port, Some(credentials.clone())))
+        .await
+        .err()
+        .unwrap();
     assert_eq!(error.kind(), ErrorKind::Authentication);
     assert!(
         matches!(error, Error::AuthenticationFailed(ref r) if r.code == 535),
         "{error}"
     );
+
+    // encryption wanted for the password: a security setting to change, not a password to type again
+    let (port, refusing) = server(vec![
+        Say("220 hi"),
+        Expect("EHLO"),
+        Say("250-hi\n250 AUTH PLAIN"),
+        Expect("AUTH PLAIN"),
+        Say("538 5.7.11 Encryption required for requested authentication mechanism"),
+    ])
+    .await;
+    let error = Client::connect(config(port, Some(credentials.clone())))
+        .await
+        .err()
+        .unwrap();
+    assert_eq!(error.kind(), ErrorKind::Security, "{error}");
+    assert!(error.to_string().contains("encrypted connection"), "{error}");
+    refusing.await.unwrap();
     handle.await.unwrap();
 
     // XOAUTH2, its error challenge answered with an empty line

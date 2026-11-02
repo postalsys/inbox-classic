@@ -11,6 +11,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+// For `pe_core_open_with`: passwords and sign-ins are kept for this run only, not in the Credential Manager
+// (test runs, a shared computer)
+#define PE_OPEN_MEMORY_PASSWORDS 1
+
 typedef enum PeEventKind {
   PE_EVENT_KIND_SYNC_STARTED = 1,
   // Comes after everything the sync found, failures included
@@ -283,17 +287,16 @@ void pe_string_free(char *text);
 // thread until `pe_core_close` returns.
 struct PeCore *pe_core_open(const char *path, PeEventCallback callback, void *context);
 
-// Like `pe_core_open`, with every server checked against the one certificate `der` (`len` bytes of
-// DER) instead of the certificates Windows trusts: for test servers, and a server whose
-// self-signed certificate the user accepted
+// Like `pe_core_open`, with `PE_OPEN_*` flags. When `certificate_file` is not NULL, every server is checked
+// against the certificates in that file (PEM or DER) instead of the ones Windows trusts: for test servers. NULL when that file has no certificate.
 //
 // # Safety
-// As `pe_core_open`; `der` must point to `len` readable bytes.
-struct PeCore *pe_core_open_pinned(const char *path,
-                                   const uint8_t *der,
-                                   size_t len,
-                                   PeEventCallback callback,
-                                   void *context);
+// As `pe_core_open`; `certificate_file` is NULL or a NUL-terminated string.
+struct PeCore *pe_core_open_with(const char *path,
+                                 uint32_t flags,
+                                 const char *certificate_file,
+                                 PeEventCallback callback,
+                                 void *context);
 
 // Stops the engine: work that waits for the network is cancelled, after at most two seconds.
 // NULL is ignored. No event starts after it returns.

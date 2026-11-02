@@ -1,0 +1,309 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'" />
+        <meta name="color-scheme" content="light" />
+        <title>PostalExpress Help</title>
+        <style>
+            html {
+                background: #fff;
+            }
+            body {
+                font:
+                    10pt Tahoma,
+                    Arial,
+                    sans-serif;
+                margin: 12px 18px;
+                color: #000;
+                max-width: 760px;
+            }
+            h1 {
+                font-size: 16pt;
+                color: #036;
+                margin: 4px 0 8px;
+            }
+            h2 {
+                font-size: 12pt;
+                color: #036;
+                border-bottom: 1px solid #9ab;
+                margin: 22px 0 6px;
+                padding-bottom: 2px;
+            }
+            h3 {
+                font-size: 10pt;
+                margin: 14px 0 4px;
+            }
+            p,
+            li {
+                line-height: 1.45;
+            }
+            ul,
+            ol {
+                margin: 4px 0 8px 22px;
+                padding: 0;
+            }
+            kbd {
+                font:
+                    9pt Tahoma,
+                    Arial,
+                    sans-serif;
+                border: 1px solid #999;
+                border-bottom-width: 2px;
+                background: #f4f4f4;
+                padding: 0 4px;
+            }
+            table {
+                border-collapse: collapse;
+                margin: 6px 0;
+            }
+            td,
+            th {
+                border: 1px solid #bbb;
+                padding: 3px 8px;
+                text-align: left;
+                vertical-align: top;
+            }
+            th {
+                background: #e8eef4;
+            }
+            .note {
+                background: #fffbe6;
+                border: 1px solid #e0c97a;
+                padding: 6px 10px;
+                margin: 8px 0;
+            }
+            code {
+                font:
+                    9pt Consolas,
+                    monospace;
+                background: #f4f4f4;
+                padding: 0 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>PostalExpress Help</h1>
+        <p>
+            PostalExpress reads and sends e-mail from IMAP and SMTP accounts: Gmail, Outlook.com, Fastmail, your company's mail server and most others. It keeps
+            a copy of your mail on this computer, so you can read what was already downloaded without a connection.
+        </p>
+
+        <h2>Contents</h2>
+        <ol>
+            <li>Adding an account</li>
+            <li>Reading mail</li>
+            <li>Pictures, links and attachments</li>
+            <li>Writing, replying and forwarding</li>
+            <li>Getting new mail</li>
+            <li>Keyboard shortcuts</li>
+            <li>When something does not work</li>
+            <li>Where your mail and passwords are kept</li>
+        </ol>
+
+        <h2>1. Adding an account</h2>
+        <p>
+            The first time PostalExpress starts it asks for an account. To add another one later, choose <b>File &gt; New Account</b> or click
+            <b>New Account</b> on the toolbar.
+        </p>
+        <ol>
+            <li>Type your name as others should see it, your e-mail address and your password, and click <b>OK</b>.</li>
+            <li>PostalExpress looks up the settings of your mail provider. This takes a few seconds; <b>Cancel</b> skips it.</li>
+            <li>
+                Check the server settings it found and click <b>OK</b>. If it found nothing it fills in the usual names (<code>imap.</code> and
+                <code>smtp.</code> followed by your domain); compare them with what your provider tells you.
+            </li>
+        </ol>
+        <h3>Gmail and Outlook.com</h3>
+        <p>These providers do not take your normal password from mail programs. Either:</p>
+        <ul>
+            <li>
+                sign in through your web browser, when PostalExpress offers it: your password is typed into Google's or Microsoft's own page and PostalExpress
+                never sees it; or
+            </li>
+            <li>
+                create an <b>app password</b> in your account's security settings (Google: <i>Security &gt; 2-Step Verification &gt; App passwords</i>;
+                Microsoft: <i>Security &gt; Advanced security options &gt; App passwords</i>) and type that instead of your password.
+            </li>
+        </ul>
+        <h3>Security settings</h3>
+        <table>
+            <tr>
+                <th>Setting</th>
+                <th>Meaning</th>
+            </tr>
+            <tr>
+                <td>SSL/TLS</td>
+                <td>The connection is encrypted from the start. Usually port 993 for IMAP and 465 for SMTP.</td>
+            </tr>
+            <tr>
+                <td>STARTTLS</td>
+                <td>
+                    The connection is encrypted right after it opens. Usually port 143 for IMAP and 587 for SMTP. PostalExpress refuses to continue if the
+                    server does not offer encryption.
+                </td>
+            </tr>
+            <tr>
+                <td>None (unencrypted)</td>
+                <td>
+                    Your password and mail travel readable by anyone on the network. Use it only for a server on your own computer or network; PostalExpress
+                    warns before using it.
+                </td>
+            </tr>
+        </table>
+
+        <h2>2. Reading mail</h2>
+        <p>
+            The window has three parts: your accounts and folders on the left, the messages of the selected folder at the top right, and the selected message
+            below them. Drag the borders between them to change their sizes.
+        </p>
+        <ul>
+            <li>Folders with unread messages are shown in <b>bold</b>, with the number of unread messages after the name.</li>
+            <li>
+                Unread messages are <b>bold</b> in the list. A message is marked read after it has been shown for a second. Use <b>Mark Read</b> and
+                <b>Mark Unread</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd> marks read) to change it yourself.
+            </li>
+            <li>In the <b>!</b> column, <b>!</b> means the message is flagged and <b>@</b> that it has attachments.</li>
+            <li>Click a column heading to sort by it; click it again to reverse the order.</li>
+            <li>Above the message are its sender, date, recipients and subject.</li>
+        </ul>
+
+        <h2>3. Pictures, links and attachments</h2>
+        <h3>Pictures</h3>
+        <p>
+            Pictures that the sender keeps on the internet are not downloaded, because downloading them tells the sender that you opened the message, when, and
+            from where. Pictures sent inside the message are shown. To see the others for a message you trust, click <b>Download pictures</b> (or
+            <b>View &gt; Download Pictures</b>).
+        </p>
+        <h3>Links and scripts</h3>
+        <p>
+            Scripts in messages never run. Clicking a link opens it in your web browser, never inside PostalExpress. Before you type a password on a page you
+            reached from an e-mail, check the address in your browser.
+        </p>
+        <h3>Attachments</h3>
+        <p>
+            When a message has attachments, an <b>Attachments</b> button appears next to the message header. Click it and choose the file to save. PostalExpress
+            suggests a safe file name: folder names, characters Windows does not allow and characters that can make a name look different from what it is are
+            removed.
+        </p>
+        <div class="note">
+            Open attachments only from people you expect them from. A program (<code>.exe</code>, <code>.js</code>, <code>.vbs</code>, <code>.msi</code>,
+            <code>.bat</code>, <code>.scr</code>) or a document that asks you to "enable content" can take over your computer.
+        </div>
+
+        <h2>4. Writing, replying and forwarding</h2>
+        <ul>
+            <li><b>Create Mail</b> (<kbd>Ctrl</kbd>+<kbd>N</kbd>) starts a new message from the account of the selected folder.</li>
+            <li>
+                <b>Reply</b> (<kbd>Ctrl</kbd>+<kbd>R</kbd>) answers the sender, <b>Reply All</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>) everyone the
+                message went to, <b>Forward</b> (<kbd>Ctrl</kbd>+<kbd>F</kbd>) sends it on. The original message is quoted below your text.
+            </li>
+            <li>
+                Separate several addresses in <b>To</b>, <b>Cc</b> and <b>Bcc</b> with commas, for example
+                <code>Mary Smith &lt;mary@example.com&gt;, john@example.com</code>. Put a name that has a comma in it in quotes:
+                <code>"Smith, Mary" &lt;mary@example.com&gt;</code>.
+            </li>
+            <li>People in <b>Bcc</b> get the message, but the other recipients do not see them.</li>
+            <li><b>Attach</b> adds files; the files are read when the message is sent.</li>
+            <li>
+                <b>Send</b> sends the message. If an address is mistyped or a file is gone, PostalExpress says so and keeps the message open so you can fix it.
+                A copy of each sent message is kept in <b>Sent Items</b>.
+            </li>
+        </ul>
+
+        <h2>5. Getting new mail</h2>
+        <p>
+            PostalExpress checks every account when it starts and every ten minutes after that. Click <b>Send/Recv</b> or press <kbd>F5</kbd> to check now. The
+            status bar at the bottom shows what it is doing and the last problem it had.
+        </p>
+
+        <h2>6. Keyboard shortcuts</h2>
+        <table>
+            <tr>
+                <th>Keys</th>
+                <th>Does</th>
+            </tr>
+            <tr>
+                <td><kbd>F5</kbd></td>
+                <td>Check all accounts for new mail</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>N</kbd></td>
+                <td>New message</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>R</kbd></td>
+                <td>Reply to the sender</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td>
+                <td>Reply to all</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
+                <td>Forward</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td>
+                <td>Mark the message read</td>
+            </tr>
+            <tr>
+                <td><kbd>F1</kbd></td>
+                <td>This help</td>
+            </tr>
+            <tr>
+                <td><kbd>Tab</kbd></td>
+                <td>Move between the folders, the message list and the fields of a window</td>
+            </tr>
+        </table>
+
+        <h2>7. When something does not work</h2>
+        <h3>"authentication failed" or PostalExpress asks for the password again</h3>
+        <p>
+            The server refused the password. Type it again; for Gmail and Outlook.com use an app password or sign in through the browser (see
+            <i>Adding an account</i>). If your provider asks for a second step when you log in on the web, it needs an app password for mail programs too. For
+            an account that signs in through the browser, PostalExpress offers to sign in again.
+        </p>
+        <h3>"TLS error" or a certificate error</h3>
+        <p>
+            PostalExpress could not confirm that it is talking to the real server, so it did not send your password. Check the server name in the account
+            settings: it has to be the name the server's certificate is made for (often <code>imap.provider.com</code>, not your own domain). On a network that
+            inspects encrypted traffic, ask its administrator.
+        </p>
+        <h3>"the server does not offer STARTTLS"</h3>
+        <p>
+            The account is set to STARTTLS but the server did not offer encryption. Try <b>SSL/TLS</b> on port 993 (IMAP) or 465 (SMTP). If nothing else works
+            the server cannot be used safely.
+        </p>
+        <h3>"the server takes the password only over an encrypted connection"</h3>
+        <p>
+            The outgoing (SMTP) server is set to <b>None (unencrypted)</b>. Your password is fine; change the SMTP security to <b>STARTTLS</b> (port 587) or
+            <b>SSL/TLS</b> (port 465).
+        </p>
+        <h3>"connection error" or "the server did not answer in time"</h3>
+        <p>
+            Check your internet connection, the server name and the port. Firewalls sometimes block the mail ports, port 25 in particular; use 465 or 587 for
+            sending. PostalExpress tries again at the next check.
+        </p>
+        <h3>A message that cannot be shown</h3>
+        <p>
+            Some messages are damaged or built in ways no mail program can read. PostalExpress shows a note instead of the message; the rest of your mail is not
+            affected.
+        </p>
+
+        <h2>8. Where your mail and passwords are kept</h2>
+        <ul>
+            <li>
+                Downloaded mail and account settings: <code>%LOCALAPPDATA%\PostalExpress\store.db</code>. Your mail stays on the server too; the copy here is
+                for reading quickly and offline.
+            </li>
+            <li>Passwords and browser sign-ins: the Windows Credential Manager, under <b>PostalExpress</b>. They are encrypted for your Windows account.</li>
+            <li>Uninstalling PostalExpress asks whether to remove the mail it downloaded. The mail on your servers is never removed.</li>
+        </ul>
+        <p>
+            For testing, <code>PostalExpress.exe --store &lt;file&gt;</code> uses another mail store, <code>--memory-passwords</code> keeps passwords for the
+            current run only, and <code>--pin-certificate &lt;file&gt;</code> accepts only the server certificate in that file (PEM or DER) instead of the ones
+            Windows trusts, for a test server with a self-signed certificate.
+        </p>
+    </body>
+</html>

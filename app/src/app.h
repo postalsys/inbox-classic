@@ -60,6 +60,12 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, c
 // asks for the password of an account; false when cancelled
 bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password);
 
+// ---- help.cpp ----
+
+// opens the help window, or brings it to the front
+void OpenHelp();
+void CloseHelp();
+
 // ---- compose.cpp ----
 
 // opens a window to write a message from `account`, with the fields of `draft` (NULL for a new message)
@@ -175,6 +181,7 @@ enum CommandId : WORD {
     IDM_REPLY,
     IDM_REPLY_ALL,
     IDM_FORWARD,
+    IDM_HELP,
     IDC_TREE = 200,
     IDC_LIST,
     IDC_ATTACHMENTS,

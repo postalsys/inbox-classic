@@ -207,23 +207,23 @@ pub unsafe extern "C" fn pe_core_open(
     context: *mut c_void,
 ) -> *mut PeCore {
     // SAFETY: as the caller guarantees
-    let Some(path) = (unsafe { arg(path) }) else {
-        return null_mut();
-    };
-    open(path, pe_net::Trust::Platform, callback, context)
+    unsafe { pe_core_open_with(path, 0, null(), callback, context) }
 }
 
-/// Like `pe_core_open`, with every server checked against the one certificate `der` (`len` bytes of
-/// DER) instead of the certificates Windows trusts: for test servers, and a server whose
-/// self-signed certificate the user accepted
+/// For `pe_core_open_with`: passwords and sign-ins are kept for this run only, not in the Credential Manager
+/// (test runs, a shared computer)
+pub const PE_OPEN_MEMORY_PASSWORDS: u32 = 1;
+
+/// Like `pe_core_open`, with `PE_OPEN_*` flags. When `certificate_file` is not NULL, every server is checked
+/// against the certificates in that file (PEM or DER) instead of the ones Windows trusts: for test servers. NULL when that file has no certificate.
 ///
 /// # Safety
-/// As `pe_core_open`; `der` must point to `len` readable bytes.
+/// As `pe_core_open`; `certificate_file` is NULL or a NUL-terminated string.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_core_open_pinned(
+pub unsafe extern "C" fn pe_core_open_with(
     path: *const c_char,
-    der: *const u8,
-    len: usize,
+    flags: u32,
+    certificate_file: *const c_char,
     callback: PeEventCallback,
     context: *mut c_void,
 ) -> *mut PeCore {
@@ -231,20 +231,35 @@ pub unsafe extern "C" fn pe_core_open_pinned(
     let Some(path) = (unsafe { arg(path) }) else {
         return null_mut();
     };
-    if der.is_null() || len == 0 {
-        return null_mut();
-    }
-    // SAFETY: as the caller guarantees
-    let certificate = unsafe { std::slice::from_raw_parts(der, len) }.to_vec();
-    open(path, pe_net::Trust::Pinned(vec![certificate]), callback, context)
+    let trust = if certificate_file.is_null() {
+        pe_net::Trust::Platform
+    } else {
+        // SAFETY: as the caller guarantees
+        match unsafe { arg(certificate_file) }.and_then(|file| pe_net::Trust::pinned_file(file.as_ref())) {
+            Some(pinned) => pinned,
+            None => return null_mut(),
+        }
+    };
+    let passwords = if flags & PE_OPEN_MEMORY_PASSWORDS != 0 {
+        pe_core::PasswordStore::Memory
+    } else {
+        pe_core::PasswordStore::System
+    };
+    open(path, trust, passwords, callback, context)
 }
 
-fn open(path: &str, trust: pe_net::Trust, callback: PeEventCallback, context: *mut c_void) -> *mut PeCore {
+fn open(
+    path: &str,
+    trust: pe_net::Trust,
+    passwords: pe_core::PasswordStore,
+    callback: PeEventCallback,
+    context: *mut c_void,
+) -> *mut PeCore {
     guard(|| {
         let callback = callback.map(|function| Callback { function, context });
         let options = pe_core::Options {
             trust,
-            passwords: pe_core::PasswordStore::System,
+            passwords,
             oauth_providers: Vec::new(),
         };
         let core = Core::open_with(path, options, move |event| {

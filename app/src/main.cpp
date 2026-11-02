@@ -2,6 +2,7 @@
 // right and the reading pane below it, with splitters between them. All mail data comes from the Rust core
 // (core.h); this file draws the frame and hands the core's events to the panes.
 #include <objbase.h>
+#include <shellapi.h>
 #include <shlobj.h>
 
 #include <algorithm>
@@ -150,6 +151,8 @@ HMENU BuildMenu() {
     HMENU tools = CreatePopupMenu();
     AppendMenuW(tools, MF_STRING, IDM_SYNC, L"Send and Recei&ve All\tF5");
     HMENU help = CreatePopupMenu();
+    AppendMenuW(help, MF_STRING, IDM_HELP, L"&Contents\tF1");
+    AppendMenuW(help, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(help, MF_STRING, IDM_ABOUT, L"&About PostalExpress");
     HMENU bar = CreateMenu();
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(file), L"&File");
@@ -164,6 +167,7 @@ HMENU BuildMenu() {
 HACCEL BuildAccelerators() {
     ACCEL keys[] = {
         {FVIRTKEY, VK_F5, IDM_SYNC},
+        {FVIRTKEY, VK_F1, IDM_HELP},
         {FVIRTKEY | FCONTROL, 'Q', IDM_MARK_READ},
         {FVIRTKEY | FCONTROL, 'N', IDM_NEW_MAIL},
         {FVIRTKEY | FCONTROL, 'R', IDM_REPLY},
@@ -277,9 +281,36 @@ std::wstring StorePath() {
     return dir + L"\\store.db";
 }
 
+// the command line, options for test runs: --store <file> uses another mail store, --memory-passwords keeps
+// passwords for this run only, --pin-certificate <file> trusts only that server certificate (see res/help.html)
+struct Arguments {
+    std::wstring store;
+    std::wstring certificate;
+    bool memoryPasswords = false;
+};
+Arguments g_arguments;
+
+void ReadArguments() {
+    int count = 0;
+    LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &count);
+    for (int i = 1; argv && i < count; i++) {
+        std::wstring arg = argv[i];
+        if (arg == L"--store" && i + 1 < count) {
+            g_arguments.store = argv[++i];
+        } else if (arg == L"--pin-certificate" && i + 1 < count) {
+            g_arguments.certificate = argv[++i];
+        } else if (arg == L"--memory-passwords") {
+            g_arguments.memoryPasswords = true;
+        }
+    }
+    LocalFree(argv);
+}
+
 bool OpenCore(HWND hwnd) {
-    std::string path = core::Narrow(StorePath());
-    g_core.reset(pe_core_open(path.c_str(), OnCoreEvent, hwnd));
+    std::string path = core::Narrow(g_arguments.store.empty() ? StorePath() : g_arguments.store);
+    uint32_t flags = g_arguments.memoryPasswords ? PE_OPEN_MEMORY_PASSWORDS : 0;
+    std::string certificate = core::Narrow(g_arguments.certificate);
+    g_core.reset(pe_core_open_with(path.c_str(), flags, certificate.empty() ? nullptr : certificate.c_str(), OnCoreEvent, hwnd));
     return g_core != nullptr;
 }
 
@@ -355,6 +386,9 @@ void OnCommand(WORD id) {
     case IDM_ABOUT:
         ShowAbout();
         return;
+    case IDM_HELP:
+        OpenHelp();
+        return;
     case IDC_TREE:
         ShowCounts();
         return;
@@ -376,7 +410,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_main = hwnd;
         SetScaleWindow(hwnd);
         if (!OpenCore(hwnd)) {
-            MessageBoxW(hwnd, L"The mail store could not be opened.", kTitle, MB_OK | MB_ICONERROR);
+            const wchar_t* why = g_arguments.certificate.empty() ? L"The mail store could not be opened."
+                                                                 : L"The mail store or the certificate file could not be opened.";
+            MessageBoxW(hwnd, why, kTitle, MB_OK | MB_ICONERROR);
             return -1;
         }
         CreateChildren(hwnd);
@@ -450,7 +486,8 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
     case WM_DESTROY:
         KillTimer(hwnd, TIMER_SYNC);
-        // the WebView2 goes before COM does, the core before its events are dropped
+        // the WebView2s go before COM does, the core before its events are dropped
+        CloseHelp();
         g_mailbox.Destroy();
         g_core.reset();
         DropQueuedEvents();
@@ -478,6 +515,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     if (FAILED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED))) {
         return 1;
     }
+    ReadArguments();
     INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_TREEVIEW_CLASSES | ICC_LISTVIEW_CLASSES | ICC_BAR_CLASSES};
     InitCommonControlsEx(&controls);
 
@@ -502,10 +540,16 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
 
     MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
-        if (!TranslateAcceleratorW(hwnd, g_accelerators, &msg)) {
-            TranslateMessage(&msg);
-            DispatchMessageW(&msg);
+        if (TranslateAcceleratorW(hwnd, g_accelerators, &msg)) {
+            continue;
         }
+        // Tab moves between the panes of the main window and the fields of a compose window
+        HWND active = GetActiveWindow();
+        if (active && IsDialogMessageW(active, &msg)) {
+            continue;
+        }
+        TranslateMessage(&msg);
+        DispatchMessageW(&msg);
     }
     DestroyAcceleratorTable(g_accelerators);
     CoUninitialize();

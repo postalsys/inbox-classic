@@ -8,5 +8,5 @@ WIN_DIR_FWD=${WIN_DIR//\\//}
 # copies the working tree (not the build outputs) to the Windows machine
 win_sync() {
     ssh "$WIN_HOST" "if not exist $WIN_DIR mkdir $WIN_DIR"
-    COPYFILE_DISABLE=1 tar -czf - --exclude build --exclude dist --exclude .git --exclude core/target . | ssh "$WIN_HOST" "tar -xzf - -C $WIN_DIR_FWD"
+    COPYFILE_DISABLE=1 tar -czf - --exclude build --exclude dist --exclude .git --exclude core/target --exclude node_modules . | ssh "$WIN_HOST" "tar -xzf - -C $WIN_DIR_FWD"
 }

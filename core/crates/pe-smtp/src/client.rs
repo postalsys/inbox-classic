@@ -141,6 +141,8 @@ impl Error {
                 ErrorKind::Security
             }
             Error::Net(_) => ErrorKind::Network,
+            // 538 (RFC 4954): the password is taken only over an encrypted connection, typing it again does not help
+            Error::AuthenticationFailed(response) if response.code == 538 => ErrorKind::Security,
             Error::AuthenticationFailed(_) | Error::AuthenticationUnavailable => ErrorKind::Authentication,
             // 530 (RFC 4954): the server wants a login first, it may only offer AUTH after STARTTLS
             Error::Refused { response, .. } if response.code == 530 => ErrorKind::Authentication,
@@ -171,6 +173,12 @@ impl fmt::Display for Error {
             Error::NoRecipients { rejected } => {
                 let list: Vec<String> = rejected.iter().map(|(a, r)| format!("{a} ({r})")).collect();
                 write!(f, "the server accepted none of the recipients: {}", list.join(", "))
+            }
+            Error::AuthenticationFailed(response) if response.code == 538 => {
+                write!(
+                    f,
+                    "the server takes the password only over an encrypted connection: {response}"
+                )
             }
             Error::AuthenticationFailed(response) => write!(f, "authentication failed: {response}"),
             Error::AuthenticationUnavailable => {

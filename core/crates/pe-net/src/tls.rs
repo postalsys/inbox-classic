@@ -27,6 +27,47 @@ pub enum Trust {
     Pinned(Vec<Vec<u8>>),
 }
 
+impl Trust {
+    /// The certificates of a PEM file, or the one certificate of a DER file, pinned: for a test server whose
+    /// certificate is in a file. None when the file cannot be read or has no certificate
+    pub fn pinned_file(path: &std::path::Path) -> Option<Trust> {
+        Self::pinned_bytes(&std::fs::read(path).ok()?)
+    }
+
+    /// As [`Trust::pinned_file`], for the contents of the file
+    pub fn pinned_bytes(contents: &[u8]) -> Option<Trust> {
+        use rustls::pki_types::pem::PemObject;
+        let pem: Vec<Vec<u8>> = CertificateDer::pem_slice_iter(contents)
+            .filter_map(Result::ok)
+            .map(|certificate| certificate.to_vec())
+            .collect();
+        if !pem.is_empty() {
+            return Some(Trust::Pinned(pem));
+        }
+        is_der_sequence(contents).then(|| Trust::Pinned(vec![contents.to_vec()]))
+    }
+}
+
+/// Whether `der` is exactly one DER SEQUENCE, as a certificate is: its length says where it ends
+fn is_der_sequence(der: &[u8]) -> bool {
+    let [0x30, first, rest @ ..] = der else {
+        return false;
+    };
+    let (length, body) = match *first {
+        short @ 0..=0x7f => (usize::from(short), rest),
+        long @ 0x81..=0x84 => {
+            let size = usize::from(long & 0x7f);
+            if rest.len() < size {
+                return false;
+            }
+            let length = rest[..size].iter().fold(0usize, |n, &b| n << 8 | usize::from(b));
+            (length, &rest[size..])
+        }
+        _ => return false,
+    };
+    body.len() == length
+}
+
 impl fmt::Debug for Trust {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -243,6 +284,36 @@ pub async fn handshake(socket: TcpStream, host: &str, trust: &Trust) -> Result<T
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pins_the_certificates_of_a_file() {
+        let der = [0x30, 0x03, 0x02, 0x01, 0x01];
+        assert_eq!(Trust::pinned_bytes(&der), Some(Trust::Pinned(vec![der.to_vec()])));
+        let pem = "-----BEGIN CERTIFICATE-----\nMAMCAQE=\n-----END CERTIFICATE-----\n";
+        assert_eq!(
+            Trust::pinned_bytes(pem.as_bytes()),
+            Some(Trust::Pinned(vec![der.to_vec()]))
+        );
+        let two = format!("subject=x\n{pem}{pem}");
+        assert_eq!(
+            Trust::pinned_bytes(two.as_bytes()),
+            Some(Trust::Pinned(vec![der.to_vec(), der.to_vec()]))
+        );
+        assert_eq!(Trust::pinned_bytes(b"not a certificate"), None);
+        // text that starts with a "0" is not DER
+        assert_eq!(Trust::pinned_bytes(b"0 is not a certificate"), None);
+        let mut long = vec![0x30, 0x82, 0x01, 0x00];
+        long.extend([0u8; 256]);
+        assert_eq!(Trust::pinned_bytes(&long), Some(Trust::Pinned(vec![long.clone()])));
+        long.push(0);
+        assert_eq!(Trust::pinned_bytes(&long), None);
+        assert_eq!(Trust::pinned_bytes(b""), None);
+        assert_eq!(
+            Trust::pinned_bytes(b"-----BEGIN PRIVATE KEY-----\nMAMCAQE=\n-----END PRIVATE KEY-----\n"),
+            None
+        );
+        assert_eq!(Trust::pinned_file(std::path::Path::new("/nonexistent/cert.pem")), None);
+    }
 
     #[test]
     fn classifies_certificate_errors() {

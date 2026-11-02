@@ -1,6 +1,7 @@
-# Fills the Add Mail Account form of a running PostalExpress and clicks OK, for testing on the build machine:
+# Fills both steps of the Add Mail Account form of a running PostalExpress, for testing on the build machine:
 #   powershell -File ui-account.ps1 <email> <password> <imap host> <imap port> <smtp host> <smtp port> <smtp security>
-# Security is the index of the choice: 0 SSL/TLS, 1 STARTTLS, 2 None. The IMAP security is SSL/TLS.
+# Security is the index of the choice: 0 SSL/TLS, 1 STARTTLS, 2 None. The IMAP security is SSL/TLS. The user name
+# is the address. scripts/ui-e2e.ps1 goes through the same form with checks.
 param(
     [Parameter(Mandatory)][string]$Email,
     [Parameter(Mandatory)][string]$Password,
@@ -16,22 +17,45 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern IntPtr GetDlgItem(IntPtr hwnd, int id);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr SendMessage(IntPtr hwnd, uint message, IntPtr wParam, string lParam);
 [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
+[DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
 '@
 $WM_SETTEXT = 0x000C; $BM_CLICK = 0x00F5; $CB_SETCURSEL = 0x014E
 
-$form = [IntPtr]::Zero
-for ($i = 0; $i -lt 50 -and $form -eq [IntPtr]::Zero; $i++) {
-    Start-Sleep -Milliseconds 200
-    $form = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+# the account form, or the server settings form when $Second (it has the SMTP security choice, id 109)
+function WaitForForm([bool]$Second) {
+    for ($i = 0; $i -lt 200; $i++) {
+        $form = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+        if ($form -ne [IntPtr]::Zero -and (-not $Second -or [Native.Win]::GetDlgItem($form, 109) -ne [IntPtr]::Zero)) { return $form }
+        Start-Sleep -Milliseconds 200
+    }
+    throw 'no Add Mail Account form'
 }
-if ($form -eq [IntPtr]::Zero) { throw 'no Add Mail Account form' }
+function Fill([IntPtr]$form, [hashtable]$values) {
+    foreach ($id in $values.Keys) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($form, $id), $WM_SETTEXT, [IntPtr]::Zero, [string]$values[$id])
+    }
+}
+# posted: the click starts the next step's modal loop, a sent one would wait for it
+function ClickOk([IntPtr]$window, [int]$id = 1) {
+    [void][Native.Win]::PostMessage([Native.Win]::GetDlgItem($window, $id), $BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero)
+}
 
-# the inputs have ids 100 and up in the order of the form (app/src/accounts.cpp)
-$values = @{ 100 = 'Test'; 101 = $Email; 102 = $Email; 103 = $Password; 104 = $ImapHost; 105 = $ImapPort; 107 = $SmtpHost; 108 = $SmtpPort }
-foreach ($id in $values.Keys) {
-    [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($form, $id), $WM_SETTEXT, [IntPtr]::Zero, [string]$values[$id])
-}
+# the inputs have ids 100 and up in the order of the form (app/src/accounts.cpp). First the name, address and
+# password; the lookup of the servers follows
+$form = WaitForForm $false
+Fill $form @{ 100 = 'Test'; 101 = $Email; 102 = $Password }
+ClickOk $form
+# then the server settings it found, corrected
+$form = WaitForForm $true
+Fill $form @{ 102 = $Email; 104 = $ImapHost; 105 = $ImapPort; 107 = $SmtpHost; 108 = $SmtpPort }
 [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($form, 106), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
 [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($form, 109), $CB_SETCURSEL, [IntPtr]$SmtpSecurity, [IntPtr]::Zero)
-# IDOK
-[void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($form, 1), $BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero)
+ClickOk $form
+if ($SmtpSecurity -eq 2) {
+    # the warning about a connection without encryption: Yes
+    for ($i = 0; $i -lt 50; $i++) {
+        $warning = [Native.Win]::FindWindow('#32770', 'Add Mail Account')
+        if ($warning -ne [IntPtr]::Zero) { ClickOk $warning 6; break }
+        Start-Sleep -Milliseconds 200
+    }
+}

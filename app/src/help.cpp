@@ -1,0 +1,90 @@
+// The help window: res/help.html, built into the exe, shown in a WebView2 like a message (scripts off, links
+// opened in the browser). One window; F1 again brings it to the front.
+#include "app.h"
+
+namespace {
+
+const wchar_t* kHelpClass = L"PostalExpressHelp";
+constexpr int IDR_HELP = 2;
+
+HWND g_help = nullptr;
+HWND g_host = nullptr;  // the parent of the preview, it shows why when WebView2 cannot start
+Preview* g_preview = nullptr;
+
+std::wstring HelpDocument() {
+    HRSRC found = FindResourceW(nullptr, MAKEINTRESOURCEW(IDR_HELP), MAKEINTRESOURCEW(10));  // RT_RCDATA
+    HGLOBAL loaded = found ? LoadResource(nullptr, found) : nullptr;
+    const char* data = loaded ? static_cast<const char*>(LockResource(loaded)) : nullptr;
+    if (!data) {
+        return L"<p>The help is missing from this copy of PostalExpress.</p>";
+    }
+    return core::Widen(std::string_view(data, SizeofResource(nullptr, found)));
+}
+
+void Layout(HWND hwnd) {
+    RECT client;
+    GetClientRect(hwnd, &client);
+    MoveWindow(g_host, 0, 0, client.right, client.bottom, TRUE);
+    RECT inner;
+    GetClientRect(g_host, &inner);
+    if (g_preview) {
+        g_preview->Resize(inner);
+    }
+}
+
+LRESULT CALLBACK HelpProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
+    case WM_SIZE:
+        Layout(hwnd);
+        return 0;
+    case WM_DESTROY:
+        if (g_preview) {
+            g_preview->Close();
+            delete g_preview;
+            g_preview = nullptr;
+        }
+        g_help = nullptr;
+        return 0;
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
+void OpenHelp() {
+    if (g_help) {
+        ShowWindow(g_help, SW_RESTORE);
+        SetForegroundWindow(g_help);
+        return;
+    }
+    static bool registered = false;
+    if (!registered) {
+        WNDCLASSEXW windowClass = {sizeof(windowClass)};
+        windowClass.lpfnWndProc = HelpProc;
+        windowClass.hInstance = GetModuleHandleW(nullptr);
+        windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+        windowClass.hIcon = LoadIconW(nullptr, IDI_QUESTION);
+        windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+        windowClass.lpszClassName = kHelpClass;
+        RegisterClassExW(&windowClass);
+        registered = true;
+    }
+    // not owned by the main window: the help stays usable while a dialog of the main window is open
+    g_help = CreateWindowExW(0, kHelpClass, L"PostalExpress Help", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT,
+                             CW_USEDEFAULT, Scale(820), Scale(700), nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+    if (!g_help) {
+        return;
+    }
+    g_host = CreateChild(g_help, L"STATIC", nullptr, WS_CLIPCHILDREN, 0, {});
+    g_preview = new Preview();
+    g_preview->Create(g_host, [](const std::wstring& error) { SetWindowTextW(g_host, error.c_str()); });
+    g_preview->Show(HelpDocument());
+    Layout(g_help);
+    ShowWindow(g_help, SW_SHOW);
+}
+
+void CloseHelp() {
+    if (g_help) {
+        DestroyWindow(g_help);
+    }
+}

@@ -3,6 +3,9 @@
 
 1 RT_MANIFEST "app.manifest"
 
+// the help window's document, src/help.cpp
+2 RCDATA "help.html"
+
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION APP_VERSION_COMMAS,0
 PRODUCTVERSION APP_VERSION_COMMAS,0

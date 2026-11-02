@@ -64,9 +64,14 @@ scripts/win-build.sh                  # copy the working tree over (tar, no .git
 scripts/win-test.sh [cargo args]      # copy and run cargo test on Windows
 scripts/win-run.sh                    # start the app on the interactive desktop (scheduled task; SSH has no desktop)
 scripts/win-screenshot.sh out.png     # screenshot of the window, DESKTOP=1 for the whole screen
+scripts/win-ui-e2e.sh                 # the UI end-to-end test on the desktop, log and screenshots in build/ui-e2e
 ```
 
-To drive the UI for a check, run these on the build machine through a scheduled task (`/it`, as `win-run.sh` does): `scripts/ui-account.ps1` fills the Add Mail Account form (use an Ethereal account), `scripts/ui-select.ps1 <folder> <row>` selects a folder and a message.
+To drive the UI for a check, run these on the build machine through a scheduled task (`/it`, as `win-run.sh` does): `scripts/ui-account.ps1` fills both steps of the Add Mail Account form (use an Ethereal account), `scripts/ui-select.ps1 <folder> <row>` selects a folder and a message.
+
+`scripts/ui-e2e.ps1` is the end-to-end test of the app itself: it starts ImapKit and the exe (with `--store`, `--memory-passwords` and `--pin-certificate` for ImapKit's self-signed certificate), adds the account through the form, reads, replies and opens the help, checking the results over ImapKit's REST API. CI runs it after the Windows build. It finds controls by the ids in `app/src/app.h` and the form order in `accounts.cpp`, so update it when those change. The user help is `app/res/help.html`, built into the exe as a resource and shown by F1; update it with the features it describes.
+
+`PE_NETWORK_TESTS=1` enables the tests that need the internet (`pe-autoconfig/tests/live.rs`); CI sets it on Linux.
 
 `scripts/build-installer.sh` builds `dist/PostalExpress-Setup.exe` (NSIS, `installer/postal-express.nsi`, per user, no admin rights) with `THIRD-PARTY-NOTICES.txt` from `scripts/notices.mjs`; it signs the exe, the uninstaller and the installer with Azure Artifact Signing (`scripts/sign-win.sh`) when `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` are set.
 

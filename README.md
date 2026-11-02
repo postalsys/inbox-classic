@@ -35,7 +35,7 @@ The app builds on Windows with Visual Studio 2022 Build Tools (C++ workload, whi
 scripts\win-build.cmd      :: gives build\PostalExpress.exe
 ```
 
-From a Mac, `scripts/win-build.sh` copies the working tree to the Windows build machine (`WIN_HOST`, `WIN_DIR`, see `scripts/win-env.sh`) and builds it there, `scripts/win-test.sh` runs the Rust tests there, `scripts/win-run.sh` starts the app on its desktop and `scripts/win-screenshot.sh out.png` takes a screenshot of the window.
+From a Mac, `scripts/win-build.sh` copies the working tree to the Windows build machine (`WIN_HOST`, `WIN_DIR`, see `scripts/win-env.sh`) and builds it there, `scripts/win-test.sh` runs the Rust tests there, `scripts/win-run.sh` starts the app on its desktop, `scripts/win-screenshot.sh out.png` takes a screenshot of the window and `scripts/win-ui-e2e.sh` runs the UI end-to-end test (`scripts/ui-e2e.ps1`) on its desktop.
 
 ## Installer
 

@@ -7,7 +7,6 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
-base64.workspace = true
 pe-imap = { path = "../pe-imap" }
 pe-net.workspace = true
 pe-store = { path = "../pe-store" }

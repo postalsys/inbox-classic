@@ -70,6 +70,12 @@ impl fmt::Display for Error {
             Error::Refused {
                 command, status, text, ..
             } => write!(f, "{command} failed ({status}): {text}"),
+            Error::AuthenticationFailed { code: Some(code), text } if is_privacy_required(code) => {
+                write!(
+                    f,
+                    "the server takes the password only over an encrypted connection: {text}"
+                )
+            }
             Error::AuthenticationFailed { text, .. } => write!(f, "authentication failed: {text}"),
             Error::NoAuthenticationMethod => f.write_str("the server offers no usable authentication method"),
             Error::Closed(Some(text)) => write!(f, "the server closed the connection: {text}"),
@@ -93,6 +99,9 @@ impl Error {
                 ErrorKind::Security
             }
             Error::Net(_) | Error::Timeout => ErrorKind::Network,
+            // PRIVACYREQUIRED (RFC 5530): the password is taken only over an encrypted connection, typing it again
+            // does not help
+            Error::AuthenticationFailed { code: Some(code), .. } if is_privacy_required(code) => ErrorKind::Security,
             Error::AuthenticationFailed { .. } | Error::NoAuthenticationMethod => ErrorKind::Authentication,
             Error::Refused { .. } => ErrorKind::Refused,
             Error::Protocol(_) | Error::TooManyResponses | Error::Unexpected(_) => ErrorKind::Protocol,
@@ -100,6 +109,10 @@ impl Error {
             Error::Command(_) | Error::NoMailboxSelected | Error::Unsupported(_) => ErrorKind::Usage,
         }
     }
+}
+
+fn is_privacy_required(code: &str) -> bool {
+    code.eq_ignore_ascii_case("PRIVACYREQUIRED")
 }
 
 impl From<pe_net::Error> for Error {
@@ -117,5 +130,26 @@ impl From<ParseError> for Error {
 impl From<CompileError> for Error {
     fn from(error: CompileError) -> Self {
         Error::Command(error)
+    }
+}
+
+#[cfg(test)]
+mod privacy_tests {
+    use super::*;
+
+    #[test]
+    fn a_login_refused_for_lack_of_encryption_is_a_security_problem() {
+        let refused = |code: Option<&str>| Error::AuthenticationFailed {
+            code: code.map(str::to_string),
+            text: "x".into(),
+        };
+        assert_eq!(refused(Some("PRIVACYREQUIRED")).kind(), ErrorKind::Security);
+        assert!(
+            refused(Some("privacyrequired"))
+                .to_string()
+                .contains("encrypted connection")
+        );
+        assert_eq!(refused(Some("AUTHENTICATIONFAILED")).kind(), ErrorKind::Authentication);
+        assert_eq!(refused(None).kind(), ErrorKind::Authentication);
     }
 }

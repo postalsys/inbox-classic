@@ -13,7 +13,6 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
-use base64::Engine;
 use pe_imap::client::Timeouts;
 use pe_imap::{Config, Credentials, Event};
 use pe_net::{Security, Trust};
@@ -87,7 +86,10 @@ impl ImapKit {
             imaps: port("imaps"),
             smtp: port("smtp"),
             rest: port("rest"),
-            cert: pem_to_der(&pem),
+            cert: match pe_net::Trust::pinned_bytes(pem.as_bytes()) {
+                Some(pe_net::Trust::Pinned(mut certificates)) => certificates.remove(0),
+                _ => panic!("no certificate in ImapKit's PEM"),
+            },
             stdin: Some(stdin),
             child,
         })
@@ -330,13 +332,6 @@ fn encode_path(path: &str) -> String {
             _ => format!("%{c:02X}"),
         })
         .collect()
-}
-
-fn pem_to_der(pem: &str) -> Vec<u8> {
-    let body: String = pem.lines().filter(|line| !line.starts_with("-----")).collect();
-    base64::engine::general_purpose::STANDARD
-        .decode(body)
-        .expect("certificate PEM")
 }
 
 /// A simple RFC 5322 message, as imapflow's tests build them

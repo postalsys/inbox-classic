@@ -70,11 +70,15 @@ fn reads_mail_through_the_c_api() {
     let path = CString::new(dir.path().join("store.db").to_str().unwrap()).unwrap();
     let (sender, events) = channel();
     let context = Box::into_raw(Box::new(Mutex::new(sender)));
+    // the server's certificate from a file, as `--pin-certificate` gives it, and passwords for this run only
+    let certificate = dir.path().join("server.der");
+    std::fs::write(&certificate, &server.cert).unwrap();
+    let certificate = CString::new(certificate.to_str().unwrap()).unwrap();
     let core = unsafe {
-        pe_core_open_pinned(
+        pe_core_open_with(
             path.as_ptr(),
-            server.cert.as_ptr(),
-            server.cert.len(),
+            PE_OPEN_MEMORY_PASSWORDS,
+            certificate.as_ptr(),
             Some(on_event),
             context.cast(),
         )
@@ -279,6 +283,15 @@ fn null_and_bad_arguments() {
     // an engine without a callback, and an unknown account
     let dir = TempDir::new("ffi-null");
     let path = CString::new(dir.path().join("store.db").to_str().unwrap()).unwrap();
+    // a certificate file that is missing or holds no certificate opens nothing
+    let missing = CString::new(dir.path().join("missing.pem").to_str().unwrap()).unwrap();
+    let flags = PE_OPEN_MEMORY_PASSWORDS;
+    assert!(unsafe { pe_core_open_with(path.as_ptr(), flags, missing.as_ptr(), None, null_mut()) }.is_null());
+    let junk = dir.path().join("junk.pem");
+    std::fs::write(&junk, "not a certificate").unwrap();
+    let junk = CString::new(junk.to_str().unwrap()).unwrap();
+    assert!(unsafe { pe_core_open_with(path.as_ptr(), flags, junk.as_ptr(), None, null_mut()) }.is_null());
+
     let core = unsafe { pe_core_open(path.as_ptr(), None, null_mut()) };
     assert!(!core.is_null());
     unsafe {
