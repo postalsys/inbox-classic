@@ -4,19 +4,17 @@
 #include "preview.h"
 
 #include <shellapi.h>
-#include <shlobj.h>
+
+#include "webview.h"
 
 using Microsoft::WRL::Callback;
 using Microsoft::WRL::ComPtr;
+using webview::StartsWith;
 
 namespace {
 
-// NavigateToString takes at most 2 MB
-constexpr size_t kMaxDocument = 1900000;
-
-bool StartsWith(const wchar_t* text, const wchar_t* prefix) {
-    return text && _wcsnicmp(text, prefix, wcslen(prefix)) == 0;
-}
+// where the documents are served from memory (webview.h); .invalid never resolves
+const wchar_t* kPageUrl = L"https://preview.postalexpress.invalid/";
 
 void OpenExternally(const wchar_t* uri) {
     if (StartsWith(uri, L"http://") || StartsWith(uri, L"https://") || StartsWith(uri, L"mailto:")) {
@@ -24,48 +22,20 @@ void OpenExternally(const wchar_t* uri) {
     }
 }
 
-std::wstring UserDataFolder() {
-    PWSTR local = nullptr;
-    std::wstring folder;
-    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &local))) {
-        folder = std::wstring(local) + L"\\PostalExpress\\WebView2";
-    }
-    CoTaskMemFree(local);
-    return folder;
-}
-
 }  // namespace
 
 void Preview::Create(HWND parent, std::function<void(const std::wstring&)> onError) {
     parent_ = parent;
     onError_ = std::move(onError);
-    std::wstring folder = UserDataFolder();
-    HRESULT hr = CreateCoreWebView2EnvironmentWithOptions(
-        nullptr, folder.c_str(), nullptr,
-        Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>([this](HRESULT result, ICoreWebView2Environment* environment) {
-            if (FAILED(result) || !environment) {
-                onError_(L"The WebView2 runtime is not available, message bodies can not be shown.");
-                return S_OK;
-            }
+    webview::Create(
+        parent_,
+        [this](ICoreWebView2Environment* environment, ICoreWebView2Controller* controller) {
             environment_ = environment;
-            environment->CreateCoreWebView2Controller(
-                parent_, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
-                             [this](HRESULT created, ICoreWebView2Controller* controller) {
-                                 if (FAILED(created) || !controller) {
-                                     onError_(L"Creating the WebView2 failed.");
-                                     return S_OK;
-                                 }
-                                 controller_ = controller;
-                                 controller_->get_CoreWebView2(&view_);
-                                 Configure();
-                                 return S_OK;
-                             })
-                             .Get());
-            return S_OK;
-        }).Get());
-    if (FAILED(hr)) {
-        onError_(L"The WebView2 runtime is not available, message bodies can not be shown.");
-    }
+            controller_ = controller;
+            controller_->get_CoreWebView2(&view_);
+            Configure();
+        },
+        [this](const std::wstring& error) { onError_(error + L" Message bodies can not be shown."); });
 }
 
 void Preview::Configure() {
@@ -79,39 +49,26 @@ void Preview::Configure() {
     settings->put_IsStatusBarEnabled(FALSE);
     settings->put_IsZoomControlEnabled(TRUE);
 
-    // nothing is loaded from the network, also not what a CSP would let through
-    view_->AddWebResourceRequestedFilter(L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
-    view_->add_WebResourceRequested(
-        Callback<ICoreWebView2WebResourceRequestedEventHandler>([this](ICoreWebView2*, ICoreWebView2WebResourceRequestedEventArgs* args) {
-            ComPtr<ICoreWebView2WebResourceRequest> request;
-            args->get_Request(&request);
-            LPWSTR uri = nullptr;
-            request->get_Uri(&uri);
-            COREWEBVIEW2_WEB_RESOURCE_CONTEXT context = COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL;
-            args->get_ResourceContext(&context);
-            // images from the network only when the user asked for them, never anything else
-            bool allowed = remoteImages_ && context == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_IMAGE &&
-                           (StartsWith(uri, L"http://") || StartsWith(uri, L"https://"));
-            if (!allowed && (StartsWith(uri, L"http://") || StartsWith(uri, L"https://") || StartsWith(uri, L"ftp://") || StartsWith(uri, L"file:"))) {
-                ComPtr<ICoreWebView2WebResourceResponse> response;
-                environment_->CreateWebResourceResponse(nullptr, 403, L"Blocked", L"", &response);
-                args->put_Response(response.Get());
-            }
-            CoTaskMemFree(uri);
-            return S_OK;
-        }).Get(),
-        nullptr);
+    // the document from memory; nothing from the network, also not what a CSP would let through, but images when the
+    // user asked for them
+    webview::FilterRequests(
+        view_.Get(), environment_.Get(), kPageUrl, [this]() -> const std::wstring& { return document_; },
+        [this](const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT context) {
+            return remoteImages_ && context == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_IMAGE &&
+                   (StartsWith(uri, L"http://") || StartsWith(uri, L"https://")) && !StartsWith(uri, kPageUrl);
+        });
 
     // links open in the browser, the pane only ever shows the documents it is given
     view_->add_NavigationStarting(
         Callback<ICoreWebView2NavigationStartingEventHandler>([](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
             LPWSTR uri = nullptr;
             args->get_Uri(&uri);
-            if (!StartsWith(uri, L"data:") && !StartsWith(uri, L"about:")) {
+            if (!webview::IsOwnPage(uri, kPageUrl)) {
                 args->put_Cancel(TRUE);
                 BOOL user = FALSE;
                 args->get_IsUserInitiated(&user);
-                if (user) {
+                // a relative link of the message points into the made-up address, not anywhere
+                if (user && !StartsWith(uri, kPageUrl)) {
                     OpenExternally(uri);
                 }
             }
@@ -132,29 +89,24 @@ void Preview::Configure() {
 
     controller_->put_Bounds(bounds_);
     controller_->put_IsVisible(IsWindowVisible(parent_) ? TRUE : FALSE);
-    // moved out first: Show() clears pending_, which would empty the document it is given
-    std::wstring pending = std::move(pending_);
-    if (pending.empty()) {
-        Clear();
+    if (pending_) {
+        Show(document_, remoteImages_);
     } else {
-        Show(pending, remoteImages_);
+        Clear();
     }
 }
 
 void Preview::Show(const std::wstring& html, bool remoteImages) {
     remoteImages_ = remoteImages;
+    document_ = html;
     if (!view_) {
-        pending_ = html;
+        pending_ = true;
         return;
     }
-    pending_.clear();
-    if (html.size() > kMaxDocument) {
-        view_->NavigateToString(
-            L"<!doctype html><html><body style=\"font:10pt Arial\"><p>This message is too large to preview. Use <b>Source</b> to see "
-            L"it.</p></body></html>");
-        return;
-    }
-    view_->NavigateToString(html.c_str());
+    pending_ = false;
+    // a new address for each document, so it is loaded again rather than taken from history
+    std::wstring url = std::wstring(kPageUrl) + L"?" + std::to_wstring(++shown_);
+    view_->Navigate(url.c_str());
 }
 
 void Preview::Clear() {

@@ -11,6 +11,7 @@ exclude = ["fuzz"]
 
 [workspace.dependencies]
 base64 = "0.22"
+getrandom = "0.4"
 encoding_rs = "0.8"
 pe-mime = { path = "crates/pe-mime" }
 pe-net = { path = "crates/pe-net" }

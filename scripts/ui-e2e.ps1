@@ -54,7 +54,7 @@ $VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
-$IDC_SEND = 300; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306
+$IDC_SEND = 300; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
@@ -121,6 +121,22 @@ function Key([IntPtr]$window, [int]$vk) {
 function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) {
     $t = if ($title) { $title } else { [NullString]::Value }
     WaitFor { $w = [Native.Win]::FindWindow($class, $t); if ($w -ne [IntPtr]::Zero) { $w } } $Seconds
+}
+# types into the HTML editor of a compose window: characters posted to the window of the WebView2 that takes input
+function TypeInEditor([IntPtr]$compose, [string]$text) {
+    $input = WaitFor { [Native.Win]::FindDescendants($compose, 'Chrome_RenderWidgetHostHWND') | Select-Object -First 1 }
+    if (-not $input) { return $false }
+    Start-Sleep -Milliseconds 500
+    # a click into the text first, as a user would when the cursor is in another field
+    $point = [IntPtr]((12 -shl 16) -bor 12)
+    [void][Native.Win]::PostMessage($input, 0x0201, [IntPtr]1, $point)
+    [void][Native.Win]::PostMessage($input, 0x0202, [IntPtr]::Zero, $point)
+    Start-Sleep -Milliseconds 300
+    foreach ($c in $text.ToCharArray()) {
+        [void][Native.Win]::PostMessage($input, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero)
+    }
+    Start-Sleep -Milliseconds 500
+    return $true
 }
 function Visible([IntPtr]$window, [int]$id) { [Native.Win]::IsWindowVisible([Native.Win]::GetDlgItem($window, $id)) }
 
@@ -291,7 +307,7 @@ try {
         Check ($null -ne $save) 'choosing one asks where to save it'
         if ($save) {
             # the file name box: the edit field that holds the suggested name (Explorer may hide the extension)
-            $name = [Native.Win]::FindDescendants($save, 'Edit') | Where-Object { (WindowText $_) -like 'report*' } | Select-Object -First 1
+            $name = WaitFor { [Native.Win]::FindDescendants($save, 'Edit') | Where-Object { (WindowText $_) -like 'report*' } | Select-Object -First 1 } 10
             Check ($null -ne $name) "the suggested name is the file's"
             Shot $save 'read-4-save'
             $target = Join-Path (Resolve-Path $Out) 'report-saved.pdf'
@@ -355,9 +371,9 @@ try {
     $compose = WaitCompose
     Check ($null -ne $compose) 'Reply opens a compose window'
     Check ((GetText $compose $IDC_TO) -like '*ann@example.com*') 'the reply goes to the sender'
-    $bodyField = [Native.Win]::GetDlgItem($compose, $IDC_BODY)
-    [void][Native.Win]::SendMessage($bodyField, $EM_SETSEL, [IntPtr]0, [IntPtr]0)
-    [void][Native.Win]::SendMessage($bodyField, $EM_REPLACESEL, [IntPtr]1, 'Thanks, Ann. Answered by the UI test.')
+    # the quote is folded behind "...", the cursor is at the top: Bold, then the answer
+    Command $compose $IDF_BOLD
+    Check (TypeInEditor $compose 'Thanks, Ann. Answered by the UI test.') 'the editor takes typing'
     Shot $compose 'write-3-reply'
     Command $compose $IDC_SEND
     # ImapKit's SMTP server delivers to its INBOX
@@ -367,6 +383,9 @@ try {
         $text = RawText $answer
         Check ($text -match 'In-Reply-To: <ui-e2e@example.com>') 'the reply refers to the message it answers'
         Check ($text -match 'Answered by the UI test') 'the reply has what was typed'
+        Check ($text -match 'Content-Type: text/html' -and $text -match 'Content-Type: text/plain') 'it is HTML with a text part'
+        Check ($text -match '<b>Thanks, Ann') 'what was typed in bold is bold'
+        Check ($text -match 'Original Message' -and $text -match 'this message was put here') 'the folded quote is sent along'
     }
     Check ($null -ne (WaitFor { Find 'Sent' "Subject: Re: $subject" })) 'a copy of the reply is in Sent'
 
@@ -376,7 +395,7 @@ try {
     Check ($null -ne $compose) 'Create Mail opens an empty compose window'
     SetText $compose $IDC_TO 'dave at example.com'
     SetText $compose $IDC_SUBJECT 'A new message from the UI test'
-    SetText $compose $IDC_BODY "Hello Dave,`r`n`r`nwritten from scratch."
+    Check (TypeInEditor $compose 'Hello Dave, written from scratch.') 'the editor of a new message takes typing'
     Command $compose $IDC_SEND
     $problem = WaitWindow '#32770' 'PostalExpress' 10
     Check ($null -ne $problem) 'a mistyped address is pointed out before sending'
@@ -388,7 +407,9 @@ try {
     SetText $compose $IDC_TO 'Dave <dave@example.com>'
     Shot $compose 'write-5-new'
     Command $compose $IDC_SEND
-    Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: A new message from the UI test' } 30)) 'the new message was sent'
+    $new = WaitFor { Find 'INBOX' 'Subject: A new message from the UI test' } 30
+    Check ($null -ne $new) 'the new message was sent'
+    Check ($new -and (RawText $new) -match 'Hello Dave, written from scratch') 'with what was typed'
 
     # ---- getting new mail ----
 
@@ -403,6 +424,19 @@ try {
     SelectRow 0
     Shot $main 'main-3-sent-items'
     SelectFolder 0
+
+    Step 'closing a message that was written'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    [void](TypeInEditor $compose 'Never mind.')
+    [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+    $ask = WaitWindow '#32770' 'PostalExpress' 10
+    Check ($null -ne $ask) 'closing asks before throwing the text away'
+    if ($ask) {
+        Shot $ask 'write-6-close'
+        Click $ask 6
+    }
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'Yes closes it'
 
     # ---- a wrong password ----
 

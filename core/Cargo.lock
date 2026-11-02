@@ -689,6 +689,7 @@ dependencies = [
 name = "pe-core"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "keyring-core",
  "pe-autoconfig",
  "pe-html",
@@ -728,6 +729,7 @@ version = "0.1.0"
 dependencies = [
  "ammonia",
  "base64",
+ "getrandom 0.4.3",
 ]
 
 [[package]]

@@ -12,6 +12,9 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 
+mod editor;
+pub use editor::{Picture, editor_document, outgoing_html, picture_uri, quote_html};
+
 /// An image a message carries for its HTML, referenced as `cid:` (multipart/related)
 #[derive(Debug, Clone, Copy)]
 pub struct InlineImage<'a> {
@@ -33,11 +36,10 @@ pub struct RenderOptions {
 /// does not make a document of gigabytes
 const MAX_EMBEDDED_BYTES: usize = 64 * 1024 * 1024;
 
-/// The sanitizer for a message with `images`. Mail layout lives in inline styles, style elements and old presentational
-/// attributes. CSS can not run code, and what it could load from the network is refused by the CSP and by the WebView2
-/// request filter.
-fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
-    let embedder = Embedder::new(images);
+/// The sanitizer of mail markup without an attribute filter (ammonia takes one, set by the caller). Mail layout lives
+/// in inline styles, style elements and old presentational attributes. CSS can not run code, and what it could load
+/// from the network is refused by the CSP and by the WebView2 request filter.
+pub(crate) fn mail_builder() -> ammonia::Builder<'static> {
     let mut builder = ammonia::Builder::default();
     builder
         .rm_clean_content_tags(["style"])
@@ -58,26 +60,35 @@ fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
             "size",
             "dir",
         ])
-        .url_schemes(HashSet::from(["http", "https", "mailto", "cid", "data"]))
-        .attribute_filter(move |element, attribute, value| {
-            let img_src = element == "img" && attribute == "src";
-            let scheme = value
-                .trim_start()
-                .get(..5)
-                .map(str::to_ascii_lowercase)
-                .unwrap_or_default();
-            if scheme == "data:" && !img_src {
-                // data: is for images only, a data: link could open a document of its own
-                return None;
-            }
-            if scheme.starts_with("cid:")
-                && (img_src || attribute == "background")
-                && let Some(uri) = embedder.embed(value)
-            {
-                return Some(Cow::Owned(uri));
-            }
-            Some(Cow::Borrowed(value))
-        });
+        .url_schemes(HashSet::from(["http", "https", "mailto", "cid", "data"]));
+    builder
+}
+
+/// The sanitizer for a message with `images`. Mail layout lives in inline styles, style elements and old presentational
+/// attributes. CSS can not run code, and what it could load from the network is refused by the CSP and by the WebView2
+/// request filter.
+pub(crate) fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
+    let embedder = Embedder::new(images);
+    let mut builder = mail_builder();
+    builder.attribute_filter(move |element, attribute, value| {
+        let img_src = element == "img" && attribute == "src";
+        let scheme = value
+            .trim_start()
+            .get(..5)
+            .map(str::to_ascii_lowercase)
+            .unwrap_or_default();
+        if scheme == "data:" && !img_src {
+            // data: is for images only, a data: link could open a document of its own
+            return None;
+        }
+        if scheme.starts_with("cid:")
+            && (img_src || attribute == "background")
+            && let Some(uri) = embedder.embed(value)
+        {
+            return Some(Cow::Owned(uri));
+        }
+        Some(Cow::Borrowed(value))
+    });
     builder
 }
 

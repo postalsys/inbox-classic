@@ -3,8 +3,9 @@
 
 use std::path::PathBuf;
 
+use pe_html::InlineImage;
 use pe_mime::Address;
-use pe_mime::parser::{self, ParsedAddress, html_to_text, parse_addresses, text_addresses};
+use pe_mime::parser::{self, ParsedAddress, html_to_text, parse_addresses, text_addresses, text_to_html};
 use pe_smtp::{Attachment, Message};
 use pe_store::AccountSettings;
 
@@ -16,7 +17,12 @@ pub struct Outgoing {
     pub cc: String,
     pub bcc: String,
     pub subject: String,
+    /// The plain text, for a message written without the editor; ignored when `html` is there
     pub text: String,
+    /// What was written in the editor, as HTML; the text part is made from it
+    pub html: Option<String>,
+    /// The quoted message of the draft ([`Draft::quote`]), added after `html`
+    pub quote: Option<String>,
     /// Files to attach
     pub attachments: Vec<PathBuf>,
     pub in_reply_to: Option<String>,
@@ -36,7 +42,10 @@ pub struct Draft {
     pub to: String,
     pub cc: String,
     pub subject: String,
-    pub text: String,
+    /// The message replied to or forwarded, as sanitized HTML with its header block (see [`pe_html::quote_html`])
+    pub quote: String,
+    /// The quote starts folded behind "..." (a reply), or open (a forward, where it is what is sent)
+    pub quote_folded: bool,
     pub in_reply_to: Option<String>,
     pub references: Vec<String>,
 }
@@ -120,6 +129,23 @@ pub fn message(account: &AccountSettings, outgoing: &Outgoing, now: i64) -> Resu
             content_id: None,
         });
     }
+    let (text, html) = match &outgoing.html {
+        Some(written) => {
+            let domain = account
+                .email
+                .rsplit_once('@')
+                .map_or("postalexpress.invalid", |(_, d)| d);
+            let (html, pictures) = pe_html::outgoing_html(written, outgoing.quote.as_deref(), domain);
+            attachments.extend(pictures.into_iter().map(|picture| Attachment {
+                filename: String::new(),
+                content_type: picture.mime_type,
+                content: picture.data,
+                content_id: Some(picture.content_id),
+            }));
+            (html_to_text(&html).trim_start().to_string(), Some(html))
+        }
+        None => (outgoing.text.clone(), None),
+    };
     Ok(Message {
         from: Address {
             name: account.name.clone(),
@@ -129,7 +155,8 @@ pub fn message(account: &AccountSettings, outgoing: &Outgoing, now: i64) -> Resu
         cc,
         bcc,
         subject: outgoing.subject.clone(),
-        text: Some(outgoing.text.clone()),
+        text: Some(text),
+        html,
         attachments,
         in_reply_to: outgoing.in_reply_to.clone(),
         references: outgoing.references.clone(),
@@ -188,30 +215,43 @@ pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Dr
     let Ok(message) = parser::parse(source) else {
         return Draft::default();
     };
-    let original = message
-        .text
-        .clone()
-        .or_else(|| message.html.as_deref().map(html_to_text))
-        .unwrap_or_default();
     let from = message.from.as_slice();
     let sender = if message.reply_to.is_empty() {
         from
     } else {
         &message.reply_to
     };
-    let header = format!(
-        "\n\n----- Original Message -----\nFrom: {}\nTo: {}\n{}Sent: {}\nSubject: {}\n\n",
-        text_addresses(from),
-        text_addresses(&message.to),
-        if message.cc.is_empty() {
-            String::new()
-        } else {
-            format!("Cc: {}\n", text_addresses(&message.cc))
-        },
-        date.map(pe_smtp::message::format_date).unwrap_or_default(),
-        message.subject.as_deref().unwrap_or_default(),
-    );
-    let mut draft = Draft::default();
+    let reply = kind != DraftKind::Forward;
+    let images: Vec<InlineImage> = message
+        .attachments
+        .iter()
+        .filter_map(|a| {
+            Some(InlineImage {
+                content_id: a.content_id.as_deref()?,
+                mime_type: &a.mime_type,
+                data: &a.content,
+            })
+        })
+        .collect();
+    let body = match (&message.html, &message.text) {
+        (Some(html), _) => html.clone(),
+        (None, Some(text)) => text_to_html(text),
+        (None, None) => String::new(),
+    };
+    let (to, cc) = (text_addresses(&message.to), text_addresses(&message.cc));
+    let sent = date.map(pe_smtp::message::format_date).unwrap_or_default();
+    let header = [
+        ("From", text_addresses(from)),
+        ("To", to),
+        ("Cc", cc),
+        ("Sent", sent),
+        ("Subject", message.subject.clone().unwrap_or_default()),
+    ];
+    let mut draft = Draft {
+        quote: pe_html::quote_html(&header, &body, &images, reply),
+        quote_folded: reply,
+        ..Default::default()
+    };
     match kind {
         DraftKind::Reply | DraftKind::ReplyAll => {
             draft.to = editable(sender);
@@ -222,15 +262,12 @@ pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Dr
                 draft.cc = editable(&others(&message.cc, own));
             }
             draft.subject = prefixed("Re: ", message.subject.as_deref().unwrap_or_default());
-            let quoted: Vec<String> = original.lines().map(|line| format!("> {line}")).collect();
-            draft.text = format!("{header}{}\n", quoted.join("\n"));
             draft.in_reply_to = message.message_id.clone();
             draft.references = message.reference_ids();
             draft.references.extend(message.message_id.clone());
         }
         DraftKind::Forward => {
             draft.subject = prefixed("Fw: ", message.subject.as_deref().unwrap_or_default());
-            draft.text = format!("{header}{original}");
         }
     }
     draft
@@ -263,8 +300,14 @@ mod tests {
         assert_eq!(reply.to, "Ann <ann@example.com>");
         assert_eq!(reply.cc, "");
         assert_eq!(reply.subject, "Re: Plans");
-        assert!(reply.text.contains("> Let's meet.\n> Tomorrow?"), "{}", reply.text);
-        assert!(reply.text.contains("Sent: Mon, 06 Oct 2025 10:00:00 +0000"));
+        assert!(reply.quote.starts_with("<blockquote"), "{}", reply.quote);
+        assert!(
+            reply.quote.contains("Let's meet.") && reply.quote.contains("Tomorrow?"),
+            "{}",
+            reply.quote
+        );
+        assert!(reply.quote.contains("<b>Sent:</b> Mon, 06 Oct 2025 10:00:00 +0000"));
+        assert!(reply.quote_folded);
         assert_eq!(reply.in_reply_to.as_deref(), Some("<m2@example.com>"));
         assert_eq!(reply.references, ["<m1@example.com>", "<m2@example.com>"]);
 
@@ -289,7 +332,8 @@ mod tests {
 
         let forward = draft(ORIGINAL, DraftKind::Forward, "me@example.com", None);
         assert_eq!((forward.to.as_str(), forward.subject.as_str()), ("", "Fw: Plans"));
-        assert!(forward.text.contains("Let's meet.\nTomorrow?"));
+        assert!(forward.quote.contains("Let's meet.") && !forward.quote.contains("<blockquote"));
+        assert!(!forward.quote_folded);
         assert_eq!(forward.in_reply_to, None);
 
         assert_eq!(prefixed("Re: ", "RE: x"), "RE: x");
@@ -321,5 +365,36 @@ mod tests {
             self::message(&account(), &outgoing, 0),
             Err(ComposeError::Attachment(..))
         ));
+    }
+
+    #[test]
+    fn html_messages() {
+        let reply = draft(ORIGINAL, DraftKind::Reply, "me@example.com", None);
+        let picture = format!("data:image/gif;base64,{}", "R0lGODlhAQABAAAAACw=");
+        let outgoing = Outgoing {
+            to: reply.to.clone(),
+            subject: reply.subject.clone(),
+            html: Some(format!(
+                "<div>Yes, <b>tomorrow</b>.</div><img src=\"{picture}\"><script>x()</script>"
+            )),
+            quote: Some(reply.quote.clone()),
+            ..Default::default()
+        };
+        let message = message(&account(), &outgoing, 0).unwrap();
+        let html = message.html.as_deref().unwrap();
+        assert!(html.starts_with("<div>Yes, <b>tomorrow</b>.</div>"), "{html}");
+        assert!(html.contains("Let's meet.") && !html.contains("<script"), "{html}");
+        // the plain text part says the same
+        let text = message.text.as_deref().unwrap();
+        assert!(text.starts_with("Yes, tomorrow."), "{text}");
+        assert!(text.contains("Let's meet."), "{text}");
+        // the picture goes beside the HTML, referenced by its Content-ID
+        assert_eq!(message.attachments.len(), 1);
+        let cid = message.attachments[0].content_id.clone().unwrap();
+        assert!(
+            cid.ends_with("@example.com") && html.contains(&format!("cid:{cid}")),
+            "{html}"
+        );
+        assert_eq!(message.attachments[0].content_type, "image/gif");
     }
 }

@@ -947,7 +947,12 @@ pub struct PeOutgoing {
     pub cc: *const c_char,
     pub bcc: *const c_char,
     pub subject: *const c_char,
+    /// The plain text, for a message without `html`
     pub text: *const c_char,
+    /// What was written in the editor, as HTML, or NULL for a plain text message
+    pub html: *const c_char,
+    /// The `quote` of the draft, added after `html`, or NULL
+    pub quote: *const c_char,
     /// From the draft of a reply, or NULL
     pub in_reply_to: *const c_char,
     /// From the draft of a reply, space separated, or NULL
@@ -989,6 +994,9 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         bcc: text(o.bcc)?,
         subject: text(o.subject)?,
         text: text(o.text)?,
+        // NULL is a plain text message, not an empty HTML one
+        html: if o.html.is_null() { None } else { Some(text(o.html)?) },
+        quote: Some(text(o.quote)?).filter(|q| !q.is_empty()),
         attachments,
         in_reply_to: Some(text(o.in_reply_to)?).filter(|r| !r.is_empty()),
         references: text(o.references)?.split_whitespace().map(str::to_string).collect(),
@@ -1041,7 +1049,10 @@ pub struct PeDraftInfo {
     pub to: *const c_char,
     pub cc: *const c_char,
     pub subject: *const c_char,
-    pub text: *const c_char,
+    /// The quoted message, for `pe_editor_document` and PeOutgoing; empty for a new message
+    pub quote: *const c_char,
+    /// The quote starts folded behind "..." (a reply) or open (a forward)
+    pub quote_folded: bool,
     /// For PeOutgoing, NULL when there is none
     pub in_reply_to: *const c_char,
     /// For PeOutgoing, space separated
@@ -1082,8 +1093,8 @@ pub unsafe extern "C" fn pe_message_draft(
                 to: strings.add(&draft.to),
                 cc: strings.add(&draft.cc),
                 subject: strings.add(&draft.subject),
-                // edit controls break lines at CRLF
-                text: strings.add(&draft.text.replace('\n', "\r\n")),
+                quote: strings.add(&draft.quote),
+                quote_folded: draft.quote_folded,
                 in_reply_to: draft.in_reply_to.as_deref().map_or(null(), |r| strings.add(r)),
                 references: strings.add(&draft.references.join(" ")),
             };

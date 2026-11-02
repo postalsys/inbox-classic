@@ -60,6 +60,44 @@ pub unsafe extern "C" fn pe_html_render(html: *const u8, len: usize, allow_remot
     .unwrap_or(null_mut())
 }
 
+/// The page of the compose window's editor, with the quoted message `quote` (from the draft, or NULL for a new
+/// message) folded behind "..." when `folded`. NULL on failure. Free with `pe_string_free`.
+///
+/// # Safety
+/// `quote` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_editor_document(quote: *const c_char, folded: bool) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let quote = if quote.is_null() {
+        None
+    } else {
+        Some(unsafe { std::ffi::CStr::from_ptr(quote) }.to_string_lossy())
+    };
+    guard(|| into_c_string(pe_html::editor_document(quote.as_deref(), folded))).unwrap_or(null_mut())
+}
+
+/// The picture file at `path` (UTF-8) as a `data:` URI for the editor's Insert Picture, NULL when it can not be
+/// read or is not a PNG, JPEG or GIF picture (by its content, not its name). Free with `pe_string_free`.
+///
+/// # Safety
+/// `path` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_picture_uri(path: *const c_char) -> *mut c_char {
+    if path.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let Ok(path) = unsafe { std::ffi::CStr::from_ptr(path) }.to_str() else {
+        return null_mut();
+    };
+    guard(|| {
+        let data = std::fs::read(path).ok()?;
+        pe_html::picture_uri(&data).map(into_c_string)
+    })
+    .flatten()
+    .unwrap_or(null_mut())
+}
+
 /// Frees a string returned by this library. NULL is ignored.
 ///
 /// # Safety
@@ -76,6 +114,39 @@ pub unsafe extern "C" fn pe_string_free(text: *mut c_char) {
 mod tests {
     use super::*;
     use std::ffi::CStr;
+
+    #[test]
+    fn editor_pages_and_pictures() {
+        let quote = CString::new("<p>old</p>").unwrap();
+        let page = unsafe { pe_editor_document(quote.as_ptr(), true) };
+        let text = unsafe { CStr::from_ptr(page) }.to_str().unwrap().to_string();
+        unsafe { pe_string_free(page) };
+        assert!(
+            text.contains("contenteditable") && text.contains("data-folded=\"1\""),
+            "{text}"
+        );
+        let page = unsafe { pe_editor_document(std::ptr::null(), false) };
+        assert!(!unsafe { CStr::from_ptr(page) }.to_str().unwrap().contains("<iframe"));
+        unsafe { pe_string_free(page) };
+
+        let dir = std::env::temp_dir().join(format!("pe-picture-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let gif = dir.join("x.txt");
+        std::fs::write(&gif, b"GIF89a").unwrap();
+        let path = CString::new(gif.to_str().unwrap()).unwrap();
+        let uri = unsafe { pe_picture_uri(path.as_ptr()) };
+        assert_eq!(
+            unsafe { CStr::from_ptr(uri) }.to_str().unwrap(),
+            "data:image/gif;base64,R0lGODlh"
+        );
+        unsafe { pe_string_free(uri) };
+        std::fs::write(&gif, b"<svg>").unwrap();
+        assert!(unsafe { pe_picture_uri(path.as_ptr()) }.is_null());
+        let missing = CString::new(dir.join("missing").to_str().unwrap()).unwrap();
+        assert!(unsafe { pe_picture_uri(missing.as_ptr()) }.is_null());
+        assert!(unsafe { pe_picture_uri(std::ptr::null()) }.is_null());
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
 
     #[test]
     fn version_matches_the_crate() {

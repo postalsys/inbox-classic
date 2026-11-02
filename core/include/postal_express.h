@@ -221,7 +221,12 @@ typedef struct PeOutgoing {
   const char *cc;
   const char *bcc;
   const char *subject;
+  // The plain text, for a message without `html`
   const char *text;
+  // What was written in the editor, as HTML, or NULL for a plain text message
+  const char *html;
+  // The `quote` of the draft, added after `html`, or NULL
+  const char *quote;
   // From the draft of a reply, or NULL
   const char *in_reply_to;
   // From the draft of a reply, space separated, or NULL
@@ -236,7 +241,10 @@ typedef struct PeDraftInfo {
   const char *to;
   const char *cc;
   const char *subject;
-  const char *text;
+  // The quoted message, for `pe_editor_document` and PeOutgoing; empty for a new message
+  const char *quote;
+  // The quote starts folded behind "..." (a reply) or open (a forward)
+  bool quote_folded;
   // For PeOutgoing, NULL when there is none
   const char *in_reply_to;
   // For PeOutgoing, space separated
@@ -272,6 +280,21 @@ const char *pe_version(void);
 char *pe_html_render(const uint8_t *html,
                      size_t len,
                      bool allow_remote_images);
+
+// The page of the compose window's editor, with the quoted message `quote` (from the draft, or NULL for a new
+// message) folded behind "..." when `folded`. NULL on failure. Free with `pe_string_free`.
+//
+// # Safety
+// `quote` must be NULL or a NUL-terminated string.
+char *pe_editor_document(const char *quote,
+                         bool folded);
+
+// The picture file at `path` (UTF-8) as a `data:` URI for the editor's Insert Picture, NULL when it can not be
+// read or is not a PNG, JPEG or GIF picture (by its content, not its name). Free with `pe_string_free`.
+//
+// # Safety
+// `path` must be NULL or a NUL-terminated string.
+char *pe_picture_uri(const char *path);
 
 // Frees a string returned by this library. NULL is ignored.
 //

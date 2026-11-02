@@ -234,8 +234,31 @@ fn sends_replies_and_keeps_a_copy() {
     assert_eq!(reply.subject, "Re: Plans for õhtu");
     assert_eq!(reply.to, "Ann <ann@example.com>");
     assert_eq!(reply.cc, "bob@example.com");
-    assert!(reply.text.contains("> Shall we meet?"));
+    assert!(reply.quote.contains("Shall we meet?"), "{}", reply.quote);
     assert!(reply.in_reply_to.is_some());
+
+    // the reply as the editor sends it: HTML, the quote after it, a text part made from both
+    let answer = pe_core::Outgoing {
+        to: reply.to.clone(),
+        subject: reply.subject.clone(),
+        html: Some("<div>Yes, at <b>six</b>.</div>".into()),
+        quote: Some(reply.quote.clone()),
+        in_reply_to: reply.in_reply_to.clone(),
+        references: reply.references.clone(),
+        ..Default::default()
+    };
+    s.core.send(account, answer).unwrap();
+    s.wait(|e| *e == Event::MessageSent { account });
+    let delivered = s.server.messages("INBOX");
+    let raw = delivered.last().unwrap()["raw"].as_str().unwrap();
+    let raw =
+        String::from_utf8(base64::Engine::decode(&base64::engine::general_purpose::STANDARD, raw).unwrap()).unwrap();
+    assert!(raw.contains("multipart/alternative"), "{raw}");
+    assert!(
+        raw.contains("Content-Type: text/html") && raw.contains("Content-Type: text/plain"),
+        "{raw}"
+    );
+    assert!(raw.contains("<b>six</b>") && raw.contains("Original Message"), "{raw}");
 
     // a recipient that is no address: nothing is sent
     let bad = pe_core::Outgoing {
@@ -245,7 +268,7 @@ fn sends_replies_and_keeps_a_copy() {
     };
     let refused = s.core.send(account, bad).unwrap_err();
     assert!(refused.to_string().contains("not an e-mail address"), "{refused}");
-    assert_eq!(s.server.messages("INBOX").len(), 1);
+    assert_eq!(s.server.messages("INBOX").len(), 2);
 }
 
 #[test]

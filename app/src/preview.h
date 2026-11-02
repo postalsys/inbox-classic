@@ -28,8 +28,12 @@ private:
 
     HWND parent_ = nullptr;
     RECT bounds_ = {};
-    // a document given before the WebView2 was ready
-    std::wstring pending_;
+    // the document shown, served when the page asks for it (webview.h)
+    std::wstring document_;
+    // a document was given before the WebView2 was ready
+    bool pending_ = false;
+    // documents shown, for an address of each
+    unsigned shown_ = 0;
     bool remoteImages_ = false;
     std::function<void(const std::wstring&)> onError_;
     Microsoft::WRL::ComPtr<ICoreWebView2Environment> environment_;

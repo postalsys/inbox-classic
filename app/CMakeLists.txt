@@ -40,11 +40,13 @@ add_executable(PostalExpress WIN32
     src/main.cpp
     src/accounts.cpp
     src/compose.cpp
+    src/editor.cpp
     src/core.cpp
     src/help.cpp
     src/mailbox.cpp
     src/ui.cpp
     src/preview.cpp
+    src/webview.cpp
     res/app.rc
 )
 add_dependencies(PostalExpress pe_core_cargo)

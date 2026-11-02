@@ -8,3 +8,4 @@ publish.workspace = true
 [dependencies]
 ammonia.workspace = true
 base64.workspace = true
+getrandom.workspace = true

@@ -202,13 +202,16 @@ fn reads_mail_through_the_c_api() {
     std::fs::write(&attachment_path, b"attached note").unwrap();
     let attachment_path = c(attachment_path.to_str().unwrap());
     let attachments = [attachment_path.as_ptr()];
-    let (body, empty) = (c("My answer"), c(""));
+    let (body, empty, html) = (c("My answer"), c(""), c("<p>My <b>answer</b></p>"));
+    assert!(info.quote_folded && text(info.quote).contains("Original Message"));
     let outgoing = PeOutgoing {
         to: info.to,
         cc: empty.as_ptr(),
         bcc: empty.as_ptr(),
         subject: info.subject,
-        text: body.as_ptr(),
+        text: empty.as_ptr(),
+        html: html.as_ptr(),
+        quote: info.quote,
         in_reply_to: info.in_reply_to,
         references: info.references,
         attachments: attachments.as_ptr(),
@@ -224,6 +227,15 @@ fn reads_mail_through_the_c_api() {
         raw.contains("Subject: Re: Report\r\n") && raw.contains("filename=note.txt"),
         "{raw}"
     );
+    // the editor's HTML with the quote after it, and the text made from them
+    assert!(
+        raw.contains("<b>answer</b>") && raw.contains("Original Message"),
+        "{raw}"
+    );
+    assert!(
+        raw.contains("Content-Type: text/plain") && !raw.contains("<script"),
+        "{raw}"
+    );
     assert!(!unsafe { pe_message_send(core, account, std::ptr::null(), null_mut()) });
     // a typo in the address: refused right away, with the reason
     let bad = c("not an address");
@@ -234,6 +246,8 @@ fn reads_mail_through_the_c_api() {
         bcc: empty.as_ptr(),
         subject: empty.as_ptr(),
         text: body.as_ptr(),
+        html: std::ptr::null(),
+        quote: std::ptr::null(),
         in_reply_to: std::ptr::null(),
         references: std::ptr::null(),
         attachments: std::ptr::null(),
