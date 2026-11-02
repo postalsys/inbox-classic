@@ -292,7 +292,12 @@ try {
         SetText $second 108 "$($ports.smtp)"
         # ImapKit's SMTP server takes a password only after STARTTLS
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 109), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
-        if ($shots) { Shot $second 'account-3-servers' }
+        if ($shots) {
+            # brought to the front and painted before the picture
+            [void][Native.Win]::SetForegroundWindow($second)
+            Start-Sleep -Milliseconds 700
+            Shot $second 'account-3-servers'
+        }
         Click $second 1
         $warning = WaitWindow '#32770' 'Add Mail Account'
         Check ($null -ne $warning) 'a connection without encryption is warned about'
@@ -800,10 +805,10 @@ try {
     Check ($null -ne $accounts) 'File > Accounts lists the accounts'
     if ($accounts) {
         $listBox = [Native.Win]::GetDlgItem($accounts, 400)
-        Check ([int][Native.Win]::SendMessage($listBox, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 2) 'both accounts are listed'
+        Check ([int][Native.Win]::SendMessage($listBox, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 2) 'both accounts are listed'
         Shot $accounts 'accounts-1-list'
         # Properties of the first: a new display name
-        [void][Native.Win]::SendMessage($listBox, $LB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
+        # the first account is selected when the list opens, and stays so after a change
         Click $accounts 402
         $properties = WaitFor {
             $f = [Native.Win]::FindWindow('PostalExpressForm', 'Properties')
@@ -823,7 +828,7 @@ try {
             }
         }
         # read back in Properties (the text of a list entry does not cross processes)
-        [void][Native.Win]::SendMessage($listBox, $LB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
+        # the first account is selected when the list opens, and stays so after a change
         Click $accounts 402
         $again = WaitFor {
             $f = [Native.Win]::FindWindow('PostalExpressForm', 'Properties')
@@ -836,12 +841,14 @@ try {
         }
         # Remove the second, the one with the wrong password
         $before = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
-        [void][Native.Win]::SendMessage($listBox, $LB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
-        Click $accounts 403
+        Key $listBox $VK_DOWN
+        Start-Sleep -Milliseconds 300
+        # the Delete key in the list does what Remove does
+        Key $listBox $VK_DELETE
         $sure = WaitWindow '#32770' 'Remove Account' 10
-        Check ($null -ne $sure) 'Remove asks first'
+        Check ($null -ne $sure) 'Remove (or Delete) asks first'
         if ($sure) { Click $sure 6 }
-        Check ([bool](WaitFor { [int][Native.Win]::SendMessage($listBox, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 })) 'and removes it'
+        Check ([bool](WaitFor { [int][Native.Win]::SendMessage($listBox, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 })) 'and removes it'
         Click $accounts 404
         [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
         $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }

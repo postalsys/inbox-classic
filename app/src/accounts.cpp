@@ -2,6 +2,8 @@
 // connects.
 #include "app.h"
 
+#include <algorithm>
+
 #include <shellapi.h>
 
 namespace {
@@ -353,20 +355,35 @@ struct AccountsState {
     bool changed = false;
 };
 
-void FillAccounts(AccountsState* state) {
-    SendMessageW(state->list, LB_RESETCONTENT, 0, 0);
+enum AccountColumn { COL_NAME, COL_EMAIL, COL_SERVER };
+
+// a row per account: its name, address and incoming server (or the provider's sign-in); `select` stays selected
+void FillAccounts(AccountsState* state, int select = 0) {
+    ListView_DeleteAllItems(state->list);
     state->ids.clear();
     state->oauth.clear();
     core::AccountList accounts(pe_accounts(state->core));
     for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
-        std::wstring line = Text(account->name) + L"  <" + Text(account->email) + L">";
-        SendMessageW(state->list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(line.c_str()));
+        std::wstring name = Text(account->name);
+        LVITEMW item = {};
+        item.mask = LVIF_TEXT;
+        item.iItem = static_cast<int>(i);
+        item.pszText = name.data();
+        int row = ListView_InsertItem(state->list, &item);
+        std::wstring email = Text(account->email);
+        ListView_SetItemText(state->list, row, COL_EMAIL, email.data());
+        core::AccountSettings settings(pe_account_settings(state->core, account->id));
+        const PeAccountSettings* info = pe_account_settings_info(settings.get());
+        bool oauth = account->oauth != PE_O_AUTH_PROVIDER_NONE;
+        std::wstring server = info ? Text(info->imap_host) + (oauth ? L" (browser sign-in)" : L"") : L"";
+        ListView_SetItemText(state->list, row, COL_SERVER, server.data());
         state->ids.push_back(account->id);
-        state->oauth.push_back(account->oauth != PE_O_AUTH_PROVIDER_NONE);
+        state->oauth.push_back(oauth);
     }
     if (!state->ids.empty()) {
-        SendMessageW(state->list, LB_SETCURSEL, 0, 0);
+        int row = std::min(select, static_cast<int>(state->ids.size()) - 1);
+        ListView_SetItemState(state->list, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
     }
 }
 
@@ -438,15 +455,14 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account, bool oauth) {
     return saved;
 }
 
-void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id, WORD code) {
-    LRESULT index = SendMessageW(state->list, LB_GETCURSEL, 0, 0);
+void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id) {
+    int index = ListView_GetNextItem(state->list, -1, LVNI_SELECTED);
     bool chosen = index >= 0 && static_cast<size_t>(index) < state->ids.size();
     int64_t account = chosen ? state->ids[index] : 0;
-    bool properties = id == IDC_ACCOUNT_PROPERTIES || (id == IDC_ACCOUNT_LIST && code == LBN_DBLCLK);
-    if (properties) {
+    if (id == IDC_ACCOUNT_PROPERTIES) {
         if (chosen && AccountProperties(hwnd, state->core, account, state->oauth[index])) {
             state->changed = true;
-            FillAccounts(state);
+            FillAccounts(state, index);
         }
         return;
     }
@@ -464,7 +480,7 @@ void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id, WORD code) {
                                    L"Remove Account", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
             pe_account_remove(state->core, account);
             state->changed = true;
-            FillAccounts(state);
+            FillAccounts(state, index);
         }
         return;
     case IDC_ACCOUNT_CLOSE:
@@ -479,9 +495,23 @@ LRESULT CALLBACK AccountsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
     switch (message) {
     case WM_COMMAND:
         if (state) {
-            OnAccountsCommand(hwnd, state, LOWORD(wParam), HIWORD(wParam));
+            // Enter in the list is IDOK of the window: Properties of the selected account
+            WORD id = LOWORD(wParam) == IDOK && GetFocus() == state->list ? IDC_ACCOUNT_PROPERTIES : LOWORD(wParam);
+            OnAccountsCommand(hwnd, state, id);
         }
         return 0;
+    case WM_NOTIFY: {
+        auto* header = reinterpret_cast<NMHDR*>(lParam);
+        if (state && header->hwndFrom == state->list) {
+            // a double-click opens Properties, Delete removes
+            if (header->code == LVN_ITEMACTIVATE) {
+                OnAccountsCommand(hwnd, state, IDC_ACCOUNT_PROPERTIES);
+            } else if (header->code == LVN_KEYDOWN && reinterpret_cast<NMLVKEYDOWN*>(lParam)->wVKey == VK_DELETE) {
+                OnAccountsCommand(hwnd, state, IDC_ACCOUNT_REMOVE);
+            }
+        }
+        return 0;
+    }
     case WM_CLOSE:
         if (state) {
             state->done = true;
@@ -508,15 +538,20 @@ bool AccountsDialog(HWND owner, PeCore* core) {
         registered = true;
     }
     int pad = Scale(10);
-    int width = Scale(460);
+    int width = Scale(600);
     int height = Scale(240);
     HWND dialog = CreateModalWindow(owner, kAccountsClass, L"Accounts", width, height);
     AccountsState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     int buttonWidth = Scale(100);
     int listRight = width - pad - buttonWidth - pad;
-    state.list = CreateChild(dialog, L"LISTBOX", L"", WS_TABSTOP | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT, IDC_ACCOUNT_LIST,
-                             {pad, pad, listRight, height - pad}, WS_EX_CLIENTEDGE);
+    state.list = CreateChild(dialog, WC_LISTVIEWW, nullptr, WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER,
+                             IDC_ACCOUNT_LIST, {pad, pad, listRight, height - pad}, WS_EX_CLIENTEDGE);
+    ListView_SetExtendedListViewStyle(state.list, LVS_EX_FULLROWSELECT);
+    AddColumn(state.list, COL_NAME, L"Account", 120);
+    AddColumn(state.list, COL_EMAIL, L"E-mail address", 170);
+    AddColumn(state.list, COL_SERVER, L"Incoming server", 100);
+    ListView_SetColumnWidth(state.list, COL_SERVER, LVSCW_AUTOSIZE_USEHEADER);
     struct Button {
         WORD id;
         const wchar_t* text;
