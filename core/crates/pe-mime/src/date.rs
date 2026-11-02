@@ -89,8 +89,9 @@ pub fn zone_offset(zone: &str) -> i64 {
         Some(b'-') => -1,
         _ => 0,
     };
+    // four ASCII digits: anything else is no offset, and slicing it could cut a character
     if sign != 0
-        && let Some(digits) = zone.get(1..5)
+        && let Some(digits) = zone.get(1..5).filter(|d| d.bytes().all(|b| b.is_ascii_digit()))
         && let (Ok(hours), Ok(minutes)) = (digits[..2].parse::<i64>(), digits[2..].parse::<i64>())
     {
         return sign * (hours * 3600 + minutes * 60);
@@ -204,5 +205,12 @@ mod tests {
         assert_eq!(zone_offset("+0530"), 19_800);
         assert_eq!(zone_offset("pst"), -28_800);
         assert_eq!(zone_offset("-07"), 0);
+        // found by the fuzzer: a zone of digits and a character of several bytes
+        assert_eq!(zone_offset("+\u{0}\u{fffd}"), 0);
+        assert_eq!(zone_offset("+1\u{fffd}"), 0);
+        assert_eq!(
+            parse_date("\u{1}  :    9  \u{1}        +\u{0}\u{fffd}\u{0}  \u{0}    :\u{fffd}"),
+            None
+        );
     }
 }

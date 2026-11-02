@@ -113,3 +113,18 @@ fn limits_hold() {
     }
     assert_eq!(parse_with(&long, limits).unwrap_err().code, "EMAXHEADERSIZE");
 }
+
+/// Inputs the fuzzer (core/fuzz) found to crash the parser, kept so they stay fixed
+#[test]
+fn fuzzer_findings() {
+    let findings: [&[u8]; 1] = [
+        // a Date zone of '+' and four bytes cutting a character in two
+        &[
+            100, 97, 116, 101, 58, 1, 32, 32, 58, 32, 32, 32, 32, 57, 32, 32, 1, 32, 32, 32, 32, 32, 32, 32, 32, 43, 0,
+            212, 0, 32, 32, 0, 32, 32, 32, 32, 58, 221,
+        ],
+    ];
+    for input in findings {
+        let _ = pe_mime::parser::parse(input);
+    }
+}
