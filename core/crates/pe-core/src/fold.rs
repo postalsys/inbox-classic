@@ -20,11 +20,37 @@ pub(crate) fn warm_up() {
 
 /// The body of `message` for the preview, as HTML (not yet sanitized), its history folded
 pub(crate) fn body(message: &Message) -> String {
-    match (&message.html, &message.text) {
-        (Some(html), _) => folded(message, Representation::Html).unwrap_or_else(|| html.clone()),
-        (None, Some(text)) => folded(message, Representation::Text).unwrap_or_else(|| text_to_html(text)),
-        (None, None) => String::new(),
+    let (representation, shown) = match (&message.html, &message.text) {
+        (Some(html), _) => (Representation::Html, html),
+        (None, Some(text)) => (Representation::Text, text),
+        (None, None) => return String::new(),
+    };
+    let key = key_of(representation, shown);
+    if let Some(body) = LAST.with_borrow(|last| last.as_ref().filter(|(k, _)| *k == key).map(|(_, b)| b.clone())) {
+        return body;
     }
+    let body = folded(message, representation).unwrap_or_else(|| match representation {
+        Representation::Html => shown.clone(),
+        Representation::Text => text_to_html(shown),
+    });
+    LAST.with_borrow_mut(|last| *last = Some((key, body.clone())));
+    body
+}
+
+thread_local! {
+    /// The last body folded on this thread: the same message shown again (its pictures allowed, say) is not
+    /// analyzed again
+    static LAST: std::cell::RefCell<Option<(u64, String)>> = const { std::cell::RefCell::new(None) };
+}
+
+/// A hash of the body shown, keyed at random for each run so no message can be made to match another
+fn key_of(representation: Representation, shown: &str) -> u64 {
+    use std::hash::{BuildHasher, Hash, Hasher};
+    static KEYS: std::sync::OnceLock<std::collections::hash_map::RandomState> = std::sync::OnceLock::new();
+    let mut hasher = KEYS.get_or_init(Default::default).build_hasher();
+    (representation == Representation::Html).hash(&mut hasher);
+    shown.hash(&mut hasher);
+    hasher.finish()
 }
 
 fn folded_segment(segment: &Segment) -> bool {
@@ -160,6 +186,19 @@ mod tests {
         assert_eq!(body_of(raw).trim(), "<p>Just a note.</p>");
         let plain = "From: Bob <bob@example.com>\r\nSubject: Hello\r\n\r\n> quoted alone is not history\r\nText.\r\n";
         assert!(!body_of(plain).contains("<details"));
+    }
+
+    #[test]
+    fn the_same_body_again_comes_from_the_cache() {
+        let raw = "From: Bob <bob@example.com>\r\nSubject: Re: x\r\nIn-Reply-To: <m1@example.com>\r\n\r\n\
+                   Yes.\r\n\r\nOn Mon, Oct 6, 2025 at 10:00 AM Ann <ann@example.com> wrote:\r\n> Hm?\r\n";
+        let first = body_of(raw);
+        assert!(first.contains("<details"), "{first}");
+        assert_eq!(body_of(raw), first);
+        // another body is not taken for it
+        let other = body_of(&raw.replace("Yes.", "No."));
+        assert!(other.contains("No.") && !other.contains("Yes."), "{other}");
+        assert_ne!(key_of(Representation::Html, "a"), key_of(Representation::Text, "a"));
     }
 
     #[test]

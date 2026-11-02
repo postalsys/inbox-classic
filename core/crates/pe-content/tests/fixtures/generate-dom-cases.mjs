@@ -55,7 +55,7 @@ const edge = [
     '<span><p>x</span>',
     '<a title="x>y">t</a>',
     '<a b="x>y" c>t</a>',
-    "<a b='x\"y' c=\"z'\">t</a>",
+    '<a b=\'x"y\' c="z\'">t</a>',
     '<a b="x"y>t</a>',
     '<a b="unterminated>t</a><p>after</p>',
     '<a "<a "<a ">x',

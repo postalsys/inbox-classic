@@ -54,9 +54,93 @@ fn fixed(imap: (&str, u16, ServerSecurity), smtp: (&str, u16, ServerSecurity), o
     })
 }
 
+/// A provider whose servers are the same for every domain it receives mail for
+struct Fixed {
+    matches: fn(&str) -> bool,
+    imap: (&'static str, u16, ServerSecurity),
+    smtp: (&'static str, u16, ServerSecurity),
+    oauth2: bool,
+}
+
+/// EmailEngine's table of hosts by their exchange (lib/autodetect-imap-settings.js, resolveUsingMX)
+const FIXED: &[Fixed] = &[
+    Fixed {
+        matches: |ex| numbered(ex, "mx", ".zone.eu"),
+        imap: ("mail.zone.ee", 993, Tls),
+        smtp: ("smtp.zone.ee", 465, Tls),
+        oauth2: false,
+    },
+    Fixed {
+        matches: |ex| ends_with_word(ex, "larksuite.com"),
+        imap: ("imap.larksuite.com", 993, Tls),
+        smtp: ("smtp.larksuite.com", 465, Tls),
+        oauth2: false,
+    },
+    Fixed {
+        matches: |ex| numbered(ex, "mx", ".zoho.eu"),
+        imap: ("imappro.zoho.eu", 993, Tls),
+        smtp: ("smtppro.zoho.eu", 465, Tls),
+        oauth2: false,
+    },
+    Fixed {
+        matches: |ex| numbered(ex, "mx", ".zoho.com"),
+        imap: ("imappro.zoho.com", 993, Tls),
+        smtp: ("smtppro.zoho.com", 465, Tls),
+        oauth2: false,
+    },
+    // Microsoft 365: its autodiscover does not hand out IMAP settings, these are fixed
+    Fixed {
+        matches: |ex| ends_with_word(ex, "protection.outlook.com"),
+        imap: ("outlook.office365.com", 993, Tls),
+        smtp: ("smtp.office365.com", 587, StartTls),
+        oauth2: true,
+    },
+    Fixed {
+        matches: |ex| ex == "mx.dka.mailcore.net",
+        imap: ("imap.dka.mailcore.net", 993, Tls),
+        smtp: ("smtp.dka.mailcore.net", 587, StartTls),
+        oauth2: false,
+    },
+    Fixed {
+        matches: |ex| ex == "ekiri.ee",
+        imap: ("turvaline.ekiri.ee", 993, Tls),
+        smtp: ("turvaline.ekiri.ee", 465, Tls),
+        oauth2: false,
+    },
+    Fixed {
+        matches: |ex| numbered(ex, "mx", ".sg.aliyun.com"),
+        imap: ("imap.sg.aliyun.com", 993, Tls),
+        smtp: ("smtp.sg.aliyun.com", 465, Tls),
+        oauth2: false,
+    },
+    // AT&T: mx-vip<digits>.prodigy.net and its subdomains
+    Fixed {
+        matches: |ex| {
+            ex.strip_suffix(".prodigy.net")
+                .is_some_and(|rest| rest.trim_end_matches(|c: char| c.is_ascii_digit()).ends_with("mx-vip"))
+        },
+        imap: ("imap.mail.att.net", 993, Tls),
+        smtp: ("smtp.mail.att.net", 465, Tls),
+        oauth2: false,
+    },
+    Fixed {
+        matches: |ex| numbered(ex, "mx", ".naver.com"),
+        imap: ("imap.naver.com", 993, Tls),
+        smtp: ("smtp.naver.com", 587, StartTls),
+        oauth2: false,
+    },
+    Fixed {
+        matches: |ex| numbered(ex, "mxbiz", ".qq.com"),
+        imap: ("imap.exmail.qq.com", 993, Tls),
+        smtp: ("smtp.exmail.qq.com", 465, Tls),
+        oauth2: false,
+    },
+];
+
 /// What the exchange (lowercase, no trailing dot) of a domain says about its servers; None for one not known
 pub fn delegate(exchange: &str) -> Option<Delegate> {
     let ex = exchange;
+    // the providers whose servers come from a lookup of their own
     if ends_with_word(ex, "l.google.com") {
         return Some(Delegate::Srv {
             domain: "gmail.com",
@@ -66,16 +150,6 @@ pub fn delegate(exchange: &str) -> Option<Delegate> {
     if ends_with_word(ex, "mx.yandex.net") {
         return Some(Delegate::Autoconfig("yandex.ru"));
     }
-    if numbered(ex, "mx", ".zone.eu") {
-        return Some(fixed(("mail.zone.ee", 993, Tls), ("smtp.zone.ee", 465, Tls), false));
-    }
-    if ends_with_word(ex, "larksuite.com") {
-        return Some(fixed(
-            ("imap.larksuite.com", 993, Tls),
-            ("smtp.larksuite.com", 465, Tls),
-            false,
-        ));
-    }
     if ends_with_word(ex, "zonemx.eu") {
         return Some(Delegate::Autoconfig("zone.ee"));
     }
@@ -84,74 +158,8 @@ pub fn delegate(exchange: &str) -> Option<Delegate> {
         let smtp = format!("smtp.mail.{region}.awsapps.com");
         return Some(fixed((&imap, 993, Tls), (&smtp, 465, Tls), false));
     }
-    if numbered(ex, "mx", ".zoho.eu") {
-        return Some(fixed(
-            ("imappro.zoho.eu", 993, Tls),
-            ("smtppro.zoho.eu", 465, Tls),
-            false,
-        ));
-    }
-    if numbered(ex, "mx", ".zoho.com") {
-        return Some(fixed(
-            ("imappro.zoho.com", 993, Tls),
-            ("smtppro.zoho.com", 465, Tls),
-            false,
-        ));
-    }
-    if ends_with_word(ex, "protection.outlook.com") {
-        // Microsoft 365: its autodiscover does not hand out IMAP settings, these are fixed
-        return Some(fixed(
-            ("outlook.office365.com", 993, Tls),
-            ("smtp.office365.com", 587, StartTls),
-            true,
-        ));
-    }
-    if ex == "mx.dka.mailcore.net" {
-        return Some(fixed(
-            ("imap.dka.mailcore.net", 993, Tls),
-            ("smtp.dka.mailcore.net", 587, StartTls),
-            false,
-        ));
-    }
-    if ex == "ekiri.ee" {
-        return Some(fixed(
-            ("turvaline.ekiri.ee", 993, Tls),
-            ("turvaline.ekiri.ee", 465, Tls),
-            false,
-        ));
-    }
-    if numbered(ex, "mx", ".sg.aliyun.com") {
-        return Some(fixed(
-            ("imap.sg.aliyun.com", 993, Tls),
-            ("smtp.sg.aliyun.com", 465, Tls),
-            false,
-        ));
-    }
-    if ex
-        .strip_suffix(".prodigy.net")
-        .is_some_and(|rest| rest.trim_end_matches(|c: char| c.is_ascii_digit()).ends_with("mx-vip"))
-    {
-        return Some(fixed(
-            ("imap.mail.att.net", 993, Tls),
-            ("smtp.mail.att.net", 465, Tls),
-            false,
-        ));
-    }
-    if numbered(ex, "mx", ".naver.com") {
-        return Some(fixed(
-            ("imap.naver.com", 993, Tls),
-            ("smtp.naver.com", 587, StartTls),
-            false,
-        ));
-    }
-    if numbered(ex, "mxbiz", ".qq.com") {
-        return Some(fixed(
-            ("imap.exmail.qq.com", 993, Tls),
-            ("smtp.exmail.qq.com", 465, Tls),
-            false,
-        ));
-    }
-    None
+    let entry = FIXED.iter().find(|entry| (entry.matches)(ex))?;
+    Some(fixed(entry.imap, entry.smtp, entry.oauth2))
 }
 
 #[cfg(test)]
