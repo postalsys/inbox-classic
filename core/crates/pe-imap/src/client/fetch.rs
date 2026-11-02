@@ -106,7 +106,7 @@ impl Client {
         &mut self,
         messages: &Messages,
         query: &FetchQuery,
-        each: &mut dyn FnMut(FetchedMessage),
+        each: &mut (dyn FnMut(FetchedMessage) + Send),
     ) -> Result<(), Error> {
         let mut next = Some(messages.clone());
         let mut ceiling = u64::MAX;
@@ -127,7 +127,7 @@ impl Client {
         &mut self,
         messages: &Messages,
         query: &FetchQuery,
-        each: &mut dyn FnMut(FetchedMessage),
+        each: &mut (dyn FnMut(FetchedMessage) + Send),
     ) -> Result<Completion, Error> {
         let exists = u64::from(self.require_selected()?.exists);
         let condstore = self.has_capability("CONDSTORE");

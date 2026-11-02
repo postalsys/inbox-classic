@@ -10,7 +10,14 @@ publish.workspace = true
 crate-type = ["staticlib", "lib"]
 
 [dependencies]
+pe-core = { path = "../pe-core" }
 pe-html.workspace = true
+pe-imap = { path = "../pe-imap" }
+pe-store = { path = "../pe-store" }
+
+[dev-dependencies]
+pe-testkit = { path = "../pe-testkit" }
+serde_json = "1"
 
 [build-dependencies]
 cbindgen = "0.29"

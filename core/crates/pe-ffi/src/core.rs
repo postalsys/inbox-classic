@@ -1,0 +1,826 @@
+//! The mail engine through C: a `PeCore` handle, lists of rows, the message view, and events
+//! delivered to a callback.
+//!
+//! Rows are `repr(C)` structs whose strings belong to the list or view they came from: they stay
+//! valid until that is freed. Functions that fail return NULL, 0 or false.
+
+use std::ffi::{CStr, CString, c_char, c_void};
+use std::ptr::{null, null_mut};
+
+use pe_core::{Core, Event, FailureKind};
+use pe_imap::SpecialUse;
+use pe_store::{AccountSettings, Security, Sort, SortField};
+
+use crate::{c_string, guard, into_c_string};
+
+/// Owns the strings of rows handed to C
+#[derive(Default)]
+struct Strings(Vec<CString>);
+
+impl Strings {
+    /// A C string that lives as long as `self`; NUL inside is replaced
+    fn add(&mut self, text: &str) -> *const c_char {
+        let text = c_string(text.to_string());
+        // the bytes are on the heap, moving the CString into the Vec does not move them
+        let pointer = text.as_ptr();
+        self.0.push(text);
+        pointer
+    }
+}
+
+/// The rows of a list handed to C, with the strings they point to
+struct Rows<T> {
+    rows: Vec<T>,
+    _strings: Strings,
+}
+
+impl<T> Rows<T> {
+    fn new<S>(items: &[S], mut row: impl FnMut(&S, &mut Strings) -> T) -> Self {
+        let mut strings = Strings::default();
+        let rows = items.iter().map(|item| row(item, &mut strings)).collect();
+        Rows {
+            rows,
+            _strings: strings,
+        }
+    }
+
+    fn count(list: Option<&Self>) -> usize {
+        list.map_or(0, |list| list.rows.len())
+    }
+
+    fn get(list: Option<&Self>, index: usize) -> *const T {
+        list.and_then(|list| list.rows.get(index)).map_or(null(), |row| row)
+    }
+}
+
+/// Moves a value to C
+fn handed<T>(value: T) -> *mut T {
+    Box::into_raw(Box::new(value))
+}
+
+/// Frees what [`handed`] gave C
+///
+/// # Safety
+/// `value` must be NULL or from [`handed`], freed once.
+unsafe fn take_back<T>(value: *mut T) {
+    if !value.is_null() {
+        // SAFETY: as the caller guarantees
+        drop(unsafe { Box::from_raw(value) });
+    }
+}
+
+/// Reads a C string argument; None for NULL or invalid UTF-8
+///
+/// # Safety
+/// `text` must be NULL or a NUL-terminated string.
+unsafe fn arg<'a>(text: *const c_char) -> Option<&'a str> {
+    if text.is_null() {
+        return None;
+    }
+    // SAFETY: the caller guarantees a NUL-terminated string
+    unsafe { CStr::from_ptr(text) }.to_str().ok()
+}
+
+// ---- events ----
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeEventKind {
+    SyncStarted = 1,
+    /// Comes after everything the sync found, failures included
+    SyncFinished = 2,
+    /// The folder list of `account` changed
+    FoldersChanged = 3,
+    /// The messages of `folder` or their flags changed
+    FolderChanged = 4,
+    /// `pe_message_view` can show `folder`/`uid` now
+    MessageReady = 5,
+    /// Work for `account` failed: `failure` and `message` say what
+    Failed = 6,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeFailureKind {
+    None = 0,
+    /// Not reachable now, try again later
+    Network = 1,
+    /// TLS failed
+    Security = 2,
+    /// The password was refused, or there is none
+    Authentication = 3,
+    Other = 4,
+}
+
+impl From<FailureKind> for PeFailureKind {
+    fn from(kind: FailureKind) -> Self {
+        match kind {
+            FailureKind::Network => PeFailureKind::Network,
+            FailureKind::Security => PeFailureKind::Security,
+            FailureKind::Authentication => PeFailureKind::Authentication,
+            FailureKind::Other => PeFailureKind::Other,
+        }
+    }
+}
+
+/// An event; valid only during the callback
+#[repr(C)]
+pub struct PeEvent {
+    pub kind: PeEventKind,
+    pub account: i64,
+    pub folder: i64,
+    pub uid: u64,
+    pub failure: PeFailureKind,
+    /// For `Failed`, UTF-8; NULL otherwise
+    pub message: *const c_char,
+}
+
+/// Called on a worker thread, never on the thread that called into the core: copy what is
+/// needed and post it to the window thread. It must not throw (make it `noexcept`), wait for
+/// the window thread, or call `pe_core_close`.
+pub type PeEventCallback = Option<unsafe extern "C" fn(context: *mut c_void, event: *const PeEvent)>;
+
+struct Callback {
+    function: unsafe extern "C" fn(*mut c_void, *const PeEvent),
+    context: *mut c_void,
+}
+
+// SAFETY: the C side promises a callback and context that may be used from any thread
+unsafe impl Send for Callback {}
+// SAFETY: as above
+unsafe impl Sync for Callback {}
+
+impl Callback {
+    fn deliver(&self, event: Event) {
+        let (kind, account, folder, uid) = match &event {
+            Event::SyncStarted { account } => (PeEventKind::SyncStarted, *account, 0, 0),
+            Event::SyncFinished { account } => (PeEventKind::SyncFinished, *account, 0, 0),
+            Event::FoldersChanged { account } => (PeEventKind::FoldersChanged, *account, 0, 0),
+            Event::FolderChanged { account, folder } => (PeEventKind::FolderChanged, *account, *folder, 0),
+            Event::MessageReady { folder, uid } => (PeEventKind::MessageReady, 0, *folder, *uid),
+            Event::Failed { account, .. } => (PeEventKind::Failed, *account, 0, 0),
+        };
+        let (failure, message) = match event {
+            Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message))),
+            _ => (PeFailureKind::None, None),
+        };
+        let event = PeEvent {
+            kind,
+            account,
+            folder,
+            uid,
+            failure,
+            message: message.as_ref().map_or(null(), |m| m.as_ptr()),
+        };
+        // a panic must not unwind into C; the callback must not throw (see PeEventCallback)
+        let _ = guard(|| {
+            // SAFETY: the C side gave a valid callback; the event and its message live for the call
+            unsafe { (self.function)(self.context, &event) }
+        });
+    }
+}
+
+// ---- the engine ----
+
+/// The mail engine
+pub struct PeCore(Core);
+
+/// Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
+/// the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
+///
+/// # Safety
+/// `path` must be a NUL-terminated string. `callback` and `context` must be usable from any
+/// thread until `pe_core_close` returns.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_core_open(
+    path: *const c_char,
+    callback: PeEventCallback,
+    context: *mut c_void,
+) -> *mut PeCore {
+    // SAFETY: as the caller guarantees
+    let Some(path) = (unsafe { arg(path) }) else {
+        return null_mut();
+    };
+    guard(|| {
+        let callback = callback.map(|function| Callback { function, context });
+        let core = Core::open(path, move |event| {
+            if let Some(callback) = &callback {
+                callback.deliver(event);
+            }
+        });
+        core.map_or(null_mut(), |core| handed(PeCore(core)))
+    })
+    .unwrap_or(null_mut())
+}
+
+/// Stops the engine: work that waits for the network is cancelled, after at most two seconds.
+/// NULL is ignored. No event starts after it returns.
+///
+/// # Safety
+/// `core` must be NULL or from `pe_core_open`, and not used after.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_core_close(core: *mut PeCore) {
+    let _ = guard(|| {
+        // SAFETY: as the caller guarantees
+        unsafe { take_back(core) }
+    });
+}
+
+/// Runs `f` on the core, `fallback` when it is NULL or `f` panics
+///
+/// # Safety
+/// `core` must be NULL or a live handle from `pe_core_open`.
+unsafe fn with<T>(core: *const PeCore, fallback: T, f: impl FnOnce(&Core) -> T) -> T {
+    // SAFETY: the caller guarantees a live handle
+    let Some(core) = (unsafe { core.as_ref() }) else {
+        return fallback;
+    };
+    guard(|| f(&core.0)).unwrap_or(fallback)
+}
+
+// ---- accounts ----
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeSecurity {
+    /// TLS from the start (993, 465)
+    Tls = 0,
+    /// STARTTLS, required
+    StartTls = 1,
+    /// No encryption: test servers only
+    Plain = 2,
+}
+
+impl From<PeSecurity> for Security {
+    fn from(value: PeSecurity) -> Self {
+        match value {
+            PeSecurity::Tls => Security::Tls,
+            PeSecurity::StartTls => Security::StartTls,
+            PeSecurity::Plain => Security::Plain,
+        }
+    }
+}
+
+/// Account settings; strings are UTF-8
+#[repr(C)]
+pub struct PeAccountSettings {
+    pub name: *const c_char,
+    pub email: *const c_char,
+    pub username: *const c_char,
+    pub imap_host: *const c_char,
+    pub imap_port: u16,
+    pub imap_security: PeSecurity,
+    pub smtp_host: *const c_char,
+    pub smtp_port: u16,
+    pub smtp_security: PeSecurity,
+}
+
+/// # Safety
+/// `settings` must be NULL or point to settings whose strings are NUL-terminated.
+unsafe fn settings(settings: *const PeAccountSettings) -> Option<AccountSettings> {
+    // SAFETY: as the caller guarantees
+    let s = unsafe { settings.as_ref() }?;
+    // SAFETY: as the caller guarantees
+    let text = |p| unsafe { arg(p) }.map(str::to_string);
+    Some(AccountSettings {
+        name: text(s.name)?,
+        email: text(s.email)?,
+        username: text(s.username)?,
+        imap_host: text(s.imap_host)?,
+        imap_port: s.imap_port,
+        imap_security: s.imap_security.into(),
+        smtp_host: text(s.smtp_host)?,
+        smtp_port: s.smtp_port,
+        smtp_security: s.smtp_security.into(),
+    })
+}
+
+/// Adds an account; its id, or 0 on failure. The password is kept in memory for this run.
+///
+/// # Safety
+/// `core` must be a live handle, `settings` valid settings, `password` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_add(
+    core: *const PeCore,
+    settings: *const PeAccountSettings,
+    password: *const c_char,
+) -> i64 {
+    // SAFETY: as the caller guarantees
+    let (Some(settings), Some(password)) = (unsafe { self::settings(settings) }, unsafe { arg(password) }) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.add_account(&settings, password).unwrap_or(0)) }
+}
+
+/// Changes the settings of an account
+///
+/// # Safety
+/// `core` must be a live handle, `settings` valid settings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_update(
+    core: *const PeCore,
+    account: i64,
+    settings: *const PeAccountSettings,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(settings) = (unsafe { self::settings(settings) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.update_account(account, &settings).is_ok()) }
+}
+
+/// Removes an account with its folders and messages
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_remove(core: *const PeCore, account: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.remove_account(account).is_ok()) }
+}
+
+/// Sets the password of an account for this run
+///
+/// # Safety
+/// `core` must be a live handle, `password` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_set_password(core: *const PeCore, account: i64, password: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(password) = (unsafe { arg(password) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, false, |core| {
+            core.set_password(account, password);
+            true
+        })
+    }
+}
+
+/// An account as the folder tree shows it
+#[repr(C)]
+pub struct PeAccount {
+    pub id: i64,
+    pub name: *const c_char,
+    pub email: *const c_char,
+}
+
+/// The accounts; free with `pe_account_list_free`
+pub struct PeAccountList(Rows<PeAccount>);
+
+/// The accounts, NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(accounts) = core.accounts() else {
+                return null_mut();
+            };
+            handed(PeAccountList(Rows::new(&accounts, |a, strings| PeAccount {
+                id: a.id,
+                name: strings.add(&a.settings.name),
+                email: strings.add(&a.settings.email),
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_list_count(list: *const PeAccountList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_list_get(list: *const PeAccountList, index: usize) -> *const PeAccount {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_list_free(list: *mut PeAccountList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+// ---- folders ----
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeSpecialUse {
+    None = 0,
+    Inbox = 1,
+    Flagged = 2,
+    Sent = 3,
+    Drafts = 4,
+    All = 5,
+    Archive = 6,
+    Junk = 7,
+    Trash = 8,
+}
+
+fn special_use(flag: Option<&str>) -> PeSpecialUse {
+    match flag.and_then(SpecialUse::from_flag) {
+        None => PeSpecialUse::None,
+        Some(SpecialUse::Inbox) => PeSpecialUse::Inbox,
+        Some(SpecialUse::Flagged) => PeSpecialUse::Flagged,
+        Some(SpecialUse::Sent) => PeSpecialUse::Sent,
+        Some(SpecialUse::Drafts) => PeSpecialUse::Drafts,
+        Some(SpecialUse::All) => PeSpecialUse::All,
+        Some(SpecialUse::Archive) => PeSpecialUse::Archive,
+        Some(SpecialUse::Junk) => PeSpecialUse::Junk,
+        Some(SpecialUse::Trash) => PeSpecialUse::Trash,
+    }
+}
+
+/// A folder as the folder tree shows it, in tree order
+#[repr(C)]
+pub struct PeFolder {
+    pub id: i64,
+    pub account: i64,
+    /// The full name on the server
+    pub path: *const c_char,
+    /// The name to show
+    pub name: *const c_char,
+    /// 0 for a top level folder
+    pub depth: u32,
+    pub special_use: PeSpecialUse,
+    /// False for a folder that only holds other folders
+    pub selectable: bool,
+    pub total: u64,
+    pub unread: u64,
+}
+
+/// The folders of an account; free with `pe_folder_list_free`
+pub struct PeFolderList(Rows<PeFolder>);
+
+/// The folders of an account, NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folders(core: *const PeCore, account: i64) -> *mut PeFolderList {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(folders) = core.folders(account) else {
+                return null_mut();
+            };
+            handed(PeFolderList(Rows::new(&folders, |f, strings| PeFolder {
+                id: f.id,
+                account: f.account_id,
+                path: strings.add(&f.info.path),
+                name: strings.add(&f.info.name),
+                depth: u32::try_from(f.info.depth()).unwrap_or(u32::MAX),
+                special_use: special_use(f.info.special_use.as_deref()),
+                selectable: f.info.selectable,
+                total: f.total,
+                unread: f.unread,
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_list_count(list: *const PeFolderList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_list_get(list: *const PeFolderList, index: usize) -> *const PeFolder {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_list_free(list: *mut PeFolderList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+// ---- messages ----
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeSortField {
+    /// The Date header, the received date without one
+    Date = 0,
+    Received = 1,
+    From = 2,
+    Subject = 3,
+    Size = 4,
+}
+
+impl From<PeSortField> for SortField {
+    fn from(value: PeSortField) -> Self {
+        match value {
+            PeSortField::Date => SortField::Date,
+            PeSortField::Received => SortField::Received,
+            PeSortField::From => SortField::From,
+            PeSortField::Subject => SortField::Subject,
+            PeSortField::Size => SortField::Size,
+        }
+    }
+}
+
+/// A row of the message list
+#[repr(C)]
+pub struct PeMessage {
+    pub uid: u64,
+    /// Seconds since the Unix epoch, valid when `has_date`
+    pub date: i64,
+    pub has_date: bool,
+    pub size: u64,
+    pub subject: *const c_char,
+    /// The name of the sender, the address when there is no name
+    pub from: *const c_char,
+    pub from_address: *const c_char,
+    pub recipients: *const c_char,
+    pub seen: bool,
+    pub flagged: bool,
+    pub answered: bool,
+    pub has_attachments: bool,
+}
+
+/// A page of the message list; free with `pe_message_list_free`
+pub struct PeMessageList(Rows<PeMessage>);
+
+/// `limit` messages of a folder from `offset` on, in the order asked for; NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_messages(
+    core: *const PeCore,
+    folder: i64,
+    sort: PeSortField,
+    ascending: bool,
+    offset: u64,
+    limit: u64,
+) -> *mut PeMessageList {
+    let sort = Sort {
+        field: sort.into(),
+        ascending,
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(messages) = core.messages(folder, sort, offset, limit) else {
+                return null_mut();
+            };
+            handed(PeMessageList(Rows::new(&messages, |m, strings| {
+                let info = &m.info;
+                PeMessage {
+                    uid: info.uid,
+                    date: info.display_date().unwrap_or(0),
+                    has_date: info.display_date().is_some(),
+                    size: info.size.unwrap_or(0),
+                    subject: strings.add(&info.subject),
+                    from: strings.add(info.sender()),
+                    from_address: strings.add(&info.from_address),
+                    recipients: strings.add(&info.recipients),
+                    seen: info.seen(),
+                    flagged: info.flagged(),
+                    answered: info.answered(),
+                    has_attachments: info.has_attachments,
+                }
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_list_count(list: *const PeMessageList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_list_get(list: *const PeMessageList, index: usize) -> *const PeMessage {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_list_free(list: *mut PeMessageList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+// ---- background work ----
+
+/// Syncs an account in the background: `SyncStarted`, what changed, `SyncFinished`
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sync(core: *const PeCore, account: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.sync(account).is_ok()) }
+}
+
+/// Gets a message ready to show, in the background: `MessageReady` follows
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_open(core: *const PeCore, folder: i64, uid: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.open_message(folder, uid).is_ok()) }
+}
+
+/// Marks a message read or unread: in the store now (`FolderChanged` follows), on the server in
+/// the background
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_set_seen(core: *const PeCore, folder: i64, uid: u64, seen: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_seen(folder, uid, seen).is_ok()) }
+}
+
+// ---- the message view ----
+
+#[repr(C)]
+pub struct PeAttachment {
+    /// The name the sender gave, for display, without control or direction characters
+    pub filename: *const c_char,
+    /// The name to save it under: no path, no reserved or unsafe characters
+    pub safe_filename: *const c_char,
+    pub mime_type: *const c_char,
+    pub size: u64,
+}
+
+/// The header fields and the document of a message
+#[repr(C)]
+pub struct PeMessageInfo {
+    pub subject: *const c_char,
+    pub from: *const c_char,
+    pub to: *const c_char,
+    pub cc: *const c_char,
+    /// Seconds since the Unix epoch, valid when `has_date`
+    pub date: i64,
+    pub has_date: bool,
+    /// The sanitized document for the preview, with its CSP
+    pub document: *const c_char,
+    pub attachment_count: usize,
+}
+
+/// A message as the preview shows it; free with `pe_message_view_free`
+pub struct PeMessageView {
+    info: PeMessageInfo,
+    attachments: Vec<PeAttachment>,
+    _strings: Strings,
+}
+
+/// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    allow_remote_images: bool,
+) -> *mut PeMessageView {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(Some(view)) = core.message_view(folder, uid, allow_remote_images) else {
+                return null_mut();
+            };
+            let mut strings = Strings::default();
+            let attachments: Vec<PeAttachment> = view
+                .attachments
+                .iter()
+                .map(|a| PeAttachment {
+                    filename: strings.add(&a.filename),
+                    safe_filename: strings.add(&a.safe_filename),
+                    mime_type: strings.add(&a.mime_type),
+                    size: a.size,
+                })
+                .collect();
+            let info = PeMessageInfo {
+                subject: strings.add(&view.subject),
+                from: strings.add(&view.from),
+                to: strings.add(&view.to),
+                cc: strings.add(&view.cc),
+                date: view.date.unwrap_or(0),
+                has_date: view.date.is_some(),
+                document: strings.add(&view.document),
+                attachment_count: attachments.len(),
+            };
+            handed(PeMessageView {
+                info,
+                attachments,
+                _strings: strings,
+            })
+        })
+    }
+}
+
+/// # Safety
+/// `view` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_info(view: *const PeMessageView) -> *const PeMessageInfo {
+    // SAFETY: as the caller guarantees
+    unsafe { view.as_ref() }.map_or(null(), |view| &view.info)
+}
+
+/// Attachment `index`, NULL past the end
+///
+/// # Safety
+/// `view` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_attachment(view: *const PeMessageView, index: usize) -> *const PeAttachment {
+    // SAFETY: as the caller guarantees
+    unsafe { view.as_ref() }
+        .and_then(|view| view.attachments.get(index))
+        .map_or(null(), |row| row)
+}
+
+/// # Safety
+/// `view` must be NULL or a view that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_free(view: *mut PeMessageView) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(view) }
+}
+
+/// The content of attachment `index` of a message, NULL on failure. `len` gets its length and
+/// `filename` the name to save it under (free it with `pe_string_free`). Free the bytes with
+/// `pe_bytes_free`.
+///
+/// # Safety
+/// `core` must be a live handle; `len` and `filename` must be valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_attachment_data(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    index: usize,
+    len: *mut usize,
+    filename: *mut *mut c_char,
+) -> *mut u8 {
+    if len.is_null() || filename.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let found = unsafe { with(core, None, |core| core.attachment(folder, uid, index).ok().flatten()) };
+    let Some((name, data)) = found else {
+        return null_mut();
+    };
+    let data = data.into_boxed_slice();
+    // SAFETY: the caller gave valid pointers
+    unsafe {
+        *len = data.len();
+        *filename = into_c_string(name);
+    }
+    Box::into_raw(data).cast()
+}
+
+/// Frees bytes from `pe_attachment_data`
+///
+/// # Safety
+/// `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_bytes_free(data: *mut u8, len: usize) {
+    if !data.is_null() {
+        // SAFETY: a boxed slice of `len` bytes made by pe_attachment_data
+        drop(unsafe { Box::from_raw(std::ptr::slice_from_raw_parts_mut(data, len)) });
+    }
+}

@@ -8,7 +8,7 @@ mod summary;
 use std::collections::HashSet;
 use std::fmt;
 
-use pe_imap::client::{FetchQuery, ListedMailbox, SearchKey, Selected};
+use pe_imap::client::{FetchQuery, ListedMailbox, SearchKey, Selected, StoreAction};
 use pe_imap::{Client, Config, Credentials, Event, Messages, SequenceSet};
 use pe_store::{Account, AccountId, Folder, FolderId, FolderInfo, MessageInfo, Store, SyncState};
 
@@ -260,9 +260,7 @@ pub async fn fetch_source(client: &mut Client, store: &mut Store, folder: Folder
         return Ok(source);
     }
     let path = store.folder(folder)?.info.path;
-    if client.selected().is_none_or(|selected| selected.path != path) {
-        client.select(&path).await?;
-    }
+    ensure_selected(client, &path).await?;
     let query = FetchQuery {
         source: true,
         ..Default::default()
@@ -275,6 +273,24 @@ pub async fn fetch_source(client: &mut Client, store: &mut Store, folder: Folder
         .ok_or(Error::MessageGone)?;
     store.set_source(folder, uid, &source)?;
     Ok(source)
+}
+
+/// Selects a folder unless it is the selected one
+async fn ensure_selected(client: &mut Client, path: &str) -> Result<()> {
+    if client.selected().is_none_or(|selected| selected.path != path) {
+        client.select(path).await?;
+    }
+    Ok(())
+}
+
+/// Marks a message read or unread on the server. The store is the caller's to change, so the
+/// windows show it before the server has it.
+pub async fn set_seen(client: &mut Client, store: &mut Store, folder: FolderId, uid: u64, seen: bool) -> Result<()> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let action = if seen { StoreAction::Add } else { StoreAction::Remove };
+    client.store(&Messages::uid(uid), action, &["\\Seen"]).await?;
+    Ok(())
 }
 
 /// Applies a change the server reported for the selected folder of `account`
@@ -307,4 +323,15 @@ pub fn apply_event(store: &mut Store, account: AccountId, event: &Event) -> Resu
         _ => Change::NeedsSync(folder),
     };
     Ok(change)
+}
+
+/// The engine runs these on a multi-threaded runtime: they have to stay `Send`
+#[allow(dead_code)]
+fn futures_are_send(client: &mut Client, store: &mut Store, event: &Event) {
+    fn send<T: Send>(_: T) {}
+    send(sync_folders(&mut *client, &mut *store, 1));
+    send(sync_folder(&mut *client, &mut *store, 1));
+    send(fetch_source(&mut *client, &mut *store, 1, 1));
+    send(set_seen(&mut *client, &mut *store, 1, 1, true));
+    let _ = apply_event(store, 1, event);
 }

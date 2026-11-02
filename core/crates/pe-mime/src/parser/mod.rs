@@ -18,7 +18,7 @@ use std::fmt;
 
 pub use address::{ParsedAddress, parse_addresses};
 pub use node::{Header, HeaderLine};
-pub use text::{html_to_text, text_to_html};
+pub use text::{html_to_text, text_addresses, text_to_html};
 
 use crate::Address;
 use node::{LineBreak, MimeNode, State};
@@ -89,6 +89,21 @@ impl Attachment {
     /// name Windows reserves, and one made from the type when the sender gave none
     pub fn safe_filename(&self) -> String {
         filename::safe_filename(self.filename.as_deref(), &self.mime_type)
+    }
+
+    /// The name to show: the sender's, without control or direction characters, so what is
+    /// shown is what is saved (`photo\u{202e}gpj.exe` does not read as `photo.exe.jpg`); the safe
+    /// name when the sender gave none
+    pub fn display_filename(&self) -> String {
+        match self
+            .filename
+            .as_deref()
+            .map(filename::without_unsafe_marks)
+            .filter(|f| !f.trim().is_empty())
+        {
+            Some(name) => name,
+            None => self.safe_filename(),
+        }
     }
 }
 
@@ -667,6 +682,18 @@ mod tests {
         assert_eq!(message.attachments.len(), 1);
         assert_eq!(message.attachments[0].filename.as_deref(), Some("../a.pdf"));
         assert_eq!(message.attachments[0].safe_filename(), "a.pdf");
+        assert_eq!(message.attachments[0].display_filename(), "../a.pdf");
+        let tricky = Attachment {
+            filename: Some("photo\u{202e}gpj.exe".into()),
+            ..Default::default()
+        };
+        assert_eq!(tricky.display_filename(), "photogpj.exe");
+        let unnamed = Attachment {
+            filename: Some("\u{202e}".into()),
+            mime_type: "application/pdf".into(),
+            ..Default::default()
+        };
+        assert_eq!(unnamed.display_filename(), "attachment.pdf");
         assert_eq!(message.attachments[0].content, b"Hello");
     }
 

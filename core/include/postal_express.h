@@ -11,6 +11,170 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+typedef enum PeEventKind {
+  PE_EVENT_KIND_SYNC_STARTED = 1,
+  // Comes after everything the sync found, failures included
+  PE_EVENT_KIND_SYNC_FINISHED = 2,
+  // The folder list of `account` changed
+  PE_EVENT_KIND_FOLDERS_CHANGED = 3,
+  // The messages of `folder` or their flags changed
+  PE_EVENT_KIND_FOLDER_CHANGED = 4,
+  // `pe_message_view` can show `folder`/`uid` now
+  PE_EVENT_KIND_MESSAGE_READY = 5,
+  // Work for `account` failed: `failure` and `message` say what
+  PE_EVENT_KIND_FAILED = 6,
+} PeEventKind;
+
+typedef enum PeFailureKind {
+  PE_FAILURE_KIND_NONE = 0,
+  // Not reachable now, try again later
+  PE_FAILURE_KIND_NETWORK = 1,
+  // TLS failed
+  PE_FAILURE_KIND_SECURITY = 2,
+  // The password was refused, or there is none
+  PE_FAILURE_KIND_AUTHENTICATION = 3,
+  PE_FAILURE_KIND_OTHER = 4,
+} PeFailureKind;
+
+typedef enum PeSecurity {
+  // TLS from the start (993, 465)
+  PE_SECURITY_TLS = 0,
+  // STARTTLS, required
+  PE_SECURITY_START_TLS = 1,
+  // No encryption: test servers only
+  PE_SECURITY_PLAIN = 2,
+} PeSecurity;
+
+typedef enum PeSpecialUse {
+  PE_SPECIAL_USE_NONE = 0,
+  PE_SPECIAL_USE_INBOX = 1,
+  PE_SPECIAL_USE_FLAGGED = 2,
+  PE_SPECIAL_USE_SENT = 3,
+  PE_SPECIAL_USE_DRAFTS = 4,
+  PE_SPECIAL_USE_ALL = 5,
+  PE_SPECIAL_USE_ARCHIVE = 6,
+  PE_SPECIAL_USE_JUNK = 7,
+  PE_SPECIAL_USE_TRASH = 8,
+} PeSpecialUse;
+
+typedef enum PeSortField {
+  // The Date header, the received date without one
+  PE_SORT_FIELD_DATE = 0,
+  PE_SORT_FIELD_RECEIVED = 1,
+  PE_SORT_FIELD_FROM = 2,
+  PE_SORT_FIELD_SUBJECT = 3,
+  PE_SORT_FIELD_SIZE = 4,
+} PeSortField;
+
+// The accounts; free with `pe_account_list_free`
+typedef struct PeAccountList PeAccountList;
+
+// The mail engine
+typedef struct PeCore PeCore;
+
+// The folders of an account; free with `pe_folder_list_free`
+typedef struct PeFolderList PeFolderList;
+
+// A page of the message list; free with `pe_message_list_free`
+typedef struct PeMessageList PeMessageList;
+
+// A message as the preview shows it; free with `pe_message_view_free`
+typedef struct PeMessageView PeMessageView;
+
+// An event; valid only during the callback
+typedef struct PeEvent {
+  enum PeEventKind kind;
+  int64_t account;
+  int64_t folder;
+  uint64_t uid;
+  enum PeFailureKind failure;
+  // For `Failed`, UTF-8; NULL otherwise
+  const char *message;
+} PeEvent;
+
+// Called on a worker thread, never on the thread that called into the core: copy what is
+// needed and post it to the window thread. It must not throw (make it `noexcept`), wait for
+// the window thread, or call `pe_core_close`.
+typedef void (*PeEventCallback)(void *context, const struct PeEvent *event);
+
+// Account settings; strings are UTF-8
+typedef struct PeAccountSettings {
+  const char *name;
+  const char *email;
+  const char *username;
+  const char *imap_host;
+  uint16_t imap_port;
+  enum PeSecurity imap_security;
+  const char *smtp_host;
+  uint16_t smtp_port;
+  enum PeSecurity smtp_security;
+} PeAccountSettings;
+
+// An account as the folder tree shows it
+typedef struct PeAccount {
+  int64_t id;
+  const char *name;
+  const char *email;
+} PeAccount;
+
+// A folder as the folder tree shows it, in tree order
+typedef struct PeFolder {
+  int64_t id;
+  int64_t account;
+  // The full name on the server
+  const char *path;
+  // The name to show
+  const char *name;
+  // 0 for a top level folder
+  uint32_t depth;
+  enum PeSpecialUse special_use;
+  // False for a folder that only holds other folders
+  bool selectable;
+  uint64_t total;
+  uint64_t unread;
+} PeFolder;
+
+// A row of the message list
+typedef struct PeMessage {
+  uint64_t uid;
+  // Seconds since the Unix epoch, valid when `has_date`
+  int64_t date;
+  bool has_date;
+  uint64_t size;
+  const char *subject;
+  // The name of the sender, the address when there is no name
+  const char *from;
+  const char *from_address;
+  const char *recipients;
+  bool seen;
+  bool flagged;
+  bool answered;
+  bool has_attachments;
+} PeMessage;
+
+// The header fields and the document of a message
+typedef struct PeMessageInfo {
+  const char *subject;
+  const char *from;
+  const char *to;
+  const char *cc;
+  // Seconds since the Unix epoch, valid when `has_date`
+  int64_t date;
+  bool has_date;
+  // The sanitized document for the preview, with its CSP
+  const char *document;
+  size_t attachment_count;
+} PeMessageInfo;
+
+typedef struct PeAttachment {
+  // The name the sender gave, for display, without control or direction characters
+  const char *filename;
+  // The name to save it under: no path, no reserved or unsafe characters
+  const char *safe_filename;
+  const char *mime_type;
+  uint64_t size;
+} PeAttachment;
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -32,6 +196,176 @@ char *pe_html_render(const uint8_t *html,
 // # Safety
 // `text` must be NULL or a string from this library that was not freed yet.
 void pe_string_free(char *text);
+
+// Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
+// the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
+//
+// # Safety
+// `path` must be a NUL-terminated string. `callback` and `context` must be usable from any
+// thread until `pe_core_close` returns.
+struct PeCore *pe_core_open(const char *path, PeEventCallback callback, void *context);
+
+// Stops the engine: work that waits for the network is cancelled, after at most two seconds.
+// NULL is ignored. No event starts after it returns.
+//
+// # Safety
+// `core` must be NULL or from `pe_core_open`, and not used after.
+void pe_core_close(struct PeCore *core);
+
+// Adds an account; its id, or 0 on failure. The password is kept in memory for this run.
+//
+// # Safety
+// `core` must be a live handle, `settings` valid settings, `password` a NUL-terminated string.
+int64_t pe_account_add(const struct PeCore *core,
+                       const struct PeAccountSettings *settings,
+                       const char *password);
+
+// Changes the settings of an account
+//
+// # Safety
+// `core` must be a live handle, `settings` valid settings.
+bool pe_account_update(const struct PeCore *core,
+                       int64_t account,
+                       const struct PeAccountSettings *settings);
+
+// Removes an account with its folders and messages
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_account_remove(const struct PeCore *core, int64_t account);
+
+// Sets the password of an account for this run
+//
+// # Safety
+// `core` must be a live handle, `password` a NUL-terminated string.
+bool pe_account_set_password(const struct PeCore *core, int64_t account, const char *password);
+
+// The accounts, NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAccountList *pe_accounts(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_account_list_count(const struct PeAccountList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeAccount *pe_account_list_get(const struct PeAccountList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_account_list_free(struct PeAccountList *list);
+
+// The folders of an account, NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeFolderList *pe_folders(const struct PeCore *core, int64_t account);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_folder_list_count(const struct PeFolderList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeFolder *pe_folder_list_get(const struct PeFolderList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_folder_list_free(struct PeFolderList *list);
+
+// `limit` messages of a folder from `offset` on, in the order asked for; NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeMessageList *pe_messages(const struct PeCore *core,
+                                  int64_t folder,
+                                  enum PeSortField sort,
+                                  bool ascending,
+                                  uint64_t offset,
+                                  uint64_t limit);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_message_list_count(const struct PeMessageList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeMessage *pe_message_list_get(const struct PeMessageList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_message_list_free(struct PeMessageList *list);
+
+// Syncs an account in the background: `SyncStarted`, what changed, `SyncFinished`
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_sync(const struct PeCore *core, int64_t account);
+
+// Gets a message ready to show, in the background: `MessageReady` follows
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_open(const struct PeCore *core, int64_t folder, uint64_t uid);
+
+// Marks a message read or unread: in the store now (`FolderChanged` follows), on the server in
+// the background
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_set_seen(const struct PeCore *core, int64_t folder, uint64_t uid, bool seen);
+
+// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise
+//
+// # Safety
+// `core` must be a live handle.
+struct PeMessageView *pe_message_view(const struct PeCore *core,
+                                      int64_t folder,
+                                      uint64_t uid,
+                                      bool allow_remote_images);
+
+// # Safety
+// `view` must be NULL or live.
+const struct PeMessageInfo *pe_message_view_info(const struct PeMessageView *view);
+
+// Attachment `index`, NULL past the end
+//
+// # Safety
+// `view` must be NULL or live.
+const struct PeAttachment *pe_message_view_attachment(const struct PeMessageView *view,
+                                                      size_t index);
+
+// # Safety
+// `view` must be NULL or a view that was not freed yet.
+void pe_message_view_free(struct PeMessageView *view);
+
+// The content of attachment `index` of a message, NULL on failure. `len` gets its length and
+// `filename` the name to save it under (free it with `pe_string_free`). Free the bytes with
+// `pe_bytes_free`.
+//
+// # Safety
+// `core` must be a live handle; `len` and `filename` must be valid pointers.
+uint8_t *pe_attachment_data(const struct PeCore *core,
+                            int64_t folder,
+                            uint64_t uid,
+                            size_t index,
+                            size_t *len,
+                            char **filename);
+
+// Frees bytes from `pe_attachment_data`
+//
+// # Safety
+// `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
+void pe_bytes_free(uint8_t *data, size_t len);
 
 #ifdef __cplusplus
 }  // extern "C"

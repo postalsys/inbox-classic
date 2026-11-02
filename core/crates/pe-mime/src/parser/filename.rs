@@ -22,11 +22,20 @@ pub(crate) fn safe_filename(name: Option<&str>, mime_type: &str) -> String {
     }
 }
 
+/// The name without control and direction characters, for display
+pub(crate) fn without_unsafe_marks(name: &str) -> String {
+    name.chars()
+        .filter(|c| !c.is_control() && !is_direction_mark(*c))
+        .collect()
+}
+
+fn is_direction_mark(c: char) -> bool {
+    // marks, embeddings, overrides and isolates
+    matches!(c, '\u{061c}' | '\u{200e}' | '\u{200f}' | '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
+}
+
 fn is_unsafe(c: char) -> bool {
-    c.is_control()
-        || matches!(c, '<' | '>' | ':' | '"' | '|' | '?' | '*')
-        // direction marks, embeddings, overrides and isolates
-        || matches!(c, '\u{061c}' | '\u{200e}' | '\u{200f}' | '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
+    c.is_control() || matches!(c, '<' | '>' | ':' | '"' | '|' | '?' | '*') || is_direction_mark(c)
 }
 
 /// `CON`, `com1.txt`, `LPT¹.log`: Windows opens a device instead of a file for these, whatever

@@ -47,6 +47,22 @@ impl MessageInfo {
     pub fn deleted(&self) -> bool {
         self.has_flag("\\Deleted")
     }
+
+    /// The sender as the list shows it: the name, the address when there is none (the From
+    /// order sorts the same way)
+    pub fn sender(&self) -> &str {
+        if self.from_name.is_empty() {
+            &self.from_address
+        } else {
+            &self.from_name
+        }
+    }
+
+    /// The date the list shows: the Date header, the received date when there is none (the
+    /// Date order sorts the same way)
+    pub fn display_date(&self) -> Option<i64> {
+        self.date.or(self.internal_date)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -182,6 +198,33 @@ impl Store {
         let flags = canonical_flags(flags);
         let changed = statement.execute(params![folder, uid, flags, is_seen(&flags), modseq])?;
         Ok(changed > 0)
+    }
+
+    /// Sets or clears one flag of a message; false when it already was so, or there is no such
+    /// message
+    pub fn set_flag(&self, folder: FolderId, uid: u64, flag: &str, on: bool) -> Result<bool> {
+        let tx = self.db.unchecked_transaction()?;
+        let Some(message) = self.message(folder, uid)? else {
+            return Ok(false);
+        };
+        let mut flags = message.info.flags;
+        flags.retain(|f| !f.eq_ignore_ascii_case(flag));
+        if on {
+            flags.push(flag.to_string());
+        }
+        let changed = self.set_flags(folder, uid, &flags, None)?;
+        tx.commit()?;
+        Ok(changed)
+    }
+
+    /// Whether the source of a message is cached
+    pub fn has_source(&self, folder: FolderId, uid: u64) -> Result<bool> {
+        self.db.query_row(
+            "SELECT EXISTS (SELECT 1 FROM bodies b JOIN messages m ON m.id = b.message_id \
+             WHERE m.folder_id = ?1 AND m.uid = ?2)",
+            params![folder, uid],
+            |row| row.get(0),
+        )
     }
 
     /// Removes messages by UID, with their cached sources; returns how many there were
@@ -323,6 +366,7 @@ mod tests {
         let info = &page[0].info;
         assert_eq!(info.uid, 3);
         assert!(info.seen() && info.flagged() && !info.answered());
+        assert_eq!((info.sender(), info.display_date()), ("@example.com", Some(200)));
         assert_eq!(info.flags, ["\\Flagged", "\\Seen"], "sorted");
 
         let folder_row = store.folder(folder).unwrap();
@@ -373,6 +417,13 @@ mod tests {
             (m.subject.as_str(), m.flags.as_slice(), m.modseq),
             ("x", &flags(&["\\Seen"])[..], Some(50))
         );
+        assert!(store.set_flag(folder, 5, "\\Flagged", true).unwrap());
+        assert!(!store.set_flag(folder, 5, "\\Flagged", true).unwrap());
+        assert!(!store.set_flag(folder, 6, "\\Flagged", true).unwrap());
+        let m = store.message(folder, 5).unwrap().unwrap().info;
+        assert_eq!(m.flags, flags(&["\\Flagged", "\\Seen"]));
+        assert!(store.set_flag(folder, 5, "\\seen", false).unwrap());
+        assert_eq!(store.folder(folder).unwrap().unread, 1);
         assert_eq!(store.remove_messages(folder, &[5, 6]).unwrap(), 1);
         assert!(store.message(folder, 5).unwrap().is_none());
     }
@@ -382,12 +433,14 @@ mod tests {
         let (store, folder) = setup();
         store.add_messages(folder, &[message(1, "x", "A", 1, &[])]).unwrap();
         assert!(!store.set_source(folder, 2, b"nope").unwrap());
+        assert!(!store.has_source(folder, 1).unwrap());
         assert!(store.set_source(folder, 1, b"Subject: x\r\n\r\nhi").unwrap());
         assert_eq!(
             store.source(folder, 1).unwrap().as_deref(),
             Some(&b"Subject: x\r\n\r\nhi"[..])
         );
         assert!(store.message(folder, 1).unwrap().unwrap().cached);
+        assert!(store.has_source(folder, 1).unwrap());
         // new flags keep the source
         store
             .add_messages(folder, &[message(1, "x", "A", 1, &["\\Seen"])])

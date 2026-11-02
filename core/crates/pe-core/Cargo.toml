@@ -1,0 +1,20 @@
+[package]
+name = "pe-core"
+description = "The mail engine behind the C API: accounts, their sync workers, the message list and message views"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+pe-html.workspace = true
+pe-imap = { path = "../pe-imap" }
+pe-mime.workspace = true
+pe-net.workspace = true
+pe-store = { path = "../pe-store" }
+pe-sync = { path = "../pe-sync" }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "macros"] }
+
+[dev-dependencies]
+pe-testkit = { path = "../pe-testkit" }
+serde_json = "1"

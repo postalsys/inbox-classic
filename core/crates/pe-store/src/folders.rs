@@ -22,6 +22,16 @@ pub struct FolderInfo {
     pub selectable: bool,
 }
 
+impl FolderInfo {
+    /// How deep the folder is in the tree, 0 at the top
+    pub fn depth(&self) -> usize {
+        match self.delimiter.as_deref() {
+            Some(delimiter) if !delimiter.is_empty() => self.path.matches(delimiter).count(),
+            _ => 0,
+        }
+    }
+}
+
 /// Where the sync of a folder got to. A different UIDVALIDITY on the server means the cached
 /// messages are no longer the server's messages.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -193,6 +203,7 @@ mod tests {
         assert_eq!(folders[1].id, inbox.id);
         assert_eq!(folders[1].state, state);
         assert_eq!(folders[0].info.special_use.as_deref(), Some("\\Sent"));
+        assert_eq!((folders[1].info.depth(), folders[2].info.depth()), (0, 1));
         assert!(store.find_folder(account, "Old").unwrap().is_none());
 
         store.reset_folder(inbox.id, Some(8)).unwrap();

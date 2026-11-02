@@ -315,7 +315,8 @@ fn format_date(timestamp: i64) -> String {
     )
 }
 
-fn text_addresses(addresses: &[ParsedAddress]) -> String {
+/// An address list as text, `Name <address>, group: a@b.c;`
+pub fn text_addresses(addresses: &[ParsedAddress]) -> String {
     let mailbox = |name: &str, address: &str| {
         if name.is_empty() {
             address.to_string()

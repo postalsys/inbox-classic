@@ -10,6 +10,7 @@ use std::net::TcpStream;
 use std::path::PathBuf;
 use std::process::{Child, ChildStdin, Command, Stdio};
 
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
 use base64::Engine;
@@ -175,6 +176,47 @@ impl ImapKit {
             poll: Duration::from_millis(200),
         };
         config
+    }
+}
+
+impl ImapKit {
+    /// Settings of the default account on this server, without encryption
+    pub fn account_settings(&self) -> pe_store::AccountSettings {
+        pe_store::AccountSettings {
+            name: "Test".into(),
+            email: "testuser@example.com".into(),
+            username: USER.into(),
+            imap_host: "127.0.0.1".into(),
+            imap_port: self.imap,
+            imap_security: pe_store::Security::Plain,
+            smtp_host: "127.0.0.1".into(),
+            smtp_port: self.smtp,
+            smtp_security: pe_store::Security::Plain,
+        }
+    }
+}
+
+/// A directory of its own for a test, removed with what is in it when dropped
+pub struct TempDir(PathBuf);
+
+impl TempDir {
+    pub fn new(name: &str) -> TempDir {
+        // tests run in parallel: a counter, the clock is not fine enough
+        static NEXT: AtomicUsize = AtomicUsize::new(0);
+        let n = NEXT.fetch_add(1, Ordering::Relaxed);
+        let dir = std::env::temp_dir().join(format!("pe-{name}-{}-{n}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("temporary directory");
+        TempDir(dir)
+    }
+
+    pub fn path(&self) -> &std::path::Path {
+        &self.0
+    }
+}
+
+impl Drop for TempDir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
     }
 }
 

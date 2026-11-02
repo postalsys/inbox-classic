@@ -160,10 +160,10 @@ impl Completion {
 
 /// Sees each untagged response of a command first: returns it to keep it (it is then also
 /// applied to the session state and reported), or None when it was the command's own data
-type UntaggedHandler<'a> = &'a mut dyn FnMut(Response) -> Result<Option<Response>, Error>;
+type UntaggedHandler<'a> = &'a mut (dyn FnMut(Response) -> Result<Option<Response>, Error> + Send);
 
 /// The data to send for a `+` continuation that is not a literal
-type ContinuationHandler<'a> = &'a mut dyn FnMut(&Response) -> Result<Vec<u8>, Error>;
+type ContinuationHandler<'a> = &'a mut (dyn FnMut(&Response) -> Result<Vec<u8>, Error> + Send);
 
 fn keep(response: Response) -> Result<Option<Response>, Error> {
     Ok(Some(response))

@@ -661,11 +661,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "pe-core"
+version = "0.1.0"
+dependencies = [
+ "pe-html",
+ "pe-imap",
+ "pe-mime",
+ "pe-net",
+ "pe-store",
+ "pe-sync",
+ "pe-testkit",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "pe-ffi"
 version = "0.1.0"
 dependencies = [
  "cbindgen",
+ "pe-core",
  "pe-html",
+ "pe-imap",
+ "pe-store",
+ "pe-testkit",
+ "serde_json",
 ]
 
 [[package]]
@@ -739,6 +759,7 @@ dependencies = [
  "base64",
  "pe-imap",
  "pe-net",
+ "pe-store",
  "serde_json",
  "tokio",
 ]

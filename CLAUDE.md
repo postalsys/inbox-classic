@@ -21,6 +21,7 @@ A Cargo workspace in `core/` (edition 2024, `rustfmt.toml` sets 120 columns). Th
 - `pe-net`: TCP and TLS (rustls with the platform verifier, or a pinned certificate) for IMAP and SMTP.
 - `pe-store`: the local cache in SQLite (rusqlite, bundled): accounts without secrets, folders, message summaries, cached sources. Schema changes are new entries in `schema.rs` `MIGRATIONS`, never edits of shipped ones.
 - `pe-sync`: keeps `pe-store` in step with an IMAP account through `pe-imap`.
+- `pe-core`: the engine the C API wraps: a tokio runtime, one worker per account (its own IMAP connection and store connection), the message view, and `Event`s for the windows.
 - `pe-testkit`: starts ImapKit (`core/e2e`) for the end-to-end tests and talks to its REST API.
 - `pe-ffi`: the only crate with `unsafe` code and the only one the app links. Every other crate starts with `#![forbid(unsafe_code)]`.
 
@@ -29,6 +30,8 @@ A Cargo workspace in `core/` (edition 2024, `rustfmt.toml` sets 120 columns). Th
 - Built as `staticlib` (`pe_ffi.lib`) and linked into the exe, not as a DLL: one signed exe, no DLL search-order risk.
 - `build.rs` runs cbindgen and writes `core/include/postal_express.h`. The header is committed so API changes show up in diffs; rebuild the crate after changing an export and commit the header with it.
 - Calls are coarse, on opaque handles. Strings go both ways as UTF-8; strings returned to C++ are allocated by Rust and released with `pe_string_free` (in C++, `core::String`, a `unique_ptr` with that deleter, see `app/src/core.h`).
+- Lists and views are opaque handles holding `repr(C)` rows whose strings they own (`pe_folders`, `pe_folder_list_get`, `pe_folder_list_free`). No JSON: C++ parses nothing. Enum constants are qualified (`PE_SORT_FIELD_DATE`) by `cbindgen.toml`.
+- Work that touches the network runs on the workers and reports through the event callback, on a worker thread: the C++ callback copies the event, posts it to the window thread, and must not throw.
 - Every export runs its body inside `guard` (`catch_unwind`) so no panic crosses into C++. Do not switch to `panic = "abort"`: a panic on a malformed message would then crash the app on every start.
 - Rust is built with `+crt-static` (`core/.cargo/config.toml`) to match the static CRT of the app (`/MT`, no Debug CRT variant). Cargo only reads that file when it runs in `core/`, which is why `app/CMakeLists.txt` sets `WORKING_DIRECTORY`. When a new Rust dependency needs more Windows system libraries, get them from `cargo rustc -p pe-ffi --release -- --print native-static-libs` and add them to `target_link_libraries`.
 

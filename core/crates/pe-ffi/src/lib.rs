@@ -6,6 +6,10 @@
 //! - No panic crosses into C++: each export runs inside `guard`, a panic becomes an error result (NULL here). A crash
 //!   on a malformed message would come back on every start, so aborting is not an option.
 
+mod core;
+
+pub use core::*;
+
 use std::ffi::{CString, c_char};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr::null_mut;
@@ -15,14 +19,19 @@ fn guard<T>(f: impl FnOnce() -> T) -> Option<T> {
     catch_unwind(AssertUnwindSafe(f)).ok()
 }
 
-/// Hands a string to C++. A NUL inside would cut it short, so it is replaced.
-fn into_c_string(text: String) -> *mut c_char {
+/// A C string of `text`. A NUL inside would cut it short, so it is replaced.
+fn c_string(text: String) -> CString {
     let text = if text.contains('\0') {
         text.replace('\0', "\u{FFFD}")
     } else {
         text
     };
-    CString::new(text).map_or(null_mut(), CString::into_raw)
+    CString::new(text).unwrap_or_default()
+}
+
+/// Hands a string to C++, to be freed with `pe_string_free`
+fn into_c_string(text: String) -> *mut c_char {
+    c_string(text).into_raw()
 }
 
 /// The version of the core, a static string that is not freed.
