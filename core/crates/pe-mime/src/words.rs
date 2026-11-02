@@ -52,13 +52,14 @@ impl<'a> Run<'a> {
         if word.base64 {
             self.base64.push_str(word.text);
         } else {
-            self.bytes.extend(decode_b(&std::mem::take(&mut self.base64)));
+            self.bytes
+                .extend(decode_base64(std::mem::take(&mut self.base64).as_bytes()));
             self.bytes.extend(decode_q(word.text));
         }
     }
 
     fn finish(mut self) -> String {
-        self.bytes.extend(decode_b(&self.base64));
+        self.bytes.extend(decode_base64(self.base64.as_bytes()));
         match self.encoding {
             Some(encoding) => encoding.decode_without_bom_handling(&self.bytes).0.into_owned(),
             None => String::from_utf8_lossy(&self.bytes).into_owned(),
@@ -130,12 +131,15 @@ fn decode_q(text: &str) -> Vec<u8> {
 
 /// B encoding: base64 where padding ends a group (joined words can carry padding inside), stray
 /// characters ignored
-fn decode_b(text: &str) -> Vec<u8> {
-    let mut out = Vec::new();
-    for piece in text.split('=') {
-        let clean: String = piece
-            .chars()
-            .filter(|c| c.is_ascii_alphanumeric() || *c == '+' || *c == '/')
+/// Base64 with whatever is not in the alphabet skipped, padding ending a group: what libmime and
+/// postal-mime both make of broken encoded words and bodies
+pub(crate) fn decode_base64(text: &[u8]) -> Vec<u8> {
+    let mut out = Vec::with_capacity(text.len() / 4 * 3);
+    for piece in text.split(|c| *c == b'=') {
+        let clean: Vec<u8> = piece
+            .iter()
+            .copied()
+            .filter(|c| c.is_ascii_alphanumeric() || *c == b'+' || *c == b'/')
             .collect();
         // a trailing single character can not hold a byte
         let usable = clean.len() - usize::from(clean.len() % 4 == 1);

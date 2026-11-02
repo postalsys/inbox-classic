@@ -40,7 +40,7 @@ pub(crate) enum State {
 pub(crate) enum Decoder {
     PassThrough {
         output: Vec<u8>,
-        pending_break: Option<Vec<u8>>,
+        pending_break: Option<LineBreak>,
     },
     Base64 {
         output: Vec<u8>,
@@ -48,8 +48,22 @@ pub(crate) enum Decoder {
     },
     QuotedPrintable {
         output: Vec<u8>,
-        pending_break: Option<Vec<u8>>,
+        pending_break: Option<LineBreak>,
     },
+}
+
+/// The line break after a line, `\r*\n`, by its number of carriage returns. The last line of a
+/// message gets a `\n` too.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct LineBreak {
+    pub crs: usize,
+}
+
+impl LineBreak {
+    fn write(self, output: &mut Vec<u8>) {
+        output.resize(output.len() + self.crs, b'\r');
+        output.push(b'\n');
+    }
 }
 
 impl Decoder {
@@ -70,14 +84,14 @@ impl Decoder {
         }
     }
 
-    fn update(&mut self, line: &[u8], line_break: &[u8]) {
+    fn update(&mut self, line: &[u8], line_break: LineBreak) {
         match self {
             Decoder::PassThrough { output, pending_break } => {
                 if let Some(pending) = pending_break.take() {
-                    output.extend_from_slice(&pending);
+                    pending.write(output);
                 }
                 output.extend_from_slice(line);
-                *pending_break = Some(line_break.to_vec());
+                *pending_break = Some(line_break);
             }
             Decoder::Base64 { output, remainder } => {
                 let before = remainder.len();
@@ -101,7 +115,7 @@ impl Decoder {
             }
             Decoder::QuotedPrintable { output, pending_break } => {
                 if let Some(pending) = pending_break.take() {
-                    output.extend_from_slice(&pending);
+                    pending.write(output);
                 }
                 let mut len = line.len();
                 while len > 0 && is_wsp(line[len - 1]) {
@@ -125,7 +139,7 @@ impl Decoder {
                     output.push(line[i]);
                     i += 1;
                 }
-                *pending_break = (!soft_break).then(|| line_break.to_vec());
+                *pending_break = (!soft_break).then_some(line_break);
             }
         }
     }
@@ -142,7 +156,7 @@ impl Decoder {
                 pending_break,
             } => {
                 if !boundary_ended && let Some(pending) = pending_break {
-                    output.extend_from_slice(&pending);
+                    pending.write(&mut output);
                 }
                 output
             }
@@ -229,7 +243,7 @@ impl MimeNode {
     pub fn feed(
         &mut self,
         line: &[u8],
-        line_break: &[u8],
+        line_break: LineBreak,
         header_size: &mut usize,
         max_header_size: usize,
     ) -> Result<bool, super::Error> {
@@ -335,17 +349,23 @@ impl MimeNode {
             .chars()
             .take_while(|c| c.is_alphanumeric() || *c == '_' || *c == '-')
             .collect();
-        self.decoder = Some(Decoder::new(&self.transfer_encoding));
+        if self.multipart.is_none() {
+            self.decoder = Some(Decoder::new(&self.transfer_encoding));
+        }
     }
 
-    /// The text of a text part, charset decoded, line breaks as `\n`, format=flowed joined
-    pub fn text_content(&self) -> String {
-        let Some(content) = &self.content else {
+    /// Takes the content of a text part as text: charset decoded, line breaks as `\n`,
+    /// format=flowed joined
+    pub fn take_text_content(&mut self) -> String {
+        let Some(content) = self.content.take() else {
             return String::new();
         };
         let params = &self.content_type.params;
         let html = self.content_type.value == "text/html";
-        let text = decode_text(content, params.get("charset").map(String::as_str), html).replace("\r\n", "\n");
+        let mut text = decode_text(&content, params.get("charset").map(String::as_str), html);
+        if text.contains('\r') {
+            text = text.replace("\r\n", "\n");
+        }
         let flowed = params.get("format").is_some_and(|f| f.eq_ignore_ascii_case("flowed"));
         if self.content_type.value == "text/plain" && flowed {
             let del_sp = params.get("delsp").is_some_and(|d| d.eq_ignore_ascii_case("yes"));
@@ -589,13 +609,15 @@ mod tests {
 
     #[test]
     fn quoted_printable_and_base64() {
+        let crlf = LineBreak { crs: 1 };
+        let lf = LineBreak { crs: 0 };
         let mut qp = Decoder::new("quoted-printable");
-        qp.update(b"caf=C3=A9 soft=", b"\r\n");
-        qp.update(b"break  ", b"\r\n");
+        qp.update(b"caf=C3=A9 soft=", crlf);
+        qp.update(b"break  ", crlf);
         assert_eq!(qp.finish(false), "café softbreak\r\n".as_bytes());
         let mut b64 = Decoder::new("base64");
-        b64.update(b"SGVs", b"\n");
-        b64.update(b"bG8=", b"\n");
+        b64.update(b"SGVs", lf);
+        b64.update(b"bG8=", lf);
         assert_eq!(b64.finish(true), b"Hello");
     }
 }

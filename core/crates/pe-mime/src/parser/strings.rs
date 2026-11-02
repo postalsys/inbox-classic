@@ -6,8 +6,7 @@
 
 use std::collections::BTreeMap;
 
-use base64::Engine;
-use base64::engine::general_purpose::STANDARD_NO_PAD;
+pub(crate) use crate::words::decode_base64;
 use encoding_rs::{Encoding, UTF_16BE, UTF_16LE, WINDOWS_1252, X_USER_DEFINED};
 
 pub(crate) fn is_wsp(c: u8) -> bool {
@@ -181,21 +180,6 @@ pub fn fold_line_breaks(text: &str) -> String {
 
 fn hex(c: u8) -> Option<u8> {
     (c as char).to_digit(16).map(|d| d as u8)
-}
-
-/// Base64 with whatever is not in the alphabet skipped, padding ending a group
-pub(crate) fn decode_base64(text: &[u8]) -> Vec<u8> {
-    let mut out = Vec::with_capacity(text.len() / 4 * 3);
-    for piece in text.split(|c| *c == b'=') {
-        let clean: Vec<u8> = piece
-            .iter()
-            .copied()
-            .filter(|c| c.is_ascii_alphanumeric() || *c == b'+' || *c == b'/')
-            .collect();
-        let usable = clean.len() - usize::from(clean.len() % 4 == 1);
-        out.extend(STANDARD_NO_PAD.decode(&clean[..usable]).unwrap_or_default());
-    }
-    out
 }
 
 fn decode_word(charset: &str, encoding: u8, text: &str) -> String {

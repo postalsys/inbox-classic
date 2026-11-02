@@ -4,32 +4,27 @@
 //! original works on JavaScript string positions.
 
 use super::strings::{decode_words, is_encoded_words_only};
+use crate::Address;
 
 /// One address, or a group of them
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ParsedAddress {
-    Mailbox {
-        name: String,
-        address: String,
-    },
-    Group {
-        name: String,
-        members: Vec<(String, String)>,
-    },
+    Mailbox(Address),
+    Group { name: String, members: Vec<Address> },
 }
 
 impl ParsedAddress {
     pub fn name(&self) -> &str {
         match self {
-            ParsedAddress::Mailbox { name, .. } | ParsedAddress::Group { name, .. } => name,
+            ParsedAddress::Mailbox(Address { name, .. }) | ParsedAddress::Group { name, .. } => name,
         }
     }
 
     /// The mailboxes, a group's members flattened
-    pub fn mailboxes(&self) -> Vec<(String, String)> {
+    pub fn mailboxes(&self) -> &[Address] {
         match self {
-            ParsedAddress::Mailbox { name, address } => vec![(name.clone(), address.clone())],
-            ParsedAddress::Group { members, .. } => members.clone(),
+            ParsedAddress::Mailbox(mailbox) => std::slice::from_ref(mailbox),
+            ParsedAddress::Group { members, .. } => members,
         }
     }
 }
@@ -923,26 +918,25 @@ fn find_address_in_text(data: &mut Parts) {
     }
 }
 
-/// A name without an address followed by an address with a name: the comma was in the name
-fn merge_name_fragments(list: Vec<ParsedAddress>) -> Vec<ParsedAddress> {
-    let mut merged: Vec<ParsedAddress> = Vec::new();
-    for current in list.into_iter().rev() {
-        if let ParsedAddress::Mailbox { name, address } = &current
-            && address.is_empty()
-            && !name.is_empty()
-            && let Some(ParsedAddress::Mailbox {
-                name: next_name,
-                address: next_address,
-            }) = merged.last_mut()
-            && !next_address.is_empty()
-            && !next_name.is_empty()
-        {
-            *next_name = format!("{name}, {next_name}");
+/// Names without an address followed by an address with a name: the commas were in the name
+fn merge_name_fragments(list: Vec<Address>) -> Vec<Address> {
+    let mut merged = Vec::with_capacity(list.len());
+    // the names waiting for an address, in `merged` from this index on
+    let mut run_start = 0;
+    for mut current in list {
+        let name_only = current.address.is_empty() && !current.name.is_empty();
+        if name_only {
+            merged.push(current);
             continue;
         }
+        if !current.address.is_empty() && !current.name.is_empty() && run_start < merged.len() {
+            let mut name: Vec<String> = merged.drain(run_start..).map(|a: Address| a.name).collect();
+            name.push(current.name);
+            current.name = name.join(", ");
+        }
         merged.push(current);
+        run_start = merged.len();
     }
-    merged.reverse();
     merged
 }
 
@@ -951,8 +945,10 @@ pub fn parse_addresses(value: &str) -> Vec<ParsedAddress> {
     let chars: Vec<char> = value.chars().collect();
     let tokens = Tokenizer::new(&chars).tokenize();
     let mut parsed = Vec::new();
+    // the mailboxes outside groups, merged when the list ends or a group starts
+    let mut loose: Vec<Address> = Vec::new();
     let mut group: Option<String> = None;
-    let mut members: Vec<ParsedAddress> = Vec::new();
+    let mut members: Vec<Address> = Vec::new();
     let mut from = 0;
     let len = tokens.list.len();
     for i in 0..=len {
@@ -970,37 +966,47 @@ pub fn parse_addresses(value: &str) -> Vec<ParsedAddress> {
         }
         if i > from {
             let (name, address) = handle_address(&tokens, from, i);
-            let mailbox = ParsedAddress::Mailbox { name, address };
+            let mailbox = Address { name, address };
             if group.is_some() {
                 members.push(mailbox)
             } else {
-                parsed.push(mailbox)
+                loose.push(mailbox)
             }
         }
         from = i + 1;
         if group.is_some() && (operator == Some(';') || i == len) {
-            let members = merge_name_fragments(std::mem::take(&mut members))
-                .into_iter()
-                .flat_map(|m| m.mailboxes())
-                .collect();
+            flush_loose(&mut parsed, &mut loose);
             parsed.push(ParsedAddress::Group {
                 name: group.take().unwrap_or_default(),
-                members,
+                members: merge_name_fragments(std::mem::take(&mut members)),
             });
         }
     }
-    merge_name_fragments(parsed)
+    flush_loose(&mut parsed, &mut loose);
+    parsed
+}
+
+fn flush_loose(parsed: &mut Vec<ParsedAddress>, loose: &mut Vec<Address>) {
+    parsed.extend(
+        merge_name_fragments(std::mem::take(loose))
+            .into_iter()
+            .map(ParsedAddress::Mailbox),
+    );
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn mailbox(name: &str, address: &str) -> ParsedAddress {
-        ParsedAddress::Mailbox {
+    fn address(name: &str, address: &str) -> Address {
+        Address {
             name: name.into(),
             address: address.into(),
         }
+    }
+
+    fn mailbox(name: &str, email: &str) -> ParsedAddress {
+        ParsedAddress::Mailbox(address(name, email))
     }
 
     #[test]
@@ -1026,7 +1032,7 @@ mod tests {
             parse_addresses("Team: a@b.c, Bob <d@e.f>;"),
             vec![ParsedAddress::Group {
                 name: "Team".into(),
-                members: vec![(String::new(), "a@b.c".into()), ("Bob".into(), "d@e.f".into())]
+                members: vec![address("", "a@b.c"), address("Bob", "d@e.f")]
             }]
         );
         assert_eq!(
@@ -1037,5 +1043,27 @@ mod tests {
             }]
         );
         assert_eq!(parse_addresses(""), vec![]);
+    }
+
+    #[test]
+    fn commas_in_unquoted_names() {
+        assert_eq!(
+            parse_addresses("Reinman, Andris <a@b.c>"),
+            vec![mailbox("Reinman, Andris", "a@b.c")]
+        );
+        assert_eq!(
+            parse_addresses("a, b, c <x@y.z>, d@e.f"),
+            vec![mailbox("a, b, c", "x@y.z"), mailbox("", "d@e.f")]
+        );
+        // a name-only fragment before an address without a name stays apart
+        assert_eq!(
+            parse_addresses("a, x@y.z"),
+            vec![mailbox("a", ""), mailbox("", "x@y.z")]
+        );
+        let name = vec!["n"; 20_000].join(", ");
+        assert_eq!(
+            parse_addresses(&format!("{name} <x@y.z>")),
+            vec![mailbox(&name, "x@y.z")]
+        );
     }
 }

@@ -1,21 +1,27 @@
 //! Messages parsed for display: headers, addresses, the text and HTML to show, and attachments.
 //! A port of postal-mime (../postal-mime/src), with its limits against hostile input: nesting,
 //! part count, header size, depth of attached messages, and addresses in attached messages.
+//!
+//! The helpers that decode header text the postal-mime way stay inside this module: the rest of
+//! the crate decodes the libmime way, for IMAP, and mixing the two would show the same subject
+//! differently depending on where it came from.
 
 mod address;
 mod entities;
+mod filename;
 mod node;
 mod strings;
 mod text;
 
+use std::collections::HashMap;
 use std::fmt;
 
 pub use address::{ParsedAddress, parse_addresses};
-pub use node::{Header, HeaderLine, StructuredHeader};
-pub use strings::{decode_charset, decode_text, decode_words as decode_header_words};
-pub use text::{decode_html_entities, escape_html, html_to_text, text_to_html};
+pub use node::{Header, HeaderLine};
+pub use text::{html_to_text, text_to_html};
 
-use node::{MimeNode, State};
+use crate::Address;
+use node::{LineBreak, MimeNode, State};
 use text::HeaderFields;
 
 /// A message that can not be parsed within the limits
@@ -63,6 +69,7 @@ impl Default for Limits {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Attachment {
+    /// As the sender wrote it, for display; see [`Attachment::safe_filename`] for saving
     pub filename: Option<String>,
     pub mime_type: String,
     pub disposition: Option<String>,
@@ -75,6 +82,14 @@ pub struct Attachment {
     /// An attached message nested too deep to be read, kept as a file
     pub rfc822_depth_exceeded: bool,
     pub content: Vec<u8>,
+}
+
+impl Attachment {
+    /// A name to save the attachment under: no path, no control or direction characters, no
+    /// name Windows reserves, and one made from the type when the sender gave none
+    pub fn safe_filename(&self) -> String {
+        filename::safe_filename(self.filename.as_deref(), &self.mime_type)
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -93,22 +108,58 @@ pub struct Message {
     pub message_id: Option<String>,
     pub in_reply_to: Option<String>,
     pub references: Option<String>,
-    /// ISO 8601 in UTC, or the Date header as written when it does not parse
+    /// The Date header as written
     pub date: Option<String>,
+    /// The Date header in seconds since the Unix epoch, when it parses
+    pub timestamp: Option<i64>,
     pub html: Option<String>,
     pub text: Option<String>,
     pub attachments: Vec<Attachment>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+impl Message {
+    /// The message IDs of References, oldest first, for threading
+    pub fn reference_ids(&self) -> Vec<String> {
+        self.references.as_deref().map(message_ids).unwrap_or_default()
+    }
+}
+
+/// The `<id>` items of a References or In-Reply-To value
+pub fn message_ids(value: &str) -> Vec<String> {
+    let mut ids = Vec::new();
+    let mut rest = value;
+    while let Some(start) = rest.find('<') {
+        let Some(end) = rest[start..].find('>') else { break };
+        let id = rest[start + 1..start + end].trim();
+        if !id.is_empty() {
+            ids.push(format!("<{id}>"));
+        }
+        rest = &rest[start + end + 1..];
+    }
+    ids
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TextType {
     Plain,
     Html,
 }
 
+/// What the header block of an attached message shows
+#[derive(Clone)]
+struct AttachedHeader {
+    from: Option<ParsedAddress>,
+    subject: Option<String>,
+    date: Option<String>,
+    timestamp: Option<i64>,
+    to: Vec<ParsedAddress>,
+    cc: Vec<ParsedAddress>,
+    bcc: Vec<ParsedAddress>,
+}
+
 enum TextItem {
     Text(String),
-    Message(Box<Message>),
+    Header(Box<AttachedHeader>),
 }
 
 /// The texts a part contributes, by type; the key is unique across nested parsers
@@ -131,10 +182,9 @@ impl TextEntry {
 #[derive(Default)]
 struct Counters {
     header_size: usize,
+    /// Also the source of the keys of text entries, unique across nested parsers
     part_count: usize,
     forwarded_addresses: usize,
-    /// For the keys of text entries
-    next_key: usize,
 }
 
 struct Parser<'a> {
@@ -142,13 +192,15 @@ struct Parser<'a> {
     counters: &'a mut Counters,
     rfc822_depth: usize,
     nodes: Vec<MimeNode>,
-    /// Node keys for text entries, `nodes` index + base
+    /// Text entry key of node 0
     key_base: usize,
     current: usize,
     /// Multiparts whose boundary is open, in order
     boundaries: Vec<usize>,
     text_entries: Vec<TextEntry>,
-    text_types: Vec<TextType>,
+    text_index: HashMap<usize, usize>,
+    has_plain: bool,
+    has_html: bool,
     attachments: Vec<Attachment>,
     force_rfc822_attachments: bool,
 }
@@ -161,13 +213,12 @@ pub fn parse(raw: &[u8]) -> Result<Message, Error> {
 pub fn parse_with(raw: &[u8], limits: Limits) -> Result<Message, Error> {
     let mut counters = Counters::default();
     let mut parser = Parser::new(limits, &mut counters, 0)?;
-    let (message, _) = parser.run(raw)?;
-    Ok(message)
+    parser.run(raw)
 }
 
 impl<'a> Parser<'a> {
     fn new(limits: Limits, counters: &'a mut Counters, rfc822_depth: usize) -> Result<Self, Error> {
-        let key_base = counters.next_key;
+        let key_base = counters.part_count;
         let mut parser = Parser {
             limits,
             counters,
@@ -177,7 +228,9 @@ impl<'a> Parser<'a> {
             current: 0,
             boundaries: Vec::new(),
             text_entries: Vec::new(),
-            text_types: Vec::new(),
+            text_index: HashMap::new(),
+            has_plain: false,
+            has_html: false,
             attachments: Vec::new(),
             force_rfc822_attachments: false,
         };
@@ -202,9 +255,9 @@ impl<'a> Parser<'a> {
                 format!("Maximum MIME nesting depth of {max} levels exceeded"),
             ));
         }
-        let multipart = parent.and_then(|p| self.nodes[p].multipart.clone());
-        self.nodes.push(MimeNode::new(parent, depth, multipart.as_deref()));
-        self.counters.next_key += 1;
+        let parent_multipart = parent.and_then(|p| self.nodes[p].multipart.as_deref());
+        let node = MimeNode::new(parent, depth, parent_multipart);
+        self.nodes.push(node);
         let index = self.nodes.len() - 1;
         if let Some(parent) = parent {
             self.nodes[parent].children.push(index);
@@ -212,8 +265,7 @@ impl<'a> Parser<'a> {
         Ok(index)
     }
 
-    /// Parses `raw`, returns the message and the text entries of a nested parser
-    fn run(&mut self, raw: &[u8]) -> Result<(Message, Vec<TextEntry>), Error> {
+    fn run(&mut self, raw: &[u8]) -> Result<Message, Error> {
         let mut pos = 0;
         while pos < raw.len() {
             let (line, line_break, next) = read_line(raw, pos);
@@ -229,36 +281,22 @@ impl<'a> Parser<'a> {
             message.html = html;
         }
         message.attachments = std::mem::take(&mut self.attachments);
-        Ok((message, std::mem::take(&mut self.text_entries)))
+        Ok(message)
     }
 
-    fn process_line(&mut self, line: &[u8], line_break: &[u8], last: bool) -> Result<(), Error> {
-        if line.len() > 2 && line.starts_with(b"--") {
-            for i in 0..self.boundaries.len() {
-                let node = self.boundaries[i];
-                let Some(terminator) = boundary_match(line, self.nodes[node].boundary.as_deref().unwrap_or_default())
-                else {
-                    continue;
-                };
-                if terminator {
-                    self.finalize(node, true);
-                    self.current = self.nodes[node].parent.unwrap_or(0);
-                } else {
-                    self.finalize_children(node, true);
-                    self.current = self.add_node(Some(node))?;
-                }
-                if last {
-                    self.finalize(0, false);
-                }
-                return Ok(());
+    fn process_line(&mut self, line: &[u8], line_break: LineBreak, last: bool) -> Result<(), Error> {
+        if !self.at_boundary(line)? {
+            let current = self.current;
+            let max = self.limits.max_headers_size;
+            let in_header = self.nodes[current].state == State::Header;
+            let again = self.nodes[current].feed(line, line_break, &mut self.counters.header_size, max)?;
+            if in_header && self.nodes[current].state == State::Body && self.nodes[current].boundary.is_some() {
+                // a multipart whose headers just ended opens its boundary
+                self.boundaries.push(current);
             }
-        }
-        let current = self.current;
-        let max = self.limits.max_headers_size;
-        let again = self.nodes[current].feed(line, line_break, &mut self.counters.header_size, max)?;
-        self.register_boundary(current);
-        if again {
-            return self.process_line(line, line_break, last);
+            if again {
+                return self.process_line(line, line_break, last);
+            }
         }
         if last {
             self.finalize(0, false);
@@ -266,14 +304,27 @@ impl<'a> Parser<'a> {
         Ok(())
     }
 
-    /// A multipart whose headers just ended opens its boundary
-    fn register_boundary(&mut self, node: usize) {
-        if self.nodes[node].state == State::Body
-            && self.nodes[node].boundary.is_some()
-            && !self.boundaries.contains(&node)
-        {
-            self.boundaries.push(node);
+    /// Handles `line` when it is a boundary of an open multipart
+    fn at_boundary(&mut self, line: &[u8]) -> Result<bool, Error> {
+        if line.len() <= 2 || !line.starts_with(b"--") {
+            return Ok(false);
         }
+        for i in 0..self.boundaries.len() {
+            let node = self.boundaries[i];
+            let Some(terminator) = boundary_match(line, self.nodes[node].boundary.as_deref().unwrap_or_default())
+            else {
+                continue;
+            };
+            if terminator {
+                self.finalize(node, true);
+                self.current = self.nodes[node].parent.unwrap_or(0);
+            } else {
+                self.finalize_children(node, true);
+                self.current = self.add_node(Some(node))?;
+            }
+            return Ok(true);
+        }
+        Ok(false)
     }
 
     fn finalize(&mut self, node: usize, boundary_ended: bool) {
@@ -297,7 +348,7 @@ impl<'a> Parser<'a> {
 
     fn has_report_parts(&self) -> bool {
         self.nodes.iter().any(|n| {
-            n.multipart.is_none()
+            n.multipart.as_deref().is_none()
                 && ["message/delivery-status", "message/feedback-report"].contains(&n.content_type.value.as_str())
         })
     }
@@ -317,36 +368,33 @@ impl<'a> Parser<'a> {
     }
 
     fn add_text(&mut self, key: usize, kind: TextType, item: TextItem) {
-        let index = match self.text_entries.iter().position(|e| e.key == key) {
-            Some(index) => index,
-            None => {
-                self.text_entries.push(TextEntry {
-                    key,
-                    plain: None,
-                    html: None,
-                });
-                self.text_entries.len() - 1
-            }
-        };
+        let index = *self.text_index.entry(key).or_insert_with(|| {
+            self.text_entries.push(TextEntry {
+                key,
+                plain: None,
+                html: None,
+            });
+            self.text_entries.len() - 1
+        });
         self.text_entries[index]
             .items(kind)
             .get_or_insert_with(Vec::new)
             .push(item);
-        if !self.text_types.contains(&kind) {
-            self.text_types.push(kind);
+        match kind {
+            TextType::Plain => self.has_plain = true,
+            TextType::Html => self.has_html = true,
         }
     }
 
-    fn collect(&mut self, index: usize, alternative: Option<usize>, related: bool) -> Result<(), Error> {
-        let mut alternative = alternative;
-        let mut related = related;
+    fn collect(&mut self, index: usize, mut alternative: Option<usize>, mut related: bool) -> Result<(), Error> {
         match self.nodes[index].multipart.as_deref() {
             None => self.collect_part(index, alternative, related)?,
             Some("alternative") => alternative = Some(index),
             Some("related") => related = true,
             Some(_) => {}
         }
-        for child in self.nodes[index].children.clone() {
+        for i in 0..self.nodes[index].children.len() {
+            let child = self.nodes[index].children[i];
             self.collect(child, alternative, related)?;
         }
         Ok(())
@@ -365,7 +413,7 @@ impl<'a> Parser<'a> {
             } else {
                 TextType::Plain
             };
-            let text = node.text_content();
+            let text = self.nodes[index].take_text_content();
             let key = self.key_base + alternative.unwrap_or(index);
             self.add_text(key, kind, TextItem::Text(text));
         } else if node.content.is_some() {
@@ -376,27 +424,27 @@ impl<'a> Parser<'a> {
     }
 
     fn collect_sub_message(&mut self, index: usize) -> Result<(), Error> {
-        let content = self.nodes[index].content.clone().unwrap_or_default();
-        let limits = self.limits;
-        let depth = self.rfc822_depth + 1;
-        let (message, entries, types) = {
-            let mut sub = Parser::new(limits, self.counters, depth)?;
-            let (message, entries) = sub.run(&content)?;
-            (message, entries, sub.text_types.clone())
+        let content = self.nodes[index].content.take().unwrap_or_default();
+        let (mut message, entries, has_plain, has_html) = {
+            let mut sub = Parser::new(self.limits, self.counters, self.rfc822_depth + 1)?;
+            let message = sub.run(&content)?;
+            (
+                message,
+                std::mem::take(&mut sub.text_entries),
+                sub.has_plain,
+                sub.has_html,
+            )
         };
-        let count = |list: &[ParsedAddress]| {
+        let count = |list: &[ParsedAddress]| -> usize {
             list.iter()
-                .map(|a| 1 + a.mailboxes().len() * usize::from(matches!(a, ParsedAddress::Group { .. })))
-                .sum::<usize>()
+                .map(|a| match a {
+                    ParsedAddress::Mailbox(_) => 1,
+                    ParsedAddress::Group { members, .. } => 1 + members.len(),
+                })
+                .sum()
         };
-        self.counters.forwarded_addresses += message
-            .from
-            .iter()
-            .map(|a| count(std::slice::from_ref(a)))
-            .sum::<usize>()
-            + count(&message.to)
-            + count(&message.cc)
-            + count(&message.bcc);
+        self.counters.forwarded_addresses +=
+            count(message.from.as_slice()) + count(&message.to) + count(&message.cc) + count(&message.bcc);
         if self.counters.forwarded_addresses > self.limits.max_forwarded_addresses {
             let max = self.limits.max_forwarded_addresses;
             return Err(Error::limit(
@@ -404,29 +452,46 @@ impl<'a> Parser<'a> {
                 format!("Maximum forwarded address count of {max} addresses exceeded"),
             ));
         }
-        let (has_plain, has_html) = (types.contains(&TextType::Plain), types.contains(&TextType::Html));
+        let header = Box::new(AttachedHeader {
+            from: message.from.take(),
+            subject: message.subject.take(),
+            date: message.date.take(),
+            timestamp: message.timestamp,
+            to: std::mem::take(&mut message.to),
+            cc: std::mem::take(&mut message.cc),
+            bcc: std::mem::take(&mut message.bcc),
+        });
         let key = self.key_base + index;
-        let attachments = message.attachments.clone();
-        let message = Box::new(message);
         if has_plain || !has_html {
-            self.add_text(key, TextType::Plain, TextItem::Message(message.clone()));
+            self.add_text(key, TextType::Plain, TextItem::Header(header.clone()));
         }
         if has_html {
-            self.add_text(key, TextType::Html, TextItem::Message(message));
+            self.add_text(key, TextType::Html, TextItem::Header(header));
         }
-        self.text_entries.extend(entries);
-        self.attachments.extend(attachments);
+        for entry in entries {
+            self.text_index.insert(entry.key, self.text_entries.len());
+            self.text_entries.push(entry);
+        }
+        self.attachments.append(&mut message.attachments);
         Ok(())
     }
 
-    fn attachment(&self, index: usize, related: bool, depth_exceeded: bool) -> Attachment {
-        let node = &self.nodes[index];
+    fn attachment(&mut self, index: usize, related: bool, depth_exceeded: bool) -> Attachment {
+        let node = &mut self.nodes[index];
+        let calendar = matches!(node.content_type.value.as_str(), "text/calendar" | "application/ics");
+        let (content, method) = if calendar {
+            let text = node.take_text_content();
+            let method = node.content_type.params.get("method").map(|m| m.trim().to_uppercase());
+            (format!("{}\n", text.trim_end_matches('\n')).into_bytes(), method)
+        } else {
+            (node.content.take().unwrap_or_default(), None)
+        };
         let filename = node
             .disposition
             .params
             .get("filename")
             .or_else(|| node.content_type.params.get("name"));
-        let mut attachment = Attachment {
+        Attachment {
             filename: filename
                 .filter(|f| !f.is_empty())
                 .map(|f| strings::decode_words(&strings::fold_line_breaks(f))),
@@ -435,16 +500,10 @@ impl<'a> Parser<'a> {
             related: related && node.content_id.is_some() && !depth_exceeded,
             description: node.description.as_deref().map(strings::decode_words),
             content_id: node.content_id.clone(),
-            method: None,
+            method,
             rfc822_depth_exceeded: depth_exceeded,
-            content: node.content.clone().unwrap_or_default(),
-        };
-        if matches!(node.content_type.value.as_str(), "text/calendar" | "application/ics") {
-            attachment.method = node.content_type.params.get("method").map(|m| m.trim().to_uppercase());
-            let text = node.text_content();
-            attachment.content = format!("{}\n", text.trim_end_matches('\n')).into_bytes();
+            content,
         }
-        attachment
     }
 
     /// The text and the HTML of the message: each part in its own type, or converted from the
@@ -452,8 +511,13 @@ impl<'a> Parser<'a> {
     fn render_text(&mut self) -> (Option<String>, Option<String>) {
         let mut plain: Option<Vec<String>> = None;
         let mut html: Option<Vec<String>> = None;
-        for entry in &self.text_entries {
-            for &kind in &self.text_types {
+        let kinds: Vec<TextType> = [(self.has_plain, TextType::Plain), (self.has_html, TextType::Html)]
+            .into_iter()
+            .filter(|(present, _)| *present)
+            .map(|(_, kind)| kind)
+            .collect();
+        for entry in std::mem::take(&mut self.text_entries) {
+            for &kind in &kinds {
                 let output = match kind {
                     TextType::Plain => plain.get_or_insert_with(Vec::new),
                     TextType::Html => html.get_or_insert_with(Vec::new),
@@ -472,10 +536,11 @@ impl<'a> Parser<'a> {
         (join(plain), join(html))
     }
 
-    fn build_message(&self) -> Message {
-        let root = &self.nodes[0];
+    fn build_message(&mut self) -> Message {
+        let headers = std::mem::take(&mut self.nodes[0].headers);
+        let header_lines = std::mem::take(&mut self.nodes[0].raw_header_lines);
         let header = |key: &str| {
-            root.headers
+            headers
                 .iter()
                 .find(|h| h.key == key)
                 .map(|h| h.value.as_str())
@@ -483,20 +548,19 @@ impl<'a> Parser<'a> {
         };
         let first_address = |key: &str| header(key).and_then(|v| parse_addresses(v).into_iter().next());
         let plain_address = |key: &str| match first_address(key) {
-            Some(ParsedAddress::Mailbox { address, .. }) if !address.is_empty() => Some(address),
+            Some(ParsedAddress::Mailbox(Address { address, .. })) if !address.is_empty() => Some(address),
             _ => None,
         };
         let all = |key: &str| -> Vec<ParsedAddress> {
-            root.headers
+            headers
                 .iter()
                 .filter(|h| h.key == key && !h.value.is_empty())
                 .flat_map(|h| parse_addresses(&h.value))
                 .collect()
         };
         let words = |key: &str| header(key).map(strings::decode_words);
+        let date = headers.iter().find(|h| h.key == "date").map(|h| h.value.clone());
         Message {
-            headers: root.headers.clone(),
-            header_lines: root.raw_header_lines.clone(),
             from: first_address("from"),
             sender: first_address("sender"),
             reply_to: all("reply-to"),
@@ -509,14 +573,10 @@ impl<'a> Parser<'a> {
             message_id: words("message-id"),
             in_reply_to: words("in-reply-to"),
             references: words("references"),
-            date: root
-                .headers
-                .iter()
-                .find(|h| h.key == "date")
-                .map(|h| match crate::date::parse_date(&h.value) {
-                    Some(timestamp) => crate::date::to_iso(timestamp),
-                    None => h.value.clone(),
-                }),
+            timestamp: date.as_deref().and_then(crate::date::parse_date),
+            date,
+            headers,
+            header_lines,
             ..Default::default()
         }
     }
@@ -524,14 +584,15 @@ impl<'a> Parser<'a> {
 
 fn render_item(item: &TextItem, kind: TextType, convert: bool) -> String {
     match item {
-        TextItem::Message(message) => {
+        TextItem::Header(header) => {
             let fields = HeaderFields {
-                from: message.from.as_ref(),
-                subject: message.subject.as_deref(),
-                date: message.date.as_deref(),
-                to: &message.to,
-                cc: &message.cc,
-                bcc: &message.bcc,
+                from: header.from.as_ref(),
+                subject: header.subject.as_deref(),
+                date: header.date.as_deref(),
+                timestamp: header.timestamp,
+                to: &header.to,
+                cc: &header.cc,
+                bcc: &header.bcc,
             };
             match kind {
                 TextType::Html => text::format_html_header(&fields),
@@ -546,22 +607,19 @@ fn render_item(item: &TextItem, kind: TextType, convert: bool) -> String {
     }
 }
 
-/// The line at `pos` without its line break, the line break, and where the next line starts.
-/// Carriage returns at the end belong to the line break.
-fn read_line(raw: &[u8], pos: usize) -> (&[u8], &[u8], usize) {
-    let mut end = pos;
-    let mut i = pos;
-    while i < raw.len() {
-        let c = raw[i];
-        i += 1;
-        if c != b'\r' && c != b'\n' {
-            end = i;
-        }
-        if c == b'\n' {
-            return (&raw[pos..end], &raw[end..i], i);
-        }
-    }
-    (&raw[pos..end], b"\n", i)
+/// The line at `pos` without its line break, the line break, and where the next line starts. The
+/// carriage returns of a last line without a line feed are dropped.
+fn read_line(raw: &[u8], pos: usize) -> (&[u8], LineBreak, usize) {
+    let (end, next) = match raw[pos..].iter().position(|c| *c == b'\n') {
+        Some(offset) => (pos + offset, pos + offset + 1),
+        None => (raw.len(), raw.len()),
+    };
+    let content_end = raw[pos..end]
+        .iter()
+        .rposition(|c| *c != b'\r')
+        .map_or(pos, |p| pos + p + 1);
+    let crs = if next == end { 0 } else { end - content_end };
+    (&raw[pos..content_end], LineBreak { crs }, next)
 }
 
 /// Whether `line` is `--boundary` (Some(false)) or `--boundary--` (Some(true)), white space after
@@ -579,32 +637,36 @@ fn boundary_match(line: &[u8], boundary: &[u8]) -> Option<bool> {
 mod tests {
     use super::*;
 
+    fn mailbox(name: &str, address: &str) -> ParsedAddress {
+        ParsedAddress::Mailbox(Address {
+            name: name.into(),
+            address: address.into(),
+        })
+    }
+
     #[test]
     fn simple_message() {
-        let raw = b"From: Andris <andris@example.com>\r\nTo: a@b.c, Team: d@e.f;\r\nSubject: =?UTF-8?Q?Tere?=\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHello\r\nworld\r\n";
+        let raw = b"From: Andris <andris@example.com>\r\nTo: a@b.c, Team: d@e.f;\r\nSubject: =?UTF-8?Q?Tere?=\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\nReferences: <a@x> <b@x>\r\n\r\nHello\r\nworld\r\n";
         let message = parse(raw).unwrap();
-        assert_eq!(
-            message.from,
-            Some(ParsedAddress::Mailbox {
-                name: "Andris".into(),
-                address: "andris@example.com".into()
-            })
-        );
+        assert_eq!(message.from, Some(mailbox("Andris", "andris@example.com")));
         assert_eq!(message.to.len(), 2);
         assert_eq!(message.subject.as_deref(), Some("Tere"));
-        assert_eq!(message.date.as_deref(), Some("2025-10-06T10:00:00.000Z"));
+        assert_eq!(message.date.as_deref(), Some("Mon, 6 Oct 2025 10:00:00 +0000"));
+        assert_eq!(message.timestamp, Some(1_759_744_800));
+        assert_eq!(message.reference_ids(), vec!["<a@x>".to_string(), "<b@x>".to_string()]);
         assert_eq!(message.text.as_deref(), Some("Hello\nworld\n"));
         assert_eq!(message.html, None);
     }
 
     #[test]
     fn alternative_and_attachment() {
-        let raw = b"Content-Type: multipart/mixed; boundary=b1\r\n\r\n--b1\r\nContent-Type: multipart/alternative; boundary=b2\r\n\r\n--b2\r\nContent-Type: text/plain\r\n\r\nplain\r\n--b2\r\nContent-Type: text/html\r\n\r\n<p>html</p>\r\n--b2--\r\n--b1\r\nContent-Type: application/pdf; name=\"a.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\nSGVsbG8=\r\n--b1--\r\n";
+        let raw = b"Content-Type: multipart/mixed; boundary=b1\r\n\r\npreamble\r\n--b1\r\nContent-Type: multipart/alternative; boundary=b2\r\n\r\n--b2\r\nContent-Type: text/plain\r\n\r\nplain\r\n--b2\r\nContent-Type: text/html\r\n\r\n<p>html</p>\r\n--b2--\r\n--b1\r\nContent-Type: application/pdf; name=\"../a.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\nSGVsbG8=\r\n--b1--\r\n";
         let message = parse(raw).unwrap();
         assert_eq!(message.text.as_deref(), Some("plain"));
         assert_eq!(message.html.as_deref(), Some("<p>html</p>"));
         assert_eq!(message.attachments.len(), 1);
-        assert_eq!(message.attachments[0].filename.as_deref(), Some("a.pdf"));
+        assert_eq!(message.attachments[0].filename.as_deref(), Some("../a.pdf"));
+        assert_eq!(message.attachments[0].safe_filename(), "a.pdf");
         assert_eq!(message.attachments[0].content, b"Hello");
     }
 
@@ -620,5 +682,14 @@ mod tests {
         };
         assert_eq!(parse_with(&raw, limits).unwrap_err().code, "EMAXNESTINGDEPTH");
         assert!(parse(&raw).is_ok());
+    }
+
+    #[test]
+    fn message_id_lists() {
+        assert_eq!(
+            message_ids(" <a@b>\r\n <c@d>junk<>"),
+            vec!["<a@b>".to_string(), "<c@d>".to_string()]
+        );
+        assert!(message_ids("none").is_empty());
     }
 }

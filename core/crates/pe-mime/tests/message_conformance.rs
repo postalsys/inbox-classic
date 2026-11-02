@@ -4,18 +4,21 @@
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
+use std::sync::LazyLock;
+
+use pe_mime::Address;
+use pe_mime::date::to_iso;
 use pe_mime::parser::{self, Message, ParsedAddress, html_to_text, parse_addresses, text_to_html};
 use serde_json::{Map, Value, json};
 
-fn cases() -> Value {
-    serde_json::from_str(include_str!("fixtures/message-cases.json")).unwrap()
-}
+static CASES: LazyLock<Value> =
+    LazyLock::new(|| serde_json::from_str(include_str!("fixtures/message-cases.json")).unwrap());
 
 fn address(address: &ParsedAddress) -> Value {
     match address {
-        ParsedAddress::Mailbox { name, address } => json!({ "name": name, "address": address }),
+        ParsedAddress::Mailbox(Address { name, address }) => json!({ "name": name, "address": address }),
         ParsedAddress::Group { name, members } => {
-            json!({ "name": name, "group": members.iter().map(|(n, a)| json!({ "name": n, "address": a })).collect::<Vec<_>>() })
+            json!({ "name": name, "group": members.iter().map(|m| json!({ "name": m.name, "address": m.address })).collect::<Vec<_>>() })
         }
     }
 }
@@ -55,7 +58,16 @@ fn message(message: &Message) -> Value {
     put(&mut out, "messageId", text(&message.message_id));
     put(&mut out, "inReplyTo", text(&message.in_reply_to));
     put(&mut out, "references", text(&message.references));
-    put(&mut out, "date", text(&message.date));
+    // postal-mime gives the date in ISO form when it parses, as written otherwise
+    put(
+        &mut out,
+        "date",
+        message
+            .timestamp
+            .map(to_iso)
+            .or_else(|| message.date.clone())
+            .map(|d| json!(d)),
+    );
     put(&mut out, "html", text(&message.html));
     put(&mut out, "text", text(&message.text));
     let attachments: Vec<Value> = message
@@ -115,7 +127,7 @@ fn short(value: Option<&Value>) -> String {
 #[test]
 fn messages_match_postal_mime() {
     let mut failures = Vec::new();
-    let cases = cases();
+    let cases = &*CASES;
     let all = cases["messages"].as_array().unwrap();
     for (i, case) in all.iter().enumerate() {
         let raw = STANDARD.decode(case["raw"].as_str().unwrap()).unwrap();
@@ -140,7 +152,7 @@ fn messages_match_postal_mime() {
 #[test]
 fn addresses_match_postal_mime() {
     let mut failures = Vec::new();
-    for case in cases()["addresses"].as_array().unwrap() {
+    for case in CASES["addresses"].as_array().unwrap() {
         let input = case["input"].as_str().unwrap();
         let actual = json!(parse_addresses(input).iter().map(address).collect::<Vec<_>>());
         if actual != case["expected"] {
@@ -160,7 +172,7 @@ fn addresses_match_postal_mime() {
 
 #[test]
 fn conversions_match_postal_mime() {
-    let cases = cases();
+    let cases = &*CASES;
     for (name, convert) in [
         ("htmlToText", html_to_text as fn(&str) -> String),
         ("textToHtml", text_to_html),

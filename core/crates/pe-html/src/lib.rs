@@ -4,8 +4,10 @@
 #![forbid(unsafe_code)]
 
 use std::borrow::Cow;
-use std::collections::HashSet;
-use std::sync::LazyLock;
+use std::collections::hash_map::Entry;
+use std::collections::{HashMap, HashSet};
+use std::sync::OnceLock;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
@@ -27,10 +29,16 @@ pub struct RenderOptions {
     pub allow_remote_images: bool,
 }
 
-static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
+/// The most bytes the `data:` URIs of embedded images add to a message, so a small image referenced a million times
+/// does not make a document of gigabytes
+const MAX_EMBEDDED_BYTES: usize = 64 * 1024 * 1024;
+
+/// The sanitizer for a message with `images`. Mail layout lives in inline styles, style elements and old presentational
+/// attributes. CSS can not run code, and what it could load from the network is refused by the CSP and by the WebView2
+/// request filter.
+fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
+    let embedder = Embedder::new(images);
     let mut builder = ammonia::Builder::default();
-    // Mail layout lives in inline styles, style elements and old presentational attributes. CSS can not run code, and
-    // what it could load from the network is refused by the CSP and by the WebView2 request filter.
     builder
         .rm_clean_content_tags(["style"])
         .add_tags(["style", "font", "center"])
@@ -51,25 +59,73 @@ static SANITIZER: LazyLock<ammonia::Builder<'static>> = LazyLock::new(|| {
             "dir",
         ])
         .url_schemes(HashSet::from(["http", "https", "mailto", "cid", "data"]))
-        // data: is for embedded images only, a data: link could open a document of its own
-        .attribute_filter(|element, attribute, value| {
-            let is_data = value
+        .attribute_filter(move |element, attribute, value| {
+            let img_src = element == "img" && attribute == "src";
+            let scheme = value
                 .trim_start()
                 .get(..5)
-                .is_some_and(|scheme| scheme.eq_ignore_ascii_case("data:"));
-            if is_data && !(element == "img" && attribute == "src") {
-                None
-            } else {
-                Some(Cow::Borrowed(value))
+                .map(str::to_ascii_lowercase)
+                .unwrap_or_default();
+            if scheme == "data:" && !img_src {
+                // data: is for images only, a data: link could open a document of its own
+                return None;
             }
+            if scheme.starts_with("cid:")
+                && (img_src || attribute == "background")
+                && let Some(uri) = embedder.embed(value)
+            {
+                return Some(Cow::Owned(uri));
+            }
+            Some(Cow::Borrowed(value))
         });
     builder
-});
+}
+
+/// Turns `cid:` URLs into `data:` URIs of the images they name. Only images: anything else stays a `cid:` the preview
+/// can not load. The sanitizer wants a callback that owns its data, so the images are copied in.
+struct Embedder {
+    /// Content-ID, lowercased, to the image; the first image of an ID wins
+    by_id: HashMap<String, usize>,
+    images: Vec<(String, Vec<u8>)>,
+    /// Each image encoded once, when it is first referenced
+    uris: Vec<OnceLock<String>>,
+    embedded: AtomicUsize,
+}
+
+impl Embedder {
+    fn new(images: &[InlineImage]) -> Self {
+        let mut by_id = HashMap::new();
+        let mut owned = Vec::new();
+        for image in images.iter().filter(|image| image.mime_type.starts_with("image/")) {
+            if let Entry::Vacant(entry) = by_id.entry(content_id(image.content_id).to_lowercase()) {
+                entry.insert(owned.len());
+                owned.push((image.mime_type.to_string(), image.data.to_vec()));
+            }
+        }
+        Embedder {
+            by_id,
+            uris: owned.iter().map(|_| OnceLock::new()).collect(),
+            images: owned,
+            embedded: AtomicUsize::new(0),
+        }
+    }
+
+    /// The `data:` URI for a `cid:` URL, None for an unknown image or when the budget is spent
+    fn embed(&self, url: &str) -> Option<String> {
+        let index = *self.by_id.get(&content_id(&url.trim_start()[4..]).to_lowercase())?;
+        let uri = self.uris[index].get_or_init(|| {
+            let (mime_type, data) = &self.images[index];
+            format!("data:{mime_type};base64,{}", STANDARD.encode(data))
+        });
+        let total = self.embedded.fetch_add(uri.len(), Ordering::Relaxed) + uri.len();
+        (total <= MAX_EMBEDDED_BYTES).then(|| uri.clone())
+    }
+}
 
 /// Removes everything from `html` that is not plain markup: scripts, event handlers, `javascript:` URLs, forms,
 /// frames, `meta` and `base`. Returns a body fragment.
 pub fn sanitize(html: &str) -> String {
-    SANITIZER.clean(html).to_string()
+    builder(&[]).clean(html).to_string()
 }
 
 /// Sanitizes `html` and wraps it in a complete document with a Content-Security-Policy, ready for the preview.
@@ -101,41 +157,6 @@ fn content_id(value: &str) -> String {
     String::from_utf8_lossy(&out).into_owned()
 }
 
-/// Points `src="cid:..."` and `background="cid:..."` of sanitized HTML at the images as data: URIs.
-/// Only images: anything else stays a `cid:` the preview can not load.
-fn embed_images(body: &str, images: &[InlineImage]) -> String {
-    // the scheme in any case: ASCII lowercasing keeps every byte where it was
-    let lower = body.to_ascii_lowercase();
-    let mut out = String::with_capacity(body.len());
-    let mut copied = 0;
-    let mut search = 0;
-    while let Some(found) = lower[search..].find("=\"cid:") {
-        let value_start = search + found + 2;
-        let Some(length) = body[value_start..].find('"') else {
-            break;
-        };
-        let url = &body[value_start..value_start + length];
-        let wanted = content_id(&url[4..].replace("&amp;", "&"));
-        let image = images.iter().find(|image| {
-            image.mime_type.starts_with("image/") && content_id(image.content_id).eq_ignore_ascii_case(&wanted)
-        });
-        out.push_str(&body[copied..value_start]);
-        match image {
-            Some(image) => {
-                out.push_str("data:");
-                out.push_str(image.mime_type);
-                out.push_str(";base64,");
-                out.push_str(&STANDARD.encode(image.data));
-            }
-            None => out.push_str(url),
-        }
-        copied = value_start + length;
-        search = copied;
-    }
-    out.push_str(&body[copied..]);
-    out
-}
-
 /// A message for the preview: sanitized, its `cid:` images embedded, in a document with a CSP
 pub fn render_message(html: &str, options: &RenderOptions, images: &[InlineImage]) -> String {
     let image_sources = if options.allow_remote_images {
@@ -143,7 +164,7 @@ pub fn render_message(html: &str, options: &RenderOptions, images: &[InlineImage
     } else {
         "data:"
     };
-    let body = embed_images(&sanitize(html), images);
+    let body = builder(images).clean(html).to_string();
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
@@ -178,6 +199,37 @@ mod tests {
         // not an image: left as a cid: the preview can not load
         assert!(!out.contains("text/html") && !out.contains("PHNjcmlwdD4"));
         assert!(out.contains("background=\"cid:missing\""));
+    }
+
+    #[test]
+    fn embeds_only_image_urls_within_the_budget() {
+        let png = InlineImage {
+            content_id: "a@x",
+            mime_type: "image/png",
+            data: &[0; 30],
+        };
+        let out = render_message(
+            "<a href=\"cid:a@x\">x</a><table background=\"cid:A@X\"></table>",
+            &RenderOptions::default(),
+            &[png],
+        );
+        assert!(out.contains("href=\"cid:a@x\""), "{out}");
+        assert!(out.contains("background=\"data:image/png;base64,AAAA"), "{out}");
+
+        let big = vec![0; 1024 * 1024];
+        let image = InlineImage {
+            content_id: "big@x",
+            mime_type: "image/png",
+            data: &big,
+        };
+        let out = render_message(
+            &"<img src=\"cid:big@x\">".repeat(100),
+            &RenderOptions::default(),
+            &[image],
+        );
+        let embedded = out.matches("data:image/png").count();
+        assert!(embedded > 0 && embedded < 100, "{embedded}");
+        assert!(out.len() < 2 * MAX_EMBEDDED_BYTES);
     }
 
     #[test]

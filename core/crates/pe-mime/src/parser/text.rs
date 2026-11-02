@@ -7,6 +7,7 @@ use regex::{Captures, Regex};
 
 use super::address::ParsedAddress;
 use super::entities::ENTITIES;
+use crate::Address;
 use crate::date::DateTime;
 
 fn regex(pattern: &str) -> Regex {
@@ -287,36 +288,31 @@ pub fn html_to_text(html: &str) -> String {
 pub struct HeaderFields<'a> {
     pub from: Option<&'a ParsedAddress>,
     pub subject: Option<&'a str>,
-    /// ISO date, or the Date header as written when it does not parse
+    /// The Date header as written, shown when it does not parse
     pub date: Option<&'a str>,
+    pub timestamp: Option<i64>,
     pub to: &'a [ParsedAddress],
     pub cc: &'a [ParsedAddress],
     pub bcc: &'a [ParsedAddress],
 }
 
+impl HeaderFields<'_> {
+    /// The date for `data-date`, in ISO form when it parses, and the date to show
+    fn dates(&self) -> Option<(String, String)> {
+        match self.timestamp {
+            Some(timestamp) => Some((crate::date::to_iso(timestamp), format_date(timestamp))),
+            None => self.date.map(|date| (date.to_string(), date.to_string())),
+        }
+    }
+}
+
 /// `10/6/2025, 10:00:00` in UTC, the form postal-mime gets from Intl for en-US
-fn format_date(date: &str) -> String {
-    let Some(timestamp) = parse_iso(date) else {
-        return date.to_string();
-    };
+fn format_date(timestamp: i64) -> String {
     let t = DateTime::from_timestamp(timestamp);
     format!(
         "{}/{}/{}, {:02}:{:02}:{:02}",
         t.month, t.day, t.year, t.hour, t.minute, t.second
     )
-}
-
-/// `2025-10-06T10:00:00.000Z`
-fn parse_iso(date: &str) -> Option<i64> {
-    let (day, time) = date.split_once('T')?;
-    let mut parts = day.split('-');
-    let (year, month, day) = (
-        parts.next()?.parse().ok()?,
-        parts.next()?.parse().ok()?,
-        parts.next()?.parse().ok()?,
-    );
-    let time = time.strip_suffix('Z')?.split('.').next()?;
-    crate::date::timestamp(year, month, day, crate::date::parse_time(time)?, 0)
 }
 
 fn text_addresses(addresses: &[ParsedAddress]) -> String {
@@ -333,14 +329,14 @@ fn text_addresses(addresses: &[ParsedAddress]) -> String {
             parts.push(", ".to_string());
         }
         match address {
-            ParsedAddress::Mailbox { name, address } => parts.push(mailbox(name, address)),
+            ParsedAddress::Mailbox(Address { name, address }) => parts.push(mailbox(name, address)),
             ParsedAddress::Group { name, members } => {
                 parts.push(format!("{name}:"));
-                for (j, (member_name, member_address)) in members.iter().enumerate() {
+                for (j, member) in members.iter().enumerate() {
                     if j > 0 {
                         parts.push(", ".into());
                     }
-                    parts.push(mailbox(member_name, member_address));
+                    parts.push(mailbox(&member.name, &member.address));
                 }
                 parts.push(";".into());
             }
@@ -369,17 +365,17 @@ fn html_addresses(addresses: &[ParsedAddress]) -> String {
             parts.push(separator.to_string());
         }
         match address {
-            ParsedAddress::Mailbox { name, address } => parts.push(mailbox(name, address)),
+            ParsedAddress::Mailbox(Address { name, address }) => parts.push(mailbox(name, address)),
             ParsedAddress::Group { name, members } => {
                 parts.push(format!(
                     "<span class=\"postal-email-address-group\">{}:</span>",
                     escape_html(name)
                 ));
-                for (j, (member_name, member_address)) in members.iter().enumerate() {
+                for (j, member) in members.iter().enumerate() {
                     if j > 0 {
                         parts.push(separator.to_string());
                     }
-                    parts.push(mailbox(member_name, member_address));
+                    parts.push(mailbox(&member.name, &member.address));
                 }
                 parts.push("<span class=\"postal-email-address-group\">;</span>".into());
             }
@@ -438,8 +434,8 @@ fn header_rows(fields: &HeaderFields) -> Vec<(&'static str, String)> {
     if let Some(subject) = fields.subject {
         rows.push(("Subject", subject.to_string()));
     }
-    if let Some(date) = fields.date {
-        rows.push(("Date", format_date(date)));
+    if let Some((_, shown)) = fields.dates() {
+        rows.push(("Date", shown));
     }
     for (key, list) in [("To", fields.to), ("Cc", fields.cc), ("Bcc", fields.bcc)] {
         if !list.is_empty() {
@@ -486,11 +482,11 @@ pub fn format_html_header(fields: &HeaderFields) -> String {
     if let Some(subject) = fields.subject {
         rows.push(row("Subject", " postal-email-header-subject", escape_html(subject)));
     }
-    if let Some(date) = fields.date {
+    if let Some((date, shown)) = fields.dates() {
         rows.push(format!(
             "<div class=\"postal-email-header-key\">Date</div><div class=\"postal-email-header-value postal-email-header-date\" data-date=\"{}\">{}</div>",
-            escape_html(date),
-            escape_html(&format_date(date))
+            escape_html(&date),
+            escape_html(&shown)
         ));
     }
     for (key, list) in [("To", fields.to), ("Cc", fields.cc), ("Bcc", fields.bcc)] {
@@ -529,14 +525,15 @@ mod tests {
 
     #[test]
     fn header_blocks() {
-        let from = ParsedAddress::Mailbox {
+        let from = ParsedAddress::Mailbox(Address {
             name: "Andris".into(),
             address: "a@b.c".into(),
-        };
+        });
         let fields = HeaderFields {
             from: Some(&from),
             subject: Some("Hi"),
-            date: Some("2025-10-06T10:00:00.000Z"),
+            date: Some("Mon, 6 Oct 2025 10:00:00 +0000"),
+            timestamp: Some(1_759_744_800),
             to: &[],
             cc: &[],
             bcc: &[],
