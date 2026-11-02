@@ -1320,6 +1320,9 @@ pub struct PeOutgoing {
     pub attachment_count: usize,
     /// The Message-ID of the draft it was saved as (from `pe_draft_save` or PeDraftInfo), or NULL
     pub message_id: *const c_char,
+    /// The account whose Drafts has that copy when From changed to another account since, 0 otherwise: the copy
+    /// there goes once the message is saved or queued in the account it goes from now
+    pub draft_account: i64,
 }
 
 /// # Safety
@@ -1361,6 +1364,7 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         in_reply_to: Some(text(o.in_reply_to)?).filter(|r| !r.is_empty()),
         references: text(o.references)?.split_whitespace().map(str::to_string).collect(),
         message_id: Some(text(o.message_id)?).filter(|id| !id.is_empty()),
+        draft_account: (o.draft_account != 0).then_some(o.draft_account),
     })
 }
 
@@ -1595,22 +1599,6 @@ pub unsafe extern "C" fn pe_draft_open(core: *const PeCore, folder: i64, uid: u6
             _ => null_mut(),
         })
     }
-}
-
-/// Removes the draft with `message_id` from the Drafts folder of `account`, in the background: for a message whose
-/// From changed to another account after it was saved, once it is saved or sent from the new one. False for an
-/// unknown account or an ID that does not name a draft.
-///
-/// # Safety
-/// `core` must be a live handle, `message_id` NULL or a NUL-terminated string.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_draft_discard(core: *const PeCore, account: i64, message_id: *const c_char) -> bool {
-    // SAFETY: as the caller guarantees
-    let Some(message_id) = (unsafe { arg(message_id) }) else {
-        return false;
-    };
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.discard_draft(account, message_id).is_ok()) }
 }
 
 /// Saves a message being written in the Drafts folder of `account`, in place of the copy saved before (the one with

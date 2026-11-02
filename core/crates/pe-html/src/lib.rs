@@ -188,18 +188,7 @@ fn content_id(value: &str) -> String {
 
 /// A message for the preview: sanitized, its `cid:` images embedded, in a document with a CSP
 pub fn render_message(html: &str, options: &RenderOptions, images: &[InlineImage]) -> String {
-    render_message_with_header(html, options, images, &[])
-}
-
-/// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows:
-/// on screen the window shows them above the message
-pub fn render_message_with_header(
-    html: &str,
-    options: &RenderOptions,
-    images: &[InlineImage],
-    header: &[(&str, &str)],
-) -> String {
-    render_view(html, options, images, header).document
+    render_view(html, options, images, &[]).document
 }
 
 /// A message rendered for the preview
@@ -210,7 +199,8 @@ pub struct Rendered {
     pub remote_images: bool,
 }
 
-/// [`render_message_with_header`], and whether the message has pictures on the internet
+/// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows (on
+/// screen the window shows them above the message), and whether the message has pictures on the internet
 pub fn render_view(html: &str, options: &RenderOptions, images: &[InlineImage], header: &[(&str, &str)]) -> Rendered {
     let remote = Arc::new(AtomicBool::new(false));
     let body = builder_noting(images, Some(remote.clone())).clean(html).to_string();
@@ -246,20 +236,9 @@ fn css_loads_remote(css: &str) -> bool {
 /// Whether the style elements of sanitized `body` load a picture from the network; the sanitizer writes them in
 /// lowercase and leaves their text as it is
 fn style_elements_load_remote(body: &str) -> bool {
-    let mut rest = body;
-    while let Some(start) = rest.find("<style") {
-        let after = &rest[start..];
-        let end = after.find("</style>").unwrap_or(after.len());
-        if css_loads_remote(&after[..end]) {
-            return true;
-        }
-        rest = &after[end..];
-        if rest.is_empty() {
-            break;
-        }
-        rest = &rest[1..];
-    }
-    false
+    body.split("<style")
+        .skip(1)
+        .any(|element| css_loads_remote(&element[..element.find("</style>").unwrap_or(element.len())]))
 }
 
 /// The preview document around a sanitized body

@@ -68,6 +68,9 @@ pub struct Outgoing {
     /// The Message-ID of the draft this was saved as before (see [`Draft::message_id`]): it keeps the ID, and the
     /// saved copy is replaced on the next save and removed once the message is sent
     pub message_id: Option<String>,
+    /// The account whose Drafts holds that saved copy, when it is not the one this goes from (From changed after it
+    /// was saved): the copy there goes once this account has the message, so it is never in neither
+    pub draft_account: Option<pe_store::AccountId>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

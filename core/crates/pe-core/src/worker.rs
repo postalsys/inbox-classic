@@ -69,10 +69,6 @@ pub(crate) enum Command {
     SaveDraft {
         outgoing: Box<crate::Outgoing>,
     },
-    /// The drafts with this Message-ID out of the Drafts folder
-    RemoveDrafts {
-        message_id: String,
-    },
 }
 
 /// A failed command, for [`Event::Failed`]
@@ -331,7 +327,6 @@ impl Worker {
             }
             Command::Send { outgoing, now } => self.queue(store, *outgoing, now).await,
             Command::SaveDraft { outgoing } => self.save_draft(store, *outgoing).await,
-            Command::RemoveDrafts { message_id } => self.remove_drafts(store, &message_id).await,
         }
     }
 
@@ -365,6 +360,7 @@ impl Worker {
             .join(", ");
         let subject = outgoing.subject.clone();
         let draft = outgoing.message_id.as_deref().and_then(crate::compose::draft_id);
+        let draft_account = outgoing.draft_account.unwrap_or(self.account);
         let built = build(
             store.account(self.account)?.settings,
             outgoing,
@@ -387,18 +383,38 @@ impl Worker {
         )?;
         self.emit(Event::OutboxChanged { account: self.account });
         // the Outbox has it now: its draft goes, whether it is sent now or later
-        if let Some(message_id) = draft
-            && let Err(failure) = self.remove_drafts(store, &message_id).await
-        {
+        if let Some(message_id) = draft {
+            self.remove_draft_of(store, draft_account, &message_id).await;
+        }
+        if now { self.send_outbox(store).await } else { Ok(()) }
+    }
+
+    /// Removes the drafts with `message_id` from the Drafts of `account`, this one or another (From changed after the
+    /// draft was saved; a connection of that account's own, for this once), after the message is safe here. A
+    /// failure is told, not passed on: what was asked for is done.
+    async fn remove_draft_of(&mut self, store: &mut Store, account: AccountId, message_id: &str) {
+        let outcome = if account == self.account {
+            self.remove_drafts(store, message_id).await
+        } else {
+            let mut other = Worker::new(
+                account,
+                self.path.clone(),
+                self.secrets.clone(),
+                self.trust.clone(),
+                self.oauth.clone(),
+                self.events.clone(),
+            );
+            other.remove_drafts(store, message_id).await
+        };
+        if let Err(failure) = outcome {
             self.fail(Failure {
                 kind: failure.kind,
                 message: format!(
-                    "the draft of the message could not be removed from Drafts: {}",
+                    "the earlier draft of the message could not be removed from Drafts: {}",
                     failure.message
                 ),
             });
         }
-        if now { self.send_outbox(store).await } else { Ok(()) }
     }
 
     /// Saves a draft in the Drafts folder, in place of the copy saved before
@@ -408,6 +424,7 @@ impl Worker {
             message: crate::compose::NO_DRAFTS.into(),
         })?;
         let message_id = outgoing.message_id.clone().unwrap_or_default();
+        let moved_from = outgoing.draft_account.filter(|from| *from != self.account);
         let time = unix_now();
         let built = build(
             store.account(self.account)?.settings,
@@ -418,6 +435,10 @@ impl Worker {
         .await?;
         let client = self.client(store).await?;
         pe_sync::save_draft(client, store, drafts.id, &built.raw, &message_id, time).await?;
+        // saved here: the copy in the Drafts of the account it went from before goes
+        if let Some(from) = moved_from {
+            self.remove_draft_of(store, from, &message_id).await;
+        }
         self.sync_one(store, drafts.id).await
     }
 

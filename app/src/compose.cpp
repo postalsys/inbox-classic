@@ -72,7 +72,8 @@ struct Compose {
     std::vector<File> files;
     // the Message-ID of the draft saved in Drafts, empty before the first save
     std::string messageId;
-    // the account whose Drafts has that copy, 0 before the first save
+    // the account whose Drafts has that copy, 0 before the first save; another than `account` once From changed, and
+    // the core moves the copy over with the next save or send
     int64_t draftAccount = 0;
     Editor editor;
     // what to do with the editor's HTML once it comes: send now, send later (into the Outbox), save in Drafts, or save
@@ -274,6 +275,8 @@ struct Fields {
         outgoing.attachments = attachments.data();
         outgoing.attachment_count = attachments.size();
         outgoing.message_id = state->messageId.empty() ? nullptr : state->messageId.c_str();
+        // saved in another account's Drafts before From changed: the core moves it once this account has it
+        outgoing.draft_account = state->draftAccount != state->account ? state->draftAccount : 0;
     }
     Fields(const Fields&) = delete;
     Fields& operator=(const Fields&) = delete;
@@ -286,15 +289,6 @@ void ShowRefusal(HWND hwnd, char* reason, const wchar_t* fallback) {
     MessageBoxW(hwnd, why.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
-// the saved copy of the message is in the Drafts of the account it goes from now: one saved before From changed to
-// another account goes from the first one's Drafts, once the message is saved or sent from the new one
-void MoveDraft(Compose* state) {
-    if (state->draftAccount && state->draftAccount != state->account && !state->messageId.empty()) {
-        pe_draft_discard(state->core, state->draftAccount, state->messageId.c_str());
-    }
-    state->draftAccount = state->account;
-}
-
 // sends with the HTML the editor gave, now or with the next Send/Recv
 void Send(HWND hwnd, Compose* state, const std::wstring& html, bool later) {
     Fields fields(state, html);
@@ -304,7 +298,6 @@ void Send(HWND hwnd, Compose* state, const std::wstring& html, bool later) {
         ShowRefusal(hwnd, reason, L"The message could not be sent.");
         return;
     }
-    MoveDraft(state);
     // the main window shows whether the server took it
     state->dirty = false;
     DestroyWindow(hwnd);
@@ -321,7 +314,7 @@ void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
         return;
     }
     core::String id(messageId);
-    MoveDraft(state);
+    state->draftAccount = state->account;
     state->messageId = id ? id.get() : "";
     state->dirty = false;
     state->editor.Clean();
@@ -716,7 +709,7 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
         state->quote = draft->quote ? draft->quote : "";
         // a saved draft opened again: its files, and its Message-ID so the next save replaces it
         state->messageId = draft->message_id ? draft->message_id : "";
-        state->draftAccount = state->messageId.empty() ? 0 : account;
+        state->draftAccount = account;
         for (size_t i = 0; i < draft->attachment_count; i++) {
             AddFile(state, Text(draft->attachments[i]));
         }

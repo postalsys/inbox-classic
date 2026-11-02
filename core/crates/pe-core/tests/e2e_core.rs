@@ -710,23 +710,74 @@ fn drafts_are_saved_reopened_and_gone_once_sent() {
         !sent.contains("Bcc:") && sent.contains(&format!("Message-ID: {message_id}")),
         "{sent}"
     );
+}
 
-    // discarded from an account (From changed to another one): gone from its Drafts
-    let other = s
-        .core
-        .save_draft(
-            account,
-            pe_core::Outgoing {
-                subject: "Moved away".into(),
-                ..Default::default()
-            },
-        )
-        .unwrap();
-    s.wait(changed);
-    assert_eq!(s.server.subjects("Drafts"), ["Moved away"]);
-    s.core.discard_draft(account, &other).unwrap();
-    s.wait(changed);
+#[test]
+fn a_draft_follows_from_to_another_account() {
+    let Some(s) = setup() else { return };
+    // a second account on a server of its own (ImapKit has one mailbox a server)
+    let Some(other_server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let first = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    let second = s.core.add_account(&settings(&other_server), PASSWORD).unwrap();
+    for account in [first, second] {
+        s.core.sync(account).unwrap();
+        s.wait(|e| *e == Event::SyncFinished { account });
+    }
+    let drafts_of = |account| {
+        s.core
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .find(|f| f.info.path == "Drafts")
+            .unwrap()
+            .id
+    };
+    let (first_drafts, second_drafts) = (drafts_of(first), drafts_of(second));
+    let mut outgoing = pe_core::Outgoing {
+        subject: "Changing hands".into(),
+        text: "x".into(),
+        ..Default::default()
+    };
+    let message_id = s.core.save_draft(first, outgoing.clone()).unwrap();
+    s.wait(|e| {
+        *e == Event::FolderChanged {
+            account: first,
+            folder: first_drafts,
+        }
+    });
+    assert_eq!(s.server.subjects("Drafts"), ["Changing hands"]);
+
+    // From changed to the second account, then saved: the copy moves, the first account's Drafts is empty once the
+    // second one has it
+    outgoing.message_id = Some(message_id);
+    outgoing.draft_account = Some(first);
+    s.core.save_draft(second, outgoing.clone()).unwrap();
+    s.wait(|e| {
+        *e == Event::FolderChanged {
+            account: second,
+            folder: second_drafts,
+        }
+    });
+    assert_eq!(other_server.subjects("Drafts"), ["Changing hands"]);
     assert!(s.server.subjects("Drafts").is_empty());
-    // only an ID that names one draft
-    assert!(s.core.discard_draft(account, "<").is_err());
+
+    // a save that fails at the server (the first account's server is gone) leaves the copy where it is: it is never
+    // in neither Drafts
+    let Setup {
+        server, core, events, ..
+    } = s;
+    drop(server);
+    outgoing.draft_account = Some(second);
+    core.save_draft(first, outgoing.clone()).unwrap();
+    loop {
+        let event = events
+            .recv_timeout(Duration::from_secs(20))
+            .expect("the failed save is told");
+        if matches!(event, Event::Failed { account, .. } if account == first) {
+            break;
+        }
+    }
+    assert_eq!(other_server.subjects("Drafts"), ["Changing hands"]);
 }

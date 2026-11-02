@@ -621,14 +621,6 @@ impl Core {
         Ok(message_id)
     }
 
-    /// Removes the draft with `message_id` from the Drafts folder of `account`, in the background (a message whose
-    /// From changed to another account: the copy in the first one's Drafts goes once it is saved or sent from the new)
-    pub fn discard_draft(&self, account: AccountId, message_id: &str) -> Result<()> {
-        let message_id = compose::draft_id(message_id).ok_or(Error::NotFound)?;
-        self.store().account(account)?;
-        self.send_command(account, Command::RemoveDrafts { message_id })
-    }
-
     /// A saved draft (a message of the Drafts folder whose source is in the store) to go on writing; its attachments
     /// are written out to a folder of their own under the system's temporary folder, to be attached again
     pub fn reopen_draft(&self, folder: FolderId, uid: u64) -> Result<Option<Draft>> {

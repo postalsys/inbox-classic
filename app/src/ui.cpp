@@ -335,9 +335,9 @@ void AddButton(HWND bar, int id, const wchar_t* text, BYTE style, int image) {
     }
     button.iBitmap = image;
     button.fsState = TBSTATE_ENABLED;
-    // on a list bar (the format bar) an icon alone, its text the tooltip; a button without an icon shows its text
-    bool iconOnly = image != I_IMAGENONE && (SendMessageW(bar, TB_GETSTYLE, 0, 0) & TBSTYLE_LIST);
-    button.fsStyle = static_cast<BYTE>(style | BTNS_AUTOSIZE | (iconOnly ? 0 : BTNS_SHOWTEXT));
+    // the text of a button with an icon is the tooltip on the format bar (mixed buttons) and the label under the icon
+    // on the others, where it shows anyway; a button without an icon shows its text
+    button.fsStyle = static_cast<BYTE>(style | BTNS_AUTOSIZE | (image == I_IMAGENONE ? BTNS_SHOWTEXT : 0));
     button.iString = reinterpret_cast<INT_PTR>(text);
     SendMessageW(bar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&button));
 }
