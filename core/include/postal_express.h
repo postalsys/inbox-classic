@@ -33,6 +33,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_AUTOCONFIG_DONE = 8,
   // The sign-in `uid` of `pe_sign_in_begin` finished: `pe_sign_in_result`
   PE_EVENT_KIND_SIGN_IN_DONE = 9,
+  // The view `uid` of `pe_message_view_start` is built: `pe_message_view_result`
+  PE_EVENT_KIND_VIEW_READY = 10,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -468,7 +470,8 @@ bool pe_message_open(const struct PeCore *core, int64_t folder, uint64_t uid);
 // `core` must be a live handle.
 bool pe_message_set_seen(const struct PeCore *core, int64_t folder, uint64_t uid, bool seen);
 
-// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise
+// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the
+// calling thread; the app's windows use `pe_message_view_start`, which builds it on a worker.
 //
 // # Safety
 // `core` must be a live handle.
@@ -476,6 +479,30 @@ struct PeMessageView *pe_message_view(const struct PeCore *core,
                                       int64_t folder,
                                       uint64_t uid,
                                       bool allow_remote_images);
+
+// Builds the view of a message whose source is in the store (after `MessageReady`) on a worker thread:
+// `ViewReady` with this request in `uid` follows. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_message_view_start(const struct PeCore *core,
+                               int64_t folder,
+                               uint64_t uid,
+                               bool allow_remote_images);
+
+// The view a request built, after its `ViewReady`, once; NULL when the message was not in the store. Free with
+// `pe_message_view_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeMessageView *pe_message_view_result(const struct PeCore *core,
+                                             uint64_t request);
+
+// Drops a view request no longer waited for
+//
+// # Safety
+// `core` must be a live handle.
+void pe_message_view_cancel(const struct PeCore *core, uint64_t request);
 
 // # Safety
 // `view` must be NULL or live.

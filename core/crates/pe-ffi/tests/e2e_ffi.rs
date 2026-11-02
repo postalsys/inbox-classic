@@ -176,6 +176,22 @@ fn reads_mail_through_the_c_api() {
     assert_eq!(text(attachment.mime_type), "application/pdf");
     unsafe { pe_message_view_free(view) };
 
+    // the same view built on a worker, as the reading pane asks for it
+    let request = unsafe { pe_message_view_start(core, inbox, uid, true) };
+    assert_ne!(request, 0);
+    wait(&events, |e| e.kind == PeEventKind::ViewReady && e.uid == request);
+    let view = unsafe { pe_message_view_result(core, request) };
+    assert!(!view.is_null());
+    let info = unsafe { &*pe_message_view_info(view) };
+    assert_eq!((text(info.subject), info.attachment_count), ("Report".to_string(), 1));
+    assert!(text(info.document).contains("<p>Hi</p>"));
+    unsafe { pe_message_view_free(view) };
+    // once only, and a cancelled request gives nothing
+    assert!(unsafe { pe_message_view_result(core, request) }.is_null());
+    let dropped = unsafe { pe_message_view_start(core, inbox, uid, false) };
+    unsafe { pe_message_view_cancel(core, dropped) };
+    assert!(unsafe { pe_message_view_result(core, dropped) }.is_null());
+
     let mut len = 0usize;
     let mut filename: *mut c_char = null_mut();
     let data = unsafe { pe_attachment_data(core, inbox, uid, 0, &mut len, &mut filename) };
@@ -314,6 +330,9 @@ fn null_and_bad_arguments() {
     unsafe {
         assert!(!pe_sync(core, 42));
         assert!(pe_message_view(core, 1, 1, false).is_null());
+        assert_eq!(pe_message_view_start(std::ptr::null(), 1, 1, false), 0);
+        assert!(pe_message_view_result(core, 12345).is_null());
+        pe_message_view_cancel(core, 12345);
         let empty = pe_folders(core, 42);
         assert_eq!(pe_folder_list_count(empty), 0);
         pe_folder_list_free(empty);

@@ -103,6 +103,8 @@ pub enum PeEventKind {
     AutoconfigDone = 8,
     /// The sign-in `uid` of `pe_sign_in_begin` finished: `pe_sign_in_result`
     SignInDone = 9,
+    /// The view `uid` of `pe_message_view_start` is built: `pe_message_view_result`
+    ViewReady = 10,
 }
 
 #[repr(C)]
@@ -168,6 +170,7 @@ impl Callback {
             Event::MessageSent { account } => (PeEventKind::MessageSent, *account, 0, 0),
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
+            Event::ViewReady { request } => (PeEventKind::ViewReady, 0, 0, *request),
         };
         let (failure, message) = match event {
             Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message))),
@@ -819,7 +822,38 @@ pub struct PeMessageView {
     _strings: Strings,
 }
 
-/// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise
+/// A view for C++: its strings and attachments owned by the handle
+fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
+    let mut strings = Strings::default();
+    let attachments: Vec<PeAttachment> = view
+        .attachments
+        .iter()
+        .map(|a| PeAttachment {
+            filename: strings.add(&a.filename),
+            safe_filename: strings.add(&a.safe_filename),
+            mime_type: strings.add(&a.mime_type),
+            size: a.size,
+        })
+        .collect();
+    let info = PeMessageInfo {
+        subject: strings.add(&view.subject),
+        from: strings.add(&view.from),
+        to: strings.add(&view.to),
+        cc: strings.add(&view.cc),
+        date: view.date.unwrap_or(0),
+        has_date: view.date.is_some(),
+        document: strings.add(&view.document),
+        attachment_count: attachments.len(),
+    };
+    handed(PeMessageView {
+        info,
+        attachments,
+        _strings: strings,
+    })
+}
+
+/// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the
+/// calling thread; the app's windows use `pe_message_view_start`, which builds it on a worker.
 ///
 /// # Safety
 /// `core` must be a live handle.
@@ -833,37 +867,57 @@ pub unsafe extern "C" fn pe_message_view(
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
-            let Ok(Some(view)) = core.message_view(folder, uid, allow_remote_images) else {
-                return null_mut();
-            };
-            let mut strings = Strings::default();
-            let attachments: Vec<PeAttachment> = view
-                .attachments
-                .iter()
-                .map(|a| PeAttachment {
-                    filename: strings.add(&a.filename),
-                    safe_filename: strings.add(&a.safe_filename),
-                    mime_type: strings.add(&a.mime_type),
-                    size: a.size,
-                })
-                .collect();
-            let info = PeMessageInfo {
-                subject: strings.add(&view.subject),
-                from: strings.add(&view.from),
-                to: strings.add(&view.to),
-                cc: strings.add(&view.cc),
-                date: view.date.unwrap_or(0),
-                has_date: view.date.is_some(),
-                document: strings.add(&view.document),
-                attachment_count: attachments.len(),
-            };
-            handed(PeMessageView {
-                info,
-                attachments,
-                _strings: strings,
-            })
+            match core.message_view(folder, uid, allow_remote_images) {
+                Ok(Some(view)) => view_handle(view),
+                _ => null_mut(),
+            }
         })
     }
+}
+
+/// Builds the view of a message whose source is in the store (after `MessageReady`) on a worker thread:
+/// `ViewReady` with this request in `uid` follows. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_start(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    allow_remote_images: bool,
+) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, 0, |core| {
+            core.message_view_start(folder, uid, allow_remote_images).unwrap_or(0)
+        })
+    }
+}
+
+/// The view a request built, after its `ViewReady`, once; NULL when the message was not in the store. Free with
+/// `pe_message_view_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_result(core: *const PeCore, request: u64) -> *mut PeMessageView {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.message_view_result(request).map_or(null_mut(), view_handle)
+        })
+    }
+}
+
+/// Drops a view request no longer waited for
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_cancel(core: *const PeCore, request: u64) {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| core.message_view_cancel(request)) }
 }
 
 /// # Safety

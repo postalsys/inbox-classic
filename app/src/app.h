@@ -130,7 +130,9 @@ private:
     void ClearReader();
     void OnSelectionChanged();
     void OnFolderSelected(LPARAM folder);
+    // asks the core for the view of the selected message, built on a worker; ShowView() shows it when it comes
     void ShowMessage();
+    void ShowView();
     void ShowHeader(const PeMessageInfo* info);
     void ChooseAttachment();
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
@@ -168,6 +170,8 @@ private:
     uint64_t uid_ = 0;
     bool remoteImages_ = false;
     core::MessageView view_;
+    // the view being built for the reading pane, 0 for none
+    uint64_t viewRequest_ = 0;
     // the text of the list cells, kept until the list asks for the next one
     std::wstring cell_;
 };

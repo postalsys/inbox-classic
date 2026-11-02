@@ -65,6 +65,10 @@ pub enum Event {
     SignInDone {
         request: u64,
     },
+    /// The view of a message is built: [`Core::message_view_result`]
+    ViewReady {
+        request: u64,
+    },
     /// Work for an account failed; `kind` says what to do about it
     Failed {
         account: AccountId,
@@ -164,6 +168,10 @@ pub struct Core {
     closed: Arc<AtomicBool>,
     /// Lookups of servers; None when the address has no domain
     autoconfig: Requests<Option<pe_autoconfig::Settings>>,
+    /// Message views built off the window thread: parsing, folding and sanitizing a large message takes a while
+    views: Requests<Option<MessageView>>,
+    /// The view request the reading pane waits for; an older one gives up
+    newest_view: Arc<std::sync::atomic::AtomicU64>,
     /// Sign-ins in the browser: the provider and the refresh token, or why not
     sign_ins: Requests<std::result::Result<(pe_oauth::ProviderKind, String), String>>,
     oauth: OAuthProviders,
@@ -211,6 +219,8 @@ impl Core {
             }),
             closed,
             autoconfig: Requests::default(),
+            views: Requests::default(),
+            newest_view: Arc::default(),
             sign_ins: Requests::default(),
             oauth: OAuthProviders(Arc::new(options.oauth_providers)),
             next_request: std::sync::atomic::AtomicU64::new(1),
@@ -417,19 +427,55 @@ impl Core {
         self.send_command(account, Command::FetchSource { folder, uid })
     }
 
-    /// The message as the preview shows it, None when its source is not in the store yet
+    /// The source of a message and the date the server got it, for a view
+    fn view_source(&self, folder: FolderId, uid: u64) -> Result<Option<(Vec<u8>, Option<i64>)>> {
+        let store = self.store();
+        let received = store.message(folder, uid)?.and_then(|m| m.info.internal_date);
+        Ok(store.source(folder, uid)?.map(|source| (source, received)))
+    }
+
+    /// The message as the preview shows it, None when its source is not in the store yet. Built on the calling
+    /// thread, for tests and tools; the windows use [`Core::message_view_start`].
     pub fn message_view(&self, folder: FolderId, uid: u64, allow_remote_images: bool) -> Result<Option<MessageView>> {
-        let (source, received) = {
-            let store = self.store();
-            let received = store.message(folder, uid)?.and_then(|m| m.info.internal_date);
-            (store.source(folder, uid)?, received)
+        Ok(self
+            .view_source(folder, uid)?
+            .and_then(|(source, received)| finish_view(&source, received, allow_remote_images, &|| false)))
+    }
+
+    /// Builds the view of a message in the background: [`Event::ViewReady`] follows with the request this returns.
+    /// The source is read now; parsing, folding and sanitizing it happen on a worker thread. A view started after
+    /// it, or [`Core::message_view_cancel`], makes it give up between those steps: one is shown at a time.
+    pub fn message_view_start(&self, folder: FolderId, uid: u64, allow_remote_images: bool) -> Result<u64> {
+        let found = self.view_source(folder, uid)?;
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        self.newest_view.store(request, Ordering::Relaxed);
+        let newest = self.newest_view.clone();
+        let work = async move {
+            let (source, received) = found?;
+            let dropped = move || newest.load(Ordering::Relaxed) != request;
+            let built =
+                tokio::task::spawn_blocking(move || finish_view(&source, received, allow_remote_images, &dropped));
+            built.await.ok().flatten()
         };
-        Ok(source.map(|source| {
-            let mut view = view::build(&source, allow_remote_images);
-            // without a Date header, the date the list shows: when the server got it
-            view.date = view.date.or(received);
-            view
-        }))
+        self.views
+            .start(self.runtime()?, request, work, self.events.clone(), |request| {
+                Event::ViewReady { request }
+            });
+        Ok(request)
+    }
+
+    /// The view a [`Core::message_view_start`] built, once: None while it is built, for an unknown request, or when
+    /// the source was not in the store
+    pub fn message_view_result(&self, request: u64) -> Option<MessageView> {
+        self.views.take(request).flatten()
+    }
+
+    /// Drops a view no longer waited for (another message was selected)
+    pub fn message_view_cancel(&self, request: u64) {
+        let _ = self
+            .newest_view
+            .compare_exchange(request, 0, Ordering::Relaxed, Ordering::Relaxed);
+        self.views.cancel(request);
     }
 
     /// The content of the `index`th attachment of [`MessageView::attachments`], with the name to
@@ -535,4 +581,18 @@ impl Drop for Core {
             runtime.shutdown_timeout(SHUTDOWN_GRACE);
         }
     }
+}
+
+/// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
+/// give up
+fn finish_view(
+    source: &[u8],
+    received: Option<i64>,
+    allow_remote_images: bool,
+    dropped: &dyn Fn() -> bool,
+) -> Option<MessageView> {
+    let mut view = view::build_unless(source, allow_remote_images, dropped)?;
+    // without a Date header, the date the list shows: when the server got it
+    view.date = view.date.or(received);
+    Some(view)
 }

@@ -38,11 +38,17 @@ impl<T: Send + 'static> Requests<T> {
         let mut map = self.map();
         let task = runtime.spawn(async move {
             let result = work.await;
-            results
-                .lock()
-                .unwrap_or_else(|p| p.into_inner())
-                .insert(request, State::Done(result));
-            events(done(request));
+            // only for a request still listed: one cancelled while it finished is not kept (nobody takes it)
+            let kept = match results.lock().unwrap_or_else(|p| p.into_inner()).get_mut(&request) {
+                Some(entry) => {
+                    *entry = State::Done(result);
+                    true
+                }
+                None => false,
+            };
+            if kept {
+                events(done(request));
+            }
         });
         map.insert(request, State::Running(task.abort_handle()));
     }
@@ -78,5 +84,74 @@ impl<T: Send + 'static> Requests<T> {
         if let Some(State::Running(task)) = self.map().remove(&request) {
             task.abort();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    fn runtime() -> tokio::runtime::Runtime {
+        tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(1)
+            .enable_all()
+            .build()
+            .unwrap()
+    }
+
+    fn sink() -> (EventSink, Arc<Mutex<Vec<u64>>>) {
+        let seen: Arc<Mutex<Vec<u64>>> = Arc::default();
+        let into = seen.clone();
+        let sink: EventSink = Arc::new(move |event| {
+            if let Event::ViewReady { request } = event {
+                into.lock().unwrap().push(request);
+            }
+        });
+        (sink, seen)
+    }
+
+    #[test]
+    fn a_result_is_taken_once() {
+        let runtime = runtime();
+        let requests: Requests<u32> = Requests::default();
+        let (events, seen) = sink();
+        requests.start(&runtime, 7, async { 42 }, events, |request| Event::ViewReady {
+            request,
+        });
+        for _ in 0..200 {
+            if !seen.lock().unwrap().is_empty() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        assert_eq!(*seen.lock().unwrap(), [7]);
+        assert_eq!(requests.take(7), Some(42));
+        assert_eq!(requests.take(7), None);
+    }
+
+    #[test]
+    fn a_cancelled_request_leaves_nothing() {
+        let runtime = runtime();
+        let requests: Requests<u32> = Requests::default();
+        let (events, seen) = sink();
+        let (release, wait) = tokio::sync::oneshot::channel::<()>();
+        requests.start(
+            &runtime,
+            9,
+            async move {
+                // finishes even if the abort comes late: it must still not be kept
+                let _ = wait.await;
+                1
+            },
+            events,
+            |request| Event::ViewReady { request },
+        );
+        requests.cancel(9);
+        let _ = release.send(());
+        std::thread::sleep(Duration::from_millis(50));
+        assert!(seen.lock().unwrap().is_empty());
+        assert_eq!(requests.take(9), None);
+        assert!(requests.map().is_empty());
     }
 }

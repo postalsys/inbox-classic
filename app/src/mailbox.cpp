@@ -325,6 +325,10 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
 // ---- the reading pane ----
 
 void Mailbox::ClearReader() {
+    if (viewRequest_) {
+        pe_message_view_cancel(core_, viewRequest_);
+        viewRequest_ = 0;
+    }
     uid_ = 0;
     remoteImages_ = false;
     view_.reset();
@@ -363,7 +367,19 @@ void Mailbox::OnFolderSelected(LPARAM folder) {
 }
 
 void Mailbox::ShowMessage() {
-    view_.reset(pe_message_view(core_, folder_, uid_, remoteImages_));
+    // parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows
+    if (viewRequest_) {
+        pe_message_view_cancel(core_, viewRequest_);
+    }
+    viewRequest_ = pe_message_view_start(core_, folder_, uid_, remoteImages_);
+    if (!viewRequest_) {
+        SetWindowTextW(header_, L" The message could not be shown.");
+    }
+}
+
+void Mailbox::ShowView() {
+    view_.reset(pe_message_view_result(core_, viewRequest_));
+    viewRequest_ = 0;
     const PeMessageInfo* info = pe_message_view_info(view_.get());
     if (!info) {
         SetWindowTextW(header_, L" The message could not be shown.");
@@ -527,6 +543,12 @@ void Mailbox::OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_MESSAGE_READY:
         if (event.folder == folder_ && event.uid == uid_) {
             ShowMessage();
+        }
+        break;
+    case PE_EVENT_KIND_VIEW_READY:
+        // a view for a message that is no longer selected was cancelled, its event is not this one
+        if (viewRequest_ && event.uid == viewRequest_) {
+            ShowView();
         }
         break;
     default:

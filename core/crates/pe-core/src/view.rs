@@ -32,16 +32,26 @@ fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
     attachments.iter().filter(|a| !a.related)
 }
 
+#[cfg(test)]
 pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
+    build_unless(source, allow_remote_images, &|| false).unwrap_or_default()
+}
+
+/// [`build`], given up (None) between its steps once `dropped` says nobody waits for it anymore
+pub(crate) fn build_unless(
+    source: &[u8],
+    allow_remote_images: bool,
+    dropped: &dyn Fn() -> bool,
+) -> Option<MessageView> {
     let options = RenderOptions { allow_remote_images };
     let message = match parser::parse(source) {
         Ok(message) => message,
         Err(error) => {
             let text = format!("This message can not be shown: {error}");
-            return MessageView {
+            return Some(MessageView {
                 document: pe_html::render_document(&text_to_html(&text), &options),
                 ..Default::default()
-            };
+            });
         }
     };
     let images: Vec<InlineImage> = message
@@ -55,9 +65,15 @@ pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
             })
         })
         .collect();
+    if dropped() {
+        return None;
+    }
     // the earlier messages of a reply or forward folded behind "..."
     let body = crate::fold::body(&message);
-    MessageView {
+    if dropped() {
+        return None;
+    }
+    Some(MessageView {
         subject: message.subject.clone().unwrap_or_default(),
         from: text_addresses(message.from.as_slice()),
         to: text_addresses(&message.to),
@@ -72,7 +88,7 @@ pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
                 size: a.content.len() as u64,
             })
             .collect(),
-    }
+    })
 }
 
 /// The content of the `index`th listed attachment, with the name to save it under
@@ -87,6 +103,19 @@ mod tests {
     use super::*;
 
     const MESSAGE: &[u8] = b"From: Andris <andris@example.com>\r\nTo: a@example.com, Team: b@example.com;\r\nSubject: Report\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\nContent-Type: multipart/mixed; boundary=m\r\n\r\n--m\r\nContent-Type: multipart/related; boundary=r\r\n\r\n--r\r\nContent-Type: text/html\r\n\r\n<p onclick=x()>Hi <img src=\"cid:logo@x\"></p><script>bad()</script>\r\n--r\r\nContent-Type: image/png\r\nContent-ID: <logo@x>\r\nContent-Transfer-Encoding: base64\r\n\r\niVBORw==\r\n--r--\r\n--m\r\nContent-Type: application/pdf; name=\"../../report.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\nJVBERg==\r\n--m--\r\n";
+
+    #[test]
+    fn a_view_nobody_waits_for_gives_up() {
+        assert!(build_unless(MESSAGE, false, &|| true).is_none());
+        assert!(build_unless(MESSAGE, false, &|| false).is_some());
+        // once it is dropped halfway, after parsing
+        let asked = std::cell::Cell::new(0);
+        let dropped = || {
+            asked.set(asked.get() + 1);
+            asked.get() > 1
+        };
+        assert!(build_unless(MESSAGE, false, &dropped).is_none());
+    }
 
     #[test]
     fn views_a_message() {

@@ -25,31 +25,34 @@ pub(crate) fn body(message: &Message) -> String {
         (None, Some(text)) => (Representation::Text, text),
         (None, None) => return String::new(),
     };
-    let key = key_of(representation, shown);
-    if let Some(body) = LAST.with_borrow(|last| last.as_ref().filter(|(k, _)| *k == key).map(|(_, b)| b.clone())) {
+    let key = key_of(message, representation, shown);
+    let last = || LAST.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+    if let Some(body) = last().as_ref().filter(|(k, _)| *k == key).map(|(_, b)| b.clone()) {
         return body;
     }
     let body = folded(message, representation).unwrap_or_else(|| match representation {
         Representation::Html => shown.clone(),
         Representation::Text => text_to_html(shown),
     });
-    LAST.with_borrow_mut(|last| *last = Some((key, body.clone())));
+    *last() = Some((key, body.clone()));
     body
 }
 
-thread_local! {
-    /// The last body folded on this thread: the same message shown again (its pictures allowed, say) is not
-    /// analyzed again
-    static LAST: std::cell::RefCell<Option<(u64, String)>> = const { std::cell::RefCell::new(None) };
-}
+/// The last body folded: the same message shown again (its pictures allowed, say) is not analyzed again
+static LAST: std::sync::Mutex<Option<(u64, String)>> = std::sync::Mutex::new(None);
 
-/// A hash of the body shown, keyed at random for each run so no message can be made to match another
-fn key_of(representation: Representation, shown: &str) -> u64 {
+/// A hash of everything the fold depends on: the body shown and the headers the analysis reads, keyed at random
+/// for each run so no message can be made to match another
+fn key_of(message: &Message, representation: Representation, shown: &str) -> u64 {
     use std::hash::{BuildHasher, Hash, Hasher};
     static KEYS: std::sync::OnceLock<std::collections::hash_map::RandomState> = std::sync::OnceLock::new();
     let mut hasher = KEYS.get_or_init(Default::default).build_hasher();
     (representation == Representation::Html).hash(&mut hasher);
     shown.hash(&mut hasher);
+    message.subject.hash(&mut hasher);
+    text_addresses(message.from.as_slice()).hash(&mut hasher);
+    message.in_reply_to.hash(&mut hasher);
+    message.reference_ids().hash(&mut hasher);
     hasher.finish()
 }
 
@@ -198,7 +201,18 @@ mod tests {
         // another body is not taken for it
         let other = body_of(&raw.replace("Yes.", "No."));
         assert!(other.contains("No.") && !other.contains("Yes."), "{other}");
-        assert_ne!(key_of(Representation::Html, "a"), key_of(Representation::Text, "a"));
+        // the same body under another subject or from another sender is analyzed for its own
+        let message = parse(raw.as_bytes()).unwrap();
+        let mut other = message.clone();
+        other.subject = Some("Another".into());
+        assert_ne!(
+            key_of(&message, Representation::Text, "a"),
+            key_of(&other, Representation::Text, "a")
+        );
+        assert_ne!(
+            key_of(&message, Representation::Html, "a"),
+            key_of(&message, Representation::Text, "a")
+        );
     }
 
     #[test]
