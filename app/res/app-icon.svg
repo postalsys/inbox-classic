@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Inbox Classic: a white envelope on a blue rounded square, as on inboxclassic.com -->
+  <defs>
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a6fc0"/>
+      <stop offset="1" stop-color="#12417a"/>
+    </linearGradient>
+  </defs>
+  <rect width="24" height="24" rx="5" fill="url(#face)"/>
+  <path d="M5 8l7 5 7-5v9H5z" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>

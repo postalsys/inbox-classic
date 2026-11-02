@@ -3,6 +3,9 @@
 
 1 RT_MANIFEST "app.manifest"
 
+// the app's icon (app-icon.svg, made by scripts/build-icons.sh): the exe's, as the first icon, and the windows'
+100 ICON "app.ico"
+
 // the help window's document, src/help.cpp
 2 RCDATA "help.html"
 

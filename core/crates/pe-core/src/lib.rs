@@ -142,9 +142,9 @@ pub(crate) type EventSink = Arc<dyn Fn(Event) + Send + Sync>;
 pub(crate) struct OAuthProviders(Arc<Vec<pe_oauth::Provider>>);
 
 impl OAuthProviders {
-    pub(crate) fn provider(&self, kind: pe_oauth::ProviderKind) -> Option<pe_oauth::Provider> {
+    pub(crate) fn provider(&self, kind: pe_oauth::ProviderKind) -> pe_oauth::Provider {
         match self.0.iter().find(|p| p.kind == kind) {
-            Some(provider) => Some(provider.clone()),
+            Some(provider) => provider.clone(),
             None => pe_oauth::Provider::builtin(kind),
         }
     }
@@ -278,7 +278,7 @@ impl Core {
         let mut settings = settings.clone();
         settings.auth = self.store().account(id)?.settings.auth;
         if let pe_store::Auth::OAuth2(name) = &settings.auth
-            && let Some(provider) = pe_oauth::ProviderKind::parse(name).and_then(|kind| self.oauth.provider(kind))
+            && let Some(provider) = pe_oauth::ProviderKind::parse(name).map(|kind| self.oauth.provider(kind))
         {
             settings = with_provider(&settings, &provider);
         }
@@ -385,16 +385,16 @@ impl Core {
         self.autoconfig.cancel(request);
     }
 
-    /// Whether this build can sign in to the provider of this IMAP server with OAuth
+    /// The provider this IMAP server belongs to, when it is one Inbox Classic signs in to with OAuth (every build has
+    /// their clients)
     pub fn oauth_provider_for(&self, imap_host: &str) -> Option<pe_oauth::ProviderKind> {
-        let kind = pe_oauth::ProviderKind::for_imap_host(imap_host)?;
-        self.oauth.provider(kind).map(|_| kind)
+        pe_oauth::ProviderKind::for_imap_host(imap_host)
     }
 
     /// Starts signing in to `kind` for `email`: the page to open in the browser, and the request
     /// [`Event::SignInDone`] comes with once the browser came back or the time ran out
     pub fn sign_in_begin(&self, kind: pe_oauth::ProviderKind, email: &str) -> Result<(u64, String)> {
-        let provider = self.oauth.provider(kind).ok_or(Error::NotFound)?;
+        let provider = self.oauth.provider(kind);
         let sign_in = pe_oauth::SignIn::begin(provider, email).map_err(|e| Error::Unavailable(e.to_string()))?;
         let url = sign_in.url.clone();
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
@@ -435,7 +435,7 @@ impl Core {
             .take(request)
             .and_then(|r| r.ok())
             .ok_or(Error::NotFound)?;
-        let provider = self.oauth.provider(kind).ok_or(Error::NotFound)?;
+        let provider = self.oauth.provider(kind);
         Ok((provider, refresh_token))
     }
 
@@ -578,6 +578,20 @@ impl Core {
     pub fn attachment(&self, folder: FolderId, uid: u64, index: usize) -> Result<Option<(String, Vec<u8>)>> {
         let source = self.store().source(folder, uid)?;
         Ok(source.and_then(|source| view::attachment(&source, index)))
+    }
+
+    /// Saves every attachment of a message into `dir` (a folder the user chose), each under its safe name; a file of
+    /// that name there is kept and the new one numbered. How many were saved; None when the message is not here yet.
+    pub fn save_attachments(&self, folder: FolderId, uid: u64, dir: &Path) -> Result<Option<(usize, usize)>> {
+        let Some(source) = self.store().source(folder, uid)? else {
+            return Ok(None);
+        };
+        let files = view::attachments(&source);
+        let saved = files
+            .iter()
+            .filter(|(name, content)| view::write_new(dir, name, content).is_ok())
+            .count();
+        Ok(Some((saved, files.len())))
     }
 
     /// Sends a message from an account in the background: [`Event::MessageSent`] or [`Event::Failed`] follows.

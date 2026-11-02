@@ -67,6 +67,9 @@ Var InstalledVersion
 Var WelcomeText
 
 !define MUI_ABORTWARNING
+; the app's own icon for the installer and the uninstaller (makensis runs from the repository root, -NOCD)
+!define MUI_ICON "app/res/app.ico"
+!define MUI_UNICON "app/res/app.ico"
 !define MUI_WELCOMEPAGE_TEXT "$WelcomeText"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${EXE}"
 !define MUI_FINISHPAGE_RUN_TEXT "Start ${PRODUCT}"

@@ -241,6 +241,31 @@ fn style_elements_load_remote(body: &str) -> bool {
         .any(|element| css_loads_remote(&element[..element.find("</style>").unwrap_or(element.len())]))
 }
 
+/// Where the CSP of a document of [`wrap`] starts, the first thing in it and before anything of the message, and how
+/// it ends: what [`print_page`] adds its script between
+const CSP_START: &str = "content=\"default-src 'none'; ";
+const DOCUMENT_END: &str = "</body></html>";
+
+/// The script of a print page: word to the window once the print preview (opened by the window, WebView2's own
+/// preview, as the page's print() would open the system dialog without one) is closed, printed or cancelled, so the
+/// window goes too
+const PRINT_SCRIPT: &str = "addEventListener('afterprint',()=>chrome.webview.postMessage('done'));";
+
+/// A document of [`render_view`] made into the page of the Print window: the same sanitized message, plus one script
+/// of ours, allowed by a nonce in the CSP (nothing else can run, the message has no scripts of its own), that says
+/// when the print preview is closed. None for a document that is not one of ours.
+pub fn print_page(document: &str) -> Option<String> {
+    let at = document.find(CSP_START)? + CSP_START.len();
+    let end = document.rfind(DOCUMENT_END)?;
+    let nonce = editor::nonce();
+    Some(format!(
+        "{}script-src 'nonce-{nonce}'; {}<script nonce=\"{nonce}\">{PRINT_SCRIPT}</script>{}",
+        &document[..at],
+        &document[at..end],
+        &document[end..]
+    ))
+}
+
 /// The preview document around a sanitized body
 fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)]) -> String {
     let image_sources = if options.allow_remote_images {
@@ -273,7 +298,7 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)]) -> String 
     };
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
-         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
+         <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
          <meta name=\"color-scheme\" content=\"light\">\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
          details.pe-fold{{margin:6px 0}}\
@@ -288,13 +313,35 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)]) -> String 
          @layer {class}{{.{class}{{display:none}}\
          @media print{{.{class}{{{shown};border-bottom:1px solid #999!important;padding-bottom:6px!important;margin-bottom:10px!important}}}}}}\
          </style>\
-         </head><body>{printed}{body}</body></html>"
+         </head><body>{printed}{body}{DOCUMENT_END}"
     )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_print_page_runs_only_its_own_script() {
+        let document = render_view("<p>hi<script>bad()</script></p>", &RenderOptions::default(), &[], &[]).document;
+        let page = print_page(&document).unwrap();
+        let nonce = page.split("'nonce-").nth(1).unwrap().split('\'').next().unwrap();
+        assert_eq!(nonce.len(), 32);
+        assert!(
+            page.contains(&format!("script-src 'nonce-{nonce}'; img-src data:")),
+            "{page}"
+        );
+        // one script, ours, at the end of the body; the message's own is gone as in the preview
+        assert_eq!(page.matches("<script").count(), 1, "{page}");
+        assert!(
+            page.ends_with(&format!(
+                "<script nonce=\"{nonce}\">{PRINT_SCRIPT}</script></body></html>"
+            )),
+            "{page}"
+        );
+        assert!(!page.contains("bad()"));
+        assert_eq!(print_page("<html>not ours</html>"), None);
+    }
 
     #[test]
     fn tells_whether_a_message_has_pictures_on_the_internet() {

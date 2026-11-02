@@ -54,8 +54,7 @@ void Preview::Configure() {
     webview::FilterRequests(
         view_.Get(), environment_.Get(), kPageUrl, [this]() -> const std::wstring& { return document_; },
         [this](const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT context) {
-            return remoteImages_ && context == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_IMAGE &&
-                   (StartsWith(uri, L"http://") || StartsWith(uri, L"https://")) && !StartsWith(uri, kPageUrl);
+            return remoteImages_ && webview::IsRemoteImage(uri, context, kPageUrl);
         });
 
     // links open in the browser, the pane only ever shows the documents it is given
@@ -107,13 +106,6 @@ void Preview::Show(const std::wstring& html, bool remoteImages) {
     // a new address for each document, so it is loaded again rather than taken from history
     std::wstring url = std::wstring(kPageUrl) + L"?" + std::to_wstring(++shown_);
     view_->Navigate(url.c_str());
-}
-
-void Preview::Print() {
-    ComPtr<ICoreWebView2_16> printing;
-    if (view_ && SUCCEEDED(view_.As(&printing))) {
-        printing->ShowPrintUI(COREWEBVIEW2_PRINT_DIALOG_KIND_BROWSER);
-    }
 }
 
 void Preview::Clear(bool noMessage) {

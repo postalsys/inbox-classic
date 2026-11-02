@@ -110,4 +110,12 @@ kind list 40 "$WINDOW" kListStrips ListIcon LIST "${SMALL_SIZES[@]}" -- "${LIST[
     cat "$work/tables"
     cat "$work/enums"
 } > app/src/icons.h
-echo "toolbar strips in $OUT and app/res/toolbar.rc, order and sizes in app/src/icons.h"
+# the app's own icon (app/res/app-icon.svg, the mark of inboxclassic.com): every size Windows asks for, with alpha
+icon_frames=()
+for size in 16 20 24 32 40 48 64 256; do
+    rsvg-convert -w "$size" -h "$size" app/res/app-icon.svg -o "$work/app-$size.png"
+    icon_frames+=("$work/app-$size.png")
+done
+magick "${icon_frames[@]}" app/res/app.ico
+
+echo "toolbar strips in $OUT and app/res/toolbar.rc, order and sizes in app/src/icons.h, the app icon in app/res/app.ico"

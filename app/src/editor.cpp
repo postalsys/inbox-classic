@@ -75,46 +75,16 @@ HWND Editor::Create(HWND parent, int id, const std::wstring& document, Handlers 
 }
 
 void Editor::Configure() {
-    ComPtr<ICoreWebView2Settings> settings;
-    view_->get_Settings(&settings);
-    settings->put_IsScriptEnabled(TRUE);
-    settings->put_IsWebMessageEnabled(TRUE);
-    settings->put_AreDefaultScriptDialogsEnabled(FALSE);
-    settings->put_AreHostObjectsAllowed(FALSE);
-    settings->put_AreDevToolsEnabled(FALSE);
-    settings->put_IsStatusBarEnabled(FALSE);
-    settings->put_IsBuiltInErrorPageEnabled(FALSE);
-    // cut, copy, paste and the spelling suggestions stay in the context menu
-    settings->put_AreDefaultContextMenusEnabled(TRUE);
-    ComPtr<ICoreWebView2Settings3> settings3;
-    if (SUCCEEDED(settings.As(&settings3))) {
-        // F5 would reload the page and throw the text away, Ctrl+P and Ctrl+F open browser windows
-        settings3->put_AreBrowserAcceleratorKeysEnabled(FALSE);
-    }
+    // its own script; cut, copy, paste and the spelling suggestions stay in the context menu
+    webview::LockDown(view_.Get(), true);
 
     // the page from memory, nothing from the network, pasted pictures from the web included
     webview::FilterRequests(
         view_.Get(), environment_.Get(), kPageUrl, [this]() -> const std::wstring& { return document_; },
         [](const wchar_t*, COREWEBVIEW2_WEB_RESOURCE_CONTEXT) { return false; });
 
-    // the page and the frame of the quote are all there is; links are not followed while writing
-    auto stay = Callback<ICoreWebView2NavigationStartingEventHandler>([](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
-        LPWSTR uri = nullptr;
-        args->get_Uri(&uri);
-        if (!webview::IsOwnPage(uri, kPageUrl)) {
-            args->put_Cancel(TRUE);
-        }
-        CoTaskMemFree(uri);
-        return S_OK;
-    });
-    view_->add_NavigationStarting(stay.Get(), nullptr);
-    view_->add_FrameNavigationStarting(stay.Get(), nullptr);
-    view_->add_NewWindowRequested(
-        Callback<ICoreWebView2NewWindowRequestedEventHandler>([](ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) {
-            args->put_Handled(TRUE);
-            return S_OK;
-        }).Get(),
-        nullptr);
+    // the page is all there is; links are not followed while writing
+    webview::StayOnPage(view_.Get(), kPageUrl);
 
     view_->add_WebMessageReceived(
         Callback<ICoreWebView2WebMessageReceivedEventHandler>([this](ICoreWebView2*, ICoreWebView2WebMessageReceivedEventArgs* args) {

@@ -3,9 +3,9 @@
 //! tokens, with PKCE (RFC 7636) so a code caught on the way is of no use. The refresh token is the account's
 //! secret; access tokens are made from it when needed.
 //!
-//! The client IDs are those Postal Systems registered with the providers. Google's Desktop App client is built in
-//! ([`GOOGLE_CLIENT_ID`]); `PE_GOOGLE_CLIENT_ID` and `PE_GOOGLE_CLIENT_SECRET` at build time replace it, and
-//! `PE_MICROSOFT_CLIENT_ID` gives Microsoft's. A provider without one is not offered.
+//! The client IDs are those Postal Systems registered with the providers, built in ([`GOOGLE_CLIENT_ID`],
+//! [`MICROSOFT_CLIENT_ID`]); `PE_GOOGLE_CLIENT_ID`, `PE_GOOGLE_CLIENT_SECRET` and `PE_MICROSOFT_CLIENT_ID` at build
+//! time replace them.
 #![forbid(unsafe_code)]
 
 mod redirect;
@@ -85,16 +85,20 @@ pub const GOOGLE_CLIENT_ID: &str = "442308651621-5je5iul1c07rg8gse9gpr12difuusmm
 /// in every copy of the app, where nobody can keep it (RFC 8252 8.5). PKCE, not this, keeps a caught code useless.
 pub const GOOGLE_CLIENT_SECRET: &str = "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";
 
+/// The public client ("Mobile and desktop applications", public client flows on) registered in Microsoft Entra for
+/// personal Microsoft accounts and work or school ones (the `common` endpoints), with a loopback redirect: no secret
+pub const MICROSOFT_CLIENT_ID: &str = "7f84440c-d933-434d-b85f-9a74085a0945";
+
 /// A build-time override, when it is there and not empty
 fn configured(value: Option<&'static str>) -> Option<&'static str> {
     value.filter(|value| !value.trim().is_empty())
 }
 
 impl Provider {
-    /// The provider with the client ID this build has for it; None without one
-    pub fn builtin(kind: ProviderKind) -> Option<Provider> {
+    /// The provider with the client ID this build has for it
+    pub fn builtin(kind: ProviderKind) -> Provider {
         match kind {
-            ProviderKind::Google => Some(Provider {
+            ProviderKind::Google => Provider {
                 kind,
                 imap: Endpoint {
                     host: "imap.gmail.com".into(),
@@ -117,8 +121,8 @@ impl Provider {
                         .unwrap_or(GOOGLE_CLIENT_SECRET)
                         .into(),
                 ),
-            }),
-            ProviderKind::Microsoft => Some(Provider {
+            },
+            ProviderKind::Microsoft => Provider {
                 kind,
                 imap: Endpoint {
                     host: "outlook.office365.com".into(),
@@ -139,9 +143,11 @@ impl Provider {
                 ]
                 .map(String::from)
                 .to_vec(),
-                client_id: configured(option_env!("PE_MICROSOFT_CLIENT_ID"))?.into(),
+                client_id: configured(option_env!("PE_MICROSOFT_CLIENT_ID"))
+                    .unwrap_or(MICROSOFT_CLIENT_ID)
+                    .into(),
                 client_secret: None,
-            }),
+            },
         }
     }
 }
@@ -345,9 +351,13 @@ mod tests {
 
     #[test]
     fn google_is_built_in_with_its_desktop_client() {
-        let google = Provider::builtin(ProviderKind::Google).unwrap();
+        let google = Provider::builtin(ProviderKind::Google);
         assert!(google.client_id.ends_with(".apps.googleusercontent.com"));
         assert!(google.client_secret.as_deref().is_some_and(|secret| !secret.is_empty()));
+        let microsoft = Provider::builtin(ProviderKind::Microsoft);
+        assert_eq!(microsoft.client_id, MICROSOFT_CLIENT_ID);
+        // a public client: no secret, PKCE alone
+        assert_eq!(microsoft.client_secret, None);
         assert_eq!(configured(Some("  ")), None);
         assert_eq!(configured(Some("x")), Some("x"));
     }

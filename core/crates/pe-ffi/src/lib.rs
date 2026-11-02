@@ -60,6 +60,22 @@ pub unsafe extern "C" fn pe_html_render(html: *const u8, len: usize, allow_remot
     .unwrap_or(null_mut())
 }
 
+/// The page of the Print window for a message document of the core (`PeMessageInfo.document`): the same document
+/// with the core's own script that says "done" once the print preview is closed. NULL for a document
+/// that is not one of the core's. Free with `pe_string_free`.
+///
+/// # Safety
+/// `document` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_print_page(document: *const c_char) -> *mut c_char {
+    if document.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let document = unsafe { std::ffi::CStr::from_ptr(document) }.to_string_lossy();
+    guard(|| pe_html::print_page(&document).map_or(null_mut(), into_c_string)).unwrap_or(null_mut())
+}
+
 /// The page of the compose window's editor, with the quoted message `quote` (from the draft, or NULL for a new
 /// message) folded behind "..." when `folded`, and `body` (the draft's, or NULL) as what is written so far. NULL on
 /// failure. Free with `pe_string_free`.
@@ -184,5 +200,9 @@ mod tests {
         assert!(!out.is_null());
         unsafe { pe_string_free(out) };
         unsafe { pe_string_free(null_mut()) };
+        // a print page only from a document of the core's
+        assert!(unsafe { pe_print_page(std::ptr::null()) }.is_null());
+        let foreign = CString::new("<html>not ours</html>").unwrap();
+        assert!(unsafe { pe_print_page(foreign.as_ptr()) }.is_null());
     }
 }

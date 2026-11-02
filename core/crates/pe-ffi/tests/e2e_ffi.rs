@@ -383,6 +383,16 @@ fn null_and_bad_arguments() {
         // drafts: nothing to open, no account to save in
         assert!(pe_draft_open(core, 1, 1).is_null());
         assert!(pe_message_headers(core, 1, 1).is_null());
+        let dir = CString::new(".").unwrap();
+        assert!(!pe_save_attachments(core, 1, 1, dir.as_ptr(), null_mut(), null_mut()));
+        assert!(!pe_save_attachments(
+            core,
+            1,
+            1,
+            std::ptr::null(),
+            null_mut(),
+            null_mut()
+        ));
         assert!(pe_message_headers(std::ptr::null(), 1, 1).is_null());
         assert!(pe_draft_open(std::ptr::null(), 1, 1).is_null());
         let mut id: *mut c_char = null_mut();

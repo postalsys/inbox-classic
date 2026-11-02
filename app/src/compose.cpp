@@ -679,7 +679,7 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
         windowClass.lpfnWndProc = ComposeProc;
         windowClass.hInstance = GetModuleHandleW(nullptr);
         windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-        windowClass.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+        SetAppIcons(windowClass);
         windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
         windowClass.lpszClassName = kComposeClass;
         RegisterClassExW(&windowClass);

@@ -591,6 +591,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         Layout();
         return 0;
     case WM_SETCURSOR: {
+        if (g_mailbox.OnSetCursor(reinterpret_cast<HWND>(wParam))) {
+            return TRUE;
+        }
         POINT point;
         GetCursorPos(&point);
         ScreenToClient(hwnd, &point);
@@ -657,6 +660,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     case WM_CTLCOLORSTATIC:
+        if (LRESULT brush = 0; g_mailbox.OnCtlColor(reinterpret_cast<HWND>(lParam), reinterpret_cast<HDC>(wParam), brush)) {
+            return brush;
+        }
         if (reinterpret_cast<HWND>(lParam) == g_folderBar) {
             // white on dark grey, as the folder bar of Outlook Express
             SetTextColor(reinterpret_cast<HDC>(wParam), RGB(0xFF, 0xFF, 0xFF));
@@ -705,7 +711,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     windowClass.lpfnWndProc = MainProc;
     windowClass.hInstance = instance;
     windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-    windowClass.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+    SetAppIcons(windowClass);
     windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
     windowClass.lpszClassName = kMainClass;
     RegisterClassExW(&windowClass);

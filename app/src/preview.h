@@ -18,8 +18,6 @@ public:
     void Show(const std::wstring& html, bool remoteImages = false);
     // empty; with "There is no message selected." centered in it, as Outlook Express has it, when `noMessage`
     void Clear(bool noMessage = false);
-    // the print dialog of the document shown (its printout has the message's header fields)
-    void Print();
     // closes the WebView2 and lets go of it, before COM is shut down
     void Close();
     void Resize(const RECT& bounds);

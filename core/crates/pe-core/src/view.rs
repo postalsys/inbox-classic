@@ -126,9 +126,44 @@ pub(crate) fn header_text(source: &[u8]) -> String {
 
 /// The content of the `index`th listed attachment, with the name to save it under
 pub(crate) fn attachment(source: &[u8], index: usize) -> Option<(String, Vec<u8>)> {
-    let message = parser::parse(source).ok()?;
-    let attachment = message.attachments.into_iter().filter(|a| !a.related).nth(index)?;
-    Some((attachment.safe_filename(), attachment.content))
+    attachments(source).into_iter().nth(index)
+}
+
+/// The listed attachments (not the pictures of an HTML body), each with the name to save it under, from one parse
+pub(crate) fn attachments(source: &[u8]) -> Vec<(String, Vec<u8>)> {
+    let Ok(message) = parser::parse(source) else {
+        return Vec::new();
+    };
+    listed(&message.attachments)
+        .map(|a| (a.safe_filename(), a.content.clone()))
+        .collect()
+}
+
+/// Writes `content` into `dir` as `name`, or as `name (2).ext`, `name (3).ext`... when that is taken: a file there is
+/// never replaced, and creating it new (not checking first) leaves no moment for another to appear in between
+pub(crate) fn write_new(dir: &std::path::Path, name: &str, content: &[u8]) -> std::io::Result<std::path::PathBuf> {
+    use std::io::Write;
+    let (stem, extension) = match name.rfind('.') {
+        Some(dot) if dot > 0 => name.split_at(dot),
+        _ => (name, ""),
+    };
+    for n in 1u32.. {
+        let candidate = if n == 1 {
+            name.to_string()
+        } else {
+            format!("{stem} ({n}){extension}")
+        };
+        let path = dir.join(candidate);
+        match std::fs::OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(mut file) => {
+                file.write_all(content)?;
+                return Ok(path);
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists && n < 10_000 => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    unreachable!("the loop returns")
 }
 
 #[cfg(test)]
@@ -207,6 +242,23 @@ mod tests {
         );
         assert_eq!(attachment(MESSAGE, 0), Some(("report.pdf".into(), b"%PDF".to_vec())));
         assert_eq!(attachment(MESSAGE, 1), None);
+    }
+
+    #[test]
+    fn files_are_saved_without_replacing_any() {
+        let dir = std::env::temp_dir().join(format!("pe-write-new-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let first = write_new(&dir, "report.pdf", b"one").unwrap();
+        let second = write_new(&dir, "report.pdf", b"two").unwrap();
+        let bare = write_new(&dir, ".hidden", b"three").unwrap();
+        assert_eq!(first.file_name().unwrap(), "report.pdf");
+        assert_eq!(second.file_name().unwrap(), "report (2).pdf");
+        assert_eq!(bare.file_name().unwrap(), ".hidden");
+        assert_eq!(std::fs::read(&first).unwrap(), b"one");
+        assert_eq!(std::fs::read(&second).unwrap(), b"two");
+        std::fs::remove_dir_all(&dir).unwrap();
+        // the attachments of a message, from one parse
+        assert_eq!(attachments(MESSAGE), [("report.pdf".to_string(), b"%PDF".to_vec())]);
     }
 
     #[test]

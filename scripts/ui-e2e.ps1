@@ -32,6 +32,7 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll")] public static extern bool EnumChildWindows(IntPtr parent, EnumProc proc, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int size);
+[DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int InternalGetWindowText(IntPtr hwnd, System.Text.StringBuilder text, int size);
 public struct RECT { public int Left, Top, Right, Bottom; }
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
@@ -337,9 +338,8 @@ try {
     Step 'reading an HTML message'
     SelectRow 0
     Check ([bool](WaitFor { Seen $newsletter })) 'showing the message marked it read on the server'
-    Check (Visible $main $IDC_ATTACHMENTS) 'the Attachments button is there'
-    Check ((GetText $main $IDC_ATTACHMENTS) -eq 'Attachments (1)') 'it counts the attachment'
-    Check (Visible $main $IDC_PICTURES) 'the Download pictures button is there'
+    Check (Visible $main $IDC_ATTACHMENTS) 'the paper clip of the attachments is there'
+    Check (Visible $main $IDC_PICTURES) 'the information bar says pictures are blocked'
     $title = WindowText $main
     Check ($title -eq 'Inbox - Inbox Classic') "the title names the folder, as the folder bar does ($title)"
     Shot $main 'read-1-html'
@@ -358,15 +358,20 @@ try {
     }
 
     Step 'pictures from the internet'
-    Click $main $IDC_PICTURES
-    Check ([bool](WaitFor { -not (Visible $main $IDC_PICTURES) } 10)) 'Download pictures shows them and goes away'
+    # a click on the information bar, as the mouse would
+    $bar = [Native.Win]::GetDlgItem($main, $IDC_PICTURES)
+    $point = [IntPtr]((8 -shl 16) -bor 40)
+    [void][Native.Win]::PostMessage($bar, 0x0201, [IntPtr]1, $point)
+    [void][Native.Win]::PostMessage($bar, 0x0202, [IntPtr]::Zero, $point)
+    Check ([bool](WaitFor { -not (Visible $main $IDC_PICTURES) } 10)) 'clicking the bar shows the pictures, and the bar goes away'
     Start-Sleep -Seconds 3
     Shot $main 'read-2-pictures'
 
     Step 'saving the attachment'
-    Click $main $IDC_ATTACHMENTS
+    # the paper clip's menu, as its drop-down opens it
+    Command $main $IDC_ATTACHMENTS
     $menu = WaitWindow '#32768' $null 10
-    Check ($null -ne $menu) 'Attachments offers the files to save'
+    Check ($null -ne $menu) 'the paper clip offers the files to save'
     if ($menu) {
         Shot $main 'read-3-attachments' $menu
         # the keys once the menu takes them: on a slow machine it appears before it does
@@ -912,11 +917,37 @@ try {
     [void](WaitFor { if ((Rows) -ge 1) { Rows } })
     SelectRow 1
     Command $main $IDM_PRINT
-    Start-Sleep -Seconds 4
-    Shot $main 'files-3-print'
-    [void][Native.Win]::SetForegroundWindow($main)
-    [System.Windows.Forms.SendKeys]::SendWait('{ESC}')
-    Start-Sleep -Seconds 1
+    # a window of its own over the app with the print preview in it, rather than a preview inside the reading pane
+    $print = WaitWindow 'InboxClassicPrint' $null 20
+    Check ($null -ne $print) 'Print opens the print preview in a window over the app'
+    if (-not $print) {
+        # what is there instead: the visible top-level windows with a title
+        $w = [IntPtr]::Zero
+        while (($w = [Native.Win]::FindWindowEx([IntPtr]::Zero, $w, [NullString]::Value, [NullString]::Value)) -ne [IntPtr]::Zero) {
+            # not WM_GETTEXT: a hung window (a print dialog left behind) would block the test for good
+            $text = New-Object System.Text.StringBuilder 256
+            [void][Native.Win]::InternalGetWindowText($w, $text, 256)
+            $title = $text.ToString()
+            if ($title -and [Native.Win]::IsWindowVisible($w)) {
+                $class = New-Object System.Text.StringBuilder 256
+                [void][Native.Win]::GetClassName($w, $class, 256)
+                Write-Host "   window: '$title' ($class)"
+            }
+        }
+        Shot $main 'files-3-print-missing'
+    }
+    if ($print) {
+        $printRect = New-Object Native.Win+RECT
+        $mainRect = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($print, [ref]$printRect)
+        [void][Native.Win]::GetWindowRect($main, [ref]$mainRect)
+        Check (($printRect.Right - $printRect.Left) -ge ($mainRect.Right - $mainRect.Left)) 'as wide as the app'
+        # the preview takes a moment to lay the message out
+        Start-Sleep -Seconds 5
+        Shot $print 'files-3-print'
+        [void][Native.Win]::PostMessage($print, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($print) } 10)) 'and closing it prints nothing'
+    }
 
     Step 'closing'
     [void][Native.Win]::PostMessage($main, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)

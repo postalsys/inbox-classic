@@ -45,6 +45,48 @@ bool IsOwnPage(const wchar_t* uri, const wchar_t* url) {
     return (_wcsnicmp(uri, url, length) == 0 && (uri[length] == L'\0' || uri[length] == L'?')) || StartsWith(uri, L"about:");
 }
 
+bool IsRemoteImage(const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT context, const wchar_t* url) {
+    return context == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_IMAGE && (StartsWith(uri, L"http://") || StartsWith(uri, L"https://")) &&
+           !StartsWith(uri, url);
+}
+
+void LockDown(ICoreWebView2* view, bool contextMenu) {
+    ComPtr<ICoreWebView2Settings> settings;
+    view->get_Settings(&settings);
+    settings->put_IsScriptEnabled(TRUE);
+    settings->put_IsWebMessageEnabled(TRUE);
+    settings->put_AreDefaultScriptDialogsEnabled(FALSE);
+    settings->put_AreHostObjectsAllowed(FALSE);
+    settings->put_AreDevToolsEnabled(FALSE);
+    settings->put_IsStatusBarEnabled(FALSE);
+    settings->put_IsBuiltInErrorPageEnabled(FALSE);
+    settings->put_AreDefaultContextMenusEnabled(contextMenu ? TRUE : FALSE);
+    ComPtr<ICoreWebView2Settings3> settings3;
+    if (SUCCEEDED(settings.As(&settings3))) {
+        settings3->put_AreBrowserAcceleratorKeysEnabled(FALSE);
+    }
+}
+
+void StayOnPage(ICoreWebView2* view, const wchar_t* url) {
+    auto stay = Callback<ICoreWebView2NavigationStartingEventHandler>([url](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
+        LPWSTR uri = nullptr;
+        args->get_Uri(&uri);
+        if (!IsOwnPage(uri, url)) {
+            args->put_Cancel(TRUE);
+        }
+        CoTaskMemFree(uri);
+        return S_OK;
+    });
+    view->add_NavigationStarting(stay.Get(), nullptr);
+    view->add_FrameNavigationStarting(stay.Get(), nullptr);
+    view->add_NewWindowRequested(
+        Callback<ICoreWebView2NewWindowRequestedEventHandler>([](ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) {
+            args->put_Handled(TRUE);
+            return S_OK;
+        }).Get(),
+        nullptr);
+}
+
 void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebView2Controller*)> ready,
             std::function<void(const std::wstring&)> failed) {
     std::wstring folder = UserDataFolder();

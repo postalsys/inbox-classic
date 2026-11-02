@@ -79,6 +79,12 @@ std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t*
                            const wchar_t* filter = L"All files (*.*)\0*.*\0", const wchar_t* extension = nullptr);
 // a modal window with `text` to read and copy in a box that can not be edited, and OK (Message Properties)
 void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text);
+// the app's icon (app.rc): the small one of the title bar, or the large one of Alt+Tab
+HICON AppIcon(bool titleBar);
+// both for a window class
+void SetAppIcons(WNDCLASSEXW& windowClass);
+// a folder chosen in the Windows folder picker, empty when cancelled
+std::wstring FolderDialog(HWND owner, const wchar_t* title);
 // the files chosen in an Open dialog that takes several, none when cancelled
 std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter);
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
@@ -100,6 +106,12 @@ bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& passw
 
 // Tools > Outbox: what waits to be sent, to send now or delete
 void OutboxDialog(HWND owner, PeCore* core);
+
+// ---- print.cpp ----
+
+// File > Print: a window over `owner` with the message `document` (the core's, PeMessageInfo.document) where the print
+// preview opens; it closes once the preview does
+void OpenPrintWindow(HWND owner, const char* document, bool remoteImages, const std::wstring& subject);
 
 // ---- help.cpp ----
 
@@ -164,6 +176,10 @@ public:
     void RenameFolder(HWND owner);
     void DeleteFolder(HWND owner);
     void LoadPictures();
+    // WM_SETCURSOR and WM_CTLCOLORSTATIC of the main window for the information bar of blocked pictures (a hand, the
+    // information colors); false for other windows
+    bool OnSetCursor(HWND window);
+    bool OnCtlColor(HWND window, HDC dc, LRESULT& brush);
     // "12 message(s), 3 unread" for the status bar
     std::wstring Counts() const;
     // the name of the selected folder (or account), for the folder bar and the title; empty with nothing selected
@@ -205,6 +221,9 @@ private:
     void ShowView();
     void ShowHeader(const PeMessageInfo* info);
     void ChooseAttachment();
+    void SaveAllAttachments();
+    void LayoutReader();
+    void ShowReaderBars(bool files, bool pictures);
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
     void DisplayInfo(NMLVDISPINFOW* info);
@@ -215,8 +234,10 @@ private:
     HWND tree_ = nullptr;
     HWND list_ = nullptr;
     HWND header_ = nullptr;
+    // the paper clip button (a toolbar of one) and the information bar of blocked pictures
     HWND attachments_ = nullptr;
     HWND pictures_ = nullptr;
+    RECT reader_ = {};
     HWND previewHost_ = nullptr;
     HFONT bold_ = nullptr;
     // the icons the list draws on its rows, and their size

@@ -40,7 +40,7 @@ const sections = [
             {
                 shot: 'account-5b-browser-sign-in',
                 name: 'Gmail sign-in through the browser',
-                what: "For a Gmail or Google Workspace address Inbox Classic offers to sign in on Google's own page in the web browser (OAuth 2.0 with PKCE, Google's Desktop App flow): the password and any second step are typed there, never into Inbox Classic, and the account then signs in with tokens kept in the Windows Credential Manager. Outlook.com works the same once a Microsoft client ID is configured.",
+                what: "For a Gmail or Google Workspace address Inbox Classic offers to sign in on Google's own page in the web browser (OAuth 2.0 with PKCE, Google's Desktop App flow): the password and any second step are typed there, never into Inbox Classic, and the account then signs in with tokens kept in the Windows Credential Manager. Outlook.com and Microsoft 365 addresses sign in the same way on Microsoft's page.",
                 how: 'Answer Yes when it is offered after the lookup; the browser opens, and the account is added once Google sends you back.',
                 checked: ['The offer appears for a Gmail address', 'No goes on to the password way']
             },
@@ -142,22 +142,22 @@ const sections = [
             {
                 shot: 'read-2-pictures',
                 name: 'Pictures from the internet, only when asked',
-                what: 'Pictures the sender keeps on the internet would tell the sender that, when and where you opened the message, so they are blocked. Download pictures, offered only when the message has such pictures, shows them for this message.',
-                how: 'The Download pictures button next to the header, or View > Download Pictures.',
-                checked: ['The button shows the pictures and goes away']
+                what: 'Pictures the sender keeps on the internet would tell the sender that, when and where you opened the message, so they are blocked. As in Outlook Express, a yellow bar across the message says so when the message has such pictures; a click on it shows them for this message.',
+                how: 'Click the yellow bar over the message, or View > Download Pictures.',
+                checked: ['The bar appears for a message with such pictures, not for others', 'A click shows the pictures and the bar goes away']
             },
             {
                 shot: 'read-3-attachments',
                 name: 'Attachments',
-                what: 'The Attachments button lists the files with their sizes. Names are made safe in Rust: no folder parts, no characters Windows forbids, nothing that makes a name look like something else.',
-                how: 'The Attachments (n) button next to the header.',
+                what: 'The paper clip at the right of the header, with how many files there are, lists them with their sizes; Save Attachments saves them all into a folder, a file already there kept and the new one numbered. Files are saved, never opened from here. Names are made safe in Rust: no folder parts, no characters Windows forbids, nothing that makes a name look like something else.',
+                how: 'The paper clip button at the right of the message header.',
                 checked: ['The menu offers the file']
             },
             {
                 shot: 'read-4-save',
                 name: 'Saving an attachment',
                 what: 'The standard Save dialog, suggesting the safe name, starting in Downloads (after that, where you saved last).',
-                how: 'Choose a file in the Attachments menu.',
+                how: 'Choose a file in the paper clip menu.',
                 checked: ["The suggested name is the attachment's", 'The saved file is byte for byte what was sent']
             },
             {
@@ -235,7 +235,7 @@ const sections = [
             {
                 shot: 'files-3-print',
                 name: 'Print',
-                what: 'The print preview of the message shown, with its sender, date, recipients and subject on top, and a destination to print to or save as PDF.',
+                what: 'A window over the app with the print preview of the message shown: the printer (or save as PDF), copies, layout and pages, and a live preview with the sender, date, recipients and subject on top. It closes once printed or cancelled.',
                 how: 'File > Print, or Ctrl+P.',
                 checked: ['The print preview opens with the header of the message']
             }

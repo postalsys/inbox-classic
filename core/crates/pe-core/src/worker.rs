@@ -555,7 +555,7 @@ impl Worker {
             });
         }
         let provider = pe_oauth::ProviderKind::parse(provider)
-            .and_then(|kind| self.oauth.provider(kind))
+            .map(|kind| self.oauth.provider(kind))
             .ok_or_else(|| Failure {
                 kind: FailureKind::Other,
                 message: format!("this build can not sign in to {provider}"),

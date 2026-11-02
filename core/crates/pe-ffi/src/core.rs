@@ -1212,6 +1212,48 @@ pub unsafe extern "C" fn pe_message_view_free(view: *mut PeMessageView) {
     unsafe { take_back(view) }
 }
 
+/// Saves every attachment of a message into the folder `dir` (UTF-8, one the user chose), each under the name the core
+/// made safe; a file of that name already there is kept and the new one numbered ("name (2).ext"). True when the
+/// message is here, with how many were saved in `saved` and how many there are in `total` (either may be NULL).
+///
+/// # Safety
+/// `core` must be a live handle, `dir` NULL or a NUL-terminated string, `saved` and `total` NULL or valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_save_attachments(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    dir: *const c_char,
+    saved: *mut usize,
+    total: *mut usize,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(dir) = (unsafe { arg(dir) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    let counts = unsafe {
+        with(core, None, |core| {
+            core.save_attachments(folder, uid, std::path::Path::new(dir))
+                .ok()
+                .flatten()
+        })
+    };
+    let Some((done, all)) = counts else {
+        return false;
+    };
+    // SAFETY: the caller gave NULL or valid pointers
+    unsafe {
+        if let Some(saved) = saved.as_mut() {
+            *saved = done;
+        }
+        if let Some(total) = total.as_mut() {
+            *total = all;
+        }
+    }
+    true
+}
+
 /// The content of attachment `index` of a message, NULL on failure. `len` gets its length and
 /// `filename` the name to save it under (free it with `pe_string_free`). Free the bytes with
 /// `pe_bytes_free`.

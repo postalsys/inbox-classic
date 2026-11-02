@@ -25,6 +25,18 @@ void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebV
 void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, const wchar_t* url,
                     std::function<const std::wstring&()> serve, std::function<bool(const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT)> allow);
 
+// a picture from the internet, which a page loads only when the user allowed it for the message shown: http(s), an
+// image, not the page's own address `url`
+bool IsRemoteImage(const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT context, const wchar_t* url);
+
+// the settings of a page that runs its own script (the editor, the Print window): its script and its messages to the
+// window, and none of dev tools, host objects, script dialogs, the status bar, error pages or the browser keys (F5
+// would reload the page, Ctrl+P and Ctrl+F open browser windows); the context menu only when `contextMenu`
+void LockDown(ICoreWebView2* view, bool contextMenu);
+
+// the page at `url` is all the view shows: navigation elsewhere is cancelled and no window opens from it
+void StayOnPage(ICoreWebView2* view, const wchar_t* url);
+
 // whether `uri` is the page itself (`url`, with or without a query) or one of the documents a page has of its own
 bool IsOwnPage(const wchar_t* uri, const wchar_t* url);
 

@@ -47,6 +47,7 @@ add_executable(InboxClassic WIN32
     src/mailbox.cpp
     src/ui.cpp
     src/preview.cpp
+    src/print.cpp
     src/webview.cpp
     res/app.rc
 )

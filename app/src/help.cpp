@@ -63,7 +63,7 @@ void OpenHelp() {
         windowClass.lpfnWndProc = HelpProc;
         windowClass.hInstance = GetModuleHandleW(nullptr);
         windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-        windowClass.hIcon = LoadIconW(nullptr, IDI_QUESTION);
+        SetAppIcons(windowClass);
         windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
         windowClass.lpszClassName = kHelpClass;
         RegisterClassExW(&windowClass);

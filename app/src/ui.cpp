@@ -5,6 +5,8 @@
 #include <cderr.h>
 #include <commdlg.h>
 #include <shlobj.h>
+#include <shobjidl.h>
+#include <wrl/client.h>
 
 #include <algorithm>
 #include <fstream>
@@ -285,6 +287,40 @@ void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     CreateChild(dialog, L"BUTTON", L"OK", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
                 {width - pad - Scale(80), height - pad - Scale(25), width - pad, height - pad});
     RunModal(dialog, box, done);
+}
+
+std::wstring FolderDialog(HWND owner, const wchar_t* title) {
+    Microsoft::WRL::ComPtr<IFileOpenDialog> dialog;
+    if (FAILED(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog)))) {
+        return L"";
+    }
+    FILEOPENDIALOGOPTIONS options = 0;
+    dialog->GetOptions(&options);
+    dialog->SetOptions(options | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST);
+    dialog->SetTitle(title);
+    // Downloads the first time, as the Save dialogs; after that Windows starts where the user picked last
+    Microsoft::WRL::ComPtr<IShellItem> downloads;
+    if (SUCCEEDED(SHGetKnownFolderItem(FOLDERID_Downloads, KF_FLAG_DEFAULT, nullptr, IID_PPV_ARGS(&downloads)))) {
+        dialog->SetDefaultFolder(downloads.Get());
+    }
+    Microsoft::WRL::ComPtr<IShellItem> chosen;
+    PWSTR path = nullptr;
+    if (FAILED(dialog->Show(owner)) || FAILED(dialog->GetResult(&chosen)) || FAILED(chosen->GetDisplayName(SIGDN_FILESYSPATH, &path))) {
+        return L"";
+    }
+    std::wstring folder = path;
+    CoTaskMemFree(path);
+    return folder;
+}
+
+HICON AppIcon(bool titleBar) {
+    int size = GetSystemMetricsForDpi(titleBar ? SM_CXSMICON : SM_CXICON, GetDpiForSystem());
+    return static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(100), IMAGE_ICON, size, size, LR_SHARED));
+}
+
+void SetAppIcons(WNDCLASSEXW& windowClass) {
+    windowClass.hIcon = AppIcon(false);
+    windowClass.hIconSm = AppIcon(true);
 }
 
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size) {

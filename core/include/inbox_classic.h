@@ -338,6 +338,14 @@ char *pe_html_render(const uint8_t *html,
                      size_t len,
                      bool allow_remote_images);
 
+// The page of the Print window for a message document of the core (`PeMessageInfo.document`): the same document
+// with the core's own script that says "done" once the print preview is closed. NULL for a document
+// that is not one of the core's. Free with `pe_string_free`.
+//
+// # Safety
+// `document` must be NULL or a NUL-terminated string.
+char *pe_print_page(const char *document);
+
 // The page of the compose window's editor, with the quoted message `quote` (from the draft, or NULL for a new
 // message) folded behind "..." when `folded`, and `body` (the draft's, or NULL) as what is written so far. NULL on
 // failure. Free with `pe_string_free`.
@@ -660,6 +668,19 @@ const struct PeAttachment *pe_message_view_attachment(const struct PeMessageView
 // # Safety
 // `view` must be NULL or a view that was not freed yet.
 void pe_message_view_free(struct PeMessageView *view);
+
+// Saves every attachment of a message into the folder `dir` (UTF-8, one the user chose), each under the name the core
+// made safe; a file of that name already there is kept and the new one numbered ("name (2).ext"). True when the
+// message is here, with how many were saved in `saved` and how many there are in `total` (either may be NULL).
+//
+// # Safety
+// `core` must be a live handle, `dir` NULL or a NUL-terminated string, `saved` and `total` NULL or valid pointers.
+bool pe_save_attachments(const struct PeCore *core,
+                         int64_t folder,
+                         uint64_t uid,
+                         const char *dir,
+                         size_t *saved,
+                         size_t *total);
 
 // The content of attachment `index` of a message, NULL on failure. `len` gets its length and
 // `filename` the name to save it under (free it with `pe_string_free`). Free the bytes with

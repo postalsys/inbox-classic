@@ -134,8 +134,16 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     AddColumn(list_, COL_SIZE, L"Size", 84, LVCFMT_RIGHT);
 
     header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
-    attachments_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP, IDC_ATTACHMENTS, {});
-    pictures_ = CreateChild(parent, L"BUTTON", L"Download pictures", WS_TABSTOP, IDC_PICTURES, {});
+    // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
+    attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_ATTACHMENTS, BarIcons::Big);
+    // a label from the start, so the bar keeps a row for it under the icon ("2 files" once a message is shown)
+    AddButton(attachments_, IDC_ATTACHMENTS, L"1 file", BTNS_WHOLEDROPDOWN, ICON_ATTACH);
+    // the information bar of Outlook Express over a message whose pictures on the internet are blocked; a click
+    // shows them
+    pictures_ = CreateChild(parent, L"STATIC",
+                            L" Some pictures have been blocked to help prevent the sender from identifying your computer. "
+                            L"Click here to download pictures.",
+                            SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER, IDC_PICTURES, {});
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
     previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN, 0, {});
@@ -160,14 +168,66 @@ void Mailbox::Destroy() {
 void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
     MoveWindow(tree_, tree.left, tree.top, tree.right - tree.left, tree.bottom - tree.top, TRUE);
     MoveWindow(list_, list.left, list.top, list.right - list.left, list.bottom - list.top, TRUE);
+    reader_ = reader;
+    LayoutReader();
+}
+
+// the paper clip and the information bar shown or not, the pane laid out again only when that changes
+void Mailbox::ShowReaderBars(bool files, bool pictures) {
+    bool changed = (IsWindowVisible(attachments_) != FALSE) != files || (IsWindowVisible(pictures_) != FALSE) != pictures;
+    ShowWindow(attachments_, files ? SW_SHOW : SW_HIDE);
+    ShowWindow(pictures_, pictures ? SW_SHOW : SW_HIDE);
+    if (changed || files) {
+        LayoutReader();
+    }
+}
+
+bool Mailbox::OnSetCursor(HWND window) {
+    if (window != pictures_) {
+        return false;
+    }
+    // the information bar is clicked like a link
+    SetCursor(LoadCursorW(nullptr, IDC_HAND));
+    return true;
+}
+
+bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
+    if (window != pictures_) {
+        return false;
+    }
+    // the colors of tooltips and information bars of the Windows scheme
+    SetTextColor(dc, GetSysColor(COLOR_INFOTEXT));
+    SetBkColor(dc, GetSysColor(COLOR_INFOBK));
+    brush = reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_INFOBK));
+    return true;
+}
+
+// the reading pane: the header, with the paper clip at its right when the message has files; the information bar
+// under it when pictures are blocked; the message below
+void Mailbox::LayoutReader() {
+    const RECT& reader = reader_;
     int headerHeight = kHeaderLines * Scale(15) + Scale(8);
-    int buttonWidth = Scale(130);
     int width = reader.right - reader.left;
-    MoveWindow(header_, reader.left, reader.top, width - buttonWidth - Scale(4), headerHeight, TRUE);
-    int x = reader.right - buttonWidth;
-    MoveWindow(attachments_, x, reader.top, buttonWidth, Scale(24), TRUE);
-    MoveWindow(pictures_, x, reader.top + Scale(28), buttonWidth, Scale(24), TRUE);
-    int top = reader.top + headerHeight + Scale(4);
+    bool files = IsWindowVisible(attachments_);
+    RECT button = {};
+    if (files) {
+        SendMessageW(attachments_, TB_AUTOSIZE, 0, 0);
+        SendMessageW(attachments_, TB_GETITEMRECT, 0, reinterpret_cast<LPARAM>(&button));
+    }
+    // the header to the paper clip, which is as wide as its button
+    int clipWidth = files ? static_cast<int>(button.right - button.left) + Scale(8) : 0;
+    MoveWindow(header_, reader.left, reader.top, width - clipWidth, headerHeight, TRUE);
+    if (files) {
+        int buttonHeight = button.bottom - button.top;
+        MoveWindow(attachments_, reader.right - clipWidth, reader.top + std::max(0, (headerHeight - buttonHeight) / 2), clipWidth, buttonHeight,
+                   TRUE);
+    }
+    int top = reader.top + headerHeight + Scale(2);
+    if (IsWindowVisible(pictures_)) {
+        int barHeight = Scale(22);
+        MoveWindow(pictures_, reader.left, top, width, barHeight, TRUE);
+        top += barHeight + Scale(2);
+    }
     MoveWindow(previewHost_, reader.left, top, width, std::max(0L, reader.bottom - top), TRUE);
     RECT inner;
     GetClientRect(previewHost_, &inner);
@@ -432,8 +492,11 @@ void Mailbox::ClearReader(bool loading) {
     remoteImages_ = false;
     view_.reset();
     KillTimer(parent_, TIMER_MARK_READ);
-    ShowWindow(attachments_, SW_HIDE);
-    ShowWindow(pictures_, SW_HIDE);
+    // the bars of the message before stay while the next one loads, and go when it is there without them: the
+    // message does not jump down and up again
+    if (!loading) {
+        ShowReaderBars(false, false);
+    }
     SetWindowTextW(header_, L"");
     // says so rather than a blank pane, unless a message is about to be shown
     preview_.Clear(!loading);
@@ -489,12 +552,13 @@ void Mailbox::ShowView() {
     const PeMessageInfo* info = pe_message_view_info(view_.get());
     if (!info) {
         SetWindowTextW(header_, L" The message could not be shown.");
+        ShowReaderBars(false, false);
         return;
     }
     ShowHeader(info);
     preview_.Show(Text(info->document), remoteImages_);
     // offered only for a message with pictures on the internet, until they are shown
-    ShowWindow(pictures_, info->remote_images && !remoteImages_ ? SW_SHOW : SW_HIDE);
+    ShowReaderBars(info->attachment_count > 0, info->remote_images && !remoteImages_);
     // read after a moment on screen, not while the user moves through the list
     SetTimer(parent_, TIMER_MARK_READ, 1000, nullptr);
 }
@@ -508,9 +572,12 @@ void Mailbox::ShowHeader(const PeMessageInfo* info) {
     header += L"\r\n Subject:  " + Text(info->subject);
     SetWindowTextW(header_, header.c_str());
     if (info->attachment_count > 0) {
-        std::wstring label = L"Attachments (" + std::to_wstring(info->attachment_count) + L")";
-        SetWindowTextW(attachments_, label.c_str());
-        ShowWindow(attachments_, SW_SHOW);
+        // the paper clip says how many files there are
+        std::wstring label = info->attachment_count == 1 ? L"1 file" : std::to_wstring(info->attachment_count) + L" files";
+        TBBUTTONINFOW button = {sizeof(button)};
+        button.dwMask = TBIF_TEXT;
+        button.pszText = label.data();
+        SendMessageW(attachments_, TB_SETBUTTONINFOW, IDC_ATTACHMENTS, reinterpret_cast<LPARAM>(&button));
     }
 }
 
@@ -519,20 +586,30 @@ void Mailbox::ChooseAttachment() {
     if (!info) {
         return;
     }
+    // each file to save (the name the sender gave, its size), then all of them into a folder, as Outlook Express
+    // has it; files are saved, never opened from here
     HMENU menu = CreatePopupMenu();
     for (size_t i = 0; i < info->attachment_count; i++) {
         const PeAttachment* attachment = pe_message_view_attachment(view_.get(), i);
         if (!attachment) {
             continue;
         }
-        std::wstring label = MenuText(L"Save " + Text(attachment->filename) + L" (" + FormatSize(attachment->size) + L")...");
+        std::wstring label = MenuText(Text(attachment->filename) + L" (" + FormatSize(attachment->size) + L")");
         AppendMenuW(menu, MF_STRING, 1 + i, label.c_str());
     }
+    // after the files' own items
+    const UINT kSaveAll = static_cast<UINT>(info->attachment_count) + 1;
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, kSaveAll, L"&Save Attachments...");
     RECT button;
     GetWindowRect(attachments_, &button);
-    int chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTALIGN | TPM_TOPALIGN, button.right, button.bottom, 0, parent_, nullptr);
+    UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTALIGN | TPM_TOPALIGN, button.right, button.bottom, 0, parent_, nullptr);
     DestroyMenu(menu);
-    if (chosen <= 0) {
+    if (chosen == kSaveAll) {
+        SaveAllAttachments();
+        return;
+    }
+    if (chosen == 0) {
         return;
     }
     size_t length = 0;
@@ -548,6 +625,23 @@ void Mailbox::ChooseAttachment() {
         MessageBoxW(parent_, L"The attachment could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
     }
     pe_bytes_free(data, length);
+}
+
+void Mailbox::SaveAllAttachments() {
+    std::wstring folder = FolderDialog(parent_, L"Save Attachments");
+    if (folder.empty()) {
+        return;
+    }
+    // the core saves them all from one reading of the message, a file already there kept and the new one numbered
+    size_t saved = 0;
+    size_t total = 0;
+    std::string dir = core::Narrow(folder);
+    if (!pe_save_attachments(core_, folder_, uid_, dir.c_str(), &saved, &total)) {
+        MessageBoxW(parent_, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+    } else if (saved < total) {
+        std::wstring text = std::to_wstring(total - saved) + L" of the " + std::to_wstring(total) + L" files could not be saved.";
+        MessageBoxW(parent_, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+    }
 }
 
 void Mailbox::LoadPictures() {
@@ -768,6 +862,11 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
         }
         return header->code == TVN_SELCHANGEDW;
     }
+    if (header->hwndFrom == attachments_ && header->code == TBN_DROPDOWN) {
+        ChooseAttachment();
+        result = TBDDRET_DEFAULT;
+        return true;
+    }
     return header->hwndFrom == list_ && OnListNotify(header, result);
 }
 
@@ -844,8 +943,9 @@ void Mailbox::ShowProperties(HWND owner) {
 }
 
 void Mailbox::PrintShown() {
-    if (uid_ && view_) {
-        preview_.Print();
+    if (const PeMessageInfo* info = uid_ ? pe_message_view_info(view_.get()) : nullptr) {
+        // the message as it is shown, with the pictures the user allowed
+        OpenPrintWindow(parent_, info->document, remoteImages_, Text(info->subject));
     }
 }
 
