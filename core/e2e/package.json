@@ -1,0 +1,10 @@
+{
+    "name": "postal-express-e2e",
+    "private": true,
+    "description": "ImapKit and its SMTP server for the end-to-end tests of the Rust core, started by pe-testkit",
+    "type": "module",
+    "dependencies": {
+        "imapkit": "5.2.0",
+        "smtp-server": "3.21.3"
+    }
+}

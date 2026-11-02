@@ -1,0 +1,232 @@
+{
+ "words": [
+  {
+   "input": "plain text",
+   "expected": "plain text"
+  },
+  {
+   "input": "=?UTF-8?Q?J=C3=B5ul_ja_uus_aasta?=",
+   "expected": "Jõul ja uus aasta"
+  },
+  {
+   "input": "=?utf-8?b?SsO1dWw=?=",
+   "expected": "Jõul"
+  },
+  {
+   "input": "=?ISO-8859-1?Q?=F5?= and =?iso-8859-1?q?=e4?=",
+   "expected": "õ and ä"
+  },
+  {
+   "input": "=?UTF-8?Q?a?= =?UTF-8?Q?b?=",
+   "expected": "ab"
+  },
+  {
+   "input": "=?UTF-8?Q?a?=   \t =?UTF-8?Q?b?=",
+   "expected": "ab"
+  },
+  {
+   "input": "=?UTF-8?B?w6E=?= =?UTF-8?B?w6k=?=",
+   "expected": "áé"
+  },
+  {
+   "input": "=?UTF-8?Q?=C3?= =?UTF-8?Q?=B5?=",
+   "expected": "õ"
+  },
+  {
+   "input": "=?UTF-8?B?w?= =?UTF-8?B?7U=?=",
+   "expected": "õ"
+  },
+  {
+   "input": "=?UTF-8?Q?=C3=B5?= =?ISO-8859-1?Q?=E4?=",
+   "expected": "õä"
+  },
+  {
+   "input": "=?UTF-8?Q?a?= x =?UTF-8?Q?b?=",
+   "expected": "a x b"
+  },
+  {
+   "input": "=?UTF-8?X?abc?=",
+   "expected": "=?UTF-8?X?abc?="
+  },
+  {
+   "input": "=?UTF-8?Q?abc",
+   "expected": "=?UTF-8?Q?abc"
+  },
+  {
+   "input": "=??Q?a?=",
+   "expected": "=??Q?a?="
+  },
+  {
+   "input": "a =? b",
+   "expected": "a =? b"
+  },
+  {
+   "input": "=?UTF-8?Q?a=ZZ?=",
+   "expected": "a=ZZ"
+  },
+  {
+   "input": "=?utf-8*en?Q?x?=",
+   "expected": "x"
+  },
+  {
+   "input": "=?windows-1257?Q?=E0?=",
+   "expected": "ą"
+  },
+  {
+   "input": "=?koi8-r?B?0ME=?=",
+   "expected": "па"
+  },
+  {
+   "input": "=?iso-2022-jp?B?GyRCJCIbKEI=?=",
+   "expected": "あ"
+  },
+  {
+   "input": "=?shift_jis?B?gqA=?=",
+   "expected": "あ"
+  },
+  {
+   "input": "Re: =?UTF-8?Q?Tere_t=C3=A4na?= [x]",
+   "expected": "Re: Tere täna [x]"
+  },
+  {
+   "input": "\"=?UTF-8?Q?Andris_Reinman?=\" <andris@example.com>",
+   "expected": "\"Andris Reinman\" <andris@example.com>"
+  },
+  {
+   "input": "=?UTF-8?Q?a=20b?=",
+   "expected": "a b"
+  },
+  {
+   "input": "=?UTF-8?Q?a_b?=",
+   "expected": "a b"
+  },
+  {
+   "input": "=?us-ascii?Q?plain?=",
+   "expected": "plain"
+  },
+  {
+   "input": "=?UTF-8?B?8J+Ygg==?= smile",
+   "expected": "😂 smile"
+  },
+  {
+   "input": "prefix=?UTF-8?Q?x?=suffix",
+   "expected": "prefixxsuffix"
+  }
+ ],
+ "params": [
+  {
+   "input": [
+    "CHARSET",
+    "utf-8",
+    "name",
+    "=?UTF-8?Q?J=C3=B5ul.txt?="
+   ],
+   "expected": {
+    "charset": "utf-8",
+    "name": "Jõul.txt"
+   }
+  },
+  {
+   "input": [
+    "filename*1",
+    ".txt",
+    "filename*0*",
+    "utf-8'et'J%C3%B5ul"
+   ],
+   "expected": {
+    "filename": "Jõul.txt"
+   }
+  },
+  {
+   "input": [
+    "title*",
+    "iso-8859-1''%F5%E4"
+   ],
+   "expected": {
+    "title": "õä"
+   }
+  },
+  {
+   "input": [
+    "note*0",
+    "a ",
+    "note*1",
+    "b"
+   ],
+   "expected": {
+    "note": "a b"
+   }
+  },
+  {
+   "input": [
+    "filename",
+    "fallback.txt",
+    "filename*",
+    "utf-8''%C3%B5.txt"
+   ],
+   "expected": {
+    "filename": "õ.txt"
+   }
+  },
+  {
+   "input": [
+    "filename",
+    "utf-8''J%C3%B5ul.txt"
+   ],
+   "expected": {
+    "filename": "Jõul.txt"
+   }
+  },
+  {
+   "input": [
+    "filename",
+    "it's a file's name"
+   ],
+   "expected": {
+    "filename": "it's a file's name"
+   }
+  },
+  {
+   "input": [
+    "x*",
+    "''%C3%B5%Z1"
+   ],
+   "expected": {
+    "x": "õ=Z1"
+   }
+  },
+  {
+   "input": [
+    "name*0",
+    "part1",
+    "name*2",
+    "part3",
+    "name*1",
+    "part2"
+   ],
+   "expected": {
+    "name": "part1part2part3"
+   }
+  },
+  {
+   "input": [
+    "FileName*0*",
+    "UTF-8''%E2%82%AC",
+    "FileName*1*",
+    "%20rates.txt"
+   ],
+   "expected": {
+    "filename": "€ rates.txt"
+   }
+  },
+  {
+   "input": [
+    "boundary",
+    "----=_Part_0_1.2"
+   ],
+   "expected": {
+    "boundary": "----=_Part_0_1.2"
+   }
+  }
+ ]
+}

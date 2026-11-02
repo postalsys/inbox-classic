@@ -1,0 +1,1038 @@
+{
+ "fetches": [
+  {
+   "input": "* 1 FETCH (FLAGS (\\Seen $eee) ENVELOPE (\"23 Oct 2003 23:28:34 -0700\" \"Ryan Finnie's MIME Torture Test v1.0\" ((\"Andris Reinman\" NIL \"andris\" \"ekiri.ee\")) ((\"Andris Reinman\" NIL \"andris\" \"ekiri.ee\")) ((\"Andris Reinman\" NIL \"andris\" \"ekiri.ee\")) ((NIL NIL \"andmekala\" \"hot.ee\")) NIL NIL NIL \"<1066976914.4721.5.camel@localhost>\") BODYSTRUCTURE ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 617 16 NIL NIL NIL NIL)(\"message\" \"rfc822\" NIL NIL \"I'll be whatever I wanna do. --Fry\" \"7bit\" 582 (\"23 Oct 2003 22:25:56 -0700\" \"plain jane message\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066973156.4264.42.camel@localhost>\") (\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 311 9 NIL NIL NIL NIL) 18 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Would you kindly shut your noise-hole? --Bender\" \"7bit\" 1460 (\"23 Oct 2003 23:15:11 -0700\" \"messages inside messages inside...\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066976111.4263.74.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 193 3 NIL NIL NIL NIL)(\"message\" \"rfc822\" NIL NIL \"At the risk of sounding negative, no. --Leela\" \"7bit\" 697 (\"23 Oct 2003 23:09:05 -0700\" \"the original message\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066975745.4263.70.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 78 3 NIL NIL NIL NIL)(\"application\" \"x-gzip\" (\"NAME\" \"foo.gz\") NIL NIL \"base64\" 58 NIL (\"attachment\" (\"filename\" \"foo.gz\")) NIL NIL) \"mixed\" (\"boundary\" \"=-XFYecI7w+0shpolXq8bb\") NIL NIL NIL) 25 NIL (\"inline\" NIL) NIL NIL) \"mixed\" (\"boundary\" \"=-9Brg7LoMERBrIDtMRose\") NIL NIL NIL) 49 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Dirt doesn't need luck! --Professor\" \"7bit\" 817 (\"23 Oct 2003 22:40:49 -0700\" \"this message JUST contains an attachment\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066974048.4264.62.camel@localhost>\") (\"application\" \"x-gzip\" (\"NAME\" \"blah.gz\") NIL \"Attachment has identical content to above foo.gz\" \"base64\" 396 NIL (\"attachment\" (\"filename\" \"blah.gz\")) NIL NIL) 17 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Hold still, I don't have good depth perception! --Leela\" \"7bit\" 1045 (\"23 Oct 2003 23:09:16 -0700\" \"Attachment filename vs. name\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066975756.4263.70.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 377 6 NIL NIL NIL NIL)(\"application\" \"x-gzip\" (\"NAME\" \"blah2.gz\") NIL \"filename is blah1.gz, name is blah2.gz\" \"base64\" 58 NIL (\"attachment\" (\"filename\" \"blah1.gz\")) NIL NIL) \"mixed\" (\"boundary\" \"=-1066975756jd02\") NIL NIL NIL) 29 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Hello little man.  I WILL DESTROY YOU! --Moro\" \"7bit\" 1149 (\"23 Oct 2003 23:09:21 -0700\" {24}\r\nNo filename? No problem! ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066975761.4263.70.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 517 10 NIL NIL NIL NIL)(\"application\" \"x-gzip\" NIL NIL \"I'm getting sick of witty things to say\" \"base64\" 58 NIL (\"attachment\" NIL) NIL NIL) \"mixed\" (\"boundary\" \"=-1066975756jd03\") NIL NIL NIL) 33 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Friends! Help! A guinea pig tricked me! --Zoidberg\" \"7bit\" 896 (\"23 Oct 2003 22:40:45 -0700\" \"html and text, both inline\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066974044.4264.62.camel@localhost>\") ((\"text\" \"html\" (\"CHARSET\" \"utf-8\") NIL NIL \"8bit\" 327 11 NIL NIL NIL NIL)(\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 61 2 NIL NIL NIL NIL) \"mixed\" (\"boundary\" \"=-ZCKMfHzvHMyK1iBu4kff\") NIL NIL NIL) 33 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Smeesh! --Amy\" \"7bit\" 642 (\"23 Oct 2003 22:41:29 -0700\" \"text and text, both inline\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066974089.4265.64.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 62 2 NIL NIL NIL NIL)(\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 68 2 NIL NIL NIL NIL) \"mixed\" (\"boundary\" \"=-pNc4wtlOIxs8RcX7H/AK\") NIL NIL NIL) 24 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"That's not a cigar. Uh... and it's not mine. --Hermes\" \"7bit\" 1515 (\"23 Oct 2003 22:39:17 -0700\" {17}\r\nHTML and... HTML? ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066973957.4263.59.camel@localhost>\") ((\"text\" \"html\" (\"CHARSET\" \"utf-8\") NIL NIL \"8bit\" 824 22 NIL NIL NIL NIL)(\"text\" \"html\" (\"NAME\" \"htmlfile.html\" \"CHARSET\" \"UTF-8\") NIL NIL \"8bit\" 118 6 NIL (\"attachment\" (\"filename\" \"htmlfile.html\")) NIL NIL) \"mixed\" (\"boundary\" \"=-zxh/IezwzZITiphpcbJZ\") NIL NIL NIL) 49 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL {71}\r\nThe spirit is willing, but the flesh is spongy, and\r\n    bruised. --Zapp \"7bit\" 6643 (\"23 Oct 2003 22:23:16 -0700\" \"smiley!\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066972996.4264.39.camel@localhost>\") (((((\"text\" \"plain\" (\"charset\" \"us-ascii\") NIL NIL \"quoted-printable\" 1606 42 NIL NIL NIL NIL)(\"text\" \"html\" (\"charset\" \"utf-8\") NIL NIL \"quoted-printable\" 2128 54 NIL NIL NIL NIL) \"alternative\" (\"boundary\" \"=-dHujWM/Xizz57x/JOmDF\") NIL NIL NIL)(\"image\" \"png\" (\"name\" \"smiley-3.png\") \"<1066971953.4232.15.camel@localhost>\" NIL \"base64\" 1122 NIL (\"attachment\" (\"filename\" \"smiley-3.png\")) NIL NIL) \"related\" (\"type\" \"multipart/alternative\" \"boundary\" \"=-GpwozF9CQ7NdF+fd+vMG\") NIL NIL NIL)(\"image\" \"gif\" (\"name\" \"dot.gif\") NIL NIL \"base64\" 96 NIL (\"attachment\" (\"filename\" \"dot.gif\")) NIL NIL) \"mixed\" (\"boundary\" \"=-CgV5jm9HAY9VbUlAuneA\") NIL NIL NIL)(\"application\" \"pgp-signature\" (\"name\" \"signature.asc\") NIL \"This is a digitally signed message part\" \"7bit\" 196 NIL NIL NIL NIL) \"signed\" (\"micalg\" \"pgp-sha1\" \"protocol\" \"application/pgp-signature\" \"boundary\" \"=-vH3FQO9a8icUn1ROCoAi\") NIL NIL NIL) 177 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Kittens give Morbo gas. --Morbo\" \"7bit\" 3088 (\"23 Oct 2003 22:32:37 -0700\" \"the PROPER way to do alternative/related\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066973557.4265.51.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 863 22 NIL NIL NIL NIL)((\"text\" \"html\" (\"CHARSET\" \"utf-8\") NIL NIL \"8bit\" 1258 22 NIL NIL NIL NIL)(\"image\" \"gif\" NIL \"<1066973340.4232.46.camel@localhost>\" NIL \"base64\" 116 NIL NIL NIL NIL) \"related\" (\"boundary\" \"=-bFkxH1S3HVGcxi+o/5jG\") NIL NIL NIL) \"alternative\" (\"type\" \"multipart/alternative\" \"boundary\" \"=-tyGlQ9JvB5uvPWzozI+y\") NIL NIL NIL) 79 NIL (\"inline\" NIL) NIL NIL) \"mixed\" (\"boundary\" \"=-qYxqvD9rbH0PNeExagh1\") NIL NIL NIL) BODY[] {0}\r\n)",
+   "envelope": {
+    "date": "2003-10-24T06:28:34.000Z",
+    "subject": "Ryan Finnie's MIME Torture Test v1.0",
+    "from": [
+     {
+      "name": "Andris Reinman",
+      "address": "andris@ekiri.ee"
+     }
+    ],
+    "sender": [
+     {
+      "name": "Andris Reinman",
+      "address": "andris@ekiri.ee"
+     }
+    ],
+    "replyTo": [
+     {
+      "name": "Andris Reinman",
+      "address": "andris@ekiri.ee"
+     }
+    ],
+    "to": [
+     {
+      "name": "",
+      "address": "andmekala@hot.ee"
+     }
+    ],
+    "messageId": "<1066976914.4721.5.camel@localhost>"
+   },
+   "bodystructure": {
+    "childNodes": [
+     {
+      "part": "1",
+      "type": "text/plain",
+      "parameters": {
+       "charset": "US-ASCII"
+      },
+      "encoding": "8bit",
+      "size": 617,
+      "lineCount": 16
+     },
+     {
+      "part": "2",
+      "type": "message/rfc822",
+      "description": "I'll be whatever I wanna do. --Fry",
+      "encoding": "7bit",
+      "size": 582,
+      "envelope": {
+       "date": "2003-10-24T05:25:56.000Z",
+       "subject": "plain jane message",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066973156.4264.42.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "2",
+        "type": "text/plain",
+        "parameters": {
+         "charset": "US-ASCII"
+        },
+        "encoding": "8bit",
+        "size": 311,
+        "lineCount": 9
+       }
+      ],
+      "lineCount": 18,
+      "disposition": "inline"
+     },
+     {
+      "part": "3",
+      "type": "message/rfc822",
+      "description": "Would you kindly shut your noise-hole? --Bender",
+      "encoding": "7bit",
+      "size": 1460,
+      "envelope": {
+       "date": "2003-10-24T06:15:11.000Z",
+       "subject": "messages inside messages inside...",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066976111.4263.74.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "3",
+        "childNodes": [
+         {
+          "part": "3.1",
+          "type": "text/plain",
+          "parameters": {
+           "charset": "US-ASCII"
+          },
+          "encoding": "8bit",
+          "size": 193,
+          "lineCount": 3
+         },
+         {
+          "part": "3.2",
+          "type": "message/rfc822",
+          "description": "At the risk of sounding negative, no. --Leela",
+          "encoding": "7bit",
+          "size": 697,
+          "envelope": {
+           "date": "2003-10-24T06:09:05.000Z",
+           "subject": "the original message",
+           "from": [
+            {
+             "name": "Ryan Finnie",
+             "address": "rfinnie@domain.dom"
+            }
+           ],
+           "sender": [
+            {
+             "name": "Ryan Finnie",
+             "address": "rfinnie@domain.dom"
+            }
+           ],
+           "replyTo": [
+            {
+             "name": "Ryan Finnie",
+             "address": "rfinnie@domain.dom"
+            }
+           ],
+           "to": [
+            {
+             "name": "",
+             "address": "bob@domain.dom"
+            }
+           ],
+           "messageId": "<1066975745.4263.70.camel@localhost>"
+          },
+          "childNodes": [
+           {
+            "part": "3.2",
+            "childNodes": [
+             {
+              "part": "3.2.1",
+              "type": "text/plain",
+              "parameters": {
+               "charset": "US-ASCII"
+              },
+              "encoding": "8bit",
+              "size": 78,
+              "lineCount": 3
+             },
+             {
+              "part": "3.2.2",
+              "type": "application/x-gzip",
+              "parameters": {
+               "name": "foo.gz"
+              },
+              "encoding": "base64",
+              "size": 58,
+              "disposition": "attachment",
+              "dispositionParameters": {
+               "filename": "foo.gz"
+              }
+             }
+            ],
+            "type": "multipart/mixed",
+            "parameters": {
+             "boundary": "=-XFYecI7w+0shpolXq8bb"
+            }
+           }
+          ],
+          "lineCount": 25,
+          "disposition": "inline"
+         }
+        ],
+        "type": "multipart/mixed",
+        "parameters": {
+         "boundary": "=-9Brg7LoMERBrIDtMRose"
+        }
+       }
+      ],
+      "lineCount": 49,
+      "disposition": "inline"
+     },
+     {
+      "part": "4",
+      "type": "message/rfc822",
+      "description": "Dirt doesn't need luck! --Professor",
+      "encoding": "7bit",
+      "size": 817,
+      "envelope": {
+       "date": "2003-10-24T05:40:49.000Z",
+       "subject": "this message JUST contains an attachment",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066974048.4264.62.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "4",
+        "type": "application/x-gzip",
+        "parameters": {
+         "name": "blah.gz"
+        },
+        "description": "Attachment has identical content to above foo.gz",
+        "encoding": "base64",
+        "size": 396,
+        "disposition": "attachment",
+        "dispositionParameters": {
+         "filename": "blah.gz"
+        }
+       }
+      ],
+      "lineCount": 17,
+      "disposition": "inline"
+     },
+     {
+      "part": "5",
+      "type": "message/rfc822",
+      "description": "Hold still, I don't have good depth perception! --Leela",
+      "encoding": "7bit",
+      "size": 1045,
+      "envelope": {
+       "date": "2003-10-24T06:09:16.000Z",
+       "subject": "Attachment filename vs. name",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066975756.4263.70.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "5",
+        "childNodes": [
+         {
+          "part": "5.1",
+          "type": "text/plain",
+          "parameters": {
+           "charset": "US-ASCII"
+          },
+          "encoding": "8bit",
+          "size": 377,
+          "lineCount": 6
+         },
+         {
+          "part": "5.2",
+          "type": "application/x-gzip",
+          "parameters": {
+           "name": "blah2.gz"
+          },
+          "description": "filename is blah1.gz, name is blah2.gz",
+          "encoding": "base64",
+          "size": 58,
+          "disposition": "attachment",
+          "dispositionParameters": {
+           "filename": "blah1.gz"
+          }
+         }
+        ],
+        "type": "multipart/mixed",
+        "parameters": {
+         "boundary": "=-1066975756jd02"
+        }
+       }
+      ],
+      "lineCount": 29,
+      "disposition": "inline"
+     },
+     {
+      "part": "6",
+      "type": "message/rfc822",
+      "description": "Hello little man.  I WILL DESTROY YOU! --Moro",
+      "encoding": "7bit",
+      "size": 1149,
+      "envelope": {
+       "date": "2003-10-24T06:09:21.000Z",
+       "subject": "No filename? No problem!",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066975761.4263.70.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "6",
+        "childNodes": [
+         {
+          "part": "6.1",
+          "type": "text/plain",
+          "parameters": {
+           "charset": "US-ASCII"
+          },
+          "encoding": "8bit",
+          "size": 517,
+          "lineCount": 10
+         },
+         {
+          "part": "6.2",
+          "type": "application/x-gzip",
+          "description": "I'm getting sick of witty things to say",
+          "encoding": "base64",
+          "size": 58,
+          "disposition": "attachment"
+         }
+        ],
+        "type": "multipart/mixed",
+        "parameters": {
+         "boundary": "=-1066975756jd03"
+        }
+       }
+      ],
+      "lineCount": 33,
+      "disposition": "inline"
+     },
+     {
+      "part": "7",
+      "type": "message/rfc822",
+      "description": "Friends! Help! A guinea pig tricked me! --Zoidberg",
+      "encoding": "7bit",
+      "size": 896,
+      "envelope": {
+       "date": "2003-10-24T05:40:45.000Z",
+       "subject": "html and text, both inline",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066974044.4264.62.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "7",
+        "childNodes": [
+         {
+          "part": "7.1",
+          "type": "text/html",
+          "parameters": {
+           "charset": "utf-8"
+          },
+          "encoding": "8bit",
+          "size": 327,
+          "lineCount": 11
+         },
+         {
+          "part": "7.2",
+          "type": "text/plain",
+          "parameters": {
+           "charset": "US-ASCII"
+          },
+          "encoding": "8bit",
+          "size": 61,
+          "lineCount": 2
+         }
+        ],
+        "type": "multipart/mixed",
+        "parameters": {
+         "boundary": "=-ZCKMfHzvHMyK1iBu4kff"
+        }
+       }
+      ],
+      "lineCount": 33,
+      "disposition": "inline"
+     },
+     {
+      "part": "8",
+      "type": "message/rfc822",
+      "description": "Smeesh! --Amy",
+      "encoding": "7bit",
+      "size": 642,
+      "envelope": {
+       "date": "2003-10-24T05:41:29.000Z",
+       "subject": "text and text, both inline",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066974089.4265.64.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "8",
+        "childNodes": [
+         {
+          "part": "8.1",
+          "type": "text/plain",
+          "parameters": {
+           "charset": "US-ASCII"
+          },
+          "encoding": "8bit",
+          "size": 62,
+          "lineCount": 2
+         },
+         {
+          "part": "8.2",
+          "type": "text/plain",
+          "parameters": {
+           "charset": "US-ASCII"
+          },
+          "encoding": "8bit",
+          "size": 68,
+          "lineCount": 2
+         }
+        ],
+        "type": "multipart/mixed",
+        "parameters": {
+         "boundary": "=-pNc4wtlOIxs8RcX7H/AK"
+        }
+       }
+      ],
+      "lineCount": 24,
+      "disposition": "inline"
+     },
+     {
+      "part": "9",
+      "type": "message/rfc822",
+      "description": "That's not a cigar. Uh... and it's not mine. --Hermes",
+      "encoding": "7bit",
+      "size": 1515,
+      "envelope": {
+       "date": "2003-10-24T05:39:17.000Z",
+       "subject": "HTML and... HTML?",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066973957.4263.59.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "9",
+        "childNodes": [
+         {
+          "part": "9.1",
+          "type": "text/html",
+          "parameters": {
+           "charset": "utf-8"
+          },
+          "encoding": "8bit",
+          "size": 824,
+          "lineCount": 22
+         },
+         {
+          "part": "9.2",
+          "type": "text/html",
+          "parameters": {
+           "name": "htmlfile.html",
+           "charset": "UTF-8"
+          },
+          "encoding": "8bit",
+          "size": 118,
+          "lineCount": 6,
+          "disposition": "attachment",
+          "dispositionParameters": {
+           "filename": "htmlfile.html"
+          }
+         }
+        ],
+        "type": "multipart/mixed",
+        "parameters": {
+         "boundary": "=-zxh/IezwzZITiphpcbJZ"
+        }
+       }
+      ],
+      "lineCount": 49,
+      "disposition": "inline"
+     },
+     {
+      "part": "10",
+      "type": "message/rfc822",
+      "description": "The spirit is willing, but the flesh is spongy, and\r\n    bruised. --Zap",
+      "encoding": "p",
+      "size": 0,
+      "envelope": {
+       "date": "6643-01-01T00:00:00.000Z"
+      },
+      "childNodes": [
+       {
+        "part": "10",
+        "type": "23 oct 2003 22:23:16 -0700/smiley!",
+        "parameters": {},
+        "id": "",
+        "description": "",
+        "encoding": "",
+        "language": [
+         "<1066972996.4264.39.camel@localhost>"
+        ]
+       }
+      ],
+      "lineCount": 0,
+      "md5": "177",
+      "language": [
+       "inline",
+       ""
+      ]
+     },
+     {
+      "part": "11",
+      "type": "message/rfc822",
+      "description": "Kittens give Morbo gas. --Morbo",
+      "encoding": "7bit",
+      "size": 3088,
+      "envelope": {
+       "date": "2003-10-24T05:32:37.000Z",
+       "subject": "the PROPER way to do alternative/related",
+       "from": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "sender": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "replyTo": [
+        {
+         "name": "Ryan Finnie",
+         "address": "rfinnie@domain.dom"
+        }
+       ],
+       "to": [
+        {
+         "name": "",
+         "address": "bob@domain.dom"
+        }
+       ],
+       "messageId": "<1066973557.4265.51.camel@localhost>"
+      },
+      "childNodes": [
+       {
+        "part": "11",
+        "childNodes": [
+         {
+          "part": "11.1",
+          "type": "text/plain",
+          "parameters": {
+           "charset": "US-ASCII"
+          },
+          "encoding": "8bit",
+          "size": 863,
+          "lineCount": 22
+         },
+         {
+          "part": "11.2",
+          "childNodes": [
+           {
+            "part": "11.2.1",
+            "type": "text/html",
+            "parameters": {
+             "charset": "utf-8"
+            },
+            "encoding": "8bit",
+            "size": 1258,
+            "lineCount": 22
+           },
+           {
+            "part": "11.2.2",
+            "type": "image/gif",
+            "id": "<1066973340.4232.46.camel@localhost>",
+            "encoding": "base64",
+            "size": 116
+           }
+          ],
+          "type": "multipart/related",
+          "parameters": {
+           "boundary": "=-bFkxH1S3HVGcxi+o/5jG"
+          }
+         }
+        ],
+        "type": "multipart/alternative",
+        "parameters": {
+         "type": "multipart/alternative",
+         "boundary": "=-tyGlQ9JvB5uvPWzozI+y"
+        }
+       }
+      ],
+      "lineCount": 79,
+      "disposition": "inline"
+     }
+    ],
+    "type": "multipart/mixed",
+    "parameters": {
+     "boundary": "=-qYxqvD9rbH0PNeExagh1"
+    }
+   }
+  },
+  {
+   "input": "* 1 FETCH (ENVELOPE (\"Mon, 6 Oct 2025 10:00:00 +0000\" \"=?UTF-8?Q?Tere_t=C3=A4na?=\" ((\"\\\"Andris\\\"\" NIL \"andris\" \"example.com\")) NIL NIL ((NIL NIL \"undisclosed-recipients\" NIL)(NIL NIL NIL NIL)) NIL NIL NIL \"<id@example.com>\"))",
+   "envelope": {
+    "date": "2025-10-06T10:00:00.000Z",
+    "subject": "Tere täna",
+    "from": [
+     {
+      "name": "Andris",
+      "address": "andris@example.com"
+     }
+    ],
+    "to": [
+     {
+      "name": "undisclosed-recipients",
+      "address": ""
+     }
+    ],
+    "messageId": "<id@example.com>"
+   }
+  },
+  {
+   "input": "* 2 FETCH (ENVELOPE (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL))",
+   "envelope": {}
+  },
+  {
+   "input": "* 3 FETCH (ENVELOPE (\"\" \"\" ((NIL NIL \"a\" \"b\")) ((NIL NIL \"group\" NIL)(NIL NIL \"x\" \"y.z\")(NIL NIL NIL NIL)) NIL NIL NIL NIL \" <r@x> \" \" <m@x> \"))",
+   "envelope": {
+    "from": [
+     {
+      "name": "",
+      "address": "a@b"
+     }
+    ],
+    "sender": [
+     {
+      "name": "group",
+      "address": ""
+     },
+     {
+      "name": "",
+      "address": "x@y.z"
+     }
+    ],
+    "inReplyTo": "<r@x>",
+    "messageId": "<m@x>"
+   }
+  },
+  {
+   "input": "* 4 FETCH (ENVELOPE (\"Thu, 23 Oct 2003 23:28:34 -0700 (PDT)\" \"plain\" ((\"=?ISO-8859-1?Q?J=F5ul?=\" NIL \"j\" \"x.ee\")) NIL NIL NIL ((NIL NIL \"only\" \"cc.ee\")) ((NIL NIL \"only\" \"bcc.ee\")) NIL NIL))",
+   "envelope": {
+    "date": "2003-10-24T06:28:34.000Z",
+    "subject": "plain",
+    "from": [
+     {
+      "name": "Jõul",
+      "address": "j@x.ee"
+     }
+    ],
+    "cc": [
+     {
+      "name": "",
+      "address": "only@cc.ee"
+     }
+    ],
+    "bcc": [
+     {
+      "name": "",
+      "address": "only@bcc.ee"
+     }
+    ]
+   }
+  },
+  {
+   "input": "* 5 FETCH (BODYSTRUCTURE ((\"text\" \"plain\" (\"charset\" \"utf-8\") NIL NIL \"7bit\" 12 1 NIL NIL NIL NIL)(\"application\" \"pdf\" (\"name\" \"=?UTF-8?Q?=C3=B5.pdf?=\") NIL NIL \"base64\" 100 NIL (\"attachment\" (\"filename*\" \"utf-8''%C3%B5.pdf\")) NIL NIL) \"mixed\" (\"boundary\" \"b1\") NIL NIL NIL))",
+   "bodystructure": {
+    "childNodes": [
+     {
+      "part": "1",
+      "type": "text/plain",
+      "parameters": {
+       "charset": "utf-8"
+      },
+      "encoding": "7bit",
+      "size": 12,
+      "lineCount": 1
+     },
+     {
+      "part": "2",
+      "type": "application/pdf",
+      "parameters": {
+       "name": "õ.pdf"
+      },
+      "encoding": "base64",
+      "size": 100,
+      "disposition": "attachment",
+      "dispositionParameters": {
+       "filename": "õ.pdf"
+      }
+     }
+    ],
+    "type": "multipart/mixed",
+    "parameters": {
+     "boundary": "b1"
+    }
+   }
+  },
+  {
+   "input": "* 6 FETCH (BODYSTRUCTURE (\"TEXT\" \"HTML\" (\"CHARSET\" \"ISO-8859-1\") \"<cid@x>\" \"desc\" \"QUOTED-PRINTABLE\" 250 10 \"ABCDEF\" (\"INLINE\" NIL) (\"EN\" \"ET\") \"http://x/loc\"))",
+   "bodystructure": {
+    "type": "text/html",
+    "parameters": {
+     "charset": "ISO-8859-1"
+    },
+    "id": "<cid@x>",
+    "description": "desc",
+    "encoding": "quoted-printable",
+    "size": 250,
+    "lineCount": 10,
+    "md5": "abcdef",
+    "disposition": "inline",
+    "language": [
+     "en",
+     "et"
+    ],
+    "location": "http://x/loc"
+   }
+  },
+  {
+   "input": "* 7 FETCH (BODYSTRUCTURE (\"text\" \"plain\" (\"charset\" \"us-ascii\") NIL NIL \"7bit\" 5 NIL (\"inline\" (\"filename\" \"a.txt\")) NIL))",
+   "bodystructure": {
+    "type": "text/plain",
+    "parameters": {
+     "charset": "us-ascii"
+    },
+    "encoding": "7bit",
+    "size": 5,
+    "md5": ""
+   }
+  },
+  {
+   "input": "* 8 FETCH (BODYSTRUCTURE (\"text\" \"plain\" NIL NIL NIL \"7bit\" 5))",
+   "bodystructure": {
+    "type": "text/plain",
+    "encoding": "7bit",
+    "size": 5
+   }
+  },
+  {
+   "input": "* 9 FETCH (BODYSTRUCTURE ((\"text\" \"plain\" NIL NIL NIL \"7bit\" 5 1) \"alternative\"))",
+   "bodystructure": {
+    "childNodes": [
+     {
+      "part": "1",
+      "type": "text/plain",
+      "encoding": "7bit",
+      "size": 5,
+      "lineCount": 1
+     }
+    ],
+    "type": "multipart/alternative"
+   }
+  },
+  {
+   "input": "* 10 FETCH (BODYSTRUCTURE (\"message\" \"rfc822\" NIL NIL NIL \"7bit\" 300 (\"Mon, 6 Oct 2025 10:00:00 +0000\" \"inner\" NIL NIL NIL NIL NIL NIL NIL NIL) (\"text\" \"plain\" NIL NIL NIL \"7bit\" 10 1) 12 NIL NIL NIL NIL))",
+   "bodystructure": {
+    "type": "message/rfc822",
+    "encoding": "7bit",
+    "size": 300,
+    "envelope": {
+     "date": "2025-10-06T10:00:00.000Z",
+     "subject": "inner"
+    },
+    "childNodes": [
+     {
+      "type": "text/plain",
+      "encoding": "7bit",
+      "size": 10,
+      "lineCount": 1
+     }
+    ],
+    "lineCount": 12
+   }
+  },
+  {
+   "input": "* 11 FETCH (BODYSTRUCTURE (\"image\" \"png\" (\"name*0\" \"very\" \"name*1\" \"long.png\") \"<img1>\" NIL \"base64\" 4096 NIL (\"inline\" (\"filename*0*\" \"utf-8''%C3%A4\" \"filename*1\" \".png\")) \"et\" NIL))",
+   "bodystructure": {
+    "type": "image/png",
+    "parameters": {
+     "name": "verylong.png"
+    },
+    "id": "<img1>",
+    "encoding": "base64",
+    "size": 4096,
+    "disposition": "inline",
+    "dispositionParameters": {
+     "filename": "ä.png"
+    },
+    "language": [
+     "et"
+    ]
+   }
+  },
+  {
+   "input": "* 12 FETCH (BODYSTRUCTURE (((\"text\" \"plain\" NIL NIL NIL \"7bit\" 1 1)(\"text\" \"html\" NIL NIL NIL \"7bit\" 1 1) \"alternative\")(\"image\" \"gif\" NIL NIL NIL \"base64\" 9) \"related\" NIL (\"inline\" NIL) (\"de\")))",
+   "bodystructure": {
+    "childNodes": [
+     {
+      "part": "1",
+      "childNodes": [
+       {
+        "part": "1.1",
+        "type": "text/plain",
+        "encoding": "7bit",
+        "size": 1,
+        "lineCount": 1
+       },
+       {
+        "part": "1.2",
+        "type": "text/html",
+        "encoding": "7bit",
+        "size": 1,
+        "lineCount": 1
+       }
+      ],
+      "type": "multipart/alternative"
+     },
+     {
+      "part": "2",
+      "type": "image/gif",
+      "encoding": "base64",
+      "size": 9
+     }
+    ],
+    "type": "multipart/related",
+    "disposition": "inline",
+    "language": [
+     "de"
+    ]
+   }
+  }
+ ],
+ "names": [
+  {
+   "name": "INBOX",
+   "encoded": "INBOX",
+   "decoded": "INBOX"
+  },
+  {
+   "name": "Tom & Jerry",
+   "encoded": "Tom &- Jerry",
+   "decoded": "Tom & Jerry"
+  },
+  {
+   "name": "Отправленные",
+   "encoded": "&BB4EQgQ,BEAEMAQyBDsENQQ9BD0ESwQ1-",
+   "decoded": "Отправленные"
+  },
+  {
+   "name": "~peter/mail/台北/日本語",
+   "encoded": "~peter/mail/&U,BTFw-/&ZeVnLIqe-",
+   "decoded": "~peter/mail/台北/日本語"
+  },
+  {
+   "name": "Šegregator/Społeczności",
+   "encoded": "&AWA-egregator/Spo&AUI-eczno&AVs-ci",
+   "decoded": "Šegregator/Społeczności"
+  },
+  {
+   "name": "😀",
+   "encoded": "&2D3eAA-",
+   "decoded": "😀"
+  },
+  {
+   "name": "Sent Items",
+   "encoded": "Sent Items",
+   "decoded": "Sent Items"
+  },
+  {
+   "name": "&",
+   "encoded": "&-",
+   "decoded": "&"
+  }
+ ]
+}

@@ -4,3 +4,4 @@ core/target/
 *.log
 .DS_Store
 screenshot.png
+core/e2e/node_modules/

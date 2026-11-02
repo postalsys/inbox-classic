@@ -5,6 +5,17 @@ edition.workspace = true
 rust-version.workspace = true
 publish.workspace = true
 
+[dependencies]
+base64.workspace = true
+pe-mime.workspace = true
+# ring rather than aws-lc-rs: no C toolchain (cmake, nasm) needed on Windows
+rustls = { version = "0.23.46", default-features = false, features = ["ring", "logging", "std", "tls12"] }
+rustls-platform-verifier = "0.7.1"
+tokio = { version = "1.54.1", features = ["rt", "net", "io-util", "time", "sync", "macros"] }
+tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "logging", "tls12"] }
+
 [dev-dependencies]
-base64 = "0.22"
+pe-mime.workspace = true
+pe-testkit = { path = "../pe-testkit" }
 serde_json = "1"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }

@@ -10,6 +10,9 @@ members = ["crates/*"]
 exclude = ["fuzz"]
 
 [workspace.dependencies]
+base64 = "0.22"
+encoding_rs = "0.8"
+pe-mime = { path = "crates/pe-mime" }
 ammonia = "4"
 pe-html = { path = "crates/pe-html" }
 

@@ -2,4 +2,5 @@ build
 dist
 core/target
 core/include
-core/crates/pe-imap/tests/fixtures/*.json
+core/crates/*/tests/fixtures/*.json
+core/e2e/package-lock.json
