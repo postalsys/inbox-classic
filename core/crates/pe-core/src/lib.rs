@@ -537,6 +537,12 @@ impl Core {
         Ok(Some((format!("{stem}.eml"), source)))
     }
 
+    /// The header block of a message for Message Properties, as text safe to show; None when it is not in the store yet
+    pub fn message_headers(&self, folder: FolderId, uid: u64) -> Result<Option<String>> {
+        let start = self.store().source_start(folder, uid, view::MAX_HEADER_TEXT)?;
+        Ok(start.map(|source| view::header_text(&source)))
+    }
+
     /// Puts a message saved as a file (`.eml`) into a folder: on the server in the background, then
     /// [`Event::FolderChanged`]. A file that is not a message, or is too large, is refused now.
     pub fn import_message(&self, folder: FolderId, path: &std::path::Path) -> Result<()> {

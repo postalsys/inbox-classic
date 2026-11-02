@@ -116,9 +116,15 @@ void Preview::Print() {
     }
 }
 
-void Preview::Clear() {
+void Preview::Clear(bool noMessage) {
     // white like the documents of messages, also when Windows uses dark mode
-    Show(L"<!doctype html><html><head><meta name=\"color-scheme\" content=\"light\"><style>html{background:#fff}</style></head><body></body></html>");
+    std::wstring page =
+        L"<!doctype html><html><head><meta name=\"color-scheme\" content=\"light\"><style>html{background:#fff}"
+        L"p{margin:24px 8px;text-align:center;font:10pt Tahoma,Arial,sans-serif;color:#000}</style></head><body>";
+    if (noMessage) {
+        page += L"<p>There is no message selected.</p>";
+    }
+    Show(page + L"</body></html>");
 }
 
 void Preview::SetVisible(bool visible) {

@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <span>
 
 namespace {
 
@@ -241,6 +242,51 @@ std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t*
     return chosen;
 }
 
+namespace {
+
+const wchar_t* kTextClass = L"InboxClassicText";
+
+LRESULT CALLBACK TextProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* done = reinterpret_cast<bool*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    if (done && ((message == WM_COMMAND && (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)) || message == WM_CLOSE)) {
+        *done = true;
+        return 0;
+    }
+    if (message == WM_CTLCOLORSTATIC) {
+        return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
+void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text) {
+    static bool registered = false;
+    if (!registered) {
+        WNDCLASSEXW windowClass = {sizeof(windowClass)};
+        windowClass.lpfnWndProc = TextProc;
+        windowClass.hInstance = GetModuleHandleW(nullptr);
+        windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+        windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
+        windowClass.lpszClassName = kTextClass;
+        RegisterClassExW(&windowClass);
+        registered = true;
+    }
+    int pad = Scale(10);
+    int width = Scale(520);
+    int height = Scale(420);
+    HWND dialog = CreateModalWindow(owner, kTextClass, title.c_str(), width, height);
+    bool done = false;
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&done));
+    CreateChild(dialog, L"STATIC", intro.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, pad, width - pad, pad + Scale(18)});
+    HWND box = CreateChild(dialog, L"EDIT", text.c_str(),
+                           WS_TABSTOP | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | ES_AUTOHSCROLL, 0,
+                           {pad, pad + Scale(22), width - pad, height - pad - Scale(35)}, WS_EX_CLIENTEDGE);
+    CreateChild(dialog, L"BUTTON", L"OK", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
+                {width - pad - Scale(80), height - pad - Scale(25), width - pad, height - pad});
+    RunModal(dialog, box, done);
+}
+
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size) {
     std::ofstream stream(path, std::ios::binary | std::ios::trunc);
     stream.write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));
@@ -258,30 +304,37 @@ void AddColumn(HWND list, int index, const wchar_t* name, int width, int format)
 
 // ---- toolbars ----
 
-namespace {
-
-// the image list of the strip closest to the DPI, at least as large; one a strip, for all the windows, as long as the
-// app runs
-HIMAGELIST BarImages(BarIcons icons) {
-    const auto& strips = icons == BarIcons::Big ? kToolbarStrips : kFormatStrips;
-    const IconStrip* chosen = &strips[std::size(strips) - 1];
+HIMAGELIST IconList(IconSet set) {
+    std::span<const IconStrip> strips = set == IconSet::Toolbar ? std::span<const IconStrip>(kToolbarStrips)
+                                         : set == IconSet::Format ? std::span<const IconStrip>(kFormatStrips)
+                                         : set == IconSet::Folders ? std::span<const IconStrip>(kFolderStrips)
+                                                                   : std::span<const IconStrip>(kListStrips);
+    // the strip closest to the DPI, at least as large
+    const IconStrip* chosen = &strips.back();
     for (const IconStrip& strip : strips) {
-        if (strip.size >= Scale(strips[0].size)) {
+        if (strip.size >= Scale(strips.front().size)) {
             chosen = &strip;
             break;
         }
     }
+    // one image list a strip, for all the windows, as long as the app runs
     static std::unordered_map<int, HIMAGELIST> lists;
     HIMAGELIST& list = lists[chosen->resource];
     if (!list) {
-        // the strips are drawn on the button face color, which is their transparent color
-        list = ImageList_LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(chosen->resource), chosen->size, 0, RGB(0xF0, 0xF0, 0xF0),
+        // what the icons were drawn over is the transparent color: the smoothed edges blend into what is around them
+        COLORREF transparent = RGB(chosen->background >> 16, (chosen->background >> 8) & 0xFF, chosen->background & 0xFF);
+        list = ImageList_LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(chosen->resource), chosen->size, 0, transparent,
                                     IMAGE_BITMAP, LR_CREATEDIBSECTION);
     }
     return list;
 }
 
-}  // namespace
+std::wstring MenuText(std::wstring text) {
+    for (size_t at = text.find(L'&'); at != std::wstring::npos; at = text.find(L'&', at + 2)) {
+        text.insert(at, 1, L'&');
+    }
+    return text;
+}
 
 HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
     // big icons with the label under them, as Outlook Express has it; small ones beside nothing, the label a tooltip
@@ -289,10 +342,9 @@ HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
     HWND bar = CreateWindowExW(0, TOOLBARCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | layout | style, 0, 0, 0, 0, hwnd,
                                reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr), nullptr);
     SendMessageW(bar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-    if (icons == BarIcons::Small) {
-        SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
-    }
-    SendMessageW(bar, TB_SETIMAGELIST, 0, reinterpret_cast<LPARAM>(BarImages(icons)));
+    // the small bar's labels are tooltips; a big button can have a menu beside it (BTNS_DROPDOWN)
+    SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, icons == BarIcons::Small ? TBSTYLE_EX_MIXEDBUTTONS : TBSTYLE_EX_DRAWDDARROWS);
+    SendMessageW(bar, TB_SETIMAGELIST, 0, reinterpret_cast<LPARAM>(IconList(icons == BarIcons::Big ? IconSet::Toolbar : IconSet::Format)));
     return bar;
 }
 

@@ -537,6 +537,12 @@ fn saves_and_imports_messages_as_files() {
     let (name, source) = s.core.message_source(inbox, uid).unwrap().unwrap();
     // a name made safe: no path, no characters Windows refuses
     assert_eq!(name, "Quarterly - report.eml");
+    // its headers for Message Properties, as text to show
+    let headers = s.core.message_headers(inbox, uid).unwrap().unwrap();
+    assert!(
+        headers.contains("Subject: Quarterly / report?\r\n") && !headers.contains("the numbers"),
+        "{headers}"
+    );
     assert!(String::from_utf8_lossy(&source).contains("the numbers"));
 
     // back in, into another folder

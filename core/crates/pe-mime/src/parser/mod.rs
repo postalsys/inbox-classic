@@ -11,7 +11,7 @@ mod entities;
 mod filename;
 
 /// A name to save a file under: no path, no control or direction characters, no name Windows reserves
-pub use filename::safe_filename;
+pub use filename::{is_direction_mark, safe_filename};
 mod node;
 mod strings;
 mod text;

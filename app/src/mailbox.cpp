@@ -2,6 +2,7 @@
 // time when the list view asks for them. Every string shown was decoded by the core; the message body is the
 // sanitized document the core made, shown in the WebView2 as it is.
 #include "app.h"
+#include "icons.h"
 
 #include <commdlg.h>
 
@@ -11,13 +12,12 @@
 namespace {
 
 constexpr uint64_t kPageSize = 100;
-// the reading pane's header with no message: says so rather than a blank pane
-const wchar_t* kNoMessage = L" No message is selected.";
 // pages kept around while the list scrolls
 constexpr size_t kPagesKept = 8;
 constexpr int kHeaderLines = 4;
 
-enum Column { COL_MARKS, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE };
+// as Outlook Express has them: the envelope (read or not), the paper clip and the flag, then the text columns
+enum Column { COL_READ, COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE };
 
 // the name Outlook Express gives a special folder, the folder's own name otherwise
 std::wstring FolderName(const PeFolder& folder) {
@@ -58,11 +58,47 @@ PeSortField SortOf(int column) {
     }
 }
 
-HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPARAM data, bool bold) {
+// the icon of a folder in the tree, by what it is for
+int IconOfFolder(PeSpecialUse use) {
+    switch (use) {
+    case PE_SPECIAL_USE_INBOX:
+        return FOLDER_MAIL_INBOX;
+    case PE_SPECIAL_USE_SENT:
+        return FOLDER_SEND;
+    case PE_SPECIAL_USE_DRAFTS:
+        return FOLDER_DRAFTS;
+    case PE_SPECIAL_USE_TRASH:
+        return FOLDER_DELETE;
+    case PE_SPECIAL_USE_JUNK:
+        return FOLDER_MAIL_PROHIBITED;
+    case PE_SPECIAL_USE_ARCHIVE:
+        return FOLDER_ARCHIVE;
+    case PE_SPECIAL_USE_FLAGGED:
+        return FOLDER_FLAG;
+    case PE_SPECIAL_USE_ALL:
+        return FOLDER_MAIL_MULTIPLE;
+    default:
+        return FOLDER_FOLDER;
+    }
+}
+
+// a column that shows an icon of the list strip in its header (the paper clip, the flag) and nothing else
+void IconColumn(HWND list, int index, int icon) {
+    AddColumn(list, index, L"", 28);
+    LVCOLUMNW column = {};
+    column.mask = LVCF_FMT | LVCF_IMAGE;
+    column.fmt = LVCFMT_IMAGE;
+    column.iImage = icon;
+    ListView_SetColumn(list, index, &column);
+}
+
+HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPARAM data, bool bold, int icon) {
     TVINSERTSTRUCTW insert = {};
     insert.hParent = parent;
     insert.hInsertAfter = TVI_LAST;
-    insert.item.mask = TVIF_TEXT | TVIF_PARAM | TVIF_STATE;
+    insert.item.mask = TVIF_TEXT | TVIF_PARAM | TVIF_STATE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
+    insert.item.iImage = icon;
+    insert.item.iSelectedImage = icon;
     insert.item.pszText = const_cast<wchar_t*>(text.c_str());
     insert.item.lParam = data;
     insert.item.stateMask = TVIS_BOLD;
@@ -82,15 +118,22 @@ void Mailbox::Create(HWND parent, PeCore* core) {
                         WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL | LVS_OWNERDATA, IDC_LIST, {},
                         WS_EX_CLIENTEDGE);
     ListView_SetExtendedListViewStyle(list_, LVS_EX_FULLROWSELECT);
+    // the icons of the list: for the headers of the paper clip and flag columns, and drawn on the rows in CustomDraw
+    listIcons_ = IconList(IconSet::List);
+    ImageList_GetIconSize(listIcons_, &iconSize_, &iconSize_);
+    ListView_SetImageList(list_, listIcons_, LVSIL_SMALL);
+    TreeView_SetImageList(tree_, IconList(IconSet::Folders), TVSIL_NORMAL);
     findLabel_ = CreateChild(parent, L"STATIC", L"Find:", SS_RIGHT | SS_CENTERIMAGE, 0, {});
     findEdit_ = CreateChild(parent, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_FIND, {}, WS_EX_CLIENTEDGE);
-    AddColumn(list_, COL_MARKS, L"!", 28);
+    AddColumn(list_, COL_READ, L"", 24);
+    IconColumn(list_, COL_ATTACH, LIST_ATTACH);
+    IconColumn(list_, COL_FLAG, LIST_FLAG);
     AddColumn(list_, COL_FROM, L"From", 180);
     AddColumn(list_, COL_SUBJECT, L"Subject", 320);
     AddColumn(list_, COL_RECEIVED, L"Received", 130);
     AddColumn(list_, COL_SIZE, L"Size", 84, LVCFMT_RIGHT);
 
-    header_ = CreateChild(parent, L"STATIC", kNoMessage, SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
+    header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
     attachments_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP, IDC_ATTACHMENTS, {});
     pictures_ = CreateChild(parent, L"BUTTON", L"Download pictures", WS_TABSTOP, IDC_PICTURES, {});
     ShowWindow(attachments_, SW_HIDE);
@@ -102,6 +145,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
+    ClearReader();
     Reload();
 }
 
@@ -155,7 +199,7 @@ void Mailbox::Reload() {
             firstAccount_ = account->id;
         }
         // an account's own item carries its id negated, so selecting it tells which account it is
-        HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->name), static_cast<LPARAM>(-account->id), false);
+        HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->name), static_cast<LPARAM>(-account->id), false, FOLDER_MAILBOX);
         FillAccount(root, account->id);
         TreeView_Expand(tree_, root, TVE_EXPAND);
     }
@@ -178,7 +222,8 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
     for (size_t i = 0; i < count; i++) {
         const PeFolder* folder = pe_folder_list_get(folders.get(), i);
         size_t depth = std::min<size_t>(folder->depth, parents.size() - 1);
-        HTREEITEM item = InsertItem(tree_, parents[depth], FolderLabel(*folder), static_cast<LPARAM>(folder->id), folder->unread > 0);
+        HTREEITEM item = InsertItem(tree_, parents[depth], FolderLabel(*folder), static_cast<LPARAM>(folder->id), folder->unread > 0,
+                                       IconOfFolder(folder->special_use));
         items_[folder->id] = item;
         folderAccounts_[folder->id] = account;
         folderNames_[folder->id] = {FolderName(*folder), folder->fixed};
@@ -307,17 +352,17 @@ const PeMessage* Mailbox::SelectedRow() {
 }
 
 void Mailbox::DisplayInfo(NMLVDISPINFOW* info) {
+    const PeMessage* row = Row(info->item.iItem);
+    if (info->item.mask & LVIF_IMAGE) {
+        // none of the list's own: the icons are drawn in CustomDraw
+        info->item.iImage = -1;
+    }
     if (!(info->item.mask & LVIF_TEXT)) {
         return;
     }
-    const PeMessage* row = Row(info->item.iItem);
     cell_.clear();
     if (row) {
         switch (info->item.iSubItem) {
-        case COL_MARKS:
-            // ! for flagged, @ for attachments, until the list has icons
-            cell_ = std::wstring(row->flagged ? L"!" : L"") + (row->has_attachments ? L"@" : L"");
-            break;
         case COL_FROM:
             cell_ = Text(row->from);
             break;
@@ -337,21 +382,47 @@ void Mailbox::DisplayInfo(NMLVDISPINFOW* info) {
 
 void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
     result = CDRF_DODEFAULT;
+    int index = static_cast<int>(draw->nmcd.dwItemSpec);
     if (draw->nmcd.dwDrawStage == CDDS_PREPAINT) {
         result = CDRF_NOTIFYITEMDRAW;
     } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT) {
-        // unread messages in bold, as Outlook Express shows them
-        const PeMessage* row = Row(static_cast<int>(draw->nmcd.dwItemSpec));
+        // unread messages in bold, as Outlook Express shows them; the icons once the row is painted
+        const PeMessage* row = Row(index);
+        result = CDRF_NOTIFYPOSTPAINT;
         if (row && !row->seen) {
             SelectObject(draw->nmcd.hdc, bold_);
-            result = CDRF_NEWFONT;
+            result |= CDRF_NEWFONT;
         }
+    } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT) {
+        if (const PeMessage* row = Row(index)) {
+            DrawRowIcons(draw->nmcd.hdc, index, *row);
+        }
+    }
+}
+
+// the envelope (closed until read), the paper clip and the flag of a row, drawn over the row as the list painted it:
+// the list itself would dither the images of a selected row, and does not highlight those of other columns
+void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
+    auto draw = [&](int column, int icon) {
+        RECT cell;
+        ListView_GetSubItemRect(list_, index, column, LVIR_BOUNDS, &cell);
+        // the first column's bounds are the whole row's: its width is the column's
+        int width = ListView_GetColumnWidth(list_, column);
+        ImageList_Draw(listIcons_, icon, dc, cell.left + (width - iconSize_) / 2, cell.top + (cell.bottom - cell.top - iconSize_) / 2,
+                       ILD_TRANSPARENT);
+    };
+    draw(COL_READ, row.seen ? LIST_MAIL_READ : LIST_MAIL);
+    if (row.has_attachments) {
+        draw(COL_ATTACH, LIST_ATTACH);
+    }
+    if (row.flagged) {
+        draw(COL_FLAG, LIST_FLAG);
     }
 }
 
 // ---- the reading pane ----
 
-void Mailbox::ClearReader() {
+void Mailbox::ClearReader(bool loading) {
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
         viewRequest_ = 0;
@@ -363,9 +434,9 @@ void Mailbox::ClearReader() {
     KillTimer(parent_, TIMER_MARK_READ);
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
-    // says so rather than a blank pane; a selected message replaces it with "Loading..."
-    SetWindowTextW(header_, kNoMessage);
-    preview_.Clear();
+    SetWindowTextW(header_, L"");
+    // says so rather than a blank pane, unless a message is about to be shown
+    preview_.Clear(!loading);
 }
 
 void Mailbox::OnSelectionChanged() {
@@ -374,7 +445,7 @@ void Mailbox::OnSelectionChanged() {
     if (uid == uid_) {
         return;
     }
-    ClearReader();
+    ClearReader(uid != 0);
     if (!uid) {
         return;
     }
@@ -384,9 +455,9 @@ void Mailbox::OnSelectionChanged() {
     pe_message_open(core_, folder_, uid);
 }
 
-void Mailbox::OnFolderSelected(LPARAM folder) {
+bool Mailbox::OnFolderSelected(LPARAM folder) {
     if (folder == folder_) {
-        return;
+        return false;
     }
     // the message of the folder before is not this folder's, nor is the search
     folder_ = folder;
@@ -394,6 +465,7 @@ void Mailbox::OnFolderSelected(LPARAM folder) {
     ClearReader();
     ReloadList(false);
     SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
+    return true;
 }
 
 void Mailbox::ShowMessage() {
@@ -453,11 +525,7 @@ void Mailbox::ChooseAttachment() {
         if (!attachment) {
             continue;
         }
-        std::wstring label = L"Save " + Text(attachment->filename) + L" (" + FormatSize(attachment->size) + L")...";
-        // & would make the next character a shortcut
-        for (size_t at = label.find(L'&'); at != std::wstring::npos; at = label.find(L'&', at + 2)) {
-            label.insert(at, 1, L'&');
-        }
+        std::wstring label = MenuText(L"Save " + Text(attachment->filename) + L" (" + FormatSize(attachment->size) + L")...");
         AppendMenuW(menu, MF_STRING, 1 + i, label.c_str());
     }
     RECT button;
@@ -586,6 +654,16 @@ void Mailbox::FolderMenu() {
     DestroyMenu(menu);
 }
 
+std::wstring Mailbox::SelectedName() const {
+    if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
+        return found->second.first;
+    }
+    if (auto found = accountNames_.find(selectedAccount_); found != accountNames_.end()) {
+        return found->second;
+    }
+    return L"";
+}
+
 bool Mailbox::FolderOf(int64_t folder, std::wstring& name, bool& fixed) const {
     auto found = folderNames_.find(folder);
     if (found == folderNames_.end()) {
@@ -677,7 +755,10 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
             LPARAM item = change->itemNew.hItem ? change->itemNew.lParam : 0;
             // an account has no messages of its own
             selectedAccount_ = item < 0 ? -item : 0;
-            OnFolderSelected(item > 0 ? item : 0);
+            // the folder bar and the title name what is selected: an account too, from another account's item
+            if (!OnFolderSelected(item > 0 ? item : 0)) {
+                SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
+            }
         }
         if (header->code == NM_RCLICK) {
             FolderMenu();
@@ -745,6 +826,21 @@ void Mailbox::SaveShownAs(HWND owner) {
         MessageBoxW(owner, L"The message could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
     }
     pe_bytes_free(data, length);
+}
+
+void Mailbox::ShowProperties(HWND owner) {
+    if (!uid_) {
+        MessageBoxW(owner, L"Select a message first.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    core::String headers(pe_message_headers(core_, folder_, uid_));
+    if (!headers) {
+        MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    const PeMessageInfo* info = pe_message_view_info(view_.get());
+    std::wstring subject = info ? Text(info->subject) : L"";
+    TextDialog(owner, subject.empty() ? L"Properties" : subject + L" Properties", L"Internet headers for this message:", Text(headers.get()));
 }
 
 void Mailbox::PrintShown() {

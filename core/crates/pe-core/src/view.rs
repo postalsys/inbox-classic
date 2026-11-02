@@ -100,6 +100,30 @@ pub(crate) fn build_unless(
     })
 }
 
+/// The most of a header block shown in Message Properties; the store reads no more of a message than this
+pub(crate) const MAX_HEADER_TEXT: usize = 256 * 1024;
+
+/// The header block of a message (its start, see [`MAX_HEADER_TEXT`]) as text to show in Message Properties, as the
+/// Details tab of Outlook Express: up to the first empty line, invalid UTF-8 replaced, control characters other than
+/// tabs and direction marks turned into spaces (no escape or reordering reaches the window), line breaks as Windows
+/// edit controls want them
+pub(crate) fn header_text(source: &[u8]) -> String {
+    let source = &source[..source.len().min(MAX_HEADER_TEXT)];
+    let text = String::from_utf8_lossy(source);
+    let mut out = String::with_capacity(text.len());
+    for line in text.split('\n') {
+        let line = line.strip_suffix('\r').unwrap_or(line);
+        // the first empty line ends the header, whichever line breaks the message has
+        if line.is_empty() {
+            break;
+        }
+        let shown = |c: char| c == '\t' || !(c.is_control() || parser::is_direction_mark(c));
+        out.extend(line.chars().map(|c| if shown(c) { c } else { ' ' }));
+        out.push_str("\r\n");
+    }
+    out
+}
+
 /// The content of the `index`th listed attachment, with the name to save it under
 pub(crate) fn attachment(source: &[u8], index: usize) -> Option<(String, Vec<u8>)> {
     let message = parser::parse(source).ok()?;
@@ -183,6 +207,21 @@ mod tests {
         );
         assert_eq!(attachment(MESSAGE, 0), Some(("report.pdf".into(), b"%PDF".to_vec())));
         assert_eq!(attachment(MESSAGE, 1), None);
+    }
+
+    #[test]
+    fn headers_to_show() {
+        let source =
+            b"From: Ann <ann@example.com>\r\nSubject: Hi \x1b[31m\xe2\x80\xaeevil\r\nX-Bad: \xff\r\n\r\nbody\r\n";
+        let text = header_text(source);
+        assert_eq!(
+            text,
+            "From: Ann <ann@example.com>\r\nSubject: Hi  [31m evil\r\nX-Bad: \u{fffd}\r\n"
+        );
+        // a message of bare line feeds, also when its body has CRLF blank lines, and one without a body
+        assert_eq!(header_text(b"A: 1\nB: 2\n\nbody\r\n\r\nmore"), "A: 1\r\nB: 2\r\n");
+        assert_eq!(header_text("A: \u{61c}x".as_bytes()), "A:  x\r\n");
+        assert_eq!(header_text(b"A: 1"), "A: 1\r\n");
     }
 
     #[test]

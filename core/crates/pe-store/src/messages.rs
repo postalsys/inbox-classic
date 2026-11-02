@@ -346,6 +346,18 @@ impl Store {
     }
 
     /// The cached source of a message
+    /// At most the first `limit` bytes of the source, without reading the rest (attachments and all)
+    pub fn source_start(&self, folder: FolderId, uid: u64, limit: usize) -> Result<Option<Vec<u8>>> {
+        self.db
+            .query_row(
+                "SELECT substr(b.source, 1, ?3) FROM bodies b JOIN messages m ON m.id = b.message_id \
+                 WHERE m.folder_id = ?1 AND m.uid = ?2",
+                params![folder, uid, limit as i64],
+                |row| row.get(0),
+            )
+            .optional()
+    }
+
     pub fn source(&self, folder: FolderId, uid: u64) -> Result<Option<Vec<u8>>> {
         self.db
             .query_row(
@@ -557,6 +569,12 @@ mod tests {
             store.source(folder, 1).unwrap().as_deref(),
             Some(&b"Subject: x\r\n\r\nhi"[..])
         );
+        // its start only, without reading the rest
+        assert_eq!(
+            store.source_start(folder, 1, 10).unwrap().as_deref(),
+            Some(&b"Subject: x"[..])
+        );
+        assert_eq!(store.source_start(folder, 9, 10).unwrap(), None);
         assert!(store.message(folder, 1).unwrap().unwrap().cached);
         assert!(store.has_source(folder, 1).unwrap());
         // new flags keep the source

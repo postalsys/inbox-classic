@@ -26,6 +26,12 @@ constexpr UINT_PTR TIMER_SYNC = 2;
 HWND g_main = nullptr;
 HWND g_toolbar = nullptr;
 HWND g_status = nullptr;
+// the band under the toolbar with the name of the selected folder, as Outlook Express has it
+HWND g_folderBar = nullptr;
+// its dark grey, under white text
+constexpr COLORREF kFolderBarColor = RGB(0x80, 0x80, 0x80);
+HFONT g_folderFont = nullptr;
+HBRUSH g_folderBrush = nullptr;
 HACCEL g_accelerators = nullptr;
 core::Core g_core;
 Mailbox g_mailbox;
@@ -60,6 +66,13 @@ void SetStatus(const std::wstring& text) {
     SendMessageW(g_status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
 }
 
+// the selected folder in the folder bar and the title: "Inbox - Inbox Classic"
+void ShowFolderName() {
+    std::wstring name = g_mailbox.SelectedName();
+    SetWindowTextW(g_folderBar, (L" " + name).c_str());
+    SetWindowTextW(g_main, name.empty() ? kTitle : (name + L" - " + kTitle).c_str());
+}
+
 void ShowCounts() {
     std::wstring counts = g_mailbox.Counts();
     SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
@@ -77,6 +90,44 @@ void SyncAll() {
     core::AccountList accounts(pe_accounts(g_core.get()));
     for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
         pe_sync(g_core.get(), pe_account_list_get(accounts.get(), i)->id);
+    }
+}
+
+// a new message from `account`, or from the account of the selected folder when 0
+void NewMessage(int64_t account = 0);
+
+// the menu beside Create Mail (a message from one account) or Send/Recv (all accounts, or one), under the button
+void AccountMenu(const NMTOOLBARW* button) {
+    bool sync = button->iItem == IDM_SYNC;
+    HMENU menu = CreatePopupMenu();
+    if (sync) {
+        AppendMenuW(menu, MF_STRING, 1, L"Send and Receive &All\tF5");
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    }
+    core::AccountList accounts(pe_accounts(g_core.get()));
+    size_t count = pe_account_list_count(accounts.get());
+    const UINT first = 100;
+    for (size_t i = 0; i < count; i++) {
+        const PeAccount* account = pe_account_list_get(accounts.get(), i);
+        std::wstring item = MenuText((sync ? L"" : L"From ") + Text(account->label));
+        AppendMenuW(menu, MF_STRING, first + static_cast<UINT>(i), item.c_str());
+    }
+    if (count == 0) {
+        AppendMenuW(menu, MF_STRING | MF_GRAYED, 0, L"No accounts yet");
+    }
+    RECT bounds = button->rcButton;
+    MapWindowPoints(g_toolbar, nullptr, reinterpret_cast<POINT*>(&bounds), 2);
+    UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_TOPALIGN, bounds.left, bounds.bottom, 0, g_main, nullptr);
+    DestroyMenu(menu);
+    if (chosen == 1) {
+        SyncAll();
+    } else if (chosen >= first && chosen < first + count) {
+        int64_t account = pe_account_list_get(accounts.get(), chosen - first)->id;
+        if (sync) {
+            pe_sync(g_core.get(), account);
+        } else {
+            NewMessage(account);
+        }
     }
 }
 
@@ -165,6 +216,8 @@ HMENU BuildMenu() {
     AppendMenuW(file, MF_STRING, IDM_IMPORT, L"&Import Messages...");
     AppendMenuW(file, MF_STRING, IDM_PRINT, L"&Print...\tCtrl+P");
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(file, MF_STRING, IDM_PROPERTIES, L"P&roperties\tAlt+Enter");
+    AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_EXIT, L"E&xit");
     HMENU compose = CreatePopupMenu();
     AppendMenuW(compose, MF_STRING, IDM_NEW_MAIL, L"&New Message\tCtrl+N");
@@ -212,6 +265,7 @@ HACCEL BuildAccelerators() {
         {FVIRTKEY | FCONTROL | FSHIFT, 'V', IDM_MOVE},
         {FVIRTKEY | FCONTROL | FSHIFT, 'F', IDM_FIND},
         {FVIRTKEY | FCONTROL, 'P', IDM_PRINT},
+        {FVIRTKEY | FALT, VK_RETURN, IDM_PROPERTIES},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -222,30 +276,42 @@ void CreateToolbar(HWND hwnd) {
         WORD id;
         const wchar_t* text;
         int icon;
+        // BTNS_DROPDOWN: a menu of the accounts beside it, as Outlook Express has
+        BYTE style = BTNS_BUTTON;
     };
     // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state (0 separates)
     Button buttons[] = {
-        {IDM_NEW_MAIL, L"Create Mail", ICON_MAIL_ADD}, {0, nullptr, 0},
-        {IDM_REPLY, L"Reply", ICON_ARROW_REPLY},       {IDM_REPLY_ALL, L"Reply All", ICON_ARROW_REPLY_ALL},
-        {IDM_FORWARD, L"Forward", ICON_ARROW_FORWARD}, {0, nullptr, 0},
-        {IDM_PRINT, L"Print", ICON_PRINT},             {IDM_DELETE, L"Delete", ICON_DELETE},
-        {0, nullptr, 0},                               {IDM_SYNC, L"Send/Recv", ICON_ARROW_SYNC},
-        {0, nullptr, 0},                               {IDM_MARK_READ, L"Mark Read", ICON_MAIL_READ},
+        {IDM_NEW_MAIL, L"Create Mail", ICON_MAIL_ADD, BTNS_DROPDOWN},
+        {0, nullptr, 0},
+        {IDM_REPLY, L"Reply", ICON_ARROW_REPLY},
+        {IDM_REPLY_ALL, L"Reply All", ICON_ARROW_REPLY_ALL},
+        {IDM_FORWARD, L"Forward", ICON_ARROW_FORWARD},
+        {0, nullptr, 0},
+        {IDM_PRINT, L"Print", ICON_PRINT},
+        {IDM_DELETE, L"Delete", ICON_DELETE},
+        {0, nullptr, 0},
+        {IDM_SYNC, L"Send/Recv", ICON_ARROW_SYNC, BTNS_DROPDOWN},
+        {0, nullptr, 0},
+        {IDM_MARK_READ, L"Mark Read", ICON_MAIL_READ},
         {IDM_MARK_UNREAD, L"Mark Unread", ICON_MAIL_UNREAD},
     };
     for (const Button& button : buttons) {
-        AddButton(g_toolbar, button.id, button.text, BTNS_BUTTON, button.icon);
+        AddButton(g_toolbar, button.id, button.text, button.style, button.icon);
     }
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
 }
 
 // the area between the toolbar and the status bar
+int FolderBarHeight() {
+    return Scale(26);
+}
+
 RECT ContentArea() {
     RECT client;
     GetClientRect(g_main, &client);
     RECT bar;
     GetWindowRect(g_toolbar, &bar);
-    client.top += bar.bottom - bar.top;
+    client.top += bar.bottom - bar.top + FolderBarHeight();
     GetWindowRect(g_status, &bar);
     client.bottom -= bar.bottom - bar.top;
     return client;
@@ -272,6 +338,7 @@ void Layout() {
     RECT bar;
     GetClientRect(g_toolbar, &bar);
     g_mailbox.PlaceFind(bar);
+    MoveWindow(g_folderBar, 0, bar.bottom, bar.right, FolderBarHeight(), TRUE);
     SendMessageW(g_status, WM_SIZE, 0, 0);
     Panes panes = Measure();
     const RECT& area = panes.area;
@@ -358,6 +425,14 @@ bool OpenCore(HWND hwnd) {
 
 void CreateChildren(HWND hwnd) {
     CreateToolbar(hwnd);
+    g_folderBar = CreateChild(hwnd, L"STATIC", L"", SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX, 0, {});
+    NONCLIENTMETRICSW metrics = {sizeof(metrics)};
+    SystemParametersInfoForDpi(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, GetDpiForWindow(hwnd));
+    metrics.lfMessageFont.lfHeight = -Scale(16);
+    metrics.lfMessageFont.lfWeight = FW_BOLD;
+    g_folderFont = CreateFontIndirectW(&metrics.lfMessageFont);
+    g_folderBrush = CreateSolidBrush(kFolderBarColor);
+    SendMessageW(g_folderBar, WM_SETFONT, reinterpret_cast<WPARAM>(g_folderFont), FALSE);
     g_status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0, hwnd, nullptr,
                                GetModuleHandleW(nullptr), nullptr);
     g_mailbox.Create(hwnd, g_core.get());
@@ -375,8 +450,8 @@ void ShowAbout() {
     MessageBoxW(g_main, text.c_str(), L"About Inbox Classic", MB_OK | MB_ICONINFORMATION);
 }
 
-void NewMessage() {
-    int64_t account = g_mailbox.CurrentAccount();
+void NewMessage(int64_t account) {
+    account = account ? account : g_mailbox.CurrentAccount();
     if (!account) {
         MessageBoxW(g_main, L"Add a mail account first.", kTitle, MB_OK | MB_ICONINFORMATION);
         return;
@@ -403,6 +478,9 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_PRINT:
         g_mailbox.PrintShown();
+        return;
+    case IDM_PROPERTIES:
+        g_mailbox.ShowProperties(g_main);
         return;
     case IDM_IMPORT:
         g_mailbox.Import(g_main);
@@ -479,6 +557,7 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDC_TREE:
         ShowCounts();
+        ShowFolderName();
         return;
     }
     g_mailbox.OnCommand(id, code);
@@ -551,8 +630,13 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     case WM_NOTIFY: {
+        auto* header = reinterpret_cast<NMHDR*>(lParam);
+        if (header->hwndFrom == g_toolbar && header->code == TBN_DROPDOWN) {
+            AccountMenu(reinterpret_cast<NMTOOLBARW*>(lParam));
+            return TBDDRET_DEFAULT;
+        }
         LRESULT result = 0;
-        if (g_mailbox.OnNotify(reinterpret_cast<NMHDR*>(lParam), result)) {
+        if (g_mailbox.OnNotify(header, result)) {
             return result;
         }
         break;
@@ -573,6 +657,12 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     case WM_CTLCOLORSTATIC:
+        if (reinterpret_cast<HWND>(lParam) == g_folderBar) {
+            // white on dark grey, as the folder bar of Outlook Express
+            SetTextColor(reinterpret_cast<HDC>(wParam), RGB(0xFF, 0xFF, 0xFF));
+            SetBkColor(reinterpret_cast<HDC>(wParam), kFolderBarColor);
+            return reinterpret_cast<LRESULT>(g_folderBrush);
+        }
         return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
     case WM_DESTROY:
         KillTimer(hwnd, TIMER_SYNC);
@@ -581,6 +671,8 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_mailbox.Destroy();
         g_core.reset();
         DropQueuedEvents();
+        DeleteObject(g_folderFont);
+        DeleteObject(g_folderBrush);
         PostQuitMessage(0);
         return 0;
     }

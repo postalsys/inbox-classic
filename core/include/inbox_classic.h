@@ -174,6 +174,9 @@ typedef struct PeAccount {
   enum PeOAuthProvider oauth;
   // The incoming (IMAP) server, for the Accounts list
   const char *imap_host;
+  // "Name <address>", or the address alone when the name is empty or the same: how From and the account menus
+  // show the account
+  const char *label;
 } PeAccount;
 
 // A folder as the folder tree shows it, in tree order
@@ -670,6 +673,15 @@ uint8_t *pe_attachment_data(const struct PeCore *core,
                             size_t index,
                             size_t *len,
                             char **filename);
+
+// The header block of a message for File > Properties, as text to show (line breaks `\r\n`, no control characters);
+// NULL when it is not in the store yet. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_message_headers(const struct PeCore *core,
+                         int64_t folder,
+                         uint64_t uid);
 
 // The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).
 // `len` gets its length and `filename` a name to save it under made from its subject (`.eml`; free it with

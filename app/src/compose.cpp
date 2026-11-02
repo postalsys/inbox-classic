@@ -499,9 +499,7 @@ void FillFrom(Compose* state) {
     core::AccountList accounts(pe_accounts(state->core));
     for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
-        std::wstring name = Text(account->name);
-        std::wstring email = Text(account->email);
-        std::wstring item = name.empty() || name == email ? email : name + L" <" + email + L">";
+        std::wstring item = Text(account->label);
         SendMessageW(state->from, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
         state->fromAccounts.push_back(account->id);
         if (account->id == state->account) {

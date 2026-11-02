@@ -29,7 +29,8 @@ pub(crate) fn without_unsafe_marks(name: &str) -> String {
         .collect()
 }
 
-fn is_direction_mark(c: char) -> bool {
+/// A character that changes the direction of the text around it: shown, it can make one text read as another
+pub fn is_direction_mark(c: char) -> bool {
     // marks, embeddings, overrides and isolates
     matches!(c, '\u{061c}' | '\u{200e}' | '\u{200f}' | '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
 }

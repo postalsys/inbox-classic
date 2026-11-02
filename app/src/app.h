@@ -54,9 +54,13 @@ void SetCell(HWND list, int row, int column, const std::wstring& text);
 // selects and focuses `row`, or the last one when there are fewer
 void SelectRow(HWND list, int row);
 
-// a flat toolbar of text buttons, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles
-// the icons of a bar (icons.h): the big ones with the label under them (main and compose windows), or the small ones
-// of the format bar, beside nothing, with the label as the tooltip
+// the icon strips of app/res/toolbar (icons.h): their image list at the size closest to the DPI, loaded once
+enum class IconSet { Toolbar, Format, Folders, List };
+HIMAGELIST IconList(IconSet set);
+// text for a menu item: a & in it stays a & rather than making the next character a shortcut
+std::wstring MenuText(std::wstring text);
+// a flat toolbar, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles. Its icons (icons.h): the big ones with
+// the label under them (main and compose windows), or the small ones of the format bar, the label as the tooltip
 enum class BarIcons { Big, Small };
 HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons);
 // a button on a bar of CreateBar, with its icon (icons.h) or I_IMAGENONE; id 0 is a separator
@@ -73,6 +77,8 @@ void RunModal(HWND dialog, HWND focus, const bool& done);
 // the path to save an attachment to, starting from the safe name the core made; empty when cancelled
 std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title = L"Save Attachment As",
                            const wchar_t* filter = L"All files (*.*)\0*.*\0", const wchar_t* extension = nullptr);
+// a modal window with `text` to read and copy in a box that can not be edited, and OK (Message Properties)
+void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text);
 // the files chosen in an Open dialog that takes several, none when cancelled
 std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter);
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
@@ -137,6 +143,8 @@ public:
     // File > Save As (the message shown, as an .eml), Print (the message shown), Import Messages (into the folder)
     void SaveShownAs(HWND owner);
     void PrintShown();
+    // File > Properties (Alt+Enter): the Internet headers of the message shown
+    void ShowProperties(HWND owner);
     void Import(HWND owner);
     bool ClearFind();
     void ResetFind();
@@ -158,6 +166,8 @@ public:
     void LoadPictures();
     // "12 message(s), 3 unread" for the status bar
     std::wstring Counts() const;
+    // the name of the selected folder (or account), for the folder bar and the title; empty with nothing selected
+    std::wstring SelectedName() const;
     std::wstring AccountName(int64_t account) const;
     std::wstring AccountEmail(int64_t account) const;
     // the provider the account signs in to through the browser, NONE for a password
@@ -181,19 +191,22 @@ private:
     void ReloadList(bool keepSelection);
     const PeMessage* Row(int index);
     const PeMessage* SelectedRow();
-    void ClearReader();
+    // the reading pane emptied; with "There is no message selected." in it unless a message is `loading`
+    void ClearReader(bool loading = false);
     void SelectAfterRemoval(int index);
     void FolderMenu();
     // the name and whether it is the Inbox or a special folder (not renamed or deleted); false when not found
     bool FolderOf(int64_t folder, std::wstring& name, bool& fixed) const;
     void OnSelectionChanged();
-    void OnFolderSelected(LPARAM folder);
+    // another folder shown; false when it was already the one shown (and the main window was not told)
+    bool OnFolderSelected(LPARAM folder);
     // asks the core for the view of the selected message, built on a worker; ShowView() shows it when it comes
     void ShowMessage();
     void ShowView();
     void ShowHeader(const PeMessageInfo* info);
     void ChooseAttachment();
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
+    void DrawRowIcons(HDC dc, int index, const PeMessage& row);
     void DisplayInfo(NMLVDISPINFOW* info);
     bool OnListNotify(NMHDR* header, LRESULT& result);
 
@@ -206,6 +219,9 @@ private:
     HWND pictures_ = nullptr;
     HWND previewHost_ = nullptr;
     HFONT bold_ = nullptr;
+    // the icons the list draws on its rows, and their size
+    HIMAGELIST listIcons_ = nullptr;
+    int iconSize_ = 16;
     Preview preview_;
     // the tree items of the folders, by folder id; a tree item's data is its folder id, 0 for an account
     std::unordered_map<int64_t, HTREEITEM> items_;
@@ -280,6 +296,7 @@ enum CommandId : WORD {
     IDM_PRINT,
     IDM_IMPORT,
     IDM_OUTBOX,
+    IDM_PROPERTIES,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

@@ -504,6 +504,19 @@ pub struct PeAccount {
     pub oauth: PeOAuthProvider,
     /// The incoming (IMAP) server, for the Accounts list
     pub imap_host: *const c_char,
+    /// "Name <address>", or the address alone when the name is empty or the same: how From and the account menus
+    /// show the account
+    pub label: *const c_char,
+}
+
+/// "Name <address>", the address alone without a name of its own
+fn account_label(name: &str, email: &str) -> String {
+    let name = name.trim();
+    if name.is_empty() || name == email {
+        email.to_string()
+    } else {
+        format!("{name} <{email}>")
+    }
 }
 
 /// The accounts; free with `pe_account_list_free`
@@ -526,6 +539,7 @@ pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList 
                 name: strings.add(&a.settings.name),
                 email: strings.add(&a.settings.email),
                 imap_host: strings.add(&a.settings.imap_host),
+                label: strings.add(&account_label(&a.settings.name, &a.settings.email)),
                 oauth: match &a.settings.auth {
                     pe_store::Auth::OAuth2(name) => match pe_oauth::ProviderKind::parse(name) {
                         Some(pe_oauth::ProviderKind::Google) => PeOAuthProvider::Google,
@@ -1230,6 +1244,22 @@ pub unsafe extern "C" fn pe_attachment_data(
     Box::into_raw(data).cast()
 }
 
+/// The header block of a message for File > Properties, as text to show (line breaks `\r\n`, no control characters);
+/// NULL when it is not in the store yet. Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_headers(core: *const PeCore, folder: i64, uid: u64) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.message_headers(folder, uid) {
+            Ok(Some(text)) => into_c_string(text),
+            _ => null_mut(),
+        })
+    }
+}
+
 /// The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).
 /// `len` gets its length and `filename` a name to save it under made from its subject (`.eml`; free it with
 /// `pe_string_free`). Free the bytes with `pe_bytes_free`.
@@ -1918,4 +1948,16 @@ pub unsafe extern "C" fn pe_account_add_oauth(
 pub unsafe extern "C" fn pe_account_reauthorize(core: *const PeCore, account: i64, request: u64) -> bool {
     // SAFETY: as the caller guarantees
     unsafe { with(core, false, |core| core.reauthorize(account, request).is_ok()) }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::account_label;
+
+    #[test]
+    fn accounts_are_labeled_by_name_and_address() {
+        assert_eq!(account_label("Ann", "ann@example.com"), "Ann <ann@example.com>");
+        assert_eq!(account_label("  ", "ann@example.com"), "ann@example.com");
+        assert_eq!(account_label("ann@example.com", "ann@example.com"), "ann@example.com");
+    }
 }

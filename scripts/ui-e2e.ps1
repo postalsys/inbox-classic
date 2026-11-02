@@ -54,7 +54,7 @@ $VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
-$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDC_SEND_LATER = 308; $IDC_SAVE = 309;
+$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SEND_LATER = 308; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
 $IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
@@ -151,7 +151,7 @@ function TypeInEditor([IntPtr]$compose, [string]$text) {
     Start-Sleep -Milliseconds 500
     return $true
 }
-# a file dialog answered: the path typed into its name box (characters, as the dialog keeps its own copy) and Enter
+# a file dialog answered: the path typed into its name box (characters, as the dialog keeps its own copy), then Open or Save
 function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]$suggested = $null) {
     $dialog = WaitWindow '#32770' $title 15
     if (-not $dialog) { return $false }
@@ -168,9 +168,10 @@ function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]
     if ($shot) { Shot $dialog $shot }
     [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
     foreach ($c in $path.ToCharArray()) { [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
-    # Enter once the box has all of the path, not after a guess at how long typing takes
+    # the dialog's own Open or Save button (id 1) once the box has all of the path: Enter could go to the list of
+    # suggestions that opens while a path is typed
     if (-not (WaitFor { (WindowText $name) -eq $path } 10)) { return $false }
-    Key $name $VK_RETURN
+    Click $dialog 1
     return [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
 }
 # whether a button of the format bar is pressed
@@ -339,7 +340,22 @@ try {
     Check (Visible $main $IDC_ATTACHMENTS) 'the Attachments button is there'
     Check ((GetText $main $IDC_ATTACHMENTS) -eq 'Attachments (1)') 'it counts the attachment'
     Check (Visible $main $IDC_PICTURES) 'the Download pictures button is there'
+    $title = WindowText $main
+    Check ($title -eq 'Inbox - Inbox Classic') "the title names the folder, as the folder bar does ($title)"
     Shot $main 'read-1-html'
+
+    Step 'message properties'
+    Command $main $IDM_PROPERTIES
+    $properties = WaitWindow 'InboxClassicText' $null 10
+    Check ($null -ne $properties) 'File > Properties opens the headers of the message'
+    if ($properties) {
+        $box = [Native.Win]::FindDescendants($properties, 'Edit') | Select-Object -First 1
+        $headers = if ($box) { WindowText $box } else { '' }
+        Check ($headers -match 'Subject: October newsletter' -and $headers -notmatch 'This message is') 'the headers, without the body'
+        Shot $properties 'read-7-properties'
+        Click $properties 1
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)) 'OK closes it'
+    }
 
     Step 'pictures from the internet'
     Click $main $IDC_PICTURES

@@ -60,9 +60,9 @@ const sections = [
             {
                 shot: 'main-1-inbox',
                 name: 'Folders and the message list',
-                what: 'Each account with its folders, special folders under their familiar names (Inbox, Sent Items, Drafts, Junk E-mail, Deleted Items). Folders with unread mail are bold with the count. In the list, unread messages are bold; the ! column shows ! for flagged and @ for attachments. Click a column heading to sort, again to reverse. The status bar shows what is going on and the counts of the folder. The toolbar has the Fluent icons over their labels, in groups as Outlook Express has them.',
+                what: 'Laid out as Outlook Express: each account with its folders, each with its icon (Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items), folders with unread mail bold with the count. The grey folder bar and the title name the selected folder. In the list a closed envelope marks unread mail (also bold), an open one read mail, with columns for the paper clip and the flag. Click a column heading to sort, again to reverse. With nothing selected the reading pane says so. The toolbar has the Fluent icons over their labels, in groups.',
                 how: 'Always there. Drag the borders between the parts to resize them.',
-                checked: ['All 7 folders of the account appear', 'The 3 messages are listed']
+                checked: ['All 7 folders of the account appear', 'The messages are listed', 'The title names the folder']
             },
             {
                 shot: 'accounts-1-list',
@@ -90,8 +90,8 @@ const sections = [
             {
                 shot: 'main-2-new-mail',
                 name: 'Send/Recv (F5) and automatic checks',
-                what: 'Every account is checked at start and every ten minutes; Send/Recv or F5 checks now. New mail appears in the list without restarting.',
-                how: 'Send/Recv on the toolbar, Tools > Send and Receive All, or F5.',
+                what: 'Every account is checked at start and every ten minutes; Send/Recv or F5 checks now. The arrow beside Send/Recv checks one account; the one beside Create Mail starts a message from a chosen account. New mail appears in the list without restarting.',
+                how: 'Send/Recv on the toolbar (or its arrow), Tools > Send and Receive All, or F5.',
                 checked: ['A message added on the server appears after Send/Recv']
             },
             {
@@ -107,6 +107,13 @@ const sections = [
         title: 'Reading mail',
         intro: 'Messages are parsed in Rust and shown in a locked-down WebView2: scripts never run, nothing is loaded from the internet unless you ask, links open in your browser.',
         features: [
+            {
+                shot: 'read-7-properties',
+                name: 'Message Properties',
+                what: 'The Internet headers of the message, as the Details tab of Outlook Express shows them: who sent it through which servers, its IDs and dates. Shown as text, to read and copy.',
+                how: 'File > Properties, or Alt+Enter.',
+                checked: ['The headers are shown, without the body', 'OK closes it']
+            },
             {
                 shot: 'read-1-html',
                 name: 'HTML messages, with pictures sent inside them',

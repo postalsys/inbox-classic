@@ -106,6 +106,8 @@ fn reads_mail_through_the_c_api() {
     assert_eq!(unsafe { pe_account_list_count(accounts) }, 1);
     let row = unsafe { &*pe_account_list_get(accounts, 0) };
     assert_eq!((row.id, text(row.email)), (account, "testuser@example.com".into()));
+    // as From and the account menus show it
+    assert_eq!(text(row.label), "Test <testuser@example.com>");
     assert!(unsafe { pe_account_list_get(accounts, 1) }.is_null());
     unsafe { pe_account_list_free(accounts) };
 
@@ -380,6 +382,8 @@ fn null_and_bad_arguments() {
         assert!(!pe_message_import(core, 1, missing.as_ptr(), null_mut()));
         // drafts: nothing to open, no account to save in
         assert!(pe_draft_open(core, 1, 1).is_null());
+        assert!(pe_message_headers(core, 1, 1).is_null());
+        assert!(pe_message_headers(std::ptr::null(), 1, 1).is_null());
         assert!(pe_draft_open(std::ptr::null(), 1, 1).is_null());
         let mut id: *mut c_char = null_mut();
         assert!(!pe_draft_save(core, 42, std::ptr::null(), &mut id, null_mut()));
