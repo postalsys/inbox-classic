@@ -8,6 +8,7 @@ publish.workspace = true
 
 [dependencies]
 pe-autoconfig = { path = "../pe-autoconfig" }
+pe-content = { path = "../pe-content" }
 pe-html.workspace = true
 pe-imap = { path = "../pe-imap" }
 pe-mime.workspace = true

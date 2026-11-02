@@ -679,10 +679,21 @@ dependencies = [
 name = "pe-autoconfig"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "idna",
  "pe-net",
  "quick-xml",
+ "serde_json",
  "tokio",
+]
+
+[[package]]
+name = "pe-content"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde_json",
+ "unicode-normalization",
 ]
 
 [[package]]
@@ -692,6 +703,7 @@ dependencies = [
  "base64",
  "keyring-core",
  "pe-autoconfig",
+ "pe-content",
  "pe-html",
  "pe-imap",
  "pe-mime",

@@ -1,0 +1,66 @@
+{
+    "description": "Signature evidence. Signatures are demoted, never deleted, so these patterns only need to be good enough to collapse a trailing block. The RFC 3676 delimiter is the only high confidence rule; everything else is positional evidence that the sequence classifier weighs.",
+    "delimiters": [
+        {
+            "id": "dash_dash_space",
+            "strength": 0.95,
+            "flags": "",
+            "pattern": "^-- ?$"
+        },
+        {
+            "id": "dash_run",
+            "strength": 0.4,
+            "flags": "",
+            "pattern": "^\\s*[-_=*~]{3,}\\s*$"
+        }
+    ],
+    "phrases": [
+        {
+            "id": "sent_from_device",
+            "strength": 0.9,
+            "flags": "i",
+            "pattern": "^\\s*(Sent from|Get) (my|Outlook|BlueMail|Mail for|Yahoo Mail|Proton Mail|the) .{0,60}$"
+        },
+        {
+            "id": "sent_from_localised",
+            "strength": 0.9,
+            "flags": "i",
+            "pattern": "^\\s*(Von meinem|Envoy. de mon|Enviado desde mi|Inviato da|Verzonden vanaf mijn|Skickat från min|Lähetetty|Saadetud minu|Отправлено с) .{0,60}$"
+        },
+        {
+            "id": "best_regards",
+            "strength": 0.35,
+            "flags": "i",
+            "pattern": "^\\s*(Best regards|Kind regards|Warm regards|Warmest regards|With (kind|best|warm) regards|Best wishes|All the best|Take care|Regards|Cheers|Thanks|Many thanks|Thanks (again|in advance)|Thank you|Sincerely|Best|Yours( sincerely| truly)?|Br|Rgds|Mit freundlichen Grüßen|Viele Grüße|Beste Grüße|Cordialement|Bien à vous|Saludos|Atentamente|Cordiali saluti|Groeten|Met vriendelijke groet|Med vänliga hälsningar|Vänliga hälsningar|Med venlig hilsen|Venlig hilsen|Med vennlig hilsen|Vennlig hilsen|Mvh|S pozdravem|Ystävällisin terveisin|Terveisin|Parimat|Parimate soovidega|Heade soovidega|Lugupidamisega|Tervitades|Tervitused|Terv|Kõike head|Ilusat päeva|Head aega|Austusega|Aitäh|Tänan|Tänud|Ette tänades|С уважением|Z poważaniem|Pozdrawiam)\\s*[,.!;]?\\s*[-\\u2013\\u2014]?\\s*$",
+            "comment": "Closing greeting. Mined from blocks the reference labelled SIGNATURE that this baseline missed, which is why the Estonian forms are here: the working corpus is roughly ten percent Estonian and those accounted for the largest group of misses. The greeting must still be the whole line; only a trailing comma, period or dash is tolerated, because 'Thanks, that works.' is prose, not a sign-off."
+        },
+        {
+            "id": "contact_line",
+            "comment": "Labelled phone, email or web line. The email and web alternatives need their own value shape: an address or URL never starts with a digit, so folding them into the phone branch made them unmatchable.",
+            "strength": 0.3,
+            "flags": "i",
+            "pattern": "^\\s*((Tel|Phone|Mobile|Mob|Fax|Cell|GSM|M|T)\\s*[:.]?\\s*[+0-9(][-0-9()\\s.]{6,}(\\s*(x|ext\\.?)\\s*\\d{1,5})?|(E|E-?mail|Mail|W|Web|WWW)\\s*[:.]\\s*(\\S+@\\S+\\.\\S+|https?:\\/\\/\\S+|www\\.\\S+))\\s*$"
+        },
+        {
+            "id": "company_registration_line",
+            "comment": "Continental European corporate footers carry a registered office and company number. These lines are boilerplate, never authored prose.",
+            "strength": 0.6,
+            "flags": "i",
+            "pattern": "^\\s*(Geschäftsführer|Handelsregister|Registergericht|Sitz der Gesellschaft|HRB\\s*\\d|USt-IdNr|VAT\\s*(No|ID)|Reg\\.?\\s*(nr|no)\\.?\\s*\\d|Registrikood|Äriregistri)"
+        },
+        {
+            "id": "postal_address_line",
+            "comment": "A street line in a trailing block. Weak on its own, but it pairs with a name or a closing greeting to identify a corporate signature.",
+            "strength": 0.4,
+            "flags": "i",
+            "pattern": "^\\s*([A-ZÄÖÜÕŠŽ][\\w.-]*\\s+)?(Str\\.|Straße|Strasse|Street|Avenue|Ave\\.|Road|Rd\\.|tee|tänav|pst)\\s*\\.?\\s*\\d"
+        },
+        {
+            "id": "postal_code_line",
+            "comment": "A postal code followed by a capitalised city name. Deliberately case sensitive: under the i flag the capital letter class matched any word, so a line like '12345 units shipped' counted as an address.",
+            "strength": 0.4,
+            "flags": "",
+            "pattern": "^\\s*[A-Z]{0,2}-?\\d{4,6}\\s+[A-ZÄÖÜÕ]"
+        }
+    ]
+}

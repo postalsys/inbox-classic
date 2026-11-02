@@ -1133,6 +1133,12 @@ pub enum PeAutoconfigSource {
     Ispdb = 1,
     /// Nothing was found: `imap.` and `smtp.` the domain
     Guess = 2,
+    /// The provider that receives the domain's mail (its MX), a provider PostalExpress knows
+    Mx = 3,
+    /// The domain's SRV records (RFC 6186)
+    Srv = 4,
+    /// Microsoft Autodiscover (Exchange)
+    Autodiscover = 5,
 }
 
 /// The servers found for an address
@@ -1148,6 +1154,12 @@ pub struct PeAutoconfigInfo {
     /// The provider takes OAuth 2.0
     pub oauth2: bool,
     pub source: PeAutoconfigSource,
+    /// The provider wants an app password rather than the account's password: its name, or NULL when not
+    pub app_password_provider: *const c_char,
+    /// The https page that tells how to make one, NULL with the provider
+    pub app_password_instructions: *const c_char,
+    /// A note about the provider's sign-in, or NULL
+    pub app_password_warning: *const c_char,
 }
 
 /// A lookup's result; free with `pe_autoconfig_free`
@@ -1157,18 +1169,25 @@ pub struct PeAutoconfig {
 }
 
 /// Looks up the servers of `email` (UTF-8) in the background; `AutoconfigDone` with this request in `uid`
-/// follows. 0 on failure.
+/// follows. 0 on failure. `password` (NULL for none) answers a Microsoft Autodiscover server that asks for it,
+/// over https and to that server only.
 ///
 /// # Safety
-/// `core` must be a live handle, `email` a NUL-terminated string.
+/// `core` must be a live handle, `email` a NUL-terminated string, `password` NULL or one.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_autoconfig_start(core: *const PeCore, email: *const c_char) -> u64 {
+pub unsafe extern "C" fn pe_autoconfig_start(
+    core: *const PeCore,
+    email: *const c_char,
+    password: *const c_char,
+) -> u64 {
     // SAFETY: as the caller guarantees
     let Some(email) = (unsafe { arg(email) }) else {
         return 0;
     };
     // SAFETY: as the caller guarantees
-    unsafe { with(core, 0, |core| core.autoconfig(email).unwrap_or(0)) }
+    let password = unsafe { arg(password) };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.autoconfig(email, password).unwrap_or(0)) }
 }
 
 /// The result of a lookup after its `AutoconfigDone`, once; NULL for an address without a domain
@@ -1188,6 +1207,7 @@ pub unsafe extern "C" fn pe_autoconfig_result(core: *const PeCore, request: u64)
                 return null_mut();
             };
             let mut strings = Strings::default();
+            let hint = found.app_password.as_ref();
             let info = PeAutoconfigInfo {
                 imap_host: strings.add(&found.imap.host),
                 imap_port: found.imap.port,
@@ -1201,7 +1221,13 @@ pub unsafe extern "C" fn pe_autoconfig_result(core: *const PeCore, request: u64)
                     pe_autoconfig::Source::Provider => PeAutoconfigSource::Provider,
                     pe_autoconfig::Source::Ispdb => PeAutoconfigSource::Ispdb,
                     pe_autoconfig::Source::Guess => PeAutoconfigSource::Guess,
+                    pe_autoconfig::Source::Mx => PeAutoconfigSource::Mx,
+                    pe_autoconfig::Source::Srv => PeAutoconfigSource::Srv,
+                    pe_autoconfig::Source::Autodiscover => PeAutoconfigSource::Autodiscover,
                 },
+                app_password_provider: hint.map_or(null(), |h| strings.add(h.provider)),
+                app_password_instructions: hint.map_or(null(), |h| strings.add(h.instructions)),
+                app_password_warning: hint.and_then(|h| h.warning).map_or(null(), |w| strings.add(w)),
             };
             handed(PeAutoconfig {
                 info,

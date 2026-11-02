@@ -60,7 +60,9 @@ pub(crate) fn mail_builder() -> ammonia::Builder<'static> {
             "size",
             "dir",
         ])
-        .url_schemes(HashSet::from(["http", "https", "mailto", "cid", "data"]));
+        .url_schemes(HashSet::from(["http", "https", "mailto", "cid", "data"]))
+        // the folds of earlier messages (pe-core fold.rs), styled by the preview document
+        .add_allowed_classes("details", ["pe-fold"]);
     builder
 }
 
@@ -180,7 +182,15 @@ pub fn render_message(html: &str, options: &RenderOptions, images: &[InlineImage
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
          <meta name=\"color-scheme\" content=\"light\">\
-         <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}</style>\
+         <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
+         details.pe-fold{{margin:6px 0}}\
+         details.pe-fold>summary{{display:inline-block;list-style:none;font:bold 9pt Arial,sans-serif;letter-spacing:1px;\
+         color:#555;background:#eee;border:1px solid #ccc;border-radius:9px;padding:0 9px;height:17px;line-height:13px;\
+         cursor:pointer;margin-bottom:4px}}\
+         details.pe-fold>summary::-webkit-details-marker{{display:none}}\
+         details.pe-fold>summary::marker{{content:\"\"}}\
+         details.pe-fold>summary:hover{{background:#e2e2e2;color:#000}}\
+         </style>\
          </head><body>{body}</body></html>"
     )
 }

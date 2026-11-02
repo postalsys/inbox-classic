@@ -192,6 +192,14 @@ $minutes = 'Minutes of the planning meeting'
 AddMessage ("From: Bob Builder <bob@example.com>`r`nTo: testuser@postalexpress.test, Dave <dave@example.com>`r`n" +
     "Cc: Carol <carol@example.com>`r`nSubject: $minutes`r`nMessage-ID: <minutes@example.com>`r`n" +
     "Date: Wed, 1 Oct 2025 09:00:00 +0000`r`n`r`nWe agreed on the dates.`r`n") @('\Seen')
+# a reply with the message it answers quoted below, as Gmail sends it: the oldest, the last row
+AddMessage ("From: Carol <carol@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: Re: Lunch on Friday`r`n" +
+    "Message-ID: <lunch2@example.com>`r`nIn-Reply-To: <lunch1@example.com>`r`nDate: Mon, 29 Sep 2025 12:00:00 +0000`r`n" +
+    "Content-Type: text/html; charset=utf-8`r`n`r`n" +
+    '<div dir="ltr">Friday is fine, see you at noon.</div><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">' +
+    'On Mon, Sep 29, 2025 at 9:00 AM UI Test &lt;testuser@postalexpress.test&gt; wrote:<br></div>' +
+    '<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">' +
+    'Lunch on Friday? The usual place.</blockquote></div>' + "`r`n") @('\Seen')
 $subject = 'Hello from the UI test'
 AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: $subject`r`n" +
     "Message-ID: <ui-e2e@example.com>`r`nDate: Mon, 6 Oct 2025 10:00:00 +0000`r`n`r`nHi,`r`n" +
@@ -288,8 +296,8 @@ try {
         Start-Sleep -Milliseconds 1500
     }
     SelectFolder 0
-    $rows = WaitFor { if ((Rows) -ge 3) { Rows } }
-    Check ($rows -eq 3) 'the messages are in the list'
+    $rows = WaitFor { if ((Rows) -ge 4) { Rows } }
+    Check ($rows -eq 4) 'the messages are in the list'
     Shot $main 'main-1-inbox'
 
     Step 'reading an HTML message'
@@ -347,15 +355,27 @@ try {
     Command $main $IDM_MARK_READ
     Check ([bool](WaitFor { Seen $newsletter })) 'Mark Read sets it again'
 
+    Step 'a reply with the earlier message folded'
+    SelectRow 3
+    Start-Sleep -Seconds 1
+    Shot $main 'read-6-folded'
+
     # ---- writing ----
 
-    function WaitCompose { WaitWindow 'PostalExpressCompose' }
+    # a compose window, once its fields are there (the window exists a moment before them)
+    function WaitCompose {
+        WaitFor {
+            $c = [Native.Win]::FindWindow('PostalExpressCompose', [NullString]::Value)
+            if ($c -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($c, $IDC_BODY) -ne [IntPtr]::Zero) { $c }
+        }
+    }
     function CloseCompose([IntPtr]$compose) {
         [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($compose) })
     }
 
     Step 'forwarding'
+    SelectRow 0
     Command $main $IDM_FORWARD
     $compose = WaitCompose
     Check ($null -ne $compose) 'Forward opens a compose window'
@@ -430,7 +450,7 @@ try {
     AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: One more thing`r`n" +
         "Message-ID: <later@example.com>`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`n`r`nArrived later.`r`n")
     Command $main $IDM_SYNC
-    Check ($null -ne (WaitFor { if ((Rows) -ge 6) { Rows } } 30)) 'the new mail is in the list'
+    Check ($null -ne (WaitFor { if ((Rows) -ge 7) { Rows } } 30)) 'the new mail is in the list'
     Shot $main 'main-2-new-mail'
     SelectFolder 1
     Check ($null -ne (WaitFor { if ((Rows) -ge 2) { Rows } })) 'Sent Items has what was sent'
@@ -450,6 +470,36 @@ try {
         Click $ask 6
     }
     Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'Yes closes it'
+
+    # ---- a provider found by its MX, one that wants an app password ----
+
+    Step 'a Gmail address'
+    Command $main $IDM_NEW_ACCOUNT
+    $first = WaitFor {
+        $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 102) -ne [IntPtr]::Zero) { $f }
+    }
+    SetText $first 100 'Gmail Test'
+    SetText $first 101 'postalexpress.test@gmail.com'
+    SetText $first 102 'not-used'
+    Click $first 1
+    $hint = WaitWindow '#32770' 'Add Mail Account' 40
+    Check ($null -ne $hint) 'Gmail wants an app password, and that is said'
+    if ($hint) {
+        Shot $hint 'account-5-app-password'
+        # No: not now to the instructions
+        Click $hint 7
+    }
+    $servers = WaitFor {
+        $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+    } 20
+    Check ($servers -and (GetText $servers 104) -eq 'imap.gmail.com' -and (GetText $servers 107) -eq 'smtp.gmail.com') 'its servers were found'
+    if ($servers) {
+        Shot $servers 'account-6-gmail'
+        Click $servers 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($servers) })
+    }
 
     # ---- a wrong password ----
 

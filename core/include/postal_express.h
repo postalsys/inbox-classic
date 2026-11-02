@@ -95,6 +95,12 @@ typedef enum PeAutoconfigSource {
   PE_AUTOCONFIG_SOURCE_ISPDB = 1,
   // Nothing was found: `imap.` and `smtp.` the domain
   PE_AUTOCONFIG_SOURCE_GUESS = 2,
+  // The provider that receives the domain's mail (its MX), a provider PostalExpress knows
+  PE_AUTOCONFIG_SOURCE_MX = 3,
+  // The domain's SRV records (RFC 6186)
+  PE_AUTOCONFIG_SOURCE_SRV = 4,
+  // Microsoft Autodiscover (Exchange)
+  PE_AUTOCONFIG_SOURCE_AUTODISCOVER = 5,
 } PeAutoconfigSource;
 
 // The accounts; free with `pe_account_list_free`
@@ -263,6 +269,12 @@ typedef struct PeAutoconfigInfo {
   // The provider takes OAuth 2.0
   bool oauth2;
   enum PeAutoconfigSource source;
+  // The provider wants an app password rather than the account's password: its name, or NULL when not
+  const char *app_password_provider;
+  // The https page that tells how to make one, NULL with the provider
+  const char *app_password_instructions;
+  // A note about the provider's sign-in, or NULL
+  const char *app_password_warning;
 } PeAutoconfigInfo;
 
 #ifdef __cplusplus
@@ -529,12 +541,14 @@ const struct PeDraftInfo *pe_draft_info(const struct PeDraft *draft);
 void pe_draft_free(struct PeDraft *draft);
 
 // Looks up the servers of `email` (UTF-8) in the background; `AutoconfigDone` with this request in `uid`
-// follows. 0 on failure.
+// follows. 0 on failure. `password` (NULL for none) answers a Microsoft Autodiscover server that asks for it,
+// over https and to that server only.
 //
 // # Safety
-// `core` must be a live handle, `email` a NUL-terminated string.
+// `core` must be a live handle, `email` a NUL-terminated string, `password` NULL or one.
 uint64_t pe_autoconfig_start(const struct PeCore *core,
-                             const char *email);
+                             const char *email,
+                             const char *password);
 
 // The result of a lookup after its `AutoconfigDone`, once; NULL for an address without a domain
 //

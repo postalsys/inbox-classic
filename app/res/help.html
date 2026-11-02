@@ -108,7 +108,12 @@
         </p>
         <ol>
             <li>Type your name as others should see it, your e-mail address and your password, and click <b>OK</b>.</li>
-            <li>PostalExpress looks up the settings of your mail provider. This takes a few seconds; <b>Cancel</b> skips it.</li>
+            <li>
+                PostalExpress looks up the settings of your mail provider: from the provider that handles your domain's mail, your domain's DNS records, your
+                provider's settings file, Thunderbird's list of providers and, for Exchange, Microsoft Autodiscover. This takes a few seconds;
+                <b>Cancel</b> skips it. Your password is sent only to an Exchange server of your own domain that asks for it, over an encrypted connection.
+            </li>
+            <li>If your provider wants an app password instead of your normal one, PostalExpress says so and offers to open its instructions.</li>
             <li>
                 Check the server settings it found and click <b>OK</b>. If it found nothing it fills in the usual names (<code>imap.</code> and
                 <code>smtp.</code> followed by your domain); compare them with what your provider tells you.
@@ -167,6 +172,12 @@
             <li>Click a column heading to sort by it; click it again to reverse the order.</li>
             <li>Above the message are its sender, date, recipients and subject.</li>
         </ul>
+
+        <h3>Earlier messages in replies</h3>
+        <p>
+            A reply often carries the messages before it. PostalExpress folds them away behind a <b>&bull;&bull;&bull;</b> button under what the sender wrote;
+            click it to see them. Only text that is clearly an earlier message is folded, anything uncertain stays in view.
+        </p>
 
         <h2>3. Pictures, links and attachments</h2>
         <h3>Pictures</h3>

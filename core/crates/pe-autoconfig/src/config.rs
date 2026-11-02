@@ -1,6 +1,8 @@
 //! Thunderbird's autoconfig XML (https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat): the
 //! first IMAP server and the first SMTP server with encryption, their user name template filled in
 
+use crate::Discovered;
+
 use quick_xml::Reader;
 use quick_xml::events::Event;
 
@@ -37,12 +39,17 @@ struct Entry {
 }
 
 impl Entry {
-    /// A server to use: a host name, a port, and encryption; a server without encryption is no option
-    fn server(&self) -> Option<Server> {
-        let valid_host = !self.host.is_empty()
-            && self.host.len() <= 253
-            && self
-                .host
+    /// A server to use: a host name (`%EMAILDOMAIN%` is `domain`), a port, and encryption; a server without
+    /// encryption is no option
+    fn server(&self, domain: &str) -> Option<Server> {
+        let host = if self.host == "%EMAILDOMAIN%" {
+            domain
+        } else {
+            self.host.as_str()
+        };
+        let valid_host = !host.is_empty()
+            && host.len() <= 253
+            && host
                 .bytes()
                 .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'.');
         let port: u16 = self.port.trim().parse().ok().filter(|p| *p > 0)?;
@@ -52,7 +59,7 @@ impl Entry {
             _ => return None,
         };
         valid_host.then(|| Server {
-            host: self.host.to_ascii_lowercase(),
+            host: host.to_ascii_lowercase(),
             port,
             security,
         })
@@ -71,6 +78,43 @@ fn fill(template: &str, email: &str) -> String {
 /// The servers of a configuration file for `email`; None when it has no usable IMAP and SMTP server
 pub fn parse_config(xml: &str, email: &str) -> Option<Found> {
     let email = email.trim();
+    let domain = email.rsplit_once('@').map(|(_, d)| d).unwrap_or_default();
+    let found = parse_partial(xml, email, &domain.to_ascii_lowercase())?;
+    Some(Found {
+        imap: found.imap?,
+        smtp: found.smtp?,
+        username: found.username.unwrap_or_else(|| email.to_string()),
+        oauth2: found.oauth2,
+    })
+}
+
+/// The servers of a configuration file for `email`, either of them missing when the file has none with encryption;
+/// None when it is no configuration file or names no usable server at all. A host name `%EMAILDOMAIN%` is
+/// `domain`.
+pub fn parse_partial(xml: &str, email: &str, domain: &str) -> Option<Discovered> {
+    let email = email.trim();
+    let entries = parse_entries(xml)?;
+    let pick = |kind: &str| {
+        entries
+            .iter()
+            .filter(|e| e.kind == kind)
+            .find_map(|e| Some((e, e.server(domain)?)))
+    };
+    let imap = pick("imap");
+    let smtp = pick("smtp");
+    // the user name and OAuth of the IMAP server, or of the SMTP server when there is no IMAP one
+    let named = imap.as_ref().or(smtp.as_ref()).map(|(entry, _)| *entry)?;
+    let username = (!named.username.is_empty()).then(|| fill(&named.username, email));
+    Some(Discovered {
+        imap: imap.map(|(_, server)| server),
+        smtp: smtp.map(|(_, server)| server),
+        username,
+        oauth2: named.oauth2,
+    })
+}
+
+/// The server entries of a configuration file
+fn parse_entries(xml: &str) -> Option<Vec<Entry>> {
     let mut reader = Reader::from_str(xml);
     let mut entries: Vec<Entry> = Vec::new();
     let mut current: Option<Entry> = None;
@@ -124,25 +168,7 @@ pub fn parse_config(xml: &str, email: &str) -> Option<Found> {
             return None;
         }
     }
-    let pick = |kind: &str| {
-        entries
-            .iter()
-            .filter(|e| e.kind == kind)
-            .find_map(|e| Some((e, e.server()?)))
-    };
-    let (imap_entry, imap) = pick("imap")?;
-    let (_, smtp) = pick("smtp")?;
-    let username = if imap_entry.username.is_empty() {
-        email.to_string()
-    } else {
-        fill(&imap_entry.username, email)
-    };
-    Some(Found {
-        imap,
-        smtp,
-        username,
-        oauth2: imap_entry.oauth2,
-    })
+    Some(entries)
 }
 
 #[cfg(test)]
@@ -210,5 +236,85 @@ mod tests {
         );
         assert_eq!(parse_config(&refs, "me@example.com").unwrap().username, "a@b&c");
         assert_eq!(fill("%EMAILLOCALPART%@%EMAILDOMAIN%", "u@d.ee"), "u@d.ee");
+    }
+
+    fn doc(incoming: &str, outgoing: &str) -> String {
+        format!(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+<clientConfig version="1.1"><emailProvider id="example.com">{incoming}{outgoing}</emailProvider></clientConfig>"#
+        )
+    }
+
+    // EmailEngine processAutoconfigFile
+    #[test]
+    fn substitutes_the_domain_in_host_and_user() {
+        let text = doc(
+            "<incomingServer type=\"imap\"><hostname>%EMAILDOMAIN%</hostname><port>143</port><socketType>STARTTLS</socketType><username>%EMAILDOMAIN%</username></incomingServer>",
+            "",
+        );
+        let found = parse_partial(&text, "john@sub.example.com", "sub.example.com").unwrap();
+        let imap = found.imap.unwrap();
+        assert_eq!(
+            (imap.host.as_str(), imap.security),
+            ("sub.example.com", ServerSecurity::StartTls)
+        );
+        assert_eq!(found.username.as_deref(), Some("sub.example.com"));
+        assert_eq!(found.smtp, None);
+    }
+
+    #[test]
+    fn either_half_is_an_answer() {
+        // no servers at all: nothing
+        assert_eq!(parse_partial(&doc("", ""), "j@example.com", "example.com"), None);
+        // an empty host name is no server, the SMTP half stands
+        let text = doc(
+            "<incomingServer type=\"imap\"><hostname></hostname><port>993</port><socketType>SSL</socketType></incomingServer>",
+            "<outgoingServer type=\"smtp\"><hostname>smtp.example.com</hostname><port>587</port><socketType>STARTTLS</socketType></outgoingServer>",
+        );
+        let found = parse_partial(&text, "j@example.com", "example.com").unwrap();
+        assert_eq!(found.imap, None);
+        assert_eq!(found.smtp.unwrap().host, "smtp.example.com");
+        // a missing port and socketType do not discard the document
+        let text = doc(
+            "<incomingServer type=\"imap\"><hostname>imap.example.com</hostname></incomingServer>",
+            "<outgoingServer type=\"smtp\"><hostname>smtp.example.com</hostname><port>465</port><socketType>SSL</socketType></outgoingServer>",
+        );
+        let found = parse_partial(&text, "j@example.com", "example.com").unwrap();
+        assert_eq!(found.imap, None);
+        assert_eq!(found.smtp.unwrap().port, 465);
+    }
+
+    #[test]
+    fn a_hostless_server_does_not_shadow_a_later_one() {
+        let text = doc(
+            "<incomingServer type=\"pop3\"><hostname>pop.example.com</hostname><port>995</port><socketType>SSL</socketType></incomingServer>\
+             <incomingServer type=\"imap\"><hostname></hostname><port>143</port><socketType>plain</socketType></incomingServer>\
+             <incomingServer type=\"imap\"><hostname>imap.example.com</hostname><port>993</port><socketType>SSL</socketType></incomingServer>",
+            "<outgoingServer type=\"smtp\"><hostname></hostname><port>25</port><socketType>plain</socketType></outgoingServer>\
+             <outgoingServer type=\"smtp\"><hostname>smtp.example.com</hostname><port>587</port><socketType>STARTTLS</socketType></outgoingServer>",
+        );
+        let found = parse_partial(&text, "j@example.com", "example.com").unwrap();
+        assert_eq!(found.imap.unwrap().port, 993);
+        assert_eq!(found.smtp.unwrap().host, "smtp.example.com");
+        // no <username>: none to fill in
+        assert_eq!(found.username, None);
+    }
+
+    #[test]
+    fn decodes_entities_in_values() {
+        let text = doc(
+            "<incomingServer type=\"imap\"><hostname>imap.example.com</hostname><port>993</port><socketType>SSL</socketType><username>john&amp;doe@example.com</username></incomingServer>",
+            "",
+        );
+        let found = parse_partial(&text, "john&doe@example.com", "example.com").unwrap();
+        assert_eq!(found.username.as_deref(), Some("john&doe@example.com"));
+        assert_eq!(
+            parse_partial(
+                "<html><body><p>Not found<br></body></html>",
+                "j@example.com",
+                "example.com"
+            ),
+            None
+        );
     }
 }

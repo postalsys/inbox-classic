@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 mod compose;
+mod fold;
 mod requests;
 mod secrets;
 mod view;
@@ -192,6 +193,8 @@ impl Core {
             .enable_all()
             .build()
             .map_err(|_| Error::Closed)?;
+        // the patterns that fold earlier messages compile meanwhile, not when the first message is shown
+        runtime.spawn_blocking(fold::warm_up);
         let closed = Arc::new(AtomicBool::new(false));
         let open = closed.clone();
         Ok(Core {
@@ -300,10 +303,24 @@ impl Core {
 
     /// Looks up the servers of `email` in the background: [`Event::AutoconfigDone`] follows with the request
     /// this returns
-    pub fn autoconfig(&self, email: &str) -> Result<u64> {
+    ///
+    /// With `password`, a Microsoft Autodiscover server that asks for it (hosted Exchange) is answered, over https
+    /// and only to the server that asked (see pe-autoconfig)
+    pub fn autoconfig(&self, email: &str, password: Option<&str>) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         let email = email.to_string();
-        let work = async move { pe_autoconfig::discover(&email).await };
+        let credentials = password
+            .filter(|p| !p.is_empty())
+            .map(|password| pe_autoconfig::Credentials {
+                user: None,
+                password: password.to_string(),
+            });
+        let work = async move {
+            match credentials {
+                Some(credentials) => pe_autoconfig::discover_with_credentials(&email, &credentials).await,
+                None => pe_autoconfig::discover(&email).await,
+            }
+        };
         self.autoconfig
             .start(self.runtime()?, request, work, self.events.clone(), |request| {
                 Event::AutoconfigDone { request }

@@ -124,14 +124,59 @@ bool WaitFor(HWND owner, PeCore* core, uint64_t request, void (*cancel)(const Pe
 }
 
 // looks the servers of `email` up; the result, or NULL
-core::Autoconfig WaitForLookup(HWND owner, PeCore* core, const std::wstring& email) {
-    uint64_t request = pe_autoconfig_start(core, core::Narrow(email).c_str());
+core::Autoconfig WaitForLookup(HWND owner, PeCore* core, const std::wstring& email, const std::wstring& password) {
+    // the password only answers a Microsoft Autodiscover server that asks for it (hosted Exchange), over https
+    std::string secret = core::Narrow(password);
+    uint64_t request = pe_autoconfig_start(core, core::Narrow(email).c_str(), secret.c_str());
+    SecureZeroMemory(secret.data(), secret.size());
     size_t at = email.find_last_of(L'@');
     std::wstring text = L"Looking up the settings of " + email.substr(at == std::wstring::npos ? 0 : at + 1) + L"...";
     if (!WaitFor(owner, core, request, pe_autoconfig_cancel, text)) {
         return core::Autoconfig();
     }
     return core::Autoconfig(pe_autoconfig_result(core, request));
+}
+
+// the first line of the server settings form: where the settings came from
+std::wstring FoundIntro(const PeAutoconfigInfo* info) {
+    if (!info) {
+        return L"Enter the account details your e-mail provider gave you.";
+    }
+    const wchar_t* change = L" Change them if your provider gave you others.";
+    switch (info->source) {
+    case PE_AUTOCONFIG_SOURCE_GUESS:
+        return L"No settings were found for this address: these are the usual names, check them with your provider.";
+    case PE_AUTOCONFIG_SOURCE_MX:
+        return std::wstring(L"Your mail is handled by a provider PostalExpress knows; these are its servers.") + change;
+    case PE_AUTOCONFIG_SOURCE_SRV:
+        return std::wstring(L"These settings were found in the DNS records of your domain.") + change;
+    case PE_AUTOCONFIG_SOURCE_AUTODISCOVER:
+        return std::wstring(L"These settings were found by Microsoft Autodiscover (Exchange).") + change;
+    default:
+        return std::wstring(L"These settings were found for this address.") + change;
+    }
+}
+
+// a provider that does not take the account's password from mail programs: says so, and opens the page that tells
+// how to make an app password when the user wants it
+void ExplainAppPassword(HWND owner, const PeAutoconfigInfo* info) {
+    if (!info || !info->app_password_provider) {
+        return;
+    }
+    std::wstring provider = Text(info->app_password_provider);
+    std::wstring text = info->app_password_warning
+                            ? Text(info->app_password_warning)
+                            : provider + L" does not take your normal password in mail programs. Create an app password in your " +
+                                  provider + L" account and type it in the Password field of the next form.";
+    std::wstring page = info->app_password_instructions ? Text(info->app_password_instructions) : L"";
+    bool linkable = page.rfind(L"https://", 0) == 0;
+    if (linkable) {
+        text += L"\n\nOpen " + provider + L"'s instructions in your browser?";
+    }
+    int answer = MessageBoxW(owner, text.c_str(), L"Add Mail Account", (linkable ? MB_YESNO : MB_OK) | MB_ICONINFORMATION);
+    if (linkable && answer == IDYES) {
+        ShellExecuteW(owner, L"open", page.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+    }
 }
 
 std::wstring SecurityName(PeSecurity security) {
@@ -184,14 +229,9 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
         return 0;
     }
     std::wstring email = first[1].value;
-    core::Autoconfig found = WaitForLookup(owner, core, email);
+    core::Autoconfig found = WaitForLookup(owner, core, email, first[2].value);
     const PeAutoconfigInfo* info = pe_autoconfig_info(found.get());
-    std::wstring intro = L"Enter the account details your e-mail provider gave you.";
-    if (info) {
-        intro = info->source == PE_AUTOCONFIG_SOURCE_GUESS
-                    ? L"No settings were found for this address: these are the usual names, check them with your provider."
-                    : L"These settings were found for this address. Change them if your provider gave you others.";
-    }
+    std::wstring intro = FoundIntro(info);
 
     PeOAuthProvider provider = info ? pe_oauth_provider_for(core, info->imap_host) : PE_O_AUTH_PROVIDER_NONE;
     if (provider != PE_O_AUTH_PROVIDER_NONE &&
@@ -218,6 +258,7 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
         return pe_account_add_oauth(core, &settings, request);
     }
 
+    ExplainAppPassword(owner, info);
     std::vector<std::wstring> security(std::begin(kSecurity), std::end(kSecurity));
     std::vector<FormField> fields = {
         {L"Display name:", first[0].value},

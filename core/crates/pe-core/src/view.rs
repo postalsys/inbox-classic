@@ -55,11 +55,8 @@ pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
             })
         })
         .collect();
-    let body = match (&message.html, &message.text) {
-        (Some(html), _) => html.clone(),
-        (None, Some(text)) => text_to_html(text),
-        (None, None) => String::new(),
-    };
+    // the earlier messages of a reply or forward folded behind "..."
+    let body = crate::fold::body(&message);
     MessageView {
         subject: message.subject.clone().unwrap_or_default(),
         from: text_addresses(message.from.as_slice()),

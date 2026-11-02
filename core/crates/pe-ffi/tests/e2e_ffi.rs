@@ -288,7 +288,10 @@ fn null_and_bad_arguments() {
     }
     // a lookup of an address without a domain finishes with nothing
     unsafe {
-        assert_eq!(pe_autoconfig_start(std::ptr::null(), std::ptr::null()), 0);
+        assert_eq!(
+            pe_autoconfig_start(std::ptr::null(), std::ptr::null(), std::ptr::null()),
+            0
+        );
         assert!(pe_autoconfig_result(std::ptr::null(), 1).is_null());
         assert!(pe_autoconfig_info(std::ptr::null()).is_null());
         pe_autoconfig_free(null_mut());

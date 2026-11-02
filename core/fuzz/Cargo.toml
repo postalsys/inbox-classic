@@ -13,6 +13,8 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
+pe-autoconfig = { path = "../crates/pe-autoconfig" }
+pe-content = { path = "../crates/pe-content" }
 pe-imap = { path = "../crates/pe-imap" }
 pe-mime = { path = "../crates/pe-mime" }
 
@@ -28,6 +30,20 @@ bench = false
 [[bin]]
 name = "mime_message"
 path = "fuzz_targets/mime_message.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "content_analyze"
+path = "fuzz_targets/content_analyze.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "autoconfig_parsers"
+path = "fuzz_targets/autoconfig_parsers.rs"
 test = false
 doc = false
 bench = false

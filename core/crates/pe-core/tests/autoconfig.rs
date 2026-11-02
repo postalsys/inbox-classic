@@ -19,8 +19,8 @@ fn lookups_report_their_request() {
         let _ = sender.send(event);
     })
     .unwrap();
-    let first = core.autoconfig("no domain here").unwrap();
-    let second = core.autoconfig("nor@here").unwrap();
+    let first = core.autoconfig("no domain here", None).unwrap();
+    let second = core.autoconfig("nor@here", Some("secret")).unwrap();
     assert_ne!(first, second);
     let mut done = Vec::new();
     while done.len() < 2 {
@@ -37,7 +37,7 @@ fn lookups_report_their_request() {
     assert_eq!(core.autoconfig_result(42), None);
 
     // a cancelled lookup is forgotten, its event or not
-    let cancelled = core.autoconfig("someone@example.invalid").unwrap();
+    let cancelled = core.autoconfig("someone@example.invalid", None).unwrap();
     core.autoconfig_cancel(cancelled);
     assert_eq!(core.autoconfig_result(cancelled), None);
 }
