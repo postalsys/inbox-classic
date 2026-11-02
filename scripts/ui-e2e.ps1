@@ -58,7 +58,7 @@ $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $
 $IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SEND_LATER = 308; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
-$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
+$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_SHOW_CC = 311; $IDC_SHOW_BCC = 312; $IDC_BCC = 304; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
@@ -461,6 +461,7 @@ try {
     Check ($to -like '*bob@example.com*' -and $to -like '*dave@example.com*') "it goes to the sender and the others ($to)"
     Check ($to -notlike '*testuser@*') 'but not to the account itself'
     Check ((GetText $compose $IDC_CC) -like '*carol@example.com*') 'with the Cc kept'
+    Check (Visible $compose $IDC_CC) 'the Cc row is open, as it has someone in it'
     Shot $compose 'write-2-reply-all'
     CloseCompose $compose
 
@@ -504,6 +505,12 @@ try {
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose
     Check ($null -ne $compose) 'Create Mail opens an empty compose window'
+    # only the rows that are needed: Cc, Bcc and Attach wait until there is something to put in them
+    Check (-not (Visible $compose $IDC_CC) -and -not (Visible $compose $IDC_BCC) -and -not (Visible $compose $IDC_FILES)) 'a new message shows no empty Cc, Bcc or Attach row'
+    Check ((Visible $compose $IDC_SHOW_CC) -and (Visible $compose $IDC_SHOW_BCC)) 'the Cc and Bcc buttons are at the end of the To row'
+    Shot $compose 'write-0-new-empty'
+    Command $compose $IDC_SHOW_CC
+    Check ([bool](WaitFor { (Visible $compose $IDC_CC) -and -not (Visible $compose $IDC_SHOW_CC) } 10)) 'Cc opens its row, and its button goes'
     $from = GetText $compose $IDC_FROM
     Check ($from -eq 'UI Test <testuser@postalexpress.test>') "From names the account it goes from ($from)"
     SetText $compose $IDC_TO 'dave at example.com'
@@ -541,6 +548,7 @@ try {
     Check ($null -ne $new) 'the new message was sent'
     Check ($new -and (RawText $new) -match 'Hello Dave, written from scratch') 'with what was typed'
     Check ($new -and (RawText $new) -match 'keep-me\.txt' -and (RawText $new) -notmatch 'wrong-file') 'with only the file left attached'
+    Check ($new -and (RawText $new) -match 'Content-Type: text/plain' -and (RawText $new) -notmatch 'Content-Type: text/html') 'nothing formatted: it went as plain text'
 
     Step 'Send Later and the Outbox'
     Command $main $IDM_NEW_MAIL

@@ -29,6 +29,9 @@ enum ComposeId : WORD {
     IDC_SEND_LATER,
     IDC_SAVE,
     IDC_FROM,
+    // the buttons at the end of the To row that open the Cc and Bcc rows
+    IDC_SHOW_CC,
+    IDC_SHOW_BCC,
     IDC_FONT = 320,
     IDC_FONT_SIZE,
     IDC_FORMATBAR,
@@ -64,6 +67,10 @@ struct Compose {
     std::string inReplyTo;
     std::string references;
     std::string quote;
+    // the quoted message was plain text: with nothing formatted written, the message goes as plain text (the core
+    // decides), with this as its quote while the user left the quote folded
+    bool quotePlain = false;
+    std::string quoteText;
     // the attached files, with what the Attach row shows for each: the name and the size when it was added
     struct File {
         std::wstring path;
@@ -80,8 +87,9 @@ struct Compose {
     // and close the window
     enum class Pending { None, Send, SendLater, Save, SaveAndClose } pending = Pending::None;
     std::wstring html;
-    // the quote was unfolded into the text: it goes as the user left it, not added again
-    bool quoteInText = false;
+    // where the quote is (see EditorQuote), and the quote as the user left it once unfolded
+    EditorQuote quoteState = EditorQuote::Folded;
+    std::string editedQuote;
     // something was typed: closing asks first
     bool dirty = false;
     bool filling = true;
@@ -93,6 +101,11 @@ struct Compose {
     // the rows of fields: From, To, Cc, Bcc, Subject, Attach
     static constexpr int kRows = 6;
     HWND labels[kRows] = {};
+    // the Cc and Bcc rows are shown when they have something in them or were opened; the Attach row with files
+    bool showCc = false;
+    bool showBcc = false;
+    HWND ccButton = nullptr;
+    HWND bccButton = nullptr;
     // the accounts it can go from, in the order of the From list
     std::vector<int64_t> fromAccounts;
     HWND from = nullptr;
@@ -133,12 +146,37 @@ void Layout(HWND hwnd, Compose* state) {
     int y = bar.bottom - bar.top + pad;
     HWND fields[] = {state->from, state->to, state->cc, state->bcc, state->subject, state->attached};
     static_assert(std::size(fields) == Compose::kRows);
+    // From, To and Subject always; Cc and Bcc when they have something or were opened; Attach once there are files
+    bool shown[] = {true, true, state->showCc, state->showBcc, true, !state->files.empty()};
+    // the Cc and Bcc buttons at the end of the To row, for the rows not shown yet
+    int buttonWidth = Scale(40);
+    int buttons = (state->showCc ? 0 : 1) + (state->showBcc ? 0 : 1);
+    int right = client.right - pad;
+    int toRight = right - buttons * (buttonWidth + Scale(4));
+    int toTop = y;
     for (int i = 0; i < Compose::kRows; i++) {
+        ShowWindow(state->labels[i], shown[i] ? SW_SHOW : SW_HIDE);
+        ShowWindow(fields[i], shown[i] ? SW_SHOW : SW_HIDE);
+        if (!shown[i]) {
+            continue;
+        }
+        if (fields[i] == state->to) {
+            toTop = y;
+        }
         MoveWindow(state->labels[i], pad, y + Scale(3), labelWidth, rowHeight, TRUE);
         // a combo box's height is that of its open list
         int height = fields[i] == state->from ? Scale(200) : rowHeight;
-        MoveWindow(fields[i], pad + labelWidth, y, client.right - 2 * pad - labelWidth, height, TRUE);
+        int fieldRight = fields[i] == state->to ? toRight : right;
+        MoveWindow(fields[i], pad + labelWidth, y, fieldRight - pad - labelWidth, height, TRUE);
         y += rowHeight + Scale(4);
+    }
+    int buttonLeft = toRight + Scale(4);
+    for (auto [button, wanted] : {std::pair{state->ccButton, !state->showCc}, std::pair{state->bccButton, !state->showBcc}}) {
+        ShowWindow(button, wanted ? SW_SHOW : SW_HIDE);
+        if (wanted) {
+            MoveWindow(button, buttonLeft, toTop, buttonWidth, rowHeight, TRUE);
+            buttonLeft += buttonWidth + Scale(4);
+        }
     }
     // the format bar: font, size, then the buttons
     int x = pad;
@@ -152,13 +190,13 @@ void Layout(HWND hwnd, Compose* state) {
     FitFiles(state);
 }
 
-// the attached files in the Attach row, side by side
+// the attached files in the Attach row, side by side; the row is there only with files
 void ShowFiles(Compose* state) {
     SendMessageW(state->attached, LB_RESETCONTENT, 0, 0);
     for (const Compose::File& file : state->files) {
         SendMessageW(state->attached, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(file.label.c_str()));
     }
-    FitFiles(state);
+    Layout(GetParent(state->attached), state);
 }
 
 // adds a file that is there (not a folder); false otherwise
@@ -269,7 +307,12 @@ struct Fields {
         outgoing.bcc = bcc.c_str();
         outgoing.subject = subject.c_str();
         outgoing.html = body.c_str();
-        outgoing.quote = state->quote.empty() || state->quoteInText ? nullptr : state->quote.c_str();
+        // the draft's quote while folded, the user's once unfolded, none once deleted; its plain text (from a plain
+        // text original) only for the draft's own
+        bool folded = state->quoteState == EditorQuote::Folded;
+        const std::string& quote = folded ? state->quote : state->editedQuote;
+        outgoing.quote = quote.empty() || state->quoteState == EditorQuote::Removed ? nullptr : quote.c_str();
+        outgoing.quote_text = folded && !state->quoteText.empty() ? state->quoteText.c_str() : nullptr;
         outgoing.in_reply_to = state->inReplyTo.empty() ? nullptr : state->inReplyTo.c_str();
         outgoing.references = state->references.c_str();
         outgoing.attachments = attachments.data();
@@ -277,6 +320,7 @@ struct Fields {
         outgoing.message_id = state->messageId.empty() ? nullptr : state->messageId.c_str();
         // saved in another account's Drafts before From changed: the core moves it once this account has it
         outgoing.draft_account = state->draftAccount != state->account ? state->draftAccount : 0;
+        outgoing.quote_plain = state->quotePlain;
     }
     Fields(const Fields&) = delete;
     Fields& operator=(const Fields&) = delete;
@@ -485,6 +529,9 @@ void CreateFields(HWND hwnd, Compose* state) {
     // who the message goes from: always shown, so it is clear even with one account, and the account it is sent with
     state->from = CreateChild(hwnd, L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, IDC_FROM, {});
     state->to = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_TO, {}, WS_EX_CLIENTEDGE);
+    // Cc and Bcc wait behind these until needed (Alt+C, Alt+B), as most mail programs have it now
+    state->ccButton = CreateChild(hwnd, L"BUTTON", L"&Cc", BS_PUSHBUTTON, IDC_SHOW_CC, {});
+    state->bccButton = CreateChild(hwnd, L"BUTTON", L"&Bcc", BS_PUSHBUTTON, IDC_SHOW_BCC, {});
     state->cc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_CC, {}, WS_EX_CLIENTEDGE);
     state->bcc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_BCC, {}, WS_EX_CLIENTEDGE);
     state->subject = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_SUBJECT, {}, WS_EX_CLIENTEDGE);
@@ -522,9 +569,10 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
     core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded, draft ? draft->body : nullptr));
     Editor::Handlers handlers;
     handlers.error = [hwnd](const std::wstring& error) { MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
-    handlers.html = [hwnd, state](const std::wstring& html, bool full) {
+    handlers.html = [hwnd, state](const std::wstring& html, EditorQuote quote, const std::wstring& edited) {
         state->html = html;
-        state->quoteInText = full;
+        state->quoteState = quote;
+        state->editedQuote = core::Narrow(edited);
         PostMessageW(hwnd, WM_SEND_HTML, 0, 0);
     };
     handlers.state = [state](const std::wstring& flags) { ShowState(state, flags); };
@@ -573,6 +621,14 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         if (LOWORD(wParam) == IDC_SAVE) {
             Request(state, Compose::Pending::Save);
+            return 0;
+        }
+        if (LOWORD(wParam) == IDC_SHOW_CC || LOWORD(wParam) == IDC_SHOW_BCC) {
+            // the row opens and takes the cursor; its button goes
+            bool cc = LOWORD(wParam) == IDC_SHOW_CC;
+            (cc ? state->showCc : state->showBcc) = true;
+            Layout(hwnd, state);
+            SetFocus(cc ? state->cc : state->bcc);
             return 0;
         }
         if (LOWORD(wParam) == IDC_ATTACH) {
@@ -701,10 +757,15 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
         SetWindowTextW(state->to, Text(draft->to).c_str());
         SetWindowTextW(state->cc, Text(draft->cc).c_str());
         SetWindowTextW(state->bcc, Text(draft->bcc).c_str());
+        // a reply to all with others in Cc, a draft with Bcc: those rows are open
+        state->showCc = draft->cc && *draft->cc;
+        state->showBcc = draft->bcc && *draft->bcc;
         SetWindowTextW(state->subject, Text(draft->subject).c_str());
         state->inReplyTo = draft->in_reply_to ? draft->in_reply_to : "";
         state->references = draft->references ? draft->references : "";
         state->quote = draft->quote ? draft->quote : "";
+        state->quoteText = draft->quote_text ? draft->quote_text : "";
+        state->quotePlain = draft->quote_text != nullptr;
         // a saved draft opened again: its files, and its Message-ID so the next save replaces it
         state->messageId = draft->message_id ? draft->message_id : "";
         state->draftAccount = account;

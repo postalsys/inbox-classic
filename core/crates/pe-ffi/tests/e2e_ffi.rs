@@ -264,6 +264,8 @@ fn reads_mail_through_the_c_api() {
         attachment_count: 1,
         message_id: std::ptr::null(),
         draft_account: 0,
+        quote_plain: !info.quote_text.is_null(),
+        quote_text: info.quote_text,
     };
     assert!(unsafe { pe_message_send(core, account, &outgoing, false, null_mut()) });
     unsafe { pe_draft_free(draft) };
@@ -302,6 +304,8 @@ fn reads_mail_through_the_c_api() {
         attachment_count: 0,
         message_id: std::ptr::null(),
         draft_account: 0,
+        quote_plain: false,
+        quote_text: std::ptr::null(),
     };
     let mut reason: *mut c_char = null_mut();
     assert!(!unsafe { pe_message_send(core, account, &typo, false, &mut reason) });

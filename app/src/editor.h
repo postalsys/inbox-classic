@@ -13,12 +13,16 @@
 
 #include <WebView2.h>
 
+// where the quoted message is when the page gives its HTML: still folded (the draft's goes with the message), unfolded
+// and maybe edited (`edited`, apart from what was written), or unfolded and deleted
+enum class EditorQuote { Folded, Edited, Removed };
+
 class Editor {
 public:
     struct Handlers {
         std::function<void(const std::wstring&)> error;
-        // the body as HTML, after Html(); `full` when the quote is in it already (unfolded), so it is not added again
-        std::function<void(const std::wstring&, bool full)> html;
+        // the body as HTML, after Html(): what was written, and the quote as the page has it (see EditorQuote)
+        std::function<void(const std::wstring& html, EditorQuote quote, const std::wstring& edited)> html;
         // one '0' or '1' per format of the bar: bold, italic, underline, numbers, bullets, left, center, right
         std::function<void(const std::wstring&)> state;
         std::function<void()> dirty;

@@ -265,6 +265,11 @@ typedef struct PeOutgoing {
   // The account whose Drafts has that copy when From changed to another account since, 0 otherwise: the copy
   // there goes once the message is saved or queued in the account it goes from now
   int64_t draft_account;
+  // The quoted message was plain text (PeDraftInfo.quote_text was there): with nothing formatted written, the
+  // message then goes as plain text
+  bool quote_plain;
+  // PeDraftInfo.quote_text while `quote` is the draft's own (not edited), NULL otherwise
+  const char *quote_text;
 } PeOutgoing;
 
 // A message waiting in the Outbox
@@ -288,6 +293,9 @@ typedef struct PeDraftInfo {
   const char *quote;
   // The quote starts folded behind "..." (a reply) or open (a forward)
   bool quote_folded;
+  // The quote as plain text (the original's own lines) when the message replied to or forwarded was plain text,
+  // NULL otherwise: for PeOutgoing (`quote_plain` and, while the quote is not edited, `quote_text`)
+  const char *quote_text;
   // For PeOutgoing, NULL when there is none
   const char *in_reply_to;
   // For PeOutgoing, space separated

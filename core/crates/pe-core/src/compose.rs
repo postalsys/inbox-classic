@@ -61,6 +61,10 @@ pub struct Outgoing {
     pub html: Option<String>,
     /// The quoted message of the draft ([`Draft::quote`]), added after `html`
     pub quote: Option<String>,
+    /// The quoted message was plain text ([`Draft::quote_text`] was there)
+    pub quote_plain: bool,
+    /// [`Draft::quote_text`], while the quote is the draft's as it was (not edited): the plain text quote of it
+    pub quote_text: Option<String>,
     /// Files to attach
     pub attachments: Vec<PathBuf>,
     pub in_reply_to: Option<String>,
@@ -90,6 +94,9 @@ pub struct Draft {
     pub quote: String,
     /// The quote starts folded behind "..." (a reply), or open (a forward, where it is what is sent)
     pub quote_folded: bool,
+    /// The quote as plain text, the original's own lines, when the message replied to or forwarded was plain text:
+    /// with nothing formatted written above it, the reply goes as plain text too ([`Outgoing::quote_text`])
+    pub quote_text: Option<String>,
     pub in_reply_to: Option<String>,
     pub references: Vec<String>,
     pub bcc: String,
@@ -199,6 +206,7 @@ fn build(
         });
     }
     let (text, html) = match &outgoing.html {
+        Some(written) if let Some(text) = plain(written, outgoing) => (text, None),
         Some(written) => {
             let domain = account
                 .email
@@ -233,6 +241,69 @@ fn build(
         message_id: outgoing.message_id.clone().unwrap_or_default(),
         ..Default::default()
     })
+}
+
+/// The message as plain text, when it goes as such: nothing formatted in what was written (the editor is always
+/// HTML), and nothing quoted but a plain text message, as the original decides for a reply or a forward. Then what
+/// was written as text, and the quote: the original's own lines, or the user's edit of it as text.
+fn plain(written: &str, outgoing: &Outgoing) -> Option<String> {
+    let quote = outgoing.quote.as_deref().filter(|q| !q.trim().is_empty());
+    if (quote.is_some() && !outgoing.quote_plain) || !pe_html::is_plain(written) {
+        return None;
+    }
+    let mut text = html_to_text(written).trim().to_string();
+    if let Some(quote) = quote {
+        text.push_str("\n\n");
+        text.push_str(&outgoing.quote_text.clone().unwrap_or_else(|| edited_quote_text(quote)));
+    }
+    // a space typed twice comes as a no-break space, which plain text has no need of
+    text = text.replace('\u{a0}', " ");
+    text.push('\n');
+    Some(text)
+}
+
+/// The header block of a quote and its lines, "> " in front of them in a reply, as Outlook Express quotes in plain text
+fn quoted_lines(header: Vec<String>, body: &str, reply: bool) -> String {
+    let body = body.trim_matches('\n');
+    let body = if reply {
+        body.lines()
+            .map(|line| {
+                if line.trim().is_empty() {
+                    ">".to_string()
+                } else {
+                    format!("> {line}")
+                }
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+    } else {
+        body.to_string()
+    };
+    format!("{}\n\n{body}", header.join("\n"))
+}
+
+/// The plain text quote of a plain text original: its header lines and its own lines, as they came
+fn text_quote(header: &[(&str, String)], text: &str, reply: bool) -> String {
+    let mut lines = vec!["----- Original Message -----".to_string()];
+    lines.extend(
+        header
+            .iter()
+            .filter(|(_, v)| !v.is_empty())
+            .map(|(name, value)| format!("{name}: {value}")),
+    );
+    quoted_lines(lines, &text.replace("\r\n", "\n"), reply)
+}
+
+/// A quote the user unfolded and maybe trimmed, as text: its header block a line each, then its message
+fn edited_quote_text(quote: &str) -> String {
+    let (reply, header, body) = pe_html::quote_parts(quote);
+    let header = html_to_text(header)
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(str::to_string)
+        .collect();
+    quoted_lines(header, &html_to_text(body), reply)
 }
 
 /// A saved draft to go on writing: its fields, what was written as the body, and its attachments (name to save
@@ -346,6 +417,10 @@ pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Dr
     let mut draft = Draft {
         quote: pe_html::quote_html(&header, &body, &images, reply),
         quote_folded: reply,
+        quote_text: match (&message.html, &message.text) {
+            (None, Some(text)) => Some(text_quote(&header, text, reply)),
+            _ => None,
+        },
         ..Default::default()
     };
     match kind {
@@ -551,5 +626,82 @@ mod tests {
             "{html}"
         );
         assert_eq!(message.attachments[0].content_type, "image/gif");
+    }
+
+    #[test]
+    fn nothing_formatted_goes_as_plain_text() {
+        // `quote`, and whether the original was plain text with its own text quote (None once the user edited it)
+        let send = |html: &str, quote: Option<&str>, quote_plain: bool, quote_text: Option<String>| {
+            let outgoing = Outgoing {
+                to: "ann@example.com".into(),
+                html: Some(html.into()),
+                quote: quote.map(str::to_string),
+                quote_plain,
+                quote_text,
+                ..Default::default()
+            };
+            message(&account(), &outgoing, 0).unwrap()
+        };
+        // a new message as the editor gives it, lines and all: text/plain only
+        let new = send(
+            "<div>Hello&nbsp; Ann,</div><div><br></div><div>see you.</div>",
+            None,
+            false,
+            None,
+        );
+        assert_eq!(new.html, None);
+        assert_eq!(new.text.as_deref(), Some("Hello  Ann,\n\nsee you.\n"));
+        // anything formatted, a picture or a link keeps it HTML
+        assert!(send("<div>Hello <b>Ann</b></div>", None, false, None).html.is_some());
+        assert!(
+            send("<div><a href=\"https://example.com\">here</a></div>", None, false, None)
+                .html
+                .is_some()
+        );
+
+        // a reply to a plain text message, nothing formatted: plain text with the original's own lines quoted
+        let original =
+            b"From: Ann <ann@example.com>\r\nSubject: Plans\r\n\r\nLet's meet.\r\n  Room   4,\r\n\r\nTomorrow?\r\n";
+        let reply = draft(original, DraftKind::Reply, "me@example.com", None);
+        let quote_text = reply.quote_text.clone();
+        assert!(quote_text.is_some());
+        let plain = send("<div>Yes.</div>", Some(&reply.quote), true, quote_text);
+        assert_eq!(plain.html, None);
+        let text = plain.text.unwrap();
+        assert!(
+            text.starts_with("Yes.\n\n----- Original Message -----\nFrom: Ann <ann@example.com>\n"),
+            "{text}"
+        );
+        // the spacing of the original as it came
+        assert!(
+            text.contains("\n> Let's meet.\n>   Room   4,\n>\n> Tomorrow?"),
+            "{text}"
+        );
+        // the quote unfolded and trimmed by the user: its text from what is left
+        let edited = reply.quote.replace("Tomorrow?", "");
+        let text = send("<div>Yes.</div>", Some(&edited), true, None).text.unwrap();
+        assert!(
+            text.starts_with("Yes.\n\n----- Original Message -----") && text.contains("\n> Let's meet."),
+            "{text}"
+        );
+        assert!(!text.contains("Tomorrow"), "{text}");
+        // the original was HTML: the reply follows it
+        let html = b"From: Ann <ann@example.com>\r\nSubject: Plans\r\nContent-Type: text/html\r\n\r\n<p>Let's <b>meet</b>.</p>\r\n";
+        let html_reply = draft(html, DraftKind::Reply, "me@example.com", None);
+        assert_eq!(html_reply.quote_text, None);
+        assert!(
+            send("<div>Yes.</div>", Some(&html_reply.quote), false, None)
+                .html
+                .is_some()
+        );
+        // a forward of a plain message: its lines as they are, without "> "
+        let forward = draft(ORIGINAL, DraftKind::Forward, "me@example.com", None);
+        let text = send("<div>FYI</div>", Some(&forward.quote), true, forward.quote_text.clone())
+            .text
+            .unwrap();
+        assert!(
+            text.contains("\nLet's meet.\nTomorrow?") && !text.contains("> Let"),
+            "{text}"
+        );
     }
 }

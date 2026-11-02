@@ -91,7 +91,7 @@ pub fn quote_html(header: &[(&str, String)], html: &str, images: &[InlineImage],
             text(value)
         ));
     }
-    block.push_str("<div><br></div>");
+    block.push_str(QUOTE_HEADER_END);
     block.push_str(&quote_sanitizer(images).clean(html).to_string());
     if reply {
         format!(
@@ -100,6 +100,27 @@ pub fn quote_html(header: &[(&str, String)], html: &str, images: &[InlineImage],
     } else {
         block
     }
+}
+
+/// Whether what was written has no formatting at all: nothing but text in paragraphs and lines, which then goes as
+/// text/plain. Judged by sanitizing it twice, keeping only `div`, `p`, `br` and plain `span`, and as usual: the same
+/// both times means there was nothing else.
+pub fn is_plain(html: &str) -> bool {
+    let mut plain = ammonia::Builder::empty();
+    plain.tags(std::collections::HashSet::from(["div", "p", "br", "span"]));
+    plain.clean(html).to_string() == crate::mail_builder().clean(html).to_string()
+}
+
+/// The empty line [`quote_html`] puts between the header block of a quoted message and the message
+const QUOTE_HEADER_END: &str = "<div><br></div>";
+
+/// A quoted message of [`quote_html`] (maybe trimmed by the user) apart: whether it is a reply's (in a blockquote),
+/// its header block and the message after it
+pub fn quote_parts(quote: &str) -> (bool, &str, &str) {
+    let quote = quote.trim();
+    let reply = quote.starts_with("<blockquote");
+    let (header, body) = quote.split_once(QUOTE_HEADER_END).unwrap_or(("", quote));
+    (reply, header, body)
 }
 
 /// A picture of the message, from a `data:` URI of its HTML, to go in multipart/related
@@ -274,6 +295,26 @@ mod tests {
         assert_ne!(
             editor_document(None, false, "").split("'nonce-").nth(1),
             page.split("'nonce-").nth(1)
+        );
+    }
+
+    #[test]
+    fn formatting_is_told_from_plain_text() {
+        assert!(is_plain("<div>a</div><div><br></div><p>b</p><span>c</span>"));
+        for formatted in [
+            "<b>a</b>",
+            "<div style=\"color:red\">a</div>",
+            "<ul><li>a</li></ul>",
+            "<img src=\"data:image/png;base64,AA\">",
+        ] {
+            assert!(!is_plain(formatted), "{formatted}");
+        }
+        let (reply, header, body) =
+            quote_parts("<blockquote type=\"cite\"><div>From: a</div><div><br></div><p>hi</p></blockquote>");
+        assert!(reply);
+        assert_eq!(
+            (header, body),
+            ("<blockquote type=\"cite\"><div>From: a</div>", "<p>hi</p></blockquote>")
         );
     }
 

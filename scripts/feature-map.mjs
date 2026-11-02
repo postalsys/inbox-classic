@@ -269,7 +269,7 @@ const sections = [
             {
                 shot: 'write-5-new',
                 name: 'A new message',
-                what: 'From shows the account the message goes from (name and address), and with several accounts chooses another. To, Cc, Bcc, Subject, the text and attached files (Attach, or dragged from Explorer), listed with their size; Delete or a right-click takes one off. Several addresses are separated with commas; names with commas go in quotes.',
+                what: 'From shows the account the message goes from (name and address), and with several accounts chooses another. Cc and Bcc wait behind buttons at the end of the To line until needed. Written in HTML; without any formatting it goes as plain text, and a reply or forward follows the original. To, Cc, Bcc, Subject, the text and attached files (Attach, or dragged from Explorer), listed with their size; Delete or a right-click takes one off. Several addresses are separated with commas; names with commas go in quotes.',
                 how: 'Create Mail on the toolbar, Message > New Message, or Ctrl+N.',
                 checked: ['From names the account', 'Attach adds the files', 'Delete takes one off', 'The message is sent and arrives with only the file left']
             },

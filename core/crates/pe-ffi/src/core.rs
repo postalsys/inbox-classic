@@ -1395,6 +1395,11 @@ pub struct PeOutgoing {
     /// The account whose Drafts has that copy when From changed to another account since, 0 otherwise: the copy
     /// there goes once the message is saved or queued in the account it goes from now
     pub draft_account: i64,
+    /// The quoted message was plain text (PeDraftInfo.quote_text was there): with nothing formatted written, the
+    /// message then goes as plain text
+    pub quote_plain: bool,
+    /// PeDraftInfo.quote_text while `quote` is the draft's own (not edited), NULL otherwise
+    pub quote_text: *const c_char,
 }
 
 /// # Safety
@@ -1437,6 +1442,8 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         references: text(o.references)?.split_whitespace().map(str::to_string).collect(),
         message_id: Some(text(o.message_id)?).filter(|id| !id.is_empty()),
         draft_account: (o.draft_account != 0).then_some(o.draft_account),
+        quote_plain: o.quote_plain,
+        quote_text: Some(text(o.quote_text)?).filter(|t| !t.is_empty()),
     })
 }
 
@@ -1580,6 +1587,9 @@ pub struct PeDraftInfo {
     pub quote: *const c_char,
     /// The quote starts folded behind "..." (a reply) or open (a forward)
     pub quote_folded: bool,
+    /// The quote as plain text (the original's own lines) when the message replied to or forwarded was plain text,
+    /// NULL otherwise: for PeOutgoing (`quote_plain` and, while the quote is not edited, `quote_text`)
+    pub quote_text: *const c_char,
     /// For PeOutgoing, NULL when there is none
     pub in_reply_to: *const c_char,
     /// For PeOutgoing, space separated
@@ -1615,6 +1625,7 @@ fn draft_handle(draft: &pe_core::Draft) -> *mut PeDraft {
         subject: strings.add(&draft.subject),
         quote: strings.add(&draft.quote),
         quote_folded: draft.quote_folded,
+        quote_text: draft.quote_text.as_deref().map_or(null(), |text| strings.add(text)),
         in_reply_to: draft.in_reply_to.as_deref().map_or(null(), |r| strings.add(r)),
         references: strings.add(&draft.references.join(" ")),
         bcc: strings.add(&draft.bcc),

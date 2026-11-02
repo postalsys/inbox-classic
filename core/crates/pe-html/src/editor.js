@@ -3,7 +3,9 @@
 // template until it is put into the text). The host calls window.pe; the page answers with plain strings over
 // postMessage, which the host never parses beyond their prefix:
 //   "html:<the body>"   the HTML of what was written, after pe.send(); the quote still folded, for the core to add
-//   "full:<the body>"   the same with the quote in it already (unfolded): nothing to add
+//   "split:<written>\u001f<quote>"  the quote unfolded into the text: what was written, then the quote as the user
+//                       left it (trimmed, written in), each on its own; the core adds that quote
+//   "full:<the body>"   the quote unfolded and then deleted: the body is all there is
 //   "state:<flags>"     one 0 or 1 per command of STATE, for the format bar
 //   "dirty"             the first change (since pe.clean(), after a save), so closing can ask before throwing it away
 (() => {
@@ -101,7 +103,19 @@
             }
         },
         send() {
-            post((unfolded ? 'full:' : 'html:') + body.innerHTML);
+            if (!unfolded) {
+                post('html:' + body.innerHTML);
+                return;
+            }
+            const block = body.querySelector(':scope > div.quoted');
+            if (!block) {
+                post('full:' + body.innerHTML);
+                return;
+            }
+            // what was written apart from the quote, which the core then judges and sends on its own
+            const written = body.cloneNode(true);
+            written.querySelector(':scope > div.quoted').remove();
+            post('split:' + written.innerHTML + '\u001f' + block.innerHTML);
         },
         // saved: the next change is a change again
         clean() {

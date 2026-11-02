@@ -13,7 +13,7 @@ use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 
 mod editor;
-pub use editor::{Picture, draft_body, editor_document, outgoing_html, picture_uri, quote_html};
+pub use editor::{Picture, draft_body, editor_document, is_plain, outgoing_html, picture_uri, quote_html, quote_parts};
 
 /// An image a message carries for its HTML, referenced as `cid:` (multipart/related)
 #[derive(Debug, Clone, Copy)]

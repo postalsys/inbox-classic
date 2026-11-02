@@ -95,9 +95,17 @@ void Editor::Configure() {
             std::wstring message = text;
             CoTaskMemFree(text);
             if (message.rfind(L"html:", 0) == 0) {
-                handlers_.html(message.substr(5), false);
+                handlers_.html(message.substr(5), EditorQuote::Folded, L"");
+            } else if (message.rfind(L"split:", 0) == 0) {
+                // what was written, the separator, the quote: the first separator, as the quote may hold one
+                size_t separator = message.find(L'\x1f', 6);
+                if (separator == std::wstring::npos) {
+                    handlers_.html(message.substr(6), EditorQuote::Removed, L"");
+                } else {
+                    handlers_.html(message.substr(6, separator - 6), EditorQuote::Edited, message.substr(separator + 1));
+                }
             } else if (message.rfind(L"full:", 0) == 0) {
-                handlers_.html(message.substr(5), true);
+                handlers_.html(message.substr(5), EditorQuote::Removed, L"");
             } else if (message.rfind(L"state:", 0) == 0) {
                 handlers_.state(message.substr(6));
             } else if (message == L"dirty") {
