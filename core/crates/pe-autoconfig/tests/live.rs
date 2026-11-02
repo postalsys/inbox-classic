@@ -12,14 +12,14 @@ async fn finds_the_servers_of_well_known_providers() {
     if !enabled() {
         return;
     }
-    let gmail = discover("postalexpress.test@gmail.com").await.unwrap();
+    let gmail = discover("postalexpress.test@gmail.com", None).await.unwrap();
     assert_ne!(gmail.source, Source::Guess, "{gmail:?}");
     assert_eq!(gmail.imap.host, "imap.gmail.com");
     assert_eq!(gmail.imap.security, ServerSecurity::Tls);
     assert_eq!(gmail.smtp.host, "smtp.gmail.com");
     assert!(gmail.oauth2);
 
-    let fastmail = discover("postalexpress.test@fastmail.com").await.unwrap();
+    let fastmail = discover("postalexpress.test@fastmail.com", None).await.unwrap();
     assert_ne!(fastmail.source, Source::Guess, "{fastmail:?}");
     assert!(fastmail.imap.host.ends_with("fastmail.com"), "{fastmail:?}");
 }
@@ -30,7 +30,7 @@ async fn guesses_for_a_domain_nobody_knows() {
         return;
     }
     // .invalid never resolves (RFC 2606)
-    let unknown = discover("someone@postalexpress.invalid").await.unwrap();
+    let unknown = discover("someone@postalexpress.invalid", None).await.unwrap();
     assert_eq!(unknown.source, Source::Guess);
     assert_eq!(unknown.imap.host, "imap.postalexpress.invalid");
 }
@@ -49,7 +49,7 @@ async fn mx_and_srv_over_dns_over_https() {
     // a Google Workspace domain: its exchange is Google's, so the servers are Gmail's
     let mx = io.mx("postalsys.com").await;
     assert!(mx[0].exchange.ends_with(".l.google.com"), "{mx:?}");
-    let postalsys = pe_autoconfig::discover("postalexpress.test@postalsys.com")
+    let postalsys = pe_autoconfig::discover("postalexpress.test@postalsys.com", None)
         .await
         .unwrap();
     assert_eq!(postalsys.source, Source::Mx, "{postalsys:?}");

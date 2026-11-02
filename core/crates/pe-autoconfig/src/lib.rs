@@ -18,8 +18,8 @@
 //!
 //! Autodiscover is the one lookup that can use the password ([`Credentials`]): hosted Exchange answers only an
 //! authenticated request. The password is sent only to an HTTPS origin that answered the anonymous request with a
-//! `401` naming Basic, never first, never over plain HTTP, never along a redirect, and never to an origin that a
-//! response body or a plain-HTTP redirect named. See [`autodiscover`].
+//! `401` naming Basic: never first, never over plain HTTP, and never to an origin that a response body named. See
+//! [`autodiscover`].
 #![forbid(unsafe_code)]
 
 mod app_password;
@@ -114,18 +114,9 @@ const TIMEOUT: Duration = Duration::from_secs(5);
 /// has none or it is not a host name
 pub fn domain_of(email: &str) -> Option<String> {
     let (_, domain) = email.trim().rsplit_once('@')?;
-    let domain = idna::domain_to_ascii(domain.trim_end_matches('.')).ok()?;
-    let valid = !domain.is_empty()
-        && domain.len() <= 253
-        && domain.contains('.')
-        && domain.split('.').all(|label| {
-            !label.is_empty()
-                && label.len() <= 63
-                && label.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
-                && !label.starts_with('-')
-                && !label.ends_with('-')
-        });
-    valid.then_some(domain)
+    let domain = dns::host_name(&idna::domain_to_ascii(domain.trim_end_matches('.')).ok()?)?;
+    // a name without a dot is a local host, not a mail domain
+    domain.contains('.').then_some(domain)
 }
 
 /// The places to ask, in order: the provider's file at two places, then the ISPDB
@@ -189,16 +180,11 @@ fn settings(email: &str, domain: &str, source: Source, found: Discovered) -> Set
     }
 }
 
-/// Finds the servers of `email`, anonymously; the guess when no configuration is found. None for an address
-/// without a domain.
-pub async fn discover(email: &str) -> Option<Settings> {
-    discover_using(email, None, &NetIo { timeout: TIMEOUT }, BUDGET).await
-}
-
-/// [`discover`] with the account's login, which only Autodiscover uses, and only for an HTTPS origin that asks for
-/// it with a Basic challenge
-pub async fn discover_with_credentials(email: &str, credentials: &Credentials) -> Option<Settings> {
-    discover_using(email, Some(credentials), &NetIo { timeout: TIMEOUT }, BUDGET).await
+/// Finds the servers of `email`; the guess when no configuration is found. None for an address without a domain.
+/// `credentials` (the account's login) are used by Autodiscover only, and only for an HTTPS origin that asks for
+/// them with a Basic challenge.
+pub async fn discover(email: &str, credentials: Option<&Credentials>) -> Option<Settings> {
+    discover_using(email, credentials, &NetIo { timeout: TIMEOUT }, BUDGET).await
 }
 
 /// [`discover`] over another network (tests answer in its place), with `budget` for each step
@@ -223,47 +209,47 @@ pub async fn discover_using<I: Io>(
     Some(settings)
 }
 
-/// A `fetch(host, path)` of HTTPS GETs as the network: nothing else is fetched, and there are no DNS records
-struct FetchIo<F>(F);
-
-impl<F, Fut> Io for FetchIo<F>
-where
-    F: Fn(String, String) -> Fut + Sync,
-    Fut: Future<Output = Result<Response, HttpError>> + Send,
-{
-    fn http(&self, request: HttpRequest) -> impl Future<Output = Result<Response, HttpError>> + Send {
-        let url = pe_net::http::parse_url(&request.url).filter(|u| u.https && request.method == Method::Get);
-        let fetch = url.map(|url| (self.0)(url.host, url.path));
-        async move {
-            match fetch {
-                Some(fetch) => fetch.await,
-                None => Err(HttpError::BadUrl),
-            }
-        }
-    }
-
-    async fn mx(&self, _: &str) -> Vec<MxRecord> {
-        Vec::new()
-    }
-
-    async fn srv(&self, _: &str) -> Vec<SrvRecord> {
-        Vec::new()
-    }
-}
-
-/// [`discover`] with another way to fetch, for tests: `fetch(host, path)` gets the configuration files over
-/// HTTPS; there are no DNS records, and no Autodiscover
-pub async fn discover_with<F, Fut>(email: &str, fetch: F) -> Option<Settings>
-where
-    F: Fn(String, String) -> Fut + Sync,
-    Fut: Future<Output = Result<Response, HttpError>> + Send,
-{
-    discover_using(email, None, &FetchIo(fetch), BUDGET).await
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A `fetch(host, path)` of HTTPS GETs as the network: nothing else is fetched, and there are no DNS records
+    struct FetchIo<F>(F);
+
+    impl<F, Fut> Io for FetchIo<F>
+    where
+        F: Fn(String, String) -> Fut + Sync,
+        Fut: Future<Output = Result<Response, HttpError>> + Send,
+    {
+        fn http(&self, request: HttpRequest) -> impl Future<Output = Result<Response, HttpError>> + Send {
+            let url = pe_net::http::parse_url(&request.url).filter(|u| u.https && request.method == Method::Get);
+            let fetch = url.map(|url| (self.0)(url.host, url.path));
+            async move {
+                match fetch {
+                    Some(fetch) => fetch.await,
+                    None => Err(HttpError::BadUrl),
+                }
+            }
+        }
+
+        async fn mx(&self, _: &str) -> Vec<MxRecord> {
+            Vec::new()
+        }
+
+        async fn srv(&self, _: &str) -> Vec<SrvRecord> {
+            Vec::new()
+        }
+    }
+
+    /// [`discover`] with another way to fetch, for tests: `fetch(host, path)` gets the configuration files over
+    /// HTTPS; there are no DNS records, and no Autodiscover
+    async fn discover_with<F, Fut>(email: &str, fetch: F) -> Option<Settings>
+    where
+        F: Fn(String, String) -> Fut + Sync,
+        Fut: Future<Output = Result<Response, HttpError>> + Send,
+    {
+        discover_using(email, None, &FetchIo(fetch), BUDGET).await
+    }
 
     #[test]
     fn domains() {
@@ -713,12 +699,12 @@ mod tests {
     #[test]
     fn the_lookups_can_run_on_another_thread() {
         fn send<T: Send>(_: T) {}
-        send(discover("a@example.com"));
+        send(discover("a@example.com", None));
         let credentials = Credentials {
             user: None,
             password: "x".into(),
         };
-        send(discover_with_credentials("a@example.com", &credentials));
+        send(discover("a@example.com", Some(&credentials)));
     }
 
     #[test]

@@ -48,6 +48,8 @@ pub(crate) fn host_name(text: &str) -> Option<String> {
                 && label
                     .bytes()
                     .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+                && !label.starts_with('-')
+                && !label.ends_with('-')
         });
     valid.then_some(host)
 }

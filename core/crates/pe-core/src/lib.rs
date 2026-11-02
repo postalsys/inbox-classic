@@ -315,12 +315,7 @@ impl Core {
                 user: None,
                 password: password.to_string(),
             });
-        let work = async move {
-            match credentials {
-                Some(credentials) => pe_autoconfig::discover_with_credentials(&email, &credentials).await,
-                None => pe_autoconfig::discover(&email).await,
-            }
-        };
+        let work = async move { pe_autoconfig::discover(&email, credentials.as_ref()).await };
         self.autoconfig
             .start(self.runtime()?, request, work, self.events.clone(), |request| {
                 Event::AutoconfigDone { request }

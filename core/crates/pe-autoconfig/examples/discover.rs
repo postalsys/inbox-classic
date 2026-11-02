@@ -7,14 +7,8 @@ async fn main() {
     let mut args = std::env::args().skip(1);
     let email = args.next().unwrap_or_else(|| "someone@gmail.com".into());
     let password = args.next().or_else(|| std::env::var("PE_PASSWORD").ok());
-    let found = match password {
-        Some(password) => {
-            let credentials = pe_autoconfig::Credentials { user: None, password };
-            pe_autoconfig::discover_with_credentials(&email, &credentials).await
-        }
-        None => pe_autoconfig::discover(&email).await,
-    };
-    match found {
+    let credentials = password.map(|password| pe_autoconfig::Credentials { user: None, password });
+    match pe_autoconfig::discover(&email, credentials.as_ref()).await {
         Some(settings) => println!("{settings:#?}"),
         None => println!("{email} has no domain"),
     }

@@ -150,7 +150,7 @@ impl Protocol {
 pub fn parse_pox(xml: &str) -> Option<Pox> {
     let mut accounts: Vec<Account> = Vec::new();
     walk(xml, |node| match node {
-        Node::Open(path) => {
+        Node::Open(path, _) => {
             let path: Vec<&str> = path.iter().map(String::as_str).collect();
             match path[..] {
                 ["autodiscover", "response", "account"] if accounts.len() < MAX_ENTRIES => {
@@ -280,7 +280,7 @@ pub fn parse_soap(xml: &str) -> Option<Discovered> {
     ];
     let mut settings: Vec<UserSetting> = Vec::new();
     walk(xml, |node| match node {
-        Node::Open(path) => {
+        Node::Open(path, _) => {
             if path.len() == 8 && path.iter().zip(SETTING).all(|(a, b)| a == b) && settings.len() < MAX_ENTRIES {
                 settings.push(UserSetting::default());
             }

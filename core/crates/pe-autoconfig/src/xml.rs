@@ -14,14 +14,23 @@ const MAX_TEXT: usize = 4096;
 const MAX_EVENTS: usize = 50_000;
 
 pub(crate) enum Node<'a> {
-    /// An element starts; the path ends with its name
-    Open(&'a [String]),
+    /// An element starts; the path ends with its name. With the value of its `type` attribute, lowercased, the
+    /// one attribute these documents carry meaning in (`<incomingServer type="imap">`)
+    Open(&'a [String], Option<&'a str>),
     /// An element ends, with its text trimmed
     Close(&'a [String], &'a str),
 }
 
 fn name_of(tag: &BytesStart) -> String {
     tag.local_name().into_inner().to_ascii_lowercase()
+}
+
+fn type_of(tag: &BytesStart) -> Option<String> {
+    let attribute = tag
+        .attributes()
+        .flatten()
+        .find(|a| a.key.local_name().as_ref() == "type")?;
+    Some(attribute.value.to_ascii_lowercase())
 }
 
 /// Walks `xml`; None when it is not well-formed (an element left open, a mismatched end tag) or too large
@@ -38,14 +47,14 @@ pub(crate) fn walk(xml: &str, mut visit: impl FnMut(Node)) -> Option<()> {
                 }
                 path.push(name_of(&tag));
                 text.clear();
-                visit(Node::Open(&path));
+                visit(Node::Open(&path, type_of(&tag).as_deref()));
             }
             Event::Empty(tag) => {
                 if path.len() >= MAX_DEPTH {
                     return None;
                 }
                 path.push(name_of(&tag));
-                visit(Node::Open(&path));
+                visit(Node::Open(&path, type_of(&tag).as_deref()));
                 visit(Node::Close(&path, ""));
                 path.pop();
                 text.clear();

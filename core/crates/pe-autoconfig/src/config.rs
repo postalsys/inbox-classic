@@ -2,9 +2,8 @@
 //! first IMAP server and the first SMTP server with encryption, their user name template filled in
 
 use crate::Discovered;
-
-use quick_xml::Reader;
-use quick_xml::events::Event;
+use crate::dns::host_name;
+use crate::xml::{Node, walk};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ServerSecurity {
@@ -47,22 +46,14 @@ impl Entry {
         } else {
             self.host.as_str()
         };
-        let valid_host = !host.is_empty()
-            && host.len() <= 253
-            && host
-                .bytes()
-                .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'.');
+        let host = host_name(host)?;
         let port: u16 = self.port.trim().parse().ok().filter(|p| *p > 0)?;
         let security = match self.socket.trim().to_ascii_uppercase().as_str() {
             "SSL" | "TLS" => ServerSecurity::Tls,
             "STARTTLS" => ServerSecurity::StartTls,
             _ => return None,
         };
-        valid_host.then(|| Server {
-            host: host.to_ascii_lowercase(),
-            port,
-            security,
-        })
+        Some(Server { host, port, security })
     }
 }
 
@@ -113,67 +104,57 @@ pub fn parse_partial(xml: &str, email: &str, domain: &str) -> Option<Discovered>
     })
 }
 
-/// The server entries of a configuration file
+/// The server entries of a configuration file; None when it is not well-formed (a cut-off file included) or
+/// longer than a configuration file is
 fn parse_entries(xml: &str) -> Option<Vec<Entry>> {
-    let mut reader = Reader::from_str(xml);
     let mut entries: Vec<Entry> = Vec::new();
     let mut current: Option<Entry> = None;
-    // the text of the element being read: quick-xml hands text, CDATA and references over separately
-    let mut text = String::new();
-    loop {
-        match reader.read_event().ok()? {
-            Event::Start(tag) => {
-                let name = tag.local_name();
-                if name.as_ref() == "incomingServer" || name.as_ref() == "outgoingServer" {
-                    let kind = tag
-                        .attributes()
-                        .flatten()
-                        .find(|a| a.key.as_ref() == "type")
-                        .map(|a| a.value.to_ascii_lowercase())
-                        .unwrap_or_default();
-                    current = Some(Entry {
-                        kind,
-                        ..Default::default()
-                    });
-                }
-                text.clear();
+    walk(xml, |node| match node {
+        Node::Open(path, kind) => {
+            if matches!(
+                path.last().map(String::as_str),
+                Some("incomingserver" | "outgoingserver")
+            ) {
+                current = Some(Entry {
+                    kind: kind.unwrap_or_default().to_string(),
+                    ..Default::default()
+                });
             }
-            Event::Text(part) => text.push_str(&part),
-            Event::CData(part) => text.push_str(&part),
-            Event::GeneralRef(reference) => {
-                if reference.is_char_ref() {
-                    text.extend(reference.resolve_char_ref().ok().flatten());
-                } else if let Some(resolved) = quick_xml::escape::resolve_predefined_entity(&reference) {
-                    text.push_str(resolved);
-                }
-            }
-            Event::End(tag) => {
-                let name = tag.local_name();
-                let value = std::mem::take(&mut text).trim().to_string();
-                match (name.as_ref(), current.as_mut()) {
-                    ("incomingServer" | "outgoingServer", Some(_)) => entries.extend(current.take()),
-                    ("hostname", Some(entry)) => entry.host = value,
-                    ("port", Some(entry)) => entry.port = value,
-                    ("socketType", Some(entry)) => entry.socket = value,
-                    ("username", Some(entry)) => entry.username = value,
-                    ("authentication", Some(entry)) => entry.oauth2 |= value.eq_ignore_ascii_case("OAuth2"),
-                    _ => {}
-                }
-            }
-            Event::Eof => break,
+        }
+        Node::Close(path, value) => match (path.last().map(String::as_str), current.as_mut()) {
+            (Some("incomingserver" | "outgoingserver"), Some(_)) => entries.extend(current.take()),
+            (Some("hostname"), Some(entry)) => entry.host = value.to_string(),
+            (Some("port"), Some(entry)) => entry.port = value.to_string(),
+            (Some("sockettype"), Some(entry)) => entry.socket = value.to_string(),
+            (Some("username"), Some(entry)) => entry.username = value.to_string(),
+            (Some("authentication"), Some(entry)) => entry.oauth2 |= value.eq_ignore_ascii_case("OAuth2"),
             _ => {}
-        }
-        // a configuration file is short; a long one is not one
-        if entries.len() > 64 || text.len() > 4096 {
-            return None;
-        }
-    }
-    Some(entries)
+        },
+    })?;
+    // a configuration file is short; a long one is not one
+    (entries.len() <= 64).then_some(entries)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_cut_off_file_is_no_configuration() {
+        let whole = "<clientConfig><emailProvider><incomingServer type=\"imap\"><hostname>imap.x.com</hostname>\
+                     <port>993</port><socketType>SSL</socketType></incomingServer><outgoingServer type=\"smtp\">\
+                     <hostname>smtp.x.com</hostname><port>465</port><socketType>SSL</socketType></outgoingServer>\
+                     </emailProvider></clientConfig>";
+        assert!(parse_config(whole, "a@x.com").is_some());
+        // cut after the IMAP server: a file that a network could have cut short is not used at all
+        let cut = &whole[..whole.find("<outgoingServer").unwrap()];
+        assert_eq!(parse_partial(cut, "a@x.com", "x.com"), None);
+        // a host name that is no host name
+        let bad = whole
+            .replace("imap.x.com", "-imap.x.com")
+            .replace("smtp.x.com", "smtp..x.com");
+        assert_eq!(parse_partial(&bad, "a@x.com", "x.com"), None);
+    }
 
     const GMAIL_LIKE: &str = r#"<?xml version="1.0"?>
 <clientConfig version="1.1">
