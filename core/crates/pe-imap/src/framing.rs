@@ -98,6 +98,11 @@ impl Framer {
         Ok(())
     }
 
+    /// Whether nothing is buffered: no part of a line or response, no literal being read
+    pub fn is_idle(&self) -> bool {
+        self.line.is_empty() && self.response.is_empty() && self.literal_waiting.is_none()
+    }
+
     fn wait_for_literal(&mut self, waiting: u64) {
         if waiting == 0 {
             self.literals.push(std::mem::take(&mut self.literal));

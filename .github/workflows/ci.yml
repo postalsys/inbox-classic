@@ -49,12 +49,23 @@ jobs:
         defaults:
             run:
                 working-directory: core
+        env:
+            # the end-to-end tests against ImapKit must run here, not skip
+            PE_E2E_REQUIRED: '1'
         steps:
             - uses: actions/checkout@v6
             - uses: dtolnay/rust-toolchain@stable
             - uses: Swatinem/rust-cache@v2
               with:
                   workspaces: core
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: npm
+                  cache-dependency-path: core/e2e/package-lock.json
+            - name: ImapKit for the end-to-end tests
+              run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
             - run: cargo test --workspace --locked
 
     windows:

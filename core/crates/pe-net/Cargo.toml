@@ -1,0 +1,17 @@
+[package]
+name = "pe-net"
+description = "Connections for IMAP and SMTP: TCP, TLS with platform or pinned trust, STARTTLS upgrades"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+# ring rather than aws-lc-rs: no C toolchain (cmake, nasm) needed on Windows
+rustls = { version = "0.23.46", default-features = false, features = ["ring", "logging", "std", "tls12"] }
+rustls-platform-verifier = "0.7.1"
+tokio = { version = "1.54.1", features = ["net", "io-util", "time"] }
+tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "logging", "tls12"] }
+
+[dev-dependencies]
+tokio = { version = "1.54.1", features = ["rt", "macros", "net", "io-util"] }
