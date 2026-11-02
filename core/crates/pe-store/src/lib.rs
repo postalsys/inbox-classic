@@ -13,7 +13,7 @@ mod schema;
 
 use std::path::Path;
 
-pub use accounts::{Account, AccountId, AccountSettings, Security};
+pub use accounts::{Account, AccountId, AccountSettings, Auth, Security};
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use messages::{Message, MessageInfo, Sort, SortField};
 pub use rusqlite::Error;

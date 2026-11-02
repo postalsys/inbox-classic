@@ -68,8 +68,26 @@ void SyncAll() {
     }
 }
 
+// an account that signs in through the browser signs in again
+void SignInAgain(int64_t account) {
+    std::wstring text = L"The sign-in of " + g_mailbox.AccountName(account) + L" was refused or ran out.\n\nSign in again in the browser?";
+    if (MessageBoxW(g_main, text.c_str(), kTitle, MB_YESNO | MB_ICONQUESTION) != IDYES) {
+        return;
+    }
+    uint64_t request =
+        SignInWithBrowser(g_main, g_core.get(), g_mailbox.OAuthProvider(account), g_mailbox.AccountEmail(account));
+    if (request && pe_account_reauthorize(g_core.get(), account, request)) {
+        pe_sync(g_core.get(), account);
+    }
+}
+
 void AskPassword(int64_t account) {
     if (!g_prompting.insert(account).second) {
+        return;
+    }
+    if (g_mailbox.OAuthProvider(account) != PE_O_AUTH_PROVIDER_NONE) {
+        SignInAgain(account);
+        g_prompting.erase(account);
         return;
     }
     std::wstring password;
@@ -92,7 +110,8 @@ void OnEvent(const UiEvent& event) {
         SetStatus(L"Done");
         break;
     case PE_EVENT_KIND_AUTOCONFIG_DONE:
-        LookupDone(event.uid);
+    case PE_EVENT_KIND_SIGN_IN_DONE:
+        RequestDone(event.uid);
         break;
     case PE_EVENT_KIND_MESSAGE_SENT:
         SetStatus(L"Message sent.");

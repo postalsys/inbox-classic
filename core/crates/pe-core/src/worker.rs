@@ -92,17 +92,29 @@ pub(crate) struct Worker {
     path: PathBuf,
     secrets: Secrets,
     trust: Trust,
+    oauth: crate::OAuthProviders,
+    /// The access token of an OAuth account and when it runs out
+    access_token: Option<(String, i64)>,
     events: EventSink,
     connection: Option<(Client, UnboundedReceiver<ImapEvent>)>,
 }
 
 impl Worker {
-    pub(crate) fn new(account: AccountId, path: PathBuf, secrets: Secrets, trust: Trust, events: EventSink) -> Self {
+    pub(crate) fn new(
+        account: AccountId,
+        path: PathBuf,
+        secrets: Secrets,
+        trust: Trust,
+        oauth: crate::OAuthProviders,
+        events: EventSink,
+    ) -> Self {
         Worker {
             account,
             path,
             secrets,
             trust,
+            oauth,
+            access_token: None,
             events,
             connection: None,
         }
@@ -144,6 +156,10 @@ impl Worker {
         if failure.kind != FailureKind::Other {
             // the connection is no good now, the next command connects again
             self.connection = None;
+        }
+        if failure.kind == FailureKind::Authentication {
+            // an access token that was refused is no good either
+            self.access_token = None;
         }
         // a refused password is told once, not again for each command until the user gives another
         if failure.kind == FailureKind::Authentication && !self.secrets.first_refusal(self.account) {
@@ -189,7 +205,7 @@ impl Worker {
             kind: FailureKind::Other,
             message: "the message could not be built".into(),
         })??;
-        let mut config = smtp_config(&account, self.credentials(&account)?);
+        let mut config = smtp_config(&account, self.credentials(&account).await?);
         config.trust = self.trust.clone();
         let mut smtp = pe_smtp::Client::connect(config).await?;
         smtp.send(&built.envelope, &built.raw).await?;
@@ -215,16 +231,70 @@ impl Worker {
     }
 
     /// The password of the account, as credentials for IMAP and SMTP
-    fn credentials(&self, account: &pe_store::Account) -> Result<Credentials, Failure> {
-        let Some(password) = self.secrets.get(self.account) else {
-            return Err(Failure {
-                kind: FailureKind::Authentication,
-                message: "no password for this account".into(),
-            });
+    /// How to log in: the password, or for an OAuth account an access token made from its refresh token
+    async fn credentials(&mut self, account: &pe_store::Account) -> Result<Credentials, Failure> {
+        let no_secret = |what: &str| Failure {
+            kind: FailureKind::Authentication,
+            message: format!("no {what} for this account"),
         };
-        Ok(Credentials::Password {
-            user: account.settings.username.clone(),
-            password,
+        let user = account.settings.username.clone();
+        let pe_store::Auth::OAuth2(provider) = &account.settings.auth else {
+            let password = self.secrets.get(self.account).ok_or_else(|| no_secret("password"))?;
+            return Ok(Credentials::Password { user, password });
+        };
+        let now = pe_oauth::now();
+        if let Some((token, expires_at)) = &self.access_token
+            && *expires_at > now
+        {
+            return Ok(Credentials::OAuth2 {
+                user,
+                access_token: token.clone(),
+            });
+        }
+        let provider = pe_oauth::ProviderKind::parse(provider)
+            .and_then(|kind| self.oauth.provider(kind))
+            .ok_or_else(|| Failure {
+                kind: FailureKind::Other,
+                message: format!("this build can not sign in to {provider}"),
+            })?;
+        // an access token is for the provider's own servers only
+        let settings = &account.settings;
+        if !settings.imap_host.eq_ignore_ascii_case(&provider.imap.host)
+            || !settings.smtp_host.eq_ignore_ascii_case(&provider.smtp.host)
+        {
+            return Err(Failure {
+                kind: FailureKind::Other,
+                message: format!(
+                    "the servers of this account are not those of {}",
+                    provider.kind.as_str()
+                ),
+            });
+        }
+        let refresh_token = self.secrets.get(self.account).ok_or_else(|| no_secret("sign-in"))?;
+        let tokens = pe_oauth::refresh(&provider, &refresh_token)
+            .await
+            .map_err(|error| Failure {
+                kind: if error.needs_sign_in() {
+                    FailureKind::Authentication
+                } else {
+                    FailureKind::Network
+                },
+                message: error.to_string(),
+            })?;
+        if let Some(new) = tokens.refresh_token.as_deref().filter(|new| *new != refresh_token) {
+            // the provider rotated it: the old one may stop working
+            if let Err(error) = self.secrets.set(self.account, new) {
+                self.emit(Event::Failed {
+                    account: self.account,
+                    kind: FailureKind::Other,
+                    message: format!("the new sign-in could not be saved for the next start: {error}"),
+                });
+            }
+        }
+        self.access_token = Some((tokens.access_token.clone(), tokens.expires_at));
+        Ok(Credentials::OAuth2 {
+            user,
+            access_token: tokens.access_token,
         })
     }
 
@@ -301,7 +371,7 @@ impl Worker {
         if self.connection.is_none() {
             // read at each connect, so changed settings are used from the next connection on
             let account = store.account(self.account)?;
-            let mut config = imap_config(&account, self.credentials(&account)?);
+            let mut config = imap_config(&account, self.credentials(&account).await?);
             config.trust = self.trust.clone();
             self.connection = Some(Client::connect(config).await?);
         }

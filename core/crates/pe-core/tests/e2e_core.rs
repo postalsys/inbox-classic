@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use pe_core::{Core, Event, FailureKind};
 use pe_store::{AccountSettings, Sort};
-use pe_testkit::{ImapKit, PASSWORD, TempDir, rfc822};
+use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
 use serde_json::json;
 
 struct Setup {
@@ -26,6 +26,7 @@ fn setup() -> Option<Setup> {
     let options = pe_core::Options {
         trust,
         passwords: pe_core::PasswordStore::Memory,
+        ..Default::default()
     };
     let core = Core::open_with(dir.path().join("store.db"), options, move |event| {
         let _ = sender.send(event);
@@ -245,4 +246,85 @@ fn sends_replies_and_keeps_a_copy() {
     let refused = s.core.send(account, bad).unwrap_err();
     assert!(refused.to_string().contains("not an e-mail address"), "{refused}");
     assert_eq!(s.server.messages("INBOX").len(), 1);
+}
+
+#[test]
+fn signs_in_with_oauth() {
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let token_port = pe_testkit::oauth_token_server();
+    let dir = TempDir::new("core-oauth");
+    let (sender, events) = channel();
+    let endpoint = |port| pe_oauth::Endpoint {
+        host: "127.0.0.1".into(),
+        port,
+        security: pe_net::Security::Plain,
+    };
+    let mock = pe_oauth::Provider {
+        kind: pe_oauth::ProviderKind::Google,
+        imap: endpoint(server.imap),
+        smtp: endpoint(server.smtp),
+        authorize_url: "https://accounts.example.com/auth".into(),
+        token_url: format!("http://127.0.0.1:{token_port}/token"),
+        scopes: vec!["https://mail.google.com/".into()],
+        client_id: "client".into(),
+        client_secret: None,
+    };
+    let options = pe_core::Options {
+        passwords: pe_core::PasswordStore::Memory,
+        oauth_providers: vec![mock],
+        ..Default::default()
+    };
+    let core = Core::open_with(dir.path().join("store.db"), options, move |event| {
+        let _ = sender.send(event);
+    })
+    .unwrap();
+    let wait = |accept: &dyn Fn(&Event) -> bool| loop {
+        let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
+        if accept(&event) {
+            return event;
+        }
+        assert!(!matches!(event, Event::Failed { .. }), "{event:?}");
+    };
+
+    assert_eq!(
+        core.oauth_provider_for("imap.gmail.com"),
+        Some(pe_oauth::ProviderKind::Google)
+    );
+    let (request, url) = core.sign_in_begin(pe_oauth::ProviderKind::Google, USER).unwrap();
+    assert!(url.starts_with("https://accounts.example.com/auth?"), "{url}");
+    assert!(pe_testkit::oauth_browser(&url, "the-code").contains("You are signed in"));
+    wait(&|e| *e == Event::SignInDone { request });
+    assert_eq!(core.sign_in_result(request), Ok(()));
+
+    // the account signs in to ImapKit with XOAUTH2 and the access token from the refresh token, at the
+    // provider's servers whatever the settings given said
+    let mut elsewhere = server.account_settings();
+    elsewhere.smtp_host = "smtp.attacker.example".into();
+    let account = core.add_account_oauth(&elsewhere, request).unwrap();
+    assert_eq!(core.accounts().unwrap()[0].settings.smtp_host, "127.0.0.1");
+    assert!(matches!(core.accounts().unwrap()[0].settings.auth, pe_store::Auth::OAuth2(ref p) if p == "google"));
+    core.sync(account).unwrap();
+    wait(&|e| *e == Event::SyncFinished { account });
+    assert!(!core.folders(account).unwrap().is_empty());
+    // the sign-in was taken
+    assert!(core.add_account_oauth(&server.account_settings(), request).is_err());
+    // changing the settings keeps how it signs in, and its servers
+    core.update_account(account, &elsewhere).unwrap();
+    let kept = &core.accounts().unwrap()[0].settings;
+    assert!(matches!(kept.auth, pe_store::Auth::OAuth2(_)) && kept.smtp_host == "127.0.0.1");
+
+    // a code the provider refuses
+    let (refused, url) = core.sign_in_begin(pe_oauth::ProviderKind::Google, USER).unwrap();
+    pe_testkit::oauth_browser(&url, "wrong-code");
+    wait(&|e| *e == Event::SignInDone { request: refused });
+    assert!(core.sign_in_result(refused).unwrap_err().contains("invalid_grant"));
+    // told once, then forgotten
+    assert!(core.sign_in_result(refused).unwrap_err().contains("not finished"));
+
+    // a cancelled sign-in is forgotten
+    let (cancelled, _) = core.sign_in_begin(pe_oauth::ProviderKind::Google, USER).unwrap();
+    core.sign_in_cancel(cancelled);
+    assert!(core.sign_in_result(cancelled).is_err());
 }

@@ -1,0 +1,21 @@
+[package]
+name = "pe-oauth"
+description = "OAuth 2.0 sign-in for mail accounts: the authorization code flow with PKCE and a loopback redirect"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+base64.workspace = true
+getrandom = "0.4.3"
+pe-net.workspace = true
+ring = "0.17.14"
+serde_json = "1"
+tokio = { version = "1.54.1", features = ["net", "io-util", "time"] }
+
+[dev-dependencies]
+pe-net.workspace = true
+base64.workspace = true
+ring = "0.17.14"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "io-util", "time"] }

@@ -37,6 +37,7 @@ async fn setup(config: Value) -> Option<Setup> {
             smtp_host: "127.0.0.1".into(),
             smtp_port: server.smtp,
             smtp_security: pe_store::Security::Plain,
+            auth: pe_store::Auth::Password,
         })
         .unwrap();
     Some(Setup {

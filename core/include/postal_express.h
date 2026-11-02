@@ -27,6 +27,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_MESSAGE_SENT = 7,
   // The lookup `uid` of `pe_autoconfig_start` is done: `pe_autoconfig_result`
   PE_EVENT_KIND_AUTOCONFIG_DONE = 8,
+  // The sign-in `uid` of `pe_sign_in_begin` finished: `pe_sign_in_result`
+  PE_EVENT_KIND_SIGN_IN_DONE = 9,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -48,6 +50,12 @@ typedef enum PeSecurity {
   // No encryption: test servers only
   PE_SECURITY_PLAIN = 2,
 } PeSecurity;
+
+typedef enum PeOAuthProvider {
+  PE_O_AUTH_PROVIDER_NONE = 0,
+  PE_O_AUTH_PROVIDER_GOOGLE = 1,
+  PE_O_AUTH_PROVIDER_MICROSOFT = 2,
+} PeOAuthProvider;
 
 typedef enum PeSpecialUse {
   PE_SPECIAL_USE_NONE = 0,
@@ -140,6 +148,9 @@ typedef struct PeAccount {
   int64_t id;
   const char *name;
   const char *email;
+  // The provider it signs in to through the browser, NONE for a password: a refused sign-in asks for
+  // `pe_sign_in_begin` and `pe_account_reauthorize`, not for a password
+  enum PeOAuthProvider oauth;
 } PeAccount;
 
 // A folder as the folder tree shows it, in tree order
@@ -518,6 +529,55 @@ const struct PeAutoconfigInfo *pe_autoconfig_info(const struct PeAutoconfig *res
 // # Safety
 // `result` must be NULL or a result that was not freed yet.
 void pe_autoconfig_free(struct PeAutoconfig *result);
+
+// The provider of an IMAP server that this build can sign in to through the browser; None when there is
+// none or this build has no client ID for it
+//
+// # Safety
+// `core` must be a live handle, `imap_host` a NUL-terminated string.
+enum PeOAuthProvider pe_oauth_provider_for(const struct PeCore *core,
+                                           const char *imap_host);
+
+// Starts signing in to `provider` for `email`. `url` gets the https:// page to open in the browser (free
+// it with `pe_string_free`); `SignInDone` with the returned request in `uid` follows. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle, `email` a NUL-terminated string, `url` a valid pointer.
+uint64_t pe_sign_in_begin(const struct PeCore *core,
+                          enum PeOAuthProvider provider,
+                          const char *email,
+                          char **url);
+
+// Whether a sign-in after its `SignInDone` got what an account needs; when not, `reason` gets why (free
+// it with `pe_string_free`) when it is not NULL
+//
+// # Safety
+// `core` must be a live handle, `reason` NULL or a valid pointer.
+bool pe_sign_in_result(const struct PeCore *core,
+                       uint64_t request,
+                       char **reason);
+
+// Stops a sign-in the user no longer waits for
+//
+// # Safety
+// `core` must be a live handle.
+void pe_sign_in_cancel(const struct PeCore *core, uint64_t request);
+
+// Adds an account that signs in with what the finished sign-in `request` got; its id, or 0
+//
+// # Safety
+// `core` must be a live handle, `settings` valid settings.
+int64_t pe_account_add_oauth(const struct PeCore *core,
+                             const struct PeAccountSettings *settings,
+                             uint64_t request);
+
+// Gives an account signed in through the browser the result of a new sign-in, after the old one was refused
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_account_reauthorize(const struct PeCore *core,
+                            int64_t account,
+                            uint64_t request);
 
 #ifdef __cplusplus
 }  // extern "C"

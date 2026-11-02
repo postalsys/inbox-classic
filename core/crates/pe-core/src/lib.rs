@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 mod compose;
+mod requests;
 mod secrets;
 mod view;
 mod worker;
@@ -22,6 +23,7 @@ use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, S
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing};
+use requests::Requests;
 pub use secrets::PasswordStore;
 use secrets::Secrets;
 pub use view::{AttachmentView, MessageView};
@@ -58,6 +60,10 @@ pub enum Event {
     AutoconfigDone {
         request: u64,
     },
+    /// A sign-in in the browser finished: [`Core::sign_in_result`]
+    SignInDone {
+        request: u64,
+    },
     /// Work for an account failed; `kind` says what to do about it
     Failed {
         account: AccountId,
@@ -88,6 +94,8 @@ pub enum Error {
     Closed,
     /// A message that can not be sent as it is
     Compose(ComposeError),
+    /// Something the system did not allow (a listener for a sign-in)
+    Unavailable(String),
 }
 
 impl fmt::Display for Error {
@@ -97,6 +105,7 @@ impl fmt::Display for Error {
             Error::NotFound => f.write_str("not found"),
             Error::Closed => f.write_str("shutting down"),
             Error::Compose(error) => write!(f, "{error}"),
+            Error::Unavailable(reason) => write!(f, "{reason}"),
         }
     }
 }
@@ -113,11 +122,18 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 pub(crate) type EventSink = Arc<dyn Fn(Event) + Send + Sync>;
 
-/// A lookup of the servers of an address
-enum Lookup {
-    Running(tokio::task::AbortHandle),
-    /// None when the address has no domain
-    Done(Option<pe_autoconfig::Settings>),
+/// The OAuth providers the engine signs in with: the built-in ones (with the client IDs of this build), or the
+/// ones of [`Options::oauth_providers`] in their place
+#[derive(Clone, Default)]
+pub(crate) struct OAuthProviders(Arc<Vec<pe_oauth::Provider>>);
+
+impl OAuthProviders {
+    pub(crate) fn provider(&self, kind: pe_oauth::ProviderKind) -> Option<pe_oauth::Provider> {
+        match self.0.iter().find(|p| p.kind == kind) {
+            Some(provider) => Some(provider.clone()),
+            None => pe_oauth::Provider::builtin(kind),
+        }
+    }
 }
 
 /// How the engine works with servers and passwords
@@ -129,6 +145,8 @@ pub struct Options {
     /// Where passwords are kept between runs; tests use [`PasswordStore::Memory`], so they never write to the
     /// Credential Manager of the user running them
     pub passwords: PasswordStore,
+    /// OAuth providers in place of the built-in ones of the same kind (tests, a mock provider)
+    pub oauth_providers: Vec<pe_oauth::Provider>,
 }
 
 pub struct Core {
@@ -143,8 +161,11 @@ pub struct Core {
     events: EventSink,
     /// Set when closing: no event is delivered after
     closed: Arc<AtomicBool>,
-    /// Lookups of servers, by request
-    autoconfig: Arc<Mutex<HashMap<u64, Lookup>>>,
+    /// Lookups of servers; None when the address has no domain
+    autoconfig: Requests<Option<pe_autoconfig::Settings>>,
+    /// Sign-ins in the browser: the provider and the refresh token, or why not
+    sign_ins: Requests<std::result::Result<(pe_oauth::ProviderKind, String), String>>,
+    oauth: OAuthProviders,
     next_request: std::sync::atomic::AtomicU64,
 }
 
@@ -186,7 +207,9 @@ impl Core {
                 }
             }),
             closed,
-            autoconfig: Arc::default(),
+            autoconfig: Requests::default(),
+            sign_ins: Requests::default(),
+            oauth: OAuthProviders(Arc::new(options.oauth_providers)),
             next_request: std::sync::atomic::AtomicU64::new(1),
         })
     }
@@ -227,8 +250,16 @@ impl Core {
         }
     }
 
+    /// Changes the settings of an account; how it signs in stays, only signing in again changes that
     pub fn update_account(&self, id: AccountId, settings: &AccountSettings) -> Result<()> {
-        self.store().update_account(id, settings)?;
+        let mut settings = settings.clone();
+        settings.auth = self.store().account(id)?.settings.auth;
+        if let pe_store::Auth::OAuth2(name) = &settings.auth
+            && let Some(provider) = pe_oauth::ProviderKind::parse(name).and_then(|kind| self.oauth.provider(kind))
+        {
+            settings = with_provider(&settings, &provider);
+        }
+        self.store().update_account(id, &settings)?;
         // the worker connects again with the new settings
         self.stop_worker(id);
         Ok(())
@@ -271,44 +302,95 @@ impl Core {
     /// this returns
     pub fn autoconfig(&self, email: &str) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
-        let (results, events, email) = (self.autoconfig.clone(), self.events.clone(), email.to_string());
-        // held while the lookup starts, so it can not finish before it is listed as running
-        let mut lookups = self.autoconfig.lock().unwrap_or_else(|p| p.into_inner());
-        let task = self.runtime()?.spawn(async move {
-            let found = pe_autoconfig::discover(&email).await;
-            results
-                .lock()
-                .unwrap_or_else(|p| p.into_inner())
-                .insert(request, Lookup::Done(found));
-            events(Event::AutoconfigDone { request });
-        });
-        lookups.insert(request, Lookup::Running(task.abort_handle()));
+        let email = email.to_string();
+        let work = async move { pe_autoconfig::discover(&email).await };
+        self.autoconfig
+            .start(self.runtime()?, request, work, self.events.clone(), |request| {
+                Event::AutoconfigDone { request }
+            });
         Ok(request)
     }
 
     /// What a lookup found, once it is done and once: None for an address without a domain, a lookup that is
     /// still running, or an unknown request
     pub fn autoconfig_result(&self, request: u64) -> Option<pe_autoconfig::Settings> {
-        let mut lookups = self.autoconfig.lock().unwrap_or_else(|p| p.into_inner());
-        match lookups.get(&request)? {
-            Lookup::Running(_) => None,
-            Lookup::Done(_) => match lookups.remove(&request) {
-                Some(Lookup::Done(found)) => found,
-                _ => None,
-            },
-        }
+        self.autoconfig.take(request).flatten()
     }
 
     /// Stops a lookup the user no longer waits for, and forgets it
     pub fn autoconfig_cancel(&self, request: u64) {
-        let removed = self
-            .autoconfig
-            .lock()
-            .unwrap_or_else(|p| p.into_inner())
-            .remove(&request);
-        if let Some(Lookup::Running(task)) = removed {
-            task.abort();
-        }
+        self.autoconfig.cancel(request);
+    }
+
+    /// Whether this build can sign in to the provider of this IMAP server with OAuth
+    pub fn oauth_provider_for(&self, imap_host: &str) -> Option<pe_oauth::ProviderKind> {
+        let kind = pe_oauth::ProviderKind::for_imap_host(imap_host)?;
+        self.oauth.provider(kind).map(|_| kind)
+    }
+
+    /// Starts signing in to `kind` for `email`: the page to open in the browser, and the request
+    /// [`Event::SignInDone`] comes with once the browser came back or the time ran out
+    pub fn sign_in_begin(&self, kind: pe_oauth::ProviderKind, email: &str) -> Result<(u64, String)> {
+        let provider = self.oauth.provider(kind).ok_or(Error::NotFound)?;
+        let sign_in = pe_oauth::SignIn::begin(provider, email).map_err(|e| Error::Unavailable(e.to_string()))?;
+        let url = sign_in.url.clone();
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let work = async move {
+            let tokens = sign_in
+                .finish(pe_oauth::SIGN_IN_TIMEOUT)
+                .await
+                .map_err(|e| e.to_string())?;
+            let refresh = tokens.refresh_token.ok_or("the provider gave no refresh token")?;
+            Ok((kind, refresh))
+        };
+        self.sign_ins
+            .start(self.runtime()?, request, work, self.events.clone(), |request| {
+                Event::SignInDone { request }
+            });
+        Ok((request, url))
+    }
+
+    /// How a sign-in ended: Ok when there is a refresh token to add an account with (kept for that), the reason
+    /// otherwise (and the sign-in is forgotten)
+    pub fn sign_in_result(&self, request: u64) -> std::result::Result<(), String> {
+        let found = self.sign_ins.inspect(request, |result| match result {
+            Ok(_) => (Ok(()), true),
+            Err(reason) => (Err(reason.clone()), false),
+        });
+        found.unwrap_or_else(|| Err("signing in has not finished".into()))
+    }
+
+    /// Stops a sign-in the user no longer waits for, and forgets it
+    pub fn sign_in_cancel(&self, request: u64) {
+        self.sign_ins.cancel(request);
+    }
+
+    /// The provider and refresh token of a finished sign-in, taken
+    fn take_sign_in(&self, request: u64) -> Result<(pe_oauth::Provider, String)> {
+        let (kind, refresh_token) = self
+            .sign_ins
+            .take(request)
+            .and_then(|r| r.ok())
+            .ok_or(Error::NotFound)?;
+        let provider = self.oauth.provider(kind).ok_or(Error::NotFound)?;
+        Ok((provider, refresh_token))
+    }
+
+    /// Adds an account that signs in with what the sign-in `request` got, at the servers of the provider: its
+    /// access tokens go nowhere else, whatever a configuration file said
+    pub fn add_account_oauth(&self, settings: &AccountSettings, request: u64) -> Result<AccountId> {
+        let (provider, refresh_token) = self.take_sign_in(request)?;
+        self.add_account(&with_provider(settings, &provider), &refresh_token)
+    }
+
+    /// Gives an OAuth account the refresh token of a new sign-in, after the old one was refused
+    pub fn reauthorize(&self, account: AccountId, request: u64) -> Result<()> {
+        let (provider, refresh_token) = self.take_sign_in(request)?;
+        let settings = with_provider(&self.store().account(account)?.settings, &provider);
+        self.store().update_account(account, &settings)?;
+        self.stop_worker(account);
+        self.keep_password(account, &refresh_token);
+        Ok(())
     }
 
     /// Syncs the folder list and every folder of an account, in the background
@@ -393,6 +475,7 @@ impl Core {
             self.path.clone(),
             self.secrets.clone(),
             self.trust.clone(),
+            self.oauth.clone(),
             self.events.clone(),
         );
         self.runtime()?.spawn(worker.run(receiver));
@@ -403,6 +486,28 @@ impl Core {
     fn stop_worker(&self, account: AccountId) {
         // dropping the sender ends the worker once its current command is done
         self.workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
+    }
+}
+
+fn store_security(security: pe_net::Security) -> pe_store::Security {
+    match security {
+        pe_net::Security::Tls => pe_store::Security::Tls,
+        pe_net::Security::StartTls => pe_store::Security::StartTls,
+        pe_net::Security::Plain => pe_store::Security::Plain,
+    }
+}
+
+/// `settings` at the servers of `provider`, signing in with it
+fn with_provider(settings: &AccountSettings, provider: &pe_oauth::Provider) -> AccountSettings {
+    AccountSettings {
+        imap_host: provider.imap.host.clone(),
+        imap_port: provider.imap.port,
+        imap_security: store_security(provider.imap.security),
+        smtp_host: provider.smtp.host.clone(),
+        smtp_port: provider.smtp.port,
+        smtp_security: store_security(provider.smtp.security),
+        auth: pe_store::Auth::OAuth2(provider.kind.as_str().to_string()),
+        ..settings.clone()
     }
 }
 

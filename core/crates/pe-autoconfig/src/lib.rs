@@ -5,12 +5,11 @@
 #![forbid(unsafe_code)]
 
 mod config;
-mod http;
 
 use std::time::Duration;
 
 pub use config::{Server, ServerSecurity, parse_config};
-pub use http::{HttpError, Response, parse_response};
+pub use pe_net::http::{HttpError, Response};
 
 /// Where the settings came from
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -106,10 +105,9 @@ pub fn guess(email: &str, domain: &str) -> Settings {
 /// Finds the servers of `email`; the guess when no configuration is found. None for an address without a
 /// domain.
 pub async fn discover(email: &str) -> Option<Settings> {
-    discover_with(
-        email,
-        |host, path| async move { http::get(&host, &path, TIMEOUT).await },
-    )
+    discover_with(email, |host, path| async move {
+        pe_net::http::get(&format!("https://{host}{path}"), TIMEOUT).await
+    })
     .await
 }
 

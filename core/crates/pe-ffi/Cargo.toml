@@ -15,6 +15,7 @@ pe-core = { path = "../pe-core" }
 pe-html.workspace = true
 pe-imap = { path = "../pe-imap" }
 pe-net.workspace = true
+pe-oauth = { path = "../pe-oauth" }
 pe-store = { path = "../pe-store" }
 
 [dev-dependencies]

@@ -53,8 +53,10 @@ bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
 
 // asks for a new account and adds it to the core; its id, or 0 when cancelled
 int64_t NewAccountDialog(HWND owner, PeCore* core);
-// the main window hands the AutoconfigDone events to the account form waiting for one
-void LookupDone(uint64_t request);
+// the main window hands AutoconfigDone and SignInDone events to the account form waiting for one
+void RequestDone(uint64_t request);
+// signs in to `provider` for `email` in the browser; the finished sign-in request, 0 when it did not work
+uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, const std::wstring& email);
 // asks for the password of an account; false when cancelled
 bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password);
 
@@ -95,6 +97,9 @@ public:
     // "12 message(s), 3 unread" for the status bar
     std::wstring Counts() const;
     std::wstring AccountName(int64_t account) const;
+    std::wstring AccountEmail(int64_t account) const;
+    // the provider the account signs in to through the browser, NONE for a password
+    PeOAuthProvider OAuthProvider(int64_t account) const;
     // the account of the selected folder, the first account without one; 0 when there is none
     int64_t CurrentAccount() const;
     // a reply, reply to all or forward of the message shown, empty when no message is shown
@@ -134,6 +139,8 @@ private:
     // the tree items of the folders, by folder id; a tree item's data is its folder id, 0 for an account
     std::unordered_map<int64_t, HTREEITEM> items_;
     std::unordered_map<int64_t, std::wstring> accountNames_;
+    std::unordered_map<int64_t, std::wstring> accountEmails_;
+    std::unordered_map<int64_t, PeOAuthProvider> accountOAuth_;
     // the account of each folder, and the first account
     std::unordered_map<int64_t, int64_t> folderAccounts_;
     int64_t firstAccount_ = 0;

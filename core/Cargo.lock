@@ -695,6 +695,7 @@ dependencies = [
  "pe-imap",
  "pe-mime",
  "pe-net",
+ "pe-oauth",
  "pe-smtp",
  "pe-store",
  "pe-sync",
@@ -715,6 +716,7 @@ dependencies = [
  "pe-html",
  "pe-imap",
  "pe-net",
+ "pe-oauth",
  "pe-store",
  "pe-testkit",
  "serde_json",
@@ -759,6 +761,18 @@ dependencies = [
  "rustls-platform-verifier",
  "tokio",
  "tokio-rustls",
+]
+
+[[package]]
+name = "pe-oauth"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "getrandom 0.4.3",
+ "pe-net",
+ "ring",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]

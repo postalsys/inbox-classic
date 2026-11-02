@@ -39,6 +39,32 @@ impl Security {
     }
 }
 
+/// How an account signs in
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub enum Auth {
+    /// A password, the account's secret
+    #[default]
+    Password,
+    /// OAuth 2.0 with this provider (`google`, `microsoft`); the account's secret is the refresh token
+    OAuth2(String),
+}
+
+impl Auth {
+    fn to_sql(&self) -> String {
+        match self {
+            Auth::Password => "password".into(),
+            Auth::OAuth2(provider) => format!("oauth2:{provider}"),
+        }
+    }
+
+    fn parse(value: &str) -> Auth {
+        match value.strip_prefix("oauth2:") {
+            Some(provider) => Auth::OAuth2(provider.to_string()),
+            None => Auth::Password,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AccountSettings {
     /// The name the account shows under, `Work`
@@ -51,6 +77,7 @@ pub struct AccountSettings {
     pub smtp_host: String,
     pub smtp_port: u16,
     pub smtp_security: Security,
+    pub auth: Auth,
 }
 
 impl AccountSettings {
@@ -66,6 +93,7 @@ impl AccountSettings {
             smtp_host: "smtp.example.com".into(),
             smtp_port: 465,
             smtp_security: Security::Tls,
+            auth: Auth::Password,
         }
     }
 }
@@ -77,7 +105,7 @@ pub struct Account {
 }
 
 const COLUMNS: &str =
-    "id, name, email, username, imap_host, imap_port, imap_security, smtp_host, smtp_port, smtp_security";
+    "id, name, email, username, imap_host, imap_port, imap_security, smtp_host, smtp_port, smtp_security, auth";
 
 fn from_row(row: &Row) -> rusqlite::Result<Account> {
     Ok(Account {
@@ -92,12 +120,15 @@ fn from_row(row: &Row) -> rusqlite::Result<Account> {
             smtp_host: row.get(7)?,
             smtp_port: row.get(8)?,
             smtp_security: Security::parse(&row.get::<_, String>(9)?),
+            auth: Auth::parse(&row.get::<_, String>(10)?),
         },
     })
 }
 
-/// The settings as parameters ?1 to ?9, in the column order of the INSERT and the UPDATE
-fn settings_params(a: &AccountSettings) -> [&dyn rusqlite::ToSql; 9] {
+/// The settings as parameters ?1 to ?10, in the column order of the INSERT and the UPDATE
+// a String, not a str: the parameter is a `&dyn ToSql`, and a str is not sized
+#[allow(clippy::ptr_arg)]
+fn settings_params<'a>(a: &'a AccountSettings, auth: &'a String) -> [&'a dyn rusqlite::ToSql; 10] {
     [
         &a.name,
         &a.email,
@@ -108,25 +139,27 @@ fn settings_params(a: &AccountSettings) -> [&dyn rusqlite::ToSql; 9] {
         &a.smtp_host,
         &a.smtp_port,
         a.smtp_security.as_sql(),
+        auth,
     ]
 }
 
 impl Store {
     pub fn add_account(&self, account: &AccountSettings) -> Result<AccountId> {
         self.db.execute(
-            "INSERT INTO accounts (name, email, username, imap_host, imap_port, imap_security, smtp_host, smtp_port, smtp_security) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
-            settings_params(account).as_slice(),
+            "INSERT INTO accounts (name, email, username, imap_host, imap_port, imap_security, smtp_host, smtp_port, smtp_security, auth) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+            settings_params(account, &account.auth.to_sql()).as_slice(),
         )?;
         Ok(self.db.last_insert_rowid())
     }
 
     pub fn update_account(&self, id: AccountId, account: &AccountSettings) -> Result<()> {
-        let mut params = settings_params(account).to_vec();
+        let auth = account.auth.to_sql();
+        let mut params = settings_params(account, &auth).to_vec();
         params.push(&id);
         let changed = self.db.execute(
             "UPDATE accounts SET name = ?1, email = ?2, username = ?3, imap_host = ?4, imap_port = ?5, imap_security = ?6, \
-             smtp_host = ?7, smtp_port = ?8, smtp_security = ?9 WHERE id = ?10",
+             smtp_host = ?7, smtp_port = ?8, smtp_security = ?9, auth = ?10 WHERE id = ?11",
             params.as_slice(),
         )?;
         if changed == 0 {
@@ -167,12 +200,21 @@ mod tests {
 
         settings.name = "Work".into();
         settings.smtp_security = Security::Plain;
+        settings.auth = Auth::OAuth2("google".into());
         store.update_account(id, &settings).unwrap();
         assert_eq!(store.accounts().unwrap(), vec![Account { id, settings }]);
         assert!(store.update_account(id + 1, &AccountSettings::example("x@y")).is_err());
 
         store.remove_account(id).unwrap();
         assert!(store.account(id).is_err());
+    }
+
+    #[test]
+    fn auth_round_trips() {
+        for auth in [Auth::Password, Auth::OAuth2("microsoft".into())] {
+            assert_eq!(Auth::parse(&auth.to_sql()), auth);
+        }
+        assert_eq!(Auth::parse("anything else"), Auth::Password);
     }
 
     #[test]

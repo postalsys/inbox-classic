@@ -149,6 +149,8 @@ void Mailbox::Reload() {
     for (size_t i = 0; i < count; i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
         accountNames_[account->id] = Text(account->name);
+        accountEmails_[account->id] = Text(account->email);
+        accountOAuth_[account->id] = account->oauth;
         if (!firstAccount_) {
             firstAccount_ = account->id;
         }
@@ -208,6 +210,16 @@ void Mailbox::UpdateFolders(int64_t account) {
 std::wstring Mailbox::AccountName(int64_t account) const {
     auto name = accountNames_.find(account);
     return name != accountNames_.end() ? name->second : L"the account";
+}
+
+std::wstring Mailbox::AccountEmail(int64_t account) const {
+    auto email = accountEmails_.find(account);
+    return email != accountEmails_.end() ? email->second : L"";
+}
+
+PeOAuthProvider Mailbox::OAuthProvider(int64_t account) const {
+    auto oauth = accountOAuth_.find(account);
+    return oauth != accountOAuth_.end() ? oauth->second : PE_O_AUTH_PROVIDER_NONE;
 }
 
 int64_t Mailbox::CurrentAccount() const {

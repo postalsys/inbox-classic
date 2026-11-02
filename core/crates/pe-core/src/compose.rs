@@ -253,6 +253,7 @@ mod tests {
             smtp_host: "smtp.example.com".into(),
             smtp_port: 465,
             smtp_security: pe_store::Security::Tls,
+            auth: pe_store::Auth::Password,
         }
     }
 

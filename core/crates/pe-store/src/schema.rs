@@ -77,6 +77,10 @@ CREATE TABLE settings (
 -- names the passwords of this store's accounts apart from those of another store
 INSERT INTO settings (key, value) VALUES ('profile', lower(hex(randomblob(16))));
 "#,
+    r#"
+-- how the account signs in: 'password', or 'oauth2:<provider>'
+ALTER TABLE accounts ADD COLUMN auth TEXT NOT NULL DEFAULT 'password';
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

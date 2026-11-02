@@ -192,6 +192,7 @@ impl ImapKit {
             smtp_host: "127.0.0.1".into(),
             smtp_port: self.smtp,
             smtp_security: pe_store::Security::Plain,
+            auth: pe_store::Auth::Password,
         }
     }
 }
@@ -218,6 +219,79 @@ impl Drop for TempDir {
     fn drop(&mut self) {
         let _ = std::fs::remove_dir_all(&self.0);
     }
+}
+
+/// A mock OAuth token endpoint on 127.0.0.1: the code `the-code` and the refresh token `r1` give the access
+/// token ImapKit takes (`TOKEN`); anything else is refused with `invalid_grant`. Runs until the test ends.
+pub fn oauth_token_server() -> u16 {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("token server");
+    let port = listener.local_addr().expect("token server").port();
+    std::thread::spawn(move || {
+        for socket in listener.incoming() {
+            let Ok(mut socket) = socket else { continue };
+            let mut request = Vec::new();
+            let mut chunk = [0u8; 4096];
+            while let Ok(read) = socket.read(&mut chunk) {
+                request.extend_from_slice(&chunk[..read]);
+                let text = String::from_utf8_lossy(&request);
+                let complete = text.split_once("\r\n\r\n").is_some_and(|(head, body)| {
+                    let length: usize = head
+                        .lines()
+                        .find_map(|l| l.strip_prefix("Content-Length: "))
+                        .and_then(|l| l.parse().ok())
+                        .unwrap_or(0);
+                    body.len() >= length
+                });
+                if complete || read == 0 {
+                    break;
+                }
+            }
+            let text = String::from_utf8_lossy(&request).into_owned();
+            let form = text.split_once("\r\n\r\n").map_or("", |(_, body)| body);
+            let has = |pair: &str| form.split('&').any(|p| p == pair);
+            let (status, body) =
+                if has("grant_type=authorization_code") && has("code=the-code") && form.contains("code_verifier=") {
+                    (
+                        200,
+                        format!(r#"{{"access_token":"{TOKEN}","refresh_token":"r1","expires_in":3600}}"#),
+                    )
+                } else if has("grant_type=refresh_token") && has("refresh_token=r1") {
+                    (200, format!(r#"{{"access_token":"{TOKEN}","expires_in":3600}}"#))
+                } else {
+                    (400, r#"{"error":"invalid_grant"}"#.to_string())
+                };
+            let response = format!(
+                "HTTP/1.1 {status} X\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            let _ = socket.write_all(response.as_bytes());
+        }
+    });
+    port
+}
+
+/// What the browser does after the user signed in at the page `url`: goes to its redirect address with
+/// `code` and the page's state. Returns the page the app answered with.
+pub fn oauth_browser(url: &str, code: &str) -> String {
+    let query = url.split_once('?').map_or("", |(_, q)| q);
+    let param = |key: &str| pe_net::http::query_param(query, key).unwrap_or_default();
+    let redirect = param("redirect_uri");
+    let port: u16 = redirect
+        .trim_end_matches('/')
+        .rsplit(':')
+        .next()
+        .and_then(|p| p.parse().ok())
+        .expect("a loopback redirect address");
+    let mut socket = TcpStream::connect(("127.0.0.1", port)).expect("the redirect listener");
+    write!(
+        socket,
+        "GET /?code={code}&state={} HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n",
+        param("state")
+    )
+    .expect("redirect");
+    let mut page = String::new();
+    let _ = socket.read_to_string(&mut page);
+    page
 }
 
 /// The password login of the default account

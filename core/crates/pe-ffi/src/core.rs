@@ -101,6 +101,8 @@ pub enum PeEventKind {
     MessageSent = 7,
     /// The lookup `uid` of `pe_autoconfig_start` is done: `pe_autoconfig_result`
     AutoconfigDone = 8,
+    /// The sign-in `uid` of `pe_sign_in_begin` finished: `pe_sign_in_result`
+    SignInDone = 9,
 }
 
 #[repr(C)]
@@ -165,6 +167,7 @@ impl Callback {
             Event::Failed { account, .. } => (PeEventKind::Failed, *account, 0, 0),
             Event::MessageSent { account } => (PeEventKind::MessageSent, *account, 0, 0),
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
+            Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
         };
         let (failure, message) = match event {
             Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message))),
@@ -242,6 +245,7 @@ fn open(path: &str, trust: pe_net::Trust, callback: PeEventCallback, context: *m
         let options = pe_core::Options {
             trust,
             passwords: pe_core::PasswordStore::System,
+            oauth_providers: Vec::new(),
         };
         let core = Core::open_with(path, options, move |event| {
             if let Some(callback) = &callback {
@@ -332,6 +336,7 @@ unsafe fn settings(settings: *const PeAccountSettings) -> Option<AccountSettings
         smtp_host: text(s.smtp_host)?,
         smtp_port: s.smtp_port,
         smtp_security: s.smtp_security.into(),
+        auth: pe_store::Auth::Password,
     })
 }
 
@@ -406,6 +411,9 @@ pub struct PeAccount {
     pub id: i64,
     pub name: *const c_char,
     pub email: *const c_char,
+    /// The provider it signs in to through the browser, NONE for a password: a refused sign-in asks for
+    /// `pe_sign_in_begin` and `pe_account_reauthorize`, not for a password
+    pub oauth: PeOAuthProvider,
 }
 
 /// The accounts; free with `pe_account_list_free`
@@ -427,6 +435,14 @@ pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList 
                 id: a.id,
                 name: strings.add(&a.settings.name),
                 email: strings.add(&a.settings.email),
+                oauth: match &a.settings.auth {
+                    pe_store::Auth::OAuth2(name) => match pe_oauth::ProviderKind::parse(name) {
+                        Some(pe_oauth::ProviderKind::Google) => PeOAuthProvider::Google,
+                        Some(pe_oauth::ProviderKind::Microsoft) => PeOAuthProvider::Microsoft,
+                        None => PeOAuthProvider::None,
+                    },
+                    pe_store::Auth::Password => PeOAuthProvider::None,
+                },
             })))
         })
     }
@@ -1193,4 +1209,134 @@ pub unsafe extern "C" fn pe_autoconfig_info(result: *const PeAutoconfig) -> *con
 pub unsafe extern "C" fn pe_autoconfig_free(result: *mut PeAutoconfig) {
     // SAFETY: as the caller guarantees
     unsafe { take_back(result) }
+}
+
+// ---- signing in through the browser ----
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeOAuthProvider {
+    None = 0,
+    Google = 1,
+    Microsoft = 2,
+}
+
+/// The provider of an IMAP server that this build can sign in to through the browser; None when there is
+/// none or this build has no client ID for it
+///
+/// # Safety
+/// `core` must be a live handle, `imap_host` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_oauth_provider_for(core: *const PeCore, imap_host: *const c_char) -> PeOAuthProvider {
+    // SAFETY: as the caller guarantees
+    let Some(host) = (unsafe { arg(imap_host) }) else {
+        return PeOAuthProvider::None;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, PeOAuthProvider::None, |core| {
+            match core.oauth_provider_for(host) {
+                Some(pe_oauth::ProviderKind::Google) => PeOAuthProvider::Google,
+                Some(pe_oauth::ProviderKind::Microsoft) => PeOAuthProvider::Microsoft,
+                None => PeOAuthProvider::None,
+            }
+        })
+    }
+}
+
+/// Starts signing in to `provider` for `email`. `url` gets the https:// page to open in the browser (free
+/// it with `pe_string_free`); `SignInDone` with the returned request in `uid` follows. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `email` a NUL-terminated string, `url` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_begin(
+    core: *const PeCore,
+    provider: PeOAuthProvider,
+    email: *const c_char,
+    url: *mut *mut c_char,
+) -> u64 {
+    let kind = match provider {
+        PeOAuthProvider::Google => pe_oauth::ProviderKind::Google,
+        PeOAuthProvider::Microsoft => pe_oauth::ProviderKind::Microsoft,
+        PeOAuthProvider::None => return 0,
+    };
+    // SAFETY: as the caller guarantees
+    let Some(email) = (unsafe { arg(email) }) else {
+        return 0;
+    };
+    if url.is_null() {
+        return 0;
+    }
+    // SAFETY: as the caller guarantees
+    let started = unsafe { with(core, None, |core| core.sign_in_begin(kind, email).ok()) };
+    let Some((request, page)) = started else {
+        return 0;
+    };
+    // SAFETY: the caller gave a valid pointer
+    unsafe { *url = into_c_string(page) };
+    request
+}
+
+/// Whether a sign-in after its `SignInDone` got what an account needs; when not, `reason` gets why (free
+/// it with `pe_string_free`) when it is not NULL
+///
+/// # Safety
+/// `core` must be a live handle, `reason` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_result(core: *const PeCore, request: u64, reason: *mut *mut c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let result = unsafe {
+        with(core, Err("the engine is closed".to_string()), |core| {
+            core.sign_in_result(request)
+        })
+    };
+    match result {
+        Ok(()) => true,
+        Err(why) => {
+            if !reason.is_null() {
+                // SAFETY: the caller gave a valid pointer
+                unsafe { *reason = into_c_string(why) };
+            }
+            false
+        }
+    }
+}
+
+/// Stops a sign-in the user no longer waits for
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_cancel(core: *const PeCore, request: u64) {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| core.sign_in_cancel(request)) }
+}
+
+/// Adds an account that signs in with what the finished sign-in `request` got; its id, or 0
+///
+/// # Safety
+/// `core` must be a live handle, `settings` valid settings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_add_oauth(
+    core: *const PeCore,
+    settings: *const PeAccountSettings,
+    request: u64,
+) -> i64 {
+    // SAFETY: as the caller guarantees
+    let Some(settings) = (unsafe { self::settings(settings) }) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.add_account_oauth(&settings, request).unwrap_or(0)) }
+}
+
+/// Gives an account signed in through the browser the result of a new sign-in, after the old one was refused
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_reauthorize(core: *const PeCore, account: i64, request: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.reauthorize(account, request).is_ok()) }
 }
