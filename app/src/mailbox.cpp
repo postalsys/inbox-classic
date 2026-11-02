@@ -621,8 +621,12 @@ void Mailbox::ChooseAttachment() {
         return;
     }
     std::wstring path = SaveFileDialog(parent_, Text(safeName.get()));
-    if (!path.empty() && !WriteFileBytes(path, data, length)) {
-        MessageBoxW(parent_, L"The attachment could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+    if (!path.empty()) {
+        if (WriteFileBytes(path, data, length)) {
+            MarkFromInternet(path);
+        } else {
+            MessageBoxW(parent_, L"The attachment could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+        }
     }
     pe_bytes_free(data, length);
 }
@@ -921,8 +925,12 @@ void Mailbox::SaveShownAs(HWND owner) {
     }
     std::wstring path = SaveFileDialog(owner, Text(safeName.get()), L"Save Message As", L"Mail messages (*.eml)\0*.eml\0All files (*.*)\0*.*\0",
                                        L"eml");
-    if (!path.empty() && !WriteFileBytes(path, data, length)) {
-        MessageBoxW(owner, L"The message could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+    if (!path.empty()) {
+        if (WriteFileBytes(path, data, length)) {
+            MarkFromInternet(path);
+        } else {
+            MessageBoxW(owner, L"The message could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+        }
     }
     pe_bytes_free(data, length);
 }

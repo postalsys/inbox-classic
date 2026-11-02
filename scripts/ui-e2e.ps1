@@ -413,6 +413,9 @@ try {
                 [void][Native.Win]::PostMessage($save, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
             }
             Check ($saved -eq $pdf) 'the attachment is saved as it was sent'
+            # marked as from the internet, so SmartScreen and Protected View look at it when it is opened
+            $zone = Get-Content -Path $target -Stream Zone.Identifier -ErrorAction SilentlyContinue
+            Check (($zone -join "`n") -match 'ZoneId=3') 'and marked as from the internet'
         }
     }
 

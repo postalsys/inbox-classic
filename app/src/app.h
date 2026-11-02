@@ -88,6 +88,8 @@ std::wstring FolderDialog(HWND owner, const wchar_t* title);
 // the files chosen in an Open dialog that takes several, none when cancelled
 std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter);
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
+// marks a saved file (an attachment, a message) as from the internet, for SmartScreen and Office's Protected View
+void MarkFromInternet(const std::wstring& path);
 
 // ---- accounts.cpp ----
 

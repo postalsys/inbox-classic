@@ -323,6 +323,13 @@ void SetAppIcons(WNDCLASSEXW& windowClass) {
     windowClass.hIconSm = AppIcon(true);
 }
 
+void MarkFromInternet(const std::wstring& path) {
+    // the Mark of the Web (zone 3) in the file's NTFS stream, as the core puts on what Save Attachments writes:
+    // opened later, the file gets SmartScreen and Office's Protected View
+    std::ofstream stream(path + L":Zone.Identifier", std::ios::binary | std::ios::trunc);
+    stream << "[ZoneTransfer]\r\nZoneId=3\r\n";
+}
+
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size) {
     std::ofstream stream(path, std::ios::binary | std::ios::trunc);
     stream.write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));

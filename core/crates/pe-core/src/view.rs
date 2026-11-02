@@ -139,6 +139,20 @@ pub(crate) fn attachments(source: &[u8]) -> Vec<(String, Vec<u8>)> {
         .collect()
 }
 
+/// What Windows keeps beside a file that came from the internet (its Mark of the Web, zone 3): opened later, the
+/// file gets SmartScreen and Office's Protected View, as one downloaded in a browser does
+pub(crate) const ZONE_IDENTIFIER: &str = "[ZoneTransfer]\r\nZoneId=3\r\n";
+
+/// Marks a saved attachment as from the internet, on Windows (an NTFS stream of the file); a file system without
+/// streams keeps the file unmarked, as a browser's download there would be
+pub(crate) fn mark_from_internet(path: &std::path::Path) {
+    if cfg!(windows) {
+        let mut stream = path.as_os_str().to_owned();
+        stream.push(":Zone.Identifier");
+        let _ = std::fs::write(stream, ZONE_IDENTIFIER);
+    }
+}
+
 /// Writes `content` into `dir` as `name`, or as `name (2).ext`, `name (3).ext`... when that is taken: a file there is
 /// never replaced, and creating it new (not checking first) leaves no moment for another to appear in between
 pub(crate) fn write_new(dir: &std::path::Path, name: &str, content: &[u8]) -> std::io::Result<std::path::PathBuf> {
@@ -157,6 +171,7 @@ pub(crate) fn write_new(dir: &std::path::Path, name: &str, content: &[u8]) -> st
         match std::fs::OpenOptions::new().write(true).create_new(true).open(&path) {
             Ok(mut file) => {
                 file.write_all(content)?;
+                mark_from_internet(&path);
                 return Ok(path);
             }
             Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists && n < 10_000 => continue,
@@ -256,6 +271,12 @@ mod tests {
         assert_eq!(bare.file_name().unwrap(), ".hidden");
         assert_eq!(std::fs::read(&first).unwrap(), b"one");
         assert_eq!(std::fs::read(&second).unwrap(), b"two");
+        // marked as from the internet, where Windows keeps such marks
+        if cfg!(windows) {
+            let mut stream = first.as_os_str().to_owned();
+            stream.push(":Zone.Identifier");
+            assert_eq!(std::fs::read_to_string(stream).unwrap(), ZONE_IDENTIFIER);
+        }
         std::fs::remove_dir_all(&dir).unwrap();
         // the attachments of a message, from one parse
         assert_eq!(attachments(MESSAGE), [("report.pdf".to_string(), b"%PDF".to_vec())]);
