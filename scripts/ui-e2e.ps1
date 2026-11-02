@@ -122,21 +122,32 @@ function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) 
     $t = if ($title) { $title } else { [NullString]::Value }
     WaitFor { $w = [Native.Win]::FindWindow($class, $t); if ($w -ne [IntPtr]::Zero) { $w } } $Seconds
 }
-# types into the HTML editor of a compose window: characters posted to the window of the WebView2 that takes input
-function TypeInEditor([IntPtr]$compose, [string]$text) {
+# the window of the WebView2 of a compose window's editor that takes input, clicked into as a user would when the
+# cursor is in another field
+function ClickEditor([IntPtr]$compose) {
     $input = WaitFor { [Native.Win]::FindDescendants($compose, 'Chrome_RenderWidgetHostHWND') | Select-Object -First 1 }
-    if (-not $input) { return $false }
+    if (-not $input) { return $null }
     Start-Sleep -Milliseconds 500
-    # a click into the text first, as a user would when the cursor is in another field
     $point = [IntPtr]((12 -shl 16) -bor 12)
     [void][Native.Win]::PostMessage($input, 0x0201, [IntPtr]1, $point)
     [void][Native.Win]::PostMessage($input, 0x0202, [IntPtr]::Zero, $point)
     Start-Sleep -Milliseconds 300
+    return $input
+}
+# types into the HTML editor of a compose window
+function TypeInEditor([IntPtr]$compose, [string]$text) {
+    $input = ClickEditor $compose
+    if (-not $input) { return $false }
     foreach ($c in $text.ToCharArray()) {
         [void][Native.Win]::PostMessage($input, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero)
     }
     Start-Sleep -Milliseconds 500
     return $true
+}
+# whether a button of the format bar is pressed
+function Pressed([IntPtr]$compose, [int]$id) {
+    $bar = [Native.Win]::GetDlgItem($compose, 322)
+    [int][Native.Win]::SendMessage($bar, 0x040A, [IntPtr]$id, [IntPtr]::Zero) -ne 0
 }
 function Visible([IntPtr]$window, [int]$id) { [Native.Win]::IsWindowVisible([Native.Win]::GetDlgItem($window, $id)) }
 
@@ -372,7 +383,9 @@ try {
     Check ($null -ne $compose) 'Reply opens a compose window'
     Check ((GetText $compose $IDC_TO) -like '*ann@example.com*') 'the reply goes to the sender'
     # the quote is folded behind "...", the cursor is at the top: Bold, then the answer
+    [void](ClickEditor $compose)
     Command $compose $IDF_BOLD
+    Check ([bool](WaitFor { Pressed $compose $IDF_BOLD } 10)) 'B shows bold is on'
     Check (TypeInEditor $compose 'Thanks, Ann. Answered by the UI test.') 'the editor takes typing'
     Shot $compose 'write-3-reply'
     Command $compose $IDC_SEND
