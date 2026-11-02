@@ -1,0 +1,6 @@
+build/
+dist/
+core/target/
+*.log
+.DS_Store
+screenshot.png

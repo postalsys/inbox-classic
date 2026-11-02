@@ -1,0 +1,4 @@
+# The C++ app links the static C runtime (/MT), so the Rust side has to as well, or the link mixes two CRTs.
+# Cargo reads this file only when it runs with core/ as the working directory, app/CMakeLists.txt makes sure of that.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]

@@ -1,0 +1,16 @@
+[package]
+name = "pe-ffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+# staticlib is what the C++ app links (pe_ffi.lib), lib lets the tests of this crate call the exports
+[lib]
+crate-type = ["staticlib", "lib"]
+
+[dependencies]
+pe-html.workspace = true
+
+[build-dependencies]
+cbindgen = "0.29"
