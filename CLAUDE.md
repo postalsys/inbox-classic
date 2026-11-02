@@ -21,6 +21,7 @@ A Cargo workspace in `core/` (edition 2024, `rustfmt.toml` sets 120 columns). Th
 - `pe-net`: TCP and TLS (rustls with the platform verifier, or a pinned certificate) for IMAP and SMTP.
 - `pe-store`: the local cache in SQLite (rusqlite, bundled): accounts without secrets, folders, message summaries, cached sources. Schema changes are new entries in `schema.rs` `MIGRATIONS`, never edits of shipped ones.
 - `pe-sync`: keeps `pe-store` in step with an IMAP account through `pe-imap`.
+- `pe-oauth`: OAuth 2.0 sign-in (authorization code with PKCE and a loopback redirect, RFC 8252) for Gmail and Outlook.com. The client IDs come from the build environment (`PE_GOOGLE_CLIENT_ID`, `PE_GOOGLE_CLIENT_SECRET`, `PE_MICROSOFT_CLIENT_ID`); a build without one does not offer that provider. An account signed in this way always uses the provider's own servers.
 - `pe-autoconfig`: finds the servers of an address the way Thunderbird does (the provider's autoconfig file, the ISPDB, then `imap.`/`smtp.` guesses), over HTTPS only, never picking a server without encryption. `cargo run -p pe-autoconfig --example discover -- user@example.com` tries it live.
 - `pe-core`: the engine the C API wraps: a tokio runtime, one worker per account (its own IMAP connection and store connection), the message view, and `Event`s for the windows. Passwords are kept in the Windows Credential Manager (`secrets.rs`); tests open the core with `PasswordStore::Memory` so they never write to the Credential Manager of whoever runs them.
 - `pe-testkit`: starts ImapKit (`core/e2e`) for the end-to-end tests and talks to its REST API.
@@ -66,6 +67,8 @@ scripts/win-screenshot.sh out.png     # screenshot of the window, DESKTOP=1 for 
 ```
 
 To drive the UI for a check, run these on the build machine through a scheduled task (`/it`, as `win-run.sh` does): `scripts/ui-account.ps1` fills the Add Mail Account form (use an Ethereal account), `scripts/ui-select.ps1 <folder> <row>` selects a folder and a message.
+
+`scripts/build-installer.sh` builds `dist/PostalExpress-Setup.exe` (NSIS, `installer/postal-express.nsi`, per user, no admin rights) with `THIRD-PARTY-NOTICES.txt` from `scripts/notices.mjs`; it signs the exe, the uninstaller and the installer with Azure Artifact Signing (`scripts/sign-win.sh`) when `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` are set.
 
 On Windows itself: `scripts\win-build.cmd` and `scripts\win-test.cmd`. Both call `scripts\vcvars.cmd`, which finds Visual Studio with vswhere and puts cargo on PATH.
 
