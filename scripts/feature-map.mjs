@@ -60,14 +60,14 @@ const sections = [
             {
                 shot: 'main-1-inbox',
                 name: 'Folders and the message list',
-                what: 'Each account with its folders, special folders under their familiar names (Inbox, Sent Items, Drafts, Junk E-mail, Deleted Items). Folders with unread mail are bold with the count. In the list, unread messages are bold; the ! column shows ! for flagged and @ for attachments. Click a column heading to sort, again to reverse. The status bar shows what is going on and the counts of the folder.',
+                what: 'Each account with its folders, special folders under their familiar names (Inbox, Sent Items, Drafts, Junk E-mail, Deleted Items). Folders with unread mail are bold with the count. In the list, unread messages are bold; the ! column shows ! for flagged and @ for attachments. Click a column heading to sort, again to reverse. The status bar shows what is going on and the counts of the folder. The toolbar has the Fluent icons over their labels, in groups as Outlook Express has them.',
                 how: 'Always there. Drag the borders between the parts to resize them.',
                 checked: ['All 7 folders of the account appear', 'The 3 messages are listed']
             },
             {
                 shot: 'accounts-1-list',
                 name: 'Accounts: change and remove',
-                what: "File > Accounts lists the accounts. Properties changes one (leave the password empty to keep it; an account that signs in through the browser only has its name changed, its servers are the provider's). Remove takes it out with its downloaded mail and saved password; the mail on the server stays.",
+                what: "File > Accounts lists the accounts with their address and incoming server. Properties (or a double-click) changes one (leave the password empty to keep it; an account that signs in through the browser only has its name changed, its servers are the provider's). Remove (or Delete) takes it out with its downloaded mail and saved password; the mail on the server stays.",
                 how: 'File > Accounts; double click an account for its Properties.',
                 checked: [
                     'Both accounts are listed',
@@ -128,7 +128,7 @@ const sections = [
             {
                 shot: 'read-2-pictures',
                 name: 'Pictures from the internet, only when asked',
-                what: 'Pictures the sender keeps on the internet would tell the sender that, when and where you opened the message, so they are blocked. Download pictures shows them for this message.',
+                what: 'Pictures the sender keeps on the internet would tell the sender that, when and where you opened the message, so they are blocked. Download pictures, offered only when the message has such pictures, shows them for this message.',
                 how: 'The Download pictures button next to the header, or View > Download Pictures.',
                 checked: ['The button shows the pictures and goes away']
             },
@@ -255,9 +255,9 @@ const sections = [
             {
                 shot: 'write-5-new',
                 name: 'A new message',
-                what: 'To, Cc, Bcc, Subject, the text and attached files (Attach, or dragged from Explorer), listed with their size; Delete or a right-click takes one off. Several addresses are separated with commas; names with commas go in quotes.',
+                what: 'From shows the account the message goes from (name and address), and with several accounts chooses another. To, Cc, Bcc, Subject, the text and attached files (Attach, or dragged from Explorer), listed with their size; Delete or a right-click takes one off. Several addresses are separated with commas; names with commas go in quotes.',
                 how: 'Create Mail on the toolbar, Message > New Message, or Ctrl+N.',
-                checked: ['Attach adds the files', 'Delete takes one off', 'The message is sent and arrives with only the file left']
+                checked: ['From names the account', 'Attach adds the files', 'Delete takes one off', 'The message is sent and arrives with only the file left']
             },
             {
                 shot: 'write-3b-select-all',
@@ -269,7 +269,7 @@ const sections = [
             {
                 shot: 'write-7-outbox',
                 name: 'Outbox and Send Later',
-                what: 'Every message goes through the Outbox: one that can not go (offline, refused) waits there with the reason and goes with the next Send/Recv, so nothing is lost. Send Later only queues it. The status bar counts what waits.',
+                what: 'Every message goes through the Outbox: one that can not go (offline, refused) waits there with the reason and goes with the next Send/Recv, so nothing is lost. Send Later only queues it. The status bar counts what waits; Tools > Outbox lists each message with when it was queued and whether it waits or why it did not go.',
                 how: 'Send Later in the compose window; Tools > Outbox to send now or delete.',
                 checked: ['Send Later does not send yet', 'The Outbox lists the message', 'Send All Now sends it']
             },

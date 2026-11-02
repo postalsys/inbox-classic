@@ -483,6 +483,8 @@ try {
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose
     Check ($null -ne $compose) 'Create Mail opens an empty compose window'
+    $from = GetText $compose 310
+    Check ($from -eq 'UI Test <testuser@postalexpress.test>') "From names the account it goes from ($from)"
     SetText $compose $IDC_TO 'dave at example.com'
     SetText $compose $IDC_SUBJECT 'A new message from the UI test'
     Check (TypeInEditor $compose 'Hello Dave, written from scratch.') 'the editor of a new message takes typing'

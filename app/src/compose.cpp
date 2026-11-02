@@ -28,6 +28,7 @@ enum ComposeId : WORD {
     IDC_FILES,
     IDC_SEND_LATER,
     IDC_SAVE,
+    IDC_FROM,
     IDC_FONT = 320,
     IDC_FONT_SIZE,
     IDC_FORMATBAR,
@@ -86,7 +87,10 @@ struct Compose {
     HWND formatBar = nullptr;
     HWND font = nullptr;
     HWND size = nullptr;
-    HWND labels[5] = {};
+    HWND labels[6] = {};
+    // the accounts it can go from, in the order of the From list
+    std::vector<int64_t> fromAccounts;
+    HWND from = nullptr;
     HWND to = nullptr;
     HWND cc = nullptr;
     HWND bcc = nullptr;
@@ -122,10 +126,12 @@ void Layout(HWND hwnd, Compose* state) {
     int labelWidth = Scale(60);
     int rowHeight = Scale(22);
     int y = bar.bottom - bar.top + pad;
-    HWND fields[] = {state->to, state->cc, state->bcc, state->subject, state->attached};
-    for (int i = 0; i < 5; i++) {
+    HWND fields[] = {state->from, state->to, state->cc, state->bcc, state->subject, state->attached};
+    for (int i = 0; i < 6; i++) {
         MoveWindow(state->labels[i], pad, y + Scale(3), labelWidth, rowHeight, TRUE);
-        MoveWindow(fields[i], pad + labelWidth, y, client.right - 2 * pad - labelWidth, rowHeight, TRUE);
+        // a combo box's height is that of its open list
+        int height = fields[i] == state->from ? Scale(200) : rowHeight;
+        MoveWindow(fields[i], pad + labelWidth, y, client.right - 2 * pad - labelWidth, height, TRUE);
         y += rowHeight + Scale(4);
     }
     // the format bar: font, size, then the buttons
@@ -465,10 +471,12 @@ void CreateFields(HWND hwnd, Compose* state) {
     AddButton(state->toolbar, IDC_SAVE, L"Save", BTNS_BUTTON, ICON_SAVE);
     AddButton(state->toolbar, 0, nullptr);
     AddButton(state->toolbar, IDC_ATTACH, L"Attach", BTNS_BUTTON, ICON_ATTACH);
-    const wchar_t* labels[] = {L"To:", L"Cc:", L"Bcc:", L"Subject:", L"Attach:"};
-    for (int i = 0; i < 5; i++) {
+    const wchar_t* labels[] = {L"From:", L"To:", L"Cc:", L"Bcc:", L"Subject:", L"Attach:"};
+    for (int i = 0; i < 6; i++) {
         state->labels[i] = CreateChild(hwnd, L"STATIC", labels[i], SS_LEFT, 0, {});
     }
+    // who the message goes from: always shown, so it is clear even with one account, and the account it is sent with
+    state->from = CreateChild(hwnd, L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, IDC_FROM, {});
     state->to = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_TO, {}, WS_EX_CLIENTEDGE);
     state->cc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_CC, {}, WS_EX_CLIENTEDGE);
     state->bcc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_BCC, {}, WS_EX_CLIENTEDGE);
@@ -477,6 +485,31 @@ void CreateFields(HWND hwnd, Compose* state) {
     state->attached = CreateChild(hwnd, L"LISTBOX", L"", WS_TABSTOP | LBS_MULTICOLUMN | LBS_NOINTEGRALHEIGHT | LBS_WANTKEYBOARDINPUT,
                                   IDC_FILES, {}, WS_EX_CLIENTEDGE);
     CreateFormatBar(hwnd, state);
+}
+
+// the From list: each account as "Name <address>", the one the message goes from selected
+void FillFrom(Compose* state) {
+    core::AccountList accounts(pe_accounts(state->core));
+    for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
+        const PeAccount* account = pe_account_list_get(accounts.get(), i);
+        std::wstring name = Text(account->name);
+        std::wstring email = Text(account->email);
+        std::wstring item = name.empty() || name == email ? email : name + L" <" + email + L">";
+        SendMessageW(state->from, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
+        state->fromAccounts.push_back(account->id);
+        if (account->id == state->account) {
+            SendMessageW(state->from, CB_SETCURSEL, i, 0);
+        }
+    }
+}
+
+// another account chosen in From: the message goes from it, with its servers, Sent Items and Drafts
+void ChooseFrom(Compose* state) {
+    LRESULT chosen = SendMessageW(state->from, CB_GETCURSEL, 0, 0);
+    if (chosen >= 0 && static_cast<size_t>(chosen) < state->fromAccounts.size() && state->fromAccounts[chosen] != state->account) {
+        state->account = state->fromAccounts[chosen];
+        state->dirty = true;
+    }
 }
 
 // the editor with the quote of the draft; its messages come back to the window
@@ -539,6 +572,10 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         if (LOWORD(wParam) == IDC_ATTACH) {
             Attach(hwnd, state);
+            return 0;
+        }
+        if (HIWORD(wParam) == CBN_SELCHANGE && LOWORD(wParam) == IDC_FROM) {
+            ChooseFrom(state);
             return 0;
         }
         if (HIWORD(wParam) == CBN_SELCHANGE && (LOWORD(wParam) == IDC_FONT || LOWORD(wParam) == IDC_FONT_SIZE)) {
@@ -652,6 +689,7 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
     auto* state = new Compose{core, account};
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
     CreateFields(hwnd, state);
+    FillFrom(state);
     // files dropped from Explorer are attached
     DragAcceptFiles(hwnd, TRUE);
     if (draft) {
