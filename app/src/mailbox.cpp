@@ -86,7 +86,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     AddColumn(list_, COL_FROM, L"From", 180);
     AddColumn(list_, COL_SUBJECT, L"Subject", 320);
     AddColumn(list_, COL_RECEIVED, L"Received", 130);
-    AddColumn(list_, COL_SIZE, L"Size", 70, LVCFMT_RIGHT);
+    AddColumn(list_, COL_SIZE, L"Size", 84, LVCFMT_RIGHT);
 
     header_ = CreateChild(parent, L"STATIC", L" No message is selected.", SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
     attachments_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP, IDC_ATTACHMENTS, {});
