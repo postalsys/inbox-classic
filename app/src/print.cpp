@@ -92,7 +92,7 @@ LRESULT CALLBACK PrintProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
 
 }  // namespace
 
-void OpenPrintWindow(HWND owner, const char* document, bool remoteImages, const std::wstring& subject) {
+void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const char* document, bool remoteImages, const std::wstring& subject) {
     core::String page(pe_print_page(document));
     if (!page) {
         MessageBoxW(owner, L"The message could not be printed.", L"Inbox Classic", MB_OK | MB_ICONERROR);
@@ -122,16 +122,20 @@ void OpenPrintWindow(HWND owner, const char* document, bool remoteImages, const 
     auto* state = new PrintState{Text(page.get()), remoteImages};
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
     ShowWindow(hwnd, SW_SHOW);
-    webview::Create(
-        hwnd,
-        [hwnd, state](ICoreWebView2Environment* environment, ICoreWebView2Controller* controller) {
-            state->environment = environment;
-            state->controller = controller;
-            controller->get_CoreWebView2(&state->view);
-            Configure(hwnd, state);
-        },
-        [hwnd](const std::wstring& error) {
-            MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
-            DestroyWindow(hwnd);
-        });
+    auto ready = [hwnd, state](ICoreWebView2Environment* created, ICoreWebView2Controller* controller) {
+        state->environment = created;
+        state->controller = controller;
+        controller->get_CoreWebView2(&state->view);
+        Configure(hwnd, state);
+    };
+    auto failed = [hwnd](const std::wstring& error) {
+        MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        DestroyWindow(hwnd);
+    };
+    // the reading pane's environment when there is one: the browser process is there already
+    if (environment) {
+        webview::CreateIn(hwnd, environment, ready, failed);
+    } else {
+        webview::Create(hwnd, ready, failed);
+    }
 }

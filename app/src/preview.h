@@ -18,6 +18,8 @@ public:
     void Show(const std::wstring& html, bool remoteImages = false);
     // empty; with "There is no message selected." centered in it, as Outlook Express has it, when `noMessage`
     void Clear(bool noMessage = false);
+    // its environment once it is there, NULL before: other views (the Print window) start from it
+    ICoreWebView2Environment* Environment() const { return environment_.Get(); }
     // closes the WebView2 and lets go of it, before COM is shut down
     void Close();
     void Resize(const RECT& bounds);

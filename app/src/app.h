@@ -111,7 +111,8 @@ void OutboxDialog(HWND owner, PeCore* core);
 
 // File > Print: a window over `owner` with the message `document` (the core's, PeMessageInfo.document) where the print
 // preview opens; it closes once the preview does
-void OpenPrintWindow(HWND owner, const char* document, bool remoteImages, const std::wstring& subject);
+// (`environment`: the reading pane's WebView2 environment to start from, or NULL for one of its own)
+void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const char* document, bool remoteImages, const std::wstring& subject);
 
 // ---- help.cpp ----
 

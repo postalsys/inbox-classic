@@ -87,6 +87,25 @@ void StayOnPage(ICoreWebView2* view, const wchar_t* url) {
         nullptr);
 }
 
+void CreateIn(HWND parent, ICoreWebView2Environment* environment,
+              std::function<void(ICoreWebView2Environment*, ICoreWebView2Controller*)> ready, std::function<void(const std::wstring&)> failed) {
+    ComPtr<ICoreWebView2Environment> kept = environment;
+    HRESULT hr = environment->CreateCoreWebView2Controller(
+        parent, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
+                    [kept, ready, failed](HRESULT created, ICoreWebView2Controller* controller) {
+                        if (FAILED(created) || !controller) {
+                            failed(L"Creating the WebView2 failed.");
+                        } else {
+                            ready(kept.Get(), controller);
+                        }
+                        return S_OK;
+                    })
+                    .Get());
+    if (FAILED(hr)) {
+        failed(L"Creating the WebView2 failed.");
+    }
+}
+
 void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebView2Controller*)> ready,
             std::function<void(const std::wstring&)> failed) {
     std::wstring folder = UserDataFolder();
@@ -98,18 +117,7 @@ void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebV
                     failed(L"The WebView2 runtime is not available.");
                     return S_OK;
                 }
-                ComPtr<ICoreWebView2Environment> kept = environment;
-                environment->CreateCoreWebView2Controller(
-                    parent, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
-                                [kept, ready, failed](HRESULT created, ICoreWebView2Controller* controller) {
-                                    if (FAILED(created) || !controller) {
-                                        failed(L"Creating the WebView2 failed.");
-                                    } else {
-                                        ready(kept.Get(), controller);
-                                    }
-                                    return S_OK;
-                                })
-                                .Get());
+                CreateIn(parent, environment, ready, failed);
                 return S_OK;
             })
             .Get());

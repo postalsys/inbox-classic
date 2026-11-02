@@ -20,6 +20,11 @@ bool StartsWith(const wchar_t* text, const wchar_t* prefix);
 void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebView2Controller*)> ready,
             std::function<void(const std::wstring&)> failed);
 
+// a controller in `parent` from an environment there is already (the reading pane's, for the Print window): no second
+// environment to start
+void CreateIn(HWND parent, ICoreWebView2Environment* environment,
+              std::function<void(ICoreWebView2Environment*, ICoreWebView2Controller*)> ready, std::function<void(const std::wstring&)> failed);
+
 // answers every request: `serve` gives the document for the address of the page (`url` is its prefix), anything else
 // from the network is refused unless `allow` says otherwise
 void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, const wchar_t* url,

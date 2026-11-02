@@ -945,7 +945,7 @@ void Mailbox::ShowProperties(HWND owner) {
 void Mailbox::PrintShown() {
     if (const PeMessageInfo* info = uid_ ? pe_message_view_info(view_.get()) : nullptr) {
         // the message as it is shown, with the pictures the user allowed
-        OpenPrintWindow(parent_, info->document, remoteImages_, Text(info->subject));
+        OpenPrintWindow(parent_, preview_.Environment(), info->document, remoteImages_, Text(info->subject));
     }
 }
 
