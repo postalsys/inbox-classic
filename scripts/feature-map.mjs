@@ -31,6 +31,20 @@ const sections = [
                 checked: ['The lookup runs and fills in the guessed names (imap.postalexpress.test for the test address)']
             },
             {
+                shot: 'account-6-gmail',
+                name: 'Providers recognized by their mail servers',
+                what: "The lookup works like EmailEngine's: the servers that receive the domain's mail (MX) are checked against a table of hosted providers (Google Workspace, Microsoft 365, Zoho, AWS WorkMail, Yandex and more), then the domain's SRV records, the provider's settings file, Thunderbird's database and Microsoft Autodiscover race, and the first answer wins. DNS questions go over DNS-over-HTTPS, so nobody on the network can hand out other servers. The form says where the settings came from.",
+                how: 'Automatic in step 2. For Exchange, the password is offered only to the Autodiscover server of your own domain that asks for it, over an encrypted connection.',
+                checked: ['A Gmail address gets imap.gmail.com and smtp.gmail.com, found by its MX']
+            },
+            {
+                shot: 'account-5-app-password',
+                name: 'App passwords explained',
+                what: "Gmail, iCloud, Yahoo, AOL and T-Online do not take the normal password from mail programs. PostalExpress says so before the server form and offers to open the provider's own instructions. For Outlook.com and Microsoft 365 it shows Microsoft's note that password sign-in is off.",
+                how: 'Shown after the lookup when the provider needs one.',
+                checked: ['The note appears for a Gmail address']
+            },
+            {
                 shot: 'account-4-warning',
                 name: 'Warning before an unencrypted connection',
                 what: 'Choosing "None (unencrypted)" for either server asks for confirmation first, since the password would travel readable. STARTTLS is required to really encrypt; a server that does not offer it is refused.',
@@ -82,6 +96,13 @@ const sections = [
                 ]
             },
             {
+                shot: 'read-6-folded',
+                name: 'Earlier messages folded away',
+                what: 'A reply usually carries the messages before it. They fold behind a ••• button under what the sender wrote, so the new part is what you see; click to open them. Which part is history is decided by a Rust port of email-content: only what is clearly an earlier message or a forward is folded, anything uncertain stays in view.',
+                how: 'Automatic; click ••• to see the earlier messages.',
+                checked: ['A Gmail-style reply shows the new text with the quote folded']
+            },
+            {
                 shot: 'read-2-pictures',
                 name: 'Pictures from the internet, only when asked',
                 what: 'Pictures the sender keeps on the internet would tell the sender that, when and where you opened the message, so they are blocked. Download pictures shows them for this message.',
@@ -117,8 +138,8 @@ const sections = [
         features: [
             {
                 shot: 'write-3-reply',
-                name: 'Reply',
-                what: 'Answers the sender with "Re:" in the subject and the original quoted below, threaded with In-Reply-To and References so other programs group the conversation.',
+                name: 'Reply, in the HTML editor',
+                what: 'Messages are written as formatted text: the bar above the text sets the font and size, bold, italic, underline, color, lists, indent, alignment, links, a dividing line and pictures, and shows what is on at the cursor. A reply has "Re:" in the subject and the original folded behind ••• under the text (sent along in full), threaded with In-Reply-To and References. Spelling is checked; Ctrl+Enter sends. The message goes as HTML with a plain text copy.',
                 how: 'Reply on the toolbar, Message > Reply to Sender, or Ctrl+R.',
                 checked: ['The reply goes to the sender', 'It arrives over SMTP with In-Reply-To set and the typed text', 'A copy is kept in Sent']
             },
@@ -132,7 +153,7 @@ const sections = [
             {
                 shot: 'write-1-forward',
                 name: 'Forward',
-                what: 'Sends the message on with "Fw:" in the subject and the original below. The recipients are left to you.',
+                what: 'Sends the message on with "Fw:" in the subject and the original shown below, pictures included. The recipients are left to you.',
                 how: 'Forward on the toolbar, Message > Forward, or Ctrl+F.',
                 checked: ['The subject is "Fw: October newsletter"', 'To is empty']
             },
@@ -142,6 +163,13 @@ const sections = [
                 what: 'To, Cc, Bcc, Subject, the text and attached files (Attach). Several addresses are separated with commas; names with commas go in quotes.',
                 how: 'Create Mail on the toolbar, Message > New Message, or Ctrl+N.',
                 checked: ['The message is sent and arrives']
+            },
+            {
+                shot: 'write-6-close',
+                name: 'Nothing written is lost by accident',
+                what: 'Closing a message you wrote in asks first, since drafts are not saved yet.',
+                how: 'Close the compose window.',
+                checked: ['Closing asks', 'Yes closes it']
             },
             {
                 shot: 'write-4-bad-address',
@@ -206,8 +234,6 @@ const missing = [
     'Save drafts, or send later',
     'Create, rename or delete folders',
     'Print, and .eml import and export',
-    'Rich text (HTML) writing: in progress, a formatting editor replaces the plain text box',
-    'Folding quoted reply history behind "...": in progress, when reading and when replying',
     'Gmail and Outlook.com browser sign-in in released builds: works, but needs the OAuth client IDs at build time'
 ];
 
