@@ -23,10 +23,11 @@ use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel};
 use crate::compiler::{Arg, Command, CompileOptions, compile, to_log_string};
 use crate::framing::{FrameLimits, Framer, RawResponse};
 use crate::parser::ParserOptions;
+use crate::sequence::SequenceSet;
 use crate::types::{Response, Token};
 
 pub use auth::Credentials;
-pub use error::Error;
+pub use error::{Error, ErrorKind};
 pub use fetch::{FetchQuery, FetchedMessage};
 pub use mailbox::{ListedMailbox, MailboxStatus, Namespace, Selected};
 pub use messages::{CopyUid, StoreAction};
@@ -105,17 +106,23 @@ impl Config {
     }
 }
 
-/// A change the server reported about the selected mailbox, or about the connection
+/// A change the server reported, about a mailbox (the one selected when it was reported) or
+/// about the connection
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
     /// The mailbox has this many messages now
-    Exists { count: u32 },
+    Exists { mailbox: String, count: u32 },
     /// The message with this sequence number is gone, later ones moved down by one
-    Expunge { seq: u32 },
+    Expunge { mailbox: String, seq: u32 },
     /// Messages with these UIDs are gone (QRESYNC)
-    Vanished { uids: String, earlier: bool },
+    Vanished {
+        mailbox: String,
+        uids: SequenceSet,
+        earlier: bool,
+    },
     /// The flags of a message changed
     Flags {
+        mailbox: String,
         seq: u32,
         uid: Option<u64>,
         flags: Vec<String>,
@@ -135,12 +142,41 @@ pub(crate) struct Completion {
     pub tagged: Response,
 }
 
-/// Decides what to do with an untagged response while a command runs: keep it in the
-/// completion or not (it was handled)
+impl Completion {
+    /// The untagged responses named `name`
+    pub fn untagged<'a>(&'a self, name: &'a str) -> impl Iterator<Item = &'a Response> {
+        self.untagged.iter().filter(move |r| r.is(name))
+    }
+}
+
+/// Sees each untagged response of a command first: returns it to keep it (it is then also
+/// applied to the session state and reported), or None when it was the command's own data
 type UntaggedHandler<'a> = &'a mut dyn FnMut(Response) -> Result<Option<Response>, Error>;
 
 /// The data to send for a `+` continuation that is not a literal
 type ContinuationHandler<'a> = &'a mut dyn FnMut(&Response) -> Result<Vec<u8>, Error>;
+
+fn keep(response: Response) -> Result<Option<Response>, Error> {
+    Ok(Some(response))
+}
+
+/// INBOX in any case is INBOX (RFC 3501 section 5.1)
+fn normalize_path(path: &str) -> String {
+    if path.eq_ignore_ascii_case("INBOX") {
+        "INBOX".into()
+    } else {
+        path.to_string()
+    }
+}
+
+/// Whether an uppercase name set has `name`, without allocating for names that are uppercase
+fn has_name(set: &HashSet<String>, name: &str) -> bool {
+    if name.bytes().any(|c| c.is_ascii_lowercase()) {
+        set.contains(&name.to_ascii_uppercase())
+    } else {
+        set.contains(name)
+    }
+}
 
 pub struct Client {
     config: Config,
@@ -156,13 +192,8 @@ pub struct Client {
     enabled: HashSet<String>,
     namespace: Option<Namespace>,
     selected: Option<Selected>,
-    /// Whether untagged FETCH responses belong to the running command (FETCH) rather than being
-    /// changes to report
-    collecting_fetch: bool,
     bye: Option<String>,
     closed: bool,
-    /// Set when a response code listed the capabilities, so they need not be asked for
-    capabilities_from_code: bool,
     events: UnboundedSender<Event>,
 }
 
@@ -190,10 +221,8 @@ impl Client {
             enabled: HashSet::new(),
             namespace: None,
             selected: None,
-            collecting_fetch: false,
             bye: None,
             closed: false,
-            capabilities_from_code: false,
             events,
         };
         client.start_session().await?;
@@ -247,8 +276,7 @@ impl Client {
         self.stream.upgrade(&self.config.host, &self.config.trust).await?;
         // the capabilities from before the upgrade could have been tampered with
         self.capabilities.clear();
-        self.capability().await?;
-        Ok(())
+        self.capability().await
     }
 
     async fn id(&mut self) -> Result<(), Error> {
@@ -257,12 +285,8 @@ impl Client {
             .client_id
             .iter()
             .flat_map(|(k, v)| [Arg::string(k.as_str()), Arg::string(v.as_str())]);
-        let args = vec![Arg::List(fields.collect())];
         // ID is informational, a server that refuses it is still usable
-        match self.run("ID", args).await {
-            Ok(_) | Err(Error::Refused { .. }) => Ok(()),
-            Err(error) => Err(error),
-        }
+        self.optional("ID", vec![Arg::List(fields.collect())]).await.map(|_| ())
     }
 
     async fn enable(&mut self) -> Result<(), Error> {
@@ -277,44 +301,32 @@ impl Client {
         if wanted.is_empty() {
             return Ok(());
         }
-        match self.run("ENABLE", wanted).await {
-            Ok(completion) => {
-                for response in completion
-                    .untagged
-                    .iter()
-                    .filter(|r| r.command.eq_ignore_ascii_case("ENABLED"))
-                {
-                    self.enabled.extend(
-                        response
-                            .attributes
-                            .iter()
-                            .filter_map(Token::text)
-                            .map(|t| t.to_ascii_uppercase()),
-                    );
-                }
-                Ok(())
+        if let Some(completion) = self.optional("ENABLE", wanted).await? {
+            for response in completion.untagged("ENABLED") {
+                self.enabled.extend(
+                    response
+                        .attributes
+                        .iter()
+                        .filter_map(Token::text)
+                        .map(|t| t.to_ascii_uppercase()),
+                );
             }
-            Err(Error::Refused { .. }) => Ok(()),
-            Err(error) => Err(error),
         }
+        Ok(())
     }
 
     /// Asks for the capabilities again
     pub async fn capability(&mut self) -> Result<(), Error> {
-        self.run("CAPABILITY", Vec::new()).await.map(|_| ())
+        self.simple("CAPABILITY", Vec::new()).await
     }
 
     pub fn has_capability(&self, name: &str) -> bool {
-        self.capabilities.contains(&name.to_ascii_uppercase())
-    }
-
-    pub fn capabilities(&self) -> &HashSet<String> {
-        &self.capabilities
+        has_name(&self.capabilities, name)
     }
 
     /// Whether an extension was enabled with ENABLE (CONDSTORE, UTF8=ACCEPT)
     pub fn is_enabled(&self, name: &str) -> bool {
-        self.enabled.contains(&name.to_ascii_uppercase())
+        has_name(&self.enabled, name)
     }
 
     pub fn namespace(&self) -> Option<&Namespace> {
@@ -334,7 +346,7 @@ impl Client {
     }
 
     pub async fn noop(&mut self) -> Result<(), Error> {
-        self.run("NOOP", Vec::new()).await.map(|_| ())
+        self.simple("NOOP", Vec::new()).await
     }
 
     /// Ends the session politely and closes the connection
@@ -348,6 +360,10 @@ impl Client {
         Ok(())
     }
 
+    fn require_selected(&self) -> Result<&Selected, Error> {
+        self.selected.as_ref().ok_or(Error::NoMailboxSelected)
+    }
+
     fn compile_options(&self) -> CompileOptions {
         CompileOptions {
             literal_plus: self.has_capability("LITERAL+"),
@@ -356,9 +372,10 @@ impl Client {
         }
     }
 
-    fn log(&self, direction: Direction, line: &str) {
+    /// Writes to the wire log, building the line only when there is a log
+    fn log(&self, direction: Direction, line: impl FnOnce() -> String) {
         if let Some(log) = &self.config.wire_log {
-            log(direction, line);
+            log(direction, &line());
         }
     }
 
@@ -371,10 +388,8 @@ impl Client {
         if self.closed {
             return Err(Error::Closed(self.bye.clone()));
         }
-        self.stream
-            .write_all(data)
-            .await
-            .map_err(|error| self.lost(error.into()))
+        let written = self.stream.write_all(data).await;
+        written.map_err(|error| self.lost(pe_net::Error::Io(error).into()))
     }
 
     /// The connection is gone: reports it once and returns the error
@@ -391,8 +406,9 @@ impl Client {
     async fn read_response(&mut self, tag: Option<&str>, timeout: Option<Duration>) -> Result<Response, Error> {
         loop {
             if let Some(raw) = self.ready.pop_front() {
-                let line = String::from_utf8_lossy(&raw.line[..raw.line.len().min(LOG_LINE_LIMIT)]).into_owned();
-                self.log(Direction::Server, &line);
+                self.log(Direction::Server, || {
+                    String::from_utf8_lossy(&raw.line[..raw.line.len().min(LOG_LINE_LIMIT)]).into_owned()
+                });
                 match raw.parse_with(&ParserOptions::default()) {
                     Ok(response) => return Ok(response),
                     Err(error) if error.tag.is_some() && error.tag.as_deref() == tag => return Err(error.into()),
@@ -410,7 +426,7 @@ impl Client {
                 },
                 None => read.await,
             };
-            let count = count.map_err(|error| self.lost(error.into()))?;
+            let count = count.map_err(|error| self.lost(pe_net::Error::Io(error).into()))?;
             if count == 0 {
                 return Err(self.lost(Error::Closed(self.bye.clone())));
             }
@@ -423,17 +439,45 @@ impl Client {
         }
     }
 
-    fn next_tag(&mut self) -> String {
+    /// Writes a command, up to its first synchronizing literal. Returns its tag and the parts
+    /// that wait for the server's continuation.
+    async fn send(&mut self, name: &str, args: Vec<Arg>) -> Result<(String, std::vec::IntoIter<Vec<u8>>), Error> {
+        if self.closed {
+            return Err(Error::Closed(self.bye.clone()));
+        }
         let tag = format!("A{}", self.next_tag);
         self.next_tag += 1;
-        tag
+        let command = Command {
+            tag,
+            name: name.to_string(),
+            args,
+        };
+        let segments = compile(&command, &self.compile_options())?;
+        self.log(Direction::Client, || to_log_string(&command));
+        // the arguments, a message for APPEND, are not needed once compiled
+        let tag = command.tag;
+        let mut segments = segments.into_iter();
+        if let Some(first) = segments.next() {
+            self.write(&first).await?;
+        }
+        Ok((tag, segments))
     }
 
     pub(crate) async fn run(&mut self, name: &str, args: Vec<Arg>) -> Result<Completion, Error> {
-        self.run_with(name, args, &mut |response| Ok(Some(response)), &mut |_| {
-            Err(Error::Unexpected("continuation request".into()))
-        })
-        .await
+        self.run_with(name, args, &mut keep, None).await
+    }
+
+    /// Runs a command, Ok(None) when the server refused it: for what a session can do without
+    pub(crate) async fn optional(&mut self, name: &str, args: Vec<Arg>) -> Result<Option<Completion>, Error> {
+        match self.run(name, args).await {
+            Ok(completion) => Ok(Some(completion)),
+            Err(Error::Refused { .. }) => Ok(None),
+            Err(error) => Err(error),
+        }
+    }
+
+    pub(crate) async fn simple(&mut self, name: &str, args: Vec<Arg>) -> Result<(), Error> {
+        self.run(name, args).await.map(|_| ())
     }
 
     /// Sends a command and reads until its completion. Literals wait for the server's
@@ -443,54 +487,51 @@ impl Client {
         name: &str,
         args: Vec<Arg>,
         untagged: UntaggedHandler<'_>,
-        continuation: ContinuationHandler<'_>,
+        mut continuation: Option<ContinuationHandler<'_>>,
     ) -> Result<Completion, Error> {
-        if self.closed {
-            return Err(Error::Closed(self.bye.clone()));
-        }
-        let command = Command {
-            tag: self.next_tag(),
-            name: name.to_string(),
-            args,
-        };
-        let segments = compile(&command, &self.compile_options())?;
-        self.log(Direction::Client, &to_log_string(&command));
-        let mut segments = segments.into_iter();
-        if let Some(first) = segments.next() {
-            self.write(&first).await?;
-        }
-
+        let (tag, mut segments) = self.send(name, args).await?;
         let mut collected = Vec::new();
         loop {
             let response = self
-                .read_response(Some(&command.tag), Some(self.config.timeouts.response))
+                .read_response(Some(&tag), Some(self.config.timeouts.response))
                 .await?;
             if response.is_continuation() {
-                let data = match segments.next() {
-                    Some(segment) => segment,
-                    None => continuation(&response)?,
+                let data = match (segments.next(), continuation.as_mut()) {
+                    (Some(segment), _) => segment,
+                    (None, Some(handler)) => handler(&response)?,
+                    (None, None) => return Err(Error::Unexpected("continuation request".into())),
                 };
                 self.write(&data).await?;
-                continue;
-            }
-            if response.tag == command.tag {
-                self.update_from_code(&response);
+            } else if response.tag == tag {
                 return self.complete(name, response, collected);
-            }
-            if response.is_untagged() {
-                self.handle_untagged(&response);
-                if let Some(keep) = untagged(response)? {
-                    if collected.len() >= MAX_COLLECTED_RESPONSES {
-                        return Err(Error::TooManyResponses);
-                    }
-                    collected.push(keep);
-                }
+            } else if response.is_untagged() {
+                self.on_untagged(response, untagged, &mut collected)?;
             }
             // a tagged response for some other tag is not ours to handle
         }
     }
 
+    /// An untagged response while a command runs: the command's handler first, then the session
+    fn on_untagged(
+        &mut self,
+        response: Response,
+        handler: UntaggedHandler<'_>,
+        collected: &mut Vec<Response>,
+    ) -> Result<(), Error> {
+        let Some(kept) = handler(response)? else {
+            return Ok(());
+        };
+        self.handle_untagged(&kept);
+        if collected.len() >= MAX_COLLECTED_RESPONSES {
+            return Err(Error::TooManyResponses);
+        }
+        collected.push(kept);
+        Ok(())
+    }
+
+    /// The tagged completion of a command
     fn complete(&mut self, name: &str, tagged: Response, untagged: Vec<Response>) -> Result<Completion, Error> {
+        self.update_from_code(&tagged);
         if tagged.command.eq_ignore_ascii_case("OK") {
             return Ok(Completion { untagged, tagged });
         }
@@ -506,10 +547,7 @@ impl Client {
     fn update_from_code(&mut self, response: &Response) {
         let Some((code, args)) = response.code() else { return };
         match code.as_str() {
-            "CAPABILITY" => {
-                self.set_capabilities(args);
-                self.capabilities_from_code = true;
-            }
+            "CAPABILITY" => self.set_capabilities(args),
             "ALERT" => self.emit(Event::Alert(response.text().unwrap_or_default())),
             _ => {}
         }
@@ -525,55 +563,64 @@ impl Client {
 
     /// Keeps the session state current with what the server reports on its own
     fn handle_untagged(&mut self, response: &Response) {
-        let command = response.command.to_ascii_uppercase();
-        match command.as_str() {
-            "CAPABILITY" => self.set_capabilities(&response.attributes),
-            "OK" | "NO" | "BAD" => self.update_from_code(response),
-            "BYE" => self.bye = Some(response.text().unwrap_or_default()),
-            "VANISHED" => self.vanished(response),
-            _ => {
-                if let Ok(seq) = command.parse::<u32>() {
-                    self.message_update(seq, response);
-                }
-            }
+        if let Some((seq, kind)) = response.message_data() {
+            self.message_update(seq, kind, response);
+            return;
+        }
+        let command = response.command.as_str();
+        if command.eq_ignore_ascii_case("CAPABILITY") {
+            self.set_capabilities(&response.attributes);
+        } else if ["OK", "NO", "BAD"].iter().any(|s| command.eq_ignore_ascii_case(s)) {
+            self.update_from_code(response);
+        } else if command.eq_ignore_ascii_case("BYE") {
+            self.bye = Some(response.text().unwrap_or_default());
+        } else if command.eq_ignore_ascii_case("VANISHED") {
+            self.vanished(response);
         }
     }
 
     /// `* 3 EXISTS`, `* 2 EXPUNGE`, `* 5 FETCH (FLAGS (...))`
-    fn message_update(&mut self, seq: u32, response: &Response) {
+    fn message_update(&mut self, seq: u32, kind: &Token, response: &Response) {
         let Some(selected) = self.selected.as_mut() else { return };
-        let Some(kind) = response.attributes.first().and_then(Token::text) else {
-            return;
-        };
-        match kind.to_ascii_uppercase().as_str() {
-            "EXISTS" => {
-                selected.exists = seq;
-                self.emit(Event::Exists { count: seq });
-            }
-            "EXPUNGE" => {
-                selected.exists = selected.exists.saturating_sub(1);
-                self.emit(Event::Expunge { seq });
-            }
-            "FETCH" if !self.collecting_fetch => {
-                let message = fetch::parse_fetch(seq, response);
-                if let Some(flags) = message.flags {
-                    self.emit(Event::Flags {
-                        seq,
-                        uid: message.uid,
-                        flags,
-                        modseq: message.modseq,
-                    });
-                }
-            }
-            _ => {}
+        let mailbox = selected.path.clone();
+        if kind.is_atom("EXISTS") {
+            selected.exists = seq;
+            self.emit(Event::Exists { mailbox, count: seq });
+        } else if kind.is_atom("EXPUNGE") {
+            selected.exists = selected.exists.saturating_sub(1);
+            self.emit(Event::Expunge { mailbox, seq });
+        } else if kind.is_atom("FETCH")
+            && let Some((uid, flags, modseq)) = fetch::flag_update(response)
+        {
+            self.emit(Event::Flags {
+                mailbox,
+                seq,
+                uid,
+                flags,
+                modseq,
+            });
         }
     }
 
     /// `* VANISHED (EARLIER) 1:3`
     fn vanished(&mut self, response: &Response) {
-        let earlier = matches!(response.attributes.first(), Some(Token::List(items)) if items.iter().any(|t| t.is_atom("EARLIER")));
-        if let Some(uids) = response.attributes.last().and_then(Token::text) {
-            self.emit(Event::Vanished { uids, earlier });
+        let Some(selected) = &self.selected else { return };
+        let earlier = response
+            .attributes
+            .first()
+            .and_then(Token::as_list)
+            .is_some_and(|items| items.iter().any(|t| t.is_atom("EARLIER")));
+        let uids = response
+            .attributes
+            .last()
+            .and_then(Token::text)
+            .and_then(|t| SequenceSet::parse(&t).ok());
+        if let Some(uids) = uids {
+            self.emit(Event::Vanished {
+                mailbox: selected.path.clone(),
+                uids,
+                earlier,
+            });
         }
     }
 
@@ -589,6 +636,7 @@ impl Client {
         }
     }
 
+    /// A mailbox name from the wire
     fn decode_path(&self, raw: &str) -> String {
         if raw.eq_ignore_ascii_case("INBOX") {
             "INBOX".into()

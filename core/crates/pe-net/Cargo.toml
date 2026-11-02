@@ -12,6 +12,3 @@ rustls = { version = "0.23.46", default-features = false, features = ["ring", "l
 rustls-platform-verifier = "0.7.1"
 tokio = { version = "1.54.1", features = ["net", "io-util", "time"] }
 tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "logging", "tls12"] }
-
-[dev-dependencies]
-tokio = { version = "1.54.1", features = ["rt", "macros", "net", "io-util"] }

@@ -3,38 +3,10 @@
 
 use std::collections::BTreeMap;
 
+pub use pe_mime::{Address, Envelope};
 use pe_mime::{decode_params, decode_words};
 
 use crate::types::Token;
-
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct Address {
-    pub name: String,
-    /// Empty for the name of an RFC 5322 group
-    pub address: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct Envelope {
-    /// The Date header as sent, see [`pe_mime::date::parse_date`]
-    pub date: Option<String>,
-    pub subject: Option<String>,
-    pub from: Vec<Address>,
-    pub sender: Vec<Address>,
-    pub reply_to: Vec<Address>,
-    pub to: Vec<Address>,
-    pub cc: Vec<Address>,
-    pub bcc: Vec<Address>,
-    pub in_reply_to: Option<String>,
-    pub message_id: Option<String>,
-}
-
-impl Envelope {
-    /// The Date header in seconds since the Unix epoch
-    pub fn timestamp(&self) -> Option<i64> {
-        self.date.as_deref().and_then(pe_mime::date::parse_date)
-    }
-}
 
 /// One part of a message
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -87,6 +59,16 @@ fn field(token: Option<&Token>) -> Option<String> {
     }
 }
 
+/// The fields of a list: absent for NIL, a field of its own for anything else (a malformed
+/// structure, read the way imapflow reads it)
+fn fields(token: Option<&Token>) -> Option<&[Token]> {
+    match token? {
+        Token::List(items) => Some(items),
+        Token::Nil => None,
+        other => Some(std::slice::from_ref(other)),
+    }
+}
+
 /// Some servers leave the quotes of a quoted display name in place
 fn unquote(value: String) -> String {
     match value.strip_prefix('"').and_then(|v| v.strip_suffix('"')) {
@@ -99,37 +81,26 @@ fn decode_text(value: Option<String>) -> String {
     unquote(decode_words(&value.unwrap_or_default()))
 }
 
-fn addresses(token: Option<&Token>) -> Vec<Address> {
-    let Some(list) = token.and_then(Token::as_list) else {
-        return Vec::new();
+fn address(fields: &[Token]) -> Option<Address> {
+    let mut name = decode_text(text(fields.first()));
+    let mailbox = text(fields.get(2)).unwrap_or_default();
+    let host = text(fields.get(3)).unwrap_or_default();
+    // a NIL host is RFC 5322 group syntax: the mailbox holds the group name, a NIL mailbox ends
+    // the group. Joining the fields would invent an address that was never there.
+    let address = if host.is_empty() {
+        if name.is_empty() && !mailbox.is_empty() {
+            name = decode_text(Some(mailbox));
+        }
+        String::new()
+    } else {
+        format!("{mailbox}@{host}")
     };
-    list.iter()
-        .filter_map(Token::as_list)
-        .filter_map(|fields| {
-            let name = decode_text(text(fields.first()));
-            let mailbox = text(fields.get(2)).unwrap_or_default();
-            let host = text(fields.get(3)).unwrap_or_default();
-            // a NIL host is RFC 5322 group syntax: the mailbox holds the group name, a NIL mailbox
-            // ends the group. Joining the fields would invent an address that was never there.
-            let address = if host.is_empty() {
-                let name = if name.is_empty() && !mailbox.is_empty() {
-                    decode_text(Some(mailbox))
-                } else {
-                    name
-                };
-                Address {
-                    name,
-                    address: String::new(),
-                }
-            } else {
-                Address {
-                    name,
-                    address: format!("{mailbox}@{host}"),
-                }
-            };
-            (!address.name.is_empty() || !address.address.is_empty()).then_some(address)
-        })
-        .collect()
+    (!name.is_empty() || !address.is_empty()).then_some(Address { name, address })
+}
+
+fn addresses(token: Option<&Token>) -> Vec<Address> {
+    let list = token.and_then(Token::as_list).unwrap_or_default();
+    list.iter().filter_map(Token::as_list).filter_map(address).collect()
 }
 
 pub fn parse_envelope(fields: &[Token]) -> Envelope {
@@ -157,38 +128,49 @@ fn params(token: Option<&Token>) -> BTreeMap<String, String> {
 }
 
 pub fn parse_body_structure(node: &[Token]) -> BodyStructure {
-    walk(node, &[])
+    walk(node, None)
 }
 
-fn walk(node: &[Token], path: &[u32]) -> BodyStructure {
-    let mut part = BodyStructure {
-        part: (!path.is_empty()).then(|| path.iter().map(u32::to_string).collect::<Vec<_>>().join(".")),
+/// A part numbered `part`; its children are numbered below it
+fn walk(node: &[Token], part: Option<String>) -> BodyStructure {
+    let mut structure = BodyStructure {
+        part,
         ..Default::default()
     };
-    let mut i = 0;
-    if matches!(node.first(), Some(Token::List(_))) {
-        // multipart: the parts, then the subtype and the extension data
-        while let Some(Token::List(child)) = node.get(i) {
-            let mut child_path = path.to_vec();
-            child_path.push(i as u32 + 1);
-            part.children.push(walk(child, &child_path));
-            i += 1;
-        }
-        part.content_type = format!("multipart/{}", lower(node.get(i)));
-        i += 1;
-        if i < node.len() {
-            part.parameters = params(node.get(i));
-            i += 1;
-        }
+    let rest = if matches!(node.first(), Some(Token::List(_))) {
+        multipart(&mut structure, node)
     } else {
-        i = single_part(&mut part, node, path);
-    }
-    extension_fields(&mut part, node, i);
-    part
+        single_part(&mut structure, node)
+    };
+    extension_fields(&mut structure, rest);
+    structure
 }
 
-/// The fields of a non-multipart part, returns the index of its extension data
-fn single_part(part: &mut BodyStructure, node: &[Token], path: &[u32]) -> usize {
+fn child_part(parent: &Option<String>, index: usize) -> String {
+    match parent {
+        Some(parent) => format!("{parent}.{index}"),
+        None => index.to_string(),
+    }
+}
+
+/// The parts, the subtype and the parameters of a multipart, returns what follows them
+fn multipart<'a>(structure: &mut BodyStructure, node: &'a [Token]) -> &'a [Token] {
+    let parts = node.iter().take_while(|t| matches!(t, Token::List(_))).count();
+    for (i, child) in node[..parts].iter().filter_map(Token::as_list).enumerate() {
+        structure
+            .children
+            .push(walk(child, Some(child_part(&structure.part, i + 1))));
+    }
+    structure.content_type = format!("multipart/{}", lower(node.get(parts)));
+    if node.len() > parts + 1 {
+        structure.parameters = params(node.get(parts + 1));
+        return &node[parts + 2..];
+    }
+    &[]
+}
+
+/// The fields of a non-multipart part, returns its extension data
+fn single_part<'a>(part: &mut BodyStructure, node: &'a [Token]) -> &'a [Token] {
     part.content_type = format!("{}/{}", lower(node.first()), lower(node.get(1)));
     part.parameters = params(node.get(2));
     part.id = field(node.get(3));
@@ -200,15 +182,9 @@ fn single_part(part: &mut BodyStructure, node: &[Token], path: &[u32]) -> usize 
     if part.content_type == "message/rfc822" {
         // the envelope, the structure and the line count of the attached message, which shares
         // the part number of its wrapper
-        part.envelope = match node.get(i) {
-            Some(Token::List(fields)) => Some(Box::new(parse_envelope(fields))),
-            None | Some(Token::Nil) => None,
-            Some(other) => Some(Box::new(parse_envelope(std::slice::from_ref(other)))),
-        };
-        match node.get(i + 1) {
-            Some(Token::List(child)) => part.children.push(walk(child, path)),
-            None | Some(Token::Nil) => {}
-            Some(other) => part.children.push(walk(std::slice::from_ref(other), path)),
+        part.envelope = fields(node.get(i)).map(|f| Box::new(parse_envelope(f)));
+        if let Some(child) = fields(node.get(i + 1)) {
+            part.children.push(walk(child, part.part.clone()));
         }
         part.line_count = count(node.get(i + 2));
         i += 3;
@@ -229,29 +205,22 @@ fn single_part(part: &mut BodyStructure, node: &[Token], path: &[u32]) -> usize 
         part.md5 = field(node.get(i)).map(|md5| md5.to_ascii_lowercase());
         i += 1;
     }
-    i
+    node.get(i..).unwrap_or_default()
 }
 
 /// Disposition, language and location, shared by multipart and other parts
-fn extension_fields(part: &mut BodyStructure, node: &[Token], mut i: usize) {
-    if i < node.len() {
-        if let Some(disposition) = node[i].as_list().filter(|d| !d.is_empty()) {
-            part.disposition = Some(lower(disposition.first()));
-            part.disposition_parameters = params(disposition.get(1));
-        }
-        i += 1;
+fn extension_fields(part: &mut BodyStructure, rest: &[Token]) {
+    let mut rest = rest.iter();
+    if let Some(disposition) = rest.next().and_then(Token::as_list).filter(|d| !d.is_empty()) {
+        part.disposition = Some(lower(disposition.first()));
+        part.disposition_parameters = params(disposition.get(1));
     }
-    if i < node.len() {
-        part.language = match &node[i] {
-            Token::List(items) => items.iter().map(|t| lower(Some(t))).collect(),
-            Token::Nil => Vec::new(),
-            other => vec![lower(Some(other))],
-        };
-        i += 1;
-    }
-    if i < node.len() {
-        part.location = field(node.get(i));
-    }
+    part.language = match rest.next() {
+        Some(Token::List(items)) => items.iter().map(|t| lower(Some(t))).collect(),
+        None | Some(Token::Nil) => Vec::new(),
+        Some(other) => vec![lower(Some(other))],
+    };
+    part.location = field(rest.next());
 }
 
 #[cfg(test)]

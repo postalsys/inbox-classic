@@ -9,8 +9,8 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use pe_imap::client::{Direction, Error, FetchQuery, SearchKey, StoreAction, Timeouts};
-use pe_imap::{Client, Config, Credentials, Event};
-use pe_net::{Security, Trust};
+use pe_imap::{Client, Config, Credentials, ErrorKind, Event, Messages, SequenceSet, SpecialUse};
+use pe_net::{Security, TlsFailureKind, Trust};
 use pe_testkit::{ImapKit, PASSWORD, TOKEN, USER, rfc822};
 use serde_json::{Value, json};
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -54,22 +54,34 @@ impl Kit {
         config
     }
 
-    async fn connect_with(&self, config: Config) -> Result<(Client, UnboundedReceiver<Event>), Error> {
-        Client::connect(config).await
-    }
-
     async fn connect(&self) -> (Client, UnboundedReceiver<Event>) {
-        self.connect_with(self.config(Security::Plain, password()))
+        Client::connect(self.config(Security::Plain, password()))
             .await
             .expect("connect")
     }
 
+    /// A connection that the server or the client refuses, with its error
+    async fn refused(&self, config: Config) -> Error {
+        match Client::connect(config).await {
+            Ok(_) => panic!("connected"),
+            Err(error) => error,
+        }
+    }
+
     fn sent(&self, needle: &str) -> bool {
-        self.lines(Direction::Client).iter().any(|line| line.contains(needle))
+        self.any(Direction::Client, needle)
     }
 
     fn received(&self, needle: &str) -> bool {
-        self.lines(Direction::Server).iter().any(|line| line.contains(needle))
+        self.any(Direction::Server, needle)
+    }
+
+    fn any(&self, direction: Direction, needle: &str) -> bool {
+        self.wire
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|(d, line)| *d == direction && line.contains(needle))
     }
 
     fn lines(&self, direction: Direction) -> Vec<String> {
@@ -108,7 +120,15 @@ fn password() -> Credentials {
     }
 }
 
-/// The client and the ImapKit for a test, or a skipped test
+fn uids(set: &str) -> Messages {
+    Messages::Uids(SequenceSet::parse(set).unwrap())
+}
+
+fn seqs(set: &str) -> Messages {
+    Messages::Seqs(SequenceSet::parse(set).unwrap())
+}
+
+/// The ImapKit for a test, or a skipped test
 macro_rules! kit {
     ($config:expr) => {
         match Kit::start($config) {
@@ -157,15 +177,13 @@ async fn login_on_a_server_without_auth_mechanisms() {
 #[tokio::test]
 async fn login_failure_is_an_authentication_failure() {
     let kit = kit!(json!({ "plugins": [] }));
-    let config = kit.config(
-        Security::Plain,
-        Credentials::Password {
-            user: USER.into(),
-            password: "wrong".into(),
-        },
-    );
-    let error = kit.connect_with(config).await.err().expect("refused");
+    let wrong = Credentials::Password {
+        user: USER.into(),
+        password: "wrong".into(),
+    };
+    let error = kit.refused(kit.config(Security::Plain, wrong)).await;
     assert!(matches!(error, Error::AuthenticationFailed { .. }), "{error:?}");
+    assert_eq!(error.kind(), ErrorKind::Authentication);
 }
 
 #[tokio::test]
@@ -187,10 +205,7 @@ async fn utf8_credentials_go_through_authenticate_plain() {
         user: "jõgi@näide.ee".into(),
         password: "pässwörd".into(),
     };
-    let (mut client, _) = kit
-        .connect_with(kit.config(Security::Plain, credentials))
-        .await
-        .unwrap();
+    let (mut client, _) = Client::connect(kit.config(Security::Plain, credentials)).await.unwrap();
     client.noop().await.unwrap();
 }
 
@@ -206,21 +221,17 @@ async fn oauth_mechanisms() {
             user: USER.into(),
             access_token: TOKEN.into(),
         };
-        let (mut client, _) = kit.connect_with(kit.config(Security::Plain, token)).await.unwrap();
+        let (mut client, _) = Client::connect(kit.config(Security::Plain, token)).await.unwrap();
         assert!(kit.sent(&format!("AUTHENTICATE {mechanism}")), "{mechanism}");
         assert!(!kit.sent(TOKEN));
         client.noop().await.unwrap();
 
-        // a wrong token gets an error challenge, answered with an empty line, then NO
+        // a wrong token gets an error challenge, answered as the mechanism wants, then NO
         let wrong = Credentials::OAuth2 {
             user: USER.into(),
             access_token: "wrong".into(),
         };
-        let error = kit
-            .connect_with(kit.config(Security::Plain, wrong))
-            .await
-            .err()
-            .expect("refused");
+        let error = kit.refused(kit.config(Security::Plain, wrong)).await;
         assert!(
             matches!(error, Error::AuthenticationFailed { .. }),
             "{mechanism}: {error:?}"
@@ -231,52 +242,43 @@ async fn oauth_mechanisms() {
 #[tokio::test]
 async fn starttls_upgrade_with_a_fresh_capability() {
     let kit = kit!(json!({ "plugins": ["STARTTLS", "AUTH-PLAIN", "ID"] }));
-    let (mut client, _) = kit
-        .connect_with(kit.config(Security::StartTls, password()))
+    let (mut client, _) = Client::connect(kit.config(Security::StartTls, password()))
         .await
         .unwrap();
     assert!(client.is_secure());
     let sent = kit.lines(Direction::Client);
-    let position = |needle: &str| sent.iter().position(|l| l.contains(needle)).unwrap_or(usize::MAX);
+    let starttls = sent.iter().position(|l| l.ends_with("STARTTLS")).unwrap();
     // CAPABILITY again right after the upgrade, and ID only over TLS
-    assert!(sent[position("STARTTLS") + 1].ends_with("CAPABILITY"), "{sent:?}");
-    assert!(position("STARTTLS") < position("ID ("));
+    assert!(sent[starttls + 1].ends_with("CAPABILITY"), "{sent:?}");
+    assert!(sent.iter().position(|l| l.contains("ID (")).unwrap() > starttls);
     client.noop().await.unwrap();
 }
 
 #[tokio::test]
 async fn required_starttls_fails_without_it() {
     let kit = kit!(json!({ "plugins": [] }));
-    let error = kit
-        .connect_with(kit.config(Security::StartTls, password()))
-        .await
-        .err()
-        .expect("refused");
+    let error = kit.refused(kit.config(Security::StartTls, password())).await;
     assert!(matches!(error, Error::StartTlsUnavailable), "{error:?}");
+    assert_eq!(error.kind(), ErrorKind::Security);
     assert!(!kit.sent("LOGIN"), "credentials never sent in plaintext");
 }
 
 #[tokio::test]
 async fn logindisabled_before_starttls_login_after_it() {
     let kit = kit!(json!({ "plugins": ["STARTTLS", "LOGINDISABLED"] }));
-    let (client, _) = kit
-        .connect_with(kit.config(Security::StartTls, password()))
+    let (client, _) = Client::connect(kit.config(Security::StartTls, password()))
         .await
         .unwrap();
     assert!(client.is_secure() && !client.has_capability("LOGINDISABLED"));
 
-    let error = kit
-        .connect_with(kit.config(Security::Plain, password()))
-        .await
-        .err()
-        .expect("refused");
+    let error = kit.refused(kit.config(Security::Plain, password())).await;
     assert!(matches!(error, Error::NoAuthenticationMethod), "{error:?}");
 }
 
 #[tokio::test]
 async fn implicit_tls() {
     let kit = kit!(json!({ "plugins": ["AUTH-PLAIN"] }));
-    let (mut client, _) = kit.connect_with(kit.config(Security::Tls, password())).await.unwrap();
+    let (mut client, _) = Client::connect(kit.config(Security::Tls, password())).await.unwrap();
     assert!(client.is_secure());
     client.noop().await.unwrap();
 }
@@ -287,8 +289,11 @@ async fn certificates_that_are_not_trusted_are_refused_and_shown() {
     for trust in [Trust::Platform, Trust::Pinned(vec![b"another certificate".to_vec()])] {
         let mut config = kit.config(Security::Tls, password());
         config.trust = trust;
-        match kit.connect_with(config).await.err().expect("refused") {
-            Error::Tls { certificate, .. } => assert_eq!(certificate.as_deref(), Some(kit.server.cert.as_slice())),
+        match kit.refused(config).await {
+            Error::Net(pe_net::Error::Tls(failure)) => {
+                assert_eq!(failure.kind, TlsFailureKind::Untrusted, "{}", failure.message);
+                assert_eq!(failure.certificate.as_deref(), Some(kit.server.cert.as_slice()));
+            }
             other => panic!("{other:?}"),
         }
     }
@@ -300,11 +305,7 @@ async fn plaintext_after_the_starttls_ok_is_refused() {
         "plugins": ["STARTTLS", "AUTH-PLAIN"],
         "script": { "on": "command", "command": "STARTTLS", "send": "$TAG OK Begin TLS\r\n* CAPABILITY IMAP4rev1 AUTH=PLAIN\r\n" }
     }));
-    let error = kit
-        .connect_with(kit.config(Security::StartTls, password()))
-        .await
-        .err()
-        .expect("refused");
+    let error = kit.refused(kit.config(Security::StartTls, password())).await;
     assert!(matches!(error, Error::StartTlsInjection), "{error:?}");
 }
 
@@ -315,16 +316,19 @@ async fn lists_special_use_folders_first() {
     let kit = kit!(json!({}));
     let (mut client, _) = kit.connect().await;
     let list = client.list().await.unwrap();
-    let summary: Vec<(&str, Option<&str>)> = list.iter().map(|m| (m.path.as_str(), m.special_use)).collect();
+    let summary: Vec<(&str, Option<SpecialUse>)> = list
+        .iter()
+        .map(|m| (m.path.as_str(), m.special_use.map(|(u, _)| u)))
+        .collect();
     assert_eq!(
         summary,
         vec![
-            ("INBOX", Some("\\Inbox")),
-            ("Sent", Some("\\Sent")),
-            ("Drafts", Some("\\Drafts")),
-            ("Archive", Some("\\Archive")),
-            ("Junk", Some("\\Junk")),
-            ("Trash", Some("\\Trash")),
+            ("INBOX", Some(SpecialUse::Inbox)),
+            ("Sent", Some(SpecialUse::Sent)),
+            ("Drafts", Some(SpecialUse::Drafts)),
+            ("Archive", Some(SpecialUse::Archive)),
+            ("Junk", Some(SpecialUse::Junk)),
+            ("Trash", Some(SpecialUse::Trash)),
         ]
     );
     assert!(list.iter().all(|m| m.subscribed && m.delimiter.as_deref() == Some("/")));
@@ -339,9 +343,15 @@ async fn special_use_by_name_without_the_extension() {
     let kit = kit!(json!({ "plugins": ["IDLE"], "storage": storage }));
     let (mut client, _) = kit.connect().await;
     let list = client.list().await.unwrap();
-    let find = |path: &str| list.iter().find(|m| m.path == path).unwrap().special_use;
-    assert_eq!(find("Sent Items"), Some("\\Sent"));
-    assert_eq!(find("Deleted Items"), Some("\\Trash"));
+    let find = |path: &str| {
+        list.iter()
+            .find(|m| m.path == path)
+            .unwrap()
+            .special_use
+            .map(|(u, _)| u)
+    };
+    assert_eq!(find("Sent Items"), Some(SpecialUse::Sent));
+    assert_eq!(find("Deleted Items"), Some(SpecialUse::Trash));
     // the shallower folder wins
     assert_eq!(find("Projects/Sent"), None);
 }
@@ -386,7 +396,9 @@ async fn select_and_status() {
     assert_eq!((status.messages, status.unseen), (Some(2), Some(1)));
     assert!(status.uid_validity.is_some() && status.highest_modseq.is_some());
 
-    let selected = client.select("INBOX").await.unwrap();
+    // INBOX in any case is INBOX
+    let selected = client.select("inbox").await.unwrap();
+    assert_eq!(selected.path, "INBOX");
     assert_eq!(selected.exists, 2);
     assert!(!selected.read_only);
     assert_eq!(selected.uid_next, Some(3));
@@ -397,11 +409,16 @@ async fn select_and_status() {
     assert!(examined.read_only);
     assert_eq!(client.selected().unwrap().path, "Sent");
     // EXAMINE refuses flag changes
-    assert!(client.store("1:*", true, StoreAction::Add, &["\\Seen"]).await.is_err());
+    assert!(
+        client
+            .store(&Messages::Uids(SequenceSet::all()), StoreAction::Add, &["\\Seen"])
+            .await
+            .is_err()
+    );
     client.unselect().await.unwrap();
     assert!(client.selected().is_none());
     assert!(matches!(
-        client.fetch("1", false, &FetchQuery::default()).await,
+        client.fetch(&seqs("1"), &FetchQuery::default()).await,
         Err(Error::NoMailboxSelected)
     ));
 }
@@ -409,6 +426,21 @@ async fn select_and_status() {
 // ---- messages ----
 
 const MULTIPART: &str = "From: =?UTF-8?Q?J=C3=B5ul?= <joul@example.com>\r\nTo: Receiver <receiver@example.com>, group: a@b.c, d@e.f;\r\nSubject: =?UTF-8?Q?Tere_t=C3=A4na?=\r\nMessage-ID: <multi@example.com>\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=\"b1\"\r\n\r\n--b1\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nHello world\r\n--b1\r\nContent-Type: application/octet-stream; name=\"=?UTF-8?Q?=C3=B5.bin?=\"\r\nContent-Disposition: attachment; filename*=utf-8''%C3%B5.bin\r\nContent-Transfer-Encoding: base64\r\n\r\nAAECAw==\r\n--b1--\r\n";
+
+fn everything() -> FetchQuery {
+    FetchQuery {
+        flags: true,
+        envelope: true,
+        body_structure: true,
+        internal_date: true,
+        size: true,
+        modseq: true,
+        headers: Some(vec!["Subject".into()]),
+        parts: vec!["1".into(), "2".into()],
+        source: true,
+        ..Default::default()
+    }
+}
 
 #[tokio::test]
 async fn append_and_fetch_everything() {
@@ -426,27 +458,11 @@ async fn append_and_fetch_everything() {
     let (_, uid) = appended.expect("APPENDUID");
     client.select("INBOX").await.unwrap();
 
-    let query = FetchQuery {
-        flags: true,
-        envelope: true,
-        body_structure: true,
-        internal_date: true,
-        size: true,
-        modseq: true,
-        headers: Some(vec!["Subject".into()]),
-        parts: vec!["1".into(), "2".into()],
-        source: true,
-        ..Default::default()
-    };
-    let messages = client.fetch(&uid.to_string(), true, &query).await.unwrap();
+    let messages = client.fetch(&Messages::uid(uid), &everything()).await.unwrap();
     assert_eq!(messages.len(), 1);
     let message = &messages[0];
     assert_eq!(message.uid, Some(uid));
-    let flags = message.flags.clone().unwrap();
-    assert!(
-        flags.contains(&"\\Flagged".into()) && flags.contains(&"$Label1".into()),
-        "{flags:?}"
-    );
+    assert_eq!(flag_list(message.flags.as_ref().unwrap()), vec!["$Label1", "\\Flagged"]);
     assert_eq!(message.internal_date, Some(1_759_744_800));
     assert_eq!(message.size, Some(MULTIPART.len() as u64));
     assert!(message.modseq.is_some());
@@ -471,8 +487,7 @@ async fn append_and_fetch_everything() {
     // reading with BODY.PEEK leaves the message unseen
     let flags = client
         .fetch(
-            &uid.to_string(),
-            true,
+            &Messages::uid(uid),
             &FetchQuery {
                 flags: true,
                 ..Default::default()
@@ -496,9 +511,9 @@ async fn search_keys_find_what_they_mean() {
     let (mut client, _) = kit.connect().await;
     client.select("INBOX").await.unwrap();
 
-    let search = |key: SearchKey| key;
+    let not = |key| SearchKey::Not(Box::new(key));
     let cases = [
-        (search(SearchKey::All), vec![first, second, third]),
+        (SearchKey::All, vec![first, second, third]),
         (SearchKey::Seen, vec![first]),
         (SearchKey::Unseen, vec![second, third]),
         (SearchKey::Flagged, vec![second]),
@@ -510,33 +525,28 @@ async fn search_keys_find_what_they_mean() {
             SearchKey::Or(Box::new(SearchKey::Seen), Box::new(SearchKey::Flagged)),
             vec![first, second],
         ),
-        (SearchKey::Not(Box::new(SearchKey::Seen)), vec![second, third]),
-        (SearchKey::Uid(format!("{second}:*")), vec![second, third]),
+        (not(SearchKey::Seen), vec![second, third]),
+        (
+            SearchKey::Uid(SequenceSet::parse(&format!("{second}:*")).unwrap()),
+            vec![second, third],
+        ),
         (SearchKey::SentSince(1_759_744_800), vec![first, second, third]),
         (SearchKey::SentBefore(1_759_744_800), vec![]),
         (SearchKey::Larger(400), vec![third]),
         (
-            SearchKey::And(vec![
-                SearchKey::Unseen,
-                SearchKey::Not(Box::new(SearchKey::Subject("täna".into()))),
-            ]),
+            SearchKey::And(vec![SearchKey::Unseen, not(SearchKey::Subject("täna".into()))]),
             vec![second],
         ),
     ];
     for (key, expected) in cases {
-        assert_eq!(client.search(&key, true).await.unwrap(), expected, "{key:?}");
+        assert_eq!(client.search(&key).await.unwrap(), expected, "{key:?}");
     }
-    assert_eq!(client.search(&SearchKey::All, false).await.unwrap(), vec![1, 2, 3]);
 }
 
 #[tokio::test]
 async fn flag_changes_copies_and_moves_leave_the_server_as_reported() {
-    for plugins in [Value::Null, json!(["UIDPLUS", "SPECIAL-USE"])] {
-        let config = if plugins.is_null() {
-            json!({})
-        } else {
-            json!({ "plugins": plugins })
-        };
+    // every extension, then a server without MOVE: COPY, STORE and UID EXPUNGE instead
+    for config in [json!({}), json!({ "plugins": ["UIDPLUS", "SPECIAL-USE"] })] {
         let kit = kit!(config);
         let one = kit.server.add_message("INBOX", &rfc822("One", "1"), &[]);
         let two = kit.server.add_message("INBOX", &rfc822("Two", "2"), &[]);
@@ -544,17 +554,16 @@ async fn flag_changes_copies_and_moves_leave_the_server_as_reported() {
         client.select("INBOX").await.unwrap();
 
         client
-            .store(&one.to_string(), true, StoreAction::Add, &["\\Seen", "\\Flagged"])
+            .store(&Messages::uid(one), StoreAction::Add, &["\\Seen", "\\Flagged"])
             .await
             .unwrap();
         client
-            .store(&one.to_string(), true, StoreAction::Remove, &["\\Flagged"])
+            .store(&Messages::uid(one), StoreAction::Remove, &["\\Flagged"])
             .await
             .unwrap();
         let fetched = client
             .fetch(
-                &one.to_string(),
-                true,
+                &Messages::uid(one),
                 &FetchQuery {
                     flags: true,
                     ..Default::default()
@@ -564,29 +573,39 @@ async fn flag_changes_copies_and_moves_leave_the_server_as_reported() {
             .unwrap();
         assert_eq!(flag_list(fetched[0].flags.as_ref().unwrap()), vec!["\\Seen"]);
 
-        let copied = client.copy(&one.to_string(), true, "Archive").await.unwrap();
-        assert!(copied.is_some(), "COPYUID");
-        let moved = client.move_messages(&two.to_string(), true, "Trash").await.unwrap();
+        let copied = client
+            .copy(&Messages::uid(one), "Archive")
+            .await
+            .unwrap()
+            .expect("COPYUID");
+        assert_eq!(copied.source.as_str(), one.to_string());
+        let moved = client.move_messages(&Messages::uid(two), "Trash").await.unwrap();
         assert!(moved.is_some(), "COPYUID of the move");
 
-        let inbox = kit.server.messages("INBOX");
-        let archive = kit.server.messages("Archive");
-        let trash = kit.server.messages("Trash");
-        let count = |v: &Value| v["messages"].as_array().or(v.as_array()).map_or(0, Vec::len);
-        assert_eq!(
-            (count(&inbox), count(&archive), count(&trash)),
-            (1, 1, 1),
-            "{inbox} {archive} {trash}"
-        );
+        let counts = ["INBOX", "Archive", "Trash"].map(|mailbox| kit.server.messages(mailbox).len());
+        assert_eq!(counts, [1, 1, 1]);
         assert_eq!(client.selected().unwrap().exists, 1);
 
         client
-            .store("1:*", false, StoreAction::Add, &["\\Deleted"])
+            .store(&seqs("1:*"), StoreAction::Add, &["\\Deleted"])
             .await
             .unwrap();
-        client.expunge(Some(&one.to_string())).await.unwrap();
+        client
+            .expunge(Some(&SequenceSet::parse(&one.to_string()).unwrap()))
+            .await
+            .unwrap();
         assert_eq!(client.selected().unwrap().exists, 0);
     }
+}
+
+#[tokio::test]
+async fn expunging_by_uid_needs_uidplus() {
+    let kit = kit!(json!({ "plugins": [] }));
+    let (mut client, _) = kit.connect().await;
+    client.select("INBOX").await.unwrap();
+    let error = client.expunge(Some(&SequenceSet::all())).await.expect_err("refused");
+    assert!(matches!(error, Error::Unsupported("UIDPLUS")), "{error:?}");
+    assert!(!kit.sent("EXPUNGE"));
 }
 
 // ---- changes by others (imapflow server-changes-test.ts) ----
@@ -600,21 +619,35 @@ async fn idle_reports_new_messages_flag_changes_and_expunges() {
 
     let (stop, stopped) = tokio::sync::oneshot::channel::<()>();
     let server = &kit.server;
+    let inbox = || "INBOX".to_string();
     let changes = async {
         tokio::task::block_in_place(|| server.add_message("INBOX", &rfc822("New", "new"), &[]));
+        let exists = wait_for(&mut events, |e| matches!(e, Event::Exists { .. })).await;
         assert_eq!(
-            wait_for(&mut events, |e| matches!(e, Event::Exists { .. })).await,
-            Event::Exists { count: 2 }
+            exists,
+            Event::Exists {
+                mailbox: inbox(),
+                count: 2
+            }
         );
         tokio::task::block_in_place(|| server.set_flags("INBOX", &[uid], &["\\Flagged"], "add"));
         match wait_for(&mut events, |e| matches!(e, Event::Flags { .. })).await {
-            Event::Flags { seq, flags, .. } => assert!(seq == 1 && flags.contains(&"\\Flagged".to_string())),
+            Event::Flags {
+                mailbox, seq, flags, ..
+            } => {
+                assert_eq!((mailbox.as_str(), seq), ("INBOX", 1));
+                assert!(flags.contains(&"\\Flagged".to_string()));
+            }
             other => panic!("{other:?}"),
         }
         tokio::task::block_in_place(|| server.expunge("INBOX", &[uid]));
+        let expunge = wait_for(&mut events, |e| matches!(e, Event::Expunge { .. })).await;
         assert_eq!(
-            wait_for(&mut events, |e| matches!(e, Event::Expunge { .. })).await,
-            Event::Expunge { seq: 1 }
+            expunge,
+            Event::Expunge {
+                mailbox: inbox(),
+                seq: 1
+            }
         );
         stop.send(()).unwrap();
     };
@@ -634,7 +667,7 @@ async fn without_idle_the_client_polls_with_noop() {
     let server = &kit.server;
     let changes = async {
         tokio::task::block_in_place(|| server.add_message("INBOX", &rfc822("New", "new"), &[]));
-        wait_for(&mut events, |e| matches!(e, Event::Exists { count: 1 })).await;
+        wait_for(&mut events, |e| matches!(e, Event::Exists { count: 1, .. })).await;
         stop.send(()).unwrap();
     };
     let (idled, ()) = tokio::join!(client.idle(async { stopped.await.unwrap() }), changes);
@@ -642,16 +675,39 @@ async fn without_idle_the_client_polls_with_noop() {
     assert!(kit.sent("NOOP") && !kit.sent("IDLE"));
 }
 
+#[tokio::test]
+async fn a_flag_change_of_another_message_during_fetch_is_an_event() {
+    // the server reports a flag change of message 2 inside the answer to a FETCH of message 1
+    let kit = kit!(json!({ "script": {
+        "on": "command", "command": "UID FETCH", "send": "* 2 FETCH (UID 2 FLAGS (\\Seen))\r\n", "run": true
+    } }));
+    kit.server.add_message("INBOX", &rfc822("One", "1"), &[]);
+    kit.server.add_message("INBOX", &rfc822("Two", "2"), &[]);
+    let (mut client, mut events) = kit.connect().await;
+    client.select("INBOX").await.unwrap();
+    let fetched = client
+        .fetch(
+            &Messages::uid(1),
+            &FetchQuery {
+                flags: true,
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+    assert_eq!(fetched.iter().map(|m| m.uid).collect::<Vec<_>>(), vec![Some(1)]);
+    match wait_for(&mut events, |e| matches!(e, Event::Flags { .. })).await {
+        Event::Flags { uid, flags, .. } => assert_eq!((uid, flags), (Some(2), vec!["\\Seen".to_string()])),
+        other => panic!("{other:?}"),
+    }
+}
+
 // ---- servers that misbehave on purpose (imapflow faults-test.ts) ----
 
 #[tokio::test]
 async fn a_bye_greeting_fails_the_connection() {
     let kit = kit!(json!({ "script": { "on": "greeting", "send": "* BYE Too many connections\r\n", "close": true } }));
-    let error = kit
-        .connect_with(kit.config(Security::Plain, password()))
-        .await
-        .err()
-        .expect("refused");
+    let error = kit.refused(kit.config(Security::Plain, password())).await;
     assert!(
         matches!(&error, Error::Closed(Some(text)) if text.contains("Too many")),
         "{error:?}"
@@ -663,8 +719,9 @@ async fn a_greeting_that_never_comes_times_out() {
     let kit = kit!(json!({ "script": { "on": "greeting", "drop": true } }));
     let mut config = kit.config(Security::Plain, password());
     config.timeouts.greeting = Duration::from_millis(500);
-    let error = kit.connect_with(config).await.err().expect("refused");
+    let error = kit.refused(config).await;
     assert!(matches!(error, Error::Timeout), "{error:?}");
+    assert_eq!(error.kind(), ErrorKind::Network);
 }
 
 #[tokio::test]
@@ -693,12 +750,7 @@ async fn a_refused_login_keeps_its_response_code_and_alerts_arrive() {
     let kit = kit!(
         json!({ "plugins": [], "script": { "on": "command", "command": "LOGIN", "send": "$TAG NO [UNAVAILABLE] Backend down\r\n" } })
     );
-    match kit
-        .connect_with(kit.config(Security::Plain, password()))
-        .await
-        .err()
-        .expect("refused")
-    {
+    match kit.refused(kit.config(Security::Plain, password())).await {
         Error::AuthenticationFailed { code, text } => {
             assert_eq!((code.as_deref(), text.as_str()), (Some("UNAVAILABLE"), "Backend down"))
         }
@@ -710,10 +762,8 @@ async fn a_refused_login_keeps_its_response_code_and_alerts_arrive() {
     );
     let (mut client, mut events) = kit.connect().await;
     client.noop().await.unwrap();
-    assert_eq!(
-        wait_for(&mut events, |e| matches!(e, Event::Alert(_))).await,
-        Event::Alert("System shutdown in 10 minutes".into())
-    );
+    let alert = wait_for(&mut events, |e| matches!(e, Event::Alert(_))).await;
+    assert_eq!(alert, Event::Alert("System shutdown in 10 minutes".into()));
 }
 
 #[tokio::test]
@@ -742,10 +792,8 @@ async fn an_unsolicited_bye_ends_the_session() {
         "{error:?}"
     );
     assert!(client.is_closed());
-    assert_eq!(
-        wait_for(&mut events, |e| matches!(e, Event::Closed(_))).await,
-        Event::Closed(Some("Server shutting down".into()))
-    );
+    let closed = wait_for(&mut events, |e| matches!(e, Event::Closed(_))).await;
+    assert_eq!(closed, Event::Closed(Some("Server shutting down".into())));
     assert!(matches!(client.noop().await, Err(Error::Closed(_))));
 }
 
@@ -758,21 +806,15 @@ async fn a_session_with_every_extension_sends_no_bad() {
     client.status("INBOX").await.unwrap();
     client.select("INBOX").await.unwrap();
     let query = FetchQuery {
-        flags: true,
-        envelope: true,
-        body_structure: true,
-        internal_date: true,
-        size: true,
-        modseq: true,
         headers: Some(vec![]),
         parts: vec!["1".into(), "2.MIME".into()],
-        source: true,
         changed_since: Some(1),
+        ..everything()
     };
-    client.fetch("1:*", true, &query).await.unwrap();
-    client.search(&SearchKey::Text("hello".into()), true).await.unwrap();
+    client.fetch(&uids("1:*"), &query).await.unwrap();
+    client.search(&SearchKey::Text("hello".into())).await.unwrap();
     client
-        .store("1", false, StoreAction::Set, &["\\Answered"])
+        .store(&seqs("1"), StoreAction::Set, &["\\Answered"])
         .await
         .unwrap();
     client.logout().await.unwrap();

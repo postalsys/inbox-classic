@@ -9,11 +9,6 @@ use base64::engine::general_purpose::{GeneralPurpose, NO_PAD};
 
 const MUTF7: GeneralPurpose = GeneralPurpose::new(&IMAP_MUTF7, NO_PAD);
 
-/// Whether a name needs encoding at all
-pub fn needs_encoding(name: &str) -> bool {
-    name.chars().any(|c| !(' '..='~').contains(&c) || c == '&')
-}
-
 pub fn encode(name: &str) -> String {
     let mut out = String::with_capacity(name.len());
     let mut pending: Vec<u16> = Vec::new();
@@ -65,11 +60,11 @@ fn try_decode(name: &str) -> Option<String> {
             if bytes.len() % 2 != 0 {
                 return None;
             }
-            let units: Vec<u16> = bytes
-                .chunks(2)
-                .map(|pair| u16::from_be_bytes([pair[0], pair[1]]))
-                .collect();
-            out.push_str(&String::from_utf16(&units).ok()?);
+            let units = bytes.chunks(2).map(|pair| u16::from_be_bytes([pair[0], pair[1]]));
+            for c in char::decode_utf16(units) {
+                // a lone surrogate is not valid modified UTF-7
+                out.push(c.ok()?);
+            }
         }
         rest = &after[end + 1..];
     }
@@ -94,7 +89,6 @@ mod tests {
             assert_eq!(encode(plain), encoded, "{plain}");
             assert_eq!(decode(encoded), plain, "{encoded}");
         }
-        assert!(needs_encoding("a&b") && needs_encoding("õ") && !needs_encoding("Sent Items"));
     }
 
     #[test]

@@ -6,10 +6,12 @@
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD_NO_PAD;
 
+use encoding_rs::Encoding;
+
 use crate::charset;
 
 struct Word<'a> {
-    start: usize,
+    /// Where the word ends in the value
     end: usize,
     charset: &'a str,
     base64: bool,
@@ -18,13 +20,34 @@ struct Word<'a> {
 
 /// Adjacent words in one charset. Base64 text is joined before it is decoded: a sender can split
 /// a word in the middle of a 4 character group.
-struct Run {
-    charset: String,
+struct Run<'a> {
+    charset: &'a str,
+    /// Resolved once for the whole run
+    encoding: Option<&'static Encoding>,
     bytes: Vec<u8>,
     base64: String,
 }
 
-impl Run {
+impl<'a> Run<'a> {
+    fn new(word: &Word<'a>) -> Self {
+        let mut run = Run {
+            charset: word.charset,
+            encoding: charset::encoding_for(word.charset),
+            bytes: Vec::new(),
+            base64: String::new(),
+        };
+        run.push(word);
+        run
+    }
+
+    /// Whether `charset` is the charset of this run
+    fn takes(&self, charset: &str) -> bool {
+        match (self.encoding, charset::encoding_for(charset)) {
+            (Some(a), Some(b)) => a == b,
+            _ => self.charset.eq_ignore_ascii_case(charset),
+        }
+    }
+
     fn push(&mut self, word: &Word) {
         if word.base64 {
             self.base64.push_str(word.text);
@@ -36,7 +59,10 @@ impl Run {
 
     fn finish(mut self) -> String {
         self.bytes.extend(decode_b(&self.base64));
-        charset::decode(&self.bytes, &self.charset)
+        match self.encoding {
+            Some(encoding) => encoding.decode_without_bom_handling(&self.bytes).0.into_owned(),
+            None => String::from_utf8_lossy(&self.bytes).into_owned(),
+        }
     }
 }
 
@@ -61,14 +87,24 @@ fn word_at(value: &str, start: usize) -> Option<Word<'_>> {
     if rest.as_bytes().get(2 + text_end + 1) != Some(&b'=') {
         return None;
     }
-    let end = start + 2 + charset_end + 1 + 2 + text_end + 2;
+    // `rest` is the end of `value`, the word ends with the "?=" after its text
+    let end = value.len() - rest[2 + text_end + 2..].len();
+    let text = &rest[2..2 + text_end];
     Some(Word {
-        start,
         end,
         charset,
         base64: encoding == b'B',
-        text: &rest[2..2 + text_end],
+        text,
     })
+}
+
+/// The byte of a `=XX` or `%XX` escape that starts at `at`
+pub(crate) fn hex_escape(bytes: &[u8], at: usize, marker: u8) -> Option<u8> {
+    let digit = |i: usize| bytes.get(i).and_then(|c| (*c as char).to_digit(16));
+    if bytes.get(at) != Some(&marker) {
+        return None;
+    }
+    Some((digit(at + 1)? * 16 + digit(at + 2)?) as u8)
 }
 
 /// Q encoding: `_` is a space, `=XX` a byte. A broken escape stays as it is.
@@ -77,17 +113,16 @@ fn decode_q(text: &str) -> Vec<u8> {
     let mut out = Vec::with_capacity(text.len());
     let mut i = 0;
     while i < text.len() {
-        let c = text[i];
-        let hex = |c: Option<&u8>| c.and_then(|c| (*c as char).to_digit(16));
-        match (c, hex(text.get(i + 1)), hex(text.get(i + 2))) {
-            (b'=', Some(high), Some(low)) => {
-                out.push((high * 16 + low) as u8);
-                i += 3;
-                continue;
-            }
-            (b'_' | b' ' | b'\t', _, _) => out.push(b' '),
-            _ => out.push(c),
+        if let Some(byte) = hex_escape(text, i, b'=') {
+            out.push(byte);
+            i += 3;
+            continue;
         }
+        out.push(if matches!(text[i], b'_' | b' ' | b'\t') {
+            b' '
+        } else {
+            text[i]
+        });
         i += 1;
     }
     out
@@ -122,22 +157,16 @@ pub fn decode_words(value: &str) -> String {
             search = start + 2;
             continue;
         };
-        let between = &value[pos..word.start];
+        let between = &value[pos..start];
         let adjacent = pending.is_some() && between.chars().all(char::is_whitespace);
         match pending.as_mut() {
-            Some(run) if adjacent && same(&run.charset, word.charset) => run.push(&word),
+            Some(run) if adjacent && run.takes(word.charset) => run.push(&word),
             _ => {
                 flush(&mut out, pending.take());
                 if !adjacent {
                     out.push_str(between);
                 }
-                let mut run = Run {
-                    charset: word.charset.to_string(),
-                    bytes: Vec::new(),
-                    base64: String::new(),
-                };
-                run.push(&word);
-                pending = Some(run);
+                pending = Some(Run::new(&word));
             }
         }
         pos = word.end;
@@ -146,13 +175,6 @@ pub fn decode_words(value: &str) -> String {
     flush(&mut out, pending);
     out.push_str(&value[pos..]);
     out
-}
-
-fn same(a: &str, b: &str) -> bool {
-    match (charset::encoding_for(a), charset::encoding_for(b)) {
-        (Some(a), Some(b)) => a == b,
-        _ => a.eq_ignore_ascii_case(b),
-    }
 }
 
 fn flush(out: &mut String, pending: Option<Run>) {

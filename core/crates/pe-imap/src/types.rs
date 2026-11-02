@@ -52,6 +52,13 @@ impl Token {
         std::str::from_utf8(bytes).ok()?.parse().ok()
     }
 
+    /// The text of every item of a list (flags, capabilities), empty for anything else
+    pub fn texts(&self) -> Vec<String> {
+        self.as_list()
+            .map(|items| items.iter().filter_map(Token::text).collect())
+            .unwrap_or_default()
+    }
+
     pub fn as_list(&self) -> Option<&[Token]> {
         match self {
             Token::List(items) => Some(items),
@@ -95,6 +102,23 @@ impl Response {
 
     pub fn is_continuation(&self) -> bool {
         self.tag == "+"
+    }
+
+    /// Whether this is an untagged response named `name` (`* LIST ...`)
+    pub fn is(&self, name: &str) -> bool {
+        self.tag == "*" && self.command.eq_ignore_ascii_case(name)
+    }
+
+    /// Message data, `* 12 FETCH (...)` or `* 3 EXISTS`: the number and what it is about
+    pub fn message_data(&self) -> Option<(u32, &Token)> {
+        let number = self.command.parse().ok()?;
+        Some((number, self.attributes.first()?))
+    }
+
+    /// The arguments of the response code `name`, `[COPYUID 1 2 3]`
+    pub fn code_args(&self, name: &str) -> Option<&[Token]> {
+        let (code, args) = self.code()?;
+        (code == name).then_some(args)
     }
 
     /// The human readable text of a status response

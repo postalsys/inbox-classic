@@ -4,5 +4,5 @@
 pub mod stream;
 pub mod tls;
 
-pub use stream::{ConnectError, Security, Stream};
-pub use tls::{TlsFailure, Trust};
+pub use stream::{Error, Security, Stream};
+pub use tls::{TlsFailure, TlsFailureKind, Trust};

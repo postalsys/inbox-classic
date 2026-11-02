@@ -7,8 +7,9 @@ use encoding_rs::{Encoding, REPLACEMENT};
 /// The encoding of a charset label, None when it is unknown
 pub fn encoding_for(charset: &str) -> Option<&'static Encoding> {
     // a RFC 2231 language suffix, "utf-8*en"
-    let label = charset.split('*').next().unwrap_or("").trim().to_ascii_lowercase();
-    let found = Encoding::for_label(label.as_bytes()).or_else(|| Encoding::for_label(normalize(&label).as_bytes()));
+    let label = charset.split('*').next().unwrap_or("").trim();
+    let found = Encoding::for_label(label.as_bytes())
+        .or_else(|| Encoding::for_label(normalize(&label.to_ascii_lowercase()).as_bytes()));
     // the replacement encoding turns everything into one U+FFFD, UTF-8 keeps more
     found.filter(|encoding| *encoding != REPLACEMENT)
 }

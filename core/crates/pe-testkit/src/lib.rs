@@ -88,8 +88,8 @@ impl ImapKit {
 
     /// Adds a message to a mailbox as if another client did, returns its UID
     pub fn add_message(&self, mailbox: &str, raw: &str, flags: &[&str]) -> u64 {
-        let path = format!("/v1/mailboxes/{}/messages", encode_path(mailbox));
-        let response = self.request("POST", &path, Some(json!({ "raw": raw, "flags": flags })));
+        let body = json!({ "raw": raw, "flags": flags });
+        let response = self.request("POST", &messages_path(mailbox, ""), Some(body));
         response["uid"]
             .as_u64()
             .unwrap_or_else(|| panic!("no UID in {response}"))
@@ -97,37 +97,25 @@ impl ImapKit {
 
     /// Changes flags as another client would, `action` is `add`, `remove` or `set`
     pub fn set_flags(&self, mailbox: &str, uids: &[u64], flags: &[&str], action: &str) {
-        let path = format!("/v1/mailboxes/{}/messages/flags", encode_path(mailbox));
-        self.request(
-            "POST",
-            &path,
-            Some(json!({ "uids": uids, "flags": flags, "action": action })),
-        );
+        let body = json!({ "uids": uids, "flags": flags, "action": action });
+        self.request("POST", &messages_path(mailbox, "/flags"), Some(body));
     }
 
     /// Expunges messages as another client would
     pub fn expunge(&self, mailbox: &str, uids: &[u64]) {
-        let path = format!("/v1/mailboxes/{}/messages/expunge", encode_path(mailbox));
-        self.request("POST", &path, Some(json!({ "uids": uids })));
+        self.request(
+            "POST",
+            &messages_path(mailbox, "/expunge"),
+            Some(json!({ "uids": uids })),
+        );
     }
 
     /// The messages of a mailbox as ImapKit stores them
-    pub fn messages(&self, mailbox: &str) -> Value {
-        self.request(
-            "GET",
-            &format!("/v1/mailboxes/{}/messages?raw=true", encode_path(mailbox)),
-            None,
-        )
-    }
-
-    /// The mailboxes as ImapKit stores them
-    pub fn mailboxes(&self) -> Value {
-        self.request("GET", "/v1/mailboxes", None)
-    }
-
-    /// A scripted fault, see the ImapKit README
-    pub fn add_script_rule(&self, rule: Value) {
-        self.request("POST", "/v1/script/rules", Some(rule));
+    pub fn messages(&self, mailbox: &str) -> Vec<Value> {
+        match self.request("GET", &messages_path(mailbox, "?raw=true"), None) {
+            Value::Array(messages) => messages,
+            other => panic!("not a message list: {other}"),
+        }
     }
 
     /// One request to the REST API, panics on an error answer
@@ -160,6 +148,11 @@ impl Drop for ImapKit {
         let _ = self.child.kill();
         let _ = self.child.wait();
     }
+}
+
+/// The REST path of the messages of a mailbox, with `suffix` after it
+fn messages_path(mailbox: &str, suffix: &str) -> String {
+    format!("/v1/mailboxes/{}/messages{suffix}", encode_path(mailbox))
 }
 
 /// A mailbox path in a REST URL: percent encoded, `/` included
@@ -206,6 +199,7 @@ mod tests {
         let uid = server.add_message("INBOX", &rfc822("Hello", "World"), &["\\Seen"]);
         assert!(uid > 0);
         let messages = server.messages("INBOX");
-        assert!(messages.to_string().contains("\\\\Seen"), "{messages}");
+        assert_eq!(messages.len(), 1);
+        assert_eq!(messages[0]["flags"], json!(["\\Seen"]), "{messages:?}");
     }
 }

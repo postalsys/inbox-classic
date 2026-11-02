@@ -5,8 +5,9 @@
 use std::collections::BTreeMap;
 
 use crate::charset;
-use crate::words::decode_words;
+use crate::words::{decode_words, hex_escape};
 
+#[derive(Default)]
 struct Continuation {
     charset: Option<String>,
     parts: Vec<(u32, String)>,
@@ -27,10 +28,7 @@ pub fn decode_params<'a>(pairs: impl IntoIterator<Item = (&'a str, &'a str)>) ->
             out.insert(name, value);
             continue;
         };
-        let entry = continued.entry(base.to_string()).or_insert(Continuation {
-            charset: None,
-            parts: Vec::new(),
-        });
+        let entry = continued.entry(base.to_string()).or_default();
         let mut value = value;
         // the first extended part carries the charset and language: utf-8'en'J%C3%B5ul
         if number == 0 && extended {
@@ -97,7 +95,8 @@ fn fix_unmarked_filename(params: &mut BTreeMap<String, String>) {
             .bytes()
             .all(|c| c.is_ascii() && c != b'\'' && (c >= 0x20 || c == b'\t' || c == b'\n' || c == b'\r'));
     if looks_encoded && charset::encoding_for(charset).is_some() {
-        let value = format!("{charset}''{value}");
+        // decoded as filename*, the language is dropped either way
+        let value = filename.clone();
         params.insert("filename*".into(), value);
     }
 }
@@ -109,11 +108,8 @@ fn percent_decode(value: &str) -> Vec<u8> {
     let mut out = Vec::with_capacity(bytes.len());
     let mut i = 0;
     while i < bytes.len() {
-        let hex = |c: Option<&u8>| c.and_then(|c| (*c as char).to_digit(16));
-        if bytes[i] == b'%'
-            && let (Some(high), Some(low)) = (hex(bytes.get(i + 1)), hex(bytes.get(i + 2)))
-        {
-            out.push((high * 16 + low) as u8);
+        if let Some(byte) = hex_escape(bytes, i, b'%') {
+            out.push(byte);
             i += 3;
             continue;
         }

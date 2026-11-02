@@ -6,7 +6,7 @@ use std::fmt;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 
-use super::{Client, Error};
+use super::{Client, Completion, Error};
 use crate::compiler::Arg;
 
 #[derive(Clone, PartialEq, Eq)]
@@ -33,23 +33,22 @@ impl fmt::Debug for Credentials {
 
 impl Client {
     pub(super) async fn authenticate(&mut self) -> Result<(), Error> {
-        self.capabilities_from_code = false;
         let result = match self.config.credentials.clone() {
             Credentials::Password { user, password } => self.password_login(&user, &password).await,
             Credentials::OAuth2 { user, access_token } => self.oauth_login(&user, &access_token).await,
         };
-        match result {
+        let completion = match result {
             Err(Error::Refused { code, text, .. }) => return Err(Error::AuthenticationFailed { code, text }),
             other => other?,
-        }
+        };
         // the capabilities change once authenticated, unless the OK of the login listed them
-        if self.capabilities_from_code {
+        if completion.tagged.code_args("CAPABILITY").is_some() {
             return Ok(());
         }
         self.capability().await
     }
 
-    async fn password_login(&mut self, user: &str, password: &str) -> Result<(), Error> {
+    async fn password_login(&mut self, user: &str, password: &str) -> Result<Completion, Error> {
         if self.has_capability("AUTH=PLAIN") {
             // PLAIN carries UTF-8 user names and passwords as they are; NUL separates its fields
             if user.contains('\0') || password.contains('\0') {
@@ -62,10 +61,10 @@ impl Client {
             return Err(Error::NoAuthenticationMethod);
         }
         let args = vec![Arg::string(user), Arg::sensitive(Arg::string(password))];
-        self.run("LOGIN", args).await.map(|_| ())
+        self.run("LOGIN", args).await
     }
 
-    async fn oauth_login(&mut self, user: &str, token: &str) -> Result<(), Error> {
+    async fn oauth_login(&mut self, user: &str, token: &str) -> Result<Completion, Error> {
         if self.has_capability("AUTH=OAUTHBEARER") {
             let payload = format!("n,a={},\x01auth=Bearer {token}\x01\x01", escape_sasl_name(user));
             return self.sasl("OAUTHBEARER", STANDARD.encode(payload)).await;
@@ -80,7 +79,7 @@ impl Client {
     /// AUTHENTICATE with one message: inline with SASL-IR, otherwise after the first `+`. A `+`
     /// after that carries an error (the OAuth mechanisms), answered so that the server sends its
     /// NO: with %x01 for OAUTHBEARER (RFC 7628 section 3.2.3), an empty line for XOAUTH2.
-    async fn sasl(&mut self, mechanism: &str, token: String) -> Result<(), Error> {
+    async fn sasl(&mut self, mechanism: &str, token: String) -> Result<Completion, Error> {
         let inline = self.has_capability("SASL-IR");
         let mut args = vec![Arg::atom(mechanism)];
         let mut pending = None;
@@ -100,14 +99,8 @@ impl Client {
                 None => error_answer.to_vec(),
             })
         };
-        self.run_with(
-            "AUTHENTICATE",
-            args,
-            &mut |response| Ok(Some(response)),
-            &mut continuation,
-        )
-        .await
-        .map(|_| ())
+        self.run_with("AUTHENTICATE", args, &mut super::keep, Some(&mut continuation))
+            .await
     }
 }
 

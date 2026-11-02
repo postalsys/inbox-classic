@@ -10,17 +10,51 @@ use unicode_normalization::UnicodeNormalization;
 
 use crate::special_use_names::{GENERIC_TOKENS, NAMES};
 
-/// The flags in display order, Inbox first
-pub const FLAGS: [&str; 8] = [
-    "\\Inbox",
-    "\\Flagged",
-    "\\Sent",
-    "\\Drafts",
-    "\\All",
-    "\\Archive",
-    "\\Junk",
-    "\\Trash",
-];
+/// A special-use folder. The order is the display order, Inbox first.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum SpecialUse {
+    Inbox,
+    Flagged,
+    Sent,
+    Drafts,
+    All,
+    Archive,
+    Junk,
+    Trash,
+}
+
+impl SpecialUse {
+    pub const ALL: [SpecialUse; 8] = [
+        SpecialUse::Inbox,
+        SpecialUse::Flagged,
+        SpecialUse::Sent,
+        SpecialUse::Drafts,
+        SpecialUse::All,
+        SpecialUse::Archive,
+        SpecialUse::Junk,
+        SpecialUse::Trash,
+    ];
+
+    /// The flag of RFC 6154, `\Sent`
+    pub fn flag(self) -> &'static str {
+        match self {
+            SpecialUse::Inbox => "\\Inbox",
+            SpecialUse::Flagged => "\\Flagged",
+            SpecialUse::Sent => "\\Sent",
+            SpecialUse::Drafts => "\\Drafts",
+            SpecialUse::All => "\\All",
+            SpecialUse::Archive => "\\Archive",
+            SpecialUse::Junk => "\\Junk",
+            SpecialUse::Trash => "\\Trash",
+        }
+    }
+
+    pub fn from_flag(flag: &str) -> Option<Self> {
+        Self::ALL
+            .into_iter()
+            .find(|use_| use_.flag().eq_ignore_ascii_case(flag))
+    }
+}
 
 /// How a special-use flag was found, the better sources first
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -33,10 +67,11 @@ pub enum Source {
     NameGuess,
 }
 
-static NAME_INDEX: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
+static NAME_INDEX: LazyLock<HashMap<&'static str, SpecialUse>> = LazyLock::new(|| {
     NAMES
         .iter()
-        .flat_map(|(flag, names)| names.iter().map(move |name| (*name, *flag)))
+        .filter_map(|(flag, names)| Some((SpecialUse::from_flag(flag)?, names)))
+        .flat_map(|(use_, names)| names.iter().map(move |name| (*name, use_)))
         .collect()
 });
 
@@ -54,18 +89,19 @@ fn is_separator(c: char) -> bool {
 }
 
 /// The special-use flag of a folder, from its LIST flags or its name (the last path component)
-pub fn detect(has_extension: bool, flags: &[String], name: &str) -> Option<(&'static str, Source)> {
+pub fn detect(has_extension: bool, flags: &[String], name: &str) -> Option<(SpecialUse, Source)> {
     if has_extension {
-        let found = FLAGS[1..]
+        // \Inbox is not a LIST flag, INBOX is found by its name
+        let found = SpecialUse::ALL[1..]
             .iter()
-            .find(|flag| flags.iter().any(|listed| listed.eq_ignore_ascii_case(flag)));
-        if let Some(flag) = found {
-            return Some((flag, Source::Extension));
+            .find(|use_| flags.iter().any(|listed| listed.eq_ignore_ascii_case(use_.flag())));
+        if let Some(use_) = found {
+            return Some((*use_, Source::Extension));
         }
     }
     let name = fold(name);
-    if let Some(flag) = NAME_INDEX.get(name.as_str()) {
-        return Some((flag, Source::Name));
+    if let Some(use_) = NAME_INDEX.get(name.as_str()) {
+        return Some((*use_, Source::Name));
     }
     // a known name decorated with generic words: stripping them has to leave exactly one word,
     // and that word has to be a known name
@@ -76,7 +112,7 @@ pub fn detect(has_extension: bool, flags: &[String], name: &str) -> Option<(&'st
     if let [word] = core.as_slice()
         && *word != name
     {
-        return NAME_INDEX.get(word).map(|flag| (*flag, Source::NameGuess));
+        return NAME_INDEX.get(word).map(|use_| (*use_, Source::NameGuess));
     }
     None
 }
@@ -93,7 +129,7 @@ mod tests {
     fn extension_flags_win() {
         assert_eq!(
             detect(true, &flags(&["\\HasNoChildren", "\\sent"]), "Whatever"),
-            Some(("\\Sent", Source::Extension))
+            Some((SpecialUse::Sent, Source::Extension))
         );
         // without the extension the flags are not trusted
         assert_eq!(detect(false, &flags(&["\\Sent"]), "Whatever"), None);
@@ -101,10 +137,22 @@ mod tests {
 
     #[test]
     fn localized_names() {
-        assert_eq!(detect(false, &[], "Gesendete Elemente"), Some(("\\Sent", Source::Name)));
-        assert_eq!(detect(false, &[], "Отправленные"), Some(("\\Sent", Source::Name)));
-        assert_eq!(detect(false, &[], "Sent Mail"), Some(("\\Sent", Source::NameGuess)));
-        assert_eq!(detect(false, &[], "\u{200e}Trash"), Some(("\\Trash", Source::Name)));
+        assert_eq!(
+            detect(false, &[], "Gesendete Elemente"),
+            Some((SpecialUse::Sent, Source::Name))
+        );
+        assert_eq!(
+            detect(false, &[], "Отправленные"),
+            Some((SpecialUse::Sent, Source::Name))
+        );
+        assert_eq!(
+            detect(false, &[], "Sent Mail"),
+            Some((SpecialUse::Sent, Source::NameGuess))
+        );
+        assert_eq!(
+            detect(false, &[], "\u{200e}Trash"),
+            Some((SpecialUse::Trash, Source::Name))
+        );
         assert_eq!(detect(false, &[], "Sent to clients"), None);
         assert_eq!(detect(false, &[], "Projects"), None);
     }

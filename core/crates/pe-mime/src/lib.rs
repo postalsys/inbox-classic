@@ -4,8 +4,10 @@
 
 pub mod charset;
 pub mod date;
+pub mod envelope;
 pub mod params;
 pub mod words;
 
+pub use envelope::{Address, Envelope};
 pub use params::decode_params;
 pub use words::decode_words;

@@ -4,9 +4,9 @@
 
 use std::collections::HashSet;
 
-use super::{Client, Completion, Error};
+use super::{Client, Error, normalize_path};
 use crate::compiler::Arg;
-use crate::special_use::{self, FLAGS, Source};
+use crate::special_use::{self, Source, SpecialUse};
 use crate::types::{Response, Token};
 
 /// The personal namespace: what mailbox names start with, and the hierarchy delimiter
@@ -18,7 +18,7 @@ pub struct Namespace {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListedMailbox {
-    /// The full name, decoded
+    /// The full name, decoded, INBOX in uppercase
     pub path: String,
     /// The last part of the path
     pub name: String,
@@ -26,9 +26,8 @@ pub struct ListedMailbox {
     /// LIST attributes, `\HasChildren`, `\Noselect`, ...
     pub flags: Vec<String>,
     pub subscribed: bool,
-    /// `\Inbox`, `\Sent`, `\Drafts`, `\Trash`, `\Junk`, `\Archive`, `\All` or `\Flagged`
-    pub special_use: Option<&'static str>,
-    pub special_use_source: Option<Source>,
+    /// What the folder is for, and how that was found
+    pub special_use: Option<(SpecialUse, Source)>,
 }
 
 impl ListedMailbox {
@@ -71,23 +70,15 @@ pub struct MailboxStatus {
     pub highest_modseq: Option<u64>,
 }
 
-fn texts(tokens: &[Token]) -> Vec<String> {
-    tokens.iter().filter_map(Token::text).collect()
-}
-
 impl Client {
     pub(super) async fn fetch_namespace(&mut self) -> Result<Option<Namespace>, Error> {
-        let completion = match self.run("NAMESPACE", Vec::new()).await {
-            Ok(completion) => completion,
-            Err(Error::Refused { .. }) => return Ok(None),
-            Err(error) => return Err(error),
+        let Some(completion) = self.optional("NAMESPACE", Vec::new()).await? else {
+            return Ok(None);
         };
         // * NAMESPACE (("" "/")) NIL NIL: the first personal namespace
         let personal = completion
-            .untagged
-            .iter()
-            .find(|r| r.command.eq_ignore_ascii_case("NAMESPACE"))
-            .and_then(|r| r.attributes.first())
+            .untagged("NAMESPACE")
+            .find_map(|r| r.attributes.first())
             .and_then(Token::as_list)
             .and_then(|list| list.first())
             .and_then(Token::as_list);
@@ -101,28 +92,21 @@ impl Client {
     pub async fn list(&mut self) -> Result<Vec<ListedMailbox>, Error> {
         let extended = self.has_capability("LIST-EXTENDED");
         let special = self.has_capability("SPECIAL-USE") || self.has_capability("IMAP4REV2");
-        let mut options = Vec::new();
-        if extended {
-            options.push(Arg::atom("SUBSCRIBED"));
-        }
-        if special {
-            options.push(Arg::atom("SPECIAL-USE"));
-        }
+        let options: Vec<Arg> = [(extended, "SUBSCRIBED"), (special, "SPECIAL-USE")]
+            .into_iter()
+            .filter(|(on, _)| *on)
+            .map(|(_, option)| Arg::atom(option))
+            .collect();
+        let with_options = !options.is_empty();
 
-        let mut subscriptions_known = false;
-        let mut mailboxes = match options.is_empty() {
-            false => match self.run_list(true, options).await {
-                Ok(listed) => {
-                    subscriptions_known = extended;
-                    listed
-                }
-                // a server that refuses RETURN options gets a plain LIST
-                Err(Error::Refused { status, .. }) if status == "BAD" => self.run_list(true, Vec::new()).await?,
-                Err(error) => return Err(error),
-            },
-            true => self.run_list(true, Vec::new()).await?,
+        let (mut mailboxes, mut subscriptions_known) = match self.run_list("LIST", options).await {
+            Ok(listed) => (listed, extended),
+            // a server that refuses RETURN options gets a plain LIST
+            Err(Error::Refused { status, .. }) if with_options && status == "BAD" => {
+                (self.run_list("LIST", Vec::new()).await?, false)
+            }
+            Err(error) => return Err(error),
         };
-
         if !subscriptions_known {
             subscriptions_known = self.mark_subscribed(&mut mailboxes).await?;
         }
@@ -138,32 +122,30 @@ impl Client {
         Ok(mailboxes)
     }
 
-    async fn run_list(&mut self, list: bool, options: Vec<Arg>) -> Result<Vec<ListedMailbox>, Error> {
+    /// LIST or LSUB of every mailbox
+    async fn run_list(&mut self, name: &str, options: Vec<Arg>) -> Result<Vec<ListedMailbox>, Error> {
         let mut args = vec![Arg::string(""), Arg::string("*")];
         if !options.is_empty() {
             args.push(Arg::atom("RETURN"));
             args.push(Arg::List(options));
         }
-        let name = if list { "LIST" } else { "LSUB" };
         let completion = self.run(name, args).await?;
-        Ok(completion
-            .untagged
-            .iter()
-            .filter(|r| r.command.eq_ignore_ascii_case(name))
-            .filter_map(|r| self.listed(r))
-            .collect())
+        Ok(completion.untagged(name).filter_map(|r| self.listed(r)).collect())
     }
 
     /// `* LIST (\HasNoChildren \Sent) "/" "Sent Items"`
     fn listed(&self, response: &Response) -> Option<ListedMailbox> {
-        let flags = texts(response.attributes.first()?.as_list()?);
+        let flags = response
+            .attributes
+            .first()?
+            .as_list()
+            .map(|_| response.attributes[0].texts())?;
         let delimiter = response
             .attributes
             .get(1)
             .and_then(Token::text)
             .filter(|d| !d.is_empty());
-        let raw = response.attributes.get(2)?.text()?;
-        let mut path = self.decode_path(&raw);
+        let mut path = self.decode_path(&response.attributes.get(2)?.text()?);
         // some servers start names with the delimiter
         if let Some(d) = &delimiter
             && path.len() > d.len()
@@ -182,13 +164,12 @@ impl Client {
             delimiter,
             flags,
             special_use: None,
-            special_use_source: None,
         })
     }
 
     /// Marks the mailboxes LSUB lists, returns whether that worked
     async fn mark_subscribed(&mut self, mailboxes: &mut [ListedMailbox]) -> Result<bool, Error> {
-        match self.run_list(false, Vec::new()).await {
+        match self.run_list("LSUB", Vec::new()).await {
             Ok(subscribed) => {
                 let paths: HashSet<&str> = subscribed.iter().map(|m| m.path.as_str()).collect();
                 for mailbox in mailboxes.iter_mut() {
@@ -216,17 +197,17 @@ impl Client {
         self.selected = None;
         let completion = self.run(command, vec![self.encode_path(path)]).await?;
         let mut selected = Selected {
-            path: self.decode_path(path),
+            path: normalize_path(path),
             read_only: command == "EXAMINE",
             ..Default::default()
         };
         for response in &completion.untagged {
             read_select_response(&mut selected, response);
         }
-        match completion.tagged.code().map(|(code, _)| code).as_deref() {
-            Some("READ-ONLY") => selected.read_only = true,
-            Some("READ-WRITE") => selected.read_only = false,
-            _ => {}
+        if completion.tagged.code_args("READ-ONLY").is_some() {
+            selected.read_only = true;
+        } else if completion.tagged.code_args("READ-WRITE").is_some() {
+            selected.read_only = false;
         }
         self.selected = Some(selected.clone());
         Ok(selected)
@@ -243,7 +224,7 @@ impl Client {
         } else {
             "CLOSE"
         };
-        self.run(command, Vec::new()).await?;
+        self.simple(command, Vec::new()).await?;
         self.selected = None;
         Ok(())
     }
@@ -264,9 +245,7 @@ impl Client {
             .await?;
         let mut status = MailboxStatus::default();
         let list = completion
-            .untagged
-            .iter()
-            .filter(|r| r.command.eq_ignore_ascii_case("STATUS"))
+            .untagged("STATUS")
             .find_map(|r| r.attributes.get(1).and_then(Token::as_list));
         for pair in list.unwrap_or_default().chunks_exact(2) {
             let value = pair[1].number();
@@ -292,10 +271,11 @@ impl Client {
     }
 
     pub async fn delete(&mut self, path: &str) -> Result<(), Error> {
+        let path = normalize_path(path);
         if self.selected.as_ref().is_some_and(|s| s.path == path) {
             self.unselect().await?;
         }
-        self.simple("DELETE", vec![self.encode_path(path)]).await
+        self.simple("DELETE", vec![self.encode_path(&path)]).await
     }
 
     pub async fn rename(&mut self, path: &str, new_path: &str) -> Result<(), Error> {
@@ -310,25 +290,15 @@ impl Client {
     pub async fn unsubscribe(&mut self, path: &str) -> Result<(), Error> {
         self.simple("UNSUBSCRIBE", vec![self.encode_path(path)]).await
     }
-
-    async fn simple(&mut self, command: &str, args: Vec<Arg>) -> Result<(), Error> {
-        self.run(command, args).await.map(|_: Completion| ())
-    }
 }
 
 fn read_select_response(selected: &mut Selected, response: &Response) {
-    let command = response.command.to_ascii_uppercase();
-    if command == "FLAGS" {
-        selected.flags = response
-            .attributes
-            .first()
-            .and_then(Token::as_list)
-            .map(texts)
-            .unwrap_or_default();
+    if response.is("FLAGS") {
+        selected.flags = response.attributes.first().map(Token::texts).unwrap_or_default();
         return;
     }
-    if let Ok(count) = command.parse::<u32>() {
-        if response.attributes.first().is_some_and(|t| t.is_atom("EXISTS")) {
+    if let Some((count, kind)) = response.message_data() {
+        if kind.is_atom("EXISTS") {
             selected.exists = count;
         }
         return;
@@ -339,53 +309,41 @@ fn read_select_response(selected: &mut Selected, response: &Response) {
         "UIDVALIDITY" => selected.uid_validity = number,
         "UIDNEXT" => selected.uid_next = number,
         "HIGHESTMODSEQ" => selected.highest_modseq = number,
-        "PERMANENTFLAGS" => {
-            selected.permanent_flags = args.first().and_then(Token::as_list).map(texts).unwrap_or_default();
-        }
+        "PERMANENTFLAGS" => selected.permanent_flags = args.first().map(Token::texts).unwrap_or_default(),
         _ => {}
     }
 }
 
-/// One mailbox per special-use flag: the best source wins, then the shallower path, then the
+/// One mailbox per special-use folder: the best source wins, then the shallower path, then the
 /// name. INBOX is always the inbox.
 fn assign_special_use(mailboxes: &mut [ListedMailbox], has_extension: bool) {
     let mut candidates = Vec::new();
     for (index, mailbox) in mailboxes.iter().enumerate() {
-        if mailbox.path == "INBOX" {
-            candidates.push((Source::Extension, 0, mailbox.path.clone(), "\\Inbox", index));
+        let found = if mailbox.path == "INBOX" {
+            Some((SpecialUse::Inbox, Source::Extension))
+        } else {
+            special_use::detect(has_extension, &mailbox.flags, &mailbox.name)
+        };
+        // a name match for a mailbox that does not exist could take the place of a real one
+        let Some((use_, source)) = found.filter(|(_, s)| *s == Source::Extension || !mailbox.has_flag("\\NonExistent"))
+        else {
             continue;
-        }
-        if let Some((flag, source)) = special_use::detect(has_extension, &mailbox.flags, &mailbox.name) {
-            // a name match for a mailbox that does not exist could take the place of a real one
-            if source != Source::Extension && mailbox.has_flag("\\NonExistent") {
-                continue;
-            }
-            candidates.push((source, mailbox.depth(), mailbox.path.clone(), flag, index));
-        }
+        };
+        candidates.push((source, mailbox.depth(), mailbox.path.clone(), use_, index));
     }
     candidates.sort();
     let mut assigned = HashSet::new();
-    for (source, _, _, flag, index) in candidates {
-        if mailboxes[index].special_use.is_some() || !assigned.insert(flag) {
-            continue;
+    for (source, _, _, use_, index) in candidates {
+        if mailboxes[index].special_use.is_none() && assigned.insert(use_) {
+            mailboxes[index].special_use = Some((use_, source));
         }
-        mailboxes[index].special_use = Some(flag);
-        mailboxes[index].special_use_source = Some(source);
     }
 }
 
+/// Special-use folders first in their order, then by name
 fn sort(mailboxes: &mut [ListedMailbox]) {
-    let order = |m: &ListedMailbox| m.special_use.and_then(|flag| FLAGS.iter().position(|f| *f == flag));
-    mailboxes.sort_by(|a, b| match (order(a), order(b)) {
-        (Some(x), Some(y)) => x.cmp(&y),
-        (Some(_), None) => std::cmp::Ordering::Less,
-        (None, Some(_)) => std::cmp::Ordering::Greater,
-        (None, None) => a
-            .path
-            .to_lowercase()
-            .cmp(&b.path.to_lowercase())
-            .then_with(|| a.path.cmp(&b.path)),
-    });
+    let use_ = |m: &ListedMailbox| m.special_use.map(|(use_, _)| use_);
+    mailboxes.sort_by_cached_key(|m| (use_(m).is_none(), use_(m), m.path.to_lowercase(), m.path.clone()));
 }
 
 #[cfg(test)]
@@ -400,7 +358,6 @@ mod tests {
             flags: flags.iter().map(|f| f.to_string()).collect(),
             subscribed: true,
             special_use: None,
-            special_use_source: None,
         }
     }
 
@@ -417,13 +374,16 @@ mod tests {
         ];
         assign_special_use(&mut list, true);
         sort(&mut list);
-        let summary: Vec<(&str, Option<&str>)> = list.iter().map(|m| (m.path.as_str(), m.special_use)).collect();
+        let summary: Vec<(&str, Option<SpecialUse>)> = list
+            .iter()
+            .map(|m| (m.path.as_str(), m.special_use.map(|(u, _)| u)))
+            .collect();
         assert_eq!(
             summary,
             vec![
-                ("INBOX", Some("\\Inbox")),
-                ("Sent", Some("\\Sent")),
-                ("Deleted Items", Some("\\Trash")),
+                ("INBOX", Some(SpecialUse::Inbox)),
+                ("Sent", Some(SpecialUse::Sent)),
+                ("Deleted Items", Some(SpecialUse::Trash)),
                 ("Projects", None),
                 ("Sent Items", None),
                 ("Trash", None),

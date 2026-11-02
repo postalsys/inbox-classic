@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 use super::{Client, Error};
 use crate::compiler::Arg;
 use crate::message::{BodyStructure, Envelope, parse_body_structure, parse_envelope};
+use crate::sequence::Messages;
 use crate::types::{Response, Token};
 
 /// The data items to fetch. The UID is always fetched.
@@ -47,18 +48,20 @@ pub struct FetchedMessage {
 
 impl FetchQuery {
     fn items(&self, condstore: bool) -> Vec<Arg> {
-        let mut items = vec![Arg::atom("UID")];
-        let flag = |on: bool, name: &str, items: &mut Vec<Arg>| {
-            if on {
-                items.push(Arg::atom(name));
-            }
-        };
-        flag(self.flags, "FLAGS", &mut items);
-        flag(self.envelope, "ENVELOPE", &mut items);
-        flag(self.body_structure, "BODYSTRUCTURE", &mut items);
-        flag(self.internal_date, "INTERNALDATE", &mut items);
-        flag(self.size, "RFC822.SIZE", &mut items);
-        flag(self.modseq && condstore, "MODSEQ", &mut items);
+        let wanted = [
+            (true, "UID"),
+            (self.flags, "FLAGS"),
+            (self.envelope, "ENVELOPE"),
+            (self.body_structure, "BODYSTRUCTURE"),
+            (self.internal_date, "INTERNALDATE"),
+            (self.size, "RFC822.SIZE"),
+            (self.modseq && condstore, "MODSEQ"),
+        ];
+        let mut items: Vec<Arg> = wanted
+            .into_iter()
+            .filter(|(on, _)| *on)
+            .map(|(_, name)| Arg::atom(name))
+            .collect();
         let peek = |section: Vec<Arg>| Arg::Section {
             name: "BODY.PEEK".into(),
             section,
@@ -72,9 +75,7 @@ impl FetchQuery {
             ])),
             None => {}
         }
-        for part in &self.parts {
-            items.push(peek(vec![Arg::atom(part.as_str())]));
-        }
+        items.extend(self.parts.iter().map(|part| peek(vec![Arg::atom(part.as_str())])));
         if self.source {
             items.push(peek(Vec::new()));
         }
@@ -83,59 +84,55 @@ impl FetchQuery {
 }
 
 impl Client {
-    /// Fetches `set` (sequence numbers, or UIDs when `uid` is set) and returns the messages in
-    /// the order the server sent them
-    pub async fn fetch(&mut self, set: &str, uid: bool, query: &FetchQuery) -> Result<Vec<FetchedMessage>, Error> {
-        let mut messages: Vec<FetchedMessage> = Vec::new();
-        self.fetch_each(set, uid, query, &mut |message| {
+    /// Fetches messages, in the order the server sent them
+    pub async fn fetch(&mut self, messages: &Messages, query: &FetchQuery) -> Result<Vec<FetchedMessage>, Error> {
+        let mut fetched: Vec<FetchedMessage> = Vec::new();
+        self.fetch_each(messages, query, &mut |message| {
             // some servers split one message over several FETCH responses
-            match messages.last_mut() {
+            match fetched.last_mut() {
                 Some(last) if last.seq == message.seq => merge(last, message),
-                _ => messages.push(message),
+                _ => fetched.push(message),
             }
         })
         .await?;
-        Ok(messages)
+        Ok(fetched)
     }
 
     /// Fetches like [`Client::fetch`], handing each message to `each` as it arrives instead of
-    /// collecting them, for large mailboxes
+    /// collecting them, for large mailboxes. A FETCH for a message that was not asked for is a
+    /// change by someone else and arrives as an event.
     pub async fn fetch_each(
         &mut self,
-        set: &str,
-        uid: bool,
+        messages: &Messages,
         query: &FetchQuery,
         each: &mut dyn FnMut(FetchedMessage),
     ) -> Result<(), Error> {
-        if self.selected.is_none() {
-            return Err(Error::NoMailboxSelected);
-        }
+        let exists = u64::from(self.require_selected()?.exists);
         let condstore = self.has_capability("CONDSTORE");
-        let mut args = vec![Arg::Sequence(set.to_string()), Arg::List(query.items(condstore))];
+        let mut args = vec![
+            Arg::Sequence(messages.set().to_string()),
+            Arg::List(query.items(condstore)),
+        ];
         if let (Some(modseq), true) = (query.changed_since, condstore) {
             args.push(Arg::List(vec![Arg::atom("CHANGEDSINCE"), Arg::Number(modseq)]));
         }
-        let command = if uid { "UID FETCH" } else { "FETCH" };
-        self.collecting_fetch = true;
-        let result = self
-            .run_with(
-                command,
-                args,
-                &mut |response| {
-                    let seq = response.command.parse::<u32>();
-                    match (seq, response.attributes.first()) {
-                        (Ok(seq), Some(kind)) if kind.is_atom("FETCH") => {
-                            each(parse_fetch(seq, &response));
-                            Ok(None)
-                        }
-                        _ => Ok(Some(response)),
-                    }
-                },
-                &mut |_| Err(Error::Unexpected("continuation request".into())),
-            )
-            .await;
-        self.collecting_fetch = false;
-        result.map(|_| ())
+        let requested = |seq: u32, response: &Response| match messages {
+            // without a UID in the answer the message can not be told apart, it is taken as asked for
+            Messages::Uids(set) => item(response, "UID")
+                .and_then(Token::number)
+                .is_none_or(|uid| set.contains(uid, u64::MAX)),
+            Messages::Seqs(set) => set.contains(u64::from(seq), exists),
+        };
+        let mut handler = |response: Response| match response.message_data() {
+            Some((seq, kind)) if kind.is_atom("FETCH") && requested(seq, &response) => {
+                each(parse_fetch(seq, response));
+                Ok(None)
+            }
+            _ => Ok(Some(response)),
+        };
+        self.run_with(&messages.command("FETCH"), args, &mut handler, None)
+            .await
+            .map(|_| ())
     }
 }
 
@@ -152,52 +149,79 @@ fn merge(into: &mut FetchedMessage, from: FetchedMessage) {
     into.parts.extend(from.parts);
 }
 
-fn bytes(token: &Token) -> Option<Vec<u8>> {
-    match token {
-        Token::String(value) | Token::Literal(value) => Some(value.clone()),
-        Token::Atom(atom) => Some(atom.value.clone()),
-        _ => None,
+/// The data items of `* 12 FETCH (UID 98 FLAGS (\Seen) ...)` as key and value
+fn items(response: Response) -> Vec<Token> {
+    match response.attributes.into_iter().nth(1) {
+        Some(Token::List(items)) => items,
+        _ => Vec::new(),
     }
 }
 
-/// `* 12 FETCH (UID 98 FLAGS (\Seen) ...)`
-pub(crate) fn parse_fetch(seq: u32, response: &Response) -> FetchedMessage {
+/// Reads a FETCH response, taking its data: a body is moved out, not copied
+pub(crate) fn parse_fetch(seq: u32, response: Response) -> FetchedMessage {
     let mut message = FetchedMessage {
         seq,
         ..Default::default()
     };
-    let Some(items) = response.attributes.get(1).and_then(Token::as_list) else {
-        return message;
-    };
-    for pair in items.chunks_exact(2) {
-        let (key, value) = (&pair[0], &pair[1]);
-        let Some(atom) = key.as_atom() else { continue };
-        let name = String::from_utf8_lossy(&atom.value).to_ascii_uppercase();
-        match (name.as_str(), &atom.section) {
-            ("UID", _) => message.uid = value.number(),
-            ("FLAGS", _) => message.flags = value.as_list().map(|f| f.iter().filter_map(Token::text).collect()),
-            ("ENVELOPE", _) => message.envelope = value.as_list().map(parse_envelope),
-            ("BODYSTRUCTURE", _) | ("BODY", None) => message.body_structure = value.as_list().map(parse_body_structure),
-            ("INTERNALDATE", _) => {
-                message.internal_date = value.text().and_then(|d| pe_mime::date::parse_internal_date(&d));
-            }
-            ("RFC822.SIZE", _) => message.size = value.number(),
-            ("MODSEQ", _) => message.modseq = value.as_list().and_then(|l| l.first()).and_then(Token::number),
-            ("BODY" | "BINARY", Some(section)) => body_section(&mut message, section, bytes(value)),
-            _ => {}
+    let mut items = items(response).into_iter();
+    while let (Some(key), Some(value)) = (items.next(), items.next()) {
+        let Token::Atom(key) = key else { continue };
+        let name = key.value.as_slice();
+        let is = |expected: &str| name.eq_ignore_ascii_case(expected.as_bytes());
+        if is("UID") {
+            message.uid = value.number();
+        } else if is("FLAGS") {
+            message.flags = value.as_list().map(|_| value.texts());
+        } else if is("ENVELOPE") {
+            message.envelope = value.as_list().map(parse_envelope);
+        } else if is("BODYSTRUCTURE") || (is("BODY") && key.section.is_none()) {
+            message.body_structure = value.as_list().map(parse_body_structure);
+        } else if is("INTERNALDATE") {
+            message.internal_date = value.text().and_then(|d| crate::date::parse_internal_date(&d));
+        } else if is("RFC822.SIZE") {
+            message.size = value.number();
+        } else if is("MODSEQ") {
+            message.modseq = value.as_list().and_then(|l| l.first()).and_then(Token::number);
+        } else if (is("BODY") || is("BINARY"))
+            && let Some(section) = &key.section
+        {
+            body_section(&mut message, section, value);
         }
     }
     message
 }
 
-fn body_section(message: &mut FetchedMessage, section: &[Token], value: Option<Vec<u8>>) {
-    let value = value.unwrap_or_default();
+/// The value of a data item of a FETCH response, without taking the response apart
+fn item<'a>(response: &'a Response, name: &str) -> Option<&'a Token> {
+    let items = response.attributes.get(1)?.as_list()?;
+    items
+        .chunks_exact(2)
+        .find(|pair| pair[0].is_atom(name))
+        .map(|pair| &pair[1])
+}
+
+/// UID, flags and MODSEQ of a FETCH that reports a flag change, None when it has no flags
+pub(crate) fn flag_update(response: &Response) -> Option<(Option<u64>, Vec<String>, Option<u64>)> {
+    let flags = item(response, "FLAGS")?.texts();
+    let uid = item(response, "UID").and_then(Token::number);
+    let modseq = item(response, "MODSEQ")
+        .and_then(Token::as_list)
+        .and_then(|l| l.first())
+        .and_then(Token::number);
+    Some((uid, flags, modseq))
+}
+
+fn body_section(message: &mut FetchedMessage, section: &[Token], value: Token) {
+    let value = match value {
+        Token::String(bytes) | Token::Literal(bytes) => bytes,
+        Token::Atom(atom) => atom.value,
+        _ => Vec::new(),
+    };
     let Some(first) = section.first().and_then(Token::text) else {
         message.source = Some(value);
         return;
     };
-    let upper = first.to_ascii_uppercase();
-    if upper == "HEADER" || upper.starts_with("HEADER.FIELDS") {
+    if first.eq_ignore_ascii_case("HEADER") || first.to_ascii_uppercase().starts_with("HEADER.FIELDS") {
         message.headers = Some(value);
     } else {
         message.parts.insert(first, value);
@@ -240,7 +264,7 @@ mod tests {
             vec![b"S: x".to_vec()],
         )
         .unwrap();
-        let message = parse_fetch(12, &response);
+        let message = parse_fetch(12, response);
         assert_eq!(message.uid, Some(98));
         assert_eq!(
             message.flags,

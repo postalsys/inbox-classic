@@ -20,11 +20,36 @@ pub enum Security {
     Plain,
 }
 
+/// A connection that could not be made or broke
 #[derive(Debug)]
-pub enum ConnectError {
+pub enum Error {
     Io(io::Error),
     Timeout,
     Tls(TlsFailure),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Io(error) => write!(f, "connection error: {error}"),
+            Error::Timeout => f.write_str("the server did not answer in time"),
+            Error::Tls(failure) => write!(f, "TLS error: {}", failure.message),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Self {
+        Error::Io(error)
+    }
+}
+
+impl From<TlsFailure> for Error {
+    fn from(failure: TlsFailure) -> Self {
+        Error::Tls(failure)
+    }
 }
 
 pub enum Stream {
@@ -42,30 +67,27 @@ impl Stream {
         security: Security,
         trust: &Trust,
         timeout: Duration,
-    ) -> Result<Stream, ConnectError> {
+    ) -> Result<Stream, Error> {
         let connect = async {
-            let socket = TcpStream::connect((host, port)).await.map_err(ConnectError::Io)?;
-            socket.set_nodelay(true).map_err(ConnectError::Io)?;
+            let socket = TcpStream::connect((host, port)).await?;
+            socket.set_nodelay(true)?;
             match security {
-                Security::Tls => tls::handshake(socket, host, trust)
-                    .await
-                    .map(|tls| Stream::Tls(Box::new(tls)))
-                    .map_err(ConnectError::Tls),
+                Security::Tls => Ok(Stream::Tls(Box::new(tls::handshake(socket, host, trust).await?))),
                 Security::StartTls | Security::Plain => Ok(Stream::Plain(socket)),
             }
         };
         tokio::time::timeout(timeout, connect)
             .await
-            .map_err(|_| ConnectError::Timeout)?
+            .map_err(|_| Error::Timeout)?
     }
 
     /// Runs the TLS handshake on a plain connection, after the server agreed to STARTTLS
-    pub async fn upgrade(&mut self, host: &str, trust: &Trust) -> Result<(), TlsFailure> {
+    pub async fn upgrade(&mut self, host: &str, trust: &Trust) -> Result<(), Error> {
         let Stream::Plain(socket) = std::mem::replace(self, Stream::Closed) else {
-            return Err(TlsFailure {
-                message: "the connection is not a plain one".into(),
-                certificate: None,
-            });
+            return Err(Error::Io(io::Error::new(
+                io::ErrorKind::NotConnected,
+                "the connection is not a plain one",
+            )));
         };
         *self = Stream::Tls(Box::new(tls::handshake(socket, host, trust).await?));
         Ok(())

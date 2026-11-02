@@ -1,19 +1,32 @@
 use std::fmt;
 
-use pe_net::{ConnectError, TlsFailure};
-
 use crate::error::{CompileError, ParseError};
+
+/// What kind of failure an error is, for what the app does about it
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ErrorKind {
+    /// The network or the server is not reachable or stopped answering: try again later
+    Network,
+    /// TLS failed or could not be had (a certificate to show the user, STARTTLS missing)
+    Security,
+    /// The credentials were refused, or no method fits them: ask the user
+    Authentication,
+    /// The server refused a command
+    Refused,
+    /// The server sent something that is not IMAP
+    Protocol,
+    /// The connection is closed
+    Closed,
+    /// The command can not be made with what the caller gave
+    Usage,
+}
 
 #[derive(Debug)]
 pub enum Error {
-    Io(std::io::Error),
-    /// The TLS handshake failed; `certificate` is what the server presented, for the user to
-    /// look at and pin
-    Tls {
-        message: String,
-        certificate: Option<Vec<u8>>,
-    },
-    /// Connecting or waiting for the server took too long
+    /// Connecting, TLS, or reading and writing failed. A TLS failure carries the certificate the
+    /// server presented, for the user to look at and pin.
+    Net(pe_net::Error),
+    /// Waiting for the server took too long
     Timeout,
     /// The server sent something that is not IMAP
     Protocol(ParseError),
@@ -41,6 +54,8 @@ pub enum Error {
     StartTlsInjection,
     /// A command needs a selected mailbox
     NoMailboxSelected,
+    /// The server lacks the extension a command needs
+    Unsupported(&'static str),
     TooManyResponses,
     Unexpected(String),
 }
@@ -48,8 +63,7 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::Io(error) => write!(f, "connection error: {error}"),
-            Error::Tls { message, .. } => write!(f, "TLS error: {message}"),
+            Error::Net(error) => error.fmt(f),
             Error::Timeout => f.write_str("the server did not answer in time"),
             Error::Protocol(error) => write!(f, "invalid response from the server: {error}"),
             Error::Command(error) => write!(f, "invalid command: {error}"),
@@ -63,6 +77,7 @@ impl fmt::Display for Error {
             Error::StartTlsUnavailable => f.write_str("the server does not offer STARTTLS"),
             Error::StartTlsInjection => f.write_str("the server sent unencrypted data during STARTTLS"),
             Error::NoMailboxSelected => f.write_str("no mailbox is selected"),
+            Error::Unsupported(extension) => write!(f, "the server does not support {extension}"),
             Error::TooManyResponses => f.write_str("the server sent too many responses"),
             Error::Unexpected(text) => write!(f, "unexpected response: {text}"),
         }
@@ -71,28 +86,25 @@ impl fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-impl From<std::io::Error> for Error {
-    fn from(error: std::io::Error) -> Self {
-        Error::Io(error)
-    }
-}
-
-impl From<TlsFailure> for Error {
-    fn from(failure: TlsFailure) -> Self {
-        Error::Tls {
-            message: failure.message,
-            certificate: failure.certificate,
+impl Error {
+    pub fn kind(&self) -> ErrorKind {
+        match self {
+            Error::Net(pe_net::Error::Tls(_)) | Error::StartTlsUnavailable | Error::StartTlsInjection => {
+                ErrorKind::Security
+            }
+            Error::Net(_) | Error::Timeout => ErrorKind::Network,
+            Error::AuthenticationFailed { .. } | Error::NoAuthenticationMethod => ErrorKind::Authentication,
+            Error::Refused { .. } => ErrorKind::Refused,
+            Error::Protocol(_) | Error::TooManyResponses | Error::Unexpected(_) => ErrorKind::Protocol,
+            Error::Closed(_) => ErrorKind::Closed,
+            Error::Command(_) | Error::NoMailboxSelected | Error::Unsupported(_) => ErrorKind::Usage,
         }
     }
 }
 
-impl From<ConnectError> for Error {
-    fn from(error: ConnectError) -> Self {
-        match error {
-            ConnectError::Io(error) => Error::Io(error),
-            ConnectError::Timeout => Error::Timeout,
-            ConnectError::Tls(failure) => failure.into(),
-        }
+impl From<pe_net::Error> for Error {
+    fn from(error: pe_net::Error) -> Self {
+        Error::Net(error)
     }
 }
 

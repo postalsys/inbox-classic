@@ -4,10 +4,8 @@
 
 use super::{Client, Error};
 use crate::compiler::Arg;
+use crate::sequence::SequenceSet;
 use crate::types::{Response, Token};
-
-/// The most numbers an ESEARCH range may expand to
-const EXPANDED_RANGE_LIMIT: u64 = 0x100_0000;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SearchKey {
@@ -42,19 +40,13 @@ pub enum SearchKey {
     Larger(u64),
     Smaller(u64),
     /// A UID set, `1:100`
-    Uid(String),
+    Uid(SequenceSet),
     /// Messages changed after this MODSEQ (CONDSTORE)
     ModSeq(u64),
     Or(Box<SearchKey>, Box<SearchKey>),
     Not(Box<SearchKey>),
     /// All of these
     And(Vec<SearchKey>),
-}
-
-/// `06-Oct-2025` of a timestamp
-fn day(timestamp: i64) -> String {
-    let date_time = pe_mime::date::format_internal_date(timestamp);
-    date_time.split(' ').next().unwrap_or_default().to_string()
 }
 
 impl SearchKey {
@@ -66,7 +58,7 @@ impl SearchKey {
         };
         let date = |args: &mut Vec<Arg>, name: &str, timestamp: i64| {
             args.push(Arg::atom(name));
-            args.push(Arg::atom(day(timestamp)));
+            args.push(Arg::atom(crate::date::format_search_date(timestamp)));
         };
         match self {
             SearchKey::All => atom(args, "ALL"),
@@ -100,7 +92,7 @@ impl SearchKey {
             SearchKey::SentBefore(t) => date(args, "SENTBEFORE", *t),
             SearchKey::Larger(size) => args.extend([Arg::atom("LARGER"), Arg::Number(*size)]),
             SearchKey::Smaller(size) => args.extend([Arg::atom("SMALLER"), Arg::Number(*size)]),
-            SearchKey::Uid(set) => args.extend([Arg::atom("UID"), Arg::Sequence(set.clone())]),
+            SearchKey::Uid(set) => args.extend([Arg::atom("UID"), Arg::Sequence(set.to_string())]),
             SearchKey::ModSeq(modseq) => args.extend([Arg::atom("MODSEQ"), Arg::Number(*modseq)]),
             SearchKey::Or(a, b) => {
                 atom(args, "OR");
@@ -147,21 +139,6 @@ impl SearchKey {
     }
 }
 
-/// The numbers of `1:3,7`, None past the expansion limit or for a malformed set
-fn expand(set: &str) -> Option<Vec<u64>> {
-    let mut out = Vec::new();
-    for range in set.split(',') {
-        let (first, last) = range.split_once(':').unwrap_or((range, range));
-        let (first, last): (u64, u64) = (first.parse().ok()?, last.parse().ok()?);
-        let (low, high) = (first.min(last), first.max(last));
-        if out.len() as u64 + (high - low) >= EXPANDED_RANGE_LIMIT {
-            return None;
-        }
-        out.extend(low..=high);
-    }
-    Some(out)
-}
-
 fn read_results(responses: &[Response]) -> Result<Vec<u64>, Error> {
     let mut found = Vec::new();
     for response in responses {
@@ -176,7 +153,8 @@ fn read_results(responses: &[Response]) -> Result<Vec<u64>, Error> {
                 let items = &response.attributes;
                 if let Some(index) = items.iter().position(|t| t.is_atom("ALL")) {
                     let set = items.get(index + 1).and_then(Token::text).unwrap_or_default();
-                    found.extend(expand(&set).ok_or(Error::TooManyResponses)?);
+                    let set = SequenceSet::parse(&set).map_err(|e| Error::Unexpected(e.message))?;
+                    found.extend(set.expand(u64::MAX).ok_or(Error::TooManyResponses)?);
                 }
             }
             _ => {}
@@ -186,18 +164,15 @@ fn read_results(responses: &[Response]) -> Result<Vec<u64>, Error> {
 }
 
 impl Client {
-    /// UIDs (or sequence numbers without `uid`) of the matching messages, ascending
-    pub async fn search(&mut self, key: &SearchKey, uid: bool) -> Result<Vec<u64>, Error> {
-        if self.selected.is_none() {
-            return Err(Error::NoMailboxSelected);
-        }
+    /// The UIDs of the matching messages, ascending
+    pub async fn search(&mut self, key: &SearchKey) -> Result<Vec<u64>, Error> {
+        self.require_selected()?;
         let mut args = Vec::new();
         if key.has_non_ascii() && !self.is_enabled("UTF8=ACCEPT") {
             args.extend([Arg::atom("CHARSET"), Arg::atom("UTF-8")]);
         }
         key.compile(&mut args);
-        let command = if uid { "UID SEARCH" } else { "SEARCH" };
-        let completion = self.run(command, args).await?;
+        let completion = self.run("UID SEARCH", args).await?;
         let mut found = read_results(&completion.untagged)?;
         found.sort_unstable();
         found.dedup();
@@ -242,7 +217,7 @@ mod tests {
             ),
             SearchKey::Not(Box::new(SearchKey::Deleted)),
             SearchKey::Header("X-Spam".into(), "yes".into()),
-            SearchKey::Uid("1:*".into()),
+            SearchKey::Uid(SequenceSet::all()),
         ]);
         assert_eq!(
             wire(&key),
@@ -261,9 +236,5 @@ mod tests {
             parse("* SEARCH 4 (MODSEQ 917162500)"),
         ];
         assert_eq!(read_results(&responses).unwrap(), vec![5, 3, 9, 2, 10, 11, 4]);
-        assert_eq!(expand("1:3,7"), Some(vec![1, 2, 3, 7]));
-        assert_eq!(expand("3:1"), Some(vec![1, 2, 3]));
-        assert_eq!(expand("1:99999999999"), None);
-        assert_eq!(expand("x"), None);
     }
 }

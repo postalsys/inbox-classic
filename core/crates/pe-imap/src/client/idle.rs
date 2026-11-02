@@ -3,16 +3,14 @@
 
 use std::future::Future;
 
-use super::{Client, Error};
+use super::{Client, Direction, Error, keep};
 
 impl Client {
     /// Waits for changes until `stop` completes or the IDLE period (`Timeouts::idle`) ends.
     /// Returns Ok(true) when `stop` completed, Ok(false) when the period ended and the caller
     /// should call it again.
     pub async fn idle(&mut self, stop: impl Future<Output = ()>) -> Result<bool, Error> {
-        if self.selected.is_none() {
-            return Err(Error::NoMailboxSelected);
-        }
+        self.require_selected()?;
         let period = tokio::time::sleep(self.config.timeouts.idle);
         tokio::pin!(stop, period);
         if !self.has_capability("IDLE") {
@@ -25,33 +23,33 @@ impl Client {
             }
         }
 
-        let tag = self.next_tag();
-        self.log(super::Direction::Client, &format!("{tag} IDLE"));
-        self.write(format!("{tag} IDLE\r\n").as_bytes()).await?;
-        let mut done_sent = false;
-        let mut stopped = false;
+        let (tag, _) = self.send("IDLE", Vec::new()).await?;
+        // None while idling, then whether `stop` (rather than the period) ended it
+        let mut ended: Option<bool> = None;
+        let mut collected = Vec::new();
         loop {
+            let timeout = ended.map(|_| self.config.timeouts.response);
             tokio::select! {
                 // the server's answer first, so a completion is never missed
                 biased;
-                response = self.read_response(Some(&tag), if done_sent { Some(self.config.timeouts.response) } else { None }) => {
+                response = self.read_response(Some(&tag), timeout) => {
                     let response = response?;
                     if response.tag == tag {
-                        self.update_from_code(&response);
-                        return self.complete("IDLE", response, Vec::new()).map(|_| stopped);
+                        return self.complete("IDLE", response, Vec::new()).map(|_| ended == Some(true));
                     }
                     if response.is_untagged() {
-                        self.handle_untagged(&response);
+                        self.on_untagged(response, &mut keep, &mut collected)?;
+                        // nothing waits for these, they were applied and reported
+                        collected.clear();
                     }
                     // the "+ idling" continuation needs no answer
                 }
-                _ = &mut stop, if !done_sent => {
-                    stopped = true;
-                    done_sent = true;
+                _ = &mut stop, if ended.is_none() => {
+                    ended = Some(true);
                     self.done().await?;
                 }
-                _ = &mut period, if !done_sent => {
-                    done_sent = true;
+                _ = &mut period, if ended.is_none() => {
+                    ended = Some(false);
                     self.done().await?;
                 }
             }
@@ -59,7 +57,7 @@ impl Client {
     }
 
     async fn done(&mut self) -> Result<(), Error> {
-        self.log(super::Direction::Client, "DONE");
+        self.log(Direction::Client, || "DONE".into());
         self.write(b"DONE\r\n").await
     }
 }
