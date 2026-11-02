@@ -11,6 +11,8 @@
 namespace {
 
 constexpr uint64_t kPageSize = 100;
+// the reading pane's header with no message: says so rather than a blank pane
+const wchar_t* kNoMessage = L" No message is selected.";
 // pages kept around while the list scrolls
 constexpr size_t kPagesKept = 8;
 constexpr int kHeaderLines = 4;
@@ -88,7 +90,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     AddColumn(list_, COL_RECEIVED, L"Received", 130);
     AddColumn(list_, COL_SIZE, L"Size", 84, LVCFMT_RIGHT);
 
-    header_ = CreateChild(parent, L"STATIC", L" No message is selected.", SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
+    header_ = CreateChild(parent, L"STATIC", kNoMessage, SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
     attachments_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP, IDC_ATTACHMENTS, {});
     pictures_ = CreateChild(parent, L"BUTTON", L"Download pictures", WS_TABSTOP, IDC_PICTURES, {});
     ShowWindow(attachments_, SW_HIDE);
@@ -362,7 +364,7 @@ void Mailbox::ClearReader() {
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
     // says so rather than a blank pane; a selected message replaces it with "Loading..."
-    SetWindowTextW(header_, L" No message is selected.");
+    SetWindowTextW(header_, kNoMessage);
     preview_.Clear();
 }
 

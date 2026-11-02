@@ -710,4 +710,23 @@ fn drafts_are_saved_reopened_and_gone_once_sent() {
         !sent.contains("Bcc:") && sent.contains(&format!("Message-ID: {message_id}")),
         "{sent}"
     );
+
+    // discarded from an account (From changed to another one): gone from its Drafts
+    let other = s
+        .core
+        .save_draft(
+            account,
+            pe_core::Outgoing {
+                subject: "Moved away".into(),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    s.wait(changed);
+    assert_eq!(s.server.subjects("Drafts"), ["Moved away"]);
+    s.core.discard_draft(account, &other).unwrap();
+    s.wait(changed);
+    assert!(s.server.subjects("Drafts").is_empty());
+    // only an ID that names one draft
+    assert!(s.core.discard_draft(account, "<").is_err());
 }

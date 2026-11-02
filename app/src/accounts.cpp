@@ -2,8 +2,6 @@
 // connects.
 #include "app.h"
 
-#include <algorithm>
-
 #include <shellapi.h>
 
 namespace {
@@ -365,26 +363,14 @@ void FillAccounts(AccountsState* state, int select = 0) {
     core::AccountList accounts(pe_accounts(state->core));
     for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
-        std::wstring name = Text(account->name);
-        LVITEMW item = {};
-        item.mask = LVIF_TEXT;
-        item.iItem = static_cast<int>(i);
-        item.pszText = name.data();
-        int row = ListView_InsertItem(state->list, &item);
-        std::wstring email = Text(account->email);
-        ListView_SetItemText(state->list, row, COL_EMAIL, email.data());
-        core::AccountSettings settings(pe_account_settings(state->core, account->id));
-        const PeAccountSettings* info = pe_account_settings_info(settings.get());
+        int row = AddRow(state->list, static_cast<int>(i), Text(account->name));
         bool oauth = account->oauth != PE_O_AUTH_PROVIDER_NONE;
-        std::wstring server = info ? Text(info->imap_host) + (oauth ? L" (browser sign-in)" : L"") : L"";
-        ListView_SetItemText(state->list, row, COL_SERVER, server.data());
+        SetCell(state->list, row, COL_EMAIL, Text(account->email));
+        SetCell(state->list, row, COL_SERVER, Text(account->imap_host) + (oauth ? L" (browser sign-in)" : L""));
         state->ids.push_back(account->id);
         state->oauth.push_back(oauth);
     }
-    if (!state->ids.empty()) {
-        int row = std::min(select, static_cast<int>(state->ids.size()) - 1);
-        ListView_SetItemState(state->list, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-    }
+    SelectRow(state->list, select);
 }
 
 
@@ -545,9 +531,7 @@ bool AccountsDialog(HWND owner, PeCore* core) {
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     int buttonWidth = Scale(100);
     int listRight = width - pad - buttonWidth - pad;
-    state.list = CreateChild(dialog, WC_LISTVIEWW, nullptr, WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER,
-                             IDC_ACCOUNT_LIST, {pad, pad, listRight, height - pad}, WS_EX_CLIENTEDGE);
-    ListView_SetExtendedListViewStyle(state.list, LVS_EX_FULLROWSELECT);
+    state.list = CreateReportList(dialog, IDC_ACCOUNT_LIST, {pad, pad, listRight, height - pad});
     AddColumn(state.list, COL_NAME, L"Account", 120);
     AddColumn(state.list, COL_EMAIL, L"E-mail address", 170);
     AddColumn(state.list, COL_SERVER, L"Incoming server", 100);

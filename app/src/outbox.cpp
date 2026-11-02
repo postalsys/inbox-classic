@@ -2,8 +2,6 @@
 // is in the Outbox comes from the core as it stores it; this window only lists it.
 #include "app.h"
 
-#include <algorithm>
-
 namespace {
 
 const wchar_t* kOutboxClass = L"InboxClassicOutbox";
@@ -22,10 +20,6 @@ struct OutboxState {
 
 enum OutboxColumn { COL_SUBJECT, COL_TO, COL_QUEUED, COL_STATUS };
 
-void SetCell(HWND list, int row, int column, const std::wstring& text) {
-    ListView_SetItemText(list, row, column, const_cast<wchar_t*>(text.c_str()));
-}
-
 // a row per message: subject, recipients, when it was queued, and whether it waits or why it did not go
 void FillOutbox(OutboxState* state, int select = 0) {
     ListView_DeleteAllItems(state->list);
@@ -34,21 +28,14 @@ void FillOutbox(OutboxState* state, int select = 0) {
     for (size_t i = 0; i < pe_outbox_count(outbox.get()); i++) {
         const PeQueued* queued = pe_outbox_get(outbox.get(), i);
         std::wstring subject = Text(queued->subject);
-        LVITEMW item = {};
-        item.mask = LVIF_TEXT;
-        item.iItem = static_cast<int>(i);
-        item.pszText = const_cast<wchar_t*>(subject.empty() ? L"(no subject)" : subject.c_str());
-        int row = ListView_InsertItem(state->list, &item);
+        int row = AddRow(state->list, static_cast<int>(i), subject.empty() ? L"(no subject)" : subject);
         SetCell(state->list, row, COL_TO, Text(queued->recipients));
         SetCell(state->list, row, COL_QUEUED, FormatDate(queued->created));
         SetCell(state->list, row, COL_STATUS, queued->problem ? L"Not sent: " + Text(queued->problem) : L"Waiting");
         state->ids.push_back(queued->id);
     }
     bool any = !state->ids.empty();
-    if (any) {
-        int row = std::min(select, static_cast<int>(state->ids.size()) - 1);
-        ListView_SetItemState(state->list, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-    }
+    SelectRow(state->list, select);
     // nothing to send or delete in an empty Outbox; a button about to be disabled hands the focus to Close first
     HWND focus = GetFocus();
     if (!any && (focus == state->send || focus == state->remove)) {
@@ -126,9 +113,7 @@ void OutboxDialog(HWND owner, PeCore* core) {
     OutboxState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     int buttonWidth = Scale(110);
-    state.list = CreateChild(dialog, WC_LISTVIEWW, nullptr, WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER,
-                             IDC_OUTBOX_LIST, {pad, pad, width - pad - buttonWidth - pad, height - pad}, WS_EX_CLIENTEDGE);
-    ListView_SetExtendedListViewStyle(state.list, LVS_EX_FULLROWSELECT);
+    state.list = CreateReportList(dialog, IDC_OUTBOX_LIST, {pad, pad, width - pad - buttonWidth - pad, height - pad});
     AddColumn(state.list, COL_SUBJECT, L"Subject", 150);
     AddColumn(state.list, COL_TO, L"To", 110);
     AddColumn(state.list, COL_QUEUED, L"Queued", 100);

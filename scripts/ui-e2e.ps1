@@ -57,7 +57,7 @@ $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $
 $IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDC_SEND_LATER = 308; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
-$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
+$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
@@ -82,8 +82,12 @@ function WaitFor([scriptblock]$Condition, [int]$Seconds = 20) {
 
 # a picture of a window; with $Also (a popup menu, say) of the area that holds both
 function Shot([IntPtr]$hwnd, [string]$name, [IntPtr]$Also = [IntPtr]::Zero) {
-    if ($Also -eq [IntPtr]::Zero) { [void][Native.Win]::SetWindowPos($hwnd, [IntPtr](-1), 0, 0, 0, 0, 0x13) }
-    Start-Sleep -Milliseconds 500
+    # in front and painted: a window that just opened may not have drawn itself yet
+    if ($Also -eq [IntPtr]::Zero) {
+        [void][Native.Win]::SetWindowPos($hwnd, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($hwnd)
+    }
+    Start-Sleep -Milliseconds 700
     $rect = New-Object Native.Win+RECT
     [void][Native.Win]::GetWindowRect($hwnd, [ref]$rect)
     if ($Also -ne [IntPtr]::Zero) {
@@ -164,7 +168,8 @@ function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]
     if ($shot) { Shot $dialog $shot }
     [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
     foreach ($c in $path.ToCharArray()) { [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
-    Start-Sleep -Milliseconds 800
+    # Enter once the box has all of the path, not after a guess at how long typing takes
+    if (-not (WaitFor { (WindowText $name) -eq $path } 10)) { return $false }
     Key $name $VK_RETURN
     return [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
 }
@@ -292,12 +297,7 @@ try {
         SetText $second 108 "$($ports.smtp)"
         # ImapKit's SMTP server takes a password only after STARTTLS
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 109), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
-        if ($shots) {
-            # brought to the front and painted before the picture
-            [void][Native.Win]::SetForegroundWindow($second)
-            Start-Sleep -Milliseconds 700
-            Shot $second 'account-3-servers'
-        }
+        if ($shots) { Shot $second 'account-3-servers' }
         Click $second 1
         $warning = WaitWindow '#32770' 'Add Mail Account'
         Check ($null -ne $warning) 'a connection without encryption is warned about'
@@ -483,7 +483,7 @@ try {
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose
     Check ($null -ne $compose) 'Create Mail opens an empty compose window'
-    $from = GetText $compose 310
+    $from = GetText $compose $IDC_FROM
     Check ($from -eq 'UI Test <testuser@postalexpress.test>') "From names the account it goes from ($from)"
     SetText $compose $IDC_TO 'dave at example.com'
     SetText $compose $IDC_SUBJECT 'A new message from the UI test'
@@ -506,13 +506,9 @@ try {
     $count = { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
     foreach ($file in 'keep-me.txt', 'wrong-file.txt') {
         $before = & $count
-        # each file once it is in the row; a dialog that was still closing from the one before gets a second try
-        for ($try = 0; $try -lt 2 -and (& $count) -eq $before; $try++) {
-            [void](WaitFor { [Native.Win]::FindWindow('#32770', 'Insert Attachment') -eq [IntPtr]::Zero } 10)
-            Command $compose $IDC_ATTACH
-            [void](AnswerFileDialog 'Insert Attachment' (Join-Path $files $file) $null)
-            [void](WaitFor { (& $count) -gt $before } 5)
-        }
+        Command $compose $IDC_ATTACH
+        [void](AnswerFileDialog 'Insert Attachment' (Join-Path $files $file) $null)
+        [void](WaitFor { (& $count) -gt $before } 10)
     }
     Check ([bool](WaitFor { (& $count) -eq 2 } 10)) 'Attach adds the files to the Attach row'
     Shot $compose 'write-5-new'
@@ -813,8 +809,8 @@ try {
     $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
     Check ($null -ne $accounts) 'File > Accounts lists the accounts'
     if ($accounts) {
-        $listBox = [Native.Win]::GetDlgItem($accounts, 400)
-        Check ([int][Native.Win]::SendMessage($listBox, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 2) 'both accounts are listed'
+        $accountList = [Native.Win]::GetDlgItem($accounts, 400)
+        Check ([int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 2) 'both accounts are listed'
         Shot $accounts 'accounts-1-list'
         # Properties of the first: a new display name
         # the first account is selected when the list opens, and stays so after a change
@@ -837,7 +833,6 @@ try {
             }
         }
         # read back in Properties (the text of a list entry does not cross processes)
-        # the first account is selected when the list opens, and stays so after a change
         Click $accounts 402
         $again = WaitFor {
             $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
@@ -850,14 +845,14 @@ try {
         }
         # Remove the second, the one with the wrong password
         $before = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
-        Key $listBox $VK_DOWN
+        Key $accountList $VK_DOWN
         Start-Sleep -Milliseconds 300
         # the Delete key in the list does what Remove does
-        Key $listBox $VK_DELETE
+        Key $accountList $VK_DELETE
         $sure = WaitWindow '#32770' 'Remove Account' 10
         Check ($null -ne $sure) 'Remove (or Delete) asks first'
         if ($sure) { Click $sure 6 }
-        Check ([bool](WaitFor { [int][Native.Win]::SendMessage($listBox, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 })) 'and removes it'
+        Check ([bool](WaitFor { [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 })) 'and removes it'
         Click $accounts 404
         [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
         $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }

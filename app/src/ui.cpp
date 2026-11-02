@@ -1,10 +1,12 @@
 // DPI scaling, child controls, formatting and the modal form the dialogs are built from
 #include "app.h"
+#include "icons.h"
 
 #include <cderr.h>
 #include <commdlg.h>
 #include <shlobj.h>
 
+#include <algorithm>
 #include <fstream>
 
 namespace {
@@ -256,31 +258,19 @@ void AddColumn(HWND list, int index, const wchar_t* name, int width, int format)
 
 // ---- toolbars ----
 
-HWND CreateBar(HWND hwnd, DWORD style, int id) {
-    HWND bar = CreateWindowExW(0, TOOLBARCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | TBSTYLE_LIST | style, 0, 0, 0, 0,
-                               hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr), nullptr);
-    SendMessageW(bar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-    SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
-    return bar;
-}
+namespace {
 
-void SetBarIcons(HWND bar, BarIcons icons) {
-    struct Strip {
-        int resource;
-        int size;
-    };
-    // the strips of app.rc: the one closest to the DPI, at least as large
-    static const Strip bigStrips[] = {{10, 24}, {11, 30}, {12, 36}, {13, 48}};
-    static const Strip smallStrips[] = {{20, 16}, {21, 20}, {22, 24}, {23, 32}};
-    const Strip* strips = icons == BarIcons::Big ? bigStrips : smallStrips;
-    const Strip* chosen = &strips[3];
-    for (int i = 0; i < 4; i++) {
-        if (strips[i].size >= Scale(strips[0].size)) {
-            chosen = &strips[i];
+// the image list of the strip closest to the DPI, at least as large; one a strip, for all the windows, as long as the
+// app runs
+HIMAGELIST BarImages(BarIcons icons) {
+    const auto& strips = icons == BarIcons::Big ? kToolbarStrips : kFormatStrips;
+    const IconStrip* chosen = &strips[std::size(strips) - 1];
+    for (const IconStrip& strip : strips) {
+        if (strip.size >= Scale(strips[0].size)) {
+            chosen = &strip;
             break;
         }
     }
-    // one image list a strip, for all the windows, as long as the app runs
     static std::unordered_map<int, HIMAGELIST> lists;
     HIMAGELIST& list = lists[chosen->resource];
     if (!list) {
@@ -288,11 +278,50 @@ void SetBarIcons(HWND bar, BarIcons icons) {
         list = ImageList_LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(chosen->resource), chosen->size, 0, RGB(0xF0, 0xF0, 0xF0),
                                     IMAGE_BITMAP, LR_CREATEDIBSECTION);
     }
-    SendMessageW(bar, TB_SETIMAGELIST, 0, reinterpret_cast<LPARAM>(list));
-    if (icons == BarIcons::Big) {
-        // the label under the icon, as Outlook Express has it
-        SendMessageW(bar, TB_SETSTYLE, 0, SendMessageW(bar, TB_GETSTYLE, 0, 0) & ~TBSTYLE_LIST);
-        SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, 0);
+    return list;
+}
+
+}  // namespace
+
+HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
+    // big icons with the label under them, as Outlook Express has it; small ones beside nothing, the label a tooltip
+    DWORD layout = icons == BarIcons::Big ? 0 : TBSTYLE_LIST | TBSTYLE_TOOLTIPS;
+    HWND bar = CreateWindowExW(0, TOOLBARCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | layout | style, 0, 0, 0, 0, hwnd,
+                               reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr), nullptr);
+    SendMessageW(bar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
+    if (icons == BarIcons::Small) {
+        SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
+    }
+    SendMessageW(bar, TB_SETIMAGELIST, 0, reinterpret_cast<LPARAM>(BarImages(icons)));
+    return bar;
+}
+
+// ---- report lists ----
+
+HWND CreateReportList(HWND parent, int id, const RECT& bounds) {
+    HWND list = CreateChild(parent, WC_LISTVIEWW, nullptr, WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER, id,
+                            bounds, WS_EX_CLIENTEDGE);
+    ListView_SetExtendedListViewStyle(list, LVS_EX_FULLROWSELECT);
+    return list;
+}
+
+int AddRow(HWND list, int index, const std::wstring& text) {
+    LVITEMW item = {};
+    item.mask = LVIF_TEXT;
+    item.iItem = index;
+    item.pszText = const_cast<wchar_t*>(text.c_str());
+    return ListView_InsertItem(list, &item);
+}
+
+void SetCell(HWND list, int row, int column, const std::wstring& text) {
+    ListView_SetItemText(list, row, column, const_cast<wchar_t*>(text.c_str()));
+}
+
+void SelectRow(HWND list, int row) {
+    int count = ListView_GetItemCount(list);
+    if (count > 0) {
+        row = std::clamp(row, 0, count - 1);
+        ListView_SetItemState(list, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
     }
 }
 

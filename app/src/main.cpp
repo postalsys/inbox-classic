@@ -217,8 +217,7 @@ HACCEL BuildAccelerators() {
 }
 
 void CreateToolbar(HWND hwnd) {
-    g_toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0);
-    SetBarIcons(g_toolbar, BarIcons::Big);
+    g_toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0, BarIcons::Big);
     struct Button {
         WORD id;
         const wchar_t* text;

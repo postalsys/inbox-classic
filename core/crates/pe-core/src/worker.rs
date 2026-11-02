@@ -69,6 +69,10 @@ pub(crate) enum Command {
     SaveDraft {
         outgoing: Box<crate::Outgoing>,
     },
+    /// The drafts with this Message-ID out of the Drafts folder
+    RemoveDrafts {
+        message_id: String,
+    },
 }
 
 /// A failed command, for [`Event::Failed`]
@@ -327,6 +331,7 @@ impl Worker {
             }
             Command::Send { outgoing, now } => self.queue(store, *outgoing, now).await,
             Command::SaveDraft { outgoing } => self.save_draft(store, *outgoing).await,
+            Command::RemoveDrafts { message_id } => self.remove_drafts(store, &message_id).await,
         }
     }
 

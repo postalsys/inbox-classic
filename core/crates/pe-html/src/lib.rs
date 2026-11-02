@@ -6,8 +6,8 @@
 use std::borrow::Cow;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
-use std::sync::OnceLock;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::{Arc, OnceLock};
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
@@ -70,10 +70,26 @@ pub(crate) fn mail_builder() -> ammonia::Builder<'static> {
 /// attributes. CSS can not run code, and what it could load from the network is refused by the CSP and by the WebView2
 /// request filter.
 pub(crate) fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
+    builder_noting(images, None)
+}
+
+/// [`builder`], setting `remote` when an attribute loads a picture from the network: an `img` src, a `background`,
+/// or a CSS `url()` / `image-set()` in a style attribute (decoded, as the sanitizer hands it over)
+fn builder_noting(images: &[InlineImage], remote: Option<Arc<AtomicBool>>) -> ammonia::Builder<'static> {
     let embedder = Embedder::new(images);
     let mut builder = mail_builder();
     builder.attribute_filter(move |element, attribute, value| {
         let img_src = element == "img" && attribute == "src";
+        if let Some(remote) = &remote {
+            let loads = match attribute {
+                "style" => css_loads_remote(value),
+                "background" => is_remote(value),
+                _ => img_src && is_remote(value),
+            };
+            if loads {
+                remote.store(true, Ordering::Relaxed);
+            }
+        }
         let scheme = value
             .trim_start()
             .get(..5)
@@ -196,37 +212,54 @@ pub struct Rendered {
 
 /// [`render_message_with_header`], and whether the message has pictures on the internet
 pub fn render_view(html: &str, options: &RenderOptions, images: &[InlineImage], header: &[(&str, &str)]) -> Rendered {
-    let body = builder(images).clean(html).to_string();
+    let remote = Arc::new(AtomicBool::new(false));
+    let body = builder_noting(images, Some(remote.clone())).clean(html).to_string();
     Rendered {
-        remote_images: refers_to_remote_images(&body),
+        // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
+        remote_images: remote.load(Ordering::Relaxed) || style_elements_load_remote(&body),
         document: wrap(&body, options, header),
     }
 }
 
-/// Whether sanitized `body` loads pictures from the network: an `img` src (the sanitizer drops srcset), a `background` attribute or a
-/// CSS `url()` / `image-set()` with an http(s) or protocol-relative address. Only for offering Download pictures: a
-/// picture this misses (CSS escapes) stays blocked all the same.
-fn refers_to_remote_images(body: &str) -> bool {
-    let lower = body.to_ascii_lowercase();
-    let remote = |rest: &str| {
-        // what may come before the address: spaces and quotes, raw or as the entities ammonia writes
-        let mut rest = rest.trim_start();
-        while let Some(next) = ["\"", "'", "&quot;", "&#39;", "&#x27;"]
-            .iter()
-            .find_map(|quote| rest.strip_prefix(quote))
-        {
-            rest = next.trim_start();
+/// An address on the network: http(s) or protocol-relative (which the https preview page would load over https).
+/// Only for offering Download pictures: what this misses (CSS escapes) stays blocked all the same.
+fn is_remote(value: &str) -> bool {
+    let value = value.trim_start().trim_start_matches(['"', '\'']).trim_start();
+    let starts = |prefix: &str| {
+        value
+            .get(..prefix.len())
+            .is_some_and(|start| start.eq_ignore_ascii_case(prefix))
+    };
+    starts("http:") || starts("https:") || value.starts_with("//")
+}
+
+/// Whether CSS text has a `url()` or `image-set()` with an address on the network
+fn css_loads_remote(css: &str) -> bool {
+    let bytes = css.as_bytes();
+    ["url(", "image-set("].iter().any(|function| {
+        bytes.windows(function.len()).enumerate().any(|(at, window)| {
+            window.eq_ignore_ascii_case(function.as_bytes()) && is_remote(&css[at + function.len()..])
+        })
+    })
+}
+
+/// Whether the style elements of sanitized `body` load a picture from the network; the sanitizer writes them in
+/// lowercase and leaves their text as it is
+fn style_elements_load_remote(body: &str) -> bool {
+    let mut rest = body;
+    while let Some(start) = rest.find("<style") {
+        let after = &rest[start..];
+        let end = after.find("</style>").unwrap_or(after.len());
+        if css_loads_remote(&after[..end]) {
+            return true;
         }
-        rest.starts_with("http:") || rest.starts_with("https:") || rest.starts_with("//")
-    };
-    let after = |pattern: &str| {
-        lower
-            .match_indices(pattern)
-            .any(|(at, _)| remote(&lower[at + pattern.len()..]))
-    };
-    [" src=\"", " background=\"", "url(", "image-set("]
-        .iter()
-        .any(|p| after(p))
+        rest = &after[end..];
+        if rest.is_empty() {
+            break;
+        }
+        rest = &rest[1..];
+    }
+    false
 }
 
 /// The preview document around a sanitized body
@@ -305,6 +338,8 @@ mod tests {
             "<img src=\"cid:logo@x\">",
             "<p>src=\"https://example.com\" written as text</p>",
             "<div style=\"color:red\">url( is only text here</div>",
+            // written in the text, not an attribute: the old text scan took this for a picture
+            "<p> src=\"https://example.com/x.png\" and url(https://example.com/y.png)</p>",
         ] {
             assert!(!remote(html), "{html}");
         }

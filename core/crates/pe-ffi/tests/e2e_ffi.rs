@@ -379,6 +379,9 @@ fn null_and_bad_arguments() {
         // drafts: nothing to open, no account to save in
         assert!(pe_draft_open(core, 1, 1).is_null());
         assert!(pe_draft_open(std::ptr::null(), 1, 1).is_null());
+        assert!(!pe_draft_discard(core, 1, std::ptr::null()));
+        let id = CString::new("<a@b>").unwrap();
+        assert!(!pe_draft_discard(core, 42, id.as_ptr()));
         let mut id: *mut c_char = null_mut();
         assert!(!pe_draft_save(core, 42, std::ptr::null(), &mut id, null_mut()));
         assert!(id.is_null());

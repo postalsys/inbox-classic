@@ -45,7 +45,7 @@ A Cargo workspace in `core/` (edition 2024, `rustfmt.toml` sets 120 columns). Th
 
 Plain Win32 (C++20, MSVC, `/W4 /utf-8 /permissive-`). The manifest (`app/res/app.manifest`) deliberately has no dependency on Common Controls 6, so the controls draw in the classic 3D style; keep it that way. Code style and patterns (pages, dialogs, tray, list views, preview) follow `../imapkit-win/host-win/src`; borrow from there when adding UI. CMake runs `cargo build --release --locked -p pe-ffi` on every build, with the Cargo target dir under `build/cargo`, and downloads the WebView2 SDK from NuGet pinned by hash.
 
-Toolbar icons are Fluent UI System Icons (MIT): the SVGs in `app/res/icons`, turned into bitmap strips (`app/res/toolbar`, drawn over the button face color, which is their transparent color, as the classic image lists have no alpha) and `app/src/icons.h` by `scripts/build-icons.sh` (rsvg-convert and ImageMagick). The strips and the header are committed; run the script after changing an icon or the lists in it, and check the result on a screenshot.
+Toolbar icons are Fluent UI System Icons (MIT): the SVGs in `app/res/icons`, turned into bitmap strips (`app/res/toolbar`, drawn over the button face color, which is their transparent color, as the classic image lists have no alpha) with `app/res/toolbar.rc` (their resources) and `app/src/icons.h` (their order and sizes) by `scripts/build-icons.sh` (rsvg-convert and ImageMagick). These are committed; run the script after changing an icon or the lists in it, and check the result on a screenshot.
 
 The app version is the `[workspace.package] version` of `core/Cargo.toml`. CMake reads the first `version = "x.y.z"` line of that file, so keep `[workspace.package]` at the top.
 

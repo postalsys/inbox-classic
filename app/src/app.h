@@ -46,13 +46,19 @@ struct FormField {
 
 // a column of a report list view, `width` at 96 DPI
 void AddColumn(HWND list, int index, const wchar_t* name, int width, int format = LVCFMT_LEFT);
+// the list of a dialog (Accounts, Outbox): one row selected at a time, full rows, columns that do not sort
+HWND CreateReportList(HWND parent, int id, const RECT& bounds);
+// a row with the text of its first column; its index
+int AddRow(HWND list, int index, const std::wstring& text);
+void SetCell(HWND list, int row, int column, const std::wstring& text);
+// selects and focuses `row`, or the last one when there are fewer
+void SelectRow(HWND list, int row);
 
 // a flat toolbar of text buttons, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles
-HWND CreateBar(HWND hwnd, DWORD style, int id);
 // the icons of a bar (icons.h): the big ones with the label under them (main and compose windows), or the small ones
 // of the format bar, beside nothing, with the label as the tooltip
 enum class BarIcons { Big, Small };
-void SetBarIcons(HWND bar, BarIcons icons);
+HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons);
 // a button on a bar of CreateBar, with its icon (icons.h) or I_IMAGENONE; id 0 is a separator
 void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON, int image = I_IMAGENONE);
 

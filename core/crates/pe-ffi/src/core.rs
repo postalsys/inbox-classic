@@ -502,6 +502,8 @@ pub struct PeAccount {
     /// The provider it signs in to through the browser, NONE for a password: a refused sign-in asks for
     /// `pe_sign_in_begin` and `pe_account_reauthorize`, not for a password
     pub oauth: PeOAuthProvider,
+    /// The incoming (IMAP) server, for the Accounts list
+    pub imap_host: *const c_char,
 }
 
 /// The accounts; free with `pe_account_list_free`
@@ -523,6 +525,7 @@ pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList 
                 id: a.id,
                 name: strings.add(&a.settings.name),
                 email: strings.add(&a.settings.email),
+                imap_host: strings.add(&a.settings.imap_host),
                 oauth: match &a.settings.auth {
                     pe_store::Auth::OAuth2(name) => match pe_oauth::ProviderKind::parse(name) {
                         Some(pe_oauth::ProviderKind::Google) => PeOAuthProvider::Google,
@@ -1592,6 +1595,22 @@ pub unsafe extern "C" fn pe_draft_open(core: *const PeCore, folder: i64, uid: u6
             _ => null_mut(),
         })
     }
+}
+
+/// Removes the draft with `message_id` from the Drafts folder of `account`, in the background: for a message whose
+/// From changed to another account after it was saved, once it is saved or sent from the new one. False for an
+/// unknown account or an ID that does not name a draft.
+///
+/// # Safety
+/// `core` must be a live handle, `message_id` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_discard(core: *const PeCore, account: i64, message_id: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(message_id) = (unsafe { arg(message_id) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.discard_draft(account, message_id).is_ok()) }
 }
 
 /// Saves a message being written in the Drafts folder of `account`, in place of the copy saved before (the one with

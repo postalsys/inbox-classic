@@ -72,6 +72,8 @@ struct Compose {
     std::vector<File> files;
     // the Message-ID of the draft saved in Drafts, empty before the first save
     std::string messageId;
+    // the account whose Drafts has that copy, 0 before the first save
+    int64_t draftAccount = 0;
     Editor editor;
     // what to do with the editor's HTML once it comes: send now, send later (into the Outbox), save in Drafts, or save
     // and close the window
@@ -87,7 +89,9 @@ struct Compose {
     HWND formatBar = nullptr;
     HWND font = nullptr;
     HWND size = nullptr;
-    HWND labels[6] = {};
+    // the rows of fields: From, To, Cc, Bcc, Subject, Attach
+    static constexpr int kRows = 6;
+    HWND labels[kRows] = {};
     // the accounts it can go from, in the order of the From list
     std::vector<int64_t> fromAccounts;
     HWND from = nullptr;
@@ -127,7 +131,8 @@ void Layout(HWND hwnd, Compose* state) {
     int rowHeight = Scale(22);
     int y = bar.bottom - bar.top + pad;
     HWND fields[] = {state->from, state->to, state->cc, state->bcc, state->subject, state->attached};
-    for (int i = 0; i < 6; i++) {
+    static_assert(std::size(fields) == Compose::kRows);
+    for (int i = 0; i < Compose::kRows; i++) {
         MoveWindow(state->labels[i], pad, y + Scale(3), labelWidth, rowHeight, TRUE);
         // a combo box's height is that of its open list
         int height = fields[i] == state->from ? Scale(200) : rowHeight;
@@ -145,7 +150,6 @@ void Layout(HWND hwnd, Compose* state) {
     state->editor.Resize({pad, y, client.right - pad, std::max(y, static_cast<int>(client.bottom) - pad)});
     FitFiles(state);
 }
-
 
 // the attached files in the Attach row, side by side
 void ShowFiles(Compose* state) {
@@ -282,6 +286,15 @@ void ShowRefusal(HWND hwnd, char* reason, const wchar_t* fallback) {
     MessageBoxW(hwnd, why.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
+// the saved copy of the message is in the Drafts of the account it goes from now: one saved before From changed to
+// another account goes from the first one's Drafts, once the message is saved or sent from the new one
+void MoveDraft(Compose* state) {
+    if (state->draftAccount && state->draftAccount != state->account && !state->messageId.empty()) {
+        pe_draft_discard(state->core, state->draftAccount, state->messageId.c_str());
+    }
+    state->draftAccount = state->account;
+}
+
 // sends with the HTML the editor gave, now or with the next Send/Recv
 void Send(HWND hwnd, Compose* state, const std::wstring& html, bool later) {
     Fields fields(state, html);
@@ -291,6 +304,7 @@ void Send(HWND hwnd, Compose* state, const std::wstring& html, bool later) {
         ShowRefusal(hwnd, reason, L"The message could not be sent.");
         return;
     }
+    MoveDraft(state);
     // the main window shows whether the server took it
     state->dirty = false;
     DestroyWindow(hwnd);
@@ -307,6 +321,7 @@ void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
         return;
     }
     core::String id(messageId);
+    MoveDraft(state);
     state->messageId = id ? id.get() : "";
     state->dirty = false;
     state->editor.Clean();
@@ -429,8 +444,7 @@ void CreateFormatBar(HWND hwnd, Compose* state) {
         SendMessageW(state->size, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(size));
     }
     SendMessageW(state->size, CB_SETCURSEL, 1, 0);
-    state->formatBar = CreateBar(hwnd, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE | TBSTYLE_TOOLTIPS, IDC_FORMATBAR);
-    SetBarIcons(state->formatBar, BarIcons::Small);
+    state->formatBar = CreateBar(hwnd, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_FORMATBAR, BarIcons::Small);
     struct Button {
         int id;
         // the tooltip
@@ -463,8 +477,7 @@ void CreateFormatBar(HWND hwnd, Compose* state) {
 }
 
 void CreateFields(HWND hwnd, Compose* state) {
-    state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0);
-    SetBarIcons(state->toolbar, BarIcons::Big);
+    state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0, BarIcons::Big);
     AddButton(state->toolbar, IDC_SEND, L"Send", BTNS_BUTTON, ICON_SEND);
     AddButton(state->toolbar, IDC_SEND_LATER, L"Send Later", BTNS_BUTTON, ICON_SEND_CLOCK);
     AddButton(state->toolbar, 0, nullptr);
@@ -472,7 +485,8 @@ void CreateFields(HWND hwnd, Compose* state) {
     AddButton(state->toolbar, 0, nullptr);
     AddButton(state->toolbar, IDC_ATTACH, L"Attach", BTNS_BUTTON, ICON_ATTACH);
     const wchar_t* labels[] = {L"From:", L"To:", L"Cc:", L"Bcc:", L"Subject:", L"Attach:"};
-    for (int i = 0; i < 6; i++) {
+    static_assert(std::size(labels) == Compose::kRows);
+    for (int i = 0; i < Compose::kRows; i++) {
         state->labels[i] = CreateChild(hwnd, L"STATIC", labels[i], SS_LEFT, 0, {});
     }
     // who the message goes from: always shown, so it is clear even with one account, and the account it is sent with
@@ -702,6 +716,7 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
         state->quote = draft->quote ? draft->quote : "";
         // a saved draft opened again: its files, and its Message-ID so the next save replaces it
         state->messageId = draft->message_id ? draft->message_id : "";
+        state->draftAccount = state->messageId.empty() ? 0 : account;
         for (size_t i = 0; i < draft->attachment_count; i++) {
             AddFile(state, Text(draft->attachments[i]));
         }

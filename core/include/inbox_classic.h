@@ -172,6 +172,8 @@ typedef struct PeAccount {
   // The provider it signs in to through the browser, NONE for a password: a refused sign-in asks for
   // `pe_sign_in_begin` and `pe_account_reauthorize`, not for a password
   enum PeOAuthProvider oauth;
+  // The incoming (IMAP) server, for the Accounts list
+  const char *imap_host;
 } PeAccount;
 
 // A folder as the folder tree shows it, in tree order
@@ -758,6 +760,16 @@ struct PeDraft *pe_message_draft(const struct PeCore *core,
 struct PeDraft *pe_draft_open(const struct PeCore *core,
                               int64_t folder,
                               uint64_t uid);
+
+// Removes the draft with `message_id` from the Drafts folder of `account`, in the background: for a message whose
+// From changed to another account after it was saved, once it is saved or sent from the new one. False for an
+// unknown account or an ID that does not name a draft.
+//
+// # Safety
+// `core` must be a live handle, `message_id` NULL or a NUL-terminated string.
+bool pe_draft_discard(const struct PeCore *core,
+                      int64_t account,
+                      const char *message_id);
 
 // Saves a message being written in the Drafts folder of `account`, in place of the copy saved before (the one with
 // `message->message_id`), in the background: `Failed` when that does not work. True with the draft's Message-ID in
