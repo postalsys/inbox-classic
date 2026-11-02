@@ -77,7 +77,8 @@ const DEFAULT_STORAGE = {
 
 const lines = createInterface({ input: process.stdin });
 const first = await new Promise(resolve => lines.once('line', resolve));
-const config = JSON.parse(first || '{}');
+// Windows PowerShell may start what it writes with a byte order mark
+const config = JSON.parse((first || '').replace(/^\uFEFF/, '') || '{}');
 
 const server = imapkit({
     plugins: ALL_PLUGINS,
