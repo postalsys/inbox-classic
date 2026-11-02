@@ -26,6 +26,7 @@ using FolderList = std::unique_ptr<PeFolderList, Deleter<pe_folder_list_free>>;
 using MessageList = std::unique_ptr<PeMessageList, Deleter<pe_message_list_free>>;
 using MessageView = std::unique_ptr<PeMessageView, Deleter<pe_message_view_free>>;
 using Draft = std::unique_ptr<PeDraft, Deleter<pe_draft_free>>;
+using Autoconfig = std::unique_ptr<PeAutoconfig, Deleter<pe_autoconfig_free>>;
 
 std::wstring Widen(std::string_view utf8);
 std::string Narrow(std::wstring_view utf16);

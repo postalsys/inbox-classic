@@ -53,6 +53,8 @@ bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
 
 // asks for a new account and adds it to the core; its id, or 0 when cancelled
 int64_t NewAccountDialog(HWND owner, PeCore* core);
+// the main window hands the AutoconfigDone events to the account form waiting for one
+void LookupDone(uint64_t request);
 // asks for the password of an account; false when cancelled
 bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password);
 

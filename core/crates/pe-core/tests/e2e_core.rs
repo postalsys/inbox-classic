@@ -23,7 +23,11 @@ fn setup() -> Option<Setup> {
     let dir = TempDir::new("core");
     let (sender, events) = channel();
     let trust = pe_net::Trust::Pinned(vec![server.cert.clone()]);
-    let core = Core::open_with_trust(dir.path().join("store.db"), trust, move |event| {
+    let options = pe_core::Options {
+        trust,
+        passwords: pe_core::PasswordStore::Memory,
+    };
+    let core = Core::open_with(dir.path().join("store.db"), options, move |event| {
         let _ = sender.send(event);
     })
     .unwrap();

@@ -25,6 +25,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_FAILED = 6,
   // A message from `account` was sent
   PE_EVENT_KIND_MESSAGE_SENT = 7,
+  // The lookup `uid` of `pe_autoconfig_start` is done: `pe_autoconfig_result`
+  PE_EVENT_KIND_AUTOCONFIG_DONE = 8,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -74,8 +76,20 @@ typedef enum PeDraftKind {
   PE_DRAFT_KIND_FORWARD = 2,
 } PeDraftKind;
 
+typedef enum PeAutoconfigSource {
+  // The provider's own configuration file
+  PE_AUTOCONFIG_SOURCE_PROVIDER = 0,
+  // Thunderbird's database of providers
+  PE_AUTOCONFIG_SOURCE_ISPDB = 1,
+  // Nothing was found: `imap.` and `smtp.` the domain
+  PE_AUTOCONFIG_SOURCE_GUESS = 2,
+} PeAutoconfigSource;
+
 // The accounts; free with `pe_account_list_free`
 typedef struct PeAccountList PeAccountList;
+
+// A lookup's result; free with `pe_autoconfig_free`
+typedef struct PeAutoconfig PeAutoconfig;
 
 // The mail engine
 typedef struct PeCore PeCore;
@@ -213,6 +227,20 @@ typedef struct PeDraftInfo {
   // For PeOutgoing, space separated
   const char *references;
 } PeDraftInfo;
+
+// The servers found for an address
+typedef struct PeAutoconfigInfo {
+  const char *imap_host;
+  uint16_t imap_port;
+  enum PeSecurity imap_security;
+  const char *smtp_host;
+  uint16_t smtp_port;
+  enum PeSecurity smtp_security;
+  const char *username;
+  // The provider takes OAuth 2.0
+  bool oauth2;
+  enum PeAutoconfigSource source;
+} PeAutoconfigInfo;
 
 #ifdef __cplusplus
 extern "C" {
@@ -462,6 +490,34 @@ const struct PeDraftInfo *pe_draft_info(const struct PeDraft *draft);
 // # Safety
 // `draft` must be NULL or a draft that was not freed yet.
 void pe_draft_free(struct PeDraft *draft);
+
+// Looks up the servers of `email` (UTF-8) in the background; `AutoconfigDone` with this request in `uid`
+// follows. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle, `email` a NUL-terminated string.
+uint64_t pe_autoconfig_start(const struct PeCore *core,
+                             const char *email);
+
+// The result of a lookup after its `AutoconfigDone`, once; NULL for an address without a domain
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAutoconfig *pe_autoconfig_result(const struct PeCore *core, uint64_t request);
+
+// Stops a lookup the user no longer waits for
+//
+// # Safety
+// `core` must be a live handle.
+void pe_autoconfig_cancel(const struct PeCore *core, uint64_t request);
+
+// # Safety
+// `result` must be NULL or live.
+const struct PeAutoconfigInfo *pe_autoconfig_info(const struct PeAutoconfig *result);
+
+// # Safety
+// `result` must be NULL or a result that was not freed yet.
+void pe_autoconfig_free(struct PeAutoconfig *result);
 
 #ifdef __cplusplus
 }  // extern "C"

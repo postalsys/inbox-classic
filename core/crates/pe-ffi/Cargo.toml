@@ -10,6 +10,7 @@ publish.workspace = true
 crate-type = ["staticlib", "lib"]
 
 [dependencies]
+pe-autoconfig = { path = "../pe-autoconfig" }
 pe-core = { path = "../pe-core" }
 pe-html.workspace = true
 pe-imap = { path = "../pe-imap" }

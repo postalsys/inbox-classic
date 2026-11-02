@@ -99,6 +99,8 @@ pub enum PeEventKind {
     Failed = 6,
     /// A message from `account` was sent
     MessageSent = 7,
+    /// The lookup `uid` of `pe_autoconfig_start` is done: `pe_autoconfig_result`
+    AutoconfigDone = 8,
 }
 
 #[repr(C)]
@@ -162,6 +164,7 @@ impl Callback {
             Event::MessageReady { folder, uid } => (PeEventKind::MessageReady, 0, *folder, *uid),
             Event::Failed { account, .. } => (PeEventKind::Failed, *account, 0, 0),
             Event::MessageSent { account } => (PeEventKind::MessageSent, *account, 0, 0),
+            Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
         };
         let (failure, message) = match event {
             Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message))),
@@ -236,7 +239,11 @@ pub unsafe extern "C" fn pe_core_open_pinned(
 fn open(path: &str, trust: pe_net::Trust, callback: PeEventCallback, context: *mut c_void) -> *mut PeCore {
     guard(|| {
         let callback = callback.map(|function| Callback { function, context });
-        let core = Core::open_with_trust(path, trust, move |event| {
+        let options = pe_core::Options {
+            trust,
+            passwords: pe_core::PasswordStore::System,
+        };
+        let core = Core::open_with(path, options, move |event| {
             if let Some(callback) = &callback {
                 callback.deliver(event);
             }
@@ -1071,4 +1078,119 @@ pub unsafe extern "C" fn pe_draft_info(draft: *const PeDraft) -> *const PeDraftI
 pub unsafe extern "C" fn pe_draft_free(draft: *mut PeDraft) {
     // SAFETY: as the caller guarantees
     unsafe { take_back(draft) }
+}
+
+// ---- finding the servers of an address ----
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeAutoconfigSource {
+    /// The provider's own configuration file
+    Provider = 0,
+    /// Thunderbird's database of providers
+    Ispdb = 1,
+    /// Nothing was found: `imap.` and `smtp.` the domain
+    Guess = 2,
+}
+
+/// The servers found for an address
+#[repr(C)]
+pub struct PeAutoconfigInfo {
+    pub imap_host: *const c_char,
+    pub imap_port: u16,
+    pub imap_security: PeSecurity,
+    pub smtp_host: *const c_char,
+    pub smtp_port: u16,
+    pub smtp_security: PeSecurity,
+    pub username: *const c_char,
+    /// The provider takes OAuth 2.0
+    pub oauth2: bool,
+    pub source: PeAutoconfigSource,
+}
+
+/// A lookup's result; free with `pe_autoconfig_free`
+pub struct PeAutoconfig {
+    info: PeAutoconfigInfo,
+    _strings: Strings,
+}
+
+/// Looks up the servers of `email` (UTF-8) in the background; `AutoconfigDone` with this request in `uid`
+/// follows. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `email` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_autoconfig_start(core: *const PeCore, email: *const c_char) -> u64 {
+    // SAFETY: as the caller guarantees
+    let Some(email) = (unsafe { arg(email) }) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.autoconfig(email).unwrap_or(0)) }
+}
+
+/// The result of a lookup after its `AutoconfigDone`, once; NULL for an address without a domain
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_autoconfig_result(core: *const PeCore, request: u64) -> *mut PeAutoconfig {
+    let security = |s: pe_autoconfig::ServerSecurity| match s {
+        pe_autoconfig::ServerSecurity::Tls => PeSecurity::Tls,
+        pe_autoconfig::ServerSecurity::StartTls => PeSecurity::StartTls,
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Some(found) = core.autoconfig_result(request) else {
+                return null_mut();
+            };
+            let mut strings = Strings::default();
+            let info = PeAutoconfigInfo {
+                imap_host: strings.add(&found.imap.host),
+                imap_port: found.imap.port,
+                imap_security: security(found.imap.security),
+                smtp_host: strings.add(&found.smtp.host),
+                smtp_port: found.smtp.port,
+                smtp_security: security(found.smtp.security),
+                username: strings.add(&found.username),
+                oauth2: found.oauth2,
+                source: match found.source {
+                    pe_autoconfig::Source::Provider => PeAutoconfigSource::Provider,
+                    pe_autoconfig::Source::Ispdb => PeAutoconfigSource::Ispdb,
+                    pe_autoconfig::Source::Guess => PeAutoconfigSource::Guess,
+                },
+            };
+            handed(PeAutoconfig {
+                info,
+                _strings: strings,
+            })
+        })
+    }
+}
+
+/// Stops a lookup the user no longer waits for
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_autoconfig_cancel(core: *const PeCore, request: u64) {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| core.autoconfig_cancel(request)) }
+}
+
+/// # Safety
+/// `result` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_autoconfig_info(result: *const PeAutoconfig) -> *const PeAutoconfigInfo {
+    // SAFETY: as the caller guarantees
+    unsafe { result.as_ref() }.map_or(null(), |result| &result.info)
+}
+
+/// # Safety
+/// `result` must be NULL or a result that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_autoconfig_free(result: *mut PeAutoconfig) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(result) }
 }

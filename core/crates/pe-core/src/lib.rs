@@ -7,10 +7,11 @@
 #![forbid(unsafe_code)]
 
 mod compose;
+mod secrets;
 mod view;
 mod worker;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -21,6 +22,8 @@ use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, S
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing};
+pub use secrets::PasswordStore;
+use secrets::Secrets;
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Worker};
 
@@ -50,6 +53,10 @@ pub enum Event {
     /// A message was sent, and is in the Sent folder when the account has one
     MessageSent {
         account: AccountId,
+    },
+    /// The servers of an address were looked up: [`Core::autoconfig_result`]
+    AutoconfigDone {
+        request: u64,
     },
     /// Work for an account failed; `kind` says what to do about it
     Failed {
@@ -106,43 +113,22 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 pub(crate) type EventSink = Arc<dyn Fn(Event) + Send + Sync>;
 
-/// The passwords of the accounts, in memory: the user gives them once per run until the
-/// Windows Credential Manager keeps them
-#[derive(Clone, Default)]
-pub(crate) struct Secrets(Arc<Mutex<SecretMap>>);
-
-#[derive(Default)]
-struct SecretMap {
-    passwords: HashMap<AccountId, String>,
-    /// Accounts whose password was refused and reported: reported once until a new one is set
-    refused: HashSet<AccountId>,
+/// A lookup of the servers of an address
+enum Lookup {
+    Running(tokio::task::AbortHandle),
+    /// None when the address has no domain
+    Done(Option<pe_autoconfig::Settings>),
 }
 
-impl Secrets {
-    fn map(&self) -> MutexGuard<'_, SecretMap> {
-        self.0.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
-    }
-
-    pub(crate) fn get(&self, account: AccountId) -> Option<String> {
-        self.map().passwords.get(&account).cloned()
-    }
-
-    fn set(&self, account: AccountId, password: &str) {
-        let mut map = self.map();
-        map.passwords.insert(account, password.to_string());
-        map.refused.remove(&account);
-    }
-
-    fn remove(&self, account: AccountId) {
-        let mut map = self.map();
-        map.passwords.remove(&account);
-        map.refused.remove(&account);
-    }
-
-    /// Whether a refused password is news: true the first time after it was set
-    pub(crate) fn first_refusal(&self, account: AccountId) -> bool {
-        self.map().refused.insert(account)
-    }
+/// How the engine works with servers and passwords
+#[derive(Clone, Default)]
+pub struct Options {
+    /// The certificates servers are checked against: the platform's, or `Trust::Pinned` ones for test servers
+    /// and a self-hosted server whose certificate the user accepted (all accounts)
+    pub trust: Trust,
+    /// Where passwords are kept between runs; tests use [`PasswordStore::Memory`], so they never write to the
+    /// Credential Manager of the user running them
+    pub passwords: PasswordStore,
 }
 
 pub struct Core {
@@ -157,24 +143,28 @@ pub struct Core {
     events: EventSink,
     /// Set when closing: no event is delivered after
     closed: Arc<AtomicBool>,
+    /// Lookups of servers, by request
+    autoconfig: Arc<Mutex<HashMap<u64, Lookup>>>,
+    next_request: std::sync::atomic::AtomicU64,
 }
 
 impl Core {
     /// Opens the store at `path` (created when missing) and starts the engine. `events` is called
     /// on worker threads, never on the thread that called into the engine.
     pub fn open(path: impl AsRef<Path>, events: impl Fn(Event) + Send + Sync + 'static) -> Result<Core> {
-        Self::open_with_trust(path, Trust::Platform, events)
+        Self::open_with(path, Options::default(), events)
     }
 
-    /// Like [`Core::open`], with the certificates the servers are checked against: the platform's, or the
-    /// certificates of `Trust::Pinned` (test servers, a certificate the user accepted)
-    pub fn open_with_trust(
+    /// Like [`Core::open`], with other [`Options`]
+    pub fn open_with(
         path: impl AsRef<Path>,
-        trust: Trust,
+        options: Options,
         events: impl Fn(Event) + Send + Sync + 'static,
     ) -> Result<Core> {
         let path = path.as_ref().to_path_buf();
         let store = Store::open(&path)?;
+        let secrets = Secrets::new(options.passwords, &store.profile_id()?);
+        let trust = options.trust;
         let runtime = tokio::runtime::Builder::new_multi_thread()
             .worker_threads(2)
             .thread_name("pe-worker")
@@ -188,7 +178,7 @@ impl Core {
             store: Mutex::new(store),
             runtime: Some(runtime),
             workers: Mutex::default(),
-            secrets: Secrets::default(),
+            secrets,
             trust,
             events: Arc::new(move |event| {
                 if !open.load(Ordering::Acquire) {
@@ -196,6 +186,8 @@ impl Core {
                 }
             }),
             closed,
+            autoconfig: Arc::default(),
+            next_request: std::sync::atomic::AtomicU64::new(1),
         })
     }
 
@@ -215,10 +207,24 @@ impl Core {
         Ok(())
     }
 
+    /// Adds an account, its password kept as the [`Options`] say
     pub fn add_account(&self, settings: &AccountSettings, password: &str) -> Result<AccountId> {
         let id = self.store().add_account(settings)?;
-        self.secrets.set(id, password);
+        // an account removed before may have had this id: its password goes, whatever happens to this one
+        self.secrets.remove(id);
+        self.keep_password(id, password);
         Ok(id)
+    }
+
+    fn keep_password(&self, account: AccountId, password: &str) {
+        if let Err(error) = self.secrets.set(account, password) {
+            // the password still works for this run
+            let _ = self.post(Event::Failed {
+                account,
+                kind: FailureKind::Other,
+                message: format!("the password could not be saved for the next start: {error}"),
+            });
+        }
     }
 
     pub fn update_account(&self, id: AccountId, settings: &AccountSettings) -> Result<()> {
@@ -230,13 +236,13 @@ impl Core {
 
     pub fn remove_account(&self, id: AccountId) -> Result<()> {
         self.stop_worker(id);
-        self.secrets.remove(id);
         self.store().remove_account(id)?;
+        self.secrets.remove(id);
         Ok(())
     }
 
     pub fn set_password(&self, id: AccountId, password: &str) {
-        self.secrets.set(id, password);
+        self.keep_password(id, password);
     }
 
     pub fn accounts(&self) -> Result<Vec<Account>> {
@@ -259,6 +265,50 @@ impl Core {
     /// Where a message is in the message list in this order
     pub fn message_index(&self, folder: FolderId, sort: Sort, uid: u64) -> Result<Option<u64>> {
         Ok(self.store().message_index(folder, sort, uid)?)
+    }
+
+    /// Looks up the servers of `email` in the background: [`Event::AutoconfigDone`] follows with the request
+    /// this returns
+    pub fn autoconfig(&self, email: &str) -> Result<u64> {
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let (results, events, email) = (self.autoconfig.clone(), self.events.clone(), email.to_string());
+        // held while the lookup starts, so it can not finish before it is listed as running
+        let mut lookups = self.autoconfig.lock().unwrap_or_else(|p| p.into_inner());
+        let task = self.runtime()?.spawn(async move {
+            let found = pe_autoconfig::discover(&email).await;
+            results
+                .lock()
+                .unwrap_or_else(|p| p.into_inner())
+                .insert(request, Lookup::Done(found));
+            events(Event::AutoconfigDone { request });
+        });
+        lookups.insert(request, Lookup::Running(task.abort_handle()));
+        Ok(request)
+    }
+
+    /// What a lookup found, once it is done and once: None for an address without a domain, a lookup that is
+    /// still running, or an unknown request
+    pub fn autoconfig_result(&self, request: u64) -> Option<pe_autoconfig::Settings> {
+        let mut lookups = self.autoconfig.lock().unwrap_or_else(|p| p.into_inner());
+        match lookups.get(&request)? {
+            Lookup::Running(_) => None,
+            Lookup::Done(_) => match lookups.remove(&request) {
+                Some(Lookup::Done(found)) => found,
+                _ => None,
+            },
+        }
+    }
+
+    /// Stops a lookup the user no longer waits for, and forgets it
+    pub fn autoconfig_cancel(&self, request: u64) {
+        let removed = self
+            .autoconfig
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .remove(&request);
+        if let Some(Lookup::Running(task)) = removed {
+            task.abort();
+        }
     }
 
     /// Syncs the folder list and every folder of an account, in the background

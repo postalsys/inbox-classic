@@ -21,7 +21,8 @@ A Cargo workspace in `core/` (edition 2024, `rustfmt.toml` sets 120 columns). Th
 - `pe-net`: TCP and TLS (rustls with the platform verifier, or a pinned certificate) for IMAP and SMTP.
 - `pe-store`: the local cache in SQLite (rusqlite, bundled): accounts without secrets, folders, message summaries, cached sources. Schema changes are new entries in `schema.rs` `MIGRATIONS`, never edits of shipped ones.
 - `pe-sync`: keeps `pe-store` in step with an IMAP account through `pe-imap`.
-- `pe-core`: the engine the C API wraps: a tokio runtime, one worker per account (its own IMAP connection and store connection), the message view, and `Event`s for the windows.
+- `pe-autoconfig`: finds the servers of an address the way Thunderbird does (the provider's autoconfig file, the ISPDB, then `imap.`/`smtp.` guesses), over HTTPS only, never picking a server without encryption. `cargo run -p pe-autoconfig --example discover -- user@example.com` tries it live.
+- `pe-core`: the engine the C API wraps: a tokio runtime, one worker per account (its own IMAP connection and store connection), the message view, and `Event`s for the windows. Passwords are kept in the Windows Credential Manager (`secrets.rs`); tests open the core with `PasswordStore::Memory` so they never write to the Credential Manager of whoever runs them.
 - `pe-testkit`: starts ImapKit (`core/e2e`) for the end-to-end tests and talks to its REST API.
 - `pe-ffi`: the only crate with `unsafe` code and the only one the app links. Every other crate starts with `#![forbid(unsafe_code)]`.
 

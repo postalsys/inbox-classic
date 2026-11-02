@@ -91,6 +91,9 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_SYNC_FINISHED:
         SetStatus(L"Done");
         break;
+    case PE_EVENT_KIND_AUTOCONFIG_DONE:
+        LookupDone(event.uid);
+        break;
     case PE_EVENT_KIND_MESSAGE_SENT:
         SetStatus(L"Message sent.");
         break;

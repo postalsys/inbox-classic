@@ -3,7 +3,8 @@
 
 use rusqlite::Connection;
 
-const MIGRATIONS: &[&str] = &[r#"
+const MIGRATIONS: &[&str] = &[
+    r#"
 CREATE TABLE accounts (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
@@ -67,7 +68,16 @@ CREATE TABLE bodies (
     message_id INTEGER PRIMARY KEY REFERENCES messages(id) ON DELETE CASCADE,
     source BLOB NOT NULL
 );
-"#];
+"#,
+    r#"
+CREATE TABLE settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+-- names the passwords of this store's accounts apart from those of another store
+INSERT INTO settings (key, value) VALUES ('profile', lower(hex(randomblob(16))));
+"#,
+];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
     let version: usize = db.pragma_query_value(None, "user_version", |row| row.get(0))?;

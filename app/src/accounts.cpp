@@ -41,25 +41,137 @@ bool Validate(const std::vector<FormField>& fields, std::wstring& error) {
     return true;
 }
 
+bool ValidFirst(const std::vector<FormField>& fields, std::wstring& error) {
+    if (fields[1].value.find(L'@') == std::wstring::npos) {
+        error = L"Type your e-mail address, name@example.com.";
+        return false;
+    }
+    return true;
+}
+
+// the lookup of servers the form waits for: its core and request, and whether its AutoconfigDone came
+struct {
+    PeCore* core = nullptr;
+    uint64_t request = 0;
+    bool done = false;
+} g_lookup;
+const wchar_t* kWaitClass = L"PostalExpressWait";
+
+LRESULT CALLBACK WaitProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    if ((message == WM_COMMAND && LOWORD(wParam) == IDCANCEL) || message == WM_CLOSE) {
+        pe_autoconfig_cancel(g_lookup.core, g_lookup.request);
+        g_lookup.done = true;
+        g_lookup.request = 0;
+        return 0;
+    }
+    if (message == WM_CTLCOLORSTATIC) {
+        return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+// waits for the lookup with a small window that can cancel it; the result, or NULL
+core::Autoconfig WaitForLookup(HWND owner, PeCore* core, const std::wstring& email) {
+    g_lookup.core = core;
+    g_lookup.request = pe_autoconfig_start(core, core::Narrow(email).c_str());
+    g_lookup.done = false;
+    if (!g_lookup.request) {
+        return core::Autoconfig();
+    }
+    static bool registered = false;
+    if (!registered) {
+        WNDCLASSEXW windowClass = {sizeof(windowClass)};
+        windowClass.lpfnWndProc = WaitProc;
+        windowClass.hInstance = GetModuleHandleW(nullptr);
+        windowClass.hCursor = LoadCursorW(nullptr, IDC_WAIT);
+        windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
+        windowClass.lpszClassName = kWaitClass;
+        RegisterClassExW(&windowClass);
+        registered = true;
+    }
+    HWND root = GetAncestor(owner, GA_ROOT);
+    RECT ownerRect;
+    GetWindowRect(root, &ownerRect);
+    int width = Scale(340);
+    int height = Scale(120);
+    HWND wait = CreateWindowExW(WS_EX_DLGMODALFRAME, kWaitClass, L"Add Mail Account", WS_POPUP | WS_CAPTION | WS_SYSMENU,
+                                (ownerRect.left + ownerRect.right - width) / 2, (ownerRect.top + ownerRect.bottom - height) / 2,
+                                width, height, root, nullptr, GetModuleHandleW(nullptr), nullptr);
+    size_t at = email.find_last_of(L'@');
+    std::wstring text = L"Looking up the settings of " + email.substr(at == std::wstring::npos ? 0 : at + 1) + L"...";
+    CreateChild(wait, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {Scale(12), Scale(12), width - Scale(24), Scale(40)});
+    CreateChild(wait, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL,
+                {width - Scale(100), Scale(48), width - Scale(16), Scale(73)});
+    bool wasEnabled = IsWindowEnabled(root);
+    EnableWindow(root, FALSE);
+    ShowWindow(wait, SW_SHOW);
+    MSG msg = {};
+    // the main window passes the AutoconfigDone of this lookup on to LookupDone
+    while (!g_lookup.done && GetMessageW(&msg, nullptr, 0, 0) > 0) {
+        if (!IsDialogMessageW(wait, &msg)) {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+    }
+    if (msg.message == WM_QUIT) {
+        PostQuitMessage(static_cast<int>(msg.wParam));
+    }
+    EnableWindow(root, wasEnabled);
+    DestroyWindow(wait);
+    uint64_t request = g_lookup.request;
+    g_lookup.request = 0;
+    return request ? core::Autoconfig(pe_autoconfig_result(core, request)) : core::Autoconfig();
+}
+
+std::wstring SecurityName(PeSecurity security) {
+    return kSecurity[security == PE_SECURITY_START_TLS ? 1 : security == PE_SECURITY_PLAIN ? 2 : 0];
+}
+
 }  // namespace
+
+void LookupDone(uint64_t request) {
+    if (request && request == g_lookup.request) {
+        g_lookup.done = true;
+    }
+}
 
 int64_t NewAccountDialog(HWND owner, PeCore* core) {
     using Kind = FormField::Kind;
-    std::vector<std::wstring> security(std::begin(kSecurity), std::end(kSecurity));
-    std::vector<FormField> fields = {
+    std::vector<FormField> first = {
         {L"Display name:", L""},
         {L"E-mail address:", L""},
-        {L"User name:", L""},
         {L"Password:", L"", Kind::Password},
-        {L"Incoming (IMAP) server:", L""},
-        {L"IMAP port:", L"993", Kind::Number},
-        {L"IMAP security:", kSecurity[0], Kind::Choice, security},
-        {L"Outgoing (SMTP) server:", L""},
-        {L"SMTP port:", L"465", Kind::Number},
-        {L"SMTP security:", kSecurity[0], Kind::Choice, security},
     };
-    while (FormDialog(owner, L"Add Mail Account", L"Enter the account details your e-mail provider gave you.", fields,
-                      Validate)) {
+    if (!FormDialog(owner, L"Add Mail Account",
+                    L"Your name as others see it, your e-mail address and its password. The servers are looked up next.",
+                    first, ValidFirst)) {
+        return 0;
+    }
+    std::wstring email = first[1].value;
+    core::Autoconfig found = WaitForLookup(owner, core, email);
+    const PeAutoconfigInfo* info = pe_autoconfig_info(found.get());
+    std::wstring intro = L"Enter the account details your e-mail provider gave you.";
+    if (info) {
+        intro = info->source == PE_AUTOCONFIG_SOURCE_GUESS
+                    ? L"No settings were found for this address: these are the usual names, check them with your provider."
+                    : L"These settings were found for this address. Change them if your provider gave you others.";
+    }
+
+    std::vector<std::wstring> security(std::begin(kSecurity), std::end(kSecurity));
+    std::vector<FormField> fields = {
+        {L"Display name:", first[0].value},
+        {L"E-mail address:", email},
+        {L"User name:", info ? Text(info->username) : L""},
+        {L"Password:", first[2].value, Kind::Password},
+        {L"Incoming (IMAP) server:", info ? Text(info->imap_host) : L""},
+        {L"IMAP port:", info ? std::to_wstring(info->imap_port) : L"993", Kind::Number},
+        {L"IMAP security:", info ? SecurityName(info->imap_security) : kSecurity[0], Kind::Choice, security},
+        {L"Outgoing (SMTP) server:", info ? Text(info->smtp_host) : L""},
+        {L"SMTP port:", info ? std::to_wstring(info->smtp_port) : L"465", Kind::Number},
+        {L"SMTP security:", info ? SecurityName(info->smtp_security) : kSecurity[0], Kind::Choice, security},
+    };
+    SecureZeroMemory(first[2].value.data(), first[2].value.size() * sizeof(wchar_t));
+    while (FormDialog(owner, L"Add Mail Account", intro, fields, Validate)) {
         bool plain = SecurityOf(fields[IMAP_SECURITY].value) == PE_SECURITY_PLAIN ||
                      SecurityOf(fields[SMTP_SECURITY].value) == PE_SECURITY_PLAIN;
         if (plain && MessageBoxW(owner,

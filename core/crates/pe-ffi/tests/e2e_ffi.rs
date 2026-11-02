@@ -268,6 +268,14 @@ fn null_and_bad_arguments() {
         pe_message_view_free(null_mut());
         pe_bytes_free(null_mut(), 0);
     }
+    // a lookup of an address without a domain finishes with nothing
+    unsafe {
+        assert_eq!(pe_autoconfig_start(std::ptr::null(), std::ptr::null()), 0);
+        assert!(pe_autoconfig_result(std::ptr::null(), 1).is_null());
+        assert!(pe_autoconfig_info(std::ptr::null()).is_null());
+        pe_autoconfig_free(null_mut());
+    }
+
     // an engine without a callback, and an unknown account
     let dir = TempDir::new("ffi-null");
     let path = CString::new(dir.path().join("store.db").to_str().unwrap()).unwrap();

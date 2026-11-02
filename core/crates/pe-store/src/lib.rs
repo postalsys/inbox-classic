@@ -46,6 +46,13 @@ impl Store {
         Ok(store)
     }
 
+    /// A random ID of this store, made with it: what keeps the passwords of its accounts apart from those of
+    /// another store on the same machine
+    pub fn profile_id(&self) -> Result<String> {
+        self.db
+            .query_row("SELECT value FROM settings WHERE key = 'profile'", [], |row| row.get(0))
+    }
+
     /// Runs `f` in one transaction: a sync step lands as a whole or not at all. Rolled back when
     /// `f` fails or panics, or the commit fails.
     pub fn transaction<T>(&mut self, f: impl FnOnce(&Store) -> Result<T>) -> Result<T> {
@@ -73,6 +80,15 @@ mod tests {
         assert_eq!(store.accounts().unwrap().len(), 1);
         drop(store);
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn profile_ids_stay_and_differ() {
+        let a = Store::open_in_memory().unwrap();
+        let id = a.profile_id().unwrap();
+        assert_eq!(id.len(), 32);
+        assert_eq!(a.profile_id().unwrap(), id);
+        assert_ne!(Store::open_in_memory().unwrap().profile_id().unwrap(), id);
     }
 
     #[test]

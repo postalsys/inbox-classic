@@ -7,6 +7,7 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+pe-autoconfig = { path = "../pe-autoconfig" }
 pe-html.workspace = true
 pe-imap = { path = "../pe-imap" }
 pe-mime.workspace = true
@@ -15,6 +16,10 @@ pe-smtp = { path = "../pe-smtp" }
 pe-store = { path = "../pe-store" }
 pe-sync = { path = "../pe-sync" }
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "macros"] }
+
+[target.'cfg(windows)'.dependencies]
+keyring-core = "1.0.1"
+windows-native-keyring-store = "1.1.0"
 
 [dev-dependencies]
 pe-testkit = { path = "../pe-testkit" }
