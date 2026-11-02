@@ -75,3 +75,34 @@ jobs:
                   name: PostalExpress-win-x64
                   path: build/PostalExpress.exe
                   if-no-files-found: error
+
+    fuzz:
+        name: Fuzz the parsers
+        runs-on: ubuntu-24.04
+        timeout-minutes: 20
+        defaults:
+            run:
+                working-directory: core/fuzz
+        steps:
+            - uses: actions/checkout@v6
+            - uses: dtolnay/rust-toolchain@nightly
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: core/fuzz
+            - uses: taiki-e/install-action@cargo-fuzz
+            # the corpus grows from run to run instead of starting empty every time
+            - uses: actions/cache@v4
+              with:
+                  path: core/fuzz/corpus
+                  key: fuzz-corpus-${{ github.run_id }}
+                  restore-keys: fuzz-corpus-
+            - name: Run every target for a minute
+              run: |
+                  for target in $(cargo fuzz list); do
+                      cargo fuzz run "$target" -- -max_total_time=60 -rss_limit_mb=2048
+                  done
+            - uses: actions/upload-artifact@v7
+              if: failure()
+              with:
+                  name: fuzz-artifacts
+                  path: core/fuzz/artifacts

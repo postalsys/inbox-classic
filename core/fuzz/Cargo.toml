@@ -1,0 +1,25 @@
+# cargo-fuzz targets for the parsers that read what a server or a sender controls. Outside the
+# workspace, libFuzzer needs a nightly toolchain:
+#
+#     cargo +nightly fuzz run imap_response -- -max_total_time=60
+[package]
+name = "pe-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+pe-imap = { path = "../crates/pe-imap" }
+
+[[bin]]
+name = "imap_response"
+path = "fuzz_targets/imap_response.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]

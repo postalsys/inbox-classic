@@ -1,0 +1,6949 @@
+[
+ {
+  "input": "TAG1 CMD",
+  "line": "VEFHMSBDTUQ=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": " TAG CMD",
+  "line": "IFRBRyBDTUQ=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError1"
+  }
+ },
+ {
+  "input": "* CMD",
+  "line": "KiBDTUQ=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "CMD",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "+ CMD",
+  "line": "KyBDTUQ=",
+  "literals": [],
+  "expected": {
+   "tag": "+",
+   "command": "",
+   "attributes": [
+    {
+     "type": "TEXT",
+     "value": "CMD"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "+",
+  "line": "Kw==",
+  "literals": [],
+  "expected": {
+   "tag": "+",
+   "command": "",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "+ ",
+  "line": "KyA=",
+  "literals": [],
+  "expected": {
+   "tag": "+",
+   "command": "",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1",
+  "line": "VEFHMQ==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError4"
+  }
+ },
+ {
+  "input": "TAG\"1 CMD",
+  "line": "VEFHIjEgQ01E",
+  "literals": [],
+  "expected": {
+   "error": "ParserError2"
+  }
+ },
+ {
+  "input": "TAG1 UID FETCH",
+  "line": "VEFHMSBVSUQgRkVUQ0g=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "UID FETCH",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 AUTHENTICATE PLAIN",
+  "line": "VEFHMSBBVVRIRU5USUNBVEUgUExBSU4=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "AUTHENTICATE PLAIN",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1  CMD",
+  "line": "VEFHMSAgQ01E",
+  "literals": [],
+  "expected": {
+   "error": "ParserError1"
+  }
+ },
+ {
+  "input": "TAG1 ",
+  "line": "VEFHMSA=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError3"
+  }
+ },
+ {
+  "input": "TAG1 CM=D",
+  "line": "VEFHMSBDTT1E",
+  "literals": [],
+  "expected": {
+   "error": "ParserError2"
+  }
+ },
+ {
+  "input": "* SEARCH ",
+  "line": "KiBTRUFSQ0gg",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH",
+  "line": "KiBTRUFSQ0g=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 12 3",
+  "line": "KiBTRUFSQ0ggMTIgMw==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [],
+   "numbers": [
+    12,
+    3
+   ],
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 1",
+  "line": "KiBTRUFSQ0ggMQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [],
+   "numbers": [
+    1
+   ],
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* search 7 4294967295",
+  "line": "KiBzZWFyY2ggNyA0Mjk0OTY3Mjk1",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "search",
+   "attributes": [],
+   "numbers": [
+    7,
+    4294967295
+   ],
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 1 2  ",
+  "line": "KiBTRUFSQ0ggMSAyICA=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [],
+   "numbers": [
+    1,
+    2
+   ],
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 0 007 9007199254740991",
+  "line": "KiBTRUFSQ0ggMCAwMDcgOTAwNzE5OTI1NDc0MDk5MQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [],
+   "numbers": [
+    0,
+    7,
+    9007199254740991
+   ],
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 9007199254740992",
+  "line": "KiBTRUFSQ0ggOTAwNzE5OTI1NDc0MDk5Mg==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "9007199254740992"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 1  2",
+  "line": "KiBTRUFSQ0ggMSAgMg==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "1"
+    },
+    {
+     "type": "ATOM",
+     "value": "2"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 1 2 3 (MODSEQ 917162500)",
+  "line": "KiBTRUFSQ0ggMSAyIDMgKE1PRFNFUSA5MTcxNjI1MDAp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "MODSEQ"
+     },
+     {
+      "type": "ATOM",
+      "value": "917162500"
+     }
+    ]
+   ],
+   "numbers": [
+    1,
+    2,
+    3
+   ],
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 1 (modseq 5)  ",
+  "line": "KiBTRUFSQ0ggMSAobW9kc2VxIDUpICA=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "MODSEQ"
+     },
+     {
+      "type": "ATOM",
+      "value": "5"
+     }
+    ]
+   ],
+   "numbers": [
+    1
+   ],
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 1 (MODSEQ x)",
+  "line": "KiBTRUFSQ0ggMSAoTU9EU0VRIHgp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "1"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "MODSEQ"
+     },
+     {
+      "type": "ATOM",
+      "value": "x"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH 1 (MODSEQ 12345678901234567890)",
+  "line": "KiBTRUFSQ0ggMSAoTU9EU0VRIDEyMzQ1Njc4OTAxMjM0NTY3ODkwKQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "1"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "MODSEQ"
+     },
+     {
+      "type": "ATOM",
+      "value": "12345678901234567890"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* SEARCH (MODSEQ 5)",
+  "line": "KiBTRUFSQ0ggKE1PRFNFUSA1KQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "SEARCH",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "MODSEQ"
+     },
+     {
+      "type": "ATOM",
+      "value": "5"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD FED",
+  "line": "VEFHMSBDTUQgRkVE",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FED"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD FED TED",
+  "line": "VEFHMSBDTUQgRkVEIFRFRA==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FED"
+    },
+    {
+     "type": "ATOM",
+     "value": "TED"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD %",
+  "line": "VEFHMSBDTUQgJQ==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "%"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD \\*",
+  "line": "VEFHMSBDTUQgXCo=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "\\*"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD \\*x",
+  "line": "VEFHMSBDTUQgXCp4",
+  "literals": [],
+  "expected": {
+   "error": "ParserError17"
+  }
+ },
+ {
+  "input": "12.82 STATUS [Gmail].Trash (UIDNEXT UNSEEN HIGHESTMODSEQ)",
+  "line": "MTIuODIgU1RBVFVTIFtHbWFpbF0uVHJhc2ggKFVJRE5FWFQgVU5TRUVOIEhJR0hFU1RNT0RTRVEp",
+  "literals": [],
+  "expected": {
+   "tag": "12.82",
+   "command": "STATUS",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "[Gmail].Trash"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "UIDNEXT"
+     },
+     {
+      "type": "ATOM",
+      "value": "UNSEEN"
+     },
+     {
+      "type": "ATOM",
+      "value": "HIGHESTMODSEQ"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD \"ABCDE\"",
+  "line": "VEFHMSBDTUQgIkFCQ0RFIg==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "STRING",
+     "value": "ABCDE"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD \"ABCDE\" \"DEFGH\"",
+  "line": "VEFHMSBDTUQgIkFCQ0RFIiAiREVGR0gi",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "STRING",
+     "value": "ABCDE"
+    },
+    {
+     "type": "STRING",
+     "value": "DEFGH"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD \"AB\\\"CD\\\\E\"",
+  "line": "VEFHMSBDTUQgIkFCXCJDRFxcRSI=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "STRING",
+     "value": "AB\"CD\\E"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD \"ABC",
+  "line": "VEFHMSBDTUQgIkFCQw==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError9"
+  }
+ },
+ {
+  "input": "TAG1 CMD \"ABC\\",
+  "line": "VEFHMSBDTUQgIkFCQ1w=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError18"
+  }
+ },
+ {
+  "input": "TAG1 CMD (1234)",
+  "line": "VEFHMSBDTUQgKDEyMzQp",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "1234"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (1234 TERE)",
+  "line": "VEFHMSBDTUQgKDEyMzQgVEVSRSk=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "1234"
+     },
+     {
+      "type": "ATOM",
+      "value": "TERE"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (1234)(TERE)",
+  "line": "VEFHMSBDTUQgKDEyMzQpKFRFUkUp",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "1234"
+     }
+    ],
+    [
+     {
+      "type": "ATOM",
+      "value": "TERE"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ( 1234)",
+  "line": "VEFHMSBDTUQgKCAxMjM0KQ==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "1234"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (1234 )",
+  "line": "VEFHMSBDTUQgKDEyMzQgKQ==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "1234"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (1234) ",
+  "line": "VEFHMSBDTUQgKDEyMzQpIA==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "1234"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (((TERE)) VANA)",
+  "line": "VEFHMSBDTUQgKCgoVEVSRSkpIFZBTkEp",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     [
+      [
+       {
+        "type": "ATOM",
+        "value": "TERE"
+       }
+      ]
+     ],
+     {
+      "type": "ATOM",
+      "value": "VANA"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (( (TERE)) VANA)",
+  "line": "VEFHMSBDTUQgKCggKFRFUkUpKSBWQU5BKQ==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     [
+      [
+       {
+        "type": "ATOM",
+        "value": "TERE"
+       }
+      ]
+     ],
+     {
+      "type": "ATOM",
+      "value": "VANA"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (((TERE) ) VANA)",
+  "line": "VEFHMSBDTUQgKCgoVEVSRSkgKSBWQU5BKQ==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     [
+      [
+       {
+        "type": "ATOM",
+        "value": "TERE"
+       }
+      ]
+     ],
+     {
+      "type": "ATOM",
+      "value": "VANA"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (1234",
+  "line": "VEFHMSBDTUQgKDEyMzQ=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError9"
+  }
+ },
+ {
+  "input": "TAG1 CMD 1234)",
+  "line": "VEFHMSBDTUQgMTIzNCk=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError16"
+  }
+ },
+ {
+  "input": "TAG1 CMD ]",
+  "line": "VEFHMSBDTUQgXQ==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError11"
+  }
+ },
+ {
+  "input": "TAG1 CMD {4}\r\nABCD",
+  "line": "VEFHMSBDTUQgezR9DQo=",
+  "literals": [
+   "QUJDRA=="
+  ],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "LITERAL",
+     "value": "ABCD"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD {4}\r\nABCD {3}\r\nEFG",
+  "line": "VEFHMSBDTUQgezR9DQogezN9DQo=",
+  "literals": [
+   "QUJDRA==",
+   "RUZH"
+  ],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "LITERAL",
+     "value": "ABCD"
+    },
+    {
+     "type": "LITERAL",
+     "value": "EFG"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ({4}\r\nABCD {4}\r\nEFGH)",
+  "line": "VEFHMSBDTUQgKHs0fQ0KIHs0fQ0KKQ==",
+  "literals": [
+   "QUJDRA==",
+   "RUZHSA=="
+  ],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "LITERAL",
+      "value": "ABCD"
+     },
+     {
+      "type": "LITERAL",
+      "value": "EFGH"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ({0}\r\n)",
+  "line": "VEFHMSBDTUQgKHswfQ0KKQ==",
+  "literals": [
+   ""
+  ],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "LITERAL",
+      "value": ""
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ({0}\r\n {5}\r\nABCDE)",
+  "line": "VEFHMSBDTUQgKHswfQ0KIHs1fQ0KKQ==",
+  "literals": [
+   "",
+   "QUJDREU="
+  ],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "LITERAL",
+      "value": ""
+     },
+     {
+      "type": "LITERAL",
+      "value": "ABCDE"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ({3}\r\nABC {0}\r\n {5}\r\nABCDE)",
+  "line": "VEFHMSBDTUQgKHszfQ0KIHswfQ0KIHs1fQ0KKQ==",
+  "literals": [
+   "QUJD",
+   "",
+   "QUJDREU="
+  ],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "LITERAL",
+      "value": "ABC"
+     },
+     {
+      "type": "LITERAL",
+      "value": ""
+     },
+     {
+      "type": "LITERAL",
+      "value": "ABCDE"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ~{4}\r\nAB\u0000D",
+  "line": "VEFHMSBDTUQgfns0fQ0K",
+  "literals": [
+   "QUIARA=="
+  ],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "LITERAL",
+     "value": "AB\u0000D"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ~",
+  "line": "VEFHMSBDTUQgfg==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "~"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ~ab",
+  "line": "VEFHMSBDTUQgfmFi",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "~ab"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (~)",
+  "line": "VEFHMSBDTUQgKH4p",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "~"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD ~\"x\"",
+  "line": "VEFHMSBDTUQgfiJ4Ig==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError12"
+  }
+ },
+ {
+  "input": "TAG1 CMD {00}\r\n",
+  "line": "VEFHMSBDTUQgezAwfQ0K",
+  "literals": [
+   ""
+  ],
+  "expected": {
+   "error": "ParserError26"
+  }
+ },
+ {
+  "input": "TAG1 CMD {x}",
+  "line": "VEFHMSBDTUQge3h9",
+  "literals": [],
+  "expected": {
+   "error": "ParserError25"
+  }
+ },
+ {
+  "input": "TAG1 CMD\tx",
+  "line": "VEFHMSBDTUQJeA==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError5"
+  }
+ },
+ {
+  "input": "TAG1 CMD \tx",
+  "line": "VEFHMSBDTUQgCXg=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError7"
+  }
+ },
+ {
+  "input": "* OK",
+  "line": "KiBPSw==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 OK",
+  "line": "VEFHMSBPSw==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "OK",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* OK [UIDNEXT 5]",
+  "line": "KiBPSyBbVUlETkVYVCA1XQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "UIDNEXT"
+      },
+      {
+       "type": "ATOM",
+       "value": "5"
+      }
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* OK [READ-WRITE] ",
+  "line": "KiBPSyBbUkVBRC1XUklURV0g",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "READ-WRITE"
+      }
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 1 FETCH (RFC822.SIZE 12345678901234)",
+  "line": "KiAxIEZFVENIIChSRkM4MjIuU0laRSAxMjM0NTY3ODkwMTIzNCk=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "RFC822.SIZE"
+     },
+     {
+      "type": "ATOM",
+      "value": "12345678901234"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* OK [HIGHESTMODSEQ 90060115194045007] Ok",
+  "line": "KiBPSyBbSElHSEVTVE1PRFNFUSA5MDA2MDExNTE5NDA0NTAwN10gT2s=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "HIGHESTMODSEQ"
+      },
+      {
+       "type": "ATOM",
+       "value": "90060115194045007"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Ok"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]",
+  "line": "VEFHMSBDTUQgQk9EWVtd",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BODY",
+     "section": []
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[(KERE)]",
+  "line": "VEFHMSBDTUQgQk9EWVsoS0VSRSld",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BODY",
+     "section": [
+      [
+       {
+        "type": "ATOM",
+        "value": "KERE"
+       }
+      ]
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[HEADER.FIELDS (Subject From) ]",
+  "line": "VEFHMSBDTUQgQk9EWVtIRUFERVIuRklFTERTIChTdWJqZWN0IEZyb20pIF0=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BODY",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "HEADER.FIELDS"
+      },
+      [
+       {
+        "type": "ATOM",
+        "value": "Subject"
+       },
+       {
+        "type": "ATOM",
+        "value": "From"
+       }
+      ]
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY.PEEK[1.2.MIME]",
+  "line": "VEFHMSBDTUQgQk9EWS5QRUVLWzEuMi5NSU1FXQ==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BODY.PEEK",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "1.2.MIME"
+      }
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BINARY[1]",
+  "line": "VEFHMSBDTUQgQklOQVJZWzFd",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BINARY",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "1"
+      }
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD XBODY[1]",
+  "line": "VEFHMSBDTUQgWEJPRFlbMV0=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "XBODY[1]"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* OK Hello world!",
+  "line": "KiBPSyBIZWxsbyB3b3JsZCE=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "TEXT",
+     "value": "Hello world!"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* OK [CAPABILITY IDLE] Hello world!",
+  "line": "KiBPSyBbQ0FQQUJJTElUWSBJRExFXSBIZWxsbyB3b3JsZCE=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "CAPABILITY"
+      },
+      {
+       "type": "ATOM",
+       "value": "IDLE"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Hello world!"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 OK [USEATTR] \\All not supported",
+  "line": "VEFHMSBPSyBbVVNFQVRUUl0gXEFsbCBub3Qgc3VwcG9ydGVk",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "USEATTR"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "\\All not supported"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* NO [NOUPDATE \"B02\"] Too many contexts",
+  "line": "KiBOTyBbTk9VUERBVEUgIkIwMiJdIFRvbyBtYW55IGNvbnRleHRz",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "NO",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "NOUPDATE"
+      },
+      {
+       "type": "STRING",
+       "value": "B02"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Too many contexts"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 OK [METADATA LONGENTRIES 2199] GETMETADATA complete",
+  "line": "VEFHMSBPSyBbTUVUQURBVEEgTE9OR0VOVFJJRVMgMjE5OV0gR0VUTUVUQURBVEEgY29tcGxldGU=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "METADATA"
+      },
+      {
+       "type": "ATOM",
+       "value": "LONGENTRIES"
+      },
+      {
+       "type": "ATOM",
+       "value": "2199"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "GETMETADATA complete"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 OK [URLMECH INTERNAL XSAMPLE=P34OKhO7VEkCbsiYY8rGEg==] done",
+  "line": "VEFHMSBPSyBbVVJMTUVDSCBJTlRFUk5BTCBYU0FNUExFPVAzNE9LaE83VkVrQ2JzaVlZOHJHRWc9PV0gZG9uZQ==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "URLMECH"
+      },
+      {
+       "type": "ATOM",
+       "value": "INTERNAL"
+      },
+      {
+       "type": "ATOM",
+       "value": "XSAMPLE=P34OKhO7VEkCbsiYY8rGEg=="
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "done"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 NO [REFERRAL IMAP://user;AUTH=*@SERVER2/] Remote Server",
+  "line": "VEFHMSBOTyBbUkVGRVJSQUwgSU1BUDovL3VzZXI7QVVUSD0qQFNFUlZFUjIvXSBSZW1vdGUgU2VydmVy",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "NO",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "REFERRAL"
+      },
+      {
+       "type": "ATOM",
+       "value": "IMAP://user;AUTH=*@SERVER2/"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Remote Server"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 NO [REFERRAL imap://[::1]/INBOX] Moved",
+  "line": "VEFHMSBOTyBbUkVGRVJSQUwgaW1hcDovL1s6OjFdL0lOQk9YXSBNb3ZlZA==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "NO",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "REFERRAL"
+      },
+      {
+       "type": "ATOM",
+       "value": "imap://[::1]/INBOX"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Moved"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 NO [REFERRAL imap://host/INBOX",
+  "line": "VEFHMSBOTyBbUkVGRVJSQUwgaW1hcDovL2hvc3QvSU5CT1g=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "NO",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "REFERRAL"
+      },
+      {
+       "type": "ATOM",
+       "value": "imap://host/INBOX"
+      }
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* OK [PERMANENTFLAGS (\\Seen\\*)] Limited",
+  "line": "KiBPSyBbUEVSTUFORU5URkxBR1MgKFxTZWVuXCopXSBMaW1pdGVk",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "PERMANENTFLAGS"
+      },
+      [
+       {
+        "type": "ATOM",
+        "value": "\\Seen"
+       },
+       {
+        "type": "ATOM",
+        "value": "\\*"
+       }
+      ]
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Limited"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* OK [PERMANENTFLAGS (de:hacking $label kt-evalution [css3-page] \\*)] Flags permitted.",
+  "line": "KiBPSyBbUEVSTUFORU5URkxBR1MgKGRlOmhhY2tpbmcgJGxhYmVsIGt0LWV2YWx1dGlvbiBbY3NzMy1wYWdlXSBcKildIEZsYWdzIHBlcm1pdHRlZC4=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "PERMANENTFLAGS"
+      },
+      [
+       {
+        "type": "ATOM",
+        "value": "de:hacking"
+       },
+       {
+        "type": "ATOM",
+        "value": "$label"
+       },
+       {
+        "type": "ATOM",
+        "value": "kt-evalution"
+       },
+       {
+        "type": "ATOM",
+        "value": "[css3-page]"
+       },
+       {
+        "type": "ATOM",
+        "value": "\\*"
+       }
+      ]
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Flags permitted."
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* OK [PERMANENTFLAGS ([css3-page] \\*)] Flags permitted.",
+  "line": "KiBPSyBbUEVSTUFORU5URkxBR1MgKFtjc3MzLXBhZ2VdIFwqKV0gRmxhZ3MgcGVybWl0dGVkLg==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "PERMANENTFLAGS"
+      },
+      [
+       {
+        "type": "ATOM",
+        "value": "[css3-page]"
+       },
+       {
+        "type": "ATOM",
+        "value": "\\*"
+       }
+      ]
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Flags permitted."
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 OK [COPYUID 4 1417051618:1417051620 1421730687:1421730689] COPY completed",
+  "line": "VEFHMSBPSyBbQ09QWVVJRCA0IDE0MTcwNTE2MTg6MTQxNzA1MTYyMCAxNDIxNzMwNjg3OjE0MjE3MzA2ODldIENPUFkgY29tcGxldGVk",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "COPYUID"
+      },
+      {
+       "type": "ATOM",
+       "value": "4"
+      },
+      {
+       "type": "SEQUENCE",
+       "value": "1417051618:1417051620"
+      },
+      {
+       "type": "SEQUENCE",
+       "value": "1421730687:1421730689"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "COPY completed"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 OK [MODIFIED 7,9] Conditional STORE failed",
+  "line": "VEFHMSBPSyBbTU9ESUZJRUQgNyw5XSBDb25kaXRpb25hbCBTVE9SRSBmYWlsZWQ=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "MODIFIED"
+      },
+      {
+       "type": "SEQUENCE",
+       "value": "7,9"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Conditional STORE failed"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<0>",
+  "line": "VEFHMSBDTUQgQk9EWVtdPDA+",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BODY",
+     "section": [],
+     "partial": [
+      0
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<12.45>",
+  "line": "VEFHMSBDTUQgQk9EWVtdPDEyLjQ1Pg==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BODY",
+     "section": [],
+     "partial": [
+      12,
+      45
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[HEADER.FIELDS (Subject From)]<12.45>",
+  "line": "VEFHMSBDTUQgQk9EWVtIRUFERVIuRklFTERTIChTdWJqZWN0IEZyb20pXTwxMi40NT4=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BODY",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "HEADER.FIELDS"
+      },
+      [
+       {
+        "type": "ATOM",
+        "value": "Subject"
+       },
+       {
+        "type": "ATOM",
+        "value": "From"
+       }
+      ]
+     ],
+     "partial": [
+      12,
+      45
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<01>",
+  "line": "VEFHMSBDTUQgQk9EWVtdPDAxPg==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError22"
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<0.01>",
+  "line": "VEFHMSBDTUQgQk9EWVtdPDAuMDE+",
+  "literals": [],
+  "expected": {
+   "error": "ParserError22"
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<0.1.>",
+  "line": "VEFHMSBDTUQgQk9EWVtdPDAuMS4+",
+  "literals": [],
+  "expected": {
+   "error": "ParserError20"
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<.1>",
+  "line": "VEFHMSBDTUQgQk9EWVtdPC4xPg==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError20"
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<1x>",
+  "line": "VEFHMSBDTUQgQk9EWVtdPDF4Pg==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError21"
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<>",
+  "line": "VEFHMSBDTUQgQk9EWVtdPD4=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "BODY",
+     "section": [],
+     "partial": [
+      0
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD BODY[]<1",
+  "line": "VEFHMSBDTUQgQk9EWVtdPDE=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError9"
+  }
+ },
+ {
+  "input": "TAG1 CMD <abc>",
+  "line": "VEFHMSBDTUQgPGFiYz4=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "<abc>"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD *:4,5:7 TEST",
+  "line": "VEFHMSBDTUQgKjo0LDU6NyBURVNU",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "SEQUENCE",
+     "value": "*:4,5:7"
+    },
+    {
+     "type": "ATOM",
+     "value": "TEST"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD 1:* TEST",
+  "line": "VEFHMSBDTUQgMToqIFRFU1Q=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "SEQUENCE",
+     "value": "1:*"
+    },
+    {
+     "type": "ATOM",
+     "value": "TEST"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD *:4 TEST",
+  "line": "VEFHMSBDTUQgKjo0IFRFU1Q=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "SEQUENCE",
+     "value": "*:4"
+    },
+    {
+     "type": "ATOM",
+     "value": "TEST"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD *:4,5:",
+  "line": "VEFHMSBDTUQgKjo0LDU6",
+  "literals": [],
+  "expected": {
+   "error": "ParserError9"
+  }
+ },
+ {
+  "input": "TAG1 CMD *:4,5:TEST TEST",
+  "line": "VEFHMSBDTUQgKjo0LDU6VEVTVCBURVNU",
+  "literals": [],
+  "expected": {
+   "error": "ParserError33"
+  }
+ },
+ {
+  "input": "TAG1 CMD *:4,5: TEST",
+  "line": "VEFHMSBDTUQgKjo0LDU6IFRFU1Q=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError27"
+  }
+ },
+ {
+  "input": "TAG1 CMD *4,5 TEST",
+  "line": "VEFHMSBDTUQgKjQsNSBURVNU",
+  "literals": [],
+  "expected": {
+   "error": "ParserError34"
+  }
+ },
+ {
+  "input": "TAG1 CMD *,5 TEST",
+  "line": "VEFHMSBDTUQgKiw1IFRFU1Q=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError32"
+  }
+ },
+ {
+  "input": "TAG1 CMD 5,* TEST",
+  "line": "VEFHMSBDTUQgNSwqIFRFU1Q=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError28"
+  }
+ },
+ {
+  "input": "TAG1 CMD 5, TEST",
+  "line": "VEFHMSBDTUQgNSwgVEVTVA==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "5,"
+    },
+    {
+     "type": "ATOM",
+     "value": "TEST"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD 5:",
+  "line": "VEFHMSBDTUQgNTo=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "5:"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD 2024:Q1 1,a",
+  "line": "VEFHMSBDTUQgMjAyNDpRMSAxLGE=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "2024:Q1"
+    },
+    {
+     "type": "ATOM",
+     "value": "1,a"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD *",
+  "line": "VEFHMSBDTUQgKg==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "*"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (*)",
+  "line": "VEFHMSBDTUQgKCop",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "SEQUENCE",
+      "value": "*"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD *:*",
+  "line": "VEFHMSBDTUQgKjoq",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "SEQUENCE",
+     "value": "*:*"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD 1:**",
+  "line": "VEFHMSBDTUQgMToqKg==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError30"
+  }
+ },
+ {
+  "input": "TAG1 CMD *1",
+  "line": "VEFHMSBDTUQgKjE=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError34"
+  }
+ },
+ {
+  "input": "TAG1 CMD (1:5 7,9)",
+  "line": "VEFHMSBDTUQgKDE6NSA3LDkp",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     {
+      "type": "SEQUENCE",
+      "value": "1:5"
+     },
+     {
+      "type": "SEQUENCE",
+      "value": "7,9"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 OK [COPYUID 1 1:3 4,5]",
+  "line": "VEFHMSBPSyBbQ09QWVVJRCAxIDE6MyA0LDVd",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "COPYUID"
+      },
+      {
+       "type": "ATOM",
+       "value": "1"
+      },
+      {
+       "type": "SEQUENCE",
+       "value": "1:3"
+      },
+      {
+       "type": "SEQUENCE",
+       "value": "4,5"
+      }
+     ]
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 331 FETCH (ENVELOPE (\"=?ISO-8859-1?Q?\\\"G=FCnter__Hammerl\\\"?=\"))",
+  "line": "KiAzMzEgRkVUQ0ggKEVOVkVMT1BFICgiPT9JU08tODg1OS0xP1E/XCJHPUZDbnRlcl9fSGFtbWVybFwiPz0iKSk=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "331",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "ENVELOPE"
+     },
+     [
+      {
+       "type": "STRING",
+       "value": "=?ISO-8859-1?Q?\"G=FCnter__Hammerl\"?="
+      }
+     ]
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 1 FETCH (FLAGS (\\Seen $eee) ENVELOPE (\"23 Oct 2003 23:28:34 -0700\" \"Ryan Finnie's MIME Torture Test v1.0\" ((\"Andris Reinman\" NIL \"andris\" \"ekiri.ee\")) ((\"Andris Reinman\" NIL \"andris\" \"ekiri.ee\")) ((\"Andris Reinman\" NIL \"andris\" \"ekiri.ee\")) ((NIL NIL \"andmekala\" \"hot.ee\")) NIL NIL NIL \"<1066976914.4721.5.camel@localhost>\") BODYSTRUCTURE ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 617 16 NIL NIL NIL NIL)(\"message\" \"rfc822\" NIL NIL \"I'll be whatever I wanna do. --Fry\" \"7bit\" 582 (\"23 Oct 2003 22:25:56 -0700\" \"plain jane message\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066973156.4264.42.camel@localhost>\") (\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 311 9 NIL NIL NIL NIL) 18 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Would you kindly shut your noise-hole? --Bender\" \"7bit\" 1460 (\"23 Oct 2003 23:15:11 -0700\" \"messages inside messages inside...\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066976111.4263.74.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 193 3 NIL NIL NIL NIL)(\"message\" \"rfc822\" NIL NIL \"At the risk of sounding negative, no. --Leela\" \"7bit\" 697 (\"23 Oct 2003 23:09:05 -0700\" \"the original message\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066975745.4263.70.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 78 3 NIL NIL NIL NIL)(\"application\" \"x-gzip\" (\"NAME\" \"foo.gz\") NIL NIL \"base64\" 58 NIL (\"attachment\" (\"filename\" \"foo.gz\")) NIL NIL) \"mixed\" (\"boundary\" \"=-XFYecI7w+0shpolXq8bb\") NIL NIL NIL) 25 NIL (\"inline\" NIL) NIL NIL) \"mixed\" (\"boundary\" \"=-9Brg7LoMERBrIDtMRose\") NIL NIL NIL) 49 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Dirt doesn't need luck! --Professor\" \"7bit\" 817 (\"23 Oct 2003 22:40:49 -0700\" \"this message JUST contains an attachment\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066974048.4264.62.camel@localhost>\") (\"application\" \"x-gzip\" (\"NAME\" \"blah.gz\") NIL \"Attachment has identical content to above foo.gz\" \"base64\" 396 NIL (\"attachment\" (\"filename\" \"blah.gz\")) NIL NIL) 17 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Hold still, I don't have good depth perception! --Leela\" \"7bit\" 1045 (\"23 Oct 2003 23:09:16 -0700\" \"Attachment filename vs. name\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066975756.4263.70.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 377 6 NIL NIL NIL NIL)(\"application\" \"x-gzip\" (\"NAME\" \"blah2.gz\") NIL \"filename is blah1.gz, name is blah2.gz\" \"base64\" 58 NIL (\"attachment\" (\"filename\" \"blah1.gz\")) NIL NIL) \"mixed\" (\"boundary\" \"=-1066975756jd02\") NIL NIL NIL) 29 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Hello little man.  I WILL DESTROY YOU! --Moro\" \"7bit\" 1149 (\"23 Oct 2003 23:09:21 -0700\" {24}\r\nNo filename? No problem! ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066975761.4263.70.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 517 10 NIL NIL NIL NIL)(\"application\" \"x-gzip\" NIL NIL \"I'm getting sick of witty things to say\" \"base64\" 58 NIL (\"attachment\" NIL) NIL NIL) \"mixed\" (\"boundary\" \"=-1066975756jd03\") NIL NIL NIL) 33 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Friends! Help! A guinea pig tricked me! --Zoidberg\" \"7bit\" 896 (\"23 Oct 2003 22:40:45 -0700\" \"html and text, both inline\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066974044.4264.62.camel@localhost>\") ((\"text\" \"html\" (\"CHARSET\" \"utf-8\") NIL NIL \"8bit\" 327 11 NIL NIL NIL NIL)(\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 61 2 NIL NIL NIL NIL) \"mixed\" (\"boundary\" \"=-ZCKMfHzvHMyK1iBu4kff\") NIL NIL NIL) 33 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Smeesh! --Amy\" \"7bit\" 642 (\"23 Oct 2003 22:41:29 -0700\" \"text and text, both inline\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066974089.4265.64.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 62 2 NIL NIL NIL NIL)(\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 68 2 NIL NIL NIL NIL) \"mixed\" (\"boundary\" \"=-pNc4wtlOIxs8RcX7H/AK\") NIL NIL NIL) 24 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"That's not a cigar. Uh... and it's not mine. --Hermes\" \"7bit\" 1515 (\"23 Oct 2003 22:39:17 -0700\" {17}\r\nHTML and... HTML? ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066973957.4263.59.camel@localhost>\") ((\"text\" \"html\" (\"CHARSET\" \"utf-8\") NIL NIL \"8bit\" 824 22 NIL NIL NIL NIL)(\"text\" \"html\" (\"NAME\" \"htmlfile.html\" \"CHARSET\" \"UTF-8\") NIL NIL \"8bit\" 118 6 NIL (\"attachment\" (\"filename\" \"htmlfile.html\")) NIL NIL) \"mixed\" (\"boundary\" \"=-zxh/IezwzZITiphpcbJZ\") NIL NIL NIL) 49 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL {71}\r\nThe spirit is willing, but the flesh is spongy, and\r\n    bruised. --Zapp \"7bit\" 6643 (\"23 Oct 2003 22:23:16 -0700\" \"smiley!\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066972996.4264.39.camel@localhost>\") (((((\"text\" \"plain\" (\"charset\" \"us-ascii\") NIL NIL \"quoted-printable\" 1606 42 NIL NIL NIL NIL)(\"text\" \"html\" (\"charset\" \"utf-8\") NIL NIL \"quoted-printable\" 2128 54 NIL NIL NIL NIL) \"alternative\" (\"boundary\" \"=-dHujWM/Xizz57x/JOmDF\") NIL NIL NIL)(\"image\" \"png\" (\"name\" \"smiley-3.png\") \"<1066971953.4232.15.camel@localhost>\" NIL \"base64\" 1122 NIL (\"attachment\" (\"filename\" \"smiley-3.png\")) NIL NIL) \"related\" (\"type\" \"multipart/alternative\" \"boundary\" \"=-GpwozF9CQ7NdF+fd+vMG\") NIL NIL NIL)(\"image\" \"gif\" (\"name\" \"dot.gif\") NIL NIL \"base64\" 96 NIL (\"attachment\" (\"filename\" \"dot.gif\")) NIL NIL) \"mixed\" (\"boundary\" \"=-CgV5jm9HAY9VbUlAuneA\") NIL NIL NIL)(\"application\" \"pgp-signature\" (\"name\" \"signature.asc\") NIL \"This is a digitally signed message part\" \"7bit\" 196 NIL NIL NIL NIL) \"signed\" (\"micalg\" \"pgp-sha1\" \"protocol\" \"application/pgp-signature\" \"boundary\" \"=-vH3FQO9a8icUn1ROCoAi\") NIL NIL NIL) 177 NIL (\"inline\" NIL) NIL NIL)(\"message\" \"rfc822\" NIL NIL \"Kittens give Morbo gas. --Morbo\" \"7bit\" 3088 (\"23 Oct 2003 22:32:37 -0700\" \"the PROPER way to do alternative/related\" ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((\"Ryan Finnie\" NIL \"rfinnie\" \"domain.dom\")) ((NIL NIL \"bob\" \"domain.dom\")) NIL NIL NIL \"<1066973557.4265.51.camel@localhost>\") ((\"text\" \"plain\" (\"CHARSET\" \"US-ASCII\") NIL NIL \"8bit\" 863 22 NIL NIL NIL NIL)((\"text\" \"html\" (\"CHARSET\" \"utf-8\") NIL NIL \"8bit\" 1258 22 NIL NIL NIL NIL)(\"image\" \"gif\" NIL \"<1066973340.4232.46.camel@localhost>\" NIL \"base64\" 116 NIL NIL NIL NIL) \"related\" (\"boundary\" \"=-bFkxH1S3HVGcxi+o/5jG\") NIL NIL NIL) \"alternative\" (\"type\" \"multipart/alternative\" \"boundary\" \"=-tyGlQ9JvB5uvPWzozI+y\") NIL NIL NIL) 79 NIL (\"inline\" NIL) NIL NIL) \"mixed\" (\"boundary\" \"=-qYxqvD9rbH0PNeExagh1\") NIL NIL NIL) BODY[] {0}\r\n)",
+  "line": "KiAxIEZFVENIIChGTEFHUyAoXFNlZW4gJGVlZSkgRU5WRUxPUEUgKCIyMyBPY3QgMjAwMyAyMzoyODozNCAtMDcwMCIgIlJ5YW4gRmlubmllJ3MgTUlNRSBUb3J0dXJlIFRlc3QgdjEuMCIgKCgiQW5kcmlzIFJlaW5tYW4iIE5JTCAiYW5kcmlzIiAiZWtpcmkuZWUiKSkgKCgiQW5kcmlzIFJlaW5tYW4iIE5JTCAiYW5kcmlzIiAiZWtpcmkuZWUiKSkgKCgiQW5kcmlzIFJlaW5tYW4iIE5JTCAiYW5kcmlzIiAiZWtpcmkuZWUiKSkgKChOSUwgTklMICJhbmRtZWthbGEiICJob3QuZWUiKSkgTklMIE5JTCBOSUwgIjwxMDY2OTc2OTE0LjQ3MjEuNS5jYW1lbEBsb2NhbGhvc3Q+IikgQk9EWVNUUlVDVFVSRSAoKCJ0ZXh0IiAicGxhaW4iICgiQ0hBUlNFVCIgIlVTLUFTQ0lJIikgTklMIE5JTCAiOGJpdCIgNjE3IDE2IE5JTCBOSUwgTklMIE5JTCkoIm1lc3NhZ2UiICJyZmM4MjIiIE5JTCBOSUwgIkknbGwgYmUgd2hhdGV2ZXIgSSB3YW5uYSBkby4gLS1GcnkiICI3Yml0IiA1ODIgKCIyMyBPY3QgMjAwMyAyMjoyNTo1NiAtMDcwMCIgInBsYWluIGphbmUgbWVzc2FnZSIgKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKChOSUwgTklMICJib2IiICJkb21haW4uZG9tIikpIE5JTCBOSUwgTklMICI8MTA2Njk3MzE1Ni40MjY0LjQyLmNhbWVsQGxvY2FsaG9zdD4iKSAoInRleHQiICJwbGFpbiIgKCJDSEFSU0VUIiAiVVMtQVNDSUkiKSBOSUwgTklMICI4Yml0IiAzMTEgOSBOSUwgTklMIE5JTCBOSUwpIDE4IE5JTCAoImlubGluZSIgTklMKSBOSUwgTklMKSgibWVzc2FnZSIgInJmYzgyMiIgTklMIE5JTCAiV291bGQgeW91IGtpbmRseSBzaHV0IHlvdXIgbm9pc2UtaG9sZT8gLS1CZW5kZXIiICI3Yml0IiAxNDYwICgiMjMgT2N0IDIwMDMgMjM6MTU6MTEgLTA3MDAiICJtZXNzYWdlcyBpbnNpZGUgbWVzc2FnZXMgaW5zaWRlLi4uIiAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKE5JTCBOSUwgImJvYiIgImRvbWFpbi5kb20iKSkgTklMIE5JTCBOSUwgIjwxMDY2OTc2MTExLjQyNjMuNzQuY2FtZWxAbG9jYWxob3N0PiIpICgoInRleHQiICJwbGFpbiIgKCJDSEFSU0VUIiAiVVMtQVNDSUkiKSBOSUwgTklMICI4Yml0IiAxOTMgMyBOSUwgTklMIE5JTCBOSUwpKCJtZXNzYWdlIiAicmZjODIyIiBOSUwgTklMICJBdCB0aGUgcmlzayBvZiBzb3VuZGluZyBuZWdhdGl2ZSwgbm8uIC0tTGVlbGEiICI3Yml0IiA2OTcgKCIyMyBPY3QgMjAwMyAyMzowOTowNSAtMDcwMCIgInRoZSBvcmlnaW5hbCBtZXNzYWdlIiAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKE5JTCBOSUwgImJvYiIgImRvbWFpbi5kb20iKSkgTklMIE5JTCBOSUwgIjwxMDY2OTc1NzQ1LjQyNjMuNzAuY2FtZWxAbG9jYWxob3N0PiIpICgoInRleHQiICJwbGFpbiIgKCJDSEFSU0VUIiAiVVMtQVNDSUkiKSBOSUwgTklMICI4Yml0IiA3OCAzIE5JTCBOSUwgTklMIE5JTCkoImFwcGxpY2F0aW9uIiAieC1nemlwIiAoIk5BTUUiICJmb28uZ3oiKSBOSUwgTklMICJiYXNlNjQiIDU4IE5JTCAoImF0dGFjaG1lbnQiICgiZmlsZW5hbWUiICJmb28uZ3oiKSkgTklMIE5JTCkgIm1peGVkIiAoImJvdW5kYXJ5IiAiPS1YRlllY0k3dyswc2hwb2xYcThiYiIpIE5JTCBOSUwgTklMKSAyNSBOSUwgKCJpbmxpbmUiIE5JTCkgTklMIE5JTCkgIm1peGVkIiAoImJvdW5kYXJ5IiAiPS05QnJnN0xvTUVSQnJJRHRNUm9zZSIpIE5JTCBOSUwgTklMKSA0OSBOSUwgKCJpbmxpbmUiIE5JTCkgTklMIE5JTCkoIm1lc3NhZ2UiICJyZmM4MjIiIE5JTCBOSUwgIkRpcnQgZG9lc24ndCBuZWVkIGx1Y2shIC0tUHJvZmVzc29yIiAiN2JpdCIgODE3ICgiMjMgT2N0IDIwMDMgMjI6NDA6NDkgLTA3MDAiICJ0aGlzIG1lc3NhZ2UgSlVTVCBjb250YWlucyBhbiBhdHRhY2htZW50IiAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKE5JTCBOSUwgImJvYiIgImRvbWFpbi5kb20iKSkgTklMIE5JTCBOSUwgIjwxMDY2OTc0MDQ4LjQyNjQuNjIuY2FtZWxAbG9jYWxob3N0PiIpICgiYXBwbGljYXRpb24iICJ4LWd6aXAiICgiTkFNRSIgImJsYWguZ3oiKSBOSUwgIkF0dGFjaG1lbnQgaGFzIGlkZW50aWNhbCBjb250ZW50IHRvIGFib3ZlIGZvby5neiIgImJhc2U2NCIgMzk2IE5JTCAoImF0dGFjaG1lbnQiICgiZmlsZW5hbWUiICJibGFoLmd6IikpIE5JTCBOSUwpIDE3IE5JTCAoImlubGluZSIgTklMKSBOSUwgTklMKSgibWVzc2FnZSIgInJmYzgyMiIgTklMIE5JTCAiSG9sZCBzdGlsbCwgSSBkb24ndCBoYXZlIGdvb2QgZGVwdGggcGVyY2VwdGlvbiEgLS1MZWVsYSIgIjdiaXQiIDEwNDUgKCIyMyBPY3QgMjAwMyAyMzowOToxNiAtMDcwMCIgIkF0dGFjaG1lbnQgZmlsZW5hbWUgdnMuIG5hbWUiICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoTklMIE5JTCAiYm9iIiAiZG9tYWluLmRvbSIpKSBOSUwgTklMIE5JTCAiPDEwNjY5NzU3NTYuNDI2My43MC5jYW1lbEBsb2NhbGhvc3Q+IikgKCgidGV4dCIgInBsYWluIiAoIkNIQVJTRVQiICJVUy1BU0NJSSIpIE5JTCBOSUwgIjhiaXQiIDM3NyA2IE5JTCBOSUwgTklMIE5JTCkoImFwcGxpY2F0aW9uIiAieC1nemlwIiAoIk5BTUUiICJibGFoMi5neiIpIE5JTCAiZmlsZW5hbWUgaXMgYmxhaDEuZ3osIG5hbWUgaXMgYmxhaDIuZ3oiICJiYXNlNjQiIDU4IE5JTCAoImF0dGFjaG1lbnQiICgiZmlsZW5hbWUiICJibGFoMS5neiIpKSBOSUwgTklMKSAibWl4ZWQiICgiYm91bmRhcnkiICI9LTEwNjY5NzU3NTZqZDAyIikgTklMIE5JTCBOSUwpIDI5IE5JTCAoImlubGluZSIgTklMKSBOSUwgTklMKSgibWVzc2FnZSIgInJmYzgyMiIgTklMIE5JTCAiSGVsbG8gbGl0dGxlIG1hbi4gIEkgV0lMTCBERVNUUk9ZIFlPVSEgLS1Nb3JvIiAiN2JpdCIgMTE0OSAoIjIzIE9jdCAyMDAzIDIzOjA5OjIxIC0wNzAwIiB7MjR9DQogKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKChOSUwgTklMICJib2IiICJkb21haW4uZG9tIikpIE5JTCBOSUwgTklMICI8MTA2Njk3NTc2MS40MjYzLjcwLmNhbWVsQGxvY2FsaG9zdD4iKSAoKCJ0ZXh0IiAicGxhaW4iICgiQ0hBUlNFVCIgIlVTLUFTQ0lJIikgTklMIE5JTCAiOGJpdCIgNTE3IDEwIE5JTCBOSUwgTklMIE5JTCkoImFwcGxpY2F0aW9uIiAieC1nemlwIiBOSUwgTklMICJJJ20gZ2V0dGluZyBzaWNrIG9mIHdpdHR5IHRoaW5ncyB0byBzYXkiICJiYXNlNjQiIDU4IE5JTCAoImF0dGFjaG1lbnQiIE5JTCkgTklMIE5JTCkgIm1peGVkIiAoImJvdW5kYXJ5IiAiPS0xMDY2OTc1NzU2amQwMyIpIE5JTCBOSUwgTklMKSAzMyBOSUwgKCJpbmxpbmUiIE5JTCkgTklMIE5JTCkoIm1lc3NhZ2UiICJyZmM4MjIiIE5JTCBOSUwgIkZyaWVuZHMhIEhlbHAhIEEgZ3VpbmVhIHBpZyB0cmlja2VkIG1lISAtLVpvaWRiZXJnIiAiN2JpdCIgODk2ICgiMjMgT2N0IDIwMDMgMjI6NDA6NDUgLTA3MDAiICJodG1sIGFuZCB0ZXh0LCBib3RoIGlubGluZSIgKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKCgiUnlhbiBGaW5uaWUiIE5JTCAicmZpbm5pZSIgImRvbWFpbi5kb20iKSkgKChOSUwgTklMICJib2IiICJkb21haW4uZG9tIikpIE5JTCBOSUwgTklMICI8MTA2Njk3NDA0NC40MjY0LjYyLmNhbWVsQGxvY2FsaG9zdD4iKSAoKCJ0ZXh0IiAiaHRtbCIgKCJDSEFSU0VUIiAidXRmLTgiKSBOSUwgTklMICI4Yml0IiAzMjcgMTEgTklMIE5JTCBOSUwgTklMKSgidGV4dCIgInBsYWluIiAoIkNIQVJTRVQiICJVUy1BU0NJSSIpIE5JTCBOSUwgIjhiaXQiIDYxIDIgTklMIE5JTCBOSUwgTklMKSAibWl4ZWQiICgiYm91bmRhcnkiICI9LVpDS01mSHp2SE15SzFpQnU0a2ZmIikgTklMIE5JTCBOSUwpIDMzIE5JTCAoImlubGluZSIgTklMKSBOSUwgTklMKSgibWVzc2FnZSIgInJmYzgyMiIgTklMIE5JTCAiU21lZXNoISAtLUFteSIgIjdiaXQiIDY0MiAoIjIzIE9jdCAyMDAzIDIyOjQxOjI5IC0wNzAwIiAidGV4dCBhbmQgdGV4dCwgYm90aCBpbmxpbmUiICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoTklMIE5JTCAiYm9iIiAiZG9tYWluLmRvbSIpKSBOSUwgTklMIE5JTCAiPDEwNjY5NzQwODkuNDI2NS42NC5jYW1lbEBsb2NhbGhvc3Q+IikgKCgidGV4dCIgInBsYWluIiAoIkNIQVJTRVQiICJVUy1BU0NJSSIpIE5JTCBOSUwgIjhiaXQiIDYyIDIgTklMIE5JTCBOSUwgTklMKSgidGV4dCIgInBsYWluIiAoIkNIQVJTRVQiICJVUy1BU0NJSSIpIE5JTCBOSUwgIjhiaXQiIDY4IDIgTklMIE5JTCBOSUwgTklMKSAibWl4ZWQiICgiYm91bmRhcnkiICI9LXBOYzR3dGxPSXhzOFJjWDdIL0FLIikgTklMIE5JTCBOSUwpIDI0IE5JTCAoImlubGluZSIgTklMKSBOSUwgTklMKSgibWVzc2FnZSIgInJmYzgyMiIgTklMIE5JTCAiVGhhdCdzIG5vdCBhIGNpZ2FyLiBVaC4uLiBhbmQgaXQncyBub3QgbWluZS4gLS1IZXJtZXMiICI3Yml0IiAxNTE1ICgiMjMgT2N0IDIwMDMgMjI6Mzk6MTcgLTA3MDAiIHsxN30NCiAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKCJSeWFuIEZpbm5pZSIgTklMICJyZmlubmllIiAiZG9tYWluLmRvbSIpKSAoKE5JTCBOSUwgImJvYiIgImRvbWFpbi5kb20iKSkgTklMIE5JTCBOSUwgIjwxMDY2OTczOTU3LjQyNjMuNTkuY2FtZWxAbG9jYWxob3N0PiIpICgoInRleHQiICJodG1sIiAoIkNIQVJTRVQiICJ1dGYtOCIpIE5JTCBOSUwgIjhiaXQiIDgyNCAyMiBOSUwgTklMIE5JTCBOSUwpKCJ0ZXh0IiAiaHRtbCIgKCJOQU1FIiAiaHRtbGZpbGUuaHRtbCIgIkNIQVJTRVQiICJVVEYtOCIpIE5JTCBOSUwgIjhiaXQiIDExOCA2IE5JTCAoImF0dGFjaG1lbnQiICgiZmlsZW5hbWUiICJodG1sZmlsZS5odG1sIikpIE5JTCBOSUwpICJtaXhlZCIgKCJib3VuZGFyeSIgIj0tenhoL0llend6WklUaXBocGNiSloiKSBOSUwgTklMIE5JTCkgNDkgTklMICgiaW5saW5lIiBOSUwpIE5JTCBOSUwpKCJtZXNzYWdlIiAicmZjODIyIiBOSUwgTklMIHs3MX0NCnAgIjdiaXQiIDY2NDMgKCIyMyBPY3QgMjAwMyAyMjoyMzoxNiAtMDcwMCIgInNtaWxleSEiICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoTklMIE5JTCAiYm9iIiAiZG9tYWluLmRvbSIpKSBOSUwgTklMIE5JTCAiPDEwNjY5NzI5OTYuNDI2NC4zOS5jYW1lbEBsb2NhbGhvc3Q+IikgKCgoKCgidGV4dCIgInBsYWluIiAoImNoYXJzZXQiICJ1cy1hc2NpaSIpIE5JTCBOSUwgInF1b3RlZC1wcmludGFibGUiIDE2MDYgNDIgTklMIE5JTCBOSUwgTklMKSgidGV4dCIgImh0bWwiICgiY2hhcnNldCIgInV0Zi04IikgTklMIE5JTCAicXVvdGVkLXByaW50YWJsZSIgMjEyOCA1NCBOSUwgTklMIE5JTCBOSUwpICJhbHRlcm5hdGl2ZSIgKCJib3VuZGFyeSIgIj0tZEh1aldNL1hpeno1N3gvSk9tREYiKSBOSUwgTklMIE5JTCkoImltYWdlIiAicG5nIiAoIm5hbWUiICJzbWlsZXktMy5wbmciKSAiPDEwNjY5NzE5NTMuNDIzMi4xNS5jYW1lbEBsb2NhbGhvc3Q+IiBOSUwgImJhc2U2NCIgMTEyMiBOSUwgKCJhdHRhY2htZW50IiAoImZpbGVuYW1lIiAic21pbGV5LTMucG5nIikpIE5JTCBOSUwpICJyZWxhdGVkIiAoInR5cGUiICJtdWx0aXBhcnQvYWx0ZXJuYXRpdmUiICJib3VuZGFyeSIgIj0tR3B3b3pGOUNRN05kRitmZCt2TUciKSBOSUwgTklMIE5JTCkoImltYWdlIiAiZ2lmIiAoIm5hbWUiICJkb3QuZ2lmIikgTklMIE5JTCAiYmFzZTY0IiA5NiBOSUwgKCJhdHRhY2htZW50IiAoImZpbGVuYW1lIiAiZG90LmdpZiIpKSBOSUwgTklMKSAibWl4ZWQiICgiYm91bmRhcnkiICI9LUNnVjVqbTlIQVk5VmJVbEF1bmVBIikgTklMIE5JTCBOSUwpKCJhcHBsaWNhdGlvbiIgInBncC1zaWduYXR1cmUiICgibmFtZSIgInNpZ25hdHVyZS5hc2MiKSBOSUwgIlRoaXMgaXMgYSBkaWdpdGFsbHkgc2lnbmVkIG1lc3NhZ2UgcGFydCIgIjdiaXQiIDE5NiBOSUwgTklMIE5JTCBOSUwpICJzaWduZWQiICgibWljYWxnIiAicGdwLXNoYTEiICJwcm90b2NvbCIgImFwcGxpY2F0aW9uL3BncC1zaWduYXR1cmUiICJib3VuZGFyeSIgIj0tdkgzRlFPOWE4aWNVbjFST0NvQWkiKSBOSUwgTklMIE5JTCkgMTc3IE5JTCAoImlubGluZSIgTklMKSBOSUwgTklMKSgibWVzc2FnZSIgInJmYzgyMiIgTklMIE5JTCAiS2l0dGVucyBnaXZlIE1vcmJvIGdhcy4gLS1Nb3JibyIgIjdiaXQiIDMwODggKCIyMyBPY3QgMjAwMyAyMjozMjozNyAtMDcwMCIgInRoZSBQUk9QRVIgd2F5IHRvIGRvIGFsdGVybmF0aXZlL3JlbGF0ZWQiICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoIlJ5YW4gRmlubmllIiBOSUwgInJmaW5uaWUiICJkb21haW4uZG9tIikpICgoTklMIE5JTCAiYm9iIiAiZG9tYWluLmRvbSIpKSBOSUwgTklMIE5JTCAiPDEwNjY5NzM1NTcuNDI2NS41MS5jYW1lbEBsb2NhbGhvc3Q+IikgKCgidGV4dCIgInBsYWluIiAoIkNIQVJTRVQiICJVUy1BU0NJSSIpIE5JTCBOSUwgIjhiaXQiIDg2MyAyMiBOSUwgTklMIE5JTCBOSUwpKCgidGV4dCIgImh0bWwiICgiQ0hBUlNFVCIgInV0Zi04IikgTklMIE5JTCAiOGJpdCIgMTI1OCAyMiBOSUwgTklMIE5JTCBOSUwpKCJpbWFnZSIgImdpZiIgTklMICI8MTA2Njk3MzM0MC40MjMyLjQ2LmNhbWVsQGxvY2FsaG9zdD4iIE5JTCAiYmFzZTY0IiAxMTYgTklMIE5JTCBOSUwgTklMKSAicmVsYXRlZCIgKCJib3VuZGFyeSIgIj0tYkZreEgxUzNIVkdjeGkrby81akciKSBOSUwgTklMIE5JTCkgImFsdGVybmF0aXZlIiAoInR5cGUiICJtdWx0aXBhcnQvYWx0ZXJuYXRpdmUiICJib3VuZGFyeSIgIj0tdHlHbFE5SnZCNXV2UFd6b3pJK3kiKSBOSUwgTklMIE5JTCkgNzkgTklMICgiaW5saW5lIiBOSUwpIE5JTCBOSUwpICJtaXhlZCIgKCJib3VuZGFyeSIgIj0tcVl4cXZEOXJiSDBQTmVFeGFnaDEiKSBOSUwgTklMIE5JTCkgQk9EWVtdIHswfQ0KKQ==",
+  "literals": [
+   "Tm8gZmlsZW5hbWU/IE5vIHByb2JsZW0h",
+   "SFRNTCBhbmQuLi4gSFRNTD8=",
+   "VGhlIHNwaXJpdCBpcyB3aWxsaW5nLCBidXQgdGhlIGZsZXNoIGlzIHNwb25neSwgYW5kDQogICAgYnJ1aXNlZC4gLS1aYXA=",
+   ""
+  ],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "FLAGS"
+     },
+     [
+      {
+       "type": "ATOM",
+       "value": "\\Seen"
+      },
+      {
+       "type": "ATOM",
+       "value": "$eee"
+      }
+     ],
+     {
+      "type": "ATOM",
+      "value": "ENVELOPE"
+     },
+     [
+      {
+       "type": "STRING",
+       "value": "23 Oct 2003 23:28:34 -0700"
+      },
+      {
+       "type": "STRING",
+       "value": "Ryan Finnie's MIME Torture Test v1.0"
+      },
+      [
+       [
+        {
+         "type": "STRING",
+         "value": "Andris Reinman"
+        },
+        null,
+        {
+         "type": "STRING",
+         "value": "andris"
+        },
+        {
+         "type": "STRING",
+         "value": "ekiri.ee"
+        }
+       ]
+      ],
+      [
+       [
+        {
+         "type": "STRING",
+         "value": "Andris Reinman"
+        },
+        null,
+        {
+         "type": "STRING",
+         "value": "andris"
+        },
+        {
+         "type": "STRING",
+         "value": "ekiri.ee"
+        }
+       ]
+      ],
+      [
+       [
+        {
+         "type": "STRING",
+         "value": "Andris Reinman"
+        },
+        null,
+        {
+         "type": "STRING",
+         "value": "andris"
+        },
+        {
+         "type": "STRING",
+         "value": "ekiri.ee"
+        }
+       ]
+      ],
+      [
+       [
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "andmekala"
+        },
+        {
+         "type": "STRING",
+         "value": "hot.ee"
+        }
+       ]
+      ],
+      null,
+      null,
+      null,
+      {
+       "type": "STRING",
+       "value": "<1066976914.4721.5.camel@localhost>"
+      }
+     ],
+     {
+      "type": "ATOM",
+      "value": "BODYSTRUCTURE"
+     },
+     [
+      [
+       {
+        "type": "STRING",
+        "value": "text"
+       },
+       {
+        "type": "STRING",
+        "value": "plain"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "CHARSET"
+        },
+        {
+         "type": "STRING",
+         "value": "US-ASCII"
+        }
+       ],
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "8bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "617"
+       },
+       {
+        "type": "ATOM",
+        "value": "16"
+       },
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "I'll be whatever I wanna do. --Fry"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "582"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 22:25:56 -0700"
+        },
+        {
+         "type": "STRING",
+         "value": "plain jane message"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066973156.4264.42.camel@localhost>"
+        }
+       ],
+       [
+        {
+         "type": "STRING",
+         "value": "text"
+        },
+        {
+         "type": "STRING",
+         "value": "plain"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "CHARSET"
+         },
+         {
+          "type": "STRING",
+          "value": "US-ASCII"
+         }
+        ],
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "8bit"
+        },
+        {
+         "type": "ATOM",
+         "value": "311"
+        },
+        {
+         "type": "ATOM",
+         "value": "9"
+        },
+        null,
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "18"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "Would you kindly shut your noise-hole? --Bender"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "1460"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 23:15:11 -0700"
+        },
+        {
+         "type": "STRING",
+         "value": "messages inside messages inside..."
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066976111.4263.74.camel@localhost>"
+        }
+       ],
+       [
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "plain"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "US-ASCII"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "193"
+         },
+         {
+          "type": "ATOM",
+          "value": "3"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         {
+          "type": "STRING",
+          "value": "message"
+         },
+         {
+          "type": "STRING",
+          "value": "rfc822"
+         },
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "At the risk of sounding negative, no. --Leela"
+         },
+         {
+          "type": "STRING",
+          "value": "7bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "697"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "23 Oct 2003 23:09:05 -0700"
+          },
+          {
+           "type": "STRING",
+           "value": "the original message"
+          },
+          [
+           [
+            {
+             "type": "STRING",
+             "value": "Ryan Finnie"
+            },
+            null,
+            {
+             "type": "STRING",
+             "value": "rfinnie"
+            },
+            {
+             "type": "STRING",
+             "value": "domain.dom"
+            }
+           ]
+          ],
+          [
+           [
+            {
+             "type": "STRING",
+             "value": "Ryan Finnie"
+            },
+            null,
+            {
+             "type": "STRING",
+             "value": "rfinnie"
+            },
+            {
+             "type": "STRING",
+             "value": "domain.dom"
+            }
+           ]
+          ],
+          [
+           [
+            {
+             "type": "STRING",
+             "value": "Ryan Finnie"
+            },
+            null,
+            {
+             "type": "STRING",
+             "value": "rfinnie"
+            },
+            {
+             "type": "STRING",
+             "value": "domain.dom"
+            }
+           ]
+          ],
+          [
+           [
+            null,
+            null,
+            {
+             "type": "STRING",
+             "value": "bob"
+            },
+            {
+             "type": "STRING",
+             "value": "domain.dom"
+            }
+           ]
+          ],
+          null,
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "<1066975745.4263.70.camel@localhost>"
+          }
+         ],
+         [
+          [
+           {
+            "type": "STRING",
+            "value": "text"
+           },
+           {
+            "type": "STRING",
+            "value": "plain"
+           },
+           [
+            {
+             "type": "STRING",
+             "value": "CHARSET"
+            },
+            {
+             "type": "STRING",
+             "value": "US-ASCII"
+            }
+           ],
+           null,
+           null,
+           {
+            "type": "STRING",
+            "value": "8bit"
+           },
+           {
+            "type": "ATOM",
+            "value": "78"
+           },
+           {
+            "type": "ATOM",
+            "value": "3"
+           },
+           null,
+           null,
+           null,
+           null
+          ],
+          [
+           {
+            "type": "STRING",
+            "value": "application"
+           },
+           {
+            "type": "STRING",
+            "value": "x-gzip"
+           },
+           [
+            {
+             "type": "STRING",
+             "value": "NAME"
+            },
+            {
+             "type": "STRING",
+             "value": "foo.gz"
+            }
+           ],
+           null,
+           null,
+           {
+            "type": "STRING",
+            "value": "base64"
+           },
+           {
+            "type": "ATOM",
+            "value": "58"
+           },
+           null,
+           [
+            {
+             "type": "STRING",
+             "value": "attachment"
+            },
+            [
+             {
+              "type": "STRING",
+              "value": "filename"
+             },
+             {
+              "type": "STRING",
+              "value": "foo.gz"
+             }
+            ]
+           ],
+           null,
+           null
+          ],
+          {
+           "type": "STRING",
+           "value": "mixed"
+          },
+          [
+           {
+            "type": "STRING",
+            "value": "boundary"
+           },
+           {
+            "type": "STRING",
+            "value": "=-XFYecI7w+0shpolXq8bb"
+           }
+          ],
+          null,
+          null,
+          null
+         ],
+         {
+          "type": "ATOM",
+          "value": "25"
+         },
+         null,
+         [
+          {
+           "type": "STRING",
+           "value": "inline"
+          },
+          null
+         ],
+         null,
+         null
+        ],
+        {
+         "type": "STRING",
+         "value": "mixed"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "boundary"
+         },
+         {
+          "type": "STRING",
+          "value": "=-9Brg7LoMERBrIDtMRose"
+         }
+        ],
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "49"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "Dirt doesn't need luck! --Professor"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "817"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 22:40:49 -0700"
+        },
+        {
+         "type": "STRING",
+         "value": "this message JUST contains an attachment"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066974048.4264.62.camel@localhost>"
+        }
+       ],
+       [
+        {
+         "type": "STRING",
+         "value": "application"
+        },
+        {
+         "type": "STRING",
+         "value": "x-gzip"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "NAME"
+         },
+         {
+          "type": "STRING",
+          "value": "blah.gz"
+         }
+        ],
+        null,
+        {
+         "type": "STRING",
+         "value": "Attachment has identical content to above foo.gz"
+        },
+        {
+         "type": "STRING",
+         "value": "base64"
+        },
+        {
+         "type": "ATOM",
+         "value": "396"
+        },
+        null,
+        [
+         {
+          "type": "STRING",
+          "value": "attachment"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "filename"
+          },
+          {
+           "type": "STRING",
+           "value": "blah.gz"
+          }
+         ]
+        ],
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "17"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "Hold still, I don't have good depth perception! --Leela"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "1045"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 23:09:16 -0700"
+        },
+        {
+         "type": "STRING",
+         "value": "Attachment filename vs. name"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066975756.4263.70.camel@localhost>"
+        }
+       ],
+       [
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "plain"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "US-ASCII"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "377"
+         },
+         {
+          "type": "ATOM",
+          "value": "6"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         {
+          "type": "STRING",
+          "value": "application"
+         },
+         {
+          "type": "STRING",
+          "value": "x-gzip"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "NAME"
+          },
+          {
+           "type": "STRING",
+           "value": "blah2.gz"
+          }
+         ],
+         null,
+         {
+          "type": "STRING",
+          "value": "filename is blah1.gz, name is blah2.gz"
+         },
+         {
+          "type": "STRING",
+          "value": "base64"
+         },
+         {
+          "type": "ATOM",
+          "value": "58"
+         },
+         null,
+         [
+          {
+           "type": "STRING",
+           "value": "attachment"
+          },
+          [
+           {
+            "type": "STRING",
+            "value": "filename"
+           },
+           {
+            "type": "STRING",
+            "value": "blah1.gz"
+           }
+          ]
+         ],
+         null,
+         null
+        ],
+        {
+         "type": "STRING",
+         "value": "mixed"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "boundary"
+         },
+         {
+          "type": "STRING",
+          "value": "=-1066975756jd02"
+         }
+        ],
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "29"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "Hello little man.  I WILL DESTROY YOU! --Moro"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "1149"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 23:09:21 -0700"
+        },
+        {
+         "type": "LITERAL",
+         "value": "No filename? No problem!"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066975761.4263.70.camel@localhost>"
+        }
+       ],
+       [
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "plain"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "US-ASCII"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "517"
+         },
+         {
+          "type": "ATOM",
+          "value": "10"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         {
+          "type": "STRING",
+          "value": "application"
+         },
+         {
+          "type": "STRING",
+          "value": "x-gzip"
+         },
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "I'm getting sick of witty things to say"
+         },
+         {
+          "type": "STRING",
+          "value": "base64"
+         },
+         {
+          "type": "ATOM",
+          "value": "58"
+         },
+         null,
+         [
+          {
+           "type": "STRING",
+           "value": "attachment"
+          },
+          null
+         ],
+         null,
+         null
+        ],
+        {
+         "type": "STRING",
+         "value": "mixed"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "boundary"
+         },
+         {
+          "type": "STRING",
+          "value": "=-1066975756jd03"
+         }
+        ],
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "33"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "Friends! Help! A guinea pig tricked me! --Zoidberg"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "896"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 22:40:45 -0700"
+        },
+        {
+         "type": "STRING",
+         "value": "html and text, both inline"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066974044.4264.62.camel@localhost>"
+        }
+       ],
+       [
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "html"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "utf-8"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "327"
+         },
+         {
+          "type": "ATOM",
+          "value": "11"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "plain"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "US-ASCII"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "61"
+         },
+         {
+          "type": "ATOM",
+          "value": "2"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        {
+         "type": "STRING",
+         "value": "mixed"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "boundary"
+         },
+         {
+          "type": "STRING",
+          "value": "=-ZCKMfHzvHMyK1iBu4kff"
+         }
+        ],
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "33"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "Smeesh! --Amy"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "642"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 22:41:29 -0700"
+        },
+        {
+         "type": "STRING",
+         "value": "text and text, both inline"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066974089.4265.64.camel@localhost>"
+        }
+       ],
+       [
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "plain"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "US-ASCII"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "62"
+         },
+         {
+          "type": "ATOM",
+          "value": "2"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "plain"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "US-ASCII"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "68"
+         },
+         {
+          "type": "ATOM",
+          "value": "2"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        {
+         "type": "STRING",
+         "value": "mixed"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "boundary"
+         },
+         {
+          "type": "STRING",
+          "value": "=-pNc4wtlOIxs8RcX7H/AK"
+         }
+        ],
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "24"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "That's not a cigar. Uh... and it's not mine. --Hermes"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "1515"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 22:39:17 -0700"
+        },
+        {
+         "type": "LITERAL",
+         "value": "HTML and... HTML?"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066973957.4263.59.camel@localhost>"
+        }
+       ],
+       [
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "html"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "utf-8"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "824"
+         },
+         {
+          "type": "ATOM",
+          "value": "22"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "html"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "NAME"
+          },
+          {
+           "type": "STRING",
+           "value": "htmlfile.html"
+          },
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "UTF-8"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "118"
+         },
+         {
+          "type": "ATOM",
+          "value": "6"
+         },
+         null,
+         [
+          {
+           "type": "STRING",
+           "value": "attachment"
+          },
+          [
+           {
+            "type": "STRING",
+            "value": "filename"
+           },
+           {
+            "type": "STRING",
+            "value": "htmlfile.html"
+           }
+          ]
+         ],
+         null,
+         null
+        ],
+        {
+         "type": "STRING",
+         "value": "mixed"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "boundary"
+         },
+         {
+          "type": "STRING",
+          "value": "=-zxh/IezwzZITiphpcbJZ"
+         }
+        ],
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "49"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "LITERAL",
+        "value": "The spirit is willing, but the flesh is spongy, and\r\n    bruised. --Zap"
+       },
+       {
+        "type": "ATOM",
+        "value": "p"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "6643"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 22:23:16 -0700"
+        },
+        {
+         "type": "STRING",
+         "value": "smiley!"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066972996.4264.39.camel@localhost>"
+        }
+       ],
+       [
+        [
+         [
+          [
+           [
+            {
+             "type": "STRING",
+             "value": "text"
+            },
+            {
+             "type": "STRING",
+             "value": "plain"
+            },
+            [
+             {
+              "type": "STRING",
+              "value": "charset"
+             },
+             {
+              "type": "STRING",
+              "value": "us-ascii"
+             }
+            ],
+            null,
+            null,
+            {
+             "type": "STRING",
+             "value": "quoted-printable"
+            },
+            {
+             "type": "ATOM",
+             "value": "1606"
+            },
+            {
+             "type": "ATOM",
+             "value": "42"
+            },
+            null,
+            null,
+            null,
+            null
+           ],
+           [
+            {
+             "type": "STRING",
+             "value": "text"
+            },
+            {
+             "type": "STRING",
+             "value": "html"
+            },
+            [
+             {
+              "type": "STRING",
+              "value": "charset"
+             },
+             {
+              "type": "STRING",
+              "value": "utf-8"
+             }
+            ],
+            null,
+            null,
+            {
+             "type": "STRING",
+             "value": "quoted-printable"
+            },
+            {
+             "type": "ATOM",
+             "value": "2128"
+            },
+            {
+             "type": "ATOM",
+             "value": "54"
+            },
+            null,
+            null,
+            null,
+            null
+           ],
+           {
+            "type": "STRING",
+            "value": "alternative"
+           },
+           [
+            {
+             "type": "STRING",
+             "value": "boundary"
+            },
+            {
+             "type": "STRING",
+             "value": "=-dHujWM/Xizz57x/JOmDF"
+            }
+           ],
+           null,
+           null,
+           null
+          ],
+          [
+           {
+            "type": "STRING",
+            "value": "image"
+           },
+           {
+            "type": "STRING",
+            "value": "png"
+           },
+           [
+            {
+             "type": "STRING",
+             "value": "name"
+            },
+            {
+             "type": "STRING",
+             "value": "smiley-3.png"
+            }
+           ],
+           {
+            "type": "STRING",
+            "value": "<1066971953.4232.15.camel@localhost>"
+           },
+           null,
+           {
+            "type": "STRING",
+            "value": "base64"
+           },
+           {
+            "type": "ATOM",
+            "value": "1122"
+           },
+           null,
+           [
+            {
+             "type": "STRING",
+             "value": "attachment"
+            },
+            [
+             {
+              "type": "STRING",
+              "value": "filename"
+             },
+             {
+              "type": "STRING",
+              "value": "smiley-3.png"
+             }
+            ]
+           ],
+           null,
+           null
+          ],
+          {
+           "type": "STRING",
+           "value": "related"
+          },
+          [
+           {
+            "type": "STRING",
+            "value": "type"
+           },
+           {
+            "type": "STRING",
+            "value": "multipart/alternative"
+           },
+           {
+            "type": "STRING",
+            "value": "boundary"
+           },
+           {
+            "type": "STRING",
+            "value": "=-GpwozF9CQ7NdF+fd+vMG"
+           }
+          ],
+          null,
+          null,
+          null
+         ],
+         [
+          {
+           "type": "STRING",
+           "value": "image"
+          },
+          {
+           "type": "STRING",
+           "value": "gif"
+          },
+          [
+           {
+            "type": "STRING",
+            "value": "name"
+           },
+           {
+            "type": "STRING",
+            "value": "dot.gif"
+           }
+          ],
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "base64"
+          },
+          {
+           "type": "ATOM",
+           "value": "96"
+          },
+          null,
+          [
+           {
+            "type": "STRING",
+            "value": "attachment"
+           },
+           [
+            {
+             "type": "STRING",
+             "value": "filename"
+            },
+            {
+             "type": "STRING",
+             "value": "dot.gif"
+            }
+           ]
+          ],
+          null,
+          null
+         ],
+         {
+          "type": "STRING",
+          "value": "mixed"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "boundary"
+          },
+          {
+           "type": "STRING",
+           "value": "=-CgV5jm9HAY9VbUlAuneA"
+          }
+         ],
+         null,
+         null,
+         null
+        ],
+        [
+         {
+          "type": "STRING",
+          "value": "application"
+         },
+         {
+          "type": "STRING",
+          "value": "pgp-signature"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "name"
+          },
+          {
+           "type": "STRING",
+           "value": "signature.asc"
+          }
+         ],
+         null,
+         {
+          "type": "STRING",
+          "value": "This is a digitally signed message part"
+         },
+         {
+          "type": "STRING",
+          "value": "7bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "196"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        {
+         "type": "STRING",
+         "value": "signed"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "micalg"
+         },
+         {
+          "type": "STRING",
+          "value": "pgp-sha1"
+         },
+         {
+          "type": "STRING",
+          "value": "protocol"
+         },
+         {
+          "type": "STRING",
+          "value": "application/pgp-signature"
+         },
+         {
+          "type": "STRING",
+          "value": "boundary"
+         },
+         {
+          "type": "STRING",
+          "value": "=-vH3FQO9a8icUn1ROCoAi"
+         }
+        ],
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "177"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      [
+       {
+        "type": "STRING",
+        "value": "message"
+       },
+       {
+        "type": "STRING",
+        "value": "rfc822"
+       },
+       null,
+       null,
+       {
+        "type": "STRING",
+        "value": "Kittens give Morbo gas. --Morbo"
+       },
+       {
+        "type": "STRING",
+        "value": "7bit"
+       },
+       {
+        "type": "ATOM",
+        "value": "3088"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "23 Oct 2003 22:32:37 -0700"
+        },
+        {
+         "type": "STRING",
+         "value": "the PROPER way to do alternative/related"
+        },
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "Ryan Finnie"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "rfinnie"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        [
+         [
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "bob"
+          },
+          {
+           "type": "STRING",
+           "value": "domain.dom"
+          }
+         ]
+        ],
+        null,
+        null,
+        null,
+        {
+         "type": "STRING",
+         "value": "<1066973557.4265.51.camel@localhost>"
+        }
+       ],
+       [
+        [
+         {
+          "type": "STRING",
+          "value": "text"
+         },
+         {
+          "type": "STRING",
+          "value": "plain"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "CHARSET"
+          },
+          {
+           "type": "STRING",
+           "value": "US-ASCII"
+          }
+         ],
+         null,
+         null,
+         {
+          "type": "STRING",
+          "value": "8bit"
+         },
+         {
+          "type": "ATOM",
+          "value": "863"
+         },
+         {
+          "type": "ATOM",
+          "value": "22"
+         },
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         [
+          {
+           "type": "STRING",
+           "value": "text"
+          },
+          {
+           "type": "STRING",
+           "value": "html"
+          },
+          [
+           {
+            "type": "STRING",
+            "value": "CHARSET"
+           },
+           {
+            "type": "STRING",
+            "value": "utf-8"
+           }
+          ],
+          null,
+          null,
+          {
+           "type": "STRING",
+           "value": "8bit"
+          },
+          {
+           "type": "ATOM",
+           "value": "1258"
+          },
+          {
+           "type": "ATOM",
+           "value": "22"
+          },
+          null,
+          null,
+          null,
+          null
+         ],
+         [
+          {
+           "type": "STRING",
+           "value": "image"
+          },
+          {
+           "type": "STRING",
+           "value": "gif"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "<1066973340.4232.46.camel@localhost>"
+          },
+          null,
+          {
+           "type": "STRING",
+           "value": "base64"
+          },
+          {
+           "type": "ATOM",
+           "value": "116"
+          },
+          null,
+          null,
+          null,
+          null
+         ],
+         {
+          "type": "STRING",
+          "value": "related"
+         },
+         [
+          {
+           "type": "STRING",
+           "value": "boundary"
+          },
+          {
+           "type": "STRING",
+           "value": "=-bFkxH1S3HVGcxi+o/5jG"
+          }
+         ],
+         null,
+         null,
+         null
+        ],
+        {
+         "type": "STRING",
+         "value": "alternative"
+        },
+        [
+         {
+          "type": "STRING",
+          "value": "type"
+         },
+         {
+          "type": "STRING",
+          "value": "multipart/alternative"
+         },
+         {
+          "type": "STRING",
+          "value": "boundary"
+         },
+         {
+          "type": "STRING",
+          "value": "=-tyGlQ9JvB5uvPWzozI+y"
+         }
+        ],
+        null,
+        null,
+        null
+       ],
+       {
+        "type": "ATOM",
+        "value": "79"
+       },
+       null,
+       [
+        {
+         "type": "STRING",
+         "value": "inline"
+        },
+        null
+       ],
+       null,
+       null
+      ],
+      {
+       "type": "STRING",
+       "value": "mixed"
+      },
+      [
+       {
+        "type": "STRING",
+        "value": "boundary"
+       },
+       {
+        "type": "STRING",
+        "value": "=-qYxqvD9rbH0PNeExagh1"
+       }
+      ],
+      null,
+      null,
+      null
+     ],
+     {
+      "type": "ATOM",
+      "value": "BODY",
+      "section": []
+     },
+     {
+      "type": "LITERAL",
+      "value": ""
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "F OK [READ-WRITE] [Gmail]/Visi laiškai selected. (Success) [THROTTLED]",
+  "line": "RiBPSyBbUkVBRC1XUklURV0gW0dtYWlsXS9WaXNpIGxhacWha2FpIHNlbGVjdGVkLiAoU3VjY2VzcykgW1RIUk9UVExFRF0=",
+  "literals": [],
+  "expected": {
+   "tag": "F",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "READ-WRITE"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "[Gmail]/Visi laiškai selected. (Success) [THROTTLED]"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "E OK [READ-WRITE] [Gmail]/Вся почта selected. (Success) [THROTTLED]",
+  "line": "RSBPSyBbUkVBRC1XUklURV0gW0dtYWlsXS/QktGB0Y8g0L/QvtGH0YLQsCBzZWxlY3RlZC4gKFN1Y2Nlc3MpIFtUSFJPVFRMRURd",
+  "literals": [],
+  "expected": {
+   "tag": "E",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "READ-WRITE"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "[Gmail]/Вся почта selected. (Success) [THROTTLED]"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* LIST (HasNoChildren UnMarked) \"/\" 'a",
+  "line": "KiBMSVNUIChIYXNOb0NoaWxkcmVuIFVuTWFya2VkKSAiLyIgJ2E=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "LIST",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "HasNoChildren"
+     },
+     {
+      "type": "ATOM",
+      "value": "UnMarked"
+     }
+    ],
+    {
+     "type": "STRING",
+     "value": "/"
+    },
+    {
+     "type": "ATOM",
+     "value": "'a"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* LIST (\\Subscribed \\Sent\\HasNoChildren) \".\" \"SENT\"",
+  "line": "KiBMSVNUIChcU3Vic2NyaWJlZCBcU2VudFxIYXNOb0NoaWxkcmVuKSAiLiIgIlNFTlQi",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "LIST",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "\\Subscribed"
+     },
+     {
+      "type": "ATOM",
+      "value": "\\Sent"
+     },
+     {
+      "type": "ATOM",
+      "value": "\\HasNoChildren"
+     }
+    ],
+    {
+     "type": "STRING",
+     "value": "."
+    },
+    {
+     "type": "STRING",
+     "value": "SENT"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* LIST (\\Sent\\) \".\" \"SENT\"",
+  "line": "KiBMSVNUIChcU2VudFwpICIuIiAiU0VOVCI=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError16"
+  }
+ },
+ {
+  "input": "* STATUS Segregator/Społeczności (MESSAGES 0 UIDNEXT 1 UIDVALIDITY 1)",
+  "line": "KiBTVEFUVVMgU2VncmVnYXRvci9TcG/FgmVjem5vxZtjaSAoTUVTU0FHRVMgMCBVSURORVhUIDEgVUlEVkFMSURJVFkgMSk=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "STATUS",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "Segregator/Społeczności"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "MESSAGES"
+     },
+     {
+      "type": "ATOM",
+      "value": "0"
+     },
+     {
+      "type": "ATOM",
+      "value": "UIDNEXT"
+     },
+     {
+      "type": "ATOM",
+      "value": "1"
+     },
+     {
+      "type": "ATOM",
+      "value": "UIDVALIDITY"
+     },
+     {
+      "type": "ATOM",
+      "value": "1"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* STATUS Šegregator/Społeczności (MESSAGES 0 UIDNEXT 1 UIDVALIDITY 1)",
+  "line": "KiBTVEFUVVMgxaBlZ3JlZ2F0b3IvU3BvxYJlY3pub8WbY2kgKE1FU1NBR0VTIDAgVUlETkVYVCAxIFVJRFZBTElESVRZIDEp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "STATUS",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "Šegregator/Społeczności"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "MESSAGES"
+     },
+     {
+      "type": "ATOM",
+      "value": "0"
+     },
+     {
+      "type": "ATOM",
+      "value": "UIDNEXT"
+     },
+     {
+      "type": "ATOM",
+      "value": "1"
+     },
+     {
+      "type": "ATOM",
+      "value": "UIDVALIDITY"
+     },
+     {
+      "type": "ATOM",
+      "value": "1"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "X NO Server Unavailable. 15",
+  "line": "WCBOTyBTZXJ2ZXIgVW5hdmFpbGFibGUuIDE1",
+  "literals": [],
+  "expected": {
+   "tag": "X",
+   "command": "NO",
+   "attributes": [
+    {
+     "type": "TEXT",
+     "value": "Server Unavailable. 15"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "Server Unavailable. 15",
+  "line": "U2VydmVyIFVuYXZhaWxhYmxlLiAxNQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "BAD",
+   "attributes": [
+    {
+     "type": "TEXT",
+     "value": "Server Unavailable. 15"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "Server Foo{",
+  "line": "U2VydmVyIEZvb3s=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError2"
+  }
+ },
+ {
+  "input": "X BAD Request is throttled. Suggested Backoff Time: 92415 milliseconds",
+  "line": "WCBCQUQgUmVxdWVzdCBpcyB0aHJvdHRsZWQuIFN1Z2dlc3RlZCBCYWNrb2ZmIFRpbWU6IDkyNDE1IG1pbGxpc2Vjb25kcw==",
+  "literals": [],
+  "expected": {
+   "tag": "X",
+   "command": "BAD",
+   "attributes": [
+    {
+     "type": "TEXT",
+     "value": "Request is throttled. Suggested Backoff Time: 92415 milliseconds"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* LIST (\\UnMarked) \".\" INBOX.[Airmail].Snooze",
+  "line": "KiBMSVNUIChcVW5NYXJrZWQpICIuIiBJTkJPWC5bQWlybWFpbF0uU25vb3pl",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "LIST",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "\\UnMarked"
+     }
+    ],
+    {
+     "type": "STRING",
+     "value": "."
+    },
+    {
+     "type": "ATOM",
+     "value": "INBOX.[Airmail].Snooze"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 32 FETCH (UID 32 RFC822.SIZE 3991 BODY[2.MIME] \"(* 61B literal *)\" BODY[2]<0.65536> \"(* 6B literal *)\")",
+  "line": "KiAzMiBGRVRDSCAoVUlEIDMyIFJGQzgyMi5TSVpFIDM5OTEgQk9EWVsyLk1JTUVdICIoKiA2MUIgbGl0ZXJhbCAqKSIgQk9EWVsyXTwwLjY1NTM2PiAiKCogNkIgbGl0ZXJhbCAqKSIp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "32",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "UID"
+     },
+     {
+      "type": "ATOM",
+      "value": "32"
+     },
+     {
+      "type": "ATOM",
+      "value": "RFC822.SIZE"
+     },
+     {
+      "type": "ATOM",
+      "value": "3991"
+     },
+     {
+      "type": "ATOM",
+      "value": "BODY",
+      "section": [
+       {
+        "type": "ATOM",
+        "value": "2.MIME"
+       }
+      ]
+     },
+     {
+      "type": "STRING",
+      "value": "(* 61B literal *)"
+     },
+     {
+      "type": "ATOM",
+      "value": "BODY",
+      "section": [
+       {
+        "type": "ATOM",
+        "value": "2"
+       }
+      ],
+      "partial": [
+       0,
+       65536
+      ]
+     },
+     {
+      "type": "STRING",
+      "value": "(* 6B literal *)"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 1 FETCH (UID 1 BODY[] {11}\r\nHello world FLAGS (\\Seen))",
+  "line": "KiAxIEZFVENIIChVSUQgMSBCT0RZW10gezExfQ0KIEZMQUdTIChcU2Vlbikp",
+  "literals": [
+   "SGVsbG8gd29ybGQ="
+  ],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "UID"
+     },
+     {
+      "type": "ATOM",
+      "value": "1"
+     },
+     {
+      "type": "ATOM",
+      "value": "BODY",
+      "section": []
+     },
+     {
+      "type": "LITERAL",
+      "value": "Hello world"
+     },
+     {
+      "type": "ATOM",
+      "value": "FLAGS"
+     },
+     [
+      {
+       "type": "ATOM",
+       "value": "\\Seen"
+      }
+     ]
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 1 FETCH (UID 1 BODYSTRUCTURE ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) FLAGS (\\Seen))",
+  "line": "KiAxIEZFVENIIChVSUQgMSBCT0RZU1RSVUNUVVJFICgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkgRkxBR1MgKFxTZWVuKSk=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "UID"
+     },
+     {
+      "type": "ATOM",
+      "value": "1"
+     },
+     {
+      "type": "ATOM",
+      "value": "BODYSTRUCTURE"
+     },
+     null,
+     {
+      "type": "ATOM",
+      "value": "FLAGS"
+     },
+     [
+      {
+       "type": "ATOM",
+       "value": "\\Seen"
+      }
+     ]
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": [
+    "BODYSTRUCTURE"
+   ]
+  }
+ },
+ {
+  "input": "* 1 FETCH (UID 1 BODYSTRUCTURE (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((()))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) ENVELOPE (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((()))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+  "line": "KiAxIEZFVENIIChVSUQgMSBCT0RZU1RSVUNUVVJFICgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSBFTlZFTE9QRSAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "UID"
+     },
+     {
+      "type": "ATOM",
+      "value": "1"
+     },
+     {
+      "type": "ATOM",
+      "value": "BODYSTRUCTURE"
+     },
+     null,
+     {
+      "type": "ATOM",
+      "value": "ENVELOPE"
+     },
+     null
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": [
+    "BODYSTRUCTURE",
+    "ENVELOPE"
+   ]
+  }
+ },
+ {
+  "input": "* 1 FETCH ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((()))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+  "line": "KiAxIEZFVENIICgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     null
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": [
+    "?"
+   ]
+  }
+ },
+ {
+  "input": "* LIST ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((()))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+  "line": "KiBMSVNUICgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSk=",
+  "literals": [],
+  "expected": {
+   "error": "MAX_IMAP_NESTING_REACHED"
+  }
+ },
+ {
+  "input": "* LIST (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((())))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+  "line": "KiBMSVNUICgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "LIST",
+   "attributes": [
+    [
+     [
+      [
+       [
+        [
+         [
+          [
+           [
+            [
+             [
+              [
+               [
+                [
+                 [
+                  [
+                   [
+                    [
+                     [
+                      [
+                       [
+                        [
+                         [
+                          [
+                           [
+                            [
+                             [
+                              [
+                               [
+                                [
+                                 [
+                                  [
+                                   [
+                                    [
+                                     [
+                                      [
+                                       [
+                                        [
+                                         [
+                                          [
+                                           [
+                                            [
+                                             [
+                                              [
+                                               [
+                                                [
+                                                 [
+                                                  [
+                                                   [
+                                                    [
+                                                     [
+                                                      [
+                                                       [
+                                                        [
+                                                         [
+                                                          [
+                                                           [
+                                                            [
+                                                             [
+                                                              [
+                                                               [
+                                                                [
+                                                                 [
+                                                                  [
+                                                                   [
+                                                                    [
+                                                                     [
+                                                                      [
+                                                                       [
+                                                                        [
+                                                                         [
+                                                                          [
+                                                                           [
+                                                                            [
+                                                                             [
+                                                                              [
+                                                                               [
+                                                                                [
+                                                                                 [
+                                                                                  [
+                                                                                   [
+                                                                                    [
+                                                                                     [
+                                                                                      [
+                                                                                       [
+                                                                                        [
+                                                                                         [
+                                                                                          [
+                                                                                           [
+                                                                                            [
+                                                                                             [
+                                                                                              [
+                                                                                               [
+                                                                                                [
+                                                                                                 [
+                                                                                                  [
+                                                                                                   [
+                                                                                                    [
+                                                                                                     [
+                                                                                                      [
+                                                                                                       []
+                                                                                                      ]
+                                                                                                     ]
+                                                                                                    ]
+                                                                                                   ]
+                                                                                                  ]
+                                                                                                 ]
+                                                                                                ]
+                                                                                               ]
+                                                                                              ]
+                                                                                             ]
+                                                                                            ]
+                                                                                           ]
+                                                                                          ]
+                                                                                         ]
+                                                                                        ]
+                                                                                       ]
+                                                                                      ]
+                                                                                     ]
+                                                                                    ]
+                                                                                   ]
+                                                                                  ]
+                                                                                 ]
+                                                                                ]
+                                                                               ]
+                                                                              ]
+                                                                             ]
+                                                                            ]
+                                                                           ]
+                                                                          ]
+                                                                         ]
+                                                                        ]
+                                                                       ]
+                                                                      ]
+                                                                     ]
+                                                                    ]
+                                                                   ]
+                                                                  ]
+                                                                 ]
+                                                                ]
+                                                               ]
+                                                              ]
+                                                             ]
+                                                            ]
+                                                           ]
+                                                          ]
+                                                         ]
+                                                        ]
+                                                       ]
+                                                      ]
+                                                     ]
+                                                    ]
+                                                   ]
+                                                  ]
+                                                 ]
+                                                ]
+                                               ]
+                                              ]
+                                             ]
+                                            ]
+                                           ]
+                                          ]
+                                         ]
+                                        ]
+                                       ]
+                                      ]
+                                     ]
+                                    ]
+                                   ]
+                                  ]
+                                 ]
+                                ]
+                               ]
+                              ]
+                             ]
+                            ]
+                           ]
+                          ]
+                         ]
+                        ]
+                       ]
+                      ]
+                     ]
+                    ]
+                   ]
+                  ]
+                 ]
+                ]
+               ]
+              ]
+             ]
+            ]
+           ]
+          ]
+         ]
+        ]
+       ]
+      ]
+     ]
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "A1 NO [XFOO see bar[baz] mailbox is busy",
+  "line": "QTEgTk8gW1hGT08gc2VlIGJhcltiYXpdIG1haWxib3ggaXMgYnVzeQ==",
+  "literals": [],
+  "expected": {
+   "tag": "A1",
+   "command": "NO",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "XFOO"
+      },
+      {
+       "type": "ATOM",
+       "value": "see"
+      },
+      {
+       "type": "ATOM",
+       "value": "bar[baz"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "mailbox is busy"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "A1 NO [XFOO unterminated",
+  "line": "QTEgTk8gW1hGT08gdW50ZXJtaW5hdGVk",
+  "literals": [],
+  "expected": {
+   "error": "ParserError9"
+  }
+ },
+ {
+  "input": "A1 OK [ALERT]text here",
+  "line": "QTEgT0sgW0FMRVJUXXRleHQgaGVyZQ==",
+  "literals": [],
+  "expected": {
+   "tag": "A1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "ALERT"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "text here"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": ")A1 OK x",
+  "line": "KUExIE9LIHg=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError2"
+  }
+ },
+ {
+  "input": "* Unavailable.",
+  "line": "KiBVbmF2YWlsYWJsZS4=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError2"
+  }
+ },
+ {
+  "input": "*",
+  "line": "Kg==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError4"
+  }
+ },
+ {
+  "input": "A1",
+  "line": "QTE=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError4"
+  }
+ },
+ {
+  "input": "* X {5}\r\nabcde",
+  "line": "KiBYIHs1fQ0K",
+  "literals": [
+   "YWJjZGU="
+  ],
+  "expected": {
+   "tag": "*",
+   "command": "X",
+   "attributes": [
+    {
+     "type": "LITERAL",
+     "value": "abcde"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "\u0000\u0000* OK padded",
+  "line": "AAAqIE9LIHBhZGRlZA==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "TEXT",
+     "value": "padded"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 2,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "\u0000\u0000\u0000",
+  "line": "AAAA",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "BAD",
+   "attributes": [],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 3 EXISTS",
+  "line": "KiAzIEVYSVNUUw==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "3",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "EXISTS"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 2 EXPUNGE",
+  "line": "KiAyIEVYUFVOR0U=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "2",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "EXPUNGE"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* FLAGS (\\Answered \\Flagged \\Deleted \\Seen \\Draft $Forwarded)",
+  "line": "KiBGTEFHUyAoXEFuc3dlcmVkIFxGbGFnZ2VkIFxEZWxldGVkIFxTZWVuIFxEcmFmdCAkRm9yd2FyZGVkKQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "FLAGS",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "\\Answered"
+     },
+     {
+      "type": "ATOM",
+      "value": "\\Flagged"
+     },
+     {
+      "type": "ATOM",
+      "value": "\\Deleted"
+     },
+     {
+      "type": "ATOM",
+      "value": "\\Seen"
+     },
+     {
+      "type": "ATOM",
+      "value": "\\Draft"
+     },
+     {
+      "type": "ATOM",
+      "value": "$Forwarded"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* CAPABILITY IMAP4rev1 LITERAL+ SASL-IR LOGIN-REFERRALS ID ENABLE IDLE AUTH=PLAIN",
+  "line": "KiBDQVBBQklMSVRZIElNQVA0cmV2MSBMSVRFUkFMKyBTQVNMLUlSIExPR0lOLVJFRkVSUkFMUyBJRCBFTkFCTEUgSURMRSBBVVRIPVBMQUlO",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "CAPABILITY",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "IMAP4rev1"
+    },
+    {
+     "type": "ATOM",
+     "value": "LITERAL+"
+    },
+    {
+     "type": "ATOM",
+     "value": "SASL-IR"
+    },
+    {
+     "type": "ATOM",
+     "value": "LOGIN-REFERRALS"
+    },
+    {
+     "type": "ATOM",
+     "value": "ID"
+    },
+    {
+     "type": "ATOM",
+     "value": "ENABLE"
+    },
+    {
+     "type": "ATOM",
+     "value": "IDLE"
+    },
+    {
+     "type": "ATOM",
+     "value": "AUTH=PLAIN"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* ID (\"name\" \"Dovecot\")",
+  "line": "KiBJRCAoIm5hbWUiICJEb3ZlY290Iik=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "ID",
+   "attributes": [
+    [
+     {
+      "type": "STRING",
+      "value": "name"
+     },
+     {
+      "type": "STRING",
+      "value": "Dovecot"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* NAMESPACE ((\"\" \"/\")) NIL NIL",
+  "line": "KiBOQU1FU1BBQ0UgKCgiIiAiLyIpKSBOSUwgTklM",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "NAMESPACE",
+   "attributes": [
+    [
+     [
+      {
+       "type": "STRING",
+       "value": ""
+      },
+      {
+       "type": "STRING",
+       "value": "/"
+      }
+     ]
+    ],
+    null,
+    null
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* LIST (\\HasNoChildren) \"/\" INBOX",
+  "line": "KiBMSVNUIChcSGFzTm9DaGlsZHJlbikgIi8iIElOQk9Y",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "LIST",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "\\HasNoChildren"
+     }
+    ],
+    {
+     "type": "STRING",
+     "value": "/"
+    },
+    {
+     "type": "ATOM",
+     "value": "INBOX"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* LIST () NIL \"Archive\"",
+  "line": "KiBMSVNUICgpIE5JTCAiQXJjaGl2ZSI=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "LIST",
+   "attributes": [
+    [],
+    null,
+    {
+     "type": "STRING",
+     "value": "Archive"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* LSUB () \".\" #news.comp.mail.misc",
+  "line": "KiBMU1VCICgpICIuIiAjbmV3cy5jb21wLm1haWwubWlzYw==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "LSUB",
+   "attributes": [
+    [],
+    {
+     "type": "STRING",
+     "value": "."
+    },
+    {
+     "type": "ATOM",
+     "value": "#news.comp.mail.misc"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* STATUS \"Drafts\" (MESSAGES 3 UNSEEN 1)",
+  "line": "KiBTVEFUVVMgIkRyYWZ0cyIgKE1FU1NBR0VTIDMgVU5TRUVOIDEp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "STATUS",
+   "attributes": [
+    {
+     "type": "STRING",
+     "value": "Drafts"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "MESSAGES"
+     },
+     {
+      "type": "ATOM",
+      "value": "3"
+     },
+     {
+      "type": "ATOM",
+      "value": "UNSEEN"
+     },
+     {
+      "type": "ATOM",
+      "value": "1"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* ESEARCH (TAG \"A282\") UID MIN 2 COUNT 3 ALL 2,10:11",
+  "line": "KiBFU0VBUkNIIChUQUcgIkEyODIiKSBVSUQgTUlOIDIgQ09VTlQgMyBBTEwgMiwxMDoxMQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "ESEARCH",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "TAG"
+     },
+     {
+      "type": "STRING",
+      "value": "A282"
+     }
+    ],
+    {
+     "type": "ATOM",
+     "value": "UID"
+    },
+    {
+     "type": "ATOM",
+     "value": "MIN"
+    },
+    {
+     "type": "ATOM",
+     "value": "2"
+    },
+    {
+     "type": "ATOM",
+     "value": "COUNT"
+    },
+    {
+     "type": "ATOM",
+     "value": "3"
+    },
+    {
+     "type": "ATOM",
+     "value": "ALL"
+    },
+    {
+     "type": "SEQUENCE",
+     "value": "2,10:11"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* ESEARCH (TAG \"A1\") UID ALL 1:2:3",
+  "line": "KiBFU0VBUkNIIChUQUcgIkExIikgVUlEIEFMTCAxOjI6Mw==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "ESEARCH",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "TAG"
+     },
+     {
+      "type": "STRING",
+      "value": "A1"
+     }
+    ],
+    {
+     "type": "ATOM",
+     "value": "UID"
+    },
+    {
+     "type": "ATOM",
+     "value": "ALL"
+    },
+    {
+     "type": "SEQUENCE",
+     "value": "1:2:3"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* QUOTAROOT INBOX \"\"",
+  "line": "KiBRVU9UQVJPT1QgSU5CT1ggIiI=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "QUOTAROOT",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "INBOX"
+    },
+    {
+     "type": "STRING",
+     "value": ""
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* QUOTA \"\" (STORAGE 10 512)",
+  "line": "KiBRVU9UQSAiIiAoU1RPUkFHRSAxMCA1MTIp",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "QUOTA",
+   "attributes": [
+    {
+     "type": "STRING",
+     "value": ""
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "STORAGE"
+     },
+     {
+      "type": "ATOM",
+      "value": "10"
+     },
+     {
+      "type": "ATOM",
+      "value": "512"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* VANISHED (EARLIER) 41,43:116,118,120:211,214:540",
+  "line": "KiBWQU5JU0hFRCAoRUFSTElFUikgNDEsNDM6MTE2LDExOCwxMjA6MjExLDIxNDo1NDA=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "VANISHED",
+   "attributes": [
+    [
+     {
+      "type": "ATOM",
+      "value": "EARLIER"
+     }
+    ],
+    {
+     "type": "SEQUENCE",
+     "value": "41,43:116,118,120:211,214:540"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 12 FETCH (FLAGS (\\Seen) INTERNALDATE \"17-Jul-1996 02:44:25 -0700\" RFC822.SIZE 4286 UID 98 MODSEQ (12121231000))",
+  "line": "KiAxMiBGRVRDSCAoRkxBR1MgKFxTZWVuKSBJTlRFUk5BTERBVEUgIjE3LUp1bC0xOTk2IDAyOjQ0OjI1IC0wNzAwIiBSRkM4MjIuU0laRSA0Mjg2IFVJRCA5OCBNT0RTRVEgKDEyMTIxMjMxMDAwKSk=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "12",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "FLAGS"
+     },
+     [
+      {
+       "type": "ATOM",
+       "value": "\\Seen"
+      }
+     ],
+     {
+      "type": "ATOM",
+      "value": "INTERNALDATE"
+     },
+     {
+      "type": "STRING",
+      "value": "17-Jul-1996 02:44:25 -0700"
+     },
+     {
+      "type": "ATOM",
+      "value": "RFC822.SIZE"
+     },
+     {
+      "type": "ATOM",
+      "value": "4286"
+     },
+     {
+      "type": "ATOM",
+      "value": "UID"
+     },
+     {
+      "type": "ATOM",
+      "value": "98"
+     },
+     {
+      "type": "ATOM",
+      "value": "MODSEQ"
+     },
+     [
+      {
+       "type": "ATOM",
+       "value": "12121231000"
+      }
+     ]
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 1 FETCH (X-GM-LABELS (\\Inbox \"Muuseum\" [Gmail]Spam) X-GM-THRID 1278455344230334865)",
+  "line": "KiAxIEZFVENIIChYLUdNLUxBQkVMUyAoXEluYm94ICJNdXVzZXVtIiBbR21haWxdU3BhbSkgWC1HTS1USFJJRCAxMjc4NDU1MzQ0MjMwMzM0ODY1KQ==",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "X-GM-LABELS"
+     },
+     [
+      {
+       "type": "ATOM",
+       "value": "\\Inbox"
+      },
+      {
+       "type": "STRING",
+       "value": "Muuseum"
+      },
+      {
+       "type": "ATOM",
+       "value": "[Gmail]Spam"
+      }
+     ],
+     {
+      "type": "ATOM",
+      "value": "X-GM-THRID"
+     },
+     {
+      "type": "ATOM",
+      "value": "1278455344230334865"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "A1 BAD [CLIENTBUG] Parse error: \u0001",
+  "line": "QTEgQkFEIFtDTElFTlRCVUddIFBhcnNlIGVycm9yOiAB",
+  "literals": [],
+  "expected": {
+   "tag": "A1",
+   "command": "BAD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "CLIENTBUG"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Parse error: \u0001"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "A1 OK [CAPABILITY IMAP4rev1 UIDPLUS] Logged in",
+  "line": "QTEgT0sgW0NBUEFCSUxJVFkgSU1BUDRyZXYxIFVJRFBMVVNdIExvZ2dlZCBpbg==",
+  "literals": [],
+  "expected": {
+   "tag": "A1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "CAPABILITY"
+      },
+      {
+       "type": "ATOM",
+       "value": "IMAP4rev1"
+      },
+      {
+       "type": "ATOM",
+       "value": "UIDPLUS"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "Logged in"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "A1 OK [APPENDUID 38505 3955] APPEND completed",
+  "line": "QTEgT0sgW0FQUEVORFVJRCAzODUwNSAzOTU1XSBBUFBFTkQgY29tcGxldGVk",
+  "literals": [],
+  "expected": {
+   "tag": "A1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "APPENDUID"
+      },
+      {
+       "type": "ATOM",
+       "value": "38505"
+      },
+      {
+       "type": "ATOM",
+       "value": "3955"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "APPEND completed"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* BYE [ALERT] going down",
+  "line": "KiBCWUUgW0FMRVJUXSBnb2luZyBkb3du",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "BYE",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "ALERT"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "going down"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* PREAUTH [CAPABILITY IMAP4rev1] ready",
+  "line": "KiBQUkVBVVRIIFtDQVBBQklMSVRZIElNQVA0cmV2MV0gcmVhZHk=",
+  "literals": [],
+  "expected": {
+   "tag": "*",
+   "command": "PREAUTH",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "",
+     "section": [
+      {
+       "type": "ATOM",
+       "value": "CAPABILITY"
+      },
+      {
+       "type": "ATOM",
+       "value": "IMAP4rev1"
+      }
+     ]
+    },
+    {
+     "type": "TEXT",
+     "value": "ready"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 1 FETCH (BODY[HEADER.FIELDS (\"From\" Subject)] {4}\r\nab\r\n)",
+  "line": "KiAxIEZFVENIIChCT0RZW0hFQURFUi5GSUVMRFMgKCJGcm9tIiBTdWJqZWN0KV0gezR9DQop",
+  "literals": [
+   "YWINCg=="
+  ],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "BODY",
+      "section": [
+       {
+        "type": "ATOM",
+        "value": "HEADER.FIELDS"
+       },
+       [
+        {
+         "type": "STRING",
+         "value": "From"
+        },
+        {
+         "type": "ATOM",
+         "value": "Subject"
+        }
+       ]
+      ]
+     },
+     {
+      "type": "LITERAL",
+      "value": "ab\r\n"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "* 1 FETCH (BINARY[1] ~{3}\r\n\u0000\u0001\u0002)",
+  "line": "KiAxIEZFVENIIChCSU5BUllbMV0gfnszfQ0KKQ==",
+  "literals": [
+   "AAEC"
+  ],
+  "expected": {
+   "tag": "*",
+   "command": "1",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "FETCH"
+    },
+    [
+     {
+      "type": "ATOM",
+      "value": "BINARY",
+      "section": [
+       {
+        "type": "ATOM",
+        "value": "1"
+       }
+      ]
+     },
+     {
+      "type": "LITERAL",
+      "value": "\u0000\u0001\u0002"
+     }
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD a\\b",
+  "line": "VEFHMSBDTUQgYVxi",
+  "literals": [],
+  "expected": {
+   "error": "ParserError16"
+  }
+ },
+ {
+  "input": "TAG1 CMD (a\\b)",
+  "line": "VEFHMSBDTUQgKGFcYik=",
+  "literals": [],
+  "expected": {
+   "error": "ParserError16"
+  }
+ },
+ {
+  "input": "TAG1 OK a\\b(c",
+  "line": "VEFHMSBPSyBhXGIoYw==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "OK",
+   "attributes": [
+    {
+     "type": "TEXT",
+     "value": "a\\b(c"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD x\"y",
+  "line": "VEFHMSBDTUQgeCJ5",
+  "literals": [],
+  "expected": {
+   "error": "ParserError16"
+  }
+ },
+ {
+  "input": "TAG1 CMD ",
+  "line": "VEFHMSBDTUQgfw==",
+  "literals": [],
+  "expected": {
+   "error": "ParserError13"
+  }
+ },
+ {
+  "input": "TAG1 CMD é",
+  "line": "VEFHMSBDTUQgw6k=",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "é"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD (NIL nil Nil)",
+  "line": "VEFHMSBDTUQgKE5JTCBuaWwgTmlsKQ==",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    [
+     null,
+     null,
+     null
+    ]
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ },
+ {
+  "input": "TAG1 CMD NIL[1]",
+  "line": "VEFHMSBDTUQgTklMWzFd",
+  "literals": [],
+  "expected": {
+   "tag": "TAG1",
+   "command": "CMD",
+   "attributes": [
+    {
+     "type": "ATOM",
+     "value": "NIL[1]"
+    }
+   ],
+   "numbers": null,
+   "nullBytesRemoved": 0,
+   "truncatedAttributes": []
+  }
+ }
+]
