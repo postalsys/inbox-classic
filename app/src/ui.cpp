@@ -2,6 +2,7 @@
 #include "app.h"
 
 #include <commdlg.h>
+#include <shlobj.h>
 
 #include <fstream>
 
@@ -254,8 +255,15 @@ std::wstring SaveFileDialog(HWND owner, const std::wstring& name) {
     dialog.lpstrFile = buffer;
     dialog.nMaxFile = MAX_PATH;
     dialog.lpstrTitle = L"Save Attachment As";
+    // Downloads the first time; after that Windows starts where the user saved last
+    PWSTR downloads = nullptr;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Downloads, 0, nullptr, &downloads))) {
+        dialog.lpstrInitialDir = downloads;
+    }
     dialog.Flags = OFN_EXPLORER | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN | OFN_NOCHANGEDIR;
-    return GetSaveFileNameW(&dialog) ? buffer : L"";
+    std::wstring chosen = GetSaveFileNameW(&dialog) ? buffer : L"";
+    CoTaskMemFree(downloads);
+    return chosen;
 }
 
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size) {

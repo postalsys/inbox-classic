@@ -37,6 +37,8 @@ constexpr int kGap = 4;
 int g_dragging = 0;
 // accounts whose password prompt is open, so a second failure does not open another
 std::set<int64_t> g_prompting;
+// accounts whose last sync failed: their failure stays in the status bar
+std::set<int64_t> g_failing;
 
 // ---- the core's events ----
 
@@ -105,10 +107,14 @@ void AskPassword(int64_t account) {
 void OnEvent(const UiEvent& event) {
     switch (event.kind) {
     case PE_EVENT_KIND_SYNC_STARTED:
+        g_failing.erase(event.account);
         SetStatus(L"Checking for new messages on " + g_mailbox.AccountName(event.account) + L"...");
         break;
     case PE_EVENT_KIND_SYNC_FINISHED:
-        SetStatus(L"Done");
+        // a failure stays in the status bar until the account syncs without one
+        if (g_failing.empty()) {
+            SetStatus(L"Done");
+        }
         break;
     case PE_EVENT_KIND_AUTOCONFIG_DONE:
     case PE_EVENT_KIND_SIGN_IN_DONE:
@@ -118,6 +124,7 @@ void OnEvent(const UiEvent& event) {
         SetStatus(L"Message sent.");
         break;
     case PE_EVENT_KIND_FAILED:
+        g_failing.insert(event.account);
         SetStatus(g_mailbox.AccountName(event.account) + L": " + event.message);
         if (event.failure == PE_FAILURE_KIND_AUTHENTICATION) {
             AskPassword(event.account);

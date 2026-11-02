@@ -1,7 +1,8 @@
-# The app end to end, driven the way a user drives it, against ImapKit (core/e2e): adds an account through the
-# account form, waits for the sync, opens a message (and checks on the server that it was marked read), answers it
-# from the compose window (and checks that the answer arrived over SMTP and was kept in Sent), and opens the help.
-# Screenshots of each step go to -Out.
+# The app end to end, driven the way a user drives it, against ImapKit (core/e2e). Every feature is used once and
+# its effect checked, on the server through ImapKit's REST API where there is one: adding an account (and a wrong
+# password), reading plain and HTML mail, marking read and unread, inline and remote pictures, saving an attachment,
+# replying, replying to all, forwarding, writing a new message (and a mistyped address), Send/Recv, Sent Items,
+# About and the help. A screenshot of each step goes to -Out (scripts/feature-map.mjs builds a page from them).
 #
 #   powershell -ExecutionPolicy Bypass -File scripts\ui-e2e.ps1 [-Exe build\PostalExpress.exe] [-Out build\ui-e2e]
 #
@@ -25,14 +26,35 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr SendMessage(IntPtr hwnd, uint message, IntPtr wParam, System.Text.StringBuilder lParam);
 [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hwnd, out RECT rect);
 [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+[DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+[DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hwnd);
+public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
+[DllImport("user32.dll")] public static extern bool EnumChildWindows(IntPtr parent, EnumProc proc, IntPtr lParam);
+[DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int size);
 public struct RECT { public int Left, Top, Right, Bottom; }
+// the windows of class `cls` anywhere under `parent`
+public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
+    var found = new System.Collections.Generic.List<IntPtr>();
+    EnumChildWindows(parent, (hwnd, _) => {
+        var name = new System.Text.StringBuilder(64);
+        GetClassName(hwnd, name, 64);
+        if (name.ToString() == cls) { found.Add(hwnd); }
+        return true;
+    }, IntPtr.Zero);
+    return found;
+}
 '@
 [void][Native.Win]::SetProcessDPIAware()
 
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
 $WM_KEYUP = 0x0101; $BM_CLICK = 0x00F5; $CB_SETCURSEL = 0x014E; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
-$IDM_REPLY = 108; $IDM_HELP = 111; $IDC_TREE = 200; $IDC_LIST = 201; $IDC_SEND = 300; $IDC_TO = 302; $IDC_BODY = 306
+$VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28
+# app/src/app.h
+$IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
+$IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
+$IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
+$IDC_SEND = 300; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
@@ -55,30 +77,54 @@ function WaitFor([scriptblock]$Condition, [int]$Seconds = 20) {
     return $null
 }
 
-function Shot([IntPtr]$hwnd, [string]$name) {
-    [void][Native.Win]::SetWindowPos($hwnd, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+# a picture of a window; with $Also (a popup menu, say) of the area that holds both
+function Shot([IntPtr]$hwnd, [string]$name, [IntPtr]$Also = [IntPtr]::Zero) {
+    if ($Also -eq [IntPtr]::Zero) { [void][Native.Win]::SetWindowPos($hwnd, [IntPtr](-1), 0, 0, 0, 0, 0x13) }
     Start-Sleep -Milliseconds 500
     $rect = New-Object Native.Win+RECT
     [void][Native.Win]::GetWindowRect($hwnd, [ref]$rect)
+    if ($Also -ne [IntPtr]::Zero) {
+        $other = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($Also, [ref]$other)
+        $rect.Left = [Math]::Min($rect.Left, $other.Left); $rect.Top = [Math]::Min($rect.Top, $other.Top)
+        $rect.Right = [Math]::Max($rect.Right, $other.Right); $rect.Bottom = [Math]::Max($rect.Bottom, $other.Bottom)
+    }
+    # a window that closed in the meantime has no picture
+    if ($rect.Right -le $rect.Left -or $rect.Bottom -le $rect.Top) { return }
     $bitmap = New-Object System.Drawing.Bitmap ($rect.Right - $rect.Left), ($rect.Bottom - $rect.Top)
     [System.Drawing.Graphics]::FromImage($bitmap).CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bitmap.Size)
-    [void][Native.Win]::SetWindowPos($hwnd, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+    if ($Also -eq [IntPtr]::Zero) { [void][Native.Win]::SetWindowPos($hwnd, [IntPtr](-2), 0, 0, 0, 0, 0x13) }
     $bitmap.Save((Join-Path $Out "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
 }
 
 function SetText([IntPtr]$window, [int]$id, [string]$text) {
     [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($window, $id), $WM_SETTEXT, [IntPtr]::Zero, $text)
 }
-function GetText([IntPtr]$window, [int]$id) {
+function WindowText([IntPtr]$window) {
     $buffer = New-Object System.Text.StringBuilder 4096
-    [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($window, $id), $WM_GETTEXT, [IntPtr]4096, $buffer)
+    [void][Native.Win]::SendMessage($window, $WM_GETTEXT, [IntPtr]4096, $buffer)
     return $buffer.ToString()
 }
+function GetText([IntPtr]$window, [int]$id) { WindowText ([Native.Win]::GetDlgItem($window, $id)) }
 function Click([IntPtr]$window, [int]$id) {
     [void][Native.Win]::PostMessage([Native.Win]::GetDlgItem($window, $id), $BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero)
 }
+# a menu or toolbar command, posted as the menu would
+function Command([IntPtr]$window, [int]$id) {
+    [void][Native.Win]::PostMessage($window, $WM_COMMAND, [IntPtr]$id, [IntPtr]::Zero)
+}
+function Key([IntPtr]$window, [int]$vk) {
+    [void][Native.Win]::PostMessage($window, $WM_KEYDOWN, [IntPtr]$vk, [IntPtr]::Zero)
+    [void][Native.Win]::PostMessage($window, $WM_KEYUP, [IntPtr]$vk, [IntPtr]::Zero)
+}
+# a top-level window of a class (and title), once it is there
+function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) {
+    $t = if ($title) { $title } else { [NullString]::Value }
+    WaitFor { $w = [Native.Win]::FindWindow($class, $t); if ($w -ne [IntPtr]::Zero) { $w } } $Seconds
+}
+function Visible([IntPtr]$window, [int]$id) { [Native.Win]::IsWindowVisible([Native.Win]::GetDlgItem($window, $id)) }
 
-# ---- ImapKit ----
+# ---- ImapKit, with mail to read ----
 
 Step 'starting ImapKit'
 $e2e = Join-Path $PSScriptRoot '..\core\e2e'
@@ -96,104 +142,302 @@ function Messages([string]$mailbox) {
 }
 # the REST API gives the source base64 encoded
 function RawText($message) { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($message.raw)) }
+function Find([string]$mailbox, [string]$pattern) { (Messages $mailbox) | Where-Object { (RawText $_) -match $pattern } | Select-Object -First 1 }
+function Seen([string]$pattern) { (Find 'INBOX' $pattern).flags -contains '\Seen' }
+function AddMessage([string]$raw, [string[]]$flags = @()) {
+    $body = @{ raw = $raw; flags = $flags } | ConvertTo-Json
+    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body "$rest/INBOX/messages")
+}
+
+# a picture sent inside the message
+$picture = New-Object System.Drawing.Bitmap 220, 60
+$graphics = [System.Drawing.Graphics]::FromImage($picture)
+$graphics.Clear([System.Drawing.Color]::FromArgb(0, 51, 102))
+$graphics.DrawString('Inline picture', (New-Object System.Drawing.Font 'Tahoma', 16), [System.Drawing.Brushes]::White, 12, 16)
+$stream = New-Object System.IO.MemoryStream
+$picture.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
+$png = [Convert]::ToBase64String($stream.ToArray(), 'InsertLineBreaks')
+$pdf = "%PDF-1.4`n% a small attachment from scripts/ui-e2e.ps1`n"
+$pdf64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($pdf))
+
+# in the list newest first: the newsletter, Ann's message, the minutes
+$minutes = 'Minutes of the planning meeting'
+AddMessage ("From: Bob Builder <bob@example.com>`r`nTo: testuser@postalexpress.test, Dave <dave@example.com>`r`n" +
+    "Cc: Carol <carol@example.com>`r`nSubject: $minutes`r`nMessage-ID: <minutes@example.com>`r`n" +
+    "Date: Wed, 1 Oct 2025 09:00:00 +0000`r`n`r`nWe agreed on the dates.`r`n") @('\Seen')
 $subject = 'Hello from the UI test'
-$raw = "From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: $subject`r`nMessage-ID: <ui-e2e@example.com>`r`nDate: Mon, 6 Oct 2025 10:00:00 +0000`r`n`r`nHi,`r`nthis message was put here by scripts/ui-e2e.ps1.`r`n"
-$body = @{ raw = $raw; flags = @() } | ConvertTo-Json
-[void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body "$rest/INBOX/messages")
+AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: $subject`r`n" +
+    "Message-ID: <ui-e2e@example.com>`r`nDate: Mon, 6 Oct 2025 10:00:00 +0000`r`n`r`nHi,`r`n" +
+    "this message was put here by scripts/ui-e2e.ps1.`r`n")
+$newsletter = 'October newsletter'
+$html = '<div style="font-family:Georgia,serif;max-width:560px"><h2 style="color:#036">October newsletter</h2>' +
+    '<p>This message is <b>HTML</b>, with a picture sent inside it:</p><p><img src="cid:banner@example.com" alt="banner"></p>' +
+    '<p>and one kept on the internet, shown only after <i>Download pictures</i>:</p>' +
+    '<p><img src="https://nodemailer.com/img/nm_logo_200x136.png" width="200" height="136" alt="remote picture"></p>' +
+    '<p>A <a href="https://example.com/news">link</a> opens in the browser. <script>alert("never runs")</script></p></div>'
+AddMessage ("From: The Newsletter <news@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: $newsletter`r`n" +
+    "Message-ID: <news@example.com>`r`nDate: Wed, 8 Oct 2025 08:00:00 +0000`r`nMIME-Version: 1.0`r`n" +
+    "Content-Type: multipart/mixed; boundary=`"mixed`"`r`n`r`n--mixed`r`n" +
+    "Content-Type: multipart/related; boundary=`"related`"`r`n`r`n--related`r`n" +
+    "Content-Type: text/html; charset=utf-8`r`n`r`n$html`r`n--related`r`n" +
+    "Content-Type: image/png`r`nContent-ID: <banner@example.com>`r`nContent-Transfer-Encoding: base64`r`n`r`n$png`r`n" +
+    "--related--`r`n--mixed`r`nContent-Type: application/pdf; name=`"report.pdf`"`r`n" +
+    "Content-Disposition: attachment; filename=`"report.pdf`"`r`nContent-Transfer-Encoding: base64`r`n`r`n$pdf64`r`n" +
+    "--mixed--`r`n") @('\Flagged')
 
 $app = $null
 try {
-    # ---- the app, its account form ----
+    # ---- adding the account ----
 
     Step 'starting PostalExpress with a store of its own'
     $store = Join-Path $Out 'store.db'
-    Remove-Item -Force -ErrorAction SilentlyContinue "$store*"
+    Remove-Item -Force -ErrorAction SilentlyContinue "$store*", (Join-Path $Out '*.png'), (Join-Path $Out 'report*.pdf')
     # ImapKit's certificate is self-signed: the app trusts it, and only it, for this run
     $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"")
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
-    $first = WaitFor { $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account'); if ($f -ne [IntPtr]::Zero) { $f } }
-    Check ($null -ne $first) 'the account form opens on the first start'
-    SetText $first 100 'UI Test'
-    SetText $first 101 'testuser@postalexpress.test'
-    SetText $first 102 'testpass'
-    Shot $first '1-account-form'
-    Click $first 1
 
-    # the lookup finds nothing for this domain: the second form comes with the usual names to correct
-    $second = WaitFor {
-        $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
-        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
-    } 40
-    Check ($null -ne $second) 'the server settings form follows the lookup'
-    Check ((GetText $second 104) -eq 'imap.postalexpress.test') 'the lookup guessed the IMAP server'
-    SetText $second 102 'testuser'
-    SetText $second 104 '127.0.0.1'
-    SetText $second 105 "$($ports.imap)"
-    [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 106), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
-    SetText $second 107 '127.0.0.1'
-    SetText $second 108 "$($ports.smtp)"
-    # ImapKit's SMTP server takes a password only after STARTTLS
-    [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 109), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
-    Shot $second '2-server-settings'
-    Click $second 1
-    # the warning about a connection without encryption: Yes
-    $warning = WaitFor { $w = [Native.Win]::FindWindow('#32770', 'Add Mail Account'); if ($w -ne [IntPtr]::Zero) { $w } }
-    Check ($null -ne $warning) 'a connection without encryption is warned about'
-    Click $warning 6
+    # both steps of the form; $password is what the first step gets
+    function AddAccount([string]$name, [string]$user, [string]$password, [bool]$shots) {
+        # the window, once its fields are there
+        $first = WaitFor {
+            $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 102) -ne [IntPtr]::Zero) { $f }
+        }
+        Check ($null -ne $first) "the account form opens ($name)"
+        SetText $first 100 $name
+        SetText $first 101 "$user@postalexpress.test"
+        SetText $first 102 $password
+        if ($shots) { Shot $first 'account-1-form' }
+        Click $first 1
+        if ($shots) {
+            $wait = WaitWindow 'PostalExpressWait' $null 5
+            if ($wait) { Shot $wait 'account-2-lookup' }
+        }
+        # the lookup finds nothing for this domain: the second form comes with the usual names to correct
+        $second = WaitFor {
+            $f = [Native.Win]::FindWindow('PostalExpressForm', 'Add Mail Account')
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+        } 40
+        Check ($null -ne $second) 'the server settings form follows the lookup'
+        if (-not $second) { Shot $first "account-failed-$user"; throw 'no server settings form' }
+        Check ((GetText $second 104) -eq 'imap.postalexpress.test') 'the lookup guessed the IMAP server'
+        SetText $second 102 $user
+        SetText $second 104 '127.0.0.1'
+        SetText $second 105 "$($ports.imap)"
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 106), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
+        SetText $second 107 '127.0.0.1'
+        SetText $second 108 "$($ports.smtp)"
+        # ImapKit's SMTP server takes a password only after STARTTLS
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 109), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
+        if ($shots) { Shot $second 'account-3-servers' }
+        Click $second 1
+        $warning = WaitWindow '#32770' 'Add Mail Account'
+        Check ($null -ne $warning) 'a connection without encryption is warned about'
+        if ($shots -and $warning) { Shot $warning 'account-4-warning' }
+        Click $warning 6
+    }
+    AddAccount 'UI Test' 'testuser' 'testpass' $true
 
     # ---- reading ----
 
-    Step 'syncing and reading'
+    Step 'syncing'
     $main = [Native.Win]::FindWindow('PostalExpressMain', [NullString]::Value)
     $tree = [Native.Win]::GetDlgItem($main, $IDC_TREE)
     $list = [Native.Win]::GetDlgItem($main, $IDC_LIST)
-    $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 3) { $n } }
+    $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
     Check ($null -ne $folders) "the folders of the account are in the tree ($folders)"
-    $root = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
-    $inbox = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $root)
-    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $inbox)
-    $rows = WaitFor { $n = [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 1) { $n } }
-    Check ($rows -eq 1) 'the message is in the list'
-    [void][Native.Win]::SendMessage($list, 0x0007, [IntPtr]::Zero, [IntPtr]::Zero)
-    [void][Native.Win]::PostMessage($list, $WM_KEYDOWN, [IntPtr]0x24, [IntPtr]::Zero)
-    [void][Native.Win]::PostMessage($list, $WM_KEYUP, [IntPtr]0x24, [IntPtr]::Zero)
-    $seen = WaitFor { (Messages 'INBOX')[0].flags -contains '\Seen' } 20
-    Check ([bool]$seen) 'showing the message marked it read on the server'
-    Shot $main '3-reading'
+    # the folders under the account: Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items
+    function SelectFolder([int]$index) {
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+        for ($i = 0; $i -lt $index; $i++) { $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item) }
+        [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $item)
+    }
+    function Rows { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    # a row of the list, reached with the keys as a user would
+    function SelectRow([int]$row) {
+        [void][Native.Win]::SendMessage($list, 0x0007, [IntPtr]::Zero, [IntPtr]::Zero)
+        Key $list $VK_HOME
+        for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
+        Start-Sleep -Milliseconds 1500
+    }
+    SelectFolder 0
+    $rows = WaitFor { if ((Rows) -ge 3) { Rows } }
+    Check ($rows -eq 3) 'the messages are in the list'
+    Shot $main 'main-1-inbox'
 
-    # ---- answering ----
+    Step 'reading an HTML message'
+    SelectRow 0
+    Check ([bool](WaitFor { Seen $newsletter })) 'showing the message marked it read on the server'
+    Check (Visible $main $IDC_ATTACHMENTS) 'the Attachments button is there'
+    Check ((GetText $main $IDC_ATTACHMENTS) -eq 'Attachments (1)') 'it counts the attachment'
+    Check (Visible $main $IDC_PICTURES) 'the Download pictures button is there'
+    Shot $main 'read-1-html'
+
+    Step 'pictures from the internet'
+    Click $main $IDC_PICTURES
+    Check ([bool](WaitFor { -not (Visible $main $IDC_PICTURES) } 10)) 'Download pictures shows them and goes away'
+    Start-Sleep -Seconds 3
+    Shot $main 'read-2-pictures'
+
+    Step 'saving the attachment'
+    Click $main $IDC_ATTACHMENTS
+    $menu = WaitWindow '#32768' $null 10
+    Check ($null -ne $menu) 'Attachments offers the files to save'
+    if ($menu) {
+        Shot $main 'read-3-attachments' $menu
+        Key $menu $VK_DOWN
+        Key $menu $VK_RETURN
+        $save = WaitWindow '#32770' 'Save Attachment As' 10
+        Check ($null -ne $save) 'choosing one asks where to save it'
+        if ($save) {
+            # the file name box: the edit field that holds the suggested name (Explorer may hide the extension)
+            $name = [Native.Win]::FindDescendants($save, 'Edit') | Where-Object { (WindowText $_) -like 'report*' } | Select-Object -First 1
+            Check ($null -ne $name) "the suggested name is the file's"
+            Shot $save 'read-4-save'
+            $target = Join-Path (Resolve-Path $Out) 'report-saved.pdf'
+            if ($name) {
+                # typed, as the dialog keeps its own copy of the name and does not see WM_SETTEXT
+                [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
+                foreach ($c in $target.ToCharArray()) {
+                    [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero)
+                }
+                Start-Sleep -Milliseconds 800
+                Key $name $VK_RETURN
+            }
+            $saved = WaitFor { if (Test-Path $target) { Get-Content -Raw $target } } 10
+            if (-not $saved) {
+                Shot $save 'read-4-save-failed'
+                [void][Native.Win]::PostMessage($save, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+            }
+            Check ($saved -eq $pdf) 'the attachment is saved as it was sent'
+        }
+    }
+
+    Step 'marking unread and read'
+    Command $main $IDM_MARK_UNREAD
+    Check ([bool](WaitFor { -not (Seen $newsletter) })) 'Mark Unread clears \Seen on the server'
+    Shot $main 'read-5-unread'
+    Command $main $IDM_MARK_READ
+    Check ([bool](WaitFor { Seen $newsletter })) 'Mark Read sets it again'
+
+    # ---- writing ----
+
+    function WaitCompose { WaitWindow 'PostalExpressCompose' }
+    function CloseCompose([IntPtr]$compose) {
+        [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($compose) })
+    }
+
+    Step 'forwarding'
+    Command $main $IDM_FORWARD
+    $compose = WaitCompose
+    Check ($null -ne $compose) 'Forward opens a compose window'
+    Check ((GetText $compose $IDC_SUBJECT) -eq "Fw: $newsletter") 'the subject is marked Fw:'
+    Check ((GetText $compose $IDC_TO) -eq '') 'the recipients are left to the user'
+    Shot $compose 'write-1-forward'
+    CloseCompose $compose
+
+    Step 'replying to all'
+    SelectRow 2
+    Command $main $IDM_REPLY_ALL
+    $compose = WaitCompose
+    Check ($null -ne $compose) 'Reply All opens a compose window'
+    $to = GetText $compose $IDC_TO
+    Check ($to -like '*bob@example.com*' -and $to -like '*dave@example.com*') "it goes to the sender and the others ($to)"
+    Check ($to -notlike '*testuser@*') 'but not to the account itself'
+    Check ((GetText $compose $IDC_CC) -like '*carol@example.com*') 'with the Cc kept'
+    Shot $compose 'write-2-reply-all'
+    CloseCompose $compose
 
     Step 'replying'
-    [void][Native.Win]::PostMessage($main, $WM_COMMAND, [IntPtr]$IDM_REPLY, [IntPtr]::Zero)
-    $compose = WaitFor { $c = [Native.Win]::FindWindow('PostalExpressCompose', [NullString]::Value); if ($c -ne [IntPtr]::Zero) { $c } }
+    SelectRow 1
+    Command $main $IDM_REPLY
+    $compose = WaitCompose
     Check ($null -ne $compose) 'Reply opens a compose window'
     Check ((GetText $compose $IDC_TO) -like '*ann@example.com*') 'the reply goes to the sender'
     $bodyField = [Native.Win]::GetDlgItem($compose, $IDC_BODY)
     [void][Native.Win]::SendMessage($bodyField, $EM_SETSEL, [IntPtr]0, [IntPtr]0)
     [void][Native.Win]::SendMessage($bodyField, $EM_REPLACESEL, [IntPtr]1, 'Thanks, Ann. Answered by the UI test.')
-    Shot $compose '4-reply'
-    [void][Native.Win]::PostMessage($compose, $WM_COMMAND, [IntPtr]$IDC_SEND, [IntPtr]::Zero)
+    Shot $compose 'write-3-reply'
+    Command $compose $IDC_SEND
     # ImapKit's SMTP server delivers to its INBOX
-    $answer = WaitFor { (Messages 'INBOX') | Where-Object { (RawText $_) -match "Subject: Re: $subject" } } 30
+    $answer = WaitFor { Find 'INBOX' "Subject: Re: $subject" } 30
     Check ($null -ne $answer) 'the reply arrived over SMTP'
     if ($answer) {
         $text = RawText $answer
         Check ($text -match 'In-Reply-To: <ui-e2e@example.com>') 'the reply refers to the message it answers'
         Check ($text -match 'Answered by the UI test') 'the reply has what was typed'
     }
-    $sent = WaitFor { $m = @(Messages 'Sent'); if ($m.Count -ge 1) { $m } } 20
-    Check ($null -ne $sent) 'a copy of the reply is in Sent'
-    Shot $main '5-after-sending'
+    Check ($null -ne (WaitFor { Find 'Sent' "Subject: Re: $subject" })) 'a copy of the reply is in Sent'
 
-    # ---- help ----
+    Step 'a new message'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    Check ($null -ne $compose) 'Create Mail opens an empty compose window'
+    SetText $compose $IDC_TO 'dave at example.com'
+    SetText $compose $IDC_SUBJECT 'A new message from the UI test'
+    SetText $compose $IDC_BODY "Hello Dave,`r`n`r`nwritten from scratch."
+    Command $compose $IDC_SEND
+    $problem = WaitWindow '#32770' 'PostalExpress' 10
+    Check ($null -ne $problem) 'a mistyped address is pointed out before sending'
+    if ($problem) {
+        Shot $problem 'write-4-bad-address'
+        [void][Native.Win]::PostMessage($problem, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+    }
+    Check ([bool](WaitFor { [Native.Win]::IsWindow($compose) -and [Native.Win]::FindWindow('#32770', 'PostalExpress') -eq [IntPtr]::Zero })) 'and the message stays open to fix it'
+    SetText $compose $IDC_TO 'Dave <dave@example.com>'
+    Shot $compose 'write-5-new'
+    Command $compose $IDC_SEND
+    Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: A new message from the UI test' } 30)) 'the new message was sent'
+
+    # ---- getting new mail ----
+
+    Step 'Send/Recv'
+    AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: One more thing`r`n" +
+        "Message-ID: <later@example.com>`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`n`r`nArrived later.`r`n")
+    Command $main $IDM_SYNC
+    Check ($null -ne (WaitFor { if ((Rows) -ge 6) { Rows } } 30)) 'the new mail is in the list'
+    Shot $main 'main-2-new-mail'
+    SelectFolder 1
+    Check ($null -ne (WaitFor { if ((Rows) -ge 2) { Rows } })) 'Sent Items has what was sent'
+    SelectRow 0
+    Shot $main 'main-3-sent-items'
+    SelectFolder 0
+
+    # ---- a wrong password ----
+
+    Step 'a wrong password'
+    Command $main $IDM_NEW_ACCOUNT
+    AddAccount 'Wrong Password' 'testuser2' 'not-the-password' $false
+    $logon = WaitWindow 'PostalExpressForm' 'Logon' 30
+    Check ($null -ne $logon) 'a refused password is asked for again'
+    if ($logon) {
+        $status = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+        $status = WindowText $status
+        Check ($status -match 'authentication') "the status bar says why ($status)"
+        Shot $main 'trouble-1-password'
+        Click $logon 2
+    }
+
+    # ---- about and help ----
+
+    Step 'about'
+    Command $main $IDM_ABOUT
+    $about = WaitWindow '#32770' 'About PostalExpress'
+    Check ($null -ne $about) 'About shows the version'
+    if ($about) {
+        Shot $about 'help-1-about'
+        [void][Native.Win]::PostMessage($about, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { [Native.Win]::FindWindow('#32770', 'About PostalExpress') -eq [IntPtr]::Zero })
+    }
 
     Step 'help'
-    [void][Native.Win]::PostMessage($main, $WM_COMMAND, [IntPtr]$IDM_HELP, [IntPtr]::Zero)
-    $help = WaitFor { $h = [Native.Win]::FindWindow('PostalExpressHelp', [NullString]::Value); if ($h -ne [IntPtr]::Zero) { $h } }
+    Command $main $IDM_HELP
+    $help = WaitWindow 'PostalExpressHelp'
     Check ($null -ne $help) 'F1 opens the help'
     if ($help) {
         Start-Sleep -Seconds 3
-        Shot $help '6-help'
+        Shot $help 'help-2-contents'
         [void][Native.Win]::PostMessage($help, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
     }
 

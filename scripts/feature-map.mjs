@@ -1,0 +1,311 @@
+#!/usr/bin/env node
+// Builds a single HTML page that maps every feature of the app to a screenshot from the UI end-to-end test
+// (scripts/ui-e2e.ps1, copied here by scripts/win-ui-e2e.sh), with the screenshots embedded:
+//   node scripts/feature-map.mjs [screenshot dir, default build/ui-e2e] [output, default build/feature-map.html]
+
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+const dir = process.argv[2] || 'build/ui-e2e';
+const out = process.argv[3] || 'build/feature-map.html';
+const version = /version = "([^"]+)"/.exec(readFileSync('core/Cargo.toml', 'utf8'))[1];
+
+// each feature: the screenshot, what it does, how to reach it, and what the UI test checks
+const sections = [
+    {
+        title: 'Adding an account',
+        intro: 'The first start opens the account form; File > New Account adds more. Two steps: who you are, then the servers.',
+        features: [
+            {
+                shot: 'account-1-form',
+                name: 'Step 1: name, address, password',
+                what: 'Three fields, nothing technical. The servers are looked up from the address after OK.',
+                how: 'First start, or File > New Account, or New Account on the toolbar.',
+                checked: ['The form opens on the first start']
+            },
+            {
+                shot: 'account-3-servers',
+                name: 'Step 2: the servers, looked up',
+                what: "PostalExpress looks up the provider's settings the way Thunderbird does: the provider's own autoconfig file, then Mozilla's ISPDB, then the usual imap. and smtp. names. Only over HTTPS, and it never picks a server without encryption. Gmail and Outlook.com accounts are offered sign-in through the browser (OAuth) when the build has client IDs.",
+                how: 'Follows step 1 automatically. Cancel on the lookup skips it.',
+                checked: ['The lookup runs and fills in the guessed names (imap.postalexpress.test for the test address)']
+            },
+            {
+                shot: 'account-4-warning',
+                name: 'Warning before an unencrypted connection',
+                what: 'Choosing "None (unencrypted)" for either server asks for confirmation first, since the password would travel readable. STARTTLS is required to really encrypt; a server that does not offer it is refused.',
+                how: 'Shown when a server is set to None.',
+                checked: ['The warning appears']
+            }
+        ]
+    },
+    {
+        title: 'The main window',
+        intro: 'Outlook Express layout: folders on the left, the message list at the top, the message below. Classic Windows controls.',
+        features: [
+            {
+                shot: 'main-1-inbox',
+                name: 'Folders and the message list',
+                what: 'Each account with its folders, special folders under their familiar names (Inbox, Sent Items, Drafts, Junk E-mail, Deleted Items). Folders with unread mail are bold with the count. In the list, unread messages are bold; the ! column shows ! for flagged and @ for attachments. Click a column heading to sort, again to reverse. The status bar shows what is going on and the counts of the folder.',
+                how: 'Always there. Drag the borders between the parts to resize them.',
+                checked: ['All 7 folders of the account appear', 'The 3 messages are listed']
+            },
+            {
+                shot: 'main-2-new-mail',
+                name: 'Send/Recv (F5) and automatic checks',
+                what: 'Every account is checked at start and every ten minutes; Send/Recv or F5 checks now. New mail appears in the list without restarting.',
+                how: 'Send/Recv on the toolbar, Tools > Send and Receive All, or F5.',
+                checked: ['A message added on the server appears after Send/Recv']
+            },
+            {
+                shot: 'main-3-sent-items',
+                name: 'Sent Items',
+                what: 'A copy of everything sent is kept in the Sent folder on the server, so other mail programs see it too.',
+                how: 'Select Sent Items in the folder tree.',
+                checked: ['Sent Items lists the reply and the new message']
+            }
+        ]
+    },
+    {
+        title: 'Reading mail',
+        intro: 'Messages are parsed in Rust and shown in a locked-down WebView2: scripts never run, nothing is loaded from the internet unless you ask, links open in your browser.',
+        features: [
+            {
+                shot: 'read-1-html',
+                name: 'HTML messages, with pictures sent inside them',
+                what: 'HTML mail is cleaned (no scripts, no forms, no tracking) and shown with its layout. Pictures that travel inside the message are shown at once. Showing a message for a second marks it read, on the server too.',
+                how: 'Click a message, or move through the list with the arrow keys.',
+                checked: [
+                    'Showing the message sets \\Seen on the server',
+                    'The Attachments button appears and counts the file',
+                    'The Download pictures button appears'
+                ]
+            },
+            {
+                shot: 'read-2-pictures',
+                name: 'Pictures from the internet, only when asked',
+                what: 'Pictures the sender keeps on the internet would tell the sender that, when and where you opened the message, so they are blocked. Download pictures shows them for this message.',
+                how: 'The Download pictures button next to the header, or View > Download Pictures.',
+                checked: ['The button shows the pictures and goes away']
+            },
+            {
+                shot: 'read-3-attachments',
+                name: 'Attachments',
+                what: 'The Attachments button lists the files with their sizes. Names are made safe in Rust: no folder parts, no characters Windows forbids, nothing that makes a name look like something else.',
+                how: 'The Attachments (n) button next to the header.',
+                checked: ['The menu offers the file']
+            },
+            {
+                shot: 'read-4-save',
+                name: 'Saving an attachment',
+                what: 'The standard Save dialog, suggesting the safe name, starting in Downloads (after that, where you saved last).',
+                how: 'Choose a file in the Attachments menu.',
+                checked: ["The suggested name is the attachment's", 'The saved file is byte for byte what was sent']
+            },
+            {
+                shot: 'read-5-unread',
+                name: 'Mark Read and Mark Unread',
+                what: 'Changes the read state on the server, so other mail programs agree.',
+                how: 'Mark Read / Mark Unread on the toolbar, the Edit menu, or Ctrl+Q for read.',
+                checked: ['Mark Unread removes \\Seen on the server', 'Mark Read sets it again']
+            }
+        ]
+    },
+    {
+        title: 'Writing mail',
+        intro: 'A compose window per message. Sending goes over SMTP from the account the message belongs to; problems are reported before anything is sent.',
+        features: [
+            {
+                shot: 'write-3-reply',
+                name: 'Reply',
+                what: 'Answers the sender with "Re:" in the subject and the original quoted below, threaded with In-Reply-To and References so other programs group the conversation.',
+                how: 'Reply on the toolbar, Message > Reply to Sender, or Ctrl+R.',
+                checked: ['The reply goes to the sender', 'It arrives over SMTP with In-Reply-To set and the typed text', 'A copy is kept in Sent']
+            },
+            {
+                shot: 'write-2-reply-all',
+                name: 'Reply All',
+                what: 'Answers the sender and everyone else the message went to, keeping Cc, leaving out your own address.',
+                how: 'Reply All on the toolbar, Message > Reply to All, or Ctrl+Shift+R.',
+                checked: ['To has the sender and the other recipients, not you', 'Cc is kept']
+            },
+            {
+                shot: 'write-1-forward',
+                name: 'Forward',
+                what: 'Sends the message on with "Fw:" in the subject and the original below. The recipients are left to you.',
+                how: 'Forward on the toolbar, Message > Forward, or Ctrl+F.',
+                checked: ['The subject is "Fw: October newsletter"', 'To is empty']
+            },
+            {
+                shot: 'write-5-new',
+                name: 'A new message',
+                what: 'To, Cc, Bcc, Subject, the text and attached files (Attach). Several addresses are separated with commas; names with commas go in quotes.',
+                how: 'Create Mail on the toolbar, Message > New Message, or Ctrl+N.',
+                checked: ['The message is sent and arrives']
+            },
+            {
+                shot: 'write-4-bad-address',
+                name: 'Mistakes are caught before sending',
+                what: 'A mistyped address or an attachment that is gone is pointed out, and the message stays open to fix.',
+                how: 'Happens on Send.',
+                checked: ['"dave at example.com" is refused with the reason', 'The compose window stays open']
+            }
+        ]
+    },
+    {
+        title: 'When something goes wrong',
+        features: [
+            {
+                shot: 'trouble-1-password',
+                name: 'A refused password',
+                what: 'The status bar says what the server answered and PostalExpress asks for the password again (for a browser sign-in account it offers to sign in again). A server that only takes the password over an encrypted connection is reported as that, not as a wrong password.',
+                how: 'Happens on its own when a server refuses the login.',
+                checked: ['The Logon prompt appears', 'The status bar keeps the reason']
+            }
+        ]
+    },
+    {
+        title: 'Help',
+        features: [
+            {
+                shot: 'help-2-contents',
+                name: 'Help',
+                what: 'A help window built into the program: adding accounts (with Gmail and Outlook.com app passwords), reading, pictures and attachments, writing, getting mail, keyboard shortcuts, troubleshooting by error message, and where mail and passwords are kept.',
+                how: 'F1 or Help > Contents.',
+                checked: ['F1 opens it']
+            },
+            {
+                shot: 'help-1-about',
+                name: 'About',
+                what: 'The version of the program and of its Rust core.',
+                how: 'Help > About PostalExpress.',
+                checked: ['It opens']
+            }
+        ]
+    }
+];
+
+const behind = [
+    ['Passwords', 'Kept in the Windows Credential Manager (under "PostalExpress"), encrypted for your Windows account; never in the mail store.'],
+    ['Offline reading', 'Messages are cached in %LOCALAPPDATA%\\PostalExpress\\store.db, so what was downloaded can be read without a connection.'],
+    [
+        'Security model',
+        'Everything a server or sender writes is parsed in Rust (IMAP, MIME, HTML sanitizing, attachment names, autoconfig XML). The Windows UI only shows values the core has checked. The reading pane has scripts, remote requests and navigation turned off.'
+    ],
+    ['Certificates', 'Server certificates are checked against what Windows trusts. There is no "accept any certificate" switch.'],
+    [
+        'Installer',
+        'A per-user installer (no admin rights), signed by Postal Systems OÜ, that upgrades in place and asks on uninstall whether to remove the downloaded mail.'
+    ]
+];
+
+const missing = [
+    'Delete or move messages, or flag them (the flag is shown, not set)',
+    'Search',
+    'Edit or remove an account (the core can, the window for it is missing)',
+    'Save drafts, or send later',
+    'Create, rename or delete folders',
+    'Print, and .eml import and export',
+    'Rich text (HTML) writing: in progress, a formatting editor replaces the plain text box',
+    'Folding quoted reply history behind "...": in progress, when reading and when replying',
+    'Gmail and Outlook.com browser sign-in in released builds: works, but needs the OAuth client IDs at build time'
+];
+
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const image = name => {
+    const path = join(dir, `${name}.png`);
+    return existsSync(path) ? `data:image/png;base64,${readFileSync(path).toString('base64')}` : null;
+};
+
+let count = 0;
+const body = sections
+    .map(section => {
+        const cards = section.features
+            .map(feature => {
+                count++;
+                const src = image(feature.shot);
+                const picture = src
+                    ? `<a class="shot" href="#${feature.shot}"><img src="${src}" alt="${esc(feature.name)}" loading="lazy"></a>`
+                    : `<div class="shot missing">No screenshot (${esc(feature.shot)})</div>`;
+                return `<article class="feature" id="f-${feature.shot}">
+  <div class="text">
+    <h3>${esc(feature.name)}</h3>
+    <p>${esc(feature.what)}</p>
+    <p class="how"><span>How</span>${esc(feature.how)}</p>
+    <div class="checked"><span>Checked by the UI test</span><ul>${feature.checked.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>
+  </div>
+  ${picture}
+</article>
+${src ? `<a class="lightbox" id="${feature.shot}" href="#f-${feature.shot}"><img src="${src}" alt=""></a>` : ''}`;
+            })
+            .join('\n');
+        return `<section><h2>${esc(section.title)}</h2>${section.intro ? `<p class="intro">${esc(section.intro)}</p>` : ''}\n${cards}</section>`;
+    })
+    .join('\n');
+
+const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PostalExpress Features</title>
+<style>
+:root { --bg: #f6f5f1; --card: #ffffff; --ink: #1d232b; --muted: #5c6670; --line: #e2dfd7; --accent: #0b4f8a; --ok: #1d7a46; --chip: #eef3f8; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #15181c; --card: #1d2127; --ink: #e7e9ec; --muted: #9aa4ae; --line: #2c323a; --accent: #7db4ea; --ok: #63c48d; --chip: #222a33; }
+}
+:root[data-theme="dark"] { --bg: #15181c; --card: #1d2127; --ink: #e7e9ec; --muted: #9aa4ae; --line: #2c323a; --accent: #7db4ea; --ok: #63c48d; --chip: #222a33; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 "Segoe UI", system-ui, sans-serif; }
+header, main, footer { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+header { padding-top: 48px; padding-bottom: 8px; }
+h1 { font-size: 34px; margin: 0 0 6px; letter-spacing: -0.5px; }
+.lead { color: var(--muted); font-size: 17px; max-width: 760px; margin: 0; }
+nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 6px; }
+nav a { background: var(--chip); color: var(--accent); text-decoration: none; padding: 4px 12px; border-radius: 999px; font-size: 13px; }
+h2 { font-size: 22px; margin: 44px 0 4px; padding-bottom: 6px; border-bottom: 2px solid var(--line); }
+.intro { color: var(--muted); margin: 6px 0 16px; max-width: 820px; }
+.feature { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(0, 1.6fr); gap: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin: 14px 0; align-items: start; }
+.feature h3 { margin: 0 0 8px; font-size: 17px; }
+.feature p { margin: 0 0 10px; }
+.how span, .checked > span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 2px; }
+.checked ul { margin: 0; padding: 0; list-style: none; }
+.checked li { padding-left: 20px; position: relative; font-size: 14px; }
+.checked li::before { content: "\\2713"; position: absolute; left: 0; color: var(--ok); font-weight: 700; }
+.shot img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 6px; cursor: zoom-in; }
+.shot.missing { color: var(--muted); font-style: italic; }
+.lightbox { display: none; }
+.lightbox:target { display: flex; position: fixed; inset: 0; background: rgba(0,0,0,0.82); align-items: center; justify-content: center; z-index: 10; cursor: zoom-out; padding: 24px; }
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: 4px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.grid div { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.grid b { display: block; margin-bottom: 4px; }
+ul.missing { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 14px 36px; margin: 12px 0; }
+ul.missing li { margin: 3px 0; }
+footer { color: var(--muted); font-size: 13px; padding-top: 30px; padding-bottom: 48px; }
+@media (max-width: 760px) { .feature { grid-template-columns: 1fr; } header { padding-top: 28px; } h1 { font-size: 28px; } header, main, footer { padding: 0 16px; } }
+</style>
+</head>
+<body>
+<header>
+<h1>PostalExpress ${esc(version)}: what it can do</h1>
+<p class="lead">Every feature of the app, with a screenshot of it running. The screenshots come from the UI end-to-end test, which drives the real program against a test mail server and checks each effect on the server. Click a screenshot to enlarge it.</p>
+<nav>${sections.map((s, i) => `<a href="#s${i}">${esc(s.title)}</a>`).join('')}<a href="#behind">Behind the scenes</a><a href="#missing">Not there yet</a></nav>
+</header>
+<main>
+${body.replace(
+    /<section>/g,
+    (() => {
+        let i = 0;
+        return () => `<section id="s${i++}">`;
+    })()
+)}
+<section id="behind"><h2>Behind the scenes</h2><div class="grid">${behind.map(([t, d]) => `<div><b>${esc(t)}</b>${esc(d)}</div>`).join('')}</div></section>
+<section id="missing"><h2>Not there yet</h2><p class="intro">What an Outlook Express user would look for and does not find yet.</p><ul class="missing">${missing.map(m => `<li>${esc(m)}</li>`).join('')}</ul></section>
+</main>
+<footer>${count} features. Generated ${new Date().toISOString().slice(0, 10)} by scripts/feature-map.mjs from the screenshots of scripts/ui-e2e.ps1.</footer>
+</body>
+</html>
+`;
+writeFileSync(out, html);
+console.log(`${out}: ${count} features`);
