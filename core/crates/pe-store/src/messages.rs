@@ -106,6 +106,25 @@ impl Sort {
     }
 }
 
+/// The condition of a search: `?2` a LIKE pattern from [`like_pattern`], `%` matching everything
+const MATCHING: &str = "(?2 = '%' OR pe_fold(subject) LIKE ?2 ESCAPE '\\' OR pe_fold(from_name) LIKE ?2 ESCAPE '\\' \
+                        OR pe_fold(from_address) LIKE ?2 ESCAPE '\\' OR pe_fold(recipients) LIKE ?2 ESCAPE '\\')";
+
+/// What was typed as a LIKE pattern for "has it in it": its own `%`, `_` and `\` taken literally
+fn like_pattern(find: &str) -> String {
+    let mut pattern = String::from("%");
+    for c in find.trim().to_lowercase().chars() {
+        if matches!(c, '%' | '_' | '\\') {
+            pattern.push('\\');
+        }
+        pattern.push(c);
+    }
+    if pattern.len() > 1 {
+        pattern.push('%');
+    }
+    pattern
+}
+
 /// Flags as the store keeps them: sorted and once each, so the same flags in another order are no
 /// change, and without `\Recent`, which differs from one connection to the next
 fn canonical_flags(flags: &[String]) -> String {
@@ -257,21 +276,53 @@ impl Store {
 
     /// A page of the message list
     pub fn messages(&self, folder: FolderId, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
+        self.messages_matching(folder, sort, "", offset, limit)
+    }
+
+    /// A page of the messages of a folder whose subject, sender or recipients have `find` in them (the whole
+    /// list for an empty one), without regard to case
+    pub fn messages_matching(
+        &self,
+        folder: FolderId,
+        sort: Sort,
+        find: &str,
+        offset: u64,
+        limit: u64,
+    ) -> Result<Vec<Message>> {
         let mut statement = self.db.prepare_cached(&format!(
-            "SELECT {COLUMNS} FROM messages WHERE folder_id = ?1 ORDER BY {} LIMIT ?2 OFFSET ?3",
+            "SELECT {COLUMNS} FROM messages WHERE folder_id = ?1 AND {MATCHING} ORDER BY {} LIMIT ?3 OFFSET ?4",
             sort.order_by()
         ))?;
-        statement.query_map(params![folder, limit, offset], from_row)?.collect()
+        statement
+            .query_map(params![folder, like_pattern(find), limit, offset], from_row)?
+            .collect()
     }
 
     /// Where a message is in the message list in this order, None when the folder does not have it
     pub fn message_index(&self, folder: FolderId, sort: Sort, uid: u64) -> Result<Option<u64>> {
+        self.message_index_matching(folder, sort, "", uid)
+    }
+
+    /// [`Store::message_index`] in the list of [`Store::messages_matching`]
+    pub fn message_index_matching(&self, folder: FolderId, sort: Sort, find: &str, uid: u64) -> Result<Option<u64>> {
         let mut statement = self.db.prepare_cached(&format!(
             "SELECT position FROM (SELECT uid, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS position \
-             FROM messages WHERE folder_id = ?1) WHERE uid = ?2",
+             FROM messages WHERE folder_id = ?1 AND {MATCHING}) WHERE uid = ?3",
             sort.order_by()
         ))?;
-        statement.query_row(params![folder, uid], |row| row.get(0)).optional()
+        statement
+            .query_row(params![folder, like_pattern(find), uid], |row| row.get(0))
+            .optional()
+    }
+
+    /// How many messages of a folder [`Store::messages_matching`] lists, and how many of them are unread
+    pub fn count_matching(&self, folder: FolderId, find: &str) -> Result<(u64, u64)> {
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT COUNT(*), COALESCE(SUM(NOT seen), 0) FROM messages WHERE folder_id = ?1 AND {MATCHING}"
+        ))?;
+        statement.query_row(params![folder, like_pattern(find)], |row| {
+            Ok((row.get(0)?, row.get(1)?))
+        })
     }
 
     pub fn message(&self, folder: FolderId, uid: u64) -> Result<Option<Message>> {
@@ -341,6 +392,57 @@ mod tests {
             from_address: format!("{}@example.com", from.to_lowercase()),
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn finds_messages() {
+        let (store, folder) = setup();
+        let mut with_recipients = message(4, "Hello", "Bob", 400, &[]);
+        with_recipients.recipients = "Carol, dave@example.com".into();
+        store
+            .add_messages(
+                folder,
+                &[
+                    message(1, "Budget for 2025", "Ann", 100, &["\\Seen"]),
+                    message(2, "Lunch", "Ann", 200, &[]),
+                    message(3, "100% sure_thing", "Zed", 300, &["\\Seen"]),
+                    with_recipients,
+                ],
+            )
+            .unwrap();
+        let sort = Sort::default();
+        let found = |find: &str| -> Vec<u64> {
+            let mut uids: Vec<u64> = store
+                .messages_matching(folder, sort, find, 0, 100)
+                .unwrap()
+                .iter()
+                .map(|m| m.info.uid)
+                .collect();
+            uids.sort();
+            uids
+        };
+        // subject, sender name, sender address and recipients; case does not matter
+        assert_eq!(found("budget"), [1]);
+        assert_eq!(found("ANN"), [1, 2]);
+        assert_eq!(found("zed@example"), [3]);
+        assert_eq!(found("carol"), [4]);
+        // what LIKE would read as wildcards is taken as typed
+        assert_eq!(found("%"), [3]);
+        assert_eq!(found("e_t"), [3]);
+        assert_eq!(found("  "), [1, 2, 3, 4]);
+        assert!(found("nothing like it").is_empty());
+        // case beyond ASCII too
+        let mut accented = message(5, "Äriplaan", "Õie", 500, &["\\Seen"]);
+        accented.from_address = "oie@example.com".into();
+        store.add_messages(folder, &[accented]).unwrap();
+        assert_eq!(found("äri"), [5]);
+        assert_eq!(found("ÕIE"), [5]);
+        store.remove_messages(folder, &[5]).unwrap();
+        // the counts and the positions of the found list
+        assert_eq!(store.count_matching(folder, "ann").unwrap(), (2, 1));
+        assert_eq!(store.count_matching(folder, "").unwrap(), (4, 2));
+        assert_eq!(store.message_index_matching(folder, sort, "ann", 2).unwrap(), Some(0));
+        assert_eq!(store.message_index_matching(folder, sort, "ann", 3).unwrap(), None);
     }
 
     #[test]

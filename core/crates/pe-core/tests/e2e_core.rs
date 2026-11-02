@@ -475,3 +475,44 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     assert!(core.messages(archive, Sort::default(), 0, 10).unwrap().is_empty());
     assert!(core.messages(trash, Sort::default(), 0, 10).unwrap().is_empty());
 }
+
+#[test]
+fn creates_renames_and_deletes_folders() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let path_of = |name: &str| {
+        s.core
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .find(|f| f.info.path == name)
+            .map(|f| f.id)
+    };
+    let archive = path_of("Archive").unwrap();
+
+    s.core.create_folder(account, Some(archive), "2024").unwrap();
+    s.wait(|e| *e == Event::FoldersChanged { account });
+    let created = path_of("Archive/2024").expect("Archive/2024");
+
+    s.core.rename_folder(created, "2025").unwrap();
+    s.wait(|e| *e == Event::FoldersChanged { account });
+    assert!(path_of("Archive/2024").is_none());
+    let renamed = path_of("Archive/2025").expect("Archive/2025");
+
+    s.core.delete_folder(renamed).unwrap();
+    s.wait(|e| *e == Event::FoldersChanged { account });
+    assert!(path_of("Archive/2025").is_none());
+
+    // refused now, before anything goes to the server
+    let inbox = path_of("INBOX").unwrap();
+    let sent = path_of("Sent").unwrap();
+    assert!(matches!(
+        s.core.rename_folder(inbox, "Mail"),
+        Err(pe_core::Error::Folder(_))
+    ));
+    assert!(matches!(s.core.delete_folder(sent), Err(pe_core::Error::Folder(_))));
+    let refused = s.core.create_folder(account, None, "a/b").unwrap_err();
+    assert!(refused.to_string().contains("\"/\""), "{refused}");
+}

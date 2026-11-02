@@ -109,6 +109,24 @@ fn reads_mail_through_the_c_api() {
     assert!(unsafe { pe_account_list_get(accounts, 1) }.is_null());
     unsafe { pe_account_list_free(accounts) };
 
+    // its settings, as Properties shows them, and changed
+    let view = unsafe { pe_account_settings(core, account) };
+    let stored = unsafe { &*pe_account_settings_info(view) };
+    assert_eq!((text(stored.name), stored.imap_port), ("Test".to_string(), server.imap));
+    assert_eq!(stored.smtp_security, PeSecurity::StartTls);
+    unsafe { pe_account_settings_free(view) };
+    let renamed = c("Renamed");
+    let changed = PeAccountSettings {
+        name: renamed.as_ptr(),
+        ..settings
+    };
+    assert!(unsafe { pe_account_update(core, account, &changed) });
+    let view = unsafe { pe_account_settings(core, account) };
+    assert_eq!(text(unsafe { &*pe_account_settings_info(view) }.name), "Renamed");
+    unsafe { pe_account_settings_free(view) };
+    assert!(unsafe { pe_account_settings(core, 4242) }.is_null());
+    assert!(unsafe { pe_account_settings_info(std::ptr::null()) }.is_null());
+
     assert!(unsafe { pe_sync(core, account) });
     wait(&events, |e| e.kind == PeEventKind::SyncFinished && e.account == account);
 
@@ -129,7 +147,17 @@ fn reads_mail_through_the_c_api() {
     let inbox = inbox.id;
     unsafe { pe_folder_list_free(folders) };
 
-    let list = unsafe { pe_messages(core, inbox, PeSortField::Subject, true, 0, 50) };
+    // a search: only what has it in its subject, sender or recipients, counted the same
+    let find = c("report");
+    let found = unsafe { pe_messages(core, inbox, PeSortField::Subject, true, find.as_ptr(), 0, 50) };
+    assert_eq!(unsafe { pe_message_list_count(found) }, 1);
+    unsafe { pe_message_list_free(found) };
+    let (mut total, mut unread) = (0u64, 0u64);
+    assert!(unsafe { pe_message_count(core, inbox, find.as_ptr(), &mut total, &mut unread) });
+    assert_eq!((total, unread), (1, 1));
+    assert!(unsafe { pe_message_count(core, inbox, std::ptr::null(), &mut total, &mut unread) });
+    assert_eq!(total, 2);
+    let list = unsafe { pe_messages(core, inbox, PeSortField::Subject, true, std::ptr::null(), 0, 50) };
     assert_eq!(unsafe { pe_message_list_count(list) }, 2);
     let first = unsafe { &*pe_message_list_get(list, 0) };
     assert_eq!(text(first.subject), "Other");
@@ -140,15 +168,15 @@ fn reads_mail_through_the_c_api() {
     );
     assert!(second.has_attachments && !second.seen);
     assert_eq!(
-        unsafe { pe_message_index(core, inbox, PeSortField::Subject, true, uid) },
+        unsafe { pe_message_index(core, inbox, PeSortField::Subject, true, std::ptr::null(), uid) },
         1
     );
     assert_eq!(
-        unsafe { pe_message_index(core, inbox, PeSortField::Subject, false, uid) },
+        unsafe { pe_message_index(core, inbox, PeSortField::Subject, false, std::ptr::null(), uid) },
         0
     );
     assert_eq!(
-        unsafe { pe_message_index(core, inbox, PeSortField::Subject, true, uid + 99) },
+        unsafe { pe_message_index(core, inbox, PeSortField::Subject, true, std::ptr::null(), uid + 99) },
         -1
     );
     let (mut total, mut unread) = (0u64, 0u64);
@@ -335,6 +363,13 @@ fn null_and_bad_arguments() {
         assert!(!pe_message_move(core, 1, 1, 2));
         assert!(!pe_message_delete(core, 1, 1));
         assert!(!pe_folder_deletes_for_good(core, 1));
+        let mut reason: *mut c_char = null_mut();
+        let bad = CString::new("").unwrap();
+        assert!(!pe_folder_create(core, 42, 0, bad.as_ptr(), &mut reason));
+        assert!(!reason.is_null());
+        pe_string_free(reason);
+        assert!(!pe_folder_rename(core, 1, bad.as_ptr(), null_mut()));
+        assert!(!pe_folder_delete(std::ptr::null(), 1, null_mut()));
         assert!(pe_message_view_result(core, 12345).is_null());
         pe_message_view_cancel(core, 12345);
         let empty = pe_folders(core, 42);

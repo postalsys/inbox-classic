@@ -42,6 +42,17 @@ pub(crate) enum Command {
         uid: u64,
         removed: Box<pe_store::MessageInfo>,
     },
+    CreateFolder {
+        parent: Option<FolderId>,
+        name: String,
+    },
+    RenameFolder {
+        folder: FolderId,
+        path: String,
+    },
+    DeleteFolder {
+        folder: FolderId,
+    },
     Send(Box<crate::Outgoing>),
 }
 
@@ -231,6 +242,26 @@ impl Worker {
                 };
                 self.restore_on_failure(store, folder, *removed, expunged)
             }
+            Command::CreateFolder { parent, name } => {
+                let client = self.client(store).await?;
+                let namespace = client.namespace().cloned();
+                let path = pe_sync::new_folder_path(store, self.account, parent, &name, namespace.as_ref())?.map_err(
+                    |refusal| Failure {
+                        kind: FailureKind::Other,
+                        message: refusal.to_string(),
+                    },
+                )?;
+                pe_sync::create_folder(self.client(store).await?, &path).await?;
+                self.sync_folder_list(store).await
+            }
+            Command::RenameFolder { folder, path } => {
+                pe_sync::rename_folder(self.client(store).await?, store, folder, &path).await?;
+                self.sync_folder_list(store).await
+            }
+            Command::DeleteFolder { folder } => {
+                pe_sync::delete_folder(self.client(store).await?, store, folder).await?;
+                self.sync_folder_list(store).await
+            }
             Command::Send(outgoing) => self.send(store, *outgoing).await,
         }
     }
@@ -364,13 +395,19 @@ impl Worker {
     }
 
     async fn sync_all(&mut self, store: &mut Store) -> Outcome {
+        self.sync_folders_and(store, |_| true).await
+    }
+
+    /// The folder tree from the server ([`Event::FoldersChanged`] when it changed), then the folders `which` picks.
+    /// One folder the server refuses does not stop the others.
+    async fn sync_folders_and(&mut self, store: &mut Store, which: impl Fn(&pe_store::Folder) -> bool) -> Outcome {
         let account = self.account;
         let before: Vec<_> = store.folders(account)?.into_iter().map(|f| f.info).collect();
         let folders = sync_folders(self.client(store).await?, store, account).await?;
         if folders.iter().map(|f| &f.info).ne(before.iter()) {
             self.emit(Event::FoldersChanged { account });
         }
-        for folder in folders.iter().filter(|f| f.info.selectable) {
+        for folder in folders.iter().filter(|f| f.info.selectable && which(f)) {
             match self.sync_one(store, folder.id).await {
                 // one folder the server refuses does not stop the others
                 Err(failure) if failure.kind == FailureKind::Other => self.emit(Event::Failed {
@@ -382,6 +419,12 @@ impl Worker {
             }
         }
         Ok(())
+    }
+
+    /// The folder tree from the server, after a folder was made, renamed or deleted: the new folders synced too
+    async fn sync_folder_list(&mut self, store: &mut Store) -> Outcome {
+        self.sync_folders_and(store, |folder| folder.state.uid_validity.is_none())
+            .await
     }
 
     async fn sync_one(&mut self, store: &mut Store, folder: FolderId) -> Outcome {

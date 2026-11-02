@@ -86,6 +86,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
                         WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL | LVS_OWNERDATA, IDC_LIST, {},
                         WS_EX_CLIENTEDGE);
     ListView_SetExtendedListViewStyle(list_, LVS_EX_FULLROWSELECT);
+    findLabel_ = CreateChild(parent, L"STATIC", L"Find:", SS_RIGHT | SS_CENTERIMAGE, 0, {});
+    findEdit_ = CreateChild(parent, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_FIND, {}, WS_EX_CLIENTEDGE);
     AddColumn(list_, COL_MARKS, L"!", 28);
     AddColumn(list_, COL_FROM, L"From", 180);
     AddColumn(list_, COL_SUBJECT, L"Subject", 320);
@@ -143,6 +145,7 @@ void Mailbox::Reload() {
     items_.clear();
     accountNames_.clear();
     folderAccounts_.clear();
+    folderNames_.clear();
     firstAccount_ = 0;
     core::AccountList accounts(pe_accounts(core_));
     size_t count = pe_account_list_count(accounts.get());
@@ -154,7 +157,8 @@ void Mailbox::Reload() {
         if (!firstAccount_) {
             firstAccount_ = account->id;
         }
-        HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->name), 0, false);
+        // an account's own item carries its id negated, so selecting it tells which account it is
+        HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->name), static_cast<LPARAM>(-account->id), false);
         FillAccount(root, account->id);
         TreeView_Expand(tree_, root, TVE_EXPAND);
     }
@@ -180,6 +184,7 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
         HTREEITEM item = InsertItem(tree_, parents[depth], FolderLabel(*folder), static_cast<LPARAM>(folder->id), folder->unread > 0);
         items_[folder->id] = item;
         folderAccounts_[folder->id] = account;
+        folderNames_[folder->id] = {FolderName(*folder), folder->fixed};
         parents.resize(depth + 1);
         parents.push_back(item);
     }
@@ -224,7 +229,10 @@ PeOAuthProvider Mailbox::OAuthProvider(int64_t account) const {
 
 int64_t Mailbox::CurrentAccount() const {
     auto account = folderAccounts_.find(folder_);
-    return account != folderAccounts_.end() ? account->second : firstAccount_;
+    if (account != folderAccounts_.end()) {
+        return account->second;
+    }
+    return selectedAccount_ ? selectedAccount_ : firstAccount_;
 }
 
 core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
@@ -240,11 +248,17 @@ void Mailbox::ReloadList(bool keepSelection) {
     pages_.clear();
     total_ = 0;
     unread_ = 0;
+    folderTotal_ = 0;
     if (folder_) {
         pe_folder_counts(core_, folder_, &total_, &unread_);
+        folderTotal_ = total_;
+        // the counts of the folder come from its indexes; a search counts what it finds
+        if (!find_.empty()) {
+            pe_message_count(core_, folder_, findUtf8_.c_str(), &total_, &unread_);
+        }
     }
     // the selection follows the message to where it is now, without a flicker of the reading pane
-    int64_t index = keepSelection && uid_ ? pe_message_index(core_, folder_, sort_, ascending_, uid_) : -1;
+    int64_t index = keepSelection && uid_ ? pe_message_index(core_, folder_, sort_, ascending_, findUtf8_.c_str(), uid_) : -1;
     reloading_ = true;
     ListView_SetItemCountEx(list_, static_cast<int>(std::min<uint64_t>(total_, INT_MAX)), LVSICF_NOSCROLL);
     ListView_SetItemState(list_, -1, 0, LVIS_SELECTED | LVIS_FOCUSED);
@@ -267,7 +281,7 @@ const PeMessage* Mailbox::Row(int index) {
         if (pages_.size() >= kPagesKept) {
             pages_.erase(pages_.begin());
         }
-        pages_.push_back({offset, core::MessageList(pe_messages(core_, folder_, sort_, ascending_, offset, kPageSize))});
+        pages_.push_back({offset, core::MessageList(pe_messages(core_, folder_, sort_, ascending_, findUtf8_.c_str(), offset, kPageSize))});
     } else if (page != pages_.end() - 1) {
         // the most recently used page goes last, the least recently used is dropped first
         std::rotate(page, page + 1, pages_.end());
@@ -359,8 +373,9 @@ void Mailbox::OnFolderSelected(LPARAM folder) {
     if (folder == folder_) {
         return;
     }
-    // the message of the folder before is not this folder's
+    // the message of the folder before is not this folder's, nor is the search
     folder_ = folder;
+    ResetFind();
     ClearReader();
     ReloadList(false);
     SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
@@ -529,9 +544,106 @@ void Mailbox::FlagSelected() {
     }
 }
 
+// ---- folders ----
+
+void Mailbox::FolderMenu() {
+    // the item under the mouse is the one the menu is for
+    TVHITTESTINFO hit = {};
+    GetCursorPos(&hit.pt);
+    POINT screen = hit.pt;
+    ScreenToClient(tree_, &hit.pt);
+    if (HTREEITEM item = TreeView_HitTest(tree_, &hit)) {
+        TreeView_SelectItem(tree_, item);
+    }
+    HMENU menu = CreatePopupMenu();
+    AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, L"&New Folder...");
+    std::wstring name;
+    bool fixed = true;
+    UINT special = folder_ && FolderOf(folder_, name, fixed) && !fixed ? MF_STRING : MF_STRING | MF_GRAYED;
+    AppendMenuW(menu, special, IDM_RENAME_FOLDER, L"&Rename...");
+    AppendMenuW(menu, special, IDM_DELETE_FOLDER, L"&Delete");
+    TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
+    DestroyMenu(menu);
+}
+
+bool Mailbox::FolderOf(int64_t folder, std::wstring& name, bool& fixed) const {
+    auto found = folderNames_.find(folder);
+    if (found == folderNames_.end()) {
+        return false;
+    }
+    name = found->second.first;
+    fixed = found->second.second;
+    return true;
+}
+
+// a folder name, asked for; empty when cancelled
+std::wstring AskFolderName(HWND owner, const wchar_t* title, const std::wstring& intro, const std::wstring& name) {
+    std::vector<FormField> fields = {{L"Folder name:", name}};
+    return FormDialog(owner, title, intro, fields) ? fields[0].value : L"";
+}
+
+// the reason the core gave, shown
+void ShowRefusal(HWND owner, char* reason, const wchar_t* fallback) {
+    core::String why(reason);
+    std::wstring text = why ? Text(why.get()) : fallback;
+    MessageBoxW(owner, text.c_str(), L"PostalExpress", MB_OK | MB_ICONWARNING);
+}
+
+void Mailbox::NewFolder(HWND owner) {
+    int64_t account = CurrentAccount();
+    if (!account) {
+        return;
+    }
+    std::wstring where = folder_ ? L"The new folder goes in the selected folder." : L"The new folder goes at the top of the account.";
+    std::wstring name = AskFolderName(owner, L"New Folder", where, L"");
+    if (name.empty()) {
+        return;
+    }
+    char* reason = nullptr;
+    if (!pe_folder_create(core_, account, folder_, core::Narrow(name).c_str(), &reason)) {
+        ShowRefusal(owner, reason, L"The folder could not be created.");
+    }
+}
+
+void Mailbox::RenameFolder(HWND owner) {
+    if (!folder_) {
+        return;
+    }
+    std::wstring current;
+    bool fixed = false;
+    FolderOf(folder_, current, fixed);
+    std::wstring name = AskFolderName(owner, L"Rename Folder", L"The new name of the folder " + current + L".", current);
+    if (name.empty() || name == current) {
+        return;
+    }
+    char* reason = nullptr;
+    if (!pe_folder_rename(core_, folder_, core::Narrow(name).c_str(), &reason)) {
+        ShowRefusal(owner, reason, L"The folder could not be renamed.");
+    }
+}
+
+void Mailbox::DeleteFolder(HWND owner) {
+    std::wstring name;
+    bool fixed = false;
+    if (!folder_ || !FolderOf(folder_, name, fixed)) {
+        return;
+    }
+    std::wstring question = L"Delete the folder \"" + name + L"\" with its messages and the folders in it? It is deleted on the server too.";
+    if (MessageBoxW(owner, question.c_str(), L"PostalExpress", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+        return;
+    }
+    char* reason = nullptr;
+    if (!pe_folder_delete(core_, folder_, &reason)) {
+        ShowRefusal(owner, reason, L"The folder could not be deleted.");
+    }
+}
+
 std::wstring Mailbox::Counts() const {
     if (!folder_) {
         return L"";
+    }
+    if (!find_.empty()) {
+        return std::to_wstring(total_) + L" of " + std::to_wstring(folderTotal_) + L" found, " + std::to_wstring(unread_) + L" unread";
     }
     return std::to_wstring(total_) + L" message(s), " + std::to_wstring(unread_) + L" unread";
 }
@@ -542,8 +654,16 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
     if (header->hwndFrom == tree_) {
         if (header->code == TVN_SELCHANGEDW && !reloading_) {
             auto* change = reinterpret_cast<NMTREEVIEWW*>(header);
+            LPARAM item = change->itemNew.hItem ? change->itemNew.lParam : 0;
             // an account has no messages of its own
-            OnFolderSelected(change->itemNew.hItem ? change->itemNew.lParam : 0);
+            selectedAccount_ = item < 0 ? -item : 0;
+            OnFolderSelected(item > 0 ? item : 0);
+        }
+        if (header->code == NM_RCLICK) {
+            FolderMenu();
+            // handled: no WM_CONTEXTMENU after it
+            result = 1;
+            return true;
         }
         return header->code == TVN_SELCHANGEDW;
     }
@@ -581,7 +701,48 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
     return false;
 }
 
-bool Mailbox::OnCommand(WORD id) {
+// ---- the Find box ----
+
+void Mailbox::PlaceFind(const RECT& row) {
+    int height = Scale(22);
+    int width = Scale(220);
+    int top = row.top + (row.bottom - row.top - height) / 2;
+    MoveWindow(findEdit_, row.right - width - Scale(6), top, width, height, TRUE);
+    MoveWindow(findLabel_, row.right - width - Scale(46), top, Scale(36), height, TRUE);
+}
+
+void Mailbox::FocusFind() {
+    SetFocus(findEdit_);
+    SendMessageW(findEdit_, EM_SETSEL, 0, -1);
+}
+
+// the Find box emptied and the search dropped, without the list following it (the caller reloads)
+void Mailbox::ResetFind() {
+    SetWindowTextW(findEdit_, L"");
+    // emptying the box fires EN_CHANGE, which starts the timer again
+    KillTimer(parent_, TIMER_FIND);
+    find_.clear();
+    findUtf8_.clear();
+}
+
+bool Mailbox::ClearFind() {
+    if (find_.empty() && GetWindowTextLengthW(findEdit_) == 0) {
+        return false;
+    }
+    ResetFind();
+    ReloadList(true);
+    SetFocus(list_);
+    return true;
+}
+
+bool Mailbox::OnCommand(WORD id, WORD code) {
+    if (id == IDC_FIND) {
+        if (code == EN_CHANGE) {
+            // a moment after the last key, not for each
+            SetTimer(parent_, TIMER_FIND, 250, nullptr);
+        }
+        return true;
+    }
     switch (id) {
     case IDC_ATTACHMENTS:
         ChooseAttachment();
@@ -594,6 +755,20 @@ bool Mailbox::OnCommand(WORD id) {
 }
 
 void Mailbox::OnTimer(UINT_PTR id) {
+    if (id == TIMER_FIND) {
+        KillTimer(parent_, TIMER_FIND);
+        std::wstring text = GetWindowString(findEdit_);
+        // what only has spaces finds everything, as the core reads it
+        size_t first = text.find_first_not_of(L" \t");
+        text = first == std::wstring::npos ? L"" : text.substr(first, text.find_last_not_of(L" \t") - first + 1);
+        if (text != find_) {
+            find_ = text;
+            findUtf8_ = core::Narrow(find_);
+            ReloadList(true);
+            SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
+        }
+        return;
+    }
     if (id != TIMER_MARK_READ) {
         return;
     }

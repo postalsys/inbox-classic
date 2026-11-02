@@ -27,6 +27,7 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hwnd, out RECT rect);
 [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
 [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hwnd);
 public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll")] public static extern bool EnumChildWindows(IntPtr parent, EnumProc proc, IntPtr lParam);
@@ -53,7 +54,8 @@ $VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
-$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $CB_SELECTSTRING = 0x014D
+$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118;
+$LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
 $IDC_SEND = 300; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
 
@@ -327,8 +329,14 @@ try {
             Start-Sleep -Milliseconds 500
             $menu = [Native.Win]::FindWindow('#32768', [NullString]::Value)
             if ($menu -ne [IntPtr]::Zero) {
-                Key $menu $VK_DOWN
-                Key $menu $VK_RETURN
+                if ($try -eq 0) {
+                    Key $menu $VK_DOWN
+                    Key $menu $VK_RETURN
+                } else {
+                    # where the menu does not take posted keys (a CI runner): real keystrokes, the app in front
+                    [void][Native.Win]::SetForegroundWindow($main)
+                    [System.Windows.Forms.SendKeys]::SendWait('{DOWN}{ENTER}')
+                }
             }
             $save = WaitWindow '#32770' 'Save Attachment As' 5
         }
@@ -467,6 +475,24 @@ try {
     Shot $main 'main-3-sent-items'
     SelectFolder 0
 
+    # ---- finding ----
+
+    Step 'finding'
+    SelectFolder 0
+    $all = WaitFor { if ((Rows) -ge 7) { Rows } }
+    $find = [Native.Win]::GetDlgItem($main, 204)
+    Check ($find -ne [IntPtr]::Zero) 'there is a Find box'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
+    Check ([bool](WaitFor { (Rows) -eq 1 })) 'typing in it narrows the list to what has it (the subject)'
+    $status = WindowText ([Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value))
+    Shot $main 'find-1-results'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'ann@example.com')
+    Check ([bool](WaitFor { (Rows) -ge 2 })) 'the sender address is found too'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'nothing has this')
+    Check ([bool](WaitFor { (Rows) -eq 0 })) 'and nothing when nothing has it'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
+    Check ([bool](WaitFor { (Rows) -eq $all })) 'clearing it shows the whole folder again'
+
     # ---- flag, delete, move ----
 
     Step 'flagging, deleting and moving'
@@ -509,6 +535,66 @@ try {
     }
     Check ([bool](WaitFor { -not (Find 'Trash' 'Subject: One more thing') } 20)) 'and then it is gone from the server'
     SelectFolder 0
+
+    # ---- folders ----
+
+    Step 'folders'
+    function Mailboxes { @(Invoke-RestMethod $rest) | ForEach-Object { $_.path } }
+    # a folder of the form that asks for a name: its name typed and OK clicked
+    function AnswerName([string]$title, [string]$name, [string]$shot) {
+        $form = WaitFor {
+            $f = [Native.Win]::FindWindow('PostalExpressForm', $title)
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 100) -ne [IntPtr]::Zero) { $f }
+        }
+        Check ($null -ne $form) "$title asks for a name"
+        if ($form) {
+            SetText $form 100 $name
+            if ($shot) { Shot $form $shot }
+            Click $form 1
+        }
+    }
+    SelectFolder 3
+    Command $main $IDM_NEW_FOLDER
+    AnswerName 'New Folder' 'Projects' 'folders-1-new'
+    Check ([bool](WaitFor { (Mailboxes) -contains 'Archive/Projects' } 20)) 'New Folder makes Archive/Projects on the server'
+    # the first folder in Archive, found again each time: the tree is built anew when the folders change
+    function ArchiveChild {
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+        for ($i = 0; $i -lt 3; $i++) { $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item) }
+        $child = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $item)
+        if ($child -ne [IntPtr]::Zero) { $child }
+    }
+    $projects = WaitFor { ArchiveChild }
+    Check ($null -ne $projects) 'and it is in the tree'
+    if ($projects) {
+        [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $projects)
+        Shot $main 'folders-2-tree'
+        Command $main $IDM_RENAME_FOLDER
+        AnswerName 'Rename Folder' 'Plans' $null
+        Check ([bool](WaitFor { (Mailboxes) -contains 'Archive/Plans' -and (Mailboxes) -notcontains 'Archive/Projects' } 20)) 'Rename renames it on the server'
+        Start-Sleep -Milliseconds 500
+        $plans = WaitFor { ArchiveChild }
+        [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $plans)
+        Command $main $IDM_DELETE_FOLDER
+        $sure = WaitWindow '#32770' 'PostalExpress' 10
+        Check ($null -ne $sure) 'deleting a folder asks first'
+        if ($sure) {
+            Shot $sure 'folders-3-delete'
+            Click $sure 6
+        }
+        Check ([bool](WaitFor { (Mailboxes) -notcontains 'Archive/Plans' } 20)) 'and Yes deletes it on the server'
+    }
+    # the Inbox is not renamed
+    SelectFolder 0
+    Command $main $IDM_RENAME_FOLDER
+    AnswerName 'Rename Folder' 'Mail' $null
+    $refused = WaitWindow '#32770' 'PostalExpress' 10
+    Check ($null -ne $refused) 'renaming the Inbox is refused with the reason'
+    if ($refused) {
+        Shot $refused 'folders-4-inbox'
+        [void][Native.Win]::PostMessage($refused, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { [Native.Win]::FindWindow('#32770', 'PostalExpress') -eq [IntPtr]::Zero })
+    }
 
     Step 'closing a message that was written'
     Command $main $IDM_NEW_MAIL
@@ -566,6 +652,63 @@ try {
         Check ($status -match 'authentication') "the status bar says why ($status)"
         Shot $main 'trouble-1-password'
         Click $logon 2
+    }
+
+    # ---- accounts ----
+
+    Step 'accounts'
+    Command $main $IDM_ACCOUNTS
+    $accounts = WaitWindow 'PostalExpressAccounts' 'Accounts'
+    Check ($null -ne $accounts) 'File > Accounts lists the accounts'
+    if ($accounts) {
+        $listBox = [Native.Win]::GetDlgItem($accounts, 400)
+        Check ([int][Native.Win]::SendMessage($listBox, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 2) 'both accounts are listed'
+        Shot $accounts 'accounts-1-list'
+        # Properties of the first: a new display name
+        [void][Native.Win]::SendMessage($listBox, $LB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
+        Click $accounts 402
+        $properties = WaitFor {
+            $f = [Native.Win]::FindWindow('PostalExpressForm', 'Properties')
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+        }
+        Check ($null -ne $properties) 'Properties shows the settings'
+        if ($properties) {
+            Check ((GetText $properties 105) -eq "$($ports.imap)") 'with the IMAP port as it was saved'
+            SetText $properties 100 'UI Test Renamed'
+            Shot $properties 'accounts-2-properties'
+            Click $properties 1
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)) 'OK closes Properties'
+            $box = [Native.Win]::FindWindow('#32770', [NullString]::Value)
+            if ($box -ne [IntPtr]::Zero) {
+                Write-Host "   a message box is open: $(WindowText $box)"
+                Shot $box 'accounts-unexpected'
+            }
+        }
+        # read back in Properties (the text of a list entry does not cross processes)
+        [void][Native.Win]::SendMessage($listBox, $LB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
+        Click $accounts 402
+        $again = WaitFor {
+            $f = [Native.Win]::FindWindow('PostalExpressForm', 'Properties')
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+        }
+        Check ($again -and (GetText $again 100) -eq 'UI Test Renamed') 'the new name is saved'
+        if ($again) {
+            Click $again 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($again) })
+        }
+        # Remove the second, the one with the wrong password
+        $before = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void][Native.Win]::SendMessage($listBox, $LB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
+        Click $accounts 403
+        $sure = WaitWindow '#32770' 'Remove Account' 10
+        Check ($null -ne $sure) 'Remove asks first'
+        if ($sure) { Click $sure 6 }
+        Check ([bool](WaitFor { [int][Native.Win]::SendMessage($listBox, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 })) 'and removes it'
+        Click $accounts 404
+        [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
+        $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }
+        Check ($null -ne $after) "the account leaves the tree ($before items before)"
+        Shot $main 'accounts-3-after'
     }
 
     # ---- about and help ----

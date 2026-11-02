@@ -179,6 +179,38 @@ void ExplainAppPassword(HWND owner, const PeAutoconfigInfo* info) {
     }
 }
 
+// the warning before a connection without encryption: true to go on
+bool AcceptPlain(HWND owner, const std::vector<FormField>& fields, const wchar_t* title) {
+    bool plain = SecurityOf(fields[IMAP_SECURITY].value) == PE_SECURITY_PLAIN || SecurityOf(fields[SMTP_SECURITY].value) == PE_SECURITY_PLAIN;
+    return !plain || MessageBoxW(owner,
+                                 L"Without encryption your password and mail travel the network readable by anyone on "
+                                 L"the way. Use this only for a server on your own computer or network.\n\nContinue?",
+                                 title, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES;
+}
+
+// the settings of the server form; `utf8` keeps the strings they point to
+PeAccountSettings SettingsOf(const std::vector<FormField>& fields, std::string (&utf8)[5]) {
+    // the user name is usually the address
+    std::wstring username = fields[USERNAME].value.empty() ? fields[EMAIL].value : fields[USERNAME].value;
+    std::wstring name = fields[NAME].value.empty() ? fields[EMAIL].value : fields[NAME].value;
+    utf8[0] = core::Narrow(name);
+    utf8[1] = core::Narrow(fields[EMAIL].value);
+    utf8[2] = core::Narrow(username);
+    utf8[3] = core::Narrow(fields[IMAP_HOST].value);
+    utf8[4] = core::Narrow(fields[SMTP_HOST].value);
+    PeAccountSettings settings = {};
+    settings.name = utf8[0].c_str();
+    settings.email = utf8[1].c_str();
+    settings.username = utf8[2].c_str();
+    settings.imap_host = utf8[3].c_str();
+    settings.imap_port = static_cast<uint16_t>(wcstoul(fields[IMAP_PORT].value.c_str(), nullptr, 10));
+    settings.imap_security = SecurityOf(fields[IMAP_SECURITY].value);
+    settings.smtp_host = utf8[4].c_str();
+    settings.smtp_port = static_cast<uint16_t>(wcstoul(fields[SMTP_PORT].value.c_str(), nullptr, 10));
+    settings.smtp_security = SecurityOf(fields[SMTP_SECURITY].value);
+    return settings;
+}
+
 std::wstring SecurityName(PeSecurity security) {
     return kSecurity[security == PE_SECURITY_START_TLS ? 1 : security == PE_SECURITY_PLAIN ? 2 : 0];
 }
@@ -274,29 +306,11 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
     };
     SecureZeroMemory(first[2].value.data(), first[2].value.size() * sizeof(wchar_t));
     while (FormDialog(owner, L"Add Mail Account", intro, fields, Validate)) {
-        bool plain = SecurityOf(fields[IMAP_SECURITY].value) == PE_SECURITY_PLAIN ||
-                     SecurityOf(fields[SMTP_SECURITY].value) == PE_SECURITY_PLAIN;
-        if (plain && MessageBoxW(owner,
-                                 L"Without encryption your password and mail travel the network readable by anyone on "
-                                 L"the way. Use this only for a server on your own computer or network.\n\nContinue?",
-                                 L"Add Mail Account", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+        if (!AcceptPlain(owner, fields, L"Add Mail Account")) {
             continue;
         }
-        // the user name is usually the address
-        std::wstring username = fields[USERNAME].value.empty() ? fields[EMAIL].value : fields[USERNAME].value;
-        std::wstring name = fields[NAME].value.empty() ? fields[EMAIL].value : fields[NAME].value;
-        std::string utf8[] = {core::Narrow(name), core::Narrow(fields[EMAIL].value), core::Narrow(username),
-                              core::Narrow(fields[IMAP_HOST].value), core::Narrow(fields[SMTP_HOST].value)};
-        PeAccountSettings settings = {};
-        settings.name = utf8[0].c_str();
-        settings.email = utf8[1].c_str();
-        settings.username = utf8[2].c_str();
-        settings.imap_host = utf8[3].c_str();
-        settings.imap_port = static_cast<uint16_t>(wcstoul(fields[IMAP_PORT].value.c_str(), nullptr, 10));
-        settings.imap_security = SecurityOf(fields[IMAP_SECURITY].value);
-        settings.smtp_host = utf8[4].c_str();
-        settings.smtp_port = static_cast<uint16_t>(wcstoul(fields[SMTP_PORT].value.c_str(), nullptr, 10));
-        settings.smtp_security = SecurityOf(fields[SMTP_SECURITY].value);
+        std::string utf8[5];
+        PeAccountSettings settings = SettingsOf(fields, utf8);
         std::string password = core::Narrow(fields[PASSWORD].value);
         int64_t account = pe_account_add(core, &settings, password.c_str());
         SecureZeroMemory(password.data(), password.size());
@@ -319,4 +333,204 @@ bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& passw
     password = fields[0].value;
     SecureZeroMemory(fields[0].value.data(), fields[0].value.size() * sizeof(wchar_t));
     return true;
+}
+
+// ---- the accounts window ----
+
+namespace {
+
+const wchar_t* kAccountsClass = L"PostalExpressAccounts";
+
+enum AccountsId : WORD { IDC_ACCOUNT_LIST = 400, IDC_ACCOUNT_ADD, IDC_ACCOUNT_PROPERTIES, IDC_ACCOUNT_REMOVE, IDC_ACCOUNT_CLOSE };
+
+struct AccountsState {
+    PeCore* core;
+    HWND list = nullptr;
+    std::vector<int64_t> ids;
+    // signs in through the browser, by position
+    std::vector<bool> oauth;
+    bool done = false;
+    bool changed = false;
+};
+
+void FillAccounts(AccountsState* state) {
+    SendMessageW(state->list, LB_RESETCONTENT, 0, 0);
+    state->ids.clear();
+    state->oauth.clear();
+    core::AccountList accounts(pe_accounts(state->core));
+    for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
+        const PeAccount* account = pe_account_list_get(accounts.get(), i);
+        std::wstring line = Text(account->name) + L"  <" + Text(account->email) + L">";
+        SendMessageW(state->list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(line.c_str()));
+        state->ids.push_back(account->id);
+        state->oauth.push_back(account->oauth != PE_O_AUTH_PROVIDER_NONE);
+    }
+    if (!state->ids.empty()) {
+        SendMessageW(state->list, LB_SETCURSEL, 0, 0);
+    }
+}
+
+
+// the settings of an account, changed: the server form for a password account, the name for one that signs in
+// through the browser (its servers are the provider's); a password typed in replaces the kept one
+bool AccountProperties(HWND owner, PeCore* core, int64_t account, bool oauth) {
+    core::AccountSettings view(pe_account_settings(core, account));
+    const PeAccountSettings* stored = pe_account_settings_info(view.get());
+    if (!stored) {
+        return false;
+    }
+    std::vector<std::wstring> security(std::begin(kSecurity), std::end(kSecurity));
+    using Kind = FormField::Kind;
+    std::vector<FormField> fields = {
+        {L"Display name:", Text(stored->name)},
+        {L"E-mail address:", Text(stored->email)},
+        {L"User name:", Text(stored->username)},
+        {L"Password:", L"", Kind::Password},
+        {L"Incoming (IMAP) server:", Text(stored->imap_host)},
+        {L"IMAP port:", std::to_wstring(stored->imap_port), Kind::Number},
+        {L"IMAP security:", SecurityName(stored->imap_security), Kind::Choice, security},
+        {L"Outgoing (SMTP) server:", Text(stored->smtp_host)},
+        {L"SMTP port:", std::to_wstring(stored->smtp_port), Kind::Number},
+        {L"SMTP security:", SecurityName(stored->smtp_security), Kind::Choice, security},
+    };
+    if (oauth) {
+        // a browser sign-in account: the name only, the rest is the provider's
+        std::vector<FormField> name = {fields[NAME]};
+        if (!FormDialog(owner, L"Properties", L"This account signs in through the browser; its servers are the provider's.", name)) {
+            return false;
+        }
+        fields[NAME] = name[0];
+        std::string utf8[5];
+        PeAccountSettings settings = SettingsOf(fields, utf8);
+        return pe_account_update(core, account, &settings);
+    }
+    std::wstring intro = L"Leave the password empty to keep the one you have.";
+    std::wstring imapHost = Text(stored->imap_host);
+    std::wstring smtpHost = Text(stored->smtp_host);
+    PeSecurity imapSecurity = stored->imap_security;
+    PeSecurity smtpSecurity = stored->smtp_security;
+    bool saved = false;
+    while (FormDialog(owner, L"Properties", intro, fields, Validate)) {
+        // warned for a side without encryption, unless it was so already to the same server: not each time such an
+        // account is saved, but when the password would go readable somewhere new
+        auto newlyPlain = [&](Field security, Field host, PeSecurity was, const std::wstring& wasHost) {
+            return SecurityOf(fields[security].value) == PE_SECURITY_PLAIN && (was != PE_SECURITY_PLAIN || fields[host].value != wasHost);
+        };
+        bool warn = newlyPlain(IMAP_SECURITY, IMAP_HOST, imapSecurity, imapHost) || newlyPlain(SMTP_SECURITY, SMTP_HOST, smtpSecurity, smtpHost);
+        if (warn && !AcceptPlain(owner, fields, L"Properties")) {
+            continue;
+        }
+        std::string utf8[5];
+        PeAccountSettings settings = SettingsOf(fields, utf8);
+        if (!pe_account_update(core, account, &settings)) {
+            MessageBoxW(owner, L"The account could not be saved.", L"Properties", MB_OK | MB_ICONERROR);
+            continue;
+        }
+        if (!fields[PASSWORD].value.empty()) {
+            std::string password = core::Narrow(fields[PASSWORD].value);
+            pe_account_set_password(core, account, password.c_str());
+            SecureZeroMemory(password.data(), password.size());
+        }
+        saved = true;
+        break;
+    }
+    SecureZeroMemory(fields[PASSWORD].value.data(), fields[PASSWORD].value.size() * sizeof(wchar_t));
+    return saved;
+}
+
+void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id, WORD code) {
+    LRESULT index = SendMessageW(state->list, LB_GETCURSEL, 0, 0);
+    bool chosen = index >= 0 && static_cast<size_t>(index) < state->ids.size();
+    int64_t account = chosen ? state->ids[index] : 0;
+    bool properties = id == IDC_ACCOUNT_PROPERTIES || (id == IDC_ACCOUNT_LIST && code == LBN_DBLCLK);
+    if (properties) {
+        if (chosen && AccountProperties(hwnd, state->core, account, state->oauth[index])) {
+            state->changed = true;
+            FillAccounts(state);
+        }
+        return;
+    }
+    switch (id) {
+    case IDC_ACCOUNT_ADD:
+        if (NewAccountDialog(hwnd, state->core) > 0) {
+            state->changed = true;
+            FillAccounts(state);
+        }
+        return;
+    case IDC_ACCOUNT_REMOVE:
+        if (account && MessageBoxW(hwnd,
+                                   L"Remove this account from PostalExpress? Its mail stays on the server; the copy on this "
+                                   L"computer and the saved password are removed.",
+                                   L"Remove Account", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+            pe_account_remove(state->core, account);
+            state->changed = true;
+            FillAccounts(state);
+        }
+        return;
+    case IDC_ACCOUNT_CLOSE:
+    case IDCANCEL:
+        state->done = true;
+        return;
+    }
+}
+
+LRESULT CALLBACK AccountsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* state = reinterpret_cast<AccountsState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    switch (message) {
+    case WM_COMMAND:
+        if (state) {
+            OnAccountsCommand(hwnd, state, LOWORD(wParam), HIWORD(wParam));
+        }
+        return 0;
+    case WM_CLOSE:
+        if (state) {
+            state->done = true;
+        }
+        return 0;
+    case WM_CTLCOLORSTATIC:
+        return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
+bool AccountsDialog(HWND owner, PeCore* core) {
+    static bool registered = false;
+    if (!registered) {
+        WNDCLASSEXW windowClass = {sizeof(windowClass)};
+        windowClass.lpfnWndProc = AccountsProc;
+        windowClass.hInstance = GetModuleHandleW(nullptr);
+        windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+        windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
+        windowClass.lpszClassName = kAccountsClass;
+        RegisterClassExW(&windowClass);
+        registered = true;
+    }
+    int pad = Scale(10);
+    int width = Scale(460);
+    int height = Scale(240);
+    HWND dialog = CreateModalWindow(owner, kAccountsClass, L"Accounts", width, height);
+    AccountsState state{core};
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
+    int buttonWidth = Scale(100);
+    int listRight = width - pad - buttonWidth - pad;
+    state.list = CreateChild(dialog, L"LISTBOX", L"", WS_TABSTOP | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT, IDC_ACCOUNT_LIST,
+                             {pad, pad, listRight, height - pad}, WS_EX_CLIENTEDGE);
+    struct Button {
+        WORD id;
+        const wchar_t* text;
+    };
+    Button buttons[] = {{IDC_ACCOUNT_ADD, L"&Add..."}, {IDC_ACCOUNT_PROPERTIES, L"&Properties..."}, {IDC_ACCOUNT_REMOVE, L"&Remove"}};
+    int top = pad;
+    for (const Button& button : buttons) {
+        CreateChild(dialog, L"BUTTON", button.text, WS_TABSTOP, button.id, {width - pad - buttonWidth, top, width - pad, top + Scale(25)});
+        top += Scale(31);
+    }
+    CreateChild(dialog, L"BUTTON", L"Close", WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_ACCOUNT_CLOSE,
+                {width - pad - buttonWidth, height - pad - Scale(25), width - pad, height - pad});
+    FillAccounts(&state);
+
+    RunModal(dialog, state.list, state.done);
+    return state.changed;
 }

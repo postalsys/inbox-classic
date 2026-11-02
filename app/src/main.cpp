@@ -142,6 +142,12 @@ void OnEvent(const UiEvent& event) {
 HMENU BuildMenu() {
     HMENU file = CreatePopupMenu();
     AppendMenuW(file, MF_STRING, IDM_NEW_ACCOUNT, L"&New Account...");
+    AppendMenuW(file, MF_STRING, IDM_ACCOUNTS, L"&Accounts...");
+    HMENU folder = CreatePopupMenu();
+    AppendMenuW(folder, MF_STRING, IDM_NEW_FOLDER, L"&New Folder...");
+    AppendMenuW(folder, MF_STRING, IDM_RENAME_FOLDER, L"&Rename...");
+    AppendMenuW(folder, MF_STRING, IDM_DELETE_FOLDER, L"&Delete");
+    AppendMenuW(file, MF_POPUP, reinterpret_cast<UINT_PTR>(folder), L"&Folder");
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_EXIT, L"E&xit");
     HMENU compose = CreatePopupMenu();
@@ -153,6 +159,8 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(compose, MF_STRING, IDM_FLAG, L"F&lag Message");
     HMENU edit = CreatePopupMenu();
+    AppendMenuW(edit, MF_STRING, IDM_FIND, L"&Find Message\tCtrl+Shift+F");
+    AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(edit, MF_STRING, IDM_MARK_READ, L"Mark as &Read\tCtrl+Q");
     AppendMenuW(edit, MF_STRING, IDM_MARK_UNREAD, L"Mark as &Unread");
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
@@ -185,6 +193,7 @@ HACCEL BuildAccelerators() {
         {FVIRTKEY | FCONTROL | FSHIFT, 'R', IDM_REPLY_ALL},
         {FVIRTKEY | FCONTROL, 'F', IDM_FORWARD},
         {FVIRTKEY | FCONTROL | FSHIFT, 'V', IDM_MOVE},
+        {FVIRTKEY | FCONTROL | FSHIFT, 'F', IDM_FIND},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -233,6 +242,9 @@ Panes Measure() {
 
 void Layout() {
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
+    RECT bar;
+    GetClientRect(g_toolbar, &bar);
+    g_mailbox.PlaceFind(bar);
     SendMessageW(g_status, WM_SIZE, 0, 0);
     Panes panes = Measure();
     const RECT& area = panes.area;
@@ -353,8 +365,17 @@ void Reply(PeDraftKind kind) {
     OpenCompose(g_main, g_core.get(), g_mailbox.CurrentAccount(), pe_draft_info(draft.get()));
 }
 
-void OnCommand(WORD id) {
+void OnCommand(WORD id, WORD code) {
     switch (id) {
+    case IDM_FIND:
+        g_mailbox.FocusFind();
+        return;
+    case IDCANCEL:
+        // Esc: the search goes first
+        if (g_mailbox.ClearFind()) {
+            ShowCounts();
+        }
+        return;
     case IDM_NEW_MAIL:
         NewMessage();
         return;
@@ -391,6 +412,21 @@ void OnCommand(WORD id) {
     case IDM_FLAG:
         g_mailbox.FlagSelected();
         return;
+    case IDM_ACCOUNTS:
+        if (AccountsDialog(g_main, g_core.get())) {
+            g_mailbox.Reload();
+            SyncAll();
+        }
+        return;
+    case IDM_NEW_FOLDER:
+        g_mailbox.NewFolder(g_main);
+        return;
+    case IDM_RENAME_FOLDER:
+        g_mailbox.RenameFolder(g_main);
+        return;
+    case IDM_DELETE_FOLDER:
+        g_mailbox.DeleteFolder(g_main);
+        return;
     case IDM_PICTURES:
         g_mailbox.LoadPictures();
         return;
@@ -404,7 +440,7 @@ void OnCommand(WORD id) {
         ShowCounts();
         return;
     }
-    g_mailbox.OnCommand(id);
+    g_mailbox.OnCommand(id, code);
 }
 
 // the events still queued when the core is closed are dropped
@@ -479,7 +515,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     case WM_COMMAND:
-        OnCommand(LOWORD(wParam));
+        OnCommand(LOWORD(wParam), HIWORD(wParam));
         return 0;
     case WM_TIMER:
         if (wParam == TIMER_SYNC) {

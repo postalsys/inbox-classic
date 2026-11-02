@@ -41,6 +41,13 @@ impl Store {
         db.pragma_update(None, "foreign_keys", true)?;
         db.pragma_update(None, "synchronous", "NORMAL")?;
         db.busy_timeout(std::time::Duration::from_secs(5))?;
+        // lowercase as Rust knows it, for searches that ignore case beyond ASCII (SQLite's own folds ASCII only)
+        db.create_scalar_function(
+            "pe_fold",
+            1,
+            rusqlite::functions::FunctionFlags::SQLITE_UTF8 | rusqlite::functions::FunctionFlags::SQLITE_DETERMINISTIC,
+            |context| Ok(context.get::<Option<String>>(0)?.map(|text| text.to_lowercase())),
+        )?;
         let mut store = Store { db };
         schema::migrate(&mut store.db)?;
         Ok(store)

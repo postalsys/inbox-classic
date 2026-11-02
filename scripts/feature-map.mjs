@@ -65,6 +65,29 @@ const sections = [
                 checked: ['All 7 folders of the account appear', 'The 3 messages are listed']
             },
             {
+                shot: 'accounts-1-list',
+                name: 'Accounts: change and remove',
+                what: "File > Accounts lists the accounts. Properties changes one (leave the password empty to keep it; an account that signs in through the browser only has its name changed, its servers are the provider's). Remove takes it out with its downloaded mail and saved password; the mail on the server stays.",
+                how: 'File > Accounts; double click an account for its Properties.',
+                checked: [
+                    'Both accounts are listed',
+                    'Properties shows the saved settings and saves a new name',
+                    'Remove asks, removes it, and it leaves the folder tree'
+                ]
+            },
+            {
+                shot: 'find-1-results',
+                name: 'Find',
+                what: 'The Find box narrows the list to the messages with what you type in their subject, sender name, sender address or recipients, as you type. The status bar counts what it found. Esc, an empty box or another folder shows the whole folder again.',
+                how: 'The Find box at the right of the toolbar, Edit > Find Message, or Ctrl+Shift+F.',
+                checked: [
+                    'A subject word finds that message only',
+                    'A sender address is found',
+                    'Nothing is listed for what nothing has',
+                    'Clearing it shows the whole folder'
+                ]
+            },
+            {
                 shot: 'main-2-new-mail',
                 name: 'Send/Recv (F5) and automatic checks',
                 what: 'Every account is checked at start and every ten minutes; Send/Recv or F5 checks now. New mail appears in the list without restarting.',
@@ -163,6 +186,18 @@ const sections = [
                 what: 'From Deleted Items, or on an account that has none, Delete removes a message for good, so it asks first. A move or delete the server does not do (offline, refused) puts the message back where it was.',
                 how: 'Delete in Deleted Items.',
                 checked: ['The question appears', 'Yes removes the message from the server']
+            },
+            {
+                shot: 'folders-2-tree',
+                name: 'Folders: new, rename, delete',
+                what: 'Makes a folder in the selected one, or at the top of an account, renames a folder (its subfolders go along) and deletes one with its messages after asking. The Inbox and the special folders stay as they are. Subfolders show under their parent whatever order the server lists them in.',
+                how: 'File > Folder, or right click in the folder list.',
+                checked: [
+                    'New Folder makes Archive/Projects on the server, and it shows under Archive',
+                    'Rename renames it on the server',
+                    'Delete asks, then deletes it on the server',
+                    'Renaming the Inbox is refused with the reason'
+                ]
             }
         ]
     },
@@ -262,10 +297,7 @@ const behind = [
 ];
 
 const missing = [
-    'Search',
-    'Edit or remove an account (the core can, the window for it is missing)',
     'Save drafts, or send later',
-    'Create, rename or delete folders',
     'Print, and .eml import and export',
     'Gmail and Outlook.com browser sign-in in released builds: works, but needs the OAuth client IDs at build time'
 ];

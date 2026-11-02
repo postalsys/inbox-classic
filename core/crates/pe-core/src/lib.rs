@@ -24,6 +24,8 @@ use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, S
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing};
+/// The rules of the folder tree the windows show: how deep a folder is, and which stay as they are
+pub use pe_sync::{is_special as is_fixed_folder, tree_depths};
 use requests::Requests;
 pub use secrets::PasswordStore;
 use secrets::Secrets;
@@ -101,6 +103,8 @@ pub enum Error {
     Compose(ComposeError),
     /// Something the system did not allow (a listener for a sign-in)
     Unavailable(String),
+    /// A folder name or a folder that can not be used
+    Folder(pe_sync::FolderRefusal),
 }
 
 impl fmt::Display for Error {
@@ -111,6 +115,7 @@ impl fmt::Display for Error {
             Error::Closed => f.write_str("shutting down"),
             Error::Compose(error) => write!(f, "{error}"),
             Error::Unavailable(reason) => write!(f, "{reason}"),
+            Error::Folder(refusal) => write!(f, "{refusal}"),
         }
     }
 }
@@ -160,7 +165,8 @@ pub struct Core {
     store: Mutex<Store>,
     /// Taken when closing
     runtime: Option<tokio::runtime::Runtime>,
-    workers: Mutex<HashMap<AccountId, UnboundedSender<Command>>>,
+    /// The worker of each account: where its commands go, and how to stop it in the middle of one
+    workers: Mutex<HashMap<AccountId, (UnboundedSender<Command>, tokio::task::AbortHandle)>>,
     secrets: Secrets,
     trust: Trust,
     events: EventSink,
@@ -279,7 +285,11 @@ impl Core {
     }
 
     pub fn remove_account(&self, id: AccountId) -> Result<()> {
-        self.stop_worker(id);
+        // now, not after its current command: a sync it was running would write into the next account that gets
+        // this id
+        if let Some((_, task)) = self.workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&id) {
+            task.abort();
+        }
         self.store().remove_account(id)?;
         self.secrets.remove(id);
         Ok(())
@@ -287,6 +297,10 @@ impl Core {
 
     pub fn set_password(&self, id: AccountId, password: &str) {
         self.keep_password(id, password);
+    }
+
+    pub fn account(&self, id: AccountId) -> Result<Account> {
+        Ok(self.store().account(id)?)
     }
 
     pub fn accounts(&self) -> Result<Vec<Account>> {
@@ -299,6 +313,29 @@ impl Core {
 
     pub fn messages(&self, folder: FolderId, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
         Ok(self.store().messages(folder, sort, offset, limit)?)
+    }
+
+    /// A page of the messages of a folder that have `find` in their subject, sender or recipients (all of them for
+    /// an empty one)
+    pub fn messages_matching(
+        &self,
+        folder: FolderId,
+        sort: Sort,
+        find: &str,
+        offset: u64,
+        limit: u64,
+    ) -> Result<Vec<Message>> {
+        Ok(self.store().messages_matching(folder, sort, find, offset, limit)?)
+    }
+
+    /// How many messages [`Core::messages_matching`] finds, and how many of them are unread
+    pub fn count_matching(&self, folder: FolderId, find: &str) -> Result<(u64, u64)> {
+        Ok(self.store().count_matching(folder, find)?)
+    }
+
+    /// Where a message is in the list of [`Core::messages_matching`]
+    pub fn message_index_matching(&self, folder: FolderId, sort: Sort, find: &str, uid: u64) -> Result<Option<u64>> {
+        Ok(self.store().message_index_matching(folder, sort, find, uid)?)
     }
 
     /// One folder with its counts
@@ -586,10 +623,54 @@ impl Core {
         self.send_command(account, command(Box::new(removed)))
     }
 
+    /// Creates a folder `name` in `parent`, or at the top of the account: on the server in the background, then
+    /// [`Event::FoldersChanged`]. A name that can not be one is refused now.
+    pub fn create_folder(&self, account: AccountId, parent: Option<FolderId>, name: &str) -> Result<()> {
+        let name = {
+            let store = self.store();
+            if let Some(parent) = parent
+                && store.folder(parent)?.account_id != account
+            {
+                return Err(Error::NotFound);
+            }
+            pe_sync::folder_name(&store, account, name)?.map_err(Error::Folder)?
+        };
+        // the path waits for the connection: at the top it goes under the server's namespace
+        self.send_command(account, Command::CreateFolder { parent, name })
+    }
+
+    /// Renames a folder (its subfolders go along): on the server in the background, then [`Event::FoldersChanged`].
+    /// The Inbox and the special folders are not renamed.
+    pub fn rename_folder(&self, folder: FolderId, name: &str) -> Result<()> {
+        let (account, path) = {
+            let store = self.store();
+            let account = store.folder(folder)?.account_id;
+            (
+                account,
+                pe_sync::renamed_path(&store, folder, name)?.map_err(Error::Folder)?,
+            )
+        };
+        self.send_command(account, Command::RenameFolder { folder, path })
+    }
+
+    /// Deletes a folder and the messages in it: on the server in the background, then [`Event::FoldersChanged`]. The
+    /// Inbox and the special folders are not deleted.
+    pub fn delete_folder(&self, folder: FolderId) -> Result<()> {
+        let account = {
+            let store = self.store();
+            let found = store.folder(folder)?;
+            if pe_sync::is_special(&found.info) {
+                return Err(Error::Folder(pe_sync::FolderRefusal::Special));
+            }
+            found.account_id
+        };
+        self.send_command(account, Command::DeleteFolder { folder })
+    }
+
     fn send_command(&self, account: AccountId, command: Command) -> Result<()> {
         let mut workers = self.workers.lock().unwrap_or_else(|p| p.into_inner());
         let command = match workers.get(&account) {
-            Some(sender) => match sender.send(command) {
+            Some((sender, _)) => match sender.send(command) {
                 Ok(()) => return Ok(()),
                 // the worker stopped: a new one takes the command
                 Err(returned) => returned.0,
@@ -607,8 +688,8 @@ impl Core {
             self.oauth.clone(),
             self.events.clone(),
         );
-        self.runtime()?.spawn(worker.run(receiver));
-        workers.insert(account, sender);
+        let task = self.runtime()?.spawn(worker.run(receiver));
+        workers.insert(account, (sender, task.abort_handle()));
         Ok(())
     }
 

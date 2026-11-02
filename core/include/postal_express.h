@@ -108,6 +108,10 @@ typedef enum PeAutoconfigSource {
 // The accounts; free with `pe_account_list_free`
 typedef struct PeAccountList PeAccountList;
 
+// The settings of an account, for its Properties: a handle whose `PeAccountSettings` (strings owned by it) comes
+// from `pe_account_settings_info`; free with `pe_account_settings_free`. NULL for an unknown account.
+typedef struct PeAccountSettingsView PeAccountSettingsView;
+
 // A lookup's result; free with `pe_autoconfig_free`
 typedef struct PeAutoconfig PeAutoconfig;
 
@@ -175,6 +179,8 @@ typedef struct PeFolder {
   const char *name;
   // 0 for a top level folder
   uint32_t depth;
+  // The Inbox or a special folder: not renamed or deleted
+  bool fixed;
   enum PeSpecialUse special_use;
   // False for a folder that only holds other folders
   bool selectable;
@@ -358,6 +364,20 @@ bool pe_account_update(const struct PeCore *core,
                        int64_t account,
                        const struct PeAccountSettings *settings);
 
+// # Safety
+// `core` must be a live handle.
+struct PeAccountSettingsView *pe_account_settings(const struct PeCore *core, int64_t account);
+
+// The settings of a `pe_account_settings` handle
+//
+// # Safety
+// `view` must be NULL or a handle that was not freed yet.
+const struct PeAccountSettings *pe_account_settings_info(const struct PeAccountSettingsView *view);
+
+// # Safety
+// `view` must be NULL or a handle that was not freed yet.
+void pe_account_settings_free(struct PeAccountSettingsView *view);
+
 // Removes an account with its folders and messages
 //
 // # Safety
@@ -416,14 +436,27 @@ void pe_folder_list_free(struct PeFolderList *list);
 // `core` must be a live handle; `total` and `unread` must be valid pointers.
 bool pe_folder_counts(const struct PeCore *core, int64_t folder, uint64_t *total, uint64_t *unread);
 
-// `limit` messages of a folder from `offset` on, in the order asked for; NULL on failure
+// How many messages of a folder `pe_messages` lists with `find` (UTF-8, NULL for all), and how many of them are
+// unread
 //
 // # Safety
-// `core` must be a live handle.
+// `core` must be a live handle, `find` NULL or a NUL-terminated string, `total` and `unread` valid pointers.
+bool pe_message_count(const struct PeCore *core,
+                      int64_t folder,
+                      const char *find,
+                      uint64_t *total,
+                      uint64_t *unread);
+
+// `limit` messages of a folder from `offset` on, in the order asked for; with `find` (UTF-8) only those with it
+// in their subject, sender or recipients, NULL or empty for all. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `find` NULL or a NUL-terminated string.
 struct PeMessageList *pe_messages(const struct PeCore *core,
                                   int64_t folder,
                                   enum PeSortField sort,
                                   bool ascending,
+                                  const char *find,
                                   uint64_t offset,
                                   uint64_t limit);
 
@@ -435,6 +468,7 @@ int64_t pe_message_index(const struct PeCore *core,
                          int64_t folder,
                          enum PeSortField sort,
                          bool ascending,
+                         const char *find,
                          uint64_t uid);
 
 // # Safety
@@ -507,6 +541,37 @@ bool pe_folder_deletes_for_good(const struct PeCore *core,
 bool pe_message_delete(const struct PeCore *core,
                        int64_t folder,
                        uint64_t uid);
+
+// Creates the folder `name` (UTF-8) in `parent`, or at the top of the account when `parent` is 0:
+// `FoldersChanged` follows once the server has it. False with the reason in `error` (NULL or a pointer to a
+// string to free with `pe_string_free`) for a name that can not be one.
+//
+// # Safety
+// `core` must be a live handle, `name` a NUL-terminated string, `error` NULL or a valid pointer.
+bool pe_folder_create(const struct PeCore *core,
+                      int64_t account,
+                      int64_t parent,
+                      const char *name,
+                      char **error);
+
+// Renames a folder to `name` (its subfolders go along): `FoldersChanged` follows. False with the reason for the
+// Inbox, a special folder or a name that can not be one.
+//
+// # Safety
+// As `pe_folder_create`.
+bool pe_folder_rename(const struct PeCore *core,
+                      int64_t folder,
+                      const char *name,
+                      char **error);
+
+// Deletes a folder and the messages in it: `FoldersChanged` follows. False with the reason for the Inbox and the
+// special folders.
+//
+// # Safety
+// `core` must be a live handle, `error` NULL or a valid pointer.
+bool pe_folder_delete(const struct PeCore *core,
+                      int64_t folder,
+                      char **error);
 
 // The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the
 // calling thread; the app's windows use `pe_message_view_start`, which builds it on a worker.

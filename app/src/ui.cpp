@@ -186,18 +186,7 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     int introHeight = intro.empty() ? 0 : Scale(36);
     int clientHeight = pad + introHeight + static_cast<int>(fields.size()) * (rowHeight + Scale(6)) + Scale(32) + pad;
 
-    RECT frame = {0, 0, clientWidth, clientHeight};
-    DWORD style = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN;
-    AdjustWindowRectEx(&frame, style, FALSE, WS_EX_DLGMODALFRAME);
-    HWND root = GetAncestor(owner, GA_ROOT);
-    RECT ownerRect;
-    GetWindowRect(root, &ownerRect);
-    int frameWidth = frame.right - frame.left;
-    int frameHeight = frame.bottom - frame.top;
-    int x = ownerRect.left + (ownerRect.right - ownerRect.left - frameWidth) / 2;
-    int y = ownerRect.top + (ownerRect.bottom - ownerRect.top - frameHeight) / 2;
-    HWND dialog = CreateWindowExW(WS_EX_DLGMODALFRAME | WS_EX_CONTROLPARENT, kFormClass, title.c_str(), style, x, y,
-                                  frameWidth, frameHeight, root, nullptr, GetModuleHandleW(nullptr), nullptr);
+    HWND dialog = CreateModalWindow(owner, kFormClass, title.c_str(), clientWidth, clientHeight);
     FormState state{&fields, validate};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
 
@@ -221,30 +210,7 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL,
                 {clientWidth - pad - buttonWidth, buttonTop, clientWidth - pad, buttonTop + Scale(25)});
 
-    // a form opened while another one is open leaves the window disabled when it closes
-    bool wasEnabled = IsWindowEnabled(root);
-    EnableWindow(root, FALSE);
-    ShowWindow(dialog, SW_SHOW);
-    if (!state.inputs.empty()) {
-        SetFocus(state.inputs[0]);
-    }
-    MSG msg = {};
-    while (!state.done && GetMessageW(&msg, nullptr, 0, 0) > 0) {
-        if (!IsDialogMessageW(dialog, &msg)) {
-            TranslateMessage(&msg);
-            DispatchMessageW(&msg);
-        }
-    }
-    if (msg.message == WM_QUIT) {
-        // keep the quit for the main loop
-        PostQuitMessage(static_cast<int>(msg.wParam));
-    }
-    EnableWindow(root, wasEnabled);
-    SetWindowLongPtrW(dialog, GWLP_USERDATA, 0);
-    DestroyWindow(dialog);
-    if (wasEnabled) {
-        SetActiveWindow(root);
-    }
+    RunModal(dialog, state.inputs.empty() ? nullptr : state.inputs[0], state.done);
     return state.accepted;
 }
 
@@ -298,4 +264,49 @@ void AddButton(HWND bar, int id, const wchar_t* text, BYTE style) {
     button.fsStyle = static_cast<BYTE>(style | BTNS_AUTOSIZE | BTNS_SHOWTEXT);
     button.iString = reinterpret_cast<INT_PTR>(text);
     SendMessageW(bar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&button));
+}
+
+// ---- modal windows ----
+
+HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight) {
+    RECT frame = {0, 0, clientWidth, clientHeight};
+    DWORD style = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN;
+    AdjustWindowRectEx(&frame, style, FALSE, WS_EX_DLGMODALFRAME);
+    HWND root = GetAncestor(owner, GA_ROOT);
+    RECT ownerRect;
+    GetWindowRect(root, &ownerRect);
+    int width = frame.right - frame.left;
+    int height = frame.bottom - frame.top;
+    int x = ownerRect.left + (ownerRect.right - ownerRect.left - width) / 2;
+    int y = ownerRect.top + (ownerRect.bottom - ownerRect.top - height) / 2;
+    return CreateWindowExW(WS_EX_DLGMODALFRAME | WS_EX_CONTROLPARENT, className, title, style, x, y, width, height, root, nullptr,
+                           GetModuleHandleW(nullptr), nullptr);
+}
+
+void RunModal(HWND dialog, HWND focus, const bool& done) {
+    HWND root = GetWindow(dialog, GW_OWNER);
+    // a window opened while another one is open leaves its owner disabled when it closes
+    bool wasEnabled = IsWindowEnabled(root);
+    EnableWindow(root, FALSE);
+    ShowWindow(dialog, SW_SHOW);
+    if (focus) {
+        SetFocus(focus);
+    }
+    MSG msg = {};
+    while (!done && GetMessageW(&msg, nullptr, 0, 0) > 0) {
+        if (!IsDialogMessageW(dialog, &msg)) {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+    }
+    if (msg.message == WM_QUIT) {
+        // keep the quit for the main loop
+        PostQuitMessage(static_cast<int>(msg.wParam));
+    }
+    EnableWindow(root, wasEnabled);
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, 0);
+    DestroyWindow(dialog);
+    if (wasEnabled) {
+        SetActiveWindow(root);
+    }
 }

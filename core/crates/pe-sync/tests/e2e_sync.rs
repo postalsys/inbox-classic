@@ -8,7 +8,8 @@ use pe_imap::{Client, Event};
 use pe_net::Security;
 use pe_store::{AccountId, AccountSettings, FolderId, Sort, Store};
 use pe_sync::{
-    Change, Report, apply_event, expunge_message, fetch_source, move_message, set_flag, sync_folder, sync_folders,
+    Change, Report, apply_event, create_folder, delete_folder, expunge_message, fetch_source, move_message,
+    new_folder_path, rename_folder, set_flag, sync_folder, sync_folders,
 };
 use pe_testkit::{ImapKit, USER, password, rfc822, wait_for};
 use serde_json::{Value, json};
@@ -318,4 +319,53 @@ async fn message_actions_with_move_and_uidplus() {
 async fn message_actions_without_move_and_uidplus() {
     // COPY and EXPUNGE, as on servers that have neither
     message_actions(json!({ "plugins": ["SPECIAL-USE"] })).await;
+}
+
+#[tokio::test]
+async fn creates_renames_and_deletes_folders() {
+    let mut s = setup!(json!({}));
+    let archive = s.folder("Archive").await;
+    let paths = |s: &Setup| -> Vec<String> {
+        s.store
+            .folders(s.account)
+            .unwrap()
+            .into_iter()
+            .map(|f| f.info.path)
+            .collect()
+    };
+    // a folder at the top and one inside Archive
+    // at the top: under the server's namespace, as the client learned it
+    let namespace = s.client.namespace().cloned();
+    let top = new_folder_path(&s.store, s.account, None, "Projects", namespace.as_ref())
+        .unwrap()
+        .unwrap();
+    assert_eq!(top, "Projects");
+    create_folder(&mut s.client, &top).await.unwrap();
+    let inside = new_folder_path(&s.store, s.account, Some(archive), "2024", None)
+        .unwrap()
+        .unwrap();
+    assert_eq!(inside, "Archive/2024");
+    create_folder(&mut s.client, &inside).await.unwrap();
+    sync_folders(&mut s.client, &mut s.store, s.account).await.unwrap();
+    assert!(paths(&s).contains(&"Projects".to_string()) && paths(&s).contains(&"Archive/2024".to_string()));
+
+    // renamed, with a message in it that goes along
+    s.server.add_message("Projects", &rfc822("In projects", "x"), &[]);
+    let projects = s.store.find_folder(s.account, "Projects").unwrap().unwrap().id;
+    let renamed = pe_sync::renamed_path(&s.store, projects, "Plans").unwrap().unwrap();
+    rename_folder(&mut s.client, &mut s.store, projects, &renamed)
+        .await
+        .unwrap();
+    sync_folders(&mut s.client, &mut s.store, s.account).await.unwrap();
+    assert!(paths(&s).contains(&"Plans".to_string()) && !paths(&s).contains(&"Projects".to_string()));
+    assert_eq!(s.server.subjects("Plans"), ["In projects"]);
+
+    // deleted, with the folders in it
+    create_folder(&mut s.client, "Plans/Q1").await.unwrap();
+    create_folder(&mut s.client, "Plans/Q1/Week1").await.unwrap();
+    sync_folders(&mut s.client, &mut s.store, s.account).await.unwrap();
+    let plans = s.store.find_folder(s.account, "Plans").unwrap().unwrap().id;
+    delete_folder(&mut s.client, &mut s.store, plans).await.unwrap();
+    sync_folders(&mut s.client, &mut s.store, s.account).await.unwrap();
+    assert!(!paths(&s).iter().any(|p| p.starts_with("Plans")), "{:?}", paths(&s));
 }

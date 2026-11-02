@@ -394,6 +394,73 @@ pub unsafe extern "C" fn pe_account_update(
     unsafe { with(core, false, |core| core.update_account(account, &settings).is_ok()) }
 }
 
+/// The settings of an account, for its Properties: a handle whose `PeAccountSettings` (strings owned by it) comes
+/// from `pe_account_settings_info`; free with `pe_account_settings_free`. NULL for an unknown account.
+pub struct PeAccountSettingsView {
+    info: PeAccountSettings,
+    _strings: Strings,
+}
+
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_settings(core: *const PeCore, account: i64) -> *mut PeAccountSettingsView {
+    let security = |s: pe_store::Security| match s {
+        pe_store::Security::Tls => PeSecurity::Tls,
+        pe_store::Security::StartTls => PeSecurity::StartTls,
+        pe_store::Security::Plain => PeSecurity::Plain,
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Some(account) = core
+                .accounts()
+                .ok()
+                .and_then(|all| all.into_iter().find(|a| a.id == account))
+            else {
+                return null_mut();
+            };
+            let s = &account.settings;
+            let mut strings = Strings::default();
+            let info = PeAccountSettings {
+                name: strings.add(&s.name),
+                email: strings.add(&s.email),
+                username: strings.add(&s.username),
+                imap_host: strings.add(&s.imap_host),
+                imap_port: s.imap_port,
+                imap_security: security(s.imap_security),
+                smtp_host: strings.add(&s.smtp_host),
+                smtp_port: s.smtp_port,
+                smtp_security: security(s.smtp_security),
+            };
+            handed(PeAccountSettingsView {
+                info,
+                _strings: strings,
+            })
+        })
+    }
+}
+
+/// The settings of a `pe_account_settings` handle
+///
+/// # Safety
+/// `view` must be NULL or a handle that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_settings_info(view: *const PeAccountSettingsView) -> *const PeAccountSettings {
+    // SAFETY: as the caller guarantees
+    unsafe { view.as_ref() }.map_or(null(), |view| &view.info)
+}
+
+/// # Safety
+/// `view` must be NULL or a handle that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_settings_free(view: *mut PeAccountSettingsView) {
+    if !view.is_null() {
+        // SAFETY: as the caller guarantees
+        drop(unsafe { Box::from_raw(view) });
+    }
+}
+
 /// Removes an account with its folders and messages
 ///
 /// # Safety
@@ -533,6 +600,8 @@ pub struct PeFolder {
     pub name: *const c_char,
     /// 0 for a top level folder
     pub depth: u32,
+    /// The Inbox or a special folder: not renamed or deleted
+    pub fixed: bool,
     pub special_use: PeSpecialUse,
     /// False for a folder that only holds other folders
     pub selectable: bool,
@@ -555,12 +624,17 @@ pub unsafe extern "C" fn pe_folders(core: *const PeCore, account: i64) -> *mut P
             let Ok(folders) = core.folders(account) else {
                 return null_mut();
             };
+            // the depth in the tree: listed ancestors only, so a folder whose parent is not listed is at the top
+            let infos: Vec<_> = folders.iter().map(|f| &f.info).collect();
+            let depths: std::collections::HashMap<i64, usize> =
+                folders.iter().map(|f| f.id).zip(pe_core::tree_depths(&infos)).collect();
             handed(PeFolderList(Rows::new(&folders, |f, strings| PeFolder {
                 id: f.id,
                 account: f.account_id,
                 path: strings.add(&f.info.path),
                 name: strings.add(&f.info.name),
-                depth: u32::try_from(f.info.depth()).unwrap_or(u32::MAX),
+                depth: u32::try_from(depths.get(&f.id).copied().unwrap_or(0)).unwrap_or(u32::MAX),
+                fixed: pe_core::is_fixed_folder(&f.info),
                 special_use: special_use(f.info.special_use.as_deref()),
                 selectable: f.info.selectable,
                 total: f.total,
@@ -613,6 +687,33 @@ pub unsafe extern "C" fn pe_folder_counts(core: *const PeCore, folder: i64, tota
     true
 }
 
+/// How many messages of a folder `pe_messages` lists with `find` (UTF-8, NULL for all), and how many of them are
+/// unread
+///
+/// # Safety
+/// `core` must be a live handle, `find` NULL or a NUL-terminated string, `total` and `unread` valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_count(
+    core: *const PeCore,
+    folder: i64,
+    find: *const c_char,
+    total: *mut u64,
+    unread: *mut u64,
+) -> bool {
+    if total.is_null() || unread.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let find = unsafe { arg(find) }.unwrap_or_default();
+    // SAFETY: as the caller guarantees
+    let Some(counts) = (unsafe { with(core, None, |core| core.count_matching(folder, find).ok()) }) else {
+        return false;
+    };
+    // SAFETY: the caller gave valid pointers
+    unsafe { (*total, *unread) = counts };
+    true
+}
+
 // ---- messages ----
 
 #[repr(C)]
@@ -660,19 +761,23 @@ pub struct PeMessage {
 /// A page of the message list; free with `pe_message_list_free`
 pub struct PeMessageList(Rows<PeMessage>);
 
-/// `limit` messages of a folder from `offset` on, in the order asked for; NULL on failure
+/// `limit` messages of a folder from `offset` on, in the order asked for; with `find` (UTF-8) only those with it
+/// in their subject, sender or recipients, NULL or empty for all. NULL on failure.
 ///
 /// # Safety
-/// `core` must be a live handle.
+/// `core` must be a live handle, `find` NULL or a NUL-terminated string.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_messages(
     core: *const PeCore,
     folder: i64,
     sort: PeSortField,
     ascending: bool,
+    find: *const c_char,
     offset: u64,
     limit: u64,
 ) -> *mut PeMessageList {
+    // SAFETY: as the caller guarantees
+    let find = unsafe { arg(find) }.unwrap_or_default();
     let sort = Sort {
         field: sort.into(),
         ascending,
@@ -680,7 +785,7 @@ pub unsafe extern "C" fn pe_messages(
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
-            let Ok(messages) = core.messages(folder, sort, offset, limit) else {
+            let Ok(messages) = core.messages_matching(folder, sort, find, offset, limit) else {
                 return null_mut();
             };
             handed(PeMessageList(Rows::new(&messages, |m, strings| {
@@ -714,17 +819,22 @@ pub unsafe extern "C" fn pe_message_index(
     folder: i64,
     sort: PeSortField,
     ascending: bool,
+    find: *const c_char,
     uid: u64,
 ) -> i64 {
+    // SAFETY: as the caller guarantees
+    let find = unsafe { arg(find) }.unwrap_or_default();
     let sort = Sort {
         field: sort.into(),
         ascending,
     };
     // SAFETY: as the caller guarantees
     unsafe {
-        with(core, -1, |core| match core.message_index(folder, sort, uid) {
-            Ok(Some(index)) => i64::try_from(index).unwrap_or(-1),
-            _ => -1,
+        with(core, -1, |core| {
+            match core.message_index_matching(folder, sort, find, uid) {
+                Ok(Some(index)) => i64::try_from(index).unwrap_or(-1),
+                _ => -1,
+            }
         })
     }
 }
@@ -831,6 +941,82 @@ pub unsafe extern "C" fn pe_folder_deletes_for_good(core: *const PeCore, folder:
 pub unsafe extern "C" fn pe_message_delete(core: *const PeCore, folder: i64, uid: u64) -> bool {
     // SAFETY: as the caller guarantees
     unsafe { with(core, false, |core| core.delete_message(folder, uid).is_ok()) }
+}
+
+// ---- folders ----
+
+/// Runs a folder change, handing its refusal (a name that can not be one, a special folder) to `error`
+///
+/// # Safety
+/// `error` must be NULL or a valid pointer.
+unsafe fn folder_change(
+    core: *const PeCore,
+    error: *mut *mut c_char,
+    change: impl FnOnce(&Core) -> pe_core::Result<()>,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe { with(core, Err(None), |core| change(core).map_err(Some)) };
+    match outcome {
+        Ok(()) => true,
+        Err(reason) => {
+            if !error.is_null() {
+                let text = reason.map_or_else(|| "the folder could not be changed".to_string(), |e| e.to_string());
+                // SAFETY: the caller gave a valid pointer
+                unsafe { *error = into_c_string(text) };
+            }
+            false
+        }
+    }
+}
+
+/// Creates the folder `name` (UTF-8) in `parent`, or at the top of the account when `parent` is 0:
+/// `FoldersChanged` follows once the server has it. False with the reason in `error` (NULL or a pointer to a
+/// string to free with `pe_string_free`) for a name that can not be one.
+///
+/// # Safety
+/// `core` must be a live handle, `name` a NUL-terminated string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_create(
+    core: *const PeCore,
+    account: i64,
+    parent: i64,
+    name: *const c_char,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let name = unsafe { arg(name) }.unwrap_or_default().to_string();
+    let parent = (parent != 0).then_some(parent);
+    // SAFETY: as the caller guarantees
+    unsafe { folder_change(core, error, |core| core.create_folder(account, parent, &name)) }
+}
+
+/// Renames a folder to `name` (its subfolders go along): `FoldersChanged` follows. False with the reason for the
+/// Inbox, a special folder or a name that can not be one.
+///
+/// # Safety
+/// As `pe_folder_create`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_rename(
+    core: *const PeCore,
+    folder: i64,
+    name: *const c_char,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let name = unsafe { arg(name) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe { folder_change(core, error, |core| core.rename_folder(folder, &name)) }
+}
+
+/// Deletes a folder and the messages in it: `FoldersChanged` follows. False with the reason for the Inbox and the
+/// special folders.
+///
+/// # Safety
+/// `core` must be a live handle, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_delete(core: *const PeCore, folder: i64, error: *mut *mut c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { folder_change(core, error, |core| core.delete_folder(folder)) }
 }
 
 // ---- the message view ----
