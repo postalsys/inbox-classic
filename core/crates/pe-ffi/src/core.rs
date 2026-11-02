@@ -7,7 +7,7 @@
 use std::ffi::{CStr, CString, c_char, c_void};
 use std::ptr::{null, null_mut};
 
-use pe_core::{Core, Event, FailureKind};
+use pe_core::{Core, DraftKind, Event, FailureKind, Outgoing};
 use pe_imap::SpecialUse;
 use pe_store::{AccountSettings, Security, Sort, SortField};
 
@@ -97,6 +97,8 @@ pub enum PeEventKind {
     MessageReady = 5,
     /// Work for `account` failed: `failure` and `message` say what
     Failed = 6,
+    /// A message from `account` was sent
+    MessageSent = 7,
 }
 
 #[repr(C)]
@@ -159,6 +161,7 @@ impl Callback {
             Event::FolderChanged { account, folder } => (PeEventKind::FolderChanged, *account, *folder, 0),
             Event::MessageReady { folder, uid } => (PeEventKind::MessageReady, 0, *folder, *uid),
             Event::Failed { account, .. } => (PeEventKind::Failed, *account, 0, 0),
+            Event::MessageSent { account } => (PeEventKind::MessageSent, *account, 0, 0),
         };
         let (failure, message) = match event {
             Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message))),
@@ -201,9 +204,39 @@ pub unsafe extern "C" fn pe_core_open(
     let Some(path) = (unsafe { arg(path) }) else {
         return null_mut();
     };
+    open(path, pe_net::Trust::Platform, callback, context)
+}
+
+/// Like `pe_core_open`, with every server checked against the one certificate `der` (`len` bytes of
+/// DER) instead of the certificates Windows trusts: for test servers, and a server whose
+/// self-signed certificate the user accepted
+///
+/// # Safety
+/// As `pe_core_open`; `der` must point to `len` readable bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_core_open_pinned(
+    path: *const c_char,
+    der: *const u8,
+    len: usize,
+    callback: PeEventCallback,
+    context: *mut c_void,
+) -> *mut PeCore {
+    // SAFETY: as the caller guarantees
+    let Some(path) = (unsafe { arg(path) }) else {
+        return null_mut();
+    };
+    if der.is_null() || len == 0 {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let certificate = unsafe { std::slice::from_raw_parts(der, len) }.to_vec();
+    open(path, pe_net::Trust::Pinned(vec![certificate]), callback, context)
+}
+
+fn open(path: &str, trust: pe_net::Trust, callback: PeEventCallback, context: *mut c_void) -> *mut PeCore {
     guard(|| {
         let callback = callback.map(|function| Callback { function, context });
-        let core = Core::open(path, move |event| {
+        let core = Core::open_with_trust(path, trust, move |event| {
             if let Some(callback) = &callback {
                 callback.deliver(event);
             }
@@ -865,4 +898,177 @@ pub unsafe extern "C" fn pe_bytes_free(data: *mut u8, len: usize) {
         // SAFETY: a boxed slice of `len` bytes made by pe_attachment_data
         drop(unsafe { Box::from_raw(std::ptr::slice_from_raw_parts_mut(data, len)) });
     }
+}
+
+// ---- writing ----
+
+/// A message to send; strings are UTF-8, address lists as the user typed them
+#[repr(C)]
+pub struct PeOutgoing {
+    pub to: *const c_char,
+    pub cc: *const c_char,
+    pub bcc: *const c_char,
+    pub subject: *const c_char,
+    pub text: *const c_char,
+    /// From the draft of a reply, or NULL
+    pub in_reply_to: *const c_char,
+    /// From the draft of a reply, space separated, or NULL
+    pub references: *const c_char,
+    /// Paths of files to attach
+    pub attachments: *const *const c_char,
+    pub attachment_count: usize,
+}
+
+/// # Safety
+/// `outgoing` must be NULL or valid, its strings NULL or NUL-terminated, `attachments` pointing to
+/// `attachment_count` of them.
+unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
+    // SAFETY: as the caller guarantees
+    let o = unsafe { outgoing.as_ref() }?;
+    // NULL is empty, text that is not UTF-8 is refused rather than sent as nothing
+    let text = |p: *const c_char| -> Option<String> {
+        // SAFETY: as the caller guarantees
+        if p.is_null() {
+            Some(String::new())
+        } else {
+            unsafe { arg(p) }.map(str::to_string)
+        }
+    };
+    let attachments = if o.attachments.is_null() || o.attachment_count == 0 {
+        Vec::new()
+    } else {
+        // SAFETY: as the caller guarantees
+        let paths = unsafe { std::slice::from_raw_parts(o.attachments, o.attachment_count) };
+        // SAFETY: as the caller guarantees
+        paths
+            .iter()
+            .map(|p| unsafe { arg(*p) }.map(std::path::PathBuf::from))
+            .collect::<Option<Vec<_>>>()?
+    };
+    Some(Outgoing {
+        to: text(o.to)?,
+        cc: text(o.cc)?,
+        bcc: text(o.bcc)?,
+        subject: text(o.subject)?,
+        text: text(o.text)?,
+        attachments,
+        in_reply_to: Some(text(o.in_reply_to)?).filter(|r| !r.is_empty()),
+        references: text(o.references)?.split_whitespace().map(str::to_string).collect(),
+    })
+}
+
+/// Sends a message from an account in the background: `MessageSent`, or `Failed` with the server's
+/// answer. A recipient that is no address or a file that is not there fails right away: false,
+/// with the reason in `error` when it is not NULL (free it with `pe_string_free`).
+///
+/// # Safety
+/// `core` must be a live handle, `message` a valid message, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_send(
+    core: *const PeCore,
+    account: i64,
+    message: *const PeOutgoing,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let result = match unsafe { outgoing(message) } {
+        // SAFETY: as the caller guarantees
+        Some(message) => unsafe { with(core, Err(None), |core| core.send(account, message).map_err(Some)) },
+        None => Err(None),
+    };
+    match result {
+        Ok(()) => true,
+        Err(reason) => {
+            if !error.is_null() {
+                let text = reason.map_or_else(|| "the message could not be sent".to_string(), |e| e.to_string());
+                // SAFETY: the caller gave a valid pointer
+                unsafe { *error = into_c_string(text) };
+            }
+            false
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeDraftKind {
+    Reply = 0,
+    ReplyAll = 1,
+    Forward = 2,
+}
+
+/// The fields a compose window starts with
+#[repr(C)]
+pub struct PeDraftInfo {
+    pub to: *const c_char,
+    pub cc: *const c_char,
+    pub subject: *const c_char,
+    pub text: *const c_char,
+    /// For PeOutgoing, NULL when there is none
+    pub in_reply_to: *const c_char,
+    /// For PeOutgoing, space separated
+    pub references: *const c_char,
+}
+
+/// A draft; free with `pe_draft_free`
+pub struct PeDraft {
+    info: PeDraftInfo,
+    _strings: Strings,
+}
+
+/// A reply, a reply to all or a forward of a message whose source is in the store (after
+/// `MessageReady`), NULL otherwise
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_draft(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    kind: PeDraftKind,
+) -> *mut PeDraft {
+    let kind = match kind {
+        PeDraftKind::Reply => DraftKind::Reply,
+        PeDraftKind::ReplyAll => DraftKind::ReplyAll,
+        PeDraftKind::Forward => DraftKind::Forward,
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(Some(draft)) = core.draft(folder, uid, kind) else {
+                return null_mut();
+            };
+            let mut strings = Strings::default();
+            let info = PeDraftInfo {
+                to: strings.add(&draft.to),
+                cc: strings.add(&draft.cc),
+                subject: strings.add(&draft.subject),
+                // edit controls break lines at CRLF
+                text: strings.add(&draft.text.replace('\n', "\r\n")),
+                in_reply_to: draft.in_reply_to.as_deref().map_or(null(), |r| strings.add(r)),
+                references: strings.add(&draft.references.join(" ")),
+            };
+            handed(PeDraft {
+                info,
+                _strings: strings,
+            })
+        })
+    }
+}
+
+/// # Safety
+/// `draft` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_info(draft: *const PeDraft) -> *const PeDraftInfo {
+    // SAFETY: as the caller guarantees
+    unsafe { draft.as_ref() }.map_or(null(), |draft| &draft.info)
+}
+
+/// # Safety
+/// `draft` must be NULL or a draft that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_free(draft: *mut PeDraft) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(draft) }
 }

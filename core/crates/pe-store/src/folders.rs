@@ -140,6 +140,17 @@ impl Store {
             .optional()
     }
 
+    /// The folder of an account with this special-use flag, `\\Sent`
+    pub fn special_folder(&self, account: AccountId, flag: &str) -> Result<Option<Folder>> {
+        self.db
+            .query_row(
+                &format!("SELECT {COLUMNS} FROM folders f WHERE f.account_id = ?1 AND f.special_use = ?2 LIMIT 1"),
+                params![account, flag],
+                from_row,
+            )
+            .optional()
+    }
+
     pub fn set_sync_state(&self, folder: FolderId, state: &SyncState) -> Result<()> {
         self.db.execute(
             "UPDATE folders SET uid_validity = ?2, uid_next = ?3, highest_modseq = ?4 WHERE id = ?1",
@@ -203,6 +214,11 @@ mod tests {
         assert_eq!(folders[1].id, inbox.id);
         assert_eq!(folders[1].state, state);
         assert_eq!(folders[0].info.special_use.as_deref(), Some("\\Sent"));
+        assert_eq!(
+            store.special_folder(account, "\\Sent").unwrap().unwrap().id,
+            folders[0].id
+        );
+        assert!(store.special_folder(account, "\\Trash").unwrap().is_none());
         assert_eq!((folders[1].info.depth(), folders[2].info.depth()), (0, 1));
         assert!(store.find_folder(account, "Old").unwrap().is_none());
 

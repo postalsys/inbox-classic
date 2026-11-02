@@ -9,6 +9,7 @@ use std::sync::Mutex;
 use std::sync::mpsc::{Receiver, Sender, channel};
 use std::time::Duration;
 
+use base64::Engine;
 use pe_ffi::*;
 use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
 use serde_json::json;
@@ -69,7 +70,15 @@ fn reads_mail_through_the_c_api() {
     let path = CString::new(dir.path().join("store.db").to_str().unwrap()).unwrap();
     let (sender, events) = channel();
     let context = Box::into_raw(Box::new(Mutex::new(sender)));
-    let core = unsafe { pe_core_open(path.as_ptr(), Some(on_event), context.cast()) };
+    let core = unsafe {
+        pe_core_open_pinned(
+            path.as_ptr(),
+            server.cert.as_ptr(),
+            server.cert.len(),
+            Some(on_event),
+            context.cast(),
+        )
+    };
     assert!(!core.is_null());
 
     let c = |s: &str| CString::new(s).unwrap();
@@ -83,7 +92,8 @@ fn reads_mail_through_the_c_api() {
         imap_security: PeSecurity::Plain,
         smtp_host: host.as_ptr(),
         smtp_port: server.smtp,
-        smtp_security: PeSecurity::Plain,
+        // ImapKit's SMTP server takes AUTH after STARTTLS only
+        smtp_security: PeSecurity::StartTls,
     };
     let password = c(PASSWORD);
     let account = unsafe { pe_account_add(core, &settings, password.as_ptr()) };
@@ -176,6 +186,59 @@ fn reads_mail_through_the_c_api() {
 
     assert!(unsafe { pe_message_set_seen(core, inbox, uid, true) });
     wait(&events, |e| e.kind == PeEventKind::FolderChanged && e.folder == inbox);
+
+    // a reply drafted in Rust, sent through the C API
+    let draft = unsafe { pe_message_draft(core, inbox, uid, PeDraftKind::Reply) };
+    let info = unsafe { &*pe_draft_info(draft) };
+    assert_eq!(
+        (text(info.to), text(info.subject)),
+        ("Sender <sender@example.com>".to_string(), "Re: Report".to_string())
+    );
+    let attachment_path = dir.path().join("note.txt");
+    std::fs::write(&attachment_path, b"attached note").unwrap();
+    let attachment_path = c(attachment_path.to_str().unwrap());
+    let attachments = [attachment_path.as_ptr()];
+    let (body, empty) = (c("My answer"), c(""));
+    let outgoing = PeOutgoing {
+        to: info.to,
+        cc: empty.as_ptr(),
+        bcc: empty.as_ptr(),
+        subject: info.subject,
+        text: body.as_ptr(),
+        in_reply_to: info.in_reply_to,
+        references: info.references,
+        attachments: attachments.as_ptr(),
+        attachment_count: 1,
+    };
+    assert!(unsafe { pe_message_send(core, account, &outgoing, null_mut()) });
+    unsafe { pe_draft_free(draft) };
+    wait(&events, |e| e.kind == PeEventKind::MessageSent && e.account == account);
+    let delivered = server.messages("INBOX");
+    let raw = delivered.last().unwrap()["raw"].as_str().unwrap();
+    let raw = String::from_utf8(base64::engine::general_purpose::STANDARD.decode(raw).unwrap()).unwrap();
+    assert!(
+        raw.contains("Subject: Re: Report\r\n") && raw.contains("filename=note.txt"),
+        "{raw}"
+    );
+    assert!(!unsafe { pe_message_send(core, account, std::ptr::null(), null_mut()) });
+    // a typo in the address: refused right away, with the reason
+    let bad = c("not an address");
+    // its own strings: the draft the first message came from is freed
+    let typo = PeOutgoing {
+        to: bad.as_ptr(),
+        cc: empty.as_ptr(),
+        bcc: empty.as_ptr(),
+        subject: empty.as_ptr(),
+        text: body.as_ptr(),
+        in_reply_to: std::ptr::null(),
+        references: std::ptr::null(),
+        attachments: std::ptr::null(),
+        attachment_count: 0,
+    };
+    let mut reason: *mut c_char = null_mut();
+    assert!(!unsafe { pe_message_send(core, account, &typo, &mut reason) });
+    assert!(text(reason).contains("not an e-mail address"), "{}", text(reason));
+    unsafe { pe_string_free(reason) };
 
     // a wrong password: a Failed event with the reason
     let wrong = c("wrong");

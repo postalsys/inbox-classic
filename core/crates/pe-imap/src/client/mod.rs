@@ -14,7 +14,6 @@ mod messages;
 mod search;
 
 use std::collections::{HashSet, VecDeque};
-use std::sync::Arc;
 use std::time::Duration;
 
 use pe_net::{Security, Stream, Trust};
@@ -41,15 +40,9 @@ const MAX_COLLECTED_RESPONSES: usize = 1_000_000;
 const LOG_LINE_LIMIT: usize = 1000;
 
 /// Who wrote a line of the wire log
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Direction {
-    Client,
-    Server,
-}
-
-/// Receives the protocol log: commands with secrets and message data hidden, server lines cut at
-/// 1000 bytes
-pub type WireLog = Arc<dyn Fn(Direction, &str) + Send + Sync>;
+/// Which way a line went, and the receiver of the protocol log: commands with secrets and message data hidden,
+/// server lines cut at 1000 bytes
+pub use pe_net::{Direction, WireLog};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Timeouts {

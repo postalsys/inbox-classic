@@ -13,9 +13,11 @@ crate-type = ["staticlib", "lib"]
 pe-core = { path = "../pe-core" }
 pe-html.workspace = true
 pe-imap = { path = "../pe-imap" }
+pe-net.workspace = true
 pe-store = { path = "../pe-store" }
 
 [dev-dependencies]
+base64.workspace = true
 pe-testkit = { path = "../pe-testkit" }
 serde_json = "1"
 

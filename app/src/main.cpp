@@ -91,6 +91,9 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_SYNC_FINISHED:
         SetStatus(L"Done");
         break;
+    case PE_EVENT_KIND_MESSAGE_SENT:
+        SetStatus(L"Message sent.");
+        break;
     case PE_EVENT_KIND_FAILED:
         SetStatus(g_mailbox.AccountName(event.account) + L": " + event.message);
         if (event.failure == PE_FAILURE_KIND_AUTHENTICATION) {
@@ -111,6 +114,12 @@ HMENU BuildMenu() {
     AppendMenuW(file, MF_STRING, IDM_NEW_ACCOUNT, L"&New Account...");
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_EXIT, L"E&xit");
+    HMENU compose = CreatePopupMenu();
+    AppendMenuW(compose, MF_STRING, IDM_NEW_MAIL, L"&New Message\tCtrl+N");
+    AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(compose, MF_STRING, IDM_REPLY, L"&Reply to Sender\tCtrl+R");
+    AppendMenuW(compose, MF_STRING, IDM_REPLY_ALL, L"Reply to &All\tCtrl+Shift+R");
+    AppendMenuW(compose, MF_STRING, IDM_FORWARD, L"&Forward\tCtrl+F");
     HMENU edit = CreatePopupMenu();
     AppendMenuW(edit, MF_STRING, IDM_MARK_READ, L"Mark as &Read\tCtrl+Q");
     AppendMenuW(edit, MF_STRING, IDM_MARK_UNREAD, L"Mark as &Unread");
@@ -125,6 +134,7 @@ HMENU BuildMenu() {
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(edit), L"&Edit");
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(view), L"&View");
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(tools), L"&Tools");
+    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(compose), L"&Message");
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(help), L"&Help");
     return bar;
 }
@@ -133,6 +143,10 @@ HACCEL BuildAccelerators() {
     ACCEL keys[] = {
         {FVIRTKEY, VK_F5, IDM_SYNC},
         {FVIRTKEY | FCONTROL, 'Q', IDM_MARK_READ},
+        {FVIRTKEY | FCONTROL, 'N', IDM_NEW_MAIL},
+        {FVIRTKEY | FCONTROL, 'R', IDM_REPLY},
+        {FVIRTKEY | FCONTROL | FSHIFT, 'R', IDM_REPLY_ALL},
+        {FVIRTKEY | FCONTROL, 'F', IDM_FORWARD},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -147,7 +161,8 @@ void CreateToolbar(HWND hwnd) {
         WORD id;
         const wchar_t* text;
     };
-    Button buttons[] = {{IDM_SYNC, L"Send/Recv"}, {IDM_MARK_READ, L"Mark Read"}, {IDM_MARK_UNREAD, L"Mark Unread"}, {IDM_NEW_ACCOUNT, L"New Account"}};
+    Button buttons[] = {{IDM_NEW_MAIL, L"Create Mail"}, {IDM_REPLY, L"Reply"}, {IDM_REPLY_ALL, L"Reply All"},
+                        {IDM_FORWARD, L"Forward"}, {IDM_SYNC, L"Send/Recv"}, {IDM_MARK_READ, L"Mark Read"}, {IDM_MARK_UNREAD, L"Mark Unread"}, {IDM_NEW_ACCOUNT, L"New Account"}};
     for (const Button& button : buttons) {
         TBBUTTON item = {};
         item.iBitmap = I_IMAGENONE;
@@ -265,8 +280,38 @@ void ShowAbout() {
     MessageBoxW(g_main, text.c_str(), L"About PostalExpress", MB_OK | MB_ICONINFORMATION);
 }
 
+void NewMessage() {
+    int64_t account = g_mailbox.CurrentAccount();
+    if (!account) {
+        MessageBoxW(g_main, L"Add a mail account first.", kTitle, MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    OpenCompose(g_main, g_core.get(), account, nullptr);
+}
+
+void Reply(PeDraftKind kind) {
+    core::Draft draft = g_mailbox.DraftOfShown(kind);
+    if (!draft) {
+        MessageBoxW(g_main, L"Select a message first.", kTitle, MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    OpenCompose(g_main, g_core.get(), g_mailbox.CurrentAccount(), pe_draft_info(draft.get()));
+}
+
 void OnCommand(WORD id) {
     switch (id) {
+    case IDM_NEW_MAIL:
+        NewMessage();
+        return;
+    case IDM_REPLY:
+        Reply(PE_DRAFT_KIND_REPLY);
+        return;
+    case IDM_REPLY_ALL:
+        Reply(PE_DRAFT_KIND_REPLY_ALL);
+        return;
+    case IDM_FORWARD:
+        Reply(PE_DRAFT_KIND_FORWARD);
+        return;
     case IDM_NEW_ACCOUNT:
         AddAccount();
         return;

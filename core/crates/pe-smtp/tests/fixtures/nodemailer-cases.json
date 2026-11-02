@@ -1,0 +1,1051 @@
+{
+ "qp": [
+  {
+   "input": "Hello\r\nworld\r\n",
+   "encoded": "Hello\r\nworld\r\n",
+   "wrapped": "Hello\r\nworld\r\n"
+  },
+  {
+   "input": "line with trailing space \r\nnext\r\n",
+   "encoded": "line with trailing space=20\r\nnext\r\n",
+   "wrapped": "line with trailing space=20\r\nnext\r\n"
+  },
+  {
+   "input": "Tere õhtust!\r\nKuidas läheb?\r\n",
+   "encoded": "Tere =C3=B5htust!\r\nKuidas l=C3=A4heb?\r\n",
+   "wrapped": "Tere =C3=B5htust!\r\nKuidas l=C3=A4heb?\r\n"
+  },
+  {
+   "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\n",
+   "encoded": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\n",
+   "wrapped": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=\r\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=\r\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\n"
+  },
+  {
+   "input": "Lorem ipsum dolor sit amet, ünicode ünicode ünicode Lorem ipsum dolor sit amet, ünicode ünicode ünicode Lorem ipsum dolor sit amet, ünicode ünicode ünicode Lorem ipsum dolor sit amet, ünicode ünicode ünicode Lorem ipsum dolor sit amet, ünicode ünicode ünicode \r\n",
+   "encoded": "Lorem ipsum dolor sit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode Lorem ipsum dolor sit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode Lorem ipsum dolor sit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode Lorem ipsum dolor sit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode Lorem ipsum dolor sit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode=20\r\n",
+   "wrapped": "Lorem ipsum dolor sit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode Lorem =\r\nipsum dolor sit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode Lorem ipsum =\r\ndolor sit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode Lorem ipsum dolor =\r\nsit amet, =C3=BCnicode =C3=BCnicode =C3=BCnicode Lorem ipsum dolor sit amet=\r\n, =C3=BCnicode =C3=BCnicode =C3=BCnicode=20\r\n"
+  },
+  {
+   "input": "equals = sign and tab\tend\t\r\n",
+   "encoded": "equals =3D sign and tab\tend=09\r\n",
+   "wrapped": "equals =3D sign and tab\tend=09\r\n"
+  },
+  {
+   "input": ".leading dot\r\n..two dots\r\n",
+   "encoded": ".leading dot\r\n..two dots\r\n",
+   "wrapped": ".leading dot\r\n..two dots\r\n"
+  },
+  {
+   "input": "éééééééééééééééééééééééééééééééééééééééé",
+   "encoded": "=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9",
+   "wrapped": "=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=\r\n=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=\r\n=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=C3=A9=\r\n=C3=A9=C3=A9=C3=A9=C3=A9"
+  },
+  {
+   "input": "日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語\r\n",
+   "encoded": "=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E\r\n",
+   "wrapped": "=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=\r\n=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=\r\n=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=\r\n=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=\r\n=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=\r\n=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=\r\n=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=\r\n=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=\r\n=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=\r\n=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=\r\n=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=E6=9C=AC=E8=AA=9E=E6=97=A5=\r\n=E6=9C=AC=E8=AA=9E\r\n"
+  }
+ ],
+ "base64": [
+  {
+   "input": "",
+   "wrapped": ""
+  },
+  {
+   "input": "hello",
+   "wrapped": "aGVsbG8="
+  },
+  {
+   "input": "Hello world, just ASCII",
+   "wrapped": "SGVsbG8gd29ybGQsIGp1c3QgQVNDSUk="
+  },
+  {
+   "input": "Jõgeva õunad on head",
+   "wrapped": "SsO1Z2V2YSDDtXVuYWQgb24gaGVhZA=="
+  },
+  {
+   "input": "Привет, как дела?",
+   "wrapped": "0J/RgNC40LLQtdGCLCDQutCw0Log0LTQtdC70LA/"
+  },
+  {
+   "input": "日本語のテキスト",
+   "wrapped": "5pel5pys6Kqe44Gu44OG44Kt44K544OI"
+  },
+  {
+   "input": "😀 party 🎉 time",
+   "wrapped": "8J+YgCBwYXJ0eSDwn46JIHRpbWU="
+  },
+  {
+   "input": "mixed ascii and ünïcödé words here",
+   "wrapped": "bWl4ZWQgYXNjaWkgYW5kIMO8bsOvY8O2ZMOpIHdvcmRzIGhlcmU="
+  },
+  {
+   "input": "quote \" and backslash \\ inside",
+   "wrapped": "cXVvdGUgIiBhbmQgYmFja3NsYXNoIFwgaW5zaWRl"
+  },
+  {
+   "input": "control \u0001 char",
+   "wrapped": "Y29udHJvbCABIGNoYXI="
+  },
+  {
+   "input": "tab\there",
+   "wrapped": "dGFiCWhlcmU="
+  },
+  {
+   "input": "looks like =?utf-8?q?an_encoded?= word",
+   "wrapped": "bG9va3MgbGlrZSA9P3V0Zi04P3E/YW5fZW5jb2RlZD89IHdvcmQ="
+  },
+  {
+   "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "wrapped": "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh\r\nYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ=="
+  },
+  {
+   "input": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word",
+   "wrapped": "d29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdv\r\ncmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3Jk\r\nIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQ="
+  },
+  {
+   "input": "Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa",
+   "wrapped": "w5xoZW5kYXR1ZCBLdW5pbmdyaWlrIGphIFDDtWhqYS1JaXJpbWFhIMOcaGVuZGF0dWQgS3VuaW5n\r\ncmlpayBqYSBQw7VoamEtSWlyaW1hYSDDnGhlbmRhdHVkIEt1bmluZ3JpaWsgamEgUMO1aGphLUlp\r\ncmltYWEgw5xoZW5kYXR1ZCBLdW5pbmdyaWlrIGphIFDDtWhqYS1JaXJpbWFh"
+  },
+  {
+   "input": "你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界",
+   "wrapped": "5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW\r\n55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9\r\n5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g\r\n5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM\r\n5L2g5aW95LiW55WM"
+  },
+  {
+   "input": "  leading and trailing spaces  ",
+   "wrapped": "ICBsZWFkaW5nIGFuZCB0cmFpbGluZyBzcGFjZXMgIA=="
+  },
+  {
+   "input": "ends with a space ",
+   "wrapped": "ZW5kcyB3aXRoIGEgc3BhY2Ug"
+  },
+  {
+   "input": "emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂",
+   "wrapped": "ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mCZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDw\r\nn5mCZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mCZW1vamkg8J+Zgg=="
+  },
+  {
+   "input": "Hello\r\nworld\r\n",
+   "wrapped": "SGVsbG8NCndvcmxkDQo="
+  },
+  {
+   "input": "line with trailing space \r\nnext\r\n",
+   "wrapped": "bGluZSB3aXRoIHRyYWlsaW5nIHNwYWNlIA0KbmV4dA0K"
+  },
+  {
+   "input": "Tere õhtust!\r\nKuidas läheb?\r\n",
+   "wrapped": "VGVyZSDDtWh0dXN0IQ0KS3VpZGFzIGzDpGhlYj8NCg=="
+  },
+  {
+   "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\n",
+   "wrapped": "eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4\r\neHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4\r\neHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4\r\neHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHgNCg=="
+  },
+  {
+   "input": "Lorem ipsum dolor sit amet, ünicode ünicode ünicode Lorem ipsum dolor sit amet, ünicode ünicode ünicode Lorem ipsum dolor sit amet, ünicode ünicode ünicode Lorem ipsum dolor sit amet, ünicode ünicode ünicode Lorem ipsum dolor sit amet, ünicode ünicode ünicode \r\n",
+   "wrapped": "TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIMO8bmljb2RlIMO8bmljb2RlIMO8bmljb2RlIExv\r\ncmVtIGlwc3VtIGRvbG9yIHNpdCBhbWV0LCDDvG5pY29kZSDDvG5pY29kZSDDvG5pY29kZSBMb3Jl\r\nbSBpcHN1bSBkb2xvciBzaXQgYW1ldCwgw7xuaWNvZGUgw7xuaWNvZGUgw7xuaWNvZGUgTG9yZW0g\r\naXBzdW0gZG9sb3Igc2l0IGFtZXQsIMO8bmljb2RlIMO8bmljb2RlIMO8bmljb2RlIExvcmVtIGlw\r\nc3VtIGRvbG9yIHNpdCBhbWV0LCDDvG5pY29kZSDDvG5pY29kZSDDvG5pY29kZSANCg=="
+  },
+  {
+   "input": "equals = sign and tab\tend\t\r\n",
+   "wrapped": "ZXF1YWxzID0gc2lnbiBhbmQgdGFiCWVuZAkNCg=="
+  },
+  {
+   "input": ".leading dot\r\n..two dots\r\n",
+   "wrapped": "LmxlYWRpbmcgZG90DQouLnR3byBkb3RzDQo="
+  },
+  {
+   "input": "éééééééééééééééééééééééééééééééééééééééé",
+   "wrapped": "w6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6nD\r\nqcOpw6nDqcOpw6nDqcOpw6nDqcOpw6k="
+  },
+  {
+   "input": "日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語\r\n",
+   "wrapped": "5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel\r\n5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys\r\n6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe\r\n5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel\r\n5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6Kqe5pel5pys6KqeDQo="
+  }
+ ],
+ "words": [
+  {
+   "input": "",
+   "encoding": "B",
+   "q": "=?UTF-8?Q??=",
+   "b": "=?UTF-8?B??=",
+   "q52": "=?UTF-8?Q??=",
+   "b52": "=?UTF-8?B??=",
+   "words": "",
+   "header": ""
+  },
+  {
+   "input": "hello",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?hello?=",
+   "b": "=?UTF-8?B?aGVsbG8=?=",
+   "q52": "=?UTF-8?Q?hello?=",
+   "b52": "=?UTF-8?B?aGVsbG8=?=",
+   "words": "hello",
+   "header": "hello"
+  },
+  {
+   "input": "Hello world, just ASCII",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?Hello_world=2C_just_ASCII?=",
+   "b": "=?UTF-8?B?SGVsbG8gd29ybGQsIGp1c3QgQVNDSUk=?=",
+   "q52": "=?UTF-8?Q?Hello_world=2C_just_ASCII?=",
+   "b52": "=?UTF-8?B?SGVsbG8gd29ybGQsIGp1c3QgQVNDSUk=?=",
+   "words": "Hello world, just ASCII",
+   "header": "Hello world, just ASCII"
+  },
+  {
+   "input": "Jõgeva õunad on head",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?J=C3=B5geva_=C3=B5unad_on_head?=",
+   "b": "=?UTF-8?B?SsO1Z2V2YSDDtXVuYWQgb24gaGVhZA==?=",
+   "q52": "=?UTF-8?Q?J=C3=B5geva_=C3=B5unad_on_head?=",
+   "b52": "=?UTF-8?B?SsO1Z2V2YSDDtXVuYWQgb24gaGVhZA==?=",
+   "words": "=?UTF-8?Q?J=C3=B5geva_=C3=B5unad_on_head?=",
+   "header": "=?UTF-8?Q?J=C3=B5geva_=C3=B5unad_on_head?="
+  },
+  {
+   "input": "Привет, как дела?",
+   "encoding": "B",
+   "q": "=?UTF-8?Q?=D0=9F=D1=80=D0=B8=D0=B2=D0=B5=D1=82=2C_=D0=BA=D0=B0=D0=BA_=D0=B4=D0=B5=D0=BB=D0=B0=3F?=",
+   "b": "=?UTF-8?B?0J/RgNC40LLQtdGCLCDQutCw0Log0LTQtdC70LA/?=",
+   "q52": "=?UTF-8?Q?=D0=9F=D1=80=D0=B8=D0=B2=D0=B5=D1=82=2C_?= =?UTF-8?Q?=D0=BA=D0=B0=D0=BA_=D0=B4=D0=B5=D0=BB?= =?UTF-8?Q?=D0=B0=3F?=",
+   "b52": "=?UTF-8?B?0J/RgNC40LLQtdGCLCDQutCw0Log0LTQtdC70LA/?=",
+   "words": "=?UTF-8?B?0J/RgNC40LLQtdGCLCDQutCw0Log0LTQtdC70LA/?=",
+   "header": "=?UTF-8?B?0J/RgNC40LLQtdGCLCDQutCw0Log0LTQtdC70LA/?="
+  },
+  {
+   "input": "日本語のテキスト",
+   "encoding": "B",
+   "q": "=?UTF-8?Q?=E6=97=A5=E6=9C=AC=E8=AA=9E=E3=81=AE=E3=83=86=E3=82=AD=E3=82=B9=E3=83=88?=",
+   "b": "=?UTF-8?B?5pel5pys6Kqe44Gu44OG44Kt44K544OI?=",
+   "q52": "=?UTF-8?Q?=E6=97=A5=E6=9C=AC=E8=AA=9E=E3=81=AE?= =?UTF-8?Q?=E3=83=86=E3=82=AD=E3=82=B9=E3=83=88?=",
+   "b52": "=?UTF-8?B?5pel5pys6Kqe44Gu44OG44Kt44K544OI?=",
+   "words": "=?UTF-8?B?5pel5pys6Kqe44Gu44OG44Kt44K544OI?=",
+   "header": "=?UTF-8?B?5pel5pys6Kqe44Gu44OG44Kt44K544OI?="
+  },
+  {
+   "input": "😀 party 🎉 time",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=F0=9F=98=80_party_=F0=9F=8E=89_time?=",
+   "b": "=?UTF-8?B?8J+YgCBwYXJ0eSDwn46JIHRpbWU=?=",
+   "q52": "=?UTF-8?Q?=F0=9F=98=80_party_=F0=9F=8E=89_time?=",
+   "b52": "=?UTF-8?B?8J+YgCBwYXJ0eSDwn46JIHRpbWU=?=",
+   "words": "=?UTF-8?Q?=F0=9F=98=80_party_=F0=9F=8E=89_time?=",
+   "header": "=?UTF-8?Q?=F0=9F=98=80_party_=F0=9F=8E=89_time?="
+  },
+  {
+   "input": "mixed ascii and ünïcödé words here",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?mixed_ascii_and_=C3=BCn=C3=AFc=C3=B6d=C3=A9_words_here?=",
+   "b": "=?UTF-8?B?bWl4ZWQgYXNjaWkgYW5kIMO8bsOvY8O2ZMOpIHdvcmRzIGhlcmU=?=",
+   "q52": "=?UTF-8?Q?mixed_ascii_and_=C3=BCn=C3=AFc=C3=B6d?= =?UTF-8?Q?=C3=A9_words_here?=",
+   "b52": "=?UTF-8?B?bWl4ZWQgYXNjaWkgYW5kIMO8bsOvY8O2ZMOpIHdv?= =?UTF-8?B?cmRzIGhlcmU=?=",
+   "words": "=?UTF-8?Q?mixed_ascii_and_=C3=BCn=C3=AFc=C3=B6d?= =?UTF-8?Q?=C3=A9_words_here?=",
+   "header": "=?UTF-8?Q?mixed_ascii_and_=C3=BCn=C3=AFc=C3=B6d?= =?UTF-8?Q?=C3=A9_words_here?="
+  },
+  {
+   "input": "quote \" and backslash \\ inside",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?quote_=22_and_backslash_=5C_inside?=",
+   "b": "=?UTF-8?B?cXVvdGUgIiBhbmQgYmFja3NsYXNoIFwgaW5zaWRl?=",
+   "q52": "=?UTF-8?Q?quote_=22_and_backslash_=5C_inside?=",
+   "b52": "=?UTF-8?B?cXVvdGUgIiBhbmQgYmFja3NsYXNoIFwgaW5zaWRl?=",
+   "words": "=?UTF-8?Q?quote_=22_and_backslash_=5C_inside?=",
+   "header": "=?UTF-8?Q?quote_=22_and_backslash_=5C_inside?="
+  },
+  {
+   "input": "control \u0001 char",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?control_=01_char?=",
+   "b": "=?UTF-8?B?Y29udHJvbCABIGNoYXI=?=",
+   "q52": "=?UTF-8?Q?control_=01_char?=",
+   "b52": "=?UTF-8?B?Y29udHJvbCABIGNoYXI=?=",
+   "words": "control \u0001 char",
+   "header": "=?UTF-8?Q?control_=01_char?="
+  },
+  {
+   "input": "tab\there",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?tab=09here?=",
+   "b": "=?UTF-8?B?dGFiCWhlcmU=?=",
+   "q52": "=?UTF-8?Q?tab=09here?=",
+   "b52": "=?UTF-8?B?dGFiCWhlcmU=?=",
+   "words": "tab\there",
+   "header": "tab\there"
+  },
+  {
+   "input": "looks like =?utf-8?q?an_encoded?= word",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?looks_like_=3D=3Futf-8=3Fq=3Fan=5Fencoded=3F=3D_word?=",
+   "b": "=?UTF-8?B?bG9va3MgbGlrZSA9P3V0Zi04P3E/YW5fZW5jb2RlZD89IHdvcmQ=?=",
+   "q52": "=?UTF-8?Q?looks_like_=3D=3Futf-8=3Fq=3Fan=5Fencode?= =?UTF-8?Q?d=3F=3D_word?=",
+   "b52": "=?UTF-8?B?bG9va3MgbGlrZSA9P3V0Zi04P3E/YW5fZW5jb2Rl?= =?UTF-8?B?ZD89IHdvcmQ=?=",
+   "words": "looks like =?utf-8?q?an_encoded?= word",
+   "header": "looks like =?utf-8?q?an_encoded?= word"
+  },
+  {
+   "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?=",
+   "b": "=?UTF-8?B?YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ==?=",
+   "q52": "=?UTF-8?Q?aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?= =?UTF-8?Q?aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?= =?UTF-8?Q?aaaaaaaaaaaaaaaaaaaa?=",
+   "b52": "=?UTF-8?B?YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh?= =?UTF-8?B?YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh?= =?UTF-8?B?YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh?= =?UTF-8?B?YWFhYWFhYWFhYQ==?=",
+   "words": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "header": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+   "input": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word_word?=",
+   "b": "=?UTF-8?B?d29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQ=?=",
+   "q52": "=?UTF-8?Q?word_word_word_word_word_word_word_word_?= =?UTF-8?Q?word_word_word_word_word_word_word_word_?= =?UTF-8?Q?word_word_word_word_word_word_word_word_?= =?UTF-8?Q?word_word_word_word_word_word?=",
+   "b52": "=?UTF-8?B?d29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQg?= =?UTF-8?B?d29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQg?= =?UTF-8?B?d29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQg?= =?UTF-8?B?d29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQg?= =?UTF-8?B?d29yZCB3b3JkIHdvcmQgd29yZCB3b3JkIHdvcmQ=?=",
+   "words": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word",
+   "header": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word"
+  },
+  {
+   "input": "Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-Iirimaa?=",
+   "b": "=?UTF-8?B?w5xoZW5kYXR1ZCBLdW5pbmdyaWlrIGphIFDDtWhqYS1JaXJpbWFhIMOcaGVuZGF0dWQgS3VuaW5ncmlpayBqYSBQw7VoamEtSWlyaW1hYSDDnGhlbmRhdHVkIEt1bmluZ3JpaWsgamEgUMO1aGphLUlpcmltYWEgw5xoZW5kYXR1ZCBLdW5pbmdyaWlrIGphIFDDtWhqYS1JaXJpbWFh?=",
+   "q52": "=?UTF-8?Q?=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-?= =?UTF-8?Q?Iirimaa_=C3=9Chendatud_Kuningriik_ja_P?= =?UTF-8?Q?=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningr?= =?UTF-8?Q?iik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud?= =?UTF-8?Q?_Kuningriik_ja_P=C3=B5hja-Iirimaa?=",
+   "b52": "=?UTF-8?B?w5xoZW5kYXR1ZCBLdW5pbmdyaWlrIGphIFDDtWhq?= =?UTF-8?B?YS1JaXJpbWFhIMOcaGVuZGF0dWQgS3VuaW5ncmlp?= =?UTF-8?B?ayBqYSBQw7VoamEtSWlyaW1hYSDDnGhlbmRhdHVk?= =?UTF-8?B?IEt1bmluZ3JpaWsgamEgUMO1aGphLUlpcmltYWEg?= =?UTF-8?B?w5xoZW5kYXR1ZCBLdW5pbmdyaWlrIGphIFDDtWhq?= =?UTF-8?B?YS1JaXJpbWFh?=",
+   "words": "=?UTF-8?Q?=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-?= =?UTF-8?Q?Iirimaa_=C3=9Chendatud_Kuningriik_ja_P?= =?UTF-8?Q?=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningr?= =?UTF-8?Q?iik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud?= =?UTF-8?Q?_Kuningriik_ja_P=C3=B5hja-Iirimaa?=",
+   "header": "=?UTF-8?Q?=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-?= =?UTF-8?Q?Iirimaa_=C3=9Chendatud_Kuningriik_ja_P?= =?UTF-8?Q?=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningr?= =?UTF-8?Q?iik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud?= =?UTF-8?Q?_Kuningriik_ja_P=C3=B5hja-Iirimaa?="
+  },
+  {
+   "input": "你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界",
+   "encoding": "B",
+   "q": "=?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?=",
+   "b": "=?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?=",
+   "q52": "=?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?= =?UTF-8?Q?=E4=BD=A0=E5=A5=BD=E4=B8=96=E7=95=8C?=",
+   "b52": "=?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?=",
+   "words": "=?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?=",
+   "header": "=?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?="
+  },
+  {
+   "input": "  leading and trailing spaces  ",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?__leading_and_trailing_spaces_=20?=",
+   "b": "=?UTF-8?B?ICBsZWFkaW5nIGFuZCB0cmFpbGluZyBzcGFjZXMgIA==?=",
+   "q52": "=?UTF-8?Q?__leading_and_trailing_spaces_=20?=",
+   "b52": "=?UTF-8?B?ICBsZWFkaW5nIGFuZCB0cmFpbGluZyBzcGFjZXMg?= =?UTF-8?B?IA==?=",
+   "words": "  leading and trailing spaces  ",
+   "header": "  leading and trailing spaces  "
+  },
+  {
+   "input": "ends with a space ",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?ends_with_a_space=20?=",
+   "b": "=?UTF-8?B?ZW5kcyB3aXRoIGEgc3BhY2Ug?=",
+   "q52": "=?UTF-8?Q?ends_with_a_space=20?=",
+   "b52": "=?UTF-8?B?ZW5kcyB3aXRoIGEgc3BhY2Ug?=",
+   "words": "ends with a space ",
+   "header": "ends with a space "
+  },
+  {
+   "input": "emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoji_=F0=9F=99=82?=",
+   "b": "=?UTF-8?B?ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mCZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mCZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mCZW1vamkg8J+Zgg==?=",
+   "q52": "=?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?=",
+   "b52": "=?UTF-8?B?ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mC?= =?UTF-8?B?ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mC?= =?UTF-8?B?ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mC?= =?UTF-8?B?ZW1vamkg8J+Zgg==?=",
+   "words": "=?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?=",
+   "header": "=?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?="
+  }
+ ],
+ "fold": [
+  {
+   "input": "Subject: ",
+   "folded": "Subject: "
+  },
+  {
+   "input": "Subject: hello",
+   "folded": "Subject: hello"
+  },
+  {
+   "input": "Subject: Hello world, just ASCII",
+   "folded": "Subject: Hello world, just ASCII"
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?J=C3=B5geva_=C3=B5unad_on_head?=",
+   "folded": "Subject: =?UTF-8?Q?J=C3=B5geva_=C3=B5unad_on_head?="
+  },
+  {
+   "input": "Subject: =?UTF-8?B?0J/RgNC40LLQtdGCLCDQutCw0Log0LTQtdC70LA/?=",
+   "folded": "Subject: =?UTF-8?B?0J/RgNC40LLQtdGCLCDQutCw0Log0LTQtdC70LA/?="
+  },
+  {
+   "input": "Subject: =?UTF-8?B?5pel5pys6Kqe44Gu44OG44Kt44K544OI?=",
+   "folded": "Subject: =?UTF-8?B?5pel5pys6Kqe44Gu44OG44Kt44K544OI?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?=F0=9F=98=80_party_=F0=9F=8E=89_time?=",
+   "folded": "Subject: =?UTF-8?Q?=F0=9F=98=80_party_=F0=9F=8E=89_time?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?mixed_ascii_and_=C3=BCn=C3=AFc=C3=B6d?= =?UTF-8?Q?=C3=A9_words_here?=",
+   "folded": "Subject: =?UTF-8?Q?mixed_ascii_and_=C3=BCn=C3=AFc=C3=B6d?=\r\n =?UTF-8?Q?=C3=A9_words_here?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?quote_=22_and_backslash_=5C_inside?=",
+   "folded": "Subject: =?UTF-8?Q?quote_=22_and_backslash_=5C_inside?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?control_=01_char?=",
+   "folded": "Subject: =?UTF-8?Q?control_=01_char?="
+  },
+  {
+   "input": "Subject: tab\there",
+   "folded": "Subject: tab\there"
+  },
+  {
+   "input": "Subject: looks like =?utf-8?q?an_encoded?= word",
+   "folded": "Subject: looks like =?utf-8?q?an_encoded?= word"
+  },
+  {
+   "input": "Subject: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "folded": "Subject:\r\n aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+   "input": "Subject: word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word",
+   "folded": "Subject: word word word word word word word word word word word word word\r\n word word word word word word word word word word word word word word word\r\n word word"
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-?= =?UTF-8?Q?Iirimaa_=C3=9Chendatud_Kuningriik_ja_P?= =?UTF-8?Q?=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningr?= =?UTF-8?Q?iik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud?= =?UTF-8?Q?_Kuningriik_ja_P=C3=B5hja-Iirimaa?=",
+   "folded": "Subject: =?UTF-8?Q?=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-?=\r\n =?UTF-8?Q?Iirimaa_=C3=9Chendatud_Kuningriik_ja_P?=\r\n =?UTF-8?Q?=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningr?=\r\n =?UTF-8?Q?iik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud?=\r\n =?UTF-8?Q?_Kuningriik_ja_P=C3=B5hja-Iirimaa?="
+  },
+  {
+   "input": "Subject: =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?=",
+   "folded": "Subject: =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?=\r\n =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?=\r\n =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?=\r\n =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?=\r\n =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?=\r\n =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?=\r\n =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?=\r\n =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?="
+  },
+  {
+   "input": "Subject:   leading and trailing spaces  ",
+   "folded": "Subject:   leading and trailing spaces  "
+  },
+  {
+   "input": "Subject: ends with a space ",
+   "folded": "Subject: ends with a space "
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?=",
+   "folded": "Subject: =?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?=\r\n =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?=\r\n =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?=\r\n =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?=\r\n =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?="
+  },
+  {
+   "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "folded": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+   "input": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word ",
+   "folded": "word word word word word word word word word word word word word word word\r\n word word word word word word word word word word word word word word word\r\n word word word word word word word word word word "
+  },
+  {
+   "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+   "folded": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\n yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+  },
+  {
+   "input": "short",
+   "folded": "short"
+  }
+ ],
+ "params": [
+  {
+   "input": "",
+   "value": "attachment; filename=\"\"",
+   "param": [
+    {
+     "key": "filename",
+     "value": ""
+    }
+   ]
+  },
+  {
+   "input": "hello",
+   "value": "attachment; filename=hello",
+   "param": [
+    {
+     "key": "filename",
+     "value": "hello"
+    }
+   ]
+  },
+  {
+   "input": "Hello world, just ASCII",
+   "value": "attachment; filename=\"Hello world, just ASCII\"",
+   "param": [
+    {
+     "key": "filename",
+     "value": "Hello world, just ASCII"
+    }
+   ]
+  },
+  {
+   "input": "Jõgeva õunad on head",
+   "value": "attachment; filename*0*=utf-8''J%C3%B5geva%20%C3%B5unad%20on%20head",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''J%C3%B5geva%20%C3%B5unad%20on%20head"
+    }
+   ]
+  },
+  {
+   "input": "Привет, как дела?",
+   "value": "attachment; filename*0*=utf-8''%D0%9F%D1%80%D0%B8%D0%B2%D0%B5%D1%82%2C%20; filename*1*=%D0%BA%D0%B0%D0%BA%20%D0%B4%D0%B5%D0%BB%D0%B0%3F",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%D0%9F%D1%80%D0%B8%D0%B2%D0%B5%D1%82%2C%20"
+    },
+    {
+     "key": "filename*1*",
+     "value": "%D0%BA%D0%B0%D0%BA%20%D0%B4%D0%B5%D0%BB%D0%B0%3F"
+    }
+   ]
+  },
+  {
+   "input": "日本語のテキスト",
+   "value": "attachment; filename*0*=utf-8''%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%81%AE; filename*1*=%E3%83%86%E3%82%AD%E3%82%B9%E3%83%88",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%81%AE"
+    },
+    {
+     "key": "filename*1*",
+     "value": "%E3%83%86%E3%82%AD%E3%82%B9%E3%83%88"
+    }
+   ]
+  },
+  {
+   "input": "😀 party 🎉 time",
+   "value": "attachment; filename*0*=utf-8''%F0%9F%98%80%20party%20%F0%9F%8E%89%20time",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%F0%9F%98%80%20party%20%F0%9F%8E%89%20time"
+    }
+   ]
+  },
+  {
+   "input": "mixed ascii and ünïcödé words here",
+   "value": "attachment; filename*0*=utf-8''mixed%20ascii%20and%20%C3%BCn%C3%AFc%C3%B6; filename*1*=d%C3%A9%20words%20here",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''mixed%20ascii%20and%20%C3%BCn%C3%AFc%C3%B6"
+    },
+    {
+     "key": "filename*1*",
+     "value": "d%C3%A9%20words%20here"
+    }
+   ]
+  },
+  {
+   "input": "quote \" and backslash \\ inside",
+   "value": "attachment; filename*0*=utf-8''quote%20%22%20and%20backslash%20%5C%20insi; filename*1=de",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''quote%20%22%20and%20backslash%20%5C%20insi"
+    },
+    {
+     "key": "filename*1",
+     "value": "de"
+    }
+   ]
+  },
+  {
+   "input": "control \u0001 char",
+   "value": "attachment; filename*0*=utf-8''control%20%01%20char",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''control%20%01%20char"
+    }
+   ]
+  },
+  {
+   "input": "tab\there",
+   "value": "attachment; filename*0*=utf-8''tab%09here",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''tab%09here"
+    }
+   ]
+  },
+  {
+   "input": "looks like =?utf-8?q?an_encoded?= word",
+   "value": "attachment; filename*0*=utf-8''looks%20like%20%3D%3Futf-8%3Fq%3Fan_encode; filename*1*=d%3F%3D%20word",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''looks%20like%20%3D%3Futf-8%3Fq%3Fan_encode"
+    },
+    {
+     "key": "filename*1*",
+     "value": "d%3F%3D%20word"
+    }
+   ]
+  },
+  {
+   "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "value": "attachment; filename*0=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; filename*1=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "param": [
+    {
+     "key": "filename*0",
+     "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+     "key": "filename*1",
+     "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+   ]
+  },
+  {
+   "input": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word",
+   "value": "attachment; filename*0=\"word word word word word word word word word word \"; filename*1=\"word word word word word word word word word word \"; filename*2=\"word word word word word word word word word word\"",
+   "param": [
+    {
+     "key": "filename*0",
+     "value": "word word word word word word word word word word "
+    },
+    {
+     "key": "filename*1",
+     "value": "word word word word word word word word word word "
+    },
+    {
+     "key": "filename*2",
+     "value": "word word word word word word word word word word"
+    }
+   ]
+  },
+  {
+   "input": "Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa",
+   "value": "attachment; filename*0*=utf-8''%C3%9Chendatud%20Kuningriik%20ja%20P%C3%B5; filename*1*=hja-Iirimaa%20%C3%9Chendatud%20Kuningriik%20ja%20; filename*2*=P%C3%B5hja-Iirimaa%20%C3%9Chendatud%20Kuningriik; filename*3*=%20ja%20P%C3%B5hja-Iirimaa%20%C3%9Chendatud%20Kun; filename*4*=ingriik%20ja%20P%C3%B5hja-Iirimaa",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%C3%9Chendatud%20Kuningriik%20ja%20P%C3%B5"
+    },
+    {
+     "key": "filename*1*",
+     "value": "hja-Iirimaa%20%C3%9Chendatud%20Kuningriik%20ja%20"
+    },
+    {
+     "key": "filename*2*",
+     "value": "P%C3%B5hja-Iirimaa%20%C3%9Chendatud%20Kuningriik"
+    },
+    {
+     "key": "filename*3*",
+     "value": "%20ja%20P%C3%B5hja-Iirimaa%20%C3%9Chendatud%20Kun"
+    },
+    {
+     "key": "filename*4*",
+     "value": "ingriik%20ja%20P%C3%B5hja-Iirimaa"
+    }
+   ]
+  },
+  {
+   "input": "你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界",
+   "value": "attachment; filename*0*=utf-8''%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C; filename*1*=%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0; filename*2*=%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD; filename*3*=%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96; filename*4*=%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C; filename*5*=%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0; filename*6*=%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD; filename*7*=%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96; filename*8*=%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C; filename*9*=%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0; filename*10*=%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD; filename*11*=%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96; filename*12*=%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C; filename*13*=%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0; filename*14*=%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD; filename*15*=%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96; filename*16*=%E7%95%8C",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
+    },
+    {
+     "key": "filename*1*",
+     "value": "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0"
+    },
+    {
+     "key": "filename*2*",
+     "value": "%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD"
+    },
+    {
+     "key": "filename*3*",
+     "value": "%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96"
+    },
+    {
+     "key": "filename*4*",
+     "value": "%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
+    },
+    {
+     "key": "filename*5*",
+     "value": "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0"
+    },
+    {
+     "key": "filename*6*",
+     "value": "%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD"
+    },
+    {
+     "key": "filename*7*",
+     "value": "%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96"
+    },
+    {
+     "key": "filename*8*",
+     "value": "%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
+    },
+    {
+     "key": "filename*9*",
+     "value": "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0"
+    },
+    {
+     "key": "filename*10*",
+     "value": "%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD"
+    },
+    {
+     "key": "filename*11*",
+     "value": "%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96"
+    },
+    {
+     "key": "filename*12*",
+     "value": "%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
+    },
+    {
+     "key": "filename*13*",
+     "value": "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0"
+    },
+    {
+     "key": "filename*14*",
+     "value": "%E5%A5%BD%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD"
+    },
+    {
+     "key": "filename*15*",
+     "value": "%E4%B8%96%E7%95%8C%E4%BD%A0%E5%A5%BD%E4%B8%96"
+    },
+    {
+     "key": "filename*16*",
+     "value": "%E7%95%8C"
+    }
+   ]
+  },
+  {
+   "input": "  leading and trailing spaces  ",
+   "value": "attachment; filename=\"  leading and trailing spaces  \"",
+   "param": [
+    {
+     "key": "filename",
+     "value": "  leading and trailing spaces  "
+    }
+   ]
+  },
+  {
+   "input": "ends with a space ",
+   "value": "attachment; filename=\"ends with a space \"",
+   "param": [
+    {
+     "key": "filename",
+     "value": "ends with a space "
+    }
+   ]
+  },
+  {
+   "input": "emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂",
+   "value": "attachment; filename*0*=utf-8''emoji%20%F0%9F%99%82emoji%20%F0%9F%99%82em; filename*1*=oji%20%F0%9F%99%82emoji%20%F0%9F%99%82emoji%20; filename*2*=%F0%9F%99%82emoji%20%F0%9F%99%82emoji%20; filename*3*=%F0%9F%99%82emoji%20%F0%9F%99%82emoji%20; filename*4*=%F0%9F%99%82emoji%20%F0%9F%99%82",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''emoji%20%F0%9F%99%82emoji%20%F0%9F%99%82em"
+    },
+    {
+     "key": "filename*1*",
+     "value": "oji%20%F0%9F%99%82emoji%20%F0%9F%99%82emoji%20"
+    },
+    {
+     "key": "filename*2*",
+     "value": "%F0%9F%99%82emoji%20%F0%9F%99%82emoji%20"
+    },
+    {
+     "key": "filename*3*",
+     "value": "%F0%9F%99%82emoji%20%F0%9F%99%82emoji%20"
+    },
+    {
+     "key": "filename*4*",
+     "value": "%F0%9F%99%82emoji%20%F0%9F%99%82"
+    }
+   ]
+  }
+ ],
+ "names": [
+  {
+   "input": "",
+   "encoded": ""
+  },
+  {
+   "input": "hello",
+   "encoded": "hello"
+  },
+  {
+   "input": "Hello world, just ASCII",
+   "encoded": "\"Hello world, just ASCII\""
+  },
+  {
+   "input": "Jõgeva õunad on head",
+   "encoded": "=?UTF-8?Q?J=C3=B5geva_=C3=B5unad_on_head?="
+  },
+  {
+   "input": "Привет, как дела?",
+   "encoded": "=?UTF-8?B?0J/RgNC40LLQtdGCLCDQutCw0Log0LTQtdC70LA/?="
+  },
+  {
+   "input": "日本語のテキスト",
+   "encoded": "=?UTF-8?B?5pel5pys6Kqe44Gu44OG44Kt44K544OI?="
+  },
+  {
+   "input": "😀 party 🎉 time",
+   "encoded": "=?UTF-8?Q?=F0=9F=98=80_party_=F0=9F=8E=89_time?="
+  },
+  {
+   "input": "mixed ascii and ünïcödé words here",
+   "encoded": "=?UTF-8?Q?mixed_ascii_and_=C3=BCn=C3=AFc=C3=B6d?= =?UTF-8?Q?=C3=A9_words_here?="
+  },
+  {
+   "input": "quote \" and backslash \\ inside",
+   "encoded": "\"quote \\\" and backslash \\\\ inside\""
+  },
+  {
+   "input": "control \u0001 char",
+   "encoded": "=?UTF-8?Q?control_=01_char?="
+  },
+  {
+   "input": "tab\there",
+   "encoded": "=?UTF-8?Q?tab=09here?="
+  },
+  {
+   "input": "looks like =?utf-8?q?an_encoded?= word",
+   "encoded": "\"looks like =?utf-8?q?an_encoded?= word\""
+  },
+  {
+   "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "encoded": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+   "input": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word",
+   "encoded": "word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word"
+  },
+  {
+   "input": "Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa Ühendatud Kuningriik ja Põhja-Iirimaa",
+   "encoded": "=?UTF-8?Q?=C3=9Chendatud_Kuningriik_ja_P=C3=B5hja-?= =?UTF-8?Q?Iirimaa_=C3=9Chendatud_Kuningriik_ja_P?= =?UTF-8?Q?=C3=B5hja-Iirimaa_=C3=9Chendatud_Kuningr?= =?UTF-8?Q?iik_ja_P=C3=B5hja-Iirimaa_=C3=9Chendatud?= =?UTF-8?Q?_Kuningriik_ja_P=C3=B5hja-Iirimaa?="
+  },
+  {
+   "input": "你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界你好世界",
+   "encoded": "=?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?= =?UTF-8?B?5L2g5aW95LiW55WM5L2g5aW95LiW55WM5L2g5aW9?= =?UTF-8?B?5LiW55WM5L2g5aW95LiW55WM5L2g5aW95LiW55WM?="
+  },
+  {
+   "input": "  leading and trailing spaces  ",
+   "encoded": "  leading and trailing spaces  "
+  },
+  {
+   "input": "ends with a space ",
+   "encoded": "ends with a space "
+  },
+  {
+   "input": "emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂",
+   "encoded": "=?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?="
+  }
+ ],
+ "addresses": [
+  {
+   "input": [
+    {
+     "name": "",
+     "address": "andris@example.com"
+    }
+   ],
+   "encoded": "andris@example.com"
+  },
+  {
+   "input": [
+    {
+     "name": "Andris Reinman",
+     "address": "andris@example.com"
+    }
+   ],
+   "encoded": "Andris Reinman <andris@example.com>"
+  },
+  {
+   "input": [
+    {
+     "name": "Reinman, Andris",
+     "address": "andris@example.com"
+    }
+   ],
+   "encoded": "\"Reinman, Andris\" <andris@example.com>"
+  },
+  {
+   "input": [
+    {
+     "name": "Jõgeva Linn",
+     "address": "info@jõgeva.ee"
+    }
+   ],
+   "encoded": "=?UTF-8?Q?J=C3=B5geva_Linn?= <info@xn--jgeva-dua.ee>"
+  },
+  {
+   "input": [
+    {
+     "name": "",
+     "address": "üser@jõgeva.ee"
+    }
+   ],
+   "encoded": "üser@jõgeva.ee"
+  },
+  {
+   "input": [
+    {
+     "name": "Quote \"me\"",
+     "address": "q@example.com"
+    },
+    {
+     "name": "",
+     "address": "b@example.com"
+    }
+   ],
+   "encoded": "\"Quote \\\"me\\\"\" <q@example.com>, b@example.com"
+  },
+  {
+   "input": [
+    {
+     "name": "Team",
+     "group": [
+      {
+       "name": "A",
+       "address": "a@example.com"
+      },
+      {
+       "name": "",
+       "address": "b@example.com"
+      }
+     ]
+    }
+   ],
+   "encoded": "Team:A <a@example.com>, b@example.com;"
+  },
+  {
+   "input": [
+    {
+     "name": "",
+     "address": "weird local@example.com"
+    }
+   ],
+   "encoded": "<\"weird local\"@example.com>"
+  },
+  {
+   "input": [
+    {
+     "name": "日本",
+     "address": "jp@example.jp"
+    }
+   ],
+   "encoded": "=?UTF-8?B?5pel5pys?= <jp@example.jp>"
+  }
+ ],
+ "messages": [
+  {
+   "name": "plain ascii",
+   "mail": {
+    "from": "Andris <andris@example.com>",
+    "to": "b@example.com",
+    "subject": "Hello",
+    "text": "Hello world!\r\n"
+   },
+   "raw": "RnJvbTogQW5kcmlzIDxhbmRyaXNAZXhhbXBsZS5jb20+DQpUbzogYkBleGFtcGxlLmNvbQ0KU3ViamVjdDogSGVsbG8NCk1lc3NhZ2UtSUQ6IDxmaXhlZEBleGFtcGxlLmNvbT4NCkRhdGU6IE1vbiwgMDYgT2N0IDIwMjUgMTA6MDA6MDAgKzAwMDANCkNvbnRlbnQtVHJhbnNmZXItRW5jb2Rpbmc6IDdiaXQNCk1JTUUtVmVyc2lvbjogMS4wDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9dXRmLTgNCg0KSGVsbG8gd29ybGQhDQo="
+  },
+  {
+   "name": "unicode text",
+   "mail": {
+    "from": "Jõgeva <j@example.com>",
+    "to": [
+     "Ülle <u@example.com>",
+     "c@example.com"
+    ],
+    "cc": "cc@example.com",
+    "subject": "Tere õhtust 😀",
+    "text": "Tere õhtust!\r\nKuidas läheb? pikk rida pikk rida pikk rida pikk rida pikk rida pikk rida pikk rida pikk rida pikk rida pikk rida pikk rida pikk rida \r\n"
+   },
+   "raw": "RnJvbTogPT9VVEYtOD9RP0o9QzM9QjVnZXZhPz0gPGpAZXhhbXBsZS5jb20+DQpUbzogPT9VVEYtOD9RPz1DMz05Q2xsZT89IDx1QGV4YW1wbGUuY29tPiwgY0BleGFtcGxlLmNvbQ0KQ2M6IGNjQGV4YW1wbGUuY29tDQpTdWJqZWN0OiA9P1VURi04P1E/VGVyZV89QzM9QjVodHVzdF89RjA9OUY9OTg9ODA/PQ0KTWVzc2FnZS1JRDogPGZpeGVkQGV4YW1wbGUuY29tPg0KRGF0ZTogTW9uLCAwNiBPY3QgMjAyNSAxMDowMDowMCArMDAwMA0KQ29udGVudC1UcmFuc2Zlci1FbmNvZGluZzogcXVvdGVkLXByaW50YWJsZQ0KTUlNRS1WZXJzaW9uOiAxLjANCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KDQpUZXJlID1DMz1CNWh0dXN0IQ0KS3VpZGFzIGw9QzM9QTRoZWI/IHBpa2sgcmlkYSBwaWtrIHJpZGEgcGlrayByaWRhIHBpa2sgcmlkYSBwaWtrIHJpZGEgcGlrayA9DQpyaWRhIHBpa2sgcmlkYSBwaWtrIHJpZGEgcGlrayByaWRhIHBpa2sgcmlkYSBwaWtrIHJpZGEgcGlrayByaWRhPTIwDQo="
+  },
+  {
+   "name": "html only",
+   "mail": {
+    "from": "a@example.com",
+    "to": "b@example.com",
+    "subject": "HTML",
+    "html": "<p>Hello <b>world</b></p>"
+   },
+   "raw": "RnJvbTogYUBleGFtcGxlLmNvbQ0KVG86IGJAZXhhbXBsZS5jb20NClN1YmplY3Q6IEhUTUwNCk1lc3NhZ2UtSUQ6IDxmaXhlZEBleGFtcGxlLmNvbT4NCkRhdGU6IE1vbiwgMDYgT2N0IDIwMjUgMTA6MDA6MDAgKzAwMDANCkNvbnRlbnQtVHJhbnNmZXItRW5jb2Rpbmc6IDdiaXQNCk1JTUUtVmVyc2lvbjogMS4wDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD11dGYtOA0KDQo8cD5IZWxsbyA8Yj53b3JsZDwvYj48L3A+DQo="
+  },
+  {
+   "name": "alternative",
+   "mail": {
+    "from": "a@example.com",
+    "to": "b@example.com",
+    "subject": "Both",
+    "text": "Plain version\r\n",
+    "html": "<p>HTML version with ünicode</p>"
+   },
+   "raw": "RnJvbTogYUBleGFtcGxlLmNvbQ0KVG86IGJAZXhhbXBsZS5jb20NClN1YmplY3Q6IEJvdGgNCk1lc3NhZ2UtSUQ6IDxmaXhlZEBleGFtcGxlLmNvbT4NCkRhdGU6IE1vbiwgMDYgT2N0IDIwMjUgMTA6MDA6MDAgKzAwMDANCk1JTUUtVmVyc2lvbjogMS4wDQpDb250ZW50LVR5cGU6IG11bHRpcGFydC9hbHRlcm5hdGl2ZTsNCiBib3VuZGFyeT0iLS1fTm1QLWIwYjBiMGIwYjBiMGIwYjAtUGFydF8xIg0KDQotLS0tX05tUC1iMGIwYjBiMGIwYjBiMGIwLVBhcnRfMQ0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PXV0Zi04DQpDb250ZW50LVRyYW5zZmVyLUVuY29kaW5nOiA3Yml0DQoNClBsYWluIHZlcnNpb24NCg0KLS0tLV9ObVAtYjBiMGIwYjBiMGIwYjBiMC1QYXJ0XzENCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04DQpDb250ZW50LVRyYW5zZmVyLUVuY29kaW5nOiBxdW90ZWQtcHJpbnRhYmxlDQoNCjxwPkhUTUwgdmVyc2lvbiB3aXRoID1DMz1CQ25pY29kZTwvcD4NCi0tLS1fTm1QLWIwYjBiMGIwYjBiMGIwYjAtUGFydF8xLS0NCg=="
+  },
+  {
+   "name": "attachments",
+   "mail": {
+    "from": "a@example.com",
+    "to": "b@example.com",
+    "subject": "Files",
+    "text": "See attached\r\n",
+    "attachments": [
+     {
+      "filename": "report.pdf",
+      "content": "JVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQgJVBERi0xLjQg",
+      "contentType": "application/pdf"
+     },
+     {
+      "filename": "õunad ja pirnid väga pika failinimega dokument.txt",
+      "content": "cGxhaW4gdGV4dCBmaWxlDQo=",
+      "contentType": "text/plain"
+     }
+    ]
+   },
+   "raw": "RnJvbTogYUBleGFtcGxlLmNvbQ0KVG86IGJAZXhhbXBsZS5jb20NClN1YmplY3Q6IEZpbGVzDQpNZXNzYWdlLUlEOiA8Zml4ZWRAZXhhbXBsZS5jb20+DQpEYXRlOiBNb24sIDA2IE9jdCAyMDI1IDEwOjAwOjAwICswMDAwDQpNSU1FLVZlcnNpb246IDEuMA0KQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvbWl4ZWQ7IGJvdW5kYXJ5PSItLV9ObVAtYjBiMGIwYjBiMGIwYjBiMC1QYXJ0XzEiDQoNCi0tLS1fTm1QLWIwYjBiMGIwYjBiMGIwYjAtUGFydF8xDQpDb250ZW50LVR5cGU6IHRleHQvcGxhaW47IGNoYXJzZXQ9dXRmLTgNCkNvbnRlbnQtVHJhbnNmZXItRW5jb2Rpbmc6IDdiaXQNCg0KU2VlIGF0dGFjaGVkDQoNCi0tLS1fTm1QLWIwYjBiMGIwYjBiMGIwYjAtUGFydF8xDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL3BkZjsgbmFtZT1yZXBvcnQucGRmDQpDb250ZW50LVRyYW5zZmVyLUVuY29kaW5nOiBiYXNlNjQNCkNvbnRlbnQtRGlzcG9zaXRpb246IGF0dGFjaG1lbnQ7IGZpbGVuYW1lPXJlcG9ydC5wZGYNCg0KSlZCRVJpMHhMalFnSlZCRVJpMHhMalFnSlZCRVJpMHhMalFnSlZCRVJpMHhMalFnSlZCRVJpMHhMalFnSlZCRVJpMHhMalFnSlZCRQ0KUmkweExqUWdKVkJFUmkweExqUWdKVkJFUmkweExqUWdKVkJFUmkweExqUWdKVkJFUmkweExqUWdKVkJFUmkweExqUWdKVkJFUmkweA0KTGpRZ0pWQkVSaTB4TGpRZ0pWQkVSaTB4TGpRZ0pWQkVSaTB4TGpRZ0pWQkVSaTB4TGpRZ0pWQkVSaTB4TGpRZ0pWQkVSaTB4TGpRZw0KSlZCRVJpMHhMalFnDQotLS0tX05tUC1iMGIwYjBiMGIwYjBiMGIwLVBhcnRfMQ0KQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOw0KIG5hbWU9Ij0/VVRGLTg/UT89QzM9QjV1bmFkX2phX3Bpcm5pZF92PUMzPUE0Z2FfcGlrYV9mYWlsPz0NCiA9P1VURi04P1E/aW5pbWVnYV9kb2t1bWVudD0yRXR4dD89Ig0KQ29udGVudC1UcmFuc2Zlci1FbmNvZGluZzogYmFzZTY0DQpDb250ZW50LURpc3Bvc2l0aW9uOiBhdHRhY2htZW50Ow0KIGZpbGVuYW1lKjAqPXV0Zi04JyclQzMlQjV1bmFkJTIwamElMjBwaXJuaWQlMjB2JUMzJUE0Z2ElMjBwaWs7DQogZmlsZW5hbWUqMT0iYSBmYWlsaW5pbWVnYSBkb2t1bWVudC50eHQiDQoNCmNHeGhhVzRnZEdWNGRDQm1hV3hsRFFvPQ0KLS0tLV9ObVAtYjBiMGIwYjBiMGIwYjBiMC1QYXJ0XzEtLQ0K"
+  },
+  {
+   "name": "related",
+   "mail": {
+    "from": "a@example.com",
+    "to": "b@example.com",
+    "subject": "Inline",
+    "text": "logo below\r\n",
+    "html": "<p>Logo: <img src=\"cid:logo@example\"></p>",
+    "attachments": [
+     {
+      "filename": "logo.png",
+      "content": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "contentType": "image/png",
+      "cid": "logo@example"
+     },
+     {
+      "filename": "a.bin",
+      "content": "AAEC/w==",
+      "contentType": "application/octet-stream"
+     }
+    ]
+   },
+   "raw": "RnJvbTogYUBleGFtcGxlLmNvbQ0KVG86IGJAZXhhbXBsZS5jb20NClN1YmplY3Q6IElubGluZQ0KTWVzc2FnZS1JRDogPGZpeGVkQGV4YW1wbGUuY29tPg0KRGF0ZTogTW9uLCAwNiBPY3QgMjAyNSAxMDowMDowMCArMDAwMA0KTUlNRS1WZXJzaW9uOiAxLjANCkNvbnRlbnQtVHlwZTogbXVsdGlwYXJ0L21peGVkOyBib3VuZGFyeT0iLS1fTm1QLWIwYjBiMGIwYjBiMGIwYjAtUGFydF8xIg0KDQotLS0tX05tUC1iMGIwYjBiMGIwYjBiMGIwLVBhcnRfMQ0KQ29udGVudC1UeXBlOiBtdWx0aXBhcnQvYWx0ZXJuYXRpdmU7DQogYm91bmRhcnk9Ii0tX05tUC1iMGIwYjBiMGIwYjBiMGIwLVBhcnRfMiINCg0KLS0tLV9ObVAtYjBiMGIwYjBiMGIwYjBiMC1QYXJ0XzINCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KQ29udGVudC1UcmFuc2Zlci1FbmNvZGluZzogN2JpdA0KDQpsb2dvIGJlbG93DQoNCi0tLS1fTm1QLWIwYjBiMGIwYjBiMGIwYjAtUGFydF8yDQpDb250ZW50LVR5cGU6IG11bHRpcGFydC9yZWxhdGVkOyB0eXBlPSJ0ZXh0L2h0bWwiOw0KIGJvdW5kYXJ5PSItLV9ObVAtYjBiMGIwYjBiMGIwYjBiMC1QYXJ0XzQiDQoNCi0tLS1fTm1QLWIwYjBiMGIwYjBiMGIwYjAtUGFydF80DQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD11dGYtOA0KQ29udGVudC1UcmFuc2Zlci1FbmNvZGluZzogN2JpdA0KDQo8cD5Mb2dvOiA8aW1nIHNyYz0iY2lkOmxvZ29AZXhhbXBsZSI+PC9wPg0KLS0tLV9ObVAtYjBiMGIwYjBiMGIwYjBiMC1QYXJ0XzQNCkNvbnRlbnQtVHlwZTogaW1hZ2UvcG5nOyBuYW1lPWxvZ28ucG5nDQpDb250ZW50LUlEOiA8bG9nb0BleGFtcGxlPg0KQ29udGVudC1UcmFuc2Zlci1FbmNvZGluZzogYmFzZTY0DQpDb250ZW50LURpc3Bvc2l0aW9uOiBpbmxpbmU7IGZpbGVuYW1lPWxvZ28ucG5nDQoNCmlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFBRUFBQUFCQ0FZQUFBQWZGY1NKQUFBQURVbEVRVlI0Mm1OaytNOVFEd0FEaGdHQVdqUjkNCmF3QUFBQUJKUlU1RXJrSmdnZz09DQotLS0tX05tUC1iMGIwYjBiMGIwYjBiMGIwLVBhcnRfNC0tDQoNCi0tLS1fTm1QLWIwYjBiMGIwYjBiMGIwYjAtUGFydF8yLS0NCg0KLS0tLV9ObVAtYjBiMGIwYjBiMGIwYjBiMC1QYXJ0XzENCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vb2N0ZXQtc3RyZWFtOyBuYW1lPWEuYmluDQpDb250ZW50LVRyYW5zZmVyLUVuY29kaW5nOiBiYXNlNjQNCkNvbnRlbnQtRGlzcG9zaXRpb246IGF0dGFjaG1lbnQ7IGZpbGVuYW1lPWEuYmluDQoNCkFBRUMvdz09DQotLS0tX05tUC1iMGIwYjBiMGIwYjBiMGIwLVBhcnRfMS0tDQo="
+  },
+  {
+   "name": "reply",
+   "mail": {
+    "from": "a@example.com",
+    "to": "b@example.com",
+    "subject": "Re: Question",
+    "inReplyTo": "<q1@example.com>",
+    "references": [
+     "<q0@example.com>",
+     "<q1@example.com>"
+    ],
+    "text": "> quoted\r\nanswer\r\n"
+   },
+   "raw": "RnJvbTogYUBleGFtcGxlLmNvbQ0KVG86IGJAZXhhbXBsZS5jb20NCkluLVJlcGx5LVRvOiA8cTFAZXhhbXBsZS5jb20+DQpSZWZlcmVuY2VzOiA8cTBAZXhhbXBsZS5jb20+IDxxMUBleGFtcGxlLmNvbT4NClN1YmplY3Q6IFJlOiBRdWVzdGlvbg0KTWVzc2FnZS1JRDogPGZpeGVkQGV4YW1wbGUuY29tPg0KRGF0ZTogTW9uLCAwNiBPY3QgMjAyNSAxMDowMDowMCArMDAwMA0KQ29udGVudC1UcmFuc2Zlci1FbmNvZGluZzogN2JpdA0KTUlNRS1WZXJzaW9uOiAxLjANCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOA0KDQo+IHF1b3RlZA0KYW5zd2VyDQo="
+  }
+ ]
+}

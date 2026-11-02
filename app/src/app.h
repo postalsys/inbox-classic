@@ -56,6 +56,11 @@ int64_t NewAccountDialog(HWND owner, PeCore* core);
 // asks for the password of an account; false when cancelled
 bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password);
 
+// ---- compose.cpp ----
+
+// opens a window to write a message from `account`, with the fields of `draft` (NULL for a new message)
+void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* draft);
+
 // ---- mailbox.cpp ----
 
 // an event of the core, copied on the worker thread and posted to the window thread
@@ -88,6 +93,10 @@ public:
     // "12 message(s), 3 unread" for the status bar
     std::wstring Counts() const;
     std::wstring AccountName(int64_t account) const;
+    // the account of the selected folder, the first account without one; 0 when there is none
+    int64_t CurrentAccount() const;
+    // a reply, reply to all or forward of the message shown, empty when no message is shown
+    core::Draft DraftOfShown(PeDraftKind kind) const;
 
 private:
     struct Page {
@@ -123,6 +132,9 @@ private:
     // the tree items of the folders, by folder id; a tree item's data is its folder id, 0 for an account
     std::unordered_map<int64_t, HTREEITEM> items_;
     std::unordered_map<int64_t, std::wstring> accountNames_;
+    // the account of each folder, and the first account
+    std::unordered_map<int64_t, int64_t> folderAccounts_;
+    int64_t firstAccount_ = 0;
     int64_t folder_ = 0;
     uint64_t total_ = 0;
     uint64_t unread_ = 0;
@@ -150,6 +162,10 @@ enum CommandId : WORD {
     IDM_MARK_UNREAD,
     IDM_PICTURES,
     IDM_ABOUT,
+    IDM_NEW_MAIL,
+    IDM_REPLY,
+    IDM_REPLY_ALL,
+    IDM_FORWARD,
     IDC_TREE = 200,
     IDC_LIST,
     IDC_ATTACHMENTS,

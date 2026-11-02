@@ -7,8 +7,9 @@ use std::collections::BTreeSet;
 use std::path::PathBuf;
 
 use pe_imap::{Client, Credentials, ErrorKind, Event as ImapEvent};
+use pe_net::Trust;
 use pe_store::{AccountId, FolderId, Store};
-use pe_sync::{Change, apply_event, fetch_source, imap_config, set_seen, sync_folder, sync_folders};
+use pe_sync::{Change, apply_event, fetch_source, imap_config, set_seen, smtp_config, sync_folder, sync_folders};
 use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 
 use crate::{Event, EventSink, FailureKind, Secrets};
@@ -18,6 +19,7 @@ pub(crate) enum Command {
     Sync,
     FetchSource { folder: FolderId, uid: u64 },
     SetSeen { folder: FolderId, uid: u64, seen: bool },
+    Send(Box<crate::Outgoing>),
 }
 
 /// A failed command, for [`Event::Failed`]
@@ -53,6 +55,30 @@ impl From<pe_sync::Error> for Failure {
     }
 }
 
+impl From<pe_smtp::Error> for Failure {
+    fn from(error: pe_smtp::Error) -> Self {
+        let kind = match error.kind() {
+            pe_smtp::ErrorKind::Network => FailureKind::Network,
+            pe_smtp::ErrorKind::Security => FailureKind::Security,
+            pe_smtp::ErrorKind::Authentication => FailureKind::Authentication,
+            _ => FailureKind::Other,
+        };
+        Failure {
+            kind,
+            message: error.to_string(),
+        }
+    }
+}
+
+impl From<crate::ComposeError> for Failure {
+    fn from(error: crate::ComposeError) -> Self {
+        Failure {
+            kind: FailureKind::Other,
+            message: error.to_string(),
+        }
+    }
+}
+
 impl From<pe_store::Error> for Failure {
     fn from(error: pe_store::Error) -> Self {
         pe_sync::Error::Store(error).into()
@@ -65,16 +91,18 @@ pub(crate) struct Worker {
     account: AccountId,
     path: PathBuf,
     secrets: Secrets,
+    trust: Trust,
     events: EventSink,
     connection: Option<(Client, UnboundedReceiver<ImapEvent>)>,
 }
 
 impl Worker {
-    pub(crate) fn new(account: AccountId, path: PathBuf, secrets: Secrets, events: EventSink) -> Self {
+    pub(crate) fn new(account: AccountId, path: PathBuf, secrets: Secrets, trust: Trust, events: EventSink) -> Self {
         Worker {
             account,
             path,
             secrets,
+            trust,
             events,
             connection: None,
         }
@@ -141,7 +169,63 @@ impl Worker {
             Command::SetSeen { folder, uid, seen } => {
                 Ok(set_seen(self.client(store).await?, store, folder, uid, seen).await?)
             }
+            Command::Send(outgoing) => self.send(store, *outgoing).await,
         }
+    }
+
+    /// Sends over SMTP, then puts a copy in the Sent folder
+    async fn send(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
+        let account = store.account(self.account)?;
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_secs() as i64);
+        // reads the attachments: off the threads that run the network
+        let settings = account.settings.clone();
+        let built = tokio::task::spawn_blocking(move || {
+            crate::compose::message(&settings, &outgoing, now).map(|message| pe_smtp::build(&message))
+        })
+        .await
+        .map_err(|_| Failure {
+            kind: FailureKind::Other,
+            message: "the message could not be built".into(),
+        })??;
+        let mut config = smtp_config(&account, self.credentials(&account)?);
+        config.trust = self.trust.clone();
+        let mut smtp = pe_smtp::Client::connect(config).await?;
+        smtp.send(&built.envelope, &built.raw).await?;
+        smtp.quit().await;
+        // sent: whatever happens to the copy, sending it again would send it twice
+        self.emit(Event::MessageSent { account: self.account });
+        self.save_sent(store, &built.raw, now).await.map_err(|failure| Failure {
+            kind: FailureKind::Other,
+            message: format!(
+                "the message was sent, but no copy could be saved in Sent: {}",
+                failure.message
+            ),
+        })
+    }
+
+    async fn save_sent(&mut self, store: &mut Store, raw: &[u8], date: i64) -> Outcome {
+        let Some(sent) = store.special_folder(self.account, "\\Sent")? else {
+            return Ok(());
+        };
+        let client = self.client(store).await?;
+        client.append(&sent.info.path, raw, &["\\Seen"], Some(date)).await?;
+        self.sync_one(store, sent.id).await
+    }
+
+    /// The password of the account, as credentials for IMAP and SMTP
+    fn credentials(&self, account: &pe_store::Account) -> Result<Credentials, Failure> {
+        let Some(password) = self.secrets.get(self.account) else {
+            return Err(Failure {
+                kind: FailureKind::Authentication,
+                message: "no password for this account".into(),
+            });
+        };
+        Ok(Credentials::Password {
+            user: account.settings.username.clone(),
+            password,
+        })
     }
 
     async fn sync_all(&mut self, store: &mut Store) -> Outcome {
@@ -217,17 +301,9 @@ impl Worker {
         if self.connection.is_none() {
             // read at each connect, so changed settings are used from the next connection on
             let account = store.account(self.account)?;
-            let Some(password) = self.secrets.get(self.account) else {
-                return Err(Failure {
-                    kind: FailureKind::Authentication,
-                    message: "no password for this account".into(),
-                });
-            };
-            let credentials = Credentials::Password {
-                user: account.settings.username.clone(),
-                password,
-            };
-            self.connection = Some(Client::connect(imap_config(&account, credentials)).await?);
+            let mut config = imap_config(&account, self.credentials(&account)?);
+            config.trust = self.trust.clone();
+            self.connection = Some(Client::connect(config).await?);
         }
         Ok(&mut self.connection.as_mut().expect("connected").0)
     }

@@ -11,6 +11,7 @@ pe-html.workspace = true
 pe-imap = { path = "../pe-imap" }
 pe-mime.workspace = true
 pe-net.workspace = true
+pe-smtp = { path = "../pe-smtp" }
 pe-store = { path = "../pe-store" }
 pe-sync = { path = "../pe-sync" }
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "macros"] }

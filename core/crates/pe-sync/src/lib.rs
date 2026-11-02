@@ -53,12 +53,32 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// The IMAP connection settings of a stored account
 pub fn imap_config(account: &Account, credentials: Credentials) -> Config {
     let settings = &account.settings;
-    let security = match settings.imap_security {
+    Config::new(
+        settings.imap_host.clone(),
+        settings.imap_port,
+        net_security(settings.imap_security),
+        credentials,
+    )
+}
+
+/// The SMTP connection settings of a stored account
+pub fn smtp_config(account: &Account, credentials: Credentials) -> pe_smtp::Config {
+    let settings = &account.settings;
+    pe_smtp::Config::new(
+        settings.smtp_host.clone(),
+        settings.smtp_port,
+        net_security(settings.smtp_security),
+        Some(credentials),
+    )
+}
+
+/// The store's security setting as the connection takes it
+fn net_security(security: pe_store::Security) -> pe_net::Security {
+    match security {
         pe_store::Security::Tls => pe_net::Security::Tls,
         pe_store::Security::StartTls => pe_net::Security::StartTls,
         pe_store::Security::Plain => pe_net::Security::Plain,
-    };
-    Config::new(settings.imap_host.clone(), settings.imap_port, security, credentials)
+    }
 }
 
 /// What a folder sync changed

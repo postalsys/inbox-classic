@@ -142,11 +142,16 @@ void Mailbox::Reload() {
     reloading_ = false;
     items_.clear();
     accountNames_.clear();
+    folderAccounts_.clear();
+    firstAccount_ = 0;
     core::AccountList accounts(pe_accounts(core_));
     size_t count = pe_account_list_count(accounts.get());
     for (size_t i = 0; i < count; i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
         accountNames_[account->id] = Text(account->name);
+        if (!firstAccount_) {
+            firstAccount_ = account->id;
+        }
         HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->name), 0, false);
         FillAccount(root, account->id);
         TreeView_Expand(tree_, root, TVE_EXPAND);
@@ -172,6 +177,7 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
         size_t depth = std::min<size_t>(folder->depth, parents.size() - 1);
         HTREEITEM item = InsertItem(tree_, parents[depth], FolderLabel(*folder), static_cast<LPARAM>(folder->id), folder->unread > 0);
         items_[folder->id] = item;
+        folderAccounts_[folder->id] = account;
         parents.resize(depth + 1);
         parents.push_back(item);
     }
@@ -202,6 +208,18 @@ void Mailbox::UpdateFolders(int64_t account) {
 std::wstring Mailbox::AccountName(int64_t account) const {
     auto name = accountNames_.find(account);
     return name != accountNames_.end() ? name->second : L"the account";
+}
+
+int64_t Mailbox::CurrentAccount() const {
+    auto account = folderAccounts_.find(folder_);
+    return account != folderAccounts_.end() ? account->second : firstAccount_;
+}
+
+core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
+    if (!uid_ || !view_) {
+        return core::Draft();
+    }
+    return core::Draft(pe_message_draft(core_, folder_, uid_, kind));
 }
 
 // ---- the message list ----

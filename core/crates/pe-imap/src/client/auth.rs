@@ -1,35 +1,13 @@
 //! Authentication: AUTHENTICATE PLAIN or LOGIN for passwords, XOAUTH2 or OAUTHBEARER for access
 //! tokens. Secrets go into commands marked sensitive, so the wire log never shows them.
 
-use std::fmt;
-
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 
 use super::{Client, Completion, Error};
 use crate::compiler::Arg;
 
-#[derive(Clone, PartialEq, Eq)]
-pub enum Credentials {
-    Password {
-        user: String,
-        password: String,
-    },
-    /// An OAuth 2.0 access token (Gmail, Outlook.com)
-    OAuth2 {
-        user: String,
-        access_token: String,
-    },
-}
-
-impl fmt::Debug for Credentials {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Credentials::Password { user, .. } => write!(f, "Password({user})"),
-            Credentials::OAuth2 { user, .. } => write!(f, "OAuth2({user})"),
-        }
-    }
-}
+pub use pe_net::Credentials;
 
 impl Client {
     pub(super) async fn authenticate(&mut self) -> Result<(), Error> {

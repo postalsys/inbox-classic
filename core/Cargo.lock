@@ -668,6 +668,7 @@ dependencies = [
  "pe-imap",
  "pe-mime",
  "pe-net",
+ "pe-smtp",
  "pe-store",
  "pe-sync",
  "pe-testkit",
@@ -679,10 +680,12 @@ dependencies = [
 name = "pe-ffi"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "cbindgen",
  "pe-core",
  "pe-html",
  "pe-imap",
+ "pe-net",
  "pe-store",
  "pe-testkit",
  "serde_json",
@@ -732,6 +735,16 @@ dependencies = [
 [[package]]
 name = "pe-smtp"
 version = "0.1.0"
+dependencies = [
+ "base64",
+ "getrandom 0.4.3",
+ "idna",
+ "pe-mime",
+ "pe-net",
+ "pe-testkit",
+ "serde_json",
+ "tokio",
+]
 
 [[package]]
 name = "pe-store"
@@ -746,6 +759,7 @@ version = "0.1.0"
 dependencies = [
  "pe-imap",
  "pe-net",
+ "pe-smtp",
  "pe-store",
  "pe-testkit",
  "serde_json",

@@ -23,6 +23,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_MESSAGE_READY = 5,
   // Work for `account` failed: `failure` and `message` say what
   PE_EVENT_KIND_FAILED = 6,
+  // A message from `account` was sent
+  PE_EVENT_KIND_MESSAGE_SENT = 7,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -66,11 +68,20 @@ typedef enum PeSortField {
   PE_SORT_FIELD_SIZE = 4,
 } PeSortField;
 
+typedef enum PeDraftKind {
+  PE_DRAFT_KIND_REPLY = 0,
+  PE_DRAFT_KIND_REPLY_ALL = 1,
+  PE_DRAFT_KIND_FORWARD = 2,
+} PeDraftKind;
+
 // The accounts; free with `pe_account_list_free`
 typedef struct PeAccountList PeAccountList;
 
 // The mail engine
 typedef struct PeCore PeCore;
+
+// A draft; free with `pe_draft_free`
+typedef struct PeDraft PeDraft;
 
 // The folders of an account; free with `pe_folder_list_free`
 typedef struct PeFolderList PeFolderList;
@@ -175,6 +186,34 @@ typedef struct PeAttachment {
   uint64_t size;
 } PeAttachment;
 
+// A message to send; strings are UTF-8, address lists as the user typed them
+typedef struct PeOutgoing {
+  const char *to;
+  const char *cc;
+  const char *bcc;
+  const char *subject;
+  const char *text;
+  // From the draft of a reply, or NULL
+  const char *in_reply_to;
+  // From the draft of a reply, space separated, or NULL
+  const char *references;
+  // Paths of files to attach
+  const char *const *attachments;
+  size_t attachment_count;
+} PeOutgoing;
+
+// The fields a compose window starts with
+typedef struct PeDraftInfo {
+  const char *to;
+  const char *cc;
+  const char *subject;
+  const char *text;
+  // For PeOutgoing, NULL when there is none
+  const char *in_reply_to;
+  // For PeOutgoing, space separated
+  const char *references;
+} PeDraftInfo;
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -204,6 +243,18 @@ void pe_string_free(char *text);
 // `path` must be a NUL-terminated string. `callback` and `context` must be usable from any
 // thread until `pe_core_close` returns.
 struct PeCore *pe_core_open(const char *path, PeEventCallback callback, void *context);
+
+// Like `pe_core_open`, with every server checked against the one certificate `der` (`len` bytes of
+// DER) instead of the certificates Windows trusts: for test servers, and a server whose
+// self-signed certificate the user accepted
+//
+// # Safety
+// As `pe_core_open`; `der` must point to `len` readable bytes.
+struct PeCore *pe_core_open_pinned(const char *path,
+                                   const uint8_t *der,
+                                   size_t len,
+                                   PeEventCallback callback,
+                                   void *context);
 
 // Stops the engine: work that waits for the network is cancelled, after at most two seconds.
 // NULL is ignored. No event starts after it returns.
@@ -382,6 +433,35 @@ uint8_t *pe_attachment_data(const struct PeCore *core,
 // # Safety
 // `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
 void pe_bytes_free(uint8_t *data, size_t len);
+
+// Sends a message from an account in the background: `MessageSent`, or `Failed` with the server's
+// answer. A recipient that is no address or a file that is not there fails right away: false,
+// with the reason in `error` when it is not NULL (free it with `pe_string_free`).
+//
+// # Safety
+// `core` must be a live handle, `message` a valid message, `error` NULL or a valid pointer.
+bool pe_message_send(const struct PeCore *core,
+                     int64_t account,
+                     const struct PeOutgoing *message,
+                     char **error);
+
+// A reply, a reply to all or a forward of a message whose source is in the store (after
+// `MessageReady`), NULL otherwise
+//
+// # Safety
+// `core` must be a live handle.
+struct PeDraft *pe_message_draft(const struct PeCore *core,
+                                 int64_t folder,
+                                 uint64_t uid,
+                                 enum PeDraftKind kind);
+
+// # Safety
+// `draft` must be NULL or live.
+const struct PeDraftInfo *pe_draft_info(const struct PeDraft *draft);
+
+// # Safety
+// `draft` must be NULL or a draft that was not freed yet.
+void pe_draft_free(struct PeDraft *draft);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -16,7 +16,7 @@ Everything a remote party writes (IMAP responses, message headers and bodies, at
 
 A Cargo workspace in `core/` (edition 2024, `rustfmt.toml` sets 120 columns). The crates under `core/crates/`:
 
-- `pe-imap`: port of `../imapflow/src`. `pe-smtp`: port of the client parts of `../nodemailer/src` (smtp-connection, mime-node, mail-composer, mime-funcs, addressparser, qp, punycode, xoauth2). `pe-mime`: port of `../postal-mime/src`. Port these idiomatically rather than line by line: response parsing as pure functions over bytes, the connection on top of that. Use the TS test suites and fixtures of the originals as the reference for behavior.
+- `pe-imap`: port of `../imapflow/src`. `pe-smtp`: port of the client parts of `../nodemailer/src` (smtp-connection, mime-node, mail-composer, mime-funcs, qp, base64, xoauth2); message building matches nodemailer byte for byte, checked by `tests/conformance.rs` against fixtures from `tests/fixtures/generate-nodemailer-cases.mjs` (run with the path of a built nodemailer checkout). `pe-mime`: port of `../postal-mime/src`. Port these idiomatically rather than line by line: response parsing as pure functions over bytes, the connection on top of that. Use the TS test suites and fixtures of the originals as the reference for behavior.
 - `pe-html`: ammonia sanitizer and the preview document wrapper with its CSP.
 - `pe-net`: TCP and TLS (rustls with the platform verifier, or a pinned certificate) for IMAP and SMTP.
 - `pe-store`: the local cache in SQLite (rusqlite, bundled): accounts without secrets, folders, message summaries, cached sources. Schema changes are new entries in `schema.rs` `MIGRATIONS`, never edits of shipped ones.

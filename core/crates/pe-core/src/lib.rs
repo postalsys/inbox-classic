@@ -6,6 +6,7 @@
 //! windows start runs on the workers and reports back as [`Event`]s, on a worker thread.
 #![forbid(unsafe_code)]
 
+mod compose;
 mod view;
 mod worker;
 
@@ -15,9 +16,11 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
+use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
+pub use compose::{ComposeError, Draft, DraftKind, Outgoing};
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Worker};
 
@@ -43,6 +46,10 @@ pub enum Event {
     MessageReady {
         folder: FolderId,
         uid: u64,
+    },
+    /// A message was sent, and is in the Sent folder when the account has one
+    MessageSent {
+        account: AccountId,
     },
     /// Work for an account failed; `kind` says what to do about it
     Failed {
@@ -72,6 +79,8 @@ pub enum Error {
     NotFound,
     /// The engine is shutting down
     Closed,
+    /// A message that can not be sent as it is
+    Compose(ComposeError),
 }
 
 impl fmt::Display for Error {
@@ -80,6 +89,7 @@ impl fmt::Display for Error {
             Error::Store(error) => write!(f, "local store: {error}"),
             Error::NotFound => f.write_str("not found"),
             Error::Closed => f.write_str("shutting down"),
+            Error::Compose(error) => write!(f, "{error}"),
         }
     }
 }
@@ -143,6 +153,7 @@ pub struct Core {
     runtime: Option<tokio::runtime::Runtime>,
     workers: Mutex<HashMap<AccountId, UnboundedSender<Command>>>,
     secrets: Secrets,
+    trust: Trust,
     events: EventSink,
     /// Set when closing: no event is delivered after
     closed: Arc<AtomicBool>,
@@ -152,6 +163,16 @@ impl Core {
     /// Opens the store at `path` (created when missing) and starts the engine. `events` is called
     /// on worker threads, never on the thread that called into the engine.
     pub fn open(path: impl AsRef<Path>, events: impl Fn(Event) + Send + Sync + 'static) -> Result<Core> {
+        Self::open_with_trust(path, Trust::Platform, events)
+    }
+
+    /// Like [`Core::open`], with the certificates the servers are checked against: the platform's, or the
+    /// certificates of `Trust::Pinned` (test servers, a certificate the user accepted)
+    pub fn open_with_trust(
+        path: impl AsRef<Path>,
+        trust: Trust,
+        events: impl Fn(Event) + Send + Sync + 'static,
+    ) -> Result<Core> {
         let path = path.as_ref().to_path_buf();
         let store = Store::open(&path)?;
         let runtime = tokio::runtime::Builder::new_multi_thread()
@@ -168,6 +189,7 @@ impl Core {
             runtime: Some(runtime),
             workers: Mutex::default(),
             secrets: Secrets::default(),
+            trust,
             events: Arc::new(move |event| {
                 if !open.load(Ordering::Acquire) {
                     events(event);
@@ -241,14 +263,14 @@ impl Core {
 
     /// Syncs the folder list and every folder of an account, in the background
     pub fn sync(&self, account: AccountId) -> Result<()> {
-        self.send(account, Command::Sync)
+        self.send_command(account, Command::Sync)
     }
 
     /// Gets the source of a message to the store, in the background; [`Event::MessageReady`]
     /// follows, right away when it is cached
     pub fn open_message(&self, folder: FolderId, uid: u64) -> Result<()> {
         let account = self.store().folder(folder)?.account_id;
-        self.send(account, Command::FetchSource { folder, uid })
+        self.send_command(account, Command::FetchSource { folder, uid })
     }
 
     /// The message as the preview shows it, None when its source is not in the store yet
@@ -273,6 +295,23 @@ impl Core {
         Ok(source.and_then(|source| view::attachment(&source, index)))
     }
 
+    /// Sends a message from an account in the background: [`Event::MessageSent`] or [`Event::Failed`] follows.
+    /// Recipients that are no addresses and attachments that are not there fail right away.
+    pub fn send(&self, account: AccountId, outgoing: Outgoing) -> Result<()> {
+        // a typo in an address is told now, while the message is still open in its window
+        compose::check(&outgoing).map_err(Error::Compose)?;
+        self.send_command(account, Command::Send(Box::new(outgoing)))
+    }
+
+    /// A reply, a reply to all or a forward of a message whose source is in the store
+    pub fn draft(&self, folder: FolderId, uid: u64, kind: DraftKind) -> Result<Option<Draft>> {
+        let store = self.store();
+        let account = store.account(store.folder(folder)?.account_id)?;
+        let date = store.message(folder, uid)?.and_then(|m| m.info.display_date());
+        let source = store.source(folder, uid)?;
+        Ok(source.map(|source| compose::draft(&source, kind, &account.settings.email, date)))
+    }
+
     /// Marks a message read or unread: in the store now, on the server in the background
     pub fn set_seen(&self, folder: FolderId, uid: u64, seen: bool) -> Result<()> {
         let (account, changed) = {
@@ -283,10 +322,10 @@ impl Core {
         if changed {
             self.post(Event::FolderChanged { account, folder })?;
         }
-        self.send(account, Command::SetSeen { folder, uid, seen })
+        self.send_command(account, Command::SetSeen { folder, uid, seen })
     }
 
-    fn send(&self, account: AccountId, command: Command) -> Result<()> {
+    fn send_command(&self, account: AccountId, command: Command) -> Result<()> {
         let mut workers = self.workers.lock().unwrap_or_else(|p| p.into_inner());
         let command = match workers.get(&account) {
             Some(sender) => match sender.send(command) {
@@ -299,7 +338,13 @@ impl Core {
         self.store().account(account).map_err(|_| Error::NotFound)?;
         let (sender, receiver) = unbounded_channel();
         sender.send(command).map_err(|_| Error::Closed)?;
-        let worker = Worker::new(account, self.path.clone(), self.secrets.clone(), self.events.clone());
+        let worker = Worker::new(
+            account,
+            self.path.clone(),
+            self.secrets.clone(),
+            self.trust.clone(),
+            self.events.clone(),
+        );
         self.runtime()?.spawn(worker.run(receiver));
         workers.insert(account, sender);
         Ok(())
