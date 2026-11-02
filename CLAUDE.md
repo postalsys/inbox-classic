@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Inbox Classic is a Windows email client that looks like Outlook Express. It is a sibling of ImapKit Desktop (`../imapkit-win`), which has the same classic Win32 look but runs a Node.js sidecar. Inbox Classic has no sidecar: IMAP, SMTP and MIME run in-process in a Rust core.
 
+The homepage, https://inboxclassic.com, is a static page in its own public repo `postalsys/inboxclassic.com` (`../inboxclassic.com`), served by GitHub Pages; its DNS is in Cloudflare. Its screenshots come from `build/ui-e2e`; refresh them when the windows change. (The repo here and the build machine's checkout still carry the old name, PostalExpress.)
+
 ## Security model (the reason for the architecture)
 
 Everything a remote party writes (IMAP responses, message headers and bodies, attachment names, autoconfig XML, DNS answers) is parsed only in Rust. The C++ code never parses remote data; it shows values the core has already decoded and validated, and passes sanitized HTML to WebView2 without changing it. Keep the C++ side minimal: new logic that touches mail data belongs in `core/`, not `app/`.
