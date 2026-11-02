@@ -7,6 +7,18 @@ use std::borrow::Cow;
 use std::collections::HashSet;
 use std::sync::LazyLock;
 
+use base64::Engine;
+use base64::engine::general_purpose::STANDARD;
+
+/// An image a message carries for its HTML, referenced as `cid:` (multipart/related)
+#[derive(Debug, Clone, Copy)]
+pub struct InlineImage<'a> {
+    /// The Content-ID, with or without its angle brackets
+    pub content_id: &'a str,
+    pub mime_type: &'a str,
+    pub data: &'a [u8],
+}
+
 /// How a message document is rendered.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct RenderOptions {
@@ -62,15 +74,79 @@ pub fn sanitize(html: &str) -> String {
 
 /// Sanitizes `html` and wraps it in a complete document with a Content-Security-Policy, ready for the preview.
 pub fn render_document(html: &str, options: &RenderOptions) -> String {
-    let images = if options.allow_remote_images {
+    render_message(html, options, &[])
+}
+
+/// The value of a `cid:` URL as a Content-ID: angle brackets and percent escapes removed
+fn content_id(value: &str) -> String {
+    let value = value.trim().trim_start_matches('<').trim_end_matches('>');
+    let bytes = value.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        let hex = |c: u8| (c as char).to_digit(16).map(|d| d as u8);
+        if bytes[i] == b'%'
+            && let (Some(high), Some(low)) = (
+                bytes.get(i + 1).and_then(|c| hex(*c)),
+                bytes.get(i + 2).and_then(|c| hex(*c)),
+            )
+        {
+            out.push(high << 4 | low);
+            i += 3;
+            continue;
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+/// Points `src="cid:..."` and `background="cid:..."` of sanitized HTML at the images as data: URIs.
+/// Only images: anything else stays a `cid:` the preview can not load.
+fn embed_images(body: &str, images: &[InlineImage]) -> String {
+    // the scheme in any case: ASCII lowercasing keeps every byte where it was
+    let lower = body.to_ascii_lowercase();
+    let mut out = String::with_capacity(body.len());
+    let mut copied = 0;
+    let mut search = 0;
+    while let Some(found) = lower[search..].find("=\"cid:") {
+        let value_start = search + found + 2;
+        let Some(length) = body[value_start..].find('"') else {
+            break;
+        };
+        let url = &body[value_start..value_start + length];
+        let wanted = content_id(&url[4..].replace("&amp;", "&"));
+        let image = images.iter().find(|image| {
+            image.mime_type.starts_with("image/") && content_id(image.content_id).eq_ignore_ascii_case(&wanted)
+        });
+        out.push_str(&body[copied..value_start]);
+        match image {
+            Some(image) => {
+                out.push_str("data:");
+                out.push_str(image.mime_type);
+                out.push_str(";base64,");
+                out.push_str(&STANDARD.encode(image.data));
+            }
+            None => out.push_str(url),
+        }
+        copied = value_start + length;
+        search = copied;
+    }
+    out.push_str(&body[copied..]);
+    out
+}
+
+/// A message for the preview: sanitized, its `cid:` images embedded, in a document with a CSP
+pub fn render_message(html: &str, options: &RenderOptions, images: &[InlineImage]) -> String {
+    let image_sources = if options.allow_remote_images {
         "data: http: https:"
     } else {
         "data:"
     };
-    let body = sanitize(html);
+    let body = embed_images(&sanitize(html), images);
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
-         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src {images}; style-src 'unsafe-inline'; font-src data:\">\
+         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
          <meta name=\"color-scheme\" content=\"light\">\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}</style>\
          </head><body>{body}</body></html>"
@@ -80,6 +156,29 @@ pub fn render_document(html: &str, options: &RenderOptions) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn embeds_inline_images() {
+        let png = InlineImage {
+            content_id: "<logo@x>",
+            mime_type: "image/png",
+            data: b"\x89PNG",
+        };
+        let html_part = InlineImage {
+            content_id: "page@x",
+            mime_type: "text/html",
+            data: b"<script>",
+        };
+        let out = render_message(
+            "<img src=\"cid:logo@x\"><img src=\"CID:%3Cpage@x%3E\"><table background=\"cid:missing\"></table>",
+            &RenderOptions::default(),
+            &[png, html_part],
+        );
+        assert!(out.contains("<img src=\"data:image/png;base64,iVBORw==\">"), "{out}");
+        // not an image: left as a cid: the preview can not load
+        assert!(!out.contains("text/html") && !out.contains("PHNjcmlwdD4"));
+        assert!(out.contains("background=\"cid:missing\""));
+    }
 
     #[test]
     fn removes_scripts_and_handlers() {

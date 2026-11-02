@@ -6,6 +6,7 @@ pub mod charset;
 pub mod date;
 pub mod envelope;
 pub mod params;
+pub mod parser;
 pub mod words;
 
 pub use envelope::{Address, Envelope};

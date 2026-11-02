@@ -14,6 +14,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 pe-imap = { path = "../crates/pe-imap" }
+pe-mime = { path = "../crates/pe-mime" }
 
 [[bin]]
 name = "imap_response"
@@ -23,3 +24,10 @@ doc = false
 bench = false
 
 [workspace]
+
+[[bin]]
+name = "mime_message"
+path = "fuzz_targets/mime_message.rs"
+test = false
+doc = false
+bench = false
