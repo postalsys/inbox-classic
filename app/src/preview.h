@@ -17,6 +17,8 @@ public:
     // remoteImages lets images from the network load, for this document only
     void Show(const std::wstring& html, bool remoteImages = false);
     void Clear();
+    // closes the WebView2 and lets go of it, before COM is shut down
+    void Close();
     void Resize(const RECT& bounds);
     // WebView2 stops drawing while its window is hidden, the page tells it when it is on screen again
     void SetVisible(bool visible);

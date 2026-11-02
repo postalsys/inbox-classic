@@ -125,6 +125,22 @@ fn reads_mail_through_the_c_api() {
         ("Report".into(), "Sender".into(), uid)
     );
     assert!(second.has_attachments && !second.seen);
+    assert_eq!(
+        unsafe { pe_message_index(core, inbox, PeSortField::Subject, true, uid) },
+        1
+    );
+    assert_eq!(
+        unsafe { pe_message_index(core, inbox, PeSortField::Subject, false, uid) },
+        0
+    );
+    assert_eq!(
+        unsafe { pe_message_index(core, inbox, PeSortField::Subject, true, uid + 99) },
+        -1
+    );
+    let (mut total, mut unread) = (0u64, 0u64);
+    assert!(unsafe { pe_folder_counts(core, inbox, &mut total, &mut unread) });
+    assert_eq!((total, unread), (2, 1));
+    assert!(!unsafe { pe_folder_counts(core, inbox + 99, &mut total, &mut unread) });
     unsafe { pe_message_list_free(list) };
 
     assert!(

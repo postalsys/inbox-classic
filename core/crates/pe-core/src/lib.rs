@@ -9,7 +9,7 @@
 mod view;
 mod worker;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -99,23 +99,39 @@ pub(crate) type EventSink = Arc<dyn Fn(Event) + Send + Sync>;
 /// The passwords of the accounts, in memory: the user gives them once per run until the
 /// Windows Credential Manager keeps them
 #[derive(Clone, Default)]
-pub(crate) struct Secrets(Arc<Mutex<HashMap<AccountId, String>>>);
+pub(crate) struct Secrets(Arc<Mutex<SecretMap>>);
+
+#[derive(Default)]
+struct SecretMap {
+    passwords: HashMap<AccountId, String>,
+    /// Accounts whose password was refused and reported: reported once until a new one is set
+    refused: HashSet<AccountId>,
+}
 
 impl Secrets {
-    fn map(&self) -> MutexGuard<'_, HashMap<AccountId, String>> {
+    fn map(&self) -> MutexGuard<'_, SecretMap> {
         self.0.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 
     pub(crate) fn get(&self, account: AccountId) -> Option<String> {
-        self.map().get(&account).cloned()
+        self.map().passwords.get(&account).cloned()
     }
 
     fn set(&self, account: AccountId, password: &str) {
-        self.map().insert(account, password.to_string());
+        let mut map = self.map();
+        map.passwords.insert(account, password.to_string());
+        map.refused.remove(&account);
     }
 
     fn remove(&self, account: AccountId) {
-        self.map().remove(&account);
+        let mut map = self.map();
+        map.passwords.remove(&account);
+        map.refused.remove(&account);
+    }
+
+    /// Whether a refused password is news: true the first time after it was set
+    pub(crate) fn first_refusal(&self, account: AccountId) -> bool {
+        self.map().refused.insert(account)
     }
 }
 
@@ -213,6 +229,16 @@ impl Core {
         Ok(self.store().messages(folder, sort, offset, limit)?)
     }
 
+    /// One folder with its counts
+    pub fn folder(&self, folder: FolderId) -> Result<Folder> {
+        Ok(self.store().folder(folder)?)
+    }
+
+    /// Where a message is in the message list in this order
+    pub fn message_index(&self, folder: FolderId, sort: Sort, uid: u64) -> Result<Option<u64>> {
+        Ok(self.store().message_index(folder, sort, uid)?)
+    }
+
     /// Syncs the folder list and every folder of an account, in the background
     pub fn sync(&self, account: AccountId) -> Result<()> {
         self.send(account, Command::Sync)
@@ -227,8 +253,17 @@ impl Core {
 
     /// The message as the preview shows it, None when its source is not in the store yet
     pub fn message_view(&self, folder: FolderId, uid: u64, allow_remote_images: bool) -> Result<Option<MessageView>> {
-        let source = self.store().source(folder, uid)?;
-        Ok(source.map(|source| view::build(&source, allow_remote_images)))
+        let (source, received) = {
+            let store = self.store();
+            let received = store.message(folder, uid)?.and_then(|m| m.info.internal_date);
+            (store.source(folder, uid)?, received)
+        };
+        Ok(source.map(|source| {
+            let mut view = view::build(&source, allow_remote_images);
+            // without a Date header, the date the list shows: when the server got it
+            view.date = view.date.or(received);
+            view
+        }))
     }
 
     /// The content of the `index`th attachment of [`MessageView::attachments`], with the name to

@@ -117,6 +117,10 @@ impl Worker {
             // the connection is no good now, the next command connects again
             self.connection = None;
         }
+        // a refused password is told once, not again for each command until the user gives another
+        if failure.kind == FailureKind::Authentication && !self.secrets.first_refusal(self.account) {
+            return;
+        }
         self.emit(Event::Failed {
             account: self.account,
             kind: failure.kind,

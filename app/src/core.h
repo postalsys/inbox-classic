@@ -30,7 +30,5 @@ std::wstring Widen(std::string_view utf8);
 std::string Narrow(std::wstring_view utf16);
 
 std::wstring Version();
-// a sanitized document for the preview, empty when the core failed
-std::wstring RenderHtml(std::string_view html, bool remoteImages);
 
 }  // namespace core

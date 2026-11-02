@@ -20,7 +20,7 @@ pub struct MessageView {
     pub from: String,
     pub to: String,
     pub cc: String,
-    /// The Date header, seconds since the Unix epoch
+    /// The Date header, the received date without one, seconds since the Unix epoch
     pub date: Option<i64>,
     /// The body for WebView2: a complete document with a CSP
     pub document: String,

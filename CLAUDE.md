@@ -64,6 +64,8 @@ scripts/win-run.sh                    # start the app on the interactive desktop
 scripts/win-screenshot.sh out.png     # screenshot of the window, DESKTOP=1 for the whole screen
 ```
 
+To drive the UI for a check, run these on the build machine through a scheduled task (`/it`, as `win-run.sh` does): `scripts/ui-account.ps1` fills the Add Mail Account form (use an Ethereal account), `scripts/ui-select.ps1 <folder> <row>` selects a folder and a message.
+
 On Windows itself: `scripts\win-build.cmd` and `scripts\win-test.cmd`. Both call `scripts\vcvars.cmd`, which finds Visual Studio with vswhere and puts cargo on PATH.
 
 Screenshots need a logged-in desktop session that is not disconnected or locked; check with `ssh andri@10.8.0.8 query user` (`Active`, not `Disc`). In a disconnected session they come out blank white.

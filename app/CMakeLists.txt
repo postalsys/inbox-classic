@@ -36,7 +36,10 @@ endif()
 
 add_executable(PostalExpress WIN32
     src/main.cpp
+    src/accounts.cpp
     src/core.cpp
+    src/mailbox.cpp
+    src/ui.cpp
     src/preview.cpp
     res/app.rc
 )

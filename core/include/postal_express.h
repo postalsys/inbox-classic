@@ -280,6 +280,12 @@ const struct PeFolder *pe_folder_list_get(const struct PeFolderList *list, size_
 // `list` must be NULL or a list that was not freed yet.
 void pe_folder_list_free(struct PeFolderList *list);
 
+// The message counts of a folder; false when there is no such folder
+//
+// # Safety
+// `core` must be a live handle; `total` and `unread` must be valid pointers.
+bool pe_folder_counts(const struct PeCore *core, int64_t folder, uint64_t *total, uint64_t *unread);
+
 // `limit` messages of a folder from `offset` on, in the order asked for; NULL on failure
 //
 // # Safety
@@ -290,6 +296,16 @@ struct PeMessageList *pe_messages(const struct PeCore *core,
                                   bool ascending,
                                   uint64_t offset,
                                   uint64_t limit);
+
+// Where message `uid` is in the message list of a folder in this order, -1 when it is not there
+//
+// # Safety
+// `core` must be a live handle.
+int64_t pe_message_index(const struct PeCore *core,
+                         int64_t folder,
+                         enum PeSortField sort,
+                         bool ascending,
+                         uint64_t uid);
 
 // # Safety
 // `list` must be NULL or live.

@@ -264,6 +264,16 @@ impl Store {
         statement.query_map(params![folder, limit, offset], from_row)?.collect()
     }
 
+    /// Where a message is in the message list in this order, None when the folder does not have it
+    pub fn message_index(&self, folder: FolderId, sort: Sort, uid: u64) -> Result<Option<u64>> {
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT position FROM (SELECT uid, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS position \
+             FROM messages WHERE folder_id = ?1) WHERE uid = ?2",
+            sort.order_by()
+        ))?;
+        statement.query_row(params![folder, uid], |row| row.get(0)).optional()
+    }
+
     pub fn message(&self, folder: FolderId, uid: u64) -> Result<Option<Message>> {
         self.db
             .query_row(
@@ -361,6 +371,12 @@ mod tests {
         assert_eq!(uids(by(SortField::From, true)), [3, 2, 1]);
         assert_eq!(uids(by(SortField::Size, false)), [3, 2, 1]);
         assert_eq!(uids(by(SortField::Received, true)), [2, 3, 1]);
+        for sort in [Sort::default(), by(SortField::Subject, true), by(SortField::From, true)] {
+            for (position, uid) in uids(sort).into_iter().enumerate() {
+                assert_eq!(store.message_index(folder, sort, uid).unwrap(), Some(position as u64));
+            }
+        }
+        assert_eq!(store.message_index(folder, Sort::default(), 99).unwrap(), None);
         let page = store.messages(folder, Sort::default(), 1, 1).unwrap();
         assert_eq!(page.len(), 1);
         let info = &page[0].info;

@@ -522,6 +522,23 @@ pub unsafe extern "C" fn pe_folder_list_free(list: *mut PeFolderList) {
     unsafe { take_back(list) }
 }
 
+/// The message counts of a folder; false when there is no such folder
+///
+/// # Safety
+/// `core` must be a live handle; `total` and `unread` must be valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_counts(core: *const PeCore, folder: i64, total: *mut u64, unread: *mut u64) -> bool {
+    if total.is_null() || unread.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let counts = unsafe { with(core, None, |core| core.folder(folder).ok().map(|f| (f.total, f.unread))) };
+    let Some(counts) = counts else { return false };
+    // SAFETY: the caller gave valid pointers
+    unsafe { (*total, *unread) = counts };
+    true
+}
+
 // ---- messages ----
 
 #[repr(C)]
@@ -609,6 +626,31 @@ pub unsafe extern "C" fn pe_messages(
                     has_attachments: info.has_attachments,
                 }
             })))
+        })
+    }
+}
+
+/// Where message `uid` is in the message list of a folder in this order, -1 when it is not there
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_index(
+    core: *const PeCore,
+    folder: i64,
+    sort: PeSortField,
+    ascending: bool,
+    uid: u64,
+) -> i64 {
+    let sort = Sort {
+        field: sort.into(),
+        ascending,
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, -1, |core| match core.message_index(folder, sort, uid) {
+            Ok(Some(index)) => i64::try_from(index).unwrap_or(-1),
+            _ => -1,
         })
     }
 }

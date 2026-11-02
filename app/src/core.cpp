@@ -28,9 +28,5 @@ std::wstring Version() {
     return Widen(pe_version());
 }
 
-std::wstring RenderHtml(std::string_view html, bool remoteImages) {
-    String document(pe_html_render(reinterpret_cast<const uint8_t*>(html.data()), html.size(), remoteImages));
-    return document ? Widen(document.get()) : std::wstring();
-}
 
 }  // namespace core

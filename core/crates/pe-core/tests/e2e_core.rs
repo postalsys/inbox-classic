@@ -86,6 +86,9 @@ fn reads_mail_like_the_windows_do() {
     });
     let view = s.core.message_view(inbox.id, styled, false).unwrap().unwrap();
     assert_eq!(view.subject, "Styled");
+    assert!(view.date.is_some(), "no Date header: the received date");
+    let index = s.core.message_index(inbox.id, Sort::default(), styled).unwrap();
+    assert_eq!(list[index.unwrap() as usize].info.uid, styled);
     assert_eq!(view.from, "Sender <sender@example.com>");
     assert!(view.document.contains("<p>Hi</p>") && !view.document.contains("script"));
 
@@ -136,6 +139,10 @@ fn a_wrong_password_is_reported() {
         "{failed:?}"
     );
     s.wait(|e| *e == Event::SyncFinished { account });
+    // told once: another sync with the same password fails quietly
+    s.core.sync(account).unwrap();
+    let next = s.wait(|e| matches!(e, Event::SyncFinished { .. } | Event::Failed { .. }));
+    assert_eq!(next, Event::SyncFinished { account });
 
     // with the right one it works
     s.core.set_password(account, PASSWORD);

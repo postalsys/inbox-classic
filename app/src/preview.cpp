@@ -174,3 +174,12 @@ void Preview::Resize(const RECT& bounds) {
         controller_->put_Bounds(bounds);
     }
 }
+
+void Preview::Close() {
+    if (controller_) {
+        controller_->Close();
+    }
+    view_.Reset();
+    controller_.Reset();
+    environment_.Reset();
+}
