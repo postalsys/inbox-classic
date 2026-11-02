@@ -500,12 +500,18 @@ try {
     New-Item -ItemType Directory -Force $files | Out-Null
     Set-Content (Join-Path $files 'keep-me.txt') 'the attachment that goes'
     Set-Content (Join-Path $files 'wrong-file.txt') 'attached by mistake'
-    foreach ($file in 'keep-me.txt', 'wrong-file.txt') {
-        Command $compose $IDC_ATTACH
-        [void](AnswerFileDialog 'Insert Attachment' (Join-Path $files $file) $null)
-    }
     $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
     $count = { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    foreach ($file in 'keep-me.txt', 'wrong-file.txt') {
+        $before = & $count
+        # each file once it is in the row; a dialog that was still closing from the one before gets a second try
+        for ($try = 0; $try -lt 2 -and (& $count) -eq $before; $try++) {
+            [void](WaitFor { [Native.Win]::FindWindow('#32770', 'Insert Attachment') -eq [IntPtr]::Zero } 10)
+            Command $compose $IDC_ATTACH
+            [void](AnswerFileDialog 'Insert Attachment' (Join-Path $files $file) $null)
+            [void](WaitFor { (& $count) -gt $before } 5)
+        }
+    }
     Check ([bool](WaitFor { (& $count) -eq 2 } 10)) 'Attach adds the files to the Attach row'
     Shot $compose 'write-5-new'
     [void][Native.Win]::SendMessage($attached, $LB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)

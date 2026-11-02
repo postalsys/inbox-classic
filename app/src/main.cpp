@@ -9,6 +9,7 @@
 #include <set>
 
 #include "app.h"
+#include "icons.h"
 
 #define WIDEN2(text) L##text
 #define WIDEN(text) WIDEN2(text)
@@ -217,18 +218,24 @@ HACCEL BuildAccelerators() {
 
 void CreateToolbar(HWND hwnd) {
     g_toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0);
+    SetBarIcons(g_toolbar, BarIcons::Big);
     struct Button {
         WORD id;
         const wchar_t* text;
+        int icon;
     };
     // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state (0 separates)
-    Button buttons[] = {{IDM_NEW_MAIL, L"Create Mail"}, {0, nullptr},          {IDM_REPLY, L"Reply"},
-                        {IDM_REPLY_ALL, L"Reply All"},  {IDM_FORWARD, L"Forward"}, {0, nullptr},
-                        {IDM_PRINT, L"Print"},          {IDM_DELETE, L"Delete"},   {0, nullptr},
-                        {IDM_SYNC, L"Send/Recv"},       {0, nullptr},              {IDM_MARK_READ, L"Mark Read"},
-                        {IDM_MARK_UNREAD, L"Mark Unread"}};
+    Button buttons[] = {
+        {IDM_NEW_MAIL, L"Create Mail", ICON_MAIL_ADD}, {0, nullptr, 0},
+        {IDM_REPLY, L"Reply", ICON_ARROW_REPLY},       {IDM_REPLY_ALL, L"Reply All", ICON_ARROW_REPLY_ALL},
+        {IDM_FORWARD, L"Forward", ICON_ARROW_FORWARD}, {0, nullptr, 0},
+        {IDM_PRINT, L"Print", ICON_PRINT},             {IDM_DELETE, L"Delete", ICON_DELETE},
+        {0, nullptr, 0},                               {IDM_SYNC, L"Send/Recv", ICON_ARROW_SYNC},
+        {0, nullptr, 0},                               {IDM_MARK_READ, L"Mark Read", ICON_MAIL_READ},
+        {IDM_MARK_UNREAD, L"Mark Unread", ICON_MAIL_UNREAD},
+    };
     for (const Button& button : buttons) {
-        AddButton(g_toolbar, button.id, button.text);
+        AddButton(g_toolbar, button.id, button.text, BTNS_BUTTON, button.icon);
     }
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
 }

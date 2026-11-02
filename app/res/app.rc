@@ -6,6 +6,16 @@
 // the help window's document, src/help.cpp
 2 RCDATA "help.html"
 
+// the toolbar icons (scripts/build-icons.sh from icons/*.svg), one strip per size: 100%, 125%, 150% and 200%
+10 BITMAP "toolbar/toolbar-24.bmp"
+11 BITMAP "toolbar/toolbar-30.bmp"
+12 BITMAP "toolbar/toolbar-36.bmp"
+13 BITMAP "toolbar/toolbar-48.bmp"
+20 BITMAP "toolbar/format-16.bmp"
+21 BITMAP "toolbar/format-20.bmp"
+22 BITMAP "toolbar/format-24.bmp"
+23 BITMAP "toolbar/format-32.bmp"
+
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION APP_VERSION_COMMAS,0
 PRODUCTVERSION APP_VERSION_COMMAS,0

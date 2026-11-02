@@ -264,7 +264,39 @@ HWND CreateBar(HWND hwnd, DWORD style, int id) {
     return bar;
 }
 
-void AddButton(HWND bar, int id, const wchar_t* text, BYTE style) {
+void SetBarIcons(HWND bar, BarIcons icons) {
+    struct Strip {
+        int resource;
+        int size;
+    };
+    // the strips of app.rc: the one closest to the DPI, at least as large
+    static const Strip bigStrips[] = {{10, 24}, {11, 30}, {12, 36}, {13, 48}};
+    static const Strip smallStrips[] = {{20, 16}, {21, 20}, {22, 24}, {23, 32}};
+    const Strip* strips = icons == BarIcons::Big ? bigStrips : smallStrips;
+    const Strip* chosen = &strips[3];
+    for (int i = 0; i < 4; i++) {
+        if (strips[i].size >= Scale(strips[0].size)) {
+            chosen = &strips[i];
+            break;
+        }
+    }
+    // one image list a strip, for all the windows, as long as the app runs
+    static std::unordered_map<int, HIMAGELIST> lists;
+    HIMAGELIST& list = lists[chosen->resource];
+    if (!list) {
+        // the strips are drawn on the button face color, which is their transparent color
+        list = ImageList_LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(chosen->resource), chosen->size, 0, RGB(0xF0, 0xF0, 0xF0),
+                                    IMAGE_BITMAP, LR_CREATEDIBSECTION);
+    }
+    SendMessageW(bar, TB_SETIMAGELIST, 0, reinterpret_cast<LPARAM>(list));
+    if (icons == BarIcons::Big) {
+        // the label under the icon, as Outlook Express has it
+        SendMessageW(bar, TB_SETSTYLE, 0, SendMessageW(bar, TB_GETSTYLE, 0, 0) & ~TBSTYLE_LIST);
+        SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, 0);
+    }
+}
+
+void AddButton(HWND bar, int id, const wchar_t* text, BYTE style, int image) {
     TBBUTTON button = {};
     button.idCommand = id;
     if (id == 0) {
@@ -272,9 +304,11 @@ void AddButton(HWND bar, int id, const wchar_t* text, BYTE style) {
         SendMessageW(bar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&button));
         return;
     }
-    button.iBitmap = I_IMAGENONE;
+    button.iBitmap = image;
     button.fsState = TBSTATE_ENABLED;
-    button.fsStyle = static_cast<BYTE>(style | BTNS_AUTOSIZE | BTNS_SHOWTEXT);
+    // on a list bar (the format bar) an icon alone, its text the tooltip; a button without an icon shows its text
+    bool iconOnly = image != I_IMAGENONE && (SendMessageW(bar, TB_GETSTYLE, 0, 0) & TBSTYLE_LIST);
+    button.fsStyle = static_cast<BYTE>(style | BTNS_AUTOSIZE | (iconOnly ? 0 : BTNS_SHOWTEXT));
     button.iString = reinterpret_cast<INT_PTR>(text);
     SendMessageW(bar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&button));
 }

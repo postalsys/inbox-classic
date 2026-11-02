@@ -73,7 +73,10 @@ function webview2Notice() {
 
 const list = crates();
 const notices =
-    'PostalExpress includes the software below. Each part keeps its own license, given here in full.\n\n' + webview2Notice() + list.map(crateNotice).join('');
+    'PostalExpress includes the software below. Each part keeps its own license, given here in full.\n\n' +
+    webview2Notice() +
+    section('Fluent UI System Icons (toolbar pictures, from app/res/icons)', read(path.join(root, 'app', 'res', 'icons', 'LICENSE'))) +
+    list.map(crateNotice).join('');
 fs.mkdirSync(staging, { recursive: true });
 fs.writeFileSync(path.join(staging, 'THIRD-PARTY-NOTICES.txt'), notices.replace(/\n/g, '\r\n'));
 console.log(`THIRD-PARTY-NOTICES.txt: WebView2 and ${list.length} crates`);

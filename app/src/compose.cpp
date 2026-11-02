@@ -4,6 +4,7 @@
 // this file only edits.
 #include "app.h"
 #include "editor.h"
+#include "icons.h"
 
 #include <commdlg.h>
 #include <shellapi.h>
@@ -423,32 +424,47 @@ void CreateFormatBar(HWND hwnd, Compose* state) {
     }
     SendMessageW(state->size, CB_SETCURSEL, 1, 0);
     state->formatBar = CreateBar(hwnd, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE | TBSTYLE_TOOLTIPS, IDC_FORMATBAR);
+    SetBarIcons(state->formatBar, BarIcons::Small);
     struct Button {
         int id;
+        // the tooltip
         const wchar_t* text;
         BYTE style;
+        int icon;
     };
     Button buttons[] = {
-        {IDF_BOLD, L"B", BTNS_CHECK},     {IDF_ITALIC, L"I", BTNS_CHECK},   {IDF_UNDERLINE, L"U", BTNS_CHECK},
-        {IDF_COLOR, L"Color", 0},         {0, nullptr, 0},                  {IDF_NUMBERS, L"1.", BTNS_CHECK},
-        {IDF_BULLETS, L"\x2022", BTNS_CHECK}, {IDF_OUTDENT, L"\x00AB", 0},  {IDF_INDENT, L"\x00BB", 0},
-        {0, nullptr, 0},                  {IDF_LEFT, L"Left", BTNS_CHECK}, {IDF_CENTER, L"Center", BTNS_CHECK},
-        {IDF_RIGHT, L"Right", BTNS_CHECK}, {0, nullptr, 0},                 {IDF_LINK, L"Link", 0},
-        {IDF_LINE, L"Line", 0},           {IDF_PICTURE, L"Picture", 0},
+        {IDF_BOLD, L"Bold (Ctrl+B)", BTNS_CHECK, FORMAT_TEXT_BOLD},
+        {IDF_ITALIC, L"Italic (Ctrl+I)", BTNS_CHECK, FORMAT_TEXT_ITALIC},
+        {IDF_UNDERLINE, L"Underline (Ctrl+U)", BTNS_CHECK, FORMAT_TEXT_UNDERLINE},
+        {IDF_COLOR, L"Font Color", 0, FORMAT_TEXT_COLOR},
+        {0, nullptr, 0, 0},
+        {IDF_NUMBERS, L"Numbered List", BTNS_CHECK, FORMAT_TEXT_NUMBER_LIST_LTR},
+        {IDF_BULLETS, L"Bulleted List", BTNS_CHECK, FORMAT_TEXT_BULLET_LIST_LTR},
+        {IDF_OUTDENT, L"Decrease Indent", 0, FORMAT_TEXT_INDENT_DECREASE_LTR},
+        {IDF_INDENT, L"Increase Indent", 0, FORMAT_TEXT_INDENT_INCREASE_LTR},
+        {0, nullptr, 0, 0},
+        {IDF_LEFT, L"Align Left", BTNS_CHECK, FORMAT_TEXT_ALIGN_LEFT},
+        {IDF_CENTER, L"Center", BTNS_CHECK, FORMAT_TEXT_ALIGN_CENTER},
+        {IDF_RIGHT, L"Align Right", BTNS_CHECK, FORMAT_TEXT_ALIGN_RIGHT},
+        {0, nullptr, 0, 0},
+        {IDF_LINK, L"Insert Hyperlink", 0, FORMAT_LINK},
+        {IDF_LINE, L"Insert Horizontal Line", 0, FORMAT_LINE_HORIZONTAL_1},
+        {IDF_PICTURE, L"Insert Picture", 0, FORMAT_IMAGE},
     };
     for (const Button& button : buttons) {
-        AddButton(state->formatBar, button.id, button.text, static_cast<BYTE>(BTNS_BUTTON | button.style));
+        AddButton(state->formatBar, button.id, button.text, static_cast<BYTE>(BTNS_BUTTON | button.style), button.icon);
     }
 }
 
 void CreateFields(HWND hwnd, Compose* state) {
     state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0);
-    AddButton(state->toolbar, IDC_SEND, L"Send");
-    AddButton(state->toolbar, IDC_SEND_LATER, L"Send Later");
+    SetBarIcons(state->toolbar, BarIcons::Big);
+    AddButton(state->toolbar, IDC_SEND, L"Send", BTNS_BUTTON, ICON_SEND);
+    AddButton(state->toolbar, IDC_SEND_LATER, L"Send Later", BTNS_BUTTON, ICON_SEND_CLOCK);
     AddButton(state->toolbar, 0, nullptr);
-    AddButton(state->toolbar, IDC_SAVE, L"Save");
+    AddButton(state->toolbar, IDC_SAVE, L"Save", BTNS_BUTTON, ICON_SAVE);
     AddButton(state->toolbar, 0, nullptr);
-    AddButton(state->toolbar, IDC_ATTACH, L"Attach");
+    AddButton(state->toolbar, IDC_ATTACH, L"Attach", BTNS_BUTTON, ICON_ATTACH);
     const wchar_t* labels[] = {L"To:", L"Cc:", L"Bcc:", L"Subject:", L"Attach:"};
     for (int i = 0; i < 5; i++) {
         state->labels[i] = CreateChild(hwnd, L"STATIC", labels[i], SS_LEFT, 0, {});

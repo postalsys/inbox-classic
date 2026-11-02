@@ -49,8 +49,12 @@ void AddColumn(HWND list, int index, const wchar_t* name, int width, int format 
 
 // a flat toolbar of text buttons, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles
 HWND CreateBar(HWND hwnd, DWORD style, int id);
-// a button with a text on a bar of CreateBar; id 0 is a separator
-void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON);
+// the icons of a bar (icons.h): the big ones with the label under them (main and compose windows), or the small ones
+// of the format bar, beside nothing, with the label as the tooltip
+enum class BarIcons { Big, Small };
+void SetBarIcons(HWND bar, BarIcons icons);
+// a button on a bar of CreateBar, with its icon (icons.h) or I_IMAGENONE; id 0 is a separator
+void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON, int image = I_IMAGENONE);
 
 // a modal form with a label and an input for each field; true with the values filled in when OK was clicked.
 // `validate` gets the values and returns an error to show, or an empty string to accept them.
