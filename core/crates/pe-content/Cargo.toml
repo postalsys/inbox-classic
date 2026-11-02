@@ -10,5 +10,3 @@ regex = "1.13.1"
 serde_json = "1"
 unicode-normalization = "0.1"
 
-[dev-dependencies]
-serde_json = "1"

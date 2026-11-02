@@ -293,30 +293,6 @@ void ShowState(Compose* state, const std::wstring& flags) {
     }
 }
 
-HWND CreateBar(HWND hwnd, DWORD style, int id) {
-    HWND bar = CreateWindowExW(0, TOOLBARCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | TBSTYLE_LIST | style, 0, 0, 0, 0,
-                               hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr), nullptr);
-    SendMessageW(bar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-    SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
-    return bar;
-}
-
-// a button with a text; id 0 is a separator
-void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON) {
-    TBBUTTON button = {};
-    button.idCommand = id;
-    if (id == 0) {
-        button.fsStyle = BTNS_SEP;
-        SendMessageW(bar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&button));
-        return;
-    }
-    button.iBitmap = I_IMAGENONE;
-    button.fsState = TBSTATE_ENABLED;
-    button.fsStyle = static_cast<BYTE>(style | BTNS_AUTOSIZE | BTNS_SHOWTEXT);
-    button.iString = reinterpret_cast<INT_PTR>(text);
-    SendMessageW(bar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&button));
-}
-
 void CreateFormatBar(HWND hwnd, Compose* state) {
     state->font = CreateChild(hwnd, L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, IDC_FONT, {});
     for (const wchar_t* font : kFonts) {

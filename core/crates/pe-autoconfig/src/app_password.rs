@@ -25,10 +25,7 @@ const MICROSOFT_WARNING: &str = "Microsoft has disabled password-based sign-ins 
 const TABLE: &[Trigger] = &[
     Trigger {
         domains: &["gmail.com", "googlemail.com"],
-        exchange: Some(|ex| {
-            ex.strip_suffix("l.google.com")
-                .is_some_and(|rest| !rest.ends_with(|c: char| c.is_ascii_alphanumeric() || c == '_'))
-        }),
+        exchange: Some(|ex| crate::mx::ends_with_word(ex, "l.google.com")),
         hint: AppPassword {
             provider: "Gmail",
             instructions: "https://support.google.com/accounts/answer/185833",

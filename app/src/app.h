@@ -41,6 +41,11 @@ struct FormField {
     std::vector<std::wstring> choices;
 };
 
+// a flat toolbar of text buttons, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles
+HWND CreateBar(HWND hwnd, DWORD style, int id);
+// a button with a text on a bar of CreateBar; id 0 is a separator
+void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON);
+
 // a modal form with a label and an input for each field; true with the values filled in when OK was clicked.
 // `validate` gets the values and returns an error to show, or an empty string to accept them.
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,

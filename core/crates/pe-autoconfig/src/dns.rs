@@ -57,7 +57,11 @@ pub(crate) fn host_name(text: &str) -> Option<String> {
 /// The `data` of the answers of type `rtype` in a DoH JSON response; None when it is not one. An answer with a
 /// `Status` other than 0 (NOERROR) has no records.
 pub fn parse_doh(json: &[u8], rtype: u16) -> Option<Vec<String>> {
-    let value: serde_json::Value = serde_json::from_slice(json).ok()?;
+    answers(&serde_json::from_slice(json).ok()?, rtype)
+}
+
+/// [`parse_doh`] of a response already read as JSON
+fn answers(value: &serde_json::Value, rtype: u16) -> Option<Vec<String>> {
     let status = value.get("Status")?.as_u64()?;
     if status != 0 {
         return Some(Vec::new());
@@ -98,28 +102,25 @@ pub fn parse_srv_data(data: &str) -> Option<SrvRecord> {
     })
 }
 
+/// The records of the answers `data`, lowest priority first
+fn records<T>(data: Vec<String>, parse: fn(&str) -> Option<T>, priority: fn(&T) -> u16) -> Vec<T> {
+    let mut records: Vec<T> = data.iter().filter_map(|d| parse(d)).collect();
+    records.sort_by_key(priority);
+    records
+}
+
 /// The MX records of a DoH response, lowest priority first
 pub fn parse_doh_mx(json: &[u8]) -> Option<Vec<MxRecord>> {
-    let mut records: Vec<MxRecord> = parse_doh(json, TYPE_MX)?
-        .iter()
-        .filter_map(|d| parse_mx_data(d))
-        .collect();
-    records.sort_by_key(|r| r.priority);
-    Some(records)
+    Some(records(parse_doh(json, TYPE_MX)?, parse_mx_data, |r| r.priority))
 }
 
 /// The SRV records of a DoH response, lowest priority first
 pub fn parse_doh_srv(json: &[u8]) -> Option<Vec<SrvRecord>> {
-    let mut records: Vec<SrvRecord> = parse_doh(json, TYPE_SRV)?
-        .iter()
-        .filter_map(|d| parse_srv_data(d))
-        .collect();
-    records.sort_by_key(|r| r.priority);
-    Some(records)
+    Some(records(parse_doh(json, TYPE_SRV)?, parse_srv_data, |r| r.priority))
 }
 
-/// The DoH response for `name`, from the first provider that gives one
-async fn query<I: Io + ?Sized>(io: &I, name: &str, rtype: &str) -> Option<Vec<u8>> {
+/// The answers of type `rtype` for `name`, from the first DoH provider that gives a DoH response
+async fn query<I: Io + ?Sized>(io: &I, name: &str, rtype: &str, code: u16) -> Option<Vec<String>> {
     let name = host_name(name)?;
     for base in [DOH_PRIMARY, DOH_FALLBACK] {
         let request = HttpRequest {
@@ -128,9 +129,10 @@ async fn query<I: Io + ?Sized>(io: &I, name: &str, rtype: &str) -> Option<Vec<u8
         };
         if let Ok(Ok(response)) = tokio::time::timeout(DOH_TIMEOUT, io.http(request)).await
             && response.status == 200
-            && serde_json::from_slice::<serde_json::Value>(&response.body).is_ok_and(|v| v.get("Status").is_some())
+            && let Ok(value) = serde_json::from_slice::<serde_json::Value>(&response.body)
+            && let Some(data) = answers(&value, code)
         {
-            return Some(response.body);
+            return Some(data);
         }
     }
     None
@@ -138,14 +140,14 @@ async fn query<I: Io + ?Sized>(io: &I, name: &str, rtype: &str) -> Option<Vec<u8
 
 /// The MX records of `domain` over DoH, lowest priority first; none when neither provider answers
 pub async fn doh_mx<I: Io + ?Sized>(io: &I, domain: &str) -> Vec<MxRecord> {
-    let body = query(io, domain, "MX").await;
-    body.and_then(|b| parse_doh_mx(&b)).unwrap_or_default()
+    let data = query(io, domain, "MX", TYPE_MX).await.unwrap_or_default();
+    records(data, parse_mx_data, |r| r.priority)
 }
 
 /// The SRV records of `name` over DoH, lowest priority first; none when neither provider answers
 pub async fn doh_srv<I: Io + ?Sized>(io: &I, name: &str) -> Vec<SrvRecord> {
-    let body = query(io, name, "SRV").await;
-    body.and_then(|b| parse_doh_srv(&b)).unwrap_or_default()
+    let data = query(io, name, "SRV", TYPE_SRV).await.unwrap_or_default();
+    records(data, parse_srv_data, |r| r.priority)
 }
 
 #[cfg(test)]

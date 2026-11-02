@@ -75,14 +75,13 @@ fn folded(message: &Message, representation: Representation) -> Option<String> {
         return None;
     }
     // what the sender wrote stays in view: a fold of everything would hide the message itself
-    let kept: usize = (0..ranges.len())
-        .map(|i| {
-            let before = if i == 0 { 0 } else { ranges[i - 1].1 };
-            source[before..ranges[i].0].trim().len()
-        })
-        .sum::<usize>()
-        + source[ranges.last()?.1..].trim().len();
-    if kept == 0 {
+    let mut kept = 0;
+    let mut at = 0;
+    for &(start, end) in &ranges {
+        kept += source[at..start].trim().len();
+        at = end;
+    }
+    if kept + source[at..].trim().len() == 0 {
         return None;
     }
     let piece = |text: &str| match representation {

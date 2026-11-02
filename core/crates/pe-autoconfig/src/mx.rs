@@ -17,7 +17,7 @@ pub enum Delegate {
 }
 
 /// `suffix` at the end of `exchange`, at a word boundary (a regex `\bsuffix$`)
-fn ends_with_word(exchange: &str, suffix: &str) -> bool {
+pub(crate) fn ends_with_word(exchange: &str, suffix: &str) -> bool {
     exchange
         .strip_suffix(suffix)
         .is_some_and(|rest| !rest.ends_with(|c: char| c.is_ascii_alphanumeric() || c == '_'))

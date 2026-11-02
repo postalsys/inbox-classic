@@ -271,3 +271,28 @@ bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size) 
     stream.write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));
     return stream.good();
 }
+
+// ---- toolbars ----
+
+HWND CreateBar(HWND hwnd, DWORD style, int id) {
+    HWND bar = CreateWindowExW(0, TOOLBARCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | TBSTYLE_LIST | style, 0, 0, 0, 0,
+                               hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr), nullptr);
+    SendMessageW(bar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
+    SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
+    return bar;
+}
+
+void AddButton(HWND bar, int id, const wchar_t* text, BYTE style) {
+    TBBUTTON button = {};
+    button.idCommand = id;
+    if (id == 0) {
+        button.fsStyle = BTNS_SEP;
+        SendMessageW(bar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&button));
+        return;
+    }
+    button.iBitmap = I_IMAGENONE;
+    button.fsState = TBSTATE_ENABLED;
+    button.fsStyle = static_cast<BYTE>(style | BTNS_AUTOSIZE | BTNS_SHOWTEXT);
+    button.iString = reinterpret_cast<INT_PTR>(text);
+    SendMessageW(bar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&button));
+}

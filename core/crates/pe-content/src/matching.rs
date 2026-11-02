@@ -28,7 +28,8 @@ pub(crate) const CONTAINMENT_THRESHOLD: f64 = 0.8;
 /// Containment at or above which a match needs no corroboration from markup.
 const STRONG_CONTAINMENT: f64 = 0.95;
 
-static TOKEN_SPLIT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[^\p{L}\p{N}]+").expect("valid"));
+/// What separates words: anything but letters and digits, shared with the sender tokens of `analyze`
+pub(crate) static NON_WORD: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[^\p{L}\p{N}]+").expect("valid"));
 
 fn fold_char(c: char, out: &mut String) {
     match c {
@@ -73,10 +74,7 @@ pub(crate) fn normalise_for_match(text: &str) -> String {
 }
 
 fn tokenise(normalised: &str) -> Vec<&str> {
-    TOKEN_SPLIT
-        .split(normalised)
-        .filter(|token| !token.is_empty())
-        .collect()
+    NON_WORD.split(normalised).filter(|token| !token.is_empty()).collect()
 }
 
 fn fnv1a32(value: &str) -> u32 {

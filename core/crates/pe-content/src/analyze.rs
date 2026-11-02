@@ -34,7 +34,6 @@ const DEGRADED_CONFIDENCE: f64 = 0.5;
 static ANGLE_ADDRESS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"<[^>]*>").expect("valid"));
 static LOCAL_PART: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"([0-9A-Za-z_.+-]{1,64})@").expect("valid"));
 static SEPARATORS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[._+-]+").expect("valid"));
-static NON_WORD: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[^\p{L}\p{N}]+").expect("valid"));
 
 /// Name tokens from a From header for signature detection: display name words and the address
 /// local part, lowercased, three characters or longer.
@@ -49,7 +48,7 @@ pub fn sender_tokens_from(from: Option<&str>) -> Vec<String> {
         .map_or("", |m| m.as_str());
     let joined = format!("{display} {}", SEPARATORS.replace_all(local, " ")).to_lowercase();
     let mut tokens: Vec<String> = Vec::new();
-    for token in NON_WORD.split(&joined) {
+    for token in crate::matching::NON_WORD.split(&joined) {
         if js_len(token) >= 3 && !tokens.iter().any(|t| t == token) {
             tokens.push(token.to_string());
         }

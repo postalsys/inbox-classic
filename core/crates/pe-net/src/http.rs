@@ -111,12 +111,22 @@ impl Url {
     /// `https://host[:port]`, the port left out when it is the scheme's default
     pub fn origin(&self) -> String {
         let scheme = if self.https { "https" } else { "http" };
+        format!("{scheme}://{}", self.authority())
+    }
+
+    /// The host, with the port when it is not the scheme's: the `Host` header
+    pub fn authority(&self) -> String {
         let default = if self.https { 443 } else { 80 };
         if self.port == default {
-            format!("{scheme}://{}", self.host)
+            self.host.clone()
         } else {
-            format!("{scheme}://{}:{}", self.host, self.port)
+            format!("{}:{}", self.host, self.port)
         }
+    }
+
+    /// The whole URL again: origin and path with its query
+    pub fn href(&self) -> String {
+        format!("{}{}", self.origin(), self.path)
     }
 }
 
@@ -290,12 +300,7 @@ fn request_bytes(url: &Url, method: Method, headers: &[(&str, &str)], body: &[u8
         Method::Get => "GET",
         Method::Post => "POST",
     };
-    let default_port = if url.https { 443 } else { 80 };
-    let host = if url.port == default_port {
-        url.host.clone()
-    } else {
-        format!("{}:{}", url.host, url.port)
-    };
+    let host = url.authority();
     let mut head = format!(
         "{method_name} {} HTTP/1.0\r\nHost: {host}\r\nUser-Agent: PostalExpress\r\n",
         url.path
@@ -432,6 +437,19 @@ mod tests {
         assert_eq!(
             parse_url("https://a.example.com/x").unwrap().origin(),
             "https://a.example.com"
+        );
+        // the Host header carries the port only when it is not the scheme's; href puts the URL back together
+        let url = parse_url("https://a.example.com:8443/x?y=1").unwrap();
+        assert_eq!(
+            (url.authority(), url.href()),
+            (
+                "a.example.com:8443".to_string(),
+                "https://a.example.com:8443/x?y=1".to_string()
+            )
+        );
+        assert_eq!(
+            parse_url("https://a.example.com/x").unwrap().authority(),
+            "a.example.com"
         );
     }
 

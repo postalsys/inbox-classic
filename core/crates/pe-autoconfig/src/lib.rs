@@ -119,8 +119,8 @@ pub fn domain_of(email: &str) -> Option<String> {
     domain.contains('.').then_some(domain)
 }
 
-/// The places to ask, in order: the provider's file at two places, then the ISPDB
-pub fn lookup_urls(email: &str, domain: &str) -> Vec<(Source, String, String)> {
+/// The provider's own configuration file at `autoconfig.<domain>`, for `email`
+pub(crate) fn provider_url(email: &str, domain: &str) -> String {
     let address: String = email
         .bytes()
         .map(|b| match b {
@@ -128,21 +128,21 @@ pub fn lookup_urls(email: &str, domain: &str) -> Vec<(Source, String, String)> {
             _ => format!("%{b:02X}"),
         })
         .collect();
-    vec![
+    format!("https://autoconfig.{domain}/mail/config-v1.1.xml?emailaddress={address}")
+}
+
+/// The configuration files to ask for, in the order of the race: the provider's file at `/.well-known` and at
+/// `autoconfig.<domain>`, then Thunderbird's ISPDB
+pub(crate) fn lookup_urls(email: &str, domain: &str) -> [(Source, String); 3] {
+    [
         (
             Source::Provider,
-            format!("autoconfig.{domain}"),
-            format!("/mail/config-v1.1.xml?emailaddress={address}"),
+            format!("https://{domain}/.well-known/autoconfig/mail/config-v1.1.xml"),
         ),
-        (
-            Source::Provider,
-            domain.to_string(),
-            "/.well-known/autoconfig/mail/config-v1.1.xml".to_string(),
-        ),
+        (Source::Provider, provider_url(email, domain)),
         (
             Source::Ispdb,
-            "autoconfig.thunderbird.net".to_string(),
-            format!("/v1.1/{domain}"),
+            format!("https://autoconfig.thunderbird.net/v1.1/{domain}"),
         ),
     ]
 }
@@ -266,9 +266,21 @@ mod tests {
     #[test]
     fn urls_are_encoded() {
         let urls = lookup_urls("a+b c@example.com", "example.com");
-        assert_eq!(urls[0].1, "autoconfig.example.com");
-        assert_eq!(urls[0].2, "/mail/config-v1.1.xml?emailaddress=a%2Bb%20c@example.com");
-        assert_eq!(urls[2].2, "/v1.1/example.com");
+        assert_eq!(
+            urls[1].1,
+            "https://autoconfig.example.com/mail/config-v1.1.xml?emailaddress=a%2Bb%20c@example.com"
+        );
+        assert_eq!(
+            urls[0].1,
+            "https://example.com/.well-known/autoconfig/mail/config-v1.1.xml"
+        );
+        assert_eq!(
+            urls[2],
+            (
+                Source::Ispdb,
+                "https://autoconfig.thunderbird.net/v1.1/example.com".into()
+            )
+        );
     }
 
     fn response(body: &str) -> Result<Response, HttpError> {

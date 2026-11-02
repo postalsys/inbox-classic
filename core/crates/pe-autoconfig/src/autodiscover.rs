@@ -384,7 +384,7 @@ fn post(url: &str, body: &str, authorization: Option<&str>) -> HttpRequest {
 async fn post_anonymous<I: Io>(io: &I, origin: &str, body: &str) -> Option<(Response, String)> {
     let mut url = https_url(&format!("{origin}{POX_PATH}"))?;
     for _ in 0..=MAX_HOPS {
-        let target = format!("{}{}", url.origin(), url.path);
+        let target = url.href();
         let response = io.http(post(&target, body, None)).await.ok()?;
         if !is_redirect(response.status) {
             return Some((response, url.origin()));

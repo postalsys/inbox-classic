@@ -185,11 +185,7 @@ HACCEL BuildAccelerators() {
 }
 
 void CreateToolbar(HWND hwnd) {
-    g_toolbar = CreateWindowExW(0, TOOLBARCLASSNAMEW, nullptr,
-                                WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | TBSTYLE_LIST | CCS_NODIVIDER | CCS_TOP, 0, 0, 0, 0, hwnd,
-                                nullptr, GetModuleHandleW(nullptr), nullptr);
-    SendMessageW(g_toolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-    SendMessageW(g_toolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
+    g_toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0);
     struct Button {
         WORD id;
         const wchar_t* text;
@@ -197,13 +193,7 @@ void CreateToolbar(HWND hwnd) {
     Button buttons[] = {{IDM_NEW_MAIL, L"Create Mail"}, {IDM_REPLY, L"Reply"}, {IDM_REPLY_ALL, L"Reply All"},
                         {IDM_FORWARD, L"Forward"}, {IDM_SYNC, L"Send/Recv"}, {IDM_MARK_READ, L"Mark Read"}, {IDM_MARK_UNREAD, L"Mark Unread"}, {IDM_NEW_ACCOUNT, L"New Account"}};
     for (const Button& button : buttons) {
-        TBBUTTON item = {};
-        item.iBitmap = I_IMAGENONE;
-        item.idCommand = button.id;
-        item.fsState = TBSTATE_ENABLED;
-        item.fsStyle = BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT;
-        item.iString = reinterpret_cast<INT_PTR>(button.text);
-        SendMessageW(g_toolbar, TB_ADDBUTTONSW, 1, reinterpret_cast<LPARAM>(&item));
+        AddButton(g_toolbar, button.id, button.text);
     }
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
 }

@@ -8,7 +8,7 @@ use crate::autodiscover;
 use crate::config::parse_partial;
 use crate::io::{BoxFuture, HttpRequest, Io, first_some};
 use crate::mx::{Delegate, delegate};
-use crate::{Credentials, Discovered, Server, ServerSecurity, Source, lookup_urls};
+use crate::{Credentials, Discovered, Server, ServerSecurity, Source, lookup_urls, provider_url};
 
 /// The servers of the SRV records of `domain` (RFC 6186): `_imaps`, else `_imap`; `_submissions`, else
 /// `_submission`. IMAP and SMTP are looked up at once. A record without TLS is STARTTLS (there is no server without
@@ -58,12 +58,6 @@ async fn config_file<I: Io>(io: &I, url: String, email: &str, domain: &str) -> O
         return None;
     }
     parse_partial(std::str::from_utf8(&response.body).ok()?, email, domain)
-}
-
-/// The provider's own file, `autoconfig.<domain>`
-fn provider_url(email: &str, domain: &str) -> String {
-    let (_, host, path) = lookup_urls(email, domain).swap_remove(0);
-    format!("https://{host}{path}")
 }
 
 /// What a known exchange says, for `email`
@@ -122,20 +116,14 @@ pub(crate) async fn race<I: Io>(
     credentials: Option<&Credentials>,
     budget: Duration,
 ) -> Option<(Source, Discovered)> {
-    let url = |at: usize| {
-        let (_, host, path) = lookup_urls(email, domain).swap_remove(at);
-        format!("https://{host}{path}")
-    };
-    first_some(vec![
-        timed(Source::Srv, budget, async { Some(srv(io, domain).await) }),
-        timed(Source::Provider, budget, config_file(io, url(1), email, domain)),
-        timed(Source::Provider, budget, config_file(io, url(0), email, domain)),
-        timed(Source::Ispdb, budget, config_file(io, url(2), email, domain)),
-        timed(
-            Source::Autodiscover,
-            budget,
-            autodiscover::resolve(io, email, domain, credentials),
-        ),
-    ])
-    .await
+    let mut lookups = vec![timed(Source::Srv, budget, async { Some(srv(io, domain).await) })];
+    lookups.extend(
+        lookup_urls(email, domain).map(|(source, url)| timed(source, budget, config_file(io, url, email, domain))),
+    );
+    lookups.push(timed(
+        Source::Autodiscover,
+        budget,
+        autodiscover::resolve(io, email, domain, credentials),
+    ));
+    first_some(lookups).await
 }
