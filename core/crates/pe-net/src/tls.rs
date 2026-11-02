@@ -193,7 +193,12 @@ fn config(trust: &Trust, seen: SeenCertificate) -> Result<ClientConfig, rustls::
         .dangerous()
         .with_custom_certificate_verifier(Arc::new(Recording { inner, seen }))
         .with_no_client_auth();
-    config.resumption = resumption();
+    // a resumed session skips the verifier, so only sessions the platform trusted are resumed:
+    // a pinned certificate is checked again on every connection, and stops working once unpinned
+    config.resumption = match trust {
+        Trust::Platform => resumption(),
+        Trust::Pinned(_) => Resumption::disabled(),
+    };
     Ok(config)
 }
 
