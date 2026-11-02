@@ -147,6 +147,15 @@ impl Completion {
     pub fn untagged<'a>(&'a self, name: &'a str) -> impl Iterator<Item = &'a Response> {
         self.untagged.iter().filter(move |r| r.is(name))
     }
+
+    /// The lowest UID a command cut short by MESSAGELIMIT (RFC 9738) worked on: the messages
+    /// below it are still to do. In the tagged OK, or in an untagged NO when the OK carries
+    /// another code.
+    pub fn message_limit(&self) -> Option<u64> {
+        std::iter::once(&self.tagged)
+            .chain(self.untagged("NO"))
+            .find_map(|response| response.code_args("MESSAGELIMIT")?.get(1)?.number())
+    }
 }
 
 /// Sees each untagged response of a command first: returns it to keep it (it is then also

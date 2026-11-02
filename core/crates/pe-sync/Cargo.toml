@@ -1,0 +1,17 @@
+[package]
+name = "pe-sync"
+description = "Keeps the local store in step with an IMAP account"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+pe-imap = { path = "../pe-imap" }
+pe-net.workspace = true
+pe-store = { path = "../pe-store" }
+
+[dev-dependencies]
+pe-testkit = { path = "../pe-testkit" }
+serde_json = "1"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros"] }

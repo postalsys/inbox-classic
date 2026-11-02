@@ -33,6 +33,45 @@ pub struct BodyStructure {
     pub children: Vec<BodyStructure>,
 }
 
+/// Parts that sign or encrypt the message rather than travel with it
+const NOT_ATTACHMENTS: [&str; 4] = [
+    "application/pkcs7-signature",
+    "application/x-pkcs7-signature",
+    "application/pgp-signature",
+    "application/pgp-encrypted",
+];
+
+impl BodyStructure {
+    /// Whether the message has files attached, by the rules the message parser (pe-mime, after
+    /// postal-mime) sorts parts with: inline text is the body, an attached message that is not
+    /// encoded is shown inline with its own parts, an image of a multipart/related HTML part is
+    /// part of the HTML; anything else is an attachment
+    pub fn has_attachments(&self) -> bool {
+        self.attachments_within(false)
+    }
+
+    fn attachments_within(&self, related: bool) -> bool {
+        if let Some(subtype) = self.content_type.strip_prefix("multipart/") {
+            let related = related || subtype == "related";
+            return self.children.iter().any(|child| child.attachments_within(related));
+        }
+        let disposition = self.disposition.as_deref().map(str::to_ascii_lowercase);
+        let inline = disposition.as_deref().is_none_or(|d| d == "inline");
+        if disposition.as_deref() == Some("attachment") {
+            return true;
+        }
+        match self.content_type.as_str() {
+            "text/plain" | "text/html" => false,
+            "message/rfc822" => {
+                let encoded = matches!(self.encoding.as_deref(), Some("base64" | "quoted-printable"));
+                !inline || encoded || self.children.iter().any(|child| child.attachments_within(false))
+            }
+            kind if NOT_ATTACHMENTS.contains(&kind) => false,
+            _ => !(related && self.id.is_some()),
+        }
+    }
+}
+
 fn text(token: Option<&Token>) -> Option<String> {
     token.and_then(Token::text)
 }
@@ -233,6 +272,65 @@ fn extension_fields(part: &mut BodyStructure, rest: &[Token]) {
 mod tests {
     use super::*;
     use crate::parse;
+
+    fn part(content_type: &str, disposition: Option<&str>, children: Vec<BodyStructure>) -> BodyStructure {
+        BodyStructure {
+            content_type: content_type.into(),
+            disposition: disposition.map(str::to_string),
+            children,
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn attachments() {
+        let text = part("text/plain", None, vec![]);
+        let html = part("text/html", None, vec![]);
+        assert!(!text.has_attachments());
+        let alternative = part("multipart/alternative", None, vec![text.clone(), html.clone()]);
+        assert!(!alternative.has_attachments());
+        let signed = part(
+            "multipart/signed",
+            None,
+            vec![text.clone(), part("application/pkcs7-signature", None, vec![])],
+        );
+        assert!(!signed.has_attachments());
+        let pdf = part(
+            "multipart/mixed",
+            None,
+            vec![alternative.clone(), part("application/pdf", None, vec![])],
+        );
+        assert!(pdf.has_attachments());
+        // an image in multipart/mixed is an attachment even without a disposition
+        let image = part(
+            "multipart/mixed",
+            None,
+            vec![text.clone(), part("image/png", None, vec![])],
+        );
+        assert!(image.has_attachments());
+        let text_file = part(
+            "multipart/mixed",
+            None,
+            vec![text.clone(), part("text/plain", Some("ATTACHMENT"), vec![])],
+        );
+        assert!(text_file.has_attachments());
+
+        let mut cid_image = part("image/png", Some("inline"), vec![]);
+        cid_image.id = Some("<logo@x>".into());
+        let related = part("multipart/related", None, vec![html.clone(), cid_image.clone()]);
+        assert!(!related.has_attachments());
+        cid_image.id = None;
+        assert!(part("multipart/related", None, vec![html, cid_image]).has_attachments());
+
+        // an attached message is read inline, its own attachments count
+        let forwarded = part("message/rfc822", None, vec![text.clone()]);
+        assert!(!part("multipart/mixed", None, vec![text.clone(), forwarded]).has_attachments());
+        assert!(part("message/rfc822", None, vec![pdf]).has_attachments());
+        assert!(part("message/rfc822", Some("attachment"), vec![text.clone()]).has_attachments());
+        let mut encoded = part("message/rfc822", None, vec![text]);
+        encoded.encoding = Some("base64".into());
+        assert!(encoded.has_attachments());
+    }
 
     fn fetch_items(line: &str) -> Vec<Token> {
         let response = parse(line.as_bytes(), Vec::new()).unwrap();

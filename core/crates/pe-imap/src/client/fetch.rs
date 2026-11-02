@@ -4,7 +4,7 @@
 
 use std::collections::BTreeMap;
 
-use super::{Client, Error};
+use super::{Client, Completion, Error};
 use crate::compiler::Arg;
 use crate::message::{BodyStructure, Envelope, parse_body_structure, parse_envelope};
 use crate::sequence::Messages;
@@ -100,13 +100,35 @@ impl Client {
 
     /// Fetches like [`Client::fetch`], handing each message to `each` as it arrives instead of
     /// collecting them, for large mailboxes. A FETCH for a message that was not asked for is a
-    /// change by someone else and arrives as an event.
+    /// change by someone else and arrives as an event. A UID FETCH that the server cuts short
+    /// with MESSAGELIMIT is repeated for the rest of the set.
     pub async fn fetch_each(
         &mut self,
         messages: &Messages,
         query: &FetchQuery,
         each: &mut dyn FnMut(FetchedMessage),
     ) -> Result<(), Error> {
+        let mut next = Some(messages.clone());
+        let mut ceiling = u64::MAX;
+        while let Some(messages) = next.take() {
+            let completion = self.fetch_once(&messages, query, each).await?;
+            // each round has to go lower, so a server can not keep the client asking
+            if let (Messages::Uids(set), Some(lowest)) = (&messages, completion.message_limit())
+                && lowest < ceiling
+            {
+                ceiling = lowest;
+                next = set.below(lowest).map(Messages::Uids);
+            }
+        }
+        Ok(())
+    }
+
+    async fn fetch_once(
+        &mut self,
+        messages: &Messages,
+        query: &FetchQuery,
+        each: &mut dyn FnMut(FetchedMessage),
+    ) -> Result<Completion, Error> {
         let exists = u64::from(self.require_selected()?.exists);
         let condstore = self.has_capability("CONDSTORE");
         let mut args = vec![
@@ -132,7 +154,6 @@ impl Client {
         };
         self.run_with(&messages.command("FETCH"), args, &mut handler, None)
             .await
-            .map(|_| ())
     }
 }
 

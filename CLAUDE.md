@@ -18,7 +18,10 @@ A Cargo workspace in `core/` (edition 2024, `rustfmt.toml` sets 120 columns). Th
 
 - `pe-imap`: port of `../imapflow/src`. `pe-smtp`: port of the client parts of `../nodemailer/src` (smtp-connection, mime-node, mail-composer, mime-funcs, addressparser, qp, punycode, xoauth2). `pe-mime`: port of `../postal-mime/src`. Port these idiomatically rather than line by line: response parsing as pure functions over bytes, the connection on top of that. Use the TS test suites and fixtures of the originals as the reference for behavior.
 - `pe-html`: ammonia sanitizer and the preview document wrapper with its CSP.
-- `pe-store`: the local cache (placeholder).
+- `pe-net`: TCP and TLS (rustls with the platform verifier, or a pinned certificate) for IMAP and SMTP.
+- `pe-store`: the local cache in SQLite (rusqlite, bundled): accounts without secrets, folders, message summaries, cached sources. Schema changes are new entries in `schema.rs` `MIGRATIONS`, never edits of shipped ones.
+- `pe-sync`: keeps `pe-store` in step with an IMAP account through `pe-imap`.
+- `pe-testkit`: starts ImapKit (`core/e2e`) for the end-to-end tests and talks to its REST API.
 - `pe-ffi`: the only crate with `unsafe` code and the only one the app links. Every other crate starts with `#![forbid(unsafe_code)]`.
 
 ### The C ABI (`pe-ffi`)

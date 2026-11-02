@@ -8,10 +8,10 @@
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use pe_imap::client::{Direction, Error, FetchQuery, SearchKey, StoreAction, Timeouts};
+use pe_imap::client::{Direction, Error, FetchQuery, SearchKey, StoreAction};
 use pe_imap::{Client, Config, Credentials, ErrorKind, Event, Messages, SequenceSet, SpecialUse};
 use pe_net::{Security, TlsFailureKind, Trust};
-use pe_testkit::{ImapKit, PASSWORD, TOKEN, USER, rfc822};
+use pe_testkit::{ImapKit, PASSWORD, TOKEN, USER, password, rfc822, wait_for};
 use serde_json::{Value, json};
 use tokio::sync::mpsc::UnboundedReceiver;
 
@@ -33,20 +33,7 @@ impl Kit {
     }
 
     fn config(&self, security: Security, credentials: Credentials) -> Config {
-        let port = if security == Security::Tls {
-            self.server.imaps
-        } else {
-            self.server.imap
-        };
-        let mut config = Config::new("127.0.0.1", port, security, credentials);
-        config.trust = Trust::Pinned(vec![self.server.cert.clone()]);
-        config.timeouts = Timeouts {
-            connect: Duration::from_secs(10),
-            greeting: Duration::from_secs(5),
-            response: Duration::from_secs(10),
-            idle: Duration::from_secs(60),
-            poll: Duration::from_millis(200),
-        };
+        let mut config = self.server.imap_config(security, credentials);
         let wire = self.wire.clone();
         config.wire_log = Some(Arc::new(move |direction, line| {
             wire.lock().unwrap().push((direction, line.to_string()))
@@ -113,13 +100,6 @@ impl Drop for Kit {
     }
 }
 
-fn password() -> Credentials {
-    Credentials::Password {
-        user: USER.into(),
-        password: PASSWORD.into(),
-    }
-}
-
 fn uids(set: &str) -> Messages {
     Messages::Uids(SequenceSet::parse(set).unwrap())
 }
@@ -143,21 +123,6 @@ fn flag_list(flags: &[String]) -> Vec<&str> {
     let mut list: Vec<&str> = flags.iter().map(String::as_str).filter(|f| *f != "\\Recent").collect();
     list.sort_unstable();
     list
-}
-
-/// Waits for an event the predicate accepts, skipping others
-async fn wait_for(events: &mut UnboundedReceiver<Event>, accept: impl Fn(&Event) -> bool) -> Event {
-    let wait = async {
-        loop {
-            let event = events.recv().await.expect("event channel open");
-            if accept(&event) {
-                return event;
-            }
-        }
-    };
-    tokio::time::timeout(Duration::from_secs(10), wait)
-        .await
-        .expect("event within 10 seconds")
 }
 
 // ---- authentication and transport (imapflow test/imapkit/auth-transport-test.ts) ----
@@ -819,4 +784,34 @@ async fn a_session_with_every_extension_sends_no_bad() {
         .unwrap();
     client.logout().await.unwrap();
     assert!(kit.received("BYE"));
+}
+
+// RFC 9738: a server with MESSAGELIMIT works on the highest UIDs only, the client asks again for
+// the rest
+#[tokio::test]
+async fn message_limit_is_followed() {
+    let kit = kit!(json!({ "messageLimit": 5 }));
+    let added: Vec<u64> = (0..12)
+        .map(|i| kit.server.add_message("INBOX", &rfc822(&format!("M{i}"), "x"), &[]))
+        .collect();
+    let (mut client, _) = kit.connect().await;
+    assert!(client.has_capability("MESSAGELIMIT=5"));
+    client.select("INBOX").await.unwrap();
+    let query = FetchQuery {
+        flags: true,
+        ..Default::default()
+    };
+    let mut fetched: Vec<u64> = client
+        .fetch(&Messages::Uids(SequenceSet::all()), &query)
+        .await
+        .unwrap()
+        .iter()
+        .filter_map(|m| m.uid)
+        .collect();
+    fetched.sort_unstable();
+    assert_eq!(fetched, added);
+    assert_eq!(client.search(&SearchKey::All).await.unwrap(), added);
+    assert_eq!(client.search(&SearchKey::Unseen).await.unwrap(), added);
+    // the server said so: the commands were cut, and asked again
+    assert!(kit.received("[MESSAGELIMIT 5 "));
 }

@@ -10,8 +10,14 @@ use std::net::TcpStream;
 use std::path::PathBuf;
 use std::process::{Child, ChildStdin, Command, Stdio};
 
+use std::time::Duration;
+
 use base64::Engine;
+use pe_imap::client::Timeouts;
+use pe_imap::{Config, Credentials, Event};
+use pe_net::{Security, Trust};
 use serde_json::{Value, json};
+use tokio::sync::mpsc::UnboundedReceiver;
 
 /// A running ImapKit, stopped when dropped
 pub struct ImapKit {
@@ -148,6 +154,51 @@ impl Drop for ImapKit {
         let _ = self.child.kill();
         let _ = self.child.wait();
     }
+}
+
+impl ImapKit {
+    /// A client configuration for this server: the plain or the TLS port for `security`, its
+    /// certificate pinned, and timeouts short enough for tests
+    pub fn imap_config(&self, security: Security, credentials: Credentials) -> Config {
+        let port = if security == Security::Tls {
+            self.imaps
+        } else {
+            self.imap
+        };
+        let mut config = Config::new("127.0.0.1", port, security, credentials);
+        config.trust = Trust::Pinned(vec![self.cert.clone()]);
+        config.timeouts = Timeouts {
+            connect: Duration::from_secs(10),
+            greeting: Duration::from_secs(5),
+            response: Duration::from_secs(10),
+            idle: Duration::from_secs(60),
+            poll: Duration::from_millis(200),
+        };
+        config
+    }
+}
+
+/// The password login of the default account
+pub fn password() -> Credentials {
+    Credentials::Password {
+        user: USER.into(),
+        password: PASSWORD.into(),
+    }
+}
+
+/// Waits up to 10 seconds for an event `accept` takes, skipping others
+pub async fn wait_for(events: &mut UnboundedReceiver<Event>, mut accept: impl FnMut(&Event) -> bool) -> Event {
+    let wait = async {
+        loop {
+            let event = events.recv().await.expect("event channel open");
+            if accept(&event) {
+                return event;
+            }
+        }
+    };
+    tokio::time::timeout(Duration::from_secs(10), wait)
+        .await
+        .expect("event within 10 seconds")
 }
 
 /// The REST path of the messages of a mailbox, with `suffix` after it

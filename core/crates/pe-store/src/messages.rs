@@ -1,0 +1,413 @@
+//! The messages of a folder: what the message list shows, the flags, and the cached sources
+
+use rusqlite::{OptionalExtension, Row, params};
+
+use crate::{FolderId, Result, Store};
+
+/// A message as the message list shows it, from ENVELOPE, FLAGS, INTERNALDATE, RFC822.SIZE and
+/// BODYSTRUCTURE
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct MessageInfo {
+    pub uid: u64,
+    pub modseq: Option<u64>,
+    /// As the store keeps them: sorted, without `\Recent`
+    pub flags: Vec<String>,
+    /// When the server got the message, seconds since the Unix epoch
+    pub internal_date: Option<i64>,
+    /// The Date header, seconds since the Unix epoch
+    pub date: Option<i64>,
+    pub size: Option<u64>,
+    pub subject: String,
+    pub from_name: String,
+    pub from_address: String,
+    /// The To recipients as the list shows them, `Andris, b@example.com`
+    pub recipients: String,
+    pub message_id: Option<String>,
+    pub in_reply_to: Option<String>,
+    pub has_attachments: bool,
+}
+
+impl MessageInfo {
+    pub fn has_flag(&self, flag: &str) -> bool {
+        self.flags.iter().any(|f| f.eq_ignore_ascii_case(flag))
+    }
+
+    pub fn seen(&self) -> bool {
+        self.has_flag("\\Seen")
+    }
+
+    pub fn flagged(&self) -> bool {
+        self.has_flag("\\Flagged")
+    }
+
+    pub fn answered(&self) -> bool {
+        self.has_flag("\\Answered")
+    }
+
+    pub fn deleted(&self) -> bool {
+        self.has_flag("\\Deleted")
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Message {
+    pub id: i64,
+    pub folder_id: FolderId,
+    pub info: MessageInfo,
+    /// Whether the source is cached
+    pub cached: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SortField {
+    /// The Date header, the received date when there is none
+    #[default]
+    Date,
+    Received,
+    From,
+    Subject,
+    Size,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct Sort {
+    pub field: SortField,
+    pub ascending: bool,
+}
+
+impl Sort {
+    /// The ORDER BY, each matching an index of the schema
+    pub(crate) fn order_by(self) -> String {
+        let column = match self.field {
+            SortField::Date => "COALESCE(date, internal_date)",
+            SortField::Received => "internal_date",
+            SortField::From => "(CASE from_name WHEN '' THEN from_address ELSE from_name END) COLLATE NOCASE",
+            SortField::Subject => "subject COLLATE NOCASE",
+            SortField::Size => "size",
+        };
+        let direction = if self.ascending { "ASC" } else { "DESC" };
+        format!("{column} {direction}, uid {direction}")
+    }
+}
+
+/// Flags as the store keeps them: sorted and once each, so the same flags in another order are no
+/// change, and without `\Recent`, which differs from one connection to the next
+fn canonical_flags(flags: &[String]) -> String {
+    let mut kept: Vec<&str> = flags
+        .iter()
+        .map(String::as_str)
+        .filter(|f| !f.is_empty() && !f.eq_ignore_ascii_case("\\Recent"))
+        .collect();
+    kept.sort_unstable();
+    kept.dedup();
+    kept.join(" ")
+}
+
+pub(crate) fn split_flags(flags: &str) -> Vec<String> {
+    flags.split(' ').filter(|f| !f.is_empty()).map(str::to_string).collect()
+}
+
+fn is_seen(canonical: &str) -> bool {
+    canonical.split(' ').any(|f| f.eq_ignore_ascii_case("\\Seen"))
+}
+
+const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_date, date, size, subject, from_name, \
+     from_address, recipients, message_id, in_reply_to, has_attachments, \
+     EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id)";
+
+fn from_row(row: &Row) -> rusqlite::Result<Message> {
+    Ok(Message {
+        id: row.get(0)?,
+        folder_id: row.get(1)?,
+        cached: row.get(15)?,
+        info: MessageInfo {
+            uid: row.get(2)?,
+            modseq: row.get(3)?,
+            flags: split_flags(&row.get::<_, String>(4)?),
+            internal_date: row.get(5)?,
+            date: row.get(6)?,
+            size: row.get(7)?,
+            subject: row.get(8)?,
+            from_name: row.get(9)?,
+            from_address: row.get(10)?,
+            recipients: row.get(11)?,
+            message_id: row.get(12)?,
+            in_reply_to: row.get(13)?,
+            has_attachments: row.get(14)?,
+        },
+    })
+}
+
+impl Store {
+    /// Adds messages to a folder. For a UID it has, only the flags are updated: within one
+    /// UIDVALIDITY the rest of a message never changes.
+    pub fn add_messages(&self, folder: FolderId, messages: &[MessageInfo]) -> Result<()> {
+        let mut statement = self.db.prepare_cached(
+            "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
+             from_address, recipients, message_id, in_reply_to, has_attachments) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15) \
+             ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
+             seen = excluded.seen",
+        )?;
+        for m in messages {
+            let flags = canonical_flags(&m.flags);
+            statement.execute(params![
+                folder,
+                m.uid,
+                m.modseq,
+                flags,
+                is_seen(&flags),
+                m.internal_date,
+                m.date,
+                m.size,
+                m.subject,
+                m.from_name,
+                m.from_address,
+                m.recipients,
+                m.message_id,
+                m.in_reply_to,
+                m.has_attachments
+            ])?;
+        }
+        Ok(())
+    }
+
+    /// Sets the flags of a message; false when they were already these, or the folder has no
+    /// message with this UID
+    pub fn set_flags(&self, folder: FolderId, uid: u64, flags: &[String], modseq: Option<u64>) -> Result<bool> {
+        let mut statement = self.db.prepare_cached(
+            "UPDATE messages SET flags = ?3, seen = ?4, modseq = COALESCE(?5, modseq) \
+             WHERE folder_id = ?1 AND uid = ?2 AND flags != ?3",
+        )?;
+        let flags = canonical_flags(flags);
+        let changed = statement.execute(params![folder, uid, flags, is_seen(&flags), modseq])?;
+        Ok(changed > 0)
+    }
+
+    /// Removes messages by UID, with their cached sources; returns how many there were
+    pub fn remove_messages(&self, folder: FolderId, uids: &[u64]) -> Result<usize> {
+        let mut statement = self
+            .db
+            .prepare_cached("DELETE FROM messages WHERE folder_id = ?1 AND uid = ?2")?;
+        let mut removed = 0;
+        for uid in uids {
+            removed += statement.execute(params![folder, uid])?;
+        }
+        Ok(removed)
+    }
+
+    /// The UIDs of the cached messages of a folder, ascending
+    pub fn uids(&self, folder: FolderId) -> Result<Vec<u64>> {
+        let mut statement = self
+            .db
+            .prepare_cached("SELECT uid FROM messages WHERE folder_id = ?1 ORDER BY uid")?;
+        statement.query_map([folder], |row| row.get(0))?.collect()
+    }
+
+    /// The highest cached UID of a folder
+    pub fn max_uid(&self, folder: FolderId) -> Result<Option<u64>> {
+        self.db
+            .query_row("SELECT MAX(uid) FROM messages WHERE folder_id = ?1", [folder], |row| {
+                row.get(0)
+            })
+    }
+
+    /// A page of the message list
+    pub fn messages(&self, folder: FolderId, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT {COLUMNS} FROM messages WHERE folder_id = ?1 ORDER BY {} LIMIT ?2 OFFSET ?3",
+            sort.order_by()
+        ))?;
+        statement.query_map(params![folder, limit, offset], from_row)?.collect()
+    }
+
+    pub fn message(&self, folder: FolderId, uid: u64) -> Result<Option<Message>> {
+        self.db
+            .query_row(
+                &format!("SELECT {COLUMNS} FROM messages WHERE folder_id = ?1 AND uid = ?2"),
+                params![folder, uid],
+                from_row,
+            )
+            .optional()
+    }
+
+    /// Caches the source of a message; false when the folder has no message with this UID
+    pub fn set_source(&self, folder: FolderId, uid: u64, source: &[u8]) -> Result<bool> {
+        let changed = self.db.execute(
+            "INSERT OR REPLACE INTO bodies (message_id, source) \
+             SELECT id, ?3 FROM messages WHERE folder_id = ?1 AND uid = ?2",
+            params![folder, uid, source],
+        )?;
+        Ok(changed > 0)
+    }
+
+    /// The cached source of a message
+    pub fn source(&self, folder: FolderId, uid: u64) -> Result<Option<Vec<u8>>> {
+        self.db
+            .query_row(
+                "SELECT b.source FROM bodies b JOIN messages m ON m.id = b.message_id WHERE m.folder_id = ?1 AND m.uid = ?2",
+                params![folder, uid],
+                |row| row.get(0),
+            )
+            .optional()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{AccountSettings, FolderInfo};
+
+    fn setup() -> (Store, FolderId) {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        let inbox = FolderInfo {
+            path: "INBOX".into(),
+            name: "INBOX".into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store.set_folders(account, &[inbox]).unwrap();
+        let folder = store.folders(account).unwrap()[0].id;
+        (store, folder)
+    }
+
+    fn flags(list: &[&str]) -> Vec<String> {
+        list.iter().map(|f| f.to_string()).collect()
+    }
+
+    fn message(uid: u64, subject: &str, from: &str, date: i64, list: &[&str]) -> MessageInfo {
+        MessageInfo {
+            uid,
+            flags: flags(list),
+            internal_date: Some(date + 60),
+            date: Some(date),
+            size: Some(uid * 100),
+            subject: subject.into(),
+            from_name: from.into(),
+            from_address: format!("{}@example.com", from.to_lowercase()),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn message_list_pages_and_sorts() {
+        let (store, folder) = setup();
+        store
+            .add_messages(
+                folder,
+                &[
+                    message(1, "b", "Zed", 300, &["\\Seen"]),
+                    message(2, "a", "Ann", 100, &[]),
+                    message(3, "C", "", 200, &["\\Seen", "\\Flagged"]),
+                ],
+            )
+            .unwrap();
+        let uids = |sort: Sort| -> Vec<u64> {
+            store
+                .messages(folder, sort, 0, 10)
+                .unwrap()
+                .iter()
+                .map(|m| m.info.uid)
+                .collect()
+        };
+        assert_eq!(uids(Sort::default()), [1, 3, 2]);
+        let by = |field, ascending| Sort { field, ascending };
+        assert_eq!(uids(by(SortField::Subject, true)), [2, 1, 3]);
+        // no name: sorted by address, "@example.com"
+        assert_eq!(uids(by(SortField::From, true)), [3, 2, 1]);
+        assert_eq!(uids(by(SortField::Size, false)), [3, 2, 1]);
+        assert_eq!(uids(by(SortField::Received, true)), [2, 3, 1]);
+        let page = store.messages(folder, Sort::default(), 1, 1).unwrap();
+        assert_eq!(page.len(), 1);
+        let info = &page[0].info;
+        assert_eq!(info.uid, 3);
+        assert!(info.seen() && info.flagged() && !info.answered());
+        assert_eq!(info.flags, ["\\Flagged", "\\Seen"], "sorted");
+
+        let folder_row = store.folder(folder).unwrap();
+        assert_eq!((folder_row.total, folder_row.unread), (3, 1));
+        assert_eq!(store.uids(folder).unwrap(), [1, 2, 3]);
+        assert_eq!(store.max_uid(folder).unwrap(), Some(3));
+    }
+
+    #[test]
+    fn flags_updates_and_removal() {
+        let (store, folder) = setup();
+        assert_eq!(store.max_uid(folder).unwrap(), None);
+        store
+            .add_messages(folder, &[message(5, "x", "A", 1, &["\\Recent"])])
+            .unwrap();
+        assert!(
+            store.message(folder, 5).unwrap().unwrap().info.flags.is_empty(),
+            "no \\Recent"
+        );
+        assert!(
+            store
+                .set_flags(folder, 5, &flags(&["\\Seen", "\\Answered"]), Some(42))
+                .unwrap()
+        );
+        assert!(!store.set_flags(folder, 6, &[], None).unwrap());
+        // the same flags in another order, with \Recent: no change
+        assert!(
+            !store
+                .set_flags(folder, 5, &flags(&["\\Answered", "\\Recent", "\\Seen"]), Some(43))
+                .unwrap()
+        );
+        let m = store.message(folder, 5).unwrap().unwrap().info;
+        assert!(m.seen() && m.answered() && !m.deleted());
+        assert_eq!(m.modseq, Some(42));
+        // a flag update without MODSEQ keeps the last one
+        store.set_flags(folder, 5, &flags(&["\\Deleted"]), None).unwrap();
+        let m = store.message(folder, 5).unwrap().unwrap().info;
+        assert!(m.deleted() && !m.seen());
+        assert_eq!(m.modseq, Some(42));
+        assert_eq!(store.folder(folder).unwrap().unread, 1);
+
+        // adding again updates the flags, the rest stays
+        let mut again = message(5, "y", "A", 1, &["\\Seen"]);
+        again.modseq = Some(50);
+        store.add_messages(folder, &[again]).unwrap();
+        let m = store.message(folder, 5).unwrap().unwrap().info;
+        assert_eq!(
+            (m.subject.as_str(), m.flags.as_slice(), m.modseq),
+            ("x", &flags(&["\\Seen"])[..], Some(50))
+        );
+        assert_eq!(store.remove_messages(folder, &[5, 6]).unwrap(), 1);
+        assert!(store.message(folder, 5).unwrap().is_none());
+    }
+
+    #[test]
+    fn sources_are_cached_and_go_with_their_message() {
+        let (store, folder) = setup();
+        store.add_messages(folder, &[message(1, "x", "A", 1, &[])]).unwrap();
+        assert!(!store.set_source(folder, 2, b"nope").unwrap());
+        assert!(store.set_source(folder, 1, b"Subject: x\r\n\r\nhi").unwrap());
+        assert_eq!(
+            store.source(folder, 1).unwrap().as_deref(),
+            Some(&b"Subject: x\r\n\r\nhi"[..])
+        );
+        assert!(store.message(folder, 1).unwrap().unwrap().cached);
+        // new flags keep the source
+        store
+            .add_messages(folder, &[message(1, "x", "A", 1, &["\\Seen"])])
+            .unwrap();
+        assert!(store.message(folder, 1).unwrap().unwrap().cached);
+        store.remove_messages(folder, &[1]).unwrap();
+        assert!(store.source(folder, 1).unwrap().is_none());
+        let orphans: i64 = store
+            .db
+            .query_row("SELECT COUNT(*) FROM bodies", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(orphans, 0);
+    }
+
+    #[test]
+    fn a_new_uid_validity_drops_the_messages() {
+        let (store, folder) = setup();
+        store.add_messages(folder, &[message(1, "x", "A", 1, &[])]).unwrap();
+        store.set_source(folder, 1, b"x").unwrap();
+        store.reset_folder(folder, Some(2)).unwrap();
+        assert!(store.uids(folder).unwrap().is_empty());
+    }
+}

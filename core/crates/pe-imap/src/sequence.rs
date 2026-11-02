@@ -28,6 +28,34 @@ impl SequenceSet {
         SequenceSet("1:*".into())
     }
 
+    /// `from:to`, or `from:*` without an end. Numbers start at 1.
+    pub fn range(from: u64, to: Option<u64>) -> Self {
+        let from = from.max(1);
+        match to {
+            Some(to) => SequenceSet(format!("{from}:{}", to.max(1))),
+            None => SequenceSet(format!("{from}:*")),
+        }
+    }
+
+    /// The part of the set below `n`, None when nothing is. `*` is taken as at least `n`, as
+    /// it is for a UID set once a message with UID `n` was seen.
+    pub fn below(&self, n: u64) -> Option<Self> {
+        let top = n.checked_sub(1).filter(|top| *top > 0)?;
+        let ranges: Vec<String> = self
+            .ranges(u64::MAX)
+            .filter(|(low, _)| *low <= top)
+            .map(|(low, high)| {
+                let high = high.min(top);
+                if low == high {
+                    low.to_string()
+                } else {
+                    format!("{low}:{high}")
+                }
+            })
+            .collect();
+        (!ranges.is_empty()).then(|| SequenceSet(ranges.join(",")))
+    }
+
     /// The numbers as ranges, `[1, 2, 3, 7]` gives `1:3,7`. None for an empty list.
     pub fn from_numbers(numbers: &[u64]) -> Option<Self> {
         let mut sorted = numbers.to_vec();
@@ -139,6 +167,15 @@ mod tests {
             "1:3,7,9"
         );
         assert_eq!(SequenceSet::from_numbers(&[]), None);
+        assert_eq!(SequenceSet::range(5, None).as_str(), "5:*");
+        let set = SequenceSet::parse("1:3,7,10:*").unwrap();
+        assert_eq!(set.below(11).unwrap().as_str(), "1:3,7,10");
+        assert_eq!(set.below(8).unwrap().as_str(), "1:3,7");
+        assert_eq!(set.below(3).unwrap().as_str(), "1:2");
+        assert_eq!(set.below(1), None);
+        assert_eq!(SequenceSet::parse("5:9").unwrap().below(5), None);
+        assert_eq!(SequenceSet::range(0, Some(9)).as_str(), "1:9");
+        assert!(SequenceSet::parse(SequenceSet::range(3, Some(3)).as_str()).is_ok());
     }
 
     #[test]

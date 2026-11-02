@@ -164,16 +164,30 @@ fn read_results(responses: &[Response]) -> Result<Vec<u64>, Error> {
 }
 
 impl Client {
-    /// The UIDs of the matching messages, ascending
+    /// The UIDs of the matching messages, ascending. A search the server cuts short with
+    /// MESSAGELIMIT is repeated for the messages below the ones it searched.
     pub async fn search(&mut self, key: &SearchKey) -> Result<Vec<u64>, Error> {
         self.require_selected()?;
-        let mut args = Vec::new();
-        if key.has_non_ascii() && !self.is_enabled("UTF8=ACCEPT") {
-            args.extend([Arg::atom("CHARSET"), Arg::atom("UTF-8")]);
+        let mut found = Vec::new();
+        // the original key, then the same key below the UID the server got down to
+        let mut next = Some(key.clone());
+        let mut ceiling = u64::MAX;
+        while let Some(round) = next.take() {
+            let mut args = Vec::new();
+            if round.has_non_ascii() && !self.is_enabled("UTF8=ACCEPT") {
+                args.extend([Arg::atom("CHARSET"), Arg::atom("UTF-8")]);
+            }
+            round.compile(&mut args);
+            let completion = self.run("UID SEARCH", args).await?;
+            found.extend(read_results(&completion.untagged)?);
+            // each round has to go lower, so a server can not keep the client asking
+            if let Some(lowest) = completion.message_limit().filter(|lowest| *lowest < ceiling) {
+                ceiling = lowest;
+                next = SequenceSet::range(1, Some(lowest))
+                    .below(lowest)
+                    .map(|rest| SearchKey::And(vec![key.clone(), SearchKey::Uid(rest)]));
+            }
         }
-        key.compile(&mut args);
-        let completion = self.run("UID SEARCH", args).await?;
-        let mut found = read_results(&completion.untagged)?;
         found.sort_unstable();
         found.dedup();
         Ok(found)
