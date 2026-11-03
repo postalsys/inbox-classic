@@ -306,6 +306,35 @@ const sections = [
                 checked: ['The message is in Deleted Items on the server', 'and out of the Inbox and the list']
             },
             {
+                shot: 'organize-6-drag',
+                name: 'Drag messages onto folders',
+                what: 'A message dragged from the list onto a folder of its account moves there; with Ctrl it is copied. The folder under the mouse is highlighted, one held over opens, the tree scrolls at its edges, and Esc cancels. Its own folder, an account and a folder of another account take nothing.',
+                how: 'Drag a message from the list onto a folder in the tree.',
+                checked: [
+                    'A message dragged onto Archive is moved there, out of the Inbox and the list',
+                    'With Ctrl it is copied there and stays in the Inbox',
+                    'Dropped on its own folder, it stays'
+                ]
+            },
+            {
+                shot: 'organize-7-junk',
+                name: 'Junk / Not Junk',
+                what: "Junk moves a message to Junk E-mail with the $Junk keyword of RFC 9051 (and $NotJunk taken away), so the server's spam filter can learn from it. In Junk E-mail the button is Not Junk, which moves it back to the Inbox with $NotJunk. A folder that does not keep keywords still gets the move.",
+                how: 'Junk or Not Junk on the toolbar, Message > Mark as Junk (Ctrl+J) or Mark as Not Junk.',
+                checked: [
+                    'Junk moves the message to Junk E-mail, with $Junk, out of the Inbox',
+                    'In Junk E-mail the toolbar has Not Junk in its place',
+                    'Not Junk moves it back to the Inbox, with $NotJunk in place of $Junk'
+                ]
+            },
+            {
+                shot: 'organize-5-all-read',
+                name: 'Mark All Read',
+                what: 'Marks every message of a folder read at once: in the list right away, on the server with one command.',
+                how: "Edit > Mark All Read, Ctrl+Shift+A, or Mark All Read on the folder's right-click menu.",
+                checked: ['No message of the folder is unread in the list', 'and none on the server']
+            },
+            {
                 shot: 'organize-4-for-good',
                 name: 'Deleting for good asks first',
                 what: 'From Deleted Items, or on an account that has none, Delete removes a message for good, so it asks first. A move or delete the server does not do (offline, refused) puts the message back where it was.',

@@ -1032,6 +1032,16 @@ pub unsafe extern "C" fn pe_message_set_seen(core: *const PeCore, folder: i64, u
     unsafe { with(core, false, |core| core.set_seen(folder, uid, seen).is_ok()) }
 }
 
+/// Marks every message of a folder read: in the store now (`FolderChanged` follows), on the server in the background
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_mark_all_read(core: *const PeCore, folder: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.mark_all_read(folder).is_ok()) }
+}
+
 /// Flags a message or takes its flag away: in the store now (`FolderChanged` follows), on the server in the
 /// background
 ///
@@ -1053,6 +1063,29 @@ pub unsafe extern "C" fn pe_message_set_flagged(core: *const PeCore, folder: i64
 pub unsafe extern "C" fn pe_message_move(core: *const PeCore, folder: i64, uid: u64, to: i64) -> bool {
     // SAFETY: as the caller guarantees
     unsafe { with(core, false, |core| core.move_message(folder, uid, to).is_ok()) }
+}
+
+/// Marks a message junk (`$Junk`) and moves it to the account's Junk folder, or not junk (`$NotJunk`) and moves it to
+/// the Inbox (`FolderChanged` of both). False when the account has no such folder.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_mark_junk(core: *const PeCore, folder: i64, uid: u64, junk: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.mark_junk(folder, uid, junk).is_ok()) }
+}
+
+/// Copies a message into another folder of its account, on the server in the background (`FolderChanged` of that
+/// folder once it is there). False for a folder of another account, the folder it is in, or one that holds no
+/// messages.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_copy(core: *const PeCore, folder: i64, uid: u64, to: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.copy_message(folder, uid, to).is_ok()) }
 }
 
 /// Whether deleting a message of `folder` removes it for good (it is Deleted Items, or the account has none), so the

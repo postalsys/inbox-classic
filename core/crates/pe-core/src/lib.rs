@@ -778,33 +778,118 @@ impl Core {
     }
 
     fn set_flag(&self, folder: FolderId, uid: u64, flag: &'static str, on: bool) -> Result<()> {
+        let (account, changed) = self.change_flag(folder, uid, flag, on)?;
+        if changed {
+            self.post(Event::FolderChanged { account, folder })?;
+        }
+        Ok(())
+    }
+
+    /// A flag of a message set or cleared in the store, and on the server in the background; whether the store
+    /// changed (the caller says so with `FolderChanged`)
+    fn change_flag(&self, folder: FolderId, uid: u64, flag: &'static str, on: bool) -> Result<(AccountId, bool)> {
         let (account, changed) = {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
             (account, store.set_flag(folder, uid, flag, on)?)
         };
         if changed {
-            self.post(Event::FolderChanged { account, folder })?;
+            self.send_command(
+                account,
+                Command::SetFlag {
+                    folder,
+                    uids: vec![uid],
+                    flag,
+                    on,
+                },
+            )?;
         }
-        self.send_command(account, Command::SetFlag { folder, uid, flag, on })
+        Ok((account, changed))
+    }
+
+    /// Marks every message of a folder read: in the store now, on the server in the background
+    pub fn mark_all_read(&self, folder: FolderId) -> Result<()> {
+        let (account, uids) = {
+            let store = self.store();
+            (store.folder(folder)?.account_id, store.mark_all_seen(folder)?)
+        };
+        if uids.is_empty() {
+            return Ok(());
+        }
+        self.post(Event::FolderChanged { account, folder })?;
+        self.send_command(
+            account,
+            Command::SetFlag {
+                folder,
+                uids,
+                flag: "\\Seen",
+                on: true,
+            },
+        )
     }
 
     /// Moves a message to another folder of its account: out of the store now, on the server in the background,
     /// which then syncs the folder it went to. When the server does not move it, it comes back into the folder.
     pub fn move_message(&self, folder: FolderId, uid: u64, to: FolderId) -> Result<()> {
-        {
-            let store = self.store();
-            let target = store.folder(to)?;
-            if target.account_id != store.folder(folder)?.account_id || !target.info.selectable || to == folder {
-                return Err(Error::NotFound);
-            }
-        }
+        self.target_of(folder, to)?;
         self.remove_then(folder, uid, |removed| Command::Move {
             folder,
             uid,
             to,
             removed,
         })
+    }
+
+    /// Marks a message junk (RFC 9051 `$Junk`, `$NotJunk` taken away) and moves it to the account's Junk folder, or
+    /// not junk (`$NotJunk`) and moves it to the Inbox: in the store now, on the server in the background. Refused
+    /// when the account has no such folder.
+    pub fn mark_junk(&self, folder: FolderId, uid: u64, junk: bool) -> Result<()> {
+        let target = {
+            let store = self.store();
+            let account = store.folder(folder)?.account_id;
+            let target = if junk {
+                store.special_folder(account, "\\Junk")?
+            } else {
+                store.find_folder(account, "INBOX")?
+            };
+            store.message(folder, uid)?.ok_or(Error::NotFound)?;
+            target.ok_or(Error::NotFound)?.id
+        };
+        let (on, off) = if junk {
+            ("$Junk", "$NotJunk")
+        } else {
+            ("$NotJunk", "$Junk")
+        };
+        let (account, set) = self.change_flag(folder, uid, on, true)?;
+        let (_, cleared) = self.change_flag(folder, uid, off, false)?;
+        if target != folder {
+            // after the flags, which the server keeps on the message as it moves; the move says the folder changed
+            return self.move_message(folder, uid, target);
+        }
+        if set || cleared {
+            self.post(Event::FolderChanged { account, folder })?;
+        }
+        Ok(())
+    }
+
+    /// Copies a message into another folder of its account, on the server in the background, which then syncs the
+    /// folder it went to
+    pub fn copy_message(&self, folder: FolderId, uid: u64, to: FolderId) -> Result<()> {
+        let account = self.target_of(folder, to)?;
+        self.store().message(folder, uid)?.ok_or(Error::NotFound)?;
+        self.send_command(account, Command::Copy { folder, uid, to })
+    }
+
+    /// The account of `folder` when a message of it can go to `to`: another folder of that account, one that holds
+    /// messages
+    fn target_of(&self, folder: FolderId, to: FolderId) -> Result<AccountId> {
+        let store = self.store();
+        let target = store.folder(to)?;
+        let account = store.folder(folder)?.account_id;
+        if target.account_id != account || !target.info.selectable || to == folder {
+            return Err(Error::NotFound);
+        }
+        Ok(account)
     }
 
     /// Deletes a message as Outlook Express does: into Deleted Items (the account's `\\Trash`), or for good when it

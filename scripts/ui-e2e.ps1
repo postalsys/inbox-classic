@@ -56,16 +56,58 @@ public static IntPtr FocusOf(IntPtr window) {
 [StructLayout(LayoutKind.Explicit)] struct Input { [FieldOffset(0)] public uint type; [FieldOffset(8)] public MouseInput mouse; }
 [DllImport("user32.dll")] static extern uint SendInput(uint count, Input[] inputs, int size);
 [DllImport("user32.dll")] static extern int GetSystemMetrics(int index);
-// a click of the left mouse button at (x, y), screen pixels, as a user's
+// the mouse as a user's: moved to (x, y), screen pixels, with the left button pressed (0x0002), let go (0x0004) or
+// neither (0)
+public static void Mouse(int x, int y, uint button) {
+    var input = new Input { type = 0 };
+    input.mouse.dx = x * 65535 / (GetSystemMetrics(0) - 1);
+    input.mouse.dy = y * 65535 / (GetSystemMetrics(1) - 1);
+    input.mouse.flags = button | 0x0001 | 0x8000;
+    SendInput(1, new[] { input }, Marshal.SizeOf(typeof(Input)));
+    System.Threading.Thread.Sleep(50);
+}
+// a click of the left mouse button at (x, y)
 public static void MouseClick(int x, int y) {
-    foreach (uint flags in new uint[] { 0x0001, 0x0002, 0x0004 }) {
-        var input = new Input { type = 0 };
-        input.mouse.dx = x * 65535 / (GetSystemMetrics(0) - 1);
-        input.mouse.dy = y * 65535 / (GetSystemMetrics(1) - 1);
-        input.mouse.flags = flags | 0x0001 | 0x8000;
-        SendInput(1, new[] { input }, Marshal.SizeOf(typeof(Input)));
-        System.Threading.Thread.Sleep(50);
+    foreach (uint button in new uint[] { 0, 0x0002, 0x0004 }) { Mouse(x, y, button); }
+}
+// from (x, y) with the button pressed, a few steps at a time, to (toX, toY), where it stays pressed
+public static void MouseDragTo(int x, int y, int toX, int toY) {
+    Mouse(x, y, 0);
+    Mouse(x, y, 0x0002);
+    for (int i = 1; i <= 20; i++) { Mouse(x + (toX - x) * i / 20, y + (toY - y) * i / 20, 0); }
+    System.Threading.Thread.Sleep(300);
+}
+[DllImport("user32.dll")] public static extern void keybd_event(byte key, byte scan, uint flags, IntPtr extra);
+[DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr hwnd, ref POINT point);
+public struct POINT { public int X, Y; }
+[DllImport("kernel32.dll")] public static extern bool WriteProcessMemory(IntPtr process, IntPtr address, byte[] buffer, IntPtr size, out IntPtr written);
+// a rectangle a control of another process fills in (LVM_GETITEMRECT, TVM_GETITEMRECT) from `seed` at its start, in
+// screen pixels
+public static RECT RemoteRect(IntPtr window, uint message, IntPtr wParam, long seed) {
+    uint pid;
+    GetWindowThreadProcessId(window, out pid);
+    var rect = new RECT();
+    IntPtr process = OpenProcess(0x0038, false, pid);
+    if (process == IntPtr.Zero) { return rect; }
+    IntPtr remote = VirtualAllocEx(process, IntPtr.Zero, (IntPtr)16, 0x3000, 0x04);
+    if (remote != IntPtr.Zero) {
+        IntPtr done;
+        byte[] start = new byte[16];
+        BitConverter.GetBytes(seed).CopyTo(start, 0);
+        WriteProcessMemory(process, remote, start, (IntPtr)16, out done);
+        if (SendMessage(window, message, wParam, remote) != IntPtr.Zero) {
+            byte[] bytes = new byte[16];
+            ReadProcessMemory(process, remote, bytes, (IntPtr)16, out done);
+            var corner = new POINT { X = BitConverter.ToInt32(bytes, 0), Y = BitConverter.ToInt32(bytes, 4) };
+            var end = new POINT { X = BitConverter.ToInt32(bytes, 8), Y = BitConverter.ToInt32(bytes, 12) };
+            ClientToScreen(window, ref corner);
+            ClientToScreen(window, ref end);
+            rect = new RECT { Left = corner.X, Top = corner.Y, Right = end.X, Bottom = end.Y };
+        }
+        VirtualFreeEx(process, remote, IntPtr.Zero, 0x8000);
     }
+    CloseHandle(process);
+    return rect;
 }
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
@@ -1092,6 +1134,88 @@ public static class Dragger {
         Click $sure 6
     }
     Check ([bool](WaitFor { -not (Find 'Trash' 'Subject: One more thing') } 20)) 'and then it is gone from the server'
+    SelectFolder 0
+
+    Step 'marking all read'
+    $IDM_MARK_ALL_READ = 126
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 5) { Rows } })
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    $unreadOnServer = { @(Messages 'INBOX' | Where-Object { $_.flags -notcontains '\Seen' }).Count }
+    Check ((& $unreadOnServer) -ge 1) "the Inbox has unread messages ($(& $unreadOnServer))"
+    Command $main $IDM_MARK_ALL_READ
+    Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match ', 0 unread' } 10)) "Edit > Mark All Read: none unread in the folder ($(StatusPart $mainStatus 2))"
+    Check ([bool](WaitFor { (& $unreadOnServer) -eq 0 } 20)) 'and none on the server'
+    Shot $main 'organize-5-all-read'
+
+    Step 'dragging a message onto a folder'
+    # a message of its own, the newest, so it is the first row
+    # Drag me the newest, Copy me a minute older: the first two rows, over what the test sent this minute
+    foreach ($pair in @(@('Drag me', 3), @('Copy me', 2))) {
+        $date = [DateTime]::UtcNow.AddMinutes($pair[1]).ToString('r')
+        AddMessage "From: Dana <dana@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: $($pair[0])`r`nDate: $date`r`nMessage-ID: <$($pair[0] -replace ' ', '-')@example.com>`r`n`r`nDragged in the UI test.`r`n"
+    }
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    $inInbox = WaitFor { if ((Rows) -ge 2 -and (Find 'INBOX' 'Subject: Copy me')) { Rows } } 30
+    # the first row and Archive (the fourth folder) on the screen
+    $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+    for ($i = 0; $i -lt 3; $i++) { $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $archiveItem) }
+    function Middle($rect) { @([int](($rect.Left + $rect.Right) / 2), [int](($rect.Top + $rect.Bottom) / 2)) }
+    [void][Native.Win]::SetForegroundWindow($main)
+    function DragFirstRow([bool]$copy, [string]$shot) {
+        $row = Middle ([Native.Win]::RemoteRect($list, 0x100E, [IntPtr]0, 0))
+        $row[0] = ([Native.Win]::RemoteRect($list, 0x100E, [IntPtr]0, 0)).Left + 120
+        $folder = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $archiveItem.ToInt64()))
+        if ($copy) { [Native.Win]::keybd_event(0x11, 0, 0, [IntPtr]::Zero) }
+        [Native.Win]::MouseDragTo($row[0], $row[1], $folder[0], $folder[1])
+        if ($shot) { Shot $main $shot }
+        [Native.Win]::Mouse($folder[0], $folder[1], 0x0004)
+        if ($copy) { [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero) }
+    }
+    $first = 'Drag me'
+    DragFirstRow $false 'organize-6-drag'
+    Check ($null -ne (WaitFor { Find 'Archive' "Subject: $first" } 20)) "a message dragged onto Archive is moved there ($first)"
+    Check ([bool](WaitFor { -not (Find 'INBOX' "Subject: $first") } 10)) 'and out of the Inbox'
+    Check ([bool](WaitFor { (Rows) -eq $inInbox - 1 } 10)) 'and out of the list'
+    $second = 'Copy me'
+    DragFirstRow $true ''
+    Check ($null -ne (WaitFor { Find 'Archive' "Subject: $second" } 20)) "with Ctrl it is copied there ($second)"
+    Check ($null -ne (Find 'INBOX' "Subject: $second")) 'and stays in the Inbox'
+    # onto the folder it is in: nothing happens
+    $inboxItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+    $row = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr]0, 0)
+    $inbox = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $inboxItem.ToInt64()))
+    $before = Rows
+    [Native.Win]::MouseDragTo($row.Left + 120, [int](($row.Top + $row.Bottom) / 2), $inbox[0], $inbox[1])
+    [Native.Win]::Mouse($inbox[0], $inbox[1], 0x0004)
+    Start-Sleep -Seconds 2
+    Check ((Rows) -eq $before -and $null -ne (Find 'INBOX' "Subject: $second")) 'dropped on its own folder, it stays'
+
+    Step 'junk and not junk'
+    $IDM_JUNK = 127; $IDM_NOT_JUNK = 128; $TB_COMMANDTOINDEX = 0x0419
+    # the main toolbar: the one with Send/Recv
+    $toolbar = [Native.Win]::FindDescendants($main, 'ToolbarWindow32') | Where-Object { [int][Native.Win]::SendMessage($_, $TB_COMMANDTOINDEX, [IntPtr]$IDM_SYNC, [IntPtr]::Zero) -ge 0 } | Select-Object -First 1
+    $hasButton = { param($id) [int][Native.Win]::SendMessage($toolbar, $TB_COMMANDTOINDEX, [IntPtr]$id, [IntPtr]::Zero) -ge 0 }
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 3) { Rows } })
+    Check ((& $hasButton $IDM_JUNK) -and -not (& $hasButton $IDM_NOT_JUNK)) 'the toolbar has Junk in the Inbox'
+    # the first row: the message copied by the drag
+    SelectRow 0
+    Command $main $IDM_JUNK
+    $junked = WaitFor { Find 'Junk' 'Subject: Copy me' } 20
+    Check ($null -ne $junked) 'Junk moves the message to Junk E-mail'
+    Check ($junked -and $junked.flags -contains '$Junk') "with the `$Junk keyword ($($junked.flags -join ' '))"
+    Check ($null -eq (Find 'INBOX' 'Subject: Copy me')) 'and out of the Inbox'
+    SelectFolder 4
+    [void](WaitFor { if ((Rows) -ge 1) { Rows } } 20)
+    Check ([bool](WaitFor { (& $hasButton $IDM_NOT_JUNK) -and -not (& $hasButton $IDM_JUNK) } 5)) 'in Junk E-mail the toolbar has Not Junk in its place'
+    SelectRow 0
+    Shot $main 'organize-7-junk'
+    Command $main $IDM_NOT_JUNK
+    $back = WaitFor { Find 'INBOX' 'Subject: Copy me' } 20
+    Check ($null -ne $back) 'Not Junk moves it back to the Inbox'
+    Check ($back -and $back.flags -contains '$NotJunk' -and $back.flags -notcontains '$Junk') "with `$NotJunk in place of `$Junk ($($back.flags -join ' '))"
     SelectFolder 0
 
     # ---- folders ----

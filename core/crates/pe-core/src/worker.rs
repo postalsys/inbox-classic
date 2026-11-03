@@ -10,8 +10,8 @@ use pe_imap::{Client, Credentials, ErrorKind, Event as ImapEvent};
 use pe_net::Trust;
 use pe_store::{AccountId, FolderId, Store};
 use pe_sync::{
-    Change, apply_event, expunge_message, fetch_source, imap_config, move_message, set_flag, smtp_config, sync_folder,
-    sync_folders,
+    Change, apply_event, copy_message, expunge_message, fetch_source, imap_config, move_message, set_flag, smtp_config,
+    sync_folder, sync_folders,
 };
 use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 
@@ -26,7 +26,7 @@ pub(crate) enum Command {
     },
     SetFlag {
         folder: FolderId,
-        uid: u64,
+        uids: Vec<u64>,
         flag: &'static str,
         on: bool,
     },
@@ -36,6 +36,12 @@ pub(crate) enum Command {
         uid: u64,
         to: FolderId,
         removed: Box<pe_store::MessageInfo>,
+    },
+    /// a copy of a message into another folder of the account
+    Copy {
+        folder: FolderId,
+        uid: u64,
+        to: FolderId,
     },
     Expunge {
         folder: FolderId,
@@ -344,8 +350,8 @@ impl Worker {
                 }
                 Ok(())
             }
-            Command::SetFlag { folder, uid, flag, on } => {
-                Ok(set_flag(self.client(store).await?, store, folder, uid, flag, on).await?)
+            Command::SetFlag { folder, uids, flag, on } => {
+                Ok(set_flag(self.client(store).await?, store, folder, &uids, flag, on).await?)
             }
             Command::Move {
                 folder,
@@ -361,6 +367,11 @@ impl Worker {
                 };
                 self.restore_on_failure(store, folder, *removed, moved)?;
                 // the message shows up in the folder it went to
+                self.sync_one(store, to).await
+            }
+            Command::Copy { folder, uid, to } => {
+                copy_message(self.client(store).await?, store, folder, uid, to).await?;
+                // the copy shows up in the folder it went to
                 self.sync_one(store, to).await
             }
             Command::Expunge { folder, uid, removed } => {

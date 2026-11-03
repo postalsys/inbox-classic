@@ -210,6 +210,8 @@
             <li>
                 Unread messages are <b>bold</b> in the list, with a closed envelope; read ones have an open envelope. A message is marked read after it has been
                 shown for a second. Use <b>Mark Read</b> and <b>Mark Unread</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd> marks read) to change it yourself.
+                <b>Edit &gt; Mark All Read</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>), or <b>Mark All Read</b> on a folder's right-click menu, marks
+                every message of the folder read.
             </li>
             <li>The paper clip column shows which messages have attachments, the flag column which ones are flagged.</li>
             <li>
@@ -243,9 +245,13 @@
                 <b>Delete</b> (the toolbar, <b>Edit &gt; Delete Message</b> or the <kbd>Del</kbd> key in the list) moves the message to <b>Deleted Items</b>;
                 deleting it there removes it for good, after asking. (On a server without the UIDPLUS extension, deleting for good also removes the other
                 messages of that folder that another mail program marked as deleted.)
-                <b>Edit &gt; Move to Folder</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) moves it to another folder of the account.
-                <b>Message &gt; Flag Message</b> flags it (<b>!</b> in the list) or takes the flag away. All of this happens on the server too, so your other
-                mail programs see it.
+                <b>Edit &gt; Move to Folder</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) moves it to another folder of the account, and so does dragging
+                it from the list onto a folder in the tree; hold <kbd>Ctrl</kbd> while you let go to copy it instead. A folder you hold it over for a moment
+                opens, and the tree scrolls at its top and bottom edges; <kbd>Esc</kbd> cancels the drag. <b>Junk</b> on the toolbar (<b
+                    >Message &gt; Mark as Junk</b
+                >, <kbd>Ctrl</kbd>+<kbd>J</kbd>) moves a message to <b>Junk E-mail</b> and tells the server it is junk (the <code>$Junk</code> keyword, which
+                spam filters learn from); in Junk E-mail the button is <b>Not Junk</b>, which moves it back to the Inbox. <b>Message &gt; Flag Message</b> flags
+                it (<b>!</b> in the list) or takes the flag away. All of this happens on the server too, so your other mail programs see it.
             </li>
             <li>
                 <b>File &gt; Folder</b>, or a right click in the folder list, makes a <b>New Folder</b> in the selected folder (at the top of an account when
@@ -408,6 +414,14 @@
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td>
                 <td>Mark the message read</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>J</kbd></td>
+                <td>Mark the message as junk</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+                <td>Mark every message of the folder read</td>
             </tr>
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>

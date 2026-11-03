@@ -238,6 +238,23 @@ impl Store {
         Ok(changed)
     }
 
+    /// Marks every unread message of a folder read; their UIDs, for the server
+    pub fn mark_all_seen(&self, folder: FolderId) -> Result<Vec<u64>> {
+        let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
+        let unread: Vec<(u64, String)> = self
+            .db
+            .prepare_cached("SELECT uid, flags FROM messages WHERE folder_id = ?1 AND seen = 0 ORDER BY uid")?
+            .query_map(params![folder], |row| Ok((row.get(0)?, row.get(1)?)))?
+            .collect::<rusqlite::Result<_>>()?;
+        for (uid, flags) in &unread {
+            let mut flags = split_flags(flags);
+            flags.push("\\Seen".into());
+            self.set_flags(folder, *uid, &flags, None)?;
+        }
+        tx.commit()?;
+        Ok(unread.into_iter().map(|(uid, _)| uid).collect())
+    }
+
     /// Whether the source of a message is cached
     pub fn has_source(&self, folder: FolderId, uid: u64) -> Result<bool> {
         self.db.query_row(
@@ -464,6 +481,18 @@ mod tests {
         assert_eq!(m.flags, flags(&["\\Flagged", "\\Seen"]));
         assert!(store.set_flag(folder, 5, "\\seen", false).unwrap());
         assert_eq!(store.folder(folder).unwrap().unread, 1);
+        // all read at once: the unread ones, their other flags kept
+        store
+            .add_messages(folder, &[message(7, "z", "A", 1, &["$Junk"])])
+            .unwrap();
+        assert_eq!(store.mark_all_seen(folder).unwrap(), [5, 7]);
+        assert_eq!(store.folder(folder).unwrap().unread, 0);
+        assert_eq!(
+            store.message(folder, 7).unwrap().unwrap().info.flags,
+            flags(&["$Junk", "\\Seen"])
+        );
+        assert!(store.mark_all_seen(folder).unwrap().is_empty());
+        store.remove_messages(folder, &[7]).unwrap();
         assert_eq!(store.remove_messages(folder, &[5, 6]).unwrap(), 1);
         assert!(store.message(folder, 5).unwrap().is_none());
     }

@@ -443,15 +443,36 @@ pub async fn set_flag(
     client: &mut Client,
     store: &mut Store,
     folder: FolderId,
-    uid: u64,
+    uids: &[u64],
     flag: &str,
     on: bool,
 ) -> Result<()> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(());
+    };
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
+    if !keeps_flag(
+        client
+            .selected()
+            .map(|s| s.permanent_flags.as_slice())
+            .unwrap_or_default(),
+        flag,
+    ) {
+        // a keyword ($Junk) the folder does not keep: the server would refuse it, and nothing else depends on it
+        return Ok(());
+    }
     let action = if on { StoreAction::Add } else { StoreAction::Remove };
-    client.store(&Messages::uid(uid), action, &[flag]).await?;
+    client.store(&Messages::Uids(set), action, &[flag]).await?;
     Ok(())
+}
+
+/// Whether a folder with these PERMANENTFLAGS keeps `flag`: the system flags always, a keyword when it is listed or
+/// new ones may be made (`\*`), and anything when the server did not say (RFC 9051 7.1)
+fn keeps_flag(permanent: &[String], flag: &str) -> bool {
+    flag.starts_with('\\')
+        || permanent.is_empty()
+        || permanent.iter().any(|f| f == "\\*" || f.eq_ignore_ascii_case(flag))
 }
 
 /// Moves a message to another folder of the account on the server (MOVE, or COPY and expunge where the server has
@@ -466,6 +487,21 @@ pub async fn move_message(
     let (from, to) = (store.folder(folder)?.info.path, store.folder(to)?.info.path);
     ensure_selected(client, &from).await?;
     client.move_messages(&Messages::uid(uid), &to).await?;
+    Ok(())
+}
+
+/// Copies a message to another folder of the account on the server (UID COPY); the folder it went to is the
+/// caller's to sync
+pub async fn copy_message(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uid: u64,
+    to: FolderId,
+) -> Result<()> {
+    let (from, to) = (store.folder(folder)?.info.path, store.folder(to)?.info.path);
+    ensure_selected(client, &from).await?;
+    client.copy(&Messages::uid(uid), &to).await?;
     Ok(())
 }
 
@@ -756,13 +792,23 @@ fn futures_are_send(client: &mut Client, store: &mut Store, event: &Event) {
     send(sync_folders(&mut *client, &mut *store, 1));
     send(sync_folder(&mut *client, &mut *store, 1));
     send(fetch_source(&mut *client, &mut *store, 1, 1));
-    send(set_flag(&mut *client, &mut *store, 1, 1, "\\Seen", true));
+    send(set_flag(&mut *client, &mut *store, 1, &[1], "\\Seen", true));
     let _ = apply_event(store, 1, event);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn keeps_keywords_the_folder_takes() {
+        let flags = |list: &[&str]| list.iter().map(|f| f.to_string()).collect::<Vec<_>>();
+        assert!(keeps_flag(&flags(&["\\Seen"]), "\\Flagged"));
+        assert!(keeps_flag(&[], "$Junk"));
+        assert!(keeps_flag(&flags(&["\\Seen", "\\*"]), "$Junk"));
+        assert!(keeps_flag(&flags(&["\\Seen", "$junk"]), "$Junk"));
+        assert!(!keeps_flag(&flags(&["\\Seen", "\\Flagged"]), "$Junk"));
+    }
 
     fn folder(path: &str, special: Option<&str>) -> pe_store::FolderInfo {
         pe_store::FolderInfo {

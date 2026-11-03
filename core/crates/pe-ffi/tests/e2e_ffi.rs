@@ -288,6 +288,8 @@ fn reads_mail_through_the_c_api() {
 
     assert!(unsafe { pe_message_set_seen(core, inbox, uid, true) });
     wait(&events, |e| e.kind == PeEventKind::FolderChanged && e.folder == inbox);
+    assert!(unsafe { pe_folder_mark_all_read(core, inbox) });
+    assert!(!unsafe { pe_folder_mark_all_read(core, 999_999) });
 
     // a reply drafted in Rust, sent through the C API
     let draft = unsafe { pe_message_draft(core, inbox, uid, PeDraftKind::Reply) };

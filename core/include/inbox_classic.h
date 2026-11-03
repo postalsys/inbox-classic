@@ -674,6 +674,13 @@ bool pe_message_open(const struct PeCore *core, int64_t folder, uint64_t uid);
 // `core` must be a live handle.
 bool pe_message_set_seen(const struct PeCore *core, int64_t folder, uint64_t uid, bool seen);
 
+// Marks every message of a folder read: in the store now (`FolderChanged` follows), on the server in the background
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_folder_mark_all_read(const struct PeCore *core,
+                             int64_t folder);
+
 // Flags a message or takes its flag away: in the store now (`FolderChanged` follows), on the server in the
 // background
 //
@@ -691,6 +698,27 @@ bool pe_message_set_flagged(const struct PeCore *core,
 // # Safety
 // `core` must be a live handle.
 bool pe_message_move(const struct PeCore *core,
+                     int64_t folder,
+                     uint64_t uid,
+                     int64_t to);
+
+// Marks a message junk (`$Junk`) and moves it to the account's Junk folder, or not junk (`$NotJunk`) and moves it to
+// the Inbox (`FolderChanged` of both). False when the account has no such folder.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_mark_junk(const struct PeCore *core,
+                          int64_t folder,
+                          uint64_t uid,
+                          bool junk);
+
+// Copies a message into another folder of its account, on the server in the background (`FolderChanged` of that
+// folder once it is there). False for a folder of another account, the folder it is in, or one that holds no
+// messages.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_copy(const struct PeCore *core,
                      int64_t folder,
                      uint64_t uid,
                      int64_t to);

@@ -135,6 +135,30 @@ fn reads_mail_like_the_windows_do() {
         }
     });
     assert_eq!(s.core.messages(inbox.id, Sort::default(), 0, 50).unwrap().len(), 3);
+
+    // Mark All Read: every message of the folder, in the store at once and on the server with one STORE
+    s.core.mark_all_read(inbox.id).unwrap();
+    let unread = |s: &Setup| {
+        s.core
+            .folders(account)
+            .unwrap()
+            .iter()
+            .find(|f| f.id == inbox.id)
+            .unwrap()
+            .unread
+    };
+    assert_eq!(unread(&s), 0);
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let on_server = s.server.messages("INBOX");
+    assert_eq!(on_server.len(), 3);
+    assert!(
+        on_server
+            .iter()
+            .all(|m| m["flags"].as_array().unwrap().contains(&json!("\\Seen"))),
+        "{on_server:?}"
+    );
+    assert_eq!(unread(&s), 0, "the sync keeps them read");
 }
 
 #[test]
@@ -708,6 +732,19 @@ fn flags_moves_and_deletes_messages() {
     // not into a folder of another account, nor into the folder it is in
     assert!(s.core.move_message(inbox, flag, inbox).is_err());
 
+    // a copy: still in the Inbox, and in the other folder once the server has it
+    s.core.copy_message(inbox, flag, archive_folder).unwrap();
+    s.wait(|e| {
+        *e == Event::FolderChanged {
+            account,
+            folder: archive_folder,
+        }
+    });
+    assert_eq!(in_store(inbox), ["Delete me", "Flag me"]);
+    eventually(&|| s.server.subjects("Archive").len() == 2);
+    assert!(s.core.copy_message(inbox, flag, inbox).is_err());
+    assert!(s.core.copy_message(inbox, 999_999, archive_folder).is_err());
+
     // deleting: into Deleted Items, and from there for good (which the window asks about first)
     assert!(!s.core.deletes_for_good(inbox).unwrap());
     assert!(s.core.deletes_for_good(trash).unwrap());
@@ -726,6 +763,26 @@ fn flags_moves_and_deletes_messages() {
     s.wait(|e| *e == Event::SyncFinished { account });
     assert_eq!(in_store(inbox), ["Flag me"]);
     assert!(in_store(trash).is_empty());
+
+    // junk: $Junk on the server and into the Junk folder; not junk: $NotJunk, back in the Inbox
+    let junk = id("Junk");
+    s.core.mark_junk(inbox, flag, true).unwrap();
+    assert!(in_store(inbox).is_empty());
+    s.wait(|e| *e == Event::FolderChanged { account, folder: junk });
+    assert_eq!(in_store(junk), ["Flag me"]);
+    let junk_flags = |s: &Setup| s.server.messages("Junk").first().map(|m| m["flags"].clone());
+    eventually(&|| junk_flags(&s).is_some_and(|f| f.as_array().unwrap().contains(&json!("$Junk"))));
+    let in_junk = s.core.messages(junk, Sort::default(), 0, 10).unwrap()[0].info.uid;
+    s.core.mark_junk(junk, in_junk, false).unwrap();
+    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
+    assert_eq!(in_store(inbox), ["Flag me"]);
+    eventually(&|| {
+        s.server.messages("INBOX").first().is_some_and(|m| {
+            let flags = m["flags"].as_array().unwrap();
+            flags.contains(&json!("$NotJunk")) && !flags.contains(&json!("$Junk"))
+        })
+    });
+    assert!(s.core.mark_junk(inbox, 999_999, true).is_err());
 }
 
 #[test]

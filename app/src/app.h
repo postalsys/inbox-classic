@@ -5,6 +5,8 @@
 #include <windows.h>
 
 #include <commctrl.h>
+#include <functional>
+#include <optional>
 
 #include <cstdint>
 #include <string>
@@ -210,6 +212,9 @@ public:
     bool OnCommand(WORD id, WORD code);
     // the Find box: placed at the right of the toolbar row, focused (Ctrl+Shift+F), cleared (Esc)
     void PlaceFind(const RECT& row);
+    // the mouse while a message is dragged (WM_MOUSEMOVE, WM_LBUTTONUP, WM_CAPTURECHANGED of the window); false when
+    // there is no drag
+    bool OnDragMouse(UINT message);
     // WM_DRAWITEM of the search field's magnifier and clear button; false for other controls
     bool OnDrawItem(const DRAWITEMSTRUCT& item);
     void FocusFind();
@@ -226,6 +231,12 @@ public:
     // the accounts changed: builds the tree again
     void Reload();
     void MarkSelected(bool seen);
+    // every message of the selected folder read (Edit > Mark All Read, the folder's menu); nothing while searching
+    void MarkAllRead();
+    // the selected message junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
+    void MarkJunk(bool junk);
+    // whether the message shown, or else the folder, is in a Junk folder: the toolbar offers Not Junk there
+    bool InJunk() const;
     // the selected message into Deleted Items (for good when it is in there), the next one selected
     void DeleteSelected();
     // asks for a folder of the account and moves the selected message there
@@ -336,8 +347,33 @@ private:
     std::unordered_map<int64_t, int64_t> folderAccounts_;
     // the name of each folder in the tree, and whether it is the Inbox or a special folder
     std::unordered_map<int64_t, std::pair<std::wstring, bool>> folderNames_;
+    // the folders that hold no messages (only other folders)
+    std::unordered_set<int64_t> unselectable_;
+    // a message being dragged onto a folder of the tree: which, its drag image, where it would go
+    struct Drag {
+        int64_t folder = 0;
+        uint64_t uid = 0;
+        // its row, which the one after it takes once it moved
+        int index = -1;
+        HIMAGELIST image = nullptr;
+        HTREEITEM over = nullptr;
+        ULONGLONG overSince = 0;
+        // whether the folder held over was opened already
+        bool opened = false;
+        int64_t target = 0;
+    };
+    std::optional<Drag> drag_;
+    void BeginDrag(int index, POINT at);
+    void EndDrag(bool drop);
+    // the folder under `screen` a message of the drag can go to, 0 for none; the item under it in `over`
+    int64_t DropTarget(POINT screen, HTREEITEM& over) const;
+    void DragTo(POINT screen);
+    // the tree changed under the drag image (highlighted, scrolled, opened) without the image smearing over it
+    void ChangeTreeUnderDrag(const std::function<void()>& change);
     // the Drafts folders, whose messages open in a compose window
     std::unordered_set<int64_t> draftFolders_;
+    // the Junk folders of the accounts
+    std::unordered_set<int64_t> junkFolders_;
     // the selected draft opens once its source is fetched
     bool openWhenReady_ = false;
     int64_t firstAccount_ = 0;
@@ -416,6 +452,9 @@ enum CommandId : WORD {
     IDM_IMPORT,
     IDM_OUTBOX,
     IDM_PROPERTIES,
+    IDM_MARK_ALL_READ,
+    IDM_JUNK,
+    IDM_NOT_JUNK,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;
@@ -423,3 +462,5 @@ constexpr UINT_PTR TIMER_MARK_READ = 1;
 constexpr UINT_PTR TIMER_FIND = 3;
 // a list of several folders follows their changes once a sync of many of them is done, not after each
 constexpr UINT_PTR TIMER_RELOAD = 4;
+// while a message is dragged: the keys (Esc, Ctrl), scrolling the tree at its edges, opening a folder held over
+constexpr UINT_PTR TIMER_DRAG = 5;

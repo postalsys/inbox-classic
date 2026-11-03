@@ -75,6 +75,23 @@ void ShowFolderName() {
     SetWindowTextW(g_main, name.empty() ? kTitle : (name + L" - " + kTitle).c_str());
 }
 
+// the toolbar's Junk button, Not Junk for a message in a Junk folder
+void UpdateJunkButton() {
+    bool inJunk = g_mailbox.InJunk();
+    int from = inJunk ? IDM_JUNK : IDM_NOT_JUNK, to = inJunk ? IDM_NOT_JUNK : IDM_JUNK;
+    if (SendMessageW(g_toolbar, TB_COMMANDTOINDEX, from, 0) < 0) {
+        return;
+    }
+    TBBUTTONINFOW info = {sizeof(info)};
+    info.dwMask = TBIF_COMMAND | TBIF_TEXT | TBIF_IMAGE;
+    info.idCommand = to;
+    info.pszText = const_cast<wchar_t*>(inJunk ? L"Not Junk" : L"Junk");
+    info.iImage = inJunk ? ICON_MAIL_CHECKMARK : ICON_MAIL_PROHIBITED;
+    SendMessageW(g_toolbar, TB_SETBUTTONINFOW, from, reinterpret_cast<LPARAM>(&info));
+    // the row of buttons as wide as their labels again
+    SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
+}
+
 void ShowCounts() {
     std::wstring counts = g_mailbox.Counts();
     SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
@@ -276,11 +293,15 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_STRING, IDM_FORWARD, L"&Forward\tCtrl+F");
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(compose, MF_STRING, IDM_FLAG, L"F&lag Message");
+    AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(compose, MF_STRING, IDM_JUNK, L"Mark as &Junk\tCtrl+J");
+    AppendMenuW(compose, MF_STRING, IDM_NOT_JUNK, L"Mark as N&ot Junk");
     HMENU edit = CreatePopupMenu();
     AppendMenuW(edit, MF_STRING, IDM_FIND, L"&Find Message\tCtrl+Shift+F");
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(edit, MF_STRING, IDM_MARK_READ, L"Mark as &Read\tCtrl+Q");
     AppendMenuW(edit, MF_STRING, IDM_MARK_UNREAD, L"Mark as &Unread");
+    AppendMenuW(edit, MF_STRING, IDM_MARK_ALL_READ, L"Mark &All Read\tCtrl+Shift+A");
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(edit, MF_STRING, IDM_MOVE, L"Mo&ve to Folder...\tCtrl+Shift+V");
     AppendMenuW(edit, MF_STRING, IDM_DELETE, L"&Delete Message\tDel");
@@ -307,6 +328,8 @@ HACCEL BuildAccelerators() {
     ACCEL keys[] = {
         {FVIRTKEY, VK_F5, IDM_SYNC},
         {FVIRTKEY | FCONTROL, 'Q', IDM_MARK_READ},
+        {FVIRTKEY | FCONTROL, 'J', IDM_JUNK},
+        {FVIRTKEY | FCONTROL | FSHIFT, 'A', IDM_MARK_ALL_READ},
         {FVIRTKEY | FCONTROL, 'N', IDM_NEW_MAIL},
         {FVIRTKEY | FCONTROL, 'R', IDM_REPLY},
         {FVIRTKEY | FCONTROL | FSHIFT, 'R', IDM_REPLY_ALL},
@@ -338,6 +361,8 @@ void CreateToolbar(HWND hwnd) {
         {0, nullptr, 0},
         {IDM_PRINT, L"Print", ICON_PRINT},
         {IDM_DELETE, L"Delete", ICON_DELETE},
+        // Not Junk in place of it in a Junk folder (UpdateJunkButton)
+        {IDM_JUNK, L"Junk", ICON_MAIL_PROHIBITED},
         {0, nullptr, 0},
         {IDM_SYNC, L"Send/Recv", ICON_ARROW_SYNC, BTNS_DROPDOWN},
         {0, nullptr, 0},
@@ -577,6 +602,13 @@ void OnCommand(WORD id, WORD code) {
     case IDM_MARK_UNREAD:
         g_mailbox.MarkSelected(false);
         return;
+    case IDM_MARK_ALL_READ:
+        g_mailbox.MarkAllRead();
+        return;
+    case IDM_JUNK:
+    case IDM_NOT_JUNK:
+        g_mailbox.MarkJunk(id == IDM_JUNK);
+        return;
     case IDM_DELETE:
         g_mailbox.DeleteSelected();
         return;
@@ -668,12 +700,18 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     case WM_MOUSEMOVE:
+        if (g_mailbox.OnDragMouse(message)) {
+            return 0;
+        }
         if (g_dragging) {
             DragSplitter({static_cast<short>(LOWORD(lParam)), static_cast<short>(HIWORD(lParam))});
         }
         return 0;
     case WM_LBUTTONUP:
     case WM_CAPTURECHANGED:
+        if (g_mailbox.OnDragMouse(message)) {
+            return 0;
+        }
         if (g_dragging) {
             g_dragging = 0;
             if (message == WM_LBUTTONUP) {
@@ -695,6 +733,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         LRESULT result = 0;
         if (g_mailbox.OnNotify(header, result)) {
+            // another message or folder: Junk or Not Junk
+            if (header->code == LVN_ITEMCHANGED || header->code == TVN_SELCHANGEDW) {
+                UpdateJunkButton();
+            }
             return result;
         }
         break;
@@ -707,8 +749,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             SyncAll();
         } else {
             g_mailbox.OnTimer(wParam);
-            // a reload or a search changes the counts
-            ShowCounts();
+            // a reload or a search changes the counts; a drag does not
+            if (wParam != TIMER_DRAG) {
+                ShowCounts();
+            }
         }
         return 0;
     case WM_CORE_EVENT: {

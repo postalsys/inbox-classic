@@ -284,11 +284,11 @@ async fn message_actions(config: Value) {
     let archive = s.folder("Archive").await;
     s.sync(inbox).await;
 
-    set_flag(&mut s.client, &mut s.store, inbox, keep, "\\Flagged", true)
+    set_flag(&mut s.client, &mut s.store, inbox, &[keep], "\\Flagged", true)
         .await
         .unwrap();
     assert!(s.server.flags("INBOX", keep).contains(&"\\Flagged".to_string()));
-    set_flag(&mut s.client, &mut s.store, inbox, keep, "\\Flagged", false)
+    set_flag(&mut s.client, &mut s.store, inbox, &[keep], "\\Flagged", false)
         .await
         .unwrap();
     assert!(!s.server.flags("INBOX", keep).contains(&"\\Flagged".to_string()));
