@@ -38,6 +38,7 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("kernel32.dll")] public static extern bool CloseHandle(IntPtr handle);
 public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll")] public static extern bool EnumChildWindows(IntPtr parent, EnumProc proc, IntPtr lParam);
+[DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc proc, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int size);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int InternalGetWindowText(IntPtr hwnd, System.Text.StringBuilder text, int size);
 public struct RECT { public int Left, Top, Right, Bottom; }
@@ -622,6 +623,24 @@ try {
     function SetSmtpPort([string]$port) {
         Command $main $IDM_ACCOUNTS
         $list = WaitWindow 'InboxClassicAccounts' 'Accounts'
+        if (-not $list) {
+            # what is there instead: the app's windows, and how the main window looks
+            [Native.Win]::EnumWindows({
+                param($w, $l)
+                $owner = [uint32]0
+                [void][Native.Win]::GetWindowThreadProcessId($w, [ref]$owner)
+                if ($owner -eq $app.Id -and [Native.Win]::IsWindowVisible($w)) {
+                    $cls = New-Object System.Text.StringBuilder 64
+                    [void][Native.Win]::GetClassName($w, $cls, 64)
+                    $title = New-Object System.Text.StringBuilder 256
+                    [void][Native.Win]::InternalGetWindowText($w, $title, 256)
+                    Write-Host "   window of the app: $cls '$title'"
+                }
+                $true
+            }, [IntPtr]::Zero) | Out-Null
+            Shot $main 'accounts-missing'
+            throw 'Tools > Accounts did not open'
+        }
         Click $list 402
         $form = WaitFor {
             $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
