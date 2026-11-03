@@ -177,6 +177,8 @@ typedef struct PeAccount {
   // "Name <address>", or the address alone when the name is empty or the same: how From and the account menus
   // show the account
   const char *label;
+  // What the folder tree calls it: its name, with its address too when another account has the same name
+  const char *title;
 } PeAccount;
 
 // A folder as the folder tree shows it, in tree order

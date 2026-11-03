@@ -259,7 +259,7 @@ void Mailbox::Reload() {
             firstAccount_ = account->id;
         }
         // an account's own item carries its id negated, so selecting it tells which account it is
-        HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->name), static_cast<LPARAM>(-account->id), false, FOLDER_MAILBOX);
+        HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->title), static_cast<LPARAM>(-account->id), false, FOLDER_MAILBOX);
         FillAccount(root, account->id);
         TreeView_Expand(tree_, root, TVE_EXPAND);
     }

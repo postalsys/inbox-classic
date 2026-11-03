@@ -507,6 +507,8 @@ pub struct PeAccount {
     /// "Name <address>", or the address alone when the name is empty or the same: how From and the account menus
     /// show the account
     pub label: *const c_char,
+    /// What the folder tree calls it: its name, with its address too when another account has the same name
+    pub title: *const c_char,
 }
 
 /// "Name <address>", the address alone without a name of its own
@@ -516,6 +518,24 @@ fn account_label(name: &str, email: &str) -> String {
         email.to_string()
     } else {
         format!("{name} <{email}>")
+    }
+}
+
+/// The account named `name` among accounts with `names`: its address added when another one has the same name, the
+/// address alone without a name
+fn account_title(name: &str, email: &str, names: &[&str]) -> String {
+    let name = name.trim();
+    if name.is_empty() {
+        return email.to_string();
+    }
+    let same = names
+        .iter()
+        .filter(|other| other.trim().eq_ignore_ascii_case(name))
+        .count();
+    if same > 1 {
+        format!("{name} ({email})")
+    } else {
+        name.to_string()
     }
 }
 
@@ -534,12 +554,14 @@ pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList 
             let Ok(accounts) = core.accounts() else {
                 return null_mut();
             };
+            let names: Vec<&str> = accounts.iter().map(|a| a.settings.name.as_str()).collect();
             handed(PeAccountList(Rows::new(&accounts, |a, strings| PeAccount {
                 id: a.id,
                 name: strings.add(&a.settings.name),
                 email: strings.add(&a.settings.email),
                 imap_host: strings.add(&a.settings.imap_host),
                 label: strings.add(&account_label(&a.settings.name, &a.settings.email)),
+                title: strings.add(&account_title(&a.settings.name, &a.settings.email, &names)),
                 oauth: match &a.settings.auth {
                     pe_store::Auth::OAuth2(name) => match pe_oauth::ProviderKind::parse(name) {
                         Some(pe_oauth::ProviderKind::Google) => PeOAuthProvider::Google,
@@ -2009,7 +2031,15 @@ pub unsafe extern "C" fn pe_account_reauthorize(
 
 #[cfg(test)]
 mod tests {
-    use super::account_label;
+    use super::{account_label, account_title};
+
+    #[test]
+    fn accounts_with_the_same_name_are_told_apart_in_the_tree() {
+        let names = ["Ann", "ann ", "Work"];
+        assert_eq!(account_title("Ann", "ann@hotmail.com", &names), "Ann (ann@hotmail.com)");
+        assert_eq!(account_title("Work", "ann@work.example", &names), "Work");
+        assert_eq!(account_title(" ", "ann@example.com", &names), "ann@example.com");
+    }
 
     #[test]
     fn accounts_are_labeled_by_name_and_address() {
