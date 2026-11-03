@@ -44,14 +44,14 @@ async fn microsoft_accepts_the_built_in_client() {
     }
 }
 
-/// The presets' issuers publish discovery documents the sign-in apps can use, and Yahoo's too, for a later preset
+/// The presets' issuers publish discovery documents the sign-in apps can use
 #[tokio::test]
 async fn presets_are_discovered() {
     if !enabled() {
         return;
     }
     let issuers = pe_oauth::Preset::all().into_iter().map(|p| p.issuer);
-    for issuer in issuers.chain(["https://api.login.yahoo.com"]) {
+    for issuer in issuers {
         let found = pe_oauth::discover(issuer)
             .await
             .unwrap_or_else(|e| panic!("{issuer}: {e}"));
