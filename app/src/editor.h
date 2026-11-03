@@ -48,6 +48,8 @@ public:
     // a formatting command of the page (bold, fontName, foreColor, insertImage...); `value` is passed as a string
     void Exec(const wchar_t* command, const std::wstring& value = L"");
     void Link(const std::wstring& url);
+    // the signature block (pe_signature_block) of another account in place of the one in the text
+    void Signature(const std::wstring& block);
     // asks the page for the body; it comes to Handlers::html
     void Html();
     // the body was saved: the next change is reported as "dirty" again

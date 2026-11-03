@@ -177,6 +177,8 @@ enum class ComposeClose { Closed, Saving, Kept };
 ComposeClose CloseComposeWindows();
 // whether any compose window is open
 bool ComposeWindowsOpen();
+// the signature of an account in an editor of its own (Accounts > Signature); whether it was saved
+bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring& name);
 // the compose windows, gone without asking, before the core they use is
 void DestroyComposeWindows();
 // the save of the draft `messageId` finished, `problem` empty when it worked: the window that saved it says so;

@@ -80,6 +80,34 @@ pub fn draft_body(html: &str, images: &[InlineImage]) -> String {
     quote_sanitizer(images).clean(html).to_string()
 }
 
+/// A signature as it is kept: what was written in the signature editor, sanitized as a draft is (its pictures as
+/// `data:` URIs), without the empty lines around it
+pub fn signature_html(html: &str) -> String {
+    let clean = draft_body(html, &[]);
+    let mut text = clean.trim();
+    loop {
+        let before = text;
+        for empty in ["<div><br></div>", "<p><br></p>", "<br>"] {
+            text = text.strip_prefix(empty).unwrap_or(text).trim_start();
+            text = text.strip_suffix(empty).unwrap_or(text).trim_end();
+        }
+        if text == before {
+            return text.to_string();
+        }
+    }
+}
+
+/// What a new message, reply or forward starts with when the account has a signature: an empty line to write on,
+/// then the signature after the usual "-- " line, in a block the editor knows to swap for another account's. Empty
+/// without a signature.
+pub fn signature_block(signature: &str) -> String {
+    let signature = signature_html(signature);
+    if signature.is_empty() {
+        return String::new();
+    }
+    format!("<div><br></div><div><br></div><div class=\"pe-signature\">-- <br>{signature}</div>")
+}
+
 /// The quoted message of a reply or forward for the editor and for sending: the header block in the manner of
 /// Outlook Express, then the message, sanitized, its `cid:` pictures embedded. A reply is indented by a bar.
 pub fn quote_html(header: &[(&str, String)], html: &str, images: &[InlineImage], reply: bool) -> String {
@@ -271,6 +299,27 @@ fn tags(html: &str) -> std::collections::HashSet<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn keeps_a_signature_sanitized_without_empty_lines() {
+        assert_eq!(
+            signature_html(
+                "<div><br></div><p><b>Ann</b> <a href=\"https://ann.example\">site</a></p><br><script>x()</script>"
+            ),
+            "<p><b>Ann</b> <a href=\"https://ann.example\" rel=\"noopener noreferrer\">site</a></p>"
+        );
+        assert_eq!(signature_html("<div><br></div>  <br>"), "");
+        // pictures of its own are kept, as data: URIs, which go as attachments when sent
+        assert!(signature_html("<img src=\"data:image/png;base64,iVBORw0KGgo=\">").contains("data:image/png"));
+        let block = signature_block("<p>Ann</p>");
+        assert_eq!(
+            block,
+            "<div><br></div><div><br></div><div class=\"pe-signature\">-- <br><p>Ann</p></div>"
+        );
+        assert_eq!(signature_block(" "), "");
+        // the editor keeps the block as it is, for From to swap it
+        assert!(editor_document(None, false, &block).contains("<div class=\"pe-signature\">-- <br><p>Ann</p></div>"));
+    }
 
     #[test]
     fn the_editor_runs_only_its_own_script() {

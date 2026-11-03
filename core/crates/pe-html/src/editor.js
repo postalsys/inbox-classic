@@ -197,6 +197,22 @@
         },
         focus() {
             body.focus();
+        },
+        // From changed: the other account's signature (the core's block, sanitized in Rust) in place of this one's,
+        // or this one's taken out when the other has none
+        signature(html) {
+            const fresh = document.createElement('template');
+            fresh.innerHTML = html;
+            const next = fresh.content.querySelector('div.pe-signature');
+            const current = body.querySelector('div.pe-signature');
+            if (current && next) {
+                current.replaceWith(next);
+            } else if (current) {
+                current.remove();
+            } else if (next) {
+                // after what was written, before a quote put into the text
+                body.insertBefore(fresh.content, body.querySelector(':scope > div.quoted'));
+            }
         }
     };
 

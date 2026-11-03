@@ -165,6 +165,10 @@ CREATE TRIGGER messages_fts_remove AFTER DELETE ON messages BEGIN
 END;
 
 "#,
+    // the signature of each account, as sanitized HTML, empty for none
+    r#"
+ALTER TABLE accounts ADD COLUMN signature TEXT NOT NULL DEFAULT '';
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

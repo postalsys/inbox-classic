@@ -45,7 +45,24 @@ LRESULT CALLBACK Editor::HostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
+// a handler the window has no use for does nothing (a call of an empty one would end the app)
+template <typename... Args>
+void OrNothing(std::function<void(Args...)>& handler) {
+    if (!handler) {
+        handler = [](Args...) {};
+    }
+}
+
 HWND Editor::Create(HWND parent, int id, const std::wstring& document, Handlers handlers) {
+    OrNothing(handlers.error);
+    OrNothing(handlers.html);
+    OrNothing(handlers.state);
+    OrNothing(handlers.dirty);
+    OrNothing(handlers.send);
+    OrNothing(handlers.save);
+    OrNothing(handlers.dropped);
+    OrNothing(handlers.link);
+    OrNothing(handlers.editLink);
     static bool registered = false;
     if (!registered) {
         WNDCLASSEXW windowClass = {sizeof(windowClass)};
@@ -260,6 +277,10 @@ void Editor::Exec(const wchar_t* command, const std::wstring& value) {
 
 void Editor::Link(const std::wstring& url) {
     Script(L"pe.link(" + JsString(url) + L")");
+}
+
+void Editor::Signature(const std::wstring& block) {
+    Script(L"pe.signature(" + JsString(block) + L")");
 }
 
 void Editor::Html() {

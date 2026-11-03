@@ -148,16 +148,23 @@ fn reads_mail_like_the_windows_do() {
             .unread
     };
     assert_eq!(unread(&s), 0);
+    // on the server once the worker got to it (a SyncFinished of the sync before may still be on its way)
+    let all_seen = |s: &Setup| {
+        let on_server = s.server.messages("INBOX");
+        on_server.len() == 3
+            && on_server
+                .iter()
+                .all(|m| m["flags"].as_array().unwrap().contains(&json!("\\Seen")))
+    };
+    for _ in 0..200 {
+        if all_seen(&s) {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    assert!(all_seen(&s), "{:?}", s.server.messages("INBOX"));
     s.core.sync(account).unwrap();
     s.wait(|e| *e == Event::SyncFinished { account });
-    let on_server = s.server.messages("INBOX");
-    assert_eq!(on_server.len(), 3);
-    assert!(
-        on_server
-            .iter()
-            .all(|m| m["flags"].as_array().unwrap().contains(&json!("\\Seen"))),
-        "{on_server:?}"
-    );
     assert_eq!(unread(&s), 0, "the sync keeps them read");
 }
 

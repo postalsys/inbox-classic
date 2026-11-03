@@ -66,7 +66,18 @@ const wchar_t* kFonts[] = {L"Arial", L"Arial Black", L"Comic Sans MS", L"Courier
 // the sizes of <font size>, 1 to 7, in points
 const wchar_t* kSizes[] = {L"8", L"10", L"12", L"14", L"18", L"24", L"36"};
 
-struct Compose {
+// what a window that writes formatted text has: the editor, and the format bar over it (the compose window, the
+// signature editor)
+struct Writing {
+    Editor editor;
+    HWND formatBar = nullptr;
+    HWND font = nullptr;
+    HWND size = nullptr;
+    // the custom colors of the color dialog
+    COLORREF colors[16] = {};
+};
+
+struct Compose : Writing {
     PeCore* core;
     int64_t account;
     // the main window, told when this one is gone
@@ -93,7 +104,6 @@ struct Compose {
     // the account whose Drafts has that copy, 0 before the first save; another than `account` once From changed, and
     // the core moves the copy over with the next save or send
     int64_t draftAccount = 0;
-    Editor editor;
     // what to do with the editor's HTML once it comes: send, save in Drafts, or save and close the window
     enum class Pending { None, Send, Save, SaveAndClose } pending = Pending::None;
     std::wstring html;
@@ -103,11 +113,7 @@ struct Compose {
     // something was typed: closing asks first
     bool dirty = false;
     bool filling = true;
-    COLORREF colors[16] = {};
     HWND toolbar = nullptr;
-    HWND formatBar = nullptr;
-    HWND font = nullptr;
-    HWND size = nullptr;
     // the rows of fields: From, To, Cc, Bcc, Subject, Attach
     static constexpr int kRows = 6;
     HWND labels[kRows] = {};
@@ -164,6 +170,8 @@ void FitFiles(Compose* state) {
     SendMessageW(state->attached, LB_SETCOLUMNWIDTH, std::clamp(each, Scale(120), Scale(240)), 0);
 }
 
+int PlaceFormatBar(Writing* state, int left, int top, int right);
+
 void Layout(HWND hwnd, Compose* state) {
     RECT client;
     GetClientRect(hwnd, &client);
@@ -212,14 +220,7 @@ void Layout(HWND hwnd, Compose* state) {
             buttonLeft += buttonWidth + Scale(4);
         }
     }
-    // the format bar: font, size, then the buttons
-    int x = pad;
-    MoveWindow(state->font, x, y, Scale(150), Scale(300), TRUE);
-    x += Scale(154);
-    MoveWindow(state->size, x, y, Scale(48), Scale(300), TRUE);
-    x += Scale(54);
-    MoveWindow(state->formatBar, x, y - Scale(1), client.right - x - pad, Scale(26), TRUE);
-    y += Scale(28);
+    y = PlaceFormatBar(state, pad, y, client.right - pad);
     state->editor.Resize({pad, y, client.right - pad, std::max(y, static_cast<int>(client.bottom) - pad)});
     FitFiles(state);
 }
@@ -415,7 +416,7 @@ void Request(Compose* state, Compose::Pending action) {
     }
 }
 
-void ChooseTextColor(HWND hwnd, Compose* state) {
+void ChooseTextColor(HWND hwnd, Writing* state) {
     CHOOSECOLORW dialog = {sizeof(dialog)};
     dialog.hwndOwner = hwnd;
     dialog.rgbResult = g_lastColor;
@@ -441,7 +442,7 @@ bool ValidLink(const std::wstring& url, std::wstring& error) {
 
 // the Link button and Ctrl+K: a new link on the selection, or with the cursor in a link its address to change, or to
 // empty to take the link off
-void InsertLink(HWND hwnd, Compose* state) {
+void InsertLink(HWND hwnd, Writing* state) {
     const std::wstring& current = state->editor.CaretLink();
     bool editing = !current.empty();
     std::vector<FormField> fields = {{L"Address:", editing ? current : L"https://"}};
@@ -460,7 +461,7 @@ void InsertLink(HWND hwnd, Compose* state) {
 }
 
 // the picture file at `path` put in the text at the cursor; false when it is no picture the core takes
-bool InsertPictureFile(Compose* state, const std::wstring& path) {
+bool InsertPictureFile(Writing* state, const std::wstring& path) {
     // the core reads the file and checks that it is a picture
     core::String uri(pe_picture_uri(core::Narrow(path).c_str()));
     if (uri) {
@@ -483,7 +484,7 @@ void DropOnText(Compose* state, const std::vector<std::wstring>& paths) {
     }
 }
 
-void InsertPicture(HWND hwnd, Compose* state) {
+void InsertPicture(HWND hwnd, Writing* state) {
     wchar_t path[MAX_PATH] = L"";
     OPENFILENAMEW dialog = {sizeof(dialog)};
     dialog.hwndOwner = hwnd;
@@ -514,7 +515,7 @@ const PageCommand kPageCommands[] = {
 };
 
 // a button of the format bar
-bool Format(HWND hwnd, Compose* state, WORD id) {
+bool Format(HWND hwnd, Writing* state, WORD id) {
     for (const PageCommand& command : kPageCommands) {
         if (command.id == id) {
             state->editor.Exec(command.command);
@@ -536,13 +537,38 @@ bool Format(HWND hwnd, Compose* state, WORD id) {
 }
 
 // the pressed state of the bar's buttons, from the page's flags
-void ShowState(Compose* state, const std::wstring& flags) {
+void ShowState(Writing* state, const std::wstring& flags) {
     for (size_t i = 0; i < std::size(kStateButtons) && i < flags.size(); i++) {
         SendMessageW(state->formatBar, TB_CHECKBUTTON, kStateButtons[i], MAKELONG(flags[i] == L'1', 0));
     }
 }
 
-void CreateFormatBar(HWND hwnd, Compose* state) {
+// a font or size chosen on the format bar (WM_COMMAND); false for other commands
+bool PickFont(Writing* state, WPARAM wParam, LPARAM lParam) {
+    if (HIWORD(wParam) != CBN_SELCHANGE || (LOWORD(wParam) != IDC_FONT && LOWORD(wParam) != IDC_FONT_SIZE)) {
+        return false;
+    }
+    LRESULT chosen = SendMessageW(reinterpret_cast<HWND>(lParam), CB_GETCURSEL, 0, 0);
+    if (LOWORD(wParam) == IDC_FONT && chosen >= 0 && chosen < static_cast<LRESULT>(std::size(kFonts))) {
+        state->editor.Exec(L"fontName", kFonts[chosen]);
+    } else if (LOWORD(wParam) == IDC_FONT_SIZE && chosen >= 0 && chosen < static_cast<LRESULT>(std::size(kSizes))) {
+        state->editor.Exec(L"fontSize", std::to_wstring(chosen + 1));
+    }
+    return true;
+}
+
+// the format bar from `left` to `right` at `top`: font, size, then the buttons; where the editor under it starts
+int PlaceFormatBar(Writing* state, int left, int top, int right) {
+    int x = left;
+    MoveWindow(state->font, x, top, Scale(150), Scale(300), TRUE);
+    x += Scale(154);
+    MoveWindow(state->size, x, top, Scale(48), Scale(300), TRUE);
+    x += Scale(54);
+    MoveWindow(state->formatBar, x, top - Scale(1), right - x, Scale(26), TRUE);
+    return top + Scale(28);
+}
+
+void CreateFormatBar(HWND hwnd, Writing* state) {
     state->font = CreateChild(hwnd, L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, IDC_FONT, {});
     for (const wchar_t* font : kFonts) {
         SendMessageW(state->font, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(font));
@@ -633,13 +659,20 @@ void ChooseFrom(Compose* state) {
     LRESULT chosen = SendMessageW(state->from, CB_GETCURSEL, 0, 0);
     if (chosen >= 0 && static_cast<size_t>(chosen) < state->fromAccounts.size() && state->fromAccounts[chosen] != state->account) {
         state->account = state->fromAccounts[chosen];
+        // its signature in place of the other's
+        core::String signature(pe_signature_block(state->core, state->account));
+        state->editor.Signature(signature ? Text(signature.get()) : L"");
         Changed(state);
     }
 }
 
 // the editor with the quote of the draft; its messages come back to the window
 void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
-    core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded, draft ? draft->body : nullptr));
+    // a saved draft opened again goes on with what was written; anything new starts with the account's signature
+    bool written = draft && draft->body && *draft->body;
+    core::String signature(written ? nullptr : pe_signature_block(state->core, state->account));
+    core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded,
+                                         written ? draft->body : signature ? signature.get() : nullptr));
     Editor::Handlers handlers;
     handlers.error = [hwnd](const std::wstring& error) { MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
     handlers.html = [hwnd, state](const std::wstring& html, EditorQuote quote, const std::wstring& edited) {
@@ -711,14 +744,7 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             ChooseFrom(state);
             return 0;
         }
-        if (HIWORD(wParam) == CBN_SELCHANGE && (LOWORD(wParam) == IDC_FONT || LOWORD(wParam) == IDC_FONT_SIZE)) {
-            HWND list = reinterpret_cast<HWND>(lParam);
-            LRESULT chosen = SendMessageW(list, CB_GETCURSEL, 0, 0);
-            if (LOWORD(wParam) == IDC_FONT && chosen >= 0 && chosen < static_cast<LRESULT>(std::size(kFonts))) {
-                state->editor.Exec(L"fontName", kFonts[chosen]);
-            } else if (chosen >= 0 && chosen < static_cast<LRESULT>(std::size(kSizes))) {
-                state->editor.Exec(L"fontSize", std::to_wstring(chosen + 1));
-            }
+        if (PickFont(state, wParam, lParam)) {
             return 0;
         }
         if (HIWORD(wParam) == EN_CHANGE && !state->filling) {
@@ -793,7 +819,133 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
+// ---- the signature editor ----
+
+const wchar_t* kSignatureClass = L"InboxClassicSignature";
+
+struct Signature : Writing {
+    PeCore* core = nullptr;
+    int64_t account = 0;
+    HWND hint = nullptr;
+    HWND ok = nullptr;
+    HWND cancel = nullptr;
+    bool done = false;
+    bool saved = false;
+    // OK pressed: saved once the page gave its HTML
+    bool saving = false;
+};
+
+void LayoutSignature(HWND hwnd, Signature* state) {
+    RECT client;
+    GetClientRect(hwnd, &client);
+    int pad = Scale(10), buttonWidth = Scale(88), buttonHeight = Scale(25);
+    int top = PlaceFormatBar(state, pad, pad, client.right - pad);
+    int buttons = client.bottom - pad - buttonHeight;
+    state->editor.Resize({pad, top, client.right - pad, std::max(top, buttons - pad)});
+    MoveWindow(state->cancel, client.right - pad - buttonWidth, buttons, buttonWidth, buttonHeight, TRUE);
+    MoveWindow(state->ok, client.right - pad - 2 * buttonWidth - Scale(6), buttons, buttonWidth, buttonHeight, TRUE);
+    MoveWindow(state->hint, pad, buttons, client.right - 3 * pad - 2 * buttonWidth, buttonHeight, TRUE);
+}
+
+LRESULT CALLBACK SignatureProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* state = reinterpret_cast<Signature*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    switch (message) {
+    case WM_SIZE:
+        if (state) {
+            LayoutSignature(hwnd, state);
+        }
+        return 0;
+    case WM_COMMAND:
+        if (!state) {
+            break;
+        }
+        if (LOWORD(wParam) == IDOK) {
+            // the page's HTML first; it is saved when it comes
+            if (!state->saving) {
+                state->saving = true;
+                state->editor.Html();
+            }
+            return 0;
+        }
+        if (LOWORD(wParam) == IDCANCEL) {
+            DestroyWindow(hwnd);
+            return 0;
+        }
+        if (PickFont(state, wParam, lParam) || Format(hwnd, state, LOWORD(wParam))) {
+            return 0;
+        }
+        break;
+    case WM_SEND_HTML:
+        DestroyWindow(hwnd);
+        return 0;
+    case WM_CLOSE:
+        DestroyWindow(hwnd);
+        return 0;
+    case WM_DESTROY:
+        if (state) {
+            state->editor.Close();
+            state->done = true;
+        }
+        break;
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
 }  // namespace
+
+bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring& name) {
+    static bool registered = false;
+    if (!registered) {
+        WNDCLASSEXW windowClass = {sizeof(windowClass)};
+        windowClass.lpfnWndProc = SignatureProc;
+        windowClass.hInstance = GetModuleHandleW(nullptr);
+        windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+        windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
+        windowClass.lpszClassName = kSignatureClass;
+        RegisterClassExW(&windowClass);
+        registered = true;
+    }
+    core::String current(pe_account_signature(core, account));
+    if (!current) {
+        return false;
+    }
+    HWND dialog = CreateModalWindow(owner, kSignatureClass, (L"Signature - " + name).c_str(), Scale(620), Scale(330));
+    Signature state;
+    state.core = core;
+    state.account = account;
+    CreateFormatBar(dialog, &state);
+    state.hint = CreateChild(dialog, L"STATIC", L"Added to new messages, replies and forwards from this account.",
+                             SS_LEFT | SS_CENTERIMAGE | SS_ENDELLIPSIS, 0, {});
+    state.ok = CreateChild(dialog, L"BUTTON", L"OK", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
+    state.cancel = CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL, {});
+    core::String page(pe_editor_document(nullptr, false, current.get()));
+    Editor::Handlers handlers;
+    handlers.error = [dialog](const std::wstring& error) { MessageBoxW(dialog, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
+    handlers.html = [dialog, &state](const std::wstring& html, EditorQuote, const std::wstring&) {
+        state.saved = pe_account_set_signature(state.core, state.account, core::Narrow(html).c_str());
+        if (!state.saved) {
+            MessageBoxW(dialog, L"The signature could not be saved.", L"Signature", MB_OK | MB_ICONERROR);
+            state.saving = false;
+            return;
+        }
+        PostMessageW(dialog, WM_SEND_HTML, 0, 0);
+    };
+    handlers.state = [&state](const std::wstring& flags) { ShowState(&state, flags); };
+    handlers.save = [dialog] { PostMessageW(dialog, WM_COMMAND, IDOK, 0); };
+    handlers.dropped = [&state](const std::vector<std::wstring>& paths) {
+        // pictures go in where they were dropped; a signature has no attachments
+        for (const std::wstring& path : paths) {
+            InsertPictureFile(&state, path);
+        }
+    };
+    handlers.editLink = [dialog, &state] { InsertLink(dialog, &state); };
+    state.editor.Create(dialog, IDC_BODY, page ? Text(page.get()) : L"", std::move(handlers));
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
+    LayoutSignature(dialog, &state);
+    state.editor.Focus();
+    RunModal(dialog, nullptr, state.done);
+    return state.saved;
+}
 
 bool ComposeKey(const MSG& msg) {
     if (msg.message != WM_KEYDOWN || msg.wParam != 'S' || !(GetKeyState(VK_CONTROL) & 0x8000)) {
@@ -829,7 +981,7 @@ void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
         return;
     }
     g_composeWindows.push_back(hwnd);
-    auto* state = new Compose{core, account, main};
+    auto* state = new Compose{{}, core, account, main};
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
     CreateFields(hwnd, state);
     FillFrom(state);

@@ -512,6 +512,20 @@ const sections = [
                 what: 'A mistyped address or an attachment that is gone is pointed out, and the message stays open to fix.',
                 how: 'Happens on Send.',
                 checked: ['"dave at example.com" is refused with the reason', 'The compose window stays open']
+            },
+            {
+                shot: 'signature-1-editor',
+                name: 'Signatures',
+                what: 'Each account has a signature of its own, written with the formatting of a message and kept sanitized. New messages, replies and forwards start with it, after an empty line and "-- ", above the quote; another account in From swaps it for its own.',
+                how: 'File > Accounts, select the account, Signature.',
+                checked: ['Signature opens the editor of the account, which takes typing', 'OK saves it']
+            },
+            {
+                shot: 'signature-2-new',
+                name: 'A new message starts with the signature',
+                what: 'What is written goes above the signature, and a reply has it above the quoted message.',
+                how: 'Create Mail, Reply, Reply All or Forward.',
+                checked: ['The message went with the signature, after what was written and the "-- " line', 'A reply has the signature above the quote']
             }
         ]
     },

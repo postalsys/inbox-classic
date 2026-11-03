@@ -1,7 +1,7 @@
 //! Mail accounts: who the user is and where their servers are. Passwords and tokens are not
 //! here, they live in the Windows Credential Manager.
 
-use rusqlite::Row;
+use rusqlite::{Row, params};
 
 use crate::{Result, Store};
 
@@ -175,6 +175,22 @@ impl Store {
         Ok(())
     }
 
+    /// The signature of an account, as the core sanitized it; empty for none
+    pub fn signature(&self, id: AccountId) -> Result<String> {
+        self.db
+            .query_row("SELECT signature FROM accounts WHERE id = ?1", [id], |row| row.get(0))
+    }
+
+    pub fn set_signature(&self, id: AccountId, html: &str) -> Result<()> {
+        let changed = self
+            .db
+            .execute("UPDATE accounts SET signature = ?2 WHERE id = ?1", params![id, html])?;
+        if changed == 0 {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
+        Ok(())
+    }
+
     pub fn remove_account(&self, id: AccountId) -> Result<()> {
         self.db.execute("DELETE FROM accounts WHERE id = ?1", [id])?;
         Ok(())
@@ -209,8 +225,21 @@ mod tests {
         settings.smtp_security = Security::Plain;
         settings.auth = Auth::OAuth2("google".into());
         store.update_account(id, &settings).unwrap();
-        assert_eq!(store.accounts().unwrap(), vec![Account { id, settings }]);
+        assert_eq!(
+            store.accounts().unwrap(),
+            vec![Account {
+                id,
+                settings: settings.clone()
+            }]
+        );
         assert!(store.update_account(id + 1, &AccountSettings::example("x@y")).is_err());
+
+        // a signature of its own, none to begin with, kept when the settings change
+        assert_eq!(store.signature(id).unwrap(), "");
+        store.set_signature(id, "<p>Ann</p>").unwrap();
+        store.update_account(id, &settings).unwrap();
+        assert_eq!(store.signature(id).unwrap(), "<p>Ann</p>");
+        assert!(store.set_signature(id + 1, "x").is_err());
 
         store.remove_account(id).unwrap();
         assert!(store.account(id).is_err());

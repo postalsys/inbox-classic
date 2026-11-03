@@ -840,7 +840,11 @@ public static class Dragger {
     $bitmap.Save((Join-Path $Out 'write-16-link-menu.png'), [System.Drawing.Imaging.ImageFormat]::Png)
     Key $input $VK_ESCAPE
     Start-Sleep -Milliseconds 500
-    # emptied, the address takes the link off and leaves its text
+    # emptied, the address takes the link off and leaves its text; the mouse off the text, so the status bar says
+    # nothing of a link under it
+    $composeRect = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($compose, [ref]$composeRect)
+    [Native.Win]::Mouse($composeRect.Left + 40, $composeRect.Bottom - 8, 0)
     Command $compose $IDF_LINK
     $dialog = WaitWindow 'InboxClassicForm' 'Edit Hyperlink' 10
     Check ($dialog -and (WaitFor { (GetText $dialog 100) -eq 'https://example.com/second' } 5)) 'the dialog shows the changed address'
@@ -1296,6 +1300,71 @@ public static class Dragger {
 
     # ---- a provider found by its MX, one that wants an app password ----
 
+    Step 'a signature'
+    $IDC_ACCOUNT_SIGNATURE = 406
+    Command $main $IDM_ACCOUNTS
+    $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
+    Check ($null -ne $accounts) 'File > Accounts opens the accounts'
+    if ($accounts) {
+        # the first account is selected when the list opens
+        Click $accounts $IDC_ACCOUNT_SIGNATURE
+        $signature = WaitWindow 'InboxClassicSignature' $null 20
+        Check ($null -ne $signature) 'Signature opens the signature editor of the account'
+        if ($signature) {
+            Check ((WindowText $signature) -match '^Signature - ') "titled with the account ($(WindowText $signature))"
+            Check (TypeInEditor $signature 'Ann, signed by the UI test') 'the signature editor takes typing'
+            Shot $signature 'signature-1-editor'
+            Click $signature 1
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($signature) } 10)) 'OK saves it and closes the editor'
+        }
+        Click $accounts 404
+        [void](WaitFor { -not [Native.Win]::IsWindow($accounts) } 10)
+    }
+    # a new message starts with it, under the line to write on
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    if ($compose) {
+        SetText $compose $IDC_TO 'Fay <fay@example.com>'
+        SetText $compose $IDC_SUBJECT 'Signed in the UI test'
+        Check (TypeInEditor $compose 'Hello Fay.') 'a new message takes typing above the signature'
+        Shot $compose 'signature-2-new'
+        Command $compose $IDC_SEND
+    }
+    $signed = WaitFor { Find 'INBOX' 'Subject: Signed in the UI test' } 30
+    $raw = if ($signed) { RawText $signed } else { '' }
+    Check ($raw -match 'Ann, signed by the UI test') 'the message went with the signature'
+    Check ($raw.IndexOf('Hello Fay') -ge 0 -and $raw.IndexOf('Hello Fay') -lt $raw.IndexOf('-- ') -and $raw.IndexOf('-- ') -lt $raw.IndexOf('Ann, signed by the UI test')) 'after what was written and the "-- " line'
+    # a reply has it above the quote
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 1) { Rows } } 20)
+    [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: Signed in the UI test') } 10)
+    # found with the search, as other messages of the test are newer
+    $findBox = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 205), 204)
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Signed in the UI test"')
+    [void](WaitFor { (Rows) -eq 1 } 20)
+    SelectRow 0
+    Command $main $IDM_REPLY
+    $compose = WaitCompose
+    if ($compose) {
+        Check (TypeInEditor $compose 'Thanks.') 'a reply takes typing'
+        Command $compose $IDC_SEND
+    }
+    $reply = WaitFor { Find 'INBOX' 'Subject: Re: Signed in the UI test' } 30
+    $raw = if ($reply) { RawText $reply } else { '' }
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
+    if ($compose -and [Native.Win]::IsWindow($compose)) {
+        Shot $compose 'signature-3-reply-left'
+        CloseCompose $compose
+        $left = WaitWindow '#32770' $null 5
+        if ($left) { Click $left 7 }
+    }
+    # in the text part, with its lines as they are (the HTML part may wrap them)
+    $plain = ($raw -replace "=`r`n", '')
+    $at = $plain.IndexOf('Ann, signed by the UI test'); $quoteAt = $plain.IndexOf('Original Message')
+    Check ($at -ge 0 -and $quoteAt -ge 0 -and $at -lt $quoteAt) "a reply has the signature above the quote ($at, $quoteAt)"
+    if (-not ($at -ge 0 -and $at -lt $quoteAt)) { Set-Content (Join-Path $out 'signature-reply.eml') $raw }
+
     Step 'a Gmail address'
     Command $main $IDM_NEW_ACCOUNT
     $first = StartPage $true
@@ -1527,6 +1596,7 @@ public static class Dragger {
         $appList = [Native.Win]::GetDlgItem($apps, 700)
         # removing it is refused while the account uses it
         KeyToRow $appList 2
+        [void](WaitFor { [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($apps, 703)) } 5)
         Click $apps 703
         $sure = WaitWindow '#32770' 'Remove Sign-in App' 10
         if ($sure) { Click $sure 6 }

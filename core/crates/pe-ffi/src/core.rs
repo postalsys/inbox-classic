@@ -404,6 +404,49 @@ pub unsafe extern "C" fn pe_account_add(
     unsafe { with(core, 0, |core| core.add_account(&settings, password).unwrap_or(0)) }
 }
 
+/// The signature of an account as sanitized HTML, for the signature editor; an empty string for none, NULL for no such
+/// account. Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_signature(core: *const PeCore, account: i64) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.signature(account).map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
+/// Keeps `html` (sanitized again) as the signature of an account; empty for none
+///
+/// # Safety
+/// `core` must be a live handle, `html` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_set_signature(core: *const PeCore, account: i64, html: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let html = unsafe { arg(html) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_signature(account, &html).is_ok()) }
+}
+
+/// What a new message, reply or forward from an account starts with in the editor: an empty line, then the signature
+/// in a block the editor can swap for another account's; an empty string without a signature. Free with
+/// `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_signature_block(core: *const PeCore, account: i64) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.signature_block(account).map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
 /// Changes the settings of an account
 ///
 /// # Safety

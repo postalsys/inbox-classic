@@ -318,6 +318,22 @@ impl Core {
         }
     }
 
+    /// The signature of an account, as sanitized HTML; empty for none
+    pub fn signature(&self, account: AccountId) -> Result<String> {
+        Ok(self.store().signature(account)?)
+    }
+
+    /// Keeps a signature for an account, sanitized ([`pe_html::signature_html`]); empty for none
+    pub fn set_signature(&self, account: AccountId, html: &str) -> Result<()> {
+        Ok(self.store().set_signature(account, &pe_html::signature_html(html))?)
+    }
+
+    /// What a new message, reply or forward from an account starts with: an empty line, then its signature
+    /// ([`pe_html::signature_block`]); empty without one
+    pub fn signature_block(&self, account: AccountId) -> Result<String> {
+        Ok(pe_html::signature_block(&self.signature(account)?))
+    }
+
     /// Changes the settings of an account; how it signs in stays, only signing in again changes that
     pub fn update_account(&self, id: AccountId, settings: &AccountSettings) -> Result<()> {
         let mut settings = settings.clone();

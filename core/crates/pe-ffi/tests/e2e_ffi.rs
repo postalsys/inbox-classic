@@ -127,6 +127,26 @@ fn reads_mail_through_the_c_api() {
     assert_eq!(text(unsafe { &*pe_account_settings_info(view) }.name), "Renamed");
     unsafe { pe_account_settings_free(view) };
     assert!(unsafe { pe_account_settings(core, 4242) }.is_null());
+
+    // a signature: kept sanitized, and the block a new message starts with
+    let owned = |text: *mut c_char| {
+        let value = unsafe { CStr::from_ptr(text) }.to_str().unwrap().to_string();
+        unsafe { pe_string_free(text) };
+        value
+    };
+    assert_eq!(owned(unsafe { pe_signature_block(core, account) }), "");
+    let signature = c("<p><b>Ann</b></p><script>x()</script>");
+    assert!(unsafe { pe_account_set_signature(core, account, signature.as_ptr()) });
+    assert_eq!(
+        owned(unsafe { pe_account_signature(core, account) }),
+        "<p><b>Ann</b></p>"
+    );
+    assert!(
+        owned(unsafe { pe_signature_block(core, account) })
+            .ends_with("<div class=\"pe-signature\">-- <br><p><b>Ann</b></p></div>")
+    );
+    assert!(!unsafe { pe_account_set_signature(core, 4242, signature.as_ptr()) });
+    assert!(unsafe { pe_account_signature(core, 4242) }.is_null());
     assert!(unsafe { pe_account_settings_info(std::ptr::null()) }.is_null());
 
     assert!(unsafe { pe_sync(core, account) });

@@ -516,6 +516,29 @@ int64_t pe_account_add(const struct PeCore *core,
                        const struct PeAccountSettings *settings,
                        const char *password);
 
+// The signature of an account as sanitized HTML, for the signature editor; an empty string for none, NULL for no such
+// account. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_account_signature(const struct PeCore *core,
+                           int64_t account);
+
+// Keeps `html` (sanitized again) as the signature of an account; empty for none
+//
+// # Safety
+// `core` must be a live handle, `html` NULL or a NUL-terminated string.
+bool pe_account_set_signature(const struct PeCore *core, int64_t account, const char *html);
+
+// What a new message, reply or forward from an account starts with in the editor: an empty line, then the signature
+// in a block the editor can swap for another account's; an empty string without a signature. Free with
+// `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_signature_block(const struct PeCore *core,
+                         int64_t account);
+
 // Changes the settings of an account
 //
 // # Safety

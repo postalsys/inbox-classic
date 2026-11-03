@@ -740,6 +740,7 @@ enum AccountsId : WORD {
     IDC_ACCOUNT_REMOVE,
     IDC_ACCOUNT_CLOSE,
     IDC_ACCOUNT_SIGN_IN_APPS,
+    IDC_ACCOUNT_SIGNATURE,
 };
 
 struct AccountsState {
@@ -852,6 +853,14 @@ void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id) {
         }
         return;
     }
+    if (id == IDC_ACCOUNT_SIGNATURE) {
+        if (chosen) {
+            wchar_t name[256] = L"";
+            ListView_GetItemText(state->list, index, COL_NAME, name, 256);
+            EditSignature(hwnd, state->core, account, name);
+        }
+        return;
+    }
     switch (id) {
     case IDC_ACCOUNT_ADD:
         if (NewAccountDialog(hwnd, state->core) > 0) {
@@ -946,6 +955,7 @@ bool AccountsDialog(HWND owner, PeCore* core) {
     };
     Button buttons[] = {{IDC_ACCOUNT_ADD, L"&Add..."},
                         {IDC_ACCOUNT_PROPERTIES, L"&Properties..."},
+                        {IDC_ACCOUNT_SIGNATURE, L"Si&gnature..."},
                         {IDC_ACCOUNT_REMOVE, L"&Remove"},
                         {IDC_ACCOUNT_SIGN_IN_APPS, L"Sign-in A&pps..."}};
     int top = pad;

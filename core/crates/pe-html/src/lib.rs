@@ -15,7 +15,7 @@ use base64::engine::general_purpose::STANDARD;
 mod editor;
 pub use editor::{
     PICTURE_FILE_LIMIT, PICTURE_HEAD, Picture, draft_body, editor_document, is_plain, outgoing_html, picture_type,
-    picture_uri, quote_html, quote_parts,
+    picture_uri, quote_html, quote_parts, signature_block, signature_html,
 };
 
 /// An image a message carries for its HTML, referenced as `cid:` (multipart/related)
@@ -65,7 +65,9 @@ pub(crate) fn mail_builder() -> ammonia::Builder<'static> {
         ])
         .url_schemes(HashSet::from(["http", "https", "mailto", "cid", "data"]))
         // the folds of earlier messages (pe-core fold.rs), styled by the preview document
-        .add_allowed_classes("details", ["pe-fold"]);
+        .add_allowed_classes("details", ["pe-fold"])
+        // the signature in a message being written, which the editor swaps for another account's
+        .add_allowed_classes("div", ["pe-signature"]);
     builder
 }
 
