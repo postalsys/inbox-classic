@@ -90,6 +90,17 @@ async fn browser(url: &str, code: Option<&str>, state_override: Option<&str>) ->
     let state = state_override
         .map(str::to_string)
         .unwrap_or_else(|| param(query, "state").unwrap());
+    browser_at(&redirect, &redirect_host(&redirect), code, &state).await
+}
+
+/// The host of the redirect address `http://host:port/`
+fn redirect_host(redirect: &str) -> String {
+    let address = redirect.strip_prefix("http://").unwrap().trim_end_matches('/');
+    address.rsplit_once(':').unwrap().0.to_string()
+}
+
+/// The browser's request to the redirect address, made to `host` (a name or an address of it)
+async fn browser_at(redirect: &str, host: &str, code: Option<&str>, state: &str) -> String {
     let port: u16 = redirect
         .trim_end_matches('/')
         .rsplit(':')
@@ -101,9 +112,9 @@ async fn browser(url: &str, code: Option<&str>, state_override: Option<&str>) ->
         Some(code) => format!("/?code={code}&state={state}&scope=mail"),
         None => format!("/?error=access_denied&state={state}"),
     };
-    let mut socket = TcpStream::connect(("127.0.0.1", port)).await.unwrap();
+    let mut socket = TcpStream::connect((host, port)).await.unwrap();
     socket
-        .write_all(format!("GET {target} HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n").as_bytes())
+        .write_all(format!("GET {target} HTTP/1.1\r\nHost: {host}\r\n\r\n").as_bytes())
         .await
         .unwrap();
     let mut page = String::new();
@@ -160,4 +171,34 @@ async fn cancelled_and_slow_sign_ins() {
         slow.finish(Duration::from_millis(100)).await,
         Err(OAuthError::TimedOut)
     ));
+}
+
+/// Microsoft takes only the `localhost` it was registered with, on any port: the browser comes back to that name,
+/// which it may look up as ::1 or 127.0.0.1, and the sign-in hears both
+#[tokio::test]
+async fn microsoft_comes_back_to_localhost() {
+    let challenge = Arc::new(Mutex::new(String::new()));
+    let port = token_server(challenge.clone()).await;
+    let microsoft = Provider {
+        kind: ProviderKind::Microsoft,
+        client_secret: None,
+        ..provider(port)
+    };
+    for host in ["::1", "127.0.0.1"] {
+        let sign_in = SignIn::begin(microsoft.clone(), "me@example.com").unwrap();
+        let url = sign_in.url.clone();
+        let query = url.split_once('?').unwrap().1;
+        let redirect = param(query, "redirect_uri").unwrap();
+        assert!(redirect.starts_with("http://localhost:"), "{redirect}");
+        *challenge.lock().unwrap() = param(query, "code_challenge").unwrap();
+        // a machine without IPv6 has no ::1 to come back to
+        if host == "::1" && std::net::TcpListener::bind(("::1", 0)).is_err() {
+            continue;
+        }
+        let state = param(query, "state").unwrap();
+        let waiting = tokio::spawn(sign_in.finish(Duration::from_secs(10)));
+        let page = browser_at(&redirect, host, Some("the-code"), &state).await;
+        assert!(page.contains("You are signed in"), "{host}: {page}");
+        assert_eq!(waiting.await.unwrap().unwrap().access_token, "testtoken");
+    }
 }

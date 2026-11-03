@@ -1,5 +1,5 @@
 //! OAuth 2.0 sign-in for mail accounts (RFC 8252, native apps): the browser opens the provider's sign-in page,
-//! the provider sends the browser back to a listener on 127.0.0.1 with a code, and the code is exchanged for
+//! the provider sends the browser back to a listener on the loopback address with a code, and the code is exchanged for
 //! tokens, with PKCE (RFC 7636) so a code caught on the way is of no use. The refresh token is the account's
 //! secret; access tokens are made from it when needed.
 //!
@@ -42,6 +42,15 @@ impl ProviderKind {
             "google" => Some(ProviderKind::Google),
             "microsoft" => Some(ProviderKind::Microsoft),
             _ => None,
+        }
+    }
+
+    /// The host of the loopback redirect address. Microsoft Entra matches a registered `http://localhost` with any
+    /// port but takes 127.0.0.1 for another address; Google's Desktop App clients take 127.0.0.1 (RFC 8252 7.3).
+    pub fn redirect_host(self) -> &'static str {
+        match self {
+            ProviderKind::Google => "127.0.0.1",
+            ProviderKind::Microsoft => "localhost",
         }
     }
 
@@ -232,6 +241,8 @@ fn challenge(verifier: &str) -> String {
 pub struct SignIn {
     provider: Provider,
     listener: std::net::TcpListener,
+    /// The same port on ::1, where a browser may go first for `localhost`
+    listener_v6: Option<std::net::TcpListener>,
     redirect_uri: String,
     verifier: String,
     state: String,
@@ -245,7 +256,11 @@ impl SignIn {
         let listener = std::net::TcpListener::bind("127.0.0.1:0").map_err(OAuthError::Io)?;
         listener.set_nonblocking(true).map_err(OAuthError::Io)?;
         let port = listener.local_addr().map_err(OAuthError::Io)?.port();
-        let redirect_uri = format!("http://127.0.0.1:{port}/");
+        // without IPv6, or with the port taken there, the browser falls back to 127.0.0.1
+        let listener_v6 = std::net::TcpListener::bind(("::1", port))
+            .and_then(|l| l.set_nonblocking(true).map(|_| l))
+            .ok();
+        let redirect_uri = format!("http://{}:{port}/", provider.kind.redirect_host());
         let verifier = random_token(32).map_err(OAuthError::Io)?;
         let state = random_token(16).map_err(OAuthError::Io)?;
         let mut params = vec![
@@ -268,6 +283,7 @@ impl SignIn {
         Ok(SignIn {
             provider,
             listener,
+            listener_v6,
             redirect_uri,
             verifier,
             state,
@@ -278,7 +294,8 @@ impl SignIn {
     /// Waits for the browser to come back, then exchanges the code for tokens
     pub async fn finish(self, timeout: Duration) -> Result<Tokens, OAuthError> {
         let listener = TcpListener::from_std(self.listener).map_err(OAuthError::Io)?;
-        let code = tokio::time::timeout(timeout, redirect::receive(&listener, &self.state))
+        let listener_v6 = self.listener_v6.and_then(|l| TcpListener::from_std(l).ok());
+        let code = tokio::time::timeout(timeout, redirect::receive(&listener, listener_v6.as_ref(), &self.state))
             .await
             .map_err(|_| OAuthError::TimedOut)??;
         let mut form = vec![
@@ -496,7 +513,8 @@ mod tests {
     async fn sign_in_url() {
         let sign_in = SignIn::begin(test_provider("https://login.example.com/token"), "me@example.com").unwrap();
         let url = &sign_in.url;
-        assert!(url.starts_with("https://login.example.com/authorize?response_type=code&client_id=client%20id&redirect_uri=http%3A%2F%2F127.0.0.1%3A"), "{url}");
+        assert!(url.starts_with("https://login.example.com/authorize?response_type=code&client_id=client%20id&redirect_uri=http%3A%2F%2Flocalhost%3A"), "{url}");
+        assert_eq!(ProviderKind::Google.redirect_host(), "127.0.0.1");
         assert!(url.contains("&scope=mail%20offline_access&state="));
         assert!(url.contains(&format!(
             "&code_challenge={}&code_challenge_method=S256",

@@ -75,9 +75,20 @@ async fn answer(mut socket: TcpStream, page: &str) {
 }
 
 /// Waits for the redirect of this sign-in; other requests are answered and ignored
-pub(crate) async fn receive(listener: &TcpListener, state: &str) -> Result<String, OAuthError> {
+pub(crate) async fn receive(
+    listener: &TcpListener,
+    listener_v6: Option<&TcpListener>,
+    state: &str,
+) -> Result<String, OAuthError> {
     loop {
-        let (mut socket, _) = listener.accept().await.map_err(OAuthError::Io)?;
+        let accepted = match listener_v6 {
+            Some(v6) => tokio::select! {
+                accepted = listener.accept() => accepted,
+                accepted = v6.accept() => accepted,
+            },
+            None => listener.accept().await,
+        };
+        let (mut socket, _) = accepted.map_err(OAuthError::Io)?;
         let mut request = Vec::new();
         let mut chunk = [0u8; 4096];
         // up to the end of the request line is enough
