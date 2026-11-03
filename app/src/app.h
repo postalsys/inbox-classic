@@ -243,12 +243,12 @@ public:
     bool OnCtlColor(HWND window, HDC dc, LRESULT& brush);
     // "12 message(s), 3 unread" for the status bar
     std::wstring Counts() const;
-    // the name of the selected folder (or account), for the title; empty with nothing selected, "Search results"
-    // while searching
+    // the name of the selected folder (or account), for the folder bar and the title; empty with nothing selected.
+    // While searching, where it looks: "All folders", or the one folder named (in:sent)
     std::wstring SelectedName() const;
-    // the folder bar: the folder's name, or what a search found for which words (and how many messages it does not
-    // know the text of yet)
-    std::wstring FolderBarText() const;
+    // the bar over the list while searching: what was found for which words (and how many messages the search does
+    // not know the text of yet); shown or hidden, the list laid out again when that changes
+    void UpdateSearchBar();
     std::wstring AccountName(int64_t account) const;
     std::wstring AccountEmail(int64_t account) const;
     // the provider the account signs in to through the browser, NONE for a password
@@ -314,6 +314,15 @@ private:
     RECT reader_ = {};
     HWND previewHost_ = nullptr;
     HFONT bold_ = nullptr;
+    HFONT link_ = nullptr;
+    // where the list goes, with the search bar over it while searching
+    RECT listArea_ = {};
+    HWND searchBar_ = nullptr;
+    HWND searchClear_ = nullptr;
+    std::wstring searchSummary_;
+    // the one folder the words typed name (in:sent), empty for every folder
+    std::wstring findPlace_;
+    void LayoutList();
     // the icons the list draws on its rows, and their size
     HIMAGELIST listIcons_ = nullptr;
     int iconSize_ = 16;
@@ -398,6 +407,9 @@ enum CommandId : WORD {
     IDC_FIND_FIELD,
     IDC_FIND_ICON,
     IDC_FIND_CLEAR,
+    // over the list while searching: what was found, and a link that ends the search
+    IDC_SEARCH_BAR,
+    IDC_SEARCH_CLEAR,
     IDM_FIND = 120,
     IDM_SAVE_AS,
     IDM_PRINT,

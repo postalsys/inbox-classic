@@ -112,6 +112,36 @@ impl Query {
         self.terms.iter().any(|term| matches!(term, Term::In { .. }))
     }
 
+    /// The one folder the search is narrowed to (`in:sent`), by the name the app gives it; `None` for every folder
+    /// (no `in:`, `in:anywhere`, several, or one left out)
+    pub fn place_name(&self) -> Option<String> {
+        let mut places = self.terms.iter().filter_map(|term| match term {
+            Term::In { place, negated } => Some((place, *negated)),
+            _ => None,
+        });
+        let (place, false) = places.next()? else {
+            return None;
+        };
+        if places.next().is_some() {
+            return None;
+        }
+        match place {
+            Place::Anywhere => None,
+            Place::Inbox => Some("Inbox".into()),
+            Place::Special { special_use, .. } => Some(
+                match *special_use {
+                    "\\Sent" => "Sent Items",
+                    "\\Drafts" => "Drafts",
+                    "\\Trash" => "Deleted Items",
+                    "\\Junk" => "Junk E-mail",
+                    _ => "Archive",
+                }
+                .into(),
+            ),
+            Place::Named(name) => Some(name.clone()),
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.terms.is_empty()
     }
@@ -445,5 +475,19 @@ mod tests {
         assert_eq!(bytes("2kb"), Some(2048));
         assert_eq!(bytes("1g"), Some(1 << 30));
         assert_eq!(bytes("lots"), None);
+    }
+
+    #[test]
+    fn names_the_one_place() {
+        let name = |text: &str| Query::parse(text, 0).place_name();
+        assert_eq!(name("hello"), None);
+        assert_eq!(name("hello in:anywhere"), None);
+        assert_eq!(name("in:inbox hello").as_deref(), Some("Inbox"));
+        assert_eq!(name("in:sent").as_deref(), Some("Sent Items"));
+        assert_eq!(name("in:spam").as_deref(), Some("Junk E-mail"));
+        assert_eq!(name("in:Projects/2025").as_deref(), Some("Projects/2025"));
+        // two places, or one left out, are not one folder
+        assert_eq!(name("in:inbox in:sent"), None);
+        assert_eq!(name("-in:inbox"), None);
     }
 }

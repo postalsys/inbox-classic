@@ -820,6 +820,20 @@ pub unsafe extern "C" fn pe_message_count(
     true
 }
 
+/// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it ("Sent Items"); NULL for
+/// every folder. Free with `pe_string_free`.
+///
+/// # Safety
+/// `text` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_search_place(text: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let text = unsafe { arg(text) }.unwrap_or_default().to_string();
+    guard(move || Core::search_place(&text).map(into_c_string))
+        .flatten()
+        .unwrap_or(null_mut())
+}
+
 /// How many messages the search does not know the text of yet (their text is fetched in the background, newest
 /// first, after each sync); 0 also when the core can not say
 ///

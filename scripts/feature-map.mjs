@@ -179,7 +179,8 @@ const sections = [
                     'A subject word finds that message only',
                     'It searches every folder, with a Folder column',
                     'A sender address is found',
-                    'The folder bar says what was found for which words',
+                    'A yellow bar over the list says what was found for which words, the folder bar where',
+                    'Clear search on it ends the search',
                     'Clearing it, or its × button, shows the folder again',
                     'Words of the text are found, once the background indexing read them'
                 ]
@@ -187,9 +188,9 @@ const sections = [
             {
                 shot: 'find-3-no-results',
                 name: 'No results',
-                what: 'When nothing matches, the folder bar says "No results for" the words, and the list says so in its middle, with what the search looks at and what to try. While the text of some messages is still being indexed, both say how many, as more may be found soon. An empty folder says "There are no items in this view."',
+                what: 'When nothing matches, the search bar says "No results for" the words, and the list says so in its middle, with what the search looks at and what to try. While the text of some messages is still being indexed, both say how many, as more may be found soon. An empty folder says "There are no items in this view."',
                 how: 'Search for something no message has.',
-                checked: ['Nothing is listed for what nothing has', 'The folder bar says there are no results']
+                checked: ['Nothing is listed for what nothing has', 'The search bar says there are no results']
             },
             {
                 shot: 'find-2-every-folder',

@@ -239,11 +239,21 @@ void Mailbox::Create(HWND parent, PeCore* core) {
                             SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER, IDC_PICTURES, {});
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
+    // over the list while searching, in the colors of the information bar: what was found, and a link to end it
+    searchBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_SEARCH_BAR, {});
+    searchClear_ = CreateChild(parent, L"STATIC", L"Clear search", SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
+                               IDC_SEARCH_CLEAR, {});
+    ShowWindow(searchBar_, SW_HIDE);
+    ShowWindow(searchClear_, SW_HIDE);
     previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN, 0, {});
     preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); });
 
     LOGFONTW font = {};
     GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
+    font.lfUnderline = TRUE;
+    link_ = CreateFontIndirectW(&font);
+    SendMessageW(searchClear_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
+    font.lfUnderline = FALSE;
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
     ClearReader();
@@ -256,13 +266,62 @@ void Mailbox::Destroy() {
     pages_.clear();
     DeleteObject(bold_);
     bold_ = nullptr;
+    DeleteObject(link_);
+    link_ = nullptr;
 }
 
 void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
     MoveWindow(tree_, tree.left, tree.top, tree.right - tree.left, tree.bottom - tree.top, TRUE);
-    MoveWindow(list_, list.left, list.top, list.right - list.left, list.bottom - list.top, TRUE);
+    listArea_ = list;
+    LayoutList();
     reader_ = reader;
     LayoutReader();
+}
+
+// the search bar over the list while it is shown, the list under it
+void Mailbox::LayoutList() {
+    RECT list = listArea_;
+    int width = list.right - list.left;
+    if (IsWindowVisible(searchBar_)) {
+        int height = Scale(22), edge = GetSystemMetrics(SM_CXBORDER);
+        MoveWindow(searchBar_, list.left, list.top, width, height, TRUE);
+        // the link inside the bar's border, at its right, as wide as its words
+        HDC dc = GetDC(searchClear_);
+        HGDIOBJ old = SelectObject(dc, link_);
+        SIZE size = {};
+        GetTextExtentPoint32W(dc, L"Clear search", 12, &size);
+        SelectObject(dc, old);
+        ReleaseDC(searchClear_, dc);
+        int linkWidth = size.cx + Scale(16);
+        MoveWindow(searchClear_, list.right - edge - linkWidth, list.top + edge, linkWidth, height - 2 * edge, TRUE);
+        SetWindowPos(searchClear_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        list.top += height + Scale(2);
+    }
+    MoveWindow(list_, list.left, list.top, width, list.bottom - list.top, TRUE);
+}
+
+void Mailbox::UpdateSearchBar() {
+    std::wstring summary;
+    if (Searching()) {
+        // what was found, for what, where: the words stay in view while the list changes under them
+        summary = total_ == 0 ? L"No results" : std::to_wstring(total_) + (total_ == 1 ? L" result" : L" results");
+        summary += L" for \u201C" + find_ + L"\u201D " + (findPlace_.empty() ? L"in all folders" : L"in " + findPlace_);
+        if (uint64_t left = pe_search_unindexed_count(core_)) {
+            // the words of these are found once their text is in (subjects, people and file names are found already)
+            summary += L"  \u00B7  still indexing the text of " + std::to_wstring(left) + (left == 1 ? L" message" : L" messages");
+        }
+    }
+    bool shown = IsWindowVisible(searchBar_) != FALSE;
+    if (summary != searchSummary_) {
+        searchSummary_ = summary;
+        SetWindowTextW(searchBar_, summary.c_str());
+        InvalidateRect(searchBar_, nullptr, TRUE);
+    }
+    if (shown != !summary.empty()) {
+        ShowWindow(searchBar_, summary.empty() ? SW_HIDE : SW_SHOW);
+        ShowWindow(searchClear_, summary.empty() ? SW_HIDE : SW_SHOW);
+        LayoutList();
+    }
 }
 
 // the paper clip and the information bar shown or not, the pane laid out again only when that changes
@@ -276,7 +335,7 @@ void Mailbox::ShowReaderBars(bool files, bool pictures) {
 }
 
 bool Mailbox::OnSetCursor(HWND window) {
-    if (window != pictures_) {
+    if (window != pictures_ && window != searchClear_) {
         return false;
     }
     // the information bar is clicked like a link
@@ -285,6 +344,13 @@ bool Mailbox::OnSetCursor(HWND window) {
 }
 
 bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
+    if (window == searchClear_) {
+        // a link on the information bar
+        SetTextColor(dc, GetSysColor(COLOR_HOTLIGHT));
+        SetBkColor(dc, GetSysColor(COLOR_INFOBK));
+        brush = reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_INFOBK));
+        return true;
+    }
     if (window != pictures_) {
         return false;
     }
@@ -904,7 +970,8 @@ void Mailbox::FolderMenu() {
 
 std::wstring Mailbox::SelectedName() const {
     if (Searching()) {
-        return L"Search results";
+        // where the search looks; what it found is on the search bar
+        return findPlace_.empty() ? L"All folders" : findPlace_;
     }
     if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
         return found->second.first;
@@ -915,27 +982,14 @@ std::wstring Mailbox::SelectedName() const {
     return L"";
 }
 
-std::wstring Mailbox::FolderBarText() const {
-    if (!Searching()) {
-        return SelectedName();
-    }
-    // what was found, for what: the words stay in view while the list changes under them
-    std::wstring found = total_ == 0 ? L"No results" : std::to_wstring(total_) + (total_ == 1 ? L" result" : L" results");
-    std::wstring text = found + L" for \u201C" + find_ + L"\u201D";
-    if (uint64_t left = pe_search_unindexed_count(core_)) {
-        // the words of these are found once their text is in (subjects, people and file names are found already)
-        text += L"   (still indexing the text of " + std::to_wstring(left) + (left == 1 ? L" message)" : L" messages)");
-    }
-    return text;
-}
-
 // what an empty list says in its middle: why there is nothing, and what to do about it
 void Mailbox::DrawEmptyList(HDC dc) const {
     std::wstring title, more;
     if (Searching()) {
         title = L"No messages match \u201C" + find_ + L"\u201D.";
-        more = L"The search looks at the subject, the people, the file names and the text of the messages in every folder. "
-               L"Check the spelling, or try fewer words.";
+        more = L"The search looks at the subject, the people, the file names and the text of the messages " +
+               (findPlace_.empty() ? std::wstring(L"in every folder") : L"in " + findPlace_) +
+               L". Check the spelling, or try fewer words.";
         if (uint64_t left = pe_search_unindexed_count(core_)) {
             more += L"\n\nThe text of " + std::to_wstring(left) + (left == 1 ? L" message is" : L" messages are") +
                     L" still being indexed, so more may be found soon.";
@@ -1212,6 +1266,23 @@ void Mailbox::PlaceFind(const RECT& row) {
 }
 
 bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
+    if (item.hwndItem == searchBar_) {
+        // the magnifier, then what was found, on the information bar's yellow
+        RECT area = item.rcItem;
+        FillRect(item.hDC, &area, GetSysColorBrush(COLOR_INFOBK));
+        int pad = Scale(6);
+        ImageList_Draw(listIcons_, LIST_SEARCH, item.hDC, area.left + pad, (area.top + area.bottom - iconSize_) / 2, ILD_TRANSPARENT);
+        area.left += pad + iconSize_ + pad;
+        RECT link;
+        GetWindowRect(searchClear_, &link);
+        area.right -= (link.right - link.left) + pad;
+        HGDIOBJ old = SelectObject(item.hDC, reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0)));
+        SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
+        SetBkMode(item.hDC, TRANSPARENT);
+        DrawTextW(item.hDC, searchSummary_.c_str(), -1, &area, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+        SelectObject(item.hDC, old);
+        return true;
+    }
     if (item.hwndItem != findIcon_ && item.hwndItem != findClear_) {
         return false;
     }
@@ -1236,6 +1307,7 @@ void Mailbox::ResetFind() {
     KillTimer(parent_, TIMER_FIND);
     find_.clear();
     findUtf8_.clear();
+    findPlace_.clear();
 }
 
 bool Mailbox::ClearFind() {
@@ -1281,6 +1353,9 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
     case IDC_PICTURES:
         LoadPictures();
         return true;
+    case IDC_SEARCH_CLEAR:
+        ClearFind();
+        return true;
     }
     return false;
 }
@@ -1301,6 +1376,8 @@ void Mailbox::OnTimer(UINT_PTR id) {
         if (text != find_) {
             find_ = text;
             findUtf8_ = core::Narrow(find_);
+            core::String place(pe_search_place(findUtf8_.c_str()));
+            findPlace_ = place ? Text(place.get()) : L"";
             ReloadList(true);
             SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
         }

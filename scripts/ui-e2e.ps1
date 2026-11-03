@@ -973,18 +973,23 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
     Check ([bool](WaitFor { (Rows) -eq 1 })) 'typing in it narrows the list to what has it (the subject)'
     Check ([bool](WaitFor { (& $columns) -eq 8 } 5)) 'it searches every folder: the list has a Folder column'
-    Check ([bool](WaitFor { (& $folderBar) -match '^ 1 result for .lunch.' } 5)) "the folder bar says what was found for what ($(& $folderBar))"
-    Check ((WindowText $main) -match '^Search results') 'and the title that it is a search'
+    # the search bar over the list says what was found for what, the folder bar where
+    $IDC_SEARCH_BAR = 208; $IDC_SEARCH_CLEAR = 209
+    $searchBar = { WindowText ([Native.Win]::GetDlgItem($main, $IDC_SEARCH_BAR)) }
+    Check ([bool](WaitFor { (Visible $main $IDC_SEARCH_BAR) -and (& $searchBar) -match '^1 result for .lunch. in all folders' } 5)) "the search bar says what was found for what ($(& $searchBar))"
+    Check ([bool](WaitFor { (& $folderBar) -eq ' All folders' } 5)) "the folder bar says where ($(& $folderBar))"
+    Check ((WindowText $main) -match '^All folders') 'and so does the title'
     Shot $main 'find-1-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'ann@example.com')
     Check ([bool](WaitFor { (Rows) -ge 2 })) 'the sender address is found too'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'nothing has this')
     Check ([bool](WaitFor { (Rows) -eq 0 })) 'and nothing when nothing has it'
     # the list then says so in its middle, and what to try
-    Check ([bool](WaitFor { (& $folderBar) -match '^ No results for .nothing has this.' } 5)) "the folder bar says there are no results ($(& $folderBar))"
+    Check ([bool](WaitFor { (& $searchBar) -match '^No results for .nothing has this.' } 5)) "the search bar says there are no results ($(& $searchBar))"
     Shot $main 'find-3-no-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
     Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 7 })) 'clearing it shows the folder again, without the Folder column'
+    Check (-not (Visible $main $IDC_SEARCH_BAR)) 'and without the search bar'
     # the clear button is there only while there is something to clear, and clears it
     Check (-not (Visible $field $IDC_FIND_CLEAR)) 'an empty Find box has no clear button'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
@@ -1004,6 +1009,7 @@ public static class Dragger {
     [void](WaitFor { (Rows) -eq $all })
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello in:inbox')
     $inInbox = WaitFor { if ((Rows) -ge 1 -and (Rows) -lt $all) { Rows } }
+    Check ([bool](WaitFor { (& $folderBar) -eq ' Inbox' -and (& $searchBar) -match ' in Inbox$' } 5)) "in:inbox: the folder bar and the search bar say the Inbox ($(& $folderBar), $(& $searchBar))"
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello')
     $everywhere = WaitFor { if ((Rows) -gt $inInbox) { Rows } }
     Check ([bool]$inInbox -and [bool]$everywhere) "the messages of other folders are found too ($everywhere), in:inbox narrows them to the Inbox ($inInbox)"
@@ -1015,7 +1021,12 @@ public static class Dragger {
     [void](WaitFor { (Rows) -eq $everywhere })
     SelectRow 0
     Check ([bool](WaitFor { (WindowText ([Native.Win]::FindDescendants($main, 'Static') | Where-Object { (WindowText $_) -match 'From:' } | Select-Object -First 1)) -match 'Subject:' } 10)) 'a result is shown in the reading pane'
-    # Esc ends the search, back in the folder
+    # Clear search on the search bar ends it
+    Click $main $IDC_SEARCH_CLEAR
+    Check ([bool](WaitFor { (Rows) -eq $all -and (WindowText $find) -eq '' -and -not (Visible $main $IDC_SEARCH_BAR) })) 'Clear search on the search bar ends the search'
+    # and so does Esc, back in the folder
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello')
+    [void](WaitFor { (Rows) -eq $everywhere })
     Key $find $VK_ESCAPE
     Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 7 })) 'Esc ends the search: the folder again, without the Folder column'
 

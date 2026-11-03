@@ -605,6 +605,13 @@ bool pe_message_count(const struct PeCore *core,
                       uint64_t *total,
                       uint64_t *unread);
 
+// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it ("Sent Items"); NULL for
+// every folder. Free with `pe_string_free`.
+//
+// # Safety
+// `text` must be NULL or a NUL-terminated string.
+char *pe_search_place(const char *text);
+
 // How many messages the search does not know the text of yet (their text is fetched in the background, newest
 // first, after each sync); 0 also when the core can not say
 //

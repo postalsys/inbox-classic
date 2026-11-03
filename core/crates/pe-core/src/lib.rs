@@ -379,6 +379,12 @@ impl Core {
         Ok(self.store().search_index(search, sort, folder, uid)?)
     }
 
+    /// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it; `None` for every
+    /// folder
+    pub fn search_place(text: &str) -> Option<String> {
+        pe_store::Query::parse(text, 0).place_name()
+    }
+
     /// How many messages the search does not know the text of yet: their text parts are fetched in the background,
     /// newest first, after each sync
     pub fn unindexed_count(&self) -> Result<u64> {

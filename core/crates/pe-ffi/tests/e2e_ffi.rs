@@ -571,6 +571,11 @@ fn null_and_bad_arguments() {
             &mut unread
         ));
         assert_eq!(pe_search_unindexed_count(std::ptr::null()), 0);
+        assert!(pe_search_place(std::ptr::null()).is_null());
+        let typed = CString::new("report in:sent").unwrap();
+        let place = pe_search_place(typed.as_ptr());
+        assert_eq!(CStr::from_ptr(place).to_str().unwrap(), "Sent Items");
+        pe_string_free(place);
         pe_message_list_free(null_mut());
         pe_message_view_free(null_mut());
         pe_bytes_free(null_mut(), 0);

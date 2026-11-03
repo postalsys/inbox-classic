@@ -70,7 +70,8 @@ void SetStatus(const std::wstring& text) {
 // the selected folder in the folder bar and the title: "Inbox - Inbox Classic"
 void ShowFolderName() {
     std::wstring name = g_mailbox.SelectedName();
-    SetWindowTextW(g_folderBar, (L" " + g_mailbox.FolderBarText()).c_str());
+    SetWindowTextW(g_folderBar, (L" " + name).c_str());
+    g_mailbox.UpdateSearchBar();
     SetWindowTextW(g_main, name.empty() ? kTitle : (name + L" - " + kTitle).c_str());
 }
 
@@ -706,6 +707,8 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             SyncAll();
         } else {
             g_mailbox.OnTimer(wParam);
+            // a reload or a search changes the counts
+            ShowCounts();
         }
         return 0;
     case WM_CORE_EVENT: {
