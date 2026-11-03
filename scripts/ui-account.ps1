@@ -19,7 +19,7 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
 [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
 '@
-$WM_SETTEXT = 0x000C; $BM_CLICK = 0x00F5; $CB_SETCURSEL = 0x014E
+$WM_SETTEXT = 0x000C; $WM_COMMAND = 0x0111; $CB_SETCURSEL = 0x014E
 
 # the first page (name and address), or the server settings form when $Second (it has the SMTP security choice, id 109)
 function WaitForForm([bool]$Second) {
@@ -37,7 +37,8 @@ function Fill([IntPtr]$form, [hashtable]$values) {
 }
 # posted: the click starts the next step's modal loop, a sent one would wait for it
 function ClickOk([IntPtr]$window, [int]$id = 1) {
-    [void][Native.Win]::PostMessage([Native.Win]::GetDlgItem($window, $id), $BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero)
+    # BN_CLICKED to the window, as a click ends up: BM_CLICK can be lost when the window is not the active one
+    [void][Native.Win]::PostMessage($window, $WM_COMMAND, [IntPtr]($id -band 0xFFFF), [Native.Win]::GetDlgItem($window, $id))
 }
 
 # the inputs have ids 100 and up in the order of the form (app/src/accounts.cpp). First the name and address; the

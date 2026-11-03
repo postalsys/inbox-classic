@@ -27,6 +27,7 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hwnd, out RECT rect);
 [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
 [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+[DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern IntPtr GetWindow(IntPtr hwnd, uint cmd);
@@ -57,7 +58,7 @@ public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr par
 [void][Native.Win]::SetProcessDPIAware()
 
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
-$WM_KEYUP = 0x0101; $BM_CLICK = 0x00F5; $CB_SETCURSEL = 0x014E; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
+$WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
 $VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
@@ -158,9 +159,15 @@ function InFront([IntPtr]$a, [IntPtr]$b) {
     return $false
 }
 # presses a button as its click ends up: BN_CLICKED to its window, which works whether or not that window is active
-# (BM_CLICK can be lost when it is not, as on the CI runner)
+# (BM_CLICK can be lost when it is not, as on the CI runner). A disabled button can not be pressed, as with the mouse:
+# a check fails instead
 function Click([IntPtr]$window, [int]$id) {
-    [void][Native.Win]::PostMessage($window, $WM_COMMAND, [IntPtr]($id -band 0xFFFF), [Native.Win]::GetDlgItem($window, $id))
+    $button = [Native.Win]::GetDlgItem($window, $id)
+    if ($button -ne [IntPtr]::Zero -and -not [Native.Win]::IsWindowEnabled($button)) {
+        Check $false "button $id is enabled to be pressed"
+        return
+    }
+    [void][Native.Win]::PostMessage($window, $WM_COMMAND, [IntPtr]($id -band 0xFFFF), $button)
 }
 # what is open when a window does not come: the app's visible windows, and a picture of $shown
 function ShowAppWindows([IntPtr]$shown, [string]$shot) {
@@ -177,7 +184,7 @@ function ShowAppWindows([IntPtr]$shown, [string]$shot) {
         }
         $true
     }, [IntPtr]::Zero) | Out-Null
-    if ($shown -ne [IntPtr]::Zero) { Shot $shown $shot }
+    Shot $shown $shot
 }
 # a menu or toolbar command, posted as the menu would
 function Command([IntPtr]$window, [int]$id) {
