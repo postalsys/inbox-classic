@@ -437,6 +437,22 @@ HICON AppIcon(bool titleBar) {
     return static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(100), IMAGE_ICON, size, size, LR_SHARED));
 }
 
+namespace {
+const wchar_t* kPreferencesKey = L"Software\\Inbox Classic";
+}
+
+DWORD GetPreference(const wchar_t* name, DWORD fallback) {
+    DWORD value = 0, size = sizeof(value);
+    if (RegGetValueW(HKEY_CURRENT_USER, kPreferencesKey, name, RRF_RT_REG_DWORD, nullptr, &value, &size) != ERROR_SUCCESS) {
+        return fallback;
+    }
+    return value;
+}
+
+void SetPreference(const wchar_t* name, DWORD value) {
+    RegSetKeyValueW(HKEY_CURRENT_USER, kPreferencesKey, name, REG_DWORD, &value, sizeof(value));
+}
+
 void SetAppIcons(WNDCLASSEXW& windowClass) {
     windowClass.hIcon = AppIcon(false);
     windowClass.hIconSm = AppIcon(true);

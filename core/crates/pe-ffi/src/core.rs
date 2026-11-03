@@ -112,6 +112,9 @@ pub enum PeEventKind {
     DraftSaved = 12,
     /// The check `uid` of `pe_sign_in_app_check` is done: `pe_sign_in_app_check_result`
     SignInAppChecked = 13,
+    /// New unread mail in the Inbox `folder` of `account`: `count` messages, `uid` the newest, `message` who it is
+    /// from and `detail` its subject
+    NewMail = 14,
 }
 
 #[repr(C)]
@@ -146,11 +149,13 @@ pub struct PeEvent {
     pub folder: i64,
     pub uid: u64,
     pub failure: PeFailureKind,
-    /// UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save.
-    /// NULL otherwise
+    /// UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; who
+    /// it is from, for `NewMail`. NULL otherwise
     pub message: *const c_char,
-    /// UTF-8: the Message-ID of the draft, for `DraftSaved`. NULL otherwise
+    /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the subject, for `NewMail`. NULL otherwise
     pub detail: *const c_char,
+    /// How many messages, for `NewMail`; 0 otherwise
+    pub count: u64,
 }
 
 /// Called on a worker thread, never on the thread that called into the core: copy what is
@@ -184,6 +189,14 @@ impl Callback {
             Event::SignInAppChecked { request } => (PeEventKind::SignInAppChecked, 0, 0, *request),
             Event::ViewReady { request } => (PeEventKind::ViewReady, 0, 0, *request),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
+            Event::NewMail {
+                account, folder, uid, ..
+            } => (PeEventKind::NewMail, *account, *folder, *uid),
+        };
+        let count = if let Event::NewMail { count, .. } = &event {
+            *count as u64
+        } else {
+            0
         };
         let (failure, message, detail) = match event {
             Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
@@ -191,6 +204,9 @@ impl Callback {
             Event::DraftSaved {
                 message_id, problem, ..
             } => (PeFailureKind::None, problem.map(c_string), Some(c_string(message_id))),
+            Event::NewMail { from, subject, .. } => {
+                (PeFailureKind::None, Some(c_string(from)), Some(c_string(subject)))
+            }
             _ => (PeFailureKind::None, None, None),
         };
         let event = PeEvent {
@@ -201,6 +217,7 @@ impl Callback {
             failure,
             message: message.as_ref().map_or(null(), |m| m.as_ptr()),
             detail: detail.as_ref().map_or(null(), |d| d.as_ptr()),
+            count,
         };
         // a panic must not unwind into C; the callback must not throw (see PeEventCallback)
         let _ = guard(|| {
@@ -667,6 +684,17 @@ pub unsafe extern "C" fn pe_account_list_get(list: *const PeAccountList, index: 
 pub unsafe extern "C" fn pe_account_list_free(list: *mut PeAccountList) {
     // SAFETY: as the caller guarantees
     unsafe { take_back(list) }
+}
+
+/// How many messages are unread in the Inboxes of all accounts (the tray and the taskbar show it); 0 also when the
+/// core can not say
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_inbox_unread(core: *const PeCore) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.inbox_unread().unwrap_or(0)) }
 }
 
 // ---- the address book ----

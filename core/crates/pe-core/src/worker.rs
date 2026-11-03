@@ -206,6 +206,24 @@ pub(crate) struct Worker {
     access_token: Option<(String, i64)>,
     events: EventSink,
     connection: Option<(Client, UnboundedReceiver<ImapEvent>)>,
+    /// A server event that woke the Inbox from IDLE, applied first with the rest
+    held: Option<ImapEvent>,
+    /// The UIDNEXT of the Inbox the last wait synced it for (Wake::Behind)
+    behind: Option<u64>,
+    /// A command ran since the last wait: what the server has to tell since then comes with a NOOP
+    worked: bool,
+}
+
+/// What ended a wait on the Inbox
+enum Wake {
+    /// A command came, or the core is closing (None)
+    Command(Option<Command>),
+    /// The server said something changed
+    Server,
+    /// The IDLE period ran out, to be renewed
+    Period,
+    /// The Inbox has mail the store does not: it came between its sync and the wait
+    Behind,
 }
 
 impl Worker {
@@ -226,6 +244,9 @@ impl Worker {
             access_token: None,
             events,
             connection: None,
+            held: None,
+            behind: None,
+            worked: false,
         }
     }
 
@@ -235,11 +256,12 @@ impl Worker {
             Ok(store) => store,
             Err(error) => return self.fail(error.into()),
         };
-        while let Some(command) = commands.recv().await {
+        while let Some(command) = self.next_command(&mut store, &mut commands).await {
             let sync = command == Command::Sync;
             if sync {
                 self.emit(Event::SyncStarted { account: self.account });
             }
+            self.worked = true;
             let mut outcome = self.handle(&mut store, command).await;
             if outcome.is_ok() {
                 outcome = self.apply_server_events(&mut store).await;
@@ -263,6 +285,81 @@ impl Worker {
         if let Some((mut client, _)) = self.connection.take() {
             let _ = client.logout().await;
         }
+    }
+
+    /// The next command. Meanwhile, while connected, the Inbox is watched (IDLE, or NOOP where the server has no IDLE),
+    /// so new mail comes in as it arrives and not only with the next sync. Without a connection it just waits: the
+    /// next sync connects again.
+    async fn next_command(&mut self, store: &mut Store, commands: &mut UnboundedReceiver<Command>) -> Option<Command> {
+        loop {
+            let inbox = self
+                .connection
+                .as_ref()
+                .filter(|(client, _)| !client.is_closed())
+                .and_then(|_| store.find_folder(self.account, "INBOX").ok().flatten());
+            let Some(inbox) = inbox else {
+                return commands.recv().await;
+            };
+            match self.watch(&inbox, commands).await {
+                Ok(Wake::Command(command)) => return command,
+                Ok(Wake::Behind) => {
+                    if let Err(failure) = self.sync_one(store, inbox.id).await {
+                        self.fail(failure);
+                    }
+                }
+                Ok(Wake::Server | Wake::Period) => {
+                    if let Err(failure) = self.apply_server_events(store).await {
+                        self.fail(failure);
+                    }
+                }
+                // the connection is gone now (fail drops it): waiting goes on without one
+                Err(failure) => self.fail(failure),
+            }
+        }
+    }
+
+    /// Waits on the Inbox until a command comes, the server reports a change or the IDLE period ends
+    async fn watch(
+        &mut self,
+        inbox: &pe_store::Folder,
+        commands: &mut UnboundedReceiver<Command>,
+    ) -> Result<Wake, Failure> {
+        let Some((client, events)) = self.connection.as_mut() else {
+            return Ok(Wake::Period);
+        };
+        if client
+            .selected()
+            .is_none_or(|selected| selected.path != inbox.info.path)
+        {
+            client.select(&inbox.info.path).await?;
+        } else if std::mem::take(&mut self.worked) {
+            // what came since the last command: a server tells it with the next one, not when IDLE starts
+            client.noop().await?;
+        }
+        if !events.is_empty() {
+            return Ok(Wake::Server);
+        }
+        // what came while the Inbox was selected for other work is in the counts of SELECT, not in an event; once for
+        // each UIDNEXT, should a sync not bring the store to it
+        let next = client.selected().and_then(|selected| selected.uid_next);
+        if next.is_some() && next != inbox.state.uid_next && next != self.behind {
+            self.behind = next;
+            return Ok(Wake::Behind);
+        }
+        let mut wake = Wake::Period;
+        let mut held = None;
+        let stop = async {
+            tokio::select! {
+                command = commands.recv() => wake = Wake::Command(command),
+                event = events.recv() => {
+                    held = event;
+                    wake = Wake::Server;
+                }
+            }
+        };
+        client.idle(stop).await?;
+        self.held = held;
+        Ok(wake)
     }
 
     /// Fetches the text parts of the newest messages the search index does not have the text of, and indexes them;
@@ -730,12 +827,33 @@ impl Worker {
     }
 
     async fn sync_one(&mut self, store: &mut Store, folder: FolderId) -> Outcome {
+        let before = store.folder(folder)?;
         let report = sync_folder(self.client(store).await?, store, folder).await?;
         if report != pe_sync::Report::default() {
             self.emit(Event::FolderChanged {
                 account: self.account,
                 folder,
             });
+        }
+        // new unread mail in the Inbox, above the UIDs the store knew: not with the first sync of the folder, nor
+        // after a reset, which would call every message new
+        if report.added > 0
+            && !report.reset
+            && before.info.path.eq_ignore_ascii_case("INBOX")
+            && let Some(next) = before.state.uid_next
+        {
+            let fresh = store.unseen_from(folder, next)?;
+            if let Some(newest) = fresh.first() {
+                let from = newest.info.sender().to_string();
+                self.emit(Event::NewMail {
+                    account: self.account,
+                    folder,
+                    uid: newest.info.uid,
+                    count: fresh.len(),
+                    from,
+                    subject: newest.info.subject.clone(),
+                });
+            }
         }
         Ok(())
     }
@@ -745,15 +863,19 @@ impl Worker {
     async fn apply_server_events(&mut self, store: &mut Store) -> Outcome {
         let mut resync = BTreeSet::new();
         loop {
-            let Some((_, events)) = self.connection.as_mut() else {
-                return Ok(());
-            };
-            let event = match events.try_recv() {
-                Ok(event) => event,
-                Err(TryRecvError::Empty) => break,
-                Err(TryRecvError::Disconnected) => {
-                    self.connection = None;
-                    break;
+            let event = if let Some(event) = self.held.take() {
+                event
+            } else {
+                let Some((_, events)) = self.connection.as_mut() else {
+                    return Ok(());
+                };
+                match events.try_recv() {
+                    Ok(event) => event,
+                    Err(TryRecvError::Empty) => break,
+                    Err(TryRecvError::Disconnected) => {
+                        self.connection = None;
+                        break;
+                    }
                 }
             };
             match apply_event(store, self.account, &event)? {

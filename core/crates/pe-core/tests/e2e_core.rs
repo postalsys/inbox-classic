@@ -1147,3 +1147,53 @@ fn a_draft_follows_from_to_another_account() {
     }
     assert_eq!(other_server.subjects("Drafts"), ["Changing hands"]);
 }
+
+#[test]
+fn new_mail_comes_in_while_watching_the_inbox() {
+    let Some(s) = setup() else { return };
+    s.server.add_message("INBOX", &rfc822("Already there", "1"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    // what was there with the first sync is not new
+    // mail that arrives later is, without another sync: the worker watches the Inbox (IDLE)
+    s.server.add_message(
+        "INBOX",
+        "From: Nora Example <nora@example.com>\r\nSubject: Fresh\r\n\r\nJust in.\r\n",
+        &[],
+    );
+    let event = s.wait(|e| matches!(e, Event::NewMail { .. }));
+    let Event::NewMail {
+        account: from_account,
+        count,
+        from,
+        subject,
+        ..
+    } = event
+    else {
+        unreachable!()
+    };
+    assert_eq!((from_account, count), (account, 1));
+    assert_eq!((from.as_str(), subject.as_str()), ("Nora Example", "Fresh"));
+    // and it is in the list
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap();
+    let subjects: Vec<String> = s
+        .core
+        .messages(inbox.id, Sort::default(), 0, 10)
+        .unwrap()
+        .into_iter()
+        .map(|m| m.info.subject)
+        .collect();
+    assert!(subjects.contains(&"Fresh".to_string()), "{subjects:?}");
+    // mail that comes already read is not announced: the next event of the Inbox is no NewMail
+    s.server
+        .add_message("INBOX", &rfc822("Read elsewhere", "2"), &["\\Seen"]);
+    let next = s.wait(|e| matches!(e, Event::NewMail { .. } | Event::FolderChanged { .. }));
+    assert!(matches!(next, Event::FolderChanged { .. }), "{next:?}");
+}

@@ -177,6 +177,26 @@ enum class ComposeClose { Closed, Saving, Kept };
 ComposeClose CloseComposeWindows();
 // whether any compose window is open
 bool ComposeWindowsOpen();
+// ---- tray.cpp ----
+
+// what the tray icon sends the main window, and what a message of it asks for
+constexpr UINT WM_TRAY = WM_APP + 60;
+enum class TrayAction { None, Handled, Open, Menu };
+// the icon in the notification area, from the window's creation until it is gone
+void TrayCreate(HWND main);
+void TrayRemove(HWND main);
+// how many messages are unread in the Inboxes: the icon's tooltip and a count on the taskbar button
+void TrayCount(HWND main, uint64_t unread);
+// a Windows notification from the icon; a click on it asks for the message `uid` of `folder` (Open)
+void TrayNotify(HWND main, const std::wstring& title, const std::wstring& text, int64_t folder, uint64_t uid);
+// a message of the main window that may be the tray's: what it asks for; for Open, the message of a clicked
+// notification in `folder` and `uid` (0 for none)
+TrayAction TrayMessage(HWND main, UINT message, WPARAM wParam, LPARAM lParam, int64_t& folder, uint64_t& uid);
+
+// a plain preference of the app (HKEY_CURRENT_USER\Software\Inbox Classic), `fallback` when it is not set
+DWORD GetPreference(const wchar_t* name, DWORD fallback);
+void SetPreference(const wchar_t* name, DWORD value);
+
 // ---- complete.cpp ----
 
 // completes the address the cursor is in, in an address field (To, Cc, Bcc), from the people written to and heard
@@ -204,8 +224,10 @@ struct UiEvent {
     uint64_t uid;
     PeFailureKind failure;
     std::wstring message;
-    // the Message-ID of a draft, for DraftSaved
+    // the Message-ID of a draft, for DraftSaved; the subject, for NewMail
     std::string detail;
+    // how many messages, for NewMail
+    uint64_t count = 0;
 };
 
 // the folder tree, the message list and the reading pane
@@ -242,6 +264,8 @@ public:
     void MarkSelected(bool seen);
     // every message of the selected folder read (Edit > Mark All Read, the folder's menu); nothing while searching
     void MarkAllRead();
+    // the message `uid` of `folder` shown: its folder chosen in the tree, the message selected in the list
+    void ShowMessage(int64_t folder, uint64_t uid);
     // the selected message junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     void MarkJunk(bool junk);
     // whether the message shown, or else the folder, is in a Junk folder: the toolbar offers Not Junk there
@@ -464,6 +488,9 @@ enum CommandId : WORD {
     IDM_MARK_ALL_READ,
     IDM_JUNK,
     IDM_NOT_JUNK,
+    IDM_NOTIFY,
+    // the tray icon's menu
+    IDM_OPEN,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

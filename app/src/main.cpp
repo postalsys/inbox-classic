@@ -54,7 +54,7 @@ void OnCoreEvent(void* context, const PeEvent* event) noexcept {
     try {
         auto* copy = new UiEvent{event->kind, event->account, event->folder, event->uid, event->failure,
                                  event->message ? core::Widen(event->message) : std::wstring(),
-                                 event->detail ? std::string(event->detail) : std::string()};
+                                 event->detail ? std::string(event->detail) : std::string(), event->count};
         if (!PostMessageW(static_cast<HWND>(context), WM_CORE_EVENT, 0, reinterpret_cast<LPARAM>(copy))) {
             delete copy;
         }
@@ -97,6 +97,73 @@ void ShowCounts() {
     SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
     // the folder bar says how many a search found
     ShowFolderName();
+}
+
+// ---- the tray ----
+
+// File > Exit, the tray's Exit or Windows shutting down: closing ends the app rather than hiding it in the tray
+bool g_exiting = false;
+
+const wchar_t* kNotifyPreference = L"NewMailNotifications";
+// Tools > Notify of New Mail, read once
+bool g_notify = GetPreference(kNotifyPreference, 1) != 0;
+const wchar_t* kTrayNotePreference = L"TrayNoteShown";
+
+// the window back from the tray (or the taskbar), in front
+void ShowMain() {
+    if (IsIconic(g_main)) {
+        ShowWindow(g_main, SW_RESTORE);
+    } else {
+        ShowWindow(g_main, SW_SHOW);
+    }
+    SetForegroundWindow(g_main);
+}
+
+// the window's close button: the app keeps checking mail from the tray; the first time it says so
+void HideToTray() {
+    ShowWindow(g_main, SW_HIDE);
+    if (!GetPreference(kTrayNotePreference, 0)) {
+        SetPreference(kTrayNotePreference, 1);
+        TrayNotify(g_main, L"Inbox Classic is still running",
+                   L"It keeps checking for new mail here. Click the icon to open it, or right-click it to exit.", 0, 0);
+    }
+}
+
+// new mail: a notification, unless the window is in front (the list shows it) or notifications are off
+void NotifyNewMail(const UiEvent& event) {
+    if (!g_notify) {
+        return;
+    }
+    if (IsWindowVisible(g_main) && !IsIconic(g_main) && GetForegroundWindow() == g_main) {
+        return;
+    }
+    std::wstring subject = core::Widen(event.detail.c_str());
+    if (subject.empty()) {
+        subject = L"(no subject)";
+    }
+    if (event.count <= 1) {
+        TrayNotify(g_main, event.message, subject, event.folder, event.uid);
+    } else {
+        TrayNotify(g_main, std::to_wstring(event.count) + L" new messages", L"The newest from " + event.message + L": " + subject, event.folder,
+                   event.uid);
+    }
+}
+
+void TrayMenu() {
+    HMENU menu = CreatePopupMenu();
+    AppendMenuW(menu, MF_STRING, IDM_OPEN, L"&Open Inbox Classic");
+    SetMenuDefaultItem(menu, IDM_OPEN, FALSE);
+    AppendMenuW(menu, MF_STRING, IDM_SYNC, L"&Check for New Mail");
+    AppendMenuW(menu, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, L"&Notify of New Mail");
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, IDM_EXIT, L"E&xit");
+    POINT at;
+    GetCursorPos(&at);
+    // in front, or the menu would not close when clicked away from
+    SetForegroundWindow(g_main);
+    TrackPopupMenu(menu, TPM_RIGHTBUTTON | TPM_BOTTOMALIGN, at.x, at.y, 0, g_main, nullptr);
+    PostMessageW(g_main, WM_NULL, 0, 0);
+    DestroyMenu(menu);
 }
 
 // the last message sent, as the outgoing pane says it once the Outbox is empty
@@ -239,6 +306,9 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_SIGN_IN_APP_CHECKED:
         RequestDone(event.uid);
         break;
+    case PE_EVENT_KIND_NEW_MAIL:
+        NotifyNewMail(event);
+        break;
     case PE_EVENT_KIND_MESSAGE_SENT:
         // shown by the OutboxChanged that follows it
         g_lastSent = L"Sent " + Quoted(event.message) + L" at " + TimeNow();
@@ -263,6 +333,10 @@ void OnEvent(const UiEvent& event) {
         break;
     }
     g_mailbox.OnEvent(event);
+    // the tray and the taskbar button: what is unread in the Inboxes, when a folder changed
+    if (event.kind == PE_EVENT_KIND_FOLDER_CHANGED || event.kind == PE_EVENT_KIND_SYNC_FINISHED) {
+        TrayCount(g_main, pe_inbox_unread(g_core.get()));
+    }
     ShowCounts();
 }
 
@@ -310,6 +384,8 @@ HMENU BuildMenu() {
     HMENU tools = CreatePopupMenu();
     AppendMenuW(tools, MF_STRING, IDM_SYNC, L"Send and Recei&ve All\tF5");
     AppendMenuW(tools, MF_STRING, IDM_OUTBOX, L"&Outbox...");
+    AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(tools, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, L"&Notify of New Mail");
     HMENU help = CreatePopupMenu();
     AppendMenuW(help, MF_STRING, IDM_HELP, L"&Contents\tF1");
     AppendMenuW(help, MF_SEPARATOR, 0, nullptr);
@@ -591,7 +667,17 @@ void OnCommand(WORD id, WORD code) {
         AddAccount();
         return;
     case IDM_EXIT:
-        DestroyWindow(g_main);
+        // the messages being written may ask first (WM_CLOSE)
+        g_exiting = true;
+        PostMessageW(g_main, WM_CLOSE, 0, 0);
+        return;
+    case IDM_OPEN:
+        ShowMain();
+        return;
+    case IDM_NOTIFY:
+        g_notify = !g_notify;
+        SetPreference(kNotifyPreference, g_notify ? 1 : 0);
+        CheckMenuItem(GetMenu(g_main), IDM_NOTIFY, MF_BYCOMMAND | (g_notify ? MF_CHECKED : MF_UNCHECKED));
         return;
     case IDM_SYNC:
         SyncAll();
@@ -659,6 +745,21 @@ void DropQueuedEvents() {
 }
 
 LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    int64_t noteFolder = 0;
+    uint64_t noteUid = 0;
+    switch (TrayMessage(hwnd, message, wParam, lParam, noteFolder, noteUid)) {
+    case TrayAction::None:
+        break;
+    case TrayAction::Handled:
+        return 0;
+    case TrayAction::Open:
+        ShowMain();
+        g_mailbox.ShowMessage(noteFolder, noteUid);
+        return 0;
+    case TrayAction::Menu:
+        TrayMenu();
+        return 0;
+    }
     switch (message) {
     case WM_CREATE:
         g_main = hwnd;
@@ -673,7 +774,13 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         // what waits from the last run
         ShowOutbox();
         SetTimer(hwnd, TIMER_SYNC, kSyncInterval, nullptr);
+        TrayCreate(hwnd);
+        TrayCount(hwnd, pe_inbox_unread(g_core.get()));
         return 0;
+    case WM_QUERYENDSESSION:
+        // Windows is shutting down or signing out: the app ends with it
+        g_exiting = true;
+        return TRUE;
     case WM_SIZE:
         Layout();
         return 0;
@@ -777,6 +884,11 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
     case WM_CLOSE:
+        // the close button: into the tray, where it goes on checking mail
+        if (!g_exiting) {
+            HideToTray();
+            return 0;
+        }
         // the messages being written first: each may ask to be saved, and the app stays while one is kept open or
         // saved
         switch (CloseComposeWindows()) {
@@ -786,6 +898,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             g_quitAfterCompose = true;
             return 0;
         case ComposeClose::Kept:
+            g_exiting = false;
             return 0;
         }
         break;
@@ -809,6 +922,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_DESTROY:
         KillTimer(hwnd, TIMER_SYNC);
+        TrayRemove(hwnd);
         DestroyComposeWindows();
         // the WebView2s go before COM does, the core before its events are dropped
         CloseHelp();

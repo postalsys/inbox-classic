@@ -244,6 +244,26 @@ impl Store {
         Ok(changed)
     }
 
+    /// How many messages are unread in the Inboxes of all accounts, for the tray and the taskbar
+    pub fn inbox_unread(&self) -> Result<u64> {
+        self.db.query_row(
+            "SELECT COUNT(*) FROM messages m JOIN folders f ON f.id = m.folder_id \
+             WHERE f.path = 'INBOX' COLLATE NOCASE AND m.seen = 0",
+            [],
+            |row| row.get(0),
+        )
+    }
+
+    /// The unread messages of a folder from UID `uid` on, the newest first
+    pub fn unseen_from(&self, folder: FolderId, uid: u64) -> Result<Vec<Message>> {
+        self.db
+            .prepare_cached(&format!(
+                "SELECT {COLUMNS} FROM messages WHERE folder_id = ?1 AND uid >= ?2 AND seen = 0 ORDER BY uid DESC"
+            ))?
+            .query_map(params![folder, uid], from_row)?
+            .collect()
+    }
+
     /// Marks every unread message of a folder read; their UIDs, for the server
     pub fn mark_all_seen(&self, folder: FolderId) -> Result<Vec<u64>> {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
@@ -470,6 +490,16 @@ mod tests {
         assert!(m.deleted() && !m.seen());
         assert_eq!(m.modseq, Some(42));
         assert_eq!(store.folder(folder).unwrap().unread, 1);
+        // the folder is an Inbox: the tray counts it, and what came from UID 5 on is unread
+        assert_eq!(store.inbox_unread().unwrap(), 1);
+        let fresh: Vec<u64> = store
+            .unseen_from(folder, 5)
+            .unwrap()
+            .iter()
+            .map(|m| m.info.uid)
+            .collect();
+        assert_eq!(fresh, [5]);
+        assert!(store.unseen_from(folder, 6).unwrap().is_empty());
 
         // adding again updates the flags, the rest stays
         let mut again = message(5, "y", "A", 1, &["\\Seen"]);

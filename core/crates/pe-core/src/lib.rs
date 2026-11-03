@@ -8,6 +8,7 @@
 
 mod compose;
 mod fold;
+pub mod mailto;
 mod requests;
 mod search;
 mod secrets;
@@ -59,6 +60,16 @@ pub enum Event {
     MessageReady {
         folder: FolderId,
         uid: u64,
+    },
+    /// New unread mail came in the Inbox of `account` (`count` messages), `uid` the newest, from `from` about
+    /// `subject`
+    NewMail {
+        account: AccountId,
+        folder: FolderId,
+        uid: u64,
+        count: usize,
+        from: String,
+        subject: String,
     },
     /// A message was sent, and is in the Sent folder when the account has one
     MessageSent {
@@ -316,6 +327,11 @@ impl Core {
                 message: format!("the password could not be saved for the next start: {error}"),
             });
         }
+    }
+
+    /// How many messages are unread in the Inboxes of all accounts
+    pub fn inbox_unread(&self) -> Result<u64> {
+        Ok(self.store().inbox_unread()?)
     }
 
     /// The people whose address or name starts with what was typed, best first, for completing an address

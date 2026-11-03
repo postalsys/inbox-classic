@@ -27,6 +27,7 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hwnd, out RECT rect);
 [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
 [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+[DllImport("user32.dll")] public static extern IntPtr GetDesktopWindow();
 [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hwnd);
@@ -128,7 +129,7 @@ $WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $EM_SETSEL = 0x00B1; $EM_REPLACESEL 
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
 $VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
-$IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
+$IDM_NEW_ACCOUNT = 100; $IDM_EXIT = 101; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
 $IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
@@ -1758,13 +1759,46 @@ public static class Dragger {
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($print) } 10)) 'and closing it prints nothing'
     }
 
+    Step 'the tray'
+    Add-Type -Namespace Native -Name Tray -MemberDefinition @'
+[StructLayout(LayoutKind.Sequential)] public struct NOTIFYICONIDENTIFIER { public int cbSize; public IntPtr hWnd; public uint uID; public Guid guidItem; }
+public struct IconRect { public int Left, Top, Right, Bottom; }
+[DllImport("shell32.dll")] public static extern int Shell_NotifyIconGetRect(ref NOTIFYICONIDENTIFIER identifier, out IconRect rect);
+public static bool HasIcon(IntPtr window) {
+    var id = new NOTIFYICONIDENTIFIER { cbSize = Marshal.SizeOf(typeof(NOTIFYICONIDENTIFIER)), hWnd = window, uID = 1 };
+    IconRect rect;
+    return Shell_NotifyIconGetRect(ref id, out rect) == 0;
+}
+'@
+    Check ([Native.Tray]::HasIcon($main)) 'the app has its icon in the notification area'
+    SelectFolder 0
+    $beforeRows = WaitFor { if ((Rows) -ge 1) { Rows } }
+    # the close button hides it there, where it goes on checking mail
+    [void][Native.Win]::PostMessage($main, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindowVisible($main) } 10)) 'closing the window hides it in the tray'
+    Check (-not $app.HasExited) 'and the app keeps running'
+    # new mail while it is hidden: it comes in at once (IDLE), with a notification
+    AddMessage "From: Nora Example <nora@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: Fresh while hidden`r`nDate: $([DateTime]::UtcNow.AddMinutes(5).ToString('r'))`r`nMessage-ID: <fresh-hidden@example.com>`r`n`r`nJust in.`r`n"
+    Start-Sleep -Seconds 6
+    $desktop = [Native.Win]::GetDesktopWindow()
+    Shot $desktop 'tray-1-notification'
+    # a click on the icon brings it back, with the new message in the Inbox
+    $WM_TRAY = 0x8000 + 60; $NIN_SELECT = 0x0400
+    [void][Native.Win]::PostMessage($main, $WM_TRAY, [IntPtr]::Zero, [IntPtr]$NIN_SELECT)
+    Check ([bool](WaitFor { [Native.Win]::IsWindowVisible($main) } 10)) 'a click on the icon shows the window again'
+    Check ([bool](WaitFor { (Rows) -gt $beforeRows } 10)) "with the new message in the list, which came without a sync ($beforeRows, $(Rows))"
+    # the taskbar button counts what is unread in the Inbox
+    Start-Sleep -Seconds 1
+    Shot $desktop 'tray-2-taskbar'
+
     Step 'closing'
     # a message being written is asked about first: Cancel keeps the app and the message, No lets both go
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose
     SetText $compose $IDC_SUBJECT 'Still writing'
     [void](TypeInEditor $compose 'Not done yet.')
-    [void][Native.Win]::PostMessage($main, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+    # File > Exit ends the app (the close button only hides it)
+    Command $main $IDM_EXIT
     $ask = WaitWindow '#32770' 'Inbox Classic' 10
     Check ($null -ne $ask) 'closing the app asks about a message with changes'
     if ($ask) {
@@ -1772,7 +1806,7 @@ public static class Dragger {
         Click $ask 2
         Start-Sleep -Seconds 1
         Check ([Native.Win]::IsWindow($main) -and [Native.Win]::IsWindow($compose)) 'Cancel keeps the app and the message open'
-        [void][Native.Win]::PostMessage($main, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        Command $main $IDM_EXIT
         $ask = WaitWindow '#32770' 'Inbox Classic' 10
         if ($ask) { Click $ask 7 }
     }

@@ -883,6 +883,27 @@ void Mailbox::MarkAllRead() {
     }
 }
 
+void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
+    auto item = items_.find(folder);
+    if (item == items_.end()) {
+        return;
+    }
+    // the folder (which ends a search), then the message in it
+    TreeView_SelectItem(tree_, item->second);
+    if (folder_ != folder) {
+        return;
+    }
+    PeSearch search = Search();
+    int64_t index = pe_message_index(core_, &search, sort_, ascending_, folder, uid);
+    if (index >= 0 && index <= INT_MAX) {
+        int row = static_cast<int>(index);
+        ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
+        ListView_SetItemState(list_, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+        ListView_EnsureVisible(list_, row, FALSE);
+        SetFocus(list_);
+    }
+}
+
 void Mailbox::MarkJunk(bool junk) {
     const PeMessage* row = SelectedRow();
     if (!row) {

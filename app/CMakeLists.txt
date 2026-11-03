@@ -42,6 +42,7 @@ add_executable(InboxClassic WIN32
     src/signinapps.cpp
     src/compose.cpp
     src/complete.cpp
+    src/tray.cpp
     src/editor.cpp
     src/core.cpp
     src/help.cpp

@@ -42,6 +42,9 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_DRAFT_SAVED = 12,
   // The check `uid` of `pe_sign_in_app_check` is done: `pe_sign_in_app_check_result`
   PE_EVENT_KIND_SIGN_IN_APP_CHECKED = 13,
+  // New unread mail in the Inbox `folder` of `account`: `count` messages, `uid` the newest, `message` who it is
+  // from and `detail` its subject
+  PE_EVENT_KIND_NEW_MAIL = 14,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -175,11 +178,13 @@ typedef struct PeEvent {
   int64_t folder;
   uint64_t uid;
   enum PeFailureKind failure;
-  // UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save.
-  // NULL otherwise
+  // UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; who
+  // it is from, for `NewMail`. NULL otherwise
   const char *message;
-  // UTF-8: the Message-ID of the draft, for `DraftSaved`. NULL otherwise
+  // UTF-8: the Message-ID of the draft, for `DraftSaved`; the subject, for `NewMail`. NULL otherwise
   const char *detail;
+  // How many messages, for `NewMail`; 0 otherwise
+  uint64_t count;
 } PeEvent;
 
 // Called on a worker thread, never on the thread that called into the core: copy what is
@@ -602,6 +607,13 @@ const struct PeAccount *pe_account_list_get(const struct PeAccountList *list, si
 // # Safety
 // `list` must be NULL or a list that was not freed yet.
 void pe_account_list_free(struct PeAccountList *list);
+
+// How many messages are unread in the Inboxes of all accounts (the tray and the taskbar show it); 0 also when the
+// core can not say
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_inbox_unread(const struct PeCore *core);
 
 // The people whose address or name (a word of it) starts with `typed`, best first, at most `limit`; NULL on failure
 //

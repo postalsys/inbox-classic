@@ -206,6 +206,18 @@ const sections = [
                 ]
             },
             {
+                shot: 'tray-2-taskbar',
+                name: 'The tray and new mail notifications',
+                what: "The Inbox of each account is watched (IMAP IDLE), so new mail comes in as it arrives. Closing the window keeps the app in the notification area, still checking mail; the icon's tooltip and a count on the taskbar button say how many messages are unread in the Inboxes. New unread mail shows a Windows notification while the window is not in front; a click opens the message. Tools > Notify of New Mail turns them off.",
+                how: 'Close the window; click the tray icon to open it again, right-click it for Check for New Mail and Exit. File > Exit ends the app.',
+                checked: [
+                    'The app has its icon in the notification area',
+                    'Closing the window hides it in the tray, and the app keeps running',
+                    'New mail comes in without a sync while it is hidden',
+                    'A click on the icon shows the window again'
+                ]
+            },
+            {
                 shot: 'main-2-new-mail',
                 name: 'Send/Recv (F5) and automatic checks',
                 what: 'Every account is checked at start and every ten minutes; Send/Recv or F5 checks now. The arrow beside Send/Recv checks one account; the one beside Create Mail starts a message from a chosen account. New mail appears in the list without restarting.',

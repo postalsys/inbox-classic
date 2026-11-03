@@ -309,6 +309,8 @@ fn reads_mail_through_the_c_api() {
     assert!(unsafe { pe_message_set_seen(core, inbox, uid, true) });
     wait(&events, |e| e.kind == PeEventKind::FolderChanged && e.folder == inbox);
     assert!(unsafe { pe_folder_mark_all_read(core, inbox) });
+    assert_eq!(unsafe { pe_inbox_unread(core) }, 0);
+    assert_eq!(unsafe { pe_inbox_unread(std::ptr::null()) }, 0);
 
     // the sender is in the address book, found by a word of the name or the address, until forgotten
     let typed = c("send");
