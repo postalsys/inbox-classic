@@ -208,12 +208,8 @@ public:
     // WM_NOTIFY and WM_COMMAND of the panes; true when handled
     bool OnNotify(NMHDR* header, LRESULT& result);
     bool OnCommand(WORD id, WORD code);
-    // the Find box: placed at the right of the toolbar row, focused (Ctrl+Shift+F), cleared (Esc); the Show and In
-    // choices at the right of the folder bar
+    // the Find box: placed at the right of the toolbar row, focused (Ctrl+Shift+F), cleared (Esc)
     void PlaceFind(const RECT& row);
-    void PlaceFilters(const RECT& folderBar);
-    // whether a window is on the folder bar (its labels), for its colors
-    bool OnFolderBar(HWND window) const;
     // WM_DRAWITEM of the search field's magnifier and clear button; false for other controls
     bool OnDrawItem(const DRAWITEMSTRUCT& item);
     void FocusFind();
@@ -247,11 +243,12 @@ public:
     bool OnCtlColor(HWND window, HDC dc, LRESULT& brush);
     // "12 message(s), 3 unread" for the status bar
     std::wstring Counts() const;
-    // the name of the selected folder (or account), for the folder bar and the title; empty with nothing selected.
-    // While searching or showing only some messages, what the list shows ("All folders: search results")
+    // the name of the selected folder (or account), for the title; empty with nothing selected, "Search results"
+    // while searching
     std::wstring SelectedName() const;
-    // for the folder bar while searching: how many messages the search does not know the text of yet, empty for none
-    std::wstring IndexingNote() const;
+    // the folder bar: the folder's name, or what a search found for which words (and how many messages it does not
+    // know the text of yet)
+    std::wstring FolderBarText() const;
     std::wstring AccountName(int64_t account) const;
     std::wstring AccountEmail(int64_t account) const;
     // the provider the account signs in to through the browser, NONE for a password
@@ -276,18 +273,16 @@ private:
     void ReloadList(bool keepSelection);
     // what the list shows: the folder (or every folder), the Show choice and the words of the Find box
     PeSearch Search() const;
-    // whether the list has messages of other folders than the selected one (All folders, or in: typed): then it has
-    // a Folder column
-    bool ListsFolders() const;
-    // anything narrowing or widening the list: words, a Show choice, All folders
+    // whether the list has what words typed found, in every folder (with a Folder column), rather than a folder
     bool Searching() const;
     void ShowFolderColumn();
     std::wstring RowFolder(int64_t folder) const;
-    void OnFilterChanged();
     const PeMessage* Row(int index);
     const PeMessage* SelectedRow();
     // the reading pane emptied; with "There is no message selected." in it unless a message is `loading`
     void ClearReader(bool loading = false);
+    // in the middle of the list while it has no rows: why, and what to do about it
+    void DrawEmptyList(HDC dc) const;
     void SelectAfterRemoval(int index);
     void FolderMenu();
     // the name and whether it is the Inbox or a special folder (not renamed or deleted); false when not found
@@ -339,23 +334,14 @@ private:
     int64_t firstAccount_ = 0;
     // the account whose own item is selected in the tree, 0 when a folder is
     int64_t selectedAccount_ = 0;
-    // what the list is narrowed to (the Find box), empty for all; the folder's own total beside it
+    // what the Find box searches for, empty when the list is the folder's
     std::wstring find_;
     std::string findUtf8_;
-    uint64_t folderTotal_ = 0;
-    // the search field: a white frame with the magnifier, the box and the clear button in it
-    HWND findFrame_ = nullptr;
+    // the search field: a white sunken window with the magnifier, the box and the clear button in it
+    HWND findField_ = nullptr;
     HWND findIcon_ = nullptr;
     HWND findEdit_ = nullptr;
     HWND findClear_ = nullptr;
-    // what the words typed name themselves (in:), worked out by the core when they change
-    bool findSpansFolders_ = false;
-    HWND showLabel_ = nullptr;
-    HWND showChoice_ = nullptr;
-    HWND scopeLabel_ = nullptr;
-    HWND scopeChoice_ = nullptr;
-    PeShow show_ = PE_SHOW_ALL;
-    bool everyFolder_ = false;
     bool folderColumn_ = false;
     int64_t folder_ = 0;
     uint64_t total_ = 0;
@@ -408,11 +394,8 @@ enum CommandId : WORD {
     IDC_ATTACHMENTS,
     IDC_PICTURES,
     IDC_FIND,
-    // beside the folder name: which messages the list shows, and in which folders it searches
-    IDC_SHOW,
-    IDC_SCOPE,
-    // the search field's frame, magnifier and clear button around the Find box
-    IDC_FIND_FRAME,
+    // the search field the Find box is in, with its magnifier and clear button
+    IDC_FIND_FIELD,
     IDC_FIND_ICON,
     IDC_FIND_CLEAR,
     IDM_FIND = 120,

@@ -385,12 +385,6 @@ impl Core {
         Ok(self.store().unindexed_count()?)
     }
 
-    /// Whether the text of a search names its own folders (`in:`), so it finds messages of other folders than the
-    /// one shown
-    pub fn search_spans_folders(text: &str) -> bool {
-        pe_store::Query::parse(text, 0).spans_folders()
-    }
-
     /// One folder with its counts
     pub fn folder(&self, folder: FolderId) -> Result<Folder> {
         Ok(self.store().folder(folder)?)

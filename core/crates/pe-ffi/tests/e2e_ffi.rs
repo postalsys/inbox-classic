@@ -175,8 +175,6 @@ fn reads_mail_through_the_c_api() {
     let operators = c("has:attachment -is:read");
     assert!(unsafe { pe_message_count(core, &folder_search(operators.as_ptr()), &mut total, &mut unread) });
     assert_eq!(total, 1);
-    assert!(unsafe { pe_search_spans_folders(c("in:sent report").as_ptr()) });
-    assert!(!unsafe { pe_search_spans_folders(find.as_ptr()) });
     let list = unsafe {
         pe_messages(
             core,
@@ -572,7 +570,6 @@ fn null_and_bad_arguments() {
             &mut total,
             &mut unread
         ));
-        assert!(!pe_search_spans_folders(std::ptr::null()));
         assert_eq!(pe_search_unindexed_count(std::ptr::null()), 0);
         pe_message_list_free(null_mut());
         pe_message_view_free(null_mut());

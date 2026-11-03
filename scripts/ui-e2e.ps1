@@ -44,6 +44,29 @@ public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int InternalGetWindowText(IntPtr hwnd, System.Text.StringBuilder text, int size);
 [DllImport("user32.dll")] public static extern int GetMenuItemCount(IntPtr menu);
 public struct RECT { public int Left, Top, Right, Bottom; }
+[StructLayout(LayoutKind.Sequential)] public struct GUITHREADINFO { public int cbSize, flags; public IntPtr active, focus, capture, menuOwner, moveSize, caret; public RECT caretRect; }
+[DllImport("user32.dll")] public static extern bool GetGUIThreadInfo(uint thread, ref GUITHREADINFO info);
+// the window with the keyboard focus in the thread of `window`
+public static IntPtr FocusOf(IntPtr window) {
+    uint pid;
+    var info = new GUITHREADINFO { cbSize = Marshal.SizeOf(typeof(GUITHREADINFO)) };
+    return GetGUIThreadInfo(GetWindowThreadProcessId(window, out pid), ref info) ? info.focus : IntPtr.Zero;
+}
+[StructLayout(LayoutKind.Sequential)] struct MouseInput { public int dx, dy; public uint data, flags, time; public IntPtr extra; }
+[StructLayout(LayoutKind.Explicit)] struct Input { [FieldOffset(0)] public uint type; [FieldOffset(8)] public MouseInput mouse; }
+[DllImport("user32.dll")] static extern uint SendInput(uint count, Input[] inputs, int size);
+[DllImport("user32.dll")] static extern int GetSystemMetrics(int index);
+// a click of the left mouse button at (x, y), screen pixels, as a user's
+public static void MouseClick(int x, int y) {
+    foreach (uint flags in new uint[] { 0x0001, 0x0002, 0x0004 }) {
+        var input = new Input { type = 0 };
+        input.mouse.dx = x * 65535 / (GetSystemMetrics(0) - 1);
+        input.mouse.dy = y * 65535 / (GetSystemMetrics(1) - 1);
+        input.mouse.flags = flags | 0x0001 | 0x8000;
+        SendInput(1, new[] { input }, Marshal.SizeOf(typeof(Input)));
+        System.Threading.Thread.Sleep(50);
+    }
+}
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
     var found = new System.Collections.Generic.List<IntPtr>();
@@ -923,25 +946,51 @@ public static class Dragger {
     Step 'finding'
     SelectFolder 0
     $all = WaitFor { if ((Rows) -ge 7) { Rows } }
-    $find = [Native.Win]::GetDlgItem($main, 204)
-    Check ($find -ne [IntPtr]::Zero) 'there is a Find box'
+    $IDC_FIND_FIELD = 205; $IDC_FIND_CLEAR = 207
+    $field = [Native.Win]::GetDlgItem($main, $IDC_FIND_FIELD)
+    $find = [Native.Win]::GetDlgItem($field, 204)
+    Check ($find -ne [IntPtr]::Zero) 'there is a Find box, in a search field'
+    # a click anywhere in the field, not only on the line of text, starts typing in it: at its left end (the
+    # magnifier), its right end and its top edge
+    [void][Native.Win]::SetForegroundWindow($main)
+    $box = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($field, [ref]$box)
+    $listBox = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($list, [ref]$listBox)
+    $middle = [int](($box.Top + $box.Bottom) / 2)
+    foreach ($point in @(@(($box.Left + 6), $middle, 'its left end'), @(($box.Right - 6), $middle, 'its right end'), @([int](($box.Left + $box.Right) / 2), ($box.Top + 4), 'its top edge'))) {
+        # somewhere else first: below the rows of the list
+        [Native.Win]::MouseClick($listBox.Left + 60, $listBox.Bottom - 10)
+        [void](WaitFor { [Native.Win]::FocusOf($main) -eq $list } 3)
+        [Native.Win]::MouseClick($point[0], $point[1])
+        Check ([bool](WaitFor { [Native.Win]::FocusOf($main) -eq $find } 3)) "a click at $($point[2]) of the search field gives the Find box the focus"
+    }
+    $listHeader = [Native.Win]::SendMessage($list, 0x101F, [IntPtr]::Zero, [IntPtr]::Zero)
+    $columns = { [int][Native.Win]::SendMessage($listHeader, 0x1200, [IntPtr]::Zero, [IntPtr]::Zero) }
+    Check ((& $columns) -eq 7) 'a folder has no Folder column'
+    # the folder bar: the static whose text starts with a space
+    $folderBar = { ([Native.Win]::FindDescendants($main, 'Static') | ForEach-Object { WindowText $_ } | Where-Object { $_.StartsWith(' ') } | Select-Object -First 1) }
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
     Check ([bool](WaitFor { (Rows) -eq 1 })) 'typing in it narrows the list to what has it (the subject)'
-    $status = WindowText ([Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value))
+    Check ([bool](WaitFor { (& $columns) -eq 8 } 5)) 'it searches every folder: the list has a Folder column'
+    Check ([bool](WaitFor { (& $folderBar) -match '^ 1 result for .lunch.' } 5)) "the folder bar says what was found for what ($(& $folderBar))"
+    Check ((WindowText $main) -match '^Search results') 'and the title that it is a search'
     Shot $main 'find-1-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'ann@example.com')
     Check ([bool](WaitFor { (Rows) -ge 2 })) 'the sender address is found too'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'nothing has this')
     Check ([bool](WaitFor { (Rows) -eq 0 })) 'and nothing when nothing has it'
+    # the list then says so in its middle, and what to try
+    Check ([bool](WaitFor { (& $folderBar) -match '^ No results for .nothing has this.' } 5)) "the folder bar says there are no results ($(& $folderBar))"
+    Shot $main 'find-3-no-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
-    Check ([bool](WaitFor { (Rows) -eq $all })) 'clearing it shows the whole folder again'
+    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 7 })) 'clearing it shows the folder again, without the Folder column'
     # the clear button is there only while there is something to clear, and clears it
-    $IDC_FIND_CLEAR = 209
-    Check (-not (Visible $main $IDC_FIND_CLEAR)) 'an empty Find box has no clear button'
+    Check (-not (Visible $field $IDC_FIND_CLEAR)) 'an empty Find box has no clear button'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
-    Check ([bool](WaitFor { (Rows) -eq 1 -and (Visible $main $IDC_FIND_CLEAR) })) 'with text in it, it has'
-    Click $main $IDC_FIND_CLEAR
-    Check ([bool](WaitFor { (Rows) -eq $all -and (WindowText $find) -eq '' -and -not (Visible $main $IDC_FIND_CLEAR) })) 'which empties it and shows the whole folder'
+    Check ([bool](WaitFor { (Rows) -eq 1 -and (Visible $field $IDC_FIND_CLEAR) })) 'with text in it, it has'
+    Click $field $IDC_FIND_CLEAR
+    Check ([bool](WaitFor { (Rows) -eq $all -and (WindowText $find) -eq '' -and -not (Visible $field $IDC_FIND_CLEAR) })) 'which empties it and shows the folder'
     # the text of messages is found too, once the search has read it (in the background after a sync; only the text
     # parts are fetched)
     Command $main $IDM_SYNC
@@ -949,40 +998,21 @@ public static class Dragger {
     Check ([bool](WaitFor { (Rows) -eq 1 } 40)) 'words of the text are found'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'from:carol')
     Check ([bool](WaitFor { (Rows) -eq 1 })) 'Gmail operators work: from:'
-    # the folder bar names what is shown
-    # the folder bar: the static whose text starts with a space (the Show and In labels do not)
-    $folderBar = { ([Native.Win]::FindDescendants($main, 'Static') | ForEach-Object { WindowText $_ } | Where-Object { $_.StartsWith(' Inbox') -or $_.StartsWith(' All folders') } | Select-Object -First 1) }
-    Check ([bool](WaitFor { (& $folderBar) -match 'Inbox: search results' } 5)) "the folder bar says it shows search results ($(& $folderBar))"
-    # Show: Flagged lists what is:starred finds
-    $IDC_SHOW = 205; $IDC_SCOPE = 206
-    function Choose([int]$id, [int]$index) {
-        $combo = [Native.Win]::GetDlgItem($main, $id)
-        [void][Native.Win]::SendMessage($combo, $CB_SETCURSEL, [IntPtr]$index, [IntPtr]::Zero)
-        [void][Native.Win]::PostMessage($main, $WM_COMMAND, [IntPtr](($id -band 0xFFFF) -bor (1 -shl 16)), $combo)
-    }
-    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:starred')
-    $starred = WaitFor { if ((Rows) -ge 1 -and (Rows) -lt $all) { Rows } }
+    # what is in other folders is found as well; in: narrows it to one
+    # from the folder (the whole of it), so what is counted is what this search found
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
     [void](WaitFor { (Rows) -eq $all })
-    Choose $IDC_SHOW 2
-    Check ([bool]$starred -and [bool](WaitFor { (Rows) -eq $starred })) "Show: Flagged lists the flagged messages, as is:starred does ($starred)"
-    Check ([bool](WaitFor { (& $folderBar) -match 'flagged messages' } 5)) 'and the folder bar says so'
-    Shot $main 'find-2-show-flagged'
-    Choose $IDC_SHOW 0
-    [void](WaitFor { (Rows) -eq $all })
-    # In: All folders: the messages of every folder in one list, with a Folder column
-    $listHeader = [Native.Win]::SendMessage($list, 0x101F, [IntPtr]::Zero, [IntPtr]::Zero)
-    $columns = { [int][Native.Win]::SendMessage($listHeader, 0x1200, [IntPtr]::Zero, [IntPtr]::Zero) }
-    Check ((& $columns) -eq 7) 'a folder has no Folder column'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello in:inbox')
+    $inInbox = WaitFor { if ((Rows) -ge 1 -and (Rows) -lt $all) { Rows } }
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello')
-    # once the search has narrowed the folder (a moment after the last key)
-    $inFolder = WaitFor { if ((Rows) -ge 1 -and (Rows) -lt $all) { Rows } }
-    Choose $IDC_SCOPE 1
-    Check ([bool](WaitFor { (Rows) -gt $inFolder })) "All folders finds it in other folders too (Sent Items), not only the Inbox ($inFolder)"
-    Check ([bool](WaitFor { (& $columns) -eq 8 } 5)) 'with a Folder column'
-    Check ([bool](WaitFor { (& $folderBar) -match 'All folders: search results' } 5)) 'the folder bar says all folders'
-    Shot $main 'find-3-all-folders'
+    $everywhere = WaitFor { if ((Rows) -gt $inInbox) { Rows } }
+    Check ([bool]$inInbox -and [bool]$everywhere) "the messages of other folders are found too ($everywhere), in:inbox narrows them to the Inbox ($inInbox)"
+    Shot $main 'find-2-every-folder'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:unread')
+    Check ([bool](WaitFor { (Rows) -ge 1 -and (Rows) -lt $all })) 'is:unread lists the unread messages'
     # a result from another folder opens where it is
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello')
+    [void](WaitFor { (Rows) -eq $everywhere })
     SelectRow 0
     Check ([bool](WaitFor { (WindowText ([Native.Win]::FindDescendants($main, 'Static') | Where-Object { (WindowText $_) -match 'From:' } | Select-Object -First 1)) -match 'Subject:' } 10)) 'a result is shown in the reading pane'
     # Esc ends the search, back in the folder

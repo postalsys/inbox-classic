@@ -831,18 +831,6 @@ pub unsafe extern "C" fn pe_search_unindexed_count(core: *const PeCore) -> u64 {
     unsafe { with(core, 0, |core| core.unindexed_count().unwrap_or(0)) }
 }
 
-/// Whether the text typed names its own folders (`in:`), so the list has messages of other folders than the one
-/// selected (and says which folder each is in)
-///
-/// # Safety
-/// `text` must be NULL or a NUL-terminated string.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_search_spans_folders(text: *const c_char) -> bool {
-    // SAFETY: as the caller guarantees
-    let text = unsafe { arg(text) }.unwrap_or_default().to_string();
-    guard(move || Core::search_spans_folders(&text)).unwrap_or(false)
-}
-
 // ---- messages ----
 
 #[repr(C)]

@@ -612,13 +612,6 @@ bool pe_message_count(const struct PeCore *core,
 // `core` must be a live handle.
 uint64_t pe_search_unindexed_count(const struct PeCore *core);
 
-// Whether the text typed names its own folders (`in:`), so the list has messages of other folders than the one
-// selected (and says which folder each is in)
-//
-// # Safety
-// `text` must be NULL or a NUL-terminated string.
-bool pe_search_spans_folders(const char *text);
-
 // `limit` messages of what `search` finds from `offset` on, in the order asked for. NULL on failure.
 //
 // # Safety

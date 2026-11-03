@@ -70,13 +70,15 @@ void SetStatus(const std::wstring& text) {
 // the selected folder in the folder bar and the title: "Inbox - Inbox Classic"
 void ShowFolderName() {
     std::wstring name = g_mailbox.SelectedName();
-    SetWindowTextW(g_folderBar, (L" " + name + g_mailbox.IndexingNote()).c_str());
+    SetWindowTextW(g_folderBar, (L" " + g_mailbox.FolderBarText()).c_str());
     SetWindowTextW(g_main, name.empty() ? kTitle : (name + L" - " + kTitle).c_str());
 }
 
 void ShowCounts() {
     std::wstring counts = g_mailbox.Counts();
     SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
+    // the folder bar says how many a search found
+    ShowFolderName();
 }
 
 // the last message sent, as the outgoing pane says it once the Outbox is empty
@@ -385,7 +387,6 @@ void Layout() {
     GetClientRect(g_toolbar, &bar);
     g_mailbox.PlaceFind(bar);
     MoveWindow(g_folderBar, 0, bar.bottom, bar.right, FolderBarHeight(), TRUE);
-    g_mailbox.PlaceFilters({0, bar.bottom, bar.right, bar.bottom + FolderBarHeight()});
     SendMessageW(g_status, WM_SIZE, 0, 0);
     Panes panes = Measure();
     const RECT& area = panes.area;
@@ -721,7 +722,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (LRESULT brush = 0; g_mailbox.OnCtlColor(reinterpret_cast<HWND>(lParam), reinterpret_cast<HDC>(wParam), brush)) {
             return brush;
         }
-        if (reinterpret_cast<HWND>(lParam) == g_folderBar || g_mailbox.OnFolderBar(reinterpret_cast<HWND>(lParam))) {
+        if (reinterpret_cast<HWND>(lParam) == g_folderBar) {
             // white on dark grey, as the folder bar of Outlook Express
             SetTextColor(reinterpret_cast<HDC>(wParam), RGB(0xFF, 0xFF, 0xFF));
             SetBkColor(reinterpret_cast<HDC>(wParam), kFolderBarColor);

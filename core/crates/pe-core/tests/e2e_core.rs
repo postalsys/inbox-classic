@@ -615,7 +615,6 @@ fn searches_the_local_index() {
     assert_eq!(subjects(None, "numbers"), ["Kvartali aruanne", "Old numbers"]);
     assert_eq!(subjects(None, "old"), ["Old numbers"]);
     assert_eq!(subjects(Some(inbox), "in:archive is:starred"), ["Old numbers"]);
-    assert!(pe_core::Core::search_spans_folders("in:archive x") && !pe_core::Core::search_spans_folders("x"));
     let search = pe_core::Search {
         folder: None,
         text: "numbers".into(),
