@@ -305,6 +305,7 @@ fn signs_in_with_oauth() {
         scopes: vec!["https://mail.google.com/".into()],
         client_id: "client".into(),
         client_secret: None,
+        response_issuer: None,
     };
     let options = pe_core::Options {
         passwords: pe_core::PasswordStore::Memory,
@@ -327,10 +328,25 @@ fn signs_in_with_oauth() {
         core.oauth_provider_for("imap.gmail.com"),
         Some(pe_oauth::ProviderKind::Google)
     );
-    let (request, url) = core.sign_in_begin(pe_oauth::ProviderKind::Google, USER).unwrap();
-    assert!(url.starts_with("https://accounts.example.com/auth?"), "{url}");
-    assert!(pe_testkit::oauth_browser(&url, "the-code").contains("You are signed in"));
-    wait(&|e| *e == Event::SignInDone { request });
+    let google = pe_core::SignInWith::Builtin(pe_oauth::ProviderKind::Google);
+    let sign_in = |email: &str, code: &str| {
+        let (request, url) = core.sign_in_begin(google, email).unwrap();
+        assert!(url.starts_with("https://accounts.example.com/auth?"), "{url}");
+        let page = pe_testkit::oauth_browser(&url, code);
+        wait(&|e| *e == Event::SignInDone { request });
+        (request, page)
+    };
+    // the built-in Google client is off out of the box: no new account with it
+    assert!(!core.sign_in_enabled(google).unwrap());
+    let (request, _) = sign_in(USER, "the-code");
+    assert!(matches!(
+        core.add_signed_in_account(request, ""),
+        Err(pe_core::Error::TurnedOff)
+    ));
+    assert!(core.accounts().unwrap().is_empty());
+    core.set_sign_in_enabled(google, true).unwrap();
+    let (request, page) = sign_in(USER, "the-code");
+    assert!(page.contains("You are signed in"));
     assert_eq!(core.sign_in_result(request), Ok(()));
 
     // the account is the one signed in to, named as its owner is at the provider, and signs in to ImapKit with
@@ -348,17 +364,14 @@ fn signs_in_with_oauth() {
     assert!(!core.folders(account).unwrap().is_empty());
     // the sign-in was taken
     assert!(core.add_signed_in_account(request, "Work").is_err());
-    // signing in again takes a sign-in of the same account only
-    let (again, url) = core.sign_in_begin(pe_oauth::ProviderKind::Google, SIGNED_IN).unwrap();
-    pe_testkit::oauth_browser(&url, "the-code");
-    wait(&|e| *e == Event::SignInDone { request: again });
+    // signing in again takes a sign-in of the same account only, also with the client turned off since
+    core.set_sign_in_enabled(google, false).unwrap();
+    let (again, _) = sign_in(SIGNED_IN, "the-code");
     core.reauthorize(account, again).unwrap();
     let mut other = server.account_settings();
     other.email = "someone.else@example.com".into();
     core.update_account(account, &other).unwrap();
-    let (again, url) = core.sign_in_begin(pe_oauth::ProviderKind::Google, SIGNED_IN).unwrap();
-    pe_testkit::oauth_browser(&url, "the-code");
-    wait(&|e| *e == Event::SignInDone { request: again });
+    let (again, _) = sign_in(SIGNED_IN, "the-code");
     let refused = core.reauthorize(account, again).unwrap_err();
     assert!(refused.to_string().contains(SIGNED_IN), "{refused}");
     // changing the settings keeps how it signs in, and its servers
@@ -369,17 +382,182 @@ fn signs_in_with_oauth() {
     assert!(matches!(kept.auth, pe_store::Auth::OAuth2(_)) && kept.smtp_host == "127.0.0.1");
 
     // a code the provider refuses
-    let (refused, url) = core.sign_in_begin(pe_oauth::ProviderKind::Google, USER).unwrap();
-    pe_testkit::oauth_browser(&url, "wrong-code");
-    wait(&|e| *e == Event::SignInDone { request: refused });
+    let (refused, _) = sign_in(USER, "wrong-code");
     assert!(core.sign_in_result(refused).unwrap_err().contains("invalid_grant"));
     // told once, then forgotten
     assert!(core.sign_in_result(refused).unwrap_err().contains("not finished"));
 
     // a cancelled sign-in is forgotten
-    let (cancelled, _) = core.sign_in_begin(pe_oauth::ProviderKind::Google, USER).unwrap();
+    let (cancelled, _) = core.sign_in_begin(google, USER).unwrap();
     core.sign_in_cancel(cancelled);
     assert!(core.sign_in_result(cancelled).is_err());
+}
+
+/// A sign-in app the user added, against ImapKit's OpenID Connect provider: discovery, the authorization code flow
+/// with PKCE, the ID token naming the account, XOAUTH2 to IMAP and SMTP with the tokens, refreshing, turning the
+/// app off, and what goes wrong (another issuer in the redirect, a denial, scopes without mail)
+#[test]
+fn signs_in_with_a_sign_in_app() {
+    const ALICE: &str = "alice@example.com";
+    let config = json!({
+        "users": {
+            ALICE: { "password": "pw", "displayName": "Alice Example" },
+            "bob@example.com": { "password": "pw" }
+        },
+        "oauth": {}
+    });
+    let Some(server) = ImapKit::start(config) else {
+        return;
+    };
+    let issuer = server
+        .oauth
+        .clone()
+        .expect("ImapKit 5.3 or newer, with its OAuth provider");
+    let dir = TempDir::new("core-app");
+    let (sender, events) = channel();
+    let options = pe_core::Options {
+        trust: pe_net::Trust::Pinned(vec![server.cert.clone()]),
+        passwords: pe_core::PasswordStore::Memory,
+        ..Default::default()
+    };
+    let core = Core::open_with(dir.path().join("store.db"), options, move |event| {
+        let _ = sender.send(event);
+    })
+    .unwrap();
+    let wait = |accept: &dyn Fn(&Event) -> bool| loop {
+        let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
+        if accept(&event) {
+            return event;
+        }
+    };
+
+    // Check reads the discovery document; saving needs it
+    let form = |client_id: &str, scopes: &str| pe_core::SignInAppForm {
+        name: "ImapKit".into(),
+        issuer: format!("{issuer}/"),
+        client_id: client_id.into(),
+        scopes: scopes.into(),
+        imap_host: "127.0.0.1".into(),
+        imap_port: server.imaps,
+        imap_security: pe_store::Security::Tls,
+        smtp_host: "127.0.0.1".into(),
+        smtp_port: server.smtp,
+        smtp_security: pe_store::Security::StartTls,
+    };
+    let mail_scopes = "openid email profile offline_access mail";
+    let unchecked = core.save_sign_in_app(None, &form("imapkit-approve", mail_scopes), pe_core::SecretChange::Keep);
+    assert!(matches!(unchecked, Err(pe_core::Error::Invalid(_))));
+    assert!(core.sign_in_app_check("http://imapkit.example").is_err());
+    let check = core.sign_in_app_check(&issuer).unwrap();
+    wait(&|e| *e == Event::SignInAppChecked { request: check });
+    let found = core.sign_in_app_check_result(check).unwrap().unwrap();
+    assert_eq!(found.token_url, format!("{issuer}/token"));
+    assert_eq!(found.response_issuer.as_deref(), Some(issuer.as_str()));
+    let app = core
+        .save_sign_in_app(None, &form("imapkit-approve", mail_scopes), pe_core::SecretChange::Keep)
+        .unwrap();
+    let with = pe_core::SignInWith::App(app);
+    assert!(core.sign_in_enabled(with).unwrap());
+
+    let sign_in = |with, email: &str| {
+        let (request, url) = core.sign_in_begin(with, email).unwrap();
+        assert!(url.starts_with(&format!("{issuer}/authorize?")), "{url}");
+        let page = pe_testkit::oauth_follow(&url);
+        wait(&|e| *e == Event::SignInDone { request });
+        (request, page)
+    };
+    let (request, page) = sign_in(with, ALICE);
+    assert!(page.contains("You are signed in"), "{page}");
+    assert_eq!(core.sign_in_result(request), Ok(()));
+    let account = core.add_signed_in_account(request, "").unwrap();
+    let added = &core.account(account).unwrap().settings;
+    assert_eq!((added.name.as_str(), added.email.as_str()), ("Alice Example", ALICE));
+    assert_eq!(added.auth, pe_store::Auth::OAuth2(format!("app:{app}")));
+    assert_eq!((added.imap_port, added.smtp_port), (server.imaps, server.smtp));
+
+    // IMAP and SMTP with the access token
+    core.sync(account).unwrap();
+    wait(&|e| *e == Event::SyncFinished { account });
+    assert!(!core.folders(account).unwrap().is_empty());
+    let outgoing = pe_core::Outgoing {
+        to: "bob@example.com".into(),
+        subject: "Signed in with a sign-in app".into(),
+        text: "Hello".into(),
+        ..Default::default()
+    };
+    core.send(account, outgoing).unwrap();
+    wait(&|e| matches!(e, Event::MessageSent { .. }));
+    let used = server.request("GET", "/v1/oauth/tokens?user=alice%40example.com&type=access", None);
+    let first_tokens = used.as_array().map_or(0, Vec::len);
+    assert!(first_tokens >= 1, "{used}");
+
+    // a worker started again makes a new access token from the refresh token
+    server.request("POST", "/v1/oauth/tokens/expire", Some(json!({ "user": ALICE })));
+    core.update_account(account, &core.account(account).unwrap().settings)
+        .unwrap();
+    core.sync(account).unwrap();
+    wait(&|e| *e == Event::SyncFinished { account });
+    let used = server.request("GET", "/v1/oauth/tokens?user=alice%40example.com&type=access", None);
+    assert!(used.as_array().map_or(0, Vec::len) > first_tokens, "{used}");
+
+    // the manager lists it with its account; removing it is refused while the account uses it
+    let entries = core.sign_in_apps().unwrap();
+    let entry = entries.iter().find(|e| e.with == with).unwrap();
+    assert_eq!(
+        (entry.name.as_str(), entry.used_by.as_slice()),
+        ("ImapKit", &[ALICE.to_string()][..])
+    );
+    let in_use = core.remove_sign_in_app(app).unwrap_err();
+    assert!(in_use.to_string().contains(ALICE), "{in_use}");
+
+    // turned off: no new account with it, but its account signs in again
+    core.set_sign_in_enabled(with, false).unwrap();
+    let (request, _) = sign_in(with, ALICE);
+    core.reauthorize(account, request).unwrap();
+    let (request, _) = sign_in(with, "bob@example.com");
+    assert!(matches!(
+        core.add_signed_in_account(request, ""),
+        Err(pe_core::Error::TurnedOff)
+    ));
+    core.set_sign_in_enabled(with, true).unwrap();
+
+    // a redirect that names another issuer (RFC 9207), and a denial
+    for (decision, reason) in [("wrong-iss", "another sign-in"), ("deny", "cancelled")] {
+        server.request("POST", "/v1/oauth/decisions", Some(json!({ "decision": decision })));
+        let (request, page) = sign_in(with, ALICE);
+        let error = core.sign_in_result(request).unwrap_err();
+        assert!(error.contains(reason), "{decision}: {error}\n{page}");
+    }
+
+    // scopes without mail: signing in works, the mail server refuses the token and says to check the scopes
+    let check = core.sign_in_app_check(&issuer).unwrap();
+    wait(&|e| *e == Event::SignInAppChecked { request: check });
+    let no_mail = core
+        .save_sign_in_app(
+            None,
+            &form("imapkit-approve", "openid email offline_access"),
+            pe_core::SecretChange::Keep,
+        )
+        .unwrap();
+    let (request, _) = sign_in(pe_core::SignInWith::App(no_mail), "bob@example.com");
+    let bob = core.add_signed_in_account(request, "").unwrap();
+    core.sync(bob).unwrap();
+    let failed = wait(&|e| matches!(e, Event::Failed { account, .. } if *account == bob));
+    let Event::Failed { kind, message, .. } = failed else {
+        unreachable!()
+    };
+    assert_eq!(kind, FailureKind::Authentication);
+    assert!(message.contains("check that the app's scopes"), "{message}");
+
+    // removed once nothing uses it, and its account goes first
+    core.remove_account(bob).unwrap();
+    core.remove_sign_in_app(no_mail).unwrap();
+    assert!(
+        core.sign_in_apps()
+            .unwrap()
+            .iter()
+            .all(|e| e.with != pe_core::SignInWith::App(no_mail))
+    );
 }
 
 #[test]

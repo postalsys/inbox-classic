@@ -4,6 +4,7 @@
 
 #include <cderr.h>
 #include <commdlg.h>
+#include <oleacc.h>
 #include <shlobj.h>
 #include <shobjidl.h>
 #include <wincodec.h>
@@ -190,6 +191,61 @@ std::wstring FormatSize(uint64_t bytes) {
 LRESULT ButtonFaceColor(HDC dc) {
     SetBkColor(dc, GetSysColor(COLOR_BTNFACE));
     return reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_BTNFACE));
+}
+
+void DrawLinkButton(const DRAWITEMSTRUCT& item) {
+    FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
+    // the dialog font, underlined; made once for the font the button has
+    static HFONT base = nullptr, underlined = nullptr;
+    auto font = reinterpret_cast<HFONT>(SendMessageW(item.hwndItem, WM_GETFONT, 0, 0));
+    if (font != base || !underlined) {
+        LOGFONTW logFont = {};
+        GetObjectW(font ? font : GetStockObject(DEFAULT_GUI_FONT), sizeof(logFont), &logFont);
+        logFont.lfUnderline = TRUE;
+        if (underlined) {
+            DeleteObject(underlined);
+        }
+        underlined = CreateFontIndirectW(&logFont);
+        base = font;
+    }
+    std::wstring text = GetWindowString(item.hwndItem);
+    HGDIOBJ old = SelectObject(item.hDC, underlined);
+    SetBkMode(item.hDC, TRANSPARENT);
+    SetTextColor(item.hDC, GetSysColor((item.itemState & ODS_DISABLED) ? COLOR_GRAYTEXT : COLOR_HOTLIGHT));
+    RECT area = item.rcItem;
+    DrawTextW(item.hDC, text.c_str(), -1, &area, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+    if ((item.itemState & ODS_FOCUS) && !(item.itemState & ODS_NOFOCUSRECT)) {
+        RECT measured = item.rcItem;
+        DrawTextW(item.hDC, text.c_str(), -1, &measured, DT_LEFT | DT_SINGLELINE | DT_NOPREFIX | DT_CALCRECT);
+        measured.top = item.rcItem.top;
+        measured.bottom = item.rcItem.bottom;
+        DrawFocusRect(item.hDC, &measured);
+    }
+    SelectObject(item.hDC, old);
+}
+
+bool SetLinkCursor(HWND hwnd, WPARAM wParam) {
+    auto target = reinterpret_cast<HWND>(wParam);
+    if (target == hwnd || !IsWindowEnabled(target) || !GetPropW(target, L"InboxClassicLink")) {
+        return false;
+    }
+    SetCursor(LoadCursorW(nullptr, IDC_HAND));
+    return true;
+}
+
+HWND CreateLinkButton(HWND parent, const wchar_t* text, int id, const RECT& bounds) {
+    HWND link = CreateChild(parent, L"BUTTON", text, WS_TABSTOP | BS_OWNERDRAW, id, bounds);
+    SetPropW(link, L"InboxClassicLink", reinterpret_cast<HANDLE>(1));
+    return link;
+}
+
+void SetAccessibleDescription(HWND control, const std::wstring& text) {
+    // PROPID_ACC_DESCRIPTION of oleacc.h, which only declares it
+    constexpr GUID kDescription = {0x4d48dfe4, 0xbd3f, 0x491f, {0xa6, 0x48, 0x49, 0x2d, 0x6f, 0x20, 0xc5, 0x88}};
+    Microsoft::WRL::ComPtr<IAccPropServices> services;
+    if (SUCCEEDED(CoCreateInstance(__uuidof(CAccPropServices), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&services)))) {
+        services->SetHwndPropStr(control, static_cast<DWORD>(OBJID_CLIENT), CHILDID_SELF, kDescription, text.c_str());
+    }
 }
 
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,

@@ -40,6 +40,8 @@ typedef enum PeEventKind {
   // The draft whose Message-ID is `detail` is in the Drafts of `account` on the server; when `message` is not
   // NULL it was not saved, and that says why
   PE_EVENT_KIND_DRAFT_SAVED = 12,
+  // The check `uid` of `pe_sign_in_app_check` is done: `pe_sign_in_app_check_result`
+  PE_EVENT_KIND_SIGN_IN_APP_CHECKED = 13,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -64,8 +66,12 @@ typedef enum PeSecurity {
 
 typedef enum PeOAuthProvider {
   PE_O_AUTH_PROVIDER_NONE = 0,
+  // The built-in Google client
   PE_O_AUTH_PROVIDER_GOOGLE = 1,
+  // The built-in Microsoft client
   PE_O_AUTH_PROVIDER_MICROSOFT = 2,
+  // A sign-in app the user added, named by its id next to this
+  PE_O_AUTH_PROVIDER_APP = 3,
 } PeOAuthProvider;
 
 typedef enum PeSpecialUse {
@@ -110,6 +116,12 @@ typedef enum PeAutoconfigSource {
   PE_AUTOCONFIG_SOURCE_AUTODISCOVER = 5,
 } PeAutoconfigSource;
 
+typedef enum PeSecretChange {
+  PE_SECRET_CHANGE_KEEP = 0,
+  PE_SECRET_CHANGE_SET = 1,
+  PE_SECRET_CHANGE_REMOVE = 2,
+} PeSecretChange;
+
 // The accounts; free with `pe_account_list_free`
 typedef struct PeAccountList PeAccountList;
 
@@ -137,6 +149,12 @@ typedef struct PeMessageView PeMessageView;
 
 // The Outbox; free with `pe_outbox_free`
 typedef struct PeOutbox PeOutbox;
+
+// The sign-in apps; free with `pe_sign_in_app_list_free`
+typedef struct PeSignInAppList PeSignInAppList;
+
+// The presets; free with `pe_sign_in_preset_list_free`
+typedef struct PeSignInPresetList PeSignInPresetList;
 
 // An event; valid only during the callback
 typedef struct PeEvent {
@@ -176,8 +194,12 @@ typedef struct PeAccount {
   const char *name;
   const char *email;
   // The provider it signs in to through the browser, NONE for a password: a refused sign-in asks for
-  // `pe_sign_in_begin` and `pe_account_reauthorize`, not for a password
+  // `pe_sign_in_begin` and `pe_account_reauthorize`, not for a password. APP: with the sign-in app `app`
   enum PeOAuthProvider oauth;
+  // The sign-in app of an `oauth` APP account, 0 otherwise
+  int64_t app;
+  // The name of what it signs in with ("Inbox Classic for Google", a sign-in app's name), empty for a password
+  const char *signs_in_with;
   // The incoming (IMAP) server, for the Accounts list
   const char *imap_host;
   // "Name <address>", or the address alone when the name is empty or the same: how From and the account menus
@@ -337,6 +359,61 @@ typedef struct PeAutoconfigInfo {
   // A note about the provider's sign-in, or NULL
   const char *app_password_warning;
 } PeAutoconfigInfo;
+
+// A sign-in app as the Sign-in Apps manager lists it: a built-in client (`provider` GOOGLE or MICROSOFT, `id` 0),
+// or one the user added (`provider` APP)
+typedef struct PeSignInApp {
+  enum PeOAuthProvider provider;
+  int64_t id;
+  const char *name;
+  // The issuer, or for a built-in client the host of its sign-in page
+  const char *issuer;
+  // Offered for new accounts
+  bool enabled;
+  // The addresses of the accounts that sign in with it, separated by ", "; empty when none
+  const char *used_by;
+  // For a built-in client: why it may be off, and what to do instead. Empty for an added app
+  const char *off_reason;
+  // What an added app was saved with (empty and 0 for a built-in client); never its secret
+  const char *client_id;
+  bool has_secret;
+  const char *scopes;
+  const char *imap_host;
+  uint16_t imap_port;
+  enum PeSecurity imap_security;
+  const char *smtp_host;
+  uint16_t smtp_port;
+  enum PeSecurity smtp_security;
+} PeSignInApp;
+
+// A sign-in app as the editor saves it (UTF-8)
+typedef struct PeSignInAppForm {
+  const char *name;
+  const char *issuer;
+  const char *client_id;
+  // Separated by spaces
+  const char *scopes;
+  const char *imap_host;
+  uint16_t imap_port;
+  enum PeSecurity imap_security;
+  const char *smtp_host;
+  uint16_t smtp_port;
+  enum PeSecurity smtp_security;
+} PeSignInAppForm;
+
+// What the editor fills a sign-in app in with for a provider, everything but the client
+typedef struct PeSignInPreset {
+  // `Google`, `Microsoft`
+  const char *name;
+  const char *issuer;
+  const char *scopes;
+  const char *imap_host;
+  uint16_t imap_port;
+  enum PeSecurity imap_security;
+  const char *smtp_host;
+  uint16_t smtp_port;
+  enum PeSecurity smtp_security;
+} PeSignInPreset;
 
 #ifdef __cplusplus
 extern "C" {
@@ -871,13 +948,15 @@ void pe_autoconfig_free(struct PeAutoconfig *result);
 enum PeOAuthProvider pe_oauth_provider_for(const struct PeCore *core,
                                            const char *imap_host);
 
-// Starts signing in to `provider` for `email`. `url` gets the https:// page to open in the browser (free
-// it with `pe_string_free`); `SignInDone` with the returned request in `uid` follows. 0 on failure.
+// Starts signing in with `provider` (and for APP, the sign-in app `app`) for `email`. `url` gets the page to open
+// in the browser (free it with `pe_string_free`); `SignInDone` with the returned request in `uid` follows. 0 on
+// failure.
 //
 // # Safety
 // `core` must be a live handle, `email` a NUL-terminated string, `url` a valid pointer.
 uint64_t pe_sign_in_begin(const struct PeCore *core,
                           enum PeOAuthProvider provider,
+                          int64_t app,
                           const char *email,
                           char **url);
 
@@ -915,6 +994,115 @@ bool pe_account_reauthorize(const struct PeCore *core,
                             int64_t account,
                             uint64_t request,
                             char **error);
+
+// The sign-in apps, the built-in Microsoft and Google clients first; NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeSignInAppList *pe_sign_in_apps(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_sign_in_app_list_count(const struct PeSignInAppList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeSignInApp *pe_sign_in_app_list_get(const struct PeSignInAppList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_sign_in_app_list_free(struct PeSignInAppList *list);
+
+// Turns a sign-in app on or off for new accounts (accounts that use it keep working); false when there is no such
+// app
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_sign_in_app_set_enabled(const struct PeCore *core,
+                                enum PeOAuthProvider provider,
+                                int64_t app,
+                                bool enabled);
+
+// Reads the discovery document of `issuer` in the background: `SignInAppChecked` with the returned request in
+// `uid` follows. 0 with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) when the
+// issuer is no address to read it from.
+//
+// # Safety
+// `core` must be a live handle, `issuer` a NUL-terminated string, `error` NULL or a valid pointer.
+uint64_t pe_sign_in_app_check(const struct PeCore *core,
+                              const char *issuer,
+                              char **error);
+
+// What the check `request` found, taken: true with what it found in `text`, or false with why the issuer can not be
+// used (free `text` with `pe_string_free`; it stays NULL while the check runs or when there is no such check)
+//
+// # Safety
+// `core` must be a live handle, `text` a valid pointer.
+bool pe_sign_in_app_check_result(const struct PeCore *core,
+                                 uint64_t request,
+                                 char **text);
+
+// Stops a check the editor no longer waits for
+//
+// # Safety
+// `core` must be a live handle.
+void pe_sign_in_app_check_cancel(const struct PeCore *core, uint64_t request);
+
+// Saves a sign-in app: a new one when `id` is 0 (turned on), else app `id`, whose accounts move to its servers.
+// Its issuer has to be checked first (`pe_sign_in_app_check`). `secret` is the client secret for SET. The app's id,
+// or 0 with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`).
+//
+// # Safety
+// `core` must be a live handle, `form` a valid form with NUL-terminated strings, `secret` NULL or a NUL-terminated
+// string, `error` NULL or a valid pointer.
+int64_t pe_sign_in_app_save(const struct PeCore *core,
+                            int64_t id,
+                            const struct PeSignInAppForm *form,
+                            enum PeSecretChange change,
+                            const char *secret,
+                            char **error);
+
+// Removes a sign-in app and its secret; false with the reason in `error` (NULL or a pointer to a string to free
+// with `pe_string_free`), as while accounts sign in with it
+//
+// # Safety
+// `core` must be a live handle, `error` NULL or a valid pointer.
+bool pe_sign_in_app_remove(const struct PeCore *core,
+                           int64_t id,
+                           char **error);
+
+// The providers the editor can fill a sign-in app in for
+struct PeSignInPresetList *pe_sign_in_presets(void);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_sign_in_preset_list_count(const struct PeSignInPresetList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeSignInPreset *pe_sign_in_preset_list_get(const struct PeSignInPresetList *list,
+                                                        size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_sign_in_preset_list_free(struct PeSignInPresetList *list);
+
+// The redirect URI to register a client of `issuer` with (`http://localhost`, `http://127.0.0.1` for Google); free
+// with `pe_string_free`
+//
+// # Safety
+// `issuer` must be NULL or a NUL-terminated string.
+char *pe_sign_in_redirect_uri(const char *issuer);
+
+// How to register a client with the provider of `issuer`, for the editor; free with `pe_string_free`
+//
+// # Safety
+// `issuer` must be NULL or a NUL-terminated string.
+char *pe_sign_in_register_hint(const char *issuer);
 
 #ifdef __cplusplus
 }  // extern "C"

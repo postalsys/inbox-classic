@@ -107,7 +107,11 @@
             <li>
                 For Gmail, Google Workspace, Outlook.com or Microsoft 365, click <b>Sign in with Google</b> or <b>Sign in with Microsoft</b> and sign in in the
                 browser window that opens. That is all: the account is the one you signed in to, named as you are at Google or Microsoft unless you typed a
-                name. See <i>Gmail and Outlook.com</i> below.
+                name. See <i>Gmail and Outlook.com</i> below. A button that is faded is turned off on this computer; <b>Why?</b> under it says why.
+            </li>
+            <li>
+                To sign in with a sign-in app of your own (see <i>Your own sign-in app</i> below), click <b>More sign-in options</b> and choose it, or
+                <b>Add a sign-in app</b>. Type your address first and the provider's page starts with it.
             </li>
             <li>For any other account, type your name as others should see it and your e-mail address, and click <b>Next</b>.</li>
             <li>
@@ -143,6 +147,30 @@
                 <b>Use App Password</b>, and type the app password instead of your normal one.
             </li>
         </ul>
+        <h3>Your own sign-in app</h3>
+        <p>
+            Signing in through the browser uses an OAuth client registered with the provider. Inbox Classic has its own for Google and Microsoft. Google lets
+            only the test users of Inbox Classic's sign in until Google has verified the app, so <b>Sign in with Google</b> is turned off out of the box. You
+            can register a client of your own (with your own Google Cloud project, your Microsoft Entra tenant, or any provider that supports OpenID Connect)
+            and add it as a sign-in app:
+        </p>
+        <ol>
+            <li>Open <b>File &gt; Accounts</b> and click <b>Sign-in Apps</b>, then <b>Add</b>.</li>
+            <li>
+                Click <b>Google</b> or <b>Microsoft</b> after <i>Fill in for</i> to fill in the issuer, scopes and servers, or type them for another provider.
+                The box at the bottom says how to register a client there and the redirect URI to register; <b>Copy</b> copies it.
+            </li>
+            <li>
+                Type the client ID, and the client secret if the provider gave you one (it is kept in the Windows Credential Manager, never shown again).
+                <b>Check</b> reads the provider's settings to see that the issuer is right; <b>OK</b> does that too before saving.
+            </li>
+            <li>Add the account with <b>More sign-in options</b> on the first page of <b>File &gt; New Account</b>.</li>
+        </ol>
+        <p>
+            In <b>Sign-in Apps</b> the check box of each app, the built-in ones included, says whether it is offered for new accounts. An app that is not
+            checked is left out; the accounts that already sign in with it keep working. An app can be removed once no account uses it. <b>Properties</b> of an
+            account says what it signs in with. If the mail server refuses a sign-in app's token, check that its scopes give access to mail.
+        </p>
         <h3>Security settings</h3>
         <table>
             <tr>
@@ -440,13 +468,17 @@
                 Downloaded mail and account settings: <code>%LOCALAPPDATA%\InboxClassic\store.db</code>. Your mail stays on the server too; the copy here is for
                 reading quickly and offline.
             </li>
-            <li>Passwords and browser sign-ins: the Windows Credential Manager, under <b>Inbox Classic</b>. They are encrypted for your Windows account.</li>
+            <li>
+                Passwords, browser sign-ins and the client secrets of sign-in apps: the Windows Credential Manager, under <b>Inbox Classic</b>. They are
+                encrypted for your Windows account.
+            </li>
             <li>Uninstalling Inbox Classic asks whether to remove the mail it downloaded. The mail on your servers is never removed.</li>
         </ul>
         <p>
             For testing, <code>InboxClassic.exe --store &lt;file&gt;</code> uses another mail store, <code>--memory-passwords</code> keeps passwords for the
-            current run only, and <code>--pin-certificate &lt;file&gt;</code> accepts only the server certificate in that file (PEM or DER) instead of the ones
-            Windows trusts, for a test server with a self-signed certificate.
+            current run only, <code>--pin-certificate &lt;file&gt;</code> accepts only the server certificate in that file (PEM or DER) instead of the ones
+            Windows trusts, for a test server with a self-signed certificate, and <code>--sign-in-page-file &lt;file&gt;</code> writes the page of a browser
+            sign-in to that file instead of opening the browser.
         </p>
     </body>
 </html>

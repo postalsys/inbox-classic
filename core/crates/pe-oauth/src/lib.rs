@@ -5,10 +5,14 @@
 //!
 //! The client IDs are those Postal Systems registered with the providers, built in ([`GOOGLE_CLIENT_ID`],
 //! [`MICROSOFT_CLIENT_ID`]); `PE_GOOGLE_CLIENT_ID`, `PE_GOOGLE_CLIENT_SECRET` and `PE_MICROSOFT_CLIENT_ID` at build
-//! time replace them.
+//! time replace them. Any other OpenID Connect provider signs in with a client the user registered there (a
+//! sign-in app), its endpoints from the issuer's discovery document ([`discover`]).
 #![forbid(unsafe_code)]
 
+mod discovery;
 mod redirect;
+
+pub use discovery::{Discovered, discover, issuer, parse_discovery};
 
 use std::fmt;
 use std::time::Duration;
@@ -27,6 +31,8 @@ const TOKEN_TIMEOUT: Duration = Duration::from_secs(30);
 pub enum ProviderKind {
     Google,
     Microsoft,
+    /// Any other OpenID Connect provider
+    Oidc,
 }
 
 impl ProviderKind {
@@ -34,6 +40,16 @@ impl ProviderKind {
         match self {
             ProviderKind::Google => "google",
             ProviderKind::Microsoft => "microsoft",
+            ProviderKind::Oidc => "oidc",
+        }
+    }
+
+    /// The kind of provider an issuer is: Google's and Microsoft's sign-in services want a few things of their own
+    pub fn of_issuer(issuer: &str) -> ProviderKind {
+        match http::parse_url(issuer).map(|url| url.host).as_deref() {
+            Some("accounts.google.com") => ProviderKind::Google,
+            Some("login.microsoftonline.com") => ProviderKind::Microsoft,
+            _ => ProviderKind::Oidc,
         }
     }
 
@@ -47,11 +63,17 @@ impl ProviderKind {
 
     /// The host of the loopback redirect address. Microsoft Entra matches a registered `http://localhost` with any
     /// port but takes 127.0.0.1 for another address; Google's Desktop App clients take 127.0.0.1 (RFC 8252 7.3).
+    /// Others get `localhost` too, what a native client is usually registered with.
     pub fn redirect_host(self) -> &'static str {
         match self {
             ProviderKind::Google => "127.0.0.1",
-            ProviderKind::Microsoft => "localhost",
+            ProviderKind::Microsoft | ProviderKind::Oidc => "localhost",
         }
+    }
+
+    /// The redirect URI to register a client with, without the port the provider has to allow any of
+    pub fn redirect_uri(self) -> String {
+        format!("http://{}", self.redirect_host())
     }
 
     /// The provider whose IMAP server this is
@@ -83,8 +105,10 @@ pub struct Provider {
     pub token_url: String,
     pub scopes: Vec<String>,
     pub client_id: String,
-    /// Google gives desktop apps a "secret" that is not one (RFC 8252 8.5); None for others
+    /// Google gives desktop apps a "secret" that is not one (RFC 8252 8.5); None for public clients
     pub client_secret: Option<String>,
+    /// The `iss` the provider's redirects carry (RFC 9207), checked when it says it sends one
+    pub response_issuer: Option<String>,
 }
 
 /// The Desktop App ("installed") client of the inbox-classic project in Google Cloud: a loopback redirect to
@@ -141,6 +165,7 @@ impl Provider {
                         .unwrap_or(GOOGLE_CLIENT_SECRET)
                         .into(),
                 ),
+                response_issuer: None,
             },
             ProviderKind::Microsoft => Provider {
                 kind,
@@ -168,7 +193,100 @@ impl Provider {
                 .to_vec(),
                 client_id: microsoft_client_id().into(),
                 client_secret: None,
+                response_issuer: None,
             },
+            ProviderKind::Oidc => Preset::other().provider(),
+        }
+    }
+}
+
+/// What a sign-in app for a provider is filled in with: everything but the client the user registered
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Preset {
+    /// `Google`, `Microsoft`; empty for the empty form
+    pub name: &'static str,
+    pub issuer: &'static str,
+    pub scopes: Vec<String>,
+    pub imap: Endpoint,
+    pub smtp: Endpoint,
+    /// How to register a client there
+    pub register: &'static str,
+}
+
+impl Preset {
+    /// The providers the editor can fill in for: Google and Microsoft, as the built-in clients use them
+    pub fn all() -> Vec<Preset> {
+        let from = |kind, name, issuer, register| {
+            let provider = Provider::builtin(kind);
+            Preset {
+                name,
+                issuer,
+                scopes: provider.scopes,
+                imap: provider.imap,
+                smtp: provider.smtp,
+                register,
+            }
+        };
+        vec![
+            from(
+                ProviderKind::Google,
+                "Google",
+                "https://accounts.google.com",
+                "In Google Cloud Console, create an OAuth client of the type Desktop app, with the scope \
+                 https://mail.google.com/ on its consent screen. While the app is in testing, only its test users \
+                 can sign in.",
+            ),
+            from(
+                ProviderKind::Microsoft,
+                "Microsoft",
+                "https://login.microsoftonline.com/common/v2.0",
+                "In Microsoft Entra, register an app with the platform Mobile and desktop applications, the redirect \
+                 URI http://localhost and public client flows allowed, and the delegated permissions \
+                 IMAP.AccessAsUser.All, SMTP.Send and offline_access. For your organization only, use \
+                 https://login.microsoftonline.com/<tenant ID>/v2.0 as the issuer.",
+            ),
+        ]
+    }
+
+    /// How to register a client with the provider of `issuer`: its preset's words, or those for any provider
+    pub fn register_hint(issuer: &str) -> &'static str {
+        let presets = Preset::all();
+        match ProviderKind::of_issuer(issuer) {
+            ProviderKind::Google => presets[0].register,
+            ProviderKind::Microsoft => presets[1].register,
+            ProviderKind::Oidc => Preset::other().register,
+        }
+    }
+
+    /// The empty form: any OpenID Connect provider
+    fn other() -> Preset {
+        let endpoint = Endpoint {
+            host: String::new(),
+            port: 993,
+            security: pe_net::Security::Tls,
+        };
+        Preset {
+            name: "",
+            issuer: "",
+            scopes: ["openid", "email", "offline_access"].map(String::from).to_vec(),
+            imap: endpoint.clone(),
+            smtp: Endpoint { port: 465, ..endpoint },
+            register: "Register a native (public) client with the redirect URI below; the provider has to allow \
+                       any port on it (RFC 8252). Add the scope the provider gives mail access with.",
+        }
+    }
+
+    fn provider(self) -> Provider {
+        Provider {
+            kind: ProviderKind::Oidc,
+            imap: self.imap,
+            smtp: self.smtp,
+            authorize_url: String::new(),
+            token_url: String::new(),
+            scopes: self.scopes,
+            client_id: String::new(),
+            client_secret: None,
+            response_issuer: None,
         }
     }
 }
@@ -193,8 +311,9 @@ pub struct Identity {
 
 /// The account the ID token of a token answer names (OpenID Connect). The token came straight from the provider's
 /// token endpoint over TLS, which OpenID Connect Core 3.1.3.7 takes in place of checking its signature; it must
-/// still be meant for this client. Google's address only when Google verified it; Microsoft's is the `email` claim,
-/// or the sign-in name (`preferred_username`) without one.
+/// still be meant for this client. The `email` claim unless the provider says it did not verify it; for others
+/// than Google (Microsoft leaves `email` out of some accounts' tokens) the sign-in name (`preferred_username`)
+/// without one.
 pub fn identity(id_token: &str, provider: &Provider) -> Option<Identity> {
     let payload = URL_SAFE_NO_PAD
         .decode(id_token.split('.').nth(1)?.trim_end_matches('='))
@@ -215,11 +334,10 @@ pub fn identity(id_token: &str, provider: &Provider) -> Option<Identity> {
             .map(str::trim)
             .filter(|v| !v.is_empty() && !v.chars().any(char::is_control))
     };
+    let verified = text("email").filter(|_| claims.get("email_verified").and_then(Value::as_bool) != Some(false));
     let email = match provider.kind {
-        ProviderKind::Google => {
-            text("email").filter(|_| claims.get("email_verified").and_then(Value::as_bool) != Some(false))
-        }
-        ProviderKind::Microsoft => text("email").or_else(|| text("preferred_username")),
+        ProviderKind::Google => verified,
+        ProviderKind::Microsoft | ProviderKind::Oidc => verified.or_else(|| text("preferred_username")),
     }
     .filter(|email| email.contains('@'))?;
     Some(Identity {
@@ -235,8 +353,8 @@ pub enum OAuthError {
     /// The user said no, or closed the page
     Denied(String),
     /// The account's organization has not approved the app (Microsoft Entra admin consent): only its administrator
-    /// can, at [`admin_consent_url`]
-    NeedsAdmin,
+    /// can, at this address ([`admin_consent_url`])
+    NeedsAdmin(String),
     /// The redirect did not come in time
     TimedOut,
     /// The redirect was not for this sign-in: another state, no code
@@ -252,7 +370,7 @@ impl OAuthError {
     pub fn needs_sign_in(&self) -> bool {
         matches!(
             self,
-            OAuthError::Refused(_) | OAuthError::Denied(_) | OAuthError::NeedsAdmin
+            OAuthError::Refused(_) | OAuthError::Denied(_) | OAuthError::NeedsAdmin(_)
         )
     }
 }
@@ -262,10 +380,9 @@ impl fmt::Display for OAuthError {
         match self {
             OAuthError::Unavailable(reason) => write!(f, "the provider did not answer properly: {reason}"),
             OAuthError::Denied(reason) => write!(f, "signing in was cancelled: {reason}"),
-            OAuthError::NeedsAdmin => write!(
+            OAuthError::NeedsAdmin(url) => write!(
                 f,
-                "your organization's administrator has to approve Inbox Classic first; they can do it at {}",
-                admin_consent_url()
+                "your organization's administrator has to approve Inbox Classic first; they can do it at {url}"
             ),
             OAuthError::TimedOut => f.write_str("signing in took too long"),
             OAuthError::BadRedirect => f.write_str("the browser came back from another sign-in"),
@@ -305,6 +422,13 @@ pub struct SignIn {
 impl SignIn {
     /// Starts listening for the redirect and makes the page to open for `email`
     pub fn begin(provider: Provider, email: &str) -> Result<SignIn, OAuthError> {
+        // the page the browser opens: https, or a provider on this computer (a test server), never anything else
+        if http::parse_url(&provider.authorize_url).is_none() || provider.authorize_url.contains('#') {
+            return Err(OAuthError::Unavailable(format!(
+                "the sign-in page is not an https:// address: {}",
+                provider.authorize_url
+            )));
+        }
         let listener = std::net::TcpListener::bind("127.0.0.1:0").map_err(OAuthError::Io)?;
         listener.set_nonblocking(true).map_err(OAuthError::Io)?;
         let port = listener.local_addr().map_err(OAuthError::Io)?.port();
@@ -350,7 +474,12 @@ impl SignIn {
     pub async fn finish(self, timeout: Duration) -> Result<Tokens, OAuthError> {
         let listener = TcpListener::from_std(self.listener).map_err(OAuthError::Io)?;
         let listener_v6 = self.listener_v6.and_then(|l| TcpListener::from_std(l).ok());
-        let code = tokio::time::timeout(timeout, redirect::receive(&listener, listener_v6.as_ref(), &self.state))
+        let expected = redirect::Expected {
+            state: &self.state,
+            issuer: self.provider.response_issuer.as_deref(),
+            client_id: &self.provider.client_id,
+        };
+        let code = tokio::time::timeout(timeout, redirect::receive(&listener, listener_v6.as_ref(), expected))
             .await
             .map_err(|_| OAuthError::TimedOut)??;
         let mut form = vec![
@@ -398,11 +527,11 @@ async fn token_request(
     parse_tokens(response.status, &response.body, refreshed, now(), provider)
 }
 
-/// Where an administrator of a Microsoft 365 organization approves the app for everyone in it
-pub fn admin_consent_url() -> String {
+/// Where an administrator of a Microsoft 365 organization approves the client for everyone in it
+pub fn admin_consent_url(client_id: &str) -> String {
     format!(
-        "{MICROSOFT_LOGIN}/organizations/adminconsent?client_id={}",
-        microsoft_client_id()
+        "{MICROSOFT_LOGIN}/organizations/adminconsent?{}",
+        form_encode(&[("client_id", client_id)])
     )
 }
 
@@ -432,7 +561,7 @@ pub fn parse_tokens(
     };
     if status != 200 {
         if text("error_description").is_some_and(|d| needs_admin(&d)) {
-            return Err(OAuthError::NeedsAdmin);
+            return Err(OAuthError::NeedsAdmin(admin_consent_url(&provider.client_id)));
         }
         let reason = [text("error"), text("error_description")]
             .into_iter()
@@ -502,9 +631,46 @@ mod tests {
             Some(ProviderKind::Microsoft)
         );
         assert_eq!(ProviderKind::for_imap_host("imap.example.com"), None);
+        assert_eq!(
+            ProviderKind::of_issuer("https://accounts.google.com"),
+            ProviderKind::Google
+        );
+        assert_eq!(
+            ProviderKind::of_issuer("https://login.microsoftonline.com/common/v2.0"),
+            ProviderKind::Microsoft
+        );
+        assert_eq!(ProviderKind::of_issuer("http://127.0.0.1:8085"), ProviderKind::Oidc);
+        assert_eq!(ProviderKind::Oidc.redirect_uri(), "http://localhost");
+        assert_eq!(ProviderKind::Google.redirect_uri(), "http://127.0.0.1");
         for kind in [ProviderKind::Google, ProviderKind::Microsoft] {
             assert_eq!(ProviderKind::parse(kind.as_str()), Some(kind));
         }
+    }
+
+    #[test]
+    fn presets_fill_in_what_the_built_in_clients_use() {
+        let presets = Preset::all();
+        assert_eq!(
+            presets.iter().map(|p| p.name).collect::<Vec<_>>(),
+            ["Google", "Microsoft"]
+        );
+        for preset in &presets {
+            let kind = ProviderKind::of_issuer(preset.issuer);
+            let builtin = Provider::builtin(kind);
+            assert_eq!(
+                (&preset.scopes, &preset.imap, &preset.smtp),
+                (&builtin.scopes, &builtin.imap, &builtin.smtp)
+            );
+            assert!(
+                issuer(preset.issuer).is_ok() && !preset.register.contains("  "),
+                "{preset:?}"
+            );
+        }
+        assert!(Preset::register_hint("https://login.microsoftonline.com/contoso/v2.0").contains("Entra"));
+        assert!(Preset::register_hint("https://accounts.google.com").contains("Desktop app"));
+        assert!(Preset::register_hint("https://sso.example.edu").contains("native (public) client"));
+        let other = Provider::builtin(ProviderKind::Oidc);
+        assert!(other.client_id.is_empty() && other.scopes.contains(&"openid".to_string()));
     }
 
     #[test]
@@ -556,8 +722,9 @@ mod tests {
             br#"{"error":"invalid_grant","error_description":"AADSTS65001: The user or administrator has not consented to use the application."}"#,
             None, 0, &p)
         .unwrap_err();
-        assert!(matches!(admin, OAuthError::NeedsAdmin) && admin.needs_sign_in());
-        assert!(admin.to_string().ends_with(&admin_consent_url()));
+        assert!(matches!(admin, OAuthError::NeedsAdmin(_)) && admin.needs_sign_in());
+        assert!(admin.to_string().ends_with(&admin_consent_url("client id")));
+        assert!(admin.to_string().ends_with("adminconsent?client_id=client%20id"));
         assert!(matches!(
             parse_tokens(200, b"<html>", None, 0, &p),
             Err(OAuthError::Refused(_))
@@ -583,6 +750,7 @@ mod tests {
             scopes: vec!["mail".into(), "offline_access".into()],
             client_id: "client id".into(),
             client_secret: None,
+            response_issuer: None,
         }
     }
 
@@ -620,6 +788,17 @@ mod tests {
             assert_eq!(identity(&id_token(refused), &google), None, "{refused}");
         }
         assert_eq!(identity("no dots", &google), None);
+        // any other provider: a verified address, or the sign-in name
+        let other = Provider {
+            kind: ProviderKind::Oidc,
+            ..microsoft.clone()
+        };
+        let token = id_token(r#"{"aud":"client id","email":"ann@example.com","email_verified":true}"#);
+        assert_eq!(identity(&token, &other), Some(ann(None)));
+        let token = id_token(
+            r#"{"aud":"client id","email":"x@example.com","email_verified":false,"preferred_username":"ann@example.com"}"#,
+        );
+        assert_eq!(identity(&token, &other), Some(ann(None)));
     }
 
     #[tokio::test]
@@ -638,5 +817,17 @@ mod tests {
         // no address typed: none suggested
         let blank = SignIn::begin(test_provider("https://login.example.com/token"), "").unwrap();
         assert!(!blank.url.contains("login_hint"), "{}", blank.url);
+        // a sign-in page that is neither https nor on this computer is never opened
+        for page in [
+            "http://login.example.com/authorize",
+            "file:///c:/x",
+            "javascript:alert(1)",
+        ] {
+            let provider = Provider {
+                authorize_url: page.into(),
+                ..test_provider("https://login.example.com/token")
+            };
+            assert!(SignIn::begin(provider, "").is_err(), "{page}");
+        }
     }
 }

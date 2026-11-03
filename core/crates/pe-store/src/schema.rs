@@ -97,6 +97,34 @@ CREATE TABLE outbox (
     problem TEXT
 );
 "#,
+    r#"
+-- OAuth clients the user registered with an OpenID Connect provider, for accounts that sign in with them
+-- ('oauth2:app:<id>'); the client secret is in the Credential Manager, never here
+CREATE TABLE sign_in_apps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    issuer TEXT NOT NULL,
+    client_id TEXT NOT NULL,
+    has_secret INTEGER NOT NULL,
+    scopes TEXT NOT NULL,
+    -- from the issuer's discovery document when the app was saved
+    authorize_url TEXT NOT NULL,
+    token_url TEXT NOT NULL,
+    -- the issuer the provider names in its redirects (RFC 9207), when it does
+    response_issuer TEXT,
+    imap_host TEXT NOT NULL,
+    imap_port INTEGER NOT NULL,
+    imap_security TEXT NOT NULL,
+    smtp_host TEXT NOT NULL,
+    smtp_port INTEGER NOT NULL,
+    smtp_security TEXT NOT NULL,
+    -- offered for new accounts
+    enabled INTEGER NOT NULL
+);
+-- whether the built-in clients are offered for new accounts: Google lets only its test users sign in with
+-- Inbox Classic's until it verifies the app
+INSERT INTO settings (key, value) VALUES ('sign_in.google', '0'), ('sign_in.microsoft', '1');
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

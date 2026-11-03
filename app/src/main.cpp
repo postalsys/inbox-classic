@@ -166,7 +166,7 @@ void SignInAgain(int64_t account) {
         return;
     }
     uint64_t request =
-        SignInWithBrowser(g_main, g_core.get(), g_mailbox.OAuthProvider(account), g_mailbox.AccountEmail(account));
+        SignInWithBrowser(g_main, g_core.get(), g_mailbox.SignIn(account), g_mailbox.AccountEmail(account));
     if (!request) {
         return;
     }
@@ -184,7 +184,7 @@ void AskPassword(int64_t account) {
     if (!g_prompting.insert(account).second) {
         return;
     }
-    if (g_mailbox.OAuthProvider(account) != PE_O_AUTH_PROVIDER_NONE) {
+    if (g_mailbox.SignIn(account).provider != PE_O_AUTH_PROVIDER_NONE) {
         SignInAgain(account);
         g_prompting.erase(account);
         return;
@@ -214,6 +214,7 @@ void OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_AUTOCONFIG_DONE:
     case PE_EVENT_KIND_SIGN_IN_DONE:
+    case PE_EVENT_KIND_SIGN_IN_APP_CHECKED:
         RequestDone(event.uid);
         break;
     case PE_EVENT_KIND_MESSAGE_SENT:
@@ -435,7 +436,8 @@ std::wstring StorePath() {
 }
 
 // the command line, options for test runs: --store <file> uses another mail store, --memory-passwords keeps
-// passwords for this run only, --pin-certificate <file> trusts only that server certificate (see res/help.html)
+// passwords for this run only, --pin-certificate <file> trusts only that server certificate (see res/help.html),
+// --sign-in-page-file <file> writes the page of a browser sign-in there for the test to open instead of the browser
 struct Arguments {
     std::wstring store;
     std::wstring certificate;
@@ -452,6 +454,8 @@ void ReadArguments() {
             g_arguments.store = argv[++i];
         } else if (arg == L"--pin-certificate" && i + 1 < count) {
             g_arguments.certificate = argv[++i];
+        } else if (arg == L"--sign-in-page-file" && i + 1 < count) {
+            SetSignInPageFile(argv[++i]);
         } else if (arg == L"--memory-passwords") {
             g_arguments.memoryPasswords = true;
         }

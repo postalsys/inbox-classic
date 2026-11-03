@@ -10,6 +10,7 @@ mod compose;
 mod fold;
 mod requests;
 mod secrets;
+mod sign_in_apps;
 mod view;
 mod worker;
 
@@ -29,6 +30,8 @@ pub use pe_sync::{is_special as is_fixed_folder, tree_depths};
 use requests::Requests;
 pub use secrets::PasswordStore;
 use secrets::Secrets;
+use sign_in_apps::{Discoveries, with_provider};
+pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Worker};
 
@@ -75,6 +78,10 @@ pub enum Event {
     SignInDone {
         request: u64,
     },
+    /// The issuer of a sign-in app was checked: [`Core::sign_in_app_check_result`]
+    SignInAppChecked {
+        request: u64,
+    },
     /// The view of a message is built: [`Core::message_view_result`]
     ViewReady {
         request: u64,
@@ -119,6 +126,12 @@ pub enum Error {
     Folder(pe_sync::FolderRefusal),
     /// Signing in again came back from another account than this one: the address it signed in to
     OtherAccount(String),
+    /// What was entered can not be used, and why
+    Invalid(String),
+    /// A sign-in app the accounts with these addresses sign in with
+    InUse(Vec<String>),
+    /// A sign-in app that is turned off for new accounts
+    TurnedOff,
 }
 
 impl fmt::Display for Error {
@@ -131,6 +144,13 @@ impl fmt::Display for Error {
             Error::Unavailable(reason) => write!(f, "{reason}"),
             Error::Folder(refusal) => write!(f, "{refusal}"),
             Error::OtherAccount(email) => write!(f, "the browser signed in to {email}, not to this account"),
+            Error::Invalid(reason) => f.write_str(reason),
+            Error::InUse(accounts) => write!(
+                f,
+                "it can not be removed while accounts sign in with it: {}",
+                accounts.join(", ")
+            ),
+            Error::TurnedOff => f.write_str("this sign-in app is turned off for new accounts"),
         }
     }
 }
@@ -195,6 +215,9 @@ pub struct Core {
     newest_view: Arc<std::sync::atomic::AtomicU64>,
     /// Sign-ins in the browser: the provider and the refresh token, or why not
     sign_ins: Requests<std::result::Result<SignedIn, String>>,
+    /// Checks of a sign-in app's issuer, and the discovery documents they read
+    checks: Requests<std::result::Result<pe_oauth::Discovered, String>>,
+    discoveries: Discoveries,
     oauth: OAuthProviders,
     next_request: std::sync::atomic::AtomicU64,
 }
@@ -243,6 +266,8 @@ impl Core {
             views: Requests::default(),
             newest_view: Arc::default(),
             sign_ins: Requests::default(),
+            checks: Requests::default(),
+            discoveries: Discoveries::default(),
             oauth: OAuthProviders(Arc::new(options.oauth_providers)),
             next_request: std::sync::atomic::AtomicU64::new(1),
         })
@@ -289,9 +314,9 @@ impl Core {
         let mut settings = settings.clone();
         settings.auth = self.store().account(id)?.settings.auth;
         if let pe_store::Auth::OAuth2(name) = &settings.auth
-            && let Some(provider) = pe_oauth::ProviderKind::parse(name).map(|kind| self.oauth.provider(kind))
+            && let Some(provider) = self.oauth.resolve(name, &self.store(), &self.secrets)
         {
-            settings = with_provider(&settings, &provider);
+            settings = with_provider(&settings, &provider, &settings.auth);
         }
         self.store().update_account(id, &settings)?;
         // the worker connects again with the new settings
@@ -402,11 +427,13 @@ impl Core {
         pe_oauth::ProviderKind::for_imap_host(imap_host)
     }
 
-    /// Starts signing in to `kind` for `email`: the page to open in the browser, and the request
-    /// [`Event::SignInDone`] comes with once the browser came back or the time ran out
-    pub fn sign_in_begin(&self, kind: pe_oauth::ProviderKind, email: &str) -> Result<(u64, String)> {
-        let provider = self.oauth.provider(kind);
-        let sign_in = pe_oauth::SignIn::begin(provider, email).map_err(|e| Error::Unavailable(e.to_string()))?;
+    /// Starts signing in with `with` for `email`: the page to open in the browser, and the request
+    /// [`Event::SignInDone`] comes with once the browser came back or the time ran out. A sign-in app that is turned
+    /// off can still sign in again an account that uses it; [`Core::add_signed_in_account`] refuses a new one.
+    pub fn sign_in_begin(&self, with: SignInWith, email: &str) -> Result<(u64, String)> {
+        let provider = self.sign_in_provider(with)?;
+        let sign_in =
+            pe_oauth::SignIn::begin(provider.clone(), email).map_err(|e| Error::Unavailable(e.to_string()))?;
         let url = sign_in.url.clone();
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         let work = async move {
@@ -419,7 +446,8 @@ impl Core {
                 .identity
                 .ok_or("the provider did not say which account signed in")?;
             Ok(SignedIn {
-                kind,
+                with,
+                provider,
                 refresh_token,
                 identity,
             })
@@ -446,41 +474,49 @@ impl Core {
         self.sign_ins.cancel(request);
     }
 
-    /// A finished sign-in, taken, and its provider
-    fn take_sign_in(&self, request: u64) -> Result<(pe_oauth::Provider, SignedIn)> {
-        let signed_in = self
-            .sign_ins
-            .take(request)
-            .and_then(|r| r.ok())
-            .ok_or(Error::NotFound)?;
-        Ok((self.oauth.provider(signed_in.kind), signed_in))
+    /// A finished sign-in, taken
+    fn take_sign_in(&self, request: u64) -> Result<SignedIn> {
+        self.sign_ins.take(request).and_then(|r| r.ok()).ok_or(Error::NotFound)
     }
 
     /// Adds the account the sign-in `request` was for, named `name` (when empty, as its owner is named at the
     /// provider): the address is the one signed in to, whatever was typed before, and the servers are the
     /// provider's, so its access tokens go nowhere else
     pub fn add_signed_in_account(&self, request: u64, name: &str) -> Result<AccountId> {
-        let (provider, signed_in) = self.take_sign_in(request)?;
+        let signed_in = self.take_sign_in(request)?;
+        if !self.sign_in_enabled(signed_in.with)? {
+            return Err(Error::TurnedOff);
+        }
         let pe_oauth::Identity { email, name: owner } = signed_in.identity;
         let name = Some(name.trim())
             .filter(|n| !n.is_empty())
             .map(str::to_string)
             .or(owner)
             .unwrap_or_else(|| email.clone());
-        let settings = provider_settings(name, email.clone(), email, &provider);
-        self.add_account(&settings, &signed_in.refresh_token)
+        let settings = AccountSettings {
+            name,
+            email: email.clone(),
+            username: email,
+            ..Default::default()
+        };
+        let auth = pe_store::Auth::OAuth2(signed_in.with.auth_name());
+        self.add_account(
+            &with_provider(&settings, &signed_in.provider, &auth),
+            &signed_in.refresh_token,
+        )
     }
 
     /// Gives an OAuth account the refresh token of a new sign-in, after the old one was refused; refused when the
     /// browser signed in to another account
     pub fn reauthorize(&self, account: AccountId, request: u64) -> Result<()> {
-        let (provider, signed_in) = self.take_sign_in(request)?;
+        let signed_in = self.take_sign_in(request)?;
         let current = self.store().account(account)?.settings;
         if !signed_in.identity.email.eq_ignore_ascii_case(&current.email) {
             return Err(Error::OtherAccount(signed_in.identity.email));
         }
         let refresh_token = signed_in.refresh_token;
-        let settings = with_provider(&current, &provider);
+        let auth = pe_store::Auth::OAuth2(signed_in.with.auth_name());
+        let settings = with_provider(&current, &signed_in.provider, &auth);
         self.store().update_account(account, &settings)?;
         self.stop_worker(account);
         self.keep_password(account, &refresh_token);
@@ -903,35 +939,10 @@ fn store_security(security: pe_net::Security) -> pe_store::Security {
 
 /// What a finished sign-in got: the refresh token of the account it was for
 struct SignedIn {
-    kind: pe_oauth::ProviderKind,
+    with: SignInWith,
+    provider: pe_oauth::Provider,
     refresh_token: String,
     identity: pe_oauth::Identity,
-}
-
-/// The settings of an account at `provider`'s servers that signs in with it
-fn provider_settings(name: String, email: String, username: String, provider: &pe_oauth::Provider) -> AccountSettings {
-    AccountSettings {
-        name,
-        email,
-        username,
-        imap_host: provider.imap.host.clone(),
-        imap_port: provider.imap.port,
-        imap_security: store_security(provider.imap.security),
-        smtp_host: provider.smtp.host.clone(),
-        smtp_port: provider.smtp.port,
-        smtp_security: store_security(provider.smtp.security),
-        auth: pe_store::Auth::OAuth2(provider.kind.as_str().to_string()),
-    }
-}
-
-/// `settings` at the servers of `provider`, signing in with it
-fn with_provider(settings: &AccountSettings, provider: &pe_oauth::Provider) -> AccountSettings {
-    provider_settings(
-        settings.name.clone(),
-        settings.email.clone(),
-        settings.username.clone(),
-        provider,
-    )
 }
 
 /// How long closing waits for the workers

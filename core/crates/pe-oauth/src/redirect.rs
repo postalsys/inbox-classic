@@ -9,6 +9,17 @@ use crate::{OAuthError, needs_admin};
 /// The most of a request read: a redirect is one line
 const MAX_REQUEST: usize = 16 * 1024;
 
+/// What a redirect has to carry to be this sign-in's
+#[derive(Clone, Copy)]
+pub(crate) struct Expected<'a> {
+    pub(crate) state: &'a str,
+    /// The `iss` of a provider that sends one (RFC 9207): a redirect with another comes from a provider the
+    /// browser was sent to by someone else, and is refused
+    pub(crate) issuer: Option<&'a str>,
+    /// The client signing in, for where an administrator approves it
+    pub(crate) client_id: &'a str,
+}
+
 /// What a redirect says
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum Redirect {
@@ -16,12 +27,14 @@ pub(crate) enum Redirect {
     Denied(String),
     /// Refused because the organization's administrator has to approve the app first
     NeedsAdmin,
+    /// This sign-in's state, from another issuer than the one signed in with
+    WrongIssuer,
     /// Not this sign-in's, or not a redirect at all (a favicon request)
     Other,
 }
 
 /// The parameters of the request line `GET /?code=...&state=... HTTP/1.1`
-pub(crate) fn parse_redirect(request: &[u8], state: &str) -> Redirect {
+pub(crate) fn parse_redirect(request: &[u8], expected: Expected) -> Redirect {
     let line = request.split(|b| *b == b'\n').next().unwrap_or_default();
     let line = String::from_utf8_lossy(line);
     let mut parts = line.split(' ');
@@ -34,6 +47,7 @@ pub(crate) fn parse_redirect(request: &[u8], state: &str) -> Redirect {
     let mut code = None;
     let mut error = None;
     let mut description = String::new();
+    let mut issuer = None;
     let mut matched = false;
     for pair in query.split('&') {
         let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
@@ -42,9 +56,13 @@ pub(crate) fn parse_redirect(request: &[u8], state: &str) -> Redirect {
             "code" => code = Some(value),
             "error" => error = Some(value),
             "error_description" => description = value,
-            "state" => matched = constant_time_eq(value.as_bytes(), state.as_bytes()),
+            "iss" => issuer = Some(value),
+            "state" => matched = constant_time_eq(value.as_bytes(), expected.state.as_bytes()),
             _ => {}
         }
+    }
+    if matched && expected.issuer.is_some() && issuer.as_deref() != expected.issuer {
+        return Redirect::WrongIssuer;
     }
     match (matched, code, error) {
         (true, Some(code), None) if !code.is_empty() => Redirect::Code(code),
@@ -118,6 +136,14 @@ fn needs_admin_page() -> String {
     )
 }
 
+fn wrong_issuer_page() -> String {
+    page(
+        "Signing in was stopped",
+        "The answer did not come from the sign-in app's provider, so Inbox Classic did not use it. Try again from Inbox Classic.",
+        Mark::Stopped,
+    )
+}
+
 fn other_page() -> String {
     page(
         "This page is not part of signing in",
@@ -139,7 +165,7 @@ async fn answer(mut socket: TcpStream, page: &str) {
 pub(crate) async fn receive(
     listener: &TcpListener,
     listener_v6: Option<&TcpListener>,
-    state: &str,
+    expected: Expected<'_>,
 ) -> Result<String, OAuthError> {
     loop {
         let accepted = match listener_v6 {
@@ -159,7 +185,7 @@ pub(crate) async fn receive(
                 Ok(read) => request.extend_from_slice(&chunk[..read]),
             }
         }
-        match parse_redirect(&request, state) {
+        match parse_redirect(&request, expected) {
             Redirect::Code(code) => {
                 answer(socket, &done_page()).await;
                 return Ok(code);
@@ -170,7 +196,11 @@ pub(crate) async fn receive(
             }
             Redirect::NeedsAdmin => {
                 answer(socket, &needs_admin_page()).await;
-                return Err(OAuthError::NeedsAdmin);
+                return Err(OAuthError::NeedsAdmin(crate::admin_consent_url(expected.client_id)));
+            }
+            Redirect::WrongIssuer => {
+                answer(socket, &wrong_issuer_page()).await;
+                return Err(OAuthError::BadRedirect);
             }
             Redirect::Other => answer(socket, &other_page()).await,
         }
@@ -183,7 +213,11 @@ mod tests {
 
     #[test]
     fn redirects() {
-        let state = "s1";
+        let state = Expected {
+            state: "s1",
+            issuer: None,
+            client_id: "client",
+        };
         assert_eq!(
             parse_redirect(b"GET /?code=4%2F0Ab&state=s1&scope=x HTTP/1.1\r\nHost: x\r\n", state),
             Redirect::Code("4/0Ab".into())
@@ -222,8 +256,43 @@ mod tests {
     }
 
     #[test]
+    fn issuers_in_redirects() {
+        let expected = Expected {
+            state: "s1",
+            issuer: Some("http://127.0.0.1:8085"),
+            client_id: "client",
+        };
+        assert_eq!(
+            parse_redirect(
+                b"GET /?code=c&state=s1&iss=http%3A%2F%2F127.0.0.1%3A8085 HTTP/1.1\r\n",
+                expected
+            ),
+            Redirect::Code("c".into())
+        );
+        // another provider's answer, or none named, from a provider that names itself
+        for request in [
+            &b"GET /?code=c&state=s1&iss=https%3A%2F%2Fwrong-issuer.invalid HTTP/1.1\r\n"[..],
+            b"GET /?code=c&state=s1 HTTP/1.1\r\n",
+            b"GET /?error=access_denied&state=s1&iss=https%3A%2F%2Fx HTTP/1.1\r\n",
+        ] {
+            assert_eq!(parse_redirect(request, expected), Redirect::WrongIssuer);
+        }
+        // not this sign-in's at all
+        assert_eq!(
+            parse_redirect(b"GET /?code=c&state=s2&iss=https%3A%2F%2Fx HTTP/1.1\r\n", expected),
+            Redirect::Other
+        );
+    }
+
+    #[test]
     fn pages_are_static() {
-        for page in [done_page(), denied_page(), needs_admin_page(), other_page()] {
+        for page in [
+            done_page(),
+            denied_page(),
+            needs_admin_page(),
+            wrong_issuer_page(),
+            other_page(),
+        ] {
             assert!(page.starts_with("<!doctype html>") && page.contains("You can close this tab."));
             assert!(!page.contains("<script") && !page.contains("http"), "{page}");
         }

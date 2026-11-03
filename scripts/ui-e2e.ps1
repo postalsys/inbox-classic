@@ -42,6 +42,7 @@ public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc proc, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int size);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int InternalGetWindowText(IntPtr hwnd, System.Text.StringBuilder text, int size);
+[DllImport("user32.dll")] public static extern int GetMenuItemCount(IntPtr menu);
 public struct RECT { public int Left, Top, Right, Bottom; }
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
@@ -60,7 +61,7 @@ public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr par
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
 $WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
-$VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
+$VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
@@ -262,7 +263,8 @@ $start.UseShellExecute = $false
 $start.RedirectStandardInput = $true
 $start.RedirectStandardOutput = $true
 $harness = [System.Diagnostics.Process]::Start($start)
-$harness.StandardInput.WriteLine('{}')
+# with its OAuth 2.0 / OpenID Connect provider, and a user with an address for name to sign in as there
+$harness.StandardInput.WriteLine('{"oauth":{},"users":{"testuser":{"password":"testpass"},"alice@example.com":{"password":"pw","displayName":"Alice Example"}}}')
 $ports = $harness.StandardOutput.ReadLine() | ConvertFrom-Json
 $rest = "http://127.0.0.1:$($ports.rest)/v1/mailboxes"
 function Messages([string]$mailbox) {
@@ -332,8 +334,12 @@ try {
     Step 'starting Inbox Classic with a store of its own'
     $store = Join-Path $Out 'store.db'
     Remove-Item -Force -ErrorAction SilentlyContinue "$store*", (Join-Path $Out '*.png'), (Join-Path $Out 'report*.pdf')
-    # ImapKit's certificate is self-signed: the app trusts it, and only it, for this run
-    $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"")
+    # ImapKit's certificate is self-signed: the app trusts it, and only it, for this run. A browser sign-in writes its
+    # page to a file, where the test opens it as the browser would
+    $signInPage = Join-Path $Out 'sign-in-page.txt'
+    Remove-Item -Force -ErrorAction SilentlyContinue $signInPage
+    $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"",
+        '--sign-in-page-file', "`"$signInPage`"")
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
     # the first page of Add Mail Account, with the address fields when $fields, else the page that offers a
@@ -937,17 +943,11 @@ try {
     SetText $first 100 'Gmail Test'
     SetText $first 101 'postalexpress.test@gmail.com'
     Click $first 1
-    # Gmail signs in through the browser (the Google client is built in): its button is offered first; the test can
-    # not sign in to Google, so Use App Password here, and the password way follows
-    $browser = StartPage $false 40
-    Check ($browser -and [Native.Win]::GetDlgItem($browser, 120) -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($browser, 121) -eq [IntPtr]::Zero) 'a Gmail address is offered Sign in with Google'
-    if ($browser) {
-        Shot $browser 'account-5b-browser-sign-in'
-        Click $browser 1
-        [void](WaitFor { -not [Native.Win]::IsWindow($browser) } 10)
-    }
+    # the built-in Google client is off out of the box and no sign-in app is added yet: no browser sign-in to offer,
+    # the app password way follows at once (Sign in with Google is offered further down, once it is turned on)
     $hint = WaitWindow '#32770' 'Add Mail Account' 40
     Check ($null -ne $hint) 'without it, Gmail wants an app password, and that is said'
+    Check ([Native.Win]::FindWindow('InboxClassicAccountStart', 'Add Mail Account') -eq [IntPtr]::Zero) 'with Google turned off, a Gmail address goes to the app password way'
     if ($hint) {
         Shot $hint 'account-5-app-password'
         # No: not now to the instructions
@@ -1035,6 +1035,203 @@ try {
         $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }
         Check ($null -ne $after) "the account leaves the tree ($before items before)"
         Shot $main 'accounts-3-after'
+    }
+
+    # ---- sign-in apps: an OAuth client of the user's, against ImapKit's OpenID Connect provider ----
+
+    Step 'sign-in apps'
+    $LVM_GETITEMSTATE = 0x102C
+    # whether the check box of a row is checked: its state image, 1 unchecked, 2 checked
+    function Checked([IntPtr]$list, [int]$row) {
+        (([int][Native.Win]::SendMessage($list, $LVM_GETITEMSTATE, [IntPtr]$row, [IntPtr]0xF000)) -shr 12) -eq 2
+    }
+    function ListRows([IntPtr]$list) { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    # a row selected with the keys, from the first
+    function KeyToRow([IntPtr]$list, [int]$row) {
+        Key $list $VK_HOME
+        for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
+        Start-Sleep -Milliseconds 400
+    }
+    # the words of a window's static texts (a message box, a form's intro)
+    function Statics([IntPtr]$window) { ([Native.Win]::FindDescendants($window, 'Static') | ForEach-Object { WindowText $_ }) -join ' ' }
+    function OpenSignInApps {
+        Command $main $IDM_ACCOUNTS
+        $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
+        if (-not $accounts) { return $null }
+        Click $accounts 405
+        $apps = WaitWindow 'InboxClassicSignInApps' 'Sign-in Apps'
+        return @($accounts, $apps)
+    }
+    function CloseSignInApps($windows) {
+        Click $windows[1] 705
+        [void](WaitFor { -not [Native.Win]::IsWindow($windows[1]) })
+        Click $windows[0] 404
+        [void](WaitFor { -not [Native.Win]::IsWindow($windows[0]) })
+    }
+
+    $windows = OpenSignInApps
+    Check ($null -ne $windows -and $windows[1]) 'File > Accounts > Sign-in Apps opens the sign-in apps'
+    if ($windows -and $windows[1]) {
+        $apps = $windows[1]
+        $appList = [Native.Win]::GetDlgItem($apps, 700)
+        Check ((ListRows $appList) -eq 2) 'the built-in Microsoft and Google clients are listed'
+        Check ((Checked $appList 0) -and -not (Checked $appList 1)) 'Microsoft is on and Google off out of the box'
+        Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($apps, 702)) -and -not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($apps, 703))) 'a built-in client can not be edited or removed'
+        Check ((WindowText ([Native.Win]::GetDlgItem($apps, 704))) -match 'built in') 'a built-in client says what it is'
+        Shot $apps 'signin-1-apps'
+
+        Click $apps 701
+        $editor = WaitWindow 'InboxClassicSignInApp' 'Add Sign-in App'
+        Check ($null -ne $editor) 'Add opens the sign-in app editor'
+        if ($editor) {
+            # a preset fills in everything but the client
+            Click $editor 600
+            Check ([bool](WaitFor { (GetText $editor 611) -eq 'https://accounts.google.com' } 5)) 'Fill in for Google fills in its issuer'
+            Check ((GetText $editor 617) -eq 'imap.gmail.com' -and (GetText $editor 624) -eq 'http://127.0.0.1') 'its servers, and the redirect URI to register'
+            Shot $editor 'signin-2-google-preset'
+            SetText $editor 610 'ImapKit'
+            SetText $editor 611 $ports.oauth
+            Check ([bool](WaitFor { (GetText $editor 624) -eq 'http://localhost' } 5)) 'the redirect URI follows the issuer'
+            SetText $editor 613 'imapkit-approve'
+            SetText $editor 616 'openid email profile offline_access mail'
+            SetText $editor 617 '127.0.0.1'
+            SetText $editor 618 "$($ports.imaps)"
+            [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($editor, 619), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
+            SetText $editor 620 '127.0.0.1'
+            SetText $editor 621 "$($ports.smtp)"
+            [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($editor, 622), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
+            Click $editor 612
+            $found = WaitWindow '#32770' 'Check' 20
+            Check ($found -and (Statics $found) -match 'can be used') "Check reads the issuer's discovery document"
+            if ($found) {
+                Shot $found 'signin-3-check'
+                Click $found 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($found) })
+            }
+            Shot $editor 'signin-4-editor'
+            Click $editor 1
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($editor) } 20)) 'OK saves the sign-in app'
+        }
+        Check ([bool](WaitFor { (ListRows $appList) -eq 3 } 5) -and (Checked $appList 2)) 'it is listed, turned on'
+        Shot $apps 'signin-5-apps-added'
+        CloseSignInApps $windows
+    }
+
+    # the first page: Google's button faded with the reason, More sign-in options with the app
+    Command $main $IDM_NEW_ACCOUNT
+    $first = StartPage $true
+    if ($first) {
+        $google = [Native.Win]::GetDlgItem($first, 120)
+        Check ($google -ne [IntPtr]::Zero -and -not [Native.Win]::IsWindowEnabled($google)) 'Sign in with Google is shown turned off'
+        Check ([Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($first, 121))) 'Sign in with Microsoft works'
+        Check ((Statics $first) -match 'Turned off on this computer') 'the reason is under it, without hovering'
+        Shot $first 'signin-6-first-page'
+        Click $first 123
+        $why = WaitWindow '#32770' 'Add Mail Account' 10
+        Check ($why -and (Statics $why) -match 'test users') 'Why? says why it is off'
+        if ($why) {
+            Shot $why 'signin-7-why'
+            Click $why 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($why) })
+        }
+        # the address typed goes to the provider as the account to sign in to
+        SetText $first 101 'alice@example.com'
+        Click $first 122
+        $menu = WaitWindow '#32768' $null 10
+        Check ($null -ne $menu) 'More sign-in options opens a menu'
+        if ($menu) {
+            $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+            Check ([Native.Win]::GetMenuItemCount($hmenu) -eq 3) 'with the sign-in app, a separator and Add a sign-in app'
+            Shot $first 'signin-8-more' $menu
+            Key $menu $VK_DOWN
+            Key $menu $VK_RETURN
+        }
+        # the app writes the page instead of opening the browser; opened here, ImapKit approves and redirects back
+        $page = WaitFor { if (Test-Path $signInPage) { Get-Content -Raw $signInPage } } 20
+        Check ($page -and $page.StartsWith("$($ports.oauth)/authorize?") -and $page -match 'login_hint=alice%40example.com') "signing in opens the sign-in app's page for the address typed"
+        if ($page) {
+            $waiting = WaitWindow 'InboxClassicWait' $null 5
+            if ($waiting) { Shot $waiting 'signin-9-waiting' }
+            $beforeTree = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+            $answer = Invoke-WebRequest -UseBasicParsing $page.Trim()
+            Check ($answer.Content -match 'You are signed in') 'the provider sends the browser back to the app, which says it is signed in'
+            Remove-Item -Force $signInPage
+            $grown = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge $beforeTree + 6) { $n } } 40
+            Check ($null -ne $grown) 'the account signed in to is added, and its folders sync with the token'
+            Shot $main 'signin-10-added'
+        }
+    }
+
+    $windows = OpenSignInApps
+    if ($windows -and $windows[1]) {
+        $apps = $windows[1]
+        $appList = [Native.Win]::GetDlgItem($apps, 700)
+        # removing it is refused while the account uses it
+        KeyToRow $appList 2
+        Click $apps 703
+        $sure = WaitWindow '#32770' 'Remove Sign-in App' 10
+        if ($sure) { Click $sure 6 }
+        $refused = WaitFor {
+            $box = [Native.Win]::FindWindow('#32770', 'Remove Sign-in App')
+            if ($box -ne [IntPtr]::Zero -and $box -ne $sure -and (Statics $box) -match 'alice@example.com') { $box }
+        } 10
+        Check ($null -ne $refused) 'a sign-in app an account uses is not removed, naming the account'
+        if ($refused) {
+            Shot $refused 'signin-11-in-use'
+            Click $refused 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($refused) })
+        }
+        # the app off, Google on: Space on a row turns it on or off (each waited for, the rows are filled again after)
+        Key $appList $VK_SPACE
+        $off = WaitFor { -not (Checked $appList 2) } 5
+        Start-Sleep -Milliseconds 500
+        KeyToRow $appList 1
+        Key $appList $VK_SPACE
+        Check ([bool]$off -and [bool](WaitFor { Checked $appList 1 } 5) -and -not (Checked $appList 2)) 'Google turned on, the sign-in app off'
+        Shot $apps 'signin-12-toggled'
+        CloseSignInApps $windows
+    }
+
+    # Properties of the account names its sign-in app
+    Command $main $IDM_ACCOUNTS
+    $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
+    if ($accounts) {
+        KeyToRow ([Native.Win]::GetDlgItem($accounts, 400)) 1
+        Click $accounts 402
+        $properties = WaitWindow 'InboxClassicForm' 'Properties'
+        Check ($properties -and (Statics $properties) -match 'Signs in with: ImapKit') 'Properties says what the account signs in with'
+        if ($properties) {
+            Shot $properties 'signin-13-properties'
+            Click $properties 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($properties) })
+        }
+        Click $accounts 404
+        [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
+    }
+
+    # Google turned on: its button works, and a Gmail address is offered it; the app turned off is not in the menu
+    Command $main $IDM_NEW_ACCOUNT
+    $first = StartPage $true
+    if ($first) {
+        Check ([Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($first, 120)) -and [Native.Win]::GetDlgItem($first, 123) -eq [IntPtr]::Zero) 'Sign in with Google works once turned on'
+        Click $first 122
+        $menu = WaitWindow '#32768' $null 10
+        if ($menu) {
+            $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+            Check ([Native.Win]::GetMenuItemCount($hmenu) -eq 1) 'a sign-in app turned off is left out of More sign-in options'
+            Key $menu $VK_ESCAPE
+            [void](WaitFor { -not [Native.Win]::IsWindow($menu) } 5)
+        }
+        SetText $first 100 'Gmail Test'
+        SetText $first 101 'postalexpress.test@gmail.com'
+        Click $first 1
+        $browser = StartPage $false 40
+        Check ($browser -and [Native.Win]::GetDlgItem($browser, 120) -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($browser, 121) -eq [IntPtr]::Zero) 'a Gmail address is offered Sign in with Google'
+        if ($browser) {
+            Shot $browser 'account-5b-browser-sign-in'
+            Click $browser 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($browser) } 10)
+        }
     }
 
     # ---- about and help ----

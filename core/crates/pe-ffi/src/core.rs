@@ -7,7 +7,7 @@
 use std::ffi::{CStr, CString, c_char, c_void};
 use std::ptr::{null, null_mut};
 
-use pe_core::{Core, DraftKind, Event, FailureKind, Outgoing};
+use pe_core::{Core, DraftKind, Event, FailureKind, Outgoing, SignInWith};
 use pe_imap::SpecialUse;
 use pe_store::{AccountSettings, Security, Sort, SortField};
 
@@ -110,6 +110,8 @@ pub enum PeEventKind {
     /// The draft whose Message-ID is `detail` is in the Drafts of `account` on the server; when `message` is not
     /// NULL it was not saved, and that says why
     DraftSaved = 12,
+    /// The check `uid` of `pe_sign_in_app_check` is done: `pe_sign_in_app_check_result`
+    SignInAppChecked = 13,
 }
 
 #[repr(C)]
@@ -179,6 +181,7 @@ impl Callback {
             Event::DraftSaved { account, .. } => (PeEventKind::DraftSaved, *account, 0, 0),
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
+            Event::SignInAppChecked { request } => (PeEventKind::SignInAppChecked, 0, 0, *request),
             Event::ViewReady { request } => (PeEventKind::ViewReady, 0, 0, *request),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
         };
@@ -328,6 +331,16 @@ pub enum PeSecurity {
     Plain = 2,
 }
 
+impl From<Security> for PeSecurity {
+    fn from(value: Security) -> Self {
+        match value {
+            Security::Tls => PeSecurity::Tls,
+            Security::StartTls => PeSecurity::StartTls,
+            Security::Plain => PeSecurity::Plain,
+        }
+    }
+}
+
 impl From<PeSecurity> for Security {
     fn from(value: PeSecurity) -> Self {
         match value {
@@ -420,11 +433,7 @@ pub struct PeAccountSettingsView {
 /// `core` must be a live handle.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_account_settings(core: *const PeCore, account: i64) -> *mut PeAccountSettingsView {
-    let security = |s: pe_store::Security| match s {
-        pe_store::Security::Tls => PeSecurity::Tls,
-        pe_store::Security::StartTls => PeSecurity::StartTls,
-        pe_store::Security::Plain => PeSecurity::Plain,
-    };
+    let security = PeSecurity::from;
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
@@ -512,8 +521,12 @@ pub struct PeAccount {
     pub name: *const c_char,
     pub email: *const c_char,
     /// The provider it signs in to through the browser, NONE for a password: a refused sign-in asks for
-    /// `pe_sign_in_begin` and `pe_account_reauthorize`, not for a password
+    /// `pe_sign_in_begin` and `pe_account_reauthorize`, not for a password. APP: with the sign-in app `app`
     pub oauth: PeOAuthProvider,
+    /// The sign-in app of an `oauth` APP account, 0 otherwise
+    pub app: i64,
+    /// The name of what it signs in with ("Inbox Classic for Google", a sign-in app's name), empty for a password
+    pub signs_in_with: *const c_char,
     /// The incoming (IMAP) server, for the Accounts list
     pub imap_host: *const c_char,
     /// "Name <address>", or the address alone when the name is empty or the same: how From and the account menus
@@ -567,21 +580,21 @@ pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList 
                 return null_mut();
             };
             let names: Vec<&str> = accounts.iter().map(|a| a.settings.name.as_str()).collect();
-            handed(PeAccountList(Rows::new(&accounts, |a, strings| PeAccount {
-                id: a.id,
-                name: strings.add(&a.settings.name),
-                email: strings.add(&a.settings.email),
-                imap_host: strings.add(&a.settings.imap_host),
-                label: strings.add(&account_label(&a.settings.name, &a.settings.email)),
-                title: strings.add(&account_title(&a.settings.name, &a.settings.email, &names)),
-                oauth: match &a.settings.auth {
-                    pe_store::Auth::OAuth2(name) => match pe_oauth::ProviderKind::parse(name) {
-                        Some(pe_oauth::ProviderKind::Google) => PeOAuthProvider::Google,
-                        Some(pe_oauth::ProviderKind::Microsoft) => PeOAuthProvider::Microsoft,
-                        None => PeOAuthProvider::None,
-                    },
-                    pe_store::Auth::Password => PeOAuthProvider::None,
-                },
+            handed(PeAccountList(Rows::new(&accounts, |a, strings| {
+                let with = SignInWith::of_auth_kind(&a.settings.auth);
+                let (oauth, app) = with.map_or((PeOAuthProvider::None, 0), sign_in_pair);
+                let signs_in_with = core.sign_in_name(&a.settings.auth).unwrap_or_default();
+                PeAccount {
+                    id: a.id,
+                    name: strings.add(&a.settings.name),
+                    email: strings.add(&a.settings.email),
+                    imap_host: strings.add(&a.settings.imap_host),
+                    label: strings.add(&account_label(&a.settings.name, &a.settings.email)),
+                    title: strings.add(&account_title(&a.settings.name, &a.settings.email, &names)),
+                    oauth,
+                    app,
+                    signs_in_with: strings.add(&signs_in_with),
+                }
             })))
         })
     }
@@ -1903,8 +1916,32 @@ pub unsafe extern "C" fn pe_autoconfig_free(result: *mut PeAutoconfig) {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PeOAuthProvider {
     None = 0,
+    /// The built-in Google client
     Google = 1,
+    /// The built-in Microsoft client
     Microsoft = 2,
+    /// A sign-in app the user added, named by its id next to this
+    App = 3,
+}
+
+/// What `provider` and `app` (for APP) name, None for NONE
+fn sign_in_with(provider: PeOAuthProvider, app: i64) -> Option<SignInWith> {
+    match provider {
+        PeOAuthProvider::Google => Some(SignInWith::Builtin(pe_oauth::ProviderKind::Google)),
+        PeOAuthProvider::Microsoft => Some(SignInWith::Builtin(pe_oauth::ProviderKind::Microsoft)),
+        PeOAuthProvider::App => Some(SignInWith::App(app)),
+        PeOAuthProvider::None => None,
+    }
+}
+
+/// The provider and app id of the C API for `with`
+fn sign_in_pair(with: SignInWith) -> (PeOAuthProvider, i64) {
+    match with {
+        SignInWith::Builtin(pe_oauth::ProviderKind::Google) => (PeOAuthProvider::Google, 0),
+        SignInWith::Builtin(pe_oauth::ProviderKind::Microsoft) => (PeOAuthProvider::Microsoft, 0),
+        SignInWith::Builtin(pe_oauth::ProviderKind::Oidc) => (PeOAuthProvider::None, 0),
+        SignInWith::App(id) => (PeOAuthProvider::App, id),
+    }
 }
 
 /// The provider of an IMAP server that this build can sign in to through the browser; None when there is
@@ -1921,17 +1958,15 @@ pub unsafe extern "C" fn pe_oauth_provider_for(core: *const PeCore, imap_host: *
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, PeOAuthProvider::None, |core| {
-            match core.oauth_provider_for(host) {
-                Some(pe_oauth::ProviderKind::Google) => PeOAuthProvider::Google,
-                Some(pe_oauth::ProviderKind::Microsoft) => PeOAuthProvider::Microsoft,
-                None => PeOAuthProvider::None,
-            }
+            core.oauth_provider_for(host)
+                .map_or(PeOAuthProvider::None, |kind| sign_in_pair(SignInWith::Builtin(kind)).0)
         })
     }
 }
 
-/// Starts signing in to `provider` for `email`. `url` gets the https:// page to open in the browser (free
-/// it with `pe_string_free`); `SignInDone` with the returned request in `uid` follows. 0 on failure.
+/// Starts signing in with `provider` (and for APP, the sign-in app `app`) for `email`. `url` gets the page to open
+/// in the browser (free it with `pe_string_free`); `SignInDone` with the returned request in `uid` follows. 0 on
+/// failure.
 ///
 /// # Safety
 /// `core` must be a live handle, `email` a NUL-terminated string, `url` a valid pointer.
@@ -1939,13 +1974,12 @@ pub unsafe extern "C" fn pe_oauth_provider_for(core: *const PeCore, imap_host: *
 pub unsafe extern "C" fn pe_sign_in_begin(
     core: *const PeCore,
     provider: PeOAuthProvider,
+    app: i64,
     email: *const c_char,
     url: *mut *mut c_char,
 ) -> u64 {
-    let kind = match provider {
-        PeOAuthProvider::Google => pe_oauth::ProviderKind::Google,
-        PeOAuthProvider::Microsoft => pe_oauth::ProviderKind::Microsoft,
-        PeOAuthProvider::None => return 0,
+    let Some(with) = sign_in_with(provider, app) else {
+        return 0;
     };
     // SAFETY: as the caller guarantees
     let Some(email) = (unsafe { arg(email) }) else {
@@ -1955,7 +1989,7 @@ pub unsafe extern "C" fn pe_sign_in_begin(
         return 0;
     }
     // SAFETY: as the caller guarantees
-    let started = unsafe { with(core, None, |core| core.sign_in_begin(kind, email).ok()) };
+    let started = unsafe { self::with(core, None, |core| core.sign_in_begin(with, email).ok()) };
     let Some((request, page)) = started else {
         return 0;
     };
@@ -2029,6 +2063,386 @@ pub unsafe extern "C" fn pe_account_reauthorize(
     let outcome = unsafe { with(core, Err(None), |core| core.reauthorize(account, request).map_err(Some)) };
     // SAFETY: as the caller guarantees
     unsafe { refused(error, outcome, "the sign-in could not be used") }.is_some()
+}
+
+// ---- sign-in apps ----
+
+/// A sign-in app as the Sign-in Apps manager lists it: a built-in client (`provider` GOOGLE or MICROSOFT, `id` 0),
+/// or one the user added (`provider` APP)
+#[repr(C)]
+pub struct PeSignInApp {
+    pub provider: PeOAuthProvider,
+    pub id: i64,
+    pub name: *const c_char,
+    /// The issuer, or for a built-in client the host of its sign-in page
+    pub issuer: *const c_char,
+    /// Offered for new accounts
+    pub enabled: bool,
+    /// The addresses of the accounts that sign in with it, separated by ", "; empty when none
+    pub used_by: *const c_char,
+    /// For a built-in client: why it may be off, and what to do instead. Empty for an added app
+    pub off_reason: *const c_char,
+    /// What an added app was saved with (empty and 0 for a built-in client); never its secret
+    pub client_id: *const c_char,
+    pub has_secret: bool,
+    pub scopes: *const c_char,
+    pub imap_host: *const c_char,
+    pub imap_port: u16,
+    pub imap_security: PeSecurity,
+    pub smtp_host: *const c_char,
+    pub smtp_port: u16,
+    pub smtp_security: PeSecurity,
+}
+
+/// The sign-in apps; free with `pe_sign_in_app_list_free`
+pub struct PeSignInAppList(Rows<PeSignInApp>);
+
+/// The sign-in apps, the built-in Microsoft and Google clients first; NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_apps(core: *const PeCore) -> *mut PeSignInAppList {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(entries) = core.sign_in_apps() else {
+                return null_mut();
+            };
+            handed(PeSignInAppList(Rows::new(&entries, |e, strings| {
+                let (provider, id) = sign_in_pair(e.with);
+                let app = e.app.clone().unwrap_or_default();
+                let off_reason = match e.with {
+                    SignInWith::Builtin(kind) => pe_core::builtin_off_reason(kind),
+                    SignInWith::App(_) => "",
+                };
+                PeSignInApp {
+                    provider,
+                    id,
+                    name: strings.add(&e.name),
+                    issuer: strings.add(&e.issuer),
+                    enabled: e.enabled,
+                    used_by: strings.add(&e.used_by.join(", ")),
+                    off_reason: strings.add(off_reason),
+                    client_id: strings.add(&app.client_id),
+                    has_secret: app.has_secret,
+                    scopes: strings.add(&app.scopes),
+                    imap_host: strings.add(&app.imap_host),
+                    imap_port: app.imap_port,
+                    imap_security: app.imap_security.into(),
+                    smtp_host: strings.add(&app.smtp_host),
+                    smtp_port: app.smtp_port,
+                    smtp_security: app.smtp_security.into(),
+                }
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_list_count(list: *const PeSignInAppList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_list_get(list: *const PeSignInAppList, index: usize) -> *const PeSignInApp {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_list_free(list: *mut PeSignInAppList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+/// Turns a sign-in app on or off for new accounts (accounts that use it keep working); false when there is no such
+/// app
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_set_enabled(
+    core: *const PeCore,
+    provider: PeOAuthProvider,
+    app: i64,
+    enabled: bool,
+) -> bool {
+    let Some(with) = sign_in_with(provider, app) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { self::with(core, false, |core| core.set_sign_in_enabled(with, enabled).is_ok()) }
+}
+
+/// Reads the discovery document of `issuer` in the background: `SignInAppChecked` with the returned request in
+/// `uid` follows. 0 with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) when the
+/// issuer is no address to read it from.
+///
+/// # Safety
+/// `core` must be a live handle, `issuer` a NUL-terminated string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_check(
+    core: *const PeCore,
+    issuer: *const c_char,
+    error: *mut *mut c_char,
+) -> u64 {
+    // SAFETY: as the caller guarantees
+    let issuer = unsafe { arg(issuer) };
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe {
+        with(core, Err(None), |core| {
+            issuer.map_or(Err(None), |issuer| core.sign_in_app_check(issuer).map_err(Some))
+        })
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the issuer could not be checked") }.unwrap_or(0)
+}
+
+/// What the check `request` found, taken: true with what it found in `text`, or false with why the issuer can not be
+/// used (free `text` with `pe_string_free`; it stays NULL while the check runs or when there is no such check)
+///
+/// # Safety
+/// `core` must be a live handle, `text` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_check_result(
+    core: *const PeCore,
+    request: u64,
+    text: *mut *mut c_char,
+) -> bool {
+    if text.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let result = unsafe { with(core, None, |core| core.sign_in_app_check_result(request)) };
+    let (ok, said) = match result {
+        Some(Ok(found)) => (
+            true,
+            format!(
+                "Sign-in page: {}\r\nToken endpoint: {}",
+                found.authorize_url, found.token_url
+            ),
+        ),
+        Some(Err(reason)) => (false, reason),
+        None => return false,
+    };
+    // SAFETY: the caller gave a valid pointer
+    unsafe { *text = into_c_string(said) };
+    ok
+}
+
+/// Stops a check the editor no longer waits for
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_check_cancel(core: *const PeCore, request: u64) {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| core.sign_in_app_check_cancel(request)) }
+}
+
+/// A sign-in app as the editor saves it (UTF-8)
+#[repr(C)]
+pub struct PeSignInAppForm {
+    pub name: *const c_char,
+    pub issuer: *const c_char,
+    pub client_id: *const c_char,
+    /// Separated by spaces
+    pub scopes: *const c_char,
+    pub imap_host: *const c_char,
+    pub imap_port: u16,
+    pub imap_security: PeSecurity,
+    pub smtp_host: *const c_char,
+    pub smtp_port: u16,
+    pub smtp_security: PeSecurity,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeSecretChange {
+    Keep = 0,
+    Set = 1,
+    Remove = 2,
+}
+
+/// Saves a sign-in app: a new one when `id` is 0 (turned on), else app `id`, whose accounts move to its servers.
+/// Its issuer has to be checked first (`pe_sign_in_app_check`). `secret` is the client secret for SET. The app's id,
+/// or 0 with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`).
+///
+/// # Safety
+/// `core` must be a live handle, `form` a valid form with NUL-terminated strings, `secret` NULL or a NUL-terminated
+/// string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_save(
+    core: *const PeCore,
+    id: i64,
+    form: *const PeSignInAppForm,
+    change: PeSecretChange,
+    secret: *const c_char,
+    error: *mut *mut c_char,
+) -> i64 {
+    // SAFETY: as the caller guarantees
+    let form = unsafe { sign_in_app_form(form) };
+    // SAFETY: as the caller guarantees
+    let secret = unsafe { arg(secret) };
+    let change = match (change, secret) {
+        (PeSecretChange::Set, Some(secret)) => Some(pe_core::SecretChange::Set(secret)),
+        (PeSecretChange::Set, None) => None,
+        (PeSecretChange::Keep, _) => Some(pe_core::SecretChange::Keep),
+        (PeSecretChange::Remove, _) => Some(pe_core::SecretChange::Remove),
+    };
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe {
+        with(core, Err(None), |core| match (form, change) {
+            (Some(form), Some(change)) => core
+                .save_sign_in_app((id != 0).then_some(id), &form, change)
+                .map_err(Some),
+            _ => Err(None),
+        })
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the sign-in app could not be saved") }.unwrap_or(0)
+}
+
+/// # Safety
+/// `form` must be NULL or point to a form whose strings are NUL-terminated.
+unsafe fn sign_in_app_form(form: *const PeSignInAppForm) -> Option<pe_core::SignInAppForm> {
+    // SAFETY: as the caller guarantees
+    let f = unsafe { form.as_ref() }?;
+    // SAFETY: as the caller guarantees
+    let text = |p| unsafe { arg(p) }.map(str::to_string);
+    Some(pe_core::SignInAppForm {
+        name: text(f.name)?,
+        issuer: text(f.issuer)?,
+        client_id: text(f.client_id)?,
+        scopes: text(f.scopes)?,
+        imap_host: text(f.imap_host)?,
+        imap_port: f.imap_port,
+        imap_security: f.imap_security.into(),
+        smtp_host: text(f.smtp_host)?,
+        smtp_port: f.smtp_port,
+        smtp_security: f.smtp_security.into(),
+    })
+}
+
+/// Removes a sign-in app and its secret; false with the reason in `error` (NULL or a pointer to a string to free
+/// with `pe_string_free`), as while accounts sign in with it
+///
+/// # Safety
+/// `core` must be a live handle, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_app_remove(core: *const PeCore, id: i64, error: *mut *mut c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe { with(core, Err(None), |core| core.remove_sign_in_app(id).map_err(Some)) };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the sign-in app could not be removed") }.is_some()
+}
+
+/// What the editor fills a sign-in app in with for a provider, everything but the client
+#[repr(C)]
+pub struct PeSignInPreset {
+    /// `Google`, `Microsoft`
+    pub name: *const c_char,
+    pub issuer: *const c_char,
+    pub scopes: *const c_char,
+    pub imap_host: *const c_char,
+    pub imap_port: u16,
+    pub imap_security: PeSecurity,
+    pub smtp_host: *const c_char,
+    pub smtp_port: u16,
+    pub smtp_security: PeSecurity,
+}
+
+/// The presets; free with `pe_sign_in_preset_list_free`
+pub struct PeSignInPresetList(Rows<PeSignInPreset>);
+
+fn preset_security(security: pe_net::Security) -> PeSecurity {
+    match security {
+        pe_net::Security::Tls => PeSecurity::Tls,
+        pe_net::Security::StartTls => PeSecurity::StartTls,
+        pe_net::Security::Plain => PeSecurity::Plain,
+    }
+}
+
+/// The providers the editor can fill a sign-in app in for
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_sign_in_presets() -> *mut PeSignInPresetList {
+    guard(|| {
+        let presets = pe_oauth::Preset::all();
+        handed(PeSignInPresetList(Rows::new(&presets, |p, strings| PeSignInPreset {
+            name: strings.add(p.name),
+            issuer: strings.add(p.issuer),
+            scopes: strings.add(&p.scopes.join(" ")),
+            imap_host: strings.add(&p.imap.host),
+            imap_port: p.imap.port,
+            imap_security: preset_security(p.imap.security),
+            smtp_host: strings.add(&p.smtp.host),
+            smtp_port: p.smtp.port,
+            smtp_security: preset_security(p.smtp.security),
+        })))
+    })
+    .unwrap_or(null_mut())
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_preset_list_count(list: *const PeSignInPresetList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_preset_list_get(
+    list: *const PeSignInPresetList,
+    index: usize,
+) -> *const PeSignInPreset {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_preset_list_free(list: *mut PeSignInPresetList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+/// The redirect URI to register a client of `issuer` with (`http://localhost`, `http://127.0.0.1` for Google); free
+/// with `pe_string_free`
+///
+/// # Safety
+/// `issuer` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_redirect_uri(issuer: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let issuer = unsafe { arg(issuer) }.unwrap_or_default().to_string();
+    guard(move || into_c_string(pe_oauth::ProviderKind::of_issuer(issuer.trim()).redirect_uri())).unwrap_or(null_mut())
+}
+
+/// How to register a client with the provider of `issuer`, for the editor; free with `pe_string_free`
+///
+/// # Safety
+/// `issuer` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sign_in_register_hint(issuer: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let issuer = unsafe { arg(issuer) }.unwrap_or_default().to_string();
+    guard(move || into_c_string(pe_oauth::Preset::register_hint(issuer.trim()).to_string())).unwrap_or(null_mut())
 }
 
 #[cfg(test)]

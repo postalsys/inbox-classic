@@ -43,3 +43,18 @@ async fn microsoft_accepts_the_built_in_client() {
         other => panic!("expected the grant refused, got {other:?}"),
     }
 }
+
+/// The presets' issuers publish discovery documents the sign-in apps can use, and Yahoo's too, for a later preset
+#[tokio::test]
+async fn presets_are_discovered() {
+    if !enabled() {
+        return;
+    }
+    let issuers = pe_oauth::Preset::all().into_iter().map(|p| p.issuer);
+    for issuer in issuers.chain(["https://api.login.yahoo.com"]) {
+        let found = pe_oauth::discover(issuer)
+            .await
+            .unwrap_or_else(|e| panic!("{issuer}: {e}"));
+        assert!(found.authorize_url.starts_with("https://") && found.token_url.starts_with("https://"));
+    }
+}

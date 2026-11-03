@@ -75,6 +75,15 @@ void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON, 
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
                 bool (*validate)(const std::vector<FormField>&, std::wstring& error) = nullptr, const wchar_t* okLabel = L"OK",
                 size_t focus = 0);
+// an owner-drawn button (CreateLinkButton) drawn as a link: underlined, in the link color, a focus rectangle around
+// the words
+void DrawLinkButton(const DRAWITEMSTRUCT& item);
+// a button that looks like a link (draw it with DrawLinkButton); Tab reaches it and Enter or Space clicks it
+HWND CreateLinkButton(HWND parent, const wchar_t* text, int id, const RECT& bounds);
+// for WM_SETCURSOR of the window with the links: the hand over a link; true when it set it
+bool SetLinkCursor(HWND hwnd, WPARAM wParam);
+// what a screen reader says about a control besides its name (the reason a button is turned off)
+void SetAccessibleDescription(HWND control, const std::wstring& text);
 // a dialog window centered on the window of `owner`, owned by it, with this client size; RunModal shows it, runs it
 // until `done` and destroys it, the owner disabled meanwhile
 HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight);
@@ -107,14 +116,33 @@ void MarkFromInternet(const std::wstring& path);
 
 // asks for a new account and adds it to the core; its id, or 0 when cancelled
 int64_t NewAccountDialog(HWND owner, PeCore* core);
-// the main window hands AutoconfigDone and SignInDone events to the account form waiting for one
+// the main window hands AutoconfigDone, SignInDone and SignInAppChecked events to the window waiting for one
 void RequestDone(uint64_t request);
-// signs in to `provider` for `email` in the browser; the finished sign-in request, 0 when it did not work
-uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, const std::wstring& email);
+// waits for the event of `request` with a small window titled `title` that says `text` and can cancel it; false when
+// it was cancelled
+bool WaitForRequest(HWND owner, PeCore* core, uint64_t request, void (*cancel)(const PeCore*, uint64_t),
+                    const std::wstring& text, const wchar_t* title);
+// what a sign-in uses: a built-in client (GOOGLE, MICROSOFT) or the sign-in app `app` (APP)
+struct SignInChoice {
+    PeOAuthProvider provider = PE_O_AUTH_PROVIDER_NONE;
+    int64_t app = 0;
+};
+// signs in with `with` for `email` in the browser; the finished sign-in request, 0 when it did not work
+uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const std::wstring& email);
+// test runs (--sign-in-page-file): the sign-in page is written to this file for the test to open, not to the browser
+void SetSignInPageFile(const std::wstring& path);
 // File > Accounts: the accounts listed, to add, change (Properties) or remove; true when one changed
 bool AccountsDialog(HWND owner, PeCore* core);
 // asks for the password of an account; false when cancelled
 bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password);
+
+// ---- signinapps.cpp ----
+
+// File > Accounts > Sign-in Apps: the built-in clients and the added sign-in apps, to turn on and off, add, change
+// or remove
+void SignInAppsDialog(HWND owner, PeCore* core);
+// the editor of a sign-in app: a new one when `app` is NULL; the id of the app saved, 0 when cancelled
+int64_t SignInAppEditor(HWND owner, PeCore* core, const PeSignInApp* app);
 
 // ---- outbox.cpp ----
 
@@ -218,7 +246,8 @@ public:
     std::wstring AccountName(int64_t account) const;
     std::wstring AccountEmail(int64_t account) const;
     // the provider the account signs in to through the browser, NONE for a password
-    PeOAuthProvider OAuthProvider(int64_t account) const;
+    // what the account signs in with through the browser; NONE for a password
+    SignInChoice SignIn(int64_t account) const;
     // the account of the selected folder, the first account without one; 0 when there is none
     int64_t CurrentAccount() const;
     // a reply, reply to all or forward of the message shown, empty when no message is shown
@@ -279,7 +308,7 @@ private:
     std::unordered_map<int64_t, HTREEITEM> items_;
     std::unordered_map<int64_t, std::wstring> accountNames_;
     std::unordered_map<int64_t, std::wstring> accountEmails_;
-    std::unordered_map<int64_t, PeOAuthProvider> accountOAuth_;
+    std::unordered_map<int64_t, SignInChoice> accountSignIns_;
     // the account of each folder, and the first account
     std::unordered_map<int64_t, int64_t> folderAccounts_;
     // the name of each folder in the tree, and whether it is the Inbox or a special folder

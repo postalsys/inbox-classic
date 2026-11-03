@@ -47,9 +47,12 @@ const sections = [
             {
                 shot: 'account-5b-browser-sign-in',
                 name: 'A Google or Microsoft address typed: their sign-in offered',
-                what: "An address found at Google (Gmail, Google Workspace) or Microsoft (Outlook.com, Microsoft 365) is offered that provider's sign-in button (OAuth 2.0 with PKCE and a loopback redirect): the password and any second step are typed on their page, never into Inbox Classic, and the account then signs in with tokens kept in the Windows Credential Manager. Use App Password goes the password way instead. A Microsoft 365 organization that has not approved the app is reported as that, with the address where its administrator approves it.",
+                what: "An address found at Google (Gmail, Google Workspace) or Microsoft (Outlook.com, Microsoft 365) is offered that provider's sign-in button when its built-in client is turned on (OAuth 2.0 with PKCE and a loopback redirect), with More sign-in options when sign-in apps are: the password and any second step are typed on their page, never into Inbox Classic, and the account then signs in with tokens kept in the Windows Credential Manager. Use App Password goes the password way instead. With nothing to sign in with, the page is left out. A Microsoft 365 organization that has not approved the app is reported as that, with the address where its administrator approves it.",
                 how: 'Type the address and click Next; the button follows the lookup.',
-                checked: ['A Gmail address is offered Sign in with Google', 'Use App Password goes on to the password way']
+                checked: [
+                    'With Google turned off (out of the box), a Gmail address goes to the app password way',
+                    'Once turned on, a Gmail address is offered Sign in with Google'
+                ]
             },
             {
                 shot: 'account-5-app-password',
@@ -64,6 +67,83 @@ const sections = [
                 what: 'Choosing "None (unencrypted)" for either server asks for confirmation first, since the password would travel readable. STARTTLS is required to really encrypt; a server that does not offer it is refused.',
                 how: 'Shown when a server is set to None.',
                 checked: ['The warning appears']
+            }
+        ]
+    },
+    {
+        title: 'Sign-in apps',
+        intro: 'Signing in through the browser uses an OAuth client registered with the provider. Inbox Classic has its own for Google and Microsoft; an OAuth client of your own, at Google, Microsoft or any OpenID Connect provider, is a sign-in app. Each can be turned on or off for new accounts. The UI test signs in for real against the OpenID Connect provider of ImapKit.',
+        features: [
+            {
+                shot: 'signin-1-apps',
+                name: 'Sign-in Apps',
+                what: 'The built-in Google and Microsoft clients and the added sign-in apps, each with a check box: checked is offered for new accounts. Out of the box Microsoft is on and Google off, since Google lets only test users sign in with Inbox Classic until it verifies the app. Turning one off never cuts an account off: the accounts that use it keep working. The note under the list says what the selected one is; a built-in client can only be turned on or off.',
+                how: 'File > Accounts > Sign-in Apps.',
+                checked: ['The built-in clients are listed, Microsoft on and Google off', 'A built-in client can not be edited or removed']
+            },
+            {
+                shot: 'signin-4-editor',
+                name: 'Adding a sign-in app',
+                what: "One form for every provider: name, issuer, client ID, client secret (kept in the Windows Credential Manager, never shown again), scopes and the IMAP and SMTP servers (always encrypted, the token goes to them). Fill in for Google or Microsoft fills in all but the client. The box at the bottom says how to register a client there and the redirect URI to register, with Copy. OK reads the issuer's OpenID Connect discovery document before saving.",
+                how: 'Sign-in Apps > Add, or Add a sign-in app in More sign-in options.',
+                checked: ['Fill in for Google fills in its issuer, servers and redirect URI', 'The redirect URI follows the issuer', 'OK saves it, turned on']
+            },
+            {
+                shot: 'signin-3-check',
+                name: 'Check',
+                what: "Reads the issuer's discovery document and says where its sign-in page and token endpoint are, or why the issuer can not be used: not https, a document for another issuer, no PKCE.",
+                how: 'Check in the sign-in app editor.',
+                checked: ["Check reads the issuer's discovery document"]
+            },
+            {
+                shot: 'signin-6-first-page',
+                name: 'A turned-off client on the first page',
+                what: 'A branded button whose built-in client is off is faded and can not be clicked, with the reason under it: "Turned off on this computer. Why?". The same words are its tooltip and what a screen reader says. With both off, the buttons are left out.',
+                how: 'File > New Account.',
+                checked: [
+                    'Sign in with Google is shown turned off, Sign in with Microsoft works',
+                    'The reason is under it, without hovering',
+                    'Once turned on, Sign in with Google works'
+                ]
+            },
+            {
+                shot: 'signin-7-why',
+                name: 'Why?',
+                what: 'Says why the built-in client may be off and what to do instead.',
+                how: 'Why? under a faded button.',
+                checked: ['Why? says why it is off']
+            },
+            {
+                shot: 'signin-8-more',
+                name: 'More sign-in options',
+                what: 'A menu of the sign-in apps that are turned on, and Add a sign-in app. The address typed goes to the provider as the account to sign in to.',
+                how: 'More sign-in options on the first page of File > New Account.',
+                checked: ['It lists the sign-in app and Add a sign-in app', 'A sign-in app turned off is left out']
+            },
+            {
+                shot: 'signin-10-added',
+                name: 'Signed in with a sign-in app',
+                what: "The browser opens the provider's page; once it comes back the account signed in to is added (its address and name from the ID token) at the sign-in app's servers, and IMAP and SMTP log in with its access token, made again from the refresh token when it runs out. A redirect that names another issuer (RFC 9207) is refused. When the mail server refuses the token, the error says to check the app's scopes.",
+                how: 'Choose the app in More sign-in options.',
+                checked: [
+                    "Signing in opens the sign-in app's page for the address typed",
+                    'The provider sends the browser back and the app says it is signed in',
+                    'The account is added and its folders sync with the token'
+                ]
+            },
+            {
+                shot: 'signin-11-in-use',
+                name: 'An app in use stays',
+                what: 'A sign-in app that accounts sign in with can not be removed; the message names them. Its check box still turns it off for new accounts.',
+                how: 'Sign-in Apps > Remove.',
+                checked: ['Removing it is refused, naming the account', 'Space turns apps on and off']
+            },
+            {
+                shot: 'signin-13-properties',
+                name: 'What an account signs in with',
+                what: "Properties of an account that signs in through the browser names its sign-in app; only its name can change, its servers are the sign-in's.",
+                how: 'File > Accounts > Properties.',
+                checked: ['Properties says what the account signs in with']
             }
         ]
     },

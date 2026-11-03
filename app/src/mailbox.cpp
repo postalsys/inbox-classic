@@ -254,7 +254,7 @@ void Mailbox::Reload() {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
         accountNames_[account->id] = Text(account->name);
         accountEmails_[account->id] = Text(account->email);
-        accountOAuth_[account->id] = account->oauth;
+        accountSignIns_[account->id] = {account->oauth, account->app};
         if (!firstAccount_) {
             firstAccount_ = account->id;
         }
@@ -327,9 +327,9 @@ std::wstring Mailbox::AccountEmail(int64_t account) const {
     return email != accountEmails_.end() ? email->second : L"";
 }
 
-PeOAuthProvider Mailbox::OAuthProvider(int64_t account) const {
-    auto oauth = accountOAuth_.find(account);
-    return oauth != accountOAuth_.end() ? oauth->second : PE_O_AUTH_PROVIDER_NONE;
+SignInChoice Mailbox::SignIn(int64_t account) const {
+    auto found = accountSignIns_.find(account);
+    return found != accountSignIns_.end() ? found->second : SignInChoice{};
 }
 
 int64_t Mailbox::CurrentAccount() const {

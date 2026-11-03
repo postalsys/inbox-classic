@@ -1,6 +1,7 @@
 // Starts ImapKit for an end-to-end test of the Rust core (pe-testkit runs it). The first line on stdin is the
 // ImapKit configuration as JSON ({} for the defaults below); the first line on stdout is where it listens:
-// { "imap": port, "imaps": port, "smtp": port, "rest": port, "cert": "path of the TLS certificate" }.
+// { "imap": port, "imaps": port, "smtp": port, "rest": port, "cert": "path of the TLS certificate", "oauth": issuer },
+// the issuer of the OAuth provider when the configuration has `oauth` (null without).
 // The server runs until stdin closes, so it goes away with the test process.
 
 import { createInterface } from 'node:readline';
@@ -98,7 +99,8 @@ process.stdout.write(
         imaps: server.tlsServer.address().port,
         smtp: server.smtpServer.server.address().port,
         rest: server.restServer.address().port,
-        cert
+        cert,
+        oauth: server.oauth ? server.oauth.issuer : null
     }) + '\n'
 );
 

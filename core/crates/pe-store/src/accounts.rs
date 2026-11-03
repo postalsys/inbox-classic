@@ -8,8 +8,9 @@ use crate::{Result, Store};
 pub type AccountId = i64;
 
 /// How a connection is encrypted
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Security {
+    #[default]
     Tls,
     StartTls,
     Plain,
@@ -17,7 +18,7 @@ pub enum Security {
 
 impl Security {
     /// The stored value, as a statement parameter
-    fn as_sql(&self) -> &'static &'static str {
+    pub(crate) fn as_sql(&self) -> &'static &'static str {
         match self {
             Security::Tls => &"tls",
             Security::StartTls => &"starttls",
@@ -30,7 +31,7 @@ impl Security {
     }
 
     /// Unknown values read as TLS, never as a weaker setting
-    fn parse(value: &str) -> Security {
+    pub(crate) fn parse(value: &str) -> Security {
         match value {
             "starttls" => Security::StartTls,
             "plain" => Security::Plain,
@@ -45,8 +46,14 @@ pub enum Auth {
     /// A password, the account's secret
     #[default]
     Password,
-    /// OAuth 2.0 with this provider (`google`, `microsoft`); the account's secret is the refresh token
+    /// OAuth 2.0 with this provider (`google`, `microsoft`, or `app:<id>` for a [`crate::SignInApp`]); the
+    /// account's secret is the refresh token
     OAuth2(String),
+}
+
+/// The provider name of an account that signs in with the sign-in app `id`
+pub fn app_provider(id: crate::SignInAppId) -> String {
+    format!("app:{id}")
 }
 
 impl Auth {
@@ -65,7 +72,7 @@ impl Auth {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct AccountSettings {
     /// The name the account shows under, `Work`
     pub name: String,

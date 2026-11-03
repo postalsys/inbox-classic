@@ -326,6 +326,180 @@ fn reads_mail_through_the_c_api() {
     drop(unsafe { Box::from_raw(context) });
 }
 
+/// Sign-in apps through the C API, against ImapKit's OpenID Connect provider: the presets, a check, saving, the
+/// manager's rows (no secret in them), signing in with the app and the account that names it
+#[test]
+fn sign_in_apps_through_the_c_api() {
+    let config = json!({ "users": { "alice@example.com": { "password": "pw", "displayName": "Alice" } }, "oauth": {} });
+    let Some(server) = ImapKit::start(config) else {
+        return;
+    };
+    let issuer = server.oauth.clone().expect("ImapKit with its OAuth provider");
+    let dir = TempDir::new("ffi-apps");
+    let path = CString::new(dir.path().join("store.db").to_str().unwrap()).unwrap();
+    let certificate = dir.path().join("server.der");
+    std::fs::write(&certificate, &server.cert).unwrap();
+    let certificate = CString::new(certificate.to_str().unwrap()).unwrap();
+    let (sender, events) = channel();
+    let context = Box::into_raw(Box::new(Mutex::new(sender)));
+    let core = unsafe {
+        pe_core_open_with(
+            path.as_ptr(),
+            PE_OPEN_MEMORY_PASSWORDS,
+            certificate.as_ptr(),
+            Some(on_event),
+            context.cast(),
+        )
+    };
+    assert!(!core.is_null());
+    let c = |s: &str| CString::new(s).unwrap();
+
+    // the presets fill in Google and Microsoft
+    let presets = pe_sign_in_presets();
+    let count = unsafe { pe_sign_in_preset_list_count(presets) };
+    let names: Vec<String> = (0..count)
+        .map(|i| text(unsafe { &*pe_sign_in_preset_list_get(presets, i) }.name))
+        .collect();
+    assert_eq!(names, ["Google", "Microsoft"]);
+    let google = unsafe { &*pe_sign_in_preset_list_get(presets, 0) };
+    assert_eq!(
+        (text(google.imap_host), google.imap_port),
+        ("imap.gmail.com".into(), 993)
+    );
+    unsafe { pe_sign_in_preset_list_free(presets) };
+    let redirect = unsafe { pe_sign_in_redirect_uri(c("https://accounts.google.com").as_ptr()) };
+    assert_eq!(text(redirect), "http://127.0.0.1");
+    unsafe { pe_string_free(redirect) };
+
+    // a check, then saving with a client secret
+    let mut reason = null_mut();
+    assert_eq!(
+        unsafe { pe_sign_in_app_check(core, c("ftp://x").as_ptr(), &mut reason) },
+        0
+    );
+    assert!(text(reason).contains("https://"));
+    unsafe { pe_string_free(reason) };
+    let check = unsafe { pe_sign_in_app_check(core, c(&issuer).as_ptr(), null_mut()) };
+    assert!(check > 0);
+    wait(&events, |e| e.kind == PeEventKind::SignInAppChecked && e.uid == check);
+    let mut found = null_mut();
+    assert!(unsafe { pe_sign_in_app_check_result(core, check, &mut found) });
+    assert!(text(found).contains(&format!("{issuer}/token")));
+    unsafe { pe_string_free(found) };
+    let (name, client, scopes, host) = (
+        c("ImapKit"),
+        c("imapkit-approve"),
+        c("openid email profile offline_access mail"),
+        c("127.0.0.1"),
+    );
+    let issuer_c = c(&issuer);
+    let form = PeSignInAppForm {
+        name: name.as_ptr(),
+        issuer: issuer_c.as_ptr(),
+        client_id: client.as_ptr(),
+        scopes: scopes.as_ptr(),
+        imap_host: host.as_ptr(),
+        imap_port: server.imaps,
+        imap_security: PeSecurity::Tls,
+        smtp_host: host.as_ptr(),
+        smtp_port: server.smtp,
+        smtp_security: PeSecurity::StartTls,
+    };
+    let plain = PeSignInAppForm {
+        imap_security: PeSecurity::Plain,
+        ..form
+    };
+    let mut reason = null_mut();
+    assert_eq!(
+        unsafe { pe_sign_in_app_save(core, 0, &plain, PeSecretChange::Keep, std::ptr::null(), &mut reason) },
+        0
+    );
+    assert!(text(reason).contains("SSL/TLS"));
+    unsafe { pe_string_free(reason) };
+    let app = unsafe { pe_sign_in_app_save(core, 0, &form, PeSecretChange::Keep, std::ptr::null(), null_mut()) };
+    assert!(app > 0);
+    // a secret saved for one issuer is not kept when the issuer changes
+    let secret = c("s3cret");
+    assert_eq!(
+        unsafe { pe_sign_in_app_save(core, app, &form, PeSecretChange::Set, secret.as_ptr(), null_mut()) },
+        app
+    );
+    let microsoft = c("https://login.microsoftonline.com/common/v2.0");
+    let moved = PeSignInAppForm {
+        issuer: microsoft.as_ptr(),
+        ..form
+    };
+    let check = unsafe { pe_sign_in_app_check(core, microsoft.as_ptr(), null_mut()) };
+    wait(&events, |e| e.kind == PeEventKind::SignInAppChecked && e.uid == check);
+    let mut found = null_mut();
+    if unsafe { pe_sign_in_app_check_result(core, check, &mut found) } {
+        // only with the network: the check of Microsoft's issuer has to work for the save to get as far
+        let mut reason = null_mut();
+        assert_eq!(
+            unsafe { pe_sign_in_app_save(core, app, &moved, PeSecretChange::Keep, std::ptr::null(), &mut reason) },
+            0
+        );
+        assert!(text(reason).contains("client secret again"));
+        unsafe { pe_string_free(reason) };
+    }
+    unsafe { pe_string_free(found) };
+    assert_eq!(
+        unsafe { pe_sign_in_app_save(core, app, &form, PeSecretChange::Remove, std::ptr::null(), null_mut()) },
+        app
+    );
+
+    // the manager's rows: the built-in clients first, Google off; the app on, with its settings
+    let rows = unsafe { pe_sign_in_apps(core) };
+    assert_eq!(unsafe { pe_sign_in_app_list_count(rows) }, 3);
+    let row = |i| unsafe { &*pe_sign_in_app_list_get(rows, i) };
+    assert_eq!((row(0).provider, row(0).enabled), (PeOAuthProvider::Microsoft, true));
+    assert_eq!((row(1).provider, row(1).enabled), (PeOAuthProvider::Google, false));
+    assert!(text(row(1).off_reason).contains("test users"));
+    assert_eq!(
+        (row(2).provider, row(2).id, row(2).enabled),
+        (PeOAuthProvider::App, app, true)
+    );
+    assert_eq!(
+        (text(row(2).client_id), row(2).imap_port),
+        ("imapkit-approve".into(), server.imaps)
+    );
+    assert!(!row(2).has_secret && text(row(2).used_by).is_empty());
+    unsafe { pe_sign_in_app_list_free(rows) };
+    assert!(unsafe { pe_sign_in_app_set_enabled(core, PeOAuthProvider::Google, 0, true) });
+    assert!(!unsafe { pe_sign_in_app_set_enabled(core, PeOAuthProvider::App, app + 1, true) });
+
+    // signing in with it, through the browser
+    let mut url = null_mut();
+    let request = unsafe {
+        pe_sign_in_begin(
+            core,
+            PeOAuthProvider::App,
+            app,
+            c("alice@example.com").as_ptr(),
+            &mut url,
+        )
+    };
+    assert!(request > 0);
+    assert!(pe_testkit::oauth_follow(&text(url)).contains("You are signed in"));
+    unsafe { pe_string_free(url) };
+    wait(&events, |e| e.kind == PeEventKind::SignInDone && e.uid == request);
+    assert!(unsafe { pe_sign_in_result(core, request, null_mut()) });
+    let account = unsafe { pe_account_add_signed_in(core, request, std::ptr::null()) };
+    assert!(account > 0);
+    let accounts = unsafe { pe_accounts(core) };
+    let row = unsafe { &*pe_account_list_get(accounts, 0) };
+    assert_eq!((row.oauth, row.app), (PeOAuthProvider::App, app));
+    assert_eq!(text(row.signs_in_with), "ImapKit");
+    unsafe { pe_account_list_free(accounts) };
+    let mut reason = null_mut();
+    assert!(!unsafe { pe_sign_in_app_remove(core, app, &mut reason) });
+    assert!(text(reason).contains("alice@example.com"));
+    unsafe { pe_string_free(reason) };
+
+    unsafe { pe_core_close(core) };
+    drop(unsafe { Box::from_raw(context) });
+}
+
 #[test]
 fn null_and_bad_arguments() {
     unsafe {
@@ -339,6 +513,42 @@ fn null_and_bad_arguments() {
         pe_message_list_free(null_mut());
         pe_message_view_free(null_mut());
         pe_bytes_free(null_mut(), 0);
+        assert!(pe_sign_in_apps(std::ptr::null()).is_null());
+        assert_eq!(pe_sign_in_app_list_count(std::ptr::null()), 0);
+        assert!(pe_sign_in_app_list_get(std::ptr::null(), 0).is_null());
+        pe_sign_in_app_list_free(null_mut());
+        pe_sign_in_preset_list_free(null_mut());
+        assert_eq!(pe_sign_in_app_check(std::ptr::null(), std::ptr::null(), null_mut()), 0);
+        assert!(!pe_sign_in_app_check_result(std::ptr::null(), 1, null_mut()));
+        assert_eq!(
+            pe_sign_in_app_save(
+                std::ptr::null(),
+                0,
+                std::ptr::null(),
+                PeSecretChange::Set,
+                std::ptr::null(),
+                null_mut()
+            ),
+            0
+        );
+        assert!(!pe_sign_in_app_remove(std::ptr::null(), 1, null_mut()));
+        assert!(!pe_sign_in_app_set_enabled(
+            std::ptr::null(),
+            PeOAuthProvider::None,
+            0,
+            true
+        ));
+        let mut url = null_mut();
+        assert_eq!(
+            pe_sign_in_begin(std::ptr::null(), PeOAuthProvider::None, 0, std::ptr::null(), &mut url),
+            0
+        );
+        let redirect = pe_sign_in_redirect_uri(std::ptr::null());
+        assert_eq!(text(redirect), "http://localhost");
+        pe_string_free(redirect);
+        let hint = pe_sign_in_register_hint(std::ptr::null());
+        assert!(text(hint).contains("redirect URI"));
+        pe_string_free(hint);
     }
     // a lookup of an address without a domain finishes with nothing
     unsafe {

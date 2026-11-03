@@ -91,6 +91,25 @@ impl From<pe_imap::Error> for Failure {
     }
 }
 
+/// A login with a sign-in app's token that the mail server refused: most likely the app's scopes do not give mail
+/// access, which is easy to get wrong when filling one in
+fn scope_hint(failure: Failure, account: &pe_store::Account) -> Failure {
+    let from_app = matches!(
+        crate::SignInWith::of_auth_kind(&account.settings.auth),
+        Some(crate::SignInWith::App(_))
+    );
+    if failure.kind != FailureKind::Authentication || !from_app {
+        return failure;
+    }
+    Failure {
+        message: format!(
+            "{}. The mail server did not take the sign-in app's token: check that the app's scopes give access to mail",
+            failure.message.trim_end_matches('.')
+        ),
+        ..failure
+    }
+}
+
 impl From<pe_sync::Error> for Failure {
     fn from(error: pe_sync::Error) -> Self {
         match error {
@@ -480,12 +499,12 @@ impl Worker {
             return Ok(());
         }
         let account = store.account(self.account)?;
-        let mut config = smtp_config(&account, self.credentials(&account).await?);
+        let mut config = smtp_config(&account, self.credentials(store, &account).await?);
         config.trust = self.trust.clone();
         let mut smtp = match pe_smtp::Client::connect(config).await {
             Ok(smtp) => smtp,
             Err(error) => {
-                let failure = Failure::from(error);
+                let failure = scope_hint(Failure::from(error), &account);
                 for message in &queued {
                     store.set_problem(message.id, &failure.message)?;
                 }
@@ -550,7 +569,7 @@ impl Worker {
 
     /// The password of the account, as credentials for IMAP and SMTP
     /// How to log in: the password, or for an OAuth account an access token made from its refresh token
-    async fn credentials(&mut self, account: &pe_store::Account) -> Result<Credentials, Failure> {
+    async fn credentials(&mut self, store: &mut Store, account: &pe_store::Account) -> Result<Credentials, Failure> {
         let no_secret = |what: &str| Failure {
             kind: FailureKind::Authentication,
             message: format!("no {what} for this account"),
@@ -569,11 +588,12 @@ impl Worker {
                 access_token: token.clone(),
             });
         }
-        let provider = pe_oauth::ProviderKind::parse(provider)
-            .map(|kind| self.oauth.provider(kind))
+        let provider = self
+            .oauth
+            .resolve(provider, store, &self.secrets)
             .ok_or_else(|| Failure {
                 kind: FailureKind::Other,
-                message: format!("this build can not sign in to {provider}"),
+                message: format!("this build can not sign in to {provider}: is its sign-in app removed?"),
             })?;
         // an access token is for the provider's own servers only
         let settings = &account.settings;
@@ -582,10 +602,7 @@ impl Worker {
         {
             return Err(Failure {
                 kind: FailureKind::Other,
-                message: format!(
-                    "the servers of this account are not those of {}",
-                    provider.kind.as_str()
-                ),
+                message: "the servers of this account are not those it signs in to".into(),
             });
         }
         let refresh_token = self.secrets.get(self.account).ok_or_else(|| no_secret("sign-in"))?;
@@ -701,9 +718,10 @@ impl Worker {
         if self.connection.is_none() {
             // read at each connect, so changed settings are used from the next connection on
             let account = store.account(self.account)?;
-            let mut config = imap_config(&account, self.credentials(&account).await?);
+            let mut config = imap_config(&account, self.credentials(store, &account).await?);
             config.trust = self.trust.clone();
-            self.connection = Some(Client::connect(config).await?);
+            let connected = Client::connect(config).await;
+            self.connection = Some(connected.map_err(|error| scope_hint(Failure::from(error), &account))?);
         }
         Ok(&mut self.connection.as_mut().expect("connected").0)
     }

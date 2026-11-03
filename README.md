@@ -3,6 +3,7 @@
 A Windows email client in the style of Outlook Express: folders on the left, messages on top, the reading pane below. The protocol and parsing code is Rust, ported from our own JavaScript libraries; the Windows UI is a thin C++ Win32 layer on top of it. Homepage: https://inboxclassic.com
 
 - Any IMAP and SMTP account, its servers looked up from the address; Gmail, Google Workspace, Outlook.com and Microsoft 365 add with Sign in with Google or Microsoft, so the password is typed on their page, never into the app
+- Sign-in apps: an OAuth client of your own at Google, Microsoft or any OpenID Connect provider, for signing in through the browser with it; each sign-in app, the built-in ones included, can be turned off for new accounts
 - Mail kept on the computer for reading offline, several accounts in one folder tree, search as you type, folders, flags, .eml import and export, printing
 - HTML mail sanitized and shown without scripts, remote pictures blocked until allowed, quoted history and forwarded mail folded away
 - An HTML editor that sends plain text when nothing is formatted, drafts saved on the server, an Outbox for what can not go yet
@@ -43,7 +44,7 @@ cd core
 cargo test --workspace
 ```
 
-The end-to-end tests run against [ImapKit](https://github.com/postalsys/imapkit), an IMAP and SMTP test server, and are skipped until it is installed: `npm ci` in `core/e2e` (Node.js 24). `PE_NETWORK_TESTS=1` also runs the tests that need the internet (account autodiscovery, and that Google and Microsoft accept the built-in OAuth clients).
+The end-to-end tests run against [ImapKit](https://github.com/postalsys/imapkit), an IMAP and SMTP test server with an OAuth 2.0 / OpenID Connect provider for the sign-in tests, and are skipped until it is installed: `npm ci` in `core/e2e` (Node.js 24). `PE_NETWORK_TESTS=1` also runs the tests that need the internet (account autodiscovery, and that Google and Microsoft accept the built-in OAuth clients).
 
 The app builds on Windows with Visual Studio 2022 Build Tools (C++ workload, which brings CMake and Ninja) and Rust (`rustup`, the MSVC toolchain):
 
@@ -57,7 +58,7 @@ From a Mac, `scripts/win-build.sh` copies the working tree to the Windows build 
 
 `scripts/build-installer.sh` builds `dist/InboxClassic-Setup.exe` from a Mac: the app is built and staged on the Windows build machine, then NSIS (`brew install makensis`) packs it. The installer works per user without administrator rights and upgrades in place. With `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` set, the exe, the uninstaller and the installer are signed with Azure Artifact Signing (`scripts/sign-win.sh`, needs `jsign`).
 
-Signing in to Gmail, Outlook.com and Microsoft 365 through the browser (OAuth 2.0, authorization code with PKCE and a loopback redirect) works in every build: the Google Desktop App client and the Microsoft public client are built in, and `PE_GOOGLE_CLIENT_ID` / `PE_GOOGLE_CLIENT_SECRET` / `PE_MICROSOFT_CLIENT_ID` at build time replace them.
+Signing in to Gmail, Outlook.com and Microsoft 365 through the browser (OAuth 2.0, authorization code with PKCE and a loopback redirect) works in every build: the Google Desktop App client and the Microsoft public client are built in, and `PE_GOOGLE_CLIENT_ID` / `PE_GOOGLE_CLIENT_SECRET` / `PE_MICROSOFT_CLIENT_ID` at build time replace them. The Google client is in Google's testing state (only its test users can sign in), so it is turned off out of the box; users can add a client of their own as a sign-in app (File > Accounts > Sign-in Apps), found through OpenID Connect discovery.
 
 ## Releasing
 

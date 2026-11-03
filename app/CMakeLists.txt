@@ -39,6 +39,7 @@ set_property(SOURCE res/app.rc APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_SO
 add_executable(InboxClassic WIN32
     src/main.cpp
     src/accounts.cpp
+    src/signinapps.cpp
     src/compose.cpp
     src/editor.cpp
     src/core.cpp
@@ -62,7 +63,7 @@ target_link_libraries(InboxClassic PRIVATE
     # what the Rust standard library needs on Windows (cargo rustc -p pe-ffi -- --print native-static-libs)
     kernel32 advapi32 ntdll userenv ws2_32 dbghelp bcrypt
     ${WEBVIEW2_DIR}/build/native/x64/WebView2LoaderStatic.lib
-    comctl32 comdlg32 shlwapi shell32 ole32 version windowscodecs
+    comctl32 comdlg32 shlwapi shell32 ole32 version windowscodecs msimg32 oleacc
 )
 # the manifest comes from app.rc
 target_link_options(InboxClassic PRIVATE /MANIFEST:NO)

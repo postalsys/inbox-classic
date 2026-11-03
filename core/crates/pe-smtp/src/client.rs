@@ -1,6 +1,6 @@
 //! An SMTP client session, the parts of nodemailer's smtp-connection a mail client uses: implicit TLS or required
 //! STARTTLS (with a check for plaintext injected before the handshake) or plain, EHLO with a HELO fallback, AUTH
-//! PLAIN, LOGIN and XOAUTH2, SIZE, SMTPUTF8 and 8BITMIME, recipients accepted one by one, and dot-stuffed DATA.
+//! PLAIN, LOGIN, XOAUTH2 and OAUTHBEARER, SIZE, SMTPUTF8 and 8BITMIME, recipients accepted one by one, and dot-stuffed DATA.
 
 use std::collections::HashSet;
 use std::fmt;
@@ -471,19 +471,34 @@ impl Client {
     async fn authenticate(&mut self, credentials: &Credentials) -> Result<(), Error> {
         let response = match credentials {
             Credentials::OAuth2 { user, access_token } => {
-                if !self.auth_methods.contains("XOAUTH2") {
+                // XOAUTH2 where offered (Gmail, Microsoft), else the standard OAUTHBEARER (RFC 7628)
+                let (mechanism, token, end) = if self.auth_methods.contains("XOAUTH2") {
+                    (
+                        "XOAUTH2",
+                        format!("user={user}\x01auth=Bearer {access_token}\x01\x01"),
+                        "",
+                    )
+                } else if self.auth_methods.contains("OAUTHBEARER") {
+                    // the GS2 header names the user, with ',' and '=' escaped (RFC 5801 4)
+                    let user = user.replace('=', "=3D").replace(',', "=2C");
+                    (
+                        "OAUTHBEARER",
+                        format!("n,a={user},\x01auth=Bearer {access_token}\x01\x01"),
+                        "AQ==",
+                    )
+                } else {
                     return Err(Error::AuthenticationUnavailable);
-                }
-                let token = STANDARD.encode(format!("user={user}\x01auth=Bearer {access_token}\x01\x01"));
+                };
                 self.send_line(
-                    &format!("AUTH XOAUTH2 {token}"),
-                    Some("AUTH XOAUTH2 (credentials hidden)"),
+                    &format!("AUTH {mechanism} {}", STANDARD.encode(token)),
+                    Some(&format!("AUTH {mechanism} (credentials hidden)")),
                 )
                 .await?;
                 let mut response = self.read_response(self.config.timeouts.command).await?;
                 if response.code == 334 {
-                    // the error details as a challenge: an empty line ends the exchange
-                    self.send_line("", None).await?;
+                    // the error details as a challenge: XOAUTH2 ends the exchange with an empty line, OAUTHBEARER
+                    // with a single ^A
+                    self.send_line(end, None).await?;
                     response = self.read_response(self.config.timeouts.command).await?;
                 }
                 response

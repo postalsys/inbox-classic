@@ -196,7 +196,39 @@ async fn authenticates_with_what_the_server_offers() {
         user: "user".into(),
         access_token: "token".into(),
     };
-    let error = Client::connect(config(port, Some(oauth))).await.err().unwrap();
+    let error = Client::connect(config(port, Some(oauth.clone()))).await.err().unwrap();
+    assert!(matches!(error, Error::AuthenticationFailed(_)), "{error}");
+    handle.await.unwrap();
+
+    // OAUTHBEARER (RFC 7628) where XOAUTH2 is not offered: taken, then refused with its error challenge answered
+    // with ^A
+    let bearer = Credentials::OAuth2 {
+        user: "a,b=c@example.com".into(),
+        access_token: "token".into(),
+    };
+    let ehlo = "250-hi\n250 AUTH PLAIN OAUTHBEARER";
+    let initial = "AUTH OAUTHBEARER bixhPWE9MkNiPTNEY0BleGFtcGxlLmNvbSwBYXV0aD1CZWFyZXIgdG9rZW4BAQ==";
+    let (port, handle) = server(vec![
+        Say("220 hi"),
+        Expect("EHLO"),
+        Say(ehlo),
+        Expect(initial),
+        Say("235 2.7.0 Accepted"),
+    ])
+    .await;
+    Client::connect(config(port, Some(bearer.clone()))).await.unwrap();
+    handle.await.unwrap();
+    let (port, handle) = server(vec![
+        Say("220 hi"),
+        Expect("EHLO"),
+        Say(ehlo),
+        Expect(initial),
+        Say("334 eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIn0="),
+        Expect("AQ=="),
+        Say("535 5.7.8 Authentication failed"),
+    ])
+    .await;
+    let error = Client::connect(config(port, Some(bearer))).await.err().unwrap();
     assert!(matches!(error, Error::AuthenticationFailed(_)), "{error}");
     handle.await.unwrap();
 }

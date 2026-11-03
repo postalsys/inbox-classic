@@ -11,14 +11,16 @@ mod folders;
 mod messages;
 mod outbox;
 mod schema;
+mod sign_in_apps;
 
 use std::path::Path;
 
-pub use accounts::{Account, AccountId, AccountSettings, Auth, Security};
+pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_provider};
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use messages::{Message, MessageInfo, Sort, SortField};
 pub use outbox::Queued;
 pub use rusqlite::Error;
+pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
 
 pub type Result<T> = std::result::Result<T, Error>;
 

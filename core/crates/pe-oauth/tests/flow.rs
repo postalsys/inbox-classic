@@ -89,6 +89,7 @@ fn provider(port: u16) -> Provider {
         scopes: vec!["mail".into()],
         client_id: "client".into(),
         client_secret: Some("not-secret".into()),
+        response_issuer: None,
     }
 }
 

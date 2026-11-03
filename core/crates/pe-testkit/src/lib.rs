@@ -31,6 +31,8 @@ pub struct ImapKit {
     pub rest: u16,
     /// The DER of the server's self-signed certificate, for STARTTLS and implicit TLS
     pub cert: Vec<u8>,
+    /// The issuer of ImapKit's OAuth 2.0 / OpenID Connect provider, when the configuration has `oauth`
+    pub oauth: Option<String>,
 }
 
 /// The default account of ImapKit
@@ -91,6 +93,7 @@ impl ImapKit {
                 Some(pe_net::Trust::Pinned(mut certificates)) => certificates.remove(0),
                 _ => panic!("no certificate in ImapKit's PEM"),
             },
+            oauth: ports["oauth"].as_str().map(str::to_string),
             stdin: Some(stdin),
             child,
         })
@@ -325,6 +328,44 @@ pub fn oauth_browser(url: &str, code: &str) -> String {
     let mut page = String::new();
     let _ = socket.read_to_string(&mut page);
     page
+}
+
+/// One GET over a new connection to 127.0.0.1 (whatever the host of `url` says, as `localhost` may be ::1 here):
+/// the status line and headers, and the body
+fn http_get(url: &str) -> (String, String) {
+    let rest = url.strip_prefix("http://").expect("an http:// address");
+    let (authority, path) = rest.split_at(rest.find('/').unwrap_or(rest.len()));
+    let port: u16 = authority
+        .rsplit(':')
+        .next()
+        .and_then(|p| p.parse().ok())
+        .expect("a port");
+    let mut socket = TcpStream::connect(("127.0.0.1", port)).expect("connect");
+    let path = if path.is_empty() { "/" } else { path };
+    write!(
+        socket,
+        "GET {path} HTTP/1.1\r\nHost: {authority}\r\nConnection: close\r\n\r\n"
+    )
+    .expect("request");
+    let mut response = String::new();
+    let _ = socket.read_to_string(&mut response);
+    let (head, body) = response.split_once("\r\n\r\n").unwrap_or((&response, ""));
+    (head.to_string(), body.to_string())
+}
+
+/// What a browser does with the sign-in page `url` of ImapKit's provider when its consent policy decides at once
+/// (`approve`, `deny`, a queued decision): follows the redirect to the app's loopback listener. Returns the page the
+/// app answered with.
+pub fn oauth_follow(url: &str) -> String {
+    let (head, body) = http_get(url);
+    let location = head
+        .lines()
+        .find_map(|line| {
+            line.strip_prefix("Location: ")
+                .or_else(|| line.strip_prefix("location: "))
+        })
+        .unwrap_or_else(|| panic!("no redirect from the provider: {head}\n{body}"));
+    http_get(location).1
 }
 
 /// The password login of the default account
