@@ -89,6 +89,14 @@ pub const GOOGLE_CLIENT_SECRET: &str = "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";
 /// personal Microsoft accounts and work or school ones (the `common` endpoints), with a loopback redirect: no secret
 pub const MICROSOFT_CLIENT_ID: &str = "7f84440c-d933-434d-b85f-9a74085a0945";
 
+/// Microsoft's sign-in service, for personal accounts and every organization
+const MICROSOFT_LOGIN: &str = "https://login.microsoftonline.com";
+
+/// The Microsoft client of this build: `PE_MICROSOFT_CLIENT_ID`, or the built-in one
+fn microsoft_client_id() -> &'static str {
+    configured(option_env!("PE_MICROSOFT_CLIENT_ID")).unwrap_or(MICROSOFT_CLIENT_ID)
+}
+
 /// A build-time override, when it is there and not empty
 fn configured(value: Option<&'static str>) -> Option<&'static str> {
     value.filter(|value| !value.trim().is_empty())
@@ -134,8 +142,8 @@ impl Provider {
                     port: 587,
                     security: pe_net::Security::StartTls,
                 },
-                authorize_url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize".into(),
-                token_url: "https://login.microsoftonline.com/common/oauth2/v2.0/token".into(),
+                authorize_url: format!("{MICROSOFT_LOGIN}/common/oauth2/v2.0/authorize"),
+                token_url: format!("{MICROSOFT_LOGIN}/common/oauth2/v2.0/token"),
                 scopes: [
                     "https://outlook.office.com/IMAP.AccessAsUser.All",
                     "https://outlook.office.com/SMTP.Send",
@@ -143,9 +151,7 @@ impl Provider {
                 ]
                 .map(String::from)
                 .to_vec(),
-                client_id: configured(option_env!("PE_MICROSOFT_CLIENT_ID"))
-                    .unwrap_or(MICROSOFT_CLIENT_ID)
-                    .into(),
+                client_id: microsoft_client_id().into(),
                 client_secret: None,
             },
         }
@@ -323,8 +329,8 @@ async fn token_request(
 /// Where an administrator of a Microsoft 365 organization approves the app for everyone in it
 pub fn admin_consent_url() -> String {
     format!(
-        "https://login.microsoftonline.com/organizations/adminconsent?client_id={}",
-        Provider::builtin(ProviderKind::Microsoft).client_id
+        "{MICROSOFT_LOGIN}/organizations/adminconsent?client_id={}",
+        microsoft_client_id()
     )
 }
 
@@ -457,11 +463,7 @@ mod tests {
         )
         .unwrap_err();
         assert!(matches!(admin, OAuthError::NeedsAdmin) && admin.needs_sign_in());
-        assert!(
-            admin
-                .to_string()
-                .ends_with(&format!("adminconsent?client_id={MICROSOFT_CLIENT_ID}"))
-        );
+        assert!(admin.to_string().ends_with(&admin_consent_url()));
         assert!(matches!(
             parse_tokens(200, b"<html>", None, 0),
             Err(OAuthError::Refused(_))
