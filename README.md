@@ -1,18 +1,26 @@
 # Inbox Classic
 
-A Windows email client in the style of Outlook Express. The protocol and parsing code is Rust, ported from our own JavaScript libraries; the Windows UI is a thin C++ Win32 layer on top of it.
+A Windows email client in the style of Outlook Express: folders on the left, messages on top, the reading pane below. The protocol and parsing code is Rust, ported from our own JavaScript libraries; the Windows UI is a thin C++ Win32 layer on top of it. Homepage: https://inboxclassic.com
+
+- Any IMAP and SMTP account, its servers looked up from the address; Gmail, Google Workspace, Outlook.com and Microsoft 365 add with Sign in with Google or Microsoft, so the password is typed on their page, never into the app
+- Mail kept on the computer for reading offline, several accounts in one folder tree, search as you type, folders, flags, .eml import and export, printing
+- HTML mail sanitized and shown without scripts, remote pictures blocked until allowed, quoted history and forwarded mail folded away
+- An HTML editor that sends plain text when nothing is formatted, drafts saved on the server, an Outbox for what can not go yet
+- No telemetry and no account with us: the app talks to your mail servers and nobody else
 
 ## Installing
 
-Run `InboxClassic-Setup.exe` from the [latest release](https://github.com/postalsys/inbox-classic/releases/latest/download/InboxClassic-Setup.exe). It installs for the current user, no administrator rights needed, to `%LOCALAPPDATA%\Programs\Inbox Classic`, with a Start menu shortcut and an entry in Installed apps. The setup, the app and the uninstaller are signed by Postal Systems OÜ. Running the setup of a newer version updates the installed one in place; the mail downloaded and the accounts in `%LOCALAPPDATA%\InboxClassic` are kept.
+Run `InboxClassic-Setup.exe` from the [latest release](https://github.com/postalsys/inbox-classic/releases/latest/download/InboxClassic-Setup.exe). It needs 64-bit Windows 10 or 11 with the Microsoft Edge WebView2 Runtime, which Windows 11 includes. It installs for the current user, no administrator rights needed, to `%LOCALAPPDATA%\Programs\Inbox Classic`, with a Start menu shortcut and an entry in Installed apps. The setup, the app and the uninstaller are signed by Postal Systems OÜ, and each release has a `hashes.txt` signed with the Postalsys Releases GPG key to check the download against.
+
+Running the setup of a newer version updates the installed one in place; the accounts and the mail downloaded, in `%LOCALAPPDATA%\InboxClassic`, are kept. Uninstalling asks whether to remove those too; the mail on the servers always stays. The user help is built in: F1 in the app (`app/res/help.html`).
 
 ## How it is put together
 
 Everything that a remote party writes, such as IMAP responses, message headers and bodies, attachment names and autoconfig documents, is parsed in Rust. The C++ app only draws what the core has already decoded and validated:
 
-- **Rust core**: IMAP (a port of [ImapFlow](https://github.com/postalsys/imapflow)), SMTP and MIME building (a port of the client parts of [Nodemailer](https://github.com/nodemailer/nodemailer)), MIME parsing (a port of [postal-mime](https://github.com/postalsys/postal-mime)), HTML sanitizing, the local store and account setup. It is linked into the exe as a static library behind a small C API.
-- **WebView2**: renders the sanitized message HTML with scripts off, network requests refused (remote images only after the user allows them) and links opened in the default browser.
-- **C++**: the windows, controls, menus and dialogs, in the classic Outlook Express look.
+- **Rust core**: IMAP (a port of [ImapFlow](https://github.com/postalsys/imapflow)), SMTP and MIME building (a port of the client parts of [Nodemailer](https://github.com/nodemailer/nodemailer)), MIME parsing (a port of [postal-mime](https://github.com/postalsys/postal-mime)), separating what a sender wrote from quoted history (a port of [email-content](https://github.com/postalsys/email-content)), HTML sanitizing (ammonia), the local store (SQLite), account autodiscovery over DNS-over-HTTPS, the OAuth 2.0 sign-in (PKCE, loopback redirect) and the passwords and tokens kept in the Windows Credential Manager. It is linked into the exe as a static library behind a small C API (`pe-ffi`, the only crate with `unsafe` code).
+- **WebView2**: renders the sanitized message HTML with scripts off, network requests refused (remote images only after the user allows them) and links opened in the default browser. The compose editor and the Print window are the only pages that run a script, their own, allowed by a nonce in their Content-Security-Policy.
+- **C++**: the windows, controls, menus and dialogs, in the classic Outlook Express look. It parses nothing a remote party wrote.
 
 ## Layout
 
@@ -20,18 +28,22 @@ Everything that a remote party writes, such as IMAP responses, message headers a
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `core/`                        | Cargo workspace with the Rust core, built as one static library (`pe_ffi.lib`)                               |
 | `core/include/inbox_classic.h` | the C API of the core, generated by cbindgen from `core/crates/pe-ffi`                                       |
+| `core/e2e/`                    | the ImapKit test server the end-to-end tests run against                                                     |
 | `app/`                         | the Win32 GUI (C++, common controls without visual styles for the classic look, WebView2 for message bodies) |
+| `app/res/`                     | the manifest, the icons (Fluent UI System Icons, SVG and the bitmap strips made from them) and the user help |
 | `scripts/`                     | build, test, run and screenshot helpers for the Windows build machine                                        |
 | `installer/`                   | the NSIS installer script                                                                                    |
 
 ## Building
 
-The Rust core builds and tests on any platform:
+The Rust core builds and tests on any platform with Rust 1.90 or newer:
 
 ```
 cd core
 cargo test --workspace
 ```
+
+The end-to-end tests run against [ImapKit](https://github.com/postalsys/imapkit), an IMAP and SMTP test server, and are skipped until it is installed: `npm ci` in `core/e2e` (Node.js 24). `PE_NETWORK_TESTS=1` also runs the tests that need the internet (account autodiscovery, and that Google and Microsoft accept the built-in OAuth clients).
 
 The app builds on Windows with Visual Studio 2022 Build Tools (C++ workload, which brings CMake and Ninja) and Rust (`rustup`, the MSVC toolchain):
 
