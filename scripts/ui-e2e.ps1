@@ -154,7 +154,8 @@ function TypeInEditor([IntPtr]$compose, [string]$text) {
 }
 # a file dialog answered: the path typed into its name box (characters, as the dialog keeps its own copy), then Open or Save
 function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]$suggested = $null) {
-    $dialog = WaitWindow '#32770' $title 15
+    # the first file dialog of a session can take long to open while the shell starts (CI runners)
+    $dialog = WaitWindow '#32770' $title 40
     if (-not $dialog) { return $false }
     # the name box: the one with the suggested name in a Save dialog, the one in the name combo box (1148) otherwise
     $name = WaitFor {
@@ -548,9 +549,14 @@ try {
     $count = { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
     foreach ($file in 'keep-me.txt', 'wrong-file.txt') {
         $before = & $count
-        Command $compose $IDC_ATTACH
-        [void](AnswerFileDialog 'Insert Attachment' (Join-Path $files $file) $null)
-        [void](WaitFor { (& $count) -gt $before } 10)
+        # once more if the dialog did not take the file, after closing what is left of it
+        for ($try = 0; $try -lt 2 -and (& $count) -le $before; $try++) {
+            $left = [Native.Win]::FindWindow('#32770', 'Insert Attachment')
+            if ($left -ne [IntPtr]::Zero) { Click $left 2; [void](WaitFor { -not [Native.Win]::IsWindow($left) } 10) }
+            Command $compose $IDC_ATTACH
+            if (-not (AnswerFileDialog 'Insert Attachment' (Join-Path $files $file) $null)) { Write-Host "   the file dialog did not take $file (try $($try + 1))" }
+            [void](WaitFor { (& $count) -gt $before } 10)
+        }
     }
     Check ([bool](WaitFor { (& $count) -eq 2 } 10)) 'Attach adds the files to the Attach row'
     Shot $compose 'write-5-new'
