@@ -4,7 +4,8 @@ A Windows email client in the style of Outlook Express: folders on the left, mes
 
 - Any IMAP and SMTP account, its servers looked up from the address; Gmail, Google Workspace, Outlook.com and Microsoft 365 add with Sign in with Google or Microsoft, so the password is typed on their page, never into the app
 - Sign-in apps: an OAuth client of your own at Google, Microsoft or any OpenID Connect provider, for signing in through the browser with it; each sign-in app, the built-in ones included, can be turned off for new accounts
-- Mail kept on the computer for reading offline, several accounts in one folder tree, search as you type, folders, flags, .eml import and export, printing
+- Mail kept on the computer for reading offline, several accounts in one folder tree, folders, flags, .eml import and export, printing
+- Search as you type in one folder or all of them, by subject, people, file names and text, from a local full-text index, with Gmail's search syntax (`from:`, `is:unread`, `has:attachment`, `in:sent`, `before:` ...)
 - HTML mail sanitized and shown without scripts, remote pictures blocked until allowed, quoted history and forwarded mail folded away
 - An HTML editor that sends plain text when nothing is formatted, drafts saved on the server, an Outbox for what can not go yet
 - No telemetry and no account with us: the app talks to your mail servers and nobody else

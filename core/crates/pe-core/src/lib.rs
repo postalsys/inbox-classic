@@ -9,6 +9,7 @@
 mod compose;
 mod fold;
 mod requests;
+mod search;
 mod secrets;
 mod sign_in_apps;
 mod view;
@@ -22,6 +23,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
+pub use pe_store::{Search, Show};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing};
@@ -247,6 +249,13 @@ impl Core {
             .map_err(|_| Error::Closed)?;
         // the patterns that fold earlier messages compile meanwhile, not when the first message is shown
         runtime.spawn_blocking(fold::warm_up);
+        // what was cached before the search index read sources (an older version), on a connection of its own
+        let indexed = path.clone();
+        runtime.spawn_blocking(move || {
+            if let Ok(mut store) = Store::open(&indexed) {
+                let _ = search::index_pending(&mut store);
+            }
+        });
         let closed = Arc::new(AtomicBool::new(false));
         let open = closed.clone();
         Ok(Core {
@@ -355,27 +364,31 @@ impl Core {
         Ok(self.store().messages(folder, sort, offset, limit)?)
     }
 
-    /// A page of the messages of a folder that have `find` in their subject, sender or recipients (all of them for
-    /// an empty one)
-    pub fn messages_matching(
-        &self,
-        folder: FolderId,
-        sort: Sort,
-        find: &str,
-        offset: u64,
-        limit: u64,
-    ) -> Result<Vec<Message>> {
-        Ok(self.store().messages_matching(folder, sort, find, offset, limit)?)
+    /// A page of what `search` finds (Gmail's syntax, see [`pe_store::Query`]), in the order of `sort`
+    pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
+        Ok(self.store().search(search, sort, offset, limit)?)
     }
 
-    /// How many messages [`Core::messages_matching`] finds, and how many of them are unread
-    pub fn count_matching(&self, folder: FolderId, find: &str) -> Result<(u64, u64)> {
-        Ok(self.store().count_matching(folder, find)?)
+    /// How many messages [`Core::search`] finds, and how many of them are unread
+    pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
+        Ok(self.store().count_search(search)?)
     }
 
-    /// Where a message is in the list of [`Core::messages_matching`]
-    pub fn message_index_matching(&self, folder: FolderId, sort: Sort, find: &str, uid: u64) -> Result<Option<u64>> {
-        Ok(self.store().message_index_matching(folder, sort, find, uid)?)
+    /// Where the message `uid` of `folder` is in what [`Core::search`] finds
+    pub fn search_index(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<u64>> {
+        Ok(self.store().search_index(search, sort, folder, uid)?)
+    }
+
+    /// How many messages the search does not know the text of yet: their text parts are fetched in the background,
+    /// newest first, after each sync
+    pub fn unindexed_count(&self) -> Result<u64> {
+        Ok(self.store().unindexed_count()?)
+    }
+
+    /// Whether the text of a search names its own folders (`in:`), so it finds messages of other folders than the
+    /// one shown
+    pub fn search_spans_folders(text: &str) -> bool {
+        pe_store::Query::parse(text, 0).spans_folders()
     }
 
     /// One folder with its counts

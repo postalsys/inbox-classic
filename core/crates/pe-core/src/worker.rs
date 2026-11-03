@@ -245,10 +245,54 @@ impl Worker {
             if sync {
                 self.emit(Event::SyncFinished { account: self.account });
             }
+            // the text of the mail for the search, a batch at a time while nothing else waits; a batch that fails is
+            // tried again after the next command
+            while commands.is_empty() {
+                match self.index_texts(&mut store).await {
+                    Ok(0) | Err(_) => break,
+                    Ok(_) => {}
+                }
+            }
         }
         if let Some((mut client, _)) = self.connection.take() {
             let _ = client.logout().await;
         }
+    }
+
+    /// Fetches the text parts of the newest messages the search index does not have the text of, and indexes them;
+    /// how many messages that was (0: all are indexed). A message with no text part is indexed without text.
+    async fn index_texts(&mut self, store: &mut Store) -> Result<usize, Failure> {
+        // the newest message's folder, so a batch selects one folder
+        let batch = store.messages_to_index(self.account, crate::search::TEXT_BATCH)?;
+        let Some(&(_, folder, _)) = batch.first() else {
+            return Ok(0);
+        };
+        let messages: Vec<(i64, u64)> = batch
+            .iter()
+            .filter(|(_, f, _)| *f == folder)
+            .map(|(message, _, uid)| (*message, *uid))
+            .collect();
+        {
+            let uids: Vec<u64> = messages.iter().map(|(_, uid)| *uid).collect();
+            let client = self.client(store).await?;
+            let texts = pe_sync::fetch_texts(client, store, folder, &uids, crate::search::PART_LIMIT).await?;
+            store.transaction(|store| {
+                for (message, uid) in &messages {
+                    let body = texts
+                        .iter()
+                        .find(|(found, _)| found == uid)
+                        .map(|(_, parts)| crate::search::parts_text(parts))
+                        .unwrap_or_default();
+                    let text = pe_store::IndexText {
+                        body,
+                        ..Default::default()
+                    };
+                    store.set_indexed(*message, &text)?;
+                }
+                Ok(())
+            })?;
+        }
+        Ok(messages.len())
     }
 
     fn emit(&self, event: Event) {
@@ -286,10 +330,18 @@ impl Worker {
             }
             Command::SendOutbox => self.send_outbox(store).await,
             Command::FetchSource { folder, uid } => {
-                if !store.has_source(folder, uid)? {
-                    fetch_source(self.client(store).await?, store, folder, uid).await?;
-                }
+                let source = if store.has_source(folder, uid)? {
+                    None
+                } else {
+                    Some(fetch_source(self.client(store).await?, store, folder, uid).await?)
+                };
                 self.emit(Event::MessageReady { folder, uid });
+                // the search finds it by what the parser reads in it from now on, after the window has it
+                if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
+                    let text = crate::search::index_text(&source);
+                    // its index row replaced at once, never missing for a search meanwhile
+                    store.transaction(|store| store.set_indexed(message.id, &text))?;
+                }
                 Ok(())
             }
             Command::SetFlag { folder, uid, flag, on } => {

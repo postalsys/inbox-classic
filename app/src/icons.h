@@ -63,4 +63,6 @@ enum ListIcon : int {
     LIST_MAIL_READ = 1,
     LIST_ATTACH = 2,
     LIST_FLAG = 3,
+    LIST_SEARCH = 4,
+    LIST_DISMISS = 5,
 };

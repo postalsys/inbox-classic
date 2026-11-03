@@ -7,6 +7,7 @@
 #include <commdlg.h>
 
 #include <algorithm>
+#include <span>
 #include <utility>
 
 namespace {
@@ -17,7 +18,54 @@ constexpr size_t kPagesKept = 8;
 constexpr int kHeaderLines = 4;
 
 // as Outlook Express has them: the envelope (read or not), the paper clip and the flag, then the text columns
-enum Column { COL_READ, COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE };
+enum Column { COL_READ, COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE, COL_FOLDER };
+
+// the Show choices, in the order of PeShow
+const wchar_t* kShowChoices[] = {L"All messages", L"Unread", L"Flagged", L"With attachments"};
+const wchar_t* kScopeChoices[] = {L"This folder", L"All folders"};
+
+// what the Find box takes, shown when the mouse rests on it
+const wchar_t* kFindTip =
+    L"Finds words in the subject, the people, the file names and the text of messages.\r\n"
+    L"\"exact phrase\"    -leave out    this OR that\r\n"
+    L"from:ann    to:bob    subject:report    filename:pdf\r\n"
+    L"is:unread    is:read    is:starred    has:attachment\r\n"
+    L"in:inbox    in:sent    in:anywhere    in:<folder name>\r\n"
+    L"before:2025/01/31    after:2025/01/01    older_than:2d    newer_than:1m\r\n"
+    L"larger:5M    smaller:100k";
+
+// what the empty search field says, grey, until it has the focus
+const wchar_t* kFindHint = L"Search mail";
+
+// the Find box: as an edit, with the grey hint drawn over it while it is empty and not focused
+LRESULT CALLBACK FindEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR) {
+    LRESULT result = DefSubclassProc(hwnd, message, wParam, lParam);
+    if (message == WM_SETFOCUS || message == WM_KILLFOCUS) {
+        InvalidateRect(hwnd, nullptr, TRUE);
+    } else if (message == WM_PAINT && GetWindowTextLengthW(hwnd) == 0 && GetFocus() != hwnd) {
+        HDC dc = GetDC(hwnd);
+        HGDIOBJ old = SelectObject(dc, reinterpret_cast<HFONT>(SendMessageW(hwnd, WM_GETFONT, 0, 0)));
+        SetTextColor(dc, GetSysColor(COLOR_GRAYTEXT));
+        SetBkMode(dc, TRANSPARENT);
+        RECT area;
+        GetClientRect(hwnd, &area);
+        area.left += LOWORD(SendMessageW(hwnd, EM_GETMARGINS, 0, 0));
+        DrawTextW(dc, kFindHint, -1, &area, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+        SelectObject(dc, old);
+        ReleaseDC(hwnd, dc);
+    }
+    return result;
+}
+
+// a drop-down list of the folder bar with `choices`, the first chosen
+HWND CreateChoice(HWND parent, int id, std::span<const wchar_t* const> choices) {
+    HWND combo = CreateChild(parent, L"COMBOBOX", nullptr, WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, id, {});
+    for (const wchar_t* choice : choices) {
+        SendMessageW(combo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(choice));
+    }
+    SendMessageW(combo, CB_SETCURSEL, 0, 0);
+    return combo;
+}
 
 // the name Outlook Express gives a special folder, the folder's own name otherwise
 std::wstring FolderName(const PeFolder& folder) {
@@ -123,8 +171,31 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     ImageList_GetIconSize(listIcons_, &iconSize_, &iconSize_);
     ListView_SetImageList(list_, listIcons_, LVSIL_SMALL);
     TreeView_SetImageList(tree_, IconList(IconSet::Folders), TVSIL_NORMAL);
-    findLabel_ = CreateChild(parent, L"STATIC", L"Find:", SS_RIGHT | SS_CENTERIMAGE, 0, {});
-    findEdit_ = CreateChild(parent, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_FIND, {}, WS_EX_CLIENTEDGE);
+    // the search field: a white sunken frame (clicked, it gives the box the focus), the magnifier, the box without a
+    // border of its own, and the clear button once there is something to clear
+    findFrame_ = CreateChild(parent, L"STATIC", L"", SS_NOTIFY | WS_CLIPSIBLINGS, IDC_FIND_FRAME, {}, WS_EX_CLIENTEDGE);
+    findIcon_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | SS_NOTIFY, IDC_FIND_ICON, {});
+    findEdit_ = CreateChild(parent, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_FIND, {});
+    SetWindowSubclass(findEdit_, FindEditProc, 0, 0);
+    // what a screen reader says for it
+    SetAccessibleDescription(findEdit_, L"Search mail");
+    findClear_ = CreateChild(parent, L"BUTTON", L"Clear search", BS_OWNERDRAW, IDC_FIND_CLEAR, {});
+    ShowWindow(findClear_, SW_HIDE);
+    // what the box takes, when the mouse rests on it
+    HWND tip = CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
+                               CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parent, nullptr, GetModuleHandleW(nullptr), nullptr);
+    SendMessageW(tip, TTM_SETMAXTIPWIDTH, 0, Scale(520));
+    SendMessageW(tip, TTM_SETDELAYTIME, TTDT_AUTOPOP, 30000);
+    TOOLINFOW tool = {sizeof(tool)};
+    tool.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+    tool.hwnd = parent;
+    tool.uId = reinterpret_cast<UINT_PTR>(findEdit_);
+    tool.lpszText = const_cast<wchar_t*>(kFindTip);
+    SendMessageW(tip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tool));
+    showLabel_ = CreateChild(parent, L"STATIC", L"Show:", SS_RIGHT | SS_CENTERIMAGE, 0, {});
+    showChoice_ = CreateChoice(parent, IDC_SHOW, kShowChoices);
+    scopeLabel_ = CreateChild(parent, L"STATIC", L"In:", SS_RIGHT | SS_CENTERIMAGE, 0, {});
+    scopeChoice_ = CreateChoice(parent, IDC_SCOPE, kScopeChoices);
     AddColumn(list_, COL_READ, L"", 24);
     IconColumn(list_, COL_ATTACH, LIST_ATTACH);
     IconColumn(list_, COL_FLAG, LIST_FLAG);
@@ -192,6 +263,12 @@ bool Mailbox::OnSetCursor(HWND window) {
 }
 
 bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
+    if (window == findFrame_) {
+        // the search field is white, as an edit is
+        SetBkColor(dc, GetSysColor(COLOR_WINDOW));
+        brush = reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_WINDOW));
+        return true;
+    }
     if (window != pictures_) {
         return false;
     }
@@ -333,7 +410,8 @@ SignInChoice Mailbox::SignIn(int64_t account) const {
 }
 
 int64_t Mailbox::CurrentAccount() const {
-    auto account = folderAccounts_.find(folder_);
+    // the account of the message shown (in a search of every folder, not the selected folder's), else of the folder
+    auto account = folderAccounts_.find(messageFolder_ ? messageFolder_ : folder_);
     if (account != folderAccounts_.end()) {
         return account->second;
     }
@@ -341,10 +419,10 @@ int64_t Mailbox::CurrentAccount() const {
 }
 
 void Mailbox::OpenSelected() {
-    if (!uid_ || !draftFolders_.contains(folder_)) {
+    if (!uid_ || !draftFolders_.contains(messageFolder_)) {
         return;
     }
-    core::Draft draft(pe_draft_open(core_, folder_, uid_));
+    core::Draft draft(pe_draft_open(core_, messageFolder_, uid_));
     if (!draft) {
         // not fetched yet: MessageReady follows
         openWhenReady_ = true;
@@ -357,26 +435,72 @@ core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
     if (!uid_ || !view_) {
         return core::Draft();
     }
-    return core::Draft(pe_message_draft(core_, folder_, uid_, kind));
+    return core::Draft(pe_message_draft(core_, messageFolder_, uid_, kind));
 }
 
 // ---- the message list ----
+
+PeSearch Mailbox::Search() const {
+    return {everyFolder_ ? 0 : folder_, show_, findUtf8_.c_str()};
+}
+
+bool Mailbox::ListsFolders() const {
+    return everyFolder_ || findSpansFolders_;
+}
+
+bool Mailbox::Searching() const {
+    return !find_.empty() || show_ != PE_SHOW_ALL || everyFolder_;
+}
+
+// the Folder column while the list has messages of several folders, and not otherwise
+void Mailbox::ShowFolderColumn() {
+    bool wanted = ListsFolders();
+    if (wanted == folderColumn_) {
+        return;
+    }
+    folderColumn_ = wanted;
+    // the Subject column gives the Folder column its room, and gets it back: the list stays as wide as its pane
+    int subject = ListView_GetColumnWidth(list_, COL_SUBJECT);
+    int folder = Scale(130);
+    if (wanted) {
+        AddColumn(list_, COL_FOLDER, L"Folder", 130);
+        ListView_SetColumnWidth(list_, COL_SUBJECT, std::max(Scale(120), subject - folder));
+    } else {
+        folder = ListView_GetColumnWidth(list_, COL_FOLDER);
+        ListView_DeleteColumn(list_, COL_FOLDER);
+        ListView_SetColumnWidth(list_, COL_SUBJECT, subject + folder);
+    }
+}
+
+// the folder of a row in a list of several folders: its name, with its account's when there are several accounts
+std::wstring Mailbox::RowFolder(int64_t folder) const {
+    auto name = folderNames_.find(folder);
+    std::wstring text = name != folderNames_.end() ? name->second.first : L"";
+    auto account = folderAccounts_.find(folder);
+    if (accountNames_.size() > 1 && account != folderAccounts_.end()) {
+        text += L" (" + AccountName(account->second) + L")";
+    }
+    return text;
+}
 
 void Mailbox::ReloadList(bool keepSelection) {
     pages_.clear();
     total_ = 0;
     unread_ = 0;
     folderTotal_ = 0;
+    ShowFolderColumn();
+    PeSearch search = Search();
     if (folder_) {
         pe_folder_counts(core_, folder_, &total_, &unread_);
         folderTotal_ = total_;
-        // the counts of the folder come from its indexes; a search counts what it finds
-        if (!find_.empty()) {
-            pe_message_count(core_, folder_, findUtf8_.c_str(), &total_, &unread_);
-        }
+    }
+    // the counts of the folder come from its indexes; a search counts what it finds. An account's own item lists
+    // nothing unless the search is of every folder
+    if (Searching() && (folder_ || ListsFolders())) {
+        pe_message_count(core_, &search, &total_, &unread_);
     }
     // the selection follows the message to where it is now, without a flicker of the reading pane
-    int64_t index = keepSelection && uid_ ? pe_message_index(core_, folder_, sort_, ascending_, findUtf8_.c_str(), uid_) : -1;
+    int64_t index = keepSelection && uid_ ? pe_message_index(core_, &search, sort_, ascending_, messageFolder_, uid_) : -1;
     reloading_ = true;
     ListView_SetItemCountEx(list_, static_cast<int>(std::min<uint64_t>(total_, INT_MAX)), LVSICF_NOSCROLL);
     ListView_SetItemState(list_, -1, 0, LVIS_SELECTED | LVIS_FOCUSED);
@@ -399,7 +523,8 @@ const PeMessage* Mailbox::Row(int index) {
         if (pages_.size() >= kPagesKept) {
             pages_.erase(pages_.begin());
         }
-        pages_.push_back({offset, core::MessageList(pe_messages(core_, folder_, sort_, ascending_, findUtf8_.c_str(), offset, kPageSize))});
+        PeSearch search = Search();
+        pages_.push_back({offset, core::MessageList(pe_messages(core_, &search, sort_, ascending_, offset, kPageSize))});
     } else if (page != pages_.end() - 1) {
         // the most recently used page goes last, the least recently used is dropped first
         std::rotate(page, page + 1, pages_.end());
@@ -434,6 +559,9 @@ void Mailbox::DisplayInfo(NMLVDISPINFOW* info) {
             break;
         case COL_SIZE:
             cell_ = FormatSize(row->size);
+            break;
+        case COL_FOLDER:
+            cell_ = RowFolder(row->folder);
             break;
         }
     }
@@ -488,6 +616,7 @@ void Mailbox::ClearReader(bool loading) {
         viewRequest_ = 0;
     }
     uid_ = 0;
+    messageFolder_ = 0;
     openWhenReady_ = false;
     remoteImages_ = false;
     view_.reset();
@@ -505,7 +634,8 @@ void Mailbox::ClearReader(bool loading) {
 void Mailbox::OnSelectionChanged() {
     const PeMessage* row = SelectedRow();
     uint64_t uid = row ? row->uid : 0;
-    if (uid == uid_) {
+    int64_t folder = row ? row->folder : 0;
+    if (uid == uid_ && folder == messageFolder_) {
         return;
     }
     ClearReader(uid != 0);
@@ -513,16 +643,17 @@ void Mailbox::OnSelectionChanged() {
         return;
     }
     uid_ = uid;
+    messageFolder_ = folder;
     SetWindowTextW(header_, L" Loading the message...");
     // MessageReady follows, right away when the message is cached
-    pe_message_open(core_, folder_, uid);
+    pe_message_open(core_, folder, uid);
 }
 
 bool Mailbox::OnFolderSelected(LPARAM folder) {
     if (folder == folder_) {
         return false;
     }
-    // the message of the folder before is not this folder's, nor is the search
+    // the message of the folder before is not this folder's, nor is the search; what Show shows stays
     folder_ = folder;
     ResetFind();
     ClearReader();
@@ -540,7 +671,7 @@ void Mailbox::ShowMessage() {
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
     }
-    viewRequest_ = pe_message_view_start(core_, folder_, uid_, remoteImages_);
+    viewRequest_ = pe_message_view_start(core_, messageFolder_, uid_, remoteImages_);
     if (!viewRequest_) {
         SetWindowTextW(header_, L" The message could not be shown.");
     }
@@ -614,7 +745,7 @@ void Mailbox::ChooseAttachment() {
     }
     size_t length = 0;
     char* name = nullptr;
-    uint8_t* data = pe_attachment_data(core_, folder_, uid_, static_cast<size_t>(chosen - 1), &length, &name);
+    uint8_t* data = pe_attachment_data(core_, messageFolder_, uid_, static_cast<size_t>(chosen - 1), &length, &name);
     core::String safeName(name);
     if (!data) {
         MessageBoxW(parent_, L"The attachment could not be read.", L"Inbox Classic", MB_OK | MB_ICONERROR);
@@ -640,7 +771,7 @@ void Mailbox::SaveAllAttachments() {
     size_t saved = 0;
     size_t total = 0;
     std::string dir = core::Narrow(folder);
-    if (!pe_save_attachments(core_, folder_, uid_, dir.c_str(), &saved, &total)) {
+    if (!pe_save_attachments(core_, messageFolder_, uid_, dir.c_str(), &saved, &total)) {
         MessageBoxW(parent_, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     } else if (saved < total) {
         std::wstring text = std::to_wstring(total - saved) + L" of the " + std::to_wstring(total) + L" files could not be saved.";
@@ -657,7 +788,7 @@ void Mailbox::LoadPictures() {
 
 void Mailbox::MarkSelected(bool seen) {
     if (uid_) {
-        pe_message_set_seen(core_, folder_, uid_, seen);
+        pe_message_set_seen(core_, messageFolder_, uid_, seen);
     }
 }
 
@@ -678,13 +809,14 @@ void Mailbox::DeleteSelected() {
         return;
     }
     uint64_t uid = row->uid;
+    int64_t folder = row->folder;
     // from Deleted Items, or an account without one, it is gone for good: asked first, as Outlook Express does
-    if (pe_folder_deletes_for_good(core_, folder_) &&
+    if (pe_folder_deletes_for_good(core_, folder) &&
         MessageBoxW(parent_, L"This message will be deleted for good. Delete it?", L"Inbox Classic",
                     MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
-    if (pe_message_delete(core_, folder_, uid)) {
+    if (pe_message_delete(core_, folder, uid)) {
         SelectAfterRemoval(index);
     }
 }
@@ -696,13 +828,15 @@ void Mailbox::MoveSelected(HWND owner) {
         return;
     }
     uint64_t uid = row->uid;
-    // the other folders of the account that hold messages
+    int64_t from = row->folder;
+    // the other folders of its account that hold messages
     std::vector<int64_t> ids;
     FormField field{L"Folder:", L"", FormField::Kind::Choice};
-    core::FolderList folders(pe_folders(core_, CurrentAccount()));
+    auto account = folderAccounts_.find(from);
+    core::FolderList folders(pe_folders(core_, account != folderAccounts_.end() ? account->second : CurrentAccount()));
     for (size_t i = 0; i < pe_folder_list_count(folders.get()); i++) {
         const PeFolder* folder = pe_folder_list_get(folders.get(), i);
-        if (folder && folder->selectable && folder->id != folder_) {
+        if (folder && folder->selectable && folder->id != from) {
             ids.push_back(folder->id);
             // a special folder by its usual name, the others by their whole path: two folders 2024 in Work and
             // in Personal are not the same
@@ -718,7 +852,7 @@ void Mailbox::MoveSelected(HWND owner) {
         return;
     }
     int chosen = fields[0].chosen;
-    if (chosen >= 0 && static_cast<size_t>(chosen) < ids.size() && pe_message_move(core_, folder_, uid, ids[chosen])) {
+    if (chosen >= 0 && static_cast<size_t>(chosen) < ids.size() && pe_message_move(core_, from, uid, ids[chosen])) {
         SelectAfterRemoval(index);
     }
 }
@@ -726,7 +860,7 @@ void Mailbox::MoveSelected(HWND owner) {
 void Mailbox::FlagSelected() {
     const PeMessage* row = SelectedRow();
     if (row) {
-        pe_message_set_flagged(core_, folder_, row->uid, !row->flagged);
+        pe_message_set_flagged(core_, row->folder, row->uid, !row->flagged);
     }
 }
 
@@ -753,13 +887,37 @@ void Mailbox::FolderMenu() {
 }
 
 std::wstring Mailbox::SelectedName() const {
-    if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
-        return found->second.first;
+    std::wstring name;
+    if (everyFolder_) {
+        name = L"All folders";
+    } else if (findSpansFolders_) {
+        // the folders typed (in:) say where
+        return L"Search results";
+    } else if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
+        name = found->second.first;
+    } else if (auto account = accountNames_.find(selectedAccount_); account != accountNames_.end()) {
+        name = account->second;
     }
-    if (auto found = accountNames_.find(selectedAccount_); found != accountNames_.end()) {
-        return found->second;
+    // what the list shows of it
+    if (!find_.empty()) {
+        name += L": search results";
+    } else if (show_ != PE_SHOW_ALL) {
+        const wchar_t* shown[] = {L"", L": unread messages", L": flagged messages", L": messages with attachments"};
+        name += shown[show_];
     }
-    return L"";
+    return name;
+}
+
+std::wstring Mailbox::IndexingNote() const {
+    if (find_.empty()) {
+        return L"";
+    }
+    uint64_t left = pe_search_unindexed_count(core_);
+    if (left == 0) {
+        return L"";
+    }
+    // the words of these are found once their text is in (subjects, people and file names are found already)
+    return L"   (the text of " + std::to_wstring(left) + (left == 1 ? L" message" : L" messages") + L" is still being read for the search)";
 }
 
 bool Mailbox::FolderOf(int64_t folder, std::wstring& name, bool& fixed) const {
@@ -835,11 +993,14 @@ void Mailbox::DeleteFolder(HWND owner) {
 }
 
 std::wstring Mailbox::Counts() const {
-    if (!folder_) {
+    if (!folder_ && !everyFolder_) {
         return L"";
     }
-    if (!find_.empty()) {
+    if (Searching() && !ListsFolders() && folder_) {
         return std::to_wstring(total_) + L" of " + std::to_wstring(folderTotal_) + L" found, " + std::to_wstring(unread_) + L" unread";
+    }
+    if (Searching()) {
+        return std::to_wstring(total_) + L" found, " + std::to_wstring(unread_) + L" unread";
     }
     return std::to_wstring(total_) + L" message(s), " + std::to_wstring(unread_) + L" unread";
 }
@@ -917,7 +1078,7 @@ void Mailbox::SaveShownAs(HWND owner) {
     }
     size_t length = 0;
     char* name = nullptr;
-    uint8_t* data = pe_message_source(core_, folder_, uid_, &length, &name);
+    uint8_t* data = pe_message_source(core_, messageFolder_, uid_, &length, &name);
     core::String safeName(name);
     if (!data) {
         MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
@@ -940,7 +1101,7 @@ void Mailbox::ShowProperties(HWND owner) {
         MessageBoxW(owner, L"Select a message first.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
-    core::String headers(pe_message_headers(core_, folder_, uid_));
+    core::String headers(pe_message_headers(core_, messageFolder_, uid_));
     if (!headers) {
         MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
@@ -978,12 +1139,69 @@ void Mailbox::Import(HWND owner) {
 
 // ---- the Find box ----
 
+void Mailbox::PlaceFilters(const RECT& bar) {
+    int height = Scale(22), labelWidth = Scale(40), gap = Scale(6);
+    int scopeWidth = Scale(104), showWidth = Scale(132);
+    int top = bar.top + (bar.bottom - bar.top - height) / 2;
+    int right = bar.right - gap;
+    MoveWindow(scopeChoice_, right - scopeWidth, top, scopeWidth, Scale(160), TRUE);
+    right -= scopeWidth;
+    MoveWindow(scopeLabel_, right - Scale(24), top, Scale(22), height, TRUE);
+    right -= Scale(24) + gap * 2;
+    MoveWindow(showChoice_, right - showWidth, top, showWidth, Scale(160), TRUE);
+    right -= showWidth;
+    MoveWindow(showLabel_, right - labelWidth, top, labelWidth - Scale(2), height, TRUE);
+    // over the folder bar, which is drawn first
+    for (HWND window : {showLabel_, showChoice_, scopeLabel_, scopeChoice_}) {
+        SetWindowPos(window, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+}
+
+bool Mailbox::OnFolderBar(HWND window) const {
+    return window == showLabel_ || window == scopeLabel_;
+}
+
+void Mailbox::OnFilterChanged() {
+    show_ = static_cast<PeShow>(std::clamp<LRESULT>(SendMessageW(showChoice_, CB_GETCURSEL, 0, 0), 0, 3));
+    everyFolder_ = SendMessageW(scopeChoice_, CB_GETCURSEL, 0, 0) == 1;
+    ReloadList(true);
+    SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
+}
+
 void Mailbox::PlaceFind(const RECT& row) {
-    int height = Scale(22);
-    int width = Scale(220);
+    int height = Scale(26), width = Scale(280), edge = GetSystemMetrics(SM_CXEDGE);
+    int left = row.right - width - Scale(8);
     int top = row.top + (row.bottom - row.top - height) / 2;
-    MoveWindow(findEdit_, row.right - width - Scale(6), top, width, height, TRUE);
-    MoveWindow(findLabel_, row.right - width - Scale(46), top, Scale(36), height, TRUE);
+    MoveWindow(findFrame_, left, top, width, height, TRUE);
+    // inside the frame's edge: the magnifier, the box (as high as its text, centered) and the clear button
+    int inner = height - 2 * edge, icon = iconSize_ + Scale(8), clear = iconSize_ + Scale(8);
+    MoveWindow(findIcon_, left + edge, top + edge, icon, inner, TRUE);
+    HDC dc = GetDC(findEdit_);
+    HGDIOBJ old = SelectObject(dc, reinterpret_cast<HFONT>(SendMessageW(findEdit_, WM_GETFONT, 0, 0)));
+    TEXTMETRICW metrics = {};
+    GetTextMetricsW(dc, &metrics);
+    SelectObject(dc, old);
+    ReleaseDC(findEdit_, dc);
+    int text = metrics.tmHeight + Scale(2);
+    MoveWindow(findEdit_, left + edge + icon, top + (height - text) / 2, width - 2 * edge - icon - clear, text, TRUE);
+    MoveWindow(findClear_, left + width - edge - clear, top + edge, clear, inner, TRUE);
+    // over the toolbar the row is part of, the frame under what is in it
+    for (HWND window : {findFrame_, findIcon_, findEdit_, findClear_}) {
+        SetWindowPos(window, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+}
+
+bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
+    if (item.hwndItem != findIcon_ && item.hwndItem != findClear_) {
+        return false;
+    }
+    FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_WINDOW));
+    int icon = item.hwndItem == findIcon_ ? LIST_SEARCH : LIST_DISMISS;
+    int pushed = (item.itemState & ODS_SELECTED) ? 1 : 0;
+    int x = (item.rcItem.left + item.rcItem.right - iconSize_) / 2 + pushed;
+    int y = (item.rcItem.top + item.rcItem.bottom - iconSize_) / 2 + pushed;
+    ImageList_Draw(listIcons_, icon, item.hDC, x, y, ILD_TRANSPARENT);
+    return true;
 }
 
 void Mailbox::FocusFind() {
@@ -998,13 +1216,18 @@ void Mailbox::ResetFind() {
     KillTimer(parent_, TIMER_FIND);
     find_.clear();
     findUtf8_.clear();
+    findSpansFolders_ = false;
+    // the search of every folder ends with it, back in the folder
+    everyFolder_ = false;
+    SendMessageW(scopeChoice_, CB_SETCURSEL, 0, 0);
 }
 
 bool Mailbox::ClearFind() {
-    if (find_.empty() && GetWindowTextLengthW(findEdit_) == 0) {
+    if (find_.empty() && GetWindowTextLengthW(findEdit_) == 0 && !everyFolder_) {
         return false;
     }
     ResetFind();
+    SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
     ReloadList(true);
     SetFocus(list_);
     return true;
@@ -1015,7 +1238,22 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
         if (code == EN_CHANGE) {
             // a moment after the last key, not for each
             SetTimer(parent_, TIMER_FIND, 250, nullptr);
+            ShowWindow(findClear_, GetWindowTextLengthW(findEdit_) > 0 ? SW_SHOW : SW_HIDE);
         }
+        return true;
+    }
+    if (id == IDC_FIND_CLEAR) {
+        // the search ends, and the box is ready for another
+        ClearFind();
+        SetFocus(findEdit_);
+        return true;
+    }
+    if ((id == IDC_FIND_FRAME || id == IDC_FIND_ICON) && code == STN_CLICKED) {
+        FocusFind();
+        return true;
+    }
+    if ((id == IDC_SHOW || id == IDC_SCOPE) && code == CBN_SELCHANGE) {
+        OnFilterChanged();
         return true;
     }
     if (id == IDOK && GetFocus() == list_) {
@@ -1034,6 +1272,12 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
 }
 
 void Mailbox::OnTimer(UINT_PTR id) {
+    if (id == TIMER_RELOAD) {
+        KillTimer(parent_, TIMER_RELOAD);
+        ReloadList(true);
+        SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
+        return;
+    }
     if (id == TIMER_FIND) {
         KillTimer(parent_, TIMER_FIND);
         std::wstring text = GetWindowString(findEdit_);
@@ -1043,6 +1287,7 @@ void Mailbox::OnTimer(UINT_PTR id) {
         if (text != find_) {
             find_ = text;
             findUtf8_ = core::Narrow(find_);
+            findSpansFolders_ = pe_search_spans_folders(findUtf8_.c_str());
             ReloadList(true);
             SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
         }
@@ -1065,12 +1310,15 @@ void Mailbox::OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_FOLDER_CHANGED:
         UpdateFolders(event.account);
-        if (event.folder == folder_) {
+        if (event.folder == folder_ && !ListsFolders()) {
             ReloadList(true);
+        } else if (ListsFolders()) {
+            // a list of several folders has messages of any of them
+            SetTimer(parent_, TIMER_RELOAD, 300, nullptr);
         }
         break;
     case PE_EVENT_KIND_MESSAGE_READY:
-        if (event.folder == folder_ && event.uid == uid_) {
+        if (event.folder == messageFolder_ && event.uid == uid_) {
             ShowMessage();
         }
         break;

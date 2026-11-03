@@ -348,6 +348,87 @@ pub async fn fetch_source(client: &mut Client, store: &mut Store, folder: Folder
     Ok(source)
 }
 
+/// The text part of a message, fetched for the search index (only that part, and only its start), with what decoding it
+/// needs: the bytes as the server keeps them
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TextPart {
+    /// `text/plain` or `text/html`
+    pub content_type: String,
+    pub charset: Option<String>,
+    /// The transfer encoding, lowercase
+    pub encoding: Option<String>,
+    pub bytes: Vec<u8>,
+}
+
+/// The text parts of these messages of a folder for the search index (see `BodyStructure::text_parts`), at most
+/// `limit` bytes of each, in the message's order. Nothing for a message without one, or one the server no longer has.
+/// Neither marks a message read (BODY.PEEK) nor caches anything.
+pub async fn fetch_texts(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uids: &[u64],
+    limit: u64,
+) -> Result<Vec<(u64, Vec<TextPart>)>> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(Vec::new());
+    };
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let query = FetchQuery {
+        body_structure: true,
+        ..Default::default()
+    };
+    let structures = client.fetch(&Messages::Uids(set), &query).await?;
+    // each message's parts, and the messages by part number: most want the same few, one FETCH each
+    let mut found: Vec<(u64, Vec<TextPart>)> = Vec::new();
+    let mut by_section: std::collections::BTreeMap<String, Vec<(usize, usize)>> = Default::default();
+    for message in structures {
+        let (Some(uid), Some(structure)) = (message.uid, message.body_structure) else {
+            continue;
+        };
+        let parts = structure.text_parts();
+        if parts.is_empty() {
+            continue;
+        }
+        let at = found.len();
+        let mut texts = Vec::new();
+        for (index, part) in parts.into_iter().enumerate() {
+            by_section.entry(part.section()).or_default().push((at, index));
+            texts.push(TextPart {
+                content_type: part.content_type.clone(),
+                charset: part.parameters.get("charset").cloned(),
+                encoding: part.encoding.clone(),
+                bytes: Vec::new(),
+            });
+        }
+        found.push((uid, texts));
+    }
+    for (section, wanted) in by_section {
+        let numbers: Vec<u64> = wanted.iter().map(|(at, _)| found[*at].0).collect();
+        let Some(set) = SequenceSet::from_numbers(&numbers) else {
+            continue;
+        };
+        let query = FetchQuery {
+            parts: vec![section.clone()],
+            part_limit: Some(limit),
+            ..Default::default()
+        };
+        for message in client.fetch(&Messages::Uids(set), &query).await? {
+            let Some(bytes) = message.parts.get(&section) else {
+                continue;
+            };
+            if let Some((at, index)) = wanted.iter().find(|(at, _)| Some(found[*at].0) == message.uid) {
+                found[*at].1[*index].bytes = bytes.clone();
+            }
+        }
+    }
+    for (_, texts) in &mut found {
+        texts.retain(|text| !text.bytes.is_empty());
+    }
+    Ok(found)
+}
+
 /// Selects a folder unless it is the selected one
 async fn ensure_selected(client: &mut Client, path: &str) -> Result<()> {
     if client.selected().is_none_or(|selected| selected.path != path) {

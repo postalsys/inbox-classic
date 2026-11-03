@@ -754,16 +754,53 @@ pub unsafe extern "C" fn pe_folder_counts(core: *const PeCore, folder: i64, tota
     true
 }
 
-/// How many messages of a folder `pe_messages` lists with `find` (UTF-8, NULL for all), and how many of them are
-/// unread
+/// What the message list shows: the messages of one folder, or of every folder, by state, and those that what was typed
+/// in the Find box finds (Gmail's syntax: words, "phrases", -word, OR, from: to: subject: filename: is:unread
+/// is:starred has:attachment in: before: after: older_than: newer_than: larger: smaller:)
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeShow {
+    All = 0,
+    Unread = 1,
+    Flagged = 2,
+    WithAttachments = 3,
+}
+
+#[repr(C)]
+pub struct PeSearch {
+    /// The folder, 0 for every folder of every account
+    pub folder: i64,
+    pub show: PeShow,
+    /// UTF-8, NULL or empty for no words
+    pub text: *const c_char,
+}
+
+/// # Safety
+/// `search` must be NULL or point to a search whose text is NULL or NUL-terminated.
+unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Search> {
+    // SAFETY: as the caller guarantees
+    let s = unsafe { search.as_ref() }?;
+    Some(pe_core::Search {
+        folder: (s.folder != 0).then_some(s.folder),
+        show: match s.show {
+            PeShow::All => pe_core::Show::All,
+            PeShow::Unread => pe_core::Show::Unread,
+            PeShow::Flagged => pe_core::Show::Flagged,
+            PeShow::WithAttachments => pe_core::Show::WithAttachments,
+        },
+        // SAFETY: as the caller guarantees
+        text: unsafe { arg(s.text) }.unwrap_or_default().to_string(),
+    })
+}
+
+/// How many messages `pe_messages` lists for `search`, and how many of them are unread
 ///
 /// # Safety
-/// `core` must be a live handle, `find` NULL or a NUL-terminated string, `total` and `unread` valid pointers.
+/// `core` must be a live handle, `search` a valid search, `total` and `unread` valid pointers.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_message_count(
     core: *const PeCore,
-    folder: i64,
-    find: *const c_char,
+    search: *const PeSearch,
     total: *mut u64,
     unread: *mut u64,
 ) -> bool {
@@ -771,14 +808,39 @@ pub unsafe extern "C" fn pe_message_count(
         return false;
     }
     // SAFETY: as the caller guarantees
-    let find = unsafe { arg(find) }.unwrap_or_default();
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return false;
+    };
     // SAFETY: as the caller guarantees
-    let Some(counts) = (unsafe { with(core, None, |core| core.count_matching(folder, find).ok()) }) else {
+    let Some(counts) = (unsafe { with(core, None, |core| core.count_search(&search).ok()) }) else {
         return false;
     };
     // SAFETY: the caller gave valid pointers
     unsafe { (*total, *unread) = counts };
     true
+}
+
+/// How many messages the search does not know the text of yet (their text is fetched in the background, newest
+/// first, after each sync); 0 also when the core can not say
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_search_unindexed_count(core: *const PeCore) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.unindexed_count().unwrap_or(0)) }
+}
+
+/// Whether the text typed names its own folders (`in:`), so the list has messages of other folders than the one
+/// selected (and says which folder each is in)
+///
+/// # Safety
+/// `text` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_search_spans_folders(text: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let text = unsafe { arg(text) }.unwrap_or_default().to_string();
+    guard(move || Core::search_spans_folders(&text)).unwrap_or(false)
 }
 
 // ---- messages ----
@@ -809,6 +871,8 @@ impl From<PeSortField> for SortField {
 /// A row of the message list
 #[repr(C)]
 pub struct PeMessage {
+    /// The folder it is in (the list of a search in every folder has messages of many)
+    pub folder: i64,
     pub uid: u64,
     /// Seconds since the Unix epoch, valid when `has_date`
     pub date: i64,
@@ -828,23 +892,23 @@ pub struct PeMessage {
 /// A page of the message list; free with `pe_message_list_free`
 pub struct PeMessageList(Rows<PeMessage>);
 
-/// `limit` messages of a folder from `offset` on, in the order asked for; with `find` (UTF-8) only those with it
-/// in their subject, sender or recipients, NULL or empty for all. NULL on failure.
+/// `limit` messages of what `search` finds from `offset` on, in the order asked for. NULL on failure.
 ///
 /// # Safety
-/// `core` must be a live handle, `find` NULL or a NUL-terminated string.
+/// `core` must be a live handle, `search` a valid search.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_messages(
     core: *const PeCore,
-    folder: i64,
+    search: *const PeSearch,
     sort: PeSortField,
     ascending: bool,
-    find: *const c_char,
     offset: u64,
     limit: u64,
 ) -> *mut PeMessageList {
     // SAFETY: as the caller guarantees
-    let find = unsafe { arg(find) }.unwrap_or_default();
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return null_mut();
+    };
     let sort = Sort {
         field: sort.into(),
         ascending,
@@ -852,12 +916,13 @@ pub unsafe extern "C" fn pe_messages(
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
-            let Ok(messages) = core.messages_matching(folder, sort, find, offset, limit) else {
+            let Ok(messages) = core.search(&search, sort, offset, limit) else {
                 return null_mut();
             };
             handed(PeMessageList(Rows::new(&messages, |m, strings| {
                 let info = &m.info;
                 PeMessage {
+                    folder: m.folder_id,
                     uid: info.uid,
                     date: info.display_date().unwrap_or(0),
                     has_date: info.display_date().is_some(),
@@ -876,32 +941,32 @@ pub unsafe extern "C" fn pe_messages(
     }
 }
 
-/// Where message `uid` is in the message list of a folder in this order, -1 when it is not there
+/// Where message `uid` of `folder` is in what `search` finds in this order, -1 when it is not there
 ///
 /// # Safety
-/// `core` must be a live handle.
+/// `core` must be a live handle, `search` a valid search.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_message_index(
     core: *const PeCore,
-    folder: i64,
+    search: *const PeSearch,
     sort: PeSortField,
     ascending: bool,
-    find: *const c_char,
+    folder: i64,
     uid: u64,
 ) -> i64 {
     // SAFETY: as the caller guarantees
-    let find = unsafe { arg(find) }.unwrap_or_default();
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return -1;
+    };
     let sort = Sort {
         field: sort.into(),
         ascending,
     };
     // SAFETY: as the caller guarantees
     unsafe {
-        with(core, -1, |core| {
-            match core.message_index_matching(folder, sort, find, uid) {
-                Ok(Some(index)) => i64::try_from(index).unwrap_or(-1),
-                _ => -1,
-            }
+        with(core, -1, |core| match core.search_index(&search, sort, folder, uid) {
+            Ok(Some(index)) => i64::try_from(index).unwrap_or(-1),
+            _ => -1,
         })
     }
 }

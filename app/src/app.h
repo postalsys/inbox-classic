@@ -208,8 +208,14 @@ public:
     // WM_NOTIFY and WM_COMMAND of the panes; true when handled
     bool OnNotify(NMHDR* header, LRESULT& result);
     bool OnCommand(WORD id, WORD code);
-    // the Find box: placed at the right of the toolbar row, focused (Ctrl+Shift+F), cleared (Esc)
+    // the Find box: placed at the right of the toolbar row, focused (Ctrl+Shift+F), cleared (Esc); the Show and In
+    // choices at the right of the folder bar
     void PlaceFind(const RECT& row);
+    void PlaceFilters(const RECT& folderBar);
+    // whether a window is on the folder bar (its labels), for its colors
+    bool OnFolderBar(HWND window) const;
+    // WM_DRAWITEM of the search field's magnifier and clear button; false for other controls
+    bool OnDrawItem(const DRAWITEMSTRUCT& item);
     void FocusFind();
     // File > Save As (the message shown, as an .eml), Print (the message shown), Import Messages (into the folder)
     void SaveShownAs(HWND owner);
@@ -241,8 +247,11 @@ public:
     bool OnCtlColor(HWND window, HDC dc, LRESULT& brush);
     // "12 message(s), 3 unread" for the status bar
     std::wstring Counts() const;
-    // the name of the selected folder (or account), for the folder bar and the title; empty with nothing selected
+    // the name of the selected folder (or account), for the folder bar and the title; empty with nothing selected.
+    // While searching or showing only some messages, what the list shows ("All folders: search results")
     std::wstring SelectedName() const;
+    // for the folder bar while searching: how many messages the search does not know the text of yet, empty for none
+    std::wstring IndexingNote() const;
     std::wstring AccountName(int64_t account) const;
     std::wstring AccountEmail(int64_t account) const;
     // the provider the account signs in to through the browser, NONE for a password
@@ -265,6 +274,16 @@ private:
     void FillAccount(HTREEITEM root, int64_t account);
     void UpdateFolders(int64_t account);
     void ReloadList(bool keepSelection);
+    // what the list shows: the folder (or every folder), the Show choice and the words of the Find box
+    PeSearch Search() const;
+    // whether the list has messages of other folders than the selected one (All folders, or in: typed): then it has
+    // a Folder column
+    bool ListsFolders() const;
+    // anything narrowing or widening the list: words, a Show choice, All folders
+    bool Searching() const;
+    void ShowFolderColumn();
+    std::wstring RowFolder(int64_t folder) const;
+    void OnFilterChanged();
     const PeMessage* Row(int index);
     const PeMessage* SelectedRow();
     // the reading pane emptied; with "There is no message selected." in it unless a message is `loading`
@@ -324,8 +343,20 @@ private:
     std::wstring find_;
     std::string findUtf8_;
     uint64_t folderTotal_ = 0;
-    HWND findLabel_ = nullptr;
+    // the search field: a white frame with the magnifier, the box and the clear button in it
+    HWND findFrame_ = nullptr;
+    HWND findIcon_ = nullptr;
     HWND findEdit_ = nullptr;
+    HWND findClear_ = nullptr;
+    // what the words typed name themselves (in:), worked out by the core when they change
+    bool findSpansFolders_ = false;
+    HWND showLabel_ = nullptr;
+    HWND showChoice_ = nullptr;
+    HWND scopeLabel_ = nullptr;
+    HWND scopeChoice_ = nullptr;
+    PeShow show_ = PE_SHOW_ALL;
+    bool everyFolder_ = false;
+    bool folderColumn_ = false;
     int64_t folder_ = 0;
     uint64_t total_ = 0;
     uint64_t unread_ = 0;
@@ -335,8 +366,9 @@ private:
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's
     bool reloading_ = false;
-    // the message shown, 0 for none
+    // the message shown and its folder (its row's: in a search of every folder not the selected one), 0 for none
     uint64_t uid_ = 0;
+    int64_t messageFolder_ = 0;
     bool remoteImages_ = false;
     core::MessageView view_;
     // the view being built for the reading pane, 0 for none
@@ -376,6 +408,13 @@ enum CommandId : WORD {
     IDC_ATTACHMENTS,
     IDC_PICTURES,
     IDC_FIND,
+    // beside the folder name: which messages the list shows, and in which folders it searches
+    IDC_SHOW,
+    IDC_SCOPE,
+    // the search field's frame, magnifier and clear button around the Find box
+    IDC_FIND_FRAME,
+    IDC_FIND_ICON,
+    IDC_FIND_CLEAR,
     IDM_FIND = 120,
     IDM_SAVE_AS,
     IDM_PRINT,
@@ -387,3 +426,5 @@ enum CommandId : WORD {
 constexpr UINT_PTR TIMER_MARK_READ = 1;
 // a moment after typing in the Find box, the list follows it
 constexpr UINT_PTR TIMER_FIND = 3;
+// a list of several folders follows their changes once a sync of many of them is done, not after each
+constexpr UINT_PTR TIMER_RELOAD = 4;

@@ -10,7 +10,9 @@ mod accounts;
 mod folders;
 mod messages;
 mod outbox;
+mod query;
 mod schema;
+mod search;
 mod sign_in_apps;
 
 use std::path::Path;
@@ -19,7 +21,9 @@ pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_prov
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use messages::{Message, MessageInfo, Sort, SortField};
 pub use outbox::Queued;
+pub use query::Query;
 pub use rusqlite::Error;
+pub use search::{IndexText, Search, Show};
 pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -45,13 +49,6 @@ impl Store {
         db.pragma_update(None, "foreign_keys", true)?;
         db.pragma_update(None, "synchronous", "NORMAL")?;
         db.busy_timeout(std::time::Duration::from_secs(5))?;
-        // lowercase as Rust knows it, for searches that ignore case beyond ASCII (SQLite's own folds ASCII only)
-        db.create_scalar_function(
-            "pe_fold",
-            1,
-            rusqlite::functions::FunctionFlags::SQLITE_UTF8 | rusqlite::functions::FunctionFlags::SQLITE_DETERMINISTIC,
-            |context| Ok(context.get::<Option<String>>(0)?.map(|text| text.to_lowercase())),
-        )?;
         let mut store = Store { db };
         schema::migrate(&mut store.db)?;
         Ok(store)

@@ -125,12 +125,52 @@ CREATE TABLE sign_in_apps (
 -- Inbox Classic's until it verifies the app
 INSERT INTO settings (key, value) VALUES ('sign_in.google', '0'), ('sign_in.microsoft', '1');
 "#,
+    r#"
+-- what the search reads besides the list's own fields: everyone the message names, decoded (From, Sender and
+-- Reply-To; To, Cc and Bcc), and the names and number of its files
+ALTER TABLE messages ADD COLUMN sender_people TEXT NOT NULL DEFAULT '';
+ALTER TABLE messages ADD COLUMN recipient_people TEXT NOT NULL DEFAULT '';
+ALTER TABLE messages ADD COLUMN attachment_names TEXT NOT NULL DEFAULT '';
+ALTER TABLE messages ADD COLUMN attachment_count INTEGER NOT NULL DEFAULT 0;
+-- 1 once the search index has the message's text (from its text part, or its cached source)
+ALTER TABLE messages ADD COLUMN text_indexed INTEGER NOT NULL DEFAULT 0;
+-- the date order of a list of every folder (a search of all folders)
+CREATE INDEX messages_all_by_date ON messages (COALESCE(date, internal_date), uid, id);
+-- the messages whose text is still to index, newest first
+CREATE INDEX messages_text_unindexed ON messages (COALESCE(date, internal_date) DESC) WHERE text_indexed = 0;
+-- 1 once the search index has the text of the cached source
+ALTER TABLE bodies ADD COLUMN indexed INTEGER NOT NULL DEFAULT 0;
+-- the sources still to index, found without reading the others
+CREATE INDEX bodies_unindexed ON bodies (message_id) WHERE indexed = 0;
+
+-- the search index, one row per message by its id: the words of its subject, its senders, its recipients, its files
+-- and, once its source is cached, its text. Contentless: the store has the text already, the index keeps only the
+-- words
+CREATE VIRTUAL TABLE messages_fts USING fts5(
+    subject, senders, recipients, attachments, body,
+    content = '', contentless_delete = 1, tokenize = 'unicode61 remove_diacritics 2'
+);
+INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body)
+    SELECT id, subject, from_name || ' ' || from_address, recipients, '', '' FROM messages;
+CREATE TRIGGER messages_fts_add AFTER INSERT ON messages BEGIN
+    INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) VALUES (
+        new.id, new.subject,
+        CASE new.sender_people WHEN '' THEN new.from_name || ' ' || new.from_address ELSE new.sender_people END,
+        CASE new.recipient_people WHEN '' THEN new.recipients ELSE new.recipient_people END,
+        new.attachment_names, ''
+    );
+END;
+CREATE TRIGGER messages_fts_remove AFTER DELETE ON messages BEGIN
+    DELETE FROM messages_fts WHERE rowid = old.id;
+END;
+
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
     let version: usize = db.pragma_query_value(None, "user_version", |row| row.get(0))?;
     for (index, migration) in MIGRATIONS.iter().enumerate().skip(version) {
-        let tx = db.transaction()?;
+        let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         tx.execute_batch(migration)?;
         tx.pragma_update(None, "user_version", index + 1)?;
         tx.commit()?;

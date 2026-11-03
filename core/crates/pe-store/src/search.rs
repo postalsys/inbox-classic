@@ -1,0 +1,629 @@
+//! Searching the message list: by folder or in every folder, by state (unread, flagged, with files) and by what is
+//! typed (see [`crate::query`], Gmail's syntax) in the full-text index (`messages_fts`, FTS5): subject, senders,
+//! recipients, file names and its text (from its text part, fetched for the index, or from its cached source).
+
+use rusqlite::types::Value;
+use rusqlite::{OptionalExtension, params, params_from_iter};
+
+use crate::messages::{COLUMNS, from_row};
+use crate::query::{Field, Place, Query, Term, Word};
+use crate::{AccountId, FolderId, Message, Result, Sort, Store};
+
+/// Which messages of the list are shown, whatever words are searched for
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Show {
+    #[default]
+    All,
+    Unread,
+    Flagged,
+    WithAttachments,
+}
+
+/// What the message list shows
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct Search {
+    /// One folder, or None for every folder of every account
+    pub folder: Option<FolderId>,
+    pub show: Show,
+    /// The words searched for, as typed; empty for none
+    pub text: String,
+}
+
+/// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
+/// column, matched at the start of a word so that results come while typing (a phrase: its last word whole). None when
+/// it has no word in it (only punctuation).
+fn fts_word(word: &Word) -> Option<String> {
+    let text = word.text.replace('"', "");
+    if !text.chars().any(char::is_alphanumeric) {
+        return None;
+    }
+    let column = match word.field {
+        Field::Any => "",
+        Field::Subject => "subject : ",
+        Field::From => "senders : ",
+        Field::To => "recipients : ",
+        Field::Filename => "attachments : ",
+    };
+    // a word of one letter is matched whole: as the start of words it would match nearly every message, and the
+    // first letter typed would make the search read them all
+    let prefix = if word.phrase || text.chars().count() < 2 {
+        ""
+    } else {
+        "*"
+    };
+    Some(format!("{column}\"{text}\"{prefix}"))
+}
+
+/// One term of words as an FTS5 query: its alternatives joined by OR; None when none of them has a word
+fn fts_term(any_of: &[Word]) -> Option<String> {
+    let words: Vec<String> = any_of.iter().filter_map(fts_word).collect();
+    match words.len() {
+        0 => None,
+        1 => words.into_iter().next(),
+        _ => Some(format!("({})", words.join(" OR "))),
+    }
+}
+
+/// The current time, for `older_than:`
+fn now() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs() as i64)
+}
+
+impl Search {
+    /// The whole list of a folder
+    pub fn folder(folder: FolderId) -> Search {
+        Search {
+            folder: Some(folder),
+            ..Default::default()
+        }
+    }
+
+    /// The WHERE of the search and its values, ?1 on
+    fn condition(&self) -> (String, Vec<Value>) {
+        let mut query = Query::parse(&self.text, now());
+        // the Show choice is a term like the one typed for it
+        query.terms.extend(match self.show {
+            Show::All => None,
+            Show::Unread => Some(Term::Seen(false)),
+            Show::Flagged => Some(Term::Flagged(true)),
+            Show::WithAttachments => Some(Term::Attachment(true)),
+        });
+        let mut parts: Vec<String> = Vec::new();
+        let mut values: Vec<Value> = Vec::new();
+        let value = |values: &mut Vec<Value>, v: Value| {
+            values.push(v);
+            format!("?{}", values.len())
+        };
+        // the folder shown, unless the search names its own (in:)
+        if let Some(folder) = self.folder.filter(|_| !query.spans_folders()) {
+            parts.push(format!("folder_id = {}", value(&mut values, Value::Integer(folder))));
+        }
+        let flagged = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
+        let answered = "instr(' ' || flags || ' ', ' \\Answered ') > 0";
+        let mut words: Vec<String> = Vec::new();
+        let date = "COALESCE(date, internal_date)";
+        for term in &query.terms {
+            match term {
+                Term::Text { any_of, negated } => match (fts_term(any_of), negated) {
+                    (Some(fts), false) => words.push(fts),
+                    (Some(fts), true) => parts.push(format!(
+                        "id NOT IN (SELECT rowid FROM messages_fts WHERE messages_fts MATCH {})",
+                        value(&mut values, Value::Text(fts))
+                    )),
+                    // only punctuation: no word to find
+                    (None, false) => parts.push("0".into()),
+                    (None, true) => {}
+                },
+                Term::Seen(seen) => parts.push(format!("seen = {}", i64::from(*seen))),
+                Term::Flagged(on) => parts.push(if *on { flagged.into() } else { format!("NOT {flagged}") }),
+                Term::Answered(on) => parts.push(if *on {
+                    answered.into()
+                } else {
+                    format!("NOT {answered}")
+                }),
+                Term::Attachment(on) => parts.push(format!("has_attachments = {}", i64::from(*on))),
+                Term::In { place, negated } => {
+                    let folders = match place {
+                        Place::Anywhere => continue,
+                        Place::Inbox => "SELECT id FROM folders WHERE path = 'INBOX' COLLATE NOCASE".to_string(),
+                        Place::Special { special_use, name } => {
+                            let special_use = value(&mut values, Value::Text(special_use.to_string()));
+                            let name = value(&mut values, Value::Text(name.clone()));
+                            format!(
+                                "SELECT id FROM folders WHERE special_use = {special_use} OR name = {name} COLLATE NOCASE"
+                            )
+                        }
+                        Place::Named(name) => {
+                            let name = value(&mut values, Value::Text(name.clone()));
+                            format!(
+                                "SELECT id FROM folders WHERE name = {name} COLLATE NOCASE OR path = {name} COLLATE NOCASE"
+                            )
+                        }
+                    };
+                    let not = if *negated { "NOT " } else { "" };
+                    parts.push(format!("folder_id {not}IN ({folders})"));
+                }
+                Term::Before(time) => parts.push(format!("{date} < {}", value(&mut values, Value::Integer(*time)))),
+                Term::After(time) => parts.push(format!("{date} >= {}", value(&mut values, Value::Integer(*time)))),
+                Term::Larger(size) => {
+                    parts.push(format!("size > {}", value(&mut values, Value::Integer(*size as i64))))
+                }
+                Term::Smaller(size) => {
+                    parts.push(format!("size < {}", value(&mut values, Value::Integer(*size as i64))))
+                }
+            }
+        }
+        if !words.is_empty() {
+            let matched = value(&mut values, Value::Text(words.join(" AND ")));
+            parts.push(format!(
+                "id IN (SELECT rowid FROM messages_fts WHERE messages_fts MATCH {matched})"
+            ));
+        }
+        let condition = if parts.is_empty() {
+            "1".to_string()
+        } else {
+            parts.join(" AND ")
+        };
+        (condition, values)
+    }
+}
+
+/// What the index keeps of a message whose source was read (the core parses it): everyone it names, its files and
+/// its text
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct IndexText {
+    /// From, Sender and Reply-To; To, Cc and Bcc
+    pub sender_people: String,
+    pub recipient_people: String,
+    /// One per line
+    pub attachment_names: String,
+    pub attachment_count: u32,
+    pub body: String,
+}
+
+impl Store {
+    /// A page of what `search` finds, in the order of `sort`
+    pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
+        let (condition, mut values) = search.condition();
+        let at = values.len();
+        values.push(Value::Integer(limit as i64));
+        values.push(Value::Integer(offset as i64));
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT {COLUMNS} FROM messages WHERE {condition} ORDER BY {} LIMIT ?{} OFFSET ?{}",
+            sort.order_by(),
+            at + 1,
+            at + 2
+        ))?;
+        statement.query_map(params_from_iter(values), from_row)?.collect()
+    }
+
+    /// How many messages `search` finds, and how many of them are unread
+    pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
+        let (condition, values) = search.condition();
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT COUNT(*), COALESCE(SUM(NOT seen), 0) FROM messages WHERE {condition}"
+        ))?;
+        statement.query_row(params_from_iter(values), |row| Ok((row.get(0)?, row.get(1)?)))
+    }
+
+    /// Where the message `uid` of `folder` is in what `search` finds in the order of `sort`; None when it is not there
+    pub fn search_index(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<u64>> {
+        let (condition, mut values) = search.condition();
+        let at = values.len();
+        values.push(Value::Integer(folder));
+        values.push(Value::Integer(uid as i64));
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT position FROM (SELECT folder_id, uid, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS position \
+             FROM messages WHERE {condition}) WHERE folder_id = ?{} AND uid = ?{}",
+            sort.order_by(),
+            at + 1,
+            at + 2
+        ))?;
+        statement
+            .query_row(params_from_iter(values), |row| row.get(0))
+            .optional()
+    }
+
+    /// Cached sources the index does not have the text of yet, a few at a time: (message id, source)
+    pub fn sources_to_index(&self, limit: usize) -> Result<Vec<(i64, Vec<u8>)>> {
+        let mut statement = self
+            .db
+            .prepare_cached("SELECT message_id, source FROM bodies WHERE indexed = 0 LIMIT ?1")?;
+        statement
+            .query_map([limit as i64], |row| Ok((row.get(0)?, row.get(1)?)))?
+            .collect()
+    }
+
+    /// The index of a message with what its source says (see [`IndexText`]); the source counts as indexed
+    pub fn set_indexed(&self, message: i64, text: &IndexText) -> Result<()> {
+        if !text.sender_people.is_empty() || !text.recipient_people.is_empty() {
+            self.db
+                .prepare_cached(
+                    "UPDATE messages SET sender_people = ?2, recipient_people = ?3, attachment_names = ?4, \
+                 attachment_count = ?5 WHERE id = ?1",
+                )?
+                .execute(params![
+                    message,
+                    text.sender_people,
+                    text.recipient_people,
+                    text.attachment_names,
+                    text.attachment_count
+                ])?;
+        }
+        self.db
+            .prepare_cached("DELETE FROM messages_fts WHERE rowid = ?1")?
+            .execute([message])?;
+        self.db.prepare_cached(
+            "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
+             SELECT id, subject, CASE sender_people WHEN '' THEN from_name || ' ' || from_address ELSE sender_people END, \
+             CASE recipient_people WHEN '' THEN recipients ELSE recipient_people END, attachment_names, ?2 \
+             FROM messages WHERE id = ?1",
+        )?
+        .execute(params![message, text.body])?;
+        self.db
+            .prepare_cached("UPDATE bodies SET indexed = 1 WHERE message_id = ?1 AND indexed = 0")?
+            .execute([message])?;
+        self.db
+            .prepare_cached("UPDATE messages SET text_indexed = 1 WHERE id = ?1")?
+            .execute([message])?;
+        Ok(())
+    }
+
+    /// Messages of an account whose text the index does not have yet, newest first: (message id, folder, UID)
+    pub fn messages_to_index(&self, account: AccountId, limit: usize) -> Result<Vec<(i64, FolderId, u64)>> {
+        let mut statement = self.db.prepare_cached(
+            "SELECT m.id, m.folder_id, m.uid FROM messages m INDEXED BY messages_text_unindexed \
+             JOIN folders f ON f.id = m.folder_id WHERE m.text_indexed = 0 AND f.account_id = ?1 \
+             ORDER BY COALESCE(m.date, m.internal_date) DESC LIMIT ?2",
+        )?;
+        statement
+            .query_map(params![account, limit as i64], |row| {
+                Ok((row.get(0)?, row.get(1)?, row.get(2)?))
+            })?
+            .collect()
+    }
+
+    /// How many messages the index does not have the text of yet
+    pub fn unindexed_count(&self) -> Result<u64> {
+        self.db
+            .query_row("SELECT COUNT(*) FROM messages WHERE text_indexed = 0", [], |row| {
+                row.get(0)
+            })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{AccountSettings, FolderInfo, MessageInfo};
+
+    fn setup() -> (Store, FolderId, FolderId) {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        let folder = |path: &str| FolderInfo {
+            path: path.into(),
+            name: path.into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store
+            .set_folders(account, &[folder("INBOX"), folder("Archive")])
+            .unwrap();
+        let folders = store.folders(account).unwrap();
+        (store, folders[0].id, folders[1].id)
+    }
+
+    fn message(uid: u64, subject: &str, from: &str, flags: &[&str]) -> MessageInfo {
+        MessageInfo {
+            uid,
+            flags: flags.iter().map(|f| f.to_string()).collect(),
+            date: Some(uid as i64 * 100),
+            subject: subject.into(),
+            from_name: from.into(),
+            from_address: format!("{}@example.com", from.to_lowercase()),
+            ..Default::default()
+        }
+    }
+
+    fn found(store: &Store, search: &Search) -> Vec<u64> {
+        let mut uids: Vec<u64> = store
+            .search(search, Sort::default(), 0, 100)
+            .unwrap()
+            .iter()
+            .map(|m| m.info.uid)
+            .collect();
+        uids.sort();
+        uids
+    }
+
+    fn words(folder: Option<FolderId>, text: &str) -> Search {
+        Search {
+            folder,
+            text: text.into(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn typed_text_can_only_be_words() {
+        let word = |text: &str| Word {
+            field: Field::Any,
+            text: text.into(),
+            phrase: false,
+        };
+        assert_eq!(fts_word(&word("budget")).as_deref(), Some("\"budget\"*"));
+        // FTS5 syntax typed is taken as words
+        assert_eq!(fts_word(&word("a\"OR\"b")).as_deref(), Some("\"aORb\"*"));
+        assert_eq!(fts_word(&word("NEAR(x)")).as_deref(), Some("\"NEAR(x)\"*"));
+        assert_eq!(fts_word(&word("...")), None);
+        assert_eq!(fts_word(&word("a")).as_deref(), Some("\"a\""));
+        let phrase = Word {
+            field: Field::Subject,
+            text: "q3 plans".into(),
+            phrase: true,
+        };
+        assert_eq!(fts_word(&phrase).as_deref(), Some("subject : \"q3 plans\""));
+        assert_eq!(
+            fts_term(&[word("ab"), word("c")]).as_deref(),
+            Some("(\"ab\"* OR \"c\")")
+        );
+    }
+
+    #[test]
+    fn finds_words_in_everything_indexed() {
+        let (store, inbox, archive) = setup();
+        let mut with_people = message(4, "Hello", "Bob", &[]);
+        with_people.sender_people = "Bob bob@example.com".into();
+        with_people.recipient_people = "Carol Sääsk carol@example.org Dave dave@example.net".into();
+        with_people.attachment_names = "Q3 report.pdf\nphoto.jpg".into();
+        with_people.attachment_count = 2;
+        with_people.has_attachments = true;
+        store
+            .add_messages(
+                inbox,
+                &[
+                    message(1, "Budget for 2025", "Ann", &["\\Seen"]),
+                    message(2, "Lunch", "Ann", &[]),
+                    message(3, "Õhtusöök", "Zed", &["\\Flagged \\Seen"]),
+                    with_people,
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(archive, &[message(9, "Budget, old", "Ann", &["\\Seen"])])
+            .unwrap();
+        let inbox_words = |text: &str| found(&store, &words(Some(inbox), text));
+        // subject, sender, everyone named, file names; case and accents do not matter, words match as they start
+        assert_eq!(inbox_words("budget"), [1]);
+        assert_eq!(inbox_words("ANN"), [1, 2]);
+        assert_eq!(inbox_words("zed@example.com"), [3]);
+        assert_eq!(inbox_words("ohtu"), [3]);
+        assert_eq!(inbox_words("saask"), [4]);
+        assert_eq!(inbox_words("dave@example.net"), [4]);
+        assert_eq!(inbox_words("report"), [4]);
+        assert_eq!(inbox_words("phot"), [4]);
+        // every word is needed
+        assert_eq!(inbox_words("budget lunch"), [] as [u64; 0]);
+        assert_eq!(inbox_words("  "), [1, 2, 3, 4]);
+        assert_eq!(inbox_words("!!"), [] as [u64; 0]);
+        // every folder
+        assert_eq!(found(&store, &words(None, "budget")), [1, 9]);
+        // the counts and the positions of the list found, which are per folder in every folder
+        assert_eq!(store.count_search(&words(Some(inbox), "ann")).unwrap(), (2, 1));
+        assert_eq!(store.count_search(&words(None, "budget")).unwrap(), (2, 0));
+        let sort = Sort::default();
+        assert_eq!(
+            store.search_index(&words(None, "budget"), sort, archive, 9).unwrap(),
+            Some(0)
+        );
+        assert_eq!(
+            store.search_index(&words(None, "budget"), sort, inbox, 1).unwrap(),
+            Some(1)
+        );
+        assert_eq!(
+            store.search_index(&words(None, "budget"), sort, inbox, 2).unwrap(),
+            None
+        );
+        // removed messages leave the index
+        store.remove_messages(inbox, &[1]).unwrap();
+        assert_eq!(found(&store, &words(None, "budget")), [9]);
+    }
+
+    #[test]
+    fn shows_by_state() {
+        let (store, inbox, archive) = setup();
+        let mut files = message(4, "Files", "Bob", &["\\Seen"]);
+        files.has_attachments = true;
+        store
+            .add_messages(
+                inbox,
+                &[
+                    message(1, "Read", "Ann", &["\\Seen"]),
+                    message(2, "Unread", "Ann", &[]),
+                    message(3, "Flagged", "Ann", &["\\Flagged", "\\Seen"]),
+                    files,
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(archive, &[message(9, "Old unread", "Ann", &[])])
+            .unwrap();
+        let show = |folder, show| {
+            found(
+                &store,
+                &Search {
+                    folder,
+                    show,
+                    ..Default::default()
+                },
+            )
+        };
+        assert_eq!(show(Some(inbox), Show::All), [1, 2, 3, 4]);
+        assert_eq!(show(Some(inbox), Show::Unread), [2]);
+        assert_eq!(show(Some(inbox), Show::Flagged), [3]);
+        assert_eq!(show(Some(inbox), Show::WithAttachments), [4]);
+        assert_eq!(show(None, Show::Unread), [2, 9]);
+        // with words too
+        let search = Search {
+            folder: None,
+            show: Show::Unread,
+            text: "old".into(),
+        };
+        assert_eq!(found(&store, &search), [9]);
+    }
+
+    #[test]
+    fn indexes_the_text_of_cached_sources() {
+        let (store, inbox, _) = setup();
+        store
+            .add_messages(
+                inbox,
+                &[message(1, "Plans", "Ann", &[]), message(2, "Other", "Bob", &[])],
+            )
+            .unwrap();
+        assert!(store.sources_to_index(10).unwrap().is_empty());
+        store
+            .set_source(inbox, 1, b"Subject: Plans\r\n\r\nthe zebra crossing")
+            .unwrap();
+        let pending = store.sources_to_index(10).unwrap();
+        assert_eq!(pending.len(), 1);
+        let id = pending[0].0;
+        assert_eq!(found(&store, &words(Some(inbox), "zebra")), [] as [u64; 0]);
+        let text = IndexText {
+            sender_people: "Ann ann@example.com".into(),
+            recipient_people: "Mallory Mõis mallory@example.com".into(),
+            attachment_names: "plan.xlsx".into(),
+            attachment_count: 1,
+            body: "the zebra crossing".into(),
+        };
+        store.set_indexed(id, &text).unwrap();
+        assert!(store.sources_to_index(10).unwrap().is_empty());
+        assert_eq!(found(&store, &words(Some(inbox), "zebra")), [1]);
+        assert_eq!(found(&store, &words(Some(inbox), "mois")), [1]);
+        assert_eq!(found(&store, &words(Some(inbox), "plan.xlsx")), [1]);
+        // still by its subject and sender, and the people by where they are
+        assert_eq!(found(&store, &words(Some(inbox), "plans ann")), [1]);
+        assert_eq!(found(&store, &words(Some(inbox), "to:mois")), [1]);
+        assert_eq!(found(&store, &words(Some(inbox), "from:mois")), [] as [u64; 0]);
+        let message = store.message(inbox, 1).unwrap().unwrap();
+        assert_eq!(
+            (message.info.attachment_count, message.info.attachment_names.as_str()),
+            (1, "plan.xlsx")
+        );
+        // a source cached again is indexed again
+        store.set_source(inbox, 1, b"Subject: Plans\r\n\r\nnew text").unwrap();
+        assert_eq!(store.sources_to_index(10).unwrap().len(), 1);
+    }
+
+    #[test]
+    fn texts_to_index_newest_first() {
+        let (store, inbox, archive) = setup();
+        let account = store.folder(inbox).unwrap().account_id;
+        store
+            .add_messages(inbox, &[message(1, "Old", "Ann", &[]), message(3, "New", "Ann", &[])])
+            .unwrap();
+        store
+            .add_messages(archive, &[message(2, "Middle", "Ann", &[])])
+            .unwrap();
+        let uids = |store: &Store| -> Vec<u64> {
+            store
+                .messages_to_index(account, 10)
+                .unwrap()
+                .into_iter()
+                .map(|(_, _, uid)| uid)
+                .collect()
+        };
+        assert_eq!(uids(&store), [3, 2, 1]);
+        assert_eq!(store.unindexed_count().unwrap(), 3);
+        let (id, folder, _) = store.messages_to_index(account, 1).unwrap()[0];
+        assert_eq!(folder, inbox);
+        let text = IndexText {
+            body: "the zebra".into(),
+            ..Default::default()
+        };
+        store.set_indexed(id, &text).unwrap();
+        assert_eq!(uids(&store), [2, 1]);
+        assert_eq!(store.unindexed_count().unwrap(), 2);
+        // its text found, its subject and sender still
+        assert_eq!(found(&store, &words(Some(inbox), "zebra")), [3]);
+        assert_eq!(found(&store, &words(Some(inbox), "new ann")), [3]);
+        // another account's are not this one's
+        assert!(store.messages_to_index(account + 1, 10).unwrap().is_empty());
+    }
+
+    #[test]
+    fn gmail_operators() {
+        let (store, inbox, archive) = setup();
+        let account = store.folder(inbox).unwrap().account_id;
+        let sent = FolderInfo {
+            path: "Sent Items".into(),
+            name: "Sent Items".into(),
+            special_use: Some("\\Sent".into()),
+            selectable: true,
+            ..Default::default()
+        };
+        let infos: Vec<FolderInfo> = store
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .map(|f| f.info)
+            .chain([sent])
+            .collect();
+        store.set_folders(account, &infos).unwrap();
+        let sent = store
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .find(|f| f.info.path == "Sent Items")
+            .unwrap()
+            .id;
+        let mut report = message(1, "Q3 report", "Ann", &["\\Seen", "\\Answered"]);
+        report.recipient_people = "Bob bob@example.com".into();
+        report.attachment_names = "q3-report.pdf".into();
+        report.has_attachments = true;
+        report.size = Some(5 * 1024 * 1024);
+        report.date = Some(1_738_281_600);
+        let mut lunch = message(2, "Lunch next week", "Bob", &[]);
+        lunch.recipient_people = "Ann ann@example.com".into();
+        lunch.size = Some(2000);
+        lunch.date = Some(1_738_281_600 + 10 * 86_400);
+        store.add_messages(inbox, &[report, lunch]).unwrap();
+        store
+            .add_messages(archive, &[message(3, "Old report", "Ann", &["\\Flagged", "\\Seen"])])
+            .unwrap();
+        store
+            .add_messages(sent, &[message(4, "Re: lunch", "Me", &["\\Seen"])])
+            .unwrap();
+        let inbox_query = |text: &str| found(&store, &words(Some(inbox), text));
+        assert_eq!(inbox_query("is:unread"), [2]);
+        assert_eq!(inbox_query("is:read"), [1]);
+        assert_eq!(inbox_query("is:answered"), [1]);
+        assert_eq!(inbox_query("has:attachment"), [1]);
+        assert_eq!(inbox_query("-has:attachment"), [2]);
+        assert_eq!(inbox_query("from:ann"), [1]);
+        assert_eq!(inbox_query("to:ann"), [2]);
+        assert_eq!(inbox_query("subject:lunch"), [2]);
+        assert_eq!(inbox_query("subject:report from:bob"), [] as [u64; 0]);
+        assert_eq!(inbox_query("filename:pdf"), [1]);
+        assert_eq!(inbox_query("report -q3"), [] as [u64; 0]);
+        assert_eq!(inbox_query("q3 OR lunch"), [1, 2]);
+        assert_eq!(inbox_query("\"next week\""), [2]);
+        assert_eq!(inbox_query("\"week next\""), [] as [u64; 0]);
+        assert_eq!(inbox_query("larger:1M"), [1]);
+        assert_eq!(inbox_query("smaller:10k"), [2]);
+        assert_eq!(inbox_query("before:2025/02/01"), [1]);
+        assert_eq!(inbox_query("after:2025/02/01"), [2]);
+        // in: looks beyond the folder shown
+        assert_eq!(inbox_query("in:sent"), [4]);
+        assert_eq!(inbox_query("in:archive report"), [3]);
+        assert_eq!(inbox_query("in:anywhere report"), [1, 3]);
+        assert_eq!(inbox_query("in:anywhere is:starred"), [3]);
+        assert_eq!(inbox_query("label:\"sent items\""), [4]);
+        assert_eq!(inbox_query("in:anywhere -in:inbox -in:sent"), [3]);
+        // older_than counts back from now: everything here is older than a day
+        assert_eq!(inbox_query("older_than:1d"), [1, 2]);
+        assert_eq!(inbox_query("newer_than:1d"), [] as [u64; 0]);
+    }
+}

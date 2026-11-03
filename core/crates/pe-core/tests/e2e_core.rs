@@ -560,6 +560,98 @@ fn signs_in_with_a_sign_in_app() {
     );
 }
 
+/// The search: what sync brings is found by its subject, its people (decoded) and its files, in a folder or in all of
+/// them, with Gmail's operators; and their text, fetched in the background
+fn raw_has(message: &serde_json::Value, text: &str) -> bool {
+    pe_testkit::raw_text(message).contains(text)
+}
+
+#[test]
+fn searches_the_local_index() {
+    let Some(s) = setup() else { return };
+    let report = "From: =?utf-8?q?=C3=95ie_S=C3=A4=C3=A4sk?= <oie@example.com>\r\nTo: Bob <bob@example.com>\r\n\
+                  Cc: Carol <carol@example.com>\r\nSubject: =?utf-8?q?Kvartali_aruanne?=\r\nMessage-ID: <report@x>\r\n\
+                  Date: Mon, 6 Oct 2025 10:00:00 +0000\r\nContent-Type: multipart/mixed; boundary=m\r\n\r\n\
+                  --m\r\nContent-Type: text/plain\r\n\r\nThe numbers mention a zebra.\r\n\
+                  --m\r\nContent-Type: application/pdf; name=\"q3-numbers.pdf\"\r\nContent-Disposition: attachment; \
+                  filename=\"q3-numbers.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\nJVBERg==\r\n--m--\r\n";
+    let report_uid = s.server.add_message("INBOX", report, &["\\Seen"]);
+    s.server
+        .add_message("INBOX", &rfc822("Lunch", "a giraffe at noon"), &[]);
+    s.server.add_message(
+        "Archive",
+        &rfc822("Old numbers", "nothing else"),
+        &["\\Seen", "\\Flagged"],
+    );
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let folders = s.core.folders(account).unwrap();
+    let inbox = folders.iter().find(|f| f.info.path == "INBOX").unwrap().id;
+    let subjects = |folder: Option<i64>, text: &str| -> Vec<String> {
+        let search = pe_core::Search {
+            folder,
+            text: text.into(),
+            ..Default::default()
+        };
+        let mut found: Vec<String> = s
+            .core
+            .search(&search, Sort::default(), 0, 50)
+            .unwrap()
+            .into_iter()
+            .map(|m| m.info.subject)
+            .collect();
+        found.sort();
+        found
+    };
+    // decoded subject and people, the file name, from the summary alone
+    assert_eq!(subjects(Some(inbox), "aruanne"), ["Kvartali aruanne"]);
+    assert_eq!(subjects(Some(inbox), "from:saask"), ["Kvartali aruanne"]);
+    assert_eq!(subjects(Some(inbox), "cc:carol"), ["Kvartali aruanne"]);
+    assert_eq!(subjects(Some(inbox), "filename:q3"), ["Kvartali aruanne"]);
+    assert_eq!(subjects(Some(inbox), "has:attachment"), ["Kvartali aruanne"]);
+    assert_eq!(subjects(Some(inbox), "is:unread"), ["Lunch"]);
+    // every folder, and in: ("numbers" is in a file name too)
+    assert_eq!(subjects(None, "numbers"), ["Kvartali aruanne", "Old numbers"]);
+    assert_eq!(subjects(None, "old"), ["Old numbers"]);
+    assert_eq!(subjects(Some(inbox), "in:archive is:starred"), ["Old numbers"]);
+    assert!(pe_core::Core::search_spans_folders("in:archive x") && !pe_core::Core::search_spans_folders("x"));
+    let search = pe_core::Search {
+        folder: None,
+        text: "numbers".into(),
+        ..Default::default()
+    };
+    assert_eq!(s.core.count_search(&search).unwrap(), (2, 0));
+    // the text of every message, fetched in the background after the sync (only the text parts, without marking
+    // anything read or downloading the messages)
+    let deadline = std::time::Instant::now() + Duration::from_secs(20);
+    while s.core.unindexed_count().unwrap() > 0 {
+        assert!(std::time::Instant::now() < deadline, "the texts were not indexed");
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    assert_eq!(subjects(Some(inbox), "zebra"), ["Kvartali aruanne"]);
+    assert_eq!(subjects(Some(inbox), "giraffe noon"), ["Lunch"]);
+    assert_eq!(subjects(None, "zebra -filename:q3"), [] as [&str; 0]);
+    let lunch = s
+        .server
+        .messages("INBOX")
+        .into_iter()
+        .find(|m| raw_has(m, "Lunch"))
+        .unwrap();
+    assert!(!lunch["flags"].to_string().contains("Seen"), "{lunch}");
+    let listed = s.core.messages(inbox, Sort::default(), 0, 10).unwrap();
+    assert!(listed.iter().all(|m| !m.cached), "only the text parts were fetched");
+    // opened, the cached source indexes it again, with what the parser reads in it
+    s.core.open_message(inbox, report_uid).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: report_uid,
+        }
+    });
+    assert_eq!(subjects(Some(inbox), "zebra"), ["Kvartali aruanne"]);
+}
+
 #[test]
 fn flags_moves_and_deletes_messages() {
     let Some(s) = setup() else { return };

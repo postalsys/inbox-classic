@@ -47,14 +47,77 @@ impl BodyStructure {
     /// encoded is shown inline with its own parts, an image of a multipart/related HTML part is
     /// part of the HTML; anything else is an attachment
     pub fn has_attachments(&self) -> bool {
-        self.attachments_within(false)
+        !self.attachments().is_empty()
     }
 
-    fn attachments_within(&self, related: bool) -> bool {
+    /// The parts that are attachments, by the rules of [`BodyStructure::has_attachments`]
+    pub fn attachments(&self) -> Vec<&BodyStructure> {
+        let mut found = Vec::new();
+        self.collect_attachments(false, &mut found);
+        found
+    }
+
+    /// The parts with the text of the message, for the search index, as EmailEngine sorts them
+    /// (`getAttachmentList`): every inline text/plain part, those of attached messages too, or without any, every
+    /// text/html part
+    pub fn text_parts(&self) -> Vec<&BodyStructure> {
+        let mut texts = Vec::new();
+        self.collect_texts(&mut texts);
+        let plain: Vec<&BodyStructure> = texts
+            .iter()
+            .copied()
+            .filter(|p| p.content_type == "text/plain")
+            .collect();
+        if plain.is_empty() {
+            texts.into_iter().filter(|p| p.content_type == "text/html").collect()
+        } else {
+            plain
+        }
+    }
+
+    fn collect_texts<'a>(&'a self, found: &mut Vec<&'a BodyStructure>) {
+        let inline = self
+            .disposition
+            .as_deref()
+            .is_none_or(|d| d.eq_ignore_ascii_case("inline"));
+        if matches!(self.content_type.as_str(), "text/plain" | "text/html") && inline {
+            found.push(self);
+        }
+        // a multipart's parts, and the body of an attached message
+        for child in &self.children {
+            child.collect_texts(found);
+        }
+    }
+
+    /// The part number to fetch this part by: `1` for the body of a message that is not a multipart
+    pub fn section(&self) -> String {
+        self.part.clone().unwrap_or_else(|| "1".into())
+    }
+
+    /// The name the sender gave the part: its disposition's filename, else its type's name; decoded
+    pub fn filename(&self) -> Option<&str> {
+        self.disposition_parameters
+            .get("filename")
+            .or_else(|| self.parameters.get("name"))
+            .map(|name| name.trim())
+            .filter(|name| !name.is_empty())
+    }
+
+    fn collect_attachments<'a>(&'a self, related: bool, found: &mut Vec<&'a BodyStructure>) {
         if let Some(subtype) = self.content_type.strip_prefix("multipart/") {
             let related = related || subtype == "related";
-            return self.children.iter().any(|child| child.attachments_within(related));
+            for child in &self.children {
+                child.collect_attachments(related, found);
+            }
+            return;
         }
+        if self.is_attachment(related) {
+            found.push(self);
+        }
+    }
+
+    /// Whether this part (not a multipart) is an attachment
+    fn is_attachment(&self, related: bool) -> bool {
         let disposition = self.disposition.as_deref().map(str::to_ascii_lowercase);
         let inline = disposition.as_deref().is_none_or(|d| d == "inline");
         if disposition.as_deref() == Some("attachment") {
@@ -64,7 +127,7 @@ impl BodyStructure {
             "text/plain" | "text/html" => false,
             "message/rfc822" => {
                 let encoded = matches!(self.encoding.as_deref(), Some("base64" | "quoted-printable"));
-                !inline || encoded || self.children.iter().any(|child| child.attachments_within(false))
+                !inline || encoded || self.children.iter().any(BodyStructure::has_attachments)
             }
             kind if NOT_ATTACHMENTS.contains(&kind) => false,
             _ => !(related && self.id.is_some()),
@@ -280,6 +343,61 @@ mod tests {
             children,
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn the_text_parts_for_the_index() {
+        let leaf = |part: &str, content_type: &str, disposition: Option<&str>| BodyStructure {
+            part: Some(part.into()),
+            content_type: content_type.into(),
+            disposition: disposition.map(String::from),
+            ..Default::default()
+        };
+        let node = |content_type: &str, part: Option<&str>, children| BodyStructure {
+            part: part.map(String::from),
+            content_type: content_type.into(),
+            children,
+            ..Default::default()
+        };
+        let sections = |structure: &BodyStructure| -> Vec<String> {
+            structure.text_parts().into_iter().map(BodyStructure::section).collect()
+        };
+        // the plain text of an alternative, and of a forwarded message, not a text file attached
+        let message = node(
+            "multipart/mixed",
+            None,
+            vec![
+                node(
+                    "multipart/alternative",
+                    Some("1"),
+                    vec![leaf("1.1", "text/plain", None), leaf("1.2", "text/html", None)],
+                ),
+                leaf("2", "text/plain", Some("attachment")),
+                node("message/rfc822", Some("3"), vec![leaf("3.1", "text/plain", None)]),
+            ],
+        );
+        assert_eq!(sections(&message), ["1.1", "3.1"]);
+        // HTML alone
+        let html = node(
+            "multipart/mixed",
+            None,
+            vec![
+                leaf("1", "text/plain", Some("attachment")),
+                leaf("2", "text/html", Some("inline")),
+            ],
+        );
+        assert_eq!(sections(&html), ["2"]);
+        // a message that is not a multipart: its body is part 1
+        let single = BodyStructure {
+            content_type: "text/plain".into(),
+            ..Default::default()
+        };
+        assert_eq!(sections(&single), ["1"]);
+        let picture = BodyStructure {
+            content_type: "image/png".into(),
+            ..Default::default()
+        };
+        assert!(picture.text_parts().is_empty());
     }
 
     #[test]

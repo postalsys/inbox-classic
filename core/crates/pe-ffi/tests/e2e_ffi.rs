@@ -149,17 +149,44 @@ fn reads_mail_through_the_c_api() {
     let inbox = inbox.id;
     unsafe { pe_folder_list_free(folders) };
 
-    // a search: only what has it in its subject, sender or recipients, counted the same
+    // a search: what it finds, counted the same, in the folder or in every folder, by state, with Gmail's operators
     let find = c("report");
-    let found = unsafe { pe_messages(core, inbox, PeSortField::Subject, true, find.as_ptr(), 0, 50) };
+    let folder_search = |text: *const c_char| PeSearch {
+        folder: inbox,
+        show: PeShow::All,
+        text,
+    };
+    let found = unsafe { pe_messages(core, &folder_search(find.as_ptr()), PeSortField::Subject, true, 0, 50) };
     assert_eq!(unsafe { pe_message_list_count(found) }, 1);
+    assert_eq!(unsafe { &*pe_message_list_get(found, 0) }.folder, inbox);
     unsafe { pe_message_list_free(found) };
     let (mut total, mut unread) = (0u64, 0u64);
-    assert!(unsafe { pe_message_count(core, inbox, find.as_ptr(), &mut total, &mut unread) });
+    assert!(unsafe { pe_message_count(core, &folder_search(find.as_ptr()), &mut total, &mut unread) });
     assert_eq!((total, unread), (1, 1));
-    assert!(unsafe { pe_message_count(core, inbox, std::ptr::null(), &mut total, &mut unread) });
+    assert!(unsafe { pe_message_count(core, &folder_search(std::ptr::null()), &mut total, &mut unread) });
     assert_eq!(total, 2);
-    let list = unsafe { pe_messages(core, inbox, PeSortField::Subject, true, std::ptr::null(), 0, 50) };
+    let everywhere = PeSearch {
+        folder: 0,
+        show: PeShow::Unread,
+        text: std::ptr::null(),
+    };
+    assert!(unsafe { pe_message_count(core, &everywhere, &mut total, &mut unread) });
+    assert_eq!((total, unread), (1, 1));
+    let operators = c("has:attachment -is:read");
+    assert!(unsafe { pe_message_count(core, &folder_search(operators.as_ptr()), &mut total, &mut unread) });
+    assert_eq!(total, 1);
+    assert!(unsafe { pe_search_spans_folders(c("in:sent report").as_ptr()) });
+    assert!(!unsafe { pe_search_spans_folders(find.as_ptr()) });
+    let list = unsafe {
+        pe_messages(
+            core,
+            &folder_search(std::ptr::null()),
+            PeSortField::Subject,
+            true,
+            0,
+            50,
+        )
+    };
     assert_eq!(unsafe { pe_message_list_count(list) }, 2);
     let first = unsafe { &*pe_message_list_get(list, 0) };
     assert_eq!(text(first.subject), "Other");
@@ -170,15 +197,42 @@ fn reads_mail_through_the_c_api() {
     );
     assert!(second.has_attachments && !second.seen);
     assert_eq!(
-        unsafe { pe_message_index(core, inbox, PeSortField::Subject, true, std::ptr::null(), uid) },
+        unsafe {
+            pe_message_index(
+                core,
+                &folder_search(std::ptr::null()),
+                PeSortField::Subject,
+                true,
+                inbox,
+                uid,
+            )
+        },
         1
     );
     assert_eq!(
-        unsafe { pe_message_index(core, inbox, PeSortField::Subject, false, std::ptr::null(), uid) },
+        unsafe {
+            pe_message_index(
+                core,
+                &folder_search(std::ptr::null()),
+                PeSortField::Subject,
+                false,
+                inbox,
+                uid,
+            )
+        },
         0
     );
     assert_eq!(
-        unsafe { pe_message_index(core, inbox, PeSortField::Subject, true, std::ptr::null(), uid + 99) },
+        unsafe {
+            pe_message_index(
+                core,
+                &folder_search(std::ptr::null()),
+                PeSortField::Subject,
+                true,
+                inbox,
+                uid + 99,
+            )
+        },
         -1
     );
     let (mut total, mut unread) = (0u64, 0u64);
@@ -510,6 +564,16 @@ fn null_and_bad_arguments() {
         assert_eq!(pe_account_add(std::ptr::null(), std::ptr::null(), std::ptr::null()), 0);
         assert_eq!(pe_account_list_count(std::ptr::null()), 0);
         assert!(pe_message_list_get(std::ptr::null(), 0).is_null());
+        assert!(pe_messages(std::ptr::null(), std::ptr::null(), PeSortField::Date, false, 0, 10).is_null());
+        let (mut total, mut unread) = (0u64, 0u64);
+        assert!(!pe_message_count(
+            std::ptr::null(),
+            std::ptr::null(),
+            &mut total,
+            &mut unread
+        ));
+        assert!(!pe_search_spans_folders(std::ptr::null()));
+        assert_eq!(pe_search_unindexed_count(std::ptr::null()), 0);
         pe_message_list_free(null_mut());
         pe_message_view_free(null_mut());
         pe_bytes_free(null_mut(), 0);

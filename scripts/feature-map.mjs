@@ -172,13 +172,35 @@ const sections = [
             {
                 shot: 'find-1-results',
                 name: 'Find',
-                what: 'The Find box narrows the list to the messages with what you type in their subject, sender name, sender address or recipients, as you type. The status bar counts what it found. Esc, an empty box or another folder shows the whole folder again.',
+                what: 'The Find box finds messages by the words of their subject, people, file names and text, as you type, from a full-text index on this computer (SQLite FTS5): words match where they start, accents and case do not matter. It takes Gmail\'s syntax: "phrases", -word, OR, from:, to:, subject:, filename:, is:unread, is:starred, has:attachment, in:, before:, after:, older_than:, larger: and more (the box\'s tooltip lists them). The text of every message is fetched for the index in the background, only its text part, without marking it read. The status bar counts what it found; Esc, the × at the end of the box, an empty box or another folder shows the whole folder again.',
                 how: 'The Find box at the right of the toolbar, Edit > Find Message, or Ctrl+Shift+F.',
                 checked: [
                     'A subject word finds that message only',
                     'A sender address is found',
                     'Nothing is listed for what nothing has',
-                    'Clearing it shows the whole folder'
+                    'Clearing it shows the whole folder',
+                    'Words of the text are found, once the background indexing read them',
+                    'from: finds by sender'
+                ]
+            },
+            {
+                shot: 'find-2-show-flagged',
+                name: 'Show: unread, flagged, with files',
+                what: 'Show at the right of the folder bar lists only the unread or flagged messages, or those with files, alone or with words in the Find box. The folder bar says what is shown.',
+                how: 'Show on the folder bar.',
+                checked: ['Show: Flagged lists what is:starred finds', 'The folder bar says so']
+            },
+            {
+                shot: 'find-3-all-folders',
+                name: 'Search all folders',
+                what: 'In: All folders searches every folder of every account at once. The results are one list, sorted like any folder, with a Folder column naming where each message is; the reading pane, Reply, Delete, Move and Flag work on each message in its own folder. Esc or a folder in the tree ends the search.',
+                how: 'In on the folder bar, or in:anywhere in the Find box.',
+                checked: [
+                    'All folders finds messages in other folders too',
+                    'With a Folder column',
+                    'The folder bar says all folders',
+                    'A result from another folder is shown in the reading pane',
+                    'Esc ends the search, without the Folder column'
                 ]
             },
             {

@@ -218,9 +218,29 @@
             </li>
             <li>Click a column heading to sort by it; click it again to reverse the order.</li>
             <li>
-                The <b>Find</b> box at the right of the toolbar (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) narrows the list of the folder to the messages
-                with what you type in their subject, sender or recipients; the status bar says how many it found. <kbd>Esc</kbd> or emptying the box shows the
-                whole folder again, and so does choosing another folder.
+                The <b>Find</b> box at the right of the toolbar (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) finds messages by the words in their subject,
+                the people they are from and to, the names of their files and their text, as you type; the status bar says how many it found. Words match where
+                words start (<code>budg</code> finds <i>budget</i>), and accents and case do not matter. <kbd>Esc</kbd>, the <b>&times;</b> at the end of the
+                box or emptying it shows the whole folder again, and so does choosing another folder.
+            </li>
+            <li>
+                <b>In</b> at the right of the folder bar searches <b>This folder</b> or <b>All folders</b> of every account; the results of all folders are one
+                list, with a <b>Folder</b> column saying where each message is. <b>Show</b> beside it lists only the unread or flagged messages, or those with
+                files, with or without words in the Find box.
+            </li>
+            <li>
+                The Find box takes what Gmail's search box takes: <code>"exact phrase"</code>, <code>-word</code> to leave out, <code>this OR that</code>,
+                <code>from:</code>, <code>to:</code> (also <code>cc:</code>, <code>bcc:</code>), <code>subject:</code>, <code>filename:</code>,
+                <code>is:unread</code>, <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>, <code>has:attachment</code>,
+                <code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:anywhere</code> or
+                <code>in:</code> and a folder's name, <code>before:2025/01/31</code>, <code>after:2025/01/01</code>, <code>older_than:2d</code> (or
+                <code>3m</code>, <code>1y</code>), <code>newer_than:1m</code>, <code>larger:5M</code> and <code>smaller:100k</code>. Point at the Find box to
+                see them.
+            </li>
+            <li>
+                The search works on this computer, without asking the server. Inbox Classic reads the text of every message for it in the background, the newest
+                first, fetching only the text (no attachments or pictures, and the messages stay unread). Right after an account is added, messages are found by
+                their subject, people and file names at once and by their text as it is read; the folder bar says how many are still to read.
             </li>
             <li>
                 <b>Delete</b> (the toolbar, <b>Edit &gt; Delete Message</b> or the <kbd>Del</kbd> key in the list) moves the message to <b>Deleted Items</b>;

@@ -935,6 +935,59 @@ public static class Dragger {
     Check ([bool](WaitFor { (Rows) -eq 0 })) 'and nothing when nothing has it'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
     Check ([bool](WaitFor { (Rows) -eq $all })) 'clearing it shows the whole folder again'
+    # the clear button is there only while there is something to clear, and clears it
+    $IDC_FIND_CLEAR = 209
+    Check (-not (Visible $main $IDC_FIND_CLEAR)) 'an empty Find box has no clear button'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
+    Check ([bool](WaitFor { (Rows) -eq 1 -and (Visible $main $IDC_FIND_CLEAR) })) 'with text in it, it has'
+    Click $main $IDC_FIND_CLEAR
+    Check ([bool](WaitFor { (Rows) -eq $all -and (WindowText $find) -eq '' -and -not (Visible $main $IDC_FIND_CLEAR) })) 'which empties it and shows the whole folder'
+    # the text of messages is found too, once the search has read it (in the background after a sync; only the text
+    # parts are fetched)
+    Command $main $IDM_SYNC
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'agreed dates')
+    Check ([bool](WaitFor { (Rows) -eq 1 } 40)) 'words of the text are found'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'from:carol')
+    Check ([bool](WaitFor { (Rows) -eq 1 })) 'Gmail operators work: from:'
+    # the folder bar names what is shown
+    # the folder bar: the static whose text starts with a space (the Show and In labels do not)
+    $folderBar = { ([Native.Win]::FindDescendants($main, 'Static') | ForEach-Object { WindowText $_ } | Where-Object { $_.StartsWith(' Inbox') -or $_.StartsWith(' All folders') } | Select-Object -First 1) }
+    Check ([bool](WaitFor { (& $folderBar) -match 'Inbox: search results' } 5)) "the folder bar says it shows search results ($(& $folderBar))"
+    # Show: Flagged lists what is:starred finds
+    $IDC_SHOW = 205; $IDC_SCOPE = 206
+    function Choose([int]$id, [int]$index) {
+        $combo = [Native.Win]::GetDlgItem($main, $id)
+        [void][Native.Win]::SendMessage($combo, $CB_SETCURSEL, [IntPtr]$index, [IntPtr]::Zero)
+        [void][Native.Win]::PostMessage($main, $WM_COMMAND, [IntPtr](($id -band 0xFFFF) -bor (1 -shl 16)), $combo)
+    }
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:starred')
+    $starred = WaitFor { if ((Rows) -ge 1 -and (Rows) -lt $all) { Rows } }
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
+    [void](WaitFor { (Rows) -eq $all })
+    Choose $IDC_SHOW 2
+    Check ([bool]$starred -and [bool](WaitFor { (Rows) -eq $starred })) "Show: Flagged lists the flagged messages, as is:starred does ($starred)"
+    Check ([bool](WaitFor { (& $folderBar) -match 'flagged messages' } 5)) 'and the folder bar says so'
+    Shot $main 'find-2-show-flagged'
+    Choose $IDC_SHOW 0
+    [void](WaitFor { (Rows) -eq $all })
+    # In: All folders: the messages of every folder in one list, with a Folder column
+    $listHeader = [Native.Win]::SendMessage($list, 0x101F, [IntPtr]::Zero, [IntPtr]::Zero)
+    $columns = { [int][Native.Win]::SendMessage($listHeader, 0x1200, [IntPtr]::Zero, [IntPtr]::Zero) }
+    Check ((& $columns) -eq 7) 'a folder has no Folder column'
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello')
+    # once the search has narrowed the folder (a moment after the last key)
+    $inFolder = WaitFor { if ((Rows) -ge 1 -and (Rows) -lt $all) { Rows } }
+    Choose $IDC_SCOPE 1
+    Check ([bool](WaitFor { (Rows) -gt $inFolder })) "All folders finds it in other folders too (Sent Items), not only the Inbox ($inFolder)"
+    Check ([bool](WaitFor { (& $columns) -eq 8 } 5)) 'with a Folder column'
+    Check ([bool](WaitFor { (& $folderBar) -match 'All folders: search results' } 5)) 'the folder bar says all folders'
+    Shot $main 'find-3-all-folders'
+    # a result from another folder opens where it is
+    SelectRow 0
+    Check ([bool](WaitFor { (WindowText ([Native.Win]::FindDescendants($main, 'Static') | Where-Object { (WindowText $_) -match 'From:' } | Select-Object -First 1)) -match 'Subject:' } 10)) 'a result is shown in the reading pane'
+    # Esc ends the search, back in the folder
+    Key $find $VK_ESCAPE
+    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 7 })) 'Esc ends the search: the folder again, without the Folder column'
 
     # ---- files ----
 

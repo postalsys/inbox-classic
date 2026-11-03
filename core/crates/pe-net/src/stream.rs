@@ -1,6 +1,7 @@
 //! A connection to a mail server: plain TCP, or TLS from the start or after STARTTLS.
 
 use std::io;
+use std::net::SocketAddr;
 use std::time::Duration;
 
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -59,6 +60,54 @@ pub enum Stream {
     Closed,
 }
 
+/// How long one address has to itself before the next one is tried as well (RFC 8305 "Happy Eyeballs")
+const NEXT_ADDRESS_AFTER: Duration = Duration::from_millis(250);
+
+/// The addresses in the order to try them: IPv6 and IPv4 by turns, starting with the family the resolver put first, so
+/// a family that does not work on this network costs one short head start, not the whole timeout
+fn interleaved(addresses: Vec<SocketAddr>) -> Vec<SocketAddr> {
+    let first_v6 = addresses.first().is_some_and(SocketAddr::is_ipv6);
+    let (mut first, mut second): (Vec<SocketAddr>, Vec<SocketAddr>) =
+        addresses.into_iter().partition(|a| a.is_ipv6() == first_v6);
+    first.reverse();
+    second.reverse();
+    let mut ordered = Vec::with_capacity(first.len() + second.len());
+    while !first.is_empty() || !second.is_empty() {
+        ordered.extend(first.pop());
+        ordered.extend(second.pop());
+    }
+    ordered
+}
+
+/// A TCP connection to the first address of `host` that answers: each next one is tried when the one before failed
+/// or did not answer within [`NEXT_ADDRESS_AFTER`], the others are dropped once one connects
+async fn connect_any(host: &str, port: u16) -> io::Result<TcpStream> {
+    let addresses = interleaved(tokio::net::lookup_host((host, port)).await?.collect());
+    let mut pending = addresses.into_iter().peekable();
+    let mut attempts = tokio::task::JoinSet::new();
+    let mut last_error = None;
+    loop {
+        if let Some(address) = pending.next() {
+            attempts.spawn(TcpStream::connect(address));
+        }
+        if attempts.is_empty() {
+            return Err(
+                last_error.unwrap_or_else(|| io::Error::new(io::ErrorKind::NotFound, "no address for the host"))
+            );
+        }
+        let more = pending.peek().is_some();
+        tokio::select! {
+            Some(done) = attempts.join_next() => match done {
+                Ok(Ok(socket)) => return Ok(socket),
+                // a refused or unreachable address: the next one starts now
+                Ok(Err(error)) => last_error = Some(error),
+                Err(error) => last_error = Some(io::Error::other(error.to_string())),
+            },
+            _ = tokio::time::sleep(NEXT_ADDRESS_AFTER), if more => {}
+        }
+    }
+}
+
 impl Stream {
     /// Connects to `host:port`, with TLS for [`Security::Tls`]
     pub async fn connect(
@@ -69,7 +118,7 @@ impl Stream {
         timeout: Duration,
     ) -> Result<Stream, Error> {
         let connect = async {
-            let socket = TcpStream::connect((host, port)).await?;
+            let socket = connect_any(host, port).await?;
             socket.set_nodelay(true)?;
             match security {
                 Security::Tls => Ok(Stream::Tls(Box::new(tls::handshake(socket, host, trust).await?))),
@@ -127,5 +176,49 @@ impl Stream {
             Stream::Closed => Ok(()),
         };
         *self = Stream::Closed;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn addresses_take_turns_by_family() {
+        let a = |s: &str| s.parse::<SocketAddr>().unwrap();
+        let ordered = interleaved(vec![
+            a("[::1]:1"),
+            a("[::2]:1"),
+            a("[::3]:1"),
+            a("10.0.0.1:1"),
+            a("10.0.0.2:1"),
+        ]);
+        assert_eq!(
+            ordered,
+            [
+                a("[::1]:1"),
+                a("10.0.0.1:1"),
+                a("[::2]:1"),
+                a("10.0.0.2:1"),
+                a("[::3]:1")
+            ]
+        );
+        assert_eq!(
+            interleaved(vec![a("10.0.0.1:1"), a("[::1]:1")]),
+            [a("10.0.0.1:1"), a("[::1]:1")]
+        );
+        assert!(interleaved(Vec::new()).is_empty());
+    }
+
+    /// `localhost` is ::1 and 127.0.0.1: with a server on 127.0.0.1 only, the refused ::1 does not stop the connection
+    #[tokio::test]
+    async fn the_next_address_when_one_does_not_answer() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let connected = connect_any("localhost", port).await.unwrap();
+        assert!(connected.peer_addr().unwrap().is_ipv4());
+        // nothing listening anywhere: the last error
+        drop(listener);
+        assert!(connect_any("127.0.0.1", port).await.is_err());
     }
 }

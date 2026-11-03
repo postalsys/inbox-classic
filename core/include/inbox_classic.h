@@ -86,6 +86,16 @@ typedef enum PeSpecialUse {
   PE_SPECIAL_USE_TRASH = 8,
 } PeSpecialUse;
 
+// What the message list shows: the messages of one folder, or of every folder, by state, and those that what was typed
+// in the Find box finds (Gmail's syntax: words, "phrases", -word, OR, from: to: subject: filename: is:unread
+// is:starred has:attachment in: before: after: older_than: newer_than: larger: smaller:)
+typedef enum PeShow {
+  PE_SHOW_ALL = 0,
+  PE_SHOW_UNREAD = 1,
+  PE_SHOW_FLAGGED = 2,
+  PE_SHOW_WITH_ATTACHMENTS = 3,
+} PeShow;
+
 typedef enum PeSortField {
   // The Date header, the received date without one
   PE_SORT_FIELD_DATE = 0,
@@ -228,8 +238,18 @@ typedef struct PeFolder {
   uint64_t unread;
 } PeFolder;
 
+typedef struct PeSearch {
+  // The folder, 0 for every folder of every account
+  int64_t folder;
+  enum PeShow show;
+  // UTF-8, NULL or empty for no words
+  const char *text;
+} PeSearch;
+
 // A row of the message list
 typedef struct PeMessage {
+  // The folder it is in (the list of a search in every folder has messages of many)
+  int64_t folder;
   uint64_t uid;
   // Seconds since the Unix epoch, valid when `has_date`
   int64_t date;
@@ -576,39 +596,49 @@ void pe_folder_list_free(struct PeFolderList *list);
 // `core` must be a live handle; `total` and `unread` must be valid pointers.
 bool pe_folder_counts(const struct PeCore *core, int64_t folder, uint64_t *total, uint64_t *unread);
 
-// How many messages of a folder `pe_messages` lists with `find` (UTF-8, NULL for all), and how many of them are
-// unread
+// How many messages `pe_messages` lists for `search`, and how many of them are unread
 //
 // # Safety
-// `core` must be a live handle, `find` NULL or a NUL-terminated string, `total` and `unread` valid pointers.
+// `core` must be a live handle, `search` a valid search, `total` and `unread` valid pointers.
 bool pe_message_count(const struct PeCore *core,
-                      int64_t folder,
-                      const char *find,
+                      const struct PeSearch *search,
                       uint64_t *total,
                       uint64_t *unread);
 
-// `limit` messages of a folder from `offset` on, in the order asked for; with `find` (UTF-8) only those with it
-// in their subject, sender or recipients, NULL or empty for all. NULL on failure.
-//
-// # Safety
-// `core` must be a live handle, `find` NULL or a NUL-terminated string.
-struct PeMessageList *pe_messages(const struct PeCore *core,
-                                  int64_t folder,
-                                  enum PeSortField sort,
-                                  bool ascending,
-                                  const char *find,
-                                  uint64_t offset,
-                                  uint64_t limit);
-
-// Where message `uid` is in the message list of a folder in this order, -1 when it is not there
+// How many messages the search does not know the text of yet (their text is fetched in the background, newest
+// first, after each sync); 0 also when the core can not say
 //
 // # Safety
 // `core` must be a live handle.
+uint64_t pe_search_unindexed_count(const struct PeCore *core);
+
+// Whether the text typed names its own folders (`in:`), so the list has messages of other folders than the one
+// selected (and says which folder each is in)
+//
+// # Safety
+// `text` must be NULL or a NUL-terminated string.
+bool pe_search_spans_folders(const char *text);
+
+// `limit` messages of what `search` finds from `offset` on, in the order asked for. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search.
+struct PeMessageList *pe_messages(const struct PeCore *core,
+                                  const struct PeSearch *search,
+                                  enum PeSortField sort,
+                                  bool ascending,
+                                  uint64_t offset,
+                                  uint64_t limit);
+
+// Where message `uid` of `folder` is in what `search` finds in this order, -1 when it is not there
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search.
 int64_t pe_message_index(const struct PeCore *core,
-                         int64_t folder,
+                         const struct PeSearch *search,
                          enum PeSortField sort,
                          bool ascending,
-                         const char *find,
+                         int64_t folder,
                          uint64_t uid);
 
 // # Safety

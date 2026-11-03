@@ -24,6 +24,8 @@ pub struct FetchQuery {
     pub headers: Option<Vec<String>>,
     /// Body parts by part number (`1`, `1.2`, `2.MIME`)
     pub parts: Vec<String>,
+    /// At most this many bytes of each of the parts, from the start (`BODY.PEEK[1]<0.n>`)
+    pub part_limit: Option<u64>,
     /// The whole message
     pub source: bool,
     /// Only messages whose MODSEQ is higher (CONDSTORE)
@@ -75,7 +77,12 @@ impl FetchQuery {
             ])),
             None => {}
         }
-        items.extend(self.parts.iter().map(|part| peek(vec![Arg::atom(part.as_str())])));
+        let partial = self.part_limit.map(|limit| (0, limit));
+        items.extend(self.parts.iter().map(|part| Arg::Section {
+            name: "BODY.PEEK".into(),
+            section: vec![Arg::atom(part.as_str())],
+            partial,
+        }));
         if self.source {
             items.push(peek(Vec::new()));
         }
@@ -278,6 +285,28 @@ mod tests {
             "A1 UID FETCH 1:* (UID FLAGS ENVELOPE MODSEQ BODY.PEEK[HEADER.FIELDS (SUBJECT REFERENCES)] BODY.PEEK[1.2] BODY.PEEK[])\r\n"
         );
         assert!(!query.items(false).iter().any(|a| *a == Arg::atom("MODSEQ")));
+    }
+
+    /// The start of a part only, and its answer, whose key carries where it starts
+    #[test]
+    fn partial_parts() {
+        let query = FetchQuery {
+            parts: vec!["1".into(), "2.1".into()],
+            part_limit: Some(65536),
+            ..Default::default()
+        };
+        let command = Command {
+            tag: "A1".into(),
+            name: "UID FETCH".into(),
+            args: vec![Arg::Sequence("5".into()), Arg::List(query.items(false))],
+        };
+        let wire = compile(&command, &CompileOptions::default()).unwrap().concat();
+        assert_eq!(
+            String::from_utf8(wire).unwrap(),
+            "A1 UID FETCH 5 (UID BODY.PEEK[1]<0.65536> BODY.PEEK[2.1]<0.65536>)\r\n"
+        );
+        let response = crate::parse(b"* 3 FETCH (UID 5 BODY[2.1]<0> \"hello\")", vec![]).unwrap();
+        assert_eq!(parse_fetch(3, response).parts["2.1"], b"hello");
     }
 
     #[test]

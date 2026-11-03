@@ -70,7 +70,7 @@ void SetStatus(const std::wstring& text) {
 // the selected folder in the folder bar and the title: "Inbox - Inbox Classic"
 void ShowFolderName() {
     std::wstring name = g_mailbox.SelectedName();
-    SetWindowTextW(g_folderBar, (L" " + name).c_str());
+    SetWindowTextW(g_folderBar, (L" " + name + g_mailbox.IndexingNote()).c_str());
     SetWindowTextW(g_main, name.empty() ? kTitle : (name + L" - " + kTitle).c_str());
 }
 
@@ -211,6 +211,8 @@ void OnEvent(const UiEvent& event) {
         if (g_failing.empty()) {
             SetStatus(L"Done");
         }
+        // how much text the search still has to read
+        ShowFolderName();
         break;
     case PE_EVENT_KIND_AUTOCONFIG_DONE:
     case PE_EVENT_KIND_SIGN_IN_DONE:
@@ -383,6 +385,7 @@ void Layout() {
     GetClientRect(g_toolbar, &bar);
     g_mailbox.PlaceFind(bar);
     MoveWindow(g_folderBar, 0, bar.bottom, bar.right, FolderBarHeight(), TRUE);
+    g_mailbox.PlaceFilters({0, bar.bottom, bar.right, bar.bottom + FolderBarHeight()});
     SendMessageW(g_status, WM_SIZE, 0, 0);
     Panes panes = Measure();
     const RECT& area = panes.area;
@@ -473,7 +476,8 @@ bool OpenCore(HWND hwnd) {
 
 void CreateChildren(HWND hwnd) {
     CreateToolbar(hwnd);
-    g_folderBar = CreateChild(hwnd, L"STATIC", L"", SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX, 0, {});
+    // the Show and In choices lie over its right end
+    g_folderBar = CreateChild(hwnd, L"STATIC", L"", SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_CLIPSIBLINGS, 0, {});
     NONCLIENTMETRICSW metrics = {sizeof(metrics)};
     SystemParametersInfoForDpi(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, GetDpiForWindow(hwnd));
     metrics.lfMessageFont.lfHeight = -Scale(16);
@@ -708,11 +712,16 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         OnEvent(*event);
         return 0;
     }
+    case WM_DRAWITEM:
+        if (g_mailbox.OnDrawItem(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam))) {
+            return TRUE;
+        }
+        break;
     case WM_CTLCOLORSTATIC:
         if (LRESULT brush = 0; g_mailbox.OnCtlColor(reinterpret_cast<HWND>(lParam), reinterpret_cast<HDC>(wParam), brush)) {
             return brush;
         }
-        if (reinterpret_cast<HWND>(lParam) == g_folderBar) {
+        if (reinterpret_cast<HWND>(lParam) == g_folderBar || g_mailbox.OnFolderBar(reinterpret_cast<HWND>(lParam))) {
             // white on dark grey, as the folder bar of Outlook Express
             SetTextColor(reinterpret_cast<HDC>(wParam), RGB(0xFF, 0xFF, 0xFF));
             SetBkColor(reinterpret_cast<HDC>(wParam), kFolderBarColor);

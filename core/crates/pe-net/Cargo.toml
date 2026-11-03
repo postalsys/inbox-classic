@@ -11,7 +11,7 @@ publish.workspace = true
 # ring rather than aws-lc-rs: no C toolchain (cmake, nasm) needed on Windows
 rustls = { version = "0.23.46", default-features = false, features = ["ring", "logging", "std", "tls12"] }
 rustls-platform-verifier = "0.7.1"
-tokio = { version = "1.54.1", features = ["net", "io-util", "time"] }
+tokio = { version = "1.54.1", features = ["net", "io-util", "time", "rt", "macros"] }
 tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "logging", "tls12"] }
 
 [dev-dependencies]

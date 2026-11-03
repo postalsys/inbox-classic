@@ -25,6 +25,13 @@ pub struct MessageInfo {
     pub message_id: Option<String>,
     pub in_reply_to: Option<String>,
     pub has_attachments: bool,
+    /// Everyone the message names, decoded, for the search: names and addresses of From, Sender and Reply-To, and of
+    /// To, Cc and Bcc; empty when only the list's own fields are known
+    pub sender_people: String,
+    pub recipient_people: String,
+    /// The names of its files, one per line, and how many there are
+    pub attachment_names: String,
+    pub attachment_count: u32,
 }
 
 impl MessageInfo {
@@ -102,27 +109,10 @@ impl Sort {
             SortField::Size => "size",
         };
         let direction = if self.ascending { "ASC" } else { "DESC" };
-        format!("{column} {direction}, uid {direction}")
+        // the id last: the same UID in two folders has one order across folders too (an index ends with the rowid, so
+        // the indexes still serve the order)
+        format!("{column} {direction}, uid {direction}, id {direction}")
     }
-}
-
-/// The condition of a search: `?2` a LIKE pattern from [`like_pattern`], `%` matching everything
-const MATCHING: &str = "(?2 = '%' OR pe_fold(subject) LIKE ?2 ESCAPE '\\' OR pe_fold(from_name) LIKE ?2 ESCAPE '\\' \
-                        OR pe_fold(from_address) LIKE ?2 ESCAPE '\\' OR pe_fold(recipients) LIKE ?2 ESCAPE '\\')";
-
-/// What was typed as a LIKE pattern for "has it in it": its own `%`, `_` and `\` taken literally
-fn like_pattern(find: &str) -> String {
-    let mut pattern = String::from("%");
-    for c in find.trim().to_lowercase().chars() {
-        if matches!(c, '%' | '_' | '\\') {
-            pattern.push('\\');
-        }
-        pattern.push(c);
-    }
-    if pattern.len() > 1 {
-        pattern.push('%');
-    }
-    pattern
 }
 
 /// Flags as the store keeps them: sorted and once each, so the same flags in another order are no
@@ -146,11 +136,12 @@ fn is_seen(canonical: &str) -> bool {
     canonical.split(' ').any(|f| f.eq_ignore_ascii_case("\\Seen"))
 }
 
-const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_date, date, size, subject, from_name, \
+pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_date, date, size, subject, from_name, \
      from_address, recipients, message_id, in_reply_to, has_attachments, \
-     EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id)";
+     EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id), sender_people, recipient_people, \
+     attachment_names, attachment_count";
 
-fn from_row(row: &Row) -> rusqlite::Result<Message> {
+pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     Ok(Message {
         id: row.get(0)?,
         folder_id: row.get(1)?,
@@ -169,6 +160,10 @@ fn from_row(row: &Row) -> rusqlite::Result<Message> {
             message_id: row.get(12)?,
             in_reply_to: row.get(13)?,
             has_attachments: row.get(14)?,
+            sender_people: row.get(16)?,
+            recipient_people: row.get(17)?,
+            attachment_names: row.get(18)?,
+            attachment_count: row.get(19)?,
         },
     })
 }
@@ -179,8 +174,9 @@ impl Store {
     pub fn add_messages(&self, folder: FolderId, messages: &[MessageInfo]) -> Result<()> {
         let mut statement = self.db.prepare_cached(
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
-             from_address, recipients, message_id, in_reply_to, has_attachments) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15) \
+             from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
+             attachment_names, attachment_count) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
@@ -201,7 +197,11 @@ impl Store {
                 m.recipients,
                 m.message_id,
                 m.in_reply_to,
-                m.has_attachments
+                m.has_attachments,
+                m.sender_people,
+                m.recipient_people,
+                m.attachment_names,
+                m.attachment_count
             ])?;
         }
         Ok(())
@@ -222,7 +222,9 @@ impl Store {
     /// Sets or clears one flag of a message; false when it already was so, or there is no such
     /// message
     pub fn set_flag(&self, folder: FolderId, uid: u64, flag: &str, on: bool) -> Result<bool> {
-        let tx = self.db.unchecked_transaction()?;
+        // the write lock first: a transaction that read and then writes can not wait for another connection's write
+        // (the workers write in the background), it would fail at once with "database is locked"
+        let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let Some(message) = self.message(folder, uid)? else {
             return Ok(false);
         };
@@ -276,53 +278,12 @@ impl Store {
 
     /// A page of the message list
     pub fn messages(&self, folder: FolderId, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
-        self.messages_matching(folder, sort, "", offset, limit)
-    }
-
-    /// A page of the messages of a folder whose subject, sender or recipients have `find` in them (the whole
-    /// list for an empty one), without regard to case
-    pub fn messages_matching(
-        &self,
-        folder: FolderId,
-        sort: Sort,
-        find: &str,
-        offset: u64,
-        limit: u64,
-    ) -> Result<Vec<Message>> {
-        let mut statement = self.db.prepare_cached(&format!(
-            "SELECT {COLUMNS} FROM messages WHERE folder_id = ?1 AND {MATCHING} ORDER BY {} LIMIT ?3 OFFSET ?4",
-            sort.order_by()
-        ))?;
-        statement
-            .query_map(params![folder, like_pattern(find), limit, offset], from_row)?
-            .collect()
+        self.search(&crate::Search::folder(folder), sort, offset, limit)
     }
 
     /// Where a message is in the message list in this order, None when the folder does not have it
     pub fn message_index(&self, folder: FolderId, sort: Sort, uid: u64) -> Result<Option<u64>> {
-        self.message_index_matching(folder, sort, "", uid)
-    }
-
-    /// [`Store::message_index`] in the list of [`Store::messages_matching`]
-    pub fn message_index_matching(&self, folder: FolderId, sort: Sort, find: &str, uid: u64) -> Result<Option<u64>> {
-        let mut statement = self.db.prepare_cached(&format!(
-            "SELECT position FROM (SELECT uid, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS position \
-             FROM messages WHERE folder_id = ?1 AND {MATCHING}) WHERE uid = ?3",
-            sort.order_by()
-        ))?;
-        statement
-            .query_row(params![folder, like_pattern(find), uid], |row| row.get(0))
-            .optional()
-    }
-
-    /// How many messages of a folder [`Store::messages_matching`] lists, and how many of them are unread
-    pub fn count_matching(&self, folder: FolderId, find: &str) -> Result<(u64, u64)> {
-        let mut statement = self.db.prepare_cached(&format!(
-            "SELECT COUNT(*), COALESCE(SUM(NOT seen), 0) FROM messages WHERE folder_id = ?1 AND {MATCHING}"
-        ))?;
-        statement.query_row(params![folder, like_pattern(find)], |row| {
-            Ok((row.get(0)?, row.get(1)?))
-        })
+        self.search_index(&crate::Search::folder(folder), sort, folder, uid)
     }
 
     pub fn message(&self, folder: FolderId, uid: u64) -> Result<Option<Message>> {
@@ -404,57 +365,6 @@ mod tests {
             from_address: format!("{}@example.com", from.to_lowercase()),
             ..Default::default()
         }
-    }
-
-    #[test]
-    fn finds_messages() {
-        let (store, folder) = setup();
-        let mut with_recipients = message(4, "Hello", "Bob", 400, &[]);
-        with_recipients.recipients = "Carol, dave@example.com".into();
-        store
-            .add_messages(
-                folder,
-                &[
-                    message(1, "Budget for 2025", "Ann", 100, &["\\Seen"]),
-                    message(2, "Lunch", "Ann", 200, &[]),
-                    message(3, "100% sure_thing", "Zed", 300, &["\\Seen"]),
-                    with_recipients,
-                ],
-            )
-            .unwrap();
-        let sort = Sort::default();
-        let found = |find: &str| -> Vec<u64> {
-            let mut uids: Vec<u64> = store
-                .messages_matching(folder, sort, find, 0, 100)
-                .unwrap()
-                .iter()
-                .map(|m| m.info.uid)
-                .collect();
-            uids.sort();
-            uids
-        };
-        // subject, sender name, sender address and recipients; case does not matter
-        assert_eq!(found("budget"), [1]);
-        assert_eq!(found("ANN"), [1, 2]);
-        assert_eq!(found("zed@example"), [3]);
-        assert_eq!(found("carol"), [4]);
-        // what LIKE would read as wildcards is taken as typed
-        assert_eq!(found("%"), [3]);
-        assert_eq!(found("e_t"), [3]);
-        assert_eq!(found("  "), [1, 2, 3, 4]);
-        assert!(found("nothing like it").is_empty());
-        // case beyond ASCII too
-        let mut accented = message(5, "Äriplaan", "Õie", 500, &["\\Seen"]);
-        accented.from_address = "oie@example.com".into();
-        store.add_messages(folder, &[accented]).unwrap();
-        assert_eq!(found("äri"), [5]);
-        assert_eq!(found("ÕIE"), [5]);
-        store.remove_messages(folder, &[5]).unwrap();
-        // the counts and the positions of the found list
-        assert_eq!(store.count_matching(folder, "ann").unwrap(), (2, 1));
-        assert_eq!(store.count_matching(folder, "").unwrap(), (4, 2));
-        assert_eq!(store.message_index_matching(folder, sort, "ann", 2).unwrap(), Some(0));
-        assert_eq!(store.message_index_matching(folder, sort, "ann", 3).unwrap(), None);
     }
 
     #[test]
