@@ -436,6 +436,30 @@ void InsertLink(HWND hwnd, Compose* state) {
     }
 }
 
+// the picture file at `path` put in the text at the cursor; false when it is no picture the core takes
+bool InsertPictureFile(Compose* state, const std::wstring& path) {
+    // the core reads the file and checks that it is a picture
+    core::String uri(pe_picture_uri(core::Narrow(path).c_str()));
+    if (uri) {
+        state->editor.Exec(L"insertImage", Text(uri.get()));
+    }
+    return uri != nullptr;
+}
+
+// files dropped on the text: each picture goes in where they were dropped, as Insert Picture puts one; other files (and
+// pictures too large to go inline) are attached, as when dropped on the rest of the window
+void DropOnText(Compose* state, const std::vector<std::wstring>& paths) {
+    std::vector<std::wstring> attach;
+    for (const std::wstring& path : paths) {
+        if (!InsertPictureFile(state, path)) {
+            attach.push_back(path);
+        }
+    }
+    if (!attach.empty()) {
+        AddFiles(state, attach);
+    }
+}
+
 void InsertPicture(HWND hwnd, Compose* state) {
     wchar_t path[MAX_PATH] = L"";
     OPENFILENAMEW dialog = {sizeof(dialog)};
@@ -448,15 +472,10 @@ void InsertPicture(HWND hwnd, Compose* state) {
     if (!GetOpenFileNameW(&dialog)) {
         return;
     }
-    // the core reads the file and checks that it is a picture
-    std::string utf8 = core::Narrow(path);
-    core::String uri(pe_picture_uri(utf8.c_str()));
-    if (!uri) {
+    if (!InsertPictureFile(state, path)) {
         MessageBoxW(hwnd, L"This file is not a PNG, JPEG or GIF picture, or it is larger than 10 MB.", L"Insert Picture",
                     MB_OK | MB_ICONWARNING);
-        return;
     }
-    state->editor.Exec(L"insertImage", Text(uri.get()));
 }
 
 // the buttons of the format bar that are one command of the page
@@ -610,6 +629,7 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
     handlers.dirty = [state] { Changed(state); };
     handlers.send = [state] { Request(state, Compose::Pending::Send); };
     handlers.save = [state] { Request(state, Compose::Pending::Save); };
+    handlers.dropped = [state](const std::vector<std::wstring>& paths) { DropOnText(state, paths); };
     state->body = state->editor.Create(hwnd, IDC_BODY, page ? Text(page.get()) : L"", std::move(handlers));
 }
 

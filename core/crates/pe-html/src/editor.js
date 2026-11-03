@@ -8,15 +8,32 @@
 //   "full:<the body>"   the quote unfolded and then deleted: the body is all there is
 //   "state:<flags>"     one 0 or 1 per command of STATE, for the format bar
 //   "dirty"             the first change (since pe.clean(), after a save), so closing can ask before throwing it away
+//   "drop"              files dropped on the page, as File objects beside the message: the host reads them (through
+//                       the core, as Insert Picture does) and inserts the pictures where the cursor now is
 (() => {
     'use strict';
     // the order of the flags of "state:", which kStateButtons in app/src/compose.cpp follows
     const STATE = ['bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList', 'justifyLeft', 'justifyCenter', 'justifyRight'];
     const body = document.getElementById('body');
-    const post = message => {
-        if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage(message);
+    // a message to the host, with the File objects of `files` beside it when given
+    const post = (message, files) => {
+        const webview = window.chrome && window.chrome.webview;
+        if (webview && files) {
+            webview.postMessageWithAdditionalObjects(message, files);
+        } else if (webview) {
+            webview.postMessage(message);
         }
+    };
+    // the cursor at `range`, or at the end of the text without one
+    const placeCursor = range => {
+        if (!range) {
+            range = document.createRange();
+            range.selectNodeContents(body);
+            range.collapse(false);
+        }
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
     };
 
     // <b>, <i>, <font> rather than spans with styles: what other mail programs show the same way
@@ -126,17 +143,34 @@
         }
     };
 
+    // files dragged in from Explorer: the cursor goes where they were dropped and the files go to the host. The page
+    // reads no file; without this the browser would try to open the file and nothing would happen
+    const carriesFiles = event => event.dataTransfer && Array.from(event.dataTransfer.types).includes('Files');
+    for (const type of ['dragenter', 'dragover']) {
+        document.addEventListener(type, event => {
+            if (carriesFiles(event)) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'copy';
+            }
+        });
+    }
+    document.addEventListener('drop', event => {
+        if (!carriesFiles(event)) {
+            return;
+        }
+        event.preventDefault();
+        body.focus();
+        const range = document.caretRangeFromPoint(event.clientX, event.clientY);
+        placeCursor(range && body.contains(range.startContainer) ? range : null);
+        post('drop', event.dataTransfer.files);
+    });
+
     // a click in the empty space below the text puts the cursor at its end, as in a text box
     document.addEventListener('mousedown', event => {
         if (event.target === document.documentElement || event.target === document.body) {
             event.preventDefault();
             body.focus();
-            const range = document.createRange();
-            range.selectNodeContents(body);
-            range.collapse(false);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
+            placeCursor(null);
         }
     });
     // the page is at least the window's height, so that space is the page's

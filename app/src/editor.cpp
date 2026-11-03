@@ -110,6 +110,8 @@ void Editor::Configure() {
                 handlers_.state(message.substr(6));
             } else if (message == L"dirty") {
                 handlers_.dirty();
+            } else if (message == L"drop") {
+                handlers_.dropped(DroppedFiles(args));
             }
             return S_OK;
         }).Get(),
@@ -141,6 +143,28 @@ void Editor::Configure() {
     if (focusWhenReady_) {
         Focus();
     }
+}
+
+std::vector<std::wstring> Editor::DroppedFiles(ICoreWebView2WebMessageReceivedEventArgs* args) {
+    // the File objects of the page's message: the paths of the files dropped, nothing of their content
+    std::vector<std::wstring> paths;
+    Microsoft::WRL::ComPtr<ICoreWebView2WebMessageReceivedEventArgs2> withObjects;
+    Microsoft::WRL::ComPtr<ICoreWebView2ObjectCollectionView> objects;
+    UINT32 count = 0;
+    if (FAILED(args->QueryInterface(IID_PPV_ARGS(&withObjects))) || FAILED(withObjects->get_AdditionalObjects(&objects)) || !objects ||
+        FAILED(objects->get_Count(&count))) {
+        return paths;
+    }
+    for (UINT32 i = 0; i < count; i++) {
+        Microsoft::WRL::ComPtr<IUnknown> object;
+        Microsoft::WRL::ComPtr<ICoreWebView2File> file;
+        LPWSTR path = nullptr;
+        if (SUCCEEDED(objects->GetValueAtIndex(i, &object)) && object && SUCCEEDED(object.As(&file)) && SUCCEEDED(file->get_Path(&path)) && path) {
+            paths.emplace_back(path);
+            CoTaskMemFree(path);
+        }
+    }
+    return paths;
 }
 
 void Editor::Script(const std::wstring& code) {

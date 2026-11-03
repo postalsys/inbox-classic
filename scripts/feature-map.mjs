@@ -361,6 +361,17 @@ const sections = [
                 checked: ['From names the account', 'Attach adds the files', 'Delete takes one off', 'The message is sent and arrives with only the file left']
             },
             {
+                shot: 'write-13-dropped-picture',
+                name: 'Pictures dropped into the text',
+                what: 'A picture file dragged from Explorer onto the text goes where it was dropped, as the Picture button puts one: the core checks that it is a PNG, JPEG, GIF or WebP picture of at most 10 MB, and sending carries it inside the message as a cid: part of multipart/related. Any other file dropped there is attached.',
+                how: 'Drag picture files from Explorer onto the text of a message.',
+                checked: [
+                    'The text takes the files dropped on it',
+                    'A file that is no picture is attached',
+                    'The picture is sent inline as a cid: part, with no data: URI left in the HTML'
+                ]
+            },
+            {
                 shot: 'write-3b-select-all',
                 name: 'Select All takes the quote',
                 what: 'Ctrl+A unfolds the quoted message into the text and selects all of it, to copy or cut; unfolded, the quote can be shortened before sending, and it is sent once.',

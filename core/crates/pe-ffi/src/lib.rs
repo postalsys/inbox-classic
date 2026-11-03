@@ -112,6 +112,18 @@ pub unsafe extern "C" fn pe_picture_uri(path: *const c_char) -> *mut c_char {
         return null_mut();
     };
     guard(|| {
+        // a file dropped on the text may be anything: its size and first bytes are looked at before it is read
+        use std::io::Read;
+        let mut file = std::fs::File::open(path).ok()?;
+        if file.metadata().ok()?.len() > pe_html::PICTURE_FILE_LIMIT as u64 {
+            return None;
+        }
+        let mut head = Vec::with_capacity(pe_html::PICTURE_HEAD);
+        (&mut file)
+            .take(pe_html::PICTURE_HEAD as u64)
+            .read_to_end(&mut head)
+            .ok()?;
+        pe_html::picture_type(&head)?;
         let data = std::fs::read(path).ok()?;
         pe_html::picture_uri(&data).map(into_c_string)
     })
@@ -161,6 +173,16 @@ mod tests {
             "data:image/gif;base64,R0lGODlh"
         );
         unsafe { pe_string_free(uri) };
+        // a file larger than a picture may be is refused by its size, before it is read
+        let big = dir.join("big.png");
+        let file = std::fs::File::create(&big).unwrap();
+        file.set_len(pe_html::PICTURE_FILE_LIMIT as u64 + 1).unwrap();
+        drop(file);
+        let mut data = std::fs::read(&big).unwrap();
+        data[..8].copy_from_slice(b"\x89PNG\r\n\x1a\n");
+        std::fs::write(&big, data).unwrap();
+        let path = CString::new(big.to_str().unwrap()).unwrap();
+        assert!(unsafe { pe_picture_uri(path.as_ptr()) }.is_null());
         std::fs::write(&gif, b"<svg>").unwrap();
         assert!(unsafe { pe_picture_uri(path.as_ptr()) }.is_null());
         let missing = CString::new(dir.join("missing").to_str().unwrap()).unwrap();

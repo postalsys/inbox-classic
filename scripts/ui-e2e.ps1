@@ -649,6 +649,86 @@ try {
     Check ($new -and (RawText $new) -match 'keep-me\.txt' -and (RawText $new) -notmatch 'wrong-file') 'with only the file left attached'
     Check ($new -and (RawText $new) -match 'Content-Type: text/plain' -and (RawText $new) -notmatch 'Content-Type: text/html') 'nothing formatted: it went as plain text'
 
+    Step 'pictures dropped into the text'
+    # a real drag and drop, as from Explorer: a small window of this test starts an OLE drag of the files while the
+    # mouse, moved by SendInput, carries them onto the editor and lets go there
+    Add-Type -ReferencedAssemblies System.Windows.Forms, System.Drawing -TypeDefinition @'
+using System;
+using System.Collections.Specialized;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows.Forms;
+public static class Dragger {
+    [StructLayout(LayoutKind.Sequential)] struct MouseInput { public int dx, dy; public uint data, flags, time; public IntPtr extra; }
+    [StructLayout(LayoutKind.Explicit)] struct Input { [FieldOffset(0)] public uint type; [FieldOffset(8)] public MouseInput mouse; }
+    [DllImport("user32.dll")] static extern uint SendInput(uint count, Input[] inputs, int size);
+    const uint MOVE = 0x0001, DOWN = 0x0002, UP = 0x0004, ABSOLUTE = 0x8000;
+    static void Mouse(int x, int y, uint flags) {
+        Rectangle screen = Screen.PrimaryScreen.Bounds;
+        var input = new Input { type = 0 };
+        input.mouse.dx = x * 65535 / (screen.Width - 1);
+        input.mouse.dy = y * 65535 / (screen.Height - 1);
+        input.mouse.flags = flags | MOVE | ABSOLUTE;
+        SendInput(1, new[] { input }, Marshal.SizeOf(typeof(Input)));
+    }
+    // drags `files` from (fromX, fromY) to (toX, toY), screen pixels; false when the drag ended without a drop
+    public static bool Drag(string[] files, int fromX, int fromY, int toX, int toY) {
+        var list = new StringCollection();
+        list.AddRange(files);
+        var data = new DataObject();
+        data.SetFileDropList(list);
+        var effect = DragDropEffects.None;
+        var form = new Form {
+            FormBorderStyle = FormBorderStyle.None, StartPosition = FormStartPosition.Manual, ShowInTaskbar = false,
+            TopMost = true, BackColor = Color.Orange, Location = new Point(fromX - 20, fromY - 20), Size = new Size(40, 40)
+        };
+        form.MouseDown += (s, e) => { effect = form.DoDragDrop(data, DragDropEffects.Copy); form.Close(); };
+        form.Shown += (s, e) => new Thread(() => {
+            Thread.Sleep(400);
+            Mouse(fromX, fromY, 0);
+            Thread.Sleep(100);
+            Mouse(fromX, fromY, DOWN);
+            Thread.Sleep(300);
+            for (int i = 1; i <= 25; i++) {
+                Mouse(fromX + (toX - fromX) * i / 25, fromY + (toY - fromY) * i / 25, 0);
+                Thread.Sleep(40);
+            }
+            Thread.Sleep(500);
+            Mouse(toX, toY, UP);
+        }) { IsBackground = true }.Start();
+        Application.Run(form);
+        return effect != DragDropEffects.None;
+    }
+}
+'@
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_TO 'Dave <dave@example.com>'
+    SetText $compose $IDC_SUBJECT 'Pictures dropped in the UI test'
+    Check (TypeInEditor $compose 'A picture: ') 'the editor takes typing'
+    $pictureFile = Join-Path $files 'dropped.png'
+    $picture.Save($pictureFile, [System.Drawing.Imaging.ImageFormat]::Png)
+    $noteFile = Join-Path $files 'dropped-note.txt'
+    Set-Content $noteFile 'not a picture, attached'
+    [void][Native.Win]::SetForegroundWindow($compose)
+    $editorRect = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($compose, $IDC_BODY), [ref]$editorRect)
+    $toX = [int](($editorRect.Left + $editorRect.Right) / 2); $toY = [int](($editorRect.Top + $editorRect.Bottom) / 2)
+    $dropped = [Dragger]::Drag(@($pictureFile, $noteFile), 40, 40, $toX, $toY)
+    Check $dropped 'the text takes files dropped on it'
+    $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
+    Check ([bool](WaitFor { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 } 10)) 'a file that is no picture is attached'
+    Start-Sleep -Seconds 1
+    Shot $compose 'write-13-dropped-picture'
+    Command $compose $IDC_SEND
+    $sentPicture = WaitFor { Find 'INBOX' 'Subject: Pictures dropped in the UI test' } 30
+    Check ($null -ne $sentPicture) 'the message with the dropped picture was sent'
+    $raw = if ($sentPicture) { RawText $sentPicture } else { '' }
+    Check ($raw -match '(?s)multipart/related.*Content-Type: image/png.*Content-ID: <picture1\.' -and $raw -match 'src=(3D)?"cid:picture1\.') 'the picture went inline, as a cid: part, like Insert Picture puts one'
+    Check ($raw -notmatch 'data:image') 'with no data: URI left in the HTML'
+    Check ($raw -match 'dropped-note\.txt' -and $raw -notmatch 'filename="?dropped\.png') 'the other file went as an attachment, the picture not'
+
     Step 'the Outbox: a send that can not go'
     # the outgoing server out of reach, as when offline: its port changed in Accounts > Properties to one nothing
     # listens on, and back

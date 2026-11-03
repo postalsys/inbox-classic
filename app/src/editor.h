@@ -1,13 +1,14 @@
 // The editor of the compose window: a WebView2 with the page of pe_editor_document, whose own script (allowed by a
 // nonce, nothing else can run) makes the message editable. The page talks back with plain strings: "html:<body>" or
-// "full:<body>" (the quote unfolded into it) after Html(), "state:<flags>" for the format bar and "dirty" on the
-// first change (after Clean(), the first change since). Network requests are refused and nothing navigates, as in the preview.
+// "full:<body>" (the quote unfolded into it) after Html(), "state:<flags>" for the format bar, "dirty" on the
+// first change (after Clean(), the first change since) and "drop" with the files dragged onto it. Network requests are refused and nothing navigates, as in the preview.
 #pragma once
 
 #include <windows.h>
 
 #include <functional>
 #include <string>
+#include <vector>
 
 #include <wrl.h>
 
@@ -30,6 +31,8 @@ public:
         std::function<void()> send;
         // Ctrl+S
         std::function<void()> save;
+        // files dragged from Explorer onto the text, the cursor now where they were dropped
+        std::function<void(const std::vector<std::wstring>& paths)> dropped;
     };
 
     // creates the host window, a child of `parent` with the control id `id`, and the WebView2 in it
@@ -48,6 +51,7 @@ public:
 private:
     void Configure();
     void Script(const std::wstring& code);
+    static std::vector<std::wstring> DroppedFiles(ICoreWebView2WebMessageReceivedEventArgs* args);
     static LRESULT CALLBACK HostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
     HWND host_ = nullptr;

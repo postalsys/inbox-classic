@@ -208,22 +208,32 @@ impl Pictures {
     }
 }
 
+/// The largest picture file Insert Picture puts in the text
+pub const PICTURE_FILE_LIMIT: usize = 10 * 1024 * 1024;
+
+/// The type of a picture every mail program shows, by its first bytes ([`PICTURE_HEAD`] of them are enough)
+pub fn picture_type(head: &[u8]) -> Option<&'static str> {
+    if head.starts_with(b"\x89PNG\r\n\x1a\n") {
+        Some("image/png")
+    } else if head.starts_with(b"\xff\xd8\xff") {
+        Some("image/jpeg")
+    } else if head.starts_with(b"GIF87a") || head.starts_with(b"GIF89a") {
+        Some("image/gif")
+    } else if head.len() >= 12 && head.starts_with(b"RIFF") && &head[8..12] == b"WEBP" {
+        Some("image/webp")
+    } else {
+        None
+    }
+}
+
+/// How many first bytes of a file [`picture_type`] needs
+pub const PICTURE_HEAD: usize = 12;
+
 /// A picture file for the editor's Insert Picture: a `data:` URI when `data` is a picture of a kind every mail
 /// program shows, by its first bytes rather than its name
 pub fn picture_uri(data: &[u8]) -> Option<String> {
-    const LIMIT: usize = 10 * 1024 * 1024;
-    let mime_type = if data.starts_with(b"\x89PNG\r\n\x1a\n") {
-        "image/png"
-    } else if data.starts_with(b"\xff\xd8\xff") {
-        "image/jpeg"
-    } else if data.starts_with(b"GIF87a") || data.starts_with(b"GIF89a") {
-        "image/gif"
-    } else if data.len() > 12 && data.starts_with(b"RIFF") && &data[8..12] == b"WEBP" {
-        "image/webp"
-    } else {
-        return None;
-    };
-    (data.len() <= LIMIT).then(|| format!("data:{mime_type};base64,{}", STANDARD.encode(data)))
+    let mime_type = picture_type(data)?;
+    (data.len() <= PICTURE_FILE_LIMIT).then(|| format!("data:{mime_type};base64,{}", STANDARD.encode(data)))
 }
 
 /// 128 random bits as hex, for the script nonce and Content-IDs. Should the system have no randomness to give, the
