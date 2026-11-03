@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/postalsys/inbox-classic/compare/v0.1.0...v0.2.0) (2026-11-03)
+
+
+### Features
+
+* sign-in apps, OAuth clients of your own at any OpenID Connect provider ([f1a28c8](https://github.com/postalsys/inbox-classic/commit/f1a28c8202ada9077d1469140ea6ff8f654ac7ff))
+
 ## 0.1.0 (2026-11-03)
 
 
