@@ -79,6 +79,8 @@ To drive the UI for a check, run these on the build machine through a scheduled 
 
 `PE_NETWORK_TESTS=1` enables the tests that need the internet (`pe-autoconfig/tests/live.rs`); CI sets it on Linux.
 
+Releases: release-please keeps a release PR on master (`release-please-config.json`, `.github/workflows/release.yaml`, which also updates `Cargo.lock` on it); merging it drafts the release and pushes the tag, then `scripts/release.sh` on the Mac, from the tag, builds and signs the installer, writes a GPG-signed `hashes.txt`, uploads both and publishes the draft. The homepage links `releases/latest/download/InboxClassic-Setup.exe`.
+
 `scripts/build-installer.sh` builds `dist/InboxClassic-Setup.exe` (NSIS, `installer/inbox-classic.nsi`, per user, no admin rights) with `THIRD-PARTY-NOTICES.txt` from `scripts/notices.mjs`; it signs the exe, the uninstaller and the installer with Azure Artifact Signing (`scripts/sign-win.sh`) when `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` are set.
 
 On Windows itself: `scripts\win-build.cmd` and `scripts\win-test.cmd`. Both call `scripts\vcvars.cmd`, which finds Visual Studio with vswhere and puts cargo on PATH.

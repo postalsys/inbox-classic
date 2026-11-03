@@ -2,6 +2,10 @@
 
 A Windows email client in the style of Outlook Express. The protocol and parsing code is Rust, ported from our own JavaScript libraries; the Windows UI is a thin C++ Win32 layer on top of it.
 
+## Installing
+
+Run `InboxClassic-Setup.exe` from the [latest release](https://github.com/postalsys/inbox-classic/releases/latest/download/InboxClassic-Setup.exe). It installs for the current user, no administrator rights needed, to `%LOCALAPPDATA%\Programs\Inbox Classic`, with a Start menu shortcut and an entry in Installed apps. The setup, the app and the uninstaller are signed by Postal Systems OÜ. Running the setup of a newer version updates the installed one in place; the mail downloaded and the accounts in `%LOCALAPPDATA%\InboxClassic` are kept.
+
 ## How it is put together
 
 Everything that a remote party writes, such as IMAP responses, message headers and bodies, attachment names and autoconfig documents, is parsed in Rust. The C++ app only draws what the core has already decoded and validated:
@@ -42,3 +46,9 @@ From a Mac, `scripts/win-build.sh` copies the working tree to the Windows build 
 `scripts/build-installer.sh` builds `dist/InboxClassic-Setup.exe` from a Mac: the app is built and staged on the Windows build machine, then NSIS (`brew install makensis`) packs it. The installer works per user without administrator rights and upgrades in place. With `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` set, the exe, the uninstaller and the installer are signed with Azure Artifact Signing (`scripts/sign-win.sh`, needs `jsign`).
 
 Signing in to Gmail, Outlook.com and Microsoft 365 through the browser (OAuth 2.0, authorization code with PKCE and a loopback redirect) works in every build: the Google Desktop App client and the Microsoft public client are built in, and `PE_GOOGLE_CLIENT_ID` / `PE_GOOGLE_CLIENT_SECRET` / `PE_MICROSOFT_CLIENT_ID` at build time replace them.
+
+## Releasing
+
+Releases follow ImapKit Desktop's flow. Commits use Conventional Commit messages (`feat:`, `fix:` ...), and release-please keeps a release PR up to date on master (`release-please-config.json`, `.github/workflows/release.yaml`). Merging the PR bumps the version in `core/Cargo.toml` (the workflow brings `Cargo.lock` along), writes the changelog, pushes the `v<version>` tag and drafts the release.
+
+Then, on the release Mac, check out the tag and run `scripts/release.sh`. It checks that CI passed for the tag, builds the installer on the Windows build machine, signs the exe, the uninstaller and the setup with Azure Artifact Signing, writes `hashes.txt` signed with the release GPG key, uploads both to the draft and publishes it. The setup has no version in its name, so https://github.com/postalsys/inbox-classic/releases/latest/download/InboxClassic-Setup.exe always gets the latest release, which is the download link of inboxclassic.com. `BUILD_ONLY=yes` builds and signs without uploading.
