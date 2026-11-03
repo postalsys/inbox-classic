@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/postalsys/inbox-classic/compare/v0.2.0...v0.3.0) (2026-11-03)
+
+
+### Features
+
+* links in a message being written can be seen, opened, changed and removed ([6b2bc15](https://github.com/postalsys/inbox-classic/commit/6b2bc15dad953234387fd728cf275f5983ef5dba))
+* pictures dragged onto the text go in as Insert Picture puts them ([ed7a8f6](https://github.com/postalsys/inbox-classic/commit/ed7a8f636b0752783914e938ab80b0a1538d3cd2))
+
 ## [0.2.0](https://github.com/postalsys/inbox-classic/compare/v0.1.0...v0.2.0) (2026-11-03)
 
 
