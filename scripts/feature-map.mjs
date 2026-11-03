@@ -372,6 +372,27 @@ const sections = [
                 ]
             },
             {
+                shot: 'write-14-link-status',
+                name: 'Where a link goes',
+                what: 'With the cursor in a link, or the mouse over one, the status bar of the message window shows its address, with Ctrl+click to open it in the browser (http, https and mailto only, as in the reading pane).',
+                how: 'Put the cursor in a link, or point at it.',
+                checked: ['With the cursor in a link, the status bar shows its address']
+            },
+            {
+                shot: 'write-15-edit-link',
+                name: 'Changing and removing a link',
+                what: 'Link (Ctrl+K) on a link shows its address to change; an empty address takes the link off and keeps its text. On text without a link it makes a new one.',
+                how: 'Link on the format bar, or Ctrl+K, with the cursor in a link.',
+                checked: ['The Link button on a link shows its address', 'It changes it', 'An empty address removes the link, the text goes without it']
+            },
+            {
+                shot: 'write-16-link-menu',
+                name: 'The menu of a link',
+                what: "Right-clicking a link selects it and offers Open Link, Edit Link and Remove Link first. The browser's own items that do nothing in a message being written (open in a new window, save link as, print) are left out.",
+                how: 'Right-click a link in the text.',
+                checked: []
+            },
+            {
                 shot: 'write-3b-select-all',
                 name: 'Select All takes the quote',
                 what: 'Ctrl+A unfolds the quoted message into the text and selects all of it, to copy or cut; unfolded, the quote can be shortened before sending, and it is sent once.',

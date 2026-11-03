@@ -1,7 +1,9 @@
 // The editor of the compose window: a WebView2 with the page of pe_editor_document, whose own script (allowed by a
 // nonce, nothing else can run) makes the message editable. The page talks back with plain strings: "html:<body>" or
 // "full:<body>" (the quote unfolded into it) after Html(), "state:<flags>" for the format bar, "dirty" on the
-// first change (after Clean(), the first change since) and "drop" with the files dragged onto it. Network requests are refused and nothing navigates, as in the preview.
+// first change (after Clean(), the first change since), "drop" with the files dragged onto it, and the addresses of
+// the link at the cursor and under the mouse ("caret:", "hover:"). Ctrl+click on a link, or Open Link in its menu,
+// opens it in the browser. Network requests are refused and nothing navigates, as in the preview.
 #pragma once
 
 #include <windows.h>
@@ -33,6 +35,10 @@ public:
         std::function<void()> save;
         // files dragged from Explorer onto the text, the cursor now where they were dropped
         std::function<void(const std::vector<std::wstring>& paths)> dropped;
+        // the address of the link under the mouse, or else of the one the cursor is in, when that changes; empty for none
+        std::function<void(const std::wstring& link)> link;
+        // Ctrl+K, or Edit Link in the menu of a link: the Link dialog
+        std::function<void()> editLink;
     };
 
     // creates the host window, a child of `parent` with the control id `id`, and the WebView2 in it
@@ -47,11 +53,16 @@ public:
     // the body was saved: the next change is reported as "dirty" again
     void Clean();
     void Focus();
+    // the address of the link the cursor is in, empty when none
+    const std::wstring& CaretLink() const { return caretLink_; }
 
 private:
     void Configure();
     void Script(const std::wstring& code);
     static std::vector<std::wstring> DroppedFiles(ICoreWebView2WebMessageReceivedEventArgs* args);
+    void LinkMenu();
+    std::wstring caretLink_;
+    std::wstring hoverLink_;
     static LRESULT CALLBACK HostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
     HWND host_ = nullptr;

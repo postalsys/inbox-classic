@@ -42,6 +42,12 @@ void LockDown(ICoreWebView2* view, bool contextMenu);
 // the page at `url` is all the view shows: navigation elsewhere is cancelled and no window opens from it
 void StayOnPage(ICoreWebView2* view, const wchar_t* url);
 
+// whether `uri` is a link that may be opened or made: http, https or mailto
+bool IsLinkScheme(const wchar_t* uri);
+
+// a link opened in the default browser or mail program: http, https and mailto only, anything else is ignored
+void OpenExternally(const wchar_t* uri);
+
 // whether `uri` is the page itself (`url`, with or without a query) or one of the documents a page has of its own
 bool IsOwnPage(const wchar_t* uri, const wchar_t* url);
 

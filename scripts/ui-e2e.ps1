@@ -68,7 +68,7 @@ $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $
 $IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
-$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_SHOW_CC = 311; $IDC_SHOW_BCC = 312; $IDC_BCC = 304; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
+$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_SHOW_CC = 311; $IDC_SHOW_BCC = 312; $IDC_BCC = 304; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330; $IDF_LINK = 341
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
@@ -728,6 +728,66 @@ public static class Dragger {
     Check ($raw -match '(?s)multipart/related.*Content-Type: image/png.*Content-ID: <picture1\.' -and $raw -match 'src=(3D)?"cid:picture1\.') 'the picture went inline, as a cid: part, like Insert Picture puts one'
     Check ($raw -notmatch 'data:image') 'with no data: URI left in the HTML'
     Check ($raw -match 'dropped-note\.txt' -and $raw -notmatch 'filename="?dropped\.png') 'the other file went as an attachment, the picture not'
+
+    Step 'links in a message being written'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_TO 'Dave <dave@example.com>'
+    SetText $compose $IDC_SUBJECT 'Links in the UI test'
+    $input = ClickEditor $compose
+    $composeStatus = [Native.Win]::FindWindowEx($compose, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    # a link with nothing selected: the address itself is the link's text
+    Command $compose $IDF_LINK
+    $dialog = WaitWindow 'InboxClassicForm' 'Hyperlink' 10
+    Check ($dialog -and (GetText $dialog 100) -eq 'https://') 'the Link button asks for an address'
+    if ($dialog) {
+        SetText $dialog 100 'https://example.com/first'
+        Click $dialog 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
+    }
+    # the cursor into the link: the status bar says where it goes
+    Start-Sleep -Milliseconds 500
+    Key $input 0x25
+    Key $input 0x25
+    Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'https://example.com/first*Ctrl+click to open*') { $t } } 10)) 'with the cursor in a link, the status bar shows its address'
+    Shot $compose 'write-14-link-status'
+    # the Link button on a link: its address to change
+    Command $compose $IDF_LINK
+    $dialog = WaitWindow 'InboxClassicForm' 'Edit Hyperlink' 10
+    Check ($dialog -and (GetText $dialog 100) -eq 'https://example.com/first') 'the Link button on a link shows its address to change'
+    if ($dialog) {
+        Shot $dialog 'write-15-edit-link'
+        SetText $dialog 100 'https://example.com/second'
+        Click $dialog 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
+    }
+    Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'https://example.com/second*') { $t } } 10)) 'and changes it'
+    # its menu: Open Link, Edit Link and Remove Link first (a picture for the feature map)
+    $point = [IntPtr]((12 -shl 16) -bor 20)
+    [void][Native.Win]::PostMessage($input, 0x0204, [IntPtr]2, $point)
+    [void][Native.Win]::PostMessage($input, 0x0205, [IntPtr]::Zero, $point)
+    Start-Sleep -Seconds 1
+    $rect = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($compose, [ref]$rect)
+    $bitmap = New-Object System.Drawing.Bitmap ($rect.Right - $rect.Left), ($rect.Bottom - $rect.Top)
+    [System.Drawing.Graphics]::FromImage($bitmap).CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bitmap.Size)
+    $bitmap.Save((Join-Path $Out 'write-16-link-menu.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+    Key $input $VK_ESCAPE
+    Start-Sleep -Milliseconds 500
+    # emptied, the address takes the link off and leaves its text
+    Command $compose $IDF_LINK
+    $dialog = WaitWindow 'InboxClassicForm' 'Edit Hyperlink' 10
+    Check ($dialog -and (GetText $dialog 100) -eq 'https://example.com/second') 'the dialog shows the changed address'
+    if ($dialog) {
+        SetText $dialog 100 ''
+        Click $dialog 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
+    }
+    Check ([bool](WaitFor { (WindowText $composeStatus) -notlike '*example.com*' } 10)) 'an empty address removes the link'
+    Command $compose $IDC_SEND
+    $linked = WaitFor { Find 'INBOX' 'Subject: Links in the UI test' } 30
+    $raw = if ($linked) { RawText $linked } else { '' }
+    Check ($raw -match 'https://example\.com/first' -and $raw -notmatch 'href' -and $raw -notmatch 'example\.com/second') 'the link text went, without the link'
 
     Step 'the Outbox: a send that can not go'
     # the outgoing server out of reach, as when offline: its port changed in Accounts > Properties to one nothing

@@ -9,6 +9,7 @@
 
 using Microsoft::WRL::Callback;
 using Microsoft::WRL::ComPtr;
+using webview::OpenExternally;
 using webview::StartsWith;
 
 namespace {
@@ -16,11 +17,6 @@ namespace {
 // where the documents are served from memory (webview.h); .invalid never resolves
 const wchar_t* kPageUrl = L"https://preview.inboxclassic.invalid/";
 
-void OpenExternally(const wchar_t* uri) {
-    if (StartsWith(uri, L"http://") || StartsWith(uri, L"https://") || StartsWith(uri, L"mailto:")) {
-        ShellExecuteW(nullptr, L"open", uri, nullptr, nullptr, SW_SHOWNORMAL);
-    }
-}
 
 }  // namespace
 

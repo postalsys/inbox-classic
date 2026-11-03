@@ -112,6 +112,11 @@ void Editor::Configure() {
                 handlers_.dirty();
             } else if (message == L"drop") {
                 handlers_.dropped(DroppedFiles(args));
+            } else if (message.rfind(L"caret:", 0) == 0 || message.rfind(L"hover:", 0) == 0) {
+                (message[0] == L'c' ? caretLink_ : hoverLink_) = message.substr(6);
+                handlers_.link(hoverLink_.empty() ? caretLink_ : hoverLink_);
+            } else if (message.rfind(L"open:", 0) == 0) {
+                webview::OpenExternally(message.c_str() + 5);
             }
             return S_OK;
         }).Get(),
@@ -130,10 +135,15 @@ void Editor::Configure() {
             } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == 'S') {
                 args->put_Handled(TRUE);
                 handlers_.save();
+            } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == 'K') {
+                args->put_Handled(TRUE);
+                handlers_.editLink();
             }
             return S_OK;
         }).Get(),
         nullptr);
+
+    LinkMenu();
 
     RECT bounds;
     GetClientRect(host_, &bounds);
@@ -143,6 +153,77 @@ void Editor::Configure() {
     if (focusWhenReady_) {
         Focus();
     }
+}
+
+void Editor::LinkMenu() {
+    // the right-click menu: what does nothing in the editor (it opens no window and goes nowhere) taken out, and on a
+    // link Open Link, Edit Link and Remove Link first
+    Microsoft::WRL::ComPtr<ICoreWebView2_11> view;
+    Microsoft::WRL::ComPtr<ICoreWebView2Environment9> environment;
+    if (FAILED(view_.As(&view)) || FAILED(environment_.As(&environment))) {
+        return;
+    }
+    view->add_ContextMenuRequested(
+        Callback<ICoreWebView2ContextMenuRequestedEventHandler>([this, environment](ICoreWebView2*, ICoreWebView2ContextMenuRequestedEventArgs* args) {
+            Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItemCollection> items;
+            args->get_MenuItems(&items);
+            UINT32 count = 0;
+            items->get_Count(&count);
+            static const wchar_t* kUseless[] = {L"openLinkInNewWindow", L"openLinkInNewTab", L"saveLinkAs", L"saveAs", L"print", L"share",
+                                                L"reload", L"back", L"forward", L"inspectElement", L"webCapture", L"screenshot",
+                                                L"readAloud", L"openLinkInNewWindowInProfile", L"addToCollections", L"searchWeb"};
+            for (UINT32 i = count; i-- > 0;) {
+                Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItem> item;
+                LPWSTR name = nullptr;
+                if (FAILED(items->GetValueAtIndex(i, &item)) || FAILED(item->get_Name(&name)) || !name) {
+                    continue;
+                }
+                for (const wchar_t* useless : kUseless) {
+                    if (wcscmp(name, useless) == 0) {
+                        items->RemoveValueAtIndex(i);
+                        break;
+                    }
+                }
+                CoTaskMemFree(name);
+            }
+            Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuTarget> target;
+            BOOL onLink = FALSE;
+            if (FAILED(args->get_ContextMenuTarget(&target)) || FAILED(target->get_HasLinkUri(&onLink)) || !onLink) {
+                return S_OK;
+            }
+            LPWSTR uri = nullptr;
+            target->get_LinkUri(&uri);
+            std::wstring link = uri ? uri : L"";
+            CoTaskMemFree(uri);
+            struct Command {
+                const wchar_t* label;
+                std::function<void()> run;
+            };
+            Command commands[] = {
+                {L"Open Link", [link] { webview::OpenExternally(link.c_str()); }},
+                {L"Edit Link...", [this] { handlers_.editLink(); }},
+                {L"Remove Link", [this] { Link(L""); }},
+            };
+            UINT32 at = 0;
+            for (const Command& command : commands) {
+                Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItem> item;
+                if (FAILED(environment->CreateContextMenuItem(command.label, nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_COMMAND, &item))) {
+                    continue;
+                }
+                item->add_CustomItemSelected(Callback<ICoreWebView2CustomItemSelectedEventHandler>([run = command.run](ICoreWebView2ContextMenuItem*, IUnknown*) {
+                                                 run();
+                                                 return S_OK;
+                                             }).Get(),
+                                             nullptr);
+                items->InsertValueAtIndex(at++, item.Get());
+            }
+            Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItem> separator;
+            if (SUCCEEDED(environment->CreateContextMenuItem(L"", nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_SEPARATOR, &separator))) {
+                items->InsertValueAtIndex(at, separator.Get());
+            }
+            return S_OK;
+        }).Get(),
+        nullptr);
 }
 
 std::vector<std::wstring> Editor::DroppedFiles(ICoreWebView2WebMessageReceivedEventArgs* args) {

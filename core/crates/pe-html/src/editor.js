@@ -8,6 +8,9 @@
 //   "full:<the body>"   the quote unfolded and then deleted: the body is all there is
 //   "state:<flags>"     one 0 or 1 per command of STATE, for the format bar
 //   "dirty"             the first change (since pe.clean(), after a save), so closing can ask before throwing it away
+//   "caret:<href>"      the address of the link the cursor is in (empty when none), when that changes
+//   "hover:<href>"      the address of the link under the mouse (empty when none), when that changes
+//   "open:<href>"       a link Ctrl+clicked, to open in the browser (the host opens http, https and mailto only)
 //   "drop"              files dropped on the page, as File objects beside the message: the host reads them (through
 //                       the core, as Insert Picture does) and inserts the pictures where the cursor now is
 (() => {
@@ -49,6 +52,51 @@
         }
     };
     document.addEventListener('selectionchange', report);
+
+    // links: their addresses for the host's status bar and Link dialog, Ctrl+click to open one
+    const linkAt = node => {
+        const element = node && (node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement);
+        const link = element && element.closest('a[href]');
+        return link && body.contains(link) ? link : null;
+    };
+    const href = link => (link ? link.getAttribute('href') : '');
+    const caretLink = () => {
+        const selection = window.getSelection();
+        return selection.rangeCount ? linkAt(selection.getRangeAt(0).commonAncestorContainer) : null;
+    };
+    // posts "<kind>:<href>" when the address changes
+    const reporter = kind => {
+        let last = '';
+        return now => {
+            if (now !== last) {
+                last = now;
+                post(kind + ':' + now);
+            }
+        };
+    };
+    const reportCaret = reporter('caret');
+    const reportHover = reporter('hover');
+    document.addEventListener('selectionchange', () => reportCaret(href(caretLink())));
+    document.addEventListener('mouseover', event => reportHover(href(linkAt(event.target))));
+    document.addEventListener('click', event => {
+        const link = linkAt(event.target);
+        if (link && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            post('open:' + href(link));
+        }
+    });
+    // a right-click on a link selects it, so the menu's commands and the Link dialog work on all of it
+    const selectLink = link => {
+        const range = document.createRange();
+        range.selectNodeContents(link);
+        placeCursor(range);
+    };
+    document.addEventListener('contextmenu', event => {
+        const link = linkAt(event.target);
+        if (link) {
+            selectLink(link);
+        }
+    });
 
     let dirty = false;
     body.addEventListener('input', () => {
@@ -106,11 +154,20 @@
             document.execCommand(command, false, value === undefined ? null : value);
             report();
         },
-        // a link around the selection, or the address itself as the link when nothing is selected
+        // a link around the selection, or the address itself as the link when nothing is selected; with the cursor in a
+        // link, that link gets the new address, or loses its link when the address is empty
         link(url) {
             body.focus();
+            const current = caretLink();
+            if (current) {
+                selectLink(current);
+            }
             const selection = window.getSelection();
-            if (selection && !selection.isCollapsed) {
+            if (!url) {
+                if (current) {
+                    document.execCommand('unlink');
+                }
+            } else if (selection && !selection.isCollapsed) {
                 document.execCommand('createLink', false, url);
             } else {
                 const a = document.createElement('a');

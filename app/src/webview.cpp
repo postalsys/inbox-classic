@@ -1,5 +1,6 @@
 #include "webview.h"
 
+#include <shellapi.h>
 #include <shlobj.h>
 #include <shlwapi.h>
 
@@ -34,6 +35,16 @@ std::string Utf8(const std::wstring& text) {
 
 bool StartsWith(const wchar_t* text, const wchar_t* prefix) {
     return text && _wcsnicmp(text, prefix, wcslen(prefix)) == 0;
+}
+
+bool IsLinkScheme(const wchar_t* uri) {
+    return StartsWith(uri, L"http://") || StartsWith(uri, L"https://") || StartsWith(uri, L"mailto:");
+}
+
+void OpenExternally(const wchar_t* uri) {
+    if (IsLinkScheme(uri)) {
+        ShellExecuteW(nullptr, L"open", uri, nullptr, nullptr, SW_SHOWNORMAL);
+    }
 }
 
 bool IsOwnPage(const wchar_t* uri, const wchar_t* url) {

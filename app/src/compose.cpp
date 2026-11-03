@@ -5,6 +5,7 @@
 #include "app.h"
 #include "editor.h"
 #include "icons.h"
+#include "webview.h"
 
 #include <commdlg.h>
 #include <shellapi.h>
@@ -70,8 +71,10 @@ struct Compose {
     int64_t account;
     // the main window, told when this one is gone
     HWND main = nullptr;
-    // the status bar at the bottom: whether the draft is saved
+    // the status bar at the bottom: whether the draft is saved, or while the cursor is in a link or the mouse over one,
+    // where it goes
     HWND status = nullptr;
+    std::wstring statusText;
     std::string inReplyTo;
     std::string references;
     std::string quote;
@@ -135,6 +138,13 @@ Compose* StateOf(HWND hwnd) {
 
 // what the status bar of the window says about the draft
 void SetComposeStatus(Compose* state, const std::wstring& text) {
+    state->statusText = text;
+    SendMessageW(state->status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
+}
+
+// where the link under the mouse, or else the one the cursor is in, goes; the status as it was without either
+void ShowLink(Compose* state, const std::wstring& link) {
+    std::wstring text = link.empty() ? state->statusText : link + L"    (Ctrl+click to open)";
     SendMessageW(state->status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
 }
 
@@ -419,19 +429,32 @@ void ChooseTextColor(HWND hwnd, Compose* state) {
     }
 }
 
+// a link address the dialog takes: a web address or an e-mail link, with more than the scheme
+bool ValidLink(const std::wstring& url, std::wstring& error) {
+    // something after "https://" or "mailto:"
+    if (webview::IsLinkScheme(url.c_str()) && url.find_first_not_of(L'/', url.find(L':') + 1) != std::wstring::npos) {
+        return true;
+    }
+    error = L"Type a web address (https://...) or an e-mail link (mailto:...).";
+    return false;
+}
+
+// the Link button and Ctrl+K: a new link on the selection, or with the cursor in a link its address to change, or to
+// empty to take the link off
 void InsertLink(HWND hwnd, Compose* state) {
-    std::vector<FormField> fields = {{L"Address:", L"https://"}};
-    auto valid = [](const std::vector<FormField>& values, std::wstring& error) {
-        const std::wstring& url = values[0].value;
-        for (const wchar_t* scheme : {L"https://", L"http://", L"mailto:"}) {
-            if (url.size() > wcslen(scheme) && _wcsnicmp(url.c_str(), scheme, wcslen(scheme)) == 0) {
-                return true;
-            }
-        }
-        error = L"Type a web address (https://...) or an e-mail link (mailto:...).";
-        return false;
+    const std::wstring& current = state->editor.CaretLink();
+    bool editing = !current.empty();
+    std::vector<FormField> fields = {{L"Address:", editing ? current : L"https://"}};
+    bool (*newLink)(const std::vector<FormField>&, std::wstring&) = [](const std::vector<FormField>& values, std::wstring& error) {
+        return ValidLink(values[0].value, error);
     };
-    if (FormDialog(hwnd, L"Hyperlink", L"The address the selected text links to.", fields, valid)) {
+    // an emptied address takes the link off
+    bool (*changedLink)(const std::vector<FormField>&, std::wstring&) = [](const std::vector<FormField>& values, std::wstring& error) {
+        return values[0].value.empty() || ValidLink(values[0].value, error);
+    };
+    if (FormDialog(hwnd, editing ? L"Edit Hyperlink" : L"Hyperlink",
+                   editing ? L"Where the link goes. Empty the address to remove the link and keep its text." : L"The address the selected text links to.",
+                   fields, editing ? changedLink : newLink)) {
         state->editor.Link(fields[0].value);
     }
 }
@@ -553,7 +576,7 @@ void CreateFormatBar(HWND hwnd, Compose* state) {
         {IDF_CENTER, L"Center", BTNS_CHECK, FORMAT_TEXT_ALIGN_CENTER},
         {IDF_RIGHT, L"Align Right", BTNS_CHECK, FORMAT_TEXT_ALIGN_RIGHT},
         {0, nullptr, 0, 0},
-        {IDF_LINK, L"Insert Hyperlink", 0, FORMAT_LINK},
+        {IDF_LINK, L"Hyperlink (Ctrl+K)", 0, FORMAT_LINK},
         {IDF_LINE, L"Insert Horizontal Line", 0, FORMAT_LINE_HORIZONTAL_1},
         {IDF_PICTURE, L"Insert Picture", 0, FORMAT_IMAGE},
     };
@@ -630,6 +653,8 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
     handlers.send = [state] { Request(state, Compose::Pending::Send); };
     handlers.save = [state] { Request(state, Compose::Pending::Save); };
     handlers.dropped = [state](const std::vector<std::wstring>& paths) { DropOnText(state, paths); };
+    handlers.link = [state](const std::wstring& link) { ShowLink(state, link); };
+    handlers.editLink = [hwnd, state] { InsertLink(hwnd, state); };
     state->body = state->editor.Create(hwnd, IDC_BODY, page ? Text(page.get()) : L"", std::move(handlers));
 }
 
