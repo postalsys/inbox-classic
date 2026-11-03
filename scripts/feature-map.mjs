@@ -290,7 +290,7 @@ const sections = [
             {
                 shot: 'write-7-outbox',
                 name: 'The Outbox',
-                what: 'Every message goes through the Outbox: one that can not go (offline, refused) waits there with the reason and goes with the next Send/Recv, so nothing is lost. Send/Recv also runs by itself every ten minutes. The status bar counts what waits; Tools > Outbox lists each message with when it was queued and whether it waits or why it did not go.',
+                what: 'Every message goes through the Outbox: one that can not go (offline, refused) waits there with the reason and goes with the next Send/Recv, so nothing is lost. Send/Recv also runs by itself every ten minutes. The middle of the status bar says what happens to what you send (Sending, Sent with its subject and time, or waiting in the Outbox), and other work does not write over it; Tools > Outbox lists each waiting message with when it was queued and why it did not go.',
                 how: 'Automatic when a send can not go; Tools > Outbox to send now or delete.',
                 checked: [
                     'There is no Send Later: Send sends',
@@ -302,7 +302,7 @@ const sections = [
             {
                 shot: 'write-8-save-draft',
                 name: 'Drafts',
-                what: 'Save keeps the message in the Drafts folder on the server, in place of the copy saved before. Closing a message with changes asks: Yes saves it in Drafts, No throws it away, Cancel goes back to it.',
+                what: 'Save keeps the message in the Drafts folder on the server, in place of the copy saved before, and the status bar of the message says when the server has it (or why not). Closing a message with changes asks: Yes saves it in Drafts, No throws it away, Cancel goes back to it.',
                 how: 'Save or Ctrl+S in the compose window, or close it and answer Yes.',
                 checked: ['Closing asks to save', 'Yes saves the draft on the server, marked as a draft']
             },
@@ -312,6 +312,27 @@ const sections = [
                 what: 'A draft opens again with its recipients, text and attached files. Sending it removes it from Drafts.',
                 how: 'Double-click the draft in Drafts, or select it and press Enter.',
                 checked: ['The draft opens with its subject and recipient', 'Save replaces it', 'Sent, it arrives and leaves Drafts']
+            },
+            {
+                shot: 'write-10-draft-saved',
+                name: 'Saved, and said so',
+                what: 'The status bar of the message window says Saved in Drafts with the time once the server has the draft, Saving to Drafts while it goes, or why it was not saved. Writing more clears it, as the saved copy is then behind.',
+                how: 'Save or Ctrl+S in the compose window.',
+                checked: ['The message window says when the draft is saved']
+            },
+            {
+                shot: 'write-11-sent',
+                name: 'Sent, and said so',
+                what: 'Once the server took a message, the middle of the main status bar says Sent with its subject and the time, and stays so until the next message goes; while it goes it says Sending, and a message that can not go is reported as waiting in the Outbox.',
+                how: 'Automatic after Send.',
+                checked: ['The main window says what was sent']
+            },
+            {
+                shot: 'write-0-main-in-front',
+                name: 'Writing in a window of its own',
+                what: 'A message being written is a window of its own on the taskbar, as in Outlook Express: the main window comes in front of it to look something up, and the keyboard goes back to where it was. Closing the app closes the messages being written first, asking about those with changes.',
+                how: 'Click the main window, or Alt+Tab, while writing.',
+                checked: ['The message window is a window of its own', 'The main window comes in front of a message being written']
             },
             {
                 shot: 'write-6-close',

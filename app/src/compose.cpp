@@ -12,10 +12,14 @@
 
 #include <algorithm>
 #include <utility>
+#include <vector>
 
 namespace {
 
 const wchar_t* kComposeClass = L"InboxClassicCompose";
+
+// the compose windows open, in the order they opened
+std::vector<HWND> g_composeWindows;
 
 enum ComposeId : WORD {
     IDC_SEND = 300,
@@ -64,6 +68,10 @@ const wchar_t* kSizes[] = {L"8", L"10", L"12", L"14", L"18", L"24", L"36"};
 struct Compose {
     PeCore* core;
     int64_t account;
+    // the main window, told when this one is gone
+    HWND main = nullptr;
+    // the status bar at the bottom: whether the draft is saved
+    HWND status = nullptr;
     std::string inReplyTo;
     std::string references;
     std::string quote;
@@ -125,6 +133,19 @@ Compose* StateOf(HWND hwnd) {
     return reinterpret_cast<Compose*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
 }
 
+// what the status bar of the window says about the draft
+void SetComposeStatus(Compose* state, const std::wstring& text) {
+    SendMessageW(state->status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
+}
+
+// the message changed since it was sent to Drafts or opened: a "saved" status no longer holds
+void Changed(Compose* state) {
+    if (!state->dirty && !state->filling) {
+        SetComposeStatus(state, L"");
+    }
+    state->dirty = true;
+}
+
 // the columns of the Attach row narrower as there are more files, down to a readable width
 void FitFiles(Compose* state) {
     RECT row;
@@ -139,6 +160,10 @@ void Layout(HWND hwnd, Compose* state) {
     SendMessageW(state->toolbar, TB_AUTOSIZE, 0, 0);
     RECT bar;
     GetWindowRect(state->toolbar, &bar);
+    SendMessageW(state->status, WM_SIZE, 0, 0);
+    RECT statusBar;
+    GetWindowRect(state->status, &statusBar);
+    client.bottom -= statusBar.bottom - statusBar.top;
     int pad = Scale(6);
     int labelWidth = Scale(60);
     int rowHeight = Scale(22);
@@ -214,7 +239,7 @@ bool AddFile(Compose* state, const std::wstring& path) {
 void AddFiles(Compose* state, const std::vector<std::wstring>& files) {
     for (const std::wstring& file : files) {
         if (AddFile(state, file)) {
-            state->dirty = true;
+            Changed(state);
         }
     }
     ShowFiles(state);
@@ -244,7 +269,7 @@ void RemoveSelectedFile(Compose* state) {
         return;
     }
     state->files.erase(state->files.begin() + index);
-    state->dirty = true;
+    Changed(state);
     ShowFiles(state);
     size_t left = state->files.size();
     if (left > 0) {
@@ -354,6 +379,10 @@ void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
     char* reason = nullptr;
     if (!pe_draft_save(state->core, state->account, &fields.outgoing, &messageId, &reason)) {
         ShowRefusal(hwnd, reason, L"The message could not be saved.");
+        // not closing after all: the main window does not wait for it
+        if (close) {
+            PostMessageW(state->main, WM_COMPOSE_KEPT, 0, 0);
+        }
         return;
     }
     core::String id(messageId);
@@ -361,6 +390,8 @@ void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
     state->messageId = id ? id.get() : "";
     state->dirty = false;
     state->editor.Clean();
+    // the server's answer follows (ComposeDraftSaved)
+    SetComposeStatus(state, L"Saving to Drafts...");
     if (close) {
         DestroyWindow(hwnd);
     }
@@ -513,6 +544,8 @@ void CreateFormatBar(HWND hwnd, Compose* state) {
 }
 
 void CreateFields(HWND hwnd, Compose* state) {
+    state->status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0, hwnd,
+                                    nullptr, GetModuleHandleW(nullptr), nullptr);
     state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0, BarIcons::Big);
     AddButton(state->toolbar, IDC_SEND, L"Send", BTNS_BUTTON, ICON_SEND);
     AddButton(state->toolbar, 0, nullptr);
@@ -558,7 +591,7 @@ void ChooseFrom(Compose* state) {
     LRESULT chosen = SendMessageW(state->from, CB_GETCURSEL, 0, 0);
     if (chosen >= 0 && static_cast<size_t>(chosen) < state->fromAccounts.size() && state->fromAccounts[chosen] != state->account) {
         state->account = state->fromAccounts[chosen];
-        state->dirty = true;
+        Changed(state);
     }
 }
 
@@ -574,7 +607,7 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
         PostMessageW(hwnd, WM_SEND_HTML, 0, 0);
     };
     handlers.state = [state](const std::wstring& flags) { ShowState(state, flags); };
-    handlers.dirty = [state] { state->dirty = true; };
+    handlers.dirty = [state] { Changed(state); };
     handlers.send = [state] { Request(state, Compose::Pending::Send); };
     handlers.save = [state] { Request(state, Compose::Pending::Save); };
     state->body = state->editor.Create(hwnd, IDC_BODY, page ? Text(page.get()) : L"", std::move(handlers));
@@ -644,7 +677,7 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             return 0;
         }
         if (HIWORD(wParam) == EN_CHANGE && !state->filling) {
-            state->dirty = true;
+            Changed(state);
             return 0;
         }
         if (Format(hwnd, state, LOWORD(wParam))) {
@@ -696,9 +729,18 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
     case WM_DESTROY:
         if (state) {
             state->editor.Close();
+            // not owned, so Windows would hand the keyboard to whatever window is next: back to the main window, as
+            // when it was the owner, unless it is minimized
+            if (GetForegroundWindow() == hwnd && IsWindowVisible(state->main) && !IsIconic(state->main)) {
+                SetForegroundWindow(state->main);
+            }
         }
         break;
     case WM_NCDESTROY:
+        std::erase(g_composeWindows, hwnd);
+        if (state) {
+            PostMessageW(state->main, WM_COMPOSE_CLOSED, 0, 0);
+        }
         delete state;
         SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);
         break;
@@ -713,15 +755,14 @@ bool ComposeKey(const MSG& msg) {
         return false;
     }
     HWND root = GetAncestor(msg.hwnd, GA_ROOT);
-    wchar_t className[64] = L"";
-    if (!root || !GetClassNameW(root, className, static_cast<int>(std::size(className))) || wcscmp(className, kComposeClass) != 0) {
+    if (std::find(g_composeWindows.begin(), g_composeWindows.end(), root) == g_composeWindows.end()) {
         return false;
     }
     PostMessageW(root, WM_COMMAND, MAKEWPARAM(IDC_SAVE, 0), 0);
     return true;
 }
 
-void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* draft) {
+void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* draft) {
     static bool registered = false;
     if (!registered) {
         WNDCLASSEXW windowClass = {sizeof(windowClass)};
@@ -735,12 +776,15 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
         registered = true;
     }
     std::wstring title = draft && draft->subject && *draft->subject ? Text(draft->subject) : L"New Message";
-    HWND hwnd = CreateWindowExW(WS_EX_CONTROLPARENT, kComposeClass, title.c_str(), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-                                CW_USEDEFAULT, CW_USEDEFAULT, Scale(760), Scale(620), owner, nullptr, GetModuleHandleW(nullptr), nullptr);
+    // no owner: a window of its own, as in Outlook Express, that the main window can come in front of
+    HWND hwnd = CreateWindowExW(WS_EX_CONTROLPARENT | WS_EX_APPWINDOW, kComposeClass, title.c_str(),
+                                WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, Scale(760), Scale(620), nullptr,
+                                nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!hwnd) {
         return;
     }
-    auto* state = new Compose{core, account};
+    g_composeWindows.push_back(hwnd);
+    auto* state = new Compose{core, account, main};
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
     CreateFields(hwnd, state);
     FillFrom(state);
@@ -777,4 +821,56 @@ void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* d
     } else {
         SetFocus(state->to);
     }
+}
+
+namespace {
+
+// a copy of the open compose windows, as closing one changes g_composeWindows
+std::vector<HWND> ComposeWindows() {
+    return g_composeWindows;
+}
+
+}  // namespace
+
+ComposeClose CloseComposeWindows() {
+    bool saving = false;
+    for (HWND hwnd : ComposeWindows()) {
+        SendMessageW(hwnd, WM_CLOSE, 0, 0);
+        if (!IsWindow(hwnd)) {
+            continue;
+        }
+        // still open: saving before it closes (Yes), or kept open (Cancel), which keeps the app too
+        Compose* state = StateOf(hwnd);
+        if (!state || state->pending != Compose::Pending::SaveAndClose) {
+            return ComposeClose::Kept;
+        }
+        saving = true;
+    }
+    return saving ? ComposeClose::Saving : ComposeClose::Closed;
+}
+
+bool ComposeWindowsOpen() {
+    return !ComposeWindows().empty();
+}
+
+void DestroyComposeWindows() {
+    for (HWND hwnd : ComposeWindows()) {
+        DestroyWindow(hwnd);
+    }
+}
+
+bool ComposeDraftSaved(const std::string& messageId, const std::wstring& problem) {
+    for (HWND hwnd : ComposeWindows()) {
+        Compose* state = StateOf(hwnd);
+        if (!state || messageId.empty() || state->messageId != messageId) {
+            continue;
+        }
+        if (!problem.empty()) {
+            SetComposeStatus(state, L"Not saved in Drafts: " + problem);
+            return true;
+        }
+        SetComposeStatus(state, L"Saved in Drafts at " + TimeNow());
+        return true;
+    }
+    return false;
 }

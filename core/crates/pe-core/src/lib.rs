@@ -58,6 +58,14 @@ pub enum Event {
     /// A message was sent, and is in the Sent folder when the account has one
     MessageSent {
         account: AccountId,
+        subject: String,
+    },
+    /// The draft with `message_id` ([`Core::save_draft`]) is in the Drafts folder on the server, or was not saved
+    /// for `problem`
+    DraftSaved {
+        account: AccountId,
+        message_id: String,
+        problem: Option<String>,
     },
     /// The servers of an address were looked up: [`Core::autoconfig_result`]
     AutoconfigDone {

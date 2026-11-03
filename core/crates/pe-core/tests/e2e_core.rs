@@ -197,7 +197,15 @@ fn sends_replies_and_keeps_a_copy() {
         .unwrap()
         .id;
     s.core.send(account, outgoing).unwrap();
-    s.wait(|e| *e == Event::MessageSent { account });
+    // with its subject, for the window to say what went
+    let sent = s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
+    assert_eq!(
+        sent,
+        Event::MessageSent {
+            account,
+            subject: "Plans for õhtu".into()
+        }
+    );
     // then the copy in Sent
     s.wait(|e| {
         *e == Event::FolderChanged {
@@ -248,7 +256,7 @@ fn sends_replies_and_keeps_a_copy() {
         ..Default::default()
     };
     s.core.send(account, answer).unwrap();
-    s.wait(|e| *e == Event::MessageSent { account });
+    s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
     let delivered = s.server.messages("INBOX");
     let raw = delivered.last().unwrap()["raw"].as_str().unwrap();
     let raw =
@@ -627,7 +635,7 @@ fn the_outbox_keeps_what_did_not_go() {
     // the server back: Send/Recv sends it, out of the Outbox
     s.core.update_account(account, &settings(&s.server)).unwrap();
     s.core.outbox_send().unwrap();
-    s.wait(|e| *e == Event::MessageSent { account });
+    s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
     assert!(s.core.outbox().unwrap().is_empty());
     assert_eq!(s.server.subjects("INBOX"), ["Waiting"]);
 
@@ -674,6 +682,16 @@ fn drafts_are_saved_reopened_and_gone_once_sent() {
         ..Default::default()
     };
     let message_id = s.core.save_draft(account, outgoing.clone()).unwrap();
+    // the window that saved it is told once the server has it
+    let saved = s.wait(|e| matches!(e, Event::DraftSaved { .. }));
+    assert_eq!(
+        saved,
+        Event::DraftSaved {
+            account,
+            message_id: message_id.clone(),
+            problem: None
+        }
+    );
     s.wait(changed);
     assert_eq!(s.server.subjects("Drafts"), ["Plans"]);
     let first = s.server.messages("Drafts")[0]["uid"].as_u64().unwrap();
@@ -716,7 +734,7 @@ fn drafts_are_saved_reopened_and_gone_once_sent() {
     };
     s.core.save_draft(account, reopened.clone()).unwrap();
     s.core.send(account, reopened).unwrap();
-    s.wait(|e| *e == Event::MessageSent { account });
+    s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
     assert!(s.server.subjects("Drafts").is_empty());
     assert_eq!(s.server.subjects("INBOX"), ["Plans"]);
     let sent = pe_testkit::raw_text(&s.server.messages("INBOX")[0]);

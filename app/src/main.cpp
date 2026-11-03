@@ -53,7 +53,8 @@ std::set<int64_t> g_failing;
 void OnCoreEvent(void* context, const PeEvent* event) noexcept {
     try {
         auto* copy = new UiEvent{event->kind, event->account, event->folder, event->uid, event->failure,
-                                 event->message ? core::Widen(event->message) : std::wstring()};
+                                 event->message ? core::Widen(event->message) : std::wstring(),
+                                 event->detail ? std::string(event->detail) : std::string()};
         if (!PostMessageW(static_cast<HWND>(context), WM_CORE_EVENT, 0, reinterpret_cast<LPARAM>(copy))) {
             delete copy;
         }
@@ -78,12 +79,39 @@ void ShowCounts() {
     SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
 }
 
-// how many messages wait in the Outbox, in the status bar: none says nothing
+// the last message sent, as the outgoing pane says it once the Outbox is empty
+std::wstring g_lastSent;
+// the app closes once the compose windows that were saving on closing are gone
+bool g_quitAfterCompose = false;
+// the control that had the keyboard when the main window went to the background, to have it again on coming back
+HWND g_lastFocus = nullptr;
+
+// "Subject" in quotes, or "(no subject)"
+std::wstring Quoted(const std::wstring& subject) {
+    return subject.empty() ? L"(no subject)" : L"\u201C" + subject + L"\u201D";
+}
+
+// the outgoing pane of the status bar, which other work does not write over: what is being sent, what waits in the
+// Outbox and why, or the last message sent
 void ShowOutbox() {
     core::Outbox outbox(pe_outbox(g_core.get()));
     size_t waiting = pe_outbox_count(outbox.get());
-    std::wstring text = waiting == 0 ? L"" : waiting == 1 ? L"1 message in the Outbox" : std::to_wstring(waiting) + L" messages in the Outbox";
+    std::wstring text = g_lastSent;
+    if (waiting > 0) {
+        const PeQueued* first = pe_outbox_get(outbox.get(), 0);
+        std::wstring subject = first && first->subject ? Text(first->subject) : L"";
+        bool failed = first && first->problem && *first->problem;
+        if (waiting > 1) {
+            text = std::to_wstring(waiting) + L" messages in the Outbox";
+        } else if (failed) {
+            text = Quoted(subject) + L" waits in the Outbox";
+        } else {
+            text = L"Sending " + Quoted(subject) + L"...";
+        }
+    }
     SendMessageW(g_status, SB_SETTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
+    // the whole text as the pane's tip, as a long subject is cut short
+    SendMessageW(g_status, SB_SETTIPTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
 }
 
 void SyncAll() {
@@ -189,7 +217,14 @@ void OnEvent(const UiEvent& event) {
         RequestDone(event.uid);
         break;
     case PE_EVENT_KIND_MESSAGE_SENT:
-        SetStatus(L"Message sent.");
+        // shown by the OutboxChanged that follows it
+        g_lastSent = L"Sent " + Quoted(event.message) + L" at " + TimeNow();
+        break;
+    case PE_EVENT_KIND_DRAFT_SAVED:
+        // the window that saved it says so; one that closed after saving leaves it to the status bar
+        if (!ComposeDraftSaved(event.detail, event.message)) {
+            SetStatus(event.message.empty() ? L"Message saved in Drafts." : L"The message was not saved in Drafts: " + event.message);
+        }
         break;
     case PE_EVENT_KIND_OUTBOX_CHANGED:
         ShowOutbox();
@@ -357,7 +392,8 @@ void Layout() {
     RECT reader = {right, list.bottom + gap, area.right, area.bottom};
     g_mailbox.Layout(tree, list, reader);
     int width = static_cast<int>(area.right - area.left);
-    int parts[] = {std::max(0, width - Scale(400)), std::max(0, width - Scale(220)), -1};
+    // the status, the outgoing mail (wide enough for a subject), the counts
+    int parts[] = {std::max(0, width - Scale(560)), std::max(0, width - Scale(220)), -1};
     SendMessageW(g_status, SB_SETPARTS, 3, reinterpret_cast<LPARAM>(parts));
 }
 
@@ -441,7 +477,8 @@ void CreateChildren(HWND hwnd) {
     g_folderFont = CreateFontIndirectW(&metrics.lfMessageFont);
     g_folderBrush = CreateSolidBrush(kFolderBarColor);
     SendMessageW(g_folderBar, WM_SETFONT, reinterpret_cast<WPARAM>(g_folderFont), FALSE);
-    g_status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0, hwnd, nullptr,
+    // tips: the whole text of a pane that is cut short (a long subject in the outgoing pane)
+    g_status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS, 0, 0, 0, 0, hwnd, nullptr,
                                GetModuleHandleW(nullptr), nullptr);
     g_mailbox.Create(hwnd, g_core.get());
 }
@@ -678,8 +715,40 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             return reinterpret_cast<LRESULT>(g_folderBrush);
         }
         return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
+    case WM_CLOSE:
+        // the messages being written first: each may ask to be saved, and the app stays while one is kept open or
+        // saved
+        switch (CloseComposeWindows()) {
+        case ComposeClose::Closed:
+            break;
+        case ComposeClose::Saving:
+            g_quitAfterCompose = true;
+            return 0;
+        case ComposeClose::Kept:
+            return 0;
+        }
+        break;
+    case WM_ACTIVATE:
+        if (LOWORD(wParam) == WA_INACTIVE) {
+            HWND focus = GetFocus();
+            g_lastFocus = focus && IsChild(hwnd, focus) ? focus : nullptr;
+        } else if (!HIWORD(wParam) && g_lastFocus && IsWindow(g_lastFocus)) {
+            // back to the list (or the tree, or Find) it left, not to the window itself
+            SetFocus(g_lastFocus);
+            return 0;
+        }
+        break;
+    case WM_COMPOSE_CLOSED:
+        if (g_quitAfterCompose && !ComposeWindowsOpen()) {
+            PostMessageW(hwnd, WM_CLOSE, 0, 0);
+        }
+        return 0;
+    case WM_COMPOSE_KEPT:
+        g_quitAfterCompose = false;
+        return 0;
     case WM_DESTROY:
         KillTimer(hwnd, TIMER_SYNC);
+        DestroyComposeWindows();
         // the WebView2s go before COM does, the core before its events are dropped
         CloseHelp();
         g_mailbox.Destroy();

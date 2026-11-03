@@ -29,6 +29,13 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hwnd);
+[DllImport("user32.dll")] public static extern IntPtr GetWindow(IntPtr hwnd, uint cmd);
+[DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint pid);
+[DllImport("kernel32.dll")] public static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
+[DllImport("kernel32.dll")] public static extern IntPtr VirtualAllocEx(IntPtr process, IntPtr address, IntPtr size, uint type, uint protect);
+[DllImport("kernel32.dll")] public static extern bool VirtualFreeEx(IntPtr process, IntPtr address, IntPtr size, uint type);
+[DllImport("kernel32.dll")] public static extern bool ReadProcessMemory(IntPtr process, IntPtr address, byte[] buffer, IntPtr size, out IntPtr read);
+[DllImport("kernel32.dll")] public static extern bool CloseHandle(IntPtr handle);
 public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll")] public static extern bool EnumChildWindows(IntPtr parent, EnumProc proc, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int size);
@@ -114,6 +121,41 @@ function WindowText([IntPtr]$window) {
     return $buffer.ToString()
 }
 function GetText([IntPtr]$window, [int]$id) { WindowText ([Native.Win]::GetDlgItem($window, $id)) }
+# the text of a part of a status bar: SB_GETTEXT writes it to memory of the app's own process, read back from there
+function StatusPart([IntPtr]$bar, [int]$index) {
+    $appPid = [uint32]0
+    [void][Native.Win]::GetWindowThreadProcessId($bar, [ref]$appPid)
+    # PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE
+    $process = [Native.Win]::OpenProcess(0x0038, $false, $appPid)
+    if ($process -eq [IntPtr]::Zero) { return '' }
+    $size = 4096
+    # MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE
+    $remote = [Native.Win]::VirtualAllocEx($process, [IntPtr]::Zero, [IntPtr]$size, 0x3000, 0x04)
+    $text = ''
+    if ($remote -ne [IntPtr]::Zero) {
+        # SB_GETTEXTLENGTHW first, so the text fits
+        $length = [int]([Native.Win]::SendMessage($bar, 0x040C, [IntPtr]$index, [IntPtr]::Zero).ToInt64() -band 0xFFFF)
+        if ($length -gt 0 -and ($length + 1) * 2 -le $size) {
+            [void][Native.Win]::SendMessage($bar, 0x040D, [IntPtr]$index, $remote)
+            $bytes = New-Object byte[] ($length * 2)
+            $read = [IntPtr]::Zero
+            if ([Native.Win]::ReadProcessMemory($process, $remote, $bytes, [IntPtr]$bytes.Length, [ref]$read)) {
+                $text = [System.Text.Encoding]::Unicode.GetString($bytes)
+            }
+        }
+        # MEM_RELEASE
+        [void][Native.Win]::VirtualFreeEx($process, $remote, [IntPtr]::Zero, 0x8000)
+    }
+    [void][Native.Win]::CloseHandle($process)
+    return $text
+}
+# whether window $a is in front of window $b
+function InFront([IntPtr]$a, [IntPtr]$b) {
+    for ($w = [Native.Win]::GetWindow($a, 2); $w -ne [IntPtr]::Zero; $w = [Native.Win]::GetWindow($w, 2)) {
+        if ($w -eq $b) { return $true }
+    }
+    return $false
+}
 function Click([IntPtr]$window, [int]$id) {
     [void][Native.Win]::PostMessage([Native.Win]::GetDlgItem($window, $id), $BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero)
 }
@@ -337,7 +379,11 @@ try {
     function Rows { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
     # a row of the list, reached with the keys as a user would
     function SelectRow([int]$row) {
-        [void][Native.Win]::SendMessage($list, 0x0007, [IntPtr]::Zero, [IntPtr]::Zero)
+        # a click into the first row gives the list the keyboard, as it does for a user
+        $point = [IntPtr]((28 -shl 16) -bor 60)
+        [void][Native.Win]::PostMessage($list, 0x0201, [IntPtr]1, $point)
+        [void][Native.Win]::PostMessage($list, 0x0202, [IntPtr]::Zero, $point)
+        Start-Sleep -Milliseconds 300
         Key $list $VK_HOME
         for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
         Start-Sleep -Milliseconds 1500
@@ -621,6 +667,14 @@ try {
     Step 'Drafts'
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose
+    # a window of its own, not owned by the main window: the main window can come in front of it
+    Check ([Native.Win]::GetWindow($compose, 4) -eq [IntPtr]::Zero) 'the message window is a window of its own'
+    # neither pinned on top (the screenshots pin the window they take)
+    foreach ($w in $main, $compose) { [void][Native.Win]::SetWindowPos($w, [IntPtr](-2), 0, 0, 0, 0, 0x13) }
+    [void][Native.Win]::SetForegroundWindow($main)
+    Check ([bool](WaitFor { InFront $main $compose } 5)) 'the main window comes in front of a message being written'
+    Shot $main 'write-0-main-in-front' $compose
+    [void][Native.Win]::SetForegroundWindow($compose)
     SetText $compose $IDC_TO 'Fay <fay@example.com>'
     SetText $compose $IDC_SUBJECT 'Draft from the UI test'
     [void](TypeInEditor $compose 'Half written.')
@@ -653,11 +707,18 @@ try {
         # saved again: one draft, the new one
         Command $compose $IDC_SAVE
         Check ($null -ne (WaitFor { $d = @(Messages 'Drafts'); if ($d.Count -eq 1 -and (RawText $d[0]) -match 'Now finished') { $d } } 30)) 'Save replaces the draft'
+        $composeStatus = [Native.Win]::FindWindowEx($compose, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+        Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'Saved in Drafts at *') { $t } } 30)) 'the message window says when the draft is saved'
+        Shot $compose 'write-10-draft-saved'
         Command $compose $IDC_SEND
         $finished = WaitFor { Find 'INBOX' 'Subject: Draft from the UI test' } 30
         Check ($null -ne $finished) 'the finished draft is sent'
         Check ($finished -and (RawText $finished) -match 'Half written' -and (RawText $finished) -match 'Now finished') 'with all that was written'
         Check ([bool](WaitFor { @(Messages 'Drafts').Count -eq 0 } 30)) 'and its draft is gone'
+        $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+        $outgoing = WaitFor { $t = StatusPart $mainStatus 1; if ($t -like "Sent *Draft from the UI test* at *") { $t } } 30
+        Check ($null -ne $outgoing) "the main window says what was sent ($(StatusPart $mainStatus 1))"
+        Shot $main 'write-11-sent'
     }
     SelectFolder 0
 
@@ -1001,8 +1062,24 @@ try {
     }
 
     Step 'closing'
+    # a message being written is asked about first: Cancel keeps the app and the message, No lets both go
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_SUBJECT 'Still writing'
+    [void](TypeInEditor $compose 'Not done yet.')
     [void][Native.Win]::PostMessage($main, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-    Check ($app.WaitForExit(15000)) 'the app closes'
+    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    Check ($null -ne $ask) 'closing the app asks about a message with changes'
+    if ($ask) {
+        Shot $ask 'write-12-close-app'
+        Click $ask 2
+        Start-Sleep -Seconds 1
+        Check ([Native.Win]::IsWindow($main) -and [Native.Win]::IsWindow($compose)) 'Cancel keeps the app and the message open'
+        [void][Native.Win]::PostMessage($main, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        if ($ask) { Click $ask 7 }
+    }
+    Check ($app.WaitForExit(15000)) 'No closes the message without saving, and the app'
 } catch {
     Check $false "unexpected error: $_ at line $($_.InvocationInfo.ScriptLineNumber)"
 } finally {

@@ -159,10 +159,20 @@ std::wstring FormatDate(int64_t seconds) {
         return {};
     }
     wchar_t date[64] = L"";
-    wchar_t time[64] = L"";
     GetDateFormatEx(LOCALE_NAME_USER_DEFAULT, DATE_SHORTDATE, &local, nullptr, date, 64, nullptr);
+    return std::wstring(date) + L" " + FormatTime(local);
+}
+
+std::wstring FormatTime(const SYSTEMTIME& local) {
+    wchar_t time[64] = L"";
     GetTimeFormatEx(LOCALE_NAME_USER_DEFAULT, TIME_NOSECONDS, &local, nullptr, time, 64);
-    return std::wstring(date) + L" " + time;
+    return time;
+}
+
+std::wstring TimeNow() {
+    SYSTEMTIME now;
+    GetLocalTime(&now);
+    return FormatTime(now);
 }
 
 std::wstring FormatSize(uint64_t bytes) {

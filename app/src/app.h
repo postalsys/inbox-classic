@@ -28,6 +28,9 @@ std::wstring GetWindowString(HWND window);
 std::wstring Text(const char* utf8);
 // a date in seconds since the Unix epoch in the user's short date and time format, local time
 std::wstring FormatDate(int64_t seconds);
+// a time of day as the user's settings write it, without seconds: of `local`, or now
+std::wstring FormatTime(const SYSTEMTIME& local);
+std::wstring TimeNow();
 // 1.2 KB, 3 MB
 std::wstring FormatSize(uint64_t bytes);
 // the brush of dialog backgrounds, for WM_CTLCOLORSTATIC
@@ -134,7 +137,21 @@ void CloseHelp();
 // ---- compose.cpp ----
 
 // opens a window to write a message from `account`, with the fields of `draft` (NULL for a new message)
-void OpenCompose(HWND owner, PeCore* core, int64_t account, const PeDraftInfo* draft);
+// a compose window of its own on the taskbar, not owned by `main` (so the main window can come in front of it); it
+// tells `main` when it is gone
+void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* draft);
+// the main window closing: each compose window is asked to close, a message with changes asks whether to save it.
+// Closed when they all went; Saving when some close once their draft is saved (WM_COMPOSE_CLOSED follows); Kept when
+// the user kept one open
+enum class ComposeClose { Closed, Saving, Kept };
+ComposeClose CloseComposeWindows();
+// whether any compose window is open
+bool ComposeWindowsOpen();
+// the compose windows, gone without asking, before the core they use is
+void DestroyComposeWindows();
+// the save of the draft `messageId` finished, `problem` empty when it worked: the window that saved it says so;
+// false when that window is no longer open
+bool ComposeDraftSaved(const std::string& messageId, const std::wstring& problem);
 // Ctrl+S in a compose window (its fields; the editor has its own): saves the message in Drafts; true when handled
 bool ComposeKey(const MSG& msg);
 
@@ -148,6 +165,8 @@ struct UiEvent {
     uint64_t uid;
     PeFailureKind failure;
     std::wstring message;
+    // the Message-ID of a draft, for DraftSaved
+    std::string detail;
 };
 
 // the folder tree, the message list and the reading pane
@@ -298,6 +317,10 @@ private:
 };
 
 constexpr UINT WM_CORE_EVENT = WM_APP + 1;
+// to the main window from a compose window: it is gone (WM_COMPOSE_CLOSED), or it stays open after all, its save on
+// closing having failed (WM_COMPOSE_KEPT)
+constexpr UINT WM_COMPOSE_CLOSED = WM_APP + 2;
+constexpr UINT WM_COMPOSE_KEPT = WM_APP + 3;
 
 enum CommandId : WORD {
     IDM_NEW_ACCOUNT = 100,

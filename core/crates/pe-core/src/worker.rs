@@ -416,8 +416,21 @@ impl Worker {
         }
     }
 
-    /// Saves a draft in the Drafts folder, in place of the copy saved before
+    /// Saves a draft in the Drafts folder, in place of the copy saved before, and says how that went to the window it
+    /// came from ([`Event::DraftSaved`])
     async fn save_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
+        let message_id = outgoing.message_id.clone().unwrap_or_default();
+        let saved = self.store_draft(store, outgoing).await;
+        self.emit(Event::DraftSaved {
+            account: self.account,
+            message_id,
+            problem: saved.as_ref().err().map(|failure| failure.message.clone()),
+        });
+        self.sync_one(store, saved?).await
+    }
+
+    /// Puts a draft in the Drafts folder on the server; the id of that folder
+    async fn store_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Result<FolderId, Failure> {
         let drafts = crate::compose::drafts_folder(store, self.account)?.ok_or_else(|| Failure {
             kind: FailureKind::Other,
             message: crate::compose::NO_DRAFTS.into(),
@@ -438,7 +451,7 @@ impl Worker {
         if let Some(from) = moved_from {
             self.remove_draft_of(store, from, &message_id).await;
         }
-        self.sync_one(store, drafts.id).await
+        Ok(drafts.id)
     }
 
     async fn remove_drafts(&mut self, store: &mut Store, message_id: &str) -> Outcome {
@@ -494,7 +507,10 @@ impl Worker {
                 Ok(_) => {
                     // sent: whatever happens next, the others still go and this one is not counted as failed
                     let unqueued = store.unqueue(message.id);
-                    self.emit(Event::MessageSent { account: self.account });
+                    self.emit(Event::MessageSent {
+                        account: self.account,
+                        subject: message.subject.clone(),
+                    });
                     self.emit(Event::OutboxChanged { account: self.account });
                     if let Err(error) = unqueued {
                         self.sent_but(format!("it is still in the Outbox: {error}"));

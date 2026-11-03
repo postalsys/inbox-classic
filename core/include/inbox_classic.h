@@ -27,7 +27,7 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_MESSAGE_READY = 5,
   // Work for `account` failed: `failure` and `message` say what
   PE_EVENT_KIND_FAILED = 6,
-  // A message from `account` was sent
+  // A message from `account` was sent; `message` is its subject
   PE_EVENT_KIND_MESSAGE_SENT = 7,
   // The lookup `uid` of `pe_autoconfig_start` is done: `pe_autoconfig_result`
   PE_EVENT_KIND_AUTOCONFIG_DONE = 8,
@@ -37,6 +37,9 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_VIEW_READY = 10,
   // The Outbox of `account` changed: a message went in or out, or did not go: `pe_outbox`
   PE_EVENT_KIND_OUTBOX_CHANGED = 11,
+  // The draft whose Message-ID is `detail` is in the Drafts of `account` on the server; when `message` is not
+  // NULL it was not saved, and that says why
+  PE_EVENT_KIND_DRAFT_SAVED = 12,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -142,8 +145,11 @@ typedef struct PeEvent {
   int64_t folder;
   uint64_t uid;
   enum PeFailureKind failure;
-  // For `Failed`, UTF-8; NULL otherwise
+  // UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save.
+  // NULL otherwise
   const char *message;
+  // UTF-8: the Message-ID of the draft, for `DraftSaved`. NULL otherwise
+  const char *detail;
 } PeEvent;
 
 // Called on a worker thread, never on the thread that called into the core: copy what is

@@ -97,7 +97,7 @@ pub enum PeEventKind {
     MessageReady = 5,
     /// Work for `account` failed: `failure` and `message` say what
     Failed = 6,
-    /// A message from `account` was sent
+    /// A message from `account` was sent; `message` is its subject
     MessageSent = 7,
     /// The lookup `uid` of `pe_autoconfig_start` is done: `pe_autoconfig_result`
     AutoconfigDone = 8,
@@ -107,6 +107,9 @@ pub enum PeEventKind {
     ViewReady = 10,
     /// The Outbox of `account` changed: a message went in or out, or did not go: `pe_outbox`
     OutboxChanged = 11,
+    /// The draft whose Message-ID is `detail` is in the Drafts of `account` on the server; when `message` is not
+    /// NULL it was not saved, and that says why
+    DraftSaved = 12,
 }
 
 #[repr(C)]
@@ -141,8 +144,11 @@ pub struct PeEvent {
     pub folder: i64,
     pub uid: u64,
     pub failure: PeFailureKind,
-    /// For `Failed`, UTF-8; NULL otherwise
+    /// UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save.
+    /// NULL otherwise
     pub message: *const c_char,
+    /// UTF-8: the Message-ID of the draft, for `DraftSaved`. NULL otherwise
+    pub detail: *const c_char,
 }
 
 /// Called on a worker thread, never on the thread that called into the core: copy what is
@@ -169,15 +175,20 @@ impl Callback {
             Event::FolderChanged { account, folder } => (PeEventKind::FolderChanged, *account, *folder, 0),
             Event::MessageReady { folder, uid } => (PeEventKind::MessageReady, 0, *folder, *uid),
             Event::Failed { account, .. } => (PeEventKind::Failed, *account, 0, 0),
-            Event::MessageSent { account } => (PeEventKind::MessageSent, *account, 0, 0),
+            Event::MessageSent { account, .. } => (PeEventKind::MessageSent, *account, 0, 0),
+            Event::DraftSaved { account, .. } => (PeEventKind::DraftSaved, *account, 0, 0),
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
             Event::ViewReady { request } => (PeEventKind::ViewReady, 0, 0, *request),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
         };
-        let (failure, message) = match event {
-            Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message))),
-            _ => (PeFailureKind::None, None),
+        let (failure, message, detail) = match event {
+            Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
+            Event::MessageSent { subject, .. } => (PeFailureKind::None, Some(c_string(subject)), None),
+            Event::DraftSaved {
+                message_id, problem, ..
+            } => (PeFailureKind::None, problem.map(c_string), Some(c_string(message_id))),
+            _ => (PeFailureKind::None, None, None),
         };
         let event = PeEvent {
             kind,
@@ -186,6 +197,7 @@ impl Callback {
             uid,
             failure,
             message: message.as_ref().map_or(null(), |m| m.as_ptr()),
+            detail: detail.as_ref().map_or(null(), |d| d.as_ptr()),
         };
         // a panic must not unwind into C; the callback must not throw (see PeEventCallback)
         let _ = guard(|| {
