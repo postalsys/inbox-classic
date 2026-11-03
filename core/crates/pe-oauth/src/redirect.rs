@@ -4,7 +4,7 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
-use crate::OAuthError;
+use crate::{OAuthError, needs_admin};
 
 /// The most of a request read: a redirect is one line
 const MAX_REQUEST: usize = 16 * 1024;
@@ -14,6 +14,8 @@ const MAX_REQUEST: usize = 16 * 1024;
 pub(crate) enum Redirect {
     Code(String),
     Denied(String),
+    /// Refused because the organization's administrator has to approve the app first
+    NeedsAdmin,
     /// Not this sign-in's, or not a redirect at all (a favicon request)
     Other,
 }
@@ -31,6 +33,7 @@ pub(crate) fn parse_redirect(request: &[u8], state: &str) -> Redirect {
     };
     let mut code = None;
     let mut error = None;
+    let mut description = String::new();
     let mut matched = false;
     for pair in query.split('&') {
         let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
@@ -38,12 +41,14 @@ pub(crate) fn parse_redirect(request: &[u8], state: &str) -> Redirect {
         match key {
             "code" => code = Some(value),
             "error" => error = Some(value),
+            "error_description" => description = value,
             "state" => matched = constant_time_eq(value.as_bytes(), state.as_bytes()),
             _ => {}
         }
     }
     match (matched, code, error) {
         (true, Some(code), None) if !code.is_empty() => Redirect::Code(code),
+        (true, _, Some(_)) if needs_admin(&description) => Redirect::NeedsAdmin,
         (true, _, Some(error)) => Redirect::Denied(error),
         _ => Redirect::Other,
     }
@@ -56,6 +61,7 @@ fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
 const DONE: &str = "<!doctype html><title>Inbox Classic</title><p>You are signed in. You can close this page and go back to Inbox Classic.</p>";
 const DENIED: &str =
     "<!doctype html><title>Inbox Classic</title><p>Signing in was cancelled. You can close this page.</p>";
+const NEEDS_ADMIN: &str = "<!doctype html><title>Inbox Classic</title><p>Your organization's administrator has to approve Inbox Classic before you can sign in with this account. Inbox Classic shows where they can do it. You can close this page.</p>";
 const OTHER: &str =
     "<!doctype html><title>Inbox Classic</title><p>This page is not part of signing in to Inbox Classic.</p>";
 
@@ -90,6 +96,10 @@ pub(crate) async fn receive(listener: &TcpListener, state: &str) -> Result<Strin
                 answer(socket, DENIED).await;
                 return Err(OAuthError::Denied(reason));
             }
+            Redirect::NeedsAdmin => {
+                answer(socket, NEEDS_ADMIN).await;
+                return Err(OAuthError::NeedsAdmin);
+            }
             Redirect::Other => answer(socket, OTHER).await,
         }
     }
@@ -108,6 +118,21 @@ mod tests {
         );
         assert_eq!(
             parse_redirect(b"GET /?error=access_denied&state=s1 HTTP/1.1\r\n", state),
+            Redirect::Denied("access_denied".into())
+        );
+        // Microsoft's "Need admin approval", left with "Return to the application"
+        assert_eq!(
+            parse_redirect(
+                b"GET /?error=access_denied&error_description=AADSTS90094%3a+The+grant+requires+admin+permission.&state=s1 HTTP/1.1\r\n",
+                state
+            ),
+            Redirect::NeedsAdmin
+        );
+        assert_eq!(
+            parse_redirect(
+                b"GET /?error=access_denied&error_description=AADSTS65004&state=s1 HTTP/1.1\r\n",
+                state
+            ),
             Redirect::Denied("access_denied".into())
         );
         // another sign-in's, or none at all

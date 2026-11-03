@@ -167,6 +167,9 @@ pub enum OAuthError {
     Unavailable(String),
     /// The user said no, or closed the page
     Denied(String),
+    /// The account's organization has not approved the app (Microsoft Entra admin consent): only its administrator
+    /// can, at [`admin_consent_url`]
+    NeedsAdmin,
     /// The redirect did not come in time
     TimedOut,
     /// The redirect was not for this sign-in: another state, no code
@@ -180,7 +183,10 @@ pub enum OAuthError {
 impl OAuthError {
     /// Whether the user has to sign in again, rather than wait for the network
     pub fn needs_sign_in(&self) -> bool {
-        matches!(self, OAuthError::Refused(_) | OAuthError::Denied(_))
+        matches!(
+            self,
+            OAuthError::Refused(_) | OAuthError::Denied(_) | OAuthError::NeedsAdmin
+        )
     }
 }
 
@@ -189,6 +195,11 @@ impl fmt::Display for OAuthError {
         match self {
             OAuthError::Unavailable(reason) => write!(f, "the provider did not answer properly: {reason}"),
             OAuthError::Denied(reason) => write!(f, "signing in was cancelled: {reason}"),
+            OAuthError::NeedsAdmin => write!(
+                f,
+                "your organization's administrator has to approve Inbox Classic first; they can do it at {}",
+                admin_consent_url()
+            ),
             OAuthError::TimedOut => f.write_str("signing in took too long"),
             OAuthError::BadRedirect => f.write_str("the browser came back from another sign-in"),
             OAuthError::Refused(reason) => write!(f, "the provider refused the sign-in: {reason}"),
@@ -309,6 +320,22 @@ async fn token_request(
     parse_tokens(response.status, &response.body, refreshed, now())
 }
 
+/// Where an administrator of a Microsoft 365 organization approves the app for everyone in it
+pub fn admin_consent_url() -> String {
+    format!(
+        "https://login.microsoftonline.com/organizations/adminconsent?client_id={}",
+        Provider::builtin(ProviderKind::Microsoft).client_id
+    )
+}
+
+/// Whether Microsoft's error text says the organization's administrator has to consent first: AADSTS65001 (no one
+/// consented), 90094 (the grant needs an admin) and 90095 (the same, with the admin consent workflow on)
+pub(crate) fn needs_admin(description: &str) -> bool {
+    ["AADSTS65001", "AADSTS90094", "AADSTS90095"]
+        .iter()
+        .any(|code| description.contains(code))
+}
+
 /// The tokens of a token endpoint's answer (RFC 6749 5.1), or its error (5.2)
 pub fn parse_tokens(status: u16, body: &[u8], refreshed: Option<&str>, now: i64) -> Result<Tokens, OAuthError> {
     let json: Value = serde_json::from_slice(body).map_err(|_| OAuthError::Refused(format!("HTTP {status}")))?;
@@ -319,6 +346,9 @@ pub fn parse_tokens(status: u16, body: &[u8], refreshed: Option<&str>, now: i64)
             .map(str::to_string)
     };
     if status != 200 {
+        if text("error_description").is_some_and(|d| needs_admin(&d)) {
+            return Err(OAuthError::NeedsAdmin);
+        }
         let reason = [text("error"), text("error_description")]
             .into_iter()
             .flatten()
@@ -418,6 +448,20 @@ mod tests {
         );
         assert!(matches!(refused, Err(OAuthError::Refused(ref r)) if r == "invalid_grant: Token has been revoked."));
         assert!(refused.unwrap_err().needs_sign_in());
+        // an organization that has not approved the app: only its administrator can help
+        let admin = parse_tokens(
+            400,
+            br#"{"error":"invalid_grant","error_description":"AADSTS65001: The user or administrator has not consented to use the application."}"#,
+            None,
+            0,
+        )
+        .unwrap_err();
+        assert!(matches!(admin, OAuthError::NeedsAdmin) && admin.needs_sign_in());
+        assert!(
+            admin
+                .to_string()
+                .ends_with(&format!("adminconsent?client_id={MICROSOFT_CLIENT_ID}"))
+        );
         assert!(matches!(
             parse_tokens(200, b"<html>", None, 0),
             Err(OAuthError::Refused(_))
