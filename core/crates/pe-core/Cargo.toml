@@ -2,6 +2,7 @@
 name = "pe-core"
 description = "The mail engine behind the C API: accounts, their sync workers, the message list and message views"
 version.workspace = true
+license.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 publish.workspace = true

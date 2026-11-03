@@ -52,3 +52,7 @@ Signing in to Gmail, Outlook.com and Microsoft 365 through the browser (OAuth 2.
 Releases follow ImapKit Desktop's flow. Commits use Conventional Commit messages (`feat:`, `fix:` ...), and release-please keeps a release PR up to date on master (`release-please-config.json`, `.github/workflows/release.yaml`). Merging the PR bumps the version in `core/Cargo.toml` (the workflow brings `Cargo.lock` along), writes the changelog, pushes the `v<version>` tag and drafts the release.
 
 Then, on the release Mac, check out the tag and run `scripts/release.sh`. It checks that CI passed for the tag, builds the installer on the Windows build machine, signs the exe, the uninstaller and the setup with Azure Artifact Signing, writes `hashes.txt` signed with the release GPG key, uploads both to the draft and publishes it. The setup has no version in its name, so https://github.com/postalsys/inbox-classic/releases/latest/download/InboxClassic-Setup.exe always gets the latest release, which is the download link of inboxclassic.com. `BUILD_ONLY=yes` builds and signs without uploading.
+
+## License
+
+Inbox Classic is licensed under the [MIT license](LICENSE). The third-party code it includes, and their licenses, are listed in `THIRD-PARTY-NOTICES.txt` of the installer (`scripts/notices.mjs`).
