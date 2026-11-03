@@ -1011,6 +1011,13 @@ struct PeDraft *pe_message_draft(const struct PeCore *core,
                                  uint64_t uid,
                                  enum PeDraftKind kind);
 
+// A new message from a `mailto:` link (RFC 6068): its addresses, subject and body; NULL for what is no such link.
+// Free with `pe_draft_free`.
+//
+// # Safety
+// `link` must be NULL or a NUL-terminated string.
+struct PeDraft *pe_mailto_draft(const char *link);
+
 // A saved draft of the Drafts folder (its source in the store, after `MessageReady`) to go on writing, NULL
 // otherwise
 //

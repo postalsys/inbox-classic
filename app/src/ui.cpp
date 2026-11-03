@@ -438,7 +438,8 @@ HICON AppIcon(bool titleBar) {
 }
 
 namespace {
-const wchar_t* kPreferencesKey = L"Software\\Inbox Classic";
+// the installer's own key, which the uninstaller removes
+const wchar_t* kPreferencesKey = L"Software\\Postal Systems\\InboxClassic";
 }
 
 DWORD GetPreference(const wchar_t* name, DWORD fallback) {

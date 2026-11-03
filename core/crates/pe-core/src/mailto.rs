@@ -34,11 +34,8 @@ fn hex(c: u8) -> Option<u8> {
 
 /// What goes in a header field: one line
 fn one_line(text: &str) -> String {
-    text.chars()
-        .map(|c| if c.is_control() { ' ' } else { c })
-        .collect::<String>()
-        .trim()
-        .to_string()
+    let line: String = text.chars().map(|c| if c.is_control() { ' ' } else { c }).collect();
+    line.trim().to_string()
 }
 
 /// Addresses added to a field, comma separated
@@ -55,19 +52,11 @@ fn append(field: &mut String, addresses: &str) {
 
 /// Text as the editor's HTML: escaped, its lines as lines
 fn body_html(text: &str) -> String {
-    let text = text.replace("\r\n", "\n");
-    text.split('\n')
-        .map(|line| {
-            let escaped = line
-                .replace('&', "&amp;")
-                .replace('<', "&lt;")
-                .replace('>', "&gt;")
-                .replace('"', "&quot;");
-            if escaped.is_empty() {
-                "<div><br></div>".to_string()
-            } else {
-                format!("<div>{escaped}</div>")
-            }
+    text.replace("\r\n", "\n")
+        .split('\n')
+        .map(|line| match pe_mime::parser::escape_html(line) {
+            escaped if escaped.is_empty() => "<div><br></div>".to_string(),
+            escaped => format!("<div>{escaped}</div>"),
         })
         .collect()
 }
@@ -109,7 +98,7 @@ mod tests {
         assert_eq!(d.to, "ann@example.com,Bob <bob@example.com>");
         assert_eq!(d.cc, "c@example.com");
         assert_eq!(d.subject, "Hello õie");
-        assert_eq!(d.body, "<div>Line 1</div><div>Line &lt;b&gt;2&lt;/b&gt;</div>");
+        assert_eq!(d.body, "<div>Line 1</div><div>Line &#x3C;b&#x3E;2&#x3C;/b&#x3E;</div>");
         // case does not matter, to= adds to the path's, + is a plus
         let d = draft("MAILTO:?To=a@example.com&to=b@example.com&BCC=x@example.com&subject=1+1").unwrap();
         assert_eq!(

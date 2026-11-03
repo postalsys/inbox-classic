@@ -21,7 +21,7 @@ use std::fmt;
 
 pub use address::{ParsedAddress, parse_addresses};
 pub use node::{Header, HeaderLine};
-pub use text::{html_to_text, text_addresses, text_to_html};
+pub use text::{escape_html, html_to_text, text_addresses, text_to_html};
 
 use crate::Address;
 use node::{LineBreak, MimeNode, State};

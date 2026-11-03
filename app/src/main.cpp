@@ -4,8 +4,11 @@
 #include <objbase.h>
 #include <shellapi.h>
 #include <shlobj.h>
+#include <shobjidl.h>
+#include <wrl/client.h>
 
 #include <algorithm>
+#include <functional>
 #include <set>
 
 #include "app.h"
@@ -386,6 +389,7 @@ HMENU BuildMenu() {
     AppendMenuW(tools, MF_STRING, IDM_OUTBOX, L"&Outbox...");
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(tools, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, L"&Notify of New Mail");
+    AppendMenuW(tools, MF_STRING, IDM_DEFAULT_APP, L"Make &Default Mail App...");
     HMENU help = CreatePopupMenu();
     AppendMenuW(help, MF_STRING, IDM_HELP, L"&Contents\tF1");
     AppendMenuW(help, MF_SEPARATOR, 0, nullptr);
@@ -548,12 +552,34 @@ struct Arguments {
     std::wstring store;
     std::wstring certificate;
     bool memoryPasswords = false;
+    // a mailto: link Windows hands the default mail program, a new message to write
+    std::wstring mailto;
 };
 Arguments g_arguments;
 
+// where a mailto: link starts in the command line, npos for none
+size_t MailtoStart(const std::wstring& line) {
+    for (size_t at = line.find(L':'); at != std::wstring::npos; at = line.find(L':', at + 1)) {
+        if (at >= 6 && _wcsnicmp(line.c_str() + at - 6, L"mailto", 6) == 0) {
+            return at - 6;
+        }
+    }
+    return std::wstring::npos;
+}
+
 void ReadArguments() {
+    // a mailto: link is the rest of the command line, whatever it has in it: a link made up to look like more
+    // arguments ("... --store ...") stays part of the link, and only what comes before it is read as options
+    std::wstring line = GetCommandLineW();
+    if (size_t start = MailtoStart(line); start != std::wstring::npos) {
+        g_arguments.mailto = line.substr(start);
+        while (!g_arguments.mailto.empty() && (g_arguments.mailto.back() == L'"' || g_arguments.mailto.back() == L' ')) {
+            g_arguments.mailto.pop_back();
+        }
+        line.resize(start);
+    }
     int count = 0;
-    LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &count);
+    LPWSTR* argv = CommandLineToArgvW(line.c_str(), &count);
     for (int i = 1; argv && i < count; i++) {
         std::wstring arg = argv[i];
         if (arg == L"--store" && i + 1 < count) {
@@ -615,6 +641,101 @@ void NewMessage(int64_t account) {
     OpenCompose(g_main, g_core.get(), account, nullptr);
 }
 
+// a new message from a mailto: link, from the account of what is shown (the core reads the link)
+void OpenMailto(const std::wstring& link) {
+    core::Draft draft(pe_mailto_draft(core::Narrow(link).c_str()));
+    if (!draft) {
+        return;
+    }
+    int64_t account = g_mailbox.CurrentAccount();
+    if (!account) {
+        MessageBoxW(g_main, L"Add a mail account first, then click the e-mail link again.", kTitle, MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
+}
+
+// ---- one app for each mail store ----
+
+// the window property that names the mail store a main window has open, so another start for it hands over to it
+const wchar_t* kStoreProperty = L"InboxClassic.Store";
+// WM_COPYDATA from another start: a mailto: link to write, or empty to show the window
+constexpr ULONG_PTR kCopyMailto = 1;
+// the link it handed over, opened once WM_COPYDATA returned
+constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
+std::wstring g_pendingMailto;
+
+HANDLE StoreTag() {
+    std::wstring store = g_arguments.store.empty() ? StorePath() : g_arguments.store;
+    CharLowerBuffW(store.data(), static_cast<DWORD>(store.size()));
+    return reinterpret_cast<HANDLE>(static_cast<uintptr_t>(std::hash<std::wstring>{}(store) | 1));
+}
+
+// the main window of another start of the app with the same mail store, nullptr when there is none
+HWND RunningWindow() {
+    struct Search {
+        HANDLE tag;
+        HWND found = nullptr;
+    } search{StoreTag()};
+    EnumWindows(
+        [](HWND hwnd, LPARAM param) -> BOOL {
+            auto* search = reinterpret_cast<Search*>(param);
+            wchar_t name[64] = L"";
+            GetClassNameW(hwnd, name, 64);
+            if (wcscmp(name, kMainClass) == 0 && GetPropW(hwnd, kStoreProperty) == search->tag) {
+                search->found = hwnd;
+                return FALSE;
+            }
+            return TRUE;
+        },
+        reinterpret_cast<LPARAM>(&search));
+    return search.found;
+}
+
+// hands what this start was for to the one already running: true when there is one
+bool HandOver() {
+    HWND running = RunningWindow();
+    if (!running) {
+        return false;
+    }
+    DWORD process = 0;
+    GetWindowThreadProcessId(running, &process);
+    AllowSetForegroundWindow(process);
+    COPYDATASTRUCT data = {kCopyMailto, static_cast<DWORD>(g_arguments.mailto.size() * sizeof(wchar_t)),
+                           const_cast<wchar_t*>(g_arguments.mailto.c_str())};
+    SendMessageTimeoutW(running, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&data), SMTO_ABORTIFHUNG, 5000, nullptr);
+    return true;
+}
+
+// what the installer registers the app as (installer/inbox-classic.nsi: MAILTOCLASS, PRODUCT)
+const wchar_t* kMailtoClass = L"InboxClassic.mailto";
+const wchar_t* kRegisteredName = L"Inbox Classic";
+
+// Tools > Make Default Mail App: Windows lets only the user choose it, in Settings, where the installer listed the app
+void MakeDefaultMailApp() {
+    Microsoft::WRL::ComPtr<IApplicationAssociationRegistration> associations;
+    LPWSTR current = nullptr;
+    if (SUCCEEDED(CoCreateInstance(CLSID_ApplicationAssociationRegistration, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&associations))) &&
+        SUCCEEDED(associations->QueryCurrentDefault(L"mailto", AT_URLPROTOCOL, AL_EFFECTIVE, &current))) {
+        bool ours = _wcsicmp(current, kMailtoClass) == 0;
+        CoTaskMemFree(current);
+        if (ours) {
+            MessageBoxW(g_main, L"Inbox Classic is your default mail app: e-mail links open a new message here.", kTitle, MB_OK | MB_ICONINFORMATION);
+            return;
+        }
+    }
+    DWORD size = 0;
+    if (RegGetValueW(HKEY_CURRENT_USER, L"Software\\RegisteredApplications", kRegisteredName, RRF_RT_REG_SZ, nullptr, nullptr, &size) !=
+        ERROR_SUCCESS) {
+        MessageBoxW(g_main, L"This copy of Inbox Classic was not installed, so Windows does not list it as a mail app. Install it to choose it.",
+                    kTitle, MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    MessageBoxW(g_main, L"Windows opens its Default apps settings for Inbox Classic. Choose it for MAILTO there.", kTitle,
+                MB_OK | MB_ICONINFORMATION);
+    ShellExecuteW(g_main, L"open", L"ms-settings:defaultapps?registeredAppUser=Inbox%20Classic", nullptr, nullptr, SW_SHOWNORMAL);
+}
+
 void Reply(PeDraftKind kind) {
     core::Draft draft = g_mailbox.DraftOfShown(kind);
     if (!draft) {
@@ -673,6 +794,9 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_OPEN:
         ShowMain();
+        return;
+    case IDM_DEFAULT_APP:
+        MakeDefaultMailApp();
         return;
     case IDM_NOTIFY:
         g_notify = !g_notify;
@@ -776,6 +900,25 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetTimer(hwnd, TIMER_SYNC, kSyncInterval, nullptr);
         TrayCreate(hwnd);
         TrayCount(hwnd, pe_inbox_unread(g_core.get()));
+        // another start of the app for this mail store hands over to this one
+        SetPropW(hwnd, kStoreProperty, StoreTag());
+        return 0;
+    case WM_COPYDATA: {
+        auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lParam);
+        if (data->dwData != kCopyMailto || data->cbData % sizeof(wchar_t) != 0 || data->cbData > 64 * 1024 * sizeof(wchar_t)) {
+            return FALSE;
+        }
+        std::wstring link(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+        ShowMain();
+        // after this message returns, so the other start is not kept waiting by the compose window
+        if (!link.empty()) {
+            g_pendingMailto = link;
+            PostMessageW(hwnd, WM_OPEN_MAILTO, 0, 0);
+        }
+        return TRUE;
+    }
+    case WM_OPEN_MAILTO:
+        OpenMailto(std::exchange(g_pendingMailto, {}));
         return 0;
     case WM_QUERYENDSESSION:
         // Windows is shutting down or signing out: the app ends with it
@@ -921,6 +1064,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_quitAfterCompose = false;
         return 0;
     case WM_DESTROY:
+        RemovePropW(hwnd, kStoreProperty);
         KillTimer(hwnd, TIMER_SYNC);
         TrayRemove(hwnd);
         DestroyComposeWindows();
@@ -956,6 +1100,11 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         return 1;
     }
     ReadArguments();
+    // the app is open already for this mail store: it takes the link, or comes to the front
+    if (HandOver()) {
+        CoUninitialize();
+        return 0;
+    }
     INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_TREEVIEW_CLASSES | ICC_LISTVIEW_CLASSES | ICC_BAR_CLASSES};
     InitCommonControlsEx(&controls);
 
@@ -977,6 +1126,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     ShowWindow(hwnd, show);
     UpdateWindow(hwnd);
     FirstRun();
+    if (!g_arguments.mailto.empty()) {
+        OpenMailto(g_arguments.mailto);
+    }
 
     MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0) > 0) {

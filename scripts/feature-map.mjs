@@ -526,6 +526,13 @@ const sections = [
                 checked: ['"dave at example.com" is refused with the reason', 'The compose window stays open']
             },
             {
+                shot: 'write-18-mailto',
+                name: 'The default mail app (mailto: links)',
+                what: "The installer lists Inbox Classic among the mail programs of Windows; chosen as the default, e-mail links open a new message with the link's addresses, subject and text (RFC 6068), and nothing else of it. A second start of the app hands the link to the one already open.",
+                how: 'Tools > Make Default Mail App opens the Default apps settings of Windows; then click an e-mail link.',
+                checked: ['A second start with a mailto: link hands it over and ends', "The running app opens a new message from it, to the link's address"]
+            },
+            {
                 shot: 'write-17-complete',
                 name: 'Address completion',
                 what: 'Typing in To, Cc or Bcc lists the people it may be from an address book on this computer: the recipients of Sent Items and the senders of the rest (Junk left out), those written to most first. Arrows choose, Enter or Tab takes one with a comma for the next, Esc closes the list, Shift+Delete forgets someone for good.',

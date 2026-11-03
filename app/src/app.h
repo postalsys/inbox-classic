@@ -193,7 +193,8 @@ void TrayNotify(HWND main, const std::wstring& title, const std::wstring& text, 
 // notification in `folder` and `uid` (0 for none)
 TrayAction TrayMessage(HWND main, UINT message, WPARAM wParam, LPARAM lParam, int64_t& folder, uint64_t& uid);
 
-// a plain preference of the app (HKEY_CURRENT_USER\Software\Inbox Classic), `fallback` when it is not set
+// a plain preference of the app (HKEY_CURRENT_USER\Software\Postal Systems\InboxClassic), `fallback` when it is
+// not set
 DWORD GetPreference(const wchar_t* name, DWORD fallback);
 void SetPreference(const wchar_t* name, DWORD value);
 
@@ -491,6 +492,7 @@ enum CommandId : WORD {
     IDM_NOTIFY,
     // the tray icon's menu
     IDM_OPEN,
+    IDM_DEFAULT_APP,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

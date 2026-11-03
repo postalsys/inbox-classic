@@ -37,6 +37,10 @@ SetCompressor /SOLID lzma
 ; the same keys for every version, this is how a newer installer finds the installed one
 !define REGKEY "Software\Postal Systems\InboxClassic"
 !define UNINSTKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\InboxClassic"
+; a mail program Windows lists in Default apps, for mailto: links (the user chooses it there; Tools > Make Default
+; Mail App opens that page)
+!define CLIENTKEY "Software\Clients\Mail\${PRODUCT}"
+!define MAILTOCLASS "InboxClassic.mailto"
 ; forward slashes work for makensis on every platform, and for the shell that runs the signing script
 !define ROOT "${__FILEDIR__}/.."
 
@@ -179,6 +183,19 @@ Section "Install"
     WriteRegDWORD HKCU "${UNINSTKEY}" "NoRepair" 1
     ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
     WriteRegDWORD HKCU "${UNINSTKEY}" "EstimatedSize" $0
+
+    ; mailto: links, should the user choose it for them
+    WriteRegStr HKCU "Software\Classes\${MAILTOCLASS}" "" "URL:MailTo Protocol"
+    WriteRegStr HKCU "Software\Classes\${MAILTOCLASS}" "URL Protocol" ""
+    WriteRegStr HKCU "Software\Classes\${MAILTOCLASS}\DefaultIcon" "" "$INSTDIR\${EXE},0"
+    WriteRegStr HKCU "Software\Classes\${MAILTOCLASS}\shell\open\command" "" '"$INSTDIR\${EXE}" "%1"'
+    WriteRegStr HKCU "${CLIENTKEY}" "" "${PRODUCT}"
+    WriteRegStr HKCU "${CLIENTKEY}\Capabilities" "ApplicationName" "${PRODUCT}"
+    WriteRegStr HKCU "${CLIENTKEY}\Capabilities" "ApplicationDescription" "A classic Windows email program."
+    WriteRegStr HKCU "${CLIENTKEY}\Capabilities" "ApplicationIcon" "$INSTDIR\${EXE},0"
+    WriteRegStr HKCU "${CLIENTKEY}\Capabilities\URLAssociations" "mailto" "${MAILTOCLASS}"
+    WriteRegStr HKCU "${CLIENTKEY}\shell\open\command" "" '"$INSTDIR\${EXE}"'
+    WriteRegStr HKCU "Software\RegisteredApplications" "${PRODUCT}" "${CLIENTKEY}\Capabilities"
 SectionEnd
 
 Section "Uninstall"
@@ -190,6 +207,9 @@ Section "Uninstall"
     RMDir "$INSTDIR"
 
     Delete "$SMPROGRAMS\${PRODUCT}.lnk"
+    DeleteRegValue HKCU "Software\RegisteredApplications" "${PRODUCT}"
+    DeleteRegKey HKCU "${CLIENTKEY}"
+    DeleteRegKey HKCU "Software\Classes\${MAILTOCLASS}"
     DeleteRegKey HKCU "${UNINSTKEY}"
     DeleteRegKey HKCU "${REGKEY}"
     DeleteRegKey /ifempty HKCU "Software\Postal Systems"

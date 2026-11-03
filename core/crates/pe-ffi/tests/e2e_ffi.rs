@@ -610,6 +610,16 @@ fn null_and_bad_arguments() {
         ));
         assert_eq!(pe_search_unindexed_count(std::ptr::null()), 0);
         assert!(pe_search_place(std::ptr::null()).is_null());
+        assert!(pe_mailto_draft(std::ptr::null()).is_null());
+        let link = CString::new("mailto:ann@example.com?subject=Hi&body=Hello").unwrap();
+        let draft = pe_mailto_draft(link.as_ptr());
+        let info = &*pe_draft_info(draft);
+        assert_eq!(CStr::from_ptr(info.to).to_str().unwrap(), "ann@example.com");
+        assert_eq!(CStr::from_ptr(info.subject).to_str().unwrap(), "Hi");
+        assert_eq!(CStr::from_ptr(info.body).to_str().unwrap(), "<div>Hello</div>");
+        pe_draft_free(draft);
+        let web = CString::new("https://example.com").unwrap();
+        assert!(pe_mailto_draft(web.as_ptr()).is_null());
         let typed = CString::new("report in:sent").unwrap();
         let place = pe_search_place(typed.as_ptr());
         assert_eq!(CStr::from_ptr(place).to_str().unwrap(), "Sent Items");

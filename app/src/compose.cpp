@@ -672,11 +672,17 @@ void ChooseFrom(Compose* state) {
 
 // the editor with the quote of the draft; its messages come back to the window
 void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
-    // a saved draft opened again goes on with what was written; anything new starts with the account's signature
-    bool written = draft && draft->body && *draft->body;
-    core::String signature(written ? nullptr : pe_signature_block(state->core, state->account));
-    core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded,
-                                         written ? draft->body : signature ? signature.get() : nullptr));
+    // a saved draft opened again goes on with what was written; anything new (a mailto: link's text too) starts with
+    // the account's signature
+    bool saved = draft && draft->message_id && *draft->message_id;
+    std::string body = draft && draft->body ? draft->body : "";
+    if (!saved) {
+        core::String signature(pe_signature_block(state->core, state->account));
+        if (signature) {
+            body += signature.get();
+        }
+    }
+    core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded, body.c_str()));
     Editor::Handlers handlers;
     handlers.error = [hwnd](const std::wstring& error) { MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
     handlers.html = [hwnd, state](const std::wstring& html, EditorQuote quote, const std::wstring& edited) {

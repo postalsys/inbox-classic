@@ -1950,6 +1950,20 @@ pub unsafe extern "C" fn pe_message_draft(
     }
 }
 
+/// A new message from a `mailto:` link (RFC 6068): its addresses, subject and body; NULL for what is no such link.
+/// Free with `pe_draft_free`.
+///
+/// # Safety
+/// `link` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_mailto_draft(link: *const c_char) -> *mut PeDraft {
+    // SAFETY: as the caller guarantees
+    let Some(link) = (unsafe { arg(link) }).map(str::to_string) else {
+        return null_mut();
+    };
+    guard(move || pe_core::mailto::draft(&link).map_or(null_mut(), |draft| draft_handle(&draft))).unwrap_or(null_mut())
+}
+
 /// A saved draft of the Drafts folder (its source in the store, after `MessageReady`) to go on writing, NULL
 /// otherwise
 ///

@@ -1304,6 +1304,25 @@ public static class Dragger {
 
     # ---- a provider found by its MX, one that wants an app password ----
 
+    Step 'an e-mail link'
+    # Windows starts the default mail program with the link: the app already open for the store takes it over
+    $link = 'mailto:gina@example.com?subject=From%20a%20link&body=Hello%20Gina%2C'
+    $second = Start-Process -FilePath $Exe -ArgumentList ($arguments + @("`"$link`"")) -PassThru
+    Check ($second.WaitForExit(15000)) 'a second start with a mailto: link hands it over and ends'
+    $linked = WaitFor {
+        $c = [Native.Win]::FindWindow('InboxClassicCompose', [NullString]::Value)
+        if ($c -ne [IntPtr]::Zero -and (GetText $c $IDC_SUBJECT) -eq 'From a link') { $c }
+    } 15
+    Check ($null -ne $linked) 'the running app opens a new message from it'
+    if ($linked) {
+        Check ((GetText $linked $IDC_TO) -eq 'gina@example.com') "to the link's address ($(GetText $linked $IDC_TO))"
+        Shot $linked 'write-18-mailto'
+        [void][Native.Win]::PostMessage($linked, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        $ask = WaitWindow '#32770' 'Inbox Classic' 5
+        if ($ask) { Click $ask 7 }
+        [void](WaitFor { -not [Native.Win]::IsWindow($linked) } 10)
+    }
+
     Step 'completing an address'
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose
@@ -1665,7 +1684,7 @@ public static class Dragger {
         KeyToRow ([Native.Win]::GetDlgItem($accounts, 400)) 1
         Click $accounts 402
         $properties = WaitWindow 'InboxClassicForm' 'Properties'
-        Check ($properties -and (Statics $properties) -match 'Signs in with: ImapKit') 'Properties says what the account signs in with'
+        Check ($properties -and [bool](WaitFor { (Statics $properties) -match 'Signs in with: ImapKit' } 10)) "Properties says what the account signs in with ($(if ($properties) { Statics $properties }))"
         if ($properties) {
             Shot $properties 'signin-13-properties'
             Click $properties 2
