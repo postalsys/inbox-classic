@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 mod accounts;
+mod contacts;
 mod folders;
 mod messages;
 mod outbox;
@@ -18,6 +19,7 @@ mod sign_in_apps;
 use std::path::Path;
 
 pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_provider};
+pub use contacts::Contact;
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use messages::{Message, MessageInfo, Sort, SortField};
 pub use outbox::Queued;

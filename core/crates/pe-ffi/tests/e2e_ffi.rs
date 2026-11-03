@@ -309,6 +309,20 @@ fn reads_mail_through_the_c_api() {
     assert!(unsafe { pe_message_set_seen(core, inbox, uid, true) });
     wait(&events, |e| e.kind == PeEventKind::FolderChanged && e.folder == inbox);
     assert!(unsafe { pe_folder_mark_all_read(core, inbox) });
+
+    // the sender is in the address book, found by a word of the name or the address, until forgotten
+    let typed = c("send");
+    let contacts = unsafe { pe_contacts(core, typed.as_ptr(), 5) };
+    assert!(unsafe { pe_contact_list_count(contacts) } >= 1);
+    let first = unsafe { &*pe_contact_list_get(contacts, 0) };
+    assert_eq!(text(first.label), "Sender <sender@example.com>");
+    assert!(unsafe { pe_contact_list_get(contacts, 99) }.is_null());
+    unsafe { pe_contact_list_free(contacts) };
+    let address = c("sender@example.com");
+    assert!(unsafe { pe_contact_forget(core, address.as_ptr()) });
+    let contacts = unsafe { pe_contacts(core, typed.as_ptr(), 5) };
+    assert_eq!(unsafe { pe_contact_list_count(contacts) }, 0);
+    unsafe { pe_contact_list_free(contacts) };
     assert!(!unsafe { pe_folder_mark_all_read(core, 999_999) });
 
     // a reply drafted in Rust, sent through the C API

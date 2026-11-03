@@ -633,6 +633,10 @@ void CreateFields(HWND hwnd, Compose* state) {
     state->bccButton = CreateChild(hwnd, L"BUTTON", L"&Bcc", BS_PUSHBUTTON, IDC_SHOW_BCC, {});
     state->cc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_CC, {}, WS_EX_CLIENTEDGE);
     state->bcc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_BCC, {}, WS_EX_CLIENTEDGE);
+    // the people written to and heard from, completed as an address is typed
+    for (HWND field : {state->to, state->cc, state->bcc}) {
+        CompleteAddresses(field, state->core);
+    }
     state->subject = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_SUBJECT, {}, WS_EX_CLIENTEDGE);
     // the files side by side; Delete or a right-click takes one off
     state->attached = CreateChild(hwnd, L"LISTBOX", L"", WS_TABSTOP | LBS_MULTICOLUMN | LBS_NOINTEGRALHEIGHT | LBS_WANTKEYBOARDINPUT,
@@ -875,12 +879,6 @@ LRESULT CALLBACK SignatureProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
             return 0;
         }
         break;
-    case WM_SEND_HTML:
-        DestroyWindow(hwnd);
-        return 0;
-    case WM_CLOSE:
-        DestroyWindow(hwnd);
-        return 0;
     case WM_DESTROY:
         if (state) {
             state->editor.Close();
@@ -894,17 +892,7 @@ LRESULT CALLBACK SignatureProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 }  // namespace
 
 bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring& name) {
-    static bool registered = false;
-    if (!registered) {
-        WNDCLASSEXW windowClass = {sizeof(windowClass)};
-        windowClass.lpfnWndProc = SignatureProc;
-        windowClass.hInstance = GetModuleHandleW(nullptr);
-        windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-        windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
-        windowClass.lpszClassName = kSignatureClass;
-        RegisterClassExW(&windowClass);
-        registered = true;
-    }
+    RegisterDialogClass(kSignatureClass, SignatureProc);
     core::String current(pe_account_signature(core, account));
     if (!current) {
         return false;
@@ -928,7 +916,8 @@ bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring
             state.saving = false;
             return;
         }
-        PostMessageW(dialog, WM_SEND_HTML, 0, 0);
+        // saved: the editor closes
+        PostMessageW(dialog, WM_CLOSE, 0, 0);
     };
     handlers.state = [&state](const std::wstring& flags) { ShowState(&state, flags); };
     handlers.save = [dialog] { PostMessageW(dialog, WM_COMMAND, IDOK, 0); };

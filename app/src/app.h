@@ -177,6 +177,13 @@ enum class ComposeClose { Closed, Saving, Kept };
 ComposeClose CloseComposeWindows();
 // whether any compose window is open
 bool ComposeWindowsOpen();
+// ---- complete.cpp ----
+
+// completes the address the cursor is in, in an address field (To, Cc, Bcc), from the people written to and heard
+// from: a list under the field as you type, arrows to choose, Enter or Tab to take one, Esc to close it, Shift+Delete
+// to forget someone
+void CompleteAddresses(HWND edit, PeCore* core);
+
 // the signature of an account in an editor of its own (Accounts > Signature); whether it was saved
 bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring& name);
 // the compose windows, gone without asking, before the core they use is

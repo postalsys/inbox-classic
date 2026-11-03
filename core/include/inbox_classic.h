@@ -142,6 +142,8 @@ typedef struct PeAccountSettingsView PeAccountSettingsView;
 // A lookup's result; free with `pe_autoconfig_free`
 typedef struct PeAutoconfig PeAutoconfig;
 
+typedef struct PeContactList PeContactList;
+
 // The mail engine
 typedef struct PeCore PeCore;
 
@@ -218,6 +220,14 @@ typedef struct PeAccount {
   // What the folder tree calls it: its name, with its address too when another account has the same name
   const char *title;
 } PeAccount;
+
+// Someone to complete an address with
+typedef struct PeContact {
+  const char *name;
+  const char *address;
+  // As it goes in an address field: `Name <address>`, the name quoted where it needs it, or the address alone
+  const char *label;
+} PeContact;
 
 // A folder as the folder tree shows it, in tree order
 typedef struct PeFolder {
@@ -592,6 +602,34 @@ const struct PeAccount *pe_account_list_get(const struct PeAccountList *list, si
 // # Safety
 // `list` must be NULL or a list that was not freed yet.
 void pe_account_list_free(struct PeAccountList *list);
+
+// The people whose address or name (a word of it) starts with `typed`, best first, at most `limit`; NULL on failure
+//
+// # Safety
+// `core` must be a live handle, `typed` NULL or a NUL-terminated string.
+struct PeContactList *pe_contacts(const struct PeCore *core,
+                                  const char *typed,
+                                  size_t limit);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_contact_list_count(const struct PeContactList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeContact *pe_contact_list_get(const struct PeContactList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_contact_list_free(struct PeContactList *list);
+
+// Takes someone out of the completions for good
+//
+// # Safety
+// `core` must be a live handle, `address` NULL or a NUL-terminated string.
+bool pe_contact_forget(const struct PeCore *core, const char *address);
 
 // The folders of an account, NULL on failure
 //

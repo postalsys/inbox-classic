@@ -169,6 +169,24 @@ END;
     r#"
 ALTER TABLE accounts ADD COLUMN signature TEXT NOT NULL DEFAULT '';
 "#,
+    // the address book that completes addresses: the people written to and heard from (contacts.rs); to begin with,
+    // the senders of the messages the store has, Sent Items and Junk left out
+    r#"
+CREATE TABLE contacts (
+    address TEXT PRIMARY KEY COLLATE NOCASE,
+    name TEXT NOT NULL DEFAULT '',
+    sent INTEGER NOT NULL DEFAULT 0,
+    received INTEGER NOT NULL DEFAULT 0,
+    last INTEGER NOT NULL DEFAULT 0,
+    hidden INTEGER NOT NULL DEFAULT 0
+);
+INSERT INTO contacts (address, name, received, last)
+    SELECT m.from_address, m.from_name, COUNT(*), MAX(COALESCE(m.date, m.internal_date, 0))
+    FROM messages m JOIN folders f ON f.id = m.folder_id
+    WHERE instr(m.from_address, '@') > 0 AND COALESCE(f.special_use, '') NOT IN ('\Sent', '\Junk')
+    GROUP BY m.from_address COLLATE NOCASE
+    ON CONFLICT (address) DO NOTHING;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

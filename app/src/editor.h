@@ -23,22 +23,23 @@ enum class EditorQuote { Folded, Edited, Removed };
 class Editor {
 public:
     struct Handlers {
-        std::function<void(const std::wstring&)> error;
+        // each does nothing unless the window gives it something to do
+        std::function<void(const std::wstring&)> error = [](const std::wstring&) {};
         // the body as HTML, after Html(): what was written, and the quote as the page has it (see EditorQuote)
-        std::function<void(const std::wstring& html, EditorQuote quote, const std::wstring& edited)> html;
+        std::function<void(const std::wstring& html, EditorQuote quote, const std::wstring& edited)> html = [](const std::wstring&, EditorQuote, const std::wstring&) {};
         // one '0' or '1' per format of the bar: bold, italic, underline, numbers, bullets, left, center, right
-        std::function<void(const std::wstring&)> state;
-        std::function<void()> dirty;
+        std::function<void(const std::wstring&)> state = [](const std::wstring&) {};
+        std::function<void()> dirty = [] {};
         // Ctrl+Enter
-        std::function<void()> send;
+        std::function<void()> send = [] {};
         // Ctrl+S
-        std::function<void()> save;
+        std::function<void()> save = [] {};
         // files dragged from Explorer onto the text, the cursor now where they were dropped
-        std::function<void(const std::vector<std::wstring>& paths)> dropped;
+        std::function<void(const std::vector<std::wstring>& paths)> dropped = [](const std::vector<std::wstring>&) {};
         // the address of the link under the mouse, or else of the one the cursor is in, when that changes; empty for none
-        std::function<void(const std::wstring& link)> link;
+        std::function<void(const std::wstring& link)> link = [](const std::wstring&) {};
         // Ctrl+K, or Edit Link in the menu of a link: the Link dialog
-        std::function<void()> editLink;
+        std::function<void()> editLink = [] {};
     };
 
     // creates the host window, a child of `parent` with the control id `id`, and the WebView2 in it

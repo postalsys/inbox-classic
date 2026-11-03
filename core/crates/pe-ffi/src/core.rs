@@ -669,6 +669,80 @@ pub unsafe extern "C" fn pe_account_list_free(list: *mut PeAccountList) {
     unsafe { take_back(list) }
 }
 
+// ---- the address book ----
+
+/// Someone to complete an address with
+#[repr(C)]
+pub struct PeContact {
+    pub name: *const c_char,
+    pub address: *const c_char,
+    /// As it goes in an address field: `Name <address>`, the name quoted where it needs it, or the address alone
+    pub label: *const c_char,
+}
+
+pub struct PeContactList(Rows<PeContact>);
+
+/// The people whose address or name (a word of it) starts with `typed`, best first, at most `limit`; NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle, `typed` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_contacts(core: *const PeCore, typed: *const c_char, limit: usize) -> *mut PeContactList {
+    // SAFETY: as the caller guarantees
+    let typed = unsafe { arg(typed) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(contacts) = core.contacts(&typed, limit) else {
+                return null_mut();
+            };
+            handed(PeContactList(Rows::new(&contacts, |c, strings| PeContact {
+                name: strings.add(&c.name),
+                address: strings.add(&c.address),
+                label: strings.add(&pe_core::address_label(&c.name, &c.address)),
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_contact_list_count(list: *const PeContactList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_contact_list_get(list: *const PeContactList, index: usize) -> *const PeContact {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_contact_list_free(list: *mut PeContactList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+/// Takes someone out of the completions for good
+///
+/// # Safety
+/// `core` must be a live handle, `address` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_contact_forget(core: *const PeCore, address: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let address = unsafe { arg(address) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.forget_contact(&address).is_ok()) }
+}
+
 // ---- folders ----
 
 #[repr(C)]

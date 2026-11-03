@@ -39,6 +39,12 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
     let attachment_names: Vec<&str> = attachments.iter().filter_map(|part| part.filename()).collect();
     let attachment_names = attachment_names.join("\n");
     let attachment_count = attachments.len() as u32;
+    // the recipients, for the address book
+    let correspondents = [&envelope.to, &envelope.cc, &envelope.bcc]
+        .into_iter()
+        .flatten()
+        .map(|a| (a.name.clone(), a.address.clone()))
+        .collect();
     let from = envelope.from.into_iter().next().unwrap_or_default();
     Some(MessageInfo {
         uid,
@@ -58,6 +64,7 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         recipient_people,
         attachment_names,
         attachment_count,
+        correspondents,
     })
 }
 

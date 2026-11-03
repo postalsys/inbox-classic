@@ -26,7 +26,7 @@ use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, S
 pub use pe_store::{Search, Show};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
-pub use compose::{ComposeError, Draft, DraftKind, Outgoing};
+pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
 /// The rules of the folder tree the windows show: how deep a folder is, and which stay as they are
 pub use pe_sync::{is_special as is_fixed_folder, tree_depths};
 use requests::Requests;
@@ -316,6 +316,16 @@ impl Core {
                 message: format!("the password could not be saved for the next start: {error}"),
             });
         }
+    }
+
+    /// The people whose address or name starts with what was typed, best first, for completing an address
+    pub fn contacts(&self, typed: &str, limit: usize) -> Result<Vec<pe_store::Contact>> {
+        Ok(self.store().contacts_matching(typed, limit)?)
+    }
+
+    /// Someone taken out of the completions for good
+    pub fn forget_contact(&self, address: &str) -> Result<()> {
+        Ok(self.store().forget_contact(address)?)
     }
 
     /// The signature of an account, as sanitized HTML; empty for none

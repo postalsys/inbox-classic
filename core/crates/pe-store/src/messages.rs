@@ -32,6 +32,9 @@ pub struct MessageInfo {
     /// The names of its files, one per line, and how many there are
     pub attachment_names: String,
     pub attachment_count: u32,
+    /// To, Cc and Bcc as names and addresses, decoded, for the address book ([`crate::contacts`]); not kept with the
+    /// message, so empty for one read from the store
+    pub correspondents: Vec<(String, String)>,
 }
 
 impl MessageInfo {
@@ -164,6 +167,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             recipient_people: row.get(17)?,
             attachment_names: row.get(18)?,
             attachment_count: row.get(19)?,
+            correspondents: Vec::new(),
         },
     })
 }
@@ -172,6 +176,8 @@ impl Store {
     /// Adds messages to a folder. For a UID it has, only the flags are updated: within one
     /// UIDVALIDITY the rest of a message never changes.
     pub fn add_messages(&self, folder: FolderId, messages: &[MessageInfo]) -> Result<()> {
+        // the people of the messages new to the store go in the address book, before they are in the store
+        self.note_correspondents(folder, messages)?;
         let mut statement = self.db.prepare_cached(
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \

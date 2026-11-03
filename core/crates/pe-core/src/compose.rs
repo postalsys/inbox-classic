@@ -345,22 +345,11 @@ pub fn reopen(source: &[u8]) -> (Draft, Vec<(String, Vec<u8>)>) {
 /// An address list to edit: what parses back into the same addresses. A name with anything but letters, digits
 /// and spaces is quoted, so `Smith, John` stays one name and not two recipients.
 fn editable(list: &[ParsedAddress]) -> String {
-    let mailbox = |m: &Address| {
-        if m.name.is_empty() {
-            return m.address.clone();
-        }
-        let plain = m
-            .name
-            .chars()
-            .all(|c| c.is_alphanumeric() || c == ' ' || c == '_' || c == '-' || c == '.');
-        let name = if plain {
-            m.name.clone()
-        } else {
-            pe_smtp::encoding::quote_string(&m.name)
-        };
-        format!("{name} <{}>", m.address)
-    };
-    let items: Vec<String> = list.iter().flat_map(ParsedAddress::mailboxes).map(mailbox).collect();
+    let items: Vec<String> = list
+        .iter()
+        .flat_map(ParsedAddress::mailboxes)
+        .map(|m: &Address| address_label(&m.name, &m.address))
+        .collect();
     items.join(", ")
 }
 
@@ -444,9 +433,49 @@ pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Dr
     draft
 }
 
+/// Someone as they go in an address field, where commas part the addresses: `Name <address>`, a name with anything
+/// but letters, digits and spaces quoted, so `Smith, John` stays one name and not two recipients; the address alone
+/// without a name
+pub fn address_label(name: &str, address: &str) -> String {
+    let name = name.trim();
+    if name.is_empty() || name.eq_ignore_ascii_case(address) {
+        return address.to_string();
+    }
+    let plain = name
+        .chars()
+        .all(|c| c.is_alphanumeric() || c == ' ' || c == '_' || c == '-' || c == '.');
+    let name = if plain {
+        name.to_string()
+    } else {
+        pe_smtp::encoding::quote_string(name)
+    };
+    format!("{name} <{address}>")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn labels_an_address_for_a_field() {
+        assert_eq!(
+            address_label("Anna Lind", "anna@example.com"),
+            "Anna Lind <anna@example.com>"
+        );
+        assert_eq!(address_label("", "anna@example.com"), "anna@example.com");
+        assert_eq!(
+            address_label("anna@example.com", "anna@example.com"),
+            "anna@example.com"
+        );
+        assert_eq!(
+            address_label("Lind, Anna", "anna@example.com"),
+            "\"Lind, Anna\" <anna@example.com>"
+        );
+        assert_eq!(
+            address_label("A \"B\" C", "a@example.com"),
+            "\"A \\\"B\\\" C\" <a@example.com>"
+        );
+    }
 
     const ORIGINAL: &[u8] = b"From: Ann <ann@example.com>\r\nTo: me@example.com, bob@example.com\r\nCc: carl@example.com\r\nSubject: Plans\r\nMessage-ID: <m2@example.com>\r\nReferences: <m1@example.com>\r\n\r\nLet's meet.\r\nTomorrow?\r\n";
 

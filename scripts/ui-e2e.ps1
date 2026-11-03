@@ -795,6 +795,8 @@ public static class Dragger {
     Check ($raw -match 'dropped-note\.txt' -and $raw -notmatch 'filename="?dropped\.png') 'the other file went as an attachment, the picture not'
 
     Step 'links in a message being written'
+    # the mouse away from where the last step left it, so no link is under it
+    [Native.Win]::Mouse(5, 5, 0)
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose
     SetText $compose $IDC_TO 'Dave <dave@example.com>'
@@ -853,7 +855,8 @@ public static class Dragger {
         Click $dialog 1
         [void](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
     }
-    Check ([bool](WaitFor { (WindowText $composeStatus) -notlike '*example.com*' } 10)) 'an empty address removes the link'
+    Check ([bool](WaitFor { (WindowText $composeStatus) -notlike '*example.com*' } 10)) "an empty address removes the link ($(WindowText $composeStatus))"
+    Shot $compose 'write-16b-unlinked'
     Command $compose $IDC_SEND
     $linked = WaitFor { Find 'INBOX' 'Subject: Links in the UI test' } 30
     $raw = if ($linked) { RawText $linked } else { '' }
@@ -1300,6 +1303,37 @@ public static class Dragger {
 
     # ---- a provider found by its MX, one that wants an app password ----
 
+    Step 'completing an address'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    if ($compose) {
+        $to = [Native.Win]::GetDlgItem($compose, $IDC_TO)
+        foreach ($c in 'ann'.ToCharArray()) { [void][Native.Win]::PostMessage($to, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
+        # the list under the field: a list box of the app's own, shown
+        $appPid = [uint32]0
+        [void][Native.Win]::GetWindowThreadProcessId($compose, [ref]$appPid)
+        $completion = WaitFor {
+            $w = [IntPtr]::Zero
+            do {
+                $w = [Native.Win]::FindWindowEx([IntPtr]::Zero, $w, 'ListBox', [NullString]::Value)
+                $owner = [uint32]0
+                if ($w -ne [IntPtr]::Zero) { [void][Native.Win]::GetWindowThreadProcessId($w, [ref]$owner) }
+            } while ($w -ne [IntPtr]::Zero -and -not ($owner -eq $appPid -and [Native.Win]::IsWindowVisible($w)))
+            if ($w -ne [IntPtr]::Zero) { $w }
+        } 10
+        Check ($null -ne $completion) 'typing in To lists the people it may be'
+        $LB_GETCOUNT = 0x018B
+        Check ($completion -and [int][Native.Win]::SendMessage($completion, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -ge 1) 'with someone heard from'
+        if ($completion) { Shot $compose 'write-17-complete' $completion }
+        Key $to $VK_RETURN
+        Check ([bool](WaitFor { (GetText $compose $IDC_TO) -eq 'Ann Example <ann@example.com>, ' } 5)) "Enter takes the first, with a comma for the next ($(GetText $compose $IDC_TO))"
+        Check ($completion -and -not [Native.Win]::IsWindowVisible($completion)) 'and closes the list'
+        [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        $ask = WaitWindow '#32770' 'Inbox Classic' 5
+        if ($ask) { Click $ask 7 }
+        [void](WaitFor { -not [Native.Win]::IsWindow($compose) } 10)
+    }
+
     Step 'a signature'
     $IDC_ACCOUNT_SIGNATURE = 406
     Command $main $IDM_ACCOUNTS
@@ -1478,7 +1512,9 @@ public static class Dragger {
     function KeyToRow([IntPtr]$list, [int]$row) {
         Key $list $VK_HOME
         for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
-        Start-Sleep -Milliseconds 400
+        # once the list has it selected (LVM_GETNEXTITEM, LVNI_SELECTED): the buttons act on the selected row
+        [void](WaitFor { [int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2) -eq $row } 5)
+        Start-Sleep -Milliseconds 200
     }
     # the words of a window's static texts (a message box, a form's intro)
     function Statics([IntPtr]$window) { ([Native.Win]::FindDescendants($window, 'Static') | ForEach-Object { WindowText $_ }) -join ' ' }

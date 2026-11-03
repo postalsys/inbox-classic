@@ -77,7 +77,17 @@
     const reportCaret = reporter('caret');
     const reportHover = reporter('hover');
     document.addEventListener('selectionchange', () => reportCaret(href(caretLink())));
-    document.addEventListener('mouseover', event => reportHover(href(linkAt(event.target))));
+    // the element under the mouse, to tell again when its link changes under it (taken off, edited away)
+    let hovered = null;
+    const hover = () => reportHover(hovered && body.contains(hovered) ? href(linkAt(hovered)) : '');
+    document.addEventListener('mouseover', event => {
+        hovered = event.target;
+        hover();
+    });
+    document.documentElement.addEventListener('mouseleave', () => {
+        hovered = null;
+        hover();
+    });
     document.addEventListener('click', event => {
         const link = linkAt(event.target);
         if (link && (event.ctrlKey || event.metaKey)) {
@@ -100,6 +110,7 @@
 
     let dirty = false;
     body.addEventListener('input', () => {
+        hover();
         if (!dirty) {
             dirty = true;
             post('dirty');
@@ -175,6 +186,7 @@
                 a.textContent = url;
                 document.execCommand('insertHTML', false, a.outerHTML);
             }
+            hover();
         },
         send() {
             if (!unfolded) {
@@ -204,7 +216,8 @@
             const fresh = document.createElement('template');
             fresh.innerHTML = html;
             const next = fresh.content.querySelector('div.pe-signature');
-            const current = body.querySelector('div.pe-signature');
+            // the block of what is written, not one in a quoted message
+            const current = body.querySelector(':scope > div.pe-signature');
             if (current && next) {
                 current.replaceWith(next);
             } else if (current) {

@@ -101,7 +101,8 @@ pub fn signature_html(html: &str) -> String {
 /// then the signature after the usual "-- " line, in a block the editor knows to swap for another account's. Empty
 /// without a signature.
 pub fn signature_block(signature: &str) -> String {
-    let signature = signature_html(signature);
+    // kept sanitized (signature_html), and the editor sanitizes its page again
+    let signature = signature.trim();
     if signature.is_empty() {
         return String::new();
     }

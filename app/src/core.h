@@ -22,6 +22,7 @@ using String = std::unique_ptr<char, Deleter<pe_string_free>>;
 // handles returned by the core
 using Core = std::unique_ptr<PeCore, Deleter<pe_core_close>>;
 using AccountList = std::unique_ptr<PeAccountList, Deleter<pe_account_list_free>>;
+using ContactList = std::unique_ptr<PeContactList, Deleter<pe_contact_list_free>>;
 using FolderList = std::unique_ptr<PeFolderList, Deleter<pe_folder_list_free>>;
 using MessageList = std::unique_ptr<PeMessageList, Deleter<pe_message_list_free>>;
 using MessageView = std::unique_ptr<PeMessageView, Deleter<pe_message_view_free>>;

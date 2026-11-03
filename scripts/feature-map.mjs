@@ -514,6 +514,16 @@ const sections = [
                 checked: ['"dave at example.com" is refused with the reason', 'The compose window stays open']
             },
             {
+                shot: 'write-17-complete',
+                name: 'Address completion',
+                what: 'Typing in To, Cc or Bcc lists the people it may be from an address book on this computer: the recipients of Sent Items and the senders of the rest (Junk left out), those written to most first. Arrows choose, Enter or Tab takes one with a comma for the next, Esc closes the list, Shift+Delete forgets someone for good.',
+                how: 'Type a few letters of a name or an address in To, Cc or Bcc.',
+                checked: [
+                    'Typing in To lists the people it may be, with someone heard from',
+                    'Enter takes the first, with a comma for the next, and closes the list'
+                ]
+            },
+            {
                 shot: 'signature-1-editor',
                 name: 'Signatures',
                 what: 'Each account has a signature of its own, written with the formatting of a message and kept sanitized. New messages, replies and forwards start with it, after an empty line and "-- ", above the quote; another account in From swaps it for its own.',
