@@ -739,7 +739,8 @@ public static class Dragger {
     # a link with nothing selected: the address itself is the link's text
     Command $compose $IDF_LINK
     $dialog = WaitWindow 'InboxClassicForm' 'Hyperlink' 10
-    Check ($dialog -and (GetText $dialog 100) -eq 'https://') 'the Link button asks for an address'
+    # found as soon as it is made: its field is read once it is filled in
+    Check ($dialog -and (WaitFor { (GetText $dialog 100) -eq 'https://' } 5)) 'the Link button asks for an address'
     if ($dialog) {
         SetText $dialog 100 'https://example.com/first'
         Click $dialog 1
@@ -754,7 +755,7 @@ public static class Dragger {
     # the Link button on a link: its address to change
     Command $compose $IDF_LINK
     $dialog = WaitWindow 'InboxClassicForm' 'Edit Hyperlink' 10
-    Check ($dialog -and (GetText $dialog 100) -eq 'https://example.com/first') 'the Link button on a link shows its address to change'
+    Check ($dialog -and (WaitFor { (GetText $dialog 100) -eq 'https://example.com/first' } 5)) 'the Link button on a link shows its address to change'
     if ($dialog) {
         Shot $dialog 'write-15-edit-link'
         SetText $dialog 100 'https://example.com/second'
@@ -777,7 +778,7 @@ public static class Dragger {
     # emptied, the address takes the link off and leaves its text
     Command $compose $IDF_LINK
     $dialog = WaitWindow 'InboxClassicForm' 'Edit Hyperlink' 10
-    Check ($dialog -and (GetText $dialog 100) -eq 'https://example.com/second') 'the dialog shows the changed address'
+    Check ($dialog -and (WaitFor { (GetText $dialog 100) -eq 'https://example.com/second' } 5)) 'the dialog shows the changed address'
     if ($dialog) {
         SetText $dialog 100 ''
         Click $dialog 1
