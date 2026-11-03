@@ -68,8 +68,10 @@ void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON, 
 
 // a modal form with a label and an input for each field; true with the values filled in when OK was clicked.
 // `validate` gets the values and returns an error to show, or an empty string to accept them.
+// `focus`: the field to start in
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
-                bool (*validate)(const std::vector<FormField>&, std::wstring& error) = nullptr, const wchar_t* okLabel = L"OK");
+                bool (*validate)(const std::vector<FormField>&, std::wstring& error) = nullptr, const wchar_t* okLabel = L"OK",
+                size_t focus = 0);
 // a dialog window centered on the window of `owner`, owned by it, with this client size; RunModal shows it, runs it
 // until `done` and destroys it, the owner disabled meanwhile
 HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight);
@@ -79,6 +81,13 @@ std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t*
                            const wchar_t* filter = L"All files (*.*)\0*.*\0", const wchar_t* extension = nullptr);
 // a modal window with `text` to read and copy in a box that can not be edited, and OK (Message Properties)
 void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text);
+// a PNG picture of the exe's resources (RCDATA, app.rc) as a bitmap `height` pixels high over `background`, as wide
+// (`width`) as that keeps its proportions; NULL, and `width` left as it was, when it can not be made
+constexpr int IDR_GOOGLE_SIGN_IN = 3;
+constexpr int IDR_MICROSOFT_SIGN_IN = 4;
+HBITMAP LoadPicture(int resource, int height, COLORREF background, int& width);
+// registers a window class of a dialog (button face background, arrow cursor) once
+void RegisterDialogClass(const wchar_t* name, WNDPROC proc);
 // the app's icon (app.rc): the small one of the title bar, or the large one of Alt+Tab
 HICON AppIcon(bool titleBar);
 // both for a window class

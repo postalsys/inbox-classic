@@ -889,21 +889,25 @@ bool pe_sign_in_result(const struct PeCore *core,
 // `core` must be a live handle.
 void pe_sign_in_cancel(const struct PeCore *core, uint64_t request);
 
-// Adds an account that signs in with what the finished sign-in `request` got; its id, or 0
+// Adds the account the finished sign-in `request` was for, at the provider's servers, named `name` (NULL or empty:
+// as its owner is named at the provider); its id, or 0
 //
 // # Safety
-// `core` must be a live handle, `settings` valid settings.
-int64_t pe_account_add_oauth(const struct PeCore *core,
-                             const struct PeAccountSettings *settings,
-                             uint64_t request);
+// `core` must be a live handle, `name` NULL or a NUL-terminated string.
+int64_t pe_account_add_signed_in(const struct PeCore *core,
+                                 uint64_t request,
+                                 const char *name);
 
-// Gives an account signed in through the browser the result of a new sign-in, after the old one was refused
+// Gives an account signed in through the browser the result of a new sign-in, after the old one was refused.
+// False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`), as when the
+// browser signed in to another account.
 //
 // # Safety
-// `core` must be a live handle.
+// `core` must be a live handle, `error` NULL or a valid pointer.
 bool pe_account_reauthorize(const struct PeCore *core,
                             int64_t account,
-                            uint64_t request);
+                            uint64_t request,
+                            char **error);
 
 #ifdef __cplusplus
 }  // extern "C"

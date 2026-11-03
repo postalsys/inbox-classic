@@ -46,14 +46,23 @@ async fn token_server(challenge: Arc<Mutex<String>>) -> u16 {
                 URL_SAFE_NO_PAD.encode(digest) == *challenge.lock().unwrap()
             });
             let (status, body) = match param(form, "grant_type").as_deref() {
-                Some("authorization_code") if param(form, "code").as_deref() == Some("the-code") && verifier_ok => (
-                    200,
-                    r#"{"access_token":"testtoken","refresh_token":"r1","expires_in":3600,"token_type":"Bearer"}"#,
-                ),
-                Some("refresh_token") if param(form, "refresh_token").as_deref() == Some("r1") => {
-                    (200, r#"{"access_token":"fresh","expires_in":3600}"#)
+                Some("authorization_code") if param(form, "code").as_deref() == Some("the-code") && verifier_ok => {
+                    let claims = r#"{"aud":"client","email":"me@example.com","email_verified":true,"name":"Me"}"#;
+                    let id_token = format!("e30.{}.c2ln", URL_SAFE_NO_PAD.encode(claims));
+                    (
+                        200,
+                        format!(
+                            r#"{{"access_token":"testtoken","refresh_token":"r1","expires_in":3600,"token_type":"Bearer","id_token":"{id_token}"}}"#
+                        ),
+                    )
                 }
-                _ => (400, r#"{"error":"invalid_grant","error_description":"Bad Request"}"#),
+                Some("refresh_token") if param(form, "refresh_token").as_deref() == Some("r1") => {
+                    (200, r#"{"access_token":"fresh","expires_in":3600}"#.to_string())
+                }
+                _ => (
+                    400,
+                    r#"{"error":"invalid_grant","error_description":"Bad Request"}"#.to_string(),
+                ),
             };
             let response = format!(
                 "HTTP/1.1 {status} X\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
@@ -146,12 +155,18 @@ async fn signs_in_and_refreshes() {
     let tokens = waiting.await.unwrap().unwrap();
     assert_eq!(tokens.access_token, "testtoken");
     assert_eq!(tokens.refresh_token.as_deref(), Some("r1"));
+    let identity = tokens.identity.unwrap();
+    assert_eq!(
+        (identity.email.as_str(), identity.name.as_deref()),
+        ("me@example.com", Some("Me"))
+    );
 
     let refreshed = refresh(&provider(port), "r1").await.unwrap();
     assert_eq!(
         (refreshed.access_token.as_str(), refreshed.refresh_token.as_deref()),
         ("fresh", Some("r1"))
     );
+    assert_eq!(refreshed.identity, None);
     let revoked = refresh(&provider(port), "revoked").await.unwrap_err();
     assert!(revoked.needs_sign_in(), "{revoked}");
 }

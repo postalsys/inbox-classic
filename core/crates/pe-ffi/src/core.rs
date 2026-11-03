@@ -1975,32 +1975,36 @@ pub unsafe extern "C" fn pe_sign_in_cancel(core: *const PeCore, request: u64) {
     unsafe { with(core, (), |core| core.sign_in_cancel(request)) }
 }
 
-/// Adds an account that signs in with what the finished sign-in `request` got; its id, or 0
+/// Adds the account the finished sign-in `request` was for, at the provider's servers, named `name` (NULL or empty:
+/// as its owner is named at the provider); its id, or 0
 ///
 /// # Safety
-/// `core` must be a live handle, `settings` valid settings.
+/// `core` must be a live handle, `name` NULL or a NUL-terminated string.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_account_add_oauth(
-    core: *const PeCore,
-    settings: *const PeAccountSettings,
-    request: u64,
-) -> i64 {
+pub unsafe extern "C" fn pe_account_add_signed_in(core: *const PeCore, request: u64, name: *const c_char) -> i64 {
     // SAFETY: as the caller guarantees
-    let Some(settings) = (unsafe { self::settings(settings) }) else {
-        return 0;
-    };
+    let name = unsafe { arg(name) }.unwrap_or_default().to_string();
     // SAFETY: as the caller guarantees
-    unsafe { with(core, 0, |core| core.add_account_oauth(&settings, request).unwrap_or(0)) }
+    unsafe { with(core, 0, |core| core.add_signed_in_account(request, &name).unwrap_or(0)) }
 }
 
-/// Gives an account signed in through the browser the result of a new sign-in, after the old one was refused
+/// Gives an account signed in through the browser the result of a new sign-in, after the old one was refused.
+/// False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`), as when the
+/// browser signed in to another account.
 ///
 /// # Safety
-/// `core` must be a live handle.
+/// `core` must be a live handle, `error` NULL or a valid pointer.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_account_reauthorize(core: *const PeCore, account: i64, request: u64) -> bool {
+pub unsafe extern "C" fn pe_account_reauthorize(
+    core: *const PeCore,
+    account: i64,
+    request: u64,
+    error: *mut *mut c_char,
+) -> bool {
     // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.reauthorize(account, request).is_ok()) }
+    let outcome = unsafe { with(core, Err(None), |core| core.reauthorize(account, request).map_err(Some)) };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the sign-in could not be used") }.is_some()
 }
 
 #[cfg(test)]

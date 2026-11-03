@@ -244,9 +244,15 @@ impl Drop for TempDir {
     }
 }
 
-/// A mock OAuth token endpoint on 127.0.0.1: the code `the-code` and the refresh token `r1` give the access
-/// token ImapKit takes (`TOKEN`); anything else is refused with `invalid_grant`. Runs until the test ends.
-pub fn oauth_token_server() -> u16 {
+/// A mock OAuth token endpoint on 127.0.0.1 for the client `client`: the code `the-code` gives the access token
+/// ImapKit takes (`TOKEN`) and an ID token for `email`, the refresh token `r1` another access token; anything else
+/// is refused with `invalid_grant`. Runs until the test ends.
+pub fn oauth_token_server(email: &str) -> u16 {
+    let claims = json!({"aud": "client", "email": email, "email_verified": true, "name": "Signed In"});
+    let id_token = format!(
+        "e30.{}.c2ln",
+        base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(claims.to_string())
+    );
     let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("token server");
     let port = listener.local_addr().expect("token server").port();
     std::thread::spawn(move || {
@@ -272,17 +278,21 @@ pub fn oauth_token_server() -> u16 {
             let text = String::from_utf8_lossy(&request).into_owned();
             let form = text.split_once("\r\n\r\n").map_or("", |(_, body)| body);
             let has = |pair: &str| form.split('&').any(|p| p == pair);
-            let (status, body) =
-                if has("grant_type=authorization_code") && has("code=the-code") && form.contains("code_verifier=") {
-                    (
-                        200,
-                        format!(r#"{{"access_token":"{TOKEN}","refresh_token":"r1","expires_in":3600}}"#),
-                    )
-                } else if has("grant_type=refresh_token") && has("refresh_token=r1") {
-                    (200, format!(r#"{{"access_token":"{TOKEN}","expires_in":3600}}"#))
-                } else {
-                    (400, r#"{"error":"invalid_grant"}"#.to_string())
-                };
+            let (status, body) = if has("grant_type=authorization_code")
+                && has("code=the-code")
+                && form.contains("code_verifier=")
+            {
+                (
+                    200,
+                    format!(
+                        r#"{{"access_token":"{TOKEN}","refresh_token":"r1","expires_in":3600,"id_token":"{id_token}"}}"#
+                    ),
+                )
+            } else if has("grant_type=refresh_token") && has("refresh_token=r1") {
+                (200, format!(r#"{{"access_token":"{TOKEN}","expires_in":3600}}"#))
+            } else {
+                (400, r#"{"error":"invalid_grant"}"#.to_string())
+            };
             let response = format!(
                 "HTTP/1.1 {status} X\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
                 body.len()

@@ -139,9 +139,17 @@ void SignInAgain(int64_t account) {
     }
     uint64_t request =
         SignInWithBrowser(g_main, g_core.get(), g_mailbox.OAuthProvider(account), g_mailbox.AccountEmail(account));
-    if (request && pe_account_reauthorize(g_core.get(), account, request)) {
-        pe_sync(g_core.get(), account);
+    if (!request) {
+        return;
     }
+    char* why = nullptr;
+    if (pe_account_reauthorize(g_core.get(), account, request, &why)) {
+        pe_sync(g_core.get(), account);
+        return;
+    }
+    core::String reason(why);
+    std::wstring refused = L"Signing in again did not work: " + (reason ? Text(reason.get()) : L"unknown reason");
+    MessageBoxW(g_main, refused.c_str(), kTitle, MB_OK | MB_ICONWARNING);
 }
 
 void AskPassword(int64_t account) {

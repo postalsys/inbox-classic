@@ -21,10 +21,10 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 '@
 $WM_SETTEXT = 0x000C; $BM_CLICK = 0x00F5; $CB_SETCURSEL = 0x014E
 
-# the account form, or the server settings form when $Second (it has the SMTP security choice, id 109)
+# the first page (name and address), or the server settings form when $Second (it has the SMTP security choice, id 109)
 function WaitForForm([bool]$Second) {
     for ($i = 0; $i -lt 200; $i++) {
-        $form = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
+        $form = [Native.Win]::FindWindow($(if ($Second) { 'InboxClassicForm' } else { 'InboxClassicAccountStart' }), 'Add Mail Account')
         if ($form -ne [IntPtr]::Zero -and (-not $Second -or [Native.Win]::GetDlgItem($form, 109) -ne [IntPtr]::Zero)) { return $form }
         Start-Sleep -Milliseconds 200
     }
@@ -40,14 +40,14 @@ function ClickOk([IntPtr]$window, [int]$id = 1) {
     [void][Native.Win]::PostMessage([Native.Win]::GetDlgItem($window, $id), $BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero)
 }
 
-# the inputs have ids 100 and up in the order of the form (app/src/accounts.cpp). First the name, address and
-# password; the lookup of the servers follows
+# the inputs have ids 100 and up in the order of the form (app/src/accounts.cpp). First the name and address; the
+# lookup of the servers follows
 $form = WaitForForm $false
-Fill $form @{ 100 = 'Test'; 101 = $Email; 102 = $Password }
+Fill $form @{ 100 = 'Test'; 101 = $Email }
 ClickOk $form
 # then the server settings it found, corrected
 $form = WaitForForm $true
-Fill $form @{ 102 = $Email; 104 = $ImapHost; 105 = $ImapPort; 107 = $SmtpHost; 108 = $SmtpPort }
+Fill $form @{ 102 = $Email; 103 = $Password; 104 = $ImapHost; 105 = $ImapPort; 107 = $SmtpHost; 108 = $SmtpPort }
 [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($form, 106), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
 [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($form, 109), $CB_SETCURSEL, [IntPtr]$SmtpSecurity, [IntPtr]::Zero)
 ClickOk $form

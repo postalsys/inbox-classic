@@ -62,7 +62,7 @@ target_link_libraries(InboxClassic PRIVATE
     # what the Rust standard library needs on Windows (cargo rustc -p pe-ffi -- --print native-static-libs)
     kernel32 advapi32 ntdll userenv ws2_32 dbghelp bcrypt
     ${WEBVIEW2_DIR}/build/native/x64/WebView2LoaderStatic.lib
-    comctl32 comdlg32 shlwapi shell32 ole32 version
+    comctl32 comdlg32 shlwapi shell32 ole32 version windowscodecs
 )
 # the manifest comes from app.rc
 target_link_options(InboxClassic PRIVATE /MANIFEST:NO)

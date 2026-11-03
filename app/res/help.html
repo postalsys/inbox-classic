@@ -104,16 +104,23 @@
         <h2>1. Adding an account</h2>
         <p>The first time Inbox Classic starts it asks for an account. To add another one later, choose <b>File &gt; New Account</b>.</p>
         <ol>
-            <li>Type your name as others should see it, your e-mail address and your password, and click <b>Next</b>.</li>
+            <li>
+                For Gmail, Google Workspace, Outlook.com or Microsoft 365, click <b>Sign in with Google</b> or <b>Sign in with Microsoft</b> and sign in in the
+                browser window that opens. That is all: the account is the one you signed in to, named as you are at Google or Microsoft unless you typed a
+                name. See <i>Gmail and Outlook.com</i> below.
+            </li>
+            <li>For any other account, type your name as others should see it and your e-mail address, and click <b>Next</b>.</li>
             <li>
                 Inbox Classic looks up the settings of your mail provider: from the provider that handles your domain's mail, your domain's DNS records, your
                 provider's settings file, Thunderbird's list of providers and, for Exchange, Microsoft Autodiscover. This takes a few seconds;
-                <b>Cancel</b> skips it. Your password is sent only to an Exchange server of your own domain that asks for it, over an encrypted connection.
+                <b>Cancel</b> skips it. An address at Google or Microsoft is offered their sign-in button here as well.
             </li>
             <li>If your provider wants an app password instead of your normal one, Inbox Classic says so and offers to open its instructions.</li>
             <li>
-                Check the server settings it found and click <b>Finish</b>. If it found nothing it fills in the usual names (<code>imap.</code> and
-                <code>smtp.</code> followed by your domain); compare them with what your provider tells you.
+                Type your password, check the server settings it found and click <b>Finish</b>. If it found nothing it fills in the usual names (<code
+                    >imap.</code
+                >
+                and <code>smtp.</code> followed by your domain); compare them with what your provider tells you.
             </li>
         </ol>
         <h3>Changing or removing an account</h3>
@@ -126,13 +133,14 @@
         <p>These providers do not take your normal password from mail programs. Either:</p>
         <ul>
             <li>
-                sign in through your web browser, which Inbox Classic offers for Gmail, Google Workspace, Outlook.com and Microsoft 365 addresses: your password
-                is typed into Google's or Microsoft's own page and Inbox Classic never sees it (a Microsoft 365 organization may first have to allow Inbox
-                Classic: Microsoft then shows <i>Need admin approval</i>, and Inbox Classic tells you the address where your administrator approves it); or
+                sign in through your web browser with <b>Sign in with Google</b> or <b>Sign in with Microsoft</b>: your password is typed into Google's or
+                Microsoft's own page and Inbox Classic never sees it (a Microsoft 365 organization may first have to allow Inbox Classic: Microsoft then shows
+                <i>Need admin approval</i>, and Inbox Classic tells you the address where your administrator approves it); or
             </li>
             <li>
                 create an <b>app password</b> in your account's security settings (Google: <i>Security &gt; 2-Step Verification &gt; App passwords</i>;
-                Microsoft: <i>Security &gt; Advanced security options &gt; App passwords</i>) and type that instead of your password.
+                Microsoft: <i>Security &gt; Advanced security options &gt; App passwords</i>), type your address, click <b>Next</b>, then
+                <b>Use App Password</b>, and type the app password instead of your normal one.
             </li>
         </ul>
         <h3>Security settings</h3>

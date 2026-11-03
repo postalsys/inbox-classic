@@ -129,7 +129,10 @@ impl Provider {
                 },
                 authorize_url: "https://accounts.google.com/o/oauth2/v2/auth".into(),
                 token_url: "https://oauth2.googleapis.com/token".into(),
-                scopes: vec!["https://mail.google.com/".into()],
+                // with OpenID Connect's, for the ID token that names the account signed in to
+                scopes: ["https://mail.google.com/", "openid", "email", "profile"]
+                    .map(String::from)
+                    .to_vec(),
                 client_id: configured(option_env!("PE_GOOGLE_CLIENT_ID"))
                     .unwrap_or(GOOGLE_CLIENT_ID)
                     .into(),
@@ -157,6 +160,9 @@ impl Provider {
                     "https://outlook.office.com/IMAP.AccessAsUser.All",
                     "https://outlook.office.com/SMTP.Send",
                     "offline_access",
+                    "openid",
+                    "email",
+                    "profile",
                 ]
                 .map(String::from)
                 .to_vec(),
@@ -174,6 +180,52 @@ pub struct Tokens {
     pub refresh_token: Option<String>,
     /// Seconds since the Unix epoch
     pub expires_at: i64,
+    /// Who signed in, from the ID token of a sign-in; None for a refresh
+    pub identity: Option<Identity>,
+}
+
+/// The account a sign-in was for: its address (the user name for IMAP and SMTP too) and the name of its owner
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Identity {
+    pub email: String,
+    pub name: Option<String>,
+}
+
+/// The account the ID token of a token answer names (OpenID Connect). The token came straight from the provider's
+/// token endpoint over TLS, which OpenID Connect Core 3.1.3.7 takes in place of checking its signature; it must
+/// still be meant for this client. Google's address only when Google verified it; Microsoft's is the `email` claim,
+/// or the sign-in name (`preferred_username`) without one.
+pub fn identity(id_token: &str, provider: &Provider) -> Option<Identity> {
+    let payload = URL_SAFE_NO_PAD
+        .decode(id_token.split('.').nth(1)?.trim_end_matches('='))
+        .ok()?;
+    let claims: Value = serde_json::from_slice(&payload).ok()?;
+    let ours = |aud: &Value| aud.as_str() == Some(provider.client_id.as_str());
+    let audience = match claims.get("aud")? {
+        Value::Array(list) => list.iter().any(ours),
+        aud => ours(aud),
+    };
+    if !audience {
+        return None;
+    }
+    let text = |key: &str| {
+        claims
+            .get(key)
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|v| !v.is_empty() && !v.chars().any(char::is_control))
+    };
+    let email = match provider.kind {
+        ProviderKind::Google => {
+            text("email").filter(|_| claims.get("email_verified").and_then(Value::as_bool) != Some(false))
+        }
+        ProviderKind::Microsoft => text("email").or_else(|| text("preferred_username")),
+    }
+    .filter(|email| email.contains('@'))?;
+    Some(Identity {
+        email: email.to_string(),
+        name: text("name").map(str::to_string),
+    })
 }
 
 #[derive(Debug)]
@@ -271,8 +323,11 @@ impl SignIn {
             ("state", state.clone()),
             ("code_challenge", challenge(&verifier)),
             ("code_challenge_method", "S256".into()),
-            ("login_hint", email.to_string()),
         ];
+        // the account to suggest, when one was typed
+        if !email.is_empty() {
+            params.push(("login_hint", email.to_string()));
+        }
         if provider.kind == ProviderKind::Google {
             // a refresh token, every time
             params.push(("access_type", "offline".into()));
@@ -340,7 +395,7 @@ async fn token_request(
     let response = http::post_form(&provider.token_url, form, TOKEN_TIMEOUT)
         .await
         .map_err(OAuthError::Http)?;
-    parse_tokens(response.status, &response.body, refreshed, now())
+    parse_tokens(response.status, &response.body, refreshed, now(), provider)
 }
 
 /// Where an administrator of a Microsoft 365 organization approves the app for everyone in it
@@ -359,8 +414,15 @@ pub(crate) fn needs_admin(description: &str) -> bool {
         .any(|code| description.contains(code))
 }
 
-/// The tokens of a token endpoint's answer (RFC 6749 5.1), or its error (5.2)
-pub fn parse_tokens(status: u16, body: &[u8], refreshed: Option<&str>, now: i64) -> Result<Tokens, OAuthError> {
+/// The tokens of `provider`'s token endpoint's answer (RFC 6749 5.1), or its error (5.2); for a sign-in (no
+/// `refreshed` token) with who signed in
+pub fn parse_tokens(
+    status: u16,
+    body: &[u8],
+    refreshed: Option<&str>,
+    now: i64,
+    provider: &Provider,
+) -> Result<Tokens, OAuthError> {
     let json: Value = serde_json::from_slice(body).map_err(|_| OAuthError::Refused(format!("HTTP {status}")))?;
     let text = |key: &str| {
         json.get(key)
@@ -395,6 +457,10 @@ pub fn parse_tokens(status: u16, body: &[u8], refreshed: Option<&str>, now: i64)
         refresh_token: text("refresh_token").or_else(|| refreshed.map(str::to_string)),
         // a minute early, so a token is not used as it runs out
         expires_at: now + expires_in - 60,
+        identity: refreshed
+            .is_none()
+            .then(|| text("id_token").and_then(|token| identity(&token, provider)))
+            .flatten(),
     })
 }
 
@@ -443,11 +509,13 @@ mod tests {
 
     #[test]
     fn token_answers() {
+        let p = test_provider("https://login.example.com/token");
         let ok = parse_tokens(
             200,
             br#"{"access_token":"a","refresh_token":"r","expires_in":3600}"#,
             None,
             1000,
+            &p,
         )
         .unwrap();
         assert_eq!(
@@ -455,10 +523,20 @@ mod tests {
             Tokens {
                 access_token: "a".into(),
                 refresh_token: Some("r".into()),
-                expires_at: 1000 + 3600 - 60
+                expires_at: 1000 + 3600 - 60,
+                identity: None,
             }
         );
-        let refreshed = parse_tokens(200, br#"{"access_token":"b","expires_in":10}"#, Some("old"), 0).unwrap();
+        let refreshed = parse_tokens(200, br#"{"access_token":"b","expires_in":10}"#, Some("old"), 0, &p).unwrap();
+        // who signed in: from a sign-in's ID token, not a refresh's
+        let id_token = id_token(r#"{"aud":"client id","email":"ann@example.com"}"#);
+        let answer = format!(r#"{{"access_token":"a","id_token":"{id_token}"}}"#);
+        let signed_in = parse_tokens(200, answer.as_bytes(), None, 0, &p).unwrap();
+        assert_eq!(signed_in.identity.unwrap().email, "ann@example.com");
+        assert_eq!(
+            parse_tokens(200, answer.as_bytes(), Some("r"), 0, &p).unwrap().identity,
+            None
+        );
         assert_eq!(
             (refreshed.refresh_token.as_deref(), refreshed.expires_at),
             (Some("old"), 0)
@@ -468,6 +546,7 @@ mod tests {
             br#"{"error":"invalid_grant","error_description":"Token has been revoked."}"#,
             None,
             0,
+            &p,
         );
         assert!(matches!(refused, Err(OAuthError::Refused(ref r)) if r == "invalid_grant: Token has been revoked."));
         assert!(refused.unwrap_err().needs_sign_in());
@@ -475,18 +554,16 @@ mod tests {
         let admin = parse_tokens(
             400,
             br#"{"error":"invalid_grant","error_description":"AADSTS65001: The user or administrator has not consented to use the application."}"#,
-            None,
-            0,
-        )
+            None, 0, &p)
         .unwrap_err();
         assert!(matches!(admin, OAuthError::NeedsAdmin) && admin.needs_sign_in());
         assert!(admin.to_string().ends_with(&admin_consent_url()));
         assert!(matches!(
-            parse_tokens(200, b"<html>", None, 0),
+            parse_tokens(200, b"<html>", None, 0, &p),
             Err(OAuthError::Refused(_))
         ));
         assert!(matches!(
-            parse_tokens(200, br#"{"token_type":"Bearer"}"#, None, 0),
+            parse_tokens(200, br#"{"token_type":"Bearer"}"#, None, 0, &p),
             Err(OAuthError::Refused(_))
         ));
     }
@@ -509,6 +586,42 @@ mod tests {
         }
     }
 
+    /// An ID token with these claims; the signature is not checked, so any will do
+    pub(crate) fn id_token(claims: &str) -> String {
+        format!("eyJhbGciOiJSUzI1NiJ9.{}.c2ln", URL_SAFE_NO_PAD.encode(claims))
+    }
+
+    #[test]
+    fn identities() {
+        let microsoft = test_provider("https://login.example.com/token");
+        let google = Provider {
+            kind: ProviderKind::Google,
+            ..microsoft.clone()
+        };
+        let ann = |name: Option<&str>| Identity {
+            email: "ann@example.com".into(),
+            name: name.map(String::from),
+        };
+        let token = id_token(r#"{"aud":"client id","email":"ann@example.com","email_verified":true,"name":"Ann"}"#);
+        assert_eq!(identity(&token, &google), Some(ann(Some("Ann"))));
+        // Microsoft: the sign-in name without an email claim, and an audience in a list
+        let token = id_token(r#"{"aud":["x","client id"],"preferred_username":"ann@example.com"}"#);
+        assert_eq!(identity(&token, &microsoft), Some(ann(None)));
+        for refused in [
+            // another client's
+            r#"{"aud":"other","email":"ann@example.com"}"#,
+            // an address Google did not verify
+            r#"{"aud":"client id","email":"ann@example.com","email_verified":false}"#,
+            // no address
+            r#"{"aud":"client id","email":"ann"}"#,
+            r#"{"aud":"client id","email":"ann@example.com\r\nX: y"}"#,
+            "not json",
+        ] {
+            assert_eq!(identity(&id_token(refused), &google), None, "{refused}");
+        }
+        assert_eq!(identity("no dots", &google), None);
+    }
+
     #[tokio::test]
     async fn sign_in_url() {
         let sign_in = SignIn::begin(test_provider("https://login.example.com/token"), "me@example.com").unwrap();
@@ -522,5 +635,8 @@ mod tests {
         )));
         assert!(url.contains("&login_hint=me%40example.com"));
         assert!(!url.contains(&sign_in.verifier), "the verifier stays here");
+        // no address typed: none suggested
+        let blank = SignIn::begin(test_provider("https://login.example.com/token"), "").unwrap();
+        assert!(!blank.url.contains("login_hint"), "{}", blank.url);
     }
 }

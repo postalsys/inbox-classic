@@ -14,35 +14,42 @@ const version = /version = "([^"]+)"/.exec(readFileSync('core/Cargo.toml', 'utf8
 const sections = [
     {
         title: 'Adding an account',
-        intro: 'The first start opens the account form; File > New Account adds more. Two steps: who you are, then the servers.',
+        intro: 'The first start opens the account form; File > New Account adds more. Google and Microsoft accounts: one click and a sign-in in the browser. Any other: who you are, then the servers and the password.',
         features: [
             {
                 shot: 'account-1-form',
-                name: 'Step 1: name, address, password',
-                what: 'Three fields, nothing technical. The servers are looked up from the address after OK.',
+                name: 'Step 1: Sign in with Google or Microsoft, or name and address',
+                what: "Google's and Microsoft's own sign-in buttons, unchanged as their branding asks: one click opens their page in the browser, and the account added is the one signed in to (read from the sign-in's OpenID Connect ID token), named as at the provider unless a name was typed. Any other account: a name and an address, nothing technical and no password yet; the servers are looked up from the address after Next.",
                 how: 'First start, or File > New Account.',
-                checked: ['The form opens on the first start']
+                checked: [
+                    'The form opens on the first start',
+                    'It starts with the Google and Microsoft sign-in buttons',
+                    'And asks no password before the servers are known'
+                ]
             },
             {
                 shot: 'account-3-servers',
-                name: 'Step 2: the servers, looked up',
-                what: "Inbox Classic looks up the provider's settings the way Thunderbird does: the provider's own autoconfig file, then Mozilla's ISPDB, then the usual imap. and smtp. names. Only over HTTPS, and it never picks a server without encryption. Gmail and Outlook.com accounts are offered sign-in through the browser (OAuth) when the build has client IDs.",
+                name: 'Step 2: the password and the servers, looked up',
+                what: "Inbox Classic looks up the provider's settings the way Thunderbird does: the provider's own autoconfig file, then Mozilla's ISPDB, then the usual imap. and smtp. names. Only over HTTPS, and it never picks a server without encryption. The password is asked here, next to the servers it goes to, and the form starts in it.",
                 how: 'Follows step 1 automatically. Cancel on the lookup skips it.',
-                checked: ['The lookup runs and fills in the guessed names (imap.postalexpress.test for the test address)']
+                checked: [
+                    'The lookup runs and fills in the guessed names (imap.postalexpress.test for the test address)',
+                    'The server form keeps the name typed first'
+                ]
             },
             {
                 shot: 'account-6-gmail',
                 name: 'Providers recognized by their mail servers',
                 what: "The lookup works like EmailEngine's: the servers that receive the domain's mail (MX) are checked against a table of hosted providers (Google Workspace, Microsoft 365, Zoho, AWS WorkMail, Yandex and more), then the domain's SRV records, the provider's settings file, Thunderbird's database and Microsoft Autodiscover race, and the first answer wins. DNS questions go over DNS-over-HTTPS, so nobody on the network can hand out other servers. The form says where the settings came from.",
-                how: 'Automatic in step 2. For Exchange, the password is offered only to the Autodiscover server of your own domain that asks for it, over an encrypted connection.',
+                how: 'Automatic in step 2.',
                 checked: ['A Gmail address gets imap.gmail.com and smtp.gmail.com, found by its MX']
             },
             {
                 shot: 'account-5b-browser-sign-in',
-                name: 'Gmail sign-in through the browser',
-                what: "For a Gmail or Google Workspace address Inbox Classic offers to sign in on Google's own page in the web browser (OAuth 2.0 with PKCE, Google's Desktop App flow): the password and any second step are typed there, never into Inbox Classic, and the account then signs in with tokens kept in the Windows Credential Manager. Outlook.com and Microsoft 365 addresses sign in the same way on Microsoft's page.",
-                how: 'Answer Yes when it is offered after the lookup; the browser opens, and the account is added once Google sends you back.',
-                checked: ['The offer appears for a Gmail address', 'No goes on to the password way']
+                name: 'A Google or Microsoft address typed: their sign-in offered',
+                what: "An address found at Google (Gmail, Google Workspace) or Microsoft (Outlook.com, Microsoft 365) is offered that provider's sign-in button (OAuth 2.0 with PKCE and a loopback redirect): the password and any second step are typed on their page, never into Inbox Classic, and the account then signs in with tokens kept in the Windows Credential Manager. Use App Password goes the password way instead. A Microsoft 365 organization that has not approved the app is reported as that, with the address where its administrator approves it.",
+                how: 'Type the address and click Next; the button follows the lookup.',
+                checked: ['A Gmail address is offered Sign in with Google', 'Use App Password goes on to the password way']
             },
             {
                 shot: 'account-5-app-password',
@@ -364,7 +371,7 @@ const behind = [
     ]
 ];
 
-const missing = ['Gmail and Outlook.com browser sign-in in released builds: works, but needs the OAuth client IDs at build time'];
+const missing = [];
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const image = name => {
@@ -445,7 +452,7 @@ footer { color: var(--muted); font-size: 13px; padding-top: 30px; padding-bottom
 <header>
 <h1>Inbox Classic ${esc(version)}: what it can do</h1>
 <p class="lead">Every feature of the app, with a screenshot of it running. The screenshots come from the UI end-to-end test, which drives the real program against a test mail server and checks each effect on the server. Click a screenshot to enlarge it.</p>
-<nav>${sections.map((s, i) => `<a href="#s${i}">${esc(s.title)}</a>`).join('')}<a href="#behind">Behind the scenes</a><a href="#missing">Not there yet</a></nav>
+<nav>${sections.map((s, i) => `<a href="#s${i}">${esc(s.title)}</a>`).join('')}<a href="#behind">Behind the scenes</a>${missing.length ? '<a href="#missing">Not there yet</a>' : ''}</nav>
 </header>
 <main>
 ${body.replace(
@@ -456,7 +463,7 @@ ${body.replace(
     })()
 )}
 <section id="behind"><h2>Behind the scenes</h2><div class="grid">${behind.map(([t, d]) => `<div><b>${esc(t)}</b>${esc(d)}</div>`).join('')}</div></section>
-<section id="missing"><h2>Not there yet</h2><p class="intro">What an Outlook Express user would look for and does not find yet.</p><ul class="missing">${missing.map(m => `<li>${esc(m)}</li>`).join('')}</ul></section>
+${missing.length ? `<section id="missing"><h2>Not there yet</h2><p class="intro">What an Outlook Express user would look for and does not find yet.</p><ul class="missing">${missing.map(m => `<li>${esc(m)}</li>`).join('')}</ul></section>` : ''}
 </main>
 <footer>${count} features. Generated ${new Date().toISOString().slice(0, 10)} by scripts/feature-map.mjs from the screenshots of scripts/ui-e2e.ps1.</footer>
 </body>

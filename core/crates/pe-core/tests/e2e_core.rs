@@ -273,10 +273,14 @@ fn sends_replies_and_keeps_a_copy() {
 
 #[test]
 fn signs_in_with_oauth() {
-    let Some(server) = ImapKit::start(json!({})) else {
+    // the account is the one the ID token names, which XOAUTH2 signs in as
+    const SIGNED_IN: &str = "testuser@example.com";
+    let users =
+        json!({ "users": { SIGNED_IN: { "password": PASSWORD, "xoauth2": { "accessToken": pe_testkit::TOKEN } } } });
+    let Some(server) = ImapKit::start(users) else {
         return;
     };
-    let token_port = pe_testkit::oauth_token_server();
+    let token_port = pe_testkit::oauth_token_server(SIGNED_IN);
     let dir = TempDir::new("core-oauth");
     let (sender, events) = channel();
     let endpoint = |port| pe_oauth::Endpoint {
@@ -321,19 +325,37 @@ fn signs_in_with_oauth() {
     wait(&|e| *e == Event::SignInDone { request });
     assert_eq!(core.sign_in_result(request), Ok(()));
 
-    // the account signs in to ImapKit with XOAUTH2 and the access token from the refresh token, at the
-    // provider's servers whatever the settings given said
-    let mut elsewhere = server.account_settings();
-    elsewhere.smtp_host = "smtp.attacker.example".into();
-    let account = core.add_account_oauth(&elsewhere, request).unwrap();
-    assert_eq!(core.accounts().unwrap()[0].settings.smtp_host, "127.0.0.1");
-    assert!(matches!(core.accounts().unwrap()[0].settings.auth, pe_store::Auth::OAuth2(ref p) if p == "google"));
+    // the account is the one signed in to, named as its owner is at the provider, and signs in to ImapKit with
+    // XOAUTH2 and the access token from the refresh token, at the provider's servers
+    let account = core.add_signed_in_account(request, " ").unwrap();
+    let added = &core.accounts().unwrap()[0].settings;
+    assert_eq!(
+        (added.name.as_str(), added.email.as_str(), added.username.as_str()),
+        ("Signed In", SIGNED_IN, SIGNED_IN)
+    );
+    assert_eq!(added.smtp_host, "127.0.0.1");
+    assert!(matches!(added.auth, pe_store::Auth::OAuth2(ref p) if p == "google"));
     core.sync(account).unwrap();
     wait(&|e| *e == Event::SyncFinished { account });
     assert!(!core.folders(account).unwrap().is_empty());
     // the sign-in was taken
-    assert!(core.add_account_oauth(&server.account_settings(), request).is_err());
+    assert!(core.add_signed_in_account(request, "Work").is_err());
+    // signing in again takes a sign-in of the same account only
+    let (again, url) = core.sign_in_begin(pe_oauth::ProviderKind::Google, SIGNED_IN).unwrap();
+    pe_testkit::oauth_browser(&url, "the-code");
+    wait(&|e| *e == Event::SignInDone { request: again });
+    core.reauthorize(account, again).unwrap();
+    let mut other = server.account_settings();
+    other.email = "someone.else@example.com".into();
+    core.update_account(account, &other).unwrap();
+    let (again, url) = core.sign_in_begin(pe_oauth::ProviderKind::Google, SIGNED_IN).unwrap();
+    pe_testkit::oauth_browser(&url, "the-code");
+    wait(&|e| *e == Event::SignInDone { request: again });
+    let refused = core.reauthorize(account, again).unwrap_err();
+    assert!(refused.to_string().contains(SIGNED_IN), "{refused}");
     // changing the settings keeps how it signs in, and its servers
+    let mut elsewhere = server.account_settings();
+    elsewhere.smtp_host = "smtp.attacker.example".into();
     core.update_account(account, &elsewhere).unwrap();
     let kept = &core.accounts().unwrap()[0].settings;
     assert!(matches!(kept.auth, pe_store::Auth::OAuth2(_)) && kept.smtp_host == "127.0.0.1");

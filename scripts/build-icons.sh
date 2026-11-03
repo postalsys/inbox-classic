@@ -118,4 +118,9 @@ for size in 16 20 24 32 40 48 64 256; do
 done
 magick "${icon_frames[@]}" app/res/app.ico
 
+# the sign-in buttons of Add Mail Account (app/res/brands), the providers' own artwork, unchanged: Google's PNG with
+# its transparent margin trimmed, Microsoft's SVG at three times its size; the app scales them with WIC
+magick app/res/brands/google-sign-in-source.png -trim +repage app/res/brands/google-sign-in.png
+rsvg-convert -z 3 app/res/brands/microsoft-sign-in.svg -o app/res/brands/microsoft-sign-in.png
+
 echo "toolbar strips in $OUT and app/res/toolbar.rc, order and sizes in app/src/icons.h, the app icon in app/res/app.ico"

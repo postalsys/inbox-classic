@@ -109,6 +109,8 @@ pub enum Error {
     Unavailable(String),
     /// A folder name or a folder that can not be used
     Folder(pe_sync::FolderRefusal),
+    /// Signing in again came back from another account than this one: the address it signed in to
+    OtherAccount(String),
 }
 
 impl fmt::Display for Error {
@@ -120,6 +122,7 @@ impl fmt::Display for Error {
             Error::Compose(error) => write!(f, "{error}"),
             Error::Unavailable(reason) => write!(f, "{reason}"),
             Error::Folder(refusal) => write!(f, "{refusal}"),
+            Error::OtherAccount(email) => write!(f, "the browser signed in to {email}, not to this account"),
         }
     }
 }
@@ -183,7 +186,7 @@ pub struct Core {
     /// The view request the reading pane waits for; an older one gives up
     newest_view: Arc<std::sync::atomic::AtomicU64>,
     /// Sign-ins in the browser: the provider and the refresh token, or why not
-    sign_ins: Requests<std::result::Result<(pe_oauth::ProviderKind, String), String>>,
+    sign_ins: Requests<std::result::Result<SignedIn, String>>,
     oauth: OAuthProviders,
     next_request: std::sync::atomic::AtomicU64,
 }
@@ -403,8 +406,15 @@ impl Core {
                 .finish(pe_oauth::SIGN_IN_TIMEOUT)
                 .await
                 .map_err(|e| e.to_string())?;
-            let refresh = tokens.refresh_token.ok_or("the provider gave no refresh token")?;
-            Ok((kind, refresh))
+            let refresh_token = tokens.refresh_token.ok_or("the provider gave no refresh token")?;
+            let identity = tokens
+                .identity
+                .ok_or("the provider did not say which account signed in")?;
+            Ok(SignedIn {
+                kind,
+                refresh_token,
+                identity,
+            })
         };
         self.sign_ins
             .start(self.runtime()?, request, work, self.events.clone(), |request| {
@@ -428,28 +438,41 @@ impl Core {
         self.sign_ins.cancel(request);
     }
 
-    /// The provider and refresh token of a finished sign-in, taken
-    fn take_sign_in(&self, request: u64) -> Result<(pe_oauth::Provider, String)> {
-        let (kind, refresh_token) = self
+    /// A finished sign-in, taken, and its provider
+    fn take_sign_in(&self, request: u64) -> Result<(pe_oauth::Provider, SignedIn)> {
+        let signed_in = self
             .sign_ins
             .take(request)
             .and_then(|r| r.ok())
             .ok_or(Error::NotFound)?;
-        let provider = self.oauth.provider(kind);
-        Ok((provider, refresh_token))
+        Ok((self.oauth.provider(signed_in.kind), signed_in))
     }
 
-    /// Adds an account that signs in with what the sign-in `request` got, at the servers of the provider: its
-    /// access tokens go nowhere else, whatever a configuration file said
-    pub fn add_account_oauth(&self, settings: &AccountSettings, request: u64) -> Result<AccountId> {
-        let (provider, refresh_token) = self.take_sign_in(request)?;
-        self.add_account(&with_provider(settings, &provider), &refresh_token)
+    /// Adds the account the sign-in `request` was for, named `name` (when empty, as its owner is named at the
+    /// provider): the address is the one signed in to, whatever was typed before, and the servers are the
+    /// provider's, so its access tokens go nowhere else
+    pub fn add_signed_in_account(&self, request: u64, name: &str) -> Result<AccountId> {
+        let (provider, signed_in) = self.take_sign_in(request)?;
+        let pe_oauth::Identity { email, name: owner } = signed_in.identity;
+        let name = Some(name.trim())
+            .filter(|n| !n.is_empty())
+            .map(str::to_string)
+            .or(owner)
+            .unwrap_or_else(|| email.clone());
+        let settings = provider_settings(name, email.clone(), email, &provider);
+        self.add_account(&settings, &signed_in.refresh_token)
     }
 
-    /// Gives an OAuth account the refresh token of a new sign-in, after the old one was refused
+    /// Gives an OAuth account the refresh token of a new sign-in, after the old one was refused; refused when the
+    /// browser signed in to another account
     pub fn reauthorize(&self, account: AccountId, request: u64) -> Result<()> {
-        let (provider, refresh_token) = self.take_sign_in(request)?;
-        let settings = with_provider(&self.store().account(account)?.settings, &provider);
+        let (provider, signed_in) = self.take_sign_in(request)?;
+        let current = self.store().account(account)?.settings;
+        if !signed_in.identity.email.eq_ignore_ascii_case(&current.email) {
+            return Err(Error::OtherAccount(signed_in.identity.email));
+        }
+        let refresh_token = signed_in.refresh_token;
+        let settings = with_provider(&current, &provider);
         self.store().update_account(account, &settings)?;
         self.stop_worker(account);
         self.keep_password(account, &refresh_token);
@@ -879,9 +902,19 @@ fn store_security(security: pe_net::Security) -> pe_store::Security {
     }
 }
 
-/// `settings` at the servers of `provider`, signing in with it
-fn with_provider(settings: &AccountSettings, provider: &pe_oauth::Provider) -> AccountSettings {
+/// What a finished sign-in got: the refresh token of the account it was for
+struct SignedIn {
+    kind: pe_oauth::ProviderKind,
+    refresh_token: String,
+    identity: pe_oauth::Identity,
+}
+
+/// The settings of an account at `provider`'s servers that signs in with it
+fn provider_settings(name: String, email: String, username: String, provider: &pe_oauth::Provider) -> AccountSettings {
     AccountSettings {
+        name,
+        email,
+        username,
         imap_host: provider.imap.host.clone(),
         imap_port: provider.imap.port,
         imap_security: store_security(provider.imap.security),
@@ -889,8 +922,17 @@ fn with_provider(settings: &AccountSettings, provider: &pe_oauth::Provider) -> A
         smtp_port: provider.smtp.port,
         smtp_security: store_security(provider.smtp.security),
         auth: pe_store::Auth::OAuth2(provider.kind.as_str().to_string()),
-        ..settings.clone()
     }
+}
+
+/// `settings` at the servers of `provider`, signing in with it
+fn with_provider(settings: &AccountSettings, provider: &pe_oauth::Provider) -> AccountSettings {
+    provider_settings(
+        settings.name.clone(),
+        settings.email.clone(),
+        settings.username.clone(),
+        provider,
+    )
 }
 
 /// How long closing waits for the workers

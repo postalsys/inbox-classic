@@ -6,6 +6,7 @@
 #include <commdlg.h>
 #include <shlobj.h>
 #include <shobjidl.h>
+#include <wincodec.h>
 #include <wrl/client.h>
 
 #include <algorithm>
@@ -72,21 +73,6 @@ LRESULT CALLBACK FormProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
-void RegisterFormClass() {
-    static bool registered = false;
-    if (registered) {
-        return;
-    }
-    WNDCLASSEXW windowClass = {sizeof(windowClass)};
-    windowClass.lpfnWndProc = FormProc;
-    windowClass.hInstance = GetModuleHandleW(nullptr);
-    windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-    windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
-    windowClass.lpszClassName = kFormClass;
-    RegisterClassExW(&windowClass);
-    registered = true;
-}
-
 HWND CreateInput(HWND dialog, const FormField& field, int id, const RECT& bounds) {
     if (field.kind == FormField::Kind::Choice) {
         RECT dropped = bounds;
@@ -110,6 +96,20 @@ HWND CreateInput(HWND dialog, const FormField& field, int id, const RECT& bounds
 }
 
 }  // namespace
+
+void RegisterDialogClass(const wchar_t* name, WNDPROC proc) {
+    WNDCLASSEXW windowClass = {sizeof(windowClass)};
+    if (GetClassInfoExW(GetModuleHandleW(nullptr), name, &windowClass)) {
+        return;
+    }
+    windowClass = {sizeof(windowClass)};
+    windowClass.lpfnWndProc = proc;
+    windowClass.hInstance = GetModuleHandleW(nullptr);
+    windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+    windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
+    windowClass.lpszClassName = name;
+    RegisterClassExW(&windowClass);
+}
 
 void SetScaleWindow(HWND window) {
     g_scaleWindow = window;
@@ -183,8 +183,8 @@ LRESULT ButtonFaceColor(HDC dc) {
 }
 
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
-                bool (*validate)(const std::vector<FormField>&, std::wstring&), const wchar_t* okLabel) {
-    RegisterFormClass();
+                bool (*validate)(const std::vector<FormField>&, std::wstring&), const wchar_t* okLabel, size_t focus) {
+    RegisterDialogClass(kFormClass, FormProc);
     int pad = Scale(10);
     int labelWidth = Scale(130);
     int clientWidth = Scale(420);
@@ -216,7 +216,7 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL,
                 {clientWidth - pad - buttonWidth, buttonTop, clientWidth - pad, buttonTop + Scale(25)});
 
-    RunModal(dialog, state.inputs.empty() ? nullptr : state.inputs[0], state.done);
+    RunModal(dialog, focus < state.inputs.size() ? state.inputs[focus] : nullptr, state.done);
     return state.accepted;
 }
 
@@ -263,17 +263,7 @@ LRESULT CALLBACK TextProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 }  // namespace
 
 void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text) {
-    static bool registered = false;
-    if (!registered) {
-        WNDCLASSEXW windowClass = {sizeof(windowClass)};
-        windowClass.lpfnWndProc = TextProc;
-        windowClass.hInstance = GetModuleHandleW(nullptr);
-        windowClass.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-        windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
-        windowClass.lpszClassName = kTextClass;
-        RegisterClassExW(&windowClass);
-        registered = true;
-    }
+    RegisterDialogClass(kTextClass, TextProc);
     int pad = Scale(10);
     int width = Scale(520);
     int height = Scale(420);
@@ -311,6 +301,69 @@ std::wstring FolderDialog(HWND owner, const wchar_t* title) {
     std::wstring folder = path;
     CoTaskMemFree(path);
     return folder;
+}
+
+namespace {
+
+// the first frame of a PNG resource, decoded by WIC
+Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> PictureFrame(IWICImagingFactory* factory, int resource) {
+    HMODULE module = GetModuleHandleW(nullptr);
+    HRSRC found = FindResourceW(module, MAKEINTRESOURCEW(resource), MAKEINTRESOURCEW(10));  // RT_RCDATA
+    HGLOBAL loaded = found ? LoadResource(module, found) : nullptr;
+    auto* data = static_cast<BYTE*>(loaded ? LockResource(loaded) : nullptr);
+    Microsoft::WRL::ComPtr<IWICStream> stream;
+    Microsoft::WRL::ComPtr<IWICBitmapDecoder> decoder;
+    Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> frame;
+    if (!data || FAILED(factory->CreateStream(&stream)) ||
+        FAILED(stream->InitializeFromMemory(data, SizeofResource(module, found))) ||
+        FAILED(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder)) ||
+        FAILED(decoder->GetFrame(0, &frame))) {
+        return nullptr;
+    }
+    return frame;
+}
+
+}  // namespace
+
+HBITMAP LoadPicture(int resource, int height, COLORREF background, int& width) {
+    Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
+    CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
+    auto frame = factory ? PictureFrame(factory.Get(), resource) : nullptr;
+    UINT naturalWidth = 0, naturalHeight = 0;
+    if (!frame || FAILED(frame->GetSize(&naturalWidth, &naturalHeight)) || !naturalHeight || height <= 0) {
+        return nullptr;
+    }
+    width = MulDiv(height, static_cast<int>(naturalWidth), static_cast<int>(naturalHeight));
+    Microsoft::WRL::ComPtr<IWICBitmapScaler> scaler;
+    Microsoft::WRL::ComPtr<IWICFormatConverter> converter;
+    if (FAILED(factory->CreateBitmapScaler(&scaler)) ||
+        FAILED(scaler->Initialize(frame.Get(), width, height, WICBitmapInterpolationModeHighQualityCubic)) ||
+        FAILED(factory->CreateFormatConverter(&converter)) ||
+        FAILED(converter->Initialize(scaler.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0,
+                                     WICBitmapPaletteTypeCustom))) {
+        return nullptr;
+    }
+    BITMAPINFO info = {};
+    info.bmiHeader = {sizeof(BITMAPINFOHEADER), width, -height, 1, 32, BI_RGB};
+    void* bits = nullptr;
+    HBITMAP bitmap = CreateDIBSection(nullptr, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
+    UINT stride = static_cast<UINT>(width) * 4;
+    if (!bitmap || FAILED(converter->CopyPixels(nullptr, stride, stride * static_cast<UINT>(height), static_cast<BYTE*>(bits)))) {
+        if (bitmap) {
+            DeleteObject(bitmap);
+        }
+        return nullptr;
+    }
+    // laid over the background: premultiplied, so each channel gets the background's share the picture leaves
+    const BYTE under[3] = {GetBValue(background), GetGValue(background), GetRValue(background)};
+    auto* pixel = static_cast<BYTE*>(bits);
+    for (int i = 0; i < width * height; i++, pixel += 4) {
+        for (int channel = 0; channel < 3; channel++) {
+            pixel[channel] = static_cast<BYTE>(pixel[channel] + under[channel] * (255 - pixel[3]) / 255);
+        }
+        pixel[3] = 255;
+    }
+    return bitmap;
 }
 
 HICON AppIcon(bool titleBar) {
@@ -465,6 +518,16 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     }
     MSG msg = {};
     while (!done && GetMessageW(&msg, nullptr, 0, 0) > 0) {
+        // Enter on an owner-drawn button clicks it: it can not be the default button, so the dialog would take IDOK
+        if (msg.message == WM_KEYDOWN && msg.wParam == VK_RETURN && IsChild(dialog, msg.hwnd) &&
+            (GetWindowLongPtrW(msg.hwnd, GWL_STYLE) & BS_TYPEMASK) == BS_OWNERDRAW) {
+            wchar_t className[16] = L"";
+            GetClassNameW(msg.hwnd, className, 16);
+            if (_wcsicmp(className, L"Button") == 0) {
+                SendMessageW(msg.hwnd, BM_CLICK, 0, 0);
+                continue;
+            }
+        }
         if (!IsDialogMessageW(dialog, &msg)) {
             TranslateMessage(&msg);
             DispatchMessageW(&msg);

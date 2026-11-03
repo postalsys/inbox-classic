@@ -266,17 +266,26 @@ try {
     $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"")
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
-    # both steps of the form; $password is what the first step gets
+    # the first page of Add Mail Account, with the address fields when $fields, else the page that offers a
+    # provider's sign-in for an address found there
+    function StartPage([bool]$fields, [int]$seconds = 10) {
+        WaitFor {
+            $f = [Native.Win]::FindWindow('InboxClassicAccountStart', 'Add Mail Account')
+            if ($f -ne [IntPtr]::Zero -and (([Native.Win]::GetDlgItem($f, 101) -ne [IntPtr]::Zero) -eq $fields)) { $f }
+        } $seconds
+    }
+
+    # both steps of the form: the name and address, then the servers with the password
     function AddAccount([string]$name, [string]$user, [string]$password, [bool]$shots) {
-        # the window, once its fields are there
-        $first = WaitFor {
-            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
-            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 102) -ne [IntPtr]::Zero) { $f }
-        }
+        $first = StartPage $true
         Check ($null -ne $first) "the account form opens ($name)"
+        if ($shots) {
+            $google = [Native.Win]::GetDlgItem($first, 120); $microsoft = [Native.Win]::GetDlgItem($first, 121)
+            Check ((WindowText $google) -eq 'Sign in with Google' -and (WindowText $microsoft) -eq 'Sign in with Microsoft') 'it starts with the Google and Microsoft sign-in buttons'
+            Check ([Native.Win]::GetDlgItem($first, 102) -eq [IntPtr]::Zero) 'and asks no password before the servers are known'
+        }
         SetText $first 100 $name
         SetText $first 101 "$user@postalexpress.test"
-        SetText $first 102 $password
         if ($shots) { Shot $first 'account-1-form' }
         Click $first 1
         if ($shots) {
@@ -291,7 +300,9 @@ try {
         Check ($null -ne $second) 'the server settings form follows the lookup'
         if (-not $second) { Shot $first "account-failed-$user"; throw 'no server settings form' }
         Check ((GetText $second 104) -eq 'imap.postalexpress.test') 'the lookup guessed the IMAP server'
+        Check ((GetText $second 100) -eq $name) 'the server form keeps the name typed first'
         SetText $second 102 $user
+        SetText $second 103 $password
         SetText $second 104 '127.0.0.1'
         SetText $second 105 "$($ports.imap)"
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 106), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
@@ -793,21 +804,17 @@ try {
 
     Step 'a Gmail address'
     Command $main $IDM_NEW_ACCOUNT
-    $first = WaitFor {
-        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
-        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 102) -ne [IntPtr]::Zero) { $f }
-    }
+    $first = StartPage $true
     SetText $first 100 'Gmail Test'
     SetText $first 101 'postalexpress.test@gmail.com'
-    SetText $first 102 'not-used'
     Click $first 1
-    # Gmail can sign in through the browser (the Google client is built in): offered first; No here, the test can not
-    # sign in to Google, so the password way follows
-    $browser = WaitWindow '#32770' 'Add Mail Account' 40
-    Check ($browser -and (WindowText ([Native.Win]::FindDescendants($browser, 'Static') | Where-Object { (WindowText $_) -match 'browser' } | Select-Object -First 1)) -match 'web browser') 'Gmail offers signing in through the browser'
+    # Gmail signs in through the browser (the Google client is built in): its button is offered first; the test can
+    # not sign in to Google, so Use App Password here, and the password way follows
+    $browser = StartPage $false 40
+    Check ($browser -and [Native.Win]::GetDlgItem($browser, 120) -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($browser, 121) -eq [IntPtr]::Zero) 'a Gmail address is offered Sign in with Google'
     if ($browser) {
         Shot $browser 'account-5b-browser-sign-in'
-        Click $browser 7
+        Click $browser 1
         [void](WaitFor { -not [Native.Win]::IsWindow($browser) } 10)
     }
     $hint = WaitWindow '#32770' 'Add Mail Account' 40

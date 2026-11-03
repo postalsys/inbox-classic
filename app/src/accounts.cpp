@@ -4,6 +4,9 @@
 
 #include <shellapi.h>
 
+#include <algorithm>
+#include <span>
+
 namespace {
 
 const wchar_t* kSecurity[] = {L"SSL/TLS", L"STARTTLS", L"None (unencrypted)"};
@@ -38,14 +41,6 @@ bool Validate(const std::vector<FormField>& fields, std::wstring& error) {
     }
     if (!ValidPort(fields[IMAP_PORT].value) || !ValidPort(fields[SMTP_PORT].value)) {
         error = L"Ports are numbers from 1 to 65535.";
-        return false;
-    }
-    return true;
-}
-
-bool ValidFirst(const std::vector<FormField>& fields, std::wstring& error) {
-    if (fields[1].value.find(L'@') == std::wstring::npos) {
-        error = L"Type your e-mail address, name@example.com.";
         return false;
     }
     return true;
@@ -124,11 +119,8 @@ bool WaitFor(HWND owner, PeCore* core, uint64_t request, void (*cancel)(const Pe
 }
 
 // looks the servers of `email` up; the result, or NULL
-core::Autoconfig WaitForLookup(HWND owner, PeCore* core, const std::wstring& email, const std::wstring& password) {
-    // the password only answers a Microsoft Autodiscover server that asks for it (hosted Exchange), over https
-    std::string secret = core::Narrow(password);
-    uint64_t request = pe_autoconfig_start(core, core::Narrow(email).c_str(), secret.c_str());
-    SecureZeroMemory(secret.data(), secret.size());
+core::Autoconfig WaitForLookup(HWND owner, PeCore* core, const std::wstring& email) {
+    uint64_t request = pe_autoconfig_start(core, core::Narrow(email).c_str(), nullptr);
     size_t at = email.find_last_of(L'@');
     std::wstring text = L"Looking up the settings of " + email.substr(at == std::wstring::npos ? 0 : at + 1) + L"...";
     if (!WaitFor(owner, core, request, pe_autoconfig_cancel, text)) {
@@ -223,6 +215,190 @@ void RequestDone(uint64_t request) {
     }
 }
 
+// ---- the first page: the providers' sign-in buttons, or the name and address of any other account ----
+
+enum class Start { Cancel, Next, SignIn };
+
+// the ids of the first page: the name and address as the server form has them, then the sign-in buttons
+enum StartId : int { IDC_START_NAME = 100, IDC_START_EMAIL = 101, IDC_SIGN_IN_GOOGLE = 120, IDC_SIGN_IN_MICROSOFT = 121 };
+
+// a provider's sign-in button: its id, its picture (the provider's own) and what a screen reader says for it
+struct SignInButton {
+    PeOAuthProvider provider;
+    int id;
+    int picture;
+    const wchar_t* label;
+    const wchar_t* company;
+};
+const SignInButton kSignIns[] = {
+    {PE_O_AUTH_PROVIDER_GOOGLE, IDC_SIGN_IN_GOOGLE, IDR_GOOGLE_SIGN_IN, L"Sign in with Google", L"Google"},
+    {PE_O_AUTH_PROVIDER_MICROSOFT, IDC_SIGN_IN_MICROSOFT, IDR_MICROSOFT_SIGN_IN, L"Sign in with Microsoft", L"Microsoft"},
+};
+
+// the button of the command `id`, or of `provider`
+const SignInButton* SignInOf(int id, PeOAuthProvider provider = PE_O_AUTH_PROVIDER_NONE) {
+    for (const SignInButton& button : kSignIns) {
+        if (button.id == id || button.provider == provider) {
+            return &button;
+        }
+    }
+    return nullptr;
+}
+
+const wchar_t* kStartClass = L"InboxClassicAccountStart";
+
+struct StartState {
+    // the inputs of the page with fields, and where what is typed in them goes
+    HWND nameInput = nullptr;
+    HWND emailInput = nullptr;
+    std::wstring* name = nullptr;
+    std::wstring* email = nullptr;
+    Start choice = Start::Cancel;
+    PeOAuthProvider provider = PE_O_AUTH_PROVIDER_NONE;
+    bool done = false;
+};
+
+// a provider's sign-in button: its own picture (kept on the button), unchanged, with the focus rectangle inside it and
+// pushed in by a pixel
+void DrawSignInButton(const DRAWITEMSTRUCT& item) {
+    FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
+    if (auto picture = reinterpret_cast<HBITMAP>(GetWindowLongPtrW(item.hwndItem, GWLP_USERDATA))) {
+        HDC memory = CreateCompatibleDC(item.hDC);
+        HGDIOBJ old = SelectObject(memory, picture);
+        int pushed = (item.itemState & ODS_SELECTED) ? 1 : 0;
+        BitBlt(item.hDC, item.rcItem.left + pushed, item.rcItem.top + pushed, item.rcItem.right - item.rcItem.left,
+               item.rcItem.bottom - item.rcItem.top, memory, 0, 0, SRCCOPY);
+        SelectObject(memory, old);
+        DeleteDC(memory);
+    }
+    if ((item.itemState & ODS_FOCUS) && !(item.itemState & ODS_NOFOCUSRECT)) {
+        RECT focus = item.rcItem;
+        InflateRect(&focus, -Scale(3), -Scale(3));
+        DrawFocusRect(item.hDC, &focus);
+    }
+}
+
+// what the command `id` chooses, false when the page stays (an address to type first)
+bool Choose(HWND hwnd, StartState& state, int id) {
+    if (const SignInButton* signIn = SignInOf(id)) {
+        state.choice = Start::SignIn;
+        state.provider = signIn->provider;
+    } else if (id == IDOK) {
+        // the page of another account wants an address to look up
+        if (state.emailInput && GetWindowString(state.emailInput).find(L'@') == std::wstring::npos) {
+            MessageBoxW(hwnd, L"Type your e-mail address, name@example.com.", L"Inbox Classic", MB_OK | MB_ICONWARNING);
+            SetFocus(state.emailInput);
+            return false;
+        }
+        state.choice = Start::Next;
+    } else if (id != IDCANCEL) {
+        return false;
+    }
+    if (state.nameInput) {
+        *state.name = GetWindowString(state.nameInput);
+        *state.email = GetWindowString(state.emailInput);
+    }
+    return true;
+}
+
+LRESULT CALLBACK StartProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* state = reinterpret_cast<StartState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    if (!state) {
+        return DefWindowProcW(hwnd, message, wParam, lParam);
+    }
+    switch (message) {
+    case WM_COMMAND:
+        state->done = Choose(hwnd, *state, LOWORD(wParam));
+        return 0;
+    case WM_DRAWITEM:
+        DrawSignInButton(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam));
+        return TRUE;
+    case WM_CLOSE:
+        state->choice = Start::Cancel;
+        state->done = true;
+        return 0;
+    case WM_CTLCOLORSTATIC:
+        return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+// a page of Add Mail Account with `intro`, a sign-in button for each of `providers` (the one chosen in `chosen`),
+// then, when `fields`, the name and address of any other account (given back in `name` and `email`) and `nextLabel`
+// to go on with that
+Start StartPage(HWND owner, const std::wstring& intro, std::span<const PeOAuthProvider> providers, bool fields,
+                const wchar_t* nextLabel, std::wstring& name, std::wstring& email, PeOAuthProvider& chosen) {
+    RegisterDialogClass(kStartClass, StartProc);
+    int pad = Scale(10), width = Scale(440), rowHeight = Scale(22), labelWidth = Scale(110);
+    int introHeight = Scale(30), buttonHeight = Scale(40), gap = Scale(12);
+    int otherHeight = fields ? Scale(12) + Scale(30) + 2 * (rowHeight + Scale(6)) : 0;
+    int height = pad + introHeight + Scale(8) + buttonHeight + Scale(14) + otherHeight + Scale(25) + pad;
+    HWND dialog = CreateModalWindow(owner, kStartClass, L"Add Mail Account", width, height);
+    StartState state;
+
+    int top = pad;
+    CreateChild(dialog, L"STATIC", intro.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + introHeight});
+    top += introHeight + Scale(8);
+    // side by side and centered, each as wide as its picture is at this height
+    std::vector<std::pair<const SignInButton*, int>> buttons;
+    std::vector<HBITMAP> pictures;
+    int total = -gap;
+    for (const SignInButton& button : kSignIns) {
+        if (std::find(providers.begin(), providers.end(), button.provider) != providers.end()) {
+            int buttonWidth = Scale(200);
+            pictures.push_back(LoadPicture(button.picture, buttonHeight, GetSysColor(COLOR_BTNFACE), buttonWidth));
+            buttons.emplace_back(&button, buttonWidth);
+            total += buttonWidth + gap;
+        }
+    }
+    HWND firstButton = nullptr;
+    int left = (width - total) / 2;
+    for (size_t i = 0; i < buttons.size(); i++) {
+        auto [button, buttonWidth] = buttons[i];
+        // the text is what a screen reader says; the picture shows the same words
+        HWND control = CreateChild(dialog, L"BUTTON", button->label, WS_TABSTOP | BS_OWNERDRAW, button->id,
+                                   {left, top, left + buttonWidth, top + buttonHeight});
+        SetWindowLongPtrW(control, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pictures[i]));
+        firstButton = firstButton ? firstButton : control;
+        left += buttonWidth + gap;
+    }
+    top += buttonHeight + Scale(14);
+    if (fields) {
+        CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {pad, top, width - pad, top + 2});
+        top += Scale(12);
+        CreateChild(dialog, L"STATIC",
+                    L"Any other e-mail account: your name as others see it and your e-mail address. Its servers are "
+                    L"looked up next.",
+                    SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + Scale(30)});
+        top += Scale(30);
+        CreateChild(dialog, L"STATIC", L"Display name:", SS_LEFT, 0, {pad, top + Scale(3), pad + labelWidth, top + rowHeight});
+        state.nameInput = CreateChild(dialog, L"EDIT", name.c_str(), WS_TABSTOP | ES_AUTOHSCROLL, IDC_START_NAME,
+                                      {pad + labelWidth, top, width - pad, top + rowHeight}, WS_EX_CLIENTEDGE);
+        top += rowHeight + Scale(6);
+        CreateChild(dialog, L"STATIC", L"E-mail address:", SS_LEFT, 0, {pad, top + Scale(3), pad + labelWidth, top + rowHeight});
+        state.emailInput = CreateChild(dialog, L"EDIT", email.c_str(), WS_TABSTOP | ES_AUTOHSCROLL, IDC_START_EMAIL,
+                                       {pad + labelWidth, top, width - pad, top + rowHeight}, WS_EX_CLIENTEDGE);
+        state.name = &name;
+        state.email = &email;
+    }
+    int buttonWidth = Scale(110), buttonTop = height - pad - Scale(25);
+    // the default where it goes on with what was typed; beside a provider's button, the other way only
+    CreateChild(dialog, L"BUTTON", nextLabel, WS_TABSTOP | (fields ? BS_DEFPUSHBUTTON : BS_PUSHBUTTON), IDOK,
+                {width - pad - buttonWidth - Scale(86), buttonTop, width - pad - Scale(86), buttonTop + Scale(25)});
+    CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL, {width - pad - Scale(80), buttonTop, width - pad, buttonTop + Scale(25)});
+
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
+    // typing comes first on the page with the fields; the provider's button on the page that offers it
+    RunModal(dialog, state.nameInput ? state.nameInput : firstButton, state.done);
+    for (HBITMAP picture : pictures) {
+        if (picture) {
+            DeleteObject(picture);
+        }
+    }
+    chosen = state.provider;
+    return state.choice;
+}
+
 uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, const std::wstring& email) {
     char* page = nullptr;
     uint64_t request = pe_sign_in_begin(core, provider, core::Narrow(email).c_str(), &page);
@@ -234,8 +410,9 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, c
         return 0;
     }
     ShellExecuteW(owner, L"open", address.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+    std::wstring account = email.empty() ? L"your account" : email;
     if (!WaitFor(owner, core, request, pe_sign_in_cancel,
-                 L"Sign in to " + email + L" in the browser window that opened, then come back here.")) {
+                 L"Sign in to " + account + L" in the browser window that opened, then come back here.")) {
         return 0;
     }
     char* why = nullptr;
@@ -248,55 +425,64 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, PeOAuthProvider provider, c
     return request;
 }
 
-int64_t NewAccountDialog(HWND owner, PeCore* core) {
-    using Kind = FormField::Kind;
-    std::vector<FormField> first = {
-        {L"Display name:", L""},
-        {L"E-mail address:", L""},
-        {L"Password:", L"", Kind::Password},
-    };
-    if (!FormDialog(owner, L"Add Mail Account",
-                    L"Your name as others see it, your e-mail address and its password. The servers are looked up next.",
-                    first, ValidFirst, L"Next >")) {
+// signs in with `provider` in the browser (`email`, when typed, as the account to suggest there) and adds the account
+// signed in to, named `name` or, without one, as at the provider
+int64_t AddSignedIn(HWND owner, PeCore* core, PeOAuthProvider provider, const std::wstring& name, const std::wstring& email) {
+    uint64_t request = SignInWithBrowser(owner, core, provider, email);
+    if (!request) {
         return 0;
     }
-    std::wstring email = first[1].value;
-    core::Autoconfig found = WaitForLookup(owner, core, email, first[2].value);
+    int64_t account = pe_account_add_signed_in(core, request, core::Narrow(name).c_str());
+    if (account <= 0) {
+        MessageBoxW(owner, L"The account could not be saved.", L"Add Mail Account", MB_OK | MB_ICONERROR);
+    }
+    return account;
+}
+
+int64_t NewAccountDialog(HWND owner, PeCore* core) {
+    std::wstring name, email;
+    PeOAuthProvider chosen = PE_O_AUTH_PROVIDER_NONE;
+    const PeOAuthProvider both[] = {PE_O_AUTH_PROVIDER_GOOGLE, PE_O_AUTH_PROVIDER_MICROSOFT};
+    Start start = StartPage(owner,
+                            L"Gmail, Google Workspace, Outlook.com and Microsoft 365: sign in on Google's or Microsoft's "
+                            L"own page. Your password is typed there, never into Inbox Classic.",
+                            both, true, L"Next >", name, email, chosen);
+    if (start == Start::Cancel) {
+        return 0;
+    }
+    if (start == Start::SignIn) {
+        return AddSignedIn(owner, core, chosen, name, email);
+    }
+    core::Autoconfig found = WaitForLookup(owner, core, email);
     const PeAutoconfigInfo* info = pe_autoconfig_info(found.get());
     std::wstring intro = FoundIntro(info);
 
+    // an address at Google or Microsoft: their sign-in first, an app password the other way
     PeOAuthProvider provider = info ? pe_oauth_provider_for(core, info->imap_host) : PE_O_AUTH_PROVIDER_NONE;
-    if (provider != PE_O_AUTH_PROVIDER_NONE &&
-        MessageBoxW(owner,
-                    L"This provider lets you sign in through your web browser, without giving Inbox Classic your "
-                    L"password.\n\nSign in with the browser?",
-                    L"Add Mail Account", MB_YESNO | MB_ICONQUESTION) == IDYES) {
-        uint64_t request = SignInWithBrowser(owner, core, provider, email);
-        if (!request) {
+    if (provider != PE_O_AUTH_PROVIDER_NONE) {
+        const PeOAuthProvider offered[] = {provider};
+        const SignInButton* signIn = SignInOf(0, provider);
+        Start choice = StartPage(owner,
+                                 email + L" signs in on " + (signIn ? signIn->company : L"the provider") +
+                                     L"'s own page, without giving Inbox Classic your password. Or use an app password "
+                                     L"made in your account's security settings.",
+                                 offered, false, L"Use App Password", name, email, chosen);
+        if (choice == Start::Cancel) {
             return 0;
         }
-        std::string utf8[] = {core::Narrow(first[0].value.empty() ? email : first[0].value), core::Narrow(email)};
-        PeAccountSettings settings = {};
-        settings.name = utf8[0].c_str();
-        settings.email = utf8[1].c_str();
-        settings.username = info->username;
-        settings.imap_host = info->imap_host;
-        settings.imap_port = info->imap_port;
-        settings.imap_security = info->imap_security;
-        settings.smtp_host = info->smtp_host;
-        settings.smtp_port = info->smtp_port;
-        settings.smtp_security = info->smtp_security;
-        SecureZeroMemory(first[2].value.data(), first[2].value.size() * sizeof(wchar_t));
-        return pe_account_add_oauth(core, &settings, request);
+        if (choice == Start::SignIn) {
+            return AddSignedIn(owner, core, provider, name, email);
+        }
     }
 
     ExplainAppPassword(owner, info);
+    using Kind = FormField::Kind;
     std::vector<std::wstring> security(std::begin(kSecurity), std::end(kSecurity));
     std::vector<FormField> fields = {
-        {L"Display name:", first[0].value},
+        {L"Display name:", name},
         {L"E-mail address:", email},
         {L"User name:", info ? Text(info->username) : L""},
-        {L"Password:", first[2].value, Kind::Password},
+        {L"Password:", L"", Kind::Password},
         {L"Incoming (IMAP) server:", info ? Text(info->imap_host) : L""},
         {L"IMAP port:", info ? std::to_wstring(info->imap_port) : L"993", Kind::Number},
         {L"IMAP security:", info ? SecurityName(info->imap_security) : kSecurity[0], Kind::Choice, security},
@@ -304,8 +490,8 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
         {L"SMTP port:", info ? std::to_wstring(info->smtp_port) : L"465", Kind::Number},
         {L"SMTP security:", info ? SecurityName(info->smtp_security) : kSecurity[0], Kind::Choice, security},
     };
-    SecureZeroMemory(first[2].value.data(), first[2].value.size() * sizeof(wchar_t));
-    while (FormDialog(owner, L"Add Mail Account", intro, fields, Validate, L"Finish")) {
+    // the name and address were typed already: the password is next
+    while (FormDialog(owner, L"Add Mail Account", intro, fields, Validate, L"Finish", PASSWORD)) {
         if (!AcceptPlain(owner, fields, L"Add Mail Account")) {
             continue;
         }
