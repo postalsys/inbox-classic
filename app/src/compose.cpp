@@ -26,8 +26,8 @@ enum ComposeId : WORD {
     IDC_SUBJECT,
     IDC_BODY,
     IDC_FILES,
-    IDC_SEND_LATER,
-    IDC_SAVE,
+    // 308 was Send Later; the ids after it stay as the UI test knows them
+    IDC_SAVE = 309,
     IDC_FROM,
     // the buttons at the end of the To row that open the Cc and Bcc rows
     IDC_SHOW_CC,
@@ -83,9 +83,8 @@ struct Compose {
     // the core moves the copy over with the next save or send
     int64_t draftAccount = 0;
     Editor editor;
-    // what to do with the editor's HTML once it comes: send now, send later (into the Outbox), save in Drafts, or save
-    // and close the window
-    enum class Pending { None, Send, SendLater, Save, SaveAndClose } pending = Pending::None;
+    // what to do with the editor's HTML once it comes: send, save in Drafts, or save and close the window
+    enum class Pending { None, Send, Save, SaveAndClose } pending = Pending::None;
     std::wstring html;
     // where the quote is (see EditorQuote), and the quote as the user left it once unfolded
     EditorQuote quoteState = EditorQuote::Folded;
@@ -334,10 +333,10 @@ void ShowRefusal(HWND hwnd, char* reason, const wchar_t* fallback) {
 }
 
 // sends with the HTML the editor gave, now or with the next Send/Recv
-void Send(HWND hwnd, Compose* state, const std::wstring& html, bool later) {
+void Send(HWND hwnd, Compose* state, const std::wstring& html) {
     Fields fields(state, html);
     char* reason = nullptr;
-    if (!pe_message_send(state->core, state->account, &fields.outgoing, later, &reason)) {
+    if (!pe_message_send(state->core, state->account, &fields.outgoing, &reason)) {
         // a typo in an address or a file that is gone: the message stays open to fix it
         ShowRefusal(hwnd, reason, L"The message could not be sent.");
         return;
@@ -516,7 +515,6 @@ void CreateFormatBar(HWND hwnd, Compose* state) {
 void CreateFields(HWND hwnd, Compose* state) {
     state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0, BarIcons::Big);
     AddButton(state->toolbar, IDC_SEND, L"Send", BTNS_BUTTON, ICON_SEND);
-    AddButton(state->toolbar, IDC_SEND_LATER, L"Send Later", BTNS_BUTTON, ICON_SEND_CLOCK);
     AddButton(state->toolbar, 0, nullptr);
     AddButton(state->toolbar, IDC_SAVE, L"Save", BTNS_BUTTON, ICON_SAVE);
     AddButton(state->toolbar, 0, nullptr);
@@ -615,10 +613,6 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             Request(state, Compose::Pending::Send);
             return 0;
         }
-        if (LOWORD(wParam) == IDC_SEND_LATER) {
-            Request(state, Compose::Pending::SendLater);
-            return 0;
-        }
         if (LOWORD(wParam) == IDC_SAVE) {
             Request(state, Compose::Pending::Save);
             return 0;
@@ -663,8 +657,7 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             using Pending = Compose::Pending;
             switch (Pending pending = std::exchange(state->pending, Pending::None)) {
             case Pending::Send:
-            case Pending::SendLater:
-                Send(hwnd, state, html, pending == Pending::SendLater);
+                Send(hwnd, state, html);
                 break;
             case Pending::Save:
             case Pending::SaveAndClose:

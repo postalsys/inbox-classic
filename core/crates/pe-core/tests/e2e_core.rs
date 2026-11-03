@@ -591,67 +591,54 @@ fn saves_and_imports_messages_as_files() {
 #[test]
 fn the_outbox_keeps_what_did_not_go() {
     let Some(s) = setup() else { return };
-    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
-    s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    // an outgoing server that is not there: the port of a listener that is closed again
+    let closed = std::net::TcpListener::bind("127.0.0.1:0")
+        .unwrap()
+        .local_addr()
+        .unwrap()
+        .port();
+    let mut unreachable = settings(&s.server);
+    unreachable.smtp_port = closed;
+    let account = s.core.add_account(&unreachable, PASSWORD).unwrap();
     let message = |subject: &str| pe_core::Outgoing {
         to: "Ann <ann@example.com>".into(),
         subject: subject.into(),
         text: "x".into(),
         ..Default::default()
     };
-
-    // Send Later: into the Outbox, not to the server
-    s.core.send_later(account, message("Later")).unwrap();
-    s.wait(|e| *e == Event::OutboxChanged { account });
-    let queued = s.core.outbox().unwrap();
-    assert_eq!(queued.len(), 1);
-    assert_eq!(
-        (queued[0].subject.as_str(), queued[0].problem.as_deref()),
-        ("Later", None)
-    );
-    assert_eq!(queued[0].recipients, "Ann <ann@example.com>");
-    std::thread::sleep(Duration::from_millis(300));
-    assert!(s.server.subjects("INBOX").is_empty());
-
-    // then sent, and out of the Outbox, with its copy in Sent
-    s.core.outbox_send().unwrap();
-    s.wait(|e| *e == Event::MessageSent { account });
-    assert!(s.core.outbox().unwrap().is_empty());
-    assert_eq!(s.server.subjects("INBOX"), ["Later"]);
-
-    // deleted without sending
-    s.core.send_later(account, message("Never")).unwrap();
-    let queued = loop {
-        s.wait(|e| *e == Event::OutboxChanged { account });
-        let queued = s.core.outbox().unwrap();
-        if !queued.is_empty() {
-            break queued;
-        }
-    };
-    let id = queued[0].id;
-    s.core.outbox_delete(id).unwrap();
-    assert!(s.core.outbox().unwrap().is_empty());
-
-    // the server gone: a send waits in the Outbox with the reason, not lost
-    let Setup {
-        server,
-        core,
-        events,
-        _dir,
-    } = s;
-    drop(server);
-    core.send(account, message("Offline")).unwrap();
-    let failed = loop {
-        if let Event::Failed { message, .. } = events.recv_timeout(Duration::from_secs(20)).expect("an event") {
+    // what a send that did not go says, once it waits in the Outbox
+    let failure = || loop {
+        if let Event::Failed { message, .. } = s.events.recv_timeout(Duration::from_secs(20)).expect("an event") {
             break message;
         }
     };
+
+    // a send that can not go waits in the Outbox with the reason, not lost
+    s.core.send(account, message("Waiting")).unwrap();
+    let failed = failure();
     assert!(failed.contains("waits in the Outbox"), "{failed}");
-    let queued = core.outbox().unwrap();
+    let queued = s.core.outbox().unwrap();
     assert_eq!(queued.len(), 1);
-    assert_eq!(queued[0].subject, "Offline");
+    assert_eq!(queued[0].subject, "Waiting");
+    assert_eq!(queued[0].recipients, "Ann <ann@example.com>");
     assert!(queued[0].problem.is_some());
+    assert!(s.server.subjects("INBOX").is_empty());
+
+    // the server back: Send/Recv sends it, out of the Outbox
+    s.core.update_account(account, &settings(&s.server)).unwrap();
+    s.core.outbox_send().unwrap();
+    s.wait(|e| *e == Event::MessageSent { account });
+    assert!(s.core.outbox().unwrap().is_empty());
+    assert_eq!(s.server.subjects("INBOX"), ["Waiting"]);
+
+    // deleted without sending
+    s.core.update_account(account, &unreachable).unwrap();
+    s.core.send(account, message("Never")).unwrap();
+    failure();
+    let queued = s.core.outbox().unwrap();
+    assert_eq!(queued.len(), 1);
+    s.core.outbox_delete(queued[0].id).unwrap();
+    assert!(s.core.outbox().unwrap().is_empty());
 }
 
 #[test]

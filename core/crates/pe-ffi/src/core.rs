@@ -1469,8 +1469,8 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
     })
 }
 
-/// Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now, or
-/// with the next Send/Recv when `later`. `MessageSent` when the server took it; `Failed` with the server's answer
+/// Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now.
+/// `MessageSent` when the server took it; `Failed` with the server's answer
 /// when it did not, the message waiting in the Outbox. A recipient that is no address or a file that is not there
 /// fails right away: false, with the reason in `error` when it is not NULL (free it with `pe_string_free`).
 ///
@@ -1481,22 +1481,12 @@ pub unsafe extern "C" fn pe_message_send(
     core: *const PeCore,
     account: i64,
     message: *const PeOutgoing,
-    later: bool,
     error: *mut *mut c_char,
 ) -> bool {
     // SAFETY: as the caller guarantees
     let result = match unsafe { outgoing(message) } {
         // SAFETY: as the caller guarantees
-        Some(message) => unsafe {
-            with(core, Err(None), |core| {
-                if later {
-                    core.send_later(account, message)
-                } else {
-                    core.send(account, message)
-                }
-                .map_err(Some)
-            })
-        },
+        Some(message) => unsafe { with(core, Err(None), |core| core.send(account, message).map_err(Some)) },
         None => Err(None),
     };
     // SAFETY: as the caller guarantees

@@ -59,10 +59,9 @@ pub(crate) enum Command {
     DeleteFolder {
         folder: FolderId,
     },
-    /// Into the Outbox, and sent from there now unless it is for later
+    /// Into the Outbox, and sent from there
     Send {
         outgoing: Box<crate::Outgoing>,
-        now: bool,
     },
     SendOutbox,
     /// Into the Drafts folder, in place of the earlier copy; `outgoing` has its Message-ID
@@ -325,7 +324,7 @@ impl Worker {
                 pe_sync::delete_folder(self.client(store).await?, store, folder).await?;
                 self.sync_folder_list(store).await
             }
-            Command::Send { outgoing, now } => self.queue(store, *outgoing, now).await,
+            Command::Send { outgoing } => self.send(store, *outgoing).await,
             Command::SaveDraft { outgoing } => self.save_draft(store, *outgoing).await,
         }
     }
@@ -349,8 +348,8 @@ impl Worker {
         outcome
     }
 
-    /// Builds a message (its attachments read now) and puts it in the Outbox; sends the Outbox when `now`
-    async fn queue(&mut self, store: &mut Store, outgoing: crate::Outgoing, now: bool) -> Outcome {
+    /// Builds a message (its attachments read now), puts it in the Outbox and sends the Outbox
+    async fn send(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
         let time = unix_now();
         let recipients = [outgoing.to.as_str(), outgoing.cc.as_str()]
             .iter()
@@ -382,11 +381,11 @@ impl Worker {
             &built.raw,
         )?;
         self.emit(Event::OutboxChanged { account: self.account });
-        // the Outbox has it now: its draft goes, whether it is sent now or later
+        // the Outbox has it now: its draft goes, whether it goes now or waits there
         if let Some(message_id) = draft {
             self.remove_draft_of(store, draft_account, &message_id).await;
         }
-        if now { self.send_outbox(store).await } else { Ok(()) }
+        self.send_outbox(store).await
     }
 
     /// Removes the drafts with `message_id` from the Drafts of `account`, this one or another (From changed after the

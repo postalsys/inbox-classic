@@ -743,8 +743,8 @@ bool pe_message_import(const struct PeCore *core,
 // `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
 void pe_bytes_free(uint8_t *data, size_t len);
 
-// Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now, or
-// with the next Send/Recv when `later`. `MessageSent` when the server took it; `Failed` with the server's answer
+// Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now.
+// `MessageSent` when the server took it; `Failed` with the server's answer
 // when it did not, the message waiting in the Outbox. A recipient that is no address or a file that is not there
 // fails right away: false, with the reason in `error` when it is not NULL (free it with `pe_string_free`).
 //
@@ -753,7 +753,6 @@ void pe_bytes_free(uint8_t *data, size_t len);
 bool pe_message_send(const struct PeCore *core,
                      int64_t account,
                      const struct PeOutgoing *message,
-                     bool later,
                      char **error);
 
 // What waits in the Outbox, of every account, oldest first; NULL on failure

@@ -267,7 +267,7 @@ fn reads_mail_through_the_c_api() {
         quote_plain: !info.quote_text.is_null(),
         quote_text: info.quote_text,
     };
-    assert!(unsafe { pe_message_send(core, account, &outgoing, false, null_mut()) });
+    assert!(unsafe { pe_message_send(core, account, &outgoing, null_mut()) });
     unsafe { pe_draft_free(draft) };
     wait(&events, |e| e.kind == PeEventKind::MessageSent && e.account == account);
     let delivered = server.messages("INBOX");
@@ -286,7 +286,7 @@ fn reads_mail_through_the_c_api() {
         raw.contains("Content-Type: text/plain") && !raw.contains("<script"),
         "{raw}"
     );
-    assert!(!unsafe { pe_message_send(core, account, std::ptr::null(), false, null_mut()) });
+    assert!(!unsafe { pe_message_send(core, account, std::ptr::null(), null_mut()) });
     // a typo in the address: refused right away, with the reason
     let bad = c("not an address");
     // its own strings: the draft the first message came from is freed
@@ -308,7 +308,7 @@ fn reads_mail_through_the_c_api() {
         quote_text: std::ptr::null(),
     };
     let mut reason: *mut c_char = null_mut();
-    assert!(!unsafe { pe_message_send(core, account, &typo, false, &mut reason) });
+    assert!(!unsafe { pe_message_send(core, account, &typo, &mut reason) });
     assert!(text(reason).contains("not an e-mail address"), "{}", text(reason));
     unsafe { pe_string_free(reason) };
 

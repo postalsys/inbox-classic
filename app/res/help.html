@@ -300,8 +300,8 @@
             </li>
             <li>
                 <b>Send</b> puts the message in the <b>Outbox</b> and sends it right away. When it can not go (no connection, the server refuses it) it stays in
-                the Outbox and goes with the next <b>Send/Recv</b>; nothing you wrote is lost. <b>Send Later</b> only puts it in the Outbox. The status bar says
-                how many wait there; <b>Tools &gt; Outbox</b> lists them, with why they did not go, and sends or deletes them.
+                the Outbox and goes with the next <b>Send/Recv</b>; nothing you wrote is lost. <b>Send/Recv</b> also runs by itself every ten minutes. The
+                status bar says how many wait there; <b>Tools &gt; Outbox</b> lists them, with why they did not go, and sends or deletes them.
             </li>
             <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> sends from the text.</li>
             <li>

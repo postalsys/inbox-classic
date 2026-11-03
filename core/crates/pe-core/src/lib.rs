@@ -617,25 +617,16 @@ impl Core {
         Ok(Some((saved, files.len())))
     }
 
-    /// Sends a message from an account in the background: [`Event::MessageSent`] or [`Event::Failed`] follows.
-    /// Recipients that are no addresses and attachments that are not there fail right away.
+    /// Sends a message from an account in the background, through the Outbox: [`Event::MessageSent`] follows, or
+    /// [`Event::Failed`] with the message left waiting in the Outbox for the next Send/Recv. Recipients that are no
+    /// addresses and attachments that are not there fail right away.
     pub fn send(&self, account: AccountId, outgoing: Outgoing) -> Result<()> {
-        self.queue(account, outgoing, true)
-    }
-
-    /// Puts a message in the Outbox; it goes with the next Send/Recv (Send Later)
-    pub fn send_later(&self, account: AccountId, outgoing: Outgoing) -> Result<()> {
-        self.queue(account, outgoing, false)
-    }
-
-    fn queue(&self, account: AccountId, outgoing: Outgoing, now: bool) -> Result<()> {
         // a typo in an address is told now, while the message is still open in its window
         compose::check(&outgoing).map_err(Error::Compose)?;
         self.send_command(
             account,
             Command::Send {
                 outgoing: Box::new(outgoing),
-                now,
             },
         )
     }

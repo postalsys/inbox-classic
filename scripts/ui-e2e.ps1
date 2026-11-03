@@ -55,7 +55,7 @@ $VK_RETURN = 0x0D; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
-$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SEND_LATER = 308; $IDC_SAVE = 309;
+$IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
 $IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_SHOW_CC = 311; $IDC_SHOW_BCC = 312; $IDC_BCC = 304; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330
@@ -564,16 +564,40 @@ try {
     Check ($new -and (RawText $new) -match 'keep-me\.txt' -and (RawText $new) -notmatch 'wrong-file') 'with only the file left attached'
     Check ($new -and (RawText $new) -match 'Content-Type: text/plain' -and (RawText $new) -notmatch 'Content-Type: text/html') 'nothing formatted: it went as plain text'
 
-    Step 'Send Later and the Outbox'
+    Step 'the Outbox: a send that can not go'
+    # the outgoing server out of reach, as when offline: its port changed in Accounts > Properties to one nothing
+    # listens on, and back
+    function SetSmtpPort([string]$port) {
+        Command $main $IDM_ACCOUNTS
+        $list = WaitWindow 'InboxClassicAccounts' 'Accounts'
+        Click $list 402
+        $form = WaitFor {
+            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+        }
+        SetText $form 108 $port
+        Click $form 1
+        # a question about a connection without encryption: Yes
+        [void](WaitFor {
+            $box = [Native.Win]::FindWindow('#32770', 'Properties')
+            if ($box -ne [IntPtr]::Zero) { Click $box 6 }
+            -not [Native.Win]::IsWindow($form)
+        } 10)
+        Click $list 404
+        [void](WaitFor { -not [Native.Win]::IsWindow($list) })
+    }
+    SetSmtpPort '1'
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose
+    Check ([Native.Win]::GetDlgItem($compose, 308) -eq [IntPtr]::Zero) 'there is no Send Later: Send sends'
     SetText $compose $IDC_TO 'Erin <erin@example.com>'
-    SetText $compose $IDC_SUBJECT 'Sent later from the UI test'
+    SetText $compose $IDC_SUBJECT 'Waited in the Outbox in the UI test'
     [void](TypeInEditor $compose 'This waited in the Outbox.')
-    Command $compose $IDC_SEND_LATER
-    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'Send Later closes the message'
-    Start-Sleep -Seconds 2
-    Check ($null -eq (Find 'INBOX' 'Subject: Sent later from the UI test')) 'and does not send it yet'
+    Command $compose $IDC_SEND
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'Send closes the message'
+    $status = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    Check ($null -ne (WaitFor { $t = WindowText $status; if ($t -match 'Outbox') { $t } } 40)) 'a send that can not go says it waits in the Outbox'
+    Check ($null -eq (Find 'INBOX' 'Subject: Waited in the Outbox in the UI test')) 'and it was not sent'
     Command $main $IDM_OUTBOX
     $outbox = WaitWindow 'InboxClassicOutbox' 'Outbox'
     Check ($null -ne $outbox) 'Tools > Outbox lists what waits'
@@ -581,9 +605,12 @@ try {
         $waiting = [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
         Check ($waiting -eq 1) 'the message is in it'
         Shot $outbox 'write-7-outbox'
-        Click $outbox 451
+        [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($outbox) })
     }
-    Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Sent later from the UI test' } 30)) 'Send All Now sends it'
+    # the server back: the settings change syncs the account, and a sync sends the Outbox first
+    SetSmtpPort "$($ports.smtp)"
+    Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Waited in the Outbox in the UI test' } 30)) 'once the server is back it goes by itself'
 
     Step 'Drafts'
     Command $main $IDM_NEW_MAIL

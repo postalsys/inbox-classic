@@ -24,9 +24,8 @@ enum ToolbarIcon : int {
     ICON_MAIL_READ = 7,
     ICON_MAIL_UNREAD = 8,
     ICON_SEND = 9,
-    ICON_SEND_CLOCK = 10,
-    ICON_SAVE = 11,
-    ICON_ATTACH = 12,
+    ICON_SAVE = 10,
+    ICON_ATTACH = 11,
 };
 
 enum FormatIcon : int {

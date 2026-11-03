@@ -289,10 +289,15 @@ const sections = [
             },
             {
                 shot: 'write-7-outbox',
-                name: 'Outbox and Send Later',
-                what: 'Every message goes through the Outbox: one that can not go (offline, refused) waits there with the reason and goes with the next Send/Recv, so nothing is lost. Send Later only queues it. The status bar counts what waits; Tools > Outbox lists each message with when it was queued and whether it waits or why it did not go.',
-                how: 'Send Later in the compose window; Tools > Outbox to send now or delete.',
-                checked: ['Send Later does not send yet', 'The Outbox lists the message', 'Send All Now sends it']
+                name: 'The Outbox',
+                what: 'Every message goes through the Outbox: one that can not go (offline, refused) waits there with the reason and goes with the next Send/Recv, so nothing is lost. Send/Recv also runs by itself every ten minutes. The status bar counts what waits; Tools > Outbox lists each message with when it was queued and whether it waits or why it did not go.',
+                how: 'Automatic when a send can not go; Tools > Outbox to send now or delete.',
+                checked: [
+                    'There is no Send Later: Send sends',
+                    'A send that can not go says it waits in the Outbox',
+                    'The Outbox lists the message',
+                    'Once the server is back it goes by itself'
+                ]
             },
             {
                 shot: 'write-8-save-draft',
