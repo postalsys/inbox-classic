@@ -157,8 +157,27 @@ function InFront([IntPtr]$a, [IntPtr]$b) {
     }
     return $false
 }
+# presses a button as its click ends up: BN_CLICKED to its window, which works whether or not that window is active
+# (BM_CLICK can be lost when it is not, as on the CI runner)
 function Click([IntPtr]$window, [int]$id) {
-    [void][Native.Win]::PostMessage([Native.Win]::GetDlgItem($window, $id), $BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero)
+    [void][Native.Win]::PostMessage($window, $WM_COMMAND, [IntPtr]($id -band 0xFFFF), [Native.Win]::GetDlgItem($window, $id))
+}
+# what is open when a window does not come: the app's visible windows, and a picture of $shown
+function ShowAppWindows([IntPtr]$shown, [string]$shot) {
+    [Native.Win]::EnumWindows({
+        param($w, $l)
+        $owner = [uint32]0
+        [void][Native.Win]::GetWindowThreadProcessId($w, [ref]$owner)
+        if ($owner -eq $app.Id -and [Native.Win]::IsWindowVisible($w)) {
+            $cls = New-Object System.Text.StringBuilder 64
+            [void][Native.Win]::GetClassName($w, $cls, 64)
+            $title = New-Object System.Text.StringBuilder 256
+            [void][Native.Win]::InternalGetWindowText($w, $title, 256)
+            Write-Host "   window of the app: $cls '$title'"
+        }
+        $true
+    }, [IntPtr]::Zero) | Out-Null
+    if ($shown -ne [IntPtr]::Zero) { Shot $shown $shot }
 }
 # a menu or toolbar command, posted as the menu would
 function Command([IntPtr]$window, [int]$id) {
@@ -624,27 +643,17 @@ try {
         Command $main $IDM_ACCOUNTS
         $list = WaitWindow 'InboxClassicAccounts' 'Accounts'
         if (-not $list) {
-            # what is there instead: the app's windows, and how the main window looks
-            [Native.Win]::EnumWindows({
-                param($w, $l)
-                $owner = [uint32]0
-                [void][Native.Win]::GetWindowThreadProcessId($w, [ref]$owner)
-                if ($owner -eq $app.Id -and [Native.Win]::IsWindowVisible($w)) {
-                    $cls = New-Object System.Text.StringBuilder 64
-                    [void][Native.Win]::GetClassName($w, $cls, 64)
-                    $title = New-Object System.Text.StringBuilder 256
-                    [void][Native.Win]::InternalGetWindowText($w, $title, 256)
-                    Write-Host "   window of the app: $cls '$title'"
-                }
-                $true
-            }, [IntPtr]::Zero) | Out-Null
-            Shot $main 'accounts-missing'
+            ShowAppWindows $main 'accounts-missing'
             throw 'Tools > Accounts did not open'
         }
         Click $list 402
         $form = WaitFor {
             $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+        }
+        if (-not $form) {
+            ShowAppWindows $list 'properties-missing'
+            throw 'Properties did not open'
         }
         SetText $form 108 $port
         Click $form 1
