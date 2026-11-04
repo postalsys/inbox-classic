@@ -16,6 +16,13 @@ VERSION=$(sed -n 's/^version = "\([0-9.]*\)"/\1/p' core/Cargo.toml | head -1)
 APP="build/mac/Inbox Classic.app"
 # the oldest macOS the app runs on, for Rust as for Swift (mac/Package.swift)
 export MACOSX_DEPLOYMENT_TARGET=26.0
+# Sparkle, the updater, as its release ships it (the version is the one scripts/release.sh makes the appcast with)
+SPARKLE_VERSION="2.10.0"
+if [ ! -d build/sparkle/Sparkle.framework ] || ! grep -q ">${SPARKLE_VERSION}<" build/sparkle/Sparkle.framework/Resources/Info.plist; then
+    rm -rf build/sparkle
+    mkdir -p build/sparkle
+    curl -sSfL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" | tar -xJ -C build/sparkle
+fi
 
 echo "Building Inbox Classic ${VERSION} for the Mac"
 (cd core && CARGO_TARGET_DIR=../build/cargo cargo build --release --locked -p pe-ffi --target aarch64-apple-darwin)
@@ -28,12 +35,14 @@ done
 BIN=$(swift build --package-path mac -c "$CONFIG" --scratch-path build/swift --show-bin-path)
 
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/icons" "$APP/Contents/Resources/brands"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/icons" "$APP/Contents/Resources/brands" "$APP/Contents/Frameworks"
+# Sparkle, for updates (mac/Package.swift)
+ditto build/sparkle/Sparkle.framework "$APP/Contents/Frameworks/Sparkle.framework"
 cp "$BIN/InboxClassic" "$APP/Contents/MacOS/Inbox Classic"
 if [ -n "${TEST:-}" ]; then
     cp "$BIN/InboxClassicUITest" "$APP/Contents/MacOS/InboxClassicUITest"
 fi
-sed "s/VERSION/${VERSION}/g; s|SPARKLE_PUBLIC_KEY|${SPARKLE_PUBLIC_KEY:-}|" mac/Resources/Info.plist > "$APP/Contents/Info.plist"
+sed "s/VERSION/${VERSION}/g" mac/Resources/Info.plist > "$APP/Contents/Info.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
 # the icons, as PDFs drawn as template images (Icons.swift), in the color the system gives them
@@ -57,10 +66,12 @@ done
 iconutil -c icns "$iconset" -o "$APP/Contents/Resources/AppIcon.icns"
 rm -rf "$(dirname "$iconset")"
 
-# signed ad hoc, so it runs here; mac-package.sh signs it with the Developer ID
-codesign --force --sign - --options runtime --entitlements mac/Resources/InboxClassic.entitlements "$APP/Contents/MacOS/Inbox Classic"
+# signed ad hoc, so it runs here; mac-package.sh signs it with the Developer ID and the hardened runtime (which an ad
+# hoc signature can not have here: its library validation wants Sparkle signed by the same team as the app)
+codesign --force --deep --sign - "$APP/Contents/Frameworks/Sparkle.framework"
+codesign --force --sign - --entitlements mac/Resources/InboxClassic.entitlements "$APP/Contents/MacOS/Inbox Classic"
 if [ -n "${TEST:-}" ]; then
     codesign --force --sign - "$APP/Contents/MacOS/InboxClassicUITest"
 fi
-codesign --force --sign - --options runtime --entitlements mac/Resources/InboxClassic.entitlements "$APP"
+codesign --force --sign - --entitlements mac/Resources/InboxClassic.entitlements "$APP"
 echo "Built $APP"

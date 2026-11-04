@@ -224,6 +224,12 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     let bcc = AddressField()
     let subject = NSTextField(string: "")
     private let attached = NSTokenField()
+    /// the field editor of To, Cc and Bcc
+    fileprivate lazy var addressEditor: AddressEditor = {
+        let editor = AddressEditor()
+        editor.isFieldEditor = true
+        return editor
+    }()
     private let ccButton = NSButton(title: "Cc", target: nil, action: nil)
     private let bccButton = NSButton(title: "Bcc", target: nil, action: nil)
     private var rows: [NSGridRow] = []
@@ -816,26 +822,43 @@ final class AddressField: NSTextField {
 }
 
 extension ComposeWindow {
-    func control(_ control: NSControl, textView: NSTextView, completions words: [String], forPartialWordRange range: NSRangePointer,
+    func control(_ control: NSControl, textView: NSTextView, completions words: [String], forPartialWordRange range: NSRange,
                  indexOfSelectedItem index: UnsafeMutablePointer<Int>) -> [String] {
         guard let field = control as? AddressField else { return [] }
-        let text = textView.string as NSString
-        let token = AddressField.tokenRange(text, caret: textView.selectedRange().location)
-        range.pointee = token
+        // the best one chosen: Return or Tab takes it
         index.pointee = 0
-        return field.people(text.substring(with: token))
+        return field.people((textView.string as NSString).substring(with: range))
     }
 
     func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
-        // a person taken with Return or Tab: a comma and a space wait for the next one
-        if control is AddressField, selector == #selector(NSResponder.insertNewline(_:)) || selector == #selector(NSResponder.insertTab(_:)) {
-            let text = textView.string
-            if !text.isEmpty && !text.hasSuffix(", ") && text.hasSuffix(">") {
-                textView.insertText(", ", replacementRange: textView.selectedRange())
-                return selector == #selector(NSResponder.insertNewline(_:))
-            }
-        }
-        return false
+        // Return or Tab after a person shown in full at the end: a comma and a space wait for the next one
+        guard control is AddressField,
+              selector == #selector(NSResponder.insertNewline(_:)) || selector == #selector(NSResponder.insertTab(_:)) else { return false }
+        let text = textView.string
+        guard text.hasSuffix(">"), NSMaxRange(textView.selectedRange()) >= (text as NSString).length else { return false }
+        textView.setSelectedRange(NSRange(location: (text as NSString).length, length: 0))
+        textView.insertText(", ", replacementRange: textView.selectedRange())
+        return selector == #selector(NSResponder.insertNewline(_:))
+    }
+
+    /// the address fields edit with an editor that completes whole addresses
+    func windowWillReturnFieldEditor(_ sender: NSWindow, to client: Any?) -> Any? {
+        guard client is AddressField else { return nil }
+        return addressEditor
+    }
+}
+
+/// The field editor of the address fields: what is completed is the address the cursor is in (between the commas), not
+/// the word, and a person taken at the end gets a comma and a space for the next one
+final class AddressEditor: NSTextView {
+    override var rangeForUserCompletion: NSRange {
+        AddressField.tokenRange(string as NSString, caret: selectedRange().location)
+    }
+
+    override func insertCompletion(_ word: String, forPartialWordRange range: NSRange, movement: Int, isFinal flag: Bool) {
+        let taken = flag && (movement == NSTextMovement.return.rawValue || movement == NSTextMovement.tab.rawValue)
+        let atEnd = NSMaxRange(range) >= (string as NSString).length
+        super.insertCompletion(word + (taken && atEnd ? ", " : ""), forPartialWordRange: range, movement: movement, isFinal: flag)
     }
 }
 

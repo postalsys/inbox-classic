@@ -3,6 +3,7 @@
 // (MainWindow.swift) shows it.
 import AppKit
 import CInboxClassic
+import Sparkle
 @preconcurrency import UserNotifications
 
 /// The command line, options for test runs: --store <file> uses another mail store, --memory-passwords keeps
@@ -71,6 +72,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     }
     /// the app ends after the compose windows that are saving have closed
     var quitAfterCompose = false
+    /// updates from the appcast (Info.plist SUFeedURL), checked daily and with Check for Updates; not in a test or a
+    /// build without its key
+    private var updater: SPUStandardUpdaterController?
 
     public init(_ arguments: Arguments) {
         self.arguments = arguments
@@ -103,6 +107,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         NSApp.activate()
         if isBundled {
             UNUserNotificationCenter.current().delegate = self
+        }
+        if isBundled && !TestHooks.testing && !(Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String ?? "").isEmpty {
+            updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
         }
         // the first start: an account to read mail from
         onMain { [self] in
@@ -224,7 +231,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         hideOthers.keyEquivalentModifierMask = [.command, .option]
         let showAll = NSMenuItem(title: "Show All", action: #selector(NSApplication.unhideAllApplications(_:)),
                                  keyEquivalent: "")
-        _ = submenu(appName, [about, separator(), services, separator(), hide, hideOthers, showAll, separator(), quit])
+        let updates = NSMenuItem(title: "Check for Updates\u{2026}", action: #selector(checkForUpdates), keyEquivalent: "")
+        updates.target = self
+        _ = submenu(appName, [about, updates, separator(), services, separator(), hide, hideOthers, showAll, separator(), quit])
 
         // the commands of each menu in the order of the table, grouped as the Windows menus group them
         let file = commands("file").filter { $0 != .exit }
@@ -268,6 +277,14 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         let help = submenu("Help", [item(for: .help, title: "Inbox Classic Help")])
         NSApp.helpMenu = help
         return bar
+    }
+
+    @objc func checkForUpdates() {
+        guard let updater else {
+            inform("This copy of Inbox Classic does not update itself. Get the latest version from inboxclassic.com.")
+            return
+        }
+        updater.checkForUpdates(nil)
     }
 
     @objc func showMain() {

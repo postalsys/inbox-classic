@@ -17,7 +17,8 @@ echo "Building Inbox Classic ${VERSION} on ${WIN_HOST}"
 win_sync
 ssh "$WIN_HOST" "$WIN_DIR\\scripts\\win-package.cmd"
 
-rm -rf dist
+# only what this builds: the Mac and Linux packages of the same release may be in dist/ already
+rm -rf dist/InboxClassic dist/InboxClassic-Setup.exe
 mkdir -p dist
 ssh "$WIN_HOST" "tar -czf - -C $WIN_DIR_FWD/dist InboxClassic" | tar -xzf - -C dist
 

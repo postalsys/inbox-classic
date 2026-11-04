@@ -28,16 +28,16 @@ public func runUITest() -> Never {
 @MainActor
 final class UITest {
     let out: URL
-    private(set) var failures = 0
-    private var log = ""
-    private var harness: Process?
-    private var rest = ""
-    private var ports: [String: Any] = [:]
-    private var delegate: AppDelegate?
-    private var main: MainWindow { delegate!.main }
+    var failures = 0
+    var log = ""
+    var harness: Process?
+    var rest = ""
+    var ports: [String: Any] = [:]
+    var delegate: AppDelegate?
+    var main: MainWindow { delegate!.main }
 
     /// the repository, where core/e2e is: PE_REPO, or the one the bundle was built in (build/mac/...)
-    private var repo: URL {
+    var repo: URL {
         if let path = ProcessInfo.processInfo.environment["PE_REPO"] {
             return URL(fileURLWithPath: path, isDirectory: true)
         }
@@ -63,7 +63,7 @@ final class UITest {
         }
     }
 
-    private func finish() {
+    func finish() {
         harness?.terminate()
         let result = failures == 0 ? "passed" : "failed: \(failures)"
         say(result)
@@ -74,17 +74,17 @@ final class UITest {
 
     // ---- what it says ----
 
-    private func say(_ text: String) {
+    func say(_ text: String) {
         print(text)
         fflush(stdout)
         log += text + "\n"
     }
 
-    private func step(_ text: String) {
+    func step(_ text: String) {
         say("== \(text)")
     }
 
-    private func check(_ ok: Bool, _ what: String) {
+    func check(_ ok: Bool, _ what: String) {
         say((ok ? "ok   " : "FAIL ") + what)
         if !ok { failures += 1 }
     }
@@ -95,12 +95,12 @@ final class UITest {
 
     // ---- waiting ----
 
-    private func pause(_ seconds: Double) async {
+    func pause(_ seconds: Double) async {
         try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
     }
 
     /// waits up to `seconds` for `condition` to give something, and returns it (or nil)
-    private func waitFor<T>(_ seconds: Double = 20, _ condition: () async -> T?) async -> T? {
+    func waitFor<T>(_ seconds: Double = 20, _ condition: () async -> T?) async -> T? {
         let end = Date().addingTimeInterval(seconds)
         while Date() < end {
             if let found = await condition() { return found }
@@ -109,25 +109,25 @@ final class UITest {
         return await condition()
     }
 
-    private func waitUntil(_ seconds: Double = 20, _ condition: () async -> Bool) async -> Bool {
+    func waitUntil(_ seconds: Double = 20, _ condition: () async -> Bool) async -> Bool {
         await waitFor(seconds) { await condition() ? true : nil } ?? false
     }
 
     // ---- finding and using the windows ----
 
     /// the visible window with the identifier `id`, the frontmost first
-    private func window(_ id: String) -> NSWindow? {
+    func window(_ id: String) -> NSWindow? {
         (Modal.windows.reversed() + NSApp.orderedWindows + NSApp.windows).first {
             $0.identifier?.rawValue == id && $0.isVisible
         }
     }
 
-    private func waitWindow(_ id: String, _ seconds: Double = 20) async -> NSWindow? {
+    func waitWindow(_ id: String, _ seconds: Double = 20) async -> NSWindow? {
         await waitFor(seconds) { window(id) }
     }
 
     /// the view with the accessibility identifier `id` under `root`
-    private func find<T: NSView>(_ id: String, in root: NSView?) -> T? {
+    func find<T: NSView>(_ id: String, in root: NSView?) -> T? {
         guard let root else { return nil }
         if root.accessibilityIdentifier() == id, let view = root as? T { return view }
         for child in root.subviews {
@@ -136,46 +136,46 @@ final class UITest {
         return nil
     }
 
-    private func find<T: NSView>(_ id: String, in window: NSWindow?) -> T? {
+    func find<T: NSView>(_ id: String, in window: NSWindow?) -> T? {
         find(id, in: window?.contentView?.superview ?? window?.contentView)
     }
 
-    private func views<T: NSView>(_ type: T.Type, in root: NSView?) -> [T] {
+    func views<T: NSView>(_ type: T.Type, in root: NSView?) -> [T] {
         guard let root else { return [] }
         return (root as? T).map { [$0] } ?? [] + root.subviews.flatMap { views(type, in: $0) }
     }
 
     /// what is typed into a field, as typing changes it (its delegate hears of it)
-    private func type(_ text: String, into field: NSTextField?) {
+    func type(_ text: String, into field: NSTextField?) {
         guard let field else { return }
         field.stringValue = text
         NotificationCenter.default.post(name: NSControl.textDidChangeNotification, object: field)
     }
 
     /// a click, after this returns: what it opens may run modally, while the test goes on
-    private func press(_ button: NSButton?) {
+    func press(_ button: NSButton?) {
         guard let button else { return }
         onMain { button.performClick(nil) }
     }
 
     /// a command of the menus or the toolbar, as they run it
-    private func command(_ command: Command) {
+    func command(_ command: Command) {
         onMain { AppDelegate.shared.perform(command) }
     }
 
     /// the button of an alert (the first is the default)
-    private func answer(_ window: NSWindow?, _ title: String) {
+    func answer(_ window: NSWindow?, _ title: String) {
         let button: NSButton? = views(NSButton.self, in: window?.contentView).first { $0.title == title }
         check(button != nil, "the alert has \(title)")
         press(button)
     }
 
     /// the text of an alert
-    private func alertText(_ window: NSWindow?) -> String {
+    func alertText(_ window: NSWindow?) -> String {
         views(NSTextField.self, in: window?.contentView).map(\.stringValue).joined(separator: " ")
     }
 
-    private func choose(_ popup: NSPopUpButton?, _ index: Int) {
+    func choose(_ popup: NSPopUpButton?, _ index: Int) {
         popup?.selectItem(at: index)
         if let popup, let action = popup.action {
             NSApp.sendAction(action, to: popup.target, from: popup)
@@ -185,7 +185,7 @@ final class UITest {
     // ---- screenshots ----
 
     /// a picture of the window as it is on screen, title bar and the web views' content included
-    private func shot(_ window: NSWindow?, _ name: String) async {
+    func shot(_ window: NSWindow?, _ name: String) async {
         guard let window, let frame = window.contentView?.superview else {
             say("   no window for \(name)")
             return
@@ -217,7 +217,7 @@ final class UITest {
 
     // ---- ImapKit ----
 
-    private func startHarness() throws {
+    func startHarness() throws {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
         process.arguments = ["node", "harness.mjs"]
@@ -244,12 +244,12 @@ final class UITest {
         rest = "http://127.0.0.1:\(parsed["rest"]!)/v1/mailboxes"
     }
 
-    private func port(_ name: String) -> String {
+    func port(_ name: String) -> String {
         "\(ports[name] ?? "")"
     }
 
     /// the messages of a mailbox, with their sources
-    private func messages(_ mailbox: String) async -> [[String: Any]] {
+    func messages(_ mailbox: String) async -> [[String: Any]] {
         let escaped = mailbox.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? mailbox
         guard let url = URL(string: "\(rest)/\(escaped)/messages?raw=true"),
               let (data, _) = try? await URLSession.shared.data(from: url),
@@ -257,20 +257,20 @@ final class UITest {
         return list
     }
 
-    private func raw(_ message: [String: Any]) -> String {
+    func raw(_ message: [String: Any]) -> String {
         guard let encoded = message["raw"] as? String, let data = Data(base64Encoded: encoded) else { return "" }
         return String(decoding: data, as: UTF8.self)
     }
 
-    private func findMessage(_ mailbox: String, _ pattern: String) async -> [String: Any]? {
+    func findMessage(_ mailbox: String, _ pattern: String) async -> [String: Any]? {
         await messages(mailbox).first { raw($0).range(of: pattern, options: .regularExpression) != nil }
     }
 
-    private func seen(_ pattern: String) async -> Bool {
+    func seen(_ pattern: String) async -> Bool {
         (await findMessage("INBOX", pattern)?["flags"] as? [String])?.contains("\\Seen") ?? false
     }
 
-    private func addMessage(_ raw: String, flags: [String] = []) async throws {
+    func addMessage(_ raw: String, flags: [String] = []) async throws {
         var request = URLRequest(url: URL(string: "\(rest)/INBOX/messages")!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -280,7 +280,7 @@ final class UITest {
 
     /// the mail the Windows test reads too: in the list newest first the newsletter, Ann's message, the minutes, and a
     /// reply with the message it answers quoted below
-    private func seed() async throws {
+    func seed() async throws {
         let picture = NSImage(size: NSSize(width: 220, height: 60), flipped: false) { rect in
             NSColor(calibratedRed: 0, green: 0.2, blue: 0.4, alpha: 1).setFill()
             rect.fill()
@@ -323,7 +323,7 @@ final class UITest {
 
     // ---- the app ----
 
-    private func startApp() {
+    func startApp() {
         let store = out.appendingPathComponent("store.db").path
         for suffix in ["", "-wal", "-shm"] {
             try? FileManager.default.removeItem(atPath: store + suffix)
@@ -339,16 +339,50 @@ final class UITest {
         delegate.applicationDidFinishLaunching(Notification(name: NSApplication.didFinishLaunchingNotification))
     }
 
-    private var tree: FolderOutline { main.mailbox.tree }
-    private var list: MessageTable { main.mailbox.list }
+    var tree: FolderOutline { main.mailbox.tree }
+    var list: MessageTable { main.mailbox.list }
 
     /// the folder at `index` under the first account (Inbox first)
-    private func selectFolder(_ index: Int) {
+    func selectFolder(_ index: Int) {
         let row = 1 + index
         tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
     }
 
-    private func selectRow(_ row: Int) async {
+    /// the folder of the first account the tree names `name` (Inbox, Sent Items, Drafts, Archive, Junk E-mail...)
+    @discardableResult
+    func selectFolder(named name: String) -> Bool {
+        for row in 0..<tree.numberOfRows {
+            if let node = tree.item(atRow: row) as? Mailbox.FolderNode, node.folder.displayName == name {
+                tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+                return true
+            }
+        }
+        return false
+    }
+
+    func search(_ words: String) {
+        main.searchField.stringValue = words
+        main.mailbox.find(words)
+        main.showCounts()
+    }
+
+    /// the mailboxes on the server
+    func mailboxes() async -> [String] {
+        guard let url = URL(string: rest), let (data, _) = try? await URLSession.shared.data(from: url),
+              let list = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return [] }
+        return list.compactMap { $0["path"] as? String }
+    }
+
+    func closeWithoutSaving(_ compose: NSWindow) async {
+        await closeCompose(compose)
+    }
+
+    func send(_ compose: NSWindow) {
+        guard let window = ComposeWindow.open.first(where: { $0.window === compose }) else { return }
+        onMain { window.sendClicked() }
+    }
+
+    func selectRow(_ row: Int) async {
         list.window?.makeFirstResponder(list)
         list.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         await pause(1.5)
@@ -356,7 +390,7 @@ final class UITest {
 
     // ---- the scenario ----
 
-    private func scenario() async throws {
+    func scenario() async throws {
         try? FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
         for file in (try? FileManager.default.contentsOfDirectory(at: out, includingPropertiesForKeys: nil)) ?? []
         where file.pathExtension == "png" || file.lastPathComponent.hasPrefix("report") {
@@ -370,12 +404,19 @@ final class UITest {
         try await addAccount()
         try await reading()
         try await writing()
+        try await outboxAndDrafts()
         try await searching()
+        try await files()
         try await organizing()
+        try await listMail()
+        try await folders()
+        try await writingMore()
+        try await signature()
+        try await accountTrouble()
         try await accountsAndHelp()
     }
 
-    private func addAccount() async throws {
+    func addAccount() async throws {
         step("adding the account")
         guard let first = await waitWindow("account.start") else { throw Failed(description: "no account form") }
         check(true, "the form opens on the first start")
@@ -415,7 +456,7 @@ final class UITest {
         answer(warning, "Yes")
     }
 
-    private func reading() async throws {
+    func reading() async throws {
         step("syncing")
         let folders = await waitFor { tree.numberOfRows >= 7 ? tree.numberOfRows : nil }
         check(folders != nil, "the folders of the account are in the tree (\(folders ?? 0))")
@@ -497,11 +538,11 @@ final class UITest {
 
     // ---- writing ----
 
-    private func waitCompose() async -> NSWindow? {
+    func waitCompose() async -> NSWindow? {
         await waitFor { ComposeWindow.open.last.flatMap { $0.window.isVisible ? $0.window : nil } }
     }
 
-    private func closeCompose(_ compose: NSWindow) async {
+    func closeCompose(_ compose: NSWindow) async {
         onMain { compose.performClose(nil) }
         if let ask = await waitWindow("alert", 3) {
             answer(ask, "Don't Save")
@@ -509,12 +550,12 @@ final class UITest {
         _ = await waitUntil { !compose.isVisible }
     }
 
-    private func field(_ id: String, _ compose: NSWindow) -> NSTextField? {
+    func field(_ id: String, _ compose: NSWindow) -> NSTextField? {
         find(id, in: compose)
     }
 
     /// types into the editor of a compose window, as typing does
-    private func typeInEditor(_ compose: NSWindow, _ text: String) async -> Bool {
+    func typeInEditor(_ compose: NSWindow, _ text: String) async -> Bool {
         guard let editor: EditorView = views(EditorView.self, in: compose.contentView).first else { return false }
         _ = await waitUntil(10) { (try? await editor.evaluateJavaScript("!!window.pe")) as? Bool == true }
         let script = "document.getElementById('body').focus();document.execCommand('insertText',false,\(jsString(text)));"
@@ -523,7 +564,7 @@ final class UITest {
         return body?.contains(text) == true
     }
 
-    private func writing() async throws {
+    func writing() async throws {
         step("forwarding")
         await selectRow(0)
         command(.forward)
@@ -613,7 +654,7 @@ final class UITest {
 
     // ---- searching ----
 
-    private func searching() async throws {
+    func searching() async throws {
         step("searching")
         main.searchField.stringValue = "newsletter"
         main.mailbox.find("newsletter")
@@ -641,38 +682,9 @@ final class UITest {
         check(await waitUntil { list.numberOfRows >= 5 }, "clearing the search shows the folder again")
     }
 
-    // ---- organizing ----
-
-    private func organizing() async throws {
-        step("flagging")
-        await selectRow(1)
-        command(.flag)
-        check(await waitUntil { await findMessage("INBOX", "Subject: Re: Hello")?["flags"] as? [String] != nil }, "the flag reaches the server")
-        await pause(1)
-        await shot(main.window, "organize-1-flagged")
-
-        step("moving to a folder")
-        command(.move)
-        let move = await waitWindow("form", 10)
-        check(move != nil, "Move to Folder asks where to")
-        await shot(move, "organize-2-move")
-        if let move {
-            let choice: NSPopUpButton? = find("form.field.0", in: move)
-            let archive = choice?.itemTitles.firstIndex(of: "Archive") ?? 0
-            choice?.selectItem(at: archive)
-            press(find("form.ok", in: move))
-            check(await waitUntil { await findMessage("Archive", "Subject: Re: Hello") != nil }, "the message is in Archive on the server")
-            await pause(1)
-            await shot(main.window, "organize-3-after")
-        }
-
-        step("the folders")
-        await shot(main.window, "folders-2-tree")
-    }
-
     // ---- accounts, sign-in apps, outbox, help ----
 
-    private func accountsAndHelp() async throws {
+    func accountsAndHelp() async throws {
         step("the accounts")
         command(.accounts)
         let accounts = await waitWindow("accounts", 10)
@@ -683,20 +695,45 @@ final class UITest {
             let apps = await waitWindow("signin.apps", 10)
             check(apps != nil, "Sign-in Apps lists the built-in clients")
             await shot(apps, "signin-1-apps")
-            NSApp.stopModal()
-            _ = await waitUntil { apps?.isVisible != true }
+            if let apps {
+                press(find("signin.add", in: apps))
+                let editor = await waitWindow("signin.editor", 10)
+                check(editor != nil, "Add opens the editor of a sign-in app")
+                if let editor {
+                    // the provider's settings filled in by its preset, the redirect URI to register shown
+                    press(find("signin.preset.0", in: editor))
+                    await pause(0.5)
+                    let issuer: NSTextField? = find("signin.issuer", in: editor)
+                    let redirect: NSTextField? = find("signin.redirect", in: editor)
+                    check(issuer?.stringValue.hasPrefix("https://") == true, "a preset fills in the issuer (\(issuer?.stringValue ?? ""))")
+                    check(redirect?.stringValue.hasPrefix("http://127.0.0.1") == true, "and shows the redirect URI to register")
+                    await shot(editor, "signin-4-editor")
+                    NSApp.stopModal()
+                    _ = await waitUntil { !editor.isVisible }
+                }
+                await pause(0.3)
+                NSApp.stopModal()
+                _ = await waitUntil { !apps.isVisible }
+            }
             await pause(0.3)
             press(find("accounts.close", in: accounts))
             _ = await waitUntil { !accounts.isVisible }
         }
 
-        step("the Outbox")
-        command(.outbox)
-        let outbox = await waitWindow("outbox", 10)
-        check(outbox != nil, "Tools > Outbox opens")
-        await shot(outbox, "write-7-outbox")
-        NSApp.stopModal()
-        _ = await waitUntil { outbox?.isVisible != true }
+        step("printing")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil { list.numberOfRows >= 3 }
+        await selectRow(0)
+        await pause(1)
+        command(.print)
+        let sheet = await waitFor(15) { main.window.attachedSheet }
+        check(sheet != nil, "Print opens the system's Print panel over the window")
+        await pause(1.5)
+        await shot(sheet, "files-3-print")
+        if let sheet {
+            main.window.endSheet(sheet, returnCode: .cancel)
+        }
+        await pause(0.5)
 
         step("the help")
         command(.help)

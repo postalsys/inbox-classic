@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 // Builds a single HTML page that maps every feature of the app to a screenshot from the UI end-to-end test
-// (scripts/ui-e2e.ps1, copied here by scripts/win-ui-e2e.sh), with the screenshots embedded:
+// (scripts/ui-e2e.ps1, copied here by scripts/win-ui-e2e.sh; the Mac's and Linux's take the same names), with the
+// screenshots embedded:
 //   node scripts/feature-map.mjs [screenshot dir, default build/ui-e2e] [output, default build/feature-map.html]
+// With --check <windows|mac|linux> it writes no page but fails when a platform's test did not take the screenshot of a
+// feature, unless `notYet` below lists it for that platform: a feature added to one app shows up as missing on the
+// others until their tests show it too (CI runs this for each platform).
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const dir = process.argv[2] || 'build/ui-e2e';
-const out = process.argv[3] || 'build/feature-map.html';
+const args = process.argv.slice(2);
+const checkAt = args.indexOf('--check');
+const checking = checkAt >= 0 ? args.splice(checkAt, 2)[1] : null;
+const dir = args[0] || 'build/ui-e2e';
+const out = args[1] || 'build/feature-map.html';
 const version = /version = "([^"]+)"/.exec(readFileSync('core/Cargo.toml', 'utf8'))[1];
 
 // each feature: the screenshot, what it does, how to reach it, and what the UI test checks
@@ -629,6 +636,80 @@ const behind = [
         'A per-user installer (no admin rights), signed by Postal Systems OÜ, that upgrades in place and asks on uninstall whether to remove the downloaded mail.'
     ]
 ];
+
+// the screenshots a platform's UI test does not take yet, each a gap to close; Windows has none
+const notYet = {
+    windows: [],
+    mac: [
+        // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can
+        // not be taken from inside the app (the test answers the panels in their place and checks what they did)
+        'read-3-attachments',
+        'read-4-save',
+        'files-1-save-as',
+        'files-2-import',
+        'tray-2-taskbar',
+        // steps of ui-e2e.ps1 the test does not take yet
+        'account-5b-browser-sign-in',
+        'signin-3-check',
+        'signin-6-first-page',
+        'signin-7-why',
+        'signin-8-more',
+        'signin-10-added',
+        'signin-11-in-use',
+        'signin-13-properties',
+        'organize-6-drag',
+        'write-0-main-in-front',
+        'write-3b-select-all',
+        'write-13-dropped-picture',
+        'write-14-link-status',
+        'write-15-edit-link',
+        'write-16-link-menu'
+    ],
+    linux: [
+        // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can
+        // not be taken from inside the app (the test answers the panels in their place and checks what they did)
+        'read-4-save',
+        'files-1-save-as',
+        'files-2-import',
+        'tray-2-taskbar',
+        // steps of ui-e2e.ps1 the test does not take yet
+        'account-5b-browser-sign-in',
+        'signin-4-editor',
+        'signin-3-check',
+        'signin-6-first-page',
+        'signin-7-why',
+        'signin-8-more',
+        'signin-10-added',
+        'signin-11-in-use',
+        'signin-13-properties',
+        'organize-6-drag',
+        'write-0-main-in-front',
+        'write-3b-select-all',
+        'write-13-dropped-picture',
+        'write-14-link-status',
+        'write-15-edit-link',
+        'write-16-link-menu'
+    ]
+};
+if (checking) {
+    if (!notYet[checking]) {
+        console.error(`--check takes windows, mac or linux, not ${checking}`);
+        process.exit(1);
+    }
+    const shots = sections.flatMap(section => section.features.map(feature => feature.shot));
+    const absent = shots.filter(shot => !existsSync(join(dir, `${shot}.png`)));
+    const unexpected = absent.filter(shot => !notYet[checking].includes(shot));
+    const closed = notYet[checking].filter(shot => !absent.includes(shot));
+    console.log(`${checking}: ${shots.length - absent.length} of ${shots.length} features shown, ${notYet[checking].length} not yet`);
+    if (closed.length) {
+        console.log(`now shown, take them off notYet.${checking}: ${closed.join(', ')}`);
+    }
+    if (unexpected.length) {
+        console.error(`no screenshot of: ${unexpected.join(', ')}`);
+        process.exit(1);
+    }
+    process.exit(0);
+}
 
 const missing = [];
 

@@ -46,7 +46,7 @@
 	<key>SUFeedURL</key>
 	<string>https://inboxclassic.com/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>SPARKLE_PUBLIC_KEY</string>
+	<string>ZPRq02MzIY+pXto/sjXIZ4JOxQJmbRiF+ORi0KzFuIY=</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 </dict>
