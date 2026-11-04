@@ -1771,9 +1771,13 @@ public static class Dragger {
     $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
     if ($accounts) {
         # the Properties of the account signed in to: each row's tried, wherever it is in the list
+        # once the window has its list, and the list its rows (the window is there a moment before them)
+        $count = WaitFor {
+            $accountList = [Native.Win]::GetDlgItem($accounts, 400)
+            $n = [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+            if ($n -ge 2) { $n }
+        } 10
         $accountList = [Native.Win]::GetDlgItem($accounts, 400)
-        # once the list has its rows
-        $count = WaitFor { $n = [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 2) { $n } } 10
         $count = [int]$count
         $said = @()
         $found = $null
