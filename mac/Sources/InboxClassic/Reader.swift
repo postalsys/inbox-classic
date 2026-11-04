@@ -1,0 +1,349 @@
+// The reading pane: the header of the message (From, Date, To, Cc, Subject) with the brand's logo at its left and the
+// attachments and Unsubscribe at its right; under it the bar of a calendar invitation and the bar that offers the
+// pictures from the internet; then the message itself. Every string shown is the core's, decoded and checked there.
+import AppKit
+import CInboxClassic
+
+@MainActor
+final class Reader: NSObject {
+    let view = NSStackView()
+    weak var mailbox: Mailbox?
+    private let preview = Preview()
+    private let header = NSTextField(wrappingLabelWithString: "")
+    private let logo = NSImageView()
+    private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
+    private let unsubscribe = NSButton(title: "Unsubscribe", target: nil, action: nil)
+    private let invitation = InfoBar(icon: "calendar_ltr", link: nil, button: "Open in Calendar")
+    private let pictures = InfoBar(icon: "image", link: nil)
+    private(set) var picturesOffered = false
+    /// the logo's side in pixels, for the core to draw it at
+    var logoPixels: Int { Int(48 * (view.window?.backingScaleFactor ?? 2)) }
+
+    override init() {
+        super.init()
+        header.isSelectable = true
+        header.setAccessibilityIdentifier("reader.header")
+        header.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        header.maximumNumberOfLines = 6
+        logo.imageScaling = .scaleProportionallyUpOrDown
+        logo.isHidden = true
+        logo.widthAnchor.constraint(equalToConstant: 48).isActive = true
+        logo.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        attachments.bezelStyle = .push
+        attachments.isBordered = true
+        attachments.setAccessibilityIdentifier("reader.attachments")
+        attachments.isHidden = true
+        attachments.menu?.delegate = self
+        unsubscribe.isBordered = false
+        unsubscribe.contentTintColor = .linkColor
+        unsubscribe.attributedTitle = NSAttributedString(string: "Unsubscribe", attributes: [
+            .foregroundColor: NSColor.linkColor, .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
+        ])
+        unsubscribe.target = self
+        unsubscribe.action = #selector(unsubscribeClicked)
+        unsubscribe.isHidden = true
+        unsubscribe.setAccessibilityIdentifier("reader.unsubscribe")
+
+        let right = NSStackView(views: [attachments, unsubscribe])
+        right.orientation = .vertical
+        right.alignment = .trailing
+        let top = NSStackView(views: [logo, header, right])
+        top.alignment = .top
+        top.spacing = 10
+        top.edgeInsets = NSEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
+        let headerBox = NSView()
+        top.translatesAutoresizingMaskIntoConstraints = false
+        headerBox.addSubview(top)
+        NSLayoutConstraint.activate([
+            top.leadingAnchor.constraint(equalTo: headerBox.leadingAnchor),
+            top.trailingAnchor.constraint(equalTo: headerBox.trailingAnchor),
+            top.topAnchor.constraint(equalTo: headerBox.topAnchor),
+            top.bottomAnchor.constraint(equalTo: headerBox.bottomAnchor),
+        ])
+        let line = NSBox()
+        line.boxType = .separator
+
+        pictures.text = "Some pictures have been blocked to help prevent the sender from identifying your computer. Click here to download pictures."
+        pictures.clicked = { [weak self] in self?.mailbox?.loadPictures() }
+        pictures.setAccessibilityIdentifier("reader.pictures")
+        invitation.clicked = { [weak self] in self?.mailbox?.openInCalendar() }
+        invitation.setAccessibilityIdentifier("reader.invitation")
+        invitation.isHidden = true
+        pictures.isHidden = true
+
+        view.orientation = .vertical
+        view.spacing = 0
+        view.alignment = .leading
+        for part in [headerBox, line, invitation, pictures, preview.view] as [NSView] {
+            view.addArrangedSubview(part)
+            part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
+        }
+        view.setHuggingPriority(.defaultLow, for: .vertical)
+        preview.view.setContentHuggingPriority(.defaultLow, for: .vertical)
+        invitation.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        pictures.heightAnchor.constraint(equalToConstant: 26).isActive = true
+        clear(loading: false)
+    }
+
+    // ---- what it shows ----
+
+    func clear(loading: Bool) {
+        header.stringValue = ""
+        // the bars of the message before stay while the next one loads, and go when it is there without them
+        if !loading {
+            attachments.isHidden = true
+            pictures.isHidden = true
+            picturesOffered = false
+        }
+        unsubscribe.isHidden = true
+        invitation.isHidden = true
+        logo.isHidden = true
+        logo.image = nil
+        // says so rather than a blank pane, unless a message is about to be shown
+        preview.clear(noMessage: !loading)
+    }
+
+    func showLoading() {
+        header.stringValue = "Loading the message\u{2026}"
+    }
+
+    func showProblem(_ problem: String) {
+        header.stringValue = problem
+        attachments.isHidden = true
+        pictures.isHidden = true
+        picturesOffered = false
+    }
+
+    func show(_ info: PeMessageInfo, view: MessageView, pictures allowed: Bool) {
+        header.attributedStringValue = headerText(info)
+        let files = info.attachment_count
+        attachments.isHidden = files == 0
+        attachments.removeAllItems()
+        // the title item of a pull-down button: the paper clip and how many files there are
+        attachments.addItem(withTitle: files == 1 ? "1 file" : "\(files) files")
+        attachments.item(at: 0)?.image = Icons.list("attach")
+        // a mailing list that says how to leave it
+        unsubscribe.isHidden = info.unsubscribe == PE_UNSUBSCRIBE_NONE
+        showInvitation(info.invitation)
+        preview.show(text(info.document), pictures: allowed)
+        // offered only for a message with pictures on the internet, until they are shown
+        picturesOffered = info.remote_images && !allowed
+        pictures.isHidden = !picturesOffered
+    }
+
+    private func headerText(_ info: PeMessageInfo) -> NSAttributedString {
+        let out = NSMutableAttributedString()
+        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        let bold = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
+        func line(_ name: String, _ value: String, last: Bool = false) {
+            out.append(NSAttributedString(string: name + ":  ", attributes: [.font: bold, .foregroundColor: NSColor.secondaryLabelColor]))
+            out.append(NSAttributedString(string: value + (last ? "" : "\n"), attributes: [.font: font, .foregroundColor: NSColor.labelColor]))
+        }
+        line("From", text(info.from))
+        line("Date", info.has_date ? formatDate(info.date) : "")
+        var to = text(info.to)
+        let cc = text(info.cc)
+        if !cc.isEmpty {
+            to += "    Cc:  " + cc
+        }
+        line("To", to)
+        line("Subject", text(info.subject), last: true)
+        return out
+    }
+
+    func showLogo(_ pixels: Data?) {
+        let side = logoPixels
+        // the core's pixels: BGRA with the alpha multiplied in
+        guard let pixels, pixels.count == side * side * 4, let provider = CGDataProvider(data: pixels as CFData),
+              let image = CGImage(width: side, height: side, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: side * 4,
+                                  space: CGColorSpaceCreateDeviceRGB(),
+                                  bitmapInfo: CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Little.rawValue
+                                      | CGImageAlphaInfo.premultipliedFirst.rawValue),
+                                  provider: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
+        else { return }
+        logo.image = NSImage(cgImage: image, size: NSSize(width: 48, height: 48))
+        logo.isHidden = false
+    }
+
+    @objc private func unsubscribeClicked() {
+        mailbox?.unsubscribe()
+    }
+
+    // ---- a calendar invitation ----
+
+    private func showInvitation(_ event: UnsafePointer<PeInvitation>?) {
+        guard let event = event?.pointee else {
+            invitation.isHidden = true
+            return
+        }
+        let kinds = ["Invitation: ", "Updated invitation: ", "Canceled: ", "Answer to an invitation: "]
+        let summary = text(event.summary)
+        let title = kinds[min(Int(event.kind.rawValue), 3)] + (summary.isEmpty ? "(no title)" : summary)
+        var parts = [when(event), text(event.location)]
+        let organizer = text(event.organizer)
+        if !organizer.isEmpty {
+            parts.append("Organizer: \(organizer)")
+        }
+        parts.append(text(event.repeats))
+        if event.attendees > 0 {
+            parts.append("\(event.attendees) " + (event.attendees == 1 ? "attendee" : "attendees"))
+        }
+        invitation.title = title
+        invitation.text = parts.filter { !$0.isEmpty }.joined(separator: "   \u{00B7}   ")
+        invitation.isHidden = false
+    }
+
+    /// when an event is, in words: its day (or days) and times, as the reader's local time or as written (floating)
+    private func when(_ event: PeInvitation) -> String {
+        guard event.has_start else { return "" }
+        let zone = event.floating ? TimeZone(secondsFromGMT: 0)! : TimeZone.current
+        let day = DateFormatter()
+        day.dateStyle = .full
+        day.timeStyle = .none
+        day.timeZone = zone
+        let time = DateFormatter()
+        time.dateStyle = .none
+        time.timeStyle = .short
+        time.timeZone = zone
+        var calendar = Calendar.current
+        calendar.timeZone = zone
+        let start = Date(timeIntervalSince1970: TimeInterval(event.start))
+        let end = event.has_end ? Date(timeIntervalSince1970: TimeInterval(event.end - (event.all_day ? 86400 : 0))) : nil
+        if event.all_day {
+            if let end, !calendar.isDate(start, inSameDayAs: end) {
+                return day.string(from: start) + " to " + day.string(from: end)
+            }
+            return day.string(from: start)
+        }
+        var said = day.string(from: start) + ", " + time.string(from: start)
+        if let end {
+            said += calendar.isDate(start, inSameDayAs: end) ? " to " + time.string(from: end)
+                : " to " + day.string(from: end) + ", " + time.string(from: end)
+        }
+        return event.floating ? said + " (the sender's time)" : said
+    }
+}
+
+// the attachment menu is made when it opens, from the message view
+extension Reader: NSMenuDelegate {
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        guard let mailbox, menu === attachments.menu else { return }
+        let title = menu.items.first?.copy() as? NSMenuItem
+        menu.removeAllItems()
+        if let title {
+            menu.addItem(title)
+        }
+        for item in mailbox.attachmentMenu().items {
+            item.menu?.removeItem(item)
+            menu.addItem(item)
+        }
+    }
+}
+
+/// A bar in the colors of an information bar: an icon, a bold title and a line of text (or one line), clicked as a
+/// whole or with a link or a button at its right
+final class InfoBar: NSView {
+    var clicked: () -> Void = {}
+    var heightConstraint: NSLayoutConstraint?
+    private let titleLabel = NSTextField(labelWithString: "")
+    private let textLabel = NSTextField(labelWithString: "")
+    private let action: NSButton?
+
+    var title: String {
+        get { titleLabel.stringValue }
+        set {
+            titleLabel.stringValue = newValue
+            titleLabel.isHidden = newValue.isEmpty
+        }
+    }
+
+    var text: String {
+        get { textLabel.stringValue }
+        set { textLabel.stringValue = newValue }
+    }
+
+    init(icon: String, link: String?, button: String? = nil) {
+        if let button {
+            action = NSButton(title: button, target: nil, action: nil)
+            action?.bezelStyle = .push
+        } else if let link {
+            action = NSButton(title: link, target: nil, action: nil)
+            action?.isBordered = false
+            action?.attributedTitle = NSAttributedString(string: link, attributes: [
+                .foregroundColor: NSColor.linkColor, .underlineStyle: NSUnderlineStyle.single.rawValue,
+            ])
+        } else {
+            action = nil
+        }
+        super.init(frame: .zero)
+        wantsLayer = true
+        let image = NSImageView(image: Icons.list(icon) ?? NSImage())
+        titleLabel.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
+        titleLabel.isHidden = true
+        titleLabel.lineBreakMode = .byTruncatingTail
+        textLabel.lineBreakMode = .byTruncatingTail
+        textLabel.textColor = .labelColor
+        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let words = NSStackView(views: [titleLabel, textLabel])
+        words.orientation = .vertical
+        words.alignment = .leading
+        words.spacing = 1
+        var views: [NSView] = [image, words]
+        if let action {
+            action.target = self
+            action.action = #selector(fire)
+            views.append(action)
+            action.setContentHuggingPriority(.required, for: .horizontal)
+        }
+        let stack = NSStackView(views: views)
+        stack.spacing = 8
+        stack.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            image.widthAnchor.constraint(equalToConstant: 16),
+            image.heightAnchor.constraint(equalToConstant: 16),
+        ])
+        clipsToBounds = true
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func updateLayer() {
+        layer?.backgroundColor = NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+                ? NSColor(calibratedRed: 0.32, green: 0.29, blue: 0.16, alpha: 1)
+                : NSColor(calibratedRed: 1, green: 0.97, blue: 0.80, alpha: 1)
+        }.cgColor
+    }
+
+    override var wantsUpdateLayer: Bool { true }
+
+    // a bar without a link or button is clicked as a whole, like a link
+    override func mouseDown(with event: NSEvent) {
+        if action == nil {
+            clicked()
+        }
+    }
+
+    override func resetCursorRects() {
+        if action == nil {
+            addCursorRect(bounds, cursor: .pointingHand)
+        }
+    }
+
+    @objc private func fire() {
+        clicked()
+    }
+
+    override func accessibilityPerformPress() -> Bool {
+        clicked()
+        return true
+    }
+}

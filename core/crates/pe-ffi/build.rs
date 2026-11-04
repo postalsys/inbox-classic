@@ -225,7 +225,14 @@ fn swift(table: &Table) -> String {
         "// {NOTE}\nimport AppKit\n\n/// A command of the menus, the toolbar and the Dock menu\nenum Command: Int, CaseIterable {{\n"
     );
     for command in &table.command {
-        writeln!(out, "    case {} = {}", camel(&command.id, false), command.windows).unwrap();
+        // a name that is a Swift keyword (import) in backticks; `.import` needs none
+        let name = camel(&command.id, false);
+        let name = if ["import", "default", "case", "in", "is", "as", "repeat"].contains(&name.as_str()) {
+            format!("`{name}`")
+        } else {
+            name
+        };
+        writeln!(out, "    case {name} = {}", command.windows).unwrap();
     }
     out.push_str("\n    /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu)\n    var menu: String {\n        switch self {\n");
     for command in &table.command {

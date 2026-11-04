@@ -25,7 +25,7 @@ enum Command: Int, CaseIterable {
     case find = 120
     case saveAs = 121
     case print = 122
-    case import = 123
+    case `import` = 123
     case outbox = 124
     case properties = 125
     case markAllRead = 126

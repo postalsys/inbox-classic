@@ -5,3 +5,7 @@ core/target/
 .DS_Store
 screenshot.png
 core/e2e/node_modules/
+.claude/
+mac/.build/
+mac/*.xcodeproj/
+mac/.swiftpm/
