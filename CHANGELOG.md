@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/postalsys/inbox-classic/compare/v0.5.0...v0.5.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **mac:** the message list no longer starts squeezed to its smallest ([4483dc2](https://github.com/postalsys/inbox-classic/commit/4483dc2bf16c0db11a678e31346871fb5725da87))
+
 ## [0.5.0](https://github.com/postalsys/inbox-classic/compare/v0.4.1...v0.5.0) (2026-11-04)
 
 
