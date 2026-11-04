@@ -3,6 +3,7 @@
 // sanitized document the core made, shown in the WebView2 as it is.
 #include "app.h"
 #include "icons.h"
+#include "webview.h"
 
 #include <commdlg.h>
 
@@ -227,7 +228,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     AddColumn(list_, COL_RECEIVED, L"Received", 130);
     AddColumn(list_, COL_SIZE, L"Size", 84, LVCFMT_RIGHT);
 
-    header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN, 0, {});
+    // not drawn over the Unsubscribe link that lies on it
+    header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN | WS_CLIPSIBLINGS, 0, {});
+    unsubscribe_ = CreateChild(parent, L"STATIC", L"Unsubscribe", SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
+    ShowWindow(unsubscribe_, SW_HIDE);
     // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
     attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_ATTACHMENTS, BarIcons::Big);
     // a label from the start, so the bar keeps a row for it under the icon ("2 files" once a message is shown)
@@ -254,6 +258,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     font.lfUnderline = TRUE;
     link_ = CreateFontIndirectW(&font);
     SendMessageW(searchClear_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
+    SendMessageW(unsubscribe_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
     font.lfUnderline = FALSE;
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
@@ -279,6 +284,18 @@ void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
     LayoutReader();
 }
 
+// how wide the words of a link are, in the link font
+int Mailbox::LinkWidth(HWND link) const {
+    std::wstring words = GetWindowString(link);
+    HDC dc = GetDC(link);
+    HGDIOBJ old = SelectObject(dc, link_);
+    SIZE size = {};
+    GetTextExtentPoint32W(dc, words.c_str(), static_cast<int>(words.size()), &size);
+    SelectObject(dc, old);
+    ReleaseDC(link, dc);
+    return size.cx;
+}
+
 // the search bar over the list while it is shown, the list under it
 void Mailbox::LayoutList() {
     RECT list = listArea_;
@@ -287,13 +304,7 @@ void Mailbox::LayoutList() {
         int height = Scale(22), edge = GetSystemMetrics(SM_CXBORDER);
         MoveWindow(searchBar_, list.left, list.top, width, height, TRUE);
         // the link inside the bar's border, at its right, as wide as its words
-        HDC dc = GetDC(searchClear_);
-        HGDIOBJ old = SelectObject(dc, link_);
-        SIZE size = {};
-        GetTextExtentPoint32W(dc, L"Clear search", 12, &size);
-        SelectObject(dc, old);
-        ReleaseDC(searchClear_, dc);
-        int linkWidth = size.cx + Scale(16);
+        int linkWidth = LinkWidth(searchClear_) + Scale(16);
         MoveWindow(searchClear_, list.right - edge - linkWidth, list.top + edge, linkWidth, height - 2 * edge, TRUE);
         SetWindowPos(searchClear_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         list.top += height + Scale(2);
@@ -336,7 +347,7 @@ void Mailbox::ShowReaderBars(bool files, bool pictures) {
 }
 
 bool Mailbox::OnSetCursor(HWND window) {
-    if (window != pictures_ && window != searchClear_) {
+    if (window != pictures_ && window != searchClear_ && window != unsubscribe_) {
         return false;
     }
     // the information bar is clicked like a link
@@ -345,11 +356,12 @@ bool Mailbox::OnSetCursor(HWND window) {
 }
 
 bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
-    if (window == searchClear_) {
-        // a link on the information bar
+    if (window == unsubscribe_ || window == searchClear_) {
+        // a link, on the header or on the information bar
+        int background = window == unsubscribe_ ? COLOR_BTNFACE : COLOR_INFOBK;
         SetTextColor(dc, GetSysColor(COLOR_HOTLIGHT));
-        SetBkColor(dc, GetSysColor(COLOR_INFOBK));
-        brush = reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_INFOBK));
+        SetBkColor(dc, GetSysColor(background));
+        brush = reinterpret_cast<LRESULT>(GetSysColorBrush(background));
         return true;
     }
     if (window != pictures_) {
@@ -377,6 +389,13 @@ void Mailbox::LayoutReader() {
     // the header to the paper clip, which is as wide as its button
     int clipWidth = files ? static_cast<int>(button.right - button.left) + Scale(8) : 0;
     MoveWindow(header_, reader.left, reader.top, width - clipWidth, headerHeight, TRUE);
+    // Unsubscribe at the right end of the Subject line, inside the header's edge
+    if (IsWindowVisible(unsubscribe_)) {
+        int linkWidth = LinkWidth(unsubscribe_) + Scale(8), edge = GetSystemMetrics(SM_CXEDGE);
+        MoveWindow(unsubscribe_, reader.left + width - clipWidth - linkWidth - edge - Scale(4), reader.top + headerHeight - edge - Scale(26),
+                   linkWidth, Scale(16), TRUE);
+        SetWindowPos(unsubscribe_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
     if (files) {
         int buttonHeight = button.bottom - button.top;
         MoveWindow(attachments_, reader.right - clipWidth, reader.top + std::max(0, (headerHeight - buttonHeight) / 2), clipWidth, buttonHeight,
@@ -718,6 +737,8 @@ void Mailbox::ClearReader(bool loading) {
         ShowReaderBars(false, false);
     }
     SetWindowTextW(header_, L"");
+    unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
+    ShowWindow(unsubscribe_, SW_HIDE);
     // says so rather than a blank pane, unless a message is about to be shown
     preview_.Clear(!loading);
 }
@@ -778,6 +799,13 @@ void Mailbox::ShowView() {
         return;
     }
     ShowHeader(info);
+    // a mailing list that says how to leave it
+    unsubscribeKind_ = info->unsubscribe;
+    unsubscribeLink_ = Text(info->unsubscribe_link);
+    unsubscribeTarget_ = Text(info->unsubscribe_target);
+    ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
+    LayoutReader();
+    InvalidateRect(unsubscribe_, nullptr, TRUE);
     preview_.Show(Text(info->document), remoteImages_);
     // offered only for a message with pictures on the internet, until they are shown
     ShowReaderBars(info->attachment_count > 0, info->remote_images && !remoteImages_);
@@ -902,6 +930,46 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
         ListView_EnsureVisible(list_, row, FALSE);
         SetFocus(list_);
     }
+}
+
+std::wstring Mailbox::Unsubscribe(std::wstring& mailto) {
+    const std::wstring& target = unsubscribeTarget_;
+    switch (unsubscribeKind_) {
+    case PE_UNSUBSCRIBE_ONE_CLICK: {
+        std::wstring question = L"Leave this mailing list?\n\nInbox Classic asks " + target +
+                                L" to stop sending it to you. No page opens and no message is sent.";
+        if (MessageBoxW(parent_, question.c_str(), L"Unsubscribe", MB_YESNO | MB_ICONQUESTION) != IDYES) {
+            return L"";
+        }
+        unsubscribeRequest_ = pe_unsubscribe(core_, messageFolder_, uid_);
+        return unsubscribeRequest_ ? L"Unsubscribing from " + target + L"..." : L"This message can not unsubscribe you.";
+    }
+    case PE_UNSUBSCRIBE_MAIL: {
+        std::wstring question = L"Leave this mailing list?\n\nThe list wants a message to " + target +
+                                L". Inbox Classic writes it for you; send it to unsubscribe.";
+        if (MessageBoxW(parent_, question.c_str(), L"Unsubscribe", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
+            mailto = unsubscribeLink_;
+        }
+        return L"";
+    }
+    case PE_UNSUBSCRIBE_WEB: {
+        std::wstring question = L"Leave this mailing list?\n\nThe list's page for it opens in your browser (" + target + L").";
+        if (MessageBoxW(parent_, question.c_str(), L"Unsubscribe", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
+            webview::OpenExternally(unsubscribeLink_.c_str());
+        }
+        return L"";
+    }
+    default:
+        return L"";
+    }
+}
+
+std::wstring Mailbox::Unsubscribed(uint64_t request, const std::wstring& problem) {
+    if (request != unsubscribeRequest_) {
+        return L"";
+    }
+    unsubscribeRequest_ = 0;
+    return problem.empty() ? L"Unsubscribed. The list says it will stop sending this mail." : L"Could not unsubscribe: " + problem;
 }
 
 void Mailbox::MarkJunk(bool junk) {

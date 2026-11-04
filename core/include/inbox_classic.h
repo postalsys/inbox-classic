@@ -45,6 +45,8 @@ typedef enum PeEventKind {
   // New unread mail in the Inbox `folder` of `account`: `count` messages, `uid` the newest, `message` who it is
   // from and `detail` its subject
   PE_EVENT_KIND_NEW_MAIL = 14,
+  // The unsubscribe `uid` of `pe_unsubscribe` is done; `message` says why not when it is not NULL
+  PE_EVENT_KIND_UNSUBSCRIBED = 15,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -107,6 +109,18 @@ typedef enum PeSortField {
   PE_SORT_FIELD_SUBJECT = 3,
   PE_SORT_FIELD_SIZE = 4,
 } PeSortField;
+
+// How a message lets its reader leave its mailing list
+typedef enum PeUnsubscribe {
+  // It does not say
+  PE_UNSUBSCRIBE_NONE = 0,
+  // `pe_unsubscribe` does it (RFC 8058)
+  PE_UNSUBSCRIBE_ONE_CLICK = 1,
+  // A message to `unsubscribe_link` (a mailto: link, for `pe_mailto_draft`), written for the user to send
+  PE_UNSUBSCRIBE_MAIL = 2,
+  // The page `unsubscribe_link` (https), opened in the browser
+  PE_UNSUBSCRIBE_WEB = 3,
+} PeUnsubscribe;
 
 typedef enum PeDraftKind {
   PE_DRAFT_KIND_REPLY = 0,
@@ -295,6 +309,11 @@ typedef struct PeMessageInfo {
   size_t attachment_count;
   // The message has pictures on the internet, blocked until it is shown again with remote images allowed
   bool remote_images;
+  enum PeUnsubscribe unsubscribe;
+  // The mailto: link or page of `unsubscribe` (Mail, Web), empty otherwise
+  const char *unsubscribe_link;
+  // Where it goes, for the window to say: the host, or the address of the message
+  const char *unsubscribe_target;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -607,6 +626,15 @@ const struct PeAccount *pe_account_list_get(const struct PeAccountList *list, si
 // # Safety
 // `list` must be NULL or a list that was not freed yet.
 void pe_account_list_free(struct PeAccountList *list);
+
+// Unsubscribes from the mailing list of a message the one-click way (`PeUnsubscribe` OneClick): in the background,
+// `Unsubscribed` follows with the request this returns; 0 for a message that offers no such way
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_unsubscribe(const struct PeCore *core,
+                        int64_t folder,
+                        uint64_t uid);
 
 // How many messages are unread in the Inboxes of all accounts (the tray and the taskbar show it); 0 also when the
 // core can not say

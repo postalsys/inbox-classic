@@ -6,6 +6,7 @@
 //! windows start runs on the workers and reports back as [`Event`]s, on a worker thread.
 #![forbid(unsafe_code)]
 
+pub mod calendar;
 mod compose;
 mod fold;
 pub mod mailto;
@@ -13,6 +14,7 @@ mod requests;
 mod search;
 mod secrets;
 mod sign_in_apps;
+pub mod unsubscribe;
 mod view;
 mod worker;
 
@@ -60,6 +62,11 @@ pub enum Event {
     MessageReady {
         folder: FolderId,
         uid: u64,
+    },
+    /// The one-click unsubscribe `request` ([`Core::unsubscribe`]) is done, or failed for `problem`
+    Unsubscribed {
+        request: u64,
+        problem: Option<String>,
     },
     /// New unread mail came in the Inbox of `account` (`count` messages), `uid` the newest, from `from` about
     /// `subject`
@@ -441,6 +448,39 @@ impl Core {
     /// Where a message is in the message list in this order
     pub fn message_index(&self, folder: FolderId, sort: Sort, uid: u64) -> Result<Option<u64>> {
         Ok(self.store().message_index(folder, sort, uid)?)
+    }
+
+    /// Unsubscribes from the mailing list of a message the one-click way (RFC 8058): a POST of
+    /// `List-Unsubscribe=One-Click` to the address the message gives, without cookies, redirects not followed, in
+    /// the background; [`Event::Unsubscribed`] follows with the request this returns. Refused for a message that
+    /// offers no one-click way ([`crate::unsubscribe::of`]), whose source is not in the store.
+    pub fn unsubscribe(&self, folder: FolderId, uid: u64) -> Result<u64> {
+        // the header block is all it takes
+        let start = self
+            .store()
+            .source_start(folder, uid, view::MAX_HEADER_TEXT)?
+            .ok_or(Error::NotFound)?;
+        let message = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?;
+        let Some(unsubscribe::Unsubscribe::OneClick { url }) = unsubscribe::of(&message.headers) else {
+            return Err(Error::NotFound);
+        };
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let events = self.events.clone();
+        self.runtime()?.spawn(async move {
+            let answer = pe_net::http::post_form(
+                &url,
+                &[("List-Unsubscribe", "One-Click")],
+                std::time::Duration::from_secs(30),
+            )
+            .await;
+            let problem = match answer {
+                Ok(response) if (200..300).contains(&response.status) => None,
+                Ok(response) => Some(format!("the list answered {}", response.status)),
+                Err(error) => Some(error.to_string()),
+            };
+            events(Event::Unsubscribed { request, problem });
+        });
+        Ok(request)
     }
 
     /// Looks up the servers of `email` in the background: [`Event::AutoconfigDone`] follows with the request

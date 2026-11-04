@@ -271,6 +271,11 @@ public:
     void MarkJunk(bool junk);
     // whether the message shown, or else the folder, is in a Junk folder: the toolbar offers Not Junk there
     bool InJunk() const;
+    // the Unsubscribe link of the message shown, after asking: what the status bar says; a mailto: link to write a
+    // message to in `mailto` when the list wants one
+    std::wstring Unsubscribe(std::wstring& mailto);
+    // the one-click unsubscribe `request` done, or not for `problem`: what the status bar says, empty for another
+    std::wstring Unsubscribed(uint64_t request, const std::wstring& problem);
     // the selected message into Deleted Items (for good when it is in there), the next one selected
     void DeleteSelected();
     // asks for a folder of the account and moves the selected message there
@@ -363,11 +368,18 @@ private:
     // where the list goes, with the search bar over it while searching
     RECT listArea_ = {};
     HWND searchBar_ = nullptr;
+    // the Unsubscribe link, and how the message shown lets its reader leave its list (PeMessageInfo)
+    HWND unsubscribe_ = nullptr;
+    PeUnsubscribe unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
+    std::wstring unsubscribeLink_;
+    std::wstring unsubscribeTarget_;
+    uint64_t unsubscribeRequest_ = 0;
     HWND searchClear_ = nullptr;
     std::wstring searchSummary_;
     // the one folder the words typed name (in:sent), empty for every folder
     std::wstring findPlace_;
     void LayoutList();
+    int LinkWidth(HWND link) const;
     // the icons the list draws on its rows, and their size
     HIMAGELIST listIcons_ = nullptr;
     int iconSize_ = 16;
@@ -480,6 +492,8 @@ enum CommandId : WORD {
     // over the list while searching: what was found, and a link that ends the search
     IDC_SEARCH_BAR,
     IDC_SEARCH_CLEAR,
+    // at the right of the message header: leaving the message's mailing list
+    IDC_UNSUBSCRIBE,
     IDM_FIND = 120,
     IDM_SAVE_AS,
     IDM_PRINT,

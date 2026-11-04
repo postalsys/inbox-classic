@@ -318,6 +318,17 @@ const sections = [
                 checked: ['The message is in Deleted Items on the server', 'and out of the Inbox and the list']
             },
             {
+                shot: 'read-8-unsubscribe',
+                name: 'Unsubscribe',
+                what: 'A message with List-Unsubscribe has Unsubscribe in its header. With List-Unsubscribe-Post and a DKIM signature that the receiving server passed and that covers both headers (RFC 8058), it asks the list to stop with a one-click POST, without cookies or redirects; otherwise it writes the message the list wants, or opens its https page. It always asks first, saying which.',
+                how: 'Unsubscribe at the right of the message header.',
+                checked: [
+                    'A message of a mailing list has Unsubscribe in its header',
+                    'It asks first, naming where it goes',
+                    'Yes posts List-Unsubscribe=One-Click to the list, and the status bar says it is done'
+                ]
+            },
+            {
                 shot: 'organize-6-drag',
                 name: 'Drag messages onto folders',
                 what: 'A message dragged from the list onto a folder of its account moves there; with Ctrl it is copied. The folder under the mouse is highlighted, one held over opens, the tree scrolls at its edges, and Esc cancels. Its own folder, an account and a folder of another account take nothing.',

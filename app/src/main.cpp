@@ -312,6 +312,11 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_NEW_MAIL:
         NotifyNewMail(event);
         break;
+    case PE_EVENT_KIND_UNSUBSCRIBED:
+        if (std::wstring said = g_mailbox.Unsubscribed(event.uid, event.message); !said.empty()) {
+            SetStatus(said);
+        }
+        break;
     case PE_EVENT_KIND_MESSAGE_SENT:
         // shown by the OutboxChanged that follows it
         g_lastSent = L"Sent " + Quoted(event.message) + L" at " + TimeNow();
@@ -798,6 +803,19 @@ void OnCommand(WORD id, WORD code) {
     case IDM_DEFAULT_APP:
         MakeDefaultMailApp();
         return;
+    case IDC_UNSUBSCRIBE: {
+        if (code != STN_CLICKED) {
+            return;
+        }
+        std::wstring mailto;
+        if (std::wstring said = g_mailbox.Unsubscribe(mailto); !said.empty()) {
+            SetStatus(said);
+        }
+        if (!mailto.empty()) {
+            OpenMailto(mailto);
+        }
+        return;
+    }
     case IDM_NOTIFY:
         g_notify = !g_notify;
         SetPreference(kNotifyPreference, g_notify ? 1 : 0);

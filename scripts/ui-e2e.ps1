@@ -82,6 +82,33 @@ public static void MouseDragTo(int x, int y, int toX, int toY) {
 [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr hwnd, ref POINT point);
 public struct POINT { public int X, Y; }
 [DllImport("kernel32.dll")] public static extern bool WriteProcessMemory(IntPtr process, IntPtr address, byte[] buffer, IntPtr size, out IntPtr written);
+// the text of a cell of a list view of another process (LVM_GETITEMTEXTW with an LVITEMW in its memory)
+public static string ListText(IntPtr list, int row, int column) {
+    uint pid;
+    GetWindowThreadProcessId(list, out pid);
+    IntPtr process = OpenProcess(0x0038, false, pid);
+    if (process == IntPtr.Zero) { return ""; }
+    string text = "";
+    IntPtr remote = VirtualAllocEx(process, IntPtr.Zero, (IntPtr)2048, 0x3000, 0x04);
+    if (remote != IntPtr.Zero) {
+        // LVITEMW on 64-bit Windows: iSubItem at 8, pszText at 24, cchTextMax at 32; the text after it, at 512
+        byte[] item = new byte[512];
+        BitConverter.GetBytes(column).CopyTo(item, 8);
+        BitConverter.GetBytes(remote.ToInt64() + 512).CopyTo(item, 24);
+        BitConverter.GetBytes(700).CopyTo(item, 32);
+        IntPtr done;
+        WriteProcessMemory(process, remote, item, (IntPtr)item.Length, out done);
+        int length = SendMessage(list, 0x1073, (IntPtr)row, remote).ToInt32();
+        if (length > 0) {
+            byte[] chars = new byte[length * 2];
+            ReadProcessMemory(process, (IntPtr)(remote.ToInt64() + 512), chars, (IntPtr)chars.Length, out done);
+            text = System.Text.Encoding.Unicode.GetString(chars);
+        }
+        VirtualFreeEx(process, remote, IntPtr.Zero, 0x8000);
+    }
+    CloseHandle(process);
+    return text;
+}
 // a rectangle a control of another process fills in (LVM_GETITEMRECT, TVM_GETITEMRECT) from `seed` at its start, in
 // screen pixels
 public static RECT RemoteRect(IntPtr window, uint message, IntPtr wParam, long seed) {
@@ -190,6 +217,8 @@ function WindowText([IntPtr]$window) {
     return $buffer.ToString()
 }
 function GetText([IntPtr]$window, [int]$id) { WindowText ([Native.Win]::GetDlgItem($window, $id)) }
+# the words of a window's static texts (a message box, a form's intro)
+function Statics([IntPtr]$window) { ([Native.Win]::FindDescendants($window, 'Static') | ForEach-Object { WindowText $_ }) -join ' ' }
 # the text of a part of a status bar: SB_GETTEXT writes it to memory of the app's own process, read back from there
 function StatusPart([IntPtr]$bar, [int]$index) {
     $appPid = [uint32]0
@@ -1144,6 +1173,58 @@ public static class Dragger {
     Check ([bool](WaitFor { -not (Find 'Trash' 'Subject: One more thing') } 20)) 'and then it is gone from the server'
     SelectFolder 0
 
+    Step 'unsubscribing'
+    # the list's server: a socket of the test, answered by hand
+    $listServer = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, 0)
+    $listServer.Start()
+    $listPort = $listServer.LocalEndpoint.Port
+    $accepted = $listServer.AcceptTcpClientAsync()
+    $listRaw = "Authentication-Results: mx.postalexpress.test; dkim=pass header.d=list.example.com`r`n" +
+        "DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:subject:list-unsubscribe:list-unsubscribe-post; bh=x; b=y`r`n" +
+        "From: Weekly List <news@list.example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: Weekly list news`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <weekly-list@list.example.com>`r`n" +
+        "List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:$listPort/u/42>`r`n" +
+        "List-Unsubscribe-Post: List-Unsubscribe=One-Click`r`n`r`nThis week on the list.`r`n"
+    AddMessage $listRaw
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    $findBox = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 205), 204)
+    [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: Weekly list news') } 20)
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Weekly list news"')
+    [void](WaitFor { (Rows) -eq 1 } 20)
+    SelectRow 0
+    $IDC_UNSUBSCRIBE = 210
+    Check ([bool](WaitFor { Visible $main $IDC_UNSUBSCRIBE } 15)) 'a message of a mailing list has Unsubscribe in its header'
+    Shot $main 'read-8-unsubscribe'
+    [void][Native.Win]::PostMessage($main, $WM_COMMAND, [IntPtr]$IDC_UNSUBSCRIBE, [Native.Win]::GetDlgItem($main, $IDC_UNSUBSCRIBE))
+    $sure = WaitWindow '#32770' 'Unsubscribe' 10
+    Check ($null -ne $sure -and (Statics $sure) -match '127\.0\.0\.1') "it asks first, naming where it goes ($(if ($sure) { Statics $sure }))"
+    if ($sure) {
+        Shot $sure 'read-9-unsubscribe-ask'
+        Click $sure 6
+    }
+    # the POST of RFC 8058, answered 200
+    $sent = ''
+    if ($accepted.Wait(15000)) {
+        $client = $accepted.Result
+        $stream = $client.GetStream()
+        $stream.ReadTimeout = 5000
+        $buffer = New-Object byte[] 4096
+        while ($sent -notmatch 'One-Click') {
+            $read = $stream.Read($buffer, 0, $buffer.Length)
+            if ($read -le 0) { break }
+            $sent += [Text.Encoding]::ASCII.GetString($buffer, 0, $read)
+        }
+        $answer = [Text.Encoding]::ASCII.GetBytes("HTTP/1.0 200 OK`r`nContent-Length: 2`r`n`r`nok")
+        $stream.Write($answer, 0, $answer.Length)
+        $client.Close()
+    }
+    $listServer.Stop()
+    Check ($sent -match '^POST /u/42 ' -and $sent -match 'List-Unsubscribe=One-Click') "Yes posts List-Unsubscribe=One-Click to the list ($(($sent -split "`r`n")[0]))"
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Unsubscribed' } 10)) "and the status bar says it is done ($(StatusPart $mainStatus 0))"
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
+
     Step 'marking all read'
     $IDM_MARK_ALL_READ = 126
     SelectFolder 0
@@ -1536,8 +1617,6 @@ public static class Dragger {
         [void](WaitFor { [int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2) -eq $row } 5)
         Start-Sleep -Milliseconds 200
     }
-    # the words of a window's static texts (a message box, a form's intro)
-    function Statics([IntPtr]$window) { ([Native.Win]::FindDescendants($window, 'Static') | ForEach-Object { WindowText $_ }) -join ' ' }
     function OpenSignInApps {
         Command $main $IDM_ACCOUNTS
         $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
@@ -1681,7 +1760,12 @@ public static class Dragger {
     Command $main $IDM_ACCOUNTS
     $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
     if ($accounts) {
-        KeyToRow ([Native.Win]::GetDlgItem($accounts, 400)) 1
+        # the row of the account signed in to (alice@example.com), wherever it is in the list
+        $accountList = [Native.Win]::GetDlgItem($accounts, 400)
+        $count = [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+        $alice = @(0..($count - 1) | Where-Object { [Native.Win]::ListText($accountList, $_, 1) -eq 'alice@example.com' }) | Select-Object -First 1
+        Check ($null -ne $alice) "the account signed in to is listed ($(@(0..($count - 1) | ForEach-Object { [Native.Win]::ListText($accountList, $_, 1) }) -join ', '))"
+        KeyToRow $accountList ([int]$alice)
         Click $accounts 402
         $properties = WaitWindow 'InboxClassicForm' 'Properties'
         Check ($properties -and [bool](WaitFor { (Statics $properties) -match 'Signs in with: ImapKit' } 10)) "Properties says what the account signs in with ($(if ($properties) { Statics $properties }))"

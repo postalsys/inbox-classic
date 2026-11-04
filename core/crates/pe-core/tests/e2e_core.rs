@@ -1197,3 +1197,65 @@ fn new_mail_comes_in_while_watching_the_inbox() {
     let next = s.wait(|e| matches!(e, Event::NewMail { .. } | Event::FolderChanged { .. }));
     assert!(matches!(next, Event::FolderChanged { .. }), "{next:?}");
 }
+
+#[test]
+fn unsubscribes_with_one_click() {
+    let Some(s) = setup() else { return };
+    // the list's server: one request, answered 200, kept for the test to read
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let server = std::thread::spawn(move || {
+        use std::io::{Read, Write};
+        let (mut stream, _) = listener.accept().unwrap();
+        stream.set_read_timeout(Some(Duration::from_secs(10))).unwrap();
+        let mut request = Vec::new();
+        let mut buffer = [0u8; 4096];
+        while !String::from_utf8_lossy(&request).contains("One-Click") {
+            let read = stream.read(&mut buffer).unwrap();
+            if read == 0 {
+                break;
+            }
+            request.extend_from_slice(&buffer[..read]);
+        }
+        stream
+            .write_all(b"HTTP/1.0 200 OK\r\nContent-Length: 2\r\n\r\nok")
+            .unwrap();
+        String::from_utf8_lossy(&request).into_owned()
+    });
+    let raw = format!(
+        "Authentication-Results: mx.example.net; dkim=pass header.d=list.example.com\r\n\
+         DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; b=y\r\n\
+         From: News <news@list.example.com>\r\nSubject: Weekly news\r\n\
+         List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:{port}/u/42>\r\n\
+         List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThe news.\r\n"
+    );
+    let uid = s.server.add_message("INBOX", &raw, &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    // read once the message is opened: its source is in the store then
+    assert!(s.core.unsubscribe(inbox, uid).is_err());
+    s.core.open_message(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    let view = s.core.message_view(inbox, uid, false).unwrap().unwrap();
+    assert!(
+        matches!(&view.unsubscribe, Some(pe_core::unsubscribe::Unsubscribe::OneClick { url }) if url.ends_with("/u/42")),
+        "{:?}",
+        view.unsubscribe
+    );
+    let request = s.core.unsubscribe(inbox, uid).unwrap();
+    let done = s.wait(|e| matches!(e, Event::Unsubscribed { .. }));
+    assert_eq!(done, Event::Unsubscribed { request, problem: None });
+    let sent = server.join().unwrap();
+    assert!(sent.starts_with("POST /u/42 "), "{sent}");
+    assert!(sent.contains("List-Unsubscribe=One-Click"), "{sent}");
+    assert!(!sent.to_ascii_lowercase().contains("cookie"), "{sent}");
+}

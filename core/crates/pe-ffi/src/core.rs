@@ -7,6 +7,7 @@
 use std::ffi::{CStr, CString, c_char, c_void};
 use std::ptr::{null, null_mut};
 
+use pe_core::unsubscribe::Unsubscribe;
 use pe_core::{Core, DraftKind, Event, FailureKind, Outgoing, SignInWith};
 use pe_imap::SpecialUse;
 use pe_store::{AccountSettings, Security, Sort, SortField};
@@ -115,6 +116,8 @@ pub enum PeEventKind {
     /// New unread mail in the Inbox `folder` of `account`: `count` messages, `uid` the newest, `message` who it is
     /// from and `detail` its subject
     NewMail = 14,
+    /// The unsubscribe `uid` of `pe_unsubscribe` is done; `message` says why not when it is not NULL
+    Unsubscribed = 15,
 }
 
 #[repr(C)]
@@ -192,6 +195,7 @@ impl Callback {
             Event::NewMail {
                 account, folder, uid, ..
             } => (PeEventKind::NewMail, *account, *folder, *uid),
+            Event::Unsubscribed { request, .. } => (PeEventKind::Unsubscribed, 0, 0, *request),
         };
         let count = if let Event::NewMail { count, .. } = &event {
             *count as u64
@@ -207,6 +211,7 @@ impl Callback {
             Event::NewMail { from, subject, .. } => {
                 (PeFailureKind::None, Some(c_string(from)), Some(c_string(subject)))
             }
+            Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
             _ => (PeFailureKind::None, None, None),
         };
         let event = PeEvent {
@@ -684,6 +689,17 @@ pub unsafe extern "C" fn pe_account_list_get(list: *const PeAccountList, index: 
 pub unsafe extern "C" fn pe_account_list_free(list: *mut PeAccountList) {
     // SAFETY: as the caller guarantees
     unsafe { take_back(list) }
+}
+
+/// Unsubscribes from the mailing list of a message the one-click way (`PeUnsubscribe` OneClick): in the background,
+/// `Unsubscribed` follows with the request this returns; 0 for a message that offers no such way
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_unsubscribe(core: *const PeCore, folder: i64, uid: u64) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.unsubscribe(folder, uid).unwrap_or(0)) }
 }
 
 /// How many messages are unread in the Inboxes of all accounts (the tray and the taskbar show it); 0 also when the
@@ -1353,6 +1369,20 @@ pub struct PeAttachment {
     pub size: u64,
 }
 
+/// How a message lets its reader leave its mailing list
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeUnsubscribe {
+    /// It does not say
+    None = 0,
+    /// `pe_unsubscribe` does it (RFC 8058)
+    OneClick = 1,
+    /// A message to `unsubscribe_link` (a mailto: link, for `pe_mailto_draft`), written for the user to send
+    Mail = 2,
+    /// The page `unsubscribe_link` (https), opened in the browser
+    Web = 3,
+}
+
 /// The header fields and the document of a message
 #[repr(C)]
 pub struct PeMessageInfo {
@@ -1368,6 +1398,11 @@ pub struct PeMessageInfo {
     pub attachment_count: usize,
     /// The message has pictures on the internet, blocked until it is shown again with remote images allowed
     pub remote_images: bool,
+    pub unsubscribe: PeUnsubscribe,
+    /// The mailto: link or page of `unsubscribe` (Mail, Web), empty otherwise
+    pub unsubscribe_link: *const c_char,
+    /// Where it goes, for the window to say: the host, or the address of the message
+    pub unsubscribe_target: *const c_char,
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
@@ -1390,6 +1425,12 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             size: a.size,
         })
         .collect();
+    let (unsubscribe, unsubscribe_link) = match &view.unsubscribe {
+        None => (PeUnsubscribe::None, ""),
+        Some(Unsubscribe::OneClick { .. }) => (PeUnsubscribe::OneClick, ""),
+        Some(Unsubscribe::Mail { link }) => (PeUnsubscribe::Mail, link.as_str()),
+        Some(Unsubscribe::Web { url }) => (PeUnsubscribe::Web, url.as_str()),
+    };
     let info = PeMessageInfo {
         subject: strings.add(&view.subject),
         from: strings.add(&view.from),
@@ -1400,6 +1441,9 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         document: strings.add(&view.document),
         attachment_count: attachments.len(),
         remote_images: view.remote_images,
+        unsubscribe,
+        unsubscribe_link: strings.add(unsubscribe_link),
+        unsubscribe_target: strings.add(&view.unsubscribe.as_ref().map(Unsubscribe::target).unwrap_or_default()),
     };
     handed(PeMessageView {
         info,

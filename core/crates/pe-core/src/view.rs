@@ -27,6 +27,8 @@ pub struct MessageView {
     /// The message has pictures on the internet (shown or not, as the view was asked for)
     pub remote_images: bool,
     pub attachments: Vec<AttachmentView>,
+    /// How the message lets its reader leave its mailing list, None when it does not say
+    pub unsubscribe: Option<crate::unsubscribe::Unsubscribe>,
 }
 
 /// The attachments the attachment bar lists: not the images of an HTML body
@@ -97,6 +99,7 @@ pub(crate) fn build_unless(
                 size: a.content.len() as u64,
             })
             .collect(),
+        unsubscribe: crate::unsubscribe::of(&message.headers),
     })
 }
 
