@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0](https://github.com/postalsys/inbox-classic/compare/v0.3.0...v0.4.0) (2026-11-04)
+
+
+### Features
+
+* a signature for each account ([b61db76](https://github.com/postalsys/inbox-classic/commit/b61db761850c6e59b9891487f049d6d10842c826))
+* a slim search bar over the list ([c1d1f75](https://github.com/postalsys/inbox-classic/commit/c1d1f755447c0dedf52510b947aa1cc96c06f8f9))
+* brand logos (BIMI) beside the header ([cc31b74](https://github.com/postalsys/inbox-classic/commit/cc31b740a78eaecc47fc2e4241a2caa7aa569dc5))
+* calendar invitations shown readably ([120b921](https://github.com/postalsys/inbox-classic/commit/120b921f3de845e40269383604dfe8bf1fa69d37))
+* complete addresses from the people written to and heard from ([abe5a88](https://github.com/postalsys/inbox-classic/commit/abe5a88777cc215077ab9f422c57bdc7936c143f))
+* local full-text search with Gmail query syntax ([87cd7cc](https://github.com/postalsys/inbox-classic/commit/87cd7cc97fa771746d77a25142c2634f4a35af04))
+* Mark All Read, dragging messages onto folders, Junk and Not Junk ([4a53a4d](https://github.com/postalsys/inbox-classic/commit/4a53a4d91bb5efb1f58fec77157fd42b7dee938f))
+* new mail as it arrives, in the tray and as a notification ([a9176bc](https://github.com/postalsys/inbox-classic/commit/a9176bcba4a2c75817dcd553708ff9a212fea5f4))
+* search every folder from one search field ([836b575](https://github.com/postalsys/inbox-classic/commit/836b5758400cfc409c2b34656a726f34d41c1eaa))
+* the default mail app for mailto: links ([9742fb5](https://github.com/postalsys/inbox-classic/commit/9742fb545db7e29c01b6fb207578b16111bcb809))
+* Unsubscribe from mailing lists ([86d5e98](https://github.com/postalsys/inbox-classic/commit/86d5e98be54ee842b920c193c3c5413d2c28835c))
+
 ## [0.3.0](https://github.com/postalsys/inbox-classic/compare/v0.2.0...v0.3.0) (2026-11-03)
 
 
