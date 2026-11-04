@@ -19,9 +19,13 @@ RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-too
     && cargo install --locked cargo-deb@3.8.0 \
     && chmod -R a+rwX /opt/rustup /opt/cargo
 
-# Node 24 for ImapKit (core/e2e), from nodejs.org
+# Node 24 for ImapKit (core/e2e), from nodejs.org. Unpacked with bsdtar: GNU tar fails to create its files
+# ("Function not implemented") in an amd64 image under Rosetta
 ARG NODE_VERSION=24.11.1
-RUN arch=$(dpkg --print-architecture | sed 's/amd64/x64/') \
+RUN apt-get update && apt-get install -y --no-install-recommends libarchive-tools && rm -rf /var/lib/apt/lists/* \
+    && arch=$(dpkg --print-architecture | sed 's/amd64/x64/') \
     && mkdir -p /opt/node \
-    && curl -sSfL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${arch}.tar.xz" \
-        | tar -xJ -C /opt/node --strip-components=1
+    && curl -sSfL -o /tmp/node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${arch}.tar.xz" \
+    && bsdtar -xf /tmp/node.tar.xz -C /opt/node --strip-components 1 \
+    && rm /tmp/node.tar.xz \
+    && node --version

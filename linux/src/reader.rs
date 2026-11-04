@@ -328,6 +328,7 @@ impl Reader {
     }
 
     /// Whether the bar of blocked pictures is shown
+    #[cfg(feature = "e2e")]
     pub fn pictures_blocked(&self) -> bool {
         self.pictures.is_visible()
     }
