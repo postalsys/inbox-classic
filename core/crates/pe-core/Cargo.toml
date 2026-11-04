@@ -23,9 +23,19 @@ pe-sync = { path = "../pe-sync" }
 resvg = { version = "0.49", default-features = false }
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "macros"] }
 
-[target.'cfg(windows)'.dependencies]
+[target.'cfg(any(windows, target_os = "macos", target_os = "linux"))'.dependencies]
 keyring-core = "1.0.1"
+
+[target.'cfg(windows)'.dependencies]
 windows-native-keyring-store = "1.1.0"
+
+# the login keychain
+[target.'cfg(target_os = "macos")'.dependencies]
+apple-native-keyring-store = { version = "1.0.2", default-features = false, features = ["keychain"] }
+
+# the Secret Service (GNOME Keyring) over D-Bus, pure Rust (zbus on its own async-io thread, so the blocking calls work inside the tokio runtime too), no libdbus
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus-secret-service-keyring-store = { version = "1.0.1", default-features = false, features = ["rt-async-io-crypto-rust"] }
 
 [dev-dependencies]
 base64.workspace = true

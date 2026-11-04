@@ -1,0 +1,228 @@
+# Every command of the main window, once for the three platforms. pe-ffi's build.rs turns it into
+#   core/include/commands.h          the IDM_ ids of the Windows app (app/src/app.h includes it)
+#   mac/Sources/Generated/Commands.swift   the Mac's Command enum with its menu, label and key
+#   linux/src/generated/commands.rs  the Linux Command enum with its action name, label and accelerator
+# All three are committed and CI checks they match this file. Each window handles the enum in one exhaustive switch
+# or match, so a command added here fails the build of a platform that does not handle it yet.
+#
+#   id       the name in code (snake_case here, IDM_NEW_ACCOUNT in C, newAccount in Swift, NewAccount in Rust)
+#   windows  the Win32 command id, which scripts/ui-e2e.ps1 posts as the menu would
+#   menu     file, edit, view, tools, message, help, or tray (the tray icon's menu only)
+#   label    as the menu shows it, without Windows' & accelerators (the Windows menus keep their own text)
+#   key      the shortcut: Mod is Ctrl on Windows and Linux and Command on the Mac; Shift, Alt (Option on the Mac);
+#            a letter, F1 to F12, Enter, Delete. mac and linux override it where those platforms differ.
+#   toggle   a menu item with a check mark
+
+[[command]]
+id = "new_account"
+windows = 100
+menu = "file"
+label = "New Account..."
+
+[[command]]
+id = "exit"
+windows = 101
+menu = "file"
+label = "Exit"
+mac = "Mod+Q"
+
+[[command]]
+id = "sync"
+windows = 102
+menu = "tools"
+label = "Send and Receive All"
+key = "F5"
+mac = "Mod+Shift+N"
+
+[[command]]
+id = "mark_read"
+windows = 103
+menu = "edit"
+label = "Mark as Read"
+key = "Mod+Q"
+mac = "Mod+Shift+U"
+
+[[command]]
+id = "mark_unread"
+windows = 104
+menu = "edit"
+label = "Mark as Unread"
+
+[[command]]
+id = "pictures"
+windows = 105
+menu = "view"
+label = "Download Pictures"
+
+[[command]]
+id = "about"
+windows = 106
+menu = "help"
+label = "About Inbox Classic"
+
+[[command]]
+id = "new_mail"
+windows = 107
+menu = "message"
+label = "New Message"
+key = "Mod+N"
+
+[[command]]
+id = "reply"
+windows = 108
+menu = "message"
+label = "Reply to Sender"
+key = "Mod+R"
+
+[[command]]
+id = "reply_all"
+windows = 109
+menu = "message"
+label = "Reply to All"
+key = "Mod+Shift+R"
+
+[[command]]
+id = "forward"
+windows = 110
+menu = "message"
+label = "Forward"
+key = "Mod+F"
+mac = "Mod+Shift+F"
+
+[[command]]
+id = "help"
+windows = 111
+menu = "help"
+label = "Contents"
+key = "F1"
+mac = "Mod+Shift+/"
+
+[[command]]
+id = "delete"
+windows = 112
+menu = "edit"
+label = "Delete Message"
+key = "Delete"
+mac = "Mod+Delete"
+
+[[command]]
+id = "move"
+windows = 113
+menu = "edit"
+label = "Move to Folder..."
+key = "Mod+Shift+V"
+
+[[command]]
+id = "flag"
+windows = 114
+menu = "message"
+label = "Flag Message"
+mac = "Mod+Shift+L"
+
+[[command]]
+id = "new_folder"
+windows = 115
+menu = "file"
+label = "New Folder..."
+
+[[command]]
+id = "rename_folder"
+windows = 116
+menu = "file"
+label = "Rename Folder..."
+
+[[command]]
+id = "delete_folder"
+windows = 117
+menu = "file"
+label = "Delete Folder"
+
+[[command]]
+id = "accounts"
+windows = 118
+menu = "file"
+label = "Accounts..."
+
+[[command]]
+id = "find"
+windows = 120
+menu = "edit"
+label = "Find Message"
+key = "Mod+Shift+F"
+mac = "Mod+F"
+
+[[command]]
+id = "save_as"
+windows = 121
+menu = "file"
+label = "Save As..."
+key = ""
+mac = "Mod+Shift+S"
+
+[[command]]
+id = "print"
+windows = 122
+menu = "file"
+label = "Print..."
+key = "Mod+P"
+
+[[command]]
+id = "import"
+windows = 123
+menu = "file"
+label = "Import Messages..."
+
+[[command]]
+id = "outbox"
+windows = 124
+menu = "tools"
+label = "Outbox..."
+
+[[command]]
+id = "properties"
+windows = 125
+menu = "file"
+label = "Properties"
+key = "Alt+Enter"
+mac = "Mod+Alt+U"
+
+[[command]]
+id = "mark_all_read"
+windows = 126
+menu = "edit"
+label = "Mark All Read"
+key = "Mod+Shift+A"
+mac = "Mod+Alt+Shift+A"
+
+[[command]]
+id = "junk"
+windows = 127
+menu = "message"
+label = "Mark as Junk"
+key = "Mod+J"
+mac = "Mod+Shift+J"
+
+[[command]]
+id = "not_junk"
+windows = 128
+menu = "message"
+label = "Mark as Not Junk"
+
+[[command]]
+id = "notify"
+windows = 129
+menu = "tools"
+label = "Notify of New Mail"
+toggle = true
+
+[[command]]
+id = "open"
+windows = 130
+menu = "tray"
+label = "Open Inbox Classic"
+
+[[command]]
+id = "default_app"
+windows = 131
+menu = "tools"
+label = "Make Default Mail App..."

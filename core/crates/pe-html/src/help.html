@@ -161,7 +161,7 @@
                 The box at the bottom says how to register a client there and the redirect URI to register; <b>Copy</b> copies it.
             </li>
             <li>
-                Type the client ID, and the client secret if the provider gave you one (it is kept in the Windows Credential Manager, never shown again).
+                Type the client ID, and the client secret if the provider gave you one (it is kept in <!--os:windows-->the Windows Credential Manager<!--/os--><!--os:mac-->your keychain<!--/os--><!--os:linux-->your keyring<!--/os-->, never shown again).
                 <b>Check</b> reads the provider's settings to see that the issuer is right; <b>OK</b> does that too before saving.
             </li>
             <li>Add the account with <b>More sign-in options</b> on the first page of <b>File &gt; New Account</b>.</li>
@@ -298,7 +298,7 @@
         <p>
             When a message has attachments, a paper clip with the number of files appears at the right of the message header. Click it and choose a file to save
             it, or <b>Save Attachments</b> to save them all into a folder (a file of the same name already there is kept, and the new one gets a number). Files
-            are saved, never opened from Inbox Classic. It suggests a safe file name: folder names, characters Windows does not allow and characters that can
+            are saved, never opened from Inbox Classic. It suggests a safe file name: folder names, characters <!--os:windows-->Windows does<!--/os--><!--os:mac,linux-->Windows and other systems do<!--/os--> not allow and characters that can
             make a name look different from what it is are removed.
         </p>
         <div class="note">
@@ -325,7 +325,7 @@
             <li><b>Create Mail</b> (<kbd>Ctrl</kbd>+<kbd>N</kbd>) starts a new message from the account of the selected folder.</li>
             <li>
                 <b>Cc</b> and <b>Bcc</b> appear only when they have someone in them; the <b>Cc</b> and <b>Bcc</b> buttons at the end of the <b>To</b> line
-                (<kbd>Alt</kbd>+<kbd>C</kbd>, <kbd>Alt</kbd>+<kbd>B</kbd>) open them. The <b>Attach</b> line appears once a file is attached.
+                <!--os:windows,linux-->(<kbd>Alt</kbd>+<kbd>C</kbd>, <kbd>Alt</kbd>+<kbd>B</kbd>) <!--/os-->open them. The <b>Attach</b> line appears once a file is attached.
             </li>
             <li>
                 You always write with formatting at hand. A message without any (no bold, colors, lists, links or pictures) goes as plain text, which every mail
@@ -350,7 +350,7 @@
                 The bar above the text formats it: the font and its size, <b>B</b>old, <b>I</b>talic, <b>U</b>nderline (or <kbd>Ctrl</kbd>+<kbd>B</kbd>,
                 <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd>), <b>Color</b>, numbered and bulleted lists, less and more indent (<b>&laquo;</b> and
                 <b>&raquo;</b>), alignment, <b>Link</b> for a web address on the selected text, <b>Line</b> for a dividing line and <b>Picture</b> to put a
-                picture in the text (or drag a picture file from Explorer into the text: it goes where you drop it). Pictures go inside the message, not as
+                picture in the text (or drag a picture file from <!--os:windows-->Explorer<!--/os--><!--os:mac-->the Finder<!--/os--><!--os:linux-->the file manager<!--/os--> into the text: it goes where you drop it). Pictures go inside the message, not as
                 separate attachments. The message goes as formatted HTML with a plain text copy for mail programs that show only text.
             </li>
             <li>
@@ -366,7 +366,7 @@
             </li>
             <li>People in <b>Bcc</b> get the message, but the other recipients do not see them.</li>
             <li>
-                <b>Attach</b> adds files, and so does dragging them from Explorer onto the address fields, or a file that is not a picture onto the text. They
+                <b>Attach</b> adds files, and so does dragging them from <!--os:windows-->Explorer<!--/os--><!--os:mac-->the Finder<!--/os--><!--os:linux-->the file manager<!--/os--> onto the address fields, or a file that is not a picture onto the text. They
                 are listed in the <b>Attach</b> row with their size; to take one off, select it and press <kbd>Delete</kbd>, or right-click it and choose
                 <b>Remove</b>. The files are read when the message is sent.
             </li>
@@ -383,8 +383,8 @@
                 saving again replaces the copy saved before. The status bar of the message says <i>Saved in Drafts</i> with the time once the server has it, or
                 why it was not saved. Closing a message with changes asks whether to save them: <b>Yes</b> saves it in Drafts, <b>No</b> throws it away,
                 <b>Cancel</b> goes back to it. To go on writing, double-click the draft in Drafts (or select it and press <kbd>Enter</kbd>): it opens with its
-                recipients, text and attached files. Once it is sent, the draft is removed from Drafts. A message you write is a window of its own on the
-                taskbar: you can go back to the main window and read mail while it stays open. Closing Inbox Classic first closes the messages you are writing,
+                recipients, text and attached files. Once it is sent, the draft is removed from Drafts. A message you write is a window of its own<!--os:windows--> on the
+                taskbar<!--/os-->: you can go back to the main window and read mail while it stays open. Closing Inbox Classic first closes the messages you are writing,
                 asking about those with changes.
             </li>
             <li>
@@ -393,7 +393,7 @@
             </li>
             <li>
                 <b>E-mail links</b> (<code>mailto:</code>) on web pages and in other programs open a new message in Inbox Classic once it is your default mail
-                app: <b>Tools &gt; Make Default Mail App</b> opens the page of Windows Settings where you choose it. The link's addresses, subject and text are
+                app: <b>Tools &gt; Make Default Mail App</b> <!--os:windows-->opens the page of Windows Settings where you choose it.<!--/os--><!--os:mac,linux-->makes it the one.<!--/os--> The link's addresses, subject and text are
                 filled in; nothing else of the link is used.
             </li>
             <li>
@@ -417,14 +417,21 @@
         </p>
         <p>
             It also watches the Inbox of each account, so new mail shows up as it arrives, not only at the next check. While its window is not in front, a
-            Windows notification says who wrote and about what; click it to open the message. <b>Tools &gt; Notify of New Mail</b> turns the notifications off
+            notification says who wrote and about what; click it to open the message. <b>Tools &gt; Notify of New Mail</b> turns the notifications off
             and on.
         </p>
-        <p>
+        <!--os:windows--><p>
             Closing the window keeps Inbox Classic running in the notification area, where it goes on checking mail; its icon there says how many messages are
             unread, and so does a count on its taskbar button. Click the icon to open it again; right-click it for <b>Check for New Mail</b> and <b>Exit</b>.
             <b>File &gt; Exit</b> ends it.
-        </p>
+        </p><!--/os--><!--os:mac--><p>
+            Closing the window keeps Inbox Classic running in the Dock, where it goes on checking mail; the Dock icon shows how many messages are unread in
+            the Inboxes. Click the Dock icon to open the window again. <b>Inbox Classic &gt; Quit Inbox Classic</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd>) ends it.
+        </p><!--/os--><!--os:linux--><p>
+            Closing the window keeps Inbox Classic running in the top bar (Ubuntu shows its icon there), where it goes on checking mail; the icon's menu has
+            <b>Open Inbox Classic</b>, <b>Check for New Mail</b> and <b>Quit</b>, and the dock shows how many messages are unread in the Inboxes. Where the
+            desktop has no place for the icon, closing the window ends Inbox Classic. <b>Quit</b> in the main menu (<kbd>Ctrl</kbd>+<kbd>Q</kbd>) ends it.
+        </p><!--/os-->
 
         <h2>6. Keyboard shortcuts</h2>
         <table>
@@ -543,19 +550,21 @@
         <h2>8. Where your mail and passwords are kept</h2>
         <ul>
             <li>
-                Downloaded mail and account settings: <code>%LOCALAPPDATA%\InboxClassic\store.db</code>. Your mail stays on the server too; the copy here is for
+                Downloaded mail and account settings: <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Your mail stays on the server too; the copy here is for
                 reading quickly and offline.
             </li>
             <li>
-                Passwords, browser sign-ins and the client secrets of sign-in apps: the Windows Credential Manager, under <b>Inbox Classic</b>. They are
-                encrypted for your Windows account.
+                Passwords, browser sign-ins and the client secrets of sign-in apps: <!--os:windows-->the Windows Credential Manager, under <b>Inbox Classic</b>. They are
+                encrypted for your Windows account.<!--/os--><!--os:mac-->your login keychain, under <b>InboxClassic</b> (Keychain Access shows them). They are
+                encrypted for your Mac account.<!--/os--><!--os:linux-->your keyring (GNOME Keyring, through the Secret Service), under <b>InboxClassic</b>. They
+                are encrypted for your login. Without a keyring they are kept until Inbox Classic quits.<!--/os-->
             </li>
-            <li>Uninstalling Inbox Classic asks whether to remove the mail it downloaded. The mail on your servers is never removed.</li>
+            <!--os:windows--><li>Uninstalling Inbox Classic asks whether to remove the mail it downloaded. The mail on your servers is never removed.</li><!--/os--><!--os:mac--><li>To remove Inbox Classic, quit it and move it to the Bin; the mail it downloaded stays in the folder above until you delete that too. The mail on your servers is never removed.</li><!--/os--><!--os:linux--><li>Removing the package (<code>sudo apt remove inbox-classic</code>) leaves the mail it downloaded in the folder above until you delete that too. The mail on your servers is never removed.</li><!--/os-->
         </ul>
         <p>
-            For testing, <code>InboxClassic.exe --store &lt;file&gt;</code> uses another mail store, <code>--memory-passwords</code> keeps passwords for the
+            For testing, <!--os:windows--><code>InboxClassic.exe<!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"<!--/os--><!--os:linux--><code>inbox-classic<!--/os--> --store &lt;file&gt;</code> uses another mail store, <code>--memory-passwords</code> keeps passwords for the
             current run only, <code>--pin-certificate &lt;file&gt;</code> accepts only the server certificate in that file (PEM or DER) instead of the ones
-            Windows trusts, for a test server with a self-signed certificate, and <code>--sign-in-page-file &lt;file&gt;</code> writes the page of a browser
+            the system trusts, for a test server with a self-signed certificate, and <code>--sign-in-page-file &lt;file&gt;</code> writes the page of a browser
             sign-in to that file instead of opening the browser.
         </p>
     </body>

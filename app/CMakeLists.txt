@@ -34,7 +34,6 @@ if(NOT EXISTS ${WEBVIEW2_DIR}/build/native/include/WebView2.h)
     file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/webview2.nupkg DESTINATION ${WEBVIEW2_DIR})
 endif()
 
-set_property(SOURCE res/app.rc APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/res/help.html)
 
 add_executable(InboxClassic WIN32
     src/main.cpp

@@ -519,6 +519,21 @@ char *pe_html_render(const uint8_t *html,
                      size_t len,
                      bool allow_remote_images);
 
+// The user help for `platform` (`windows`, `mac` or `linux`; NULL is the platform this was built for): one page
+// for every platform, with the parts of the others left out. Free with `pe_string_free`.
+//
+// # Safety
+// `platform` must be NULL or a NUL-terminated string.
+char *pe_help_page(const char *platform);
+
+// The WebKit content rules (WKContentRuleList JSON) of a web view that shows the core's documents: every load
+// blocked but the app's own `inboxclassic:` documents, `cid:` and `data:`, and with `allow_remote_images` the
+// message's pictures from the internet. Free with `pe_string_free`.
+char *pe_webkit_content_rules(bool allow_remote_images);
+
+// A size as the windows show it (`512 bytes`, `13 KB`, `2.4 MB`). Free with `pe_string_free`.
+char *pe_format_size(uint64_t bytes);
+
 // The page of the Print window for a message document of the core (`PeMessageInfo.document`): the same document
 // with the core's own script that says "done" once the print preview is closed. NULL for a document
 // that is not one of the core's. Free with `pe_string_free`.

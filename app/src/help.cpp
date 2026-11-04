@@ -1,24 +1,22 @@
-// The help window: res/help.html, built into the exe, shown in a WebView2 like a message (scripts off, links
+// The help window: the core's help page (pe_help_page, core/crates/pe-html/src/help.html), shown in a WebView2 like a message (scripts off, links
 // opened in the browser). One window; F1 again brings it to the front.
 #include "app.h"
 
 namespace {
 
 const wchar_t* kHelpClass = L"InboxClassicHelp";
-constexpr int IDR_HELP = 2;
 
 HWND g_help = nullptr;
 HWND g_host = nullptr;  // the parent of the preview, it shows why when WebView2 cannot start
 Preview* g_preview = nullptr;
 
 std::wstring HelpDocument() {
-    HRSRC found = FindResourceW(nullptr, MAKEINTRESOURCEW(IDR_HELP), MAKEINTRESOURCEW(10));  // RT_RCDATA
-    HGLOBAL loaded = found ? LoadResource(nullptr, found) : nullptr;
-    const char* data = loaded ? static_cast<const char*>(LockResource(loaded)) : nullptr;
-    if (!data) {
+    // one help for every platform, the core leaves out the parts of the others
+    core::String page(pe_help_page("windows"));
+    if (!page) {
         return L"<p>The help is missing from this copy of Inbox Classic.</p>";
     }
-    return core::Widen(std::string_view(data, SizeofResource(nullptr, found)));
+    return core::Widen(page.get());
 }
 
 void Layout(HWND hwnd) {

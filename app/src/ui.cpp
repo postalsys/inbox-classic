@@ -187,15 +187,9 @@ std::wstring TimeNow() {
 }
 
 std::wstring FormatSize(uint64_t bytes) {
-    if (bytes < 1024) {
-        return std::to_wstring(bytes) + L" bytes";
-    }
-    if (bytes < 1024 * 1024) {
-        return std::to_wstring((bytes + 1023) / 1024) + L" KB";
-    }
-    wchar_t text[32];
-    swprintf_s(text, L"%.1f MB", static_cast<double>(bytes) / (1024.0 * 1024.0));
-    return text;
+    // the same words on every platform: the core makes them
+    core::String text(pe_format_size(bytes));
+    return Text(text.get());
 }
 
 LRESULT ButtonFaceColor(HDC dc) {

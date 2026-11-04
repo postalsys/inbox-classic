@@ -558,6 +558,8 @@ struct Arguments {
     std::wstring store;
     std::wstring certificate;
     bool memoryPasswords = false;
+    // --version: print it and exit
+    bool version = false;
     // a mailto: link Windows hands the default mail program, a new message to write
     std::wstring mailto;
 };
@@ -596,6 +598,8 @@ void ReadArguments() {
             SetSignInPageFile(argv[++i]);
         } else if (arg == L"--memory-passwords") {
             g_arguments.memoryPasswords = true;
+        } else if (arg == L"--version") {
+            g_arguments.version = true;
         }
     }
     LocalFree(argv);
@@ -1119,6 +1123,14 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         return 1;
     }
     ReadArguments();
+    // the version to standard output (redirected when a script runs it: the release's boot test), no window
+    if (g_arguments.version) {
+        std::string text = "Inbox Classic " + std::string(pe_version()) + "\n";
+        DWORD written = 0;
+        WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
+        CoUninitialize();
+        return 0;
+    }
     // the app is open already for this mail store: it takes the link, or comes to the front
     if (HandOver()) {
         CoUninitialize();

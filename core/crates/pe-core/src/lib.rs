@@ -16,6 +16,7 @@ mod requests;
 mod search;
 mod secrets;
 mod sign_in_apps;
+mod text;
 pub mod unsubscribe;
 mod view;
 mod worker;
@@ -39,6 +40,7 @@ pub use secrets::PasswordStore;
 use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
+pub use text::format_size;
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Worker};
 

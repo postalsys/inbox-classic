@@ -1,5 +1,5 @@
-//! The passwords of the accounts (and the client secrets of sign-in apps): kept in memory while the app runs, and on
-//! Windows in the Credential Manager between runs, so the user gives a password once. The credentials are named
+//! The passwords of the accounts (and the client secrets of sign-in apps): kept in memory while the app runs, and in
+//! the system's password store between runs (the Credential Manager, the keychain, the Secret Service), so the user gives a password once. The credentials are named
 //! after the store's profile ID and the account or app, so two stores on one machine (the app's, a test's) never
 //! share one.
 
@@ -24,7 +24,7 @@ impl From<AccountId> for Key {
 /// Where passwords are kept between runs
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum PasswordStore {
-    /// The Windows Credential Manager; memory only on other systems
+    /// The Credential Manager on Windows, the login keychain on the Mac, the Secret Service on Linux
     #[default]
     System,
     /// Memory only: the user gives them again on the next run (tests, a shared computer)
@@ -38,27 +38,49 @@ trait Backend: Send + Sync {
     fn remove(&self, key: Key);
 }
 
-#[cfg(windows)]
-mod windows {
+/// The system's own password store: the Credential Manager on Windows, the login keychain on the Mac, the Secret
+/// Service (GNOME Keyring) on Linux, all through keyring-core
+#[cfg(any(windows, target_os = "macos", target_os = "linux"))]
+mod native {
     use std::sync::Arc;
 
     use keyring_core::api::CredentialStoreApi;
 
     use super::Key;
 
-    /// The Credential Manager, generic credentials named `InboxClassic` / `<profile>/<account>` (or
-    /// `<profile>/app/<app>`)
-    pub(super) struct CredentialManager {
-        store: Arc<windows_native_keyring_store::Store>,
+    /// Credentials named `InboxClassic` / `<profile>/<account>` (or `<profile>/app/<app>`)
+    pub(super) struct NativeStore {
+        store: Arc<dyn CredentialStoreApi + Send + Sync>,
         profile: String,
     }
 
-    impl CredentialManager {
-        pub(super) fn new(profile: String) -> Result<CredentialManager, String> {
-            Ok(CredentialManager {
-                store: windows_native_keyring_store::Store::new().map_err(|e| e.to_string())?,
-                profile,
-            })
+    /// What the store is called in messages to the user
+    #[cfg(windows)]
+    const NAME: &str = "the Credential Manager";
+    #[cfg(target_os = "macos")]
+    const NAME: &str = "the keychain";
+    #[cfg(target_os = "linux")]
+    const NAME: &str = "the system keyring (Secret Service)";
+
+    #[cfg(windows)]
+    fn open() -> keyring_core::Result<Arc<dyn CredentialStoreApi + Send + Sync>> {
+        Ok(windows_native_keyring_store::Store::new()?)
+    }
+
+    #[cfg(target_os = "macos")]
+    fn open() -> keyring_core::Result<Arc<dyn CredentialStoreApi + Send + Sync>> {
+        Ok(apple_native_keyring_store::keychain::Store::new()?)
+    }
+
+    #[cfg(target_os = "linux")]
+    fn open() -> keyring_core::Result<Arc<dyn CredentialStoreApi + Send + Sync>> {
+        Ok(zbus_secret_service_keyring_store::Store::new()?)
+    }
+
+    impl NativeStore {
+        pub(super) fn new(profile: String) -> Result<NativeStore, String> {
+            let store = open().map_err(|e| format!("{NAME} is not available: {e}"))?;
+            Ok(NativeStore { store, profile })
         }
 
         fn entry(&self, key: Key) -> Option<keyring_core::Entry> {
@@ -70,13 +92,13 @@ mod windows {
         }
     }
 
-    impl super::Backend for CredentialManager {
+    impl super::Backend for NativeStore {
         fn load(&self, key: Key) -> Option<String> {
             self.entry(key)?.get_password().ok()
         }
 
         fn save(&self, key: Key, password: &str) -> Result<(), String> {
-            let entry = self.entry(key).ok_or("the Credential Manager is not available")?;
+            let entry = self.entry(key).ok_or_else(|| format!("{NAME} is not available"))?;
             entry.set_password(password).map_err(|e| e.to_string())
         }
 
@@ -106,15 +128,15 @@ pub(crate) struct Secrets {
 impl Secrets {
     /// Passwords kept as `kind` says, for the store with this profile ID
     pub(crate) fn new(kind: PasswordStore, profile: &str) -> Secrets {
-        #[cfg(windows)]
+        #[cfg(any(windows, target_os = "macos", target_os = "linux"))]
         let (backend, unavailable): (Option<Arc<dyn Backend>>, _) = match kind {
-            PasswordStore::System => match windows::CredentialManager::new(profile.to_string()) {
+            PasswordStore::System => match native::NativeStore::new(profile.to_string()) {
                 Ok(backend) => (Some(Arc::new(backend)), None),
                 Err(error) => (None, Some(error)),
             },
             PasswordStore::Memory => (None, None),
         };
-        #[cfg(not(windows))]
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         let (backend, unavailable): (Option<Arc<dyn Backend>>, Option<String>) = {
             let _ = (kind, profile);
             (None, None)
@@ -202,10 +224,16 @@ mod tests {
         assert_eq!(secrets.get(Key::App(1)), None);
     }
 
-    /// The Credential Manager keeps a password between runs, under the profile of the store
-    #[cfg(windows)]
+    /// The system's store keeps a password between runs, under the profile of the store. On Windows always (the
+    /// Credential Manager of the test user); on the Mac and Linux only with PE_KEYRING_TESTS=1, as it writes to the
+    /// keychain or the keyring of whoever runs it, which may ask them first
+    #[cfg(any(windows, target_os = "macos", target_os = "linux"))]
     #[test]
-    fn credential_manager() {
+    fn system_store() {
+        if !cfg!(windows) && std::env::var_os("PE_KEYRING_TESTS").is_none() {
+            eprintln!("skipping: set PE_KEYRING_TESTS=1 to use the keychain or the keyring");
+            return;
+        }
         let profile = format!("test-{}", std::process::id());
         let first = Secrets::new(PasswordStore::System, &profile);
         if let Err(error) = first.set(7, "kept between runs") {

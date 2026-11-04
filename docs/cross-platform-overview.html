@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inbox Classic on Mac and Linux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column of 72rem, wide tables and the diagram scroll inside their own boxes. */
+:root {
+    --bg: #f3f4f8;
+    --surface: #ffffff;
+    --fg: #1a1e2a;
+    --muted: #5b6273;
+    --line: #d7dbe5;
+    --accent: #0a246a;
+    --accent-ink: #ffffff;
+    --soft: #e7ebf6;
+    --win: #1b4fa8;
+    --mac: #4d5166;
+    --linux: #bf4418;
+    --gate: #1f7a3f;
+    --display: "IBM Plex Sans Condensed", "Helvetica Neue", Arial, sans-serif;
+    --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #11141b;
+        --surface: #191d26;
+        --fg: #e5e8ef;
+        --muted: #9ba3b5;
+        --line: #2a3040;
+        --accent: #8fb1ff;
+        --accent-ink: #0b1430;
+        --soft: #1f2636;
+        --win: #7ea5f0;
+        --mac: #b3b8cc;
+        --linux: #f08a5e;
+        --gate: #5fc786;
+        color-scheme: dark;
+    }
+}
+:root[data-theme="dark"] {
+    --bg: #11141b;
+    --surface: #191d26;
+    --fg: #e5e8ef;
+    --muted: #9ba3b5;
+    --line: #2a3040;
+    --accent: #8fb1ff;
+    --accent-ink: #0b1430;
+    --soft: #1f2636;
+    --win: #7ea5f0;
+    --mac: #b3b8cc;
+    --linux: #f08a5e;
+    --gate: #5fc786;
+    color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { font-size: 16px; }
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    line-height: 1.55;
+    padding-block: 2.5rem 4rem;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 72rem; margin: 0 auto; display: grid; gap: 3rem; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); letter-spacing: -0.01em; }
+h2 { font-size: 1.55rem; }
+h3 { font-size: 1.1rem; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+code { background: var(--soft); padding: 0.05em 0.35em; border-radius: 3px; }
+.eyebrow { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 1.25rem; }
+.lede { font-size: 1.12rem; max-width: 64ch; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
+.stat { border-top: 3px solid var(--accent); padding-top: 0.6rem; }
+.stat b { display: block; font-family: var(--display); font-size: 2rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { color: var(--muted); font-size: 0.95rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1.1rem 1.2rem; display: grid; gap: 0.6rem; align-content: start; min-width: 0; }
+.card h3 { display: flex; align-items: center; gap: 0.5rem; }
+.dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; flex: none; }
+.dot.win { background: var(--win); } .dot.mac { background: var(--mac); } .dot.linux { background: var(--linux); }
+.card ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.3rem; font-size: 0.95rem; }
+.card .note { color: var(--muted); font-size: 0.9rem; }
+/* grid children would otherwise grow to their content's minimum width and push the page wider than the viewport */
+.tablewrap, .diagram, .timeline { min-width: 0; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { text-align: left; vertical-align: top; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--line); min-width: 9rem; }
+th { font-family: var(--display); font-weight: 600; font-size: 0.95rem; background: var(--soft); white-space: nowrap; }
+th:first-child, td:first-child { min-width: 11rem; }
+tr:last-child td { border-bottom: 0; }
+td.win { color: var(--win); } td.mac { color: var(--mac); } td.linux { color: var(--linux); }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1rem; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; max-width: 100%; height: auto; min-width: 640px; font-family: var(--body); }
+.timeline { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1rem; overflow-x: auto; }
+.tl { display: grid; grid-template-columns: 11rem repeat(14, minmax(2.6rem, 1fr)); gap: 0.35rem 0; min-width: 48rem; font-size: 0.85rem; align-items: center; }
+.tl .month { grid-row: 1; text-align: center; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 0.3rem; margin-bottom: 0.3rem; }
+.tl .label { grid-column: 1; padding-right: 0.8rem; color: var(--fg); }
+.tl .bar { height: 1.45rem; border-radius: 3px; color: #fff; font-family: var(--mono); font-size: 0.72rem; display: flex; align-items: center; padding: 0 0.5rem; white-space: nowrap; overflow: hidden; }
+.bar.core { background: var(--accent); color: var(--accent-ink); }
+.bar.mac { background: var(--mac); } .bar.linux { background: var(--linux); } .bar.sync { background: var(--gate); }
+.rules { display: grid; gap: 0.8rem; counter-reset: rule; padding: 0; margin: 0; list-style: none; }
+.rules li { display: grid; grid-template-columns: 2.2rem 1fr; gap: 0.6rem; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 0.8rem 1rem; }
+.rules li::before { counter-increment: rule; content: counter(rule); font-family: var(--display); font-size: 1.3rem; font-weight: 600; color: var(--accent); line-height: 1.2; }
+.rules b { font-weight: 600; }
+.rules .gate { display: inline-block; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gate); border: 1px solid var(--gate); border-radius: 3px; padding: 0 0.4rem; margin-left: 0.4rem; vertical-align: middle; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem; }
+.plain { padding-left: 1.1rem; margin: 0; display: grid; gap: 0.4rem; }
+dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 0.3rem 1rem; font-size: 0.95rem; }
+dt { font-family: var(--mono); font-size: 0.82rem; color: var(--muted); padding-top: 0.15rem; }
+dd { margin: 0; }
+footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+@media (max-width: 560px) { dl { grid-template-columns: 1fr; } dt { padding-top: 0.4rem; } }
+@media (prefers-reduced-motion: no-preference) { a:focus-visible, li:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } }
+</style>
+</head>
+<body>
+<main>
+
+<header style="display:grid; gap:1.2rem">
+    <div class="eyebrow">Plan, 2026-11-04, from version 0.4.1, decisions confirmed</div>
+    <h1>Inbox Classic on Mac and Linux</h1>
+    <p class="lede">A Mac version and a Linux version are possible, and most of the work is already done: everything that handles mail lives in the Rust core, which builds and passes its tests on all three systems today. Each new platform needs a native shell of about the size of the Windows one, a password backend, a build and release path, and, once there are three shells, a way to keep them in step. The full plan is in <code>docs/cross-platform-plan.md</code>.</p>
+    <div class="stats">
+        <div class="stat"><b>47,600</b><span>lines of Rust in the core, shared unchanged</span></div>
+        <div class="stat"><b>8,600</b><span>lines of C++ in the Windows shell, the size each new shell will be</span></div>
+        <div class="stat"><b>2 weeks</b><span>of core work before either shell starts</span></div>
+        <div class="stat"><b>6 months</b><span>one developer, Mac first, then Linux; 4 with a second developer on Linux</span></div>
+    </div>
+</header>
+
+<section>
+    <h2>One core, three shells</h2>
+    <p>The core is the only place that parses anything a remote party wrote. A shell draws, wires and calls; it never derives. The Windows shell talks to the core through the C ABI of <code>pe-ffi</code>, the Mac shell does the same from Swift, and the Linux shell, being Rust, links <code>pe-core</code> directly.</p>
+    <div class="diagram">
+        <svg viewBox="0 0 960 400" role="img" aria-label="Three shells above one Rust core">
+            <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/>
+                </marker>
+            </defs>
+            <!-- shells -->
+            <g font-size="14">
+                <rect x="20" y="20" width="290" height="118" rx="6" fill="var(--surface)" stroke="var(--win)" stroke-width="2"/>
+                <text x="36" y="48" fill="var(--win)" font-weight="600" font-size="16">Windows, as today</text>
+                <text x="36" y="72" fill="var(--fg)">C++, Win32 controls, classic look</text>
+                <text x="36" y="94" fill="var(--fg)">WebView2 for the preview and the editor</text>
+                <text x="36" y="116" fill="var(--muted)">app/, 8,600 lines</text>
+
+                <rect x="335" y="20" width="290" height="118" rx="6" fill="var(--surface)" stroke="var(--mac)" stroke-width="2"/>
+                <text x="351" y="48" fill="var(--mac)" font-weight="600" font-size="16">macOS, new</text>
+                <text x="351" y="72" fill="var(--fg)">Swift, AppKit, native look</text>
+                <text x="351" y="94" fill="var(--fg)">WKWebView for the preview and the editor</text>
+                <text x="351" y="116" fill="var(--muted)">mac/, about the same size</text>
+
+                <rect x="650" y="20" width="290" height="118" rx="6" fill="var(--surface)" stroke="var(--linux)" stroke-width="2"/>
+                <text x="666" y="48" fill="var(--linux)" font-weight="600" font-size="16">Linux, new</text>
+                <text x="666" y="72" fill="var(--fg)">Rust, GTK 4 and libadwaita, native look</text>
+                <text x="666" y="94" fill="var(--fg)">WebKitGTK 6.0 for the preview and the editor</text>
+                <text x="666" y="116" fill="var(--muted)">linux/, about the same size</text>
+            </g>
+            <!-- connectors -->
+            <g stroke="var(--muted)" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+                <path d="M165 138 V 206"/>
+                <path d="M480 138 V 206"/>
+                <path d="M795 138 V 206"/>
+            </g>
+            <g font-size="12" font-family="var(--mono)" fill="var(--muted)">
+                <rect x="100" y="160" width="130" height="22" rx="3" fill="var(--bg)"/>
+                <text x="165" y="175" text-anchor="middle">C ABI, pe-ffi</text>
+                <rect x="415" y="160" width="130" height="22" rx="3" fill="var(--bg)"/>
+                <text x="480" y="175" text-anchor="middle">C ABI, pe-ffi</text>
+                <rect x="725" y="160" width="140" height="22" rx="3" fill="var(--bg)"/>
+                <text x="795" y="175" text-anchor="middle">Rust API, pe-core</text>
+            </g>
+            <!-- core -->
+            <rect x="20" y="208" width="920" height="118" rx="6" fill="var(--accent)"/>
+            <g fill="var(--accent-ink)" font-size="14">
+                <text x="36" y="236" font-weight="600" font-size="16">The Rust core, core/, 47,600 lines, unchanged</text>
+                <text x="36" y="262">pe-imap, pe-smtp, pe-mime, pe-html (sanitizer, CSP, editor page), pe-store (SQLite, FTS5 search), pe-sync,</text>
+                <text x="36" y="284">pe-oauth, pe-autoconfig (DNS over HTTPS), pe-content (folding), pe-net (rustls), pe-core (workers, events, view)</text>
+                <text x="36" y="310" opacity="0.8">New in Phase 0: Keychain and Secret Service password backends, WebKit content rules, help per platform, the command table</text>
+            </g>
+            <!-- platform backends -->
+            <g font-size="13" font-family="var(--mono)">
+                <rect x="20" y="346" width="290" height="36" rx="4" fill="var(--soft)"/>
+                <text x="165" y="369" text-anchor="middle" fill="var(--fg)">Credential Manager · Schannel roots</text>
+                <rect x="335" y="346" width="290" height="36" rx="4" fill="var(--soft)"/>
+                <text x="480" y="369" text-anchor="middle" fill="var(--fg)">Keychain · Security.framework roots</text>
+                <rect x="650" y="346" width="290" height="36" rx="4" fill="var(--soft)"/>
+                <text x="795" y="369" text-anchor="middle" fill="var(--fg)">Secret Service · system CA bundle</text>
+            </g>
+        </svg>
+    </div>
+</section>
+
+<section>
+    <h2>Targets</h2>
+    <p>Current releases only. Nothing older is supported, which keeps each shell on one toolkit version and one set of APIs.</p>
+    <div class="cards">
+        <div class="card">
+            <h3><span class="dot win"></span>Windows</h3>
+            <ul>
+                <li>Windows 10 and 11, as today</li>
+                <li>Nothing changes but the shared pieces: the command table, the help filter, <code>pe_format_size</code></li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3><span class="dot mac"></span>macOS</h3>
+            <ul>
+                <li>macOS 27 (2026-09-14, Apple silicon only), built with Xcode 27 on this Mac, which runs 26.6.2</li>
+                <li>Deployment target 26 until this Mac moves to 27; arm64 only, no universal binary</li>
+                <li>Swift 6.4, AppKit, WKWebView; Developer ID signing and notarization; Sparkle updates</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3><span class="dot linux"></span>Linux</h3>
+            <ul>
+                <li>Ubuntu 26.04 LTS and newer (26.10 is out), GNOME 50 on Wayland, x86_64 and arm64</li>
+                <li>GTK 4.22, libadwaita 1.9, WebKitGTK 2.52 (the 6.0 API), as 26.04.1 ships them</li>
+                <li>Rust with gtk4-rs, a <code>.deb</code> first, Flatpak second</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>The web views, locked down three ways</h2>
+    <p>The one real porting risk. WebView2 lets the C++ refuse every request on <code>*</code>; WebKit cannot intercept <code>https</code>, so the WebKit shells serve the documents from a custom scheme and block everything else with a content rule list, which the core generates once and Rust tests pin. The Mac spike in week 1 settles whether this holds, with a hostile test message that every platform's end-to-end test keeps checking.</p>
+    <div class="tablewrap">
+        <table>
+            <thead><tr><th>Need</th><th>WebView2 (today)</th><th>WKWebView</th><th>WebKitGTK 6.0</th></tr></thead>
+            <tbody>
+                <tr><td>Scripts off in the preview</td><td class="win"><code>IsScriptEnabled</code> false</td><td class="mac"><code>allowsContentJavaScript</code> false</td><td class="linux"><code>enable-javascript</code> false</td></tr>
+                <tr><td>Only the editor's own script</td><td class="win">nonce CSP, web messages</td><td class="mac">nonce CSP, <code>WKScriptMessageHandler</code> "host"</td><td class="linux">nonce CSP, <code>register_script_message_handler</code> "host"</td></tr>
+                <tr><td>Documents served from memory</td><td class="win"><code>WebResourceRequested</code> at <code>https://preview.inboxclassic.invalid/</code></td><td class="mac"><code>WKURLSchemeHandler</code> for <code>inboxclassic:</code> and <code>cid:</code></td><td class="linux"><code>register_uri_scheme</code> for the same two</td></tr>
+                <tr><td>Refuse http(s), ftp, file</td><td class="win">the same filter, images allowed per message</td><td class="mac"><code>WKContentRuleList</code> from the core's JSON, swapped per message</td><td class="linux"><code>UserContentFilterStore</code>, the same JSON</td></tr>
+                <tr><td>No navigation, no new windows</td><td class="win"><code>NavigationStarting</code>, <code>NewWindowRequested</code></td><td class="mac"><code>WKNavigationDelegate</code>, <code>WKUIDelegate</code></td><td class="linux"><code>decide-policy</code>, <code>create</code></td></tr>
+                <tr><td>Links in the browser</td><td class="win"><code>ShellExecute</code></td><td class="mac"><code>NSWorkspace.open</code></td><td class="linux"><code>gtk::UriLauncher</code></td></tr>
+                <tr><td>Nothing on disk, no dev tools</td><td class="win">settings</td><td class="mac"><code>nonPersistent()</code> data store</td><td class="linux">ephemeral <code>NetworkSession</code>, extras off</td></tr>
+                <tr><td>Files dropped on the editor</td><td class="win">the page posts WebView2 File objects</td><td class="mac">the window takes the drop first</td><td class="linux"><code>gtk::DropTarget</code> on the window</td></tr>
+                <tr><td>Print</td><td class="win">WebView2 print preview, <code>pe_print_page</code></td><td class="mac"><code>printOperation(with:)</code>, the system panel</td><td class="linux"><code>WebKitPrintOperation</code></td></tr>
+                <tr><td>Process isolation</td><td class="win">WebView2's</td><td class="mac">WebKit's sandboxed content process</td><td class="linux">the bubblewrap sandbox, on by default</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section>
+    <h2>Phases and schedule</h2>
+    <p>One developer. The Mac comes first: the larger market for a desktop mail client, and it is built on this machine. Linux can start right after Phase 0 if a second developer takes it.</p>
+    <div class="timeline">
+        <div class="tl">
+            <div class="label" style="grid-row:1"></div>
+            <div class="month" style="grid-column:2 / span 2">Nov 2026</div>
+            <div class="month" style="grid-column:4 / span 2">Dec</div>
+            <div class="month" style="grid-column:6 / span 2">Jan 2027</div>
+            <div class="month" style="grid-column:8 / span 2">Feb</div>
+            <div class="month" style="grid-column:10 / span 2">Mar</div>
+            <div class="month" style="grid-column:12 / span 2">Apr</div>
+            <div class="month" style="grid-column:14 / span 2">May</div>
+
+            <div class="label">Phase 0, the core</div>
+            <div class="bar core" style="grid-column:2 / span 2">2 weeks</div>
+
+            <div class="label">Mac web view spike</div>
+            <div class="bar mac" style="grid-column:3 / span 2">go / no-go</div>
+
+            <div class="label">Mac windows</div>
+            <div class="bar mac" style="grid-column:4 / span 4">8 weeks</div>
+
+            <div class="label">Mac release, homepage</div>
+            <div class="bar mac" style="grid-column:8 / span 2">release</div>
+
+            <div class="label">Linux shell</div>
+            <div class="bar linux" style="grid-column:10 / span 4">7 weeks</div>
+
+            <div class="label">Linux release, homepage</div>
+            <div class="bar linux" style="grid-column:13 / span 2">release</div>
+
+            <div class="label">Phase 3, three in step</div>
+            <div class="bar sync" style="grid-column:15 / span 1">gates</div>
+        </div>
+    </div>
+    <div class="cards">
+        <div class="card">
+            <h3>Phase 0: the core, 2 weeks</h3>
+            <ul>
+                <li>Keychain and Secret Service backends in <code>secrets.rs</code>, on the <code>keyring-core</code> trait Windows uses</li>
+                <li><code>pe_webkit_content_rules()</code>: the blocking policy as WebKit JSON, tested in Rust</li>
+                <li><code>editor.js</code> posts through <code>window.webkit.messageHandlers.host</code> as well</li>
+                <li><code>help.html</code> marked per platform, <code>pe_help_page(platform)</code> filters it</li>
+                <li><code>core/commands.toml</code>: every command once, generated into C, Swift and Rust enums</li>
+                <li><code>FormatSize</code> and any other string C++ composes from mail data move into the core</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3><span class="dot mac"></span>Phase 1: macOS, 10 to 12 weeks</h3>
+            <ul>
+                <li>Xcode 27, xcodegen (<code>project.yml</code> reviewed, the project generated), create-dmg</li>
+                <li>Week 1: the WKWebView lockdown against the hostile message</li>
+                <li>Then the windows in the Windows order: main window, accounts, reading, compose and editor, outbox, sign-in apps, help, print, badge and notifications, mailto and .eml</li>
+                <li>Hardened runtime, Developer ID, notarization, DMG, Sparkle 2.10 with the appcast on inboxclassic.com</li>
+                <li>XCUITest driver of the shared scenario; a <code>mac</code> job on <code>macos-26</code></li>
+                <li><code>release.sh</code> builds and notarizes the DMG after the Windows installer; the homepage gets the Mac download, copy and screenshots</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3><span class="dot linux"></span>Phase 2: Linux, 7 to 9 weeks</h3>
+            <ul>
+                <li><code>linux/</code> crate with its own workspace, linking <code>pe-core</code>; gtk4 0.11, libadwaita 0.9, webkit6 0.6, ksni 0.3</li>
+                <li>WebKitGTK locked down with the same rules, ephemeral session, custom schemes</li>
+                <li>Tray through the AppIndicator extension, <code>gio::Notification</code>, the dock's LauncherEntry badge, portal file dialogs</li>
+                <li><code>cargo deb</code> for amd64 and arm64, then a Flatpak on the GNOME 50 runtime</li>
+                <li>dogtail driver under Xvfb; a <code>linux</code> job in the <code>ubuntu:26.04</code> container, a second on 26.10</li>
+                <li><code>release.sh</code> builds both <code>.deb</code>s in Docker; the homepage gets the Linux download and screenshots</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Development environments</h2>
+    <div class="two">
+        <div class="card">
+            <h3><span class="dot mac"></span>This Mac, for the Mac version</h3>
+            <dl>
+                <dt>has</dt><dd>macOS 26.6.2, M5 Pro, Swift 6.4 (Command Line Tools), rustup with aarch64-apple-darwin, Homebrew, QEMU, Docker through OrbStack, the Developer ID Application certificates of Postal Systems OÜ</dd>
+                <dt>needs</dt><dd>Xcode 27 for XCUITest and <code>xcodebuild</code> (<code>brew install xcodesorg/made/xcodes</code>, <code>xcodes install 27 --select</code>, about 15 GB), <code>brew install xcodegen create-dmg</code>, an App Store Connect API key stored with <code>notarytool store-credentials</code></dd>
+                <dt>scripts</dt><dd><code>mac-build.sh</code>, <code>mac-package.sh</code>, <code>mac-run.sh</code>, <code>mac-screenshot.sh</code>, <code>mac-ui-e2e.sh</code>, mirroring the <code>win-*</code> ones</dd>
+            </dl>
+        </div>
+        <div class="card">
+            <h3><span class="dot linux"></span>Linux, from this Mac</h3>
+            <dl>
+                <dt>Docker</dt><dd>OrbStack is installed. <code>linux/Dockerfile</code> from <code>ubuntu:26.04</code> builds the shell and runs clippy, the tests and the headless end-to-end test under Xvfb; arm64 natively, amd64 through Rosetta. The same image is CI's container.</dd>
+                <dt>QEMU</dt><dd>Installed from Homebrew. <code>linux-vm.sh</code> installs Ubuntu Desktop 26.04 arm64 once (hvf, virtio-gpu with GL, ssh forwarded to 2222), then rsyncs the tree, installs the <code>.deb</code>, starts the app on the GNOME desktop and takes screenshots through QMP <code>screendump</code>, from outside the guest. UTM is the same QEMU with a window, for poking around by hand.</dd>
+                <dt>scripts</dt><dd><code>linux-build.sh</code>, <code>linux-test.sh</code>, <code>linux-ui-e2e.sh</code>, <code>linux-vm.sh create|start|run|screenshot</code></dd>
+            </dl>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Releasing on three platforms</h2>
+    <p>Every release is built from the release Mac, as today, and nothing is published until every platform's package exists. <code>release.sh</code> keeps its shape (checks, builds, <code>hashes.txt</code>, upload, publish) and gains two platforms: the Mac part with the first Mac release, the Linux part with the first Linux release. release-please, the draft release and the tag stay as they are; <code>linux/Cargo.toml</code> gets its version from release-please, the Mac reads it from <code>core/Cargo.toml</code> at build time.</p>
+    <div class="tablewrap">
+        <table>
+            <thead><tr><th>File</th><th>Built</th><th>Signed</th><th>Checked before upload</th></tr></thead>
+            <tbody>
+                <tr><td class="win"><code>InboxClassic-Setup.exe</code></td><td>on the Windows build machine, <code>build-installer.sh</code>, unchanged</td><td>Azure Artifact Signing: exe, uninstaller, installer</td><td>the signature; the exe run with <code>--version</code> on the build machine</td></tr>
+                <tr><td class="mac"><code>InboxClassic.dmg</code></td><td>here, <code>mac-package.sh</code></td><td>Developer ID, hardened runtime, notarized and stapled, app and DMG</td><td><code>codesign --verify</code>, <code>spctl --assess</code>, <code>stapler validate</code>; the app out of the DMG run with <code>--version</code></td></tr>
+                <tr><td class="linux"><code>InboxClassic-amd64.deb</code>, <code>InboxClassic-arm64.deb</code></td><td>here in Docker, <code>linux-package.sh</code>, arm64 natively and amd64 through Rosetta</td><td>not as files; <code>hashes.txt</code> covers them, a signed apt repository later</td><td><code>dpkg-deb --info</code>, <code>lintian</code>; installed and run with <code>--version</code> in a clean container per architecture, arm64 also on the QEMU desktop</td></tr>
+                <tr><td><code>hashes.txt</code></td><td>here, SHA-256 of the four packages</td><td>GPG, the Postalsys Releases key</td><td><code>gpg --verify</code> with that key's <code>VALIDSIG</code></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="two">
+        <div class="card">
+            <h3>The order of a release</h3>
+            <ul>
+                <li>Checks first, failing fast: clean tree at the tag, CI green including the <code>mac</code> and <code>linux</code> jobs, the Windows machine reachable, Docker running, Xcode selected, every signing credential present, the GPG passphrase asked up front</li>
+                <li>Windows (slowest, another machine), then the Mac (notarization takes minutes), then Linux, each into <code>dist/</code>; <code>--version</code> is added to every shell in Phase 0 as the boot test</li>
+                <li>One <code>hashes.txt</code>, upload with <code>--clobber</code>, publish as latest</li>
+                <li>Then <code>generate_appcast</code> over the DMG and a push of <code>appcast.xml</code> to inboxclassic.com; later the Flathub manifest bump</li>
+                <li><code>PLATFORMS=windows,mac,linux</code> rebuilds one platform after a failure; <code>BUILD_ONLY=yes</code> stays</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>The homepage, inboxclassic.com</h3>
+            <ul>
+                <li>One static page, no scripts today; copy rewritten from "for Windows" to Windows, Mac and Linux, with a requirements line per platform</li>
+                <li>The hero and the closing CTA list all three downloads; the first script on the page reads <code>navigator.userAgentData.platform</code> (falling back to <code>navigator.platform</code>) and makes the visitor's platform the main button. Without JavaScript all three show, Windows first</li>
+                <li><code>img/windows</code>, <code>img/mac</code>, <code>img/linux</code>: the same five screenshots from each platform's own end-to-end run, swapped by the same script; <code>homepage-screenshots.sh</code> refreshes all three sets in one command</li>
+                <li><code>appcast.xml</code> for Sparkle from the first Mac release; <code>apt/</code> later</li>
+                <li>Mac goes live with the first Mac release, Linux with the first Linux release</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Keeping three shells in step</h2>
+    <p>Every feature becomes UI work three times. These rules make a missing third visible, and the ones marked as gates make it a failed build or a failed CI run rather than something to remember.</p>
+    <ol class="rules">
+        <li><div><b>The core computes, the shells show.</b> Every string, count and decision a user sees comes from the core; a shell reads values and calls operations.</div></li>
+        <li><div><b>One command table, three generated enums.</b><span class="gate">build gate</span> <code>core/commands.toml</code> holds every command with its label, shortcuts, icon and help anchor; each shell handles the generated enum exhaustively, so a new command fails the build of the shell that ignores it.</div></li>
+        <li><div><b>One scenario, three drivers, one check.</b><span class="gate">CI gate</span> The end-to-end steps are written once; PowerShell, XCUITest and dogtail implement them and save screenshots under the same names. <code>feature-map.mjs --check</code> fails a platform whose screenshots miss a feature.</div></li>
+        <li><div><b>One help, one icon set, one version, one changelog.</b> <code>help.html</code> filtered per platform in Rust, the Fluent SVGs rendered for each toolkit by <code>build-icons.sh</code>, the version in <code>core/Cargo.toml</code>, release-please as it is.</div></li>
+        <li><div><b>One release, one homepage.</b> <code>release.sh</code> builds every platform's package, boot-tests each with <code>--version</code>, signs one <code>hashes.txt</code>, uploads everything, publishes the draft, then the Sparkle appcast. The homepage shows a download and the screenshots of each platform, refreshed from the three end-to-end runs.</div></li>
+        <li><div><b>A PR touches all three or says why.</b><span class="gate">CI gate</span> When the C header, the command table or the feature list changed, <code>app/</code>, <code>mac/</code> and <code>linux/</code> must all have changed, unless the PR carries the label <code>shells: partial</code> and names what is left for which platform.</div></li>
+        <li><div><b>A parity table by feature.</b> <code>docs/shells.md</code> maps each feature to its file and function on each platform.</div></li>
+        <li><div><b>CLAUDE.md knows all three.</b> What each shell is, where each window lives on each platform, how to build, run, screenshot and test each, and the order of work for a feature: core and its tests, the command table or header, the three shells, the scenario step and feature-map entry, the help.</div></li>
+    </ol>
+</section>
+
+<section>
+    <h2>Decisions and risks</h2>
+    <div class="two">
+        <div class="card">
+            <h3>Decisions, confirmed 2026-11-04</h3>
+            <ul>
+                <li><b>Native look</b> on the Mac and on Linux, the Outlook Express look stays Windows-only. Same layout, features, icons and words everywhere.</li>
+                <li><b>Apple silicon only,</b> macOS 26 or newer now, 27 soon. Intel Macs on 26 are out; a universal binary is a day's work if that changes.</li>
+                <li><b>Ubuntu 26.04 LTS or newer,</b> <code>.deb</code> first, Flatpak second, no snap.</li>
+                <li><b>Linux shell in Rust</b> against <code>pe-core</code>; the Mac shell in Swift against the C ABI; <code>app/</code> keeps its name.</li>
+                <li><b>Developer ID and Sparkle,</b> not the Mac App Store, so no App Sandbox.</li>
+                <li><b>Every release built from the release Mac,</b> all platforms, published together; no signing keys on GitHub.</li>
+                <li><b>The homepage detects the platform</b> and shows all three, with each platform's own screenshots.</li>
+                <li><b>One developer, the Mac first,</b> then Linux: about six months.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Risks</h3>
+            <ul>
+                <li><b>A WebKit load that cannot be refused.</b> The spike comes first; the fallback is stripping the construct in <code>pe-html</code> for the WebKit document.</li>
+                <li><b>Keychain prompts on dev builds</b> when the signing identity changes: sign Debug builds with the Developer ID, or run with <code>--memory-passwords</code>.</li>
+                <li><b>No tray on vanilla GNOME.</b> Ubuntu ships the AppIndicator extension; elsewhere the app quits with its last window.</li>
+                <li><b>Headless AT-SPI flakiness.</b> Waits and retries as in <code>ui-e2e.ps1</code>; the VM for what the container cannot show.</li>
+                <li><b>Three times the UI work per feature.</b> Only the gates above keep it honest.</li>
+                <li><b>A release that fails halfway.</b> <code>PLATFORMS=</code> rebuilds one platform and the upload takes what is in <code>dist/</code>, so a release never starts over.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<footer>Versions checked on 2026-11-04: Ubuntu 26.04.1 (GTK 4.22.4, libadwaita 1.9.1, WebKitGTK 2.52.6, GNOME Shell 50.1), Ubuntu 26.10 on Docker Hub, gtk4 0.11.5, libadwaita 0.9.2, webkit6 0.6.1, ksni 0.3.7, apple-native-keyring-store 1.0.2, zbus-secret-service-keyring-store 1.0.1, cargo-deb 3.8.0, Sparkle 2.10, Xcode 27 on macOS 26.6 or newer.</footer>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,37 @@
+// Generated from core/commands.toml by core/crates/pe-ffi/build.rs, do not edit
+#pragma once
+
+// the commands of the menus, toolbar and tray, posted as WM_COMMAND
+enum PeCommandId : unsigned short {
+    IDM_NEW_ACCOUNT = 100,
+    IDM_EXIT = 101,
+    IDM_SYNC = 102,
+    IDM_MARK_READ = 103,
+    IDM_MARK_UNREAD = 104,
+    IDM_PICTURES = 105,
+    IDM_ABOUT = 106,
+    IDM_NEW_MAIL = 107,
+    IDM_REPLY = 108,
+    IDM_REPLY_ALL = 109,
+    IDM_FORWARD = 110,
+    IDM_HELP = 111,
+    IDM_DELETE = 112,
+    IDM_MOVE = 113,
+    IDM_FLAG = 114,
+    IDM_NEW_FOLDER = 115,
+    IDM_RENAME_FOLDER = 116,
+    IDM_DELETE_FOLDER = 117,
+    IDM_ACCOUNTS = 118,
+    IDM_FIND = 120,
+    IDM_SAVE_AS = 121,
+    IDM_PRINT = 122,
+    IDM_IMPORT = 123,
+    IDM_OUTBOX = 124,
+    IDM_PROPERTIES = 125,
+    IDM_MARK_ALL_READ = 126,
+    IDM_JUNK = 127,
+    IDM_NOT_JUNK = 128,
+    IDM_NOTIFY = 129,
+    IDM_OPEN = 130,
+    IDM_DEFAULT_APP = 131,
+};

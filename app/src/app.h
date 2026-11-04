@@ -14,6 +14,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "commands.h"
 #include "core.h"
 #include "preview.h"
 
@@ -476,26 +477,9 @@ constexpr UINT WM_CORE_EVENT = WM_APP + 1;
 constexpr UINT WM_COMPOSE_CLOSED = WM_APP + 2;
 constexpr UINT WM_COMPOSE_KEPT = WM_APP + 3;
 
-enum CommandId : WORD {
-    IDM_NEW_ACCOUNT = 100,
-    IDM_EXIT,
-    IDM_SYNC,
-    IDM_MARK_READ,
-    IDM_MARK_UNREAD,
-    IDM_PICTURES,
-    IDM_ABOUT,
-    IDM_NEW_MAIL,
-    IDM_REPLY,
-    IDM_REPLY_ALL,
-    IDM_FORWARD,
-    IDM_HELP,
-    IDM_DELETE,
-    IDM_MOVE,
-    IDM_FLAG,
-    IDM_NEW_FOLDER,
-    IDM_RENAME_FOLDER,
-    IDM_DELETE_FOLDER,
-    IDM_ACCOUNTS,
+// the commands of the menus, toolbar and tray (IDM_*) come from core/commands.toml, shared with the Mac and Linux
+// windows; the ids of the controls are this app's own
+enum ControlId : WORD {
     IDC_TREE = 200,
     IDC_LIST,
     IDC_ATTACHMENTS,
@@ -515,19 +499,6 @@ enum CommandId : WORD {
     IDC_OPEN_CALENDAR,
     // at the left of the message header: the brand's BIMI logo
     IDC_LOGO,
-    IDM_FIND = 120,
-    IDM_SAVE_AS,
-    IDM_PRINT,
-    IDM_IMPORT,
-    IDM_OUTBOX,
-    IDM_PROPERTIES,
-    IDM_MARK_ALL_READ,
-    IDM_JUNK,
-    IDM_NOT_JUNK,
-    IDM_NOTIFY,
-    // the tray icon's menu
-    IDM_OPEN,
-    IDM_DEFAULT_APP,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

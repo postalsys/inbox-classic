@@ -60,6 +60,37 @@ pub unsafe extern "C" fn pe_html_render(html: *const u8, len: usize, allow_remot
     .unwrap_or(null_mut())
 }
 
+/// The user help for `platform` (`windows`, `mac` or `linux`; NULL is the platform this was built for): one page
+/// for every platform, with the parts of the others left out. Free with `pe_string_free`.
+///
+/// # Safety
+/// `platform` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_help_page(platform: *const c_char) -> *mut c_char {
+    let platform = if platform.is_null() {
+        pe_html::Platform::current()
+    } else {
+        // SAFETY: as the caller guarantees
+        let name = unsafe { std::ffi::CStr::from_ptr(platform) }.to_string_lossy();
+        pe_html::Platform::from_name(&name).unwrap_or_else(pe_html::Platform::current)
+    };
+    guard(|| into_c_string(pe_html::help_page(platform))).unwrap_or(null_mut())
+}
+
+/// The WebKit content rules (WKContentRuleList JSON) of a web view that shows the core's documents: every load
+/// blocked but the app's own `inboxclassic:` documents, `cid:` and `data:`, and with `allow_remote_images` the
+/// message's pictures from the internet. Free with `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_webkit_content_rules(allow_remote_images: bool) -> *mut c_char {
+    guard(|| into_c_string(pe_html::webkit_content_rules(allow_remote_images))).unwrap_or(null_mut())
+}
+
+/// A size as the windows show it (`512 bytes`, `13 KB`, `2.4 MB`). Free with `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_format_size(bytes: u64) -> *mut c_char {
+    guard(|| into_c_string(pe_core::format_size(bytes))).unwrap_or(null_mut())
+}
+
 /// The page of the Print window for a message document of the core (`PeMessageInfo.document`): the same document
 /// with the core's own script that says "done" once the print preview is closed. NULL for a document
 /// that is not one of the core's. Free with `pe_string_free`.

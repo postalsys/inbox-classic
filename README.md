@@ -16,7 +16,7 @@ A Windows email client in the style of Outlook Express: folders on the left, mes
 
 Run `InboxClassic-Setup.exe` from the [latest release](https://github.com/postalsys/inbox-classic/releases/latest/download/InboxClassic-Setup.exe). It needs 64-bit Windows 10 or 11 with the Microsoft Edge WebView2 Runtime, which Windows 11 includes. It installs for the current user, no administrator rights needed, to `%LOCALAPPDATA%\Programs\Inbox Classic`, with a Start menu shortcut and an entry in Installed apps. The setup, the app and the uninstaller are signed by Postal Systems OÜ, and each release has a `hashes.txt` signed with the Postalsys Releases GPG key to check the download against.
 
-Running the setup of a newer version updates the installed one in place; the accounts and the mail downloaded, in `%LOCALAPPDATA%\InboxClassic`, are kept. Uninstalling asks whether to remove those too; the mail on the servers always stays. The user help is built in: F1 in the app (`app/res/help.html`).
+Running the setup of a newer version updates the installed one in place; the accounts and the mail downloaded, in `%LOCALAPPDATA%\InboxClassic`, are kept. Uninstalling asks whether to remove those too; the mail on the servers always stays. The user help is built in: F1 in the app (`core/crates/pe-html/src/help.html`, one page for every platform).
 
 ## How it is put together
 

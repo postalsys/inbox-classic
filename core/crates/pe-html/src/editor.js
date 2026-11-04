@@ -1,7 +1,8 @@
 // The editor of the compose window. The only script Inbox Classic runs: the page allows it by a nonce, nothing else
 // can run (the CSP has no other script source; the quoted message was sanitized in Rust and waits in an inert
-// template until it is put into the text). The host calls window.pe; the page answers with plain strings over
-// postMessage, which the host never parses beyond their prefix:
+// template until it is put into the text). The host calls window.pe (pe.exec, pe.link, pe.signature, pe.send, pe.clean,
+// pe.focus: the same calls from every platform's window); the page answers with plain strings over postMessage
+// (WebView2) or the "host" message handler (WebKit), which the host never parses beyond their prefix:
 //   "html:<the body>"   the HTML of what was written, after pe.send(); the quote still folded, for the core to add
 //   "split:<written>\u001f<quote>"  the quote unfolded into the text: what was written, then the quote as the user
 //                       left it (trimmed, written in), each on its own; the core adds that quote
@@ -18,13 +19,18 @@
     // the order of the flags of "state:", which kStateButtons in app/src/compose.cpp follows
     const STATE = ['bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList', 'justifyLeft', 'justifyCenter', 'justifyRight'];
     const body = document.getElementById('body');
-    // a message to the host, with the File objects of `files` beside it when given
+    // a message to the host, with the File objects of `files` beside it when given: WebView2 on Windows, or the
+    // "host" message handler of WebKit on the Mac and Linux (WKWebView, WebKitGTK), which gets no files: the window
+    // there takes the paths of dropped files from the drag itself
     const post = (message, files) => {
         const webview = window.chrome && window.chrome.webview;
+        const webkit = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.host;
         if (webview && files) {
             webview.postMessageWithAdditionalObjects(message, files);
         } else if (webview) {
             webview.postMessage(message);
+        } else if (webkit) {
+            webkit.postMessage(message);
         }
     };
     // the cursor at `range`, or at the end of the text without one
