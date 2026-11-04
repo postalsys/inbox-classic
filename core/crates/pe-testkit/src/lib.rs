@@ -340,13 +340,26 @@ fn http_get(url: &str) -> (String, String) {
         .next()
         .and_then(|p| p.parse().ok())
         .expect("a port");
-    let mut socket = TcpStream::connect(("127.0.0.1", port)).expect("connect");
     let path = if path.is_empty() { "/" } else { path };
-    write!(
-        socket,
-        "GET {path} HTTP/1.1\r\nHost: {authority}\r\nConnection: close\r\n\r\n"
-    )
-    .expect("request");
+    let request = format!("GET {path} HTTP/1.1\r\nHost: {authority}\r\nConnection: close\r\n\r\n");
+    // a connection the server dropped before reading it (under load, a listener still settling) fails the write: the
+    // server never saw the request, so it is sent again on a new one, a few times
+    let mut attempt = 0;
+    let mut socket = loop {
+        attempt += 1;
+        let sent = TcpStream::connect(("127.0.0.1", port)).and_then(|mut socket| {
+            socket.write_all(request.as_bytes())?;
+            Ok(socket)
+        });
+        match sent {
+            Ok(socket) => break socket,
+            Err(error) if attempt < 5 => {
+                eprintln!("GET {url}: {error}, again");
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            }
+            Err(error) => panic!("request: {error}"),
+        }
+    };
     let mut response = String::new();
     let _ = socket.read_to_string(&mut response);
     let (head, body) = response.split_once("\r\n\r\n").unwrap_or((&response, ""));
