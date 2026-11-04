@@ -1217,6 +1217,24 @@ public static class Dragger {
     Shot $main 'read-10-invitation'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
+    Step 'a brand logo (BIMI)'
+    $logoSvg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny-ps" viewBox="0 0 100 100"><title>Brand</title>' +
+        '<rect width="100" height="100" rx="22" fill="#0a5bd3"/><circle cx="50" cy="50" r="26" fill="#ffffff"/><circle cx="50" cy="50" r="13" fill="#0a5bd3"/></svg>'
+    $indicator = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($logoSvg))
+    $branded = "Authentication-Results: mx.postalexpress.test; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example`r`n" +
+        "BIMI-Indicator: $indicator`r`nFrom: Brand <hello@brand.example>`r`nTo: testuser@postalexpress.test`r`nSubject: News from the brand`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <brand-news@brand.example>`r`n`r`nOur news.`r`n"
+    AddMessage $branded
+    Command $main $IDM_SYNC
+    [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: News from the brand') } 20)
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"News from the brand"')
+    [void](WaitFor { (Rows) -eq 1 } 20)
+    SelectRow 0
+    $IDC_LOGO = 213
+    Check ([bool](WaitFor { Visible $main $IDC_LOGO } 15)) 'a sender whose logo the server passed has it beside the header'
+    Shot $main 'read-11-logo'
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
+
     Step 'marking all read'
     $IDM_MARK_ALL_READ = 126
     SelectFolder 0

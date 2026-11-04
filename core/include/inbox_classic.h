@@ -47,6 +47,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_NEW_MAIL = 14,
   // The unsubscribe `uid` of `pe_unsubscribe` is done; `message` says why not when it is not NULL
   PE_EVENT_KIND_UNSUBSCRIBED = 15,
+  // The logo `uid` of `pe_logo_start` is drawn, or there was none: `pe_logo_result`
+  PE_EVENT_KIND_LOGO_READY = 16,
 } PeEventKind;
 
 typedef enum PeFailureKind {
@@ -344,6 +346,8 @@ typedef struct PeMessageInfo {
   const char *unsubscribe_target;
   // The event of its calendar part, NULL without one; owned by the view
   const struct PeInvitation *invitation;
+  // The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
+  bool has_logo;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -667,6 +671,25 @@ char *pe_invitation_file(const struct PeCore *core,
                          int64_t folder,
                          uint64_t uid,
                          const char *dir);
+
+// Draws the BIMI logo of a message (`has_logo`) `size` pixels square in the background: `LogoReady` follows with
+// the request this returns; 0 for a message without one
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_logo_start(const struct PeCore *core,
+                       int64_t folder,
+                       uint64_t uid,
+                       uint32_t size);
+
+// The pixels of a drawn logo: `size` x `size` BGRA with the alpha multiplied in, `len` bytes; NULL when there was
+// none. Taken once; free with `pe_bytes_free`.
+//
+// # Safety
+// `core` must be a live handle, `len` a valid pointer.
+uint8_t *pe_logo_result(const struct PeCore *core,
+                        uint64_t request,
+                        size_t *len);
 
 // Unsubscribes from the mailing list of a message the one-click way (`PeUnsubscribe` OneClick): in the background,
 // `Unsubscribed` follows with the request this returns; 0 for a message that offers no such way

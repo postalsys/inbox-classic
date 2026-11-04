@@ -118,6 +118,8 @@ pub enum PeEventKind {
     NewMail = 14,
     /// The unsubscribe `uid` of `pe_unsubscribe` is done; `message` says why not when it is not NULL
     Unsubscribed = 15,
+    /// The logo `uid` of `pe_logo_start` is drawn, or there was none: `pe_logo_result`
+    LogoReady = 16,
 }
 
 #[repr(C)]
@@ -196,6 +198,7 @@ impl Callback {
                 account, folder, uid, ..
             } => (PeEventKind::NewMail, *account, *folder, *uid),
             Event::Unsubscribed { request, .. } => (PeEventKind::Unsubscribed, 0, 0, *request),
+            Event::LogoReady { request } => (PeEventKind::LogoReady, 0, 0, *request),
         };
         let count = if let Event::NewMail { count, .. } = &event {
             *count as u64
@@ -713,6 +716,42 @@ pub unsafe extern "C" fn pe_invitation_file(
         with(core, null_mut(), |core| match core.invitation_file(folder, uid, &dir) {
             Ok(Some(path)) => into_c_string(path.to_string_lossy().into_owned()),
             _ => null_mut(),
+        })
+    }
+}
+
+/// Draws the BIMI logo of a message (`has_logo`) `size` pixels square in the background: `LogoReady` follows with
+/// the request this returns; 0 for a message without one
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_logo_start(core: *const PeCore, folder: i64, uid: u64, size: u32) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.logo_start(folder, uid, size).unwrap_or(0)) }
+}
+
+/// The pixels of a drawn logo: `size` x `size` BGRA with the alpha multiplied in, `len` bytes; NULL when there was
+/// none. Taken once; free with `pe_bytes_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `len` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_logo_result(core: *const PeCore, request: u64, len: *mut usize) -> *mut u8 {
+    // SAFETY: as the caller guarantees
+    let Some(len) = (unsafe { len.as_mut() }) else {
+        return null_mut();
+    };
+    *len = 0;
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.logo_result(request) {
+            Some(pixels) => {
+                let pixels = pixels.into_boxed_slice();
+                *len = pixels.len();
+                Box::into_raw(pixels).cast()
+            }
+            None => null_mut(),
         })
     }
 }
@@ -1462,6 +1501,8 @@ pub struct PeMessageInfo {
     pub unsubscribe_target: *const c_char,
     /// The event of its calendar part, NULL without one; owned by the view
     pub invitation: *const PeInvitation,
+    /// The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
+    pub has_logo: bool,
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
@@ -1526,6 +1567,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         unsubscribe_link: strings.add(unsubscribe_link),
         unsubscribe_target: strings.add(&view.unsubscribe.as_ref().map(Unsubscribe::target).unwrap_or_default()),
         invitation: invitation.as_deref().map_or(null(), |i| i as *const PeInvitation),
+        has_logo: view.has_logo,
     };
     handed(PeMessageView {
         info,

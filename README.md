@@ -7,8 +7,10 @@ A Windows email client in the style of Outlook Express: folders on the left, mes
 - Mail kept on the computer for reading offline, several accounts in one folder tree, folders, flags, .eml import and export, printing
 - Search every folder as you type, by subject, people, file names and text, from a local full-text index, with Gmail's search syntax (`from:`, `is:unread`, `has:attachment`, `in:sent`, `before:` ...)
 - HTML mail sanitized and shown without scripts, remote pictures blocked until allowed, quoted history and forwarded mail folded away
-- An HTML editor that sends plain text when nothing is formatted, drafts saved on the server, an Outbox for what can not go yet
-- No telemetry and no account with us: the app talks to your mail servers and nobody else
+- An HTML editor that sends plain text when nothing is formatted, drafts saved on the server, an Outbox for what can not go yet; a signature for each account, and addresses completed from the people you write to and hear from
+- New mail as it arrives (IMAP IDLE), with a Windows notification, a tray icon and an unread count on the taskbar; the default mail app for `mailto:` links
+- Drag messages onto folders, Mark All Read, Junk and Not Junk (`$Junk`/`$NotJunk`), one-click Unsubscribe (RFC 8058), calendar invitations shown readably, brand logos (BIMI)
+- No telemetry and no account with us: the app talks to your mail servers, and beyond them only when a message asks for it: a mailing list's unsubscribe address once you agree, a brand's logo address when your mail server approved the logo
 
 ## Installing
 

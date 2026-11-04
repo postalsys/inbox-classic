@@ -29,12 +29,7 @@ impl Unsubscribe {
     }
 }
 
-fn header<'a>(headers: &'a [Header], key: &'a str) -> impl Iterator<Item = &'a str> {
-    headers
-        .iter()
-        .filter(move |h| h.key.eq_ignore_ascii_case(key))
-        .map(|h| h.value.as_str())
-}
+use crate::authres::{headers as header, passes, tag, verdict};
 
 /// The addresses of `List-Unsubscribe`: what is in angle brackets
 fn addresses(value: &str) -> Vec<&str> {
@@ -45,31 +40,12 @@ fn addresses(value: &str) -> Vec<&str> {
         .collect()
 }
 
-/// The value of a tag of a DKIM-Signature or a property of Authentication-Results (`d=`, `header.d=`)
-fn tag<'a>(value: &'a str, name: &str) -> Option<&'a str> {
-    value
-        .split([';', ' ', '\t', '\r', '\n'])
-        .filter_map(|part| part.split_once('='))
-        .find(|(key, _)| key.trim().eq_ignore_ascii_case(name))
-        .map(|(_, value)| value.trim().trim_matches('"'))
-}
-
-/// The domains the receiving server says signed the message: `dkim=pass` results of the topmost
-/// Authentication-Results
-fn passed_domains(headers: &[Header]) -> Vec<String> {
-    let Some(results) = header(headers, "authentication-results").next() else {
-        return Vec::new();
-    };
-    // after the server's id, one result per `;`
-    results
-        .split(';')
-        .skip(1)
-        .filter(|result| {
-            result
-                .split_whitespace()
-                .next()
-                .is_some_and(|method| method.eq_ignore_ascii_case("dkim=pass"))
-        })
+/// The domains the provider says signed the message: its `dkim=pass` results
+fn passed_domains(headers: &[Header], trusted: &[String]) -> Vec<String> {
+    verdict(headers, trusted)
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|result| passes(result, "dkim"))
         .filter_map(|result| {
             tag(result, "header.d").map(str::to_string).or_else(|| {
                 tag(result, "header.i")
@@ -82,8 +58,8 @@ fn passed_domains(headers: &[Header]) -> Vec<String> {
 }
 
 /// Whether a signature of a domain that passed covers both List-Unsubscribe headers
-fn signed(headers: &[Header]) -> bool {
-    let passed = passed_domains(headers);
+fn signed(headers: &[Header], trusted: &[String]) -> bool {
+    let passed = passed_domains(headers, trusted);
     header(headers, "dkim-signature").any(|signature| {
         let compact: String = signature.chars().filter(|c| !c.is_whitespace()).collect();
         let domain = tag(&compact, "d").unwrap_or_default().to_ascii_lowercase();
@@ -98,9 +74,9 @@ fn signed(headers: &[Header]) -> bool {
     })
 }
 
-/// How the message lets its reader leave its list, the one-click way first, then a message, then a page; None when
-/// it does not say
-pub fn of(headers: &[Header]) -> Option<Unsubscribe> {
+/// How the message lets its reader leave its list, the one-click way first (when the provider of the account, whose
+/// verdicts `trusted` names, says the signature passed), then a message, then a page; None when it does not say
+pub fn of(headers: &[Header], trusted: &[String]) -> Option<Unsubscribe> {
     let list = header(headers, "list-unsubscribe").next()?;
     let addresses = addresses(list);
     // what this client goes to: https, or http to the loopback address (test servers)
@@ -116,7 +92,7 @@ pub fn of(headers: &[Header]) -> Option<Unsubscribe> {
         .next()
         .is_some_and(|post| post.trim().eq_ignore_ascii_case("List-Unsubscribe=One-Click"));
     match (web, mail) {
-        (Some(url), _) if one_click && signed(headers) => Some(Unsubscribe::OneClick { url }),
+        (Some(url), _) if one_click && signed(headers, trusted) => Some(Unsubscribe::OneClick { url }),
         (_, Some(link)) => Some(Unsubscribe::Mail { link }),
         (Some(url), None) => Some(Unsubscribe::Web { url }),
         (None, None) => None,
@@ -126,6 +102,11 @@ pub fn of(headers: &[Header]) -> Option<Unsubscribe> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// As the account whose provider names its verdicts mx.example.net has it
+    fn of(headers: &[Header]) -> Option<Unsubscribe> {
+        super::of(headers, &["example.net".to_string()])
+    }
 
     fn headers(text: &str) -> Vec<Header> {
         let source = format!("{text}\r\nSubject: x\r\n\r\nbody\r\n");

@@ -8,6 +8,7 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+base64.workspace = true
 pe-autoconfig = { path = "../pe-autoconfig" }
 pe-content = { path = "../pe-content" }
 pe-html.workspace = true
@@ -18,6 +19,8 @@ pe-oauth = { path = "../pe-oauth" }
 pe-smtp = { path = "../pe-smtp" }
 pe-store = { path = "../pe-store" }
 pe-sync = { path = "../pe-sync" }
+# BIMI logos (SVG Tiny PS) to pixels: no text (no system fonts read), no raster images
+resvg = { version = "0.49", default-features = false }
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "macros"] }
 
 [target.'cfg(windows)'.dependencies]

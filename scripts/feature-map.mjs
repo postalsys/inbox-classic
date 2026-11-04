@@ -318,6 +318,13 @@ const sections = [
                 checked: ['The message is in Deleted Items on the server', 'and out of the Inbox and the list']
             },
             {
+                shot: 'read-11-logo',
+                name: 'Brand logos (BIMI)',
+                what: "The logo of a sender's brand beside the header, when the receiving server's Authentication-Results say bimi=pass and dmarc=pass: from BIMI-Indicator, or fetched once a run from the https BIMI-Location. The SVG is checked (at most 32 KB, no scripts, nothing loaded from elsewhere) and drawn to pixels in Rust (resvg, without text or system fonts).",
+                how: 'Select a message from a brand whose logo the server passed.',
+                checked: ['A sender whose logo the server passed has it beside the header']
+            },
+            {
                 shot: 'read-10-invitation',
                 name: 'Calendar invitations',
                 what: "A message with a calendar part (iCalendar, read in Rust) shows its first event over the text: invitation, update or cancellation, the title, when in the reader's time zone (the time zones the file defines, with their daylight-saving rules), where, the organizer, how it repeats and how many attend. Open in Calendar writes the calendar part alone to a file and opens it in the calendar program.",

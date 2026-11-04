@@ -1223,7 +1223,7 @@ fn unsubscribes_with_one_click() {
         String::from_utf8_lossy(&request).into_owned()
     });
     let raw = format!(
-        "Authentication-Results: mx.example.net; dkim=pass header.d=list.example.com\r\n\
+        "Authentication-Results: mx.example.com; dkim=pass header.d=list.example.com\r\n\
          DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; b=y\r\n\
          From: News <news@list.example.com>\r\nSubject: Weekly news\r\n\
          List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:{port}/u/42>\r\n\
@@ -1301,4 +1301,70 @@ fn shows_a_calendar_invitation() {
     );
     // a message without one has none
     assert!(s.core.invitation_file(inbox, 999, dir.path()).unwrap().is_none());
+}
+
+#[test]
+fn draws_a_bimi_logo_from_its_location() {
+    let Some(s) = setup() else { return };
+    let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\" viewBox=\"0 0 10 10\">\
+               <title>Brand</title><rect width=\"10\" height=\"10\" fill=\"#0000ff\"/></svg>";
+    // the brand's server: answers each request with the logo, counting them
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let served = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let count = served.clone();
+    let body = svg.to_string();
+    std::thread::spawn(move || {
+        use std::io::{Read, Write};
+        for stream in listener.incoming() {
+            let Ok(mut stream) = stream else { break };
+            let mut buffer = [0u8; 2048];
+            let _ = stream.read(&mut buffer);
+            count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let answer = format!(
+                "HTTP/1.0 200 OK\r\nContent-Type: image/svg+xml\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            let _ = stream.write_all(answer.as_bytes());
+        }
+    });
+    let raw = format!(
+        "Authentication-Results: mx.example.com; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example\r\n\
+         BIMI-Location: v=BIMI1; l=http://127.0.0.1:{port}/logo.svg\r\nFrom: Brand <hello@brand.example>\r\nSubject: Hello\r\n\r\nHi.\r\n"
+    );
+    let uid = s.server.add_message("INBOX", &raw, &[]);
+    let plain = s.server.add_message("INBOX", &rfc822("No logo", "x"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    for message in [uid, plain] {
+        s.core.open_message(inbox, message).unwrap();
+        s.wait(|e| {
+            *e == Event::MessageReady {
+                folder: inbox,
+                uid: message,
+            }
+        });
+    }
+    assert!(s.core.message_view(inbox, uid, false).unwrap().unwrap().has_logo);
+    assert!(!s.core.message_view(inbox, plain, false).unwrap().unwrap().has_logo);
+    assert!(s.core.logo_start(inbox, plain, 32).is_err());
+    // drawn twice, fetched once
+    for _ in 0..2 {
+        let request = s.core.logo_start(inbox, uid, 32).unwrap();
+        s.wait(|e| *e == Event::LogoReady { request });
+        let pixels = s.core.logo_result(request).expect("the logo");
+        assert_eq!(pixels.len(), 32 * 32 * 4);
+        // blue, BGRA
+        assert_eq!(&pixels[(16 * 32 + 16) * 4..][..4], &[255, 0, 0, 255]);
+    }
+    assert_eq!(served.load(std::sync::atomic::Ordering::Relaxed), 1);
 }

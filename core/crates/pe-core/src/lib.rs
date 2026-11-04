@@ -6,6 +6,8 @@
 //! windows start runs on the workers and reports back as [`Event`]s, on a worker thread.
 #![forbid(unsafe_code)]
 
+mod authres;
+pub mod bimi;
 pub mod calendar;
 mod compose;
 mod fold;
@@ -62,6 +64,10 @@ pub enum Event {
     MessageReady {
         folder: FolderId,
         uid: u64,
+    },
+    /// The logo `request` ([`Core::logo_start`]) is drawn, or there was none: [`Core::logo_result`]
+    LogoReady {
+        request: u64,
     },
     /// The one-click unsubscribe `request` ([`Core::unsubscribe`]) is done, or failed for `problem`
     Unsubscribed {
@@ -229,6 +235,10 @@ pub struct Core {
     closed: Arc<AtomicBool>,
     /// Lookups of servers; None when the address has no domain
     autoconfig: Requests<Option<pe_autoconfig::Settings>>,
+    /// BIMI logos being drawn, as pixels once done
+    logos: Requests<Option<Vec<u8>>>,
+    /// The SVGs fetched from BIMI-Location for this run, by address (None: there was none to have)
+    logo_svgs: Arc<std::sync::Mutex<HashMap<String, Option<Vec<u8>>>>>,
     /// Message views built off the window thread: parsing, folding and sanitizing a large message takes a while
     views: Requests<Option<MessageView>>,
     /// The view request the reading pane waits for; an older one gives up
@@ -290,6 +300,8 @@ impl Core {
             }),
             closed,
             autoconfig: Requests::default(),
+            logos: Requests::default(),
+            logo_svgs: Arc::default(),
             views: Requests::default(),
             newest_view: Arc::default(),
             sign_ins: Requests::default(),
@@ -461,7 +473,9 @@ impl Core {
             .source_start(folder, uid, view::MAX_HEADER_TEXT)?
             .ok_or(Error::NotFound)?;
         let message = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?;
-        let Some(unsubscribe::Unsubscribe::OneClick { url }) = unsubscribe::of(&message.headers) else {
+        let Some(unsubscribe::Unsubscribe::OneClick { url }) =
+            unsubscribe::of(&message.headers, &self.trusted(folder)?)
+        else {
             return Err(Error::NotFound);
         };
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
@@ -509,6 +523,56 @@ impl Core {
     /// still running, or an unknown request
     pub fn autoconfig_result(&self, request: u64) -> Option<pe_autoconfig::Settings> {
         self.autoconfig.take(request).flatten()
+    }
+
+    /// The BIMI logo of a message ([`bimi::of`]) drawn `size` pixels square, in the background:
+    /// [`Event::LogoReady`] follows with the request this returns. The SVG of BIMI-Indicator is drawn as it is; one
+    /// at a BIMI-Location is fetched once a run, without cookies, at most [`bimi::MAX_SVG`]. Refused for a message
+    /// without a logo the receiving server passed, or not downloaded yet.
+    pub fn logo_start(&self, folder: FolderId, uid: u64, size: u32) -> Result<u64> {
+        let start = self
+            .store()
+            .source_start(folder, uid, view::MAX_HEADER_TEXT)?
+            .ok_or(Error::NotFound)?;
+        let headers = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?.headers;
+        let logo = bimi::of(&headers, &self.trusted(folder)?).ok_or(Error::NotFound)?;
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let svgs = self.logo_svgs.clone();
+        let work = async move {
+            let svg = match logo {
+                bimi::Logo::Indicator(svg) => Some(svg),
+                bimi::Logo::Location(url) => {
+                    let known = svgs.lock().unwrap_or_else(|p| p.into_inner()).get(&url).cloned();
+                    match known {
+                        Some(svg) => svg,
+                        None => {
+                            let fetched = match pe_net::http::get(&url, std::time::Duration::from_secs(15)).await {
+                                Ok(response) if response.status == 200 && response.body.len() <= bimi::MAX_SVG => {
+                                    Some(response.body)
+                                }
+                                _ => None,
+                            };
+                            svgs.lock()
+                                .unwrap_or_else(|p| p.into_inner())
+                                .insert(url, fetched.clone());
+                            fetched
+                        }
+                    }
+                }
+            };
+            svg.and_then(|svg| bimi::render(&svg, size))
+        };
+        self.logos
+            .start(self.runtime()?, request, work, self.events.clone(), |request| {
+                Event::LogoReady { request }
+            });
+        Ok(request)
+    }
+
+    /// The pixels of a drawn logo (BGRA, the alpha multiplied in, `size` x `size`), taken once; None when there was
+    /// none to draw or it is not done
+    pub fn logo_result(&self, request: u64) -> Option<Vec<u8>> {
+        self.logos.take(request).flatten()
     }
 
     /// Stops a lookup the user no longer waits for, and forgets it
@@ -631,18 +695,29 @@ impl Core {
     }
 
     /// The source of a message and the date the server got it, for a view
-    fn view_source(&self, folder: FolderId, uid: u64) -> Result<Option<(Vec<u8>, Option<i64>)>> {
+    fn view_source(&self, folder: FolderId, uid: u64) -> Result<Option<ViewSource>> {
         let store = self.store();
         let received = store.message(folder, uid)?.and_then(|m| m.info.internal_date);
-        Ok(store.source(folder, uid)?.map(|source| (source, received)))
+        // with the store at hand: trusted() takes it again
+        let trusted = authres::trusted(&store.account(store.folder(folder)?.account_id)?.settings);
+        Ok(store.source(folder, uid)?.map(|source| (source, received, trusted)))
+    }
+
+    /// The domains whose verdicts in a message's headers (Authentication-Results) the provider of the folder's
+    /// account gives
+    fn trusted(&self, folder: FolderId) -> Result<Vec<String>> {
+        let store = self.store();
+        Ok(authres::trusted(
+            &store.account(store.folder(folder)?.account_id)?.settings,
+        ))
     }
 
     /// The message as the preview shows it, None when its source is not in the store yet. Built on the calling
     /// thread, for tests and tools; the windows use [`Core::message_view_start`].
     pub fn message_view(&self, folder: FolderId, uid: u64, allow_remote_images: bool) -> Result<Option<MessageView>> {
-        Ok(self
-            .view_source(folder, uid)?
-            .and_then(|(source, received)| finish_view(&source, received, allow_remote_images, &|| false)))
+        Ok(self.view_source(folder, uid)?.and_then(|(source, received, trusted)| {
+            finish_view(&source, received, allow_remote_images, &trusted, &|| false)
+        }))
     }
 
     /// Builds the view of a message in the background: [`Event::ViewReady`] follows with the request this returns.
@@ -654,10 +729,11 @@ impl Core {
         self.newest_view.store(request, Ordering::Relaxed);
         let newest = self.newest_view.clone();
         let work = async move {
-            let (source, received) = found?;
+            let (source, received, trusted) = found?;
             let dropped = move || newest.load(Ordering::Relaxed) != request;
-            let built =
-                tokio::task::spawn_blocking(move || finish_view(&source, received, allow_remote_images, &dropped));
+            let built = tokio::task::spawn_blocking(move || {
+                finish_view(&source, received, allow_remote_images, &trusted, &dropped)
+            });
             built.await.ok().flatten()
         };
         self.views
@@ -1158,13 +1234,17 @@ impl Drop for Core {
 
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
 /// give up
+/// The source of a message, the date the server got it, and the domains whose verdicts its account trusts
+type ViewSource = (Vec<u8>, Option<i64>, Vec<String>);
+
 fn finish_view(
     source: &[u8],
     received: Option<i64>,
     allow_remote_images: bool,
+    trusted: &[String],
     dropped: &dyn Fn() -> bool,
 ) -> Option<MessageView> {
-    let mut view = view::build_unless(source, allow_remote_images, dropped)?;
+    let mut view = view::build_unless(source, allow_remote_images, trusted, dropped)?;
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(received);
     Some(view)

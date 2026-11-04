@@ -31,6 +31,8 @@ pub struct MessageView {
     pub unsubscribe: Option<crate::unsubscribe::Unsubscribe>,
     /// The event of its calendar part (an invitation, an update, a cancellation), None without one
     pub invitation: Option<crate::calendar::Invitation>,
+    /// The brand has a BIMI logo the receiving server passed ([`crate::Core::logo_start`] draws it)
+    pub has_logo: bool,
 }
 
 /// The calendar part of a message (`text/calendar`, `application/ics`)
@@ -47,13 +49,14 @@ fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
 
 #[cfg(test)]
 pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
-    build_unless(source, allow_remote_images, &|| false).unwrap_or_default()
+    build_unless(source, allow_remote_images, &[], &|| false).unwrap_or_default()
 }
 
 /// [`build`], given up (None) between its steps once `dropped` says nobody waits for it anymore
 pub(crate) fn build_unless(
     source: &[u8],
     allow_remote_images: bool,
+    trusted: &[String],
     dropped: &dyn Fn() -> bool,
 ) -> Option<MessageView> {
     let options = RenderOptions { allow_remote_images };
@@ -108,7 +111,8 @@ pub(crate) fn build_unless(
                 size: a.content.len() as u64,
             })
             .collect(),
-        unsubscribe: crate::unsubscribe::of(&message.headers),
+        unsubscribe: crate::unsubscribe::of(&message.headers, trusted),
+        has_logo: crate::bimi::of(&message.headers, trusted).is_some(),
         invitation: calendar_part(&message.attachments).and_then(|part| {
             crate::calendar::invitation(&String::from_utf8_lossy(&part.content), part.method.as_deref())
         }),
@@ -204,15 +208,15 @@ mod tests {
 
     #[test]
     fn a_view_nobody_waits_for_gives_up() {
-        assert!(build_unless(MESSAGE, false, &|| true).is_none());
-        assert!(build_unless(MESSAGE, false, &|| false).is_some());
+        assert!(build_unless(MESSAGE, false, &[], &|| true).is_none());
+        assert!(build_unless(MESSAGE, false, &[], &|| false).is_some());
         // once it is dropped halfway, after parsing
         let asked = std::cell::Cell::new(0);
         let dropped = || {
             asked.set(asked.get() + 1);
             asked.get() > 1
         };
-        assert!(build_unless(MESSAGE, false, &dropped).is_none());
+        assert!(build_unless(MESSAGE, false, &[], &dropped).is_none());
     }
 
     #[test]

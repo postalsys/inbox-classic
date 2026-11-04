@@ -373,6 +373,12 @@ private:
     HWND searchBar_ = nullptr;
     // the Unsubscribe link, and how the message shown lets its reader leave its list (PeMessageInfo)
     HWND unsubscribe_ = nullptr;
+    // the BIMI logo of the message shown, once the core drew it, and the request it was drawn for
+    HWND logo_ = nullptr;
+    HBITMAP logoBitmap_ = nullptr;
+    uint64_t logoRequest_ = 0;
+    int logoSize_ = 0;
+    void ShowLogo(bool wanted);
     // the event of the message shown, its two lines as the bar shows them
     HWND invitation_ = nullptr;
     HWND openCalendar_ = nullptr;
@@ -507,6 +513,8 @@ enum CommandId : WORD {
     // under the header of a message with a calendar part: the event, and a button that opens it in the calendar
     IDC_INVITATION,
     IDC_OPEN_CALENDAR,
+    // at the left of the message header: the brand's BIMI logo
+    IDC_LOGO,
     IDM_FIND = 120,
     IDM_SAVE_AS,
     IDM_PRINT,

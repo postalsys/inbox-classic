@@ -234,6 +234,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     unsubscribe_ = CreateChild(parent, L"STATIC", L"Unsubscribe", SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
     ShowWindow(unsubscribe_, SW_HIDE);
     invitation_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_INVITATION, {});
+    logo_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW, IDC_LOGO, {});
+    ShowWindow(logo_, SW_HIDE);
     openCalendar_ = CreateChild(parent, L"BUTTON", L"Open in Calendar", WS_TABSTOP | BS_PUSHBUTTON, IDC_OPEN_CALENDAR, {});
     ShowWindow(invitation_, SW_HIDE);
     ShowWindow(openCalendar_, SW_HIDE);
@@ -272,6 +274,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
 }
 
 void Mailbox::Destroy() {
+    if (logoBitmap_) {
+        DeleteObject(logoBitmap_);
+        logoBitmap_ = nullptr;
+    }
     preview_.Close();
     view_.reset();
     pages_.clear();
@@ -391,9 +397,14 @@ void Mailbox::LayoutReader() {
         SendMessageW(attachments_, TB_AUTOSIZE, 0, 0);
         SendMessageW(attachments_, TB_GETITEMRECT, 0, reinterpret_cast<LPARAM>(&button));
     }
-    // the header to the paper clip, which is as wide as its button
+    // the header to the paper clip, which is as wide as its button; the brand's logo, when there is one, at its left
     int clipWidth = files ? static_cast<int>(button.right - button.left) + Scale(8) : 0;
-    MoveWindow(header_, reader.left, reader.top, width - clipWidth, headerHeight, TRUE);
+    int logoWidth = 0;
+    if (IsWindowVisible(logo_)) {
+        logoWidth = logoSize_ + Scale(12);
+        MoveWindow(logo_, reader.left, reader.top, logoWidth - Scale(4), headerHeight, TRUE);
+    }
+    MoveWindow(header_, reader.left + logoWidth, reader.top, width - clipWidth - logoWidth, headerHeight, TRUE);
     // Unsubscribe at the right end of the Subject line, inside the header's edge
     if (IsWindowVisible(unsubscribe_)) {
         int linkWidth = LinkWidth(unsubscribe_) + Scale(8), edge = GetSystemMetrics(SM_CXEDGE);
@@ -753,6 +764,7 @@ void Mailbox::ClearReader(bool loading) {
     unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
     ShowWindow(unsubscribe_, SW_HIDE);
     ShowInvitation(nullptr);
+    ShowLogo(false);
     // says so rather than a blank pane, unless a message is about to be shown
     preview_.Clear(!loading);
 }
@@ -819,6 +831,7 @@ void Mailbox::ShowView() {
     unsubscribeTarget_ = Text(info->unsubscribe_target);
     ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
     ShowInvitation(info->invitation);
+    ShowLogo(info->has_logo);
     LayoutReader();
     InvalidateRect(unsubscribe_, nullptr, TRUE);
     preview_.Show(Text(info->document), remoteImages_);
@@ -1020,6 +1033,20 @@ std::wstring When(const PeInvitation& event) {
     return event.floating ? when + L" (the sender's time)" : when;
 }
 }  // namespace
+
+// the logo is asked for when the message has one the server passed, and shown once it is drawn (LogoReady)
+void Mailbox::ShowLogo(bool wanted) {
+    if (logoBitmap_) {
+        DeleteObject(logoBitmap_);
+        logoBitmap_ = nullptr;
+    }
+    logoRequest_ = 0;
+    ShowWindow(logo_, SW_HIDE);
+    if (wanted) {
+        logoSize_ = Scale(48);
+        logoRequest_ = pe_logo_start(core_, messageFolder_, uid_, static_cast<uint32_t>(logoSize_));
+    }
+}
 
 void Mailbox::ShowInvitation(const PeInvitation* event) {
     if (!event) {
@@ -1489,6 +1516,21 @@ void Mailbox::PlaceFind(const RECT& row) {
 }
 
 bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
+    if (item.hwndItem == logo_) {
+        // the logo, its own transparency kept, in the middle of its place beside the header
+        FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
+        if (logoBitmap_) {
+            HDC source = CreateCompatibleDC(item.hDC);
+            HGDIOBJ old = SelectObject(source, logoBitmap_);
+            BLENDFUNCTION blend = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
+            int x = (item.rcItem.left + item.rcItem.right - logoSize_) / 2;
+            int y = (item.rcItem.top + item.rcItem.bottom - logoSize_) / 2;
+            AlphaBlend(item.hDC, x, y, logoSize_, logoSize_, source, 0, 0, logoSize_, logoSize_, blend);
+            SelectObject(source, old);
+            DeleteDC(source);
+        }
+        return true;
+    }
     if (item.hwndItem == invitation_) {
         // the calendar, then the event in two lines, on the information bar's yellow
         RECT area = item.rcItem;
@@ -1845,6 +1887,30 @@ void Mailbox::OnEvent(const UiEvent& event) {
         // a view for a message that is no longer selected was cancelled, its event is not this one
         if (viewRequest_ && event.uid == viewRequest_) {
             ShowView();
+        }
+        break;
+    case PE_EVENT_KIND_LOGO_READY:
+        if (logoRequest_ && event.uid == logoRequest_) {
+            logoRequest_ = 0;
+            size_t length = 0;
+            uint8_t* pixels = pe_logo_result(core_, event.uid, &length);
+            size_t expected = static_cast<size_t>(logoSize_) * logoSize_ * 4;
+            if (pixels && length == expected) {
+                // the core's pixels, BGRA with the alpha multiplied in, as AlphaBlend takes them
+                BITMAPINFO info = {};
+                info.bmiHeader = {sizeof(BITMAPINFOHEADER), logoSize_, -logoSize_, 1, 32, BI_RGB};
+                void* bits = nullptr;
+                logoBitmap_ = CreateDIBSection(nullptr, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
+                if (logoBitmap_ && bits) {
+                    memcpy(bits, pixels, expected);
+                    ShowWindow(logo_, SW_SHOW);
+                    LayoutReader();
+                    InvalidateRect(logo_, nullptr, TRUE);
+                }
+            }
+            if (pixels) {
+                pe_bytes_free(pixels, length);
+            }
         }
         break;
     default:
