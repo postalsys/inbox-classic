@@ -60,7 +60,12 @@ node scripts/notices.mjs --mac "$APP/Contents/Resources"
 
 # inside out: Sparkle's helpers, its framework, the app's executable, the bundle
 sign() {
-    codesign --force --timestamp --options runtime --sign "$IDENTITY" "$@"
+    if [ "$IDENTITY" = "-" ]; then
+        # ad hoc: no hardened runtime, whose library validation wants every part signed by one team
+        codesign --force --sign - "$@"
+    else
+        codesign --force --timestamp --options runtime --sign "$IDENTITY" "$@"
+    fi
 }
 SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
 for helper in "$SPARKLE"/Versions/B/XPCServices/*.xpc "$SPARKLE/Versions/B/Autoupdate" "$SPARKLE/Versions/B/Updater.app"; do
