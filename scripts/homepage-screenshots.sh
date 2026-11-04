@@ -37,10 +37,15 @@ for platform in "${platforms[@]}"; do
                 magick "$source" -crop "${width}x${height}+7+0" +repage -strip "$target"
                 ;;
             mac)
-                magick "$source" -resize 50% -strip "$target"
+                # the compose window, as on Windows, down to its fields and the start of the text
+                crop=""
+                [ "$shot" = write-5-new ] && crop="-crop x400+0+0 +repage"
+                magick "$source" -resize 50% $crop -strip "$target"
                 ;;
             linux)
-                magick "$source" -strip "$target"
+                crop=""
+                [ "$shot" = write-5-new ] && crop="-crop x400+0+0 +repage"
+                magick "$source" $crop -strip "$target"
                 ;;
         esac
         echo "$target $(magick identify -format '%wx%h' "$target")"

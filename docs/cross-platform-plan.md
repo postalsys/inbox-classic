@@ -4,6 +4,16 @@ A plan for a Mac version and a Linux version of Inbox Classic, written 2026-11-0
 
 The short version: the Rust core (47,600 lines in `core/`, everything that touches mail data) already builds and passes its tests on macOS and Linux in CI. What a new platform needs is a new shell of about the size of the Windows one (`app/`, 8,600 lines of C++), a password backend for that platform in the core, and a build, test and release path. Each shell is native: Swift and AppKit on the Mac, Rust and GTK 4 on Linux, nothing shared between the three beyond the core. The last part of the plan is how three shells stay in step once all three exist.
 
+## What changed while building it
+
+The apps were built as planned, with these departures:
+
+- **No Xcode project, no XCUITest, no dogtail.** The Mac app is a Swift package built with the command line tools (`scripts/mac-build.sh` assembles the bundle). Both UI end-to-end tests run the real app in their own process and drive its windows from inside: the Mac's as a second executable in the bundle (`mac/Sources/InboxClassic/UITest.swift`), Linux's built in with the `e2e` feature. That needs no accessibility or screen recording permission, runs the same here and on CI, and captures each window (the web views' content included) to the same screenshot names as the Windows test. The system's file panels run in processes of their own, so the tests answer them in their place.
+- **Sparkle from its release, not through SwiftPM.** The package manager's download of Sparkle's binary stalled; the framework comes from the release tarball the release script downloads anyway (`build/sparkle`).
+- **The ad hoc development build has no hardened runtime**: its library validation refuses Sparkle when the app has no team. The release package (`scripts/mac-package.sh`) signs everything with the Developer ID and the hardened runtime.
+- **The core's events on the Mac go through run-loop blocks**, not the main dispatch queue: a modal window run from a block of that queue holds up every other block until it closes.
+- **The shared help, commands and texts** came out as planned (`pe_help_page`, `core/commands.toml`, `pe-core/src/text.rs`); `lintian` is not run on the `.deb`s, the boot test in a clean container is.
+
 ## Decisions, confirmed 2026-11-04
 
 1. **Native look on the Mac and on Linux.** The Outlook Express look comes almost free from the classic Win32 controls; AppKit and GTK would have to fake it, and that is the opposite of using native elements. On the Mac and on Linux the app is a standard three-pane mail client with the same layout, features, icons and words, sold on what the core does (the security model, the search, the folding, offline mail), not on the retro look. On Linux that means a libadwaita header bar, not a classic menu bar.

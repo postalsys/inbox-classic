@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Inbox Classic is a Windows email client that looks like Outlook Express. It is a sibling of ImapKit Desktop (`../imapkit-win`), which has the same classic Win32 look but runs a Node.js sidecar. Inbox Classic has no sidecar: IMAP, SMTP and MIME run in-process in a Rust core.
+Inbox Classic is an email client for Windows, the Mac and Linux. On Windows it looks like Outlook Express; on the Mac (AppKit) and Linux (GTK 4 and libadwaita) it looks native to the system, with the same layout, features and words. It is a sibling of ImapKit Desktop (`../imapkit-win`), which has the same classic Win32 look but runs a Node.js sidecar. Inbox Classic has no sidecar: IMAP, SMTP and MIME run in-process in a Rust core, the same for all three apps.
 
 The homepage, https://inboxclassic.com, is a static page in its own public repo `postalsys/inboxclassic.com` (`../inboxclassic.com`), served by GitHub Pages; its DNS is in Cloudflare. Its screenshots come from `build/ui-e2e`; refresh them when the windows change. The app repo is `postalsys/inbox-classic` (renamed from postal-express; the build machine's checkout path and this local folder keep the old name).
 
@@ -49,6 +49,18 @@ Toolbar icons are Fluent UI System Icons (MIT): the SVGs in `app/res/icons`, tur
 
 The app version is the `[workspace.package] version` of `core/Cargo.toml`. CMake reads the first `version = "x.y.z"` line of that file, so keep `[workspace.package]` at the top.
 
+## Three apps
+
+Windows (`app/`, C++ and Win32), the Mac (`mac/`, Swift and AppKit on the C API) and Linux (`linux/`, Rust and GTK 4 on `pe-core` directly) are three thin windows on the one core. `docs/shells.md` says where each feature lives on each; `docs/cross-platform-plan.md` is the plan they were built from.
+
+- **A feature lands on all three in the same pull request.** The order of work: the core and its tests; `core/commands.toml` (a command of the menus) or the C API; the three apps; the step of each platform's UI end-to-end test and its entry in `scripts/feature-map.mjs`; the help (`core/crates/pe-html/src/help.html`, `<!--os:mac-->...<!--/os-->` where the platforms differ). `scripts/check-shells.sh` fails a PR that changes the C API, the commands or the feature list without changing `app/`, `mac/` and `linux/`, unless it is labelled `shells: partial` and says what is left; `feature-map.mjs --check <platform>` fails a platform whose test does not show a feature, unless `notYet` lists it.
+- **The core computes, the apps show.** Every string, count and decision from mail data comes from the core (sizes, account labels and folder names are in `pe-core/src/text.rs`); an app reads values and calls operations. Logic needed by all three goes in the core once.
+- **Commands** come from `core/commands.toml`: generated into `core/include/commands.h`, `mac/Sources/InboxClassic/Generated/Commands.swift` and `linux/src/generated/commands.rs` by pe-ffi's `build.rs` (committed; CI checks they match). Each app handles the enum in one exhaustive switch, so a new command fails the build of an app that does not handle it.
+- **Web views**: WebView2 serves the documents at `https://*.inboxclassic.invalid/`, WKWebView and WebKitGTK from the scheme `inboxclassic:`; all three block every other load (WebView2 by its request filter, WebKit by `pe_webkit_content_rules`), and only the editor page runs a script.
+- **The Mac**: `scripts/mac-build.sh` builds `build/mac/Inbox Classic.app` (Swift package in `mac/`, no Xcode project; Sparkle 2.10 from its release in `build/sparkle`; ad hoc signed, no hardened runtime), `scripts/mac-ui-e2e.sh` runs its UI test, which hosts the app in-process and drives its windows (no accessibility or screen recording permission needed; the system's file panels are answered by `TestHooks`), screenshots in `build/ui-e2e-mac`. `scripts/mac-package.sh` makes the signed, notarized `dist/InboxClassic.dmg`. The core's events reach the windows through run-loop blocks in the common modes (`onMain` in `Core.swift`), never `DispatchQueue.main`, whose blocks stop while a modal window runs.
+- **Linux**: `scripts/linux-build.sh`, `linux-test.sh`, `linux-ui-e2e.sh` and `linux-package.sh` run in Docker (`linux/Dockerfile`, Ubuntu 26.04; arm64 natively, amd64 through Rosetta); the UI test is built in with the `e2e` feature and runs under Xvfb, screenshots in `build/ui-e2e-linux`. `scripts/linux-vm.sh` runs an Ubuntu Desktop VM in QEMU for what only a desktop shows (the tray, notifications, the dock).
+- **The homepage** shows each visitor their platform's download and screenshots; `scripts/homepage-screenshots.sh` refreshes the screenshots of all three from the UI tests' runs.
+
 ## Commands
 
 Rust, on the Mac or anywhere:
@@ -79,7 +91,7 @@ To drive the UI for a check, run these on the build machine through a scheduled 
 
 `PE_NETWORK_TESTS=1` enables the tests that need the internet (`pe-autoconfig/tests/live.rs`); CI sets it on Linux.
 
-Releases: release-please keeps a release PR on master (`release-please-config.json`, `.github/workflows/release.yaml`, which also updates `Cargo.lock` on it); merging it drafts the release and pushes the tag, then `scripts/release.sh` on the Mac, from the tag, builds and signs the installer, writes a GPG-signed `hashes.txt`, uploads both and publishes the draft. The homepage links `releases/latest/download/InboxClassic-Setup.exe`.
+Releases: release-please keeps a release PR on master (`release-please-config.json`, `.github/workflows/release.yaml`, which also updates `core/Cargo.lock` and `linux/Cargo.lock` on it and the version in `linux/Cargo.toml`); merging it drafts the release and pushes the tag, then `scripts/release.sh` on the Mac, from the tag, builds the Windows installer (on the build machine), the Mac disk image (signed and notarized) and the two Linux packages (in Docker), starts each with `--version`, writes a GPG-signed `hashes.txt`, uploads them and publishes the draft, then puts the Mac update (Sparkle's `appcast.xml`, signed with the key `generate_keys --account inbox-classic` keeps in the release Mac's keychain) on the homepage. `PLATFORMS=mac` rebuilds one platform to finish a release one of whose builds failed. The homepage links `releases/latest/download/` `InboxClassic-Setup.exe`, `InboxClassic.dmg`, `InboxClassic-amd64.deb` and `InboxClassic-arm64.deb`.
 
 `scripts/build-installer.sh` builds `dist/InboxClassic-Setup.exe` (NSIS, `installer/inbox-classic.nsi`, per user, no admin rights) with `THIRD-PARTY-NOTICES.txt` from `scripts/notices.mjs`; it signs the exe, the uninstaller and the installer with Azure Artifact Signing (`scripts/sign-win.sh`) when `SIGN_WIN_ACCOUNT` and `SIGN_WIN_PROFILE` are set.
 
@@ -87,6 +99,6 @@ On Windows itself: `scripts\win-build.cmd` and `scripts\win-test.cmd`. Both call
 
 Screenshots need a logged-in desktop session that is not disconnected or locked; check with `ssh andri@10.8.0.8 query user` (`Active`, not `Disc`). In a disconnected session they come out blank white.
 
-CI (`.github/workflows/ci.yml`) runs fmt, clippy with `-D warnings`, a check that the committed C header matches the build, the Rust tests on Linux, Windows and macOS, and the app build on Windows (artifact `InboxClassic-win-x64`). Markdown and YAML are formatted with prettier (`npx prettier --write`, config in `.prettierrc.json`).
+CI (`.github/workflows/ci.yml`) runs fmt, clippy with `-D warnings`, a check that the committed C header and command tables match the build, the Rust tests on Linux, Windows and macOS, and each app's build and UI end-to-end test with its feature check: Windows (artifact `InboxClassic-win-x64`), the Mac on `macos-26` (`InboxClassic-mac-arm64`, signed ad hoc), Linux in an `ubuntu:26.04` container (`InboxClassic-linux-amd64`); on pull requests also `scripts/check-shells.sh`. Markdown and YAML are formatted with prettier (`npx prettier --write`, config in `.prettierrc.json`).
 
 For test IMAP and SMTP accounts use Ethereal (see the global instructions) or ImapKit (`../imapkit`, `../imapkit-win`).

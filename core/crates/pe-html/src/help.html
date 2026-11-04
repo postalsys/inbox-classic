@@ -230,7 +230,7 @@
                 message; otherwise it writes the message the list wants for you to send, or opens the list's page in your browser.
             </li>
             <li>
-                <b>File &gt; Properties</b> (<kbd>Alt</kbd>+<kbd>Enter</kbd>) shows the Internet headers of the message: who sent it, through which servers, and
+                <b>File &gt; Properties</b> (<!--os:windows,linux--><kbd>Alt</kbd>+<kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd><!--/os-->) shows the Internet headers of the message: who sent it, through which servers, and
                 when.
             </li>
             <li>Click a column heading to sort by it; click it again to reverse the order.</li>
@@ -411,7 +411,7 @@
 
         <h2>5. Getting new mail</h2>
         <p>
-            Inbox Classic checks every account when it starts and every ten minutes after that. Click <b>Send/Recv</b> or press <kbd>F5</kbd> to check now; the
+            Inbox Classic checks every account when it starts and every ten minutes after that. Click <b>Send/Recv</b> or press <!--os:windows,linux--><kbd>F5</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd><!--/os--> to check now; the
             arrow beside <b>Send/Recv</b> checks a single account, and the one beside <b>Create Mail</b> starts a message from the account you choose. The
             status bar at the bottom shows what it is doing and the last problem it had.
         </p>
@@ -439,10 +439,17 @@
                 <th>Keys</th>
                 <th>Does</th>
             </tr>
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>F5</kbd></td>
                 <td>Check all accounts for new mail</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td>
+                <td>Check all accounts for new mail</td>
+            </tr>
+            <!--/os-->
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>N</kbd></td>
                 <td>New message</td>
@@ -455,38 +462,87 @@
                 <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td>
                 <td>Reply to all</td>
             </tr>
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
                 <td>Forward</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
+                <td>Forward</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td>
                 <td>Mark the message read</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd></td>
+                <td>Mark the message read</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>J</kbd></td>
                 <td>Mark the message as junk</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd></td>
+                <td>Mark the message as junk</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
                 <td>Mark every message of the folder read</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+                <td>Mark every message of the folder read</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
                 <td>Find messages in the folder</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
+                <td>Find messages in the folder</td>
+            </tr>
+            <!--/os-->
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>P</kbd></td>
                 <td>Print the message</td>
             </tr>
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>Alt</kbd>+<kbd>Enter</kbd></td>
                 <td>The headers of the message (Properties)</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd></td>
+                <td>The headers of the message (Properties)</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>Del</kbd></td>
                 <td>Delete the message (in the message list)</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Delete</kbd></td>
+                <td>Delete the message (in the message list)</td>
+            </tr>
+            <!--/os-->
             <tr>
                 <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd></td>
                 <td>Move the message to another folder</td>
@@ -503,10 +559,17 @@
                 <td><kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd></td>
                 <td>Bold, italic, underline while writing</td>
             </tr>
+            <!--os:windows,linux-->
             <tr>
                 <td><kbd>F1</kbd></td>
                 <td>This help</td>
             </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>?</kbd></td>
+                <td>This help</td>
+            </tr>
+            <!--/os-->
             <tr>
                 <td><kbd>Tab</kbd></td>
                 <td>Move between the folders, the message list and the fields of a window</td>
