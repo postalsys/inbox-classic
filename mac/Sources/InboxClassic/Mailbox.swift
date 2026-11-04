@@ -562,8 +562,10 @@ public final class Mailbox: NSObject {
         guard newUid != 0 else { return }
         uid = newUid
         messageFolder = newFolder
-        reader.showLoading()
-        // MessageReady follows, right away when the message is cached
+        if let row {
+            reader.showLoading(row)
+        }
+        // MessageReady follows, right away when the message is cached, or MessageFailed
         pe_message_open(core.handle, newFolder, newUid)
     }
 
@@ -602,6 +604,13 @@ public final class Mailbox: NSObject {
                 self.markSelected(seen: true)
             }
         }
+    }
+
+    /// Try Again, or the account synced again after the message could not be downloaded
+    func retryDownload() {
+        guard uid != 0 else { return }
+        reader.showDownloading()
+        pe_message_open(core.handle, messageFolder, uid)
     }
 
     func loadPictures() {
@@ -969,7 +978,12 @@ public final class Mailbox: NSObject {
             }
         case PE_EVENT_KIND_MESSAGE_READY:
             if event.folder == messageFolder && event.uid == uid {
+                reader.arrived()
                 showMessage()
+            }
+        case PE_EVENT_KIND_MESSAGE_FAILED:
+            if event.folder == messageFolder && event.uid == uid {
+                reader.showFailed(kind: event.failure, reason: event.message)
             }
         case PE_EVENT_KIND_VIEW_READY:
             // a view for a message that is no longer selected was cancelled, its event is not this one
@@ -986,6 +1000,11 @@ public final class Mailbox: NSObject {
         case PE_EVENT_KIND_SYNC_FINISHED:
             // how much text the search still has to read
             updateSearchBar()
+            // the account is back: a message it could not give is tried again
+            if event.failure == PE_FAILURE_KIND_NONE, reader.showsFailure,
+               folderNodes[messageFolder]?.folder.account == event.account {
+                retryDownload()
+            }
         default:
             break
         }

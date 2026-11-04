@@ -309,6 +309,8 @@ impl Mailbox {
         clear.connect_clicked(move |_| cleared());
         let pictures = on(|this| this.load_pictures());
         self.reader.download_pictures.connect_clicked(move |_| pictures());
+        let again = on(|this| this.retry_download());
+        self.reader.try_again.connect_clicked(move |_| again());
         let calendar = on(|this| {
             let this = this.clone();
             spawn(async move { this.open_in_calendar().await });
@@ -683,9 +685,20 @@ impl Mailbox {
         }
         self.uid.set(uid);
         self.message_folder.set(folder);
-        self.reader.loading();
-        // MessageReady follows, right away when the message is cached
+        if let Some((_, message)) = &selected {
+            self.reader.loading(&message.info);
+        }
+        // MessageReady follows, right away when the message is cached, or MessageFailed
         let _ = shell().core.open_message(folder, uid);
+    }
+
+    /// Try Again, or the account synced again after the message could not be downloaded
+    fn retry_download(&self) {
+        if self.uid.get() == 0 {
+            return;
+        }
+        self.reader.downloading();
+        let _ = shell().core.open_message(self.message_folder.get(), self.uid.get());
     }
 
     /// The reading pane emptied; with "There is no message selected." in it unless a message is `loading`
@@ -991,7 +1004,18 @@ impl Mailbox {
             }
             Event::MessageReady { folder, uid } => {
                 if *folder == self.message_folder.get() && *uid == self.uid.get() {
+                    self.reader.stop_downloading_note();
                     self.show_message_view();
+                }
+            }
+            Event::MessageFailed {
+                folder,
+                uid,
+                kind,
+                message,
+            } => {
+                if *folder == self.message_folder.get() && *uid == self.uid.get() {
+                    self.reader.not_downloaded(*kind, message);
                 }
             }
             Event::ViewReady { request } => {
@@ -1006,7 +1030,14 @@ impl Mailbox {
                     self.reader.show_logo(shell().core.logo_result(*request), LOGO_SIZE);
                 }
             }
-            Event::SyncFinished { .. } => self.show_folder_name(),
+            Event::SyncFinished { account, failure } => {
+                self.show_folder_name();
+                // the account is back: a message it could not give is tried again
+                let failed_here = self.folder_accounts.borrow().get(&self.message_folder.get()) == Some(account);
+                if failure.is_none() && self.reader.shows_failure() && failed_here {
+                    self.retry_download();
+                }
+            }
             _ => {}
         }
     }

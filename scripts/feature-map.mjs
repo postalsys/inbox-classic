@@ -277,6 +277,20 @@ const sections = [
                 checked: ['The bar appears for a message with such pictures, not for others', 'A click shows the pictures and the bar goes away']
             },
             {
+                shot: 'read-13-downloading',
+                name: 'Messages being downloaded',
+                what: 'A message is downloaded when it is opened, on a connection of its own, so it does not wait behind a long sync of a new account. Its header shows at once from the list; should the message take longer than a moment, the pane says it is being downloaded.',
+                how: 'Select a message that was not downloaded yet.',
+                checked: ["The header shows the message's sender and subject at once", 'The pane says the message is being downloaded']
+            },
+            {
+                shot: 'read-12-not-downloaded',
+                name: 'Messages that could not be downloaded',
+                what: 'When the server can not be reached, the pane says why in words (the server, the sign-in or a secure connection), and a bar offers to try again. The message is tried again by itself once the account syncs.',
+                how: 'Click the bar (Try Again on the Mac and Linux), or wait for the account to be back online.',
+                checked: ['A message that can not be downloaded says why, with Try Again', 'Once the account is back the message shows by itself']
+            },
+            {
                 shot: 'read-3-attachments',
                 name: 'Attachments',
                 what: 'The paper clip at the right of the header, with how many files there are, lists them with their sizes; Save Attachments saves them all into a folder, a file already there kept and the new one numbered. Files are saved, never opened from here. Names are made safe in Rust: no folder parts, no characters Windows forbids, nothing that makes a name look like something else.',

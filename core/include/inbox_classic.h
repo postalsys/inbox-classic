@@ -15,9 +15,31 @@
 // (test runs, a shared computer)
 #define PE_OPEN_MEMORY_PASSWORDS 1
 
+// What the reading pane shows instead of a message (`pe_reader_page`)
+typedef enum PeReaderState {
+  // No message is selected
+  PE_READER_STATE_NO_MESSAGE = 0,
+  // The message selected is being downloaded (after `pe_message_open`, before `MessageReady`)
+  PE_READER_STATE_DOWNLOADING = 1,
+  // It could not be downloaded (`MessageFailed`): `failure` and `reason` are the event's
+  PE_READER_STATE_FAILED = 2,
+} PeReaderState;
+
+typedef enum PeFailureKind {
+  PE_FAILURE_KIND_NONE = 0,
+  // Not reachable now, try again later
+  PE_FAILURE_KIND_NETWORK = 1,
+  // TLS failed
+  PE_FAILURE_KIND_SECURITY = 2,
+  // The password was refused, or there is none
+  PE_FAILURE_KIND_AUTHENTICATION = 3,
+  PE_FAILURE_KIND_OTHER = 4,
+} PeFailureKind;
+
 typedef enum PeEventKind {
   PE_EVENT_KIND_SYNC_STARTED = 1,
-  // Comes after everything the sync found, failures included
+  // Comes after everything the sync found, failures included; `failure` is what kept it from finishing, `None`
+  // when it did (the account is online)
   PE_EVENT_KIND_SYNC_FINISHED = 2,
   // The folder list of `account` changed
   PE_EVENT_KIND_FOLDERS_CHANGED = 3,
@@ -49,18 +71,10 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_UNSUBSCRIBED = 15,
   // The logo `uid` of `pe_logo_start` is drawn, or there was none: `pe_logo_result`
   PE_EVENT_KIND_LOGO_READY = 16,
+  // `folder`/`uid` (opened with `pe_message_open`) could not be downloaded: `failure` and `message` say why, for
+  // `pe_reader_page`. Opening it again tries again
+  PE_EVENT_KIND_MESSAGE_FAILED = 17,
 } PeEventKind;
-
-typedef enum PeFailureKind {
-  PE_FAILURE_KIND_NONE = 0,
-  // Not reachable now, try again later
-  PE_FAILURE_KIND_NETWORK = 1,
-  // TLS failed
-  PE_FAILURE_KIND_SECURITY = 2,
-  // The password was refused, or there is none
-  PE_FAILURE_KIND_AUTHENTICATION = 3,
-  PE_FAILURE_KIND_OTHER = 4,
-} PeFailureKind;
 
 typedef enum PeSecurity {
   // TLS from the start (993, 465)
@@ -530,6 +544,19 @@ char *pe_help_page(const char *platform);
 // blocked but the app's own `inboxclassic:` documents, `cid:` and `data:`, and with `allow_remote_images` the
 // message's pictures from the internet. Free with `pe_string_free`.
 char *pe_webkit_content_rules(bool allow_remote_images);
+
+// The page of the reading pane for `state`, the same words on every platform: a document to show as the messages
+// are shown. `failure` and `reason` (NULL for none) are those of `MessageFailed`, for `Failed`. Free with
+// `pe_string_free`.
+//
+// # Safety
+// `reason` must be NULL or a NUL-terminated string.
+char *pe_reader_page(enum PeReaderState state,
+                     enum PeFailureKind failure,
+                     const char *reason);
+
+// What the windows say beside Try Again over a message that could not be downloaded. Free with `pe_string_free`.
+char *pe_retry_note(void);
 
 // A size as the windows show it (`512 bytes`, `13 KB`, `2.4 MB`). Free with `pe_string_free`.
 char *pe_format_size(uint64_t bytes);

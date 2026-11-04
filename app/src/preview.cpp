@@ -5,6 +5,7 @@
 
 #include <shellapi.h>
 
+#include "core.h"
 #include "webview.h"
 
 using Microsoft::WRL::Callback;
@@ -105,14 +106,18 @@ void Preview::Show(const std::wstring& html, bool remoteImages) {
 }
 
 void Preview::Clear(bool noMessage) {
-    // white like the documents of messages, also when Windows uses dark mode
-    std::wstring page =
-        L"<!doctype html><html><head><meta name=\"color-scheme\" content=\"light\"><style>html{background:#fff}"
-        L"p{margin:24px 8px;text-align:center;font:10pt Tahoma,Arial,sans-serif;color:#000}</style></head><body>";
     if (noMessage) {
-        page += L"<p>There is no message selected.</p>";
+        ShowState(PE_READER_STATE_NO_MESSAGE);
+        return;
     }
-    Show(page + L"</body></html>");
+    // white like the documents of messages, also when Windows uses dark mode
+    Show(L"<!doctype html><html><head><meta name=\"color-scheme\" content=\"light\"><style>html{background:#fff}</style>"
+         L"</head><body></body></html>");
+}
+
+void Preview::ShowState(PeReaderState state, PeFailureKind failure, const std::string& reason) {
+    core::String page(pe_reader_page(state, failure, reason.c_str()));
+    Show(page ? core::Widen(page.get()) : L"");
 }
 
 void Preview::SetVisible(bool visible) {

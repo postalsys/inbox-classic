@@ -85,6 +85,52 @@ pub extern "C" fn pe_webkit_content_rules(allow_remote_images: bool) -> *mut c_c
     guard(|| into_c_string(pe_html::webkit_content_rules(allow_remote_images))).unwrap_or(null_mut())
 }
 
+/// What the reading pane shows instead of a message (`pe_reader_page`)
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeReaderState {
+    /// No message is selected
+    NoMessage = 0,
+    /// The message selected is being downloaded (after `pe_message_open`, before `MessageReady`)
+    Downloading = 1,
+    /// It could not be downloaded (`MessageFailed`): `failure` and `reason` are the event's
+    Failed = 2,
+}
+
+/// The page of the reading pane for `state`, the same words on every platform: a document to show as the messages
+/// are shown. `failure` and `reason` (NULL for none) are those of `MessageFailed`, for `Failed`. Free with
+/// `pe_string_free`.
+///
+/// # Safety
+/// `reason` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_reader_page(
+    state: PeReaderState,
+    failure: core::PeFailureKind,
+    reason: *const c_char,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let reason = (!reason.is_null()).then(|| unsafe { std::ffi::CStr::from_ptr(reason) }.to_string_lossy());
+    guard(|| {
+        let state = match state {
+            PeReaderState::NoMessage => pe_core::ReaderState::NoMessage,
+            PeReaderState::Downloading => pe_core::ReaderState::Downloading,
+            PeReaderState::Failed => pe_core::ReaderState::Failed {
+                kind: failure.into(),
+                reason: reason.as_deref().unwrap_or_default(),
+            },
+        };
+        into_c_string(pe_core::reader_page(state))
+    })
+    .unwrap_or(null_mut())
+}
+
+/// What the windows say beside Try Again over a message that could not be downloaded. Free with `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_retry_note() -> *mut c_char {
+    guard(|| into_c_string(pe_core::RETRY_NOTE.to_string())).unwrap_or(null_mut())
+}
+
 /// A size as the windows show it (`512 bytes`, `13 KB`, `2.4 MB`). Free with `pe_string_free`.
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_format_size(bytes: u64) -> *mut c_char {

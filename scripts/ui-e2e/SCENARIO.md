@@ -149,7 +149,17 @@ Screenshots: `write-14-link-status` (not yet on the Mac, not yet on Linux), `wri
 - an empty address removes the link
 - the link text went, without the link
 
-## 16. The Outbox: a send that can not go
+## 16. A message that is not downloaded yet
+
+Screenshots: `read-13-downloading`, `read-12-not-downloaded`
+
+- the header shows the message's sender and subject at once, from the list
+- the pane says the message is being downloaded
+- a message that can not be downloaded says why, with Try Again
+- once the account is back the message shows by itself
+- and Try Again goes
+
+## 17. The Outbox: a send that can not go
 
 Screenshots: `write-7-outbox`
 
@@ -161,7 +171,7 @@ Screenshots: `write-7-outbox`
 - the message is in it
 - once the server is back it goes by itself
 
-## 17. Drafts
+## 18. Drafts
 
 Screenshots: `write-0-main-in-front` (not yet on the Mac, not yet on Linux), `write-8-save-draft`, `write-9-draft-reopened`, `write-10-draft-saved`, `write-11-sent`
 
@@ -182,14 +192,14 @@ Screenshots: `write-0-main-in-front` (not yet on the Mac, not yet on Linux), `wr
 - and its draft is gone
 - the main window says what was sent
 
-## 18. Send/Recv
+## 19. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`
 
 - the new mail is in the list
 - Sent Items has what was sent
 
-## 19. Finding
+## 20. Finding
 
 Screenshots: `find-1-results`, `find-3-no-results`, `find-2-every-folder`
 
@@ -218,14 +228,14 @@ Screenshots: `find-1-results`, `find-3-no-results`, `find-2-every-folder`
 - Clear search on the search bar ends the search
 - Esc ends the search: the folder again, without the Folder column
 
-## 20. Saving and importing a message as a file
+## 21. Saving and importing a message as a file
 
 - Save As asks where, with the subject as the name
 - and saves the message as it came
 - Import Messages asks for files
 - and puts the message in the folder, on the server
 
-## 21. Flagging, deleting and moving
+## 22. Flagging, deleting and moving
 
 Screenshots: `organize-1-flagged`, `organize-2-move`, `organize-3-after`, `organize-4-for-good`
 
@@ -240,7 +250,7 @@ Screenshots: `organize-1-flagged`, `organize-2-move`, `organize-3-after`, `organ
 - deleting for good asks first
 - and then it is gone from the server
 
-## 22. Unsubscribing
+## 23. Unsubscribing
 
 Screenshots: `read-8-unsubscribe`, `read-9-unsubscribe-ask`
 
@@ -248,19 +258,19 @@ Screenshots: `read-8-unsubscribe`, `read-9-unsubscribe-ask`
 - it asks first, naming where it goes
 - and the status bar says it is done
 
-## 23. A calendar invitation
+## 24. A calendar invitation
 
 Screenshots: `read-10-invitation`
 
 - a message with an invitation shows the event over the text, with Open in Calendar
 
-## 24. A brand logo (BIMI)
+## 25. A brand logo (BIMI)
 
 Screenshots: `read-11-logo`
 
 - a sender whose logo the server passed has it beside the header
 
-## 25. Marking all read
+## 26. Marking all read
 
 Screenshots: `organize-5-all-read`
 
@@ -268,7 +278,7 @@ Screenshots: `organize-5-all-read`
 - Edit > Mark All Read: none unread in the folder
 - and none on the server
 
-## 26. Dragging a message onto a folder
+## 27. Dragging a message onto a folder
 
 - a message dragged onto Archive is moved there
 - and out of the Inbox
@@ -277,7 +287,7 @@ Screenshots: `organize-5-all-read`
 - and stays in the Inbox
 - dropped on its own folder, it stays
 
-## 27. Junk and not junk
+## 28. Junk and not junk
 
 Screenshots: `organize-7-junk`
 
@@ -288,7 +298,7 @@ Screenshots: `organize-7-junk`
 - the search field is still drawn over the toolbar (edge $edgePixel, inside $insidePixel)
 - Not Junk moves it back to the Inbox
 
-## 28. Folders
+## 29. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
 
@@ -300,7 +310,7 @@ Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
 - and Yes deletes it on the server
 - renaming the Inbox is refused with the reason
 
-## 29. Closing a message that was written
+## 30. Closing a message that was written
 
 Screenshots: `write-6-close`
 
@@ -308,14 +318,14 @@ Screenshots: `write-6-close`
 - No closes it
 - without saving it
 
-## 30. An e-mail link
+## 31. An e-mail link
 
 Screenshots: `write-18-mailto`
 
 - a second start with a mailto: link hands it over and ends
 - the running app opens a new message from it
 
-## 31. Completing an address
+## 32. Completing an address
 
 Screenshots: `write-17-complete`
 
@@ -324,7 +334,7 @@ Screenshots: `write-17-complete`
 - Enter takes the first, with a comma for the next
 - and closes the list
 
-## 32. A signature
+## 33. A signature
 
 Screenshots: `signature-1-editor`, `signature-2-new`, `signature-3-reply-left`
 
@@ -338,7 +348,7 @@ Screenshots: `signature-1-editor`, `signature-2-new`, `signature-3-reply-left`
 - a reply takes typing
 - a reply has the signature above the quote
 
-## 33. A Gmail address
+## 34. A Gmail address
 
 Screenshots: `account-5-app-password`, `account-6-gmail`
 
@@ -346,14 +356,14 @@ Screenshots: `account-5-app-password`, `account-6-gmail`
 - with Google turned off, a Gmail address goes to the app password way
 - its servers were found
 
-## 34. A wrong password
+## 35. A wrong password
 
 Screenshots: `trouble-1-password`
 
 - a refused password is asked for again
 - the status bar says why
 
-## 35. Accounts
+## 36. Accounts
 
 Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, `accounts-3-after`
 
@@ -367,7 +377,7 @@ Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, 
 - and removes it
 - the account leaves the tree
 
-## 36. Sign-in apps
+## 37. Sign-in apps
 
 Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not yet on the Mac, not yet on Linux), `signin-4-editor` (not yet on Linux), `signin-5-apps-added`, `signin-6-first-page` (not yet on the Mac, not yet on Linux), `signin-7-why` (not yet on the Mac, not yet on Linux), `signin-8-more` (not yet on the Mac, not yet on Linux), `signin-9-waiting`, `signin-10-added` (not yet on the Mac, not yet on Linux), `signin-11-in-use` (not yet on the Mac, not yet on Linux), `signin-12-toggled`, `signin-13-properties` (not yet on the Mac, not yet on Linux), `account-5b-browser-sign-in` (not yet on the Mac, not yet on Linux)
 
@@ -396,19 +406,19 @@ Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not ye
 - a sign-in app turned off is left out of More sign-in options
 - a Gmail address is offered Sign in with Google
 
-## 37. About
+## 38. About
 
 Screenshots: `help-1-about`
 
 - About shows the version
 
-## 38. Help
+## 39. Help
 
 Screenshots: `help-2-contents`
 
 - F1 opens the help
 
-## 39. Printing
+## 40. Printing
 
 Screenshots: `files-3-print-missing`, `files-3-print`
 
@@ -416,7 +426,7 @@ Screenshots: `files-3-print-missing`, `files-3-print`
 - as wide as the app
 - and closing it prints nothing
 
-## 40. The tray
+## 41. The tray
 
 Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not yet on Linux)
 
@@ -426,7 +436,7 @@ Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not ye
 - a click on the icon shows the window again
 - with the new message in the list, which came without a sync
 
-## 41. Closing
+## 42. Closing
 
 Screenshots: `write-12-close-app`
 

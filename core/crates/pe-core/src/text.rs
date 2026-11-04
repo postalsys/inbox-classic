@@ -54,9 +54,72 @@ pub fn folder_name(folder: &pe_store::FolderInfo) -> String {
     }
 }
 
+/// What the windows say beside Try Again over a message that could not be downloaded
+pub const RETRY_NOTE: &str = "Not downloaded. It is tried again once the account is back online.";
+
+/// What the reading pane shows when it shows no message
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReaderState<'a> {
+    /// No message is selected
+    NoMessage,
+    /// The message selected is being downloaded ([`crate::Core::open_message`])
+    Downloading,
+    /// It could not be downloaded ([`crate::Event::MessageFailed`]): `kind` and the server's `reason`
+    Failed { kind: crate::FailureKind, reason: &'a str },
+}
+
+/// The page of the reading pane for `state` (pe_html::status_page): the same words on every platform. A failure says
+/// what happened; the windows put [`RETRY_NOTE`] and Try Again over it, and try again on their own once the account
+/// syncs.
+pub fn reader_page(state: ReaderState) -> String {
+    use crate::FailureKind;
+    match state {
+        ReaderState::NoMessage => pe_html::status_page("There is no message selected.", "", false),
+        ReaderState::Downloading => pe_html::status_page(
+            "Downloading the message\u{2026}",
+            "It is shown here as soon as it has arrived.",
+            true,
+        ),
+        ReaderState::Failed { kind, reason } => {
+            let reason = reason.trim().trim_end_matches('.');
+            // what happened, and for a sign-in what to do; what happens next is beside Try Again
+            let detail = match kind {
+                FailureKind::Network => format!("The mail server could not be reached ({reason})."),
+                FailureKind::Authentication => format!(
+                    "The mail server did not accept the sign-in ({reason}). Check the password or sign in again \
+                     in File > Accounts."
+                ),
+                FailureKind::Security => {
+                    format!("The connection to the mail server could not be made secure ({reason}).")
+                }
+                FailureKind::Other => format!("The mail server answered: {reason}."),
+            };
+            pe_html::status_page("The message could not be downloaded", &detail, false)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_reading_pane_says_why() {
+        assert!(reader_page(ReaderState::NoMessage).contains("There is no message selected."));
+        let downloading = reader_page(ReaderState::Downloading);
+        assert!(downloading.contains("Downloading the message") && downloading.contains("class=\"spin\""));
+        let offline = reader_page(ReaderState::Failed {
+            kind: crate::FailureKind::Network,
+            reason: "connection refused.",
+        });
+        assert!(offline.contains("could not be downloaded") && offline.contains("(connection refused)"));
+        assert!(!offline.contains("class=\"spin\""));
+        let refused = reader_page(ReaderState::Failed {
+            kind: crate::FailureKind::Authentication,
+            reason: "AUTHENTICATIONFAILED",
+        });
+        assert!(refused.contains("did not accept the sign-in"));
+    }
 
     #[test]
     fn accounts_with_the_same_name_are_told_apart_in_the_tree() {

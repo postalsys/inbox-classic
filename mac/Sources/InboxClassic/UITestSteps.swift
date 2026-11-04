@@ -4,19 +4,25 @@
 import AppKit
 import CInboxClassic
 import Darwin
+import WebKit
 
 extension UITest {
     // ---- the Outbox and Drafts ----
 
     /// the outgoing server's port, changed in Accounts > Properties (to one nothing listens on, and back)
     func setSmtpPort(_ port: String) async throws {
+        try await setPort(field: 8, port)
+    }
+
+    /// a port of the account's servers (the field of the Properties form: 5 IMAP, 8 SMTP), changed there
+    func setPort(field index: Int, _ port: String) async throws {
         command(.accounts)
         guard let accounts = await waitWindow("accounts", 10) else { throw Failed(description: "no Accounts window") }
         press(find("accounts.properties", in: accounts))
         guard let form = await waitFor(10, { window("form").flatMap { $0.title == "Properties" ? $0 : nil } }) else {
             throw Failed(description: "no Properties form")
         }
-        type(port, into: find("form.field.8", in: form))
+        type(port, into: find("form.field.\(index)", in: form))
         press(find("form.ok", in: form))
         // a question about a connection without encryption: Yes
         if let ask = await waitWindow("alert", 5) {
@@ -25,6 +31,47 @@ extension UITest {
         _ = await waitUntil(10) { !form.isVisible }
         press(find("accounts.close", in: accounts))
         _ = await waitUntil(10) { !accounts.isVisible }
+    }
+
+    /// the text the reading pane shows now (its own document's, which the test can read with scripts off for the page)
+    func readerText() async -> String {
+        guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
+        return (try? await web.evaluateJavaScript("document.body ? document.body.innerText : ''")) as? String ?? ""
+    }
+
+    /// a message the server does not give yet, and then can not: the pane says it is downloading, then why it is not
+    /// there with Try Again, and once the account is back it shows the message by itself
+    func notDownloaded() async throws {
+        step("a message that is not downloaded yet")
+        try await addMessage("From: Hal Example <hal@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Waiting on the server\r\n"
+            + "Message-ID: <waiting@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nHere at last.\r\n")
+        command(.sync)
+        _ = await waitFor(20) { await findMessage("INBOX", "Subject: Waiting on the server") }
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(20) { list.numberOfRows >= 9 }
+        // a server that takes the connection and says nothing: the download waits
+        guard let silent = SilentServer() else { throw Failed(description: "no silent server") }
+        try await setPort(field: 5, "\(silent.port)")
+        search("subject:\"Waiting on the server\"")
+        _ = await waitUntil(20) { list.numberOfRows == 1 }
+        await selectRow(0)
+        let header: NSTextField? = find("reader.header", in: main.window)
+        check(header?.stringValue.contains("Waiting on the server") == true && header?.stringValue.contains("Hal Example") == true,
+              "the header shows the message's sender and subject at once (\(header?.stringValue ?? ""))")
+        check(await waitUntil(10) { await readerText().contains("Downloading the message") }, "the pane says the message is being downloaded")
+        await shot(main.window, "read-13-downloading")
+        // the server gone: why, and Try Again
+        silent.stop()
+        let retry: InfoBar? = find("reader.retry", in: main.window)
+        check(await waitUntil(20) { retry?.isHidden == false }, "a message that can not be downloaded has Try Again")
+        check(await waitUntil(5) { await readerText().contains("could not be downloaded") }, "and the pane says why")
+        await shot(main.window, "read-12-not-downloaded")
+        // the server back: the account syncs, and the message is tried again by itself
+        try await setPort(field: 5, port("imap"))
+        check(await waitUntil(30) { await readerText().contains("Here at last") }, "once the account is back the message shows by itself")
+        check(retry?.isHidden == true, "and Try Again goes")
+        search("")
+        selectFolder(named: "Inbox")
     }
 
     func outboxAndDrafts() async throws {
@@ -192,7 +239,61 @@ extension UITest {
 
     // ---- what mailing lists, invitations and brands send ----
 
+    /// A server on this Mac that takes connections and says nothing, until it is stopped: a mail server that does not
+    /// answer
+    final class SilentServer: @unchecked Sendable {
+        let port: UInt16
+        private let socket: Int32
+        private var clients: [Int32] = []
+        private let lock = NSLock()
+
+        init?() {
+            guard let (fd, port) = UITest.loopbackListener(backlog: 8) else { return nil }
+            socket = fd
+            self.port = port
+            Thread.detachNewThread { [self] in
+                while true {
+                    let client = accept(fd, nil, nil)
+                    if client < 0 { return }
+                    lock.lock()
+                    clients.append(client)
+                    lock.unlock()
+                }
+            }
+        }
+
+        /// every connection closed, and no more taken
+        func stop() {
+            lock.lock()
+            clients.forEach { close($0) }
+            clients.removeAll()
+            lock.unlock()
+            shutdown(socket, SHUT_RDWR)
+            close(socket)
+        }
+    }
+
     /// a one-shot HTTP server on this Mac: the request it got, once one came
+    /// a socket listening on a port of 127.0.0.1 the system picked, and that port
+    nonisolated static func loopbackListener(backlog: Int32) -> (Int32, UInt16)? {
+        let fd = Darwin.socket(AF_INET, SOCK_STREAM, 0)
+        var address = sockaddr_in()
+        address.sin_family = sa_family_t(AF_INET)
+        address.sin_addr.s_addr = inet_addr("127.0.0.1")
+        var length = socklen_t(MemoryLayout<sockaddr_in>.size)
+        let bound = withUnsafePointer(to: &address) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { bind(fd, $0, length) }
+        }
+        guard bound == 0, listen(fd, backlog) == 0 else {
+            close(fd)
+            return nil
+        }
+        withUnsafeMutablePointer(to: &address) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { _ = getsockname(fd, $0, &length) }
+        }
+        return (fd, UInt16(bigEndian: address.sin_port))
+    }
+
     final class ListServer: @unchecked Sendable {
         let port: UInt16
         private let socket: Int32
@@ -200,24 +301,9 @@ extension UITest {
         private let lock = NSLock()
 
         init?() {
-            let fd = Darwin.socket(AF_INET, SOCK_STREAM, 0)
-            var address = sockaddr_in()
-            address.sin_family = sa_family_t(AF_INET)
-            address.sin_addr.s_addr = inet_addr("127.0.0.1")
-            address.sin_port = 0
-            var length = socklen_t(MemoryLayout<sockaddr_in>.size)
-            let bound = withUnsafePointer(to: &address) {
-                $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { bind(fd, $0, length) }
-            }
-            guard bound == 0, listen(fd, 1) == 0 else {
-                close(fd)
-                return nil
-            }
-            withUnsafeMutablePointer(to: &address) {
-                $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { _ = getsockname(fd, $0, &length) }
-            }
+            guard let (fd, port) = UITest.loopbackListener(backlog: 1) else { return nil }
             socket = fd
-            port = UInt16(bigEndian: address.sin_port)
+            self.port = port
             Thread.detachNewThread { [self] in serve(fd) }
         }
 

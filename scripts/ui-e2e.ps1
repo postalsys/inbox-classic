@@ -346,9 +346,9 @@ function RawText($message) {
 }
 function Find([string]$mailbox, [string]$pattern) { (Messages $mailbox) | Where-Object { (RawText $_) -match $pattern } | Select-Object -First 1 }
 function Seen([string]$pattern) { (Find 'INBOX' $pattern).flags -contains '\Seen' }
-function AddMessage([string]$raw, [string[]]$flags = @()) {
+function AddMessage([string]$raw, [string[]]$flags = @(), [string]$mailbox = 'INBOX') {
     $body = @{ raw = $raw; flags = $flags } | ConvertTo-Json
-    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body "$rest/INBOX/messages")
+    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body "$rest/$mailbox/messages")
 }
 
 # a picture sent inside the message
@@ -865,10 +865,9 @@ public static class Dragger {
     $raw = if ($linked) { RawText $linked } else { '' }
     Check ($raw -match 'https://example\.com/first' -and $raw -notmatch 'href' -and $raw -notmatch 'example\.com/second') 'the link text went, without the link'
 
-    Step 'the Outbox: a send that can not go'
-    # the outgoing server out of reach, as when offline: its port changed in Accounts > Properties to one nothing
-    # listens on, and back
-    function SetSmtpPort([string]$port) {
+    # a server out of reach, as when offline: its port (105 the incoming, 108 the outgoing) changed in Accounts >
+    # Properties, and back
+    function SetPort([int]$field, [string]$port) {
         Command $main $IDM_ACCOUNTS
         $list = WaitWindow 'InboxClassicAccounts' 'Accounts'
         if (-not $list) {
@@ -884,7 +883,7 @@ public static class Dragger {
             ShowAppWindows $list 'properties-missing'
             throw 'Properties did not open'
         }
-        SetText $form 108 $port
+        SetText $form $field $port
         Click $form 1
         # a question about a connection without encryption: Yes
         [void](WaitFor {
@@ -895,6 +894,38 @@ public static class Dragger {
         Click $list 404
         [void](WaitFor { -not [Native.Win]::IsWindow($list) })
     }
+    function SetSmtpPort([string]$port) { SetPort 108 $port }
+
+    Step 'a message that is not downloaded yet'
+    $IDC_RETRY = 214
+    $waiting = 'Subject: Waiting on the server'
+    # in Archive, so the rows of the Inbox the later steps count stay as they are; dated a moment ahead, so it is the
+    # first row there
+    AddMessage ("From: Hal Example <hal@example.com>`r`nTo: testuser@postalexpress.test`r`n$waiting`r`n" +
+        "Message-ID: <waiting@example.com>`r`nDate: $([DateTime]::UtcNow.AddMinutes(5).ToString('r'))`r`n`r`nHere at last.`r`n") @() 'Archive'
+    Command $main $IDM_SYNC
+    [void](WaitFor { Find 'Archive' $waiting })
+    SelectFolder 3
+    Start-Sleep -Seconds 2
+    # a server that takes the connection and says nothing: the download waits
+    $silent = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, 0)
+    $silent.Start()
+    SetPort 105 "$($silent.LocalEndpoint.Port)"
+    SelectRow 0
+    $header = Statics $main
+    Check ($header -like '*Waiting on the server*' -and $header -like '*Hal Example*') 'the header shows the message''s sender and subject at once'
+    Check (-not (Visible $main $IDC_RETRY)) 'while it is being downloaded there is no Try Again'
+    Shot $main 'read-13-downloading'
+    # the server gone: why, and Try Again
+    $silent.Stop()
+    Check ([bool](WaitFor { Visible $main $IDC_RETRY } 30)) 'a message that can not be downloaded says why, with Try Again'
+    Shot $main 'read-12-not-downloaded'
+    # the server back: the account syncs, and the message is tried again by itself
+    SetPort 105 "$($ports.imap)"
+    Check ([bool](WaitFor { -not (Visible $main $IDC_RETRY) -and (Find 'Archive' $waiting).flags -contains '\Seen' } 40)) 'once the account is back the message shows by itself'
+    SelectFolder 0
+
+    Step 'the Outbox: a send that can not go'
     SetSmtpPort '1'
     Command $main $IDM_NEW_MAIL
     $compose = WaitCompose

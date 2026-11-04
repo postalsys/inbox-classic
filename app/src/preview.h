@@ -10,6 +10,8 @@
 
 #include <WebView2.h>
 
+#include "inbox_classic.h"
+
 class Preview {
 public:
     // creates the WebView2 in `parent` (asynchronously), `onError` gets a message when that fails
@@ -18,6 +20,8 @@ public:
     void Show(const std::wstring& html, bool remoteImages = false);
     // empty; with "There is no message selected." centered in it, as Outlook Express has it, when `noMessage`
     void Clear(bool noMessage = false);
+    // the core's page for a message that is not here: being downloaded, or why it could not be (`reason` in UTF-8)
+    void ShowState(PeReaderState state, PeFailureKind failure = PE_FAILURE_KIND_NONE, const std::string& reason = {});
     // its environment once it is there, NULL before: other views (the Print window) start from it
     ICoreWebView2Environment* Environment() const { return environment_.Get(); }
     // closes the WebView2 and lets go of it, before COM is shut down

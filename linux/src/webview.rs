@@ -221,6 +221,15 @@ impl DocumentView {
         });
     }
 
+    /// What the e2e driver checks: the document shown
+    #[cfg(feature = "e2e")]
+    pub fn shown(&self) -> String {
+        web()
+            .document(&self.current.borrow())
+            .map(|d| d.to_string())
+            .unwrap_or_default()
+    }
+
     /// The document dropped (the view is going away)
     pub fn release(&self) {
         web().forget(&self.current.borrow());
@@ -303,18 +312,15 @@ pub fn js_string(value: &str) -> String {
     out
 }
 
-/// The page of a reading pane with no message: says so, unless `empty`
+/// The page of a reading pane with no message: the core's, saying so, or an empty one while a message is coming
 pub fn no_message(say_so: bool) -> String {
-    let mut page = String::from(
-        "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"color-scheme\" content=\"light\">\
-         <style>html{background:#fff}p{margin:24px 8px;text-align:center;font:10pt sans-serif;color:#555}</style>\
-         </head><body>",
-    );
     if say_so {
-        page.push_str("<p>There is no message selected.</p>");
+        pe_core::reader_page(pe_core::ReaderState::NoMessage)
+    } else {
+        "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"color-scheme\" content=\"light\">\
+         <style>html{background:#fff}</style></head><body></body></html>"
+            .into()
     }
-    page.push_str("</body></html>");
-    page
 }
 
 #[cfg(test)]

@@ -74,7 +74,7 @@ fn reads_mail_like_the_windows_do() {
     assert_eq!(s.core.accounts().unwrap()[0].id, account);
     s.core.sync(account).unwrap();
     s.wait(|e| *e == Event::FoldersChanged { account });
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
 
     let folders = s.core.folders(account).unwrap();
     let inbox = folders.iter().find(|f| f.info.path == "INBOX").unwrap();
@@ -120,7 +120,7 @@ fn reads_mail_like_the_windows_do() {
         1
     );
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let on_server = s.server.messages("INBOX");
     let flags = on_server.iter().find(|m| m["uid"] == json!(styled)).unwrap()["flags"].clone();
     assert_eq!(flags, json!(["\\Seen"]));
@@ -164,7 +164,7 @@ fn reads_mail_like_the_windows_do() {
     }
     assert!(all_seen(&s), "{:?}", s.server.messages("INBOX"));
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     assert_eq!(unread(&s), 0, "the sync keeps them read");
 }
 
@@ -178,16 +178,27 @@ fn a_wrong_password_is_reported() {
         matches!(failed, Event::Failed { kind: FailureKind::Authentication, account: a, .. } if a == account),
         "{failed:?}"
     );
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account,
+            failure: Some(FailureKind::Authentication),
+        }
+    });
     // told once: another sync with the same password fails quietly
     s.core.sync(account).unwrap();
     let next = s.wait(|e| matches!(e, Event::SyncFinished { .. } | Event::Failed { .. }));
-    assert_eq!(next, Event::SyncFinished { account });
+    assert_eq!(
+        next,
+        Event::SyncFinished {
+            account,
+            failure: Some(FailureKind::Authentication)
+        }
+    );
 
     // with the right one it works
     s.core.set_password(account, PASSWORD);
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     assert!(!s.core.folders(account).unwrap().is_empty());
 }
 
@@ -197,7 +208,7 @@ fn removing_an_account_removes_its_mail() {
     s.server.add_message("INBOX", &rfc822("First", "x"), &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     s.core.remove_account(account).unwrap();
     assert!(s.core.accounts().unwrap().is_empty());
     assert!(s.core.folders(account).unwrap().is_empty());
@@ -209,7 +220,7 @@ fn sends_replies_and_keeps_a_copy() {
     let Some(s) = setup() else { return };
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
 
     let outgoing = pe_core::Outgoing {
         to: "Ann <ann@example.com>".into(),
@@ -257,7 +268,7 @@ fn sends_replies_and_keeps_a_copy() {
 
     // the reply to what arrived
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let inbox = folders.iter().find(|f| f.info.path == "INBOX").unwrap().id;
     let uid = s.core.messages(inbox, Sort::default(), 0, 10).unwrap()[0].info.uid;
     s.core.open_message(inbox, uid).unwrap();
@@ -391,7 +402,7 @@ fn signs_in_with_oauth() {
     assert_eq!(added.smtp_host, "127.0.0.1");
     assert!(matches!(added.auth, pe_store::Auth::OAuth2(ref p) if p == "google"));
     core.sync(account).unwrap();
-    wait(&|e| *e == Event::SyncFinished { account });
+    wait(&|e| *e == Event::SyncFinished { account, failure: None });
     assert!(!core.folders(account).unwrap().is_empty());
     // the sign-in was taken
     assert!(core.add_signed_in_account(request, "Work").is_err());
@@ -508,7 +519,7 @@ fn signs_in_with_a_sign_in_app() {
 
     // IMAP and SMTP with the access token
     core.sync(account).unwrap();
-    wait(&|e| *e == Event::SyncFinished { account });
+    wait(&|e| *e == Event::SyncFinished { account, failure: None });
     assert!(!core.folders(account).unwrap().is_empty());
     let outgoing = pe_core::Outgoing {
         to: "bob@example.com".into(),
@@ -527,7 +538,7 @@ fn signs_in_with_a_sign_in_app() {
     core.update_account(account, &core.account(account).unwrap().settings)
         .unwrap();
     core.sync(account).unwrap();
-    wait(&|e| *e == Event::SyncFinished { account });
+    wait(&|e| *e == Event::SyncFinished { account, failure: None });
     let used = server.request("GET", "/v1/oauth/tokens?user=alice%40example.com&type=access", None);
     assert!(used.as_array().map_or(0, Vec::len) > first_tokens, "{used}");
 
@@ -616,7 +627,7 @@ fn searches_the_local_index() {
     );
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let folders = s.core.folders(account).unwrap();
     let inbox = folders.iter().find(|f| f.info.path == "INBOX").unwrap().id;
     let subjects = |folder: Option<i64>, text: &str| -> Vec<String> {
@@ -690,7 +701,7 @@ fn flags_moves_and_deletes_messages() {
     let delete = s.server.add_message("INBOX", &rfc822("Delete me", "3"), &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let folders = s.core.folders(account).unwrap();
     let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
     let (inbox, archive_folder, trash) = (id("INBOX"), id("Archive"), id("Trash"));
@@ -767,7 +778,7 @@ fn flags_moves_and_deletes_messages() {
 
     // a sync agrees with all of it
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     assert_eq!(in_store(inbox), ["Flag me"]);
     assert!(in_store(trash).is_empty());
 
@@ -799,7 +810,7 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     let second = s.server.add_message("INBOX", &rfc822("Second", "2"), &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let folders = s.core.folders(account).unwrap();
     let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
     let (inbox, archive, trash) = (id("INBOX"), id("Archive"), id("Trash"));
@@ -844,7 +855,7 @@ fn creates_renames_and_deletes_folders() {
     let Some(s) = setup() else { return };
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let path_of = |name: &str| {
         s.core
             .folders(account)
@@ -888,7 +899,7 @@ fn saves_and_imports_messages_as_files() {
         .add_message("INBOX", &rfc822("Quarterly / report?", "the numbers"), &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let folders = s.core.folders(account).unwrap();
     let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
     let (inbox, archive) = (id("INBOX"), id("Archive"));
@@ -987,7 +998,7 @@ fn drafts_are_saved_reopened_and_gone_once_sent() {
     let Some(s) = setup() else { return };
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let drafts = s
         .core
         .folders(account)
@@ -1089,7 +1100,7 @@ fn a_draft_follows_from_to_another_account() {
     let second = s.core.add_account(&settings(&other_server), PASSWORD).unwrap();
     for account in [first, second] {
         s.core.sync(account).unwrap();
-        s.wait(|e| *e == Event::SyncFinished { account });
+        s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     }
     let drafts_of = |account| {
         s.core
@@ -1154,7 +1165,7 @@ fn new_mail_comes_in_while_watching_the_inbox() {
     s.server.add_message("INBOX", &rfc822("Already there", "1"), &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     // what was there with the first sync is not new
     // mail that arrives later is, without another sync: the worker watches the Inbox (IDLE)
     s.server.add_message(
@@ -1232,7 +1243,7 @@ fn unsubscribes_with_one_click() {
     let uid = s.server.add_message("INBOX", &raw, &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let inbox = s
         .core
         .folders(account)
@@ -1272,7 +1283,7 @@ fn shows_a_calendar_invitation() {
     let uid = s.server.add_message("INBOX", raw, &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let inbox = s
         .core
         .folders(account)
@@ -1336,7 +1347,7 @@ fn draws_a_bimi_logo_from_its_location() {
     let plain = s.server.add_message("INBOX", &rfc822("No logo", "x"), &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account });
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let inbox = s
         .core
         .folders(account)
@@ -1367,4 +1378,116 @@ fn draws_a_bimi_logo_from_its_location() {
         assert_eq!(&pixels[(16 * 32 + 16) * 4..][..4], &[255, 0, 0, 255]);
     }
     assert_eq!(served.load(std::sync::atomic::Ordering::Relaxed), 1);
+}
+
+/// A message the server can not give says so, for the reading pane, and opening it again tries again: an account
+/// whose server is out of reach (its port changed to one nothing listens on), and back
+#[test]
+fn a_message_that_can_not_be_downloaded_says_why() {
+    let Some(s) = setup() else { return };
+    let uid = s
+        .server
+        .add_message("INBOX", &rfc822("Unread", "Not downloaded yet"), &[]);
+    let good = settings(&s.server);
+    let account = s.core.add_account(&good, PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+
+    // a port nothing listens on: taken and given back
+    let closed = std::net::TcpListener::bind("127.0.0.1:0")
+        .unwrap()
+        .local_addr()
+        .unwrap()
+        .port();
+    let mut away = good.clone();
+    away.imap_port = closed;
+    s.core.update_account(account, &away).unwrap();
+    s.core.open_message(inbox, uid).unwrap();
+    let failed = s.wait(|e| matches!(e, Event::MessageFailed { .. }));
+    let Event::MessageFailed {
+        folder,
+        uid: failed_uid,
+        kind,
+        message,
+    } = failed
+    else {
+        unreachable!()
+    };
+    assert_eq!(
+        (folder, failed_uid, kind),
+        (inbox, uid, FailureKind::Network),
+        "{message}"
+    );
+    assert!(!message.is_empty());
+    let page = pe_core::reader_page(pe_core::ReaderState::Failed { kind, reason: &message });
+    assert!(page.contains("could not be reached"), "{page}");
+
+    // a sync that can not reach the server says so as it finishes: the windows do not try the message again yet
+    s.core.sync(account).unwrap();
+    s.wait(|e| matches!(e, Event::Failed { kind: FailureKind::Network, account: a, .. } if *a == account));
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account,
+            failure: Some(FailureKind::Network),
+        }
+    });
+    // the server back: opening it again downloads it
+    s.core.update_account(account, &good).unwrap();
+    s.core.open_message(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    let view = s.core.message_view(inbox, uid, false).unwrap().unwrap();
+    assert!(view.document.contains("Not downloaded yet"));
+}
+
+/// A message opened while the account's worker is busy with a long sync comes from the reader, its own connection,
+/// without waiting for the sync to end
+#[test]
+fn a_message_opened_during_a_sync_comes_at_once() {
+    let Some(s) = setup() else { return };
+    let warm = s.server.add_message("INBOX", &rfc822("First", "Opened first"), &[]);
+    let uid = s
+        .server
+        .add_message("INBOX", &rfc822("Second", "Read me while it syncs"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    // the reader connected, as it is once the user has read a message
+    s.core.open_message(inbox, warm).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: warm,
+        }
+    });
+    // a folder with many messages, which its first sync takes a while to list
+    let big = "Archive";
+    for n in 0..400 {
+        s.server.add_message(big, &rfc822(&format!("Old {n}"), "old"), &[]);
+    }
+    s.core.sync(account).unwrap();
+    s.core.open_message(inbox, uid).unwrap();
+    // the message before the sync is done
+    let first = s.wait(|e| matches!(e, Event::MessageReady { .. } | Event::SyncFinished { .. }));
+    assert_eq!(
+        first,
+        Event::MessageReady { folder: inbox, uid },
+        "the message waited for the sync"
+    );
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
 }

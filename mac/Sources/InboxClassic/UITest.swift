@@ -404,6 +404,7 @@ final class UITest {
         try await addAccount()
         try await reading()
         try await writing()
+        try await notDownloaded()
         try await outboxAndDrafts()
         try await searching()
         try await files()

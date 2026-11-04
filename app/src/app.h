@@ -352,6 +352,10 @@ private:
     void SaveAllAttachments();
     void LayoutReader();
     void ShowReaderBars(bool files, bool pictures);
+    // the bar over a message that could not be downloaded, shown or not
+    void ShowRetry(bool shown);
+    // Try Again, or the account synced again after the message could not be downloaded
+    void RetryDownload();
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
     void DisplayInfo(NMLVDISPINFOW* info);
@@ -365,6 +369,7 @@ private:
     // the paper clip button (a toolbar of one) and the information bar of blocked pictures
     HWND attachments_ = nullptr;
     HWND pictures_ = nullptr;
+    HWND retry_ = nullptr;
     RECT reader_ = {};
     HWND previewHost_ = nullptr;
     HFONT bold_ = nullptr;
@@ -499,6 +504,8 @@ enum ControlId : WORD {
     IDC_OPEN_CALENDAR,
     // at the left of the message header: the brand's BIMI logo
     IDC_LOGO,
+    // under the header of a message that could not be downloaded: a click tries again
+    IDC_RETRY,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;
@@ -508,3 +515,5 @@ constexpr UINT_PTR TIMER_FIND = 3;
 constexpr UINT_PTR TIMER_RELOAD = 4;
 // while a message is dragged: the keys (Esc, Ctrl), scrolling the tree at its edges, opening a folder held over
 constexpr UINT_PTR TIMER_DRAG = 5;
+// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
+constexpr UINT_PTR TIMER_DOWNLOADING = 6;

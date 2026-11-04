@@ -448,7 +448,7 @@ async fn capture(window: &gtk::Window) -> Option<gdk::Texture> {
         return None;
     }
     let snapshot = gtk::Snapshot::new();
-    gtk::WidgetPaintable::new(Some(window)).snapshot(&snapshot, width as f64, height as f64);
+    paint_window(window, &snapshot, width, height).await;
     let root = window.clone().upcast::<gtk::Widget>();
     let dialogs: Vec<adw::Dialog> = descendants::<adw::Dialog>(&root)
         .into_iter()
@@ -492,6 +492,29 @@ async fn capture(window: &gtk::Window) -> Option<gdk::Texture> {
     let node = snapshot.to_node()?;
     let renderer = window.renderer()?;
     Some(renderer.render_texture(node, Some(&graphene::Rect::new(0.0, 0.0, width as f32, height as f32))))
+}
+
+/// The window as it was painted: taken in its next paint, as the picture is gone once anything in it changes (the
+/// spinner of a message being downloaded turns all the time)
+async fn paint_window(window: &gtk::Window, snapshot: &gtk::Snapshot, width: i32, height: i32) {
+    let paint = || gtk::WidgetPaintable::new(Some(window)).current_image();
+    let Some(clock) = window.frame_clock() else {
+        paint().snapshot(snapshot, width as f64, height as f64);
+        return;
+    };
+    let taken: Rc<RefCell<Option<gdk::Paintable>>> = Rc::default();
+    let into = taken.clone();
+    let painted = window.clone();
+    let handler = clock.connect_after_paint(move |_| {
+        if into.borrow().is_none() {
+            into.replace(Some(gtk::WidgetPaintable::new(Some(&painted)).current_image()));
+        }
+    });
+    window.queue_draw();
+    wait_until(2, || taken.borrow().is_some()).await;
+    clock.disconnect(handler);
+    let image = taken.take().unwrap_or_else(paint);
+    image.snapshot(snapshot, width as f64, height as f64);
 }
 
 /// A web view as WebKit draws it, where it is in the window; its bounds, None when it is not shown
@@ -697,6 +720,7 @@ async fn scenario(d: Rc<Driver>) {
     add_account(&d, "UI Test", "testuser", "testpass", true).await;
     reading(&d).await;
     writing(&d).await;
+    steps::not_downloaded(&d).await;
     outbox(&d).await;
     drafts(&d).await;
     send_receive(&d).await;
@@ -1081,6 +1105,11 @@ async fn writing(d: &Driver) {
 /// The outgoing server out of reach, as when offline: its port changed in Accounts > Properties to one nothing
 /// listens on, and back
 async fn set_smtp_port(d: &Driver, port: &str) {
+    set_port(d, "form-8", port).await;
+}
+
+/// A server's port (`form-5` the incoming, `form-8` the outgoing) changed in Accounts > Properties
+async fn set_port(d: &Driver, field: &str, port: &str) {
     command(Command::Accounts);
     let Some(accounts) = wait_dialog(10, "accounts-dialog").await else {
         d.check(false, "File > Accounts opens");
@@ -1092,7 +1121,7 @@ async fn set_smtp_port(d: &Driver, port: &str) {
         d.check(false, "Properties opens");
         return;
     };
-    set_text(form.upcast_ref(), "form-8", port);
+    set_text(form.upcast_ref(), field, port);
     click(form.upcast_ref(), "dialog-ok");
     // a question about a connection without encryption: Yes
     if let Some(question) = wait_alert(5).await {

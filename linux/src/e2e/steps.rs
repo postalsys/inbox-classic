@@ -565,3 +565,81 @@ pub async fn closing(d: &Driver) {
         "No closes the message without saving, and the app",
     );
 }
+
+/// A server that takes connections and says nothing, until it is stopped: a download that waits
+struct SilentServer {
+    port: u16,
+    clients: std::sync::Arc<std::sync::Mutex<Vec<std::net::TcpStream>>>,
+}
+
+impl SilentServer {
+    fn start() -> SilentServer {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("a socket for the silent server");
+        let port = listener.local_addr().map(|a| a.port()).unwrap_or(0);
+        let clients: std::sync::Arc<std::sync::Mutex<Vec<std::net::TcpStream>>> = Default::default();
+        let kept = clients.clone();
+        std::thread::spawn(move || {
+            for stream in listener.incoming().flatten() {
+                kept.lock().unwrap().push(stream);
+            }
+        });
+        SilentServer { port, clients }
+    }
+
+    /// every connection closed
+    fn stop(&self) {
+        for stream in self.clients.lock().unwrap().drain(..) {
+            let _ = stream.shutdown(std::net::Shutdown::Both);
+        }
+    }
+}
+
+pub async fn not_downloaded(d: &Driver) {
+    d.step("a message that is not downloaded yet");
+    let main = main_window();
+    let raw = format!(
+        "From: Hal Example <hal@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Waiting on the server\r\n\
+         Message-ID: <waiting@example.com>\r\nDate: {}\r\n\r\nHere at last.\r\n",
+        date_now(0)
+    );
+    let _ = d.add_message(&raw, &[]);
+    run_command(Command::Sync);
+    select_folder("Inbox");
+    wait_for(20, || d.find("INBOX", "Subject: Waiting on the server")).await;
+    pause(1500).await;
+    // a server that takes the connection and says nothing: the download waits
+    let silent = SilentServer::start();
+    set_port(d, "form-5", &silent.port.to_string()).await;
+    show_found("subject:\"Waiting on the server\"").await;
+    let reader = &shell().main().reader;
+    let header = reader.header_text();
+    d.check(
+        header.contains("Waiting on the server") && header.contains("Hal Example"),
+        &format!("the header shows the message's sender and subject at once ({header})"),
+    );
+    d.check(
+        wait_until(10, || reader.preview.shown().contains("Downloading the message")).await,
+        "the pane says the message is being downloaded",
+    );
+    d.shot(&main, "read-13-downloading").await;
+    // the server gone: why, and Try Again
+    silent.stop();
+    d.check(
+        wait_until(20, || reader.shows_failure()).await,
+        "a message that can not be downloaded has Try Again",
+    );
+    d.check(
+        reader.preview.shown().contains("could not be downloaded"),
+        "and the pane says why",
+    );
+    d.shot(&main, "read-12-not-downloaded").await;
+    // the server back: the account syncs, and the message is tried again by itself
+    set_port(d, "form-5", &d.ports.imap.to_string()).await;
+    d.check(
+        wait_until(30, || reader.preview.shown().contains("Here at last")).await,
+        "once the account is back the message shows by itself",
+    );
+    d.check(!reader.shows_failure(), "and Try Again goes");
+    search("").await;
+    select_folder("Inbox");
+}

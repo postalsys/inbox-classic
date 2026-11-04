@@ -40,12 +40,15 @@ pub use secrets::PasswordStore;
 use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
-pub use text::{account_label, account_title, folder_name, format_size};
+pub use text::{RETRY_NOTE, ReaderState, account_label, account_title, folder_name, format_size, reader_page};
 pub use view::{AttachmentView, MessageView};
-use worker::{Command, Worker};
+use worker::{Command, Role, SharedToken, Worker};
 
 /// The version of the core, which the About boxes show
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// The workers of the accounts (or their readers): the commands they take, and the task to stop
+type Workers = Mutex<HashMap<AccountId, (UnboundedSender<Command>, tokio::task::AbortHandle)>>;
 
 /// What the engine tells the windows. Delivered on a worker thread.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -55,6 +58,8 @@ pub enum Event {
     },
     SyncFinished {
         account: AccountId,
+        /// What kept the sync from finishing (told by a `Failed` before), None when it did: the account is online
+        failure: Option<FailureKind>,
     },
     /// The folder list of an account changed
     FoldersChanged {
@@ -69,6 +74,14 @@ pub enum Event {
     MessageReady {
         folder: FolderId,
         uid: u64,
+    },
+    /// The message opened ([`Core::open_message`]) could not be downloaded: `kind` and `message` say why. Opening it
+    /// again tries again
+    MessageFailed {
+        folder: FolderId,
+        uid: u64,
+        kind: FailureKind,
+        message: String,
     },
     /// The logo `request` ([`Core::logo_start`]) is drawn, or there was none: [`Core::logo_result`]
     LogoReady {
@@ -232,7 +245,11 @@ pub struct Core {
     /// Taken when closing
     runtime: Option<tokio::runtime::Runtime>,
     /// The worker of each account: where its commands go, and how to stop it in the middle of one
-    workers: Mutex<HashMap<AccountId, (UnboundedSender<Command>, tokio::task::AbortHandle)>>,
+    workers: Workers,
+    /// The readers of the accounts: their own connections that download the messages opened (`worker::Role::Reader`)
+    readers: Workers,
+    /// The access token of each OAuth account, which its worker and its reader share
+    tokens: Mutex<HashMap<AccountId, SharedToken>>,
     secrets: Secrets,
     trust: Trust,
     events: EventSink,
@@ -296,6 +313,8 @@ impl Core {
             store: Mutex::new(store),
             runtime: Some(runtime),
             workers: Mutex::default(),
+            readers: Mutex::default(),
+            tokens: Mutex::default(),
             secrets,
             trust,
             events: Arc::new(move |event| {
@@ -402,9 +421,12 @@ impl Core {
     pub fn remove_account(&self, id: AccountId) -> Result<()> {
         // now, not after its current command: a sync it was running would write into the next account that gets
         // this id
-        if let Some((_, task)) = self.workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&id) {
-            task.abort();
+        for workers in [&self.workers, &self.readers] {
+            if let Some((_, task)) = workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&id) {
+                task.abort();
+            }
         }
+        self.tokens.lock().unwrap_or_else(|p| p.into_inner()).remove(&id);
         self.store().remove_account(id)?;
         self.secrets.remove(id);
         Ok(())
@@ -692,11 +714,17 @@ impl Core {
         self.send_command(account, Command::Sync)
     }
 
-    /// Gets the source of a message to the store, in the background; [`Event::MessageReady`]
-    /// follows, right away when it is cached
+    /// Gets the source of a message to the store, in the background, on the account's reader: a connection of its own,
+    /// so it does not wait for a sync. [`Event::MessageReady`] follows, right away when it is cached, or
+    /// [`Event::MessageFailed`] when it can not be downloaded
     pub fn open_message(&self, folder: FolderId, uid: u64) -> Result<()> {
         let account = self.store().folder(folder)?.account_id;
-        self.send_command(account, Command::FetchSource { folder, uid })
+        self.send_to(
+            &self.readers,
+            Role::Reader,
+            account,
+            Command::FetchSource { folder, uid },
+        )
     }
 
     /// The source of a message and the date the server got it, for a view
@@ -1161,7 +1189,22 @@ impl Core {
     }
 
     fn send_command(&self, account: AccountId, command: Command) -> Result<()> {
-        let mut workers = self.workers.lock().unwrap_or_else(|p| p.into_inner());
+        self.send_to(&self.workers, Role::Main, account, command)
+    }
+
+    /// The access token both workers of `account` use
+    fn token(&self, account: AccountId) -> SharedToken {
+        self.tokens
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .entry(account)
+            .or_default()
+            .clone()
+    }
+
+    /// Hands `command` to the worker of `account` in `workers` (of `role`), started when there is none or it stopped
+    fn send_to(&self, workers: &Workers, role: Role, account: AccountId, command: Command) -> Result<()> {
+        let mut workers = workers.lock().unwrap_or_else(|p| p.into_inner());
         let command = match workers.get(&account) {
             Some((sender, _)) => match sender.send(command) {
                 Ok(()) => return Ok(()),
@@ -1175,10 +1218,12 @@ impl Core {
         sender.send(command).map_err(|_| Error::Closed)?;
         let worker = Worker::new(
             account,
+            role,
             self.path.clone(),
             self.secrets.clone(),
             self.trust.clone(),
             self.oauth.clone(),
+            self.token(account),
             self.events.clone(),
         );
         let task = self.runtime()?.spawn(worker.run(receiver));
@@ -1187,8 +1232,11 @@ impl Core {
     }
 
     fn stop_worker(&self, account: AccountId) {
-        // dropping the sender ends the worker once its current command is done
+        // dropping the sender ends the worker once its current command is done; the reader too, and the token goes,
+        // as the settings it was for changed
         self.workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
+        self.readers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
+        self.tokens.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
     }
 }
 
@@ -1230,6 +1278,7 @@ impl Drop for Core {
     fn drop(&mut self) {
         self.closed.store(true, Ordering::Release);
         self.workers.lock().unwrap_or_else(|p| p.into_inner()).clear();
+        self.readers.lock().unwrap_or_else(|p| p.into_inner()).clear();
         if let Some(runtime) = self.runtime.take() {
             // workers that are waiting for the network are cancelled
             runtime.shutdown_timeout(SHUTDOWN_GRACE);

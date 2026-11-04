@@ -168,3 +168,46 @@ mod tests {
         assert_eq!(last["trigger"]["resource-type"], serde_json::json!(["image"]));
     }
 }
+
+/// A page of the reading pane that is not a message: no message selected, the message downloading, or why it could not
+/// be. `title` and `detail` are text (escaped here); with `busy` a spinner turns above them, drawn and moved by CSS
+/// alone, as the pane runs no script. The same light page as the messages, under the same CSP.
+pub fn status_page(title: &str, detail: &str, busy: bool) -> String {
+    let spinner = if busy {
+        "<div class=\"spin\" aria-hidden=\"true\"></div>"
+    } else {
+        ""
+    };
+    let detail = if detail.is_empty() {
+        String::new()
+    } else {
+        format!("<p class=\"detail\">{}</p>", crate::editor::text(detail))
+    };
+    format!(
+        "<!doctype html><html><head><meta charset=\"utf-8\">\
+         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'\">\
+         <meta name=\"color-scheme\" content=\"light\"><style>\
+         html{{background:#fff}}body{{margin:0;padding:48px 24px;text-align:center;font:13px system-ui,-apple-system,'Segoe UI',sans-serif;color:#333}}\
+         .title{{font-size:14px;font-weight:600;margin:0 0 6px}}.detail{{margin:0 auto;max-width:420px;line-height:1.45;color:#666}}\
+         .spin{{width:22px;height:22px;margin:0 auto 14px;border:2px solid #d8d8d8;border-top-color:#777;border-radius:50%;\
+         animation:spin .9s linear infinite}}@keyframes spin{{to{{transform:rotate(360deg)}}}}\
+         @media (prefers-reduced-motion:reduce){{.spin{{animation-duration:3s}}}}\
+         </style></head><body role=\"status\">{spinner}<p class=\"title\">{}</p>{detail}</body></html>",
+        crate::editor::text(title)
+    )
+}
+
+#[cfg(test)]
+mod status_tests {
+    use super::*;
+
+    #[test]
+    fn a_status_page_is_text_only() {
+        let page = status_page("Downloading <b>", "it & more", true);
+        assert!(page.contains("Downloading &lt;b&gt;") && page.contains("it &amp; more"));
+        assert!(page.contains("class=\"spin\"") && !page.contains("<script"));
+        assert!(page.contains("default-src 'none'"));
+        let quiet = status_page("There is no message selected.", "", false);
+        assert!(!quiet.contains("class=\"spin\"") && !quiet.contains("class=\"detail\""));
+    }
+}

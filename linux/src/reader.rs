@@ -6,6 +6,8 @@ use adw::prelude::*;
 use gtk::{gdk, gio, glib};
 use pe_core::MessageView;
 use pe_core::calendar::{Invitation, Method};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use crate::webview::{DocumentView, no_message};
 
@@ -18,7 +20,7 @@ pub struct Reader {
     from: gtk::Label,
     date: gtk::Label,
     to: gtk::Label,
-    /// "Loading the message...", or why it is not shown
+    /// Why the message is not shown
     note: gtk::Label,
     /// Leaving the message's mailing list: its click goes to the window
     pub unsubscribe: gtk::Label,
@@ -32,7 +34,18 @@ pub struct Reader {
     /// The bar that says pictures from the internet are blocked; its button shows them
     pictures: gtk::Box,
     pub download_pictures: gtk::Button,
+    /// The bar over a message that could not be downloaded; its button tries again
+    retry: gtk::Box,
+    pub try_again: gtk::Button,
     pub preview: DocumentView,
+    /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
+    downloading: Rc<RefCell<Option<glib::SourceId>>>,
+}
+
+/// The pane says the message is being downloaded, without Try Again
+fn show_downloading(preview: &DocumentView, retry: &gtk::Box) {
+    retry.set_visible(false);
+    preview.show(&pe_core::reader_page(pe_core::ReaderState::Downloading), false);
 }
 
 fn field_label(text: &str) -> gtk::Label {
@@ -145,10 +158,25 @@ impl Reader {
         pictures.append(&download_pictures);
         pictures.set_visible(false);
 
+        let note_retry = gtk::Label::new(Some(pe_core::RETRY_NOTE));
+        note_retry.set_xalign(0.0);
+        note_retry.set_hexpand(true);
+        note_retry.set_ellipsize(gtk::pango::EllipsizeMode::End);
+        let try_again = gtk::Button::with_label("Try Again");
+        try_again.set_widget_name("reader-try-again");
+        let retry = gtk::Box::new(gtk::Orientation::Horizontal, 10);
+        retry.add_css_class("info-bar");
+        retry.set_widget_name("reader-retry");
+        retry.append(&gtk::Image::from_icon_name("ic-arrow-sync-symbolic"));
+        retry.append(&note_retry);
+        retry.append(&try_again);
+        retry.set_visible(false);
+
         let preview = DocumentView::new("preview", false);
         preview.view.set_widget_name("reader-preview");
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 0);
         widget.append(&header);
+        widget.append(&retry);
         widget.append(&invitation);
         widget.append(&pictures);
         widget.append(&preview.view);
@@ -171,7 +199,10 @@ impl Reader {
             open_calendar,
             pictures,
             download_pictures,
+            retry,
+            try_again,
             preview,
+            downloading: Rc::default(),
         };
         reader.clear(false);
         reader
@@ -186,6 +217,8 @@ impl Reader {
             self.invitation.set_visible(false);
         }
         self.unsubscribe.set_visible(false);
+        self.retry.set_visible(false);
+        self.stop_downloading_note();
         self.logo.set_visible(false);
         self.subject.set_text("");
         self.fields.set_visible(false);
@@ -194,13 +227,58 @@ impl Reader {
         self.preview.show(&no_message(!loading), false);
     }
 
-    pub fn loading(&self) {
+    /// A message asked for: its header from the list at once (the window says it is downloading a moment later, should
+    /// it not be here yet)
+    pub fn loading(&self, message: &pe_store::MessageInfo) {
         self.header.set_visible(true);
-        self.note.set_text("Loading the message...");
-        self.note.set_visible(true);
+        self.note.set_visible(false);
+        self.retry.set_visible(false);
+        self.fields.set_visible(true);
+        self.subject.set_text(&message.subject);
+        self.from.set_text(message.sender());
+        self.date
+            .set_text(&message.display_date().map(crate::ui::format_date).unwrap_or_default());
+        self.to.set_text(&message.recipients);
+        self.stop_downloading_note();
+        let (preview, retry, timer) = (self.preview.clone(), self.retry.clone(), self.downloading.clone());
+        let id = glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
+            timer.borrow_mut().take();
+            show_downloading(&preview, &retry);
+        });
+        self.downloading.replace(Some(id));
+    }
+
+    /// The "downloading" page no longer due: the message came (it is parsed now), failed, or another is selected
+    pub fn stop_downloading_note(&self) {
+        if let Some(timer) = self.downloading.borrow_mut().take() {
+            timer.remove();
+        }
+    }
+
+    /// The message is being downloaded
+    pub fn downloading(&self) {
+        self.stop_downloading_note();
+        show_downloading(&self.preview, &self.retry);
+    }
+
+    /// The message could not be downloaded: why, in the pane, and Try Again over it
+    pub fn not_downloaded(&self, kind: pe_core::FailureKind, reason: &str) {
+        self.stop_downloading_note();
+        self.attachments.set_visible(false);
+        self.pictures.set_visible(false);
+        self.retry.set_visible(true);
+        self.preview.show(
+            &pe_core::reader_page(pe_core::ReaderState::Failed { kind, reason }),
+            false,
+        );
+    }
+
+    pub fn shows_failure(&self) -> bool {
+        self.retry.is_visible()
     }
 
     pub fn failed(&self) {
+        self.stop_downloading_note();
         self.header.set_visible(true);
         self.fields.set_visible(false);
         self.subject.set_text("");
@@ -215,6 +293,8 @@ impl Reader {
     pub fn show(&self, view: &MessageView, remote_images: bool) {
         self.header.set_visible(true);
         self.note.set_visible(false);
+        self.retry.set_visible(false);
+        self.stop_downloading_note();
         self.fields.set_visible(true);
         self.subject.set_text(&view.subject);
         self.from.set_text(&view.from);

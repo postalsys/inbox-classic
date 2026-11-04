@@ -1,10 +1,12 @@
-//! The worker of an account: runs the commands the windows send, one at a time, on the
-//! account's IMAP connection, connecting when there is none, and applies what the server reports
-//! meanwhile.
+//! The workers of an account: the main one runs the commands the windows send, one at a time, on the account's
+//! IMAP connection, connecting when there is none, and applies what the server reports meanwhile; the reader,
+//! on a connection of its own, only downloads the messages the user opens, so one opened during a long sync (the
+//! first of a new account) comes at once and not after it.
 
 use std::collections::BTreeSet;
 
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use pe_imap::{Client, Credentials, ErrorKind, Event as ImapEvent};
 use pe_net::Trust;
@@ -196,14 +198,25 @@ fn kept(failure: Failure, waiting: usize) -> Failure {
     }
 }
 
+/// The access token of an OAuth account and when it runs out, shared by its two workers so a token is refreshed once,
+/// not by each (a provider that rotates refresh tokens would take the second refresh as a replay)
+pub(crate) type SharedToken = Arc<tokio::sync::Mutex<Option<(String, i64)>>>;
+
+/// What a worker does: everything but opening messages, or only that
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Role {
+    Main,
+    Reader,
+}
+
 pub(crate) struct Worker {
     account: AccountId,
+    role: Role,
     path: PathBuf,
     secrets: Secrets,
     trust: Trust,
     oauth: crate::OAuthProviders,
-    /// The access token of an OAuth account and when it runs out
-    access_token: Option<(String, i64)>,
+    access_token: SharedToken,
     events: EventSink,
     connection: Option<(Client, UnboundedReceiver<ImapEvent>)>,
     /// A server event that woke the Inbox from IDLE, applied first with the rest
@@ -227,21 +240,25 @@ enum Wake {
 }
 
 impl Worker {
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         account: AccountId,
+        role: Role,
         path: PathBuf,
         secrets: Secrets,
         trust: Trust,
         oauth: crate::OAuthProviders,
+        access_token: SharedToken,
         events: EventSink,
     ) -> Self {
         Worker {
             account,
+            role,
             path,
             secrets,
             trust,
             oauth,
-            access_token: None,
+            access_token,
             events,
             connection: None,
             held: None,
@@ -256,6 +273,9 @@ impl Worker {
             Ok(store) => store,
             Err(error) => return self.fail(error.into()),
         };
+        if self.role == Role::Reader {
+            return self.read(&mut store, &mut commands).await;
+        }
         while let Some(command) = self.next_command(&mut store, &mut commands).await {
             let sync = command == Command::Sync;
             if sync {
@@ -266,12 +286,16 @@ impl Worker {
             if outcome.is_ok() {
                 outcome = self.apply_server_events(&mut store).await;
             }
+            let failure = outcome.as_ref().err().map(|failure| failure.kind);
             if let Err(failure) = outcome {
                 self.fail(failure);
             }
             // after the failure and the changes it found, so the window knows the sync is done
             if sync {
-                self.emit(Event::SyncFinished { account: self.account });
+                self.emit(Event::SyncFinished {
+                    account: self.account,
+                    failure,
+                });
             }
             // the text of the mail for the search, a batch at a time while nothing else waits; a batch that fails is
             // tried again after the next command
@@ -284,6 +308,72 @@ impl Worker {
         }
         if let Some((mut client, _)) = self.connection.take() {
             let _ = client.logout().await;
+        }
+    }
+
+    /// The reader: the messages opened, each downloaded as it is asked for; one that can not be is reported for the
+    /// reading pane ([`Event::MessageFailed`]), not as a failure of the account (the main worker reports those)
+    async fn read(&mut self, store: &mut Store, commands: &mut UnboundedReceiver<Command>) {
+        while let Some(mut command) = commands.recv().await {
+            // only the message asked for last: those the user moved past on the way to it are not waited for
+            while let Ok(next) = commands.try_recv() {
+                command = next;
+            }
+            let Command::FetchSource { folder, uid } = command else {
+                continue;
+            };
+            // what the server says of its folder is the main worker's to follow, not kept here
+            if let Some((_, server_events)) = &mut self.connection {
+                while server_events.try_recv().is_ok() {}
+            }
+            // a connection the server closed while it was not used shows when it is used: once more on a new one
+            let had_connection = self.connection.is_some();
+            let mut outcome = self.fetch_for_view(store, folder, uid).await;
+            if had_connection
+                && outcome
+                    .as_ref()
+                    .is_err_and(|failure| failure.kind == FailureKind::Network)
+            {
+                self.connection = None;
+                outcome = self.fetch_for_view(store, folder, uid).await;
+            }
+            if let Err(failure) = outcome {
+                self.reset_after(&failure);
+                self.emit(Event::MessageFailed {
+                    folder,
+                    uid,
+                    kind: failure.kind,
+                    message: failure.message,
+                });
+            }
+        }
+        if let Some((mut client, _)) = self.connection.take() {
+            let _ = client.logout().await;
+        }
+    }
+
+    /// The source of a message in the store, fetched when it is not there yet; [`Event::MessageReady`] once it is,
+    /// and the search indexes it by its text from then on
+    async fn fetch_for_view(&mut self, store: &mut Store, folder: FolderId, uid: u64) -> Outcome {
+        let source = if store.has_source(folder, uid)? {
+            None
+        } else {
+            Some(fetch_source(self.client(store).await?, store, folder, uid).await?)
+        };
+        self.emit(Event::MessageReady { folder, uid });
+        // the search finds it by what the parser reads in it from now on, after the window has it
+        if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
+            let text = crate::search::index_text(&source);
+            // its index row replaced at once, never missing for a search meanwhile
+            store.transaction(|store| store.set_indexed(message.id, &text))?;
+        }
+        Ok(())
+    }
+
+    /// The access token is no good: the next connect of either worker refreshes it
+    fn forget_token(&self) {
+        if let Ok(mut token) = self.access_token.try_lock() {
+            *token = None;
         }
     }
 
@@ -402,15 +492,18 @@ impl Worker {
         (self.events)(event);
     }
 
-    fn fail(&mut self, failure: Failure) {
+    /// What a failure leaves no good: the connection (the next command connects again), and a refused access token
+    fn reset_after(&mut self, failure: &Failure) {
         if failure.kind != FailureKind::Other {
-            // the connection is no good now, the next command connects again
             self.connection = None;
         }
         if failure.kind == FailureKind::Authentication {
-            // an access token that was refused is no good either
-            self.access_token = None;
+            self.forget_token();
         }
+    }
+
+    fn fail(&mut self, failure: Failure) {
+        self.reset_after(&failure);
         // a refused password is told once, not again for each command until the user gives another
         if failure.kind == FailureKind::Authentication && !self.secrets.first_refusal(self.account) {
             return;
@@ -432,21 +525,8 @@ impl Worker {
                 self.sync_all(store).await
             }
             Command::SendOutbox => self.send_outbox(store).await,
-            Command::FetchSource { folder, uid } => {
-                let source = if store.has_source(folder, uid)? {
-                    None
-                } else {
-                    Some(fetch_source(self.client(store).await?, store, folder, uid).await?)
-                };
-                self.emit(Event::MessageReady { folder, uid });
-                // the search finds it by what the parser reads in it from now on, after the window has it
-                if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
-                    let text = crate::search::index_text(&source);
-                    // its index row replaced at once, never missing for a search meanwhile
-                    store.transaction(|store| store.set_indexed(message.id, &text))?;
-                }
-                Ok(())
-            }
+            // the reader's (Core::open_message), never sent here
+            Command::FetchSource { .. } => Ok(()),
             Command::SetFlag { folder, uids, flag, on } => {
                 Ok(set_flag(self.client(store).await?, store, folder, &uids, flag, on).await?)
             }
@@ -576,10 +656,12 @@ impl Worker {
         } else {
             let mut other = Worker::new(
                 account,
+                Role::Main,
                 self.path.clone(),
                 self.secrets.clone(),
                 self.trust.clone(),
                 self.oauth.clone(),
+                SharedToken::default(),
                 self.events.clone(),
             );
             other.remove_drafts(store, message_id).await
@@ -740,7 +822,10 @@ impl Worker {
             return Ok(Credentials::Password { user, password });
         };
         let now = pe_oauth::now();
-        if let Some((token, expires_at)) = &self.access_token
+        // held while refreshing, so the other worker waits for this token rather than refreshing too
+        let shared = self.access_token.clone();
+        let mut access_token = shared.lock().await;
+        if let Some((token, expires_at)) = &*access_token
             && *expires_at > now
         {
             return Ok(Credentials::OAuth2 {
@@ -786,7 +871,7 @@ impl Worker {
                 });
             }
         }
-        self.access_token = Some((tokens.access_token.clone(), tokens.expires_at));
+        *access_token = Some((tokens.access_token.clone(), tokens.expires_at));
         Ok(Credentials::OAuth2 {
             user,
             access_token: tokens.access_token,

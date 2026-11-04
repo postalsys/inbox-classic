@@ -15,6 +15,10 @@ final class Reader: NSObject {
     private let unsubscribe = NSButton(title: "Unsubscribe", target: nil, action: nil)
     private let invitation = InfoBar(icon: "calendar_ltr", link: nil, button: "Open in Calendar")
     private let pictures = InfoBar(icon: "image", link: nil)
+    /// over a message that could not be downloaded: Try Again
+    private let retry = InfoBar(icon: "arrow_sync", link: nil, button: "Try Again")
+    /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
+    private var downloadingTimer: Timer?
     private(set) var picturesOffered = false
     /// the logo's side in pixels, for the core to draw it at
     var logoPixels: Int { Int(48 * (view.window?.backingScaleFactor ?? 2)) }
@@ -68,6 +72,10 @@ final class Reader: NSObject {
         pictures.clicked = { [weak self] in self?.mailbox?.loadPictures() }
         pictures.setAccessibilityIdentifier("reader.pictures")
         invitation.clicked = { [weak self] in self?.mailbox?.openInCalendar() }
+        retry.text = taken(pe_retry_note()) ?? ""
+        retry.clicked = { [weak self] in self?.mailbox?.retryDownload() }
+        retry.setAccessibilityIdentifier("reader.retry")
+        retry.isHidden = true
         invitation.setAccessibilityIdentifier("reader.invitation")
         invitation.isHidden = true
         pictures.isHidden = true
@@ -75,7 +83,7 @@ final class Reader: NSObject {
         view.orientation = .vertical
         view.spacing = 0
         view.alignment = .leading
-        for part in [headerBox, line, invitation, pictures, preview.view] as [NSView] {
+        for part in [headerBox, line, retry, invitation, pictures, preview.view] as [NSView] {
             view.addArrangedSubview(part)
             part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         }
@@ -83,12 +91,15 @@ final class Reader: NSObject {
         preview.view.setContentHuggingPriority(.defaultLow, for: .vertical)
         invitation.heightAnchor.constraint(equalToConstant: 44).isActive = true
         pictures.heightAnchor.constraint(equalToConstant: 26).isActive = true
+        retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
         clear(loading: false)
     }
 
     // ---- what it shows ----
 
     func clear(loading: Bool) {
+        downloadingTimer?.invalidate()
+        retry.isHidden = true
         header.stringValue = ""
         // the bars of the message before stay while the next one loads, and go when it is there without them
         if !loading {
@@ -104,11 +115,43 @@ final class Reader: NSObject {
         preview.clear(noMessage: !loading)
     }
 
-    func showLoading() {
-        header.stringValue = "Loading the message\u{2026}"
+    /// a message asked for: its header from the list at once, and after a moment, should it not be here yet, that it is
+    /// being downloaded
+    func showLoading(_ row: Message) {
+        header.attributedStringValue = headerText(from: row.from, date: row.date, to: row.recipients, cc: "", subject: row.subject)
+        retry.isHidden = true
+        downloadingTimer?.invalidate()
+        downloadingTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.showDownloading() }
+        }
     }
 
+    /// the message is here: being parsed now, not downloaded
+    func arrived() {
+        downloadingTimer?.invalidate()
+        retry.isHidden = true
+    }
+
+    func showDownloading() {
+        downloadingTimer?.invalidate()
+        retry.isHidden = true
+        preview.showState(PE_READER_STATE_DOWNLOADING)
+    }
+
+    /// the message could not be downloaded: why, in the pane, and Try Again over it
+    func showFailed(kind: PeFailureKind, reason: String) {
+        downloadingTimer?.invalidate()
+        attachments.isHidden = true
+        pictures.isHidden = true
+        picturesOffered = false
+        retry.isHidden = false
+        preview.showState(PE_READER_STATE_FAILED, failure: kind, reason: reason)
+    }
+
+    var showsFailure: Bool { !retry.isHidden }
+
     func showProblem(_ problem: String) {
+        downloadingTimer?.invalidate()
         header.stringValue = problem
         attachments.isHidden = true
         pictures.isHidden = true
@@ -116,6 +159,8 @@ final class Reader: NSObject {
     }
 
     func show(_ info: PeMessageInfo, view: MessageView, pictures allowed: Bool) {
+        downloadingTimer?.invalidate()
+        retry.isHidden = true
         header.attributedStringValue = headerText(info)
         let files = info.attachment_count
         attachments.isHidden = files == 0
@@ -133,6 +178,12 @@ final class Reader: NSObject {
     }
 
     private func headerText(_ info: PeMessageInfo) -> NSAttributedString {
+        headerText(from: text(info.from), date: info.has_date ? info.date : nil, to: text(info.to), cc: text(info.cc),
+                   subject: text(info.subject))
+    }
+
+    /// From, Date, To (with Cc) and Subject, the names bold
+    private func headerText(from: String, date: Int64?, to: String, cc: String, subject: String) -> NSAttributedString {
         let out = NSMutableAttributedString()
         let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
         let bold = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
@@ -140,15 +191,10 @@ final class Reader: NSObject {
             out.append(NSAttributedString(string: name + ":  ", attributes: [.font: bold, .foregroundColor: NSColor.secondaryLabelColor]))
             out.append(NSAttributedString(string: value + (last ? "" : "\n"), attributes: [.font: font, .foregroundColor: NSColor.labelColor]))
         }
-        line("From", text(info.from))
-        line("Date", info.has_date ? formatDate(info.date) : "")
-        var to = text(info.to)
-        let cc = text(info.cc)
-        if !cc.isEmpty {
-            to += "    Cc:  " + cc
-        }
-        line("To", to)
-        line("Subject", text(info.subject), last: true)
+        line("From", from)
+        line("Date", date.map(formatDate) ?? "")
+        line("To", cc.isEmpty ? to : to + "    Cc:  " + cc)
+        line("Subject", subject, last: true)
         return out
     }
 

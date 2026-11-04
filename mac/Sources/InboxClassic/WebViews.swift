@@ -184,12 +184,18 @@ final class Preview: NSObject {
         view.load(URLRequest(url: server.serve(document, host: "preview", path: "\(shown)")))
     }
 
+    /// the core's page for `state` (no message selected, downloading, why it could not be downloaded)
+    func showState(_ state: PeReaderState, failure: PeFailureKind = PE_FAILURE_KIND_NONE, reason: String = "") {
+        show(reason.withCString { taken(pe_reader_page(state, failure, $0)) } ?? "")
+    }
+
     /// says that no message is selected, or shows nothing while one loads
     func clear(noMessage: Bool = true) {
-        let page = "<!doctype html><html><head><meta name=\"color-scheme\" content=\"light\"><style>html{background:#fff}"
-            + "p{margin:24px 8px;text-align:center;font:13px -apple-system,sans-serif;color:#555}</style></head><body>"
-            + (noMessage ? "<p>There is no message selected.</p>" : "") + "</body></html>"
-        show(page)
+        if noMessage {
+            showState(PE_READER_STATE_NO_MESSAGE)
+        } else {
+            show("<!doctype html><html><head><meta name=\"color-scheme\" content=\"light\"><style>html{background:#fff}</style></head><body></body></html>")
+        }
     }
 }
 

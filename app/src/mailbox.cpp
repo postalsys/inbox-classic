@@ -251,6 +251,12 @@ void Mailbox::Create(HWND parent, PeCore* core) {
                             SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER, IDC_PICTURES, {});
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
+    // the same bar over a message that could not be downloaded: a click tries again
+    core::String note(pe_retry_note());
+    std::wstring retry = L" " + Text(note.get()) + L" Click here to try again.";
+    retry_ = CreateChild(parent, L"STATIC", retry.c_str(), SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER,
+                         IDC_RETRY, {});
+    ShowWindow(retry_, SW_HIDE);
     // over the list while searching, in the colors of the information bar: what was found, and a link to end it
     searchBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_SEARCH_BAR, {});
     searchClear_ = CreateChild(parent, L"STATIC", L"Clear search", SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
@@ -357,8 +363,15 @@ void Mailbox::ShowReaderBars(bool files, bool pictures) {
     }
 }
 
+void Mailbox::ShowRetry(bool shown) {
+    if ((IsWindowVisible(retry_) != FALSE) != shown) {
+        ShowWindow(retry_, shown ? SW_SHOW : SW_HIDE);
+        LayoutReader();
+    }
+}
+
 bool Mailbox::OnSetCursor(HWND window) {
-    if (window != pictures_ && window != searchClear_ && window != unsubscribe_) {
+    if (window != pictures_ && window != retry_ && window != searchClear_ && window != unsubscribe_) {
         return false;
     }
     // the information bar is clicked like a link
@@ -375,7 +388,7 @@ bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
         brush = reinterpret_cast<LRESULT>(GetSysColorBrush(background));
         return true;
     }
-    if (window != pictures_) {
+    if (window != pictures_ && window != retry_) {
         return false;
     }
     // the colors of tooltips and information bars of the Windows scheme
@@ -418,6 +431,11 @@ void Mailbox::LayoutReader() {
                    TRUE);
     }
     int top = reader.top + headerHeight + Scale(2);
+    if (IsWindowVisible(retry_)) {
+        int barHeight = Scale(22);
+        MoveWindow(retry_, reader.left, top, width, barHeight, TRUE);
+        top += barHeight + Scale(2);
+    }
     if (IsWindowVisible(invitation_)) {
         int barHeight = Scale(40), buttonWidth = Scale(120), buttonHeight = Scale(25);
         MoveWindow(invitation_, reader.left, top, width, barHeight, TRUE);
@@ -744,6 +762,19 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
 
 // ---- the reading pane ----
 
+namespace {
+
+// the header's lines (Cc, when there is one, beside To), from a message's view or its row in the list
+std::wstring HeaderText(const char* from, bool hasDate, int64_t date, const char* to, const char* cc, const char* subject) {
+    std::wstring header = L" From:  " + Text(from) + L"\r\n Date:  " + (hasDate ? FormatDate(date) : L"") + L"\r\n To:  " + Text(to);
+    if (cc && *cc) {
+        header += L"    Cc:  " + Text(cc);
+    }
+    return header + L"\r\n Subject:  " + Text(subject);
+}
+
+}  // namespace
+
 void Mailbox::ClearReader(bool loading) {
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
@@ -755,6 +786,8 @@ void Mailbox::ClearReader(bool loading) {
     remoteImages_ = false;
     view_.reset();
     KillTimer(parent_, TIMER_MARK_READ);
+    KillTimer(parent_, TIMER_DOWNLOADING);
+    ShowRetry(false);
     // the bars of the message before stay while the next one loads, and go when it is there without them: the
     // message does not jump down and up again
     if (!loading) {
@@ -782,9 +815,21 @@ void Mailbox::OnSelectionChanged() {
     }
     uid_ = uid;
     messageFolder_ = folder;
-    SetWindowTextW(header_, L" Loading the message...");
-    // MessageReady follows, right away when the message is cached
+    // the header from the list at once; the pane says the message is being downloaded a moment later, should it not
+    // be here yet
+    SetWindowTextW(header_, HeaderText(row->from, row->has_date, row->date, row->recipients, nullptr, row->subject).c_str());
+    SetTimer(parent_, TIMER_DOWNLOADING, 250, nullptr);
+    // MessageReady follows, right away when the message is cached, or MessageFailed
     pe_message_open(core_, folder, uid);
+}
+
+void Mailbox::RetryDownload() {
+    if (!uid_) {
+        return;
+    }
+    ShowRetry(false);
+    preview_.ShowState(PE_READER_STATE_DOWNLOADING);
+    pe_message_open(core_, messageFolder_, uid_);
 }
 
 bool Mailbox::OnFolderSelected(LPARAM folder) {
@@ -842,13 +887,7 @@ void Mailbox::ShowView() {
 }
 
 void Mailbox::ShowHeader(const PeMessageInfo* info) {
-    std::wstring header = L" From:  " + Text(info->from) + L"\r\n Date:  " + (info->has_date ? FormatDate(info->date) : L"") +
-                          L"\r\n To:  " + Text(info->to);
-    if (info->cc && *info->cc) {
-        header += L"    Cc:  " + Text(info->cc);
-    }
-    header += L"\r\n Subject:  " + Text(info->subject);
-    SetWindowTextW(header_, header.c_str());
+    SetWindowTextW(header_, HeaderText(info->from, info->has_date, info->date, info->to, info->cc, info->subject).c_str());
     if (info->attachment_count > 0) {
         // the paper clip says how many files there are
         std::wstring label = info->attachment_count == 1 ? L"1 file" : std::to_wstring(info->attachment_count) + L" files";
@@ -1641,6 +1680,9 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
     case IDC_PICTURES:
         LoadPictures();
         return true;
+    case IDC_RETRY:
+        RetryDownload();
+        return true;
     case IDC_SEARCH_CLEAR:
         ClearFind();
         return true;
@@ -1832,6 +1874,11 @@ void Mailbox::OnTimer(UINT_PTR id) {
         SetCursor(DragCursor(!drag_->target ? 1 : (GetKeyState(VK_CONTROL) < 0 ? 3 : 2)));
         return;
     }
+    if (id == TIMER_DOWNLOADING) {
+        KillTimer(parent_, TIMER_DOWNLOADING);
+        preview_.ShowState(PE_READER_STATE_DOWNLOADING);
+        return;
+    }
     if (id == TIMER_RELOAD) {
         KillTimer(parent_, TIMER_RELOAD);
         ReloadList(true);
@@ -1880,7 +1927,26 @@ void Mailbox::OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_MESSAGE_READY:
         if (event.folder == messageFolder_ && event.uid == uid_) {
+            KillTimer(parent_, TIMER_DOWNLOADING);
+            ShowRetry(false);
             ShowMessage();
+        }
+        break;
+    case PE_EVENT_KIND_MESSAGE_FAILED:
+        if (event.folder == messageFolder_ && event.uid == uid_) {
+            KillTimer(parent_, TIMER_DOWNLOADING);
+            ShowReaderBars(false, false);
+            ShowRetry(true);
+            preview_.ShowState(PE_READER_STATE_FAILED, event.failure, core::Narrow(event.message));
+        }
+        break;
+    case PE_EVENT_KIND_SYNC_FINISHED:
+        // the account is back: a message it could not give is tried again
+        if (event.failure == PE_FAILURE_KIND_NONE && IsWindowVisible(retry_)) {
+            auto account = folderAccounts_.find(messageFolder_);
+            if (account != folderAccounts_.end() && account->second == event.account) {
+                RetryDownload();
+            }
         }
         break;
     case PE_EVENT_KIND_VIEW_READY:

@@ -88,7 +88,8 @@ unsafe fn arg<'a>(text: *const c_char) -> Option<&'a str> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PeEventKind {
     SyncStarted = 1,
-    /// Comes after everything the sync found, failures included
+    /// Comes after everything the sync found, failures included; `failure` is what kept it from finishing, `None`
+    /// when it did (the account is online)
     SyncFinished = 2,
     /// The folder list of `account` changed
     FoldersChanged = 3,
@@ -120,6 +121,9 @@ pub enum PeEventKind {
     Unsubscribed = 15,
     /// The logo `uid` of `pe_logo_start` is drawn, or there was none: `pe_logo_result`
     LogoReady = 16,
+    /// `folder`/`uid` (opened with `pe_message_open`) could not be downloaded: `failure` and `message` say why, for
+    /// `pe_reader_page`. Opening it again tries again
+    MessageFailed = 17,
 }
 
 #[repr(C)]
@@ -133,6 +137,17 @@ pub enum PeFailureKind {
     /// The password was refused, or there is none
     Authentication = 3,
     Other = 4,
+}
+
+impl From<PeFailureKind> for FailureKind {
+    fn from(kind: PeFailureKind) -> Self {
+        match kind {
+            PeFailureKind::Network => FailureKind::Network,
+            PeFailureKind::Security => FailureKind::Security,
+            PeFailureKind::Authentication => FailureKind::Authentication,
+            PeFailureKind::None | PeFailureKind::Other => FailureKind::Other,
+        }
+    }
 }
 
 impl From<FailureKind> for PeFailureKind {
@@ -182,7 +197,7 @@ impl Callback {
     fn deliver(&self, event: Event) {
         let (kind, account, folder, uid) = match &event {
             Event::SyncStarted { account } => (PeEventKind::SyncStarted, *account, 0, 0),
-            Event::SyncFinished { account } => (PeEventKind::SyncFinished, *account, 0, 0),
+            Event::SyncFinished { account, .. } => (PeEventKind::SyncFinished, *account, 0, 0),
             Event::FoldersChanged { account } => (PeEventKind::FoldersChanged, *account, 0, 0),
             Event::FolderChanged { account, folder } => (PeEventKind::FolderChanged, *account, *folder, 0),
             Event::MessageReady { folder, uid } => (PeEventKind::MessageReady, 0, *folder, *uid),
@@ -199,6 +214,7 @@ impl Callback {
             } => (PeEventKind::NewMail, *account, *folder, *uid),
             Event::Unsubscribed { request, .. } => (PeEventKind::Unsubscribed, 0, 0, *request),
             Event::LogoReady { request } => (PeEventKind::LogoReady, 0, 0, *request),
+            Event::MessageFailed { folder, uid, .. } => (PeEventKind::MessageFailed, 0, *folder, *uid),
         };
         let count = if let Event::NewMail { count, .. } = &event {
             *count as u64
@@ -215,6 +231,8 @@ impl Callback {
                 (PeFailureKind::None, Some(c_string(from)), Some(c_string(subject)))
             }
             Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
+            Event::MessageFailed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
+            Event::SyncFinished { failure, .. } => (failure.map_or(PeFailureKind::None, Into::into), None, None),
             _ => (PeFailureKind::None, None, None),
         };
         let event = PeEvent {
