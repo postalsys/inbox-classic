@@ -142,21 +142,31 @@ std::wstring Text(const char* utf8) {
     return utf8 ? core::Widen(utf8) : std::wstring();
 }
 
-std::wstring FormatDate(int64_t seconds) {
+bool UnixToSystemTime(int64_t seconds, bool local, SYSTEMTIME& time) {
     // the dates FILETIME holds, 1601 to 30827; a sender can write any date
     constexpr int64_t kFrom1601 = 11644473600LL;
     constexpr int64_t kLast = 910692730085LL;
     if (seconds < -kFrom1601 || seconds > kLast) {
-        return {};
+        return false;
     }
     // seconds since 1970 to 100 ns intervals since 1601
     ULARGE_INTEGER ticks;
     ticks.QuadPart = static_cast<ULONGLONG>(seconds + kFrom1601) * 10000000ULL;
     FILETIME utc = {ticks.LowPart, ticks.HighPart};
     SYSTEMTIME universal;
+    if (!FileTimeToSystemTime(&utc, &universal)) {
+        return false;
+    }
+    if (!local) {
+        time = universal;
+        return true;
+    }
+    return SystemTimeToTzSpecificLocalTime(nullptr, &universal, &time) != FALSE;
+}
+
+std::wstring FormatDate(int64_t seconds) {
     SYSTEMTIME local;
-    if (!FileTimeToSystemTime(&utc, &universal) ||
-        !SystemTimeToTzSpecificLocalTime(nullptr, &universal, &local)) {
+    if (!UnixToSystemTime(seconds, true, local)) {
         return {};
     }
     wchar_t date[64] = L"";

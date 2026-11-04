@@ -756,6 +756,23 @@ impl Core {
         Ok(Some((saved, files.len())))
     }
 
+    /// The calendar part of a message written to `dir` as `invitation.ics` (a number added when that is taken), for
+    /// the calendar program to open; its path, None when the message has none or is not downloaded yet
+    pub fn invitation_file(&self, folder: FolderId, uid: u64, dir: &Path) -> Result<Option<PathBuf>> {
+        let Some(source) = self.store().source(folder, uid)? else {
+            return Ok(None);
+        };
+        let Ok(message) = pe_mime::parser::parse(&source) else {
+            return Ok(None);
+        };
+        let Some(part) = view::calendar_part(&message.attachments) else {
+            return Ok(None);
+        };
+        // its bytes as they came, whatever their charset
+        let written = std::fs::create_dir_all(dir).and_then(|_| view::write_new(dir, "invitation.ics", &part.content));
+        written.map(Some).map_err(|error| Error::Unavailable(error.to_string()))
+    }
+
     /// Sends a message from an account in the background, through the Outbox: [`Event::MessageSent`] follows, or
     /// [`Event::Failed`] with the message left waiting in the Outbox for the next Send/Recv. Recipients that are no
     /// addresses and attachments that are not there fail right away.

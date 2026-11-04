@@ -1259,3 +1259,46 @@ fn unsubscribes_with_one_click() {
     assert!(sent.contains("List-Unsubscribe=One-Click"), "{sent}");
     assert!(!sent.to_ascii_lowercase().contains("cookie"), "{sent}");
 }
+
+#[test]
+fn shows_a_calendar_invitation() {
+    let Some(s) = setup() else { return };
+    let raw = "From: Ann <ann@example.com>\r\nSubject: Invitation: Planning\r\n\
+        Content-Type: multipart/mixed; boundary=b\r\n\r\n--b\r\nContent-Type: text/plain\r\n\r\nSee you there.\r\n\
+        --b\r\nContent-Type: text/calendar; method=REQUEST; charset=utf-8\r\n\r\n\
+        BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:p1@example.com\r\nSUMMARY:Planning\r\n\
+        DTSTART:20261201T100000Z\r\nDTEND:20261201T110000Z\r\nLOCATION:Room 2\r\n\
+        ORGANIZER;CN=Ann:mailto:ann@example.com\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n--b--\r\n";
+    let uid = s.server.add_message("INBOX", raw, &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    s.core.open_message(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    let view = s.core.message_view(inbox, uid, false).unwrap().unwrap();
+    let invitation = view.invitation.expect("an invitation");
+    assert_eq!(
+        (invitation.summary.as_str(), invitation.location.as_str()),
+        ("Planning", "Room 2")
+    );
+    assert_eq!(invitation.end.unwrap() - invitation.start.unwrap(), 3600);
+    // the calendar part on its own, for the calendar program
+    let dir = TempDir::new("calendar");
+    let path = s.core.invitation_file(inbox, uid, dir.path()).unwrap().unwrap();
+    assert_eq!(path.file_name().unwrap(), "invitation.ics");
+    let written = std::fs::read_to_string(&path).unwrap();
+    assert!(
+        written.starts_with("BEGIN:VCALENDAR") && written.contains("SUMMARY:Planning"),
+        "{written}"
+    );
+    // a message without one has none
+    assert!(s.core.invitation_file(inbox, 999, dir.path()).unwrap().is_none());
+}

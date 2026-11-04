@@ -67,4 +67,5 @@ enum ListIcon : int {
     LIST_FLAG = 3,
     LIST_SEARCH = 4,
     LIST_DISMISS = 5,
+    LIST_CALENDAR_LTR = 6,
 };

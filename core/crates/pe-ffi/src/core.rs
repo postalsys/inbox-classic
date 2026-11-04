@@ -691,6 +691,32 @@ pub unsafe extern "C" fn pe_account_list_free(list: *mut PeAccountList) {
     unsafe { take_back(list) }
 }
 
+/// The calendar part of a message written to the folder `dir` as invitation.ics (numbered when that is taken), for the
+/// calendar program to open: its path, NULL when the message has none or is not downloaded. Free with
+/// `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `dir` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_invitation_file(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    dir: *const c_char,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(dir) = (unsafe { arg(dir) }).map(std::path::PathBuf::from) else {
+        return null_mut();
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.invitation_file(folder, uid, &dir) {
+            Ok(Some(path)) => into_c_string(path.to_string_lossy().into_owned()),
+            _ => null_mut(),
+        })
+    }
+}
+
 /// Unsubscribes from the mailing list of a message the one-click way (`PeUnsubscribe` OneClick): in the background,
 /// `Unsubscribed` follows with the request this returns; 0 for a message that offers no such way
 ///
@@ -1369,6 +1395,37 @@ pub struct PeAttachment {
     pub size: u64,
 }
 
+/// What the calendar part of a message asks
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeInvitationKind {
+    Request = 0,
+    Update = 1,
+    Cancel = 2,
+    Reply = 3,
+}
+
+/// The event of a message's calendar part, as the reading pane shows it
+#[repr(C)]
+pub struct PeInvitation {
+    pub kind: PeInvitationKind,
+    pub summary: *const c_char,
+    /// Seconds since the Unix epoch, valid when `has_start` / `has_end`; with `floating`, the time as written (shown
+    /// as UTC, not converted)
+    pub start: i64,
+    pub end: i64,
+    pub has_start: bool,
+    pub has_end: bool,
+    /// Dates without times; `end` is the day after the last
+    pub all_day: bool,
+    pub floating: bool,
+    pub location: *const c_char,
+    pub organizer: *const c_char,
+    pub attendees: usize,
+    /// How it repeats, in words; empty for once
+    pub repeats: *const c_char,
+}
+
 /// How a message lets its reader leave its mailing list
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1403,12 +1460,15 @@ pub struct PeMessageInfo {
     pub unsubscribe_link: *const c_char,
     /// Where it goes, for the window to say: the host, or the address of the message
     pub unsubscribe_target: *const c_char,
+    /// The event of its calendar part, NULL without one; owned by the view
+    pub invitation: *const PeInvitation,
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
 pub struct PeMessageView {
     info: PeMessageInfo,
     attachments: Vec<PeAttachment>,
+    _invitation: Option<Box<PeInvitation>>,
     _strings: Strings,
 }
 
@@ -1425,6 +1485,27 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             size: a.size,
         })
         .collect();
+    let invitation = view.invitation.as_ref().map(|event| {
+        Box::new(PeInvitation {
+            kind: match event.method {
+                pe_core::calendar::Method::Request => PeInvitationKind::Request,
+                pe_core::calendar::Method::Update => PeInvitationKind::Update,
+                pe_core::calendar::Method::Cancel => PeInvitationKind::Cancel,
+                pe_core::calendar::Method::Reply => PeInvitationKind::Reply,
+            },
+            summary: strings.add(&event.summary),
+            start: event.start.unwrap_or(0),
+            end: event.end.unwrap_or(0),
+            has_start: event.start.is_some(),
+            has_end: event.end.is_some(),
+            all_day: event.all_day,
+            floating: event.floating,
+            location: strings.add(&event.location),
+            organizer: strings.add(&event.organizer),
+            attendees: event.attendees,
+            repeats: strings.add(&event.repeats),
+        })
+    });
     let (unsubscribe, unsubscribe_link) = match &view.unsubscribe {
         None => (PeUnsubscribe::None, ""),
         Some(Unsubscribe::OneClick { .. }) => (PeUnsubscribe::OneClick, ""),
@@ -1444,10 +1525,12 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         unsubscribe,
         unsubscribe_link: strings.add(unsubscribe_link),
         unsubscribe_target: strings.add(&view.unsubscribe.as_ref().map(Unsubscribe::target).unwrap_or_default()),
+        invitation: invitation.as_deref().map_or(null(), |i| i as *const PeInvitation),
     };
     handed(PeMessageView {
         info,
         attachments,
+        _invitation: invitation,
         _strings: strings,
     })
 }

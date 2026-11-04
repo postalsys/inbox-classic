@@ -33,7 +33,6 @@ pub struct Invitation {
     pub attendees: usize,
     /// How it repeats, in words; empty for once
     pub repeats: String,
-    pub description: String,
 }
 
 /// A content line: its name (uppercase), its parameters (names uppercase) and its value
@@ -96,18 +95,12 @@ fn param<'a>(params: &'a [(String, String)], name: &str) -> Option<&'a str> {
     params.iter().find(|(k, _)| k == name).map(|(_, v)| v.as_str())
 }
 
-/// Days since 1970-01-01 of a date (proleptic Gregorian)
+/// Days since 1970-01-01 of a date; a month or day out of range counts for nothing
 fn days(year: i64, month: i64, day: i64) -> i64 {
-    let (y, m) = if month <= 2 {
-        (year - 1, month + 9)
-    } else {
-        (year, month - 3)
+    let (Ok(month), Ok(day)) = (u32::try_from(month.clamp(1, 12)), u32::try_from(day.clamp(1, 31))) else {
+        return 0;
     };
-    let era = y.div_euclid(400);
-    let yoe = y - era * 400;
-    let doy = (153 * m + 2) / 5 + day - 1;
-    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
-    era * 146097 + doe - 719468
+    pe_mime::date::days_from_civil(year.clamp(-9999, 9999), month, day)
 }
 
 /// `YYYYMMDD` or `YYYYMMDDTHHMMSS[Z]`: seconds of the wall time as if it were UTC, whether it is a date, and
@@ -166,10 +159,12 @@ impl Transition {
 fn by_day(value: &str) -> Option<(i64, i64)> {
     let value = value.split(',').next()?.trim();
     let split = value.len().checked_sub(2)?;
+    // `get`, not slicing: a rule in another script has no byte boundary there
+    let (week, day) = (value.get(..split)?, value.get(split..)?);
     let weekday = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
         .iter()
-        .position(|d| *d == &value[split..])? as i64;
-    let week = if split == 0 { 1 } else { value[..split].parse().ok()? };
+        .position(|d| *d == day)? as i64;
+    let week = if week.is_empty() { 1 } else { week.parse().ok()? };
     Some((week, weekday))
 }
 
@@ -197,13 +192,16 @@ fn offset_at(transitions: &[Transition], wall: i64) -> Option<i64> {
         .map(|(_, offset)| offset)
 }
 
+/// A part of an RRULE (`FREQ`, `BYDAY`)
+fn rule_part<'a>(rule: &'a str, name: &str) -> Option<&'a str> {
+    rule.split(';')
+        .filter_map(|p| p.split_once('='))
+        .find(|(k, _)| k.eq_ignore_ascii_case(name))
+        .map(|(_, v)| v)
+}
+
 fn repeats(rule: &str) -> String {
-    let part = |name: &str| {
-        rule.split(';')
-            .filter_map(|p| p.split_once('='))
-            .find(|(k, _)| k.eq_ignore_ascii_case(name))
-            .map(|(_, v)| v.to_ascii_uppercase())
-    };
+    let part = |name: &str| rule_part(rule, name).map(str::to_ascii_uppercase);
     let interval: u32 = part("INTERVAL").and_then(|i| i.parse().ok()).unwrap_or(1);
     let unit = match part("FREQ").as_deref() {
         Some("DAILY") => ("day", "days"),
@@ -278,13 +276,7 @@ pub fn invitation(calendar: &str, method: Option<&str>) -> Option<Invitation> {
                         "DTSTART" => t.start = date_time(value).map_or(0, |(at, _, _)| at),
                         "TZOFFSETTO" => t.offset = offset(value).unwrap_or(0),
                         "RRULE" => {
-                            let get = |key: &str| {
-                                value
-                                    .split(';')
-                                    .filter_map(|p| p.split_once('='))
-                                    .find(|(k, _)| k.eq_ignore_ascii_case(key))
-                                    .map(|(_, v)| v)
-                            };
+                            let get = |key: &str| rule_part(value, key);
                             t.rule = match (
                                 get("BYMONTH").and_then(|m| m.parse().ok()),
                                 get("BYDAY").and_then(by_day),
@@ -338,7 +330,6 @@ pub fn invitation(calendar: &str, method: Option<&str>) -> Option<Invitation> {
         match name.as_str() {
             "SUMMARY" => invitation.summary = text(value),
             "LOCATION" => invitation.location = text(value),
-            "DESCRIPTION" => invitation.description = text(value),
             "DTSTART" => invitation.start = instant(params, value),
             "DTEND" => invitation.end = instant(params, value),
             "DURATION" => duration = Some(value.as_str()),
@@ -375,12 +366,12 @@ fn seconds(value: &str) -> Option<i64> {
     let (mut total, mut number) = (0i64, 0i64);
     for c in value.chars() {
         match c {
-            '0'..='9' => number = number * 10 + c.to_digit(10)? as i64,
-            'W' => total += std::mem::take(&mut number) * 7 * 86400,
-            'D' => total += std::mem::take(&mut number) * 86400,
-            'H' => total += std::mem::take(&mut number) * 3600,
-            'M' => total += std::mem::take(&mut number) * 60,
-            'S' => total += std::mem::take(&mut number),
+            '0'..='9' => number = number.checked_mul(10)?.checked_add(c.to_digit(10)? as i64)?,
+            'W' => total = total.checked_add(std::mem::take(&mut number).checked_mul(7 * 86400)?)?,
+            'D' => total = total.checked_add(std::mem::take(&mut number).checked_mul(86400)?)?,
+            'H' => total = total.checked_add(std::mem::take(&mut number).checked_mul(3600)?)?,
+            'M' => total = total.checked_add(std::mem::take(&mut number).checked_mul(60)?)?,
+            'S' => total = total.checked_add(std::mem::take(&mut number))?,
             'T' => {}
             _ => return None,
         }
@@ -417,7 +408,10 @@ mod tests {
         assert_eq!(invitation.attendees, 2);
         assert_eq!(invitation.repeats, "Every week on Wednesday, 10 times");
         // a folded line, and an escaped line break
-        assert_eq!(invitation.description, "Bring the\n numbers.which we have");
+        assert_eq!(
+            text("Bring the\\n numbers.which we have"),
+            "Bring the\n numbers.which we have"
+        );
         // in winter the zone is +02:00
         let winter = INVITE
             .replace("20260715T140000", "20260115T140000")
@@ -458,5 +452,12 @@ mod tests {
         assert_eq!(invitation("BEGIN:VCALENDAR\nEND:VCALENDAR", None), None);
         let broken = invitation("BEGIN:VEVENT\nDTSTART:2026\nnonsense\nSUMMARY:x\nEND:VEVENT", None).unwrap();
         assert_eq!((broken.start, broken.summary.as_str()), (None, "x"));
+        // what a hostile file could write is read without a panic: huge durations, rules in other scripts
+        let hostile = "BEGIN:VTIMEZONE\nTZID:z\nBEGIN:STANDARD\nDTSTART:19700101T000000\nTZOFFSETTO:+0100\n\
+                       RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=\u{d5}\u{d5}\nEND:STANDARD\nEND:VTIMEZONE\nBEGIN:VEVENT\n\
+                       DTSTART;TZID=z:20260101T090000\nDURATION:P99999999999999999999W\nSUMMARY:\u{f5}\nEND:VEVENT";
+        let read = invitation(hostile, None).unwrap();
+        assert!(read.end.is_none());
+        assert_eq!(seconds("P9999999999999999999D"), None);
     }
 }

@@ -6,6 +6,7 @@
 #include "webview.h"
 
 #include <commdlg.h>
+#include <shellapi.h>
 
 #include <algorithm>
 #include <array>
@@ -232,6 +233,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN | WS_CLIPSIBLINGS, 0, {});
     unsubscribe_ = CreateChild(parent, L"STATIC", L"Unsubscribe", SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
     ShowWindow(unsubscribe_, SW_HIDE);
+    invitation_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_INVITATION, {});
+    openCalendar_ = CreateChild(parent, L"BUTTON", L"Open in Calendar", WS_TABSTOP | BS_PUSHBUTTON, IDC_OPEN_CALENDAR, {});
+    ShowWindow(invitation_, SW_HIDE);
+    ShowWindow(openCalendar_, SW_HIDE);
     // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
     attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_ATTACHMENTS, BarIcons::Big);
     // a label from the start, so the bar keeps a row for it under the icon ("2 files" once a message is shown)
@@ -402,6 +407,14 @@ void Mailbox::LayoutReader() {
                    TRUE);
     }
     int top = reader.top + headerHeight + Scale(2);
+    if (IsWindowVisible(invitation_)) {
+        int barHeight = Scale(40), buttonWidth = Scale(120), buttonHeight = Scale(25);
+        MoveWindow(invitation_, reader.left, top, width, barHeight, TRUE);
+        MoveWindow(openCalendar_, reader.left + width - buttonWidth - Scale(8), top + (barHeight - buttonHeight) / 2, buttonWidth, buttonHeight,
+                   TRUE);
+        SetWindowPos(openCalendar_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        top += barHeight + Scale(2);
+    }
     if (IsWindowVisible(pictures_)) {
         int barHeight = Scale(22);
         MoveWindow(pictures_, reader.left, top, width, barHeight, TRUE);
@@ -739,6 +752,7 @@ void Mailbox::ClearReader(bool loading) {
     SetWindowTextW(header_, L"");
     unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
     ShowWindow(unsubscribe_, SW_HIDE);
+    ShowInvitation(nullptr);
     // says so rather than a blank pane, unless a message is about to be shown
     preview_.Clear(!loading);
 }
@@ -804,6 +818,7 @@ void Mailbox::ShowView() {
     unsubscribeLink_ = Text(info->unsubscribe_link);
     unsubscribeTarget_ = Text(info->unsubscribe_target);
     ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
+    ShowInvitation(info->invitation);
     LayoutReader();
     InvalidateRect(unsubscribe_, nullptr, TRUE);
     preview_.Show(Text(info->document), remoteImages_);
@@ -970,6 +985,85 @@ std::wstring Mailbox::Unsubscribed(uint64_t request, const std::wstring& problem
     }
     unsubscribeRequest_ = 0;
     return problem.empty() ? L"Unsubscribed. The list says it will stop sending this mail." : L"Could not unsubscribe: " + problem;
+}
+
+namespace {
+// an instant as the reader's local time, or as written (floating: in no zone the invitation defines)
+bool EventTime(int64_t seconds, bool floating, SYSTEMTIME& time) {
+    return UnixToSystemTime(seconds, !floating, time);
+}
+
+std::wstring LongDate(const SYSTEMTIME& time) {
+    wchar_t date[96] = L"";
+    GetDateFormatEx(LOCALE_NAME_USER_DEFAULT, DATE_LONGDATE, &time, nullptr, date, 96, nullptr);
+    return date;
+}
+
+bool SameDay(const SYSTEMTIME& a, const SYSTEMTIME& b) {
+    return a.wYear == b.wYear && a.wMonth == b.wMonth && a.wDay == b.wDay;
+}
+
+// when an event is, in words: its day (or days) and times
+std::wstring When(const PeInvitation& event) {
+    SYSTEMTIME start, end;
+    if (!event.has_start || !EventTime(event.start, event.floating, start)) {
+        return L"";
+    }
+    bool hasEnd = event.has_end && EventTime(event.end - (event.all_day ? 86400 : 0), event.floating, end);
+    if (event.all_day) {
+        return hasEnd && !SameDay(start, end) ? LongDate(start) + L" to " + LongDate(end) : LongDate(start);
+    }
+    std::wstring when = LongDate(start) + L", " + FormatTime(start);
+    if (hasEnd) {
+        when += SameDay(start, end) ? L" to " + FormatTime(end) : L" to " + LongDate(end) + L", " + FormatTime(end);
+    }
+    return event.floating ? when + L" (the sender's time)" : when;
+}
+}  // namespace
+
+void Mailbox::ShowInvitation(const PeInvitation* event) {
+    if (!event) {
+        ShowWindow(invitation_, SW_HIDE);
+        ShowWindow(openCalendar_, SW_HIDE);
+        return;
+    }
+    const wchar_t* kinds[] = {L"Invitation: ", L"Updated invitation: ", L"Canceled: ", L"Answer to an invitation: "};
+    std::wstring summary = Text(event->summary);
+    invitationTitle_ = kinds[std::clamp(static_cast<int>(event->kind), 0, 3)] + (summary.empty() ? std::wstring(L"(no title)") : summary);
+    std::vector<std::wstring> parts = {When(*event), Text(event->location)};
+    if (std::wstring organizer = Text(event->organizer); !organizer.empty()) {
+        parts.push_back(L"Organizer: " + organizer);
+    }
+    parts.push_back(Text(event->repeats));
+    if (event->attendees > 0) {
+        parts.push_back(std::to_wstring(event->attendees) + (event->attendees == 1 ? L" attendee" : L" attendees"));
+    }
+    invitationDetails_.clear();
+    for (const std::wstring& part : parts) {
+        if (!part.empty()) {
+            invitationDetails_ += (invitationDetails_.empty() ? L"" : L"   \u00B7   ") + part;
+        }
+    }
+    ShowWindow(invitation_, SW_SHOW);
+    ShowWindow(openCalendar_, SW_SHOW);
+    InvalidateRect(invitation_, nullptr, TRUE);
+}
+
+// the calendar part as a file of its own (the core writes it, and only it), for the calendar program
+void Mailbox::OpenInCalendar() {
+    wchar_t temp[MAX_PATH] = L"";
+    GetTempPathW(MAX_PATH, temp);
+    std::wstring dir = std::wstring(temp) + L"InboxClassic\\Invitations";
+    core::String path(pe_invitation_file(core_, messageFolder_, uid_, core::Narrow(dir).c_str()));
+    if (!path) {
+        MessageBoxW(parent_, L"The invitation could not be read.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+        return;
+    }
+    // marked as from the internet by the core, which wrote it
+    std::wstring file = Text(path.get());
+    if (reinterpret_cast<INT_PTR>(ShellExecuteW(parent_, L"open", file.c_str(), nullptr, nullptr, SW_SHOWNORMAL)) <= 32) {
+        MessageBoxW(parent_, L"No calendar program on this computer opens invitations (.ics files).", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+    }
 }
 
 void Mailbox::MarkJunk(bool junk) {
@@ -1395,6 +1489,29 @@ void Mailbox::PlaceFind(const RECT& row) {
 }
 
 bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
+    if (item.hwndItem == invitation_) {
+        // the calendar, then the event in two lines, on the information bar's yellow
+        RECT area = item.rcItem;
+        FillRect(item.hDC, &area, GetSysColorBrush(COLOR_INFOBK));
+        int pad = Scale(8);
+        ImageList_Draw(listIcons_, LIST_CALENDAR_LTR, item.hDC, area.left + pad, (area.top + area.bottom - iconSize_) / 2, ILD_TRANSPARENT);
+        area.left += pad + iconSize_ + pad;
+        RECT button;
+        GetWindowRect(openCalendar_, &button);
+        area.right -= (button.right - button.left) + 2 * pad;
+        SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
+        SetBkMode(item.hDC, TRANSPARENT);
+        UINT format = DT_LEFT | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS;
+        int middle = (area.top + area.bottom) / 2;
+        RECT title = {area.left, area.top + Scale(3), area.right, middle};
+        HGDIOBJ old = SelectObject(item.hDC, bold_);
+        DrawTextW(item.hDC, invitationTitle_.c_str(), -1, &title, format | DT_BOTTOM);
+        SelectObject(item.hDC, reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0)));
+        RECT details = {area.left, middle + Scale(1), area.right, area.bottom - Scale(3)};
+        DrawTextW(item.hDC, invitationDetails_.c_str(), -1, &details, format | DT_TOP);
+        SelectObject(item.hDC, old);
+        return true;
+    }
     if (item.hwndItem == searchBar_) {
         // the magnifier, then what was found, on the information bar's yellow
         RECT area = item.rcItem;
@@ -1484,6 +1601,9 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
         return true;
     case IDC_SEARCH_CLEAR:
         ClearFind();
+        return true;
+    case IDC_OPEN_CALENDAR:
+        OpenInCalendar();
         return true;
     }
     return false;

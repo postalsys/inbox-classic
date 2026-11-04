@@ -318,6 +318,13 @@ const sections = [
                 checked: ['The message is in Deleted Items on the server', 'and out of the Inbox and the list']
             },
             {
+                shot: 'read-10-invitation',
+                name: 'Calendar invitations',
+                what: "A message with a calendar part (iCalendar, read in Rust) shows its first event over the text: invitation, update or cancellation, the title, when in the reader's time zone (the time zones the file defines, with their daylight-saving rules), where, the organizer, how it repeats and how many attend. Open in Calendar writes the calendar part alone to a file and opens it in the calendar program.",
+                how: 'Select a message with an invitation; Open in Calendar on its bar.',
+                checked: ['A message with an invitation shows the event over the text, with Open in Calendar']
+            },
+            {
                 shot: 'read-8-unsubscribe',
                 name: 'Unsubscribe',
                 what: 'A message with List-Unsubscribe has Unsubscribe in its header. With List-Unsubscribe-Post and a DKIM signature that the receiving server passed and that covers both headers (RFC 8058), it asks the list to stop with a one-click POST, without cookies or redirects; otherwise it writes the message the list wants, or opens its https page. It always asks first, saying which.',

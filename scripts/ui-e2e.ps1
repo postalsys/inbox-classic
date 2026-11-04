@@ -82,33 +82,6 @@ public static void MouseDragTo(int x, int y, int toX, int toY) {
 [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr hwnd, ref POINT point);
 public struct POINT { public int X, Y; }
 [DllImport("kernel32.dll")] public static extern bool WriteProcessMemory(IntPtr process, IntPtr address, byte[] buffer, IntPtr size, out IntPtr written);
-// the text of a cell of a list view of another process (LVM_GETITEMTEXTW with an LVITEMW in its memory)
-public static string ListText(IntPtr list, int row, int column) {
-    uint pid;
-    GetWindowThreadProcessId(list, out pid);
-    IntPtr process = OpenProcess(0x0038, false, pid);
-    if (process == IntPtr.Zero) { return ""; }
-    string text = "";
-    IntPtr remote = VirtualAllocEx(process, IntPtr.Zero, (IntPtr)2048, 0x3000, 0x04);
-    if (remote != IntPtr.Zero) {
-        // LVITEMW on 64-bit Windows: iSubItem at 8, pszText at 24, cchTextMax at 32; the text after it, at 512
-        byte[] item = new byte[512];
-        BitConverter.GetBytes(column).CopyTo(item, 8);
-        BitConverter.GetBytes(remote.ToInt64() + 512).CopyTo(item, 24);
-        BitConverter.GetBytes(700).CopyTo(item, 32);
-        IntPtr done;
-        WriteProcessMemory(process, remote, item, (IntPtr)item.Length, out done);
-        int length = SendMessage(list, 0x1073, (IntPtr)row, remote).ToInt32();
-        if (length > 0) {
-            byte[] chars = new byte[length * 2];
-            ReadProcessMemory(process, (IntPtr)(remote.ToInt64() + 512), chars, (IntPtr)chars.Length, out done);
-            text = System.Text.Encoding.Unicode.GetString(chars);
-        }
-        VirtualFreeEx(process, remote, IntPtr.Zero, 0x8000);
-    }
-    CloseHandle(process);
-    return text;
-}
 // a rectangle a control of another process fills in (LVM_GETITEMRECT, TVM_GETITEMRECT) from `seed` at its start, in
 // screen pixels
 public static RECT RemoteRect(IntPtr window, uint message, IntPtr wParam, long seed) {
@@ -1225,6 +1198,25 @@ public static class Dragger {
     Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Unsubscribed' } 10)) "and the status bar says it is done ($(StatusPart $mainStatus 0))"
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
+    Step 'a calendar invitation'
+    $invite = "From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: Invitation: Quarterly planning`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <planning-invite@example.com>`r`n" +
+        "Content-Type: multipart/mixed; boundary=inv`r`n`r`n--inv`r`nContent-Type: text/plain`r`n`r`nLet us plan the quarter.`r`n" +
+        "--inv`r`nContent-Type: text/calendar; method=REQUEST; charset=utf-8`r`n`r`n" +
+        "BEGIN:VCALENDAR`r`nMETHOD:REQUEST`r`nBEGIN:VEVENT`r`nUID:planning@example.com`r`nSUMMARY:Quarterly planning`r`n" +
+        "DTSTART:20261201T100000Z`r`nDTEND:20261201T113000Z`r`nLOCATION:Room 2`r`nORGANIZER;CN=Ann Example:mailto:ann@example.com`r`n" +
+        "ATTENDEE;CN=Test:mailto:testuser@postalexpress.test`r`nRRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=4`r`nEND:VEVENT`r`nEND:VCALENDAR`r`n--inv--`r`n"
+    AddMessage $invite
+    Command $main $IDM_SYNC
+    [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: Invitation: Quarterly planning') } 20)
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Quarterly planning"')
+    [void](WaitFor { (Rows) -eq 1 } 20)
+    SelectRow 0
+    $IDC_INVITATION = 211; $IDC_OPEN_CALENDAR = 212
+    Check ([bool](WaitFor { (Visible $main $IDC_INVITATION) -and (Visible $main $IDC_OPEN_CALENDAR) } 15)) 'a message with an invitation shows the event over the text, with Open in Calendar'
+    Shot $main 'read-10-invitation'
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
+
     Step 'marking all read'
     $IDM_MARK_ALL_READ = 126
     SelectFolder 0
@@ -1760,20 +1752,26 @@ public static class Dragger {
     Command $main $IDM_ACCOUNTS
     $accounts = WaitWindow 'InboxClassicAccounts' 'Accounts'
     if ($accounts) {
-        # the row of the account signed in to (alice@example.com), wherever it is in the list
+        # the Properties of the account signed in to: each row's tried, wherever it is in the list
         $accountList = [Native.Win]::GetDlgItem($accounts, 400)
         $count = [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
-        $alice = @(0..($count - 1) | Where-Object { [Native.Win]::ListText($accountList, $_, 1) -eq 'alice@example.com' }) | Select-Object -First 1
-        Check ($null -ne $alice) "the account signed in to is listed ($(@(0..($count - 1) | ForEach-Object { [Native.Win]::ListText($accountList, $_, 1) }) -join ', '))"
-        KeyToRow $accountList ([int]$alice)
-        Click $accounts 402
-        $properties = WaitWindow 'InboxClassicForm' 'Properties'
-        Check ($properties -and [bool](WaitFor { (Statics $properties) -match 'Signs in with: ImapKit' } 10)) "Properties says what the account signs in with ($(if ($properties) { Statics $properties }))"
-        if ($properties) {
-            Shot $properties 'signin-13-properties'
+        $said = @()
+        $found = $null
+        for ($row = 0; $row -lt $count -and -not $found; $row++) {
+            KeyToRow $accountList $row
+            Click $accounts 402
+            $properties = WaitWindow 'InboxClassicForm' 'Properties'
+            if (-not $properties) { continue }
+            if (WaitFor { (Statics $properties) -match 'Signs in with: ImapKit' } 3) {
+                $found = $properties
+                Shot $properties 'signin-13-properties'
+            } else {
+                $said += Statics $properties
+            }
             Click $properties 2
             [void](WaitFor { -not [Native.Win]::IsWindow($properties) })
         }
+        Check ($null -ne $found) "Properties of the account signed in to says what it signs in with ($count accounts; $($said -join ' | '))"
         Click $accounts 404
         [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
     }

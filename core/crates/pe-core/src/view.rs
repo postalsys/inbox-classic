@@ -29,6 +29,15 @@ pub struct MessageView {
     pub attachments: Vec<AttachmentView>,
     /// How the message lets its reader leave its mailing list, None when it does not say
     pub unsubscribe: Option<crate::unsubscribe::Unsubscribe>,
+    /// The event of its calendar part (an invitation, an update, a cancellation), None without one
+    pub invitation: Option<crate::calendar::Invitation>,
+}
+
+/// The calendar part of a message (`text/calendar`, `application/ics`)
+pub(crate) fn calendar_part(attachments: &[Attachment]) -> Option<&Attachment> {
+    attachments
+        .iter()
+        .find(|a| matches!(a.mime_type.as_str(), "text/calendar" | "application/ics"))
 }
 
 /// The attachments the attachment bar lists: not the images of an HTML body
@@ -100,6 +109,9 @@ pub(crate) fn build_unless(
             })
             .collect(),
         unsubscribe: crate::unsubscribe::of(&message.headers),
+        invitation: calendar_part(&message.attachments).and_then(|part| {
+            crate::calendar::invitation(&String::from_utf8_lossy(&part.content), part.method.as_deref())
+        }),
     })
 }
 

@@ -122,6 +122,14 @@ typedef enum PeUnsubscribe {
   PE_UNSUBSCRIBE_WEB = 3,
 } PeUnsubscribe;
 
+// What the calendar part of a message asks
+typedef enum PeInvitationKind {
+  PE_INVITATION_KIND_REQUEST = 0,
+  PE_INVITATION_KIND_UPDATE = 1,
+  PE_INVITATION_KIND_CANCEL = 2,
+  PE_INVITATION_KIND_REPLY = 3,
+} PeInvitationKind;
+
 typedef enum PeDraftKind {
   PE_DRAFT_KIND_REPLY = 0,
   PE_DRAFT_KIND_REPLY_ALL = 1,
@@ -295,6 +303,26 @@ typedef struct PeMessage {
   bool has_attachments;
 } PeMessage;
 
+// The event of a message's calendar part, as the reading pane shows it
+typedef struct PeInvitation {
+  enum PeInvitationKind kind;
+  const char *summary;
+  // Seconds since the Unix epoch, valid when `has_start` / `has_end`; with `floating`, the time as written (shown
+  // as UTC, not converted)
+  int64_t start;
+  int64_t end;
+  bool has_start;
+  bool has_end;
+  // Dates without times; `end` is the day after the last
+  bool all_day;
+  bool floating;
+  const char *location;
+  const char *organizer;
+  size_t attendees;
+  // How it repeats, in words; empty for once
+  const char *repeats;
+} PeInvitation;
+
 // The header fields and the document of a message
 typedef struct PeMessageInfo {
   const char *subject;
@@ -314,6 +342,8 @@ typedef struct PeMessageInfo {
   const char *unsubscribe_link;
   // Where it goes, for the window to say: the host, or the address of the message
   const char *unsubscribe_target;
+  // The event of its calendar part, NULL without one; owned by the view
+  const struct PeInvitation *invitation;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -626,6 +656,17 @@ const struct PeAccount *pe_account_list_get(const struct PeAccountList *list, si
 // # Safety
 // `list` must be NULL or a list that was not freed yet.
 void pe_account_list_free(struct PeAccountList *list);
+
+// The calendar part of a message written to the folder `dir` as invitation.ics (numbered when that is taken), for the
+// calendar program to open: its path, NULL when the message has none or is not downloaded. Free with
+// `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `dir` a NUL-terminated string.
+char *pe_invitation_file(const struct PeCore *core,
+                         int64_t folder,
+                         uint64_t uid,
+                         const char *dir);
 
 // Unsubscribes from the mailing list of a message the one-click way (`PeUnsubscribe` OneClick): in the background,
 // `Unsubscribed` follows with the request this returns; 0 for a message that offers no such way

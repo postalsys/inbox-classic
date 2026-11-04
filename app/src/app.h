@@ -32,6 +32,9 @@ std::wstring Text(const char* utf8);
 std::wstring FormatDate(int64_t seconds);
 // a time of day as the user's settings write it, without seconds: of `local`, or now
 std::wstring FormatTime(const SYSTEMTIME& local);
+// seconds since the Unix epoch as a SYSTEMTIME, the reader's local time when `local`, else UTC; false for a date
+// Windows can not hold
+bool UnixToSystemTime(int64_t seconds, bool local, SYSTEMTIME& time);
 std::wstring TimeNow();
 // 1.2 KB, 3 MB
 std::wstring FormatSize(uint64_t bytes);
@@ -370,6 +373,13 @@ private:
     HWND searchBar_ = nullptr;
     // the Unsubscribe link, and how the message shown lets its reader leave its list (PeMessageInfo)
     HWND unsubscribe_ = nullptr;
+    // the event of the message shown, its two lines as the bar shows them
+    HWND invitation_ = nullptr;
+    HWND openCalendar_ = nullptr;
+    std::wstring invitationTitle_;
+    std::wstring invitationDetails_;
+    void ShowInvitation(const PeInvitation* event);
+    void OpenInCalendar();
     PeUnsubscribe unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
     std::wstring unsubscribeLink_;
     std::wstring unsubscribeTarget_;
@@ -494,6 +504,9 @@ enum CommandId : WORD {
     IDC_SEARCH_CLEAR,
     // at the right of the message header: leaving the message's mailing list
     IDC_UNSUBSCRIBE,
+    // under the header of a message with a calendar part: the event, and a button that opens it in the calendar
+    IDC_INVITATION,
+    IDC_OPEN_CALENDAR,
     IDM_FIND = 120,
     IDM_SAVE_AS,
     IDM_PRINT,
