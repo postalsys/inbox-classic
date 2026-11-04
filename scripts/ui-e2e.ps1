@@ -1772,7 +1772,9 @@ public static class Dragger {
     if ($accounts) {
         # the Properties of the account signed in to: each row's tried, wherever it is in the list
         $accountList = [Native.Win]::GetDlgItem($accounts, 400)
-        $count = [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+        # once the list has its rows
+        $count = WaitFor { $n = [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 2) { $n } } 10
+        $count = [int]$count
         $said = @()
         $found = $null
         for ($row = 0; $row -lt $count -and -not $found; $row++) {
