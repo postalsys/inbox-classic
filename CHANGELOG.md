@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/postalsys/inbox-classic/compare/v0.4.0...v0.4.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* keep the toolbar from painting over the search field ([404d1ff](https://github.com/postalsys/inbox-classic/commit/404d1fff5ad84776b0bcb90660deeef5fa5779a9))
+
 ## [0.4.0](https://github.com/postalsys/inbox-classic/compare/v0.3.0...v0.4.0) (2026-11-04)
 
 
