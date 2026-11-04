@@ -40,9 +40,12 @@ pub use secrets::PasswordStore;
 use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
-pub use text::format_size;
+pub use text::{account_label, account_title, folder_name, format_size};
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Worker};
+
+/// The version of the core, which the About boxes show
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// What the engine tells the windows. Delivered on a worker thread.
 #[derive(Debug, Clone, PartialEq, Eq)]

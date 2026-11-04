@@ -604,34 +604,6 @@ pub struct PeAccount {
     pub title: *const c_char,
 }
 
-/// "Name <address>", the address alone without a name of its own
-fn account_label(name: &str, email: &str) -> String {
-    let name = name.trim();
-    if name.is_empty() || name == email {
-        email.to_string()
-    } else {
-        format!("{name} <{email}>")
-    }
-}
-
-/// The account named `name` among accounts with `names`: its address added when another one has the same name, the
-/// address alone without a name
-fn account_title(name: &str, email: &str, names: &[&str]) -> String {
-    let name = name.trim();
-    if name.is_empty() {
-        return email.to_string();
-    }
-    let same = names
-        .iter()
-        .filter(|other| other.trim().eq_ignore_ascii_case(name))
-        .count();
-    if same > 1 {
-        format!("{name} ({email})")
-    } else {
-        name.to_string()
-    }
-}
-
 /// The accounts; free with `pe_account_list_free`
 pub struct PeAccountList(Rows<PeAccount>);
 
@@ -657,8 +629,8 @@ pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList 
                     name: strings.add(&a.settings.name),
                     email: strings.add(&a.settings.email),
                     imap_host: strings.add(&a.settings.imap_host),
-                    label: strings.add(&account_label(&a.settings.name, &a.settings.email)),
-                    title: strings.add(&account_title(&a.settings.name, &a.settings.email, &names)),
+                    label: strings.add(&pe_core::account_label(&a.settings.name, &a.settings.email)),
+                    title: strings.add(&pe_core::account_title(&a.settings.name, &a.settings.email, &names)),
                     oauth,
                     app,
                     signs_in_with: strings.add(&signs_in_with),
@@ -2871,24 +2843,4 @@ pub unsafe extern "C" fn pe_sign_in_register_hint(issuer: *const c_char) -> *mut
     // SAFETY: as the caller guarantees
     let issuer = unsafe { arg(issuer) }.unwrap_or_default().to_string();
     guard(move || into_c_string(pe_oauth::Preset::register_hint(issuer.trim()).to_string())).unwrap_or(null_mut())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{account_label, account_title};
-
-    #[test]
-    fn accounts_with_the_same_name_are_told_apart_in_the_tree() {
-        let names = ["Ann", "ann ", "Work"];
-        assert_eq!(account_title("Ann", "ann@hotmail.com", &names), "Ann (ann@hotmail.com)");
-        assert_eq!(account_title("Work", "ann@work.example", &names), "Work");
-        assert_eq!(account_title(" ", "ann@example.com", &names), "ann@example.com");
-    }
-
-    #[test]
-    fn accounts_are_labeled_by_name_and_address() {
-        assert_eq!(account_label("Ann", "ann@example.com"), "Ann <ann@example.com>");
-        assert_eq!(account_label("  ", "ann@example.com"), "ann@example.com");
-        assert_eq!(account_label("ann@example.com", "ann@example.com"), "ann@example.com");
-    }
 }

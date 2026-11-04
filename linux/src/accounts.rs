@@ -1,0 +1,830 @@
+//! Adding an account (the providers' sign-in buttons or a name and an address, the servers looked up, then the
+//! server form with the password), the password prompt, signing in through the browser, and File > Accounts with
+//! each account's Properties and Signature. The values go to the core as typed; the core checks them when it
+//! connects.
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use adw::prelude::*;
+use gtk::{gio, glib};
+use pe_autoconfig::{ServerSecurity, Source};
+use pe_core::SignInWith;
+use pe_oauth::ProviderKind;
+use pe_store::{AccountSettings, Auth, Security};
+
+use crate::app::{shell, spawn};
+use crate::ui::{self, Field, Form, TITLE};
+
+const SECURITY: [&str; 3] = ["SSL/TLS", "STARTTLS", "None (unencrypted)"];
+
+/// The fields of the server form, in order
+const NAME: usize = 0;
+const EMAIL: usize = 1;
+const USERNAME: usize = 2;
+const PASSWORD: usize = 3;
+const IMAP_HOST: usize = 4;
+const IMAP_PORT: usize = 5;
+const IMAP_SECURITY: usize = 6;
+const SMTP_HOST: usize = 7;
+const SMTP_PORT: usize = 8;
+const SMTP_SECURITY: usize = 9;
+
+fn security_of(index: Option<usize>) -> Security {
+    match index {
+        Some(1) => Security::StartTls,
+        Some(2) => Security::Plain,
+        _ => Security::Tls,
+    }
+}
+
+fn security_index(security: Security) -> usize {
+    match security {
+        Security::Tls => 0,
+        Security::StartTls => 1,
+        Security::Plain => 2,
+    }
+}
+
+fn valid_port(text: &str) -> bool {
+    text.len() <= 5 && text.parse::<u32>().is_ok_and(|port| (1..=65535).contains(&port))
+}
+
+fn validate(fields: &[Field]) -> Result<(), String> {
+    for required in [EMAIL, IMAP_HOST, SMTP_HOST] {
+        if fields[required].value.is_empty() {
+            return Err(format!("{} is required.", fields[required].label.trim_end_matches(':')));
+        }
+    }
+    if !fields[EMAIL].value.contains('@') {
+        return Err("The e-mail address is not valid.".into());
+    }
+    if !valid_port(&fields[IMAP_PORT].value) || !valid_port(&fields[SMTP_PORT].value) {
+        return Err("Ports are numbers from 1 to 65535.".into());
+    }
+    Ok(())
+}
+
+/// The fields of the server form, filled with `settings`
+fn server_fields(settings: &AccountSettings) -> Vec<Field> {
+    let security = || SECURITY.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+    vec![
+        Field::text("Display name:", &settings.name),
+        Field::text("E-mail address:", &settings.email),
+        Field::text("User name:", &settings.username),
+        Field::password("Password:"),
+        Field::text("Incoming (IMAP) server:", &settings.imap_host),
+        Field::number("IMAP port:", settings.imap_port.to_string()),
+        Field::choice("IMAP security:", security(), security_index(settings.imap_security)),
+        Field::text("Outgoing (SMTP) server:", &settings.smtp_host),
+        Field::number("SMTP port:", settings.smtp_port.to_string()),
+        Field::choice("SMTP security:", security(), security_index(settings.smtp_security)),
+    ]
+}
+
+/// The settings of the server form; the user name and the name are the address when left empty
+fn settings_of(form: &Form, auth: Auth) -> AccountSettings {
+    let email = form.value(EMAIL);
+    let or_email = |value: String| if value.is_empty() { email.clone() } else { value };
+    AccountSettings {
+        name: or_email(form.value(NAME)),
+        email: email.clone(),
+        username: or_email(form.value(USERNAME)),
+        imap_host: form.value(IMAP_HOST),
+        imap_port: form.value(IMAP_PORT).parse().unwrap_or(993),
+        imap_security: security_of(form.chosen(IMAP_SECURITY)),
+        smtp_host: form.value(SMTP_HOST),
+        smtp_port: form.value(SMTP_PORT).parse().unwrap_or(465),
+        smtp_security: security_of(form.chosen(SMTP_SECURITY)),
+        auth,
+    }
+}
+
+/// The warning before a connection without encryption: true to go on
+async fn accept_plain(parent: &impl IsA<gtk::Widget>, settings: &AccountSettings, title: &str) -> bool {
+    let plain = settings.imap_security == Security::Plain || settings.smtp_security == Security::Plain;
+    let text = "Without encryption your password and mail travel the network readable by anyone on the way. Use \
+                this only for a server on your own computer or network.\n\nContinue?";
+    !plain || ui::confirm(parent, title, text, true).await
+}
+
+// ---- the first page: the providers' sign-in buttons, or the name and address of any other account ----
+
+enum Start {
+    Cancel,
+    Next,
+    SignIn(SignInWith),
+}
+
+/// What a page of Add Mail Account offers: the intro, a sign-in button for each of `providers` (faded and turned off
+/// when its client is off; left out when all are off), More sign-in options when `more`, then when `fields` the name
+/// and address of any other account, and `next` to go on with that
+struct Offer {
+    intro: String,
+    providers: Vec<ProviderKind>,
+    more: bool,
+    fields: bool,
+    next: &'static str,
+}
+
+/// The sign-in apps as the core has them now
+struct Apps(Vec<pe_core::SignInAppEntry>);
+
+impl Apps {
+    fn load() -> Apps {
+        Apps(shell().core.sign_in_apps().unwrap_or_default())
+    }
+
+    fn on(&self, kind: ProviderKind) -> bool {
+        self.0
+            .iter()
+            .any(|app| app.with == SignInWith::Builtin(kind) && app.enabled)
+    }
+
+    /// The added apps that are on, for new accounts
+    fn added_on(&self) -> Vec<(i64, String)> {
+        self.0
+            .iter()
+            .filter_map(|app| match app.with {
+                SignInWith::App(id) if app.enabled => Some((id, app.name.clone())),
+                _ => None,
+            })
+            .collect()
+    }
+}
+
+fn provider_button(kind: ProviderKind) -> (&'static str, &'static str, &'static str) {
+    match kind {
+        ProviderKind::Microsoft => ("sign-in-microsoft", "Sign in with Microsoft", "microsoft-sign-in.png"),
+        _ => ("sign-in-google", "Sign in with Google", "google-sign-in.png"),
+    }
+}
+
+fn company(kind: ProviderKind) -> &'static str {
+    match kind {
+        ProviderKind::Microsoft => "Microsoft",
+        ProviderKind::Google => "Google",
+        ProviderKind::Oidc => "the provider",
+    }
+}
+
+/// A page of Add Mail Account; the name and address typed come back in `name` and `email`
+async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut String, email: &mut String) -> Start {
+    let (send, choice) = async_channel::unbounded::<Start>();
+    let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
+    content.set_margin_start(18);
+    content.set_margin_end(18);
+    content.set_margin_bottom(18);
+    let intro = ui::wrapped_label(&offer.intro);
+    intro.set_widget_name("start-intro");
+    content.append(&intro);
+    // the buttons side by side; none when every one of them is off
+    let shown: Vec<ProviderKind> = if offer.providers.iter().any(|kind| apps.on(*kind)) {
+        offer.providers.clone()
+    } else {
+        Vec::new()
+    };
+    let buttons = gtk::Box::new(gtk::Orientation::Horizontal, 12);
+    buttons.set_halign(gtk::Align::Center);
+    for kind in &shown {
+        buttons.append(&sign_in_button(*kind, apps.on(*kind), &send));
+    }
+    if !shown.is_empty() {
+        content.append(&buttons);
+    }
+    if offer.more {
+        let more = gtk::Button::with_label("More sign-in options...");
+        more.add_css_class("flat");
+        more.set_halign(gtk::Align::Start);
+        more.set_widget_name("sign-in-more");
+        let chosen = send.clone();
+        more.connect_clicked(move |button| more_menu(button, chosen.clone()));
+        content.append(&more);
+    }
+    let group = adw::PreferencesGroup::new();
+    let name_row = adw::EntryRow::builder()
+        .title("Display name")
+        .text(name.as_str())
+        .build();
+    name_row.set_widget_name("start-name");
+    let email_row = adw::EntryRow::builder()
+        .title("E-mail address")
+        .text(email.as_str())
+        .build();
+    email_row.set_widget_name("start-email");
+    email_row.set_input_purpose(gtk::InputPurpose::Email);
+    if offer.fields {
+        content.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
+        content.append(&ui::wrapped_label(
+            "Any other e-mail account: your name as others see it and your e-mail address. Its servers are looked up \
+             next.",
+        ));
+        group.add(&name_row);
+        group.add(&email_row);
+        name_row.set_activates_default(true);
+        email_row.set_activates_default(true);
+        content.append(&group);
+    }
+    let (dialog, next) = ui::dialog_with_buttons("Add Mail Account", &content, offer.next, 500);
+    dialog.set_widget_name("account-start");
+    if !offer.fields {
+        next.remove_css_class("suggested-action");
+    }
+    let on_close = send.clone();
+    dialog.connect_closed(move |_| {
+        let _ = on_close.try_send(Start::Cancel);
+    });
+    next.connect_clicked(move |_| {
+        let _ = send.try_send(Start::Next);
+    });
+    dialog.present(Some(parent));
+    if offer.fields {
+        name_row.grab_focus();
+    }
+    let result = loop {
+        match choice.recv().await.unwrap_or(Start::Cancel) {
+            // the page of another account wants an address to look up
+            Start::Next if offer.fields && !email_row.text().contains('@') => {
+                ui::alert(&dialog, TITLE, "Type your e-mail address, name@example.com.").await;
+                email_row.grab_focus();
+            }
+            other => break other,
+        }
+    };
+    if offer.fields {
+        *name = name_row.text().trim().to_string();
+        *email = email_row.text().trim().to_string();
+    }
+    dialog.close();
+    result
+}
+
+/// A provider's sign-in button: its own picture, unchanged; when its client is turned off, faded and turned off, with
+/// a line under it that says so and Why?
+fn sign_in_button(kind: ProviderKind, on: bool, chosen: &async_channel::Sender<Start>) -> gtk::Widget {
+    let (id, label, picture) = provider_button(kind);
+    let image = gtk::Picture::for_resource(&format!("/com/inboxclassic/InboxClassic/brands/{picture}"));
+    image.set_can_shrink(true);
+    image.set_content_fit(gtk::ContentFit::Contain);
+    // as wide as the picture is at 40 pixels high (the pictures are 374 x 86 and 645 x 123)
+    image.set_size_request(if kind == ProviderKind::Microsoft { 210 } else { 174 }, 40);
+    let button = gtk::Button::builder()
+        .child(&image)
+        .tooltip_text(label)
+        .sensitive(on)
+        .build();
+    button.add_css_class("flat");
+    button.set_widget_name(id);
+    button.update_property(&[gtk::accessible::Property::Label(label)]);
+    let send = chosen.clone();
+    button.connect_clicked(move |_| {
+        let _ = send.try_send(Start::SignIn(SignInWith::Builtin(kind)));
+    });
+    if on {
+        return button.upcast();
+    }
+    let reason = format!(
+        "{label} is turned off on this computer. {}",
+        pe_core::builtin_off_reason(kind)
+    );
+    button.set_tooltip_text(Some(&reason));
+    let off = gtk::Label::new(Some("Turned off on this computer."));
+    off.add_css_class("dim-label");
+    let why = gtk::LinkButton::with_label("about:blank", "Why?");
+    why.set_widget_name(&format!("{id}-why"));
+    let text = format!(
+        "{label} is turned off on this computer.\n\n{}",
+        pe_core::builtin_off_reason(kind)
+    );
+    why.connect_activate_link(move |link| {
+        let link = link.clone().upcast::<gtk::Widget>();
+        let text = text.clone();
+        spawn(async move { ui::alert(&link, "Add Mail Account", &text).await });
+        glib::Propagation::Stop
+    });
+    let line = gtk::Box::new(gtk::Orientation::Horizontal, 4);
+    line.append(&off);
+    line.append(&why);
+    let column = gtk::Box::new(gtk::Orientation::Vertical, 2);
+    column.append(&button);
+    column.append(&line);
+    column.upcast()
+}
+
+/// More sign-in options: a menu of the added sign-in apps that are on, and Add a sign-in app
+fn more_menu(button: &gtk::Button, chosen: async_channel::Sender<Start>) {
+    let apps = Apps::load().added_on();
+    let menu = gio::Menu::new();
+    let group = gio::SimpleActionGroup::new();
+    let added = gio::Menu::new();
+    for (id, name) in &apps {
+        let item = gio::MenuItem::new(Some(name), None);
+        item.set_action_and_target_value(Some("more.app"), Some(&id.to_variant()));
+        added.append_item(&item);
+    }
+    if !apps.is_empty() {
+        menu.append_section(None, &added);
+    }
+    let add = gio::Menu::new();
+    add.append(Some("Add a sign-in app..."), Some("more.add"));
+    menu.append_section(None, &add);
+    let app = gio::SimpleAction::new("app", Some(glib::VariantTy::INT64));
+    let send = chosen.clone();
+    app.connect_activate(move |_, id| {
+        if let Some(id) = id.and_then(|id| id.get::<i64>()) {
+            let _ = send.try_send(Start::SignIn(SignInWith::App(id)));
+        }
+    });
+    let new = gio::SimpleAction::new("add", None);
+    let parent = button.clone();
+    new.connect_activate(move |_, _| {
+        let parent = parent.clone().upcast::<gtk::Widget>();
+        let send = chosen.clone();
+        spawn(async move {
+            let id = crate::sign_in_apps::editor(&parent, None).await;
+            if id != 0 {
+                let _ = send.try_send(Start::SignIn(SignInWith::App(id)));
+            }
+        });
+    });
+    group.add_action(&app);
+    group.add_action(&new);
+    button.insert_action_group("more", Some(&group));
+    let popover = gtk::PopoverMenu::from_model(Some(&menu));
+    popover.set_parent(button);
+    popover.set_widget_name("sign-in-more-menu");
+    popover.connect_closed(|popover| {
+        let popover = popover.clone();
+        glib::idle_add_local_once(move || popover.unparent());
+    });
+    popover.popup();
+}
+
+// ---- signing in through the browser ----
+
+/// Signs in with `with` for `email` in the browser; the finished sign-in request, None when it did not work
+pub async fn sign_in_with_browser(parent: &impl IsA<gtk::Widget>, with: SignInWith, email: &str) -> Option<u64> {
+    let shell = shell();
+    let Ok((request, page)) = shell.core.sign_in_begin(with, email) else {
+        ui::alert(parent, TITLE, "Signing in through the browser could not start.").await;
+        return None;
+    };
+    // the core makes the page, and gives only an https page or one of a provider on this computer (a test server)
+    match &shell.sign_in_page_file {
+        Some(file) => {
+            let _ = std::fs::write(file, &page);
+        }
+        None => gtk::UriLauncher::new(&page).launch(ui::window_of(parent).as_ref(), gio::Cancellable::NONE, |_| {}),
+    }
+    let account = if email.is_empty() { "your account" } else { email };
+    let text = format!("Sign in to {account} in the browser window that opened, then come back here.");
+    let cancel = |request| shell.core.sign_in_cancel(request);
+    if !ui::wait_for_request(parent, request, cancel, &text, "Add Mail Account").await {
+        return None;
+    }
+    if let Err(reason) = shell.core.sign_in_result(request) {
+        ui::alert(parent, TITLE, &format!("Signing in did not work: {reason}")).await;
+        return None;
+    }
+    Some(request)
+}
+
+/// Signs in with `with` and adds the account signed in to, named `name` or, without one, as at the provider
+async fn add_signed_in(parent: &gtk::Widget, with: SignInWith, name: &str, email: &str) -> i64 {
+    let Some(request) = sign_in_with_browser(parent, with, email).await else {
+        return 0;
+    };
+    match shell().core.add_signed_in_account(request, name) {
+        Ok(account) => account,
+        Err(_) => {
+            ui::alert(parent, "Add Mail Account", "The account could not be saved.").await;
+            0
+        }
+    }
+}
+
+// ---- adding an account ----
+
+/// Looks the servers of `email` up, waiting with a dialog that can cancel it; what was found, None for nothing or
+/// a cancel
+async fn look_up(parent: &gtk::Widget, email: &str) -> Option<pe_autoconfig::Settings> {
+    let shell = shell();
+    let request = shell.core.autoconfig(email, None).ok()?;
+    let domain = email.rsplit_once('@').map_or(email, |(_, domain)| domain);
+    let text = format!("Looking up the settings of {domain}...");
+    let cancel = |request| shell.core.autoconfig_cancel(request);
+    if !ui::wait_for_request(parent, request, cancel, &text, "Add Mail Account").await {
+        return None;
+    }
+    shell.core.autoconfig_result(request)
+}
+
+/// The first line of the server form: where the settings came from
+fn found_intro(found: Option<&pe_autoconfig::Settings>) -> String {
+    let change = " Change them if your provider gave you others.";
+    match found.map(|f| f.source) {
+        None => "Enter the account details your e-mail provider gave you.".into(),
+        Some(Source::Guess) => {
+            "No settings were found for this address: these are the usual names, check them with your provider.".into()
+        }
+        Some(Source::Mx) => {
+            format!("Your mail is handled by a provider Inbox Classic knows; these are its servers.{change}")
+        }
+        Some(Source::Srv) => format!("These settings were found in the DNS records of your domain.{change}"),
+        Some(Source::Autodiscover) => {
+            format!("These settings were found by Microsoft Autodiscover (Exchange).{change}")
+        }
+        Some(_) => format!("These settings were found for this address.{change}"),
+    }
+}
+
+/// A provider that does not take the account's password from mail programs: says so, and opens the page that tells
+/// how to make an app password when the user wants it
+async fn explain_app_password(parent: &gtk::Widget, found: Option<&pe_autoconfig::Settings>) {
+    let Some(hint) = found.and_then(|f| f.app_password.as_ref()) else {
+        return;
+    };
+    let provider = hint.provider;
+    let mut text = match hint.warning {
+        Some(warning) => warning.to_string(),
+        None => format!(
+            "{provider} does not take your normal password in mail programs. Create an app password in your \
+             {provider} account and type it in the Password field of the next form."
+        ),
+    };
+    let page = hint.instructions;
+    if page.starts_with("https://") {
+        text.push_str(&format!("\n\nOpen {provider}'s instructions in your browser?"));
+        if ui::confirm(parent, "Add Mail Account", &text, false).await {
+            ui::open_externally(page, ui::window_of(parent).as_ref());
+        }
+    } else {
+        ui::alert(parent, "Add Mail Account", &text).await;
+    }
+}
+
+fn server_security(security: ServerSecurity) -> Security {
+    match security {
+        ServerSecurity::Tls => Security::Tls,
+        ServerSecurity::StartTls => Security::StartTls,
+    }
+}
+
+/// Asks for a new account and adds it to the core; its id, or 0 when cancelled
+pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
+    let parent = parent.as_ref().clone();
+    let (mut name, mut email) = (String::new(), String::new());
+    let apps = Apps::load();
+    let any = apps.on(ProviderKind::Google) || apps.on(ProviderKind::Microsoft);
+    let first = Offer {
+        intro: if any {
+            "Gmail, Google Workspace, Outlook.com and Microsoft 365: sign in on Google's or Microsoft's own page. Your \
+             password is typed there, never into Inbox Classic."
+                .into()
+        } else {
+            "Sign in through the browser with one of your sign-in apps (More sign-in options), or add any e-mail \
+             account with your name and address below."
+                .into()
+        },
+        providers: vec![ProviderKind::Google, ProviderKind::Microsoft],
+        more: true,
+        fields: true,
+        next: "Next >",
+    };
+    match start_page(&parent, &apps, first, &mut name, &mut email).await {
+        Start::Cancel => return 0,
+        Start::SignIn(with) => return add_signed_in(&parent, with, &name, &email).await,
+        Start::Next => {}
+    }
+    let found = look_up(&parent, &email).await;
+    // an address at Google or Microsoft: a browser sign-in first (the built-in client when it is on, the added
+    // sign-in apps that are), an app password the other way
+    let provider = found
+        .as_ref()
+        .and_then(|f| shell().core.oauth_provider_for(&f.imap.host));
+    let more = !apps.added_on().is_empty();
+    if let Some(kind) = provider.filter(|kind| apps.on(*kind) || more) {
+        let intro = if apps.on(kind) {
+            format!(
+                "{email} signs in on {}'s own page, without giving Inbox Classic your password. Or use an app \
+                 password made in your account's security settings.",
+                company(kind)
+            )
+        } else {
+            format!(
+                "{email} can sign in on {}'s own page with one of your sign-in apps (More sign-in options). Or use \
+                 an app password made in your account's security settings.",
+                company(kind)
+            )
+        };
+        let offer = Offer {
+            intro,
+            providers: if apps.on(kind) { vec![kind] } else { Vec::new() },
+            more,
+            fields: false,
+            next: "Use App Password",
+        };
+        match start_page(&parent, &apps, offer, &mut name, &mut email).await {
+            Start::Cancel => return 0,
+            Start::SignIn(with) => return add_signed_in(&parent, with, &name, &email).await,
+            Start::Next => {}
+        }
+    }
+    explain_app_password(&parent, found.as_ref()).await;
+    let start = AccountSettings {
+        name,
+        email,
+        username: found.as_ref().map(|f| f.username.clone()).unwrap_or_default(),
+        imap_host: found.as_ref().map(|f| f.imap.host.clone()).unwrap_or_default(),
+        imap_port: found.as_ref().map_or(993, |f| f.imap.port),
+        imap_security: found
+            .as_ref()
+            .map_or(Security::Tls, |f| server_security(f.imap.security)),
+        smtp_host: found.as_ref().map(|f| f.smtp.host.clone()).unwrap_or_default(),
+        smtp_port: found.as_ref().map_or(465, |f| f.smtp.port),
+        smtp_security: found
+            .as_ref()
+            .map_or(Security::Tls, |f| server_security(f.smtp.security)),
+        auth: Auth::Password,
+    };
+    // the name and address were typed already: the password is next
+    let form = Form::new(
+        &parent,
+        "Add Mail Account",
+        &found_intro(found.as_ref()),
+        server_fields(&start),
+        "Finish",
+        PASSWORD,
+    );
+    form.widget().set_widget_name("account-servers");
+    form.validate_with(validate);
+    while form.run().await {
+        let settings = settings_of(&form, Auth::Password);
+        if !accept_plain(form.widget(), &settings, "Add Mail Account").await {
+            continue;
+        }
+        match shell().core.add_account(&settings, &form.value(PASSWORD)) {
+            Ok(account) => {
+                form.close();
+                return account;
+            }
+            Err(_) => ui::alert(form.widget(), "Add Mail Account", "The account could not be saved.").await,
+        }
+    }
+    form.close();
+    0
+}
+
+/// Asks for the password of an account; None when cancelled
+pub async fn password_dialog(parent: &impl IsA<gtk::Widget>, account: &str) -> Option<String> {
+    let intro = format!("Enter the password of {account}.");
+    let form = Form::new(parent, "Logon", &intro, vec![Field::password("Password:")], "OK", 0);
+    form.widget().set_widget_name("logon");
+    let ok = form.run().await;
+    let password = form.value(0);
+    form.close();
+    ok.then_some(password)
+}
+
+// ---- the accounts window ----
+
+/// The settings of an account, changed: the server form for a password account, the name for one that signs in
+/// through the browser with `signs_in_with` (its servers are the sign-in's); a password typed in replaces the kept
+/// one
+async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<String>) -> bool {
+    let core = &shell().core;
+    let Ok(stored) = core.account(account) else {
+        return false;
+    };
+    let stored = stored.settings;
+    if let Some(with) = signs_in_with {
+        // a browser sign-in account: the name only, the rest is the provider's
+        let intro =
+            format!("Signs in with: {with}. It signs in through the browser and uses the servers of its sign-in.");
+        let form = Form::new(
+            parent,
+            "Properties",
+            &intro,
+            vec![Field::text("Display name:", &stored.name)],
+            "OK",
+            0,
+        );
+        form.widget().set_widget_name("account-properties");
+        let ok = form.run().await;
+        let name = form.value(0);
+        form.close();
+        if !ok {
+            return false;
+        }
+        let settings = AccountSettings { name, ..stored };
+        return core.update_account(account, &settings).is_ok();
+    }
+    let form = Form::new(
+        parent,
+        "Properties",
+        "Leave the password empty to keep the one you have.",
+        server_fields(&stored),
+        "OK",
+        0,
+    );
+    form.widget().set_widget_name("account-properties");
+    form.validate_with(validate);
+    let mut saved = false;
+    while form.run().await {
+        let settings = settings_of(&form, stored.auth.clone());
+        // warned for a side without encryption, unless it was so already to the same server: not each time such an
+        // account is saved, but when the password would go readable somewhere new
+        let newly_plain = |security: Security, host: &str, was: Security, was_host: &str| {
+            security == Security::Plain && (was != Security::Plain || host != was_host)
+        };
+        let warn = newly_plain(
+            settings.imap_security,
+            &settings.imap_host,
+            stored.imap_security,
+            &stored.imap_host,
+        ) || newly_plain(
+            settings.smtp_security,
+            &settings.smtp_host,
+            stored.smtp_security,
+            &stored.smtp_host,
+        );
+        if warn && !accept_plain(form.widget(), &settings, "Properties").await {
+            continue;
+        }
+        if core.update_account(account, &settings).is_err() {
+            ui::alert(form.widget(), "Properties", "The account could not be saved.").await;
+            continue;
+        }
+        let password = form.value(PASSWORD);
+        if !password.is_empty() {
+            core.set_password(account, &password);
+        }
+        saved = true;
+        break;
+    }
+    form.close();
+    saved
+}
+
+/// A row of the accounts list: its name, then its address and incoming server (or the provider's sign-in)
+struct AccountRow {
+    id: i64,
+    name: String,
+    signs_in_with: Option<String>,
+}
+
+fn fill_accounts(list: &gtk::ListBox, rows: &RefCell<Vec<AccountRow>>, select: usize) {
+    while let Some(child) = list.first_child() {
+        list.remove(&child);
+    }
+    let core = &shell().core;
+    let mut kept = Vec::new();
+    for account in core.accounts().unwrap_or_default() {
+        let s = &account.settings;
+        let oauth = SignInWith::of_auth_kind(&s.auth).is_some();
+        let server = if oauth {
+            format!("{} (browser sign-in)", s.imap_host)
+        } else {
+            s.imap_host.clone()
+        };
+        let row = adw::ActionRow::builder()
+            .title(glib::markup_escape_text(&s.name))
+            .subtitle(glib::markup_escape_text(&format!("{}  \u{00B7}  {server}", s.email)))
+            .build();
+        list.append(&row);
+        kept.push(AccountRow {
+            id: account.id,
+            name: s.name.clone(),
+            signs_in_with: if oauth { core.sign_in_name(&s.auth) } else { None },
+        });
+    }
+    let last = kept.len().saturating_sub(1);
+    *rows.borrow_mut() = kept;
+    list.select_row(list.row_at_index(select.min(last) as i32).as_ref());
+}
+
+/// File > Accounts: the accounts listed, to add, change (Properties), write a signature for, or remove; true when
+/// one changed
+pub async fn accounts_dialog(parent: &impl IsA<gtk::Widget>) -> bool {
+    let list = gtk::ListBox::new();
+    list.add_css_class("boxed-list");
+    list.set_selection_mode(gtk::SelectionMode::Single);
+    list.set_widget_name("accounts-list");
+    let rows: Rc<RefCell<Vec<AccountRow>>> = Rc::default();
+    fill_accounts(&list, &rows, 0);
+    let (send, clicks) = async_channel::unbounded::<&'static str>();
+    let buttons = gtk::Box::new(gtk::Orientation::Vertical, 6);
+    for (id, label) in [
+        ("add", "Add..."),
+        ("properties", "Properties..."),
+        ("signature", "Signature..."),
+        ("remove", "Remove"),
+        ("sign-in-apps", "Sign-in Apps..."),
+    ] {
+        let button = gtk::Button::with_label(label);
+        button.set_widget_name(&format!("accounts-{id}"));
+        let send = send.clone();
+        button.connect_clicked(move |_| {
+            let _ = send.try_send(id);
+        });
+        buttons.append(&button);
+    }
+    let activate = send.clone();
+    list.connect_row_activated(move |_, _| {
+        let _ = activate.try_send("properties");
+    });
+    let scrolled = gtk::ScrolledWindow::builder()
+        .child(&list)
+        .min_content_height(220)
+        .hexpand(true)
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .build();
+    let content = gtk::Box::new(gtk::Orientation::Horizontal, 12);
+    content.set_margin_start(18);
+    content.set_margin_end(18);
+    content.set_margin_bottom(18);
+    content.append(&scrolled);
+    content.append(&buttons);
+    let view = adw::ToolbarView::new();
+    view.add_top_bar(&adw::HeaderBar::new());
+    view.set_content(Some(&content));
+    let dialog = adw::Dialog::builder()
+        .title("Accounts")
+        .content_width(640)
+        .child(&view)
+        .build();
+    dialog.set_widget_name("accounts-dialog");
+    dialog.connect_closed(move |_| {
+        let _ = send.try_send("close");
+    });
+    dialog.present(Some(parent.as_ref()));
+    let mut changed = false;
+    let host = dialog.clone().upcast::<gtk::Widget>();
+    while let Ok(click) = clicks.recv().await {
+        let index = list.selected_row().map_or(0, |row| row.index().max(0) as usize);
+        let chosen = rows
+            .borrow()
+            .get(index)
+            .map(|r| (r.id, r.name.clone(), r.signs_in_with.clone()));
+        match (click, chosen) {
+            ("close", _) => break,
+            ("add", _) => {
+                if new_account(&host).await > 0 {
+                    changed = true;
+                    fill_accounts(&list, &rows, usize::MAX);
+                }
+            }
+            ("properties", Some((id, _, with))) => {
+                if properties(&host, id, with).await {
+                    changed = true;
+                    fill_accounts(&list, &rows, index);
+                }
+            }
+            ("signature", Some((id, name, _))) => {
+                crate::compose::edit_signature(&host, id, &name).await;
+            }
+            ("remove", Some((id, _, _))) => {
+                let text = "Remove this account from Inbox Classic? Its mail stays on the server; the copy on this \
+                            computer and the saved password are removed.";
+                if ui::confirm(&host, "Remove Account", text, true).await {
+                    let _ = shell().core.remove_account(id);
+                    changed = true;
+                    fill_accounts(&list, &rows, index);
+                }
+            }
+            ("sign-in-apps", _) => {
+                crate::sign_in_apps::sign_in_apps_dialog(&host).await;
+                fill_accounts(&list, &rows, index);
+            }
+            _ => {}
+        }
+    }
+    dialog.close();
+    changed
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_server_form_is_checked() {
+        let mut fields = server_fields(&AccountSettings {
+            email: "ann@example.com".into(),
+            imap_host: "imap.example.com".into(),
+            imap_port: 993,
+            smtp_host: "smtp.example.com".into(),
+            smtp_port: 465,
+            ..Default::default()
+        });
+        assert_eq!(validate(&fields), Ok(()));
+        fields[IMAP_PORT].value = "70000".into();
+        assert_eq!(validate(&fields), Err("Ports are numbers from 1 to 65535.".into()));
+        fields[IMAP_PORT].value = "993".into();
+        fields[EMAIL].value = "ann".into();
+        assert_eq!(validate(&fields), Err("The e-mail address is not valid.".into()));
+        fields[SMTP_HOST].value.clear();
+        assert_eq!(validate(&fields), Err("Outgoing (SMTP) server is required.".into()));
+        assert_eq!(fields[SMTP_SECURITY].chosen(), Some(0));
+    }
+}

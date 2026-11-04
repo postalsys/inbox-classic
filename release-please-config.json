@@ -12,6 +12,10 @@
                     "type": "toml",
                     "path": "core/Cargo.toml",
                     "jsonpath": "$.workspace.package.version"
+                },
+                {
+                    "type": "generic",
+                    "path": "linux/Cargo.toml"
                 }
             ],
             "bump-minor-pre-major": true

@@ -110,6 +110,78 @@ jobs:
                       build/ui-e2e/log.txt
                   if-no-files-found: ignore
 
+    linux:
+        name: Build and test the Linux app
+        runs-on: ubuntu-latest
+        # the base of linux/Dockerfile, so CI and scripts/linux-*.sh build in the same system
+        container: ubuntu:26.04
+        timeout-minutes: 45
+        defaults:
+            run:
+                working-directory: linux
+        steps:
+            - name: Packages (as linux/Dockerfile installs them)
+              working-directory: /
+              env:
+                  DEBIAN_FRONTEND: noninteractive
+              run: |
+                  apt-get update
+                  apt-get install -y --no-install-recommends \
+                      build-essential pkg-config ca-certificates curl xz-utils git dpkg-dev \
+                      libgtk-4-dev libadwaita-1-dev libwebkitgtk-6.0-dev libdbus-1-dev \
+                      xvfb xauth dbus dbus-x11 at-spi2-core gnome-keyring libsecret-tools \
+                      fonts-dejavu-core fonts-cantarell adwaita-icon-theme
+            - uses: actions/checkout@v6
+            - uses: dtolnay/rust-toolchain@stable
+              with:
+                  components: clippy, rustfmt
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: linux
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+            - uses: taiki-e/install-action@v2
+              with:
+                  tool: cargo-deb@3.8.0
+            - run: cargo fmt --check
+            - run: cargo clippy --locked --all-targets -- -D warnings
+            - run: cargo clippy --locked --all-targets --features e2e -- -D warnings
+            - run: cargo test --locked
+            - run: cargo build --release --locked
+            - name: The .deb
+              run: |
+                  node ../scripts/notices.mjs --linux ../build/linux-notices
+                  cargo deb --no-build --locked --output ../dist/InboxClassic-amd64.deb
+                  dpkg-deb --info ../dist/InboxClassic-amd64.deb
+                  target/release/inbox-classic --version
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: InboxClassic-linux-amd64
+                  path: dist/InboxClassic-amd64.deb
+                  if-no-files-found: error
+            - name: ImapKit for the UI test
+              run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
+            # the app driven through its widgets against ImapKit under Xvfb, screenshots of each step
+            - name: UI end-to-end test
+              run: |
+                  cargo build --locked --features e2e
+                  ../scripts/linux-ui-e2e-run.sh target/debug/inbox-classic ../build/ui-e2e-linux
+            - name: The page of the screenshots
+              if: always()
+              working-directory: .
+              run: node scripts/feature-map.mjs build/ui-e2e-linux build/feature-map-linux.html
+            - uses: actions/upload-artifact@v7
+              if: always()
+              with:
+                  name: ui-e2e-linux
+                  path: |
+                      build/ui-e2e-linux/*.png
+                      build/ui-e2e-linux/log.txt
+                      build/feature-map-linux.html
+                  if-no-files-found: ignore
+
     fuzz:
         name: Fuzz the parsers
         runs-on: ubuntu-24.04
