@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.0](https://github.com/postalsys/inbox-classic/compare/v0.4.1...v0.5.0) (2026-11-04)
+
+
+### Features
+
+* **core:** account labels, folder names and the version for every shell ([193d715](https://github.com/postalsys/inbox-classic/commit/193d715f296468c59857b06bb54772af36c54f32))
+* **linux:** packaging, CI, the VM and the rest of the UI test ([e7886ed](https://github.com/postalsys/inbox-classic/commit/e7886ed0f0203eed744d6c6cda4eb723b2df25a5))
+* **linux:** the Flatpak, on the GNOME runtime ([0df877b](https://github.com/postalsys/inbox-classic/commit/0df877bc4e818ff2d94b1e5cee9ed74f78f42e58))
+* **linux:** the GTK 4 app with its in-process UI test ([5c2913d](https://github.com/postalsys/inbox-classic/commit/5c2913d68aedd44a4714866c59bfc1ae66c321a1))
+* Mac updates, packaging and the full UI test; the release for every platform ([08f9296](https://github.com/postalsys/inbox-classic/commit/08f9296af5f6d738c9448d2a05be23ee330a28be))
+* **mac:** the Mac app, native AppKit on the Rust core ([ffa857a](https://github.com/postalsys/inbox-classic/commit/ffa857a1fd9e75e390b668a5cf6632dc8179cfc2))
+* the shared pieces for the Mac and Linux versions ([fd61c1a](https://github.com/postalsys/inbox-classic/commit/fd61c1aa25f02b2fdd56c047cb2ea2e802cfc450))
+
+
+### Bug Fixes
+
+* an unsigned Mac package for a look, without the hardened runtime ([a95ec33](https://github.com/postalsys/inbox-classic/commit/a95ec33025a7b569ec9e2f71463fceab3c3be6eb))
+* **linux:** build the amd64 image under Rosetta, lint without the e2e feature ([590e7d3](https://github.com/postalsys/inbox-classic/commit/590e7d3c25fcf20019690e0773dcaa806c99a336))
+* **mac:** room for the size beside the Folder column of a search ([0df0dea](https://github.com/postalsys/inbox-classic/commit/0df0dea63f5a06d462268968e3fc0cd82a51c2b4))
+
 ## [0.4.1](https://github.com/postalsys/inbox-classic/compare/v0.4.0...v0.4.1) (2026-11-04)
 
 
