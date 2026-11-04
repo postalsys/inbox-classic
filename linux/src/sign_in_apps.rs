@@ -48,7 +48,11 @@ impl ServerRows {
     fn new(group: &adw::PreferencesGroup, kind: &str, host: &str, port: u16, security: Security) -> ServerRows {
         let lower = kind.to_lowercase();
         let host = entry_row(&format!("{kind} server"), host, &format!("app-{lower}-host"));
-        let port = entry_row(&format!("{kind} port"), &if port != 0 { port.to_string() } else { String::new() }, &format!("app-{lower}-port"));
+        let port = entry_row(
+            &format!("{kind} port"),
+            &if port != 0 { port.to_string() } else { String::new() },
+            &format!("app-{lower}-port"),
+        );
         port.set_input_purpose(gtk::InputPurpose::Digits);
         let security_row = adw::ComboRow::builder()
             .title(format!("{kind} security"))
@@ -103,10 +107,14 @@ impl Editor {
         self.scopes.set_text(&preset.scopes.join(" "));
         self.imap.host.set_text(&preset.imap.host);
         self.imap.port.set_text(&preset.imap.port.to_string());
-        self.imap.security.set_selected(security_index(net_security(preset.imap.security)));
+        self.imap
+            .security
+            .set_selected(security_index(net_security(preset.imap.security)));
         self.smtp.host.set_text(&preset.smtp.host);
         self.smtp.port.set_text(&preset.smtp.port.to_string());
-        self.smtp.security.set_selected(security_index(net_security(preset.smtp.security)));
+        self.smtp
+            .security
+            .set_selected(security_index(net_security(preset.smtp.security)));
         self.show_registration();
         self.client_id.grab_focus();
     }
@@ -137,7 +145,10 @@ async fn check_issuer(parent: &impl IsA<gtk::Widget>, issuer: &str) -> Result<St
         return Err(String::new());
     }
     match core.sign_in_app_check_result(request) {
-        Some(Ok(found)) => Ok(format!("Sign-in page: {}\nToken endpoint: {}", found.authorize_url, found.token_url)),
+        Some(Ok(found)) => Ok(format!(
+            "Sign-in page: {}\nToken endpoint: {}",
+            found.authorize_url, found.token_url
+        )),
         Some(Err(reason)) => Err(reason),
         None => Err(String::new()),
     }
@@ -201,7 +212,9 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
     );
     let register = ui::wrapped_label("");
     register.set_widget_name("app-register");
-    let registration = adw::PreferencesGroup::builder().title("Register it with your provider").build();
+    let registration = adw::PreferencesGroup::builder()
+        .title("Register it with your provider")
+        .build();
     let redirect = entry_row("Redirect URI", "", "app-redirect");
     redirect.set_editable(false);
     let copy = gtk::Button::with_label("Copy");
@@ -252,7 +265,12 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
         .propagate_natural_height(true)
         .max_content_height(640)
         .build();
-    let (dialog, ok) = ui::dialog_with_buttons(if id != 0 { "Sign-in App" } else { "Add Sign-in App" }, &scrolled, "OK", 560);
+    let (dialog, ok) = ui::dialog_with_buttons(
+        if id != 0 { "Sign-in App" } else { "Add Sign-in App" },
+        &scrolled,
+        "OK",
+        560,
+    );
     dialog.set_widget_name("sign-in-app-editor");
     let (send, clicks) = async_channel::unbounded::<&'static str>();
     let closed = send.clone();
@@ -326,7 +344,12 @@ async fn save(dialog: &adw::Dialog, editor: &Editor, id: i64, had_secret: bool) 
     match saved {
         Ok(app) => Some(app),
         Err(reason) => {
-            ui::alert(dialog, "Sign-in App", &format!("The sign-in app could not be saved: {reason}")).await;
+            ui::alert(
+                dialog,
+                "Sign-in App",
+                &format!("The sign-in app could not be saved: {reason}"),
+            )
+            .await;
             None
         }
     }
@@ -362,12 +385,19 @@ impl AppsWindow {
                     SignInWith::Builtin(kind) if !app.enabled => pe_core::builtin_off_reason(kind),
                     _ => "",
                 };
-                format!("{} is built in: only whether it is used for new accounts can change. {reason}", app.name)
+                format!(
+                    "{} is built in: only whether it is used for new accounts can change. {reason}",
+                    app.name
+                )
             }
             (Some(_), Some(added)) => format!(
                 "Client ID: {}{}",
                 added.client_id,
-                if added.has_secret { ", with a client secret." } else { ", a public client (no secret)." }
+                if added.has_secret {
+                    ", with a client secret."
+                } else {
+                    ", a public client (no secret)."
+                }
             ),
             _ => String::new(),
         };
@@ -383,12 +413,26 @@ impl AppsWindow {
         let apps = shell().core.sign_in_apps().unwrap_or_default();
         for (index, app) in apps.iter().enumerate() {
             let builtin = app.app.is_none();
-            let used_by = if app.used_by.is_empty() { "No accounts".to_string() } else { app.used_by.join(", ") };
+            let used_by = if app.used_by.is_empty() {
+                "No accounts".to_string()
+            } else {
+                app.used_by.join(", ")
+            };
             let row = adw::ActionRow::builder()
-                .title(glib::markup_escape_text(&format!("{}{}", app.name, if builtin { " (built-in)" } else { "" })))
-                .subtitle(glib::markup_escape_text(&format!("{}  \u{00B7}  {used_by}", app.issuer)))
+                .title(glib::markup_escape_text(&format!(
+                    "{}{}",
+                    app.name,
+                    if builtin { " (built-in)" } else { "" }
+                )))
+                .subtitle(glib::markup_escape_text(&format!(
+                    "{}  \u{00B7}  {used_by}",
+                    app.issuer
+                )))
                 .build();
-            let switch = gtk::Switch::builder().active(app.enabled).valign(gtk::Align::Center).build();
+            let switch = gtk::Switch::builder()
+                .active(app.enabled)
+                .valign(gtk::Align::Center)
+                .build();
             switch.set_widget_name(&format!("app-on-{index}"));
             switch.update_property(&[gtk::accessible::Property::Label("Offered for new accounts")]);
             let this = Rc::downgrade(self);
@@ -407,7 +451,8 @@ impl AppsWindow {
         }
         let last = apps.len().saturating_sub(1);
         *self.apps.borrow_mut() = apps;
-        self.list.select_row(self.list.row_at_index(select.min(last) as i32).as_ref());
+        self.list
+            .select_row(self.list.row_at_index(select.min(last) as i32).as_ref());
         self.filling.set(false);
         self.show_selected();
     }
@@ -489,7 +534,11 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
     let view = adw::ToolbarView::new();
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));
-    let dialog = adw::Dialog::builder().title("Sign-in Apps").content_width(680).child(&view).build();
+    let dialog = adw::Dialog::builder()
+        .title("Sign-in Apps")
+        .content_width(680)
+        .child(&view)
+        .build();
     dialog.set_widget_name("sign-in-apps-dialog");
     dialog.connect_closed(move |_| {
         let _ = send.try_send("close");

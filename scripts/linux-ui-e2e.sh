@@ -13,7 +13,7 @@ fi
 . scripts/linux-env.sh
 mkdir -p build/ui-e2e-linux
 linux_run "
-    (cd /src/core/e2e && npm ci --no-audit --no-fund --silent)
+    $LINUX_E2E_MODULES
     cargo build --locked --features e2e
     /src/scripts/linux-ui-e2e-run.sh \$CARGO_TARGET_DIR/debug/inbox-classic /src/build/ui-e2e-linux
 "

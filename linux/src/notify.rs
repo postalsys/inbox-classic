@@ -6,8 +6,8 @@
 use std::collections::HashMap;
 use std::sync::mpsc;
 
-use gtk::prelude::*;
 use gtk::gio;
+use gtk::prelude::*;
 
 /// A notification that a click on opens the message `uid` of `folder`
 pub fn new_mail(application: &adw::Application, title: &str, text: &str, folder: i64, uid: u64) {

@@ -163,7 +163,11 @@ fn fail_to_start(application: &adw::Application, why: &'static str) {
 /// The first start: an account to read mail from, then what the command line asked for
 fn first_run(arguments: Arguments) {
     let shell = shell();
-    let none = shell.core.accounts().map(|accounts| accounts.is_empty()).unwrap_or(true);
+    let none = shell
+        .core
+        .accounts()
+        .map(|accounts| accounts.is_empty())
+        .unwrap_or(true);
     spawn(async move {
         if none {
             add_account().await;
@@ -228,7 +232,10 @@ impl Shell {
         match &event {
             Event::SyncStarted { account } => {
                 self.failing.borrow_mut().remove(account);
-                main.set_status(&format!("Checking for new messages on {}...", main.account_name(*account)));
+                main.set_status(&format!(
+                    "Checking for new messages on {}...",
+                    main.account_name(*account)
+                ));
             }
             Event::SyncFinished { .. } => {
                 // a failure stays in the status bar until the account syncs without one
@@ -236,9 +243,9 @@ impl Shell {
                     main.set_status("Done");
                 }
             }
-            Event::AutoconfigDone { request }
-            | Event::SignInDone { request }
-            | Event::SignInAppChecked { request } => self.request_done(*request),
+            Event::AutoconfigDone { request } | Event::SignInDone { request } | Event::SignInAppChecked { request } => {
+                self.request_done(*request)
+            }
             Event::NewMail { .. } => self.notify_new_mail(&event),
             Event::Unsubscribed { request, problem } => {
                 let said = main.unsubscribed(*request, problem.as_deref());
@@ -309,7 +316,13 @@ impl Shell {
             notify::new_mail(&self.application, from, subject, *folder, *uid);
         } else {
             let text = format!("The newest from {from}: {subject}");
-            notify::new_mail(&self.application, &format!("{count} new messages"), &text, *folder, *uid);
+            notify::new_mail(
+                &self.application,
+                &format!("{count} new messages"),
+                &text,
+                *folder,
+                *uid,
+            );
         }
     }
 
@@ -360,7 +373,11 @@ impl Shell {
 
     /// A new message from `account`, or from the account of the selected folder when 0
     pub fn new_message(&self, account: i64) {
-        let account = if account != 0 { account } else { self.main().current_account() };
+        let account = if account != 0 {
+            account
+        } else {
+            self.main().current_account()
+        };
         if account == 0 {
             let window = self.main().window().clone();
             spawn(async move { ui::alert(&window, TITLE, "Add a mail account first.").await });
@@ -477,13 +494,18 @@ async fn make_default_mail_app() {
     let shell = shell();
     let window = shell.main().window().clone();
     let desktop = format!("{}.desktop", crate::APP_ID);
-    let Some(app) = gio::AppInfo::all().into_iter().find(|app| app.id().as_deref() == Some(desktop.as_str())) else {
+    let Some(app) = gio::AppInfo::all()
+        .into_iter()
+        .find(|app| app.id().as_deref() == Some(desktop.as_str()))
+    else {
         let text = "This copy of Inbox Classic was not installed, so the system does not list it as a mail app. \
                     Install it to choose it.";
         ui::alert(&window, TITLE, text).await;
         return;
     };
-    let ours = gio::AppInfo::default_for_uri_scheme("mailto").and_then(|current| current.id()).as_deref()
+    let ours = gio::AppInfo::default_for_uri_scheme("mailto")
+        .and_then(|current| current.id())
+        .as_deref()
         == Some(desktop.as_str());
     let said = if ours {
         "Inbox Classic is your default mail app: e-mail links open a new message here."

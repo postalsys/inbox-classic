@@ -42,7 +42,10 @@ glib::wrapper! {
 
 impl FolderItem {
     fn new(id: i64, markup: &str, icon: &str) -> FolderItem {
-        let item: FolderItem = glib::Object::builder().property("markup", markup).property("icon", icon).build();
+        let item: FolderItem = glib::Object::builder()
+            .property("markup", markup)
+            .property("icon", icon)
+            .build();
         item.imp().id.set(id);
         item
     }
@@ -68,15 +71,19 @@ pub struct Entry {
     pub depth: usize,
 }
 
+type CanDrop = Box<dyn Fn(&str, i64) -> bool>;
+type Dropped = Box<dyn Fn(&str, i64, bool)>;
+type Menu = Box<dyn Fn(&gtk::Widget, f64, f64)>;
+
 /// What the tree tells the window: a folder (or an account, negated) chosen, and messages dropped onto a folder
 pub struct Handlers {
     pub selected: Box<dyn Fn(i64)>,
     /// Whether messages dragged as `payload` may go to folder `to`
-    pub can_drop: Box<dyn Fn(&str, i64) -> bool>,
+    pub can_drop: CanDrop,
     /// The drop: payload, folder, and whether to copy (Ctrl held) rather than move
-    pub dropped: Box<dyn Fn(&str, i64, bool)>,
+    pub dropped: Dropped,
     /// The right-click menu of the selected folder, at a point of the widget clicked
-    pub menu: Box<dyn Fn(&gtk::Widget, f64, f64)>,
+    pub menu: Menu,
 }
 
 pub struct FolderTree {
@@ -243,7 +250,9 @@ impl FolderTree {
 fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactory {
     let factory = gtk::SignalListItemFactory::new();
     factory.connect_setup(move |_, item| {
-        let Some(item) = item.downcast_ref::<gtk::ListItem>() else { return };
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
         let icon = gtk::Image::new();
         let label = gtk::Label::new(None);
         label.set_use_markup(true);
@@ -261,8 +270,12 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactor
         let row_expression = item.property_expression("item");
         row_expression.bind(&expander, "list-row", gtk::Widget::NONE);
         let folder = row_expression.chain_property::<gtk::TreeListRow>("item");
-        folder.chain_property::<FolderItem>("markup").bind(&label, "label", gtk::Widget::NONE);
-        folder.chain_property::<FolderItem>("icon").bind(&icon, "icon-name", gtk::Widget::NONE);
+        folder
+            .chain_property::<FolderItem>("markup")
+            .bind(&label, "label", gtk::Widget::NONE);
+        folder
+            .chain_property::<FolderItem>("icon")
+            .bind(&icon, "icon-name", gtk::Widget::NONE);
         add_drop_target(&expander, item, handlers.clone());
         let click = gtk::GestureClick::new();
         click.set_button(gtk::gdk::BUTTON_SECONDARY);
@@ -287,7 +300,10 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactor
 
 /// Messages dragged from the list (their folder and uid as text) onto the row of a folder
 fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: Rc<RefCell<Option<Handlers>>>) {
-    let target = gtk::DropTarget::new(glib::Type::STRING, gtk::gdk::DragAction::MOVE | gtk::gdk::DragAction::COPY);
+    let target = gtk::DropTarget::new(
+        glib::Type::STRING,
+        gtk::gdk::DragAction::MOVE | gtk::gdk::DragAction::COPY,
+    );
     target.set_preload(true);
     let folder_of = {
         let item = item.downgrade();
@@ -300,7 +316,10 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         }
     };
     let action_for = |target: &gtk::DropTarget| {
-        if target.current_event_state().contains(gtk::gdk::ModifierType::CONTROL_MASK) {
+        if target
+            .current_event_state()
+            .contains(gtk::gdk::ModifierType::CONTROL_MASK)
+        {
             gtk::gdk::DragAction::COPY
         } else {
             gtk::gdk::DragAction::MOVE
@@ -317,7 +336,11 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         let done = open_later.clone();
         let id = glib::timeout_add_local_once(std::time::Duration::from_millis(800), move || {
             done.borrow_mut().take();
-            if let Some(row) = row_item.upgrade().and_then(|i| i.item()).and_downcast::<gtk::TreeListRow>() {
+            if let Some(row) = row_item
+                .upgrade()
+                .and_then(|i| i.item())
+                .and_downcast::<gtk::TreeListRow>()
+            {
                 row.set_expanded(true);
             }
         });
@@ -343,7 +366,9 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         if let Some(id) = opening.borrow_mut().take() {
             id.remove();
         }
-        let Ok(payload) = value.get::<String>() else { return false };
+        let Ok(payload) = value.get::<String>() else {
+            return false;
+        };
         match (folder_of(), &*handlers.borrow()) {
             (Some(folder), Some(handlers)) if (handlers.can_drop)(&payload, folder.id()) => {
                 let copy = action_for(target) == gtk::gdk::DragAction::COPY;

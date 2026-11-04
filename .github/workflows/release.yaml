@@ -23,19 +23,20 @@ jobs:
             # configured through release-please-config.json, only the config file can set `draft`
             - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
               id: release
-            # the release PR changes the version in core/Cargo.toml, and Cargo.lock lists every crate of the workspace
-            # with it: the Windows build runs with --locked, so the PR's lock file follows
+            # the release PR changes the version in core/Cargo.toml and linux/Cargo.toml, and each Cargo.lock lists the
+            # crates of the core with it: the builds run with --locked, so the PR's lock files follow (the Linux crate's
+            # path dependencies on the core are resolved again with it, which needs no GTK)
             - if: ${{ steps.release.outputs.pr }}
               uses: actions/checkout@v6
               with:
                   ref: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
             - if: ${{ steps.release.outputs.pr }}
-              working-directory: core
               run: |
-                  cargo update --workspace
-                  if ! git diff --quiet Cargo.lock; then
+                  (cd core && cargo update --workspace)
+                  (cd linux && cargo update --workspace)
+                  if ! git diff --quiet core/Cargo.lock linux/Cargo.lock; then
                       git config user.name "github-actions[bot]"
                       git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                      git commit -m "chore: update Cargo.lock for the release" Cargo.lock
+                      git commit -m "chore: update Cargo.lock for the release" core/Cargo.lock linux/Cargo.lock
                       git push
                   fi

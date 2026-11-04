@@ -82,10 +82,10 @@ impl Arguments {
 
 /// A file argument as a path: a file:// URI (as file managers hand them) or a path
 fn file_path(arg: &str) -> PathBuf {
-    if arg.starts_with("file://") {
-        if let Some(path) = gio::File::for_uri(arg).path() {
-            return path;
-        }
+    if arg.starts_with("file://")
+        && let Some(path) = gio::File::for_uri(arg).path()
+    {
+        return path;
     }
     PathBuf::from(arg)
 }
@@ -127,7 +127,10 @@ fn main() -> glib::ExitCode {
         return e2e::run(out);
         #[cfg(not(feature = "e2e"))]
         {
-            eprintln!("this build has no UI test (--e2e {}): build it with --features e2e", out.display());
+            eprintln!(
+                "this build has no UI test (--e2e {}): build it with --features e2e",
+                out.display()
+            );
             return glib::ExitCode::FAILURE;
         }
     }
@@ -170,18 +173,41 @@ mod tests {
 
     #[test]
     fn options_and_a_mailto_link() {
-        let parsed = Arguments::parse(&["--store", "/tmp/s.db", "--memory-passwords", "--pin-certificate", "c.pem"]);
+        let parsed = Arguments::parse(&[
+            "--store",
+            "/tmp/s.db",
+            "--memory-passwords",
+            "--pin-certificate",
+            "c.pem",
+        ]);
         assert_eq!(parsed.store, Some(PathBuf::from("/tmp/s.db")));
         assert_eq!(parsed.certificate, Some(PathBuf::from("c.pem")));
         assert!(parsed.memory_passwords && !parsed.version);
         // what follows the link is part of it, however it looks
-        let parsed = Arguments::parse(&["--memory-passwords", "mailto:ann@example.com?subject=Hi", "--store", "x"]);
-        assert_eq!(parsed.mailto.as_deref(), Some("mailto:ann@example.com?subject=Hi --store x"));
+        let parsed = Arguments::parse(&[
+            "--memory-passwords",
+            "mailto:ann@example.com?subject=Hi",
+            "--store",
+            "x",
+        ]);
+        assert_eq!(
+            parsed.mailto.as_deref(),
+            Some("mailto:ann@example.com?subject=Hi --store x")
+        );
         assert_eq!(parsed.store, None);
-        assert_eq!(Arguments::parse(&["MAILTO:bob@example.com"]).mailto.as_deref(), Some("MAILTO:bob@example.com"));
+        assert_eq!(
+            Arguments::parse(&["MAILTO:bob@example.com"]).mailto.as_deref(),
+            Some("MAILTO:bob@example.com")
+        );
         assert!(Arguments::parse(&["--version"]).version);
-        assert_eq!(Arguments::parse(&["/tmp/a.eml"]).files, vec![PathBuf::from("/tmp/a.eml")]);
-        assert_eq!(Arguments::parse(&["file:///tmp/b%20c.eml"]).files, vec![PathBuf::from("/tmp/b c.eml")]);
+        assert_eq!(
+            Arguments::parse(&["/tmp/a.eml"]).files,
+            vec![PathBuf::from("/tmp/a.eml")]
+        );
+        assert_eq!(
+            Arguments::parse(&["file:///tmp/b%20c.eml"]).files,
+            vec![PathBuf::from("/tmp/b c.eml")]
+        );
     }
 
     #[test]

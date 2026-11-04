@@ -236,7 +236,9 @@ impl Mailbox {
             };
             action.connect_activate(move |_, _| run_command(command));
             self.window.add_action(&action);
-            if let Some(accel) = command.accel() {
+            // Delete is the message list's own key (connect_list_keys), not the window's: in a text field it deletes
+            // text
+            if let Some(accel) = command.accel().filter(|_| command != Command::Delete) {
                 application.set_accels_for_action(&format!("win.{}", command.name()), &[accel]);
             }
         }
@@ -306,7 +308,7 @@ impl Mailbox {
         });
         clear.connect_clicked(move |_| cleared());
         let pictures = on(|this| this.load_pictures());
-        self.reader.pictures.connect_button_clicked(move |_| pictures());
+        self.reader.download_pictures.connect_clicked(move |_| pictures());
         let calendar = on(|this| {
             let this = this.clone();
             spawn(async move { this.open_in_calendar().await });
@@ -322,18 +324,29 @@ impl Mailbox {
         });
         self.connect_tree();
         // Esc: the search goes first
-        let escape = on(|this| {
-            this.clear_find();
-        });
+        let weak = Rc::downgrade(self);
         let shortcuts = gtk::ShortcutController::new();
         shortcuts.add_shortcut(gtk::Shortcut::new(
             gtk::ShortcutTrigger::parse_string("Escape"),
             Some(gtk::CallbackAction::new(move |_, _| {
-                escape();
-                glib::Propagation::Stop
+                if weak.upgrade().is_some_and(|this| this.clear_find()) {
+                    glib::Propagation::Stop
+                } else {
+                    glib::Propagation::Proceed
+                }
             })),
         ));
         self.window.add_controller(shortcuts);
+        // Delete in the list, as on Windows
+        let keys = gtk::EventControllerKey::new();
+        keys.connect_key_pressed(|_, key, _, modifiers| {
+            if key == gdk::Key::Delete && modifiers.is_empty() {
+                run_command(Command::Delete);
+                return glib::Propagation::Stop;
+            }
+            glib::Propagation::Proceed
+        });
+        self.list.view.add_controller(keys);
         self.window.connect_close_request(|_| {
             shell().close_main();
             glib::Propagation::Stop
@@ -426,9 +439,13 @@ impl Mailbox {
         for (folder, depth) in folders.iter().zip(depths) {
             let special = special_use(folder);
             self.folder_accounts.borrow_mut().insert(folder.id, account);
-            self.folder_names
-                .borrow_mut()
-                .insert(folder.id, (pe_core::folder_name(&folder.info), pe_core::is_fixed_folder(&folder.info)));
+            self.folder_names.borrow_mut().insert(
+                folder.id,
+                (
+                    pe_core::folder_name(&folder.info),
+                    pe_core::is_fixed_folder(&folder.info),
+                ),
+            );
             if !folder.info.selectable {
                 self.unselectable.borrow_mut().insert(folder.id);
             }
@@ -463,7 +480,10 @@ impl Mailbox {
         let from = gio::Menu::new();
         let sync = gio::Menu::new();
         let all = gio::Menu::new();
-        all.append(Some("Send and Receive All"), Some(&format!("win.{}", Command::Sync.name())));
+        all.append(
+            Some("Send and Receive All"),
+            Some(&format!("win.{}", Command::Sync.name())),
+        );
         sync.append_section(None, &all);
         let each = gio::Menu::new();
         for account in accounts.iter() {
@@ -546,7 +566,12 @@ impl Mailbox {
 
     /// The folder of a row in a list of several folders: its name, with its account's when there are several
     pub fn row_folder(&self, folder: i64) -> String {
-        let mut text = self.folder_names.borrow().get(&folder).map(|(name, _)| name.clone()).unwrap_or_default();
+        let mut text = self
+            .folder_names
+            .borrow()
+            .get(&folder)
+            .map(|(name, _)| name.clone())
+            .unwrap_or_default();
         if self.accounts.borrow().len() > 1
             && let Some(account) = self.folder_accounts.borrow().get(&folder)
         {
@@ -581,13 +606,15 @@ impl Mailbox {
         let (total, unread) = if searching {
             core.count_search(&search).unwrap_or((0, 0))
         } else if self.folder.get() != 0 {
-            core.folder(self.folder.get()).map(|f| (f.total, f.unread)).unwrap_or((0, 0))
+            core.folder(self.folder.get())
+                .map(|f| (f.total, f.unread))
+                .unwrap_or((0, 0))
         } else {
             (0, 0)
         };
         self.total.set(total);
         self.unread.set(unread);
-        self.list.columns.folder.set_visible(searching);
+        self.list.show_folder_column(searching);
         // the selection follows the message to where it is now, without a flicker of the reading pane
         let index = if keep_selection && self.uid.get() != 0 {
             core.search_index(&search, self.list.sort(), self.message_folder.get(), self.uid.get())
@@ -610,7 +637,11 @@ impl Mailbox {
             let mut more = format!(
                 "The search looks at the subject, the people, the file names and the text of the messages {}. Check \
                  the spelling, or try fewer words.",
-                if place.is_empty() { "in every folder".into() } else { format!("in {place}") }
+                if place.is_empty() {
+                    "in every folder".into()
+                } else {
+                    format!("in {place}")
+                }
             );
             let left = shell().core.unindexed_count().unwrap_or(0);
             if left > 0 {
@@ -619,7 +650,10 @@ impl Mailbox {
                     "\n\nThe text of {left} {verb} still being indexed, so more may be found soon."
                 ));
             }
-            (format!("No messages match \u{201C}{}\u{201D}.", self.find_text.borrow()), more)
+            (
+                format!("No messages match \u{201C}{}\u{201D}.", self.find_text.borrow()),
+                more,
+            )
         } else if self.folder.get() != 0 {
             ("There are no items in this view.".into(), String::new())
         } else if self.selected_account.get() != 0 {
@@ -812,20 +846,29 @@ impl Mailbox {
     pub fn selected_name(&self) -> String {
         if self.searching() {
             let place = self.find_place.borrow();
-            return if place.is_empty() { "All folders".into() } else { place.clone() };
+            return if place.is_empty() {
+                "All folders".into()
+            } else {
+                place.clone()
+            };
         }
         if let Some((name, _)) = self.folder_names.borrow().get(&self.folder.get()) {
             return name.clone();
         }
-        self.account(self.selected_account.get()).map(|a| a.name).unwrap_or_default()
+        self.account(self.selected_account.get())
+            .map(|a| a.name)
+            .unwrap_or_default()
     }
 
     /// The selected folder in the header bar and the title: "Inbox - Inbox Classic"; the search bar
     pub fn show_folder_name(&self) {
         let name = self.selected_name();
         self.title.set_title(if name.is_empty() { TITLE } else { &name });
-        self.window
-            .set_title(Some(&if name.is_empty() { TITLE.to_string() } else { format!("{name} - {TITLE}") }));
+        self.window.set_title(Some(&if name.is_empty() {
+            TITLE.to_string()
+        } else {
+            format!("{name} - {TITLE}")
+        }));
         self.update_search_bar();
     }
 
@@ -846,7 +889,11 @@ impl Mailbox {
         summary.push_str(&format!(
             " for \u{201C}{}\u{201D} {}",
             self.find_text.borrow(),
-            if place.is_empty() { "in all folders".into() } else { format!("in {place}") }
+            if place.is_empty() {
+                "in all folders".into()
+            } else {
+                format!("in {place}")
+            }
         ));
         let left = shell().core.unindexed_count().unwrap_or(0);
         if left > 0 {
@@ -889,7 +936,11 @@ impl Mailbox {
 
     #[cfg(feature = "e2e")]
     pub fn status_texts(&self) -> (String, String, String) {
-        (self.status.text().into(), self.outgoing.text().into(), self.counts.text().into())
+        (
+            self.status.text().into(),
+            self.outgoing.text().into(),
+            self.counts.text().into(),
+        )
     }
 
     #[cfg(feature = "e2e")]
@@ -906,13 +957,21 @@ impl Mailbox {
             (Command::Junk, "Junk")
         };
         self.junk.set_action_name(Some(&format!("win.{}", command.name())));
-        self.junk.set_icon_name(if in_junk { "ic-mail-checkmark-symbolic" } else { "ic-mail-prohibited-symbolic" });
+        self.junk.set_icon_name(if in_junk {
+            "ic-mail-checkmark-symbolic"
+        } else {
+            "ic-mail-prohibited-symbolic"
+        });
         self.junk.set_tooltip_text(Some(label));
     }
 
     /// Whether the message shown, or else the folder, is in a Junk folder
     pub fn in_junk(&self) -> bool {
-        let folder = if self.uid.get() != 0 { self.message_folder.get() } else { self.folder.get() };
+        let folder = if self.uid.get() != 0 {
+            self.message_folder.get()
+        } else {
+            self.folder.get()
+        };
         self.junk_folders.borrow().contains(&folder)
     }
 
@@ -992,14 +1051,22 @@ impl Mailbox {
 
     pub fn flag_selected(&self) {
         if let Some((_, message)) = self.list.selected() {
-            let _ = shell().core.set_flagged(message.folder_id, message.info.uid, !message.info.flagged());
+            let _ = shell()
+                .core
+                .set_flagged(message.folder_id, message.info.uid, !message.info.flagged());
         }
     }
 
     /// The selected message junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     pub async fn mark_junk(&self, junk: bool) {
-        let Some((_, message)) = self.list.selected() else { return };
-        if shell().core.mark_junk(message.folder_id, message.info.uid, junk).is_err() {
+        let Some((_, message)) = self.list.selected() else {
+            return;
+        };
+        if shell()
+            .core
+            .mark_junk(message.folder_id, message.info.uid, junk)
+            .is_err()
+        {
             let text = if junk {
                 "This account has no Junk E-mail folder to move the message to."
             } else {
@@ -1020,11 +1087,19 @@ impl Mailbox {
 
     /// The selected message into Deleted Items (for good when it is in there, asked first)
     pub async fn delete_selected(&self) {
-        let Some((index, message)) = self.list.selected() else { return };
+        let Some((index, message)) = self.list.selected() else {
+            return;
+        };
         let core = &shell().core;
         let (folder, uid) = (message.folder_id, message.info.uid);
         if core.deletes_for_good(folder).unwrap_or(false)
-            && !ui::confirm(&self.window, TITLE, "This message will be deleted for good. Delete it?", true).await
+            && !ui::confirm(
+                &self.window,
+                TITLE,
+                "This message will be deleted for good. Delete it?",
+                true,
+            )
+            .await
         {
             return;
         }
@@ -1035,9 +1110,16 @@ impl Mailbox {
 
     /// Asks for another folder of the message's account and moves it there
     pub async fn move_selected(&self) {
-        let Some((index, message)) = self.list.selected() else { return };
+        let Some((index, message)) = self.list.selected() else {
+            return;
+        };
         let from = message.folder_id;
-        let account = self.folder_accounts.borrow().get(&from).copied().unwrap_or_else(|| self.current_account());
+        let account = self
+            .folder_accounts
+            .borrow()
+            .get(&from)
+            .copied()
+            .unwrap_or_else(|| self.current_account());
         let mut ids = Vec::new();
         let mut choices = Vec::new();
         for folder in shell().core.folders(account).unwrap_or_default() {
@@ -1076,8 +1158,10 @@ impl Mailbox {
         }
     }
 
-    fn can_drop(&self, payload: &str, to: i64) -> bool {
-        let Some((from, _)) = parse_payload(payload) else { return false };
+    pub fn can_drop(&self, payload: &str, to: i64) -> bool {
+        let Some((from, _)) = parse_payload(payload) else {
+            return false;
+        };
         let accounts = self.folder_accounts.borrow();
         // an account's own item, the folder the message is in, one of another account, or one that holds no
         // messages: not there
@@ -1090,8 +1174,10 @@ impl Mailbox {
 
     /// A message dropped onto a folder: moved, or copied with Ctrl; a move selects the message after it, as Move to
     /// Folder does
-    fn drop_message(&self, payload: &str, to: i64, copy: bool) {
-        let Some((folder, uid)) = parse_payload(payload) else { return };
+    pub fn drop_message(&self, payload: &str, to: i64, copy: bool) {
+        let Some((folder, uid)) = parse_payload(payload) else {
+            return;
+        };
         let core = &shell().core;
         if copy {
             let _ = core.copy_message(folder, uid, to);
@@ -1148,7 +1234,14 @@ impl Mailbox {
     }
 
     async fn ask_folder_name(&self, title: &str, intro: &str, name: &str) -> Option<String> {
-        let form = Form::new(&self.window, title, intro, vec![Field::text("Folder name:", name)], "OK", 0);
+        let form = Form::new(
+            &self.window,
+            title,
+            intro,
+            vec![Field::text("Folder name:", name)],
+            "OK",
+            0,
+        );
         form.widget().set_widget_name("folder-name-dialog");
         let ok = form.run().await;
         let value = form.value(0);
@@ -1168,8 +1261,13 @@ impl Mailbox {
         } else {
             "The new folder goes at the top of the account."
         };
-        let Some(name) = self.ask_folder_name("New Folder", where_, "").await else { return };
-        if let Err(reason) = shell().core.create_folder(account, (folder != 0).then_some(folder), &name) {
+        let Some(name) = self.ask_folder_name("New Folder", where_, "").await else {
+            return;
+        };
+        if let Err(reason) = shell()
+            .core
+            .create_folder(account, (folder != 0).then_some(folder), &name)
+        {
             ui::alert(&self.window, TITLE, &reason.to_string()).await;
         }
     }
@@ -1179,9 +1277,16 @@ impl Mailbox {
         if folder == 0 {
             return;
         }
-        let current = self.folder_names.borrow().get(&folder).map(|(n, _)| n.clone()).unwrap_or_default();
+        let current = self
+            .folder_names
+            .borrow()
+            .get(&folder)
+            .map(|(n, _)| n.clone())
+            .unwrap_or_default();
         let intro = format!("The new name of the folder {current}.");
-        let Some(name) = self.ask_folder_name("Rename Folder", &intro, &current).await else { return };
+        let Some(name) = self.ask_folder_name("Rename Folder", &intro, &current).await else {
+            return;
+        };
         if name == current {
             return;
         }
@@ -1192,7 +1297,9 @@ impl Mailbox {
 
     pub async fn delete_folder(&self) {
         let folder = self.folder.get();
-        let Some((name, _)) = self.folder_names.borrow().get(&folder).cloned() else { return };
+        let Some((name, _)) = self.folder_names.borrow().get(&folder).cloned() else {
+            return;
+        };
         let question = format!(
             "Delete the folder \u{201C}{name}\u{201D} with its messages and the folders in it? It is deleted on the \
              server too."
@@ -1218,7 +1325,9 @@ impl Mailbox {
             return;
         };
         let patterns = Some(("Mail messages", &["*.eml"][..]));
-        let Some(path) = ui::save_file(&window, "Save Message As", &name, patterns).await else { return };
+        let Some(path) = ui::save_file(&window, "Save Message As", &name, patterns).await else {
+            return;
+        };
         if std::fs::write(&path, data).is_err() {
             ui::alert(&window, TITLE, "The message could not be saved.").await;
         }
@@ -1234,9 +1343,23 @@ impl Mailbox {
             ui::alert(&self.window, TITLE, "The message is not downloaded yet.").await;
             return;
         };
-        let subject = self.view.borrow().as_ref().map(|v| v.subject.clone()).unwrap_or_default();
-        let title = if subject.is_empty() { "Properties".into() } else { format!("{subject} Properties") };
-        let dialog = ui::text_dialog(&self.window, &title, "Internet headers for this message:", &headers.replace("\r\n", "\n"));
+        let subject = self
+            .view
+            .borrow()
+            .as_ref()
+            .map(|v| v.subject.clone())
+            .unwrap_or_default();
+        let title = if subject.is_empty() {
+            "Properties".into()
+        } else {
+            format!("{subject} Properties")
+        };
+        let dialog = ui::text_dialog(
+            &self.window,
+            &title,
+            "Internet headers for this message:",
+            &headers.replace("\r\n", "\n"),
+        );
         dialog.set_widget_name("properties-dialog");
     }
 
@@ -1253,7 +1376,12 @@ impl Mailbox {
     pub async fn import(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
         if self.folder.get() == 0 {
-            ui::alert(&window, "Import Messages", "Choose the folder to put the messages in first.").await;
+            ui::alert(
+                &window,
+                "Import Messages",
+                "Choose the folder to put the messages in first.",
+            )
+            .await;
             return;
         }
         let patterns = Some(("Mail messages", &["*.eml"][..]));
@@ -1269,7 +1397,12 @@ impl Mailbox {
             }
         }
         if !problems.is_empty() {
-            ui::alert(&self.window, "Import Messages", &format!("These were not imported:\n\n{problems}")).await;
+            ui::alert(
+                &self.window,
+                "Import Messages",
+                &format!("These were not imported:\n\n{problems}"),
+            )
+            .await;
         }
     }
 
@@ -1277,10 +1410,18 @@ impl Mailbox {
     pub async fn import_file(&self, file: &Path) {
         let folder = self.folder.get();
         let Some((folder_name, _)) = self.folder_names.borrow().get(&folder).cloned() else {
-            ui::alert(&self.window, "Import Messages", "Choose the folder to put the messages in first.").await;
+            ui::alert(
+                &self.window,
+                "Import Messages",
+                "Choose the folder to put the messages in first.",
+            )
+            .await;
             return;
         };
-        let name = file.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+        let name = file
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
         let question = format!("Put the message {name} into the folder {folder_name}?");
         if ui::confirm(&self.window, "Import Messages", &question, false).await {
             self.import_files(&[file.to_path_buf()]).await;
@@ -1289,11 +1430,16 @@ impl Mailbox {
 
     async fn save_attachment(&self, index: usize) {
         let window = self.window.clone().upcast::<gtk::Window>();
-        let Ok(Some((name, data))) = shell().core.attachment(self.message_folder.get(), self.uid.get(), index) else {
+        let Ok(Some((name, data))) = shell()
+            .core
+            .attachment(self.message_folder.get(), self.uid.get(), index)
+        else {
             ui::alert(&window, TITLE, "The attachment could not be read.").await;
             return;
         };
-        let Some(path) = ui::save_file(&window, "Save Attachment As", &name, None).await else { return };
+        let Some(path) = ui::save_file(&window, "Save Attachment As", &name, None).await else {
+            return;
+        };
         if std::fs::write(&path, data).is_err() {
             ui::alert(&window, TITLE, "The attachment could not be saved.").await;
         }
@@ -1303,8 +1449,13 @@ impl Mailbox {
     /// already there kept and the new one numbered
     async fn save_all_attachments(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
-        let Some(dir) = ui::choose_folder(&window, "Save Attachments").await else { return };
-        match shell().core.save_attachments(self.message_folder.get(), self.uid.get(), &dir) {
+        let Some(dir) = ui::choose_folder(&window, "Save Attachments").await else {
+            return;
+        };
+        match shell()
+            .core
+            .save_attachments(self.message_folder.get(), self.uid.get(), &dir)
+        {
             Ok(Some((saved, total))) if saved < total => {
                 let text = format!("{} of the {total} files could not be saved.", total - saved);
                 ui::alert(&window, TITLE, &text).await;
@@ -1317,7 +1468,10 @@ impl Mailbox {
     /// The calendar part as a file of its own (the core writes it, and only it), for the calendar program
     async fn open_in_calendar(&self) {
         let dir = glib::tmp_dir().join("InboxClassic").join("Invitations");
-        let Ok(Some(path)) = shell().core.invitation_file(self.message_folder.get(), self.uid.get(), &dir) else {
+        let Ok(Some(path)) = shell()
+            .core
+            .invitation_file(self.message_folder.get(), self.uid.get(), &dir)
+        else {
             ui::alert(&self.window, TITLE, "The invitation could not be read.").await;
             return;
         };
@@ -1333,7 +1487,9 @@ impl Mailbox {
     /// The Unsubscribe link of the message shown, after asking
     async fn unsubscribe(&self) {
         use pe_core::unsubscribe::Unsubscribe;
-        let Some(how) = self.view.borrow().as_ref().and_then(|v| v.unsubscribe.clone()) else { return };
+        let Some(how) = self.view.borrow().as_ref().and_then(|v| v.unsubscribe.clone()) else {
+            return;
+        };
         let target = how.target();
         let ok = [("cancel", "Cancel"), ("ok", "OK")];
         match how {
@@ -1345,7 +1501,10 @@ impl Mailbox {
                 if !ui::confirm(&self.window, "Unsubscribe", &question, false).await {
                     return;
                 }
-                let request = shell().core.unsubscribe(self.message_folder.get(), self.uid.get()).unwrap_or(0);
+                let request = shell()
+                    .core
+                    .unsubscribe(self.message_folder.get(), self.uid.get())
+                    .unwrap_or(0);
                 self.unsubscribe_request.set(request);
                 self.set_status(&if request != 0 {
                     format!("Unsubscribing from {target}...")

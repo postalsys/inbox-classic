@@ -44,7 +44,11 @@ fn token_at(text: &str, caret: usize) -> (usize, usize) {
 fn take(text: &str, caret: usize, label: &str) -> (String, usize) {
     let (start, end) = token_at(text, caret);
     let after = &text[end..];
-    let inserted = if after.is_empty() { format!("{label}, ") } else { label.to_string() };
+    let inserted = if after.is_empty() {
+        format!("{label}, ")
+    } else {
+        label.to_string()
+    };
     (format!("{}{inserted}{after}", &text[..start]), start + inserted.len())
 }
 
@@ -64,6 +68,12 @@ impl Completion {
         self.popover.popdown();
     }
 
+    /// Whether the keys go to the field: its text has the focus of its window
+    fn typing(&self) -> bool {
+        let focus = self.entry.root().and_then(|root| root.focus());
+        focus.is_some_and(|focus| focus == self.entry.clone().upcast::<gtk::Widget>() || focus.is_ancestor(&self.entry))
+    }
+
     /// The people for what is typed now; the list gone when there are none
     fn update(&self) {
         if self.taking.get() {
@@ -74,7 +84,7 @@ impl Completion {
         let (start, _) = token_at(&text, caret);
         let typed = &text[start..caret.max(start)];
         // a whole address typed with its brackets is not looked up again
-        if typed.is_empty() || typed.contains('<') || !self.entry.has_focus() {
+        if typed.is_empty() || typed.contains('<') || !self.typing() {
             self.hide();
             return;
         }
@@ -129,7 +139,10 @@ impl Completion {
 
     /// Shift+Delete on a person in the list: out of the address book for good
     fn forget(&self) {
-        if let Some(address) = self.chosen().and_then(|i| self.rows.borrow().get(i).map(|r| r.1.clone())) {
+        if let Some(address) = self
+            .chosen()
+            .and_then(|i| self.rows.borrow().get(i).map(|r| r.1.clone()))
+        {
             let _ = shell().core.forget_contact(&address);
             self.update();
         }
@@ -176,9 +189,16 @@ pub fn attach(entry: &gtk::Entry) {
     });
     let typed = Rc::downgrade(&completion);
     entry.connect_changed(move |_| {
-        if let Some(completion) = typed.upgrade() {
-            completion.update();
+        if typed.upgrade().is_some_and(|c| c.taking.get()) {
+            return;
         }
+        // once the cursor moved past what was typed
+        let typed = typed.clone();
+        glib::idle_add_local_once(move || {
+            if let Some(completion) = typed.upgrade() {
+                completion.update();
+            }
+        });
     });
     let clicked = Rc::downgrade(&completion);
     list.connect_row_activated(move |_, row| {
@@ -190,9 +210,9 @@ pub fn attach(entry: &gtk::Entry) {
     keys.set_propagation_phase(gtk::PropagationPhase::Capture);
     let pressed = Rc::downgrade(&completion);
     keys.connect_key_pressed(move |_, key, _, modifiers| {
-        pressed
-            .upgrade()
-            .map_or(glib::Propagation::Proceed, |completion| completion.on_key(key, modifiers))
+        pressed.upgrade().map_or(glib::Propagation::Proceed, |completion| {
+            completion.on_key(key, modifiers)
+        })
     });
     entry.add_controller(keys);
     let focus = gtk::EventControllerFocus::new();
@@ -245,7 +265,10 @@ mod tests {
 
     #[test]
     fn taking_a_person() {
-        assert_eq!(take("an", 2, "Ann <ann@example.com>"), ("Ann <ann@example.com>, ".into(), 23));
+        assert_eq!(
+            take("an", 2, "Ann <ann@example.com>"),
+            ("Ann <ann@example.com>, ".into(), 23)
+        );
         let (text, caret) = take("x@y, bo, z@w", 7, "Bob <bob@b.c>");
         assert_eq!(text, "x@y, Bob <bob@b.c>, z@w");
         assert_eq!(&text[..caret], "x@y, Bob <bob@b.c>");

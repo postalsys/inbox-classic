@@ -42,26 +42,96 @@ struct FormatButton {
 
 const FORMAT_BUTTONS: &[&[FormatButton]] = &[
     &[
-        FormatButton { icon: "ic-text-bold-symbolic", tooltip: "Bold (Ctrl+B)", command: Some("bold"), state: Some(0) },
-        FormatButton { icon: "ic-text-italic-symbolic", tooltip: "Italic (Ctrl+I)", command: Some("italic"), state: Some(1) },
-        FormatButton { icon: "ic-text-underline-symbolic", tooltip: "Underline (Ctrl+U)", command: Some("underline"), state: Some(2) },
-        FormatButton { icon: "ic-text-color-symbolic", tooltip: "Font Color", command: None, state: None },
+        FormatButton {
+            icon: "ic-text-bold-symbolic",
+            tooltip: "Bold (Ctrl+B)",
+            command: Some("bold"),
+            state: Some(0),
+        },
+        FormatButton {
+            icon: "ic-text-italic-symbolic",
+            tooltip: "Italic (Ctrl+I)",
+            command: Some("italic"),
+            state: Some(1),
+        },
+        FormatButton {
+            icon: "ic-text-underline-symbolic",
+            tooltip: "Underline (Ctrl+U)",
+            command: Some("underline"),
+            state: Some(2),
+        },
+        FormatButton {
+            icon: "ic-text-color-symbolic",
+            tooltip: "Font Color",
+            command: None,
+            state: None,
+        },
     ],
     &[
-        FormatButton { icon: "ic-text-number-list-ltr-symbolic", tooltip: "Numbered List", command: Some("insertOrderedList"), state: Some(3) },
-        FormatButton { icon: "ic-text-bullet-list-ltr-symbolic", tooltip: "Bulleted List", command: Some("insertUnorderedList"), state: Some(4) },
-        FormatButton { icon: "ic-text-indent-decrease-ltr-symbolic", tooltip: "Decrease Indent", command: Some("outdent"), state: None },
-        FormatButton { icon: "ic-text-indent-increase-ltr-symbolic", tooltip: "Increase Indent", command: Some("indent"), state: None },
+        FormatButton {
+            icon: "ic-text-number-list-ltr-symbolic",
+            tooltip: "Numbered List",
+            command: Some("insertOrderedList"),
+            state: Some(3),
+        },
+        FormatButton {
+            icon: "ic-text-bullet-list-ltr-symbolic",
+            tooltip: "Bulleted List",
+            command: Some("insertUnorderedList"),
+            state: Some(4),
+        },
+        FormatButton {
+            icon: "ic-text-indent-decrease-ltr-symbolic",
+            tooltip: "Decrease Indent",
+            command: Some("outdent"),
+            state: None,
+        },
+        FormatButton {
+            icon: "ic-text-indent-increase-ltr-symbolic",
+            tooltip: "Increase Indent",
+            command: Some("indent"),
+            state: None,
+        },
     ],
     &[
-        FormatButton { icon: "ic-text-align-left-symbolic", tooltip: "Align Left", command: Some("justifyLeft"), state: Some(5) },
-        FormatButton { icon: "ic-text-align-center-symbolic", tooltip: "Center", command: Some("justifyCenter"), state: Some(6) },
-        FormatButton { icon: "ic-text-align-right-symbolic", tooltip: "Align Right", command: Some("justifyRight"), state: Some(7) },
+        FormatButton {
+            icon: "ic-text-align-left-symbolic",
+            tooltip: "Align Left",
+            command: Some("justifyLeft"),
+            state: Some(5),
+        },
+        FormatButton {
+            icon: "ic-text-align-center-symbolic",
+            tooltip: "Center",
+            command: Some("justifyCenter"),
+            state: Some(6),
+        },
+        FormatButton {
+            icon: "ic-text-align-right-symbolic",
+            tooltip: "Align Right",
+            command: Some("justifyRight"),
+            state: Some(7),
+        },
     ],
     &[
-        FormatButton { icon: "ic-link-symbolic", tooltip: "Hyperlink (Ctrl+K)", command: None, state: None },
-        FormatButton { icon: "ic-line-horizontal-1-symbolic", tooltip: "Insert Horizontal Line", command: Some("insertHorizontalRule"), state: None },
-        FormatButton { icon: "ic-image-symbolic", tooltip: "Insert Picture", command: None, state: None },
+        FormatButton {
+            icon: "ic-link-symbolic",
+            tooltip: "Hyperlink (Ctrl+K)",
+            command: None,
+            state: None,
+        },
+        FormatButton {
+            icon: "ic-line-horizontal-1-symbolic",
+            tooltip: "Insert Horizontal Line",
+            command: Some("insertHorizontalRule"),
+            state: None,
+        },
+        FormatButton {
+            icon: "ic-image-symbolic",
+            tooltip: "Insert Picture",
+            command: None,
+            state: None,
+        },
     ],
 ];
 
@@ -115,7 +185,9 @@ impl FormatBar {
             let editor = Rc::downgrade(editor);
             let following = Rc::downgrade(&bar);
             button.connect_clicked(move |button| {
-                let (Some(editor), Some(bar)) = (editor.upgrade(), following.upgrade()) else { return };
+                let (Some(editor), Some(bar)) = (editor.upgrade(), following.upgrade()) else {
+                    return;
+                };
                 if bar.following.get() {
                     return;
                 }
@@ -167,16 +239,26 @@ fn format_dialog(button: &gtk::Button, editor: &Rc<Editor>, which: &str, _attach
 }
 
 thread_local! {
-    static LAST_COLOR: RefCell<gdk::RGBA> = RefCell::new(gdk::RGBA::new(0.0, 0.2, 0.4, 1.0));
+    static LAST_COLOR: RefCell<gdk::RGBA> = const { RefCell::new(gdk::RGBA::new(0.0, 0.2, 0.4, 1.0)) };
 }
 
 async fn choose_color(window: &gtk::Window, editor: &Editor) {
-    let dialog = gtk::ColorDialog::builder().title("Font Color").with_alpha(false).build();
+    let dialog = gtk::ColorDialog::builder()
+        .title("Font Color")
+        .with_alpha(false)
+        .build();
     let initial = LAST_COLOR.with(|c| *c.borrow());
-    let Ok(color) = dialog.choose_rgba_future(Some(window), Some(&initial)).await else { return };
+    let Ok(color) = dialog.choose_rgba_future(Some(window), Some(&initial)).await else {
+        return;
+    };
     LAST_COLOR.with(|c| *c.borrow_mut() = color);
     let channel = |v: f32| (v.clamp(0.0, 1.0) * 255.0).round() as u8;
-    let hex = format!("#{:02x}{:02x}{:02x}", channel(color.red()), channel(color.green()), channel(color.blue()));
+    let hex = format!(
+        "#{:02x}{:02x}{:02x}",
+        channel(color.red()),
+        channel(color.green()),
+        channel(color.blue())
+    );
     editor.exec("foreColor", &hex);
 }
 
@@ -196,7 +278,10 @@ async fn insert_link(window: &gtk::Window, editor: &Editor) {
     let current = editor.caret_link();
     let editing = !current.is_empty();
     let (title, intro) = if editing {
-        ("Edit Hyperlink", "Where the link goes. Empty the address to remove the link and keep its text.")
+        (
+            "Edit Hyperlink",
+            "Where the link goes. Empty the address to remove the link and keep its text.",
+        )
     } else {
         ("Hyperlink", "The address the selected text links to.")
     };
@@ -221,7 +306,13 @@ async fn insert_link(window: &gtk::Window, editor: &Editor) {
 
 async fn insert_picture(window: &gtk::Window, editor: &Editor) {
     let patterns = Some(("Pictures", &["*.png", "*.jpg", "*.jpeg", "*.gif"][..]));
-    let Some(path) = ui::open_files(window, "Insert Picture", patterns).await.into_iter().next() else { return };
+    let Some(path) = ui::open_files(window, "Insert Picture", patterns)
+        .await
+        .into_iter()
+        .next()
+    else {
+        return;
+    };
     if !insert_picture_file(editor, &path) {
         let text = "This file is not a PNG, JPEG or GIF picture, or it is larger than 10 MB.";
         ui::alert(window, "Insert Picture", text).await;
@@ -337,8 +428,10 @@ impl Compose {
     fn new(account: i64, draft: Option<&Draft>) -> Rc<Compose> {
         let shell = shell();
         let accounts = shell.core.accounts().unwrap_or_default();
-        let labels: Vec<String> =
-            accounts.iter().map(|a| pe_core::account_label(&a.settings.name, &a.settings.email)).collect();
+        let labels: Vec<String> = accounts
+            .iter()
+            .map(|a| pe_core::account_label(&a.settings.name, &a.settings.email))
+            .collect();
         let from = gtk::DropDown::from_strings(&labels.iter().map(String::as_str).collect::<Vec<_>>());
         from.set_hexpand(true);
         from.set_widget_name("compose-from");
@@ -426,7 +519,10 @@ impl Compose {
         header.pack_start(&send);
         header.pack_start(&save);
         header.pack_start(&attach);
-        let title = draft.map(|d| d.subject.clone()).filter(|s| !s.is_empty()).unwrap_or("New Message".into());
+        let title = draft
+            .map(|d| d.subject.clone())
+            .filter(|s| !s.is_empty())
+            .unwrap_or("New Message".into());
         let toolbar = adw::ToolbarView::new();
         toolbar.add_top_bar(&header);
         toolbar.set_content(Some(&content));
@@ -570,7 +666,8 @@ impl Compose {
         }
         let subject = on(|this| {
             let text = this.subject.text();
-            this.window.set_title(Some(if text.is_empty() { "New Message" } else { &text }));
+            this.window
+                .set_title(Some(if text.is_empty() { "New Message" } else { &text }));
         });
         self.subject.connect_changed(move |_| subject());
         let from = on(|this| this.choose_from());
@@ -672,7 +769,9 @@ impl Compose {
         let weak = Rc::downgrade(self);
         click.connect_pressed(move |_, _, x, y| {
             let Some(this) = weak.upgrade() else { return };
-            let Some(child) = this.attached.child_at_pos(x as i32, y as i32) else { return };
+            let Some(child) = this.attached.child_at_pos(x as i32, y as i32) else {
+                return;
+            };
             this.attached.select_child(&child);
             let menu = gio::Menu::new();
             menu.append(Some("Remove"), Some("files.remove"));
@@ -704,7 +803,9 @@ impl Compose {
         let target = gtk::DropTarget::new(gdk::FileList::static_type(), gdk::DragAction::COPY);
         let weak = Rc::downgrade(self);
         target.connect_drop(move |_, value, _, _| {
-            let (Some(this), Ok(files)) = (weak.upgrade(), value.get::<gdk::FileList>()) else { return false };
+            let (Some(this), Ok(files)) = (weak.upgrade(), value.get::<gdk::FileList>()) else {
+                return false;
+            };
             let paths: Vec<PathBuf> = files.files().iter().filter_map(|f| f.path()).collect();
             this.add_files(&paths);
             true
@@ -739,12 +840,15 @@ impl Compose {
 
     /// Another account chosen in From: the message goes from it, with its servers, Sent Items, Drafts and signature
     fn choose_from(&self) {
-        let Some(&account) = self.accounts.get(self.from.selected() as usize) else { return };
+        let Some(&account) = self.accounts.get(self.from.selected() as usize) else {
+            return;
+        };
         if account == self.account.get() || self.filling.get() {
             return;
         }
         self.account.set(account);
-        self.editor.signature(&shell().core.signature_block(account).unwrap_or_default());
+        self.editor
+            .signature(&shell().core.signature_block(account).unwrap_or_default());
         self.changed();
     }
 
@@ -752,11 +856,16 @@ impl Compose {
 
     /// Adds a file that is there (not a folder); false otherwise
     fn add_file(&self, path: &Path) -> bool {
-        let Ok(metadata) = std::fs::metadata(path) else { return false };
+        let Ok(metadata) = std::fs::metadata(path) else {
+            return false;
+        };
         if metadata.is_dir() {
             return false;
         }
-        let name = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+        let name = path
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
         let file = File {
             path: path.to_path_buf(),
             label: format!("{name} ({})", pe_core::format_size(metadata.len())),
@@ -785,7 +894,9 @@ impl Compose {
 
     /// The selected file of the Attach row taken off the message
     pub fn remove_selected_file(&self) {
-        let Some(child) = self.attached.selected_children().into_iter().next() else { return };
+        let Some(child) = self.attached.selected_children().into_iter().next() else {
+            return;
+        };
         let index = child.index();
         if index < 0 || index as usize >= self.files.borrow().len() {
             return;
@@ -805,7 +916,10 @@ impl Compose {
     /// Files dropped on the text: each picture goes in where the cursor is, as Insert Picture puts one; other files
     /// (and pictures too large to go inline) are attached
     fn drop_on_text(&self, paths: Vec<PathBuf>) {
-        let attach: Vec<PathBuf> = paths.into_iter().filter(|path| !insert_picture_file(&self.editor, path)).collect();
+        let attach: Vec<PathBuf> = paths
+            .into_iter()
+            .filter(|path| !insert_picture_file(&self.editor, path))
+            .collect();
         self.add_files(&attach);
     }
 
@@ -846,7 +960,10 @@ impl Compose {
         let (quote, quote_text) = match quote {
             Quote::Folded => {
                 let own = self.quote.borrow().clone();
-                ((!own.is_empty()).then_some(own), self.quote_text.borrow().clone().filter(|t| !t.is_empty()))
+                (
+                    (!own.is_empty()).then_some(own),
+                    self.quote_text.borrow().clone().filter(|t| !t.is_empty()),
+                )
             }
             Quote::Edited(edited) => ((!edited.is_empty()).then(|| edited.clone()), None),
             Quote::Removed => (None, None),
@@ -909,7 +1026,10 @@ impl Compose {
         }
         let answers = [("cancel", "Cancel"), ("no", "No"), ("yes", "Yes")];
         let question = "Do you want to save changes to this message in Drafts?";
-        match ui::ask(&self.window, TITLE, question, &answers, "yes", "cancel", None).await.as_str() {
+        match ui::ask(&self.window, TITLE, question, &answers, "yes", "cancel", None)
+            .await
+            .as_str()
+        {
             "yes" => {
                 self.request(Pending::SaveAndClose);
                 Closing::Saving
@@ -939,7 +1059,10 @@ impl Compose {
 /// false when that window is no longer open
 pub fn draft_saved(message_id: &str, problem: Option<&str>) -> bool {
     let composes = shell().composes.borrow().clone();
-    let Some(compose) = composes.iter().find(|c| c.message_id.borrow().as_deref() == Some(message_id)) else {
+    let Some(compose) = composes
+        .iter()
+        .find(|c| c.message_id.borrow().as_deref() == Some(message_id))
+    else {
         return false;
     };
     match problem {
@@ -970,7 +1093,9 @@ pub async fn close_all() -> bool {
 
 /// The signature of an account in an editor of its own (Accounts > Signature); whether it was saved
 pub async fn edit_signature(parent: &impl IsA<gtk::Widget>, account: i64, name: &str) -> bool {
-    let Ok(current) = shell().core.signature(account) else { return false };
+    let Ok(current) = shell().core.signature(account) else {
+        return false;
+    };
     let editor = Editor::new(&pe_html::editor_document(None, false, &current));
     let format = FormatBar::new(&editor, false);
     let hint = gtk::Label::new(Some("Added to new messages, replies and forwards from this account."));

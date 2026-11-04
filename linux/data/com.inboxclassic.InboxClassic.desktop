@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Inbox Classic
+GenericName=Mail Client
+Comment=Read and write e-mail: a fast, simple mail program
+Keywords=mail;email;e-mail;imap;smtp;inbox;
+Exec=inbox-classic %u
+Icon=com.inboxclassic.InboxClassic
+Terminal=false
+Categories=Network;Email;GTK;
+MimeType=x-scheme-handler/mailto;message/rfc822;
+StartupNotify=true
+StartupWMClass=com.inboxclassic.InboxClassic

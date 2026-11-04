@@ -61,10 +61,7 @@ pub async fn ask(
     close: &str,
     destructive: Option<&str>,
 ) -> String {
-    let dialog = adw::AlertDialog::new(
-        (heading != TITLE).then_some(heading),
-        Some(body),
-    );
+    let dialog = adw::AlertDialog::new((heading != TITLE).then_some(heading), Some(body));
     for (id, label) in answers {
         dialog.add_response(id, label);
     }
@@ -80,8 +77,22 @@ pub async fn ask(
 
 /// Yes or No, No the default for a question that throws something away (`destructive`)
 pub async fn confirm(parent: &impl IsA<gtk::Widget>, heading: &str, body: &str, destructive: bool) -> bool {
-    let (default, red) = if destructive { ("no", Some("yes")) } else { ("yes", None) };
-    ask(parent, heading, body, &[("no", "No"), ("yes", "Yes")], default, "no", red).await == "yes"
+    let (default, red) = if destructive {
+        ("no", Some("yes"))
+    } else {
+        ("yes", None)
+    };
+    ask(
+        parent,
+        heading,
+        body,
+        &[("no", "No"), ("yes", "Yes")],
+        default,
+        "no",
+        red,
+    )
+    .await
+        == "yes"
 }
 
 // ---- the form dialog ----
@@ -312,7 +323,12 @@ fn form_row(index: usize, field: &Field) -> gtk::Widget {
 
 /// A dialog with a header bar of Cancel and `ok_label` around its title, over `content`; the OK button (named
 /// `dialog-ok`) is its default
-pub fn dialog_with_buttons(title: &str, content: &impl IsA<gtk::Widget>, ok_label: &str, width: i32) -> (adw::Dialog, gtk::Button) {
+pub fn dialog_with_buttons(
+    title: &str,
+    content: &impl IsA<gtk::Widget>,
+    ok_label: &str,
+    width: i32,
+) -> (adw::Dialog, gtk::Button) {
     let header = adw::HeaderBar::new();
     header.set_show_end_title_buttons(false);
     header.set_show_start_title_buttons(false);
@@ -357,7 +373,11 @@ pub fn text_dialog(parent: &impl IsA<gtk::Widget>, title: &str, intro: &str, tex
     view.set_wrap_mode(gtk::WrapMode::WordChar);
     view.buffer().set_text(text);
     view.set_widget_name("properties-text");
-    let scrolled = gtk::ScrolledWindow::builder().child(&view).min_content_height(360).vexpand(true).build();
+    let scrolled = gtk::ScrolledWindow::builder()
+        .child(&view)
+        .min_content_height(360)
+        .vexpand(true)
+        .build();
     scrolled.add_css_class("card");
     let content = gtk::Box::new(gtk::Orientation::Vertical, 8);
     content.set_margin_start(12);
@@ -369,7 +389,12 @@ pub fn text_dialog(parent: &impl IsA<gtk::Widget>, title: &str, intro: &str, tex
     let view_ = adw::ToolbarView::new();
     view_.add_top_bar(&header);
     view_.set_content(Some(&content));
-    let dialog = adw::Dialog::builder().title(title).content_width(640).content_height(520).child(&view_).build();
+    let dialog = adw::Dialog::builder()
+        .title(title)
+        .content_width(640)
+        .content_height(520)
+        .child(&view_)
+        .build();
     dialog.present(Some(parent.as_ref()));
     dialog
 }
@@ -410,7 +435,11 @@ pub async fn wait_for_request(
     let view = adw::ToolbarView::new();
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));
-    let dialog = adw::Dialog::builder().title(title).content_width(380).child(&view).build();
+    let dialog = adw::Dialog::builder()
+        .title(title)
+        .content_width(380)
+        .child(&view)
+        .build();
     dialog.set_widget_name("wait-dialog");
     let on_close = send.clone();
     dialog.connect_closed(move |_| {
@@ -487,11 +516,20 @@ fn downloads() -> Option<gio::File> {
 }
 
 /// The path to save a file to, starting from the safe name the core made, in Downloads; None when cancelled
-pub async fn save_file(parent: &gtk::Window, title: &str, name: &str, patterns: Option<(&str, &[&str])>) -> Option<PathBuf> {
+pub async fn save_file(
+    parent: &gtk::Window,
+    title: &str,
+    name: &str,
+    patterns: Option<(&str, &[&str])>,
+) -> Option<PathBuf> {
     if let Some(answer) = test_answer() {
         return answer.into_iter().next();
     }
-    let dialog = gtk::FileDialog::builder().title(title).initial_name(name).modal(true).build();
+    let dialog = gtk::FileDialog::builder()
+        .title(title)
+        .initial_name(name)
+        .modal(true)
+        .build();
     if let Some(folder) = downloads() {
         dialog.set_initial_folder(Some(&folder));
     }

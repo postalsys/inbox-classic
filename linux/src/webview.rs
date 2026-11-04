@@ -47,7 +47,9 @@ impl Web {
         });
         let served = Rc::downgrade(&web);
         context.register_uri_scheme(pe_html::DOCUMENT_SCHEME, move |request| {
-            let document = served.upgrade().and_then(|web| web.document(&request.uri().unwrap_or_default()));
+            let document = served
+                .upgrade()
+                .and_then(|web| web.document(&request.uri().unwrap_or_default()));
             match document {
                 Some(document) => {
                     let bytes = glib::Bytes::from_owned(document.as_bytes().to_vec());
@@ -227,7 +229,12 @@ impl DocumentView {
 
 /// What a document may do: show itself (and its own anchors), nothing else; a link the user follows opens in the
 /// browser
-fn decide(view: &webkit::WebView, decision: &webkit::PolicyDecision, kind: webkit::PolicyDecisionType, own: &str) -> bool {
+fn decide(
+    view: &webkit::WebView,
+    decision: &webkit::PolicyDecision,
+    kind: webkit::PolicyDecisionType,
+    own: &str,
+) -> bool {
     use webkit::PolicyDecisionType as Kind;
     match kind {
         Kind::NavigationAction | Kind::NewWindowAction => {

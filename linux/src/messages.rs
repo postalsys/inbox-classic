@@ -16,6 +16,9 @@ use crate::app::shell;
 const PAGE: u32 = 100;
 /// Pages kept while the list scrolls, the least recently used dropped first
 const PAGES_KEPT: usize = 8;
+/// The widths the Subject and Folder columns start with
+const SUBJECT_WIDTH: i32 = 320;
+const FOLDER_WIDTH: i32 = 130;
 
 mod imp {
     use super::*;
@@ -81,7 +84,12 @@ mod imp {
                     }
                     let rows = shell()
                         .core
-                        .search(&self.search.borrow(), self.sort.get(), u64::from(offset), u64::from(PAGE))
+                        .search(
+                            &self.search.borrow(),
+                            self.sort.get(),
+                            u64::from(offset),
+                            u64::from(PAGE),
+                        )
                         .unwrap_or_default()
                         .into_iter()
                         .map(super::MessageRow::new)
@@ -90,7 +98,10 @@ mod imp {
                     pages.len() - 1
                 }
             };
-            pages[index].1.get((position - offset) as usize).map(|row| row.clone().upcast())
+            pages[index]
+                .1
+                .get((position - offset) as usize)
+                .map(|row| row.clone().upcast())
         }
     }
 }
@@ -125,7 +136,11 @@ impl MessageModel {
         imp.sort.set(sort);
         imp.active.set(active);
         imp.pages.borrow_mut().clear();
-        let now = if active { u32::try_from(total).unwrap_or(u32::MAX) } else { 0 };
+        let now = if active {
+            u32::try_from(total).unwrap_or(u32::MAX)
+        } else {
+            0
+        };
         imp.total.set(now);
         self.items_changed(0, before, now);
     }
@@ -160,16 +175,26 @@ impl MessageList {
         view.add_css_class("message-list");
         view.set_widget_name("message-list");
         view.set_reorderable(false);
-        view.append_column(&icon_column(|m| Some(if m.info.seen() { "ic-mail-read-symbolic" } else { "ic-mail-symbolic" })));
+        view.append_column(&icon_column(|m| {
+            Some(if m.info.seen() {
+                "ic-mail-read-symbolic"
+            } else {
+                "ic-mail-symbolic"
+            })
+        }));
         view.append_column(&icon_column(|m| m.info.has_attachments.then_some("ic-attach-symbolic")));
         view.append_column(&icon_column(|m| m.info.flagged().then_some("ic-flag-symbolic")));
         let from = text_column("From", 180, false, 0.0, |m| m.info.sender().to_string());
-        let subject = text_column("Subject", 320, true, 0.0, |m| m.info.subject.clone());
+        let subject = text_column("Subject", SUBJECT_WIDTH, true, 0.0, |m| m.info.subject.clone());
         let received = text_column("Received", 130, false, 0.0, |m| {
             m.info.display_date().map(crate::ui::format_date).unwrap_or_default()
         });
-        let size = text_column("Size", 84, false, 1.0, |m| pe_core::format_size(m.info.size.unwrap_or(0)));
-        let folder = text_column("Folder", 130, false, 0.0, |m| shell().main().row_folder(m.folder_id));
+        let size = text_column("Size", 92, false, 1.0, |m| {
+            pe_core::format_size(m.info.size.unwrap_or(0))
+        });
+        let folder = text_column("Folder", FOLDER_WIDTH, false, 0.0, |m| {
+            shell().main().row_folder(m.folder_id)
+        });
         folder.set_visible(false);
         for column in [&from, &subject, &received, &size, &folder] {
             view.append_column(column);
@@ -248,6 +273,20 @@ impl MessageList {
         self.sort.get()
     }
 
+    /// The Folder column while the list has messages of several folders: the Subject column gives it its room, and
+    /// gets it back, so the list stays as wide as its pane
+    pub fn show_folder_column(&self, shown: bool) {
+        if self.columns.folder.is_visible() == shown {
+            return;
+        }
+        self.columns.folder.set_visible(shown);
+        self.columns.subject.set_fixed_width(if shown {
+            SUBJECT_WIDTH - FOLDER_WIDTH
+        } else {
+            SUBJECT_WIDTH
+        });
+    }
+
     /// The list again: what `search` finds, `total` of them (nothing when not `active`), the row `select` selected
     pub fn reset(&self, search: pe_core::Search, total: u64, active: bool, select: Option<u64>) {
         self.model.reset(search, self.sort.get(), total, active);
@@ -290,9 +329,17 @@ fn icon_column(icon: fn(&Message) -> Option<&'static str>) -> gtk::ColumnViewCol
         }
     });
     factory.connect_bind(move |_, item| {
-        let Some(item) = item.downcast_ref::<gtk::ListItem>() else { return };
-        let Some(image) = item.child().and_downcast::<gtk::Image>() else { return };
-        let name = item.item().and_downcast::<MessageRow>().and_then(|row| row.with(icon)).flatten();
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let Some(image) = item.child().and_downcast::<gtk::Image>() else {
+            return;
+        };
+        let name = item
+            .item()
+            .and_downcast::<MessageRow>()
+            .and_then(|row| row.with(icon))
+            .flatten();
         image.set_icon_name(name);
     });
     let column = gtk::ColumnViewColumn::new(None, Some(factory));
@@ -320,9 +367,15 @@ fn text_column(
         }
     });
     factory.connect_bind(move |_, item| {
-        let Some(item) = item.downcast_ref::<gtk::ListItem>() else { return };
-        let Some(label) = item.child().and_downcast::<gtk::Label>() else { return };
-        let Some(row) = item.item().and_downcast::<MessageRow>() else { return };
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let Some(label) = item.child().and_downcast::<gtk::Label>() else {
+            return;
+        };
+        let Some(row) = item.item().and_downcast::<MessageRow>() else {
+            return;
+        };
         let (words, unread) = row.with(|m| (text(m), !m.info.seen())).unwrap_or_default();
         label.set_text(&words);
         if unread {

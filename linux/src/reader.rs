@@ -29,8 +29,9 @@ pub struct Reader {
     invitation_title: gtk::Label,
     invitation_details: gtk::Label,
     pub open_calendar: gtk::Button,
-    /// Pictures from the internet blocked: its button shows them
-    pub pictures: adw::Banner,
+    /// The bar that says pictures from the internet are blocked; its button shows them
+    pictures: gtk::Box,
+    pub download_pictures: gtk::Button,
     pub preview: DocumentView,
 }
 
@@ -46,8 +47,7 @@ fn value_label(name: &str) -> gtk::Label {
     let label = gtk::Label::new(None);
     label.set_xalign(0.0);
     label.set_selectable(true);
-    label.set_wrap(true);
-    label.set_wrap_mode(gtk::pango::WrapMode::WordChar);
+    label.set_ellipsize(gtk::pango::EllipsizeMode::End);
     label.set_hexpand(true);
     label.set_widget_name(name);
     label
@@ -63,7 +63,10 @@ impl Reader {
         let fields = gtk::Grid::new();
         fields.set_column_spacing(8);
         fields.set_row_spacing(2);
-        for (row, (name, value)) in [("From:", &from), ("To:", &to), ("Date:", &date)].into_iter().enumerate() {
+        for (row, (name, value)) in [("From:", &from), ("To:", &to), ("Date:", &date)]
+            .into_iter()
+            .enumerate()
+        {
             fields.attach(&field_label(name), 0, row as i32, 1, 1);
             fields.attach(value, 1, row as i32, 1, 1);
         }
@@ -126,11 +129,21 @@ impl Reader {
         invitation.append(&open_calendar);
         invitation.set_visible(false);
 
-        let pictures = adw::Banner::new(
+        let blocked = gtk::Label::new(Some(
             "Some pictures have been blocked to help prevent the sender from identifying your computer.",
-        );
-        pictures.set_button_label(Some("Download Pictures"));
+        ));
+        blocked.set_xalign(0.0);
+        blocked.set_hexpand(true);
+        blocked.set_ellipsize(gtk::pango::EllipsizeMode::End);
+        let download_pictures = gtk::Button::with_label("Download Pictures");
+        download_pictures.set_widget_name("reader-download-pictures");
+        let pictures = gtk::Box::new(gtk::Orientation::Horizontal, 10);
+        pictures.add_css_class("info-bar");
         pictures.set_widget_name("reader-pictures");
+        pictures.append(&gtk::Image::from_icon_name("ic-image-symbolic"));
+        pictures.append(&blocked);
+        pictures.append(&download_pictures);
+        pictures.set_visible(false);
 
         let preview = DocumentView::new("preview", false);
         preview.view.set_widget_name("reader-preview");
@@ -157,6 +170,7 @@ impl Reader {
             invitation_details,
             open_calendar,
             pictures,
+            download_pictures,
             preview,
         };
         reader.clear(false);
@@ -168,7 +182,7 @@ impl Reader {
     pub fn clear(&self, loading: bool) {
         if !loading {
             self.attachments.set_visible(false);
-            self.pictures.set_revealed(false);
+            self.pictures.set_visible(false);
             self.invitation.set_visible(false);
         }
         self.unsubscribe.set_visible(false);
@@ -193,7 +207,7 @@ impl Reader {
         self.note.set_text("The message could not be shown.");
         self.note.set_visible(true);
         self.attachments.set_visible(false);
-        self.pictures.set_revealed(false);
+        self.pictures.set_visible(false);
     }
 
     /// The message: its header, the bars it needs, its document (with its pictures from the internet when
@@ -204,7 +218,8 @@ impl Reader {
         self.fields.set_visible(true);
         self.subject.set_text(&view.subject);
         self.from.set_text(&view.from);
-        self.date.set_text(&view.date.map(crate::ui::format_date).unwrap_or_default());
+        self.date
+            .set_text(&view.date.map(crate::ui::format_date).unwrap_or_default());
         let to = if view.cc.is_empty() {
             view.to.clone()
         } else {
@@ -216,7 +231,7 @@ impl Reader {
         self.show_invitation(view.invitation.as_ref());
         self.preview.show(&view.document, remote_images);
         // offered only for a message with pictures on the internet, until they are shown
-        self.pictures.set_revealed(view.remote_images && !remote_images);
+        self.pictures.set_visible(view.remote_images && !remote_images);
     }
 
     /// The paper clip: how many files, a menu item to save each (the name the sender gave, its size), then all of
@@ -227,7 +242,11 @@ impl Reader {
         if count == 0 {
             return;
         }
-        self.attachments_label.set_text(&if count == 1 { "1 file".into() } else { format!("{count} files") });
+        self.attachments_label.set_text(&if count == 1 {
+            "1 file".into()
+        } else {
+            format!("{count} files")
+        });
         let files = gio::Menu::new();
         for (index, file) in view.attachments.iter().enumerate() {
             let label = format!("{} ({})", file.filename, pe_core::format_size(file.size));
@@ -255,7 +274,11 @@ impl Reader {
             Method::Cancel => "Canceled: ",
             Method::Reply => "Answer to an invitation: ",
         };
-        let summary = if event.summary.is_empty() { "(no title)" } else { &event.summary };
+        let summary = if event.summary.is_empty() {
+            "(no title)"
+        } else {
+            &event.summary
+        };
         self.invitation_title.set_text(&format!("{kind}{summary}"));
         let mut parts = vec![when(event), event.location.clone()];
         if !event.organizer.is_empty() {
@@ -292,6 +315,21 @@ impl Reader {
             }
             _ => self.logo.set_visible(false),
         }
+    }
+
+    #[cfg(feature = "e2e")]
+    pub fn invitation_shown(&self) -> bool {
+        self.invitation.is_visible()
+    }
+
+    #[cfg(feature = "e2e")]
+    pub fn logo_shown(&self) -> bool {
+        self.logo.is_visible()
+    }
+
+    /// Whether the bar of blocked pictures is shown
+    pub fn pictures_blocked(&self) -> bool {
+        self.pictures.is_visible()
     }
 
     pub fn hide_logo(&self) {

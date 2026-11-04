@@ -17,7 +17,11 @@ fn fill(list: &gtk::ListBox, ids: &RefCell<Vec<i64>>, select: usize, buttons: &[
     }
     let queued = shell().core.outbox().unwrap_or_default();
     for message in &queued {
-        let subject = if message.subject.is_empty() { "(no subject)" } else { &message.subject };
+        let subject = if message.subject.is_empty() {
+            "(no subject)"
+        } else {
+            &message.subject
+        };
         let status = match &message.problem {
             Some(problem) => format!("Not sent: {problem}"),
             None => "Waiting".into(),
@@ -93,7 +97,11 @@ pub async fn outbox_dialog(parent: &impl IsA<gtk::Widget>) {
     let view = adw::ToolbarView::new();
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));
-    let dialog = adw::Dialog::builder().title("Outbox").content_width(680).child(&view).build();
+    let dialog = adw::Dialog::builder()
+        .title("Outbox")
+        .content_width(680)
+        .child(&view)
+        .build();
     dialog.set_widget_name("outbox-dialog");
     dialog.connect_closed(move |_| {
         let _ = send.try_send("close");
@@ -107,7 +115,9 @@ pub async fn outbox_dialog(parent: &impl IsA<gtk::Widget>) {
             }
             "delete" => {
                 let index = list.selected_row().map_or(0, |row| row.index().max(0) as usize);
-                let Some(id) = ids.borrow().get(index).copied() else { continue };
+                let Some(id) = ids.borrow().get(index).copied() else {
+                    continue;
+                };
                 if ui::confirm(&dialog, "Outbox", "Delete this message without sending it?", true).await {
                     let _ = shell().core.outbox_delete(id);
                     // the next one selected, where the deleted one was

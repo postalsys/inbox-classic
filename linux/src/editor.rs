@@ -24,20 +24,23 @@ pub enum Quote {
     Removed,
 }
 
+/// A handler that gets a string of the page
+type OnText = Option<Box<dyn Fn(&str)>>;
+
 /// What the editor tells its window; each does nothing unless the window gives it something to do
 #[derive(Default)]
 pub struct Handlers {
     /// The body as HTML, after [`Editor::html`]: what was written, and the quote as the page has it
     pub html: Option<Box<dyn Fn(String, Quote)>>,
     /// One '0' or '1' per format of the bar: bold, italic, underline, numbers, bullets, left, center, right
-    pub state: Option<Box<dyn Fn(&str)>>,
+    pub state: OnText,
     pub dirty: Option<Box<dyn Fn()>>,
     /// Ctrl+Enter
     pub send: Option<Box<dyn Fn()>>,
     /// Ctrl+S
     pub save: Option<Box<dyn Fn()>>,
     /// The address of the link under the mouse, or else of the one the cursor is in; empty for none
-    pub link: Option<Box<dyn Fn(&str)>>,
+    pub link: OnText,
     /// Ctrl+K, or Edit Link in the menu of a link
     pub edit_link: Option<Box<dyn Fn()>>,
     /// Files dragged from the file manager onto the text
@@ -139,7 +142,11 @@ impl Editor {
 
     fn report_link(&self, handlers: &Handlers) {
         let hover = self.hover_link.borrow();
-        let shown = if hover.is_empty() { self.caret_link.borrow().clone() } else { hover.clone() };
+        let shown = if hover.is_empty() {
+            self.caret_link.borrow().clone()
+        } else {
+            hover.clone()
+        };
         if let Some(link) = &handlers.link {
             link(&shown);
         }
@@ -151,7 +158,9 @@ impl Editor {
         keys.set_propagation_phase(gtk::PropagationPhase::Capture);
         let weak = Rc::downgrade(self);
         keys.connect_key_pressed(move |_, key, _, modifiers| {
-            let Some(editor) = weak.upgrade() else { return glib::Propagation::Proceed };
+            let Some(editor) = weak.upgrade() else {
+                return glib::Propagation::Proceed;
+            };
             if !modifiers.contains(gdk::ModifierType::CONTROL_MASK) {
                 return glib::Propagation::Proceed;
             }
@@ -177,7 +186,9 @@ impl Editor {
         let weak = Rc::downgrade(self);
         target.connect_drop(move |_, value, _, _| {
             let Some(editor) = weak.upgrade() else { return false };
-            let Ok(files) = value.get::<gdk::FileList>() else { return false };
+            let Ok(files) = value.get::<gdk::FileList>() else {
+                return false;
+            };
             let paths: Vec<PathBuf> = files.files().iter().filter_map(|file| file.path()).collect();
             if let Some(dropped) = &editor.handlers.borrow().dropped {
                 dropped(paths);
@@ -299,7 +310,10 @@ pub fn picture_uri(path: &std::path::Path) -> Option<String> {
         return None;
     }
     let mut head = Vec::with_capacity(pe_html::PICTURE_HEAD);
-    (&mut file).take(pe_html::PICTURE_HEAD as u64).read_to_end(&mut head).ok()?;
+    (&mut file)
+        .take(pe_html::PICTURE_HEAD as u64)
+        .read_to_end(&mut head)
+        .ok()?;
     pe_html::picture_type(&head)?;
     let data = std::fs::read(path).ok()?;
     pe_html::picture_uri(&data)

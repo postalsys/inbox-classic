@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- What the App Center and other software stores show of Inbox Classic -->
+<component type="desktop-application">
+  <id>com.inboxclassic.InboxClassic</id>
+  <name>Inbox Classic</name>
+  <summary>A fast, simple mail program</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <developer id="com.postalsys">
+    <name>Postal Systems OÜ</name>
+  </developer>
+  <description>
+    <p>
+      Inbox Classic reads and writes e-mail with the folders on the left, the messages at the top and the message
+      below, as mail programs used to. It works with any IMAP and SMTP account, and signs in to Outlook.com and
+      Microsoft 365 through the browser.
+    </p>
+    <ul>
+      <li>Every message is shown sanitized, without scripts, and pictures from the internet only when you allow them</li>
+      <li>A search that finds words in the subject, the people, the file names and the text, with Gmail's operators</li>
+      <li>Replies fold away the earlier messages they quote</li>
+      <li>Mail stays readable offline; passwords are kept in your keyring</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">com.inboxclassic.InboxClassic.desktop</launchable>
+  <url type="homepage">https://inboxclassic.com</url>
+  <url type="bugtracker">https://github.com/postalsys/inbox-classic/issues</url>
+  <categories>
+    <category>Network</category>
+    <category>Email</category>
+  </categories>
+  <provides>
+    <binary>inbox-classic</binary>
+    <mediatype>x-scheme-handler/mailto</mediatype>
+    <mediatype>message/rfc822</mediatype>
+  </provides>
+  <content_rating type="oars-1.1"/>
+</component>

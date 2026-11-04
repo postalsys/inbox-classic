@@ -23,7 +23,11 @@ fn main() {
             .find(|path| root.join(path).exists())
             .expect("an SVG of the icon");
         let alias = format!("icons/scalable/actions/ic-{}-symbolic.svg", name.replace('_', "-"));
-        writeln!(xml, "    <file alias=\"{alias}\" preprocess=\"xml-stripblanks\">{file}</file>").unwrap();
+        writeln!(
+            xml,
+            "    <file alias=\"{alias}\" preprocess=\"xml-stripblanks\">{file}</file>"
+        )
+        .unwrap();
     }
     for (alias, file) in [
         ("brands/google-sign-in.png", "app/res/brands/google-sign-in.png"),

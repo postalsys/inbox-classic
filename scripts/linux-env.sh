@@ -17,6 +17,12 @@ linux_image() {
     docker build --quiet --platform "linux/$LINUX_ARCH" -t "$LINUX_IMAGE" -f linux/Dockerfile linux >/dev/null
 }
 
+# the shell command that installs ImapKit's node_modules in the container, once for each package-lock.json
+LINUX_E2E_MODULES='(cd /src/core/e2e && stamp=$(sha256sum package-lock.json) &&
+    if [ "$(cat node_modules/.lock-stamp 2>/dev/null)" != "$stamp" ]; then
+        npm ci --no-audit --no-fund --silent && echo "$stamp" > node_modules/.lock-stamp
+    fi)'
+
 # runs a shell command in the container with the tree at /src: the crates downloaded once into a volume, ImapKit's
 # node_modules in a volume of their own (the Mac's in core/e2e are not for Linux). Extra docker options in LINUX_DOCKER
 linux_run() {
