@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/postalsys/inbox-classic/compare/v0.5.1...v0.6.0) (2026-11-04)
+
+
+### Features
+
+* say when a message is being downloaded, and why it could not be ([913f863](https://github.com/postalsys/inbox-classic/commit/913f86342ecfdefecbd4c9b27ca68e057169e305))
+
 ## [0.5.1](https://github.com/postalsys/inbox-classic/compare/v0.5.0...v0.5.1) (2026-11-04)
 
 
