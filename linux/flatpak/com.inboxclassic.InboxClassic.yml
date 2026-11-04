@@ -1,0 +1,49 @@
+# The Flatpak of the Linux app, for distributions other than Ubuntu and for Flathub: the same build as the .deb, on the
+# GNOME runtime (GTK 4, libadwaita and WebKitGTK are the runtime's). The crates come from cargo-sources.json, which
+# flatpak-cargo-generator writes from linux/Cargo.lock (scripts/linux-flatpak.sh), so the build needs no network.
+id: com.inboxclassic.InboxClassic
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+sdk-extensions:
+    - org.freedesktop.Sdk.Extension.rust-stable
+command: inbox-classic
+finish-args:
+    # the mail servers, and the browser sign-in's loopback redirect
+    - --share=network
+    - --share=ipc
+    - --socket=wayland
+    - --socket=fallback-x11
+    - --device=dri
+    # passwords in the keyring
+    - --talk-name=org.freedesktop.secrets
+    # the icon in the top bar, and the unread count of the dock
+    - --talk-name=org.kde.StatusNotifierWatcher
+    # attachments saved to Downloads by default; other places through the file chooser portal
+    - --filesystem=xdg-download
+build-options:
+    append-path: /usr/lib/sdk/rust-stable/bin
+    env:
+        CARGO_HOME: /run/build/inbox-classic/cargo
+modules:
+    - name: inbox-classic
+      buildsystem: simple
+      build-commands:
+          - cd linux && cargo --offline build --release --locked
+          - install -Dm755 linux/target/release/inbox-classic /app/bin/inbox-classic
+          - install -Dm644 linux/data/com.inboxclassic.InboxClassic.desktop /app/share/applications/com.inboxclassic.InboxClassic.desktop
+          - install -Dm644 linux/data/com.inboxclassic.InboxClassic.metainfo.xml /app/share/metainfo/com.inboxclassic.InboxClassic.metainfo.xml
+          - install -Dm644 app/res/app-icon.svg /app/share/icons/hicolor/scalable/apps/com.inboxclassic.InboxClassic.svg
+          - install -Dm644 LICENSE /app/share/licenses/inbox-classic/LICENSE
+      sources:
+          # the repository as it is checked out; Flathub's copy names a tag and its commit instead
+          - type: dir
+            path: ../..
+            skip:
+                - build
+                - dist
+                - core/target
+                - linux/target
+                - core/e2e/node_modules
+                - .claude
+          - cargo-sources.json

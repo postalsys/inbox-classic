@@ -9,3 +9,4 @@ core/e2e/node_modules/
 mac/.build/
 mac/*.xcodeproj/
 mac/.swiftpm/
+.flatpak-builder/
