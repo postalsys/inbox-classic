@@ -428,7 +428,8 @@ HACCEL BuildAccelerators() {
 }
 
 void CreateToolbar(HWND hwnd) {
-    g_toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0, BarIcons::Big);
+    // the search field lies on the toolbar: clipped out of it, so a repaint of the buttons never covers the field
+    g_toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP | WS_CLIPSIBLINGS, 0, BarIcons::Big);
     struct Button {
         WORD id;
         const wchar_t* text;

@@ -1309,6 +1309,19 @@ public static class Dragger {
     SelectFolder 4
     [void](WaitFor { if ((Rows) -ge 1) { Rows } } 20)
     Check ([bool](WaitFor { (& $hasButton $IDM_NOT_JUNK) -and -not (& $hasButton $IDM_JUNK) } 5)) 'in Junk E-mail the toolbar has Not Junk in its place'
+    # the toolbar redrawn with the new button leaves the search field on it alone: its sunken edge and white inside
+    # still there, not the toolbar's face
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 700
+    $fieldBox = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($main, 205), [ref]$fieldBox)
+    $fieldPicture = New-Object System.Drawing.Bitmap ($fieldBox.Right - $fieldBox.Left), ($fieldBox.Bottom - $fieldBox.Top)
+    [System.Drawing.Graphics]::FromImage($fieldPicture).CopyFromScreen($fieldBox.Left, $fieldBox.Top, 0, 0, $fieldPicture.Size)
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+    $edgePixel = $fieldPicture.GetPixel(0, [int]($fieldPicture.Height / 2))
+    $insidePixel = $fieldPicture.GetPixel([int]($fieldPicture.Width / 2), 3)
+    Check ($edgePixel.R -lt 200 -and $insidePixel.R -eq 255 -and $insidePixel.G -eq 255 -and $insidePixel.B -eq 255) "the search field is still drawn over the toolbar (edge $edgePixel, inside $insidePixel)"
     SelectRow 0
     Shot $main 'organize-7-junk'
     Command $main $IDM_NOT_JUNK
