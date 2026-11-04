@@ -77,7 +77,7 @@ public final class Mailbox: NSObject {
         tree.delegate = self
         tree.mailbox = self
         let treeScroll = scrolled(tree)
-        treeScroll.widthAnchor.constraint(greaterThanOrEqualToConstant: 160).isActive = true
+        treeScroll.widthAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestTree).isActive = true
 
         setUpList()
         let listScroll = scrolled(list)
@@ -101,7 +101,7 @@ public final class Mailbox: NSObject {
             listScroll.bottomAnchor.constraint(equalTo: listArea.bottomAnchor),
         ])
         setUpEmptyText(in: listScroll)
-        listArea.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
+        listArea.heightAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestList).isActive = true
 
         reader.mailbox = self
         reader.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120).isActive = true
@@ -115,16 +115,30 @@ public final class Mailbox: NSObject {
         reload()
     }
 
-    /// the sizes the Windows app starts with, unless the user moved the dividers before; once the window has its size
+    /// the sizes the Windows app starts with (the tree 210 wide, the list 260 high), unless the user moved the dividers
+    /// there before. A pane at its smallest is taken as not chosen: the split views put the panes there when they are
+    /// laid out before the window has its size, and remember it. Only once the window is laid out, or the positions
+    /// would not hold
     func placeDividers() {
-        let defaults = UserDefaults.standard
-        if TestHooks.testing || defaults.object(forKey: "NSSplitView Subview Frames Panes") == nil {
+        view.layoutSubtreeIfNeeded()
+        guard view.bounds.width > 400, rightSplit.bounds.height > 300 else {
+            // not laid out yet: once it is
+            after(0.1) { [weak self] in self?.placeDividers() }
+            return
+        }
+        let tree = view.arrangedSubviews[0].frame.width
+        if TestHooks.testing || tree <= Mailbox.smallestTree + 1 {
             view.setPosition(210, ofDividerAt: 0)
         }
-        if TestHooks.testing || defaults.object(forKey: "NSSplitView Subview Frames ListAndReader") == nil {
+        let list = rightSplit.arrangedSubviews[0].frame.height
+        if TestHooks.testing || list <= Mailbox.smallestList + 1 {
             rightSplit.setPosition(260, ofDividerAt: 0)
         }
     }
+
+    /// the smallest the folder tree and the message list can be made
+    private static let smallestTree: CGFloat = 160
+    private static let smallestList: CGFloat = 80
 
     private func scrolled(_ document: NSView) -> NSScrollView {
         let scroll = NSScrollView()

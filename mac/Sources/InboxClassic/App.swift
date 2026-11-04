@@ -102,8 +102,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         self.core = core
         main = MainWindow(core: core)
         main.window.makeKeyAndOrderFront(nil)
-        main.mailbox.view.layoutSubtreeIfNeeded()
-        main.mailbox.placeDividers()
+        // once the window is laid out at its size, on the next turn of the run loop
+        onMain { [weak self] in self?.main?.mailbox.placeDividers() }
         NSApp.activate()
         if isBundled {
             UNUserNotificationCenter.current().delegate = self
