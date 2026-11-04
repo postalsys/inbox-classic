@@ -15,7 +15,9 @@ LINUX_DOCKER="-e CARGO_TARGET_DIR=/src/build/cargo-linux-core-$LINUX_ARCH -e PE_
     cd /src/core
     dbus-run-session -- bash -euo pipefail -c '
         echo -n test-password | gnome-keyring-daemon --unlock --components=secrets >/dev/null
-        gnome-keyring-daemon --start --components=secrets >/dev/null
+        # the keyring answers before the tests use it
+        echo -n check | secret-tool store --label=check service inbox-classic-check account check
+        [ \"\$(secret-tool lookup service inbox-classic-check account check)\" = check ] && echo the keyring answers
         cargo test --workspace --locked $*
     '
 "
