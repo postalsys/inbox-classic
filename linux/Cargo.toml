@@ -1,0 +1,47 @@
+[package]
+name = "inbox-classic"
+description = "A fast, simple mail program: IMAP, SMTP and MIME in a Rust core, a GTK 4 window"
+version = "0.4.1" # x-release-please-version
+edition = "2024"
+rust-version = "1.90"
+license = "MIT"
+publish = false
+authors = ["Postal Systems OÜ <info@postalsys.com>"]
+homepage = "https://inboxclassic.com"
+repository = "https://github.com/postalsys/inbox-classic"
+
+# its own workspace, so `cargo test --workspace` in core/ (on the Mac and Windows too) never builds GTK
+[workspace]
+
+[dependencies]
+pe-autoconfig = { path = "../core/crates/pe-autoconfig" }
+pe-core = { path = "../core/crates/pe-core" }
+pe-html = { path = "../core/crates/pe-html" }
+pe-imap = { path = "../core/crates/pe-imap" }
+pe-net = { path = "../core/crates/pe-net" }
+pe-oauth = { path = "../core/crates/pe-oauth" }
+pe-store = { path = "../core/crates/pe-store" }
+gtk = { package = "gtk4", version = "0.11", features = ["v4_20"] }
+adw = { package = "libadwaita", version = "0.9", features = ["v1_8"] }
+webkit = { package = "webkit6", version = "0.6" }
+# the tray icon (StatusNotifierItem, which Ubuntu's AppIndicator extension shows)
+ksni = { version = "0.3", default-features = false, features = ["blocking", "async-io"] }
+# the unread count on the dock (com.canonical.Unity.LauncherEntry)
+zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
+# the core's events from its worker threads to the window thread, and a request's answer to the window waiting
+async-channel = "2"
+futures-channel = "0.3"
+# the e2e driver's checks over ImapKit's REST API
+serde_json = { version = "1", optional = true }
+base64 = { version = "0.22", optional = true }
+
+[build-dependencies]
+glib-build-tools = "0.22"
+
+[features]
+# the in-process driver of the UI end-to-end test (scripts/linux-ui-e2e.sh); never in a release
+e2e = ["dep:serde_json", "dep:base64"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
