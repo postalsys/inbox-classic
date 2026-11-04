@@ -291,7 +291,7 @@ public final class Mailbox: NSObject {
         list.setDraggingSourceOperationMask([.move, .copy], forLocal: true)
         let columns: [(ColumnID, String, CGFloat)] = [
             (.read, "", 22), (.attach, "", 22), (.flag, "", 22), (.from, "From", 180), (.subject, "Subject", 320),
-            (.received, "Received", 130), (.size, "Size", 72),
+            (.received, "Received", 130), (.size, "Size", 84),
         ]
         for (id, title, width) in columns {
             list.addTableColumn(makeColumn(id, title: title, width: width))
