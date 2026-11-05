@@ -1083,7 +1083,7 @@ async fn writing(d: &Driver) {
     })
     .await;
     d.check(bold, "B shows bold is on");
-    c.editor.type_text("Thanks, Ann. Answered by the UI test.");
+    c.editor.type_text("Thanks, Ann. The lake one is my favourite too.");
     pause(500).await;
     d.shot(&c.window, "write-3-reply").await;
     click(c.window.upcast_ref(), "compose-send");
@@ -1095,7 +1095,7 @@ async fn writing(d: &Driver) {
             text.contains("In-Reply-To: <ui-e2e@example.com>"),
             "the reply refers to the message it answers",
         );
-        d.check(text.contains("Answered by the UI test"), "the reply has what was typed");
+        d.check(text.contains("my favourite too"), "the reply has what was typed");
         d.check(
             text.contains("Content-Type: text/html") && text.contains("Content-Type: text/plain"),
             "it is HTML with a text part",

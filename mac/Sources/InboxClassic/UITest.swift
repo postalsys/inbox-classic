@@ -628,7 +628,7 @@ final class UITest {
         guard let reply = await waitCompose() else { throw Failed(description: "no compose window") }
         compose = reply
         check(field("compose.to", compose)?.stringValue.contains("ann@example.com") == true, "the reply goes to the sender")
-        check(await typeInEditor(compose, "Thanks, Ann. Answered by the UI test."), "the editor takes typing")
+        check(await typeInEditor(compose, "Thanks, Ann. The lake one is my favourite too."), "the editor takes typing")
         await pause(0.5)
         await shot(compose, "write-3-reply")
         ComposeWindow.open.last.map { window in onMain { window.perform(#selector(ComposeWindow.sendClicked)) } }
@@ -637,7 +637,7 @@ final class UITest {
         if let answered {
             let text = raw(answered)
             check(text.contains("In-Reply-To: <ui-e2e@example.com>"), "the reply refers to the message it answers")
-            check(text.contains("Answered by the UI test"), "the reply has what was typed")
+            check(text.contains("my favourite too"), "the reply has what was typed")
             check(text.contains("Original Message") && text.contains("shared album"), "the folded quote is sent along")
         }
         check(await waitFor { await findMessage("Sent", "Subject: Re: Photos from Saturday") } != nil, "a copy of the reply is in Sent")

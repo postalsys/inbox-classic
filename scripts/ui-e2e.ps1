@@ -752,7 +752,7 @@ try {
     [void](ClickEditor $compose)
     Command $compose $IDF_BOLD
     Check ([bool](WaitFor { Pressed $compose $IDF_BOLD } 10)) 'B shows bold is on'
-    Check (TypeInEditor $compose 'Thanks, Ann. Answered by the UI test.') 'the editor takes typing'
+    Check (TypeInEditor $compose 'Thanks, Ann. The lake one is my favourite too.') 'the editor takes typing'
     Shot $compose 'write-3-reply'
     # Select All unfolds the quote and selects it along with the text
     [void][Native.Win]::SetForegroundWindow($compose)
@@ -769,7 +769,7 @@ try {
     if ($answer) {
         $text = RawText $answer
         Check ($text -match 'In-Reply-To: <ui-e2e@example.com>') 'the reply refers to the message it answers'
-        Check ($text -match 'Answered by the UI test') 'the reply has what was typed'
+        Check ($text -match 'my favourite too') 'the reply has what was typed'
         Check ($text -match 'Content-Type: text/html' -and $text -match 'Content-Type: text/plain') 'it is HTML with a text part'
         Check ($text -match '<b>Thanks, Ann') 'what was typed in bold is bold'
         Check ($text -match 'Original Message' -and $text -match 'shared album') 'the folded quote is sent along'

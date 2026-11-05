@@ -57,6 +57,10 @@ for platform in "${platforms[@]}"; do
                 magick "$source" $crop -strip "$target"
                 ;;
         esac
+        # the search results: the window down to the header of the message shown, without the empty rest of its pane
+        if [ "$shot" = find-2-every-folder ]; then
+            magick "$target" -gravity North -crop 100%x53%+0+0 +repage "$target"
+        fi
         echo "$target $(magick identify -format '%wx%h' "$target")"
     done
 done
