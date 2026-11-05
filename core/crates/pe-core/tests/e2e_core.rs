@@ -169,6 +169,33 @@ fn reads_mail_like_the_windows_do() {
 }
 
 #[test]
+fn opens_on_the_newest_message_of_the_first_inbox() {
+    let Some(s) = setup() else { return };
+    assert_eq!(s.core.start_message().unwrap(), None, "no account");
+    let dated = |subject: &str, date: &str| {
+        format!("From: Sender <sender@example.com>\r\nSubject: {subject}\r\nDate: {date}\r\n\r\nHi\r\n")
+    };
+    let newest = s
+        .server
+        .add_message("INBOX", &dated("Newest", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
+    // a higher UID, an older date: the date decides
+    s.server
+        .add_message("INBOX", &dated("Older", "Mon, 6 Oct 2025 10:00:00 +0000"), &[]);
+
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap();
+    assert_eq!(s.core.start_message().unwrap(), Some((inbox.id, Some(newest))));
+}
+
+#[test]
 fn a_wrong_password_is_reported() {
     let Some(s) = setup() else { return };
     let account = s.core.add_account(&settings(&s.server), "wrong").unwrap();

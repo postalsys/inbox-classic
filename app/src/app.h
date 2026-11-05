@@ -99,9 +99,9 @@ std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t*
                            const wchar_t* filter = L"All files (*.*)\0*.*\0", const wchar_t* extension = nullptr);
 // `text` with its line breaks as CRLF, as an edit box shows them
 std::wstring WithCrlf(const std::wstring& text);
-// a modal window that can be resized with `text` (a message's source) in a fixed-width font to read and copy, and
-// Close
-void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& text);
+// a modal window that can be resized with `text` (a message's source) in a fixed-width font to read and copy, Save
+// As (`save`, given the window) and Close
+void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& text, const std::function<void(HWND)>& save);
 // a modal window with `text` to read and copy in a box that can not be edited, and OK (Message Properties)
 void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text);
 // a PNG picture of the exe's resources (RCDATA, app.rc) as a bitmap `height` pixels high over `background`, as wide
@@ -295,6 +295,8 @@ public:
     void MarkAllRead();
     // the message `uid` of `folder` shown: its folder chosen in the tree, the message selected in the list
     void ShowMessage(int64_t folder, uint64_t uid);
+    // the window shown the first time: the first account's Inbox chosen and its newest message selected
+    void SelectStart();
     // the selected message junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     void MarkJunk(bool junk);
     // whether the message shown, or else the folder, is in a Junk folder: the toolbar offers Not Junk there
@@ -500,6 +502,8 @@ private:
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's
     bool reloading_ = false;
+    // SelectStart has run: later showings of the window keep what is selected
+    bool started_ = false;
     // the message shown and its folder (its row's: in a search of every folder not the selected one), 0 for none
     uint64_t uid_ = 0;
     int64_t messageFolder_ = 0;

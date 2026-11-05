@@ -1022,6 +1022,18 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
     }
 }
 
+void Mailbox::SelectStart() {
+    if (started_) {
+        return;
+    }
+    started_ = true;
+    int64_t folder = 0;
+    uint64_t uid = 0;
+    if (!folder_ && pe_start_message(core_, &folder, &uid)) {
+        ShowMessage(folder, uid);
+    }
+}
+
 std::wstring Mailbox::Unsubscribe(std::wstring& mailto) {
     const std::wstring& target = unsubscribeTarget_;
     switch (unsubscribeKind_) {
@@ -1553,7 +1565,8 @@ void Mailbox::ShowSource(HWND owner) {
         MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
-    SourceDialog(owner, Text(titleText.get()), Text(text.get()));
+    // Save As from here saves the message shown, as File > Save As does
+    SourceDialog(owner, Text(titleText.get()), Text(text.get()), [this](HWND window) { SaveShownAs(window); });
 }
 
 // the right-click menu of the message list: the actions on the message under the mouse (selected first), as Outlook

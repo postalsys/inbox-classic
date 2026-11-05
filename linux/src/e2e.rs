@@ -968,6 +968,18 @@ async fn reading(d: &Driver) {
                 &format!("the window names the message ({})", dialog.title()),
             );
             d.shot(&dialog, "read-15-source").await;
+            let eml = d.out.join("source-saved.eml");
+            let _ = std::fs::remove_file(&eml);
+            FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![eml.clone()]));
+            if let Some(save) = named_in(dialog.upcast_ref(), "source-save").and_downcast::<gtk::Button>() {
+                save.emit_clicked();
+            }
+            let saved = wait_until(10, || {
+                std::fs::read_to_string(&eml).is_ok_and(|t| t.contains("larches are turning"))
+            })
+            .await;
+            d.check(saved, "Save As in it saves the message as it came");
+            d.check(dialog_named("source-dialog").is_some(), "and the source stays open");
             dialog.close();
             d.check(wait_gone(10, "source-dialog").await, "Close closes it");
         }

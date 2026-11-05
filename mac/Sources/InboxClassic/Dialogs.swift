@@ -262,9 +262,9 @@ func wrappingLabel(_ text: String) -> NSTextField {
 /// A window with `text` to read and copy, and OK (Message Properties)
 @MainActor
 func textDialog(title: String, intro: String?, text: String, ok: String = "OK", id: String = "text",
-                size: NSSize = NSSize(width: 640, height: 440)) {
-    let window = NSWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: [.titled, .resizable],
-                          backing: .buffered, defer: true)
+                size: NSSize = NSSize(width: 640, height: 440), action: ButtonAction? = nil) {
+    let window = TextDialogWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: [.titled, .resizable],
+                                  backing: .buffered, defer: true)
     window.title = title
     window.identifier = NSUserInterfaceItemIdentifier(id)
     let scroll = NSTextView.scrollableTextView()
@@ -275,19 +275,49 @@ func textDialog(title: String, intro: String?, text: String, ok: String = "OK", 
     view.setAccessibilityIdentifier("text.body")
     let ok = NSButton(title: ok, target: NSApp, action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
     ok.keyEquivalent = "\r"
-    let stack = NSStackView(views: (intro.map { [NSTextField(labelWithString: $0)] } ?? []) + [scroll, ok])
+    // a button that does not close the window on the left, the one that does on the right
+    let buttons = NSStackView(views: (action.map { [$0.button] } ?? []) + [NSView(), ok])
+    buttons.orientation = .horizontal
+    let stack = NSStackView(views: (intro.map { [NSTextField(labelWithString: $0)] } ?? []) + [scroll, buttons])
     stack.orientation = .vertical
     stack.alignment = .leading
     stack.edgeInsets = NSEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
     scroll.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -32).isActive = true
     scroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 300).isActive = true
-    ok.trailingAnchor.constraint(equalTo: stack.trailingAnchor, constant: -16).isActive = true
+    buttons.widthAnchor.constraint(equalTo: scroll.widthAnchor).isActive = true
     window.contentView = stack
     window.center()
     Modal.opened(window)
     NSApp.runModal(for: window)
     Modal.closed(window)
     window.orderOut(nil)
+}
+
+/// The window of [`textDialog`]: Esc closes it, as Close does
+final class TextDialogWindow: NSWindow {
+    override func cancelOperation(_ sender: Any?) {
+        NSApp.stopModal()
+    }
+}
+
+/// A button that runs a closure, for a dialog's own action (Save As in View Source)
+@MainActor
+final class ButtonAction: NSObject {
+    let button: NSButton
+    private let run: () -> Void
+
+    init(_ title: String, id: String, run: @escaping () -> Void) {
+        self.run = run
+        button = NSButton(title: title, target: nil, action: nil)
+        super.init()
+        button.target = self
+        button.action = #selector(press)
+        button.setAccessibilityIdentifier(id)
+    }
+
+    @objc private func press() {
+        run()
+    }
 }
 
 // ---- waiting for the core ----

@@ -261,9 +261,9 @@ const sections = [
             {
                 shot: 'read-15-source',
                 name: 'View Source',
-                what: 'The whole message as the server keeps it (RFC 822): every header, every part, attachments as their encoded text. Shown as plain text in a window that can be made larger, with control characters made harmless; a message over 4 MB is cut short with a note (File > Save As keeps all of it).',
+                what: 'The whole message as the server keeps it (RFC 822): every header, every part, attachments as their encoded text. Shown as plain text in a window that can be made larger, with control characters made harmless; a message over 4 MB is cut short with a note. Save As in the window saves the whole message as an .eml file, as File > Save As does.',
                 how: 'View > Message Source (Ctrl+U on Windows and Linux), or View Source on the right-click menu.',
-                checked: ['It shows the header and every part', 'The window names the message', 'Close closes it']
+                checked: ['It shows the header and every part', 'The window names the message', 'Save As in it saves the message', 'Close closes it']
             },
             {
                 shot: 'read-1-html',

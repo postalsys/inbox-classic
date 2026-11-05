@@ -55,6 +55,8 @@ Screenshots: `read-14-menu` (not on the Mac: its menus run in a tracking loop of
 - View Source opens the whole message
 - with its header and every part, as the server has it
 - the window names the message
+- Save As in it asks where, with the subject as the name, and saves the message as it came
+- and the source stays open
 - Close closes it
 
 ## 7. Pictures from the internet

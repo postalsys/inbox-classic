@@ -75,6 +75,8 @@ pub struct Mailbox {
     selected_account: Cell<i64>,
     /// The folder shown, 0 for none
     folder: Cell<i64>,
+    /// select_start has run: later showings of the window keep what is selected
+    started: Cell<bool>,
     /// What the Find box searches for, empty when the list is the folder's, and the one folder it names (in:sent)
     find_text: RefCell<String>,
     find_place: RefCell<String>,
@@ -201,6 +203,7 @@ impl Mailbox {
             junk_folders: RefCell::default(),
             selected_account: Cell::new(0),
             folder: Cell::new(0),
+            started: Cell::new(false),
             find_text: RefCell::default(),
             find_place: RefCell::default(),
             total: Cell::new(0),
@@ -843,6 +846,16 @@ impl Mailbox {
         }
     }
 
+    /// The window shown the first time: the first account's Inbox chosen and its newest message selected
+    pub fn select_start(&self) {
+        if self.started.replace(true) || self.folder.get() != 0 {
+            return;
+        }
+        if let Ok(Some((folder, uid))) = shell().core.start_message() {
+            self.show_message(folder, uid.unwrap_or(0));
+        }
+    }
+
     // ---- the Find box ----
 
     fn on_find_changed(&self) {
@@ -1429,7 +1442,20 @@ impl Mailbox {
             ui::alert(&self.window, TITLE, "The message is not downloaded yet.").await;
             return;
         };
-        let dialog = ui::text_dialog_sized(&self.window, &title, "", &text.replace("\r\n", "\n"), (820, 600), false);
+        // Save As from here saves the message shown, as File > Save As does
+        let save = gtk::Button::with_label(Command::SaveAs.label());
+        save.set_widget_name("source-save");
+        save.connect_clicked(|_| run_command(Command::SaveAs));
+        let text = text.replace("\r\n", "\n");
+        let dialog = ui::text_dialog_sized(
+            &self.window,
+            &title,
+            "",
+            &text,
+            (820, 600),
+            false,
+            Some(save.upcast_ref()),
+        );
         dialog.set_widget_name("source-dialog");
     }
 

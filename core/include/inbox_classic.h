@@ -1120,6 +1120,15 @@ void pe_folder_list_free(struct PeFolderList *list);
 // `core` must be a live handle; `total` and `unread` must be valid pointers.
 bool pe_folder_counts(const struct PeCore *core, int64_t folder, uint64_t *total, uint64_t *unread);
 
+// What the main window selects when it opens: the Inbox of the first account in `folder` and its newest message in
+// `uid` (0 when the Inbox is empty); false when there is no account or its Inbox is not known yet
+//
+// # Safety
+// `core` must be a live handle; `folder` and `uid` must be valid pointers.
+bool pe_start_message(const struct PeCore *core,
+                      int64_t *folder,
+                      uint64_t *uid);
+
 // How many messages `pe_messages` lists for `search`, and how many of them are unread
 //
 // # Safety

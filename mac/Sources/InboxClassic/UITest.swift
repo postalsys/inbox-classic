@@ -523,6 +523,21 @@ final class UITest {
                   "with its header and every part, as the server has it")
             check(source.title == "Message Source: October newsletter", "the window names the message (\(source.title))")
             await shot(source, "read-15-source")
+            let eml = out.appendingPathComponent("source-saved.eml")
+            try? FileManager.default.removeItem(at: eml)
+            var suggested: String?
+            TestHooks.save = { name in
+                suggested = name
+                return eml
+            }
+            let save: NSButton? = find("source.save", in: source)
+            onMain { _ = save?.accessibilityPerformPress() }
+            check(await waitUntil(10) { suggested != nil } && suggested?.contains("October newsletter") == true,
+                  "Save As in it asks where, with the subject as the name (\(suggested ?? ""))")
+            check(await waitUntil(10) { (try? String(contentsOf: eml, encoding: .utf8))?.contains("larches are turning") == true },
+                  "and saves the message as it came")
+            TestHooks.save = nil
+            check(source.isVisible, "and the source stays open")
             NSApp.stopModal()
             check(await waitUntil(10) { !source.isVisible }, "Close closes it")
         }

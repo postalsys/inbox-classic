@@ -465,6 +465,24 @@ impl Core {
         Ok(self.store().messages(folder, sort, offset, limit)?)
     }
 
+    /// What the main window selects when it opens: the Inbox of the first account and its newest message (by date,
+    /// `None` when the Inbox is empty); `None` when there is no account or the first one has no Inbox yet
+    pub fn start_message(&self) -> Result<Option<(FolderId, Option<u64>)>> {
+        let store = self.store();
+        let Some(account) = store.accounts()?.into_iter().next() else {
+            return Ok(None);
+        };
+        let Some(inbox) = store.find_folder(account.id, "INBOX")? else {
+            return Ok(None);
+        };
+        let newest = Sort {
+            field: pe_store::SortField::Date,
+            ascending: false,
+        };
+        let uid = store.messages(inbox.id, newest, 0, 1)?.first().map(|m| m.info.uid);
+        Ok(Some((inbox.id, uid)))
+    }
+
     /// A page of what `search` finds (Gmail's syntax, see [`pe_store::Query`]), in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
         Ok(self.store().search(search, sort, offset, limit)?)

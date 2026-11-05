@@ -38,6 +38,8 @@ public final class Mailbox: NSObject {
 
     // the list: the folder or the search, its order and its rows
     private(set) var folder: Int64 = 0
+    /// selectStart has run: later showings of the window keep what is selected
+    private var started = false
     private var selectedAccount: Int64 = 0
     private var sort = PE_SORT_FIELD_DATE
     private var ascending = false
@@ -645,6 +647,15 @@ public final class Mailbox: NSObject {
         }
     }
 
+    /// the window shown the first time: the first account's Inbox chosen and its newest message selected
+    func selectStart() {
+        guard !started else { return }
+        started = true
+        if folder == 0, let start = core.startMessage() {
+            showMessage(folder: start.folder, uid: start.uid)
+        }
+    }
+
     // ---- the message's own actions ----
 
     @objc func openSelected() {
@@ -841,7 +852,13 @@ public final class Mailbox: NSObject {
             inform("The message is not downloaded yet.")
             return
         }
-        textDialog(title: name, intro: nil, text: source, ok: "Close", id: "source", size: NSSize(width: 760, height: 560))
+        // Save As from here saves the message shown, as File > Save As does
+        let save = ButtonAction(Command.saveAs.label, id: "source.save") { [weak self] in self?.saveShownAs() }
+        // the key of File > Save As
+        save.button.keyEquivalent = "s"
+        save.button.keyEquivalentModifierMask = [.command, .shift]
+        textDialog(title: name, intro: nil, text: source, ok: "Close", id: "source", size: NSSize(width: 760, height: 560),
+                   action: save)
     }
 
     /// the right-click menu of the message list: the actions on the message, as Outlook Express has them, with the

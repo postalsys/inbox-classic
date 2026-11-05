@@ -627,6 +627,12 @@ try {
         $sourceTitle = WindowText $source
         Check ($sourceTitle -eq 'Message Source: October newsletter') "the window names the message ($sourceTitle)"
         Shot $source 'read-15-source'
+        $sourceEml = Join-Path (Resolve-Path $Out) 'source-saved.eml'
+        Remove-Item -Force -ErrorAction SilentlyContinue $sourceEml
+        Click $source $IDM_SAVE_AS
+        Check (AnswerFileDialog 'Save Message As' $sourceEml $null '*October newsletter*') 'Save As in it asks where, with the subject as the name'
+        Check ([bool](WaitFor { (Test-Path $sourceEml) -and (Get-Content -Raw $sourceEml) -match 'larches are turning' } 10)) 'and saves the message as it came'
+        Check ([Native.Win]::IsWindow($source)) 'and the source stays open'
         Click $source 1
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($source) } 10)) 'Close closes it'
     }

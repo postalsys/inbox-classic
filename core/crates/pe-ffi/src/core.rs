@@ -1013,6 +1013,24 @@ pub unsafe extern "C" fn pe_folder_counts(core: *const PeCore, folder: i64, tota
     true
 }
 
+/// What the main window selects when it opens: the Inbox of the first account in `folder` and its newest message in
+/// `uid` (0 when the Inbox is empty); false when there is no account or its Inbox is not known yet
+///
+/// # Safety
+/// `core` must be a live handle; `folder` and `uid` must be valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_start_message(core: *const PeCore, folder: *mut i64, uid: *mut u64) -> bool {
+    if folder.is_null() || uid.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let start = unsafe { with(core, None, |core| core.start_message().ok().flatten()) };
+    let Some((inbox, newest)) = start else { return false };
+    // SAFETY: the caller gave valid pointers
+    unsafe { (*folder, *uid) = (inbox, newest.unwrap_or(0)) };
+    true
+}
+
 /// What the message list shows: the messages of one folder, or of every folder, by state, and those that what was typed
 /// in the Find box finds (Gmail's syntax: words, "phrases", -word, OR, from: to: subject: filename: is:unread
 /// is:starred has:attachment in: before: after: older_than: newer_than: larger: smaller:)

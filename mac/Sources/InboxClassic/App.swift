@@ -119,7 +119,12 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             main.window.makeKeyAndOrderFront(nil)
         }
         // once the window is laid out at its size, on the next turn of the run loop
-        onMain { [weak self] in self?.main?.mailbox.placeDividers() }
+        onMain { [weak self] in
+            self?.main?.mailbox.placeDividers()
+            if !(self?.arguments.background ?? true) {
+                self?.main?.mailbox.selectStart()
+            }
+        }
         if !arguments.background {
             NSApp.activate()
         }

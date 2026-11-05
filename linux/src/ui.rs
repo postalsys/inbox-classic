@@ -368,10 +368,11 @@ pub fn wrapped_label(text: &str) -> gtk::Label {
 
 /// A dialog with `text` to read and copy that can not be edited, and OK (Message Properties); no intro when it is empty
 pub fn text_dialog(parent: &impl IsA<gtk::Widget>, title: &str, intro: &str, text: &str) -> adw::Dialog {
-    text_dialog_sized(parent, title, intro, text, (640, 520), true)
+    text_dialog_sized(parent, title, intro, text, (640, 520), true, None)
 }
 
-/// [`text_dialog`] of `size`; lines that do not fit wrapped, or (`wrap` false) scrolled to, as source code is
+/// [`text_dialog`] of `size`; lines that do not fit wrapped, or (`wrap` false) scrolled to, as source code is; `action`
+/// at the start of its header bar
 pub fn text_dialog_sized(
     parent: &impl IsA<gtk::Widget>,
     title: &str,
@@ -379,6 +380,7 @@ pub fn text_dialog_sized(
     text: &str,
     size: (i32, i32),
     wrap: bool,
+    action: Option<&gtk::Widget>,
 ) -> adw::Dialog {
     let view = gtk::TextView::new();
     view.set_editable(false);
@@ -390,6 +392,11 @@ pub fn text_dialog_sized(
     });
     view.buffer().set_text(text);
     view.set_widget_name("properties-text");
+    // the text off the edges of its card
+    view.set_top_margin(8);
+    view.set_bottom_margin(8);
+    view.set_left_margin(10);
+    view.set_right_margin(10);
     let scrolled = gtk::ScrolledWindow::builder()
         .child(&view)
         .min_content_height(360)
@@ -405,6 +412,9 @@ pub fn text_dialog_sized(
     }
     content.append(&scrolled);
     let header = adw::HeaderBar::new();
+    if let Some(action) = action {
+        header.pack_start(action);
+    }
     let view_ = adw::ToolbarView::new();
     view_.add_top_bar(&header);
     view_.set_content(Some(&content));

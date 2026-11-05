@@ -170,6 +170,13 @@ final class Core {
         return (total, unread)
     }
 
+    /// what the main window selects when it opens: the first account's Inbox and its newest message (0 when empty)
+    func startMessage() -> (folder: Int64, uid: UInt64)? {
+        var folder: Int64 = 0
+        var uid: UInt64 = 0
+        return pe_start_message(handle, &folder, &uid) ? (folder, uid) : nil
+    }
+
     /// what a search finds
     func messageCount(_ search: Search) -> (total: UInt64, unread: UInt64) {
         var total: UInt64 = 0
