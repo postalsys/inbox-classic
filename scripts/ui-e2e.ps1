@@ -337,6 +337,10 @@ function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) 
     $t = if ($title) { $title } else { [NullString]::Value }
     WaitFor { $w = [Native.Win]::FindWindow($class, $t); if ($w -ne [IntPtr]::Zero) { $w } } $Seconds
 }
+# a window of the app's own once it shows: its controls are made and filled before it does, so they can be read
+function WaitShown([string]$class, [int]$Seconds = 20) {
+    WaitFor { $w = [Native.Win]::FindWindow($class, [NullString]::Value); if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w)) { $w } } $Seconds
+}
 # the window of the WebView2 of a compose window's editor that takes input, clicked into as a user would when the
 # cursor is in another field
 function ClickEditor([IntPtr]$compose) {
@@ -602,13 +606,13 @@ try {
         for ($i = 0; $i -le $sourceAt; $i++) { if ($labels[$i]) { Key $menu $VK_DOWN } }
         Key $menu $VK_RETURN
     }
-    $source = WaitWindow 'InboxClassicSource' $null 5
+    $source = WaitShown 'InboxClassicSource' 5
     if (-not $source) {
         # where the menu does not take posted keys: the command, as the menu would send it
         $menu = [Native.Win]::FindWindow('#32768', [NullString]::Value)
         if ($menu -ne [IntPtr]::Zero) { Key $menu $VK_ESCAPE }
         Command $main $IDM_VIEW_SOURCE
-        $source = WaitWindow 'InboxClassicSource' $null 10
+        $source = WaitShown 'InboxClassicSource' 10
     }
     Check ($null -ne $source) 'View Source opens the whole message'
     if ($source) {
@@ -1418,7 +1422,7 @@ public static class Dragger {
     $env:APP = (Resolve-Path $Exe).Path; $env:STORE = $store; $env:OUT = $agentOut
     $agent = Start-Process -FilePath $agentExe -ArgumentList "`"$(Join-Path $PSScriptRoot 'ui-e2e\agent.mjs')`"" -PassThru -WindowStyle Hidden
     $agentSaid = { param($step) if (Test-Path $agentOut) { @(Get-Content $agentOut | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.step -eq $step })[0] } }
-    $ask = WaitWindow 'InboxClassicAgentAccess' $null 30
+    $ask = WaitShown 'InboxClassicAgentAccess' 30
     Check ($null -ne $ask) 'a program whose agent connects for the first time is asked about'
     if ($ask) {
         Check ((WindowText ([Native.Win]::GetDlgItem($ask, $IDC_AGENT_PATH))) -match 'My AI agent\.exe') 'the question names the program'
@@ -1440,7 +1444,7 @@ public static class Dragger {
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match ", $($unreadBefore - 2) unread" } 10)) "and in the window at once ($(StatusPart $mainStatus 2))"
     Shot $main 'agents-3-after'
-    $send = WaitWindow 'InboxClassicAgentSend' $null 30
+    $send = WaitShown 'InboxClassicAgentSend' 30
     Check ($null -ne $send) 'a message the agent wants to send is shown to the user first'
     if ($send) {
         $recipients = [Native.Win]::GetDlgItem($send, $IDC_AGENT_RECIPIENTS)
@@ -1454,7 +1458,7 @@ public static class Dragger {
     $sent = WaitFor { & $agentSaid 'sent' } 20
     Check ($sent.result.sent -eq $true) 'the agent learns the user said yes'
     Command $main $IDM_OUTBOX
-    $outbox = WaitWindow 'InboxClassicOutbox' $null 10
+    $outbox = WaitShown 'InboxClassicOutbox' 10
     if ($outbox) {
         $outboxList = [Native.Win]::GetDlgItem($outbox, 450)
         Check ([Native.Win]::RemoteListText($outboxList, 0, 3) -match '^Sent by an AI agent; goes at') 'it waits in the Outbox, where it can still be deleted'
@@ -1463,14 +1467,12 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
     }
     Command $main $IDM_AI_AGENTS
-    $agents = WaitWindow 'InboxClassicAgents' $null 10
+    $agents = WaitShown 'InboxClassicAgents' 10
     Check ($null -ne $agents) 'Tools > AI Agents opens'
     if ($agents) {
         $hosts = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_HOSTS)
         $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
         Check ([Native.Win]::RemoteListText($hosts, 0, 0) -eq 'My AI agent' -and [Native.Win]::RemoteListText($hosts, 0, 1) -match '^Read, organize and send with your yes') "it lists the program and what it may do ($([Native.Win]::RemoteListText($hosts, 0, 1)))"
-        # the window fills its lists as it opens: what they say once they say it
-        [void](WaitFor { [Native.Win]::IsWindowVisible($agents) } 10)
         $newest = { [Native.Win]::RemoteListText($log, 0, 2) }
         [void](WaitFor { (& $newest) -match '^Sent' } 10)
         Check ((& $newest) -match '^Sent "Lunch on Friday\?" to pat@example.net' -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') "and what its agent did, newest first ($(& $newest); $([Native.Win]::RemoteListText($log, 1, 2)))"
@@ -1482,7 +1484,7 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
     }
     Command $main $IDM_OUTBOX
-    $outbox = WaitWindow 'InboxClassicOutbox' $null 10
+    $outbox = WaitShown 'InboxClassicOutbox' 10
     if ($outbox) {
         Check ([int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'and the Outbox is empty'
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
