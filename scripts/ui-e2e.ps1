@@ -1469,11 +1469,15 @@ public static class Dragger {
         $hosts = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_HOSTS)
         $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
         Check ([Native.Win]::RemoteListText($hosts, 0, 0) -eq 'My AI agent' -and [Native.Win]::RemoteListText($hosts, 0, 1) -match '^Read, organize and send with your yes') "it lists the program and what it may do ($([Native.Win]::RemoteListText($hosts, 0, 1)))"
-        Check ([Native.Win]::RemoteListText($log, 0, 2) -match '^Sent "Lunch on Friday\?" to pat@example.net' -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') 'and what its agent did, newest first'
+        # the window fills its lists as it opens: what they say once they say it
+        [void](WaitFor { [Native.Win]::IsWindowVisible($agents) } 10)
+        $newest = { [Native.Win]::RemoteListText($log, 0, 2) }
+        [void](WaitFor { (& $newest) -match '^Sent' } 10)
+        Check ((& $newest) -match '^Sent "Lunch on Friday\?" to pat@example.net' -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') "and what its agent did, newest first ($(& $newest); $([Native.Win]::RemoteListText($log, 1, 2)))"
         Shot $agents 'agents-6-window'
         # the newest, the message sent, is selected: Undo takes it out of the Outbox before it goes
         Click $agents $IDC_AGENTS_UNDO
-        Check ([bool](WaitFor { [Native.Win]::RemoteListText($log, 0, 2) -match 'taken back' } 10)) 'Undo takes the message back'
+        Check ([bool](WaitFor { (& $newest) -match 'taken back' } 10)) "Undo takes the message back ($(& $newest))"
         [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
     }
