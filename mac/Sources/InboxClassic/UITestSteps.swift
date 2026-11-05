@@ -43,7 +43,7 @@ extension UITest {
     /// there with Try Again, and once the account is back it shows the message by itself
     func notDownloaded() async throws {
         step("a message that is not downloaded yet")
-        try await addMessage("From: Hal Example <hal@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Waiting on the server\r\n"
+        try await addMessage("From: Hal Example <hal@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Waiting on the server\r\n"
             + "Message-ID: <waiting@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nHere at last.\r\n")
         command(.sync)
         _ = await waitFor(20) { await findMessage("INBOX", "Subject: Waiting on the server") }
@@ -146,7 +146,7 @@ extension UITest {
         selectFolder(named: "Inbox")
 
         step("Send/Recv")
-        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: One more thing\r\n"
+        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: One more thing\r\n"
             + "Message-ID: <later@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nArrived later.\r\n")
         command(.sync)
         let arrived = await waitFor(30) { await findMessage("INBOX", "Subject: One more thing") } != nil
@@ -338,9 +338,9 @@ extension UITest {
     func listMail() async throws {
         step("unsubscribing")
         guard let server = ListServer() else { throw Failed(description: "no list server") }
-        try await addMessage("Authentication-Results: mx.postalexpress.test; dkim=pass header.d=list.example.com\r\n"
+        try await addMessage("Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com\r\n"
             + "DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:subject:list-unsubscribe:list-unsubscribe-post; bh=x; b=y\r\n"
-            + "From: Weekly List <news@list.example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Weekly list news\r\n"
+            + "From: Weekly List <news@list.example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Weekly list news\r\n"
             + "Date: \(rfc2822(Date()))\r\nMessage-ID: <weekly-list@list.example.com>\r\n"
             + "List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:\(server.port)/u/42>\r\n"
             + "List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThis week on the list.\r\n")
@@ -364,13 +364,13 @@ extension UITest {
         search("")
 
         step("a calendar invitation")
-        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Invitation: Quarterly planning\r\n"
+        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Invitation: Quarterly planning\r\n"
             + "Date: \(rfc2822(Date()))\r\nMessage-ID: <planning-invite@example.com>\r\n"
             + "Content-Type: multipart/mixed; boundary=inv\r\n\r\n--inv\r\nContent-Type: text/plain\r\n\r\nLet us plan the quarter.\r\n"
             + "--inv\r\nContent-Type: text/calendar; method=REQUEST; charset=utf-8\r\n\r\n"
             + "BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:planning@example.com\r\nSUMMARY:Quarterly planning\r\n"
             + "DTSTART:20261201T100000Z\r\nDTEND:20261201T113000Z\r\nLOCATION:Room 2\r\nORGANIZER;CN=Ann Example:mailto:ann@example.com\r\n"
-            + "ATTENDEE;CN=Test:mailto:testuser@postalexpress.test\r\nRRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=4\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n--inv--\r\n")
+            + "ATTENDEE;CN=Test:mailto:testuser@inboxclassic.test\r\nRRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=4\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n--inv--\r\n")
         command(.sync)
         _ = await waitFor(20) { await findMessage("INBOX", "Subject: Invitation: Quarterly planning") }
         search("subject:\"Quarterly planning\"")
@@ -385,8 +385,8 @@ extension UITest {
         step("a brand logo (BIMI)")
         let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\" viewBox=\"0 0 100 100\"><title>Brand</title>"
             + "<rect width=\"100\" height=\"100\" rx=\"22\" fill=\"#0a5bd3\"/><circle cx=\"50\" cy=\"50\" r=\"26\" fill=\"#ffffff\"/><circle cx=\"50\" cy=\"50\" r=\"13\" fill=\"#0a5bd3\"/></svg>"
-        try await addMessage("Authentication-Results: mx.postalexpress.test; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example\r\n"
-            + "BIMI-Indicator: \(Data(svg.utf8).base64EncodedString())\r\nFrom: Brand <hello@brand.example>\r\nTo: testuser@postalexpress.test\r\n"
+        try await addMessage("Authentication-Results: mx.inboxclassic.test; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example\r\n"
+            + "BIMI-Indicator: \(Data(svg.utf8).base64EncodedString())\r\nFrom: Brand <hello@brand.example>\r\nTo: testuser@inboxclassic.test\r\n"
             + "Subject: News from the brand\r\nDate: \(rfc2822(Date()))\r\nMessage-ID: <brand-news@brand.example>\r\n\r\nOur news.\r\n")
         command(.sync)
         _ = await waitFor(20) { await findMessage("INBOX", "Subject: News from the brand") }
@@ -583,7 +583,7 @@ extension UITest {
         command(.newAccount)
         guard let first = await waitWindow("account.start") else { throw Failed(description: "no account form") }
         type("Gmail Test", into: find("account.name", in: first))
-        type("postalexpress.test@gmail.com", into: find("account.email", in: first))
+        type("inboxclassic.test@gmail.com", into: find("account.email", in: first))
         press(find("account.next", in: first))
         // the built-in Google client is off out of the box: the app password way follows at once
         let hint = await waitWindow("alert", 40)
@@ -603,7 +603,7 @@ extension UITest {
         command(.newAccount)
         guard let start = await waitWindow("account.start") else { throw Failed(description: "no account form") }
         type("Wrong Password", into: find("account.name", in: start))
-        type("testuser2@postalexpress.test", into: find("account.email", in: start))
+        type("testuser2@inboxclassic.test", into: find("account.email", in: start))
         press(find("account.next", in: start))
         guard let second = await waitFor(40, { window("form").flatMap { $0.title == "Add Mail Account" ? $0 : nil } }) else {
             throw Failed(description: "no server settings form")
@@ -649,7 +649,7 @@ extension UITest {
         let rowsBefore = list.numberOfRows
         for (from, subject, body) in [("Maria Lopez <maria@example.org>", "Quarterly report draft", "Here is the draft of the quarterly report. Comments by Thursday?"),
                                       ("Sam Lee <sam@example.org>", "Team lunch on Friday", "Who is in for lunch on Friday at noon?")] {
-            try await addMessage("From: \(from)\r\nTo: testuser@postalexpress.test\r\nSubject: \(subject)\r\nDate: \(rfc2822(Date()))\r\n"
+            try await addMessage("From: \(from)\r\nTo: testuser@inboxclassic.test\r\nSubject: \(subject)\r\nDate: \(rfc2822(Date()))\r\n"
                 + "Message-ID: <\(UUID().uuidString)@example.org>\r\n\r\n\(body)\r\n")
         }
         command(.sync)

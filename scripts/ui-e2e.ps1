@@ -424,11 +424,13 @@ function AddMessage([string]$raw, [string[]]$flags = @(), [string]$mailbox = 'IN
     [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body "$rest/$mailbox/messages")
 }
 
-# a picture sent inside the message
-$picture = New-Object System.Drawing.Bitmap 220, 60
+# a picture sent inside the message: the newsletter's banner
+$picture = New-Object System.Drawing.Bitmap 560, 110
 $graphics = [System.Drawing.Graphics]::FromImage($picture)
-$graphics.Clear([System.Drawing.Color]::FromArgb(0, 51, 102))
-$graphics.DrawString('Inline picture', (New-Object System.Drawing.Font 'Tahoma', 16), [System.Drawing.Brushes]::White, 12, 16)
+$graphics.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
+$graphics.Clear([System.Drawing.Color]::FromArgb(31, 77, 58))
+$graphics.DrawString('Trail Notes', (New-Object System.Drawing.Font 'Georgia', 30, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)), [System.Drawing.Brushes]::White, 24, 22)
+$graphics.DrawString('Walks, maps and weekend ideas  |  October', (New-Object System.Drawing.Font 'Georgia', 15, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)), (New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(214, 232, 220))), 26, 66)
 $stream = New-Object System.IO.MemoryStream
 $picture.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
 $png = [Convert]::ToBase64String($stream.ToArray(), 'InsertLineBreaks')
@@ -437,28 +439,31 @@ $pdf64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($pdf))
 
 # in the list newest first: the newsletter, Ann's message, the minutes
 $minutes = 'Minutes of the planning meeting'
-AddMessage ("From: Bob Builder <bob@example.com>`r`nTo: testuser@postalexpress.test, Dave <dave@example.com>`r`n" +
+AddMessage ("From: Bob Harris <bob@example.com>`r`nTo: testuser@inboxclassic.test, Dave <dave@example.com>`r`n" +
     "Cc: Carol <carol@example.com>`r`nSubject: $minutes`r`nMessage-ID: <minutes@example.com>`r`n" +
     "Date: Wed, 1 Oct 2025 09:00:00 +0000`r`n`r`nWe agreed on the dates.`r`n") @('\Seen')
 # a reply with the message it answers quoted below, as Gmail sends it: the oldest, the last row
-AddMessage ("From: Carol <carol@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: Re: Lunch on Friday`r`n" +
+AddMessage ("From: Carol <carol@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: Lunch on Friday`r`n" +
     "Message-ID: <lunch2@example.com>`r`nIn-Reply-To: <lunch1@example.com>`r`nDate: Mon, 29 Sep 2025 12:00:00 +0000`r`n" +
     "Content-Type: text/html; charset=utf-8`r`n`r`n" +
     '<div dir="ltr">Friday is fine, see you at noon.</div><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">' +
-    'On Mon, Sep 29, 2025 at 9:00 AM UI Test &lt;testuser@postalexpress.test&gt; wrote:<br></div>' +
+    'On Mon, Sep 29, 2025 at 9:00 AM Alex Morgan &lt;testuser@inboxclassic.test&gt; wrote:<br></div>' +
     '<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">' +
     'Lunch on Friday? The usual place.</blockquote></div>' + "`r`n") @('\Seen')
-$subject = 'Hello from the UI test'
-AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: $subject`r`n" +
-    "Message-ID: <ui-e2e@example.com>`r`nDate: Mon, 6 Oct 2025 10:00:00 +0000`r`n`r`nHi,`r`n" +
-    "this message was put here by scripts/ui-e2e.ps1.`r`n")
+$subject = 'Photos from Saturday'
+AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $subject`r`n" +
+    "Message-ID: <ui-e2e@example.com>`r`nDate: Mon, 6 Oct 2025 10:00:00 +0000`r`n`r`nHi Alex,`r`n" +
+    "the photos from Saturday are in the shared album. The one from the lake came out best.`r`n`r`nAnn`r`n")
 $newsletter = 'October newsletter'
-$html = '<div style="font-family:Georgia,serif;max-width:560px"><h2 style="color:#036">October newsletter</h2>' +
-    '<p>This message is <b>HTML</b>, with a picture sent inside it:</p><p><img src="cid:banner@example.com" alt="banner"></p>' +
-    '<p>and one kept on the internet, shown only after <i>Download pictures</i>:</p>' +
-    '<p><img src="https://nodemailer.com/img/nm_logo_200x136.png" width="200" height="136" alt="remote picture"></p>' +
-    '<p>A <a href="https://example.com/news">link</a> opens in the browser. <script>alert("never runs")</script></p></div>'
-AddMessage ("From: The Newsletter <news@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: $newsletter`r`n" +
+$html = '<div style="font-family:Georgia,serif;max-width:560px;color:#222">' +
+    '<p><img src="cid:banner@example.com" width="560" height="110" alt="Trail Notes"></p>' +
+    '<h2 style="color:#1f4d3a;margin:18px 0 6px">Five autumn walks worth the drive</h2>' +
+    '<p>The larches are turning gold and the summer crowds have gone home. This month we picked five routes for short ' +
+    'October days, each under four hours, with a warm cafe at the end.</p>' +
+    '<p><a href="https://example.com/news">Read the full guide</a> <script>alert("never runs")</script></p>' +
+    '<p style="color:#666;font-size:14px">Photo of the month, sent in by a reader:</p>' +
+    '<p><img src="https://nodemailer.com/img/nm_logo_200x136.png" width="200" height="136" alt="Photo of the month"></p></div>'
+AddMessage ("From: Trail Notes <news@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $newsletter`r`n" +
     "Message-ID: <news@example.com>`r`nDate: Wed, 8 Oct 2025 08:00:00 +0000`r`nMIME-Version: 1.0`r`n" +
     "Content-Type: multipart/mixed; boundary=`"mixed`"`r`n`r`n--mixed`r`n" +
     "Content-Type: multipart/related; boundary=`"related`"`r`n`r`n--related`r`n" +
@@ -502,7 +507,7 @@ try {
             Check ([Native.Win]::GetDlgItem($first, 102) -eq [IntPtr]::Zero) 'and asks no password before the servers are known'
         }
         SetText $first 100 $name
-        SetText $first 101 "$user@postalexpress.test"
+        SetText $first 101 "$user@inboxclassic.test"
         if ($shots) { Shot $first 'account-1-form' }
         Click $first 1
         if ($shots) {
@@ -516,7 +521,7 @@ try {
         } 40
         Check ($null -ne $second) 'the server settings form follows the lookup'
         if (-not $second) { Shot $first "account-failed-$user"; throw 'no server settings form' }
-        Check ((GetText $second 104) -eq 'imap.postalexpress.test') 'the lookup guessed the IMAP server'
+        Check ((GetText $second 104) -eq 'imap.inboxclassic.test') 'the lookup guessed the IMAP server'
         Check ((GetText $second 100) -eq $name) 'the server form keeps the name typed first'
         SetText $second 102 $user
         SetText $second 103 $password
@@ -534,7 +539,7 @@ try {
         if ($shots -and $warning) { Shot $warning 'account-4-warning' }
         Click $warning 6
     }
-    AddAccount 'UI Test' 'testuser' 'testpass' $true
+    AddAccount 'Alex Morgan' 'testuser' 'testpass' $true
 
     # ---- reading ----
 
@@ -583,7 +588,7 @@ try {
     if ($properties) {
         $box = [Native.Win]::FindDescendants($properties, 'Edit') | Select-Object -First 1
         $headers = if ($box) { WindowText $box } else { '' }
-        Check ($headers -match 'Subject: October newsletter' -and $headers -notmatch 'This message is') 'the headers, without the body'
+        Check ($headers -match 'Subject: October newsletter' -and $headers -notmatch 'larches are turning') 'the headers, without the body'
         Shot $properties 'read-7-properties'
         Click $properties 1
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)) 'OK closes it'
@@ -618,7 +623,7 @@ try {
     if ($source) {
         $box = [Native.Win]::FindDescendants($source, 'Edit') | Select-Object -First 1
         $raw = if ($box) { WindowText $box } else { '' }
-        Check ($raw -match 'Subject: October newsletter' -and $raw -match 'Content-Type: multipart' -and $raw -match 'This message is') 'with its header and every part, as the server has it'
+        Check ($raw -match 'Subject: October newsletter' -and $raw -match 'Content-Type: multipart' -and $raw -match 'larches are turning') 'with its header and every part, as the server has it'
         $sourceTitle = WindowText $source
         Check ($sourceTitle -eq 'Message Source: October newsletter') "the window names the message ($sourceTitle)"
         Shot $source 'read-15-source'
@@ -767,9 +772,9 @@ try {
         Check ($text -match 'Answered by the UI test') 'the reply has what was typed'
         Check ($text -match 'Content-Type: text/html' -and $text -match 'Content-Type: text/plain') 'it is HTML with a text part'
         Check ($text -match '<b>Thanks, Ann') 'what was typed in bold is bold'
-        Check ($text -match 'Original Message' -and $text -match 'this message was put here') 'the folded quote is sent along'
+        Check ($text -match 'Original Message' -and $text -match 'shared album') 'the folded quote is sent along'
         # once in the HTML part and once in the text part: unfolded into the text, it is not added a second time
-        Check ((([regex]::Matches($text, 'this message was put here')).Count) -eq 2) 'the quote is sent once'
+        Check ((([regex]::Matches($text, 'shared album')).Count) -eq 2) 'the quote is sent once'
     }
     Check ($null -ne (WaitFor { Find 'Sent' "Subject: Re: $subject" })) 'a copy of the reply is in Sent'
 
@@ -784,10 +789,10 @@ try {
     Command $compose $IDC_SHOW_CC
     Check ([bool](WaitFor { (Visible $compose $IDC_CC) -and -not (Visible $compose $IDC_SHOW_CC) } 10)) 'Cc opens its row, and its button goes'
     $from = GetText $compose $IDC_FROM
-    Check ($from -eq 'UI Test <testuser@postalexpress.test>') "From names the account it goes from ($from)"
+    Check ($from -eq 'Alex Morgan <testuser@inboxclassic.test>') "From names the account it goes from ($from)"
     SetText $compose $IDC_TO 'dave at example.com'
-    SetText $compose $IDC_SUBJECT 'A new message from the UI test'
-    Check (TypeInEditor $compose 'Hello Dave, written from scratch.') 'the editor of a new message takes typing'
+    SetText $compose $IDC_SUBJECT 'Trail map for Sunday'
+    Check (TypeInEditor $compose 'Hi Dave, here is the trail map for Sunday. See you at nine!') 'the editor of a new message takes typing'
     Command $compose $IDC_SEND
     $problem = WaitWindow '#32770' 'Inbox Classic' 10
     Check ($null -ne $problem) 'a mistyped address is pointed out before sending'
@@ -800,11 +805,11 @@ try {
     # two files attached, one taken off again with Delete
     $files = Join-Path $env:TEMP 'pe-ui-attach'
     New-Item -ItemType Directory -Force $files | Out-Null
-    Set-Content (Join-Path $files 'keep-me.txt') 'the attachment that goes'
+    Set-Content (Join-Path $files 'trail-map.txt') 'the attachment that goes'
     Set-Content (Join-Path $files 'wrong-file.txt') 'attached by mistake'
     $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
     $count = { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
-    foreach ($file in 'keep-me.txt', 'wrong-file.txt') {
+    foreach ($file in 'trail-map.txt', 'wrong-file.txt') {
         $before = & $count
         # once more if the dialog did not take the file, after closing what is left of it
         for ($try = 0; $try -lt 2 -and (& $count) -le $before; $try++) {
@@ -821,10 +826,10 @@ try {
     Key $attached $VK_DELETE
     Check ([bool](WaitFor { (& $count) -eq 1 } 10)) 'Delete in the Attach row takes one off'
     Command $compose $IDC_SEND
-    $new = WaitFor { Find 'INBOX' 'Subject: A new message from the UI test' } 30
+    $new = WaitFor { Find 'INBOX' 'Subject: Trail map for Sunday' } 30
     Check ($null -ne $new) 'the new message was sent'
-    Check ($new -and (RawText $new) -match 'Hello Dave, written from scratch') 'with what was typed'
-    Check ($new -and (RawText $new) -match 'keep-me\.txt' -and (RawText $new) -notmatch 'wrong-file') 'with only the file left attached'
+    Check ($new -and (RawText $new) -match 'here is the trail map for Sunday') 'with what was typed'
+    Check ($new -and (RawText $new) -match 'trail-map\.txt' -and (RawText $new) -notmatch 'wrong-file') 'with only the file left attached'
     Check ($new -and (RawText $new) -match 'Content-Type: text/plain' -and (RawText $new) -notmatch 'Content-Type: text/html') 'nothing formatted: it went as plain text'
 
     Step 'pictures dropped into the text'
@@ -1011,7 +1016,7 @@ public static class Dragger {
     $waiting = 'Subject: Waiting on the server'
     # in Archive, so the rows of the Inbox the later steps count stay as they are; dated a moment ahead, so it is the
     # first row there
-    AddMessage ("From: Hal Example <hal@example.com>`r`nTo: testuser@postalexpress.test`r`n$waiting`r`n" +
+    AddMessage ("From: Hal Example <hal@example.com>`r`nTo: testuser@inboxclassic.test`r`n$waiting`r`n" +
         "Message-ID: <waiting@example.com>`r`nDate: $([DateTime]::UtcNow.AddMinutes(5).ToString('r'))`r`n`r`nHere at last.`r`n") @() 'Archive'
     Command $main $IDM_SYNC
     [void](WaitFor { Find 'Archive' $waiting })
@@ -1123,7 +1128,7 @@ public static class Dragger {
     # ---- getting new mail ----
 
     Step 'Send/Recv'
-    AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: One more thing`r`n" +
+    AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: One more thing`r`n" +
         "Message-ID: <later@example.com>`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`n`r`nArrived later.`r`n")
     Command $main $IDM_SYNC
     Check ($null -ne (WaitFor { if ((Rows) -ge 7) { Rows } } 30)) 'the new mail is in the list'
@@ -1200,17 +1205,17 @@ public static class Dragger {
     # from the folder (the whole of it), so what is counted is what this search found
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
     [void](WaitFor { (Rows) -eq $all })
-    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello in:inbox')
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos in:inbox')
     $inInbox = WaitFor { if ((Rows) -ge 1 -and (Rows) -lt $all) { Rows } }
     Check ([bool](WaitFor { (& $folderBar) -eq ' Inbox' -and (& $searchBar) -match ' in Inbox$' } 5)) "in:inbox: the folder bar and the search bar say the Inbox ($(& $folderBar), $(& $searchBar))"
-    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello')
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos')
     $everywhere = WaitFor { if ((Rows) -gt $inInbox) { Rows } }
     Check ([bool]$inInbox -and [bool]$everywhere) "the messages of other folders are found too ($everywhere), in:inbox narrows them to the Inbox ($inInbox)"
     Shot $main 'find-2-every-folder'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:unread')
     Check ([bool](WaitFor { (Rows) -ge 1 -and (Rows) -lt $all })) 'is:unread lists the unread messages'
     # a result from another folder opens where it is
-    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello')
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos')
     [void](WaitFor { (Rows) -eq $everywhere })
     SelectRow 0
     Check ([bool](WaitFor { (WindowText ([Native.Win]::FindDescendants($main, 'Static') | Where-Object { (WindowText $_) -match 'From:' } | Select-Object -First 1)) -match 'Subject:' } 10)) 'a result is shown in the reading pane'
@@ -1218,7 +1223,7 @@ public static class Dragger {
     Click $main $IDC_SEARCH_CLEAR
     Check ([bool](WaitFor { (Rows) -eq $all -and (WindowText $find) -eq '' -and -not (Visible $main $IDC_SEARCH_BAR) })) 'Clear search on the search bar ends the search'
     # and so does Esc, back in the folder
-    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'hello')
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos')
     [void](WaitFor { (Rows) -eq $everywhere })
     Key $find $VK_ESCAPE
     Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 7 })) 'Esc ends the search: the folder again, without the Folder column'
@@ -1293,9 +1298,9 @@ public static class Dragger {
     $listServer.Start()
     $listPort = $listServer.LocalEndpoint.Port
     $accepted = $listServer.AcceptTcpClientAsync()
-    $listRaw = "Authentication-Results: mx.postalexpress.test; dkim=pass header.d=list.example.com`r`n" +
+    $listRaw = "Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com`r`n" +
         "DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:subject:list-unsubscribe:list-unsubscribe-post; bh=x; b=y`r`n" +
-        "From: Weekly List <news@list.example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: Weekly list news`r`n" +
+        "From: Weekly List <news@list.example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Weekly list news`r`n" +
         "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <weekly-list@list.example.com>`r`n" +
         "List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:$listPort/u/42>`r`n" +
         "List-Unsubscribe-Post: List-Unsubscribe=One-Click`r`n`r`nThis week on the list.`r`n"
@@ -1340,13 +1345,13 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
     Step 'a calendar invitation'
-    $invite = "From: Ann Example <ann@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: Invitation: Quarterly planning`r`n" +
+    $invite = "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Invitation: Quarterly planning`r`n" +
         "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <planning-invite@example.com>`r`n" +
         "Content-Type: multipart/mixed; boundary=inv`r`n`r`n--inv`r`nContent-Type: text/plain`r`n`r`nLet us plan the quarter.`r`n" +
         "--inv`r`nContent-Type: text/calendar; method=REQUEST; charset=utf-8`r`n`r`n" +
         "BEGIN:VCALENDAR`r`nMETHOD:REQUEST`r`nBEGIN:VEVENT`r`nUID:planning@example.com`r`nSUMMARY:Quarterly planning`r`n" +
         "DTSTART:20261201T100000Z`r`nDTEND:20261201T113000Z`r`nLOCATION:Room 2`r`nORGANIZER;CN=Ann Example:mailto:ann@example.com`r`n" +
-        "ATTENDEE;CN=Test:mailto:testuser@postalexpress.test`r`nRRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=4`r`nEND:VEVENT`r`nEND:VCALENDAR`r`n--inv--`r`n"
+        "ATTENDEE;CN=Test:mailto:testuser@inboxclassic.test`r`nRRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=4`r`nEND:VEVENT`r`nEND:VCALENDAR`r`n--inv--`r`n"
     AddMessage $invite
     Command $main $IDM_SYNC
     [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: Invitation: Quarterly planning') } 20)
@@ -1362,8 +1367,8 @@ public static class Dragger {
     $logoSvg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny-ps" viewBox="0 0 100 100"><title>Brand</title>' +
         '<rect width="100" height="100" rx="22" fill="#0a5bd3"/><circle cx="50" cy="50" r="26" fill="#ffffff"/><circle cx="50" cy="50" r="13" fill="#0a5bd3"/></svg>'
     $indicator = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($logoSvg))
-    $branded = "Authentication-Results: mx.postalexpress.test; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example`r`n" +
-        "BIMI-Indicator: $indicator`r`nFrom: Brand <hello@brand.example>`r`nTo: testuser@postalexpress.test`r`nSubject: News from the brand`r`n" +
+    $branded = "Authentication-Results: mx.inboxclassic.test; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example`r`n" +
+        "BIMI-Indicator: $indicator`r`nFrom: Brand <hello@brand.example>`r`nTo: testuser@inboxclassic.test`r`nSubject: News from the brand`r`n" +
         "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <brand-news@brand.example>`r`n`r`nOur news.`r`n"
     AddMessage $branded
     Command $main $IDM_SYNC
@@ -1406,7 +1411,7 @@ public static class Dragger {
     $inboxBefore = @(Messages 'INBOX').Count
     foreach ($new in @(@('Maria Lopez <maria@example.org>', 'Quarterly report draft', 'Here is the draft of the quarterly report. Comments by Thursday?'),
                        @('Sam Lee <sam@example.org>', 'Team lunch on Friday', 'Who is in for lunch on Friday at noon?'))) {
-        AddMessage ("From: $($new[0])`r`nTo: testuser@postalexpress.test`r`nSubject: $($new[1])`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`n" +
+        AddMessage ("From: $($new[0])`r`nTo: testuser@inboxclassic.test`r`nSubject: $($new[1])`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`n" +
             "Message-ID: <$([guid]::NewGuid())@example.org>`r`n`r`n$($new[2])`r`n")
     }
     SelectFolder 0
@@ -1509,7 +1514,7 @@ public static class Dragger {
     # Drag me the newest, Copy me a minute older: the first two rows, over what the test sent this minute
     foreach ($pair in @(@('Drag me', 3), @('Copy me', 2))) {
         $date = [DateTime]::UtcNow.AddMinutes($pair[1]).ToString('r')
-        AddMessage "From: Dana <dana@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: $($pair[0])`r`nDate: $date`r`nMessage-ID: <$($pair[0] -replace ' ', '-')@example.com>`r`n`r`nDragged in the UI test.`r`n"
+        AddMessage "From: Dana <dana@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $($pair[0])`r`nDate: $date`r`nMessage-ID: <$($pair[0] -replace ' ', '-')@example.com>`r`n`r`nDragged in the UI test.`r`n"
     }
     Command $main $IDM_SYNC
     SelectFolder 0
@@ -1784,7 +1789,7 @@ public static class Dragger {
     Command $main $IDM_NEW_ACCOUNT
     $first = StartPage $true
     SetText $first 100 'Gmail Test'
-    SetText $first 101 'postalexpress.test@gmail.com'
+    SetText $first 101 'inboxclassic.test@gmail.com'
     Click $first 1
     # the built-in Google client is off out of the box and no sign-in app is added yet: no browser sign-in to offer,
     # the app password way follows at once (Sign in with Google is offered further down, once it is turned on)
@@ -1842,7 +1847,7 @@ public static class Dragger {
         Check ($null -ne $properties) 'Properties shows the settings'
         if ($properties) {
             Check ((GetText $properties 105) -eq "$($ports.imap)") 'with the IMAP port as it was saved'
-            SetText $properties 100 'UI Test Renamed'
+            SetText $properties 100 'Alex Morgan Renamed'
             Shot $properties 'accounts-2-properties'
             Click $properties 1
             Check ([bool](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)) 'OK closes Properties'
@@ -1858,7 +1863,7 @@ public static class Dragger {
             $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
         }
-        Check ($again -and (GetText $again 100) -eq 'UI Test Renamed') 'the new name is saved'
+        Check ($again -and (GetText $again 100) -eq 'Alex Morgan Renamed') 'the new name is saved'
         if ($again) {
             Click $again 2
             [void](WaitFor { -not [Native.Win]::IsWindow($again) })
@@ -2084,7 +2089,7 @@ public static class Dragger {
             [void](WaitFor { -not [Native.Win]::IsWindow($menu) } 5)
         }
         SetText $first 100 'Gmail Test'
-        SetText $first 101 'postalexpress.test@gmail.com'
+        SetText $first 101 'inboxclassic.test@gmail.com'
         Click $first 1
         $browser = StartPage $false 40
         Check ($browser -and [Native.Win]::GetDlgItem($browser, 120) -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($browser, 121) -eq [IntPtr]::Zero) 'a Gmail address is offered Sign in with Google'
@@ -2173,7 +2178,7 @@ public static bool HasIcon(IntPtr window) {
     Check ([bool](WaitFor { -not [Native.Win]::IsWindowVisible($main) } 10)) 'closing the window hides it in the tray'
     Check (-not $app.HasExited) 'and the app keeps running'
     # new mail while it is hidden: it comes in at once (IDLE), with a notification
-    AddMessage "From: Nora Example <nora@example.com>`r`nTo: testuser@postalexpress.test`r`nSubject: Fresh while hidden`r`nDate: $([DateTime]::UtcNow.AddMinutes(5).ToString('r'))`r`nMessage-ID: <fresh-hidden@example.com>`r`n`r`nJust in.`r`n"
+    AddMessage "From: Nora Example <nora@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Fresh while hidden`r`nDate: $([DateTime]::UtcNow.AddMinutes(5).ToString('r'))`r`nMessage-ID: <fresh-hidden@example.com>`r`n`r`nJust in.`r`n"
     Start-Sleep -Seconds 6
     $desktop = [Native.Win]::GetDesktopWindow()
     Shot $desktop 'tray-1-notification'

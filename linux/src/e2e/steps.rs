@@ -60,9 +60,9 @@ pub async fn unsubscribing(d: &Driver) {
     let main = main_window();
     let (port, received) = list_server();
     let raw = format!(
-        "Authentication-Results: mx.postalexpress.test; dkim=pass header.d=list.example.com\r\n\
+        "Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com\r\n\
          DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:subject:list-unsubscribe:list-unsubscribe-post; bh=x; \
-         b=y\r\nFrom: Weekly List <news@list.example.com>\r\nTo: testuser@postalexpress.test\r\n\
+         b=y\r\nFrom: Weekly List <news@list.example.com>\r\nTo: testuser@inboxclassic.test\r\n\
          Subject: Weekly list news\r\nDate: {}\r\nMessage-ID: <weekly-list@list.example.com>\r\n\
          List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:{port}/u/42>\r\n\
          List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThis week on the list.\r\n",
@@ -110,13 +110,13 @@ pub async fn invitation_and_logo(d: &Driver) {
     d.step("a calendar invitation");
     let main = main_window();
     let invite = format!(
-        "From: Ann Example <ann@example.com>\r\nTo: testuser@postalexpress.test\r\n\
+        "From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\n\
          Subject: Invitation: Quarterly planning\r\nDate: {}\r\nMessage-ID: <planning-invite@example.com>\r\n\
          Content-Type: multipart/mixed; boundary=inv\r\n\r\n--inv\r\nContent-Type: text/plain\r\n\r\n\
          Let us plan the quarter.\r\n--inv\r\nContent-Type: text/calendar; method=REQUEST; charset=utf-8\r\n\r\n\
          BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:planning@example.com\r\n\
          SUMMARY:Quarterly planning\r\nDTSTART:20261201T100000Z\r\nDTEND:20261201T113000Z\r\nLOCATION:Room 2\r\n\
-         ORGANIZER;CN=Ann Example:mailto:ann@example.com\r\nATTENDEE;CN=Test:mailto:testuser@postalexpress.test\r\n\
+         ORGANIZER;CN=Ann Example:mailto:ann@example.com\r\nATTENDEE;CN=Test:mailto:testuser@inboxclassic.test\r\n\
          RRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=4\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n--inv--\r\n",
         date_now(0)
     );
@@ -141,9 +141,9 @@ pub async fn invitation_and_logo(d: &Driver) {
                fill=\"#0a5bd3\"/></svg>";
     let indicator = base64::engine::general_purpose::STANDARD.encode(svg);
     let branded = format!(
-        "Authentication-Results: mx.postalexpress.test; dmarc=pass header.from=brand.example; bimi=pass \
+        "Authentication-Results: mx.inboxclassic.test; dmarc=pass header.from=brand.example; bimi=pass \
          header.d=brand.example\r\nBIMI-Indicator: {indicator}\r\nFrom: Brand <hello@brand.example>\r\n\
-         To: testuser@postalexpress.test\r\nSubject: News from the brand\r\nDate: {}\r\n\
+         To: testuser@inboxclassic.test\r\nSubject: News from the brand\r\nDate: {}\r\n\
          Message-ID: <brand-news@brand.example>\r\n\r\nOur news.\r\n",
         date_now(0)
     );
@@ -230,7 +230,7 @@ pub async fn agent(d: &Driver) {
     ] {
         let id = glib::uuid_string_random();
         let raw = format!(
-            "From: {from}\r\nTo: testuser@postalexpress.test\r\nSubject: {subject}\r\nMessage-ID: <{id}@example.org>\r\n\r\n{body}\r\n"
+            "From: {from}\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\nMessage-ID: <{id}@example.org>\r\n\r\n{body}\r\n"
         );
         let _ = d.add_message(&raw, &[]);
     }
@@ -454,7 +454,7 @@ pub async fn dragging(d: &Driver) {
     // Drag me the newest, Copy me a minute older: the first two rows
     for (subject, minutes) in [("Drag me", 3), ("Copy me", 2)] {
         let raw = format!(
-            "From: Dana <dana@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: {subject}\r\nDate: {}\r\n\
+            "From: Dana <dana@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\nDate: {}\r\n\
              Message-ID: <{}@example.com>\r\n\r\nDragged in the UI test.\r\n",
             date_now(minutes),
             subject.replace(' ', "-")
@@ -765,7 +765,7 @@ pub async fn gmail(d: &Driver) {
         return;
     };
     set_text(first.upcast_ref(), "start-name", "Gmail Test");
-    set_text(first.upcast_ref(), "start-email", "postalexpress.test@gmail.com");
+    set_text(first.upcast_ref(), "start-email", "inboxclassic.test@gmail.com");
     click(first.upcast_ref(), "dialog-ok");
     // the built-in Google client is off out of the box and no sign-in app is added: the app password way follows
     let hint = wait_alert(40).await;
@@ -859,7 +859,7 @@ pub async fn not_downloaded(d: &Driver) {
     d.step("a message that is not downloaded yet");
     let main = main_window();
     let raw = format!(
-        "From: Hal Example <hal@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Waiting on the server\r\n\
+        "From: Hal Example <hal@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Waiting on the server\r\n\
          Message-ID: <waiting@example.com>\r\nDate: {}\r\n\r\nHere at last.\r\n",
         date_now(0)
     );
