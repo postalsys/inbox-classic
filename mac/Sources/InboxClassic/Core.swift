@@ -141,9 +141,15 @@ final class Core {
     }
 
     func folders(_ account: Int64) -> [Folder] {
-        guard let list = pe_folders(handle, account) else { return [] }
+        folderTree(account).folders
+    }
+
+    /// the folders of an account with the unread messages its row shows collapsed (not Junk E-mail or Deleted Items)
+    func folderTree(_ account: Int64) -> (folders: [Folder], unread: UInt64) {
+        guard let list = pe_folders(handle, account) else { return ([], 0) }
         defer { pe_folder_list_free(list) }
-        return (0..<pe_folder_list_count(list)).compactMap { pe_folder_list_get(list, $0).map { Folder($0.pointee) } }
+        let folders = (0..<pe_folder_list_count(list)).compactMap { pe_folder_list_get(list, $0).map { Folder($0.pointee) } }
+        return (folders, pe_folder_list_unread(list))
     }
 
     func sync(_ account: Int64) { pe_sync(handle, account) }
@@ -242,6 +248,8 @@ struct Folder {
     let selectable: Bool
     let total: UInt64
     let unread: UInt64
+    /// the unread messages of the folders under it, which its row shows while collapsed
+    let unreadBelow: UInt64
 
     init(_ folder: PeFolder) {
         id = folder.id
@@ -254,6 +262,7 @@ struct Folder {
         selectable = folder.selectable
         total = folder.total
         unread = folder.unread
+        unreadBelow = folder.unread_below
     }
 
     /// the name mail programs of the Outlook Express kind give a special folder, the folder's own name otherwise
@@ -355,4 +364,9 @@ func formatDate(_ seconds: Int64) -> String {
 /// The time of day now, without seconds
 func timeNow() -> String {
     DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .short)
+}
+
+/// The time of day of `seconds` since the Unix epoch, without seconds
+func timeOfDay(_ seconds: Int64) -> String {
+    DateFormatter.localizedString(from: Date(timeIntervalSince1970: TimeInterval(seconds)), dateStyle: .none, timeStyle: .short)
 }

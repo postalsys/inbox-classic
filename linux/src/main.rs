@@ -4,6 +4,7 @@
 #![forbid(unsafe_code)]
 
 mod accounts;
+mod agents;
 mod app;
 mod complete;
 mod compose;
@@ -51,6 +52,10 @@ pub struct Arguments {
     pub files: Vec<PathBuf>,
     /// The UI end-to-end test, its screenshots and log to this folder (builds with the `e2e` feature only)
     pub e2e: Option<PathBuf>,
+    /// --mcp: relay an AI agent's MCP connection to the app that is running (started when it is not), no window
+    pub mcp: bool,
+    /// --background: started for an agent (by --mcp), without its window
+    pub background: bool,
 }
 
 impl Arguments {
@@ -72,6 +77,8 @@ impl Arguments {
                 "--e2e" => parsed.e2e = rest.next().map(PathBuf::from),
                 "--memory-passwords" => parsed.memory_passwords = true,
                 "--version" => parsed.version = true,
+                "--mcp" => parsed.mcp = true,
+                "--background" => parsed.background = true,
                 file if !file.starts_with("--") => parsed.files.push(file_path(file)),
                 _ => {}
             }
@@ -122,6 +129,9 @@ fn main() -> glib::ExitCode {
         println!("Inbox Classic {VERSION}");
         return glib::ExitCode::SUCCESS;
     }
+    if arguments.mcp {
+        return relay(&arguments);
+    }
     if let Some(out) = arguments.e2e.clone() {
         #[cfg(feature = "e2e")]
         return e2e::run(out);
@@ -135,6 +145,19 @@ fn main() -> glib::ExitCode {
         }
     }
     run(arguments, argv)
+}
+
+/// `--mcp`: the relay of an agent's MCP server, to the app that has this store open, started in the background when it
+/// is not running; no display is opened
+fn relay(arguments: &Arguments) -> glib::ExitCode {
+    let store = arguments.store.clone().unwrap_or_else(default_store);
+    match pe_mcp::relay_for_store(&store, arguments.store.as_deref(), &pe_mcp::launching_program()) {
+        Ok(()) => glib::ExitCode::SUCCESS,
+        Err(error) => {
+            eprintln!("{error}");
+            glib::ExitCode::FAILURE
+        }
+    }
 }
 
 /// Runs the app: the first start for a store opens it, another one hands its command line to that one and ends
@@ -159,8 +182,13 @@ pub fn run(arguments: Arguments, argv: Vec<String>) -> glib::ExitCode {
         match first.borrow_mut().take() {
             // the first start: its own arguments, as read before the display opened
             Some(arguments) => app::start(application, arguments),
-            // another start for this store: what it was for, here
-            None => app::hand_over(Arguments::parse(&args)),
+            // another start for this store: what it was for, here; one in the background (for an agent) finds it running
+            None => {
+                let arguments = Arguments::parse(&args);
+                if !arguments.background {
+                    app::hand_over(arguments);
+                }
+            }
         }
         glib::ExitCode::SUCCESS
     });

@@ -18,6 +18,19 @@ pe-imap = { path = "../pe-imap" }
 pe-net.workspace = true
 pe-oauth = { path = "../pe-oauth" }
 pe-store = { path = "../pe-store" }
+pe-mcp = { path = "../pe-mcp" }
+tokio = { version = "1.54.1", features = ["rt", "net", "io-util", "time", "sync", "macros"] }
+
+# the named pipe agents reach the app on, open to this user alone, and the program that started the relay
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_Pipes",
+    "Win32_System_Threading",
+] }
 
 [dev-dependencies]
 base64.workspace = true

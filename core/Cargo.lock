@@ -1395,13 +1395,16 @@ dependencies = [
  "pe-core",
  "pe-html",
  "pe-imap",
+ "pe-mcp",
  "pe-net",
  "pe-oauth",
  "pe-store",
  "pe-testkit",
  "serde",
  "serde_json",
+ "tokio",
  "toml",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1425,6 +1428,19 @@ dependencies = [
  "serde_json",
  "tokio",
  "unicode-normalization",
+]
+
+[[package]]
+name = "pe-mcp"
+version = "0.6.0"
+dependencies = [
+ "pe-core",
+ "pe-mime",
+ "pe-net",
+ "pe-store",
+ "pe-testkit",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]

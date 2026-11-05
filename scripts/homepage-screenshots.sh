@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 HOMEPAGE=${HOMEPAGE:-../inboxclassic.com}
 # the screenshots the page shows
-SHOTS=(read-1-html account-1-form find-2-every-folder write-5-new)
+SHOTS=(read-1-html account-1-form find-2-every-folder write-5-new agents-4-send)
 platforms=("$@")
 [ ${#platforms[@]} -gt 0 ] || platforms=(windows mac linux)
 
@@ -34,7 +34,12 @@ for platform in "${platforms[@]}"; do
                 width=$((${size%x*} - 14))
                 height=$((${size#*x} - 7))
                 [ "$shot" = write-5-new ] && height=400
-                magick "$source" -crop "${width}x${height}+7+0" +repage -strip "$target"
+                if [ "$shot" = agents-4-send ]; then
+                    # a dialog: no resize border to crop
+                    magick "$source" -strip "$target"
+                else
+                    magick "$source" -crop "${width}x${height}+7+0" +repage -strip "$target"
+                fi
                 ;;
             mac)
                 # the compose window, as on Windows, down to its fields and the start of the text
@@ -47,6 +52,8 @@ for platform in "${platforms[@]}"; do
                 [ "$shot" = write-5-new ] && crop="-crop x400+0+0 +repage"
                 # the account form is a dialog over the main window: the dialog, where it is in a window of 1090x750
                 [ "$shot" = account-1-form ] && crop="-crop 551x459+270+146 +repage"
+                # the send confirmation is a dialog over the main window too
+                [ "$shot" = agents-4-send ] && crop="-crop 528x481+281+135 +repage"
                 magick "$source" $crop -strip "$target"
                 ;;
         esac

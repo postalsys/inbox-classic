@@ -7,6 +7,7 @@ use std::collections::BTreeSet;
 
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 
 use pe_imap::{Client, Credentials, ErrorKind, Event as ImapEvent};
 use pe_net::Trust;
@@ -32,12 +33,12 @@ pub(crate) enum Command {
         flag: &'static str,
         on: bool,
     },
-    /// `removed` is the row taken out of the store, put back when the server does not do it
+    /// `removed` are the rows taken out of the store, put back when the server does not do it
     Move {
         folder: FolderId,
-        uid: u64,
+        uids: Vec<u64>,
         to: FolderId,
-        removed: Box<pe_store::MessageInfo>,
+        removed: Vec<pe_store::MessageInfo>,
     },
     /// a copy of a message into another folder of the account
     Copy {
@@ -67,9 +68,10 @@ pub(crate) enum Command {
     DeleteFolder {
         folder: FolderId,
     },
-    /// Into the Outbox, and sent from there
+    /// Into the Outbox, and sent from there; not before `not_before` when it is given (seconds since the Unix epoch)
     Send {
         outgoing: Box<crate::Outgoing>,
+        not_before: Option<i64>,
     },
     SendOutbox,
     /// Into the Drafts folder, in place of the earlier copy; `outgoing` has its Message-ID
@@ -179,7 +181,8 @@ async fn build(
 }
 
 /// Seconds since the Unix epoch
-fn unix_now() -> i64 {
+/// Seconds since the Unix epoch
+pub(crate) fn unix_now() -> i64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_or(0, |d| d.as_secs() as i64)
@@ -237,6 +240,8 @@ enum Wake {
     Period,
     /// The Inbox has mail the store does not: it came between its sync and the wait
     Behind,
+    /// A message in the Outbox waited for now
+    Due,
 }
 
 impl Worker {
@@ -382,16 +387,37 @@ impl Worker {
     /// next sync connects again.
     async fn next_command(&mut self, store: &mut Store, commands: &mut UnboundedReceiver<Command>) -> Option<Command> {
         loop {
+            // a message in the Outbox that waits for its time goes when it comes, whatever else waits
+            let due = store
+                .outbox_next_due(self.account)
+                .ok()
+                .flatten()
+                .map(|at| Duration::from_secs(u64::try_from(at - unix_now()).unwrap_or(0)));
+            if due == Some(Duration::ZERO) {
+                if let Err(failure) = self.send_outbox(store).await {
+                    self.fail(failure);
+                }
+                // what did not go (offline, refused) stays in the Outbox as any other: Send/Recv tries again
+                let _ = store.clear_not_before(self.account, unix_now());
+                continue;
+            }
             let inbox = self
                 .connection
                 .as_ref()
                 .filter(|(client, _)| !client.is_closed())
                 .and_then(|_| store.find_folder(self.account, "INBOX").ok().flatten());
             let Some(inbox) = inbox else {
-                return commands.recv().await;
+                match due {
+                    Some(due) => match tokio::time::timeout(due, commands.recv()).await {
+                        Ok(command) => return command,
+                        Err(_) => continue,
+                    },
+                    None => return commands.recv().await,
+                }
             };
-            match self.watch(&inbox, commands).await {
+            match self.watch(&inbox, commands, due).await {
                 Ok(Wake::Command(command)) => return command,
+                Ok(Wake::Due) => continue,
                 Ok(Wake::Behind) => {
                     if let Err(failure) = self.sync_one(store, inbox.id).await {
                         self.fail(failure);
@@ -409,10 +435,12 @@ impl Worker {
     }
 
     /// Waits on the Inbox until a command comes, the server reports a change or the IDLE period ends
+    /// (or `due`, when a message of the Outbox waits that long)
     async fn watch(
         &mut self,
         inbox: &pe_store::Folder,
         commands: &mut UnboundedReceiver<Command>,
+        due: Option<Duration>,
     ) -> Result<Wake, Failure> {
         let Some((client, events)) = self.connection.as_mut() else {
             return Ok(Wake::Period);
@@ -439,12 +467,19 @@ impl Worker {
         let mut wake = Wake::Period;
         let mut held = None;
         let stop = async {
+            let until_due = async {
+                match due {
+                    Some(due) => tokio::time::sleep(due).await,
+                    None => std::future::pending().await,
+                }
+            };
             tokio::select! {
                 command = commands.recv() => wake = Wake::Command(command),
                 event = events.recv() => {
                     held = event;
                     wake = Wake::Server;
                 }
+                () = until_due => wake = Wake::Due,
             }
         };
         client.idle(stop).await?;
@@ -532,17 +567,17 @@ impl Worker {
             }
             Command::Move {
                 folder,
-                uid,
+                uids,
                 to,
                 removed,
             } => {
                 let moved = match self.client(store).await {
-                    Ok(client) => move_message(client, store, folder, uid, to)
+                    Ok(client) => move_message(client, store, folder, &uids, to)
                         .await
                         .map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                self.restore_on_failure(store, folder, *removed, moved)?;
+                self.restore_on_failure(store, folder, &removed, moved)?;
                 // the message shows up in the folder it went to
                 self.sync_one(store, to).await
             }
@@ -556,7 +591,7 @@ impl Worker {
                     Ok(client) => expunge_message(client, store, folder, uid).await.map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                self.restore_on_failure(store, folder, *removed, expunged)
+                self.restore_on_failure(store, folder, &[*removed], expunged)
             }
             Command::Append { folder, raw, date } => {
                 let path = store.folder(folder)?.info.path;
@@ -583,7 +618,7 @@ impl Worker {
                 pe_sync::delete_folder(self.client(store).await?, store, folder).await?;
                 self.sync_folder_list(store).await
             }
-            Command::Send { outgoing } => self.send(store, *outgoing).await,
+            Command::Send { outgoing, not_before } => self.send(store, *outgoing, not_before).await,
             Command::SaveDraft { outgoing } => self.save_draft(store, *outgoing).await,
         }
     }
@@ -594,11 +629,11 @@ impl Worker {
         &mut self,
         store: &mut Store,
         folder: FolderId,
-        removed: pe_store::MessageInfo,
+        removed: &[pe_store::MessageInfo],
         outcome: Outcome,
     ) -> Outcome {
         if outcome.is_err() {
-            store.add_messages(folder, &[removed])?;
+            store.add_messages(folder, removed)?;
             self.emit(Event::FolderChanged {
                 account: self.account,
                 folder,
@@ -608,7 +643,7 @@ impl Worker {
     }
 
     /// Builds a message (its attachments read now), puts it in the Outbox and sends the Outbox
-    async fn send(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
+    async fn send(&mut self, store: &mut Store, outgoing: crate::Outgoing, not_before: Option<i64>) -> Outcome {
         let time = unix_now();
         let recipients = [outgoing.to.as_str(), outgoing.cc.as_str()]
             .iter()
@@ -636,6 +671,7 @@ impl Worker {
                 recipients,
                 created: time,
                 problem: None,
+                not_before,
             },
             &built.raw,
         )?;
@@ -736,7 +772,8 @@ impl Worker {
     /// Sends what the Outbox has for this account, oldest first: each one the server takes leaves the Outbox and gets
     /// its copy in Sent. One it refuses stays with the reason; when the network fails the rest wait for the next try.
     async fn send_outbox(&mut self, store: &mut Store) -> Outcome {
-        let queued = store.outbox(Some(self.account))?;
+        // a message that waits for its time is left for then (next_command wakes for it)
+        let queued = store.outbox_due(self.account, unix_now())?;
         if queued.is_empty() {
             return Ok(());
         }

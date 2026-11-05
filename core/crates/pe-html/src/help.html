@@ -97,6 +97,7 @@
             <li>Writing, replying and forwarding</li>
             <li>Getting new mail</li>
             <li>Keyboard shortcuts</li>
+            <li>AI agents</li>
             <li>When something does not work</li>
             <li>Where your mail and passwords are kept</li>
         </ol>
@@ -204,8 +205,9 @@
         </p>
         <ul>
             <li>
-                Each folder has its icon, and folders with unread messages are shown in <b>bold</b>, with the number of unread messages after the name. The grey
-                bar above the panes and the window title name the selected folder.
+                Each folder has its icon, and folders with unread messages are shown in <b>bold</b>, with the number of unread messages after the name. A collapsed
+                account, or a collapsed folder with folders in it, is bold with the unread messages of the folders it hides (Junk E-mail and Deleted Items do
+                not count), so new mail is never out of sight. The grey bar above the panes and the window title name the selected folder.
             </li>
             <li>
                 Unread messages are <b>bold</b> in the list, with a closed envelope; read ones have an open envelope. A message is marked read after it has been
@@ -231,7 +233,12 @@
             </li>
             <li>
                 <b>File &gt; Properties</b> (<!--os:windows,linux--><kbd>Alt</kbd>+<kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd><!--/os-->) shows the Internet headers of the message: who sent it, through which servers, and
-                when.
+                when. <b>View &gt; Message Source</b><!--os:windows,linux--> (<kbd>Ctrl</kbd>+<kbd>U</kbd>)<!--/os--> shows the whole message as the server
+                keeps it: every header and every part, as text.
+            </li>
+            <li>
+                Right-click a message<!--os:windows,linux--> (or press the menu key)<!--/os--> for what can be done with it: reply, forward, mark it read or
+                unread, flag it, mark it as junk, move it to a folder, delete it, save or print it, and see its source or properties.
             </li>
             <li>Click a column heading to sort by it; click it again to reverse the order.</li>
             <li>
@@ -539,6 +546,11 @@
                 <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd></td>
                 <td>The headers of the message (Properties)</td>
             </tr>
+            <!--/os--><!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>U</kbd></td>
+                <td>The whole message (Message Source)</td>
+            </tr>
             <!--/os-->
             <!--os:windows,linux-->
             <tr>
@@ -584,7 +596,46 @@
             </tr>
         </table>
 
-        <h2>7. When something does not work</h2>
+        <h2>7. AI agents</h2>
+        <p>
+            If you use an AI agent (Claude, Cursor or another program that speaks the Model Context Protocol, MCP), you can let it read and organize your mail
+            here. There is no AI in Inbox Classic and nothing is sent to an AI service: an agent works only when you let its program in, and only with the
+            accounts you choose.
+        </p>
+        <ul>
+            <li>
+                <b>Connecting.</b> <b>Tools &gt; AI Agents &gt; How to Connect an Agent</b> gives the lines to add to your agent's settings (for Claude
+                Desktop: <b>Settings &gt; Developer &gt; Edit Config</b>). The agent starts Inbox Classic with <code>--mcp</code>, which connects it to the Inbox
+                Classic that is running, or starts one in the background. Only programs running as you on this computer can reach it.
+            </li>
+            <li>
+                <b>The first time</b> a program's agent connects, Inbox Classic asks you, naming the program, what it may do: read mail; organize it (mark read,
+                flag, junk, move, delete to Deleted Items); write drafts for you to send; and send mail, each message only after you say yes. Choose the accounts
+                it may see. <b>Don't Allow</b> turns the program away, and you are not asked about it again.
+            </li>
+            <li>
+                <b>Sending.</b> Every message an agent wants to send is shown to you first, with every recipient by address and the addresses you never wrote to
+                marked. <b>Send</b> comes on after a moment; <b>Edit First</b> opens it in a new message to change; <b>Don't Send</b> is the default. What you
+                send waits 30 seconds in the Outbox, where you can still delete it.
+            </li>
+            <li>
+                <b>What changes</b> shows in the windows at once, as if you had done it. An agent never deletes anything for good and never changes your account
+                settings. Reading a message does not mark it read.
+            </li>
+            <li>
+                <b>Tools &gt; AI Agents</b> lists the programs you let in or turned away (<b>Change</b> what one may do, or <b>Remove</b> it to be asked
+                again), and everything agents did, newest first. <b>Undo</b> takes back a read state, a flag, a move or a delete, and a message still in the
+                Outbox. <b>Let AI agents connect</b> turns them all off at once.
+            </li>
+            <li>
+                <b>Be careful what you ask.</b> Mail is written by other people, and a message can try to talk an agent into something: forwarding your mail,
+                deleting it, writing to someone. Inbox Classic hides from agents the text a message hides from you and tells them that mail is not instructions,
+                but an agent can still be fooled. Read every message it wants to send before you say yes, and let an agent send only if you need it to. An agent
+                that also has other tools (browsing the web, reading your files) could pass on what it reads through them; Inbox Classic cannot see those.
+            </li>
+        </ul>
+
+        <h2>8. When something does not work</h2>
         <h3>"authentication failed" or Inbox Classic asks for the password again</h3>
         <p>
             The server refused the password. Type it again; for Gmail and Outlook.com use an app password or sign in through the browser (see
@@ -618,7 +669,7 @@
             affected.
         </p>
 
-        <h2>8. Where your mail and passwords are kept</h2>
+        <h2>9. Where your mail and passwords are kept</h2>
         <ul>
             <li>
                 Downloaded mail and account settings: <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Your mail stays on the server too; the copy here is for
@@ -636,7 +687,8 @@
             For testing, <!--os:windows--><code>InboxClassic.exe<!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"<!--/os--><!--os:linux--><code>inbox-classic<!--/os--> --store &lt;file&gt;</code> uses another mail store, <code>--memory-passwords</code> keeps passwords for the
             current run only, <code>--pin-certificate &lt;file&gt;</code> accepts only the server certificate in that file (PEM or DER) instead of the ones
             the system trusts, for a test server with a self-signed certificate, and <code>--sign-in-page-file &lt;file&gt;</code> writes the page of a browser
-            sign-in to that file instead of opening the browser.
+            sign-in to that file instead of opening the browser. <code>--mcp</code> is what an AI agent starts (above); <code>--background</code> starts
+            Inbox Classic without its window.
         </p>
     </body>
 </html>

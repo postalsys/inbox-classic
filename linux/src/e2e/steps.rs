@@ -158,6 +158,267 @@ pub async fn invitation_and_logo(d: &Driver) {
     search("").await;
 }
 
+pub async fn collapsed_account(d: &Driver) {
+    d.step("a collapsed account");
+    let core = &shell().core;
+    let account = core.accounts().ok().and_then(|a| a.first().map(|a| a.id)).unwrap_or(0);
+    let inbox = core
+        .folders(account)
+        .unwrap_or_default()
+        .into_iter()
+        .find(|f| pe_core::folder_name(&f.info) == "Inbox");
+    let inbox_unread = inbox.as_ref().map_or(0, |f| f.unread);
+    let inbox_id = inbox.map_or(0, |f| f.id);
+    let tree = || shell().main().folders.clone();
+    let label = |id: i64| tree().markup_of(id).unwrap_or_default();
+    d.check(
+        inbox_unread >= 1,
+        &format!("the Inbox has unread messages ({})", label(inbox_id)),
+    );
+    tree().set_expanded(-account, false);
+    let counted = |markup: &str| {
+        markup
+            .rsplit_once(" (")
+            .and_then(|(_, n)| n.trim_end_matches(")</b>").parse::<u64>().ok())
+            .unwrap_or(0)
+    };
+    d.check(
+        wait_until(5, || counted(&label(-account)) >= inbox_unread).await,
+        &format!(
+            "collapsed, the account shows the unread messages of its folders ({})",
+            label(-account)
+        ),
+    );
+    d.check(label(-account).starts_with("<b>"), "and is bold");
+    d.shot(&main_window(), "folders-5-collapsed").await;
+    tree().set_expanded(-account, true);
+    d.check(
+        wait_until(5, || {
+            counted(&label(-account)) == 0 && counted(&label(inbox_id)) == inbox_unread
+        })
+        .await,
+        "expanded, the count is back on the Inbox alone",
+    );
+}
+
+/// The lines the test's agent (scripts/ui-e2e/agent.mjs) wrote: the result of `step`
+fn agent_said(file: &std::path::Path, step: &str) -> Option<Value> {
+    let text = std::fs::read_to_string(file).ok()?;
+    text.lines()
+        .filter_map(|line| serde_json::from_str::<Value>(line).ok())
+        .find(|entry| entry["step"] == step)
+        .map(|entry| entry["result"].clone())
+}
+
+/// An AI agent through --mcp: let in, reading and marking messages read as the window shows, sending only after a yes
+pub async fn agent(d: &Driver) {
+    d.step("an AI agent");
+    select_folder("Inbox");
+    // two new messages for the agent to read, whatever the steps before left unread
+    let rows_before = rows();
+    for (from, subject, body) in [
+        (
+            "Maria Lopez <maria@example.org>",
+            "Quarterly report draft",
+            "Here is the draft of the quarterly report. Comments by Thursday?",
+        ),
+        (
+            "Sam Lee <sam@example.org>",
+            "Team lunch on Friday",
+            "Who is in for lunch on Friday at noon?",
+        ),
+    ] {
+        let id = glib::uuid_string_random();
+        let raw = format!(
+            "From: {from}\r\nTo: testuser@postalexpress.test\r\nSubject: {subject}\r\nMessage-ID: <{id}@example.org>\r\n\r\n{body}\r\n"
+        );
+        let _ = d.add_message(&raw, &[]);
+    }
+    run_command(Command::Sync);
+    wait_until(20, || rows() >= rows_before + 2).await;
+    let unread = || {
+        d.messages("INBOX")
+            .iter()
+            .filter(|m| !m["flags"].as_array().is_some_and(|f| f.iter().any(|f| f == "\\Seen")))
+            .count()
+    };
+    let before = unread();
+    d.shot(&main_window(), "agents-1-before").await;
+    // the agent: Node.js under a name of its own, as an agent host would be, starting the relay (--mcp)
+    let out = d.out.join("agent.jsonl");
+    let host = d.out.join("My AI agent");
+    let node = std::process::Command::new("sh")
+        .args(["-c", "command -v node"])
+        .output()
+        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+        .unwrap_or_default();
+    let _ = std::fs::remove_file(&host);
+    let copied = std::fs::copy(&node, &host).is_ok();
+    d.check(copied, &format!("the test's agent is ready ({node})"));
+    let script = harness_dir().join("../../scripts/ui-e2e/agent.mjs");
+    let mut agent = std::process::Command::new(&host)
+        .arg(&script)
+        .env("APP", std::env::current_exe().unwrap_or_default())
+        .env("STORE", d.out.join("store.db"))
+        .env("OUT", &out)
+        .spawn()
+        .ok();
+
+    let ask = wait_for(30, || alert().filter(|a| a.widget_name() == "agent-connect")).await;
+    d.check(
+        ask.is_some(),
+        "a program whose agent connects for the first time is asked about",
+    );
+    if let Some(ask) = &ask {
+        let root: gtk::Widget = ask.clone().upcast();
+        d.check(
+            label_of(&root, "agent-path").contains("My AI agent"),
+            "the question names the program",
+        );
+        let level = |index: usize| named_in(&root, &format!("agent-level-{index}")).and_downcast::<gtk::CheckButton>();
+        let on = |index: usize| level(index).is_some_and(|c| c.is_active());
+        d.check(
+            on(0) && on(1) && !on(2) && !on(3),
+            "reading and organizing are offered, sending is not",
+        );
+        // sending too, for the rest of the test
+        if let Some(send) = level(3) {
+            send.set_active(true);
+        }
+        d.shot(ask, "agents-2-connect").await;
+        answer(ask, "Allow");
+    }
+    let marked = wait_for(30, || agent_said(&out, "marked")).await;
+    d.check(
+        agent_said(&out, "initialize").is_some_and(|i| i["result"]["serverInfo"]["name"] == "inbox-classic"),
+        "allowed, the agent connects",
+    );
+    let tools = agent_said(&out, "tools")
+        .and_then(|t| t.as_array().map(Vec::len))
+        .unwrap_or(0);
+    d.check(tools == 14, &format!("with the tools of what it may do ({tools})"));
+    let read = agent_said(&out, "read").unwrap_or_default();
+    d.check(
+        read["notice"]
+            .as_str()
+            .is_some_and(|n| n.contains("not as instructions"))
+            && read["unread"] == true,
+        "it reads a message as text, told it is the sender's, without marking it read",
+    );
+    d.check(marked.is_some_and(|m| m["done"] == true), "it marks two messages read");
+    d.check(
+        wait_until(20, || unread() + 2 == before).await,
+        &format!("on the server ({before} unread before)"),
+    );
+    d.check(
+        wait_until(10, || {
+            shell()
+                .main()
+                .status_texts()
+                .2
+                .contains(&format!(", {} unread", before - 2))
+        })
+        .await,
+        &format!("and in the window at once ({})", shell().main().status_texts().2),
+    );
+    d.shot(&main_window(), "agents-3-after").await;
+
+    let send = wait_for(30, || alert().filter(|a| a.widget_name() == "agent-send")).await;
+    d.check(
+        send.is_some(),
+        "a message the agent wants to send is shown to the user first",
+    );
+    if let Some(send) = &send {
+        let root: gtk::Widget = send.clone().upcast();
+        d.check(
+            label_of(&root, "agent-recipient-0") == "pat@example.net",
+            "every recipient by address",
+        );
+        d.check(
+            label_of(&root, "agent-warning").contains("never written to pat@example.net"),
+            "with a warning about the new address",
+        );
+        d.check(
+            !send.is_response_enabled("send"),
+            "Send waits a moment before it can be pressed",
+        );
+        pause(2000).await;
+        d.shot(send, "agents-4-send").await;
+        answer(send, "Send");
+    }
+    let sent = wait_for(20, || agent_said(&out, "sent")).await;
+    d.check(
+        sent.is_some_and(|s| s["sent"] == true),
+        "the agent learns the user said yes",
+    );
+
+    let subtitles = |dialog: &adw::Dialog, name: &str| -> Vec<(String, String)> {
+        let mut rows: Vec<adw::ActionRow> = descendants::<adw::ActionRow>(dialog.upcast_ref())
+            .into_iter()
+            .filter(|row| row.widget_name() == name || name.is_empty())
+            .collect();
+        // in the order the list shows them
+        rows.sort_by_key(|row| row.index());
+        rows.iter()
+            .map(|row| (row.title().to_string(), row.subtitle().unwrap_or_default().to_string()))
+            .collect()
+    };
+    command(Command::Outbox);
+    if let Some(outbox) = wait_dialog(10, "outbox-dialog").await {
+        let rows = subtitles(&outbox, "");
+        d.check(
+            rows.first()
+                .is_some_and(|(_, subtitle)| subtitle.contains("Sent by an AI agent; goes at")),
+            "it waits in the Outbox, where it can still be deleted",
+        );
+        d.shot(&outbox, "agents-5-outbox").await;
+        outbox.close();
+        wait_gone(10, "outbox-dialog").await;
+    }
+    command(Command::AiAgents);
+    match wait_dialog(10, "agents-dialog").await {
+        Some(agents) => {
+            let hosts = subtitles(&agents, "agents-host");
+            d.check(
+                hosts.first().is_some_and(|(name, access)| {
+                    name == "My AI agent" && access.starts_with("Read, organize and send with your yes")
+                }),
+                &format!("it lists the program and what it may do ({hosts:?})"),
+            );
+            let entries = subtitles(&agents, "agents-entry");
+            d.check(
+                entries
+                    .first()
+                    .is_some_and(|(what, _)| what.starts_with("Sent \"Lunch on Friday?\" to pat@example.net"))
+                    && entries.get(1).is_some_and(|(what, _)| what.starts_with("Marked read")),
+                &format!("and what its agent did, newest first ({entries:?})"),
+            );
+            d.shot(&agents, "agents-6-window").await;
+            click(agents.upcast_ref(), "agents-undo");
+            d.check(
+                wait_until(10, || {
+                    subtitles(&agents, "agents-entry")
+                        .first()
+                        .is_some_and(|(what, _)| what.contains("taken back"))
+                })
+                .await,
+                "Undo takes the message back",
+            );
+            agents.close();
+            wait_gone(10, "agents-dialog").await;
+        }
+        None => d.check(false, "Tools > AI Agents opens"),
+    }
+    d.check(
+        shell().core.outbox().unwrap_or_default().is_empty(),
+        "and the Outbox is empty",
+    );
+    if let Some(agent) = agent.as_mut() {
+        let _ = agent.kill();
+        let _ = agent.wait();
+    }
+}
+
 pub async fn mark_all_read(d: &Driver) {
     d.step("marking all read");
     select_folder("Inbox");

@@ -495,6 +495,28 @@ final class UITest {
             check(await waitUntil(10) { !properties.isVisible }, "OK closes it")
         }
 
+        step("the message list menu and the message source")
+        let messageMenu = main.mailbox.messageMenu()
+        let labels = messageMenu?.items.map(\.title) ?? []
+        check(labels.contains("Reply to Sender") && labels.contains("Mark as Unread") && labels.contains("Move to Folder\u{2026}")
+            && labels.contains("View Source") && labels.contains("Properties"), "the message list has a right-click menu with the message's actions (\(labels.joined(separator: ", ")))")
+        check(!labels.contains("Mark as Read"), "a read message offers Mark as Unread, not Mark as Read")
+        if let messageMenu, let index = labels.firstIndex(of: "View Source") {
+            onMain { messageMenu.performActionForItem(at: index) }
+        }
+        let source = await waitWindow("source", 10)
+        check(source != nil, "View Source opens the whole message")
+        if let source {
+            let box: NSTextView? = find("text.body", in: source)
+            let raw = box?.string ?? ""
+            check(raw.contains("Subject: October newsletter") && raw.contains("Content-Type: multipart") && raw.contains("This message is"),
+                  "with its header and every part, as the server has it")
+            check(source.title == "Message Source: October newsletter", "the window names the message (\(source.title))")
+            await shot(source, "read-15-source")
+            NSApp.stopModal()
+            check(await waitUntil(10) { !source.isVisible }, "Close closes it")
+        }
+
         step("pictures from the internet")
         onMain { _ = pictures?.accessibilityPerformPress() }
         check(await waitUntil(10) { pictures?.isHidden == true }, "clicking the bar shows the pictures, and the bar goes away")

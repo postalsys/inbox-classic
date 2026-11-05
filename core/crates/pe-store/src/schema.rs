@@ -187,6 +187,42 @@ INSERT INTO contacts (address, name, received, last)
     GROUP BY m.from_address COLLATE NOCASE
     ON CONFLICT (address) DO NOTHING;
 "#,
+    // AI agents (MCP clients) the user let in or turned away, by the program that runs them, with what each may do,
+    // and what they did (agents.rs)
+    r#"
+CREATE TABLE agent_hosts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- the program the agent runs in, as the system names its file: what tells one agent from another
+    path TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    allowed INTEGER NOT NULL,
+    -- what it may do, bits: 1 read, 2 organize, 4 drafts, 8 send
+    levels INTEGER NOT NULL,
+    -- the ids of the accounts it may use, comma separated
+    accounts TEXT NOT NULL,
+    created INTEGER NOT NULL,
+    last_used INTEGER
+);
+CREATE TABLE agent_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    host_id INTEGER NOT NULL REFERENCES agent_hosts(id) ON DELETE CASCADE,
+    at INTEGER NOT NULL,
+    what TEXT NOT NULL,
+    account_id INTEGER,
+    folder_id INTEGER,
+    uid INTEGER,
+    message_id TEXT,
+    summary TEXT NOT NULL,
+    -- how to take it back, as agents.rs writes it; NULL when it can not be
+    undo TEXT,
+    undone INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX agent_log_by_time ON agent_log (at DESC, id DESC);
+-- the rate limits count a host's entries; a host removed takes its own along
+CREATE INDEX agent_log_by_host ON agent_log (host_id, what, at);
+-- a message that waits before it goes (one an agent sent, with time to take it back), seconds since the Unix epoch
+ALTER TABLE outbox ADD COLUMN not_before INTEGER;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

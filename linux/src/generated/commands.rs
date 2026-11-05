@@ -34,6 +34,8 @@ pub enum Command {
     Notify,
     Open,
     DefaultApp,
+    ViewSource,
+    AiAgents,
 }
 
 impl Command {
@@ -69,6 +71,8 @@ impl Command {
         Command::Notify,
         Command::Open,
         Command::DefaultApp,
+        Command::ViewSource,
+        Command::AiAgents,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -105,6 +109,8 @@ impl Command {
             Command::Notify => "notify",
             Command::Open => "open",
             Command::DefaultApp => "default-app",
+            Command::ViewSource => "view-source",
+            Command::AiAgents => "ai-agents",
         }
     }
 
@@ -142,6 +148,8 @@ impl Command {
             Command::Notify => "tools",
             Command::Open => "tray",
             Command::DefaultApp => "tools",
+            Command::ViewSource => "view",
+            Command::AiAgents => "tools",
         }
     }
 
@@ -178,6 +186,8 @@ impl Command {
             Command::Notify => "Notify of New Mail",
             Command::Open => "Open Inbox Classic",
             Command::DefaultApp => "Make Default Mail App…",
+            Command::ViewSource => "Message Source",
+            Command::AiAgents => "AI Agents…",
         }
     }
 
@@ -215,6 +225,8 @@ impl Command {
             Command::Notify => None,
             Command::Open => None,
             Command::DefaultApp => None,
+            Command::ViewSource => Some("<Primary>u"),
+            Command::AiAgents => None,
         }
     }
 
@@ -252,6 +264,8 @@ impl Command {
             Command::Notify => true,
             Command::Open => false,
             Command::DefaultApp => false,
+            Command::ViewSource => false,
+            Command::AiAgents => false,
         }
     }
 }

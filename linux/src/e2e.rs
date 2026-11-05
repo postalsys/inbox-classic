@@ -14,7 +14,7 @@ use std::time::{Duration, Instant};
 
 use adw::prelude::*;
 use base64::Engine;
-use gtk::{gdk, glib, graphene};
+use gtk::{gdk, gio, glib, graphene};
 use serde_json::Value;
 use webkit::prelude::*;
 
@@ -616,6 +616,35 @@ fn click(root: &gtk::Widget, name: &str) -> bool {
     }
 }
 
+/// The labels of a menu's items, its sections' included
+fn menu_labels(popover: Option<&gtk::PopoverMenu>) -> Vec<String> {
+    fn walk(model: &gio::MenuModel, labels: &mut Vec<String>) {
+        for index in 0..model.n_items() {
+            if let Some(section) = model.item_link(index, gio::MENU_LINK_SECTION) {
+                walk(&section, labels);
+            } else if let Some(label) = model
+                .item_attribute_value(index, gio::MENU_ATTRIBUTE_LABEL, None)
+                .and_then(|v| v.get::<String>())
+            {
+                labels.push(label);
+            }
+        }
+    }
+    let mut labels = Vec::new();
+    if let Some(model) = popover.and_then(|p| p.menu_model()) {
+        walk(&model, &mut labels);
+    }
+    labels
+}
+
+/// The text of a label named `name` under `root`
+fn label_of(root: &gtk::Widget, name: &str) -> String {
+    named_in(root, name)
+        .and_downcast::<gtk::Label>()
+        .map(|l| l.text().to_string())
+        .unwrap_or_default()
+}
+
 /// The message box open, when there is one
 fn alert() -> Option<adw::AlertDialog> {
     windows()
@@ -729,6 +758,8 @@ async fn scenario(d: Rc<Driver>) {
     organizing(&d).await;
     steps::unsubscribing(&d).await;
     steps::invitation_and_logo(&d).await;
+    steps::collapsed_account(&d).await;
+    steps::agent(&d).await;
     steps::mark_all_read(&d).await;
     steps::dragging(&d).await;
     steps::junk(&d).await;
@@ -877,6 +908,62 @@ async fn reading(d: &Driver) {
             dialog.close();
         }
         None => d.check(false, "File > Properties opens the headers of the message"),
+    }
+
+    d.step("the message list menu and the message source");
+    let mailbox = shell().main();
+    let list_view: gtk::Widget = mailbox.list.view.clone().upcast();
+    mailbox.message_menu(&list_view, 60.0, 60.0);
+    let labels = menu_labels(mailbox.message_popover.borrow().as_ref());
+    d.check(
+        [
+            "Reply to Sender",
+            "Mark as Unread",
+            "Move to Folder\u{2026}",
+            "View Source",
+            "Properties",
+        ]
+        .iter()
+        .all(|label| labels.iter().any(|l| l == label)),
+        &format!(
+            "the message list has a right-click menu with the message's actions ({})",
+            labels.join(", ")
+        ),
+    );
+    d.check(
+        !labels.iter().any(|l| l == "Mark as Read"),
+        "a read message offers Mark as Unread, not Mark as Read",
+    );
+    d.shot(&main_window(), "read-14-menu").await;
+    if let Some(popover) = mailbox.message_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+    let _ = list_view.activate_action("message.viewsource", None);
+    match wait_dialog(10, "source-dialog").await {
+        Some(dialog) => {
+            let text = named_in(dialog.upcast_ref(), "properties-text")
+                .and_downcast::<gtk::TextView>()
+                .map(|v| {
+                    let buffer = v.buffer();
+                    buffer.text(&buffer.start_iter(), &buffer.end_iter(), false).to_string()
+                })
+                .unwrap_or_default();
+            d.check(true, "View Source opens the whole message");
+            d.check(
+                text.contains("Subject: October newsletter")
+                    && text.contains("Content-Type: multipart")
+                    && text.contains("This message is"),
+                "with its header and every part, as the server has it",
+            );
+            d.check(
+                dialog.title() == "Message Source: October newsletter",
+                &format!("the window names the message ({})", dialog.title()),
+            );
+            d.shot(&dialog, "read-15-source").await;
+            dialog.close();
+            d.check(wait_gone(10, "source-dialog").await, "Close closes it");
+        }
+        None => d.check(false, "View Source opens the whole message"),
     }
 
     d.step("pictures from the internet");

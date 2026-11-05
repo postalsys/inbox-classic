@@ -184,6 +184,15 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             }
         case PE_EVENT_KIND_OUTBOX_CHANGED:
             showOutbox()
+        case PE_EVENT_KIND_AGENT_ASK:
+            // after this event, so the question does not hold up the others; with the window it is about in front
+            let request = event.uid
+            onMain {
+                self.show()
+                agentQuestion(core: self.core, request: request)
+            }
+        case PE_EVENT_KIND_AGENT_LOG_CHANGED:
+            AgentsWindow.refresh()
         case PE_EVENT_KIND_FAILED:
             failing.insert(event.account)
             setStatus("\(mailbox.accountName(event.account)): \(event.message)")

@@ -6,6 +6,7 @@
 //! windows start runs on the workers and reports back as [`Event`]s, on a worker thread.
 #![forbid(unsafe_code)]
 
+pub mod agents;
 mod authres;
 pub mod bimi;
 pub mod calendar;
@@ -40,7 +41,10 @@ pub use secrets::PasswordStore;
 use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
-pub use text::{RETRY_NOTE, ReaderState, account_label, account_title, folder_name, format_size, reader_page};
+pub use text::{
+    HiddenUnread, RETRY_NOTE, ReaderState, account_label, account_title, folder_kind, folder_name, format_size,
+    hidden_unread, reader_page,
+};
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, SharedToken, Worker};
 
@@ -140,6 +144,12 @@ pub enum Event {
         kind: FailureKind,
         message: String,
     },
+    /// An AI agent needs the user to answer: [`Core::agent_ask`] says what, [`Core::agent_answer`] answers
+    AgentAsk {
+        request: u64,
+    },
+    /// What agents did changed ([`Core::agent_log`])
+    AgentLogChanged,
 }
 
 /// What a failure asks of the user
@@ -255,6 +265,8 @@ pub struct Core {
     events: EventSink,
     /// Set when closing: no event is delivered after
     closed: Arc<AtomicBool>,
+    /// The questions of AI agents waiting for the user (agents.rs)
+    agent_asks: Mutex<agents::Asks>,
     /// Lookups of servers; None when the address has no domain
     autoconfig: Requests<Option<pe_autoconfig::Settings>>,
     /// BIMI logos being drawn, as pixels once done
@@ -323,6 +335,7 @@ impl Core {
                 }
             }),
             closed,
+            agent_asks: Mutex::default(),
             autoconfig: Requests::default(),
             logos: Requests::default(),
             logo_svgs: Arc::default(),
@@ -714,6 +727,11 @@ impl Core {
         self.send_command(account, Command::Sync)
     }
 
+    /// One message of a folder as the list shows it, None when the folder has no message with this UID
+    pub fn message(&self, folder: FolderId, uid: u64) -> Result<Option<Message>> {
+        Ok(self.store().message(folder, uid)?)
+    }
+
     /// Gets the source of a message to the store, in the background, on the account's reader: a connection of its own,
     /// so it does not wait for a sync. [`Event::MessageReady`] follows, right away when it is cached, or
     /// [`Event::MessageFailed`] when it can not be downloaded
@@ -808,6 +826,27 @@ impl Core {
         Ok(Some((format!("{stem}.eml"), source)))
     }
 
+    /// The whole source of a message for View Source, as text safe to show, and the title of its window; None when it
+    /// is not in the store yet ([`Core::open_message`] fetches it)
+    pub fn message_source_text(&self, folder: FolderId, uid: u64) -> Result<Option<(String, String)>> {
+        let (source, size, subject) = {
+            let store = self.store();
+            // as much as is shown, and a byte to tell that there is more
+            let Some(source) = store.source_start(folder, uid, view::MAX_SOURCE_TEXT + 1)? else {
+                return Ok(None);
+            };
+            let info = store.message(folder, uid)?.map(|m| m.info);
+            let size = info.as_ref().and_then(|i| i.size).map_or(source.len(), |s| s as usize);
+            (source, size, info.map(|i| i.subject).unwrap_or_default())
+        };
+        let title = if subject.trim().is_empty() {
+            "Message Source".to_string()
+        } else {
+            format!("Message Source: {}", view::header_text(subject.as_bytes()).trim_end())
+        };
+        Ok(Some((title, view::source_text(&source, size))))
+    }
+
     /// The header block of a message for Message Properties, as text safe to show; None when it is not in the store yet
     pub fn message_headers(&self, folder: FolderId, uid: u64) -> Result<Option<String>> {
         let start = self.store().source_start(folder, uid, view::MAX_HEADER_TEXT)?;
@@ -851,6 +890,18 @@ impl Core {
         Ok(source.and_then(|source| view::attachment(&source, index)))
     }
 
+    /// The `index`th listed attachment of a message with its name to save it under and its type, from one parse; None
+    /// when the message is not in the store yet or has no such attachment
+    pub fn attachment_with_type(
+        &self,
+        folder: FolderId,
+        uid: u64,
+        index: usize,
+    ) -> Result<Option<(String, String, Vec<u8>)>> {
+        let source = self.store().source(folder, uid)?;
+        Ok(source.and_then(|source| view::attachment_with_type(&source, index)))
+    }
+
     /// Saves every attachment of a message into `dir` (a folder the user chose), each under its safe name; a file of
     /// that name there is kept and the new one numbered. How many were saved; None when the message is not here yet.
     pub fn save_attachments(&self, folder: FolderId, uid: u64, dir: &Path) -> Result<Option<(usize, usize)>> {
@@ -892,6 +943,7 @@ impl Core {
             account,
             Command::Send {
                 outgoing: Box::new(outgoing),
+                not_before: None,
             },
         )
     }
@@ -943,7 +995,13 @@ impl Core {
 
     /// The messages waiting in the Outbox, of every account, oldest first
     pub fn outbox(&self) -> Result<Vec<pe_store::Queued>> {
-        Ok(self.store().outbox(None)?)
+        let now = worker::unix_now();
+        let mut queued = self.store().outbox(None)?;
+        // a time that came is no longer waited for: the message goes with the next try, as any other
+        for message in &mut queued {
+            message.not_before = message.not_before.filter(|&at| at > now);
+        }
+        Ok(queued)
     }
 
     /// Takes a message out of the Outbox without sending it
@@ -961,6 +1019,8 @@ impl Core {
     pub fn outbox_send(&self) -> Result<()> {
         let accounts = self.store().outbox_accounts()?;
         for account in accounts {
+            // the user's Send All Now sends what an agent's message waits for too
+            self.store().clear_not_before(account, i64::MAX)?;
             self.send_command(account, Command::SendOutbox)?;
         }
         Ok(())
@@ -986,33 +1046,7 @@ impl Core {
     }
 
     fn set_flag(&self, folder: FolderId, uid: u64, flag: &'static str, on: bool) -> Result<()> {
-        let (account, changed) = self.change_flag(folder, uid, flag, on)?;
-        if changed {
-            self.post(Event::FolderChanged { account, folder })?;
-        }
-        Ok(())
-    }
-
-    /// A flag of a message set or cleared in the store, and on the server in the background; whether the store
-    /// changed (the caller says so with `FolderChanged`)
-    fn change_flag(&self, folder: FolderId, uid: u64, flag: &'static str, on: bool) -> Result<(AccountId, bool)> {
-        let (account, changed) = {
-            let store = self.store();
-            let account = store.folder(folder)?.account_id;
-            (account, store.set_flag(folder, uid, flag, on)?)
-        };
-        if changed {
-            self.send_command(
-                account,
-                Command::SetFlag {
-                    folder,
-                    uids: vec![uid],
-                    flag,
-                    on,
-                },
-            )?;
-        }
-        Ok((account, changed))
+        self.set_flag_many(folder, &[uid], flag, on)
     }
 
     /// Marks every message of a folder read: in the store now, on the server in the background
@@ -1039,19 +1073,91 @@ impl Core {
     /// Moves a message to another folder of its account: out of the store now, on the server in the background,
     /// which then syncs the folder it went to. When the server does not move it, it comes back into the folder.
     pub fn move_message(&self, folder: FolderId, uid: u64, to: FolderId) -> Result<()> {
-        self.target_of(folder, to)?;
-        self.remove_then(folder, uid, |removed| Command::Move {
-            folder,
-            uid,
-            to,
-            removed,
-        })
+        self.move_messages(folder, &[uid], to)
+    }
+
+    /// Moves messages to another folder of their account with one command, as [`Core::move_message`] moves one.
+    /// Refused when one of them is not there, and then none moves.
+    pub fn move_messages(&self, folder: FolderId, uids: &[u64], to: FolderId) -> Result<()> {
+        let account = self.target_of(folder, to)?;
+        if uids.is_empty() {
+            return Ok(());
+        }
+        let removed = self.store().transaction(|store| {
+            let removed = uids
+                .iter()
+                .map(|&uid| {
+                    store
+                        .message(folder, uid)?
+                        .map(|m| m.info)
+                        .ok_or(pe_store::Error::QueryReturnedNoRows)
+                })
+                .collect::<pe_store::Result<Vec<_>>>()?;
+            store.remove_messages(folder, uids)?;
+            Ok(removed)
+        });
+        let removed = removed.map_err(|error| match error {
+            pe_store::Error::QueryReturnedNoRows => Error::NotFound,
+            other => Error::Store(other),
+        })?;
+        self.post(Event::FolderChanged { account, folder })?;
+        self.send_command(
+            account,
+            Command::Move {
+                folder,
+                uids: uids.to_vec(),
+                to,
+                removed,
+            },
+        )
+    }
+
+    /// Deletes messages as [`Core::delete_message`] deletes one, into Deleted Items only: refused where that would
+    /// delete them for good (in Deleted Items, or an account without one)
+    pub fn trash_messages(&self, folder: FolderId, uids: &[u64]) -> Result<FolderId> {
+        let trash = self.trash_for(folder)?.ok_or(Error::NotFound)?;
+        self.move_messages(folder, uids, trash)?;
+        Ok(trash)
+    }
+
+    /// Sets or clears a flag on messages of a folder: in the store now, on the server in the background with one
+    /// command for all of them
+    pub fn set_flag_many(&self, folder: FolderId, uids: &[u64], flag: &'static str, on: bool) -> Result<()> {
+        let (account, changed) = {
+            let store = self.store();
+            let account = store.folder(folder)?.account_id;
+            let changed = store
+                .set_flag_many(folder, uids, flag, on)
+                .map_err(|error| match error {
+                    pe_store::Error::QueryReturnedNoRows => Error::NotFound,
+                    other => Error::Store(other),
+                })?;
+            (account, changed)
+        };
+        if changed.is_empty() {
+            return Ok(());
+        }
+        self.post(Event::FolderChanged { account, folder })?;
+        self.send_command(
+            account,
+            Command::SetFlag {
+                folder,
+                uids: changed,
+                flag,
+                on,
+            },
+        )
     }
 
     /// Marks a message junk (RFC 9051 `$Junk`, `$NotJunk` taken away) and moves it to the account's Junk folder, or
     /// not junk (`$NotJunk`) and moves it to the Inbox: in the store now, on the server in the background. Refused
     /// when the account has no such folder.
     pub fn mark_junk(&self, folder: FolderId, uid: u64, junk: bool) -> Result<()> {
+        self.mark_junk_many(folder, &[uid], junk)
+    }
+
+    /// [`Core::mark_junk`] for messages of a folder, with one command for each step
+    pub fn mark_junk_many(&self, folder: FolderId, uids: &[u64], junk: bool) -> Result<()> {
         let target = {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
@@ -1060,7 +1166,6 @@ impl Core {
             } else {
                 store.find_folder(account, "INBOX")?
             };
-            store.message(folder, uid)?.ok_or(Error::NotFound)?;
             target.ok_or(Error::NotFound)?.id
         };
         let (on, off) = if junk {
@@ -1068,14 +1173,11 @@ impl Core {
         } else {
             ("$NotJunk", "$Junk")
         };
-        let (account, set) = self.change_flag(folder, uid, on, true)?;
-        let (_, cleared) = self.change_flag(folder, uid, off, false)?;
+        // the flags first, which the server keeps on the messages as they move; the move says the folder changed
+        self.set_flag_many(folder, uids, on, true)?;
+        self.set_flag_many(folder, uids, off, false)?;
         if target != folder {
-            // after the flags, which the server keeps on the message as it moves; the move says the folder changed
-            return self.move_message(folder, uid, target);
-        }
-        if set || cleared {
-            self.post(Event::FolderChanged { account, folder })?;
+            self.move_messages(folder, uids, target)?;
         }
         Ok(())
     }

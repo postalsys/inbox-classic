@@ -16,11 +16,11 @@ use crate::{c_string, guard, into_c_string};
 
 /// Owns the strings of rows handed to C
 #[derive(Default)]
-struct Strings(Vec<CString>);
+pub(crate) struct Strings(Vec<CString>);
 
 impl Strings {
     /// A C string that lives as long as `self`; NUL inside is replaced
-    fn add(&mut self, text: &str) -> *const c_char {
+    pub(crate) fn add(&mut self, text: &str) -> *const c_char {
         let text = c_string(text.to_string());
         // the bytes are on the heap, moving the CString into the Vec does not move them
         let pointer = text.as_ptr();
@@ -30,13 +30,13 @@ impl Strings {
 }
 
 /// The rows of a list handed to C, with the strings they point to
-struct Rows<T> {
+pub(crate) struct Rows<T> {
     rows: Vec<T>,
     _strings: Strings,
 }
 
 impl<T> Rows<T> {
-    fn new<S>(items: &[S], mut row: impl FnMut(&S, &mut Strings) -> T) -> Self {
+    pub(crate) fn new<S>(items: &[S], mut row: impl FnMut(&S, &mut Strings) -> T) -> Self {
         let mut strings = Strings::default();
         let rows = items.iter().map(|item| row(item, &mut strings)).collect();
         Rows {
@@ -45,17 +45,17 @@ impl<T> Rows<T> {
         }
     }
 
-    fn count(list: Option<&Self>) -> usize {
+    pub(crate) fn count(list: Option<&Self>) -> usize {
         list.map_or(0, |list| list.rows.len())
     }
 
-    fn get(list: Option<&Self>, index: usize) -> *const T {
+    pub(crate) fn get(list: Option<&Self>, index: usize) -> *const T {
         list.and_then(|list| list.rows.get(index)).map_or(null(), |row| row)
     }
 }
 
 /// Moves a value to C
-fn handed<T>(value: T) -> *mut T {
+pub(crate) fn handed<T>(value: T) -> *mut T {
     Box::into_raw(Box::new(value))
 }
 
@@ -63,7 +63,7 @@ fn handed<T>(value: T) -> *mut T {
 ///
 /// # Safety
 /// `value` must be NULL or from [`handed`], freed once.
-unsafe fn take_back<T>(value: *mut T) {
+pub(crate) unsafe fn take_back<T>(value: *mut T) {
     if !value.is_null() {
         // SAFETY: as the caller guarantees
         drop(unsafe { Box::from_raw(value) });
@@ -74,7 +74,7 @@ unsafe fn take_back<T>(value: *mut T) {
 ///
 /// # Safety
 /// `text` must be NULL or a NUL-terminated string.
-unsafe fn arg<'a>(text: *const c_char) -> Option<&'a str> {
+pub(crate) unsafe fn arg<'a>(text: *const c_char) -> Option<&'a str> {
     if text.is_null() {
         return None;
     }
@@ -124,6 +124,10 @@ pub enum PeEventKind {
     /// `folder`/`uid` (opened with `pe_message_open`) could not be downloaded: `failure` and `message` say why, for
     /// `pe_reader_page`. Opening it again tries again
     MessageFailed = 17,
+    /// An AI agent needs the user to answer question `uid`: `pe_agent_ask_kind`
+    AgentAsk = 18,
+    /// What AI agents did changed: `pe_agent_log`
+    AgentLogChanged = 19,
 }
 
 #[repr(C)]
@@ -215,6 +219,8 @@ impl Callback {
             Event::Unsubscribed { request, .. } => (PeEventKind::Unsubscribed, 0, 0, *request),
             Event::LogoReady { request } => (PeEventKind::LogoReady, 0, 0, *request),
             Event::MessageFailed { folder, uid, .. } => (PeEventKind::MessageFailed, 0, *folder, *uid),
+            Event::AgentAsk { request } => (PeEventKind::AgentAsk, 0, 0, *request),
+            Event::AgentLogChanged => (PeEventKind::AgentLogChanged, 0, 0, 0),
         };
         let count = if let Event::NewMail { count, .. } = &event {
             *count as u64
@@ -256,7 +262,22 @@ impl Callback {
 // ---- the engine ----
 
 /// The mail engine
-pub struct PeCore(Core);
+pub struct PeCore {
+    pub(crate) core: std::sync::Arc<Core>,
+    /// The store's file, which names where agents reach this app
+    pub(crate) store: std::path::PathBuf,
+    /// The MCP server, once `pe_mcp_start` started it
+    pub(crate) mcp: std::sync::Mutex<Option<pe_mcp::McpServer>>,
+}
+
+impl Drop for PeCore {
+    fn drop(&mut self) {
+        // the server lets go of the engine first, so the engine stops here, on this thread
+        if let Some(mut mcp) = self.mcp.lock().unwrap_or_else(|p| p.into_inner()).take() {
+            mcp.stop();
+        }
+    }
+}
 
 /// Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
 /// the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
@@ -331,7 +352,13 @@ fn open(
                 callback.deliver(event);
             }
         });
-        core.map_or(null_mut(), |core| handed(PeCore(core)))
+        core.map_or(null_mut(), |core| {
+            handed(PeCore {
+                core: std::sync::Arc::new(core),
+                store: std::path::PathBuf::from(path),
+                mcp: std::sync::Mutex::new(None),
+            })
+        })
     })
     .unwrap_or(null_mut())
 }
@@ -353,12 +380,12 @@ pub unsafe extern "C" fn pe_core_close(core: *mut PeCore) {
 ///
 /// # Safety
 /// `core` must be NULL or a live handle from `pe_core_open`.
-unsafe fn with<T>(core: *const PeCore, fallback: T, f: impl FnOnce(&Core) -> T) -> T {
+pub(crate) unsafe fn with<T>(core: *const PeCore, fallback: T, f: impl FnOnce(&Core) -> T) -> T {
     // SAFETY: the caller guarantees a live handle
     let Some(core) = (unsafe { core.as_ref() }) else {
         return fallback;
     };
-    guard(|| f(&core.0)).unwrap_or(fallback)
+    guard(|| f(&core.core)).unwrap_or(fallback)
 }
 
 // ---- accounts ----
@@ -890,10 +917,13 @@ pub struct PeFolder {
     pub selectable: bool,
     pub total: u64,
     pub unread: u64,
+    /// The unread messages of the folders under it (not Junk E-mail or Deleted Items): a collapsed folder shows
+    /// `unread + unread_below`, an expanded one `unread`
+    pub unread_below: u64,
 }
 
 /// The folders of an account; free with `pe_folder_list_free`
-pub struct PeFolderList(Rows<PeFolder>);
+pub struct PeFolderList(Rows<PeFolder>, u64);
 
 /// The folders of an account, NULL on failure
 ///
@@ -909,22 +939,35 @@ pub unsafe extern "C" fn pe_folders(core: *const PeCore, account: i64) -> *mut P
             };
             // the depth in the tree: listed ancestors only, so a folder whose parent is not listed is at the top
             let infos: Vec<_> = folders.iter().map(|f| &f.info).collect();
-            let depths: std::collections::HashMap<i64, usize> =
-                folders.iter().map(|f| f.id).zip(pe_core::tree_depths(&infos)).collect();
-            handed(PeFolderList(Rows::new(&folders, |f, strings| PeFolder {
+            let tree_depths = pe_core::tree_depths(&infos);
+            let hidden = pe_core::hidden_unread(&folders, &tree_depths);
+            let rows: Vec<_> = folders.iter().zip(tree_depths).zip(hidden.below).collect();
+            let rows = Rows::new(&rows, |((f, depth), below), strings| PeFolder {
                 id: f.id,
                 account: f.account_id,
                 path: strings.add(&f.info.path),
                 name: strings.add(&f.info.name),
-                depth: u32::try_from(depths.get(&f.id).copied().unwrap_or(0)).unwrap_or(u32::MAX),
+                depth: u32::try_from(*depth).unwrap_or(u32::MAX),
                 fixed: pe_core::is_fixed_folder(&f.info),
                 special_use: special_use(f.info.special_use.as_deref()),
                 selectable: f.info.selectable,
                 total: f.total,
                 unread: f.unread,
-            })))
+                unread_below: *below,
+            });
+            handed(PeFolderList(rows, hidden.account))
         })
     }
+}
+
+/// The unread messages of the account of `list` (not Junk E-mail or Deleted Items): what its row shows collapsed
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_list_unread(list: *const PeFolderList) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { list.as_ref() }.map_or(0, |list| list.1)
 }
 
 /// # Safety
@@ -1753,6 +1796,32 @@ pub unsafe extern "C" fn pe_message_headers(core: *const PeCore, folder: i64, ui
     }
 }
 
+/// The whole source of a message for View Source, as text safe to show (line breaks `\r\n`, no control
+/// characters, cut short past 4 MB with a line that says so), and in `title` the title of its window; NULL when it is
+/// not in the store yet (`pe_message_open` fetches it, `MessageReady` follows). Free both with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle; `title` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_source_text(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    title: *mut *mut c_char,
+) -> *mut c_char {
+    if title.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let found = unsafe { with(core, None, |core| core.message_source_text(folder, uid).ok().flatten()) };
+    let Some((name, text)) = found else {
+        return null_mut();
+    };
+    // SAFETY: the caller gave a valid pointer
+    unsafe { *title = into_c_string(name) };
+    into_c_string(text)
+}
+
 /// The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).
 /// `len` gets its length and `filename` a name to save it under made from its subject (`.eml`; free it with
 /// `pe_string_free`). Free the bytes with `pe_bytes_free`.
@@ -1935,6 +2004,8 @@ pub struct PeQueued {
     pub created: i64,
     /// Why the last try did not work, NULL before the first
     pub problem: *const c_char,
+    /// It waits until then before it goes (one an AI agent sent), seconds since the Unix epoch; 0 when it does not
+    pub not_before: i64,
 }
 
 /// The Outbox; free with `pe_outbox_free`
@@ -1959,6 +2030,7 @@ pub unsafe extern "C" fn pe_outbox(core: *const PeCore) -> *mut PeOutbox {
                 recipients: strings.add(&q.recipients),
                 created: q.created,
                 problem: q.problem.as_deref().map_or(null(), |p| strings.add(p)),
+                not_before: q.not_before.unwrap_or(0),
             })))
         })
     }
@@ -2053,7 +2125,7 @@ pub struct PeDraft {
 }
 
 /// A draft handed to C
-fn draft_handle(draft: &pe_core::Draft) -> *mut PeDraft {
+pub(crate) fn draft_handle(draft: &pe_core::Draft) -> *mut PeDraft {
     let mut strings = Strings::default();
     let attachments: Vec<*const c_char> = draft
         .attachments

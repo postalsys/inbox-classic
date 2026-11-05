@@ -481,12 +481,15 @@ pub async fn move_message(
     client: &mut Client,
     store: &mut Store,
     folder: FolderId,
-    uid: u64,
+    uids: &[u64],
     to: FolderId,
 ) -> Result<()> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(());
+    };
     let (from, to) = (store.folder(folder)?.info.path, store.folder(to)?.info.path);
     ensure_selected(client, &from).await?;
-    client.move_messages(&Messages::uid(uid), &to).await?;
+    client.move_messages(&Messages::Uids(set), &to).await?;
     Ok(())
 }
 

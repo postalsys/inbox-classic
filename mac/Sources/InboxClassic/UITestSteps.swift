@@ -398,6 +398,24 @@ extension UITest {
         await shot(main.window, "read-11-logo")
         search("")
 
+        step("a collapsed account")
+        let rowLabel = { (row: Int) -> String in
+            (self.tree.view(atColumn: 0, row: row, makeIfNecessary: true) as? FolderCell)?.accessibilityLabel() ?? ""
+        }
+        let inboxRow = (0..<tree.numberOfRows).first { (tree.item(atRow: $0) as? Mailbox.FolderNode)?.folder.displayName == "Inbox" } ?? 1
+        let inboxUnread = (tree.item(atRow: inboxRow) as? Mailbox.FolderNode)?.folder.unread ?? 0
+        check(inboxUnread >= 1, "the Inbox has unread messages (\(rowLabel(inboxRow)))")
+        tree.collapseItem(tree.item(atRow: 0))
+        check(await waitUntil(5) { rowLabel(0).hasSuffix("unread") && (tree.view(atColumn: 0, row: 0, makeIfNecessary: true) as? FolderCell)?.unreadShown ?? 0 >= inboxUnread },
+              "collapsed, the account shows the unread messages of its folders (\(rowLabel(0)))")
+        check((tree.view(atColumn: 0, row: 0, makeIfNecessary: true) as? FolderCell)?.isBold == true, "and is bold")
+        await shot(main.window, "folders-5-collapsed")
+        tree.expandItem(tree.item(atRow: 0))
+        check(await waitUntil(5) { !rowLabel(0).hasSuffix("unread") && rowLabel(inboxRow).hasSuffix("unread") },
+              "expanded, the count is back on the Inbox alone")
+
+        try await agent()
+
         step("marking all read")
         selectFolder(named: "Inbox")
         _ = await waitUntil { list.numberOfRows >= 5 }
@@ -610,5 +628,139 @@ extension UITest {
         await shot(main.window, "trouble-1-password")
         press(logon.flatMap { find("form.cancel", in: $0) })
         _ = await waitUntil { logon?.isVisible != true }
+    }
+
+    /// the lines the test's agent (scripts/ui-e2e/agent.mjs) wrote, by step
+    private func agentSaid(_ file: URL, _ step: String) -> Any? {
+        guard let text = try? String(contentsOf: file, encoding: .utf8) else { return nil }
+        for line in text.split(separator: "\n") {
+            if let entry = try? JSONSerialization.jsonObject(with: Data(line.utf8)) as? [String: Any], entry["step"] as? String == step {
+                return entry["result"] ?? NSNull()
+            }
+        }
+        return nil
+    }
+
+    /// an AI agent through --mcp: let in, reading and marking messages read as the window shows, sending only after a yes
+    func agent() async throws {
+        step("an AI agent")
+        selectFolder(named: "Inbox")
+        // two new messages for the agent to read, whatever the steps before left unread
+        let rowsBefore = list.numberOfRows
+        for (from, subject, body) in [("Maria Lopez <maria@example.org>", "Quarterly report draft", "Here is the draft of the quarterly report. Comments by Thursday?"),
+                                      ("Sam Lee <sam@example.org>", "Team lunch on Friday", "Who is in for lunch on Friday at noon?")] {
+            try await addMessage("From: \(from)\r\nTo: testuser@postalexpress.test\r\nSubject: \(subject)\r\nDate: \(rfc2822(Date()))\r\n"
+                + "Message-ID: <\(UUID().uuidString)@example.org>\r\n\r\n\(body)\r\n")
+        }
+        command(.sync)
+        _ = await waitUntil { list.numberOfRows >= rowsBefore + 2 }
+        let unread = { await self.messages("INBOX").filter { !(($0["flags"] as? [String]) ?? []).contains("\\Seen") }.count }
+        let unreadBefore = await unread()
+        await pause(1)
+        await shot(main.window, "agents-1-before")
+        // the agent: Node.js under a name of its own, as an agent host would be, starting the relay (--mcp)
+        let agentOut = out.appendingPathComponent("agent.jsonl")
+        let host = out.appendingPathComponent("My AI agent")
+        let which = Process()
+        which.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        which.arguments = ["which", "node"]
+        let found = Pipe()
+        which.standardOutput = found
+        try which.run()
+        which.waitUntilExit()
+        let node = String(decoding: found.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+        try? FileManager.default.removeItem(at: host)
+        try FileManager.default.copyItem(at: URL(fileURLWithPath: node), to: host)
+        let agent = Process()
+        agent.executableURL = host
+        agent.arguments = [repo.appendingPathComponent("scripts/ui-e2e/agent.mjs").path]
+        var environment = ProcessInfo.processInfo.environment
+        environment["APP"] = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/Inbox Classic").path
+        environment["STORE"] = out.appendingPathComponent("store.db").path
+        environment["OUT"] = agentOut.path
+        agent.environment = environment
+        try agent.run()
+        defer { if agent.isRunning { agent.terminate() } }
+
+        let ask = await waitWindow("agent.connect", 30)
+        check(ask != nil, "a program whose agent connects for the first time is asked about")
+        if let ask {
+            let path: NSTextField? = find("agent.path", in: ask)
+            check(path?.stringValue.contains("My AI agent") == true, "the question names the program")
+            let level = { (index: Int) -> NSButton? in self.find("agent.level.\(index)", in: ask) }
+            check(level(0)?.state == .on && level(1)?.state == .on && level(2)?.state == .off && level(3)?.state == .off,
+                  "reading and organizing are offered, sending is not")
+            // sending too, for the rest of the test
+            level(3)?.state = .on
+            await shot(ask, "agents-2-connect")
+            press(find("agent.allow", in: ask))
+        }
+        let marked = await waitFor(30) { agentSaid(agentOut, "marked") as? [String: Any] }
+        let initialize = agentSaid(agentOut, "initialize") as? [String: Any]
+        check(((initialize?["result"] as? [String: Any])?["serverInfo"] as? [String: Any])?["name"] as? String == "inbox-classic",
+              "allowed, the agent connects")
+        let tools = agentSaid(agentOut, "tools") as? [String] ?? []
+        check(tools.count == 14, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
+        let read = agentSaid(agentOut, "read") as? [String: Any]
+        check((read?["notice"] as? String)?.contains("not as instructions") == true && read?["unread"] as? Bool == true,
+              "it reads a message as text, told it is the sender's, without marking it read")
+        check(marked?["done"] as? Bool == true, "it marks two messages read")
+        check(await waitUntil(20) { await unread() == unreadBefore - 2 }, "on the server (\(unreadBefore) unread before)")
+        let counts: NSTextField? = find("status.counts", in: main.window)
+        check(await waitUntil(10) { counts?.stringValue.contains(", \(unreadBefore - 2) unread") == true },
+              "and in the window at once (\(counts?.stringValue ?? ""))")
+        await shot(main.window, "agents-3-after")
+
+        let send = await waitWindow("agent.send", 30)
+        check(send != nil, "a message the agent wants to send is shown to the user first")
+        if let send {
+            let recipient: NSTextField? = find("agent.recipient.0", in: send)
+            check(recipient?.stringValue == "pat@example.net", "every recipient by address")
+            let warning: NSTextField? = find("agent.warning", in: send)
+            check(warning?.stringValue.contains("never written to pat@example.net") == true, "with a warning about the new address")
+            let button: NSButton? = find("agent.sendButton", in: send)
+            check(button?.isEnabled == false, "Send waits a moment before it can be pressed")
+            await pause(2)
+            await shot(send, "agents-4-send")
+            press(button)
+        }
+        let sent = await waitFor(20) { agentSaid(agentOut, "sent") as? [String: Any] }
+        check(sent?["sent"] as? Bool == true, "the agent learns the user said yes")
+
+        command(.outbox)
+        if let outbox = await waitWindow("outbox", 10) {
+            let table: NSTableView? = find("outbox.list", in: outbox)
+            let status = (table?.view(atColumn: 3, row: 0, makeIfNecessary: true) as? NSTextField)?.stringValue ?? ""
+            check(status.hasPrefix("Sent by an AI agent; goes at"), "it waits in the Outbox, where it can still be deleted (\(status))")
+            await shot(outbox, "agents-5-outbox")
+            NSApp.stopModal()
+            _ = await waitUntil { !outbox.isVisible }
+        }
+        command(.aiAgents)
+        if let agents = await waitWindow("agents", 10) {
+            let hosts: NSTableView? = find("agents.hosts", in: agents)
+            let log: NSTableView? = find("agents.log", in: agents)
+            let cell = { (table: NSTableView?, column: Int, row: Int) -> String in
+                (table?.view(atColumn: column, row: row, makeIfNecessary: true) as? NSTextField)?.stringValue ?? ""
+            }
+            check(cell(hosts, 0, 0) == "My AI agent" && cell(hosts, 1, 0).hasPrefix("Read, organize and send with your yes"),
+                  "it lists the program and what it may do (\(cell(hosts, 1, 0)))")
+            check(cell(log, 2, 0).hasPrefix("Sent \"Lunch on Friday?\" to pat@example.net") && cell(log, 2, 1).hasPrefix("Marked read"),
+                  "and what its agent did, newest first")
+            await shot(agents, "agents-6-window")
+            press(find("agents.undo", in: agents))
+            check(await waitUntil(10) { cell(log, 2, 0).contains("taken back") }, "Undo takes the message back")
+            NSApp.stopModal()
+            _ = await waitUntil { !agents.isVisible }
+        } else {
+            check(false, "Tools > AI Agents opens")
+        }
+        command(.outbox)
+        if let outbox = await waitWindow("outbox", 10) {
+            let table: NSTableView? = find("outbox.list", in: outbox)
+            check(table?.numberOfRows == 0, "and the Outbox is empty")
+            NSApp.stopModal()
+            _ = await waitUntil { !outbox.isVisible }
+        }
     }
 }

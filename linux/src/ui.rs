@@ -31,6 +31,7 @@ const STYLE: &str = "
 .editor-frame { border-top: 1px solid alpha(@borders, 0.6); }
 .attachment { padding: 2px 8px; border-radius: 6px; background-color: alpha(@view_fg_color, 0.06); }
 .completion row { padding: 4px 8px; }
+.new-address { font-size: 0.8em; font-weight: bold; color: white; background-color: @error_bg_color; border-radius: 4px; padding: 1px 6px; }
 ";
 
 pub fn load_style() {
@@ -365,12 +366,28 @@ pub fn wrapped_label(text: &str) -> gtk::Label {
     label
 }
 
-/// A dialog with `text` to read and copy that can not be edited, and OK (Message Properties)
+/// A dialog with `text` to read and copy that can not be edited, and OK (Message Properties); no intro when it is empty
 pub fn text_dialog(parent: &impl IsA<gtk::Widget>, title: &str, intro: &str, text: &str) -> adw::Dialog {
+    text_dialog_sized(parent, title, intro, text, (640, 520), true)
+}
+
+/// [`text_dialog`] of `size`; lines that do not fit wrapped, or (`wrap` false) scrolled to, as source code is
+pub fn text_dialog_sized(
+    parent: &impl IsA<gtk::Widget>,
+    title: &str,
+    intro: &str,
+    text: &str,
+    size: (i32, i32),
+    wrap: bool,
+) -> adw::Dialog {
     let view = gtk::TextView::new();
     view.set_editable(false);
     view.set_monospace(true);
-    view.set_wrap_mode(gtk::WrapMode::WordChar);
+    view.set_wrap_mode(if wrap {
+        gtk::WrapMode::WordChar
+    } else {
+        gtk::WrapMode::None
+    });
     view.buffer().set_text(text);
     view.set_widget_name("properties-text");
     let scrolled = gtk::ScrolledWindow::builder()
@@ -383,7 +400,9 @@ pub fn text_dialog(parent: &impl IsA<gtk::Widget>, title: &str, intro: &str, tex
     content.set_margin_start(12);
     content.set_margin_end(12);
     content.set_margin_bottom(12);
-    content.append(&wrapped_label(intro));
+    if !intro.is_empty() {
+        content.append(&wrapped_label(intro));
+    }
     content.append(&scrolled);
     let header = adw::HeaderBar::new();
     let view_ = adw::ToolbarView::new();
@@ -391,8 +410,8 @@ pub fn text_dialog(parent: &impl IsA<gtk::Widget>, title: &str, intro: &str, tex
     view_.set_content(Some(&content));
     let dialog = adw::Dialog::builder()
         .title(title)
-        .content_width(640)
-        .content_height(520)
+        .content_width(size.0)
+        .content_height(size.1)
         .child(&view_)
         .build();
     dialog.present(Some(parent.as_ref()));
@@ -464,6 +483,14 @@ pub async fn wait_for_request(
 pub fn format_date(seconds: i64) -> String {
     glib::DateTime::from_unix_local(seconds)
         .and_then(|date| date.format("%x %H:%M"))
+        .map(|text| text.to_string())
+        .unwrap_or_default()
+}
+
+/// The time of day of `seconds` since the Unix epoch, local time, without seconds
+pub fn format_time(seconds: i64) -> String {
+    glib::DateTime::from_unix_local(seconds)
+        .and_then(|date| date.format("%H:%M"))
         .map(|text| text.to_string())
         .unwrap_or_default()
 }

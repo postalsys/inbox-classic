@@ -1,0 +1,20 @@
+[package]
+name = "pe-mcp"
+description = "The MCP server that lets the user's AI agents work on the mailbox, and the relay that connects them"
+version.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+pe-core = { path = "../pe-core" }
+pe-mime.workspace = true
+pe-store = { path = "../pe-store" }
+serde_json = "1"
+tokio = { version = "1.54.1", features = ["rt", "net", "io-util", "io-std", "time", "sync", "macros"] }
+
+[dev-dependencies]
+pe-testkit = { path = "../pe-testkit" }
+pe-net.workspace = true
+tokio = { version = "1.54.1", features = ["rt", "net", "io-util", "time", "macros"] }

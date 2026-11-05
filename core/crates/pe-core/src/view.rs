@@ -136,9 +136,41 @@ pub(crate) fn header_text(source: &[u8]) -> String {
         if line.is_empty() {
             break;
         }
-        let shown = |c: char| c == '\t' || !(c.is_control() || parser::is_direction_mark(c));
-        out.extend(line.chars().map(|c| if shown(c) { c } else { ' ' }));
+        push_shown(&mut out, line);
         out.push_str("\r\n");
+    }
+    out
+}
+
+/// A line of mail as a window may show it: control characters and direction marks (which could make it read as
+/// something else) as spaces, tabs kept
+fn push_shown(out: &mut String, line: &str) {
+    let shown = |c: char| c == '\t' || !(c.is_control() || parser::is_direction_mark(c));
+    out.extend(line.chars().map(|c| if shown(c) { c } else { ' ' }));
+}
+
+/// The most of a message's source View Source shows
+pub(crate) const MAX_SOURCE_TEXT: usize = 4 * 1024 * 1024;
+
+/// The whole source of a message as text safe to show in a window (View Source), from its first bytes (`source`, at
+/// most [`MAX_SOURCE_TEXT`] of them shown) of `size` in all: line breaks as `\r\n`, each line made safe as a header
+/// line is, bytes that are not UTF-8 as U+FFFD; past [`MAX_SOURCE_TEXT`] it is cut short, with a line that says so
+pub(crate) fn source_text(source: &[u8], size: usize) -> String {
+    let shown = &source[..source.len().min(MAX_SOURCE_TEXT)];
+    let text = String::from_utf8_lossy(shown);
+    let mut out = String::with_capacity(text.len() + text.len() / 40);
+    for (index, line) in text.split('\n').enumerate() {
+        if index > 0 {
+            out.push_str("\r\n");
+        }
+        push_shown(&mut out, line.strip_suffix('\r').unwrap_or(line));
+    }
+    let size = size.max(source.len());
+    if size > MAX_SOURCE_TEXT {
+        out.push_str(&format!(
+            "\r\n\r\n[{} more not shown. File > Save As keeps the whole message.]\r\n",
+            crate::format_size((size - MAX_SOURCE_TEXT) as u64)
+        ));
     }
     out
 }
@@ -146,6 +178,17 @@ pub(crate) fn header_text(source: &[u8]) -> String {
 /// The content of the `index`th listed attachment, with the name to save it under
 pub(crate) fn attachment(source: &[u8], index: usize) -> Option<(String, Vec<u8>)> {
     attachments(source).into_iter().nth(index)
+}
+
+/// The `index`th listed attachment with the name to save it under and its type
+pub(crate) fn attachment_with_type(source: &[u8], index: usize) -> Option<(String, String, Vec<u8>)> {
+    let message = parser::parse(source).ok()?;
+    let attachment = listed(&message.attachments).nth(index)?;
+    Some((
+        attachment.safe_filename(),
+        attachment.mime_type.clone(),
+        attachment.content.clone(),
+    ))
 }
 
 /// The listed attachments (not the pictures of an HTML body), each with the name to save it under, from one parse
@@ -309,6 +352,16 @@ mod tests {
         assert_eq!(
             text,
             "From: Ann <ann@example.com>\r\nSubject: Hi  [31m evil\r\nX-Bad: \u{fffd}\r\n"
+        );
+        // the whole source, made as safe to show; bare line feeds become CRLF
+        assert_eq!(
+            source_text(b"A: 1\nB: \x1b[31mx\r\n\r\nbody \xff\n", 0),
+            "A: 1\r\nB:  [31mx\r\n\r\nbody \u{fffd}\r\n"
+        );
+        let large = vec![b'a'; MAX_SOURCE_TEXT + 2048];
+        assert!(
+            source_text(&large, large.len())
+                .ends_with("[2 KB more not shown. File > Save As keeps the whole message.]\r\n")
         );
         // a message of bare line feeds, also when its body has CRLF blank lines, and one without a body
         assert_eq!(header_text(b"A: 1\nB: 2\n\nbody\r\n\r\nmore"), "A: 1\r\nB: 2\r\n");

@@ -261,20 +261,21 @@ func wrappingLabel(_ text: String) -> NSTextField {
 
 /// A window with `text` to read and copy, and OK (Message Properties)
 @MainActor
-func textDialog(title: String, intro: String, text: String) {
-    let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 640, height: 440), styleMask: [.titled, .resizable],
+func textDialog(title: String, intro: String?, text: String, ok: String = "OK", id: String = "text",
+                size: NSSize = NSSize(width: 640, height: 440)) {
+    let window = NSWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
     window.title = title
-    window.identifier = NSUserInterfaceItemIdentifier("text")
+    window.identifier = NSUserInterfaceItemIdentifier(id)
     let scroll = NSTextView.scrollableTextView()
     let view = scroll.documentView as! NSTextView
     view.isEditable = false
     view.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
     view.string = text
     view.setAccessibilityIdentifier("text.body")
-    let ok = NSButton(title: "OK", target: NSApp, action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
+    let ok = NSButton(title: ok, target: NSApp, action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
     ok.keyEquivalent = "\r"
-    let stack = NSStackView(views: [NSTextField(labelWithString: intro), scroll, ok])
+    let stack = NSStackView(views: (intro.map { [NSTextField(labelWithString: $0)] } ?? []) + [scroll, ok])
     stack.orientation = .vertical
     stack.alignment = .leading
     stack.edgeInsets = NSEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)

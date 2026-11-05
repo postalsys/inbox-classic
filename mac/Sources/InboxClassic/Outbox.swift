@@ -16,6 +16,8 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
         let recipients: String
         let created: Int64
         let problem: String?
+        /// an AI agent's message waits until then, while it can still be deleted
+        let notBefore: Int64
     }
 
     private let window: NSWindow
@@ -78,7 +80,8 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
             for index in 0..<pe_outbox_count(outbox) {
                 guard let queued = pe_outbox_get(outbox, index)?.pointee else { continue }
                 rows.append(Queued(id: queued.id, subject: text(queued.subject), recipients: text(queued.recipients),
-                                   created: queued.created, problem: queued.problem.map { String(cString: $0) }))
+                                   created: queued.created, problem: queued.problem.map { String(cString: $0) },
+                                   notBefore: queued.not_before))
             }
         }
         table.reloadData()
@@ -99,7 +102,14 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
         case "subject": value = queued.subject.isEmpty ? "(no subject)" : queued.subject
         case "to": value = queued.recipients
         case "queued": value = formatDate(queued.created)
-        default: value = queued.problem.map { "Not sent: \($0)" } ?? "Waiting"
+        default:
+            if let problem = queued.problem {
+                value = "Not sent: \(problem)"
+            } else if queued.notBefore != 0 {
+                value = "Sent by an AI agent; goes at \(timeOfDay(queued.notBefore))"
+            } else {
+                value = "Waiting"
+            }
         }
         let label = NSTextField(labelWithString: value)
         label.lineBreakMode = .byTruncatingTail

@@ -17,6 +17,10 @@ public struct Arguments {
     public var version = false
     /// a mailto: link to write a message for
     public var mailto: String?
+    /// --mcp: relay an AI agent's MCP connection to the app that is running (started when it is not), no window
+    public var mcp = false
+    /// --background: started for an agent (by --mcp), without its window
+    public var background = false
 
     public init(_ arguments: [String]) {
         var rest = arguments.dropFirst().makeIterator()
@@ -27,6 +31,8 @@ public struct Arguments {
             case "--sign-in-page-file": signInPageFile = rest.next()
             case "--memory-passwords": memoryPasswords = true
             case "--version": version = true
+            case "--mcp": mcp = true
+            case "--background": background = true
             default:
                 if argument.lowercased().hasPrefix("mailto:") {
                     mailto = argument
@@ -50,6 +56,11 @@ public func runApp(_ arguments: Arguments = Arguments(CommandLine.arguments)) ->
     if arguments.version {
         print("Inbox Classic \(Core.version)")
         exit(0)
+    }
+    if arguments.mcp {
+        // before the app starts: no Dock icon, no window, only the relay between the agent and the running app
+        let store = arguments.store ?? defaultStorePath()
+        exit(arguments.store.map { given in given.withCString { pe_mcp_relay(store, $0) } } ?? pe_mcp_relay(store, nil))
     }
     let app = NSApplication.shared
     let delegate = AppDelegate(arguments)
@@ -100,11 +111,18 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             return
         }
         self.core = core
+        // where the user's AI agents reach this app (--mcp); another app with this store open keeps them
+        pe_mcp_start(core.handle)
         main = MainWindow(core: core)
-        main.window.makeKeyAndOrderFront(nil)
+        // started for an agent: running, with its window closed as it is after closing it
+        if !arguments.background {
+            main.window.makeKeyAndOrderFront(nil)
+        }
         // once the window is laid out at its size, on the next turn of the run loop
         onMain { [weak self] in self?.main?.mailbox.placeDividers() }
-        NSApp.activate()
+        if !arguments.background {
+            NSApp.activate()
+        }
         if isBundled {
             UNUserNotificationCenter.current().delegate = self
         }
@@ -113,7 +131,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         // the first start: an account to read mail from
         onMain { [self] in
-            if core.accounts().isEmpty {
+            if core.accounts().isEmpty && !arguments.background {
                 main.addAccount()
             } else {
                 core.syncAll()
@@ -266,7 +284,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         _ = submenu("View", commands("view").map { item(for: $0) })
         _ = submenu("Message", [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
                                 separator(), item(for: .flag), separator(), item(for: .junk), item(for: .notJunk)])
-        _ = submenu("Tools", [item(for: .sync), item(for: .outbox), separator(), item(for: .notify), item(for: .defaultApp)])
+        _ = submenu("Tools", [item(for: .sync), item(for: .outbox), separator(), item(for: .aiAgents), separator(), item(for: .notify),
+                              item(for: .defaultApp)])
         let window = submenu("Window", [
             NSMenuItem(title: "Minimize", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"),
             NSMenuItem(title: "Zoom", action: #selector(NSWindow.performZoom(_:)), keyEquivalent: ""),
@@ -331,6 +350,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .notify: notify.toggle()
         case .open: main.show()
         case .defaultApp: main.makeDefaultMailApp()
+        case .viewSource: main.mailbox.showSource()
+        case .aiAgents: AgentsWindow.open(core: core)
         }
     }
 
@@ -344,7 +365,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         let typing = NSApp.keyWindow?.firstResponder is NSText
         switch command {
         case .delete: return !typing && main.mailbox.hasSelection
-        case .markRead, .markUnread, .flag, .move, .reply, .replyAll, .forward, .saveAs, .print, .properties:
+        case .markRead, .markUnread, .flag, .move, .reply, .replyAll, .forward, .saveAs, .print, .properties, .viewSource:
             return main.mailbox.hasSelection
         case .junk: return main.mailbox.hasSelection && !main.mailbox.inJunk
         case .notJunk: return main.mailbox.hasSelection && main.mailbox.inJunk

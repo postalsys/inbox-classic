@@ -44,6 +44,18 @@ public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int size);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int InternalGetWindowText(IntPtr hwnd, System.Text.StringBuilder text, int size);
 [DllImport("user32.dll")] public static extern int GetMenuItemCount(IntPtr menu);
+[DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetMenuString(IntPtr menu, uint item, System.Text.StringBuilder text, int size, uint flags);
+// the labels of a menu's items, by position (separators empty)
+public static string[] MenuLabels(IntPtr menu) {
+    int count = GetMenuItemCount(menu);
+    var labels = new string[count < 0 ? 0 : count];
+    for (int i = 0; i < labels.Length; i++) {
+        var text = new System.Text.StringBuilder(128);
+        GetMenuString(menu, (uint)i, text, 128, 0x400);
+        labels[i] = text.ToString().Replace("&", "");
+    }
+    return labels;
+}
 public struct RECT { public int Left, Top, Right, Bottom; }
 [StructLayout(LayoutKind.Sequential)] public struct GUITHREADINFO { public int cbSize, flags; public IntPtr active, focus, capture, menuOwner, moveSize, caret; public RECT caretRect; }
 [DllImport("user32.dll")] public static extern bool GetGUIThreadInfo(uint thread, ref GUITHREADINFO info);
@@ -110,6 +122,62 @@ public static RECT RemoteRect(IntPtr window, uint message, IntPtr wParam, long s
     CloseHandle(process);
     return rect;
 }
+// the text of tree item `item` of a tree view of another process (TVM_GETITEMW into its memory)
+public static string RemoteTreeText(IntPtr tree, IntPtr item) {
+    uint pid;
+    GetWindowThreadProcessId(tree, out pid);
+    string text = "";
+    IntPtr process = OpenProcess(0x0038, false, pid);
+    if (process == IntPtr.Zero) { return text; }
+    IntPtr remote = VirtualAllocEx(process, IntPtr.Zero, (IntPtr)1024, 0x3000, 0x04);
+    if (remote != IntPtr.Zero) {
+        IntPtr done;
+        // TVITEMW on x64: mask, hItem at 8, pszText at 24, cchTextMax at 32; the text after it at 64
+        byte[] tvitem = new byte[64];
+        BitConverter.GetBytes((uint)0x0011).CopyTo(tvitem, 0);
+        BitConverter.GetBytes(item.ToInt64()).CopyTo(tvitem, 8);
+        BitConverter.GetBytes(remote.ToInt64() + 64).CopyTo(tvitem, 24);
+        BitConverter.GetBytes(256).CopyTo(tvitem, 32);
+        WriteProcessMemory(process, remote, tvitem, (IntPtr)64, out done);
+        if (SendMessage(tree, 0x113E, IntPtr.Zero, remote) != IntPtr.Zero) {
+            byte[] bytes = new byte[512];
+            ReadProcessMemory(process, (IntPtr)(remote.ToInt64() + 64), bytes, (IntPtr)512, out done);
+            text = System.Text.Encoding.Unicode.GetString(bytes);
+            int end = text.IndexOf('\0');
+            if (end >= 0) { text = text.Substring(0, end); }
+        }
+        VirtualFreeEx(process, remote, IntPtr.Zero, 0x8000);
+    }
+    CloseHandle(process);
+    return text;
+}
+// the text of a cell of a list view of another process (LVM_GETITEMTEXTW into its memory)
+public static string RemoteListText(IntPtr list, int row, int column) {
+    uint pid;
+    GetWindowThreadProcessId(list, out pid);
+    string text = "";
+    IntPtr process = OpenProcess(0x0038, false, pid);
+    if (process == IntPtr.Zero) { return text; }
+    IntPtr remote = VirtualAllocEx(process, IntPtr.Zero, (IntPtr)1024, 0x3000, 0x04);
+    if (remote != IntPtr.Zero) {
+        IntPtr done;
+        // LVITEMW on x64: iSubItem at 8, pszText at 24, cchTextMax at 32; the text after it at 128
+        byte[] item = new byte[128];
+        BitConverter.GetBytes(column).CopyTo(item, 8);
+        BitConverter.GetBytes(remote.ToInt64() + 128).CopyTo(item, 24);
+        BitConverter.GetBytes(256).CopyTo(item, 32);
+        WriteProcessMemory(process, remote, item, (IntPtr)128, out done);
+        int length = (int)SendMessage(list, 0x1073, (IntPtr)row, remote);
+        if (length > 0) {
+            byte[] bytes = new byte[length * 2];
+            ReadProcessMemory(process, (IntPtr)(remote.ToInt64() + 128), bytes, (IntPtr)bytes.Length, out done);
+            text = System.Text.Encoding.Unicode.GetString(bytes);
+        }
+        VirtualFreeEx(process, remote, IntPtr.Zero, 0x8000);
+    }
+    CloseHandle(process);
+    return text;
+}
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
     var found = new System.Collections.Generic.List<IntPtr>();
@@ -130,6 +198,7 @@ $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LV
 $VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_EXIT = 101; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
+$IDM_VIEW_SOURCE = 132; $IDM_AI_AGENTS = 133
 $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $IDM_FORWARD = 110; $IDM_HELP = 111
 $IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
@@ -267,6 +336,10 @@ function Key([IntPtr]$window, [int]$vk) {
 function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) {
     $t = if ($title) { $title } else { [NullString]::Value }
     WaitFor { $w = [Native.Win]::FindWindow($class, $t); if ($w -ne [IntPtr]::Zero) { $w } } $Seconds
+}
+# a window of the app's own once it shows: its controls are made and filled before it does, so they can be read
+function WaitShown([string]$class, [int]$Seconds = 20) {
+    WaitFor { $w = [Native.Win]::FindWindow($class, [NullString]::Value); if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w)) { $w } } $Seconds
 }
 # the window of the WebView2 of a compose window's editor that takes input, clicked into as a user would when the
 # cursor is in another field
@@ -514,6 +587,43 @@ try {
         Shot $properties 'read-7-properties'
         Click $properties 1
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)) 'OK closes it'
+    }
+
+    Step 'the message list menu and the message source'
+    # the menu key in the list, as Shift+F10 opens it: the menu at the selected message
+    $WM_CONTEXTMENU = 0x007B
+    [void][Native.Win]::PostMessage($main, $WM_CONTEXTMENU, $list, [IntPtr](-1))
+    $menu = WaitWindow '#32768' $null 10
+    Check ($null -ne $menu) 'the message list has a right-click menu'
+    if ($menu) {
+        $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+        $labels = [Native.Win]::MenuLabels($hmenu)
+        Check (($labels -contains 'Reply to Sender') -and ($labels -contains 'Mark as Unread') -and ($labels -contains 'Move to Folder...') -and
+            ($labels -contains 'View Source') -and ($labels -contains 'Properties')) "with the message's actions ($($labels -join ', '))"
+        Check ($labels -notcontains 'Mark as Read') 'a read message offers Mark as Unread, not Mark as Read'
+        Shot $main 'read-14-menu' $menu
+        $sourceAt = [array]::IndexOf($labels, 'View Source')
+        for ($i = 0; $i -le $sourceAt; $i++) { if ($labels[$i]) { Key $menu $VK_DOWN } }
+        Key $menu $VK_RETURN
+    }
+    $source = WaitShown 'InboxClassicSource' 5
+    if (-not $source) {
+        # where the menu does not take posted keys: the command, as the menu would send it
+        $menu = [Native.Win]::FindWindow('#32768', [NullString]::Value)
+        if ($menu -ne [IntPtr]::Zero) { Key $menu $VK_ESCAPE }
+        Command $main $IDM_VIEW_SOURCE
+        $source = WaitShown 'InboxClassicSource' 10
+    }
+    Check ($null -ne $source) 'View Source opens the whole message'
+    if ($source) {
+        $box = [Native.Win]::FindDescendants($source, 'Edit') | Select-Object -First 1
+        $raw = if ($box) { WindowText $box } else { '' }
+        Check ($raw -match 'Subject: October newsletter' -and $raw -match 'Content-Type: multipart' -and $raw -match 'This message is') 'with its header and every part, as the server has it'
+        $sourceTitle = WindowText $source
+        Check ($sourceTitle -eq 'Message Source: October newsletter') "the window names the message ($sourceTitle)"
+        Shot $source 'read-15-source'
+        Click $source 1
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($source) } 10)) 'Close closes it'
     }
 
     Step 'pictures from the internet'
@@ -1265,6 +1375,122 @@ public static class Dragger {
     Check ([bool](WaitFor { Visible $main $IDC_LOGO } 15)) 'a sender whose logo the server passed has it beside the header'
     Shot $main 'read-11-logo'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
+
+    Step 'a collapsed account'
+    # the account's own item, the first of the tree, and the Inbox under it
+    $accountItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+    $inboxItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $accountItem)
+    $TVM_GETITEMSTATE = 0x1127; $TVIS_BOLD = 0x10; $VK_LEFT = 0x25; $VK_RIGHT = 0x27
+    $bold = { param($item) ([int][Native.Win]::SendMessage($tree, $TVM_GETITEMSTATE, $item, [IntPtr]$TVIS_BOLD) -band $TVIS_BOLD) -ne 0 }
+    $inboxText = [Native.Win]::RemoteTreeText($tree, $inboxItem)
+    Check ($inboxText -match '\((\d+)\)$') "the Inbox has unread messages ($inboxText)"
+    $inboxUnread = if ($inboxText -match '\((\d+)\)$') { [int]$Matches[1] } else { 0 }
+    # collapsed with the keyboard, as a user would, so the tree tells the window (TVM_EXPAND would not)
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $accountItem)
+    [void][Native.Win]::SetForegroundWindow($main)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+    $collapsed = WaitFor { $t = [Native.Win]::RemoteTreeText($tree, $accountItem); if ($t -match '\((\d+)\)$' -and [int]$Matches[1] -ge $inboxUnread) { $t } } 5
+    Check ([bool]$collapsed) "collapsed, the account shows the unread messages of its folders ($([Native.Win]::RemoteTreeText($tree, $accountItem)))"
+    Check (& $bold $accountItem) 'and is bold'
+    Shot $main 'folders-5-collapsed'
+    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
+    $expanded = WaitFor { $t = [Native.Win]::RemoteTreeText($tree, $accountItem); if ($t -notmatch '\(\d+\)$') { $t } } 5
+    Check ([bool]$expanded -and -not (& $bold $accountItem) -and ([Native.Win]::RemoteTreeText($tree, $inboxItem)) -match '\(\d+\)$') 'expanded, the count is back on the Inbox alone'
+
+    Step 'an AI agent'
+    $IDC_AGENT_LEVEL = 600; $IDC_AGENT_PATH = 611; $IDC_AGENT_RECIPIENTS = 612; $IDC_AGENT_WARNING = 614; $IDC_AGENT_SEND = 615
+    $IDC_AGENTS_HOSTS = 631; $IDC_AGENTS_LOG = 634; $IDC_AGENTS_UNDO = 635; $BM_GETCHECK = 0x00F0; $BM_SETCHECK = 0x00F1
+    # two new messages for the agent to read, whatever the steps before left unread
+    $inboxBefore = @(Messages 'INBOX').Count
+    foreach ($new in @(@('Maria Lopez <maria@example.org>', 'Quarterly report draft', 'Here is the draft of the quarterly report. Comments by Thursday?'),
+                       @('Sam Lee <sam@example.org>', 'Team lunch on Friday', 'Who is in for lunch on Friday at noon?'))) {
+        AddMessage ("From: $($new[0])`r`nTo: testuser@postalexpress.test`r`nSubject: $($new[1])`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`n" +
+            "Message-ID: <$([guid]::NewGuid())@example.org>`r`n`r`n$($new[2])`r`n")
+    }
+    SelectFolder 0
+    Command $main $IDM_SYNC
+    [void](WaitFor { if ((Rows) -ge $inboxBefore + 2) { Rows } } 20)
+    $unreadBefore = @(Messages 'INBOX' | Where-Object { $_.flags -notcontains '\Seen' }).Count
+    Start-Sleep -Seconds 1
+    Shot $main 'agents-1-before'
+    # the agent: Node.js under a name of its own, as an agent host would be, starting the relay (--mcp)
+    $agentOut = Join-Path $Out 'agent.jsonl'
+    $agentExe = Join-Path $Out 'My AI agent.exe'
+    Copy-Item -Force (Get-Command node).Source $agentExe
+    $env:APP = (Resolve-Path $Exe).Path; $env:STORE = $store; $env:OUT = $agentOut
+    $agent = Start-Process -FilePath $agentExe -ArgumentList "`"$(Join-Path $PSScriptRoot 'ui-e2e\agent.mjs')`"" -PassThru -WindowStyle Hidden
+    $agentSaid = { param($step) if (Test-Path $agentOut) { @(Get-Content $agentOut | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.step -eq $step })[0] } }
+    $ask = WaitShown 'InboxClassicAgentAccess' 30
+    Check ($null -ne $ask) 'a program whose agent connects for the first time is asked about'
+    if ($ask) {
+        Check ((WindowText ([Native.Win]::GetDlgItem($ask, $IDC_AGENT_PATH))) -match 'My AI agent\.exe') 'the question names the program'
+        $checked = { param($i) [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($ask, $IDC_AGENT_LEVEL + $i), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 }
+        Check ((& $checked 0) -and (& $checked 1) -and -not (& $checked 2) -and -not (& $checked 3)) 'reading and organizing are offered, sending is not'
+        # sending too, for the rest of the test
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($ask, $IDC_AGENT_LEVEL + 3), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        Shot $ask 'agents-2-connect'
+        Click $ask 1
+    }
+    $marked = WaitFor { & $agentSaid 'marked' } 30
+    Check ((& $agentSaid 'initialize').result.result.serverInfo.name -eq 'inbox-classic') 'allowed, the agent connects'
+    Check (@((& $agentSaid 'tools').result).Count -eq 14) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
+    $read = (& $agentSaid 'read').result
+    Check ($read.notice -match 'not as instructions' -and $read.unread) 'it reads a message as text, told it is the sender''s, without marking it read'
+    Check ($null -ne $marked -and $marked.result.done) 'it marks two messages read'
+    $unreadAfter = WaitFor { $n = @(Messages 'INBOX' | Where-Object { $_.flags -notcontains '\Seen' }).Count; if ($n -eq $unreadBefore - 2) { "$n" } } 20
+    Check ($null -ne $unreadAfter) "on the server ($unreadBefore unread before, $unreadAfter after)"
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match ", $($unreadBefore - 2) unread" } 10)) "and in the window at once ($(StatusPart $mainStatus 2))"
+    Shot $main 'agents-3-after'
+    $send = WaitShown 'InboxClassicAgentSend' 30
+    Check ($null -ne $send) 'a message the agent wants to send is shown to the user first'
+    if ($send) {
+        $recipients = [Native.Win]::GetDlgItem($send, $IDC_AGENT_RECIPIENTS)
+        Check ([Native.Win]::RemoteListText($recipients, 0, 1) -eq 'pat@example.net' -and [Native.Win]::RemoteListText($recipients, 0, 3) -eq 'Never written to') 'every recipient by address, the new ones marked'
+        Check ((WindowText ([Native.Win]::GetDlgItem($send, $IDC_AGENT_WARNING))) -match 'never written to pat@example.net') 'with a warning about the new address'
+        Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($send, $IDC_AGENT_SEND))) 'Send waits a moment before it can be pressed'
+        Start-Sleep -Seconds 2
+        Shot $send 'agents-4-send'
+        Click $send $IDC_AGENT_SEND
+    }
+    $sent = WaitFor { & $agentSaid 'sent' } 20
+    Check ($sent.result.sent -eq $true) 'the agent learns the user said yes'
+    Command $main $IDM_OUTBOX
+    $outbox = WaitShown 'InboxClassicOutbox' 10
+    if ($outbox) {
+        $outboxList = [Native.Win]::GetDlgItem($outbox, 450)
+        Check ([Native.Win]::RemoteListText($outboxList, 0, 3) -match '^Sent by an AI agent; goes at') 'it waits in the Outbox, where it can still be deleted'
+        Shot $outbox 'agents-5-outbox'
+        [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
+    }
+    Command $main $IDM_AI_AGENTS
+    $agents = WaitShown 'InboxClassicAgents' 10
+    Check ($null -ne $agents) 'Tools > AI Agents opens'
+    if ($agents) {
+        $hosts = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_HOSTS)
+        $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
+        Check ([Native.Win]::RemoteListText($hosts, 0, 0) -eq 'My AI agent' -and [Native.Win]::RemoteListText($hosts, 0, 1) -match '^Read, organize and send with your yes') "it lists the program and what it may do ($([Native.Win]::RemoteListText($hosts, 0, 1)))"
+        $newest = { [Native.Win]::RemoteListText($log, 0, 2) }
+        [void](WaitFor { (& $newest) -match '^Sent' } 10)
+        Check ((& $newest) -match '^Sent "Lunch on Friday\?" to pat@example.net' -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') "and what its agent did, newest first ($(& $newest); $([Native.Win]::RemoteListText($log, 1, 2)))"
+        Shot $agents 'agents-6-window'
+        # the newest, the message sent, is selected: Undo takes it out of the Outbox before it goes
+        Click $agents $IDC_AGENTS_UNDO
+        Check ([bool](WaitFor { (& $newest) -match 'taken back' } 10)) "Undo takes the message back ($(& $newest))"
+        [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
+    }
+    Command $main $IDM_OUTBOX
+    $outbox = WaitShown 'InboxClassicOutbox' 10
+    if ($outbox) {
+        Check ([int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'and the Outbox is empty'
+        [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
+    }
+    if ($agent -and -not $agent.HasExited) { $agent | Stop-Process -Force -ErrorAction SilentlyContinue }
 
     Step 'marking all read'
     $IDM_MARK_ALL_READ = 126

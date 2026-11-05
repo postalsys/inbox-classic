@@ -19,10 +19,12 @@ pub struct Queued {
     pub created: i64,
     /// Why the last try did not work, None before the first
     pub problem: Option<String>,
+    /// It waits until then before it goes, seconds since the Unix epoch
+    pub not_before: Option<i64>,
 }
 
 /// Without the message itself, which only sending needs ([`Store::queued_raw`])
-const COLUMNS: &str = "id, account_id, envelope_from, envelope_to, subject, recipients, created, problem";
+const COLUMNS: &str = "id, account_id, envelope_from, envelope_to, subject, recipients, created, problem, not_before";
 
 fn from_row(row: &rusqlite::Row) -> rusqlite::Result<Queued> {
     let to: String = row.get(3)?;
@@ -35,6 +37,7 @@ fn from_row(row: &rusqlite::Row) -> rusqlite::Result<Queued> {
         recipients: row.get(5)?,
         created: row.get(6)?,
         problem: row.get(7)?,
+        not_before: row.get(8)?,
     })
 }
 
@@ -42,8 +45,8 @@ impl Store {
     /// Puts a message, built as `raw`, in the Outbox; its id
     pub fn queue(&self, message: &Queued, raw: &[u8]) -> Result<i64> {
         self.db.execute(
-            "INSERT INTO outbox (account_id, envelope_from, envelope_to, raw, subject, recipients, created, problem) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            "INSERT INTO outbox (account_id, envelope_from, envelope_to, raw, subject, recipients, created, problem, \
+             not_before) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             params![
                 message.account_id,
                 message.envelope_from,
@@ -53,6 +56,7 @@ impl Store {
                 message.recipients,
                 message.created,
                 message.problem,
+                message.not_before,
             ],
         )?;
         Ok(self.db.last_insert_rowid())
@@ -70,6 +74,32 @@ impl Store {
         self.db
             .query_row(&format!("SELECT {COLUMNS} FROM outbox WHERE id = ?1"), [id], from_row)
             .optional()
+    }
+
+    /// The messages of an account that may go at `now`: those that do not wait for a later time, oldest first
+    pub fn outbox_due(&self, account: AccountId, now: i64) -> Result<Vec<Queued>> {
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT {COLUMNS} FROM outbox WHERE account_id = ?1 AND COALESCE(not_before, 0) <= ?2 ORDER BY id"
+        ))?;
+        statement.query_map(params![account, now], from_row)?.collect()
+    }
+
+    /// When the next message of an account that waits for its time may go, None when none waits
+    pub fn outbox_next_due(&self, account: AccountId) -> Result<Option<i64>> {
+        self.db.query_row(
+            "SELECT MIN(not_before) FROM outbox WHERE account_id = ?1 AND not_before IS NOT NULL",
+            [account],
+            |row| row.get(0),
+        )
+    }
+
+    /// The messages of an account whose time came no longer wait: they go as any other from now on
+    pub fn clear_not_before(&self, account: AccountId, now: i64) -> Result<()> {
+        self.db.execute(
+            "UPDATE outbox SET not_before = NULL WHERE account_id = ?1 AND not_before <= ?2",
+            params![account, now],
+        )?;
+        Ok(())
     }
 
     /// The message itself, as it goes over SMTP
@@ -124,6 +154,7 @@ mod tests {
             subject: subject.into(),
             recipients: "Bob, c@example.com".into(),
             created: 1_700_000_000,
+            not_before: None,
             problem: None,
         }
     }
@@ -159,5 +190,35 @@ mod tests {
         store.remove_account(second).unwrap();
         assert!(store.queued(two).unwrap().is_none());
         assert!(store.outbox(None).unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_message_can_wait_for_its_time() {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        store.queue(&queued(account, "now"), b"raw").unwrap();
+        let later = store
+            .queue(
+                &Queued {
+                    not_before: Some(1_000),
+                    ..queued(account, "later")
+                },
+                b"raw",
+            )
+            .unwrap();
+        assert_eq!(store.outbox_next_due(account).unwrap(), Some(1_000));
+        let subjects = |now| {
+            store
+                .outbox_due(account, now)
+                .unwrap()
+                .into_iter()
+                .map(|q| q.subject)
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(subjects(999), ["now"]);
+        assert_eq!(subjects(1_000), ["now", "later"]);
+        assert_eq!(store.queued(later).unwrap().unwrap().not_before, Some(1_000));
+        store.unqueue(later).unwrap();
+        assert_eq!(store.outbox_next_due(account).unwrap(), None);
     }
 }

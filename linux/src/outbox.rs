@@ -22,9 +22,11 @@ fn fill(list: &gtk::ListBox, ids: &RefCell<Vec<i64>>, select: usize, buttons: &[
         } else {
             &message.subject
         };
-        let status = match &message.problem {
-            Some(problem) => format!("Not sent: {problem}"),
-            None => "Waiting".into(),
+        // one an AI agent sent waits a moment, while it can still be deleted
+        let status = match (&message.problem, message.not_before) {
+            (Some(problem), _) => format!("Not sent: {problem}"),
+            (None, Some(at)) => format!("Sent by an AI agent; goes at {}", ui::format_time(at)),
+            (None, None) => "Waiting".into(),
         };
         let row = adw::ActionRow::builder()
             .title(glib::markup_escape_text(subject))

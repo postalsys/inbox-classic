@@ -166,6 +166,10 @@ fn reads_mail_through_the_c_api() {
         ("INBOX".into(), 2, 1, 0)
     );
     assert!(rows.iter().any(|f| f.special_use == PeSpecialUse::Sent));
+    // what a collapsed account shows: the unread messages of its folders, none hidden under the Inbox
+    assert_eq!(inbox.unread_below, 0);
+    assert_eq!(unsafe { pe_folder_list_unread(folders) }, 1);
+    assert_eq!(unsafe { pe_folder_list_unread(std::ptr::null()) }, 0);
     let inbox = inbox.id;
     unsafe { pe_folder_list_free(folders) };
 
@@ -305,6 +309,45 @@ fn reads_mail_through_the_c_api() {
         pe_string_free(filename);
     }
     assert!(unsafe { pe_attachment_data(core, inbox, uid, 1, &mut len, &mut filename) }.is_null());
+
+    // View Source: the whole message as text, its window named for it
+    let mut title: *mut c_char = null_mut();
+    let source = unsafe { pe_message_source_text(core, inbox, uid, &mut title) };
+    let shown = text(source);
+    assert!(
+        shown.contains("Subject: Report\r\n") && shown.contains("<script>x()</script>") && shown.contains("JVBERg==")
+    );
+    assert_eq!(text(title), "Message Source: Report");
+    unsafe {
+        pe_string_free(source);
+        pe_string_free(title);
+    }
+    assert!(unsafe { pe_message_source_text(core, inbox, uid + 99, &mut title) }.is_null());
+    assert!(unsafe { pe_message_source_text(core, inbox, uid, std::ptr::null_mut()) }.is_null());
+
+    // AI agents: on, none decided about, nothing done yet; the setup an agent's settings take
+    assert!(unsafe { pe_agents_enabled(core) });
+    assert!(unsafe { pe_agents_set_enabled(core, false) } && !unsafe { pe_agents_enabled(core) });
+    assert!(unsafe { pe_agents_set_enabled(core, true) });
+    let hosts = unsafe { pe_agent_hosts(core) };
+    assert_eq!(unsafe { pe_agent_host_list_count(hosts) }, 0);
+    assert!(unsafe { pe_agent_host_list_get(hosts, 0) }.is_null());
+    unsafe { pe_agent_host_list_free(hosts) };
+    let log = unsafe { pe_agent_log(core, 10) };
+    assert_eq!(unsafe { pe_agent_log_count(log) }, 0);
+    unsafe { pe_agent_log_free(log) };
+    assert_eq!(unsafe { pe_agent_ask_kind(core, 1) }, PeAgentAskKind::None);
+    assert!(unsafe { pe_agent_send_info(core, 1) }.is_null());
+    assert!(!unsafe { pe_agent_answer_connect(core, 1, true, PE_AGENT_DEFAULT, std::ptr::null(), 0) });
+    let given = unsafe { pe_mcp_config(path.as_ptr()) };
+    let config = text(given);
+    unsafe { pe_string_free(given) };
+    assert!(
+        config.contains("\"--mcp\"") && config.contains("\"--store\""),
+        "{config}"
+    );
+    // the server for agents starts once, for this store
+    assert!(unsafe { pe_mcp_start(core) } && unsafe { pe_mcp_start(core) });
 
     assert!(unsafe { pe_message_set_seen(core, inbox, uid, true) });
     wait(&events, |e| e.kind == PeEventKind::FolderChanged && e.folder == inbox);

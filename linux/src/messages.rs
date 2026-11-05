@@ -393,6 +393,7 @@ fn text_column(
 
 /// A row dragged onto a folder of the tree: its folder and uid, as text
 fn add_drag_source(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
+    add_menu(widget, item);
     let source = gtk::DragSource::new();
     source.set_actions(gdk::DragAction::MOVE | gdk::DragAction::COPY);
     let item = item.downgrade();
@@ -402,6 +403,22 @@ fn add_drag_source(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
         Some(gdk::ContentProvider::for_value(&payload.to_value()))
     });
     widget.add_controller(source);
+}
+
+/// The right-click menu of the message a cell shows: its row selected first, as a click would
+fn add_menu(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
+    let click = gtk::GestureClick::new();
+    click.set_button(gdk::BUTTON_SECONDARY);
+    let item = item.downgrade();
+    click.connect_pressed(move |gesture, _, x, y| {
+        let (Some(item), Some(widget)) = (item.upgrade(), gesture.widget()) else {
+            return;
+        };
+        let main = shell().main();
+        main.list.select(item.position());
+        main.message_menu(&widget, x, y);
+    });
+    widget.add_controller(click);
 }
 
 pub fn drag_payload(folder: i64, uid: u64) -> String {

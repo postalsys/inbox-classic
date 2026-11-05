@@ -97,6 +97,11 @@ void RunModal(HWND dialog, HWND focus, const bool& done);
 // the path to save an attachment to, starting from the safe name the core made; empty when cancelled
 std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title = L"Save Attachment As",
                            const wchar_t* filter = L"All files (*.*)\0*.*\0", const wchar_t* extension = nullptr);
+// `text` with its line breaks as CRLF, as an edit box shows them
+std::wstring WithCrlf(const std::wstring& text);
+// a modal window that can be resized with `text` (a message's source) in a fixed-width font to read and copy, and
+// Close
+void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& text);
 // a modal window with `text` to read and copy in a box that can not be edited, and OK (Message Properties)
 void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text);
 // a PNG picture of the exe's resources (RCDATA, app.rc) as a bitmap `height` pixels high over `background`, as wide
@@ -149,6 +154,18 @@ bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& passw
 void SignInAppsDialog(HWND owner, PeCore* core);
 // the editor of a sign-in app: a new one when `app` is NULL; the id of the app saved, 0 when cancelled
 int64_t SignInAppEditor(HWND owner, PeCore* core, const PeSignInApp* app);
+
+// ---- agents.cpp ----
+
+// a question of an AI agent for the user (the AgentAsk event): a program that connects for the first time, or a
+// message an agent wants to send
+void AgentQuestion(HWND owner, PeCore* core, uint64_t request);
+// Tools > AI Agents: whether agents may connect, the programs let in or turned away, what agents did
+void AgentsDialog(HWND owner, PeCore* core);
+// what agents did changed (AgentLogChanged): an open AI Agents window shows it
+void AgentsChanged();
+// main.cpp: the store given with --store, NULL for the usual one (for the setup of an agent)
+const char* StoreArgument();
 
 // ---- outbox.cpp ----
 
@@ -259,6 +276,13 @@ public:
     void PrintShown();
     // File > Properties (Alt+Enter): the Internet headers of the message shown
     void ShowProperties(HWND owner);
+    // View Source: the whole message as the server has it
+    void ShowSource(HWND owner);
+    // the message list's right-click menu at `screen`, or at the selected row for (-1, -1) (the menu key)
+    void MessageMenu(POINT screen);
+    HWND List() const { return list_; }
+    // the right-click menu while it is open, for the UI test
+    HMENU OpenMenu() const { return lastMenu_; }
     void Import(HWND owner);
     bool ClearFind();
     void ResetFind();
@@ -324,6 +348,7 @@ private:
 
     void FillAccount(HTREEITEM root, int64_t account);
     void UpdateFolders(int64_t account);
+    void ShowRow(HTREEITEM item);
     void ReloadList(bool keepSelection);
     // what the list shows: the folder (or every folder), the Show choice and the words of the Find box
     PeSearch Search() const;
@@ -408,6 +433,16 @@ private:
     Preview preview_;
     // the tree items of the folders, by folder id; a tree item's data is its folder id, 0 for an account
     std::unordered_map<int64_t, HTREEITEM> items_;
+    // the account's own item of each account
+    std::unordered_map<int64_t, HTREEITEM> accountItems_;
+    // what each row of the tree shows: its name, its own unread messages and those of the folders under it
+    struct TreeRow {
+        std::wstring name;
+        uint64_t own = 0;
+        uint64_t below = 0;
+    };
+    std::unordered_map<HTREEITEM, TreeRow> rows_;
+    HMENU lastMenu_ = nullptr;
     std::unordered_map<int64_t, std::wstring> accountNames_;
     std::unordered_map<int64_t, std::wstring> accountEmails_;
     std::unordered_map<int64_t, SignInChoice> accountSignIns_;
@@ -506,6 +541,30 @@ enum ControlId : WORD {
     IDC_LOGO,
     // under the header of a message that could not be downloaded: a click tries again
     IDC_RETRY,
+};
+
+// the controls of the AI agents' windows (agents.cpp), which the UI test finds by them
+enum AgentControlId : WORD {
+    // what a program may do: the first of the four levels (the others follow it), the accounts, its file
+    IDC_AGENT_LEVEL = 600,
+    IDC_AGENT_ACCOUNTS = 610,
+    IDC_AGENT_PATH,
+    // a message to send: the recipients, the text, the warning, and the three answers
+    IDC_AGENT_RECIPIENTS,
+    IDC_AGENT_BODY,
+    IDC_AGENT_WARNING,
+    IDC_AGENT_SEND,
+    IDC_AGENT_COMPOSE,
+    IDC_AGENT_DONT_SEND,
+    // Tools > AI Agents
+    IDC_AGENTS_ENABLED = 630,
+    IDC_AGENTS_HOSTS,
+    IDC_AGENTS_CHANGE,
+    IDC_AGENTS_REMOVE,
+    IDC_AGENTS_LOG,
+    IDC_AGENTS_UNDO,
+    IDC_AGENTS_CLEAR,
+    IDC_AGENTS_SETUP,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

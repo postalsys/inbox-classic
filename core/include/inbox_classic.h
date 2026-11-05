@@ -11,6 +11,27 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+// What an agent may do, bits for `levels`: read mail
+#define PE_AGENT_READ 1
+
+// Organize it: read state, flags, junk, moves, deletes to Deleted Items
+#define PE_AGENT_ORGANIZE 2
+
+// Write drafts
+#define PE_AGENT_DRAFTS 4
+
+// Send, each message after the user says yes
+#define PE_AGENT_SEND 8
+
+// What a program the user lets in is offered first
+#define PE_AGENT_DEFAULT 3
+
+// How long a message an agent sent waits in the Outbox, in seconds
+#define PE_AGENT_SEND_DELAY 30
+
+// The levels an agent may be given, as the windows offer them: `count` of them
+#define PE_AGENT_LEVEL_COUNT 4
+
 // For `pe_core_open_with`: passwords and sign-ins are kept for this run only, not in the Credential Manager
 // (test runs, a shared computer)
 #define PE_OPEN_MEMORY_PASSWORDS 1
@@ -35,6 +56,23 @@ typedef enum PeFailureKind {
   PE_FAILURE_KIND_AUTHENTICATION = 3,
   PE_FAILURE_KIND_OTHER = 4,
 } PeFailureKind;
+
+typedef enum PeAgentAskKind {
+  // Answered already, or no such question
+  PE_AGENT_ASK_KIND_NONE = 0,
+  // A program wants to connect: `pe_agent_connect_info`, answered with `pe_agent_answer_connect`
+  PE_AGENT_ASK_KIND_CONNECT = 1,
+  // An agent wants to send a message: `pe_agent_send_info`, answered with `pe_agent_answer_send`
+  PE_AGENT_ASK_KIND_SEND = 2,
+} PeAgentAskKind;
+
+typedef enum PeAgentSendAnswer {
+  // Into the Outbox, to go after PE_AGENT_SEND_DELAY seconds
+  PE_AGENT_SEND_ANSWER_SEND = 0,
+  // Nothing sent: the draft comes back, for the window that writes a message
+  PE_AGENT_SEND_ANSWER_COMPOSE = 1,
+  PE_AGENT_SEND_ANSWER_DONT_SEND = 2,
+} PeAgentSendAnswer;
 
 typedef enum PeEventKind {
   PE_EVENT_KIND_SYNC_STARTED = 1,
@@ -74,6 +112,10 @@ typedef enum PeEventKind {
   // `folder`/`uid` (opened with `pe_message_open`) could not be downloaded: `failure` and `message` say why, for
   // `pe_reader_page`. Opening it again tries again
   PE_EVENT_KIND_MESSAGE_FAILED = 17,
+  // An AI agent needs the user to answer question `uid`: `pe_agent_ask_kind`
+  PE_EVENT_KIND_AGENT_ASK = 18,
+  // What AI agents did changed: `pe_agent_log`
+  PE_EVENT_KIND_AGENT_LOG_CHANGED = 19,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -180,6 +222,14 @@ typedef struct PeAccountList PeAccountList;
 // from `pe_account_settings_info`; free with `pe_account_settings_free`. NULL for an unknown account.
 typedef struct PeAccountSettingsView PeAccountSettingsView;
 
+typedef struct PeAgentConnectInfo PeAgentConnectInfo;
+
+typedef struct PeAgentHostList PeAgentHostList;
+
+typedef struct PeAgentLog PeAgentLog;
+
+typedef struct PeAgentSendInfo PeAgentSendInfo;
+
 // A lookup's result; free with `pe_autoconfig_free`
 typedef struct PeAutoconfig PeAutoconfig;
 
@@ -208,6 +258,79 @@ typedef struct PeSignInAppList PeSignInAppList;
 
 // The presets; free with `pe_sign_in_preset_list_free`
 typedef struct PeSignInPresetList PeSignInPresetList;
+
+// A program that wants to connect
+typedef struct PeAgentConnect {
+  // Its file
+  const char *path;
+  // The question for the dialog: "Claude wants to use your mail"
+  const char *title;
+  // What the dialog says under it
+  const char *detail;
+} PeAgentConnect;
+
+// A message an agent wants to send, as the confirmation shows it
+typedef struct PeAgentSend {
+  // The account it goes from
+  int64_t account;
+  // The dialog's title line: "Claude wants to send this message"
+  const char *title;
+  // What the dialog says under it
+  const char *detail;
+  // The account, as From shows it
+  const char *from;
+  const char *subject;
+  // What goes, as plain text (the quoted message of a reply after it, as the mail program adds it)
+  const char *text;
+  // "Reply to "Plans"", "Forward of ..."; empty for a new message
+  const char *original;
+  // One line, "You have never written to a@b.c", empty when none is new
+  const char *warning;
+  // The files that go with it, one line ("Files: a.pdf (13 KB)"), empty without any
+  const char *files;
+} PeAgentSend;
+
+// A recipient of a message an agent wants to send
+typedef struct PeAgentRecipient {
+  // `To`, `Cc` or `Bcc`
+  const char *field;
+  const char *name;
+  const char *address;
+  // The user never wrote to this address
+  bool new_address;
+} PeAgentRecipient;
+
+// A program the user decided about
+typedef struct PeAgentHost {
+  int64_t id;
+  const char *name;
+  const char *path;
+  bool allowed;
+  // PE_AGENT_* bits
+  uint32_t levels;
+  // What it may do, in words: "Read and organize mail, 1 account", "Turned away"
+  const char *access;
+  // Seconds since the Unix epoch, 0 when never
+  int64_t last_used;
+  // The heading and the words of Change for it
+  const char *change_title;
+  const char *change_detail;
+} PeAgentHost;
+
+// What an agent did
+typedef struct PeAgentLogEntry {
+  int64_t id;
+  // The program
+  const char *host;
+  // Seconds since the Unix epoch
+  int64_t at;
+  // `Moved "Invoice 12" to Archive`, with "(taken back)" once it was
+  const char *summary;
+  // `pe_agent_undo` can take it back
+  bool can_undo;
+  // It was taken back
+  bool undone;
+} PeAgentLogEntry;
 
 // An event; valid only during the callback
 typedef struct PeEvent {
@@ -289,6 +412,9 @@ typedef struct PeFolder {
   bool selectable;
   uint64_t total;
   uint64_t unread;
+  // The unread messages of the folders under it (not Junk E-mail or Deleted Items): a collapsed folder shows
+  // `unread + unread_below`, an expanded one `unread`
+  uint64_t unread_below;
 } PeFolder;
 
 typedef struct PeSearch {
@@ -414,6 +540,8 @@ typedef struct PeQueued {
   int64_t created;
   // Why the last try did not work, NULL before the first
   const char *problem;
+  // It waits until then before it goes (one an AI agent sent), seconds since the Unix epoch; 0 when it does not
+  int64_t not_before;
 } PeQueued;
 
 // The fields a compose window starts with
@@ -591,6 +719,189 @@ char *pe_picture_uri(const char *path);
 // # Safety
 // `text` must be NULL or a string from this library that was not freed yet.
 void pe_string_free(char *text);
+
+// Starts the MCP server agents reach this app on (a socket or named pipe of its own, for this store and this user);
+// false when it could not (another app has this store open). Stopped by `pe_core_close`.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_mcp_start(const struct PeCore *core);
+
+// `--mcp`: relays stdin and stdout to the app that has the store at `store` open, for the program that started
+// this process, until either side closes; the process should then end. When the app is not running it is started
+// with `--background` (and `--store store_argument` when that is not NULL). 0 when the relay ran, 1 when the app could
+// not be reached (the reason on stderr).
+//
+// # Safety
+// `store` must be a NUL-terminated string; `store_argument` NULL or one.
+int32_t pe_mcp_relay(const char *store,
+                     const char *store_argument);
+
+// The bit (PE_AGENT_*) of level `index`, 0 past the end
+uint32_t pe_agent_level_bit(size_t index);
+
+// What level `index` lets an agent do, a static string that is not freed; NULL past the end
+const char *pe_agent_level_label(size_t index);
+
+// What an agent's settings name to start this app as its MCP server: a JSON block for the `mcpServers` of Claude
+// Desktop, Cursor and the like, with this executable and `--mcp` (and `--store` when the store is not the usual
+// one, `store_argument` not NULL). Free with `pe_string_free`.
+//
+// # Safety
+// `store_argument` must be NULL or a NUL-terminated string.
+char *pe_mcp_config(const char *store_argument);
+
+// What question `request` (an `AgentAsk` event) is
+//
+// # Safety
+// `core` must be a live handle.
+enum PeAgentAskKind pe_agent_ask_kind(const struct PeCore *core, uint64_t request);
+
+// The program of question `request`, NULL when it is not a Connect question. Free with `pe_agent_connect_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAgentConnectInfo *pe_agent_connect_info(const struct PeCore *core,
+                                                 uint64_t request);
+
+// # Safety
+// `info` must be NULL or live.
+const struct PeAgentConnect *pe_agent_connect(const struct PeAgentConnectInfo *info);
+
+// # Safety
+// `info` must be NULL or not freed yet.
+void pe_agent_connect_free(struct PeAgentConnectInfo *info);
+
+// Answers a Connect question: let the program in with `levels` (PE_AGENT_* bits) on the `count` accounts in
+// `accounts`, or turn it away (`allow` false; it is not asked about again). False when the question was answered
+// already.
+//
+// # Safety
+// `core` must be a live handle; `accounts` must point to `count` ids (NULL when 0).
+bool pe_agent_answer_connect(const struct PeCore *core,
+                             uint64_t request,
+                             bool allow,
+                             uint32_t levels,
+                             const int64_t *accounts,
+                             size_t count);
+
+// The message of question `request`, NULL when it is not a Send question. Free with `pe_agent_send_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAgentSendInfo *pe_agent_send_info(const struct PeCore *core,
+                                           uint64_t request);
+
+// # Safety
+// `info` must be NULL or live.
+const struct PeAgentSend *pe_agent_send(const struct PeAgentSendInfo *info);
+
+// # Safety
+// `info` must be NULL or live.
+size_t pe_agent_send_recipient_count(const struct PeAgentSendInfo *info);
+
+// Recipient `index`, NULL past the end
+//
+// # Safety
+// `info` must be NULL or live.
+const struct PeAgentRecipient *pe_agent_send_recipient(const struct PeAgentSendInfo *info,
+                                                       size_t index);
+
+// # Safety
+// `info` must be NULL or not freed yet.
+void pe_agent_send_free(struct PeAgentSendInfo *info);
+
+// Answers a Send question. For Compose the draft to open in a new message comes back (free with
+// `pe_draft_free`); NULL otherwise, or when the question was answered already.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeDraft *pe_agent_answer_send(const struct PeCore *core,
+                                     uint64_t request,
+                                     enum PeAgentSendAnswer answer);
+
+// Whether agents may connect at all
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_agents_enabled(const struct PeCore *core);
+
+// # Safety
+// `core` must be a live handle.
+bool pe_agents_set_enabled(const struct PeCore *core, bool enabled);
+
+// The programs the user decided about, by name. Free with `pe_agent_host_list_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAgentHostList *pe_agent_hosts(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_agent_host_list_count(const struct PeAgentHostList *list);
+
+// # Safety
+// `list` must be NULL or live.
+const struct PeAgentHost *pe_agent_host_list_get(const struct PeAgentHostList *list, size_t index);
+
+// Whether host `index` of the list may use `account`
+//
+// # Safety
+// `list` must be NULL or live.
+bool pe_agent_host_list_has_account(const struct PeAgentHostList *list,
+                                    size_t index,
+                                    int64_t account);
+
+// # Safety
+// `list` must be NULL or not freed yet.
+void pe_agent_host_list_free(struct PeAgentHostList *list);
+
+// Changes what a program may do
+//
+// # Safety
+// `core` must be a live handle; `accounts` must point to `count` ids (NULL when 0).
+bool pe_agent_host_update(const struct PeCore *core,
+                          int64_t id,
+                          bool allowed,
+                          uint32_t levels,
+                          const int64_t *accounts,
+                          size_t count);
+
+// Forgets a program and what it did: it is asked about again the next time it connects
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_agent_host_remove(const struct PeCore *core, int64_t id);
+
+// The newest `limit` entries of what agents did, newest first. Free with `pe_agent_log_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAgentLog *pe_agent_log(const struct PeCore *core, uint64_t limit);
+
+// # Safety
+// `log` must be NULL or live.
+size_t pe_agent_log_count(const struct PeAgentLog *log);
+
+// # Safety
+// `log` must be NULL or live.
+const struct PeAgentLogEntry *pe_agent_log_get(const struct PeAgentLog *log, size_t index);
+
+// # Safety
+// `log` must be NULL or not freed yet.
+void pe_agent_log_free(struct PeAgentLog *log);
+
+// Takes back what log entry `id` did: NULL when it was, else why not (free with `pe_string_free`)
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_agent_undo(const struct PeCore *core, int64_t id);
+
+// Forgets what agents did
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_agent_log_clear(const struct PeCore *core);
 
 // Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
 // the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
@@ -782,6 +1093,12 @@ bool pe_contact_forget(const struct PeCore *core, const char *address);
 // # Safety
 // `core` must be a live handle.
 struct PeFolderList *pe_folders(const struct PeCore *core, int64_t account);
+
+// The unread messages of the account of `list` (not Junk E-mail or Deleted Items): what its row shows collapsed
+//
+// # Safety
+// `list` must be NULL or live.
+uint64_t pe_folder_list_unread(const struct PeFolderList *list);
 
 // # Safety
 // `list` must be NULL or live.
@@ -1061,6 +1378,17 @@ uint8_t *pe_attachment_data(const struct PeCore *core,
 char *pe_message_headers(const struct PeCore *core,
                          int64_t folder,
                          uint64_t uid);
+
+// The whole source of a message for View Source, as text safe to show (line breaks `\r\n`, no control
+// characters, cut short past 4 MB with a line that says so), and in `title` the title of its window; NULL when it is
+// not in the store yet (`pe_message_open` fetches it, `MessageReady` follows). Free both with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle; `title` a valid pointer.
+char *pe_message_source_text(const struct PeCore *core,
+                             int64_t folder,
+                             uint64_t uid,
+                             char **title);
 
 // The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).
 // `len` gets its length and `filename` a name to save it under made from its subject (`.eml`; free it with

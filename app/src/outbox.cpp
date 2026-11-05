@@ -31,7 +31,15 @@ void FillOutbox(OutboxState* state, int select = 0) {
         int row = AddRow(state->list, static_cast<int>(i), subject.empty() ? L"(no subject)" : subject);
         SetCell(state->list, row, COL_TO, Text(queued->recipients));
         SetCell(state->list, row, COL_QUEUED, FormatDate(queued->created));
-        SetCell(state->list, row, COL_STATUS, queued->problem ? L"Not sent: " + Text(queued->problem) : L"Waiting");
+        // one an AI agent sent waits a moment, while it can still be deleted
+        std::wstring status = L"Waiting";
+        SYSTEMTIME at;
+        if (queued->problem) {
+            status = L"Not sent: " + Text(queued->problem);
+        } else if (queued->not_before && UnixToSystemTime(queued->not_before, true, at)) {
+            status = L"Sent by an AI agent; goes at " + FormatTime(at);
+        }
+        SetCell(state->list, row, COL_STATUS, status);
         state->ids.push_back(queued->id);
     }
     bool any = !state->ids.empty();
