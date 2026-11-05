@@ -1105,10 +1105,7 @@ async fn writing(d: &Driver) {
             text.contains("Original Message") && text.contains("shared album"),
             "the folded quote is sent along",
         );
-        d.check(
-            text.matches("shared album").count() == 2,
-            "the quote is sent once",
-        );
+        d.check(text.matches("shared album").count() == 2, "the quote is sent once");
     }
     let sent = wait_for(30, || d.find("Sent", &format!("Subject: Re: {SUBJECT}"))).await;
     d.check(sent.is_some(), "a copy of the reply is in Sent");
@@ -1145,7 +1142,8 @@ async fn writing(d: &Driver) {
     );
     c.to.set_text("dave at example.com");
     c.subject.set_text("Trail map for Sunday");
-    c.editor.type_text("Hi Dave, here is the trail map for Sunday. See you at nine!");
+    c.editor
+        .type_text("Hi Dave, here is the trail map for Sunday. See you at nine!");
     pause(500).await;
     click(c.window.upcast_ref(), "compose-send");
     let problem = wait_alert(10).await;
