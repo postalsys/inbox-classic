@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/postalsys/inbox-classic/compare/v0.6.0...v0.7.0) (2026-11-05)
+
+
+### Features
+
+* AI agents (MCP), message menu and source, unread in collapsed folders ([#9](https://github.com/postalsys/inbox-classic/issues/9)) ([16abc1f](https://github.com/postalsys/inbox-classic/commit/16abc1f3318eb9e2ee06da5288c8162d9e193db7))
+
 ## [0.6.0](https://github.com/postalsys/inbox-classic/compare/v0.5.1...v0.6.0) (2026-11-04)
 
 
