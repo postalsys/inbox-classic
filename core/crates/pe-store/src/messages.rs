@@ -244,6 +244,26 @@ impl Store {
         Ok(changed)
     }
 
+    /// Sets or clears one flag of messages of a folder in one transaction; the UIDs whose flags changed. Refused
+    /// (`QueryReturnedNoRows`) when one of them is not there, and then none changes.
+    pub fn set_flag_many(&self, folder: FolderId, uids: &[u64], flag: &str, on: bool) -> Result<Vec<u64>> {
+        let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
+        let mut changed = Vec::new();
+        for &uid in uids {
+            let message = self.message(folder, uid)?.ok_or(rusqlite::Error::QueryReturnedNoRows)?;
+            let mut flags = message.info.flags;
+            flags.retain(|f| !f.eq_ignore_ascii_case(flag));
+            if on {
+                flags.push(flag.to_string());
+            }
+            if self.set_flags(folder, uid, &flags, None)? {
+                changed.push(uid);
+            }
+        }
+        tx.commit()?;
+        Ok(changed)
+    }
+
     /// How many messages are unread in the Inboxes of all accounts, for the tray and the taskbar
     pub fn inbox_unread(&self) -> Result<u64> {
         self.db.query_row(

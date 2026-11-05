@@ -14,11 +14,13 @@ use base64::engine::general_purpose::STANDARD;
 
 mod editor;
 mod platform;
+mod visible;
 pub use editor::{
     PICTURE_FILE_LIMIT, PICTURE_HEAD, Picture, draft_body, editor_document, is_plain, outgoing_html, picture_type,
     picture_uri, quote_html, quote_parts, signature_block, signature_html,
 };
 pub use platform::{DOCUMENT_SCHEME, Platform, help_page, status_page, webkit_content_rules};
+pub use visible::visible_html;
 
 /// An image a message carries for its HTML, referenced as `cid:` (multipart/related)
 #[derive(Debug, Clone, Copy)]

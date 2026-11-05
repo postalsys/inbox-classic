@@ -1,7 +1,7 @@
 //! Sign-in apps: OAuth clients the user registered with an OpenID Connect provider, and whether each is offered for
 //! new accounts, the two built-in clients included. Their secrets are not here, they live in the Credential Manager.
 
-use rusqlite::{OptionalExtension, Row};
+use rusqlite::Row;
 
 use crate::{Result, Security, Store};
 
@@ -147,23 +147,11 @@ impl Store {
 
     /// Whether the built-in client of `provider` (`google`, `microsoft`) is offered for new accounts
     pub fn builtin_sign_in_enabled(&self, provider: &str) -> Result<bool> {
-        let value: Option<String> = self
-            .db
-            .query_row(
-                "SELECT value FROM settings WHERE key = ?1",
-                [builtin_key(provider)],
-                |row| row.get(0),
-            )
-            .optional()?;
-        Ok(value.as_deref() == Some("1"))
+        self.bool_setting(&builtin_key(provider), false)
     }
 
     pub fn set_builtin_sign_in_enabled(&self, provider: &str, enabled: bool) -> Result<()> {
-        self.db.execute(
-            "INSERT INTO settings (key, value) VALUES (?1, ?2) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
-            (builtin_key(provider), if enabled { "1" } else { "0" }),
-        )?;
-        Ok(())
+        self.set_bool_setting(&builtin_key(provider), enabled)
     }
 }
 

@@ -54,6 +54,61 @@ pub fn folder_name(folder: &pe_store::FolderInfo) -> String {
     }
 }
 
+/// The unread messages a folder tree hides when a row is collapsed: for each folder (in tree order, as
+/// [`crate::Core::folders`] lists them, with the [`crate::tree_depths`] of their infos) the unread messages of the folders
+/// under it, and for the account the unread messages of all its folders. Junk E-mail and Deleted Items count for neither,
+/// so a spam folder does not keep a collapsed account bold. A collapsed row shows its own unread messages plus these; an
+/// expanded one its own alone.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct HiddenUnread {
+    /// Of each folder, in the order given
+    pub below: Vec<u64>,
+    /// Of the whole account
+    pub account: u64,
+}
+
+pub fn hidden_unread(folders: &[pe_store::Folder], depths: &[usize]) -> HiddenUnread {
+    use pe_imap::SpecialUse;
+    let counted: Vec<u64> = folders
+        .iter()
+        .map(
+            |folder| match folder.info.special_use.as_deref().and_then(SpecialUse::from_flag) {
+                Some(SpecialUse::Junk | SpecialUse::Trash) => 0,
+                _ => folder.unread,
+            },
+        )
+        .collect();
+    let depth = |i: usize| depths.get(i).copied().unwrap_or(0);
+    let below = (0..folders.len())
+        .map(|i| {
+            (i + 1..folders.len())
+                .take_while(|&j| depth(j) > depth(i))
+                .map(|j| counted[j])
+                .sum()
+        })
+        .collect();
+    HiddenUnread {
+        below,
+        account: counted.iter().sum(),
+    }
+}
+
+/// What kind of special folder a folder is, in a word for agents (`inbox`, `sent`, `drafts`, `deleted`, `junk`,
+/// `archive`), empty for another folder
+pub fn folder_kind(folder: &pe_store::FolderInfo) -> &'static str {
+    use pe_imap::SpecialUse;
+    match folder.special_use.as_deref().and_then(SpecialUse::from_flag) {
+        Some(SpecialUse::Inbox) => "inbox",
+        Some(SpecialUse::Sent) => "sent",
+        Some(SpecialUse::Drafts) => "drafts",
+        Some(SpecialUse::Trash) => "deleted",
+        Some(SpecialUse::Junk) => "junk",
+        Some(SpecialUse::Archive) => "archive",
+        _ if folder.path.eq_ignore_ascii_case("INBOX") => "inbox",
+        _ => "",
+    }
+}
+
 /// What the windows say beside Try Again over a message that could not be downloaded
 pub const RETRY_NOTE: &str = "Not downloaded. It is tried again once the account is back online.";
 
@@ -102,6 +157,46 @@ pub fn reader_page(state: ReaderState) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn folder(path: &str, special_use: Option<&str>, unread: u64) -> pe_store::Folder {
+        pe_store::Folder {
+            id: 0,
+            account_id: 1,
+            info: pe_store::FolderInfo {
+                path: path.into(),
+                name: path.rsplit('/').next().unwrap_or(path).into(),
+                delimiter: Some("/".into()),
+                flags: Vec::new(),
+                special_use: special_use.map(Into::into),
+                subscribed: true,
+                selectable: true,
+            },
+            state: Default::default(),
+            total: unread,
+            unread,
+        }
+    }
+
+    #[test]
+    fn a_collapsed_row_counts_what_it_hides() {
+        let folders = [
+            folder("INBOX", Some("\\Inbox"), 3),
+            folder("INBOX/Lists", None, 2),
+            folder("INBOX/Lists/Rust", None, 4),
+            folder("Junk", Some("\\Junk"), 50),
+            folder("Projects", None, 0),
+            folder("Projects/Old", None, 1),
+            folder("Projects/Spam", Some("\\Junk"), 9),
+            folder("Trash", Some("\\Trash"), 7),
+        ];
+        let infos: Vec<_> = folders.iter().map(|f| &f.info).collect();
+        let depths = crate::tree_depths(&infos);
+        let hidden = hidden_unread(&folders, &depths);
+        assert_eq!(hidden.below, [6, 4, 0, 0, 1, 0, 0, 0]);
+        // Junk and Deleted Items do not light up the account
+        assert_eq!(hidden.account, 10);
+        assert_eq!(hidden_unread(&[], &[]), HiddenUnread::default());
+    }
 
     #[test]
     fn the_reading_pane_says_why() {

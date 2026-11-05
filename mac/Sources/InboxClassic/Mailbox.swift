@@ -154,6 +154,8 @@ public final class Mailbox: NSObject {
     final class AccountNode {
         let account: Account
         var children: [FolderNode] = []
+        /// the unread messages of its folders, which its row shows while collapsed
+        var unread: UInt64 = 0
         init(_ account: Account) { self.account = account }
     }
 
@@ -175,7 +177,9 @@ public final class Mailbox: NSObject {
             let node = AccountNode(account)
             // the last folder at each depth, the parent of the next deeper one
             var parents: [FolderNode] = []
-            for folder in core.folders(account.id) {
+            let listed = core.folderTree(account.id)
+            node.unread = listed.unread
+            for folder in listed.folders {
                 let item = FolderNode(folder)
                 folderNodes[folder.id] = item
                 let depth = min(folder.depth, parents.count)
@@ -205,12 +209,17 @@ public final class Mailbox: NSObject {
 
     /// the labels of the folders of an account; a folder the tree does not have yet builds it again
     private func updateFolders(_ account: Int64) {
-        for folder in core.folders(account) {
+        let folderTree = core.folderTree(account)
+        for folder in folderTree.folders {
             guard let node = folderNodes[folder.id] else {
                 reload()
                 return
             }
             node.folder = folder
+            tree.reloadItem(node)
+        }
+        if let node = accounts.first(where: { $0.account.id == account }) {
+            node.unread = folderTree.unread
             tree.reloadItem(node)
         }
     }
@@ -819,6 +828,58 @@ public final class Mailbox: NSObject {
                    text: headers)
     }
 
+    /// View Source: the whole message as the server has it
+    func showSource() {
+        guard uid != 0 else {
+            inform("Select a message first.")
+            return
+        }
+        var title: UnsafeMutablePointer<CChar>?
+        let source = taken(pe_message_source_text(core.handle, messageFolder, uid, &title))
+        let name = taken(title) ?? "Message Source"
+        guard let source else {
+            inform("The message is not downloaded yet.")
+            return
+        }
+        textDialog(title: name, intro: nil, text: source, ok: "Close", id: "source", size: NSSize(width: 760, height: 560))
+    }
+
+    /// the right-click menu of the message list: the actions on the message, as Outlook Express has them, with the
+    /// choices that fit it (Mark as Unread for a read one, Not Junk in Junk E-mail)
+    func messageMenu() -> NSMenu? {
+        guard let message = selectedRow else { return nil }
+        let menu = NSMenu()
+        func add(_ command: Command, _ title: String? = nil) {
+            let item = NSMenuItem(title: title ?? command.label, action: #selector(AppDelegate.runCommand(_:)), keyEquivalent: "")
+            item.tag = command.rawValue
+            item.target = AppDelegate.shared
+            item.setAccessibilityIdentifier("menu.\(command)")
+            menu.addItem(item)
+        }
+        if folderNodes[message.folder]?.folder.specialUse == PE_SPECIAL_USE_DRAFTS {
+            let open = NSMenuItem(title: "Open", action: #selector(openSelected), keyEquivalent: "")
+            open.target = self
+            menu.addItem(open)
+            menu.addItem(.separator())
+        }
+        add(.reply, "Reply to Sender")
+        add(.replyAll, "Reply to All")
+        add(.forward)
+        menu.addItem(.separator())
+        add(message.seen ? .markUnread : .markRead)
+        add(.flag, message.flagged ? "Clear Flag" : "Flag Message")
+        add(inJunk ? .notJunk : .junk)
+        add(.move, "Move to Folder\u{2026}")
+        add(.delete, "Delete")
+        menu.addItem(.separator())
+        add(.saveAs)
+        add(.print)
+        menu.addItem(.separator())
+        add(.viewSource, "View Source")
+        add(.properties)
+        return menu
+    }
+
     func printShown() {
         guard uid != 0, let info = messageView?.info else { return }
         // the message as it is shown, with the pictures the user allowed
@@ -1039,11 +1100,15 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         let cell = (outlineView.makeView(withIdentifier: FolderCell.identifier, owner: nil) as? FolderCell) ?? FolderCell()
         switch item {
         case let account as AccountNode:
-            cell.show(name: account.account.title, count: 0, icon: Icons.folder("mailbox"), bold: false)
+            // collapsed, an account shows the unread messages of its folders
+            let unread = outlineView.isItemExpanded(account) ? 0 : account.unread
+            cell.show(name: account.account.title, count: unread, icon: Icons.folder("mailbox"), bold: unread > 0)
             cell.setAccessibilityIdentifier("tree.account.\(account.account.id)")
         case let node as FolderNode:
-            cell.show(name: node.folder.displayName, count: node.folder.unread, icon: Icons.folder(Icons.folderIcon(node.folder.specialUse)),
-                      bold: node.folder.unread > 0)
+            // collapsed, a folder adds those of the folders under it
+            let unread = node.folder.unread + (outlineView.isItemExpanded(node) ? 0 : node.folder.unreadBelow)
+            cell.show(name: node.folder.displayName, count: unread, icon: Icons.folder(Icons.folderIcon(node.folder.specialUse)),
+                      bold: unread > 0)
             cell.setAccessibilityIdentifier("tree.folder.\(node.folder.id)")
         default:
             break
@@ -1053,6 +1118,21 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
     /// the selected row drawn by the row itself, in the system's selection color, rather than by the source list's
     /// vibrancy (which a picture of the window taken by the app, as the UI test takes them, can not show)
+    /// collapsed, a row shows the unread messages it hides; expanded, its folders show them again
+    public func outlineViewItemDidCollapse(_ notification: Notification) {
+        reloadExpanded(notification)
+    }
+
+    public func outlineViewItemDidExpand(_ notification: Notification) {
+        reloadExpanded(notification)
+    }
+
+    private func reloadExpanded(_ notification: Notification) {
+        if let item = notification.userInfo?["NSObject"] {
+            tree.reloadItem(item)
+        }
+    }
+
     public func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         SelectionRow()
     }
@@ -1180,7 +1260,13 @@ final class FolderCell: NSTableCellView {
 
     required init?(coder: NSCoder) { fatalError() }
 
+    /// the unread count it shows, and whether in bold, for the UI test
+    private(set) var unreadShown: UInt64 = 0
+    private(set) var isBold = false
+
     func show(name text: String, count unread: UInt64, icon image: NSImage?, bold: Bool) {
+        unreadShown = unread
+        isBold = bold
         name.stringValue = text
         name.font = bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
         count.stringValue = unread > 0 ? "\(unread)" : ""
@@ -1284,9 +1370,19 @@ public final class FolderOutline: NSOutlineView {
     }
 }
 
-/// The message list: Return opens a draft, Delete deletes, as the list of the Windows app does
+/// The message list: Return opens a draft, Delete deletes, as the list of the Windows app does; a right click opens the
+/// message's menu
 public final class MessageTable: NSTableView {
     weak var mailbox: Mailbox?
+
+    public override func menu(for event: NSEvent) -> NSMenu? {
+        let row = self.row(at: convert(event.locationInWindow, from: nil))
+        guard row >= 0 else { return nil }
+        if !selectedRowIndexes.contains(row) {
+            selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        }
+        return mailbox?.messageMenu()
+    }
 
     public override func keyDown(with event: NSEvent) {
         switch event.keyCode {

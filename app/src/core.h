@@ -32,6 +32,10 @@ using Outbox = std::unique_ptr<PeOutbox, Deleter<pe_outbox_free>>;
 using AccountSettings = std::unique_ptr<PeAccountSettingsView, Deleter<pe_account_settings_free>>;
 using SignInAppList = std::unique_ptr<PeSignInAppList, Deleter<pe_sign_in_app_list_free>>;
 using SignInPresetList = std::unique_ptr<PeSignInPresetList, Deleter<pe_sign_in_preset_list_free>>;
+using AgentConnect = std::unique_ptr<PeAgentConnectInfo, Deleter<pe_agent_connect_free>>;
+using AgentSend = std::unique_ptr<PeAgentSendInfo, Deleter<pe_agent_send_free>>;
+using AgentHostList = std::unique_ptr<PeAgentHostList, Deleter<pe_agent_host_list_free>>;
+using AgentLog = std::unique_ptr<PeAgentLog, Deleter<pe_agent_log_free>>;
 
 std::wstring Widen(std::string_view utf8);
 std::string Narrow(std::wstring_view utf16);

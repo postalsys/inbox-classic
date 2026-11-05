@@ -1223,6 +1223,7 @@ dependencies = [
  "pe-core",
  "pe-html",
  "pe-imap",
+ "pe-mcp",
  "pe-net",
  "pe-oauth",
  "pe-store",
@@ -1744,6 +1745,17 @@ dependencies = [
  "pe-net",
  "tokio",
  "unicode-normalization",
+]
+
+[[package]]
+name = "pe-mcp"
+version = "0.6.0"
+dependencies = [
+ "pe-core",
+ "pe-mime",
+ "pe-store",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]

@@ -5,6 +5,7 @@
 #include <shellapi.h>
 #include <shlobj.h>
 #include <shobjidl.h>
+#include <windowsx.h>
 #include <wrl/client.h>
 
 #include <algorithm>
@@ -330,6 +331,14 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_OUTBOX_CHANGED:
         ShowOutbox();
         break;
+    case PE_EVENT_KIND_AGENT_ASK:
+        // the question with the window it is about, in front
+        ShowMain();
+        AgentQuestion(g_main, g_core.get(), event.uid);
+        break;
+    case PE_EVENT_KIND_AGENT_LOG_CHANGED:
+        AgentsChanged();
+        break;
     case PE_EVENT_KIND_FAILED:
         g_failing.insert(event.account);
         SetStatus(g_mailbox.AccountName(event.account) + L": " + event.message);
@@ -389,9 +398,13 @@ HMENU BuildMenu() {
     AppendMenuW(edit, MF_STRING, IDM_DELETE, L"&Delete Message\tDel");
     HMENU view = CreatePopupMenu();
     AppendMenuW(view, MF_STRING, IDM_PICTURES, L"Download &Pictures");
+    AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(view, MF_STRING, IDM_VIEW_SOURCE, L"Message &Source\tCtrl+U");
     HMENU tools = CreatePopupMenu();
     AppendMenuW(tools, MF_STRING, IDM_SYNC, L"Send and Recei&ve All\tF5");
     AppendMenuW(tools, MF_STRING, IDM_OUTBOX, L"&Outbox...");
+    AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(tools, MF_STRING, IDM_AI_AGENTS, L"&AI Agents...");
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(tools, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, L"&Notify of New Mail");
     AppendMenuW(tools, MF_STRING, IDM_DEFAULT_APP, L"Make &Default Mail App...");
@@ -423,6 +436,7 @@ HACCEL BuildAccelerators() {
         {FVIRTKEY | FCONTROL | FSHIFT, 'F', IDM_FIND},
         {FVIRTKEY | FCONTROL, 'P', IDM_PRINT},
         {FVIRTKEY | FALT, VK_RETURN, IDM_PROPERTIES},
+        {FVIRTKEY | FCONTROL, 'U', IDM_VIEW_SOURCE},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -562,6 +576,10 @@ struct Arguments {
     bool version = false;
     // a mailto: link Windows hands the default mail program, a new message to write
     std::wstring mailto;
+    // --mcp: relay an AI agent's MCP connection to the app that is running (started when it is not), no window
+    bool mcp = false;
+    // --background: started for an agent (by --mcp), in the tray without its window
+    bool background = false;
 };
 Arguments g_arguments;
 
@@ -600,6 +618,10 @@ void ReadArguments() {
             g_arguments.memoryPasswords = true;
         } else if (arg == L"--version") {
             g_arguments.version = true;
+        } else if (arg == L"--mcp") {
+            g_arguments.mcp = true;
+        } else if (arg == L"--background") {
+            g_arguments.background = true;
         }
     }
     LocalFree(argv);
@@ -610,7 +632,28 @@ bool OpenCore(HWND hwnd) {
     uint32_t flags = g_arguments.memoryPasswords ? PE_OPEN_MEMORY_PASSWORDS : 0;
     std::string certificate = core::Narrow(g_arguments.certificate);
     g_core.reset(pe_core_open_with(path.c_str(), flags, certificate.empty() ? nullptr : certificate.c_str(), OnCoreEvent, hwnd));
+    if (g_core) {
+        // where the user's AI agents reach this app (--mcp); another app with this store open keeps them
+        pe_mcp_start(g_core.get());
+    }
     return g_core != nullptr;
+}
+
+}  // namespace
+
+const char* StoreArgument() {
+    static std::string store;
+    store = core::Narrow(g_arguments.store);
+    return store.empty() ? nullptr : store.c_str();
+}
+
+namespace {
+
+// --mcp: the relay of an agent's MCP server, to the app that has this store open; the app is started in the
+// background when it is not running
+int RelayMcp() {
+    std::string store = core::Narrow(g_arguments.store.empty() ? StorePath() : g_arguments.store);
+    return pe_mcp_relay(store.c_str(), StoreArgument());
 }
 
 void CreateChildren(HWND hwnd) {
@@ -768,6 +811,12 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_PROPERTIES:
         g_mailbox.ShowProperties(g_main);
+        return;
+    case IDM_VIEW_SOURCE:
+        g_mailbox.ShowSource(g_main);
+        return;
+    case IDM_AI_AGENTS:
+        AgentsDialog(g_main, g_core.get());
         return;
     case IDM_IMPORT:
         g_mailbox.Import(g_main);
@@ -998,6 +1047,13 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                      suggested->bottom - suggested->top, SWP_NOZORDER | SWP_NOACTIVATE);
         return 0;
     }
+    case WM_CONTEXTMENU:
+        // the menu key or Shift+F10 in the message list (a right click comes as NM_RCLICK)
+        if (reinterpret_cast<HWND>(wParam) == g_mailbox.List()) {
+            g_mailbox.MessageMenu({GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)});
+            return 0;
+        }
+        break;
     case WM_NOTIFY: {
         auto* header = reinterpret_cast<NMHDR*>(lParam);
         if (header->hwndFrom == g_toolbar && header->code == TBN_DROPDOWN) {
@@ -1131,8 +1187,14 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         CoUninitialize();
         return 0;
     }
-    // the app is open already for this mail store: it takes the link, or comes to the front
-    if (HandOver()) {
+    if (g_arguments.mcp) {
+        int result = RelayMcp();
+        CoUninitialize();
+        return result;
+    }
+    // the app is open already for this mail store: it takes the link, or comes to the front (not for a start in the
+    // background: the agent that asked for it finds it running)
+    if (g_arguments.background ? RunningWindow() != nullptr : HandOver()) {
         CoUninitialize();
         return 0;
     }
@@ -1154,9 +1216,12 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         return 1;
     }
     g_accelerators = BuildAccelerators();
-    ShowWindow(hwnd, show);
-    UpdateWindow(hwnd);
-    FirstRun();
+    // started for an agent: in the tray, where it checks mail as it does with its window closed
+    if (!g_arguments.background) {
+        ShowWindow(hwnd, show);
+        UpdateWindow(hwnd);
+        FirstRun();
+    }
     if (!g_arguments.mailto.empty()) {
         OpenMailto(g_arguments.mailto);
     }

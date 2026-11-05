@@ -21,7 +21,11 @@ use crate::{Arguments, compose, notify, tray};
 const SYNC_INTERVAL: u32 = 10 * 60;
 
 pub struct Shell {
-    pub core: pe_core::Core,
+    pub core: std::sync::Arc<pe_core::Core>,
+    /// Where the user's AI agents reach this app (--mcp); stopped before the app ends
+    mcp: RefCell<Option<pe_mcp::McpServer>>,
+    /// --store, when the store is not the usual one
+    store_argument: Option<PathBuf>,
     pub application: adw::Application,
     pub settings: Settings,
     /// Test runs (--sign-in-page-file): a browser sign-in writes its page here instead of opening the browser
@@ -83,8 +87,13 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
     };
     let settings = Settings::load();
     let notify = settings.bool(settings::NOTIFY, true);
+    let core = std::sync::Arc::new(core);
+    // another app with this store open keeps the agents
+    let mcp = pe_mcp::McpServer::for_store(core.clone(), &store).ok();
     let state = Rc::new(Shell {
         core,
+        mcp: RefCell::new(mcp),
+        store_argument: arguments.store.clone(),
         application: application.clone(),
         settings,
         sign_in_page_file: arguments.sign_in_page_file.clone(),
@@ -117,8 +126,20 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
     });
     *state.tray.borrow_mut() = tray::Tray::start();
     state.show_unread();
-    application.connect_shutdown(|_| shell().settings.flush());
-    main.window().present();
+    application.connect_shutdown(|_| {
+        let shell = shell();
+        shell.settings.flush();
+        // the server lets go of the engine before the app ends
+        if let Some(mut mcp) = shell.mcp.borrow_mut().take() {
+            mcp.stop();
+        }
+    });
+    if arguments.background {
+        // started for an agent: running, with its window closed as it is after closing it
+        *state.hold.borrow_mut() = Some(application.hold());
+    } else {
+        main.window().present();
+    }
     first_run(arguments);
 }
 
@@ -167,7 +188,8 @@ fn first_run(arguments: Arguments) {
         .core
         .accounts()
         .map(|accounts| accounts.is_empty())
-        .unwrap_or(true);
+        .unwrap_or(true)
+        && !arguments.background;
     spawn(async move {
         if none {
             add_account().await;
@@ -269,6 +291,13 @@ impl Shell {
                 }
             }
             Event::OutboxChanged { .. } => self.show_outbox(),
+            Event::AgentAsk { request } => {
+                // with the window it is about in front
+                self.show_main();
+                let request = *request;
+                spawn(async move { crate::agents::question(request).await });
+            }
+            Event::AgentLogChanged => crate::agents::refresh(),
             Event::Failed { account, kind, message } => {
                 self.failing.borrow_mut().insert(*account);
                 main.set_status(&format!("{}: {message}", main.account_name(*account)));
@@ -372,6 +401,18 @@ impl Shell {
     }
 
     /// A new message from `account`, or from the account of the selected folder when 0
+    /// A message an agent wrote, opened to write further from `account`
+    pub fn open_draft(&self, account: i64, draft: pe_core::Draft) {
+        compose::open(account, Some(draft));
+    }
+
+    /// The store given with --store, None for the usual one (for the setup of an agent)
+    pub fn store_argument(&self) -> Option<String> {
+        self.store_argument
+            .as_ref()
+            .map(|store| store.to_string_lossy().into_owned())
+    }
+
     pub fn new_message(&self, account: i64) {
         let account = if account != 0 {
             account
@@ -576,6 +617,8 @@ pub fn run_command(command: Command) {
         Command::Notify => shell.set_notify(!shell.notify.get()),
         Command::Open => shell.show_main(),
         Command::DefaultApp => spawn(make_default_mail_app()),
+        Command::ViewSource => spawn(async move { main.show_source().await }),
+        Command::AiAgents => spawn(async move { crate::agents::agents_dialog(main.window()).await }),
     }
 }
 

@@ -332,6 +332,94 @@ LRESULT CALLBACK TextProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 }  // namespace
 
+namespace {
+
+const wchar_t* kSourceClass = L"InboxClassicSource";
+
+struct SourceState {
+    bool done = false;
+    HWND box = nullptr;
+    HWND close = nullptr;
+    HFONT font = nullptr;
+};
+
+// the text fills the window, Close stays in its corner
+void LayoutSource(HWND hwnd, const SourceState& state) {
+    RECT client;
+    GetClientRect(hwnd, &client);
+    int pad = Scale(10);
+    int buttonHeight = Scale(25);
+    MoveWindow(state.box, pad, pad, client.right - 2 * pad, client.bottom - 3 * pad - buttonHeight, TRUE);
+    MoveWindow(state.close, client.right - pad - Scale(80), client.bottom - pad - buttonHeight, Scale(80), buttonHeight, TRUE);
+}
+
+LRESULT CALLBACK SourceProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* state = reinterpret_cast<SourceState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    if (!state) {
+        return DefWindowProcW(hwnd, message, wParam, lParam);
+    }
+    switch (message) {
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
+            state->done = true;
+        }
+        return 0;
+    case WM_CLOSE:
+        state->done = true;
+        return 0;
+    case WM_SIZE:
+        LayoutSource(hwnd, *state);
+        return 0;
+    case WM_GETMINMAXINFO: {
+        auto* limits = reinterpret_cast<MINMAXINFO*>(lParam);
+        limits->ptMinTrackSize = {Scale(360), Scale(240)};
+        return 0;
+    }
+    case WM_CTLCOLORSTATIC:
+        // the read-only box white, as a document is
+        SetBkColor(reinterpret_cast<HDC>(wParam), GetSysColor(COLOR_WINDOW));
+        return reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_WINDOW));
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
+std::wstring WithCrlf(const std::wstring& text) {
+    std::wstring shown;
+    shown.reserve(text.size() + text.size() / 32);
+    for (wchar_t c : text) {
+        if (c == L'\n' && (shown.empty() || shown.back() != L'\r')) {
+            shown += L'\r';
+        }
+        shown += c;
+    }
+    return shown;
+}
+
+void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& text) {
+    RegisterDialogClass(kSourceClass, SourceProc);
+    HWND dialog = CreateModalWindow(owner, kSourceClass, title.c_str(), Scale(760), Scale(560));
+    // a window to read a long text in: it can be made larger
+    SetWindowLongPtrW(dialog, GWL_STYLE, GetWindowLongPtrW(dialog, GWL_STYLE) | WS_THICKFRAME | WS_MAXIMIZEBOX);
+    SetWindowPos(dialog, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+    SourceState state;
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
+    state.box = CreateChild(dialog, L"EDIT", L"",
+                            WS_TABSTOP | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | ES_AUTOHSCROLL, 0, {},
+                            WS_EX_CLIENTEDGE);
+    // the whole message fits: the box takes more than its usual 32K characters
+    SendMessageW(state.box, EM_SETLIMITTEXT, 0, 0);
+    state.font = CreateFontW(-Scale(13), 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                             CLEARTYPE_QUALITY, FIXED_PITCH | FF_MODERN, L"Consolas");
+    SendMessageW(state.box, WM_SETFONT, reinterpret_cast<WPARAM>(state.font), FALSE);
+    SetWindowTextW(state.box, text.c_str());
+    state.close = CreateChild(dialog, L"BUTTON", L"Close", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
+    LayoutSource(dialog, state);
+    RunModal(dialog, state.box, state.done);
+    DeleteObject(state.font);
+}
+
 void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text) {
     RegisterDialogClass(kTextClass, TextProc);
     int pad = Scale(10);

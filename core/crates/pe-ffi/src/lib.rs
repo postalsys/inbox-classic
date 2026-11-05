@@ -6,8 +6,12 @@
 //! - No panic crosses into C++: each export runs inside `guard`, a panic becomes an error result (NULL here). A crash
 //!   on a malformed message would come back on every start, so aborting is not an option.
 
+mod agents;
 mod core;
+#[cfg(windows)]
+mod windows;
 
+pub use agents::*;
 pub use core::*;
 
 use std::ffi::{CString, c_char};

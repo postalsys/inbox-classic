@@ -112,12 +112,9 @@ std::wstring FolderName(const PeFolder& folder) {
     }
 }
 
-std::wstring FolderLabel(const PeFolder& folder) {
-    std::wstring label = FolderName(folder);
-    if (folder.unread > 0) {
-        label += L" (" + std::to_wstring(folder.unread) + L")";
-    }
-    return label;
+// a row's name with an unread count after it, when there is one
+std::wstring CountedLabel(const std::wstring& name, uint64_t unread) {
+    return unread > 0 ? name + L" (" + std::to_wstring(unread) + L")" : name;
 }
 
 PeSortField SortOf(int column) {
@@ -464,6 +461,8 @@ void Mailbox::Reload() {
     TreeView_DeleteAllItems(tree_);
     reloading_ = false;
     items_.clear();
+    rows_.clear();
+    accountItems_.clear();
     accountNames_.clear();
     folderAccounts_.clear();
     folderNames_.clear();
@@ -483,8 +482,12 @@ void Mailbox::Reload() {
         }
         // an account's own item carries its id negated, so selecting it tells which account it is
         HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->title), static_cast<LPARAM>(-account->id), false, FOLDER_MAILBOX);
+        accountItems_[account->id] = root;
+        rows_[root] = {Text(account->title), 0, 0};
         FillAccount(root, account->id);
+        // TVM_EXPAND sends no TVN_ITEMEXPANDED: the account's row is shown expanded here
         TreeView_Expand(tree_, root, TVE_EXPAND);
+        ShowRow(root);
     }
     auto item = items_.find(selected);
     if (item != items_.end()) {
@@ -505,9 +508,10 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
     for (size_t i = 0; i < count; i++) {
         const PeFolder* folder = pe_folder_list_get(folders.get(), i);
         size_t depth = std::min<size_t>(folder->depth, parents.size() - 1);
-        HTREEITEM item = InsertItem(tree_, parents[depth], FolderLabel(*folder), static_cast<LPARAM>(folder->id), folder->unread > 0,
-                                       IconOfFolder(folder->special_use));
+        HTREEITEM item = InsertItem(tree_, parents[depth], CountedLabel(FolderName(*folder), folder->unread), static_cast<LPARAM>(folder->id),
+                                    folder->unread > 0, IconOfFolder(folder->special_use));
         items_[folder->id] = item;
+        rows_[item] = {FolderName(*folder), folder->unread, folder->unread_below};
         folderAccounts_[folder->id] = account;
         folderNames_[folder->id] = {FolderName(*folder), folder->fixed};
         if (!folder->selectable) {
@@ -522,6 +526,26 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
         parents.resize(depth + 1);
         parents.push_back(item);
     }
+    rows_[root].below = pe_folder_list_unread(folders.get());
+}
+
+// a row with its unread count: its own while expanded, with what it hides while collapsed (an account's row has
+// none of its own), bold when there is one
+void Mailbox::ShowRow(HTREEITEM item) {
+    auto row = rows_.find(item);
+    if (row == rows_.end()) {
+        return;
+    }
+    bool expanded = (TreeView_GetItemState(tree_, item, TVIS_EXPANDED) & TVIS_EXPANDED) != 0;
+    uint64_t unread = row->second.own + (expanded ? 0 : row->second.below);
+    std::wstring label = CountedLabel(row->second.name, unread);
+    TVITEMW update = {};
+    update.mask = TVIF_TEXT | TVIF_STATE;
+    update.hItem = item;
+    update.pszText = label.data();
+    update.stateMask = TVIS_BOLD;
+    update.state = unread > 0 ? TVIS_BOLD : 0;
+    TreeView_SetItem(tree_, &update);
 }
 
 // the labels and bold states of the folders of an account; a folder the tree does not have yet builds it again
@@ -535,14 +559,13 @@ void Mailbox::UpdateFolders(int64_t account) {
             Reload();
             return;
         }
-        std::wstring label = FolderLabel(*folder);
-        TVITEMW update = {};
-        update.mask = TVIF_TEXT | TVIF_STATE;
-        update.hItem = item->second;
-        update.pszText = label.data();
-        update.stateMask = TVIS_BOLD;
-        update.state = folder->unread > 0 ? TVIS_BOLD : 0;
-        TreeView_SetItem(tree_, &update);
+        rows_[item->second] = {FolderName(*folder), folder->unread, folder->unread_below};
+        ShowRow(item->second);
+    }
+    auto root = accountItems_.find(account);
+    if (root != accountItems_.end()) {
+        rows_[root->second].below = pe_folder_list_unread(folders.get());
+        ShowRow(root->second);
     }
 }
 
@@ -1410,6 +1433,10 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
                 SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
             }
         }
+        if (header->code == TVN_ITEMEXPANDEDW) {
+            // collapsed, a row shows the unread messages it hides; expanded, its folders show them again
+            ShowRow(reinterpret_cast<NMTREEVIEWW*>(header)->itemNew.hItem);
+        }
         if (header->code == NM_RCLICK) {
             FolderMenu();
             // handled: no WM_CONTEXTMENU after it
@@ -1442,6 +1469,13 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
     case LVN_BEGINDRAG: {
         auto* begin = reinterpret_cast<NMLISTVIEW*>(header);
         BeginDrag(begin->iItem, begin->ptAction);
+        return true;
+    }
+    case NM_RCLICK: {
+        POINT screen;
+        GetCursorPos(&screen);
+        MessageMenu(screen);
+        result = 1;
         return true;
     }
     case LVN_ITEMACTIVATE:
@@ -1505,6 +1539,75 @@ void Mailbox::ShowProperties(HWND owner) {
     const PeMessageInfo* info = pe_message_view_info(view_.get());
     std::wstring subject = info ? Text(info->subject) : L"";
     TextDialog(owner, subject.empty() ? L"Properties" : subject + L" Properties", L"Internet headers for this message:", Text(headers.get()));
+}
+
+void Mailbox::ShowSource(HWND owner) {
+    if (!uid_) {
+        MessageBoxW(owner, L"Select a message first.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    char* title = nullptr;
+    core::String text(pe_message_source_text(core_, messageFolder_, uid_, &title));
+    core::String titleText(title);
+    if (!text) {
+        MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    SourceDialog(owner, Text(titleText.get()), Text(text.get()));
+}
+
+// the right-click menu of the message list: the actions on the message under the mouse (selected first), as Outlook
+// Express has them, with the choices that fit it (Mark as Unread for a read one, Not Junk in Junk E-mail)
+void Mailbox::MessageMenu(POINT screen) {
+    int index = ListView_GetNextItem(list_, -1, LVNI_SELECTED);
+    if (screen.x != -1 || screen.y != -1) {
+        LVHITTESTINFO hit = {};
+        hit.pt = screen;
+        ScreenToClient(list_, &hit.pt);
+        index = ListView_HitTest(list_, &hit);
+        if (index < 0) {
+            return;
+        }
+        ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
+        ListView_SetItemState(list_, index, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+    } else if (index >= 0) {
+        // the menu key: the menu at the selected row
+        RECT row = {LVIR_LABEL};
+        ListView_GetItemRect(list_, index, &row, LVIR_LABEL);
+        screen = {row.left + Scale(8), row.bottom};
+        ClientToScreen(list_, &screen);
+    }
+    const PeMessage* message = index >= 0 ? Row(index) : nullptr;
+    if (!message) {
+        return;
+    }
+    bool draft = draftFolders_.contains(message->folder);
+    HMENU menu = CreatePopupMenu();
+    if (draft) {
+        AppendMenuW(menu, MF_STRING, IDOK, L"&Open");
+        SetMenuDefaultItem(menu, IDOK, FALSE);
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    }
+    AppendMenuW(menu, MF_STRING, IDM_REPLY, L"&Reply to Sender");
+    AppendMenuW(menu, MF_STRING, IDM_REPLY_ALL, L"Reply to A&ll");
+    AppendMenuW(menu, MF_STRING, IDM_FORWARD, L"&Forward");
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, message->seen ? IDM_MARK_UNREAD : IDM_MARK_READ, message->seen ? L"Mark as &Unread" : L"Mark as &Read");
+    AppendMenuW(menu, MF_STRING, IDM_FLAG, message->flagged ? L"Clear Fla&g" : L"Fla&g Message");
+    bool junk = junkFolders_.contains(message->folder);
+    AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, junk ? L"Mark as &Not Junk" : L"Mark as &Junk");
+    AppendMenuW(menu, MF_STRING, IDM_MOVE, L"&Move to Folder...");
+    AppendMenuW(menu, MF_STRING, IDM_DELETE, L"&Delete");
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, IDM_SAVE_AS, L"Save &As...");
+    AppendMenuW(menu, MF_STRING, IDM_PRINT, L"&Print...");
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, IDM_VIEW_SOURCE, L"View &Source");
+    AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, L"Propert&ies");
+    lastMenu_ = menu;
+    TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
+    lastMenu_ = nullptr;
+    DestroyMenu(menu);
 }
 
 void Mailbox::PrintShown() {

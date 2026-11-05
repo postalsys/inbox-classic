@@ -226,3 +226,17 @@ id = "default_app"
 windows = 131
 menu = "tools"
 label = "Make Default Mail App..."
+
+[[command]]
+id = "view_source"
+windows = 132
+menu = "view"
+label = "Message Source"
+key = "Mod+U"
+mac = ""
+
+[[command]]
+id = "ai_agents"
+windows = 133
+menu = "tools"
+label = "AI Agents..."

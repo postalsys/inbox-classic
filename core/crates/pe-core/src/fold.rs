@@ -56,6 +56,32 @@ fn key_of(message: &Message, representation: Representation, shown: &str) -> u64
     hasher.finish()
 }
 
+/// pe-content's reading of `text` or `html` of `message`, with the headers it takes as evidence; None when the
+/// analysis did not work out. Hostile mail must not take the app down: a panic in it is caught.
+pub(crate) fn analysis(message: &Message, text: Option<&str>, html: Option<&str>) -> Option<pe_content::AnalyzeResult> {
+    let from = text_addresses(message.from.as_slice());
+    let references = message.reference_ids();
+    let content = MessageContent {
+        text,
+        html,
+        subject: message.subject.as_deref(),
+        from: Some(from.as_str()).filter(|f| !f.is_empty()),
+        in_reply_to: message.in_reply_to.as_deref(),
+        references: references.iter().map(String::as_str).collect(),
+        ..Default::default()
+    };
+    std::panic::catch_unwind(|| pe_content::analyze(&content, &AnalyzeOptions::default()))
+        .ok()?
+        .ok()
+}
+
+/// Every segment of an analysis, the hidden ones too, in the order of the body
+pub(crate) fn segments(result: &pe_content::AnalyzeResult) -> Vec<&Segment> {
+    let mut segments: Vec<&Segment> = result.segments.iter().chain(&result.hidden_segments).collect();
+    segments.sort_by_key(|s| s.source.start);
+    segments
+}
+
 fn folded_segment(segment: &Segment) -> bool {
     segment.visibility == Visibility::Hide
         || (segment.visibility == Visibility::Collapse
@@ -64,31 +90,18 @@ fn folded_segment(segment: &Segment) -> bool {
 
 /// The body with its history folded, None when there is nothing to fold or the analysis did not work out
 fn folded(message: &Message, representation: Representation) -> Option<String> {
-    let from = text_addresses(message.from.as_slice());
-    let references = message.reference_ids();
     // only the part that is shown: analyzing both lets the analysis prefer the other one, and then nothing that is
     // shown would fold
     let shown_html = representation == Representation::Html;
-    let content = MessageContent {
-        text: message.text.as_deref().filter(|_| !shown_html),
-        html: message.html.as_deref().filter(|_| shown_html),
-        subject: message.subject.as_deref(),
-        from: Some(from.as_str()).filter(|f| !f.is_empty()),
-        in_reply_to: message.in_reply_to.as_deref(),
-        references: references.iter().map(String::as_str).collect(),
-        ..Default::default()
-    };
-    // hostile mail must not take the preview down: an analysis that fails shows the message unfolded
-    let result = std::panic::catch_unwind(|| pe_content::analyze(&content, &AnalyzeOptions::default()))
-        .ok()?
-        .ok()?;
-    let mut segments: Vec<&Segment> = result
-        .segments
-        .iter()
-        .chain(&result.hidden_segments)
+    let result = analysis(
+        message,
+        message.text.as_deref().filter(|_| !shown_html),
+        message.html.as_deref().filter(|_| shown_html),
+    )?;
+    let segments: Vec<&Segment> = segments(&result)
+        .into_iter()
         .filter(|s| s.source.representation == representation)
         .collect();
-    segments.sort_by_key(|s| s.source.start);
     let source = match representation {
         Representation::Html => message.html.as_deref()?,
         Representation::Text => result.canonical_text.get(&segments.first()?.source.mime_part)?.as_str(),

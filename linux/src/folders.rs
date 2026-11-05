@@ -23,6 +23,11 @@ mod imp {
         pub icon: RefCell<String>,
         /// The folder's id, or an account's id negated for the account's own item
         pub id: Cell<i64>,
+        /// The name, its own unread messages and those of the folders under it, which it shows while collapsed
+        pub name: RefCell<String>,
+        pub unread: Cell<u64>,
+        pub below: Cell<u64>,
+        pub expanded: Cell<bool>,
         pub children: RefCell<Option<gio::ListStore>>,
     }
 
@@ -41,13 +46,31 @@ glib::wrapper! {
 }
 
 impl FolderItem {
-    fn new(id: i64, markup: &str, icon: &str) -> FolderItem {
-        let item: FolderItem = glib::Object::builder()
-            .property("markup", markup)
-            .property("icon", icon)
-            .build();
-        item.imp().id.set(id);
+    fn new(entry: &Entry) -> FolderItem {
+        let item: FolderItem = glib::Object::builder().property("icon", entry.icon).build();
+        let imp = item.imp();
+        imp.id.set(entry.id);
+        *imp.name.borrow_mut() = entry.name.clone();
+        imp.unread.set(entry.unread);
+        imp.below.set(entry.below);
+        item.show();
         item
+    }
+
+    /// The label: the name, with the unread count, bold, when there is one: its own while expanded, with what it
+    /// hides while collapsed
+    fn show(&self) {
+        let imp = self.imp();
+        let unread = imp.unread.get() + if imp.expanded.get() { 0 } else { imp.below.get() };
+        let name = glib::markup_escape_text(&imp.name.borrow());
+        let markup = if unread > 0 {
+            format!("<b>{name} ({unread})</b>")
+        } else {
+            name.to_string()
+        };
+        if self.markup() != markup {
+            self.set_markup(markup);
+        }
     }
 
     pub fn id(&self) -> i64 {
@@ -63,10 +86,13 @@ impl FolderItem {
     }
 }
 
-/// An item of the tree as it is built: its id, the markup, the icon and its depth under the account
+/// An item of the tree as it is built: its id, its name, its unread messages and those of the folders under it, the
+/// icon and its depth under the account
 pub struct Entry {
     pub id: i64,
-    pub markup: String,
+    pub name: String,
+    pub unread: u64,
+    pub below: u64,
     pub icon: &'static str,
     pub depth: usize,
 }
@@ -105,6 +131,19 @@ impl FolderTree {
             item.downcast_ref::<FolderItem>()
                 .and_then(|folder| folder.imp().children.borrow().clone())
                 .map(|children| children.upcast())
+        });
+        // a row opened or closed changes the rows after it: each item learns whether it is expanded, and shows the
+        // unread messages it hides while it is not
+        // only the row before the change (the one opened or closed) and the rows it added can have changed
+        tree.connect_items_changed(|model, position, _, added| {
+            for index in position.saturating_sub(1)..position + added {
+                let Some(row) = model.row(index) else { continue };
+                if let Some(item) = row.item().and_downcast::<FolderItem>()
+                    && item.imp().expanded.replace(row.is_expanded()) != row.is_expanded()
+                {
+                    item.show();
+                }
+            }
         });
         let selection = gtk::SingleSelection::new(Some(tree));
         selection.set_autoselect(false);
@@ -149,13 +188,13 @@ impl FolderTree {
         let mut items = HashMap::new();
         let mut parents = HashMap::new();
         for (account, folders) in accounts {
-            let top = FolderItem::new(account.id, &account.markup, account.icon);
+            let top = FolderItem::new(&account);
             items.insert(account.id, top.clone());
             // the last item at each depth, the parent of the next deeper one
             let mut chain = vec![top.clone()];
             for folder in folders {
                 let depth = folder.depth.min(chain.len() - 1);
-                let item = FolderItem::new(folder.id, &folder.markup, folder.icon);
+                let item = FolderItem::new(&folder);
                 chain[depth].add_child(&item);
                 parents.insert(folder.id, chain[depth].id());
                 chain.truncate(depth + 1);
@@ -184,16 +223,41 @@ impl FolderTree {
         kept || selected == 0
     }
 
-    /// The label of a folder changed; false when the tree does not have it (and has to be built again)
-    pub fn update(&self, id: i64, markup: &str) -> bool {
+    /// The unread messages of a folder (or an account, its id negated) changed; false when the tree does not have it
+    /// (and has to be built again)
+    pub fn update(&self, id: i64, unread: u64, below: u64) -> bool {
         match self.items.borrow().get(&id) {
             Some(item) => {
-                if item.markup() != markup {
-                    item.set_markup(markup);
-                }
+                item.imp().unread.set(unread);
+                item.imp().below.set(below);
+                item.show();
                 true
             }
             None => false,
+        }
+    }
+
+    /// The label of item `id` as it shows now, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn markup_of(&self, id: i64) -> Option<String> {
+        self.items.borrow().get(&id).map(|item| item.markup())
+    }
+
+    /// Opens or closes the row of item `id` as a click on its expander would, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn set_expanded(&self, id: i64, expanded: bool) {
+        let Some(model) = self.tree_model() else { return };
+        let mut position = 0;
+        while let Some(row) = model.row(position) {
+            if row
+                .item()
+                .and_downcast::<FolderItem>()
+                .is_some_and(|item| item.id() == id)
+            {
+                row.set_expanded(expanded);
+                return;
+            }
+            position += 1;
         }
     }
 

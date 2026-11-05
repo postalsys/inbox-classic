@@ -18,6 +18,7 @@ pe-autoconfig = { path = "../core/crates/pe-autoconfig" }
 pe-core = { path = "../core/crates/pe-core" }
 pe-html = { path = "../core/crates/pe-html" }
 pe-imap = { path = "../core/crates/pe-imap" }
+pe-mcp = { path = "../core/crates/pe-mcp" }
 pe-net = { path = "../core/crates/pe-net" }
 pe-oauth = { path = "../core/crates/pe-oauth" }
 pe-store = { path = "../core/crates/pe-store" }

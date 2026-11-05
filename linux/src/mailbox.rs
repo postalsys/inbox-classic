@@ -67,6 +67,8 @@ pub struct Mailbox {
     folder_names: RefCell<HashMap<i64, (String, bool)>>,
     /// The folders that hold no messages (only other folders), the Drafts and the Junk folders
     unselectable: RefCell<HashSet<i64>>,
+    /// The message list's right-click menu, the last one opened (the e2e driver reads it)
+    pub message_popover: RefCell<Option<gtk::PopoverMenu>>,
     draft_folders: RefCell<HashSet<i64>>,
     junk_folders: RefCell<HashSet<i64>>,
     /// The account whose own item is selected in the tree, 0 when a folder is
@@ -194,6 +196,7 @@ impl Mailbox {
             folder_accounts: RefCell::default(),
             folder_names: RefCell::default(),
             unselectable: RefCell::default(),
+            message_popover: RefCell::default(),
             draft_folders: RefCell::default(),
             junk_folders: RefCell::default(),
             selected_account: Cell::new(0),
@@ -325,6 +328,7 @@ impl Mailbox {
             glib::Propagation::Stop
         });
         self.connect_tree();
+        self.connect_menu_key();
         // Esc: the search goes first
         let weak = Rc::downgrade(self);
         let shortcuts = gtk::ShortcutController::new();
@@ -353,6 +357,22 @@ impl Mailbox {
             shell().close_main();
             glib::Propagation::Stop
         });
+    }
+
+    /// The menu key and Shift+F10 in the message list open the selected message's menu, as a right click does
+    fn connect_menu_key(self: &Rc<Self>) {
+        let keys = gtk::EventControllerKey::new();
+        let this = Rc::downgrade(self);
+        keys.connect_key_pressed(move |controller, key, _, modifiers| {
+            let menu_key =
+                key == gdk::Key::Menu || (key == gdk::Key::F10 && modifiers.contains(gdk::ModifierType::SHIFT_MASK));
+            if let (true, Some(this), Some(widget)) = (menu_key, this.upgrade(), controller.widget()) {
+                this.message_menu(&widget, 48.0, 48.0);
+                return glib::Propagation::Stop;
+            }
+            glib::Propagation::Proceed
+        });
+        self.list.view.add_controller(keys);
     }
 
     fn connect_tree(self: &Rc<Self>) {
@@ -404,14 +424,17 @@ impl Mailbox {
                 sign_in: SignInWith::of_auth_kind(&s.auth),
             });
             let title = pe_core::account_title(&s.name, &s.email, &names);
+            let folders = core.folders(account.id).unwrap_or_default();
+            let (folder_entries, unread) = self.folder_entries(account.id, &folders);
             let top = Entry {
                 id: -account.id,
-                markup: glib::markup_escape_text(&title).to_string(),
+                name: title,
+                unread: 0,
+                below: unread,
                 icon: "ic-mailbox-symbolic",
                 depth: 0,
             };
-            let folders = core.folders(account.id).unwrap_or_default();
-            entries.push((top, self.folder_entries(account.id, &folders)));
+            entries.push((top, folder_entries));
         }
         *self.accounts.borrow_mut() = infos;
         self.fill_account_menus();
@@ -433,12 +456,13 @@ impl Mailbox {
         self.show_folder_name();
     }
 
-    /// The entries of an account's folders, and what the window keeps of each
-    fn folder_entries(&self, account: i64, folders: &[Folder]) -> Vec<Entry> {
+    /// The entries of an account's folders, and what the window keeps of each; with the account's unread messages
+    fn folder_entries(&self, account: i64, folders: &[Folder]) -> (Vec<Entry>, u64) {
         let infos: Vec<&pe_store::FolderInfo> = folders.iter().map(|f| &f.info).collect();
         let depths = pe_core::tree_depths(&infos);
+        let hidden = pe_core::hidden_unread(folders, &depths);
         let mut entries = Vec::new();
-        for (folder, depth) in folders.iter().zip(depths) {
+        for ((folder, depth), below) in folders.iter().zip(depths).zip(hidden.below) {
             let special = special_use(folder);
             self.folder_accounts.borrow_mut().insert(folder.id, account);
             self.folder_names.borrow_mut().insert(
@@ -458,22 +482,28 @@ impl Mailbox {
             };
             entries.push(Entry {
                 id: folder.id,
-                markup: folder_markup(folder),
+                name: pe_core::folder_name(&folder.info),
+                unread: folder.unread,
+                below,
                 icon: folder_icon(special),
                 depth,
             });
         }
-        entries
+        (entries, hidden.account)
     }
 
     /// The labels and bold states of the folders of an account; a folder the tree does not have yet builds it again
     fn update_folders(&self, account: i64) {
-        for folder in shell().core.folders(account).unwrap_or_default() {
-            if !self.folders.update(folder.id, &folder_markup(&folder)) {
+        let folders = shell().core.folders(account).unwrap_or_default();
+        let infos: Vec<&pe_store::FolderInfo> = folders.iter().map(|f| &f.info).collect();
+        let hidden = pe_core::hidden_unread(&folders, &pe_core::tree_depths(&infos));
+        for (folder, below) in folders.iter().zip(hidden.below) {
+            if !self.folders.update(folder.id, folder.unread, below) {
                 self.reload();
                 return;
             }
         }
+        self.folders.update(-account, 0, hidden.account);
     }
 
     /// The menus beside Create Mail (a message from one account) and Send/Recv (all accounts, or one)
@@ -1253,15 +1283,7 @@ impl Mailbox {
         rest.append(Some("Delete"), Some("folder.delete"));
         menu.append_section(None, &rest);
         widget.insert_action_group("folder", Some(&group));
-        let popover = gtk::PopoverMenu::from_model(Some(&menu));
-        popover.set_parent(widget);
-        popover.set_has_arrow(false);
-        popover.set_pointing_to(Some(&gdk::Rectangle::new(x as i32, y as i32, 1, 1)));
-        popover.connect_closed(|popover| {
-            let popover = popover.clone();
-            glib::idle_add_local_once(move || popover.unparent());
-        });
-        popover.popup();
+        popup_menu(widget, &menu, x, y);
     }
 
     async fn ask_folder_name(&self, title: &str, intro: &str, name: &str) -> Option<String> {
@@ -1392,6 +1414,85 @@ impl Mailbox {
             &headers.replace("\r\n", "\n"),
         );
         dialog.set_widget_name("properties-dialog");
+    }
+
+    /// View Source: the whole message as the server has it
+    pub async fn show_source(&self) {
+        if self.uid.get() == 0 {
+            ui::alert(&self.window, TITLE, "Select a message first.").await;
+            return;
+        }
+        let Ok(Some((title, text))) = shell()
+            .core
+            .message_source_text(self.message_folder.get(), self.uid.get())
+        else {
+            ui::alert(&self.window, TITLE, "The message is not downloaded yet.").await;
+            return;
+        };
+        let dialog = ui::text_dialog_sized(&self.window, &title, "", &text.replace("\r\n", "\n"), (820, 600), false);
+        dialog.set_widget_name("source-dialog");
+    }
+
+    /// The right-click menu of the message list: the actions on the message, as Outlook Express has them, with the
+    /// choices that fit it (Mark as Unread for a read one, Not Junk in Junk E-mail)
+    pub fn message_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
+        let Some((_, message)) = self.list.selected() else {
+            return;
+        };
+        let group = gio::SimpleActionGroup::new();
+        // the command's own label, or the one that fits this message
+        let add = |section: &gio::Menu, command: Command, label: Option<&str>| {
+            let name = format!("{command:?}").to_lowercase();
+            let action = gio::SimpleAction::new(&name, None);
+            action.connect_activate(move |_, _| run_command(command));
+            group.add_action(&action);
+            section.append(Some(label.unwrap_or(command.label())), Some(&format!("message.{name}")));
+        };
+        let menu = gio::Menu::new();
+        if self.draft_folders.borrow().contains(&message.folder_id) {
+            let open = gio::Menu::new();
+            let action = gio::SimpleAction::new("open", None);
+            let this = Rc::downgrade(self);
+            action.connect_activate(move |_, _| {
+                if let Some(this) = this.upgrade() {
+                    this.open_selected();
+                }
+            });
+            group.add_action(&action);
+            open.append(Some("Open"), Some("message.open"));
+            menu.append_section(None, &open);
+        }
+        let answer = gio::Menu::new();
+        for command in [Command::Reply, Command::ReplyAll, Command::Forward] {
+            add(&answer, command, None);
+        }
+        menu.append_section(None, &answer);
+        let organize = gio::Menu::new();
+        add(
+            &organize,
+            if message.info.seen() {
+                Command::MarkUnread
+            } else {
+                Command::MarkRead
+            },
+            None,
+        );
+        add(&organize, Command::Flag, message.info.flagged().then_some("Clear Flag"));
+        let junk = self.junk_folders.borrow().contains(&message.folder_id);
+        add(&organize, if junk { Command::NotJunk } else { Command::Junk }, None);
+        add(&organize, Command::Move, None);
+        add(&organize, Command::Delete, Some("Delete"));
+        menu.append_section(None, &organize);
+        let files = gio::Menu::new();
+        add(&files, Command::SaveAs, None);
+        add(&files, Command::Print, None);
+        menu.append_section(None, &files);
+        let details = gio::Menu::new();
+        add(&details, Command::ViewSource, Some("View Source"));
+        add(&details, Command::Properties, None);
+        menu.append_section(None, &details);
+        widget.insert_action_group("message", Some(&group));
+        *self.message_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
     }
 
     /// File > Print: the message as it is shown, with the pictures the user allowed, through the print dialog
@@ -1594,14 +1695,18 @@ fn folder_icon(special: Option<SpecialUse>) -> &'static str {
     }
 }
 
-/// A folder's label: its name, with the unread count, bold, when it has unread messages
-fn folder_markup(folder: &Folder) -> String {
-    let name = glib::markup_escape_text(&pe_core::folder_name(&folder.info));
-    if folder.unread > 0 {
-        format!("<b>{name} ({})</b>", folder.unread)
-    } else {
-        name.to_string()
-    }
+/// A right-click menu of `menu` at (`x`, `y`) of `widget`, let go of once it closed
+fn popup_menu(widget: &gtk::Widget, menu: &gio::Menu, x: f64, y: f64) -> gtk::PopoverMenu {
+    let popover = gtk::PopoverMenu::from_model(Some(menu));
+    popover.set_parent(widget);
+    popover.set_has_arrow(false);
+    popover.set_pointing_to(Some(&gdk::Rectangle::new(x as i32, y as i32, 1, 1)));
+    popover.connect_closed(|popover| {
+        let popover = popover.clone();
+        glib::idle_add_local_once(move || popover.unparent());
+    });
+    popover.popup();
+    popover
 }
 
 /// The header bar: the toolbar's buttons in groups as Outlook Express has them (writing, answering, the message,

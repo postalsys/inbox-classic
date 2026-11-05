@@ -252,6 +252,20 @@ const sections = [
                 checked: ['The headers are shown, without the body', 'OK closes it']
             },
             {
+                shot: 'read-14-menu',
+                name: 'The message right-click menu',
+                what: 'Right-click a message for what can be done with it, as in Outlook Express: reply, forward, mark it read or unread, flag it, junk it, move it, delete it, save or print it, and see its source or properties. The menu fits the message: Mark as Unread for a read one, Not Junk in Junk E-mail, Open for a draft.',
+                how: 'Right-click a message in the list, or press the menu key (Shift+F10) on the selected one.',
+                checked: ["The menu has the message's actions", 'A read message offers Mark as Unread, not Mark as Read']
+            },
+            {
+                shot: 'read-15-source',
+                name: 'View Source',
+                what: 'The whole message as the server keeps it (RFC 822): every header, every part, attachments as their encoded text. Shown as plain text in a window that can be made larger, with control characters made harmless; a message over 4 MB is cut short with a note (File > Save As keeps all of it).',
+                how: 'View > Message Source (Ctrl+U on Windows and Linux), or View Source on the right-click menu.',
+                checked: ['It shows the header and every part', 'The window names the message', 'Close closes it']
+            },
+            {
                 shot: 'read-1-html',
                 name: 'HTML messages, with pictures sent inside them',
                 what: 'HTML mail is cleaned (no scripts, no forms, no tracking) and shown with its layout. Pictures that travel inside the message are shown at once. Showing a message for a second marks it read, on the server too.',
@@ -410,6 +424,72 @@ const sections = [
                     'Delete asks, then deletes it on the server',
                     'Renaming the Inbox is refused with the reason'
                 ]
+            },
+            {
+                shot: 'folders-5-collapsed',
+                name: 'Unread mail in a collapsed account',
+                what: 'A collapsed account, or a collapsed folder with folders in it, is bold with the unread messages of the folders it hides, so new mail is not out of sight. Junk E-mail and Deleted Items do not count. Expanded, each folder shows its own again.',
+                how: 'Click the arrow beside an account or a folder to collapse it.',
+                checked: ['Collapsed, the account shows the unread messages of its folders, bold', 'Expanded, the count is back on the Inbox alone']
+            }
+        ]
+    },
+    {
+        title: 'AI agents',
+        intro: 'Let the AI agent you already use (Claude, Cursor, any MCP client) read and organize your mail. There is no AI in Inbox Classic: an agent connects only when you let its program in, sees only the accounts you choose, and every message it wants to send waits for your yes. Each change is listed and can be taken back.',
+        features: [
+            {
+                shot: 'agents-1-before',
+                name: 'Before: unread mail',
+                what: 'Two new messages in the Inbox, unread and bold, before the agent starts.',
+                how: 'The agent is started by its own program (Claude Desktop and the like) with Inbox Classic as an MCP server: Tools > AI Agents > How to Connect an Agent.',
+                checked: ['Two new unread messages are in the list']
+            },
+            {
+                shot: 'agents-2-connect',
+                name: 'A program connects for the first time',
+                what: "The first time a program's agent connects, Inbox Classic asks: which program it is (by its file), what it may do (read, organize, write drafts, send with your yes) and which accounts it may see. Reading and organizing are offered; sending is not. Don't Allow is the default, and a program turned away is not asked about again.",
+                how: 'Shown when an agent connects; changed later in Tools > AI Agents.',
+                checked: [
+                    'The question names the program',
+                    'Reading and organizing are offered, sending is not',
+                    'Allowed, the agent connects with the tools of what it may do'
+                ]
+            },
+            {
+                shot: 'agents-3-after',
+                name: 'Changes show in the windows at once',
+                what: "What the agent changes goes through the same core as the menus: messages it marks read lose their bold at once, and the server has the change. Reading a message does not mark it read, and the agent gets the text a reader sees, without what the message hides (text in white, in display:none), told it is the sender's words, not instructions.",
+                how: 'Automatic.',
+                checked: [
+                    "It reads a message as text, told it is the sender's, without marking it read",
+                    'It marks two messages read, on the server and in the window at once'
+                ]
+            },
+            {
+                shot: 'agents-4-send',
+                name: 'Nothing is sent without your yes',
+                what: "A message an agent wants to send is shown in full first: every recipient by address, new addresses marked, the subject and the text. Send comes on after a moment, so a key pressed for another window does not send; Don't Send is the default, and Edit First opens it in a new message to change.",
+                how: 'Shown when an agent asks to send; only for a program allowed to send.',
+                checked: [
+                    'Every recipient by address, the new ones marked, with a warning',
+                    'Send waits a moment before it can be pressed',
+                    'The agent learns the user said yes'
+                ]
+            },
+            {
+                shot: 'agents-5-outbox',
+                name: 'Sent messages wait 30 seconds',
+                what: 'What you let an agent send waits 30 seconds in the Outbox, where it can still be deleted, or taken back with Undo in Tools > AI Agents.',
+                how: 'Tools > Outbox.',
+                checked: ['It waits in the Outbox, where it can still be deleted']
+            },
+            {
+                shot: 'agents-6-window',
+                name: 'Tools > AI Agents',
+                what: "Turn agents off altogether, see the programs let in or turned away and change what each may do, and see everything agents did, newest first, with Undo for read state, flags, moves and deletes, and for a message still in the Outbox. How to Connect an Agent gives the settings to paste into an agent's configuration.",
+                how: 'Tools > AI Agents.',
+                checked: ['It lists the program and what it may do', 'And what its agent did, newest first', 'Undo takes the message back']
             }
         ]
     },
@@ -659,6 +739,8 @@ const notYet = {
         // not be taken from inside the app (the test answers the panels in their place and checks what they did)
         'read-3-attachments',
         'read-4-save',
+        // a menu runs in a tracking loop of its own, which a picture taken from inside the app does not see
+        'read-14-menu',
         'files-1-save-as',
         'files-2-import',
         'tray-2-taskbar',

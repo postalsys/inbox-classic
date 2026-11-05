@@ -293,7 +293,7 @@ async fn message_actions(config: Value) {
         .unwrap();
     assert!(!s.server.flags("INBOX", keep).contains(&"\\Flagged".to_string()));
 
-    move_message(&mut s.client, &mut s.store, inbox, moved, archive)
+    move_message(&mut s.client, &mut s.store, inbox, &[moved], archive)
         .await
         .unwrap();
     assert_eq!(s.server.subjects("Archive"), ["Move me"]);
