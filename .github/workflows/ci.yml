@@ -109,6 +109,14 @@ jobs:
             - name: ImapKit for the UI test
               run: npm ci --no-audit --no-fund
               working-directory: core/e2e
+            # a screen wider than the runner's 1024x768, so the main window's screenshots (the homepage's) are whole
+            - name: Screen resolution
+              shell: powershell
+              continue-on-error: true
+              run: |
+                  Set-DisplayResolution -Width 1920 -Height 1080 -Force
+                  Add-Type -AssemblyName System.Windows.Forms
+                  [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
             # the app driven through its windows against ImapKit: account form, sync, reading, reply, help
             - name: UI end-to-end test
               shell: powershell
