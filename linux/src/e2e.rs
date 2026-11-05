@@ -1160,8 +1160,8 @@ async fn writing(d: &Driver) {
     let files = std::env::temp_dir().join("ic-ui-attach");
     let _ = std::fs::create_dir_all(&files);
     let _ = std::fs::write(files.join("trail-map.txt"), "the attachment that goes\n");
-    let _ = std::fs::write(files.join("wrong-file.txt"), "attached by mistake\n");
-    for file in ["trail-map.txt", "wrong-file.txt"] {
+    let _ = std::fs::write(files.join("packing-list.txt"), "attached by mistake\n");
+    for file in ["trail-map.txt", "packing-list.txt"] {
         FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![files.join(file)]));
         click(c.window.upcast_ref(), "compose-attach");
         pause(300).await;
@@ -1186,7 +1186,7 @@ async fn writing(d: &Driver) {
     let raw = new.as_ref().map(raw_text).unwrap_or_default();
     d.check(raw.contains("here is the trail map for Sunday"), "with what was typed");
     d.check(
-        raw.contains("trail-map.txt") && !raw.contains("wrong-file"),
+        raw.contains("trail-map.txt") && !raw.contains("packing-list"),
         "with only the file left attached",
     );
     d.check(

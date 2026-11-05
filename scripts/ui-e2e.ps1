@@ -806,10 +806,10 @@ try {
     $files = Join-Path $env:TEMP 'pe-ui-attach'
     New-Item -ItemType Directory -Force $files | Out-Null
     Set-Content (Join-Path $files 'trail-map.txt') 'the attachment that goes'
-    Set-Content (Join-Path $files 'wrong-file.txt') 'attached by mistake'
+    Set-Content (Join-Path $files 'packing-list.txt') 'attached by mistake'
     $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
     $count = { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
-    foreach ($file in 'trail-map.txt', 'wrong-file.txt') {
+    foreach ($file in 'trail-map.txt', 'packing-list.txt') {
         $before = & $count
         # once more if the dialog did not take the file, after closing what is left of it
         for ($try = 0; $try -lt 2 -and (& $count) -le $before; $try++) {
@@ -829,7 +829,7 @@ try {
     $new = WaitFor { Find 'INBOX' 'Subject: Trail map for Sunday' } 30
     Check ($null -ne $new) 'the new message was sent'
     Check ($new -and (RawText $new) -match 'here is the trail map for Sunday') 'with what was typed'
-    Check ($new -and (RawText $new) -match 'trail-map\.txt' -and (RawText $new) -notmatch 'wrong-file') 'with only the file left attached'
+    Check ($new -and (RawText $new) -match 'trail-map\.txt' -and (RawText $new) -notmatch 'packing-list') 'with only the file left attached'
     Check ($new -and (RawText $new) -match 'Content-Type: text/plain' -and (RawText $new) -notmatch 'Content-Type: text/html') 'nothing formatted: it went as plain text'
 
     Step 'pictures dropped into the text'
