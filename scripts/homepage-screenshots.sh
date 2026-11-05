@@ -28,18 +28,13 @@ for platform in "${platforms[@]}"; do
         target="$HOMEPAGE/img/$platform/$shot.png"
         case "$platform" in
             windows)
-                # 7 pixels of resize border at the left, the right and the bottom; the compose window down to its fields
-                # and the start of the text, as the page has room for
+                # 7 pixels of resize border at the left, the right and the bottom (the send question has one too, as it
+                # can be resized); the compose window down to its fields and the start of the text, as the page has room for
                 size=$(magick identify -format '%wx%h' "$source")
                 width=$((${size%x*} - 14))
                 height=$((${size#*x} - 7))
                 [ "$shot" = write-5-new ] && height=400
-                if [ "$shot" = agents-4-send ]; then
-                    # a dialog: no resize border to crop
-                    magick "$source" -strip "$target"
-                else
-                    magick "$source" -crop "${width}x${height}+7+0" +repage -strip "$target"
-                fi
+                magick "$source" -crop "${width}x${height}+7+0" +repage -strip "$target"
                 ;;
             mac)
                 # the compose window, as on Windows, down to its fields and the start of the text
@@ -57,6 +52,10 @@ for platform in "${platforms[@]}"; do
                 magick "$source" $crop -strip "$target"
                 ;;
         esac
+        # the search results: the window down to the header of the message shown, without the empty rest of its pane
+        if [ "$shot" = find-2-every-folder ]; then
+            magick "$target" -gravity North -crop 100%x53%+0+0 +repage "$target"
+        fi
         echo "$target $(magick identify -format '%wx%h' "$target")"
     done
 done

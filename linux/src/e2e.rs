@@ -25,7 +25,7 @@ use crate::ui::FILE_ANSWERS;
 /// The steps after organizing: lists, invitations, logos, dragging, junk, folders, links, completion, signatures
 mod steps;
 
-const SUBJECT: &str = "Hello from the UI test";
+const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
 
@@ -282,21 +282,26 @@ fn raw_text(message: &Value) -> String {
         .unwrap_or_default()
 }
 
-/// A picture sent inside the message: white words on blue, as a PNG
+/// A picture sent inside the message: the newsletter's banner, as a PNG
 fn banner_png() -> Vec<u8> {
     use gtk::cairo;
-    let (width, height) = (220, 60);
+    let (width, height) = (560, 110);
     let Ok(mut surface) = cairo::ImageSurface::create(cairo::Format::ARgb32, width, height) else {
         return Vec::new();
     };
     if let Ok(cr) = cairo::Context::new(&surface) {
-        cr.set_source_rgb(0.0, 0.2, 0.4);
+        cr.set_source_rgb(31.0 / 255.0, 77.0 / 255.0, 58.0 / 255.0);
         let _ = cr.paint();
         cr.set_source_rgb(1.0, 1.0, 1.0);
-        cr.select_font_face("Sans", cairo::FontSlant::Normal, cairo::FontWeight::Normal);
-        cr.set_font_size(20.0);
-        cr.move_to(16.0, 38.0);
-        let _ = cr.show_text("Inline picture");
+        cr.select_font_face("Serif", cairo::FontSlant::Normal, cairo::FontWeight::Bold);
+        cr.set_font_size(30.0);
+        cr.move_to(24.0, 54.0);
+        let _ = cr.show_text("Trail Notes");
+        cr.set_source_rgb(214.0 / 255.0, 232.0 / 255.0, 220.0 / 255.0);
+        cr.select_font_face("Serif", cairo::FontSlant::Normal, cairo::FontWeight::Normal);
+        cr.set_font_size(15.0);
+        cr.move_to(26.0, 82.0);
+        let _ = cr.show_text("Walks, maps and weekend ideas  |  October");
     }
     surface.flush();
     let stride = surface.stride() as usize;
@@ -313,38 +318,41 @@ fn seed(driver: &Driver) -> Result<(), String> {
     let pdf64 = base64::engine::general_purpose::STANDARD.encode(pdf);
     driver.add_message(
         &format!(
-            "From: Bob Builder <bob@example.com>\r\nTo: testuser@postalexpress.test, Dave <dave@example.com>\r\n\
+            "From: Bob Harris <bob@example.com>\r\nTo: testuser@inboxclassic.test, Dave <dave@example.com>\r\n\
              Cc: Carol <carol@example.com>\r\nSubject: {MINUTES}\r\nMessage-ID: <minutes@example.com>\r\n\
              Date: Wed, 1 Oct 2025 09:00:00 +0000\r\n\r\nWe agreed on the dates.\r\n"
         ),
         &["\\Seen"],
     )?;
     driver.add_message(
-        "From: Carol <carol@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Re: Lunch on Friday\r\n\
+        "From: Carol <carol@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: Lunch on Friday\r\n\
          Message-ID: <lunch2@example.com>\r\nIn-Reply-To: <lunch1@example.com>\r\nDate: Mon, 29 Sep 2025 12:00:00 +0000\r\n\
          Content-Type: text/html; charset=utf-8\r\n\r\n\
          <div dir=\"ltr\">Friday is fine, see you at noon.</div><br><div class=\"gmail_quote\"><div dir=\"ltr\" \
-         class=\"gmail_attr\">On Mon, Sep 29, 2025 at 9:00 AM UI Test &lt;testuser@postalexpress.test&gt; wrote:<br></div>\
+         class=\"gmail_attr\">On Mon, Sep 29, 2025 at 9:00 AM Alex Morgan &lt;testuser@inboxclassic.test&gt; wrote:<br></div>\
          <blockquote class=\"gmail_quote\" style=\"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);\
          padding-left:1ex\">Lunch on Friday? The usual place.</blockquote></div>\r\n",
         &["\\Seen"],
     )?;
     driver.add_message(
         &format!(
-            "From: Ann Example <ann@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: {SUBJECT}\r\n\
-             Message-ID: <ui-e2e@example.com>\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHi,\r\n\
-             this message was put here by the Linux UI test.\r\n"
+            "From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {SUBJECT}\r\n\
+             Message-ID: <ui-e2e@example.com>\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHi Alex,\r\n\
+             the photos from Saturday are in the shared album. The one from the lake came out best.\r\n\r\nAnn\r\n"
         ),
         &[],
     )?;
-    let html = "<div style=\"font-family:Georgia,serif;max-width:560px\"><h2 style=\"color:#036\">October newsletter</h2>\
-        <p>This message is <b>HTML</b>, with a picture sent inside it:</p><p><img src=\"cid:banner@example.com\" alt=\"banner\"></p>\
-        <p>and one kept on the internet, shown only after <i>Download pictures</i>:</p>\
-        <p><img src=\"https://nodemailer.com/img/nm_logo_200x136.png\" width=\"200\" height=\"136\" alt=\"remote picture\"></p>\
-        <p>A <a href=\"https://example.com/news\">link</a> opens in the browser. <script>alert(\"never runs\")</script></p></div>";
+    let html = "<div style=\"font-family:Georgia,serif;max-width:560px;color:#222\">\
+        <p><img src=\"cid:banner@example.com\" width=\"560\" height=\"110\" alt=\"Trail Notes\"></p>\
+        <h2 style=\"color:#1f4d3a;margin:18px 0 6px\">Five autumn walks worth the drive</h2>\
+        <p>The larches are turning gold and the summer crowds have gone home. This month we picked five routes for short \
+        October days, each under four hours, with a warm cafe at the end.</p>\
+        <p><a href=\"https://example.com/news\">Read the full guide</a> <script>alert(\"never runs\")</script></p>\
+        <p style=\"color:#666;font-size:14px\">Photo of the month, sent in by a reader:</p>\
+        <p><img src=\"https://nodemailer.com/img/nm_logo_200x136.png\" width=\"200\" height=\"136\" alt=\"Photo of the month\"></p></div>";
     driver.add_message(
         &format!(
-            "From: The Newsletter <news@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: {NEWSLETTER}\r\n\
+            "From: Trail Notes <news@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {NEWSLETTER}\r\n\
              Message-ID: <news@example.com>\r\nDate: Wed, 8 Oct 2025 08:00:00 +0000\r\nMIME-Version: 1.0\r\n\
              Content-Type: multipart/mixed; boundary=\"mixed\"\r\n\r\n--mixed\r\n\
              Content-Type: multipart/related; boundary=\"related\"\r\n\r\n--related\r\n\
@@ -746,7 +754,7 @@ fn command(command: Command) {
 // ---- the scenario ----
 
 async fn scenario(d: Rc<Driver>) {
-    add_account(&d, "UI Test", "testuser", "testpass", true).await;
+    add_account(&d, "Alex Morgan", "testuser", "testpass", true).await;
     reading(&d).await;
     writing(&d).await;
     steps::not_downloaded(&d).await;
@@ -799,7 +807,7 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
         );
     }
     set_text(&first, "start-name", name);
-    set_text(&first, "start-email", &format!("{user}@postalexpress.test"));
+    set_text(&first, "start-email", &format!("{user}@inboxclassic.test"));
     if shots {
         d.shot(&first, "account-1-form").await;
     }
@@ -815,7 +823,7 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     let second = second.upcast::<gtk::Widget>();
     d.check(true, "the server settings form follows the lookup");
     d.check(
-        text_of(&second, "form-4") == "imap.postalexpress.test",
+        text_of(&second, "form-4") == "imap.inboxclassic.test",
         "the lookup guessed the IMAP server",
     );
     d.check(
@@ -901,7 +909,7 @@ async fn reading(d: &Driver) {
                 })
                 .unwrap_or_default();
             d.check(
-                text.contains("Subject: October newsletter") && !text.contains("This message is"),
+                text.contains("Subject: October newsletter") && !text.contains("larches are turning"),
                 "File > Properties opens the headers of the message, without the body",
             );
             d.shot(&dialog, "read-7-properties").await;
@@ -952,7 +960,7 @@ async fn reading(d: &Driver) {
             d.check(
                 text.contains("Subject: October newsletter")
                     && text.contains("Content-Type: multipart")
-                    && text.contains("This message is"),
+                    && text.contains("larches are turning"),
                 "with its header and every part, as the server has it",
             );
             d.check(
@@ -1075,7 +1083,7 @@ async fn writing(d: &Driver) {
     })
     .await;
     d.check(bold, "B shows bold is on");
-    c.editor.type_text("Thanks, Ann. Answered by the UI test.");
+    c.editor.type_text("Thanks, Ann. The lake one is my favourite too.");
     pause(500).await;
     d.shot(&c.window, "write-3-reply").await;
     click(c.window.upcast_ref(), "compose-send");
@@ -1087,20 +1095,17 @@ async fn writing(d: &Driver) {
             text.contains("In-Reply-To: <ui-e2e@example.com>"),
             "the reply refers to the message it answers",
         );
-        d.check(text.contains("Answered by the UI test"), "the reply has what was typed");
+        d.check(text.contains("my favourite too"), "the reply has what was typed");
         d.check(
             text.contains("Content-Type: text/html") && text.contains("Content-Type: text/plain"),
             "it is HTML with a text part",
         );
         d.check(text.contains("<b>Thanks, Ann"), "what was typed in bold is bold");
         d.check(
-            text.contains("Original Message") && text.contains("this message was put here"),
+            text.contains("Original Message") && text.contains("shared album"),
             "the folded quote is sent along",
         );
-        d.check(
-            text.matches("this message was put here").count() == 2,
-            "the quote is sent once",
-        );
+        d.check(text.matches("shared album").count() == 2, "the quote is sent once");
     }
     let sent = wait_for(30, || d.find("Sent", &format!("Subject: Re: {SUBJECT}"))).await;
     d.check(sent.is_some(), "a copy of the reply is in Sent");
@@ -1132,12 +1137,13 @@ async fn writing(d: &Driver) {
         .map(|s| s.string().to_string())
         .unwrap_or_default();
     d.check(
-        from == "UI Test <testuser@postalexpress.test>",
+        from == "Alex Morgan <testuser@inboxclassic.test>",
         &format!("From names the account it goes from ({from})"),
     );
     c.to.set_text("dave at example.com");
-    c.subject.set_text("A new message from the UI test");
-    c.editor.type_text("Hello Dave, written from scratch.");
+    c.subject.set_text("Trail map for Sunday");
+    c.editor
+        .type_text("Hi Dave, here is the trail map for Sunday. See you at nine!");
     pause(500).await;
     click(c.window.upcast_ref(), "compose-send");
     let problem = wait_alert(10).await;
@@ -1153,9 +1159,9 @@ async fn writing(d: &Driver) {
     c.to.set_text("Dave <dave@example.com>");
     let files = std::env::temp_dir().join("ic-ui-attach");
     let _ = std::fs::create_dir_all(&files);
-    let _ = std::fs::write(files.join("keep-me.txt"), "the attachment that goes\n");
-    let _ = std::fs::write(files.join("wrong-file.txt"), "attached by mistake\n");
-    for file in ["keep-me.txt", "wrong-file.txt"] {
+    let _ = std::fs::write(files.join("trail-map.txt"), "the attachment that goes\n");
+    let _ = std::fs::write(files.join("packing-list.txt"), "attached by mistake\n");
+    for file in ["trail-map.txt", "packing-list.txt"] {
         FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![files.join(file)]));
         click(c.window.upcast_ref(), "compose-attach");
         pause(300).await;
@@ -1175,12 +1181,12 @@ async fn writing(d: &Driver) {
         "Delete in the Attach row takes one off",
     );
     click(c.window.upcast_ref(), "compose-send");
-    let new = wait_for(30, || d.find("INBOX", "Subject: A new message from the UI test")).await;
+    let new = wait_for(30, || d.find("INBOX", "Subject: Trail map for Sunday")).await;
     d.check(new.is_some(), "the new message was sent");
     let raw = new.as_ref().map(raw_text).unwrap_or_default();
-    d.check(raw.contains("Hello Dave, written from scratch"), "with what was typed");
+    d.check(raw.contains("here is the trail map for Sunday"), "with what was typed");
     d.check(
-        raw.contains("keep-me.txt") && !raw.contains("wrong-file"),
+        raw.contains("trail-map.txt") && !raw.contains("packing-list"),
         "with only the file left attached",
     );
     d.check(
@@ -1364,7 +1370,7 @@ async fn send_receive(d: &Driver) {
         .unwrap_or_default();
     let added = d.add_message(
         &format!(
-            "From: Ann Example <ann@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: One more thing\r\n\
+            "From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: One more thing\r\n\
              Message-ID: <later@example.com>\r\nDate: {now}\r\n\r\nArrived later.\r\n"
         ),
         &[],
@@ -1451,14 +1457,14 @@ async fn finding(d: &Driver) {
     search("from:carol").await;
     d.check(wait_until(10, || rows() == 1).await, "Gmail operators work: from:");
     search("").await;
-    search("hello in:inbox").await;
+    search("photos in:inbox").await;
     let in_inbox = wait_for(10, || (rows() >= 1 && rows() < all).then(rows)).await;
     let summary = mailbox.search_summary().unwrap_or_default();
     d.check(
         summary.ends_with(" in Inbox") && mailbox.selected_name() == "Inbox",
         &format!("in:inbox: the title and the search bar say the Inbox ({summary})"),
     );
-    search("hello").await;
+    search("photos").await;
     let everywhere = wait_for(10, || (rows() > in_inbox.unwrap_or(0)).then(rows)).await;
     d.check(in_inbox.is_some() && everywhere.is_some(), &format!("the messages of other folders are found too ({everywhere:?}), in:inbox narrows them to the Inbox ({in_inbox:?})"));
     select_row(0).await;
@@ -1468,7 +1474,7 @@ async fn finding(d: &Driver) {
         wait_until(10, || rows() >= 1 && rows() < all).await,
         "is:unread lists the unread messages",
     );
-    search("hello").await;
+    search("photos").await;
     select_row(0).await;
     d.check(
         wait_until(10, || mailbox.reader.header_text().contains('@')).await,
@@ -1484,7 +1490,7 @@ async fn finding(d: &Driver) {
         .await,
         "Clear search on the search bar ends the search",
     );
-    search("hello").await;
+    search("photos").await;
     mailbox.find.emit_by_name::<()>("stop-search", &[]);
     d.check(
         wait_until(10, || rows() == all && !mailbox.list.columns.folder.is_visible()).await,
@@ -1633,7 +1639,7 @@ async fn accounts(d: &Driver) {
                 text_of(form.upcast_ref(), "form-5") == d.ports.imap.to_string(),
                 "Properties shows the settings, with the IMAP port as it was saved",
             );
-            set_text(form.upcast_ref(), "form-0", "UI Test Renamed");
+            set_text(form.upcast_ref(), "form-0", "Alex Morgan Renamed");
             d.shot(&form, "accounts-2-properties").await;
             click(form.upcast_ref(), "dialog-ok");
             if let Some(question) = wait_alert(3).await {
@@ -1648,7 +1654,7 @@ async fn accounts(d: &Driver) {
         .accounts()
         .unwrap_or_default()
         .iter()
-        .any(|a| a.settings.name == "UI Test Renamed");
+        .any(|a| a.settings.name == "Alex Morgan Renamed");
     d.check(renamed, "the new name is saved");
     // Remove the second, the one with the wrong password
     if let Some(list) = named_in(&accounts, "accounts-list").and_downcast::<gtk::ListBox>() {

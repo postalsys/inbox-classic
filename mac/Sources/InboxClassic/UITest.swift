@@ -281,36 +281,46 @@ final class UITest {
     /// the mail the Windows test reads too: in the list newest first the newsletter, Ann's message, the minutes, and a
     /// reply with the message it answers quoted below
     func seed() async throws {
-        let picture = NSImage(size: NSSize(width: 220, height: 60), flipped: false) { rect in
-            NSColor(calibratedRed: 0, green: 0.2, blue: 0.4, alpha: 1).setFill()
+        // the newsletter's banner
+        let picture = NSImage(size: NSSize(width: 560, height: 110), flipped: false) { rect in
+            NSColor(calibratedRed: 31 / 255, green: 77 / 255, blue: 58 / 255, alpha: 1).setFill()
             rect.fill()
-            ("Inline picture" as NSString).draw(at: NSPoint(x: 12, y: 18), withAttributes: [
-                .font: NSFont.systemFont(ofSize: 20), .foregroundColor: NSColor.white,
+            let georgia = { (size: CGFloat, bold: Bool) in
+                NSFont(name: bold ? "Georgia-Bold" : "Georgia", size: size) ?? NSFont.systemFont(ofSize: size)
+            }
+            ("Trail Notes" as NSString).draw(at: NSPoint(x: 24, y: 50), withAttributes: [
+                .font: georgia(30, true), .foregroundColor: NSColor.white,
+            ])
+            ("Walks, maps and weekend ideas  |  October" as NSString).draw(at: NSPoint(x: 26, y: 24), withAttributes: [
+                .font: georgia(15, false), .foregroundColor: NSColor(calibratedRed: 214 / 255, green: 232 / 255, blue: 220 / 255, alpha: 1),
             ])
             return true
         }
         let png = NSBitmapImageRep(data: picture.tiffRepresentation!)!.representation(using: .png, properties: [:])!
             .base64EncodedString(options: .lineLength76Characters).replacingOccurrences(of: "\r\n", with: "\r\n")
         let pdf = Data("%PDF-1.4\n% a small attachment from the Mac UI test\n".utf8).base64EncodedString()
-        try await addMessage("From: Bob Builder <bob@example.com>\r\nTo: testuser@postalexpress.test, Dave <dave@example.com>\r\n"
+        try await addMessage("From: Bob Harris <bob@example.com>\r\nTo: testuser@inboxclassic.test, Dave <dave@example.com>\r\n"
             + "Cc: Carol <carol@example.com>\r\nSubject: Minutes of the planning meeting\r\nMessage-ID: <minutes@example.com>\r\n"
             + "Date: Wed, 1 Oct 2025 09:00:00 +0000\r\n\r\nWe agreed on the dates.\r\n", flags: ["\\Seen"])
-        try await addMessage("From: Carol <carol@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Re: Lunch on Friday\r\n"
+        try await addMessage("From: Carol <carol@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: Lunch on Friday\r\n"
             + "Message-ID: <lunch2@example.com>\r\nIn-Reply-To: <lunch1@example.com>\r\nDate: Mon, 29 Sep 2025 12:00:00 +0000\r\n"
             + "Content-Type: text/html; charset=utf-8\r\n\r\n"
             + "<div dir=\"ltr\">Friday is fine, see you at noon.</div><br><div class=\"gmail_quote\"><div dir=\"ltr\" class=\"gmail_attr\">"
-            + "On Mon, Sep 29, 2025 at 9:00 AM UI Test &lt;testuser@postalexpress.test&gt; wrote:<br></div>"
+            + "On Mon, Sep 29, 2025 at 9:00 AM Alex Morgan &lt;testuser@inboxclassic.test&gt; wrote:<br></div>"
             + "<blockquote class=\"gmail_quote\" style=\"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex\">"
             + "Lunch on Friday? The usual place.</blockquote></div>\r\n", flags: ["\\Seen"])
-        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: Hello from the UI test\r\n"
-            + "Message-ID: <ui-e2e@example.com>\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHi,\r\n"
-            + "this message was put here by the Mac UI test.\r\n")
-        let html = "<div style=\"font-family:Georgia,serif;max-width:560px\"><h2 style=\"color:#036\">October newsletter</h2>"
-            + "<p>This message is <b>HTML</b>, with a picture sent inside it:</p><p><img src=\"cid:banner@example.com\" alt=\"banner\"></p>"
-            + "<p>and one kept on the internet, shown only after <i>Download pictures</i>:</p>"
-            + "<p><img src=\"https://nodemailer.com/img/nm_logo_200x136.png\" width=\"200\" height=\"136\" alt=\"remote picture\"></p>"
-            + "<p>A <a href=\"https://example.com/news\">link</a> opens in the browser. <script>alert(\"never runs\")</script></p></div>"
-        try await addMessage("From: The Newsletter <news@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: October newsletter\r\n"
+        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Photos from Saturday\r\n"
+            + "Message-ID: <ui-e2e@example.com>\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHi Alex,\r\n"
+            + "the photos from Saturday are in the shared album. The one from the lake came out best.\r\n\r\nAnn\r\n")
+        let html = "<div style=\"font-family:Georgia,serif;max-width:560px;color:#222\">"
+            + "<p><img src=\"cid:banner@example.com\" width=\"560\" height=\"110\" alt=\"Trail Notes\"></p>"
+            + "<h2 style=\"color:#1f4d3a;margin:18px 0 6px\">Five autumn walks worth the drive</h2>"
+            + "<p>The larches are turning gold and the summer crowds have gone home. This month we picked five routes for short "
+            + "October days, each under four hours, with a warm cafe at the end.</p>"
+            + "<p><a href=\"https://example.com/news\">Read the full guide</a> <script>alert(\"never runs\")</script></p>"
+            + "<p style=\"color:#666;font-size:14px\">Photo of the month, sent in by a reader:</p>"
+            + "<p><img src=\"https://nodemailer.com/img/nm_logo_200x136.png\" width=\"200\" height=\"136\" alt=\"Photo of the month\"></p></div>"
+        try await addMessage("From: Trail Notes <news@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: October newsletter\r\n"
             + "Message-ID: <news@example.com>\r\nDate: Wed, 8 Oct 2025 08:00:00 +0000\r\nMIME-Version: 1.0\r\n"
             + "Content-Type: multipart/mixed; boundary=\"mixed\"\r\n\r\n--mixed\r\n"
             + "Content-Type: multipart/related; boundary=\"related\"\r\n\r\n--related\r\n"
@@ -425,8 +435,8 @@ final class UITest {
         let microsoft: NSButton? = find("account.microsoft", in: first)
         check(google?.accessibilityLabel() == "Sign in with Google" && microsoft?.accessibilityLabel() == "Sign in with Microsoft",
               "it starts with the Google and Microsoft sign-in buttons")
-        type("UI Test", into: find("account.name", in: first))
-        type("testuser@postalexpress.test", into: find("account.email", in: first))
+        type("Alex Morgan", into: find("account.name", in: first))
+        type("testuser@inboxclassic.test", into: find("account.email", in: first))
         await shot(first, "account-1-form")
         press(find("account.next", in: first))
         if let wait = await waitWindow("wait", 5) {
@@ -438,8 +448,8 @@ final class UITest {
         }
         check(true, "the server settings form follows the lookup")
         let field = { (index: Int) -> NSTextField? in self.find("form.field.\(index)", in: second) }
-        check(field(4)?.stringValue == "imap.postalexpress.test", "the lookup guessed the IMAP server")
-        check(field(0)?.stringValue == "UI Test", "the server form keeps the name typed first")
+        check(field(4)?.stringValue == "imap.inboxclassic.test", "the lookup guessed the IMAP server")
+        check(field(0)?.stringValue == "Alex Morgan", "the server form keeps the name typed first")
         type("testuser", into: field(2))
         type("testpass", into: field(3))
         type("127.0.0.1", into: field(4))
@@ -489,7 +499,7 @@ final class UITest {
         if let properties {
             let box: NSTextView? = find("text.body", in: properties)
             let headers = box?.string ?? ""
-            check(headers.contains("Subject: October newsletter") && !headers.contains("This message is"), "the headers, without the body")
+            check(headers.contains("Subject: October newsletter") && !headers.contains("larches are turning"), "the headers, without the body")
             await shot(properties, "read-7-properties")
             NSApp.stopModal()
             check(await waitUntil(10) { !properties.isVisible }, "OK closes it")
@@ -509,7 +519,7 @@ final class UITest {
         if let source {
             let box: NSTextView? = find("text.body", in: source)
             let raw = box?.string ?? ""
-            check(raw.contains("Subject: October newsletter") && raw.contains("Content-Type: multipart") && raw.contains("This message is"),
+            check(raw.contains("Subject: October newsletter") && raw.contains("Content-Type: multipart") && raw.contains("larches are turning"),
                   "with its header and every part, as the server has it")
             check(source.title == "Message Source: October newsletter", "the window names the message (\(source.title))")
             await shot(source, "read-15-source")
@@ -618,19 +628,19 @@ final class UITest {
         guard let reply = await waitCompose() else { throw Failed(description: "no compose window") }
         compose = reply
         check(field("compose.to", compose)?.stringValue.contains("ann@example.com") == true, "the reply goes to the sender")
-        check(await typeInEditor(compose, "Thanks, Ann. Answered by the UI test."), "the editor takes typing")
+        check(await typeInEditor(compose, "Thanks, Ann. The lake one is my favourite too."), "the editor takes typing")
         await pause(0.5)
         await shot(compose, "write-3-reply")
         ComposeWindow.open.last.map { window in onMain { window.perform(#selector(ComposeWindow.sendClicked)) } }
-        let answered = await waitFor(30) { await findMessage("INBOX", "Subject: Re: Hello from the UI test") }
+        let answered = await waitFor(30) { await findMessage("INBOX", "Subject: Re: Photos from Saturday") }
         check(answered != nil, "the reply arrived over SMTP")
         if let answered {
             let text = raw(answered)
             check(text.contains("In-Reply-To: <ui-e2e@example.com>"), "the reply refers to the message it answers")
-            check(text.contains("Answered by the UI test"), "the reply has what was typed")
-            check(text.contains("Original Message") && text.contains("this message was put here"), "the folded quote is sent along")
+            check(text.contains("my favourite too"), "the reply has what was typed")
+            check(text.contains("Original Message") && text.contains("shared album"), "the folded quote is sent along")
         }
-        check(await waitFor { await findMessage("Sent", "Subject: Re: Hello from the UI test") } != nil, "a copy of the reply is in Sent")
+        check(await waitFor { await findMessage("Sent", "Subject: Re: Photos from Saturday") } != nil, "a copy of the reply is in Sent")
 
         step("a new message")
         command(.newMail)
@@ -641,10 +651,10 @@ final class UITest {
         await pause(1)
         await shot(compose, "write-0-new-empty")
         let from: NSPopUpButton? = find("compose.from", in: compose)
-        check(from?.titleOfSelectedItem == "UI Test <testuser@postalexpress.test>", "From names the account it goes from")
+        check(from?.titleOfSelectedItem == "Alex Morgan <testuser@inboxclassic.test>", "From names the account it goes from")
         type("dave at example.com", into: field("compose.to", compose))
-        type("A new message from the UI test", into: field("compose.subject", compose))
-        check(await typeInEditor(compose, "Hello Dave, written from scratch."), "the editor of a new message takes typing")
+        type("Trail map for Sunday", into: field("compose.subject", compose))
+        check(await typeInEditor(compose, "Hi Dave, here is the trail map for Sunday. See you at nine!"), "the editor of a new message takes typing")
         ComposeWindow.open.last.map { window in onMain { window.perform(#selector(ComposeWindow.sendClicked)) } }
         let problem = await waitWindow("alert", 10)
         check(problem != nil, "a mistyped address is pointed out before sending")
@@ -652,7 +662,7 @@ final class UITest {
         answer(problem, "OK")
         check(await waitUntil { compose.isVisible && window("alert") == nil }, "and the message stays open to fix it")
         type("Dave <dave@example.com>", into: field("compose.to", compose))
-        let file = out.appendingPathComponent("keep-me.txt")
+        let file = out.appendingPathComponent("trail-map.txt")
         try "the attachment that goes".write(to: file, atomically: true, encoding: .utf8)
         ComposeWindow.open.last?.attachForTest([file])
         let attached: NSTokenField? = find("compose.attached", in: compose)
@@ -660,10 +670,10 @@ final class UITest {
         await pause(0.5)
         await shot(compose, "write-5-new")
         ComposeWindow.open.last.map { window in onMain { window.perform(#selector(ComposeWindow.sendClicked)) } }
-        let sent = await waitFor(30) { await findMessage("INBOX", "Subject: A new message from the UI test") }
+        let sent = await waitFor(30) { await findMessage("INBOX", "Subject: Trail map for Sunday") }
         check(sent != nil, "the new message was sent")
-        check(sent.map { raw($0).contains("Hello Dave, written from scratch") } == true, "with what was typed")
-        check(sent.map { raw($0).contains("keep-me.txt") } == true, "with the file attached")
+        check(sent.map { raw($0).contains("here is the trail map for Sunday") } == true, "with what was typed")
+        check(sent.map { raw($0).contains("trail-map.txt") } == true, "with the file attached")
         await shot(main.window, "write-11-sent")
 
         step("Sent Items")

@@ -40,7 +40,7 @@ const sections = [
                 what: "Inbox Classic looks up the provider's settings the way Thunderbird does: the provider's own autoconfig file, then Mozilla's ISPDB, then the usual imap. and smtp. names. Only over HTTPS, and it never picks a server without encryption. The password is asked here, next to the servers it goes to, and the form starts in it.",
                 how: 'Follows step 1 automatically. Cancel on the lookup skips it.',
                 checked: [
-                    'The lookup runs and fills in the guessed names (imap.postalexpress.test for the test address)',
+                    'The lookup runs and fills in the guessed names (imap.inboxclassic.test for the test address)',
                     'The server form keeps the name typed first'
                 ]
             },
