@@ -5,7 +5,6 @@ use std::ffi::c_char;
 use std::ptr::null_mut;
 
 use pe_core::{Action, MessageRef, Summary};
-use pe_store::Sort;
 
 use crate::core::{PeCore, PeSearch, PeSortField, handed, refused, search_of, take_back, with};
 use crate::{guard, into_c_string};
@@ -123,10 +122,7 @@ pub unsafe extern "C" fn pe_selection_set_ranges(
         };
         starts.iter().copied().zip(ends.iter().copied()).collect()
     };
-    let sort = Sort {
-        field: sort.into(),
-        ascending,
-    };
+    let sort = crate::core::sort_of(sort, ascending);
     // SAFETY: as the caller guarantees
     let refs = unsafe { with(core, None, |core| core.refs_in_ranges(&search, sort, &ranges).ok()) };
     match refs {
@@ -162,10 +158,7 @@ pub unsafe extern "C" fn pe_selection_positions(
     let Some(search) = (unsafe { search_of(search) }) else {
         return null_mut();
     };
-    let sort = Sort {
-        field: sort.into(),
-        ascending,
-    };
+    let sort = crate::core::sort_of(sort, ascending);
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
@@ -233,6 +226,20 @@ impl From<&PeSelectionSummary> for Summary {
     }
 }
 
+impl From<Summary> for PeSelectionSummary {
+    fn from(s: Summary) -> Self {
+        PeSelectionSummary {
+            count: s.count,
+            unread: s.unread,
+            flagged: s.flagged,
+            in_junk: s.in_junk,
+            accounts: s.accounts,
+            folders: s.folders,
+            for_good: s.for_good,
+        }
+    }
+}
+
 /// Fills `summary`; false on failure
 ///
 /// # Safety
@@ -255,59 +262,52 @@ pub unsafe extern "C" fn pe_selection_summary(
         return false;
     };
     // SAFETY: the caller gave a valid pointer
-    unsafe {
-        *summary = PeSelectionSummary {
-            count: found.count,
-            unread: found.unread,
-            flagged: found.flagged,
-            in_junk: found.in_junk,
-            accounts: found.accounts,
-            folders: found.folders,
-            for_good: found.for_good,
-        }
-    };
+    unsafe { *summary = found.into() };
     true
 }
 
-/// What the reading pane says over several messages, "3 messages selected" (`detail` false) or "2 unread, 1
-/// flagged" under it (`detail` true, empty when neither). Free with `pe_string_free`.
+/// The reading pane's page over several messages ("3 messages selected", "2 unread" under it), in the style of
+/// `pe_reader_page`. Free with `pe_string_free`.
 ///
 /// # Safety
 /// `summary` must be a valid pointer.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_selection_summary_text(summary: *const PeSelectionSummary, detail: bool) -> *mut c_char {
+pub unsafe extern "C" fn pe_selection_page(summary: *const PeSelectionSummary) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(summary) = (unsafe { summary.as_ref() }) else {
+        return null_mut();
+    };
+    guard(|| into_c_string(Summary::from(summary).page())).unwrap_or(null_mut())
+}
+
+/// What to ask before Delete when it removes some of the messages of `summary` for good, NULL when it removes none.
+/// Free with `pe_string_free`.
+///
+/// # Safety
+/// `summary` must be a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_delete_question(summary: *const PeSelectionSummary) -> *mut c_char {
     // SAFETY: as the caller guarantees
     let Some(summary) = (unsafe { summary.as_ref() }) else {
         return null_mut();
     };
     guard(|| {
-        let summary = Summary::from(summary);
-        into_c_string(if detail { summary.detail() } else { summary.title() })
+        Summary::from(summary)
+            .delete_question()
+            .map_or(null_mut(), into_c_string)
     })
     .unwrap_or(null_mut())
 }
 
-/// What to ask before Delete when it removes some of them for good, NULL when it removes none. Free with
-/// `pe_string_free`.
+/// Whether Flag flags the messages of `summary` (one is not flagged) or takes the flags away (all are), for the label
+/// of the command
 ///
 /// # Safety
-/// `core` must be a live handle, `selection` a live selection.
+/// `summary` must be a valid pointer.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_selection_delete_question(
-    core: *const PeCore,
-    selection: *const PeSelection,
-) -> *mut c_char {
+pub unsafe extern "C" fn pe_selection_flags(summary: *const PeSelectionSummary) -> bool {
     // SAFETY: as the caller guarantees
-    let Some(selection) = (unsafe { selection.as_ref() }) else {
-        return null_mut();
-    };
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| match core.delete_question(&selection.0) {
-            Ok(Some(question)) => into_c_string(question),
-            _ => null_mut(),
-        })
-    }
+    unsafe { summary.as_ref() }.is_some_and(|s| Summary::from(s).flags())
 }
 
 #[repr(C)]
@@ -317,6 +317,8 @@ pub enum PeAction {
     Unread = 1,
     Flag = 2,
     Unflag = 3,
+    /// Flag them when one is not flagged, take the flags away when all are (`pe_selection_flags`)
+    ToggleFlag = 9,
     Junk = 4,
     NotJunk = 5,
     /// Into Deleted Items, or for good (ask first: `pe_selection_delete_question`)
@@ -348,6 +350,7 @@ pub unsafe extern "C" fn pe_selection_act(
         PeAction::Unread => Action::Read(false),
         PeAction::Flag => Action::Flag(true),
         PeAction::Unflag => Action::Flag(false),
+        PeAction::ToggleFlag => Action::ToggleFlag,
         PeAction::Junk => Action::Junk(true),
         PeAction::NotJunk => Action::Junk(false),
         PeAction::Delete => Action::Delete,
@@ -387,9 +390,30 @@ pub unsafe extern "C" fn pe_undo(core: *const PeCore, error: *mut *mut c_char) -
     unsafe { refused(error, outcome, "nothing to undo") }.map_or(null_mut(), into_c_string)
 }
 
-/// The counts of a list in the status bar: "12 messages, 3 unread", with ", 2 selected" when more than one is. Free
-/// with `pe_string_free`.
+/// Fills `selection` with the messages the last `pe_undo` brought back that are in their folders again, to select
+/// them after the list reloads; empty while none is there yet. Forgotten once all are there. False on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` a live selection.
 #[unsafe(no_mangle)]
-pub extern "C" fn pe_list_counts(total: u64, unread: u64, selected: u64) -> *mut c_char {
-    guard(|| into_c_string(pe_core::list_counts(total, unread, selected))).unwrap_or(null_mut())
+pub unsafe extern "C" fn pe_undo_restored(core: *const PeCore, selection: *mut PeSelection) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(selection) = (unsafe { selection.as_mut() }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    match unsafe { with(core, None, |core| core.restored().ok()) } {
+        Some(found) => {
+            selection.0 = found;
+            true
+        }
+        None => false,
+    }
+}
+
+/// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search
+/// (`searching`), with ", 2 selected" when more than one is. Free with `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_list_counts(total: u64, unread: u64, selected: u64, searching: bool) -> *mut c_char {
+    guard(|| into_c_string(pe_core::list_counts(total, unread, selected, searching))).unwrap_or(null_mut())
 }

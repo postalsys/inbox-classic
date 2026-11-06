@@ -1,11 +1,12 @@
 //! The messages selected in a list: found by their places in it (the list shows rows by position, so a selection of
 //! the windows is ranges of positions), and found again after the list changed (new mail moves the positions).
 
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashMap};
 
 use rusqlite::params_from_iter;
 use rusqlite::types::Value;
 
+use crate::messages::split_flags;
 use crate::{FolderId, Result, Search, Sort, Store};
 
 /// A message the windows point at: its folder and UID
@@ -15,23 +16,46 @@ pub struct MessageRef {
     pub uid: u64,
 }
 
+impl MessageRef {
+    /// The UIDs of `refs` by folder, in folder order, each folder's in the order given
+    pub fn by_folder(refs: &[MessageRef]) -> BTreeMap<FolderId, Vec<u64>> {
+        let mut groups: BTreeMap<FolderId, Vec<u64>> = BTreeMap::new();
+        for r in refs {
+            groups.entry(r.folder).or_default().push(r.uid);
+        }
+        groups
+    }
+}
+
 /// What an action on picked messages needs of each: where it is, its flags and its Message-ID
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Picked {
     pub at: MessageRef,
-    /// As the store keeps them: sorted, space separated
-    pub flags: String,
+    pub flags: Vec<String>,
     pub message_id: Option<String>,
 }
 
 impl Picked {
     pub fn has_flag(&self, flag: &str) -> bool {
-        self.flags.split(' ').any(|f| f.eq_ignore_ascii_case(flag))
+        self.flags.iter().any(|f| f.eq_ignore_ascii_case(flag))
+    }
+
+    pub fn seen(&self) -> bool {
+        self.has_flag("\\Seen")
+    }
+
+    pub fn flagged(&self) -> bool {
+        self.has_flag("\\Flagged")
     }
 }
 
 /// SQLite's limit on the values of one statement is 32766; picked messages go in by this many at a time
 const CHUNK: usize = 400;
+
+/// `?, ?, ?` for `n` values
+fn marks(n: usize) -> String {
+    vec!["?"; n].join(", ")
+}
 
 impl Store {
     /// The messages at positions `ranges` (start included, end not) of what `search` finds in the order of `sort`, in
@@ -41,7 +65,7 @@ impl Store {
         if ranges.is_empty() {
             return Ok(Vec::new());
         }
-        let (condition, mut values) = search.condition(false);
+        let (positioned, mut values) = search.positioned(sort);
         let mut wanted = Vec::with_capacity(ranges.len());
         for (start, end) in &ranges {
             values.push(Value::Integer(*start as i64));
@@ -53,9 +77,7 @@ impl Store {
             ));
         }
         let mut statement = self.db.prepare(&format!(
-            "SELECT folder_id, uid FROM (SELECT folder_id, uid, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS position \
-             FROM messages WHERE {condition}) WHERE {} ORDER BY position",
-            sort.order_by(),
+            "SELECT folder_id, uid FROM ({positioned}) WHERE {} ORDER BY position",
             wanted.join(" OR ")
         ))?;
         statement
@@ -69,82 +91,86 @@ impl Store {
     }
 
     /// Where `refs` are now in what `search` finds in the order of `sort`, ascending; those no longer there are left
-    /// out. One pass over the list, however many there are.
+    /// out. One pass over the list, which hands back only theirs.
     pub fn positions(&self, search: &Search, sort: Sort, refs: &[MessageRef]) -> Result<Vec<u64>> {
         if refs.is_empty() {
             return Ok(Vec::new());
         }
-        let wanted: HashSet<MessageRef> = refs.iter().copied().collect();
-        let folders: HashSet<FolderId> = refs.iter().map(|r| r.folder).collect();
-        let (condition, values) = search.condition(false);
-        let mut statement = self.db.prepare(&format!(
-            "SELECT folder_id, uid, ROW_NUMBER() OVER (ORDER BY {}) - 1 FROM messages WHERE {condition}",
-            sort.order_by()
-        ))?;
-        let mut rows = statement.query(params_from_iter(values))?;
-        let mut found = Vec::new();
-        while let Some(row) = rows.next()? {
-            let at = MessageRef {
-                folder: row.get(0)?,
-                uid: row.get(1)?,
-            };
-            if folders.contains(&at.folder) && wanted.contains(&at) {
-                found.push(row.get::<_, u64>(2)?);
+        self.db.execute_batch(
+            "CREATE TEMP TABLE IF NOT EXISTS picked_refs (folder_id INTEGER, uid INTEGER, PRIMARY KEY (folder_id, uid)) \
+             WITHOUT ROWID; DELETE FROM temp.picked_refs;",
+        )?;
+        {
+            let mut insert = self
+                .db
+                .prepare_cached("INSERT OR IGNORE INTO temp.picked_refs (folder_id, uid) VALUES (?1, ?2)")?;
+            for r in refs {
+                insert.execute(rusqlite::params![r.folder, r.uid])?;
             }
         }
-        found.sort_unstable();
-        Ok(found)
+        let (positioned, values) = search.positioned(sort);
+        let found: Result<Vec<u64>> = {
+            let mut statement = self.db.prepare(&format!(
+                "SELECT l.position FROM ({positioned}) l JOIN temp.picked_refs p \
+                 ON p.folder_id = l.folder_id AND p.uid = l.uid ORDER BY l.position"
+            ))?;
+            statement
+                .query_map(params_from_iter(values), |row| row.get(0))?
+                .collect()
+        };
+        self.db.execute("DELETE FROM temp.picked_refs", [])?;
+        found
     }
 
     /// The messages of `refs` still in the store, with their flags and Message-IDs, in the order of `refs`
     pub fn picked(&self, refs: &[MessageRef]) -> Result<Vec<Picked>> {
-        let mut picked = Vec::with_capacity(refs.len());
-        let mut by_folder: Vec<(FolderId, Vec<u64>)> = Vec::new();
-        for r in refs {
-            match by_folder.iter_mut().find(|(folder, _)| *folder == r.folder) {
-                Some((_, uids)) => uids.push(r.uid),
-                None => by_folder.push((r.folder, vec![r.uid])),
-            }
-        }
-        let mut found = std::collections::HashMap::new();
-        for (folder, uids) in &by_folder {
+        let mut found = HashMap::new();
+        for (folder, uids) in MessageRef::by_folder(refs) {
             for chunk in uids.chunks(CHUNK) {
-                let marks = vec!["?"; chunk.len()].join(", ");
                 let mut statement = self.db.prepare(&format!(
-                    "SELECT uid, flags, message_id FROM messages WHERE folder_id = ? AND uid IN ({marks})"
+                    "SELECT uid, flags, message_id FROM messages WHERE folder_id = ? AND uid IN ({})",
+                    marks(chunk.len())
                 ))?;
-                let values = std::iter::once(Value::Integer(*folder))
+                let values = std::iter::once(Value::Integer(folder))
                     .chain(chunk.iter().map(|&uid| Value::Integer(uid as i64)))
                     .collect::<Vec<_>>();
                 let mut rows = statement.query(params_from_iter(values))?;
                 while let Some(row) = rows.next()? {
                     let at = MessageRef {
-                        folder: *folder,
+                        folder,
                         uid: row.get(0)?,
                     };
-                    found.insert(at, (row.get::<_, String>(1)?, row.get::<_, Option<String>>(2)?));
+                    found.insert(at, (split_flags(&row.get::<_, String>(1)?), row.get(2)?));
                 }
             }
         }
-        for r in refs {
-            if let Some((flags, message_id)) = found.remove(r) {
-                picked.push(Picked {
+        Ok(refs
+            .iter()
+            .filter_map(|r| {
+                found.remove(r).map(|(flags, message_id)| Picked {
                     at: *r,
                     flags,
                     message_id,
-                });
-            }
-        }
-        Ok(picked)
+                })
+            })
+            .collect())
     }
 
     /// The UIDs in `folder` of messages with these Message-IDs, the newest of each
     pub fn uids_of_message_ids(&self, folder: FolderId, message_ids: &[String]) -> Result<Vec<u64>> {
         let mut uids = Vec::new();
-        for id in message_ids {
-            if let Some(uid) = self.uid_of_message_id(folder, id)? {
-                uids.push(uid);
-            }
+        for chunk in message_ids.chunks(CHUNK) {
+            let mut statement = self.db.prepare(&format!(
+                "SELECT MAX(uid) FROM messages WHERE folder_id = ? AND message_id IN ({}) GROUP BY message_id",
+                marks(chunk.len())
+            ))?;
+            let values = std::iter::once(Value::Integer(folder))
+                .chain(chunk.iter().map(|id| Value::Text(id.clone())))
+                .collect::<Vec<_>>();
+            let found: Vec<u64> = statement
+                .query_map(params_from_iter(values), |row| row.get(0))?
+                .collect::<Result<_>>()?;
+            uids.extend(found);
         }
         uids.sort_unstable();
         uids.dedup();

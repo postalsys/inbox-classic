@@ -806,6 +806,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::agent(&d).await;
     steps::mark_all_read(&d).await;
     steps::dragging(&d).await;
+    steps::several_messages(&d).await;
     steps::junk(&d).await;
     steps::folders(&d).await;
     steps::closing_a_message(&d).await;

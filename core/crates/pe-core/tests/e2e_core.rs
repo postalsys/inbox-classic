@@ -848,16 +848,16 @@ fn flags_moves_and_deletes_messages() {
     };
 
     // a flag: in the store at once, on the server soon
-    s.core.set_flagged(inbox, flag, true).unwrap();
+    s.core.set_flag_many(inbox, &[flag], "\\Flagged", true).unwrap();
     s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
     let row = s.core.messages(inbox, Sort::default(), 0, 100).unwrap();
     assert!(row.iter().find(|m| m.info.uid == flag).unwrap().info.flagged());
     eventually(&|| s.server.flags("INBOX", flag).contains(&"\\Flagged".to_string()));
-    s.core.set_flagged(inbox, flag, false).unwrap();
+    s.core.set_flag_many(inbox, &[flag], "\\Flagged", false).unwrap();
     eventually(&|| !s.server.flags("INBOX", flag).contains(&"\\Flagged".to_string()));
 
     // a move: gone from the list at once, in the other folder once the server has it
-    s.core.move_message(inbox, archive, archive_folder).unwrap();
+    s.core.move_messages(inbox, &[archive], archive_folder).unwrap();
     assert_eq!(in_store(inbox), ["Delete me", "Flag me"]);
     s.wait(|e| {
         *e == Event::FolderChanged {
@@ -868,10 +868,10 @@ fn flags_moves_and_deletes_messages() {
     assert_eq!(in_store(archive_folder), ["Archive me"]);
     assert_eq!(s.server.subjects("Archive"), ["Archive me"]);
     // not into a folder of another account, nor into the folder it is in
-    assert!(s.core.move_message(inbox, flag, inbox).is_err());
+    assert!(s.core.move_messages(inbox, &[flag], inbox).is_err());
 
     // a copy: still in the Inbox, and in the other folder once the server has it
-    s.core.copy_message(inbox, flag, archive_folder).unwrap();
+    s.core.copy_messages(inbox, &[flag], archive_folder).unwrap();
     s.wait(|e| {
         *e == Event::FolderChanged {
             account,
@@ -880,18 +880,18 @@ fn flags_moves_and_deletes_messages() {
     });
     assert_eq!(in_store(inbox), ["Delete me", "Flag me"]);
     eventually(&|| s.server.subjects("Archive").len() == 2);
-    assert!(s.core.copy_message(inbox, flag, inbox).is_err());
-    assert!(s.core.copy_message(inbox, 999_999, archive_folder).is_err());
+    assert!(s.core.copy_messages(inbox, &[flag], inbox).is_err());
+    assert!(s.core.copy_messages(inbox, &[999_999], archive_folder).is_err());
 
     // deleting: into Deleted Items, and from there for good (which the window asks about first)
     assert!(!s.core.deletes_for_good(inbox).unwrap());
     assert!(s.core.deletes_for_good(trash).unwrap());
-    s.core.delete_message(inbox, delete).unwrap();
+    s.core.delete_messages(inbox, &[delete]).unwrap();
     s.wait(|e| *e == Event::FolderChanged { account, folder: trash });
     assert_eq!(in_store(trash), ["Delete me"]);
     assert_eq!(s.server.subjects("Trash"), ["Delete me"]);
     let in_trash = s.core.messages(trash, Sort::default(), 0, 10).unwrap()[0].info.uid;
-    s.core.delete_message(trash, in_trash).unwrap();
+    s.core.delete_messages(trash, &[in_trash]).unwrap();
     assert!(in_store(trash).is_empty());
     eventually(&|| s.server.subjects("Trash").is_empty());
     assert_eq!(s.server.subjects("INBOX"), ["Flag me"]);
@@ -904,14 +904,14 @@ fn flags_moves_and_deletes_messages() {
 
     // junk: $Junk on the server and into the Junk folder; not junk: $NotJunk, back in the Inbox
     let junk = id("Junk");
-    s.core.mark_junk(inbox, flag, true).unwrap();
+    s.core.mark_junk_many(inbox, &[flag], true).unwrap();
     assert!(in_store(inbox).is_empty());
     s.wait(|e| *e == Event::FolderChanged { account, folder: junk });
     assert_eq!(in_store(junk), ["Flag me"]);
     let junk_flags = |s: &Setup| s.server.messages("Junk").first().map(|m| m["flags"].clone());
     eventually(&|| junk_flags(&s).is_some_and(|f| f.as_array().unwrap().contains(&json!("$Junk"))));
     let in_junk = s.core.messages(junk, Sort::default(), 0, 10).unwrap()[0].info.uid;
-    s.core.mark_junk(junk, in_junk, false).unwrap();
+    s.core.mark_junk_many(junk, &[in_junk], false).unwrap();
     s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
     assert_eq!(in_store(inbox), ["Flag me"]);
     eventually(&|| {
@@ -920,7 +920,7 @@ fn flags_moves_and_deletes_messages() {
             flags.contains(&json!("$NotJunk")) && !flags.contains(&json!("$Junk"))
         })
     });
-    assert!(s.core.mark_junk(inbox, 999_999, true).is_err());
+    assert!(s.core.mark_junk_many(inbox, &[999_999], true).is_err());
 }
 
 #[test]
@@ -980,6 +980,12 @@ fn acts_on_selected_messages_and_undoes() {
     s.core.act(&three[..2], Action::Flag(true)).unwrap();
     let summary = s.core.summary(&three).unwrap();
     assert_eq!((summary.unread, summary.flagged), (0, 2));
+    assert!(summary.flags());
+    // toggled: one is not flagged, so all are; then all are, so none
+    s.core.act(&three, Action::ToggleFlag).unwrap();
+    assert!(!s.core.summary(&three).unwrap().flags());
+    s.core.act(&three, Action::ToggleFlag).unwrap();
+    assert_eq!(s.core.summary(&three).unwrap().flagged, 0);
     eventually(&|| {
         uids[..3]
             .iter()
@@ -994,16 +1000,22 @@ fn acts_on_selected_messages_and_undoes() {
     );
     assert_eq!(in_store(inbox), ["Four"]);
     assert_eq!(s.core.undo_label().as_deref(), Some("Undo Move"));
-    eventually(&|| in_store(archive).len() == 3);
+    // at once, before the folder they went to has shown them: the worker takes it back after the move
     assert_eq!(s.core.undo().unwrap(), "Moved 3 messages back to Inbox");
     assert_eq!(s.core.undo_label(), None);
-    assert!(in_store(archive).is_empty());
-    eventually(&|| in_store(inbox).len() == 4);
+    eventually(&|| in_store(inbox).len() == 4 && in_store(archive).is_empty());
+    // the window selects them once they are back; then they are forgotten
+    let restored = s.core.restored().unwrap();
+    let mut back: Vec<u64> = restored.iter().map(|r| r.uid).collect();
+    back.sort();
+    assert_eq!(back.len(), 3);
+    assert!(restored.iter().all(|r| r.folder == inbox));
+    assert!(s.core.restored().unwrap().is_empty());
     assert_eq!(s.server.subjects("Archive").len(), 0);
 
     // deleted into Deleted Items, then back
     let all: Vec<MessageRef> = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 4)]).unwrap();
-    assert_eq!(s.core.delete_question(&all).unwrap(), None);
+    assert_eq!(s.core.summary(&all).unwrap().delete_question(), None);
     assert_eq!(
         s.core.act(&all[..2], Action::Delete).unwrap(),
         "Moved 2 messages to Deleted Items"
@@ -1050,11 +1062,11 @@ fn acts_on_selected_messages_and_undoes() {
         .unwrap();
     let mixed = [in_trash[0], all[0]];
     assert_eq!(
-        s.core.delete_question(&mixed).unwrap().as_deref(),
+        s.core.summary(&mixed).unwrap().delete_question().as_deref(),
         Some("1 of the 2 messages will be deleted for good. Delete the messages?")
     );
     assert_eq!(
-        s.core.delete_question(&in_trash).unwrap().as_deref(),
+        s.core.summary(&in_trash).unwrap().delete_question().as_deref(),
         Some("These 2 messages will be deleted for good. Delete them?")
     );
     assert_eq!(
@@ -1087,8 +1099,8 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     } = s;
     // the server goes away: nothing it was asked can happen
     drop(server);
-    core.move_message(inbox, first, archive).unwrap();
-    core.delete_message(inbox, second).unwrap();
+    core.move_messages(inbox, &[first], archive).unwrap();
+    core.delete_messages(inbox, &[second]).unwrap();
     // out of the list at once
     let mut changes = 0;
     let mut failures = 0;

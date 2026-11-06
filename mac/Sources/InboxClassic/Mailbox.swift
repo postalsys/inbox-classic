@@ -63,6 +63,14 @@ public final class Mailbox: NSObject {
     private var remoteImages = false
     private var openWhenReady = false
     private var markReadTimer: Timer?
+    /// the selected messages, one or several, as the core's actions take them
+    private let selection: OpaquePointer = pe_selection_new()
+    /// what the selected messages are in numbers
+    private(set) var summary = PeSelectionSummary()
+    /// after Undo: the messages it brings back are selected once the list has them (until the user selects otherwise)
+    private var restorePending = false
+
+    var selectedCount: Int { list.numberOfSelectedRows }
     private var reloadTimer: Timer?
     private var logoRequest: UInt64 = 0
     private var unsubscribeRequest: UInt64 = 0
@@ -287,6 +295,7 @@ public final class Mailbox: NSObject {
             changed()
             return
         }
+        restorePending = false
         // the message of the folder before is not this folder's, nor is the search
         folder = id
         allInboxes = all
@@ -312,17 +321,23 @@ public final class Mailbox: NSObject {
     }
 
     var counts: String {
-        if searching && total == 0 { return "No messages found" }
-        if searching { return "\(total) found, \(unread) unread" }
-        if folder == 0 && !allInboxes { return "" }
-        return "\(total) message(s), \(unread) unread"
+        if folder == 0 && !allInboxes && !searching { return "" }
+        return taken(pe_list_counts(total, unread, UInt64(selectedCount), searching)) ?? ""
     }
 
     var inJunk: Bool {
-        folderNodes[uid != 0 ? messageFolder : folder]?.folder.specialUse == PE_SPECIAL_USE_JUNK
+        if selectedCount > 1 { return summary.in_junk }
+        return folderNodes[uid != 0 ? messageFolder : folder]?.folder.specialUse == PE_SPECIAL_USE_JUNK
     }
 
-    var hasSelection: Bool { uid != 0 }
+    /// one message or more selected: the commands of the selection apply
+    var hasSelection: Bool { selectedCount > 0 }
+
+    /// exactly one message selected, the one shown: the commands of one message apply (Reply, Print, Source)
+    var hasOne: Bool { selectedCount == 1 && uid != 0 }
+
+    /// Move to Folder: the messages are of one account (another account's folders come later)
+    var canMove: Bool { selectedCount > 0 && summary.accounts <= 1 }
 
     var picturesBlocked: Bool { uid != 0 && messageView != nil && !remoteImages && reader.picturesOffered }
 
@@ -348,7 +363,7 @@ public final class Mailbox: NSObject {
         list.delegate = self
         list.mailbox = self
         list.usesAlternatingRowBackgroundColors = true
-        list.allowsMultipleSelection = false
+        list.allowsMultipleSelection = true
         list.allowsColumnReordering = false
         list.rowHeight = 20
         list.style = .fullWidth
@@ -438,12 +453,16 @@ public final class Mailbox: NSObject {
         } else if folder != 0 {
             (total, unread) = core.folderCounts(folder)
         }
-        // the selection follows the message to where it is now, without a flicker of the reading pane
-        let index = keepSelection && uid != 0
+        // the selection follows the messages to where they are now, without a flicker of the reading pane
+        let several = keepSelection && selectedCount > 1
+            ? core.positions(of: selection, in: search, sort: sort, ascending: ascending) : nil
+        let index = keepSelection && several == nil && uid != 0
             ? core.messageIndex(search, sort: sort, ascending: ascending, folder: messageFolder, uid: uid) : -1
         reloading = true
         list.reloadData()
-        if index >= 0 {
+        if let several, !several.isEmpty {
+            list.selectRowIndexes(several, byExtendingSelection: false)
+        } else if index >= 0 {
             list.selectRowIndexes(IndexSet(integer: Int(index)), byExtendingSelection: false)
             list.scrollRowToVisible(Int(index))
         } else {
@@ -452,7 +471,23 @@ public final class Mailbox: NSObject {
         reloading = false
         updateEmptyText()
         updateSearchBar()
-        selectionDidChange()
+        // several selected again: the same messages, only their numbers may have changed
+        selectionDidChange(same: several?.isEmpty == false)
+        if restorePending {
+            selectRestored()
+        }
+    }
+
+    /// the messages Undo brought back selected, once they are in the list
+    private func selectRestored() {
+        let restored: OpaquePointer = pe_selection_new()
+        defer { pe_selection_free(restored) }
+        guard pe_undo_restored(core.handle, restored), pe_selection_count(restored) > 0 else { return }
+        let rows = core.positions(of: restored, in: search, sort: sort, ascending: ascending)
+        guard let first = rows.first else { return }
+        restorePending = false
+        list.selectRowIndexes(rows, byExtendingSelection: false)
+        list.scrollRowToVisible(first)
     }
 
     func row(_ index: Int) -> Message? {
@@ -471,7 +506,36 @@ public final class Mailbox: NSObject {
         return at < rows.count ? rows[at] : nil
     }
 
-    var selectedRow: Message? { row(list.selectedRow) }
+    /// the one selected message; nil when none or several are
+    var selectedRow: Message? { list.numberOfSelectedRows == 1 ? row(list.selectedRow) : nil }
+
+    /// the selection as the core keeps it: the row of one, the positions of several (found by the core in one go)
+    private func updateSelection() {
+        let rows = list.selectedRowIndexes
+        pe_selection_clear(selection)
+        if rows.count == 1, let row = row(rows.first!) {
+            pe_selection_add(selection, row.folder, row.uid)
+        } else if rows.count > 1 {
+            let ranges = rows.rangeView
+            let starts = ranges.map { UInt64($0.lowerBound) }
+            let ends = ranges.map { UInt64($0.upperBound) }
+            _ = search.with { pe_selection_set_ranges(core.handle, selection, $0, sort, ascending, starts, ends, starts.count) }
+        }
+        updateSummary()
+    }
+
+    private func updateSummary() {
+        summary = PeSelectionSummary()
+        if selectedCount > 0 {
+            _ = pe_selection_summary(core.handle, selection, &summary)
+        }
+    }
+
+    func selectAllMessages() {
+        guard total > 0 else { return }
+        list.window?.makeFirstResponder(list)
+        list.selectAll(nil)
+    }
 
     fileprivate func sortBy(_ column: NSTableColumn) {
         let field: PeSortField
@@ -611,12 +675,28 @@ public final class Mailbox: NSObject {
         reader.clear(loading: loading)
     }
 
-    fileprivate func selectionDidChange() {
+    /// `same`: the list was reloaded with the same messages selected, whose numbers alone may have changed
+    fileprivate func selectionDidChange(same: Bool = false) {
         guard !reloading else { return }
+        if same {
+            updateSummary()
+        } else {
+            updateSelection()
+        }
+        // several: none of them is opened (or marked read); the pane says how many
+        if selectedCount > 1 {
+            if !reader.showsSummary {
+                clearReader()
+            }
+            reader.showSummary(summary)
+            selectionChanged()
+            return
+        }
         let row = selectedRow
         let newUid = row?.uid ?? 0
         let newFolder = row?.folder ?? 0
-        if newUid == uid && newFolder == messageFolder {
+        if newUid == uid && newFolder == messageFolder && !reader.showsSummary {
+            selectionChanged()
             return
         }
         clearReader(loading: newUid != 0)
@@ -663,7 +743,7 @@ public final class Mailbox: NSObject {
         markReadTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self, let row = self.selectedRow, row.uid == self.uid, !row.seen else { return }
-                self.markSelected(seen: true)
+                self.markSelected(seen: true, quiet: true)
             }
         }
     }
@@ -738,10 +818,25 @@ public final class Mailbox: NSObject {
         return Draft(pe_message_draft(core.handle, messageFolder, uid, kind))
     }
 
-    func markSelected(seen: Bool) {
-        if uid != 0 {
-            pe_message_set_seen(core.handle, messageFolder, uid, seen)
+    /// `action` on `messages` (the selected ones by default): what was done in the status bar, or why not
+    @discardableResult
+    private func act(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil, quiet: Bool = false) -> Bool {
+        switch core.act(messages ?? selection, action, to: to) {
+        case .success(let done):
+            if !quiet {
+                status(done)
+            }
+            return true
+        case .failure(let refusal):
+            inform(refusal.reason, style: .warning)
+            return false
         }
+    }
+
+    /// `quiet`: the shown message read after a moment on screen, which the status bar does not announce
+    func markSelected(seen: Bool, quiet: Bool = false) {
+        guard hasSelection else { return }
+        act(seen ? PE_ACTION_READ : PE_ACTION_UNREAD, quiet: quiet)
     }
 
     func markAllRead() {
@@ -753,21 +848,30 @@ public final class Mailbox: NSObject {
         }
     }
 
+    /// `action` takes the selected messages out of the list: the row after the last of them is selected then
+    @discardableResult
+    private func actAndRemove(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil) -> Bool {
+        let next = (list.selectedRowIndexes.last ?? -1) + 1 - selectedCount
+        guard act(action, to: to, on: messages) else { return false }
+        selectAfterRemoval(next)
+        return true
+    }
+
     func markJunk(_ junk: Bool) {
-        guard let row = selectedRow else { return }
-        if !pe_message_mark_junk(core.handle, row.folder, row.uid, junk) {
-            inform(junk ? "This account has no Junk E-mail folder to move the message to."
-                             : "The message could not be moved to the Inbox.")
-        }
+        guard hasSelection else { return }
+        actAndRemove(junk ? PE_ACTION_JUNK : PE_ACTION_NOT_JUNK)
     }
 
+    /// flags them all unless all are flagged, then takes the flag off all
     func flagSelected() {
-        if let row = selectedRow {
-            pe_message_set_flagged(core.handle, row.folder, row.uid, !row.flagged)
-        }
+        guard hasSelection else { return }
+        act(PE_ACTION_TOGGLE_FLAG)
     }
 
-    /// after a message left the list: the one that took its place selected, or the last one
+    /// whether Flag flags (or takes the flag off) the selected messages
+    var flagsSelected: Bool { pe_selection_flags(&summary) }
+
+    /// after messages left the list: the one that took their place selected, or the last one
     private func selectAfterRemoval(_ index: Int) {
         reloadList(keepSelection: false)
         if index >= 0 && total > 0 {
@@ -778,33 +882,49 @@ public final class Mailbox: NSObject {
     }
 
     func deleteSelected() {
-        let index = list.selectedRow
-        guard let row = row(index) else { return }
-        // from Deleted Items, or an account without one, it is gone for good: asked first
-        if pe_folder_deletes_for_good(core.handle, row.folder)
-            && !ask("This message will be deleted for good. Delete it?", yes: "Delete", no: "Cancel", destructive: true) {
+        guard hasSelection else { return }
+        // from Deleted Items, or an account without one, they are gone for good: asked first
+        if let question = taken(pe_selection_delete_question(&summary)),
+           !ask(question, yes: "Delete", no: "Cancel", destructive: true) {
             return
         }
-        if pe_message_delete(core.handle, row.folder, row.uid) {
-            selectAfterRemoval(index)
-        }
+        actAndRemove(PE_ACTION_DELETE)
     }
 
     func moveSelected() {
-        let index = list.selectedRow
-        guard let row = row(index) else { return }
-        // the other folders of its account that hold messages
-        let account = folderNodes[row.folder]?.folder.account ?? currentAccount
-        let targets = core.folders(account).filter { $0.selectable && $0.id != row.folder }
+        guard canMove, let first = firstSelected else { return }
+        // the other folders of their account that hold messages
+        let account = folderNodes[first.folder]?.folder.account ?? currentAccount
+        let targets = core.folders(account).filter { $0.selectable && !(selectedCount == 1 && $0.id == first.folder) }
         guard !targets.isEmpty else { return }
         // a special folder by its usual name, the others by their whole path
         let names = targets.map { $0.specialUse != PE_SPECIAL_USE_NONE ? $0.displayName : $0.path }
-        guard let fields = formDialog(title: "Move", intro: "Move the selected message to the folder:",
+        let intro = selectedCount > 1 ? "Move the \(selectedCount) selected messages to the folder:"
+                                      : "Move the selected message to the folder:"
+        guard let fields = formDialog(title: "Move", intro: intro,
                                       fields: [FormField(label: "Folder:", value: names[0], kind: .choice(names))])
         else { return }
         let chosen = fields[0].chosen
-        if targets.indices.contains(chosen) && pe_message_move(core.handle, row.folder, row.uid, targets[chosen].id) {
-            selectAfterRemoval(index)
+        if targets.indices.contains(chosen) {
+            actAndRemove(PE_ACTION_MOVE, to: targets[chosen].id)
+        }
+    }
+
+    /// the first selected message, which tells the account of them all
+    private var firstSelected: (folder: Int64, uid: UInt64)? {
+        var folder: Int64 = 0
+        var uid: UInt64 = 0
+        return pe_selection_get(selection, 0, &folder, &uid) ? (folder, uid) : nil
+    }
+
+    func undo() {
+        switch core.undo() {
+        case .success(let done):
+            status(done)
+            restorePending = true
+            selectRestored()
+        case .failure(let refusal):
+            inform(refusal.reason, style: .warning)
         }
     }
 
@@ -934,7 +1054,8 @@ public final class Mailbox: NSObject {
     /// the right-click menu of the message list: the actions on the message, as Outlook Express has them, with the
     /// choices that fit it (Mark as Unread for a read one, Not Junk in Junk E-mail)
     func messageMenu() -> NSMenu? {
-        guard let message = selectedRow else { return nil }
+        guard hasSelection else { return nil }
+        let message = selectedRow
         let menu = NSMenu()
         func add(_ command: Command, _ title: String? = nil) {
             let item = NSMenuItem(title: title ?? command.label, action: #selector(AppDelegate.runCommand(_:)), keyEquivalent: "")
@@ -943,7 +1064,7 @@ public final class Mailbox: NSObject {
             item.setAccessibilityIdentifier("menu.\(command)")
             menu.addItem(item)
         }
-        if folderNodes[message.folder]?.folder.specialUse == PE_SPECIAL_USE_DRAFTS {
+        if let message, folderNodes[message.folder]?.folder.specialUse == PE_SPECIAL_USE_DRAFTS {
             let open = NSMenuItem(title: "Open", action: #selector(openSelected), keyEquivalent: "")
             open.target = self
             menu.addItem(open)
@@ -953,8 +1074,9 @@ public final class Mailbox: NSObject {
         add(.replyAll, "Reply to All")
         add(.forward)
         menu.addItem(.separator())
-        add(message.seen ? .markUnread : .markRead)
-        add(.flag, message.flagged ? "Clear Flag" : "Flag Message")
+        // several: read if any is unread, flagged unless all are
+        add(summary.unread > 0 ? .markRead : .markUnread)
+        add(.flag, flagsSelected ? "Flag Message" : "Clear Flag")
         add(inJunk ? .notJunk : .junk)
         add(.move, "Move to Folder\u{2026}")
         add(.delete, "Delete")
@@ -1085,23 +1207,32 @@ public final class Mailbox: NSObject {
 
     // ---- dragging a message onto a folder ----
 
-    /// the folder a message dragged from `from` may go to: another folder of its account that holds messages
-    fileprivate func dropTarget(_ item: Any?, from: Int64) -> Int64? {
-        guard let node = item as? FolderNode, node.folder.selectable, node.folder.id != from,
-              let source = folderNodes[from], source.folder.account == node.folder.account else { return nil }
+    /// the folder messages dragged from `folders` may go to: a folder of their account that holds messages, not the one
+    /// they all are in
+    fileprivate func dropTarget(_ item: Any?, from folders: [Int64]) -> Int64? {
+        guard let node = item as? FolderNode, node.folder.selectable, !folders.isEmpty,
+              folders.contains(where: { $0 != node.folder.id }),
+              folders.allSatisfy({ folderNodes[$0]?.folder.account == node.folder.account }) else { return nil }
         return node.folder.id
     }
 
-    fileprivate func drop(folder from: Int64, uid message: UInt64, to: Int64, copy: Bool) -> Bool {
+    /// the dragged messages into `to`: a drag of selected rows carries the selection (NSTableView drags what is selected),
+    /// which then leaves the list as Move leaves it
+    fileprivate func drop(_ messages: [(Int64, UInt64)], to: Int64, copy: Bool) -> Bool {
+        let dragged: OpaquePointer = pe_selection_new()
+        defer { pe_selection_free(dragged) }
+        for (folder, uid) in messages {
+            pe_selection_add(dragged, folder, uid)
+        }
         if copy {
-            return pe_message_copy(core.handle, from, message, to)
+            return act(PE_ACTION_COPY, to: to, on: dragged)
         }
-        let index = from == messageFolder && message == uid ? list.selectedRow : -1
-        guard pe_message_move(core.handle, from, message, to) else { return false }
-        if index >= 0 {
-            selectAfterRemoval(index)
+        // from this list when they are what is selected here
+        if messages.count == selectedCount, let first = messages.first, let selected = firstSelected,
+           first.0 == selected.folder && first.1 == selected.uid {
+            return actAndRemove(PE_ACTION_MOVE, to: to, on: dragged)
         }
-        return true
+        return act(PE_ACTION_MOVE, to: to, on: dragged)
     }
 
     // ---- the core's events ----
@@ -1248,22 +1379,26 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
     public func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem item: Any?,
                             proposedChildIndex index: Int) -> NSDragOperation {
-        guard let (from, _) = draggedMessage(info), dropTarget(item, from: from) != nil, index == NSOutlineViewDropOnItemIndex
-        else { return [] }
+        let messages = draggedMessages(info)
+        guard dropTarget(item, from: messages.map { $0.0 }) != nil, index == NSOutlineViewDropOnItemIndex else { return [] }
         // Option copies, as in the Finder
         return NSEvent.modifierFlags.contains(.option) ? .copy : .move
     }
 
     public func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
-        guard let (from, message) = draggedMessage(info), let to = dropTarget(item, from: from) else { return false }
-        return drop(folder: from, uid: message, to: to, copy: NSEvent.modifierFlags.contains(.option))
+        let messages = draggedMessages(info)
+        guard let to = dropTarget(item, from: messages.map { $0.0 }) else { return false }
+        return drop(messages, to: to, copy: NSEvent.modifierFlags.contains(.option))
     }
 
-    private func draggedMessage(_ info: NSDraggingInfo) -> (Int64, UInt64)? {
-        guard let value = info.draggingPasteboard.string(forType: messagePasteboardType) else { return nil }
-        let parts = value.split(separator: " ")
-        guard parts.count == 2, let folder = Int64(parts[0]), let uid = UInt64(parts[1]) else { return nil }
-        return (folder, uid)
+    /// the messages on the pasteboard, one item each
+    private func draggedMessages(_ info: NSDraggingInfo) -> [(Int64, UInt64)] {
+        (info.draggingPasteboard.pasteboardItems ?? []).compactMap { item in
+            guard let value = item.string(forType: messagePasteboardType) else { return nil }
+            let parts = value.split(separator: " ")
+            guard parts.count == 2, let folder = Int64(parts[0]), let uid = UInt64(parts[1]) else { return nil }
+            return (folder, uid)
+        }
     }
 }
 
@@ -1304,6 +1439,10 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
     }
 
     public func tableViewSelectionDidChange(_ notification: Notification) {
+        // the user chose: what Undo brings back is not selected over it (selectRestored clears it before it selects)
+        if !reloading {
+            restorePending = false
+        }
         selectionDidChange()
     }
 
@@ -1461,6 +1600,25 @@ public final class FolderOutline: NSOutlineView {
         }
         return mailbox?.folderMenu()
     }
+
+    // Edit > Select All and Undo from the tree are the message list's: a folder is selected alone and has no undo
+    public override func selectAll(_ sender: Any?) {
+        mailbox?.selectAllMessages()
+    }
+
+    @objc func undo(_ sender: Any?) {
+        mailbox?.undo()
+    }
+
+    public override func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
+        if item.action == #selector(undo(_:)) {
+            return MessageTable.validateUndo(item, mailbox)
+        }
+        if item.action == #selector(selectAll(_:)) {
+            return (mailbox?.total ?? 0) > 0
+        }
+        return super.validateUserInterfaceItem(item)
+    }
 }
 
 /// The message list: Return opens a draft, Delete deletes, as the list of the Windows app does; a right click opens the
@@ -1475,6 +1633,24 @@ public final class MessageTable: NSTableView {
             selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         }
         return mailbox?.messageMenu()
+    }
+
+    /// Edit > Undo with the list (or the tree) in front: the core's last move, delete or junk, named in the menu
+    @objc func undo(_ sender: Any?) {
+        mailbox?.undo()
+    }
+
+    static func validateUndo(_ item: NSValidatedUserInterfaceItem, _ mailbox: Mailbox?) -> Bool {
+        let label = mailbox?.core.undoLabel
+        (item as? NSMenuItem)?.title = label ?? "Undo"
+        return label != nil
+    }
+
+    public override func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
+        if item.action == #selector(undo(_:)) {
+            return MessageTable.validateUndo(item, mailbox)
+        }
+        return super.validateUserInterfaceItem(item)
     }
 
     public override func keyDown(with event: NSEvent) {

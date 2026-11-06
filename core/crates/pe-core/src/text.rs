@@ -20,9 +20,17 @@ pub fn messages(count: u64) -> String {
     }
 }
 
-/// The counts of a list in the status bar: "12 messages, 3 unread", and ", 2 selected" when more than one is
-pub fn list_counts(total: u64, unread: u64, selected: u64) -> String {
-    let mut text = format!("{}, {unread} unread", messages(total));
+/// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search
+/// ("No messages found" for none), and ", 2 selected" when more than one is
+pub fn list_counts(total: u64, unread: u64, selected: u64, searching: bool) -> String {
+    if searching && total == 0 {
+        return "No messages found".into();
+    }
+    let mut text = if searching {
+        format!("{total} found, {unread} unread")
+    } else {
+        format!("{}, {unread} unread", messages(total))
+    };
     if selected > 1 {
         text.push_str(&format!(", {selected} selected"));
     }

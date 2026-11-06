@@ -2,11 +2,12 @@
 //! a search): read and unread, flag, junk, delete, move and copy, each folder's messages with one command; what to
 //! call it in the status bar; and Edit > Undo for the last move, delete or junk.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use pe_store::{FolderId, MessageRef, Picked, Search, Sort};
 
 use crate::text::messages;
+use crate::worker::Command;
 use crate::{Core, Error, Result};
 
 /// The most UIDs one command carries, so a command line stays short whatever was selected (a UID set of messages
@@ -20,12 +21,27 @@ pub enum Action {
     Read(bool),
     /// Flag (true) or take the flag away
     Flag(bool),
+    /// Flag them when one is not flagged, take the flags away when all are ([`Summary::flags`])
+    ToggleFlag,
     /// Junk (true), into Junk E-mail; not junk, into the Inbox
     Junk(bool),
-    /// Into Deleted Items, or for good from there and from an account without one ([`Core::delete_question`])
+    /// Into Deleted Items, or for good from there and from an account without one ([`Summary::delete_question`])
     Delete,
     Move(FolderId),
     Copy(FolderId),
+}
+
+impl Action {
+    /// What Edit > Undo calls taking it back ("Move" for "Undo Move"); None for what is not taken back
+    fn undo_name(self) -> Option<&'static str> {
+        match self {
+            Action::Move(_) => Some("Move"),
+            Action::Delete => Some("Delete"),
+            Action::Junk(true) => Some("Mark as Junk"),
+            Action::Junk(false) => Some("Mark as Not Junk"),
+            _ => None,
+        }
+    }
 }
 
 /// The selected messages in numbers, for the reading pane, the status bar and which commands apply
@@ -49,6 +65,11 @@ impl Summary {
         format!("{} selected", messages(self.count))
     }
 
+    /// The reading pane's page over several messages, in the style of its other states ([`crate::reader_page`])
+    pub fn page(&self) -> String {
+        pe_html::status_page(&self.title(), &self.detail(), false)
+    }
+
     /// "2 unread, 1 flagged" under it; empty when neither
     pub fn detail(&self) -> String {
         let mut parts = Vec::new();
@@ -60,6 +81,23 @@ impl Summary {
         }
         parts.join(", ")
     }
+
+    /// Whether Flag flags them (one is not flagged) or takes the flags away (all are)
+    pub fn flags(&self) -> bool {
+        self.flagged < self.count
+    }
+
+    /// What to ask before Delete when it removes some of them for good; None when it removes none
+    pub fn delete_question(&self) -> Option<String> {
+        match (self.for_good, self.count) {
+            (0, _) => None,
+            (1, 1) => Some("This message will be deleted for good. Delete it?".into()),
+            (n, all) if n == all => Some(format!("These {n} messages will be deleted for good. Delete them?")),
+            (n, all) => Some(format!(
+                "{n} of the {all} messages will be deleted for good. Delete the messages?"
+            )),
+        }
+    }
 }
 
 /// What Edit > Undo takes back: messages that went from one folder to another, found again by their Message-IDs
@@ -70,13 +108,15 @@ pub(crate) struct Undo {
     moves: Vec<UndoMove>,
 }
 
+/// Messages to move back, by the worker of the account they are in now ([`Command::UndoMoves`]): it runs after the
+/// move it takes back and the sync of the folder they went to, so it finds them there however soon it is asked
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct UndoMove {
-    from: FolderId,
-    to: FolderId,
-    message_ids: Vec<String>,
-    /// A flag junk set, taken away again before they go back
-    flag: Option<&'static str>,
+pub(crate) struct UndoMove {
+    pub(crate) from: FolderId,
+    pub(crate) to: FolderId,
+    pub(crate) message_ids: Vec<String>,
+    /// A keyword junk set, taken away again before they go back
+    pub(crate) flag: Option<&'static str>,
 }
 
 impl Core {
@@ -100,38 +140,20 @@ impl Core {
             in_junk: !picked.is_empty(),
             ..Summary::default()
         };
-        let mut accounts = Vec::new();
+        let mut accounts = BTreeSet::new();
         for (folder, group) in by_folder(&picked) {
             let info = store.folder(folder)?;
-            if !accounts.contains(&info.account_id) {
-                accounts.push(info.account_id);
-            }
+            accounts.insert(info.account_id);
             summary.folders += 1;
             summary.in_junk &= info.info.special_use.as_deref() == Some("\\Junk");
-            let trash = store.special_folder(info.account_id, "\\Trash")?.map(|t| t.id);
-            if trash.is_none() || trash == Some(folder) {
+            if crate::trash_in(&store, folder)?.is_none() {
                 summary.for_good += group.len() as u64;
             }
-            for p in group {
-                summary.unread += u64::from(!p.has_flag("\\Seen"));
-                summary.flagged += u64::from(p.has_flag("\\Flagged"));
-            }
+            summary.unread += group.iter().filter(|p| !p.seen()).count() as u64;
+            summary.flagged += group.iter().filter(|p| p.flagged()).count() as u64;
         }
         summary.accounts = accounts.len() as u64;
         Ok(summary)
-    }
-
-    /// What to ask before Delete when it removes some of them for good; None when it removes none
-    pub fn delete_question(&self, refs: &[MessageRef]) -> Result<Option<String>> {
-        let summary = self.summary(refs)?;
-        Ok(match (summary.for_good, summary.count) {
-            (0, _) => None,
-            (1, 1) => Some("This message will be deleted for good. Delete it?".into()),
-            (n, all) if n == all => Some(format!("These {n} messages will be deleted for good. Delete them?")),
-            (n, all) => Some(format!(
-                "{n} of the {all} messages will be deleted for good. Delete the messages?"
-            )),
-        })
     }
 
     /// Does `action` to the messages `refs` (those still there), each folder's with one command: in the store now,
@@ -140,17 +162,25 @@ impl Core {
     pub fn act(&self, refs: &[MessageRef], action: Action) -> Result<String> {
         let picked = self.store().picked(refs)?;
         if picked.is_empty() {
-            return Err(Error::NotFound);
+            return Err(Error::Unavailable("The messages are no longer there.".into()));
         }
         let groups = by_folder(&picked);
+        let action = match action {
+            Action::ToggleFlag => Action::Flag(picked.iter().any(|p| !p.flagged())),
+            other => other,
+        };
         if let Action::Move(to) | Action::Copy(to) = action {
-            self.check_target(groups.keys().copied(), to)?;
+            // checked for all before any of them goes
+            for folder in groups.keys().filter(|&&folder| folder != to) {
+                self.target_of(*folder, to)?;
+            }
         }
+        let undo_name = action.undo_name();
         let mut undo = Vec::new();
         for (folder, group) in &groups {
             let uids: Vec<u64> = group.iter().map(|p| p.at.uid).collect();
             let went = self.act_on_folder(*folder, &uids, action)?;
-            if let Some((to, flag)) = went {
+            if let (Some(_), Some((to, flag))) = (undo_name, went) {
                 undo.push(UndoMove {
                     from: *folder,
                     to,
@@ -159,38 +189,17 @@ impl Core {
                 });
             }
         }
-        let count = picked.len() as u64;
-        let what = match action {
-            Action::Move(_) => Some("Move"),
-            Action::Delete => Some("Delete"),
-            Action::Junk(true) => Some("Mark as Junk"),
-            Action::Junk(false) => Some("Mark as Not Junk"),
-            _ => None,
-        };
-        let text = self.done_text(action, count, &undo)?;
+        let text = self.done_text(action, picked.len() as u64, &undo)?;
         // what moved can be taken back; what is gone for good ends what came before it
-        if let Some(what) = what {
+        if let Some(what) = undo_name {
             *self.undo.lock().unwrap_or_else(|e| e.into_inner()) =
                 (!undo.is_empty()).then_some(Undo { what, moves: undo });
         }
         Ok(text)
     }
 
-    /// Where messages can go from `folders`: a folder of the same account that holds messages. Checked for all before
-    /// any of them moves.
-    fn check_target(&self, folders: impl Iterator<Item = FolderId>, to: FolderId) -> Result<()> {
-        let store = self.store();
-        let target = store.folder(to)?;
-        for folder in folders {
-            if store.folder(folder)?.account_id != target.account_id || !target.info.selectable {
-                return Err(Error::NotFound);
-            }
-        }
-        Ok(())
-    }
-
     /// One folder's part of [`Core::act`], a command per [`PER_COMMAND`] messages. Returns where they went and the
-    /// flag set on the way, when they moved.
+    /// keyword set on the way, when they moved.
     fn act_on_folder(
         &self,
         folder: FolderId,
@@ -200,10 +209,10 @@ impl Core {
         let went = match action {
             Action::Delete => self.trash_for(folder)?.map(|trash| (trash, None)),
             Action::Move(to) if to != folder => Some((to, None)),
-            Action::Junk(junk) => self
-                .junk_target(folder, junk)?
-                .filter(|&to| to != folder)
-                .map(|to| (to, Some(if junk { "$Junk" } else { "$NotJunk" }))),
+            Action::Junk(junk) => {
+                let to = self.junk_target(folder, junk)?;
+                (to != folder).then_some((to, Some(crate::junk_keywords(junk).0)))
+            }
             _ => None,
         };
         for chunk in uids.chunks(PER_COMMAND) {
@@ -216,27 +225,17 @@ impl Core {
                 Action::Move(to) | Action::Copy(to) if to == folder => {}
                 Action::Move(to) => self.move_messages(folder, chunk, to)?,
                 Action::Copy(to) => self.copy_messages(folder, chunk, to)?,
+                Action::ToggleFlag => unreachable!("resolved by act"),
             }
         }
         Ok(went)
-    }
-
-    /// The folder junk (or not junk) goes to from `folder`: the account's Junk folder, or its Inbox
-    fn junk_target(&self, folder: FolderId, junk: bool) -> Result<Option<FolderId>> {
-        let store = self.store();
-        let account = store.folder(folder)?.account_id;
-        let target = if junk {
-            store.special_folder(account, "\\Junk")?
-        } else {
-            store.find_folder(account, "INBOX")?
-        };
-        Ok(target.map(|f| f.id))
     }
 
     /// What the status bar says once `action` is done to `count` messages
     fn done_text(&self, action: Action, count: u64, moved: &[UndoMove]) -> Result<String> {
         let n = messages(count);
         Ok(match action {
+            Action::ToggleFlag => unreachable!("resolved by act"),
             Action::Read(true) => format!("Marked {n} as read"),
             Action::Read(false) => format!("Marked {n} as unread"),
             Action::Flag(true) => format!("Flagged {n}"),
@@ -266,42 +265,46 @@ impl Core {
     }
 
     /// Takes back the last move, delete into Deleted Items or junk: the messages go back to the folders they came
-    /// from, found by their Message-IDs where they went. Returns what the status bar says. Refused when none of them is
-    /// there (yet: the folder they went to has not shown them).
+    /// from, found by their Message-IDs where they went, by the worker of their account (after the move it takes back,
+    /// however soon it is asked). Returns what the status bar says.
     pub fn undo(&self) -> Result<String> {
         let undo = self.undo.lock().unwrap_or_else(|e| e.into_inner()).take();
         let Some(undo) = undo else {
-            return Err(Error::NotFound);
+            return Err(Error::Unavailable("There is nothing to undo.".into()));
         };
-        let mut back = 0;
-        let mut found = Vec::new();
+        let mut by_account: BTreeMap<pe_store::AccountId, Vec<UndoMove>> = BTreeMap::new();
         for m in &undo.moves {
-            let uids = self.store().uids_of_message_ids(m.to, &m.message_ids)?;
-            if !uids.is_empty() {
-                found.push((m, uids));
-            }
+            let account = self.store().folder(m.to)?.account_id;
+            by_account.entry(account).or_default().push(m.clone());
         }
-        if found.is_empty() {
-            // kept for another try, once the folder they went to shows them
-            *self.undo.lock().unwrap_or_else(|e| e.into_inner()) = Some(undo);
-            return Err(Error::Unavailable(
-                "The messages are not in the folder they went to yet. Try again in a moment.".into(),
-            ));
+        for (account, moves) in by_account {
+            self.send_command(account, Command::UndoMoves { moves })?;
         }
-        for (m, uids) in &found {
-            for chunk in uids.chunks(PER_COMMAND) {
-                if let Some(flag) = m.flag {
-                    self.set_flag_many(m.to, chunk, flag, false)?;
-                }
-                self.move_messages(m.to, chunk, m.from)?;
-            }
-            back += uids.len() as u64;
-        }
+        let back = undo.moves.iter().map(|m| m.message_ids.len() as u64).sum();
+        *self.restored.lock().unwrap_or_else(|e| e.into_inner()) =
+            undo.moves.iter().map(|m| (m.from, m.message_ids.clone())).collect();
         Ok(format!(
             "Moved {} back to {}",
             messages(back),
-            self.places(found.iter().map(|(m, _)| m.from))?
+            self.places(undo.moves.iter().map(|m| m.from))?
         ))
+    }
+
+    /// The messages the last Undo brought back that are in their folders again (they get there once the server has
+    /// moved them and the folder is synced), for the window to select them. Forgotten once all are there.
+    pub fn restored(&self) -> Result<Vec<MessageRef>> {
+        let mut restored = self.restored.lock().unwrap_or_else(|e| e.into_inner());
+        let mut found = Vec::new();
+        let mut all = true;
+        for (folder, ids) in restored.iter() {
+            let uids = self.store().uids_of_message_ids(*folder, ids)?;
+            all &= uids.len() >= ids.len();
+            found.extend(uids.into_iter().map(|uid| MessageRef { folder: *folder, uid }));
+        }
+        if all {
+            restored.clear();
+        }
+        Ok(found)
     }
 }
 

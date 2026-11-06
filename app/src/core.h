@@ -36,6 +36,8 @@ using AgentConnect = std::unique_ptr<PeAgentConnectInfo, Deleter<pe_agent_connec
 using AgentSend = std::unique_ptr<PeAgentSendInfo, Deleter<pe_agent_send_free>>;
 using AgentHostList = std::unique_ptr<PeAgentHostList, Deleter<pe_agent_host_list_free>>;
 using AgentLog = std::unique_ptr<PeAgentLog, Deleter<pe_agent_log_free>>;
+using Selection = std::unique_ptr<PeSelection, Deleter<pe_selection_free>>;
+using Positions = std::unique_ptr<PePositions, Deleter<pe_positions_free>>;
 
 std::wstring Widen(std::string_view utf8);
 std::string Narrow(std::wstring_view utf16);

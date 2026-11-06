@@ -6,7 +6,7 @@ import CInboxClassic
 @preconcurrency import UserNotifications
 
 @MainActor
-public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSSearchFieldDelegate {
+public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSSearchFieldDelegate, NSToolbarItemValidation {
     let core: Core
     public let window: NSWindow
     public let mailbox: Mailbox
@@ -49,7 +49,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             window.center()
         }
         mailbox.changed = { [weak self] in self?.showCounts() }
-        mailbox.selectionChanged = { [weak self] in self?.updateJunk() }
+        mailbox.selectionChanged = { [weak self] in
+            self?.updateJunk()
+            self?.showCounts()
+            // the buttons of one message and of the selection follow it at once, not at the next event
+            self?.window.toolbar?.validateVisibleItems()
+        }
         mailbox.status = { [weak self] in self?.setStatus($0) }
         mailbox.openMailto = { [weak self] in self?.openMailto($0) }
         showOutbox()
@@ -456,6 +461,16 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             command = .notJunk
         }
         AppDelegate.shared.perform(command)
+    }
+
+    /// the buttons of one message are off for several (and for none), those of the selection for none
+    public func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
+        guard let id = Item(rawValue: item.itemIdentifier.rawValue), let command = command(of: id) else { return true }
+        switch command {
+        case _ where command.needsOne: return mailbox.hasOne
+        case .delete, .junk, .markRead, .markUnread: return mailbox.hasSelection
+        default: return true
+        }
     }
 
     /// Junk, or Not Junk for a message in a Junk folder

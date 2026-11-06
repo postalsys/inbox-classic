@@ -220,6 +220,8 @@ typedef enum PeAction {
   PE_ACTION_UNREAD = 1,
   PE_ACTION_FLAG = 2,
   PE_ACTION_UNFLAG = 3,
+  // Flag them when one is not flagged, take the flags away when all are (`pe_selection_flags`)
+  PE_ACTION_TOGGLE_FLAG = 9,
   PE_ACTION_JUNK = 4,
   PE_ACTION_NOT_JUNK = 5,
   // Into Deleted Items, or for good (ask first: `pe_selection_delete_question`)
@@ -1262,65 +1264,6 @@ bool pe_folder_mark_all_read(const struct PeCore *core,
 // `core` must be a live handle.
 bool pe_mark_all_inboxes_read(const struct PeCore *core);
 
-// Flags a message or takes its flag away: in the store now (`FolderChanged` follows), on the server in the
-// background
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_set_flagged(const struct PeCore *core,
-                            int64_t folder,
-                            uint64_t uid,
-                            bool flagged);
-
-// Moves a message to another folder of its account: out of the list now (`FolderChanged`), into the other
-// folder once the server has it (`FolderChanged` of that folder). False for a folder of another account, the
-// folder it is in, or one that holds no messages.
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_move(const struct PeCore *core,
-                     int64_t folder,
-                     uint64_t uid,
-                     int64_t to);
-
-// Marks a message junk (`$Junk`) and moves it to the account's Junk folder, or not junk (`$NotJunk`) and moves it to
-// the Inbox (`FolderChanged` of both). False when the account has no such folder.
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_mark_junk(const struct PeCore *core,
-                          int64_t folder,
-                          uint64_t uid,
-                          bool junk);
-
-// Copies a message into another folder of its account, on the server in the background (`FolderChanged` of that
-// folder once it is there). False for a folder of another account, the folder it is in, or one that holds no
-// messages.
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_copy(const struct PeCore *core,
-                     int64_t folder,
-                     uint64_t uid,
-                     int64_t to);
-
-// Whether deleting a message of `folder` removes it for good (it is Deleted Items, or the account has none), so the
-// window can ask first
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_folder_deletes_for_good(const struct PeCore *core,
-                                int64_t folder);
-
-// Deletes a message: into Deleted Items, or for good when it is in there or the account has none. Out of the list
-// now (`FolderChanged`), on the server in the background.
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_delete(const struct PeCore *core,
-                       int64_t folder,
-                       uint64_t uid);
-
 // Creates the folder `name` (UTF-8) in `parent`, or at the top of the account when `parent` is 0:
 // `FoldersChanged` follows once the server has it. False with the reason in `error` (NULL or a pointer to a
 // string to free with `pe_string_free`) for a name that can not be one.
@@ -1844,21 +1787,26 @@ bool pe_selection_summary(const struct PeCore *core,
                           const struct PeSelection *selection,
                           struct PeSelectionSummary *summary);
 
-// What the reading pane says over several messages, "3 messages selected" (`detail` false) or "2 unread, 1
-// flagged" under it (`detail` true, empty when neither). Free with `pe_string_free`.
+// The reading pane's page over several messages ("3 messages selected", "2 unread" under it), in the style of
+// `pe_reader_page`. Free with `pe_string_free`.
 //
 // # Safety
 // `summary` must be a valid pointer.
-char *pe_selection_summary_text(const struct PeSelectionSummary *summary,
-                                bool detail);
+char *pe_selection_page(const struct PeSelectionSummary *summary);
 
-// What to ask before Delete when it removes some of them for good, NULL when it removes none. Free with
-// `pe_string_free`.
+// What to ask before Delete when it removes some of the messages of `summary` for good, NULL when it removes none.
+// Free with `pe_string_free`.
 //
 // # Safety
-// `core` must be a live handle, `selection` a live selection.
-char *pe_selection_delete_question(const struct PeCore *core,
-                                   const struct PeSelection *selection);
+// `summary` must be a valid pointer.
+char *pe_selection_delete_question(const struct PeSelectionSummary *summary);
+
+// Whether Flag flags the messages of `summary` (one is not flagged) or takes the flags away (all are), for the label
+// of the command
+//
+// # Safety
+// `summary` must be a valid pointer.
+bool pe_selection_flags(const struct PeSelectionSummary *summary);
 
 // Does `action` to the selected messages, each folder's with one command: in the store now (`FolderChanged`), on the
 // server in the background. Returns what the status bar says ("Moved 3 messages to Archive"), or NULL with the
@@ -1887,11 +1835,20 @@ char *pe_undo_label(const struct PeCore *core);
 char *pe_undo(const struct PeCore *core,
               char **error);
 
-// The counts of a list in the status bar: "12 messages, 3 unread", with ", 2 selected" when more than one is. Free
-// with `pe_string_free`.
+// Fills `selection` with the messages the last `pe_undo` brought back that are in their folders again, to select
+// them after the list reloads; empty while none is there yet. Forgotten once all are there. False on failure.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection.
+bool pe_undo_restored(const struct PeCore *core,
+                      struct PeSelection *selection);
+
+// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search
+// (`searching`), with ", 2 selected" when more than one is. Free with `pe_string_free`.
 char *pe_list_counts(uint64_t total,
                      uint64_t unread,
-                     uint64_t selected);
+                     uint64_t selected,
+                     bool searching);
 
 #ifdef __cplusplus
 }  // extern "C"

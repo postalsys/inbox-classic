@@ -615,13 +615,15 @@ pub fn run_command(command: Command) {
         }),
         Command::Properties => spawn(async move { main.show_properties().await }),
         Command::MarkAllRead => main.mark_all_read(),
-        Command::Junk => spawn(async move { main.mark_junk(true).await }),
-        Command::NotJunk => spawn(async move { main.mark_junk(false).await }),
+        Command::Junk => main.mark_junk(true),
+        Command::NotJunk => main.mark_junk(false),
         Command::Notify => shell.set_notify(!shell.notify.get()),
         Command::Open => shell.show_main(),
         Command::DefaultApp => spawn(make_default_mail_app()),
         Command::ViewSource => spawn(async move { main.show_source().await }),
         Command::AiAgents => spawn(async move { crate::agents::agents_dialog(main.window()).await }),
+        Command::SelectAll => main.select_all(),
+        Command::Undo => spawn(async move { main.undo().await }),
     }
 }
 

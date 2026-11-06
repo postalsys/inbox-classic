@@ -748,10 +748,7 @@ fn null_and_bad_arguments() {
         assert!(!pe_sync(core, 42));
         assert!(pe_message_view(core, 1, 1, false).is_null());
         assert_eq!(pe_message_view_start(std::ptr::null(), 1, 1, false), 0);
-        assert!(!pe_message_set_flagged(std::ptr::null(), 1, 1, true));
-        assert!(!pe_message_move(core, 1, 1, 2));
-        assert!(!pe_message_delete(core, 1, 1));
-        assert!(!pe_folder_deletes_for_good(core, 1));
+        assert!(!pe_message_set_seen(std::ptr::null(), 1, 1, true));
         let mut reason: *mut c_char = null_mut();
         let bad = CString::new("").unwrap();
         assert!(!pe_folder_create(core, 42, 0, bad.as_ptr(), &mut reason));

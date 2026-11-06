@@ -9,7 +9,7 @@ use std::rc::Rc;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_store::{Message, Sort, SortField};
+use pe_store::{Message, MessageRef, Sort, SortField};
 
 use crate::app::shell;
 
@@ -157,7 +157,7 @@ pub struct Columns {
 
 pub struct MessageList {
     pub view: gtk::ColumnView,
-    pub selection: gtk::SingleSelection,
+    pub selection: gtk::MultiSelection,
     model: MessageModel,
     pub columns: Columns,
     /// The sort being set from here (not by a click on a header)
@@ -168,9 +168,7 @@ pub struct MessageList {
 impl MessageList {
     pub fn new() -> Rc<MessageList> {
         let model: MessageModel = glib::Object::new();
-        let selection = gtk::SingleSelection::new(Some(model.clone()));
-        selection.set_autoselect(false);
-        selection.set_can_unselect(true);
+        let selection = gtk::MultiSelection::new(Some(model.clone()));
         let view = gtk::ColumnView::new(Some(selection.clone()));
         view.add_css_class("message-list");
         view.set_widget_name("message-list");
@@ -288,34 +286,119 @@ impl MessageList {
         });
     }
 
-    /// The list again: what `search` finds, `total` of them (nothing when not `active`), the row `select` selected
-    pub fn reset(&self, search: pe_core::Search, total: u64, active: bool, select: Option<u64>) {
+    /// The list again: what `search` finds, `total` of them (nothing when not `active`), the rows `select` selected
+    pub fn reset(self: &Rc<Self>, search: pe_core::Search, total: u64, active: bool, select: &[u64]) {
         self.model.reset(search, self.sort.get(), total, active);
-        match select.and_then(|index| u32::try_from(index).ok()) {
-            Some(index) if index < self.model.n_items() => {
-                self.selection.set_selected(index);
-                self.view.scroll_to(index, None, gtk::ListScrollFlags::NONE, None);
+        self.select_positions(select);
+        self.reveal(select);
+    }
+
+    /// Scrolls only as far as the rows at `positions` (ascending) need to be seen: to the top when they fit under the
+    /// rows above them, so the newest messages stay in sight; not at all when the first is in sight; else to it.
+    /// Once the list is laid out with its new rows.
+    pub fn reveal(self: &Rc<Self>, positions: &[u64]) {
+        let (Some(&first), Some(&last)) = (positions.first(), positions.last()) else {
+            return;
+        };
+        let list = Rc::downgrade(self);
+        glib::idle_add_local_once(move || {
+            let Some(list) = list.upgrade() else { return };
+            let rows = list.model.n_items();
+            let (Ok(first), Ok(last)) = (u32::try_from(first), u32::try_from(last)) else {
+                return;
+            };
+            if rows == 0 || first >= rows {
+                return;
             }
-            _ => self.selection.set_selected(gtk::INVALID_LIST_POSITION),
-        }
+            let Some(adjustment) = list.view.vadjustment() else {
+                list.view.scroll_to(first, None, gtk::ListScrollFlags::NONE, None);
+                return;
+            };
+            let row = adjustment.upper() / f64::from(rows);
+            let (top, page) = (adjustment.value(), adjustment.page_size());
+            if row <= 0.0 || f64::from(last.min(rows - 1) + 1) * row <= page {
+                adjustment.set_value(0.0);
+            } else if f64::from(first) * row < top || f64::from(first + 1) * row > top + page {
+                list.view.scroll_to(first, None, gtk::ListScrollFlags::NONE, None);
+            }
+        });
     }
 
     pub fn rows(&self) -> u32 {
         self.model.n_items()
     }
 
-    /// The selected row and its position
+    /// How many rows are selected
+    pub fn selected_count(&self) -> u64 {
+        self.selection.selection().size()
+    }
+
+    /// The one selected row and its position; None when none or several are
     pub fn selected(&self) -> Option<(u32, Message)> {
-        let position = self.selection.selected();
-        let row = self.selection.selected_item().and_downcast::<MessageRow>()?;
+        let selected = self.selection.selection();
+        if selected.size() != 1 {
+            return None;
+        }
+        let position = selected.minimum();
+        let row = self.model.item(position).and_downcast::<MessageRow>()?;
         Some((position, row.with(Message::clone)?))
     }
 
+    /// The selected positions as ranges, start included and end not, ascending
+    pub fn selected_ranges(&self) -> Vec<(u64, u64)> {
+        let selected = self.selection.selection();
+        let mut ranges: Vec<(u64, u64)> = Vec::new();
+        let Some((mut iter, first)) = gtk::BitsetIter::init_first(&selected) else {
+            return ranges;
+        };
+        let mut at = Some(first);
+        while let Some(position) = at {
+            let position = u64::from(position);
+            match ranges.last_mut() {
+                Some((_, end)) if *end == position => *end += 1,
+                _ => ranges.push((position, position + 1)),
+            }
+            at = iter.next();
+        }
+        ranges
+    }
+
+    /// The last selected position
+    pub fn last_selected(&self) -> Option<u32> {
+        let selected = self.selection.selection();
+        (!selected.is_empty()).then(|| selected.maximum())
+    }
+
+    /// Whether the row at `position` is selected
+    pub fn is_selected(&self, position: u32) -> bool {
+        self.selection.is_selected(position)
+    }
+
+    /// Selects only the rows at `positions`
+    pub fn select_positions(&self, positions: &[u64]) {
+        let rows = self.model.n_items();
+        let wanted = gtk::Bitset::new_empty();
+        for position in positions {
+            if let Ok(position) = u32::try_from(*position)
+                && position < rows
+            {
+                wanted.add(position);
+            }
+        }
+        let all = gtk::Bitset::new_range(0, rows);
+        self.selection.set_selection(&wanted, &all);
+    }
+
+    /// Selects only the row `index`, scrolled to and with the focus
     pub fn select(&self, index: u32) {
         if index < self.model.n_items() {
-            self.selection.set_selected(index);
+            self.selection.select_item(index, true);
             self.view.scroll_to(index, None, gtk::ListScrollFlags::FOCUS, None);
         }
+    }
+
+    pub fn select_all(&self) {
+        self.selection.select_all();
     }
 }
 
@@ -392,21 +475,35 @@ fn text_column(
     column
 }
 
-/// A row dragged onto a folder of the tree: its folder and uid, as text
+/// Rows dragged onto a folder of the tree: a selected row brings the whole selection, another row itself alone, as
+/// their folders and uids in text
 fn add_drag_source(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
     add_menu(widget, item);
     let source = gtk::DragSource::new();
     source.set_actions(gdk::DragAction::MOVE | gdk::DragAction::COPY);
     let item = item.downgrade();
     source.connect_prepare(move |_, _, _| {
-        let row = item.upgrade()?.item().and_downcast::<MessageRow>()?;
-        let payload = row.with(|m| drag_payload(m.folder_id, m.info.uid))?;
-        Some(gdk::ContentProvider::for_value(&payload.to_value()))
+        let item = item.upgrade()?;
+        let main = shell().main();
+        let refs = if main.list.is_selected(item.position()) {
+            main.selected_refs()
+        } else {
+            let row = item.item().and_downcast::<MessageRow>()?;
+            vec![row.with(|m| MessageRef {
+                folder: m.folder_id,
+                uid: m.info.uid,
+            })?]
+        };
+        if refs.is_empty() {
+            return None;
+        }
+        Some(gdk::ContentProvider::for_value(&drag_payload(&refs).to_value()))
     });
     widget.add_controller(source);
 }
 
-/// The right-click menu of the message a cell shows: its row selected first, as a click would
+/// The right-click menu of the messages a cell shows: a row outside the selection selected alone first, as a click
+/// would; one inside it keeps the selection
 fn add_menu(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
     let click = gtk::GestureClick::new();
     click.set_button(gdk::BUTTON_SECONDARY);
@@ -416,20 +513,35 @@ fn add_menu(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
             return;
         };
         let main = shell().main();
-        main.list.select(item.position());
+        if !main.list.is_selected(item.position()) {
+            main.list.select(item.position());
+        }
         main.message_menu(&widget, x, y);
     });
     widget.add_controller(click);
 }
 
-pub fn drag_payload(folder: i64, uid: u64) -> String {
-    format!("{folder} {uid}")
+/// Messages as a drag carries them: "folder uid" each, a line each
+pub fn drag_payload(refs: &[MessageRef]) -> String {
+    refs.iter()
+        .map(|r| format!("{} {}", r.folder, r.uid))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
-/// The folder and uid of a dragged row
-pub fn parse_payload(payload: &str) -> Option<(i64, u64)> {
-    let (folder, uid) = payload.split_once(' ')?;
-    Some((folder.parse().ok()?, uid.parse().ok()?))
+/// The messages of a drag; None when it is anything else
+pub fn parse_payload(payload: &str) -> Option<Vec<MessageRef>> {
+    let refs = payload
+        .lines()
+        .map(|line| {
+            let (folder, uid) = line.split_once(' ')?;
+            Some(MessageRef {
+                folder: folder.parse().ok()?,
+                uid: uid.parse().ok()?,
+            })
+        })
+        .collect::<Option<Vec<_>>>()?;
+    (!refs.is_empty()).then_some(refs)
 }
 
 #[cfg(test)]
@@ -437,9 +549,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn dragged_rows_name_their_message() {
-        assert_eq!(parse_payload(&drag_payload(12, 345)), Some((12, 345)));
+    fn dragged_rows_name_their_messages() {
+        let refs = [MessageRef { folder: 12, uid: 345 }, MessageRef { folder: 13, uid: 1 }];
+        assert_eq!(parse_payload(&drag_payload(&refs)), Some(refs.to_vec()));
+        assert_eq!(parse_payload(&drag_payload(&refs[..1])), Some(refs[..1].to_vec()));
         assert_eq!(parse_payload("12"), None);
         assert_eq!(parse_payload("x 1"), None);
+        assert_eq!(parse_payload("12 1\nhello"), None);
+        assert_eq!(parse_payload(""), None);
     }
 }

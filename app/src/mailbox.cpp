@@ -16,6 +16,12 @@
 
 namespace {
 
+// the reason the core gave for a refusal, or `fallback` when it gave none
+std::wstring ReasonText(char* reason, const wchar_t* fallback) {
+    core::String why(reason);
+    return why ? Text(why.get()) : fallback;
+}
+
 constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
 constexpr size_t kPagesKept = 8;
@@ -191,7 +197,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
                         WS_TABSTOP | TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_SHOWSELALWAYS, IDC_TREE, {},
                         WS_EX_CLIENTEDGE);
     list_ = CreateChild(parent, WC_LISTVIEWW, nullptr,
-                        WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SINGLESEL | LVS_OWNERDATA, IDC_LIST, {},
+                        WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA, IDC_LIST, {},
                         WS_EX_CLIENTEDGE);
     ListView_SetExtendedListViewStyle(list_, LVS_EX_FULLROWSELECT);
     // the icons of the list: for the headers of the paper clip and flag columns, and drawn on the rows in CustomDraw
@@ -626,6 +632,7 @@ int64_t Mailbox::CurrentAccount() const {
 }
 
 void Mailbox::OpenSelected() {
+    FlushSelection();
     if (!uid_ || !draftFolders_.contains(messageFolder_)) {
         return;
     }
@@ -707,6 +714,18 @@ std::wstring Mailbox::RowFolder(int64_t folder) const {
 }
 
 void Mailbox::ReloadList(bool keepSelection) {
+    // a selection the user just made and TIMER_SELECTION has not taken yet: taken from the rows as they were shown,
+    // before the list changes under it
+    bool pending = keepSelection && std::exchange(selectionPending_, false);
+    if (pending) {
+        KillTimer(parent_, TIMER_SELECTION);
+        pe_selection_clear(selection_.get());
+        for (int i : SelectedRows()) {
+            if (const PeMessage* row = Row(i)) {
+                pe_selection_add(selection_.get(), row->folder, row->uid);
+            }
+        }
+    }
     pages_.clear();
     total_ = 0;
     unread_ = 0;
@@ -719,8 +738,12 @@ void Mailbox::ReloadList(bool keepSelection) {
     } else if (folder_) {
         pe_folder_counts(core_, folder_, &total_, &unread_);
     }
-    // the selection follows the message to where it is now, without a flicker of the reading pane
-    int64_t index = keepSelection && uid_ ? pe_message_index(core_, &search, sort_, ascending_, messageFolder_, uid_) : -1;
+    // the selection follows the message to where it is now, without a flicker of the reading pane; several selected
+    // messages are found again where they are now
+    int64_t index = keepSelection && uid_ && !pending ? pe_message_index(core_, &search, sort_, ascending_, messageFolder_, uid_) : -1;
+    core::Positions several(keepSelection && (pending || !uid_) && pe_selection_count(selection_.get()) > 0
+                                ? pe_selection_positions(core_, selection_.get(), &search, sort_, ascending_)
+                                : nullptr);
     reloading_ = true;
     ListView_SetItemCountEx(list_, static_cast<int>(std::min<uint64_t>(total_, INT_MAX)), LVSICF_NOSCROLL);
     // an empty list says why, and that may have changed with the same count
@@ -730,9 +753,32 @@ void Mailbox::ReloadList(bool keepSelection) {
         ListView_SetItemState(list_, static_cast<int>(index), LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
         ListView_EnsureVisible(list_, static_cast<int>(index), FALSE);
     }
+    // the messages selected before are still the selection where they are now: only their numbers change
+    bool kept = SelectPositions(several.get(), false);
+    if (undoPending_ && SelectRestored(search)) {
+        undoPending_ = false;
+        kept = false;
+    }
     reloading_ = false;
     InvalidateRect(list_, nullptr, FALSE);
-    OnSelectionChanged();
+    KillTimer(parent_, TIMER_SELECTION);
+    selectionPending_ = false;
+    OnSelectionChanged(!kept);
+}
+
+bool Mailbox::SelectPositions(const PePositions* positions, bool focusFirst) {
+    size_t count = pe_positions_count(positions);
+    for (size_t i = 0; i < count; i++) {
+        uint64_t at = pe_positions_get(positions, i);
+        UINT state = LVIS_SELECTED | (focusFirst && i == 0 ? LVIS_FOCUSED : 0);
+        if (at < static_cast<uint64_t>(INT_MAX)) {
+            ListView_SetItemState(list_, static_cast<int>(at), state, state);
+        }
+    }
+    if (focusFirst && count > 0) {
+        ListView_EnsureVisible(list_, static_cast<int>(std::min<uint64_t>(pe_positions_get(positions, 0), INT_MAX)), FALSE);
+    }
+    return count > 0;
 }
 
 const PeMessage* Mailbox::Row(int index) {
@@ -874,9 +920,16 @@ void Mailbox::ClearReader(bool loading) {
     ShowLogo(false);
     // says so rather than a blank pane, unless a message is about to be shown
     preview_.Clear(!loading);
+    summaryPage_.clear();
 }
 
-void Mailbox::OnSelectionChanged() {
+void Mailbox::OnSelectionChanged(bool rebuild) {
+    TakeSelection(rebuild);
+    // the main window: the buttons and counts for what is selected now
+    SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_LIST, kSelectionTaken), 0);
+    if (SelectedCount() > 1) {
+        return;
+    }
     const PeMessage* row = SelectedRow();
     uint64_t uid = row ? row->uid : 0;
     int64_t folder = row ? row->folder : 0;
@@ -897,6 +950,90 @@ void Mailbox::OnSelectionChanged() {
     pe_message_open(core_, folder, uid);
 }
 
+void Mailbox::ScheduleSelection() {
+    // the user chose: what Undo brings back is not selected over it
+    undoPending_ = false;
+    selectionPending_ = true;
+    SetTimer(parent_, TIMER_SELECTION, USER_TIMER_MINIMUM, nullptr);
+}
+
+void Mailbox::FlushSelection() {
+    if (std::exchange(selectionPending_, false)) {
+        KillTimer(parent_, TIMER_SELECTION);
+        OnSelectionChanged();
+    }
+}
+
+size_t Mailbox::SelectedCount() const {
+    return static_cast<size_t>(ListView_GetSelectedCount(list_));
+}
+
+std::vector<int> Mailbox::SelectedRows() const {
+    std::vector<int> rows;
+    for (int i = ListView_GetNextItem(list_, -1, LVNI_SELECTED); i >= 0; i = ListView_GetNextItem(list_, i, LVNI_SELECTED)) {
+        rows.push_back(i);
+    }
+    return rows;
+}
+
+void Mailbox::TakeSelection(bool rebuild) {
+    size_t count = SelectedCount();
+    if (count == 1) {
+        pe_selection_clear(selection_.get());
+        if (const PeMessage* row = SelectedRow()) {
+            pe_selection_add(selection_.get(), row->folder, row->uid);
+        }
+    } else if (count == 0) {
+        pe_selection_clear(selection_.get());
+    } else if (rebuild) {
+        // the selected rows as ranges of positions: Select All on a long list is one range, not every row
+        std::vector<uint64_t> starts, ends;
+        for (int i : SelectedRows()) {
+            if (!ends.empty() && ends.back() == static_cast<uint64_t>(i)) {
+                ends.back()++;
+            } else {
+                starts.push_back(static_cast<uint64_t>(i));
+                ends.push_back(static_cast<uint64_t>(i) + 1);
+            }
+        }
+        PeSearch search = Search();
+        pe_selection_set_ranges(core_, selection_.get(), &search, sort_, ascending_, starts.data(), ends.data(), starts.size());
+    }
+    summary_ = {};
+    if (pe_selection_count(selection_.get()) > 0) {
+        pe_selection_summary(core_, selection_.get(), &summary_);
+    }
+    if (count <= 1) {
+        return;
+    }
+    // several: none of them is opened, the pane says how many (again only when that changed)
+    if (uid_) {
+        ClearReader();
+        // the header without the logo and bars of the message that was shown
+        LayoutReader();
+    }
+    core::String page(pe_selection_page(&summary_));
+    std::wstring html = page ? core::Widen(page.get()) : L"";
+    if (html != summaryPage_) {
+        summaryPage_ = html;
+        preview_.Show(html);
+    }
+}
+
+bool Mailbox::SelectRestored(const PeSearch& search) {
+    core::Selection restored(pe_selection_new());
+    if (!pe_undo_restored(core_, restored.get()) || pe_selection_count(restored.get()) == 0) {
+        return false;
+    }
+    core::Positions at(pe_selection_positions(core_, restored.get(), &search, sort_, ascending_));
+    if (pe_positions_count(at.get()) == 0) {
+        return false;
+    }
+    ListView_SetItemState(list_, -1, 0, LVIS_SELECTED | LVIS_FOCUSED);
+    // the first of them in view
+    return SelectPositions(at.get(), true);
+}
+
 void Mailbox::RetryDownload() {
     if (!uid_) {
         return;
@@ -913,6 +1050,7 @@ bool Mailbox::OnFolderSelected(int64_t folder, bool allInboxes) {
     // the message of the folder before is not this folder's, nor is the search; what Show shows stays
     folder_ = folder;
     allInboxes_ = allInboxes;
+    undoPending_ = false;
     ResetFind();
     ClearReader();
     ReloadList(false);
@@ -1089,6 +1227,8 @@ bool Mailbox::SelectInList(int64_t folder, uint64_t uid) {
     ListView_SetItemState(list_, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
     ListView_EnsureVisible(list_, row, FALSE);
     SetFocus(list_);
+    // chosen by the app, not clicked through: followed at once
+    FlushSelection();
     return true;
 }
 
@@ -1245,24 +1385,66 @@ void Mailbox::OpenInCalendar() {
 }
 
 void Mailbox::MarkJunk(bool junk) {
-    const PeMessage* row = SelectedRow();
-    if (!row) {
-        return;
-    }
-    if (!pe_message_mark_junk(core_, row->folder, row->uid, junk)) {
-        MessageBoxW(parent_, junk ? L"This account has no Junk E-mail folder to move the message to." : L"The message could not be moved to the Inbox.",
-                    L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
-    }
+    Act(junk ? PE_ACTION_JUNK : PE_ACTION_NOT_JUNK);
 }
 
 bool Mailbox::InJunk() const {
-    return junkFolders_.contains(uid_ ? messageFolder_ : folder_);
+    if (summary_.count > 0) {
+        return summary_.in_junk;
+    }
+    return junkFolders_.contains(folder_);
 }
 
 void Mailbox::MarkSelected(bool seen) {
-    if (uid_) {
-        pe_message_set_seen(core_, messageFolder_, uid_, seen);
+    Act(seen ? PE_ACTION_READ : PE_ACTION_UNREAD);
+}
+
+bool Mailbox::Act(PeAction action, int64_t to) {
+    FlushSelection();
+    if (pe_selection_count(selection_.get()) == 0) {
+        return false;
     }
+    // what takes the place of rows that leave the list: the row after the last of them
+    bool leaves = action == PE_ACTION_DELETE || action == PE_ACTION_MOVE || action == PE_ACTION_JUNK || action == PE_ACTION_NOT_JUNK;
+    int after = leaves ? RowAfterSelection() : -1;
+    char* reason = nullptr;
+    core::String done(pe_selection_act(core_, selection_.get(), action, to, &reason));
+    Say(done ? Text(done.get()) : ReasonText(reason, L"The messages could not be changed."));
+    if (done && leaves) {
+        SelectAfterRemoval(after);
+    }
+    return done != nullptr;
+}
+
+void Mailbox::Say(const std::wstring& text) {
+    said_ = text;
+    SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_LIST, kSaid), 0);
+}
+
+int Mailbox::RowAfterSelection() const {
+    // every selected row before the one after the last of them goes: it moves up by as many, less the last itself
+    std::vector<int> rows = SelectedRows();
+    return rows.empty() ? -1 : rows.back() - static_cast<int>(rows.size()) + 1;
+}
+
+void Mailbox::SelectAll() {
+    if (ListView_GetItemCount(list_) > 0) {
+        ListView_SetItemState(list_, -1, LVIS_SELECTED, LVIS_SELECTED);
+        SetFocus(list_);
+    }
+}
+
+void Mailbox::Undo() {
+    char* reason = nullptr;
+    core::String done(pe_undo(core_, &reason));
+    // selected once the list has them again
+    undoPending_ = done != nullptr;
+    Say(done ? Text(done.get()) : ReasonText(reason, L"There is nothing to undo."));
+}
+
+std::wstring Mailbox::UndoLabel() const {
+    core::String label(pe_undo_label(core_));
+    return label ? Text(label.get()) : L"";
 }
 
 // after a message left the list: the one that took its place selected, or the last one
@@ -1272,36 +1454,33 @@ void Mailbox::SelectAfterRemoval(int index) {
         int next = std::min(index, static_cast<int>(std::min<uint64_t>(total_, INT_MAX)) - 1);
         ListView_SetItemState(list_, next, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
         ListView_EnsureVisible(list_, next, FALSE);
+        FlushSelection();
     }
 }
 
 void Mailbox::DeleteSelected() {
-    int index = ListView_GetNextItem(list_, -1, LVNI_SELECTED);
-    const PeMessage* row = Row(index);
-    if (!row) {
+    FlushSelection();
+    if (pe_selection_count(selection_.get()) == 0) {
         return;
     }
-    uint64_t uid = row->uid;
-    int64_t folder = row->folder;
-    // from Deleted Items, or an account without one, it is gone for good: asked first, as Outlook Express does
-    if (pe_folder_deletes_for_good(core_, folder) &&
-        MessageBoxW(parent_, L"This message will be deleted for good. Delete it?", L"Inbox Classic",
-                    MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+    // from Deleted Items, or an account without one, they are gone for good: asked first, as Outlook Express does
+    core::String question(pe_selection_delete_question(&summary_));
+    if (question && MessageBoxW(parent_, Text(question.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
-    if (pe_message_delete(core_, folder, uid)) {
-        SelectAfterRemoval(index);
-    }
+    Act(PE_ACTION_DELETE);
 }
 
 void Mailbox::MoveSelected(HWND owner) {
-    int index = ListView_GetNextItem(list_, -1, LVNI_SELECTED);
-    const PeMessage* row = Row(index);
-    if (!row) {
+    FlushSelection();
+    int64_t from = 0;
+    uint64_t uid = 0;
+    // to a folder of their account: messages of several accounts (All Inboxes, a search) do not move together
+    if (summary_.accounts != 1 || !pe_selection_get(selection_.get(), 0, &from, &uid)) {
         return;
     }
-    uint64_t uid = row->uid;
-    int64_t from = row->folder;
+    // the folder they are all in is not offered; from several folders, any of the account's
+    int64_t exclude = summary_.folders == 1 ? from : 0;
     // the other folders of its account that hold messages
     std::vector<int64_t> ids;
     FormField field{L"Folder:", L"", FormField::Kind::Choice};
@@ -1309,7 +1488,7 @@ void Mailbox::MoveSelected(HWND owner) {
     core::FolderList folders(pe_folders(core_, account != folderAccounts_.end() ? account->second : CurrentAccount()));
     for (size_t i = 0; i < pe_folder_list_count(folders.get()); i++) {
         const PeFolder* folder = pe_folder_list_get(folders.get(), i);
-        if (folder && folder->selectable && folder->id != from) {
+        if (folder && folder->selectable && folder->id != exclude) {
             ids.push_back(folder->id);
             // a special folder by its usual name, the others by their whole path: two folders 2024 in Work and
             // in Personal are not the same
@@ -1321,20 +1500,20 @@ void Mailbox::MoveSelected(HWND owner) {
     }
     field.value = field.choices[0];
     std::vector<FormField> fields = {field};
-    if (!FormDialog(owner, L"Move", L"Move the selected message to the folder:", fields)) {
+    std::wstring prompt = summary_.count > 1 ? L"Move the " + std::to_wstring(summary_.count) + L" selected messages to the folder:"
+                                             : L"Move the selected message to the folder:";
+    if (!FormDialog(owner, L"Move", prompt.c_str(), fields)) {
         return;
     }
     int chosen = fields[0].chosen;
-    if (chosen >= 0 && static_cast<size_t>(chosen) < ids.size() && pe_message_move(core_, from, uid, ids[chosen])) {
-        SelectAfterRemoval(index);
+    if (chosen >= 0 && static_cast<size_t>(chosen) < ids.size()) {
+        Act(PE_ACTION_MOVE, ids[chosen]);
     }
 }
 
 void Mailbox::FlagSelected() {
-    const PeMessage* row = SelectedRow();
-    if (row) {
-        pe_message_set_flagged(core_, row->folder, row->uid, !row->flagged);
-    }
+    // flagged when any of them is not, the flags taken away when all have one
+    Act(PE_ACTION_TOGGLE_FLAG);
 }
 
 // ---- folders ----
@@ -1448,9 +1627,7 @@ std::wstring AskFolderName(HWND owner, const wchar_t* title, const std::wstring&
 
 // the reason the core gave, shown
 void ShowRefusal(HWND owner, char* reason, const wchar_t* fallback) {
-    core::String why(reason);
-    std::wstring text = why ? Text(why.get()) : fallback;
-    MessageBoxW(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+    MessageBoxW(owner, ReasonText(reason, fallback).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
 void Mailbox::NewFolder(HWND owner) {
@@ -1503,16 +1680,11 @@ void Mailbox::DeleteFolder(HWND owner) {
 }
 
 std::wstring Mailbox::Counts() const {
-    if (Searching() && total_ == 0) {
-        return L"No messages found";
-    }
-    if (Searching()) {
-        return std::to_wstring(total_) + L" found, " + std::to_wstring(unread_) + L" unread";
-    }
-    if (!folder_ && !allInboxes_) {
+    if (!Searching() && !folder_ && !allInboxes_) {
         return L"";
     }
-    return std::to_wstring(total_) + L" message(s), " + std::to_wstring(unread_) + L" unread";
+    core::String counts(pe_list_counts(total_, unread_, SelectedCount(), Searching()));
+    return counts ? Text(counts.get()) : L"";
 }
 
 // ---- messages from the controls and the core ----
@@ -1560,7 +1732,13 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
         return true;
     case LVN_ITEMCHANGED:
         if (!reloading_ && (reinterpret_cast<NMLISTVIEW*>(header)->uChanged & LVIF_STATE)) {
-            OnSelectionChanged();
+            ScheduleSelection();
+        }
+        return true;
+    case LVN_ODSTATECHANGED:
+        // a range of rows selected at once (Shift+click) in the list of owner data
+        if (!reloading_) {
+            ScheduleSelection();
         }
         return true;
     case LVN_BEGINDRAG: {
@@ -1666,7 +1844,10 @@ void Mailbox::MessageMenu(POINT screen) {
         if (index < 0) {
             return;
         }
-        ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
+        // a row of the selection keeps it; another row is selected alone
+        if (!(ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED)) {
+            ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
+        }
         ListView_SetItemState(list_, index, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
     } else if (index >= 0) {
         // the menu key: the menu at the selected row
@@ -1679,7 +1860,11 @@ void Mailbox::MessageMenu(POINT screen) {
     if (!message) {
         return;
     }
-    bool draft = draftFolders_.contains(message->folder);
+    // the menu is for the selection as it is now
+    FlushSelection();
+    // with several selected, what works on one message alone is there but off (as the menu opens), so the menu does not
+    // change shape
+    bool draft = SelectedCount() == 1 && draftFolders_.contains(message->folder);
     HMENU menu = CreatePopupMenu();
     if (draft) {
         AppendMenuW(menu, MF_STRING, IDOK, L"&Open");
@@ -1690,9 +1875,12 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING, IDM_REPLY_ALL, L"Reply to A&ll");
     AppendMenuW(menu, MF_STRING, IDM_FORWARD, L"&Forward");
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, message->seen ? IDM_MARK_UNREAD : IDM_MARK_READ, message->seen ? L"Mark as &Unread" : L"Mark as &Read");
-    AppendMenuW(menu, MF_STRING, IDM_FLAG, message->flagged ? L"Clear Fla&g" : L"Fla&g Message");
-    bool junk = junkFolders_.contains(message->folder);
+    // read when any of them is unread; flagged when any is not
+    bool read = summary_.unread == 0;
+    AppendMenuW(menu, MF_STRING, read ? IDM_MARK_UNREAD : IDM_MARK_READ, read ? L"Mark as &Unread" : L"Mark as &Read");
+    bool flagged = summary_.count > 0 && !pe_selection_flags(&summary_);
+    AppendMenuW(menu, MF_STRING, IDM_FLAG, flagged ? L"Clear Fla&g" : L"Fla&g Message");
+    bool junk = summary_.in_junk;
     AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, junk ? L"Mark as &Not Junk" : L"Mark as &Junk");
     AppendMenuW(menu, MF_STRING, IDM_MOVE, L"&Move to Folder...");
     AppendMenuW(menu, MF_STRING, IDM_DELETE, L"&Delete");
@@ -1921,14 +2109,14 @@ POINT InWindow(HWND window, POINT screen) {
 }  // namespace
 
 void Mailbox::BeginDrag(int index, POINT at) {
+    FlushSelection();
     const PeMessage* row = Row(index);
     if (!row || drag_) {
         return;
     }
     drag_.emplace();
     drag_->folder = row->folder;
-    drag_->uid = row->uid;
-    drag_->index = index;
+    // the list selects the row picked up: the drag carries the selection, the row with it
     // the row as it looks, under the cursor where it was picked up
     POINT origin = {};
     drag_->image = ListView_CreateDragImage(list_, index, &origin);
@@ -1961,11 +2149,12 @@ int64_t Mailbox::DropTarget(POINT screen, HTREEITEM& over) const {
     item.mask = TVIF_PARAM;
     item.hItem = over;
     TreeView_GetItem(tree_, &item);
-    // an account's own item (its id negated), the folder the message is in, one of another account, or one that
-    // holds no messages: not there
+    // an account's own item (its id negated), the folder they are all in, one of another account (or messages of
+    // several accounts), or one that holds no messages: not there
     int64_t folder = static_cast<int64_t>(item.lParam);
     auto from = folderAccounts_.find(drag_->folder), to = folderAccounts_.find(folder);
-    if (folder <= 0 || folder == drag_->folder || unselectable_.count(folder) || from == folderAccounts_.end() ||
+    bool sameFolder = summary_.folders <= 1 && folder == drag_->folder;
+    if (folder <= 0 || sameFolder || summary_.accounts > 1 || unselectable_.count(folder) || from == folderAccounts_.end() ||
         to == folderAccounts_.end() || from->second != to->second) {
         return 0;
     }
@@ -2019,13 +2208,8 @@ void Mailbox::EndDrag(bool drop) {
     if (!drop || !drag.target) {
         return;
     }
-    // Ctrl copies, as in Explorer; a move selects the message after it, as Move to Folder does
-    bool copy = GetKeyState(VK_CONTROL) < 0;
-    if (copy) {
-        pe_message_copy(core_, drag.folder, drag.uid, drag.target);
-    } else if (pe_message_move(core_, drag.folder, drag.uid, drag.target) && drag.folder == messageFolder_ && drag.uid == uid_) {
-        SelectAfterRemoval(drag.index);
-    }
+    // Ctrl copies, as in Explorer; a move selects the message after them, as Move to Folder does
+    Act(GetKeyState(VK_CONTROL) < 0 ? PE_ACTION_COPY : PE_ACTION_MOVE, drag.target);
 }
 
 bool Mailbox::OnDragMouse(UINT message) {
@@ -2075,6 +2259,10 @@ void Mailbox::OnTimer(UINT_PTR id) {
         SetCursor(DragCursor(!drag_->target ? 1 : (GetKeyState(VK_CONTROL) < 0 ? 3 : 2)));
         return;
     }
+    if (id == TIMER_SELECTION) {
+        FlushSelection();
+        return;
+    }
     if (id == TIMER_DOWNLOADING) {
         KillTimer(parent_, TIMER_DOWNLOADING);
         preview_.ShowState(PE_READER_STATE_DOWNLOADING);
@@ -2108,7 +2296,8 @@ void Mailbox::OnTimer(UINT_PTR id) {
     KillTimer(parent_, TIMER_MARK_READ);
     const PeMessage* row = SelectedRow();
     if (row && row->uid == uid_ && !row->seen) {
-        MarkSelected(true);
+        // read after a moment on screen: no word of it in the status bar
+        pe_message_set_seen(core_, messageFolder_, uid_, true);
     }
 }
 

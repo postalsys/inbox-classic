@@ -226,6 +226,19 @@ function WaitFor([scriptblock]$Condition, [int]$Seconds = 20) {
     return $null
 }
 
+# the screen at ($left, $top) into $bitmap; the desktop of a remote session may refuse a copy for a moment (its
+# display redrawn, the client resized)
+function CopyScreen($bitmap, [int]$left, [int]$top) {
+    for ($try = 1; ; $try++) {
+        try {
+            [System.Drawing.Graphics]::FromImage($bitmap).CopyFromScreen($left, $top, 0, 0, $bitmap.Size)
+            return
+        } catch {
+            if ($try -ge 10) { throw }
+            Start-Sleep -Seconds 2
+        }
+    }
+}
 # a picture of a window; with $Also (a popup menu, say) of the area that holds both
 function Shot([IntPtr]$hwnd, [string]$name, [IntPtr]$Also = [IntPtr]::Zero) {
     # in front and painted: a window that just opened may not have drawn itself yet
@@ -245,7 +258,7 @@ function Shot([IntPtr]$hwnd, [string]$name, [IntPtr]$Also = [IntPtr]::Zero) {
     # a window that closed in the meantime has no picture
     if ($rect.Right -le $rect.Left -or $rect.Bottom -le $rect.Top) { return }
     $bitmap = New-Object System.Drawing.Bitmap ($rect.Right - $rect.Left), ($rect.Bottom - $rect.Top)
-    [System.Drawing.Graphics]::FromImage($bitmap).CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bitmap.Size)
+    CopyScreen $bitmap $rect.Left $rect.Top
     if ($Also -eq [IntPtr]::Zero) { [void][Native.Win]::SetWindowPos($hwnd, [IntPtr](-2), 0, 0, 0, 0, 0x13) }
     $bitmap.Save((Join-Path $Out "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
 }
@@ -974,7 +987,7 @@ public static class Dragger {
     $rect = New-Object Native.Win+RECT
     [void][Native.Win]::GetWindowRect($compose, [ref]$rect)
     $bitmap = New-Object System.Drawing.Bitmap ($rect.Right - $rect.Left), ($rect.Bottom - $rect.Top)
-    [System.Drawing.Graphics]::FromImage($bitmap).CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bitmap.Size)
+    CopyScreen $bitmap $rect.Left $rect.Top
     $bitmap.Save((Join-Path $Out 'write-16-link-menu.png'), [System.Drawing.Imaging.ImageFormat]::Png)
     Key $input $VK_ESCAPE
     Start-Sleep -Milliseconds 500
@@ -1055,7 +1068,7 @@ public static class Dragger {
     Shot $main 'read-12-not-downloaded'
     # the server back: the account syncs, and the message is tried again by itself
     SetPort 105 "$($ports.imap)"
-    Check ([bool](WaitFor { -not (Visible $main $IDC_RETRY) -and (Find 'Archive' $waiting).flags -contains '\Seen' } 40)) 'once the account is back the message shows by itself'
+    Check ([bool](WaitFor { -not (Visible $main $IDC_RETRY) -and (Find 'Archive' $waiting).flags -contains '\Seen' } 40)) "once the account is back the message shows by itself (Try Again $(Visible $main $IDC_RETRY), flags $((Find 'Archive' $waiting).flags -join ' '))"
     SelectFolder 0
 
     Step 'the Outbox: a send that can not go'
@@ -1536,7 +1549,7 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     SelectFolder 0
-    $inInbox = WaitFor { if ((Rows) -ge 2 -and (Find 'INBOX' 'Subject: Copy me')) { Rows } } 30
+    $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, 4) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, 4) -eq 'Copy me') { Rows } } 30
     # the first row and Archive (the fourth folder) on the screen
     $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
     for ($i = 0; $i -lt 3; $i++) { $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $archiveItem) }
@@ -1556,7 +1569,7 @@ public static class Dragger {
     DragFirstRow $false 'organize-6-drag'
     Check ($null -ne (WaitFor { Find 'Archive' "Subject: $first" } 20)) "a message dragged onto Archive is moved there ($first)"
     Check ([bool](WaitFor { -not (Find 'INBOX' "Subject: $first") } 10)) 'and out of the Inbox'
-    Check ([bool](WaitFor { (Rows) -eq $inInbox - 1 } 10)) 'and out of the list'
+    Check ([bool](WaitFor { (Rows) -eq $inInbox - 1 } 10)) "and out of the list ($(Rows) rows, $inInbox before)"
     $second = 'Copy me'
     DragFirstRow $true ''
     Check ($null -ne (WaitFor { Find 'Archive' "Subject: $second" } 20)) "with Ctrl it is copied there ($second)"
@@ -1570,6 +1583,78 @@ public static class Dragger {
     [Native.Win]::Mouse($inbox[0], $inbox[1], 0x0004)
     Start-Sleep -Seconds 2
     Check ((Rows) -eq $before -and $null -ne (Find 'INBOX' "Subject: $second")) 'dropped on its own folder, it stays'
+
+    Step 'several messages'
+    $IDM_SELECT_ALL = 134; $IDM_UNDO = 135; $TB_ISBUTTONENABLED = 0x0409
+    $buttons = [Native.Win]::FindDescendants($main, 'ToolbarWindow32') | Where-Object { [int][Native.Win]::SendMessage($_, 0x0419, [IntPtr]$IDM_SYNC, [IntPtr]::Zero) -ge 0 } | Select-Object -First 1
+    $enabled = { param($id) [int][Native.Win]::SendMessage($buttons, $TB_ISBUTTONENABLED, [IntPtr]$id, [IntPtr]::Zero) -ne 0 }
+    SelectFolder 0
+    $before = WaitFor { if ((Rows) -ge 3) { Rows } }
+    SelectRow 0
+    # Ctrl+click on the next two rows adds them
+    [void][Native.Win]::SetForegroundWindow($main)
+    [Native.Win]::keybd_event(0x11, 0, 0, [IntPtr]::Zero)
+    foreach ($i in 1, 2) {
+        $box = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr]$i, 0)
+        [Native.Win]::MouseClick($box.Left + 120, [int](($box.Top + $box.Bottom) / 2))
+    }
+    [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
+    $subjects = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
+    $onServer = { param($mailbox) @($subjects | Where-Object { $s = $_; Find $mailbox "Subject: $([regex]::Escape($s))" }).Count }
+    # Archive may have one of them already (the copy the drag made)
+    $inArchive = & $onServer 'Archive'
+    Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match ', 3 selected$' } 10)) "Ctrl+click adds two more messages: three are selected ($(StatusPart $mainStatus 2))"
+    Command $main $IDM_MARK_UNREAD
+    $allUnread = { @($subjects | Where-Object { (Find 'INBOX' "Subject: $([regex]::Escape($_))").flags -notcontains '\Seen' }).Count -eq 3 }
+    Check ([bool](WaitFor $allUnread 20)) 'Mark as Unread marks the three unread on the server'
+    Check ((StatusPart $mainStatus 0) -eq 'Marked 3 messages as unread') "the status bar says what was done ($(StatusPart $mainStatus 0))"
+    Check ((StatusPart $mainStatus 2) -match ', 3 selected$') 'the status bar says 3 selected'
+    Check (-not (& $enabled $IDM_REPLY) -and (& $enabled $IDM_MARK_READ)) 'Reply is off for several, Mark as Read is on'
+    Start-Sleep -Milliseconds 700
+    Shot $main 'select-1-several'
+    Command $main $IDM_MARK_READ
+    $allRead = { @($subjects | Where-Object { (Find 'INBOX' "Subject: $([regex]::Escape($_))").flags -contains '\Seen' }).Count -eq 3 }
+    Check ([bool](WaitFor $allRead 20)) 'Mark as Read marks the three read on the server'
+    Command $main $IDM_MOVE
+    $move = WaitFor {
+        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Move')
+        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 100) -ne [IntPtr]::Zero) { $f }
+    }
+    Check ($null -ne $move) 'Move to Folder asks where'
+    if ($move) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($move, 100), $CB_SELECTSTRING, [IntPtr](-1), 'Archive')
+        Click $move 1
+    }
+    Check ([bool](WaitFor { -not (& $onServer 'INBOX') -and (& $onServer 'Archive') -eq 3 } 20)) 'Move to Folder moves the three to Archive'
+    Check ([bool](WaitFor { (Rows) -eq $before - 3 } 10)) 'and out of the list'
+    Check ((StatusPart $mainStatus 0) -eq 'Moved 3 messages to Archive') "the status bar says they were moved to Archive ($(StatusPart $mainStatus 0))"
+    Command $main $IDM_UNDO
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -eq 'Moved 3 messages back to Inbox' } 10)) "Edit > Undo Move brings them back to the Inbox ($(StatusPart $mainStatus 0))"
+    Check ([bool](WaitFor { (& $onServer 'INBOX') -eq 3 -and (& $onServer 'Archive') -eq $inArchive } 20)) "and on the server ($(& $onServer 'INBOX') in the Inbox, $(& $onServer 'Archive') in Archive)"
+    [void](WaitFor { (Rows) -eq $before } 20)
+    # the rows selected (LVM_GETNEXTITEM, LVNI_SELECTED), and whether the first of them is in view
+    $selectedRows = {
+        $found = @(); $i = -1
+        while (($i = [int][Native.Win]::SendMessage($list, 0x100C, [IntPtr]$i, [IntPtr]2)) -ge 0) { $found += $i }
+        $found
+    }
+    $restored = {
+        $rows = @(& $selectedRows)
+        $names = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) } | Sort-Object)
+        $top = [int][Native.Win]::SendMessage($list, 0x1027, [IntPtr]::Zero, [IntPtr]::Zero)
+        $page = [int][Native.Win]::SendMessage($list, 0x1028, [IntPtr]::Zero, [IntPtr]::Zero)
+        $rows.Count -eq 3 -and (($names -join '|') -eq (($subjects | Sort-Object) -join '|')) -and $rows[0] -ge $top -and $rows[0] -lt $top + $page
+    }
+    Check ([bool](WaitFor $restored 20)) "and selects them, in view ($((& $selectedRows) -join ', '))"
+    Start-Sleep -Milliseconds 700
+    Shot $main 'select-2-undo'
+    [void][Native.Win]::PostMessage($list, 0x0201, [IntPtr]1, [IntPtr]((28 -shl 16) -bor 60))
+    [void][Native.Win]::PostMessage($list, 0x0202, [IntPtr]::Zero, [IntPtr]((28 -shl 16) -bor 60))
+    Start-Sleep -Milliseconds 300
+    Command $main $IDM_SELECT_ALL
+    Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match ", $(Rows) selected$" } 10)) "Select All selects every message of the list ($(StatusPart $mainStatus 2))"
+    SelectRow 0
+    Check ([bool](WaitFor { (StatusPart $mainStatus 2) -notmatch 'selected' -and (& $enabled $IDM_REPLY) } 10)) 'one message selected again is shown in the reading pane'
 
     Step 'junk and not junk'
     $IDM_JUNK = 127; $IDM_NOT_JUNK = 128; $TB_COMMANDTOINDEX = 0x0419
@@ -1597,7 +1682,7 @@ public static class Dragger {
     $fieldBox = New-Object Native.Win+RECT
     [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($main, 205), [ref]$fieldBox)
     $fieldPicture = New-Object System.Drawing.Bitmap ($fieldBox.Right - $fieldBox.Left), ($fieldBox.Bottom - $fieldBox.Top)
-    [System.Drawing.Graphics]::FromImage($fieldPicture).CopyFromScreen($fieldBox.Left, $fieldBox.Top, 0, 0, $fieldPicture.Size)
+    CopyScreen $fieldPicture $fieldBox.Left $fieldBox.Top
     [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
     $edgePixel = $fieldPicture.GetPixel(0, [int]($fieldPicture.Height / 2))
     $insidePixel = $fieldPicture.GetPixel([int]($fieldPicture.Width / 2), 3)

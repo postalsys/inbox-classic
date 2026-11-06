@@ -290,7 +290,18 @@ public:
     void OnEvent(const UiEvent& event);
     // the accounts changed: builds the tree again
     void Reload();
+    // what the last action on messages did, for the status bar (IDC_LIST, kSaid)
+    const std::wstring& Said() const { return said_; }
+    // the selected messages read or unread
     void MarkSelected(bool seen);
+    // how many messages are selected, and what they are in numbers (count 0 with none)
+    size_t SelectedCount() const;
+    const PeSelectionSummary& Summary() const { return summary_; }
+    // Edit > Select All: every message of the list
+    void SelectAll();
+    // Edit > Undo: the last move, delete or junk taken back; what the menu calls it, empty when there is nothing
+    void Undo();
+    std::wstring UndoLabel() const;
     // every message of the selected folder read, or of every Inbox from All Inboxes (Edit > Mark All Read, the folder's
     // menu); nothing while searching
     void MarkAllRead();
@@ -299,20 +310,20 @@ public:
     // the window shown the first time: All Inboxes (two or more accounts) or the first account's Inbox chosen, and its
     // newest message selected
     void SelectStart();
-    // the selected message junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
+    // the selected messages junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     void MarkJunk(bool junk);
-    // whether the message shown, or else the folder, is in a Junk folder: the toolbar offers Not Junk there
+    // whether the selected messages, or else the folder, are in a Junk folder: the toolbar offers Not Junk there
     bool InJunk() const;
     // the Unsubscribe link of the message shown, after asking: what the status bar says; a mailto: link to write a
     // message to in `mailto` when the list wants one
     std::wstring Unsubscribe(std::wstring& mailto);
     // the one-click unsubscribe `request` done, or not for `problem`: what the status bar says, empty for another
     std::wstring Unsubscribed(uint64_t request, const std::wstring& problem);
-    // the selected message into Deleted Items (for good when it is in there), the next one selected
+    // the selected messages into Deleted Items (for good from there, asked first), the next one selected
     void DeleteSelected();
-    // asks for a folder of the account and moves the selected message there
+    // asks for a folder of their account and moves the selected messages there
     void MoveSelected(HWND owner);
-    // flags the selected message, or takes its flag away
+    // flags the selected messages, or takes their flags away when all of them have one
     void FlagSelected();
     // a folder in the selected one (at the top of the selected account), renaming and deleting the selected one
     void NewFolder(HWND owner);
@@ -323,7 +334,7 @@ public:
     // information colors); false for other windows
     bool OnSetCursor(HWND window);
     bool OnCtlColor(HWND window, HDC dc, LRESULT& brush);
-    // "12 message(s), 3 unread" for the status bar
+    // "12 messages, 3 unread" for the status bar, with ", 2 selected" when more than one is
     std::wstring Counts() const;
     // the name of the selected folder (or account), for the folder bar and the title; empty with nothing selected.
     // While searching, where it looks: "All folders", or the one folder named (in:sent)
@@ -367,10 +378,26 @@ private:
     // in the middle of the list while it has no rows: why, and what to do about it
     void DrawEmptyList(HDC dc) const;
     void SelectAfterRemoval(int index);
+    // the selection taken from the list again (a message, or the positions of several), its summary, and with several
+    // the reading pane saying how many
+    void TakeSelection(bool rebuild);
+    std::vector<int> SelectedRows() const;
+    // the rows at `positions` selected, the first focused and in view with `focusFirst`; false for none
+    bool SelectPositions(const PePositions* positions, bool focusFirst);
+    // `action` done to the selected messages, the status bar told what was done, and the row after them selected when
+    // they left the list; true when it was done
+    bool Act(PeAction action, int64_t to = 0);
+    void Say(const std::wstring& text);
+    // the list changed its selection: taken once it is done changing it (TIMER_SELECTION)
+    void ScheduleSelection();
+    // the row the selection is replaced by once the selected rows left the list: the one after the last of them
+    int RowAfterSelection() const;
     void FolderMenu();
     // the name and whether it is the Inbox or a special folder (not renamed or deleted); false when not found
     bool FolderOf(int64_t folder, std::wstring& name, bool& fixed) const;
-    void OnSelectionChanged();
+    // the selection taken again; with `rebuild` false the messages selected stay as they were (a reload selected them
+    // again where they are now) and only their numbers are taken
+    void OnSelectionChanged(bool rebuild = true);
     // another folder (or All Inboxes) shown; false when it was already the one shown (and the main window was not told)
     bool OnFolderSelected(int64_t folder, bool allInboxes = false);
     // whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
@@ -463,12 +490,10 @@ private:
     // All Inboxes at the top of the tree (two or more accounts), and whether it is selected
     HTREEITEM allInboxesItem_ = nullptr;
     bool allInboxes_ = false;
-    // a message being dragged onto a folder of the tree: which, its drag image, where it would go
+    // the selected messages being dragged onto a folder of the tree: the row picked up, its drag image, where they
+    // would go
     struct Drag {
         int64_t folder = 0;
-        uint64_t uid = 0;
-        // its row, which the one after it takes once it moved
-        int index = -1;
         HIMAGELIST image = nullptr;
         HTREEITEM over = nullptr;
         ULONGLONG overSince = 0;
@@ -477,6 +502,20 @@ private:
         int64_t target = 0;
     };
     std::optional<Drag> drag_;
+    // the selected messages, as the core knows them: kept when the list changes under them, so an action reaches the
+    // messages that were selected; and what they are in numbers
+    core::Selection selection_{pe_selection_new()};
+    PeSelectionSummary summary_ = {};
+    // the page the reading pane shows over several messages, empty when it shows another
+    std::wstring summaryPage_;
+    std::wstring said_;
+    // the list changed its selection and TIMER_SELECTION has not taken it yet; taken at once before anything acts on it
+    bool selectionPending_ = false;
+    void FlushSelection();
+    // Undo brought messages back: they are selected once the list has them again
+    bool undoPending_ = false;
+    // the messages Undo brought back selected, once they are in the list again; false while none is there yet
+    bool SelectRestored(const PeSearch& search);
     void BeginDrag(int index, POINT at);
     void EndDrag(bool drop);
     // the folder under `screen` a message of the drag can go to, 0 for none; the item under it in `over`
@@ -556,6 +595,11 @@ enum ControlId : WORD {
     IDC_RETRY,
 };
 
+// what the message list tells the main window with WM_COMMAND of IDC_LIST: its selection was taken (the buttons and
+// counts follow it), or an action on messages was done (Mailbox::Said for the status bar)
+constexpr WORD kSelectionTaken = 1;
+constexpr WORD kSaid = 2;
+
 // the controls of the AI agents' windows (agents.cpp), which the UI test finds by them
 enum AgentControlId : WORD {
     // what a program may do: the first of the four levels (the others follow it), the accounts, its file
@@ -589,3 +633,6 @@ constexpr UINT_PTR TIMER_RELOAD = 4;
 constexpr UINT_PTR TIMER_DRAG = 5;
 // a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
 constexpr UINT_PTR TIMER_DOWNLOADING = 6;
+// the selection of the message list taken once the list has done changing it: a click or a key in a list of several
+// selected rows takes every row away first, which is no change the reading pane should follow
+constexpr UINT_PTR TIMER_SELECTION = 7;

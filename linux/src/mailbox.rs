@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_core::{DraftKind, Event, MessageView, SignInWith};
+use pe_core::{Action, DraftKind, Event, MessageRef, MessageView, SignInWith, Summary};
 use pe_imap::SpecialUse;
 use pe_store::Folder;
 
@@ -33,6 +33,9 @@ larger:5M    smaller:100k";
 /// The size the logo of a brand is drawn at
 const LOGO_SIZE: i32 = 48;
 const ALL_INBOXES_NAME: &str = "All Inboxes";
+
+/// The commands whose keys a text field has too: the field with the focus has them first
+const TEXT_KEYS: [Command; 3] = [Command::Delete, Command::SelectAll, Command::Undo];
 
 /// An account as the window knows it
 #[derive(Clone)]
@@ -62,6 +65,8 @@ pub struct Mailbox {
     outgoing: gtk::Label,
     counts: gtk::Label,
     junk: gtk::Button,
+    /// The Edit submenu of the primary menu, whose Undo says what it takes back
+    edit_menu: gio::Menu,
     create_mail: adw::SplitButton,
     send_receive: adw::SplitButton,
     accounts: RefCell<Vec<AccountInfo>>,
@@ -92,6 +97,14 @@ pub struct Mailbox {
     /// The message shown and its folder (its row's: in a search of every folder not the selected one), 0 for none
     uid: Cell<u64>,
     message_folder: Cell<i64>,
+    /// The selected messages (one or many) and what they are in numbers
+    refs: RefCell<Vec<MessageRef>>,
+    summary: RefCell<Summary>,
+    /// An Undo brought messages back: they are selected once their folder shows them, unless the user selected
+    /// something else or another folder first
+    undone: Cell<bool>,
+    /// What Edit > Undo says now
+    undo_label: RefCell<Option<String>>,
     remote_images: Cell<bool>,
     view: RefCell<Option<MessageView>>,
     /// The view being built for the reading pane, 0 for none
@@ -120,7 +133,7 @@ impl Mailbox {
         find.set_widget_name("find");
         find.update_property(&[gtk::accessible::Property::Label("Search mail")]);
         let title = adw::WindowTitle::new(TITLE, "");
-        let (header, junk, create_mail, send_receive) = header_bar(&title, &find);
+        let (header, junk, create_mail, send_receive, edit_menu) = header_bar(&title, &find);
         let search_summary = gtk::Label::new(None);
         search_summary.set_xalign(0.0);
         search_summary.set_hexpand(true);
@@ -199,6 +212,7 @@ impl Mailbox {
             outgoing,
             counts,
             junk,
+            edit_menu,
             create_mail,
             send_receive,
             accounts: RefCell::default(),
@@ -219,6 +233,10 @@ impl Mailbox {
             unread: Cell::new(0),
             uid: Cell::new(0),
             message_folder: Cell::new(0),
+            refs: RefCell::default(),
+            summary: RefCell::default(),
+            undone: Cell::new(false),
+            undo_label: RefCell::default(),
             remote_images: Cell::new(false),
             view: RefCell::new(None),
             view_request: Cell::new(0),
@@ -231,6 +249,7 @@ impl Mailbox {
         });
         mailbox.install_actions(application);
         mailbox.connect(&clear);
+        mailbox.update_undo();
         mailbox.reload();
         mailbox.reload_list(false);
         mailbox
@@ -252,8 +271,8 @@ impl Mailbox {
             action.connect_activate(move |_, _| run_command(command));
             self.window.add_action(&action);
             // Delete is the message list's own key (connect_list_keys), not the window's: in a text field it deletes
-            // text
-            if let Some(accel) = command.accel().filter(|_| command != Command::Delete) {
+            // text; Select All and Undo are the window's after the field with the focus had them (connect)
+            if let Some(accel) = command.accel().filter(|_| !TEXT_KEYS.contains(&command)) {
                 application.set_accels_for_action(&format!("win.{}", command.name()), &[accel]);
             }
         }
@@ -306,7 +325,12 @@ impl Mailbox {
                 }
             }
         };
-        let changed = on(|this| this.on_selection_changed());
+        let changed = on(|this| {
+            if !this.reloading.get() {
+                this.undone.set(false);
+            }
+            this.on_selection_changed();
+        });
         self.list.selection.connect_selection_changed(move |_, _, _| changed());
         let activated = on(|this| this.open_selected());
         self.list.view.connect_activate(move |_, _| activated());
@@ -354,6 +378,18 @@ impl Mailbox {
                 }
             })),
         ));
+        // Select All and Undo once the widget with the focus did not take them: a text field selects or undoes its
+        // own text first (the application's accelerators would come before it)
+        for command in [Command::SelectAll, Command::Undo] {
+            let Some(accel) = command.accel() else { continue };
+            shortcuts.add_shortcut(gtk::Shortcut::new(
+                gtk::ShortcutTrigger::parse_string(accel),
+                Some(gtk::CallbackAction::new(move |_, _| {
+                    run_command(command);
+                    glib::Propagation::Stop
+                })),
+            ));
+        }
         self.window.add_controller(shortcuts);
         // Delete in the list, as on Windows
         let keys = gtk::EventControllerKey::new();
@@ -572,6 +608,7 @@ impl Mailbox {
         if self.reloading.get() {
             return;
         }
+        self.undone.set(false);
         let all_inboxes = id == ALL_INBOXES;
         // an account has no messages of its own
         self.selected_account.set(if id < 0 && !all_inboxes { -id } else { 0 });
@@ -704,20 +741,66 @@ impl Mailbox {
         self.unread.set(unread);
         self.list
             .show_folder_column(several, if self.searching() { "Folder" } else { "Account" });
-        // the selection follows the message to where it is now, without a flicker of the reading pane
-        let index = if keep_selection && self.uid.get() != 0 {
+        // the selection follows the messages to where they are now, without a flicker of the reading pane
+        let positions: Vec<u64> = if !keep_selection {
+            Vec::new()
+        } else if self.several() {
+            core.positions(&search, self.list.sort(), &self.refs.borrow())
+                .unwrap_or_default()
+        } else if self.uid.get() != 0 {
             core.search_index(&search, self.list.sort(), self.message_folder.get(), self.uid.get())
                 .ok()
                 .flatten()
+                .into_iter()
+                .collect()
         } else {
-            None
+            Vec::new()
         };
         self.reloading.set(true);
-        self.list.reset(search, total, active, index);
+        self.list.reset(search, total, active, &positions);
         self.reloading.set(false);
         self.show_empty_list();
         self.show_counts();
+        if !self.select_restored() {
+            self.selection_reloaded();
+        }
+    }
+
+    /// The list again with the selection kept: several messages stay the ones they were (only their numbers may have
+    /// changed); anything else as a change of the selection
+    fn selection_reloaded(&self) {
+        if self.several() && self.list.selected_count() > 1 {
+            *self.summary.borrow_mut() = shell().core.summary(&self.refs.borrow()).unwrap_or_default();
+            self.reader.summary(&self.summary.borrow());
+            self.selection_shown();
+        } else {
+            self.on_selection_changed();
+        }
+    }
+
+    /// The messages the last Undo brought back selected, once the list has them; false when it does not (yet)
+    fn select_restored(&self) -> bool {
+        if !self.undone.get() {
+            return false;
+        }
+        let core = &shell().core;
+        let refs = core.restored().unwrap_or_default();
+        let positions = core
+            .positions(&self.search(), self.list.sort(), &refs)
+            .unwrap_or_default();
+        let Some(&first) = positions.first() else {
+            return false;
+        };
+        // first: the selection set here is no choice of the user's that would end it
+        self.undone.set(false);
+        self.list.select_positions(&positions);
+        if let Ok(first) = u32::try_from(first) {
+            self.list.view.scroll_to(first, None, gtk::ListScrollFlags::FOCUS, None);
+        }
+        // the focus on the first, then only as much scrolling as they need
+        self.list.reveal(&positions);
         self.on_selection_changed();
+        true
     }
 
     /// In the middle of an empty list: why there is nothing, and what to do about it
@@ -761,13 +844,31 @@ impl Mailbox {
         if self.reloading.get() {
             return;
         }
+        let core = &shell().core;
+        if self.list.selected_count() > 1 {
+            let refs = core
+                .refs_in_ranges(&self.search(), self.list.sort(), &self.list.selected_ranges())
+                .unwrap_or_default();
+            *self.summary.borrow_mut() = core.summary(&refs).unwrap_or_default();
+            *self.refs.borrow_mut() = refs;
+            if !self.reader.shows_summary() {
+                self.clear_reader(false);
+            }
+            self.reader.summary(&self.summary.borrow());
+            self.selection_shown();
+            return;
+        }
         let selected = self.list.selected();
         let (folder, uid) = selected.as_ref().map_or((0, 0), |(_, m)| (m.folder_id, m.info.uid));
-        if uid == self.uid.get() && folder == self.message_folder.get() {
+        let refs: Vec<MessageRef> = selected.iter().map(|_| MessageRef { folder, uid }).collect();
+        *self.summary.borrow_mut() = core.summary(&refs).unwrap_or_default();
+        *self.refs.borrow_mut() = refs;
+        if uid == self.uid.get() && folder == self.message_folder.get() && !self.reader.shows_summary() {
+            self.selection_shown();
             return;
         }
         self.clear_reader(uid != 0);
-        self.update_junk_button();
+        self.selection_shown();
         if uid == 0 {
             return;
         }
@@ -778,6 +879,60 @@ impl Mailbox {
         }
         // MessageReady follows, right away when the message is cached, or MessageFailed
         let _ = shell().core.open_message(folder, uid);
+    }
+
+    /// What follows the selection: the counts in the status bar, Junk or Not Junk, the commands for one message off
+    /// while several are selected and Move off for messages of several accounts
+    fn selection_shown(&self) {
+        self.show_counts();
+        self.update_junk_button();
+        let several = self.several();
+        for command in Command::ALL.iter().filter(|c| c.needs_one()) {
+            self.enable(*command, !several);
+        }
+        self.enable(Command::Move, self.summary.borrow().accounts <= 1);
+    }
+
+    fn enable(&self, command: Command, on: bool) {
+        if let Some(action) = self
+            .window
+            .lookup_action(command.name())
+            .and_downcast::<gio::SimpleAction>()
+        {
+            action.set_enabled(on);
+        }
+    }
+
+    /// Several messages are selected: the reading pane says how many, none is shown
+    fn several(&self) -> bool {
+        self.refs.borrow().len() > 1
+    }
+
+    /// Undo on or off, saying what it takes back ("Undo Move"); after what can change it
+    fn update_undo(&self) {
+        let undo = shell().core.undo_label();
+        self.enable(Command::Undo, undo.is_some());
+        if *self.undo_label.borrow() == undo {
+            return;
+        }
+        let label = undo.clone().unwrap_or_else(|| Command::Undo.label().to_string());
+        *self.undo_label.borrow_mut() = undo;
+        let at = Command::ALL
+            .iter()
+            .filter(|c| c.menu() == "edit")
+            .position(|c| *c == Command::Undo);
+        if let Some(at) = at.and_then(|at| i32::try_from(at).ok())
+            && self.edit_menu.n_items() > at
+        {
+            let item = menu_item(&label, Command::Undo);
+            self.edit_menu.remove(at);
+            self.edit_menu.insert_item(at, &item);
+        }
+    }
+
+    /// The selected messages: the one selected, or the several
+    pub fn selected_refs(&self) -> Vec<MessageRef> {
+        self.refs.borrow().clone()
     }
 
     /// Try Again, or the account synced again after the message could not be downloaded
@@ -854,7 +1009,7 @@ impl Mailbox {
                 && message.info.uid == this.uid.get()
                 && !message.info.seen()
             {
-                this.mark_selected(true);
+                let _ = shell().core.set_seen(message.folder_id, message.info.uid, true);
             }
         });
         *self.mark_read.borrow_mut() = Some(timer);
@@ -1056,17 +1211,13 @@ impl Mailbox {
         self.outgoing.set_tooltip_text(Some(text));
     }
 
-    /// "12 message(s), 3 unread" for the status bar; the search bar says how many a search found
+    /// "12 messages, 3 unread" for the status bar ("12 found" for a search), and how many are selected when several are
     pub fn show_counts(&self) {
         let (total, unread) = (self.total.get(), self.unread.get());
-        let text = if self.searching() && total == 0 {
-            "No messages found".to_string()
-        } else if self.searching() {
-            format!("{total} found, {unread} unread")
-        } else if self.folder.get() == 0 && !self.all_inboxes.get() {
+        let text = if !self.searching() && self.folder.get() == 0 && !self.all_inboxes.get() {
             String::new()
         } else {
-            format!("{total} message(s), {unread} unread")
+            pe_core::list_counts(total, unread, self.list.selected_count(), self.searching())
         };
         self.counts.set_text(&text);
         self.update_search_bar();
@@ -1103,14 +1254,12 @@ impl Mailbox {
         self.junk.set_tooltip_text(Some(label));
     }
 
-    /// Whether the message shown, or else the folder, is in a Junk folder
+    /// Whether the messages selected, or else the folder, are in a Junk folder
     pub fn in_junk(&self) -> bool {
-        let folder = if self.uid.get() != 0 {
-            self.message_folder.get()
-        } else {
-            self.folder.get()
-        };
-        self.junk_folders.borrow().contains(&folder)
+        if !self.refs.borrow().is_empty() {
+            return self.summary.borrow().in_junk;
+        }
+        self.junk_folders.borrow().contains(&self.folder.get())
     }
 
     // ---- the core's events ----
@@ -1182,12 +1331,44 @@ impl Mailbox {
         *self.reload_later.borrow_mut() = Some(timer);
     }
 
-    // ---- commands on the message ----
+    // ---- commands on the messages ----
+
+    /// `action` done to the selected messages
+    fn act(&self, action: Action) {
+        self.act_on(self.selected_refs(), action);
+    }
+
+    /// `action` done to `refs`, its outcome in the status bar, the core's refusal said as it is; when they are the
+    /// selection, a move or delete selects the message after them
+    fn act_on(&self, refs: Vec<MessageRef>, action: Action) {
+        if refs.is_empty() {
+            return;
+        }
+        // the row that takes the place of the last one going
+        let after = (refs == self.selected_refs())
+            .then(|| self.list.last_selected())
+            .flatten()
+            .map(|last| (last + 1).saturating_sub(refs.len() as u32));
+        let outcome = shell().core.act(&refs, action);
+        self.update_undo();
+        match outcome {
+            Ok(text) => {
+                self.set_status(&text);
+                if matches!(action, Action::Delete | Action::Move(_) | Action::Junk(_))
+                    && let Some(after) = after
+                {
+                    self.select_after_removal(after);
+                }
+            }
+            Err(error) => {
+                let window = self.window.clone();
+                spawn(async move { ui::alert(&window, TITLE, &error.to_string()).await });
+            }
+        }
+    }
 
     pub fn mark_selected(&self, seen: bool) {
-        if self.uid.get() != 0 {
-            let _ = shell().core.set_seen(self.message_folder.get(), self.uid.get(), seen);
-        }
+        self.act(Action::Read(seen));
     }
 
     /// Every message of the selected folder read, or of every Inbox from All Inboxes; nothing while searching
@@ -1209,34 +1390,17 @@ impl Mailbox {
         }
     }
 
+    /// Flags the selected messages, or takes the flag away when they all have it
     pub fn flag_selected(&self) {
-        if let Some((_, message)) = self.list.selected() {
-            let _ = shell()
-                .core
-                .set_flagged(message.folder_id, message.info.uid, !message.info.flagged());
-        }
+        self.act(Action::ToggleFlag);
     }
 
-    /// The selected message junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
-    pub async fn mark_junk(&self, junk: bool) {
-        let Some((_, message)) = self.list.selected() else {
-            return;
-        };
-        if shell()
-            .core
-            .mark_junk(message.folder_id, message.info.uid, junk)
-            .is_err()
-        {
-            let text = if junk {
-                "This account has no Junk E-mail folder to move the message to."
-            } else {
-                "The message could not be moved to the Inbox."
-            };
-            ui::alert(&self.window, TITLE, text).await;
-        }
+    /// The selected messages junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
+    pub fn mark_junk(&self, junk: bool) {
+        self.act(Action::Junk(junk));
     }
 
-    /// After a message left the list: the one that took its place selected, or the last one
+    /// After messages left the list: the one that took the place of the last of them selected, or the last one
     fn select_after_removal(&self, index: u32) {
         self.reload_list(false);
         let rows = self.list.rows();
@@ -1245,45 +1409,42 @@ impl Mailbox {
         }
     }
 
-    /// The selected message into Deleted Items (for good when it is in there, asked first)
+    /// The selected messages into Deleted Items (for good when they are in there, asked first)
     pub async fn delete_selected(&self) {
-        let Some((index, message)) = self.list.selected() else {
+        if self.selected_refs().is_empty() {
             return;
-        };
-        let core = &shell().core;
-        let (folder, uid) = (message.folder_id, message.info.uid);
-        if core.deletes_for_good(folder).unwrap_or(false)
-            && !ui::confirm(
-                &self.window,
-                TITLE,
-                "This message will be deleted for good. Delete it?",
-                true,
-            )
-            .await
+        }
+        let question = self.summary.borrow().delete_question();
+        if let Some(question) = question
+            && !ui::confirm(&self.window, TITLE, &question, true).await
         {
             return;
         }
-        if core.delete_message(folder, uid).is_ok() {
-            self.select_after_removal(index);
-        }
+        self.act(Action::Delete);
     }
 
-    /// Asks for another folder of the message's account and moves it there
+    /// Asks for another folder of the messages' account and moves them there
     pub async fn move_selected(&self) {
-        let Some((index, message)) = self.list.selected() else {
+        let refs = self.selected_refs();
+        let summary = self.summary.borrow().clone();
+        let Some(first) = refs.first() else {
             return;
         };
-        let from = message.folder_id;
+        if summary.accounts > 1 {
+            return;
+        }
         let account = self
             .folder_accounts
             .borrow()
-            .get(&from)
+            .get(&first.folder)
             .copied()
             .unwrap_or_else(|| self.current_account());
+        // the folder they are all in is no choice
+        let from = (summary.folders == 1).then_some(first.folder);
         let mut ids = Vec::new();
         let mut choices = Vec::new();
         for folder in shell().core.folders(account).unwrap_or_default() {
-            if folder.info.selectable && folder.id != from {
+            if folder.info.selectable && Some(folder.id) != from {
                 ids.push(folder.id);
                 // a special folder by its usual name, the others by their whole path: two folders 2024 in Work and
                 // in Personal are not the same
@@ -1297,10 +1458,15 @@ impl Mailbox {
         if ids.is_empty() {
             return;
         }
+        let intro = if refs.len() == 1 {
+            "Move the selected message to the folder:".to_string()
+        } else {
+            format!("Move the {} selected messages to the folder:", refs.len())
+        };
         let form = Form::new(
             &self.window,
             "Move",
-            "Move the selected message to the folder:",
+            &intro,
             vec![Field::choice("Folder:", choices, 0)],
             "OK",
             0,
@@ -1311,45 +1477,51 @@ impl Mailbox {
         }
         let chosen = form.chosen(0);
         form.close();
-        if let Some(to) = chosen.and_then(|i| ids.get(i))
-            && shell().core.move_message(from, message.info.uid, *to).is_ok()
-        {
-            self.select_after_removal(index);
+        if let Some(&to) = chosen.and_then(|i| ids.get(i)) {
+            self.act(Action::Move(to));
+        }
+    }
+
+    /// Edit > Select All: every message of the list
+    pub fn select_all(&self) {
+        self.list.select_all();
+        self.list.view.grab_focus();
+    }
+
+    /// Edit > Undo: the last move, delete or junk taken back
+    pub async fn undo(&self) {
+        let outcome = shell().core.undo();
+        self.update_undo();
+        match outcome {
+            Ok(text) => {
+                self.set_status(&text);
+                self.undone.set(true);
+                self.select_restored();
+            }
+            Err(error) => ui::alert(&self.window, TITLE, &error.to_string()).await,
         }
     }
 
     pub fn can_drop(&self, payload: &str, to: i64) -> bool {
-        let Some((from, _)) = parse_payload(payload) else {
+        let Some(refs) = parse_payload(payload) else {
             return false;
         };
         let accounts = self.folder_accounts.borrow();
-        // an account's own item, the folder the message is in, one of another account, or one that holds no
-        // messages: not there
+        let account = accounts.get(&to);
+        // an account's own item, the folder they all are in, one of another account, or one that holds no messages:
+        // not there
         to > 0
-            && to != from
+            && account.is_some()
             && !self.unselectable.borrow().contains(&to)
-            && accounts.get(&from).is_some()
-            && accounts.get(&from) == accounts.get(&to)
+            && !refs.iter().all(|r| r.folder == to)
+            && refs.iter().all(|r| accounts.get(&r.folder) == account)
     }
 
-    /// A message dropped onto a folder: moved, or copied with Ctrl; a move selects the message after it, as Move to
-    /// Folder does
+    /// Messages dropped onto a folder: moved, or copied with Ctrl; a move of the selection selects the message after
+    /// it, as Move to Folder does
     pub fn drop_message(&self, payload: &str, to: i64, copy: bool) {
-        let Some((folder, uid)) = parse_payload(payload) else {
-            return;
-        };
-        let core = &shell().core;
-        if copy {
-            let _ = core.copy_message(folder, uid, to);
-            return;
-        }
-        let shown = folder == self.message_folder.get() && uid == self.uid.get();
-        let index = self.list.selected().map(|(index, _)| index);
-        if core.move_message(folder, uid, to).is_ok()
-            && shown
-            && let Some(index) = index
-        {
-            self.select_after_removal(index);
+        if let Some(refs) = parse_payload(payload) {
+            self.act_on(refs, if copy { Action::Copy(to) } else { Action::Move(to) });
         }
     }
 
@@ -1556,20 +1728,26 @@ impl Mailbox {
     /// The right-click menu of the message list: the actions on the message, as Outlook Express has them, with the
     /// choices that fit it (Mark as Unread for a read one, Not Junk in Junk E-mail)
     pub fn message_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
-        let Some((_, message)) = self.list.selected() else {
+        let refs = self.selected_refs();
+        let Some(first) = refs.first().copied() else {
             return;
         };
+        let several = self.several();
+        let summary = self.summary.borrow().clone();
         let group = gio::SimpleActionGroup::new();
         // the command's own label, or the one that fits this message
         let add = |section: &gio::Menu, command: Command, label: Option<&str>| {
             let name = format!("{command:?}").to_lowercase();
             let action = gio::SimpleAction::new(&name, None);
             action.connect_activate(move |_, _| run_command(command));
+            // off as on the primary menu: the commands of one message while several are selected
+            let on = self.window.lookup_action(command.name()).is_none_or(|a| a.is_enabled());
+            action.set_enabled(on);
             group.add_action(&action);
             section.append(Some(label.unwrap_or(command.label())), Some(&format!("message.{name}")));
         };
         let menu = gio::Menu::new();
-        if self.draft_folders.borrow().contains(&message.folder_id) {
+        if !several && self.draft_folders.borrow().contains(&first.folder) {
             let open = gio::Menu::new();
             let action = gio::SimpleAction::new("open", None);
             let this = Rc::downgrade(self);
@@ -1588,18 +1766,26 @@ impl Mailbox {
         }
         menu.append_section(None, &answer);
         let organize = gio::Menu::new();
+        // Mark as Read while any is unread; Clear Flag when they all have it
         add(
             &organize,
-            if message.info.seen() {
+            if summary.unread == 0 {
                 Command::MarkUnread
             } else {
                 Command::MarkRead
             },
             None,
         );
-        add(&organize, Command::Flag, message.info.flagged().then_some("Clear Flag"));
-        let junk = self.junk_folders.borrow().contains(&message.folder_id);
-        add(&organize, if junk { Command::NotJunk } else { Command::Junk }, None);
+        add(&organize, Command::Flag, (!summary.flags()).then_some("Clear Flag"));
+        add(
+            &organize,
+            if summary.in_junk {
+                Command::NotJunk
+            } else {
+                Command::Junk
+            },
+            None,
+        );
         add(&organize, Command::Move, None);
         add(&organize, Command::Delete, Some("Delete"));
         menu.append_section(None, &organize);
@@ -1834,7 +2020,13 @@ fn popup_menu(widget: &gtk::Widget, menu: &gio::Menu, x: f64, y: f64) -> gtk::Po
 fn header_bar(
     title: &adw::WindowTitle,
     find: &gtk::SearchEntry,
-) -> (adw::HeaderBar, gtk::Button, adw::SplitButton, adw::SplitButton) {
+) -> (
+    adw::HeaderBar,
+    gtk::Button,
+    adw::SplitButton,
+    adw::SplitButton,
+    gio::Menu,
+) {
     let header = adw::HeaderBar::new();
     header.set_title_widget(Some(title));
     let action = |command: Command| format!("win.{}", command.name());
@@ -1884,22 +2076,25 @@ fn header_bar(
         }
         header.pack_start(&linked);
     }
+    let (primary, edit_menu) = primary_menu();
     let menu = gtk::MenuButton::builder()
         .icon_name("open-menu-symbolic")
-        .menu_model(&primary_menu())
+        .menu_model(&primary)
         .primary(true)
         .tooltip_text("Main Menu")
         .build();
     menu.set_widget_name("primary-menu");
     header.pack_end(&menu);
     header.pack_end(find);
-    (header, junk, create_mail, send_receive)
+    (header, junk, create_mail, send_receive, edit_menu)
 }
 
-/// The primary menu: the commands of the table by their menu (File, Edit, View, Tools, Message, Help), Quit last
-fn primary_menu() -> gio::Menu {
+/// The primary menu: the commands of the table by their menu (File, Edit, View, Tools, Message, Help), Quit last;
+/// and its Edit submenu
+fn primary_menu() -> (gio::Menu, gio::Menu) {
     let menu = gio::Menu::new();
     let sections = gio::Menu::new();
+    let mut edit = gio::Menu::new();
     for (id, name) in [
         ("file", "File"),
         ("edit", "Edit"),
@@ -1910,16 +2105,31 @@ fn primary_menu() -> gio::Menu {
     ] {
         let submenu = gio::Menu::new();
         for command in Command::ALL.iter().filter(|c| c.menu() == id && **c != Command::Exit) {
-            submenu.append(Some(command.label()), Some(&format!("win.{}", command.name())));
+            submenu.append_item(&menu_item(command.label(), *command));
         }
         sections.append_submenu(Some(name), &submenu);
+        if id == "edit" {
+            edit = submenu;
+        }
     }
     menu.append_section(None, &sections);
     let quit = gio::Menu::new();
     // GNOME names it Quit
     quit.append(Some("Quit"), Some(&format!("win.{}", Command::Exit.name())));
     menu.append_section(None, &quit);
-    menu
+    (menu, edit)
+}
+
+/// An item of the primary menu for `command`, under `label`; the keys of Select All and Undo shown as the others'
+/// are, as they are no application accelerators (TEXT_KEYS)
+fn menu_item(label: &str, command: Command) -> gio::MenuItem {
+    let item = gio::MenuItem::new(Some(label), Some(&format!("win.{}", command.name())));
+    if TEXT_KEYS.contains(&command)
+        && let Some(accel) = command.accel()
+    {
+        item.set_attribute_value("accel", Some(&accel.to_variant()));
+    }
+    item
 }
 
 /// What an empty list says in its middle
