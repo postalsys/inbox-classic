@@ -290,7 +290,13 @@ fn swift(table: &Table) -> String {
     }
     out.push_str("        }\n    }\n\n    /// Acts on one message only: off while several are selected\n    var needsOne: Bool {\n        switch self {\n");
     for command in &table.command {
-        writeln!(out, "        case .{}: return {}", camel(&command.id, false), command.one).unwrap();
+        writeln!(
+            out,
+            "        case .{}: return {}",
+            camel(&command.id, false),
+            command.one
+        )
+        .unwrap();
     }
     out.push_str("        }\n    }\n}\n");
     out
@@ -362,7 +368,13 @@ fn rust(table: &Table) -> String {
     }
     out.push_str("        }\n    }\n\n    /// Acts on one message only: off while several are selected\n    pub fn needs_one(self) -> bool {\n        match self {\n");
     for command in &table.command {
-        writeln!(out, "            Command::{} => {},", camel(&command.id, true), command.one).unwrap();
+        writeln!(
+            out,
+            "            Command::{} => {},",
+            camel(&command.id, true),
+            command.one
+        )
+        .unwrap();
     }
     out.push_str("        }\n    }\n}\n");
     out
