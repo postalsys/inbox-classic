@@ -4,7 +4,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use pe_store::{FolderId, MessageRef, Picked, Search, Sort};
+use pe_store::{FLAG_COLOR_BITS, FlagColor, FolderId, MessageRef, Picked, Search, Sort};
 
 use crate::text::messages;
 use crate::worker::Command;
@@ -23,6 +23,8 @@ pub enum Action {
     Flag(bool),
     /// Flag them when one is not flagged, take the flags away when all are ([`Summary::flags`])
     ToggleFlag,
+    /// Flag them in a colour, as Apple Mail does (`\\Flagged` and its `$MailFlagBit` keywords)
+    FlagColor(FlagColor),
     /// Junk (true), into Junk E-mail; not junk, into the Inbox
     Junk(bool),
     /// Into Deleted Items, or for good from there and from an account without one ([`Summary::delete_question`])
@@ -50,6 +52,8 @@ pub struct Summary {
     pub count: u64,
     pub unread: u64,
     pub flagged: u64,
+    /// The colour all of them are flagged in; None when one is not flagged or their colours differ
+    pub flag_color: Option<FlagColor>,
     /// Every one of them is in a Junk folder (Mark as Not Junk applies, not Mark as Junk)
     pub in_junk: bool,
     /// How many accounts and folders they are in
@@ -161,6 +165,7 @@ impl Core {
             ..Summary::default()
         };
         let mut accounts = BTreeSet::new();
+        let mut colors = BTreeSet::new();
         for (folder, group) in by_folder(&picked) {
             let info = store.folder(folder)?;
             accounts.insert(info.account_id);
@@ -171,8 +176,16 @@ impl Core {
             }
             summary.unread += group.iter().filter(|p| !p.seen()).count() as u64;
             summary.flagged += group.iter().filter(|p| p.flagged()).count() as u64;
+            for color in group.iter().filter_map(|p| p.flag_color()) {
+                colors.insert(color);
+            }
         }
         summary.accounts = accounts.len() as u64;
+        // the colour of the Flag menu's check mark: all of them flagged, in one colour
+        summary.flag_color = match colors.len() {
+            1 if summary.flagged == summary.count => colors.first().copied(),
+            _ => None,
+        };
         Ok(summary)
     }
 
@@ -285,7 +298,24 @@ impl Core {
         for chunk in uids.chunks(PER_COMMAND) {
             match action {
                 Action::Read(on) => self.set_flag_many(folder, chunk, "\\Seen", on)?,
-                Action::Flag(on) => self.set_flag_many(folder, chunk, "\\Flagged", on)?,
+                Action::Flag(true) => self.set_flag_many(folder, chunk, "\\Flagged", true)?,
+                // the colour goes with the flag
+                Action::Flag(false) => {
+                    let mut remove = vec!["\\Flagged"];
+                    remove.extend(FLAG_COLOR_BITS);
+                    self.change_flags_many(folder, chunk, &[], &remove)?
+                }
+                Action::FlagColor(color) => {
+                    let (mut add, mut remove) = (vec!["\\Flagged"], Vec::new());
+                    for (i, bit) in FLAG_COLOR_BITS.iter().enumerate() {
+                        if color.bits() & (1 << i) != 0 {
+                            add.push(*bit);
+                        } else {
+                            remove.push(*bit);
+                        }
+                    }
+                    self.change_flags_many(folder, chunk, &add, &remove)?
+                }
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,
                 Action::Move(_) | Action::Copy(_) | Action::ToggleFlag => unreachable!("handled before"),
@@ -303,6 +333,7 @@ impl Core {
             Action::Read(false) => format!("Marked {n} as unread"),
             Action::Flag(true) => format!("Flagged {n}"),
             Action::Flag(false) => format!("Took the flag off {n}"),
+            Action::FlagColor(color) => format!("Flagged {n} {}", color_name(color).to_lowercase()),
             Action::Delete if moved.is_empty() => format!("Deleted {n} for good"),
             Action::Delete | Action::Junk(_) => format!("Moved {n} to {}", self.places(moved.iter().map(|m| m.to))?),
             // to another account they go in the background, Event::Transferring says how far
@@ -386,4 +417,17 @@ fn by_folder(picked: &[Picked]) -> BTreeMap<FolderId, Vec<&Picked>> {
         groups.entry(p.at.folder).or_default().push(p);
     }
     groups
+}
+
+/// A flag colour's name, as the Flag menu lists them
+pub fn color_name(color: FlagColor) -> &'static str {
+    match color {
+        FlagColor::Red => "Red",
+        FlagColor::Orange => "Orange",
+        FlagColor::Yellow => "Yellow",
+        FlagColor::Green => "Green",
+        FlagColor::Blue => "Blue",
+        FlagColor::Purple => "Purple",
+        FlagColor::Gray => "Gray",
+    }
 }

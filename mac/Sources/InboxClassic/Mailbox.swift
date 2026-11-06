@@ -392,9 +392,15 @@ public final class Mailbox: NSObject {
         for (id, title, width) in columns {
             list.addTableColumn(makeColumn(id, title: title, width: width))
         }
-        // the paper clip and the flag in their headers, as Outlook Express has them
-        list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("attach"))?.headerCell.image = Icons.list("attach")
-        list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("flag"))?.headerCell.image = Icons.list("flag")
+        // the paper clip and the flag in their headers, as Outlook Express has them (a header cell does not draw the
+        // image of a column without a title on its own)
+        for (id, icon) in [("attach", "attach"), ("flag", "flag")] {
+            guard let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id)),
+                  let image = Icons.list(icon) else { continue }
+            let header = IconHeaderCell(textCell: "")
+            header.icon = image
+            column.headerCell = header
+        }
         showSortIndicator()
     }
 
@@ -881,8 +887,18 @@ public final class Mailbox: NSObject {
         act(PE_ACTION_TOGGLE_FLAG)
     }
 
-    /// whether Flag flags (or takes the flag off) the selected messages
-    var flagsSelected: Bool { pe_selection_flags(&summary) }
+
+    /// flags the selected messages in a colour (1 red to 7 gray)
+    func flagSelected(color: UInt8) {
+        guard hasSelection else { return }
+        act(PE_ACTION_FLAG_COLOR, to: Int64(color))
+    }
+
+    /// takes flag and colour off the selected messages
+    func clearFlag() {
+        guard hasSelection else { return }
+        act(PE_ACTION_UNFLAG)
+    }
 
     /// after messages left the list: the one that took their place selected, or the last one
     private func selectAfterRemoval(_ index: Int) {
@@ -1081,9 +1097,9 @@ public final class Mailbox: NSObject {
         add(.replyAll, "Reply to All")
         add(.forward)
         menu.addItem(.separator())
-        // several: read if any is unread, flagged unless all are
+        // several: read if any is unread; Flag in a colour or Clear Flag (the toggle is the Message menu's, by its key)
         add(summary.unread > 0 ? .markRead : .markUnread)
-        add(.flag, flagsSelected ? "Flag Message" : "Clear Flag")
+        menu.addItem(AppDelegate.shared.flagMenu())
         add(inJunk ? .notJunk : .junk)
         add(.move, "Move to Folder\u{2026}")
         add(.copy, "Copy to Folder\u{2026}")
@@ -1553,7 +1569,9 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? IconCell) ?? IconCell(id)
             switch ColumnID(rawValue: id.rawValue) {
             case .attach: cell.show(message.hasAttachments ? Icons.list("attach") : nil)
-            default: cell.show(message.flagged ? Icons.list("flag") : nil)
+            default:
+                cell.show(message.flagged ? Icons.coloredFlag(message.flagColor) : nil,
+                          selected: message.flagged ? Icons.selectedFlag : nil)
             }
             return cell
         default:
@@ -1677,8 +1695,40 @@ final class IconCell: NSTableCellView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    func show(_ image: NSImage?) {
-        icon.image = image
+    private var plain: NSImage?
+    private var onSelection: NSImage?
+
+    /// `image`, and `selected` in its place on a selected row (a coloured flag turns white there, as Mail shows it,
+    /// so a blue flag stays visible on the blue of the selection)
+    func show(_ image: NSImage?, selected: NSImage? = nil) {
+        plain = image
+        onSelection = selected
+        update()
+    }
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet { update() }
+    }
+
+    private func update() {
+        icon.image = backgroundStyle == .emphasized ? (onSelection ?? plain) : plain
+    }
+}
+
+/// A column header that shows an icon in place of a title (the paper clip, the flag), in the colour of the titles
+final class IconHeaderCell: NSTableHeaderCell {
+    /// the icon, tinted once in the colour of the titles
+    var icon: NSImage? {
+        didSet { tinted = icon.map { Icons.tinted($0, .secondaryLabelColor) } }
+    }
+    private var tinted: NSImage?
+
+    override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
+        super.drawInterior(withFrame: cellFrame, in: controlView)
+        guard let tinted else { return }
+        let size = NSSize(width: 14, height: 14)
+        tinted.draw(in: NSRect(x: cellFrame.midX - size.width / 2, y: cellFrame.midY - size.height / 2,
+                               width: size.width, height: size.height))
     }
 }
 

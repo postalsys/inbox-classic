@@ -124,7 +124,22 @@ HWND FocusedEdit() {
 
 // the Edit and Message menus as they open: Undo names what it takes back, and with several messages selected what
 // works on one message alone is off
+// whether `menu` itself has an item `id` (not one of its submenus, which MF_BYCOMMAND would search too)
+bool HasOwnItem(HMENU menu, UINT id) {
+    for (int i = 0, count = GetMenuItemCount(menu); i < count; i++) {
+        if (GetMenuItemID(menu, i) == id) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UpdateMenu(HMENU menu) {
+    // the Flag submenu as it opens; the menu it is in is updated as any other
+    if (HasOwnItem(menu, IDM_FLAG_CLEAR)) {
+        g_mailbox.UpdateFlagMenu(menu);
+        return;
+    }
     bool several = g_mailbox.SelectedCount() > 1;
     for (int i = 0, count = GetMenuItemCount(menu); i < count; i++) {
         UINT id = GetMenuItemID(menu, i);
@@ -446,6 +461,7 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_STRING, IDM_FORWARD, L"&Forward\tCtrl+F");
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(compose, MF_STRING, IDM_FLAG, L"F&lag Message");
+    AppendMenuW(compose, MF_POPUP, reinterpret_cast<UINT_PTR>(g_mailbox.FlagMenu()), L"Fla&g");
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(compose, MF_STRING, IDM_JUNK, L"Mark as &Junk\tCtrl+J");
     AppendMenuW(compose, MF_STRING, IDM_NOT_JUNK, L"Mark as N&ot Junk");
@@ -875,6 +891,11 @@ void Reply(PeDraftKind kind) {
 }
 
 void OnCommand(WORD id, WORD code) {
+    // a colour of the Flag submenu, or Clear Flag
+    if (id > IDM_FLAG_COLOR && id <= IDM_FLAG_CLEAR) {
+        g_mailbox.FlagColor(id == IDM_FLAG_CLEAR ? 0 : id - IDM_FLAG_COLOR);
+        return;
+    }
     switch (id) {
     case IDM_FIND:
         g_mailbox.FocusFind();

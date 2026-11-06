@@ -397,6 +397,14 @@ public:
     void MoveSelected(HWND owner, bool copy = false);
     // flags the selected messages, or takes their flags away when all of them have one
     void FlagSelected();
+    // flags the selected messages in colour `color` (1 red to 7 gray, Apple Mail's), or takes flag and colour away
+    // (0)
+    void FlagColor(int color);
+    // the Flag submenu: the seven colours with their flags, then Clear Flag (IDM_FLAG_COLOR + n, IDM_FLAG_CLEAR);
+    // owned by the menu it is put in
+    HMENU FlagMenu();
+    // its items as the selection is now: the colour every selected message has checked, Clear Flag when one is flagged
+    void UpdateFlagMenu(HMENU menu);
     // a folder in the selected one (at the top of the selected account), renaming and deleting the selected one
     void NewFolder(HWND owner);
     void RenameFolder(HWND owner);
@@ -693,6 +701,10 @@ enum ControlId : WORD {
     // under the header of a message that could not be downloaded: a click tries again
     IDC_RETRY,
 };
+
+// the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
+constexpr WORD IDM_FLAG_COLOR = 900;
+constexpr WORD IDM_FLAG_CLEAR = 908;
 
 // what the message list tells the main window with WM_COMMAND of IDC_LIST: its selection was taken (the buttons and
 // counts follow it), or an action on messages was done (Mailbox::Said for the status bar)

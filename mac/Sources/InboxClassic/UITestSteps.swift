@@ -428,6 +428,7 @@ extension UITest {
 
         try await severalMessages()
         try await messagesAsFiles()
+        try await flagColors()
 
         step("junk and not junk")
         await selectRow(0)
@@ -540,6 +541,88 @@ extension UITest {
         try? FileManager.default.removeItem(at: dir)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
+    }
+
+    /// Flag colours as Apple Mail keeps them: \\Flagged with $MailFlagBit0 to $MailFlagBit2
+    func flagColors() async throws {
+        step("flag colours")
+        let status: NSTextField? = find("status.text", in: main.window)
+        selectFolder(named: "Inbox")
+        let before = list.numberOfRows
+        // flagged purple by Apple Mail
+        try await addMessage(
+            "From: Mira Lind <mira@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Flagged in Apple Mail\r\n"
+                + "Message-ID: <purple@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nPurple, from the other program.\r\n",
+            flags: ["\\Flagged", "$MailFlagBit0", "$MailFlagBit2"])
+        command(.sync)
+        _ = await waitUntil { list.numberOfRows > before }
+        let menu = AppDelegate.shared.flagMenu().submenu
+        let colors = menu?.items.filter { $0.action == #selector(AppDelegate.flagColor(_:)) }.map(\.title) ?? []
+        check(colors == ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Gray"]
+              && menu?.items.last?.title == "Clear Flag",
+              "Message > Flag has the seven colours of Apple Mail and Clear Flag (\(colors))")
+        func index(_ subject: String) -> Int? {
+            (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == subject }
+        }
+        func choose(_ color: Int) {
+            let action = color == 0 ? #selector(AppDelegate.clearFlag(_:)) : #selector(AppDelegate.flagColor(_:))
+            guard let item = menu?.items.first(where: { $0.action == action && (color == 0 || $0.tag == color) })
+            else { return check(false, "the Flag menu has colour \(color)") }
+            check(AppDelegate.shared.validateMenuItem(item), "\(item.title) can be chosen")
+            onMain { _ = NSApp.sendAction(action, to: AppDelegate.shared, from: item) }
+        }
+        func serverFlags(_ subject: String) async -> [String] {
+            (await findMessage("INBOX", "Subject: \(NSRegularExpression.escapedPattern(for: subject))")?["flags"] as? [String]) ?? []
+        }
+        check(await waitUntil(10) { index("Flagged in Apple Mail").flatMap { main.mailbox.row($0)?.flagColor } == 6 },
+              "a message flagged purple by another program (Apple Mail) shows a purple flag")
+
+        // orange on one (of those not flagged, so they can be left as they were)
+        let subjects = (0..<min(list.numberOfRows, 8)).compactMap { main.mailbox.row($0) }
+            .filter { !$0.flagged }.map(\.subject)
+        guard subjects.count >= 3 else { return check(false, "three other messages to flag") }
+        if let row = index(subjects[0]) { await selectRow(row) }
+        let rightClick = main.mailbox.messageMenu()?.items ?? []
+        check(rightClick.contains { $0.title == "Flag" && $0.submenu != nil }
+              && !rightClick.contains { $0.title == "Flag Message" || $0.title == "Clear Flag" },
+              "the right-click menu has the Flag submenu, and Clear Flag only in it")
+        choose(2)
+        check(await waitUntil(20) { let f = await serverFlags(subjects[0]); return f.contains("\\Flagged") && f.contains("$MailFlagBit0") },
+              "Orange flags the message orange: \\Flagged and $MailFlagBit0 on the server")
+        check(await waitUntil(10) { index(subjects[0]).flatMap { main.mailbox.row($0)?.flagColor } == 2 },
+              "the flag column shows it in orange")
+        check(status?.stringValue == "Flagged 1 message orange", "the status bar says so (\(status?.stringValue ?? ""))")
+
+        // blue on two selected
+        let two = [subjects[1], subjects[2]].compactMap(index)
+        list.selectRowIndexes(IndexSet(two), byExtendingSelection: false)
+        await pause(0.5)
+        choose(5)
+        check(await waitUntil(20) {
+            for subject in subjects[1...2] {
+                let f = await serverFlags(subject)
+                if !(f.contains("\\Flagged") && f.contains("$MailFlagBit2") && !f.contains("$MailFlagBit0")) { return false }
+            }
+            return true
+        }, "Blue on two selected messages flags both blue: $MailFlagBit2")
+        check(menu?.items.first { $0.tag == 5 }.map { item in _ = AppDelegate.shared.validateMenuItem(item); return item.state == .on } == true,
+              "the Flag menu checks Blue for them")
+        // one of the blue ones selected: its flag white on the selection, the others in their colours
+        await selectRow(index(subjects[1]) ?? 0)
+        await shot(main.window, "flags-1-colors")
+
+        // Clear Flag takes flag and colour away
+        if let row = index("Flagged in Apple Mail") { await selectRow(row) }
+        choose(0)
+        check(await waitUntil(20) {
+            let f = await serverFlags("Flagged in Apple Mail")
+            return !f.contains("\\Flagged") && !f.contains("$MailFlagBit0") && !f.contains("$MailFlagBit2")
+        }, "Clear Flag takes the flag and its colour away on the server")
+        // the others back as they were, for the steps after
+        list.selectRowIndexes(IndexSet(subjects[0...2].compactMap(index)), byExtendingSelection: false)
+        await pause(0.5)
+        choose(0)
+        _ = await waitUntil(20) { await serverFlags(subjects[0]).contains("\\Flagged") == false }
     }
 
     func messagesAsFiles() async throws {

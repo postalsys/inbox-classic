@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_core::{Action, DraftKind, Event, MessageRef, MessageView, SignInWith, Summary};
+use pe_core::{Action, DraftKind, Event, FlagColor, MessageRef, MessageView, SignInWith, Summary};
 use pe_imap::SpecialUse;
 use pe_store::Folder;
 
@@ -173,7 +173,8 @@ impl Mailbox {
             .orientation(gtk::Orientation::Horizontal)
             .start_child(&tree)
             .end_child(&right)
-            .position(settings.int(settings::TREE_WIDTH, 220))
+            // wide enough for "Deleted Items (99)" under a second account, the longest of the special folders
+            .position(settings.int(settings::TREE_WIDTH, 250))
             .shrink_start_child(false)
             .resize_start_child(false)
             .vexpand(true)
@@ -291,7 +292,55 @@ impl Mailbox {
         });
         self.window.add_action(&from);
         self.window.add_action(&sync);
+        self.install_flag_actions();
         self.install_reader_actions();
+    }
+
+    /// The Flag menu's actions: a colour for the selected messages (its state the colour they all have, 0 for none or
+    /// several, so the menu marks it), and Clear Flag
+    fn install_flag_actions(self: &Rc<Self>) {
+        let color = gio::SimpleAction::new_stateful(FLAG_COLOR, Some(glib::VariantTy::INT32), &0i32.to_variant());
+        let this = Rc::downgrade(self);
+        color.connect_activate(move |_, number| {
+            let color = number
+                .and_then(|n| n.get::<i32>())
+                .and_then(|n| u8::try_from(n).ok())
+                .and_then(FlagColor::from_number);
+            if let (Some(this), Some(color)) = (this.upgrade(), color) {
+                this.act(Action::FlagColor(color));
+            }
+        });
+        let clear = gio::SimpleAction::new(FLAG_CLEAR, None);
+        let this = Rc::downgrade(self);
+        clear.connect_activate(move |_, _| {
+            if let Some(this) = this.upgrade() {
+                this.act(Action::Flag(false));
+            }
+        });
+        self.window.add_action(&color);
+        self.window.add_action(&clear);
+    }
+
+    /// The Flag menu follows the selection: its colour marked, Clear Flag on while one of them is flagged
+    fn update_flag_actions(&self) {
+        let summary = self.summary.borrow();
+        let any = !self.refs.borrow().is_empty();
+        if let Some(action) = self
+            .window
+            .lookup_action(FLAG_COLOR)
+            .and_downcast::<gio::SimpleAction>()
+        {
+            action.set_enabled(any);
+            let marked = summary.flag_color;
+            action.set_state(&i32::from(marked.map_or(0, |c| c as u8)).to_variant());
+        }
+        if let Some(action) = self
+            .window
+            .lookup_action(FLAG_CLEAR)
+            .and_downcast::<gio::SimpleAction>()
+        {
+            action.set_enabled(any && summary.flagged > 0);
+        }
     }
 
     fn install_reader_actions(self: &Rc<Self>) {
@@ -902,6 +951,7 @@ impl Mailbox {
         }
         self.enable(Command::Move, any);
         self.enable(Command::Copy, any);
+        self.update_flag_actions();
     }
 
     fn enable(&self, command: Command, on: bool) {
@@ -1733,6 +1783,13 @@ impl Mailbox {
 
     /// The right-click menu of the message list: the actions on the message, as Outlook Express has them, with the
     /// choices that fit it (Mark as Unread for a read one, Not Junk in Junk E-mail)
+    /// The Flag menu on its own at `x`, `y` of `widget`, as the message menu's Flag submenu shows it: for the UI test's
+    /// picture (a submenu can not be opened from outside the popover)
+    #[cfg(feature = "e2e")]
+    pub fn flag_menu_at(&self, widget: &gtk::Widget, x: f64, y: f64) {
+        *self.message_popover.borrow_mut() = Some(popup_menu(widget, &flag_menu(), x, y));
+    }
+
     pub fn message_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
         let refs = self.selected_refs();
         let Some(first) = refs.first().copied() else {
@@ -1772,7 +1829,7 @@ impl Mailbox {
         }
         menu.append_section(None, &answer);
         let organize = gio::Menu::new();
-        // Mark as Read while any is unread; Clear Flag when they all have it
+        // Mark as Read while any is unread
         add(
             &organize,
             if summary.unread == 0 {
@@ -1782,7 +1839,8 @@ impl Mailbox {
             },
             None,
         );
-        add(&organize, Command::Flag, (!summary.flags()).then_some("Clear Flag"));
+        // the colours and Clear Flag; the Flag Message toggle is the primary menu's, with its key
+        organize.append_submenu(Some("Flag"), &flag_menu());
         add(
             &organize,
             if summary.in_junk {
@@ -2009,8 +2067,10 @@ fn folder_icon(special: Option<SpecialUse>) -> &'static str {
 }
 
 /// A right-click menu of `menu` at (`x`, `y`) of `widget`, let go of once it closed
+/// `menu` at `x`, `y` of `widget`, with the rows of the Flag menu where it has one (none is put in a menu without)
 fn popup_menu(widget: &gtk::Widget, menu: &gio::Menu, x: f64, y: f64) -> gtk::PopoverMenu {
     let popover = gtk::PopoverMenu::from_model(Some(menu));
+    flag_rows(&popover);
     popover.set_parent(widget);
     popover.set_has_arrow(false);
     popover.set_pointing_to(Some(&gdk::Rectangle::new(x as i32, y as i32, 1, 1)));
@@ -2091,6 +2151,9 @@ fn header_bar(
         .tooltip_text("Main Menu")
         .build();
     menu.set_widget_name("primary-menu");
+    if let Some(popover) = menu.popover().and_downcast::<gtk::PopoverMenu>() {
+        flag_rows(&popover);
+    }
     header.pack_end(&menu);
     header.pack_end(find);
     (header, junk, create_mail, send_receive, edit_menu)
@@ -2113,6 +2176,10 @@ fn primary_menu() -> (gio::Menu, gio::Menu) {
         let submenu = gio::Menu::new();
         for command in Command::ALL.iter().filter(|c| c.menu() == id && **c != Command::Exit) {
             submenu.append_item(&menu_item(command.label(), *command));
+            // the colours beside the flag
+            if *command == Command::Flag {
+                submenu.append_submenu(Some("Flag"), &flag_menu());
+            }
         }
         sections.append_submenu(Some(name), &submenu);
         if id == "edit" {
@@ -2125,6 +2192,87 @@ fn primary_menu() -> (gio::Menu, gio::Menu) {
     quit.append(Some("Quit"), Some(&format!("win.{}", Command::Exit.name())));
     menu.append_section(None, &quit);
     (menu, edit)
+}
+
+/// The Flag menu's actions (window actions, so the primary menu and the message menu share them)
+const FLAG_COLOR: &str = "flag-color";
+const FLAG_CLEAR: &str = "flag-clear";
+
+/// The Flag menu: Apple Mail's seven colours, each a row of its own (`flag_rows`) with the mark of the colour the
+/// selection has, its flag and its name; then Clear Flag. (A popover menu shows no icon beside an item with a mark,
+/// and no markup, so the rows are widgets.)
+fn flag_menu() -> gio::Menu {
+    let menu = gio::Menu::new();
+    let colors = gio::Menu::new();
+    for color in FlagColor::ALL {
+        let item = gio::MenuItem::new(Some(pe_core::color_name(color)), None);
+        item.set_attribute_value("custom", Some(&flag_row_id(color).to_variant()));
+        colors.append_item(&item);
+    }
+    menu.append_section(None, &colors);
+    let clear = gio::Menu::new();
+    clear.append(Some("Clear Flag"), Some(&format!("win.{FLAG_CLEAR}")));
+    menu.append_section(None, &clear);
+    menu
+}
+
+fn flag_row_id(color: FlagColor) -> String {
+    format!("flag-{}", color as u8)
+}
+
+/// The rows of the Flag menu, put into a popover that shows `flag_menu`
+fn flag_rows(popover: &gtk::PopoverMenu) {
+    for color in FlagColor::ALL {
+        popover.add_child(&flag_row(color), &flag_row_id(color));
+    }
+}
+
+/// A colour of the Flag menu: the mark when the selected messages have it, its flag, its name
+fn flag_row(color: FlagColor) -> gtk::Button {
+    let check = gtk::Image::from_icon_name("object-select-symbolic");
+    let swatch = gtk::DrawingArea::new();
+    swatch.set_content_width(16);
+    swatch.set_content_height(16);
+    swatch.set_valign(gtk::Align::Center);
+    swatch.set_draw_func(move |_, cr, _, _| crate::messages::draw_flag(cr, 0.0, 0.0, color));
+    let label = gtk::Label::new(Some(pe_core::color_name(color)));
+    label.set_xalign(0.0);
+    label.set_hexpand(true);
+    let row = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+    row.append(&check);
+    row.append(&swatch);
+    row.append(&label);
+    let button = gtk::Button::builder()
+        .child(&row)
+        .has_frame(false)
+        .action_name(format!("win.{FLAG_COLOR}"))
+        .action_target(&i32::from(color as u8).to_variant())
+        .build();
+    button.add_css_class("flag-row");
+    // the mark of the colour they have, read as the menu opens
+    button.connect_map(move |button| {
+        let marked = button
+            .root()
+            .and_downcast::<gtk::ApplicationWindow>()
+            .and_then(|w| w.action_state(FLAG_COLOR))
+            .and_then(|v| v.get::<i32>());
+        check.set_opacity(if marked == Some(i32::from(color as u8)) {
+            1.0
+        } else {
+            0.0
+        });
+    });
+    // a menu closes once a row of it is chosen
+    button.connect_clicked(|button| {
+        let mut widget = button.parent();
+        while let Some(w) = widget {
+            if let Some(popover) = w.downcast_ref::<gtk::Popover>() {
+                popover.popdown();
+            }
+            widget = w.parent();
+        }
+    });
+    button
 }
 
 /// An item of the primary menu for `command`, under `label`; the keys of Select All and Undo shown as the others'

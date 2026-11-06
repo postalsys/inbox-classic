@@ -32,9 +32,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use pe_net::Trust;
+pub use pe_store::FlagColor;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
 pub use pe_store::{MessageRef, Scope, Search, Show};
-pub use selection::{Action, Summary};
+pub use selection::{Action, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
@@ -1230,6 +1231,41 @@ impl Core {
                 uids: changed,
                 flag,
                 on,
+            },
+        )
+    }
+
+    /// Adds flags to messages of a folder and takes others away: in the store now in one go, on the server in the
+    /// background with at most one command each (a flag and its colour change together)
+    pub fn change_flags_many(
+        &self,
+        folder: FolderId,
+        uids: &[u64],
+        add: &[&'static str],
+        remove: &[&'static str],
+    ) -> Result<()> {
+        let (account, changed) = {
+            let store = self.store();
+            let account = store.folder(folder)?.account_id;
+            let changed = store
+                .change_flags_many(folder, uids, add, remove)
+                .map_err(|error| match error {
+                    pe_store::Error::QueryReturnedNoRows => Error::NotFound,
+                    other => Error::Store(other),
+                })?;
+            (account, changed)
+        };
+        if changed.is_empty() {
+            return Ok(());
+        }
+        self.post(Event::FolderChanged { account, folder })?;
+        self.send_command(
+            account,
+            Command::SetFlags {
+                folder,
+                uids: changed,
+                add: add.to_vec(),
+                remove: remove.to_vec(),
             },
         )
     }

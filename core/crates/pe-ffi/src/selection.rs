@@ -212,6 +212,9 @@ pub struct PeSelectionSummary {
     pub count: u64,
     pub unread: u64,
     pub flagged: u64,
+    /// The colour all of them are flagged in (1 red to 7 gray, as `PeMessage.flag_color`), 0 when one is not flagged
+    /// or their colours differ
+    pub flag_color: u8,
     /// Every one is in a Junk folder: Mark as Not Junk applies, not Mark as Junk
     pub in_junk: bool,
     /// How many accounts and folders they are in
@@ -227,6 +230,7 @@ impl From<&PeSelectionSummary> for Summary {
             count: s.count,
             unread: s.unread,
             flagged: s.flagged,
+            flag_color: pe_core::FlagColor::from_number(s.flag_color),
             in_junk: s.in_junk,
             accounts: s.accounts,
             folders: s.folders,
@@ -241,6 +245,7 @@ impl From<Summary> for PeSelectionSummary {
             count: s.count,
             unread: s.unread,
             flagged: s.flagged,
+            flag_color: s.flag_color.map_or(0, |c| c as u8),
             in_junk: s.in_junk,
             accounts: s.accounts,
             folders: s.folders,
@@ -355,6 +360,8 @@ pub enum PeAction {
     Unflag = 3,
     /// Flag them when one is not flagged, take the flags away when all are (`pe_selection_flags`)
     ToggleFlag = 9,
+    /// Flag them in the colour `to` (1 red to 7 gray, as `PeMessage.flag_color`)
+    FlagColor = 10,
     Junk = 4,
     NotJunk = 5,
     /// Into Deleted Items, or for good (ask first: `pe_selection_delete_question`)
@@ -387,6 +394,16 @@ pub unsafe extern "C" fn pe_selection_act(
         PeAction::Flag => Action::Flag(true),
         PeAction::Unflag => Action::Flag(false),
         PeAction::ToggleFlag => Action::ToggleFlag,
+        PeAction::FlagColor => match u8::try_from(to).ok().and_then(pe_core::FlagColor::from_number) {
+            Some(color) => Action::FlagColor(color),
+            None => {
+                if !error.is_null() {
+                    // SAFETY: the caller gave a valid pointer
+                    unsafe { *error = into_c_string("not a flag colour".to_string()) };
+                }
+                return null_mut();
+            }
+        },
         PeAction::Junk => Action::Junk(true),
         PeAction::NotJunk => Action::Junk(false),
         PeAction::Delete => Action::Delete,
@@ -930,4 +947,14 @@ pub unsafe extern "C" fn pe_selection_downloading_text(
             _ => null_mut(),
         })
     }
+}
+
+/// The name of the flag colour `color` (1 red to 7 gray) as the Flag menu lists it ("Orange"); NULL for another
+/// number. Free with `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_flag_color_name(color: u8) -> *mut c_char {
+    guard(|| {
+        pe_core::FlagColor::from_number(color).map_or(null_mut(), |c| into_c_string(pe_core::color_name(c).to_string()))
+    })
+    .unwrap_or(null_mut())
 }

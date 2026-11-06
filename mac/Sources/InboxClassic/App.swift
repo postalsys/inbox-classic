@@ -290,7 +290,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         _ = submenu("Edit", edit)
         _ = submenu("View", commands("view").map { item(for: $0) })
         _ = submenu("Message", [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
-                                separator(), item(for: .flag), separator(), item(for: .junk), item(for: .notJunk)])
+                                separator(), item(for: .flag), flagMenu(), separator(), item(for: .junk),
+                                item(for: .notJunk)])
         _ = submenu("Tools", [item(for: .sync), item(for: .outbox), separator(), item(for: .aiAgents), separator(), item(for: .notify),
                               item(for: .defaultApp)])
         let window = submenu("Window", [
@@ -365,7 +366,48 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
 
+    /// Flag, a submenu of the seven colours Apple Mail flags in (by name, with their colour), then Clear Flag
+    func flagMenu() -> NSMenuItem {
+        let menu = NSMenu(title: "Flag")
+        for color in UInt8(1)...7 {
+            let name = taken(pe_flag_color_name(color)) ?? ""
+            let item = NSMenuItem(title: name, action: #selector(flagColor(_:)), keyEquivalent: "")
+            item.tag = Int(color)
+            item.target = self
+            item.image = Icons.coloredFlag(color)
+            item.setAccessibilityIdentifier("flag.\(color)")
+            menu.addItem(item)
+        }
+        menu.addItem(.separator())
+        let clear = NSMenuItem(title: "Clear Flag", action: #selector(clearFlag(_:)), keyEquivalent: "")
+        clear.target = self
+        clear.setAccessibilityIdentifier("flag.clear")
+        menu.addItem(clear)
+        let flag = NSMenuItem(title: "Flag", action: nil, keyEquivalent: "")
+        flag.submenu = menu
+        return flag
+    }
+
+    @objc func flagColor(_ sender: NSMenuItem) {
+        main?.mailbox.flagSelected(color: UInt8(clamping: sender.tag))
+    }
+
+    @objc func clearFlag(_ sender: NSMenuItem) {
+        main?.mailbox.clearFlag()
+    }
+
     public func validateMenuItem(_ item: NSMenuItem) -> Bool {
+        if item.action == #selector(flagColor(_:)) || item.action == #selector(clearFlag(_:)) {
+            item.state = .off
+            guard let main, core != nil, main.mailbox.hasSelection else { return false }
+            let summary = main.mailbox.summary
+            if item.action == #selector(clearFlag(_:)) {
+                return summary.flagged > 0
+            }
+            // the colour every selected message is flagged in is checked
+            item.state = Int(summary.flag_color) == item.tag ? .on : .off
+            return true
+        }
         guard let command = Command(rawValue: item.tag), item.action == #selector(runCommand(_:)) else { return true }
         if command == .notify {
             item.state = notify ? .on : .off

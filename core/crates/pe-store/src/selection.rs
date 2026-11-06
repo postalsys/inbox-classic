@@ -47,6 +47,11 @@ impl Picked {
     pub fn flagged(&self) -> bool {
         self.has_flag("\\Flagged")
     }
+
+    /// The colour of its flag, None when it is not flagged
+    pub fn flag_color(&self) -> Option<crate::FlagColor> {
+        crate::FlagColor::of(&self.flags)
+    }
 }
 
 /// SQLite's limit on the values of one statement is 32766; picked messages go in by this many at a time

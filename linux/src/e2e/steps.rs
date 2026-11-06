@@ -867,6 +867,204 @@ pub async fn messages_as_files(d: &Driver) {
     select_folder("Inbox");
 }
 
+/// SCENARIO 33: flag colours, as Apple Mail keeps them on the server
+pub async fn flag_colors(d: &Driver) {
+    d.step("flag colours");
+    let main = shell().main();
+    let core = &shell().core;
+    select_folder("Inbox");
+    wait_until(10, || rows() >= 3).await;
+    let listed = rows();
+    // dated now, so it is on top with the others the step flags, all in sight
+    let raw = format!(
+        "From: Nina Berg <nina@example.org>\r\nTo: testuser@inboxclassic.test\r\nSubject: Flagged in Apple Mail\r\n\
+         Message-ID: <flagged-in-apple-mail@example.org>\r\nDate: {}\r\n\r\nPurple there.\r\n",
+        date_now(0)
+    );
+    // purple as Apple Mail sets it: the flag, bits 0 and 2
+    let _ = d.add_message(&raw, &["\\Flagged", "$MailFlagBit0", "$MailFlagBit2"]);
+    run_command(Command::Sync);
+    d.check(
+        wait_until(30, || rows() == listed + 1).await,
+        "a message flagged by another program is in the list",
+    );
+    let Some(inbox) = folder_id("Inbox") else {
+        d.check(false, "the tree has the Inbox");
+        return;
+    };
+    let listing = || {
+        core.search(&pe_core::Search::folder(inbox), main.list.sort(), 0, 200)
+            .unwrap_or_default()
+    };
+    // the flags the list draws, by the colour each says
+    let drawn = || -> Vec<String> {
+        let view: gtk::Widget = main.list.view.clone().upcast();
+        descendants::<gtk::DrawingArea>(&view)
+            .iter()
+            .filter(|a| a.is_mapped())
+            .filter_map(|a| a.tooltip_text().map(|t| t.to_string()))
+            .collect()
+    };
+    main.list
+        .view
+        .scroll_to(0, None::<&gtk::ColumnViewColumn>, gtk::ListScrollFlags::NONE, None);
+    d.check(
+        wait_until(10, || drawn().iter().any(|c| c == "Purple")).await,
+        &format!(
+            "a message flagged purple by another program (Apple Mail) shows a purple flag ({})",
+            drawn().join(", ")
+        ),
+    );
+
+    // three that have no flag, near the top so their flags are in sight
+    let plain: Vec<(u32, String)> = listing()
+        .iter()
+        .enumerate()
+        .filter(|(_, m)| m.info.flag_color().is_none())
+        .take(3)
+        .map(|(i, m)| (i as u32, m.info.subject.clone()))
+        .collect();
+    if plain.len() < 3 {
+        d.check(false, "the Inbox has three messages without a flag");
+        return;
+    }
+    let flags_of = |subject: &str| d.flags("INBOX", &format!("Subject: {subject}"));
+    let has = |subject: &str, flag: &str| flags_of(subject).iter().any(|f| f == flag);
+    let flag_in = |number: i32| {
+        gio::prelude::ActionGroupExt::activate_action(main.window(), "flag-color", Some(&number.to_variant()))
+    };
+
+    // the Flag menu: the seven colours and Clear Flag
+    select_row(plain[0].0).await;
+    let list_view: gtk::Widget = main.list.view.clone().upcast();
+    main.flag_menu_at(&list_view, 60.0, 60.0);
+    // the colour names, then Clear Flag
+    let labels: Vec<String> = menu_labels(main.message_popover.borrow().as_ref())
+        .iter()
+        .map(|l| l.trim().to_string())
+        .collect();
+    if let Some(popover) = main.message_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+    d.check(
+        labels
+            == [
+                "Red",
+                "Orange",
+                "Yellow",
+                "Green",
+                "Blue",
+                "Purple",
+                "Gray",
+                "Clear Flag",
+            ],
+        &format!(
+            "Message > Flag has the seven colours of Apple Mail and Clear Flag ({})",
+            labels.join(", ")
+        ),
+    );
+
+    // orange on one: the flag and bit 0
+    let orange = plain[0].1.clone();
+    flag_in(2);
+    d.check(
+        wait_until(20, || {
+            has(&orange, "\\Flagged") && has(&orange, "$MailFlagBit0") && !has(&orange, "$MailFlagBit1")
+        })
+        .await,
+        &format!(
+            "Orange flags the message orange: \\Flagged and $MailFlagBit0 on the server ({})",
+            flags_of(&orange).join(" ")
+        ),
+    );
+    d.check(
+        main.status_texts().0 == "Flagged 1 message orange",
+        &format!("the status bar says so ({})", main.status_texts().0),
+    );
+    d.check(
+        wait_until(10, || drawn().iter().any(|c| c == "Orange")).await,
+        "the flag column shows it in orange",
+    );
+
+    // blue on two selected: bit 2 on both
+    let (blue_a, blue_b) = (plain[1].1.clone(), plain[2].1.clone());
+    select_row(plain[1].0).await;
+    main.list.selection.select_item(plain[2].0, false);
+    wait_until(10, || main.selected_refs().len() == 2).await;
+    flag_in(5);
+    d.check(
+        wait_until(20, || {
+            [&blue_a, &blue_b]
+                .iter()
+                .all(|s| has(s, "\\Flagged") && has(s, "$MailFlagBit2") && !has(s, "$MailFlagBit0"))
+        })
+        .await,
+        "Blue on two selected messages flags both blue: $MailFlagBit2",
+    );
+    let marks = wait_until(10, || {
+        main.window().action_state("flag-color").and_then(|v| v.get::<i32>()) == Some(5)
+    })
+    .await;
+    let marked = main.window().action_state("flag-color").and_then(|v| v.get::<i32>());
+    d.check(
+        marks,
+        &format!("the Flag menu marks the colour the selected messages have ({marked:?})"),
+    );
+
+    // the picture: the colours in the list, the Flag menu over it
+    main.list
+        .view
+        .scroll_to(0, None::<&gtk::ColumnViewColumn>, gtk::ListScrollFlags::NONE, None);
+    wait_until(10, || drawn().iter().filter(|c| *c == "Blue").count() == 2).await;
+    main.flag_menu_at(&list_view, 70.0, 150.0);
+    pause(400).await;
+    d.shot(main.window(), "flags-1-colors").await;
+    if let Some(popover) = main.message_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+
+    // Clear Flag on the four: the flag and its colour go
+    let purple = listing()
+        .iter()
+        .position(|m| m.info.subject == "Flagged in Apple Mail")
+        .map(|p| p as u32);
+    select_row(plain[0].0).await;
+    for index in [plain[1].0, plain[2].0].into_iter().chain(purple) {
+        main.list.selection.select_item(index, false);
+    }
+    wait_until(10, || main.selected_refs().len() == 4).await;
+    gio::prelude::ActionGroupExt::activate_action(main.window(), "flag-clear", None);
+    let all = [
+        orange.as_str(),
+        blue_a.as_str(),
+        blue_b.as_str(),
+        "Flagged in Apple Mail",
+    ];
+    d.check(
+        wait_until(20, || {
+            all.iter().all(|s| {
+                flags_of(s)
+                    .iter()
+                    .all(|f| f != "\\Flagged" && !f.starts_with("$MailFlagBit"))
+            })
+        })
+        .await,
+        "Clear Flag takes the flag and its colour away on the server",
+    );
+    // the one added is not the steps' after this one: it goes
+    if let Some(added) = listing()
+        .iter()
+        .find(|m| m.info.subject == "Flagged in Apple Mail")
+        .map(|m| pe_core::MessageRef {
+            folder: inbox,
+            uid: m.info.uid,
+        })
+    {
+        let _ = core.act(&[added], pe_core::Action::Delete);
+    }
+    wait_until(10, || rows() == listed).await;
+}
+
 pub async fn junk(d: &Driver) {
     d.step("junk and not junk");
     let main = shell().main();

@@ -37,9 +37,67 @@ pub struct MessageInfo {
     pub correspondents: Vec<(String, String)>,
 }
 
+/// The colour of a flag, as Apple Mail keeps it: `\\Flagged` with three keyword bits, `$MailFlagBit0` to
+/// `$MailFlagBit2`, none of them for red. Other mail programs see a flag; Apple Mail and this one see its colour.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[repr(u8)]
+pub enum FlagColor {
+    Red = 1,
+    Orange = 2,
+    Yellow = 3,
+    Green = 4,
+    Blue = 5,
+    Purple = 6,
+    Gray = 7,
+}
+
+/// The keyword bits of a flag's colour, bit 0 first
+pub const FLAG_COLOR_BITS: [&str; 3] = ["$MailFlagBit0", "$MailFlagBit1", "$MailFlagBit2"];
+
+impl FlagColor {
+    pub const ALL: [FlagColor; 7] = [
+        FlagColor::Red,
+        FlagColor::Orange,
+        FlagColor::Yellow,
+        FlagColor::Green,
+        FlagColor::Blue,
+        FlagColor::Purple,
+        FlagColor::Gray,
+    ];
+
+    /// Its keyword bits: red none, orange bit 0, yellow bit 1, green 0 and 1, blue 2, purple 0 and 2, gray 1 and 2
+    pub fn bits(self) -> u8 {
+        self as u8 - 1
+    }
+
+    /// The one numbered as C names it (1 red to 7 gray)
+    pub fn from_number(number: u8) -> Option<FlagColor> {
+        FlagColor::ALL.get(usize::from(number).checked_sub(1)?).copied()
+    }
+
+    /// The colour of a message with `flags`; None when it is not flagged. All three bits (which Apple Mail does not
+    /// set) read as red.
+    pub fn of(flags: &[String]) -> Option<FlagColor> {
+        let has = |flag: &str| flags.iter().any(|f| f.eq_ignore_ascii_case(flag));
+        if !has("\\Flagged") {
+            return None;
+        }
+        let bits = FLAG_COLOR_BITS
+            .iter()
+            .enumerate()
+            .fold(0u8, |bits, (i, bit)| if has(bit) { bits | 1 << i } else { bits });
+        Some(FlagColor::ALL.get(usize::from(bits)).copied().unwrap_or(FlagColor::Red))
+    }
+}
+
 impl MessageInfo {
     pub fn has_flag(&self, flag: &str) -> bool {
         self.flags.iter().any(|f| f.eq_ignore_ascii_case(flag))
+    }
+
+    /// The colour of its flag, None when it is not flagged
+    pub fn flag_color(&self) -> Option<FlagColor> {
+        FlagColor::of(&self.flags)
     }
 
     pub fn seen(&self) -> bool {
@@ -247,15 +305,23 @@ impl Store {
     /// Sets or clears one flag of messages of a folder in one transaction; the UIDs whose flags changed. Refused
     /// (`QueryReturnedNoRows`) when one of them is not there, and then none changes.
     pub fn set_flag_many(&self, folder: FolderId, uids: &[u64], flag: &str, on: bool) -> Result<Vec<u64>> {
+        if on {
+            self.change_flags_many(folder, uids, &[flag], &[])
+        } else {
+            self.change_flags_many(folder, uids, &[], &[flag])
+        }
+    }
+
+    /// Adds the flags `add` to messages of a folder and takes `remove` away, in one transaction; the UIDs of those
+    /// that changed. Refused when one of them is not there.
+    pub fn change_flags_many(&self, folder: FolderId, uids: &[u64], add: &[&str], remove: &[&str]) -> Result<Vec<u64>> {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let mut changed = Vec::new();
         for &uid in uids {
             let message = self.message(folder, uid)?.ok_or(rusqlite::Error::QueryReturnedNoRows)?;
             let mut flags = message.info.flags;
-            flags.retain(|f| !f.eq_ignore_ascii_case(flag));
-            if on {
-                flags.push(flag.to_string());
-            }
+            flags.retain(|f| !add.iter().chain(remove).any(|x| f.eq_ignore_ascii_case(x)));
+            flags.extend(add.iter().map(|f| f.to_string()));
             if self.set_flags(folder, uid, &flags, None)? {
                 changed.push(uid);
             }
@@ -397,6 +463,44 @@ impl Store {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn flag_colors_as_apple_mail_keeps_them() {
+        let flags = |list: &[&str]| list.iter().map(|f| f.to_string()).collect::<Vec<_>>();
+        assert_eq!(FlagColor::of(&flags(&["$MailFlagBit0"])), None);
+        assert_eq!(FlagColor::of(&flags(&["\\Flagged"])), Some(FlagColor::Red));
+        assert_eq!(
+            FlagColor::of(&flags(&["\\Flagged", "$MailFlagBit0"])),
+            Some(FlagColor::Orange)
+        );
+        assert_eq!(
+            FlagColor::of(&flags(&["\\Flagged", "$mailflagbit1"])),
+            Some(FlagColor::Yellow)
+        );
+        assert_eq!(
+            FlagColor::of(&flags(&["\\Flagged", "$MailFlagBit0", "$MailFlagBit1"])),
+            Some(FlagColor::Green)
+        );
+        assert_eq!(
+            FlagColor::of(&flags(&["\\Flagged", "$MailFlagBit2"])),
+            Some(FlagColor::Blue)
+        );
+        assert_eq!(
+            FlagColor::of(&flags(&["\\Flagged", "$MailFlagBit0", "$MailFlagBit2"])),
+            Some(FlagColor::Purple)
+        );
+        assert_eq!(
+            FlagColor::of(&flags(&["\\Flagged", "$MailFlagBit1", "$MailFlagBit2"])),
+            Some(FlagColor::Gray)
+        );
+        let all = ["\\Flagged", "$MailFlagBit0", "$MailFlagBit1", "$MailFlagBit2"];
+        assert_eq!(FlagColor::of(&flags(&all)), Some(FlagColor::Red));
+        for color in FlagColor::ALL {
+            assert_eq!(FlagColor::from_number(color as u8), Some(color));
+        }
+        assert_eq!(FlagColor::from_number(0), None);
+        assert_eq!(FlagColor::from_number(8), None);
+    }
+
     use super::*;
     use crate::{AccountSettings, FolderInfo};
 
