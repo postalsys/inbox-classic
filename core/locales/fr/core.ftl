@@ -64,16 +64,43 @@ selection-flagged = { $count } avec indicateur
 delete-for-good-one = Ce message sera supprimé définitivement. Le supprimer ?
 delete-for-good-all = Ces { $count } messages seront supprimés définitivement. Les supprimer ?
 delete-for-good-some = { $count } des { $total } messages seront supprimés définitivement. Supprimer les messages ?
-done-read = { $messages } marqués comme lus
-done-unread = { $messages } marqués comme non lus
-done-flagged = Indicateur ajouté à { $messages }
+done-read = { $count ->
+    [one] { $messages } marqué comme lu
+   *[other] { $messages } marqués comme lus
+}
+done-unread = { $count ->
+    [one] { $messages } marqué comme non lu
+   *[other] { $messages } marqués comme non lus
+}
+done-flagged = { $count ->
+    [one] Indicateur ajouté à { $messages }
+   *[other] Indicateur ajouté à { $messages }
+}
 done-unflagged = Indicateur retiré de { $messages }
-done-deleted-for-good = { $messages } supprimés définitivement
-done-moved = { $messages } déplacés vers { $folder }
-done-copied = { $messages } copiés vers { $folder }
-done-moving = Déplacement de { $messages } vers { $folder }...
-done-copying = Copie de { $messages } vers { $folder }...
-done-moved-back = { $messages } replacés dans { $folder }
+done-deleted-for-good = { $count ->
+    [one] { $messages } supprimé définitivement
+   *[other] { $messages } supprimés définitivement
+}
+done-moved = { $count ->
+    [one] { $messages } déplacé vers { $folder }
+   *[other] { $messages } déplacés vers { $folder }
+}
+done-copied = { $count ->
+    [one] { $messages } copié vers { $folder }
+   *[other] { $messages } copiés vers { $folder }
+}
+done-moving = { $count ->
+    [one] Déplacement de { $messages } vers { $folder }...
+   *[other] Déplacement de { $messages } vers { $folder }...
+}
+done-copying = { $count ->
+    [one] Copie de { $messages } vers { $folder }...
+   *[other] Copie de { $messages } vers { $folder }...
+}
+done-moved-back = { $count ->
+    [one] { $messages } replacé dans { $folder }
+   *[other] { $messages } replacés dans { $folder }
+}
 their-folders = leurs dossiers
 undo-move = Annuler le déplacement
 undo-delete = Annuler la suppression
@@ -132,19 +159,37 @@ transfer-copying = Copie { $done } sur { $messages } vers { $folder }...
 transfer-another-account = un autre compte
 transfer-folder-gone = le dossier de destination n'existe plus
 transfer-not-on-server = le message n'est plus sur le serveur
-transfer-not-moved = { $messages } n'ont pas pu être déplacés vers un autre compte : { $reason }
-transfer-not-copied = { $messages } n'ont pas pu être copiés vers un autre compte : { $reason }
+transfer-not-moved = { $count ->
+    [one] { $messages } n'a pas pu être déplacé vers un autre compte : { $reason }
+   *[other] { $messages } n'ont pas pu être déplacés vers un autre compte : { $reason }
+}
+transfer-not-copied = { $count ->
+    [one] { $messages } n'a pas pu être copié vers un autre compte : { $reason }
+   *[other] { $messages } n'ont pas pu être copiés vers un autre compte : { $reason }
+}
 transfer-none-moved = Aucun message n'a pu être déplacé
 transfer-none-copied = Aucun message n'a pu être copié
 
 ## Messages as files
 
 export-not-in-time = le message n'a pas pu être téléchargé à temps
-export-not-saved = { $failed } sur { $messages } n'ont pas pu être enregistrés ({ $problems })
+export-not-saved = { $failed ->
+    [one] { $failed } sur { $messages } n'a pas pu être enregistré ({ $problems })
+   *[other] { $failed } sur { $messages } n'ont pas pu être enregistrés ({ $problems })
+}
 export-not-attached = les messages n'ont pas pu être joints : { $error }
-saved-to = Enregistré dans { $folder } : { $messages }
-downloading-messages = Téléchargement de { $messages }...
-import-put = Placé dans { $folder } : { $messages }
+saved-to = { $count ->
+    [one] { $messages } enregistré dans { $folder }
+   *[other] { $messages } enregistrés dans { $folder }
+}
+downloading-messages = { $count ->
+    [one] Téléchargement de { $messages }...
+   *[other] Téléchargement de { $messages }...
+}
+import-put = { $count ->
+    [one] { $messages } placé dans { $folder }
+   *[other] { $messages } placés dans { $folder }
+}
 import-not-put = Ceux-ci n'ont pas été placés dans le dossier :
 
     { $problems }

@@ -64,16 +64,43 @@ selection-flagged = { $count } con marca
 delete-for-good-one = Este mensaje se eliminará definitivamente. ¿Eliminarlo?
 delete-for-good-all = Estos { $count } mensajes se eliminarán definitivamente. ¿Eliminarlos?
 delete-for-good-some = { $count } de los { $total } mensajes se eliminarán definitivamente. ¿Eliminar los mensajes?
-done-read = { $messages } marcados como leídos
-done-unread = { $messages } marcados como no leídos
-done-flagged = { $messages } marcados con marca
+done-read = { $count ->
+    [one] { $messages } marcado como leído
+   *[other] { $messages } marcados como leídos
+}
+done-unread = { $count ->
+    [one] { $messages } marcado como no leído
+   *[other] { $messages } marcados como no leídos
+}
+done-flagged = { $count ->
+    [one] { $messages } marcado con marca
+   *[other] { $messages } marcados con marca
+}
 done-unflagged = Se quitó la marca de { $messages }
-done-deleted-for-good = { $messages } eliminados definitivamente
-done-moved = { $messages } movidos a { $folder }
-done-copied = { $messages } copiados a { $folder }
-done-moving = Moviendo { $messages } a { $folder }...
-done-copying = Copiando { $messages } a { $folder }...
-done-moved-back = { $messages } devueltos a { $folder }
+done-deleted-for-good = { $count ->
+    [one] { $messages } eliminado definitivamente
+   *[other] { $messages } eliminados definitivamente
+}
+done-moved = { $count ->
+    [one] { $messages } movido a { $folder }
+   *[other] { $messages } movidos a { $folder }
+}
+done-copied = { $count ->
+    [one] { $messages } copiado a { $folder }
+   *[other] { $messages } copiados a { $folder }
+}
+done-moving = { $count ->
+    [one] Moviendo { $messages } a { $folder }...
+   *[other] Moviendo { $messages } a { $folder }...
+}
+done-copying = { $count ->
+    [one] Copiando { $messages } a { $folder }...
+   *[other] Copiando { $messages } a { $folder }...
+}
+done-moved-back = { $count ->
+    [one] { $messages } devuelto a { $folder }
+   *[other] { $messages } devueltos a { $folder }
+}
 their-folders = sus carpetas
 undo-move = Deshacer Mover
 undo-delete = Deshacer Eliminar
@@ -132,19 +159,37 @@ transfer-copying = Copiando { $done } de { $messages } a { $folder }...
 transfer-another-account = otra cuenta
 transfer-folder-gone = la carpeta de destino ya no existe
 transfer-not-on-server = el mensaje ya no está en el servidor
-transfer-not-moved = No se pudieron mover { $messages } a otra cuenta: { $reason }
-transfer-not-copied = No se pudieron copiar { $messages } a otra cuenta: { $reason }
+transfer-not-moved = { $count ->
+    [one] No se pudo mover { $messages } a otra cuenta: { $reason }
+   *[other] No se pudieron mover { $messages } a otra cuenta: { $reason }
+}
+transfer-not-copied = { $count ->
+    [one] No se pudo copiar { $messages } a otra cuenta: { $reason }
+   *[other] No se pudieron copiar { $messages } a otra cuenta: { $reason }
+}
 transfer-none-moved = No se pudo mover ningún mensaje
 transfer-none-copied = No se pudo copiar ningún mensaje
 
 ## Messages as files
 
 export-not-in-time = el mensaje no se pudo descargar a tiempo
-export-not-saved = No se pudieron guardar { $failed } de { $messages } ({ $problems })
+export-not-saved = { $failed ->
+    [one] No se pudo guardar { $failed } de { $messages } ({ $problems })
+   *[other] No se pudieron guardar { $failed } de { $messages } ({ $problems })
+}
 export-not-attached = no se pudieron adjuntar los mensajes: { $error }
-saved-to = Guardado en { $folder }: { $messages }
-downloading-messages = Descargando { $messages }...
-import-put = Colocado en { $folder }: { $messages }
+saved-to = { $count ->
+    [one] { $messages } guardado en { $folder }
+   *[other] { $messages } guardados en { $folder }
+}
+downloading-messages = { $count ->
+    [one] Descargando { $messages }...
+   *[other] Descargando { $messages }...
+}
+import-put = { $count ->
+    [one] { $messages } colocado en { $folder }
+   *[other] { $messages } colocados en { $folder }
+}
 import-not-put = Estos no se colocaron en la carpeta:
 
     { $problems }

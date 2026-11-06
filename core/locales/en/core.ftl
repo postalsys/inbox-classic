@@ -69,16 +69,34 @@ selection-flagged = { $count } flagged
 delete-for-good-one = This message will be deleted for good. Delete it?
 delete-for-good-all = These { $count } messages will be deleted for good. Delete them?
 delete-for-good-some = { $count } of the { $total } messages will be deleted for good. Delete the messages?
-done-read = Marked { $messages } as read
-done-unread = Marked { $messages } as unread
-done-flagged = Flagged { $messages }
+done-read = { $count ->
+   *[other] Marked { $messages } as read
+}
+done-unread = { $count ->
+   *[other] Marked { $messages } as unread
+}
+done-flagged = { $count ->
+   *[other] Flagged { $messages }
+}
 done-unflagged = Took the flag off { $messages }
-done-deleted-for-good = Deleted { $messages } for good
-done-moved = Moved { $messages } to { $folder }
-done-copied = Copied { $messages } to { $folder }
-done-moving = Moving { $messages } to { $folder }...
-done-copying = Copying { $messages } to { $folder }...
-done-moved-back = Moved { $messages } back to { $folder }
+done-deleted-for-good = { $count ->
+   *[other] Deleted { $messages } for good
+}
+done-moved = { $count ->
+   *[other] Moved { $messages } to { $folder }
+}
+done-copied = { $count ->
+   *[other] Copied { $messages } to { $folder }
+}
+done-moving = { $count ->
+   *[other] Moving { $messages } to { $folder }...
+}
+done-copying = { $count ->
+   *[other] Copying { $messages } to { $folder }...
+}
+done-moved-back = { $count ->
+   *[other] Moved { $messages } back to { $folder }
+}
 their-folders = their folders
 undo-move = Undo Move
 undo-delete = Undo Delete
@@ -142,8 +160,12 @@ transfer-copying = Copying { $done } of { $messages } to { $folder }...
 transfer-another-account = another account
 transfer-folder-gone = the folder it was going to is no longer there
 transfer-not-on-server = the message is no longer on the server
-transfer-not-moved = { $messages } could not be moved to another account: { $reason }
-transfer-not-copied = { $messages } could not be copied to another account: { $reason }
+transfer-not-moved = { $count ->
+   *[other] { $messages } could not be moved to another account: { $reason }
+}
+transfer-not-copied = { $count ->
+   *[other] { $messages } could not be copied to another account: { $reason }
+}
 transfer-none-moved = No message could be moved
 transfer-none-copied = No message could be copied
 
@@ -153,10 +175,16 @@ export-not-in-time = the message could not be downloaded in time
 export-not-saved = { $failed } of { $messages } could not be saved ({ $problems })
 export-not-attached = the messages could not be attached: { $error }
 # the status bar after Save As with several: "Saved 3 messages to Desktop"
-saved-to = Saved { $messages } to { $folder }
-downloading-messages = Downloading { $messages }...
+saved-to = { $count ->
+   *[other] Saved { $messages } to { $folder }
+}
+downloading-messages = { $count ->
+   *[other] Downloading { $messages }...
+}
 # the status bar after files are dropped on a folder: "Put 3 messages in Archive"
-import-put = Put { $messages } in { $folder }
+import-put = { $count ->
+   *[other] Put { $messages } in { $folder }
+}
 import-not-put = These were not put in the folder:
 
     { $problems }

@@ -65,9 +65,8 @@ The terms of Outlook Express and Outlook in each language, kept the same everywh
 
 Forms of address: German uses "Sie", French "vous", Spanish "usted", Estonian the polite plural ("teie").
 
-Open questions for the native review:
+Notes for the native review:
 
-- French and Spanish status texts that start with the count ("{ $messages } déplacés vers", "{ $messages } movidos a") do
-  not agree in number for one message ("1 message déplacés"); the flag, Save As and import texts were worded to avoid
-  it, the older ones still need it.
 - Colours in sentences ("Flagged 2 messages blue") take the language's own form through a selector on the colour (`done-flagged-color`), never the English name lowercased.
+- Status texts that name a number of messages ("{ $messages } déplacés vers") choose by `$count` so the words agree
+  with it (`[one]` and `*[other]`, more forms where the language has them); English has the one form under `*[other]`.

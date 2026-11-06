@@ -64,16 +64,43 @@ selection-flagged = { $count } lipuga
 delete-for-good-one = See kiri kustutatakse jäädavalt. Kas kustutada?
 delete-for-good-all = Need { $count } kirja kustutatakse jäädavalt. Kas kustutada?
 delete-for-good-some = { $total } kirjast { $count } kustutatakse jäädavalt. Kas kustutada kirjad?
-done-read = { $messages } märgiti loetuks
-done-unread = { $messages } märgiti lugemata
-done-flagged = { $messages } märgiti lipuga
+done-read = { $count ->
+    [one] { $messages } märgiti loetuks
+   *[other] { $messages } märgiti loetuks
+}
+done-unread = { $count ->
+    [one] { $messages } märgiti lugemata
+   *[other] { $messages } märgiti lugemata
+}
+done-flagged = { $count ->
+    [one] { $messages } märgiti lipuga
+   *[other] { $messages } märgiti lipuga
+}
 done-unflagged = { $messages } lipp eemaldati
-done-deleted-for-good = { $messages } kustutati jäädavalt
-done-moved = { $messages } teisaldati kausta { $folder }
-done-copied = { $messages } kopeeriti kausta { $folder }
-done-moving = { $messages } teisaldatakse kausta { $folder }...
-done-copying = { $messages } kopeeritakse kausta { $folder }...
-done-moved-back = { $messages } teisaldati tagasi kausta { $folder }
+done-deleted-for-good = { $count ->
+    [one] { $messages } kustutati jäädavalt
+   *[other] { $messages } kustutati jäädavalt
+}
+done-moved = { $count ->
+    [one] { $messages } teisaldati kausta { $folder }
+   *[other] { $messages } teisaldati kausta { $folder }
+}
+done-copied = { $count ->
+    [one] { $messages } kopeeriti kausta { $folder }
+   *[other] { $messages } kopeeriti kausta { $folder }
+}
+done-moving = { $count ->
+    [one] { $messages } teisaldatakse kausta { $folder }...
+   *[other] { $messages } teisaldatakse kausta { $folder }...
+}
+done-copying = { $count ->
+    [one] { $messages } kopeeritakse kausta { $folder }...
+   *[other] { $messages } kopeeritakse kausta { $folder }...
+}
+done-moved-back = { $count ->
+    [one] { $messages } teisaldati tagasi kausta { $folder }
+   *[other] { $messages } teisaldati tagasi kausta { $folder }
+}
 their-folders = oma kaustadesse
 undo-move = Võta teisaldamine tagasi
 undo-delete = Võta kustutamine tagasi
@@ -132,8 +159,14 @@ transfer-copying = Kopeeritakse { $done }/{ $messages } kausta { $folder }...
 transfer-another-account = teine konto
 transfer-folder-gone = sihtkausta pole enam olemas
 transfer-not-on-server = kirja pole enam serveris
-transfer-not-moved = { $messages } ei saanud teise kontosse teisaldada: { $reason }
-transfer-not-copied = { $messages } ei saanud teise kontosse kopeerida: { $reason }
+transfer-not-moved = { $count ->
+    [one] { $messages } ei saanud teise kontosse teisaldada: { $reason }
+   *[other] { $messages } ei saanud teise kontosse teisaldada: { $reason }
+}
+transfer-not-copied = { $count ->
+    [one] { $messages } ei saanud teise kontosse kopeerida: { $reason }
+   *[other] { $messages } ei saanud teise kontosse kopeerida: { $reason }
+}
 transfer-none-moved = Ühtegi kirja ei saanud teisaldada
 transfer-none-copied = Ühtegi kirja ei saanud kopeerida
 
@@ -142,9 +175,18 @@ transfer-none-copied = Ühtegi kirja ei saanud kopeerida
 export-not-in-time = kirja ei saanud õigeks ajaks alla laadida
 export-not-saved = { $messages } hulgast ei saanud salvestada { $failed } ({ $problems })
 export-not-attached = kirju ei saanud manustada: { $error }
-saved-to = { $messages } salvestati kausta { $folder }
-downloading-messages = Laaditakse alla { $messages }...
-import-put = { $messages } pandi kausta { $folder }
+saved-to = { $count ->
+    [one] { $messages } salvestati kausta { $folder }
+   *[other] { $messages } salvestati kausta { $folder }
+}
+downloading-messages = { $count ->
+    [one] Laaditakse alla { $messages }...
+   *[other] Laaditakse alla { $messages }...
+}
+import-put = { $count ->
+    [one] { $messages } pandi kausta { $folder }
+   *[other] { $messages } pandi kausta { $folder }
+}
 import-not-put = Neid ei pandud kausta:
 
     { $problems }

@@ -28,13 +28,20 @@ pub fn saved_text(count: u64, place: &std::path::Path) -> String {
         .map_or_else(|| place.display().to_string(), |n| n.to_string_lossy().into_owned());
     tr_args(
         Text::SavedTo,
-        &[("messages", (&messages(count)).into()), ("folder", (&name).into())],
+        &[
+            ("messages", (&messages(count)).into()),
+            ("count", count.into()),
+            ("folder", (&name).into()),
+        ],
     )
 }
 
 /// What the status bar says while messages not downloaded yet come for files or a forward: "Downloading 3 messages..."
 pub fn downloading_text(count: u64) -> String {
-    tr_args(Text::DownloadingMessages, &[("messages", (&messages(count)).into())])
+    tr_args(
+        Text::DownloadingMessages,
+        &[("messages", (&messages(count)).into()), ("count", count.into())],
+    )
 }
 
 /// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search

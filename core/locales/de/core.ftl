@@ -64,16 +64,43 @@ selection-flagged = { $count } gekennzeichnet
 delete-for-good-one = Diese Nachricht wird endgültig gelöscht. Löschen?
 delete-for-good-all = Diese { $count } Nachrichten werden endgültig gelöscht. Löschen?
 delete-for-good-some = { $count } der { $total } Nachrichten werden endgültig gelöscht. Die Nachrichten löschen?
-done-read = { $messages } als gelesen markiert
-done-unread = { $messages } als ungelesen markiert
-done-flagged = { $messages } gekennzeichnet
+done-read = { $count ->
+    [one] { $messages } als gelesen markiert
+   *[other] { $messages } als gelesen markiert
+}
+done-unread = { $count ->
+    [one] { $messages } als ungelesen markiert
+   *[other] { $messages } als ungelesen markiert
+}
+done-flagged = { $count ->
+    [one] { $messages } gekennzeichnet
+   *[other] { $messages } gekennzeichnet
+}
 done-unflagged = Kennzeichnung von { $messages } entfernt
-done-deleted-for-good = { $messages } endgültig gelöscht
-done-moved = { $messages } nach { $folder } verschoben
-done-copied = { $messages } nach { $folder } kopiert
-done-moving = { $messages } werden nach { $folder } verschoben...
-done-copying = { $messages } werden nach { $folder } kopiert...
-done-moved-back = { $messages } zurück nach { $folder } verschoben
+done-deleted-for-good = { $count ->
+    [one] { $messages } endgültig gelöscht
+   *[other] { $messages } endgültig gelöscht
+}
+done-moved = { $count ->
+    [one] { $messages } nach { $folder } verschoben
+   *[other] { $messages } nach { $folder } verschoben
+}
+done-copied = { $count ->
+    [one] { $messages } nach { $folder } kopiert
+   *[other] { $messages } nach { $folder } kopiert
+}
+done-moving = { $count ->
+    [one] { $messages } wird nach { $folder } verschoben...
+   *[other] { $messages } werden nach { $folder } verschoben...
+}
+done-copying = { $count ->
+    [one] { $messages } wird nach { $folder } kopiert...
+   *[other] { $messages } werden nach { $folder } kopiert...
+}
+done-moved-back = { $count ->
+    [one] { $messages } zurück nach { $folder } verschoben
+   *[other] { $messages } zurück nach { $folder } verschoben
+}
 their-folders = ihre Ordner
 undo-move = Verschieben rückgängig machen
 undo-delete = Löschen rückgängig machen
@@ -127,24 +154,42 @@ target-recent = { $folder } ({ $account })
 
 ## Moving and copying to another account
 
-transfer-moving = { $done } von { $messages } werden nach { $folder } verschoben...
-transfer-copying = { $done } von { $messages } werden nach { $folder } kopiert...
+transfer-moving = Nachricht { $done } von { $messages } wird nach { $folder } verschoben...
+transfer-copying = Nachricht { $done } von { $messages } wird nach { $folder } kopiert...
 transfer-another-account = ein anderes Konto
 transfer-folder-gone = der Zielordner ist nicht mehr vorhanden
 transfer-not-on-server = die Nachricht ist nicht mehr auf dem Server
-transfer-not-moved = { $messages } konnten nicht in ein anderes Konto verschoben werden: { $reason }
-transfer-not-copied = { $messages } konnten nicht in ein anderes Konto kopiert werden: { $reason }
+transfer-not-moved = { $count ->
+    [one] { $messages } konnte nicht in ein anderes Konto verschoben werden: { $reason }
+   *[other] { $messages } konnten nicht in ein anderes Konto verschoben werden: { $reason }
+}
+transfer-not-copied = { $count ->
+    [one] { $messages } konnte nicht in ein anderes Konto kopiert werden: { $reason }
+   *[other] { $messages } konnten nicht in ein anderes Konto kopiert werden: { $reason }
+}
 transfer-none-moved = Keine Nachricht konnte verschoben werden
 transfer-none-copied = Keine Nachricht konnte kopiert werden
 
 ## Messages as files
 
 export-not-in-time = die Nachricht konnte nicht rechtzeitig heruntergeladen werden
-export-not-saved = { $failed } von { $messages } konnten nicht gespeichert werden ({ $problems })
+export-not-saved = { $failed ->
+    [one] { $failed } von { $messages } konnte nicht gespeichert werden ({ $problems })
+   *[other] { $failed } von { $messages } konnten nicht gespeichert werden ({ $problems })
+}
 export-not-attached = die Nachrichten konnten nicht angehängt werden: { $error }
-saved-to = { $messages } in { $folder } gespeichert
-downloading-messages = { $messages } werden heruntergeladen...
-import-put = { $messages } in { $folder } abgelegt
+saved-to = { $count ->
+    [one] { $messages } in { $folder } gespeichert
+   *[other] { $messages } in { $folder } gespeichert
+}
+downloading-messages = { $count ->
+    [one] { $messages } wird heruntergeladen...
+   *[other] { $messages } werden heruntergeladen...
+}
+import-put = { $count ->
+    [one] { $messages } in { $folder } abgelegt
+   *[other] { $messages } in { $folder } abgelegt
+}
 import-not-put = Diese wurden nicht in den Ordner gelegt:
 
     { $problems }

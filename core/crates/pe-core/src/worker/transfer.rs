@@ -169,6 +169,7 @@ impl Worker {
                 if copy { Text::DoneCopied } else { Text::DoneMoved },
                 &[
                     ("messages", (&messages(went as u64)).into()),
+                    ("count", went.into()),
                     ("folder", (&place).into()),
                 ],
             ),
@@ -188,6 +189,7 @@ impl Worker {
                     text,
                     &[
                         ("messages", (&messages(failed.len() as u64)).into()),
+                        ("count", failed.len().into()),
                         ("reason", (&failure.message).into()),
                     ],
                 ),

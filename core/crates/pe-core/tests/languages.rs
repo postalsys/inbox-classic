@@ -70,6 +70,24 @@ fn the_core_speaks_the_language_set() {
     // French counts 0 as one
     assert_eq!(pe_core::messages(0), "0 message");
     assert_eq!(pe_core::color_name(pe_core::FlagColor::Gray), "Gris");
+    // participles agree with the number, one as well as several
+    assert_eq!(
+        pe_core::saved_text(1, std::path::Path::new("/x/Bureau")),
+        "1 message enregistré dans Bureau"
+    );
+    assert_eq!(
+        pe_core::saved_text(3, std::path::Path::new("/x/Bureau")),
+        "3 messages enregistrés dans Bureau"
+    );
+    i18n::set_language("es");
+    assert_eq!(
+        pe_core::saved_text(1, std::path::Path::new("/x/Escritorio")),
+        "1 mensaje guardado en Escritorio"
+    );
+    assert_eq!(pe_core::downloading_text(2), "Descargando 2 mensajes...");
+    i18n::set_language("de");
+    assert_eq!(pe_core::downloading_text(1), "1 Nachricht wird heruntergeladen...");
+    assert_eq!(pe_core::downloading_text(2), "2 Nachrichten werden heruntergeladen...");
 
     // the help in the language, its keys as its keyboards name them; English for a language without one
     i18n::set_language("de");

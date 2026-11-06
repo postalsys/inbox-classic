@@ -964,7 +964,11 @@ impl Core {
         }
         let said = tr_args(
             Text::ImportPut,
-            &[("messages", (&text::messages(put)).into()), ("folder", (&name).into())],
+            &[
+                ("messages", (&text::messages(put)).into()),
+                ("count", put.into()),
+                ("folder", (&name).into()),
+            ],
         );
         let report =
             (!problems.is_empty()).then(|| tr_args(Text::ImportNotPut, &[("problems", (&problems.join("\n")).into())]));

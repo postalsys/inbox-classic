@@ -353,7 +353,11 @@ impl Core {
         let folder = folder.unwrap_or_default();
         Ok(tr_args(
             text,
-            &[("messages", (&n).into()), ("folder", (&folder).into())],
+            &[
+                ("messages", (&n).into()),
+                ("count", count.into()),
+                ("folder", (&folder).into()),
+            ],
         ))
     }
 
@@ -395,13 +399,17 @@ impl Core {
         for (account, moves) in by_account {
             self.send_command(account, Command::UndoMoves { moves })?;
         }
-        let back = undo.moves.iter().map(|m| m.message_ids.len() as u64).sum();
+        let back: u64 = undo.moves.iter().map(|m| m.message_ids.len() as u64).sum();
         *self.restored.lock().unwrap_or_else(|e| e.into_inner()) =
             undo.moves.iter().map(|m| (m.from, m.message_ids.clone())).collect();
         let folder = self.places(undo.moves.iter().map(|m| m.from))?;
         Ok(tr_args(
             Text::DoneMovedBack,
-            &[("messages", (&messages(back)).into()), ("folder", (&folder).into())],
+            &[
+                ("messages", (&messages(back)).into()),
+                ("count", back.into()),
+                ("folder", (&folder).into()),
+            ],
         ))
     }
 
