@@ -333,6 +333,8 @@ struct Message {
     let recipients: String
     let seen: Bool
     let flagged: Bool
+    /// the colour of its flag, Apple Mail's (1 red to 7 gray), 0 when not flagged
+    let flagColor: UInt8
     let answered: Bool
     let hasAttachments: Bool
 
@@ -347,6 +349,7 @@ struct Message {
         recipients = text(message.recipients)
         seen = message.seen
         flagged = message.flagged
+        flagColor = message.flag_color
         answered = message.answered
         hasAttachments = message.has_attachments
     }

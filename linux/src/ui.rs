@@ -31,6 +31,9 @@ const STYLE: &str = "
 .editor-frame { border-top: 1px solid alpha(@borders, 0.6); }
 .attachment { padding: 2px 8px; border-radius: 6px; background-color: alpha(@view_fg_color, 0.06); }
 .completion row { padding: 4px 8px; }
+.flag-row { padding: 0 6px; min-height: 30px; border-radius: 6px; }
+.flag-row label { font-weight: normal; }
+.flag-row:hover { background-color: alpha(@view_fg_color, 0.08); }
 .new-address { font-size: 0.8em; font-weight: bold; color: white; background-color: @error_bg_color; border-radius: 4px; padding: 1px 6px; }
 ";
 

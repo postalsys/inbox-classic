@@ -175,7 +175,7 @@ impl MessageList {
         view.set_reorderable(false);
         // no read/unread column: an unread message is bold, which says it; its space is the sender's and the subject's
         view.append_column(&icon_column(|m| m.info.has_attachments.then_some("ic-attach-symbolic")));
-        view.append_column(&icon_column(|m| m.info.flagged().then_some("ic-flag-symbolic")));
+        view.append_column(&flag_column());
         let from = text_column("From", 200, false, 0.0, |m| m.info.sender().to_string());
         let subject = text_column("Subject", SUBJECT_WIDTH, true, 0.0, |m| m.info.subject.clone());
         let received = text_column("Received", 130, false, 0.0, |m| {
@@ -420,6 +420,82 @@ fn icon_column(icon: fn(&Message) -> Option<&'static str>) -> gtk::ColumnViewCol
             .and_then(|row| row.with(icon))
             .flatten();
         image.set_icon_name(name);
+    });
+    let column = gtk::ColumnViewColumn::new(None, Some(factory));
+    column.set_fixed_width(30);
+    column.set_resizable(false);
+    column
+}
+
+/// The colour a flag is drawn in: the GNOME palette's, as Apple Mail's seven
+pub fn flag_rgb(color: pe_core::FlagColor) -> (f64, f64, f64) {
+    use pe_core::FlagColor;
+    let hex: u32 = match color {
+        FlagColor::Red => 0xe01b24,
+        FlagColor::Orange => 0xff7800,
+        FlagColor::Yellow => 0xe5a50a,
+        FlagColor::Green => 0x2ec27e,
+        FlagColor::Blue => 0x3584e4,
+        FlagColor::Purple => 0x9141ac,
+        FlagColor::Gray => 0x77767b,
+    };
+    let channel = |shift: u32| f64::from((hex >> shift) & 0xff) / 255.0;
+    (channel(16), channel(8), channel(0))
+}
+
+/// A flag in `color`, 16 pixels, as the flag column and the Flag menu draw it: the pole, and the pennant filled with a
+/// darker edge so it reads on a selected row too
+pub fn draw_flag(cr: &gtk::cairo::Context, x: f64, y: f64, color: pe_core::FlagColor) {
+    let (r, g, b) = flag_rgb(color);
+    cr.set_line_width(1.0);
+    cr.move_to(x + 4.0, y + 2.5);
+    cr.line_to(x + 12.5, y + 2.5);
+    cr.line_to(x + 10.5, y + 6.0);
+    cr.line_to(x + 12.5, y + 9.5);
+    cr.line_to(x + 4.0, y + 9.5);
+    cr.close_path();
+    cr.set_source_rgb(r, g, b);
+    let _ = cr.fill_preserve();
+    cr.set_source_rgba(r * 0.6, g * 0.6, b * 0.6, 1.0);
+    let _ = cr.stroke();
+    cr.set_line_width(1.5);
+    cr.move_to(x + 3.75, y + 2.0);
+    cr.line_to(x + 3.75, y + 14.0);
+    let _ = cr.stroke();
+}
+
+/// The flag column: each flagged message's flag in its colour (Apple Mail's), nothing for the others
+fn flag_column() -> gtk::ColumnViewColumn {
+    let factory = gtk::SignalListItemFactory::new();
+    factory.connect_setup(|_, item| {
+        if let Some(item) = item.downcast_ref::<gtk::ListItem>() {
+            let area = gtk::DrawingArea::new();
+            area.set_content_width(16);
+            area.set_content_height(16);
+            area.set_halign(gtk::Align::Center);
+            add_drag_source(&area, item);
+            item.set_child(Some(&area));
+        }
+    });
+    factory.connect_bind(|_, item| {
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let Some(area) = item.child().and_downcast::<gtk::DrawingArea>() else {
+            return;
+        };
+        let color = item
+            .item()
+            .and_downcast::<MessageRow>()
+            .and_then(|row| row.with(|m| m.info.flag_color()))
+            .flatten();
+        // what the e2e test reads of the row
+        area.set_tooltip_text(color.map(pe_core::color_name));
+        area.set_draw_func(move |_, cr, _, _| {
+            if let Some(color) = color {
+                draw_flag(cr, 0.0, 0.0, color);
+            }
+        });
     });
     let column = gtk::ColumnViewColumn::new(None, Some(factory));
     column.set_fixed_width(30);
