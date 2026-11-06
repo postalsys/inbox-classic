@@ -59,7 +59,7 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
 
         let intro = wrappingLabel(prompt)
         intro.setAccessibilityIdentifier("move.prompt")
-        filter.placeholderString = Text.macFindFolder.text
+        filter.placeholderString = Text.uiFindFolder.text
         filter.delegate = self
         filter.sendsSearchStringImmediately = true
         filter.setAccessibilityIdentifier("move.filter")
@@ -85,7 +85,7 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
 
         let newFolder = NSButton(title: Text.macNewFolderButton.text, target: self, action: #selector(makeFolder))
         newFolder.setAccessibilityIdentifier("move.new")
-        let cancelButton = NSButton(title: Text.macCancel.text, target: self, action: #selector(cancel))
+        let cancelButton = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancel))
         cancelButton.keyEquivalent = "\u{1b}"
         cancelButton.setAccessibilityIdentifier("move.cancel")
         okButton.target = self
@@ -292,11 +292,11 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
         let account = node?.account ?? core.accounts().first?.id ?? 0
         guard account != 0 else { return }
         let parent = node?.folder ?? 0
-        let intro = parent != 0 ? Text.macNewFolderIn.text(["folder": node?.name ?? ""]) : Text.macNewFolderAtTop.text
-        guard let name = askFolderName(title: Text.macNewFolder.text, intro: intro, name: ""), !name.isEmpty else { return }
+        let intro = parent != 0 ? Text.uiNewFolderIn.text(["folder": node?.name ?? ""]) : Text.uiNewFolderAtTop.text
+        guard let name = askFolderName(title: Text.uiNewFolderTitle.text, intro: intro, name: ""), !name.isEmpty else { return }
         var reason: UnsafeMutablePointer<CChar>?
         if !name.withCString({ pe_folder_create(core.handle, account, parent, $0, &reason) }) {
-            refused(reason, Text.macFolderNotCreated.text)
+            refused(reason, Text.uiFolderNotCreated.text)
         }
         // made in the background: FolderCreated chooses it here
     }

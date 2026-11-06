@@ -111,7 +111,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         guard let core = Core(path: store, memoryPasswords: arguments.memoryPasswords, certificate: arguments.certificate,
                               onEvent: { [weak self] in self?.main?.onEvent($0) })
         else {
-            inform(arguments.certificate == nil ? Text.macStoreNotOpened.text : Text.macStoreOrCertificateNotOpened.text,
+            inform(arguments.certificate == nil ? Text.uiStoreNotOpened.text : Text.uiStoreOrCertNotOpened.text,
                         style: .error)
             NSApp.terminate(nil)
             return
@@ -290,7 +290,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             }(),
             separator(),
             NSMenuItem(title: Text.macCut.text, action: #selector(NSText.cut(_:)), keyEquivalent: "x"),
-            NSMenuItem(title: Text.macCopy.text, action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
+            NSMenuItem(title: Text.uiButtonCopy.text, action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
             NSMenuItem(title: Text.macPaste.text, action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
             NSMenuItem(title: Text.cmdSelectAll.text, action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
             separator(),
@@ -312,7 +312,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             NSMenuItem(title: "Inbox Classic", action: #selector(showMain), keyEquivalent: "0"),
         ])
         NSApp.windowsMenu = window
-        let help = submenu(Text.menuHelp.text, [item(for: .help, title: Text.macHelpTitle.text)])
+        let help = submenu(Text.menuHelp.text, [item(for: .help, title: Text.uiHelpTitle.text)])
         NSApp.helpMenu = help
         return bar
     }
@@ -411,7 +411,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
 
     /// Flag, a submenu of the seven colours Apple Mail flags in (by name, with their colour), then Clear Flag
     func flagMenu() -> NSMenuItem {
-        let menu = NSMenu(title: Text.macFlag.text)
+        let menu = NSMenu(title: Text.uiMenuFlag.text)
         for color in UInt8(1)...7 {
             let name = taken(pe_flag_color_name(color)) ?? ""
             let item = NSMenuItem(title: name, action: #selector(flagColor(_:)), keyEquivalent: "")
@@ -422,11 +422,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             menu.addItem(item)
         }
         menu.addItem(.separator())
-        let clear = NSMenuItem(title: Text.macClearFlag.text, action: #selector(clearFlag(_:)), keyEquivalent: "")
+        let clear = NSMenuItem(title: Text.uiClearFlag.text, action: #selector(clearFlag(_:)), keyEquivalent: "")
         clear.target = self
         clear.setAccessibilityIdentifier("flag.clear")
         menu.addItem(clear)
-        let flag = NSMenuItem(title: Text.macFlag.text, action: nil, keyEquivalent: "")
+        let flag = NSMenuItem(title: Text.uiMenuFlag.text, action: nil, keyEquivalent: "")
         flag.submenu = menu
         return flag
     }

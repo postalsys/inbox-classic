@@ -213,7 +213,7 @@ final class Core {
         if let done = taken(pe_selection_act(handle, selection, action, to, &reason)) {
             return .success(done)
         }
-        return .failure(Refusal(taken(reason) ?? Text.macMessagesNotChanged.text))
+        return .failure(Refusal(taken(reason) ?? Text.uiMessagesNotChanged.text))
     }
 
     /// what Edit > Undo takes back, "Undo Move"; nil when nothing

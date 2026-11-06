@@ -15,7 +15,7 @@ extension UITest {
         }
         let popup = shown.language
         let titles = popup.itemTitles
-        let system = Text.macSystemDefault.text(["language": Languages.name(Languages.system)])
+        let system = Text.uiOptionsSystemDefault.text(["language": Languages.name(Languages.system)])
         check(titles.first == system, "Language starts with System default and the language it is now (\(titles.first ?? ""))")
         check(Array(titles.dropFirst()) == ["English", "Deutsch", "Eesti", "Español", "Français"],
               "then the languages by their own names (\(titles.dropFirst().joined(separator: ", ")))")

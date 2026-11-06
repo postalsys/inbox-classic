@@ -53,7 +53,7 @@ pub async fn choose(parent: &impl IsA<gtk::Widget>, request: Request) -> Option<
     prompt.set_widget_name("move-prompt");
     content.append(&prompt);
     let filter = gtk::SearchEntry::new();
-    filter.set_placeholder_text(Some(&t!(GtkFindFolder)));
+    filter.set_placeholder_text(Some(&t!(UiFindFolder)));
     filter.set_widget_name("move-filter");
     content.append(&filter);
     let list = gtk::ListBox::new();
@@ -158,11 +158,11 @@ pub async fn choose(parent: &impl IsA<gtk::Widget>, request: Request) -> Option<
 async fn make_folder(dialog: &adw::Dialog, rows: &Rows) -> Option<i64> {
     let (account, parent, name) = rows.highlighted()?;
     let intro = if parent.is_some() {
-        t!(GtkNewFolderIn, folder = &*name)
+        t!(UiNewFolderIn, folder = &*name)
     } else {
         t!(GtkNewFolderAtTopOf, account = &*name)
     };
-    let folder = ui::ask_folder_name(dialog, &t!(GtkNewFolderTitle), &intro, "").await?;
+    let folder = ui::ask_folder_name(dialog, &t!(UiNewFolderTitle), &intro, "").await?;
     let (sender, created) = async_channel::bounded(1);
     CREATED.with(|waiting| *waiting.borrow_mut() = Some(sender.clone()));
     if let Err(reason) = shell().core.create_folder(account, parent, &folder) {

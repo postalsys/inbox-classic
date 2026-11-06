@@ -28,16 +28,16 @@ void FillOutbox(OutboxState* state, int select = 0) {
     for (size_t i = 0; i < pe_outbox_count(outbox.get()); i++) {
         const PeQueued* queued = pe_outbox_get(outbox.get(), i);
         std::wstring subject = Text(queued->subject);
-        int row = AddRow(state->list, static_cast<int>(i), subject.empty() ? core::T(PE_TEXT_WIN_NO_SUBJECT) : subject);
+        int row = AddRow(state->list, static_cast<int>(i), subject.empty() ? core::T(PE_TEXT_UI_NO_SUBJECT) : subject);
         SetCell(state->list, row, COL_TO, Text(queued->recipients));
         SetCell(state->list, row, COL_QUEUED, FormatDate(queued->created));
         // one an AI agent sent waits a moment, while it can still be deleted
-        std::wstring status = core::T(PE_TEXT_WIN_OUTBOX_STATUS_WAITING);
+        std::wstring status = core::T(PE_TEXT_UI_OUTBOX_STATUS_WAITING);
         SYSTEMTIME at;
         if (queued->problem) {
-            status = core::T(PE_TEXT_WIN_OUTBOX_STATUS_NOT_SENT, {{"reason", Text(queued->problem)}});
+            status = core::T(PE_TEXT_UI_OUTBOX_STATUS_NOT_SENT, {{"reason", Text(queued->problem)}});
         } else if (queued->not_before && UnixToSystemTime(queued->not_before, true, at)) {
-            status = core::T(PE_TEXT_WIN_OUTBOX_STATUS_AGENT, {{"time", FormatTime(at)}});
+            status = core::T(PE_TEXT_UI_OUTBOX_STATUS_AGENT, {{"time", FormatTime(at)}});
         }
         SetCell(state->list, row, COL_STATUS, status);
         state->ids.push_back(queued->id);
@@ -56,7 +56,7 @@ void FillOutbox(OutboxState* state, int select = 0) {
 void DeleteSelected(HWND hwnd, OutboxState* state) {
     int index = ListView_GetNextItem(state->list, -1, LVNI_SELECTED);
     if (index >= 0 && static_cast<size_t>(index) < state->ids.size() &&
-        MessageBoxW(hwnd, core::T(PE_TEXT_WIN_OUTBOX_DELETE_ASK).c_str(), core::Plain(PE_TEXT_WIN_OUTBOX_TITLE).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+        MessageBoxW(hwnd, core::T(PE_TEXT_UI_OUTBOX_DELETE_ASK).c_str(), core::Plain(PE_TEXT_UI_OUTBOX_TITLE).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
         pe_outbox_delete(state->core, state->ids[index]);
         // the next one selected, where the deleted one was
         FillOutbox(state, index);
@@ -117,22 +117,22 @@ void OutboxDialog(HWND owner, PeCore* core) {
     int pad = Scale(10);
     int width = Scale(640);
     int height = Scale(260);
-    HWND dialog = CreateModalWindow(owner, kOutboxClass, core::Plain(PE_TEXT_WIN_OUTBOX_TITLE).c_str(), width, height);
+    HWND dialog = CreateModalWindow(owner, kOutboxClass, core::Plain(PE_TEXT_UI_OUTBOX_TITLE).c_str(), width, height);
     OutboxState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     int buttonWidth = Scale(110);
     state.list = CreateReportList(dialog, IDC_OUTBOX_LIST, {pad, pad, width - pad - buttonWidth - pad, height - pad});
-    AddColumn(state.list, COL_SUBJECT, core::T(PE_TEXT_WIN_COL_SUBJECT).c_str(), 150);
+    AddColumn(state.list, COL_SUBJECT, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 150);
     AddColumn(state.list, COL_TO, core::T(PE_TEXT_WIN_COL_TO).c_str(), 110);
-    AddColumn(state.list, COL_QUEUED, core::T(PE_TEXT_WIN_COL_QUEUED).c_str(), 100);
-    AddColumn(state.list, COL_STATUS, core::T(PE_TEXT_WIN_COL_STATUS).c_str(), 100);
+    AddColumn(state.list, COL_QUEUED, core::T(PE_TEXT_UI_COL_QUEUED).c_str(), 100);
+    AddColumn(state.list, COL_STATUS, core::T(PE_TEXT_UI_COL_STATUS).c_str(), 100);
     // the last column takes the rest of the width, no wider
     ListView_SetColumnWidth(state.list, COL_STATUS, LVSCW_AUTOSIZE_USEHEADER);
     state.send = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_OUTBOX_SEND_ALL).c_str(), WS_TABSTOP, IDC_OUTBOX_SEND,
                              {width - pad - buttonWidth, pad, width - pad, pad + Scale(25)});
     state.remove = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_DELETE_BUTTON).c_str(), WS_TABSTOP, IDC_OUTBOX_DELETE,
                                {width - pad - buttonWidth, pad + Scale(31), width - pad, pad + Scale(56)});
-    state.close = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_CLOSE).c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_OUTBOX_CLOSE,
+    state.close = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_CLOSE).c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_OUTBOX_CLOSE,
                 {width - pad - buttonWidth, height - pad - Scale(25), width - pad, height - pad});
     FillOutbox(&state);
     RunModal(dialog, state.list, state.done);

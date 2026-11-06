@@ -51,7 +51,7 @@ pub fn load_style() {
 
 /// A message box with OK. `heading` is the caption, left out when it is only the app's name
 pub async fn alert(parent: &impl IsA<gtk::Widget>, heading: &str, body: &str) {
-    ask(parent, heading, body, &[("ok", t!(GtkOk).as_str())], "ok", "ok", None).await;
+    ask(parent, heading, body, &[("ok", t!(UiOk).as_str())], "ok", "ok", None).await;
 }
 
 /// A message box with the given answers (id, label); the id of the one chosen, `close` for Esc. `destructive`
@@ -90,7 +90,7 @@ pub async fn confirm(parent: &impl IsA<gtk::Widget>, heading: &str, body: &str, 
         parent,
         heading,
         body,
-        &[("no", t!(GtkNo).as_str()), ("yes", t!(GtkYes).as_str())],
+        &[("no", t!(UiNo).as_str()), ("yes", t!(UiYes).as_str())],
         default,
         "no",
         red,
@@ -331,8 +331,8 @@ pub async fn ask_folder_name(parent: &impl IsA<gtk::Widget>, title: &str, intro:
         parent,
         title,
         intro,
-        vec![Field::text(&t!(GtkFolderName), name)],
-        &t!(GtkOk),
+        vec![Field::text(&t!(UiFolderName), name)],
+        &t!(UiOk),
         0,
     );
     form.widget().set_widget_name("folder-name-dialog");
@@ -353,7 +353,7 @@ pub fn dialog_with_buttons(
     let header = adw::HeaderBar::new();
     header.set_show_end_title_buttons(false);
     header.set_show_start_title_buttons(false);
-    let cancel = gtk::Button::with_label(&t!(GtkCancel));
+    let cancel = gtk::Button::with_label(&t!(UiCancel));
     cancel.set_widget_name("dialog-cancel");
     let ok = gtk::Button::with_label(ok_label);
     ok.set_widget_name("dialog-ok");
@@ -469,7 +469,7 @@ pub async fn wait_for_request(
     label.set_widget_name("wait-text");
     let spinner = adw::Spinner::new();
     spinner.set_size_request(32, 32);
-    let cancel_button = gtk::Button::with_label(&t!(GtkCancel));
+    let cancel_button = gtk::Button::with_label(&t!(UiCancel));
     cancel_button.set_widget_name("wait-cancel");
     cancel_button.set_halign(gtk::Align::End);
     let row = gtk::Box::new(gtk::Orientation::Horizontal, 12);
@@ -609,7 +609,7 @@ fn filter(name: &str, patterns: &[&str]) -> gio::ListStore {
         filter.add_pattern(pattern);
     }
     let all = gtk::FileFilter::new();
-    all.set_name(Some(&t!(GtkAllFiles)));
+    all.set_name(Some(&t!(UiFilterAll)));
     all.add_pattern("*");
     let filters = gio::ListStore::new::<gtk::FileFilter>();
     filters.append(&filter);

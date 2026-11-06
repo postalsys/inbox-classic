@@ -201,9 +201,9 @@ void Editor::LinkMenu() {
                 std::function<void()> run;
             };
             Command commands[] = {
-                {core::Plain(PE_TEXT_WIN_OPEN_LINK), [link] { webview::OpenExternally(link.c_str()); }},
-                {core::Plain(PE_TEXT_WIN_EDIT_LINK), [this] { handlers_.editLink(); }},
-                {core::Plain(PE_TEXT_WIN_REMOVE_LINK), [this] { Link(L""); }},
+                {core::Plain(PE_TEXT_UI_OPEN_LINK), [link] { webview::OpenExternally(link.c_str()); }},
+                {core::Plain(PE_TEXT_UI_EDIT_LINK), [this] { handlers_.editLink(); }},
+                {core::Plain(PE_TEXT_UI_REMOVE_LINK), [this] { Link(L""); }},
             };
             UINT32 at = 0;
             for (const Command& command : commands) {

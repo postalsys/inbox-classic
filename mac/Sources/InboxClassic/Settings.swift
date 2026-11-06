@@ -107,7 +107,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         window.isReleasedWhenClosed = false
         window.delegate = self
 
-        let system = Text.macSystemDefault.text(["language": Languages.name(Languages.system)])
+        let system = Text.uiOptionsSystemDefault.text(["language": Languages.name(Languages.system)])
         language.addItem(withTitle: system)
         codes = [nil]
         for (code, name) in Languages.all {
@@ -170,7 +170,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         Languages.chosen = code
         // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
         guard (code ?? Languages.system) != Languages.current else { return }
-        if ask(Text.macRestartQuestion.text, yes: Text.macRestartNow.text, no: Text.macRestartLater.text,
+        if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
                style: .information) {
             AppDelegate.shared?.restart()
         }

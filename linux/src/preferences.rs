@@ -32,7 +32,7 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
         .iter()
         .map(|choice| match choice {
             None => t!(
-                GtkSystemDefault,
+                UiOptionsSystemDefault,
                 language = crate::words::language_name(crate::words::system_language())
             ),
             Some(code) => crate::words::language_name(code).to_string(),
@@ -116,7 +116,7 @@ fn whole_names() -> gtk::SignalListItemFactory {
 
 /// The language changes at the next start: now, or later
 async fn ask_restart(parent: &adw::PreferencesDialog) {
-    let (later, now) = (t!(GtkRestartLater), t!(GtkRestartNow));
+    let (later, now) = (t!(UiRestartLater), t!(UiRestartNow));
     let answers = [("later", later.as_str()), ("restart", now.as_str())];
     let answer = ui::ask(
         parent,

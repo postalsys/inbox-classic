@@ -288,8 +288,8 @@ void SetAccessibleDescription(HWND control, const std::wstring& text) {
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
                 bool (*validate)(const std::vector<FormField>&, std::wstring&), const wchar_t* okLabel, size_t focus) {
     RegisterDialogClass(kFormClass, FormProc);
-    std::wstring ok = okLabel ? okLabel : core::T(PE_TEXT_WIN_OK);
-    std::wstring cancel = core::T(PE_TEXT_WIN_CANCEL);
+    std::wstring ok = okLabel ? okLabel : core::T(PE_TEXT_UI_OK);
+    std::wstring cancel = core::T(PE_TEXT_UI_CANCEL);
     int pad = Scale(10);
     // the label column as wide as the longest label, the inputs keep at least their usual width
     int labelWidth = Scale(130);
@@ -347,8 +347,8 @@ std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t*
     wchar_t buffer[MAX_PATH] = L"";
     wcsncpy_s(buffer, name.c_str(), _TRUNCATE);
     OPENFILENAMEW dialog = {sizeof(dialog)};
-    std::wstring allFiles = FileFilter({{core::T(PE_TEXT_WIN_FILTER_ALL), L"*.*"}});
-    std::wstring attachment = core::Plain(PE_TEXT_WIN_SAVE_ATTACHMENT_AS);
+    std::wstring allFiles = FileFilter({{core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}});
+    std::wstring attachment = core::Plain(PE_TEXT_UI_SAVE_ATTACHMENT_AS);
     dialog.hwndOwner = owner;
     dialog.lpstrFilter = filter ? filter : allFiles.c_str();
     dialog.lpstrFile = buffer;
@@ -477,7 +477,7 @@ void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& tex
     SendMessageW(state.box, WM_SETFONT, reinterpret_cast<WPARAM>(state.font), FALSE);
     SetWindowTextW(state.box, text.c_str());
     state.save = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_SAVE_AS_BUTTON).c_str(), WS_TABSTOP, IDM_SAVE_AS, {});
-    state.close = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_CLOSE).c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
+    state.close = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_CLOSE).c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
     LayoutSource(dialog, state);
     RunModal(dialog, state.box, state.done);
     DeleteObject(state.font);
@@ -495,7 +495,7 @@ void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     HWND box = CreateChild(dialog, L"EDIT", text.c_str(),
                            WS_TABSTOP | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | ES_AUTOHSCROLL, 0,
                            {pad, pad + Scale(22), width - pad, height - pad - Scale(35)}, WS_EX_CLIENTEDGE);
-    std::wstring ok = core::T(PE_TEXT_WIN_OK);
+    std::wstring ok = core::T(PE_TEXT_UI_OK);
     CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
                 {width - pad - ButtonWidth({ok}), height - pad - Scale(25), width - pad, height - pad});
     RunModal(dialog, box, done);

@@ -79,8 +79,8 @@ impl Reader {
         fields.set_column_spacing(8);
         fields.set_row_spacing(2);
         for (row, (name, value)) in [
-            (t!(GtkReaderFrom), &from),
-            (t!(GtkReaderTo), &to),
+            (t!(UiFieldFrom), &from),
+            (t!(UiFieldTo), &to),
             (t!(GtkReaderDate), &date),
         ]
         .into_iter()
@@ -95,7 +95,7 @@ impl Reader {
         let unsubscribe = gtk::Label::new(None);
         unsubscribe.set_markup(&format!(
             "<a href=\"unsubscribe\">{}</a>",
-            gtk::glib::markup_escape_text(&t!(GtkUnsubscribe))
+            gtk::glib::markup_escape_text(&t!(UiUnsubscribe))
         ));
         unsubscribe.set_widget_name("reader-unsubscribe");
         unsubscribe.set_valign(gtk::Align::Start);
@@ -140,7 +140,7 @@ impl Reader {
         lines.set_hexpand(true);
         lines.append(&invitation_title);
         lines.append(&invitation_details);
-        let open_calendar = gtk::Button::with_label(&t!(GtkOpenInCalendar));
+        let open_calendar = gtk::Button::with_label(&t!(UiOpenInCalendar));
         open_calendar.set_valign(gtk::Align::Center);
         open_calendar.set_widget_name("reader-open-calendar");
         let invitation = gtk::Box::new(gtk::Orientation::Horizontal, 10);
@@ -169,7 +169,7 @@ impl Reader {
         note_retry.set_xalign(0.0);
         note_retry.set_hexpand(true);
         note_retry.set_ellipsize(gtk::pango::EllipsizeMode::End);
-        let try_again = gtk::Button::with_label(&t!(GtkTryAgain));
+        let try_again = gtk::Button::with_label(&t!(UiTryAgain));
         try_again.set_widget_name("reader-try-again");
         let retry = gtk::Box::new(gtk::Orientation::Horizontal, 10);
         retry.add_css_class("info-bar");
@@ -314,7 +314,7 @@ impl Reader {
         self.header.set_visible(true);
         self.fields.set_visible(false);
         self.subject.set_text("");
-        self.note.set_text(&t!(GtkMessageNotShown));
+        self.note.set_text(&t!(UiNotShown));
         self.note.set_visible(true);
         self.attachments.set_visible(false);
         self.pictures.set_visible(false);
@@ -386,7 +386,7 @@ impl Reader {
             Method::Cancel => "cancel",
             Method::Reply => "reply",
         };
-        let untitled = t!(GtkNoTitle);
+        let untitled = t!(UiNoTitle);
         let summary = if event.summary.is_empty() {
             &untitled
         } else {
@@ -495,18 +495,18 @@ fn when(event: &Invitation) -> String {
         .and_then(|e| event_time(e - if event.all_day { 86400 } else { 0 }, event.floating));
     if event.all_day {
         return match end {
-            Some(end) if !same_day(&start, &end) => t!(GtkFromTo, start = &long_date(&start), end = &long_date(&end)),
+            Some(end) if !same_day(&start, &end) => t!(UiEventSpan, start = &long_date(&start), end = &long_date(&end)),
             _ => long_date(&start),
         };
     }
     let at = |time: &glib::DateTime| t!(GtkDayAndTime, day = &long_date(time), time = &time_of_day(time));
     let text = match end {
-        Some(end) if same_day(&start, &end) => t!(GtkFromTo, start = &at(&start), end = &time_of_day(&end)),
-        Some(end) => t!(GtkFromTo, start = &at(&start), end = &at(&end)),
+        Some(end) if same_day(&start, &end) => t!(UiEventSpan, start = &at(&start), end = &time_of_day(&end)),
+        Some(end) => t!(UiEventSpan, start = &at(&start), end = &at(&end)),
         None => at(&start),
     };
     if event.floating {
-        t!(GtkSendersTime, when = &text)
+        t!(UiEventFloating, when = &text)
     } else {
         text
     }

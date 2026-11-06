@@ -1,7 +1,9 @@
 # Translation glossary
 
 The words of the windows live in the Fluent files of this folder, one folder a language: `core.ftl` for what the core
-says (the same on every platform), `app.ftl` for the windows (menus, commands, dialogs). English (`en`) is the source;
+says (the same on every platform), `app.ftl` for the windows (menus, commands, dialogs, and the words the windows of
+more than one platform share, `ui-` ids), and `windows.ftl`, `mac.ftl` and `linux.ftl` for words only one platform
+has. English (`en`) is the source;
 a word a language does not have yet is shown in English. The user help is `core/crates/pe-html/src/help.<lang>.html`.
 
 **Status: the German, Estonian, French and Spanish files and help pages are drafts, written without a native
@@ -60,6 +62,10 @@ The terms of Outlook Express and Outlook in each language, kept the same everywh
 | Gray               | Grau                   | Hall                  | Gris                      | Gris                           |
 | sign-in app        | Anmelde-App            | sisselogimisrakendus  | application de connexion  | aplicación de inicio de sesión |
 | AI agent           | KI-Agent               | tehisintellekti agent | agent d'IA                | agente de IA                   |
+| client ID          | Client-ID              | kliendi ID            | ID client                 | ID de cliente                  |
+| client secret      | Client-Geheimnis       | kliendi saladus       | secret client             | secreto de cliente             |
+| issuer (OAuth)     | Aussteller             | väljaandja            | émetteur                  | emisor                         |
+| sign-in app        | Anmelde-App            | sisselogimisrakendus  | application de connexion  | aplicación de inicio de sesión |
 | File > Accounts    | Datei > Konten         | Fail > Kontod         | Fichier > Comptes         | Archivo > Cuentas              |
 | Tools              | Extras                 | Tööriistad            | Outils                    | Herramientas                   |
 | Ctrl / Shift / Del | Strg / Umschalt / Entf | Ctrl / Shift / Del    | Ctrl / Maj / Suppr        | Ctrl / Mayús / Supr            |

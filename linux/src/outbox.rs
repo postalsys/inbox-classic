@@ -16,7 +16,7 @@ fn fill(list: &gtk::ListBox, ids: &RefCell<Vec<i64>>, select: usize, buttons: &[
         list.remove(&child);
     }
     let queued = shell().core.outbox().unwrap_or_default();
-    let no_subject = t!(GtkNoSubject);
+    let no_subject = t!(UiNoSubject);
     for message in &queued {
         let subject = if message.subject.is_empty() {
             &no_subject
@@ -25,9 +25,9 @@ fn fill(list: &gtk::ListBox, ids: &RefCell<Vec<i64>>, select: usize, buttons: &[
         };
         // one an AI agent sent waits a moment, while it can still be deleted
         let status = match (&message.problem, message.not_before) {
-            (Some(problem), _) => t!(GtkOutboxNotSent, reason = problem),
-            (None, Some(at)) => t!(GtkOutboxAgent, time = &ui::format_time(at)),
-            (None, None) => t!(GtkOutboxWaiting),
+            (Some(problem), _) => t!(UiOutboxStatusNotSent, reason = problem),
+            (None, Some(at)) => t!(UiOutboxStatusAgent, time = &ui::format_time(at)),
+            (None, None) => t!(UiOutboxStatusWaiting),
         };
         let row = adw::ActionRow::builder()
             .title(glib::markup_escape_text(subject))
@@ -70,8 +70,8 @@ pub async fn outbox_dialog(parent: &impl IsA<gtk::Widget>) {
         });
         button
     };
-    let send_now = button(&t!(GtkOutboxSendAll), "send");
-    let delete = button(&t!(GtkOutboxDelete), "delete");
+    let send_now = button(&t!(UiOutboxSendAll), "send");
+    let delete = button(&t!(UiTbDelete), "delete");
     fill(&list, &ids, 0, &[&send_now, &delete]);
     let keys = gtk::EventControllerKey::new();
     let deleted = send.clone();
@@ -102,7 +102,7 @@ pub async fn outbox_dialog(parent: &impl IsA<gtk::Widget>) {
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));
     let dialog = adw::Dialog::builder()
-        .title(t!(GtkOutboxTitle))
+        .title(t!(UiOutboxTitle))
         .content_width(680)
         .child(&view)
         .build();
@@ -122,7 +122,7 @@ pub async fn outbox_dialog(parent: &impl IsA<gtk::Widget>) {
                 let Some(id) = ids.borrow().get(index).copied() else {
                     continue;
                 };
-                if ui::confirm(&dialog, &t!(GtkOutboxTitle), &t!(GtkOutboxDeleteAsk), true).await {
+                if ui::confirm(&dialog, &t!(UiOutboxTitle), &t!(UiOutboxDeleteAsk), true).await {
                     let _ = shell().core.outbox_delete(id);
                     // the next one selected, where the deleted one was
                     fill(&list, &ids, index, &[&send_now, &delete]);

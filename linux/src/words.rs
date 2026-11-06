@@ -1,4 +1,4 @@
-//! The words of the windows, from the core's catalogs (core/locales) in the language in use: `t!(GtkSearchMail)`, or
+//! The words of the windows, from the core's catalogs (core/locales) in the language in use: `t!(UiFindHint)`, or
 //! with what goes into the words, `t!(GtkFrom, account = &label)`. The language is chosen at the start ([`choose`]).
 
 pub use pe_core::i18n::{Arg, Text, tr, tr_args};
@@ -70,7 +70,7 @@ mod tests {
     fn words_with_their_values() {
         pe_core::i18n::set_language("en");
         assert_eq!(
-            t!(GtkNewFolderIn, folder = "Archive"),
+            t!(UiNewFolderIn, folder = "Archive"),
             "The new folder goes in Archive."
         );
         assert_eq!(t!(GtkUnreadMessages, count = 0u64), "No unread messages");

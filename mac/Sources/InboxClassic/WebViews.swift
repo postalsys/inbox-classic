@@ -218,7 +218,7 @@ final class HelpWindow: NSObject, NSWindowDelegate {
     private override init() {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 640),
                           styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
-        window.title = Text.macHelpTitle.text
+        window.title = Text.uiHelpTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("help")
         window.isReleasedWhenClosed = false
         super.init()
@@ -230,7 +230,7 @@ final class HelpWindow: NSObject, NSWindowDelegate {
         if TestHooks.testing || !window.setFrameUsingName("Help") {
             window.center()
         }
-        preview.show(taken(pe_help_page("mac")) ?? "<p>" + Text.macHelpMissing.text + "</p>")
+        preview.show(taken(pe_help_page("mac")) ?? "<p>" + Text.uiHelpMissing.text + "</p>")
     }
 
     func windowWillClose(_ notification: Notification) {

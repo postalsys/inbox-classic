@@ -16,13 +16,13 @@ enum AlertStyle {
 @MainActor
 func inform(_ text: String, title: String = appName, style: AlertStyle = .information, in window: NSWindow? = nil) {
     let alert = makeAlert(text, title: title, style: style)
-    alert.addButton(withTitle: Text.macOk.text)
+    alert.addButton(withTitle: Text.uiOk.text)
     run(alert)
 }
 
 /// A question; true for the first button. `destructive` makes the second one the default, as for deleting
 @MainActor
-func ask(_ text: String, title: String = appName, yes: String = Text.macYes.text, no: String = Text.macNo.text,
+func ask(_ text: String, title: String = appName, yes: String = Text.uiYes.text, no: String = Text.uiNo.text,
          style: AlertStyle = .warning,
          destructive: Bool = false) -> Bool {
     let alert = makeAlert(text, title: title, style: style)
@@ -42,11 +42,11 @@ enum Answer {
 }
 
 @MainActor
-func askYesNoCancel(_ text: String, title: String = appName, yes: String = Text.macYes.text,
-                    no: String = Text.macNo.text) -> Answer {
+func askYesNoCancel(_ text: String, title: String = appName, yes: String = Text.uiYes.text,
+                    no: String = Text.uiNo.text) -> Answer {
     let alert = makeAlert(text, title: title, style: .warning)
     alert.addButton(withTitle: yes)
-    alert.addButton(withTitle: Text.macCancel.text)
+    alert.addButton(withTitle: Text.uiCancel.text)
     alert.addButton(withTitle: no)
     switch run(alert) {
     case .alertFirstButtonReturn: return .yes
@@ -111,7 +111,7 @@ struct FormField {
 /// A modal form: a label and an input for each field, OK and Cancel; the fields with their values when OK was
 /// pressed, nil when cancelled. `validate` gets the values and returns an error to show, nil to accept them.
 @MainActor
-func formDialog(title: String, intro: String, fields: [FormField], ok: String = Text.macOk.text, focus: Int = 0,
+func formDialog(title: String, intro: String, fields: [FormField], ok: String = Text.uiOk.text, focus: Int = 0,
                 validate: (([FormField]) -> String?)? = nil) -> [FormField]? {
     let form = FormWindow(title: title, intro: intro, fields: fields, ok: ok, focus: focus, validate: validate)
     return form.run()
@@ -152,7 +152,7 @@ final class FormWindow: NSObject, NSWindowDelegate {
             grid.column(at: 1).width = 260
         }
 
-        let cancelButton = NSButton(title: Text.macCancel.text, target: self, action: #selector(cancel))
+        let cancelButton = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancel))
         cancelButton.keyEquivalent = "\u{1b}"
         cancelButton.setAccessibilityIdentifier("form.cancel")
         let okButton = NSButton(title: ok, target: self, action: #selector(accept))
@@ -240,7 +240,7 @@ final class FormWindow: NSObject, NSWindowDelegate {
 /// The name of a folder to make or rename, asked for; nil when cancelled
 @MainActor
 func askFolderName(title: String, intro: String, name: String) -> String? {
-    formDialog(title: title, intro: intro, fields: [FormField(label: Text.macFolderName.text, value: name)])?[0].value
+    formDialog(title: title, intro: intro, fields: [FormField(label: Text.uiFolderName.text, value: name)])?[0].value
 }
 
 /// Why the core refused, or `fallback` when it did not say
@@ -275,7 +275,7 @@ func wrappingLabel(_ text: String) -> NSTextField {
 
 /// A window with `text` to read and copy, and OK (Message Properties)
 @MainActor
-func textDialog(title: String, intro: String?, text: String, ok: String = Text.macOk.text, id: String = "text",
+func textDialog(title: String, intro: String?, text: String, ok: String = Text.uiOk.text, id: String = "text",
                 size: NSSize = NSSize(width: 640, height: 440), action: ButtonAction? = nil) {
     let window = TextDialogWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: [.titled, .resizable],
                                   backing: .buffered, defer: true)
@@ -365,7 +365,7 @@ enum Waiting {
         spinner.startAnimation(nil)
         let label = wrappingLabel(text)
         label.setAccessibilityIdentifier("wait.text")
-        let cancelButton = NSButton(title: Text.macCancel.text, target: NSApp,
+        let cancelButton = NSButton(title: Text.uiCancel.text, target: NSApp,
                                     action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
         cancelButton.keyEquivalent = "\u{1b}"
         let row = NSStackView(views: [spinner, label])
@@ -406,7 +406,7 @@ enum TestHooks {
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled
 @MainActor
-func saveFilePanel(name: String, title: String = Text.macSaveAttachmentAs.text, types: [UTType] = []) -> URL? {
+func saveFilePanel(name: String, title: String = Text.uiSaveAttachmentAs.text, types: [UTType] = []) -> URL? {
     if let answer = TestHooks.save { return answer(name) }
     let panel = NSSavePanel()
     panel.title = title

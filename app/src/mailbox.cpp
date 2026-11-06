@@ -26,7 +26,7 @@ std::wstring ReasonText(char* reason, PeText fallback) {
 
 // a folder name, asked for; empty when cancelled
 std::wstring AskFolderName(HWND owner, PeText title, const std::wstring& intro, const std::wstring& name) {
-    std::vector<FormField> fields = {{core::T(PE_TEXT_WIN_FOLDER_NAME), name}};
+    std::vector<FormField> fields = {{core::T(PE_TEXT_UI_FOLDER_NAME), name}};
     return FormDialog(owner, core::Title(title), intro, fields) ? fields[0].value : L"";
 }
 
@@ -42,7 +42,7 @@ constexpr int kHeaderLines = 4;
 // the data of the All Inboxes item: neither a folder (positive) nor an account (a negated id)
 constexpr LPARAM kAllInboxesItem = std::numeric_limits<LPARAM>::min();
 std::wstring AllInboxes() {
-    return core::T(PE_TEXT_WIN_ALL_INBOXES);
+    return core::T(PE_TEXT_UI_ALL_INBOXES);
 }
 
 // as Outlook Express has them: the envelope (read or not), the paper clip and the flag, then the text columns
@@ -73,7 +73,7 @@ LRESULT CALLBACK FindEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
         RECT area;
         GetClientRect(hwnd, &area);
         area.left += LOWORD(SendMessageW(hwnd, EM_GETMARGINS, 0, 0));
-        DrawTextW(dc, core::T(PE_TEXT_WIN_FIND_HINT).c_str(), -1, &area, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+        DrawTextW(dc, core::T(PE_TEXT_UI_FIND_HINT).c_str(), -1, &area, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
         SelectObject(dc, old);
         ReleaseDC(hwnd, dc);
     }
@@ -234,8 +234,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     findEdit_ = CreateChild(findField_, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_FIND, {});
     SetWindowSubclass(findEdit_, FindEditProc, 0, 0);
     // what a screen reader says for it
-    SetAccessibleDescription(findEdit_, core::T(PE_TEXT_WIN_FIND_HINT));
-    findClear_ = CreateChild(findField_, L"BUTTON", core::T(PE_TEXT_WIN_CLEAR_SEARCH).c_str(), BS_OWNERDRAW, IDC_FIND_CLEAR, {});
+    SetAccessibleDescription(findEdit_, core::T(PE_TEXT_UI_FIND_HINT));
+    findClear_ = CreateChild(findField_, L"BUTTON", core::T(PE_TEXT_UI_CLEAR_SEARCH).c_str(), BS_OWNERDRAW, IDC_FIND_CLEAR, {});
     ShowWindow(findClear_, SW_HIDE);
     // what the box takes, when the mouse rests on it
     HWND tip = CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
@@ -246,7 +246,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     tool.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
     tool.hwnd = parent;
     // the tooltip keeps a copy
-    std::wstring findTip = core::T(PE_TEXT_WIN_FIND_TIP) + L"\r\n" + kFindSyntax;
+    std::wstring findTip = core::T(PE_TEXT_UI_FIND_TIP) + L"\r\n" + kFindSyntax;
     tool.lpszText = findTip.data();
     for (HWND window : {findField_, findEdit_}) {
         tool.uId = reinterpret_cast<UINT_PTR>(window);
@@ -254,19 +254,19 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     }
     IconColumn(list_, COL_ATTACH, LIST_ATTACH);
     IconColumn(list_, COL_FLAG, LIST_FLAG);
-    AddColumn(list_, COL_FROM, core::T(PE_TEXT_WIN_COL_FROM).c_str(), 200);
-    AddColumn(list_, COL_SUBJECT, core::T(PE_TEXT_WIN_COL_SUBJECT).c_str(), 320);
-    AddColumn(list_, COL_RECEIVED, core::T(PE_TEXT_WIN_COL_RECEIVED).c_str(), 130);
-    AddColumn(list_, COL_SIZE, core::T(PE_TEXT_WIN_COL_SIZE).c_str(), 84, LVCFMT_RIGHT);
+    AddColumn(list_, COL_FROM, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
+    AddColumn(list_, COL_SUBJECT, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 320);
+    AddColumn(list_, COL_RECEIVED, core::T(PE_TEXT_UI_COL_RECEIVED).c_str(), 130);
+    AddColumn(list_, COL_SIZE, core::T(PE_TEXT_UI_COL_SIZE).c_str(), 84, LVCFMT_RIGHT);
 
     // not drawn over the Unsubscribe link that lies on it
     header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN | WS_CLIPSIBLINGS, 0, {});
-    unsubscribe_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_WIN_UNSUBSCRIBE).c_str(), SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
+    unsubscribe_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
     ShowWindow(unsubscribe_, SW_HIDE);
     invitation_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_INVITATION, {});
     logo_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW, IDC_LOGO, {});
     ShowWindow(logo_, SW_HIDE);
-    openCalendar_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_WIN_OPEN_IN_CALENDAR).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_OPEN_CALENDAR, {});
+    openCalendar_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_OPEN_IN_CALENDAR).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_OPEN_CALENDAR, {});
     ShowWindow(invitation_, SW_HIDE);
     ShowWindow(openCalendar_, SW_HIDE);
     // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
@@ -275,7 +275,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     AddButton(attachments_, IDC_ATTACHMENTS, core::T(PE_TEXT_WIN_FILES, {{"count", L"1"}}).c_str(), BTNS_WHOLEDROPDOWN, ICON_ATTACH);
     // the information bar of Outlook Express over a message whose pictures on the internet are blocked; a click
     // shows them
-    std::wstring blocked = L" " + core::T(PE_TEXT_WIN_PICTURES_BLOCKED);
+    std::wstring blocked = L" " + core::T(PE_TEXT_UI_PICTURES_BLOCKED);
     pictures_ = CreateChild(parent, L"STATIC", blocked.c_str(),
                             SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER, IDC_PICTURES, {});
     ShowWindow(attachments_, SW_HIDE);
@@ -288,7 +288,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     ShowWindow(retry_, SW_HIDE);
     // over the list while searching, in the colors of the information bar: what was found, and a link to end it
     searchBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_SEARCH_BAR, {});
-    searchClear_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_WIN_CLEAR_SEARCH).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
+    searchClear_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_CLEAR_SEARCH).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
                                IDC_SEARCH_CLEAR, {});
     ShowWindow(searchBar_, SW_HIDE);
     ShowWindow(searchClear_, SW_HIDE);
@@ -630,7 +630,7 @@ void Mailbox::UpdateFolders(int64_t account) {
 
 std::wstring Mailbox::AccountName(int64_t account) const {
     auto name = accountNames_.find(account);
-    return name != accountNames_.end() ? name->second : core::T(PE_TEXT_WIN_THE_ACCOUNT);
+    return name != accountNames_.end() ? name->second : core::T(PE_TEXT_UI_THE_ACCOUNT);
 }
 
 std::wstring Mailbox::AccountEmail(int64_t account) const {
@@ -693,7 +693,7 @@ bool Mailbox::SeveralFolders() const {
 // all in an Inbox, the Account column
 void Mailbox::ShowFolderColumn() {
     bool wanted = SeveralFolders();
-    std::wstring title = core::T(Searching() ? PE_TEXT_WIN_COL_FOLDER : PE_TEXT_WIN_COL_ACCOUNT);
+    std::wstring title = core::T(Searching() ? PE_TEXT_UI_COL_FOLDER : PE_TEXT_UI_COL_ACCOUNT);
     if (wanted && folderColumn_) {
         LVCOLUMNW column = {};
         column.mask = LVCF_TEXT;
@@ -1158,7 +1158,7 @@ void Mailbox::ShowMessage() {
     }
     viewRequest_ = pe_message_view_start(core_, messageFolder_, uid_, remoteImages_);
     if (!viewRequest_) {
-        SetWindowTextW(header_, (L" " + core::T(PE_TEXT_WIN_NOT_SHOWN)).c_str());
+        SetWindowTextW(header_, (L" " + core::T(PE_TEXT_UI_NOT_SHOWN)).c_str());
     }
 }
 
@@ -1167,7 +1167,7 @@ void Mailbox::ShowView() {
     viewRequest_ = 0;
     const PeMessageInfo* info = pe_message_view_info(view_.get());
     if (!info) {
-        SetWindowTextW(header_, (L" " + core::T(PE_TEXT_WIN_NOT_SHOWN)).c_str());
+        SetWindowTextW(header_, (L" " + core::T(PE_TEXT_UI_NOT_SHOWN)).c_str());
         ShowReaderBars(false, false);
         return;
     }
@@ -1236,7 +1236,7 @@ void Mailbox::ChooseAttachment() {
     uint8_t* data = pe_attachment_data(core_, messageFolder_, uid_, static_cast<size_t>(chosen - 1), &length, &name);
     core::String safeName(name);
     if (!data) {
-        MessageBoxW(parent_, core::T(PE_TEXT_WIN_ATTACHMENT_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxW(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
     }
     std::wstring path = SaveFileDialog(parent_, Text(safeName.get()));
@@ -1244,7 +1244,7 @@ void Mailbox::ChooseAttachment() {
         if (WriteFileBytes(path, data, length)) {
             MarkFromInternet(path);
         } else {
-            MessageBoxW(parent_, core::T(PE_TEXT_WIN_ATTACHMENT_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+            MessageBoxW(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         }
     }
     pe_bytes_free(data, length);
@@ -1260,7 +1260,7 @@ void Mailbox::SaveAllAttachments() {
     size_t total = 0;
     std::string dir = core::Narrow(folder);
     if (!pe_save_attachments(core_, messageFolder_, uid_, dir.c_str(), &saved, &total)) {
-        MessageBoxW(parent_, core::T(PE_TEXT_WIN_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(parent_, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     } else if (saved < total) {
         std::wstring text =
             core::T(PE_TEXT_WIN_FILES_NOT_SAVED, {{"failed", std::to_wstring(total - saved)}, {"count", std::to_wstring(total)}});
@@ -1345,23 +1345,23 @@ std::wstring Mailbox::Unsubscribe(std::wstring& mailto) {
     const std::wstring& target = unsubscribeTarget_;
     switch (unsubscribeKind_) {
     case PE_UNSUBSCRIBE_ONE_CLICK: {
-        std::wstring question = core::T(PE_TEXT_WIN_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_WIN_LEAVE_ONE_CLICK, {{"target", target}});
-        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_WIN_UNSUBSCRIBE).c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
+        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_ONE_CLICK, {{"target", target}});
+        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
             return L"";
         }
         unsubscribeRequest_ = pe_unsubscribe(core_, messageFolder_, uid_);
-        return unsubscribeRequest_ ? core::T(PE_TEXT_WIN_UNSUBSCRIBING, {{"target", target}}) : core::T(PE_TEXT_WIN_CANNOT_UNSUBSCRIBE);
+        return unsubscribeRequest_ ? core::T(PE_TEXT_UI_UNSUBSCRIBING, {{"target", target}}) : core::T(PE_TEXT_UI_CANNOT_UNSUBSCRIBE);
     }
     case PE_UNSUBSCRIBE_MAIL: {
-        std::wstring question = core::T(PE_TEXT_WIN_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_WIN_LEAVE_MAIL, {{"target", target}});
-        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_WIN_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
+        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_MAIL, {{"target", target}});
+        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
             mailto = unsubscribeLink_;
         }
         return L"";
     }
     case PE_UNSUBSCRIBE_WEB: {
-        std::wstring question = core::T(PE_TEXT_WIN_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_WIN_LEAVE_WEB, {{"target", target}});
-        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_WIN_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
+        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_WEB, {{"target", target}});
+        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
             webview::OpenExternally(unsubscribeLink_.c_str());
         }
         return L"";
@@ -1376,7 +1376,7 @@ std::wstring Mailbox::Unsubscribed(uint64_t request, const std::wstring& problem
         return L"";
     }
     unsubscribeRequest_ = 0;
-    return problem.empty() ? core::T(PE_TEXT_WIN_UNSUBSCRIBED) : core::T(PE_TEXT_WIN_NOT_UNSUBSCRIBED, {{"reason", problem}});
+    return problem.empty() ? core::T(PE_TEXT_UI_UNSUBSCRIBED) : core::T(PE_TEXT_UI_NOT_UNSUBSCRIBED, {{"reason", problem}});
 }
 
 namespace {
@@ -1403,15 +1403,15 @@ std::wstring When(const PeInvitation& event) {
     }
     bool hasEnd = event.has_end && EventTime(event.end - (event.all_day ? 86400 : 0), event.floating, end);
     if (event.all_day) {
-        return hasEnd && !SameDay(start, end) ? core::T(PE_TEXT_WIN_EVENT_SPAN, {{"start", LongDate(start)}, {"end", LongDate(end)}})
+        return hasEnd && !SameDay(start, end) ? core::T(PE_TEXT_UI_EVENT_SPAN, {{"start", LongDate(start)}, {"end", LongDate(end)}})
                                               : LongDate(start);
     }
     std::wstring when = LongDate(start) + L", " + FormatTime(start);
     if (hasEnd) {
         std::wstring until = SameDay(start, end) ? FormatTime(end) : LongDate(end) + L", " + FormatTime(end);
-        when = core::T(PE_TEXT_WIN_EVENT_SPAN, {{"start", when}, {"end", until}});
+        when = core::T(PE_TEXT_UI_EVENT_SPAN, {{"start", when}, {"end", until}});
     }
-    return event.floating ? core::T(PE_TEXT_WIN_EVENT_FLOATING, {{"when", when}}) : when;
+    return event.floating ? core::T(PE_TEXT_UI_EVENT_FLOATING, {{"when", when}}) : when;
 }
 }  // namespace
 
@@ -1435,14 +1435,14 @@ void Mailbox::ShowInvitation(const PeInvitation* event) {
         ShowWindow(openCalendar_, SW_HIDE);
         return;
     }
-    PeText kinds[] = {PE_TEXT_WIN_INVITATION, PE_TEXT_WIN_INVITATION_UPDATED, PE_TEXT_WIN_INVITATION_CANCELED,
-                      PE_TEXT_WIN_INVITATION_ANSWER};
+    PeText kinds[] = {PE_TEXT_UI_INVITATION, PE_TEXT_UI_INVITATION_UPDATED, PE_TEXT_UI_INVITATION_CANCELED,
+                      PE_TEXT_UI_INVITATION_ANSWER};
     std::wstring summary = Text(event->summary);
     invitationTitle_ = core::T(kinds[std::clamp(static_cast<int>(event->kind), 0, 3)],
-                               {{"title", summary.empty() ? core::T(PE_TEXT_WIN_NO_TITLE) : summary}});
+                               {{"title", summary.empty() ? core::T(PE_TEXT_UI_NO_TITLE) : summary}});
     std::vector<std::wstring> parts = {When(*event), Text(event->location)};
     if (std::wstring organizer = Text(event->organizer); !organizer.empty()) {
-        parts.push_back(core::T(PE_TEXT_WIN_ORGANIZER, {{"name", organizer}}));
+        parts.push_back(core::T(PE_TEXT_UI_ORGANIZER, {{"name", organizer}}));
     }
     parts.push_back(Text(event->repeats));
     if (event->attendees > 0) {
@@ -1466,13 +1466,13 @@ void Mailbox::OpenInCalendar() {
     std::wstring dir = std::wstring(temp) + L"InboxClassic\\Invitations";
     core::String path(pe_invitation_file(core_, messageFolder_, uid_, core::Narrow(dir).c_str()));
     if (!path) {
-        MessageBoxW(parent_, core::T(PE_TEXT_WIN_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxW(parent_, core::T(PE_TEXT_UI_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
     }
     // marked as from the internet by the core, which wrote it
     std::wstring file = Text(path.get());
     if (reinterpret_cast<INT_PTR>(ShellExecuteW(parent_, L"open", file.c_str(), nullptr, nullptr, SW_SHOWNORMAL)) <= 32) {
-        MessageBoxW(parent_, core::T(PE_TEXT_WIN_NO_CALENDAR).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(parent_, core::T(PE_TEXT_UI_NO_CALENDAR).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     }
 }
 
@@ -1501,7 +1501,7 @@ bool Mailbox::Act(PeAction action, int64_t to) {
     int after = leaves ? RowAfterSelection() : -1;
     char* reason = nullptr;
     core::String done(pe_selection_act(core_, selection_.get(), action, to, &reason));
-    Say(done ? Text(done.get()) : ReasonText(reason, PE_TEXT_WIN_MESSAGES_NOT_CHANGED));
+    Say(done ? Text(done.get()) : ReasonText(reason, PE_TEXT_UI_MESSAGES_NOT_CHANGED));
     if (done && leaves) {
         SelectAfterRemoval(after);
     }
@@ -1578,14 +1578,14 @@ void Mailbox::MoveSelected(HWND owner, bool copy) {
     // the folder they are all in is shown but not offered; from several folders, any
     pick.current = summary_.folders == 1 ? first : 0;
     pick.newFolder = [this](HWND window, int64_t account, int64_t parent) {
-        std::wstring where = core::T(parent ? PE_TEXT_WIN_NEW_FOLDER_IN_HIGHLIGHTED : PE_TEXT_WIN_NEW_FOLDER_AT_TOP);
+        std::wstring where = core::T(parent ? PE_TEXT_WIN_NEW_FOLDER_IN_HIGHLIGHTED : PE_TEXT_UI_NEW_FOLDER_AT_TOP);
         std::wstring name = AskFolderName(window, PE_TEXT_CMD_NEW_FOLDER, where, L"");
         if (name.empty()) {
             return;
         }
         char* reason = nullptr;
         if (!pe_folder_create(core_, account, parent, core::Narrow(name).c_str(), &reason)) {
-            ShowRefusal(window, reason, PE_TEXT_WIN_FOLDER_NOT_CREATED);
+            ShowRefusal(window, reason, PE_TEXT_UI_FOLDER_NOT_CREATED);
             return;
         }
         // highlighted once the server made it (FolderCreated)
@@ -1687,7 +1687,7 @@ void Mailbox::FolderMenu() {
 std::wstring Mailbox::SelectedName() const {
     if (Searching()) {
         // where the search looks; what it found is on the search bar
-        return findPlace_.empty() ? core::T(PE_TEXT_WIN_ALL_FOLDERS) : findPlace_;
+        return findPlace_.empty() ? core::T(PE_TEXT_UI_ALL_FOLDERS) : findPlace_;
     }
     if (allInboxes_) {
         return AllInboxes();
@@ -1705,15 +1705,15 @@ std::wstring Mailbox::SelectedName() const {
 void Mailbox::DrawEmptyList(HDC dc) const {
     std::wstring title, more;
     if (Searching()) {
-        title = core::T(PE_TEXT_WIN_NO_MATCH, {{"words", find_}});
-        more = findPlace_.empty() ? core::T(PE_TEXT_WIN_NO_MATCH_ALL) : core::T(PE_TEXT_WIN_NO_MATCH_IN, {{"folder", findPlace_}});
+        title = core::T(PE_TEXT_UI_NO_MATCH, {{"words", find_}});
+        more = findPlace_.empty() ? core::T(PE_TEXT_UI_NO_MATCH_ALL) : core::T(PE_TEXT_UI_NO_MATCH_IN, {{"folder", findPlace_}});
         if (uint64_t left = pe_search_unindexed_count(core_)) {
             more += L"\n\n" + core::T(PE_TEXT_WIN_NO_MATCH_INDEXING, {{"count", std::to_wstring(left)}});
         }
     } else if (folder_ || allInboxes_) {
-        title = core::T(PE_TEXT_WIN_NO_ITEMS);
+        title = core::T(PE_TEXT_UI_NO_ITEMS);
     } else if (selectedAccount_) {
-        title = core::T(PE_TEXT_WIN_CHOOSE_FOLDER);
+        title = core::T(PE_TEXT_UI_CHOOSE_FOLDER);
     } else {
         return;
     }
@@ -1758,14 +1758,14 @@ void Mailbox::NewFolder(HWND owner) {
     if (!account || allInboxes_) {
         return;
     }
-    std::wstring where = core::T(folder_ ? PE_TEXT_WIN_NEW_FOLDER_IN_SELECTED : PE_TEXT_WIN_NEW_FOLDER_AT_TOP);
+    std::wstring where = core::T(folder_ ? PE_TEXT_UI_NEW_FOLDER_IN_SELECTED : PE_TEXT_UI_NEW_FOLDER_AT_TOP);
     std::wstring name = AskFolderName(owner, PE_TEXT_CMD_NEW_FOLDER, where, L"");
     if (name.empty()) {
         return;
     }
     char* reason = nullptr;
     if (!pe_folder_create(core_, account, folder_, core::Narrow(name).c_str(), &reason)) {
-        ShowRefusal(owner, reason, PE_TEXT_WIN_FOLDER_NOT_CREATED);
+        ShowRefusal(owner, reason, PE_TEXT_UI_FOLDER_NOT_CREATED);
     }
 }
 
@@ -1776,13 +1776,13 @@ void Mailbox::RenameFolder(HWND owner) {
     std::wstring current;
     bool fixed = false;
     FolderOf(folder_, current, fixed);
-    std::wstring name = AskFolderName(owner, PE_TEXT_CMD_RENAME_FOLDER, core::T(PE_TEXT_WIN_RENAME_FOLDER_INTRO, {{"folder", current}}), current);
+    std::wstring name = AskFolderName(owner, PE_TEXT_CMD_RENAME_FOLDER, core::T(PE_TEXT_UI_RENAME_FOLDER_INTRO, {{"folder", current}}), current);
     if (name.empty() || name == current) {
         return;
     }
     char* reason = nullptr;
     if (!pe_folder_rename(core_, folder_, core::Narrow(name).c_str(), &reason)) {
-        ShowRefusal(owner, reason, PE_TEXT_WIN_FOLDER_NOT_RENAMED);
+        ShowRefusal(owner, reason, PE_TEXT_UI_FOLDER_NOT_RENAMED);
     }
 }
 
@@ -1798,7 +1798,7 @@ void Mailbox::DeleteFolder(HWND owner) {
     }
     char* reason = nullptr;
     if (!pe_folder_delete(core_, folder_, &reason)) {
-        ShowRefusal(owner, reason, PE_TEXT_WIN_FOLDER_NOT_DELETED);
+        ShowRefusal(owner, reason, PE_TEXT_UI_FOLDER_NOT_DELETED);
     }
 }
 
@@ -1916,7 +1916,7 @@ struct FilesDoneInfo {
 
 void Mailbox::SaveSelectedInto(HWND owner) {
     FlushSelection();
-    std::wstring dir = FolderDialog(owner, core::Plain(PE_TEXT_WIN_SAVE_MESSAGES_IN).c_str());
+    std::wstring dir = FolderDialog(owner, core::Plain(PE_TEXT_UI_SAVE_MESSAGES_IN).c_str());
     if (dir.empty()) {
         return;
     }
@@ -1987,16 +1987,16 @@ void Mailbox::SaveShownAs(HWND owner) {
     uint8_t* data = pe_message_source(core_, messageFolder_, uid_, &length, &name);
     core::String safeName(name);
     if (!data) {
-        MessageBoxW(owner, core::T(PE_TEXT_WIN_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
-    std::wstring filter = FileFilter({{core::T(PE_TEXT_WIN_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_WIN_FILTER_ALL), L"*.*"}});
-    std::wstring path = SaveFileDialog(owner, Text(safeName.get()), core::Plain(PE_TEXT_WIN_SAVE_MESSAGE_AS).c_str(), filter.c_str(), L"eml");
+    std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}});
+    std::wstring path = SaveFileDialog(owner, Text(safeName.get()), core::Plain(PE_TEXT_UI_SAVE_MESSAGE_AS).c_str(), filter.c_str(), L"eml");
     if (!path.empty()) {
         if (WriteFileBytes(path, data, length)) {
             MarkFromInternet(path);
         } else {
-            MessageBoxW(owner, core::T(PE_TEXT_WIN_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+            MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         }
     }
     pe_bytes_free(data, length);
@@ -2004,30 +2004,30 @@ void Mailbox::SaveShownAs(HWND owner) {
 
 void Mailbox::ShowProperties(HWND owner) {
     if (!uid_) {
-        MessageBoxW(owner, core::T(PE_TEXT_WIN_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     core::String headers(pe_message_headers(core_, messageFolder_, uid_));
     if (!headers) {
-        MessageBoxW(owner, core::T(PE_TEXT_WIN_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     const PeMessageInfo* info = pe_message_view_info(view_.get());
     std::wstring subject = info ? Text(info->subject) : L"";
-    TextDialog(owner, subject.empty() ? core::Title(PE_TEXT_CMD_PROPERTIES) : core::T(PE_TEXT_WIN_PROPERTIES_OF, {{"subject", subject}}),
-               core::T(PE_TEXT_WIN_INTERNET_HEADERS), Text(headers.get()));
+    TextDialog(owner, subject.empty() ? core::Title(PE_TEXT_CMD_PROPERTIES) : core::T(PE_TEXT_UI_PROPERTIES_OF, {{"subject", subject}}),
+               core::T(PE_TEXT_UI_INTERNET_HEADERS), Text(headers.get()));
 }
 
 void Mailbox::ShowSource(HWND owner) {
     if (!uid_) {
-        MessageBoxW(owner, core::T(PE_TEXT_WIN_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     char* title = nullptr;
     core::String text(pe_message_source_text(core_, messageFolder_, uid_, &title));
     core::String titleText(title);
     if (!text) {
-        MessageBoxW(owner, core::T(PE_TEXT_WIN_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     // Save As from here saves the message shown, as File > Save As does
@@ -2108,11 +2108,11 @@ void Mailbox::PrintShown() {
 
 void Mailbox::Import(HWND owner) {
     if (!folder_) {
-        MessageBoxW(owner, core::T(PE_TEXT_WIN_IMPORT_CHOOSE_FOLDER).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_UI_IMPORT_CHOOSE_FOLDER).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONINFORMATION);
         return;
     }
     std::vector<std::wstring> files = OpenFilesDialog(owner, core::Title(PE_TEXT_CMD_IMPORT).c_str(),
-        FileFilter({{core::T(PE_TEXT_WIN_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_WIN_FILTER_ALL), L"*.*"}}).c_str());
+        FileFilter({{core::T(PE_TEXT_UI_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}}).c_str());
     if (!files.empty()) {
         ImportFiles(folder_, files, owner);
     }

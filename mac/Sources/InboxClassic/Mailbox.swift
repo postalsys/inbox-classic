@@ -21,7 +21,7 @@ public final class Mailbox: NSObject {
     public let list = MessageTable()
     let reader: Reader
     private let listArea = NSView()
-    private let searchBar = InfoBar(icon: "search", link: Text.macClearSearch.text)
+    private let searchBar = InfoBar(icon: "search", link: Text.uiClearSearch.text)
     private let emptyTitle = NSTextField(labelWithString: "")
     private let emptyMore = NSTextField(wrappingLabelWithString: "")
     private let rightSplit = NSSplitView()
@@ -195,7 +195,7 @@ public final class Mailbox: NSObject {
         var unread: UInt64 = 0
     }
 
-    static var allInboxesName: String { Text.macAllInboxes.text }
+    static var allInboxesName: String { Text.uiAllInboxes.text }
 
     /// the rows at the top of the tree: All Inboxes, then the accounts
     private var topNodes: [Any] {
@@ -281,7 +281,7 @@ public final class Mailbox: NSObject {
     }
 
     func accountName(_ account: Int64) -> String {
-        accountInfo[account]?.name ?? Text.macTheAccount.text
+        accountInfo[account]?.name ?? Text.uiTheAccount.text
     }
 
     func accountEmail(_ account: Int64) -> String {
@@ -320,7 +320,7 @@ public final class Mailbox: NSObject {
     var selectedName: String {
         if searching {
             // where the search looks; what it found is on the search bar
-            return findPlace.isEmpty ? Text.macAllFolders.text : findPlace
+            return findPlace.isEmpty ? Text.uiAllFolders.text : findPlace
         }
         if allInboxes {
             return Mailbox.allInboxesName
@@ -387,7 +387,7 @@ public final class Mailbox: NSObject {
         let columns: [(ColumnID, String, CGFloat)] = [
             // no envelope column: bold says a message is unread, and From and Subject get the room
             (.attach, "", 22), (.flag, "", 22), (.from, Text.headerFrom.text, 200), (.subject, Text.headerSubject.text, 342),
-            (.received, Text.macColumnReceived.text, 130), (.size, Text.macColumnSize.text, 96),
+            (.received, Text.uiColReceived.text, 130), (.size, Text.uiColSize.text, 96),
         ]
         for (id, title, width) in columns {
             list.addTableColumn(makeColumn(id, title: title, width: width))
@@ -424,7 +424,7 @@ public final class Mailbox: NSObject {
     /// the Folder column while the list has messages of several folders, and not otherwise; in All Inboxes, whose rows
     /// are all in an Inbox, the Account column
     private func showFolderColumn() {
-        let title = searching ? Text.macColumnFolder.text : Text.macColumnAccount.text
+        let title = searching ? Text.uiColFolder.text : Text.uiColAccount.text
         list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue))?.title = title
         guard severalFolders != folderColumn else { return }
         folderColumn = severalFolders
@@ -615,17 +615,17 @@ public final class Mailbox: NSObject {
         var more = ""
         if total == 0 {
             if searching {
-                title = Text.macNoMatch.text(["words": findText])
-                more = findPlace.isEmpty ? Text.macSearchLooksEverywhere.text
-                                         : Text.macSearchLooksIn.text(["folder": findPlace])
+                title = Text.uiNoMatch.text(["words": findText])
+                more = findPlace.isEmpty ? Text.uiNoMatchAll.text
+                                         : Text.uiNoMatchIn.text(["folder": findPlace])
                 let left = core.unindexedCount
                 if left > 0 {
                     more += "\n\n" + Text.macStillIndexingMore.text(["count": left])
                 }
             } else if folder != 0 || allInboxes {
-                title = Text.macNoItems.text
+                title = Text.uiNoItems.text
             } else if selectedAccount != 0 {
-                title = Text.macChooseFolder.text
+                title = Text.uiChooseFolder.text
             }
         }
         emptyTitle.stringValue = title
@@ -741,7 +741,7 @@ public final class Mailbox: NSObject {
         }
         viewRequest = pe_message_view_start(core.handle, messageFolder, uid, remoteImages)
         if viewRequest == 0 {
-            reader.showProblem(Text.macMessageNotShown.text)
+            reader.showProblem(Text.uiNotShown.text)
         }
     }
 
@@ -749,7 +749,7 @@ public final class Mailbox: NSObject {
         messageView = MessageView(pe_message_view_result(core.handle, viewRequest))
         viewRequest = 0
         guard let messageView, let info = messageView.info else {
-            reader.showProblem(Text.macMessageNotShown.text)
+            reader.showProblem(Text.uiNotShown.text)
             return
         }
         reader.show(info.pointee, view: messageView, pictures: remoteImages)
@@ -913,7 +913,7 @@ public final class Mailbox: NSObject {
         guard hasSelection else { return }
         // from Deleted Items, or an account without one, they are gone for good: asked first
         if let question = taken(pe_selection_delete_question(&summary)),
-           !ask(question, yes: Text.macDelete.text, no: Text.macCancel.text, destructive: true) {
+           !ask(question, yes: Text.uiTbDelete.text, no: Text.uiCancel.text, destructive: true) {
             return
         }
         actAndRemove(PE_ACTION_DELETE)
@@ -923,7 +923,7 @@ public final class Mailbox: NSObject {
     /// the background (the status bar says how far)
     func moveSelected(copy: Bool = false) {
         guard hasSelection else { return }
-        let verb = copy ? Text.macCopyButton.text : Text.macMoveButton.text
+        let verb = copy ? Text.uiButtonCopy.text : Text.uiButtonMove.text
         let title = taken(pe_selection_move_text(&summary, copy, false)) ?? verb
         let prompt = taken(pe_selection_move_text(&summary, copy, true)) ?? ""
         // the folder they are all in can not be chosen
@@ -960,33 +960,33 @@ public final class Mailbox: NSObject {
     func newFolder() {
         let account = currentAccount
         guard account != 0, !allInboxes else { return }
-        let where_ = folder != 0 ? Text.macNewFolderInSelected.text : Text.macNewFolderAtTop.text
-        guard let name = askFolderName(title: Text.macNewFolder.text, intro: where_, name: ""), !name.isEmpty else { return }
+        let where_ = folder != 0 ? Text.uiNewFolderInSelected.text : Text.uiNewFolderAtTop.text
+        guard let name = askFolderName(title: Text.uiNewFolderTitle.text, intro: where_, name: ""), !name.isEmpty else { return }
         var reason: UnsafeMutablePointer<CChar>?
         if !name.withCString({ pe_folder_create(core.handle, account, folder, $0, &reason) }) {
-            refused(reason, Text.macFolderNotCreated.text)
+            refused(reason, Text.uiFolderNotCreated.text)
         }
     }
 
     func renameFolder() {
         guard folder != 0, let node = folderNodes[folder], !node.folder.fixed else { return }
         let current = node.folder.displayName
-        guard let name = askFolderName(title: Text.macRenameFolder.text, intro: Text.macRenameFolderIntro.text(["folder": current]),
+        guard let name = askFolderName(title: Text.uiRenameFolderTitle.text, intro: Text.uiRenameFolderIntro.text(["folder": current]),
                                        name: current),
               !name.isEmpty, name != current else { return }
         var reason: UnsafeMutablePointer<CChar>?
         if !name.withCString({ pe_folder_rename(core.handle, folder, $0, &reason) }) {
-            refused(reason, Text.macFolderNotRenamed.text)
+            refused(reason, Text.uiFolderNotRenamed.text)
         }
     }
 
     func deleteFolder() {
         guard folder != 0, let node = folderNodes[folder], !node.folder.fixed else { return }
-        guard ask(Text.macDeleteFolderQuestion.text(["folder": node.folder.displayName]),
-                  yes: Text.macDelete.text, no: Text.macCancel.text, destructive: true) else { return }
+        guard ask(Text.uiDeleteFolderQuestion.text(["folder": node.folder.displayName]),
+                  yes: Text.uiTbDelete.text, no: Text.uiCancel.text, destructive: true) else { return }
         var reason: UnsafeMutablePointer<CChar>?
         if !pe_folder_delete(core.handle, folder, &reason) {
-            refused(reason, Text.macFolderNotDeleted.text)
+            refused(reason, Text.uiFolderNotDeleted.text)
         }
     }
 
@@ -1031,41 +1031,41 @@ public final class Mailbox: NSObject {
         let data = takenBytes(pe_message_source(core.handle, messageFolder, uid, &length, &name), length)
         let safeName = taken(name) ?? "message.eml"
         guard let data else {
-            inform(Text.macNotDownloaded.text)
+            inform(Text.uiNotDownloaded.text)
             return
         }
-        if let url = saveFilePanel(name: safeName, title: Text.macSaveMessageAs.text, types: [.emailMessage]),
+        if let url = saveFilePanel(name: safeName, title: Text.uiSaveMessageAs.text, types: [.emailMessage]),
            !writeDownloaded(data, to: url) {
-            inform(Text.macMessageNotSaved.text, style: .error)
+            inform(Text.uiNotSaved.text, style: .error)
         }
     }
 
     func showProperties() {
         guard uid != 0 else {
-            inform(Text.macSelectMessageFirst.text)
+            inform(Text.uiSelectMessageFirst.text)
             return
         }
         guard let headers = taken(pe_message_headers(core.handle, messageFolder, uid)) else {
-            inform(Text.macNotDownloaded.text)
+            inform(Text.uiNotDownloaded.text)
             return
         }
         let subject = messageView?.info.map { text($0.pointee.subject) } ?? ""
-        textDialog(title: subject.isEmpty ? Text.macProperties.text : Text.macPropertiesOf.text(["subject": subject]),
-                   intro: Text.macInternetHeaders.text,
+        textDialog(title: subject.isEmpty ? Text.uiProperties.text : Text.uiPropertiesOf.text(["subject": subject]),
+                   intro: Text.uiInternetHeaders.text,
                    text: headers)
     }
 
     /// View Source: the whole message as the server has it
     func showSource() {
         guard uid != 0 else {
-            inform(Text.macSelectMessageFirst.text)
+            inform(Text.uiSelectMessageFirst.text)
             return
         }
         var title: UnsafeMutablePointer<CChar>?
         let source = taken(pe_message_source_text(core.handle, messageFolder, uid, &title))
         let name = taken(title) ?? Text.messageSourceUntitled.text
         guard let source else {
-            inform(Text.macNotDownloaded.text)
+            inform(Text.uiNotDownloaded.text)
             return
         }
         // Save As from here saves the message shown, as File > Save As does
@@ -1073,7 +1073,7 @@ public final class Mailbox: NSObject {
         // the key of File > Save As
         save.button.keyEquivalent = "s"
         save.button.keyEquivalentModifierMask = [.command, .shift]
-        textDialog(title: name, intro: nil, text: source, ok: Text.macClose.text, id: "source", size: NSSize(width: 760, height: 560),
+        textDialog(title: name, intro: nil, text: source, ok: Text.uiClose.text, id: "source", size: NSSize(width: 760, height: 560),
                    action: save)
     }
 
@@ -1091,7 +1091,7 @@ public final class Mailbox: NSObject {
             menu.addItem(item)
         }
         if let message, folderNodes[message.folder]?.folder.specialUse == PE_SPECIAL_USE_DRAFTS {
-            let open = NSMenuItem(title: Text.macOpen.text, action: #selector(openSelected), keyEquivalent: "")
+            let open = NSMenuItem(title: Text.uiMenuOpen.text, action: #selector(openSelected), keyEquivalent: "")
             open.target = self
             menu.addItem(open)
             menu.addItem(.separator())
@@ -1106,12 +1106,12 @@ public final class Mailbox: NSObject {
         add(inJunk ? .notJunk : .junk)
         add(.move)
         add(.copy)
-        add(.delete, Text.macDelete.text)
+        add(.delete, Text.uiTbDelete.text)
         menu.addItem(.separator())
         add(.saveAs)
         add(.print)
         menu.addItem(.separator())
-        add(.viewSource, Text.macViewSource.text)
+        add(.viewSource, Text.uiMenuViewSource.text)
         add(.properties)
         return menu
     }
@@ -1125,7 +1125,7 @@ public final class Mailbox: NSObject {
 
     func importMessages() {
         guard folder != 0 else {
-            inform(Text.macImportChooseFolder.text, title: Text.macImportMessages.text)
+            inform(Text.uiImportChooseFolder.text, title: Text.macImportMessages.text)
             return
         }
         importFiles(openFilesPanel(title: Text.macImportMessages.text, types: [.emailMessage, .data]), into: folder)
@@ -1169,7 +1169,7 @@ public final class Mailbox: NSObject {
     func forwardSelected(_ open: @escaping @MainActor (Draft, Int64) -> Void) {
         guard let first = refs(of: selection).first else { return }
         let account = folderNodes[first.0]?.folder.account ?? currentAccount
-        withDownloads(title: Text.macToolForward.text, { core, selection, error in
+        withDownloads(title: Text.uiTbForward.text, { core, selection, error in
             Handed(value: pe_selection_forward(core, selection, exportTimeout, &error))
         }, then: { draft in
             if let made = Draft(draft.value) {
@@ -1266,21 +1266,21 @@ public final class Mailbox: NSObject {
         let data = takenBytes(pe_attachment_data(core.handle, messageFolder, uid, sender.tag, &length, &name), length)
         let safeName = taken(name) ?? "attachment"
         guard let data else {
-            inform(Text.macAttachmentNotRead.text, style: .error)
+            inform(Text.uiAttachmentNotRead.text, style: .error)
             return
         }
         if let url = saveFilePanel(name: safeName), !writeDownloaded(data, to: url) {
-            inform(Text.macAttachmentNotSaved.text, style: .error)
+            inform(Text.uiAttachmentNotSaved.text, style: .error)
         }
     }
 
     @objc private func saveAllAttachments() {
-        guard let folder = folderPanel(title: Text.macSaveAttachments.text) else { return }
+        guard let folder = folderPanel(title: Text.uiSaveAttachments.text) else { return }
         // the core saves them all from one reading of the message, a file already there kept and the new one numbered
         var saved = 0
         var total = 0
         if !folder.path.withCString({ pe_save_attachments(core.handle, messageFolder, uid, $0, &saved, &total) }) {
-            inform(Text.macNotDownloaded.text)
+            inform(Text.uiNotDownloaded.text)
         } else if saved < total {
             inform(Text.macFilesNotSaved.text(["failed": total - saved, "count": total]), style: .error)
         }
@@ -1290,7 +1290,7 @@ public final class Mailbox: NSObject {
     func openInCalendar() {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("InboxClassic/Invitations").path
         guard let path = dir.withCString({ taken(pe_invitation_file(core.handle, messageFolder, uid, $0)) }) else {
-            inform(Text.macInvitationNotRead.text, style: .error)
+            inform(Text.uiInvitationNotRead.text, style: .error)
             return
         }
         if !NSWorkspace.shared.open(URL(fileURLWithPath: path)) {
@@ -1306,18 +1306,18 @@ public final class Mailbox: NSObject {
         let link = text(info.unsubscribe_link)
         switch info.unsubscribe {
         case PE_UNSUBSCRIBE_ONE_CLICK:
-            guard ask(Text.macLeaveList.text + "\n\n" + Text.macUnsubscribeOneClick.text(["target": target]),
-                      title: Text.macUnsubscribe.text, style: .information) else { return }
+            guard ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveOneClick.text(["target": target]),
+                      title: Text.uiUnsubscribe.text, style: .information) else { return }
             unsubscribeRequest = pe_unsubscribe(core.handle, messageFolder, uid)
-            status(unsubscribeRequest != 0 ? Text.macUnsubscribing.text(["target": target]) : Text.macCanNotUnsubscribe.text)
+            status(unsubscribeRequest != 0 ? Text.macUnsubscribing.text(["target": target]) : Text.uiCannotUnsubscribe.text)
         case PE_UNSUBSCRIBE_MAIL:
-            if ask(Text.macLeaveList.text + "\n\n" + Text.macUnsubscribeMail.text(["target": target]),
-                   title: Text.macUnsubscribe.text, yes: Text.macOk.text, no: Text.macCancel.text, style: .information) {
+            if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveMail.text(["target": target]),
+                   title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
                 openMailto(link)
             }
         case PE_UNSUBSCRIBE_WEB:
-            if ask(Text.macLeaveList.text + "\n\n" + Text.macUnsubscribeWeb.text(["target": target]),
-                   title: Text.macUnsubscribe.text, yes: Text.macOk.text, no: Text.macCancel.text, style: .information) {
+            if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveWeb.text(["target": target]),
+                   title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
                 openExternally(URL(string: link))
             }
         default:
@@ -1328,7 +1328,7 @@ public final class Mailbox: NSObject {
     func unsubscribed(_ request: UInt64, problem: String) -> String? {
         guard request == unsubscribeRequest else { return nil }
         unsubscribeRequest = 0
-        return problem.isEmpty ? Text.macUnsubscribed.text : Text.macNotUnsubscribed.text(["reason": problem])
+        return problem.isEmpty ? Text.uiUnsubscribed.text : Text.uiNotUnsubscribed.text(["reason": problem])
     }
 
     // ---- dragging a message onto a folder ----

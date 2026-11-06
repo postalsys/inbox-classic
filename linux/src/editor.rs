@@ -228,11 +228,11 @@ impl Editor {
             });
             menu.insert(&webkit::ContextMenuItem::new_separator(), 0);
             menu.insert(
-                &webkit::ContextMenuItem::from_gaction(&remove, &t!(GtkRemoveLink), None),
+                &webkit::ContextMenuItem::from_gaction(&remove, &t!(UiRemoveLink), None),
                 0,
             );
-            menu.insert(&webkit::ContextMenuItem::from_gaction(&edit, &t!(GtkEditLink), None), 0);
-            menu.insert(&webkit::ContextMenuItem::from_gaction(&open, &t!(GtkOpenLink), None), 0);
+            menu.insert(&webkit::ContextMenuItem::from_gaction(&edit, &t!(UiEditLink), None), 0);
+            menu.insert(&webkit::ContextMenuItem::from_gaction(&open, &t!(UiOpenLink), None), 0);
             false
         });
     }

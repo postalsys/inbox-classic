@@ -69,7 +69,7 @@ const FORMAT_BUTTONS: &[&[FormatButton]] = &[
         FormatButton {
             icon: "ic-text-color-symbolic",
             name: "Font Color",
-            tooltip: Text::GtkFormatFontColor,
+            tooltip: Text::UiFormatColor,
             command: None,
             state: None,
         },
@@ -78,28 +78,28 @@ const FORMAT_BUTTONS: &[&[FormatButton]] = &[
         FormatButton {
             icon: "ic-text-number-list-ltr-symbolic",
             name: "Numbered List",
-            tooltip: Text::GtkFormatNumberedList,
+            tooltip: Text::UiFormatNumbers,
             command: Some("insertOrderedList"),
             state: Some(3),
         },
         FormatButton {
             icon: "ic-text-bullet-list-ltr-symbolic",
             name: "Bulleted List",
-            tooltip: Text::GtkFormatBulletedList,
+            tooltip: Text::UiFormatBullets,
             command: Some("insertUnorderedList"),
             state: Some(4),
         },
         FormatButton {
             icon: "ic-text-indent-decrease-ltr-symbolic",
             name: "Decrease Indent",
-            tooltip: Text::GtkFormatDecreaseIndent,
+            tooltip: Text::UiFormatOutdent,
             command: Some("outdent"),
             state: None,
         },
         FormatButton {
             icon: "ic-text-indent-increase-ltr-symbolic",
             name: "Increase Indent",
-            tooltip: Text::GtkFormatIncreaseIndent,
+            tooltip: Text::UiFormatIndent,
             command: Some("indent"),
             state: None,
         },
@@ -108,21 +108,21 @@ const FORMAT_BUTTONS: &[&[FormatButton]] = &[
         FormatButton {
             icon: "ic-text-align-left-symbolic",
             name: "Align Left",
-            tooltip: Text::GtkFormatAlignLeft,
+            tooltip: Text::UiFormatLeft,
             command: Some("justifyLeft"),
             state: Some(5),
         },
         FormatButton {
             icon: "ic-text-align-center-symbolic",
             name: "Center",
-            tooltip: Text::GtkFormatCenter,
+            tooltip: Text::UiFormatCenter,
             command: Some("justifyCenter"),
             state: Some(6),
         },
         FormatButton {
             icon: "ic-text-align-right-symbolic",
             name: "Align Right",
-            tooltip: Text::GtkFormatAlignRight,
+            tooltip: Text::UiFormatRight,
             command: Some("justifyRight"),
             state: Some(7),
         },
@@ -138,14 +138,14 @@ const FORMAT_BUTTONS: &[&[FormatButton]] = &[
         FormatButton {
             icon: "ic-line-horizontal-1-symbolic",
             name: "Insert Horizontal Line",
-            tooltip: Text::GtkFormatInsertHorizontalLine,
+            tooltip: Text::UiFormatLine,
             command: Some("insertHorizontalRule"),
             state: None,
         },
         FormatButton {
             icon: "ic-image-symbolic",
             name: "Insert Picture",
-            tooltip: Text::GtkFormatInsertPicture,
+            tooltip: Text::UiInsertPicture,
             command: None,
             state: None,
         },
@@ -168,7 +168,7 @@ impl FormatBar {
         font.set_tooltip_text(Some(&t!(GtkFont)));
         let size = gtk::DropDown::from_strings(SIZES);
         size.set_selected(1);
-        size.set_tooltip_text(Some(&t!(GtkFontSize)));
+        size.set_tooltip_text(Some(&t!(UiColSize)));
         widget.append(&font);
         widget.append(&size);
         let mut toggles = Vec::new();
@@ -261,7 +261,7 @@ thread_local! {
 
 async fn choose_color(window: &gtk::Window, editor: &Editor) {
     let dialog = gtk::ColorDialog::builder()
-        .title(t!(GtkFormatFontColor))
+        .title(t!(UiFormatColor))
         .with_alpha(false)
         .build();
     let initial = LAST_COLOR.with(|c| *c.borrow());
@@ -285,7 +285,7 @@ fn valid_link(url: &str) -> Result<(), String> {
     if ui::is_link(url) && !rest.trim_start_matches('/').is_empty() {
         Ok(())
     } else {
-        Err(t!(GtkLinkInvalid))
+        Err(t!(UiLinkInvalid))
     }
 }
 
@@ -295,17 +295,17 @@ async fn insert_link(window: &gtk::Window, editor: &Editor) {
     let current = editor.caret_link();
     let editing = !current.is_empty();
     let (title, intro) = if editing {
-        (t!(GtkEditHyperlink), t!(GtkEditHyperlinkIntro))
+        (t!(UiEditHyperlink), t!(UiEditHyperlinkIntro))
     } else {
-        (t!(GtkHyperlink), t!(GtkHyperlinkIntro))
+        (t!(UiHyperlink), t!(UiHyperlinkIntro))
     };
     let value = if editing { current } else { "https://".into() };
     let form = Form::new(
         window,
         &title,
         &intro,
-        vec![Field::text(&t!(GtkLinkAddress), value)],
-        &t!(GtkOk),
+        vec![Field::text(&t!(UiLinkAddress), value)],
+        &t!(UiOk),
         0,
     );
     form.widget().set_widget_name("link-dialog");
@@ -326,9 +326,9 @@ async fn insert_link(window: &gtk::Window, editor: &Editor) {
 }
 
 async fn insert_picture(window: &gtk::Window, editor: &Editor) {
-    let pictures = t!(GtkPictures);
+    let pictures = t!(UiFilterPictures);
     let patterns = Some((pictures.as_str(), &["*.png", "*.jpg", "*.jpeg", "*.gif"][..]));
-    let Some(path) = ui::open_files(window, &t!(GtkInsertPicture), patterns)
+    let Some(path) = ui::open_files(window, &t!(UiInsertPicture), patterns)
         .await
         .into_iter()
         .next()
@@ -336,7 +336,7 @@ async fn insert_picture(window: &gtk::Window, editor: &Editor) {
         return;
     };
     if !insert_picture_file(editor, &path) {
-        ui::alert(window, &t!(GtkInsertPicture), &t!(GtkNotAPicture)).await;
+        ui::alert(window, &t!(UiInsertPicture), &t!(UiNotAPicture)).await;
     }
 }
 
@@ -494,12 +494,12 @@ impl Compose {
         grid.set_column_spacing(8);
         grid.set_row_spacing(4);
         let rows: [(String, gtk::Widget); 6] = [
-            (t!(GtkComposeFrom), from.clone().upcast()),
-            (t!(GtkComposeTo), to_row.upcast()),
-            (t!(GtkComposeCc), cc.clone().upcast()),
-            (t!(GtkComposeBcc), bcc.clone().upcast()),
-            (t!(GtkComposeSubject), subject.clone().upcast()),
-            (t!(GtkComposeAttach), attached.clone().upcast()),
+            (t!(UiFieldFrom), from.clone().upcast()),
+            (t!(UiFieldTo), to_row.upcast()),
+            (t!(UiFieldCc), cc.clone().upcast()),
+            (t!(UiFieldBcc), bcc.clone().upcast()),
+            (t!(UiFieldSubject), subject.clone().upcast()),
+            (t!(UiFieldAttach), attached.clone().upcast()),
         ];
         let mut placed: Vec<[gtk::Widget; 2]> = Vec::new();
         for (index, (label, field)) in rows.into_iter().enumerate() {
@@ -538,12 +538,12 @@ impl Compose {
         content.append(&frame);
         content.append(&status_bar);
         let header = adw::HeaderBar::new();
-        let send = gtk::Button::with_label(&t!(GtkSend));
+        let send = gtk::Button::with_label(&t!(UiTbSend));
         send.add_css_class("suggested-action");
         send.set_widget_name("compose-send");
         let save = ui::icon_button("ic-save-symbolic", &t!(GtkSaveTip));
         save.set_widget_name("compose-save");
-        let attach = ui::icon_button("ic-attach-symbolic", &t!(GtkAttachTip));
+        let attach = ui::icon_button("ic-attach-symbolic", &t!(UiTbAttach));
         attach.set_widget_name("compose-attach");
         header.pack_start(&send);
         header.pack_start(&save);
@@ -551,7 +551,7 @@ impl Compose {
         let title = draft
             .map(|d| d.subject.clone())
             .filter(|s| !s.is_empty())
-            .unwrap_or_else(|| t!(GtkNewMessage));
+            .unwrap_or_else(|| t!(UiNewMessageTitle));
         let toolbar = adw::ToolbarView::new();
         toolbar.add_top_bar(&header);
         toolbar.set_content(Some(&content));
@@ -696,7 +696,7 @@ impl Compose {
         let subject = on(|this| {
             let text = this.subject.text();
             this.window.set_title(Some(&if text.is_empty() {
-                t!(GtkNewMessage)
+                t!(UiNewMessageTitle)
             } else {
                 text.to_string()
             }));
@@ -806,7 +806,7 @@ impl Compose {
             };
             this.attached.select_child(&child);
             let menu = gio::Menu::new();
-            menu.append(Some(&t!(GtkRemove)), Some("files.remove"));
+            menu.append(Some(&t!(UiRemove)), Some("files.remove"));
             let group = gio::SimpleActionGroup::new();
             let remove = gio::SimpleAction::new("remove", None);
             let removing = Rc::downgrade(&this);
@@ -920,7 +920,7 @@ impl Compose {
 
     async fn attach(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
-        let files = ui::open_files(&window, &t!(GtkInsertAttachment), None).await;
+        let files = ui::open_files(&window, &t!(UiInsertAttachment), None).await;
         self.add_files(&files);
     }
 
@@ -1040,7 +1040,7 @@ impl Compose {
                 self.dirty.set(false);
                 self.editor.clean();
                 // the server's answer follows (draft_saved)
-                self.set_status(&t!(GtkSavingDraft));
+                self.set_status(&t!(UiSavingDraft));
                 if close {
                     self.destroy();
                 }
@@ -1056,12 +1056,12 @@ impl Compose {
             self.destroy();
             return Closing::Closed;
         }
-        let (cancel, no, yes) = (t!(GtkCancel), t!(GtkNo), t!(GtkYes));
+        let (cancel, no, yes) = (t!(UiCancel), t!(UiNo), t!(UiYes));
         let answers = [("cancel", cancel.as_str()), ("no", no.as_str()), ("yes", yes.as_str())];
         match ui::ask(
             &self.window,
             TITLE,
-            &t!(GtkSaveChanges),
+            &t!(UiSaveChangesAsk),
             &answers,
             "yes",
             "cancel",
@@ -1106,8 +1106,8 @@ pub fn draft_saved(message_id: &str, problem: Option<&str>) -> bool {
         return false;
     };
     match problem {
-        Some(problem) => compose.set_status(&t!(GtkNotSavedInDrafts, reason = problem)),
-        None => compose.set_status(&t!(GtkSavedInDraftsAt, time = &ui::time_now())),
+        Some(problem) => compose.set_status(&t!(UiComposeNotSaved, reason = problem)),
+        None => compose.set_status(&t!(UiComposeSavedAt, time = &ui::time_now())),
     }
     true
 }
@@ -1138,7 +1138,7 @@ pub async fn edit_signature(parent: &impl IsA<gtk::Widget>, account: i64, name: 
     };
     let editor = Editor::new(&pe_html::editor_document(None, false, &current));
     let format = FormatBar::new(&editor, false);
-    let hint = gtk::Label::new(Some(&t!(GtkSignatureHint)));
+    let hint = gtk::Label::new(Some(&t!(UiSignatureHint)));
     hint.set_xalign(0.0);
     hint.set_wrap(true);
     hint.set_margin_start(10);
@@ -1152,7 +1152,7 @@ pub async fn edit_signature(parent: &impl IsA<gtk::Widget>, account: i64, name: 
     content.append(&format.widget);
     content.append(&frame);
     content.append(&hint);
-    let (dialog, ok) = ui::dialog_with_buttons(&t!(GtkSignatureOf, account = name), &content, &t!(GtkOk), 640);
+    let (dialog, ok) = ui::dialog_with_buttons(&t!(UiSignatureOf, account = name), &content, &t!(UiOk), 640);
     dialog.set_content_height(360);
     dialog.set_widget_name("signature-dialog");
     let (send, answer) = async_channel::bounded::<Option<String>>(1);
@@ -1188,7 +1188,7 @@ pub async fn edit_signature(parent: &impl IsA<gtk::Widget>, account: i64, name: 
             saved = true;
             break;
         }
-        ui::alert(&dialog, &t!(GtkSignature), &t!(GtkSignatureNotSaved)).await;
+        ui::alert(&dialog, &t!(UiSignature), &t!(UiSignatureNotSaved)).await;
     }
     editor.release();
     dialog.close();

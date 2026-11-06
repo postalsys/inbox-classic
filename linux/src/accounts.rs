@@ -52,32 +52,32 @@ fn validate(fields: &[Field]) -> Result<(), String> {
     for required in [EMAIL, IMAP_HOST, SMTP_HOST] {
         if fields[required].value.is_empty() {
             let field = fields[required].label.trim_end_matches([':', ' ', '\u{a0}']);
-            return Err(t!(GtkFieldRequired, field = field));
+            return Err(t!(UiFieldRequired, field = field));
         }
     }
     if !fields[EMAIL].value.contains('@') {
-        return Err(t!(GtkAddressNotValid));
+        return Err(t!(UiEmailInvalid));
     }
     if !valid_port(&fields[IMAP_PORT].value) || !valid_port(&fields[SMTP_PORT].value) {
-        return Err(t!(GtkPortsAreNumbers));
+        return Err(t!(UiPortsInvalid));
     }
     Ok(())
 }
 
 /// The fields of the server form, filled with `settings`
 fn server_fields(settings: &AccountSettings) -> Vec<Field> {
-    let security = || vec!["SSL/TLS".to_string(), "STARTTLS".into(), t!(GtkSecurityNone)];
+    let security = || vec!["SSL/TLS".to_string(), "STARTTLS".into(), t!(UiSecurityNone)];
     vec![
-        Field::text(&t!(GtkDisplayName), &settings.name),
-        Field::text(&t!(GtkEmailAddress), &settings.email),
-        Field::text(&t!(GtkUserName), &settings.username),
-        Field::password(&t!(GtkPassword)),
-        Field::text(&t!(GtkImapServer), &settings.imap_host),
-        Field::number(&t!(GtkImapPort), settings.imap_port.to_string()),
-        Field::choice(&t!(GtkImapSecurity), security(), security_index(settings.imap_security)),
-        Field::text(&t!(GtkSmtpServer), &settings.smtp_host),
-        Field::number(&t!(GtkSmtpPort), settings.smtp_port.to_string()),
-        Field::choice(&t!(GtkSmtpSecurity), security(), security_index(settings.smtp_security)),
+        Field::text(&t!(UiFieldName), &settings.name),
+        Field::text(&t!(UiFieldEmail), &settings.email),
+        Field::text(&t!(UiFieldUser), &settings.username),
+        Field::password(&t!(UiFieldPassword)),
+        Field::text(&t!(UiFieldImapHost), &settings.imap_host),
+        Field::number(&t!(UiFieldImapPort), settings.imap_port.to_string()),
+        Field::choice(&t!(UiFieldImapSecurity), security(), security_index(settings.imap_security)),
+        Field::text(&t!(UiFieldSmtpHost), &settings.smtp_host),
+        Field::number(&t!(UiFieldSmtpPort), settings.smtp_port.to_string()),
+        Field::choice(&t!(UiFieldSmtpSecurity), security(), security_index(settings.smtp_security)),
     ]
 }
 
@@ -154,12 +154,12 @@ fn provider_button(kind: ProviderKind) -> (&'static str, String, &'static str) {
     match kind {
         ProviderKind::Microsoft => (
             "sign-in-microsoft",
-            t!(GtkSignInWith, provider = "Microsoft"),
+            t!(UiSignInWith, provider = "Microsoft"),
             "microsoft-sign-in.png",
         ),
         _ => (
             "sign-in-google",
-            t!(GtkSignInWith, provider = "Google"),
+            t!(UiSignInWith, provider = "Google"),
             "google-sign-in.png",
         ),
     }
@@ -169,7 +169,7 @@ fn company(kind: ProviderKind) -> String {
     match kind {
         ProviderKind::Microsoft => "Microsoft".into(),
         ProviderKind::Google => "Google".into(),
-        ProviderKind::Oidc => t!(GtkTheProvider),
+        ProviderKind::Oidc => t!(UiTheProvider),
     }
 }
 
@@ -198,7 +198,7 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
         content.append(&buttons);
     }
     if offer.more {
-        let more = gtk::Button::with_label(&t!(GtkMoreSignIn));
+        let more = gtk::Button::with_label(&t!(UiMoreSignIn));
         more.add_css_class("flat");
         more.set_halign(gtk::Align::Start);
         more.set_widget_name("sign-in-more");
@@ -213,21 +213,21 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
         .build();
     name_row.set_widget_name("start-name");
     let email_row = adw::EntryRow::builder()
-        .title(t!(GtkEmailAddressTitle))
+        .title(t!(UiColEmail))
         .text(email.as_str())
         .build();
     email_row.set_widget_name("start-email");
     email_row.set_input_purpose(gtk::InputPurpose::Email);
     if offer.fields {
         content.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
-        content.append(&ui::wrapped_label(&t!(GtkOtherAccountIntro)));
+        content.append(&ui::wrapped_label(&t!(UiOtherAccount)));
         group.add(&name_row);
         group.add(&email_row);
         name_row.set_activates_default(true);
         email_row.set_activates_default(true);
         content.append(&group);
     }
-    let (dialog, next) = ui::dialog_with_buttons(&t!(GtkAddMailAccount), &content, &offer.next, 500);
+    let (dialog, next) = ui::dialog_with_buttons(&t!(UiAddAccountTitle), &content, &offer.next, 500);
     dialog.set_widget_name("account-start");
     if !offer.fields {
         next.remove_css_class("suggested-action");
@@ -247,7 +247,7 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
         match choice.recv().await.unwrap_or(Start::Cancel) {
             // the page of another account wants an address to look up
             Start::Next if offer.fields && !email_row.text().contains('@') => {
-                ui::alert(&dialog, TITLE, &t!(GtkTypeAddress)).await;
+                ui::alert(&dialog, TITLE, &t!(UiTypeEmail)).await;
                 email_row.grab_focus();
             }
             other => break other,
@@ -291,9 +291,9 @@ fn sign_in_button(kind: ProviderKind, on: bool, chosen: &async_channel::Sender<S
         reason = &pe_core::builtin_off_text(kind)
     );
     button.set_tooltip_text(Some(&reason));
-    let off = gtk::Label::new(Some(&t!(GtkTurnedOff)));
+    let off = gtk::Label::new(Some(&t!(UiOffHere)));
     off.add_css_class("dim-label");
-    let why = gtk::LinkButton::with_label("about:blank", &t!(GtkWhy));
+    let why = gtk::LinkButton::with_label("about:blank", &t!(UiWhy));
     why.set_widget_name(&format!("{id}-why"));
     let text = t!(
         GtkTurnedOffWhyLong,
@@ -303,7 +303,7 @@ fn sign_in_button(kind: ProviderKind, on: bool, chosen: &async_channel::Sender<S
     why.connect_activate_link(move |link| {
         let link = link.clone().upcast::<gtk::Widget>();
         let text = text.clone();
-        spawn(async move { ui::alert(&link, &t!(GtkAddMailAccount), &text).await });
+        spawn(async move { ui::alert(&link, &t!(UiAddAccountTitle), &text).await });
         glib::Propagation::Stop
     });
     let line = gtk::Box::new(gtk::Orientation::Horizontal, 4);
@@ -330,7 +330,7 @@ fn more_menu(button: &gtk::Button, chosen: async_channel::Sender<Start>) {
         menu.append_section(None, &added);
     }
     let add = gio::Menu::new();
-    add.append(Some(&t!(GtkAddSignInApp)), Some("more.add"));
+    add.append(Some(&t!(UiAddSignInApp)), Some("more.add"));
     menu.append_section(None, &add);
     let app = gio::SimpleAction::new("app", Some(glib::VariantTy::INT64));
     let send = chosen.clone();
@@ -370,7 +370,7 @@ fn more_menu(button: &gtk::Button, chosen: async_channel::Sender<Start>) {
 pub async fn sign_in_with_browser(parent: &impl IsA<gtk::Widget>, with: SignInWith, email: &str) -> Option<u64> {
     let shell = shell();
     let Ok((request, page)) = shell.core.sign_in_begin(with, email) else {
-        ui::alert(parent, TITLE, &t!(GtkBrowserSignInNotStarted)).await;
+        ui::alert(parent, TITLE, &t!(UiSignInNotStarted)).await;
         return None;
     };
     // the core makes the page, and gives only an https page or one of a provider on this computer (a test server)
@@ -381,16 +381,16 @@ pub async fn sign_in_with_browser(parent: &impl IsA<gtk::Widget>, with: SignInWi
         None => gtk::UriLauncher::new(&page).launch(ui::window_of(parent).as_ref(), gio::Cancellable::NONE, |_| {}),
     }
     let text = if email.is_empty() {
-        t!(GtkSignInInBrowserYours)
+        t!(UiSignInInBrowserYours)
     } else {
-        t!(GtkSignInInBrowser, account = email)
+        t!(UiSignInInBrowser, account = email)
     };
     let cancel = |request| shell.core.sign_in_cancel(request);
-    if !ui::wait_for_request(parent, request, cancel, &text, &t!(GtkAddMailAccount)).await {
+    if !ui::wait_for_request(parent, request, cancel, &text, &t!(UiAddAccountTitle)).await {
         return None;
     }
     if let Err(reason) = shell.core.sign_in_result(request) {
-        ui::alert(parent, TITLE, &t!(GtkSigningInFailed, reason = &reason.to_string())).await;
+        ui::alert(parent, TITLE, &t!(UiSignInFailed, reason = &reason.to_string())).await;
         return None;
     }
     Some(request)
@@ -404,7 +404,7 @@ async fn add_signed_in(parent: &gtk::Widget, with: SignInWith, name: &str, email
     match shell().core.add_signed_in_account(request, name) {
         Ok(account) => account,
         Err(_) => {
-            ui::alert(parent, &t!(GtkAddMailAccount), &t!(GtkAccountNotSaved)).await;
+            ui::alert(parent, &t!(UiAddAccountTitle), &t!(UiAccountNotSaved)).await;
             0
         }
     }
@@ -418,9 +418,9 @@ async fn look_up(parent: &gtk::Widget, email: &str) -> Option<pe_autoconfig::Set
     let shell = shell();
     let request = shell.core.autoconfig(email, None).ok()?;
     let domain = email.rsplit_once('@').map_or(email, |(_, domain)| domain);
-    let text = t!(GtkLookingUp, domain = domain);
+    let text = t!(UiLookingUp, domain = domain);
     let cancel = |request| shell.core.autoconfig_cancel(request);
-    if !ui::wait_for_request(parent, request, cancel, &text, &t!(GtkAddMailAccount)).await {
+    if !ui::wait_for_request(parent, request, cancel, &text, &t!(UiAddAccountTitle)).await {
         return None;
     }
     shell.core.autoconfig_result(request)
@@ -429,14 +429,14 @@ async fn look_up(parent: &gtk::Widget, email: &str) -> Option<pe_autoconfig::Set
 /// The first line of the server form: where the settings came from
 fn found_intro(found: Option<&pe_autoconfig::Settings>) -> String {
     let found = match found.map(|f| f.source) {
-        None => return t!(GtkFoundNone),
-        Some(Source::Guess) => return t!(GtkFoundGuess),
-        Some(Source::Mx) => t!(GtkFoundMx),
-        Some(Source::Srv) => t!(GtkFoundSrv),
-        Some(Source::Autodiscover) => t!(GtkFoundAutodiscover),
-        Some(_) => t!(GtkFoundOther),
+        None => return t!(UiFoundNone),
+        Some(Source::Guess) => return t!(UiFoundGuess),
+        Some(Source::Mx) => t!(UiFoundMx),
+        Some(Source::Srv) => t!(UiFoundSrv),
+        Some(Source::Autodiscover) => t!(UiFoundAutodiscover),
+        Some(_) => t!(UiFoundOther),
     };
-    format!("{found} {}", t!(GtkFoundChange))
+    format!("{found} {}", t!(UiFoundChange))
 }
 
 /// A provider that does not take the account's password from mail programs: says so, and opens the page that tells
@@ -448,16 +448,16 @@ async fn explain_app_password(parent: &gtk::Widget, found: Option<&pe_autoconfig
     let provider = hint.provider;
     let mut text = match hint.warning {
         Some(warning) => warning.to_string(),
-        None => t!(GtkAppPasswordNeeded, provider = provider),
+        None => t!(UiAppPasswordNeeded, provider = provider),
     };
     let page = hint.instructions;
     if page.starts_with("https://") {
-        text.push_str(&format!("\n\n{}", t!(GtkOpenInstructions, provider = provider)));
-        if ui::confirm(parent, &t!(GtkAddMailAccount), &text, false).await {
+        text.push_str(&format!("\n\n{}", t!(UiAppPasswordOpen, provider = provider)));
+        if ui::confirm(parent, &t!(UiAddAccountTitle), &text, false).await {
             ui::open_externally(page, ui::window_of(parent).as_ref());
         }
     } else {
-        ui::alert(parent, &t!(GtkAddMailAccount), &text).await;
+        ui::alert(parent, &t!(UiAddAccountTitle), &text).await;
     }
 }
 
@@ -475,7 +475,7 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
     let apps = Apps::load();
     let any = apps.on(ProviderKind::Google) || apps.on(ProviderKind::Microsoft);
     let first = Offer {
-        intro: if any { t!(GtkStartIntro) } else { t!(GtkStartIntroApps) },
+        intro: if any { t!(UiStartIntro) } else { t!(UiStartIntroApps) },
         providers: vec![ProviderKind::Google, ProviderKind::Microsoft],
         more: true,
         fields: true,
@@ -504,7 +504,7 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
             providers: if apps.on(kind) { vec![kind] } else { Vec::new() },
             more,
             fields: false,
-            next: t!(GtkUseAppPassword),
+            next: t!(UiUseAppPassword),
         };
         match start_page(&parent, &apps, offer, &mut name, &mut email).await {
             Start::Cancel => return 0,
@@ -532,17 +532,17 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
     // the name and address were typed already: the password is next
     let form = Form::new(
         &parent,
-        &t!(GtkAddMailAccount),
+        &t!(UiAddAccountTitle),
         &found_intro(found.as_ref()),
         server_fields(&start),
-        &t!(GtkFinish),
+        &t!(UiFinish),
         PASSWORD,
     );
     form.widget().set_widget_name("account-servers");
     form.validate_with(validate);
     while form.run().await {
         let settings = settings_of(&form, Auth::Password);
-        if !accept_plain(form.widget(), &settings, &t!(GtkAddMailAccount)).await {
+        if !accept_plain(form.widget(), &settings, &t!(UiAddAccountTitle)).await {
             continue;
         }
         match shell().core.add_account(&settings, &form.value(PASSWORD)) {
@@ -550,7 +550,7 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
                 form.close();
                 return account;
             }
-            Err(_) => ui::alert(form.widget(), &t!(GtkAddMailAccount), &t!(GtkAccountNotSaved)).await,
+            Err(_) => ui::alert(form.widget(), &t!(UiAddAccountTitle), &t!(UiAccountNotSaved)).await,
         }
     }
     form.close();
@@ -559,13 +559,13 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
 
 /// Asks for the password of an account; None when cancelled
 pub async fn password_dialog(parent: &impl IsA<gtk::Widget>, account: &str) -> Option<String> {
-    let intro = t!(GtkEnterPassword, account = account);
+    let intro = t!(UiEnterPassword, account = account);
     let form = Form::new(
         parent,
-        &t!(GtkLogon),
+        &t!(UiLogon),
         &intro,
-        vec![Field::password(&t!(GtkPassword))],
-        &t!(GtkOk),
+        vec![Field::password(&t!(UiFieldPassword))],
+        &t!(UiOk),
         0,
     );
     form.widget().set_widget_name("logon");
@@ -588,13 +588,13 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     let stored = stored.settings;
     if let Some(with) = signs_in_with {
         // a browser sign-in account: the name only, the rest is the provider's
-        let intro = t!(GtkSignsInWith, app = &with);
+        let intro = t!(UiSignsInWith, app = &with);
         let form = Form::new(
             parent,
-            &t!(GtkProperties),
+            &t!(UiProperties),
             &intro,
-            vec![Field::text(&t!(GtkDisplayName), &stored.name)],
-            &t!(GtkOk),
+            vec![Field::text(&t!(UiFieldName), &stored.name)],
+            &t!(UiOk),
             0,
         );
         form.widget().set_widget_name("account-properties");
@@ -609,10 +609,10 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     }
     let form = Form::new(
         parent,
-        &t!(GtkProperties),
-        &t!(GtkKeepPassword),
+        &t!(UiProperties),
+        &t!(UiKeepPassword),
         server_fields(&stored),
-        &t!(GtkOk),
+        &t!(UiOk),
         0,
     );
     form.widget().set_widget_name("account-properties");
@@ -636,11 +636,11 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
             stored.smtp_security,
             &stored.smtp_host,
         );
-        if warn && !accept_plain(form.widget(), &settings, &t!(GtkProperties)).await {
+        if warn && !accept_plain(form.widget(), &settings, &t!(UiProperties)).await {
             continue;
         }
         if core.update_account(account, &settings).is_err() {
-            ui::alert(form.widget(), &t!(GtkProperties), &t!(GtkAccountNotSaved)).await;
+            ui::alert(form.widget(), &t!(UiProperties), &t!(UiAccountNotSaved)).await;
             continue;
         }
         let password = form.value(PASSWORD);
@@ -671,7 +671,7 @@ fn fill_accounts(list: &gtk::ListBox, rows: &RefCell<Vec<AccountRow>>, select: u
         let s = &account.settings;
         let oauth = SignInWith::of_auth_kind(&s.auth).is_some();
         let server = if oauth {
-            t!(GtkBrowserSignInServer, server = &s.imap_host)
+            t!(UiBrowserSignInServer, server = &s.imap_host)
         } else {
             s.imap_host.clone()
         };
@@ -706,7 +706,7 @@ pub async fn accounts_dialog(parent: &impl IsA<gtk::Widget>) -> bool {
         ("add", t!(GtkAccountsAdd)),
         ("properties", t!(GtkAccountsProperties)),
         ("signature", t!(GtkAccountsSignature)),
-        ("remove", t!(GtkRemove)),
+        ("remove", t!(UiRemove)),
         ("sign-in-apps", t!(GtkAccountsSignInApps)),
     ] {
         let button = gtk::Button::with_label(&label);
@@ -737,7 +737,7 @@ pub async fn accounts_dialog(parent: &impl IsA<gtk::Widget>) -> bool {
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));
     let dialog = adw::Dialog::builder()
-        .title(t!(GtkAccountsTitle))
+        .title(t!(UiAccountsTitle))
         .content_width(640)
         .child(&view)
         .build();
@@ -772,7 +772,7 @@ pub async fn accounts_dialog(parent: &impl IsA<gtk::Widget>) -> bool {
                 crate::compose::edit_signature(&host, id, &name).await;
             }
             ("remove", Some((id, _, _))) => {
-                if ui::confirm(&host, &t!(GtkRemoveAccount), &t!(GtkRemoveAccountAsk), true).await {
+                if ui::confirm(&host, &t!(UiRemoveAccount), &t!(UiRemoveAccountAsk), true).await {
                     let _ = shell().core.remove_account(id);
                     changed = true;
                     fill_accounts(&list, &rows, index);

@@ -23,19 +23,19 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
     private let window: NSWindow
     private let core: Core
     private let table = NSTableView()
-    private let send = NSButton(title: Text.macSendAllNow.text, target: nil, action: nil)
-    private let delete = NSButton(title: Text.macDelete.text, target: nil, action: nil)
+    private let send = NSButton(title: Text.uiOutboxSendAll.text, target: nil, action: nil)
+    private let delete = NSButton(title: Text.uiTbDelete.text, target: nil, action: nil)
     private var rows: [Queued] = []
 
     init(core: Core) {
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 280), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
-        window.title = Text.macOutbox.text
+        window.title = Text.uiOutboxTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("outbox")
         super.init()
         for (id, title, width) in [("subject", Text.headerSubject.text, 170.0), ("to", Text.headerTo.text, 130.0),
-                                   ("queued", Text.macColumnQueued.text, 120.0), ("status", Text.macColumnStatus.text, 120.0)] {
+                                   ("queued", Text.uiColQueued.text, 120.0), ("status", Text.uiColStatus.text, 120.0)] {
             let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(id))
             column.title = title
             column.width = width
@@ -56,7 +56,7 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
         send.setAccessibilityIdentifier("outbox.send")
         delete.target = self
         delete.action = #selector(deleteSelected)
-        let close = NSButton(title: Text.macClose.text, target: NSApp,
+        let close = NSButton(title: Text.uiClose.text, target: NSApp,
                              action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
         close.keyEquivalent = "\r"
         let side = NSStackView(views: [send, delete, NSView(), close])
@@ -101,16 +101,16 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
         let queued = rows[row]
         let value: String
         switch column?.identifier.rawValue {
-        case "subject": value = queued.subject.isEmpty ? Text.macNoSubject.text : queued.subject
+        case "subject": value = queued.subject.isEmpty ? Text.uiNoSubject.text : queued.subject
         case "to": value = queued.recipients
         case "queued": value = formatDate(queued.created)
         default:
             if let problem = queued.problem {
-                value = Text.macNotSent.text(["reason": problem])
+                value = Text.uiOutboxStatusNotSent.text(["reason": problem])
             } else if queued.notBefore != 0 {
-                value = Text.macAgentGoesAt.text(["time": timeOfDay(queued.notBefore)])
+                value = Text.uiOutboxStatusAgent.text(["time": timeOfDay(queued.notBefore)])
             } else {
-                value = Text.macWaiting.text
+                value = Text.uiOutboxStatusWaiting.text
             }
         }
         let label = NSTextField(labelWithString: value)
@@ -126,7 +126,7 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
     @objc private func deleteSelected() {
         let index = table.selectedRow
         guard rows.indices.contains(index),
-              ask(Text.macDeleteUnsent.text, title: Text.macOutbox.text, yes: Text.macDelete.text, no: Text.macCancel.text,
+              ask(Text.uiOutboxDeleteAsk.text, title: Text.uiOutboxTitle.text, yes: Text.uiTbDelete.text, no: Text.uiCancel.text,
                   destructive: true)
         else { return }
         pe_outbox_delete(core.handle, rows[index].id)

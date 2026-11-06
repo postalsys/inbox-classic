@@ -78,9 +78,9 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
     });
     let Some(core) = core else {
         let why = if arguments.certificate.is_none() {
-            t!(GtkStoreNotOpened)
+            t!(UiStoreNotOpened)
         } else {
-            t!(GtkStoreOrCertNotOpened)
+            t!(UiStoreOrCertNotOpened)
         };
         fail_to_start(application, &why);
         return;
@@ -270,12 +270,12 @@ impl Shell {
         match &event {
             Event::SyncStarted { account } => {
                 self.failing.borrow_mut().remove(account);
-                main.set_status(&t!(GtkChecking, account = &main.account_name(*account)));
+                main.set_status(&t!(UiChecking, account = &main.account_name(*account)));
             }
             Event::SyncFinished { .. } => {
                 // a failure stays in the status bar until the account syncs without one
                 if self.failing.borrow().is_empty() {
-                    main.set_status(&t!(GtkDone));
+                    main.set_status(&t!(UiDone));
                 }
             }
             Event::AutoconfigDone { request } | Event::SignInDone { request } | Event::SignInAppChecked { request } => {
@@ -298,8 +298,8 @@ impl Shell {
                 // the window that saved it says so; one that closed after saving leaves it to the status bar
                 if !compose::draft_saved(message_id, problem.as_deref()) {
                     match problem {
-                        None => main.set_status(&t!(GtkDraftSaved)),
-                        Some(problem) => main.set_status(&t!(GtkDraftNotSaved, reason = problem)),
+                        None => main.set_status(&t!(UiDraftSaved)),
+                        Some(problem) => main.set_status(&t!(UiDraftNotSaved, reason = problem)),
                     }
                 }
             }
@@ -356,12 +356,12 @@ impl Shell {
         if !self.notify.get() || (window.is_visible() && window.is_active()) {
             return;
         }
-        let no_subject = t!(GtkNoSubject);
+        let no_subject = t!(UiNoSubject);
         let subject = if subject.is_empty() { &no_subject } else { subject };
         if *count <= 1 {
             notify::new_mail(&self.application, from, subject, *folder, *uid);
         } else {
-            let text = t!(GtkNewestFrom, sender = from, subject = subject);
+            let text = t!(UiNewestFrom, sender = from, subject = subject);
             notify::new_mail(
                 &self.application,
                 &t!(GtkNewMessages, count = *count),
@@ -383,11 +383,11 @@ impl Shell {
                 .borrow()
                 .as_ref()
                 .map_or_else(String::new, |(subject, time)| {
-                    t!(GtkSentAt, subject = &quoted(subject), time = time)
+                    t!(UiSentAt, subject = &quoted(subject), time = time)
                 }),
-            [first] if first.problem.is_some() => t!(GtkOutboxWaits, subject = &quoted(&first.subject)),
-            [first] => t!(GtkOutboxSending, subject = &quoted(&first.subject)),
-            more => t!(GtkOutboxCount, count = more.len()),
+            [first] if first.problem.is_some() => t!(UiOutboxWaits, subject = &quoted(&first.subject)),
+            [first] => t!(UiOutboxSending, subject = &quoted(&first.subject)),
+            more => t!(UiOutboxWaiting, count = more.len()),
         };
         self.main().set_outgoing(&text);
     }
@@ -417,7 +417,7 @@ impl Shell {
         self.main().window().set_visible(false);
         if !self.settings.bool(settings::TRAY_NOTE, false) {
             self.settings.set_bool(settings::TRAY_NOTE, true);
-            notify::note(&self.application, &t!(GtkStillRunning), &t!(GtkStillRunningDetail));
+            notify::note(&self.application, &t!(UiStillRunning), &t!(GtkStillRunningDetail));
         }
         false
     }
@@ -443,7 +443,7 @@ impl Shell {
         };
         if account == 0 {
             let window = self.main().window().clone();
-            spawn(async move { ui::alert(&window, TITLE, &t!(GtkAddAccountFirst)).await });
+            spawn(async move { ui::alert(&window, TITLE, &t!(UiAddAccountFirst)).await });
             return;
         }
         compose::open(account, None);
@@ -456,7 +456,7 @@ impl Shell {
         };
         let account = self.main().current_account();
         if account == 0 {
-            ui::alert(self.main().window(), TITLE, &t!(GtkAddAccountFirstLink)).await;
+            ui::alert(self.main().window(), TITLE, &t!(UiAddAccountFirstLink)).await;
             return;
         }
         compose::open(account, Some(draft));
@@ -468,7 +468,7 @@ impl Shell {
             Some(draft) => compose::open(main.current_account(), Some(draft)),
             None => {
                 let window = main.window().clone();
-                spawn(async move { ui::alert(&window, TITLE, &t!(GtkSelectMessageFirst)).await });
+                spawn(async move { ui::alert(&window, TITLE, &t!(UiSelectMessageFirst)).await });
             }
         }
     }
@@ -488,9 +488,9 @@ impl Shell {
 /// "Subject" in quotes, or "(no subject)"
 fn quoted(subject: &str) -> String {
     if subject.is_empty() {
-        t!(GtkNoSubject)
+        t!(UiNoSubject)
     } else {
-        t!(GtkQuoted, subject = subject)
+        t!(UiQuoted, subject = subject)
     }
 }
 
@@ -526,7 +526,7 @@ async fn sign_in_again(account: i64, with: SignInWith) {
             let _ = shell.core.sync(account);
         }
         Err(reason) => {
-            ui::alert(&window, TITLE, &t!(GtkSignInAgainFailed, reason = &reason.to_string())).await;
+            ui::alert(&window, TITLE, &t!(UiSignInAgainFailed, reason = &reason.to_string())).await;
         }
     }
 }
@@ -584,7 +584,7 @@ async fn make_default_mail_app() {
         .as_deref()
         == Some(desktop.as_str());
     let said = if ours {
-        t!(GtkDefaultAppIs)
+        t!(UiDefaultAppIs)
     } else if app.set_as_default_for_type("x-scheme-handler/mailto").is_ok() {
         t!(GtkDefaultAppNow)
     } else {
@@ -599,7 +599,7 @@ fn show_about() {
         .application_name(TITLE)
         .application_icon(crate::APP_ID)
         .version(crate::VERSION)
-        .comments(t!(GtkAboutCore, version = pe_core::VERSION))
+        .comments(t!(UiAboutCore, version = pe_core::VERSION))
         .developer_name("Postal Systems OÜ")
         .website("https://inboxclassic.com")
         .license_type(gtk::License::MitX11)

@@ -101,7 +101,7 @@ impl Editor {
     /// A preset fills in everything but the client; the name only when there is none yet
     fn fill(&self, preset: &pe_oauth::Preset) {
         if self.name.text().is_empty() {
-            self.name.set_text(&t!(GtkPresetName, provider = preset.name));
+            self.name.set_text(&t!(UiPresetAppName, provider = preset.name));
         }
         self.issuer.set_text(preset.issuer);
         self.scopes.set_text(&preset.scopes.join(" "));
@@ -145,8 +145,8 @@ async fn check_issuer(parent: &impl IsA<gtk::Widget>, issuer: &str) -> Result<St
         parent,
         request,
         cancel,
-        &t!(GtkCheckingIssuer, issuer = issuer),
-        &t!(GtkSignInApp),
+        &t!(UiCheckingIssuer, issuer = issuer),
+        &t!(UiSignInApp),
     )
     .await
     {
@@ -174,13 +174,13 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
     content.set_margin_start(18);
     content.set_margin_end(18);
     content.set_margin_bottom(18);
-    content.append(&ui::wrapped_label(&t!(GtkAppEditorIntro)));
+    content.append(&ui::wrapped_label(&t!(UiSignInAppIntro)));
     let fill_row = gtk::Box::new(gtk::Orientation::Horizontal, 6);
-    fill_row.append(&gtk::Label::new(Some(&t!(GtkFillInFor))));
+    fill_row.append(&gtk::Label::new(Some(&t!(UiFillInFor))));
     let group = adw::PreferencesGroup::new();
-    let name = entry_row(&t!(GtkAppName), &text(|a| &a.name), "app-name");
-    let issuer = entry_row(&t!(GtkIssuer), &text(|a| &a.issuer), "app-issuer");
-    let check = gtk::Button::with_label(&t!(GtkCheck));
+    let name = entry_row(&t!(UiColName), &text(|a| &a.name), "app-name");
+    let issuer = entry_row(&t!(UiColIssuer), &text(|a| &a.issuer), "app-issuer");
+    let check = gtk::Button::with_label(&t!(UiCheck));
     check.set_valign(gtk::Align::Center);
     check.set_widget_name("app-check");
     issuer.add_suffix(&check);
@@ -193,7 +193,7 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
     }
     group.add(&secret);
     let remove_secret = had_secret.then(|| {
-        let row = adw::SwitchRow::builder().title(t!(GtkSecretSaved)).build();
+        let row = adw::SwitchRow::builder().title(t!(UiRemoveSecret)).build();
         group.add(&row);
         row
     });
@@ -216,10 +216,10 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
     );
     let register = ui::wrapped_label("");
     register.set_widget_name("app-register");
-    let registration = adw::PreferencesGroup::builder().title(t!(GtkRegisterIt)).build();
+    let registration = adw::PreferencesGroup::builder().title(t!(UiRegisterIt)).build();
     let redirect = entry_row(&t!(GtkRedirectUri), "", "app-redirect");
     redirect.set_editable(false);
-    let copy = gtk::Button::with_label(&t!(GtkCopyButton));
+    let copy = gtk::Button::with_label(&t!(UiButtonCopy));
     copy.set_valign(gtk::Align::Center);
     redirect.add_suffix(&copy);
     registration.add(&register);
@@ -269,12 +269,12 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
         .build();
     let (dialog, ok) = ui::dialog_with_buttons(
         &if id != 0 {
-            t!(GtkSignInApp)
+            t!(UiSignInApp)
         } else {
-            t!(GtkAddSignInAppTitle)
+            t!(UiAddSignInAppTitle)
         },
         &scrolled,
-        &t!(GtkOk),
+        &t!(UiOk),
         560,
     );
     dialog.set_widget_name("sign-in-app-editor");
@@ -301,10 +301,10 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
                 let issuer = editor.issuer.text().trim().to_string();
                 match check_issuer(&dialog, &issuer).await {
                     Ok(found) => {
-                        ui::alert(&dialog, &t!(GtkCheck), &t!(GtkIssuerUsable, found = &found)).await;
+                        ui::alert(&dialog, &t!(UiCheck), &t!(GtkIssuerUsable, found = &found)).await;
                     }
                     Err(reason) if !reason.is_empty() => {
-                        ui::alert(&dialog, &t!(GtkCheck), &t!(GtkIssuerNotUsable, reason = &reason)).await;
+                        ui::alert(&dialog, &t!(UiCheck), &t!(UiIssuerUnusable, reason = &reason)).await;
                     }
                     Err(_) => {}
                 }
@@ -326,12 +326,12 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
 async fn save(dialog: &adw::Dialog, editor: &Editor, id: i64, had_secret: bool) -> Option<i64> {
     let form = editor.form();
     if form.imap_port == 0 || form.smtp_port == 0 {
-        ui::alert(dialog, &t!(GtkSignInApp), &t!(GtkPortsAreNumbers)).await;
+        ui::alert(dialog, &t!(UiSignInApp), &t!(UiPortsInvalid)).await;
         return None;
     }
     if let Err(reason) = check_issuer(dialog, &form.issuer).await {
         if !reason.is_empty() {
-            ui::alert(dialog, &t!(GtkSignInApp), &t!(GtkIssuerNotUsable, reason = &reason)).await;
+            ui::alert(dialog, &t!(UiSignInApp), &t!(UiIssuerUnusable, reason = &reason)).await;
             editor.issuer.grab_focus();
         }
         return None;
@@ -352,8 +352,8 @@ async fn save(dialog: &adw::Dialog, editor: &Editor, id: i64, had_secret: bool) 
         Err(reason) => {
             ui::alert(
                 dialog,
-                &t!(GtkSignInApp),
-                &t!(GtkAppNotSaved, reason = &reason.to_string()),
+                &t!(UiSignInApp),
+                &t!(UiSignInAppNotSaved, reason = &reason.to_string()),
             )
             .await;
             None
@@ -393,8 +393,8 @@ impl AppsWindow {
                 };
                 t!(GtkAppBuiltIn, app = &app.name, reason = &reason)
             }
-            (Some(_), Some(added)) if added.has_secret => t!(GtkClientWithSecret, client = &added.client_id),
-            (Some(_), Some(added)) => t!(GtkClientPublic, client = &added.client_id),
+            (Some(_), Some(added)) if added.has_secret => t!(UiClientWithSecret, client = &added.client_id),
+            (Some(_), Some(added)) => t!(UiClientPublic, client = &added.client_id),
             _ => String::new(),
         };
         self.note.set_text(&note);
@@ -410,7 +410,7 @@ impl AppsWindow {
         for (index, app) in apps.iter().enumerate() {
             let builtin = app.app.is_none();
             let used_by = if app.used_by.is_empty() {
-                t!(GtkNoAccounts)
+                t!(UiNoAccounts)
             } else {
                 app.used_by.join(", ")
             };
@@ -474,7 +474,7 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
     };
     let add = button(&t!(GtkAccountsAdd), "add");
     let edit = button(&t!(GtkEditButton), "edit");
-    let remove = button(&t!(GtkRemove), "remove");
+    let remove = button(&t!(UiRemove), "remove");
     let buttons = gtk::Box::new(gtk::Orientation::Vertical, 6);
     buttons.append(&add);
     buttons.append(&edit);
@@ -528,7 +528,7 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));
     let dialog = adw::Dialog::builder()
-        .title(t!(GtkSignInAppsTitle))
+        .title(t!(UiSignInApps))
         .content_width(680)
         .child(&view)
         .build();
@@ -562,12 +562,12 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
             "remove" => {
                 let Some((id, _, name)) = added else { continue };
                 let question = t!(GtkRemoveAppAsk, app = &*name);
-                if !ui::confirm(&host, &t!(GtkRemoveSignInApp), &question, true).await {
+                if !ui::confirm(&host, &t!(UiRemoveSignInApp), &question, true).await {
                     continue;
                 }
                 if let Err(reason) = shell().core.remove_sign_in_app(id) {
-                    let text = t!(GtkAppNotRemoved, reason = &reason.to_string());
-                    ui::alert(&host, &t!(GtkRemoveSignInApp), &text).await;
+                    let text = t!(UiSignInAppNotRemoved, reason = &reason.to_string());
+                    ui::alert(&host, &t!(UiRemoveSignInApp), &text).await;
                     continue;
                 }
                 window.fill(index);

@@ -622,7 +622,7 @@ HBITMAP DragImage(HFONT font, const std::wstring& subject, size_t count, SIZE& s
     HDC dc = CreateCompatibleDC(screen);
     HGDIOBJ oldFont = SelectObject(dc, font);
     std::wstring badge = count > 1 ? std::to_wstring(count) : L"";
-    std::wstring text = subject.empty() ? core::T(PE_TEXT_WIN_NO_SUBJECT) : subject;
+    std::wstring text = subject.empty() ? core::T(PE_TEXT_UI_NO_SUBJECT) : subject;
     RECT measure = {0, 0, 0, 0};
     DrawTextW(dc, text.c_str(), -1, &measure, DT_CALCRECT | DT_SINGLELINE | DT_NOPREFIX);
     int pad = Scale(6);

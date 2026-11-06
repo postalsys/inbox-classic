@@ -2968,7 +2968,7 @@ public static bool HasIcon(IntPtr window) {
         Check (($menus -join ',') -eq ($wanted -join ',')) "the menus are German ($($menus -join ', '))"
         $tools = [Native.Win]::MenuLabels([Native.Win]::GetSubMenu([Native.Win]::GetMenu($main), 3))
         Check ($tools[-1] -eq $de['cmd-options']) "Tools ends with $($de['cmd-options'])"
-        Check ((ToolbarText $main $IDM_NEW_MAIL) -eq $de['win-tb-create-mail']) "the toolbar is German ($(ToolbarText $main $IDM_NEW_MAIL))"
+        Check ((ToolbarText $main $IDM_NEW_MAIL) -eq $de['ui-tb-create-mail']) "the toolbar is German ($(ToolbarText $main $IDM_NEW_MAIL))"
         $folders = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)))
         Check (@($folders | Where-Object { $_ -like "$($de['folder-inbox'])*" }).Count -gt 0) "the folders are German ($($folders -join ', '))"
         $status = [Native.Win]::FindDescendants($main, 'msctls_statusbar32') | Select-Object -First 1

@@ -89,7 +89,7 @@ void UpdateJunkButton() {
     TBBUTTONINFOW info = {sizeof(info)};
     info.dwMask = TBIF_COMMAND | TBIF_TEXT | TBIF_IMAGE;
     info.idCommand = to;
-    std::wstring label = core::T(inJunk ? PE_TEXT_WIN_TB_NOT_JUNK : PE_TEXT_WIN_TB_JUNK);
+    std::wstring label = core::T(inJunk ? PE_TEXT_UI_TB_NOT_JUNK : PE_TEXT_UI_TB_JUNK);
     info.pszText = label.data();
     info.iImage = inJunk ? ICON_MAIL_CHECKMARK : ICON_MAIL_PROHIBITED;
     SendMessageW(g_toolbar, TB_SETBUTTONINFOW, from, reinterpret_cast<LPARAM>(&info));
@@ -211,7 +211,7 @@ void HideToTray() {
     ShowWindow(g_main, SW_HIDE);
     if (!GetPreference(kTrayNotePreference, 0)) {
         SetPreference(kTrayNotePreference, 1);
-        TrayNotify(g_main, core::T(PE_TEXT_WIN_STILL_RUNNING), core::T(PE_TEXT_WIN_STILL_RUNNING_DETAIL), 0, 0);
+        TrayNotify(g_main, core::T(PE_TEXT_UI_STILL_RUNNING), core::T(PE_TEXT_WIN_STILL_RUNNING_DETAIL), 0, 0);
     }
 }
 
@@ -225,13 +225,13 @@ void NotifyNewMail(const UiEvent& event) {
     }
     std::wstring subject = core::Widen(event.detail.c_str());
     if (subject.empty()) {
-        subject = core::T(PE_TEXT_WIN_NO_SUBJECT);
+        subject = core::T(PE_TEXT_UI_NO_SUBJECT);
     }
     if (event.count <= 1) {
         TrayNotify(g_main, event.message, subject, event.folder, event.uid);
     } else {
         TrayNotify(g_main, core::T(PE_TEXT_WIN_NEW_MESSAGES, {{"count", std::to_wstring(event.count)}}),
-                   core::T(PE_TEXT_WIN_NEWEST_FROM, {{"sender", event.message}, {"subject", subject}}), event.folder, event.uid);
+                   core::T(PE_TEXT_UI_NEWEST_FROM, {{"sender", event.message}, {"subject", subject}}), event.folder, event.uid);
     }
 }
 
@@ -261,7 +261,7 @@ HWND g_lastFocus = nullptr;
 
 // "Subject" in quotes, or "(no subject)"
 std::wstring Quoted(const std::wstring& subject) {
-    return subject.empty() ? core::T(PE_TEXT_WIN_NO_SUBJECT) : core::T(PE_TEXT_WIN_QUOTED, {{"subject", subject}});
+    return subject.empty() ? core::T(PE_TEXT_UI_NO_SUBJECT) : core::T(PE_TEXT_UI_QUOTED, {{"subject", subject}});
 }
 
 // the outgoing pane of the status bar, which other work does not write over: what is being sent, what waits in the
@@ -275,11 +275,11 @@ void ShowOutbox() {
         std::wstring subject = first && first->subject ? Text(first->subject) : L"";
         bool failed = first && first->problem && *first->problem;
         if (waiting > 1) {
-            text = core::T(PE_TEXT_WIN_OUTBOX_WAITING, {{"count", std::to_wstring(waiting)}});
+            text = core::T(PE_TEXT_UI_OUTBOX_WAITING, {{"count", std::to_wstring(waiting)}});
         } else if (failed) {
-            text = core::T(PE_TEXT_WIN_OUTBOX_WAITS, {{"subject", Quoted(subject)}});
+            text = core::T(PE_TEXT_UI_OUTBOX_WAITS, {{"subject", Quoted(subject)}});
         } else {
-            text = core::T(PE_TEXT_WIN_OUTBOX_SENDING, {{"subject", Quoted(subject)}});
+            text = core::T(PE_TEXT_UI_OUTBOX_SENDING, {{"subject", Quoted(subject)}});
         }
     }
     SendMessageW(g_status, SB_SETTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
@@ -311,7 +311,7 @@ void AccountMenu(const NMTOOLBARW* button) {
     for (size_t i = 0; i < count; i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
         std::wstring label = MenuText(Text(account->label));
-        std::wstring item = sync ? label : core::T(PE_TEXT_WIN_FROM_ACCOUNT, {{"account", label}});
+        std::wstring item = sync ? label : core::T(PE_TEXT_UI_FROM_ACCOUNT, {{"account", label}});
         AppendMenuW(menu, MF_STRING, first + static_cast<UINT>(i), item.c_str());
     }
     if (count == 0) {
@@ -335,8 +335,8 @@ void AccountMenu(const NMTOOLBARW* button) {
 
 // an account that signs in through the browser signs in again
 void SignInAgain(int64_t account) {
-    std::wstring text = core::T(PE_TEXT_WIN_SIGN_IN_REFUSED, {{"account", g_mailbox.AccountName(account)}}) + L"\n\n" +
-                        core::T(PE_TEXT_WIN_SIGN_IN_AGAIN_ASK);
+    std::wstring text = core::T(PE_TEXT_UI_SIGN_IN_REFUSED, {{"account", g_mailbox.AccountName(account)}}) + L"\n\n" +
+                        core::T(PE_TEXT_UI_SIGN_IN_AGAIN_ASK);
     if (MessageBoxW(g_main, text.c_str(), kTitle, MB_YESNO | MB_ICONQUESTION) != IDYES) {
         return;
     }
@@ -351,8 +351,8 @@ void SignInAgain(int64_t account) {
         return;
     }
     core::String reason(why);
-    std::wstring refused = core::T(PE_TEXT_WIN_SIGN_IN_AGAIN_FAILED,
-                                   {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_WIN_UNKNOWN_REASON)}});
+    std::wstring refused = core::T(PE_TEXT_UI_SIGN_IN_AGAIN_FAILED,
+                                   {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
     MessageBoxW(g_main, refused.c_str(), kTitle, MB_OK | MB_ICONWARNING);
 }
 
@@ -380,12 +380,12 @@ void OnEvent(const UiEvent& event) {
     switch (event.kind) {
     case PE_EVENT_KIND_SYNC_STARTED:
         g_failing.erase(event.account);
-        SetStatus(core::T(PE_TEXT_WIN_CHECKING, {{"account", g_mailbox.AccountName(event.account)}}));
+        SetStatus(core::T(PE_TEXT_UI_CHECKING, {{"account", g_mailbox.AccountName(event.account)}}));
         break;
     case PE_EVENT_KIND_SYNC_FINISHED:
         // a failure stays in the status bar until the account syncs without one
         if (g_failing.empty()) {
-            SetStatus(core::T(PE_TEXT_WIN_DONE));
+            SetStatus(core::T(PE_TEXT_UI_DONE));
         }
         // how much text the search still has to read
         ShowFolderName();
@@ -405,13 +405,13 @@ void OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_MESSAGE_SENT:
         // shown by the OutboxChanged that follows it
-        g_lastSent = core::T(PE_TEXT_WIN_SENT_AT, {{"subject", Quoted(event.message)}, {"time", TimeNow()}});
+        g_lastSent = core::T(PE_TEXT_UI_SENT_AT, {{"subject", Quoted(event.message)}, {"time", TimeNow()}});
         break;
     case PE_EVENT_KIND_DRAFT_SAVED:
         // the window that saved it says so; one that closed after saving leaves it to the status bar
         if (!ComposeDraftSaved(event.detail, event.message)) {
-            SetStatus(event.message.empty() ? core::T(PE_TEXT_WIN_DRAFT_SAVED)
-                                            : core::T(PE_TEXT_WIN_DRAFT_NOT_SAVED, {{"reason", event.message}}));
+            SetStatus(event.message.empty() ? core::T(PE_TEXT_UI_DRAFT_SAVED)
+                                            : core::T(PE_TEXT_UI_DRAFT_NOT_SAVED, {{"reason", event.message}}));
         }
         break;
     case PE_EVENT_KIND_OUTBOX_CHANGED:
@@ -552,21 +552,21 @@ void CreateToolbar(HWND hwnd) {
     };
     // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state (0 separates)
     Button buttons[] = {
-        {IDM_NEW_MAIL, PE_TEXT_WIN_TB_CREATE_MAIL, ICON_MAIL_ADD, BTNS_DROPDOWN},
+        {IDM_NEW_MAIL, PE_TEXT_UI_TB_CREATE_MAIL, ICON_MAIL_ADD, BTNS_DROPDOWN},
         {0, PE_TEXT_MENU_FILE, 0},
-        {IDM_REPLY, PE_TEXT_WIN_TB_REPLY, ICON_ARROW_REPLY},
-        {IDM_REPLY_ALL, PE_TEXT_WIN_TB_REPLY_ALL, ICON_ARROW_REPLY_ALL},
-        {IDM_FORWARD, PE_TEXT_WIN_TB_FORWARD, ICON_ARROW_FORWARD},
+        {IDM_REPLY, PE_TEXT_UI_TB_REPLY, ICON_ARROW_REPLY},
+        {IDM_REPLY_ALL, PE_TEXT_UI_TB_REPLY_ALL, ICON_ARROW_REPLY_ALL},
+        {IDM_FORWARD, PE_TEXT_UI_TB_FORWARD, ICON_ARROW_FORWARD},
         {0, PE_TEXT_MENU_FILE, 0},
-        {IDM_PRINT, PE_TEXT_WIN_TB_PRINT, ICON_PRINT},
-        {IDM_DELETE, PE_TEXT_WIN_TB_DELETE, ICON_DELETE},
+        {IDM_PRINT, PE_TEXT_UI_TB_PRINT, ICON_PRINT},
+        {IDM_DELETE, PE_TEXT_UI_TB_DELETE, ICON_DELETE},
         // Not Junk in place of it in a Junk folder (UpdateJunkButton)
-        {IDM_JUNK, PE_TEXT_WIN_TB_JUNK, ICON_MAIL_PROHIBITED},
+        {IDM_JUNK, PE_TEXT_UI_TB_JUNK, ICON_MAIL_PROHIBITED},
         {0, PE_TEXT_MENU_FILE, 0},
-        {IDM_SYNC, PE_TEXT_WIN_TB_SYNC, ICON_ARROW_SYNC, BTNS_DROPDOWN},
+        {IDM_SYNC, PE_TEXT_UI_TB_SYNC, ICON_ARROW_SYNC, BTNS_DROPDOWN},
         {0, PE_TEXT_MENU_FILE, 0},
-        {IDM_MARK_READ, PE_TEXT_WIN_TB_MARK_READ, ICON_MAIL_READ},
-        {IDM_MARK_UNREAD, PE_TEXT_WIN_TB_MARK_UNREAD, ICON_MAIL_UNREAD},
+        {IDM_MARK_READ, PE_TEXT_UI_TB_MARK_READ, ICON_MAIL_READ},
+        {IDM_MARK_UNREAD, PE_TEXT_UI_TB_MARK_UNREAD, ICON_MAIL_UNREAD},
     };
     for (const Button& button : buttons) {
         std::wstring label = button.id ? core::T(button.text) : std::wstring();
@@ -819,14 +819,14 @@ void AddAccount() {
 
 void ShowAbout() {
     std::wstring text = std::wstring(L"Inbox Classic ") + APP_VERSION_W + L"\n" +
-                        core::T(PE_TEXT_WIN_ABOUT_CORE, {{"version", core::Version()}}) + L"\n\nPostal Systems OÜ";
+                        core::T(PE_TEXT_UI_ABOUT_CORE, {{"version", core::Version()}}) + L"\n\nPostal Systems OÜ";
     MessageBoxW(g_main, text.c_str(), core::Plain(PE_TEXT_CMD_ABOUT).c_str(), MB_OK | MB_ICONINFORMATION);
 }
 
 void NewMessage(int64_t account) {
     account = account ? account : g_mailbox.CurrentAccount();
     if (!account) {
-        MessageBoxW(g_main, core::T(PE_TEXT_WIN_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), account, nullptr);
@@ -840,7 +840,7 @@ void OpenMailto(const std::wstring& link) {
     }
     int64_t account = g_mailbox.CurrentAccount();
     if (!account) {
-        MessageBoxW(g_main, core::T(PE_TEXT_WIN_ADD_ACCOUNT_FIRST_LINK).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST_LINK).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
@@ -915,7 +915,7 @@ void MakeDefaultMailApp() {
         bool ours = _wcsicmp(current, kMailtoClass) == 0;
         CoTaskMemFree(current);
         if (ours) {
-            MessageBoxW(g_main, core::T(PE_TEXT_WIN_DEFAULT_APP_IS).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+            MessageBoxW(g_main, core::T(PE_TEXT_UI_DEFAULT_APP_IS).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
             return;
         }
     }
@@ -934,7 +934,7 @@ void MakeDefaultMailApp() {
 void Reply(PeDraftKind kind) {
     core::Draft draft = g_mailbox.DraftOfShown(kind);
     if (!draft) {
-        MessageBoxW(g_main, core::T(PE_TEXT_WIN_SELECT_MESSAGE_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(g_main, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), g_mailbox.CurrentAccount(), pe_draft_info(draft.get()));
@@ -1150,7 +1150,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_main = hwnd;
         SetScaleWindow(hwnd);
         if (!OpenCore(hwnd)) {
-            std::wstring why = core::T(g_arguments.certificate.empty() ? PE_TEXT_WIN_STORE_NOT_OPENED : PE_TEXT_WIN_STORE_OR_CERT_NOT_OPENED);
+            std::wstring why = core::T(g_arguments.certificate.empty() ? PE_TEXT_UI_STORE_NOT_OPENED : PE_TEXT_UI_STORE_OR_CERT_NOT_OPENED);
             MessageBoxW(hwnd, why.c_str(), kTitle, MB_OK | MB_ICONERROR);
             return -1;
         }

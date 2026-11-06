@@ -22,7 +22,7 @@ struct AccessForm {
 impl AccessForm {
     fn new(path: &str, levels: AgentLevels, has: impl Fn(i64) -> bool) -> Rc<AccessForm> {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 6);
-        let program = gtk::Label::new(Some(&t!(GtkAgentProgram, path = path)));
+        let program = gtk::Label::new(Some(&t!(UiProgramPath, path = path)));
         program.set_xalign(0.0);
         program.set_ellipsize(gtk::pango::EllipsizeMode::Middle);
         program.set_tooltip_text(Some(path));
@@ -121,7 +121,7 @@ pub async fn question(request: u64) {
                 &heading,
                 &body,
                 &form.widget,
-                &[("deny", t!(GtkDontAllow).as_str()), ("allow", t!(GtkAllow).as_str())],
+                &[("deny", t!(UiDontAllow).as_str()), ("allow", t!(UiAllow).as_str())],
                 "agent-connect",
             );
             dialog.set_response_appearance("allow", adw::ResponseAppearance::Suggested);
@@ -142,9 +142,9 @@ pub async fn question(request: u64) {
                 &text.detail,
                 &extra,
                 &[
-                    ("dont", t!(GtkDontSend).as_str()),
-                    ("compose", t!(GtkEditFirst).as_str()),
-                    ("send", t!(GtkSend).as_str()),
+                    ("dont", t!(UiDontSend).as_str()),
+                    ("compose", t!(UiEditFirst).as_str()),
+                    ("send", t!(UiTbSend).as_str()),
                 ],
                 "agent-send",
             );
@@ -197,7 +197,7 @@ fn send_details(ask: &agents::SendAsk, text: &agents::SendText) -> gtk::Box {
         row += 1;
     };
     let plain = |text: &str| -> gtk::Widget { ui::wrapped_label(text).upcast() };
-    line(&t!(GtkComposeFrom), &[plain(&ask.from)]);
+    line(&t!(UiFieldFrom), &[plain(&ask.from)]);
     for (index, recipient) in ask.recipients.iter().enumerate() {
         let address = gtk::Label::new(Some(&recipient.address));
         address.add_css_class("heading");
@@ -209,19 +209,19 @@ fn send_details(ask: &agents::SendAsk, text: &agents::SendText) -> gtk::Box {
             cells.push(name.upcast());
         }
         if recipient.new {
-            let tag = gtk::Label::new(Some(&t!(GtkNewAddress)));
+            let tag = gtk::Label::new(Some(&t!(UiNewAddress)));
             tag.add_css_class("new-address");
             tag.set_valign(gtk::Align::Center);
             cells.push(tag.upcast());
         }
         let field = match recipient.field {
-            "Cc" => t!(GtkComposeCc),
-            "Bcc" => t!(GtkComposeBcc),
-            _ => t!(GtkComposeTo),
+            "Cc" => t!(UiFieldCc),
+            "Bcc" => t!(UiFieldBcc),
+            _ => t!(UiFieldTo),
         };
         line(&field, &cells);
     }
-    line(&t!(GtkComposeSubject), &[plain(&ask.subject)]);
+    line(&t!(UiFieldSubject), &[plain(&ask.subject)]);
     if !text.original.is_empty() {
         let original = gtk::Label::new(Some(&text.original));
         original.add_css_class("dim-label");
@@ -361,9 +361,9 @@ impl AgentsDialog {
             &body,
             &form.widget,
             &[
-                ("cancel", t!(GtkCancel).as_str()),
-                ("away", t!(GtkTurnAway).as_str()),
-                ("allow", t!(GtkAllow).as_str()),
+                ("cancel", t!(UiCancel).as_str()),
+                ("away", t!(UiTurnAway).as_str()),
+                ("allow", t!(UiAllow).as_str()),
             ],
             "agent-access",
         );
@@ -399,13 +399,13 @@ impl AgentsDialog {
             return;
         };
         if let Err(error) = shell().core.agent_undo(id) {
-            ui::alert(&self.dialog, &t!(GtkAiAgents), &agents::undo_refusal(&error)).await;
+            ui::alert(&self.dialog, &t!(UiAiAgents), &agents::undo_refusal(&error)).await;
         }
         self.fill();
     }
 
     async fn clear_log(self: Rc<Self>) {
-        if ui::confirm(&self.dialog, &t!(GtkClearAgentLog), &t!(GtkClearAgentLogDetail), false).await {
+        if ui::confirm(&self.dialog, &t!(UiClearAgentLog), &t!(UiClearAgentLogDetail), false).await {
             let _ = shell().core.clear_agent_log();
             self.fill();
         }
@@ -454,14 +454,14 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
         button.set_widget_name(name);
         button
     };
-    let enabled = adw::SwitchRow::builder().title(t!(GtkLetAgentsConnect)).build();
+    let enabled = adw::SwitchRow::builder().title(t!(UiLetAgentsConnect)).build();
     enabled.set_widget_name("agents-enabled");
     let switch = gtk::ListBox::new();
     switch.add_css_class("boxed-list");
     switch.append(&enabled);
     let agents = Rc::new(AgentsDialog {
         dialog: adw::Dialog::builder()
-            .title(t!(GtkAiAgents))
+            .title(t!(UiAiAgents))
             .content_width(720)
             .content_height(620)
             .build(),
@@ -470,13 +470,13 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
         log: list("agents-log", &t!(GtkNothingYet)),
         host_ids: RefCell::default(),
         entries: RefCell::default(),
-        change: button(&t!(GtkChangeButton), "agents-change"),
-        remove: button(&t!(GtkRemove), "agents-remove"),
-        undo: button(&t!(GtkUndoButton), "agents-undo"),
-        clear: button(&t!(GtkClearButton), "agents-clear"),
+        change: button(&t!(UiChangeButton), "agents-change"),
+        remove: button(&t!(UiRemove), "agents-remove"),
+        undo: button(&t!(UiUndoButton), "agents-undo"),
+        clear: button(&t!(UiClearButton), "agents-clear"),
     });
     agents.dialog.set_widget_name("agents-dialog");
-    let setup = button(&t!(GtkHowToConnect), "agents-setup");
+    let setup = button(&t!(UiHowToConnect), "agents-setup");
     setup.add_css_class("flat");
     setup.set_halign(gtk::Align::Start);
     let content = gtk::Box::new(gtk::Orientation::Vertical, 18);
@@ -485,13 +485,13 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
     content.set_margin_bottom(18);
     content.append(&switch);
     content.append(&section(
-        &t!(GtkAgentPrograms),
+        &t!(UiAgentPrograms),
         &agents.hosts,
         &[&agents.change, &agents.remove],
         120,
     ));
     content.append(&section(
-        &t!(GtkWhatAgentsDid),
+        &t!(UiWhatAgentsDid),
         &agents.log,
         &[&agents.undo, &agents.clear],
         220,
@@ -533,7 +533,7 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
             .map(|p| p.to_string_lossy().into_owned())
             .unwrap_or_default();
         let config = agents::mcp_config(&exe, store.as_deref());
-        let dialog = ui::text_dialog(&parent_window, &t!(GtkConnectAgent), &t!(GtkConnectAgentIntro), &config);
+        let dialog = ui::text_dialog(&parent_window, &t!(UiConnectAgent), &t!(UiConnectAgentIntro), &config);
         dialog.set_widget_name("agents-setup-dialog");
     });
 

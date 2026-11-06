@@ -113,7 +113,7 @@ void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const ch
     // over the app, the size of its window, as large as the preview can be
     RECT area;
     GetWindowRect(owner, &area);
-    std::wstring title = subject.empty() ? core::T(PE_TEXT_WIN_PRINT_TITLE) : core::T(PE_TEXT_WIN_PRINT_TITLE_OF, {{"subject", subject}});
+    std::wstring title = subject.empty() ? core::T(PE_TEXT_UI_TB_PRINT) : core::T(PE_TEXT_WIN_PRINT_TITLE_OF, {{"subject", subject}});
     HWND hwnd = CreateWindowExW(0, kPrintClass, title.c_str(), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, area.left, area.top,
                                 area.right - area.left, area.bottom - area.top, owner, nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!hwnd) {

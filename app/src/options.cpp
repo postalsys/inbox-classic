@@ -123,7 +123,7 @@ bool OptionsDialog(HWND owner, bool& notify) {
 
     std::wstring label = core::T(PE_TEXT_WIN_OPTIONS_LANGUAGE_LABEL), note = core::T(PE_TEXT_WIN_OPTIONS_RESTART_NOTE);
     std::wstring notifyText = core::T(PE_TEXT_WIN_OPTIONS_NOTIFY);
-    std::wstring ok = core::T(PE_TEXT_WIN_OK), cancel = core::T(PE_TEXT_WIN_CANCEL);
+    std::wstring ok = core::T(PE_TEXT_UI_OK), cancel = core::T(PE_TEXT_UI_CANCEL);
     int pad = Scale(12), row = Scale(22);
     int labelWidth = static_cast<int>(MeasureText(label).cx) + Scale(8);
     // wide enough for the longest language name and the check box's words
@@ -140,7 +140,7 @@ bool OptionsDialog(HWND owner, bool& notify) {
     HWND combo = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, IDC_OPTIONS_LANGUAGE,
                              {left + labelWidth, y, right, y + Scale(200)});
     // the first item follows Windows, and says which language that is now
-    std::wstring systemItem = core::T(PE_TEXT_WIN_OPTIONS_SYSTEM_DEFAULT, {{"language", nameOf(system)}});
+    std::wstring systemItem = core::T(PE_TEXT_UI_OPTIONS_SYSTEM_DEFAULT, {{"language", nameOf(system)}});
     SendMessageW(combo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(systemItem.c_str()));
     int selected = 0;
     for (size_t i = 0; i < languages.size(); i++) {
