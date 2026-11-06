@@ -508,8 +508,10 @@ mod tests {
     #[test]
     fn register_hint_by_issuer() {
         use pe_i18n::{Text, tr};
-        let hint = register_hint("https://login.microsoftonline.com/contoso/v2.0");
-        assert_eq!(hint, tr(Text::SignInRegisterMicrosoft));
+        assert_eq!(
+            register_hint("https://login.microsoftonline.com/contoso/v2.0"),
+            tr(Text::SignInRegisterMicrosoft)
+        );
         assert_eq!(
             register_hint("https://accounts.google.com"),
             tr(Text::SignInRegisterGoogle)

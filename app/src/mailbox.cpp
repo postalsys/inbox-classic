@@ -2124,7 +2124,8 @@ int Mailbox::PlaceFind(const RECT& row, int buttonsRight) {
     // its usual width, narrower down to a minimum where the toolbar's buttons need the room
     int width = std::clamp(static_cast<int>(row.right) - buttonsRight - Scale(16), Scale(150), Scale(280));
     int height = Scale(26), edge = GetSystemMetrics(SM_CXEDGE);
-    MoveWindow(findField_, row.right - width - Scale(8), row.top + (row.bottom - row.top - height) / 2, width, height, TRUE);
+    int left = static_cast<int>(row.right) - width - Scale(8);
+    MoveWindow(findField_, left, row.top + (row.bottom - row.top - height) / 2, width, height, TRUE);
     // over the toolbar the row is part of
     SetWindowPos(findField_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     // in the field: the magnifier, the box (as high as its text, centered) and the clear button
@@ -2139,7 +2140,7 @@ int Mailbox::PlaceFind(const RECT& row, int buttonsRight) {
     int text = metrics.tmHeight + Scale(2);
     MoveWindow(findEdit_, icon, (inner - text) / 2, width - 2 * edge - icon - clear, text, TRUE);
     MoveWindow(findClear_, width - 2 * edge - clear, 0, clear, inner, TRUE);
-    return static_cast<int>(row.right) - width - Scale(8);
+    return left;
 }
 
 bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
