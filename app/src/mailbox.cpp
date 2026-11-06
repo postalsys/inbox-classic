@@ -7,11 +7,13 @@
 
 #include <commdlg.h>
 #include <shellapi.h>
+#include <shlwapi.h>
 
 #include <algorithm>
 #include <array>
 #include <limits>
 #include <span>
+#include <thread>
 #include <utility>
 
 namespace {
@@ -42,7 +44,8 @@ constexpr LPARAM kAllInboxesItem = std::numeric_limits<LPARAM>::min();
 const wchar_t* kAllInboxes = L"All Inboxes";
 
 // as Outlook Express has them: the envelope (read or not), the paper clip and the flag, then the text columns
-enum Column { COL_READ, COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE, COL_FOLDER };
+// no read and unread column: bold says it
+enum Column { COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE, COL_FOLDER };
 
 // what the Find box takes, shown when the mouse rests on it
 const wchar_t* kFindTip =
@@ -217,6 +220,11 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     ImageList_GetIconSize(listIcons_, &iconSize_, &iconSize_);
     ListView_SetImageList(list_, listIcons_, LVSIL_SMALL);
     TreeView_SetImageList(tree_, IconList(IconSet::Folders), TVSIL_NORMAL);
+    // messages dragged onto a folder, .eml files dragged onto a folder or the list
+    treeSite_.mailbox = this;
+    listSite_.mailbox = this;
+    treeTarget_ = RegisterDropSite(tree_, &treeSite_);
+    listTarget_ = RegisterDropSite(list_, &listSite_);
     // the search field: a white sunken window with the magnifier, the box without a border of its own, and the clear
     // button once there is something to clear
     findField_ = CreateFindField(parent);
@@ -240,10 +248,9 @@ void Mailbox::Create(HWND parent, PeCore* core) {
         tool.uId = reinterpret_cast<UINT_PTR>(window);
         SendMessageW(tip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tool));
     }
-    AddColumn(list_, COL_READ, L"", 24);
     IconColumn(list_, COL_ATTACH, LIST_ATTACH);
     IconColumn(list_, COL_FLAG, LIST_FLAG);
-    AddColumn(list_, COL_FROM, L"From", 180);
+    AddColumn(list_, COL_FROM, L"From", 200);
     AddColumn(list_, COL_SUBJECT, L"Subject", 320);
     AddColumn(list_, COL_RECEIVED, L"Received", 130);
     AddColumn(list_, COL_SIZE, L"Size", 84, LVCFMT_RIGHT);
@@ -299,6 +306,13 @@ void Mailbox::Create(HWND parent, PeCore* core) {
 }
 
 void Mailbox::Destroy() {
+    for (auto [window, target] : {std::pair{tree_, &treeTarget_}, std::pair{list_, &listTarget_}}) {
+        if (*target) {
+            RevokeDragDrop(window);
+            reinterpret_cast<IUnknown*>(*target)->Release();
+            *target = nullptr;
+        }
+    }
     if (logoBitmap_) {
         DeleteObject(logoBitmap_);
         logoBitmap_ = nullptr;
@@ -865,7 +879,7 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
     }
 }
 
-// the envelope (closed until read), the paper clip and the flag of a row, drawn over the row as the list painted it:
+// the paper clip and the flag of a row, drawn over the row as the list painted it:
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
 void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
     auto draw = [&](int column, int icon) {
@@ -876,7 +890,6 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         ImageList_Draw(listIcons_, icon, dc, cell.left + (width - iconSize_) / 2, cell.top + (cell.bottom - cell.top - iconSize_) / 2,
                        ILD_TRANSPARENT);
     };
-    draw(COL_READ, row.seen ? LIST_MAIL_READ : LIST_MAIL);
     if (row.has_attachments) {
         draw(COL_ATTACH, LIST_ATTACH);
     }
@@ -1731,11 +1744,9 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
             ScheduleSelection();
         }
         return true;
-    case LVN_BEGINDRAG: {
-        auto* begin = reinterpret_cast<NMLISTVIEW*>(header);
-        BeginDrag(begin->iItem, begin->ptAction);
+    case LVN_BEGINDRAG:
+        BeginDrag(reinterpret_cast<NMLISTVIEW*>(header)->iItem);
         return true;
-    }
     case NM_RCLICK: {
         POINT screen;
         GetCursorPos(&screen);
@@ -1766,6 +1777,93 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
 }
 
 // ---- files and printing ----
+
+namespace {
+
+// what a save or forward of several messages off the window thread finished with
+struct FilesDoneInfo {
+    // a forward: the new message, from `account`
+    core::Draft draft;
+    int64_t account = 0;
+    // a save: how many went into the folder `place`
+    size_t saved = 0;
+    std::wstring place;
+    // why not, when it did not
+    std::wstring problem;
+};
+
+// a copy of `selection`, for work on another thread while the list's own changes
+core::Selection CopyOf(const PeSelection* selection) {
+    core::Selection copy(pe_selection_new());
+    int64_t folder = 0;
+    uint64_t uid = 0;
+    for (size_t i = 0; pe_selection_get(selection, i, &folder, &uid); i++) {
+        pe_selection_add(copy.get(), folder, uid);
+    }
+    return copy;
+}
+
+}  // namespace
+
+void Mailbox::SaveSelectedInto(HWND owner) {
+    FlushSelection();
+    std::wstring dir = FolderDialog(owner, L"Save Messages In");
+    if (dir.empty()) {
+        return;
+    }
+    // those not downloaded yet come first: said in the status bar meanwhile
+    Say(Text(core::String(pe_downloading_text(pe_selection_count(selection_.get()))).get()));
+    std::thread([core = core_, selection = CopyOf(selection_.get()), dir, window = parent_]() mutable {
+        auto done = std::make_unique<FilesDoneInfo>();
+        done->place = dir;
+        char* reason = nullptr;
+        if (PeTextList* paths = pe_selection_save(core, selection.get(), core::Narrow(dir).c_str(), 120000, &reason)) {
+            done->saved = pe_text_list_count(paths);
+            pe_text_list_free(paths);
+        } else {
+            done->problem = ReasonText(reason, L"The messages could not be saved.");
+        }
+        PostMessageW(window, WM_FILES_DONE, 0, reinterpret_cast<LPARAM>(done.release()));
+    }).detach();
+}
+
+void Mailbox::ForwardSelected() {
+    FlushSelection();
+    int64_t folder = 0;
+    uint64_t uid = 0;
+    if (!pe_selection_get(selection_.get(), 0, &folder, &uid)) {
+        return;
+    }
+    // from the account of the first of them
+    auto found = folderAccounts_.find(folder);
+    int64_t account = found != folderAccounts_.end() ? found->second : CurrentAccount();
+    Say(Text(core::String(pe_downloading_text(pe_selection_count(selection_.get()))).get()));
+    std::thread([core = core_, selection = CopyOf(selection_.get()), account, window = parent_]() mutable {
+        auto done = std::make_unique<FilesDoneInfo>();
+        done->account = account;
+        char* reason = nullptr;
+        done->draft.reset(pe_selection_forward(core, selection.get(), 120000, &reason));
+        if (!done->draft) {
+            done->problem = ReasonText(reason, L"The messages could not be forwarded.");
+        }
+        PostMessageW(window, WM_FILES_DONE, 0, reinterpret_cast<LPARAM>(done.release()));
+    }).detach();
+}
+
+void Mailbox::FilesDone(LPARAM lParam) {
+    std::unique_ptr<FilesDoneInfo> done(reinterpret_cast<FilesDoneInfo*>(lParam));
+    if (!done->problem.empty()) {
+        Say(L"");
+        MessageBoxW(parent_, done->problem.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+        return;
+    }
+    if (done->draft) {
+        Say(L"");
+        OpenCompose(parent_, core_, done->account, pe_draft_info(done->draft.get()));
+        return;
+    }
+    Say(Text(core::String(pe_saved_text(done->saved, core::Narrow(done->place).c_str())).get()));
+}
 
 void Mailbox::SaveShownAs(HWND owner) {
     if (!uid_) {
@@ -1900,16 +1998,8 @@ void Mailbox::Import(HWND owner) {
         return;
     }
     std::vector<std::wstring> files = OpenFilesDialog(owner, L"Import Messages", L"Mail messages (*.eml)\0*.eml\0All files (*.*)\0*.*\0");
-    std::wstring problems;
-    for (const std::wstring& file : files) {
-        char* reason = nullptr;
-        if (!pe_message_import(core_, folder_, core::Narrow(file).c_str(), &reason)) {
-            core::String why(reason);
-            problems += (why ? Text(why.get()) : file) + L"\n";
-        }
-    }
-    if (!problems.empty()) {
-        MessageBoxW(owner, (L"These were not imported:\n\n" + problems).c_str(), L"Import Messages", MB_OK | MB_ICONWARNING);
+    if (!files.empty()) {
+        ImportFiles(folder_, files, owner);
     }
 }
 
@@ -2073,59 +2163,33 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
     return false;
 }
 
-// ---- dragging a message onto a folder ----
+// ---- dragging messages: onto a folder, out of the app as files, files into a folder ----
 
-namespace {
-// the cursors of a drag and drop as Explorer shows them (OLE's own), the system's where those are missing
-HCURSOR DragCursor(int effect) {
-    // in ole32: 1 is no drop, 2 move, 3 copy; loaded once
-    static const std::array<HCURSOR, 3> cursors = [] {
-        std::array<HCURSOR, 3> loaded = {};
-        HMODULE ole = GetModuleHandleW(L"ole32.dll");
-        for (int i = 0; i < 3; i++) {
-            HCURSOR cursor = ole ? LoadCursorW(ole, MAKEINTRESOURCEW(i + 1)) : nullptr;
-            loaded[i] = cursor ? cursor : LoadCursorW(nullptr, i == 0 ? IDC_NO : IDC_ARROW);
-        }
-        return loaded;
-    }();
-    return cursors[std::clamp(effect, 1, 3) - 1];
-}
-
-// where the drag image is drawn: in the coordinates of the window's own rectangle
-POINT InWindow(HWND window, POINT screen) {
-    RECT bounds;
-    GetWindowRect(window, &bounds);
-    return {screen.x - bounds.left, screen.y - bounds.top};
-}
-}  // namespace
-
-void Mailbox::BeginDrag(int index, POINT at) {
+void Mailbox::BeginDrag(int index) {
     FlushSelection();
     const PeMessage* row = Row(index);
-    if (!row || drag_) {
+    if (!row || pe_selection_count(selection_.get()) == 0) {
         return;
     }
-    drag_.emplace();
-    drag_->folder = row->folder;
-    // the list selects the row picked up: the drag carries the selection, the row with it
-    // the row as it looks, under the cursor where it was picked up
-    POINT origin = {};
-    drag_->image = ListView_CreateDragImage(list_, index, &origin);
-    if (drag_->image) {
-        ImageList_BeginDrag(drag_->image, 0, at.x - origin.x, at.y - origin.y);
-        POINT screen = at;
-        ClientToScreen(list_, &screen);
-        POINT inside = InWindow(parent_, screen);
-        ImageList_DragEnter(parent_, inside.x, inside.y);
-    }
-    SetCapture(parent_);
-    SetTimer(parent_, TIMER_DRAG, 50, nullptr);
-    SetCursor(DragCursor(1));
+    // the folder they are all in takes nothing; from several folders any takes them
+    int64_t folder = 0;
+    uint64_t uid = 0;
+    pe_selection_get(selection_.get(), 0, &folder, &uid);
+    dragFrom_ = summary_.folders <= 1 ? folder : 0;
+    IDataObject* data = MessagesData(core_, selection_.get());
+    SIZE size = {};
+    HBITMAP image = DragImage(reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0)), Text(row->subject),
+                              pe_selection_count(selection_.get()), size);
+    // the cursor a little inside the image's left edge, as where the row was picked up
+    DWORD effect = RunDrag(data, image, size, {Scale(12), size.cy / 2});
+    (void)effect;
+    data->Release();
+    dragFrom_ = 0;
 }
 
-int64_t Mailbox::DropTarget(POINT screen, HTREEITEM& over) const {
+int64_t Mailbox::DropFolder(DropFrom from, POINT screen, HTREEITEM& over) const {
     over = nullptr;
-    if (WindowFromPoint(screen) != tree_) {
+    if (from == DropFrom::Nothing) {
         return 0;
     }
     TVHITTESTINFO hit = {};
@@ -2140,114 +2204,163 @@ int64_t Mailbox::DropTarget(POINT screen, HTREEITEM& over) const {
     item.mask = TVIF_PARAM;
     item.hItem = over;
     TreeView_GetItem(tree_, &item);
-    // an account's own item (its id negated), the folder they are all in, or one that holds no messages: not there.
-    // A folder of another account takes them too, the core moves them across
+    // an account's own item (its id negated), All Inboxes, the folder they are all in, or one that holds no messages:
+    // not there. A folder of another account takes them too, the core moves them across
     int64_t folder = static_cast<int64_t>(item.lParam);
-    bool sameFolder = summary_.folders <= 1 && folder == drag_->folder;
-    if (folder <= 0 || sameFolder || unselectable_.count(folder) || !folderAccounts_.contains(folder)) {
+    if (folder <= 0 || unselectable_.count(folder) || !folderAccounts_.contains(folder)) {
+        return 0;
+    }
+    if (from == DropFrom::Messages && folder == dragFrom_) {
         return 0;
     }
     return folder;
 }
 
-void Mailbox::DragTo(POINT screen) {
-    HTREEITEM over = nullptr;
-    int64_t target = DropTarget(screen, over);
-    if (over != drag_->over) {
-        drag_->over = over;
-        drag_->overSince = GetTickCount64();
-        drag_->opened = false;
-    }
-    if (target != drag_->target) {
-        drag_->target = target;
-        // the folder it would go to highlighted
-        ChangeTreeUnderDrag([&] { TreeView_SelectDropTarget(tree_, target ? over : nullptr); });
-    }
-    if (drag_->image) {
-        POINT inside = InWindow(parent_, screen);
-        ImageList_DragMove(inside.x, inside.y);
-    }
-    // Ctrl copies, as in Explorer
-    SetCursor(DragCursor(!target ? 1 : (GetKeyState(VK_CONTROL) < 0 ? 3 : 2)));
-}
-
 void Mailbox::ChangeTreeUnderDrag(const std::function<void()>& change) {
-    ImageList_DragShowNolock(FALSE);
+    ShowDragImage(treeTarget_, false);
     change();
     UpdateWindow(tree_);
-    ImageList_DragShowNolock(TRUE);
+    ShowDragImage(treeTarget_, true);
 }
 
-void Mailbox::EndDrag(bool drop) {
-    if (!drag_) {
-        return;
+DWORD Mailbox::TreeSite::Over(DropFrom from, POINT screen, DWORD keys, DWORD allowed) {
+    Mailbox& box = *mailbox;
+    HTREEITEM over = nullptr;
+    int64_t target = box.DropFolder(from, screen, over);
+    DragOver& drag = box.dragOver_;
+    if (over != drag.over) {
+        drag.over = over;
+        drag.overSince = GetTickCount64();
+        drag.opened = false;
     }
-    Drag drag = *drag_;
-    drag_.reset();
-    KillTimer(parent_, TIMER_DRAG);
-    if (drag.image) {
-        ImageList_DragLeave(parent_);
-        ImageList_EndDrag();
-        ImageList_Destroy(drag.image);
+    if (target != drag.target) {
+        drag.target = target;
+        // the folder it would go to highlighted
+        box.ChangeTreeUnderDrag([&] { TreeView_SelectDropTarget(box.tree_, target ? over : nullptr); });
     }
-    TreeView_SelectDropTarget(tree_, nullptr);
-    if (GetCapture() == parent_) {
-        ReleaseCapture();
+    // held at the top or bottom edge of the tree it scrolls, a line at a time, to the folders out of view
+    RECT tree;
+    GetWindowRect(box.tree_, &tree);
+    int edge = Scale(16);
+    bool atEdge = screen.y < tree.top + edge || screen.y >= tree.bottom - edge;
+    ULONGLONG now = GetTickCount64();
+    if (!atEdge) {
+        drag.edgeSince = 0;
+    } else if (!drag.edgeSince) {
+        drag.edgeSince = now;
+    } else if (now - drag.edgeSince > 400 && now - drag.scrolled > 100) {
+        WPARAM scroll = screen.y < tree.top + edge ? SB_LINEUP : SB_LINEDOWN;
+        box.ChangeTreeUnderDrag([&] { SendMessageW(box.tree_, WM_VSCROLL, scroll, 0); });
+        drag.scrolled = now;
     }
-    if (!drop || !drag.target) {
-        return;
+    // a folder held over for a moment opens, to the folders in it
+    if (drag.over && !drag.opened && GetTickCount64() - drag.overSince > 800) {
+        box.ChangeTreeUnderDrag([&] { TreeView_Expand(box.tree_, drag.over, TVE_EXPAND); });
+        drag.opened = true;
     }
-    // Ctrl copies, as in Explorer; a move selects the message after them, as Move to Folder does
-    Act(GetKeyState(VK_CONTROL) < 0 ? PE_ACTION_COPY : PE_ACTION_MOVE, drag.target);
+    if (!target) {
+        return DROPEFFECT_NONE;
+    }
+    // files are put in; messages move, and with Ctrl are copied, as in Explorer
+    if (from == DropFrom::Files) {
+        return allowed & DROPEFFECT_COPY;
+    }
+    DWORD wanted = (keys & MK_CONTROL) ? DROPEFFECT_COPY : DROPEFFECT_MOVE;
+    return allowed & wanted;
 }
 
-bool Mailbox::OnDragMouse(UINT message) {
-    if (!drag_) {
-        return false;
+void Mailbox::TreeSite::Leave() {
+    Mailbox& box = *mailbox;
+    box.dragOver_ = {};
+    box.ChangeTreeUnderDrag([&] { TreeView_SelectDropTarget(box.tree_, nullptr); });
+}
+
+DWORD Mailbox::TreeSite::Dropped(IDataObject* data, DropFrom from, POINT screen, DWORD keys, DWORD allowed) {
+    Mailbox& box = *mailbox;
+    DWORD effect = Over(from, screen, keys, allowed);
+    int64_t target = box.dragOver_.target;
+    Leave();
+    if (!effect || !target) {
+        return DROPEFFECT_NONE;
     }
-    POINT screen;
-    GetCursorPos(&screen);
-    if (message == WM_MOUSEMOVE) {
-        DragTo(screen);
+    if (from == DropFrom::Files) {
+        box.ImportFiles(target, DroppedFiles(data), box.parent_);
+        return DROPEFFECT_COPY;
+    }
+    // the list's own drag carries the selection; a move selects the message after them, as Move to Folder does
+    box.Act(effect == DROPEFFECT_COPY ? PE_ACTION_COPY : PE_ACTION_MOVE, target);
+    return effect;
+}
+
+DWORD Mailbox::ListSite::Over(DropFrom from, POINT, DWORD, DWORD allowed) {
+    // files go into the folder shown; not into All Inboxes or a search, which are no one folder
+    Mailbox& box = *mailbox;
+    bool oneFolder = box.folder_ && !box.allInboxes_ && box.find_.empty();
+    return from == DropFrom::Files && oneFolder && !box.unselectable_.count(box.folder_) ? (allowed & DROPEFFECT_COPY) : DROPEFFECT_NONE;
+}
+
+DWORD Mailbox::ListSite::Dropped(IDataObject* data, DropFrom from, POINT screen, DWORD keys, DWORD allowed) {
+    if (!Over(from, screen, keys, allowed)) {
+        return DROPEFFECT_NONE;
+    }
+    mailbox->ImportFiles(mailbox->folder_, DroppedFiles(data), mailbox->parent_);
+    return DROPEFFECT_COPY;
+}
+
+void Mailbox::ImportFiles(int64_t folder, const std::vector<std::wstring>& files, HWND owner) {
+    std::vector<std::string> paths;
+    for (const std::wstring& file : files) {
+        paths.push_back(core::Narrow(file));
+    }
+    std::vector<const char*> pointers;
+    for (const std::string& path : paths) {
+        pointers.push_back(path.c_str());
+    }
+    // what went in for the status bar, and what did not, as the core says them
+    char* said = nullptr;
+    char* report = nullptr;
+    pe_import_files(core_, folder, pointers.data(), pointers.size(), &said, &report);
+    if (core::String text(said); text) {
+        Say(Text(text.get()));
+    }
+    if (core::String told(report); told) {
+        MessageBoxW(owner, Text(told.get()).c_str(), L"Import Messages", MB_OK | MB_ICONWARNING);
+    }
+}
+
+int Mailbox::TestDragOut(const std::wstring& dir) {
+    FlushSelection();
+    if (pe_selection_count(selection_.get()) == 0) {
+        return -1;
+    }
+    IDataObject* data = MessagesData(core_, selection_.get());
+    int written = WriteDataInto(data, dir);
+    data->Release();
+    return written;
+}
+
+DWORD Mailbox::TestDropFiles(HTREEITEM item, const std::vector<std::wstring>& paths) {
+    IDataObject* data = FilesData(paths);
+    if (!data) {
+        return DROPEFFECT_NONE;
+    }
+    // where a drop onto the item lands: its middle, as the mouse would let go there
+    RECT box = {};
+    TreeView_GetItemRect(tree_, item, &box, TRUE);
+    POINT screen = {(box.left + box.right) / 2, (box.top + box.bottom) / 2};
+    ClientToScreen(tree_, &screen);
+    DropFrom from = DropKind(data);
+    DWORD effect = treeSite_.Over(from, screen, 0, DROPEFFECT_COPY | DROPEFFECT_MOVE);
+    if (effect) {
+        effect = treeSite_.Dropped(data, from, screen, 0, DROPEFFECT_COPY | DROPEFFECT_MOVE);
     } else {
-        // let go over a folder: there; the capture lost (another window, Alt+Tab): nowhere
-        EndDrag(message == WM_LBUTTONUP);
+        treeSite_.Leave();
     }
-    return true;
+    data->Release();
+    return effect;
 }
 
 void Mailbox::OnTimer(UINT_PTR id) {
-    if (id == TIMER_DRAG) {
-        if (!drag_) {
-            KillTimer(parent_, TIMER_DRAG);
-            return;
-        }
-        if (GetKeyState(VK_ESCAPE) < 0) {
-            EndDrag(false);
-            return;
-        }
-        POINT screen;
-        GetCursorPos(&screen);
-        RECT tree;
-        GetWindowRect(tree_, &tree);
-        // at the top or bottom edge of the tree it scrolls, to the folders out of view
-        if (screen.x >= tree.left && screen.x < tree.right) {
-            int edge = Scale(16);
-            WPARAM scroll = screen.y < tree.top + edge ? SB_LINEUP : screen.y >= tree.bottom - edge ? SB_LINEDOWN : SB_ENDSCROLL;
-            if (scroll != SB_ENDSCROLL) {
-                ChangeTreeUnderDrag([&] { SendMessageW(tree_, WM_VSCROLL, scroll, 0); });
-                DragTo(screen);
-            }
-        }
-        // a folder held over for a moment opens, to the folders in it
-        if (drag_->over && !drag_->opened && GetTickCount64() - drag_->overSince > 800) {
-            ChangeTreeUnderDrag([&] { TreeView_Expand(tree_, drag_->over, TVE_EXPAND); });
-            drag_->opened = true;
-        }
-        // Ctrl pressed or let go changes the cursor at once, without the mouse moving
-        SetCursor(DragCursor(!drag_->target ? 1 : (GetKeyState(VK_CONTROL) < 0 ? 3 : 2)));
-        return;
-    }
     if (id == TIMER_SELECTION) {
         FlushSelection();
         return;

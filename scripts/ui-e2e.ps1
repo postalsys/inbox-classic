@@ -151,6 +151,18 @@ public static string RemoteTreeText(IntPtr tree, IntPtr item) {
     CloseHandle(process);
     return text;
 }
+// a string handed to another window with WM_COPYDATA (the app's test hooks, with --test-hooks); what it returns
+[StructLayout(LayoutKind.Sequential)] public struct COPYDATASTRUCT { public IntPtr dwData; public int cbData; public IntPtr lpData; }
+[DllImport("user32.dll", EntryPoint = "SendMessageW")] static extern IntPtr SendCopyData(IntPtr hwnd, uint message, IntPtr wParam, ref COPYDATASTRUCT data);
+public static long SendText(IntPtr hwnd, long kind, string text) {
+    byte[] bytes = System.Text.Encoding.Unicode.GetBytes(text);
+    IntPtr memory = Marshal.AllocHGlobal(Math.Max(bytes.Length, 1));
+    Marshal.Copy(bytes, 0, memory, bytes.Length);
+    COPYDATASTRUCT data = new COPYDATASTRUCT { dwData = (IntPtr)kind, cbData = bytes.Length, lpData = memory };
+    long result = SendCopyData(hwnd, 0x004A, IntPtr.Zero, ref data).ToInt64();
+    Marshal.FreeHGlobal(memory);
+    return result;
+}
 // the text of a cell of a list view of another process (LVM_GETITEMTEXTW into its memory)
 public static string RemoteListText(IntPtr list, int row, int column) {
     uint pid;
@@ -400,6 +412,39 @@ function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]
     Click $dialog 1
     return [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
 }
+# the Windows folder picker (Save Messages In) answered with `path`: typed into its Folder box, then Select Folder
+function AnswerFolderDialog([string]$title, [string]$path) {
+    $dialog = WaitWindow '#32770' $title 40
+    if (-not $dialog) {
+        Shot ([Native.Win]::GetDesktopWindow()) 'debug-folder-dialog-missing'
+        return $false
+    }
+    # the Folder box: the one edit field it shows (the address bar's is hidden until clicked)
+    $name = WaitFor { [Native.Win]::FindDescendants($dialog, 'Edit') | Where-Object { [Native.Win]::IsWindowVisible($_) } | Select-Object -First 1 } 10
+    $answered = $false
+    if ($name) {
+        [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
+        foreach ($c in $path.ToCharArray()) { [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
+        if (WaitFor { (WindowText $name) -eq $path } 10) {
+            Click $dialog 1
+            # a typed folder is opened first, its name then in the box: Select Folder once more chooses it
+            $leaf = Split-Path -Leaf $path
+            if (-not (WaitFor { -not [Native.Win]::IsWindow($dialog) } 3) -and (WaitFor { (WindowText $name) -eq $leaf } 5)) {
+                Click $dialog 1
+            }
+            $answered = [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
+        }
+    }
+    if (-not $answered -and [Native.Win]::IsWindow($dialog)) {
+        $edits = @([Native.Win]::FindDescendants($dialog, 'Edit') | ForEach-Object { "$([Native.Win]::IsWindowVisible($_)):'$(WindowText $_)'" }) -join ', '
+        Write-Host "   (the folder dialog: edit fields $edits)"
+        Shot $dialog 'debug-folder-dialog'
+        # not left open over the steps after this one
+        [void][Native.Win]::PostMessage($dialog, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($dialog) } 5)
+    }
+    return $answered
+}
 # whether a button of the format bar is pressed
 function Pressed([IntPtr]$compose, [int]$id) {
     $bar = [Native.Win]::GetDlgItem($compose, 322)
@@ -500,7 +545,7 @@ try {
     $signInPage = Join-Path $Out 'sign-in-page.txt'
     Remove-Item -Force -ErrorAction SilentlyContinue $signInPage
     $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"",
-        '--sign-in-page-file', "`"$signInPage`"")
+        '--sign-in-page-file', "`"$signInPage`"", '--test-hooks')
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
     # the first page of Add Mail Account, with the address fields when $fields, else the page that offers a
@@ -1240,12 +1285,12 @@ public static class Dragger {
     }
     $listHeader = [Native.Win]::SendMessage($list, 0x101F, [IntPtr]::Zero, [IntPtr]::Zero)
     $columns = { [int][Native.Win]::SendMessage($listHeader, 0x1200, [IntPtr]::Zero, [IntPtr]::Zero) }
-    Check ((& $columns) -eq 7) 'a folder has no Folder column'
+    Check ((& $columns) -eq 6) 'a folder has no Folder column'
     # the folder bar: the static whose text starts with a space
     $folderBar = { ([Native.Win]::FindDescendants($main, 'Static') | ForEach-Object { WindowText $_ } | Where-Object { $_.StartsWith(' ') } | Select-Object -First 1) }
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
     Check ([bool](WaitFor { (Rows) -eq 1 })) 'typing in it narrows the list to what has it (the subject)'
-    Check ([bool](WaitFor { (& $columns) -eq 8 } 5)) 'it searches every folder: the list has a Folder column'
+    Check ([bool](WaitFor { (& $columns) -eq 7 } 5)) 'it searches every folder: the list has a Folder column'
     # the search bar over the list says what was found for what, the folder bar where
     $IDC_SEARCH_BAR = 208; $IDC_SEARCH_CLEAR = 209
     $searchBar = { WindowText ([Native.Win]::GetDlgItem($main, $IDC_SEARCH_BAR)) }
@@ -1261,7 +1306,7 @@ public static class Dragger {
     Check ([bool](WaitFor { (& $searchBar) -match '^No results for .nothing has this.' } 5)) "the search bar says there are no results ($(& $searchBar))"
     Shot $main 'find-3-no-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
-    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 7 })) 'clearing it shows the folder again, without the Folder column'
+    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 6 })) 'clearing it shows the folder again, without the Folder column'
     Check (-not (Visible $main $IDC_SEARCH_BAR)) 'and without the search bar'
     # the clear button is there only while there is something to clear, and clears it
     Check (-not (Visible $field $IDC_FIND_CLEAR)) 'an empty Find box has no clear button'
@@ -1301,7 +1346,7 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos')
     [void](WaitFor { (Rows) -eq $everywhere })
     Key $find $VK_ESCAPE
-    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 7 })) 'Esc ends the search: the folder again, without the Folder column'
+    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 6 })) 'Esc ends the search: the folder again, without the Folder column'
 
     # ---- files ----
 
@@ -1590,7 +1635,7 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     SelectFolder 0
-    $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, 4) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, 4) -eq 'Copy me') { Rows } } 30
+    $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, 3) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, 3) -eq 'Copy me') { Rows } } 30
     # the first row and Archive (the fourth folder) on the screen
     $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
     for ($i = 0; $i -lt 3; $i++) { $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $archiveItem) }
@@ -1611,7 +1656,7 @@ public static class Dragger {
     Check ($null -ne (WaitFor { Find 'Archive' "Subject: $first" } 20)) "a message dragged onto Archive is moved there ($first)"
     Check ([bool](WaitFor { -not (Find 'INBOX' "Subject: $first") } 10)) 'and out of the Inbox'
     # by its subject: mail arriving meanwhile changes the number of rows
-    $listed = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 4) -eq $subject }).Count -gt 0 }
+    $listed = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $subject }).Count -gt 0 }
     Check ([bool](WaitFor { -not (& $listed $first) } 10)) "and out of the list ($(Rows) rows, $inInbox before)"
     $second = 'Copy me'
     DragFirstRow $true ''
@@ -1642,7 +1687,7 @@ public static class Dragger {
         [Native.Win]::MouseClick($box.Left + 120, [int](($box.Top + $box.Bottom) / 2))
     }
     [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
-    $subjects = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
+    $subjects = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) })
     $onServer = { param($mailbox) @($subjects | Where-Object { $s = $_; Find $mailbox "Subject: $([regex]::Escape($s))" }).Count }
     # Archive may have one of them already (the copy the drag made)
     $inArchive = & $onServer 'Archive'
@@ -1679,7 +1724,7 @@ public static class Dragger {
     }
     $restored = {
         $rows = @(& $selectedRows)
-        $names = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) } | Sort-Object)
+        $names = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) } | Sort-Object)
         $top = [int][Native.Win]::SendMessage($list, 0x1027, [IntPtr]::Zero, [IntPtr]::Zero)
         $page = [int][Native.Win]::SendMessage($list, 0x1028, [IntPtr]::Zero, [IntPtr]::Zero)
         $rows.Count -eq 3 -and (($names -join '|') -eq (($subjects | Sort-Object) -join '|')) -and $rows[0] -ge $top -and $rows[0] -lt $top + $page
@@ -1693,6 +1738,111 @@ public static class Dragger {
     Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match ", $(Rows) selected$" } 10)) "Select All selects every message of the list ($(StatusPart $mainStatus 2))"
     SelectRow 0
     Check ([bool](WaitFor { (StatusPart $mainStatus 2) -notmatch 'selected' -and (& $enabled $IDM_REPLY) } 10)) 'one message selected again is shown in the reading pane'
+
+    Step 'messages as files'
+    $kDragOut = 0x44524F55; $kDropFiles = 0x44524F50
+    # one not downloaded yet: it arrives now and is never opened
+    $notOpened = 'Not opened yet'
+    $added = Invoke-RestMethod -Method Post -ContentType 'application/json' "$rest/INBOX/messages" -Body (@{
+        raw = "From: Ferry Office <ferry@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $notOpened`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <not-opened@example.com>`r`n`r`nThe ferry times for the weekend.`r`n"
+        flags = @() } | ConvertTo-Json)
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    [void](WaitFor { (Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 3) -eq $notOpened } 30)
+    # the newest three, the one not downloaded among them
+    SelectRow 0
+    [void][Native.Win]::SetForegroundWindow($main)
+    [Native.Win]::keybd_event(0x11, 0, 0, [IntPtr]::Zero)
+    foreach ($i in 1, 2) {
+        $box = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr]$i, 0)
+        [Native.Win]::MouseClick($box.Left + 120, [int](($box.Top + $box.Bottom) / 2))
+    }
+    [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
+    [void](WaitFor { (StatusPart $mainStatus 2) -match ', 3 selected$' } 10)
+    $three = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) })
+    # the file a subject becomes: what Windows does not allow in a name taken out
+    $fileOf = { param($subject) (($subject -replace '[/\\]', '-') -replace '[<>:"|?*]', '') + '.eml' }
+    $sameBytes = { param($dir)
+        @($three | Where-Object {
+            $path = Join-Path $dir (& $fileOf $_)
+            $server = Find 'INBOX' "Subject: $([regex]::Escape($_))"
+            # (an antivirus on the test machine may add its own header to what it fetches over IMAP: not compared)
+            $plain = { param($text) (($text -replace "`r`n", "`n") -split "`n" | Where-Object { $_ -notmatch '^X-EsetId:' }) -join "`n" }
+            (Test-Path -LiteralPath $path) -and $server -and (& $plain ([IO.File]::ReadAllText($path))) -eq (& $plain (RawText $server))
+        }).Count -eq 3
+    }
+    # dropped into a folder as Explorer drops it: the one not downloaded makes them files fetched at the drop
+    $out1 = Join-Path (Resolve-Path $Out) 'dragged-out'
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $out1
+    [void](New-Item -ItemType Directory -Force $out1)
+    $written = [Native.Win]::SendText($main, $kDragOut, $out1)
+    Check ($written -eq 3 -and @($three | Where-Object { Test-Path -LiteralPath (Join-Path $out1 (& $fileOf $_)) }).Count -eq 3) "three messages dragged out become three .eml files where they are dropped, named after their subjects ($written)"
+    Check (& $sameBytes $out1) 'with what each message is, byte for byte'
+    Check ($three -contains $notOpened) 'one not downloaded yet is downloaded for it'
+    Shot $main 'files-4-drag-out'
+    # all downloaded now: written at once, as files that keep the mark of a download from the internet
+    $out2 = Join-Path (Resolve-Path $Out) 'dragged-out-again'
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $out2
+    [void](New-Item -ItemType Directory -Force $out2)
+    $written = [Native.Win]::SendText($main, $kDragOut, $out2)
+    $zone = Get-Content -LiteralPath (Join-Path $out2 (& $fileOf $three[0])) -Stream Zone.Identifier -ErrorAction SilentlyContinue
+    Check ($written -eq 3 -and (& $sameBytes $out2) -and (($zone -join "`n") -match 'ZoneId=3')) "downloaded, they are files marked as from the internet ($written)"
+    # Save As with three: a folder, never over a file there
+    $saveDir = Join-Path (Resolve-Path $Out) 'saved-three'
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $saveDir
+    [void](New-Item -ItemType Directory -Force $saveDir)
+    $theirs = Join-Path $saveDir (& $fileOf $three[1])
+    Set-Content -LiteralPath $theirs -Value 'mine' -NoNewline
+    Command $main $IDM_SAVE_AS
+    Check (AnswerFolderDialog 'Save Messages In' $saveDir) 'Save As with three selected asks for a folder'
+    $savedAll = WaitFor { (@(Get-ChildItem -LiteralPath $saveDir -Filter '*.eml').Count -eq 4) } 30
+    Check ([bool]$savedAll -and (Get-Content -Raw -LiteralPath $theirs) -eq 'mine') "and saves the three there, never over a file that is there ($(@(Get-ChildItem -LiteralPath $saveDir).Count) files)"
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -eq 'Saved 3 messages to saved-three' } 10)) "the status bar says where ($(StatusPart $mainStatus 0))"
+    # Forward with three: one new message with them attached
+    Command $main $IDM_FORWARD
+    $compose = WaitCompose
+    Check ($null -ne $compose) 'Forward with three selected writes one new message'
+    if ($compose) {
+        $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
+        $files = WaitFor { if ([int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 3) { 3 } } 10
+        Check ($files -eq 3) 'with the three attached as .eml files'
+        Check ((GetText $compose $IDC_SUBJECT) -eq "Fw: $($three[0])") "its subject is the first one's, with Fw: ($(GetText $compose $IDC_SUBJECT))"
+        # the mouse out of the way: no tooltip of the format bar in the picture
+        [Native.Win]::Mouse(2, 2, 0)
+        Start-Sleep -Milliseconds 300
+        Shot $compose 'files-5-forward'
+        CloseCompose $compose
+    }
+    # .eml files dropped onto Archive are put in it; a file that is not a message is turned away
+    $dropDir = Join-Path (Resolve-Path $Out) 'to-drop'
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $dropDir
+    [void](New-Item -ItemType Directory -Force $dropDir)
+    $dropped = @('Dropped one', 'Dropped two', 'Dropped three') | ForEach-Object {
+        $path = Join-Path $dropDir "$_.eml"
+        $raw = "From: Files <files@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $_`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <$($_ -replace ' ', '-')@example.com>`r`n`r`nDropped from a folder.`r`n"
+        [IO.File]::WriteAllText($path, $raw)
+        $path
+    }
+    $text = Join-Path $dropDir 'notes.txt'
+    Set-Content -LiteralPath $text -Value 'not a message'
+    $archive = TreeRow $tree 'Alex Morgan' 'Archive'
+    $effect = [Native.Win]::SendText($main, $kDropFiles, "$($archive.ToInt64())|$($dropped -join '|')")
+    $inArchive = { @('Dropped one', 'Dropped two', 'Dropped three' | Where-Object { Find 'Archive' "Subject: $_" }).Count }
+    Check ($effect -eq 1 -and [bool](WaitFor { (& $inArchive) -eq 3 } 20)) ".eml files dropped onto Archive in the folder tree are put in it, on the server ($effect, $(& $inArchive))"
+    $effect = [Native.Win]::SendText($main, $kDropFiles, "$($archive.ToInt64())|$text")
+    Check ($effect -eq 0) "a file that is not a message is turned away ($effect)"
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $archive)
+    [void](WaitFor { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -like 'Dropped*' }).Count -eq 3 } 20)
+    # one of them shown
+    $droppedRow = @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq 'Dropped one' })[0]
+    if ($null -ne $droppedRow) { SelectRow $droppedRow }
+    [void](WaitFor { (StatusPart $mainStatus 2) -notmatch 'selected' } 5)
+    Shot $main 'files-6-drop-in'
+    # the message added for this step goes, so the Inbox is as the steps after expect it
+    [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)")
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    [void](WaitFor { [Native.Win]::RemoteListText($list, 0, 3) -ne $notOpened } 20)
 
     Step 'junk and not junk'
     $IDM_JUNK = 127; $IDM_NOT_JUNK = 128; $TB_COMMANDTOINDEX = 0x0419
@@ -1995,7 +2145,7 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
     $expected = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
     Check ([bool](WaitFor { (Rows) -eq $expected } 20)) "it lists the mail of both accounts' Inboxes ($(Rows) of $expected)"
-    $COL_FOLDER = 7
+    $COL_FOLDER = 6
     $places = @(0..([Math]::Min(4, (Rows)) - 1) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_FOLDER) })
     Check (($places -contains 'Work') -and ($places -contains 'Alex Morgan')) "newest first, the two accounts' messages among each other, the Account column naming each ($($places -join ', '))"
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
@@ -2037,7 +2187,7 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 3) -eq $across) { Rows } } 30)
     SelectRow 0
     Command $main $IDM_MOVE
     $move = WaitPicker 'Move Message'
@@ -2070,7 +2220,7 @@ public static class Dragger {
     # the second account's Archive in the main tree, with the message in it
     $workArchive = TreeRow $tree 'Work' 'Archive'
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $workArchive)
-    [void](WaitFor { if ((Rows) -ge 1 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 20)
+    [void](WaitFor { if ((Rows) -ge 1 -and [Native.Win]::RemoteListText($list, 0, 3) -eq $across) { Rows } } 20)
     SelectRow 0
     Shot $main 'move-2-accounts'
     SelectFolder 0
@@ -2078,7 +2228,7 @@ public static class Dragger {
     Check ([bool](WaitFor { $null -ne (Find 'INBOX' "Subject: $across") } 30)) 'Edit > Undo Move brings it back to the first account'
     Check ([bool](WaitFor { -not ((Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $across" }) } 20)) 'and out of the second account''s Archive'
     # Copy to Folder: the second account's Archive is under Recent now
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 1, 4) -eq $copied) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 1, 3) -eq $copied) { Rows } } 30)
     SelectRow 1
     Command $main $IDM_COPY
     $copy = WaitPicker 'Copy Message'
@@ -2095,7 +2245,7 @@ public static class Dragger {
     Check ($null -ne (Find 'INBOX' "Subject: $copied")) 'and keeps it in the Inbox'
     # dragged onto the second account's Archive in the folder tree
     SelectFolder 0
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 2, 4) -eq $dragged) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 2, 3) -eq $dragged) { Rows } } 30)
     SelectRow 2
     [void][Native.Win]::SetForegroundWindow($main)
     $workArchive = TreeRow $tree 'Work' 'Archive'

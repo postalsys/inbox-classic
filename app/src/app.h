@@ -145,6 +145,40 @@ bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
 // marks a saved file (an attachment, a message) as from the internet, for SmartScreen and Office's Protected View
 void MarkFromInternet(const std::wstring& path);
 
+// ---- dragdrop.cpp: messages as files with OLE ----
+
+struct IDataObject;
+struct IDropTarget;
+
+// what a drag over a window of the app carries: messages of its own list, .eml files (only), or nothing it takes
+enum class DropFrom { Nothing, Messages, Files };
+// a window that takes drops: where it would go and what the drag does there, and the drop
+struct DropSite {
+    virtual ~DropSite() = default;
+    // the effect a drag of `from` would have at `screen` (DROPEFFECT_*), the place highlighted
+    virtual DWORD Over(DropFrom from, POINT screen, DWORD keys, DWORD allowed) = 0;
+    virtual void Leave() = 0;
+    virtual DWORD Dropped(IDataObject* data, DropFrom from, POINT screen, DWORD keys, DWORD allowed) = 0;
+};
+DropFrom DropKind(IDataObject* data);
+// the files of a drop (CF_HDROP), none when it has none
+std::vector<std::wstring> DroppedFiles(IDataObject* data);
+// `window` takes drops through `site` (RegisterDragDrop); its target, to revoke and to hide the drag image with
+IDropTarget* RegisterDropSite(HWND window, DropSite* site);
+void ShowDragImage(IDropTarget* target, bool show);
+// the selected messages as the data of a drag: the app's own format for the folder tree, and for Explorer the files,
+// written now with the Mark of the Web when all are downloaded, or else named now and fetched when a drop asks
+IDataObject* MessagesData(PeCore* core, const PeSelection* selection);
+// what the drag shows: the subject as the selected row, and how many for several
+HBITMAP DragImage(HFONT font, const std::wstring& subject, size_t count, SIZE& size);
+// DoDragDrop of `data` with `image` (taken over) under the cursor at `offset`; the effect of the drop
+DWORD RunDrag(IDataObject* data, HBITMAP image, SIZE size, POINT offset);
+// what Explorer does with a drop of `data` into the folder `dir` (for the UI test): the files written there, -1 for data
+// without any
+int WriteDataInto(IDataObject* data, const std::wstring& dir);
+// files as Explorer hands them over in a drag (for the UI test)
+IDataObject* FilesData(const std::vector<std::wstring>& paths);
+
 // ---- accounts.cpp ----
 
 // asks for a new account and adds it to the core; its id, or 0 when cancelled
@@ -287,9 +321,16 @@ public:
     bool OnCommand(WORD id, WORD code);
     // the Find box: placed at the right of the toolbar row, focused (Ctrl+Shift+F), cleared (Esc)
     void PlaceFind(const RECT& row);
-    // the mouse while a message is dragged (WM_MOUSEMOVE, WM_LBUTTONUP, WM_CAPTURECHANGED of the window); false when
-    // there is no drag
-    bool OnDragMouse(UINT message);
+    // the UI test's stand-ins for what the system does: a drag of the selected messages dropped into the folder `dir`
+    // as Explorer drops it (the files written, -1 for none), and files dropped onto the tree item `item`; the effect
+    int TestDragOut(const std::wstring& dir);
+    DWORD TestDropFiles(HTREEITEM item, const std::vector<std::wstring>& paths);
+    // what a background save or forward of several messages finished with (WM_FILES_DONE)
+    void FilesDone(LPARAM done);
+    // several messages saved into a folder each as its own file, or forwarded attached to one message, off the window
+    // thread
+    void SaveSelectedInto(HWND owner);
+    void ForwardSelected();
     // WM_DRAWITEM of the search field's magnifier and clear button; false for other controls
     bool OnDrawItem(const DRAWITEMSTRUCT& item);
     void FocusFind();
@@ -513,18 +554,39 @@ private:
     // All Inboxes at the top of the tree (two or more accounts), and whether it is selected
     HTREEITEM allInboxesItem_ = nullptr;
     bool allInboxes_ = false;
-    // the selected messages being dragged onto a folder of the tree: the row picked up, its drag image, where they
-    // would go
-    struct Drag {
-        int64_t folder = 0;
-        HIMAGELIST image = nullptr;
+    // a drag over the tree: the item under it and since when (one held over opens), where it would go
+    struct DragOver {
         HTREEITEM over = nullptr;
         ULONGLONG overSince = 0;
-        // whether the folder held over was opened already
         bool opened = false;
         int64_t target = 0;
+        // since when it is held at the tree's top or bottom edge, and when it scrolled last
+        ULONGLONG edgeSince = 0;
+        ULONGLONG scrolled = 0;
     };
-    std::optional<Drag> drag_;
+    DragOver dragOver_;
+    // the folder the messages of the list's own drag come from (a drop there does nothing), 0 when none is dragged
+    int64_t dragFrom_ = 0;
+    // the tree and the list take drops through these
+    struct TreeSite : DropSite {
+        Mailbox* mailbox = nullptr;
+        DWORD Over(DropFrom from, POINT screen, DWORD keys, DWORD allowed) override;
+        void Leave() override;
+        DWORD Dropped(IDataObject* data, DropFrom from, POINT screen, DWORD keys, DWORD allowed) override;
+    };
+    struct ListSite : DropSite {
+        Mailbox* mailbox = nullptr;
+        DWORD Over(DropFrom from, POINT screen, DWORD keys, DWORD allowed) override;
+        void Leave() override {}
+        DWORD Dropped(IDataObject* data, DropFrom from, POINT screen, DWORD keys, DWORD allowed) override;
+    };
+    TreeSite treeSite_;
+    ListSite listSite_;
+    IDropTarget* treeTarget_ = nullptr;
+    IDropTarget* listTarget_ = nullptr;
+    // .eml files into `folder` as Import does; the reasons of those that were not
+    void ImportFiles(int64_t folder, const std::vector<std::wstring>& files, HWND owner);
+
     // a folder made with New Folder in the Move and Copy window: highlighted there once it exists (FolderCreated)
     bool newInPick_ = false;
     // the selected messages, as the core knows them: kept when the list changes under them, so an action reaches the
@@ -541,11 +603,10 @@ private:
     bool undoPending_ = false;
     // the messages Undo brought back selected, once they are in the list again; false while none is there yet
     bool SelectRestored(const PeSearch& search);
-    void BeginDrag(int index, POINT at);
-    void EndDrag(bool drop);
-    // the folder under `screen` a message of the drag can go to, 0 for none; the item under it in `over`
-    int64_t DropTarget(POINT screen, HTREEITEM& over) const;
-    void DragTo(POINT screen);
+    // a drag of the selected messages out of the list (the row `index` picked up): onto a folder, or out of the app
+    void BeginDrag(int index);
+    // the folder under `screen` a drag of `from` can go to, 0 for none; the item under it in `over`
+    int64_t DropFolder(DropFrom from, POINT screen, HTREEITEM& over) const;
     // the tree changed under the drag image (highlighted, scrolled, opened) without the image smearing over it
     void ChangeTreeUnderDrag(const std::function<void()>& change);
     // the Drafts folders, whose messages open in a compose window
@@ -593,6 +654,8 @@ constexpr UINT WM_CORE_EVENT = WM_APP + 1;
 // closing having failed (WM_COMPOSE_KEPT)
 constexpr UINT WM_COMPOSE_CLOSED = WM_APP + 2;
 constexpr UINT WM_COMPOSE_KEPT = WM_APP + 3;
+// a save or forward of several messages done on another thread: lParam a FilesDoneInfo the window takes over
+constexpr UINT WM_FILES_DONE = WM_APP + 4;
 
 // the commands of the menus, toolbar and tray (IDM_*) come from core/commands.toml, shared with the Mac and Linux
 // windows; the ids of the controls are this app's own
@@ -655,7 +718,6 @@ constexpr UINT_PTR TIMER_FIND = 3;
 // a list of several folders follows their changes once a sync of many of them is done, not after each
 constexpr UINT_PTR TIMER_RELOAD = 4;
 // while a message is dragged: the keys (Esc, Ctrl), scrolling the tree at its edges, opening a folder held over
-constexpr UINT_PTR TIMER_DRAG = 5;
 // a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
 constexpr UINT_PTR TIMER_DOWNLOADING = 6;
 // the selection of the message list taken once the list has done changing it: a click or a key in a list of several
