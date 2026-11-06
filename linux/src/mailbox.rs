@@ -1371,19 +1371,21 @@ impl Mailbox {
             group.add_action(&action);
         };
         add("mark-all-read", some_unread, Command::MarkAllRead);
-        // All Inboxes is no folder of one account to make a folder in
-        add("new", !all_inboxes, Command::NewFolder);
+        add("new", true, Command::NewFolder);
         add("rename", changeable, Command::RenameFolder);
         add("delete", changeable, Command::DeleteFolder);
         let menu = gio::Menu::new();
         let first = gio::Menu::new();
         first.append(Some("Mark All Read"), Some("folder.mark-all-read"));
         menu.append_section(None, &first);
-        let rest = gio::Menu::new();
-        rest.append(Some("New Folder..."), Some("folder.new"));
-        rest.append(Some("Rename..."), Some("folder.rename"));
-        rest.append(Some("Delete"), Some("folder.delete"));
-        menu.append_section(None, &rest);
+        // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none
+        if !all_inboxes {
+            let rest = gio::Menu::new();
+            rest.append(Some("New Folder..."), Some("folder.new"));
+            rest.append(Some("Rename..."), Some("folder.rename"));
+            rest.append(Some("Delete"), Some("folder.delete"));
+            menu.append_section(None, &rest);
+        }
         widget.insert_action_group("folder", Some(&group));
         popup_menu(widget, &menu, x, y);
     }
