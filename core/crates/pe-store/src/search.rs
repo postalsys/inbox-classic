@@ -96,7 +96,7 @@ impl Search {
 
     /// The WHERE of the search and its values, ?1 on. `in_order`: for a page in an order that has an index over every
     /// folder (date, received), which then walks it rather than sort all the Inboxes have.
-    fn condition(&self, in_order: bool) -> (String, Vec<Value>) {
+    pub(crate) fn condition(&self, in_order: bool) -> (String, Vec<Value>) {
         let mut query = Query::parse(&self.text, now());
         // the Show choice is a term like the one typed for it
         query.terms.extend(match self.show {

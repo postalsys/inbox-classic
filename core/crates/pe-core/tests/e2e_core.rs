@@ -6,7 +6,7 @@
 use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 
-use pe_core::{Core, Event, FailureKind};
+use pe_core::{Action, Core, Event, FailureKind, MessageRef, Search};
 use pe_store::{AccountSettings, Sort};
 use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
 use serde_json::json;
@@ -921,6 +921,151 @@ fn flags_moves_and_deletes_messages() {
         })
     });
     assert!(s.core.mark_junk(inbox, 999_999, true).is_err());
+}
+
+#[test]
+fn acts_on_selected_messages_and_undoes() {
+    let Some(s) = setup() else { return };
+    let uids: Vec<u64> = ["One", "Two", "Three", "Four"]
+        .iter()
+        .map(|subject| s.server.add_message("INBOX", &rfc822(subject, "x"), &[]))
+        .collect();
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive, trash, junk) = (id("INBOX"), id("Archive"), id("Trash"), id("Junk"));
+    let at = |folder, uid| MessageRef { folder, uid };
+    let eventually = |done: &dyn Fn() -> bool| {
+        for _ in 0..400 {
+            if done() {
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(25));
+        }
+        panic!("did not get there");
+    };
+    let in_store = |folder| -> Vec<String> {
+        let mut subjects: Vec<String> = s
+            .core
+            .messages(folder, Sort::default(), 0, 100)
+            .unwrap()
+            .into_iter()
+            .map(|m| m.info.subject)
+            .collect();
+        subjects.sort();
+        subjects
+    };
+
+    // the list's rows by position, newest (the highest UID, as the dates are the same) first
+    let list = Search::folder(inbox);
+    let picked = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 2)]).unwrap();
+    assert_eq!(picked, [at(inbox, uids[3]), at(inbox, uids[2])]);
+    assert_eq!(s.core.positions(&list, Sort::default(), &picked).unwrap(), [0, 1]);
+
+    let three = [at(inbox, uids[0]), at(inbox, uids[1]), at(inbox, uids[2])];
+    let summary = s.core.summary(&three).unwrap();
+    assert_eq!((summary.count, summary.unread, summary.flagged), (3, 3, 0));
+    assert_eq!((summary.accounts, summary.folders, summary.for_good), (1, 1, 0));
+    assert!(!summary.in_junk);
+    assert_eq!(summary.title(), "3 messages selected");
+    assert_eq!(summary.detail(), "3 unread");
+
+    // read and flagged, with one command each
+    assert_eq!(
+        s.core.act(&three, Action::Read(true)).unwrap(),
+        "Marked 3 messages as read"
+    );
+    s.core.act(&three[..2], Action::Flag(true)).unwrap();
+    let summary = s.core.summary(&three).unwrap();
+    assert_eq!((summary.unread, summary.flagged), (0, 2));
+    eventually(&|| {
+        uids[..3]
+            .iter()
+            .all(|&uid| s.server.flags("INBOX", uid).contains(&"\\Seen".into()))
+    });
+    assert_eq!(s.core.undo_label(), None, "flags are not undone");
+
+    // moved together, then back with Undo
+    assert_eq!(
+        s.core.act(&three, Action::Move(archive)).unwrap(),
+        "Moved 3 messages to Archive"
+    );
+    assert_eq!(in_store(inbox), ["Four"]);
+    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Move"));
+    eventually(&|| in_store(archive).len() == 3);
+    assert_eq!(s.core.undo().unwrap(), "Moved 3 messages back to Inbox");
+    assert_eq!(s.core.undo_label(), None);
+    assert!(in_store(archive).is_empty());
+    eventually(&|| in_store(inbox).len() == 4);
+    assert_eq!(s.server.subjects("Archive").len(), 0);
+
+    // deleted into Deleted Items, then back
+    let all: Vec<MessageRef> = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 4)]).unwrap();
+    assert_eq!(s.core.delete_question(&all).unwrap(), None);
+    assert_eq!(
+        s.core.act(&all[..2], Action::Delete).unwrap(),
+        "Moved 2 messages to Deleted Items"
+    );
+    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Delete"));
+    eventually(&|| in_store(trash).len() == 2);
+    s.core.undo().unwrap();
+    eventually(&|| in_store(inbox).len() == 4 && s.server.subjects("Trash").is_empty());
+
+    // junk and back: $Junk taken away again
+    let all: Vec<MessageRef> = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 4)]).unwrap();
+    assert_eq!(
+        s.core.act(&all[..1], Action::Junk(true)).unwrap(),
+        "Moved 1 message to Junk E-mail"
+    );
+    eventually(&|| in_store(junk).len() == 1);
+    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Mark as Junk"));
+    s.core.undo().unwrap();
+    eventually(&|| in_store(inbox).len() == 4 && s.server.subjects("Junk").is_empty());
+    eventually(&|| {
+        s.server
+            .messages("INBOX")
+            .iter()
+            .all(|m| !m["flags"].as_array().unwrap().contains(&json!("$Junk")))
+    });
+
+    // copies stay; from Deleted Items, delete asks first and removes for good
+    let all: Vec<MessageRef> = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 4)]).unwrap();
+    assert_eq!(
+        s.core.act(&all[..2], Action::Copy(archive)).unwrap(),
+        "Copied 2 messages to Archive"
+    );
+    eventually(&|| in_store(archive).len() == 2);
+    assert_eq!(in_store(inbox).len(), 4);
+    let in_archive = s
+        .core
+        .refs_in_ranges(&Search::folder(archive), Sort::default(), &[(0, 2)])
+        .unwrap();
+    s.core.act(&in_archive, Action::Move(trash)).unwrap();
+    eventually(&|| in_store(trash).len() == 2);
+    let in_trash = s
+        .core
+        .refs_in_ranges(&Search::folder(trash), Sort::default(), &[(0, 2)])
+        .unwrap();
+    let mixed = [in_trash[0], all[0]];
+    assert_eq!(
+        s.core.delete_question(&mixed).unwrap().as_deref(),
+        Some("1 of the 2 messages will be deleted for good. Delete the messages?")
+    );
+    assert_eq!(
+        s.core.delete_question(&in_trash).unwrap().as_deref(),
+        Some("These 2 messages will be deleted for good. Delete them?")
+    );
+    assert_eq!(
+        s.core.act(&in_trash, Action::Delete).unwrap(),
+        "Deleted 2 messages for good"
+    );
+    assert_eq!(s.core.undo_label(), None, "for good is not undone");
+    eventually(&|| s.server.subjects("Trash").is_empty());
+
+    // not into a folder of another account or one that holds no messages, and nothing when they are gone
+    assert!(s.core.act(&[at(inbox, 999_999)], Action::Read(true)).is_err());
 }
 
 #[test]

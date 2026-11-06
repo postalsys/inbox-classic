@@ -1069,7 +1069,7 @@ pub struct PeSearch {
 
 /// # Safety
 /// `search` must be NULL or point to a search whose text is NULL or NUL-terminated.
-unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Search> {
+pub(crate) unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Search> {
     // SAFETY: as the caller guarantees
     let s = unsafe { search.as_ref() }?;
     Some(pe_core::Search {
@@ -1438,7 +1438,11 @@ unsafe fn folder_change(
 ///
 /// # Safety
 /// `error` must be NULL or a valid pointer.
-unsafe fn refused<T>(error: *mut *mut c_char, outcome: Result<T, Option<pe_core::Error>>, fallback: &str) -> Option<T> {
+pub(crate) unsafe fn refused<T>(
+    error: *mut *mut c_char,
+    outcome: Result<T, Option<pe_core::Error>>,
+    fallback: &str,
+) -> Option<T> {
     match outcome {
         Ok(value) => Some(value),
         Err(reason) => {

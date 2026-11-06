@@ -36,6 +36,8 @@ enum Command: Int, CaseIterable {
     case defaultApp = 131
     case viewSource = 132
     case aiAgents = 133
+    case selectAll = 134
+    case undo = 135
 
     /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu)
     var menu: String {
@@ -73,6 +75,8 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return "tools"
         case .viewSource: return "view"
         case .aiAgents: return "tools"
+        case .selectAll: return "edit"
+        case .undo: return "edit"
         }
     }
 
@@ -111,6 +115,8 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return "Make Default Mail App…"
         case .viewSource: return "Message Source"
         case .aiAgents: return "AI Agents…"
+        case .selectAll: return "Select All"
+        case .undo: return "Undo"
         }
     }
 
@@ -150,6 +156,8 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return nil
         case .viewSource: return nil
         case .aiAgents: return nil
+        case .selectAll: return ("a", [.command])
+        case .undo: return ("z", [.command])
         }
     }
 
@@ -189,6 +197,8 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return false
         case .viewSource: return false
         case .aiAgents: return false
+        case .selectAll: return false
+        case .undo: return false
         }
     }
 }

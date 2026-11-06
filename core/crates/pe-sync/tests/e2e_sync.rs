@@ -8,7 +8,7 @@ use pe_imap::{Client, Event};
 use pe_net::Security;
 use pe_store::{AccountId, AccountSettings, FolderId, Sort, Store};
 use pe_sync::{
-    Change, Report, apply_event, create_folder, delete_folder, expunge_message, fetch_source, move_message,
+    Change, Report, apply_event, create_folder, delete_folder, expunge_messages, fetch_source, move_message,
     new_folder_path, rename_folder, set_flag, sync_folder, sync_folders,
 };
 use pe_testkit::{ImapKit, USER, password, rfc822, wait_for};
@@ -299,7 +299,7 @@ async fn message_actions(config: Value) {
     assert_eq!(s.server.subjects("Archive"), ["Move me"]);
     assert_eq!(s.server.subjects("INBOX"), ["Keep", "Delete me"]);
 
-    expunge_message(&mut s.client, &mut s.store, inbox, deleted)
+    expunge_messages(&mut s.client, &mut s.store, inbox, &[deleted])
         .await
         .unwrap();
     assert_eq!(s.server.subjects("INBOX"), ["Keep"]);

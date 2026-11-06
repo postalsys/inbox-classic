@@ -16,6 +16,7 @@ pub mod mailto;
 mod requests;
 mod search;
 mod secrets;
+mod selection;
 mod sign_in_apps;
 mod text;
 pub mod unsubscribe;
@@ -30,7 +31,8 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
-pub use pe_store::{Scope, Search, Show};
+pub use pe_store::{MessageRef, Scope, Search, Show};
+pub use selection::{Action, Summary};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
@@ -43,7 +45,7 @@ use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
 pub use text::{
     HiddenUnread, RETRY_NOTE, ReaderState, account_label, account_title, folder_kind, folder_name, format_size,
-    hidden_unread, reader_page,
+    hidden_unread, list_counts, messages, reader_page,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, SharedToken, Worker};
@@ -300,6 +302,8 @@ pub struct Core {
     discoveries: Discoveries,
     oauth: OAuthProviders,
     next_request: std::sync::atomic::AtomicU64,
+    /// What Edit > Undo takes back (selection.rs)
+    undo: Mutex<Option<selection::Undo>>,
 }
 
 impl Core {
@@ -362,6 +366,7 @@ impl Core {
             discoveries: Discoveries::default(),
             oauth: OAuthProviders(Arc::new(options.oauth_providers)),
             next_request: std::sync::atomic::AtomicU64::new(1),
+            undo: Mutex::new(None),
         })
     }
 
@@ -1243,9 +1248,30 @@ impl Core {
     /// Copies a message into another folder of its account, on the server in the background, which then syncs the
     /// folder it went to
     pub fn copy_message(&self, folder: FolderId, uid: u64, to: FolderId) -> Result<()> {
+        self.copy_messages(folder, &[uid], to)
+    }
+
+    /// Copies messages of a folder into another folder of their account with one command, as [`Core::copy_message`]
+    /// copies one. Refused when one of them is not there.
+    pub fn copy_messages(&self, folder: FolderId, uids: &[u64], to: FolderId) -> Result<()> {
         let account = self.target_of(folder, to)?;
-        self.store().message(folder, uid)?.ok_or(Error::NotFound)?;
-        self.send_command(account, Command::Copy { folder, uid, to })
+        if uids.is_empty() {
+            return Ok(());
+        }
+        {
+            let store = self.store();
+            for &uid in uids {
+                store.message(folder, uid)?.ok_or(Error::NotFound)?;
+            }
+        }
+        self.send_command(
+            account,
+            Command::Copy {
+                folder,
+                uids: uids.to_vec(),
+                to,
+            },
+        )
     }
 
     /// The account of `folder` when a message of it can go to `to`: another folder of that account, one that holds
@@ -1264,9 +1290,18 @@ impl Core {
     /// is in there already or the account has none ([`Core::deletes_for_good`]). Out of the store now, on the server
     /// in the background.
     pub fn delete_message(&self, folder: FolderId, uid: u64) -> Result<()> {
+        self.delete_messages(folder, &[uid])
+    }
+
+    /// Deletes messages of a folder as [`Core::delete_message`] deletes one, with one command
+    pub fn delete_messages(&self, folder: FolderId, uids: &[u64]) -> Result<()> {
         match self.trash_for(folder)? {
-            Some(trash) => self.move_message(folder, uid, trash),
-            None => self.remove_then(folder, uid, |removed| Command::Expunge { folder, uid, removed }),
+            Some(trash) => self.move_messages(folder, uids, trash),
+            None => self.remove_then(folder, uids, |removed| Command::Expunge {
+                folder,
+                uids: uids.to_vec(),
+                removed,
+            }),
         }
     }
 
@@ -1290,18 +1325,24 @@ impl Core {
     fn remove_then(
         &self,
         folder: FolderId,
-        uid: u64,
-        command: impl FnOnce(Box<pe_store::MessageInfo>) -> Command,
+        uids: &[u64],
+        command: impl FnOnce(Vec<pe_store::MessageInfo>) -> Command,
     ) -> Result<()> {
+        if uids.is_empty() {
+            return Ok(());
+        }
         let (account, removed) = {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
-            let removed = store.message(folder, uid)?.ok_or(Error::NotFound)?.info;
-            store.remove_messages(folder, &[uid])?;
+            let removed = uids
+                .iter()
+                .map(|&uid| Ok(store.message(folder, uid)?.ok_or(Error::NotFound)?.info))
+                .collect::<Result<Vec<_>>>()?;
+            store.remove_messages(folder, uids)?;
             (account, removed)
         };
         self.post(Event::FolderChanged { account, folder })?;
-        self.send_command(account, command(Box::new(removed)))
+        self.send_command(account, command(removed))
     }
 
     /// Creates a folder `name` in `parent`, or at the top of the account: on the server in the background, then

@@ -336,7 +336,24 @@ Screenshots: `organize-5-all-read`
 - and stays in the Inbox
 - dropped on its own folder, it stays
 
-## 31. Junk and not junk
+## 31. Several messages
+
+Screenshots: `select-1-several`, `select-2-undo`
+
+- Ctrl+click (Command+click on the Mac) adds two more messages: three are selected
+- the reading pane says 3 messages are selected, and how many of them are unread
+- the status bar says 3 selected
+- Reply is off for several, Mark as Read is on
+- Mark as Read marks the three read on the server
+- Move to Folder moves the three to Archive
+- and out of the list
+- the status bar says they were moved to Archive
+- Edit > Undo Move brings them back to the Inbox
+- and on the server
+- Select All selects every message of the list
+- one message selected again is shown in the reading pane
+
+## 32. Junk and not junk
 
 Screenshots: `organize-7-junk`
 
@@ -347,7 +364,7 @@ Screenshots: `organize-7-junk`
 - the search field is still drawn over the toolbar (edge $edgePixel, inside $insidePixel)
 - Not Junk moves it back to the Inbox
 
-## 32. Folders
+## 33. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
 
@@ -359,7 +376,7 @@ Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
 - and Yes deletes it on the server
 - renaming the Inbox is refused with the reason
 
-## 33. Closing a message that was written
+## 34. Closing a message that was written
 
 Screenshots: `write-6-close`
 
@@ -367,14 +384,14 @@ Screenshots: `write-6-close`
 - No closes it
 - without saving it
 
-## 34. An e-mail link
+## 35. An e-mail link
 
 Screenshots: `write-18-mailto`
 
 - a second start with a mailto: link hands it over and ends
 - the running app opens a new message from it
 
-## 35. Completing an address
+## 36. Completing an address
 
 Screenshots: `write-17-complete`
 
@@ -383,7 +400,7 @@ Screenshots: `write-17-complete`
 - Enter takes the first, with a comma for the next
 - and closes the list
 
-## 36. A signature
+## 37. A signature
 
 Screenshots: `signature-1-editor`, `signature-2-new`, `signature-3-reply-left`
 
@@ -397,7 +414,7 @@ Screenshots: `signature-1-editor`, `signature-2-new`, `signature-3-reply-left`
 - a reply takes typing
 - a reply has the signature above the quote
 
-## 37. A Gmail address
+## 38. A Gmail address
 
 Screenshots: `account-5-app-password`, `account-6-gmail`
 
@@ -405,7 +422,7 @@ Screenshots: `account-5-app-password`, `account-6-gmail`
 - with Google turned off, a Gmail address goes to the app password way
 - its servers were found
 
-## 38. A wrong password
+## 39. A wrong password
 
 Screenshots: `trouble-1-password`
 
@@ -415,7 +432,7 @@ The second account is on a second ImapKit server (`second` in the harness config
 - the status bar says why
 - with the right password typed, the account syncs
 
-## 39. All Inboxes
+## 40. All Inboxes
 
 Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the test checks the menu's items there without a picture of it)
 
@@ -428,7 +445,7 @@ Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the
 - a reply goes from the account of the message
 - Mark All Read marks both Inboxes read on the servers
 
-## 40. Accounts
+## 41. Accounts
 
 Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, `accounts-3-after`
 
@@ -443,7 +460,7 @@ Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, 
 - the account leaves the tree
 - All Inboxes goes with the second account
 
-## 41. Sign-in apps
+## 42. Sign-in apps
 
 Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not yet on the Mac, not yet on Linux), `signin-4-editor` (not yet on Linux), `signin-5-apps-added`, `signin-6-first-page` (not yet on the Mac, not yet on Linux), `signin-7-why` (not yet on the Mac, not yet on Linux), `signin-8-more` (not yet on the Mac, not yet on Linux), `signin-9-waiting`, `signin-10-added` (not yet on the Mac, not yet on Linux), `signin-11-in-use` (not yet on the Mac, not yet on Linux), `signin-12-toggled`, `signin-13-properties` (not yet on the Mac, not yet on Linux), `account-5b-browser-sign-in` (not yet on the Mac, not yet on Linux)
 
@@ -472,19 +489,19 @@ Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not ye
 - a sign-in app turned off is left out of More sign-in options
 - a Gmail address is offered Sign in with Google
 
-## 42. About
+## 43. About
 
 Screenshots: `help-1-about`
 
 - About shows the version
 
-## 43. Help
+## 44. Help
 
 Screenshots: `help-2-contents`
 
 - F1 opens the help
 
-## 44. Printing
+## 45. Printing
 
 Screenshots: `files-3-print-missing`, `files-3-print`
 
@@ -492,7 +509,7 @@ Screenshots: `files-3-print-missing`, `files-3-print`
 - as wide as the app
 - and closing it prints nothing
 
-## 45. The tray
+## 46. The tray
 
 Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not yet on Linux)
 
@@ -502,7 +519,7 @@ Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not ye
 - a click on the icon shows the window again
 - with the new message in the list, which came without a sync
 
-## 46. Closing
+## 47. Closing
 
 Screenshots: `write-12-close-app`
 

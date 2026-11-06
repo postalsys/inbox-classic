@@ -36,4 +36,6 @@ enum PeCommandId : unsigned short {
     IDM_DEFAULT_APP = 131,
     IDM_VIEW_SOURCE = 132,
     IDM_AI_AGENTS = 133,
+    IDM_SELECT_ALL = 134,
+    IDM_UNDO = 135,
 };

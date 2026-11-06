@@ -13,8 +13,8 @@ use pe_imap::{Client, Credentials, ErrorKind, Event as ImapEvent};
 use pe_net::Trust;
 use pe_store::{AccountId, FolderId, Store};
 use pe_sync::{
-    Change, apply_event, copy_message, expunge_message, fetch_source, imap_config, move_message, set_flag, smtp_config,
-    sync_folder, sync_folders,
+    Change, apply_event, copy_messages, expunge_messages, fetch_source, imap_config, move_message, set_flag,
+    smtp_config, sync_folder, sync_folders,
 };
 use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 
@@ -40,16 +40,17 @@ pub(crate) enum Command {
         to: FolderId,
         removed: Vec<pe_store::MessageInfo>,
     },
-    /// a copy of a message into another folder of the account
+    /// a copy of messages into another folder of the account
     Copy {
         folder: FolderId,
-        uid: u64,
+        uids: Vec<u64>,
         to: FolderId,
     },
+    /// messages deleted for good; `removed` as for [`Command::Move`]
     Expunge {
         folder: FolderId,
-        uid: u64,
-        removed: Box<pe_store::MessageInfo>,
+        uids: Vec<u64>,
+        removed: Vec<pe_store::MessageInfo>,
     },
     /// A message from a file into a folder, read
     Append {
@@ -581,17 +582,19 @@ impl Worker {
                 // the message shows up in the folder it went to
                 self.sync_one(store, to).await
             }
-            Command::Copy { folder, uid, to } => {
-                copy_message(self.client(store).await?, store, folder, uid, to).await?;
+            Command::Copy { folder, uids, to } => {
+                copy_messages(self.client(store).await?, store, folder, &uids, to).await?;
                 // the copy shows up in the folder it went to
                 self.sync_one(store, to).await
             }
-            Command::Expunge { folder, uid, removed } => {
+            Command::Expunge { folder, uids, removed } => {
                 let expunged = match self.client(store).await {
-                    Ok(client) => expunge_message(client, store, folder, uid).await.map_err(Failure::from),
+                    Ok(client) => expunge_messages(client, store, folder, &uids)
+                        .await
+                        .map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                self.restore_on_failure(store, folder, &[*removed], expunged)
+                self.restore_on_failure(store, folder, &removed, expunged)
             }
             Command::Append { folder, raw, date } => {
                 let path = store.folder(folder)?.info.path;

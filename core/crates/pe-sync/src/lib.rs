@@ -493,27 +493,30 @@ pub async fn move_message(
     Ok(())
 }
 
-/// Copies a message to another folder of the account on the server (UID COPY); the folder it went to is the
+/// Copies messages to another folder of the account on the server (UID COPY); the folder they went to is the
 /// caller's to sync
-pub async fn copy_message(
+pub async fn copy_messages(
     client: &mut Client,
     store: &mut Store,
     folder: FolderId,
-    uid: u64,
+    uids: &[u64],
     to: FolderId,
 ) -> Result<()> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(());
+    };
     let (from, to) = (store.folder(folder)?.info.path, store.folder(to)?.info.path);
     ensure_selected(client, &from).await?;
-    client.copy(&Messages::uid(uid), &to).await?;
+    client.copy(&Messages::Uids(set), &to).await?;
     Ok(())
 }
 
-/// Deletes a message for good on the server: `\\Deleted`, then expunged. With UIDPLUS only this message is
+/// Deletes messages for good on the server: `\\Deleted`, then expunged. With UIDPLUS only these messages are
 /// expunged; without it, EXPUNGE takes every message of the folder marked deleted, as other mail programs do too.
-pub async fn expunge_message(client: &mut Client, store: &mut Store, folder: FolderId, uid: u64) -> Result<()> {
+pub async fn expunge_messages(client: &mut Client, store: &mut Store, folder: FolderId, uids: &[u64]) -> Result<()> {
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
-    expunge_uids(client, &[uid]).await
+    expunge_uids(client, uids).await
 }
 
 /// Removes these messages of the selected folder for good
