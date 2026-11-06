@@ -1391,6 +1391,76 @@ fn messages_become_files() {
 }
 
 #[test]
+fn flags_in_colors_as_apple_mail_does() {
+    let Some(s) = setup() else { return };
+    let red = s.server.add_message("INBOX", &rfc822("Red one", "x"), &[]);
+    let apple = s.server.add_message(
+        "INBOX",
+        &rfc822("From Apple Mail", "y"),
+        &["\\Flagged", "$MailFlagBit2"],
+    );
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let at = |uid| MessageRef { folder: inbox, uid };
+    let color = |uid| s.core.message(inbox, uid).unwrap().unwrap().info.flag_color();
+    let eventually = |done: &dyn Fn() -> bool| {
+        for _ in 0..400 {
+            if done() {
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(25));
+        }
+        panic!("did not get there");
+    };
+    let has = |uid, flag: &str| s.server.flags("INBOX", uid).iter().any(|f| f == flag);
+
+    // one flagged blue by Apple Mail reads as blue
+    assert_eq!(color(apple), Some(pe_core::FlagColor::Blue));
+    // green: \\Flagged with bits 0 and 1, on the server too
+    assert_eq!(
+        s.core
+            .act(&[at(red)], Action::FlagColor(pe_core::FlagColor::Green))
+            .unwrap(),
+        "Flagged 1 message green"
+    );
+    assert_eq!(color(red), Some(pe_core::FlagColor::Green));
+    eventually(&|| has(red, "\\Flagged") && has(red, "$MailFlagBit0") && has(red, "$MailFlagBit1"));
+    // purple from blue: bit 0 added, bit 2 kept
+    s.core
+        .act(&[at(apple)], Action::FlagColor(pe_core::FlagColor::Purple))
+        .unwrap();
+    eventually(&|| has(apple, "$MailFlagBit0") && has(apple, "$MailFlagBit2"));
+    // two colours: no one colour in the summary
+    let summary = s.core.summary(&[at(red), at(apple)]).unwrap();
+    assert_eq!((summary.flagged, summary.flag_color), (2, None));
+    // red: no bits
+    s.core
+        .act(&[at(red), at(apple)], Action::FlagColor(pe_core::FlagColor::Red))
+        .unwrap();
+    assert_eq!(
+        s.core.summary(&[at(red), at(apple)]).unwrap().flag_color,
+        Some(pe_core::FlagColor::Red)
+    );
+    eventually(&|| !has(red, "$MailFlagBit0") && !has(apple, "$MailFlagBit2"));
+    // the flag taken away takes its colour along
+    s.core
+        .act(&[at(apple)], Action::FlagColor(pe_core::FlagColor::Gray))
+        .unwrap();
+    s.core.act(&[at(apple)], Action::Flag(false)).unwrap();
+    eventually(&|| color(apple).is_none());
+    eventually(&|| !has(apple, "\\Flagged") && !has(apple, "$MailFlagBit1") && !has(apple, "$MailFlagBit2"));
+}
+
+#[test]
 fn a_move_or_delete_the_server_does_not_do_comes_back() {
     let Some(s) = setup() else { return };
     let first = s.server.add_message("INBOX", &rfc822("First", "1"), &[]);

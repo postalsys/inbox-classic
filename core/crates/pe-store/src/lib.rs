@@ -27,7 +27,7 @@ pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_prov
 pub use agents::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry, NewLogEntry};
 pub use contacts::Contact;
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
-pub use messages::{Message, MessageInfo, Sort, SortField};
+pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Sort, SortField};
 pub use outbox::Queued;
 pub use query::Query;
 pub use rusqlite::Error;

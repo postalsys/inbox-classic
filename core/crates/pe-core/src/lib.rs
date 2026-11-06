@@ -32,9 +32,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use pe_net::Trust;
+pub use pe_store::FlagColor;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
 pub use pe_store::{MessageRef, Scope, Search, Show};
-pub use selection::{Action, Summary};
+pub use selection::{Action, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 

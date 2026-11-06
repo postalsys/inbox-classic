@@ -1199,6 +1199,9 @@ pub struct PeMessage {
     pub recipients: *const c_char,
     pub seen: bool,
     pub flagged: bool,
+    /// The colour of its flag (Apple Mail's): 0 when not flagged, 1 red, 2 orange, 3 yellow, 4 green, 5 blue, 6
+    /// purple, 7 gray
+    pub flag_color: u8,
     pub answered: bool,
     pub has_attachments: bool,
 }
@@ -1244,6 +1247,7 @@ pub unsafe extern "C" fn pe_messages(
                     recipients: strings.add(&info.recipients),
                     seen: info.seen(),
                     flagged: info.flagged(),
+                    flag_color: info.flag_color().map_or(0, |c| c as u8),
                     answered: info.answered(),
                     has_attachments: info.has_attachments,
                 }

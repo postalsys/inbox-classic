@@ -227,6 +227,8 @@ typedef enum PeAction {
   PE_ACTION_UNFLAG = 3,
   // Flag them when one is not flagged, take the flags away when all are (`pe_selection_flags`)
   PE_ACTION_TOGGLE_FLAG = 9,
+  // Flag them in the colour `to` (1 red to 7 gray, as `PeMessage.flag_color`)
+  PE_ACTION_FLAG_COLOR = 10,
   PE_ACTION_JUNK = 4,
   PE_ACTION_NOT_JUNK = 5,
   // Into Deleted Items, or for good (ask first: `pe_selection_delete_question`)
@@ -490,6 +492,9 @@ typedef struct PeMessage {
   const char *recipients;
   bool seen;
   bool flagged;
+  // The colour of its flag (Apple Mail's): 0 when not flagged, 1 red, 2 orange, 3 yellow, 4 green, 5 blue, 6
+  // purple, 7 gray
+  uint8_t flag_color;
   bool answered;
   bool has_attachments;
 } PeMessage;
@@ -699,6 +704,9 @@ typedef struct PeSelectionSummary {
   uint64_t count;
   uint64_t unread;
   uint64_t flagged;
+  // The colour all the flagged ones have (1 red to 7 gray, as `PeMessage.flag_color`), 0 when none is flagged or
+  // their colours differ
+  uint8_t flag_color;
   // Every one is in a Junk folder: Mark as Not Junk applies, not Mark as Junk
   bool in_junk;
   // How many accounts and folders they are in
@@ -2068,6 +2076,10 @@ char *pe_downloading_text(uint64_t count);
 // `core` must be a live handle, `selection` a live selection.
 char *pe_selection_downloading_text(const struct PeCore *core,
                                     const struct PeSelection *selection);
+
+// The name of the flag colour `color` (1 red to 7 gray) as the Flag menu lists it ("Orange"); NULL for another
+// number. Free with `pe_string_free`.
+char *pe_flag_color_name(uint8_t color);
 
 #ifdef __cplusplus
 }  // extern "C"

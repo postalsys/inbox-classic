@@ -449,6 +449,17 @@ const sections = [
                 checked: ['The status bar says the messages were moved to Archive', 'Edit > Undo Move brings them back to the Inbox, on the server']
             },
             {
+                shot: 'flags-1-colors',
+                name: 'Flag colours',
+                what: 'Messages are flagged in the seven colours of Apple Mail (red, orange, yellow, green, blue, purple, gray), kept on the server as Apple Mail keeps them: \\Flagged with the keywords $MailFlagBit0 to $MailFlagBit2. A message Apple Mail flagged shows its colour here and the other way round; other mail programs see a flag. The flag column shows the colour.',
+                how: 'Message > Flag and a colour, or the message menu; Clear Flag takes it away.',
+                checked: [
+                    'Orange sets \\Flagged and $MailFlagBit0 on the server, and the flag column shows it orange',
+                    'Blue on two selected messages flags both blue',
+                    'A message flagged purple by Apple Mail shows a purple flag; Clear Flag takes flag and colour away'
+                ]
+            },
+            {
                 shot: 'organize-7-junk',
                 name: 'Junk / Not Junk',
                 what: "Junk moves a message to Junk E-mail with the $Junk keyword of RFC 9051 (and $NotJunk taken away), so the server's spam filter can learn from it. In Junk E-mail the button is Not Junk, which moves it back to the Inbox with $NotJunk. A folder that does not keep keywords still gets the move.",
