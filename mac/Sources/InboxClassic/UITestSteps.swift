@@ -650,6 +650,8 @@ extension UITest {
             return true
         }, ".eml files dropped onto Archive in the folder tree are put in it, on the server")
         check(await findMessage("Archive", "not a message") == nil, "and the other file is not")
+        let put: NSTextField? = find("status.text", in: main.window)
+        check(put?.stringValue == "Put 3 messages in Archive", "the status bar says what was put where (\(put?.stringValue ?? ""))")
         selectFolder(named: "Archive")
         _ = await waitUntil(20) { (0..<self.list.numberOfRows).compactMap { self.main.mailbox.row($0)?.subject }.contains("Winter berths") }
         await selectRow(0)

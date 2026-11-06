@@ -1117,12 +1117,17 @@ public final class Mailbox: NSObject {
         guard !files.isEmpty else { return }
         let paths = files.map { strdup($0.path) }
         defer { paths.forEach { free($0) } }
+        var said: UnsafeMutablePointer<CChar>?
         var report: UnsafeMutablePointer<CChar>?
         let ok = paths.map { UnsafePointer($0) }.withUnsafeBufferPointer {
-            pe_import_files(core.handle, folder, $0.baseAddress, paths.count, &report)
+            pe_import_files(core.handle, folder, $0.baseAddress, paths.count, &said, &report)
         }
-        if let said = taken(report) {
-            inform(said, title: "Import Messages", style: ok ? .information : .warning)
+        // what went in in the status bar, what did not in a window
+        if let said = taken(said) {
+            status(said)
+        }
+        if let report = taken(report) {
+            inform(report, title: "Import Messages", style: ok ? .information : .warning)
         }
     }
 
