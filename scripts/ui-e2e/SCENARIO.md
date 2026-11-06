@@ -542,6 +542,7 @@ Screenshots: `options-1-language`, `lang-1-german`, `lang-2-pseudo-main`, `lang-
 - Language lists System default, with the language it is now, and English, Deutsch, Eesti, Español and Français by their own names
 - a language chosen says the app starts again to change it, with Restart Now and Later
 - started in German, the menus, the toolbar and the status bar are in German
+- and the special folders, Archive among them (Posteingang, Archiv)
 - started in the pseudo-language, nothing in the main window, the compose window and the account form is left in English
 - and nothing is cut off
 

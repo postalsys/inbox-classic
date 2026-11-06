@@ -118,26 +118,6 @@ HWND CreateFindField(HWND parent) {
     return CreateChild(parent, L"InboxClassicSearchField", L"", WS_CLIPCHILDREN, IDC_FIND_FIELD, {}, WS_EX_CLIENTEDGE);
 }
 
-// the name Outlook Express gives a special folder, the folder's own name otherwise
-std::wstring FolderName(const PeFolder& folder) {
-    switch (folder.special_use) {
-    case PE_SPECIAL_USE_INBOX:
-        return core::T(PE_TEXT_FOLDER_INBOX);
-    case PE_SPECIAL_USE_SENT:
-        return core::T(PE_TEXT_FOLDER_SENT);
-    case PE_SPECIAL_USE_TRASH:
-        return core::T(PE_TEXT_FOLDER_DELETED);
-    case PE_SPECIAL_USE_DRAFTS:
-        return core::T(PE_TEXT_FOLDER_DRAFTS);
-    case PE_SPECIAL_USE_JUNK:
-        return core::T(PE_TEXT_FOLDER_JUNK);
-    case PE_SPECIAL_USE_ARCHIVE:
-        return core::T(PE_TEXT_FOLDER_ARCHIVE);
-    default:
-        return Text(folder.name);
-    }
-}
-
 // a row's name with an unread count after it, when there is one
 std::wstring CountedLabel(const std::wstring& name, uint64_t unread) {
     return unread > 0 ? name + L" (" + std::to_wstring(unread) + L")" : name;
@@ -563,12 +543,12 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
     for (size_t i = 0; i < count; i++) {
         const PeFolder* folder = pe_folder_list_get(folders.get(), i);
         size_t depth = std::min<size_t>(folder->depth, parents.size() - 1);
-        HTREEITEM item = InsertItem(tree_, parents[depth], CountedLabel(FolderName(*folder), folder->unread), static_cast<LPARAM>(folder->id),
+        HTREEITEM item = InsertItem(tree_, parents[depth], CountedLabel(Text(folder->name), folder->unread), static_cast<LPARAM>(folder->id),
                                     folder->unread > 0, IconOfFolder(folder->special_use));
         items_[folder->id] = item;
-        rows_[item] = {FolderName(*folder), folder->unread, folder->unread_below};
+        rows_[item] = {Text(folder->name), folder->unread, folder->unread_below};
         folderAccounts_[folder->id] = account;
-        folderNames_[folder->id] = {FolderName(*folder), folder->fixed};
+        folderNames_[folder->id] = {Text(folder->name), folder->fixed};
         if (!folder->selectable) {
             unselectable_.insert(folder->id);
         }
@@ -614,7 +594,7 @@ void Mailbox::UpdateFolders(int64_t account) {
             Reload();
             return;
         }
-        rows_[item->second] = {FolderName(*folder), folder->unread, folder->unread_below};
+        rows_[item->second] = {Text(folder->name), folder->unread, folder->unread_below};
         ShowRow(item->second);
     }
     auto root = accountItems_.find(account);

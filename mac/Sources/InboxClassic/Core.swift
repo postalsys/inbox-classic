@@ -308,18 +308,6 @@ struct Folder {
         unread = folder.unread
         unreadBelow = folder.unread_below
     }
-
-    /// the name mail programs of the Outlook Express kind give a special folder, the folder's own name otherwise
-    var displayName: String {
-        switch specialUse {
-        case PE_SPECIAL_USE_INBOX: return Text.folderInbox.text
-        case PE_SPECIAL_USE_SENT: return Text.folderSent.text
-        case PE_SPECIAL_USE_TRASH: return Text.folderDeleted.text
-        case PE_SPECIAL_USE_DRAFTS: return Text.folderDrafts.text
-        case PE_SPECIAL_USE_JUNK: return Text.folderJunk.text
-        default: return name
-        }
-    }
 }
 
 struct Message {

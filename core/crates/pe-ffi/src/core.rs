@@ -914,7 +914,7 @@ pub struct PeFolder {
     pub account: i64,
     /// The full name on the server
     pub path: *const c_char,
-    /// The name to show
+    /// The name to show, in the language for a special folder (Sent Items, Deleted Items)
     pub name: *const c_char,
     /// 0 for a top level folder
     pub depth: u32,
@@ -954,7 +954,7 @@ pub unsafe extern "C" fn pe_folders(core: *const PeCore, account: i64) -> *mut P
                 id: f.id,
                 account: f.account_id,
                 path: strings.add(&f.info.path),
-                name: strings.add(&f.info.name),
+                name: strings.add(&pe_core::folder_name(&f.info)),
                 depth: u32::try_from(*depth).unwrap_or(u32::MAX),
                 fixed: pe_core::is_fixed_folder(&f.info),
                 special_use: special_use(f.info.special_use.as_deref()),

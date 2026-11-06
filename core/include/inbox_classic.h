@@ -453,7 +453,7 @@ typedef struct PeFolder {
   int64_t account;
   // The full name on the server
   const char *path;
-  // The name to show
+  // The name to show, in the language for a special folder (Sent Items, Deleted Items)
   const char *name;
   // 0 for a top level folder
   uint32_t depth;

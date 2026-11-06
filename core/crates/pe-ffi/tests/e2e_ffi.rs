@@ -162,8 +162,14 @@ fn reads_mail_through_the_c_api() {
         .find(|f| f.special_use == PeSpecialUse::Inbox)
         .expect("INBOX");
     assert_eq!(
-        (text(inbox.name), inbox.total, inbox.unread, inbox.depth),
-        ("INBOX".into(), 2, 1, 0)
+        (
+            text(inbox.path),
+            text(inbox.name),
+            inbox.total,
+            inbox.unread,
+            inbox.depth
+        ),
+        ("INBOX".into(), "Inbox".into(), 2, 1, 0)
     );
     assert!(rows.iter().any(|f| f.special_use == PeSpecialUse::Sent));
     // what a collapsed account shows: the unread messages of its folders, none hidden under the Inbox

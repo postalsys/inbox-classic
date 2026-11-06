@@ -326,7 +326,7 @@ public final class Mailbox: NSObject {
             return Mailbox.allInboxesName
         }
         if let node = folderNodes[folder] {
-            return node.folder.displayName
+            return node.folder.name
         }
         return accountInfo[selectedAccount]?.name ?? ""
     }
@@ -453,7 +453,7 @@ public final class Mailbox: NSObject {
         if allInboxes && !searching {
             return accountInfo[node.folder.account]?.title ?? ""
         }
-        var text = node.folder.displayName
+        var text = node.folder.name
         if accountInfo.count > 1 {
             text += " (\(accountName(node.folder.account)))"
         }
@@ -970,7 +970,7 @@ public final class Mailbox: NSObject {
 
     func renameFolder() {
         guard folder != 0, let node = folderNodes[folder], !node.folder.fixed else { return }
-        let current = node.folder.displayName
+        let current = node.folder.name
         guard let name = askFolderName(title: Text.uiRenameFolderTitle.text, intro: Text.uiRenameFolderIntro.text(["folder": current]),
                                        name: current),
               !name.isEmpty, name != current else { return }
@@ -982,7 +982,7 @@ public final class Mailbox: NSObject {
 
     func deleteFolder() {
         guard folder != 0, let node = folderNodes[folder], !node.folder.fixed else { return }
-        guard ask(Text.uiDeleteFolderQuestion.text(["folder": node.folder.displayName]),
+        guard ask(Text.uiDeleteFolderQuestion.text(["folder": node.folder.name]),
                   yes: Text.uiTbDelete.text, no: Text.uiCancel.text, destructive: true) else { return }
         var reason: UnsafeMutablePointer<CChar>?
         if !pe_folder_delete(core.handle, folder, &reason) {
@@ -1452,7 +1452,7 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         case let node as FolderNode:
             // collapsed, a folder adds those of the folders under it
             let unread = node.folder.unread + (outlineView.isItemExpanded(node) ? 0 : node.folder.unreadBelow)
-            cell.show(name: node.folder.displayName, count: unread, icon: Icons.folder(Icons.folderIcon(node.folder.specialUse)),
+            cell.show(name: node.folder.name, count: unread, icon: Icons.folder(Icons.folderIcon(node.folder.specialUse)),
                       bold: unread > 0)
             cell.setAccessibilityIdentifier("tree.folder.\(node.folder.id)")
         default:

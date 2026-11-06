@@ -1625,10 +1625,11 @@ fn clear_private_dirs() {
 
 /// Makes a folder, failing when it is there; on Unix readable by this user only
 fn new_dir(dir: &std::path::Path) -> std::io::Result<()> {
-    let mut builder = std::fs::DirBuilder::new();
     #[cfg(unix)]
-    std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
-    builder.create(dir)
+    let made = std::os::unix::fs::DirBuilderExt::mode(&mut std::fs::DirBuilder::new(), 0o700).create(dir);
+    #[cfg(not(unix))]
+    let made = std::fs::DirBuilder::new().create(dir);
+    made
 }
 
 fn store_security(security: pe_net::Security) -> pe_store::Security {
