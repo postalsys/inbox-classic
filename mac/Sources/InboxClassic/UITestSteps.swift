@@ -557,7 +557,7 @@ extension UITest {
         command(.sync)
         _ = await waitUntil { list.numberOfRows > before }
         let menu = AppDelegate.shared.flagMenu().submenu
-        let colors = menu?.items.filter { $0.action == #selector(AppDelegate.flagColor(_:)) && $0.tag != 0 }.map(\.title) ?? []
+        let colors = menu?.items.filter { $0.action == #selector(AppDelegate.flagColor(_:)) }.map(\.title) ?? []
         check(colors == ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Gray"]
               && menu?.items.last?.title == "Clear Flag",
               "Message > Flag has the seven colours of Apple Mail and Clear Flag (\(colors))")
@@ -565,10 +565,11 @@ extension UITest {
             (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == subject }
         }
         func choose(_ color: Int) {
-            guard let item = menu?.items.first(where: { $0.action == #selector(AppDelegate.flagColor(_:)) && $0.tag == color })
+            let action = color == 0 ? #selector(AppDelegate.clearFlag(_:)) : #selector(AppDelegate.flagColor(_:))
+            guard let item = menu?.items.first(where: { $0.action == action && (color == 0 || $0.tag == color) })
             else { return check(false, "the Flag menu has colour \(color)") }
             check(AppDelegate.shared.validateMenuItem(item), "\(item.title) can be chosen")
-            onMain { AppDelegate.shared.flagColor(item) }
+            onMain { _ = NSApp.sendAction(action, to: AppDelegate.shared, from: item) }
         }
         func serverFlags(_ subject: String) async -> [String] {
             (await findMessage("INBOX", "Subject: \(NSRegularExpression.escapedPattern(for: subject))")?["flags"] as? [String]) ?? []

@@ -890,14 +890,16 @@ public final class Mailbox: NSObject {
     /// whether Flag flags (or takes the flag off) the selected messages
     var flagsSelected: Bool { pe_selection_flags(&summary) }
 
-    /// flags the selected messages in a colour (1 red to 7 gray), or takes flag and colour off (0)
+    /// flags the selected messages in a colour (1 red to 7 gray)
     func flagSelected(color: UInt8) {
         guard hasSelection else { return }
-        if color == 0 {
-            act(PE_ACTION_UNFLAG)
-        } else {
-            act(PE_ACTION_FLAG_COLOR, to: Int64(color))
-        }
+        act(PE_ACTION_FLAG_COLOR, to: Int64(color))
+    }
+
+    /// takes flag and colour off the selected messages
+    func clearFlag() {
+        guard hasSelection else { return }
+        act(PE_ACTION_UNFLAG)
     }
 
     /// after messages left the list: the one that took their place selected, or the last one
@@ -1718,15 +1720,18 @@ final class IconCell: NSTableCellView {
 
 /// A column header that shows an icon in place of a title (the paper clip, the flag), in the colour of the titles
 final class IconHeaderCell: NSTableHeaderCell {
-    var icon: NSImage?
+    /// the icon, tinted once in the colour of the titles
+    var icon: NSImage? {
+        didSet { tinted = icon.map { Icons.tinted($0, .secondaryLabelColor) } }
+    }
+    private var tinted: NSImage?
 
     override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
         super.drawInterior(withFrame: cellFrame, in: controlView)
-        guard let icon else { return }
+        guard let tinted else { return }
         let size = NSSize(width: 14, height: 14)
-        let rect = NSRect(x: cellFrame.midX - size.width / 2, y: cellFrame.midY - size.height / 2,
-                          width: size.width, height: size.height)
-        Icons.tinted(icon, .secondaryLabelColor).draw(in: rect)
+        tinted.draw(in: NSRect(x: cellFrame.midX - size.width / 2, y: cellFrame.midY - size.height / 2,
+                               width: size.width, height: size.height))
     }
 }
 

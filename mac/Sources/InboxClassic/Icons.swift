@@ -45,26 +45,21 @@ enum Icons {
 
     /// A flag filled in its colour, for the list and the Flag menu: not a template, so it keeps its colour on a
     /// selected row
-    static func coloredFlag(_ color: UInt8) -> NSImage? {
-        let key = "flag.fill@\(color)"
+    static func coloredFlag(_ color: UInt8) -> NSImage? { flagImage(flagColor(color), key: "flag.fill@\(color)") }
+
+    /// A flag on a selected row: white, whatever its colour
+    static var selectedFlag: NSImage? { flagImage(.white, key: "flag.fill@white") }
+
+    private static func flagImage(_ color: NSColor, key: String) -> NSImage? {
         if let image = cache[key] { return image }
         let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .regular)
-            .applying(NSImage.SymbolConfiguration(paletteColors: [flagColor(color)]))
+            .applying(NSImage.SymbolConfiguration(paletteColors: [color]))
         guard let image = NSImage(systemSymbolName: "flag.fill", accessibilityDescription: nil)?
             .withSymbolConfiguration(config) else { return nil }
         image.isTemplate = false
         cache[key] = image
         return image
     }
-
-    /// A flag on a selected row: white, whatever its colour
-    static let selectedFlag: NSImage? = {
-        let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .regular)
-            .applying(NSImage.SymbolConfiguration(paletteColors: [.white]))
-        let image = NSImage(systemSymbolName: "flag.fill", accessibilityDescription: nil)?.withSymbolConfiguration(config)
-        image?.isTemplate = false
-        return image
-    }()
 
     /// `image` drawn in `color`: a template icon where its cell does not tint it (a column header)
     static func tinted(_ image: NSImage, _ color: NSColor) -> NSImage {

@@ -379,8 +379,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             menu.addItem(item)
         }
         menu.addItem(.separator())
-        let clear = NSMenuItem(title: "Clear Flag", action: #selector(flagColor(_:)), keyEquivalent: "")
-        clear.tag = 0
+        let clear = NSMenuItem(title: "Clear Flag", action: #selector(clearFlag(_:)), keyEquivalent: "")
         clear.target = self
         clear.setAccessibilityIdentifier("flag.clear")
         menu.addItem(clear)
@@ -393,16 +392,21 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         main?.mailbox.flagSelected(color: UInt8(clamping: sender.tag))
     }
 
+    @objc func clearFlag(_ sender: NSMenuItem) {
+        main?.mailbox.clearFlag()
+    }
+
     public func validateMenuItem(_ item: NSMenuItem) -> Bool {
-        if item.action == #selector(flagColor(_:)) {
-            guard let main, core != nil, main.mailbox.hasSelection else {
-                item.state = .off
-                return false
-            }
+        if item.action == #selector(flagColor(_:)) || item.action == #selector(clearFlag(_:)) {
+            item.state = .off
+            guard let main, core != nil, main.mailbox.hasSelection else { return false }
             let summary = main.mailbox.summary
-            // the colour every selected message has is checked
-            item.state = item.tag != 0 && summary.flagged == summary.count && Int(summary.flag_color) == item.tag ? .on : .off
-            return item.tag != 0 || summary.flagged > 0
+            if item.action == #selector(clearFlag(_:)) {
+                return summary.flagged > 0
+            }
+            // the colour every selected message is flagged in is checked
+            item.state = Int(summary.flag_color) == item.tag ? .on : .off
+            return true
         }
         guard let command = Command(rawValue: item.tag), item.action == #selector(runCommand(_:)) else { return true }
         if command == .notify {
