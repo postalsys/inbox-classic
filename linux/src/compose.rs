@@ -425,6 +425,14 @@ fn field_entry(name: &str) -> gtk::Entry {
 }
 
 impl Compose {
+    /// The files attached, as their paths (the UI test reads them)
+    #[cfg(feature = "e2e")]
+    pub fn attached(&self) -> Vec<PathBuf> {
+        self.files.borrow().iter().map(|f| f.path.clone()).collect()
+    }
+}
+
+impl Compose {
     fn new(account: i64, draft: Option<&Draft>) -> Rc<Compose> {
         let shell = shell();
         let accounts = shell.core.accounts().unwrap_or_default();

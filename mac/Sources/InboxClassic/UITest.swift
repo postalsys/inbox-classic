@@ -55,6 +55,8 @@ final class UITest {
     func start() {
         NSApplication.shared.setActivationPolicy(.regular)
         TestHooks.testing = true
+        // an exception AppKit would swallow ends the test where it is thrown, not in a later layout pass
+        UserDefaults.standard.set(true, forKey: "NSApplicationCrashOnExceptions")
         Task { @MainActor in
             do {
                 try await scenario()

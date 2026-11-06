@@ -223,7 +223,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     let cc = AddressField()
     let bcc = AddressField()
     let subject = NSTextField(string: "")
-    private let attached = NSTokenField()
+    private let attached = WrappingTokenField()
     /// the field editor of To, Cc and Bcc
     fileprivate lazy var addressEditor: AddressEditor = {
         let editor = AddressEditor()
@@ -242,6 +242,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     private var quoteText = ""
     /// the attached files, with what the Attach row shows for each: the name and the size when it was added
     private var files: [(url: URL, label: String)] = []
+    /// the names of the attached files, for the UI test
+    var attachedNames: [String] { files.map { $0.url.lastPathComponent } }
     /// the Message-ID of the draft saved in Drafts, empty before the first save
     private(set) var messageId = ""
     /// the account whose Drafts has that copy, 0 before the first save
@@ -336,6 +338,11 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         attached.delegate = self
         attached.tokenStyle = .rounded
         attached.isEditable = true
+        // every attached file in sight: the row grows a line for what does not fit, as a forward of several has
+        attached.usesSingleLineMode = false
+        attached.cell?.wraps = true
+        attached.cell?.isScrollable = false
+        attached.lineBreakMode = .byWordWrapping
         // Cc and Bcc wait behind these until needed, as most mail programs have it now
         ccButton.target = self
         ccButton.action = #selector(showCcRow)
@@ -975,5 +982,28 @@ final class SignatureEditor: NSObject, NSWindowDelegate {
         editor.close()
         window.orderOut(nil)
         return saved
+    }
+}
+
+/// A token field as tall as its tokens need at its width, so a row of attachments wraps instead of hiding the last ones
+final class WrappingTokenField: NSTokenField {
+    private var laidOutWidth: CGFloat = 0
+
+    override var intrinsicContentSize: NSSize {
+        guard let cell, bounds.width > 0 else { return super.intrinsicContentSize }
+        let needed = cell.cellSize(forBounds: NSRect(x: 0, y: 0, width: bounds.width, height: .greatestFiniteMagnitude))
+        return NSSize(width: NSView.noIntrinsicMetric, height: max(ceil(needed.height), super.intrinsicContentSize.height))
+    }
+
+    override func layout() {
+        super.layout()
+        if laidOutWidth != bounds.width {
+            laidOutWidth = bounds.width
+            invalidateIntrinsicContentSize()
+        }
+    }
+
+    override var objectValue: Any? {
+        didSet { invalidateIntrinsicContentSize() }
     }
 }

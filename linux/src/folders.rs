@@ -9,6 +9,7 @@ use std::rc::Rc;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
+use pe_core::MessageRef;
 
 mod imp {
     use super::*;
@@ -100,17 +101,20 @@ pub struct Entry {
     pub depth: usize,
 }
 
-type CanDrop = Box<dyn Fn(&str, i64) -> bool>;
-type Dropped = Box<dyn Fn(&str, i64, bool)>;
+type CanDrop = Box<dyn Fn(&[MessageRef], i64) -> bool>;
+type Dropped = Box<dyn Fn(&[MessageRef], i64, bool)>;
+type FilesDropped = Box<dyn Fn(i64, Vec<std::path::PathBuf>)>;
 type Menu = Box<dyn Fn(&gtk::Widget, f64, f64)>;
 
 /// What the tree tells the window: a folder (or an account, negated) chosen, and messages dropped onto a folder
 pub struct Handlers {
     pub selected: Box<dyn Fn(i64)>,
-    /// Whether messages dragged as `payload` may go to folder `to`
+    /// Whether the messages dragged may go to folder `to`
     pub can_drop: CanDrop,
-    /// The drop: payload, folder, and whether to copy (Ctrl held) rather than move
+    /// The drop: the messages, the folder, and whether to copy (Ctrl held) rather than move
     pub dropped: Dropped,
+    /// .eml files dropped onto folder `to` from outside the app, to put in it
+    pub files_dropped: FilesDropped,
     /// The right-click menu of the selected folder, at a point of the widget clicked
     pub menu: Menu,
 }
@@ -376,12 +380,18 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactor
     factory
 }
 
-/// Messages dragged from the list (their folder and uid as text) onto the row of a folder
+/// What is dropped onto the row of a folder: messages dragged from the list (moved, copied with Ctrl), or .eml files
+/// from a file manager (put in it, as Import does)
 fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: Rc<RefCell<Option<Handlers>>>) {
     let target = gtk::DropTarget::new(
-        glib::Type::STRING,
+        glib::Type::INVALID,
         gtk::gdk::DragAction::MOVE | gtk::gdk::DragAction::COPY,
     );
+    // the app's own messages first: a drag from the list also offers them as files, for other programs
+    target.set_types(&[
+        crate::files::DraggedMessages::static_type(),
+        gtk::gdk::FileList::static_type(),
+    ]);
     target.set_preload(true);
     let folder_of = {
         let item = item.downgrade();
@@ -402,6 +412,14 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         } else {
             gtk::gdk::DragAction::MOVE
         }
+    };
+    // what a drop of `value` onto `folder` does: messages moved or copied, files put in it; None when it takes nothing
+    let takes = move |handlers: &Handlers, value: &glib::Value, folder: i64, target: &gtk::DropTarget| {
+        if let Ok(dragged) = value.get::<crate::files::DraggedMessages>() {
+            return (handlers.can_drop)(&dragged.0, folder).then(|| action_for(target));
+        }
+        let files = crate::files::paths_of(&value.get::<gtk::gdk::FileList>().ok()?);
+        (folder > 0 && crate::files::all_messages(&files)).then_some(gtk::gdk::DragAction::COPY)
     };
     let can = handlers.clone();
     let folder = folder_of.clone();
@@ -434,27 +452,28 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         }
     });
     target.connect_motion(move |target, _, _| {
-        let payload = target.value().and_then(|v| v.get::<String>().ok()).unwrap_or_default();
-        match (folder(), &*can.borrow()) {
-            (Some(folder), Some(handlers)) if (handlers.can_drop)(&payload, folder.id()) => action_for(target),
-            _ => gtk::gdk::DragAction::empty(),
-        }
+        let (Some(value), Some(folder), Some(handlers)) = (target.value(), folder(), &*can.borrow()) else {
+            return gtk::gdk::DragAction::empty();
+        };
+        takes(handlers, &value, folder.id(), target).unwrap_or(gtk::gdk::DragAction::empty())
     });
     target.connect_drop(move |target, value, _, _| {
         if let Some(id) = opening.borrow_mut().take() {
             id.remove();
         }
-        let Ok(payload) = value.get::<String>() else {
+        let (Some(folder), Some(handlers)) = (folder_of(), &*handlers.borrow()) else {
             return false;
         };
-        match (folder_of(), &*handlers.borrow()) {
-            (Some(folder), Some(handlers)) if (handlers.can_drop)(&payload, folder.id()) => {
-                let copy = action_for(target) == gtk::gdk::DragAction::COPY;
-                (handlers.dropped)(&payload, folder.id(), copy);
-                true
-            }
-            _ => false,
+        if takes(handlers, value, folder.id(), target).is_none() {
+            return false;
         }
+        if let Ok(dragged) = value.get::<crate::files::DraggedMessages>() {
+            let copy = action_for(target) == gtk::gdk::DragAction::COPY;
+            (handlers.dropped)(&dragged.0, folder.id(), copy);
+        } else if let Ok(list) = value.get::<gtk::gdk::FileList>() {
+            (handlers.files_dropped)(folder.id(), crate::files::paths_of(&list));
+        }
+        true
     });
     widget.add_controller(target);
 }

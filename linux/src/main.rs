@@ -11,6 +11,7 @@ mod compose;
 #[cfg(feature = "e2e")]
 mod e2e;
 mod editor;
+mod files;
 mod folders;
 mod help;
 mod mailbox;

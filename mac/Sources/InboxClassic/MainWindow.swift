@@ -341,6 +341,13 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     }
 
     func reply(_ kind: PeDraftKind) {
+        // several: one new message with them attached
+        if kind == PE_DRAFT_KIND_FORWARD && mailbox.selectedCount > 1 {
+            mailbox.forwardSelected { [core] draft, account in
+                ComposeWindow.open(core: core, account: account, draft: draft)
+            }
+            return
+        }
         guard let draft = mailbox.draftOfShown(kind) else {
             inform("Select a message first.")
             return
@@ -473,7 +480,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         guard let id = Item(rawValue: item.itemIdentifier.rawValue), let command = command(of: id) else { return true }
         switch command {
         case _ where command.needsOne: return mailbox.hasOne
-        case .delete, .junk, .markRead, .markUnread: return mailbox.hasSelection
+        case .delete, .junk, .markRead, .markUnread, .forward: return mailbox.hasSelection
         default: return true
         }
     }

@@ -4,7 +4,7 @@
 
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use adw::prelude::*;
@@ -16,7 +16,7 @@ use pe_store::Folder;
 use crate::app::{run_command, shell, spawn};
 use crate::commands::Command;
 use crate::folders::{ALL_INBOXES, Entry, FolderTree, Handlers};
-use crate::messages::{MessageList, parse_payload};
+use crate::messages::MessageList;
 use crate::reader::Reader;
 use crate::settings;
 use crate::ui::{self, TITLE};
@@ -427,6 +427,7 @@ impl Mailbox {
         let selected = Rc::downgrade(self);
         let can = Rc::downgrade(self);
         let dropped = Rc::downgrade(self);
+        let imported = Rc::downgrade(self);
         let menu = Rc::downgrade(self);
         self.folders.set_handlers(Handlers {
             selected: Box::new(move |id| {
@@ -434,10 +435,15 @@ impl Mailbox {
                     this.on_tree_selected(id);
                 }
             }),
-            can_drop: Box::new(move |payload, to| can.upgrade().is_some_and(|this| this.can_drop(payload, to))),
-            dropped: Box::new(move |payload, to, copy| {
+            can_drop: Box::new(move |refs, to| can.upgrade().is_some_and(|this| this.can_drop(refs, to))),
+            dropped: Box::new(move |refs, to, copy| {
                 if let Some(this) = dropped.upgrade() {
-                    this.drop_message(payload, to, copy);
+                    this.drop_message(refs, to, copy);
+                }
+            }),
+            files_dropped: Box::new(move |to, files| {
+                if let Some(this) = imported.upgrade() {
+                    spawn(async move { this.drop_files(Some(to), files).await });
                 }
             }),
             menu: Box::new(move |widget, x, y| {
@@ -906,7 +912,7 @@ impl Mailbox {
     }
 
     /// Several messages are selected: the reading pane says how many, none is shown
-    fn several(&self) -> bool {
+    pub fn several(&self) -> bool {
         self.refs.borrow().len() > 1
     }
 
@@ -1465,10 +1471,10 @@ impl Mailbox {
         }
     }
 
-    pub fn can_drop(&self, payload: &str, to: i64) -> bool {
-        let Some(refs) = parse_payload(payload) else {
+    pub fn can_drop(&self, refs: &[MessageRef], to: i64) -> bool {
+        if refs.is_empty() {
             return false;
-        };
+        }
         // an account's own item, the folder they all are in, or one that holds no messages: not there; a folder of
         // another account takes them, in the background
         to > 0
@@ -1479,10 +1485,24 @@ impl Mailbox {
 
     /// Messages dropped onto a folder: moved, or copied with Ctrl; a move of the selection selects the message after
     /// it, as Move to Folder does
-    pub fn drop_message(&self, payload: &str, to: i64, copy: bool) {
-        if let Some(refs) = parse_payload(payload) {
-            self.act_on(refs, if copy { Action::Copy(to) } else { Action::Move(to) });
+    pub fn drop_message(&self, refs: &[MessageRef], to: i64, copy: bool) {
+        self.act_on(refs.to_vec(), if copy { Action::Copy(to) } else { Action::Move(to) });
+    }
+
+    /// .eml files dropped from a file manager onto folder `to`, or onto the list (None: the folder it shows): put in
+    /// it as Import does
+    pub async fn drop_files(&self, to: Option<i64>, files: Vec<PathBuf>) {
+        let folder = to.unwrap_or(self.folder.get());
+        if folder <= 0 || !self.folder_accounts.borrow().contains_key(&folder) {
+            ui::alert(
+                &self.window,
+                "Import Messages",
+                "Choose the folder to put the messages in first.",
+            )
+            .await;
+            return;
         }
+        self.import_into(folder, &files).await;
     }
 
     // ---- folders ----
@@ -1590,8 +1610,12 @@ impl Mailbox {
 
     // ---- files and printing ----
 
-    /// File > Save As: the message shown, as an .eml
+    /// File > Save As: the message shown, as an .eml; several selected, into a folder chosen, one file each
     pub async fn save_shown_as(&self) {
+        if self.several() {
+            self.save_selected_into_folder().await;
+            return;
+        }
         if self.uid.get() == 0 {
             return;
         }
@@ -1606,6 +1630,43 @@ impl Mailbox {
         };
         if std::fs::write(&path, data).is_err() {
             ui::alert(&window, TITLE, "The message could not be saved.").await;
+        }
+    }
+
+    /// Save As with several selected: a folder asked for, each message saved there under its subject, never over a
+    /// file there; those not downloaded yet are downloaded for it
+    async fn save_selected_into_folder(&self) {
+        let refs = self.selected_refs();
+        let window = self.window.clone().upcast::<gtk::Window>();
+        let Some(dir) = ui::choose_folder(&window, "Save Messages In").await else {
+            return;
+        };
+        match crate::files::save(refs, dir.clone()).await {
+            Ok(written) => self.set_status(&pe_core::saved_text(
+                written.len() as u64,
+                &crate::files::place_name(&dir),
+            )),
+            Err(why) => ui::alert(&window, TITLE, &why).await,
+        }
+    }
+
+    /// Forward with several selected: one new message with them attached as .eml files, from the account of the first;
+    /// those not downloaded yet are downloaded for it
+    pub async fn forward_selected(&self) {
+        let refs = self.selected_refs();
+        let Some(first) = refs.first().copied() else {
+            return;
+        };
+        let account = self.folder_accounts.borrow().get(&first.folder).copied().unwrap_or(0);
+        let wanted = refs.clone();
+        let draft = crate::files::with_downloads(&wanted, move |core| {
+            core.forward_as_attachments(&refs, crate::files::WAIT)
+                .map_err(|e| e.to_string())
+        })
+        .await;
+        match draft {
+            Ok(draft) => crate::compose::open(account, Some(draft)),
+            Err(why) => ui::alert(&self.window, TITLE, &why).await,
         }
     }
 
@@ -1773,9 +1834,13 @@ impl Mailbox {
     }
 
     async fn import_files(&self, files: &[std::path::PathBuf]) {
+        self.import_into(self.folder.get(), files).await;
+    }
+
+    async fn import_into(&self, folder: i64, files: &[std::path::PathBuf]) {
         let mut problems = String::new();
         for file in files {
-            if let Err(reason) = shell().core.import_message(self.folder.get(), file) {
+            if let Err(reason) = shell().core.import_message(folder, file) {
                 problems.push_str(&format!("{}: {reason}\n", file.display()));
             }
         }

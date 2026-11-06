@@ -472,10 +472,10 @@ pub async fn dragging(d: &Driver) {
     };
     let in_inbox = rows();
     let payload = |m: &pe_store::Message| {
-        crate::messages::drag_payload(&[pe_store::MessageRef {
+        vec![pe_store::MessageRef {
             folder: m.folder_id,
             uid: m.info.uid,
-        }])
+        }]
     };
     // what the drop target of a folder does with the row dragged onto it
     if let Some((_, message)) = main.list.selected() {
@@ -636,6 +636,215 @@ pub async fn several_messages(d: &Driver) {
     })
     .await;
     d.check(shown, "one message selected again is shown in the reading pane");
+}
+
+/// SCENARIO 32: messages dragged out as .eml files, saved several at once, forwarded as attachments, and .eml files
+/// dropped onto a folder
+pub async fn messages_as_files(d: &Driver) {
+    d.step("messages as files");
+    let main = shell().main();
+    let core = &shell().core;
+    select_folder("Inbox");
+    wait_until(10, || rows() >= 3).await;
+    let listed = rows();
+    // one the app has not downloaded: it comes now, on top
+    let raw = |subject: &str, body: &str| {
+        let id: String = subject.chars().filter(char::is_ascii_alphanumeric).collect();
+        format!(
+            "From: Nina Berg <nina@example.org>\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\n\
+             Message-ID: <{id}@example.org>\r\nDate: Fri, 6 Nov 2026 10:00:00 +0000\r\n\r\n{body}\r\n"
+        )
+    };
+    let _ = d.add_message(&raw("Not opened yet", "Downloaded for the drag."), &[]);
+    run_command(Command::Sync);
+    d.check(
+        wait_until(30, || rows() == listed + 1).await,
+        "a message not downloaded yet is in the list",
+    );
+    // the one added and the two after it in the list
+    let position = folder_id("Inbox").and_then(|inbox| {
+        core.search(&pe_core::Search::folder(inbox), main.list.sort(), 0, 200)
+            .unwrap_or_default()
+            .iter()
+            .position(|m| m.info.subject == "Not opened yet")
+    });
+    let first = position.unwrap_or(0) as u32;
+    let first = first.min(rows().saturating_sub(3));
+    // a neighbour first: the one added selected alone would be opened, and downloaded, by the reading pane
+    let alone = if position.is_some_and(|p| p as u32 == first) {
+        first + 1
+    } else {
+        first
+    };
+    select_row(alone).await;
+    for index in first..first + 3 {
+        main.list.selection.select_item(index, false);
+    }
+    wait_until(10, || main.selected_refs().len() == 3).await;
+    let refs = main.selected_refs();
+    let added = refs.iter().copied().find(|r| {
+        core.message(r.folder, r.uid)
+            .ok()
+            .flatten()
+            .is_some_and(|m| m.info.subject == "Not opened yet")
+    });
+    let names = core.export_names(&refs).unwrap_or_default();
+    d.check(
+        refs.len() == 3 && added.is_some_and(|r| !core.all_downloaded(&[r]).unwrap_or(true)),
+        "three selected, one of them not downloaded yet",
+    );
+
+    // what a file manager reads of the drag: text/uri-list, the files written then
+    let provider = crate::files::drag_content(refs.clone());
+    let stream = gio::MemoryOutputStream::new_resizable();
+    let written = provider
+        .write_mime_type_future("text/uri-list", &stream, glib::Priority::DEFAULT)
+        .await;
+    let _ = stream.close(gio::Cancellable::NONE);
+    let list = String::from_utf8_lossy(&stream.steal_as_bytes()).into_owned();
+    let paths: Vec<std::path::PathBuf> = list
+        .lines()
+        .filter_map(|line| gio::File::for_uri(line.trim()).path())
+        .collect();
+    let file_names: Vec<String> = paths
+        .iter()
+        .filter_map(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
+        .collect();
+    d.check(
+        written.is_ok() && file_names == names && names.iter().all(|n| n.ends_with(".eml")),
+        &format!(
+            "three messages dragged out of the list become three .eml files, named after their subjects ({})",
+            file_names.join(", ")
+        ),
+    );
+    let same = refs.iter().zip(&paths).all(|(r, path)| {
+        let source = core
+            .message_source(r.folder, r.uid)
+            .ok()
+            .flatten()
+            .map(|(_, bytes)| bytes);
+        source.is_some() && std::fs::read(path).ok() == source
+    });
+    d.check(same, "with what each message is, byte for byte");
+    d.check(
+        added.is_some_and(|r| core.all_downloaded(&[r]).unwrap_or(false)),
+        "one not downloaded yet is downloaded for it",
+    );
+    d.check(
+        !provider.formats().contain_mime_type("text/plain"),
+        "other programs are offered files, not text",
+    );
+    // the three in sight for the picture
+    main.list.reveal(&[u64::from(first), u64::from(first) + 2]);
+    main.list.view.scroll_to(
+        first + 2,
+        None::<&gtk::ColumnViewColumn>,
+        gtk::ListScrollFlags::NONE,
+        None,
+    );
+    pause(500).await;
+    d.shot(main.window(), "files-4-drag-out").await;
+
+    // Save As with the three: into a folder, never over a file there
+    let dir = d.out.join("saved-several");
+    let _ = std::fs::remove_dir_all(&dir);
+    let _ = std::fs::create_dir_all(&dir);
+    if let Some(first) = names.first() {
+        let _ = std::fs::write(dir.join(first), "mine");
+    }
+    FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![dir.clone()]));
+    run_command(Command::SaveAs);
+    let said = wait_until(30, || main.status_texts().0 == "Saved 3 messages to saved-several").await;
+    let in_dir = std::fs::read_dir(&dir).map(|e| e.count()).unwrap_or(0);
+    let kept = names
+        .first()
+        .and_then(|n| std::fs::read_to_string(dir.join(n)).ok())
+        .is_some_and(|c| c == "mine");
+    d.check(
+        said && in_dir == 4 && kept,
+        &format!(
+            "Save As with three selected asks for a folder and saves the three there, never over a file that is there \
+             ({}, {in_dir} files)",
+            main.status_texts().0
+        ),
+    );
+
+    // Forward with the three: one message, them attached
+    let first_subject = refs
+        .first()
+        .and_then(|r| core.message(r.folder, r.uid).ok().flatten())
+        .map(|m| m.info.subject)
+        .unwrap_or_default();
+    run_command(Command::Forward);
+    match wait_compose(30).await {
+        Some(c) => {
+            let attached = c.attached();
+            d.check(
+                attached.len() == 3 && attached.iter().all(|p| p.extension().is_some_and(|e| e == "eml")),
+                &format!(
+                    "Forward with three selected writes one new message with the three attached as .eml files ({})",
+                    attached.len()
+                ),
+            );
+            d.check(
+                c.subject.text() == format!("Fw: {first_subject}"),
+                &format!("its subject is the first one's, with Fw: ({})", c.subject.text()),
+            );
+            d.shot(&c.window, "files-5-forward").await;
+            close_compose(&c).await;
+        }
+        None => d.check(false, "Forward with three selected writes one new message"),
+    }
+
+    // the one added is not the steps' after this one: it goes
+    if let Some(added) = added {
+        let _ = core.act(&[added], pe_core::Action::Delete);
+    }
+    wait_until(10, || rows() == listed).await;
+
+    // .eml files from a file manager onto Archive
+    let drop_dir = d.out.join("dropped");
+    let _ = std::fs::remove_dir_all(&drop_dir);
+    let _ = std::fs::create_dir_all(&drop_dir);
+    let mut dropped = Vec::new();
+    for (n, subject) in ["Dropped one", "Dropped two", "Dropped three"].iter().enumerate() {
+        let path = drop_dir.join(format!("{n}.eml"));
+        let _ = std::fs::write(&path, raw(subject, "Dropped onto a folder."));
+        dropped.push(path);
+    }
+    let text = drop_dir.join("notes.txt");
+    let _ = std::fs::write(&text, "not a message");
+    let mut with_text = dropped.clone();
+    with_text.push(text);
+    d.check(
+        !crate::files::all_messages(&with_text),
+        "a file that is not a message is turned away",
+    );
+    match folder_id("Archive") {
+        Some(archive) => main.drop_files(Some(archive), dropped).await,
+        None => d.check(false, "the tree has Archive"),
+    }
+    d.check(
+        wait_until(30, || {
+            ["Dropped one", "Dropped two", "Dropped three"]
+                .iter()
+                .all(|s| d.find("Archive", &format!("Subject: {s}")).is_some())
+        })
+        .await,
+        ".eml files dropped onto Archive in the folder tree are put in it, on the server",
+    );
+    select_folder("Archive");
+    wait_until(20, || rows() >= 3).await;
+    // one of them shown, as it came
+    let dropped_at = folder_id("Archive").and_then(|archive| {
+        core.search(&pe_core::Search::folder(archive), main.list.sort(), 0, 200)
+            .unwrap_or_default()
+            .iter()
+            .position(|m| m.info.subject == "Dropped three")
+    });
+    select_row(dropped_at.unwrap_or(0) as u32).await;
+    d.shot(main.window(), "files-6-drop-in").await;
+    select_folder("Inbox");
 }
 
 pub async fn junk(d: &Driver) {
@@ -1353,10 +1562,10 @@ pub async fn between_accounts(d: &Driver) {
     // a drag onto the other account's folder
     select("Travel booking").await;
     if let Some((_, message)) = main.list.selected() {
-        let payload = crate::messages::drag_payload(&[pe_store::MessageRef {
+        let payload = vec![pe_store::MessageRef {
             folder: message.folder_id,
             uid: message.info.uid,
-        }]);
+        }];
         d.check(
             main.can_drop(&payload, archive2),
             "a folder of the second account takes a dragged message",

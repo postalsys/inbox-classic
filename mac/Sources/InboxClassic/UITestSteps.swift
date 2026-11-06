@@ -4,6 +4,7 @@
 import AppKit
 import CInboxClassic
 import Darwin
+import UniformTypeIdentifiers
 import WebKit
 
 extension UITest {
@@ -426,6 +427,7 @@ extension UITest {
         await shot(main.window, "organize-5-all-read")
 
         try await severalMessages()
+        try await messagesAsFiles()
 
         step("junk and not junk")
         await selectRow(0)
@@ -472,7 +474,7 @@ extension UITest {
             item.tag = command.rawValue
             return AppDelegate.shared.validateMenuItem(item)
         }
-        check(!enabled(.reply) && !enabled(.forward) && enabled(.markRead) && enabled(.move),
+        check(!enabled(.reply) && !enabled(.print) && enabled(.forward) && enabled(.markRead) && enabled(.move),
               "Reply is off for several, Mark as Read is on")
         await shot(main.window, "select-1-several")
         command(.markRead)
@@ -528,6 +530,132 @@ extension UITest {
         let header: NSTextField? = find("reader.header", in: main.window)
         check(!main.mailbox.reader.showsSummary && header?.stringValue.isEmpty == false,
               "one message selected again is shown in the reading pane")
+    }
+
+    // ---- messages as files ----
+
+    /// a folder of its own under the test's output, empty
+    func emptyFolder(_ name: String) -> URL {
+        let dir = out.appendingPathComponent(name)
+        try? FileManager.default.removeItem(at: dir)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    func messagesAsFiles() async throws {
+        step("messages as files")
+        selectFolder(named: "Inbox")
+        let before = list.numberOfRows
+        // a new one, never opened: downloaded for the files
+        try await addMessage(
+            "From: Petra Holm <petra@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Ferry times\r\n"
+                + "Message-ID: <ferry@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nThe ferry leaves at nine.\r\n")
+        command(.sync)
+        _ = await waitUntil { list.numberOfRows > before }
+        await selectRow(0)
+        list.selectRowIndexes(IndexSet([0, 1, 2]), byExtendingSelection: false)
+        await pause(0.5)
+        let picked = (0..<3).compactMap { main.mailbox.row($0) }
+        let subjects = picked.map(\.subject)
+        let selection = newSelection(picked.map { ($0.folder, $0.uid) })
+        check(!pe_selection_all_downloaded(main.core.handle, selection), "one of the three is not downloaded yet")
+        pe_selection_free(selection)
+
+        // the drag out: the Finder asks each file promise to be written in the folder it is dropped on
+        let dropped = emptyFolder("dragged-out")
+        let promises = (0..<3).compactMap { main.mailbox.promise(forRow: $0) }
+        let writer = main.mailbox.filePromises
+        let names = promises.map { writer.filePromiseProvider($0, fileNameForType: emlType.identifier) }
+        var finished = 0
+        // the writes run off the main thread, as the promises' queue runs them for the Finder
+        for (promise, name) in zip(promises, names) {
+            guard let drag = promise.drag else { continue }
+            let job = Handed(value: (writer, drag, promise.index, dropped.appendingPathComponent(name)))
+            Thread.detachNewThread {
+                let (writer, drag, index, url) = job.value
+                writer.write(drag, index, to: url)
+                onMain { finished += 1 }
+            }
+        }
+        check(await waitUntil(60) { finished == 3 }, "three messages dragged out become three .eml files where they are dropped")
+        main.mailbox.dragEnded()
+        let files = ((try? FileManager.default.contentsOfDirectory(atPath: dropped.path)) ?? []).sorted()
+        check(Set(files) == Set(subjects.map { "\($0).eml" }), "named after their subjects (\(files.joined(separator: ", ")))")
+        var differ: [String] = []
+        for subject in subjects {
+            let file = (try? Data(contentsOf: dropped.appendingPathComponent("\(subject).eml"))) ?? Data()
+            let pattern = "Subject: \(NSRegularExpression.escapedPattern(for: subject))"
+            guard let message = await findMessage("INBOX", pattern),
+                  let encoded = message["raw"] as? String, let server = Data(base64Encoded: encoded) else {
+                differ.append("\(subject): not on the server")
+                continue
+            }
+            if file != server { differ.append("\(subject): \(file.count) bytes, the server's \(server.count)") }
+        }
+        check(differ.isEmpty, "with what each message is, byte for byte \(differ.joined(separator: "; "))")
+        check(main.mailbox.reader.showsSummary, "one not downloaded yet is downloaded for it, the three still selected")
+        let status: NSTextField? = find("status.text", in: main.window)
+        check(await waitUntil(10) { status?.stringValue == "Saved 3 messages to dragged-out" },
+              "the status bar says where they were saved (\(status?.stringValue ?? ""))")
+        await shot(main.window, "files-4-drag-out")
+
+        // Save As with three: into a folder, never over a file there
+        let saved = emptyFolder("saved-several")
+        try "mine".write(to: saved.appendingPathComponent("\(subjects[0]).eml"), atomically: true, encoding: .utf8)
+        TestHooks.folder = { saved }
+        command(.saveAs)
+        check(await waitUntil(30) { status?.stringValue == "Saved 3 messages to saved-several" },
+              "Save As with three selected asks for a folder and saves the three there (\(status?.stringValue ?? ""))")
+        TestHooks.folder = nil
+        let savedFiles = (try? FileManager.default.contentsOfDirectory(atPath: saved.path)) ?? []
+        check(savedFiles.count == 4 && savedFiles.contains("\(subjects[0]) (2).eml")
+              && (try? String(contentsOf: saved.appendingPathComponent("\(subjects[0]).eml"), encoding: .utf8)) == "mine",
+              "never over a file that is there (\(savedFiles.sorted().joined(separator: ", ")))")
+
+        // Forward with three: one new message, the three attached
+        command(.forward)
+        let compose = await waitCompose()
+        let window = ComposeWindow.open.last
+        check(await waitUntil(20) { window?.attachedNames.count == 3 },
+              "Forward with three selected writes one new message with the three attached as .eml files")
+        check(window?.attachedNames.allSatisfy { $0.hasSuffix(".eml") } == true, "as .eml files (\(window?.attachedNames ?? []))")
+        let subject: NSTextField? = find("compose.subject", in: compose)
+        check(subject?.stringValue == "Fw: \(subjects[0])", "its subject is the first one's, with Fw: (\(subject?.stringValue ?? ""))")
+        await pause(0.5)
+        await shot(compose, "files-5-forward")
+        if let compose { await closeCompose(compose) }
+
+        // .eml files from the Finder onto Archive; a file that is not a message is turned away
+        let incoming = emptyFolder("drop-in")
+        var urls: [URL] = []
+        for (n, name) in ["Harbour plan", "Boat repairs", "Winter berths"].enumerated() {
+            let url = incoming.appendingPathComponent("\(name).eml")
+            try ("From: Harbour Office <office@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: \(name)\r\n"
+                + "Message-ID: <drop\(n)@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nDropped in.\r\n")
+                .write(to: url, atomically: true, encoding: .utf8)
+            urls.append(url)
+        }
+        let note = incoming.appendingPathComponent("notes.txt")
+        try "not a message".write(to: note, atomically: true, encoding: .utf8)
+        let archive = folder(ofAccount: 0, named: "Archive")
+        let drop = urls + [note]
+        onMain { [main] in main.mailbox.dropFiles(drop, into: archive) }
+        let turnedAway = await waitWindow("alert", 10)
+        check(alertText(turnedAway).contains("notes.txt"), "a file that is not a message is turned away")
+        answer(turnedAway, "OK")
+        check(await waitUntil(30) {
+            for name in ["Harbour plan", "Boat repairs", "Winter berths"] where await findMessage("Archive", "Subject: \(name)") == nil {
+                return false
+            }
+            return true
+        }, ".eml files dropped onto Archive in the folder tree are put in it, on the server")
+        check(await findMessage("Archive", "not a message") == nil, "and the other file is not")
+        selectFolder(named: "Archive")
+        _ = await waitUntil(20) { (0..<self.list.numberOfRows).compactMap { self.main.mailbox.row($0)?.subject }.contains("Winter berths") }
+        await selectRow(0)
+        await pause(0.5)
+        await shot(main.window, "files-6-drop-in")
+        selectFolder(named: "Inbox")
     }
 
     // ---- folders ----
