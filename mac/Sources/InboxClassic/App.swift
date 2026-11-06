@@ -88,6 +88,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     }
     /// the app ends after the compose windows that are saving have closed
     var quitAfterCompose = false
+    /// Restart Now was chosen: a new copy starts once this one has ended
+    private var restarting = false
     /// updates from the appcast (Info.plist SUFeedURL), checked daily and with Check for Updates; not in a test or a
     /// build without its key
     private var updater: SPUStandardUpdaterController?
@@ -186,6 +188,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             quitAfterCompose = true
             return .terminateCancel
         case .kept:
+            // a message kept open: no quitting, and no starting again when the user quits later
+            restarting = false
             return .terminateCancel
         }
     }
@@ -325,8 +329,6 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         main?.show()
     }
 
-    /// Starts the app again (a language chosen in Settings counts from the start): a new copy a moment after this one
-    /// has quit, so the two never hold the store at once
     /// The menus and the main window made again in the language set now, as starting in it makes them: the UI test's
     /// start again, which it can not do in its own process
     func remakeWindows() {
@@ -342,13 +344,20 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
 
+    /// Starts the app again (a language chosen in Settings counts from the start): it quits as Quit does, and only once
+    /// it really ends (no message kept open) a new copy starts, a moment after, so the two never hold the store at once
     func restart() {
+        restarting = true
+        NSApp.terminate(nil)
+    }
+
+    public func applicationWillTerminate(_ notification: Notification) {
+        guard restarting else { return }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
         process.arguments = ["-c", "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; /usr/bin/open \"$2\"", "restart",
                              String(ProcessInfo.processInfo.processIdentifier), Bundle.main.bundlePath]
         try? process.run()
-        NSApp.terminate(nil)
     }
 
     @objc func runCommand(_ sender: NSMenuItem) {

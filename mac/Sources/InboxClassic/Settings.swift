@@ -10,9 +10,17 @@ enum Languages {
     /// The language of the windows for this run: `override` (--language), or the first of the app's preferred
     /// languages (its own AppleLanguages, the system's otherwise) there is a catalog of, English when none
     static func apply(_ override: String?) {
-        let code = override ?? resolve(Locale.preferredLanguages)
-        _ = taken(code.withCString { pe_set_language($0) })
+        let wanted = override ?? resolve(Locale.preferredLanguages)
+        // the code of the catalog the core took (de-AT is de, a language without one English), the pseudo-language's
+        // dates English
+        let used = taken(wanted.withCString { pe_set_language($0) }) ?? "en"
+        let code = used == "qps" ? "en" : used
         locale = Locale(identifier: Locale.current.region.map { "\(code)_\($0.identifier)" } ?? code)
+    }
+
+    /// The code of the language the windows are in now
+    static var current: String {
+        taken(pe_language()) ?? "en"
     }
 
     /// The language of the windows with the system's region, for the dates written out in words
@@ -160,6 +168,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         let code = codes[index]
         guard code != Languages.chosen else { return }
         Languages.chosen = code
+        // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
+        guard (code ?? Languages.system) != Languages.current else { return }
         if ask(Text.macRestartQuestion.text, yes: Text.macRestartNow.text, no: Text.macRestartLater.text,
                style: .information) {
             AppDelegate.shared?.restart()
