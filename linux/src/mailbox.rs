@@ -1829,7 +1829,7 @@ impl Mailbox {
         }
         menu.append_section(None, &answer);
         let organize = gio::Menu::new();
-        // Mark as Read while any is unread; Clear Flag when they all have it
+        // Mark as Read while any is unread
         add(
             &organize,
             if summary.unread == 0 {
@@ -1839,7 +1839,7 @@ impl Mailbox {
             },
             None,
         );
-        add(&organize, Command::Flag, (!summary.flags()).then_some("Clear Flag"));
+        // the colours and Clear Flag; the Flag Message toggle is the primary menu's, with its key
         organize.append_submenu(Some("Flag"), &flag_menu());
         add(
             &organize,

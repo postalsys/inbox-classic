@@ -10,6 +10,7 @@
 #include <shlwapi.h>
 
 #include <algorithm>
+#include <cwctype>
 #include <limits>
 #include <span>
 #include <thread>
@@ -873,6 +874,77 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
     }
 }
 
+namespace {
+
+// the colours of the flags, close to Windows' own palette: red, orange, yellow, green, blue, purple, gray
+COLORREF FlagRgb(int color) {
+    static const COLORREF colors[] = {RGB(232, 17, 35),  RGB(247, 99, 12),  RGB(234, 168, 0),  RGB(16, 137, 62),
+                                      RGB(0, 120, 215), RGB(136, 23, 152), RGB(118, 118, 118)};
+    return colors[(color >= 1 && color <= 7) ? color - 1 : 0];
+}
+
+// a flag in `rgb` in the square at `left`, `top` of `size` pixels: its pole and its cloth, an outline of `edge` around
+// both where it stands on a colour of its own (the selected row)
+void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb, COLORREF edge, bool outline) {
+    int pole = std::max(1, size / 12), cloth = size * 3 / 4;
+    int x = left + size / 5, y = top + size / 8, bottom = top + size - size / 10;
+    POINT shape[] = {{x, y}, {x + cloth, y + cloth / 4}, {x, y + cloth / 2}};
+    if (outline) {
+        HPEN around = CreatePen(PS_SOLID, std::max(1, size / 16), edge);
+        HGDIOBJ oldPen = SelectObject(dc, around);
+        HGDIOBJ oldBrush = SelectObject(dc, GetStockObject(NULL_BRUSH));
+        Polygon(dc, shape, 3);
+        MoveToEx(dc, x, y, nullptr);
+        LineTo(dc, x, bottom);
+        SelectObject(dc, oldBrush);
+        SelectObject(dc, oldPen);
+        DeleteObject(around);
+    }
+    HBRUSH fill = CreateSolidBrush(rgb);
+    HPEN line = CreatePen(PS_SOLID, 1, rgb);
+    HGDIOBJ oldPen = SelectObject(dc, line);
+    HGDIOBJ oldBrush = SelectObject(dc, fill);
+    Polygon(dc, shape, 3);
+    RECT staff = {x, y, x + pole, bottom};
+    FillRect(dc, &staff, fill);
+    SelectObject(dc, oldBrush);
+    SelectObject(dc, oldPen);
+    DeleteObject(line);
+    DeleteObject(fill);
+}
+
+// a menu picture in `color` on the menu's background, made once: its flag, or (`checked`) a check mark in it, the mark
+// a menu item with a picture of its own would otherwise not show
+HBITMAP FlagBitmap(int color, bool checked) {
+    static HBITMAP made[2][8] = {};
+    HBITMAP& bitmap = made[checked][color];
+    if (!bitmap) {
+        int size = GetSystemMetrics(SM_CYMENUCHECK);
+        HDC screen = GetDC(nullptr);
+        HDC dc = CreateCompatibleDC(screen);
+        bitmap = CreateCompatibleBitmap(screen, size, size);
+        HGDIOBJ old = SelectObject(dc, bitmap);
+        RECT all = {0, 0, size, size};
+        FillRect(dc, &all, GetSysColorBrush(COLOR_MENU));
+        if (checked) {
+            HPEN pen = CreatePen(PS_SOLID, std::max(2, size / 6), FlagRgb(color));
+            HGDIOBJ oldPen = SelectObject(dc, pen);
+            POINT mark[] = {{size / 6, size / 2}, {size * 5 / 12, size * 3 / 4}, {size * 5 / 6, size / 4}};
+            Polyline(dc, mark, 3);
+            SelectObject(dc, oldPen);
+            DeleteObject(pen);
+        } else {
+            DrawFlag(dc, 0, 0, size, FlagRgb(color), 0, false);
+        }
+        SelectObject(dc, old);
+        DeleteDC(dc);
+        ReleaseDC(nullptr, screen);
+    }
+    return bitmap;
+}
+
+} // namespace
+
 // the paper clip and the flag of a row, drawn over the row as the list painted it:
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
 void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
@@ -888,7 +960,13 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         draw(COL_ATTACH, LIST_ATTACH);
     }
     if (row.flagged) {
-        draw(COL_FLAG, LIST_FLAG);
+        // the flag in its colour (red when it has none), with a white edge on the selected row's highlight
+        RECT cell;
+        ListView_GetSubItemRect(list_, index, COL_FLAG, LVIR_BOUNDS, &cell);
+        int width = ListView_GetColumnWidth(list_, COL_FLAG);
+        bool selected = ListView_GetItemState(list_, index, LVIS_SELECTED) != 0;
+        DrawFlag(dc, cell.left + (width - iconSize_) / 2, cell.top + (cell.bottom - cell.top - iconSize_) / 2, iconSize_,
+                 FlagRgb(row.flag_color ? row.flag_color : 1), RGB(255, 255, 255), selected);
     }
 }
 
@@ -1524,6 +1602,55 @@ void Mailbox::FlagSelected() {
     Act(PE_ACTION_TOGGLE_FLAG);
 }
 
+void Mailbox::FlagColor(int color) {
+    if (color == 0) {
+        Act(PE_ACTION_UNFLAG);
+    } else {
+        Act(PE_ACTION_FLAG_COLOR, color);
+    }
+}
+
+HMENU Mailbox::FlagMenu() {
+    HMENU menu = CreatePopupMenu();
+    std::wstring used;
+    for (int color = 1; color <= 7; color++) {
+        core::String name(pe_flag_color_name(static_cast<uint8_t>(color)));
+        std::wstring label = Text(name.get());
+        // each by a letter of its own: Gray after Green takes its second
+        for (size_t at = 0; at < label.size(); at++) {
+            wchar_t letter = static_cast<wchar_t>(towlower(label[at]));
+            if (iswalpha(letter) && used.find(letter) == std::wstring::npos) {
+                used += letter;
+                label.insert(at, L"&");
+                break;
+            }
+        }
+        MENUITEMINFOW item = {sizeof item};
+        // its flag where the check mark goes, a check mark in its colour once checked
+        item.fMask = MIIM_ID | MIIM_STRING | MIIM_CHECKMARKS;
+        item.wID = IDM_FLAG_COLOR + color;
+        item.dwTypeData = label.data();
+        item.hbmpUnchecked = FlagBitmap(color, false);
+        item.hbmpChecked = FlagBitmap(color, true);
+        InsertMenuItemW(menu, color - 1, TRUE, &item);
+    }
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, IDM_FLAG_CLEAR, L"&Clear Flag");
+    // its checks and greying as it opens (WM_INITMENUPOPUP)
+    return menu;
+}
+
+void Mailbox::UpdateFlagMenu(HMENU menu) {
+    FlushSelection();
+    bool some = SelectedCount() > 0;
+    for (int color = 1; color <= 7; color++) {
+        EnableMenuItem(menu, IDM_FLAG_COLOR + color, MF_BYCOMMAND | (some ? MF_ENABLED : MF_GRAYED));
+        CheckMenuItem(menu, IDM_FLAG_COLOR + color,
+                      MF_BYCOMMAND | (some && summary_.flag_color == color ? MF_CHECKED : MF_UNCHECKED));
+    }
+    EnableMenuItem(menu, IDM_FLAG_CLEAR, MF_BYCOMMAND | (some && summary_.flagged > 0 ? MF_ENABLED : MF_GRAYED));
+}
+
 // ---- folders ----
 
 void Mailbox::FolderMenu() {
@@ -1950,11 +2077,11 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING, IDM_REPLY_ALL, L"Reply to A&ll");
     AppendMenuW(menu, MF_STRING, IDM_FORWARD, L"&Forward");
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    // read when any of them is unread; flagged when any is not
+    // read when any of them is unread
     bool read = summary_.unread == 0;
     AppendMenuW(menu, MF_STRING, read ? IDM_MARK_UNREAD : IDM_MARK_READ, read ? L"Mark as &Unread" : L"Mark as &Read");
-    bool flagged = summary_.count > 0 && !pe_selection_flags(&summary_);
-    AppendMenuW(menu, MF_STRING, IDM_FLAG, flagged ? L"Clear Fla&g" : L"Fla&g Message");
+    // the colours and Clear Flag (the menu bar keeps Flag Message, its shortcut, beside it)
+    AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(FlagMenu()), L"Fla&g");
     bool junk = summary_.in_junk;
     AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, junk ? L"Mark as &Not Junk" : L"Mark as &Junk");
     AppendMenuW(menu, MF_STRING, IDM_MOVE, L"&Move to Folder...");

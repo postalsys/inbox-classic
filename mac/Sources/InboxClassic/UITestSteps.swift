@@ -582,6 +582,10 @@ extension UITest {
             .filter { !$0.flagged }.map(\.subject)
         guard subjects.count >= 3 else { return check(false, "three other messages to flag") }
         if let row = index(subjects[0]) { await selectRow(row) }
+        let rightClick = main.mailbox.messageMenu()?.items ?? []
+        check(rightClick.contains { $0.title == "Flag" && $0.submenu != nil }
+              && !rightClick.contains { $0.title == "Flag Message" || $0.title == "Clear Flag" },
+              "the right-click menu has the Flag submenu, and Clear Flag only in it")
         choose(2)
         check(await waitUntil(20) { let f = await serverFlags(subjects[0]); return f.contains("\\Flagged") && f.contains("$MailFlagBit0") },
               "Orange flags the message orange: \\Flagged and $MailFlagBit0 on the server")

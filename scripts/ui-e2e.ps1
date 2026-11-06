@@ -44,6 +44,8 @@ public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder name, int size);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int InternalGetWindowText(IntPtr hwnd, System.Text.StringBuilder text, int size);
 [DllImport("user32.dll")] public static extern int GetMenuItemCount(IntPtr menu);
+[DllImport("user32.dll")] public static extern IntPtr GetSubMenu(IntPtr menu, int position);
+[DllImport("user32.dll")] public static extern uint GetMenuState(IntPtr menu, uint id, uint flags);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetMenuString(IntPtr menu, uint item, System.Text.StringBuilder text, int size, uint flags);
 // the labels of a menu's items, by position (separators empty)
 public static string[] MenuLabels(IntPtr menu) {
@@ -1843,6 +1845,132 @@ public static class Dragger {
     Command $main $IDM_SYNC
     SelectFolder 0
     [void](WaitFor { [Native.Win]::RemoteListText($list, 0, 3) -ne $notOpened } 20)
+
+    Step 'flag colours'
+    $IDM_FLAG_COLOR = 900; $IDM_FLAG_CLEAR = 908; $MF_CHECKED = 0x8
+    # a message Apple Mail flagged purple: \Flagged with $MailFlagBit0 and $MailFlagBit2
+    $apple = 'Flagged in Apple Mail'
+    AddMessage ("From: Mira Lind <mira@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $apple`r`nMessage-ID: <apple-flag@example.com>`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`n`r`nFlagged purple in Apple Mail.`r`n") @('\Flagged', '$MailFlagBit0', '$MailFlagBit2')
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    $rowOf = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $subject })[0] }
+    [void](WaitFor { $null -ne (& $rowOf $apple) } 20)
+    # the colour of a row's flag: the most coloured pixel of its flag cell, as the screen shows it
+    $flagColor = {
+        param($row)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 300
+        # LVM_GETSUBITEMRECT of the flag column (1), its bounds
+        $cell = [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32))
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        if ($cell.Right -le $cell.Left -or $cell.Bottom -le $cell.Top) { return $null }
+        $picture = New-Object System.Drawing.Bitmap ($cell.Right - $cell.Left), ($cell.Bottom - $cell.Top)
+        CopyScreen $picture $cell.Left $cell.Top
+        $best = $null; $most = -1
+        for ($x = 0; $x -lt $picture.Width; $x++) {
+            for ($y = 0; $y -lt $picture.Height; $y++) {
+                $p = $picture.GetPixel($x, $y)
+                $spread = [Math]::Max($p.R, [Math]::Max($p.G, $p.B)) - [Math]::Min($p.R, [Math]::Min($p.G, $p.B))
+                if ($spread -gt $most) { $most = $spread; $best = $p }
+            }
+        }
+        $best
+    }
+    $near = { param($c, $r, $g, $b) $c -and [Math]::Abs($c.R - $r) -lt 40 -and [Math]::Abs($c.G - $g) -lt 40 -and [Math]::Abs($c.B - $b) -lt 40 }
+    # another row selected, so the flag is drawn on the list's white
+    SelectRow ([int](& $rowOf $apple) + 1)
+    $purple = & $flagColor (& $rowOf $apple)
+    Check (& $near $purple 136 23 152) "a message flagged purple by another program (Apple Mail) shows a purple flag ($purple)"
+
+    # three rows without a flag for the colours
+    $plain = @(0..([Math]::Min(8, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) } |
+        Where-Object { $_ -and $_ -ne $apple -and ((Find 'INBOX' "Subject: $([regex]::Escape($_))").flags -notcontains '\Flagged') } | Select-Object -First 3)
+    $flagsOf = { param($subject) @((Find 'INBOX' "Subject: $([regex]::Escape($subject))").flags) }
+
+    # the menu: the seven colours and Clear Flag
+    SelectRow (& $rowOf $plain[0])
+    $WM_CONTEXTMENU = 0x007B
+    [void][Native.Win]::PostMessage($main, $WM_CONTEXTMENU, $list, [IntPtr](-1))
+    $menu = WaitWindow '#32768' $null 10
+    if ($menu) {
+        $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+        $labels = [Native.Win]::MenuLabels($hmenu)
+        $at = [array]::IndexOf($labels, 'Flag')
+        $colours = if ($at -ge 0) { [Native.Win]::MenuLabels([Native.Win]::GetSubMenu($hmenu, $at)) } else { @() }
+        Check (($colours -join ',') -eq 'Red,Orange,Yellow,Green,Blue,Purple,Gray,,Clear Flag') "the message menu's Flag has the seven colours of Apple Mail and Clear Flag ($($colours -join ', '))"
+        Key $menu $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+    } else {
+        Check $false 'the message list has a right-click menu'
+    }
+
+    # orange: \Flagged and $MailFlagBit0
+    Command $main ($IDM_FLAG_COLOR + 2)
+    Check ([bool](WaitFor { $f = & $flagsOf $plain[0]; ($f -contains '\Flagged') -and ($f -contains '$MailFlagBit0') -and ($f -notcontains '$MailFlagBit1') -and ($f -notcontains '$MailFlagBit2') } 20)) "Orange flags the message orange: \Flagged and `$MailFlagBit0 on the server ($((& $flagsOf $plain[0]) -join ' '))"
+    Check ((StatusPart $mainStatus 0) -eq 'Flagged 1 message orange') "the status bar says so ($(StatusPart $mainStatus 0))"
+    SelectRow (& $rowOf $apple)
+    $orange = & $flagColor (& $rowOf $plain[0])
+    Check (& $near $orange 247 99 12) "the flag column shows it in orange ($orange)"
+
+    # blue on two selected
+    SelectRow (& $rowOf $plain[1])
+    [void][Native.Win]::SetForegroundWindow($main)
+    [Native.Win]::keybd_event(0x11, 0, 0, [IntPtr]::Zero)
+    $box = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr](& $rowOf $plain[2]), 0)
+    [Native.Win]::MouseClick($box.Left + 120, [int](($box.Top + $box.Bottom) / 2))
+    [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
+    [void](WaitFor { (StatusPart $mainStatus 2) -match ', 2 selected$' } 10)
+    Command $main ($IDM_FLAG_COLOR + 5)
+    $blue = { param($s) $f = & $flagsOf $s; ($f -contains '\Flagged') -and ($f -contains '$MailFlagBit2') -and ($f -notcontains '$MailFlagBit0') -and ($f -notcontains '$MailFlagBit1') }
+    Check ([bool](WaitFor { (& $blue $plain[1]) -and (& $blue $plain[2]) } 20)) 'Blue on two selected messages flags both blue: $MailFlagBit2'
+    # the menu checks Blue: its Flag submenu opened as the keys open it
+    [void][Native.Win]::PostMessage($main, $WM_CONTEXTMENU, $list, [IntPtr](-1))
+    $menu = WaitWindow '#32768' $null 10
+    $sub = [IntPtr]::Zero
+    if ($menu) {
+        $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+        $labels = [Native.Win]::MenuLabels($hmenu)
+        $at = [array]::IndexOf($labels, 'Flag')
+        for ($i = 0; $i -le $at; $i++) { if ($labels[$i]) { Key $menu $VK_DOWN } }
+        Key $menu 0x27
+        # the submenu: another menu window, besides the one opened first
+        $otherMenu = {
+            $next = [IntPtr]::Zero
+            while (($next = [Native.Win]::FindWindowEx([IntPtr]::Zero, $next, '#32768', [NullString]::Value)) -ne [IntPtr]::Zero) {
+                if ($next -ne $menu -and [Native.Win]::IsWindowVisible($next)) { return $next }
+            }
+        }
+        $sub = WaitFor $otherMenu 5
+        $flagMenu = [Native.Win]::GetSubMenu($hmenu, $at)
+        Check ((([Native.Win]::GetMenuState($flagMenu, $IDM_FLAG_COLOR + 5, 0) -band $MF_CHECKED) -ne 0) -and
+            (([Native.Win]::GetMenuState($flagMenu, $IDM_FLAG_COLOR + 2, 0) -band $MF_CHECKED) -eq 0)) 'the Flag menu checks Blue, the colour both have'
+        if ($sub) { Shot $main 'flags-1-colors' $sub } else { Shot $main 'flags-1-colors' $menu }
+        Key $menu $VK_ESCAPE
+        Key $menu $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+    }
+
+    # Clear Flag takes the flag and its colour away
+    SelectRow (& $rowOf $plain[0])
+    [void][Native.Win]::SetForegroundWindow($main)
+    [Native.Win]::keybd_event(0x11, 0, 0, [IntPtr]::Zero)
+    foreach ($s in $plain[1], $plain[2], $apple) {
+        $box = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr](& $rowOf $s), 0)
+        [Native.Win]::MouseClick($box.Left + 120, [int](($box.Top + $box.Bottom) / 2))
+    }
+    [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
+    [void](WaitFor { (StatusPart $mainStatus 2) -match ', 4 selected$' } 10)
+    Command $main $IDM_FLAG_CLEAR
+    $cleared = { param($s) $f = & $flagsOf $s; ($f -notcontains '\Flagged') -and ($f -notcontains '$MailFlagBit0') -and ($f -notcontains '$MailFlagBit1') -and ($f -notcontains '$MailFlagBit2') }
+    Check ([bool](WaitFor { @($plain + $apple | Where-Object { & $cleared $_ }).Count -eq 4 } 20)) 'Clear Flag takes the flag and its colour away on the server'
+    # the message added for this step goes, so the Inbox is as the steps after expect it
+    $added = Find 'INBOX' "Subject: $apple"
+    if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    [void](WaitFor { $null -eq (& $rowOf $apple) } 20)
 
     Step 'junk and not junk'
     $IDM_JUNK = 127; $IDM_NOT_JUNK = 128; $TB_COMMANDTOINDEX = 0x0419

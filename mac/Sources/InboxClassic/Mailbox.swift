@@ -887,8 +887,6 @@ public final class Mailbox: NSObject {
         act(PE_ACTION_TOGGLE_FLAG)
     }
 
-    /// whether Flag flags (or takes the flag off) the selected messages
-    var flagsSelected: Bool { pe_selection_flags(&summary) }
 
     /// flags the selected messages in a colour (1 red to 7 gray)
     func flagSelected(color: UInt8) {
@@ -1099,9 +1097,8 @@ public final class Mailbox: NSObject {
         add(.replyAll, "Reply to All")
         add(.forward)
         menu.addItem(.separator())
-        // several: read if any is unread, flagged unless all are
+        // several: read if any is unread; Flag in a colour or Clear Flag (the toggle is the Message menu's, by its key)
         add(summary.unread > 0 ? .markRead : .markUnread)
-        add(.flag, flagsSelected ? "Flag Message" : "Clear Flag")
         menu.addItem(AppDelegate.shared.flagMenu())
         add(inJunk ? .notJunk : .junk)
         add(.move, "Move to Folder\u{2026}")
