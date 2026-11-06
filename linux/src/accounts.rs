@@ -74,10 +74,18 @@ fn server_fields(settings: &AccountSettings) -> Vec<Field> {
         Field::password(&t!(UiFieldPassword)),
         Field::text(&t!(UiFieldImapHost), &settings.imap_host),
         Field::number(&t!(UiFieldImapPort), settings.imap_port.to_string()),
-        Field::choice(&t!(UiFieldImapSecurity), security(), security_index(settings.imap_security)),
+        Field::choice(
+            &t!(UiFieldImapSecurity),
+            security(),
+            security_index(settings.imap_security),
+        ),
         Field::text(&t!(UiFieldSmtpHost), &settings.smtp_host),
         Field::number(&t!(UiFieldSmtpPort), settings.smtp_port.to_string()),
-        Field::choice(&t!(UiFieldSmtpSecurity), security(), security_index(settings.smtp_security)),
+        Field::choice(
+            &t!(UiFieldSmtpSecurity),
+            security(),
+            security_index(settings.smtp_security),
+        ),
     ]
 }
 

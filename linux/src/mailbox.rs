@@ -2094,12 +2094,7 @@ fn header_bar(
         vec![create_mail.clone().upcast()],
         vec![
             button("ic-arrow-reply-symbolic", &t!(UiTbReply), Command::Reply).upcast(),
-            button(
-                "ic-arrow-reply-all-symbolic",
-                &t!(UiTbReplyAll),
-                Command::ReplyAll,
-            )
-            .upcast(),
+            button("ic-arrow-reply-all-symbolic", &t!(UiTbReplyAll), Command::ReplyAll).upcast(),
             button("ic-arrow-forward-symbolic", &t!(UiTbForward), Command::Forward).upcast(),
         ],
         vec![
@@ -2110,12 +2105,7 @@ fn header_bar(
         vec![send_receive.clone().upcast()],
         vec![
             button("ic-mail-read-symbolic", &t!(UiTbMarkRead), Command::MarkRead).upcast(),
-            button(
-                "ic-mail-unread-symbolic",
-                &t!(UiTbMarkUnread),
-                Command::MarkUnread,
-            )
-            .upcast(),
+            button("ic-mail-unread-symbolic", &t!(UiTbMarkUnread), Command::MarkUnread).upcast(),
         ],
     ];
     for group in groups {

@@ -69,10 +69,7 @@ mod tests {
     #[test]
     fn words_with_their_values() {
         pe_core::i18n::set_language("en");
-        assert_eq!(
-            t!(UiNewFolderIn, folder = "Archive"),
-            "The new folder goes in Archive."
-        );
+        assert_eq!(t!(UiNewFolderIn, folder = "Archive"), "The new folder goes in Archive.");
         assert_eq!(t!(GtkUnreadMessages, count = 0u64), "No unread messages");
         assert_eq!(t!(GtkUnreadMessages, count = 3u64), "3 unread messages");
         // a blank line inside a message is kept

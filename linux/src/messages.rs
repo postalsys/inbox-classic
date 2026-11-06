@@ -177,9 +177,7 @@ impl MessageList {
         view.append_column(&icon_column(|m| m.info.has_attachments.then_some("ic-attach-symbolic")));
         view.append_column(&flag_column());
         let from = text_column(&t!(UiColFrom), 200, false, 0.0, |m| m.info.sender().to_string());
-        let subject = text_column(&t!(UiColSubject), SUBJECT_WIDTH, true, 0.0, |m| {
-            m.info.subject.clone()
-        });
+        let subject = text_column(&t!(UiColSubject), SUBJECT_WIDTH, true, 0.0, |m| m.info.subject.clone());
         let received = text_column(&t!(UiColReceived), 130, false, 0.0, |m| {
             m.info.display_date().map(crate::ui::format_date).unwrap_or_default()
         });
