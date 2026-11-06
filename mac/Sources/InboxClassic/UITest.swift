@@ -379,7 +379,7 @@ final class UITest {
     @discardableResult
     func selectFolder(named name: String) -> Bool {
         for row in 0..<tree.numberOfRows {
-            if let node = tree.item(atRow: row) as? Mailbox.FolderNode, node.folder.displayName == name {
+            if let node = tree.item(atRow: row) as? Mailbox.FolderNode, node.folder.name == name {
                 tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
                 return true
             }

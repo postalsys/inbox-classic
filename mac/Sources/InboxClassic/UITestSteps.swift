@@ -402,7 +402,7 @@ extension UITest {
         let rowLabel = { (row: Int) -> String in
             (self.tree.view(atColumn: 0, row: row, makeIfNecessary: true) as? FolderCell)?.accessibilityLabel() ?? ""
         }
-        let inboxRow = (0..<tree.numberOfRows).first { (tree.item(atRow: $0) as? Mailbox.FolderNode)?.folder.displayName == "Inbox" } ?? 1
+        let inboxRow = (0..<tree.numberOfRows).first { (tree.item(atRow: $0) as? Mailbox.FolderNode)?.folder.name == "Inbox" } ?? 1
         let inboxUnread = (tree.item(atRow: inboxRow) as? Mailbox.FolderNode)?.folder.unread ?? 0
         check(inboxUnread >= 1, "the Inbox has unread messages (\(rowLabel(inboxRow)))")
         tree.collapseItem(tree.item(atRow: 0))
@@ -782,7 +782,7 @@ extension UITest {
     }
 
     func folderNode(_ name: String) -> Mailbox.FolderNode? {
-        (0..<tree.numberOfRows).compactMap { tree.item(atRow: $0) as? Mailbox.FolderNode }.first { $0.folder.displayName == name }
+        (0..<tree.numberOfRows).compactMap { tree.item(atRow: $0) as? Mailbox.FolderNode }.first { $0.folder.name == name }
     }
 
     // ---- closing, links and completion ----
@@ -1019,7 +1019,7 @@ extension UITest {
     func folder(ofAccount index: Int, named name: String) -> Int64 {
         let accounts = main.mailbox.core.accounts()
         guard accounts.indices.contains(index) else { return 0 }
-        return main.mailbox.core.folders(accounts[index].id).first { $0.displayName == name }?.id ?? 0
+        return main.mailbox.core.folders(accounts[index].id).first { $0.name == name }?.id ?? 0
     }
 
     /// highlights `folder` in the Move window, as a click on its row would

@@ -1964,6 +1964,10 @@ pub async fn languages(d: &Driver) {
         german.iter().all(|w| words.iter().any(|shown| shown == w)),
         &format!("started in German, the toolbar and the columns are in German ({words:?})"),
     );
+    d.check(
+        folder_id("Posteingang").is_some() && folder_id("Archiv").is_some(),
+        "the special folders are in German, Archive among them",
+    );
     let menu = named_in(&main, "primary-menu").and_downcast::<gtk::MenuButton>();
     if let Some(menu) = &menu {
         menu.popup();

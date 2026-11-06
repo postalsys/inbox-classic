@@ -42,6 +42,8 @@ extension UITest {
               "the toolbar is in German (\(labels.joined(separator: ", ")))")
         let counts: NSTextField? = find("status.counts", in: main.window)
         check(counts?.stringValue.contains("ungelesen") == true, "the status bar is in German (\(counts?.stringValue ?? ""))")
+        check(folder(ofAccount: 0, named: "Posteingang") != 0 && folder(ofAccount: 0, named: "Archiv") != 0,
+              "the special folders are in German, Archive among them")
         await shot(main.window, "lang-1-german")
 
         step("the windows in the pseudo-language")
