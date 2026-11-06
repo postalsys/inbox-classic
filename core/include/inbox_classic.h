@@ -418,8 +418,10 @@ typedef struct PeFolder {
 } PeFolder;
 
 typedef struct PeSearch {
-  // The folder, 0 for every folder of every account
+  // The folder, 0 for every folder of every account (or of the Inboxes, with `all_inboxes`)
   int64_t folder;
+  // With `folder` 0: the Inbox of every account rather than every folder
+  bool all_inboxes;
   enum PeShow show;
   // UTF-8, NULL or empty for no words
   const char *text;
@@ -1120,6 +1122,21 @@ void pe_folder_list_free(struct PeFolderList *list);
 // `core` must be a live handle; `total` and `unread` must be valid pointers.
 bool pe_folder_counts(const struct PeCore *core, int64_t folder, uint64_t *total, uint64_t *unread);
 
+// What the main window selects when it opens: with two or more accounts All Inboxes (`all_inboxes` true) and the
+// newest message of every Inbox, with one its Inbox and its newest message; `folder` the folder of the message (the
+// first account's Inbox when there is none), `uid` 0 when there is none; false when there is no account or its
+// Inbox is not known yet
+//
+// # Safety
+// `core` must be a live handle; `all_inboxes`, `folder` and `uid` must be valid pointers.
+bool pe_start_message(const struct PeCore *core,
+                      bool *all_inboxes,
+                      int64_t *folder,
+                      uint64_t *uid);
+
+// Whether the folder tree has All Inboxes above the accounts, for this many accounts
+bool pe_all_inboxes_shown(size_t accounts);
+
 // How many messages `pe_messages` lists for `search`, and how many of them are unread
 //
 // # Safety
@@ -1204,6 +1221,12 @@ bool pe_message_set_seen(const struct PeCore *core, int64_t folder, uint64_t uid
 // `core` must be a live handle.
 bool pe_folder_mark_all_read(const struct PeCore *core,
                              int64_t folder);
+
+// Marks every message of every account's Inbox read, as `pe_folder_mark_all_read` marks one folder
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_mark_all_inboxes_read(const struct PeCore *core);
 
 // Flags a message or takes its flag away: in the store now (`FolderChanged` follows), on the server in the
 // background

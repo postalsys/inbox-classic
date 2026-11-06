@@ -55,6 +55,8 @@ Screenshots: `read-14-menu` (not on the Mac: its menus run in a tracking loop of
 - View Source opens the whole message
 - with its header and every part, as the server has it
 - the window names the message
+- Save As in it asks where, with the subject as the name, and saves the message as it came
+- and the source stays open
 - Close closes it
 
 ## 7. Pictures from the internet
@@ -407,10 +409,25 @@ Screenshots: `account-5-app-password`, `account-6-gmail`
 
 Screenshots: `trouble-1-password`
 
+The second account is on a second ImapKit server (`second` in the harness configuration), as ImapKit's users share one mailbox.
+
 - a refused password is asked for again
 - the status bar says why
+- with the right password typed, the account syncs
 
-## 39. Accounts
+## 39. All Inboxes
+
+Screenshots: `all-inboxes-1-list`
+
+- All Inboxes is at the top of the tree, above the accounts
+- it lists the mail of both accounts' Inboxes
+- newest first, the two accounts' messages among each other
+- the Account column names the account of each
+- the status bar counts both Inboxes
+- a reply goes from the account of the message
+- Mark All Read marks both Inboxes read on the servers
+
+## 40. Accounts
 
 Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, `accounts-3-after`
 
@@ -423,8 +440,9 @@ Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, 
 - Remove (or Delete) asks first
 - and removes it
 - the account leaves the tree
+- All Inboxes goes with the second account
 
-## 40. Sign-in apps
+## 41. Sign-in apps
 
 Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not yet on the Mac, not yet on Linux), `signin-4-editor` (not yet on Linux), `signin-5-apps-added`, `signin-6-first-page` (not yet on the Mac, not yet on Linux), `signin-7-why` (not yet on the Mac, not yet on Linux), `signin-8-more` (not yet on the Mac, not yet on Linux), `signin-9-waiting`, `signin-10-added` (not yet on the Mac, not yet on Linux), `signin-11-in-use` (not yet on the Mac, not yet on Linux), `signin-12-toggled`, `signin-13-properties` (not yet on the Mac, not yet on Linux), `account-5b-browser-sign-in` (not yet on the Mac, not yet on Linux)
 
@@ -453,19 +471,19 @@ Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not ye
 - a sign-in app turned off is left out of More sign-in options
 - a Gmail address is offered Sign in with Google
 
-## 41. About
+## 42. About
 
 Screenshots: `help-1-about`
 
 - About shows the version
 
-## 42. Help
+## 43. Help
 
 Screenshots: `help-2-contents`
 
 - F1 opens the help
 
-## 43. Printing
+## 44. Printing
 
 Screenshots: `files-3-print-missing`, `files-3-print`
 
@@ -473,7 +491,7 @@ Screenshots: `files-3-print-missing`, `files-3-print`
 - as wide as the app
 - and closing it prints nothing
 
-## 44. The tray
+## 45. The tray
 
 Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not yet on Linux)
 
@@ -483,7 +501,7 @@ Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not ye
 - a click on the icon shows the window again
 - with the new message in the list, which came without a sync
 
-## 45. Closing
+## 46. Closing
 
 Screenshots: `write-12-close-app`
 

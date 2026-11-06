@@ -340,7 +340,9 @@ struct SourceState {
     bool done = false;
     HWND box = nullptr;
     HWND close = nullptr;
+    HWND save = nullptr;
     HFONT font = nullptr;
+    const std::function<void(HWND)>* saveAs = nullptr;
 };
 
 // the text fills the window, Close stays in its corner
@@ -350,7 +352,10 @@ void LayoutSource(HWND hwnd, const SourceState& state) {
     int pad = Scale(10);
     int buttonHeight = Scale(25);
     MoveWindow(state.box, pad, pad, client.right - 2 * pad, client.bottom - 3 * pad - buttonHeight, TRUE);
-    MoveWindow(state.close, client.right - pad - Scale(80), client.bottom - pad - buttonHeight, Scale(80), buttonHeight, TRUE);
+    int buttonTop = client.bottom - pad - buttonHeight;
+    MoveWindow(state.close, client.right - pad - Scale(80), buttonTop, Scale(80), buttonHeight, TRUE);
+    // a button that does not close the window on the other side
+    MoveWindow(state.save, pad, buttonTop, Scale(90), buttonHeight, TRUE);
 }
 
 LRESULT CALLBACK SourceProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -362,6 +367,8 @@ LRESULT CALLBACK SourceProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
     case WM_COMMAND:
         if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
             state->done = true;
+        } else if (LOWORD(wParam) == IDM_SAVE_AS) {
+            (*state->saveAs)(hwnd);
         }
         return 0;
     case WM_CLOSE:
@@ -397,13 +404,14 @@ std::wstring WithCrlf(const std::wstring& text) {
     return shown;
 }
 
-void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& text) {
+void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& text, const std::function<void(HWND)>& save) {
     RegisterDialogClass(kSourceClass, SourceProc);
     HWND dialog = CreateModalWindow(owner, kSourceClass, title.c_str(), Scale(760), Scale(560));
     // a window to read a long text in: it can be made larger
     SetWindowLongPtrW(dialog, GWL_STYLE, GetWindowLongPtrW(dialog, GWL_STYLE) | WS_THICKFRAME | WS_MAXIMIZEBOX);
     SetWindowPos(dialog, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
     SourceState state;
+    state.saveAs = &save;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     state.box = CreateChild(dialog, L"EDIT", L"",
                             WS_TABSTOP | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | ES_AUTOHSCROLL, 0, {},
@@ -414,6 +422,7 @@ void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& tex
                              CLEARTYPE_QUALITY, FIXED_PITCH | FF_MODERN, L"Consolas");
     SendMessageW(state.box, WM_SETFONT, reinterpret_cast<WPARAM>(state.font), FALSE);
     SetWindowTextW(state.box, text.c_str());
+    state.save = CreateChild(dialog, L"BUTTON", L"Save &As...", WS_TABSTOP, IDM_SAVE_AS, {});
     state.close = CreateChild(dialog, L"BUTTON", L"Close", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
     LayoutSource(dialog, state);
     RunModal(dialog, state.box, state.done);

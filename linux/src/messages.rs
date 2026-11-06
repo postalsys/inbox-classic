@@ -273,9 +273,10 @@ impl MessageList {
         self.sort.get()
     }
 
-    /// The Folder column while the list has messages of several folders: the Subject column gives it its room, and
-    /// gets it back, so the list stays as wide as its pane
-    pub fn show_folder_column(&self, shown: bool) {
+    /// The Folder column while the list has messages of several folders, under `title` (Account in All Inboxes): the
+    /// Subject column gives it its room, and gets it back, so the list stays as wide as its pane
+    pub fn show_folder_column(&self, shown: bool, title: &str) {
+        self.columns.folder.set_title(Some(title));
         if self.columns.folder.is_visible() == shown {
             return;
         }

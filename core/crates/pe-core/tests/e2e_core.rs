@@ -169,6 +169,127 @@ fn reads_mail_like_the_windows_do() {
 }
 
 #[test]
+fn opens_on_the_newest_message_of_the_first_inbox() {
+    let Some(s) = setup() else { return };
+    assert_eq!(s.core.start_message().unwrap(), None, "no account");
+    let dated = |subject: &str, date: &str| {
+        format!("From: Sender <sender@example.com>\r\nSubject: {subject}\r\nDate: {date}\r\n\r\nHi\r\n")
+    };
+    let newest = s
+        .server
+        .add_message("INBOX", &dated("Newest", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
+    // a higher UID, an older date: the date decides
+    s.server
+        .add_message("INBOX", &dated("Older", "Mon, 6 Oct 2025 10:00:00 +0000"), &[]);
+
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap();
+    let start = pe_core::Start {
+        all_inboxes: false,
+        folder: inbox.id,
+        uid: Some(newest),
+    };
+    assert_eq!(s.core.start_message().unwrap(), Some(start));
+}
+
+#[test]
+fn all_inboxes_list_and_mark_every_account() {
+    let Some(s) = setup() else { return };
+    // a second account on a server of its own (ImapKit has one mailbox a server)
+    let Some(other_server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let dated = |subject: &str, date: &str| {
+        format!("From: Sender <sender@example.com>\r\nSubject: {subject}\r\nDate: {date}\r\n\r\nHi\r\n")
+    };
+    s.server
+        .add_message("INBOX", &dated("First's", "Mon, 6 Oct 2025 10:00:00 +0000"), &[]);
+    s.server
+        .add_message("Archive", &dated("Archived", "Wed, 8 Oct 2025 10:00:00 +0000"), &[]);
+    let first = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(first).unwrap();
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account: first,
+            failure: None,
+        }
+    });
+    let second = s.core.add_account(&settings(&other_server), PASSWORD).unwrap();
+    s.core.sync(second).unwrap();
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account: second,
+            failure: None,
+        }
+    });
+    let inbox2 = s
+        .core
+        .folders(second)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let all = pe_core::Search {
+        scope: pe_core::Scope::AllInboxes,
+        ..Default::default()
+    };
+    let subjects = || -> Vec<String> {
+        s.core
+            .search(&all, Sort::default(), 0, 50)
+            .unwrap()
+            .into_iter()
+            .map(|m| m.info.subject)
+            .collect()
+    };
+    assert_eq!(subjects(), ["First's"], "the Archive is not an Inbox");
+
+    // mail arriving in the second account's Inbox is listed, newest first, and opens the window
+    let newest = other_server.add_message("INBOX", &dated("Second's", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
+    s.core.sync(second).unwrap();
+    s.wait(|e| {
+        *e == Event::FolderChanged {
+            account: second,
+            folder: inbox2,
+        }
+    });
+    assert_eq!(subjects(), ["Second's", "First's"]);
+    assert_eq!(s.core.count_search(&all).unwrap(), (2, 2));
+    let start = pe_core::Start {
+        all_inboxes: true,
+        folder: inbox2,
+        uid: Some(newest),
+    };
+    assert_eq!(s.core.start_message().unwrap(), Some(start));
+
+    // Mark All Read reaches both servers
+    s.core.mark_all_inboxes_read().unwrap();
+    assert_eq!(s.core.count_search(&all).unwrap(), (2, 0));
+    let all_seen = |server: &ImapKit| {
+        server
+            .messages("INBOX")
+            .iter()
+            .all(|m| m["flags"].as_array().unwrap().contains(&json!("\\Seen")))
+    };
+    for _ in 0..200 {
+        if all_seen(&s.server) && all_seen(&other_server) {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    assert!(all_seen(&s.server) && all_seen(&other_server));
+    assert_eq!(s.server.messages("Archive")[0]["flags"], json!([]), "only the Inboxes");
+}
+
+#[test]
 fn a_wrong_password_is_reported() {
     let Some(s) = setup() else { return };
     let account = s.core.add_account(&settings(&s.server), "wrong").unwrap();
@@ -632,7 +753,7 @@ fn searches_the_local_index() {
     let inbox = folders.iter().find(|f| f.info.path == "INBOX").unwrap().id;
     let subjects = |folder: Option<i64>, text: &str| -> Vec<String> {
         let search = pe_core::Search {
-            folder,
+            scope: folder.map_or(pe_core::Scope::Everywhere, pe_core::Scope::Folder),
             text: text.into(),
             ..Default::default()
         };
@@ -658,7 +779,6 @@ fn searches_the_local_index() {
     assert_eq!(subjects(None, "old"), ["Old numbers"]);
     assert_eq!(subjects(Some(inbox), "in:archive is:starred"), ["Old numbers"]);
     let search = pe_core::Search {
-        folder: None,
         text: "numbers".into(),
         ..Default::default()
     };

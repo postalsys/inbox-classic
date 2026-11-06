@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 
 use pe_core::agents::{AgentAnswer, AgentHost, AgentLevels, Undo};
 use pe_core::{Core, DraftKind, Outgoing};
-use pe_store::{AccountId, FolderId, NewLogEntry, Search, Show, Sort};
+use pe_store::{AccountId, FolderId, NewLogEntry, Scope, Search, Show, Sort};
 use serde_json::{Map, Value, json};
 
 /// The most messages a list or a search gives at once
@@ -542,7 +542,7 @@ fn list_messages(call: &Call, args: &Args) -> Outcome {
     let folder = call.folder(args.int("folder")?)?;
     let (offset, limit) = args.page();
     let search = Search {
-        folder: Some(folder.id),
+        scope: Scope::Folder(folder.id),
         show: if args.flag("unread_only", false) {
             Show::Unread
         } else {
@@ -583,7 +583,7 @@ fn search_messages(call: &Call, args: &Args) -> Outcome {
     }
     let (offset, limit) = args.page();
     let search = Search {
-        folder: None,
+        scope: Scope::Everywhere,
         show: Show::All,
         text: query,
     };

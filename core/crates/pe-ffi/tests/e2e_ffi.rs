@@ -177,6 +177,7 @@ fn reads_mail_through_the_c_api() {
     let find = c("report");
     let folder_search = |text: *const c_char| PeSearch {
         folder: inbox,
+        all_inboxes: false,
         show: PeShow::All,
         text,
     };
@@ -191,11 +192,22 @@ fn reads_mail_through_the_c_api() {
     assert_eq!(total, 2);
     let everywhere = PeSearch {
         folder: 0,
+        all_inboxes: false,
         show: PeShow::Unread,
         text: std::ptr::null(),
     };
     assert!(unsafe { pe_message_count(core, &everywhere, &mut total, &mut unread) });
     assert_eq!((total, unread), (1, 1));
+    // the Inbox of every account (one account here): its two messages, one unread
+    let all_inboxes = PeSearch {
+        folder: 0,
+        all_inboxes: true,
+        show: PeShow::All,
+        text: std::ptr::null(),
+    };
+    assert!(unsafe { pe_message_count(core, &all_inboxes, &mut total, &mut unread) });
+    assert_eq!((total, unread), (2, 1));
+    assert!(!pe_all_inboxes_shown(1) && pe_all_inboxes_shown(2));
     let operators = c("has:attachment -is:read");
     assert!(unsafe { pe_message_count(core, &folder_search(operators.as_ptr()), &mut total, &mut unread) });
     assert_eq!(total, 1);

@@ -7,7 +7,7 @@ use rusqlite::{OptionalExtension, params, params_from_iter};
 
 use crate::messages::{COLUMNS, from_row};
 use crate::query::{Field, Place, Query, Term, Word};
-use crate::{AccountId, FolderId, Message, Result, Sort, Store};
+use crate::{AccountId, FolderId, Message, Result, Sort, SortField, Store};
 
 /// Which messages of the list are shown, whatever words are searched for
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -19,11 +19,25 @@ pub enum Show {
     WithAttachments,
 }
 
+/// The folders the message list shows
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Scope {
+    /// One folder
+    Folder(FolderId),
+    /// The Inbox of every account
+    AllInboxes,
+    /// Every folder of every account
+    #[default]
+    Everywhere,
+}
+
+/// The Inbox of every account, as SQL
+pub(crate) const INBOXES: &str = "SELECT id FROM folders WHERE path = 'INBOX' COLLATE NOCASE";
+
 /// What the message list shows
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Search {
-    /// One folder, or None for every folder of every account
-    pub folder: Option<FolderId>,
+    pub scope: Scope,
     pub show: Show,
     /// The words searched for, as typed; empty for none
     pub text: String,
@@ -75,13 +89,14 @@ impl Search {
     /// The whole list of a folder
     pub fn folder(folder: FolderId) -> Search {
         Search {
-            folder: Some(folder),
+            scope: Scope::Folder(folder),
             ..Default::default()
         }
     }
 
-    /// The WHERE of the search and its values, ?1 on
-    fn condition(&self) -> (String, Vec<Value>) {
+    /// The WHERE of the search and its values, ?1 on. `in_order`: for a page in an order that has an index over every
+    /// folder (date, received), which then walks it rather than sort all the Inboxes have.
+    fn condition(&self, in_order: bool) -> (String, Vec<Value>) {
         let mut query = Query::parse(&self.text, now());
         // the Show choice is a term like the one typed for it
         query.terms.extend(match self.show {
@@ -96,9 +111,14 @@ impl Search {
             values.push(v);
             format!("?{}", values.len())
         };
-        // the folder shown, unless the search names its own (in:)
-        if let Some(folder) = self.folder.filter(|_| !query.spans_folders()) {
-            parts.push(format!("folder_id = {}", value(&mut values, Value::Integer(folder))));
+        // the folders shown, unless the search names its own (in:)
+        match self.scope {
+            _ if query.spans_folders() => {}
+            Scope::Folder(folder) => parts.push(format!("folder_id = {}", value(&mut values, Value::Integer(folder)))),
+            // the + keeps SQLite off the folder indexes, which would sort every message of the Inboxes for a page
+            Scope::AllInboxes if in_order => parts.push(format!("+folder_id IN ({INBOXES})")),
+            Scope::AllInboxes => parts.push(format!("folder_id IN ({INBOXES})")),
+            Scope::Everywhere => {}
         }
         let flagged = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
         let answered = "instr(' ' || flags || ' ', ' \\Answered ') > 0";
@@ -127,7 +147,7 @@ impl Search {
                 Term::In { place, negated } => {
                     let folders = match place {
                         Place::Anywhere => continue,
-                        Place::Inbox => "SELECT id FROM folders WHERE path = 'INBOX' COLLATE NOCASE".to_string(),
+                        Place::Inbox => INBOXES.to_string(),
                         Place::Special { special_use, name } => {
                             let special_use = value(&mut values, Value::Text(special_use.to_string()));
                             let name = value(&mut values, Value::Text(name.clone()));
@@ -186,7 +206,8 @@ pub struct IndexText {
 impl Store {
     /// A page of what `search` finds, in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
-        let (condition, mut values) = search.condition();
+        let in_order = matches!(sort.field, SortField::Date | SortField::Received);
+        let (condition, mut values) = search.condition(in_order);
         let at = values.len();
         values.push(Value::Integer(limit as i64));
         values.push(Value::Integer(offset as i64));
@@ -199,9 +220,15 @@ impl Store {
         statement.query_map(params_from_iter(values), from_row)?.collect()
     }
 
+    /// The Inbox of every account, the folders [`Scope::AllInboxes`] lists
+    pub fn inboxes(&self) -> Result<Vec<FolderId>> {
+        let mut statement = self.db.prepare_cached(&format!("{INBOXES} ORDER BY account_id, id"))?;
+        statement.query_map([], |row| row.get(0))?.collect()
+    }
+
     /// How many messages `search` finds, and how many of them are unread
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
-        let (condition, values) = search.condition();
+        let (condition, values) = search.condition(false);
         let mut statement = self.db.prepare_cached(&format!(
             "SELECT COUNT(*), COALESCE(SUM(NOT seen), 0) FROM messages WHERE {condition}"
         ))?;
@@ -210,7 +237,7 @@ impl Store {
 
     /// Where the message `uid` of `folder` is in what `search` finds in the order of `sort`; None when it is not there
     pub fn search_index(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<u64>> {
-        let (condition, mut values) = search.condition();
+        let (condition, mut values) = search.condition(false);
         let at = values.len();
         values.push(Value::Integer(folder));
         values.push(Value::Integer(uid as i64));
@@ -340,7 +367,7 @@ mod tests {
 
     fn words(folder: Option<FolderId>, text: &str) -> Search {
         Search {
-            folder,
+            scope: folder.map_or(Scope::Everywhere, Scope::Folder),
             text: text.into(),
             ..Default::default()
         }
@@ -450,11 +477,11 @@ mod tests {
         store
             .add_messages(archive, &[message(9, "Old unread", "Ann", &[])])
             .unwrap();
-        let show = |folder, show| {
+        let show = |folder: Option<FolderId>, show| {
             found(
                 &store,
                 &Search {
-                    folder,
+                    scope: folder.map_or(Scope::Everywhere, Scope::Folder),
                     show,
                     ..Default::default()
                 },
@@ -467,11 +494,76 @@ mod tests {
         assert_eq!(show(None, Show::Unread), [2, 9]);
         // with words too
         let search = Search {
-            folder: None,
+            scope: Scope::Everywhere,
             show: Show::Unread,
             text: "old".into(),
         };
         assert_eq!(found(&store, &search), [9]);
+    }
+
+    #[test]
+    fn all_inboxes_lists_every_inbox_and_nothing_else() {
+        let (store, inbox, archive) = setup();
+        let second = store.add_account(&AccountSettings::example("b@example.org")).unwrap();
+        let folder = |path: &str| FolderInfo {
+            path: path.into(),
+            name: path.into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store.set_folders(second, &[folder("Inbox"), folder("Sent")]).unwrap();
+        let folders = store.folders(second).unwrap();
+        let (inbox2, sent2) = (folders[0].id, folders[1].id);
+        // dates and received dates in other orders, so the two sorts differ
+        let dated = |uid: u64, date: i64, received: i64, flags: &[&str]| MessageInfo {
+            date: Some(date),
+            internal_date: Some(received),
+            ..message(uid, "Hello", "Ann", flags)
+        };
+        store
+            .add_messages(inbox, &[dated(1, 100, 400, &[]), dated(2, 300, 200, &["\\Seen"])])
+            .unwrap();
+        store.add_messages(inbox2, &[dated(7, 200, 300, &[])]).unwrap();
+        store.add_messages(archive, &[dated(5, 500, 500, &[])]).unwrap();
+        store.add_messages(sent2, &[dated(6, 600, 600, &["\\Seen"])]).unwrap();
+        let all = Search {
+            scope: Scope::AllInboxes,
+            ..Default::default()
+        };
+        let listed = |search: &Search, field| -> Vec<u64> {
+            let sort = Sort {
+                field,
+                ascending: false,
+            };
+            store
+                .search(search, sort, 0, 10)
+                .unwrap()
+                .iter()
+                .map(|m| m.info.uid)
+                .collect()
+        };
+        assert_eq!(listed(&all, crate::SortField::Date), [2, 7, 1]);
+        assert_eq!(listed(&all, crate::SortField::Received), [1, 7, 2]);
+        assert_eq!(store.count_search(&all).unwrap(), (3, 2));
+        assert_eq!(store.inboxes().unwrap(), [inbox, inbox2]);
+        let newest = Sort {
+            field: crate::SortField::Date,
+            ascending: false,
+        };
+        assert_eq!(store.search_index(&all, newest, inbox2, 7).unwrap(), Some(1));
+        assert_eq!(store.search_index(&all, newest, archive, 5).unwrap(), None);
+        // by state and words in the scope
+        let unread = Search {
+            show: Show::Unread,
+            ..all.clone()
+        };
+        assert_eq!(found(&store, &unread), [1, 7]);
+        // a typed in: looks where it says
+        let sent = Search {
+            text: "in:sent".into(),
+            ..all.clone()
+        };
+        assert_eq!(found(&store, &sent), [6]);
     }
 
     #[test]

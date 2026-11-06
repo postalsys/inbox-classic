@@ -100,6 +100,8 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         }
         window.makeKeyAndOrderFront(nil)
         NSApp.activate()
+        // started for an agent: shown now for the first time
+        mailbox.selectStart()
     }
 
     /// the close button: the app keeps checking mail from the Dock

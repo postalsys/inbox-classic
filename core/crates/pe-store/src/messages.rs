@@ -267,8 +267,10 @@ impl Store {
     /// How many messages are unread in the Inboxes of all accounts, for the tray and the taskbar
     pub fn inbox_unread(&self) -> Result<u64> {
         self.db.query_row(
-            "SELECT COUNT(*) FROM messages m JOIN folders f ON f.id = m.folder_id \
-             WHERE f.path = 'INBOX' COLLATE NOCASE AND m.seen = 0",
+            &format!(
+                "SELECT COUNT(*) FROM messages WHERE folder_id IN ({}) AND seen = 0",
+                crate::search::INBOXES
+            ),
             [],
             |row| row.get(0),
         )

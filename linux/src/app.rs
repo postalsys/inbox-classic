@@ -139,6 +139,7 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         *state.hold.borrow_mut() = Some(application.hold());
     } else {
         main.window().present();
+        main.select_start();
     }
     first_run(arguments);
 }
@@ -378,6 +379,8 @@ impl Shell {
     pub fn show_main(&self) {
         self.hold.borrow_mut().take();
         self.main().window().present();
+        // started for an agent: shown now for the first time
+        self.main().select_start();
     }
 
     /// The window's close button: with an icon in the top bar the app keeps checking mail there (the first time it

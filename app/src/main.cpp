@@ -121,6 +121,8 @@ void ShowMain() {
         ShowWindow(g_main, SW_SHOW);
     }
     SetForegroundWindow(g_main);
+    // started in the tray: shown now for the first time
+    g_mailbox.SelectStart();
 }
 
 // the window's close button: the app keeps checking mail from the tray; the first time it says so
@@ -1220,6 +1222,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     if (!g_arguments.background) {
         ShowWindow(hwnd, show);
         UpdateWindow(hwnd);
+        g_mailbox.SelectStart();
         FirstRun();
     }
     if (!g_arguments.mailto.empty()) {

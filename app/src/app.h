@@ -99,9 +99,9 @@ std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t*
                            const wchar_t* filter = L"All files (*.*)\0*.*\0", const wchar_t* extension = nullptr);
 // `text` with its line breaks as CRLF, as an edit box shows them
 std::wstring WithCrlf(const std::wstring& text);
-// a modal window that can be resized with `text` (a message's source) in a fixed-width font to read and copy, and
-// Close
-void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& text);
+// a modal window that can be resized with `text` (a message's source) in a fixed-width font to read and copy, Save
+// As (`save`, given the window) and Close
+void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& text, const std::function<void(HWND)>& save);
 // a modal window with `text` to read and copy in a box that can not be edited, and OK (Message Properties)
 void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text);
 // a PNG picture of the exe's resources (RCDATA, app.rc) as a bitmap `height` pixels high over `background`, as wide
@@ -291,10 +291,14 @@ public:
     // the accounts changed: builds the tree again
     void Reload();
     void MarkSelected(bool seen);
-    // every message of the selected folder read (Edit > Mark All Read, the folder's menu); nothing while searching
+    // every message of the selected folder read, or of every Inbox from All Inboxes (Edit > Mark All Read, the folder's
+    // menu); nothing while searching
     void MarkAllRead();
     // the message `uid` of `folder` shown: its folder chosen in the tree, the message selected in the list
     void ShowMessage(int64_t folder, uint64_t uid);
+    // the window shown the first time: All Inboxes (two or more accounts) or the first account's Inbox chosen, and its
+    // newest message selected
+    void SelectStart();
     // the selected message junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     void MarkJunk(bool junk);
     // whether the message shown, or else the folder, is in a Junk folder: the toolbar offers Not Junk there
@@ -367,8 +371,12 @@ private:
     // the name and whether it is the Inbox or a special folder (not renamed or deleted); false when not found
     bool FolderOf(int64_t folder, std::wstring& name, bool& fixed) const;
     void OnSelectionChanged();
-    // another folder shown; false when it was already the one shown (and the main window was not told)
-    bool OnFolderSelected(LPARAM folder);
+    // another folder (or All Inboxes) shown; false when it was already the one shown (and the main window was not told)
+    bool OnFolderSelected(int64_t folder, bool allInboxes = false);
+    // whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
+    bool SeveralFolders() const;
+    // the row of the message `uid` of `folder` selected in the list; false when it is not there
+    bool SelectInList(int64_t folder, uint64_t uid);
     // asks the core for the view of the selected message, built on a worker; ShowView() shows it when it comes
     void ShowMessage();
     void ShowView();
@@ -452,6 +460,9 @@ private:
     std::unordered_map<int64_t, std::pair<std::wstring, bool>> folderNames_;
     // the folders that hold no messages (only other folders)
     std::unordered_set<int64_t> unselectable_;
+    // All Inboxes at the top of the tree (two or more accounts), and whether it is selected
+    HTREEITEM allInboxesItem_ = nullptr;
+    bool allInboxes_ = false;
     // a message being dragged onto a folder of the tree: which, its drag image, where it would go
     struct Drag {
         int64_t folder = 0;
@@ -500,6 +511,8 @@ private:
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's
     bool reloading_ = false;
+    // SelectStart has run: later showings of the window keep what is selected
+    bool started_ = false;
     // the message shown and its folder (its row's: in a search of every folder not the selected one), 0 for none
     uint64_t uid_ = 0;
     int64_t messageFolder_ = 0;
