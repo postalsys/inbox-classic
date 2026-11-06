@@ -165,6 +165,12 @@ DropFrom DropKind(IDataObject* data);
 std::vector<std::wstring> DroppedFiles(IDataObject* data);
 // `window` takes drops through `site` (RegisterDragDrop); its target, to revoke and to hide the drag image with
 IDropTarget* RegisterDropSite(HWND window, DropSite* site);
+// `window` takes no more drops; `target` released and cleared
+void RevokeDropSite(HWND window, IDropTarget*& target);
+// the texts of a list of the core, released after
+std::vector<std::wstring> Texts(const core::TextList& list);
+// a copy of `selection`, for work on another thread or in a drag while the list's own selection changes
+core::Selection CopyOf(const PeSelection* selection);
 void ShowDragImage(IDropTarget* target, bool show);
 // the selected messages as the data of a drag: the app's own format for the folder tree, and for Explorer the files,
 // written now with the Mark of the Web when all are downloaded, or else named now and fetched when a drop asks
@@ -327,6 +333,8 @@ public:
     DWORD TestDropFiles(HTREEITEM item, const std::vector<std::wstring>& paths);
     // what a background save or forward of several messages finished with (WM_FILES_DONE)
     void FilesDone(LPARAM done);
+    // files dropped onto a folder, imported after the drop (WM_IMPORT_DROPPED)
+    void ImportDropped(WPARAM folder, LPARAM files);
     // several messages saved into a folder each as its own file, or forwarded attached to one message, off the window
     // thread
     void SaveSelectedInto(HWND owner);
@@ -656,6 +664,9 @@ constexpr UINT WM_COMPOSE_CLOSED = WM_APP + 2;
 constexpr UINT WM_COMPOSE_KEPT = WM_APP + 3;
 // a save or forward of several messages done on another thread: lParam a FilesDoneInfo the window takes over
 constexpr UINT WM_FILES_DONE = WM_APP + 4;
+// files dropped onto a folder, imported once the drop is over: wParam the folder, lParam a std::vector<std::wstring>
+// of their paths the window takes over
+constexpr UINT WM_IMPORT_DROPPED = WM_APP + 5;
 
 // the commands of the menus, toolbar and tray (IDM_*) come from core/commands.toml, shared with the Mac and Linux
 // windows; the ids of the controls are this app's own

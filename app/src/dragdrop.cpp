@@ -11,7 +11,6 @@
 #include <atomic>
 #include <functional>
 #include <map>
-#include <mutex>
 #include <optional>
 #include <thread>
 
@@ -94,6 +93,16 @@ HGLOBAL DropFiles(const std::vector<std::wstring>& paths) {
     return global;
 }
 
+// the window's messages (and calls of other apartments) for a moment, while it waits
+void PumpOnce() {
+    MsgWaitForMultipleObjects(0, nullptr, FALSE, 50, QS_ALLINPUT);
+    MSG message;
+    while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&message);
+        DispatchMessageW(&message);
+    }
+}
+
 // runs `work` on a thread of its own while this one keeps its windows answering, as a drop into Explorer waits for
 // messages that are downloaded first
 template <typename T>
@@ -105,12 +114,7 @@ T WhilePumping(std::function<T()> work) {
         done = true;
     });
     while (!done) {
-        MsgWaitForMultipleObjects(0, nullptr, FALSE, 50, QS_ALLINPUT);
-        MSG message;
-        while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&message);
-            DispatchMessageW(&message);
-        }
+        PumpOnce();
     }
     worker.join();
     return result;
@@ -120,8 +124,10 @@ T WhilePumping(std::function<T()> work) {
 // (CF_HDROP), or their names and contents to be fetched when a drop asks for them (virtual files)
 class MessageData : public IDataObject, public IDataObjectAsyncCapability {
 public:
-    MessageData(PeCore* core, core::Selection selection, std::vector<std::wstring> names, std::vector<std::wstring> written)
-        : core_(core), selection_(std::move(selection)), names_(std::move(names)), written_(std::move(written)) {}
+    // `files`: all of them are downloaded, so they are offered as files (CF_HDROP) written when a drop asks for them;
+    // otherwise as virtual files fetched then
+    MessageData(PeCore* core, core::Selection selection, std::vector<std::wstring> names, bool files)
+        : core_(core), selection_(std::move(selection)), names_(std::move(names)), files_(files) {}
 
     ~MessageData() {
         for (auto& [format, medium] : extra_) {
@@ -177,14 +183,24 @@ public:
             DWORD effect = DROPEFFECT_COPY;
             medium->tymed = TYMED_HGLOBAL;
             medium->hGlobal = GlobalOf(&effect, sizeof(effect));
-            return S_OK;
-        }
-        if (format->cfFormat == CF_HDROP && !written_.empty()) {
-            medium->tymed = TYMED_HGLOBAL;
-            medium->hGlobal = DropFiles(written_);
             return medium->hGlobal ? S_OK : E_OUTOFMEMORY;
         }
-        if (format->cfFormat == DescriptorFormat() && written_.empty()) {
+        if (format->cfFormat == CF_HDROP && files_) {
+            const std::vector<std::wstring>& written = Written();
+            if (written.empty()) {
+                return E_FAIL;
+            }
+            medium->tymed = TYMED_HGLOBAL;
+            medium->hGlobal = DropFiles(written);
+            return medium->hGlobal ? S_OK : E_OUTOFMEMORY;
+        }
+        if (format->cfFormat == DescriptorFormat() && !files_) {
+            // the core's names fit a file name; one that would not is not cut (its extension with it): no files
+            for (const std::wstring& name : names_) {
+                if (name.size() >= MAX_PATH) {
+                    return E_UNEXPECTED;
+                }
+            }
             size_t size = sizeof(FILEGROUPDESCRIPTORW) + (names_.empty() ? 0 : names_.size() - 1) * sizeof(FILEDESCRIPTORW);
             HGLOBAL global = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, size);
             if (!global) {
@@ -194,18 +210,22 @@ public:
             group->cItems = static_cast<UINT>(names_.size());
             for (size_t i = 0; i < names_.size(); i++) {
                 group->fgd[i].dwFlags = FD_PROGRESSUI;
-                lstrcpynW(group->fgd[i].cFileName, names_[i].c_str(), MAX_PATH);
+                wcscpy_s(group->fgd[i].cFileName, names_[i].c_str());
             }
             GlobalUnlock(global);
             medium->tymed = TYMED_HGLOBAL;
             medium->hGlobal = global;
             return S_OK;
         }
-        if (format->cfFormat == ContentsFormat() && written_.empty()) {
+        if (format->cfFormat == ContentsFormat() && !files_) {
             if (!(format->tymed & TYMED_ISTREAM) || format->lindex < 0 || static_cast<size_t>(format->lindex) >= names_.size()) {
                 return DV_E_FORMATETC;
             }
-            const std::vector<std::string>& files = Contents();
+            const std::vector<std::string>* fetched = Contents();
+            if (!fetched) {
+                return E_PENDING;
+            }
+            const std::vector<std::string>& files = *fetched;
             if (static_cast<size_t>(format->lindex) >= files.size() || files[format->lindex].empty()) {
                 // not to be had (gone from the server, not downloaded in time): the drop is told
                 return E_FAIL;
@@ -229,8 +249,8 @@ public:
         if (extra_.contains(format->cfFormat) || format->cfFormat == OwnFormat() || format->cfFormat == PreferredEffectFormat()) {
             return S_OK;
         }
-        if (written_.empty() ? (format->cfFormat == DescriptorFormat() || format->cfFormat == ContentsFormat())
-                             : format->cfFormat == CF_HDROP) {
+        if (!files_ ? (format->cfFormat == DescriptorFormat() || format->cfFormat == ContentsFormat())
+                    : format->cfFormat == CF_HDROP) {
             return S_OK;
         }
         return DV_E_FORMATETC;
@@ -266,14 +286,14 @@ public:
             {static_cast<CLIPFORMAT>(OwnFormat()), nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL},
             {static_cast<CLIPFORMAT>(PreferredEffectFormat()), nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL},
         };
-        if (written_.empty()) {
+        if (!files_) {
             formats.push_back({static_cast<CLIPFORMAT>(DescriptorFormat()), nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL});
             formats.push_back({static_cast<CLIPFORMAT>(ContentsFormat()), nullptr, DVASPECT_CONTENT, -1, TYMED_ISTREAM});
         } else {
             formats.push_back({CF_HDROP, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL});
         }
         for (const auto& [format, medium] : extra_) {
-            formats.push_back({static_cast<CLIPFORMAT>(format), nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL});
+            formats.push_back({static_cast<CLIPFORMAT>(format), nullptr, DVASPECT_CONTENT, -1, medium.tymed});
         }
         return SHCreateStdEnumFmtEtc(static_cast<UINT>(formats.size()), formats.data(), out);
     }
@@ -310,31 +330,44 @@ public:
         return S_OK;
     }
 
-    const std::vector<std::wstring>& Names() const { return names_; }
-
-    // the files' bytes, fetched once when the first is asked for: from the store, or downloaded meanwhile
-    const std::vector<std::string>& Contents() {
-        std::lock_guard<std::mutex> lock(contentsLock_);
-        if (contents_) {
-            return *contents_;
+    // the files' bytes, fetched once when the first is asked for: from the store, or downloaded meanwhile. Every call
+    // comes on the window's thread (its apartment); one that comes while the fetch keeps the window answering waits
+    // for that fetch. Null when they could not be had.
+    const std::vector<std::string>* Contents() {
+        while (fetching_ && !contents_) {
+            PumpOnce();
         }
+        if (contents_) {
+            return &*contents_;
+        }
+        fetching_ = true;
         PeCore* core = core_;
         PeSelection* selection = selection_.get();
         contents_ = WhilePumping<std::vector<std::string>>([core, selection] {
             std::vector<std::string> files;
-            PeExport* exported = pe_selection_export(core, selection, 120000);
-            for (size_t i = 0, count = pe_export_count(exported); i < count; i++) {
+            core::Export exported(pe_selection_export(core, selection, 120000));
+            for (size_t i = 0, count = pe_export_count(exported.get()); i < count; i++) {
                 const char* name = nullptr;
                 const uint8_t* data = nullptr;
                 size_t length = 0;
                 const char* error = nullptr;
-                pe_export_get(exported, i, &name, &data, &length, &error);
+                pe_export_get(exported.get(), i, &name, &data, &length, &error);
                 files.emplace_back(data ? std::string(reinterpret_cast<const char*>(data), length) : std::string());
             }
-            pe_export_free(exported);
             return files;
         });
-        return *contents_;
+        fetching_ = false;
+        return &*contents_;
+    }
+
+    // the files written by the core into a folder of the user's own, once, when a drop first asks for them
+    const std::vector<std::wstring>& Written() {
+        if (!written_) {
+            char* reason = nullptr;
+            written_ = Texts(core::TextList(pe_selection_drag_files(core_, selection_.get(), 10000, &reason)));
+            core::String why(reason);
+        }
+        return *written_;
     }
 
 private:
@@ -342,9 +375,10 @@ private:
     PeCore* core_;
     core::Selection selection_;
     std::vector<std::wstring> names_;
-    std::vector<std::wstring> written_;
+    bool files_;
+    std::optional<std::vector<std::wstring>> written_;
     std::map<UINT, STGMEDIUM> extra_;
-    std::mutex contentsLock_;
+    bool fetching_ = false;
     std::optional<std::vector<std::string>> contents_;
     BOOL async_ = TRUE;
     BOOL inOperation_ = FALSE;
@@ -518,41 +552,44 @@ IDropTarget* RegisterDropSite(HWND window, DropSite* site) {
     return target;
 }
 
+void RevokeDropSite(HWND window, IDropTarget*& target) {
+    if (target) {
+        RevokeDragDrop(window);
+        target->Release();
+        target = nullptr;
+    }
+}
+
 void ShowDragImage(IDropTarget* target, bool show) {
     if (target) {
         static_cast<DropTarget*>(target)->ShowImage(show);
     }
 }
 
-IDataObject* MessagesData(PeCore* core, const PeSelection* selection) {
+std::vector<std::wstring> Texts(const core::TextList& list) {
+    std::vector<std::wstring> texts;
+    for (size_t i = 0, count = pe_text_list_count(list.get()); i < count; i++) {
+        texts.push_back(Text(pe_text_list_get(list.get(), i)));
+    }
+    return texts;
+}
+
+core::Selection CopyOf(const PeSelection* selection) {
     core::Selection copy(pe_selection_new());
     int64_t folder = 0;
     uint64_t uid = 0;
     for (size_t i = 0; pe_selection_get(selection, i, &folder, &uid); i++) {
         pe_selection_add(copy.get(), folder, uid);
     }
-    std::vector<std::wstring> names;
-    if (PeTextList* list = pe_selection_file_names(core, copy.get())) {
-        for (size_t i = 0, count = pe_text_list_count(list); i < count; i++) {
-            names.push_back(Text(pe_text_list_get(list, i)));
-        }
-        pe_text_list_free(list);
-    }
-    // all downloaded: written now by the core into a folder of the user's own, with the Mark of the Web, and handed
-    // over as files that keep it
-    std::vector<std::wstring> written;
-    if (pe_selection_all_downloaded(core, copy.get())) {
-        char* reason = nullptr;
-        if (PeTextList* paths = pe_selection_drag_files(core, copy.get(), 10000, &reason)) {
-            for (size_t i = 0, count = pe_text_list_count(paths); i < count; i++) {
-                written.push_back(Text(pe_text_list_get(paths, i)));
-            }
-            pe_text_list_free(paths);
-        }
-        // not written: offered as files fetched when a drop asks for them
-        core::String why(reason);
-    }
-    return new MessageData(core, std::move(copy), std::move(names), std::move(written));
+    return copy;
+}
+
+IDataObject* MessagesData(PeCore* core, const PeSelection* selection) {
+    core::Selection copy = CopyOf(selection);
+    std::vector<std::wstring> names = Texts(core::TextList(pe_selection_file_names(core, copy.get())));
+    // all downloaded: files written by the core with the Mark of the Web, which the copies keep
+    bool files = pe_selection_all_downloaded(core, copy.get());
+    return new MessageData(core, std::move(copy), std::move(names), files);
 }
 
 DWORD RunDrag(IDataObject* data, HBITMAP image, SIZE size, POINT offset) {

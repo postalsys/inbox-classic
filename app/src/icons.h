@@ -61,11 +61,9 @@ enum FolderIcon : int {
 };
 
 enum ListIcon : int {
-    LIST_MAIL = 0,
-    LIST_MAIL_READ = 1,
-    LIST_ATTACH = 2,
-    LIST_FLAG = 3,
-    LIST_SEARCH = 4,
-    LIST_DISMISS = 5,
-    LIST_CALENDAR_LTR = 6,
+    LIST_ATTACH = 0,
+    LIST_FLAG = 1,
+    LIST_SEARCH = 2,
+    LIST_DISMISS = 3,
+    LIST_CALENDAR_LTR = 4,
 };

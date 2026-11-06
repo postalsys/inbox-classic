@@ -10,7 +10,6 @@
 #include <shlwapi.h>
 
 #include <algorithm>
-#include <array>
 #include <limits>
 #include <span>
 #include <thread>
@@ -306,13 +305,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
 }
 
 void Mailbox::Destroy() {
-    for (auto [window, target] : {std::pair{tree_, &treeTarget_}, std::pair{list_, &listTarget_}}) {
-        if (*target) {
-            RevokeDragDrop(window);
-            reinterpret_cast<IUnknown*>(*target)->Release();
-            *target = nullptr;
-        }
-    }
+    RevokeDropSite(tree_, treeTarget_);
+    RevokeDropSite(list_, listTarget_);
     if (logoBitmap_) {
         DeleteObject(logoBitmap_);
         logoBitmap_ = nullptr;
@@ -1792,17 +1786,6 @@ struct FilesDoneInfo {
     std::wstring problem;
 };
 
-// a copy of `selection`, for work on another thread while the list's own changes
-core::Selection CopyOf(const PeSelection* selection) {
-    core::Selection copy(pe_selection_new());
-    int64_t folder = 0;
-    uint64_t uid = 0;
-    for (size_t i = 0; pe_selection_get(selection, i, &folder, &uid); i++) {
-        pe_selection_add(copy.get(), folder, uid);
-    }
-    return copy;
-}
-
 }  // namespace
 
 void Mailbox::SaveSelectedInto(HWND owner) {
@@ -1812,7 +1795,9 @@ void Mailbox::SaveSelectedInto(HWND owner) {
         return;
     }
     // those not downloaded yet come first: said in the status bar meanwhile
-    Say(Text(core::String(pe_downloading_text(pe_selection_count(selection_.get()))).get()));
+    if (core::String downloading(pe_selection_downloading_text(core_, selection_.get())); downloading) {
+        Say(Text(downloading.get()));
+    }
     std::thread([core = core_, selection = CopyOf(selection_.get()), dir, window = parent_]() mutable {
         auto done = std::make_unique<FilesDoneInfo>();
         done->place = dir;
@@ -1837,7 +1822,9 @@ void Mailbox::ForwardSelected() {
     // from the account of the first of them
     auto found = folderAccounts_.find(folder);
     int64_t account = found != folderAccounts_.end() ? found->second : CurrentAccount();
-    Say(Text(core::String(pe_downloading_text(pe_selection_count(selection_.get()))).get()));
+    if (core::String downloading(pe_selection_downloading_text(core_, selection_.get())); downloading) {
+        Say(Text(downloading.get()));
+    }
     std::thread([core = core_, selection = CopyOf(selection_.get()), account, window = parent_]() mutable {
         auto done = std::make_unique<FilesDoneInfo>();
         done->account = account;
@@ -2181,8 +2168,7 @@ void Mailbox::BeginDrag(int index) {
     HBITMAP image = DragImage(reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0)), Text(row->subject),
                               pe_selection_count(selection_.get()), size);
     // the cursor a little inside the image's left edge, as where the row was picked up
-    DWORD effect = RunDrag(data, image, size, {Scale(12), size.cy / 2});
-    (void)effect;
+    RunDrag(data, image, size, {Scale(12), size.cy / 2});
     data->Release();
     dragFrom_ = 0;
 }
@@ -2284,7 +2270,9 @@ DWORD Mailbox::TreeSite::Dropped(IDataObject* data, DropFrom from, POINT screen,
         return DROPEFFECT_NONE;
     }
     if (from == DropFrom::Files) {
-        box.ImportFiles(target, DroppedFiles(data), box.parent_);
+        // put in once the drop is over, not while the program the files come from waits for it
+        PostMessageW(box.parent_, WM_IMPORT_DROPPED, static_cast<WPARAM>(target),
+                     reinterpret_cast<LPARAM>(new std::vector<std::wstring>(DroppedFiles(data))));
         return DROPEFFECT_COPY;
     }
     // the list's own drag carries the selection; a move selects the message after them, as Move to Folder does
@@ -2303,7 +2291,8 @@ DWORD Mailbox::ListSite::Dropped(IDataObject* data, DropFrom from, POINT screen,
     if (!Over(from, screen, keys, allowed)) {
         return DROPEFFECT_NONE;
     }
-    mailbox->ImportFiles(mailbox->folder_, DroppedFiles(data), mailbox->parent_);
+    PostMessageW(mailbox->parent_, WM_IMPORT_DROPPED, static_cast<WPARAM>(mailbox->folder_),
+                 reinterpret_cast<LPARAM>(new std::vector<std::wstring>(DroppedFiles(data))));
     return DROPEFFECT_COPY;
 }
 
@@ -2328,6 +2317,11 @@ void Mailbox::ImportFiles(int64_t folder, const std::vector<std::wstring>& files
     }
 }
 
+void Mailbox::ImportDropped(WPARAM folder, LPARAM files) {
+    std::unique_ptr<std::vector<std::wstring>> paths(reinterpret_cast<std::vector<std::wstring>*>(files));
+    ImportFiles(static_cast<int64_t>(folder), *paths, parent_);
+}
+
 int Mailbox::TestDragOut(const std::wstring& dir) {
     FlushSelection();
     if (pe_selection_count(selection_.get()) == 0) {
@@ -2349,13 +2343,7 @@ DWORD Mailbox::TestDropFiles(HTREEITEM item, const std::vector<std::wstring>& pa
     TreeView_GetItemRect(tree_, item, &box, TRUE);
     POINT screen = {(box.left + box.right) / 2, (box.top + box.bottom) / 2};
     ClientToScreen(tree_, &screen);
-    DropFrom from = DropKind(data);
-    DWORD effect = treeSite_.Over(from, screen, 0, DROPEFFECT_COPY | DROPEFFECT_MOVE);
-    if (effect) {
-        effect = treeSite_.Dropped(data, from, screen, 0, DROPEFFECT_COPY | DROPEFFECT_MOVE);
-    } else {
-        treeSite_.Leave();
-    }
+    DWORD effect = treeSite_.Dropped(data, DropKind(data), screen, 0, DROPEFFECT_COPY | DROPEFFECT_MOVE);
     data->Release();
     return effect;
 }

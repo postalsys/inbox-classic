@@ -96,11 +96,6 @@ void UpdateJunkButton() {
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
 }
 
-// Forward and Save As take one message or several, and none: off with nothing selected
-bool NeedsSome(unsigned id) {
-    return id == IDM_FORWARD || id == IDM_SAVE_AS;
-}
-
 // the toolbar's buttons for one message off while several are selected
 void UpdateSelectionButtons() {
     bool one = g_mailbox.SelectedCount() <= 1;
@@ -111,7 +106,7 @@ void UpdateSelectionButtons() {
         SendMessageW(g_toolbar, TB_GETBUTTON, i, reinterpret_cast<LPARAM>(&button));
         if (CommandNeedsOne(static_cast<unsigned>(button.idCommand))) {
             SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(one ? TRUE : FALSE, 0));
-        } else if (NeedsSome(static_cast<unsigned>(button.idCommand))) {
+        } else if (CommandNeedsSome(static_cast<unsigned>(button.idCommand))) {
             SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(any ? TRUE : FALSE, 0));
         }
     }
@@ -135,7 +130,7 @@ void UpdateMenu(HMENU menu) {
         UINT id = GetMenuItemID(menu, i);
         if (CommandNeedsOne(id)) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (several ? MF_GRAYED : MF_ENABLED));
-        } else if (NeedsSome(id)) {
+        } else if (CommandNeedsSome(id)) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.SelectedCount() > 0 ? MF_ENABLED : MF_GRAYED));
         }
     }
@@ -1207,6 +1202,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_FILES_DONE:
         g_mailbox.FilesDone(lParam);
+        return 0;
+    case WM_IMPORT_DROPPED:
+        g_mailbox.ImportDropped(wParam, lParam);
         return 0;
     case WM_CORE_EVENT: {
         std::unique_ptr<UiEvent> event(reinterpret_cast<UiEvent*>(lParam));
