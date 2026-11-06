@@ -11,6 +11,7 @@ mod authres;
 pub mod bimi;
 pub mod calendar;
 mod compose;
+mod export;
 mod fold;
 pub mod mailto;
 mod requests;
@@ -38,6 +39,7 @@ pub use targets::{TargetKind, TargetRow};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
+pub use export::Exported;
 /// The rules of the folder tree the windows show: how deep a folder is, and which stay as they are
 pub use pe_sync::{is_special as is_fixed_folder, tree_depths};
 use requests::Requests;
@@ -885,14 +887,7 @@ impl Core {
             return Ok(None);
         };
         let subject = store.message(folder, uid)?.map(|m| m.info.subject).unwrap_or_default();
-        // the subject made safe first, the extension after: a subject of only `???` is not left without one
-        let stem = pe_mime::parser::safe_filename(Some(&subject.replace(['/', '\\'], "-")), "message/rfc822");
-        let stem = if stem.starts_with("attachment.") {
-            "message".to_string()
-        } else {
-            stem
-        };
-        Ok(Some((format!("{stem}.eml"), source)))
+        Ok(Some((export::eml_name(&subject), source)))
     }
 
     /// The whole source of a message for View Source, as text safe to show, and the title of its window; None when it

@@ -1279,6 +1279,89 @@ fn a_move_between_accounts_cut_short_goes_on_without_a_second_copy() {
 }
 
 #[test]
+fn messages_become_files() {
+    let Some(s) = setup() else { return };
+    let lunch = s.server.add_message("INBOX", &rfc822("Lunch", "first"), &[]);
+    let lunch2 = s.server.add_message("INBOX", &rfc822("Lunch", "second"), &[]);
+    let other = s.server.add_message("INBOX", &rfc822("Other", "third"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let refs: Vec<MessageRef> = [lunch, lunch2, other]
+        .iter()
+        .map(|&uid| MessageRef { folder: inbox, uid })
+        .collect();
+    assert_eq!(
+        s.core.export_names(&refs).unwrap(),
+        ["Lunch.eml", "Lunch (2).eml", "Other.eml"]
+    );
+    // none was opened: they are downloaded for the files, and kept
+    assert!(!s.core.all_downloaded(&refs).unwrap());
+    let files = s.core.export_messages(&refs, Duration::from_secs(20)).unwrap();
+    assert_eq!(files.len(), 3);
+    let body = |f: &pe_core::Exported| String::from_utf8(f.source.clone().unwrap()).unwrap();
+    assert!(body(&files[0]).contains("first") && body(&files[1]).contains("second"));
+    assert!(s.core.all_downloaded(&refs).unwrap());
+
+    // saved into a folder, never over a file there
+    let dir = TempDir::new("export");
+    std::fs::write(dir.path().join("Other.eml"), "mine").unwrap();
+    let written = s
+        .core
+        .save_messages(&refs, dir.path(), Duration::from_secs(20))
+        .unwrap();
+    let mut names: Vec<String> = written
+        .iter()
+        .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
+        .collect();
+    names.sort();
+    assert_eq!(names, ["Lunch (2).eml", "Lunch.eml", "Other (2).eml"]);
+    assert_eq!(std::fs::read_to_string(dir.path().join("Other.eml")).unwrap(), "mine");
+
+    // forwarded as attachments, the subject the first one's
+    let draft = s
+        .core
+        .forward_as_attachments(&refs[1..], Duration::from_secs(20))
+        .unwrap();
+    assert_eq!(draft.subject, "Fw: Lunch");
+    assert_eq!(draft.attachments.len(), 2);
+    assert!(
+        std::fs::read_to_string(&draft.attachments[1])
+            .unwrap()
+            .contains("third")
+    );
+
+    // one gone from the server can not be had: told, the others still come
+    let gone = s.server.add_message("INBOX", &rfc822("Gone", "x"), &[]);
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    s.server.expunge("INBOX", &[gone]);
+    let files = s
+        .core
+        .export_messages(
+            &[
+                MessageRef {
+                    folder: inbox,
+                    uid: gone,
+                },
+                refs[2],
+            ],
+            Duration::from_secs(20),
+        )
+        .unwrap();
+    assert!(files[0].source.is_err());
+    assert!(files[1].source.is_ok());
+}
+
+#[test]
 fn a_move_or_delete_the_server_does_not_do_comes_back() {
     let Some(s) = setup() else { return };
     let first = s.server.add_message("INBOX", &rfc822("First", "1"), &[]);

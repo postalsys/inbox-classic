@@ -540,3 +540,229 @@ pub unsafe extern "C" fn pe_undo_restored(core: *const PeCore, selection: *mut P
 pub extern "C" fn pe_list_counts(total: u64, unread: u64, selected: u64, searching: bool) -> *mut c_char {
     guard(|| into_c_string(pe_core::list_counts(total, unread, selected, searching))).unwrap_or(null_mut())
 }
+
+// ---- as files ----
+
+/// Texts (file names, paths); free with `pe_text_list_free`
+pub struct PeTextList {
+    texts: Vec<std::ffi::CString>,
+}
+
+fn text_list(texts: impl IntoIterator<Item = String>) -> *mut PeTextList {
+    handed(PeTextList {
+        texts: texts.into_iter().map(crate::c_string).collect(),
+    })
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_text_list_count(list: *const PeTextList) -> usize {
+    // SAFETY: as the caller guarantees
+    unsafe { list.as_ref() }.map_or(0, |l| l.texts.len())
+}
+
+/// Text `index` (UTF-8), valid until the list is freed; NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_text_list_get(list: *const PeTextList, index: usize) -> *const c_char {
+    // SAFETY: as the caller guarantees
+    unsafe { list.as_ref() }
+        .and_then(|l| l.texts.get(index))
+        .map_or(std::ptr::null(), |t| t.as_ptr())
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet, freed once.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_text_list_free(list: *mut PeTextList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+/// The file names the selected messages get as `.eml` files, in order and different from each other ("Lunch.eml",
+/// "Lunch (2).eml"), without downloading them; NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle, `selection` a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_file_names(
+    core: *const PeCore,
+    selection: *const PeSelection,
+) -> *mut PeTextList {
+    // SAFETY: as the caller guarantees
+    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.export_names(&refs).map_or(null_mut(), text_list)
+        })
+    }
+}
+
+/// Whether every selected message is downloaded, so its file can be written at once
+///
+/// # Safety
+/// `core` must be a live handle, `selection` a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_all_downloaded(core: *const PeCore, selection: *const PeSelection) -> bool {
+    // SAFETY: as the caller guarantees
+    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.all_downloaded(&refs).unwrap_or(false)) }
+}
+
+/// The selected messages as files; free with `pe_export_free`
+pub struct PeExport {
+    files: Vec<(std::ffi::CString, std::result::Result<Vec<u8>, std::ffi::CString>)>,
+}
+
+/// The selected messages as files, downloading those not here yet, waiting at most `timeout_ms` for them. BLOCKS:
+/// call it from a thread of its own (a drop's data thread, a file promise's queue), never the window thread. NULL
+/// on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_export(
+    core: *const PeCore,
+    selection: *const PeSelection,
+    timeout_ms: u64,
+) -> *mut PeExport {
+    // SAFETY: as the caller guarantees
+    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            match core.export_messages(&refs, std::time::Duration::from_millis(timeout_ms)) {
+                Ok(files) => handed(PeExport {
+                    files: files
+                        .into_iter()
+                        .map(|f| (crate::c_string(f.name), f.source.map_err(crate::c_string)))
+                        .collect(),
+                }),
+                Err(_) => null_mut(),
+            }
+        })
+    }
+}
+
+/// # Safety
+/// `export` must be NULL or from `pe_selection_export`, not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_export_count(export: *const PeExport) -> usize {
+    // SAFETY: as the caller guarantees
+    unsafe { export.as_ref() }.map_or(0, |e| e.files.len())
+}
+
+/// File `index`: its name, and its bytes (`data`, `len`) or why it could not be had (`error`, `data` NULL). All valid
+/// until the export is freed. False past the end.
+///
+/// # Safety
+/// `export` must be NULL or from `pe_selection_export`, not freed yet; the out pointers valid.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_export_get(
+    export: *const PeExport,
+    index: usize,
+    name: *mut *const c_char,
+    data: *mut *const u8,
+    len: *mut usize,
+    error: *mut *const c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some((file_name, source)) = (unsafe { export.as_ref() }).and_then(|e| e.files.get(index)) else {
+        return false;
+    };
+    if name.is_null() || data.is_null() || len.is_null() || error.is_null() {
+        return false;
+    }
+    // SAFETY: the caller gave valid pointers
+    unsafe {
+        *name = file_name.as_ptr();
+        match source {
+            Ok(bytes) => {
+                *data = bytes.as_ptr();
+                *len = bytes.len();
+                *error = std::ptr::null();
+            }
+            Err(problem) => {
+                *data = std::ptr::null();
+                *len = 0;
+                *error = problem.as_ptr();
+            }
+        }
+    }
+    true
+}
+
+/// # Safety
+/// `export` must be NULL or from `pe_selection_export`, freed once.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_export_free(export: *mut PeExport) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(export) }
+}
+
+/// Writes the selected messages into the folder `dir` as `.eml` files, never over a file there, marked as from the
+/// internet where the system has such a mark (Windows; the Mac app sets its own). Returns the paths written, or NULL
+/// with the reason in `error` (free with `pe_string_free`). BLOCKS as `pe_selection_export` does.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` a live selection, `dir` a NUL-terminated string, `error` NULL or valid.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_save(
+    core: *const PeCore,
+    selection: *const PeSelection,
+    dir: *const c_char,
+    timeout_ms: u64,
+    error: *mut *mut c_char,
+) -> *mut PeTextList {
+    // SAFETY: as the caller guarantees
+    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    // SAFETY: as the caller guarantees
+    let dir = unsafe { crate::core::arg(dir) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe {
+        with(core, Err(None), |core| {
+            core.save_messages(
+                &refs,
+                std::path::Path::new(&dir),
+                std::time::Duration::from_millis(timeout_ms),
+            )
+            .map_err(Some)
+        })
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the messages could not be saved") }.map_or(null_mut(), |paths| {
+        text_list(paths.into_iter().map(|p| p.to_string_lossy().into_owned()))
+    })
+}
+
+/// A new message forwarding the selected messages as attached `.eml` files (written from the account of the first),
+/// its subject the first one's with "Fw: "; free with `pe_draft_free`. NULL with the reason in `error` (free with
+/// `pe_string_free`). BLOCKS as `pe_selection_export` does, while what is not downloaded comes.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` a live selection, `error` NULL or valid.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_forward(
+    core: *const PeCore,
+    selection: *const PeSelection,
+    timeout_ms: u64,
+    error: *mut *mut c_char,
+) -> *mut crate::core::PeDraft {
+    // SAFETY: as the caller guarantees
+    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe {
+        with(core, Err(None), |core| {
+            core.forward_as_attachments(&refs, std::time::Duration::from_millis(timeout_ms))
+                .map_err(Some)
+        })
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the messages could not be forwarded") }
+        .map_or(null_mut(), |draft| crate::core::draft_handle(&draft))
+}

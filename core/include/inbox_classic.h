@@ -273,6 +273,9 @@ typedef struct PeCore PeCore;
 // A draft; free with `pe_draft_free`
 typedef struct PeDraft PeDraft;
 
+// The selected messages as files; free with `pe_export_free`
+typedef struct PeExport PeExport;
+
 // The folders of an account; free with `pe_folder_list_free`
 typedef struct PeFolderList PeFolderList;
 
@@ -299,6 +302,9 @@ typedef struct PeSignInPresetList PeSignInPresetList;
 
 // The rows of the Move and Copy window; free with `pe_target_list_free`
 typedef struct PeTargetList PeTargetList;
+
+// Texts (file names, paths); free with `pe_text_list_free`
+typedef struct PeTextList PeTextList;
 
 // A program that wants to connect
 typedef struct PeAgentConnect {
@@ -1918,6 +1924,87 @@ char *pe_list_counts(uint64_t total,
                      uint64_t unread,
                      uint64_t selected,
                      bool searching);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+size_t pe_text_list_count(const struct PeTextList *list);
+
+// Text `index` (UTF-8), valid until the list is freed; NULL past the end
+//
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+const char *pe_text_list_get(const struct PeTextList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet, freed once.
+void pe_text_list_free(struct PeTextList *list);
+
+// The file names the selected messages get as `.eml` files, in order and different from each other ("Lunch.eml",
+// "Lunch (2).eml"), without downloading them; NULL on failure
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection.
+struct PeTextList *pe_selection_file_names(const struct PeCore *core,
+                                           const struct PeSelection *selection);
+
+// Whether every selected message is downloaded, so its file can be written at once
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection.
+bool pe_selection_all_downloaded(const struct PeCore *core, const struct PeSelection *selection);
+
+// The selected messages as files, downloading those not here yet, waiting at most `timeout_ms` for them. BLOCKS:
+// call it from a thread of its own (a drop's data thread, a file promise's queue), never the window thread. NULL
+// on failure.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection.
+struct PeExport *pe_selection_export(const struct PeCore *core,
+                                     const struct PeSelection *selection,
+                                     uint64_t timeout_ms);
+
+// # Safety
+// `export` must be NULL or from `pe_selection_export`, not freed yet.
+size_t pe_export_count(const struct PeExport *export_);
+
+// File `index`: its name, and its bytes (`data`, `len`) or why it could not be had (`error`, `data` NULL). All valid
+// until the export is freed. False past the end.
+//
+// # Safety
+// `export` must be NULL or from `pe_selection_export`, not freed yet; the out pointers valid.
+bool pe_export_get(const struct PeExport *export_,
+                   size_t index,
+                   const char **name,
+                   const uint8_t **data,
+                   size_t *len,
+                   const char **error);
+
+// # Safety
+// `export` must be NULL or from `pe_selection_export`, freed once.
+void pe_export_free(struct PeExport *export_);
+
+// Writes the selected messages into the folder `dir` as `.eml` files, never over a file there, marked as from the
+// internet where the system has such a mark (Windows; the Mac app sets its own). Returns the paths written, or NULL
+// with the reason in `error` (free with `pe_string_free`). BLOCKS as `pe_selection_export` does.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection, `dir` a NUL-terminated string, `error` NULL or valid.
+struct PeTextList *pe_selection_save(const struct PeCore *core,
+                                     const struct PeSelection *selection,
+                                     const char *dir,
+                                     uint64_t timeout_ms,
+                                     char **error);
+
+// A new message forwarding the selected messages as attached `.eml` files (written from the account of the first),
+// its subject the first one's with "Fw: "; free with `pe_draft_free`. NULL with the reason in `error` (free with
+// `pe_string_free`). BLOCKS as `pe_selection_export` does, while what is not downloaded comes.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection, `error` NULL or valid.
+struct PeDraft *pe_selection_forward(const struct PeCore *core,
+                                     const struct PeSelection *selection,
+                                     uint64_t timeout_ms,
+                                     char **error);
 
 #ifdef __cplusplus
 }  // extern "C"
