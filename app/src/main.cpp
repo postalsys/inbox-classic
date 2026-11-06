@@ -393,8 +393,8 @@ void OnEvent(const UiEvent& event) {
         AgentsChanged();
         break;
     case PE_EVENT_KIND_TRANSFERRING:
-        // how far messages going to another account are, and Done once they all went
-        SetStatus(event.message.empty() ? L"Done" : event.message);
+        // how far messages going to another account are, and what was done once they all went
+        SetStatus(event.message);
         break;
     case PE_EVENT_KIND_FAILED:
         g_failing.insert(event.account);

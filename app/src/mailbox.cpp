@@ -185,6 +185,8 @@ void IconColumn(HWND list, int index, int icon) {
     ListView_SetColumn(list, index, &column);
 }
 
+}  // namespace
+
 HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPARAM data, bool bold, int icon) {
     TVINSERTSTRUCTW insert = {};
     insert.hParent = parent;
@@ -199,7 +201,6 @@ HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPAR
     return TreeView_InsertItem(tree, &insert);
 }
 
-}  // namespace
 
 void Mailbox::Create(HWND parent, PeCore* core) {
     parent_ = parent;
@@ -321,14 +322,7 @@ void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
 
 // how wide the words of a link are, in the link font
 int Mailbox::LinkWidth(HWND link) const {
-    std::wstring words = GetWindowString(link);
-    HDC dc = GetDC(link);
-    HGDIOBJ old = SelectObject(dc, link_);
-    SIZE size = {};
-    GetTextExtentPoint32W(dc, words.c_str(), static_cast<int>(words.size()), &size);
-    SelectObject(dc, old);
-    ReleaseDC(link, dc);
-    return size.cx;
+    return TextWidth(link, link_);
 }
 
 // the search bar over the list while it is shown, the list under it
@@ -1482,23 +1476,6 @@ void Mailbox::DeleteSelected() {
     Act(PE_ACTION_DELETE);
 }
 
-std::vector<PickerAccount> Mailbox::PickerAccounts(int64_t current) const {
-    std::vector<PickerAccount> out;
-    core::AccountList accounts(pe_accounts(core_));
-    for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
-        const PeAccount* account = pe_account_list_get(accounts.get(), i);
-        PickerAccount picked{account->id, Text(account->title), {}};
-        core::FolderList folders(pe_folders(core_, account->id));
-        for (size_t f = 0; f < pe_folder_list_count(folders.get()); f++) {
-            const PeFolder* folder = pe_folder_list_get(folders.get(), f);
-            picked.folders.push_back({folder->id, account->id, FolderName(*folder), folder->depth, IconOfFolder(folder->special_use),
-                                      folder->selectable && folder->id != current, folder->id == current});
-        }
-        out.push_back(std::move(picked));
-    }
-    return out;
-}
-
 void Mailbox::MoveSelected(HWND owner, bool copy) {
     FlushSelection();
     int64_t first = 0;
@@ -1507,34 +1484,12 @@ void Mailbox::MoveSelected(HWND owner, bool copy) {
         return;
     }
     FolderPick pick;
+    pick.core = core_;
     pick.title = Text(core::String(pe_selection_move_text(&summary_, copy, false)).get());
     pick.prompt = Text(core::String(pe_selection_move_text(&summary_, copy, true)).get());
     pick.verb = copy ? L"&Copy" : L"&Move";
     // the folder they are all in is shown but not offered; from several folders, any
-    pick.accounts = PickerAccounts(summary_.folders == 1 ? first : 0);
-    std::unordered_map<int64_t, const PickerFolder*> folders;
-    std::unordered_map<int64_t, std::wstring> titles;
-    for (const auto& account : pick.accounts) {
-        titles[account.id] = account.title;
-        for (const auto& folder : account.folders) {
-            folders[folder.id] = &folder;
-        }
-    }
-    // the folders used last, named with their account when there are several
-    int64_t recent[3] = {};
-    size_t count = pe_recent_targets(core_, recent, 3);
-    for (size_t i = 0; i < count; i++) {
-        auto folder = folders.find(recent[i]);
-        if (folder == folders.end() || !folder->second->choosable) {
-            continue;
-        }
-        std::wstring label = folder->second->name;
-        if (pick.accounts.size() > 1) {
-            label += L" (" + titles[folder->second->account] + L")";
-        }
-        pick.recent.push_back({recent[i], label});
-    }
-    pick.highlight = pick.recent.empty() ? 0 : pick.recent[0].folder;
+    pick.current = summary_.folders == 1 ? first : 0;
     pick.newFolder = [this](HWND window, int64_t account, int64_t parent) {
         std::wstring where = parent ? L"The new folder goes in the highlighted folder." : L"The new folder goes at the top of the account.";
         std::wstring name = AskFolderName(window, L"New Folder", where, L"");
@@ -1546,60 +1501,15 @@ void Mailbox::MoveSelected(HWND owner, bool copy) {
             ShowRefusal(window, reason, L"The folder could not be created.");
             return;
         }
-        // highlighted once the server made it (FoldersChanged)
-        newInPick_ = NewInPick{account, parent, name};
+        // highlighted once the server made it (FolderCreated)
+        newInPick_ = true;
     };
-    pick_ = &pick;
+    newInPick_ = false;
     int64_t to = PickFolder(owner, pick);
-    pick_ = nullptr;
-    newInPick_.reset();
+    newInPick_ = false;
     if (to) {
         Act(copy ? PE_ACTION_COPY : PE_ACTION_MOVE, to);
     }
-}
-
-void Mailbox::FolderMadeInPick() {
-    if (!pick_ || !FolderPickOpen()) {
-        return;
-    }
-    int64_t current = 0;
-    for (const auto& account : pick_->accounts) {
-        for (const auto& folder : account.folders) {
-            if (folder.current) {
-                current = folder.id;
-            }
-        }
-    }
-    pick_->accounts = PickerAccounts(current);
-    int64_t made = 0;
-    if (newInPick_) {
-        // the folder of that name right under the parent: the first one after it one level deeper
-        for (const auto& account : pick_->accounts) {
-            if (account.id != newInPick_->account) {
-                continue;
-            }
-            size_t depth = 0;
-            bool under = newInPick_->parent == 0;
-            for (const auto& folder : account.folders) {
-                if (folder.id == newInPick_->parent) {
-                    under = true;
-                    depth = folder.depth + 1;
-                    continue;
-                }
-                if (under && folder.depth == depth && folder.name == newInPick_->name) {
-                    made = folder.id;
-                    break;
-                }
-                if (newInPick_->parent && under && folder.depth < depth) {
-                    break;
-                }
-            }
-        }
-        if (made) {
-            newInPick_.reset();
-        }
-    }
-    RefreshFolderPick(made);
 }
 
 void Mailbox::FlagSelected() {
@@ -2384,7 +2294,14 @@ void Mailbox::OnEvent(const UiEvent& event) {
     switch (event.kind) {
     case PE_EVENT_KIND_FOLDERS_CHANGED:
         Reload();
-        FolderMadeInPick();
+        // an open Move and Copy window shows the folders as they are now
+        RefreshFolderPick(0);
+        break;
+    case PE_EVENT_KIND_FOLDER_CREATED:
+        if (newInPick_) {
+            newInPick_ = false;
+            RefreshFolderPick(event.folder);
+        }
         break;
     case PE_EVENT_KIND_FOLDER_CHANGED:
         UpdateFolders(event.account);

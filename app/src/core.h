@@ -24,6 +24,7 @@ using Core = std::unique_ptr<PeCore, Deleter<pe_core_close>>;
 using AccountList = std::unique_ptr<PeAccountList, Deleter<pe_account_list_free>>;
 using ContactList = std::unique_ptr<PeContactList, Deleter<pe_contact_list_free>>;
 using FolderList = std::unique_ptr<PeFolderList, Deleter<pe_folder_list_free>>;
+using TargetList = std::unique_ptr<PeTargetList, Deleter<pe_target_list_free>>;
 using MessageList = std::unique_ptr<PeMessageList, Deleter<pe_message_list_free>>;
 using MessageView = std::unique_ptr<PeMessageView, Deleter<pe_message_view_free>>;
 using Draft = std::unique_ptr<PeDraft, Deleter<pe_draft_free>>;

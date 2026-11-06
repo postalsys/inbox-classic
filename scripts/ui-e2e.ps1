@@ -1653,7 +1653,6 @@ public static class Dragger {
     Check ((StatusPart $mainStatus 0) -eq 'Marked 3 messages as unread') "the status bar says what was done ($(StatusPart $mainStatus 0))"
     Check ((StatusPart $mainStatus 2) -match ', 3 selected$') 'the status bar says 3 selected'
     Check (-not (& $enabled $IDM_REPLY) -and (& $enabled $IDM_MARK_READ)) 'Reply is off for several, Mark as Read is on'
-    Start-Sleep -Milliseconds 700
     Shot $main 'select-1-several'
     Command $main $IDM_MARK_READ
     $allRead = { @($subjects | Where-Object { (Find 'INBOX' "Subject: $([regex]::Escape($_))").flags -contains '\Seen' }).Count -eq 3 }
@@ -1686,7 +1685,6 @@ public static class Dragger {
         $rows.Count -eq 3 -and (($names -join '|') -eq (($subjects | Sort-Object) -join '|')) -and $rows[0] -ge $top -and $rows[0] -lt $top + $page
     }
     Check ([bool](WaitFor $restored 20)) "and selects them, in view ($((& $selectedRows) -join ', '))"
-    Start-Sleep -Milliseconds 700
     Shot $main 'select-2-undo'
     [void][Native.Win]::PostMessage($list, 0x0201, [IntPtr]1, [IntPtr]((28 -shl 16) -bor 60))
     [void][Native.Win]::PostMessage($list, 0x0202, [IntPtr]::Zero, [IntPtr]((28 -shl 16) -bor 60))
@@ -2059,12 +2057,12 @@ public static class Dragger {
         Check ($narrowed.Count -ge 2 -and $others.Count -eq 0) "typing in the filter narrows the tree to the folders that match ($($narrowed -join ', '))"
         SetText $move 101 ''
         Check (PickIn $move 'Work' 'Archive') "the second account's Archive can be chosen"
-        Start-Sleep -Milliseconds 400
         Shot $move 'move-1-dialog'
         $listed = Rows
         Click $move 1
         Check ([bool](WaitFor { (Rows) -eq $listed - 1 } 10)) 'a message of the first account moved to the second account''s Archive leaves the list at once'
-        Check ((StatusPart $mainStatus 0) -match '^(Moving 1 message to Archive|Moving 1 of 1|Done)') "the status bar says how far the move is ($(StatusPart $mainStatus 0))"
+        Check ((StatusPart $mainStatus 0) -match '^Mov(ing|ed) 1 ') "the status bar says how far the move is ($(StatusPart $mainStatus 0))"
+        Check ([bool](WaitFor { (StatusPart $mainStatus 0) -eq 'Moved 1 message to Archive' } 30)) "and what was done once it is there ($(StatusPart $mainStatus 0))"
     }
     $there = WaitFor { (Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $across" } | Select-Object -First 1 } 30
     Check ($null -ne $there -and $there.flags -contains '\Flagged') "it is in the second account's Archive on its server, with its flags ($($there.flags -join ' '))"
@@ -2074,7 +2072,6 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $workArchive)
     [void](WaitFor { if ((Rows) -ge 1 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 20)
     SelectRow 0
-    Start-Sleep -Milliseconds 700
     Shot $main 'move-2-accounts'
     SelectFolder 0
     Command $main $IDM_UNDO

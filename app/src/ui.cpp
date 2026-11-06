@@ -112,6 +112,18 @@ void RegisterDialogClass(const wchar_t* name, WNDPROC proc) {
     RegisterClassExW(&windowClass);
 }
 
+int TextWidth(HWND control, HFONT font) {
+    std::wstring text = GetWindowString(control);
+    text.erase(std::remove(text.begin(), text.end(), L'&'), text.end());
+    HDC dc = GetDC(control);
+    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    SIZE size = {};
+    GetTextExtentPoint32W(dc, text.c_str(), static_cast<int>(text.size()), &size);
+    SelectObject(dc, old);
+    ReleaseDC(control, dc);
+    return static_cast<int>(size.cx);
+}
+
 void SetScaleWindow(HWND window) {
     g_scaleWindow = window;
 }
