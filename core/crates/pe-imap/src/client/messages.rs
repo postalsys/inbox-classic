@@ -40,15 +40,42 @@ impl Client {
     /// Changes flags. The new flags arrive as [`super::Event::Flags`] when the server reports
     /// them, as it does for changes by other clients.
     pub async fn store(&mut self, messages: &Messages, action: StoreAction, flags: &[&str]) -> Result<(), Error> {
+        self.store_flags(messages, action, flags, false).await
+    }
+
+    /// Changes flags without the server telling the new ones back (`.SILENT`): for a change the caller has applied
+    /// already, so the flags it reports for this command do not overwrite a newer change made meanwhile. Changes by
+    /// other clients still arrive as [`super::Event::Flags`].
+    pub async fn store_silent(
+        &mut self,
+        messages: &Messages,
+        action: StoreAction,
+        flags: &[&str],
+    ) -> Result<(), Error> {
+        self.store_flags(messages, action, flags, true).await
+    }
+
+    async fn store_flags(
+        &mut self,
+        messages: &Messages,
+        action: StoreAction,
+        flags: &[&str],
+        silent: bool,
+    ) -> Result<(), Error> {
         self.require_selected()?;
         let item = match action {
             StoreAction::Add => "+FLAGS",
             StoreAction::Remove => "-FLAGS",
             StoreAction::Set => "FLAGS",
         };
+        let item = if silent {
+            format!("{item}.SILENT")
+        } else {
+            item.to_string()
+        };
         let args = vec![
             Arg::Sequence(messages.set().to_string()),
-            Arg::atom(item),
+            Arg::atom(&item),
             Arg::List(flags.iter().map(|f| Arg::atom(*f)).collect()),
         ];
         self.simple(&messages.command("STORE"), args).await

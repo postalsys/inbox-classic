@@ -481,7 +481,8 @@ pub async fn set_flag(
         return Ok(());
     }
     let action = if on { StoreAction::Add } else { StoreAction::Remove };
-    client.store(&Messages::Uids(set), action, &[flag]).await?;
+    // the store has the change already: the flags the server would report for it could overwrite a newer one
+    client.store_silent(&Messages::Uids(set), action, &[flag]).await?;
     Ok(())
 }
 

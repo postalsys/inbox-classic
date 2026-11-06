@@ -537,6 +537,12 @@ async fn flag_changes_copies_and_moves_leave_the_server_as_reported() {
             .await
             .unwrap();
         assert_eq!(flag_list(fetched[0].flags.as_ref().unwrap()), vec!["\\Seen"]);
+        // silently: the change is made, the server tells nothing back for it
+        client
+            .store_silent(&Messages::uid(one), StoreAction::Add, &["$Junk"])
+            .await
+            .unwrap();
+        assert!(kit.server.flags("INBOX", one).iter().any(|f| f == "$Junk"));
 
         let copied = client
             .copy(&Messages::uid(one), "Archive")

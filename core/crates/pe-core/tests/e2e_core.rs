@@ -984,10 +984,11 @@ fn acts_on_selected_messages_and_undoes() {
     assert_eq!((summary.unread, summary.flagged), (0, 2));
     assert!(summary.flags());
     // toggled: one is not flagged, so all are; then all are, so none
+    // (what the server says of the flags meanwhile can show an older state for a moment; it settles on the last)
     s.core.act(&three, Action::ToggleFlag).unwrap();
-    assert!(!s.core.summary(&three).unwrap().flags());
+    eventually(&|| !s.core.summary(&three).unwrap().flags());
     s.core.act(&three, Action::ToggleFlag).unwrap();
-    assert_eq!(s.core.summary(&three).unwrap().flagged, 0);
+    eventually(&|| s.core.summary(&three).unwrap().flagged == 0);
     eventually(&|| {
         uids[..3]
             .iter()
