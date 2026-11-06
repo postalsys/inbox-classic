@@ -970,6 +970,8 @@ fn acts_on_selected_messages_and_undoes() {
     assert_eq!((summary.accounts, summary.folders, summary.for_good), (1, 1, 0));
     assert!(!summary.in_junk);
     assert_eq!(summary.title(), "3 messages selected");
+    assert_eq!(summary.move_title(false), "Move 3 Messages");
+    assert_eq!(summary.move_prompt(true), "Copy the 3 selected messages to:");
     assert_eq!(summary.detail(), "3 unread");
 
     // read and flagged, with one command each

@@ -299,6 +299,33 @@ pub unsafe extern "C" fn pe_selection_delete_question(summary: *const PeSelectio
     .unwrap_or(null_mut())
 }
 
+/// The Move or Copy window's words for the messages of `summary`: its title ("Move 3 Messages", `prompt` false) or
+/// what it says over the folders ("Move the 3 selected messages to:", `prompt` true); `copy` for Copy to Folder. Free
+/// with `pe_string_free`.
+///
+/// # Safety
+/// `summary` must be a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_move_text(
+    summary: *const PeSelectionSummary,
+    copy: bool,
+    prompt: bool,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(summary) = (unsafe { summary.as_ref() }) else {
+        return null_mut();
+    };
+    guard(|| {
+        let summary = Summary::from(summary);
+        into_c_string(if prompt {
+            summary.move_prompt(copy)
+        } else {
+            summary.move_title(copy)
+        })
+    })
+    .unwrap_or(null_mut())
+}
+
 /// Whether Flag flags the messages of `summary` (one is not flagged) or takes the flags away (all are), for the label
 /// of the command
 ///

@@ -87,6 +87,26 @@ impl Summary {
         self.flagged < self.count
     }
 
+    /// The title of the Move or Copy window (`copy`): "Move 3 Messages", "Copy Message"
+    pub fn move_title(&self, copy: bool) -> String {
+        let verb = if copy { "Copy" } else { "Move" };
+        if self.count == 1 {
+            format!("{verb} Message")
+        } else {
+            format!("{verb} {} Messages", self.count)
+        }
+    }
+
+    /// What the Move or Copy window says over its folders: "Move the 3 selected messages to:"
+    pub fn move_prompt(&self, copy: bool) -> String {
+        let verb = if copy { "Copy" } else { "Move" };
+        if self.count == 1 {
+            format!("{verb} the selected message to:")
+        } else {
+            format!("{verb} the {} selected messages to:", self.count)
+        }
+    }
+
     /// What to ask before Delete when it removes some of them for good; None when it removes none
     pub fn delete_question(&self) -> Option<String> {
         match (self.for_good, self.count) {

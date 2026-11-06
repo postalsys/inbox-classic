@@ -1804,6 +1804,16 @@ char *pe_selection_page(const struct PeSelectionSummary *summary);
 // `summary` must be a valid pointer.
 char *pe_selection_delete_question(const struct PeSelectionSummary *summary);
 
+// The Move or Copy window's words for the messages of `summary`: its title ("Move 3 Messages", `prompt` false) or
+// what it says over the folders ("Move the 3 selected messages to:", `prompt` true); `copy` for Copy to Folder. Free
+// with `pe_string_free`.
+//
+// # Safety
+// `summary` must be a valid pointer.
+char *pe_selection_move_text(const struct PeSelectionSummary *summary,
+                             bool copy,
+                             bool prompt);
+
 // Whether Flag flags the messages of `summary` (one is not flagged) or takes the flags away (all are), for the label
 // of the command
 //
