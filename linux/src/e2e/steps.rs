@@ -848,6 +848,11 @@ pub async fn messages_as_files(d: &Driver) {
         .await,
         ".eml files dropped onto Archive in the folder tree are put in it, on the server",
     );
+    let said = main.status_texts().0;
+    d.check(
+        said == "Put 3 messages in Archive",
+        &format!("the status bar says they were put in Archive ({said})"),
+    );
     select_folder("Archive");
     wait_until(20, || rows() >= 3).await;
     // one of them shown, as it came

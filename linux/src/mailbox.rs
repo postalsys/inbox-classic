@@ -1837,7 +1837,10 @@ impl Mailbox {
 
     async fn import_into(&self, folder: i64, files: &[std::path::PathBuf]) {
         let report = match shell().core.import_files(folder, files) {
-            Ok(report) => report,
+            Ok((said, report)) => {
+                self.set_status(&said);
+                report
+            }
             Err(error) => Some(error.to_string()),
         };
         if let Some(report) = report {
