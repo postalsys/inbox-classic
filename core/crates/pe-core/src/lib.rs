@@ -1534,16 +1534,23 @@ fn private_root() -> PathBuf {
     }
 }
 
-/// Removes what [`private_dir`] folders an earlier run left (drafts' and forwards' attachments, dragged files): at the
-/// start, before any window uses them
+/// Removes what [`private_dir`] folders earlier runs left (drafts' and forwards' attachments, dragged files), those a
+/// day old: one written by another core running now (another profile, a test) is left alone
 fn clear_private_dirs() {
+    const AGE: std::time::Duration = std::time::Duration::from_secs(24 * 60 * 60);
     let parent = private_root().join("InboxClassic");
     // only a folder of this user's: not a link, and the folders in it removed one by one
     if std::fs::symlink_metadata(&parent).is_ok_and(|m| m.is_dir())
         && let Ok(entries) = std::fs::read_dir(&parent)
     {
         for entry in entries.flatten() {
-            if entry.file_type().is_ok_and(|t| t.is_dir()) {
+            let old = entry
+                .metadata()
+                .and_then(|m| m.modified())
+                .ok()
+                .and_then(|at| at.elapsed().ok())
+                .is_some_and(|age| age > AGE);
+            if old && entry.file_type().is_ok_and(|t| t.is_dir()) {
                 let _ = std::fs::remove_dir_all(entry.path());
             }
         }
