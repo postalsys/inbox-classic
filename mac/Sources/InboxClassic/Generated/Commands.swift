@@ -222,7 +222,7 @@ enum Command: Int, CaseIterable {
         case .newMail: return false
         case .reply: return true
         case .replyAll: return true
-        case .forward: return true
+        case .forward: return false
         case .help: return false
         case .delete: return false
         case .move: return false
@@ -233,7 +233,7 @@ enum Command: Int, CaseIterable {
         case .deleteFolder: return false
         case .accounts: return false
         case .find: return false
-        case .saveAs: return true
+        case .saveAs: return false
         case .print: return true
         case .import: return false
         case .outbox: return false

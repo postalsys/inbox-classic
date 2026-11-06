@@ -47,8 +47,6 @@ inline bool CommandNeedsOne(unsigned id) {
     case IDM_PICTURES:
     case IDM_REPLY:
     case IDM_REPLY_ALL:
-    case IDM_FORWARD:
-    case IDM_SAVE_AS:
     case IDM_PRINT:
     case IDM_PROPERTIES:
     case IDM_VIEW_SOURCE:

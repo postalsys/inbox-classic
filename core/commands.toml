@@ -106,7 +106,6 @@ menu = "message"
 label = "Forward"
 key = "Mod+F"
 mac = "Mod+Shift+F"
-one = true
 
 [[command]]
 id = "help"
@@ -183,7 +182,6 @@ menu = "file"
 label = "Save As..."
 key = ""
 mac = "Mod+Shift+S"
-one = true
 
 [[command]]
 id = "print"

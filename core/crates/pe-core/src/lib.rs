@@ -48,8 +48,8 @@ use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
 pub use text::{
-    HiddenUnread, RETRY_NOTE, ReaderState, account_label, account_title, folder_kind, folder_name, format_size,
-    hidden_unread, list_counts, messages, reader_page,
+    HiddenUnread, RETRY_NOTE, ReaderState, account_label, account_title, downloading_text, folder_kind, folder_name,
+    format_size, hidden_unread, list_counts, messages, reader_page, saved_text,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};

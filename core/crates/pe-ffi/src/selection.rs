@@ -766,3 +766,22 @@ pub unsafe extern "C" fn pe_selection_forward(
     unsafe { refused(error, outcome, "the messages could not be forwarded") }
         .map_or(null_mut(), |draft| crate::core::draft_handle(&draft))
 }
+
+/// What the status bar says once `count` messages are saved as files into the folder named `place` (UTF-8): "Saved 3
+/// messages to Desktop". Free with `pe_string_free`.
+///
+/// # Safety
+/// `place` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_saved_text(count: u64, place: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let place = unsafe { crate::core::arg(place) }.unwrap_or_default().to_string();
+    guard(|| into_c_string(pe_core::saved_text(count, &place))).unwrap_or(null_mut())
+}
+
+/// What the status bar says while `count` messages not downloaded yet come for files or a forward: "Downloading 3
+/// messages...". Free with `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_downloading_text(count: u64) -> *mut c_char {
+    guard(|| into_c_string(pe_core::downloading_text(count))).unwrap_or(null_mut())
+}

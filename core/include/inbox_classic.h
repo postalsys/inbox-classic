@@ -2006,6 +2006,18 @@ struct PeDraft *pe_selection_forward(const struct PeCore *core,
                                      uint64_t timeout_ms,
                                      char **error);
 
+// What the status bar says once `count` messages are saved as files into the folder named `place` (UTF-8): "Saved 3
+// messages to Desktop". Free with `pe_string_free`.
+//
+// # Safety
+// `place` must be NULL or a NUL-terminated string.
+char *pe_saved_text(uint64_t count,
+                    const char *place);
+
+// What the status bar says while `count` messages not downloaded yet come for files or a forward: "Downloading 3
+// messages...". Free with `pe_string_free`.
+char *pe_downloading_text(uint64_t count);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
