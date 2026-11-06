@@ -2061,6 +2061,14 @@ bool pe_import_files(const struct PeCore *core,
 // messages...". Free with `pe_string_free`.
 char *pe_downloading_text(uint64_t count);
 
+// What the status bar says while the selected messages that are not downloaded yet come ("Downloading 2
+// messages..."), NULL when all are here. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection.
+char *pe_selection_downloading_text(const struct PeCore *core,
+                                    const struct PeSelection *selection);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus

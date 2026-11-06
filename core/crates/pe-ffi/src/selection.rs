@@ -910,3 +910,24 @@ pub unsafe extern "C" fn pe_import_files(
 pub extern "C" fn pe_downloading_text(count: u64) -> *mut c_char {
     guard(|| into_c_string(pe_core::downloading_text(count))).unwrap_or(null_mut())
 }
+
+/// What the status bar says while the selected messages that are not downloaded yet come ("Downloading 2
+/// messages..."), NULL when all are here. Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_downloading_text(
+    core: *const PeCore,
+    selection: *const PeSelection,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let refs = unsafe { refs_of(selection) };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.downloading_text(&refs) {
+            Ok(Some(text)) => into_c_string(text),
+            _ => null_mut(),
+        })
+    }
+}

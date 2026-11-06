@@ -13,6 +13,7 @@
 #            a letter, F1 to F12, Enter, Delete. mac and linux override it where those platforms differ.
 #   toggle   a menu item with a check mark
 #   one      acts on one message only: off while several are selected
+#   some     acts on one or several messages: off with none selected
 
 [[command]]
 id = "new_account"
@@ -106,6 +107,7 @@ menu = "message"
 label = "Forward"
 key = "Mod+F"
 mac = "Mod+Shift+F"
+some = true
 
 [[command]]
 id = "help"
@@ -182,6 +184,7 @@ menu = "file"
 label = "Save As..."
 key = ""
 mac = "Mod+Shift+S"
+some = true
 
 [[command]]
 id = "print"

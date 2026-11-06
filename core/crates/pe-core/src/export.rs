@@ -23,13 +23,21 @@ pub struct Exported {
 pub(crate) fn eml_name(subject: &str) -> String {
     // the subject made safe first, the extension after: a subject of only `???` is not left without one
     let stem = pe_mime::parser::safe_filename(Some(&subject.replace(['/', '\\'], "-")), "message/rfc822");
-    let stem = if stem.starts_with("attachment.") {
+    let mut stem = if stem.starts_with("attachment.") {
         "message".to_string()
     } else {
         stem
     };
-    format!("{stem}.eml")
+    // a file name is at most 255 UTF-16 units on Windows and the Mac, 255 bytes on Linux: room left for ".eml" and
+    // " (99)", so the extension is never cut off where the name is made to fit
+    while stem.encode_utf16().count() > MAX_STEM || stem.len() > MAX_STEM {
+        stem.pop();
+    }
+    format!("{}.eml", stem.trim_end_matches(['.', ' ']))
 }
+
+/// The longest stem of a file name, in UTF-16 units and in bytes
+const MAX_STEM: usize = 240;
 
 /// `names` made different from each other (case aside, as the file systems of Windows and the Mac compare them):
 /// `Lunch.eml`, `Lunch (2).eml`
@@ -75,6 +83,17 @@ impl Core {
             }
         }
         Ok(true)
+    }
+
+    /// What the status bar says while the messages of `refs` that are not here yet come: "Downloading 2 messages...";
+    /// None when all are here
+    pub fn downloading_text(&self, refs: &[MessageRef]) -> Result<Option<String>> {
+        let store = self.store();
+        let mut missing = 0;
+        for r in refs {
+            missing += u64::from(!store.has_source(r.folder, r.uid)?);
+        }
+        Ok((missing > 0).then(|| crate::text::downloading_text(missing)))
     }
 
     /// The messages `refs` as files, downloading those that are not here yet (kept for reading too), waiting at most
@@ -214,6 +233,16 @@ mod tests {
         assert_eq!(eml_name("a/b\\c"), "a-b-c.eml");
         assert_eq!(eml_name(""), "message.eml");
         assert_eq!(eml_name("???"), "message.eml");
+    }
+
+    #[test]
+    fn long_names_keep_their_extension() {
+        let emoji = "\u{1F600}".repeat(150);
+        let name = eml_name(&format!("{emoji}x.hta"));
+        assert!(name.ends_with(".eml"), "{name}");
+        assert!(name.encode_utf16().count() <= 250 && name.len() <= 250);
+        let latin = eml_name(&"a".repeat(400));
+        assert!(latin.len() <= MAX_STEM + 4 && latin.ends_with(".eml"));
     }
 
     #[test]
