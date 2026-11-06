@@ -36,6 +36,20 @@ key = "F5"
 mac = "Mod+Shift+N"
 
 [[command]]
+id = "undo"
+windows = 135
+menu = "edit"
+label = "Undo"
+key = "Mod+Z"
+
+[[command]]
+id = "select_all"
+windows = 134
+menu = "edit"
+label = "Select All"
+key = "Mod+A"
+
+[[command]]
 id = "mark_read"
 windows = 103
 menu = "edit"
@@ -116,6 +130,12 @@ windows = 113
 menu = "edit"
 label = "Move to Folder..."
 key = "Mod+Shift+V"
+
+[[command]]
+id = "copy"
+windows = 136
+menu = "edit"
+label = "Copy to Folder..."
 
 [[command]]
 id = "flag"
@@ -249,23 +269,3 @@ id = "ai_agents"
 windows = 133
 menu = "tools"
 label = "AI Agents..."
-
-[[command]]
-id = "select_all"
-windows = 134
-menu = "edit"
-label = "Select All"
-key = "Mod+A"
-
-[[command]]
-id = "undo"
-windows = 135
-menu = "edit"
-label = "Undo"
-key = "Mod+Z"
-
-[[command]]
-id = "copy"
-windows = 136
-menu = "edit"
-label = "Copy to Folder..."

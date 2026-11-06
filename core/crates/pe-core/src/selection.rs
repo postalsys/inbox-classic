@@ -189,19 +189,30 @@ impl Core {
             Action::ToggleFlag => Action::Flag(picked.iter().any(|p| !p.flagged())),
             other => other,
         };
-        let mut crossed = false;
-        if let Action::Move(to) | Action::Copy(to) = action {
-            self.check_target(to)?;
-            self.store().note_target(to)?;
-            for folder in groups.keys() {
-                crossed |= self.crosses(*folder, to)?;
+        // the account of the folder they go to, checked before any of them goes
+        let target = match action {
+            Action::Move(to) | Action::Copy(to) => {
+                let store = self.store();
+                let folder = store.folder(to)?;
+                if !folder.info.selectable {
+                    return Err(Error::Unavailable("That folder does not hold messages.".into()));
+                }
+                store.note_target(to)?;
+                Some(folder.account_id)
             }
-        }
+            _ => None,
+        };
+        let mut crossed = false;
         let undo_name = action.undo_name();
         let mut undo = Vec::new();
         for (folder, group) in &groups {
             let uids: Vec<u64> = group.iter().map(|p| p.at.uid).collect();
-            let went = self.act_on_folder(*folder, &uids, action)?;
+            let crosses = match target {
+                Some(account) => self.store().folder(*folder)?.account_id != account,
+                None => false,
+            };
+            crossed |= crosses;
+            let went = self.act_on_folder(*folder, &uids, action, crosses)?;
             if let (Some(_), Some((to, flag))) = (undo_name, went) {
                 undo.push(UndoMove {
                     from: *folder,
@@ -220,25 +231,10 @@ impl Core {
         Ok(text)
     }
 
-    /// Where messages can go: a folder that holds messages, of their account or another. Checked before any of them
-    /// moves.
-    fn check_target(&self, to: FolderId) -> Result<()> {
-        if !self.store().folder(to)?.info.selectable {
-            return Err(Error::NotFound);
-        }
-        Ok(())
-    }
-
-    /// Whether messages of `folder` going to `to` go to another account
-    fn crosses(&self, folder: FolderId, to: FolderId) -> Result<bool> {
-        let store = self.store();
-        Ok(store.folder(folder)?.account_id != store.folder(to)?.account_id)
-    }
-
     /// Moves (or copies) messages of `folder` to `to`: in their account with one command, to another account through
     /// the store's transfers ([`Core::transfer_messages`])
-    fn move_anywhere(&self, folder: FolderId, uids: &[u64], to: FolderId, copy: bool) -> Result<()> {
-        if self.crosses(folder, to)? {
+    fn move_anywhere(&self, folder: FolderId, uids: &[u64], to: FolderId, copy: bool, crosses: bool) -> Result<()> {
+        if crosses {
             return self.transfer_messages(folder, uids, to, copy);
         }
         for chunk in uids.chunks(PER_COMMAND) {
@@ -269,10 +265,17 @@ impl Core {
         folder: FolderId,
         uids: &[u64],
         action: Action,
+        crosses: bool,
     ) -> Result<Option<(FolderId, Option<&'static str>)>> {
+        if let Action::Move(to) | Action::Copy(to) = action {
+            // already there: nothing to do
+            if to != folder {
+                self.move_anywhere(folder, uids, to, matches!(action, Action::Copy(_)), crosses)?;
+            }
+            return Ok((matches!(action, Action::Move(_)) && to != folder).then_some((to, None)));
+        }
         let went = match action {
             Action::Delete => self.trash_for(folder)?.map(|trash| (trash, None)),
-            Action::Move(to) if to != folder => Some((to, None)),
             Action::Junk(junk) => {
                 let to = self.junk_target(folder, junk)?;
                 (to != folder).then_some((to, Some(crate::junk_keywords(junk).0)))
@@ -285,16 +288,8 @@ impl Core {
                 Action::Flag(on) => self.set_flag_many(folder, chunk, "\\Flagged", on)?,
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,
-                // already there: nothing to do
-                Action::Move(_) | Action::Copy(_) => {}
-                Action::ToggleFlag => unreachable!("resolved by act"),
+                Action::Move(_) | Action::Copy(_) | Action::ToggleFlag => unreachable!("handled before"),
             }
-        }
-        match action {
-            Action::Move(to) | Action::Copy(to) if to != folder => {
-                self.move_anywhere(folder, uids, to, matches!(action, Action::Copy(_)))?
-            }
-            _ => {}
         }
         Ok(went)
     }

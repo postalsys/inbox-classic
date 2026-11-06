@@ -18,6 +18,7 @@ mod search;
 mod secrets;
 mod selection;
 mod sign_in_apps;
+mod targets;
 mod text;
 pub mod unsubscribe;
 mod view;
@@ -33,6 +34,7 @@ use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
 pub use pe_store::{MessageRef, Scope, Search, Show};
 pub use selection::{Action, Summary};
+pub use targets::{TargetKind, TargetRow};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
@@ -152,9 +154,15 @@ pub enum Event {
     },
     /// What agents did changed ([`Core::agent_log`])
     AgentLogChanged,
-    /// Messages going to another account: how far it is ("Moving 3 of 12 messages to Archive..."), None when done
+    /// Messages going to another account: how far it is ("Moving 3 of 12 messages to Archive..."), and at the end what
+    /// was done ("Moved 12 messages to Archive")
     Transferring {
-        text: Option<String>,
+        text: String,
+    },
+    /// A folder made with [`Core::create_folder`] is there, for a window waiting for it to choose it
+    FolderCreated {
+        account: AccountId,
+        folder: FolderId,
     },
 }
 

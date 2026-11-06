@@ -15,6 +15,7 @@ mod folders;
 mod help;
 mod mailbox;
 mod messages;
+mod move_dialog;
 mod notify;
 mod outbox;
 mod reader;

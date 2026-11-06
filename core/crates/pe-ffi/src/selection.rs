@@ -6,7 +6,7 @@ use std::ptr::null_mut;
 
 use pe_core::{Action, MessageRef, Summary};
 
-use crate::core::{PeCore, PeSearch, PeSortField, handed, refused, search_of, take_back, with};
+use crate::core::{PeCore, PeSearch, PeSortField, Rows, handed, refused, search_of, take_back, with};
 use crate::{guard, into_c_string};
 
 /// Selected messages; free with `pe_selection_free`
@@ -390,27 +390,100 @@ pub unsafe extern "C" fn pe_selection_act(
     unsafe { refused(error, outcome, "the messages could not be changed") }.map_or(null_mut(), into_c_string)
 }
 
-/// The folders messages were moved or copied to last, newest first, for the Move and Copy window: up to `max` ids
-/// written to `folders`; returns how many
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeTargetKind {
+    /// "Recent", over the folders used last
+    Heading = 0,
+    /// A folder used last, named with its account when there are several
+    Recent = 1,
+    /// An account, over its folders
+    Account = 2,
+    /// A folder of the account above it
+    Folder = 3,
+}
+
+/// A row of the Move and Copy window; its strings belong to the list
+#[repr(C)]
+pub struct PeTarget {
+    pub kind: PeTargetKind,
+    pub account: i64,
+    /// 0 for a heading or an account
+    pub folder: i64,
+    /// UTF-8: "Inbox (current)", "Archive (Work)"
+    pub label: *const c_char,
+    /// How deep under its account (0 for the account and the rows of Recent)
+    pub depth: u32,
+    /// UTF-8: its icon ("inbox", "sent", "drafts", "deleted", "junk", "archive", "" for a plain folder)
+    pub icon: *const c_char,
+    /// Messages can go there
+    pub choosable: bool,
+}
+
+/// The rows of the Move and Copy window; free with `pe_target_list_free`
+pub struct PeTargetList(Rows<PeTarget>);
+
+/// The rows of the Move and Copy window for messages all in `current` (0 for messages of several folders), what
+/// `filter` (UTF-8, NULL or empty for none) leaves of them: "Recent" and the folders used last while nothing is typed,
+/// then every account with its folders, a folder that matches with those above it. NULL on failure.
 ///
 /// # Safety
-/// `core` must be a live handle, `folders` NULL or room for `max` ids.
+/// `core` must be a live handle, `filter` NULL or a NUL-terminated string.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_recent_targets(core: *const PeCore, folders: *mut i64, max: usize) -> usize {
-    if folders.is_null() || max == 0 {
-        return 0;
-    }
+pub unsafe extern "C" fn pe_move_targets(
+    core: *const PeCore,
+    current: i64,
+    filter: *const c_char,
+) -> *mut PeTargetList {
     // SAFETY: as the caller guarantees
-    let found = unsafe {
-        with(core, Vec::new(), |core| {
-            core.recent_targets(max as u64).unwrap_or_default()
+    let filter = unsafe { crate::core::arg(filter) }.unwrap_or_default().to_string();
+    let current = (current != 0).then_some(current);
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.move_targets(current, &filter) {
+            Ok(rows) => handed(PeTargetList(Rows::new(&rows, |row, strings| PeTarget {
+                kind: match row.kind {
+                    pe_core::TargetKind::Heading => PeTargetKind::Heading,
+                    pe_core::TargetKind::Recent => PeTargetKind::Recent,
+                    pe_core::TargetKind::Account => PeTargetKind::Account,
+                    pe_core::TargetKind::Folder => PeTargetKind::Folder,
+                },
+                account: row.account,
+                folder: row.folder,
+                label: strings.add(&row.label),
+                depth: row.depth,
+                icon: strings.add(row.icon),
+                choosable: row.choosable,
+            }))),
+            Err(_) => null_mut(),
         })
-    };
-    for (i, folder) in found.iter().take(max).enumerate() {
-        // SAFETY: the caller gave room for `max`
-        unsafe { *folders.add(i) = *folder };
     }
-    found.len().min(max)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_target_list_count(list: *const PeTargetList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|l| &l.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_target_list_get(list: *const PeTargetList, index: usize) -> *const PeTarget {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|l| &l.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet, freed once.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_target_list_free(list: *mut PeTargetList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
 }
 
 /// What Edit > Undo says, "Undo Move"; NULL when there is nothing to take back. Free with `pe_string_free`.

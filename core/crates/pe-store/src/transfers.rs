@@ -103,23 +103,15 @@ impl Store {
         Ok(account)
     }
 
-    /// The next message on its way from `account`, oldest first
-    pub fn next_transfer(&self, account: AccountId) -> Result<Option<Transfer>> {
+    /// The next message on its way from `account` after the one numbered `after` (0 for the first), oldest first
+    pub fn next_transfer(&self, account: AccountId, after: i64) -> Result<Option<Transfer>> {
         self.db
             .query_row(
-                &format!("SELECT {COLUMNS} FROM transfers WHERE account_id = ?1 ORDER BY id LIMIT 1"),
-                params![account],
+                &format!("SELECT {COLUMNS} FROM transfers WHERE account_id = ?1 AND id > ?2 ORDER BY id LIMIT 1"),
+                params![account, after],
                 from_row,
             )
             .optional()
-    }
-
-    /// The accounts with messages on their way, to start again after a restart
-    pub fn transfer_accounts(&self) -> Result<Vec<AccountId>> {
-        let mut statement = self
-            .db
-            .prepare_cached("SELECT DISTINCT account_id FROM transfers ORDER BY account_id")?;
-        statement.query_map([], |row| row.get(0))?.collect()
     }
 
     /// How many messages are on their way from `account`
@@ -131,13 +123,14 @@ impl Store {
         )
     }
 
-    /// Keeps the source fetched for a transfer, and that an APPEND of it is being tried
+    /// Keeps the source fetched for a transfer, so a try after a failure does not fetch it again
     pub fn set_transfer_source(&self, id: i64, source: &[u8]) -> Result<()> {
         self.db
             .execute("UPDATE transfers SET source = ?2 WHERE id = ?1", params![id, source])?;
         Ok(())
     }
 
+    /// Notes that an APPEND of it is being tried: a try after this one first looks for the copy in the folder
     pub fn set_transfer_tried(&self, id: i64) -> Result<()> {
         self.db
             .execute("UPDATE transfers SET tried = 1 WHERE id = ?1", params![id])?;
@@ -197,17 +190,16 @@ mod tests {
             tried: false,
         };
         let ids = store.add_transfers(&[transfer(7), transfer(8)]).unwrap();
-        assert_eq!(store.transfer_accounts().unwrap(), vec![a]);
         assert_eq!(store.transfers_left(a).unwrap(), 2);
         assert_eq!(store.transfers_left(b).unwrap(), 0);
-        let next = store.next_transfer(a).unwrap().unwrap();
+        let next = store.next_transfer(a, 0).unwrap().unwrap();
         assert_eq!((next.id, next.uid, next.tried), (ids[0], 7, false));
         store.set_transfer_source(next.id, b"raw").unwrap();
         store.set_transfer_tried(next.id).unwrap();
-        let next = store.next_transfer(a).unwrap().unwrap();
+        let next = store.next_transfer(a, 0).unwrap().unwrap();
         assert_eq!((next.source.as_deref(), next.tried), (Some(&b"raw"[..]), true));
         store.remove_transfer(next.id).unwrap();
-        assert_eq!(store.next_transfer(a).unwrap().unwrap().uid, 8);
+        assert_eq!(store.next_transfer(a, 0).unwrap().unwrap().uid, 8);
         // the folders moved to last, newest first; one used again goes on top
         store
             .set_folders(
@@ -240,6 +232,6 @@ mod tests {
 
         // an account removed takes its transfers along
         store.remove_account(a).unwrap();
-        assert!(store.transfer_accounts().unwrap().is_empty());
+        assert_eq!(store.transfers_left(a).unwrap(), 0);
     }
 }

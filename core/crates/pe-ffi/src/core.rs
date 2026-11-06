@@ -128,9 +128,11 @@ pub enum PeEventKind {
     AgentAsk = 18,
     /// What AI agents did changed: `pe_agent_log`
     AgentLogChanged = 19,
-    /// Messages are going to another account: `message` says how far ("Moving 3 of 12 messages to Archive..."), NULL
-    /// once they are all done
+    /// Messages are going to another account: `message` says how far ("Moving 3 of 12 messages to Archive..."), and at
+    /// the end what was done ("Moved 12 messages to Archive")
     Transferring = 20,
+    /// The folder `folder` of `account` made with `pe_folder_create` is there (to choose it in the window that made it)
+    FolderCreated = 21,
 }
 
 #[repr(C)]
@@ -177,7 +179,7 @@ pub struct PeEvent {
     pub uid: u64,
     pub failure: PeFailureKind,
     /// UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; who
-    /// it is from, for `NewMail`; how far it is, for `Transferring` (NULL once done). NULL otherwise
+    /// it is from, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
     pub message: *const c_char,
     /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the subject, for `NewMail`. NULL otherwise
     pub detail: *const c_char,
@@ -225,6 +227,7 @@ impl Callback {
             Event::AgentAsk { request } => (PeEventKind::AgentAsk, 0, 0, *request),
             Event::AgentLogChanged => (PeEventKind::AgentLogChanged, 0, 0, 0),
             Event::Transferring { .. } => (PeEventKind::Transferring, 0, 0, 0),
+            Event::FolderCreated { account, folder } => (PeEventKind::FolderCreated, *account, *folder, 0),
         };
         let count = if let Event::NewMail { count, .. } = &event {
             *count as u64
@@ -243,7 +246,7 @@ impl Callback {
             Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
             Event::MessageFailed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
             Event::SyncFinished { failure, .. } => (failure.map_or(PeFailureKind::None, Into::into), None, None),
-            Event::Transferring { text } => (PeFailureKind::None, text.map(c_string), None),
+            Event::Transferring { text } => (PeFailureKind::None, Some(c_string(text)), None),
             _ => (PeFailureKind::None, None, None),
         };
         let event = PeEvent {

@@ -6,6 +6,8 @@ enum Command: Int, CaseIterable {
     case newAccount = 100
     case exit = 101
     case sync = 102
+    case undo = 135
+    case selectAll = 134
     case markRead = 103
     case markUnread = 104
     case pictures = 105
@@ -17,6 +19,7 @@ enum Command: Int, CaseIterable {
     case help = 111
     case delete = 112
     case move = 113
+    case copy = 136
     case flag = 114
     case newFolder = 115
     case renameFolder = 116
@@ -36,9 +39,6 @@ enum Command: Int, CaseIterable {
     case defaultApp = 131
     case viewSource = 132
     case aiAgents = 133
-    case selectAll = 134
-    case undo = 135
-    case copy = 136
 
     /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu)
     var menu: String {
@@ -46,6 +46,8 @@ enum Command: Int, CaseIterable {
         case .newAccount: return "file"
         case .exit: return "file"
         case .sync: return "tools"
+        case .undo: return "edit"
+        case .selectAll: return "edit"
         case .markRead: return "edit"
         case .markUnread: return "edit"
         case .pictures: return "view"
@@ -57,6 +59,7 @@ enum Command: Int, CaseIterable {
         case .help: return "help"
         case .delete: return "edit"
         case .move: return "edit"
+        case .copy: return "edit"
         case .flag: return "message"
         case .newFolder: return "file"
         case .renameFolder: return "file"
@@ -76,9 +79,6 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return "tools"
         case .viewSource: return "view"
         case .aiAgents: return "tools"
-        case .selectAll: return "edit"
-        case .undo: return "edit"
-        case .copy: return "edit"
         }
     }
 
@@ -87,6 +87,8 @@ enum Command: Int, CaseIterable {
         case .newAccount: return "New Account…"
         case .exit: return "Exit"
         case .sync: return "Send and Receive All"
+        case .undo: return "Undo"
+        case .selectAll: return "Select All"
         case .markRead: return "Mark as Read"
         case .markUnread: return "Mark as Unread"
         case .pictures: return "Download Pictures"
@@ -98,6 +100,7 @@ enum Command: Int, CaseIterable {
         case .help: return "Contents"
         case .delete: return "Delete Message"
         case .move: return "Move to Folder…"
+        case .copy: return "Copy to Folder…"
         case .flag: return "Flag Message"
         case .newFolder: return "New Folder…"
         case .renameFolder: return "Rename Folder…"
@@ -117,9 +120,6 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return "Make Default Mail App…"
         case .viewSource: return "Message Source"
         case .aiAgents: return "AI Agents…"
-        case .selectAll: return "Select All"
-        case .undo: return "Undo"
-        case .copy: return "Copy to Folder…"
         }
     }
 
@@ -129,6 +129,8 @@ enum Command: Int, CaseIterable {
         case .newAccount: return nil
         case .exit: return ("q", [.command])
         case .sync: return ("n", [.command, .shift])
+        case .undo: return ("z", [.command])
+        case .selectAll: return ("a", [.command])
         case .markRead: return ("u", [.command, .shift])
         case .markUnread: return nil
         case .pictures: return nil
@@ -140,6 +142,7 @@ enum Command: Int, CaseIterable {
         case .help: return ("?", [.command])
         case .delete: return ("\u{8}", [.command])
         case .move: return ("v", [.command, .shift])
+        case .copy: return nil
         case .flag: return ("l", [.command, .shift])
         case .newFolder: return nil
         case .renameFolder: return nil
@@ -159,9 +162,6 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return nil
         case .viewSource: return nil
         case .aiAgents: return nil
-        case .selectAll: return ("a", [.command])
-        case .undo: return ("z", [.command])
-        case .copy: return nil
         }
     }
 
@@ -171,6 +171,8 @@ enum Command: Int, CaseIterable {
         case .newAccount: return false
         case .exit: return false
         case .sync: return false
+        case .undo: return false
+        case .selectAll: return false
         case .markRead: return false
         case .markUnread: return false
         case .pictures: return false
@@ -182,6 +184,7 @@ enum Command: Int, CaseIterable {
         case .help: return false
         case .delete: return false
         case .move: return false
+        case .copy: return false
         case .flag: return false
         case .newFolder: return false
         case .renameFolder: return false
@@ -201,9 +204,6 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return false
         case .viewSource: return false
         case .aiAgents: return false
-        case .selectAll: return false
-        case .undo: return false
-        case .copy: return false
         }
     }
 
@@ -213,6 +213,8 @@ enum Command: Int, CaseIterable {
         case .newAccount: return false
         case .exit: return false
         case .sync: return false
+        case .undo: return false
+        case .selectAll: return false
         case .markRead: return false
         case .markUnread: return false
         case .pictures: return true
@@ -224,6 +226,7 @@ enum Command: Int, CaseIterable {
         case .help: return false
         case .delete: return false
         case .move: return false
+        case .copy: return false
         case .flag: return false
         case .newFolder: return false
         case .renameFolder: return false
@@ -243,9 +246,6 @@ enum Command: Int, CaseIterable {
         case .defaultApp: return false
         case .viewSource: return true
         case .aiAgents: return false
-        case .selectAll: return false
-        case .undo: return false
-        case .copy: return false
         }
     }
 }

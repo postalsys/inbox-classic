@@ -42,6 +42,46 @@ std::wstring FormatSize(uint64_t bytes);
 // the brush of dialog backgrounds, for WM_CTLCOLORSTATIC
 LRESULT ButtonFaceColor(HDC dc);
 
+// the Move and Copy window (folderpicker.cpp)
+struct PickerFolder {
+    int64_t id = 0;
+    int64_t account = 0;
+    std::wstring name;
+    size_t depth = 0;
+    int icon = 0;
+    // it holds messages and is not the folder they are all in
+    bool choosable = false;
+    // the folder they are all in, shown as such
+    bool current = false;
+};
+struct PickerAccount {
+    int64_t id = 0;
+    std::wstring title;
+    // in tree order, with their depths
+    std::vector<PickerFolder> folders;
+};
+struct PickerRecent {
+    int64_t folder = 0;
+    std::wstring label;
+};
+struct FolderPick {
+    std::wstring title;
+    std::wstring prompt;
+    // the button: Move or Copy
+    std::wstring verb;
+    std::vector<PickerAccount> accounts;
+    std::vector<PickerRecent> recent;
+    // highlighted at first
+    int64_t highlight = 0;
+    // New Folder in `parent` (0: at the top of `account`), from the window `owner`
+    std::function<void(HWND owner, int64_t account, int64_t parent)> newFolder;
+};
+// shows it until a folder is chosen (its id) or it is cancelled (0)
+int64_t PickFolder(HWND owner, FolderPick& pick);
+// the open one shows its folders again (they changed in `pick.accounts`), with `highlight` highlighted when not 0
+void RefreshFolderPick(int64_t highlight);
+bool FolderPickOpen();
+
 struct FormField {
     enum class Kind { Text, Password, Number, Choice };
     std::wstring label;
@@ -322,7 +362,8 @@ public:
     // the selected messages into Deleted Items (for good from there, asked first), the next one selected
     void DeleteSelected();
     // asks for a folder of their account and moves the selected messages there
-    void MoveSelected(HWND owner);
+    // Move to Folder, or Copy to Folder with `copy`
+    void MoveSelected(HWND owner, bool copy = false);
     // flags the selected messages, or takes their flags away when all of them have one
     void FlagSelected();
     // a folder in the selected one (at the top of the selected account), renaming and deleting the selected one
@@ -502,6 +543,17 @@ private:
         int64_t target = 0;
     };
     std::optional<Drag> drag_;
+    // the Move and Copy window while it is open, and a folder made in it, highlighted once the tree has it
+    FolderPick* pick_ = nullptr;
+    struct NewInPick {
+        int64_t account = 0;
+        int64_t parent = 0;
+        std::wstring name;
+    };
+    std::optional<NewInPick> newInPick_;
+    // the accounts and their folders for the Move and Copy window; `current` the folder the messages are all in
+    std::vector<PickerAccount> PickerAccounts(int64_t current) const;
+    void FolderMadeInPick();
     // the selected messages, as the core knows them: kept when the list changes under them, so an action reaches the
     // messages that were selected; and what they are in numbers
     core::Selection selection_{pe_selection_new()};

@@ -129,7 +129,6 @@ void UpdateMenu(HMENU menu) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (several ? MF_GRAYED : MF_ENABLED));
         }
     }
-    EnableMenuItem(menu, IDM_MOVE, MF_BYCOMMAND | (g_mailbox.Summary().accounts > 1 ? MF_GRAYED : MF_ENABLED));
     if (GetMenuState(menu, IDM_UNDO, MF_BYCOMMAND) == static_cast<UINT>(-1)) {
         return;
     }
@@ -393,6 +392,10 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_AGENT_LOG_CHANGED:
         AgentsChanged();
         break;
+    case PE_EVENT_KIND_TRANSFERRING:
+        // how far messages going to another account are, and Done once they all went
+        SetStatus(event.message.empty() ? L"Done" : event.message);
+        break;
     case PE_EVENT_KIND_FAILED:
         g_failing.insert(event.account);
         SetStatus(g_mailbox.AccountName(event.account) + L": " + event.message);
@@ -452,6 +455,7 @@ HMENU BuildMenu() {
     AppendMenuW(edit, MF_STRING, IDM_MARK_ALL_READ, L"Mark &All Read\tCtrl+Shift+A");
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(edit, MF_STRING, IDM_MOVE, L"Mo&ve to Folder...\tCtrl+Shift+V");
+    AppendMenuW(edit, MF_STRING, IDM_COPY, L"&Copy to Folder...");
     AppendMenuW(edit, MF_STRING, IDM_DELETE, L"&Delete Message\tDel");
     HMENU view = CreatePopupMenu();
     AppendMenuW(view, MF_STRING, IDM_PICTURES, L"Download &Pictures");
@@ -968,7 +972,8 @@ void OnCommand(WORD id, WORD code) {
         g_mailbox.DeleteSelected();
         return;
     case IDM_MOVE:
-        g_mailbox.MoveSelected(g_main);
+    case IDM_COPY:
+        g_mailbox.MoveSelected(g_main, id == IDM_COPY);
         return;
     case IDM_FLAG:
         g_mailbox.FlagSelected();

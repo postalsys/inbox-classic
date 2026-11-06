@@ -1723,6 +1723,7 @@ dependencies = [
  "pe-sync",
  "resvg",
  "tokio",
+ "unicode-normalization",
  "windows-native-keyring-store",
  "zbus-secret-service-keyring-store",
 ]

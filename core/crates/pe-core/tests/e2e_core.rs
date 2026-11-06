@@ -1156,6 +1156,34 @@ fn moves_and_copies_between_accounts() {
     );
     eventually(&|| in_store(archive2) == ["Move me"]);
     assert_eq!(s.core.recent_targets(3).unwrap(), [archive2]);
+    // the Move and Copy window: Recent first, named with the account; the folder they are in can not be chosen
+    let rows = s.core.move_targets(Some(inbox), "").unwrap();
+    assert_eq!(rows[0].kind, pe_core::TargetKind::Heading);
+    assert_eq!((rows[1].kind, rows[1].folder), (pe_core::TargetKind::Recent, archive2));
+    assert!(rows[1].label.starts_with("Archive ("), "{}", rows[1].label);
+    let current = rows
+        .iter()
+        .find(|r| r.kind == pe_core::TargetKind::Folder && r.folder == inbox)
+        .unwrap();
+    assert_eq!(current.label, "Inbox (current)");
+    assert!(!current.choosable);
+    assert_eq!(
+        rows.iter().filter(|r| r.kind == pe_core::TargetKind::Account).count(),
+        2
+    );
+    // typed: what matches with the accounts above, without Recent, accents and case aside
+    let rows = s.core.move_targets(Some(inbox), "ÁRCH").unwrap();
+    let kinds: Vec<_> = rows.iter().map(|r| (r.kind, r.label.as_str())).collect();
+    assert_eq!(
+        kinds
+            .iter()
+            .filter(|(k, _)| *k == pe_core::TargetKind::Folder)
+            .map(|(_, l)| *l)
+            .collect::<Vec<_>>(),
+        ["Archive", "Archive"]
+    );
+    assert!(rows.iter().all(|r| r.kind != pe_core::TargetKind::Recent));
+    assert!(s.core.move_targets(None, "nothing like it").unwrap().is_empty());
 
     // a copy: both keep it
     s.core.act(&[at(inbox, copied)], Action::Copy(archive2)).unwrap();
@@ -1235,7 +1263,7 @@ fn a_move_between_accounts_cut_short_goes_on_without_a_second_copy() {
                 tried: false,
             }])
             .unwrap();
-        let id = store.next_transfer(first).unwrap().unwrap().id;
+        let id = store.next_transfer(first, 0).unwrap().unwrap().id;
         store.set_transfer_tried(id).unwrap();
     }
     // the next sync of the account finishes it

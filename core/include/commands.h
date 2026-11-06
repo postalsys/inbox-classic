@@ -6,6 +6,8 @@ enum PeCommandId : unsigned short {
     IDM_NEW_ACCOUNT = 100,
     IDM_EXIT = 101,
     IDM_SYNC = 102,
+    IDM_UNDO = 135,
+    IDM_SELECT_ALL = 134,
     IDM_MARK_READ = 103,
     IDM_MARK_UNREAD = 104,
     IDM_PICTURES = 105,
@@ -17,6 +19,7 @@ enum PeCommandId : unsigned short {
     IDM_HELP = 111,
     IDM_DELETE = 112,
     IDM_MOVE = 113,
+    IDM_COPY = 136,
     IDM_FLAG = 114,
     IDM_NEW_FOLDER = 115,
     IDM_RENAME_FOLDER = 116,
@@ -36,9 +39,6 @@ enum PeCommandId : unsigned short {
     IDM_DEFAULT_APP = 131,
     IDM_VIEW_SOURCE = 132,
     IDM_AI_AGENTS = 133,
-    IDM_SELECT_ALL = 134,
-    IDM_UNDO = 135,
-    IDM_COPY = 136,
 };
 
 // whether a command acts on one message only, off while several are selected

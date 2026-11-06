@@ -19,7 +19,7 @@ use crate::folders::{ALL_INBOXES, Entry, FolderTree, Handlers};
 use crate::messages::{MessageList, parse_payload};
 use crate::reader::Reader;
 use crate::settings;
-use crate::ui::{self, Field, Form, TITLE};
+use crate::ui::{self, TITLE};
 
 /// What the Find box takes, shown when the mouse rests on it
 const FIND_TIP: &str = "Finds words in the subject, the people, the file names and the text of messages.\n\
@@ -882,7 +882,7 @@ impl Mailbox {
     }
 
     /// What follows the selection: the counts in the status bar, Junk or Not Junk, the commands for one message off
-    /// while several are selected and Move off for messages of several accounts
+    /// while several are selected; Move and Copy with any selected
     fn selection_shown(&self) {
         self.show_counts();
         self.update_junk_button();
@@ -890,7 +890,9 @@ impl Mailbox {
         for command in Command::ALL.iter().filter(|c| c.needs_one()) {
             self.enable(*command, !several);
         }
-        self.enable(Command::Move, self.summary.borrow().accounts <= 1);
+        let any = !self.refs.borrow().is_empty();
+        self.enable(Command::Move, any);
+        self.enable(Command::Copy, any);
     }
 
     fn enable(&self, command: Command, on: bool) {
@@ -1423,62 +1425,23 @@ impl Mailbox {
         self.act(Action::Delete);
     }
 
-    /// Asks for another folder of the messages' account and moves them there
-    pub async fn move_selected(&self) {
+    /// Move to Folder (or Copy to Folder, `copy`): asks where, in the folder tree of every account, and sends the
+    /// selected messages there; to another account they go in the background
+    pub async fn move_selected(&self, copy: bool) {
         let refs = self.selected_refs();
-        let summary = self.summary.borrow().clone();
         let Some(first) = refs.first() else {
             return;
         };
-        if summary.accounts > 1 {
-            return;
-        }
-        let account = self
-            .folder_accounts
-            .borrow()
-            .get(&first.folder)
-            .copied()
-            .unwrap_or_else(|| self.current_account());
-        // the folder they are all in is no choice
-        let from = (summary.folders == 1).then_some(first.folder);
-        let mut ids = Vec::new();
-        let mut choices = Vec::new();
-        for folder in shell().core.folders(account).unwrap_or_default() {
-            if folder.info.selectable && Some(folder.id) != from {
-                ids.push(folder.id);
-                // a special folder by its usual name, the others by their whole path: two folders 2024 in Work and
-                // in Personal are not the same
-                choices.push(if folder.info.special_use.is_some() {
-                    pe_core::folder_name(&folder.info)
-                } else {
-                    folder.info.path.clone()
-                });
-            }
-        }
-        if ids.is_empty() {
-            return;
-        }
-        let intro = if refs.len() == 1 {
-            "Move the selected message to the folder:".to_string()
-        } else {
-            format!("Move the {} selected messages to the folder:", refs.len())
+        let summary = self.summary.borrow().clone();
+        let request = crate::move_dialog::Request {
+            title: summary.move_title(copy),
+            prompt: summary.move_prompt(copy),
+            verb: if copy { "Copy" } else { "Move" }.into(),
+            // the folder they are all in is no choice
+            current: (summary.folders == 1).then_some(first.folder),
         };
-        let form = Form::new(
-            &self.window,
-            "Move",
-            &intro,
-            vec![Field::choice("Folder:", choices, 0)],
-            "OK",
-            0,
-        );
-        form.widget().set_widget_name("move-dialog");
-        if !form.run().await {
-            return;
-        }
-        let chosen = form.chosen(0);
-        form.close();
-        if let Some(&to) = chosen.and_then(|i| ids.get(i)) {
-            self.act(Action::Move(to));
+        if let Some(to) = crate::move_dialog::choose(&self.window, request).await {
+            self.act(if copy { Action::Copy(to) } else { Action::Move(to) });
         }
     }
 
@@ -1506,15 +1469,12 @@ impl Mailbox {
         let Some(refs) = parse_payload(payload) else {
             return false;
         };
-        let accounts = self.folder_accounts.borrow();
-        let account = accounts.get(&to);
-        // an account's own item, the folder they all are in, one of another account, or one that holds no messages:
-        // not there
+        // an account's own item, the folder they all are in, or one that holds no messages: not there; a folder of
+        // another account takes them, in the background
         to > 0
-            && account.is_some()
+            && self.folder_accounts.borrow().contains_key(&to)
             && !self.unselectable.borrow().contains(&to)
             && !refs.iter().all(|r| r.folder == to)
-            && refs.iter().all(|r| accounts.get(&r.folder) == account)
     }
 
     /// Messages dropped onto a folder: moved, or copied with Ctrl; a move of the selection selects the message after
@@ -1565,22 +1525,6 @@ impl Mailbox {
         *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
     }
 
-    async fn ask_folder_name(&self, title: &str, intro: &str, name: &str) -> Option<String> {
-        let form = Form::new(
-            &self.window,
-            title,
-            intro,
-            vec![Field::text("Folder name:", name)],
-            "OK",
-            0,
-        );
-        form.widget().set_widget_name("folder-name-dialog");
-        let ok = form.run().await;
-        let value = form.value(0);
-        form.close();
-        (ok && !value.is_empty()).then_some(value)
-    }
-
     /// A folder in the selected one, or at the top of the selected account
     pub async fn new_folder(&self) {
         let account = self.current_account();
@@ -1593,7 +1537,7 @@ impl Mailbox {
         } else {
             "The new folder goes at the top of the account."
         };
-        let Some(name) = self.ask_folder_name("New Folder", where_, "").await else {
+        let Some(name) = ui::ask_folder_name(&self.window, "New Folder", where_, "").await else {
             return;
         };
         if let Err(reason) = shell()
@@ -1616,7 +1560,7 @@ impl Mailbox {
             .map(|(n, _)| n.clone())
             .unwrap_or_default();
         let intro = format!("The new name of the folder {current}.");
-        let Some(name) = self.ask_folder_name("Rename Folder", &intro, &current).await else {
+        let Some(name) = ui::ask_folder_name(&self.window, "Rename Folder", &intro, &current).await else {
             return;
         };
         if name == current {
@@ -1787,6 +1731,7 @@ impl Mailbox {
             None,
         );
         add(&organize, Command::Move, None);
+        add(&organize, Command::Copy, None);
         add(&organize, Command::Delete, Some("Delete"));
         menu.append_section(None, &organize);
         let files = gio::Menu::new();

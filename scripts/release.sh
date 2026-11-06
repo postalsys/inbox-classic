@@ -85,7 +85,7 @@ mkdir -p dist
 # Windows first: it takes longest, on another machine
 if building windows; then
     ./scripts/build-installer.sh
-    said=$(ssh "$WIN_HOST" "$WIN_DIR\\dist\\InboxClassic\\InboxClassic.exe --version" | tr -d '\r')
+    said=$(ssh -n "$WIN_HOST" "$WIN_DIR\\dist\\InboxClassic\\InboxClassic.exe --version" | tr -d '\r')
     [ "$said" = "Inbox Classic ${VERSION}" ] || fail "The Windows app says '${said}', not Inbox Classic ${VERSION}"
 fi
 if building mac; then

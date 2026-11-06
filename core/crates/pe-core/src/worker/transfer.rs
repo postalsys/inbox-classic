@@ -27,9 +27,19 @@ fn appendable(flags: &str) -> Vec<&str> {
         .collect()
 }
 
+/// A failure that trying again does not help
+fn gone(message: &str) -> Failure {
+    Failure {
+        kind: FailureKind::Other,
+        message: message.into(),
+    }
+}
+
 impl Worker {
-    /// Moves or copies every message waiting to go from this account, oldest first. Stops at a failure of the network,
-    /// leaving the rest for later (the next sync); a message that can not go is shown in its folder again and told.
+    /// Moves or copies every message waiting to go from this account, oldest first: each copied to its account, then
+    /// the originals of the moves taken out of their folders with one command a folder. Stops at a failure of the
+    /// network, leaving the rest for later (the next sync); a message that can not go is shown in its folder again and
+    /// told. [`Event::Transferring`] says how far it is, and at the end what was done.
     pub(super) async fn transfer(&mut self, store: &mut Store) -> Outcome {
         let total = store.transfers_left(self.account)?;
         if total == 0 {
@@ -38,40 +48,43 @@ impl Worker {
         let mut others: BTreeMap<AccountId, Worker> = BTreeMap::new();
         let mut arrived: BTreeSet<FolderId> = BTreeSet::new();
         let mut back: BTreeSet<FolderId> = BTreeSet::new();
+        // the originals of moves whose copies arrived: (transfer, folder, uid), out of their folders at the end
+        let mut copied: Vec<(i64, FolderId, u64)> = Vec::new();
+        let mut last = 0;
         let mut failed: Vec<(Transfer, Failure)> = Vec::new();
+        let mut copy = false;
         let mut done = 0;
         let mut outcome = Ok(());
-        while let Some(t) = store.next_transfer(self.account)? {
+        while let Some(t) = store.next_transfer(self.account, last)? {
+            last = t.id;
             done += 1;
+            copy = t.copy;
             let target = store.folder(t.to).ok();
             let verb = if t.copy { "Copying" } else { "Moving" };
             let place = target
                 .as_ref()
                 .map_or_else(|| "another account".into(), |f| crate::text::folder_name(&f.info));
             self.emit(Event::Transferring {
-                text: Some(format!("{verb} {done} of {} to {place}...", messages(total))),
+                text: format!("{verb} {done} of {} to {place}...", messages(total)),
             });
             let Some(target) = target else {
                 // the folder it was going to is gone
                 store.remove_transfer(t.id)?;
                 back.insert(t.from);
-                failed.push((
-                    t,
-                    Failure {
-                        kind: FailureKind::Other,
-                        message: "the folder it was going to is no longer there".into(),
-                    },
-                ));
+                failed.push((t, gone("the folder it was going to is no longer there")));
                 continue;
             };
-            let other = match others.entry(target.account_id) {
-                std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
-                std::collections::btree_map::Entry::Vacant(entry) => entry.insert(self.sibling(target.account_id)),
-            };
-            match self.transfer_one(store, other, &t, &target.info.path).await {
+            let other = others
+                .entry(target.account_id)
+                .or_insert_with(|| self.sibling(target.account_id));
+            match self.copy_over(store, other, &t, &target.info.path).await {
                 Ok(()) => {
-                    store.remove_transfer(t.id)?;
                     arrived.insert(t.to);
+                    if t.copy {
+                        store.remove_transfer(t.id)?;
+                    } else {
+                        copied.push((t.id, t.from, t.uid));
+                    }
                 }
                 Err(failure) if failure.kind != FailureKind::Other => {
                     // not reachable now: kept, to go with the next sync
@@ -83,6 +96,38 @@ impl Worker {
                     back.insert(t.from);
                     failed.push((t, failure));
                 }
+            }
+        }
+        // the originals of what arrived, a folder at a time; kept on their way until then, so a try after a failure
+        // here finds the copies there and only takes these out
+        let mut by_folder: BTreeMap<FolderId, Vec<(i64, u64)>> = BTreeMap::new();
+        for (id, folder, uid) in copied {
+            by_folder.entry(folder).or_default().push((id, uid));
+        }
+        let mut moved = 0;
+        for (folder, items) in by_folder {
+            let uids: Vec<u64> = items.iter().map(|(_, uid)| *uid).collect();
+            let removed = match self.client(store).await {
+                Ok(client) => expunge_messages(client, store, folder, &uids)
+                    .await
+                    .map_err(Failure::from),
+                Err(failure) => Err(failure),
+            };
+            match removed {
+                Ok(()) => {
+                    for (id, _) in &items {
+                        store.remove_transfer(*id)?;
+                    }
+                    moved += items.len();
+                }
+                Err(failure) => outcome = outcome.and(Err(failure)),
+            }
+        }
+        let mut arrived_names: Vec<String> = Vec::new();
+        for folder in &arrived {
+            let name = crate::text::folder_name(&store.folder(*folder)?.info);
+            if !arrived_names.contains(&name) {
+                arrived_names.push(name);
             }
         }
         for folder in arrived {
@@ -99,7 +144,20 @@ impl Worker {
                 self.fail(failure);
             }
         }
-        self.emit(Event::Transferring { text: None });
+        let went = if copy { done - failed.len() } else { moved };
+        let verb = if copy { "Copied" } else { "Moved" };
+        // the folder they went to by its name, as the status bar says it for a move in one account
+        let place = match arrived_names.as_slice() {
+            [one] => one.clone(),
+            _ => "their folders".to_string(),
+        };
+        let text = if went > 0 {
+            format!("{verb} {} to {place}", messages(went as u64))
+        } else {
+            let verb = if copy { "copied" } else { "moved" };
+            format!("No message could be {verb}")
+        };
+        self.emit(Event::Transferring { text });
         if let Some((first, failure)) = failed.first() {
             let verb = if first.copy { "copied" } else { "moved" };
             self.fail(Failure {
@@ -114,20 +172,14 @@ impl Worker {
         outcome
     }
 
-    /// One message: its source, an APPEND by `other` (unless a try before got it there), then, for a move, out of the
-    /// folder it came from
-    async fn transfer_one(&mut self, store: &mut Store, other: &mut Worker, t: &Transfer, to_path: &str) -> Outcome {
+    /// One message: its source, then an APPEND by `other`, unless a try before got it there
+    async fn copy_over(&mut self, store: &mut Store, other: &mut Worker, t: &Transfer, to_path: &str) -> Outcome {
         let source = match &t.source {
             Some(source) => source.clone(),
             None => {
                 let source = match fetch_raw(self.client(store).await?, store, t.from, t.uid).await {
                     Ok(source) => source,
-                    Err(pe_sync::Error::MessageGone) => {
-                        return Err(Failure {
-                            kind: FailureKind::Other,
-                            message: "the message is no longer on the server".into(),
-                        });
-                    }
+                    Err(pe_sync::Error::MessageGone) => return Err(gone("the message is no longer on the server")),
                     Err(error) => return Err(error.into()),
                 };
                 store.set_transfer_source(t.id, &source)?;
@@ -146,9 +198,6 @@ impl Worker {
                 .await?
                 .append(to_path, &source, &flags, t.internal_date)
                 .await?;
-        }
-        if !t.copy {
-            expunge_messages(self.client(store).await?, store, t.from, &[t.uid]).await?;
         }
         Ok(())
     }

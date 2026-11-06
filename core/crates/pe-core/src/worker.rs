@@ -691,7 +691,14 @@ impl Worker {
                     },
                 )?;
                 pe_sync::create_folder(self.client(store).await?, &path).await?;
-                self.sync_folder_list(store).await
+                self.sync_folder_list(store).await?;
+                if let Some(folder) = store.find_folder(self.account, &path)? {
+                    self.emit(Event::FolderCreated {
+                        account: self.account,
+                        folder: folder.id,
+                    });
+                }
+                Ok(())
             }
             Command::RenameFolder { folder, path } => {
                 pe_sync::rename_folder(self.client(store).await?, store, folder, &path).await?;
