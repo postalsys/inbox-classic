@@ -1044,13 +1044,7 @@ impl Core {
         };
         let (mut draft, files) = compose::reopen(&source);
         if !files.is_empty() {
-            let nanos = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map_or(0, |d| d.as_nanos());
-            let base = std::env::temp_dir()
-                .join("InboxClassic")
-                .join(format!("draft-{folder}-{uid}-{nanos}"));
-            draft.attachments = write_out(&base, files).map_err(|error| {
+            draft.attachments = write_out(&format!("draft-{folder}-{uid}"), files).map_err(|error| {
                 Error::Unavailable(format!("an attachment of the draft could not be kept: {error}"))
             })?;
         }
@@ -1429,19 +1423,83 @@ pub(crate) fn junk_keywords(junk: bool) -> (&'static str, &'static str) {
     }
 }
 
-/// Writes files (name, content) under `base`, each in a folder of its own so two of one name stay apart; their paths
-fn write_out(base: &std::path::Path, files: Vec<(String, Vec<u8>)>) -> std::io::Result<Vec<PathBuf>> {
+/// Writes files (name, content) into a new folder of this user's own (`name` and a number that makes it new), each in
+/// a folder of its own there so two of one name stay apart; their paths. Under the runtime folder on Linux (the system's
+/// temporary folder there is shared by every user), under the temporary folder elsewhere (the Mac's and Windows' are
+/// each user's own); readable by this user only.
+fn write_out(name: &str, files: Vec<(String, Vec<u8>)>) -> std::io::Result<Vec<PathBuf>> {
+    let base = private_dir(name)?;
     files
         .into_iter()
         .enumerate()
-        .map(|(index, (name, content))| {
+        .map(|(index, (file, content))| {
             let dir = base.join(index.to_string());
-            std::fs::create_dir_all(&dir)?;
-            let path = dir.join(name);
+            new_dir(&dir)?;
+            let path = dir.join(file);
             std::fs::write(&path, content)?;
             Ok(path)
         })
         .collect()
+}
+
+/// A new folder of this user's own for files the app writes out, `name` with a number that makes it new
+fn private_dir(name: &str) -> std::io::Result<PathBuf> {
+    let root = if cfg!(all(unix, not(target_os = "macos"))) {
+        std::env::var_os("XDG_RUNTIME_DIR")
+            .map(PathBuf::from)
+            .filter(|dir| dir.is_absolute())
+            .unwrap_or_else(std::env::temp_dir)
+    } else {
+        std::env::temp_dir()
+    };
+    let parent = root.join("InboxClassic");
+    match new_dir(&parent) {
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+        other => other?,
+    }
+    // a link to elsewhere is not followed
+    if !std::fs::symlink_metadata(&parent)?.is_dir() {
+        return Err(std::io::Error::other(format!("{} is not a folder", parent.display())));
+    }
+    for _ in 0..100 {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_nanos());
+        let dir = parent.join(format!("{name}-{nanos}"));
+        match new_dir(&dir) {
+            Ok(()) => {
+                // a parent another user made first (and left open to others) is not used: the folder made in it
+                // is this user's, so their owners differ
+                if !same_owner(&parent, &dir)? {
+                    let _ = std::fs::remove_dir(&dir);
+                    return Err(std::io::Error::other(format!("{} is another user's", parent.display())));
+                }
+                return Ok(dir);
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    Err(std::io::Error::other("no new folder could be made"))
+}
+
+#[cfg(unix)]
+fn same_owner(a: &std::path::Path, b: &std::path::Path) -> std::io::Result<bool> {
+    use std::os::unix::fs::MetadataExt;
+    Ok(std::fs::symlink_metadata(a)?.uid() == std::fs::symlink_metadata(b)?.uid())
+}
+
+#[cfg(not(unix))]
+fn same_owner(_a: &std::path::Path, _b: &std::path::Path) -> std::io::Result<bool> {
+    Ok(true)
+}
+
+/// Makes a folder, failing when it is there; on Unix readable by this user only
+fn new_dir(dir: &std::path::Path) -> std::io::Result<()> {
+    let mut builder = std::fs::DirBuilder::new();
+    #[cfg(unix)]
+    std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
+    builder.create(dir)
 }
 
 fn store_security(security: pe_net::Security) -> pe_store::Security {
@@ -1491,4 +1549,23 @@ fn finish_view(
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(received);
     Some(view)
+}
+
+#[cfg(test)]
+mod write_out_tests {
+    #[test]
+    fn files_written_out_in_a_folder_of_this_users_own() {
+        let files = vec![("a.eml".to_string(), b"one".to_vec()), ("a.eml".to_string(), b"two".to_vec())];
+        let paths = super::write_out("test", files).unwrap();
+        assert_eq!(std::fs::read(&paths[0]).unwrap(), b"one");
+        assert_eq!(std::fs::read(&paths[1]).unwrap(), b"two");
+        assert_ne!(paths[0].parent(), paths[1].parent());
+        let dir = paths[0].parent().unwrap().parent().unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(std::fs::metadata(dir).unwrap().permissions().mode() & 0o777, 0o700);
+        }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
 }

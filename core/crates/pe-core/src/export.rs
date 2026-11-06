@@ -178,13 +178,7 @@ impl Core {
                 .map_err(|problem| Error::Unavailable(format!("{}: {problem}", file.name)))?;
             files.push((file.name, source));
         }
-        let nanos = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map_or(0, |d| d.as_nanos());
-        let base = std::env::temp_dir()
-            .join("InboxClassic")
-            .join(format!("forward-{}-{}-{nanos}", first.folder, first.uid));
-        let attachments = crate::write_out(&base, files)
+        let attachments = crate::write_out(&format!("forward-{}-{}", first.folder, first.uid), files)
             .map_err(|error| Error::Unavailable(format!("the messages could not be attached: {error}")))?;
         Ok(Draft {
             subject: crate::compose::prefixed("Fw: ", &subject),
