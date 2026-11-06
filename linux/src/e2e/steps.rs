@@ -23,8 +23,13 @@ fn date_now(minutes: i32) -> String {
 
 /// The id of a folder of the first account by the name the tree gives it
 fn folder_id(name: &str) -> Option<i64> {
+    folder_of(0, name)
+}
+
+/// The id of a folder of the account at `index` (0 the first) by the name the tree gives it
+fn folder_of(index: usize, name: &str) -> Option<i64> {
     let core = &shell().core;
-    let account = core.accounts().ok()?.first()?.id;
+    let account = core.accounts().ok()?.get(index)?.id;
     core.folders(account)
         .ok()?
         .into_iter()
@@ -236,12 +241,7 @@ pub async fn agent(d: &Driver) {
     }
     run_command(Command::Sync);
     wait_until(20, || rows() >= rows_before + 2).await;
-    let unread = || {
-        d.messages("INBOX")
-            .iter()
-            .filter(|m| !m["flags"].as_array().is_some_and(|f| f.iter().any(|f| f == "\\Seen")))
-            .count()
-    };
+    let unread = || d.unread_at(d.ports.rest);
     let before = unread();
     d.shot(&main_window(), "agents-1-before").await;
     // the agent: Node.js under a name of its own, as an agent host would be, starting the relay (--mcp)
@@ -423,12 +423,7 @@ pub async fn mark_all_read(d: &Driver) {
     d.step("marking all read");
     select_folder("Inbox");
     wait_until(10, || rows() >= 5).await;
-    let unread_on_server = || {
-        d.messages("INBOX")
-            .iter()
-            .filter(|m| !m["flags"].as_array().is_some_and(|f| f.iter().any(|f| f == "\\Seen")))
-            .count()
-    };
+    let unread_on_server = || d.unread_at(d.ports.rest);
     d.check(
         unread_on_server() >= 1,
         &format!("the Inbox has unread messages ({})", unread_on_server()),
@@ -903,4 +898,120 @@ pub async fn not_downloaded(d: &Driver) {
     d.check(!reader.shows_failure(), "and Try Again goes");
     search("").await;
     select_folder("Inbox");
+}
+
+/// The second account's mail on its own server, for All Inboxes: unread, dated a little ahead so it is the newest in
+/// the list (over what the steps before added), around the first account's message of the step
+pub fn seed_second(d: &Driver) {
+    for (from, subject, body, minutes) in [
+        (
+            "Priya Shah <priya@work.example>",
+            "Contract renewal for next year",
+            "The renewal is ready to sign. Could you look it over before Friday?",
+            10,
+        ),
+        (
+            "Tom Becker <tom@work.example>",
+            "Offsite agenda",
+            "Here is the agenda for the offsite. Add anything you want to talk about.",
+            8,
+        ),
+    ] {
+        let raw = format!(
+            "From: {from}\r\nTo: testuser2@inboxclassic.test\r\nSubject: {subject}\r\nDate: {}\r\n\
+             Message-ID: <{}@work.example>\r\n\r\n{body}\r\n",
+            date_now(minutes),
+            subject.replace(' ', "-")
+        );
+        if let Err(error) = d.add_message_at(d.ports.second_rest, &raw, &[]) {
+            d.check(false, &format!("the second account's mail went into ImapKit ({error})"));
+        }
+    }
+}
+
+/// The second account's Inbox
+pub fn second_inbox() -> Option<i64> {
+    folder_of(1, "Inbox")
+}
+
+/// The mail of both accounts' Inboxes in one list, a reply from the account of a message, Mark All Read of both
+pub async fn all_inboxes(d: &Driver) {
+    d.step("All Inboxes");
+    let main = shell().main();
+    let (Some(inbox), Some(second)) = (folder_id("Inbox"), second_inbox()) else {
+        d.check(false, "both accounts have an Inbox");
+        return;
+    };
+    // a new message for the first account too, so both have unread mail
+    let raw = format!(
+        "From: Maria Lopez <maria@example.org>\r\nTo: testuser@inboxclassic.test\r\nSubject: Photos from the trip\r\n\
+         Date: {}\r\nMessage-ID: <trip-photos@example.org>\r\n\r\nThe photos from the trip are in the shared album.\r\n",
+        date_now(9)
+    );
+    let _ = d.add_message(&raw, &[]);
+    command(Command::Sync);
+    wait_until(20, || shell().core.folder(inbox).is_ok_and(|f| f.unread >= 1)).await;
+    d.check(
+        main.folders.markup_of(crate::folders::ALL_INBOXES).is_some()
+            && main.folders.top_id() == Some(crate::folders::ALL_INBOXES),
+        "All Inboxes is at the top of the tree, above the accounts",
+    );
+    main.folders.select(crate::folders::ALL_INBOXES);
+    let both = |f: i64| shell().core.folder(f).map_or(0, |f| f.total);
+    let expected = both(inbox) + both(second);
+    d.check(
+        wait_until(10, || u64::from(rows()) == expected).await,
+        &format!("it lists the mail of both accounts' Inboxes ({} of {expected})", rows()),
+    );
+    // the rows as the list has them, from the core
+    let all = pe_core::Search {
+        scope: pe_core::Scope::AllInboxes,
+        ..Default::default()
+    };
+    let listed = shell().core.search(&all, main.list.sort(), 0, 4).unwrap_or_default();
+    let folders: Vec<i64> = listed.iter().map(|m| m.folder_id).collect();
+    d.check(
+        folders.contains(&inbox) && folders.contains(&second),
+        "newest first, the two accounts' messages among each other",
+    );
+    let row = main.row_folder(second);
+    let title = main.list.columns.folder.title().unwrap_or_default();
+    d.check(
+        row == "Work" && title == "Account",
+        &format!("the Account column names the account of each ({title}: {row})"),
+    );
+    let counts = main.status_texts().2;
+    d.check(
+        counts.starts_with(&format!("{expected} message(s)")),
+        &format!("the status bar counts both Inboxes ({counts})"),
+    );
+    // the newest message, the second account's
+    select_row(0).await;
+    pause(500).await;
+    d.shot(&main_window(), "all-inboxes-1-list").await;
+    if let Some(index) = folders.iter().position(|f| *f == second) {
+        select_row(index as u32).await;
+    }
+    run_command(Command::Reply);
+    match wait_compose(10).await {
+        Some(c) => {
+            let from = compose_from(&c);
+            d.check(
+                from == "Work <testuser2@inboxclassic.test>",
+                &format!("a reply goes from the account of the message ({from})"),
+            );
+            close_compose(&c).await;
+        }
+        None => d.check(false, "Reply opens a compose window"),
+    }
+    let unread = |rest: u16| d.unread_at(rest);
+    run_command(Command::MarkAllRead);
+    d.check(
+        wait_until(20, || unread(d.ports.rest) == 0 && unread(d.ports.second_rest) == 0).await,
+        &format!(
+            "Mark All Read marks both Inboxes read on the servers ({} and {} unread)",
+            unread(d.ports.rest),
+            unread(d.ports.second_rest)
+        ),
+    );
 }

@@ -32,6 +32,8 @@ final class UITest {
     var log = ""
     var harness: Process?
     var rest = ""
+    /// the REST API of the second server, with a mailbox of its own, for the second account
+    var secondRest = ""
     var ports: [String: Any] = [:]
     var delegate: AppDelegate?
     var main: MainWindow { delegate!.main }
@@ -229,7 +231,7 @@ final class UITest {
         try process.run()
         harness = process
         // with its OAuth 2.0 / OpenID Connect provider, and a user with an address for name to sign in as there
-        let config = #"{"oauth":{},"users":{"testuser":{"password":"testpass"},"alice@example.com":{"password":"pw","displayName":"Alice Example"}}}"#
+        let config = #"{"oauth":{},"users":{"testuser":{"password":"testpass"},"alice@example.com":{"password":"pw","displayName":"Alice Example"}},"second":{"users":{"testuser2":{"password":"testpass2"}}}}"#
         input.fileHandleForWriting.write(Data((config + "\n").utf8))
         var line = Data()
         while true {
@@ -242,19 +244,30 @@ final class UITest {
         }
         ports = parsed
         rest = "http://127.0.0.1:\(parsed["rest"]!)/v1/mailboxes"
+        secondRest = "http://127.0.0.1:\((parsed["second"] as? [String: Any])?["rest"] ?? "")/v1/mailboxes"
     }
 
     func port(_ name: String) -> String {
         "\(ports[name] ?? "")"
     }
 
+    /// a port of the second server
+    func secondPort(_ name: String) -> String {
+        "\((ports["second"] as? [String: Any])?[name] ?? "")"
+    }
+
     /// the messages of a mailbox, with their sources
-    func messages(_ mailbox: String) async -> [[String: Any]] {
+    func messages(_ mailbox: String, at server: String? = nil) async -> [[String: Any]] {
         let escaped = mailbox.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? mailbox
-        guard let url = URL(string: "\(rest)/\(escaped)/messages?raw=true"),
+        guard let url = URL(string: "\(server ?? rest)/\(escaped)/messages?raw=true"),
               let (data, _) = try? await URLSession.shared.data(from: url),
               let list = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return [] }
         return list
+    }
+
+    /// how many messages of the Inbox of a server (the first by default) are unread
+    func unreadOnServer(at server: String? = nil) async -> Int {
+        await messages("INBOX", at: server).filter { !(($0["flags"] as? [String]) ?? []).contains("\\Seen") }.count
     }
 
     func raw(_ message: [String: Any]) -> String {
@@ -270,8 +283,8 @@ final class UITest {
         (await findMessage("INBOX", pattern)?["flags"] as? [String])?.contains("\\Seen") ?? false
     }
 
-    func addMessage(_ raw: String, flags: [String] = []) async throws {
-        var request = URLRequest(url: URL(string: "\(rest)/INBOX/messages")!)
+    func addMessage(_ raw: String, flags: [String] = [], at server: String? = nil) async throws {
+        var request = URLRequest(url: URL(string: "\(server ?? rest)/INBOX/messages")!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: ["raw": raw, "flags": flags])
@@ -424,6 +437,7 @@ final class UITest {
         try await writingMore()
         try await signature()
         try await accountTrouble()
+        try await allInboxes()
         try await accountsAndHelp()
     }
 

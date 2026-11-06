@@ -223,6 +223,10 @@ CREATE INDEX agent_log_by_host ON agent_log (host_id, what, at);
 -- a message that waits before it goes (one an agent sent, with time to take it back), seconds since the Unix epoch
 ALTER TABLE outbox ADD COLUMN not_before INTEGER;
 "#,
+    // the Received order of a list over several folders (All Inboxes, a search of every folder) without a scan
+    r#"
+CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
@@ -249,6 +253,18 @@ mod tests {
         assert_eq!(version, MIGRATIONS.len());
     }
 
+    /// The query plan of `sql`, its steps joined
+    fn plan(db: &Connection, sql: &str) -> String {
+        let steps: Vec<String> = db
+            .prepare(&format!("EXPLAIN QUERY PLAN {sql}"))
+            .unwrap()
+            .query_map([], |row| row.get::<_, String>(3))
+            .unwrap()
+            .map(Result::unwrap)
+            .collect();
+        steps.join("; ")
+    }
+
     #[test]
     fn the_message_list_orders_use_indexes() {
         let mut db = Connection::open_in_memory().unwrap();
@@ -262,21 +278,32 @@ mod tests {
         ] {
             for ascending in [true, false] {
                 let order = crate::Sort { field, ascending }.order_by();
-                let sql =
-                    format!("EXPLAIN QUERY PLAN SELECT id FROM messages WHERE folder_id = 1 ORDER BY {order} LIMIT 10");
-                let plan: Vec<String> = db
-                    .prepare(&sql)
-                    .unwrap()
-                    .query_map([], |row| row.get::<_, String>(3))
-                    .unwrap()
-                    .map(Result::unwrap)
-                    .collect();
-                let plan = plan.join("; ");
+                let plan = plan(
+                    &db,
+                    &format!("SELECT id FROM messages WHERE folder_id = 1 ORDER BY {order} LIMIT 10"),
+                );
                 assert!(
                     !plan.contains("TEMP B-TREE"),
                     "{field:?} sorts without an index: {plan}"
                 );
             }
+        }
+        // over the Inboxes of every account (search.rs keeps it off the folder indexes for these orders)
+        for field in [crate::SortField::Date, crate::SortField::Received] {
+            let order = crate::Sort {
+                field,
+                ascending: false,
+            }
+            .order_by();
+            let sql = format!(
+                "SELECT id FROM messages WHERE +folder_id IN ({}) ORDER BY {order} LIMIT 10",
+                crate::search::INBOXES
+            );
+            let plan = plan(&db, &sql);
+            assert!(
+                !plan.contains("TEMP B-TREE"),
+                "{field:?} over folders sorts without an index: {plan}"
+            );
         }
         let plan: String = db
             .query_row(

@@ -86,6 +86,9 @@ impl FolderItem {
     }
 }
 
+/// The id of All Inboxes, at the top of the tree: neither a folder (positive) nor an account (a negated id)
+pub const ALL_INBOXES: i64 = i64::MIN;
+
 /// An item of the tree as it is built: its id, its name, its unread messages and those of the folders under it, the
 /// icon and its depth under the account
 pub struct Entry {
@@ -179,14 +182,19 @@ impl FolderTree {
         *self.handlers.borrow_mut() = Some(handlers);
     }
 
-    /// The tree built again from the accounts, each with its entries in tree order; the selection kept when its
-    /// folder is still there (false when it is gone)
-    pub fn rebuild(&self, accounts: Vec<(Entry, Vec<Entry>)>) -> bool {
+    /// The tree built again from the accounts, each with its entries in tree order, under `top` (All Inboxes) when
+    /// there is one; the selection kept when its folder is still there (false when it is gone)
+    pub fn rebuild(&self, top: Option<Entry>, accounts: Vec<(Entry, Vec<Entry>)>) -> bool {
         let selected = self.selected();
         self.reloading.set(true);
         self.root.remove_all();
         let mut items = HashMap::new();
         let mut parents = HashMap::new();
+        if let Some(entry) = top {
+            let item = FolderItem::new(&entry);
+            items.insert(entry.id, item.clone());
+            self.root.append(&item);
+        }
         for (account, folders) in accounts {
             let top = FolderItem::new(&account);
             items.insert(account.id, top.clone());
@@ -261,7 +269,7 @@ impl FolderTree {
         }
     }
 
-    /// The id of what is selected: a folder, an account negated, 0 for nothing
+    /// The id of what is selected: a folder, an account negated, [`ALL_INBOXES`], 0 for nothing
     pub fn selected(&self) -> i64 {
         self.selection
             .selected_item()
@@ -297,6 +305,12 @@ impl FolderTree {
             position += 1;
         }
         false
+    }
+
+    /// The id of the first row of the tree, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn top_id(&self) -> Option<i64> {
+        self.root.item(0).and_downcast::<FolderItem>().map(|item| item.id())
     }
 
     /// The visible rows, as the e2e driver counts them

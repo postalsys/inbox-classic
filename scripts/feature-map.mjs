@@ -166,6 +166,19 @@ const sections = [
                 checked: ['All 7 folders of the account appear', 'The messages are listed', 'The title names the folder']
             },
             {
+                shot: 'all-inboxes-1-list',
+                name: 'All Inboxes',
+                what: "With two or more accounts, All Inboxes at the top of the folder tree lists the mail of every account's Inbox in one list, newest first, with an Account column naming the account of each message and the unread count of all of them. The app opens on it, with the newest message selected. Reply, Forward, Move and Delete act on the message in its own account, and Create Mail starts from the account of the selected message. Mark All Read on it marks every Inbox read. It goes when only one account is left.",
+                how: 'Select All Inboxes at the top of the folder tree.',
+                checked: [
+                    'It is at the top of the tree, above the accounts',
+                    "It lists the mail of both accounts' Inboxes, newest first, with the Account column naming each",
+                    'The status bar counts both Inboxes',
+                    'A reply goes from the account of the message',
+                    'Mark All Read marks both Inboxes read on the servers'
+                ]
+            },
+            {
                 shot: 'accounts-1-list',
                 name: 'Accounts: change and remove',
                 what: "File > Accounts lists the accounts with their address and incoming server. Properties (or a double-click) changes one (leave the password empty to keep it; an account that signs in through the browser only has its name changed, its servers are the provider's). Remove (or Delete) takes it out with its downloaded mail and saved password; the mail on the server stays.",

@@ -30,7 +30,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
-pub use pe_store::{Search, Show};
+pub use pe_store::{Scope, Search, Show};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
@@ -233,6 +233,22 @@ impl OAuthProviders {
             None => pe_oauth::Provider::builtin(kind),
         }
     }
+}
+
+/// What the main window selects when it opens, see [`Core::start_message`]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Start {
+    /// All Inboxes rather than one folder
+    pub all_inboxes: bool,
+    /// The folder of the message, or the first account's Inbox when there is none
+    pub folder: FolderId,
+    /// The newest message, `None` when the list is empty
+    pub uid: Option<u64>,
+}
+
+/// Whether the folder tree has All Inboxes above the accounts: with two or more of them
+pub fn all_inboxes_shown(accounts: usize) -> bool {
+    accounts >= 2
 }
 
 /// How the engine works with servers and passwords
@@ -465,22 +481,37 @@ impl Core {
         Ok(self.store().messages(folder, sort, offset, limit)?)
     }
 
-    /// What the main window selects when it opens: the Inbox of the first account and its newest message (by date,
-    /// `None` when the Inbox is empty); `None` when there is no account or the first one has no Inbox yet
-    pub fn start_message(&self) -> Result<Option<(FolderId, Option<u64>)>> {
+    /// What the main window selects when it opens (`None` when there is no account or the first one has no Inbox
+    /// yet): with two or more accounts All Inboxes and the newest message of every Inbox, with one its Inbox and its
+    /// newest message (by date)
+    pub fn start_message(&self) -> Result<Option<Start>> {
         let store = self.store();
-        let Some(account) = store.accounts()?.into_iter().next() else {
+        let accounts = store.accounts()?;
+        let Some(account) = accounts.first() else {
             return Ok(None);
         };
         let Some(inbox) = store.find_folder(account.id, "INBOX")? else {
             return Ok(None);
         };
+        let all_inboxes = all_inboxes_shown(accounts.len());
+        let search = Search {
+            scope: if all_inboxes {
+                Scope::AllInboxes
+            } else {
+                Scope::Folder(inbox.id)
+            },
+            ..Default::default()
+        };
         let newest = Sort {
             field: pe_store::SortField::Date,
             ascending: false,
         };
-        let uid = store.messages(inbox.id, newest, 0, 1)?.first().map(|m| m.info.uid);
-        Ok(Some((inbox.id, uid)))
+        let message = store.search(&search, newest, 0, 1)?.into_iter().next();
+        Ok(Some(Start {
+            all_inboxes,
+            folder: message.as_ref().map_or(inbox.id, |m| m.folder_id),
+            uid: message.map(|m| m.info.uid),
+        }))
     }
 
     /// A page of what `search` finds (Gmail's syntax, see [`pe_store::Query`]), in the order of `sort`
@@ -1086,6 +1117,15 @@ impl Core {
                 on: true,
             },
         )
+    }
+
+    /// Marks every message of every account's Inbox read, as [`Core::mark_all_read`] marks one folder
+    pub fn mark_all_inboxes_read(&self) -> Result<()> {
+        let inboxes = self.store().inboxes()?;
+        for inbox in inboxes {
+            self.mark_all_read(inbox)?;
+        }
+        Ok(())
     }
 
     /// Moves a message to another folder of its account: out of the store now, on the server in the background,

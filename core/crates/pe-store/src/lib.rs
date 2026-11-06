@@ -29,7 +29,7 @@ pub use messages::{Message, MessageInfo, Sort, SortField};
 pub use outbox::Queued;
 pub use query::Query;
 pub use rusqlite::Error;
-pub use search::{IndexText, Search, Show};
+pub use search::{IndexText, Scope, Search, Show};
 pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
 
 pub type Result<T> = std::result::Result<T, Error>;

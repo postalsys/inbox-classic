@@ -291,11 +291,13 @@ public:
     // the accounts changed: builds the tree again
     void Reload();
     void MarkSelected(bool seen);
-    // every message of the selected folder read (Edit > Mark All Read, the folder's menu); nothing while searching
+    // every message of the selected folder read, or of every Inbox from All Inboxes (Edit > Mark All Read, the folder's
+    // menu); nothing while searching
     void MarkAllRead();
     // the message `uid` of `folder` shown: its folder chosen in the tree, the message selected in the list
     void ShowMessage(int64_t folder, uint64_t uid);
-    // the window shown the first time: the first account's Inbox chosen and its newest message selected
+    // the window shown the first time: All Inboxes (two or more accounts) or the first account's Inbox chosen, and its
+    // newest message selected
     void SelectStart();
     // the selected message junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     void MarkJunk(bool junk);
@@ -369,8 +371,12 @@ private:
     // the name and whether it is the Inbox or a special folder (not renamed or deleted); false when not found
     bool FolderOf(int64_t folder, std::wstring& name, bool& fixed) const;
     void OnSelectionChanged();
-    // another folder shown; false when it was already the one shown (and the main window was not told)
-    bool OnFolderSelected(LPARAM folder);
+    // another folder (or All Inboxes) shown; false when it was already the one shown (and the main window was not told)
+    bool OnFolderSelected(int64_t folder, bool allInboxes = false);
+    // whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
+    bool SeveralFolders() const;
+    // the row of the message `uid` of `folder` selected in the list; false when it is not there
+    bool SelectInList(int64_t folder, uint64_t uid);
     // asks the core for the view of the selected message, built on a worker; ShowView() shows it when it comes
     void ShowMessage();
     void ShowView();
@@ -454,6 +460,9 @@ private:
     std::unordered_map<int64_t, std::pair<std::wstring, bool>> folderNames_;
     // the folders that hold no messages (only other folders)
     std::unordered_set<int64_t> unselectable_;
+    // All Inboxes at the top of the tree (two or more accounts), and whether it is selected
+    HTREEITEM allInboxesItem_ = nullptr;
+    bool allInboxes_ = false;
     // a message being dragged onto a folder of the tree: which, its drag image, where it would go
     struct Drag {
         int64_t folder = 0;

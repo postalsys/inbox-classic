@@ -170,11 +170,13 @@ final class Core {
         return (total, unread)
     }
 
-    /// what the main window selects when it opens: the first account's Inbox and its newest message (0 when empty)
-    func startMessage() -> (folder: Int64, uid: UInt64)? {
+    /// what the main window selects when it opens: All Inboxes (two or more accounts) or the first account's Inbox,
+    /// and the newest message (its folder, a uid of 0 when there is none)
+    func startMessage() -> (allInboxes: Bool, folder: Int64, uid: UInt64)? {
+        var allInboxes = false
         var folder: Int64 = 0
         var uid: UInt64 = 0
-        return pe_start_message(handle, &folder, &uid) ? (folder, uid) : nil
+        return pe_start_message(handle, &allInboxes, &folder, &uid) ? (allInboxes, folder, uid) : nil
     }
 
     /// what a search finds
@@ -208,11 +210,13 @@ final class Core {
 /// What the message list shows: a folder, or words searched in every folder (folder 0)
 struct Search {
     var folder: Int64
+    /// with `folder` 0: every account's Inbox rather than every folder
+    var allInboxes = false
     var text: String
 
     func with<T>(_ body: (UnsafePointer<PeSearch>) -> T) -> T {
         text.withCString { words in
-            var search = PeSearch(folder: folder, show: PE_SHOW_ALL, text: words)
+            var search = PeSearch(folder: folder, all_inboxes: allInboxes, show: PE_SHOW_ALL, text: words)
             return withUnsafePointer(to: &search) { body($0) }
         }
     }

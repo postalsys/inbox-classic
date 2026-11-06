@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <array>
+#include <limits>
 #include <span>
 #include <utility>
 
@@ -19,6 +20,9 @@ constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
 constexpr size_t kPagesKept = 8;
 constexpr int kHeaderLines = 4;
+// the data of the All Inboxes item: neither a folder (positive) nor an account (a negated id)
+constexpr LPARAM kAllInboxesItem = std::numeric_limits<LPARAM>::min();
+const wchar_t* kAllInboxes = L"All Inboxes";
 
 // as Outlook Express has them: the envelope (read or not), the paper clip and the flag, then the text columns
 enum Column { COL_READ, COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE, COL_FOLDER };
@@ -456,6 +460,7 @@ void Mailbox::LayoutReader() {
 
 void Mailbox::Reload() {
     int64_t selected = folder_;
+    bool allSelected = allInboxes_;
     // deleting the items changes the selection: not a folder the user picked
     reloading_ = true;
     TreeView_DeleteAllItems(tree_);
@@ -467,11 +472,18 @@ void Mailbox::Reload() {
     folderAccounts_.clear();
     folderNames_.clear();
     unselectable_.clear();
+    allInboxesItem_ = nullptr;
     draftFolders_.clear();
     junkFolders_.clear();
     firstAccount_ = 0;
     core::AccountList accounts(pe_accounts(core_));
     size_t count = pe_account_list_count(accounts.get());
+    if (pe_all_inboxes_shown(count)) {
+        // above the accounts, the mail of every Inbox; its unread count as a folder's
+        allInboxesItem_ = InsertItem(tree_, TVI_ROOT, kAllInboxes, kAllInboxesItem, false, FOLDER_MAIL_INBOX);
+        rows_[allInboxesItem_] = {kAllInboxes, pe_inbox_unread(core_), 0};
+        ShowRow(allInboxesItem_);
+    }
     for (size_t i = 0; i < count; i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
         accountNames_[account->id] = Text(account->name);
@@ -489,12 +501,28 @@ void Mailbox::Reload() {
         TreeView_Expand(tree_, root, TVE_EXPAND);
         ShowRow(root);
     }
-    auto item = items_.find(selected);
-    if (item != items_.end()) {
-        reloading_ = true;
-        TreeView_SelectItem(tree_, item->second);
+    // what was selected, again; All Inboxes gone with one account left: that account's Inbox (as the window starts)
+    HTREEITEM target = nullptr;
+    bool same = true;
+    if (allSelected && allInboxesItem_) {
+        target = allInboxesItem_;
+    } else if (allSelected) {
+        bool all = false;
+        int64_t inbox = 0;
+        uint64_t uid = 0;
+        if (pe_start_message(core_, &all, &inbox, &uid) && items_.contains(inbox)) {
+            target = items_[inbox];
+            same = false;
+        }
+    } else if (auto item = items_.find(selected); item != items_.end()) {
+        target = item->second;
+    }
+    if (target) {
+        // the same folder again is no folder the user picked; the Inbox in place of All Inboxes is shown
+        reloading_ = same;
+        TreeView_SelectItem(tree_, target);
         reloading_ = false;
-    } else if (selected) {
+    } else if (selected || allSelected) {
         // the folder is gone
         OnFolderSelected(0);
     }
@@ -567,6 +595,10 @@ void Mailbox::UpdateFolders(int64_t account) {
         rows_[root->second].below = pe_folder_list_unread(folders.get());
         ShowRow(root->second);
     }
+    if (allInboxesItem_) {
+        rows_[allInboxesItem_].own = pe_inbox_unread(core_);
+        ShowRow(allInboxesItem_);
+    }
 }
 
 std::wstring Mailbox::AccountName(int64_t account) const {
@@ -615,18 +647,31 @@ core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
 
 // ---- the message list ----
 
-// words typed search every folder of every account (in: narrows that); without, the list is the folder's
+// words typed search every folder of every account (in: narrows that); without, the list is the folder's, or every
+// Inbox's
 PeSearch Mailbox::Search() const {
-    return {Searching() ? 0 : folder_, PE_SHOW_ALL, findUtf8_.c_str()};
+    return {Searching() ? 0 : folder_, !Searching() && allInboxes_, PE_SHOW_ALL, findUtf8_.c_str()};
 }
 
 bool Mailbox::Searching() const {
     return !find_.empty();
 }
 
-// the Folder column while the list has messages of several folders, and not otherwise
+bool Mailbox::SeveralFolders() const {
+    return Searching() || allInboxes_;
+}
+
+// the Folder column while the list has messages of several folders, and not otherwise; in All Inboxes, whose rows are
+// all in an Inbox, the Account column
 void Mailbox::ShowFolderColumn() {
-    bool wanted = Searching();
+    bool wanted = SeveralFolders();
+    const wchar_t* title = Searching() ? L"Folder" : L"Account";
+    if (wanted && folderColumn_) {
+        LVCOLUMNW column = {};
+        column.mask = LVCF_TEXT;
+        column.pszText = const_cast<wchar_t*>(title);
+        ListView_SetColumn(list_, COL_FOLDER, &column);
+    }
     if (wanted == folderColumn_) {
         return;
     }
@@ -635,7 +680,7 @@ void Mailbox::ShowFolderColumn() {
     int subject = ListView_GetColumnWidth(list_, COL_SUBJECT);
     int folder = Scale(130);
     if (wanted) {
-        AddColumn(list_, COL_FOLDER, L"Folder", 130);
+        AddColumn(list_, COL_FOLDER, title, 130);
         ListView_SetColumnWidth(list_, COL_SUBJECT, std::max(Scale(120), subject - folder));
     } else {
         folder = ListView_GetColumnWidth(list_, COL_FOLDER);
@@ -644,11 +689,17 @@ void Mailbox::ShowFolderColumn() {
     }
 }
 
-// the folder of a row in a list of several folders: its name, with its account's when there are several accounts
+// the folder of a row in a list of several folders: its name, with its account's when there are several accounts; in
+// All Inboxes the account alone, as the tree names it
 std::wstring Mailbox::RowFolder(int64_t folder) const {
+    auto account = folderAccounts_.find(folder);
+    if (allInboxes_ && !Searching()) {
+        auto title = account != folderAccounts_.end() ? accountItems_.find(account->second) : accountItems_.end();
+        auto row = title != accountItems_.end() ? rows_.find(title->second) : rows_.end();
+        return row != rows_.end() ? row->second.name : L"";
+    }
     auto name = folderNames_.find(folder);
     std::wstring text = name != folderNames_.end() ? name->second.first : L"";
-    auto account = folderAccounts_.find(folder);
     if (accountNames_.size() > 1 && account != folderAccounts_.end()) {
         text += L" (" + AccountName(account->second) + L")";
     }
@@ -661,9 +712,9 @@ void Mailbox::ReloadList(bool keepSelection) {
     unread_ = 0;
     ShowFolderColumn();
     PeSearch search = Search();
-    // the counts of the folder come from its indexes; a search, of every folder, counts what it finds. An account's own
-    // item lists nothing
-    if (Searching()) {
+    // the counts of the folder come from its indexes; a search, of every folder, and All Inboxes count what they find.
+    // An account's own item lists nothing
+    if (SeveralFolders()) {
         pe_message_count(core_, &search, &total_, &unread_);
     } else if (folder_) {
         pe_folder_counts(core_, folder_, &total_, &unread_);
@@ -855,12 +906,13 @@ void Mailbox::RetryDownload() {
     pe_message_open(core_, messageFolder_, uid_);
 }
 
-bool Mailbox::OnFolderSelected(LPARAM folder) {
-    if (folder == folder_) {
+bool Mailbox::OnFolderSelected(int64_t folder, bool allInboxes) {
+    if (folder == folder_ && allInboxes == allInboxes_) {
         return false;
     }
     // the message of the folder before is not this folder's, nor is the search; what Show shows stays
     folder_ = folder;
+    allInboxes_ = allInboxes;
     ResetFind();
     ClearReader();
     ReloadList(false);
@@ -996,7 +1048,12 @@ void Mailbox::LoadPictures() {
 }
 
 void Mailbox::MarkAllRead() {
-    if (folder_ && !Searching()) {
+    if (Searching()) {
+        return;
+    }
+    if (allInboxes_) {
+        pe_mark_all_inboxes_read(core_);
+    } else if (folder_) {
         pe_folder_mark_all_read(core_, folder_);
     }
 }
@@ -1006,20 +1063,33 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
     if (item == items_.end()) {
         return;
     }
+    // All Inboxes stays when it has the message (of an Inbox), its list up to date with it
+    if (allInboxes_ && !Searching()) {
+        KillTimer(parent_, TIMER_RELOAD);
+        ReloadList(true);
+        if (SelectInList(folder, uid)) {
+            return;
+        }
+    }
     // the folder (which ends a search), then the message in it
     TreeView_SelectItem(tree_, item->second);
-    if (folder_ != folder) {
-        return;
+    if (folder_ == folder) {
+        SelectInList(folder, uid);
     }
+}
+
+bool Mailbox::SelectInList(int64_t folder, uint64_t uid) {
     PeSearch search = Search();
     int64_t index = pe_message_index(core_, &search, sort_, ascending_, folder, uid);
-    if (index >= 0 && index <= INT_MAX) {
-        int row = static_cast<int>(index);
-        ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
-        ListView_SetItemState(list_, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-        ListView_EnsureVisible(list_, row, FALSE);
-        SetFocus(list_);
+    if (index < 0 || index > INT_MAX) {
+        return false;
     }
+    int row = static_cast<int>(index);
+    ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
+    ListView_SetItemState(list_, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+    ListView_EnsureVisible(list_, row, FALSE);
+    SetFocus(list_);
+    return true;
 }
 
 void Mailbox::SelectStart() {
@@ -1027,10 +1097,17 @@ void Mailbox::SelectStart() {
         return;
     }
     started_ = true;
+    bool allInboxes = false;
     int64_t folder = 0;
     uint64_t uid = 0;
-    if (!folder_ && pe_start_message(core_, &folder, &uid)) {
+    if (folder_ || allInboxes_ || !pe_start_message(core_, &allInboxes, &folder, &uid)) {
+        return;
+    }
+    if (!allInboxes) {
         ShowMessage(folder, uid);
+    } else if (allInboxesItem_) {
+        TreeView_SelectItem(tree_, allInboxesItem_);
+        SelectInList(folder, uid);
     }
 }
 
@@ -1274,10 +1351,12 @@ void Mailbox::FolderMenu() {
     HMENU menu = CreatePopupMenu();
     // Mark All Read first, as Outlook Express has it, for a folder with unread messages
     uint64_t total = 0, unread = 0;
-    bool someUnread = folder_ && pe_folder_counts(core_, folder_, &total, &unread) && unread > 0;
+    bool someUnread = allInboxes_ ? pe_inbox_unread(core_) > 0
+                                  : folder_ && pe_folder_counts(core_, folder_, &total, &unread) && unread > 0;
     AppendMenuW(menu, someUnread ? MF_STRING : MF_STRING | MF_GRAYED, IDM_MARK_ALL_READ, L"Mark &All Read");
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, L"&New Folder...");
+    // All Inboxes is no folder of one account to make a folder in
+    AppendMenuW(menu, allInboxes_ ? MF_STRING | MF_GRAYED : MF_STRING, IDM_NEW_FOLDER, L"&New Folder...");
     std::wstring name;
     bool fixed = true;
     UINT special = folder_ && FolderOf(folder_, name, fixed) && !fixed ? MF_STRING : MF_STRING | MF_GRAYED;
@@ -1291,6 +1370,9 @@ std::wstring Mailbox::SelectedName() const {
     if (Searching()) {
         // where the search looks; what it found is on the search bar
         return findPlace_.empty() ? L"All folders" : findPlace_;
+    }
+    if (allInboxes_) {
+        return kAllInboxes;
     }
     if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
         return found->second.first;
@@ -1313,7 +1395,7 @@ void Mailbox::DrawEmptyList(HDC dc) const {
             more += L"\n\nThe text of " + std::to_wstring(left) + (left == 1 ? L" message is" : L" messages are") +
                     L" still being indexed, so more may be found soon.";
         }
-    } else if (folder_) {
+    } else if (folder_ || allInboxes_) {
         title = L"There are no items in this view.";
     } else if (selectedAccount_) {
         title = L"Choose a folder to see its messages.";
@@ -1371,7 +1453,7 @@ void ShowRefusal(HWND owner, char* reason, const wchar_t* fallback) {
 
 void Mailbox::NewFolder(HWND owner) {
     int64_t account = CurrentAccount();
-    if (!account) {
+    if (!account || allInboxes_) {
         return;
     }
     std::wstring where = folder_ ? L"The new folder goes in the selected folder." : L"The new folder goes at the top of the account.";
@@ -1425,7 +1507,7 @@ std::wstring Mailbox::Counts() const {
     if (Searching()) {
         return std::to_wstring(total_) + L" found, " + std::to_wstring(unread_) + L" unread";
     }
-    if (!folder_) {
+    if (!folder_ && !allInboxes_) {
         return L"";
     }
     return std::to_wstring(total_) + L" message(s), " + std::to_wstring(unread_) + L" unread";
@@ -1438,10 +1520,11 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
         if (header->code == TVN_SELCHANGEDW && !reloading_) {
             auto* change = reinterpret_cast<NMTREEVIEWW*>(header);
             LPARAM item = change->itemNew.hItem ? change->itemNew.lParam : 0;
+            bool allInboxes = item == kAllInboxesItem;
             // an account has no messages of its own
-            selectedAccount_ = item < 0 ? -item : 0;
+            selectedAccount_ = item < 0 && !allInboxes ? -item : 0;
             // the folder bar and the title name what is selected: an account too, from another account's item
-            if (!OnFolderSelected(item > 0 ? item : 0)) {
+            if (!OnFolderSelected(item > 0 ? item : 0, allInboxes)) {
                 SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
             }
         }
@@ -2036,7 +2119,7 @@ void Mailbox::OnEvent(const UiEvent& event) {
         UpdateFolders(event.account);
         if (event.folder == folder_ && !Searching()) {
             ReloadList(true);
-        } else if (Searching()) {
+        } else if (SeveralFolders()) {
             // a list of several folders has messages of any of them
             SetTimer(parent_, TIMER_RELOAD, 300, nullptr);
         }

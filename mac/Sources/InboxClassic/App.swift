@@ -375,6 +375,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .junk: return main.mailbox.hasSelection && !main.mailbox.inJunk
         case .notJunk: return main.mailbox.hasSelection && main.mailbox.inJunk
         case .pictures: return main.mailbox.picturesBlocked
+        // All Inboxes is no folder of one account to make a folder in or import into
+        case .newFolder, .import: return !main.mailbox.allInboxes
         default: return true
         }
     }

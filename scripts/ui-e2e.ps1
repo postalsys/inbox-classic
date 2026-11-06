@@ -405,12 +405,14 @@ $start.RedirectStandardInput = $true
 $start.RedirectStandardOutput = $true
 $harness = [System.Diagnostics.Process]::Start($start)
 # with its OAuth 2.0 / OpenID Connect provider, and a user with an address for name to sign in as there
-$harness.StandardInput.WriteLine('{"oauth":{},"users":{"testuser":{"password":"testpass"},"alice@example.com":{"password":"pw","displayName":"Alice Example"}}}')
+# and a second server with a mailbox of its own for the second account (ImapKit's users share one mailbox)
+$harness.StandardInput.WriteLine('{"oauth":{},"users":{"testuser":{"password":"testpass"},"alice@example.com":{"password":"pw","displayName":"Alice Example"}},"second":{"users":{"testuser2":{"password":"testpass2"}}}}')
 $ports = $harness.StandardOutput.ReadLine() | ConvertFrom-Json
 $rest = "http://127.0.0.1:$($ports.rest)/v1/mailboxes"
-function Messages([string]$mailbox) {
+$rest2 = "http://127.0.0.1:$($ports.second.rest)/v1/mailboxes"
+function Messages([string]$mailbox, [string]$server = $rest) {
     # through the pipeline, which unrolls the array: Windows PowerShell hands an empty one on as one object
-    @(Invoke-RestMethod "$rest/$([uri]::EscapeDataString($mailbox))/messages?raw=true" | ForEach-Object { $_ })
+    @(Invoke-RestMethod "$server/$([uri]::EscapeDataString($mailbox))/messages?raw=true" | ForEach-Object { $_ })
 }
 # the REST API gives the source base64 encoded
 function RawText($message) {
@@ -419,9 +421,9 @@ function RawText($message) {
 }
 function Find([string]$mailbox, [string]$pattern) { (Messages $mailbox) | Where-Object { (RawText $_) -match $pattern } | Select-Object -First 1 }
 function Seen([string]$pattern) { (Find 'INBOX' $pattern).flags -contains '\Seen' }
-function AddMessage([string]$raw, [string[]]$flags = @(), [string]$mailbox = 'INBOX') {
+function AddMessage([string]$raw, [string[]]$flags = @(), [string]$mailbox = 'INBOX', [string]$server = $rest) {
     $body = @{ raw = $raw; flags = $flags } | ConvertTo-Json
-    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body "$rest/$mailbox/messages")
+    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body "$server/$mailbox/messages")
 }
 
 # a picture sent inside the message: the newsletter's banner
@@ -497,8 +499,9 @@ try {
         } $seconds
     }
 
-    # both steps of the form: the name and address, then the servers with the password
-    function AddAccount([string]$name, [string]$user, [string]$password, [bool]$shots) {
+    # both steps of the form: the name and address, then the servers with the password; on the second server
+    function AddAccount([string]$name, [string]$user, [string]$password, [bool]$shots, [bool]$onSecond = $false) {
+        $on = if ($onSecond) { $ports.second } else { $ports }
         $first = StartPage $true
         Check ($null -ne $first) "the account form opens ($name)"
         if ($shots) {
@@ -526,10 +529,10 @@ try {
         SetText $second 102 $user
         SetText $second 103 $password
         SetText $second 104 '127.0.0.1'
-        SetText $second 105 "$($ports.imap)"
+        SetText $second 105 "$($on.imap)"
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 106), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
         SetText $second 107 '127.0.0.1'
-        SetText $second 108 "$($ports.smtp)"
+        SetText $second 108 "$($on.smtp)"
         # ImapKit's SMTP server takes a password only after STARTTLS
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 109), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
         if ($shots) { Shot $second 'account-3-servers' }
@@ -549,9 +552,18 @@ try {
     $list = [Native.Win]::GetDlgItem($main, $IDC_LIST)
     $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
     Check ($null -ne $folders) "the folders of the account are in the tree ($folders)"
+    # the first account's item: the first at the top of the tree with folders under it (All Inboxes, above the
+    # accounts while there are two, has none)
+    function FirstAccountItem {
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+        if ([Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $item) -eq [IntPtr]::Zero) {
+            $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
+        }
+        $item
+    }
     # the folders under the account: Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items
     function SelectFolder([int]$index) {
-        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FirstAccountItem))
         for ($i = 0; $i -lt $index; $i++) { $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item) }
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $item)
     }
@@ -1821,8 +1833,16 @@ public static class Dragger {
     # ---- a wrong password ----
 
     Step 'a wrong password'
+    # the second account's mail, on a server of its own, unread, dated a little ahead so it is the newest in the list
+    # (over what the steps before added), around the first account's message of the next step
+    foreach ($mail in @(
+            @('Priya Shah <priya@work.example>', 'Contract renewal for next year', 'The renewal is ready to sign. Could you look it over before Friday?', 10),
+            @('Tom Becker <tom@work.example>', 'Offsite agenda', 'Here is the agenda for the offsite. Add anything you want to talk about.', 8))) {
+        $date = [DateTime]::UtcNow.AddMinutes($mail[3]).ToString('r')
+        AddMessage "From: $($mail[0])`r`nTo: testuser2@inboxclassic.test`r`nSubject: $($mail[1])`r`nDate: $date`r`nMessage-ID: <$($mail[1] -replace ' ', '-')@work.example>`r`n`r`n$($mail[2])`r`n" @() 'INBOX' $rest2
+    }
     Command $main $IDM_NEW_ACCOUNT
-    AddAccount 'Wrong Password' 'testuser2' 'not-the-password' $false
+    AddAccount 'Work' 'testuser2' 'not-the-password' $false $true
     $logon = WaitWindow 'InboxClassicForm' 'Logon' 30
     Check ($null -ne $logon) 'a refused password is asked for again'
     if ($logon) {
@@ -1830,8 +1850,47 @@ public static class Dragger {
         $status = WindowText $status
         Check ($status -match 'authentication') "the status bar says why ($status)"
         Shot $main 'trouble-1-password'
-        Click $logon 2
+        # the right password, and the account syncs
+        SetText $logon 100 'testpass2'
+        Click $logon 1
+        $synced = WaitFor {
+            $work = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, (FirstAccountItem))
+            if ($work -ne [IntPtr]::Zero -and [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $work) -ne [IntPtr]::Zero) { $work }
+        } 30
+        Check ($null -ne $synced) 'with the right password typed, the account syncs'
     }
+
+    # ---- All Inboxes ----
+
+    Step 'All Inboxes'
+    # a new message for the first account too, so both have unread mail
+    $date = [DateTime]::UtcNow.AddMinutes(9).ToString('r')
+    AddMessage "From: Maria Lopez <maria@example.org>`r`nTo: testuser@inboxclassic.test`r`nSubject: Photos from the trip`r`nDate: $date`r`nMessage-ID: <trip-photos@example.org>`r`n`r`nThe photos from the trip are in the shared album.`r`n"
+    Command $main $IDM_SYNC
+    $top = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+    Check (([Native.Win]::RemoteTreeText($tree, $top)) -match '^All Inboxes') "All Inboxes is at the top of the tree, above the accounts ($([Native.Win]::RemoteTreeText($tree, $top)))"
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
+    $expected = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
+    Check ([bool](WaitFor { (Rows) -eq $expected } 20)) "it lists the mail of both accounts' Inboxes ($(Rows) of $expected)"
+    $COL_FOLDER = 7
+    $places = @(0..([Math]::Min(4, (Rows)) - 1) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_FOLDER) })
+    Check (($places -contains 'Work') -and ($places -contains 'Alex Morgan')) "newest first, the two accounts' messages among each other, the Account column naming each ($($places -join ', '))"
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    Check ((StatusPart $mainStatus 2) -match "^$expected message") "the status bar counts both Inboxes ($(StatusPart $mainStatus 2))"
+    SelectRow 0
+    Shot $main 'all-inboxes-1-list'
+    SelectRow ([array]::IndexOf($places, 'Work'))
+    Command $main $IDM_REPLY
+    $compose = WaitCompose
+    Check ($null -ne $compose) 'Reply opens a compose window'
+    if ($compose) {
+        $from = GetText $compose $IDC_FROM
+        Check ($from -eq 'Work <testuser2@inboxclassic.test>') "a reply goes from the account of the message ($from)"
+        CloseCompose $compose
+    }
+    Command $main $IDM_MARK_ALL_READ
+    $unreadOn = { param($server) @(Messages 'INBOX' $server | Where-Object { $_.flags -notcontains '\Seen' }).Count }
+    Check ([bool](WaitFor { (& $unreadOn $rest) -eq 0 -and (& $unreadOn $rest2) -eq 0 } 20)) "Mark All Read marks both Inboxes read on the servers ($(& $unreadOn $rest) and $(& $unreadOn $rest2) unread)"
 
     # ---- accounts ----
 
@@ -1888,6 +1947,8 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
         $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }
         Check ($null -ne $after) "the account leaves the tree ($before items before)"
+        $top = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+        Check (([Native.Win]::RemoteTreeText($tree, $top)) -notmatch '^All Inboxes') 'All Inboxes goes with the second account'
         Shot $main 'accounts-3-after'
     }
 

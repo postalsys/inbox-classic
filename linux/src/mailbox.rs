@@ -15,7 +15,7 @@ use pe_store::Folder;
 
 use crate::app::{run_command, shell, spawn};
 use crate::commands::Command;
-use crate::folders::{Entry, FolderTree, Handlers};
+use crate::folders::{ALL_INBOXES, Entry, FolderTree, Handlers};
 use crate::messages::{MessageList, parse_payload};
 use crate::reader::Reader;
 use crate::settings;
@@ -32,6 +32,7 @@ larger:5M    smaller:100k";
 
 /// The size the logo of a brand is drawn at
 const LOGO_SIZE: i32 = 48;
+const ALL_INBOXES_NAME: &str = "All Inboxes";
 
 /// An account as the window knows it
 #[derive(Clone)]
@@ -40,6 +41,8 @@ struct AccountInfo {
     name: String,
     email: String,
     label: String,
+    /// What the folder tree calls it
+    title: String,
     sign_in: Option<SignInWith>,
 }
 
@@ -75,6 +78,8 @@ pub struct Mailbox {
     selected_account: Cell<i64>,
     /// The folder shown, 0 for none
     folder: Cell<i64>,
+    /// All Inboxes is shown: the mail of every account's Inbox
+    all_inboxes: Cell<bool>,
     /// select_start has run: later showings of the window keep what is selected
     started: Cell<bool>,
     /// What the Find box searches for, empty when the list is the folder's, and the one folder it names (in:sent)
@@ -203,6 +208,7 @@ impl Mailbox {
             junk_folders: RefCell::default(),
             selected_account: Cell::new(0),
             folder: Cell::new(0),
+            all_inboxes: Cell::new(false),
             started: Cell::new(false),
             find_text: RefCell::default(),
             find_place: RefCell::default(),
@@ -419,14 +425,15 @@ impl Mailbox {
         self.junk_folders.borrow_mut().clear();
         for account in &accounts {
             let s = &account.settings;
+            let title = pe_core::account_title(&s.name, &s.email, &names);
             infos.push(AccountInfo {
                 id: account.id,
                 name: s.name.clone(),
                 email: s.email.clone(),
                 label: pe_core::account_label(&s.name, &s.email),
+                title: title.clone(),
                 sign_in: SignInWith::of_auth_kind(&s.auth),
             });
-            let title = pe_core::account_title(&s.name, &s.email, &names);
             let folders = core.folders(account.id).unwrap_or_default();
             let (folder_entries, unread) = self.folder_entries(account.id, &folders);
             let top = Entry {
@@ -441,20 +448,35 @@ impl Mailbox {
         }
         *self.accounts.borrow_mut() = infos;
         self.fill_account_menus();
-        let shown = if self.folder.get() != 0 {
+        let shown = if self.all_inboxes.get() {
+            ALL_INBOXES
+        } else if self.folder.get() != 0 {
             self.folder.get()
         } else {
             -self.selected_account.get()
         };
+        // above the accounts, the mail of every Inbox; its unread count as a folder's
+        let top = pe_core::all_inboxes_shown(accounts.len()).then(|| Entry {
+            id: ALL_INBOXES,
+            name: ALL_INBOXES_NAME.into(),
+            unread: core.inbox_unread().unwrap_or(0),
+            below: 0,
+            icon: folder_icon(Some(SpecialUse::Inbox)),
+            depth: 0,
+        });
         self.reloading.set(true);
-        let kept = self.folders.rebuild(entries);
+        let kept = self.folders.rebuild(top, entries);
         if shown != 0 && kept {
             self.folders.select(shown);
         }
         self.reloading.set(false);
-        if !kept && self.folder.get() != 0 {
-            // the folder is gone
-            self.on_folder_selected(0);
+        if !kept && (self.folder.get() != 0 || self.all_inboxes.get()) {
+            // one account left: its Inbox in place of All Inboxes (as the window starts); else the folder is gone
+            let inbox = core.start_message().ok().flatten().map(|start| start.folder);
+            let replaced = self.all_inboxes.get() && inbox.is_some_and(|inbox| self.folders.select(inbox));
+            if !replaced {
+                self.on_folder_selected(0, false);
+            }
         }
         self.show_folder_name();
     }
@@ -507,6 +529,10 @@ impl Mailbox {
             }
         }
         self.folders.update(-account, 0, hidden.account);
+        if pe_core::all_inboxes_shown(self.accounts.borrow().len()) {
+            self.folders
+                .update(ALL_INBOXES, shell().core.inbox_unread().unwrap_or(0), 0);
+        }
     }
 
     /// The menus beside Create Mail (a message from one account) and Send/Recv (all accounts, or one)
@@ -543,21 +569,23 @@ impl Mailbox {
         if self.reloading.get() {
             return;
         }
+        let all_inboxes = id == ALL_INBOXES;
         // an account has no messages of its own
-        self.selected_account.set(if id < 0 { -id } else { 0 });
-        if !self.on_folder_selected(id.max(0)) {
+        self.selected_account.set(if id < 0 && !all_inboxes { -id } else { 0 });
+        if !self.on_folder_selected(id.max(0), all_inboxes) {
             self.show_folder_name();
         }
         self.update_junk_button();
     }
 
-    /// Another folder shown; false when it was already the one shown
-    fn on_folder_selected(&self, folder: i64) -> bool {
-        if folder == self.folder.get() {
+    /// Another folder (or All Inboxes) shown; false when it was already the one shown
+    fn on_folder_selected(&self, folder: i64, all_inboxes: bool) -> bool {
+        if folder == self.folder.get() && all_inboxes == self.all_inboxes.get() {
             return false;
         }
         // the message of the folder before is not this folder's, nor is the search
         self.folder.set(folder);
+        self.all_inboxes.set(all_inboxes);
         self.reset_find();
         self.clear_reader(false);
         self.reload_list(false);
@@ -599,8 +627,19 @@ impl Mailbox {
         self.accounts.borrow().first().map_or(0, |a| a.id)
     }
 
-    /// The folder of a row in a list of several folders: its name, with its account's when there are several
+    /// The folder of a row in a list of several folders: its name, with its account's when there are several; in All
+    /// Inboxes the account alone, as the tree names it
     pub fn row_folder(&self, folder: i64) -> String {
+        if self.all_inboxes.get() && !self.searching() {
+            let account = self.folder_accounts.borrow().get(&folder).copied();
+            return self
+                .accounts
+                .borrow()
+                .iter()
+                .find(|a| Some(a.id) == account)
+                .map(|a| a.title.clone())
+                .unwrap_or_default();
+        }
         let mut text = self
             .folder_names
             .borrow()
@@ -621,12 +660,23 @@ impl Mailbox {
         !self.find_text.borrow().is_empty()
     }
 
+    /// Whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
+    fn several_folders(&self) -> bool {
+        self.searching() || self.all_inboxes.get()
+    }
+
     /// What the list shows: words typed search every folder of every account (in: narrows that); without, the
-    /// folder
+    /// folder, or every Inbox
     fn search(&self) -> pe_core::Search {
-        let searching = self.searching();
+        let scope = if self.searching() {
+            pe_core::Scope::Everywhere
+        } else if self.all_inboxes.get() {
+            pe_core::Scope::AllInboxes
+        } else {
+            pe_core::Scope::Folder(self.folder.get())
+        };
         pe_core::Search {
-            folder: (!searching).then_some(self.folder.get()),
+            scope,
             show: pe_core::Show::All,
             text: self.find_text.borrow().clone(),
         }
@@ -635,10 +685,10 @@ impl Mailbox {
     fn reload_list(&self, keep_selection: bool) {
         let core = &shell().core;
         let search = self.search();
-        let searching = self.searching();
-        let active = searching || self.folder.get() != 0;
-        // the counts of the folder come from its indexes; a search counts what it finds
-        let (total, unread) = if searching {
+        let several = self.several_folders();
+        let active = several || self.folder.get() != 0;
+        // the counts of the folder come from its indexes; a search and All Inboxes count what they find
+        let (total, unread) = if several {
             core.count_search(&search).unwrap_or((0, 0))
         } else if self.folder.get() != 0 {
             core.folder(self.folder.get())
@@ -649,7 +699,8 @@ impl Mailbox {
         };
         self.total.set(total);
         self.unread.set(unread);
-        self.list.show_folder_column(searching);
+        self.list
+            .show_folder_column(several, if self.searching() { "Folder" } else { "Account" });
         // the selection follows the message to where it is now, without a flicker of the reading pane
         let index = if keep_selection && self.uid.get() != 0 {
             core.search_index(&search, self.list.sort(), self.message_folder.get(), self.uid.get())
@@ -662,6 +713,7 @@ impl Mailbox {
         self.list.reset(search, total, active, index);
         self.reloading.set(false);
         self.show_empty_list();
+        self.show_counts();
         self.on_selection_changed();
     }
 
@@ -689,7 +741,7 @@ impl Mailbox {
                 format!("No messages match \u{201C}{}\u{201D}.", self.find_text.borrow()),
                 more,
             )
-        } else if self.folder.get() != 0 {
+        } else if self.folder.get() != 0 || self.all_inboxes.get() {
             ("There are no items in this view.".into(), String::new())
         } else if self.selected_account.get() != 0 {
             ("Choose a folder to see its messages.".into(), String::new())
@@ -834,25 +886,50 @@ impl Mailbox {
     /// The message `uid` of `folder` shown: its folder chosen in the tree (which ends a search), the message
     /// selected in the list
     pub fn show_message(&self, folder: i64, uid: u64) {
+        // All Inboxes stays when it has the message (of an Inbox), its list up to date with it
+        if self.all_inboxes.get() && !self.searching() {
+            if let Some(timer) = self.reload_later.borrow_mut().take() {
+                timer.remove();
+            }
+            self.reload_list(true);
+            if self.select_in_list(folder, uid) {
+                return;
+            }
+        }
         if !self.folders.select(folder) || self.folder.get() != folder {
             return;
         }
-        let core = &shell().core;
-        if let Ok(Some(index)) = core.search_index(&self.search(), self.list.sort(), folder, uid)
-            && let Ok(index) = u32::try_from(index)
-        {
-            self.list.select(index);
-            self.list.view.grab_focus();
-        }
+        self.select_in_list(folder, uid);
     }
 
-    /// The window shown the first time: the first account's Inbox chosen and its newest message selected
+    /// The row of the message `uid` of `folder` selected in the list; false when it is not there
+    fn select_in_list(&self, folder: i64, uid: u64) -> bool {
+        let core = &shell().core;
+        let Ok(Some(index)) = core.search_index(&self.search(), self.list.sort(), folder, uid) else {
+            return false;
+        };
+        let Ok(index) = u32::try_from(index) else {
+            return false;
+        };
+        self.list.select(index);
+        self.list.view.grab_focus();
+        true
+    }
+
+    /// The window shown the first time: All Inboxes (two or more accounts) or the first account's Inbox chosen, and
+    /// its newest message selected
     pub fn select_start(&self) {
-        if self.started.replace(true) || self.folder.get() != 0 {
+        if self.started.replace(true) || self.folder.get() != 0 || self.all_inboxes.get() {
             return;
         }
-        if let Ok(Some((folder, uid))) = shell().core.start_message() {
-            self.show_message(folder, uid.unwrap_or(0));
+        let Ok(Some(start)) = shell().core.start_message() else {
+            return;
+        };
+        let uid = start.uid.unwrap_or(0);
+        if !start.all_inboxes {
+            self.show_message(start.folder, uid);
+        } else if self.folders.select(ALL_INBOXES) {
+            self.select_in_list(start.folder, uid);
         }
     }
 
@@ -892,7 +969,6 @@ impl Mailbox {
         self.reset_find();
         self.reload_list(true);
         self.show_folder_name();
-        self.show_counts();
         self.list.view.grab_focus();
         true
     }
@@ -907,6 +983,9 @@ impl Mailbox {
             } else {
                 place.clone()
             };
+        }
+        if self.all_inboxes.get() {
+            return ALL_INBOXES_NAME.into();
         }
         if let Some((name, _)) = self.folder_names.borrow().get(&self.folder.get()) {
             return name.clone();
@@ -981,7 +1060,7 @@ impl Mailbox {
             "No messages found".to_string()
         } else if self.searching() {
             format!("{total} found, {unread} unread")
-        } else if self.folder.get() == 0 {
+        } else if self.folder.get() == 0 && !self.all_inboxes.get() {
             String::new()
         } else {
             format!("{total} message(s), {unread} unread")
@@ -1040,7 +1119,7 @@ impl Mailbox {
                 self.update_folders(*account);
                 if *folder == self.folder.get() && !self.searching() {
                     self.reload_list(true);
-                } else if self.searching() {
+                } else if self.several_folders() {
                     // a list of several folders follows their changes once a sync of many of them is done
                     self.reload_soon();
                 }
@@ -1095,7 +1174,6 @@ impl Mailbox {
                 this.reload_later.borrow_mut().take();
                 this.reload_list(true);
                 this.show_folder_name();
-                this.show_counts();
             }
         });
         *self.reload_later.borrow_mut() = Some(timer);
@@ -1109,9 +1187,14 @@ impl Mailbox {
         }
     }
 
-    /// Every message of the selected folder read; nothing while searching
+    /// Every message of the selected folder read, or of every Inbox from All Inboxes; nothing while searching
     pub fn mark_all_read(&self) {
-        if self.folder.get() != 0 && !self.searching() {
+        if self.searching() {
+            return;
+        }
+        if self.all_inboxes.get() {
+            let _ = shell().core.mark_all_inboxes_read();
+        } else if self.folder.get() != 0 {
             let _ = shell().core.mark_all_read(self.folder.get());
         }
     }
@@ -1273,7 +1356,12 @@ impl Mailbox {
     /// messages; New Folder, Rename and Delete for a folder that is not special
     fn folder_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
         let folder = self.folder.get();
-        let some_unread = folder != 0 && shell().core.folder(folder).is_ok_and(|f| f.unread > 0);
+        let all_inboxes = self.all_inboxes.get();
+        let some_unread = if all_inboxes {
+            shell().core.inbox_unread().is_ok_and(|unread| unread > 0)
+        } else {
+            folder != 0 && shell().core.folder(folder).is_ok_and(|f| f.unread > 0)
+        };
         let changeable = folder != 0 && self.folder_names.borrow().get(&folder).is_some_and(|(_, fixed)| !fixed);
         let group = gio::SimpleActionGroup::new();
         let add = |name: &str, enabled: bool, command: Command| {
@@ -1283,7 +1371,8 @@ impl Mailbox {
             group.add_action(&action);
         };
         add("mark-all-read", some_unread, Command::MarkAllRead);
-        add("new", true, Command::NewFolder);
+        // All Inboxes is no folder of one account to make a folder in
+        add("new", !all_inboxes, Command::NewFolder);
         add("rename", changeable, Command::RenameFolder);
         add("delete", changeable, Command::DeleteFolder);
         let menu = gio::Menu::new();
@@ -1318,7 +1407,7 @@ impl Mailbox {
     /// A folder in the selected one, or at the top of the selected account
     pub async fn new_folder(&self) {
         let account = self.current_account();
-        if account == 0 {
+        if account == 0 || self.all_inboxes.get() {
             return;
         }
         let folder = self.folder.get();

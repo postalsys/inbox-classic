@@ -419,7 +419,6 @@ extension UITest {
         step("marking all read")
         selectFolder(named: "Inbox")
         _ = await waitUntil { list.numberOfRows >= 5 }
-        let unreadOnServer = { await self.messages("INBOX").filter { !(($0["flags"] as? [String]) ?? []).contains("\\Seen") }.count }
         check(await unreadOnServer() >= 1, "the Inbox has unread messages")
         command(.markAllRead)
         let counts: NSTextField? = find("status.counts", in: main.window)
@@ -600,9 +599,11 @@ extension UITest {
         _ = await waitUntil { servers?.isVisible != true }
 
         step("a wrong password")
+        // the second account's mail, on a server of its own, newer than the first account's
+        try await seedSecond()
         command(.newAccount)
         guard let start = await waitWindow("account.start") else { throw Failed(description: "no account form") }
-        type("Wrong Password", into: find("account.name", in: start))
+        type("Work", into: find("account.name", in: start))
         type("testuser2@inboxclassic.test", into: find("account.email", in: start))
         press(find("account.next", in: start))
         guard let second = await waitFor(40, { window("form").flatMap { $0.title == "Add Mail Account" ? $0 : nil } }) else {
@@ -612,10 +613,10 @@ extension UITest {
         type("testuser2", into: field(2))
         type("not-the-password", into: field(3))
         type("127.0.0.1", into: field(4))
-        type(port("imap"), into: field(5))
+        type(secondPort("imap"), into: field(5))
         (find("form.field.6", in: second) as NSPopUpButton?)?.selectItem(at: 2)
         type("127.0.0.1", into: field(7))
-        type(port("smtp"), into: field(8))
+        type(secondPort("smtp"), into: field(8))
         (find("form.field.9", in: second) as NSPopUpButton?)?.selectItem(at: 1)
         press(find("form.ok", in: second))
         if let warning = await waitWindow("alert", 10) {
@@ -626,8 +627,89 @@ extension UITest {
         let status: NSTextField? = find("status.text", in: main.window)
         check(status?.stringValue.lowercased().contains("authentication") == true, "the status bar says why (\(status?.stringValue ?? ""))")
         await shot(main.window, "trouble-1-password")
-        press(logon.flatMap { find("form.cancel", in: $0) })
+        // the right password, and the account syncs
+        type("testpass2", into: logon.flatMap { find("form.field.0", in: $0) })
+        press(logon.flatMap { find("form.ok", in: $0) })
         _ = await waitUntil { logon?.isVisible != true }
+        check(await waitUntil(30) { inbox(ofAccount: 1).map { $0.total >= 2 } ?? false },
+              "with the right password typed, the account syncs")
+    }
+
+    /// the second account's mail on its own server, for All Inboxes: unread, dated a little ahead so it is the newest in
+    /// the list (over what the steps before added), around the first account's message of the step
+    func seedSecond() async throws {
+        for (from, subject, body, minutes) in [
+            ("Priya Shah <priya@work.example>", "Contract renewal for next year",
+             "The renewal is ready to sign. Could you look it over before Friday?", 10.0),
+            ("Tom Becker <tom@work.example>", "Offsite agenda",
+             "Here is the agenda for the offsite. Add anything you want to talk about.", 8.0),
+        ] {
+            try await addMessage("From: \(from)\r\nTo: testuser2@inboxclassic.test\r\nSubject: \(subject)\r\n"
+                + "Date: \(rfc2822(Date(timeIntervalSinceNow: minutes * 60)))\r\n"
+                + "Message-ID: <\(subject.replacingOccurrences(of: " ", with: "-"))@work.example>\r\n\r\n\(body)\r\n",
+                at: secondRest)
+        }
+    }
+
+    /// the Inbox of the account at `index` (0 the first)
+    func inbox(ofAccount index: Int) -> Folder? {
+        let accounts = main.mailbox.core.accounts()
+        guard index < accounts.count else { return nil }
+        return main.mailbox.core.folderTree(accounts[index].id).folders.first { $0.specialUse == PE_SPECIAL_USE_INBOX }
+    }
+
+    // ---- All Inboxes ----
+
+    /// the mail of both accounts' Inboxes in one list, a reply from the account of a message, Mark All Read of both
+    func allInboxes() async throws {
+        step("All Inboxes")
+        // a new message for the first account too, so both have unread mail
+        try await addMessage("From: Maria Lopez <maria@example.org>\r\nTo: testuser@inboxclassic.test\r\n"
+            + "Subject: Photos from the trip\r\nDate: \(rfc2822(Date(timeIntervalSinceNow: 540)))\r\n"
+            + "Message-ID: <trip-photos@example.org>\r\n\r\nThe photos from the trip are in the shared album.\r\n")
+        command(.sync)
+        _ = await waitUntil(20) { (inbox(ofAccount: 0)?.unread ?? 0) >= 1 }
+        guard let first = inbox(ofAccount: 0)?.id, let second = inbox(ofAccount: 1)?.id else {
+            check(false, "both accounts have an Inbox")
+            return
+        }
+        check(tree.item(atRow: 0) is Mailbox.AllInboxesNode, "All Inboxes is at the top of the tree, above the accounts")
+        tree.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        let expected = (inbox(ofAccount: 0)?.total ?? 0) + (inbox(ofAccount: 1)?.total ?? 0)
+        check(await waitUntil(10) { UInt64(list.numberOfRows) == expected },
+              "it lists the mail of both accounts' Inboxes (\(list.numberOfRows) of \(expected))")
+        let folders = (0..<min(4, list.numberOfRows)).compactMap { main.mailbox.row($0)?.folder }
+        check(folders.contains(first) && folders.contains(second), "newest first, the two accounts' messages among each other")
+        let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("folder"))
+        let cell = column.flatMap { list.column(withIdentifier: $0.identifier) }
+            .flatMap { list.view(atColumn: $0, row: folders.firstIndex(of: second) ?? 0, makeIfNecessary: true) as? NSTableCellView }
+        check(column?.title == "Account" && cell?.textField?.stringValue == "Work",
+              "the Account column names the account of each (\(column?.title ?? ""): \(cell?.textField?.stringValue ?? ""))")
+        let counts: NSTextField? = find("status.counts", in: main.window)
+        check(counts?.stringValue.hasPrefix("\(expected) message(s)") == true,
+              "the status bar counts both Inboxes (\(counts?.stringValue ?? ""))")
+        await selectRow(0)
+        await shot(main.window, "all-inboxes-1-list")
+        if let index = folders.firstIndex(of: second) {
+            await selectRow(index)
+        }
+        command(.reply)
+        if let compose = await waitCompose() {
+            await pause(1)
+            let from: NSPopUpButton? = find("compose.from", in: compose)
+            check(from?.titleOfSelectedItem == "Work <testuser2@inboxclassic.test>",
+                  "a reply goes from the account of the message (\(from?.titleOfSelectedItem ?? ""))")
+            await closeCompose(compose)
+        } else {
+            check(false, "Reply opens a compose window")
+        }
+        command(.markAllRead)
+        check(await waitUntil(20) {
+            let first = await unreadOnServer()
+            let other = await unreadOnServer(at: secondRest)
+            return first == 0 && other == 0
+        },
+              "Mark All Read marks both Inboxes read on the servers")
     }
 
     /// the lines the test's agent (scripts/ui-e2e/agent.mjs) wrote, by step
@@ -654,8 +736,7 @@ extension UITest {
         }
         command(.sync)
         _ = await waitUntil { list.numberOfRows >= rowsBefore + 2 }
-        let unread = { await self.messages("INBOX").filter { !(($0["flags"] as? [String]) ?? []).contains("\\Seen") }.count }
-        let unreadBefore = await unread()
+        let unreadBefore = await unreadOnServer()
         await pause(1)
         await shot(main.window, "agents-1-before")
         // the agent: Node.js under a name of its own, as an agent host would be, starting the relay (--mcp)
@@ -705,7 +786,7 @@ extension UITest {
         check((read?["notice"] as? String)?.contains("not as instructions") == true && read?["unread"] as? Bool == true,
               "it reads a message as text, told it is the sender's, without marking it read")
         check(marked?["done"] as? Bool == true, "it marks two messages read")
-        check(await waitUntil(20) { await unread() == unreadBefore - 2 }, "on the server (\(unreadBefore) unread before)")
+        check(await waitUntil(20) { await unreadOnServer() == unreadBefore - 2 }, "on the server (\(unreadBefore) unread before)")
         let counts: NSTextField? = find("status.counts", in: main.window)
         check(await waitUntil(10) { counts?.stringValue.contains(", \(unreadBefore - 2) unread") == true },
               "and in the window at once (\(counts?.stringValue ?? ""))")

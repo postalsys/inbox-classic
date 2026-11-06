@@ -38,6 +38,10 @@ struct Ports {
     smtp: u16,
     rest: u16,
     cert: String,
+    /// The second server, with a mailbox of its own, for the second account
+    second_imap: u16,
+    second_smtp: u16,
+    second_rest: u16,
 }
 
 struct Driver {
@@ -174,13 +178,14 @@ fn start_harness() -> Result<((Child, ChildStdin), Ports), String> {
         .spawn()
         .map_err(|e| e.to_string())?;
     let mut stdin = child.stdin.take().ok_or("no stdin")?;
-    let config = r#"{"oauth":{},"users":{"testuser":{"password":"testpass"},"testuser2":{"password":"testpass2"},"alice@example.com":{"password":"pw","displayName":"Alice Example"}}}"#;
+    let config = r#"{"oauth":{},"users":{"testuser":{"password":"testpass"},"alice@example.com":{"password":"pw","displayName":"Alice Example"}},"second":{"users":{"testuser2":{"password":"testpass2"}}}}"#;
     writeln!(stdin, "{config}").map_err(|e| e.to_string())?;
     let stdout = child.stdout.take().ok_or("no stdout")?;
     let mut line = String::new();
     BufReader::new(stdout).read_line(&mut line).map_err(|e| e.to_string())?;
     let ports: Value = serde_json::from_str(&line).map_err(|e| format!("{e}: {line}"))?;
     let port = |name: &str| ports[name].as_u64().unwrap_or(0) as u16;
+    let second = |name: &str| ports["second"][name].as_u64().unwrap_or(0) as u16;
     Ok((
         (child, stdin),
         Ports {
@@ -188,6 +193,9 @@ fn start_harness() -> Result<((Child, ChildStdin), Ports), String> {
             smtp: port("smtp"),
             rest: port("rest"),
             cert: ports["cert"].as_str().unwrap_or_default().to_string(),
+            second_imap: second("imap"),
+            second_smtp: second("smtp"),
+            second_rest: second("rest"),
         },
     ))
 }
@@ -228,8 +236,13 @@ fn http(port: u16, method: &str, path: &str, body: Option<&str>) -> Result<Strin
 
 impl Driver {
     fn messages(&self, mailbox: &str) -> Vec<Value> {
+        self.messages_at(self.ports.rest, mailbox)
+    }
+
+    /// The messages of a mailbox of the server whose REST API is at `rest`
+    fn messages_at(&self, rest: u16, mailbox: &str) -> Vec<Value> {
         let path = format!("/v1/mailboxes/{}/messages?raw=true", mailbox.replace('/', "%2F"));
-        http(self.ports.rest, "GET", &path, None)
+        http(rest, "GET", &path, None)
             .ok()
             .and_then(|body| serde_json::from_str::<Value>(&body).ok())
             .and_then(|v| v.as_array().cloned())
@@ -254,6 +267,14 @@ impl Driver {
             .find(|m| raw_text(m).contains(needle))
     }
 
+    /// How many messages of the Inbox of the server whose REST API is at `rest` are unread
+    fn unread_at(&self, rest: u16) -> usize {
+        self.messages_at(rest, "INBOX")
+            .iter()
+            .filter(|m| !m["flags"].as_array().is_some_and(|f| f.iter().any(|f| f == "\\Seen")))
+            .count()
+    }
+
     fn flags(&self, mailbox: &str, needle: &str) -> Vec<String> {
         self.find(mailbox, needle)
             .and_then(|m| m["flags"].as_array().cloned())
@@ -268,8 +289,13 @@ impl Driver {
     }
 
     fn add_message(&self, raw: &str, flags: &[&str]) -> Result<(), String> {
+        self.add_message_at(self.ports.rest, raw, flags)
+    }
+
+    /// A message into the Inbox of the server whose REST API is at `rest`
+    fn add_message_at(&self, rest: u16, raw: &str, flags: &[&str]) -> Result<(), String> {
         let body = serde_json::json!({ "raw": raw, "flags": flags }).to_string();
-        http(self.ports.rest, "POST", "/v1/mailboxes/INBOX/messages", Some(&body)).map(|_| ())
+        http(rest, "POST", "/v1/mailboxes/INBOX/messages", Some(&body)).map(|_| ())
     }
 }
 
@@ -738,6 +764,16 @@ async fn wait_compose(seconds: u64) -> Option<Rc<crate::compose::Compose>> {
     Some(found)
 }
 
+/// The account a compose window sends from, as its From list shows it
+fn compose_from(compose: &crate::compose::Compose) -> String {
+    named_in(compose.window.upcast_ref(), "compose-from")
+        .and_downcast::<gtk::DropDown>()
+        .and_then(|d| d.selected_item())
+        .and_downcast::<gtk::StringObject>()
+        .map(|s| s.string().to_string())
+        .unwrap_or_default()
+}
+
 async fn close_compose(compose: &crate::compose::Compose) {
     compose.window.close();
     if let Some(dialog) = wait_alert(3).await {
@@ -754,7 +790,7 @@ fn command(command: Command) {
 // ---- the scenario ----
 
 async fn scenario(d: Rc<Driver>) {
-    add_account(&d, "Alex Morgan", "testuser", "testpass", true).await;
+    add_account(&d, "Alex Morgan", "testuser", "testpass", true, false).await;
     reading(&d).await;
     writing(&d).await;
     steps::not_downloaded(&d).await;
@@ -778,6 +814,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::signature(&d).await;
     steps::gmail(&d).await;
     wrong_password(&d).await;
+    steps::all_inboxes(&d).await;
     accounts(&d).await;
     sign_in_apps(&d).await;
     about_and_help(&d).await;
@@ -785,8 +822,13 @@ async fn scenario(d: Rc<Driver>) {
     steps::closing(&d).await;
 }
 
-/// Both steps of the account form: the name and address, then the servers with the password
-async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: bool) {
+/// Both steps of the account form: the name and address, then the servers with the password; on the `second` server
+async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: bool, second: bool) {
+    let (imap, smtp) = if second {
+        (d.ports.second_imap, d.ports.second_smtp)
+    } else {
+        (d.ports.imap, d.ports.smtp)
+    };
     d.step(&format!("adding the account {name}"));
     let Some(first) = wait_dialog(20, "account-start").await else {
         d.check(false, &format!("the account form opens ({name})"));
@@ -833,12 +875,12 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     set_text(&second, "form-2", user);
     set_text(&second, "form-3", password);
     set_text(&second, "form-4", "127.0.0.1");
-    set_text(&second, "form-5", &d.ports.imap.to_string());
+    set_text(&second, "form-5", &imap.to_string());
     if let Some(combo) = named_in(&second, "form-6").and_downcast::<adw::ComboRow>() {
         combo.set_selected(2);
     }
     set_text(&second, "form-7", "127.0.0.1");
-    set_text(&second, "form-8", &d.ports.smtp.to_string());
+    set_text(&second, "form-8", &smtp.to_string());
     // ImapKit's SMTP server takes a password only after STARTTLS
     if let Some(combo) = named_in(&second, "form-9").and_downcast::<adw::ComboRow>() {
         combo.set_selected(1);
@@ -1142,12 +1184,7 @@ async fn writing(d: &Driver) {
         wait_until(5, || WidgetExt::is_visible(&c.cc) && !c.cc_button.is_visible()).await,
         "Cc opens its row, and its button goes",
     );
-    let from = named_in(c.window.upcast_ref(), "compose-from")
-        .and_downcast::<gtk::DropDown>()
-        .and_then(|d| d.selected_item())
-        .and_downcast::<gtk::StringObject>()
-        .map(|s| s.string().to_string())
-        .unwrap_or_default();
+    let from = compose_from(&c);
     d.check(
         from == "Alex Morgan <testuser@inboxclassic.test>",
         &format!("From names the account it goes from ({from})"),
@@ -1616,8 +1653,10 @@ async fn organizing(d: &Driver) {
 
 async fn wrong_password(d: &Driver) {
     d.step("a wrong password");
+    // the second account's mail, on a server of its own, newer than the first account's
+    steps::seed_second(d);
     command(Command::NewAccount);
-    add_account(d, "Wrong Password", "testuser2", "not-the-password", false).await;
+    add_account(d, "Work", "testuser2", "not-the-password", false, true).await;
     let logon = wait_dialog(30, "logon").await;
     d.check(logon.is_some(), "a refused password is asked for again");
     if let Some(logon) = logon {
@@ -1627,7 +1666,14 @@ async fn wrong_password(d: &Driver) {
             &format!("the status bar says why ({status})"),
         );
         d.shot(&logon, "trouble-1-password").await;
-        logon.close();
+        // the right password, and the account syncs
+        set_text(logon.upcast_ref(), "form-0", "testpass2");
+        click(logon.upcast_ref(), "dialog-ok");
+        let synced = wait_until(30, || {
+            steps::second_inbox().is_some_and(|inbox| shell().core.folder(inbox).is_ok_and(|f| f.total >= 2))
+        })
+        .await;
+        d.check(synced, "with the right password typed, the account syncs");
     }
 }
 
@@ -1684,6 +1730,13 @@ async fn accounts(d: &Driver) {
         dialog.close();
     }
     wait_gone(10, "accounts-dialog").await;
+    d.check(
+        wait_until(10, || {
+            shell().main().folders.markup_of(crate::folders::ALL_INBOXES).is_none()
+        })
+        .await,
+        "All Inboxes goes with the second account",
+    );
     d.shot(&main_window(), "accounts-3-after").await;
 }
 

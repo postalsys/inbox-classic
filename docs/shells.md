@@ -8,6 +8,7 @@ The three apps are thin windows on the same Rust core (`core/`). A feature that 
 | The core's API and events                   | `core.cpp`, `core.h`                         | `Core.swift` (on `core/include/inbox_classic.h`)    | `app.rs` (on `pe-core` directly)             |
 | Main window, toolbar, search, status bar    | `main.cpp`, `mailbox.cpp`                    | `MainWindow.swift`                                  | `mailbox.rs`                                 |
 | Folder tree                                 | `mailbox.cpp`                                | `Mailbox.swift`                                     | `folders.rs`                                 |
+| All Inboxes (its item, list, Mark All Read) | `mailbox.cpp`                                | `Mailbox.swift` (`AllInboxesNode`)                  | `folders.rs` (`ALL_INBOXES`), `mailbox.rs`   |
 | Message list, its right-click menu          | `mailbox.cpp`                                | `Mailbox.swift`                                     | `messages.rs`, `mailbox.rs`                  |
 | Message Source                              | `mailbox.cpp`, `ui.cpp` (`SourceDialog`)     | `Mailbox.swift`, `Dialogs.swift` (`textDialog`)     | `mailbox.rs`, `ui.rs`                        |
 | Reading pane, attachments, bars, logo       | `mailbox.cpp`, `preview.cpp`                 | `Reader.swift`, `WebViews.swift`                    | `reader.rs`, `webview.rs`                    |

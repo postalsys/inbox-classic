@@ -32,12 +32,16 @@ public final class Mailbox: NSObject {
     // the folder tree
     private var accounts: [AccountNode] = []
     private var folderNodes: [Int64: FolderNode] = [:]
+    /// All Inboxes above the accounts (two or more of them)
+    private var allInboxesNode: AllInboxesNode?
     private var accountInfo: [Int64: Account] = [:]
     private var firstAccount: Int64 = 0
     private var reloading = false
 
     // the list: the folder or the search, its order and its rows
     private(set) var folder: Int64 = 0
+    /// All Inboxes is selected: the list has the mail of every account's Inbox
+    private(set) var allInboxes = false
     /// selectStart has run: later showings of the window keep what is selected
     private var started = false
     private var selectedAccount: Int64 = 0
@@ -167,13 +171,29 @@ public final class Mailbox: NSObject {
         init(_ folder: Folder) { self.folder = folder }
     }
 
+    /// the mail of every account's Inbox in one list, with their unread messages
+    final class AllInboxesNode {
+        var unread: UInt64 = 0
+    }
+
+    static let allInboxesName = "All Inboxes"
+
+    /// the rows at the top of the tree: All Inboxes, then the accounts
+    private var topNodes: [Any] {
+        (allInboxesNode.map { [$0] } ?? []) + accounts
+    }
+
     public func reload() {
         let selected = folder
+        let allSelected = allInboxes
         accounts = []
         folderNodes = [:]
         accountInfo = [:]
         firstAccount = 0
-        for account in core.accounts() {
+        let all = core.accounts()
+        allInboxesNode = pe_all_inboxes_shown(all.count) ? AllInboxesNode() : nil
+        allInboxesNode?.unread = core.inboxUnread
+        for account in all {
             accountInfo[account.id] = account
             if firstAccount == 0 { firstAccount = account.id }
             let node = AccountNode(account)
@@ -197,16 +217,27 @@ public final class Mailbox: NSObject {
         reloading = true
         tree.reloadData()
         accounts.forEach { tree.expandItem($0, expandChildren: true) }
-        if let node = folderNodes[selected] {
-            let row = tree.row(forItem: node)
-            if row >= 0 { tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false) }
+        let reselected: Any? = allSelected ? allInboxesNode : folderNodes[selected]
+        if let node = reselected {
+            selectTreeNode(node)
         }
         reloading = false
-        if selected != 0 && folderNodes[selected] == nil {
+        if allSelected && allInboxesNode == nil, let start = core.startMessage(), let inbox = folderNodes[start.folder] {
+            // one account left: its Inbox in place of All Inboxes (as the window starts)
+            selectTreeNode(inbox)
+        } else if (selected != 0 || allSelected) && reselected == nil {
             // the folder is gone
             folderSelected(0)
         }
         changed()
+    }
+
+    /// the row of `node` in the tree selected, when it is shown
+    private func selectTreeNode(_ node: Any) {
+        let row = tree.row(forItem: node)
+        if row >= 0 {
+            tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        }
     }
 
     /// the labels of the folders of an account; a folder the tree does not have yet builds it again
@@ -222,6 +253,10 @@ public final class Mailbox: NSObject {
         }
         if let node = accounts.first(where: { $0.account.id == account }) {
             node.unread = folderTree.unread
+            tree.reloadItem(node)
+        }
+        if let node = allInboxesNode {
+            node.unread = core.inboxUnread
             tree.reloadItem(node)
         }
     }
@@ -247,13 +282,14 @@ public final class Mailbox: NSObject {
         return selectedAccount != 0 ? selectedAccount : firstAccount
     }
 
-    fileprivate func folderSelected(_ id: Int64) {
-        guard id != folder else {
+    fileprivate func folderSelected(_ id: Int64, allInboxes all: Bool = false) {
+        guard id != folder || all != allInboxes else {
             changed()
             return
         }
         // the message of the folder before is not this folder's, nor is the search
         folder = id
+        allInboxes = all
         resetFind()
         clearReader()
         reloadList(keepSelection: false)
@@ -266,6 +302,9 @@ public final class Mailbox: NSObject {
             // where the search looks; what it found is on the search bar
             return findPlace.isEmpty ? "All folders" : findPlace
         }
+        if allInboxes {
+            return Mailbox.allInboxesName
+        }
         if let node = folderNodes[folder] {
             return node.folder.displayName
         }
@@ -275,7 +314,7 @@ public final class Mailbox: NSObject {
     var counts: String {
         if searching && total == 0 { return "No messages found" }
         if searching { return "\(total) found, \(unread) unread" }
-        if folder == 0 { return "" }
+        if folder == 0 && !allInboxes { return "" }
         return "\(total) message(s), \(unread) unread"
     }
 
@@ -291,9 +330,13 @@ public final class Mailbox: NSObject {
 
     private var searching: Bool { !findText.isEmpty }
 
-    /// words typed search every folder of every account (in: narrows that); without, the list is the folder's
+    /// whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
+    private var severalFolders: Bool { searching || allInboxes }
+
+    /// words typed search every folder of every account (in: narrows that); without, the list is the folder's, or
+    /// every Inbox's
     private var search: Search {
-        Search(folder: searching ? 0 : folder, text: findText)
+        Search(folder: searching ? 0 : folder, allInboxes: !searching && allInboxes, text: findText)
     }
 
     private enum ColumnID: String, CaseIterable {
@@ -344,15 +387,18 @@ public final class Mailbox: NSObject {
         return column
     }
 
-    /// the Folder column while the list has messages of several folders, and not otherwise
+    /// the Folder column while the list has messages of several folders, and not otherwise; in All Inboxes, whose rows
+    /// are all in an Inbox, the Account column
     private func showFolderColumn() {
-        guard searching != folderColumn else { return }
-        folderColumn = searching
+        let title = searching ? "Folder" : "Account"
+        list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue))?.title = title
+        guard severalFolders != folderColumn else { return }
+        folderColumn = severalFolders
         // the Subject column gives the Folder column its room, and gets it back: the list stays as wide as its pane
         let id = NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue)
         let subject = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.subject.rawValue))
         if folderColumn {
-            let column = makeColumn(.folder, title: "Folder", width: 130)
+            let column = makeColumn(.folder, title: title, width: 130)
             subject.map { $0.width = max(120, $0.width - column.width) }
             list.addTableColumn(column)
             // after Subject, before Received, as the Windows list has it at its end
@@ -366,9 +412,13 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// the folder of a row in a list of several folders: its name, with its account's when there are several accounts
+    /// the folder of a row in a list of several folders: its name, with its account's when there are several accounts;
+    /// in All Inboxes the account alone, as the tree names it
     private func rowFolder(_ id: Int64) -> String {
         guard let node = folderNodes[id] else { return "" }
+        if allInboxes && !searching {
+            return accountInfo[node.folder.account]?.title ?? ""
+        }
         var text = node.folder.displayName
         if accountInfo.count > 1 {
             text += " (\(accountName(node.folder.account)))"
@@ -381,8 +431,9 @@ public final class Mailbox: NSObject {
         total = 0
         unread = 0
         showFolderColumn()
-        // the counts of the folder come from its indexes; a search counts what it finds; an account lists nothing
-        if searching {
+        // the counts of the folder come from its indexes; a search and All Inboxes count what they find; an account
+        // lists nothing
+        if severalFolders {
             (total, unread) = core.messageCount(search)
         } else if folder != 0 {
             (total, unread) = core.folderCounts(folder)
@@ -489,7 +540,7 @@ public final class Mailbox: NSObject {
                     more += "\n\nThe text of \(left) " + (left == 1 ? "message is" : "messages are")
                         + " still being indexed, so more may be found soon."
                 }
-            } else if folder != 0 {
+            } else if folder != 0 || allInboxes {
                 title = "There are no items in this view."
             } else if selectedAccount != 0 {
                 title = "Choose a folder to see its messages."
@@ -634,25 +685,39 @@ public final class Mailbox: NSObject {
     /// the message (`folder`, `uid`) in its folder, selected; the folder ends a search
     func showMessage(folder id: Int64, uid message: UInt64) {
         guard let node = folderNodes[id] else { return }
-        let treeRow = tree.row(forItem: node)
-        if treeRow >= 0 {
-            tree.selectRowIndexes(IndexSet(integer: treeRow), byExtendingSelection: false)
+        // All Inboxes stays when it has the message (of an Inbox), its list up to date with it
+        if allInboxes && !searching {
+            reloadTimer?.invalidate()
+            reloadList(keepSelection: true)
+            if selectInList(folder: id, uid: message) { return }
         }
+        selectTreeNode(node)
         guard folder == id else { return }
-        let index = core.messageIndex(search, sort: sort, ascending: ascending, folder: id, uid: message)
-        if index >= 0 {
-            list.selectRowIndexes(IndexSet(integer: Int(index)), byExtendingSelection: false)
-            list.scrollRowToVisible(Int(index))
-            list.window?.makeFirstResponder(list)
-        }
+        selectInList(folder: id, uid: message)
     }
 
-    /// the window shown the first time: the first account's Inbox chosen and its newest message selected
+    /// the row of the message `uid` of `folder` selected in the list; false when it is not there
+    @discardableResult
+    private func selectInList(folder id: Int64, uid message: UInt64) -> Bool {
+        let index = core.messageIndex(search, sort: sort, ascending: ascending, folder: id, uid: message)
+        guard index >= 0 else { return false }
+        list.selectRowIndexes(IndexSet(integer: Int(index)), byExtendingSelection: false)
+        list.scrollRowToVisible(Int(index))
+        list.window?.makeFirstResponder(list)
+        return true
+    }
+
+    /// the window shown the first time: All Inboxes (two or more accounts) or the first account's Inbox chosen, and its
+    /// newest message selected
     func selectStart() {
         guard !started else { return }
         started = true
-        if folder == 0, let start = core.startMessage() {
+        guard folder == 0, !allInboxes, let start = core.startMessage() else { return }
+        if !start.allInboxes {
             showMessage(folder: start.folder, uid: start.uid)
+        } else if let node = allInboxesNode {
+            selectTreeNode(node)
+            selectInList(folder: start.folder, uid: start.uid)
         }
     }
 
@@ -680,7 +745,10 @@ public final class Mailbox: NSObject {
     }
 
     func markAllRead() {
-        if folder != 0 && !searching {
+        guard !searching else { return }
+        if allInboxes {
+            pe_mark_all_inboxes_read(core.handle)
+        } else if folder != 0 {
             pe_folder_mark_all_read(core.handle, folder)
         }
     }
@@ -752,7 +820,7 @@ public final class Mailbox: NSObject {
 
     func newFolder() {
         let account = currentAccount
-        guard account != 0 else { return }
+        guard account != 0, !allInboxes else { return }
         let where_ = folder != 0 ? "The new folder goes in the selected folder." : "The new folder goes at the top of the account."
         guard let name = askFolderName(title: "New Folder", intro: where_, name: ""), !name.isEmpty else { return }
         var reason: UnsafeMutablePointer<CChar>?
@@ -785,9 +853,10 @@ public final class Mailbox: NSObject {
     /// the folder menu (a right-click in the tree): Mark All Read, New, Rename, Delete
     fileprivate func folderMenu() -> NSMenu {
         let menu = NSMenu()
-        let someUnread = folder != 0 && core.folderCounts(folder).unread > 0
+        let someUnread = allInboxes ? core.inboxUnread > 0 : folder != 0 && core.folderCounts(folder).unread > 0
         let editable = folder != 0 && !(folderNodes[folder]?.folder.fixed ?? true)
-        for (command, enabled) in [(Command.markAllRead, someUnread), (.newFolder, true), (.renameFolder, editable),
+        // All Inboxes is no folder of one account to make a folder in
+        for (command, enabled) in [(Command.markAllRead, someUnread), (.newFolder, !allInboxes), (.renameFolder, editable),
                                    (.deleteFolder, editable)] {
             let item = NSMenuItem(title: command.label, action: #selector(folderMenuItem(_:)), keyEquivalent: "")
             item.target = self
@@ -1044,7 +1113,7 @@ public final class Mailbox: NSObject {
             updateFolders(event.account)
             if event.folder == folder && !searching {
                 reloadList(keepSelection: true)
-            } else if searching {
+            } else if severalFolders {
                 // a list of several folders has messages of any of them; once a sync of many is done, not after each
                 reloadTimer?.invalidate()
                 reloadTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
@@ -1094,7 +1163,7 @@ public final class Mailbox: NSObject {
 extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
     public func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
         switch item {
-        case nil: return accounts.count
+        case nil: return topNodes.count
         case let account as AccountNode: return account.children.count
         case let folder as FolderNode: return folder.children.count
         default: return 0
@@ -1105,7 +1174,7 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         switch item {
         case let account as AccountNode: return account.children[index]
         case let folder as FolderNode: return folder.children[index]
-        default: return accounts[index]
+        default: return topNodes[index]
         }
     }
 
@@ -1116,6 +1185,9 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
     public func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
         let cell = (outlineView.makeView(withIdentifier: FolderCell.identifier, owner: nil) as? FolderCell) ?? FolderCell()
         switch item {
+        case let all as AllInboxesNode:
+            cell.show(name: Mailbox.allInboxesName, count: all.unread, icon: Icons.folder("mail_inbox"), bold: all.unread > 0)
+            cell.setAccessibilityIdentifier("tree.allInboxes")
         case let account as AccountNode:
             // collapsed, an account shows the unread messages of its folders
             let unread = outlineView.isItemExpanded(account) ? 0 : account.unread
@@ -1158,7 +1230,10 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         guard !reloading else { return }
         let item = tree.item(atRow: tree.selectedRow)
         // an account has no messages of its own
-        if let account = item as? AccountNode {
+        if item is AllInboxesNode {
+            selectedAccount = 0
+            folderSelected(0, allInboxes: true)
+        } else if let account = item as? AccountNode {
             selectedAccount = account.account.id
             folderSelected(0)
         } else if let node = item as? FolderNode {
