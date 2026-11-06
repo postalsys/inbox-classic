@@ -72,6 +72,8 @@ pub struct Mailbox {
     unselectable: RefCell<HashSet<i64>>,
     /// The message list's right-click menu, the last one opened (the e2e driver reads it)
     pub message_popover: RefCell<Option<gtk::PopoverMenu>>,
+    /// The folder tree's right-click menu, the last one opened (the e2e driver reads it)
+    pub folder_popover: RefCell<Option<gtk::PopoverMenu>>,
     draft_folders: RefCell<HashSet<i64>>,
     junk_folders: RefCell<HashSet<i64>>,
     /// The account whose own item is selected in the tree, 0 when a folder is
@@ -204,6 +206,7 @@ impl Mailbox {
             folder_names: RefCell::default(),
             unselectable: RefCell::default(),
             message_popover: RefCell::default(),
+            folder_popover: RefCell::default(),
             draft_folders: RefCell::default(),
             junk_folders: RefCell::default(),
             selected_account: Cell::new(0),
@@ -1354,7 +1357,7 @@ impl Mailbox {
 
     /// The right-click menu of a folder: Mark All Read first, as Outlook Express has it, for a folder with unread
     /// messages; New Folder, Rename and Delete for a folder that is not special
-    fn folder_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
+    pub fn folder_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
         let folder = self.folder.get();
         let all_inboxes = self.all_inboxes.get();
         let some_unread = if all_inboxes {
@@ -1387,7 +1390,7 @@ impl Mailbox {
             menu.append_section(None, &rest);
         }
         widget.insert_action_group("folder", Some(&group));
-        popup_menu(widget, &menu, x, y);
+        *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
     }
 
     async fn ask_folder_name(&self, title: &str, intro: &str, name: &str) -> Option<String> {

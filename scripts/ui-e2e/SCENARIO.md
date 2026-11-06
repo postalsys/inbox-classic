@@ -417,14 +417,14 @@ The second account is on a second ImapKit server (`second` in the harness config
 
 ## 39. All Inboxes
 
-Screenshots: `all-inboxes-1-list`
+Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the test checks the menu's items there without a picture of it)
 
 - All Inboxes is at the top of the tree, above the accounts
 - it lists the mail of both accounts' Inboxes
 - newest first, the two accounts' messages among each other
 - the Account column names the account of each
 - the status bar counts both Inboxes
-- its right-click menu has Mark All Read alone (the Mac)
+- its right-click menu has Mark All Read alone
 - a reply goes from the account of the message
 - Mark All Read marks both Inboxes read on the servers
 

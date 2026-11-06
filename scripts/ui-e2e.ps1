@@ -1879,6 +1879,19 @@ public static class Dragger {
     Check ((StatusPart $mainStatus 2) -match "^$expected message") "the status bar counts both Inboxes ($(StatusPart $mainStatus 2))"
     SelectRow 0
     Shot $main 'all-inboxes-1-list'
+    # its right-click menu, as a right-click on its row opens it: Mark All Read alone, no folder commands
+    [void][Native.Win]::SetForegroundWindow($main)
+    $at = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $top.ToInt64()))
+    foreach ($button in @(0, 0x0008, 0x0010)) { [Native.Win]::Mouse($at[0], $at[1], $button) }
+    $menu = WaitWindow '#32768' $null 10
+    Check ($null -ne $menu) 'All Inboxes has a right-click menu'
+    if ($menu) {
+        $labels = @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)))
+        Check ($labels.Count -eq 1 -and $labels[0] -eq 'Mark All Read') "with Mark All Read alone ($($labels -join ', '))"
+        Shot $main 'all-inboxes-2-menu' $menu
+        Key $menu $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+    }
     SelectRow ([array]::IndexOf($places, 'Work'))
     Command $main $IDM_REPLY
     $compose = WaitCompose
