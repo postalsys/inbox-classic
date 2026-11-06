@@ -382,11 +382,9 @@ win-edit = &Modificar...
 
 ## Opciones
 
-win-options-language-group = Idioma
 win-options-language-label = &Mostrar Inbox Classic en:
 win-options-system-default = Idioma del sistema ({ $language })
 win-options-restart-note = Inbox Classic se reinicia para mostrar otro idioma.
-win-options-notify-group = Notificaciones
 win-options-notify = &Avisarme cuando llegue correo nuevo
 win-restart-ask = Inbox Classic se mostrará en el idioma elegido ({ $language }) después de reiniciarse. ¿Reiniciar ahora?
 win-restart-now = &Reiniciar ahora

@@ -2231,7 +2231,7 @@ public static class Dragger {
         $signature = WaitWindow 'InboxClassicSignature' $null 20
         Check ($null -ne $signature) 'Signature opens the signature editor of the account'
         if ($signature) {
-            Check ((WindowText $signature) -match '^Signature - ') "titled with the account ($(WindowText $signature))"
+            Check ((WindowText $signature) -match '^Signature: ') "titled with the account ($(WindowText $signature))"
             Check (TypeInEditor $signature 'Ann, signed by the UI test') 'the signature editor takes typing'
             Shot $signature 'signature-1-editor'
             Click $signature 1

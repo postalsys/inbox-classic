@@ -121,28 +121,24 @@ bool OptionsDialog(HWND owner, bool& notify) {
         return found != languages.end() ? found->name : code;
     };
 
-    std::wstring languageGroup = core::T(PE_TEXT_WIN_OPTIONS_LANGUAGE_GROUP), label = core::T(PE_TEXT_WIN_OPTIONS_LANGUAGE_LABEL);
-    std::wstring note = core::T(PE_TEXT_WIN_OPTIONS_RESTART_NOTE), notifyGroup = core::T(PE_TEXT_WIN_OPTIONS_NOTIFY_GROUP);
+    std::wstring label = core::T(PE_TEXT_WIN_OPTIONS_LANGUAGE_LABEL), note = core::T(PE_TEXT_WIN_OPTIONS_RESTART_NOTE);
     std::wstring notifyText = core::T(PE_TEXT_WIN_OPTIONS_NOTIFY);
     std::wstring ok = core::T(PE_TEXT_WIN_OK), cancel = core::T(PE_TEXT_WIN_CANCEL);
-    int pad = Scale(12), inset = Scale(12), row = Scale(22);
+    int pad = Scale(12), row = Scale(22);
     int labelWidth = static_cast<int>(MeasureText(label).cx) + Scale(8);
-    // the box keeps the longest language name and the check box's words in view
-    int inner = std::max({Scale(340), labelWidth + Scale(200), static_cast<int>(MeasureText(notifyText).cx) + Scale(24)});
-    int width = 2 * pad + 2 * inset + inner;
-    int noteHeight = std::max(Scale(16), static_cast<int>(MeasureText(note, inner).cy));
-    int languageHeight = Scale(20) + row + Scale(6) + noteHeight + Scale(10);
-    int notifyHeight = Scale(20) + row + Scale(8);
-    int height = pad + languageHeight + Scale(10) + notifyHeight + Scale(14) + Scale(25) + pad;
+    // wide enough for the longest language name and the check box's words
+    int inner = std::max({Scale(360), labelWidth + Scale(200), static_cast<int>(MeasureText(notifyText).cx) + Scale(24)});
+    int width = 2 * pad + inner;
+    int noteHeight = std::max(Scale(16), static_cast<int>(MeasureText(note, inner - labelWidth).cy));
+    // the language and its note, a line, the notifications, the buttons
+    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + row + Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
     OptionsState state;
 
-    int top = pad;
-    CreateChild(dialog, L"BUTTON", languageGroup.c_str(), BS_GROUPBOX, 0, {pad, top, width - pad, top + languageHeight});
-    int left = pad + inset, y = top + Scale(20);
+    int left = pad, right = width - pad, y = pad;
     CreateChild(dialog, L"STATIC", label.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + labelWidth, y + row});
     HWND combo = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, IDC_OPTIONS_LANGUAGE,
-                             {left + labelWidth, y, width - pad - inset, y + Scale(200)});
+                             {left + labelWidth, y, right, y + Scale(200)});
     // the first item follows Windows, and says which language that is now
     std::wstring systemItem = core::T(PE_TEXT_WIN_OPTIONS_SYSTEM_DEFAULT, {{"language", nameOf(system)}});
     SendMessageW(combo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(systemItem.c_str()));
@@ -154,13 +150,14 @@ bool OptionsDialog(HWND owner, bool& notify) {
         }
     }
     SendMessageW(combo, CB_SETCURSEL, selected, 0);
-    y += row + Scale(6);
-    CreateChild(dialog, L"STATIC", note.c_str(), SS_LEFT | SS_NOPREFIX, IDC_OPTIONS_NOTE, {left, y, width - pad - inset, y + noteHeight});
-    top += languageHeight + Scale(10);
-    CreateChild(dialog, L"BUTTON", notifyGroup.c_str(), BS_GROUPBOX, 0, {pad, top, width - pad, top + notifyHeight});
-    y = top + Scale(20);
+    y += row + Scale(4);
+    // under the list, as a note to it
+    CreateChild(dialog, L"STATIC", note.c_str(), SS_LEFT | SS_NOPREFIX, IDC_OPTIONS_NOTE, {left + labelWidth, y, right, y + noteHeight});
+    y += noteHeight + Scale(12);
+    CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {left, y, right, y + 2});
+    y += 2 + Scale(12);
     HWND check = CreateChild(dialog, L"BUTTON", notifyText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_OPTIONS_NOTIFY,
-                             {left, y, width - pad - inset, y + row});
+                             {left, y, right, y + row});
     Button_SetCheck(check, notify ? BST_CHECKED : BST_UNCHECKED);
     int buttonWidth = ButtonWidth({ok, cancel}), buttonTop = height - pad - Scale(25);
     CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,

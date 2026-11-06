@@ -1240,15 +1240,13 @@ enum Text: UInt32 {
     case winColIssuer = 1234
     case winColUsedBy = 1235
     case winEdit = 1236
-    case winOptionsLanguageGroup = 1237
-    case winOptionsLanguageLabel = 1238
-    case winOptionsSystemDefault = 1239
-    case winOptionsRestartNote = 1240
-    case winOptionsNotifyGroup = 1241
-    case winOptionsNotify = 1242
-    case winRestartAsk = 1243
-    case winRestartNow = 1244
-    case winRestartLater = 1245
+    case winOptionsLanguageLabel = 1237
+    case winOptionsSystemDefault = 1238
+    case winOptionsRestartNote = 1239
+    case winOptionsNotify = 1240
+    case winRestartAsk = 1241
+    case winRestartNow = 1242
+    case winRestartLater = 1243
 
     /// In the language in use, menu marks (&) left out
     var text: String {

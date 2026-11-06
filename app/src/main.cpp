@@ -611,7 +611,11 @@ void Layout() {
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
     RECT bar;
     GetClientRect(g_toolbar, &bar);
-    g_mailbox.PlaceFind(bar);
+    // where the buttons end: the Find box gives way to their longer words in other languages
+    int buttons = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
+    RECT last = {};
+    SendMessageW(g_toolbar, TB_GETITEMRECT, buttons > 0 ? buttons - 1 : 0, reinterpret_cast<LPARAM>(&last));
+    g_mailbox.PlaceFind(bar, last.right);
     MoveWindow(g_folderBar, 0, bar.bottom, bar.right, FolderBarHeight(), TRUE);
     SendMessageW(g_status, WM_SIZE, 0, 0);
     Panes panes = Measure();

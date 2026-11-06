@@ -382,11 +382,9 @@ win-edit = &Muuda...
 
 ## Suvandid
 
-win-options-language-group = Keel
 win-options-language-label = &Inbox Classicu keel:
 win-options-system-default = Süsteemi keel ({ $language })
 win-options-restart-note = Teise keele näitamiseks taaskäivitub Inbox Classic.
-win-options-notify-group = Teavitused
 win-options-notify = &Teavita mind uute kirjade saabumisest
 win-restart-ask = Inbox Classic näitab valitud keelt ({ $language }) pärast taaskäivitust. Kas taaskäivitada kohe?
 win-restart-now = &Taaskäivita kohe
