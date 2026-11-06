@@ -25,7 +25,7 @@ pub fn open() {
     // not owned by the main window: the help stays usable while a dialog of the main window is open
     let window = adw::ApplicationWindow::builder()
         .application(&shell().application)
-        .title("Inbox Classic Help")
+        .title(t!(UiHelpTitle))
         .default_width(820)
         .default_height(700)
         .content(&toolbar)

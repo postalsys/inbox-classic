@@ -39,6 +39,7 @@ pub enum Command {
     DefaultApp,
     ViewSource,
     AiAgents,
+    Options,
 }
 
 impl Command {
@@ -79,6 +80,7 @@ impl Command {
         Command::DefaultApp,
         Command::ViewSource,
         Command::AiAgents,
+        Command::Options,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -120,6 +122,7 @@ impl Command {
             Command::DefaultApp => "default-app",
             Command::ViewSource => "view-source",
             Command::AiAgents => "ai-agents",
+            Command::Options => "options",
         }
     }
 
@@ -162,48 +165,69 @@ impl Command {
             Command::DefaultApp => "tools",
             Command::ViewSource => "view",
             Command::AiAgents => "tools",
+            Command::Options => "tools",
         }
     }
 
-    pub fn label(self) -> &'static str {
+    /// Its label in the catalog (cmd-<id>), its menu letter marked with &
+    pub fn text(self) -> pe_core::i18n::Text {
         match self {
-            Command::NewAccount => "New Account…",
-            Command::Exit => "Exit",
-            Command::Sync => "Send and Receive All",
-            Command::Undo => "Undo",
-            Command::SelectAll => "Select All",
-            Command::MarkRead => "Mark as Read",
-            Command::MarkUnread => "Mark as Unread",
-            Command::Pictures => "Download Pictures",
-            Command::About => "About Inbox Classic",
-            Command::NewMail => "New Message",
-            Command::Reply => "Reply to Sender",
-            Command::ReplyAll => "Reply to All",
-            Command::Forward => "Forward",
-            Command::Help => "Contents",
-            Command::Delete => "Delete Message",
-            Command::Move => "Move to Folder…",
-            Command::Copy => "Copy to Folder…",
-            Command::Flag => "Flag Message",
-            Command::NewFolder => "New Folder…",
-            Command::RenameFolder => "Rename Folder…",
-            Command::DeleteFolder => "Delete Folder",
-            Command::Accounts => "Accounts…",
-            Command::Find => "Find Message",
-            Command::SaveAs => "Save As…",
-            Command::Print => "Print…",
-            Command::Import => "Import Messages…",
-            Command::Outbox => "Outbox…",
-            Command::Properties => "Properties",
-            Command::MarkAllRead => "Mark All Read",
-            Command::Junk => "Mark as Junk",
-            Command::NotJunk => "Mark as Not Junk",
-            Command::Notify => "Notify of New Mail",
-            Command::Open => "Open Inbox Classic",
-            Command::DefaultApp => "Make Default Mail App…",
-            Command::ViewSource => "Message Source",
-            Command::AiAgents => "AI Agents…",
+            Command::NewAccount => pe_core::i18n::Text::CmdNewAccount,
+            Command::Exit => pe_core::i18n::Text::CmdExit,
+            Command::Sync => pe_core::i18n::Text::CmdSync,
+            Command::Undo => pe_core::i18n::Text::CmdUndo,
+            Command::SelectAll => pe_core::i18n::Text::CmdSelectAll,
+            Command::MarkRead => pe_core::i18n::Text::CmdMarkRead,
+            Command::MarkUnread => pe_core::i18n::Text::CmdMarkUnread,
+            Command::Pictures => pe_core::i18n::Text::CmdPictures,
+            Command::About => pe_core::i18n::Text::CmdAbout,
+            Command::NewMail => pe_core::i18n::Text::CmdNewMail,
+            Command::Reply => pe_core::i18n::Text::CmdReply,
+            Command::ReplyAll => pe_core::i18n::Text::CmdReplyAll,
+            Command::Forward => pe_core::i18n::Text::CmdForward,
+            Command::Help => pe_core::i18n::Text::CmdHelp,
+            Command::Delete => pe_core::i18n::Text::CmdDelete,
+            Command::Move => pe_core::i18n::Text::CmdMove,
+            Command::Copy => pe_core::i18n::Text::CmdCopy,
+            Command::Flag => pe_core::i18n::Text::CmdFlag,
+            Command::NewFolder => pe_core::i18n::Text::CmdNewFolder,
+            Command::RenameFolder => pe_core::i18n::Text::CmdRenameFolder,
+            Command::DeleteFolder => pe_core::i18n::Text::CmdDeleteFolder,
+            Command::Accounts => pe_core::i18n::Text::CmdAccounts,
+            Command::Find => pe_core::i18n::Text::CmdFind,
+            Command::SaveAs => pe_core::i18n::Text::CmdSaveAs,
+            Command::Print => pe_core::i18n::Text::CmdPrint,
+            Command::Import => pe_core::i18n::Text::CmdImport,
+            Command::Outbox => pe_core::i18n::Text::CmdOutbox,
+            Command::Properties => pe_core::i18n::Text::CmdProperties,
+            Command::MarkAllRead => pe_core::i18n::Text::CmdMarkAllRead,
+            Command::Junk => pe_core::i18n::Text::CmdJunk,
+            Command::NotJunk => pe_core::i18n::Text::CmdNotJunk,
+            Command::Notify => pe_core::i18n::Text::CmdNotify,
+            Command::Open => pe_core::i18n::Text::CmdOpen,
+            Command::DefaultApp => pe_core::i18n::Text::CmdDefaultApp,
+            Command::ViewSource => pe_core::i18n::Text::CmdViewSource,
+            Command::AiAgents => pe_core::i18n::Text::CmdAiAgents,
+            Command::Options => pe_core::i18n::Text::CmdOptions,
         }
+    }
+
+    /// In the language in use, without its menu letter; kept for the run (one string a command and language)
+    pub fn label(self) -> &'static str {
+        type Labels = std::collections::HashMap<(&'static str, Command), &'static str>;
+        static LABELS: std::sync::Mutex<Option<Labels>> = std::sync::Mutex::new(None);
+        let mut labels = LABELS.lock().unwrap_or_else(|e| e.into_inner());
+        let labels = labels.get_or_insert_with(Labels::new);
+        labels.entry((pe_core::i18n::language(), self)).or_insert_with(|| {
+            let text = pe_core::i18n::without_mnemonic(&pe_core::i18n::tr(self.text())).replace("...", "…");
+            Box::leak(text.into_boxed_str())
+        })
+    }
+
+    /// In the language in use with its menu letter as GTK marks it (`_Reply to Sender`)
+    #[allow(dead_code)]
+    pub fn mnemonic_label(self) -> String {
+        pe_core::i18n::gtk_mnemonic(&pe_core::i18n::tr(self.text())).replace("...", "…")
     }
 
     /// Its GTK accelerator, or None
@@ -245,6 +269,7 @@ impl Command {
             Command::DefaultApp => None,
             Command::ViewSource => Some("<Primary>u"),
             Command::AiAgents => None,
+            Command::Options => Some("<Primary>comma"),
         }
     }
 
@@ -287,6 +312,7 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => false,
             Command::AiAgents => false,
+            Command::Options => false,
         }
     }
 
@@ -329,6 +355,7 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => false,
             Command::AiAgents => false,
+            Command::Options => false,
         }
     }
 
@@ -371,6 +398,7 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => true,
             Command::AiAgents => false,
+            Command::Options => false,
         }
     }
 }

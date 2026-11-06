@@ -30,7 +30,7 @@ pub struct Shell {
     pub settings: Settings,
     /// Test runs (--sign-in-page-file): a browser sign-in writes its page here instead of opening the browser
     pub sign_in_page_file: Option<PathBuf>,
-    main: OnceCell<Rc<Mailbox>>,
+    main: RefCell<Option<Rc<Mailbox>>>,
     /// The dialogs waiting for the event of a request (a lookup, a sign-in, a check), by request
     requests: RefCell<HashMap<u64, async_channel::Sender<bool>>>,
     /// Accounts whose password prompt is open, so a second failure does not open another
@@ -38,7 +38,7 @@ pub struct Shell {
     /// Accounts whose last sync failed: their failure stays in the status bar
     failing: RefCell<HashSet<i64>>,
     /// The last message sent, as the outgoing part of the status bar says once the Outbox is empty
-    last_sent: RefCell<String>,
+    last_sent: RefCell<Option<(String, String)>>,
     /// Tools > Notify of New Mail
     pub notify: Cell<bool>,
     /// Quit was chosen: closing the window ends the app rather than hiding it in the tray
@@ -78,11 +78,11 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
     });
     let Some(core) = core else {
         let why = if arguments.certificate.is_none() {
-            "The mail store could not be opened."
+            t!(UiStoreNotOpened)
         } else {
-            "The mail store or the certificate file could not be opened."
+            t!(UiStoreOrCertNotOpened)
         };
-        fail_to_start(application, why);
+        fail_to_start(application, &why);
         return;
     };
     let settings = Settings::load();
@@ -97,7 +97,7 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         application: application.clone(),
         settings,
         sign_in_page_file: arguments.sign_in_page_file.clone(),
-        main: OnceCell::new(),
+        main: RefCell::default(),
         requests: RefCell::default(),
         prompting: RefCell::default(),
         failing: RefCell::default(),
@@ -113,7 +113,7 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
     });
     install_app_actions(application);
     let main = Mailbox::new(application);
-    let _ = state.main.set(main.clone());
+    *state.main.borrow_mut() = Some(main.clone());
     spawn(async move {
         while let Ok(event) = events.recv().await {
             shell().on_event(event);
@@ -167,7 +167,7 @@ fn open_core(
 }
 
 /// The store could not be opened: said in a window of its own, then the app ends
-fn fail_to_start(application: &adw::Application, why: &'static str) {
+fn fail_to_start(application: &adw::Application, why: &str) {
     let window = adw::ApplicationWindow::builder()
         .application(application)
         .title(TITLE)
@@ -176,8 +176,9 @@ fn fail_to_start(application: &adw::Application, why: &'static str) {
         .build();
     window.present();
     let closing = window.clone();
+    let why = why.to_string();
     spawn(async move {
-        ui::alert(&closing, TITLE, why).await;
+        ui::alert(&closing, TITLE, &why).await;
         closing.close();
     });
 }
@@ -229,7 +230,21 @@ pub async fn add_account() {
 
 impl Shell {
     pub fn main(&self) -> Rc<Mailbox> {
-        self.main.get().cloned().expect("the main window")
+        self.main.borrow().clone().expect("the main window")
+    }
+
+    /// The main window made again in the language in use now, in place of the one there was (the UI test, which
+    /// changes the language without starting again)
+    #[cfg(feature = "e2e")]
+    pub fn remake_main(&self) {
+        let old = self.main();
+        let new = Mailbox::new(&self.application);
+        *self.main.borrow_mut() = Some(new.clone());
+        old.window().destroy();
+        new.window().present();
+        new.select_start();
+        self.show_outbox();
+        self.show_unread();
     }
 
     // ---- requests the dialogs wait for ----
@@ -255,15 +270,12 @@ impl Shell {
         match &event {
             Event::SyncStarted { account } => {
                 self.failing.borrow_mut().remove(account);
-                main.set_status(&format!(
-                    "Checking for new messages on {}...",
-                    main.account_name(*account)
-                ));
+                main.set_status(&t!(UiChecking, account = &main.account_name(*account)));
             }
             Event::SyncFinished { .. } => {
                 // a failure stays in the status bar until the account syncs without one
                 if self.failing.borrow().is_empty() {
-                    main.set_status("Done");
+                    main.set_status(&t!(UiDone));
                 }
             }
             Event::AutoconfigDone { request } | Event::SignInDone { request } | Event::SignInAppChecked { request } => {
@@ -278,7 +290,7 @@ impl Shell {
             }
             Event::MessageSent { subject, .. } => {
                 // shown by the OutboxChanged that follows it
-                *self.last_sent.borrow_mut() = format!("Sent {} at {}", quoted(subject), ui::time_now());
+                *self.last_sent.borrow_mut() = Some((subject.clone(), ui::time_now()));
             }
             Event::DraftSaved {
                 message_id, problem, ..
@@ -286,8 +298,8 @@ impl Shell {
                 // the window that saved it says so; one that closed after saving leaves it to the status bar
                 if !compose::draft_saved(message_id, problem.as_deref()) {
                     match problem {
-                        None => main.set_status("Message saved in Drafts."),
-                        Some(problem) => main.set_status(&format!("The message was not saved in Drafts: {problem}")),
+                        None => main.set_status(&t!(UiDraftSaved)),
+                        Some(problem) => main.set_status(&t!(UiDraftNotSaved, reason = problem)),
                     }
                 }
             }
@@ -344,14 +356,15 @@ impl Shell {
         if !self.notify.get() || (window.is_visible() && window.is_active()) {
             return;
         }
-        let subject = if subject.is_empty() { "(no subject)" } else { subject };
+        let no_subject = t!(UiNoSubject);
+        let subject = if subject.is_empty() { &no_subject } else { subject };
         if *count <= 1 {
             notify::new_mail(&self.application, from, subject, *folder, *uid);
         } else {
-            let text = format!("The newest from {from}: {subject}");
+            let text = t!(UiNewestFrom, sender = from, subject = subject);
             notify::new_mail(
                 &self.application,
-                &format!("{count} new messages"),
+                &t!(GtkNewMessages, count = *count),
                 &text,
                 *folder,
                 *uid,
@@ -364,10 +377,17 @@ impl Shell {
     pub fn show_outbox(&self) {
         let waiting = self.core.outbox().unwrap_or_default();
         let text = match waiting.as_slice() {
-            [] => self.last_sent.borrow().clone(),
-            [first] if first.problem.is_some() => format!("{} waits in the Outbox", quoted(&first.subject)),
-            [first] => format!("Sending {}...", quoted(&first.subject)),
-            more => format!("{} messages in the Outbox", more.len()),
+            // in the words of now, which may be another language than when it went
+            [] => self
+                .last_sent
+                .borrow()
+                .as_ref()
+                .map_or_else(String::new, |(subject, time)| {
+                    t!(UiSentAt, subject = &quoted(subject), time = time)
+                }),
+            [first] if first.problem.is_some() => t!(UiOutboxWaits, subject = &quoted(&first.subject)),
+            [first] => t!(UiOutboxSending, subject = &quoted(&first.subject)),
+            more => t!(UiOutboxWaiting, count = more.len()),
         };
         self.main().set_outgoing(&text);
     }
@@ -397,11 +417,7 @@ impl Shell {
         self.main().window().set_visible(false);
         if !self.settings.bool(settings::TRAY_NOTE, false) {
             self.settings.set_bool(settings::TRAY_NOTE, true);
-            notify::note(
-                &self.application,
-                "Inbox Classic is still running",
-                "It keeps checking for new mail. Its icon in the top bar opens it again, or quits it.",
-            );
+            notify::note(&self.application, &t!(UiStillRunning), &t!(GtkStillRunningDetail));
         }
         false
     }
@@ -427,7 +443,7 @@ impl Shell {
         };
         if account == 0 {
             let window = self.main().window().clone();
-            spawn(async move { ui::alert(&window, TITLE, "Add a mail account first.").await });
+            spawn(async move { ui::alert(&window, TITLE, &t!(UiAddAccountFirst)).await });
             return;
         }
         compose::open(account, None);
@@ -440,8 +456,7 @@ impl Shell {
         };
         let account = self.main().current_account();
         if account == 0 {
-            let text = "Add a mail account first, then click the e-mail link again.";
-            ui::alert(self.main().window(), TITLE, text).await;
+            ui::alert(self.main().window(), TITLE, &t!(UiAddAccountFirstLink)).await;
             return;
         }
         compose::open(account, Some(draft));
@@ -453,7 +468,7 @@ impl Shell {
             Some(draft) => compose::open(main.current_account(), Some(draft)),
             None => {
                 let window = main.window().clone();
-                spawn(async move { ui::alert(&window, TITLE, "Select a message first.").await });
+                spawn(async move { ui::alert(&window, TITLE, &t!(UiSelectMessageFirst)).await });
             }
         }
     }
@@ -473,9 +488,9 @@ impl Shell {
 /// "Subject" in quotes, or "(no subject)"
 fn quoted(subject: &str) -> String {
     if subject.is_empty() {
-        "(no subject)".into()
+        t!(UiNoSubject)
     } else {
-        format!("\u{201C}{subject}\u{201D}")
+        t!(UiQuoted, subject = subject)
     }
 }
 
@@ -499,10 +514,7 @@ async fn sign_in_again(account: i64, with: SignInWith) {
     let shell = shell();
     let main = shell.main();
     let window = main.window().clone();
-    let text = format!(
-        "The sign-in of {} was refused or ran out.\n\nSign in again in the browser?",
-        main.account_name(account)
-    );
+    let text = t!(GtkSignInAgainAsk, account = &main.account_name(account));
     if !ui::confirm(&window, TITLE, &text, false).await {
         return;
     }
@@ -514,9 +526,28 @@ async fn sign_in_again(account: i64, with: SignInWith) {
             let _ = shell.core.sync(account);
         }
         Err(reason) => {
-            ui::alert(&window, TITLE, &format!("Signing in again did not work: {reason}")).await;
+            ui::alert(&window, TITLE, &t!(UiSignInAgainFailed, reason = &reason.to_string())).await;
         }
     }
+}
+
+thread_local! {
+    /// Restart Now in Preferences: the app starts again once it ended
+    static RESTART: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Quits, then starts again (a new language); stays when a message being written is kept open
+pub async fn restart() {
+    RESTART.with(|r| r.set(true));
+    quit().await;
+    if !shell().exiting.get() {
+        RESTART.with(|r| r.set(false));
+    }
+}
+
+/// Whether the app ended to start again
+pub fn restarting() -> bool {
+    RESTART.with(Cell::get)
 }
 
 /// Quit: the messages being written first, each may ask to be saved; the app stays when one is kept open
@@ -545,9 +576,7 @@ async fn make_default_mail_app() {
         .into_iter()
         .find(|app| app.id().as_deref() == Some(desktop.as_str()))
     else {
-        let text = "This copy of Inbox Classic was not installed, so the system does not list it as a mail app. \
-                    Install it to choose it.";
-        ui::alert(&window, TITLE, text).await;
+        ui::alert(&window, TITLE, &t!(GtkDefaultAppNotInstalled)).await;
         return;
     };
     let ours = gio::AppInfo::default_for_uri_scheme("mailto")
@@ -555,13 +584,13 @@ async fn make_default_mail_app() {
         .as_deref()
         == Some(desktop.as_str());
     let said = if ours {
-        "Inbox Classic is your default mail app: e-mail links open a new message here."
+        t!(UiDefaultAppIs)
     } else if app.set_as_default_for_type("x-scheme-handler/mailto").is_ok() {
-        "Inbox Classic is now your default mail app: e-mail links open a new message here."
+        t!(GtkDefaultAppNow)
     } else {
-        "Inbox Classic could not be made the default mail app."
+        t!(GtkDefaultAppFailed)
     };
-    ui::alert(&window, TITLE, said).await;
+    ui::alert(&window, TITLE, &said).await;
 }
 
 fn show_about() {
@@ -570,7 +599,7 @@ fn show_about() {
         .application_name(TITLE)
         .application_icon(crate::APP_ID)
         .version(crate::VERSION)
-        .comments(format!("Core {}", pe_core::VERSION))
+        .comments(t!(UiAboutCore, version = pe_core::VERSION))
         .developer_name("Postal Systems OÜ")
         .website("https://inboxclassic.com")
         .license_type(gtk::License::MitX11)
@@ -632,6 +661,7 @@ pub fn run_command(command: Command) {
         Command::AiAgents => spawn(async move { crate::agents::agents_dialog(main.window()).await }),
         Command::SelectAll => main.select_all(),
         Command::Undo => spawn(async move { main.undo().await }),
+        Command::Options => crate::preferences::run(),
     }
 }
 

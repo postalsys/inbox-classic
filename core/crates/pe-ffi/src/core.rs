@@ -2600,8 +2600,8 @@ pub unsafe extern "C" fn pe_sign_in_apps(core: *const PeCore) -> *mut PeSignInAp
                 let (provider, id) = sign_in_pair(e.with);
                 let app = e.app.clone().unwrap_or_default();
                 let off_reason = match e.with {
-                    SignInWith::Builtin(kind) => pe_core::builtin_off_reason(kind),
-                    SignInWith::App(_) => "",
+                    SignInWith::Builtin(kind) => pe_core::builtin_off_text(kind),
+                    SignInWith::App(_) => String::new(),
                 };
                 PeSignInApp {
                     provider,
@@ -2610,7 +2610,7 @@ pub unsafe extern "C" fn pe_sign_in_apps(core: *const PeCore) -> *mut PeSignInAp
                     issuer: strings.add(&e.issuer),
                     enabled: e.enabled,
                     used_by: strings.add(&e.used_by.join(", ")),
-                    off_reason: strings.add(off_reason),
+                    off_reason: strings.add(&off_reason),
                     client_id: strings.add(&app.client_id),
                     has_secret: app.has_secret,
                     scopes: strings.add(&app.scopes),

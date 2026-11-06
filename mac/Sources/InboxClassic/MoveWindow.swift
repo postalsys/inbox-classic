@@ -59,7 +59,7 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
 
         let intro = wrappingLabel(prompt)
         intro.setAccessibilityIdentifier("move.prompt")
-        filter.placeholderString = "Find a folder"
+        filter.placeholderString = Text.uiFindFolder.text
         filter.delegate = self
         filter.sendsSearchStringImmediately = true
         filter.setAccessibilityIdentifier("move.filter")
@@ -83,9 +83,9 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
         scroll.autohidesScrollers = true
         scroll.borderType = .bezelBorder
 
-        let newFolder = NSButton(title: "New Folder\u{2026}", target: self, action: #selector(makeFolder))
+        let newFolder = NSButton(title: Text.macNewFolderButton.text, target: self, action: #selector(makeFolder))
         newFolder.setAccessibilityIdentifier("move.new")
-        let cancelButton = NSButton(title: "Cancel", target: self, action: #selector(cancel))
+        let cancelButton = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancel))
         cancelButton.keyEquivalent = "\u{1b}"
         cancelButton.setAccessibilityIdentifier("move.cancel")
         okButton.target = self
@@ -292,11 +292,11 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
         let account = node?.account ?? core.accounts().first?.id ?? 0
         guard account != 0 else { return }
         let parent = node?.folder ?? 0
-        let intro = parent != 0 ? "The new folder goes in \(node?.name ?? "the folder")." : "The new folder goes at the top of the account."
-        guard let name = askFolderName(title: "New Folder", intro: intro, name: ""), !name.isEmpty else { return }
+        let intro = parent != 0 ? Text.uiNewFolderIn.text(["folder": node?.name ?? ""]) : Text.uiNewFolderAtTop.text
+        guard let name = askFolderName(title: Text.uiNewFolderTitle.text, intro: intro, name: ""), !name.isEmpty else { return }
         var reason: UnsafeMutablePointer<CChar>?
         if !name.withCString({ pe_folder_create(core.handle, account, parent, $0, &reason) }) {
-            refused(reason, "The folder could not be created.")
+            refused(reason, Text.uiFolderNotCreated.text)
         }
         // made in the background: FolderCreated chooses it here
     }

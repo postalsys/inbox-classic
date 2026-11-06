@@ -213,7 +213,7 @@ final class Core {
         if let done = taken(pe_selection_act(handle, selection, action, to, &reason)) {
             return .success(done)
         }
-        return .failure(Refusal(taken(reason) ?? "The messages could not be changed."))
+        return .failure(Refusal(taken(reason) ?? Text.uiMessagesNotChanged.text))
     }
 
     /// what Edit > Undo takes back, "Undo Move"; nil when nothing
@@ -224,7 +224,7 @@ final class Core {
         if let done = taken(pe_undo(handle, &reason)) {
             return .success(done)
         }
-        return .failure(Refusal(taken(reason) ?? "There is nothing to undo."))
+        return .failure(Refusal(taken(reason) ?? Text.nothingToUndo.text))
     }
 
     var unindexedCount: UInt64 { pe_search_unindexed_count(handle) }
@@ -312,11 +312,11 @@ struct Folder {
     /// the name mail programs of the Outlook Express kind give a special folder, the folder's own name otherwise
     var displayName: String {
         switch specialUse {
-        case PE_SPECIAL_USE_INBOX: return "Inbox"
-        case PE_SPECIAL_USE_SENT: return "Sent Items"
-        case PE_SPECIAL_USE_TRASH: return "Deleted Items"
-        case PE_SPECIAL_USE_DRAFTS: return "Drafts"
-        case PE_SPECIAL_USE_JUNK: return "Junk E-mail"
+        case PE_SPECIAL_USE_INBOX: return Text.folderInbox.text
+        case PE_SPECIAL_USE_SENT: return Text.folderSent.text
+        case PE_SPECIAL_USE_TRASH: return Text.folderDeleted.text
+        case PE_SPECIAL_USE_DRAFTS: return Text.folderDrafts.text
+        case PE_SPECIAL_USE_JUNK: return Text.folderJunk.text
         default: return name
         }
     }
@@ -397,7 +397,7 @@ func takenBytes(_ data: UnsafeMutablePointer<UInt8>?, _ length: Int) -> Data? {
 
 /// The words the windows show for a size, the core's
 func formatSize(_ bytes: UInt64) -> String {
-    taken(pe_format_size(bytes)) ?? "\(bytes) bytes"
+    taken(pe_format_size(bytes)) ?? Text.sizeBytes.text(["count": bytes])
 }
 
 /// A date as the user's settings write it, short date and time

@@ -21,9 +21,9 @@ use crate::reader::Reader;
 use crate::settings;
 use crate::ui::{self, TITLE};
 
-/// What the Find box takes, shown when the mouse rests on it
-const FIND_TIP: &str = "Finds words in the subject, the people, the file names and the text of messages.\n\
-\"exact phrase\"    -leave out    this OR that\n\
+/// What the Find box takes, shown when the mouse rests on it: the words of the catalogs, then the syntax, which is
+/// the same in every language
+const FIND_SYNTAX: &str = "\"exact phrase\"    -leave out    this OR that\n\
 from:ann    to:bob    subject:report    filename:pdf\n\
 is:unread    is:read    is:starred    has:attachment\n\
 in:inbox    in:sent    in:anywhere    in:<folder name>\n\
@@ -32,7 +32,6 @@ larger:5M    smaller:100k";
 
 /// The size the logo of a brand is drawn at
 const LOGO_SIZE: i32 = 48;
-const ALL_INBOXES_NAME: &str = "All Inboxes";
 
 /// The commands whose keys a text field has too: the field with the focus has them first
 const TEXT_KEYS: [Command; 3] = [Command::Delete, Command::SelectAll, Command::Undo];
@@ -125,13 +124,13 @@ impl Mailbox {
         let list = MessageList::new();
         let reader = Reader::new();
         let find = gtk::SearchEntry::builder()
-            .placeholder_text("Search mail")
-            .tooltip_text(FIND_TIP)
+            .placeholder_text(t!(UiFindHint))
+            .tooltip_text(format!("{}\n{FIND_SYNTAX}", t!(UiFindTip)))
             .search_delay(250)
             .width_chars(26)
             .build();
         find.set_widget_name("find");
-        find.update_property(&[gtk::accessible::Property::Label("Search mail")]);
+        find.update_property(&[gtk::accessible::Property::Label(&t!(UiFindHint))]);
         let title = adw::WindowTitle::new(TITLE, "");
         let (header, junk, create_mail, send_receive, edit_menu) = header_bar(&title, &find);
         let search_summary = gtk::Label::new(None);
@@ -139,7 +138,7 @@ impl Mailbox {
         search_summary.set_hexpand(true);
         search_summary.set_ellipsize(gtk::pango::EllipsizeMode::End);
         search_summary.set_widget_name("search-summary");
-        let clear = gtk::Button::with_label("Clear search");
+        let clear = gtk::Button::with_label(&t!(UiClearSearch));
         clear.add_css_class("flat");
         clear.set_widget_name("search-clear");
         let search_bar = gtk::Box::new(gtk::Orientation::Horizontal, 8);
@@ -173,8 +172,9 @@ impl Mailbox {
             .orientation(gtk::Orientation::Horizontal)
             .start_child(&tree)
             .end_child(&right)
-            // wide enough for "Deleted Items (99)" under a second account, the longest of the special folders
-            .position(settings.int(settings::TREE_WIDTH, 250))
+            // wide enough for "Deleted Items (99)" under a second account, the longest of the special folders, and
+            // for their longer names in other languages ("Gelöschte Objekte (99)")
+            .position(settings.int(settings::TREE_WIDTH, 280))
             .shrink_start_child(false)
             .resize_start_child(false)
             .vexpand(true)
@@ -552,7 +552,7 @@ impl Mailbox {
         // above the accounts, the mail of every Inbox; its unread count as a folder's
         let top = pe_core::all_inboxes_shown(accounts.len()).then(|| Entry {
             id: ALL_INBOXES,
-            name: ALL_INBOXES_NAME.into(),
+            name: t!(UiAllInboxes),
             unread: core.inbox_unread().unwrap_or(0),
             below: 0,
             icon: folder_icon(Some(SpecialUse::Inbox)),
@@ -636,13 +636,13 @@ impl Mailbox {
         let sync = gio::Menu::new();
         let all = gio::Menu::new();
         all.append(
-            Some("Send and Receive All"),
+            Some(&crate::words::plain(crate::words::Text::CmdSync)),
             Some(&format!("win.{}", Command::Sync.name())),
         );
         sync.append_section(None, &all);
         let each = gio::Menu::new();
         for account in accounts.iter() {
-            let item = gio::MenuItem::new(Some(&format!("From {}", account.label)), None);
+            let item = gio::MenuItem::new(Some(&t!(UiFromAccount, account = &account.label)), None);
             item.set_action_and_target_value(Some("win.new-mail-from"), Some(&account.id.to_variant()));
             from.append_item(&item);
             let item = gio::MenuItem::new(Some(&account.label), None);
@@ -651,8 +651,9 @@ impl Mailbox {
         }
         if accounts.is_empty() {
             // an item without an action is shown turned off
-            from.append(Some("No accounts yet"), Some("win.none"));
-            each.append(Some("No accounts yet"), Some("win.none"));
+            let none = crate::words::plain(crate::words::Text::TrayNoAccounts);
+            from.append(Some(&none), Some("win.none"));
+            each.append(Some(&none), Some("win.none"));
         }
         sync.append_section(None, &each);
         self.create_mail.set_menu_model(Some(&from));
@@ -689,7 +690,7 @@ impl Mailbox {
     }
 
     pub fn account_name(&self, account: i64) -> String {
-        self.account(account).map_or_else(|| "the account".into(), |a| a.name)
+        self.account(account).map_or_else(|| t!(UiTheAccount), |a| a.name)
     }
 
     pub fn account_email(&self, account: i64) -> String {
@@ -794,8 +795,14 @@ impl Mailbox {
         };
         self.total.set(total);
         self.unread.set(unread);
-        self.list
-            .show_folder_column(several, if self.searching() { "Folder" } else { "Account" });
+        self.list.show_folder_column(
+            several,
+            &if self.searching() {
+                t!(UiColFolder)
+            } else {
+                t!(UiColAccount)
+            },
+        );
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let positions: Vec<u64> = if !keep_selection {
             Vec::new()
@@ -862,30 +869,21 @@ impl Mailbox {
     fn show_empty_list(&self) {
         let (title, more) = if self.searching() {
             let place = self.find_place.borrow();
-            let mut more = format!(
-                "The search looks at the subject, the people, the file names and the text of the messages {}. Check \
-                 the spelling, or try fewer words.",
-                if place.is_empty() {
-                    "in every folder".into()
-                } else {
-                    format!("in {place}")
-                }
-            );
+            let mut more = if place.is_empty() {
+                t!(UiNoMatchAll)
+            } else {
+                t!(GtkSearchLooksIn, place = &*place)
+            };
             let left = shell().core.unindexed_count().unwrap_or(0);
             if left > 0 {
-                let verb = if left == 1 { "message is" } else { "messages are" };
-                more.push_str(&format!(
-                    "\n\nThe text of {left} {verb} still being indexed, so more may be found soon."
-                ));
+                more.push_str("\n\n");
+                more.push_str(&t!(GtkSearchStillIndexing, count = left));
             }
-            (
-                format!("No messages match \u{201C}{}\u{201D}.", self.find_text.borrow()),
-                more,
-            )
+            (t!(UiNoMatch, words = &*self.find_text.borrow()), more)
         } else if self.folder.get() != 0 || self.all_inboxes.get() {
-            ("There are no items in this view.".into(), String::new())
+            (t!(UiNoItems), String::new())
         } else if self.selected_account.get() != 0 {
-            ("Choose a folder to see its messages.".into(), String::new())
+            (t!(UiChooseFolder), String::new())
         } else {
             (String::new(), String::new())
         };
@@ -1198,13 +1196,13 @@ impl Mailbox {
         if self.searching() {
             let place = self.find_place.borrow();
             return if place.is_empty() {
-                "All folders".into()
+                t!(UiAllFolders)
             } else {
                 place.clone()
             };
         }
         if self.all_inboxes.get() {
-            return ALL_INBOXES_NAME.into();
+            return t!(UiAllInboxes);
         }
         if let Some((name, _)) = self.folder_names.borrow().get(&self.folder.get()) {
             return name.clone();
@@ -1234,27 +1232,17 @@ impl Mailbox {
             return;
         }
         let total = self.total.get();
-        let mut summary = match total {
-            0 => "No results".to_string(),
-            1 => "1 result".to_string(),
-            n => format!("{n} results"),
-        };
         let place = self.find_place.borrow();
-        summary.push_str(&format!(
-            " for \u{201C}{}\u{201D} {}",
-            self.find_text.borrow(),
-            if place.is_empty() {
-                "in all folders".into()
-            } else {
-                format!("in {place}")
-            }
-        ));
+        let words = self.find_text.borrow();
+        let mut summary = if place.is_empty() {
+            t!(GtkSearchResultsEverywhere, count = total, words = &*words)
+        } else {
+            t!(GtkSearchResultsIn, count = total, words = &*words, place = &*place)
+        };
         let left = shell().core.unindexed_count().unwrap_or(0);
         if left > 0 {
-            summary.push_str(&format!(
-                "  \u{00B7}  still indexing the text of {left} {}",
-                if left == 1 { "message" } else { "messages" }
-            ));
+            summary.push_str("  \u{00B7}  ");
+            summary.push_str(&t!(GtkSearchIndexing, count = left));
         }
         self.search_summary.set_text(&summary);
         self.search_bar.set_visible(true);
@@ -1302,9 +1290,9 @@ impl Mailbox {
     fn update_junk_button(&self) {
         let in_junk = self.in_junk();
         let (command, label) = if in_junk {
-            (Command::NotJunk, "Not Junk")
+            (Command::NotJunk, t!(UiTbNotJunk))
         } else {
-            (Command::Junk, "Junk")
+            (Command::Junk, t!(UiTbJunk))
         };
         self.junk.set_action_name(Some(&format!("win.{}", command.name())));
         self.junk.set_icon_name(if in_junk {
@@ -1312,7 +1300,7 @@ impl Mailbox {
         } else {
             "ic-mail-prohibited-symbolic"
         });
-        self.junk.set_tooltip_text(Some(label));
+        self.junk.set_tooltip_text(Some(&label));
     }
 
     /// Whether the messages selected, or else the folder, are in a Junk folder
@@ -1495,7 +1483,11 @@ impl Mailbox {
         let request = crate::move_dialog::Request {
             title: summary.move_title(copy),
             prompt: summary.move_prompt(copy),
-            verb: if copy { "Copy" } else { "Move" }.into(),
+            verb: if copy {
+                crate::words::plain(crate::words::Text::UiButtonCopy)
+            } else {
+                crate::words::plain(crate::words::Text::UiButtonMove)
+            },
             // the folder they are all in is no choice
             current: (summary.folders == 1).then_some(first.folder),
         };
@@ -1547,12 +1539,7 @@ impl Mailbox {
     pub async fn drop_files(&self, to: Option<i64>, files: Vec<PathBuf>) {
         let folder = to.unwrap_or(self.folder.get());
         if folder <= 0 || !self.folder_accounts.borrow().contains_key(&folder) {
-            ui::alert(
-                &self.window,
-                "Import Messages",
-                "Choose the folder to put the messages in first.",
-            )
-            .await;
+            ui::alert(&self.window, &import_title(), &t!(UiImportChooseFolder)).await;
             return;
         }
         self.import_into(folder, &files).await;
@@ -1584,14 +1571,20 @@ impl Mailbox {
         add("delete", changeable, Command::DeleteFolder);
         let menu = gio::Menu::new();
         let first = gio::Menu::new();
-        first.append(Some("Mark All Read"), Some("folder.mark-all-read"));
+        first.append(
+            Some(&crate::words::plain(crate::words::Text::CmdMarkAllRead)),
+            Some("folder.mark-all-read"),
+        );
         menu.append_section(None, &first);
         // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none
         if !all_inboxes {
             let rest = gio::Menu::new();
-            rest.append(Some("New Folder..."), Some("folder.new"));
-            rest.append(Some("Rename..."), Some("folder.rename"));
-            rest.append(Some("Delete"), Some("folder.delete"));
+            rest.append(
+                Some(&crate::words::plain(crate::words::Text::CmdNewFolder)),
+                Some("folder.new"),
+            );
+            rest.append(Some(&t!(GtkMenuRename)), Some("folder.rename"));
+            rest.append(Some(&t!(UiTbDelete)), Some("folder.delete"));
             menu.append_section(None, &rest);
         }
         widget.insert_action_group("folder", Some(&group));
@@ -1606,11 +1599,11 @@ impl Mailbox {
         }
         let folder = self.folder.get();
         let where_ = if folder != 0 {
-            "The new folder goes in the selected folder."
+            t!(UiNewFolderInSelected)
         } else {
-            "The new folder goes at the top of the account."
+            t!(UiNewFolderAtTop)
         };
-        let Some(name) = ui::ask_folder_name(&self.window, "New Folder", where_, "").await else {
+        let Some(name) = ui::ask_folder_name(&self.window, &t!(UiNewFolderTitle), &where_, "").await else {
             return;
         };
         if let Err(reason) = shell()
@@ -1632,8 +1625,8 @@ impl Mailbox {
             .get(&folder)
             .map(|(n, _)| n.clone())
             .unwrap_or_default();
-        let intro = format!("The new name of the folder {current}.");
-        let Some(name) = ui::ask_folder_name(&self.window, "Rename Folder", &intro, &current).await else {
+        let intro = t!(UiRenameFolderIntro, folder = &current);
+        let Some(name) = ui::ask_folder_name(&self.window, &t!(UiRenameFolderTitle), &intro, &current).await else {
             return;
         };
         if name == current {
@@ -1649,10 +1642,7 @@ impl Mailbox {
         let Some((name, _)) = self.folder_names.borrow().get(&folder).cloned() else {
             return;
         };
-        let question = format!(
-            "Delete the folder \u{201C}{name}\u{201D} with its messages and the folders in it? It is deleted on the \
-             server too."
-        );
+        let question = t!(UiDeleteFolderQuestion, folder = &name);
         if !ui::confirm(&self.window, TITLE, &question, true).await {
             return;
         }
@@ -1674,15 +1664,16 @@ impl Mailbox {
         }
         let window = self.window.clone().upcast::<gtk::Window>();
         let Ok(Some((name, data))) = shell().core.message_source(self.message_folder.get(), self.uid.get()) else {
-            ui::alert(&window, TITLE, "The message is not downloaded yet.").await;
+            ui::alert(&window, TITLE, &t!(UiNotDownloaded)).await;
             return;
         };
-        let patterns = Some(("Mail messages", &["*.eml"][..]));
-        let Some(path) = ui::save_file(&window, "Save Message As", &name, patterns).await else {
+        let kind = t!(UiFilterMessages);
+        let patterns = Some((kind.as_str(), &["*.eml"][..]));
+        let Some(path) = ui::save_file(&window, &t!(UiSaveMessageAs), &name, patterns).await else {
             return;
         };
         if std::fs::write(&path, data).is_err() {
-            ui::alert(&window, TITLE, "The message could not be saved.").await;
+            ui::alert(&window, TITLE, &t!(UiNotSaved)).await;
         }
     }
 
@@ -1690,7 +1681,7 @@ impl Mailbox {
     /// file there; those not downloaded yet are downloaded for it
     async fn save_selected_into_folder(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
-        let Some(dir) = ui::choose_folder(&window, "Save Messages In").await else {
+        let Some(dir) = ui::choose_folder(&window, &t!(UiSaveMessagesIn)).await else {
             return;
         };
         let into = dir.clone();
@@ -1724,11 +1715,11 @@ impl Mailbox {
     /// File > Properties: the Internet headers of the message shown
     pub async fn show_properties(&self) {
         if self.uid.get() == 0 {
-            ui::alert(&self.window, TITLE, "Select a message first.").await;
+            ui::alert(&self.window, TITLE, &t!(UiSelectMessageFirst)).await;
             return;
         }
         let Ok(Some(headers)) = shell().core.message_headers(self.message_folder.get(), self.uid.get()) else {
-            ui::alert(&self.window, TITLE, "The message is not downloaded yet.").await;
+            ui::alert(&self.window, TITLE, &t!(UiNotDownloaded)).await;
             return;
         };
         let subject = self
@@ -1738,14 +1729,14 @@ impl Mailbox {
             .map(|v| v.subject.clone())
             .unwrap_or_default();
         let title = if subject.is_empty() {
-            "Properties".into()
+            crate::words::plain(crate::words::Text::UiProperties)
         } else {
-            format!("{subject} Properties")
+            t!(UiPropertiesOf, subject = &subject)
         };
         let dialog = ui::text_dialog(
             &self.window,
             &title,
-            "Internet headers for this message:",
+            &t!(UiInternetHeaders),
             &headers.replace("\r\n", "\n"),
         );
         dialog.set_widget_name("properties-dialog");
@@ -1754,14 +1745,14 @@ impl Mailbox {
     /// View Source: the whole message as the server has it
     pub async fn show_source(&self) {
         if self.uid.get() == 0 {
-            ui::alert(&self.window, TITLE, "Select a message first.").await;
+            ui::alert(&self.window, TITLE, &t!(UiSelectMessageFirst)).await;
             return;
         }
         let Ok(Some((title, text))) = shell()
             .core
             .message_source_text(self.message_folder.get(), self.uid.get())
         else {
-            ui::alert(&self.window, TITLE, "The message is not downloaded yet.").await;
+            ui::alert(&self.window, TITLE, &t!(UiNotDownloaded)).await;
             return;
         };
         // Save As from here saves the message shown, as File > Save As does
@@ -1820,7 +1811,10 @@ impl Mailbox {
                 }
             });
             group.add_action(&action);
-            open.append(Some("Open"), Some("message.open"));
+            open.append(
+                Some(&crate::words::plain(crate::words::Text::UiMenuOpen)),
+                Some("message.open"),
+            );
             menu.append_section(None, &open);
         }
         let answer = gio::Menu::new();
@@ -1840,7 +1834,7 @@ impl Mailbox {
             None,
         );
         // the colours and Clear Flag; the Flag Message toggle is the primary menu's, with its key
-        organize.append_submenu(Some("Flag"), &flag_menu());
+        organize.append_submenu(Some(&crate::words::plain(crate::words::Text::UiMenuFlag)), &flag_menu());
         add(
             &organize,
             if summary.in_junk {
@@ -1852,14 +1846,18 @@ impl Mailbox {
         );
         add(&organize, Command::Move, None);
         add(&organize, Command::Copy, None);
-        add(&organize, Command::Delete, Some("Delete"));
+        add(&organize, Command::Delete, Some(&t!(UiTbDelete)));
         menu.append_section(None, &organize);
         let files = gio::Menu::new();
         add(&files, Command::SaveAs, None);
         add(&files, Command::Print, None);
         menu.append_section(None, &files);
         let details = gio::Menu::new();
-        add(&details, Command::ViewSource, Some("View Source"));
+        add(
+            &details,
+            Command::ViewSource,
+            Some(&crate::words::plain(crate::words::Text::UiMenuViewSource)),
+        );
         add(&details, Command::Properties, None);
         menu.append_section(None, &details);
         widget.insert_action_group("message", Some(&group));
@@ -1879,16 +1877,12 @@ impl Mailbox {
     pub async fn import(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
         if self.folder.get() == 0 {
-            ui::alert(
-                &window,
-                "Import Messages",
-                "Choose the folder to put the messages in first.",
-            )
-            .await;
+            ui::alert(&window, &import_title(), &t!(UiImportChooseFolder)).await;
             return;
         }
-        let patterns = Some(("Mail messages", &["*.eml"][..]));
-        let files = ui::open_files(&window, "Import Messages", patterns).await;
+        let kind = t!(UiFilterMessages);
+        let patterns = Some((kind.as_str(), &["*.eml"][..]));
+        let files = ui::open_files(&window, &import_title(), patterns).await;
         self.import_files(&files).await;
     }
 
@@ -1905,7 +1899,7 @@ impl Mailbox {
             Err(error) => Some(error.to_string()),
         };
         if let Some(report) = report {
-            ui::alert(&self.window, "Import Messages", &report).await;
+            ui::alert(&self.window, &import_title(), &report).await;
         }
     }
 
@@ -1913,20 +1907,15 @@ impl Mailbox {
     pub async fn import_file(&self, file: &Path) {
         let folder = self.folder.get();
         let Some((folder_name, _)) = self.folder_names.borrow().get(&folder).cloned() else {
-            ui::alert(
-                &self.window,
-                "Import Messages",
-                "Choose the folder to put the messages in first.",
-            )
-            .await;
+            ui::alert(&self.window, &import_title(), &t!(UiImportChooseFolder)).await;
             return;
         };
         let name = file
             .file_name()
             .map(|n| n.to_string_lossy().into_owned())
             .unwrap_or_default();
-        let question = format!("Put the message {name} into the folder {folder_name}?");
-        if ui::confirm(&self.window, "Import Messages", &question, false).await {
+        let question = t!(GtkImportOneQuestion, file = &*name, folder = &*folder_name);
+        if ui::confirm(&self.window, &import_title(), &question, false).await {
             self.import_files(&[file.to_path_buf()]).await;
         }
     }
@@ -1937,14 +1926,14 @@ impl Mailbox {
             .core
             .attachment(self.message_folder.get(), self.uid.get(), index)
         else {
-            ui::alert(&window, TITLE, "The attachment could not be read.").await;
+            ui::alert(&window, TITLE, &t!(UiAttachmentNotRead)).await;
             return;
         };
-        let Some(path) = ui::save_file(&window, "Save Attachment As", &name, None).await else {
+        let Some(path) = ui::save_file(&window, &t!(UiSaveAttachmentAs), &name, None).await else {
             return;
         };
         if std::fs::write(&path, data).is_err() {
-            ui::alert(&window, TITLE, "The attachment could not be saved.").await;
+            ui::alert(&window, TITLE, &t!(UiAttachmentNotSaved)).await;
         }
     }
 
@@ -1952,7 +1941,7 @@ impl Mailbox {
     /// already there kept and the new one numbered
     async fn save_all_attachments(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
-        let Some(dir) = ui::choose_folder(&window, "Save Attachments").await else {
+        let Some(dir) = ui::choose_folder(&window, &t!(UiSaveAttachments)).await else {
             return;
         };
         match shell()
@@ -1960,11 +1949,11 @@ impl Mailbox {
             .save_attachments(self.message_folder.get(), self.uid.get(), &dir)
         {
             Ok(Some((saved, total))) if saved < total => {
-                let text = format!("{} of the {total} files could not be saved.", total - saved);
+                let text = t!(GtkFilesNotSaved, failed = total - saved, total = total);
                 ui::alert(&window, TITLE, &text).await;
             }
             Ok(Some(_)) => {}
-            _ => ui::alert(&window, TITLE, "The message is not downloaded yet.").await,
+            _ => ui::alert(&window, TITLE, &t!(UiNotDownloaded)).await,
         }
     }
 
@@ -1975,13 +1964,13 @@ impl Mailbox {
             .core
             .invitation_file(self.message_folder.get(), self.uid.get(), &dir)
         else {
-            ui::alert(&self.window, TITLE, "The invitation could not be read.").await;
+            ui::alert(&self.window, TITLE, &t!(UiInvitationNotRead)).await;
             return;
         };
         let launcher = gtk::FileLauncher::new(Some(&gio::File::for_path(&path)));
         if launcher.launch_future(Some(&self.window)).await.is_err() {
-            let text = "No calendar program on this computer opens invitations (.ics files).";
-            ui::alert(&self.window, TITLE, text).await;
+            let text = t!(UiNoCalendar);
+            ui::alert(&self.window, TITLE, &text).await;
         }
     }
 
@@ -1994,14 +1983,13 @@ impl Mailbox {
             return;
         };
         let target = how.target();
-        let ok = [("cancel", "Cancel"), ("ok", "OK")];
+        let (cancel, okay) = (t!(UiCancel), t!(UiOk));
+        let ok = [("cancel", cancel.as_str()), ("ok", okay.as_str())];
+        let title = t!(UiUnsubscribe);
         match how {
             Unsubscribe::OneClick { .. } => {
-                let question = format!(
-                    "Leave this mailing list?\n\nInbox Classic asks {target} to stop sending it to you. No page opens \
-                     and no message is sent."
-                );
-                if !ui::confirm(&self.window, "Unsubscribe", &question, false).await {
+                let question = t!(GtkUnsubscribeOneClick, target = &*target);
+                if !ui::confirm(&self.window, &title, &question, false).await {
                     return;
                 }
                 let request = shell()
@@ -2010,24 +1998,20 @@ impl Mailbox {
                     .unwrap_or(0);
                 self.unsubscribe_request.set(request);
                 self.set_status(&if request != 0 {
-                    format!("Unsubscribing from {target}...")
+                    t!(UiUnsubscribing, target = &*target)
                 } else {
-                    "This message can not unsubscribe you.".into()
+                    t!(UiCannotUnsubscribe)
                 });
             }
             Unsubscribe::Mail { link } => {
-                let question = format!(
-                    "Leave this mailing list?\n\nThe list wants a message to {target}. Inbox Classic writes it for you; \
-                     send it to unsubscribe."
-                );
-                if ui::ask(&self.window, "Unsubscribe", &question, &ok, "ok", "cancel", None).await == "ok" {
+                let question = t!(GtkUnsubscribeMail, target = &*target);
+                if ui::ask(&self.window, &title, &question, &ok, "ok", "cancel", None).await == "ok" {
                     shell().open_mailto(&link).await;
                 }
             }
             Unsubscribe::Web { url } => {
-                let question =
-                    format!("Leave this mailing list?\n\nThe list's page for it opens in your browser ({target}).");
-                if ui::ask(&self.window, "Unsubscribe", &question, &ok, "ok", "cancel", None).await == "ok" {
+                let question = t!(GtkUnsubscribeWeb, target = &*target);
+                if ui::ask(&self.window, &title, &question, &ok, "ok", "cancel", None).await == "ok" {
                     ui::open_externally(&url, Some(self.window.upcast_ref()));
                 }
             }
@@ -2041,8 +2025,8 @@ impl Mailbox {
         }
         self.unsubscribe_request.set(0);
         match problem {
-            None => "Unsubscribed. The list says it will stop sending this mail.".into(),
-            Some(problem) => format!("Could not unsubscribe: {problem}"),
+            None => t!(UiUnsubscribed),
+            Some(problem) => t!(GtkUnsubscribeFailed, problem = problem),
         }
     }
 }
@@ -2105,34 +2089,34 @@ fn header_bar(
     };
     let create_mail = adw::SplitButton::builder()
         .icon_name("ic-mail-add-symbolic")
-        .tooltip_text("Create Mail")
-        .dropdown_tooltip("A message from one account")
+        .tooltip_text(t!(UiTbCreateMail))
+        .dropdown_tooltip(t!(GtkToolbarCreateMailMenu))
         .action_name(action(Command::NewMail))
         .build();
     let send_receive = adw::SplitButton::builder()
         .icon_name("ic-arrow-sync-symbolic")
-        .tooltip_text("Send/Recv")
-        .dropdown_tooltip("Send and receive one account")
+        .tooltip_text(t!(UiTbSync))
+        .dropdown_tooltip(t!(GtkToolbarSendRecvMenu))
         .action_name(action(Command::Sync))
         .build();
-    let junk = button("ic-mail-prohibited-symbolic", "Junk", Command::Junk);
+    let junk = button("ic-mail-prohibited-symbolic", &t!(UiTbJunk), Command::Junk);
     junk.set_widget_name("junk");
     let groups: Vec<Vec<gtk::Widget>> = vec![
         vec![create_mail.clone().upcast()],
         vec![
-            button("ic-arrow-reply-symbolic", "Reply", Command::Reply).upcast(),
-            button("ic-arrow-reply-all-symbolic", "Reply All", Command::ReplyAll).upcast(),
-            button("ic-arrow-forward-symbolic", "Forward", Command::Forward).upcast(),
+            button("ic-arrow-reply-symbolic", &t!(UiTbReply), Command::Reply).upcast(),
+            button("ic-arrow-reply-all-symbolic", &t!(UiTbReplyAll), Command::ReplyAll).upcast(),
+            button("ic-arrow-forward-symbolic", &t!(UiTbForward), Command::Forward).upcast(),
         ],
         vec![
-            button("ic-print-symbolic", "Print", Command::Print).upcast(),
-            button("ic-delete-symbolic", "Delete", Command::Delete).upcast(),
+            button("ic-print-symbolic", &t!(UiTbPrint), Command::Print).upcast(),
+            button("ic-delete-symbolic", &t!(UiTbDelete), Command::Delete).upcast(),
             junk.clone().upcast(),
         ],
         vec![send_receive.clone().upcast()],
         vec![
-            button("ic-mail-read-symbolic", "Mark Read", Command::MarkRead).upcast(),
-            button("ic-mail-unread-symbolic", "Mark Unread", Command::MarkUnread).upcast(),
+            button("ic-mail-read-symbolic", &t!(UiTbMarkRead), Command::MarkRead).upcast(),
+            button("ic-mail-unread-symbolic", &t!(UiTbMarkUnread), Command::MarkUnread).upcast(),
         ],
     ];
     for group in groups {
@@ -2148,7 +2132,7 @@ fn header_bar(
         .icon_name("open-menu-symbolic")
         .menu_model(&primary)
         .primary(true)
-        .tooltip_text("Main Menu")
+        .tooltip_text(t!(GtkMainMenu))
         .build();
     menu.set_widget_name("primary-menu");
     if let Some(popover) = menu.popover().and_downcast::<gtk::PopoverMenu>() {
@@ -2165,31 +2149,44 @@ fn primary_menu() -> (gio::Menu, gio::Menu) {
     let menu = gio::Menu::new();
     let sections = gio::Menu::new();
     let mut edit = gio::Menu::new();
+    use crate::words::{Text, plain};
     for (id, name) in [
-        ("file", "File"),
-        ("edit", "Edit"),
-        ("view", "View"),
-        ("tools", "Tools"),
-        ("message", "Message"),
-        ("help", "Help"),
+        ("file", Text::MenuFile),
+        ("edit", Text::MenuEdit),
+        ("view", Text::MenuView),
+        ("tools", Text::MenuTools),
+        ("message", Text::MenuMessage),
+        ("help", Text::MenuHelp),
     ] {
         let submenu = gio::Menu::new();
-        for command in Command::ALL.iter().filter(|c| c.menu() == id && **c != Command::Exit) {
+        // Quit and Preferences have the places GNOME gives them, at the end
+        let elsewhere = [Command::Exit, Command::Options];
+        for command in Command::ALL.iter().filter(|c| c.menu() == id && !elsewhere.contains(c)) {
             submenu.append_item(&menu_item(command.label(), *command));
             // the colours beside the flag
             if *command == Command::Flag {
-                submenu.append_submenu(Some("Flag"), &flag_menu());
+                submenu.append_submenu(Some(&crate::words::plain(crate::words::Text::UiMenuFlag)), &flag_menu());
             }
         }
-        sections.append_submenu(Some(name), &submenu);
+        sections.append_submenu(Some(&plain(name)), &submenu);
         if id == "edit" {
             edit = submenu;
         }
     }
     menu.append_section(None, &sections);
+    let preferences = gio::Menu::new();
+    let item = gio::MenuItem::new(
+        Some(&t!(GtkPreferences)),
+        Some(&format!("win.{}", Command::Options.name())),
+    );
+    if let Some(accel) = Command::Options.accel() {
+        item.set_attribute_value("accel", Some(&accel.to_variant()));
+    }
+    preferences.append_item(&item);
+    menu.append_section(None, &preferences);
     let quit = gio::Menu::new();
     // GNOME names it Quit
-    quit.append(Some("Quit"), Some(&format!("win.{}", Command::Exit.name())));
+    quit.append(Some(&t!(GtkQuit)), Some(&format!("win.{}", Command::Exit.name())));
     menu.append_section(None, &quit);
     (menu, edit)
 }
@@ -2211,7 +2208,10 @@ fn flag_menu() -> gio::Menu {
     }
     menu.append_section(None, &colors);
     let clear = gio::Menu::new();
-    clear.append(Some("Clear Flag"), Some(&format!("win.{FLAG_CLEAR}")));
+    clear.append(
+        Some(&crate::words::plain(crate::words::Text::UiClearFlag)),
+        Some(&format!("win.{FLAG_CLEAR}")),
+    );
     menu.append_section(None, &clear);
     menu
 }
@@ -2336,4 +2336,9 @@ fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Label) {
     bar.append(&gtk::Separator::new(gtk::Orientation::Vertical));
     bar.append(&counts);
     (bar, status, outgoing, counts)
+}
+
+/// The title of Import's windows: the command's name without its dots
+fn import_title() -> String {
+    crate::words::title(crate::words::Text::CmdImport)
 }

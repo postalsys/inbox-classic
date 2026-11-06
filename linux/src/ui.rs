@@ -51,7 +51,7 @@ pub fn load_style() {
 
 /// A message box with OK. `heading` is the caption, left out when it is only the app's name
 pub async fn alert(parent: &impl IsA<gtk::Widget>, heading: &str, body: &str) {
-    ask(parent, heading, body, &[("ok", "OK")], "ok", "ok", None).await;
+    ask(parent, heading, body, &[("ok", t!(UiOk).as_str())], "ok", "ok", None).await;
 }
 
 /// A message box with the given answers (id, label); the id of the one chosen, `close` for Esc. `destructive`
@@ -90,7 +90,7 @@ pub async fn confirm(parent: &impl IsA<gtk::Widget>, heading: &str, body: &str, 
         parent,
         heading,
         body,
-        &[("no", "No"), ("yes", "Yes")],
+        &[("no", t!(UiNo).as_str()), ("yes", t!(UiYes).as_str())],
         default,
         "no",
         red,
@@ -327,7 +327,14 @@ fn form_row(index: usize, field: &Field) -> gtk::Widget {
 
 /// Asks for a folder's name (New Folder, Rename Folder): the name typed, None for Cancel or nothing typed
 pub async fn ask_folder_name(parent: &impl IsA<gtk::Widget>, title: &str, intro: &str, name: &str) -> Option<String> {
-    let form = Form::new(parent, title, intro, vec![Field::text("Folder name:", name)], "OK", 0);
+    let form = Form::new(
+        parent,
+        title,
+        intro,
+        vec![Field::text(&t!(UiFolderName), name)],
+        &t!(UiOk),
+        0,
+    );
     form.widget().set_widget_name("folder-name-dialog");
     let ok = form.run().await;
     let value = form.value(0);
@@ -346,7 +353,7 @@ pub fn dialog_with_buttons(
     let header = adw::HeaderBar::new();
     header.set_show_end_title_buttons(false);
     header.set_show_start_title_buttons(false);
-    let cancel = gtk::Button::with_label("Cancel");
+    let cancel = gtk::Button::with_label(&t!(UiCancel));
     cancel.set_widget_name("dialog-cancel");
     let ok = gtk::Button::with_label(ok_label);
     ok.set_widget_name("dialog-ok");
@@ -462,7 +469,7 @@ pub async fn wait_for_request(
     label.set_widget_name("wait-text");
     let spinner = adw::Spinner::new();
     spinner.set_size_request(32, 32);
-    let cancel_button = gtk::Button::with_label("Cancel");
+    let cancel_button = gtk::Button::with_label(&t!(UiCancel));
     cancel_button.set_widget_name("wait-cancel");
     cancel_button.set_halign(gtk::Align::End);
     let row = gtk::Box::new(gtk::Orientation::Horizontal, 12);
@@ -505,7 +512,7 @@ pub async fn wait_for_request(
 /// Seconds since the Unix epoch in the user's short date and the time without seconds, local time
 pub fn format_date(seconds: i64) -> String {
     glib::DateTime::from_unix_local(seconds)
-        .and_then(|date| date.format("%x %H:%M"))
+        .and_then(|date| date.format(&format!("%x {}", time_format())))
         .map(|text| text.to_string())
         .unwrap_or_default()
 }
@@ -513,15 +520,64 @@ pub fn format_date(seconds: i64) -> String {
 /// The time of day of `seconds` since the Unix epoch, local time, without seconds
 pub fn format_time(seconds: i64) -> String {
     glib::DateTime::from_unix_local(seconds)
-        .and_then(|date| date.format("%H:%M"))
+        .and_then(|date| date.format(time_format()))
         .map(|text| text.to_string())
         .unwrap_or_default()
+}
+
+/// The locale's time of day (its %X) without the seconds, as a glib format: "%H:%M", "%l:%M %p", "%H.%M"
+pub fn time_format() -> &'static str {
+    static FORMAT: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    FORMAT.get_or_init(|| {
+        // 13:45:56 says where the locale puts each part
+        let Ok(reference) = glib::DateTime::from_local(2001, 2, 3, 13, 45, 56.0) else {
+            return "%H:%M".into();
+        };
+        let text = |format: &str| reference.format(format).map(|t| t.to_string()).unwrap_or_default();
+        time_pattern(&text("%X"), &text("%p"))
+    })
+}
+
+/// The format of a time written like `reference` (13:45:56 in the locale), without its seconds; "%H:%M" when it is
+/// not understood
+fn time_pattern(reference: &str, pm: &str) -> String {
+    let fallback = || "%H:%M".to_string();
+    let Some(at) = reference.find("56") else {
+        return fallback();
+    };
+    // the seconds with the separator before them
+    let start = reference[..at]
+        .char_indices()
+        .next_back()
+        .map_or(at, |(i, c)| if c.is_ascii_digit() { at } else { i });
+    let mut pattern = format!("{}{}", &reference[..start], &reference[at + 2..]);
+    if !pm.is_empty() && pattern.contains(pm) {
+        pattern = pattern.replacen(pm, "\u{1}", 1);
+    }
+    let Some(minutes) = pattern.find("45") else {
+        return fallback();
+    };
+    pattern.replace_range(minutes..minutes + 2, "\u{2}");
+    let hours = if pattern.contains("13") {
+        ("13", "%H")
+    } else if pattern.contains("01") {
+        ("01", "%I")
+    } else if pattern.contains('1') {
+        ("1", "%l")
+    } else {
+        return fallback();
+    };
+    pattern = pattern.replacen(hours.0, hours.1, 1);
+    if pattern.chars().any(|c| c.is_ascii_digit()) {
+        return fallback();
+    }
+    pattern.replace('\u{1}', "%p").replace('\u{2}', "%M").trim().to_string()
 }
 
 /// The time of day now, without seconds
 pub fn time_now() -> String {
     glib::DateTime::now_local()
-        .and_then(|now| now.format("%H:%M"))
+        .and_then(|now| now.format(time_format()))
         .map(|text| text.to_string())
         .unwrap_or_default()
 }
@@ -553,7 +609,7 @@ fn filter(name: &str, patterns: &[&str]) -> gio::ListStore {
         filter.add_pattern(pattern);
     }
     let all = gtk::FileFilter::new();
-    all.set_name(Some("All files"));
+    all.set_name(Some(&t!(UiFilterAll)));
     all.add_pattern("*");
     let filters = gio::ListStore::new::<gtk::FileFilter>();
     filters.append(&filter);
@@ -650,6 +706,16 @@ pub fn icon_button(icon: &str, tooltip: &str) -> gtk::Button {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn time_without_seconds() {
+        assert_eq!(time_pattern("13:45:56", ""), "%H:%M");
+        assert_eq!(time_pattern("01:45:56 PM", "PM"), "%I:%M %p");
+        assert_eq!(time_pattern("1:45:56 PM", "PM"), "%l:%M %p");
+        assert_eq!(time_pattern("13.45.56", ""), "%H.%M");
+        assert_eq!(time_pattern("PM 01:45:56", "PM"), "%p %I:%M");
+        assert_eq!(time_pattern("nonsense", ""), "%H:%M");
+    }
 
     #[test]
     fn links_that_open() {

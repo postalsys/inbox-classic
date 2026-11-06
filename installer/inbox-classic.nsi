@@ -76,7 +76,12 @@ Var WelcomeText
 !define MUI_UNICON "app/res/app.ico"
 !define MUI_WELCOMEPAGE_TEXT "$WelcomeText"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${EXE}"
-!define MUI_FINISHPAGE_RUN_TEXT "Start ${PRODUCT}"
+!define MUI_FINISHPAGE_RUN_TEXT "$(StartApp)"
+; the language asked for first, Windows' own preselected; remembered for the next update and for the uninstaller
+!define MUI_LANGDLL_REGISTRY_ROOT HKCU
+!define MUI_LANGDLL_REGISTRY_KEY "${REGKEY}"
+!define MUI_LANGDLL_REGISTRY_VALUENAME "InstallerLanguage"
+!define MUI_LANGDLL_WINDOWTITLE "${PRODUCT}"
 
 !insertmacro MUI_PAGE_WELCOME
 ; an upgrade goes where the installed version is, the folder is chosen on the first install only
@@ -88,7 +93,63 @@ Var WelcomeText
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
+; the languages there are catalogs of (core/locales), English first
 !insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "German"
+!insertmacro MUI_LANGUAGE "Estonian"
+!insertmacro MUI_LANGUAGE "Spanish"
+!insertmacro MUI_LANGUAGE "French"
+!insertmacro MUI_RESERVEFILE_LANGDLL
+
+; the installer's own words in each language; ${PRODUCT} and the versions are filled in
+; the code of the language chosen for the installer, the app's language on a first install (app/src/options.cpp)
+LangString LanguageCode ${LANG_ENGLISH} "en"
+LangString LanguageCode ${LANG_GERMAN} "de"
+LangString LanguageCode ${LANG_ESTONIAN} "et"
+LangString LanguageCode ${LANG_SPANISH} "es"
+LangString LanguageCode ${LANG_FRENCH} "fr"
+
+LangString StartApp ${LANG_ENGLISH} "Start ${PRODUCT}"
+LangString StartApp ${LANG_GERMAN} "${PRODUCT} starten"
+LangString StartApp ${LANG_ESTONIAN} "Käivita ${PRODUCT}"
+LangString StartApp ${LANG_SPANISH} "Iniciar ${PRODUCT}"
+LangString StartApp ${LANG_FRENCH} "Démarrer ${PRODUCT}"
+
+LangString WelcomeNew ${LANG_ENGLISH} "This will install ${PRODUCT} ${VERSION}, an e-mail program.$\r$\n$\r$\nNo administrator rights are needed, it is installed for your account only."
+LangString WelcomeNew ${LANG_GERMAN} "Hiermit wird ${PRODUCT} ${VERSION} installiert, ein E-Mail-Programm.$\r$\n$\r$\nAdministratorrechte sind nicht nötig, es wird nur für Ihr Konto installiert."
+LangString WelcomeNew ${LANG_ESTONIAN} "See installib meiliprogrammi ${PRODUCT} ${VERSION}.$\r$\n$\r$\nAdministraatori õigusi pole vaja, see installitakse ainult teie kontole."
+LangString WelcomeNew ${LANG_SPANISH} "Se instalará ${PRODUCT} ${VERSION}, un programa de correo electrónico.$\r$\n$\r$\nNo se necesitan derechos de administrador; se instala solo para su cuenta."
+LangString WelcomeNew ${LANG_FRENCH} "Ceci va installer ${PRODUCT} ${VERSION}, un programme de messagerie.$\r$\n$\r$\nAucun droit d'administrateur n'est nécessaire, il est installé pour votre compte uniquement."
+
+LangString WelcomeSame ${LANG_ENGLISH} "${PRODUCT} ${VERSION} is installed already. This will install it again.$\r$\n$\r$\nYour accounts and mail are kept."
+LangString WelcomeSame ${LANG_GERMAN} "${PRODUCT} ${VERSION} ist bereits installiert. Hiermit wird es erneut installiert.$\r$\n$\r$\nIhre Konten und E-Mails bleiben erhalten."
+LangString WelcomeSame ${LANG_ESTONIAN} "${PRODUCT} ${VERSION} on juba installitud. See installib selle uuesti.$\r$\n$\r$\nTeie kontod ja kirjad jäävad alles."
+LangString WelcomeSame ${LANG_SPANISH} "${PRODUCT} ${VERSION} ya está instalado. Se instalará de nuevo.$\r$\n$\r$\nSus cuentas y su correo se conservan."
+LangString WelcomeSame ${LANG_FRENCH} "${PRODUCT} ${VERSION} est déjà installé. Ceci va le réinstaller.$\r$\n$\r$\nVos comptes et votre courrier sont conservés."
+
+LangString WelcomeUpdate ${LANG_ENGLISH} "This will update ${PRODUCT} $InstalledVersion to ${VERSION}.$\r$\n$\r$\nIf it is running it is closed first. Your accounts and mail are kept."
+LangString WelcomeUpdate ${LANG_GERMAN} "Hiermit wird ${PRODUCT} $InstalledVersion auf ${VERSION} aktualisiert.$\r$\n$\r$\nLäuft es, wird es zuerst geschlossen. Ihre Konten und E-Mails bleiben erhalten."
+LangString WelcomeUpdate ${LANG_ESTONIAN} "See uuendab programmi ${PRODUCT} versioonist $InstalledVersion versioonile ${VERSION}.$\r$\n$\r$\nKui see töötab, suletakse see enne. Teie kontod ja kirjad jäävad alles."
+LangString WelcomeUpdate ${LANG_SPANISH} "Se actualizará ${PRODUCT} $InstalledVersion a ${VERSION}.$\r$\n$\r$\nSi está abierto, primero se cierra. Sus cuentas y su correo se conservan."
+LangString WelcomeUpdate ${LANG_FRENCH} "Ceci va mettre à jour ${PRODUCT} $InstalledVersion vers ${VERSION}.$\r$\n$\r$\nS'il est ouvert, il est d'abord fermé. Vos comptes et votre courrier sont conservés."
+
+LangString OlderAsk ${LANG_ENGLISH} "${PRODUCT} $InstalledVersion is installed, which is newer than ${VERSION}. Install the older version anyway?"
+LangString OlderAsk ${LANG_GERMAN} "${PRODUCT} $InstalledVersion ist installiert und neuer als ${VERSION}. Die ältere Version trotzdem installieren?"
+LangString OlderAsk ${LANG_ESTONIAN} "Installitud on ${PRODUCT} $InstalledVersion, mis on uuem kui ${VERSION}. Kas installida vanem versioon siiski?"
+LangString OlderAsk ${LANG_SPANISH} "Está instalado ${PRODUCT} $InstalledVersion, que es más reciente que ${VERSION}. ¿Instalar de todos modos la versión anterior?"
+LangString OlderAsk ${LANG_FRENCH} "${PRODUCT} $InstalledVersion est installé et plus récent que ${VERSION}. Installer quand même l'ancienne version ?"
+
+LangString StillRunning ${LANG_ENGLISH} "${PRODUCT} is still running. Close it and try again."
+LangString StillRunning ${LANG_GERMAN} "${PRODUCT} läuft noch. Schließen Sie es und versuchen Sie es erneut."
+LangString StillRunning ${LANG_ESTONIAN} "${PRODUCT} töötab endiselt. Sulgege see ja proovige uuesti."
+LangString StillRunning ${LANG_SPANISH} "${PRODUCT} sigue abierto. Ciérrelo y vuelva a intentarlo."
+LangString StillRunning ${LANG_FRENCH} "${PRODUCT} est toujours ouvert. Fermez-le et réessayez."
+
+LangString RemoveMailAsk ${LANG_ENGLISH} "Also remove the accounts and the mail ${PRODUCT} keeps on this computer? The mail on the servers stays."
+LangString RemoveMailAsk ${LANG_GERMAN} "Auch die Konten und E-Mails entfernen, die ${PRODUCT} auf diesem Computer speichert? Die E-Mails auf den Servern bleiben."
+LangString RemoveMailAsk ${LANG_ESTONIAN} "Kas eemaldada ka kontod ja kirjad, mida ${PRODUCT} selles arvutis hoiab? Serverites olevad kirjad jäävad alles."
+LangString RemoveMailAsk ${LANG_SPANISH} "¿Quitar también las cuentas y el correo que ${PRODUCT} guarda en este equipo? El correo de los servidores se queda."
+LangString RemoveMailAsk ${LANG_FRENCH} "Supprimer aussi les comptes et le courrier qu'${PRODUCT} garde sur cet ordinateur ? Le courrier sur les serveurs reste."
 
 ; Closes a running Inbox Classic of this user. taskkill without /f sends WM_CLOSE, so the app closes its store
 ; and logs out of its servers. A running exe can not be opened for writing (it can be renamed, so that is no test);
@@ -125,7 +186,7 @@ Var WelcomeText
                 nsExec::Exec '"$SYSDIR\taskkill.exe" /f /fi "USERNAME eq $0" /im ${EXE}'
                 Pop $2
             ${ElseIf} $1 > 40
-                MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "${PRODUCT} is still running. Close it and try again." /SD IDCANCEL IDRETRY +2
+                MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(StillRunning)" /SD IDCANCEL IDRETRY +2
                 Abort
                 StrCpy $1 0
             ${EndIf}
@@ -136,22 +197,31 @@ Var WelcomeText
 !insertmacro CLOSE_APP "un."
 
 Function .onInit
+    ; not asked in a silent install, which stays in Windows' language (or the one chosen before)
+    ${IfNot} ${Silent}
+        !insertmacro MUI_LANGDLL_DISPLAY
+    ${EndIf}
     ReadRegStr $InstalledVersion HKCU "${UNINSTKEY}" "DisplayVersion"
     ${If} $InstalledVersion == ""
-        StrCpy $WelcomeText "This will install ${PRODUCT} ${VERSION}, an e-mail program.$\r$\n$\r$\nNo administrator rights are needed, it is installed for your account only."
+        StrCpy $WelcomeText "$(WelcomeNew)"
         Return
     ${EndIf}
     ; 0 the same version, 1 this one is newer, 2 the installed one is newer
     ${VersionCompare} "${VERSION}" "$InstalledVersion" $0
     ${If} $0 = 2
-        MessageBox MB_YESNO|MB_ICONQUESTION "${PRODUCT} $InstalledVersion is installed, which is newer than ${VERSION}. Install the older version anyway?" /SD IDNO IDYES +2
+        MessageBox MB_YESNO|MB_ICONQUESTION "$(OlderAsk)" /SD IDNO IDYES +2
         Abort
     ${EndIf}
     ${If} $0 = 0
-        StrCpy $WelcomeText "${PRODUCT} ${VERSION} is installed already. This will install it again.$\r$\n$\r$\nYour accounts and mail are kept."
+        StrCpy $WelcomeText "$(WelcomeSame)"
     ${Else}
-        StrCpy $WelcomeText "This will update ${PRODUCT} $InstalledVersion to ${VERSION}.$\r$\n$\r$\nIf it is running it is closed first. Your accounts and mail are kept."
+        StrCpy $WelcomeText "$(WelcomeUpdate)"
     ${EndIf}
+FunctionEnd
+
+Function un.onInit
+    ; the language the installer was run in
+    !insertmacro MUI_UNGETLANGUAGE
 FunctionEnd
 
 Function SkipDirectoryOnUpgrade
@@ -171,6 +241,16 @@ Section "Install"
 
     WriteRegStr HKCU "${REGKEY}" "InstallDir" "$INSTDIR"
     WriteRegStr HKCU "${REGKEY}" "Version" "${VERSION}"
+    ; the app in the language chosen for the installer, on a first install only: never over a language the user chose
+    ; in Options, and not in a silent install, where nobody chose one (the app follows Windows then)
+    ${If} $InstalledVersion == ""
+    ${AndIfNot} ${Silent}
+        ClearErrors
+        ReadRegStr $0 HKCU "${REGKEY}" "Language"
+        ${If} ${Errors}
+            WriteRegStr HKCU "${REGKEY}" "Language" "$(LanguageCode)"
+        ${EndIf}
+    ${EndIf}
     WriteRegStr HKCU "${UNINSTKEY}" "DisplayName" "${PRODUCT}"
     WriteRegStr HKCU "${UNINSTKEY}" "DisplayVersion" "${VERSION}"
     WriteRegStr HKCU "${UNINSTKEY}" "Publisher" "${PUBLISHER}"
@@ -218,6 +298,6 @@ Section "Uninstall"
     RMDir /r "$LOCALAPPDATA\InboxClassic\WebView2"
     ; the saved passwords stay in the Credential Manager under "InboxClassic", named after a random ID of the
     ; removed store: no other store can use them
-    MessageBox MB_YESNO|MB_ICONQUESTION "Also remove the accounts and the mail Inbox Classic keeps on this computer? The mail on the servers stays." /SD IDNO IDNO +2
+    MessageBox MB_YESNO|MB_ICONQUESTION "$(RemoveMailAsk)" /SD IDNO IDNO +2
     RMDir /r "$LOCALAPPDATA\InboxClassic"
 SectionEnd

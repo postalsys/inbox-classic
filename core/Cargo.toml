@@ -18,6 +18,7 @@ pe-mime = { path = "crates/pe-mime" }
 pe-net = { path = "crates/pe-net" }
 ammonia = "4"
 pe-html = { path = "crates/pe-html" }
+pe-i18n = { path = "crates/pe-i18n" }
 
 [profile.release]
 lto = "thin"

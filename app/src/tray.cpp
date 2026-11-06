@@ -41,9 +41,9 @@ void SetTip(NOTIFYICONDATAW& data) {
 
 std::wstring UnreadText(uint64_t unread) {
     if (unread == 0) {
-        return L"No unread messages";
+        return core::T(PE_TEXT_WIN_NO_UNREAD);
     }
-    return std::to_wstring(unread) + (unread == 1 ? L" unread message" : L" unread messages");
+    return core::T(PE_TEXT_WIN_UNREAD_MESSAGES, {{"count", std::to_wstring(unread)}});
 }
 
 // the count, white on a red disc, for the taskbar button

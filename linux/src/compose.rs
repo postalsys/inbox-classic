@@ -15,6 +15,7 @@ use crate::app::{shell, spawn};
 use crate::commands::Command;
 use crate::editor::{Editor, Handlers, Quote, picture_uri};
 use crate::ui::{self, Field, Form, TITLE};
+use crate::words::{Text, tr};
 
 const FONTS: &[&str] = &[
     "Arial",
@@ -35,7 +36,9 @@ const SIZES: &[&str] = &["8", "10", "12", "14", "18", "24", "36"];
 /// place in the page's state flags when it shows one (keep in step with STATE in core/crates/pe-html/src/editor.js)
 struct FormatButton {
     icon: &'static str,
-    tooltip: &'static str,
+    /// the widget's name, the same in every language
+    name: &'static str,
+    tooltip: Text,
     command: Option<&'static str>,
     state: Option<usize>,
 }
@@ -44,25 +47,29 @@ const FORMAT_BUTTONS: &[&[FormatButton]] = &[
     &[
         FormatButton {
             icon: "ic-text-bold-symbolic",
-            tooltip: "Bold (Ctrl+B)",
+            name: "Bold",
+            tooltip: Text::GtkFormatBold,
             command: Some("bold"),
             state: Some(0),
         },
         FormatButton {
             icon: "ic-text-italic-symbolic",
-            tooltip: "Italic (Ctrl+I)",
+            name: "Italic",
+            tooltip: Text::GtkFormatItalic,
             command: Some("italic"),
             state: Some(1),
         },
         FormatButton {
             icon: "ic-text-underline-symbolic",
-            tooltip: "Underline (Ctrl+U)",
+            name: "Underline",
+            tooltip: Text::GtkFormatUnderline,
             command: Some("underline"),
             state: Some(2),
         },
         FormatButton {
             icon: "ic-text-color-symbolic",
-            tooltip: "Font Color",
+            name: "Font Color",
+            tooltip: Text::UiFormatColor,
             command: None,
             state: None,
         },
@@ -70,25 +77,29 @@ const FORMAT_BUTTONS: &[&[FormatButton]] = &[
     &[
         FormatButton {
             icon: "ic-text-number-list-ltr-symbolic",
-            tooltip: "Numbered List",
+            name: "Numbered List",
+            tooltip: Text::UiFormatNumbers,
             command: Some("insertOrderedList"),
             state: Some(3),
         },
         FormatButton {
             icon: "ic-text-bullet-list-ltr-symbolic",
-            tooltip: "Bulleted List",
+            name: "Bulleted List",
+            tooltip: Text::UiFormatBullets,
             command: Some("insertUnorderedList"),
             state: Some(4),
         },
         FormatButton {
             icon: "ic-text-indent-decrease-ltr-symbolic",
-            tooltip: "Decrease Indent",
+            name: "Decrease Indent",
+            tooltip: Text::UiFormatOutdent,
             command: Some("outdent"),
             state: None,
         },
         FormatButton {
             icon: "ic-text-indent-increase-ltr-symbolic",
-            tooltip: "Increase Indent",
+            name: "Increase Indent",
+            tooltip: Text::UiFormatIndent,
             command: Some("indent"),
             state: None,
         },
@@ -96,19 +107,22 @@ const FORMAT_BUTTONS: &[&[FormatButton]] = &[
     &[
         FormatButton {
             icon: "ic-text-align-left-symbolic",
-            tooltip: "Align Left",
+            name: "Align Left",
+            tooltip: Text::UiFormatLeft,
             command: Some("justifyLeft"),
             state: Some(5),
         },
         FormatButton {
             icon: "ic-text-align-center-symbolic",
-            tooltip: "Center",
+            name: "Center",
+            tooltip: Text::UiFormatCenter,
             command: Some("justifyCenter"),
             state: Some(6),
         },
         FormatButton {
             icon: "ic-text-align-right-symbolic",
-            tooltip: "Align Right",
+            name: "Align Right",
+            tooltip: Text::UiFormatRight,
             command: Some("justifyRight"),
             state: Some(7),
         },
@@ -116,19 +130,22 @@ const FORMAT_BUTTONS: &[&[FormatButton]] = &[
     &[
         FormatButton {
             icon: "ic-link-symbolic",
-            tooltip: "Hyperlink (Ctrl+K)",
+            name: "Hyperlink",
+            tooltip: Text::GtkFormatHyperlink,
             command: None,
             state: None,
         },
         FormatButton {
             icon: "ic-line-horizontal-1-symbolic",
-            tooltip: "Insert Horizontal Line",
+            name: "Insert Horizontal Line",
+            tooltip: Text::UiFormatLine,
             command: Some("insertHorizontalRule"),
             state: None,
         },
         FormatButton {
             icon: "ic-image-symbolic",
-            tooltip: "Insert Picture",
+            name: "Insert Picture",
+            tooltip: Text::UiInsertPicture,
             command: None,
             state: None,
         },
@@ -148,10 +165,10 @@ impl FormatBar {
         let widget = gtk::Box::new(gtk::Orientation::Horizontal, 6);
         widget.add_css_class("format-bar");
         let font = gtk::DropDown::from_strings(FONTS);
-        font.set_tooltip_text(Some("Font"));
+        font.set_tooltip_text(Some(&t!(GtkFont)));
         let size = gtk::DropDown::from_strings(SIZES);
         size.set_selected(1);
-        size.set_tooltip_text(Some("Size"));
+        size.set_tooltip_text(Some(&t!(UiColSize)));
         widget.append(&font);
         widget.append(&size);
         let mut toggles = Vec::new();
@@ -168,9 +185,9 @@ impl FormatBar {
                     gtk::Button::new()
                 };
                 button.set_icon_name(spec.icon);
-                button.set_tooltip_text(Some(spec.tooltip));
+                button.set_tooltip_text(Some(&tr(spec.tooltip)));
                 button.add_css_class("flat");
-                button.set_widget_name(spec.tooltip.split(" (").next().unwrap_or(spec.tooltip));
+                button.set_widget_name(spec.name);
                 linked.append(&button);
                 buttons.push((spec, button));
             }
@@ -193,7 +210,7 @@ impl FormatBar {
                 }
                 match spec.command {
                     Some(command) => editor.exec(command, ""),
-                    None => format_dialog(button, &editor, spec.tooltip, attach_pictures),
+                    None => format_dialog(button, &editor, spec.name, attach_pictures),
                 }
             });
         }
@@ -244,7 +261,7 @@ thread_local! {
 
 async fn choose_color(window: &gtk::Window, editor: &Editor) {
     let dialog = gtk::ColorDialog::builder()
-        .title("Font Color")
+        .title(t!(UiFormatColor))
         .with_alpha(false)
         .build();
     let initial = LAST_COLOR.with(|c| *c.borrow());
@@ -268,7 +285,7 @@ fn valid_link(url: &str) -> Result<(), String> {
     if ui::is_link(url) && !rest.trim_start_matches('/').is_empty() {
         Ok(())
     } else {
-        Err("Type a web address (https://...) or an e-mail link (mailto:...).".into())
+        Err(t!(UiLinkInvalid))
     }
 }
 
@@ -278,15 +295,19 @@ async fn insert_link(window: &gtk::Window, editor: &Editor) {
     let current = editor.caret_link();
     let editing = !current.is_empty();
     let (title, intro) = if editing {
-        (
-            "Edit Hyperlink",
-            "Where the link goes. Empty the address to remove the link and keep its text.",
-        )
+        (t!(UiEditHyperlink), t!(UiEditHyperlinkIntro))
     } else {
-        ("Hyperlink", "The address the selected text links to.")
+        (t!(UiHyperlink), t!(UiHyperlinkIntro))
     };
     let value = if editing { current } else { "https://".into() };
-    let form = Form::new(window, title, intro, vec![Field::text("Address:", value)], "OK", 0);
+    let form = Form::new(
+        window,
+        &title,
+        &intro,
+        vec![Field::text(&t!(UiLinkAddress), value)],
+        &t!(UiOk),
+        0,
+    );
     form.widget().set_widget_name("link-dialog");
     // an emptied address takes the link off
     form.validate_with(move |fields| {
@@ -305,8 +326,9 @@ async fn insert_link(window: &gtk::Window, editor: &Editor) {
 }
 
 async fn insert_picture(window: &gtk::Window, editor: &Editor) {
-    let patterns = Some(("Pictures", &["*.png", "*.jpg", "*.jpeg", "*.gif"][..]));
-    let Some(path) = ui::open_files(window, "Insert Picture", patterns)
+    let pictures = t!(UiFilterPictures);
+    let patterns = Some((pictures.as_str(), &["*.png", "*.jpg", "*.jpeg", "*.gif"][..]));
+    let Some(path) = ui::open_files(window, &t!(UiInsertPicture), patterns)
         .await
         .into_iter()
         .next()
@@ -314,8 +336,7 @@ async fn insert_picture(window: &gtk::Window, editor: &Editor) {
         return;
     };
     if !insert_picture_file(editor, &path) {
-        let text = "This file is not a PNG, JPEG or GIF picture, or it is larger than 10 MB.";
-        ui::alert(window, "Insert Picture", text).await;
+        ui::alert(window, &t!(UiInsertPicture), &t!(UiNotAPicture)).await;
     }
 }
 
@@ -455,9 +476,9 @@ impl Compose {
             crate::complete::attach(field);
         }
         // Cc and Bcc wait behind these until needed (Alt+C, Alt+B), as most mail programs have it now
-        let cc_button = gtk::Button::with_mnemonic("_Cc");
+        let cc_button = gtk::Button::with_mnemonic(&t!(GtkShowCc));
         cc_button.set_widget_name("compose-show-cc");
-        let bcc_button = gtk::Button::with_mnemonic("_Bcc");
+        let bcc_button = gtk::Button::with_mnemonic(&t!(GtkShowBcc));
         bcc_button.set_widget_name("compose-show-bcc");
         let to_row = gtk::Box::new(gtk::Orientation::Horizontal, 4);
         to_row.append(&to);
@@ -472,17 +493,17 @@ impl Compose {
         grid.add_css_class("compose-fields");
         grid.set_column_spacing(8);
         grid.set_row_spacing(4);
-        let rows: [(&str, gtk::Widget); 6] = [
-            ("From:", from.clone().upcast()),
-            ("To:", to_row.upcast()),
-            ("Cc:", cc.clone().upcast()),
-            ("Bcc:", bcc.clone().upcast()),
-            ("Subject:", subject.clone().upcast()),
-            ("Attach:", attached.clone().upcast()),
+        let rows: [(String, gtk::Widget); 6] = [
+            (t!(UiFieldFrom), from.clone().upcast()),
+            (t!(UiFieldTo), to_row.upcast()),
+            (t!(UiFieldCc), cc.clone().upcast()),
+            (t!(UiFieldBcc), bcc.clone().upcast()),
+            (t!(UiFieldSubject), subject.clone().upcast()),
+            (t!(UiFieldAttach), attached.clone().upcast()),
         ];
         let mut placed: Vec<[gtk::Widget; 2]> = Vec::new();
         for (index, (label, field)) in rows.into_iter().enumerate() {
-            let label = row_label(label);
+            let label = row_label(&label);
             grid.attach(&label, 0, index as i32, 1, 1);
             grid.attach(&field, 1, index as i32, 1, 1);
             placed.push([label.upcast(), field]);
@@ -517,12 +538,12 @@ impl Compose {
         content.append(&frame);
         content.append(&status_bar);
         let header = adw::HeaderBar::new();
-        let send = gtk::Button::with_label("Send");
+        let send = gtk::Button::with_label(&t!(UiTbSend));
         send.add_css_class("suggested-action");
         send.set_widget_name("compose-send");
-        let save = ui::icon_button("ic-save-symbolic", "Save (Ctrl+S)");
+        let save = ui::icon_button("ic-save-symbolic", &t!(GtkSaveTip));
         save.set_widget_name("compose-save");
-        let attach = ui::icon_button("ic-attach-symbolic", "Attach");
+        let attach = ui::icon_button("ic-attach-symbolic", &t!(UiTbAttach));
         attach.set_widget_name("compose-attach");
         header.pack_start(&send);
         header.pack_start(&save);
@@ -530,7 +551,7 @@ impl Compose {
         let title = draft
             .map(|d| d.subject.clone())
             .filter(|s| !s.is_empty())
-            .unwrap_or("New Message".into());
+            .unwrap_or_else(|| t!(UiNewMessageTitle));
         let toolbar = adw::ToolbarView::new();
         toolbar.add_top_bar(&header);
         toolbar.set_content(Some(&content));
@@ -674,8 +695,11 @@ impl Compose {
         }
         let subject = on(|this| {
             let text = this.subject.text();
-            this.window
-                .set_title(Some(if text.is_empty() { "New Message" } else { &text }));
+            this.window.set_title(Some(&if text.is_empty() {
+                t!(UiNewMessageTitle)
+            } else {
+                text.to_string()
+            }));
         });
         self.subject.connect_changed(move |_| subject());
         let from = on(|this| this.choose_from());
@@ -782,7 +806,10 @@ impl Compose {
             };
             this.attached.select_child(&child);
             let menu = gio::Menu::new();
-            menu.append(Some("Remove"), Some("files.remove"));
+            menu.append(
+                Some(&crate::words::plain(crate::words::Text::UiRemove)),
+                Some("files.remove"),
+            );
             let group = gio::SimpleActionGroup::new();
             let remove = gio::SimpleAction::new("remove", None);
             let removing = Rc::downgrade(&this);
@@ -842,7 +869,7 @@ impl Compose {
         if link.is_empty() {
             self.status.set_text(&self.status_text.borrow());
         } else {
-            self.status.set_text(&format!("{link}    (Ctrl+click to open)"));
+            self.status.set_text(&t!(GtkLinkStatus, link = link));
         }
     }
 
@@ -896,7 +923,7 @@ impl Compose {
 
     async fn attach(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
-        let files = ui::open_files(&window, "Insert Attachment", None).await;
+        let files = ui::open_files(&window, &t!(UiInsertAttachment), None).await;
         self.add_files(&files);
     }
 
@@ -1016,7 +1043,7 @@ impl Compose {
                 self.dirty.set(false);
                 self.editor.clean();
                 // the server's answer follows (draft_saved)
-                self.set_status("Saving to Drafts...");
+                self.set_status(&t!(UiSavingDraft));
                 if close {
                     self.destroy();
                 }
@@ -1032,11 +1059,19 @@ impl Compose {
             self.destroy();
             return Closing::Closed;
         }
-        let answers = [("cancel", "Cancel"), ("no", "No"), ("yes", "Yes")];
-        let question = "Do you want to save changes to this message in Drafts?";
-        match ui::ask(&self.window, TITLE, question, &answers, "yes", "cancel", None)
-            .await
-            .as_str()
+        let (cancel, no, yes) = (t!(UiCancel), t!(UiNo), t!(UiYes));
+        let answers = [("cancel", cancel.as_str()), ("no", no.as_str()), ("yes", yes.as_str())];
+        match ui::ask(
+            &self.window,
+            TITLE,
+            &t!(UiSaveChangesAsk),
+            &answers,
+            "yes",
+            "cancel",
+            None,
+        )
+        .await
+        .as_str()
         {
             "yes" => {
                 self.request(Pending::SaveAndClose);
@@ -1074,8 +1109,8 @@ pub fn draft_saved(message_id: &str, problem: Option<&str>) -> bool {
         return false;
     };
     match problem {
-        Some(problem) => compose.set_status(&format!("Not saved in Drafts: {problem}")),
-        None => compose.set_status(&format!("Saved in Drafts at {}", ui::time_now())),
+        Some(problem) => compose.set_status(&t!(UiComposeNotSaved, reason = problem)),
+        None => compose.set_status(&t!(UiComposeSavedAt, time = &ui::time_now())),
     }
     true
 }
@@ -1106,7 +1141,7 @@ pub async fn edit_signature(parent: &impl IsA<gtk::Widget>, account: i64, name: 
     };
     let editor = Editor::new(&pe_html::editor_document(None, false, &current));
     let format = FormatBar::new(&editor, false);
-    let hint = gtk::Label::new(Some("Added to new messages, replies and forwards from this account."));
+    let hint = gtk::Label::new(Some(&t!(UiSignatureHint)));
     hint.set_xalign(0.0);
     hint.set_wrap(true);
     hint.set_margin_start(10);
@@ -1120,7 +1155,7 @@ pub async fn edit_signature(parent: &impl IsA<gtk::Widget>, account: i64, name: 
     content.append(&format.widget);
     content.append(&frame);
     content.append(&hint);
-    let (dialog, ok) = ui::dialog_with_buttons(&format!("Signature - {name}"), &content, "OK", 640);
+    let (dialog, ok) = ui::dialog_with_buttons(&t!(UiSignatureOf, account = name), &content, &t!(UiOk), 640);
     dialog.set_content_height(360);
     dialog.set_widget_name("signature-dialog");
     let (send, answer) = async_channel::bounded::<Option<String>>(1);
@@ -1156,7 +1191,7 @@ pub async fn edit_signature(parent: &impl IsA<gtk::Widget>, account: i64, name: 
             saved = true;
             break;
         }
-        ui::alert(&dialog, "Signature", "The signature could not be saved.").await;
+        ui::alert(&dialog, &t!(UiSignature), &t!(UiSignatureNotSaved)).await;
     }
     editor.release();
     dialog.close();

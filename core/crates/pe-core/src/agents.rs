@@ -15,6 +15,8 @@ use tokio::sync::oneshot;
 
 pub use pe_store::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry};
 
+use pe_i18n::{Text, tr, tr_args};
+
 use crate::{Core, Draft, DraftKind, Error, Event, Outgoing, Result};
 
 /// How long a message an agent sent waits in the Outbox, where the user can still delete it
@@ -22,18 +24,23 @@ pub const SEND_DELAY: i64 = 30;
 /// How many messages one agent may send from one account in an hour
 pub const SENDS_PER_HOUR: u64 = 20;
 
-/// What an agent may do, as the windows offer it: the level and its description
-pub const LEVELS: [(u32, &str); 4] = [
-    (
-        AgentLevels::READ,
-        "Read mail: folders, the message list, search and messages",
-    ),
-    (
-        AgentLevels::ORGANIZE,
-        "Organize mail: read state, flags, junk, moving, deleting to Deleted Items",
-    ),
-    (AgentLevels::DRAFTS, "Write drafts for you to send"),
-    (AgentLevels::SEND, "Send mail, each message only after you say yes"),
+/// What level `bit` lets an agent do, in the language in use
+pub fn level_text(bit: u32) -> String {
+    match bit {
+        AgentLevels::READ => tr(Text::AgentLevelRead),
+        AgentLevels::ORGANIZE => tr(Text::AgentLevelOrganize),
+        AgentLevels::DRAFTS => tr(Text::AgentLevelDrafts),
+        AgentLevels::SEND => tr(Text::AgentLevelSend),
+        _ => String::new(),
+    }
+}
+
+/// The levels of what an agent may do, in the order the windows offer them ([`level_text`] says what each lets it do)
+pub const LEVEL_BITS: [u32; 4] = [
+    AgentLevels::READ,
+    AgentLevels::ORGANIZE,
+    AgentLevels::DRAFTS,
+    AgentLevels::SEND,
 ];
 
 /// The levels as kept: none without reading, which everything else builds on
@@ -168,20 +175,17 @@ pub struct SendText {
 /// The question and the words under it when `host` connects for the first time
 pub fn connect_text(host: &HostInfo) -> (String, String) {
     (
-        format!("{} wants to use your mail", host.name),
-        "An AI agent asked to work with Inbox Classic. Choose what it may do and which accounts it may see; you can \
-         change this later under Tools > AI Agents.\n\nAgents read mail that other people wrote, and a message can \
-         try to trick them. Inbox Classic always asks you before an agent sends anything."
-            .into(),
+        tr_args(Text::AgentConnectTitle, &[("program", (&host.name).into())]),
+        tr(Text::AgentConnectDetail),
     )
 }
 
 /// The words of the confirmation of `ask`
 pub fn send_text(ask: &SendAsk) -> SendText {
     let original = match &ask.original {
-        Some((DraftKind::Reply, subject)) => format!("Reply to \u{201c}{subject}\u{201d}"),
-        Some((DraftKind::ReplyAll, subject)) => format!("Reply to all on \u{201c}{subject}\u{201d}"),
-        Some((DraftKind::Forward, subject)) => format!("Forward of \u{201c}{subject}\u{201d}"),
+        Some((DraftKind::Reply, subject)) => tr_args(Text::AgentReplyTo, &[("subject", subject.into())]),
+        Some((DraftKind::ReplyAll, subject)) => tr_args(Text::AgentReplyAllOn, &[("subject", subject.into())]),
+        Some((DraftKind::Forward, subject)) => tr_args(Text::AgentForwardOf, &[("subject", subject.into())]),
         None => String::new(),
     };
     let new: Vec<&str> = ask
@@ -192,15 +196,12 @@ pub fn send_text(ask: &SendAsk) -> SendText {
         .collect();
     let warning = match new.as_slice() {
         [] => String::new(),
-        [one] => format!("You have never written to {one}."),
-        many => format!("You have never written to {} of these addresses.", many.len()),
+        [one] => tr_args(Text::AgentNeverWrittenOne, &[("address", (*one).into())]),
+        many => tr_args(Text::AgentNeverWrittenMany, &[("count", many.len().into())]),
     };
     SendText {
-        title: format!("{} wants to send this message", ask.host.name),
-        detail: format!(
-            "Check who it goes to and what it says. If you send it, it waits {SEND_DELAY} seconds in the Outbox, \
-             where you can still delete it."
-        ),
+        title: tr_args(Text::AgentSendTitle, &[("program", (&ask.host.name).into())]),
+        detail: tr_args(Text::AgentSendDetail, &[("seconds", SEND_DELAY.into())]),
         original,
         warning,
     }
@@ -209,17 +210,20 @@ pub fn send_text(ask: &SendAsk) -> SendText {
 /// The heading and words of Change in the AI Agents window, for `host`
 pub fn change_text(host: &AgentHost) -> (String, String) {
     let detail = if host.allowed {
-        "Change what this program\u{2019}s AI agents may do with your mail."
+        tr(Text::AgentChangeAllowed)
     } else {
-        "You turned this program away. Allow it to let its agents use your mail again."
+        tr(Text::AgentChangeRefused)
     };
-    (format!("What {} may do", host.name), detail.into())
+    (
+        tr_args(Text::AgentChangeTitle, &[("program", (&host.name).into())]),
+        detail,
+    )
 }
 
 /// An entry of the log as the AI Agents window lists it
 pub fn log_text(entry: &AgentLogEntry) -> String {
     if entry.undone {
-        format!("{} (taken back)", entry.entry.summary)
+        tr_args(Text::AgentLogTakenBack, &[("entry", (&entry.entry.summary).into())])
     } else {
         entry.entry.summary.clone()
     }
@@ -235,47 +239,49 @@ pub fn files_text(ask: &SendAsk) -> String {
         .iter()
         .map(|(name, size)| format!("{name} ({})", crate::format_size(*size)))
         .collect();
-    format!("Files: {}", files.join(", "))
+    tr_args(Text::AgentFiles, &[("files", (&files.join(", ")).into())])
 }
 
 /// Why an entry of the log could not be taken back, for the windows
 pub fn undo_refusal(error: &Error) -> String {
     match error {
-        Error::Unavailable(why) => format!("It can not be taken back: {why}."),
-        _ => "It can not be taken back.".into(),
+        Error::Unavailable(why) => tr_args(Text::AgentUndoRefusedWhy, &[("reason", why.into())]),
+        _ => tr(Text::AgentUndoRefused),
     }
 }
 
 /// What a program may do, in words for the AI Agents window
 pub fn access_text(host: &AgentHost) -> String {
     if !host.allowed {
-        return "Turned away".into();
+        return tr(Text::AgentTurnedAway);
     }
     let levels = host.levels;
     let mut can = Vec::new();
     if levels.has(AgentLevels::READ) {
-        can.push("read");
+        can.push(tr(Text::AgentCanRead));
     }
     if levels.has(AgentLevels::ORGANIZE) {
-        can.push("organize");
+        can.push(tr(Text::AgentCanOrganize));
     }
     if levels.has(AgentLevels::DRAFTS) {
-        can.push("write drafts");
+        can.push(tr(Text::AgentCanDrafts));
     }
     if levels.has(AgentLevels::SEND) {
-        can.push("send with your yes");
+        can.push(tr(Text::AgentCanSend));
     }
     let can = match can.as_slice() {
-        [] => "Nothing".to_string(),
+        [] => tr(Text::AgentCanNothing),
         [one] => capitalized(one),
-        [first @ .., last] => capitalized(&format!("{} and {last}", first.join(", "))),
+        [first @ .., last] => capitalized(&tr_args(
+            Text::AgentCanList,
+            &[("first", (&first.join(", ")).into()), ("last", last.into())],
+        )),
     };
-    let accounts = match host.accounts.len() {
-        0 => "no accounts".to_string(),
-        1 => "1 account".to_string(),
-        n => format!("{n} accounts"),
-    };
-    format!("{can}; {accounts}")
+    let accounts = tr_args(Text::AgentAccounts, &[("count", host.accounts.len().into())]);
+    tr_args(
+        Text::AgentAccess,
+        &[("can", (&can).into()), ("accounts", (&accounts).into())],
+    )
 }
 
 fn capitalized(text: &str) -> String {
@@ -355,7 +361,7 @@ fn written_and_earlier(message: &parser::Message, text: &str) -> (String, String
 pub(crate) fn agent_message(source: &[u8]) -> AgentMessage {
     let Ok(message) = parser::parse(source) else {
         return AgentMessage {
-            written: "This message can not be read.".into(),
+            written: tr(Text::AgentUnreadable),
             ..Default::default()
         };
     };
@@ -541,7 +547,7 @@ impl Core {
                     host: ask.host.id,
                     what: "compose".into(),
                     account: Some(ask.account),
-                    summary: format!("Opened \"{}\" in a new message for you to finish", ask.subject),
+                    summary: tr_args(Text::AgentLogComposed, &[("subject", (&ask.subject).into())]),
                     ..Default::default()
                 }])?;
                 compose = Some(ask.draft.clone());
@@ -551,7 +557,7 @@ impl Core {
                     host: ask.host.id,
                     what: "refused".into(),
                     account: Some(ask.account),
-                    summary: format!("You did not send \"{}\"", ask.subject),
+                    summary: tr_args(Text::AgentLogRefused, &[("subject", (&ask.subject).into())]),
                     ..Default::default()
                 }])?;
             }
@@ -581,7 +587,10 @@ impl Core {
             what: "send".into(),
             account: Some(ask.account),
             message_id: Some(message_id.clone()),
-            summary: format!("Sent \"{}\" to {}", ask.subject, to.join(", ")),
+            summary: tr_args(
+                Text::AgentLogSent,
+                &[("subject", (&ask.subject).into()), ("to", (&to.join(", ")).into())],
+            ),
             undo: Some(
                 Undo::Unsend {
                     account: ask.account,
@@ -610,9 +619,9 @@ impl Core {
             if self.store().folder(folder)?.account_id != account {
                 return Err(Error::NotFound);
             }
-            draft = self.draft(folder, uid, kind)?.ok_or_else(|| {
-                Error::Unavailable("the message answered is not downloaded yet: read it first".into())
-            })?;
+            draft = self
+                .draft(folder, uid, kind)?
+                .ok_or_else(|| Error::Unavailable(tr(Text::AgentOriginalNotDownloaded)))?;
             answered = self.store().message(folder, uid)?.map(|m| (kind, m.info.subject));
             if outgoing.to.trim().is_empty() {
                 outgoing.to = draft.to.clone();
@@ -654,7 +663,7 @@ impl Core {
             host: host.id,
             what: "save_draft".into(),
             account: Some(account),
-            summary: format!("Saved the draft \"{subject}\""),
+            summary: tr_args(Text::AgentLogDraft, &[("subject", (&subject).into())]),
             ..Default::default()
         }])
     }
@@ -749,12 +758,12 @@ impl Core {
             .undo
             .as_deref()
             .and_then(Undo::read)
-            .ok_or_else(|| Error::Unavailable("this can not be taken back".into()))?;
+            .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoImpossible)))?;
         match undo {
             Undo::Flag { folder, uid, flag, was } => {
                 let flag = flag_name(&flag).ok_or(Error::NotFound)?;
                 if self.store().message(folder, uid)?.is_none() {
-                    return Err(Error::Unavailable("the message is no longer in that folder".into()));
+                    return Err(Error::Unavailable(tr(Text::AgentUndoNotInFolder)));
                 }
                 if flag == "\\Flagged" && !was {
                     // a flag taken away takes its colour along
@@ -769,14 +778,14 @@ impl Core {
                 let uid = self
                     .store()
                     .uid_of_message_id(to, &message_id)?
-                    .ok_or_else(|| Error::Unavailable("the message is not in the folder it went to (yet)".into()))?;
+                    .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoNotArrived)))?;
                 self.move_messages(to, &[uid], from)?;
             }
             Undo::Unsend { account, message_id } => {
                 let queued = self
                     .store()
                     .outbox_with_message_id(account, &message_id)?
-                    .ok_or_else(|| Error::Unavailable("the message was sent already".into()))?;
+                    .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoSent)))?;
                 self.outbox_delete(queued)?;
             }
         }
@@ -904,7 +913,7 @@ mod tests {
         );
         assert_eq!(normalized(AgentLevels(15 | 64)), AgentLevels(15));
         assert_eq!(normalized(AgentLevels::DEFAULT), AgentLevels::DEFAULT);
-        assert_eq!(LEVELS.iter().map(|(bit, _)| bit).sum::<u32>(), 15);
+        assert_eq!(LEVEL_BITS.iter().sum::<u32>(), 15);
     }
 
     #[test]

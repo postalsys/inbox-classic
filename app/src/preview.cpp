@@ -32,7 +32,7 @@ void Preview::Create(HWND parent, std::function<void(const std::wstring&)> onErr
             controller_->get_CoreWebView2(&view_);
             Configure();
         },
-        [this](const std::wstring& error) { onError_(error + L" Message bodies can not be shown."); });
+        [this](const std::wstring& error) { onError_(error + L" " + core::T(PE_TEXT_WIN_NO_BODIES)); });
 }
 
 void Preview::Configure() {

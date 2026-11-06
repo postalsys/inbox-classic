@@ -6,8 +6,16 @@
 use pe_content::{AnalyzeOptions, Label, MessageContent, Representation, Segment, Visibility};
 use pe_mime::parser::{Message, text_addresses, text_to_html};
 
-/// The summary of a fold: the button. Styled by the document of `pe_html::render_message`.
-const SUMMARY: &str = "<summary title=\"Show the earlier messages\">&#8226;&#8226;&#8226;</summary>";
+/// The summary of a fold: the button, its tip in the language in use. Styled by the document of
+/// `pe_html::render_message`.
+fn summary() -> String {
+    let title = pe_i18n::tr(pe_i18n::Text::FoldShowEarlier)
+        .replace('&', "&amp;")
+        .replace('"', "&quot;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;");
+    format!("<summary title=\"{title}\">&#8226;&#8226;&#8226;</summary>")
+}
 
 /// Compiles pe-content's patterns ahead of the first message shown, which would otherwise wait for them
 pub(crate) fn warm_up() {
@@ -153,7 +161,7 @@ fn folded(message: &Message, representation: Representation) -> Option<String> {
     for (start, end) in ranges {
         out.push_str(&piece(&source[at..start]));
         out.push_str("<details class=\"pe-fold\">");
-        out.push_str(SUMMARY);
+        out.push_str(&summary());
         out.push_str(&piece(&source[start..end]));
         out.push_str("</details>");
         at = end;
@@ -309,7 +317,7 @@ mod tests {
         let fold = html.find("<details").expect(&html);
         assert!(html[..fold].contains("Six works for me."), "{html}");
         assert!(html[fold..].contains("Shall we meet at six?"), "{html}");
-        assert!(html.contains(SUMMARY));
+        assert!(html.contains(&summary()));
     }
 
     #[test]

@@ -44,7 +44,7 @@ pub async fn with_downloads<T: Send + 'static>(
             .unwrap_or_default()),
     };
     if downloading.is_some() {
-        shell().main().set_status("Done");
+        shell().main().set_status(&t!(UiDone));
     }
     done
 }

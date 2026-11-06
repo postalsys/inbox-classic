@@ -46,6 +46,7 @@ add_executable(InboxClassic WIN32
     src/editor.cpp
     src/core.cpp
     src/help.cpp
+    src/options.cpp
     src/outbox.cpp
     src/mailbox.cpp
     src/folderpicker.cpp

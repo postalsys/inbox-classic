@@ -9,6 +9,8 @@ use std::time::Duration;
 
 use pe_store::{AccountId, MessageRef};
 
+use pe_i18n::{Text, tr, tr_args};
+
 use crate::worker::{Role, Worker};
 use crate::{Core, Draft, Error, Result};
 
@@ -144,9 +146,7 @@ impl Core {
         for (r, name) in refs.iter().zip(names) {
             let source = match store.source(r.folder, r.uid)? {
                 Some(source) => Ok(source),
-                None => Err(problems
-                    .remove(r)
-                    .unwrap_or_else(|| "the message could not be downloaded in time".into())),
+                None => Err(problems.remove(r).unwrap_or_else(|| tr(Text::ExportNotInTime))),
             };
             exported.push(Exported { name, source });
         }
@@ -170,11 +170,15 @@ impl Core {
             }
         }
         if !problems.is_empty() {
-            return Err(Error::Unavailable(format!(
-                "{} of {} could not be saved ({})",
-                problems.len(),
-                crate::text::messages(refs.len() as u64),
-                problems.join("; ")
+            let total = crate::text::messages(refs.len() as u64);
+            let listed = problems.join("; ");
+            return Err(Error::Unavailable(tr_args(
+                Text::ExportNotSaved,
+                &[
+                    ("failed", problems.len().into()),
+                    ("messages", (&total).into()),
+                    ("problems", (&listed).into()),
+                ],
             )));
         }
         Ok(written)
@@ -205,8 +209,13 @@ impl Core {
                 .map_err(|problem| Error::Unavailable(format!("{}: {problem}", file.name)))?;
             files.push((file.name, source));
         }
-        let attachments = crate::write_out(&format!("forward-{}-{}", first.folder, first.uid), files)
-            .map_err(|error| Error::Unavailable(format!("the messages could not be attached: {error}")))?;
+        let attachments =
+            crate::write_out(&format!("forward-{}-{}", first.folder, first.uid), files).map_err(|error| {
+                Error::Unavailable(tr_args(
+                    Text::ExportNotAttached,
+                    &[("error", (&error.to_string()).into())],
+                ))
+            })?;
         Ok(Draft {
             subject: crate::compose::prefixed("Fw: ", &subject),
             attachments,

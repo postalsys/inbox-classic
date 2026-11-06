@@ -73,7 +73,7 @@ void ShowRegistration(HWND dialog) {
 // a preset fills in everything but the client; the name only when there is none yet
 void FillPreset(HWND dialog, const PeSignInPreset& preset) {
     if (ItemText(dialog, IDC_APP_NAME).empty()) {
-        SetItemText(dialog, IDC_APP_NAME, Text(preset.name) + L" sign-in app");
+        SetItemText(dialog, IDC_APP_NAME, core::T(PE_TEXT_UI_PRESET_APP_NAME, {{"provider", Text(preset.name)}}));
     }
     SetItemText(dialog, IDC_APP_ISSUER, Text(preset.issuer));
     SetItemText(dialog, IDC_APP_SCOPES, Text(preset.scopes));
@@ -101,10 +101,11 @@ bool CheckIssuer(HWND dialog, PeCore* core, std::wstring& said) {
     uint64_t request = pe_sign_in_app_check(core, core::Narrow(issuer).c_str(), &error);
     core::String reason(error);
     if (!request) {
-        said = reason ? Text(reason.get()) : L"the issuer can not be checked";
+        said = reason ? Text(reason.get()) : core::T(PE_TEXT_UI_ISSUER_NOT_CHECKED);
         return false;
     }
-    if (!WaitForRequest(dialog, core, request, pe_sign_in_app_check_cancel, L"Checking " + issuer + L"...", L"Sign-in App")) {
+    if (!WaitForRequest(dialog, core, request, pe_sign_in_app_check_cancel, core::T(PE_TEXT_UI_CHECKING_ISSUER, {{"issuer", issuer}}),
+                        core::Plain(PE_TEXT_UI_SIGN_IN_APP))) {
         said.clear();
         return false;
     }
@@ -119,13 +120,13 @@ bool CheckIssuer(HWND dialog, PeCore* core, std::wstring& said) {
 bool SaveApp(HWND dialog, EditorState& state) {
     uint16_t imapPort = PortOf(dialog, IDC_APP_IMAP_PORT), smtpPort = PortOf(dialog, IDC_APP_SMTP_PORT);
     if (!imapPort || !smtpPort) {
-        MessageBoxW(dialog, L"Ports are numbers from 1 to 65535.", L"Sign-in App", MB_OK | MB_ICONWARNING);
+        MessageBoxW(dialog, core::T(PE_TEXT_UI_PORTS_INVALID).c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
         return false;
     }
     std::wstring said;
     if (!CheckIssuer(dialog, state.core, said)) {
         if (!said.empty()) {
-            MessageBoxW(dialog, (L"The issuer can not be used: " + said).c_str(), L"Sign-in App", MB_OK | MB_ICONWARNING);
+            MessageBoxW(dialog, core::T(PE_TEXT_UI_ISSUER_UNUSABLE, {{"reason", said}}).c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
             SetFocus(Item(dialog, IDC_APP_ISSUER));
         }
         return false;
@@ -154,8 +155,9 @@ bool SaveApp(HWND dialog, EditorState& state) {
     SecureZeroMemory(text[6].data(), text[6].size());
     core::String reason(error);
     if (!saved) {
-        std::wstring message = L"The sign-in app could not be saved: " + (reason ? Text(reason.get()) : L"unknown reason");
-        MessageBoxW(dialog, message.c_str(), L"Sign-in App", MB_OK | MB_ICONWARNING);
+        std::wstring message =
+            core::T(PE_TEXT_UI_SIGN_IN_APP_NOT_SAVED, {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
+        MessageBoxW(dialog, message.c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
         return false;
     }
     state.saved = saved;
@@ -178,8 +180,9 @@ void OnEditorCommand(HWND dialog, EditorState& state, int id, int code) {
         std::wstring said;
         bool usable = CheckIssuer(dialog, state.core, said);
         if (!said.empty()) {
-            std::wstring text = usable ? L"The issuer can be used.\n\n" + said : L"The issuer can not be used: " + said;
-            MessageBoxW(dialog, text.c_str(), L"Check", MB_OK | (usable ? MB_ICONINFORMATION : MB_ICONWARNING));
+            std::wstring text = usable ? core::T(PE_TEXT_UI_ISSUER_USABLE) + L"\n\n" + said
+                                       : core::T(PE_TEXT_UI_ISSUER_UNUSABLE, {{"reason", said}});
+            MessageBoxW(dialog, text.c_str(), core::Plain(PE_TEXT_UI_CHECK).c_str(), MB_OK | (usable ? MB_ICONINFORMATION : MB_ICONWARNING));
         }
         return;
     }
@@ -218,11 +221,11 @@ LRESULT CALLBACK EditorProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 }
 
 // a row of the editor: its label, then the control at `left` to `right`
-HWND EditorRow(HWND dialog, const wchar_t* label, int top, int pad, int labelWidth, const wchar_t* className, const std::wstring& text,
+HWND EditorRow(HWND dialog, const std::wstring& label, int top, int pad, int labelWidth, const wchar_t* className, const std::wstring& text,
                DWORD style, int id, int right, DWORD exStyle = WS_EX_CLIENTEDGE) {
     int height = Scale(22);
-    if (label) {
-        CreateChild(dialog, L"STATIC", label, SS_LEFT, 0, {pad, top + Scale(3), pad + labelWidth, top + height});
+    if (!label.empty()) {
+        CreateChild(dialog, L"STATIC", label.c_str(), SS_LEFT, 0, {pad, top + Scale(3), pad + labelWidth, top + height});
     }
     return CreateChild(dialog, className, text.c_str(), WS_TABSTOP | style, id, {pad + labelWidth, top, right, top + height}, exStyle);
 }
@@ -238,7 +241,7 @@ HWND SecurityChoice(HWND dialog, int id, const RECT& bounds, PeSecurity chosen) 
 }
 
 // the servers row: host, port and encryption
-void ServerRow(HWND dialog, const wchar_t* label, int top, int pad, int labelWidth, int width, int ids, const std::wstring& host,
+void ServerRow(HWND dialog, const std::wstring& label, int top, int pad, int labelWidth, int width, int ids, const std::wstring& host,
                uint16_t port, PeSecurity security) {
     int portLeft = width - pad - Scale(190);
     EditorRow(dialog, label, top, pad, labelWidth, L"EDIT", host, ES_AUTOHSCROLL, ids, portLeft - Scale(6));
@@ -255,20 +258,29 @@ int64_t SignInAppEditor(HWND owner, PeCore* core, const PeSignInApp* app) {
     state.presets.reset(pe_sign_in_presets());
     state.id = app ? app->id : 0;
     state.hadSecret = app && app->has_secret;
-    int pad = Scale(10), width = Scale(500), labelWidth = Scale(110), row = Scale(28);
+    enum Label { FILL, NAME, ISSUER, CLIENT_ID, SECRET, SCOPES, IMAP, SMTP, REDIRECT };
+    std::vector<std::wstring> labels = {core::T(PE_TEXT_UI_FILL_IN_FOR),   core::T(PE_TEXT_UI_APP_NAME),    core::T(PE_TEXT_UI_ISSUER),
+                             core::T(PE_TEXT_UI_CLIENT_ID),     core::T(PE_TEXT_UI_CLIENT_SECRET), core::T(PE_TEXT_UI_SCOPES),
+                             core::T(PE_TEXT_UI_IMAP_SERVER),   core::T(PE_TEXT_UI_SMTP_SERVER), core::T(PE_TEXT_UI_REDIRECT_URI)};
+    std::wstring intro = core::T(PE_TEXT_UI_SIGN_IN_APP_INTRO), check = core::T(PE_TEXT_UI_CHECK), copy = core::T(PE_TEXT_UI_BUTTON_COPY);
+    std::wstring ok = core::T(PE_TEXT_UI_OK), cancel = core::T(PE_TEXT_UI_CANCEL);
+    int pad = Scale(10), width = Scale(500), row = Scale(28);
+    int labelWidth = LabelWidth(labels, 110);
+    // the inputs keep their room when the labels are long
+    width = std::max(width, pad + labelWidth + Scale(370) + pad);
+    int introHeight = std::max(Scale(32), static_cast<int>(MeasureText(intro, width - 2 * pad).cy) + Scale(2));
+    int sideButton = ButtonWidth({check, copy});
     int rows = 7 + (state.hadSecret ? 1 : 0);
     // the intro, the presets and the rows, the registration box, the redirect URI, the buttons
-    int height = pad + Scale(36) + row + rows * row + Scale(6 + 8 + 20 + 48) + Scale(22) + Scale(16) + Scale(25) + pad;
-    HWND dialog = CreateModalWindow(owner, kEditorClass, app ? L"Sign-in App" : L"Add Sign-in App", width, height);
+    int height = pad + introHeight + Scale(4) + row + rows * row + Scale(6 + 8 + 20 + 48) + Scale(22) + Scale(16) + Scale(25) + pad;
+    HWND dialog = CreateModalWindow(owner, kEditorClass, core::Plain(app ? PE_TEXT_UI_SIGN_IN_APP : PE_TEXT_UI_ADD_SIGN_IN_APP_TITLE).c_str(),
+                                    width, height);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, 0);
 
     int top = pad;
-    CreateChild(dialog, L"STATIC",
-                L"An OAuth client you registered with your provider, for accounts that sign in through the browser. "
-                L"Fill it in for a provider, then add the client ID (and secret, if the provider gave one).",
-                SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + Scale(32)});
-    top += Scale(36);
-    CreateChild(dialog, L"STATIC", L"Fill in for:", SS_LEFT, 0, {pad, top + Scale(4), pad + labelWidth, top + Scale(22)});
+    CreateChild(dialog, L"STATIC", intro.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + introHeight});
+    top += introHeight + Scale(4);
+    CreateChild(dialog, L"STATIC", labels[FILL].c_str(), SS_LEFT, 0, {pad, top + Scale(4), pad + labelWidth, top + Scale(22)});
     int left = pad + labelWidth;
     for (size_t i = 0; i < pe_sign_in_preset_list_count(state.presets.get()); i++) {
         const PeSignInPreset* preset = pe_sign_in_preset_list_get(state.presets.get(), i);
@@ -278,44 +290,46 @@ int64_t SignInAppEditor(HWND owner, PeCore* core, const PeSignInApp* app) {
     }
     top += row;
     int right = width - pad;
-    HWND name = EditorRow(dialog, L"Name:", top, pad, labelWidth, L"EDIT", app ? Text(app->name) : L"", ES_AUTOHSCROLL, IDC_APP_NAME, right);
+    HWND name = EditorRow(dialog, labels[NAME], top, pad, labelWidth, L"EDIT", app ? Text(app->name) : L"", ES_AUTOHSCROLL, IDC_APP_NAME, right);
     top += row;
-    EditorRow(dialog, L"Issuer:", top, pad, labelWidth, L"EDIT", app ? Text(app->issuer) : L"", ES_AUTOHSCROLL, IDC_APP_ISSUER,
-              right - Scale(86));
-    CreateChild(dialog, L"BUTTON", L"C&heck", WS_TABSTOP, IDC_APP_CHECK, {right - Scale(80), top - Scale(1), right, top + Scale(23)});
+    EditorRow(dialog, labels[ISSUER], top, pad, labelWidth, L"EDIT", app ? Text(app->issuer) : L"", ES_AUTOHSCROLL, IDC_APP_ISSUER,
+              right - sideButton - Scale(6));
+    CreateChild(dialog, L"BUTTON", check.c_str(), WS_TABSTOP, IDC_APP_CHECK, {right - sideButton, top - Scale(1), right, top + Scale(23)});
     top += row;
-    EditorRow(dialog, L"Client ID:", top, pad, labelWidth, L"EDIT", app ? Text(app->client_id) : L"", ES_AUTOHSCROLL,
+    EditorRow(dialog, labels[CLIENT_ID], top, pad, labelWidth, L"EDIT", app ? Text(app->client_id) : L"", ES_AUTOHSCROLL,
               IDC_APP_CLIENT_ID, right);
     top += row;
     // never shown again once saved: it is in the Credential Manager
-    EditorRow(dialog, L"Client secret:", top, pad, labelWidth, L"EDIT", L"", ES_AUTOHSCROLL | ES_PASSWORD, IDC_APP_SECRET, right);
+    EditorRow(dialog, labels[SECRET], top, pad, labelWidth, L"EDIT", L"", ES_AUTOHSCROLL | ES_PASSWORD, IDC_APP_SECRET, right);
     top += row;
     if (state.hadSecret) {
-        CreateChild(dialog, L"BUTTON", L"A secret is saved; type another to replace it, or remove it", WS_TABSTOP | BS_AUTOCHECKBOX,
+        CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_REMOVE_SECRET).c_str(), WS_TABSTOP | BS_AUTOCHECKBOX,
                     IDC_APP_REMOVE_SECRET, {pad + labelWidth, top, right, top + Scale(22)});
         top += row;
     }
-    EditorRow(dialog, L"Scopes:", top, pad, labelWidth, L"EDIT", app ? Text(app->scopes) : L"", ES_AUTOHSCROLL, IDC_APP_SCOPES, right);
+    EditorRow(dialog, labels[SCOPES], top, pad, labelWidth, L"EDIT", app ? Text(app->scopes) : L"", ES_AUTOHSCROLL, IDC_APP_SCOPES, right);
     top += row;
-    ServerRow(dialog, L"IMAP server:", top, pad, labelWidth, width, IDC_APP_IMAP_HOST, app ? Text(app->imap_host) : L"",
+    ServerRow(dialog, labels[IMAP], top, pad, labelWidth, width, IDC_APP_IMAP_HOST, app ? Text(app->imap_host) : L"",
               app ? app->imap_port : 993, app ? app->imap_security : PE_SECURITY_TLS);
     top += row;
-    ServerRow(dialog, L"SMTP server:", top, pad, labelWidth, width, IDC_APP_SMTP_HOST, app ? Text(app->smtp_host) : L"",
+    ServerRow(dialog, labels[SMTP], top, pad, labelWidth, width, IDC_APP_SMTP_HOST, app ? Text(app->smtp_host) : L"",
               app ? app->smtp_port : 465, app ? app->smtp_security : PE_SECURITY_TLS);
     top += row + Scale(6);
     CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {pad, top, right, top + 2});
     top += Scale(8);
-    CreateChild(dialog, L"STATIC", L"Register it with your provider", SS_LEFT | SS_NOPREFIX, 0, {pad, top, right, top + Scale(18)});
+    CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_REGISTER_IT).c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, right, top + Scale(18)});
     top += Scale(20);
     CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_APP_REGISTER, {pad, top, right, top + Scale(46)});
     top += Scale(48);
-    EditorRow(dialog, L"Redirect URI:", top, pad, labelWidth, L"EDIT", L"", ES_AUTOHSCROLL | ES_READONLY, IDC_APP_REDIRECT, right - Scale(86));
-    CreateChild(dialog, L"BUTTON", L"&Copy", WS_TABSTOP, IDC_APP_COPY, {right - Scale(80), top - Scale(1), right, top + Scale(23)});
+    EditorRow(dialog, labels[REDIRECT], top, pad, labelWidth, L"EDIT", L"", ES_AUTOHSCROLL | ES_READONLY, IDC_APP_REDIRECT,
+              right - sideButton - Scale(6));
+    CreateChild(dialog, L"BUTTON", copy.c_str(), WS_TABSTOP, IDC_APP_COPY, {right - sideButton, top - Scale(1), right, top + Scale(23)});
 
     int buttonTop = height - pad - Scale(25);
-    CreateChild(dialog, L"BUTTON", L"OK", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
-                {right - Scale(166), buttonTop, right - Scale(86), buttonTop + Scale(25)});
-    CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL, {right - Scale(80), buttonTop, right, buttonTop + Scale(25)});
+    int buttonWidth = ButtonWidth({ok, cancel});
+    CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
+                {right - 2 * buttonWidth - Scale(6), buttonTop, right - buttonWidth - Scale(6), buttonTop + Scale(25)});
+    CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP, IDCANCEL, {right - buttonWidth, buttonTop, right, buttonTop + Scale(25)});
     ShowRegistration(dialog);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     RunModal(dialog, app ? name : Item(dialog, IDC_APP_PRESET), state.done);
@@ -360,10 +374,10 @@ void ShowSelected(HWND hwnd, const AppsState& state) {
     EnableWindow(GetDlgItem(hwnd, IDC_APPS_REMOVE), added);
     std::wstring note;
     if (app && !added) {
-        note = Text(app->name) + L" is built in: only whether it is used for new accounts can change. ";
+        note = core::T(PE_TEXT_UI_BUILT_IN_NOTE, {{"name", Text(app->name)}}) + L" ";
         note += app->enabled ? L"" : Text(app->off_reason);
     } else if (added) {
-        note = L"Client ID: " + Text(app->client_id) + (app->has_secret ? L", with a client secret." : L", a public client (no secret).");
+        note = core::T(app->has_secret ? PE_TEXT_UI_CLIENT_WITH_SECRET : PE_TEXT_UI_CLIENT_PUBLIC, {{"client", Text(app->client_id)}});
     }
     SetWindowTextW(GetDlgItem(hwnd, IDC_APPS_NOTE), note.c_str());
 }
@@ -376,10 +390,10 @@ void FillApps(HWND hwnd, AppsState& state, int select = 0) {
     for (size_t i = 0; i < pe_sign_in_app_list_count(state.apps.get()); i++) {
         const PeSignInApp* app = pe_sign_in_app_list_get(state.apps.get(), i);
         bool builtin = app->provider != PE_O_AUTH_PROVIDER_APP;
-        int row = AddRow(state.list, static_cast<int>(i), Text(app->name) + (builtin ? L" (built-in)" : L""));
+        int row = AddRow(state.list, static_cast<int>(i), Text(app->name) + (builtin ? L" " + core::T(PE_TEXT_WIN_BUILT_IN) : L""));
         SetCell(state.list, row, APPS_ISSUER, Text(app->issuer));
         std::wstring usedBy = Text(app->used_by);
-        SetCell(state.list, row, APPS_USED_BY, usedBy.empty() ? L"No accounts" : usedBy);
+        SetCell(state.list, row, APPS_USED_BY, usedBy.empty() ? core::T(PE_TEXT_UI_NO_ACCOUNTS) : usedBy);
         ListView_SetCheckState(state.list, row, app->enabled);
     }
     SelectRow(state.list, select);
@@ -417,15 +431,16 @@ void OnAppsCommand(HWND hwnd, AppsState& state, WORD id) {
         if (!added) {
             return;
         }
-        std::wstring question = L"Remove the sign-in app " + Text(app->name) + L" and its saved client secret?";
-        if (MessageBoxW(hwnd, question.c_str(), L"Remove Sign-in App", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+        std::wstring question = core::T(PE_TEXT_UI_REMOVE_SIGN_IN_APP_ASK, {{"name", Text(app->name)}});
+        if (MessageBoxW(hwnd, question.c_str(), core::Plain(PE_TEXT_UI_REMOVE_SIGN_IN_APP).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
             return;
         }
         char* error = nullptr;
         if (!pe_sign_in_app_remove(state.core, app->id, &error)) {
             core::String reason(error);
-            std::wstring text = L"The sign-in app was not removed: " + (reason ? Text(reason.get()) : L"unknown reason");
-            MessageBoxW(hwnd, text.c_str(), L"Remove Sign-in App", MB_OK | MB_ICONWARNING);
+            std::wstring text =
+                core::T(PE_TEXT_UI_SIGN_IN_APP_NOT_REMOVED, {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
+            MessageBoxW(hwnd, text.c_str(), core::Plain(PE_TEXT_UI_REMOVE_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
             return;
         }
         FillApps(hwnd, state, index);
@@ -488,35 +503,35 @@ LRESULT CALLBACK AppsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 void SignInAppsDialog(HWND owner, PeCore* core) {
     RegisterDialogClass(kAppsClass, AppsProc);
     int pad = Scale(10), width = Scale(640), height = Scale(300);
-    HWND dialog = CreateModalWindow(owner, kAppsClass, L"Sign-in Apps", width, height);
+    HWND dialog = CreateModalWindow(owner, kAppsClass, core::Plain(PE_TEXT_UI_SIGN_IN_APPS).c_str(), width, height);
     AppsState state{core};
-    int buttonWidth = Scale(100), listRight = width - pad - buttonWidth - pad;
+    struct Button {
+        WORD id;
+        std::wstring text;
+    };
+    Button buttons[] = {{IDC_APPS_ADD, core::T(PE_TEXT_WIN_ADD)}, {IDC_APPS_EDIT, core::T(PE_TEXT_WIN_EDIT)}, {IDC_APPS_REMOVE, core::T(PE_TEXT_UI_REMOVE)}};
+    std::wstring close = core::T(PE_TEXT_UI_CLOSE);
+    int buttonWidth = ButtonWidth({buttons[0].text, buttons[1].text, buttons[2].text, close}, 100);
+    int listRight = width - pad - buttonWidth - pad;
     int top = pad;
-    CreateChild(dialog, L"STATIC",
-                L"Sign-in apps let accounts sign in through the browser. One that is not checked is not offered for new "
-                L"accounts; the accounts that already use it keep working.",
-                SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + Scale(30)});
+    CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_SIGN_IN_APPS_INTRO).c_str(), SS_LEFT | SS_NOPREFIX, 0,
+                {pad, top, width - pad, top + Scale(30)});
     top += Scale(36);
     int noteTop = height - pad - Scale(25) - Scale(8) - Scale(32);
     state.list = CreateReportList(dialog, IDC_APPS_LIST, {pad, top, listRight, noteTop - Scale(8)});
     ListView_SetExtendedListViewStyleEx(state.list, LVS_EX_CHECKBOXES, LVS_EX_CHECKBOXES);
-    AddColumn(state.list, APPS_NAME, L"Name", 200);
-    AddColumn(state.list, APPS_ISSUER, L"Issuer", 160);
-    AddColumn(state.list, APPS_USED_BY, L"Used by", 100);
+    AddColumn(state.list, APPS_NAME, core::T(PE_TEXT_UI_COL_NAME).c_str(), 200);
+    AddColumn(state.list, APPS_ISSUER, core::T(PE_TEXT_UI_COL_ISSUER).c_str(), 160);
+    AddColumn(state.list, APPS_USED_BY, core::T(PE_TEXT_UI_COL_USED_BY).c_str(), 100);
     ListView_SetColumnWidth(state.list, APPS_USED_BY, LVSCW_AUTOSIZE_USEHEADER);
-    struct Button {
-        WORD id;
-        const wchar_t* text;
-    };
-    Button buttons[] = {{IDC_APPS_ADD, L"&Add..."}, {IDC_APPS_EDIT, L"&Edit..."}, {IDC_APPS_REMOVE, L"&Remove"}};
     int buttonTop = top;
     for (const Button& button : buttons) {
-        CreateChild(dialog, L"BUTTON", button.text, WS_TABSTOP, button.id,
+        CreateChild(dialog, L"BUTTON", button.text.c_str(), WS_TABSTOP, button.id,
                     {width - pad - buttonWidth, buttonTop, width - pad, buttonTop + Scale(25)});
         buttonTop += Scale(31);
     }
     CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_APPS_NOTE, {pad, noteTop, width - pad, noteTop + Scale(32)});
-    CreateChild(dialog, L"BUTTON", L"Close", WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_APPS_CLOSE,
+    CreateChild(dialog, L"BUTTON", close.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_APPS_CLOSE,
                 {width - pad - buttonWidth, height - pad - Scale(25), width - pad, height - pad});
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     FillApps(dialog, state);

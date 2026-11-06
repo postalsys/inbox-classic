@@ -93,6 +93,8 @@ pub fn run(out: PathBuf) -> glib::ExitCode {
         certificate: Some(PathBuf::from(&driver.ports.cert)),
         memory_passwords: true,
         sign_in_page_file: Some(out.join("sign-in-page.txt")),
+        // English whatever the system or Preferences say: the checks read the English words
+        language: Some("en".into()),
         ..Default::default()
     };
     let store = out.join("store.db").to_string_lossy().into_owned();
@@ -837,6 +839,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::between_accounts(&d).await;
     accounts(&d).await;
     sign_in_apps(&d).await;
+    steps::languages(&d).await;
     about_and_help(&d).await;
     printing(&d).await;
     steps::closing(&d).await;

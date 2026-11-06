@@ -114,8 +114,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         window.orderOut(nil)
         if !UserDefaults.standard.bool(forKey: "DockNoteShown") {
             UserDefaults.standard.set(true, forKey: "DockNoteShown")
-            notifyUser(title: "Inbox Classic is still running",
-                       text: "It keeps checking for new mail. Click its icon in the Dock to open it again.", folder: 0, uid: 0)
+            notifyUser(title: Text.uiStillRunning.text, text: Text.macStillRunningDetail.text, folder: 0, uid: 0)
         }
         return false
     }
@@ -136,7 +135,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
 
     /// "Subject" in quotes, or "(no subject)"
     private func quoted(_ subject: String) -> String {
-        subject.isEmpty ? "(no subject)" : "\u{201C}\(subject)\u{201D}"
+        subject.isEmpty ? Text.uiNoSubject.text : Text.uiQuoted.text(["subject": subject])
     }
 
     /// the outgoing pane: what is being sent, what waits in the Outbox and why, or the last message sent
@@ -149,11 +148,11 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             let subject = text(first.pointee.subject)
             let failed = first.pointee.problem != nil && first.pointee.problem.pointee != 0
             if waiting > 1 {
-                said = "\(waiting) messages in the Outbox"
+                said = Text.macOutboxWaiting.text(["count": waiting])
             } else if failed {
-                said = "\(quoted(subject)) waits in the Outbox"
+                said = Text.uiOutboxWaits.text(["subject": quoted(subject)])
             } else {
-                said = "Sending \(quoted(subject))\u{2026}"
+                said = Text.macSending.text(["subject": quoted(subject)])
             }
         }
         outboxText.stringValue = said
@@ -166,11 +165,11 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         switch event.kind {
         case PE_EVENT_KIND_SYNC_STARTED:
             failing.remove(event.account)
-            setStatus("Checking for new messages on \(mailbox.accountName(event.account))\u{2026}")
+            setStatus(Text.macChecking.text(["account": mailbox.accountName(event.account)]))
         case PE_EVENT_KIND_SYNC_FINISHED:
             // a failure stays in the status bar until the account syncs without one
             if failing.isEmpty {
-                setStatus("Done")
+                setStatus(Text.uiDone.text)
             }
         case PE_EVENT_KIND_AUTOCONFIG_DONE, PE_EVENT_KIND_SIGN_IN_DONE, PE_EVENT_KIND_SIGN_IN_APP_CHECKED:
             Waiting.requestDone(event.uid)
@@ -182,12 +181,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             }
         case PE_EVENT_KIND_MESSAGE_SENT:
             // shown by the OutboxChanged that follows it
-            lastSent = "Sent \(quoted(event.message)) at \(timeNow())"
+            lastSent = Text.uiSentAt.text(["subject": quoted(event.message), "time": timeNow()])
         case PE_EVENT_KIND_DRAFT_SAVED:
             // the window that saved it says so; one that closed after saving leaves it to the status bar
             if !ComposeWindow.draftSaved(messageId: event.detail, problem: event.message) {
-                setStatus(event.message.isEmpty ? "Message saved in Drafts."
-                                                : "The message was not saved in Drafts: \(event.message)")
+                setStatus(event.message.isEmpty ? Text.uiDraftSaved.text
+                                                : Text.uiDraftNotSaved.text(["reason": event.message]))
             }
         case PE_EVENT_KIND_OUTBOX_CHANGED:
             showOutbox()
@@ -207,7 +206,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             MoveWindow.shown?.folderCreated(event.folder)
         case PE_EVENT_KIND_FAILED:
             failing.insert(event.account)
-            setStatus("\(mailbox.accountName(event.account)): \(event.message)")
+            setStatus(Text.macAccountSaid.text(["account": mailbox.accountName(event.account), "message": event.message]))
             if event.failure == PE_FAILURE_KIND_AUTHENTICATION {
                 // after this event, so the prompt does not hold up the others
                 onMain { self.askPassword(event.account) }
@@ -236,11 +235,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         if window.isVisible && !window.isMiniaturized && NSApp.isActive && window.isKeyWindow {
             return
         }
-        let subject = event.detail.isEmpty ? "(no subject)" : event.detail
+        let subject = event.detail.isEmpty ? Text.uiNoSubject.text : event.detail
         if event.count <= 1 {
             notifyUser(title: event.message, text: subject, folder: event.folder, uid: event.uid)
         } else {
-            notifyUser(title: "\(event.count) new messages", text: "The newest from \(event.message): \(subject)",
+            notifyUser(title: Text.macNewMessages.text(["count": event.count]),
+                       text: Text.macNewestFrom.text(["from": event.message, "subject": subject]),
                        folder: event.folder, uid: event.uid)
         }
     }
@@ -263,7 +263,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
 
     /// an account that signs in through the browser signs in again
     private func signInAgain(_ account: Int64) {
-        guard ask("The sign-in of \(mailbox.accountName(account)) was refused or ran out.\n\nSign in again in the browser?",
+        guard ask(Text.uiSignInRefused.text(["account": mailbox.accountName(account)]) + "\n\n" + Text.uiSignInAgainAsk.text,
                   style: .information) else { return }
         let request = SignIn.withBrowser(core: core, with: mailbox.signIn(account), email: mailbox.accountEmail(account))
         guard request != 0 else { return }
@@ -272,7 +272,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             core.sync(account)
             return
         }
-        inform("Signing in again did not work: \(taken(why) ?? "unknown reason")", style: .warning)
+        inform(Text.uiSignInAgainFailed.text(["reason": taken(why) ?? Text.uiUnknownReason.text]), style: .warning)
     }
 
     private func askPassword(_ account: Int64) {
@@ -313,7 +313,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: appName,
             .applicationVersion: version,
-            .version: "Core \(Core.version)",
+            .version: Text.uiAboutCore.text(["version": Core.version]),
         ])
     }
 
@@ -323,7 +323,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     func newMessage(_ account: Int64 = 0) {
         let account = account != 0 ? account : mailbox.currentAccount
         guard account != 0 else {
-            inform("Add a mail account first.")
+            inform(Text.uiAddAccountFirst.text)
             return
         }
         ComposeWindow.open(core: core, account: account, draft: nil)
@@ -334,7 +334,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         guard let draft = link.withCString({ Draft(pe_mailto_draft($0)) }) else { return }
         let account = mailbox.currentAccount
         guard account != 0 else {
-            inform("Add a mail account first, then click the e-mail link again.")
+            inform(Text.uiAddAccountFirstLink.text)
             return
         }
         ComposeWindow.open(core: core, account: account, draft: draft)
@@ -349,7 +349,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             return
         }
         guard let draft = mailbox.draftOfShown(kind) else {
-            inform("Select a message first.")
+            inform(Text.uiSelectMessageFirst.text)
             return
         }
         ComposeWindow.open(core: core, account: mailbox.currentAccount, draft: draft)
@@ -368,18 +368,18 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     func makeDefaultMailApp() {
         let bundle = Bundle.main.bundleURL
         guard bundle.pathExtension == "app" else {
-            inform("This copy of Inbox Classic is not an app bundle, so it can not be the default mail app.")
+            inform(Text.macNotBundle.text)
             return
         }
         if let current = NSWorkspace.shared.urlForApplication(toOpen: URL(string: "mailto:someone@example.com")!),
            current.standardizedFileURL == bundle.standardizedFileURL {
-            inform("Inbox Classic is your default mail app: e-mail links open a new message here.")
+            inform(Text.uiDefaultAppIs.text)
             return
         }
         NSWorkspace.shared.setDefaultApplication(at: bundle, toOpenURLsWithScheme: "mailto") { error in
             Task { @MainActor in
                 if let error {
-                    inform("Inbox Classic was not made the default mail app: \(error.localizedDescription)", style: .warning)
+                    inform(Text.macNotMadeDefault.text(["reason": error.localizedDescription]), style: .warning)
                 }
             }
         }
@@ -422,15 +422,17 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
                         willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         guard let item = Item(rawValue: identifier.rawValue) else { return nil }
         let labels: [Item: (String, String)] = [
-            .createMail: ("Create Mail", "mail_add"), .reply: ("Reply", "arrow_reply"), .replyAll: ("Reply All", "arrow_reply_all"),
-            .forward: ("Forward", "arrow_forward"), .print: ("Print", "print"), .delete: ("Delete", "delete"),
-            .junk: ("Junk", "mail_prohibited"), .sync: ("Send/Recv", "arrow_sync"), .markRead: ("Mark Read", "mail_read"),
-            .markUnread: ("Mark Unread", "mail_unread"),
+            .createMail: (Text.uiTbCreateMail.text, "mail_add"), .reply: (Text.uiTbReply.text, "arrow_reply"),
+            .replyAll: (Text.uiTbReplyAll.text, "arrow_reply_all"), .forward: (Text.uiTbForward.text, "arrow_forward"),
+            .print: (Text.uiTbPrint.text, "print"), .delete: (Text.uiTbDelete.text, "delete"),
+            .junk: (Text.uiTbJunk.text, "mail_prohibited"), .sync: (Text.uiTbSync.text, "arrow_sync"),
+            .markRead: (Text.uiTbMarkRead.text, "mail_read"), .markUnread: (Text.uiTbMarkUnread.text, "mail_unread"),
         ]
         if item == .search {
             let search = NSSearchToolbarItem(itemIdentifier: identifier)
             search.searchField = searchField
-            searchField.placeholderString = "Search mail"
+            search.label = Text.macToolSearch.text
+            searchField.placeholderString = Text.uiFindHint.text
             searchField.delegate = self
             searchField.sendsSearchStringImmediately = false
             searchField.sendsWholeSearchString = false
@@ -489,15 +491,14 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     /// Junk, or Not Junk for a message in a Junk folder
     private func updateJunk() {
         let inJunk = mailbox.inJunk
-        junkItem?.label = inJunk ? "Not Junk" : "Junk"
+        junkItem?.label = inJunk ? Text.uiTbNotJunk.text : Text.uiTbJunk.text
         junkItem?.image = Icons.toolbar(inJunk ? "mail_checkmark" : "mail_prohibited")
     }
 
     // ---- searching ----
 
     /// what the search field takes, shown when the mouse rests on it
-    private let findTip = """
-        Finds words in the subject, the people, the file names and the text of messages.
+    private let findTip = Text.uiFindTip.text + "\n" + """
         "exact phrase"    -leave out    this OR that
         from:ann    to:bob    subject:report    filename:pdf
         is:unread    is:read    is:starred    has:attachment
@@ -545,7 +546,7 @@ extension MainWindow: NSMenuDelegate {
         let sync = menu.identifier?.rawValue == "sync"
         menu.removeAllItems()
         if sync {
-            let all = NSMenuItem(title: "Send and Receive All", action: #selector(accountChosen(_:)), keyEquivalent: "")
+            let all = NSMenuItem(title: Text.cmdSync.text, action: #selector(accountChosen(_:)), keyEquivalent: "")
             all.target = self
             all.tag = 0
             menu.addItem(all)
@@ -553,7 +554,8 @@ extension MainWindow: NSMenuDelegate {
         }
         let accounts = core.accounts()
         for account in accounts {
-            let item = NSMenuItem(title: (sync ? "" : "From ") + account.label, action: #selector(accountChosen(_:)),
+            let item = NSMenuItem(title: sync ? account.label : Text.uiFromAccount.text(["account": account.label]),
+                                  action: #selector(accountChosen(_:)),
                                   keyEquivalent: "")
             item.target = self
             item.tag = Int(account.id)
@@ -561,7 +563,7 @@ extension MainWindow: NSMenuDelegate {
             menu.addItem(item)
         }
         if accounts.isEmpty {
-            let none = NSMenuItem(title: "No accounts yet", action: nil, keyEquivalent: "")
+            let none = NSMenuItem(title: Text.trayNoAccounts.text, action: nil, keyEquivalent: "")
             none.isEnabled = false
             menu.addItem(none)
         }

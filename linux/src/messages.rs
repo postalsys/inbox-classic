@@ -176,15 +176,15 @@ impl MessageList {
         // no read/unread column: an unread message is bold, which says it; its space is the sender's and the subject's
         view.append_column(&icon_column(|m| m.info.has_attachments.then_some("ic-attach-symbolic")));
         view.append_column(&flag_column());
-        let from = text_column("From", 200, false, 0.0, |m| m.info.sender().to_string());
-        let subject = text_column("Subject", SUBJECT_WIDTH, true, 0.0, |m| m.info.subject.clone());
-        let received = text_column("Received", 130, false, 0.0, |m| {
+        let from = text_column(&t!(UiColFrom), 200, false, 0.0, |m| m.info.sender().to_string());
+        let subject = text_column(&t!(UiColSubject), SUBJECT_WIDTH, true, 0.0, |m| m.info.subject.clone());
+        let received = text_column(&t!(UiColReceived), 130, false, 0.0, |m| {
             m.info.display_date().map(crate::ui::format_date).unwrap_or_default()
         });
-        let size = text_column("Size", 92, false, 1.0, |m| {
+        let size = text_column(&t!(UiColSize), 92, false, 1.0, |m| {
             pe_core::format_size(m.info.size.unwrap_or(0))
         });
-        let folder = text_column("Folder", FOLDER_WIDTH, false, 0.0, |m| {
+        let folder = text_column(&t!(UiColFolder), FOLDER_WIDTH, false, 0.0, |m| {
             shell().main().row_folder(m.folder_id)
         });
         folder.set_visible(false);

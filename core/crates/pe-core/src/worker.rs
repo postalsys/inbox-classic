@@ -18,6 +18,8 @@ use pe_sync::{
 };
 use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 
+use pe_i18n::{Text, tr, tr_args};
+
 use crate::{Event, EventSink, FailureKind, Secrets};
 
 mod transfer;
@@ -128,9 +130,9 @@ fn scope_hint(failure: Failure, account: &pe_store::Account) -> Failure {
         return failure;
     }
     Failure {
-        message: format!(
-            "{}. The mail server did not take the sign-in app's token: check that the app's scopes give access to mail",
-            failure.message.trim_end_matches('.')
+        message: tr_args(
+            Text::ErrorAppScopes,
+            &[("reason", failure.message.trim_end_matches('.').into())],
         ),
         ..failure
     }
@@ -191,7 +193,7 @@ async fn build(
         .await
         .map_err(|_| Failure {
             kind: FailureKind::Other,
-            message: "the message could not be built".into(),
+            message: tr(Text::ErrorNotBuilt),
         })?
         .map_err(Failure::from)
 }
@@ -206,11 +208,7 @@ pub(crate) fn unix_now() -> i64 {
 
 /// A send that did not go: the reason, and that the message waits in the Outbox
 fn kept(failure: Failure, waiting: usize) -> Failure {
-    let note = if waiting == 1 {
-        "the message waits in the Outbox and is sent with the next Send/Recv".to_string()
-    } else {
-        format!("{waiting} messages wait in the Outbox and are sent with the next Send/Recv")
-    };
+    let note = tr_args(Text::ErrorOutboxWaits, &[("count", waiting.into())]);
     Failure {
         kind: failure.kind,
         message: format!("{} ({note})", failure.message),
@@ -734,7 +732,7 @@ impl Worker {
                 let path = pe_sync::new_folder_path(store, self.account, parent, &name, namespace.as_ref())?.map_err(
                     |refusal| Failure {
                         kind: FailureKind::Other,
-                        message: refusal.to_string(),
+                        message: crate::folder_refusal(&refusal),
                     },
                 )?;
                 pe_sync::create_folder(self.client(store).await?, &path).await?;
@@ -832,10 +830,7 @@ impl Worker {
         if let Err(failure) = outcome {
             self.fail(Failure {
                 kind: failure.kind,
-                message: format!(
-                    "the earlier draft of the message could not be removed from Drafts: {}",
-                    failure.message
-                ),
+                message: tr_args(Text::ErrorDraftNotRemoved, &[("reason", (&failure.message).into())]),
             });
         }
     }
@@ -871,7 +866,7 @@ impl Worker {
     async fn store_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Result<FolderId, Failure> {
         let drafts = crate::compose::drafts_folder(store, self.account)?.ok_or_else(|| Failure {
             kind: FailureKind::Other,
-            message: crate::compose::NO_DRAFTS.into(),
+            message: tr(Text::ErrorNoDrafts),
         })?;
         let message_id = outgoing.message_id.clone().unwrap_or_default();
         let moved_from = outgoing.draft_account.filter(|from| *from != self.account);
@@ -906,7 +901,7 @@ impl Worker {
         self.emit(Event::Failed {
             account: self.account,
             kind: FailureKind::Other,
-            message: format!("the message was sent, but {problem}"),
+            message: tr_args(Text::ErrorSentBut, &[("problem", (&problem).into())]),
         });
     }
 
@@ -952,10 +947,13 @@ impl Worker {
                     });
                     self.emit(Event::OutboxChanged { account: self.account });
                     if let Err(error) = unqueued {
-                        self.sent_but(format!("it is still in the Outbox: {error}"));
+                        self.sent_but(tr_args(
+                            Text::ErrorSentStillInOutbox,
+                            &[("error", (&error.to_string()).into())],
+                        ));
                     }
                     if let Err(failure) = self.save_sent(store, &raw, message.created).await {
-                        self.sent_but(format!("no copy could be saved in Sent: {}", failure.message));
+                        self.sent_but(tr_args(Text::ErrorSentNoCopy, &[("reason", (&failure.message).into())]));
                     }
                 }
                 Err(error) => {
@@ -990,13 +988,16 @@ impl Worker {
     /// The password of the account, as credentials for IMAP and SMTP
     /// How to log in: the password, or for an OAuth account an access token made from its refresh token
     async fn credentials(&mut self, store: &mut Store, account: &pe_store::Account) -> Result<Credentials, Failure> {
-        let no_secret = |what: &str| Failure {
+        let no_secret = |text: Text| Failure {
             kind: FailureKind::Authentication,
-            message: format!("no {what} for this account"),
+            message: tr(text),
         };
         let user = account.settings.username.clone();
         let pe_store::Auth::OAuth2(provider) = &account.settings.auth else {
-            let password = self.secrets.get(self.account).ok_or_else(|| no_secret("password"))?;
+            let password = self
+                .secrets
+                .get(self.account)
+                .ok_or_else(|| no_secret(Text::ErrorNoPassword))?;
             return Ok(Credentials::Password { user, password });
         };
         let now = pe_oauth::now();
@@ -1016,7 +1017,10 @@ impl Worker {
             .resolve(provider, store, &self.secrets)
             .ok_or_else(|| Failure {
                 kind: FailureKind::Other,
-                message: format!("this build can not sign in to {provider}: is its sign-in app removed?"),
+                message: tr_args(
+                    Text::ErrorProviderMissing,
+                    &[("provider", (&provider.to_string()).into())],
+                ),
             })?;
         // an access token is for the provider's own servers only
         let settings = &account.settings;
@@ -1025,10 +1029,13 @@ impl Worker {
         {
             return Err(Failure {
                 kind: FailureKind::Other,
-                message: "the servers of this account are not those it signs in to".into(),
+                message: tr(Text::ErrorProviderServers),
             });
         }
-        let refresh_token = self.secrets.get(self.account).ok_or_else(|| no_secret("sign-in"))?;
+        let refresh_token = self
+            .secrets
+            .get(self.account)
+            .ok_or_else(|| no_secret(Text::ErrorNoSignIn))?;
         let tokens = pe_oauth::refresh(&provider, &refresh_token)
             .await
             .map_err(|error| Failure {
@@ -1045,7 +1052,7 @@ impl Worker {
                 self.emit(Event::Failed {
                     account: self.account,
                     kind: FailureKind::Other,
-                    message: format!("the new sign-in could not be saved for the next start: {error}"),
+                    message: tr_args(Text::ErrorSignInNotSaved, &[("error", (&error.to_string()).into())]),
                 });
             }
         }
@@ -1075,7 +1082,13 @@ impl Worker {
                 Err(failure) if failure.kind == FailureKind::Other => self.emit(Event::Failed {
                     account,
                     kind: failure.kind,
-                    message: format!("{}: {}", folder.info.path, failure.message),
+                    message: tr_args(
+                        Text::ErrorInFolder,
+                        &[
+                            ("folder", (&folder.info.path).into()),
+                            ("reason", (&failure.message).into()),
+                        ],
+                    ),
                 }),
                 result => result?,
             }

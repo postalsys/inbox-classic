@@ -6,6 +6,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use pe_store::{FLAG_COLOR_BITS, FlagColor, FolderId, MessageRef, Picked, Search, Sort};
 
+use pe_i18n::{Text, tr, tr_args};
+
 use crate::text::messages;
 use crate::worker::Command;
 use crate::{Core, Error, Result};
@@ -35,12 +37,12 @@ pub enum Action {
 
 impl Action {
     /// What Edit > Undo calls taking it back ("Move" for "Undo Move"); None for what is not taken back
-    fn undo_name(self) -> Option<&'static str> {
+    fn undo_name(self) -> Option<Text> {
         match self {
-            Action::Move(_) => Some("Move"),
-            Action::Delete => Some("Delete"),
-            Action::Junk(true) => Some("Mark as Junk"),
-            Action::Junk(false) => Some("Mark as Not Junk"),
+            Action::Move(_) => Some(Text::UndoMove),
+            Action::Delete => Some(Text::UndoDelete),
+            Action::Junk(true) => Some(Text::UndoJunk),
+            Action::Junk(false) => Some(Text::UndoNotJunk),
             _ => None,
         }
     }
@@ -66,7 +68,7 @@ pub struct Summary {
 impl Summary {
     /// "3 messages selected" for the reading pane
     pub fn title(&self) -> String {
-        format!("{} selected", messages(self.count))
+        tr_args(Text::SelectionTitle, &[("count", self.count.into())])
     }
 
     /// The reading pane's page over several messages, in the style of its other states ([`crate::reader_page`])
@@ -78,10 +80,10 @@ impl Summary {
     pub fn detail(&self) -> String {
         let mut parts = Vec::new();
         if self.unread > 0 {
-            parts.push(format!("{} unread", self.unread));
+            parts.push(tr_args(Text::SelectionUnread, &[("count", self.unread.into())]));
         }
         if self.flagged > 0 {
-            parts.push(format!("{} flagged", self.flagged));
+            parts.push(tr_args(Text::SelectionFlagged, &[("count", self.flagged.into())]));
         }
         parts.join(", ")
     }
@@ -93,32 +95,33 @@ impl Summary {
 
     /// The title of the Move or Copy window (`copy`): "Move 3 Messages", "Copy Message"
     pub fn move_title(&self, copy: bool) -> String {
-        let verb = if copy { "Copy" } else { "Move" };
-        if self.count == 1 {
-            format!("{verb} Message")
+        let text = if copy {
+            Text::MoveWindowTitleCopy
         } else {
-            format!("{verb} {} Messages", self.count)
-        }
+            Text::MoveWindowTitleMove
+        };
+        tr_args(text, &[("count", self.count.into())])
     }
 
     /// What the Move or Copy window says over its folders: "Move the 3 selected messages to:"
     pub fn move_prompt(&self, copy: bool) -> String {
-        let verb = if copy { "Copy" } else { "Move" };
-        if self.count == 1 {
-            format!("{verb} the selected message to:")
+        let text = if copy {
+            Text::MoveWindowPromptCopy
         } else {
-            format!("{verb} the {} selected messages to:", self.count)
-        }
+            Text::MoveWindowPromptMove
+        };
+        tr_args(text, &[("count", self.count.into())])
     }
 
     /// What to ask before Delete when it removes some of them for good; None when it removes none
     pub fn delete_question(&self) -> Option<String> {
         match (self.for_good, self.count) {
             (0, _) => None,
-            (1, 1) => Some("This message will be deleted for good. Delete it?".into()),
-            (n, all) if n == all => Some(format!("These {n} messages will be deleted for good. Delete them?")),
-            (n, all) => Some(format!(
-                "{n} of the {all} messages will be deleted for good. Delete the messages?"
+            (1, 1) => Some(tr(Text::DeleteForGoodOne)),
+            (n, all) if n == all => Some(tr_args(Text::DeleteForGoodAll, &[("count", n.into())])),
+            (n, all) => Some(tr_args(
+                Text::DeleteForGoodSome,
+                &[("count", n.into()), ("total", all.into())],
             )),
         }
     }
@@ -127,8 +130,8 @@ impl Summary {
 /// What Edit > Undo takes back: messages that went from one folder to another, found again by their Message-IDs
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct Undo {
-    /// "Undo Move" without its "Undo"
-    what: &'static str,
+    /// What Edit > Undo says, "Undo Move"
+    what: Text,
     moves: Vec<UndoMove>,
 }
 
@@ -195,7 +198,7 @@ impl Core {
     pub fn act(&self, refs: &[MessageRef], action: Action) -> Result<String> {
         let picked = self.store().picked(refs)?;
         if picked.is_empty() {
-            return Err(Error::Unavailable("The messages are no longer there.".into()));
+            return Err(Error::Unavailable(tr(Text::MessagesGone)));
         }
         let groups = by_folder(&picked);
         let action = match action {
@@ -208,7 +211,7 @@ impl Core {
                 let store = self.store();
                 let folder = store.folder(to)?;
                 if !folder.info.selectable {
-                    return Err(Error::Unavailable("That folder does not hold messages.".into()));
+                    return Err(Error::Unavailable(tr(Text::FolderHoldsNoMessages)));
                 }
                 store.note_target(to)?;
                 Some(folder.account_id)
@@ -327,21 +330,35 @@ impl Core {
     /// What the status bar says once `action` is done to `count` messages
     fn done_text(&self, action: Action, count: u64, moved: &[UndoMove], crossed: bool) -> Result<String> {
         let n = messages(count);
-        Ok(match action {
+        let (text, folder) = match action {
             Action::ToggleFlag => unreachable!("resolved by act"),
-            Action::Read(true) => format!("Marked {n} as read"),
-            Action::Read(false) => format!("Marked {n} as unread"),
-            Action::Flag(true) => format!("Flagged {n}"),
-            Action::Flag(false) => format!("Took the flag off {n}"),
-            Action::FlagColor(color) => format!("Flagged {n} {}", color_name(color).to_lowercase()),
-            Action::Delete if moved.is_empty() => format!("Deleted {n} for good"),
-            Action::Delete | Action::Junk(_) => format!("Moved {n} to {}", self.places(moved.iter().map(|m| m.to))?),
+            Action::Read(true) => (Text::DoneRead, None),
+            Action::Read(false) => (Text::DoneUnread, None),
+            Action::Flag(true) => (Text::DoneFlagged, None),
+            Action::Flag(false) => (Text::DoneUnflagged, None),
+            Action::FlagColor(color) => {
+                return Ok(tr_args(
+                    Text::DoneFlaggedColor,
+                    &[("messages", (&n).into()), ("color", color_id(color).into())],
+                ));
+            }
+            Action::Delete if moved.is_empty() => (Text::DoneDeletedForGood, None),
+            Action::Delete | Action::Junk(_) => (Text::DoneMoved, Some(self.places(moved.iter().map(|m| m.to))?)),
             // to another account they go in the background, Event::Transferring says how far
-            Action::Move(to) if crossed => format!("Moving {n} to {}...", self.places([to].into_iter())?),
-            Action::Copy(to) if crossed => format!("Copying {n} to {}...", self.places([to].into_iter())?),
-            Action::Move(to) => format!("Moved {n} to {}", self.places([to].into_iter())?),
-            Action::Copy(to) => format!("Copied {n} to {}", self.places([to].into_iter())?),
-        })
+            Action::Move(to) if crossed => (Text::DoneMoving, Some(self.places([to].into_iter())?)),
+            Action::Copy(to) if crossed => (Text::DoneCopying, Some(self.places([to].into_iter())?)),
+            Action::Move(to) => (Text::DoneMoved, Some(self.places([to].into_iter())?)),
+            Action::Copy(to) => (Text::DoneCopied, Some(self.places([to].into_iter())?)),
+        };
+        let folder = folder.unwrap_or_default();
+        Ok(tr_args(
+            text,
+            &[
+                ("messages", (&n).into()),
+                ("count", count.into()),
+                ("folder", (&folder).into()),
+            ],
+        ))
     }
 
     /// The name of the folder they all went to, or "their folders" when they went to several
@@ -351,7 +368,7 @@ impl Core {
         folders.dedup();
         match folders.as_slice() {
             [one] => Ok(crate::text::folder_name(&self.store().folder(*one)?.info)),
-            _ => Ok("their folders".into()),
+            _ => Ok(tr(Text::TheirFolders)),
         }
     }
 
@@ -363,7 +380,7 @@ impl Core {
     /// What Edit > Undo says it takes back, "Undo Move"; None when there is nothing
     pub fn undo_label(&self) -> Option<String> {
         let undo = self.undo.lock().unwrap_or_else(|e| e.into_inner());
-        undo.as_ref().map(|u| format!("Undo {}", u.what))
+        undo.as_ref().map(|u| tr(u.what))
     }
 
     /// Takes back the last move, delete into Deleted Items or junk: the messages go back to the folders they came
@@ -372,7 +389,7 @@ impl Core {
     pub fn undo(&self) -> Result<String> {
         let undo = self.undo.lock().unwrap_or_else(|e| e.into_inner()).take();
         let Some(undo) = undo else {
-            return Err(Error::Unavailable("There is nothing to undo.".into()));
+            return Err(Error::Unavailable(tr(Text::NothingToUndo)));
         };
         let mut by_account: BTreeMap<pe_store::AccountId, Vec<UndoMove>> = BTreeMap::new();
         for m in &undo.moves {
@@ -382,13 +399,17 @@ impl Core {
         for (account, moves) in by_account {
             self.send_command(account, Command::UndoMoves { moves })?;
         }
-        let back = undo.moves.iter().map(|m| m.message_ids.len() as u64).sum();
+        let back: u64 = undo.moves.iter().map(|m| m.message_ids.len() as u64).sum();
         *self.restored.lock().unwrap_or_else(|e| e.into_inner()) =
             undo.moves.iter().map(|m| (m.from, m.message_ids.clone())).collect();
-        Ok(format!(
-            "Moved {} back to {}",
-            messages(back),
-            self.places(undo.moves.iter().map(|m| m.from))?
+        let folder = self.places(undo.moves.iter().map(|m| m.from))?;
+        Ok(tr_args(
+            Text::DoneMovedBack,
+            &[
+                ("messages", (&messages(back)).into()),
+                ("count", back.into()),
+                ("folder", (&folder).into()),
+            ],
         ))
     }
 
@@ -419,15 +440,29 @@ fn by_folder(picked: &[Picked]) -> BTreeMap<FolderId, Vec<&Picked>> {
     groups
 }
 
-/// A flag colour's name, as the Flag menu lists them
+/// A flag colour's name, as the Flag menu lists them ("Orange"), in the language in use. Kept once a language and a
+/// colour (seven colours, a handful of languages), so the windows can hold it as a `&'static str`.
 pub fn color_name(color: FlagColor) -> &'static str {
+    static NAMES: std::sync::Mutex<Vec<(&'static str, FlagColor, &'static str)>> = std::sync::Mutex::new(Vec::new());
+    let language = pe_i18n::language();
+    let mut names = NAMES.lock().unwrap_or_else(|e| e.into_inner());
+    if let Some((_, _, name)) = names.iter().find(|(l, c, _)| *l == language && *c == color) {
+        return name;
+    }
+    let name: &'static str = Box::leak(tr_args(Text::FlagColor, &[("color", color_id(color).into())]).into_boxed_str());
+    names.push((language, color, name));
+    name
+}
+
+/// How the catalog names a flag colour, for its selectors
+fn color_id(color: FlagColor) -> &'static str {
     match color {
-        FlagColor::Red => "Red",
-        FlagColor::Orange => "Orange",
-        FlagColor::Yellow => "Yellow",
-        FlagColor::Green => "Green",
-        FlagColor::Blue => "Blue",
-        FlagColor::Purple => "Purple",
-        FlagColor::Gray => "Gray",
+        FlagColor::Red => "red",
+        FlagColor::Orange => "orange",
+        FlagColor::Yellow => "yellow",
+        FlagColor::Green => "green",
+        FlagColor::Blue => "blue",
+        FlagColor::Purple => "purple",
+        FlagColor::Gray => "gray",
     }
 }

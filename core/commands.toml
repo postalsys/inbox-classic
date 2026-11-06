@@ -8,7 +8,7 @@
 #   id       the name in code (snake_case here, IDM_NEW_ACCOUNT in C, newAccount in Swift, NewAccount in Rust)
 #   windows  the Win32 command id, which scripts/ui-e2e.ps1 posts as the menu would
 #   menu     file, edit, view, tools, message, help, or tray (the tray icon's menu only)
-#   label    as the menu shows it, without Windows' & accelerators (the Windows menus keep their own text)
+#   (label)  not here: the catalog's cmd-<id> in core/locales/en/app.ftl, in every language, & marking the menu letter
 #   key      the shortcut: Mod is Ctrl on Windows and Linux and Command on the Mac; Shift, Alt (Option on the Mac);
 #            a letter, F1 to F12, Enter, Delete. mac and linux override it where those platforms differ.
 #   toggle   a menu item with a check mark
@@ -19,20 +19,17 @@
 id = "new_account"
 windows = 100
 menu = "file"
-label = "New Account..."
 
 [[command]]
 id = "exit"
 windows = 101
 menu = "file"
-label = "Exit"
 mac = "Mod+Q"
 
 [[command]]
 id = "sync"
 windows = 102
 menu = "tools"
-label = "Send and Receive All"
 key = "F5"
 mac = "Mod+Shift+N"
 
@@ -40,21 +37,18 @@ mac = "Mod+Shift+N"
 id = "undo"
 windows = 135
 menu = "edit"
-label = "Undo"
 key = "Mod+Z"
 
 [[command]]
 id = "select_all"
 windows = 134
 menu = "edit"
-label = "Select All"
 key = "Mod+A"
 
 [[command]]
 id = "mark_read"
 windows = 103
 menu = "edit"
-label = "Mark as Read"
 key = "Mod+Q"
 mac = "Mod+Shift+U"
 
@@ -62,33 +56,28 @@ mac = "Mod+Shift+U"
 id = "mark_unread"
 windows = 104
 menu = "edit"
-label = "Mark as Unread"
 
 [[command]]
 id = "pictures"
 windows = 105
 menu = "view"
-label = "Download Pictures"
 one = true
 
 [[command]]
 id = "about"
 windows = 106
 menu = "help"
-label = "About Inbox Classic"
 
 [[command]]
 id = "new_mail"
 windows = 107
 menu = "message"
-label = "New Message"
 key = "Mod+N"
 
 [[command]]
 id = "reply"
 windows = 108
 menu = "message"
-label = "Reply to Sender"
 key = "Mod+R"
 one = true
 
@@ -96,7 +85,6 @@ one = true
 id = "reply_all"
 windows = 109
 menu = "message"
-label = "Reply to All"
 key = "Mod+Shift+R"
 one = true
 
@@ -104,7 +92,6 @@ one = true
 id = "forward"
 windows = 110
 menu = "message"
-label = "Forward"
 key = "Mod+F"
 mac = "Mod+Shift+F"
 some = true
@@ -113,7 +100,6 @@ some = true
 id = "help"
 windows = 111
 menu = "help"
-label = "Contents"
 key = "F1"
 mac = "Mod+Shift+/"
 
@@ -121,7 +107,6 @@ mac = "Mod+Shift+/"
 id = "delete"
 windows = 112
 menu = "edit"
-label = "Delete Message"
 key = "Delete"
 mac = "Mod+Delete"
 
@@ -129,51 +114,43 @@ mac = "Mod+Delete"
 id = "move"
 windows = 113
 menu = "edit"
-label = "Move to Folder..."
 key = "Mod+Shift+V"
 
 [[command]]
 id = "copy"
 windows = 136
 menu = "edit"
-label = "Copy to Folder..."
 
 [[command]]
 id = "flag"
 windows = 114
 menu = "message"
-label = "Flag Message"
 mac = "Mod+Shift+L"
 
 [[command]]
 id = "new_folder"
 windows = 115
 menu = "file"
-label = "New Folder..."
 
 [[command]]
 id = "rename_folder"
 windows = 116
 menu = "file"
-label = "Rename Folder..."
 
 [[command]]
 id = "delete_folder"
 windows = 117
 menu = "file"
-label = "Delete Folder"
 
 [[command]]
 id = "accounts"
 windows = 118
 menu = "file"
-label = "Accounts..."
 
 [[command]]
 id = "find"
 windows = 120
 menu = "edit"
-label = "Find Message"
 key = "Mod+Shift+F"
 mac = "Mod+F"
 
@@ -181,7 +158,6 @@ mac = "Mod+F"
 id = "save_as"
 windows = 121
 menu = "file"
-label = "Save As..."
 key = ""
 mac = "Mod+Shift+S"
 some = true
@@ -190,7 +166,6 @@ some = true
 id = "print"
 windows = 122
 menu = "file"
-label = "Print..."
 key = "Mod+P"
 one = true
 
@@ -198,19 +173,16 @@ one = true
 id = "import"
 windows = 123
 menu = "file"
-label = "Import Messages..."
 
 [[command]]
 id = "outbox"
 windows = 124
 menu = "tools"
-label = "Outbox..."
 
 [[command]]
 id = "properties"
 windows = 125
 menu = "file"
-label = "Properties"
 key = "Alt+Enter"
 mac = "Mod+Alt+U"
 one = true
@@ -219,7 +191,6 @@ one = true
 id = "mark_all_read"
 windows = 126
 menu = "edit"
-label = "Mark All Read"
 key = "Mod+Shift+A"
 mac = "Mod+Alt+Shift+A"
 
@@ -227,7 +198,6 @@ mac = "Mod+Alt+Shift+A"
 id = "junk"
 windows = 127
 menu = "message"
-label = "Mark as Junk"
 key = "Mod+J"
 mac = "Mod+Shift+J"
 
@@ -235,32 +205,27 @@ mac = "Mod+Shift+J"
 id = "not_junk"
 windows = 128
 menu = "message"
-label = "Mark as Not Junk"
 
 [[command]]
 id = "notify"
 windows = 129
 menu = "tools"
-label = "Notify of New Mail"
 toggle = true
 
 [[command]]
 id = "open"
 windows = 130
 menu = "tray"
-label = "Open Inbox Classic"
 
 [[command]]
 id = "default_app"
 windows = 131
 menu = "tools"
-label = "Make Default Mail App..."
 
 [[command]]
 id = "view_source"
 windows = 132
 menu = "view"
-label = "Message Source"
 key = "Mod+U"
 mac = ""
 one = true
@@ -269,4 +234,11 @@ one = true
 id = "ai_agents"
 windows = 133
 menu = "tools"
-label = "AI Agents..."
+
+[[command]]
+id = "options"
+windows = 137
+menu = "tools"
+key = ""
+mac = "Mod+,"
+linux = "Mod+,"

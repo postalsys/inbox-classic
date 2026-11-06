@@ -2,9 +2,25 @@
 //! the content rules the WebKit web views (the Mac's WKWebView, Linux's WebKitGTK) block every load with, as WebView2's
 //! request filter does on Windows.
 
-/// The user help, one source for every platform: `<!--os:mac-->` (or `os:windows,linux`, any list) starts a part only
-/// those platforms show and `<!--/os-->` ends it
+/// The user help, one source for every platform in each language: `<!--os:mac-->` (or `os:windows,linux`, any list)
+/// starts a part only those platforms show and `<!--/os-->` ends it. Keys are written `<kbd>Ctrl</kbd>` in every
+/// language; the page names them as the keyboards of its language do.
 const HELP: &str = include_str!("help.html");
+const HELPS: &[(&str, &str)] = &[
+    ("en", HELP),
+    ("de", include_str!("help.de.html")),
+    ("et", include_str!("help.et.html")),
+    ("es", include_str!("help.es.html")),
+    ("fr", include_str!("help.fr.html")),
+];
+
+/// The help of `language`, English for one there is none of
+fn help_source(language: &str) -> &'static str {
+    HELPS
+        .iter()
+        .find(|(code, _)| *code == language)
+        .map_or(HELP, |(_, page)| page)
+}
 
 /// A platform the windows run on
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -45,10 +61,16 @@ impl Platform {
     }
 }
 
-/// The help page for `platform`: the parts of other platforms left out, and on the Mac the keys named as its keyboard
-/// names them (Ctrl is Command there, Alt is Option)
+/// The help page for `platform` in the language in use: the parts of other platforms left out, and the keys named as
+/// the keyboard names them (on the Mac Ctrl is Command and Alt is Option; on a German keyboard Ctrl is Strg)
 pub fn help_page(platform: Platform) -> String {
-    let filtered = filter_platform(HELP, platform);
+    help_page_in(platform, pe_i18n::language())
+}
+
+/// [`help_page`] in `language` (English for one there is no help of)
+pub fn help_page_in(platform: Platform, language: &str) -> String {
+    use pe_i18n::{Text, tr};
+    let filtered = filter_platform(help_source(language), platform);
     match platform {
         Platform::Mac => filtered
             .replace("<kbd>Ctrl</kbd>", "<kbd>\u{2318}</kbd>")
@@ -56,7 +78,15 @@ pub fn help_page(platform: Platform) -> String {
             .replace("<kbd>Shift</kbd>", "<kbd>\u{21E7}</kbd>")
             .replace("<kbd>Del</kbd>", "<kbd>\u{232B}</kbd>")
             .replace("<kbd>Delete</kbd>", "<kbd>\u{232B}</kbd>"),
-        _ => filtered,
+        _ => {
+            let key = |text: Text| format!("<kbd>{}</kbd>", crate::editor::text(&tr(text)));
+            filtered
+                .replace("<kbd>Ctrl</kbd>", &key(Text::KeyCtrl))
+                .replace("<kbd>Alt</kbd>", &key(Text::KeyAlt))
+                .replace("<kbd>Shift</kbd>", &key(Text::KeyShift))
+                .replace("<kbd>Del</kbd>", &key(Text::KeyDel))
+                .replace("<kbd>Enter</kbd>", &key(Text::KeyEnter))
+        }
     }
 }
 
@@ -116,6 +146,42 @@ pub fn webkit_content_rules(allow_remote_images: bool) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_help_has_the_english_one_s_shape() {
+        // a translation keeps every platform part, key, item, heading and row of the English page, and the house
+        // style of no en or em dashes
+        let shape = |page: &str| {
+            [
+                "<!--os:",
+                "<!--/os-->",
+                "<kbd>",
+                "<li>",
+                "<h2>",
+                "<h3>",
+                "<tr>",
+                "<table>",
+                "<div class=\"note\">",
+            ]
+            .map(|mark| page.matches(mark).count())
+        };
+        let english = shape(HELP);
+        for (code, page) in HELPS {
+            assert_eq!(
+                shape(page),
+                english,
+                "the help in {code} is not shaped as the English one"
+            );
+            assert!(!page.contains(['\u{2013}', '\u{2014}']), "a dash in the help in {code}");
+            assert!(
+                page.contains(&format!("<html lang=\"{code}\">")) || *code == "en",
+                "{code}"
+            );
+            for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
+                assert!(!help_page_in(platform, code).contains("<!--os"), "{code}");
+            }
+        }
+    }
 
     #[test]
     fn parts_of_other_platforms_are_left_out() {

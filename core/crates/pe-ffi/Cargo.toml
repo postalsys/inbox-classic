@@ -11,6 +11,7 @@ publish.workspace = true
 crate-type = ["staticlib", "lib"]
 
 [dependencies]
+pe-i18n.workspace = true
 pe-autoconfig = { path = "../pe-autoconfig" }
 pe-core = { path = "../pe-core" }
 pe-html.workspace = true

@@ -31,6 +31,7 @@ The three apps are thin windows on the same Rust core (`core/`). A feature that 
 | Printing                                    | `print.cpp`                                  | `WebViews.swift` (`Printer`)                        | `webview.rs`                                 |
 | New mail: tray, notification, unread count  | `tray.cpp`                                   | `MainWindow.swift` (Dock badge, notifications)      | `tray.rs`, `notify.rs`                       |
 | Dialogs, forms, file panels                 | `ui.cpp`                                     | `Dialogs.swift`                                     | `ui.rs`                                      |
+| Options window, the language                | `options.cpp`, `main.cpp` (registry)         | `Settings.swift`, `App.swift` (AppleLanguages)      | `settings.rs`, `preferences.rs`              |
 | Preferences                                 | `ui.cpp` (registry)                          | `UserDefaults`                                      | `settings.rs` (`settings.ini`)               |
 | Icons                                       | `icons.h`, `app/res/toolbar`                 | `Icons.swift` (PDFs made by `scripts/mac-build.sh`) | `linux/data`, made by `linux/build.rs`       |
 | UI end-to-end test                          | `scripts/ui-e2e.ps1`                         | `UITest.swift`, `UITestSteps.swift`                 | `e2e.rs`, `e2e/`                             |

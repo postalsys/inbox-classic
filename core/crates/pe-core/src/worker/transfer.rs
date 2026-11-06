@@ -9,6 +9,8 @@ use pe_store::{AccountId, FolderId, Store, Transfer};
 use pe_sync::{expunge_messages, fetch_raw, has_message_id};
 
 use super::{Failure, Outcome, Worker};
+use pe_i18n::{Text, tr, tr_args};
+
 use crate::text::messages;
 use crate::{Event, FailureKind};
 
@@ -60,18 +62,30 @@ impl Worker {
             done += 1;
             copy = t.copy;
             let target = store.folder(t.to).ok();
-            let verb = if t.copy { "Copying" } else { "Moving" };
-            let place = target
-                .as_ref()
-                .map_or_else(|| "another account".into(), |f| crate::text::folder_name(&f.info));
+            let place = target.as_ref().map_or_else(
+                || tr(Text::TransferAnotherAccount),
+                |f| crate::text::folder_name(&f.info),
+            );
+            let text = if t.copy {
+                Text::TransferCopying
+            } else {
+                Text::TransferMoving
+            };
             self.emit(Event::Transferring {
-                text: format!("{verb} {done} of {} to {place}...", messages(total)),
+                text: tr_args(
+                    text,
+                    &[
+                        ("done", done.into()),
+                        ("messages", (&messages(total)).into()),
+                        ("folder", (&place).into()),
+                    ],
+                ),
             });
             let Some(target) = target else {
                 // the folder it was going to is gone
                 store.remove_transfer(t.id)?;
                 back.insert(t.from);
-                failed.push((t, gone("the folder it was going to is no longer there")));
+                failed.push((t, gone(&tr(Text::TransferFolderGone))));
                 continue;
             };
             let other = others
@@ -145,27 +159,39 @@ impl Worker {
             }
         }
         let went = if copy { done - failed.len() } else { moved };
-        let verb = if copy { "Copied" } else { "Moved" };
         // the folder they went to by its name, as the status bar says it for a move in one account
         let place = match arrived_names.as_slice() {
             [one] => one.clone(),
-            _ => "their folders".to_string(),
+            _ => tr(Text::TheirFolders),
         };
-        let text = if went > 0 {
-            format!("{verb} {} to {place}", messages(went as u64))
-        } else {
-            let verb = if copy { "copied" } else { "moved" };
-            format!("No message could be {verb}")
+        let text = match (went > 0, copy) {
+            (true, copy) => tr_args(
+                if copy { Text::DoneCopied } else { Text::DoneMoved },
+                &[
+                    ("messages", (&messages(went as u64)).into()),
+                    ("count", went.into()),
+                    ("folder", (&place).into()),
+                ],
+            ),
+            (false, true) => tr(Text::TransferNoneCopied),
+            (false, false) => tr(Text::TransferNoneMoved),
         };
         self.emit(Event::Transferring { text });
         if let Some((first, failure)) = failed.first() {
-            let verb = if first.copy { "copied" } else { "moved" };
+            let text = if first.copy {
+                Text::TransferNotCopied
+            } else {
+                Text::TransferNotMoved
+            };
             self.fail(Failure {
                 kind: FailureKind::Other,
-                message: format!(
-                    "{} could not be {verb} to another account: {}",
-                    messages(failed.len() as u64),
-                    failure.message
+                message: tr_args(
+                    text,
+                    &[
+                        ("messages", (&messages(failed.len() as u64)).into()),
+                        ("count", failed.len().into()),
+                        ("reason", (&failure.message).into()),
+                    ],
                 ),
             });
         }
@@ -179,7 +205,7 @@ impl Worker {
             None => {
                 let source = match fetch_raw(self.client(store).await?, store, t.from, t.uid).await {
                     Ok(source) => source,
-                    Err(pe_sync::Error::MessageGone) => return Err(gone("the message is no longer on the server")),
+                    Err(pe_sync::Error::MessageGone) => return Err(gone(&tr(Text::TransferNotOnServer))),
                     Err(error) => return Err(error.into()),
                 };
                 store.set_transfer_source(t.id, &source)?;

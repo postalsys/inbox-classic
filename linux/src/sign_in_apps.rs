@@ -47,15 +47,15 @@ struct ServerRows {
 impl ServerRows {
     fn new(group: &adw::PreferencesGroup, kind: &str, host: &str, port: u16, security: Security) -> ServerRows {
         let lower = kind.to_lowercase();
-        let host = entry_row(&format!("{kind} server"), host, &format!("app-{lower}-host"));
+        let host = entry_row(&t!(GtkAppServer, kind = kind), host, &format!("app-{lower}-host"));
         let port = entry_row(
-            &format!("{kind} port"),
+            &t!(GtkAppPort, kind = kind),
             &if port != 0 { port.to_string() } else { String::new() },
             &format!("app-{lower}-port"),
         );
         port.set_input_purpose(gtk::InputPurpose::Digits);
         let security_row = adw::ComboRow::builder()
-            .title(format!("{kind} security"))
+            .title(t!(GtkAppSecurity, kind = kind))
             .model(&gtk::StringList::new(&SECURITY))
             .build();
         security_row.set_selected(security_index(security));
@@ -101,7 +101,7 @@ impl Editor {
     /// A preset fills in everything but the client; the name only when there is none yet
     fn fill(&self, preset: &pe_oauth::Preset) {
         if self.name.text().is_empty() {
-            self.name.set_text(&format!("{} sign-in app", preset.name));
+            self.name.set_text(&t!(UiPresetAppName, provider = preset.name));
         }
         self.issuer.set_text(preset.issuer);
         self.scopes.set_text(&preset.scopes.join(" "));
@@ -141,13 +141,22 @@ async fn check_issuer(parent: &impl IsA<gtk::Widget>, issuer: &str) -> Result<St
     let core = &shell().core;
     let request = core.sign_in_app_check(issuer).map_err(|reason| reason.to_string())?;
     let cancel = |request| core.sign_in_app_check_cancel(request);
-    if !ui::wait_for_request(parent, request, cancel, &format!("Checking {issuer}..."), "Sign-in App").await {
+    if !ui::wait_for_request(
+        parent,
+        request,
+        cancel,
+        &t!(UiCheckingIssuer, issuer = issuer),
+        &t!(UiSignInApp),
+    )
+    .await
+    {
         return Err(String::new());
     }
     match core.sign_in_app_check_result(request) {
-        Some(Ok(found)) => Ok(format!(
-            "Sign-in page: {}\nToken endpoint: {}",
-            found.authorize_url, found.token_url
+        Some(Ok(found)) => Ok(t!(
+            GtkIssuerFound,
+            page = &found.authorize_url,
+            endpoint = &found.token_url
         )),
         Some(Err(reason)) => Err(reason),
         None => Err(String::new()),
@@ -165,35 +174,30 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
     content.set_margin_start(18);
     content.set_margin_end(18);
     content.set_margin_bottom(18);
-    content.append(&ui::wrapped_label(
-        "An OAuth client you registered with your provider, for accounts that sign in through the browser. Fill it in \
-         for a provider, then add the client ID (and secret, if the provider gave one).",
-    ));
+    content.append(&ui::wrapped_label(&t!(UiSignInAppIntro)));
     let fill_row = gtk::Box::new(gtk::Orientation::Horizontal, 6);
-    fill_row.append(&gtk::Label::new(Some("Fill in for:")));
+    fill_row.append(&gtk::Label::new(Some(&t!(UiFillInFor))));
     let group = adw::PreferencesGroup::new();
-    let name = entry_row("Name", &text(|a| &a.name), "app-name");
-    let issuer = entry_row("Issuer", &text(|a| &a.issuer), "app-issuer");
-    let check = gtk::Button::with_label("Check");
+    let name = entry_row(&t!(UiColName), &text(|a| &a.name), "app-name");
+    let issuer = entry_row(&t!(UiColIssuer), &text(|a| &a.issuer), "app-issuer");
+    let check = gtk::Button::with_label(&crate::words::plain(crate::words::Text::UiCheck));
     check.set_valign(gtk::Align::Center);
     check.set_widget_name("app-check");
     issuer.add_suffix(&check);
-    let client_id = entry_row("Client ID", &text(|a| &a.client_id), "app-client-id");
+    let client_id = entry_row(&t!(GtkClientId), &text(|a| &a.client_id), "app-client-id");
     // never shown again once saved: it is in the keyring
-    let secret = adw::PasswordEntryRow::builder().title("Client secret").build();
+    let secret = adw::PasswordEntryRow::builder().title(t!(GtkClientSecret)).build();
     secret.set_widget_name("app-secret");
     for row in [&name, &issuer, &client_id] {
         group.add(row);
     }
     group.add(&secret);
     let remove_secret = had_secret.then(|| {
-        let row = adw::SwitchRow::builder()
-            .title("A secret is saved; type another to replace it, or remove it")
-            .build();
+        let row = adw::SwitchRow::builder().title(t!(UiRemoveSecret)).build();
         group.add(&row);
         row
     });
-    let scopes = entry_row("Scopes", &text(|a| &a.scopes), "app-scopes");
+    let scopes = entry_row(&t!(GtkScopes), &text(|a| &a.scopes), "app-scopes");
     group.add(&scopes);
     let servers = adw::PreferencesGroup::new();
     let imap = ServerRows::new(
@@ -212,12 +216,10 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
     );
     let register = ui::wrapped_label("");
     register.set_widget_name("app-register");
-    let registration = adw::PreferencesGroup::builder()
-        .title("Register it with your provider")
-        .build();
-    let redirect = entry_row("Redirect URI", "", "app-redirect");
+    let registration = adw::PreferencesGroup::builder().title(t!(UiRegisterIt)).build();
+    let redirect = entry_row(&t!(GtkRedirectUri), "", "app-redirect");
     redirect.set_editable(false);
-    let copy = gtk::Button::with_label("Copy");
+    let copy = gtk::Button::with_label(&crate::words::plain(crate::words::Text::UiButtonCopy));
     copy.set_valign(gtk::Align::Center);
     redirect.add_suffix(&copy);
     registration.add(&register);
@@ -266,9 +268,13 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
         .max_content_height(640)
         .build();
     let (dialog, ok) = ui::dialog_with_buttons(
-        if id != 0 { "Sign-in App" } else { "Add Sign-in App" },
+        &if id != 0 {
+            t!(UiSignInApp)
+        } else {
+            t!(UiAddSignInAppTitle)
+        },
         &scrolled,
-        "OK",
+        &t!(UiOk),
         560,
     );
     dialog.set_widget_name("sign-in-app-editor");
@@ -295,10 +301,20 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
                 let issuer = editor.issuer.text().trim().to_string();
                 match check_issuer(&dialog, &issuer).await {
                     Ok(found) => {
-                        ui::alert(&dialog, "Check", &format!("The issuer can be used.\n\n{found}")).await;
+                        ui::alert(
+                            &dialog,
+                            &crate::words::plain(crate::words::Text::UiCheck),
+                            &t!(GtkIssuerUsable, found = &found),
+                        )
+                        .await;
                     }
                     Err(reason) if !reason.is_empty() => {
-                        ui::alert(&dialog, "Check", &format!("The issuer can not be used: {reason}")).await;
+                        ui::alert(
+                            &dialog,
+                            &crate::words::plain(crate::words::Text::UiCheck),
+                            &t!(UiIssuerUnusable, reason = &reason),
+                        )
+                        .await;
                     }
                     Err(_) => {}
                 }
@@ -320,12 +336,12 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
 async fn save(dialog: &adw::Dialog, editor: &Editor, id: i64, had_secret: bool) -> Option<i64> {
     let form = editor.form();
     if form.imap_port == 0 || form.smtp_port == 0 {
-        ui::alert(dialog, "Sign-in App", "Ports are numbers from 1 to 65535.").await;
+        ui::alert(dialog, &t!(UiSignInApp), &t!(UiPortsInvalid)).await;
         return None;
     }
     if let Err(reason) = check_issuer(dialog, &form.issuer).await {
         if !reason.is_empty() {
-            ui::alert(dialog, "Sign-in App", &format!("The issuer can not be used: {reason}")).await;
+            ui::alert(dialog, &t!(UiSignInApp), &t!(UiIssuerUnusable, reason = &reason)).await;
             editor.issuer.grab_focus();
         }
         return None;
@@ -346,8 +362,8 @@ async fn save(dialog: &adw::Dialog, editor: &Editor, id: i64, had_secret: bool) 
         Err(reason) => {
             ui::alert(
                 dialog,
-                "Sign-in App",
-                &format!("The sign-in app could not be saved: {reason}"),
+                &t!(UiSignInApp),
+                &t!(UiSignInAppNotSaved, reason = &reason.to_string()),
             )
             .await;
             None
@@ -382,23 +398,13 @@ impl AppsWindow {
         let note = match (&app, added) {
             (Some(app), None) => {
                 let reason = match app.with {
-                    SignInWith::Builtin(kind) if !app.enabled => pe_core::builtin_off_reason(kind),
-                    _ => "",
+                    SignInWith::Builtin(kind) if !app.enabled => pe_core::builtin_off_text(kind),
+                    _ => String::new(),
                 };
-                format!(
-                    "{} is built in: only whether it is used for new accounts can change. {reason}",
-                    app.name
-                )
+                t!(GtkAppBuiltIn, app = &app.name, reason = &reason)
             }
-            (Some(_), Some(added)) => format!(
-                "Client ID: {}{}",
-                added.client_id,
-                if added.has_secret {
-                    ", with a client secret."
-                } else {
-                    ", a public client (no secret)."
-                }
-            ),
+            (Some(_), Some(added)) if added.has_secret => t!(UiClientWithSecret, client = &added.client_id),
+            (Some(_), Some(added)) => t!(UiClientPublic, client = &added.client_id),
             _ => String::new(),
         };
         self.note.set_text(&note);
@@ -414,16 +420,16 @@ impl AppsWindow {
         for (index, app) in apps.iter().enumerate() {
             let builtin = app.app.is_none();
             let used_by = if app.used_by.is_empty() {
-                "No accounts".to_string()
+                t!(UiNoAccounts)
             } else {
                 app.used_by.join(", ")
             };
             let row = adw::ActionRow::builder()
-                .title(glib::markup_escape_text(&format!(
-                    "{}{}",
-                    app.name,
-                    if builtin { " (built-in)" } else { "" }
-                )))
+                .title(glib::markup_escape_text(&if builtin {
+                    t!(GtkBuiltIn, app = &app.name)
+                } else {
+                    app.name.clone()
+                }))
                 .subtitle(glib::markup_escape_text(&format!(
                     "{}  \u{00B7}  {used_by}",
                     app.issuer
@@ -434,7 +440,7 @@ impl AppsWindow {
                 .valign(gtk::Align::Center)
                 .build();
             switch.set_widget_name(&format!("app-on-{index}"));
-            switch.update_property(&[gtk::accessible::Property::Label("Offered for new accounts")]);
+            switch.update_property(&[gtk::accessible::Property::Label(&t!(GtkOfferedForNew))]);
             let this = Rc::downgrade(self);
             let with = app.with;
             switch.connect_active_notify(move |switch| {
@@ -476,9 +482,9 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
         });
         button
     };
-    let add = button("Add...", "add");
-    let edit = button("Edit...", "edit");
-    let remove = button("Remove", "remove");
+    let add = button(&t!(GtkAccountsAdd), "add");
+    let edit = button(&t!(GtkEditButton), "edit");
+    let remove = button(&crate::words::plain(crate::words::Text::UiRemove), "remove");
     let buttons = gtk::Box::new(gtk::Orientation::Vertical, 6);
     buttons.append(&add);
     buttons.append(&edit);
@@ -525,17 +531,14 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
     content.set_margin_start(18);
     content.set_margin_end(18);
     content.set_margin_bottom(18);
-    content.append(&ui::wrapped_label(
-        "Sign-in apps let accounts sign in through the browser. One that is turned off is not offered for new \
-         accounts; the accounts that already use it keep working.",
-    ));
+    content.append(&ui::wrapped_label(&t!(GtkSignInAppsIntro)));
     content.append(&row);
     content.append(&note);
     let view = adw::ToolbarView::new();
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));
     let dialog = adw::Dialog::builder()
-        .title("Sign-in Apps")
+        .title(t!(UiSignInApps))
         .content_width(680)
         .child(&view)
         .build();
@@ -568,13 +571,13 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
             }
             "remove" => {
                 let Some((id, _, name)) = added else { continue };
-                let question = format!("Remove the sign-in app {name} and its saved client secret?");
-                if !ui::confirm(&host, "Remove Sign-in App", &question, true).await {
+                let question = t!(GtkRemoveAppAsk, app = &*name);
+                if !ui::confirm(&host, &t!(UiRemoveSignInApp), &question, true).await {
                     continue;
                 }
                 if let Err(reason) = shell().core.remove_sign_in_app(id) {
-                    let text = format!("The sign-in app was not removed: {reason}");
-                    ui::alert(&host, "Remove Sign-in App", &text).await;
+                    let text = t!(UiSignInAppNotRemoved, reason = &reason.to_string());
+                    ui::alert(&host, &t!(UiRemoveSignInApp), &text).await;
                     continue;
                 }
                 window.fill(index);

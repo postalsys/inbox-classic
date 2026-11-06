@@ -201,41 +201,50 @@ fn rule_part<'a>(rule: &'a str, name: &str) -> Option<&'a str> {
 }
 
 fn repeats(rule: &str) -> String {
+    use pe_i18n::{Text, tr, tr_args};
     let part = |name: &str| rule_part(rule, name).map(str::to_ascii_uppercase);
     let interval: u32 = part("INTERVAL").and_then(|i| i.parse().ok()).unwrap_or(1);
     let unit = match part("FREQ").as_deref() {
-        Some("DAILY") => ("day", "days"),
-        Some("WEEKLY") => ("week", "weeks"),
-        Some("MONTHLY") => ("month", "months"),
-        Some("YEARLY") => ("year", "years"),
-        _ => return "Repeats".to_string(),
+        Some("DAILY") => "day",
+        Some("WEEKLY") => "week",
+        Some("MONTHLY") => "month",
+        Some("YEARLY") => "year",
+        _ => return tr(Text::Repeats),
     };
-    let mut words = if interval == 1 {
-        format!("Every {}", unit.0)
-    } else {
-        format!("Every {interval} {}", unit.1)
-    };
-    if let Some(days) = part("BYDAY").filter(|_| unit.0 == "week") {
-        let names: Vec<&str> = days
+    let mut words = tr_args(
+        Text::RepeatsEvery,
+        &[("unit", unit.into()), ("interval", interval.into())],
+    );
+    if let Some(days) = part("BYDAY").filter(|_| unit == "week") {
+        let names: Vec<String> = days
             .split(',')
             .filter_map(|d| match d.trim() {
-                "MO" => Some("Monday"),
-                "TU" => Some("Tuesday"),
-                "WE" => Some("Wednesday"),
-                "TH" => Some("Thursday"),
-                "FR" => Some("Friday"),
-                "SA" => Some("Saturday"),
-                "SU" => Some("Sunday"),
+                "MO" => Some(Text::DayMonday),
+                "TU" => Some(Text::DayTuesday),
+                "WE" => Some(Text::DayWednesday),
+                "TH" => Some(Text::DayThursday),
+                "FR" => Some(Text::DayFriday),
+                "SA" => Some(Text::DaySaturday),
+                "SU" => Some(Text::DaySunday),
                 _ => None,
             })
+            .map(tr)
             .collect();
         if !names.is_empty() {
-            words.push_str(" on ");
-            words.push_str(&names.join(", "));
+            let days = names.join(", ");
+            words = tr_args(
+                Text::RepeatsOn,
+                &[("repeats", (&words).into()), ("days", (&days).into())],
+            );
         }
     }
     if let Some(count) = part("COUNT") {
-        words.push_str(&format!(", {count} times"));
+        // a number, so the language can choose "1 time" or "3 times"; as written when it is not one
+        let count = match count.parse::<u64>() {
+            Ok(n) => pe_i18n::Arg::from(n),
+            Err(_) => (&count).into(),
+        };
+        words = tr_args(Text::RepeatsTimes, &[("repeats", (&words).into()), ("count", count)]);
     }
     words
 }

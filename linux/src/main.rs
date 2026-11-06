@@ -3,6 +3,10 @@
 //! crate; the windows show what it decoded and sanitized, and the web views show its documents as they are.
 #![forbid(unsafe_code)]
 
+// first, so `t!` is known in every module after it
+#[macro_use]
+mod words;
+
 mod accounts;
 mod agents;
 mod app;
@@ -19,6 +23,7 @@ mod messages;
 mod move_dialog;
 mod notify;
 mod outbox;
+mod preferences;
 mod reader;
 mod settings;
 mod sign_in_apps;
@@ -58,6 +63,8 @@ pub struct Arguments {
     pub mcp: bool,
     /// --background: started for an agent (by --mcp), without its window
     pub background: bool,
+    /// --language <code>: the windows in this language for this run, whatever Preferences says (tests: de, qps)
+    pub language: Option<String>,
 }
 
 impl Arguments {
@@ -77,6 +84,7 @@ impl Arguments {
                 "--pin-certificate" => parsed.certificate = rest.next().map(PathBuf::from),
                 "--sign-in-page-file" => parsed.sign_in_page_file = rest.next().map(PathBuf::from),
                 "--e2e" => parsed.e2e = rest.next().map(PathBuf::from),
+                "--language" => parsed.language = rest.next().map(str::to_string),
                 "--memory-passwords" => parsed.memory_passwords = true,
                 "--version" => parsed.version = true,
                 "--mcp" => parsed.mcp = true,
@@ -164,6 +172,9 @@ fn relay(arguments: &Arguments) -> glib::ExitCode {
 
 /// Runs the app: the first start for a store opens it, another one hands its command line to that one and ends
 pub fn run(arguments: Arguments, argv: Vec<String>) -> glib::ExitCode {
+    // the words of every window from here on: --language, else the one chosen in Preferences, else the system's
+    let chosen = settings::Settings::load().text(settings::LANGUAGE);
+    words::choose(arguments.language.as_deref().or(chosen.as_deref()));
     let application = adw::Application::builder()
         .application_id(application_id(arguments.store.as_ref()))
         .flags(gio::ApplicationFlags::HANDLES_COMMAND_LINE)
@@ -194,7 +205,29 @@ pub fn run(arguments: Arguments, argv: Vec<String>) -> glib::ExitCode {
         }
         glib::ExitCode::SUCCESS
     });
-    application.run_with_args(&argv)
+    let code = application.run_with_args(&argv);
+    if app::restarting() {
+        start_again(&argv);
+    }
+    code
+}
+
+/// Starts the app again in this process (Preferences, a new language), with the command line it had but a
+/// --language, which would keep the old one
+fn start_again(argv: &[String]) {
+    use std::os::unix::process::CommandExt;
+    let Ok(exe) = std::env::current_exe() else { return };
+    let mut args = Vec::new();
+    let mut rest = argv.iter().skip(1);
+    while let Some(arg) = rest.next() {
+        if arg == "--language" {
+            rest.next();
+        } else {
+            args.push(arg.clone());
+        }
+    }
+    // only returns when it failed
+    let _ = std::process::Command::new(exe).args(args).exec();
 }
 
 #[cfg(test)]

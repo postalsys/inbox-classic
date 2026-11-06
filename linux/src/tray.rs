@@ -58,7 +58,7 @@ impl ksni::Tray for Icon {
         };
         vec![
             item(Command::Open.label(), Command::Open),
-            item("Check for New Mail", Command::Sync),
+            item(&crate::words::plain(crate::words::Text::TrayCheck), Command::Sync),
             CheckmarkItem {
                 label: Command::Notify.label().into(),
                 checked: self.notify,
@@ -67,7 +67,7 @@ impl ksni::Tray for Icon {
             }
             .into(),
             ksni::MenuItem::Separator,
-            item("Quit", Command::Exit),
+            item(&t!(GtkQuit), Command::Exit),
         ]
     }
 }

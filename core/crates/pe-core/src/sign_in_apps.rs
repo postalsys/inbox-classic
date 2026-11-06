@@ -59,15 +59,11 @@ pub fn builtin_name(kind: ProviderKind) -> &'static str {
     }
 }
 
-/// Why a built-in client may be turned off, and what to do instead
-pub fn builtin_off_reason(kind: ProviderKind) -> &'static str {
+/// Why a built-in client may be turned off, and what to do instead, in the language in use
+pub fn builtin_off_text(kind: ProviderKind) -> String {
     match kind {
-        ProviderKind::Google => {
-            "Google has not verified Inbox Classic yet, so it lets only test users sign in with it. Use your own \
-             Google sign-in app or an app password, or turn it on in Sign-in Apps (File > Accounts) if you are a \
-             test user."
-        }
-        _ => "It was turned off in Sign-in Apps (File > Accounts), where it can be turned on again.",
+        ProviderKind::Google => pe_i18n::tr(pe_i18n::Text::SignInOffGoogle),
+        _ => pe_i18n::tr(pe_i18n::Text::SignInOffOther),
     }
 }
 
@@ -178,31 +174,34 @@ fn valid_host(host: &str) -> bool {
 
 /// The form, checked, as the app to save: its endpoints from the discovery `found`
 fn checked_app(form: &SignInAppForm, found: Discovered, has_secret: bool, enabled: bool) -> Result<SignInApp> {
-    let invalid = |reason: &str| Err(Error::Invalid(reason.to_string()));
+    use pe_i18n::{Text, tr, tr_args};
+    let invalid = |text: Text| Err(Error::Invalid(tr(text)));
     let text = |value: &str| value.trim().to_string();
     if form.name.trim().is_empty() {
-        return invalid("the sign-in app needs a name");
+        return invalid(Text::SignInAppNoName);
     }
     if form.client_id.trim().is_empty() || form.client_id.chars().any(char::is_control) {
-        return invalid("the client ID is missing");
+        return invalid(Text::SignInAppNoClient);
     }
     let scopes = form.scopes.split_whitespace().collect::<Vec<_>>().join(" ");
     if scopes.is_empty() {
-        return invalid("the sign-in app needs the scopes that give mail access");
+        return invalid(Text::SignInAppNoScopes);
     }
     for (what, host, port, security) in [
         ("IMAP", &form.imap_host, form.imap_port, form.imap_security),
         ("SMTP", &form.smtp_host, form.smtp_port, form.smtp_security),
     ] {
         if !valid_host(host.trim()) || port == 0 {
-            return Err(Error::Invalid(format!(
-                "the {what} server is missing or not a host name"
+            return Err(Error::Invalid(tr_args(
+                Text::SignInAppBadHost,
+                &[("server", what.into())],
             )));
         }
         // the access token goes to these servers: never without encryption
         if security == Security::Plain {
-            return Err(Error::Invalid(format!(
-                "the {what} server has to use SSL/TLS or STARTTLS"
+            return Err(Error::Invalid(tr_args(
+                Text::SignInAppPlain,
+                &[("server", what.into())],
             )));
         }
     }
@@ -322,7 +321,7 @@ impl Core {
         let found = self
             .discoveries
             .get(&issuer)
-            .ok_or_else(|| Error::Invalid("the issuer has not been checked yet".into()))?;
+            .ok_or_else(|| Error::Invalid(pe_i18n::tr(pe_i18n::Text::SignInAppNotChecked)))?;
         let before = id.map(|id| self.store().sign_in_app(id)).transpose()?.map(|s| s.app);
         let has_secret = match secret {
             SecretChange::Set(value) => !value.is_empty(),
@@ -335,9 +334,7 @@ impl Core {
                 .as_ref()
                 .is_some_and(|app| app.has_secret && app.issuer != issuer)
         {
-            return Err(Error::Invalid(
-                "the issuer changed: type the client secret again, or remove it".into(),
-            ));
+            return Err(Error::Invalid(pe_i18n::tr(pe_i18n::Text::SignInAppIssuerChanged)));
         }
         let enabled = before.as_ref().is_none_or(|app| app.enabled);
         let app = checked_app(form, found, has_secret, enabled)?;

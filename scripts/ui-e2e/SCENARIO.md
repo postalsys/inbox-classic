@@ -534,19 +534,30 @@ Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not ye
 - a sign-in app turned off is left out of More sign-in options
 - a Gmail address is offered Sign in with Google
 
-## 46. About
+## 46. Options and the language
+
+Screenshots: `options-1-language`, `lang-1-german`, `lang-2-pseudo-main`, `lang-3-pseudo-form`
+
+- Tools > Options (Settings on the Mac, Preferences on Linux) has Language and Notify of New Mail
+- Language lists System default, with the language it is now, and English, Deutsch, Eesti, Español and Français by their own names
+- a language chosen says the app starts again to change it, with Restart Now and Later
+- started in German, the menus, the toolbar and the status bar are in German
+- started in the pseudo-language, nothing in the main window, the compose window and the account form is left in English
+- and nothing is cut off
+
+## 47. About
 
 Screenshots: `help-1-about`
 
 - About shows the version
 
-## 47. Help
+## 48. Help
 
 Screenshots: `help-2-contents`
 
 - F1 opens the help
 
-## 48. Printing
+## 49. Printing
 
 Screenshots: `files-3-print-missing`, `files-3-print`
 
@@ -554,7 +565,7 @@ Screenshots: `files-3-print-missing`, `files-3-print`
 - as wide as the app
 - and closing it prints nothing
 
-## 49. The tray
+## 50. The tray
 
 Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not yet on Linux)
 
@@ -564,7 +575,7 @@ Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not ye
 - a click on the icon shows the window again
 - with the new message in the list, which came without a sync
 
-## 50. Closing
+## 51. Closing
 
 Screenshots: `write-12-close-app`
 

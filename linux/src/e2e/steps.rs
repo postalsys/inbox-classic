@@ -1796,3 +1796,222 @@ pub async fn between_accounts(d: &Driver) {
         "a message dragged onto a folder of the second account is moved there",
     );
 }
+
+// ---- 46. Options and the language ----
+
+/// The words a window shows: its labels (buttons' included) and the message list's column titles, but not the mail's
+/// own (the rows of the list and the tree, and the reading pane's header, which hold names and subjects)
+fn shown_words(root: &gtk::Widget) -> Vec<(String, bool)> {
+    let data: Vec<gtk::Widget> = [
+        "folder-tree",
+        "message-list",
+        "reader-subject",
+        "reader-from",
+        "reader-to",
+        "reader-date",
+        "reader-attachments",
+        "reader-invitation",
+    ]
+    .iter()
+    .filter_map(|name| named_in(root, name))
+    .collect();
+    let titles: Vec<String> = named_in(root, "message-list")
+        .and_downcast::<gtk::ColumnView>()
+        .map(|view| {
+            let columns = view.columns();
+            (0..columns.n_items())
+                .filter_map(|i| columns.item(i).and_downcast::<gtk::ColumnViewColumn>())
+                .filter(|c| c.is_visible())
+                .filter_map(|c| c.title().map(|t| t.to_string()))
+                .filter(|t| !t.is_empty())
+                .collect()
+        })
+        .unwrap_or_default();
+    descendants::<gtk::Label>(root)
+        .into_iter()
+        .filter(|label| label.is_mapped() && label.text().chars().any(char::is_alphabetic))
+        .filter(|label| {
+            let in_data = data.iter().any(|d| label == d || label.is_ancestor(d));
+            !in_data || titles.iter().any(|t| *t == label.text())
+        })
+        // the outgoing part of the status bar names a message's subject, which may be cut off as long as it is
+        .map(|label| {
+            let cut = label.layout().is_ellipsized() && label.widget_name() != "outgoing";
+            (label.text().to_string(), cut)
+        })
+        // the toolbar's buttons are icons that say what they do in their tooltips
+        .chain(
+            descendants::<gtk::Widget>(root)
+                .into_iter()
+                .filter(|w| w.is_mapped() && !data.iter().any(|d| w.is_ancestor(d)))
+                .filter_map(|w| w.tooltip_text())
+                .map(|tip| (tip.to_string(), false)),
+        )
+        .collect()
+}
+
+/// The words in English left in a window in the pseudo-language (any that does not start with its bracket), and
+/// those cut off
+fn not_pseudo(root: &gtk::Widget, data: &[&str]) -> (Vec<String>, Vec<String>) {
+    let words = shown_words(root);
+    let english = words
+        .iter()
+        .filter(|(text, _)| !text.starts_with('[') && !data.iter().any(|d| text.contains(d)))
+        .map(|(text, _)| text.clone())
+        .collect();
+    let cut = words
+        .iter()
+        .filter(|(_, cut)| *cut)
+        .map(|(text, _)| text.clone())
+        .collect();
+    (english, cut)
+}
+
+/// The main window again, in `language`, with the Inbox and its first message shown
+async fn in_language(language: &str) {
+    pe_core::i18n::set_language(language);
+    shell().remake_main();
+    pause(1000).await;
+    select_folder(&pe_core::i18n::tr(pe_core::i18n::Text::FolderInbox));
+    wait_until(10, || rows() >= 1).await;
+    select_row(0).await;
+}
+
+pub async fn languages(d: &Driver) {
+    d.step("Preferences and the language");
+    command(Command::Options);
+    let Some(dialog) = wait_dialog(10, "preferences-dialog").await else {
+        d.check(false, "the main menu's Preferences opens");
+        return;
+    };
+    let root = dialog.clone().upcast::<gtk::Widget>();
+    let row = named_in(&root, "preferences-language").and_downcast::<adw::ComboRow>();
+    let names: Vec<String> = row
+        .as_ref()
+        .and_then(|r| r.model())
+        .and_downcast::<gtk::StringList>()
+        .map(|list| {
+            (0..list.n_items())
+                .filter_map(|i| list.string(i))
+                .map(|s| s.to_string())
+                .collect()
+        })
+        .unwrap_or_default();
+    d.check(
+        names.first().is_some_and(|n| n == "System default (English)")
+            && names[1..] == ["English", "Deutsch", "Eesti", "Español", "Français"],
+        &format!(
+            "Language lists System default, with the language it is now, and the five by their own names ({names:?})"
+        ),
+    );
+    d.check(
+        named_in(&root, "preferences-notify").is_some(),
+        "Preferences has Notify of New Mail",
+    );
+    let Some(row) = row else { return };
+    // the list open for the picture
+    adw::prelude::ActionRowExt::activate(&row);
+    pause(500).await;
+    d.shot(&dialog, "options-1-language").await;
+    for popover in descendants::<gtk::Popover>(&root) {
+        popover.popdown();
+    }
+    row.set_selected(2);
+    match wait_alert(5).await {
+        Some(alert) => {
+            let text = alert_text(&alert);
+            d.check(
+                text.contains("restarts to change the language"),
+                &format!("a language chosen says the app starts again to change it ({text})"),
+            );
+            let buttons: Vec<String> = descendants::<gtk::Button>(alert.upcast_ref())
+                .iter()
+                .filter_map(|b| {
+                    b.child()
+                        .and_downcast::<gtk::Label>()
+                        .map(|l| l.text().to_string())
+                        .or(b.label().map(|l| l.to_string()))
+                })
+                .collect();
+            d.check(
+                buttons.iter().any(|b| b == "Restart Now") && buttons.iter().any(|b| b == "Later"),
+                &format!("with Restart Now and Later ({buttons:?})"),
+            );
+            answer(&alert, "Later");
+        }
+        None => d.check(false, "a language chosen says the app starts again to change it"),
+    }
+    d.check(
+        shell().settings.text(crate::settings::LANGUAGE).as_deref() == Some("de"),
+        "the language chosen is kept for the next start",
+    );
+    // back to the system's, which takes the setting out
+    row.set_selected(0);
+    pause(300).await;
+    d.check(
+        shell().settings.text(crate::settings::LANGUAGE).is_none() && alert().is_none(),
+        "System default, the language in use already, asks nothing",
+    );
+    dialog.close();
+    wait_gone(10, "preferences-dialog").await;
+
+    d.step("in German");
+    in_language("de").await;
+    let main = main_window();
+    let words: Vec<String> = shown_words(&main).into_iter().map(|(w, _)| w).collect();
+    let german = ["Antworten", "Weiterleiten", "Von", "Betreff"];
+    d.check(
+        german.iter().all(|w| words.iter().any(|shown| shown == w)),
+        &format!("started in German, the toolbar and the columns are in German ({words:?})"),
+    );
+    let menu = named_in(&main, "primary-menu").and_downcast::<gtk::MenuButton>();
+    if let Some(menu) = &menu {
+        menu.popup();
+        pause(500).await;
+        let labels = menu_labels(menu.popover().and_downcast::<gtk::PopoverMenu>().as_ref());
+        d.check(
+            labels.iter().any(|l| l == "Datei") && labels.iter().any(|l| l == "Einstellungen"),
+            &format!("the main menu is in German ({labels:?})"),
+        );
+    }
+    d.shot(&main, "lang-1-german").await;
+    if let Some(menu) = &menu {
+        menu.popdown();
+    }
+
+    d.step("in the pseudo-language");
+    in_language("qps").await;
+    let main = main_window();
+    // what the mail says, and the account's name and address
+    let data = ["Alex Morgan", "testuser", "@", "Inbox Classic"];
+    let (english, cut) = not_pseudo(&main, &data);
+    d.check(
+        english.is_empty(),
+        &format!("nothing in the main window is left in English ({english:?})"),
+    );
+    d.check(
+        cut.is_empty(),
+        &format!("nothing in the main window is cut off ({cut:?})"),
+    );
+    d.shot(&main, "lang-2-pseudo-main").await;
+    command(Command::NewAccount);
+    match wait_dialog(10, "account-start").await {
+        Some(form) => {
+            let root = form.clone().upcast::<gtk::Widget>();
+            let (english, cut) = not_pseudo(&root, &data);
+            d.check(
+                english.is_empty(),
+                &format!("nothing in the account form is left in English ({english:?})"),
+            );
+            d.check(
+                cut.is_empty(),
+                &format!("nothing in the account form is cut off ({cut:?})"),
+            );
+            d.shot(&form, "lang-3-pseudo-form").await;
+            form.close();
+            wait_gone(10, "account-start").await;
+        }
+        None => d.check(false, "File > New Account opens in the pseudo-language"),
+    }
+    in_language("en").await;
+}

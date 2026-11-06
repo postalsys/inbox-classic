@@ -6,7 +6,11 @@
 #include <string>
 #include <string_view>
 
+#include <initializer_list>
+#include <utility>
+
 #include "inbox_classic.h"
+#include "texts.h"
 
 namespace core {
 
@@ -46,5 +50,16 @@ std::wstring Widen(std::string_view utf8);
 std::string Narrow(std::wstring_view utf16);
 
 std::wstring Version();
+
+// a word of the catalogs (core/locales) in the language in use, `&` marking a menu letter as the catalog has it
+// Sets the language of the words (once, at start), and forgets the words looked up before
+void SetLanguage(const std::wstring& code);
+std::wstring T(PeText text);
+// the same without the menu letter marks
+std::wstring Plain(PeText text);
+// a command as the title of the window it opens: without its menu letter and the "..." that says a window follows
+std::wstring Title(PeText text);
+// a word with its placeables filled: T(PE_TEXT_X, {{"count", L"3"}, {"folder", name}})
+std::wstring T(PeText text, std::initializer_list<std::pair<const char*, std::wstring>> args);
 
 }  // namespace core

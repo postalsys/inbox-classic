@@ -55,12 +55,16 @@ mod native {
     }
 
     /// What the store is called in messages to the user
-    #[cfg(windows)]
-    const NAME: &str = "the Credential Manager";
-    #[cfg(target_os = "macos")]
-    const NAME: &str = "the keychain";
-    #[cfg(target_os = "linux")]
-    const NAME: &str = "the system keyring (Secret Service)";
+    fn name() -> String {
+        use pe_i18n::{Text, tr};
+        if cfg!(windows) {
+            tr(Text::SecretsWindows)
+        } else if cfg!(target_os = "macos") {
+            tr(Text::SecretsMac)
+        } else {
+            tr(Text::SecretsLinux)
+        }
+    }
 
     #[cfg(windows)]
     fn open() -> keyring_core::Result<Arc<dyn CredentialStoreApi + Send + Sync>> {
@@ -79,7 +83,12 @@ mod native {
 
     impl NativeStore {
         pub(super) fn new(profile: String) -> Result<NativeStore, String> {
-            let store = open().map_err(|e| format!("{NAME} is not available: {e}"))?;
+            let store = open().map_err(|e| {
+                pe_i18n::tr_args(
+                    pe_i18n::Text::SecretsUnavailableWhy,
+                    &[("store", (&name()).into()), ("error", (&e.to_string()).into())],
+                )
+            })?;
             Ok(NativeStore { store, profile })
         }
 
@@ -98,7 +107,9 @@ mod native {
         }
 
         fn save(&self, key: Key, password: &str) -> Result<(), String> {
-            let entry = self.entry(key).ok_or_else(|| format!("{NAME} is not available"))?;
+            let entry = self
+                .entry(key)
+                .ok_or_else(|| pe_i18n::tr_args(pe_i18n::Text::SecretsUnavailable, &[("store", (&name()).into())]))?;
             entry.set_password(password).map_err(|e| e.to_string())
         }
 

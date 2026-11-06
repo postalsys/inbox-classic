@@ -8,6 +8,7 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+pe-i18n.workspace = true
 pe-core = { path = "../pe-core" }
 pe-mime.workspace = true
 pe-store = { path = "../pe-store" }

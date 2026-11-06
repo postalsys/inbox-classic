@@ -44,6 +44,14 @@ if [ -n "${TEST:-}" ]; then
 fi
 sed "s/VERSION/${VERSION}/g" mac/Resources/Info.plist > "$APP/Contents/Info.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
+# the languages there are catalogs of (core/locales), so the system offers them for the app (System Settings >
+# General > Language & Region > Applications) and AppKit's own words (Services, Enter Full Screen) follow the app's
+/usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations array" "$APP/Contents/Info.plist"
+for dir in core/locales/*/; do
+    code=$(basename "$dir")
+    /usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations: string $code" "$APP/Contents/Info.plist"
+    mkdir -p "$APP/Contents/Resources/$code.lproj"
+done
 
 # the icons, as PDFs drawn as template images (Icons.swift), in the color the system gives them
 for svg in app/res/icons/*.svg; do

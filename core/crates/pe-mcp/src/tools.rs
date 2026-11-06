@@ -2,6 +2,7 @@
 //! user let the program do at the time of the call, so a change in the AI Agents window counts at once. Everything
 //! goes through the engine's own methods, so the windows show every change as it happens.
 
+use pe_i18n::{Text, tr_args};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -718,10 +719,10 @@ fn set_flag(call: &Call, args: &Args, flag: &'static str, on: bool) -> Outcome {
         .collect::<Result<_, String>>()?;
     call.core.set_flag_many(folder.id, &uids, flag, on).map_err(engine)?;
     let done = match (flag, on) {
-        ("\\Seen", true) => "Marked read",
-        ("\\Seen", false) => "Marked unread",
-        (_, true) => "Flagged",
-        (_, false) => "Took the flag off",
+        ("\\Seen", true) => Text::AgentLogRead,
+        ("\\Seen", false) => Text::AgentLogUnread,
+        (_, true) => Text::AgentLogFlagged,
+        (_, false) => Text::AgentLogUnflagged,
     };
     let entries: Vec<NewLogEntry> = before
         .iter()
@@ -733,7 +734,7 @@ fn set_flag(call: &Call, args: &Args, flag: &'static str, on: bool) -> Outcome {
                 flag: flag.into(),
                 was: !on,
             };
-            let summary = format!("{done} \"{}\"", subject(&message.info));
+            let summary = tr_args(done, &[("subject", subject(&message.info).into())]);
             call.message_entry(&folder, message.info.uid, summary, Some(undo))
         })
         .collect();
@@ -774,10 +775,14 @@ fn move_messages(call: &Call, args: &Args, trash: bool) -> Outcome {
     let entries: Vec<NewLogEntry> = messages
         .iter()
         .map(|message| {
+            let named = subject(&message.info);
             let summary = if trash {
-                format!("Deleted \"{}\"", subject(&message.info))
+                tr_args(Text::AgentLogDeleted, &[("subject", named.into())])
             } else {
-                format!("Moved \"{}\" to {target}", subject(&message.info))
+                tr_args(
+                    Text::AgentLogMoved,
+                    &[("subject", named.into()), ("folder", (&target).into())],
+                )
             };
             let undo = message.info.message_id.clone().map(|message_id| Undo::Move {
                 from: folder.id,
@@ -813,11 +818,12 @@ fn mark_junk(call: &Call, args: &Args) -> Outcome {
     let entries: Vec<NewLogEntry> = messages
         .iter()
         .map(|message| {
-            let summary = format!(
-                "Marked \"{}\" as {}",
-                subject(&message.info),
-                if junk { "junk" } else { "not junk" }
-            );
+            let text = if junk {
+                Text::AgentLogJunk
+            } else {
+                Text::AgentLogNotJunk
+            };
+            let summary = tr_args(text, &[("subject", subject(&message.info).into())]);
             call.message_entry(&folder, message.info.uid, summary, None)
         })
         .collect();
@@ -834,7 +840,7 @@ fn create_folder(call: &Call, args: &Args) -> Outcome {
     };
     let name = args.string("name");
     call.core.create_folder(account, parent, &name).map_err(engine)?;
-    call.log(&[call.entry(account, format!("Made the folder \"{name}\""))])?;
+    call.log(&[call.entry(account, tr_args(Text::AgentLogFolder, &[("name", (&name).into())]))])?;
     Ok(json!({ "done": true, "note": "the folder shows in list_folders once the server made it" }))
 }
 
@@ -848,7 +854,10 @@ fn unsubscribe(call: &Call, args: &Args) -> Outcome {
         }
         other => engine(other),
     })?;
-    let summary = format!("Unsubscribed from the list of \"{}\"", subject(&message.info));
+    let summary = tr_args(
+        Text::AgentLogUnsubscribed,
+        &[("subject", subject(&message.info).into())],
+    );
     call.log(&[call.message_entry(&folder, uid, summary, None)])?;
     Ok(json!({ "done": true, "note": "the list was asked to take the address off" }))
 }

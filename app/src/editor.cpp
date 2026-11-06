@@ -3,6 +3,7 @@
 // keys that could reload the page and lose what was written.
 #include "editor.h"
 
+#include "core.h"
 #include "webview.h"
 
 using Microsoft::WRL::Callback;
@@ -70,7 +71,7 @@ HWND Editor::Create(HWND parent, int id, const std::wstring& document, Handlers 
             controller_->get_CoreWebView2(&view_);
             Configure();
         },
-        [this](const std::wstring& error) { handlers_.error(error + L" Messages can not be written."); });
+        [this](const std::wstring& error) { handlers_.error(error + L" " + core::T(PE_TEXT_WIN_EDITOR_FAILED)); });
     return host_;
 }
 
@@ -196,18 +197,18 @@ void Editor::LinkMenu() {
             std::wstring link = uri ? uri : L"";
             CoTaskMemFree(uri);
             struct Command {
-                const wchar_t* label;
+                std::wstring label;
                 std::function<void()> run;
             };
             Command commands[] = {
-                {L"Open Link", [link] { webview::OpenExternally(link.c_str()); }},
-                {L"Edit Link...", [this] { handlers_.editLink(); }},
-                {L"Remove Link", [this] { Link(L""); }},
+                {core::Plain(PE_TEXT_UI_OPEN_LINK), [link] { webview::OpenExternally(link.c_str()); }},
+                {core::Plain(PE_TEXT_UI_EDIT_LINK), [this] { handlers_.editLink(); }},
+                {core::Plain(PE_TEXT_UI_REMOVE_LINK), [this] { Link(L""); }},
             };
             UINT32 at = 0;
             for (const Command& command : commands) {
                 Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItem> item;
-                if (FAILED(environment->CreateContextMenuItem(command.label, nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_COMMAND, &item))) {
+                if (FAILED(environment->CreateContextMenuItem(command.label.c_str(), nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_COMMAND, &item))) {
                     continue;
                 }
                 item->add_CustomItemSelected(Callback<ICoreWebView2CustomItemSelectedEventHandler>([run = command.run](ICoreWebView2ContextMenuItem*, IUnknown*) {

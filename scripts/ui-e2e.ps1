@@ -193,6 +193,51 @@ public static string RemoteListText(IntPtr list, int row, int column) {
     CloseHandle(process);
     return text;
 }
+// a text a window of another process writes into memory it is given with a message Windows does not copy between
+// processes (TB_GETBUTTONTEXTW), its length the result of `message`
+public static string RemoteText(IntPtr window, uint message, IntPtr wParam) {
+    uint pid;
+    GetWindowThreadProcessId(window, out pid);
+    string text = "";
+    IntPtr process = OpenProcess(0x0038, false, pid);
+    if (process == IntPtr.Zero) { return text; }
+    IntPtr remote = VirtualAllocEx(process, IntPtr.Zero, (IntPtr)4096, 0x3000, 0x04);
+    if (remote != IntPtr.Zero) {
+        int length = (int)SendMessage(window, message, wParam, remote);
+        if (length > 0 && length < 2048) {
+            IntPtr done;
+            byte[] bytes = new byte[length * 2];
+            ReadProcessMemory(process, remote, bytes, (IntPtr)bytes.Length, out done);
+            text = System.Text.Encoding.Unicode.GetString(bytes);
+        }
+        VirtualFreeEx(process, remote, IntPtr.Zero, 0x8000);
+    }
+    CloseHandle(process);
+    return text;
+}
+[DllImport("user32.dll")] public static extern IntPtr GetMenu(IntPtr hwnd);
+[DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr hwnd, int index);
+[DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr hwnd, out RECT rect);
+[DllImport("user32.dll")] static extern IntPtr GetDC(IntPtr hwnd);
+[DllImport("user32.dll")] static extern int ReleaseDC(IntPtr hwnd, IntPtr dc);
+[DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr dc, IntPtr obj);
+[DllImport("gdi32.dll")] static extern IntPtr GetStockObject(int index);
+[DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int DrawText(IntPtr dc, string text, int count, ref RECT rect, uint format);
+// whether the words of a control fit it in the dialog font the app gives its controls (DEFAULT_GUI_FONT): a static's
+// wrapped to its width within its height, a button's on one line with room for its frame, and for its box when `box`
+public static bool Fits(IntPtr hwnd, string text, bool button, bool box) {
+    RECT client;
+    GetClientRect(hwnd, out client);
+    IntPtr dc = GetDC(hwnd);
+    IntPtr old = SelectObject(dc, GetStockObject(17));
+    int width = client.Right - client.Left - (button ? (box ? 18 : 8) : 0);
+    RECT need = new RECT { Left = 0, Top = 0, Right = width, Bottom = 0 };
+    // DT_CALCRECT, and DT_SINGLELINE or DT_WORDBREAK
+    DrawText(dc, text, -1, ref need, 0x400u | (button ? 0x20u : 0x10u));
+    SelectObject(dc, old);
+    ReleaseDC(hwnd, dc);
+    return need.Right <= width && (button || need.Bottom <= client.Bottom - client.Top);
+}
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
     var found = new System.Collections.Generic.List<IntPtr>();
@@ -208,7 +253,7 @@ public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr par
 [void][Native.Win]::SetProcessDPIAware()
 
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
-$WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
+$WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $CB_GETCOUNT = 0x0146; $CB_GETLBTEXT = 0x0148; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
 $VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
@@ -221,10 +266,15 @@ $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
 $IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_SHOW_CC = 311; $IDC_SHOW_BCC = 312; $IDC_BCC = 304; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330; $IDF_LINK = 341
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
+# the app's preferences, where Options keeps the language: the one of whoever runs the test is put back at the end
+$preferencesKey = 'HKCU:\Software\Postal Systems\InboxClassic'
+$savedLanguage = (Get-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue).Language
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
 Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Out 'result.txt')
 Start-Transcript -Path (Join-Path $Out 'log.txt') -Force | Out-Null
 $failures = @()
+# the apps started again (StartAgain), ended at the end should one hang
+$started = @()
 function Step([string]$text) { Write-Host "== $text" }
 function Check([bool]$ok, [string]$what) {
     if ($ok) { Write-Host "   ok: $what" } else { Write-Host "   FAILED: $what"; $script:failures += $what }
@@ -2181,7 +2231,7 @@ public static class Dragger {
         $signature = WaitWindow 'InboxClassicSignature' $null 20
         Check ($null -ne $signature) 'Signature opens the signature editor of the account'
         if ($signature) {
-            Check ((WindowText $signature) -match '^Signature - ') "titled with the account ($(WindowText $signature))"
+            Check ((WindowText $signature) -match '^Signature: ') "titled with the account ($(WindowText $signature))"
             Check (TypeInEditor $signature 'Ann, signed by the UI test') 'the signature editor takes typing'
             Shot $signature 'signature-1-editor'
             Click $signature 1
@@ -2691,6 +2741,42 @@ public static class Dragger {
         }
     }
 
+    # ---- Options and the language ----
+
+    Step 'Options and the language'
+    $IDM_OPTIONS = 137; $IDC_OPTIONS_LANGUAGE = 660; $IDC_OPTIONS_NOTIFY = 661
+    Command $main $IDM_OPTIONS
+    $options = WaitShown 'InboxClassicOptions'
+    Check ($null -ne $options) 'Tools > Options opens'
+    if ($options) {
+        $combo = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_LANGUAGE)
+        $count = [int][Native.Win]::SendMessage($combo, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+        # CB_GETLBTEXT is one of the messages Windows copies between processes: a buffer of this one
+        $items = @(for ($i = 0; $i -lt $count; $i++) {
+            $item = New-Object System.Text.StringBuilder 256
+            [void][Native.Win]::SendMessage($combo, $CB_GETLBTEXT, [IntPtr]$i, $item)
+            $item.ToString()
+        })
+        Check ($items.Count -eq 6 -and $items[0] -like 'System default (*)') "Language starts with System default and the language it is now ($($items[0]))"
+        # the names in themselves; the script stays ASCII for Windows PowerShell, which reads it as ANSI
+        $names = "English,Deutsch,Eesti,Espa$([char]0xF1)ol,Fran$([char]0xE7)ais"
+        Check ((($items | Select-Object -Skip 1) -join ',') -eq $names) "and lists the five languages by their own names ($($items -join ', '))"
+        Check ([Native.Win]::GetDlgItem($options, $IDC_OPTIONS_NOTIFY) -ne [IntPtr]::Zero) 'Notify of New Mail is there too'
+        $deutsch = [array]::IndexOf($items, 'Deutsch')
+        [void][Native.Win]::SendMessage($combo, $CB_SETCURSEL, [IntPtr]$deutsch, [IntPtr]::Zero)
+        Shot $options 'options-1-language'
+        Click $options 1
+        $restart = WaitShown 'InboxClassicRestart' 10
+        Check ($null -ne $restart) 'a language chosen asks to restart'
+        if ($restart) {
+            Check ((GetText $restart 1) -eq '&Restart Now' -and (GetText $restart 2) -eq '&Later') 'with Restart Now and Later'
+            Click $restart 2
+        }
+        Start-Sleep -Milliseconds 500
+        Check ((Get-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue).Language -eq 'de') 'the language is kept for the next start'
+        Check ([Native.Win]::IsWindow($main) -and -not $app.HasExited) 'Later keeps the app running'
+    }
+
     # ---- about and help ----
 
     Step 'about'
@@ -2802,10 +2888,152 @@ public static bool HasIcon(IntPtr window) {
         if ($ask) { Click $ask 7 }
     }
     Check ($app.WaitForExit(15000)) 'No closes the message without saving, and the app'
+
+    # ---- the other languages ----
+
+    # the language of a catalog, as the app shows it: id to words (core/locales/<language>/*.ftl), one line each
+    function Catalog([string]$language) {
+        $words = @{}
+        foreach ($file in Get-ChildItem (Join-Path $PSScriptRoot "..\core\locales\$language") -Filter '*.ftl') {
+            foreach ($line in Get-Content -Encoding UTF8 $file.FullName) {
+                if ($line -match '^([a-z][a-z0-9-]*) = (.+)$') { $words[$Matches[1]] = $Matches[2].Replace('&', '') }
+            }
+        }
+        $words
+    }
+    # the app started again with this store; the main window once it shows its folders
+    function StartAgain([string[]]$more) {
+        # one that did not close (its failure is reported) would take the new start over
+        if (-not $script:app.HasExited) { $script:app.Kill(); [void]$script:app.WaitForExit(5000) }
+        $script:started += $script:app
+        $script:app = Start-Process -FilePath $Exe -ArgumentList ($arguments + $more) -PassThru
+        $window = WaitFor {
+            # the window of the new process, not of one still closing
+            $w = [Native.Win]::FindWindow('InboxClassicMain', [NullString]::Value)
+            $owner = [uint32]0
+            if ($w -ne [IntPtr]::Zero) { [void][Native.Win]::GetWindowThreadProcessId($w, [ref]$owner) }
+            if ($w -ne [IntPtr]::Zero -and $owner -eq $script:app.Id -and [Native.Win]::IsWindowVisible($w)) { $w }
+        } 30
+        if ($window) {
+            $t = [Native.Win]::GetDlgItem($window, $IDC_TREE)
+            [void](WaitFor { if (@(TreeTexts $t).Count -gt 2) { $true } } 30)
+            Start-Sleep -Seconds 2
+        }
+        $window
+    }
+    function Quit([IntPtr]$window, [string]$what) {
+        Command $window $IDM_EXIT
+        Check ($script:app.WaitForExit(15000)) "File > Exit ends the app ($what)"
+    }
+    # the toolbar of the main window and the words of its buttons
+    function ToolbarText([IntPtr]$window, [int]$id) {
+        foreach ($bar in [Native.Win]::FindDescendants($window, 'ToolbarWindow32')) {
+            $text = [Native.Win]::RemoteText($bar, 0x044B, [IntPtr]$id)
+            if ($text) { return $text }
+        }
+        ''
+    }
+    # every static and button of $window: its words not left in English (a word of the pseudo-language starts with
+    # "["), and, unless $wordsOnly, not cut off
+    function CheckPseudo([IntPtr]$window, [string]$what, [bool]$wordsOnly = $false) {
+        $english = @(); $cut = @()
+        foreach ($class in 'Static', 'Button') {
+            foreach ($control in [Native.Win]::FindDescendants($window, $class)) {
+                if (-not [Native.Win]::IsWindowVisible($control)) { continue }
+                $text = WindowText $control
+                if ([string]::IsNullOrWhiteSpace($text)) { continue }
+                if (-not $text.TrimStart().StartsWith('[')) { $english += $text }
+                $style = [Native.Win]::GetWindowLong($control, -16)
+                $kind = $style -band 0x1F
+                # owner drawn (a picture, a link) and group boxes draw their words their own way
+                $drawn = ($class -eq 'Button' -and (($kind -band 0xF) -in @(7, 11))) -or ($class -eq 'Static' -and $kind -eq 13)
+                if ($wordsOnly -or $drawn) { continue }
+                $isButton = $class -eq 'Button'
+                $hasBox = ($kind -band 0xF) -in @(2, 3, 5, 6)
+                if (-not [Native.Win]::Fits($control, $text, $isButton, $hasBox)) { $cut += $text }
+            }
+        }
+        Check ($english.Count -eq 0) "${what}: no word left in English ($($english -join ' | '))"
+        if (-not $wordsOnly) { Check ($cut.Count -eq 0) "${what}: nothing cut off ($($cut -join ' | '))" }
+    }
+
+    Step 'in German'
+    # the language chosen in Options above, read at start
+    $de = Catalog 'de'
+    $main = StartAgain @()
+    Check ($null -ne $main) 'the app starts again in the language chosen'
+    if ($main) {
+        $menus = [Native.Win]::MenuLabels([Native.Win]::GetMenu($main))
+        $wanted = @('menu-file', 'menu-edit', 'menu-view', 'menu-tools', 'menu-message', 'menu-help' | ForEach-Object { $de[$_] })
+        Check (($menus -join ',') -eq ($wanted -join ',')) "the menus are German ($($menus -join ', '))"
+        $tools = [Native.Win]::MenuLabels([Native.Win]::GetSubMenu([Native.Win]::GetMenu($main), 3))
+        Check ($tools[-1] -eq $de['cmd-options']) "Tools ends with $($de['cmd-options'])"
+        Check ((ToolbarText $main $IDM_NEW_MAIL) -eq $de['ui-tb-create-mail']) "the toolbar is German ($(ToolbarText $main $IDM_NEW_MAIL))"
+        $folders = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)))
+        Check (@($folders | Where-Object { $_ -like "$($de['folder-inbox'])*" }).Count -gt 0) "the folders are German ($($folders -join ', '))"
+        $status = [Native.Win]::FindDescendants($main, 'msctls_statusbar32') | Select-Object -First 1
+        Write-Host "   status bar: $(StatusPart $status 0) | $(StatusPart $status 1)"
+        Shot $main 'lang-1-german'
+        Quit $main 'German'
+    }
+    Remove-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue
+
+    Step 'in the pseudo-language'
+    $main = StartAgain @('--language', 'qps')
+    Check ($null -ne $main) 'the app starts in the pseudo-language'
+    if ($main) {
+        $menus = [Native.Win]::MenuLabels([Native.Win]::GetMenu($main))
+        $bar = [Native.Win]::GetMenu($main)
+        $items = @()
+        for ($i = 0; $i -lt $menus.Count; $i++) { $items += [Native.Win]::MenuLabels([Native.Win]::GetSubMenu($bar, $i)) }
+        $english = @(($menus + $items) | Where-Object { $_ -and -not $_.StartsWith('[') })
+        Check ($english.Count -eq 0) "no menu item is left in English ($($english -join ' | '))"
+        $buttons = @($IDM_NEW_MAIL, $IDM_REPLY, $IDM_REPLY_ALL, $IDM_FORWARD, $IDM_PRINT, $IDM_DELETE, $IDM_SYNC | ForEach-Object { ToolbarText $main $_ })
+        Check (@($buttons | Where-Object { -not $_.StartsWith('[') }).Count -eq 0) "no toolbar button is left in English ($($buttons -join ' | '))"
+        $folders = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)))
+        Check (@($folders | Where-Object { $_.StartsWith('[') }).Count -ge 3) "the special folders and All Inboxes are pseudo ($($folders -join ', '))"
+        CheckPseudo $main 'the main window' $true
+        Shot $main 'lang-2-pseudo-main'
+
+        Command $main $IDM_NEW_MAIL
+        $compose = WaitCompose
+        if ($compose) {
+            CheckPseudo $compose 'the compose window'
+            [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+            [void](WaitFor { if (-not [Native.Win]::IsWindow($compose)) { $true } } 10)
+        }
+
+        Command $main $IDM_OPTIONS
+        $options = WaitShown 'InboxClassicOptions'
+        if ($options) {
+            CheckPseudo $options 'Options'
+            Shot $options 'lang-4-pseudo-options'
+            Click $options 2
+        }
+
+        Command $main $IDM_NEW_ACCOUNT
+        $form = WaitShown 'InboxClassicAccountStart' 10
+        Check ($null -ne $form) 'Add Mail Account opens'
+        if ($form) {
+            CheckPseudo $form 'the account form'
+            Shot $form 'lang-3-pseudo-form'
+            Click $form 2
+        }
+        Start-Sleep -Milliseconds 500
+        Quit $main 'pseudo-language'
+    }
 } catch {
     Check $false "unexpected error: $_ at line $($_.InvocationInfo.ScriptLineNumber)"
 } finally {
-    if ($app -and -not $app.HasExited) { $app.Kill() }
+    # this run's app, and any earlier one of it that did not close (a dialog left open by a failed step)
+    foreach ($process in @($app) + $started) {
+        if ($process -and -not $process.HasExited) { $process.Kill() }
+    }
+    if ($null -eq $savedLanguage) {
+        Remove-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue
+    } else {
+        Set-ItemProperty -Path $preferencesKey -Name Language -Value $savedLanguage
+    }
     $harness.StandardInput.Close()
     if (-not $harness.WaitForExit(5000)) { $harness.Kill() }
 }
