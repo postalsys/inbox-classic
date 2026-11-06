@@ -14,8 +14,9 @@ func agentQuestion(core: Core, request: UInt64) {
         guard let connect = pe_agent_connect(info)?.pointee else { return }
         let form = AccessForm(core: core, path: text(connect.path), levels: UInt32(PE_AGENT_DEFAULT)) { _ in true }
         // the safe answer is the default: Return does not let a program in
-        let question = QuestionWindow(title: "AI Agent", heading: text(connect.title), detail: text(connect.detail), id: "agent.connect",
-                                      accessory: form.view, answers: [("Allow", "agent.allow"), ("Don\u{2019}t Allow", "agent.deny")],
+        let question = QuestionWindow(title: Text.macAiAgent.text, heading: text(connect.title), detail: text(connect.detail),
+                                      id: "agent.connect", accessory: form.view,
+                                      answers: [(Text.macAllow.text, "agent.allow"), (Text.macDontAllow.text, "agent.deny")],
                                       safe: 1)
         let answer = question.run()
         let (levels, accounts) = form.chosen
@@ -127,12 +128,12 @@ private final class AccessForm: NSObject {
         stack.spacing = 6
         view = stack
         super.init()
-        let program = note("Program: \(path)")
+        let program = note(Text.macProgramPath.text(["path": path]))
         program.toolTip = path
         program.setAccessibilityIdentifier("agent.path")
         stack.addArrangedSubview(program)
         stack.setCustomSpacing(12, after: program)
-        stack.addArrangedSubview(bold("It may:"))
+        stack.addArrangedSubview(bold(Text.macItMay.text))
         for (index, (bit, label)) in Self.levels.enumerated() {
             let box = NSButton(checkboxWithTitle: label, target: self, action: #selector(levelChanged(_:)))
             box.state = levels & bit != 0 ? .on : .off
@@ -141,7 +142,7 @@ private final class AccessForm: NSObject {
             stack.addArrangedSubview(box)
         }
         stack.setCustomSpacing(12, after: levelBoxes.last!)
-        stack.addArrangedSubview(bold("Accounts it may use:"))
+        stack.addArrangedSubview(bold(Text.macAccountsItMayUse.text))
         for account in core.accounts() {
             let box = NSButton(checkboxWithTitle: account.label, target: nil, action: nil)
             box.state = has(account.id) ? .on : .off
@@ -221,7 +222,7 @@ private func sendQuestion(core: Core, request: UInt64) {
         name.textColor = .secondaryLabelColor
         grid.addRow(with: [name] + cells)
     }
-    row("From:", [NSTextField(labelWithString: text(send.from))])
+    row(Text.macFieldFrom.text, [NSTextField(labelWithString: text(send.from))])
     for index in 0..<pe_agent_send_recipient_count(info) {
         guard let recipient = pe_agent_send_recipient(info, index)?.pointee else { continue }
         let address = NSTextField(labelWithString: text(recipient.address))
@@ -235,13 +236,13 @@ private func sendQuestion(core: Core, request: UInt64) {
             cells.append(named)
         }
         if recipient.new_address {
-            cells.append(badge("New address"))
+            cells.append(badge(Text.macNewAddress.text))
         }
         let line = NSStackView(views: cells)
         line.spacing = 6
         row("\(text(recipient.field)):", [line])
     }
-    row("Subject:", [NSTextField(labelWithString: text(send.subject))])
+    row(Text.macFieldSubject.text, [NSTextField(labelWithString: text(send.subject))])
     let original = text(send.original)
     if !original.isEmpty {
         row("", [note(original)])
@@ -263,9 +264,10 @@ private func sendQuestion(core: Core, request: UInt64) {
     if !files.isEmpty {
         stack.addArrangedSubview(note(files))
     }
-    let question = QuestionWindow(title: "Send Message?", heading: text(send.title), detail: text(send.detail), id: "agent.send",
-                                  accessory: stack,
-                                  answers: [("Edit First", "agent.compose"), ("Don\u{2019}t Send", "agent.dontSend"), ("Send", "agent.sendButton")],
+    let question = QuestionWindow(title: Text.macSendMessageQuestion.text, heading: text(send.title), detail: text(send.detail),
+                                  id: "agent.send", accessory: stack,
+                                  answers: [(Text.macEditFirst.text, "agent.compose"), (Text.macDontSend.text, "agent.dontSend"),
+                                            (Text.macSend.text, "agent.sendButton")],
                                   safe: 1)
     // Send comes on after a moment, so a key pressed for another window does not send
     let sendButton = question.buttons[2]
@@ -314,13 +316,13 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     private static var open: AgentsWindow?
     let window: NSWindow
     private let core: Core
-    private let enabled = NSButton(checkboxWithTitle: "Let AI agents connect to Inbox Classic", target: nil, action: nil)
+    private let enabled = NSButton(checkboxWithTitle: Text.macLetAgentsConnect.text, target: nil, action: nil)
     private let hostTable = NSTableView()
     private let logTable = NSTableView()
-    private let change = NSButton(title: "Change\u{2026}", target: nil, action: nil)
-    private let remove = NSButton(title: "Remove", target: nil, action: nil)
-    private let undo = NSButton(title: "Undo", target: nil, action: nil)
-    private let clear = NSButton(title: "Clear", target: nil, action: nil)
+    private let change = NSButton(title: Text.macChangeButton.text, target: nil, action: nil)
+    private let remove = NSButton(title: Text.macRemove.text, target: nil, action: nil)
+    private let undo = NSButton(title: Text.macUndoButton.text, target: nil, action: nil)
+    private let clear = NSButton(title: Text.macClear.text, target: nil, action: nil)
     private var hosts: [Host] = []
     private var entries: [Entry] = []
     private var accountsOfHost: [Int64: (Int64) -> Bool] = [:]
@@ -341,15 +343,18 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 860, height: 560), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
-        window.title = "AI Agents"
+        window.title = Text.macAiAgents.text
         window.identifier = NSUserInterfaceItemIdentifier("agents")
         super.init()
         enabled.target = self
         enabled.action = #selector(toggleEnabled)
         enabled.setAccessibilityIdentifier("agents.enabled")
         let hostScroll = table(hostTable, id: "agents.hosts",
-                               columns: [("name", "Program", 140), ("access", "May", 360), ("used", "Last used", 170)])
-        let logScroll = table(logTable, id: "agents.log", columns: [("at", "When", 150), ("host", "Program", 120), ("what", "What", 400)])
+                               columns: [("name", Text.macColumnProgram.text, 140), ("access", Text.macColumnMay.text, 360),
+                                         ("used", Text.macColumnLastUsed.text, 170)])
+        let logScroll = table(logTable, id: "agents.log",
+                              columns: [("at", Text.macColumnWhen.text, 150), ("host", Text.macColumnProgram.text, 120),
+                                        ("what", Text.macColumnWhat.text, 400)])
         hostTable.doubleAction = #selector(changeHost)
         for (button, action, id) in [(change, #selector(changeHost), "agents.change"), (remove, #selector(removeHost), "agents.remove"),
                                      (undo, #selector(undoEntry), "agents.undo"), (clear, #selector(clearLog), "agents.clear")] {
@@ -358,9 +363,10 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
             button.setAccessibilityIdentifier(id)
             button.widthAnchor.constraint(equalToConstant: 110).isActive = true
         }
-        let setup = NSButton(title: "How to Connect an Agent\u{2026}", target: self, action: #selector(showSetup))
+        let setup = NSButton(title: Text.macHowToConnect.text, target: self, action: #selector(showSetup))
         setup.setAccessibilityIdentifier("agents.setup")
-        let close = NSButton(title: "Close", target: NSApp, action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
+        let close = NSButton(title: Text.macClose.text, target: NSApp,
+                             action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
         close.keyEquivalent = "\r"
         func side(_ buttons: [NSButton]) -> NSStackView {
             let stack = NSStackView(views: buttons + [NSView()])
@@ -379,8 +385,8 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
             row.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
             return stack
         }
-        let programs = section("Programs whose agents asked to use your mail", hostScroll, [change, remove])
-        let log = section("What agents did", logScroll, [undo, clear])
+        let programs = section(Text.macAgentPrograms.text, hostScroll, [change, remove])
+        let log = section(Text.macAgentLog.text, logScroll, [undo, clear])
         hostScroll.heightAnchor.constraint(equalToConstant: 120).isActive = true
         logScroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 180).isActive = true
         let bottom = NSStackView(views: [setup, NSView(), close])
@@ -471,7 +477,7 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
             switch column?.identifier.rawValue {
             case "name": value = host.name
             case "access": value = host.access
-            default: value = host.lastUsed == 0 ? "Never" : formatDate(host.lastUsed)
+            default: value = host.lastUsed == 0 ? Text.macNever.text : formatDate(host.lastUsed)
             }
         } else {
             let entry = entries[row]
@@ -500,9 +506,10 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         let host = hosts[hostTable.selectedRow]
         let form = AccessForm(core: core, path: host.path, levels: host.allowed ? host.levels : UInt32(PE_AGENT_DEFAULT),
                               has: accountsOfHost[host.id] ?? { _ in false })
-        let question = QuestionWindow(title: "AI Agent Access", heading: host.changeTitle, detail: host.changeDetail,
+        let question = QuestionWindow(title: Text.macAiAgentAccess.text, heading: host.changeTitle, detail: host.changeDetail,
                                       id: "agent.access", accessory: form.view,
-                                      answers: [("Turn Away", "agent.turnAway"), ("Cancel", "agent.cancel"), ("Allow", "agent.allow")], safe: 2)
+                                      answers: [(Text.macTurnAway.text, "agent.turnAway"), (Text.macCancel.text, "agent.cancel"),
+                                                (Text.macAllow.text, "agent.allow")], safe: 2)
         let answer = question.run()
         let (levels, accounts) = form.chosen
         if answer == 2 {
@@ -517,8 +524,8 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
 
     @objc private func removeHost() {
         guard hosts.indices.contains(hostTable.selectedRow),
-              ask("Forget this program and what its agents did?\n\nIt is asked about again the next time it connects.",
-                  title: "AI Agents", yes: "Remove", no: "Cancel", destructive: true)
+              ask(Text.macForgetProgram.text + "\n\n" + Text.macForgetProgramDetail.text,
+                  title: Text.macAiAgents.text, yes: Text.macRemove.text, no: Text.macCancel.text, destructive: true)
         else { return }
         pe_agent_host_remove(core.handle, hosts[hostTable.selectedRow].id)
         fill()
@@ -527,13 +534,14 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     @objc private func undoEntry() {
         guard entries.indices.contains(logTable.selectedRow) else { return }
         if let why = taken(pe_agent_undo(core.handle, entries[logTable.selectedRow].id)) {
-            inform(why, title: "AI Agents")
+            inform(why, title: Text.macAiAgents.text)
         }
         fill()
     }
 
     @objc private func clearLog() {
-        guard ask("Clear the list of what agents did?\n\nWhat they did stays done.", title: "AI Agents", yes: "Clear", no: "Cancel")
+        guard ask(Text.macClearLog.text + "\n\n" + Text.macClearLogDetail.text, title: Text.macAiAgents.text,
+                  yes: Text.macClear.text, no: Text.macCancel.text)
         else { return }
         pe_agent_log_clear(core.handle)
         fill()
@@ -542,8 +550,8 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     @objc private func showSetup() {
         let store = AppDelegate.shared.arguments.store
         let config = (store.map { store in store.withCString { taken(pe_mcp_config($0)) } } ?? taken(pe_mcp_config(nil))) ?? ""
-        textDialog(title: "Connect an AI Agent",
-                   intro: "Add this to the MCP servers of your agent (Claude Desktop: Settings > Developer > Edit Config):",
+        textDialog(title: Text.macConnectAgent.text,
+                   intro: Text.macConnectAgentIntro.text,
                    text: config, id: "agents.setupText", size: NSSize(width: 620, height: 300))
     }
 

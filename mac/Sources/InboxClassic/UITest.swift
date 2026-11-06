@@ -358,6 +358,8 @@ final class UITest {
         // ImapKit's certificate is self-signed: the app trusts it, and only it, for this run
         let arguments = Arguments(["InboxClassic", "--store", store, "--memory-passwords", "--pin-certificate", port("cert"),
                                    "--sign-in-page-file", signInPage])
+        // the test reads English, whatever the languages of the machine it runs on
+        Languages.apply("en")
         let delegate = AppDelegate(arguments)
         self.delegate = delegate
         NSApp.delegate = delegate
@@ -442,6 +444,7 @@ final class UITest {
         try await allInboxes()
         try await betweenAccounts()
         try await accountsAndHelp()
+        try await languages()
     }
 
     func addAccount() async throws {
@@ -610,7 +613,7 @@ final class UITest {
     func closeCompose(_ compose: NSWindow) async {
         onMain { compose.performClose(nil) }
         if let ask = await waitWindow("alert", 3) {
-            answer(ask, "Don't Save")
+            answer(ask, Text.macDontSave.text)
         }
         _ = await waitUntil { !compose.isVisible }
     }

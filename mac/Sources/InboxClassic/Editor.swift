@@ -211,9 +211,9 @@ final class EditorView: WKWebView {
         }
         let link = editor.caretLink
         let items = [
-            NSMenuItem(title: "Open Link", action: #selector(openLink), keyEquivalent: ""),
-            NSMenuItem(title: "Edit Link\u{2026}", action: #selector(editLink), keyEquivalent: ""),
-            NSMenuItem(title: "Remove Link", action: #selector(removeLink), keyEquivalent: ""),
+            NSMenuItem(title: Text.macOpenLink.text, action: #selector(openLink), keyEquivalent: ""),
+            NSMenuItem(title: Text.macEditLink.text, action: #selector(editLink), keyEquivalent: ""),
+            NSMenuItem(title: Text.macRemoveLink.text, action: #selector(removeLink), keyEquivalent: ""),
             NSMenuItem.separator(),
         ]
         for (index, item) in items.enumerated() {

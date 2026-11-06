@@ -47,34 +47,35 @@ final class FormatBar: NSObject {
         var views: [NSView] = [font, size]
         // the buttons whose state the page reports, in the order of its flags (STATE in editor.js)
         let toggles: [(String, String, String)] = [
-            ("text_bold", "bold", "Bold (\u{2318}B)"), ("text_italic", "italic", "Italic (\u{2318}I)"),
-            ("text_underline", "underline", "Underline (\u{2318}U)"),
+            ("text_bold", "bold", Text.macBold.text + " (\u{2318}B)"), ("text_italic", "italic", Text.macItalic.text + " (\u{2318}I)"),
+            ("text_underline", "underline", Text.macUnderline.text + " (\u{2318}U)"),
         ]
         let lists: [(String, String, String)] = [
-            ("text_number_list_ltr", "insertOrderedList", "Numbered List"), ("text_bullet_list_ltr", "insertUnorderedList", "Bulleted List"),
+            ("text_number_list_ltr", "insertOrderedList", Text.macNumberedList.text),
+            ("text_bullet_list_ltr", "insertUnorderedList", Text.macBulletedList.text),
         ]
         let aligns: [(String, String, String)] = [
-            ("text_align_left", "justifyLeft", "Align Left"), ("text_align_center", "justifyCenter", "Center"),
-            ("text_align_right", "justifyRight", "Align Right"),
+            ("text_align_left", "justifyLeft", Text.macAlignLeft.text), ("text_align_center", "justifyCenter", Text.macCenter.text),
+            ("text_align_right", "justifyRight", Text.macAlignRight.text),
         ]
         for (icon, command, tip) in toggles {
             views.append(stateButton(icon, command, tip))
         }
-        views.append(plainButton("text_color", tip: "Font Color", action: #selector(chooseColor)))
+        views.append(plainButton("text_color", tip: Text.macFontColor.text, action: #selector(chooseColor)))
         views.append(gap())
         for (icon, command, tip) in lists {
             views.append(stateButton(icon, command, tip))
         }
-        views.append(commandButton("text_indent_decrease_ltr", "outdent", "Decrease Indent"))
-        views.append(commandButton("text_indent_increase_ltr", "indent", "Increase Indent"))
+        views.append(commandButton("text_indent_decrease_ltr", "outdent", Text.macDecreaseIndent.text))
+        views.append(commandButton("text_indent_increase_ltr", "indent", Text.macIncreaseIndent.text))
         views.append(gap())
         for (icon, command, tip) in aligns {
             views.append(stateButton(icon, command, tip))
         }
         views.append(gap())
-        views.append(plainButton("link", tip: "Hyperlink (\u{2318}K)", action: #selector(linkClicked)))
-        views.append(commandButton("line_horizontal_1", "insertHorizontalRule", "Insert Horizontal Line"))
-        views.append(plainButton("image", tip: "Insert Picture", action: #selector(pictureClicked)))
+        views.append(plainButton("link", tip: Text.macHyperlink.text + " (\u{2318}K)", action: #selector(linkClicked)))
+        views.append(commandButton("line_horizontal_1", "insertHorizontalRule", Text.macHorizontalLine.text))
+        views.append(plainButton("image", tip: Text.macInsertPicture.text, action: #selector(pictureClicked)))
         views.forEach { view.addArrangedSubview($0) }
         view.spacing = 2
         view.setCustomSpacing(8, after: size)
@@ -88,6 +89,8 @@ final class FormatBar: NSObject {
 
     private func button(_ icon: String, tip: String) -> NSButton {
         let button = NSButton(image: Icons.format(icon) ?? NSImage(), target: self, action: nil)
+        // a picture only: without AppKit's "Button" as its title, which VoiceOver could read
+        button.title = ""
         button.bezelStyle = .toolbar
         button.toolTip = tip
         button.setAccessibilityLabel(tip)
@@ -172,11 +175,11 @@ private func validLink(_ url: String) -> Bool {
 func insertLink(_ editor: Editor) {
     let current = editor.caretLink
     let editing = !current.isEmpty
-    let error = "Type a web address (https://...) or an e-mail link (mailto:...)."
+    let error = Text.macLinkInvalid.text
     guard let fields = formDialog(
-        title: editing ? "Edit Hyperlink" : "Hyperlink",
-        intro: editing ? "Where the link goes. Empty the address to remove the link and keep its text." : "The address the selected text links to.",
-        fields: [FormField(label: "Address:", value: editing ? current : "https://")],
+        title: editing ? Text.macEditHyperlink.text : Text.macHyperlink.text,
+        intro: editing ? Text.macEditHyperlinkIntro.text : Text.macHyperlinkIntro.text,
+        fields: [FormField(label: Text.macLinkAddress.text, value: editing ? current : "https://")],
         validate: { values in
             let url = values[0].value
             // an emptied address takes the link off
@@ -197,9 +200,10 @@ func insertPictureFile(_ editor: Editor, _ url: URL) -> Bool {
 
 @MainActor
 func insertPicture(_ editor: Editor) {
-    guard let file = openFilesPanel(title: "Insert Picture", types: [.png, .jpeg, .gif], multiple: false).first else { return }
+    guard let file = openFilesPanel(title: Text.macInsertPicture.text, types: [.png, .jpeg, .gif], multiple: false).first
+    else { return }
     if !insertPictureFile(editor, file) {
-        inform("This file is not a PNG, JPEG or GIF picture, or it is larger than 10 MB.", title: "Insert Picture", style: .warning)
+        inform(Text.macNotAPicture.text, title: Text.macInsertPicture.text, style: .warning)
     }
 }
 
@@ -230,8 +234,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         editor.isFieldEditor = true
         return editor
     }()
-    private let ccButton = NSButton(title: "Cc", target: nil, action: nil)
-    private let bccButton = NSButton(title: "Bcc", target: nil, action: nil)
+    private let ccButton = NSButton(title: Text.headerCc.text, target: nil, action: nil)
+    private let bccButton = NSButton(title: Text.macBcc.text, target: nil, action: nil)
     private var rows: [NSGridRow] = []
     private let grid = NSGridView()
     private var inReplyTo = ""
@@ -270,7 +274,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     private init(core: Core, account: Int64, draft: PeDraftInfo?) {
         self.core = core
         self.account = account
-        let title = draft.map { text($0.subject) }.flatMap { $0.isEmpty ? nil : $0 } ?? "New Message"
+        let title = draft.map { text($0.subject) }.flatMap { $0.isEmpty ? nil : $0 } ?? Text.macNewMessage.text
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 620),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         window.title = title
@@ -361,12 +365,12 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             label.alignment = .right
             return label
         }
-        grid.addRow(with: [label("From:"), from])
-        grid.addRow(with: [label("To:"), toRow])
-        grid.addRow(with: [label("Cc:"), cc])
-        grid.addRow(with: [label("Bcc:"), bcc])
-        grid.addRow(with: [label("Subject:"), subject])
-        grid.addRow(with: [label("Attach:"), attached])
+        grid.addRow(with: [label(Text.macFieldFrom.text), from])
+        grid.addRow(with: [label(Text.macFieldTo.text), toRow])
+        grid.addRow(with: [label(Text.macFieldCc.text), cc])
+        grid.addRow(with: [label(Text.macFieldBcc.text), bcc])
+        grid.addRow(with: [label(Text.macFieldSubject.text), subject])
+        grid.addRow(with: [label(Text.macFieldAttach.text), attached])
         grid.column(at: 0).xPlacement = .trailing
         grid.column(at: 0).width = 64
         grid.rowAlignment = .firstBaseline
@@ -510,7 +514,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
 
     /// where the link under the mouse, or else the one the cursor is in, goes; the status as it was without either
     private func showLink(_ link: String) {
-        status.stringValue = link.isEmpty ? statusText : "\(link)    (\u{2318}-click to open)"
+        status.stringValue = link.isEmpty ? statusText : "\(link)    (" + Text.macCommandClickToOpen.text + ")"
     }
 
     /// the message changed since it was sent to Drafts or opened: a "saved" status no longer holds
@@ -556,7 +560,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     }
 
     @objc private func attach() {
-        addFiles(openFilesPanel(title: "Insert Attachment"))
+        addFiles(openFilesPanel(title: Text.macInsertAttachment.text))
     }
 
     /// a file taken off in the Attach row (Delete, or Remove in its menu)
@@ -575,7 +579,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
 
     func tokenField(_ tokenField: NSTokenField, menuForRepresentedObject representedObject: Any) -> NSMenu? {
         let menu = NSMenu()
-        let item = NSMenuItem(title: "Remove", action: #selector(removeFile(_:)), keyEquivalent: "")
+        let item = NSMenuItem(title: Text.macRemove.text, action: #selector(removeFile(_:)), keyEquivalent: "")
         item.target = self
         item.representedObject = representedObject
         menu.addItem(item)
@@ -646,7 +650,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         var reason: UnsafeMutablePointer<CChar>?
         guard pe_message_send(core.handle, account, &message, &reason) else {
             // a typo in an address or a file that is gone: the message stays open to fix it
-            inform(taken(reason) ?? "The message could not be sent.", style: .warning)
+            inform(taken(reason) ?? Text.macMessageNotSent.text, style: .warning)
             return
         }
         // the main window shows whether the server took it
@@ -662,7 +666,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         var id: UnsafeMutablePointer<CChar>?
         var reason: UnsafeMutablePointer<CChar>?
         guard pe_draft_save(core.handle, account, &message, &id, &reason) else {
-            inform(taken(reason) ?? "The message could not be saved.", style: .warning)
+            inform(taken(reason) ?? Text.macMessageNotSaved.text, style: .warning)
             // not closing after all: the app does not wait for it
             if close {
                 AppDelegate.shared.quitAfterCompose = false
@@ -674,7 +678,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         dirty = false
         editor.clean()
         // the server's answer follows (draftSaved)
-        setStatus("Saving to Drafts\u{2026}")
+        setStatus(Text.macSavingToDrafts.text)
         if close {
             closeNow()
         }
@@ -689,7 +693,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// it saved. Save saves it in Drafts and closes the window after.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         guard dirty else { return true }
-        switch askYesNoCancel("Do you want to save changes to this message in Drafts?", yes: "Save", no: "Don't Save") {
+        switch askYesNoCancel(Text.macSaveChangesQuestion.text, yes: Text.macSave.text, no: Text.macDontSave.text) {
         case .yes:
             request(.saveAndClose)
             return false
@@ -736,16 +740,19 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// the server's answer to a save: the window that saved it says so; false when no window has that draft
     static func draftSaved(messageId: String, problem: String) -> Bool {
         guard !messageId.isEmpty, let compose = open.first(where: { $0.messageId == messageId }) else { return false }
-        compose.setStatus(problem.isEmpty ? "Saved in Drafts at \(timeNow())" : "Not saved in Drafts: \(problem)")
+        compose.setStatus(problem.isEmpty ? Text.macSavedInDraftsAt.text(["time": timeNow()])
+                                          : Text.macNotSavedInDrafts.text(["reason": problem]))
         return true
     }
 }
 
 extension ComposeWindow: NSToolbarDelegate {
-    private static let items: [(String, String, String, Selector)] = [
-        ("send", "Send", "send", #selector(sendClicked)), ("save", "Save", "save", #selector(saveClicked)),
-        ("attach", "Attach", "attach", #selector(attach)),
-    ]
+    private static var items: [(String, String, String, Selector)] {
+        [
+            ("send", Text.macSend.text, "send", #selector(sendClicked)), ("save", Text.macSave.text, "save", #selector(saveClicked)),
+            ("attach", Text.macAttach.text, "attach", #selector(attach)),
+        ]
+    }
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         [NSToolbarItem.Identifier("send"), .space, NSToolbarItem.Identifier("save"), .space, NSToolbarItem.Identifier("attach")]
@@ -894,7 +901,7 @@ final class SignatureEditor: NSObject, NSWindowDelegate {
         self.account = account
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 640, height: 360), styleMask: [.titled, .resizable], backing: .buffered,
                           defer: true)
-        window.title = "Signature - \(name)"
+        window.title = Text.macSignatureTitle.text(["account": name])
         window.identifier = NSUserInterfaceItemIdentifier("signature")
         super.init()
         var handlers = Editor.Handlers()
@@ -922,11 +929,11 @@ final class SignatureEditor: NSObject, NSWindowDelegate {
             guard let self else { return }
             insertPicture(editor)
         }
-        let hint = NSTextField(labelWithString: "Added to new messages, replies and forwards from this account.")
+        let hint = NSTextField(labelWithString: Text.macSignatureHint.text)
         hint.textColor = .secondaryLabelColor
-        let cancel = NSButton(title: "Cancel", target: self, action: #selector(cancelled))
+        let cancel = NSButton(title: Text.macCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"
-        let okButton = NSButton(title: "OK", target: self, action: #selector(ok))
+        let okButton = NSButton(title: Text.macOk.text, target: self, action: #selector(ok))
         okButton.keyEquivalent = "\r"
         okButton.keyEquivalentModifierMask = .command
         okButton.setAccessibilityIdentifier("signature.ok")
@@ -962,7 +969,7 @@ final class SignatureEditor: NSObject, NSWindowDelegate {
     private func htmlArrived(_ html: String) {
         saved = html.withCString { pe_account_set_signature(core.handle, account, $0) }
         guard saved else {
-            inform("The signature could not be saved.", title: "Signature", style: .error)
+            inform(Text.macSignatureNotSaved.text, title: Text.macSignature.text, style: .error)
             saving = false
             return
         }

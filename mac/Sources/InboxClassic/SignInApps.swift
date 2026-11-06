@@ -26,8 +26,7 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
     private let issuer = NSTextField(string: "")
     private let clientId = NSTextField(string: "")
     private let secret = NSSecureTextField(string: "")
-    private let removeSecret = NSButton(checkboxWithTitle: "A secret is saved; type another to replace it, or remove it",
-                                        target: nil, action: nil)
+    private let removeSecret = NSButton(checkboxWithTitle: Text.macSecretSaved.text, target: nil, action: nil)
     private let scopes = NSTextField(string: "")
     private let imapHost = NSTextField(string: "")
     private let imapPort = NSTextField(string: "")
@@ -45,7 +44,7 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         hadSecret = app?.hasSecret ?? false
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 520), styleMask: [.titled], backing: .buffered,
                           defer: true)
-        window.title = app == nil ? "Add Sign-in App" : "Sign-in App"
+        window.title = app == nil ? Text.macAddSignInAppTitle.text : Text.macSignInApp.text
         window.identifier = NSUserInterfaceItemIdentifier("signin.editor")
         super.init()
         if let list = pe_sign_in_presets() {
@@ -81,16 +80,16 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
     }
 
     private func layout() -> NSView {
-        let intro = wrappingLabel("An OAuth client you registered with your provider, for accounts that sign in through the browser. Fill it in for a provider, then add the client ID (and secret, if the provider gave one).")
+        let intro = wrappingLabel(Text.macSignInAppIntro.text)
         let presetButtons = NSStackView(views: presets.enumerated().map { index, preset in
             let button = NSButton(title: preset.name, target: self, action: #selector(fillPreset(_:)))
             button.tag = index
             button.setAccessibilityIdentifier("signin.preset.\(index)")
             return button
         })
-        let check = NSButton(title: "Check", target: self, action: #selector(checkClicked))
+        let check = NSButton(title: Text.macCheck.text, target: self, action: #selector(checkClicked))
         check.setAccessibilityIdentifier("signin.check")
-        let copy = NSButton(title: "Copy", target: self, action: #selector(copyRedirect))
+        let copy = NSButton(title: Text.macCopyButton.text, target: self, action: #selector(copyRedirect))
         let issuerRow = NSStackView(views: [issuer, check])
         let redirectRow = NSStackView(views: [redirect, copy])
         let server = { (host: NSTextField, port: NSTextField, security: NSPopUpButton) -> NSStackView in
@@ -98,20 +97,20 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
             return NSStackView(views: [host, port, security])
         }
         var rows: [[NSView]] = [
-            [NSTextField(labelWithString: "Fill in for:"), presetButtons],
-            [NSTextField(labelWithString: "Name:"), name],
-            [NSTextField(labelWithString: "Issuer:"), issuerRow],
-            [NSTextField(labelWithString: "Client ID:"), clientId],
+            [NSTextField(labelWithString: Text.macFillInFor.text), presetButtons],
+            [NSTextField(labelWithString: Text.macAppName.text), name],
+            [NSTextField(labelWithString: Text.macIssuer.text), issuerRow],
+            [NSTextField(labelWithString: Text.macClientId.text), clientId],
             // never shown again once saved: it is in the keychain
-            [NSTextField(labelWithString: "Client secret:"), secret],
+            [NSTextField(labelWithString: Text.macClientSecret.text), secret],
         ]
         if hadSecret {
             rows.append([NSGridCell.emptyContentView, removeSecret])
         }
         rows += [
-            [NSTextField(labelWithString: "Scopes:"), scopes],
-            [NSTextField(labelWithString: "IMAP server:"), server(imapHost, imapPort, imapSecurity)],
-            [NSTextField(labelWithString: "SMTP server:"), server(smtpHost, smtpPort, smtpSecurity)],
+            [NSTextField(labelWithString: Text.macScopes.text), scopes],
+            [NSTextField(labelWithString: Text.macAppImapServer.text), server(imapHost, imapPort, imapSecurity)],
+            [NSTextField(labelWithString: Text.macAppSmtpServer.text), server(smtpHost, smtpPort, smtpSecurity)],
         ]
         let grid = NSGridView(views: rows)
         grid.column(at: 0).xPlacement = .trailing
@@ -120,13 +119,13 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         grid.rowSpacing = 8
         let line = NSBox()
         line.boxType = .separator
-        let registerTitle = NSTextField(labelWithString: "Register it with your provider")
+        let registerTitle = NSTextField(labelWithString: Text.macRegisterIt.text)
         registerTitle.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
-        let redirectGrid = NSGridView(views: [[NSTextField(labelWithString: "Redirect URI:"), redirectRow]])
+        let redirectGrid = NSGridView(views: [[NSTextField(labelWithString: Text.macRedirectUri.text), redirectRow]])
         redirectGrid.column(at: 1).width = 380
-        let cancel = NSButton(title: "Cancel", target: self, action: #selector(cancelled))
+        let cancel = NSButton(title: Text.macCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"
-        let ok = NSButton(title: "OK", target: self, action: #selector(okClicked))
+        let ok = NSButton(title: Text.macOk.text, target: self, action: #selector(okClicked))
         ok.keyEquivalent = "\r"
         ok.setAccessibilityIdentifier("signin.ok")
         let buttons = buttonRow([cancel, ok])
@@ -158,7 +157,7 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
     @objc private func fillPreset(_ sender: NSButton) {
         let preset = presets[sender.tag]
         if name.stringValue.isEmpty {
-            name.stringValue = preset.name + " sign-in app"
+            name.stringValue = Text.macPresetAppName.text(["provider": preset.name])
         }
         issuer.stringValue = preset.issuer
         scopes.stringValue = preset.scopes
@@ -184,8 +183,8 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         var error: UnsafeMutablePointer<CChar>?
         let request = typed.withCString { pe_sign_in_app_check(core.handle, $0, &error) }
         let reason = taken(error)
-        guard request != 0 else { return (false, reason ?? "the issuer can not be checked") }
-        guard Waiting.wait(for: request, text: "Checking \(typed)\u{2026}", title: "Sign-in App",
+        guard request != 0 else { return (false, reason ?? Text.macIssuerNotChecked.text) }
+        guard Waiting.wait(for: request, text: Text.macCheckingIssuer.text(["issuer": typed]), title: Text.macSignInApp.text,
                            cancel: { pe_sign_in_app_check_cancel(self.core.handle, $0) }) else { return (false, "") }
         var found: UnsafeMutablePointer<CChar>?
         let usable = pe_sign_in_app_check_result(core.handle, request, &found)
@@ -195,8 +194,8 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
     @objc private func checkClicked() {
         let (usable, said) = checkIssuer()
         if !said.isEmpty {
-            inform(usable ? "The issuer can be used.\n\n\(said)" : "The issuer can not be used: \(said)", title: "Check",
-                        style: usable ? .information : .warning)
+            inform(usable ? Text.macIssuerUsable.text + "\n\n" + said : Text.macIssuerNotUsable.text(["reason": said]),
+                   title: Text.macCheck.text, style: usable ? .information : .warning)
         }
     }
 
@@ -209,13 +208,13 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         let imap = port(imapPort)
         let smtp = port(smtpPort)
         guard imap != 0, smtp != 0 else {
-            inform("Ports are numbers from 1 to 65535.", title: "Sign-in App", style: .warning)
+            inform(Text.macPortsInvalid.text, title: Text.macSignInApp.text, style: .warning)
             return
         }
         let (usable, said) = checkIssuer()
         guard usable else {
             if !said.isEmpty {
-                inform("The issuer can not be used: \(said)", title: "Sign-in App", style: .warning)
+                inform(Text.macIssuerNotUsable.text(["reason": said]), title: Text.macSignInApp.text, style: .warning)
                 window.makeFirstResponder(issuer)
             }
             return
@@ -236,8 +235,8 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         strings.wipe()
         secret.stringValue = ""
         guard result != 0 else {
-            inform("The sign-in app could not be saved: \(taken(error) ?? "unknown reason")", title: "Sign-in App",
-                        style: .warning)
+            inform(Text.macSignInAppNotSaved.text(["reason": taken(error) ?? Text.macUnknownReason.text]),
+                   title: Text.macSignInApp.text, style: .warning)
             return
         }
         saved = result
@@ -271,18 +270,19 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
     private let core: Core
     private let table = NSTableView()
     private let note = NSTextField(wrappingLabelWithString: "")
-    private let edit = NSButton(title: "Edit\u{2026}", target: nil, action: nil)
-    private let remove = NSButton(title: "Remove", target: nil, action: nil)
+    private let edit = NSButton(title: Text.macEditButton.text, target: nil, action: nil)
+    private let remove = NSButton(title: Text.macRemove.text, target: nil, action: nil)
     private var apps: [SignInApps.App] = []
 
     init(core: Core) {
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 340), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
-        window.title = "Sign-in Apps"
+        window.title = Text.macSignInApps.text
         window.identifier = NSUserInterfaceItemIdentifier("signin.apps")
         super.init()
-        for (id, title, width) in [("on", "", 24.0), ("name", "Name", 210.0), ("issuer", "Issuer", 200.0), ("used", "Used by", 110.0)] {
+        for (id, title, width) in [("on", "", 24.0), ("name", Text.macColumnName.text, 210.0), ("issuer", Text.macColumnIssuer.text, 200.0),
+                                   ("used", Text.macColumnUsedBy.text, 110.0)] {
             let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(id))
             column.title = title
             column.width = width
@@ -300,13 +300,14 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
         scroll.documentView = table
         scroll.hasVerticalScroller = true
         scroll.borderType = .bezelBorder
-        let add = NSButton(title: "Add\u{2026}", target: self, action: #selector(addClicked))
+        let add = NSButton(title: Text.macAddButton.text, target: self, action: #selector(addClicked))
         add.setAccessibilityIdentifier("signin.add")
         edit.target = self
         edit.action = #selector(editClicked)
         remove.target = self
         remove.action = #selector(removeClicked)
-        let close = NSButton(title: "Close", target: NSApp, action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
+        let close = NSButton(title: Text.macClose.text, target: NSApp,
+                             action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
         close.keyEquivalent = "\r"
         let side = NSStackView(views: [add, edit, remove, NSView(), close])
         side.orientation = .vertical
@@ -314,7 +315,7 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
         for button in [add, edit, remove, close] {
             button.widthAnchor.constraint(equalToConstant: 110).isActive = true
         }
-        let intro = wrappingLabel("Sign-in apps let accounts sign in through the browser. One that is not checked is not offered for new accounts; the accounts that already use it keep working.")
+        let intro = wrappingLabel(Text.macSignInAppsIntro.text)
         let middle = NSStackView(views: [scroll, side])
         middle.alignment = .top
         let stack = NSStackView(views: [intro, middle, note])
@@ -351,11 +352,11 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
             box.state = app.enabled ? .on : .off
             box.tag = row
             box.setAccessibilityIdentifier("signin.on.\(row)")
-            box.setAccessibilityLabel("Use \(app.name) for new accounts")
+            box.setAccessibilityLabel(Text.macUseForNewAccounts.text(["name": app.name]))
             return box
-        case "name": return NSTextField(labelWithString: app.name + (builtin ? " (built-in)" : ""))
+        case "name": return NSTextField(labelWithString: builtin ? Text.macBuiltIn.text(["name": app.name]) : app.name)
         case "issuer": return NSTextField(labelWithString: app.issuer)
-        default: return NSTextField(labelWithString: app.usedBy.isEmpty ? "No accounts" : app.usedBy)
+        default: return NSTextField(labelWithString: app.usedBy.isEmpty ? Text.macNoAccounts.text : app.usedBy)
         }
     }
 
@@ -374,9 +375,10 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
         edit.isEnabled = added
         remove.isEnabled = added
         if let app, !added {
-            note.stringValue = "\(app.name) is built in: only whether it is used for new accounts can change. " + (app.enabled ? "" : app.offReason)
+            note.stringValue = Text.macBuiltInNote.text(["name": app.name]) + (app.enabled ? "" : " " + app.offReason)
         } else if let app {
-            note.stringValue = "Client ID: \(app.clientId)" + (app.hasSecret ? ", with a client secret." : ", a public client (no secret).")
+            note.stringValue = app.hasSecret ? Text.macClientWithSecret.text(["client": app.clientId])
+                                             : Text.macClientPublic.text(["client": app.clientId])
         } else {
             note.stringValue = ""
         }
@@ -403,12 +405,12 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
 
     @objc private func removeClicked() {
         guard let app = selected, app.provider == PE_O_AUTH_PROVIDER_APP,
-              ask("Remove the sign-in app \(app.name) and its saved client secret?", title: "Remove Sign-in App", yes: "Remove",
-                  no: "Cancel", destructive: true) else { return }
+              ask(Text.macRemoveSignInAppQuestion.text(["name": app.name]), title: Text.macRemoveSignInApp.text,
+                  yes: Text.macRemove.text, no: Text.macCancel.text, destructive: true) else { return }
         var error: UnsafeMutablePointer<CChar>?
         if !pe_sign_in_app_remove(core.handle, app.id, &error) {
-            inform("The sign-in app was not removed: \(taken(error) ?? "unknown reason")", title: "Remove Sign-in App",
-                        style: .warning)
+            inform(Text.macSignInAppNotRemoved.text(["reason": taken(error) ?? Text.macUnknownReason.text]),
+                   title: Text.macRemoveSignInApp.text, style: .warning)
             return
         }
         fill(select: table.selectedRow)

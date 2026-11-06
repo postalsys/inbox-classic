@@ -3,12 +3,15 @@
 import AppKit
 import CInboxClassic
 
-private let securityNames = ["SSL/TLS", "STARTTLS", "None (unencrypted)"]
+@MainActor
+private var securityNames: [String] { ["SSL/TLS", "STARTTLS", Text.macSecurityNone.text] }
 
+@MainActor
 private func securityOf(_ name: String) -> PeSecurity {
     name == securityNames[1] ? PE_SECURITY_START_TLS : name == securityNames[2] ? PE_SECURITY_PLAIN : PE_SECURITY_TLS
 }
 
+@MainActor
 private func securityName(_ security: PeSecurity) -> String {
     securityNames[security == PE_SECURITY_START_TLS ? 1 : security == PE_SECURITY_PLAIN ? 2 : 0]
 }
@@ -23,15 +26,17 @@ private func validPort(_ text: String) -> Bool {
     return (1...65535).contains(port)
 }
 
+@MainActor
 private func validate(_ fields: [FormField]) -> String? {
     for required in [Field.email, .imapHost, .smtpHost] where fields[required.rawValue].value.isEmpty {
-        return "\(fields[required.rawValue].label.dropLast()) is required."
+        let label = fields[required.rawValue].label
+        return Text.macFieldRequired.text(["field": label.hasSuffix(":") ? String(label.dropLast()) : label])
     }
     if !fields[Field.email.rawValue].value.contains("@") {
-        return "The e-mail address is not valid."
+        return Text.macEmailInvalid.text
     }
     if !validPort(fields[Field.imapPort.rawValue].value) || !validPort(fields[Field.smtpPort.rawValue].value) {
-        return "Ports are numbers from 1 to 65535."
+        return Text.macPortsInvalid.text
     }
     return nil
 }
@@ -41,11 +46,11 @@ private func validate(_ fields: [FormField]) -> String? {
 private func acceptPlain(_ fields: [FormField], title: String) -> Bool {
     let plain = securityOf(fields[Field.imapSecurity.rawValue].value) == PE_SECURITY_PLAIN
         || securityOf(fields[Field.smtpSecurity.rawValue].value) == PE_SECURITY_PLAIN
-    return !plain || ask("Without encryption your password and mail travel the network readable by anyone on the way. Use this only for a server on your own computer or network.\n\nContinue?",
-                         title: title, destructive: true)
+    return !plain || ask(Text.macPlainWarning.text + "\n\n" + Text.macContinueQuestion.text, title: title, destructive: true)
 }
 
 /// the settings of the server form as the core takes them; `strings` keeps what they point to
+@MainActor
 private func settingsOf(_ fields: [FormField], _ strings: CStrings) -> PeAccountSettings {
     let value = { (field: Field) in fields[field.rawValue].value }
     // the user name is usually the address
@@ -59,19 +64,20 @@ private func settingsOf(_ fields: [FormField], _ strings: CStrings) -> PeAccount
 }
 
 /// the server form's fields, filled in from what was found or stored
+@MainActor
 private func serverFields(name: String, email: String, username: String, imapHost: String, imapPort: UInt16,
                           imapSecurity: PeSecurity, smtpHost: String, smtpPort: UInt16, smtpSecurity: PeSecurity) -> [FormField] {
     [
-        FormField(label: "Display name:", value: name),
-        FormField(label: "E-mail address:", value: email),
-        FormField(label: "User name:", value: username),
-        FormField(label: "Password:", kind: .password),
-        FormField(label: "Incoming (IMAP) server:", value: imapHost),
-        FormField(label: "IMAP port:", value: "\(imapPort)", kind: .number),
-        FormField(label: "IMAP security:", value: securityName(imapSecurity), kind: .choice(securityNames)),
-        FormField(label: "Outgoing (SMTP) server:", value: smtpHost),
-        FormField(label: "SMTP port:", value: "\(smtpPort)", kind: .number),
-        FormField(label: "SMTP security:", value: securityName(smtpSecurity), kind: .choice(securityNames)),
+        FormField(label: Text.macDisplayName.text, value: name),
+        FormField(label: Text.macEmailAddress.text, value: email),
+        FormField(label: Text.macUserName.text, value: username),
+        FormField(label: Text.macPassword.text, kind: .password),
+        FormField(label: Text.macImapServer.text, value: imapHost),
+        FormField(label: Text.macImapPort.text, value: "\(imapPort)", kind: .number),
+        FormField(label: Text.macImapSecurity.text, value: securityName(imapSecurity), kind: .choice(securityNames)),
+        FormField(label: Text.macSmtpServer.text, value: smtpHost),
+        FormField(label: Text.macSmtpPort.text, value: "\(smtpPort)", kind: .number),
+        FormField(label: Text.macSmtpSecurity.text, value: securityName(smtpSecurity), kind: .choice(securityNames)),
     ]
 }
 
@@ -95,7 +101,7 @@ enum SignIn {
         // the core makes the page, and gives only an https page or one of a provider on this computer (a test server)
         let address = taken(page) ?? ""
         guard request != 0, !address.isEmpty else {
-            inform("Signing in through the browser could not start.", style: .error)
+            inform(Text.macSignInNotStarted.text, style: .error)
             return 0
         }
         if let pageFile {
@@ -103,13 +109,13 @@ enum SignIn {
         } else if let url = URL(string: address) {
             NSWorkspace.shared.open(url)
         }
-        let account = email.isEmpty ? "your account" : email
-        guard Waiting.wait(for: request, text: "Sign in to \(account) in the browser window that opened, then come back here.",
-                           title: "Add Mail Account", cancel: { pe_sign_in_cancel(core.handle, $0) })
+        let text = email.isEmpty ? Text.macSignInWaitingAny.text : Text.macSignInWaiting.text(["account": email])
+        guard Waiting.wait(for: request, text: text, title: Text.macAddMailAccount.text,
+                           cancel: { pe_sign_in_cancel(core.handle, $0) })
         else { return 0 }
         var why: UnsafeMutablePointer<CChar>?
         if !pe_sign_in_result(core.handle, request, &why) {
-            inform("Signing in did not work: \(taken(why) ?? "unknown reason")", style: .warning)
+            inform(Text.macSignInDidNotWork.text(["reason": taken(why) ?? Text.macUnknownReason.text]), style: .warning)
             return 0
         }
         // back in front, the browser had it
@@ -180,22 +186,26 @@ private struct SignInButton {
     let company: String
 }
 
-private let signInButtons = [
-    SignInButton(provider: PE_O_AUTH_PROVIDER_GOOGLE, picture: "brands/google-sign-in.png", label: "Sign in with Google",
-                 company: "Google"),
-    SignInButton(provider: PE_O_AUTH_PROVIDER_MICROSOFT, picture: "brands/microsoft-sign-in.png", label: "Sign in with Microsoft",
-                 company: "Microsoft"),
-]
+@MainActor
+private var signInButtons: [SignInButton] {
+    [
+        SignInButton(provider: PE_O_AUTH_PROVIDER_GOOGLE, picture: "brands/google-sign-in.png",
+                     label: Text.macSignInWith.text(["provider": "Google"]), company: "Google"),
+        SignInButton(provider: PE_O_AUTH_PROVIDER_MICROSOFT, picture: "brands/microsoft-sign-in.png",
+                     label: Text.macSignInWith.text(["provider": "Microsoft"]), company: "Microsoft"),
+    ]
+}
 
 /// What a page of Add Mail Account offers: the intro, a sign-in button for each of `providers` (faded and turned off
 /// when its client is off; left out when all are off), More sign-in options when `more`, then when `fields` the name
 /// and address of any other account and `next` to go on with that
+@MainActor
 private struct StartOffer {
     var intro = ""
     var providers: [PeOAuthProvider] = []
     var more = false
     var fields = false
-    var next = "Next"
+    var next = Text.macNext.text
 }
 
 private enum Start {
@@ -219,14 +229,14 @@ private final class StartPage: NSObject {
         self.offer = offer
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), styleMask: [.titled], backing: .buffered,
                           defer: true)
-        window.title = "Add Mail Account"
+        window.title = Text.macAddMailAccount.text
         window.identifier = NSUserInterfaceItemIdentifier("account.start")
         super.init()
         nameField.stringValue = name
         emailField.stringValue = email
         nameField.setAccessibilityIdentifier("account.name")
         emailField.setAccessibilityIdentifier("account.email")
-        nameField.placeholderString = "Ann Smith"
+        nameField.placeholderString = Text.macNamePlaceholder.text
         emailField.placeholderString = "name@example.com"
 
         var rows: [NSView] = [wrappingLabel(offer.intro)]
@@ -239,7 +249,7 @@ private final class StartPage: NSObject {
             rows.append(buttons)
         }
         if offer.more {
-            let more = linkButton("More sign-in options\u{2026}", action: #selector(chooseMore(_:)))
+            let more = linkButton(Text.macMoreSignInOptions.text, action: #selector(chooseMore(_:)))
             more.setAccessibilityIdentifier("account.more")
             moreButton = more
             rows.append(more)
@@ -248,15 +258,15 @@ private final class StartPage: NSObject {
             let line = NSBox()
             line.boxType = .separator
             rows.append(line)
-            rows.append(wrappingLabel("Any other e-mail account: your name as others see it and your e-mail address. Its servers are looked up next."))
-            let grid = NSGridView(views: [[NSTextField(labelWithString: "Display name:"), nameField],
-                                          [NSTextField(labelWithString: "E-mail address:"), emailField]])
+            rows.append(wrappingLabel(Text.macAnyOtherAccount.text))
+            let grid = NSGridView(views: [[NSTextField(labelWithString: Text.macDisplayName.text), nameField],
+                                          [NSTextField(labelWithString: Text.macEmailAddress.text), emailField]])
             grid.column(at: 0).xPlacement = .trailing
             grid.column(at: 1).width = 300
             grid.rowAlignment = .firstBaseline
             rows.append(grid)
         }
-        let cancel = NSButton(title: "Cancel", target: self, action: #selector(cancelled))
+        let cancel = NSButton(title: Text.macCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"
         let next = NSButton(title: offer.next, target: self, action: #selector(nextClicked))
         next.setAccessibilityIdentifier("account.next")
@@ -306,14 +316,24 @@ private final class StartPage: NSObject {
         button.setAccessibilityLabel(sign.label)
         button.setAccessibilityIdentifier(sign.provider == PE_O_AUTH_PROVIDER_GOOGLE ? "account.google" : "account.microsoft")
         guard !on else { return button }
-        let reason = "\(sign.label) is turned off on this computer. " + (apps.builtin(sign.provider)?.offReason ?? "")
+        let reason = Text.macTurnedOffNamed.text(["name": sign.label]) + " " + (apps.builtin(sign.provider)?.offReason ?? "")
         button.toolTip = reason
         button.setAccessibilityHelp(reason)
-        let why = linkButton("Why?", action: #selector(whyClicked(_:)))
+        let why = linkButton(Text.macWhy.text, action: #selector(whyClicked(_:)))
         why.tag = Int(sign.provider.rawValue)
-        let note = NSStackView(views: [NSTextField(labelWithString: "Turned off on this computer."), why])
-        note.spacing = 4
-        let column = NSStackView(views: [button, note])
+        // under the button and no wider than it, wrapped when the words of a language are longer
+        let note = NSTextField(wrappingLabelWithString: Text.macTurnedOff.text)
+        note.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        note.textColor = .secondaryLabelColor
+        let width = button.image?.size.width ?? 180
+        note.preferredMaxLayoutWidth = width
+        note.widthAnchor.constraint(lessThanOrEqualToConstant: width).isActive = true
+        why.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        why.attributedTitle = NSAttributedString(string: why.title, attributes: [
+            .foregroundColor: NSColor.linkColor, .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
+        ])
+        let column = NSStackView(views: [button, note, why])
         column.orientation = .vertical
         column.alignment = .leading
         column.spacing = 2
@@ -328,8 +348,8 @@ private final class StartPage: NSObject {
     @objc private func whyClicked(_ sender: NSButton) {
         let provider = PeOAuthProvider(rawValue: UInt32(sender.tag))
         let label = signInButtons.first { $0.provider == provider }?.label ?? ""
-        inform("\(label) is turned off on this computer.\n\n" + (apps.builtin(provider)?.offReason ?? ""),
-                    title: "Add Mail Account")
+        inform(Text.macTurnedOffNamed.text(["name": label]) + "\n\n" + (apps.builtin(provider)?.offReason ?? ""),
+               title: Text.macAddMailAccount.text)
     }
 
     /// More sign-in options: a menu of the added sign-in apps that are on, and Add a sign-in app
@@ -344,7 +364,7 @@ private final class StartPage: NSObject {
         if !apps.addedOn.isEmpty {
             menu.addItem(.separator())
         }
-        let add = NSMenuItem(title: "Add a sign-in app\u{2026}", action: #selector(moreChosen(_:)), keyEquivalent: "")
+        let add = NSMenuItem(title: Text.macAddSignInApp.text, action: #selector(moreChosen(_:)), keyEquivalent: "")
         add.target = self
         add.tag = 0
         menu.addItem(add)
@@ -361,7 +381,7 @@ private final class StartPage: NSObject {
     @objc private func nextClicked() {
         // the page of another account wants an address to look up
         if offer.fields && !emailField.stringValue.contains("@") {
-            inform("Type your e-mail address, name@example.com.", style: .warning)
+            inform(Text.macTypeEmail.text, style: .warning)
             window.makeFirstResponder(emailField)
             return
         }
@@ -391,20 +411,21 @@ private final class StartPage: NSObject {
 // ---- the server settings ----
 
 /// the first line of the server settings form: where the settings came from
+@MainActor
 private func foundIntro(_ info: PeAutoconfigInfo?) -> String {
-    guard let info else { return "Enter the account details your e-mail provider gave you." }
-    let change = " Change them if your provider gave you others."
+    guard let info else { return Text.macFoundNone.text }
+    let change = " " + Text.macFoundChange.text
     switch info.source {
     case PE_AUTOCONFIG_SOURCE_GUESS:
-        return "No settings were found for this address: these are the usual names, check them with your provider."
+        return Text.macFoundGuess.text
     case PE_AUTOCONFIG_SOURCE_MX:
-        return "Your mail is handled by a provider Inbox Classic knows; these are its servers." + change
+        return Text.macFoundMx.text + change
     case PE_AUTOCONFIG_SOURCE_SRV:
-        return "These settings were found in the DNS records of your domain." + change
+        return Text.macFoundSrv.text + change
     case PE_AUTOCONFIG_SOURCE_AUTODISCOVER:
-        return "These settings were found by Microsoft Autodiscover (Exchange)." + change
+        return Text.macFoundAutodiscover.text + change
     default:
-        return "These settings were found for this address." + change
+        return Text.macFoundOther.text + change
     }
 }
 
@@ -415,16 +436,16 @@ private func explainAppPassword(_ info: PeAutoconfigInfo?) {
     guard let info, info.app_password_provider != nil else { return }
     let provider = text(info.app_password_provider)
     var said = info.app_password_warning != nil ? text(info.app_password_warning)
-        : "\(provider) does not take your normal password in mail programs. Create an app password in your \(provider) account and type it in the Password field of the next form."
+        : Text.macAppPasswordNeeded.text(["provider": provider])
     let page = text(info.app_password_instructions)
     let linkable = page.hasPrefix("https://")
     if linkable {
-        said += "\n\nOpen \(provider)'s instructions in your browser?"
-        if ask(said, title: "Add Mail Account", style: .information) {
+        said += "\n\n" + Text.macOpenInstructions.text(["provider": provider])
+        if ask(said, title: Text.macAddMailAccount.text, style: .information) {
             openExternally(URL(string: page))
         }
     } else {
-        inform(said, title: "Add Mail Account")
+        inform(said, title: Text.macAddMailAccount.text)
     }
 }
 
@@ -435,7 +456,7 @@ private func addSignedIn(core: Core, with: SignInChoice, name: String, email: St
     guard request != 0 else { return 0 }
     let account = name.withCString { pe_account_add_signed_in(core.handle, request, $0) }
     if account <= 0 {
-        inform("The account could not be saved.", title: "Add Mail Account", style: .error)
+        inform(Text.macAccountNotSaved.text, title: Text.macAddMailAccount.text, style: .error)
     }
     return account
 }
@@ -451,8 +472,7 @@ func newAccountDialog(core: Core) -> Int64 {
     first.more = true
     first.fields = true
     first.intro = apps.on(PE_O_AUTH_PROVIDER_GOOGLE) || apps.on(PE_O_AUTH_PROVIDER_MICROSOFT)
-        ? "Gmail, Google Workspace, Outlook.com and Microsoft 365: sign in on Google's or Microsoft's own page. Your password is typed there, never into Inbox Classic."
-        : "Sign in through the browser with one of your sign-in apps (More sign-in options), or add any e-mail account with your name and address below."
+        ? Text.macStartIntro.text : Text.macStartIntroApps.text
     switch StartPage(core: core, apps: apps, offer: first, name: name, email: email).run(name: &name, email: &email) {
     case .cancel: return 0
     case .signIn(let with): return addSignedIn(core: core, with: with, name: name, email: email)
@@ -462,7 +482,7 @@ func newAccountDialog(core: Core) -> Int64 {
     // the servers of the address, looked up
     let request = email.withCString { pe_autoconfig_start(core.handle, $0, nil) }
     let domain = email.split(separator: "@").last.map(String.init) ?? email
-    guard Waiting.wait(for: request, text: "Looking up the settings of \(domain)\u{2026}", title: "Add Mail Account",
+    guard Waiting.wait(for: request, text: Text.macLookingUp.text(["domain": domain]), title: Text.macAddMailAccount.text,
                        cancel: { pe_autoconfig_cancel(core.handle, $0) }) else { return 0 }
     let found = pe_autoconfig_result(core.handle, request)
     defer { if let found { pe_autoconfig_free(found) } }
@@ -472,14 +492,14 @@ func newAccountDialog(core: Core) -> Int64 {
     let provider = info.map { info in pe_oauth_provider_for(core.handle, info.imap_host) } ?? PE_O_AUTH_PROVIDER_NONE
     var offer = StartOffer()
     offer.more = !apps.addedOn.isEmpty
-    offer.next = "Use App Password"
+    offer.next = Text.macUseAppPassword.text
     if provider != PE_O_AUTH_PROVIDER_NONE && (apps.on(provider) || offer.more) {
-        let company = signInButtons.first { $0.provider == provider }?.company ?? "the provider"
+        let company = signInButtons.first { $0.provider == provider }?.company ?? Text.macTheProvider.text
         if apps.on(provider) {
             offer.providers = [provider]
-            offer.intro = "\(email) signs in on \(company)'s own page, without giving Inbox Classic your password. Or use an app password made in your account's security settings."
+            offer.intro = Text.macSignsInAt.text(["email": email, "provider": company])
         } else {
-            offer.intro = "\(email) can sign in on \(company)'s own page with one of your sign-in apps (More sign-in options). Or use an app password made in your account's security settings."
+            offer.intro = Text.macCanSignInAt.text(["email": email, "provider": company])
         }
         switch StartPage(core: core, apps: apps, offer: offer, name: name, email: email).run(name: &name, email: &email) {
         case .cancel: return 0
@@ -495,10 +515,10 @@ func newAccountDialog(core: Core) -> Int64 {
         smtpHost: info.map { text($0.smtp_host) } ?? "", smtpPort: info?.smtp_port ?? 465,
         smtpSecurity: info?.smtp_security ?? PE_SECURITY_TLS)
     // the name and address were typed already: the password is next
-    while let filled = formDialog(title: "Add Mail Account", intro: foundIntro(info), fields: fields, ok: "Finish",
-                                  focus: Field.password.rawValue, validate: validate) {
+    while let filled = formDialog(title: Text.macAddMailAccount.text, intro: foundIntro(info), fields: fields,
+                                  ok: Text.macFinish.text, focus: Field.password.rawValue, validate: validate) {
         fields = filled
-        guard acceptPlain(fields, title: "Add Mail Account") else { continue }
+        guard acceptPlain(fields, title: Text.macAddMailAccount.text) else { continue }
         let strings = CStrings()
         var settings = settingsOf(fields, strings)
         let password = strings.add(fields[Field.password.rawValue].value)
@@ -507,7 +527,7 @@ func newAccountDialog(core: Core) -> Int64 {
         if account > 0 {
             return account
         }
-        inform("The account could not be saved.", title: "Add Mail Account", style: .error)
+        inform(Text.macAccountNotSaved.text, title: Text.macAddMailAccount.text, style: .error)
     }
     return 0
 }
@@ -515,8 +535,8 @@ func newAccountDialog(core: Core) -> Int64 {
 /// the password of `account`, asked for; nil when cancelled
 @MainActor
 func passwordDialog(account: String) -> String? {
-    formDialog(title: "Logon", intro: "Enter the password of \(account).",
-               fields: [FormField(label: "Password:", kind: .password)])?[0].value
+    formDialog(title: Text.macLogon.text, intro: Text.macEnterPassword.text(["account": account]),
+               fields: [FormField(label: Text.macPassword.text, kind: .password)])?[0].value
 }
 
 // ---- the Accounts window ----
@@ -533,8 +553,8 @@ private func accountProperties(core: Core, account: Int64, signsInWith: String) 
                               smtpHost: text(stored.smtp_host), smtpPort: stored.smtp_port, smtpSecurity: stored.smtp_security)
     if !signsInWith.isEmpty {
         // a browser sign-in account: the name only, the rest is the provider's
-        guard let name = formDialog(title: "Properties",
-                                    intro: "Signs in with: \(signsInWith). It signs in through the browser and uses the servers of its sign-in.",
+        guard let name = formDialog(title: Text.macProperties.text,
+                                    intro: Text.macSignsInWith.text(["app": signsInWith]),
                                     fields: [fields[Field.name.rawValue]]) else { return false }
         fields[Field.name.rawValue] = name[0]
         let strings = CStrings()
@@ -542,7 +562,7 @@ private func accountProperties(core: Core, account: Int64, signsInWith: String) 
         return pe_account_update(core.handle, account, &settings)
     }
     let was = (imap: stored.imap_security, imapHost: text(stored.imap_host), smtp: stored.smtp_security, smtpHost: text(stored.smtp_host))
-    while let filled = formDialog(title: "Properties", intro: "Leave the password empty to keep the one you have.", fields: fields,
+    while let filled = formDialog(title: Text.macProperties.text, intro: Text.macKeepPassword.text, fields: fields,
                                   validate: validate) {
         fields = filled
         // warned for a side without encryption, unless it was so already to the same server
@@ -551,13 +571,13 @@ private func accountProperties(core: Core, account: Int64, signsInWith: String) 
                 && (before != PE_SECURITY_PLAIN || fields[host.rawValue].value != beforeHost)
         }
         let warn = newlyPlain(.imapSecurity, .imapHost, was.imap, was.imapHost) || newlyPlain(.smtpSecurity, .smtpHost, was.smtp, was.smtpHost)
-        if warn && !acceptPlain(fields, title: "Properties") {
+        if warn && !acceptPlain(fields, title: Text.macProperties.text) {
             continue
         }
         let strings = CStrings()
         var settings = settingsOf(fields, strings)
         guard pe_account_update(core.handle, account, &settings) else {
-            inform("The account could not be saved.", title: "Properties", style: .error)
+            inform(Text.macAccountNotSaved.text, title: Text.macProperties.text, style: .error)
             continue
         }
         let password = fields[Field.password.rawValue].value
@@ -589,10 +609,11 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 640, height: 280), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
-        window.title = "Accounts"
+        window.title = Text.macAccounts.text
         window.identifier = NSUserInterfaceItemIdentifier("accounts")
         super.init()
-        for (id, title, width) in [("name", "Account", 140.0), ("email", "E-mail address", 190.0), ("server", "Incoming server", 160.0)] {
+        for (id, title, width) in [("name", Text.macColumnAccount.text, 140.0), ("email", Text.macColumnEmail.text, 190.0),
+                                   ("server", Text.macColumnIncoming.text, 160.0)] {
             let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(id))
             column.title = title
             column.width = width
@@ -611,13 +632,15 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         scroll.hasVerticalScroller = true
         scroll.borderType = .bezelBorder
         let buttons = NSStackView(views: [
-            button("Add\u{2026}", #selector(add), "accounts.add"), button("Properties\u{2026}", #selector(properties), "accounts.properties"),
-            button("Signature\u{2026}", #selector(signature), "accounts.signature"), button("Remove", #selector(remove), "accounts.remove"),
-            button("Sign-in Apps\u{2026}", #selector(signInApps), "accounts.apps"),
+            button(Text.macAddButton.text, #selector(add), "accounts.add"),
+            button(Text.macPropertiesButton.text, #selector(properties), "accounts.properties"),
+            button(Text.macSignatureButton.text, #selector(signature), "accounts.signature"),
+            button(Text.macRemove.text, #selector(remove), "accounts.remove"),
+            button(Text.macSignInAppsButton.text, #selector(signInApps), "accounts.apps"),
         ])
         buttons.orientation = .vertical
         buttons.alignment = .leading
-        let close = button("Close", #selector(closeClicked), "accounts.close")
+        let close = button(Text.macClose.text, #selector(closeClicked), "accounts.close")
         close.keyEquivalent = "\r"
         let side = NSStackView(views: [buttons, NSView(), close])
         side.orientation = .vertical
@@ -657,7 +680,8 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         switch column?.identifier.rawValue {
         case "name": value = account.name
         case "email": value = account.email
-        default: value = account.imapHost + (account.oauth != PE_O_AUTH_PROVIDER_NONE ? " (browser sign-in)" : "")
+        default: value = account.oauth != PE_O_AUTH_PROVIDER_NONE ? Text.macBrowserSignIn.text(["server": account.imapHost])
+                                                                  : account.imapHost
         }
         let label = NSTextField(labelWithString: value)
         label.lineBreakMode = .byTruncatingTail
@@ -691,8 +715,8 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
 
     @objc private func remove() {
         guard let account = selected,
-              ask("Remove this account from Inbox Classic? Its mail stays on the server; the copy on this computer and the saved password are removed.",
-                  title: "Remove Account", yes: "Remove", no: "Cancel", destructive: true) else { return }
+              ask(Text.macRemoveAccountQuestion.text, title: Text.macRemoveAccount.text, yes: Text.macRemove.text,
+                  no: Text.macCancel.text, destructive: true) else { return }
         let row = table.selectedRow
         pe_account_remove(core.handle, account.id)
         changed = true

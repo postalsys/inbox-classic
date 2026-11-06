@@ -796,7 +796,7 @@ extension UITest {
         let ask = await waitWindow("alert", 10)
         check(ask != nil, "closing asks before throwing the text away")
         await shot(ask, "write-6-close")
-        answer(ask, "Don't Save")
+        answer(ask, Text.macDontSave.text)
         check(await waitUntil { !compose.isVisible }, "Don't Save closes it")
         await pause(1)
         check(await findMessage("Drafts", "Never mind") == nil, "without saving it")

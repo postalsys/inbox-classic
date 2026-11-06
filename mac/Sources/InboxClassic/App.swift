@@ -21,6 +21,8 @@ public struct Arguments {
     public var mcp = false
     /// --background: started for an agent (by --mcp), without its window
     public var background = false
+    /// --language <code>: the language of the windows for this run (tests: de, qps), over the one chosen
+    public var language: String?
 
     public init(_ arguments: [String]) {
         var rest = arguments.dropFirst().makeIterator()
@@ -33,6 +35,7 @@ public struct Arguments {
             case "--version": version = true
             case "--mcp": mcp = true
             case "--background": background = true
+            case "--language": language = rest.next()
             default:
                 if argument.lowercased().hasPrefix("mailto:") {
                     mailto = argument
@@ -62,6 +65,8 @@ public func runApp(_ arguments: Arguments = Arguments(CommandLine.arguments)) ->
         let store = arguments.store ?? defaultStorePath()
         exit(arguments.store.map { given in given.withCString { pe_mcp_relay(store, $0) } } ?? pe_mcp_relay(store, nil))
     }
+    // every word of the windows in the language of this run, before the first window reads one
+    Languages.apply(arguments.language)
     let app = NSApplication.shared
     let delegate = AppDelegate(arguments)
     app.delegate = delegate
@@ -104,8 +109,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         guard let core = Core(path: store, memoryPasswords: arguments.memoryPasswords, certificate: arguments.certificate,
                               onEvent: { [weak self] in self?.main?.onEvent($0) })
         else {
-            inform(arguments.certificate == nil ? "The mail store could not be opened."
-                                                     : "The mail store or the certificate file could not be opened.",
+            inform(arguments.certificate == nil ? Text.macStoreNotOpened.text : Text.macStoreOrCertificateNotOpened.text,
                         style: .error)
             NSApp.terminate(nil)
             return
@@ -166,7 +170,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     public func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
         let menu = NSMenu()
         for command in Command.allCases where command.menu == "tray" || command == .sync || command == .notify {
-            menu.addItem(item(for: command, title: command == .sync ? "Check for New Mail" : nil))
+            menu.addItem(item(for: command, title: command == .sync ? Text.trayCheck.text : nil))
         }
         return menu
     }
@@ -244,19 +248,21 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         let separator = { NSMenuItem.separator() }
 
         let about = item(for: .about)
-        let quit = item(for: .exit, title: "Quit Inbox Classic")
-        let services = NSMenuItem(title: "Services", action: nil, keyEquivalent: "")
+        let quit = item(for: .exit, title: Text.macQuit.text)
+        let settings = item(for: .options, title: Text.macSettings.text)
+        let services = NSMenuItem(title: Text.macServices.text, action: nil, keyEquivalent: "")
         services.submenu = NSMenu()
         NSApp.servicesMenu = services.submenu
-        let hide = NSMenuItem(title: "Hide Inbox Classic", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
-        let hideOthers = NSMenuItem(title: "Hide Others", action: #selector(NSApplication.hideOtherApplications(_:)),
+        let hide = NSMenuItem(title: Text.macHide.text, action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
+        let hideOthers = NSMenuItem(title: Text.macHideOthers.text, action: #selector(NSApplication.hideOtherApplications(_:)),
                                     keyEquivalent: "h")
         hideOthers.keyEquivalentModifierMask = [.command, .option]
-        let showAll = NSMenuItem(title: "Show All", action: #selector(NSApplication.unhideAllApplications(_:)),
+        let showAll = NSMenuItem(title: Text.macShowAll.text, action: #selector(NSApplication.unhideAllApplications(_:)),
                                  keyEquivalent: "")
-        let updates = NSMenuItem(title: "Check for Updates\u{2026}", action: #selector(checkForUpdates), keyEquivalent: "")
+        let updates = NSMenuItem(title: Text.macCheckUpdates.text, action: #selector(checkForUpdates), keyEquivalent: "")
         updates.target = self
-        _ = submenu(appName, [about, updates, separator(), services, separator(), hide, hideOthers, showAll, separator(), quit])
+        _ = submenu(appName, [about, updates, separator(), settings, separator(), services, separator(), hide, hideOthers,
+                              showAll, separator(), quit])
 
         // the commands of each menu in the order of the table, grouped as the Windows menus group them
         let file = commands("file").filter { $0 != .exit }
@@ -264,51 +270,52 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
                                        item(for: .newFolder), item(for: .renameFolder), item(for: .deleteFolder), separator(),
                                        item(for: .saveAs), item(for: .import), item(for: .print), separator(),
                                        item(for: .properties), separator(),
-                                       NSMenuItem(title: "Close Window", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")]
+                                       NSMenuItem(title: Text.macCloseWindow.text, action: #selector(NSWindow.performClose(_:)),
+                                                  keyEquivalent: "w")]
         assert(file.allSatisfy { command in fileItems.contains { $0.tag == command.rawValue } })
-        _ = submenu("File", fileItems)
+        _ = submenu(Text.menuFile.text, fileItems)
 
         // Undo and Select All go to the first responder: a text field's own, or the message list's (Command.undo and
         // Command.selectAll, which the list and the tree answer)
         let edit: [NSMenuItem] = [
-            NSMenuItem(title: "Undo", action: Selector(("undo:")), keyEquivalent: "z"),
+            NSMenuItem(title: Text.cmdUndo.text, action: Selector(("undo:")), keyEquivalent: "z"),
             {
-                let redo = NSMenuItem(title: "Redo", action: Selector(("redo:")), keyEquivalent: "z")
+                let redo = NSMenuItem(title: Text.macRedo.text, action: Selector(("redo:")), keyEquivalent: "z")
                 redo.keyEquivalentModifierMask = [.command, .shift]
                 return redo
             }(),
             separator(),
-            NSMenuItem(title: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x"),
-            NSMenuItem(title: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
-            NSMenuItem(title: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
-            NSMenuItem(title: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
+            NSMenuItem(title: Text.macCut.text, action: #selector(NSText.cut(_:)), keyEquivalent: "x"),
+            NSMenuItem(title: Text.macCopy.text, action: #selector(NSText.copy(_:)), keyEquivalent: "c"),
+            NSMenuItem(title: Text.macPaste.text, action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
+            NSMenuItem(title: Text.cmdSelectAll.text, action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
             separator(),
             item(for: .find), separator(),
             item(for: .markRead), item(for: .markUnread), item(for: .markAllRead), separator(),
             item(for: .move), item(for: .delete),
         ]
-        _ = submenu("Edit", edit)
-        _ = submenu("View", commands("view").map { item(for: $0) })
-        _ = submenu("Message", [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
+        _ = submenu(Text.menuEdit.text, edit)
+        _ = submenu(Text.menuView.text, commands("view").map { item(for: $0) })
+        _ = submenu(Text.menuMessage.text, [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
                                 separator(), item(for: .flag), flagMenu(), separator(), item(for: .junk),
                                 item(for: .notJunk)])
-        _ = submenu("Tools", [item(for: .sync), item(for: .outbox), separator(), item(for: .aiAgents), separator(), item(for: .notify),
+        _ = submenu(Text.menuTools.text, [item(for: .sync), item(for: .outbox), separator(), item(for: .aiAgents), separator(), item(for: .notify),
                               item(for: .defaultApp)])
-        let window = submenu("Window", [
-            NSMenuItem(title: "Minimize", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"),
-            NSMenuItem(title: "Zoom", action: #selector(NSWindow.performZoom(_:)), keyEquivalent: ""),
+        let window = submenu(Text.macMenuWindow.text, [
+            NSMenuItem(title: Text.macMinimize.text, action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"),
+            NSMenuItem(title: Text.macZoom.text, action: #selector(NSWindow.performZoom(_:)), keyEquivalent: ""),
             separator(),
             NSMenuItem(title: "Inbox Classic", action: #selector(showMain), keyEquivalent: "0"),
         ])
         NSApp.windowsMenu = window
-        let help = submenu("Help", [item(for: .help, title: "Inbox Classic Help")])
+        let help = submenu(Text.menuHelp.text, [item(for: .help, title: Text.macHelpTitle.text)])
         NSApp.helpMenu = help
         return bar
     }
 
     @objc func checkForUpdates() {
         guard let updater else {
-            inform("This copy of Inbox Classic does not update itself. Get the latest version from inboxclassic.com.")
+            inform(Text.macNoUpdates.text)
             return
         }
         updater.checkForUpdates(nil)
@@ -316,6 +323,32 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
 
     @objc func showMain() {
         main?.show()
+    }
+
+    /// Starts the app again (a language chosen in Settings counts from the start): a new copy a moment after this one
+    /// has quit, so the two never hold the store at once
+    /// The menus and the main window made again in the language set now, as starting in it makes them: the UI test's
+    /// start again, which it can not do in its own process
+    func remakeWindows() {
+        guard let core else { return }
+        NSApp.mainMenu = buildMenu()
+        let old = main
+        main = MainWindow(core: core)
+        old?.window.orderOut(nil)
+        main.window.makeKeyAndOrderFront(nil)
+        onMain { [weak self] in
+            self?.main?.mailbox.placeDividers()
+            self?.main?.mailbox.selectStart()
+        }
+    }
+
+    func restart() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; /usr/bin/open \"$2\"", "restart",
+                             String(ProcessInfo.processInfo.processIdentifier), Bundle.main.bundlePath]
+        try? process.run()
+        NSApp.terminate(nil)
     }
 
     @objc func runCommand(_ sender: NSMenuItem) {
@@ -363,12 +396,13 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .aiAgents: AgentsWindow.open(core: core)
         case .selectAll: main.mailbox.selectAllMessages()
         case .undo: main.mailbox.undo()
+        case .options: SettingsWindow.open(core: core)
         }
     }
 
     /// Flag, a submenu of the seven colours Apple Mail flags in (by name, with their colour), then Clear Flag
     func flagMenu() -> NSMenuItem {
-        let menu = NSMenu(title: "Flag")
+        let menu = NSMenu(title: Text.macFlag.text)
         for color in UInt8(1)...7 {
             let name = taken(pe_flag_color_name(color)) ?? ""
             let item = NSMenuItem(title: name, action: #selector(flagColor(_:)), keyEquivalent: "")
@@ -379,11 +413,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             menu.addItem(item)
         }
         menu.addItem(.separator())
-        let clear = NSMenuItem(title: "Clear Flag", action: #selector(clearFlag(_:)), keyEquivalent: "")
+        let clear = NSMenuItem(title: Text.macClearFlag.text, action: #selector(clearFlag(_:)), keyEquivalent: "")
         clear.target = self
         clear.setAccessibilityIdentifier("flag.clear")
         menu.addItem(clear)
-        let flag = NSMenuItem(title: "Flag", action: nil, keyEquivalent: "")
+        let flag = NSMenuItem(title: Text.macFlag.text, action: nil, keyEquivalent: "")
         flag.submenu = menu
         return flag
     }

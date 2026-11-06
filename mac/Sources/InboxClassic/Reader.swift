@@ -12,11 +12,11 @@ final class Reader: NSObject {
     private let header = NSTextField(wrappingLabelWithString: "")
     private let logo = NSImageView()
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
-    private let unsubscribe = NSButton(title: "Unsubscribe", target: nil, action: nil)
-    private let invitation = InfoBar(icon: "calendar_ltr", link: nil, button: "Open in Calendar")
+    private let unsubscribe = NSButton(title: Text.macUnsubscribe.text, target: nil, action: nil)
+    private let invitation = InfoBar(icon: "calendar_ltr", link: nil, button: Text.macOpenInCalendar.text)
     private let pictures = InfoBar(icon: "image", link: nil)
     /// over a message that could not be downloaded: Try Again
-    private let retry = InfoBar(icon: "arrow_sync", link: nil, button: "Try Again")
+    private let retry = InfoBar(icon: "arrow_sync", link: nil, button: Text.macTryAgain.text)
     /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
     private var downloadingTimer: Timer?
     private(set) var picturesOffered = false
@@ -42,7 +42,7 @@ final class Reader: NSObject {
         attachments.menu?.delegate = self
         unsubscribe.isBordered = false
         unsubscribe.contentTintColor = .linkColor
-        unsubscribe.attributedTitle = NSAttributedString(string: "Unsubscribe", attributes: [
+        unsubscribe.attributedTitle = NSAttributedString(string: Text.macUnsubscribe.text, attributes: [
             .foregroundColor: NSColor.linkColor, .underlineStyle: NSUnderlineStyle.single.rawValue,
             .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
         ])
@@ -70,7 +70,7 @@ final class Reader: NSObject {
         let line = NSBox()
         line.boxType = .separator
 
-        pictures.text = "Some pictures have been blocked to help prevent the sender from identifying your computer. Click here to download pictures."
+        pictures.text = Text.macPicturesBlocked.text
         pictures.clicked = { [weak self] in self?.mailbox?.loadPictures() }
         pictures.setAccessibilityIdentifier("reader.pictures")
         invitation.clicked = { [weak self] in self?.mailbox?.openInCalendar() }
@@ -185,7 +185,7 @@ final class Reader: NSObject {
         attachments.isHidden = files == 0
         attachments.removeAllItems()
         // the title item of a pull-down button: the paper clip and how many files there are
-        attachments.addItem(withTitle: files == 1 ? "1 file" : "\(files) files")
+        attachments.addItem(withTitle: Text.macFiles.text(["count": files]))
         attachments.item(at: 0)?.image = Icons.list("attach")
         // a mailing list that says how to leave it
         unsubscribe.isHidden = info.unsubscribe == PE_UNSUBSCRIBE_NONE
@@ -210,10 +210,10 @@ final class Reader: NSObject {
             out.append(NSAttributedString(string: name + ":  ", attributes: [.font: bold, .foregroundColor: NSColor.secondaryLabelColor]))
             out.append(NSAttributedString(string: value + (last ? "" : "\n"), attributes: [.font: font, .foregroundColor: NSColor.labelColor]))
         }
-        line("From", from)
-        line("Date", date.map(formatDate) ?? "")
-        line("To", cc.isEmpty ? to : to + "    Cc:  " + cc)
-        line("Subject", subject, last: true)
+        line(Text.headerFrom.text, from)
+        line(Text.headerDate.text, date.map(formatDate) ?? "")
+        line(Text.headerTo.text, cc.isEmpty ? to : to + "    " + Text.headerCc.text + ":  " + cc)
+        line(Text.headerSubject.text, subject, last: true)
         return out
     }
 
@@ -242,17 +242,17 @@ final class Reader: NSObject {
             invitation.isHidden = true
             return
         }
-        let kinds = ["Invitation: ", "Updated invitation: ", "Canceled: ", "Answer to an invitation: "]
+        let kinds = [Text.macInvitation, Text.macInvitationUpdated, Text.macInvitationCanceled, Text.macInvitationAnswer]
         let summary = text(event.summary)
-        let title = kinds[min(Int(event.kind.rawValue), 3)] + (summary.isEmpty ? "(no title)" : summary)
+        let title = kinds[min(Int(event.kind.rawValue), 3)].text(["title": summary.isEmpty ? Text.macNoTitle.text : summary])
         var parts = [when(event), text(event.location)]
         let organizer = text(event.organizer)
         if !organizer.isEmpty {
-            parts.append("Organizer: \(organizer)")
+            parts.append(Text.macOrganizer.text(["name": organizer]))
         }
         parts.append(text(event.repeats))
         if event.attendees > 0 {
-            parts.append("\(event.attendees) " + (event.attendees == 1 ? "attendee" : "attendees"))
+            parts.append(Text.macAttendees.text(["count": event.attendees]))
         }
         invitation.title = title
         invitation.text = parts.filter { !$0.isEmpty }.joined(separator: "   \u{00B7}   ")
@@ -264,10 +264,12 @@ final class Reader: NSObject {
         guard event.has_start else { return "" }
         let zone = event.floating ? TimeZone(secondsFromGMT: 0)! : TimeZone.current
         let day = DateFormatter()
+        day.locale = Languages.locale
         day.dateStyle = .full
         day.timeStyle = .none
         day.timeZone = zone
         let time = DateFormatter()
+        time.locale = Languages.locale
         time.dateStyle = .none
         time.timeStyle = .short
         time.timeZone = zone
@@ -277,16 +279,16 @@ final class Reader: NSObject {
         let end = event.has_end ? Date(timeIntervalSince1970: TimeInterval(event.end - (event.all_day ? 86400 : 0))) : nil
         if event.all_day {
             if let end, !calendar.isDate(start, inSameDayAs: end) {
-                return day.string(from: start) + " to " + day.string(from: end)
+                return Text.macFromTo.text(["start": day.string(from: start), "end": day.string(from: end)])
             }
             return day.string(from: start)
         }
         var said = day.string(from: start) + ", " + time.string(from: start)
         if let end {
-            said += calendar.isDate(start, inSameDayAs: end) ? " to " + time.string(from: end)
-                : " to " + day.string(from: end) + ", " + time.string(from: end)
+            said = Text.macFromTo.text(["start": said, "end": calendar.isDate(start, inSameDayAs: end)
+                ? time.string(from: end) : day.string(from: end) + ", " + time.string(from: end)])
         }
-        return event.floating ? said + " (the sender's time)" : said
+        return event.floating ? Text.macSendersTime.text(["when": said]) : said
     }
 }
 
