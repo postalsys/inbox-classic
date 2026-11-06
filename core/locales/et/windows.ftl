@@ -3,13 +3,13 @@
 
 ## Põhiaken
 
-win-still-running-detail = See kontrollib siin edasi uusi kirju. Avamiseks klõpsake ikooni, sulgemiseks paremklõpsake seda.
+win-still-running-detail = Inbox Classic kontrollib taustal uute kirjade saabumist. Avamiseks klõpsake ikooni. Väljumiseks avage paremklõpsuga ikooni menüü.
 win-new-messages = { $count ->
     [one] { $count } uus kiri
    *[other] { $count } uut kirja
 }
 win-default-app-not-installed = Seda Inbox Classicu koopiat pole installitud, seega ei näita Windows seda meiliprogrammina. Selle valimiseks installige see.
-win-default-app-settings = Windows avab Inbox Classicu vaikerakenduste sätted. Valige see seal MAILTO jaoks.
+win-default-app-settings = Windows avab vaikerakenduste sätted. Määrake Inbox Classic seal MAILTO-linkide avamiseks.
 win-no-unread = Lugemata kirju pole
 win-unread-messages = { $count ->
     [one] { $count } lugemata kiri
@@ -17,7 +17,7 @@ win-unread-messages = { $count ->
 }
 win-print-failed = Kirja ei saanud printida.
 win-print-title-of = Prindi: { $subject }
-win-no-bodies = Kirjade sisu ei saa näidata.
+win-no-bodies = Kirjade sisu ei saa kuvada.
 win-webview-failed = WebView2 loomine ebaõnnestus.
 win-webview-missing = WebView2 käituskeskkond pole saadaval.
 
@@ -36,9 +36,9 @@ win-too-many-files = Liiga palju faile korraga: valige vähem.
 
 win-editor-failed = Kirju ei saa kirjutada.
 win-ctrl-click-to-open = ({ $ctrl }+klõps avab)
-win-format-bold = Paks ({ $ctrl }+B)
+win-format-bold = Paks kiri ({ $ctrl }+B)
 win-format-italic = Kaldkiri ({ $ctrl }+I)
-win-format-underline = Allakriipsutus ({ $ctrl }+U)
+win-format-underline = Allajoonitud ({ $ctrl }+U)
 win-format-link = Hüperlink ({ $ctrl }+K)
 win-show-cc = &Koopia
 win-show-bcc = &Pimekoopia
@@ -61,8 +61,7 @@ win-search-indexing = { $count ->
    *[other] { $count } kirja teksti alles indekseeritakse
 }
 win-no-match-indexing = { $count ->
-    [one] { $count } kirja teksti alles indekseeritakse, nii et peagi võib leida rohkem.
-   *[other] { $count } kirja teksti alles indekseeritakse, nii et peagi võib leida rohkem.
+   *[other] { $count } kirja sisu veel indekseeritakse. Otsingutulemusi võib lisanduda.
 }
 win-files = { $count ->
     [one] { $count } fail
@@ -75,8 +74,8 @@ win-attendees = { $count ->
     [one] { $count } osaleja
    *[other] { $count } osalejat
 }
-win-new-folder-in-highlighted = Uus kaust tuleb esiletõstetud kausta.
-win-delete-folder-ask = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja kaustadega? See kustutatakse ka serverist.
+win-new-folder-in-highlighted = Uus kaust luuakse valitud kausta alamkaustana.
+win-delete-folder-ask = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
 win-rename = &Nimeta ümber...
 win-messages-not-saved = Kirju ei saanud salvestada.
 win-messages-not-forwarded = Kirju ei saanud edastada.
@@ -100,11 +99,11 @@ win-col-address = Aadress
 win-never-written-to = Pole kunagi kirjutanud
 win-send = &Saada
 win-dont-send = Ä&ra saada
-win-forget-program-ask = Kas unustada see programm ja see, mida selle agendid tegid? Järgmisel ühendumisel küsitakse uuesti.
-win-clear-log-ask = Kas tühjendada loend sellest, mida agendid tegid? Mis tehtud, see jääb tehtuks.
-win-agent-programs = &Programmid, mille agendid soovisid teie kirju kasutada:
+win-forget-program-ask = Kas eemaldada see programm koos õiguste ja agentide tegevusajalooga? Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
+win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agentide tehtud muudatusi tagasi.
+win-agent-programs = &Programmid, mille agendid on taotlenud juurdepääsu teie e-postile:
 win-change = &Muuda...
-win-what-agents-did = &Mida agendid tegid:
+win-what-agents-did = &Agentide tegevusajalugu:
 win-how-to-connect = Kuidas agenti ühendada
 
 ## Sisselogimisrakendused
@@ -115,6 +114,6 @@ win-edit = &Muuda...
 ## Suvandid
 
 win-options-language-label = &Inbox Classicu keel:
-win-options-restart-note = Teise keele näitamiseks taaskäivitub Inbox Classic.
+win-options-restart-note = Keele vahetamiseks tuleb Inbox Classic taaskäivitada.
 win-options-notify = &Teavita mind uute kirjade saabumisest
-win-restart-ask = Inbox Classic näitab valitud keelt ({ $language }) pärast taaskäivitust. Kas taaskäivitada kohe?
+win-restart-ask = Valitud keel ({ $language }) rakendub pärast Inbox Classicu taaskäivitamist. Kas taaskäivitada kohe?

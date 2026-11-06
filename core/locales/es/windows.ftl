@@ -3,13 +3,13 @@
 
 ## La ventana principal
 
-win-still-running-detail = Sigue buscando correo nuevo aquí. Haga clic en el icono para abrirlo, o haga clic con el botón derecho para salir.
+win-still-running-detail = Inbox Classic sigue buscando correo nuevo en segundo plano. Haga clic en su icono para abrirlo. Para salir, abra el menú del icono con el botón derecho.
 win-new-messages = { $count ->
     [one] { $count } mensaje nuevo
    *[other] { $count } mensajes nuevos
 }
-win-default-app-not-installed = Esta copia de Inbox Classic no se instaló, por eso Windows no la muestra como programa de correo. Instálela para elegirla.
-win-default-app-settings = Windows abre su configuración de aplicaciones predeterminadas para Inbox Classic. Elíjalo allí para MAILTO.
+win-default-app-not-installed = Inbox Classic no está instalado, por lo que Windows no lo muestra entre las aplicaciones de correo. Instálelo para elegirlo como aplicación predeterminada.
+win-default-app-settings = Windows abrirá la configuración de aplicaciones predeterminadas. Seleccione Inbox Classic para abrir los vínculos MAILTO.
 win-no-unread = No hay mensajes sin leer
 win-unread-messages = { $count ->
     [one] { $count } mensaje sin leer
@@ -61,8 +61,8 @@ win-search-indexing = { $count ->
    *[other] aún se indexa el texto de { $count } mensajes
 }
 win-no-match-indexing = { $count ->
-    [one] El texto de { $count } mensaje aún se está indexando, así que pronto puede encontrarse más.
-   *[other] El texto de { $count } mensajes aún se está indexando, así que pronto puede encontrarse más.
+    [one] Se está indexando el texto de { $count } mensaje. Pueden aparecer más resultados.
+   *[other] Se está indexando el texto de { $count } mensajes. Pueden aparecer más resultados.
 }
 win-files = { $count ->
     [one] { $count } archivo
@@ -70,13 +70,13 @@ win-files = { $count ->
 }
 win-click-to-retry = Haga clic aquí para volver a intentarlo.
 win-save-attachments = &Guardar archivos adjuntos...
-win-files-not-saved = No se pudieron guardar { $failed } de los { $count } archivos.
+win-files-not-saved = Archivos sin guardar: { $failed } de { $count }.
 win-attendees = { $count ->
     [one] { $count } asistente
    *[other] { $count } asistentes
 }
-win-new-folder-in-highlighted = La carpeta nueva va dentro de la carpeta resaltada.
-win-delete-folder-ask = ¿Eliminar la carpeta «{ $folder }» con sus mensajes y las carpetas que contiene? También se elimina en el servidor.
+win-new-folder-in-highlighted = La nueva carpeta se creará dentro de la carpeta seleccionada.
+win-delete-folder-ask = ¿Eliminar la carpeta «{ $folder }», todos sus mensajes y sus subcarpetas? También se eliminarán del servidor.
 win-rename = Cambiar &nombre...
 win-messages-not-saved = No se pudieron guardar los mensajes.
 win-messages-not-forwarded = No se pudieron reenviar los mensajes.
@@ -100,11 +100,11 @@ win-col-address = Dirección
 win-never-written-to = Nunca escrito
 win-send = &Enviar
 win-dont-send = &No enviar
-win-forget-program-ask = ¿Olvidar este programa y lo que hicieron sus agentes? Se volverá a preguntar la próxima vez que se conecte.
-win-clear-log-ask = ¿Borrar la lista de lo que hicieron los agentes? Lo que hicieron queda hecho.
+win-forget-program-ask = ¿Quitar este programa, sus permisos y el historial de sus agentes? Se le volverá a pedir autorización la próxima vez que el programa se conecte.
+win-clear-log-ask = ¿Borrar el historial de los agentes? Esto no deshará los cambios realizados.
 win-agent-programs = P&rogramas cuyos agentes pidieron usar su correo:
 win-change = &Cambiar...
-win-what-agents-did = &Lo que hicieron los agentes:
+win-what-agents-did = &Historial de los agentes:
 win-how-to-connect = Cómo conectar un agente
 
 ## Aplicaciones de inicio de sesión
@@ -115,6 +115,6 @@ win-edit = &Modificar...
 ## Opciones
 
 win-options-language-label = &Mostrar Inbox Classic en:
-win-options-restart-note = Inbox Classic se reinicia para mostrar otro idioma.
+win-options-restart-note = Reinicie Inbox Classic para aplicar el nuevo idioma.
 win-options-notify = &Avisarme cuando llegue correo nuevo
 win-restart-ask = Inbox Classic se mostrará en el idioma elegido ({ $language }) después de reiniciarse. ¿Reiniciar ahora?

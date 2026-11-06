@@ -3,10 +3,10 @@
 
 ## The main window
 
-gtk-search-looks-in = Die Suche durchsucht Betreff, Personen, Dateinamen und Text der Nachrichten in { $place }. Prüfen Sie die Schreibweise, oder versuchen Sie es mit weniger Wörtern.
+gtk-search-looks-in = Die Suche in { $place } umfasst Betreff, Absender, Empfänger, Anlagennamen und Nachrichtentext. Prüfen Sie die Schreibweise oder versuchen Sie es mit weniger Wörtern.
 gtk-search-still-indexing = { $count ->
-    [one] Der Text von 1 Nachricht wird noch indiziert, es kann also bald mehr gefunden werden.
-   *[other] Der Text von { $count } Nachrichten wird noch indiziert, es kann also bald mehr gefunden werden.
+    [one] Der Text einer Nachricht wird noch indiziert. Weitere Suchergebnisse können hinzukommen.
+   *[other] Die Texte von { $count } Nachrichten werden noch indiziert. Weitere Suchergebnisse können hinzukommen.
 }
 gtk-search-results-everywhere = { $count ->
     [0] Keine Ergebnisse
@@ -23,23 +23,23 @@ gtk-search-indexing = { $count ->
    *[other] der Text von { $count } Nachrichten wird noch indiziert
 }
 gtk-menu-rename = Umbenennen...
-gtk-import-one-question = Die Nachricht { $file } in den Ordner { $folder } legen?
-gtk-files-not-saved = { $failed } der { $total } Dateien konnten nicht gespeichert werden.
+gtk-import-one-question = Die Nachricht { $file } in den Ordner { $folder } importieren?
+gtk-files-not-saved = Nicht gespeicherte Dateien: { $failed } von { $total }.
 gtk-unsubscribe-one-click =
     Diese Mailingliste verlassen?
 
-    Inbox Classic bittet { $target }, Ihnen nichts mehr zu senden. Es öffnet sich keine Seite und es wird keine Nachricht gesendet.
+    Inbox Classic sendet eine Abmeldeanfrage an { $target }. Dabei wird keine Webseite geöffnet und keine E-Mail versendet.
 gtk-unsubscribe-mail =
     Diese Mailingliste verlassen?
 
-    Die Liste möchte eine Nachricht an { $target }. Inbox Classic schreibt sie für Sie; senden Sie sie, um abzubestellen.
+    Zum Abbestellen ist eine E-Mail an { $target } erforderlich. Inbox Classic bereitet sie für Sie vor. Senden Sie die Nachricht, um die Abmeldung abzuschließen.
 gtk-unsubscribe-web =
     Diese Mailingliste verlassen?
 
-    Die Seite der Liste dafür öffnet sich in Ihrem Browser ({ $target }).
+    Die Abmeldeseite der Mailingliste wird im Browser geöffnet ({ $target }).
 gtk-unsubscribe-failed = Abbestellen nicht möglich: { $problem }
-gtk-toolbar-create-mail-menu = Eine Nachricht von einem Konto
-gtk-toolbar-send-recv-menu = Ein Konto senden und empfangen
+gtk-toolbar-create-mail-menu = Nachricht von einem bestimmten Konto schreiben
+gtk-toolbar-send-recv-menu = Nachrichten für ein bestimmtes Konto senden und empfangen
 gtk-main-menu = Hauptmenü
 gtk-quit = Beenden
 
@@ -63,18 +63,21 @@ gtk-unread-messages = { $count ->
 
 ## The Outbox
 
-gtk-outbox-empty = Nichts wartet auf das Senden.
-gtk-outbox-row = An: { $to }  ·  Eingereiht { $queued }  ·  { $status }
+gtk-outbox-empty = Keine Nachrichten zum Senden vorhanden.
+gtk-outbox-row = An: { $to }  ·  In Warteschlange seit: { $queued }  ·  { $status }
 
 ## The app
 
-gtk-new-messages = { $count } neue Nachrichten
-gtk-still-running-detail = Es ruft weiter neue E-Mails ab. Sein Symbol in der oberen Leiste öffnet es wieder oder beendet es.
+gtk-new-messages = { $count ->
+    [one] { $count } neue Nachricht
+   *[other] { $count } neue Nachrichten
+}
+gtk-still-running-detail = Inbox Classic prüft im Hintergrund auf neue E-Mails. Über das Symbol in der oberen Leiste können Sie das Programm öffnen oder beenden.
 gtk-sign-in-again-ask =
-    Die Anmeldung von { $account } wurde abgelehnt oder ist abgelaufen.
+    Die Anmeldung für { $account } wurde abgelehnt oder ist abgelaufen.
 
     Im Browser erneut anmelden?
-gtk-default-app-not-installed = Diese Kopie von Inbox Classic wurde nicht installiert, daher führt das System sie nicht als E-Mail-Programm. Installieren Sie sie, um sie auszuwählen.
+gtk-default-app-not-installed = Inbox Classic ist nicht installiert und wird deshalb vom System nicht als E-Mail-Programm aufgeführt. Installieren Sie Inbox Classic, um es als Standard auszuwählen.
 gtk-default-app-now = Inbox Classic ist jetzt Ihr Standard-E-Mail-Programm: E-Mail-Links öffnen hier eine neue Nachricht.
 gtk-default-app-failed = Inbox Classic konnte nicht als Standard-E-Mail-Programm festgelegt werden.
 
@@ -83,7 +86,7 @@ gtk-default-app-failed = Inbox Classic konnte nicht als Standard-E-Mail-Programm
 ## The reading pane
 
 gtk-reader-date = Datum:
-gtk-reader-files = Die Dateien der Nachricht
+gtk-reader-files = Anlagen der Nachricht
 gtk-pictures-blocked = Einige Bilder wurden blockiert, damit der Absender Ihren Computer nicht erkennen kann.
 gtk-download-pictures = Bilder herunterladen
 gtk-save-attachments-menu = Anlagen speichern...
@@ -115,18 +118,18 @@ gtk-link-status = { $link }    (Strg+Klick zum Öffnen)
 ## Accounts
 
 gtk-plain-warning =
-    Ohne Verschlüsselung gehen Ihr Kennwort und Ihre E-Mails lesbar für jeden auf dem Weg durch das Netz. Verwenden Sie das nur für einen Server auf Ihrem eigenen Computer oder in Ihrem Netzwerk.
+    Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Kennwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
 
     Fortfahren?
 gtk-display-name-title = Anzeigename
-gtk-turned-off-why = { $button } ist auf diesem Computer ausgeschaltet. { $reason }
+gtk-turned-off-why = Die Option „{ $button }“ ist auf diesem Computer deaktiviert. { $reason }
 gtk-turned-off-why-long =
-    { $button } ist auf diesem Computer ausgeschaltet.
+    Die Option „{ $button }“ ist auf diesem Computer deaktiviert.
 
     { $reason }
 gtk-next = Weiter >
-gtk-provider-sign-in = { $address } meldet sich auf der Seite von { $provider } an, ohne Inbox Classic Ihr Kennwort zu geben. Oder verwenden Sie ein App-Kennwort aus den Sicherheitseinstellungen Ihres Kontos.
-gtk-provider-sign-in-apps = { $address } kann sich auf der Seite von { $provider } mit einer Ihrer Anmelde-Apps anmelden (Weitere Anmeldeoptionen). Oder verwenden Sie ein App-Kennwort aus den Sicherheitseinstellungen Ihres Kontos.
+gtk-provider-sign-in = Melden Sie sich für { $address } auf der Webseite von { $provider } an. Ihr Kennwort wird nicht an Inbox Classic weitergegeben. Alternativ können Sie ein App-Kennwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
+gtk-provider-sign-in-apps = Melden Sie sich für { $address } auf der Webseite von { $provider } mit einer Ihrer Anmelde-Apps an („Weitere Anmeldeoptionen“). Alternativ können Sie ein App-Kennwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
 gtk-accounts-add = Hinzufügen...
 gtk-accounts-properties = Eigenschaften...
 gtk-accounts-signature = Signatur...
@@ -142,35 +145,35 @@ gtk-issuer-found =
     Token-Endpunkt: { $endpoint }
 gtk-client-id = Client-ID
 gtk-client-secret = Client-Geheimnis
-gtk-scopes = Bereiche (Scopes)
+gtk-scopes = Berechtigungen (Scopes)
 gtk-redirect-uri = Umleitungs-URI
 gtk-issuer-usable =
     Der Aussteller kann verwendet werden.
 
     { $found }
-gtk-app-built-in = { $app } ist eingebaut: Nur ob sie für neue Konten verwendet wird, lässt sich ändern. { $reason }
-gtk-built-in = { $app } (eingebaut)
+gtk-app-built-in = { $app } ist integriert. Sie können nur festlegen, ob diese App für neue Konten angeboten wird. { $reason }
+gtk-built-in = { $app } (integriert)
 gtk-offered-for-new = Für neue Konten angeboten
 gtk-edit-button = Bearbeiten...
 gtk-remove-app-ask = Die Anmelde-App { $app } und ihr gespeichertes Client-Geheimnis entfernen?
-gtk-sign-in-apps-intro = Mit Anmelde-Apps melden sich Konten über den Browser an. Eine ausgeschaltete wird für neue Konten nicht angeboten; Konten, die sie schon verwenden, funktionieren weiter.
+gtk-sign-in-apps-intro = Anmelde-Apps ermöglichen die Anmeldung im Browser. Deaktivierte Apps werden für neue Konten nicht angeboten. Bestehende Konten können sie weiterhin verwenden.
 
 ## AI agents
 
-gtk-agent-it-may = Es darf
-gtk-agent-accounts = Konten, die es verwenden darf
+gtk-agent-it-may = Erlaubte Aktionen
+gtk-agent-accounts = Freigegebene Konten
 gtk-never-used = Nie verwendet
 gtk-last-used = Zuletzt verwendet { $date }
-gtk-forget-program = Dieses Programm vergessen?
-gtk-forget-program-detail = Es wird beim nächsten Verbinden erneut gefragt, und was seine Agenten getan haben, wird vergessen.
-gtk-no-agents-yet = Noch hat kein Agent gefragt, Ihre E-Mails verwenden zu dürfen.
+gtk-forget-program = Dieses Programm entfernen?
+gtk-forget-program-detail = Die Berechtigungen des Programms und der Aktivitätsverlauf seiner Agenten werden gelöscht. Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
+gtk-no-agents-yet = Bisher hat kein Agent Zugriff auf Ihre E-Mails angefordert.
 gtk-nothing-yet = Noch nichts.
 
 ## Preferences
 
 gtk-preferences = Einstellungen
 gtk-language = Sprache
-gtk-language-subtitle = Die Wörter der Fenster und der Hilfe
+gtk-language-subtitle = Sprache der Benutzeroberfläche und der Hilfe
 gtk-new-mail-group = Neue E-Mail
 gtk-notify-subtitle = Eine Benachrichtigung, wenn neue Nachrichten eintreffen, während das Fenster im Hintergrund ist
 gtk-restart-to-change = Inbox Classic startet neu, um die Sprache zu ändern.

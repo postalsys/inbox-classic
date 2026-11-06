@@ -164,7 +164,7 @@
         <ol>
             <li>Ouvrez <b>Fichier &gt; Comptes</b> et cliquez sur <b>Applications de connexion</b>, puis sur <b>Ajouter</b>.</li>
             <li>
-                Cliquez sur <b>Google</b> ou <b>Microsoft</b> après <i>Remplir pour</i> pour remplir l'émetteur, les étendues et les serveurs, ou saisissez-les
+                Cliquez sur <b>Google</b> ou <b>Microsoft</b> après <i>Préremplir pour</i> pour remplir l'émetteur, les autorisations et les serveurs, ou saisissez-les
                 pour un autre fournisseur. La zone du bas indique comment y enregistrer un client et l'URI de redirection à enregistrer ; <b>Copier</b> la copie.
             </li>
             <li>
@@ -177,7 +177,7 @@
             Dans <b>Applications de connexion</b>, la case de chaque application, intégrées comprises, indique si elle est proposée pour les nouveaux
             comptes. Une application non cochée est laissée de côté ; les comptes qui se connectent déjà avec elle continuent de fonctionner. Une application
             peut être supprimée dès qu'aucun compte ne l'utilise. Les <b>Propriétés</b> d'un compte indiquent avec quoi il se connecte. Si le serveur de
-            messagerie refuse le jeton d'une application de connexion, vérifiez que ses étendues (scopes) donnent accès à la messagerie.
+            messagerie refuse le jeton d'une application de connexion, vérifiez que ses autorisations (scopes) donnent accès à la messagerie.
         </p>
         <h3>Paramètres de sécurité</h3>
         <table>
@@ -220,15 +220,15 @@
             <li>
                 Avec deux comptes ou plus, <b>Toutes les boîtes</b> en haut de la liste des dossiers montre le courrier de la Boîte de réception de chaque compte
                 dans une seule liste, le plus récent d'abord, avec une colonne <b>Compte</b> qui nomme le compte de chaque message. Répondre, Transférer,
-                Déplacer et Supprimer agissent sur un message dans son propre compte, et un nouveau message part du compte du message sélectionné. <b>Marquer
-                tout comme lu</b> y marque chaque Boîte de réception comme lue. Son menu contextuel n'a que <b>Marquer tout comme lu</b> : on ne peut pas y
+                Déplacer et Supprimer agissent sur un message dans son propre compte, et un nouveau message part du compte du message sélectionné. <b>Marquer tous les messages
+                comme lus</b> y marque chaque Boîte de réception comme lue. Son menu contextuel n'a que <b>Marquer tous les messages comme lus</b> : on ne peut pas y
                 créer de dossiers ni y importer de messages, car ce n'est pas un dossier d'un seul compte.
             </li>
             <li>
                 Les messages non lus sont en <b>gras</b> dans la liste. Un message est
                 marqué comme lu après avoir été affiché une seconde. Utilisez <b>Marquer comme lu</b> et <b>Marquer comme non lu</b>
-                (<kbd>Ctrl</kbd>+<kbd>Q</kbd> marque comme lu) pour le changer vous-même. <b>Edition &gt; Marquer tout comme lu</b>
-                (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>), ou <b>Marquer tout comme lu</b> dans le menu contextuel d'un dossier, marque comme lu chaque
+                (<kbd>Ctrl</kbd>+<kbd>Q</kbd> marque comme lu) pour le changer vous-même. <b>Édition &gt; Marquer tous les messages comme lus</b>
+                (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>), ou <b>Marquer tous les messages comme lus</b> dans le menu contextuel d'un dossier, marque comme lu chaque
                 message du dossier.
             </li>
             <li>La colonne du trombone montre les messages qui ont des pièces jointes, la colonne de l'indicateur ceux qui ont un indicateur.</li>
@@ -286,10 +286,10 @@
                 de sa lecture ; la barre du dossier indique combien il en reste à lire.
             </li>
             <li>
-                <b>Supprimer</b> (la barre d'outils, <b>Edition &gt; Supprimer le message</b> ou la touche <kbd>Del</kbd> dans la liste) déplace le message
+                <b>Supprimer</b> (la barre d'outils, <b>Édition &gt; Supprimer le message</b> ou la touche <kbd>Del</kbd> dans la liste) déplace le message
                 vers <b>Éléments supprimés</b> ; le supprimer de là l'efface définitivement, après confirmation. (Sur un serveur sans l'extension UIDPLUS, la
                 suppression définitive efface aussi les autres messages de ce dossier qu'un autre programme de messagerie a marqués comme supprimés.)
-                <b>Edition &gt; Déplacer vers un dossier</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) le déplace vers un autre dossier, du même compte ou d'un autre, et <b>Edition &gt; Copier vers un dossier</b> l'y copie. Les deux montrent
+                <b>Édition &gt; Déplacer vers un dossier</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) le déplace vers un autre dossier, du même compte ou d'un autre, et <b>Édition &gt; Copier vers un dossier</b> l'y copie. Les deux montrent
                 les dossiers de tous les comptes dans une arborescence : tapez une partie d'un nom dans la zone au-dessus pour trouver un dossier, les
                 dossiers utilisés en dernier sont en haut sous <b>Récents</b>, et <b>Nouveau dossier</b> en crée un. Le faire glisser de la liste sur un
                 dossier de l'arborescence le déplace aussi ; maintenez <kbd>Ctrl</kbd> en le relâchant pour le copier à la place. Un message qui va vers un
@@ -300,22 +300,22 @@
                 dossier au-dessus duquel vous le maintenez un instant s'ouvre, et l'arborescence défile à ses bords haut et bas ; <kbd>Esc</kbd> annule le
                 glisser. <b>Indésirable</b> dans la barre d'outils (<b>Message &gt; Marquer comme indésirable</b>, <kbd>Ctrl</kbd>+<kbd>J</kbd>) déplace un
                 message vers <b>Courrier indésirable</b> et indique au serveur qu'il est indésirable (le mot-clé <code>$Junk</code>, dont les filtres
-                anti-spam apprennent) ; dans Courrier indésirable, le bouton est <b>Acceptable</b>, qui le remet dans la Boîte de réception. <b>Message &gt;
-                Marquer le message d'un indicateur</b> lui ajoute un indicateur (<b>!</b> dans la liste) ou le retire. <b>Message &gt; Indicateur</b> lui met un indicateur de couleur : rouge, orange, jaune,
+                anti-spam apprennent) ; dans Courrier indésirable, le bouton est <b>Non indésirable</b>, qui le remet dans la Boîte de réception. <b>Message &gt;
+                Ajouter un indicateur au message</b> lui ajoute un indicateur (<b>!</b> dans la liste) ou le retire. <b>Message &gt; Indicateur</b> lui met un indicateur de couleur : rouge, orange, jaune,
                 vert, bleu, violet ou gris, comme Apple Mail, de sorte qu'une couleur mise dans l'un apparaît dans l'autre (les autres programmes de
                 messagerie montrent un indicateur simple). <b>Effacer l'indicateur</b> retire l'indicateur et sa couleur. Tout cela se fait aussi sur le
                 serveur, pour que vos autres programmes de messagerie le voient.
             </li>
             <li>
                 Pour travailler sur plusieurs messages à la fois, maintenez <kbd>Ctrl</kbd> et cliquez sur chacun d'eux, ou cliquez sur le premier et maintenez
-                <kbd>Shift</kbd> en cliquant sur le dernier (<kbd>Shift</kbd> avec les flèches fait de même) ; <b>Edition &gt; Sélectionner tout</b>
+                <kbd>Shift</kbd> en cliquant sur le dernier (<kbd>Shift</kbd> avec les flèches fait de même) ; <b>Édition &gt; Sélectionner tout</b>
                 (<kbd>Ctrl</kbd>+<kbd>A</kbd>) sélectionne chaque message de la liste. Le volet de lecture indique alors combien sont sélectionnés et combien
                 d'entre eux sont non lus ou ont un indicateur, et la barre d'état les compte aussi. Marquer comme lu ou non lu, l'indicateur, Indésirable,
                 Supprimer et Déplacer vers un dossier agissent sur tous, et en faire glisser un les fait tous glisser ; Répondre, Imprimer et les commandes de
                 ce genre n'agissent que sur un seul message.
             </li>
             <li>
-                <b>Edition &gt; Annuler</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) annule le dernier déplacement, la dernière suppression ou le dernier marquage comme
+                <b>Édition &gt; Annuler</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) annule le dernier déplacement, la dernière suppression ou le dernier marquage comme
                 indésirable, quel que soit le nombre de messages : ils retournent dans les dossiers d'où ils venaient, et y sont sélectionnés une fois revenus. Le menu indique ce qu'il annule
                 (<b>Annuler le déplacement</b>), et la barre d'état indique ce qui a été fait. Un message supprimé définitivement ne peut pas revenir.
             </li>

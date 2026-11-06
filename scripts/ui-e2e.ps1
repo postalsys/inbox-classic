@@ -1511,7 +1511,7 @@ public static class Dragger {
     $listServer.Stop()
     Check ($sent -match '^POST /u/42 ' -and $sent -match 'List-Unsubscribe=One-Click') "Yes posts List-Unsubscribe=One-Click to the list ($(($sent -split "`r`n")[0]))"
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
-    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Unsubscribed' } 10)) "and the status bar says it is done ($(StatusPart $mainStatus 0))"
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Unsubscribe request accepted' } 10)) "and the status bar says it is done ($(StatusPart $mainStatus 0))"
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
     Step 'a calendar invitation'
@@ -1636,7 +1636,7 @@ public static class Dragger {
     $outbox = WaitShown 'InboxClassicOutbox' 10
     if ($outbox) {
         $outboxList = [Native.Win]::GetDlgItem($outbox, 450)
-        Check ([Native.Win]::RemoteListText($outboxList, 0, 3) -match '^Sent by an AI agent; goes at') 'it waits in the Outbox, where it can still be deleted'
+        Check ([Native.Win]::RemoteListText($outboxList, 0, 3) -match '^Queued by an AI agent; sends at') 'it waits in the Outbox, where it can still be deleted'
         Shot $outbox 'agents-5-outbox'
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
@@ -2702,7 +2702,7 @@ public static class Dragger {
             Click $accounts 402
             $properties = WaitWindow 'InboxClassicForm' 'Properties'
             if (-not $properties) { continue }
-            if (WaitFor { (Statics $properties) -match 'Signs in with: ImapKit' } 3) {
+            if (WaitFor { (Statics $properties) -match 'Sign-in app: ImapKit' } 3) {
                 $found = $properties
                 Shot $properties 'signin-13-properties'
             } else {

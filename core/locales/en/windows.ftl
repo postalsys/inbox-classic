@@ -3,13 +3,13 @@
 
 ## The main window
 
-win-still-running-detail = It keeps checking for new mail here. Click the icon to open it, or right-click it to exit.
+win-still-running-detail = Inbox Classic keeps checking for new mail in the background. Click the icon to open it. To exit, right-click the icon and use its menu.
 win-new-messages = { $count ->
     [one] { $count } new message
    *[other] { $count } new messages
 }
 win-default-app-not-installed = This copy of Inbox Classic was not installed, so Windows does not list it as a mail app. Install it to choose it.
-win-default-app-settings = Windows opens its Default apps settings for Inbox Classic. Choose it for MAILTO there.
+win-default-app-settings = Windows will open its Default apps settings. Choose Inbox Classic to open MAILTO links.
 win-no-unread = No unread messages
 win-unread-messages = { $count ->
     [one] 1 unread message
@@ -75,7 +75,7 @@ win-attendees = { $count ->
     [one] { $count } attendee
    *[other] { $count } attendees
 }
-win-new-folder-in-highlighted = The new folder goes in the highlighted folder.
+win-new-folder-in-highlighted = The new folder will be created inside the selected folder.
 win-delete-folder-ask = Delete the folder "{ $folder }" with its messages and the folders in it? It is deleted on the server too.
 win-rename = &Rename...
 win-messages-not-saved = The messages could not be saved.
@@ -100,11 +100,11 @@ win-col-address = Address
 win-never-written-to = Never written to
 win-send = &Send
 win-dont-send = &Don't Send
-win-forget-program-ask = Forget this program and what its agents did? It is asked about again the next time it connects.
-win-clear-log-ask = Clear the list of what agents did? What they did stays done.
-win-agent-programs = &Programs whose agents asked to use your mail:
+win-forget-program-ask = Remove this program, its permissions and its agents’ activity history? You will be asked for permission again the next time it connects.
+win-clear-log-ask = Clear the agents’ activity history? This will not undo changes made by the agents.
+win-agent-programs = &Programs whose agents have requested access to your mail:
 win-change = &Change...
-win-what-agents-did = &What agents did:
+win-what-agents-did = Agent &activity:
 win-how-to-connect = How to connect an agent
 
 ## Sign-in apps
@@ -115,6 +115,6 @@ win-edit = &Edit...
 ## Options
 
 win-options-language-label = &Show Inbox Classic in:
-win-options-restart-note = Inbox Classic restarts to show another language.
+win-options-restart-note = Restart Inbox Classic to change the language.
 win-options-notify = &Notify me when new mail arrives
 win-restart-ask = Inbox Classic shows { $language } once it restarts. Restart now?

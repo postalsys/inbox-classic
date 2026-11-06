@@ -16,7 +16,7 @@ mac-paste = Kleebi
 mac-menu-window = Aken
 mac-minimize = Minimeeri
 mac-zoom = Suumi
-mac-no-updates = See Inbox Classicu koopia ei uuenda end ise. Uusima versiooni leiate aadressilt inboxclassic.com.
+mac-no-updates = See Inbox Classicu versioon ei toeta automaatseid uuendusi. Uusima versiooni saate alla laadida aadressilt inboxclassic.com.
 
 ## Settings
 
@@ -32,14 +32,14 @@ mac-choose = Vali
 
 ## The main window
 
-mac-still-running-detail = See kontrollib edasi uut posti. Uuesti avamiseks klõpsake selle ikooni Dockis.
+mac-still-running-detail = Inbox Classic kontrollib taustal uute kirjade saabumist. Rakenduse avamiseks klõpsake selle ikooni Dockis.
 mac-outbox-waiting =
     { $count ->
         [one] { $count } kiri väljundkaustas
        *[other] { $count } kirja väljundkaustas
     }
-mac-sending = Saadan: { $subject }…
-mac-checking = Kontrollin uusi kirju kontol { $account }…
+mac-sending = Saadetakse { $subject }…
+mac-checking = Kontrollitakse konto { $account } uusi kirju…
 mac-account-said = { $account }: { $message }
 mac-new-messages =
     { $count ->
@@ -48,15 +48,14 @@ mac-new-messages =
     }
 mac-newest-from = Uusim saatjalt { $from }: { $subject }
 mac-not-bundle = See Inbox Classicu koopia ei ole rakenduse pakett, seega ei saa see olla vaikimisi e-posti rakendus.
-mac-not-made-default = Inbox Classicut ei tehtud vaikimisi e-posti rakenduseks: { $reason }
+mac-not-made-default = Inbox Classicut ei õnnestunud vaikimisi meilirakenduseks määrata: { $reason }
 mac-tool-search = Otsi
 
 ## The folders and the message list
 
 mac-still-indexing-more =
     { $count ->
-        [one] { $count } kirja teksti alles indekseeritakse, nii et peagi võib leiduda rohkem.
-       *[other] { $count } kirja teksti alles indekseeritakse, nii et peagi võib leiduda rohkem.
+       *[other] { $count } kirja sisu veel indekseeritakse. Otsingutulemusi võib lisanduda.
     }
 mac-results-everywhere =
     { $count ->
@@ -84,16 +83,16 @@ mac-files-not-saved =
        *[other] { $count } failist { $failed } ei saanud salvestada.
     }
 mac-no-calendar-app = Ükski selle Maci kalendrirakendus ei ava kutseid (.ics-faile).
-mac-unsubscribing = Loobun tellimusest: { $target }…
+mac-unsubscribing = Loobutakse tellimusest { $target }…
 
 ## The compose window
 
-mac-bold = Paks
+mac-bold = Paks kiri
 mac-italic = Kaldkiri
 mac-underline = Allajoonitud
-mac-bcc = Bcc
+mac-bcc = Pimekoopia
 mac-command-click-to-open = avamiseks ⌘-klõps
-mac-saving-to-drafts = Salvestan mustanditesse…
+mac-saving-to-drafts = Salvestatakse mustanditesse…
 mac-dont-save = Ära salvesta
 
 ## The reading pane
@@ -113,9 +112,9 @@ mac-attendees =
 
 mac-next = Edasi
 mac-name-placeholder = Mari Maasikas
-mac-more-sign-in-options = Rohkem sisselogimisviise…
+mac-more-sign-in-options = Muud sisselogimisviisid…
 mac-add-sign-in-app = Lisa sisselogimisrakendus…
-mac-looking-up = Otsin domeeni { $domain } seadeid…
+mac-looking-up = Otsitakse domeeni { $domain } sätteid…
 mac-add-button = Lisa…
 mac-properties-button = Atribuudid…
 mac-signature-button = Allkiri…
@@ -123,12 +122,12 @@ mac-sign-in-apps-button = Sisselogimisrakendused…
 
 ## AI agents
 
-mac-forget-program = Kas unustada see programm ja see, mida selle agendid tegid?
-mac-forget-program-detail = Seda küsitakse uuesti, kui see järgmine kord ühendub.
+mac-forget-program = Kas eemaldada see programm koos agentide tegevusajalooga?
+mac-forget-program-detail = Programmi õigused kustutatakse. Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
 
 ## Sign-in apps
 
-mac-checking-issuer = Kontrollin: { $issuer }…
+mac-checking-issuer = Kontrollitakse väljaandjat { $issuer }…
 mac-edit-button = Muuda…
 mac-use-for-new-accounts = Kasuta rakendust { $name } uute kontode jaoks
 mac-built-in = { $name } (sisseehitatud)

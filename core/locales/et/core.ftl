@@ -32,13 +32,13 @@ folder-archive = Arhiiv
 
 reader-no-message = Ühtegi kirja pole valitud.
 reader-downloading = Kirja laaditakse alla…
-reader-downloading-detail = Kiri kuvatakse siin kohe, kui see on kohale jõudnud.
+reader-downloading-detail = Kiri kuvatakse siin, kui allalaadimine on lõppenud.
 reader-failed = Kirja ei saanud alla laadida
 reader-failed-network = Meiliserveriga ei saanud ühendust ({ $reason }).
-reader-failed-sign-in = Meiliserver ei võtnud sisselogimist vastu ({ $reason }). Kontrollige parooli või logige uuesti sisse menüüs Fail > Kontod.
-reader-failed-security = Ühendust meiliserveriga ei saanud turvaliseks muuta ({ $reason }).
+reader-failed-sign-in = Meiliserver lükkas sisselogimise tagasi ({ $reason }). Kontrollige parooli või logige uuesti sisse menüüs Fail > Kontod.
+reader-failed-security = Meiliserveriga ei saanud luua turvalist ühendust ({ $reason }).
 reader-failed-other = Meiliserver vastas: { $reason }.
-reader-retry-note = Alla laadimata. Proovitakse uuesti, kui konto on taas võrgus.
+reader-retry-note = Kiri on alla laadimata. Allalaadimist proovitakse uuesti, kui ühendus kontoga taastub.
 reader-unreadable = Seda kirja ei saa kuvada: { $error }
 message-source-title = Kirja lähtekood: { $subject }
 message-source-untitled = Kirja lähtekood
@@ -47,7 +47,7 @@ message-source-untitled = Kirja lähtekood
 
 header-from = Saatja
 header-date = Kuupäev
-header-to = Adressaat
+header-to = Saaja
 header-cc = Koopia
 header-sent = Saadetud
 header-subject = Teema
@@ -70,43 +70,37 @@ done-read = { $count ->
    *[other] { $messages } märgiti loetuks
 }
 done-unread = { $count ->
-    [one] { $messages } märgiti lugemata
-   *[other] { $messages } märgiti lugemata
+   *[other] { $messages } märgiti lugemata kirjaks
 }
 done-flagged = { $count ->
     [one] { $messages } märgiti lipuga
    *[other] { $messages } märgiti lipuga
 }
-done-unflagged = { $messages } lipp eemaldati
+done-unflagged = Lipumärgistus eemaldati: { $messages }
 done-deleted-for-good = { $count ->
     [one] { $messages } kustutati jäädavalt
    *[other] { $messages } kustutati jäädavalt
 }
 done-moved = { $count ->
-    [one] { $messages } teisaldati kausta { $folder }
-   *[other] { $messages } teisaldati kausta { $folder }
+   *[other] Teisaldatud: { $messages }. Sihtkoht: { $folder }
 }
 done-copied = { $count ->
-    [one] { $messages } kopeeriti kausta { $folder }
-   *[other] { $messages } kopeeriti kausta { $folder }
+   *[other] Kopeeritud: { $messages }. Sihtkoht: { $folder }
 }
 done-moving = { $count ->
-    [one] { $messages } teisaldatakse kausta { $folder }...
-   *[other] { $messages } teisaldatakse kausta { $folder }...
+   *[other] Teisaldatakse: { $messages }. Sihtkoht: { $folder }...
 }
 done-copying = { $count ->
-    [one] { $messages } kopeeritakse kausta { $folder }...
-   *[other] { $messages } kopeeritakse kausta { $folder }...
+   *[other] Kopeeritakse: { $messages }. Sihtkoht: { $folder }...
 }
 done-moved-back = { $count ->
-    [one] { $messages } teisaldati tagasi kausta { $folder }
-   *[other] { $messages } teisaldati tagasi kausta { $folder }
+   *[other] Tagasi teisaldatud: { $messages }. Sihtkoht: { $folder }
 }
-their-folders = oma kaustadesse
+their-folders = vastavad kaustad
 undo-move = Võta teisaldamine tagasi
 undo-delete = Võta kustutamine tagasi
 undo-junk = Võta rämpspostiks märkimine tagasi
-undo-not-junk = Võta mitte-rämpspostiks märkimine tagasi
+undo-not-junk = Võta tavapostiks märkimine tagasi
 nothing-to-undo = Pole midagi tagasi võtta.
 messages-gone = Neid kirju pole enam.
 folder-holds-no-messages = Selles kaustas ei saa kirju hoida.
@@ -155,18 +149,16 @@ target-recent = { $folder } ({ $account })
 
 ## Moving and copying to another account
 
-transfer-moving = Teisaldatakse { $done }/{ $messages } kausta { $folder }...
-transfer-copying = Kopeeritakse { $done }/{ $messages } kausta { $folder }...
+transfer-moving = Teisaldatakse: { $done } / { $messages }. Sihtkoht: { $folder }...
+transfer-copying = Kopeeritakse: { $done } / { $messages }. Sihtkoht: { $folder }...
 transfer-another-account = teine konto
 transfer-folder-gone = sihtkausta pole enam olemas
 transfer-not-on-server = kirja pole enam serveris
 transfer-not-moved = { $count ->
-    [one] { $messages } ei saanud teise kontosse teisaldada: { $reason }
-   *[other] { $messages } ei saanud teise kontosse teisaldada: { $reason }
+   *[other] Teisele kontole teisaldamine ebaõnnestus ({ $messages }): { $reason }
 }
 transfer-not-copied = { $count ->
-    [one] { $messages } ei saanud teise kontosse kopeerida: { $reason }
-   *[other] { $messages } ei saanud teise kontosse kopeerida: { $reason }
+   *[other] Teisele kontole kopeerimine ebaõnnestus ({ $messages }): { $reason }
 }
 transfer-none-moved = Ühtegi kirja ei saanud teisaldada
 transfer-none-copied = Ühtegi kirja ei saanud kopeerida
@@ -174,33 +166,31 @@ transfer-none-copied = Ühtegi kirja ei saanud kopeerida
 ## Messages as files
 
 export-not-in-time = kirja ei saanud õigeks ajaks alla laadida
-export-not-saved = { $messages } hulgast ei saanud salvestada { $failed } ({ $problems })
+export-not-saved = Salvestamata: { $failed } (kokku { $messages }). { $problems }
 export-not-attached = kirju ei saanud manustada: { $error }
 saved-to = { $count ->
     [one] { $messages } salvestati kausta { $folder }
    *[other] { $messages } salvestati kausta { $folder }
 }
 downloading-messages = { $count ->
-    [one] Laaditakse alla { $messages }...
-   *[other] Laaditakse alla { $messages }...
+   *[other] Allalaadimine: { $messages }...
 }
 import-put = { $count ->
-    [one] { $messages } pandi kausta { $folder }
-   *[other] { $messages } pandi kausta { $folder }
+   *[other] { $messages } imporditi kausta { $folder }
 }
-import-not-put = Neid ei pandud kausta:
+import-not-put = Järgmisi kirju ei saanud kausta importida:
 
     { $problems }
 
 ## Problems the windows show
 
-error-store = kohalik andmeladu: { $error }
+error-store = kohalik kirjahoidla: { $error }
 error-not-found = ei leitud
 error-closed = suletakse
 error-other-account = brauser logis sisse kontole { $email }, mitte sellele kontole
-error-in-use = seda ei saa eemaldada, kuni kontod sellega sisse logivad: { $accounts }
+error-in-use = rakendust ei saa eemaldada, sest seda kasutavad järgmised kontod: { $accounts }
 error-turned-off = see sisselogimisrakendus on uute kontode jaoks välja lülitatud
-error-folder-name = kausta nimi pikkusega 1 kuni 200 märki, ilma juhtmärkideta
+error-folder-name = kausta nimi peab olema 1 kuni 200 märki pikk ega tohi sisaldada juhtmärke
 error-folder-separator = kausta nimes ei tohi selles serveris olla märki „{ $separator }“
 error-folder-special = sisendkausta ja erikaustu ei saa ümber nimetada ega kustutada
 error-no-recipients = kirjal pole adressaate
@@ -209,11 +199,11 @@ error-attachment = faili { $path } ei saanud lugeda: { $error }
 error-no-drafts = kontol pole mustandite kausta, kuhu kirja salvestada
 error-draft-attachment = mustandi manust ei saanud alles hoida: { $error }
 error-password-not-saved = parooli ei saanud järgmiseks käivituseks salvestada: { $error }
-error-sign-in-not-saved = uut sisselogimist ei saanud järgmiseks käivituseks salvestada: { $error }
+error-sign-in-not-saved = uusi sisselogimisandmeid ei saanud järgmiseks käivituseks salvestada: { $error }
 error-import-unreadable = faili { $path } ei saa lugeda: { $error }
 error-import-too-large = { $path } on suurem kui 50 MB
 error-import-not-mail = { $path } pole e-kiri
-error-list-answered = postiloend vastas { $status }
+error-list-answered = meililisti server vastas olekukoodiga { $status }
 error-not-built = kirja ei saanud koostada
 error-outbox-waits = { $count ->
     [one] kiri ootab väljundkaustas ja saadetakse järgmise saatmise ja vastuvõtmisega
@@ -224,10 +214,10 @@ error-sent-but = kiri saadeti, aga { $problem }
 error-sent-still-in-outbox = see on endiselt väljundkaustas: { $error }
 error-sent-no-copy = koopiat ei saanud saadetud kirjade kausta salvestada: { $reason }
 error-no-password = selle konto jaoks pole parooli
-error-no-sign-in = selle konto jaoks pole sisselogimist
+error-no-sign-in = selle konto sisselogimisandmed puuduvad
 error-provider-missing = see versioon ei saa teenusesse { $provider } sisse logida: kas selle sisselogimisrakendus on eemaldatud?
-error-provider-servers = selle konto serverid pole need, kuhu see sisse logib
-error-app-scopes = { $reason }. Meiliserver ei võtnud sisselogimisrakenduse luba vastu: kontrollige, et rakenduse õigused (scopes) annavad juurdepääsu e-postile
+error-provider-servers = konto serverid ei vasta sisselogimisrakenduse serveritele
+error-app-scopes = { $reason }. Meiliserver lükkas sisselogimisrakenduse juurdepääsutõendi tagasi. Kontrollige, kas rakenduse juurdepääsuõigused (scopes) lubavad e-posti kasutada
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
@@ -236,14 +226,14 @@ sign-in-off-google = Google pole Inbox Classicut veel kinnitanud, seega lubab ta
 sign-in-off-other = See lülitati välja jaotises Sisselogimisrakendused (Fail > Kontod), kus selle saab uuesti sisse lülitada.
 sign-in-app-no-name = sisselogimisrakendus vajab nime
 sign-in-app-no-client = kliendi ID puudub
-sign-in-app-no-scopes = sisselogimisrakendus vajab õigusi (scopes), mis annavad juurdepääsu e-postile
-sign-in-app-bad-host = { $server }-server puudub või pole hostinimi
+sign-in-app-no-scopes = sisselogimisrakendusele tuleb määrata e-posti kasutamist lubavad juurdepääsuõigused (scopes)
+sign-in-app-bad-host = { $server }-serveri aadress puudub või ei ole kehtiv hostinimi
 sign-in-app-plain = { $server }-server peab kasutama SSL/TLS-i või STARTTLS-i
 sign-in-app-not-checked = väljaandjat pole veel kontrollitud
 sign-in-app-issuer-changed = väljaandja muutus: sisestage kliendi saladus uuesti või eemaldage see
-sign-in-register-google = Looge Google Cloud Console'is OAuth-klient tüübiga Desktop app ja lisage selle nõusolekuekraanile ulatus https://mail.google.com/. Kuni rakendus on testimisel, saavad sisse logida ainult selle testkasutajad.
+sign-in-register-google = Looge Google Cloud Console'is OAuth-klient tüübiga Desktop app ja lisage selle nõusolekuekraanile juurdepääsuõigus (scope) https://mail.google.com/. Kuni rakendus on testimisel, saavad sisse logida ainult selle testkasutajad.
 sign-in-register-microsoft = Registreerige Microsoft Entras rakendus platvormiga Mobile and desktop applications, ümbersuunamise URI-ga http://localhost, lubatud avaliku kliendi voogudega ning delegeeritud õigustega IMAP.AccessAsUser.All, SMTP.Send ja offline_access. Ainult oma organisatsiooni jaoks kasutage väljaandjana aadressi https://login.microsoftonline.com/<rentniku ID>/v2.0.
-sign-in-register-other = Registreerige natiivne (avalik) klient allpool oleva ümbersuunamise URI-ga; teenusepakkuja peab lubama sellel mis tahes pordi (RFC 8252). Lisage ulatus, millega teenusepakkuja annab ligipääsu kirjadele.
+sign-in-register-other = Registreerige natiivne (avalik) klient allpool oleva ümbersuunamise URI-ga; teenusepakkuja peab lubama sellel mis tahes pordi (RFC 8252). Lisage teenusepakkuja määratud juurdepääsuõigus (scope), mis lubab e-posti kasutada.
 
 ## Calendar invitations
 
@@ -281,21 +271,21 @@ day-sunday = pühapäeval
 
 ## AI agents
 
-agent-level-read = Lugeda e-posti: kaustad, kirjade loend, otsing ja kirjad
-agent-level-organize = Korraldada e-posti: lugemise olek, lipud, rämpspost, teisaldamine, kustutamine kausta Kustutatud kirjad
-agent-level-drafts = Kirjutada mustandeid, mille teie saadate
-agent-level-send = Saata e-posti, iga kiri alles pärast teie nõusolekut
+agent-level-read = Lugeda e-posti: vaadata kaustu ja kirju ning kasutada otsingut
+agent-level-organize = Hallata e-posti: märkida kirju loetuks või lugemata kirjaks, lisada lippe, hallata rämpsposti, teisaldada kirju ja kustutada neid kausta Kustutatud kirjad
+agent-level-drafts = Koostada mustandeid, mille saadate ise
+agent-level-send = Saata kirju, küsides iga kirja jaoks teie nõusolekut
 agent-connect-title = { $program } soovib kasutada teie e-posti
-agent-connect-detail = Tehisintellekti agent soovib Inbox Classicuga töötada. Valige, mida see teha tohib ja milliseid kontosid näha; saate seda hiljem muuta menüüs Tööriistad > Tehisintellekti agendid.
+agent-connect-detail = Tehisintellekti agent soovib kasutada Inbox Classicut. Valige, mida agent teha tohib ja millistele kontodele ligi pääseb. Õigusi saate hiljem muuta menüüs Tööriistad > Tehisintellekti agendid.
 
-    Agendid loevad kirju, mida on kirjutanud teised inimesed, ja kiri võib proovida neid petta. Inbox Classic küsib teilt alati enne, kui agent midagi saadab.
+    Agendid loevad teiste inimeste kirju, mis võivad sisaldada eksitavaid juhiseid. Inbox Classic küsib alati teie nõusolekut, enne kui agent kirja saadab.
 agent-reply-to = Vastus kirjale „{ $subject }“
-agent-reply-all-on = Vastus kõigile kirjale „{ $subject }“
+agent-reply-all-on = Vastus kõigile kirja „{ $subject }“ adressaatidele
 agent-forward-of = Kirja „{ $subject }“ edastus
 agent-never-written-one = Te pole kunagi kirjutanud aadressile { $address }.
-agent-never-written-many = Te pole kunagi kirjutanud { $count } aadressile nendest.
+agent-never-written-many = Nende saajate hulgas on { $count } aadressi, millele te pole varem kirjutanud.
 agent-send-title = { $program } soovib selle kirja saata
-agent-send-detail = Kontrollige, kellele see läheb ja mida see ütleb. Kui saadate selle, ootab see { $seconds } sekundit väljundkaustas, kus saate selle veel kustutada.
+agent-send-detail = Kontrollige kirja saajaid ja sisu. Pärast saatmise kinnitamist ootab kiri { $seconds } sekundit väljundkaustas, kust saate selle veel kustutada.
 agent-change-title = Mida { $program } teha tohib
 agent-change-allowed = Muutke, mida selle programmi tehisintellekti agendid teie e-postiga teha tohivad.
 agent-change-refused = Te keelasite selle programmi. Lubage see, et selle agendid saaksid jälle teie e-posti kasutada.
@@ -307,7 +297,7 @@ agent-undo-impossible = seda ei saa tagasi võtta
 agent-undo-not-in-folder = kiri pole enam selles kaustas
 agent-undo-not-arrived = kiri pole (veel) sihtkaustas
 agent-undo-sent = kiri on juba saadetud
-agent-original-not-downloaded = vastatud kiri pole veel alla laaditud: lugege see kõigepealt läbi
+agent-original-not-downloaded = kiri, millele vastate, pole veel alla laaditud. Avage see kõigepealt
 agent-turned-away = Keelatud
 agent-can-nothing = Mitte midagi
 agent-can-read = lugeda
@@ -327,15 +317,15 @@ agent-log-refused = Te ei saatnud kirja „{ $subject }“
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
 agent-log-draft = Mustand „{ $subject }“ salvestati
 agent-log-read = „{ $subject }“ märgiti loetuks
-agent-log-unread = „{ $subject }“ märgiti lugemata
+agent-log-unread = „{ $subject }“ märgiti lugemata kirjaks
 agent-log-flagged = „{ $subject }“ märgiti lipuga
 agent-log-unflagged = Kirjalt „{ $subject }“ eemaldati lipp
 agent-log-deleted = „{ $subject }“ kustutati
 agent-log-moved = „{ $subject }“ teisaldati kausta { $folder }
 agent-log-junk = „{ $subject }“ märgiti rämpspostiks
-agent-log-not-junk = „{ $subject }“ märgiti mitte-rämpspostiks
+agent-log-not-junk = „{ $subject }“ märgiti tavapostiks
 agent-log-folder = Loodi kaust „{ $name }“
-agent-log-unsubscribed = Loobuti kirja „{ $subject }“ postiloendist
+agent-log-unsubscribed = Loobuti kirja „{ $subject }“ saatnud meililisti tellimusest
 
 ## Keys
 
@@ -347,8 +337,8 @@ key-enter = Enter
 
 ## Signing in and passwords
 
-sign-in-no-refresh = teenusepakkuja ei andnud värskendusluba
-sign-in-no-account = teenusepakkuja ei öelnud, milline konto sisse logis
+sign-in-no-refresh = teenusepakkuja ei väljastanud värskendustõendit
+sign-in-no-account = teenusepakkuja ei tagastanud sisselogitud konto andmeid
 sign-in-not-finished = sisselogimine pole lõppenud
 secrets-unavailable = { $store } pole saadaval
 secrets-unavailable-why = { $store } pole saadaval: { $error }

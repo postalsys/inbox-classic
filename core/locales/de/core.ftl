@@ -32,13 +32,13 @@ folder-archive = Archiv
 
 reader-no-message = Es ist keine Nachricht ausgewählt.
 reader-downloading = Die Nachricht wird heruntergeladen…
-reader-downloading-detail = Sie wird hier angezeigt, sobald sie angekommen ist.
+reader-downloading-detail = Die Nachricht wird angezeigt, sobald der Download abgeschlossen ist.
 reader-failed = Die Nachricht konnte nicht heruntergeladen werden
 reader-failed-network = Der Mailserver war nicht erreichbar ({ $reason }).
 reader-failed-sign-in = Der Mailserver hat die Anmeldung nicht angenommen ({ $reason }). Prüfen Sie das Kennwort oder melden Sie sich unter Datei > Konten erneut an.
-reader-failed-security = Die Verbindung zum Mailserver konnte nicht gesichert werden ({ $reason }).
+reader-failed-security = Es konnte keine sichere Verbindung zum Mailserver hergestellt werden ({ $reason }).
 reader-failed-other = Der Mailserver antwortete: { $reason }.
-reader-retry-note = Nicht heruntergeladen. Es wird erneut versucht, sobald das Konto wieder online ist.
+reader-retry-note = Noch nicht heruntergeladen. Der Download wird erneut versucht, sobald die Verbindung zum Konto wiederhergestellt ist.
 reader-unreadable = Diese Nachricht kann nicht angezeigt werden: { $error }
 message-source-title = Nachrichtenquelltext: { $subject }
 message-source-untitled = Nachrichtenquelltext
@@ -77,39 +77,39 @@ done-flagged = { $count ->
     [one] { $messages } gekennzeichnet
    *[other] { $messages } gekennzeichnet
 }
-done-unflagged = Kennzeichnung von { $messages } entfernt
+done-unflagged = Kennzeichnung entfernt: { $messages }
 done-deleted-for-good = { $count ->
     [one] { $messages } endgültig gelöscht
    *[other] { $messages } endgültig gelöscht
 }
 done-moved = { $count ->
-    [one] { $messages } nach { $folder } verschoben
-   *[other] { $messages } nach { $folder } verschoben
+    [one] { $messages } in { $folder } verschoben
+   *[other] { $messages } in { $folder } verschoben
 }
 done-copied = { $count ->
-    [one] { $messages } nach { $folder } kopiert
-   *[other] { $messages } nach { $folder } kopiert
+    [one] { $messages } in { $folder } kopiert
+   *[other] { $messages } in { $folder } kopiert
 }
 done-moving = { $count ->
-    [one] { $messages } wird nach { $folder } verschoben...
-   *[other] { $messages } werden nach { $folder } verschoben...
+    [one] { $messages } wird in { $folder } verschoben...
+   *[other] { $messages } werden in { $folder } verschoben...
 }
 done-copying = { $count ->
-    [one] { $messages } wird nach { $folder } kopiert...
-   *[other] { $messages } werden nach { $folder } kopiert...
+    [one] { $messages } wird in { $folder } kopiert...
+   *[other] { $messages } werden in { $folder } kopiert...
 }
 done-moved-back = { $count ->
-    [one] { $messages } zurück nach { $folder } verschoben
-   *[other] { $messages } zurück nach { $folder } verschoben
+    [one] { $messages } zurück in { $folder } verschoben
+   *[other] { $messages } zurück in { $folder } verschoben
 }
-their-folders = ihre Ordner
+their-folders = die jeweiligen Ordner
 undo-move = Verschieben rückgängig machen
 undo-delete = Löschen rückgängig machen
 undo-junk = Als Junk markieren rückgängig machen
 undo-not-junk = Als Nicht-Junk markieren rückgängig machen
 nothing-to-undo = Es gibt nichts rückgängig zu machen.
 messages-gone = Die Nachrichten sind nicht mehr da.
-folder-holds-no-messages = Dieser Ordner enthält keine Nachrichten.
+folder-holds-no-messages = In diesem Ordner können keine Nachrichten gespeichert werden.
 no-junk-folder = Dieses Konto hat keinen Junk-E-Mail-Ordner, in den die Nachrichten verschoben werden könnten.
 no-inbox-folder = Dieses Konto hat keinen Posteingang, in den die Nachrichten verschoben werden könnten.
 done-flagged-color = { $messages } { $color ->
@@ -155,8 +155,8 @@ target-recent = { $folder } ({ $account })
 
 ## Moving and copying to another account
 
-transfer-moving = Nachricht { $done } von { $messages } wird nach { $folder } verschoben...
-transfer-copying = Nachricht { $done } von { $messages } wird nach { $folder } kopiert...
+transfer-moving = Verschieben in { $folder }: { $done } von insgesamt { $messages }...
+transfer-copying = Kopieren in { $folder }: { $done } von insgesamt { $messages }...
 transfer-another-account = ein anderes Konto
 transfer-folder-gone = der Zielordner ist nicht mehr vorhanden
 transfer-not-on-server = die Nachricht ist nicht mehr auf dem Server
@@ -191,7 +191,7 @@ import-put = { $count ->
     [one] { $messages } in { $folder } abgelegt
    *[other] { $messages } in { $folder } abgelegt
 }
-import-not-put = Diese wurden nicht in den Ordner gelegt:
+import-not-put = Folgende Nachrichten konnten nicht importiert werden:
 
     { $problems }
 
@@ -201,22 +201,22 @@ error-store = lokaler Speicher: { $error }
 error-not-found = nicht gefunden
 error-closed = wird beendet
 error-other-account = der Browser hat sich bei { $email } angemeldet, nicht bei diesem Konto
-error-in-use = es kann nicht entfernt werden, solange sich Konten damit anmelden: { $accounts }
+error-in-use = die App kann nicht entfernt werden, da folgende Konten sie verwenden: { $accounts }
 error-turned-off = diese Anmelde-App ist für neue Konten ausgeschaltet
-error-folder-name = ein Ordnername mit 1 bis 200 Zeichen, ohne Steuerzeichen
+error-folder-name = der Ordnername muss 1 bis 200 Zeichen lang sein und darf keine Steuerzeichen enthalten
 error-folder-separator = ein Ordnername darf auf diesem Server kein „{ $separator }“ enthalten
-error-folder-special = der Posteingang und die besonderen Ordner können nicht umbenannt oder gelöscht werden
+error-folder-special = der Posteingang und die Spezialordner können nicht umbenannt oder gelöscht werden
 error-no-recipients = die Nachricht hat keine Empfänger
 error-bad-address = „{ $address }“ ist keine E-Mail-Adresse
 error-attachment = { $path } konnte nicht gelesen werden: { $error }
 error-no-drafts = das Konto hat keinen Entwürfe-Ordner, in dem die Nachricht gespeichert werden kann
-error-draft-attachment = eine Anlage des Entwurfs konnte nicht behalten werden: { $error }
+error-draft-attachment = eine Anlage des Entwurfs konnte nicht übernommen werden: { $error }
 error-password-not-saved = das Kennwort konnte für den nächsten Start nicht gespeichert werden: { $error }
-error-sign-in-not-saved = die neue Anmeldung konnte für den nächsten Start nicht gespeichert werden: { $error }
+error-sign-in-not-saved = die neuen Anmeldedaten konnten für den nächsten Start nicht gespeichert werden: { $error }
 error-import-unreadable = { $path } kann nicht gelesen werden: { $error }
 error-import-too-large = { $path } ist größer als 50 MB
 error-import-not-mail = { $path } ist keine E-Mail-Nachricht
-error-list-answered = die Liste antwortete { $status }
+error-list-answered = der Server der Mailingliste hat mit Status { $status } geantwortet
 error-not-built = die Nachricht konnte nicht erstellt werden
 error-outbox-waits = { $count ->
     [one] die Nachricht wartet im Postausgang und wird beim nächsten Senden/Empfangen gesendet
@@ -227,26 +227,26 @@ error-sent-but = die Nachricht wurde gesendet, aber { $problem }
 error-sent-still-in-outbox = sie ist noch im Postausgang: { $error }
 error-sent-no-copy = es konnte keine Kopie in Gesendete Objekte gespeichert werden: { $reason }
 error-no-password = kein Kennwort für dieses Konto
-error-no-sign-in = keine Anmeldung für dieses Konto
+error-no-sign-in = keine Anmeldedaten für dieses Konto vorhanden
 error-provider-missing = diese Version kann sich nicht bei { $provider } anmelden: wurde die Anmelde-App entfernt?
-error-provider-servers = die Server dieses Kontos sind nicht die, bei denen es sich anmeldet
-error-app-scopes = { $reason }. Der Mailserver hat das Token der Anmelde-App nicht angenommen: prüfen Sie, ob die Bereiche (Scopes) der App Zugriff auf E-Mail geben
+error-provider-servers = die Server dieses Kontos stimmen nicht mit denen der Anmelde-App überein
+error-app-scopes = { $reason }. Der Mailserver hat das Token der Anmelde-App abgelehnt. Prüfen Sie, ob die Berechtigungen (Scopes) der App den Zugriff auf E-Mails erlauben
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google hat Inbox Classic noch nicht überprüft und lässt sich daher nur von Testbenutzern damit anmelden. Verwenden Sie Ihre eigene Google-Anmelde-App oder ein App-Kennwort, oder schalten Sie sie unter Anmelde-Apps (Datei > Konten) ein, wenn Sie Testbenutzer sind.
+sign-in-off-google = Google hat Inbox Classic noch nicht verifiziert. Deshalb können sich damit nur Testnutzer anmelden. Verwenden Sie Ihre eigene Google-Anmelde-App oder ein App-Kennwort. Als Testnutzer können Sie die integrierte App unter Anmelde-Apps (Datei > Konten) aktivieren.
 sign-in-off-other = Sie wurde unter Anmelde-Apps (Datei > Konten) ausgeschaltet und kann dort wieder eingeschaltet werden.
 sign-in-app-no-name = die Anmelde-App braucht einen Namen
 sign-in-app-no-client = die Client-ID fehlt
-sign-in-app-no-scopes = die Anmelde-App braucht die Bereiche (Scopes), die Zugriff auf E-Mail geben
-sign-in-app-bad-host = der { $server }-Server fehlt oder ist kein Hostname
+sign-in-app-no-scopes = der Anmelde-App fehlen die Berechtigungen (Scopes) für den Zugriff auf E-Mails
+sign-in-app-bad-host = die Adresse des { $server }-Servers fehlt oder ist kein gültiger Hostname
 sign-in-app-plain = der { $server }-Server muss SSL/TLS oder STARTTLS verwenden
 sign-in-app-not-checked = der Aussteller wurde noch nicht geprüft
 sign-in-app-issuer-changed = der Aussteller hat sich geändert: geben Sie das Client-Geheimnis erneut ein oder entfernen Sie es
-sign-in-register-google = Erstellen Sie in der Google Cloud Console einen OAuth-Client vom Typ Desktop-App, mit dem Bereich https://mail.google.com/ auf seinem Zustimmungsbildschirm. Solange die App im Test ist, können sich nur ihre Testnutzer anmelden.
+sign-in-register-google = Erstellen Sie in der Google Cloud Console einen OAuth-Client vom Typ Desktop-App, mit der Berechtigung (Scope) https://mail.google.com/ auf seinem Zustimmungsbildschirm. Solange die App im Test ist, können sich nur ihre Testnutzer anmelden.
 sign-in-register-microsoft = Registrieren Sie in Microsoft Entra eine App mit der Plattform Mobilgerät- und Desktopanwendungen, dem Umleitungs-URI http://localhost, erlaubten öffentlichen Clientflows und den delegierten Berechtigungen IMAP.AccessAsUser.All, SMTP.Send und offline_access. Nur für Ihre Organisation verwenden Sie https://login.microsoftonline.com/<Mandanten-ID>/v2.0 als Aussteller.
-sign-in-register-other = Registrieren Sie einen nativen (öffentlichen) Client mit dem Umleitungs-URI unten; der Anbieter muss jeden Port darauf erlauben (RFC 8252). Fügen Sie den Bereich hinzu, mit dem der Anbieter Zugriff auf E-Mails gibt.
+sign-in-register-other = Registrieren Sie einen nativen (öffentlichen) Client mit dem Umleitungs-URI unten; der Anbieter muss jeden Port darauf erlauben (RFC 8252). Fügen Sie die vom Anbieter vorgegebene Berechtigung (Scope) für den Zugriff auf E-Mails hinzu.
 
 ## Calendar invitations
 
@@ -269,7 +269,7 @@ repeats-every = { $unit ->
        *[other] Alle { $interval } Jahre
     }
 }
-repeats-on = { $repeats } am { $days }
+repeats-on = { $repeats }: { $days }
 repeats-times = { $count ->
     [one] { $repeats }, einmal
    *[other] { $repeats }, { $count } Mal
@@ -285,8 +285,8 @@ day-sunday = Sonntag
 ## AI agents
 
 agent-level-read = E-Mail lesen: Ordner, Nachrichtenliste, Suche und Nachrichten
-agent-level-organize = E-Mail ordnen: Lesestatus, Kennzeichnungen, Junk, Verschieben, Löschen nach Gelöschte Objekte
-agent-level-drafts = Entwürfe schreiben, die Sie senden
+agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben und löschen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
+agent-level-drafts = Entwürfe erstellen, die Sie selbst senden
 agent-level-send = E-Mail senden, jede Nachricht erst nach Ihrer Zustimmung
 agent-connect-title = { $program } möchte Ihre E-Mail verwenden
 agent-connect-detail = Ein KI-Agent möchte mit Inbox Classic arbeiten. Wählen Sie, was er tun darf und welche Konten er sehen darf; Sie können das später unter Extras > KI-Agenten ändern.
@@ -298,10 +298,10 @@ agent-forward-of = Weiterleitung von „{ $subject }“
 agent-never-written-one = Sie haben noch nie an { $address } geschrieben.
 agent-never-written-many = Sie haben noch nie an { $count } dieser Adressen geschrieben.
 agent-send-title = { $program } möchte diese Nachricht senden
-agent-send-detail = Prüfen Sie, an wen sie geht und was darin steht. Wenn Sie sie senden, wartet sie { $seconds } Sekunden im Postausgang, wo Sie sie noch löschen können.
+agent-send-detail = Prüfen Sie die Empfänger und den Inhalt. Nach Ihrer Bestätigung wartet die Nachricht { $seconds } Sekunden im Postausgang. Dort können Sie sie noch löschen.
 agent-change-title = Was { $program } tun darf
 agent-change-allowed = Ändern Sie, was die KI-Agenten dieses Programms mit Ihrer E-Mail tun dürfen.
-agent-change-refused = Sie haben dieses Programm abgewiesen. Erlauben Sie es, damit seine Agenten Ihre E-Mail wieder verwenden können.
+agent-change-refused = Sie haben diesem Programm den Zugriff verweigert. Lassen Sie es zu, damit seine Agenten wieder auf Ihre E-Mails zugreifen können.
 agent-log-taken-back = { $entry } (rückgängig gemacht)
 agent-files = Dateien: { $files }
 agent-undo-refused = Das kann nicht rückgängig gemacht werden.
@@ -310,7 +310,7 @@ agent-undo-impossible = das kann nicht rückgängig gemacht werden
 agent-undo-not-in-folder = die Nachricht ist nicht mehr in diesem Ordner
 agent-undo-not-arrived = die Nachricht ist (noch) nicht im Zielordner
 agent-undo-sent = die Nachricht wurde bereits gesendet
-agent-original-not-downloaded = die beantwortete Nachricht ist noch nicht heruntergeladen: lesen Sie sie zuerst
+agent-original-not-downloaded = die ursprüngliche Nachricht wurde noch nicht heruntergeladen. Öffnen Sie sie zuerst
 agent-turned-away = Abgewiesen
 agent-can-nothing = Nichts
 agent-can-read = lesen
@@ -338,7 +338,7 @@ agent-log-moved = „{ $subject }“ nach { $folder } verschoben
 agent-log-junk = „{ $subject }“ als Junk markiert
 agent-log-not-junk = „{ $subject }“ als Nicht-Junk markiert
 agent-log-folder = Ordner „{ $name }“ erstellt
-agent-log-unsubscribed = Von der Liste von „{ $subject }“ abgemeldet
+agent-log-unsubscribed = Mailingliste der Nachricht „{ $subject }“ abbestellt
 
 ## Keys
 

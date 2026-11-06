@@ -14,9 +14,21 @@ size-bytes = { $count ->
 size-kb = { $size } KB
 size-mb = { $size } MB
 list-counts = { $messages }, { $unread } sin leer
-list-counts-selected = { $messages }, { $unread } sin leer, { $selected } seleccionados
-list-counts-found = { $found } encontrados, { $unread } sin leer
-list-counts-found-selected = { $found } encontrados, { $unread } sin leer, { $selected } seleccionados
+list-counts-selected = { $messages }, { $unread } sin leer, { $selected ->
+    [one] { $selected } seleccionado
+   *[other] { $selected } seleccionados
+}
+list-counts-found = { $found ->
+    [one] { $found } encontrado
+   *[other] { $found } encontrados
+}, { $unread } sin leer
+list-counts-found-selected = { $found ->
+    [one] { $found } encontrado
+   *[other] { $found } encontrados
+}, { $unread } sin leer, { $selected ->
+    [one] { $selected } seleccionado
+   *[other] { $selected } seleccionados
+}
 list-counts-none = No se encontraron mensajes
 
 ## Special folders
@@ -32,13 +44,13 @@ folder-archive = Archivo
 
 reader-no-message = No hay ningún mensaje seleccionado.
 reader-downloading = Descargando el mensaje…
-reader-downloading-detail = Se mostrará aquí en cuanto llegue.
+reader-downloading-detail = El mensaje se mostrará aquí cuando finalice la descarga.
 reader-failed = No se pudo descargar el mensaje
 reader-failed-network = No se pudo conectar con el servidor de correo ({ $reason }).
 reader-failed-sign-in = El servidor de correo no aceptó el inicio de sesión ({ $reason }). Compruebe la contraseña o vuelva a iniciar sesión en Archivo > Cuentas.
-reader-failed-security = No se pudo proteger la conexión con el servidor de correo ({ $reason }).
+reader-failed-security = No se pudo establecer una conexión segura con el servidor de correo ({ $reason }).
 reader-failed-other = El servidor de correo respondió: { $reason }.
-reader-retry-note = No descargado. Se volverá a intentar cuando la cuenta vuelva a estar en línea.
+reader-retry-note = El mensaje no se ha descargado. Se volverá a intentar cuando se restablezca la conexión con la cuenta.
 reader-unreadable = Este mensaje no se puede mostrar: { $error }
 message-source-title = Código fuente del mensaje: { $subject }
 message-source-untitled = Código fuente del mensaje
@@ -74,8 +86,7 @@ done-unread = { $count ->
    *[other] { $messages } marcados como no leídos
 }
 done-flagged = { $count ->
-    [one] { $messages } marcado con marca
-   *[other] { $messages } marcados con marca
+   *[other] Se añadió una marca a { $messages }
 }
 done-unflagged = Se quitó la marca de { $messages }
 done-deleted-for-good = { $count ->
@@ -109,7 +120,7 @@ undo-junk = Deshacer Marcar como correo no deseado
 undo-not-junk = Deshacer Marcar como correo deseado
 nothing-to-undo = No hay nada que deshacer.
 messages-gone = Los mensajes ya no están.
-folder-holds-no-messages = Esa carpeta no contiene mensajes.
+folder-holds-no-messages = Esta carpeta no puede contener mensajes.
 no-junk-folder = Esta cuenta no tiene una carpeta de correo no deseado a la que mover los mensajes.
 no-inbox-folder = Esta cuenta no tiene una bandeja de entrada a la que mover los mensajes.
 done-flagged-color = Marca { $color ->
@@ -191,7 +202,7 @@ import-put = { $count ->
     [one] { $messages } colocado en { $folder }
    *[other] { $messages } colocados en { $folder }
 }
-import-not-put = Estos no se colocaron en la carpeta:
+import-not-put = No se pudieron importar los siguientes mensajes:
 
     { $problems }
 
@@ -203,7 +214,7 @@ error-closed = cerrándose
 error-other-account = el navegador inició sesión en { $email }, no en esta cuenta
 error-in-use = no se puede quitar mientras haya cuentas que inician sesión con ella: { $accounts }
 error-turned-off = esta aplicación de inicio de sesión está desactivada para cuentas nuevas
-error-folder-name = un nombre de carpeta de 1 a 200 caracteres, sin caracteres de control
+error-folder-name = el nombre de la carpeta debe tener entre 1 y 200 caracteres, sin caracteres de control
 error-folder-separator = un nombre de carpeta no puede contener "{ $separator }" en este servidor
 error-folder-special = la Bandeja de entrada y las carpetas especiales no se pueden renombrar ni eliminar
 error-no-recipients = el mensaje no tiene destinatarios
@@ -212,11 +223,11 @@ error-attachment = no se pudo leer { $path }: { $error }
 error-no-drafts = la cuenta no tiene una carpeta Borradores donde guardar el mensaje
 error-draft-attachment = no se pudo conservar un archivo adjunto del borrador: { $error }
 error-password-not-saved = no se pudo guardar la contraseña para el próximo inicio: { $error }
-error-sign-in-not-saved = no se pudo guardar el nuevo inicio de sesión para el próximo inicio: { $error }
+error-sign-in-not-saved = no se pudieron guardar los nuevos datos de inicio de sesión para la próxima vez que abra la aplicación: { $error }
 error-import-unreadable = no se puede leer { $path }: { $error }
 error-import-too-large = { $path } ocupa más de 50 MB
 error-import-not-mail = { $path } no es un mensaje de correo electrónico
-error-list-answered = la lista respondió { $status }
+error-list-answered = el servidor de la lista respondió con el código { $status }
 error-not-built = no se pudo crear el mensaje
 error-outbox-waits = { $count ->
     [one] el mensaje espera en la Bandeja de salida y se enviará con el próximo Enviar y recibir
@@ -227,10 +238,10 @@ error-sent-but = el mensaje se envió, pero { $problem }
 error-sent-still-in-outbox = sigue en la Bandeja de salida: { $error }
 error-sent-no-copy = no se pudo guardar una copia en Elementos enviados: { $reason }
 error-no-password = no hay contraseña para esta cuenta
-error-no-sign-in = no hay inicio de sesión para esta cuenta
+error-no-sign-in = no hay datos de inicio de sesión guardados para esta cuenta
 error-provider-missing = esta versión no puede iniciar sesión en { $provider }: ¿se quitó su aplicación de inicio de sesión?
-error-provider-servers = los servidores de esta cuenta no son aquellos en los que inicia sesión
-error-app-scopes = { $reason }. El servidor de correo no aceptó el token de la aplicación de inicio de sesión: compruebe que los ámbitos (scopes) de la aplicación dan acceso al correo
+error-provider-servers = los servidores de esta cuenta no coinciden con los de la aplicación de inicio de sesión
+error-app-scopes = { $reason }. El servidor de correo rechazó el token de la aplicación de inicio de sesión. Compruebe que sus permisos (scopes) permiten acceder al correo
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
@@ -239,14 +250,14 @@ sign-in-off-google = Google aún no ha verificado Inbox Classic, así que solo p
 sign-in-off-other = Se desactivó en Aplicaciones de inicio de sesión (Archivo > Cuentas), donde se puede volver a activar.
 sign-in-app-no-name = la aplicación de inicio de sesión necesita un nombre
 sign-in-app-no-client = falta el ID de cliente
-sign-in-app-no-scopes = la aplicación de inicio de sesión necesita los ámbitos (scopes) que dan acceso al correo
-sign-in-app-bad-host = falta el servidor { $server } o no es un nombre de host
+sign-in-app-no-scopes = la aplicación de inicio de sesión necesita permisos (scopes) de acceso al correo
+sign-in-app-bad-host = falta la dirección del servidor { $server } o no es un nombre de host válido
 sign-in-app-plain = el servidor { $server } debe usar SSL/TLS o STARTTLS
 sign-in-app-not-checked = el emisor aún no se ha comprobado
 sign-in-app-issuer-changed = el emisor cambió: vuelva a escribir el secreto de cliente o quítelo
-sign-in-register-google = En Google Cloud Console, cree un cliente OAuth de tipo Aplicación de escritorio, con el ámbito https://mail.google.com/ en su pantalla de consentimiento. Mientras la aplicación esté en pruebas, solo sus usuarios de prueba pueden iniciar sesión.
+sign-in-register-google = En Google Cloud Console, cree un cliente OAuth de tipo Aplicación de escritorio, con el permiso (scope) https://mail.google.com/ en su pantalla de consentimiento. Mientras la aplicación esté en pruebas, solo sus usuarios de prueba pueden iniciar sesión.
 sign-in-register-microsoft = En Microsoft Entra, registre una aplicación con la plataforma Aplicaciones móviles y de escritorio, el URI de redirección http://localhost, los flujos de cliente público permitidos y los permisos delegados IMAP.AccessAsUser.All, SMTP.Send y offline_access. Solo para su organización, use https://login.microsoftonline.com/<ID de inquilino>/v2.0 como emisor.
-sign-in-register-other = Registre un cliente nativo (público) con el URI de redirección de abajo; el proveedor debe permitir cualquier puerto en él (RFC 8252). Agregue el ámbito con el que el proveedor da acceso al correo.
+sign-in-register-other = Registre un cliente nativo (público) con el URI de redirección de abajo; el proveedor debe permitir cualquier puerto en él (RFC 8252). Añada el permiso (scope) que indique su proveedor para acceder al correo.
 
 ## Calendar invitations
 
@@ -269,7 +280,7 @@ repeats-every = { $unit ->
        *[other] Cada { $interval } años
     }
 }
-repeats-on = { $repeats } el { $days }
+repeats-on = { $repeats }: { $days }
 repeats-times = { $count ->
     [one] { $repeats }, una vez
    *[other] { $repeats }, { $count } veces
@@ -285,7 +296,7 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Leer el correo: carpetas, lista de mensajes, búsqueda y mensajes
-agent-level-organize = Organizar el correo: leído o no leído, marcas, correo no deseado, mover, eliminar a Elementos eliminados
+agent-level-organize = Organizar el correo: marcar como leído o no leído, añadir marcas, gestionar el correo no deseado, mover mensajes y enviarlos a Elementos eliminados
 agent-level-drafts = Escribir borradores para que usted los envíe
 agent-level-send = Enviar correo, cada mensaje solo después de que usted lo apruebe
 agent-connect-title = { $program } quiere usar su correo
@@ -298,10 +309,10 @@ agent-forward-of = Reenvío de «{ $subject }»
 agent-never-written-one = Nunca ha escrito a { $address }.
 agent-never-written-many = Nunca ha escrito a { $count } de estas direcciones.
 agent-send-title = { $program } quiere enviar este mensaje
-agent-send-detail = Compruebe a quién va y qué dice. Si lo envía, espera { $seconds } segundos en la Bandeja de salida, donde aún puede eliminarlo.
+agent-send-detail = Revise los destinatarios y el contenido del mensaje. Tras confirmar el envío, permanecerá { $seconds } segundos en la Bandeja de salida, donde aún podrá eliminarlo.
 agent-change-title = Qué puede hacer { $program }
 agent-change-allowed = Cambie lo que los agentes de IA de este programa pueden hacer con su correo.
-agent-change-refused = Rechazó este programa. Permítalo para que sus agentes puedan volver a usar su correo.
+agent-change-refused = Ha denegado el acceso a este programa. Autorícelo para que sus agentes puedan volver a acceder a su correo.
 agent-log-taken-back = { $entry } (deshecho)
 agent-files = Archivos: { $files }
 agent-undo-refused = No se puede deshacer.
@@ -310,7 +321,7 @@ agent-undo-impossible = esto no se puede deshacer
 agent-undo-not-in-folder = el mensaje ya no está en esa carpeta
 agent-undo-not-arrived = el mensaje no está (todavía) en la carpeta de destino
 agent-undo-sent = el mensaje ya se envió
-agent-original-not-downloaded = el mensaje respondido aún no está descargado: léalo primero
+agent-original-not-downloaded = el mensaje original aún no se ha descargado. Ábralo primero
 agent-turned-away = Rechazado
 agent-can-nothing = Nada
 agent-can-read = leer
@@ -331,14 +342,14 @@ agent-log-sent = Se envió «{ $subject }» a { $to }
 agent-log-draft = Se guardó el borrador «{ $subject }»
 agent-log-read = «{ $subject }» marcado como leído
 agent-log-unread = «{ $subject }» marcado como no leído
-agent-log-flagged = «{ $subject }» marcado con marca
+agent-log-flagged = Se añadió una marca a «{ $subject }»
 agent-log-unflagged = Se quitó la marca de «{ $subject }»
 agent-log-deleted = Se eliminó «{ $subject }»
 agent-log-moved = «{ $subject }» movido a { $folder }
 agent-log-junk = «{ $subject }» marcado como correo no deseado
 agent-log-not-junk = «{ $subject }» marcado como correo deseado
 agent-log-folder = Se creó la carpeta «{ $name }»
-agent-log-unsubscribed = Baja de la lista de «{ $subject }»
+agent-log-unsubscribed = Suscripción cancelada a la lista que envió «{ $subject }»
 
 ## Keys
 

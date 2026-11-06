@@ -22,7 +22,7 @@ extension UITest {
         check(shown.notify.title == "Notify me when new mail arrives", "Notify of New Mail is there too")
         onMain { self.choose(popup, 2) }
         let question = await waitWindow("alert", 10)
-        check(alertText(question).contains("Start Inbox Classic again now to change the language?"),
+        check(alertText(question).contains("Restart Inbox Classic now to change the language?"),
               "choosing Deutsch asks to start again (\(alertText(question)))")
         let buttons = views(NSButton.self, in: question?.contentView).map(\.title)
         check(buttons.contains("Restart Now") && buttons.contains("Later"), "with Restart Now and Later")

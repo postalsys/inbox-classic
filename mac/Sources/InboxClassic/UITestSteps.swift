@@ -360,7 +360,7 @@ extension UITest {
         check(await waitUntil(15) { server.received.hasPrefix("POST /u/42 ") && server.received.contains("List-Unsubscribe=One-Click") },
               "Yes posts List-Unsubscribe=One-Click to the list")
         let status: NSTextField? = find("status.text", in: main.window)
-        check(await waitUntil(10) { status?.stringValue.contains("Unsubscribed") == true }, "and the status bar says it is done")
+        check(await waitUntil(10) { status?.stringValue.contains("Unsubscribe request accepted") == true }, "and the status bar says it is done")
         search("")
 
         step("a calendar invitation")
@@ -1244,7 +1244,7 @@ extension UITest {
         if let outbox = await waitWindow("outbox", 10) {
             let table: NSTableView? = find("outbox.list", in: outbox)
             let status = (table?.view(atColumn: 3, row: 0, makeIfNecessary: true) as? NSTextField)?.stringValue ?? ""
-            check(status.hasPrefix("Sent by an AI agent; goes at"), "it waits in the Outbox, where it can still be deleted (\(status))")
+            check(status.hasPrefix("Queued by an AI agent; sends at"), "it waits in the Outbox, where it can still be deleted (\(status))")
             await shot(outbox, "agents-5-outbox")
             NSApp.stopModal()
             _ = await waitUntil { !outbox.isVisible }

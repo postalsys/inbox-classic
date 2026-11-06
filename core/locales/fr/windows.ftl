@@ -3,13 +3,13 @@
 
 ## La fenêtre principale
 
-win-still-running-detail = Il continue à relever le courrier ici. Cliquez sur l'icône pour l'ouvrir, ou cliquez dessus avec le bouton droit pour le quitter.
+win-still-running-detail = Inbox Classic continue de relever le courrier en arrière-plan. Cliquez sur son icône pour l’ouvrir. Pour quitter l’application, ouvrez le menu de l’icône avec le bouton droit.
 win-new-messages = { $count ->
     [one] { $count } nouveau message
    *[other] { $count } nouveaux messages
 }
-win-default-app-not-installed = Cette copie d'Inbox Classic n'a pas été installée, Windows ne la propose donc pas comme programme de messagerie. Installez-la pour la choisir.
-win-default-app-settings = Windows ouvre ses paramètres d'applications par défaut pour Inbox Classic. Choisissez-le pour MAILTO.
+win-default-app-not-installed = Inbox Classic n’est pas installé et ne figure donc pas dans la liste des applications de messagerie de Windows. Installez-le pour le choisir comme application par défaut.
+win-default-app-settings = Windows ouvre les paramètres des applications par défaut. Choisissez Inbox Classic pour ouvrir les liens MAILTO.
 win-no-unread = Aucun message non lu
 win-unread-messages = { $count ->
     [one] { $count } message non lu
@@ -70,13 +70,13 @@ win-files = { $count ->
 }
 win-click-to-retry = Cliquez ici pour réessayer.
 win-save-attachments = &Enregistrer les pièces jointes...
-win-files-not-saved = { $failed } des { $count } fichiers n'ont pas pu être enregistrés.
+win-files-not-saved = Fichiers non enregistrés : { $failed } sur { $count }.
 win-attendees = { $count ->
     [one] { $count } participant
    *[other] { $count } participants
 }
-win-new-folder-in-highlighted = Le nouveau dossier est créé dans le dossier mis en évidence.
-win-delete-folder-ask = Supprimer le dossier « { $folder } » avec ses messages et les dossiers qu'il contient ? Il est aussi supprimé sur le serveur.
+win-new-folder-in-highlighted = Le nouveau dossier sera créé dans le dossier sélectionné.
+win-delete-folder-ask = Supprimer le dossier « { $folder } », tous ses messages et ses sous-dossiers ? Ils seront également supprimés du serveur.
 win-rename = &Renommer...
 win-messages-not-saved = Les messages n'ont pas pu être enregistrés.
 win-messages-not-forwarded = Les messages n'ont pas pu être transférés.
@@ -100,11 +100,11 @@ win-col-address = Adresse
 win-never-written-to = Jamais écrit
 win-send = &Envoyer
 win-dont-send = &Ne pas envoyer
-win-forget-program-ask = Oublier ce programme et ce que ses agents ont fait ? La question sera reposée à sa prochaine connexion.
-win-clear-log-ask = Effacer la liste de ce que les agents ont fait ? Ce qu'ils ont fait reste fait.
+win-forget-program-ask = Supprimer ce programme, ses autorisations et l’historique de ses agents ? Une autorisation vous sera de nouveau demandée à la prochaine connexion.
+win-clear-log-ask = Effacer l’historique des agents ? Les modifications effectuées ne seront pas annulées.
 win-agent-programs = &Programmes dont les agents ont demandé à utiliser votre courrier :
 win-change = &Modifier...
-win-what-agents-did = Ce que les agents ont &fait :
+win-what-agents-did = &Historique des agents :
 win-how-to-connect = Comment connecter un agent
 
 ## Applications de connexion
@@ -115,6 +115,6 @@ win-edit = &Modifier...
 ## Options
 
 win-options-language-label = &Afficher Inbox Classic en :
-win-options-restart-note = Inbox Classic redémarre pour afficher une autre langue.
+win-options-restart-note = Redémarrez Inbox Classic pour appliquer la nouvelle langue.
 win-options-notify = &Me prévenir de l'arrivée de nouveaux messages
 win-restart-ask = Inbox Classic s'affichera dans la langue choisie ({ $language }) après un redémarrage. Redémarrer maintenant ?

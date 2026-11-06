@@ -3,13 +3,13 @@
 
 ## Das Hauptfenster
 
-win-still-running-detail = Es sucht hier weiter nach neuer E-Mail. Klicken Sie auf das Symbol, um es zu öffnen, oder klicken Sie mit der rechten Maustaste darauf, um es zu beenden.
+win-still-running-detail = Inbox Classic prüft im Hintergrund auf neue E-Mails. Klicken Sie zum Öffnen auf das Symbol. Zum Beenden öffnen Sie mit der rechten Maustaste das Symbolmenü.
 win-new-messages = { $count ->
     [one] { $count } neue Nachricht
    *[other] { $count } neue Nachrichten
 }
-win-default-app-not-installed = Diese Kopie von Inbox Classic wurde nicht installiert, deshalb führt Windows sie nicht als E-Mail-Programm. Installieren Sie sie, um sie auszuwählen.
-win-default-app-settings = Windows öffnet seine Einstellungen für Standard-Apps bei Inbox Classic. Wählen Sie es dort für MAILTO.
+win-default-app-not-installed = Inbox Classic ist nicht installiert und wird deshalb von Windows nicht als E-Mail-Programm aufgeführt. Installieren Sie Inbox Classic, um es als Standard auszuwählen.
+win-default-app-settings = Windows öffnet die Einstellungen für Standard-Apps. Legen Sie dort Inbox Classic zum Öffnen von MAILTO-Links fest.
 win-no-unread = Keine ungelesenen Nachrichten
 win-unread-messages = { $count ->
     [one] { $count } ungelesene Nachricht
@@ -61,8 +61,8 @@ win-search-indexing = { $count ->
    *[other] der Text von { $count } Nachrichten wird noch indiziert
 }
 win-no-match-indexing = { $count ->
-    [one] Der Text von { $count } Nachricht wird noch indiziert, es kann also bald mehr gefunden werden.
-   *[other] Der Text von { $count } Nachrichten wird noch indiziert, es kann also bald mehr gefunden werden.
+    [one] Der Text einer Nachricht wird noch indiziert. Weitere Suchergebnisse können hinzukommen.
+   *[other] Die Texte von { $count } Nachrichten werden noch indiziert. Weitere Suchergebnisse können hinzukommen.
 }
 win-files = { $count ->
     [one] { $count } Datei
@@ -70,13 +70,13 @@ win-files = { $count ->
 }
 win-click-to-retry = Klicken Sie hier, um es erneut zu versuchen.
 win-save-attachments = Anlagen &speichern...
-win-files-not-saved = { $failed } der { $count } Dateien konnten nicht gespeichert werden.
+win-files-not-saved = Nicht gespeicherte Dateien: { $failed } von { $count }.
 win-attendees = { $count ->
     [one] { $count } Teilnehmer
    *[other] { $count } Teilnehmer
 }
-win-new-folder-in-highlighted = Der neue Ordner kommt in den hervorgehobenen Ordner.
-win-delete-folder-ask = Den Ordner „{ $folder }“ mit seinen Nachrichten und den Ordnern darin löschen? Er wird auch auf dem Server gelöscht.
+win-new-folder-in-highlighted = Der neue Ordner wird im ausgewählten Ordner angelegt.
+win-delete-folder-ask = Den Ordner „{ $folder }“ mit allen Nachrichten und Unterordnern löschen? Diese werden auch auf dem Server gelöscht.
 win-rename = &Umbenennen...
 win-messages-not-saved = Die Nachrichten konnten nicht gespeichert werden.
 win-messages-not-forwarded = Die Nachrichten konnten nicht weitergeleitet werden.
@@ -100,21 +100,21 @@ win-col-address = Adresse
 win-never-written-to = Nie angeschrieben
 win-send = &Senden
 win-dont-send = &Nicht senden
-win-forget-program-ask = Dieses Programm vergessen und was seine Agenten getan haben? Beim nächsten Verbinden wird erneut gefragt.
-win-clear-log-ask = Die Liste dessen löschen, was Agenten getan haben? Was sie getan haben, bleibt getan.
-win-agent-programs = &Programme, deren Agenten Ihre E-Mail verwenden wollten:
+win-forget-program-ask = Dieses Programm mit seinen Berechtigungen und dem Aktivitätsverlauf seiner Agenten entfernen? Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
+win-clear-log-ask = Aktivitätsverlauf der Agenten löschen? Die vorgenommenen Änderungen werden dadurch nicht rückgängig gemacht.
+win-agent-programs = &Programme, deren Agenten Zugriff auf Ihre E-Mails angefordert haben:
 win-change = Ä&ndern...
-win-what-agents-did = &Was Agenten getan haben:
+win-what-agents-did = &Aktivitätsverlauf der Agenten:
 win-how-to-connect = So verbinden Sie einen Agenten
 
 ## Anmelde-Apps
 
-win-built-in = (eingebaut)
+win-built-in = (integriert)
 win-edit = &Bearbeiten...
 
 ## Optionen
 
-win-options-language-label = Inbox Classic &anzeigen in:
-win-options-restart-note = Inbox Classic startet neu, um eine andere Sprache anzuzeigen.
+win-options-language-label = &Sprache von Inbox Classic:
+win-options-restart-note = Die neue Sprache wird nach einem Neustart von Inbox Classic übernommen.
 win-options-notify = Bei neuer E-Mail &benachrichtigen
-win-restart-ask = Inbox Classic zeigt { $language } nach einem Neustart an. Jetzt neu starten?
+win-restart-ask = Nach einem Neustart wird Inbox Classic auf { $language } angezeigt. Jetzt neu starten?

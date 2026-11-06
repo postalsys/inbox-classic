@@ -16,7 +16,7 @@ mac-paste = Coller
 mac-menu-window = Fenêtre
 mac-minimize = Réduire
 mac-zoom = Zoom
-mac-no-updates = Cette copie d'Inbox Classic ne se met pas à jour toute seule. Téléchargez la dernière version sur inboxclassic.com.
+mac-no-updates = Cette version d’Inbox Classic ne prend pas en charge les mises à jour automatiques. Téléchargez la dernière version sur inboxclassic.com.
 
 ## Settings
 
@@ -32,7 +32,7 @@ mac-choose = Choisir
 
 ## The main window
 
-mac-still-running-detail = Il continue de relever les nouveaux messages. Cliquez sur son icône dans le Dock pour le rouvrir.
+mac-still-running-detail = Inbox Classic continue de relever le courrier en arrière-plan. Cliquez sur son icône dans le Dock pour ouvrir l’application.
 mac-outbox-waiting =
     { $count ->
         [one] { $count } message dans la Boîte d'envoi
@@ -46,9 +46,9 @@ mac-new-messages =
         [one] { $count } nouveau message
        *[other] { $count } nouveaux messages
     }
-mac-newest-from = Le plus récent, de { $from } : { $subject }
+mac-newest-from = Dernier message de { $from } : { $subject }
 mac-not-bundle = Cette copie d'Inbox Classic n'est pas un paquet d'application, elle ne peut donc pas être l'app de messagerie par défaut.
-mac-not-made-default = Inbox Classic n'est pas devenu l'app de messagerie par défaut : { $reason }
+mac-not-made-default = Impossible de définir Inbox Classic comme app de messagerie par défaut : { $reason }
 mac-tool-search = Rechercher
 
 ## The folders and the message list
@@ -75,15 +75,15 @@ mac-still-indexing =
         [one] indexation du texte de { $count } message en cours
        *[other] indexation du texte de { $count } messages en cours
     }
-mac-folder-unread = { $folder }, { $count } non lus
+mac-folder-unread = { $folder }, { $count ->
+    [one] { $count } non lu
+   *[other] { $count } non lus
+}
 mac-import-messages = Importer des messages
 mac-save-messages = Enregistrer les messages
 mac-save-attachments-menu = Enregistrer les pièces jointes…
-mac-files-not-saved =
-    { $count ->
-       *[other] { $failed } des { $count } fichiers n'ont pas pu être enregistrés.
-    }
-mac-no-calendar-app = Aucune app de calendrier de ce Mac n'ouvre les invitations (fichiers .ics).
+mac-files-not-saved = Fichiers non enregistrés : { $failed } sur { $count }.
+mac-no-calendar-app = Aucune app de calendrier n’est disponible sur ce Mac pour ouvrir les invitations (fichiers .ics).
 mac-unsubscribing = Désabonnement de { $target }…
 
 ## The compose window
@@ -123,8 +123,8 @@ mac-sign-in-apps-button = Applications de connexion…
 
 ## AI agents
 
-mac-forget-program = Oublier ce programme et ce qu'ont fait ses agents ?
-mac-forget-program-detail = La question lui sera reposée à sa prochaine connexion.
+mac-forget-program = Supprimer ce programme et l’historique de ses agents ?
+mac-forget-program-detail = Les autorisations du programme seront effacées. Une autorisation vous sera de nouveau demandée à la prochaine connexion.
 
 ## Sign-in apps
 

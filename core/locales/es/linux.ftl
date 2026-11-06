@@ -3,10 +3,10 @@
 
 ## The main window
 
-gtk-search-looks-in = La búsqueda mira el asunto, las personas, los nombres de archivo y el texto de los mensajes de { $place }. Revise la ortografía o pruebe con menos palabras.
+gtk-search-looks-in = La búsqueda en { $place } incluye el asunto, los remitentes, los destinatarios, los nombres de los archivos adjuntos y el texto de los mensajes. Revise la ortografía o pruebe con menos palabras.
 gtk-search-still-indexing = { $count ->
-    [one] El texto de { $count } mensaje aún se está indexando, así que pronto puede encontrarse más.
-   *[other] El texto de { $count } mensajes aún se está indexando, así que pronto puede encontrarse más.
+    [one] Se está indexando el texto de { $count } mensaje. Pueden aparecer más resultados.
+   *[other] Se está indexando el texto de { $count } mensajes. Pueden aparecer más resultados.
 }
 gtk-search-results-everywhere = { $count ->
     [0] Ningún resultado
@@ -23,23 +23,23 @@ gtk-search-indexing = { $count ->
    *[other] aún se indexa el texto de { $count } mensajes
 }
 gtk-menu-rename = Cambiar nombre...
-gtk-import-one-question = ¿Poner el mensaje { $file } en la carpeta { $folder }?
-gtk-files-not-saved = No se pudieron guardar { $failed } de los { $total } archivos.
+gtk-import-one-question = ¿Importar el mensaje { $file } a la carpeta { $folder }?
+gtk-files-not-saved = Archivos sin guardar: { $failed } de { $total }.
 gtk-unsubscribe-one-click =
     ¿Salir de esta lista de correo?
 
-    Inbox Classic pide a { $target } que deje de enviársela. No se abre ninguna página ni se envía ningún mensaje.
+    Inbox Classic enviará una solicitud de baja a { $target }. No se abrirá ninguna página web ni se enviará ningún correo electrónico.
 gtk-unsubscribe-mail =
     ¿Salir de esta lista de correo?
 
-    La lista pide un mensaje a { $target }. Inbox Classic lo escribe por usted; envíelo para cancelar la suscripción.
+    Para cancelar la suscripción, debe enviar un mensaje a { $target }. Inbox Classic lo prepara por usted. Envíelo para confirmar la baja.
 gtk-unsubscribe-web =
     ¿Salir de esta lista de correo?
 
-    La página de la lista para ello se abre en su navegador ({ $target }).
+    Se abrirá la página de baja de la lista en su navegador ({ $target }).
 gtk-unsubscribe-failed = No se pudo cancelar la suscripción: { $problem }
-gtk-toolbar-create-mail-menu = Un mensaje desde una cuenta
-gtk-toolbar-send-recv-menu = Enviar y recibir una cuenta
+gtk-toolbar-create-mail-menu = Redactar desde una cuenta específica
+gtk-toolbar-send-recv-menu = Enviar y recibir mensajes de una cuenta específica
 gtk-main-menu = Menú principal
 gtk-quit = Salir
 
@@ -63,27 +63,30 @@ gtk-unread-messages = { $count ->
 
 ## The Outbox
 
-gtk-outbox-empty = Nada espera para enviarse.
-gtk-outbox-row = Para: { $to }  ·  En cola { $queued }  ·  { $status }
+gtk-outbox-empty = No hay mensajes pendientes de envío.
+gtk-outbox-row = Para: { $to }  ·  En cola desde { $queued }  ·  { $status }
 
 ## The app
 
-gtk-new-messages = { $count } mensajes nuevos
-gtk-still-running-detail = Sigue buscando correo nuevo. Su icono en la barra superior lo vuelve a abrir o lo cierra.
+gtk-new-messages = { $count ->
+    [one] { $count } mensaje nuevo
+   *[other] { $count } mensajes nuevos
+}
+gtk-still-running-detail = Inbox Classic sigue buscando correo nuevo en segundo plano. Utilice su icono en la barra superior para abrir la aplicación o salir de ella.
 gtk-sign-in-again-ask =
-    El inicio de sesión de { $account } se rechazó o caducó.
+    Se rechazó el inicio de sesión en { $account } o la sesión ha caducado.
 
     ¿Iniciar sesión de nuevo en el navegador?
-gtk-default-app-not-installed = Esta copia de Inbox Classic no se instaló, por eso el sistema no la muestra como aplicación de correo. Instálela para elegirla.
+gtk-default-app-not-installed = Inbox Classic no está instalado, por lo que no aparece entre las aplicaciones de correo del sistema. Instálelo para elegirlo como aplicación predeterminada.
 gtk-default-app-now = Inbox Classic es ahora su aplicación de correo predeterminada: los vínculos de correo abren aquí un mensaje nuevo.
-gtk-default-app-failed = No se pudo hacer de Inbox Classic la aplicación de correo predeterminada.
+gtk-default-app-failed = No se pudo establecer Inbox Classic como aplicación de correo predeterminada.
 
 ## Buttons and words used in many windows
 
 ## The reading pane
 
 gtk-reader-date = Fecha:
-gtk-reader-files = Los archivos del mensaje
+gtk-reader-files = Archivos adjuntos del mensaje
 gtk-pictures-blocked = Se han bloqueado algunas imágenes para impedir que el remitente identifique su equipo.
 gtk-download-pictures = Descargar imágenes
 gtk-save-attachments-menu = Guardar archivos adjuntos...
@@ -115,18 +118,18 @@ gtk-link-status = { $link }    (Ctrl+clic para abrir)
 ## Accounts
 
 gtk-plain-warning =
-    Sin cifrado, su contraseña y su correo viajan por la red legibles para cualquiera en el camino. Úselo solo para un servidor en su propio equipo o red.
+    Sin cifrado, cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Utilice esta conexión solo con un servidor en su propio equipo o en su red local.
 
     ¿Continuar?
 gtk-display-name-title = Nombre para mostrar
-gtk-turned-off-why = { $button } está desactivado en este equipo. { $reason }
+gtk-turned-off-why = La opción «{ $button }» está desactivada en este equipo. { $reason }
 gtk-turned-off-why-long =
-    { $button } está desactivado en este equipo.
+    La opción «{ $button }» está desactivada en este equipo.
 
     { $reason }
 gtk-next = Siguiente >
-gtk-provider-sign-in = { $address } inicia sesión en la página de { $provider }, sin dar su contraseña a Inbox Classic. O use una contraseña de aplicación creada en la configuración de seguridad de su cuenta.
-gtk-provider-sign-in-apps = { $address } puede iniciar sesión en la página de { $provider } con una de sus aplicaciones de inicio de sesión (Más opciones de inicio de sesión). O use una contraseña de aplicación creada en la configuración de seguridad de su cuenta.
+gtk-provider-sign-in = Inicie sesión en la cuenta { $address } desde el sitio web de { $provider }. Su contraseña no se compartirá con Inbox Classic. También puede usar una contraseña de aplicación creada en la configuración de seguridad de su cuenta.
+gtk-provider-sign-in-apps = Inicie sesión en la cuenta { $address } desde el sitio web de { $provider } con una de sus aplicaciones de inicio de sesión («Más opciones de inicio de sesión»). También puede usar una contraseña de aplicación creada en la configuración de seguridad de su cuenta.
 gtk-accounts-add = Agregar...
 gtk-accounts-properties = Propiedades...
 gtk-accounts-signature = Firma...
@@ -142,13 +145,13 @@ gtk-issuer-found =
     Punto de conexión de tokens: { $endpoint }
 gtk-client-id = ID de cliente
 gtk-client-secret = Secreto de cliente
-gtk-scopes = Ámbitos (scopes)
+gtk-scopes = Permisos (scopes)
 gtk-redirect-uri = URI de redirección
 gtk-issuer-usable =
     El emisor se puede usar.
 
     { $found }
-gtk-app-built-in = { $app } está integrada: solo puede cambiar si se usa para cuentas nuevas. { $reason }
+gtk-app-built-in = { $app } es una aplicación integrada. Solo puede elegir si se ofrece para cuentas nuevas. { $reason }
 gtk-built-in = { $app } (integrada)
 gtk-offered-for-new = Ofrecida para cuentas nuevas
 gtk-edit-button = Editar...
@@ -157,12 +160,12 @@ gtk-sign-in-apps-intro = Las aplicaciones de inicio de sesión permiten que las 
 
 ## AI agents
 
-gtk-agent-it-may = Puede
-gtk-agent-accounts = Cuentas que puede usar
+gtk-agent-it-may = Acciones permitidas
+gtk-agent-accounts = Cuentas autorizadas
 gtk-never-used = Nunca usado
-gtk-last-used = Usado por última vez { $date }
-gtk-forget-program = ¿Olvidar este programa?
-gtk-forget-program-detail = Se le vuelve a preguntar la próxima vez que se conecte, y se olvida lo que hicieron sus agentes.
+gtk-last-used = Último uso: { $date }
+gtk-forget-program = ¿Quitar este programa?
+gtk-forget-program-detail = Se borrarán los permisos del programa y el historial de sus agentes. Se le volverá a pedir autorización la próxima vez que el programa se conecte.
 gtk-no-agents-yet = Ningún agente ha pedido aún usar su correo.
 gtk-nothing-yet = Nada todavía.
 
@@ -170,7 +173,7 @@ gtk-nothing-yet = Nada todavía.
 
 gtk-preferences = Preferencias
 gtk-language = Idioma
-gtk-language-subtitle = Las palabras de las ventanas y de la ayuda
+gtk-language-subtitle = Idioma de la interfaz y de la ayuda
 gtk-new-mail-group = Correo nuevo
 gtk-notify-subtitle = Una notificación cuando llegan mensajes nuevos mientras la ventana está en segundo plano
 gtk-restart-to-change = Inbox Classic se reinicia para cambiar el idioma.

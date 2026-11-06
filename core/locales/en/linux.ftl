@@ -3,10 +3,10 @@
 
 ## The main window
 
-gtk-search-looks-in = The search looks at the subject, the people, the file names and the text of the messages in { $place }. Check the spelling, or try fewer words.
+gtk-search-looks-in = The search in { $place } covers subjects, senders, recipients, attachment names and message text. Check the spelling or try fewer words.
 gtk-search-still-indexing = { $count ->
-    [one] The text of 1 message is still being indexed, so more may be found soon.
-   *[other] The text of { $count } messages are still being indexed, so more may be found soon.
+    [one] The text of 1 message is still being indexed. More results may appear soon.
+   *[other] The text of { $count } messages is still being indexed. More results may appear soon.
 }
 gtk-search-results-everywhere = { $count ->
     [0] No results
@@ -23,23 +23,23 @@ gtk-search-indexing = { $count ->
    *[other] still indexing the text of { $count } messages
 }
 gtk-menu-rename = Rename...
-gtk-import-one-question = Put the message { $file } into the folder { $folder }?
+gtk-import-one-question = Import the message { $file } into { $folder }?
 gtk-files-not-saved = { $failed } of the { $total } files could not be saved.
 gtk-unsubscribe-one-click =
     Leave this mailing list?
 
-    Inbox Classic asks { $target } to stop sending it to you. No page opens and no message is sent.
+    Inbox Classic will send an unsubscribe request to { $target }. No web page will open and no e-mail will be sent.
 gtk-unsubscribe-mail =
     Leave this mailing list?
 
-    The list wants a message to { $target }. Inbox Classic writes it for you; send it to unsubscribe.
+    To unsubscribe, send an e-mail to { $target }. Inbox Classic will prepare it for you. Send the message to confirm.
 gtk-unsubscribe-web =
     Leave this mailing list?
 
-    The list's page for it opens in your browser ({ $target }).
+    The mailing list’s unsubscribe page will open in your browser ({ $target }).
 gtk-unsubscribe-failed = Could not unsubscribe: { $problem }
-gtk-toolbar-create-mail-menu = A message from one account
-gtk-toolbar-send-recv-menu = Send and receive one account
+gtk-toolbar-create-mail-menu = Compose from a specific account
+gtk-toolbar-send-recv-menu = Send and receive mail for a specific account
 gtk-main-menu = Main Menu
 gtk-quit = Quit
 
@@ -63,15 +63,18 @@ gtk-unread-messages = { $count ->
 
 ## The Outbox
 
-gtk-outbox-empty = Nothing waits to be sent.
+gtk-outbox-empty = No messages are waiting to be sent.
 gtk-outbox-row = To: { $to }  ·  Queued { $queued }  ·  { $status }
 
 ## The app
 
-gtk-new-messages = { $count } new messages
-gtk-still-running-detail = It keeps checking for new mail. Its icon in the top bar opens it again, or quits it.
+gtk-new-messages = { $count ->
+    [one] { $count } new message
+   *[other] { $count } new messages
+}
+gtk-still-running-detail = Inbox Classic keeps checking for new mail in the background. Use its icon in the top bar to open or quit the app.
 gtk-sign-in-again-ask =
-    The sign-in of { $account } was refused or ran out.
+    Sign-in to { $account } was rejected or the session has expired.
 
     Sign in again in the browser?
 gtk-default-app-not-installed = This copy of Inbox Classic was not installed, so the system does not list it as a mail app. Install it to choose it.
@@ -83,7 +86,7 @@ gtk-default-app-failed = Inbox Classic could not be made the default mail app.
 ## The reading pane
 
 gtk-reader-date = Date:
-gtk-reader-files = The files of the message
+gtk-reader-files = Message attachments
 gtk-pictures-blocked = Some pictures have been blocked to help prevent the sender from identifying your computer.
 gtk-download-pictures = Download Pictures
 gtk-save-attachments-menu = Save Attachments...
@@ -115,18 +118,18 @@ gtk-link-status = { $link }    (Ctrl+click to open)
 ## Accounts
 
 gtk-plain-warning =
-    Without encryption your password and mail travel the network readable by anyone on the way. Use this only for a server on your own computer or network.
+    Without encryption, anyone who intercepts your network traffic can read your password and messages. Only use this connection with a server on your own computer or local network.
 
     Continue?
 gtk-display-name-title = Display name
-gtk-turned-off-why = { $button } is turned off on this computer. { $reason }
+gtk-turned-off-why = The “{ $button }” option is disabled on this computer. { $reason }
 gtk-turned-off-why-long =
-    { $button } is turned off on this computer.
+    The “{ $button }” option is disabled on this computer.
 
     { $reason }
 gtk-next = Next >
-gtk-provider-sign-in = { $address } signs in on { $provider }'s own page, without giving Inbox Classic your password. Or use an app password made in your account's security settings.
-gtk-provider-sign-in-apps = { $address } can sign in on { $provider }'s own page with one of your sign-in apps (More sign-in options). Or use an app password made in your account's security settings.
+gtk-provider-sign-in = Sign in to { $address } on { $provider }’s website. Your password is not shared with Inbox Classic. You can also use an app password created in your account’s security settings.
+gtk-provider-sign-in-apps = Sign in to { $address } on { $provider }’s website using one of your sign-in apps (More sign-in options). You can also use an app password created in your account’s security settings.
 gtk-accounts-add = Add...
 gtk-accounts-properties = Properties...
 gtk-accounts-signature = Signature...
@@ -148,7 +151,7 @@ gtk-issuer-usable =
     The issuer can be used.
 
     { $found }
-gtk-app-built-in = { $app } is built in: only whether it is used for new accounts can change. { $reason }
+gtk-app-built-in = { $app } is built in. You can only change whether it is offered for new accounts. { $reason }
 gtk-built-in = { $app } (built-in)
 gtk-offered-for-new = Offered for new accounts
 gtk-edit-button = Edit...
@@ -157,12 +160,12 @@ gtk-sign-in-apps-intro = Sign-in apps let accounts sign in through the browser. 
 
 ## AI agents
 
-gtk-agent-it-may = It may
-gtk-agent-accounts = Accounts it may use
+gtk-agent-it-may = Allowed actions
+gtk-agent-accounts = Allowed accounts
 gtk-never-used = Never used
 gtk-last-used = Last used { $date }
-gtk-forget-program = Forget this program?
-gtk-forget-program-detail = It is asked about again the next time it connects, and what its agents did is forgotten.
+gtk-forget-program = Remove this program?
+gtk-forget-program-detail = The program’s permissions and its agents’ activity history will be deleted. You will be asked for permission again the next time it connects.
 gtk-no-agents-yet = No agent has asked to use your mail yet.
 gtk-nothing-yet = Nothing yet.
 
@@ -170,7 +173,7 @@ gtk-nothing-yet = Nothing yet.
 
 gtk-preferences = Preferences
 gtk-language = Language
-gtk-language-subtitle = The words of the windows and the help
+gtk-language-subtitle = Language of the app and help
 gtk-new-mail-group = New mail
 gtk-notify-subtitle = A notification when new messages arrive while the window is in the background
 gtk-restart-to-change = Inbox Classic restarts to change the language.

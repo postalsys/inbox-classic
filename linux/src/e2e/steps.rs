@@ -101,7 +101,7 @@ pub async fn unsubscribing(d: &Driver) {
         posted,
         &format!("Yes posts List-Unsubscribe=One-Click to the list ({first})"),
     );
-    let done = wait_until(10, || shell().main().status_texts().0.contains("Unsubscribed")).await;
+    let done = wait_until(10, || shell().main().status_texts().0.contains("Unsubscribe request accepted")).await;
     d.check(
         done,
         &format!(
@@ -369,7 +369,7 @@ pub async fn agent(d: &Driver) {
         let rows = subtitles(&outbox, "");
         d.check(
             rows.first()
-                .is_some_and(|(_, subtitle)| subtitle.contains("Sent by an AI agent; goes at")),
+                .is_some_and(|(_, subtitle)| subtitle.contains("Queued by an AI agent; sends at")),
             "it waits in the Outbox, where it can still be deleted",
         );
         d.shot(&outbox, "agents-5-outbox").await;

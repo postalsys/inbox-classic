@@ -877,7 +877,7 @@ mod tests {
         );
         // the words of Change, the log and a refusal
         host.allowed = false;
-        assert!(change_text(&host).1.starts_with("You turned this program away"));
+        assert!(change_text(&host).1.starts_with("You denied this program access"));
         let mut entry = AgentLogEntry {
             id: 1,
             host_name: "Agent".into(),

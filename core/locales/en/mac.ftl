@@ -18,15 +18,15 @@ mac-paste = Paste
 mac-menu-window = Window
 mac-minimize = Minimize
 mac-zoom = Zoom
-mac-no-updates = This copy of Inbox Classic does not update itself. Get the latest version from inboxclassic.com.
+mac-no-updates = This version of Inbox Classic does not support automatic updates. Download the latest version from inboxclassic.com.
 
 ## Settings
 
 mac-settings-title = Settings
 mac-language-label = Language:
-mac-restart-hint = Inbox Classic starts again to change the language.
+mac-restart-hint = Restart Inbox Classic to change the language.
 mac-notify-new-mail = Notify me when new mail arrives
-mac-restart-question = Start Inbox Classic again now to change the language?
+mac-restart-question = Restart Inbox Classic now to change the language?
 
 ## Dialogs
 
@@ -34,7 +34,7 @@ mac-choose = Choose
 
 ## The main window
 
-mac-still-running-detail = It keeps checking for new mail. Click its icon in the Dock to open it again.
+mac-still-running-detail = Inbox Classic keeps checking for new mail in the background. Click its icon in the Dock to open the app.
 mac-outbox-waiting =
     { $count ->
         [one] { $count } message in the Outbox
@@ -48,7 +48,7 @@ mac-new-messages =
         [one] { $count } new message
        *[other] { $count } new messages
     }
-mac-newest-from = The newest from { $from }: { $subject }
+mac-newest-from = Latest message from { $from }: { $subject }
 mac-not-bundle = This copy of Inbox Classic is not an app bundle, so it can not be the default mail app.
 mac-not-made-default = Inbox Classic was not made the default mail app: { $reason }
 mac-tool-search = Search
@@ -85,7 +85,7 @@ mac-files-not-saved =
     { $count ->
        *[other] { $failed } of the { $count } files could not be saved.
     }
-mac-no-calendar-app = No calendar app on this Mac opens invitations (.ics files).
+mac-no-calendar-app = No calendar app is available on this Mac to open invitations (.ics files).
 mac-unsubscribing = Unsubscribing from { $target }…
 
 ## The compose window
@@ -125,8 +125,8 @@ mac-sign-in-apps-button = Sign-in Apps…
 
 ## AI agents
 
-mac-forget-program = Forget this program and what its agents did?
-mac-forget-program-detail = It is asked about again the next time it connects.
+mac-forget-program = Remove this program and its agents’ activity history?
+mac-forget-program-detail = The program’s permissions will be deleted. You will be asked for permission again the next time it connects.
 
 ## Sign-in apps
 

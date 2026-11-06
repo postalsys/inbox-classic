@@ -16,7 +16,7 @@ mac-paste = Einsetzen
 mac-menu-window = Fenster
 mac-minimize = Im Dock ablegen
 mac-zoom = Zoomen
-mac-no-updates = Diese Kopie von Inbox Classic aktualisiert sich nicht selbst. Die neueste Version gibt es auf inboxclassic.com.
+mac-no-updates = Diese Version von Inbox Classic unterstützt keine automatischen Updates. Die neueste Version können Sie auf inboxclassic.com herunterladen.
 
 ## Settings
 
@@ -32,7 +32,7 @@ mac-choose = Auswählen
 
 ## The main window
 
-mac-still-running-detail = Es sucht weiter nach neuen Nachrichten. Klicken Sie auf das Symbol im Dock, um es wieder zu öffnen.
+mac-still-running-detail = Inbox Classic prüft im Hintergrund auf neue E-Mails. Klicken Sie auf das Symbol im Dock, um das Programm zu öffnen.
 mac-outbox-waiting =
     { $count ->
         [one] { $count } Nachricht im Postausgang
@@ -46,17 +46,17 @@ mac-new-messages =
         [one] { $count } neue Nachricht
        *[other] { $count } neue Nachrichten
     }
-mac-newest-from = Die neueste von { $from }: { $subject }
+mac-newest-from = Neueste Nachricht von { $from }: { $subject }
 mac-not-bundle = Diese Kopie von Inbox Classic ist kein App-Paket und kann daher nicht die Standard-E-Mail-App sein.
-mac-not-made-default = Inbox Classic wurde nicht zur Standard-E-Mail-App gemacht: { $reason }
+mac-not-made-default = Inbox Classic konnte nicht als Standard-E-Mail-App festgelegt werden: { $reason }
 mac-tool-search = Suchen
 
 ## The folders and the message list
 
 mac-still-indexing-more =
     { $count ->
-        [one] Der Text von { $count } Nachricht wird noch indiziert, es kann also bald mehr gefunden werden.
-       *[other] Der Text von { $count } Nachrichten wird noch indiziert, es kann also bald mehr gefunden werden.
+        [one] Der Text einer Nachricht wird noch indiziert. Weitere Suchergebnisse können hinzukommen.
+       *[other] Die Texte von { $count } Nachrichten werden noch indiziert. Weitere Suchergebnisse können hinzukommen.
     }
 mac-results-everywhere =
     { $count ->
@@ -79,11 +79,8 @@ mac-folder-unread = { $folder }, { $count } ungelesen
 mac-import-messages = Nachrichten importieren
 mac-save-messages = Nachrichten speichern
 mac-save-attachments-menu = Anlagen speichern…
-mac-files-not-saved =
-    { $count ->
-       *[other] { $failed } von { $count } Dateien konnten nicht gespeichert werden.
-    }
-mac-no-calendar-app = Keine Kalender-App auf diesem Mac öffnet Einladungen (.ics-Dateien).
+mac-files-not-saved = Nicht gespeicherte Dateien: { $failed } von { $count }.
+mac-no-calendar-app = Auf diesem Mac ist keine Kalender-App zum Öffnen von Einladungen (.ics-Dateien) verfügbar.
 mac-unsubscribing = Abbestellen bei { $target }…
 
 ## The compose window
@@ -123,8 +120,8 @@ mac-sign-in-apps-button = Anmelde-Apps…
 
 ## AI agents
 
-mac-forget-program = Dieses Programm und was seine Agenten getan haben vergessen?
-mac-forget-program-detail = Es wird erneut gefragt, wenn es sich das nächste Mal verbindet.
+mac-forget-program = Dieses Programm und den Aktivitätsverlauf seiner Agenten entfernen?
+mac-forget-program-detail = Die Berechtigungen des Programms werden gelöscht. Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
 
 ## Sign-in apps
 
