@@ -227,6 +227,32 @@ ALTER TABLE outbox ADD COLUMN not_before INTEGER;
     r#"
 CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id);
 "#,
+    // messages on their way to a folder of another account (transfers.rs): the source is copied there first, and the
+    // original removed only after the server took the copy, so a crash or a failure loses nothing
+    r#"
+CREATE TABLE transfers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- the account the message comes from, whose worker moves it
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    from_folder INTEGER NOT NULL,
+    uid INTEGER NOT NULL,
+    to_folder INTEGER NOT NULL,
+    -- a copy keeps the original
+    copy INTEGER NOT NULL,
+    message_id TEXT,
+    flags TEXT NOT NULL,
+    internal_date INTEGER,
+    -- the message as the server keeps it, when it was here already; fetched otherwise
+    source BLOB,
+    -- 1 once an APPEND was tried: on another try, a copy the target has already is not made again
+    tried INTEGER NOT NULL DEFAULT 0
+);
+-- the folders messages were last moved or copied to, which the Move and Copy window offers first
+CREATE TABLE recent_targets (
+    folder_id INTEGER PRIMARY KEY REFERENCES folders(id) ON DELETE CASCADE,
+    used INTEGER NOT NULL
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

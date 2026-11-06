@@ -200,6 +200,11 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             }
         case PE_EVENT_KIND_AGENT_LOG_CHANGED:
             AgentsWindow.refresh()
+        case PE_EVENT_KIND_TRANSFERRING:
+            // messages going to another account: how far, then what was done
+            setStatus(event.message)
+        case PE_EVENT_KIND_FOLDER_CREATED:
+            MoveWindow.shown?.folderCreated(event.folder)
         case PE_EVENT_KIND_FAILED:
             failing.insert(event.account)
             setStatus("\(mailbox.accountName(event.account)): \(event.message)")

@@ -214,13 +214,12 @@ extension UITest {
         check(await waitUntil { list.numberOfRows == listed - 1 }, "the list has one less")
         // the next one is selected: move it to Archive through the dialog
         command(.move)
-        let move = await waitWindow("form", 10)
+        let move = await waitWindow("move", 10)
         check(move != nil, "Move to Folder asks where")
         if let move {
-            let choice: NSPopUpButton? = find("form.field.0", in: move)
-            choice?.selectItem(at: choice?.itemTitles.firstIndex(of: "Archive") ?? 0)
+            choose(folder(ofAccount: 0, named: "Archive"), in: move)
             await shot(move, "organize-2-move")
-            press(find("form.ok", in: move))
+            press(find("move.ok", in: move))
             check(await waitUntil { list.numberOfRows == listed - 2 }, "the selected message is out of the list")
         }
         await shot(main.window, "organize-3-after")
@@ -484,12 +483,12 @@ extension UITest {
         }, "Mark as Read marks the three read on the server")
 
         command(.move)
-        let move = await waitWindow("form", 10)
-        check(alertText(move).contains("Move the 3 selected messages"), "Move to Folder asks where the three go")
+        let move = await waitWindow("move", 10)
+        let prompt: NSTextField? = find("move.prompt", in: move)
+        check(prompt?.stringValue == "Move the 3 selected messages to:", "Move to Folder asks where the three go")
         if let move {
-            let choice: NSPopUpButton? = find("form.field.0", in: move)
-            choice?.selectItem(at: choice?.itemTitles.firstIndex(of: "Archive") ?? 0)
-            press(find("form.ok", in: move))
+            choose(folder(ofAccount: 0, named: "Archive"), in: move)
+            press(find("move.ok", in: move))
         }
         check(await waitUntil(20) {
             var all = true
@@ -799,6 +798,137 @@ extension UITest {
             return first == 0 && other == 0
         },
               "Mark All Read marks both Inboxes read on the servers")
+    }
+
+    // ---- moving between accounts ----
+
+    /// the folder of an account (by its place in the tree) the tree names `name`
+    func folder(ofAccount index: Int, named name: String) -> Int64 {
+        let accounts = main.mailbox.core.accounts()
+        guard accounts.indices.contains(index) else { return 0 }
+        return main.mailbox.core.folders(accounts[index].id).first { $0.displayName == name }?.id ?? 0
+    }
+
+    /// highlights `folder` in the Move window, as a click on its row would
+    func choose(_ folder: Int64, in window: NSWindow) {
+        (window.delegate as? MoveWindow)?.highlight(folder, inRecent: false)
+    }
+
+    /// the rows of the Move window
+    func moveRows(_ window: NSWindow?) -> [MoveWindow.Node] {
+        guard let outline: NSOutlineView = find("move.outline", in: window) else { return [] }
+        return (0..<outline.numberOfRows).compactMap { outline.item(atRow: $0) as? MoveWindow.Node }
+    }
+
+    func findMessage(_ mailbox: String, _ pattern: String, at server: String) async -> [String: Any]? {
+        await messages(mailbox, at: server).first { raw($0).range(of: pattern, options: .regularExpression) != nil }
+    }
+
+    /// Move to Folder and Copy to Folder with the folders of both accounts, a move to the other account and back with
+    /// Undo, a copy, Recent, and a drag onto the other account's folder
+    func betweenAccounts() async throws {
+        step("moving between accounts")
+        let archive = folder(ofAccount: 0, named: "Archive")
+        let otherArchive = folder(ofAccount: 1, named: "Archive")
+        let inbox = folder(ofAccount: 0, named: "Inbox")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil { list.numberOfRows >= 3 }
+        await selectRow(0)
+        guard let message = main.mailbox.row(0) else {
+            check(false, "the Inbox has a message to move")
+            return
+        }
+        let subject = NSRegularExpression.escapedPattern(for: message.subject)
+        if !message.flagged {
+            command(.flag)
+            _ = await waitUntil { main.mailbox.row(0)?.flagged == true }
+        }
+
+        command(.move)
+        let move = await waitWindow("move", 10)
+        let rows = moveRows(move)
+        check(rows.filter { $0.kind == .account }.count == 2
+              && rows.contains { $0.folder == otherArchive } && find("move.filter", in: move) as NSSearchField? != nil,
+              "Move to Folder shows the folders of both accounts in a tree, with a filter box")
+        let current = rows.first { $0.kind == .folder && $0.folder == inbox }
+        check(current?.choosable == false && current?.name == "Inbox (current)",
+              "the folder the message is in is shown but can not be chosen (\(current?.name ?? ""))")
+        let ok: NSButton? = find("move.ok", in: move)
+        check(ok?.title == "Move", "the button says Move (\(ok?.title ?? ""))")
+        check(rows.contains { $0.kind == .recent && $0.folder == archive }, "the folder used last is under Recent")
+        move?.makeKeyAndOrderFront(nil)
+        _ = await waitUntil(2) { move?.isKeyWindow == true }
+        await shot(move, "move-1-dialog")
+        if let move, let filter: NSSearchField = find("move.filter", in: move) {
+            filter.stringValue = "arch"
+            (move.delegate as? MoveWindow)?.controlTextDidChange(Notification(name: NSControl.textDidChangeNotification))
+            let narrowed = moveRows(move).filter { $0.kind == .folder }
+            check(!narrowed.isEmpty && narrowed.allSatisfy { $0.name.localizedCaseInsensitiveContains("arch") },
+                  "typing in the filter narrows the tree to the folders that match")
+            choose(otherArchive, in: move)
+            let listed = list.numberOfRows
+            press(find("move.ok", in: move))
+            check(await waitUntil(5) { list.numberOfRows == listed - 1 }, "a message moved to the other account's Archive leaves the list at once")
+        }
+        let status: NSTextField? = find("status.text", in: main.window)
+        check(await waitUntil(30) { status?.stringValue == "Moved 1 message to Archive" },
+              "the status bar says how the move went (\(status?.stringValue ?? ""))")
+        let there = await waitFor(30) { await self.findMessage("Archive", "Subject: \(subject)", at: self.secondRest) }
+        check((there?["flags"] as? [String])?.contains("\\Flagged") == true,
+              "it is in the second account's Archive on its server, with its flags")
+        check(await waitUntil(20) { await findMessage("INBOX", "Subject: \(subject)") == nil },
+              "and gone from the first account's server")
+        if let node = (0..<tree.numberOfRows).compactMap({ tree.item(atRow: $0) as? Mailbox.FolderNode })
+            .first(where: { $0.folder.id == otherArchive }) {
+            tree.selectRowIndexes(IndexSet(integer: tree.row(forItem: node)), byExtendingSelection: false)
+            _ = await waitUntil(10) { list.numberOfRows >= 1 }
+            await selectRow(0)
+            _ = await waitUntil(5) { main.mailbox.hasOne }
+            await shot(main.window, "move-2-accounts")
+        }
+
+        command(.undo)
+        let back = await waitUntil(30) { await findMessage("INBOX", "Subject: \(subject)") != nil }
+        let left = await waitUntil(20) { await findMessage("Archive", "Subject: \(subject)", at: secondRest) == nil }
+        check(back && left, "Edit > Undo Move brings it back to the first account")
+
+        selectFolder(named: "Inbox")
+        _ = await waitUntil { list.numberOfRows >= 2 }
+        await selectRow(0)
+        let copied = NSRegularExpression.escapedPattern(for: main.mailbox.row(0)?.subject ?? "")
+        command(.copy)
+        let copy = await waitWindow("move", 10)
+        let copyButton: NSButton? = find("move.ok", in: copy)
+        if let copy {
+            choose(otherArchive, in: copy)
+            press(copyButton)
+        }
+        check(copyButton?.title == "Copy" && copy?.title.hasPrefix("Copy") == true, "Copy to Folder says Copy")
+        let copiedThere = await waitFor(30) { await self.findMessage("Archive", "Subject: \(copied)", at: self.secondRest) }
+        let kept = await findMessage("INBOX", "Subject: \(copied)")
+        check(copiedThere != nil && kept != nil,
+              "Copy to Folder copies a message to the second account's Archive and keeps it in the Inbox")
+
+        command(.move)
+        if let again = await waitWindow("move", 10) {
+            check(moveRows(again).contains { $0.kind == .recent && $0.folder == otherArchive },
+                  "the next Move to Folder offers Archive of the second account under Recent")
+            press(find("move.cancel", in: again))
+        }
+
+        // dropped onto a folder of the other account (the drag itself runs outside the app's reach)
+        await selectRow(1)
+        if let dragged = main.mailbox.row(1) {
+            let pattern = NSRegularExpression.escapedPattern(for: dragged.subject)
+            let node = (0..<tree.numberOfRows).compactMap { tree.item(atRow: $0) as? Mailbox.FolderNode }
+                .first { $0.folder.id == otherArchive }
+            check(main.mailbox.dropTarget(node, from: [dragged.folder]) == otherArchive
+                  && main.mailbox.drop([(dragged.folder, dragged.uid)], to: otherArchive, copy: false),
+                  "a folder of the second account takes a dragged message")
+            let moved = await waitFor(30) { await self.findMessage("Archive", "Subject: \(pattern)", at: self.secondRest) }
+            let gone = await waitUntil(20) { await findMessage("INBOX", "Subject: \(pattern)") == nil }
+            check(moved != nil && gone, "a message dragged onto a folder of the second account is moved there")
+        }
     }
 
     /// the lines the test's agent (scripts/ui-e2e/agent.mjs) wrote, by step

@@ -28,7 +28,7 @@ fn folder_id(name: &str) -> Option<i64> {
 }
 
 /// The id of a folder of the account at `index` (0 the first) by the name the tree gives it
-fn folder_of(index: usize, name: &str) -> Option<i64> {
+pub(super) fn folder_of(index: usize, name: &str) -> Option<i64> {
     let core = &shell().core;
     let account = core.accounts().ok()?.get(index)?.id;
     core.folders(account)
@@ -568,12 +568,8 @@ pub async fn several_messages(d: &Driver) {
     command(Command::Move);
     match wait_dialog(10, "move-dialog").await {
         Some(dialog) => {
-            if let Some(combo) = named_in(dialog.upcast_ref(), "form-0").and_downcast::<adw::ComboRow>() {
-                let model = combo.model().and_downcast::<gtk::StringList>();
-                let archive = model.and_then(|m| (0..m.n_items()).find(|i| m.string(*i).as_deref() == Some("Archive")));
-                if let Some(index) = archive {
-                    combo.set_selected(index);
-                }
+            if let Some(archive) = folder_id("Archive") {
+                pick_folder(&dialog, archive);
             }
             click(dialog.upcast_ref(), "dialog-ok");
         }
@@ -1163,5 +1159,213 @@ pub async fn all_inboxes(d: &Driver) {
             unread(d.ports.rest),
             unread(d.ports.second_rest)
         ),
+    );
+}
+
+/// SCENARIO 41: Move and Copy to Folder offer every account's folders in a tree with a filter; a message moved to the
+/// second account goes there with its flags and leaves the first, Undo brings it back, Copy keeps it, the folder used
+/// last is under Recent, and a drag onto the other account moves it
+pub async fn between_accounts(d: &Driver) {
+    d.step("moving between accounts");
+    let main = shell().main();
+    let core = &shell().core;
+    let accounts: Vec<i64> = core.accounts().unwrap_or_default().iter().map(|a| a.id).collect();
+    let (Some(inbox), Some(archive2), [first, second, ..]) =
+        (folder_id("Inbox"), folder_of(1, "Archive"), &accounts[..])
+    else {
+        d.check(false, "two accounts, the second with Archive");
+        return;
+    };
+    let second_rest = d.ports.second_rest;
+    let on_second = |mailbox: &str, subject: &str| {
+        d.messages_at(second_rest, mailbox)
+            .into_iter()
+            .find(|m| raw_text(m).contains(&format!("Subject: {subject}")))
+    };
+    let on_first = |mailbox: &str, subject: &str| d.find(mailbox, &format!("Subject: {subject}"));
+    for (subject, minutes, flags) in [
+        ("Quarterly figures", 13, &["\\Flagged"][..]),
+        ("Board minutes", 12, &[][..]),
+        ("Travel booking", 11, &[][..]),
+    ] {
+        let raw = format!(
+            "From: Nina Berg <nina@example.org>\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\nDate: {}\r\n\
+             Message-ID: <{}@example.org>\r\n\r\nFor the move between accounts.\r\n",
+            date_now(minutes),
+            subject.replace(' ', "-")
+        );
+        let _ = d.add_message(&raw, flags);
+    }
+    command(Command::Sync);
+    select_folder("Inbox");
+    let listed = |subject: &str| {
+        core.search(&pe_core::Search::folder(inbox), main.list.sort(), 0, 100)
+            .unwrap_or_default()
+            .iter()
+            .position(|m| m.info.subject == subject)
+    };
+    wait_until(30, || listed("Travel booking").is_some()).await;
+    // selects the message with `subject`, and waits until the window has taken it
+    let select = |subject: &str| {
+        if let Some(index) = listed(subject) {
+            main.list.select(index as u32);
+        }
+        let subject = subject.to_string();
+        let main = main.clone();
+        async move {
+            wait_until(10, || {
+                main.list.selected().is_some_and(|(_, m)| m.info.subject == subject) && main.selected_refs().len() == 1
+            })
+            .await
+        }
+    };
+
+    // the window: both accounts' folders, the filter, the current folder, the button
+    select("Quarterly figures").await;
+    let in_inbox = rows();
+    command(Command::Move);
+    let Some(dialog) = wait_dialog(10, "move-dialog").await else {
+        d.check(false, "Move to Folder shows the folders of both accounts");
+        return;
+    };
+    let root: gtk::Widget = dialog.clone().upcast();
+    let list = named_in(&root, "move-folders").and_downcast::<gtk::ListBox>();
+    let row_named = |name: &str| -> Option<gtk::ListBoxRow> {
+        let list = list.as_ref()?;
+        let mut index = 0;
+        while let Some(row) = list.row_at_index(index) {
+            if row.widget_name() == name {
+                return Some(row);
+            }
+            index += 1;
+        }
+        None
+    };
+    d.check(
+        row_named(&format!("move-account-{first}")).is_some()
+            && row_named(&format!("move-account-{second}")).is_some()
+            && row_named(&format!("move-folder-{archive2}")).is_some()
+            && named_in(&root, "move-filter").is_some(),
+        "Move to Folder shows the folders of both accounts in a tree, with a filter box",
+    );
+    d.check(
+        row_named(&format!("move-folder-{inbox}")).is_some_and(|r| !r.is_activatable()),
+        "the folder the message is in is shown but can not be chosen",
+    );
+    let button = named_in(&root, "dialog-ok")
+        .and_downcast::<gtk::Button>()
+        .and_then(|b| b.label())
+        .unwrap_or_default();
+    d.check(button == "Move", &format!("the button says Move ({button})"));
+    pause(400).await;
+    d.shot(&dialog, "move-1-dialog").await;
+    set_text(&root, "move-filter", "arch");
+    let shown = |name: &str| row_named(name).is_some_and(|r| r.is_child_visible());
+    d.check(
+        wait_until(10, || {
+            shown(&format!("move-folder-{archive2}")) && !shown(&format!("move-folder-{inbox}"))
+        })
+        .await,
+        "typing in the filter narrows the tree to the folders that match",
+    );
+    pick_folder(&dialog, archive2);
+    click(&root, "dialog-ok");
+    d.check(
+        wait_until(10, || rows() == in_inbox - 1).await,
+        "a message of the first account moved to the second account's Archive leaves the list at once",
+    );
+    let done = wait_until(30, || main.status_texts().0 == "Moved 1 message to Archive").await;
+    d.check(
+        done,
+        &format!(
+            "the status bar says how far the move is, then that it is done ({})",
+            main.status_texts().0
+        ),
+    );
+    let arrived = wait_for(30, || on_second("Archive", "Quarterly figures")).await;
+    let flagged = arrived
+        .as_ref()
+        .and_then(|m| m["flags"].as_array().cloned())
+        .is_some_and(|f| f.iter().any(|f| f == "\\Flagged"));
+    d.check(
+        arrived.is_some() && flagged,
+        "it is in the second account's Archive on its server, with its flags",
+    );
+    d.check(
+        wait_until(20, || on_first("INBOX", "Quarterly figures").is_none()).await,
+        "and gone from the first account's server",
+    );
+    // the second account's Archive, with the message there
+    wait_until(20, || core.folder(archive2).is_ok_and(|f| f.total >= 1)).await;
+    main.folders.select(archive2);
+    wait_until(10, || rows() >= 1).await;
+    select_row(0).await;
+    d.shot(&main_window(), "move-2-accounts").await;
+    select_folder("Inbox");
+    pause(500).await;
+
+    run_command(Command::Undo);
+    d.check(
+        wait_until(30, || {
+            on_first("INBOX", "Quarterly figures").is_some() && on_second("Archive", "Quarterly figures").is_none()
+        })
+        .await,
+        "Edit > Undo Move brings it back to the first account",
+    );
+
+    // a copy keeps it
+    wait_until(20, || listed("Board minutes").is_some()).await;
+    select("Board minutes").await;
+    command(Command::Copy);
+    match wait_dialog(10, "move-dialog").await {
+        Some(dialog) => {
+            let label = named_in(dialog.upcast_ref(), "dialog-ok")
+                .and_downcast::<gtk::Button>()
+                .and_then(|b| b.label())
+                .unwrap_or_default();
+            d.check(label == "Copy", &format!("Copy to Folder's button says Copy ({label})"));
+            pick_folder(&dialog, archive2);
+            click(dialog.upcast_ref(), "dialog-ok");
+        }
+        None => d.check(false, "Copy to Folder asks where"),
+    }
+    d.check(
+        wait_for(30, || on_second("Archive", "Board minutes")).await.is_some()
+            && on_first("INBOX", "Board minutes").is_some(),
+        "Copy to Folder copies a message to the second account's Archive and keeps it in the Inbox",
+    );
+
+    // the folder used last, on top
+    command(Command::Move);
+    match wait_dialog(10, "move-dialog").await {
+        Some(dialog) => {
+            let recent = named_in(dialog.upcast_ref(), &format!("move-recent-{archive2}")).is_some();
+            d.check(
+                recent,
+                "the next Move to Folder offers Archive of the second account under Recent",
+            );
+            click(dialog.upcast_ref(), "dialog-cancel");
+            wait_gone(10, "move-dialog").await;
+        }
+        None => d.check(false, "Move to Folder opens again"),
+    }
+
+    // a drag onto the other account's folder
+    select("Travel booking").await;
+    if let Some((_, message)) = main.list.selected() {
+        let payload = crate::messages::drag_payload(&[pe_store::MessageRef {
+            folder: message.folder_id,
+            uid: message.info.uid,
+        }]);
+        d.check(
+            main.can_drop(&payload, archive2),
+            "a folder of the second account takes a dragged message",
+        );
+        main.drop_message(&payload, archive2, false);
+    }
+    d.check(
+        wait_for(30, || on_second("Archive", "Travel booking")).await.is_some()
+            && wait_until(20, || on_first("INBOX", "Travel booking").is_none()).await,
+        "a message dragged onto a folder of the second account is moved there",
     );
 }

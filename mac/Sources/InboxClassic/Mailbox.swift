@@ -336,9 +336,6 @@ public final class Mailbox: NSObject {
     /// exactly one message selected, the one shown: the commands of one message apply (Reply, Print, Source)
     var hasOne: Bool { selectedCount == 1 && uid != 0 }
 
-    /// Move to Folder: the messages are of one account (another account's folders come later)
-    var canMove: Bool { selectedCount > 0 && summary.accounts <= 1 }
-
     var picturesBlocked: Bool { uid != 0 && messageView != nil && !remoteImages && reader.picturesOffered }
 
     // ---- the message list ----
@@ -891,22 +888,20 @@ public final class Mailbox: NSObject {
         actAndRemove(PE_ACTION_DELETE)
     }
 
-    func moveSelected() {
-        guard canMove, let first = firstSelected else { return }
-        // the other folders of their account that hold messages
-        let account = folderNodes[first.folder]?.folder.account ?? currentAccount
-        let targets = core.folders(account).filter { $0.selectable && !(selectedCount == 1 && $0.id == first.folder) }
-        guard !targets.isEmpty else { return }
-        // a special folder by its usual name, the others by their whole path
-        let names = targets.map { $0.specialUse != PE_SPECIAL_USE_NONE ? $0.displayName : $0.path }
-        let intro = selectedCount > 1 ? "Move the \(selectedCount) selected messages to the folder:"
-                                      : "Move the selected message to the folder:"
-        guard let fields = formDialog(title: "Move", intro: intro,
-                                      fields: [FormField(label: "Folder:", value: names[0], kind: .choice(names))])
-        else { return }
-        let chosen = fields[0].chosen
-        if targets.indices.contains(chosen) {
-            actAndRemove(PE_ACTION_MOVE, to: targets[chosen].id)
+    /// Move to Folder, or Copy to Folder (`copy`): the window of every account's folders; to another account they go in
+    /// the background (the status bar says how far)
+    func moveSelected(copy: Bool = false) {
+        guard hasSelection else { return }
+        let title = taken(pe_selection_move_text(&summary, copy, false)) ?? (copy ? "Copy" : "Move")
+        let prompt = taken(pe_selection_move_text(&summary, copy, true)) ?? ""
+        // the folder they are all in can not be chosen
+        let current = summary.folders == 1 ? firstSelected?.folder ?? 0 : 0
+        let window = MoveWindow(core: core, title: title, prompt: prompt, verb: copy ? "Copy" : "Move", current: current)
+        guard let to = window.run() else { return }
+        if copy {
+            act(PE_ACTION_COPY, to: to)
+        } else {
+            actAndRemove(PE_ACTION_MOVE, to: to)
         }
     }
 
@@ -929,14 +924,6 @@ public final class Mailbox: NSObject {
     }
 
     // ---- folders ----
-
-    private func askFolderName(title: String, intro: String, name: String) -> String? {
-        formDialog(title: title, intro: intro, fields: [FormField(label: "Folder name:", value: name)])?[0].value
-    }
-
-    private func refused(_ reason: UnsafeMutablePointer<CChar>?, _ fallback: String) {
-        inform(taken(reason) ?? fallback, style: .warning)
-    }
 
     func newFolder() {
         let account = currentAccount
@@ -1079,6 +1066,7 @@ public final class Mailbox: NSObject {
         add(.flag, flagsSelected ? "Flag Message" : "Clear Flag")
         add(inJunk ? .notJunk : .junk)
         add(.move, "Move to Folder\u{2026}")
+        add(.copy, "Copy to Folder\u{2026}")
         add(.delete, "Delete")
         menu.addItem(.separator())
         add(.saveAs)
@@ -1209,16 +1197,17 @@ public final class Mailbox: NSObject {
 
     /// the folder messages dragged from `folders` may go to: a folder of their account that holds messages, not the one
     /// they all are in
-    fileprivate func dropTarget(_ item: Any?, from folders: [Int64]) -> Int64? {
+    func dropTarget(_ item: Any?, from folders: [Int64]) -> Int64? {
+        // a folder of any account that holds messages, not the one they are all in
         guard let node = item as? FolderNode, node.folder.selectable, !folders.isEmpty,
-              folders.contains(where: { $0 != node.folder.id }),
-              folders.allSatisfy({ folderNodes[$0]?.folder.account == node.folder.account }) else { return nil }
+              folders.contains(where: { $0 != node.folder.id }) else { return nil }
         return node.folder.id
     }
 
     /// the dragged messages into `to`: a drag of selected rows carries the selection (NSTableView drags what is selected),
     /// which then leaves the list as Move leaves it
-    fileprivate func drop(_ messages: [(Int64, UInt64)], to: Int64, copy: Bool) -> Bool {
+    @discardableResult
+    func drop(_ messages: [(Int64, UInt64)], to: Int64, copy: Bool) -> Bool {
         let dragged: OpaquePointer = pe_selection_new()
         defer { pe_selection_free(dragged) }
         for (folder, uid) in messages {

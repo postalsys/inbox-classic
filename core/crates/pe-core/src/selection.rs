@@ -87,6 +87,26 @@ impl Summary {
         self.flagged < self.count
     }
 
+    /// The title of the Move or Copy window (`copy`): "Move 3 Messages", "Copy Message"
+    pub fn move_title(&self, copy: bool) -> String {
+        let verb = if copy { "Copy" } else { "Move" };
+        if self.count == 1 {
+            format!("{verb} Message")
+        } else {
+            format!("{verb} {} Messages", self.count)
+        }
+    }
+
+    /// What the Move or Copy window says over its folders: "Move the 3 selected messages to:"
+    pub fn move_prompt(&self, copy: bool) -> String {
+        let verb = if copy { "Copy" } else { "Move" };
+        if self.count == 1 {
+            format!("{verb} the selected message to:")
+        } else {
+            format!("{verb} the {} selected messages to:", self.count)
+        }
+    }
+
     /// What to ask before Delete when it removes some of them for good; None when it removes none
     pub fn delete_question(&self) -> Option<String> {
         match (self.for_good, self.count) {
@@ -169,17 +189,30 @@ impl Core {
             Action::ToggleFlag => Action::Flag(picked.iter().any(|p| !p.flagged())),
             other => other,
         };
-        if let Action::Move(to) | Action::Copy(to) = action {
-            // checked for all before any of them goes
-            for folder in groups.keys().filter(|&&folder| folder != to) {
-                self.target_of(*folder, to)?;
+        // the account of the folder they go to, checked before any of them goes
+        let target = match action {
+            Action::Move(to) | Action::Copy(to) => {
+                let store = self.store();
+                let folder = store.folder(to)?;
+                if !folder.info.selectable {
+                    return Err(Error::Unavailable("That folder does not hold messages.".into()));
+                }
+                store.note_target(to)?;
+                Some(folder.account_id)
             }
-        }
+            _ => None,
+        };
+        let mut crossed = false;
         let undo_name = action.undo_name();
         let mut undo = Vec::new();
         for (folder, group) in &groups {
             let uids: Vec<u64> = group.iter().map(|p| p.at.uid).collect();
-            let went = self.act_on_folder(*folder, &uids, action)?;
+            let crosses = match target {
+                Some(account) => self.store().folder(*folder)?.account_id != account,
+                None => false,
+            };
+            crossed |= crosses;
+            let went = self.act_on_folder(*folder, &uids, action, crosses)?;
             if let (Some(_), Some((to, flag))) = (undo_name, went) {
                 undo.push(UndoMove {
                     from: *folder,
@@ -189,13 +222,40 @@ impl Core {
                 });
             }
         }
-        let text = self.done_text(action, picked.len() as u64, &undo)?;
+        let text = self.done_text(action, picked.len() as u64, &undo, crossed)?;
         // what moved can be taken back; what is gone for good ends what came before it
         if let Some(what) = undo_name {
             *self.undo.lock().unwrap_or_else(|e| e.into_inner()) =
                 (!undo.is_empty()).then_some(Undo { what, moves: undo });
         }
         Ok(text)
+    }
+
+    /// Moves (or copies) messages of `folder` to `to`: in their account with one command, to another account through
+    /// the store's transfers ([`Core::transfer_messages`])
+    fn move_anywhere(&self, folder: FolderId, uids: &[u64], to: FolderId, copy: bool, crosses: bool) -> Result<()> {
+        if crosses {
+            return self.transfer_messages(folder, uids, to, copy);
+        }
+        for chunk in uids.chunks(PER_COMMAND) {
+            if copy {
+                self.copy_messages(folder, chunk, to)?;
+            } else {
+                self.move_messages(folder, chunk, to)?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Moves or copies messages of `folder` to a folder of another account: each kept in the store with what it takes
+    /// (its source when it is here, its flags and date), a move out of the list now; the worker of their account does
+    /// the rest in the background ([`Event::Transferring`] says how far it is)
+    fn transfer_messages(&self, folder: FolderId, uids: &[u64], to: FolderId, copy: bool) -> Result<()> {
+        let account = self.store().start_transfers(folder, uids, to, copy)?;
+        if !copy {
+            self.post(crate::Event::FolderChanged { account, folder })?;
+        }
+        self.send_command(account, crate::worker::Command::Transfer)
     }
 
     /// One folder's part of [`Core::act`], a command per [`PER_COMMAND`] messages. Returns where they went and the
@@ -205,10 +265,17 @@ impl Core {
         folder: FolderId,
         uids: &[u64],
         action: Action,
+        crosses: bool,
     ) -> Result<Option<(FolderId, Option<&'static str>)>> {
+        if let Action::Move(to) | Action::Copy(to) = action {
+            // already there: nothing to do
+            if to != folder {
+                self.move_anywhere(folder, uids, to, matches!(action, Action::Copy(_)), crosses)?;
+            }
+            return Ok((matches!(action, Action::Move(_)) && to != folder).then_some((to, None)));
+        }
         let went = match action {
             Action::Delete => self.trash_for(folder)?.map(|trash| (trash, None)),
-            Action::Move(to) if to != folder => Some((to, None)),
             Action::Junk(junk) => {
                 let to = self.junk_target(folder, junk)?;
                 (to != folder).then_some((to, Some(crate::junk_keywords(junk).0)))
@@ -221,18 +288,14 @@ impl Core {
                 Action::Flag(on) => self.set_flag_many(folder, chunk, "\\Flagged", on)?,
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,
-                // already there: nothing to do
-                Action::Move(to) | Action::Copy(to) if to == folder => {}
-                Action::Move(to) => self.move_messages(folder, chunk, to)?,
-                Action::Copy(to) => self.copy_messages(folder, chunk, to)?,
-                Action::ToggleFlag => unreachable!("resolved by act"),
+                Action::Move(_) | Action::Copy(_) | Action::ToggleFlag => unreachable!("handled before"),
             }
         }
         Ok(went)
     }
 
     /// What the status bar says once `action` is done to `count` messages
-    fn done_text(&self, action: Action, count: u64, moved: &[UndoMove]) -> Result<String> {
+    fn done_text(&self, action: Action, count: u64, moved: &[UndoMove], crossed: bool) -> Result<String> {
         let n = messages(count);
         Ok(match action {
             Action::ToggleFlag => unreachable!("resolved by act"),
@@ -242,6 +305,9 @@ impl Core {
             Action::Flag(false) => format!("Took the flag off {n}"),
             Action::Delete if moved.is_empty() => format!("Deleted {n} for good"),
             Action::Delete | Action::Junk(_) => format!("Moved {n} to {}", self.places(moved.iter().map(|m| m.to))?),
+            // to another account they go in the background, Event::Transferring says how far
+            Action::Move(to) if crossed => format!("Moving {n} to {}...", self.places([to].into_iter())?),
+            Action::Copy(to) if crossed => format!("Copying {n} to {}...", self.places([to].into_iter())?),
             Action::Move(to) => format!("Moved {n} to {}", self.places([to].into_iter())?),
             Action::Copy(to) => format!("Copied {n} to {}", self.places([to].into_iter())?),
         })
@@ -256,6 +322,11 @@ impl Core {
             [one] => Ok(crate::text::folder_name(&self.store().folder(*one)?.info)),
             _ => Ok("their folders".into()),
         }
+    }
+
+    /// The folders messages were moved or copied to last, the newest first, for the Move and Copy window
+    pub fn recent_targets(&self, limit: u64) -> Result<Vec<FolderId>> {
+        Ok(self.store().recent_targets(limit)?)
     }
 
     /// What Edit > Undo says it takes back, "Undo Move"; None when there is nothing

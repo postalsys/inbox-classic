@@ -438,6 +438,7 @@ final class UITest {
         try await signature()
         try await accountTrouble()
         try await allInboxes()
+        try await betweenAccounts()
         try await accountsAndHelp()
     }
 

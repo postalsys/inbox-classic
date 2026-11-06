@@ -581,6 +581,50 @@ try {
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $item)
     }
     function Rows { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    # a tree's row by its account and folder, their unread counts and "(current)" left out; Zero when it is not there
+    function TreeRow([IntPtr]$t, [string]$account, [string]$folder) {
+        $name = { param($item) ([Native.Win]::RemoteTreeText($t, $item)) -replace ' \((\d+|current)\)$', '' }
+        $item = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+        while ($item -ne [IntPtr]::Zero) {
+            if ((& $name $item) -eq $account) {
+                $child = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]4, $item)
+                while ($child -ne [IntPtr]::Zero) {
+                    if ((& $name $child) -eq $folder) { return $child }
+                    $child = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]1, $child)
+                }
+            }
+            $item = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]1, $item)
+        }
+        [IntPtr]::Zero
+    }
+    # the texts of the rows a tree shows, top to bottom
+    function TreeTexts([IntPtr]$t) {
+        $texts = @()
+        $item = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+        while ($item -ne [IntPtr]::Zero) {
+            $texts += [Native.Win]::RemoteTreeText($t, $item)
+            $item = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]6, $item)
+        }
+        $texts
+    }
+    # the Move and Copy window, once it is open
+    function WaitPicker([string]$title) {
+        WaitFor {
+            $f = [Native.Win]::FindWindow('InboxClassicFolderPicker', $title)
+            # once its tree has the folders
+            if ($f -ne [IntPtr]::Zero) {
+                $t = [Native.Win]::GetDlgItem($f, 102)
+                if ($t -ne [IntPtr]::Zero -and [int][Native.Win]::SendMessage($t, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -gt 0) { $f }
+            }
+        }
+    }
+    # a folder of the Move and Copy window chosen, as a click on it would
+    function PickIn([IntPtr]$picker, [string]$account, [string]$folder) {
+        $pickerTree = [Native.Win]::GetDlgItem($picker, 102)
+        $row = TreeRow $pickerTree $account $folder
+        if ($row -ne [IntPtr]::Zero) { [void][Native.Win]::SendMessage($pickerTree, $TVM_SELECTITEM, [IntPtr]9, $row) }
+        $row -ne [IntPtr]::Zero
+    }
     # a row of the list, reached with the keys as a user would
     function SelectRow([int]$row) {
         # a click into the first row gives the list the keyboard, as it does for a user
@@ -1295,13 +1339,10 @@ public static class Dragger {
     Check ([bool](WaitFor { (Rows) -eq $listed - 1 })) 'the list has one less'
     # the next one is selected: move it to Archive through the dialog
     Command $main $IDM_MOVE
-    $move = WaitFor {
-        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Move')
-        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 100) -ne [IntPtr]::Zero) { $f }
-    }
+    $move = WaitPicker 'Move Message'
     Check ($null -ne $move) 'Move to Folder asks where'
     if ($move) {
-        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($move, 100), $CB_SELECTSTRING, [IntPtr](-1), 'Archive')
+        Check (PickIn $move 'Alex Morgan' 'Archive') 'Archive can be chosen'
         Shot $move 'organize-2-move'
         Click $move 1
         # the one selected after the delete: the newest, the message sent later
@@ -1569,7 +1610,9 @@ public static class Dragger {
     DragFirstRow $false 'organize-6-drag'
     Check ($null -ne (WaitFor { Find 'Archive' "Subject: $first" } 20)) "a message dragged onto Archive is moved there ($first)"
     Check ([bool](WaitFor { -not (Find 'INBOX' "Subject: $first") } 10)) 'and out of the Inbox'
-    Check ([bool](WaitFor { (Rows) -eq $inInbox - 1 } 10)) "and out of the list ($(Rows) rows, $inInbox before)"
+    # by its subject: mail arriving meanwhile changes the number of rows
+    $listed = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 4) -eq $subject }).Count -gt 0 }
+    Check ([bool](WaitFor { -not (& $listed $first) } 10)) "and out of the list ($(Rows) rows, $inInbox before)"
     $second = 'Copy me'
     DragFirstRow $true ''
     Check ($null -ne (WaitFor { Find 'Archive' "Subject: $second" } 20)) "with Ctrl it is copied there ($second)"
@@ -1610,19 +1653,15 @@ public static class Dragger {
     Check ((StatusPart $mainStatus 0) -eq 'Marked 3 messages as unread') "the status bar says what was done ($(StatusPart $mainStatus 0))"
     Check ((StatusPart $mainStatus 2) -match ', 3 selected$') 'the status bar says 3 selected'
     Check (-not (& $enabled $IDM_REPLY) -and (& $enabled $IDM_MARK_READ)) 'Reply is off for several, Mark as Read is on'
-    Start-Sleep -Milliseconds 700
     Shot $main 'select-1-several'
     Command $main $IDM_MARK_READ
     $allRead = { @($subjects | Where-Object { (Find 'INBOX' "Subject: $([regex]::Escape($_))").flags -contains '\Seen' }).Count -eq 3 }
     Check ([bool](WaitFor $allRead 20)) 'Mark as Read marks the three read on the server'
     Command $main $IDM_MOVE
-    $move = WaitFor {
-        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Move')
-        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 100) -ne [IntPtr]::Zero) { $f }
-    }
+    $move = WaitPicker 'Move 3 Messages'
     Check ($null -ne $move) 'Move to Folder asks where'
     if ($move) {
-        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($move, 100), $CB_SELECTSTRING, [IntPtr](-1), 'Archive')
+        [void](PickIn $move 'Alex Morgan' 'Archive')
         Click $move 1
     }
     Check ([bool](WaitFor { -not (& $onServer 'INBOX') -and (& $onServer 'Archive') -eq 3 } 20)) 'Move to Folder moves the three to Archive'
@@ -1646,7 +1685,6 @@ public static class Dragger {
         $rows.Count -eq 3 -and (($names -join '|') -eq (($subjects | Sort-Object) -join '|')) -and $rows[0] -ge $top -and $rows[0] -lt $top + $page
     }
     Check ([bool](WaitFor $restored 20)) "and selects them, in view ($((& $selectedRows) -join ', '))"
-    Start-Sleep -Milliseconds 700
     Shot $main 'select-2-undo'
     [void][Native.Win]::PostMessage($list, 0x0201, [IntPtr]1, [IntPtr]((28 -shl 16) -bor 60))
     [void][Native.Win]::PostMessage($list, 0x0202, [IntPtr]::Zero, [IntPtr]((28 -shl 16) -bor 60))
@@ -1989,6 +2027,85 @@ public static class Dragger {
     Command $main $IDM_MARK_ALL_READ
     $unreadOn = { param($server) @(Messages 'INBOX' $server | Where-Object { $_.flags -notcontains '\Seen' }).Count }
     Check ([bool](WaitFor { (& $unreadOn $rest) -eq 0 -and (& $unreadOn $rest2) -eq 0 } 20)) "Mark All Read marks both Inboxes read on the servers ($(& $unreadOn $rest) and $(& $unreadOn $rest2) unread)"
+
+    Step 'moving between accounts'
+    $IDM_COPY = 136
+    $across = 'Across the accounts'; $copied = 'Copied across'; $dragged = 'Dragged across'
+    foreach ($pair in @(@($across, 12), @($copied, 11), @($dragged, 10))) {
+        $date = [DateTime]::UtcNow.AddMinutes($pair[1]).ToString('r')
+        AddMessage "From: Sam Lee <sam@example.org>`r`nTo: testuser@inboxclassic.test`r`nSubject: $($pair[0])`r`nDate: $date`r`nMessage-ID: <$($pair[0] -replace ' ', '-')@example.org>`r`n`r`nMoved between the accounts in the UI test.`r`n" @('\Flagged')
+    }
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 30)
+    SelectRow 0
+    Command $main $IDM_MOVE
+    $move = WaitPicker 'Move Message'
+    Check ($null -ne $move) 'Move to Folder opens'
+    if ($move) {
+        $pickerTree = [Native.Win]::GetDlgItem($move, 102)
+        $texts = @(TreeTexts $pickerTree)
+        Check (($texts -contains 'Alex Morgan') -and ($texts -contains 'Work') -and [Native.Win]::GetDlgItem($move, 101) -ne [IntPtr]::Zero) "Move to Folder shows the folders of both accounts in a tree, with a filter box ($($texts -join ', '))"
+        $current = TreeRow $pickerTree 'Alex Morgan' 'Inbox'
+        [void][Native.Win]::SendMessage($pickerTree, $TVM_SELECTITEM, [IntPtr]9, $current)
+        $ok = [Native.Win]::GetDlgItem($move, 1)
+        Check (([Native.Win]::RemoteTreeText($pickerTree, $current)) -eq 'Inbox (current)' -and -not [Native.Win]::IsWindowEnabled($ok)) 'the folder the message is in is shown but can not be chosen'
+        Check ((WindowText $ok) -eq '&Move') "the button says Move ($(WindowText $ok))"
+        SetText $move 101 'arch'
+        $narrowed = @(TreeTexts $pickerTree)
+        $others = @($narrowed | Where-Object { $_ -notmatch 'Archive' -and $_ -notin @('Recent', 'Alex Morgan', 'Work') })
+        Check ($narrowed.Count -ge 2 -and $others.Count -eq 0) "typing in the filter narrows the tree to the folders that match ($($narrowed -join ', '))"
+        SetText $move 101 ''
+        Check (PickIn $move 'Work' 'Archive') "the second account's Archive can be chosen"
+        Shot $move 'move-1-dialog'
+        $listed = Rows
+        Click $move 1
+        Check ([bool](WaitFor { (Rows) -eq $listed - 1 } 10)) 'a message of the first account moved to the second account''s Archive leaves the list at once'
+        Check ((StatusPart $mainStatus 0) -match '^Mov(ing|ed) 1 ') "the status bar says how far the move is ($(StatusPart $mainStatus 0))"
+        Check ([bool](WaitFor { (StatusPart $mainStatus 0) -eq 'Moved 1 message to Archive' } 30)) "and what was done once it is there ($(StatusPart $mainStatus 0))"
+    }
+    $there = WaitFor { (Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $across" } | Select-Object -First 1 } 30
+    Check ($null -ne $there -and $there.flags -contains '\Flagged') "it is in the second account's Archive on its server, with its flags ($($there.flags -join ' '))"
+    Check ([bool](WaitFor { -not (Find 'INBOX' "Subject: $across") } 20)) "and gone from the first account's server"
+    # the second account's Archive in the main tree, with the message in it
+    $workArchive = TreeRow $tree 'Work' 'Archive'
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $workArchive)
+    [void](WaitFor { if ((Rows) -ge 1 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 20)
+    SelectRow 0
+    Shot $main 'move-2-accounts'
+    SelectFolder 0
+    Command $main $IDM_UNDO
+    Check ([bool](WaitFor { $null -ne (Find 'INBOX' "Subject: $across") } 30)) 'Edit > Undo Move brings it back to the first account'
+    Check ([bool](WaitFor { -not ((Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $across" }) } 20)) 'and out of the second account''s Archive'
+    # Copy to Folder: the second account's Archive is under Recent now
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 1, 4) -eq $copied) { Rows } } 30)
+    SelectRow 1
+    Command $main $IDM_COPY
+    $copy = WaitPicker 'Copy Message'
+    Check ($null -ne $copy) 'Copy to Folder opens'
+    if ($copy) {
+        $copyTree = [Native.Win]::GetDlgItem($copy, 102)
+        $recent = TreeRow $copyTree 'Recent' 'Archive (Work)'
+        Check ($recent -ne [IntPtr]::Zero) "the next Move to Folder offers Archive of the second account under Recent ($((TreeTexts $copyTree) -join ', '))"
+        Check ((WindowText ([Native.Win]::GetDlgItem($copy, 1))) -eq '&Copy') 'the button says Copy'
+        [void](PickIn $copy 'Work' 'Archive')
+        Click $copy 1
+    }
+    Check ($null -ne (WaitFor { (Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $copied" } | Select-Object -First 1 } 30)) "Copy to Folder copies a message to the second account's Archive"
+    Check ($null -ne (Find 'INBOX' "Subject: $copied")) 'and keeps it in the Inbox'
+    # dragged onto the second account's Archive in the folder tree
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 2, 4) -eq $dragged) { Rows } } 30)
+    SelectRow 2
+    [void][Native.Win]::SetForegroundWindow($main)
+    $workArchive = TreeRow $tree 'Work' 'Archive'
+    [void][Native.Win]::SendMessage($tree, 0x1114, [IntPtr]0, $workArchive)
+    $row = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr]2, 0)
+    $target = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $workArchive.ToInt64()))
+    [Native.Win]::MouseDragTo($row.Left + 120, [int](($row.Top + $row.Bottom) / 2), $target[0], $target[1])
+    [Native.Win]::Mouse($target[0], $target[1], 0x0004)
+    Check ($null -ne (WaitFor { (Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $dragged" } | Select-Object -First 1 } 30)) 'a message dragged onto a folder of the second account is moved there'
+    Check ([bool](WaitFor { -not (Find 'INBOX' "Subject: $dragged") } 20)) 'and out of the first account'
 
     # ---- accounts ----
 

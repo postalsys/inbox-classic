@@ -1381,6 +1381,7 @@ dependencies = [
  "resvg",
  "serde_json",
  "tokio",
+ "unicode-normalization",
  "windows-native-keyring-store",
  "zbus-secret-service-keyring-store",
 ]

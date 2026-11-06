@@ -4,4 +4,4 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 . scripts/win-env.sh
 win_sync
-ssh "$WIN_HOST" "$WIN_DIR\\scripts\\win-test.cmd $*"
+ssh -n "$WIN_HOST" "$WIN_DIR\\scripts\\win-test.cmd $*"

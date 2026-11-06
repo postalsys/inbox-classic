@@ -332,6 +332,14 @@ pub async fn fetch_source(client: &mut Client, store: &mut Store, folder: Folder
     if let Some(source) = store.source(folder, uid)? {
         return Ok(source);
     }
+    let source = fetch_raw(client, store, folder, uid).await?;
+    store.set_source(folder, uid, &source)?;
+    Ok(source)
+}
+
+/// A message as the server keeps it, fetched without keeping it in the store (one on its way to another account,
+/// whose row is out of the list already)
+pub async fn fetch_raw(client: &mut Client, store: &mut Store, folder: FolderId, uid: u64) -> Result<Vec<u8>> {
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
     let query = FetchQuery {
@@ -339,13 +347,23 @@ pub async fn fetch_source(client: &mut Client, store: &mut Store, folder: Folder
         ..Default::default()
     };
     let fetched = client.fetch(&Messages::uid(uid), &query).await?;
-    let source = fetched
+    fetched
         .into_iter()
         .find(|m| m.uid == Some(uid))
         .and_then(|m| m.source)
-        .ok_or(Error::MessageGone)?;
-    store.set_source(folder, uid, &source)?;
-    Ok(source)
+        .ok_or(Error::MessageGone)
+}
+
+/// Whether `folder` on the server has a message with this Message-ID
+pub async fn has_message_id(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    message_id: &str,
+) -> Result<bool> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    Ok(!with_message_id(client, message_id, false).await?.is_empty())
 }
 
 /// The text part of a message, fetched for the search index (only that part, and only its start), with what decoding it
@@ -534,10 +552,10 @@ async fn expunge_uids(client: &mut Client, uids: &[u64]) -> Result<()> {
     Ok(())
 }
 
-/// The drafts of the selected folder with this Message-ID. SEARCH HEADER matches any part of the header, so what it
-/// finds is checked: the same ID (case aside) and the \\Draft flag. A draft opened again whose ID is `<` must not
-/// take the others with it.
-async fn with_message_id(client: &mut Client, message_id: &str) -> Result<Vec<u64>> {
+/// The messages of the selected folder with this Message-ID (`drafts`: only those with the \\Draft flag). SEARCH HEADER
+/// matches any part of the header, so what it finds is checked: the same ID (case and spaces aside). A draft opened
+/// again whose ID is `<` must not take the others with it.
+async fn with_message_id(client: &mut Client, message_id: &str, drafts: bool) -> Result<Vec<u64>> {
     let found = client
         .search(&SearchKey::Header("Message-ID".into(), message_id.into()))
         .await?;
@@ -545,29 +563,31 @@ async fn with_message_id(client: &mut Client, message_id: &str) -> Result<Vec<u6
         return Ok(Vec::new());
     };
     let query = FetchQuery {
-        flags: true,
+        flags: drafts,
         envelope: true,
         ..Default::default()
     };
     let fetched = client.fetch(&Messages::Uids(set), &query).await?;
     Ok(fetched
         .into_iter()
-        .filter(|m| is_draft_with_id(m, message_id))
+        .filter(|m| has_id(m, message_id) && (!drafts || is_draft(m)))
         .filter_map(|m| m.uid)
         .collect())
 }
 
-fn is_draft_with_id(message: &pe_imap::client::FetchedMessage, message_id: &str) -> bool {
-    let same_id = message
+fn has_id(message: &pe_imap::client::FetchedMessage, message_id: &str) -> bool {
+    message
         .envelope
         .as_ref()
         .and_then(|e| e.message_id.as_deref())
-        .is_some_and(|id| id.eq_ignore_ascii_case(message_id));
-    let draft = message
+        .is_some_and(|id| id.trim().eq_ignore_ascii_case(message_id.trim()))
+}
+
+fn is_draft(message: &pe_imap::client::FetchedMessage) -> bool {
+    message
         .flags
         .as_ref()
-        .is_some_and(|flags| flags.iter().any(|f| f.eq_ignore_ascii_case("\\Draft")));
-    same_id && draft
+        .is_some_and(|flags| flags.iter().any(|f| f.eq_ignore_ascii_case("\\Draft")))
 }
 
 /// Saves a draft in the Drafts folder `folder` in place of its earlier copies, the ones with its Message-ID. They
@@ -582,7 +602,7 @@ pub async fn save_draft(
 ) -> Result<()> {
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
-    let earlier = with_message_id(client, message_id).await?;
+    let earlier = with_message_id(client, message_id, true).await?;
     client.append(&path, raw, &["\\Draft", "\\Seen"], Some(date)).await?;
     expunge_uids(client, &earlier).await
 }
@@ -591,7 +611,7 @@ pub async fn save_draft(
 pub async fn remove_drafts(client: &mut Client, store: &mut Store, folder: FolderId, message_id: &str) -> Result<()> {
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
-    let drafts = with_message_id(client, message_id).await?;
+    let drafts = with_message_id(client, message_id, true).await?;
     expunge_uids(client, &drafts).await
 }
 

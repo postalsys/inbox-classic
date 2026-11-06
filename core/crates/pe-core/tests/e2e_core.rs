@@ -970,6 +970,8 @@ fn acts_on_selected_messages_and_undoes() {
     assert_eq!((summary.accounts, summary.folders, summary.for_good), (1, 1, 0));
     assert!(!summary.in_junk);
     assert_eq!(summary.title(), "3 messages selected");
+    assert_eq!(summary.move_title(false), "Move 3 Messages");
+    assert_eq!(summary.move_prompt(true), "Copy the 3 selected messages to:");
     assert_eq!(summary.detail(), "3 unread");
 
     // read and flagged, with one command each
@@ -1078,6 +1080,202 @@ fn acts_on_selected_messages_and_undoes() {
 
     // not into a folder of another account or one that holds no messages, and nothing when they are gone
     assert!(s.core.act(&[at(inbox, 999_999)], Action::Read(true)).is_err());
+}
+
+#[test]
+fn moves_and_copies_between_accounts() {
+    let Some(s) = setup() else { return };
+    let Some(other_server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let moved = s
+        .server
+        .add_message("INBOX", &rfc822("Move me", "x"), &["\\Seen", "\\Flagged"]);
+    let copied = s.server.add_message("INBOX", &rfc822("Copy me", "y"), &[]);
+    let first = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(first).unwrap();
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account: first,
+            failure: None,
+        }
+    });
+    let second = s.core.add_account(&settings(&other_server), PASSWORD).unwrap();
+    s.core.sync(second).unwrap();
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account: second,
+            failure: None,
+        }
+    });
+    let folder = |account, path: &str| {
+        s.core
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .find(|f| f.info.path == path)
+            .unwrap()
+            .id
+    };
+    let (inbox, archive2) = (folder(first, "INBOX"), folder(second, "Archive"));
+    let at = |folder, uid| MessageRef { folder, uid };
+    let eventually = |done: &dyn Fn() -> bool| {
+        for _ in 0..400 {
+            if done() {
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(25));
+        }
+        panic!("did not get there");
+    };
+    let in_store = |folder| -> Vec<String> {
+        let mut subjects: Vec<String> = s
+            .core
+            .messages(folder, Sort::default(), 0, 100)
+            .unwrap()
+            .into_iter()
+            .map(|m| m.info.subject)
+            .collect();
+        subjects.sort();
+        subjects
+    };
+
+    // a move: out of the list at once, on the other server with its flags, then gone from the first
+    assert_eq!(
+        s.core.act(&[at(inbox, moved)], Action::Move(archive2)).unwrap(),
+        "Moving 1 message to Archive..."
+    );
+    assert_eq!(in_store(inbox), ["Copy me"]);
+    eventually(&|| other_server.subjects("Archive") == ["Move me"]);
+    eventually(&|| s.server.subjects("INBOX") == ["Copy me"]);
+    let there = &other_server.messages("Archive")[0];
+    let flags = there["flags"].as_array().unwrap();
+    assert!(
+        flags.contains(&json!("\\Seen")) && flags.contains(&json!("\\Flagged")),
+        "{there}"
+    );
+    eventually(&|| in_store(archive2) == ["Move me"]);
+    assert_eq!(s.core.recent_targets(3).unwrap(), [archive2]);
+    // the Move and Copy window: Recent first, named with the account; the folder they are in can not be chosen
+    let rows = s.core.move_targets(Some(inbox), "").unwrap();
+    assert_eq!(rows[0].kind, pe_core::TargetKind::Heading);
+    assert_eq!((rows[1].kind, rows[1].folder), (pe_core::TargetKind::Recent, archive2));
+    assert!(rows[1].label.starts_with("Archive ("), "{}", rows[1].label);
+    let current = rows
+        .iter()
+        .find(|r| r.kind == pe_core::TargetKind::Folder && r.folder == inbox)
+        .unwrap();
+    assert_eq!(current.label, "Inbox (current)");
+    assert!(!current.choosable);
+    assert_eq!(
+        rows.iter().filter(|r| r.kind == pe_core::TargetKind::Account).count(),
+        2
+    );
+    // typed: what matches with the accounts above, without Recent, accents and case aside
+    let rows = s.core.move_targets(Some(inbox), "ÁRCH").unwrap();
+    let kinds: Vec<_> = rows.iter().map(|r| (r.kind, r.label.as_str())).collect();
+    assert_eq!(
+        kinds
+            .iter()
+            .filter(|(k, _)| *k == pe_core::TargetKind::Folder)
+            .map(|(_, l)| *l)
+            .collect::<Vec<_>>(),
+        ["Archive", "Archive"]
+    );
+    assert!(rows.iter().all(|r| r.kind != pe_core::TargetKind::Recent));
+    assert!(s.core.move_targets(None, "nothing like it").unwrap().is_empty());
+
+    // a copy: both keep it
+    s.core.act(&[at(inbox, copied)], Action::Copy(archive2)).unwrap();
+    eventually(&|| other_server.subjects("Archive").len() == 2);
+    assert_eq!(s.server.subjects("INBOX"), ["Copy me"]);
+
+    // Undo takes the move back, across the accounts again
+    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Move"));
+    s.core.undo().unwrap();
+    eventually(&|| s.server.subjects("INBOX").len() == 2);
+    eventually(&|| other_server.subjects("Archive") == ["Copy me"]);
+    eventually(&|| in_store(inbox) == ["Copy me", "Move me"]);
+
+    // a message the target refuses comes back where it was, and the user is told
+    let gone = folder(second, "Junk");
+    other_server.delete_folder("Junk");
+    let back = s
+        .core
+        .refs_in_ranges(&Search::folder(inbox), Sort::default(), &[(0, 2)])
+        .unwrap();
+    s.core.act(&back[..1], Action::Move(gone)).unwrap();
+    s.wait(|e| matches!(e, Event::Failed { account, message, .. } if *account == first && message.contains("could not be moved")));
+    eventually(&|| in_store(inbox).len() == 2);
+    assert_eq!(s.server.subjects("INBOX").len(), 2);
+}
+
+#[test]
+fn a_move_between_accounts_cut_short_goes_on_without_a_second_copy() {
+    let Some(s) = setup() else { return };
+    let Some(other_server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let raw = rfc822("Half moved", "x");
+    let uid = s.server.add_message("INBOX", &raw, &[]);
+    // the copy had arrived when the app stopped, the original was not removed yet
+    other_server.add_message("Archive", &raw, &[]);
+    let first = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(first).unwrap();
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account: first,
+            failure: None,
+        }
+    });
+    let second = s.core.add_account(&settings(&other_server), PASSWORD).unwrap();
+    s.core.sync(second).unwrap();
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account: second,
+            failure: None,
+        }
+    });
+    let folder = |account, path: &str| {
+        s.core
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .find(|f| f.info.path == path)
+            .unwrap()
+            .id
+    };
+    let (inbox, archive2) = (folder(first, "INBOX"), folder(second, "Archive"));
+    {
+        let store = pe_store::Store::open(s._dir.path().join("store.db")).unwrap();
+        store
+            .add_transfers(&[pe_store::Transfer {
+                id: 0,
+                account: first,
+                from: inbox,
+                uid,
+                to: archive2,
+                copy: false,
+                message_id: Some("<Halfmoved@example.com>".into()),
+                flags: String::new(),
+                internal_date: None,
+                source: None,
+                tried: false,
+            }])
+            .unwrap();
+        let id = store.next_transfer(first, 0).unwrap().unwrap().id;
+        store.set_transfer_tried(id).unwrap();
+    }
+    // the next sync of the account finishes it
+    s.core.sync(first).unwrap();
+    s.wait(|e| {
+        *e == Event::SyncFinished {
+            account: first,
+            failure: None,
+        }
+    });
+    assert_eq!(other_server.subjects("Archive"), ["Half moved"]);
+    assert!(s.server.subjects("INBOX").is_empty());
 }
 
 #[test]

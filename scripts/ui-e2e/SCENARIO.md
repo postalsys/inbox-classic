@@ -445,7 +445,26 @@ Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the
 - a reply goes from the account of the message
 - Mark All Read marks both Inboxes read on the servers
 
-## 41. Accounts
+## 41. Moving between accounts
+
+Screenshots: `move-1-dialog`, `move-2-accounts`
+
+With the second account still there:
+
+- Move to Folder shows the folders of both accounts in a tree, with a filter box
+- the folder the message is in is shown but can not be chosen
+- the button says Move
+- typing in the filter narrows the tree to the folders that match
+- a message of the first account moved to the second account's Archive leaves the list at once
+- the status bar says how far the move is
+- it is in the second account's Archive on its server, with its flags
+- and gone from the first account's server
+- Edit > Undo Move brings it back to the first account
+- Copy to Folder copies a message to the second account's Archive and keeps it in the Inbox
+- the next Move to Folder offers Archive of the second account under Recent
+- a message dragged onto a folder of the second account is moved there
+
+## 42. Accounts
 
 Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, `accounts-3-after`
 
@@ -460,7 +479,7 @@ Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, 
 - the account leaves the tree
 - All Inboxes goes with the second account
 
-## 42. Sign-in apps
+## 43. Sign-in apps
 
 Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not yet on the Mac, not yet on Linux), `signin-4-editor` (not yet on Linux), `signin-5-apps-added`, `signin-6-first-page` (not yet on the Mac, not yet on Linux), `signin-7-why` (not yet on the Mac, not yet on Linux), `signin-8-more` (not yet on the Mac, not yet on Linux), `signin-9-waiting`, `signin-10-added` (not yet on the Mac, not yet on Linux), `signin-11-in-use` (not yet on the Mac, not yet on Linux), `signin-12-toggled`, `signin-13-properties` (not yet on the Mac, not yet on Linux), `account-5b-browser-sign-in` (not yet on the Mac, not yet on Linux)
 
@@ -489,19 +508,19 @@ Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not ye
 - a sign-in app turned off is left out of More sign-in options
 - a Gmail address is offered Sign in with Google
 
-## 43. About
+## 44. About
 
 Screenshots: `help-1-about`
 
 - About shows the version
 
-## 44. Help
+## 45. Help
 
 Screenshots: `help-2-contents`
 
 - F1 opens the help
 
-## 45. Printing
+## 46. Printing
 
 Screenshots: `files-3-print-missing`, `files-3-print`
 
@@ -509,7 +528,7 @@ Screenshots: `files-3-print-missing`, `files-3-print`
 - as wide as the app
 - and closing it prints nothing
 
-## 46. The tray
+## 47. The tray
 
 Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not yet on Linux)
 
@@ -519,7 +538,7 @@ Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not ye
 - a click on the icon shows the window again
 - with the new message in the list, which came without a sync
 
-## 47. Closing
+## 48. Closing
 
 Screenshots: `write-12-close-app`
 

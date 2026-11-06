@@ -15,12 +15,12 @@ cd "$(dirname "$0")/.."
 VERSION=$(sed -n 's/^version = "\([0-9.]*\)"/\1/p' core/Cargo.toml | head -1)
 echo "Building Inbox Classic ${VERSION} on ${WIN_HOST}"
 win_sync
-ssh "$WIN_HOST" "$WIN_DIR\\scripts\\win-package.cmd"
+ssh -n "$WIN_HOST" "$WIN_DIR\\scripts\\win-package.cmd"
 
 # only what this builds: the Mac and Linux packages of the same release may be in dist/ already
 rm -rf dist/InboxClassic dist/InboxClassic-Setup.exe
 mkdir -p dist
-ssh "$WIN_HOST" "tar -czf - -C $WIN_DIR_FWD/dist InboxClassic" | tar -xzf - -C dist
+ssh -n "$WIN_HOST" "tar -czf - -C $WIN_DIR_FWD/dist InboxClassic" | tar -xzf - -C dist
 
 ./scripts/sign-win.sh dist/InboxClassic/InboxClassic.exe
 

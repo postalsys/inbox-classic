@@ -623,6 +623,22 @@ fn named_in(root: &gtk::Widget, name: &str) -> Option<gtk::Widget> {
         .find(|w| w.widget_name() == name && w.is_mapped())
 }
 
+/// Highlights folder `id` in the Move and Copy window, as a click on its row does
+fn pick_folder(dialog: &adw::Dialog, id: i64) -> bool {
+    let Some(list) = named_in(dialog.upcast_ref(), "move-folders").and_downcast::<gtk::ListBox>() else {
+        return false;
+    };
+    let mut index = 0;
+    while let Some(row) = list.row_at_index(index) {
+        if row.widget_name() == format!("move-folder-{id}") && row.is_selectable() {
+            list.select_row(Some(&row));
+            return true;
+        }
+        index += 1;
+    }
+    false
+}
+
 fn set_text(root: &gtk::Widget, name: &str, text: &str) -> bool {
     match named_in(root, name).and_then(|w| w.dynamic_cast::<gtk::Editable>().ok()) {
         Some(editable) => {
@@ -816,6 +832,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::gmail(&d).await;
     wrong_password(&d).await;
     steps::all_inboxes(&d).await;
+    steps::between_accounts(&d).await;
     accounts(&d).await;
     sign_in_apps(&d).await;
     about_and_help(&d).await;
@@ -1616,13 +1633,10 @@ async fn organizing(d: &Driver) {
     command(Command::Move);
     match wait_dialog(10, "move-dialog").await {
         Some(dialog) => {
-            if let Some(combo) = named_in(dialog.upcast_ref(), "form-0").and_downcast::<adw::ComboRow>() {
-                let model = combo.model().and_downcast::<gtk::StringList>();
-                let archive = model.and_then(|m| (0..m.n_items()).find(|i| m.string(*i).as_deref() == Some("Archive")));
-                if let Some(index) = archive {
-                    combo.set_selected(index);
-                }
+            if let Some(archive) = steps::folder_of(0, "Archive") {
+                pick_folder(&dialog, archive);
             }
+            pause(300).await;
             d.shot(&dialog, "organize-2-move").await;
             click(dialog.upcast_ref(), "dialog-ok");
             let moved = wait_for(20, || d.find("Archive", &format!("Subject: {moving}"))).await;

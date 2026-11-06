@@ -322,6 +322,16 @@ fn form_row(index: usize, field: &Field) -> gtk::Widget {
     row
 }
 
+/// Asks for a folder's name (New Folder, Rename Folder): the name typed, None for Cancel or nothing typed
+pub async fn ask_folder_name(parent: &impl IsA<gtk::Widget>, title: &str, intro: &str, name: &str) -> Option<String> {
+    let form = Form::new(parent, title, intro, vec![Field::text("Folder name:", name)], "OK", 0);
+    form.widget().set_widget_name("folder-name-dialog");
+    let ok = form.run().await;
+    let value = form.value(0);
+    form.close();
+    (ok && !value.is_empty()).then_some(value)
+}
+
 /// A dialog with a header bar of Cancel and `ok_label` around its title, over `content`; the OK button (named
 /// `dialog-ok`) is its default
 pub fn dialog_with_buttons(

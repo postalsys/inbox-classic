@@ -20,6 +20,8 @@ use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 
 use crate::{Event, EventSink, FailureKind, Secrets};
 
+mod transfer;
+
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum Command {
     Sync,
@@ -79,6 +81,8 @@ pub(crate) enum Command {
     UndoMoves {
         moves: Vec<crate::selection::UndoMove>,
     },
+    /// The messages waiting in the store to go from this account to folders of others (transfer.rs)
+    Transfer,
     /// Into the Drafts folder, in place of the earlier copy; `outgoing` has its Message-ID
     SaveDraft {
         outgoing: Box<crate::Outgoing>,
@@ -210,6 +214,20 @@ fn kept(failure: Failure, waiting: usize) -> Failure {
 /// not by each (a provider that rotates refresh tokens would take the second refresh as a replay)
 pub(crate) type SharedToken = Arc<tokio::sync::Mutex<Option<(String, i64)>>>;
 
+/// The [`SharedToken`] of every account: a worker that connects to another account for once (a draft to remove, a
+/// message moved between accounts) uses that account's, so the token is still refreshed once
+pub(crate) type Tokens = Arc<std::sync::Mutex<std::collections::HashMap<AccountId, SharedToken>>>;
+
+/// The token `account` uses, made when it has none yet
+pub(crate) fn token_of(tokens: &Tokens, account: AccountId) -> SharedToken {
+    tokens
+        .lock()
+        .unwrap_or_else(|p| p.into_inner())
+        .entry(account)
+        .or_default()
+        .clone()
+}
+
 /// What a worker does: everything but opening messages, or only that
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Role {
@@ -225,6 +243,7 @@ pub(crate) struct Worker {
     trust: Trust,
     oauth: crate::OAuthProviders,
     access_token: SharedToken,
+    tokens: Tokens,
     events: EventSink,
     connection: Option<(Client, UnboundedReceiver<ImapEvent>)>,
     /// A server event that woke the Inbox from IDLE, applied first with the rest
@@ -258,7 +277,7 @@ impl Worker {
         secrets: Secrets,
         trust: Trust,
         oauth: crate::OAuthProviders,
-        access_token: SharedToken,
+        tokens: Tokens,
         events: EventSink,
     ) -> Self {
         Worker {
@@ -268,7 +287,8 @@ impl Worker {
             secrets,
             trust,
             oauth,
-            access_token,
+            access_token: token_of(&tokens, account),
+            tokens,
             events,
             connection: None,
             held: None,
@@ -396,6 +416,16 @@ impl Worker {
             if let Some(flag) = m.flag {
                 store.set_flag_many(m.to, &uids, flag, false)?;
                 set_flag(self.client(store).await?, store, m.to, &uids, flag, false).await?;
+            }
+            if store.folder(m.from)?.account_id != self.account {
+                // back to another account: through the transfers, as the move there went
+                store.start_transfers(m.to, &uids, m.from, false)?;
+                self.emit(Event::FolderChanged {
+                    account: self.account,
+                    folder: m.to,
+                });
+                self.transfer(store).await?;
+                continue;
             }
             let mut removed = Vec::with_capacity(uids.len());
             for &uid in &uids {
@@ -602,8 +632,13 @@ impl Worker {
                 if let Err(failure) = self.send_outbox(store).await {
                     self.fail(failure);
                 }
+                // and messages left on their way to another account
+                if let Err(failure) = self.transfer(store).await {
+                    self.fail(failure);
+                }
                 self.sync_all(store).await
             }
+            Command::Transfer => self.transfer(store).await,
             Command::SendOutbox => self.send_outbox(store).await,
             // the reader's (Core::open_message), never sent here
             Command::FetchSource { .. } => Ok(()),
@@ -656,7 +691,14 @@ impl Worker {
                     },
                 )?;
                 pe_sync::create_folder(self.client(store).await?, &path).await?;
-                self.sync_folder_list(store).await
+                self.sync_folder_list(store).await?;
+                if let Some(folder) = store.find_folder(self.account, &path)? {
+                    self.emit(Event::FolderCreated {
+                        account: self.account,
+                        folder: folder.id,
+                    });
+                }
+                Ok(())
             }
             Command::RenameFolder { folder, path } => {
                 pe_sync::rename_folder(self.client(store).await?, store, folder, &path).await?;
@@ -738,17 +780,7 @@ impl Worker {
         let outcome = if account == self.account {
             self.remove_drafts(store, message_id).await
         } else {
-            let mut other = Worker::new(
-                account,
-                Role::Main,
-                self.path.clone(),
-                self.secrets.clone(),
-                self.trust.clone(),
-                self.oauth.clone(),
-                SharedToken::default(),
-                self.events.clone(),
-            );
-            other.remove_drafts(store, message_id).await
+            self.sibling(account).remove_drafts(store, message_id).await
         };
         if let Err(failure) = outcome {
             self.fail(Failure {
@@ -759,6 +791,20 @@ impl Worker {
                 ),
             });
         }
+    }
+
+    /// A worker for another account, for one piece of work on a connection of its own
+    fn sibling(&self, account: AccountId) -> Worker {
+        Worker::new(
+            account,
+            Role::Main,
+            self.path.clone(),
+            self.secrets.clone(),
+            self.trust.clone(),
+            self.oauth.clone(),
+            self.tokens.clone(),
+            self.events.clone(),
+        )
     }
 
     /// Saves a draft in the Drafts folder, in place of the copy saved before, and says how that went to the window it

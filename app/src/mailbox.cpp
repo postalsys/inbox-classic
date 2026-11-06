@@ -22,6 +22,17 @@ std::wstring ReasonText(char* reason, const wchar_t* fallback) {
     return why ? Text(why.get()) : fallback;
 }
 
+// a folder name, asked for; empty when cancelled
+std::wstring AskFolderName(HWND owner, const wchar_t* title, const std::wstring& intro, const std::wstring& name) {
+    std::vector<FormField> fields = {{L"Folder name:", name}};
+    return FormDialog(owner, title, intro, fields) ? fields[0].value : L"";
+}
+
+// the reason the core gave, shown
+void ShowRefusal(HWND owner, char* reason, const wchar_t* fallback) {
+    MessageBoxW(owner, ReasonText(reason, fallback).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+}
+
 constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
 constexpr size_t kPagesKept = 8;
@@ -174,6 +185,8 @@ void IconColumn(HWND list, int index, int icon) {
     ListView_SetColumn(list, index, &column);
 }
 
+}  // namespace
+
 HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPARAM data, bool bold, int icon) {
     TVINSERTSTRUCTW insert = {};
     insert.hParent = parent;
@@ -188,7 +201,6 @@ HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPAR
     return TreeView_InsertItem(tree, &insert);
 }
 
-}  // namespace
 
 void Mailbox::Create(HWND parent, PeCore* core) {
     parent_ = parent;
@@ -310,14 +322,7 @@ void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
 
 // how wide the words of a link are, in the link font
 int Mailbox::LinkWidth(HWND link) const {
-    std::wstring words = GetWindowString(link);
-    HDC dc = GetDC(link);
-    HGDIOBJ old = SelectObject(dc, link_);
-    SIZE size = {};
-    GetTextExtentPoint32W(dc, words.c_str(), static_cast<int>(words.size()), &size);
-    SelectObject(dc, old);
-    ReleaseDC(link, dc);
-    return size.cx;
+    return TextWidth(link, link_);
 }
 
 // the search bar over the list while it is shown, the list under it
@@ -1471,43 +1476,39 @@ void Mailbox::DeleteSelected() {
     Act(PE_ACTION_DELETE);
 }
 
-void Mailbox::MoveSelected(HWND owner) {
+void Mailbox::MoveSelected(HWND owner, bool copy) {
     FlushSelection();
-    int64_t from = 0;
+    int64_t first = 0;
     uint64_t uid = 0;
-    // to a folder of their account: messages of several accounts (All Inboxes, a search) do not move together
-    if (summary_.accounts != 1 || !pe_selection_get(selection_.get(), 0, &from, &uid)) {
+    if (!pe_selection_get(selection_.get(), 0, &first, &uid)) {
         return;
     }
-    // the folder they are all in is not offered; from several folders, any of the account's
-    int64_t exclude = summary_.folders == 1 ? from : 0;
-    // the other folders of its account that hold messages
-    std::vector<int64_t> ids;
-    FormField field{L"Folder:", L"", FormField::Kind::Choice};
-    auto account = folderAccounts_.find(from);
-    core::FolderList folders(pe_folders(core_, account != folderAccounts_.end() ? account->second : CurrentAccount()));
-    for (size_t i = 0; i < pe_folder_list_count(folders.get()); i++) {
-        const PeFolder* folder = pe_folder_list_get(folders.get(), i);
-        if (folder && folder->selectable && folder->id != exclude) {
-            ids.push_back(folder->id);
-            // a special folder by its usual name, the others by their whole path: two folders 2024 in Work and
-            // in Personal are not the same
-            field.choices.push_back(folder->special_use != PE_SPECIAL_USE_NONE ? FolderName(*folder) : Text(folder->path));
+    FolderPick pick;
+    pick.core = core_;
+    pick.title = Text(core::String(pe_selection_move_text(&summary_, copy, false)).get());
+    pick.prompt = Text(core::String(pe_selection_move_text(&summary_, copy, true)).get());
+    pick.verb = copy ? L"&Copy" : L"&Move";
+    // the folder they are all in is shown but not offered; from several folders, any
+    pick.current = summary_.folders == 1 ? first : 0;
+    pick.newFolder = [this](HWND window, int64_t account, int64_t parent) {
+        std::wstring where = parent ? L"The new folder goes in the highlighted folder." : L"The new folder goes at the top of the account.";
+        std::wstring name = AskFolderName(window, L"New Folder", where, L"");
+        if (name.empty()) {
+            return;
         }
-    }
-    if (ids.empty()) {
-        return;
-    }
-    field.value = field.choices[0];
-    std::vector<FormField> fields = {field};
-    std::wstring prompt = summary_.count > 1 ? L"Move the " + std::to_wstring(summary_.count) + L" selected messages to the folder:"
-                                             : L"Move the selected message to the folder:";
-    if (!FormDialog(owner, L"Move", prompt.c_str(), fields)) {
-        return;
-    }
-    int chosen = fields[0].chosen;
-    if (chosen >= 0 && static_cast<size_t>(chosen) < ids.size()) {
-        Act(PE_ACTION_MOVE, ids[chosen]);
+        char* reason = nullptr;
+        if (!pe_folder_create(core_, account, parent, core::Narrow(name).c_str(), &reason)) {
+            ShowRefusal(window, reason, L"The folder could not be created.");
+            return;
+        }
+        // highlighted once the server made it (FolderCreated)
+        newInPick_ = true;
+    };
+    newInPick_ = false;
+    int64_t to = PickFolder(owner, pick);
+    newInPick_ = false;
+    if (to) {
+        Act(copy ? PE_ACTION_COPY : PE_ACTION_MOVE, to);
     }
 }
 
@@ -1617,17 +1618,6 @@ bool Mailbox::FolderOf(int64_t folder, std::wstring& name, bool& fixed) const {
     name = found->second.first;
     fixed = found->second.second;
     return true;
-}
-
-// a folder name, asked for; empty when cancelled
-std::wstring AskFolderName(HWND owner, const wchar_t* title, const std::wstring& intro, const std::wstring& name) {
-    std::vector<FormField> fields = {{L"Folder name:", name}};
-    return FormDialog(owner, title, intro, fields) ? fields[0].value : L"";
-}
-
-// the reason the core gave, shown
-void ShowRefusal(HWND owner, char* reason, const wchar_t* fallback) {
-    MessageBoxW(owner, ReasonText(reason, fallback).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
 void Mailbox::NewFolder(HWND owner) {
@@ -1883,6 +1873,7 @@ void Mailbox::MessageMenu(POINT screen) {
     bool junk = summary_.in_junk;
     AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, junk ? L"Mark as &Not Junk" : L"Mark as &Junk");
     AppendMenuW(menu, MF_STRING, IDM_MOVE, L"&Move to Folder...");
+    AppendMenuW(menu, MF_STRING, IDM_COPY, L"&Copy to Folder...");
     AppendMenuW(menu, MF_STRING, IDM_DELETE, L"&Delete");
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_SAVE_AS, L"Save &As...");
@@ -2149,13 +2140,11 @@ int64_t Mailbox::DropTarget(POINT screen, HTREEITEM& over) const {
     item.mask = TVIF_PARAM;
     item.hItem = over;
     TreeView_GetItem(tree_, &item);
-    // an account's own item (its id negated), the folder they are all in, one of another account (or messages of
-    // several accounts), or one that holds no messages: not there
+    // an account's own item (its id negated), the folder they are all in, or one that holds no messages: not there.
+    // A folder of another account takes them too, the core moves them across
     int64_t folder = static_cast<int64_t>(item.lParam);
-    auto from = folderAccounts_.find(drag_->folder), to = folderAccounts_.find(folder);
     bool sameFolder = summary_.folders <= 1 && folder == drag_->folder;
-    if (folder <= 0 || sameFolder || summary_.accounts > 1 || unselectable_.count(folder) || from == folderAccounts_.end() ||
-        to == folderAccounts_.end() || from->second != to->second) {
+    if (folder <= 0 || sameFolder || unselectable_.count(folder) || !folderAccounts_.contains(folder)) {
         return 0;
     }
     return folder;
@@ -2305,6 +2294,14 @@ void Mailbox::OnEvent(const UiEvent& event) {
     switch (event.kind) {
     case PE_EVENT_KIND_FOLDERS_CHANGED:
         Reload();
+        // an open Move and Copy window shows the folders as they are now
+        RefreshFolderPick(0);
+        break;
+    case PE_EVENT_KIND_FOLDER_CREATED:
+        if (newInPick_) {
+            newInPick_ = false;
+            RefreshFolderPick(event.folder);
+        }
         break;
     case PE_EVENT_KIND_FOLDER_CHANGED:
         UpdateFolders(event.account);

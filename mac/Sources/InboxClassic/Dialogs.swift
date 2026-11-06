@@ -235,6 +235,18 @@ final class FormWindow: NSObject, NSWindowDelegate {
     }
 }
 
+/// The name of a folder to make or rename, asked for; nil when cancelled
+@MainActor
+func askFolderName(title: String, intro: String, name: String) -> String? {
+    formDialog(title: title, intro: intro, fields: [FormField(label: "Folder name:", value: name)])?[0].value
+}
+
+/// Why the core refused, or `fallback` when it did not say
+@MainActor
+func refused(_ reason: UnsafeMutablePointer<CChar>?, _ fallback: String) {
+    inform(taken(reason) ?? fallback, style: .warning)
+}
+
 /// The buttons of a window in a row at its right, the default last, as Mac windows have them; as wide as its window
 /// once given that width
 @MainActor

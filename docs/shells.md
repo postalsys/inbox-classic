@@ -11,6 +11,7 @@ The three apps are thin windows on the same Rust core (`core/`). A feature that 
 | All Inboxes (its item, list, Mark All Read) | `mailbox.cpp`                                | `Mailbox.swift` (`AllInboxesNode`)                  | `folders.rs` (`ALL_INBOXES`), `mailbox.rs`   |
 | Message list, its right-click menu          | `mailbox.cpp`                                | `Mailbox.swift`                                     | `messages.rs`, `mailbox.rs`                  |
 | Several messages selected, Undo             | `mailbox.cpp`                                | `Mailbox.swift`                                     | `messages.rs`, `mailbox.rs`                  |
+| Move and Copy to Folder (folder tree)       | `mailbox.cpp`, `ui.cpp`                      | `Mailbox.swift`, `Dialogs.swift`                    | `mailbox.rs`, `ui.rs`                        |
 | Message Source                              | `mailbox.cpp`, `ui.cpp` (`SourceDialog`)     | `Mailbox.swift`, `Dialogs.swift` (`textDialog`)     | `mailbox.rs`, `ui.rs`                        |
 | Reading pane, attachments, bars, logo       | `mailbox.cpp`, `preview.cpp`                 | `Reader.swift`, `WebViews.swift`                    | `reader.rs`, `webview.rs`                    |
 | The web views and their lockdown            | `webview.cpp`, `preview.cpp`                 | `WebViews.swift` (content rules of the core)        | `webview.rs` (content rules of the core)     |

@@ -340,6 +340,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .help: HelpWindow.open()
         case .delete: main.mailbox.deleteSelected()
         case .move: main.mailbox.moveSelected()
+        case .copy: main.mailbox.moveSelected(copy: true)
         case .flag: main.mailbox.flagSelected()
         case .newFolder: main.mailbox.newFolder()
         case .renameFolder: main.mailbox.renameFolder()
@@ -379,7 +380,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         switch command {
         case .delete: return !typing && main.mailbox.hasSelection
         case .markRead, .markUnread, .flag: return main.mailbox.hasSelection
-        case .move: return main.mailbox.canMove
+        case .move, .copy: return main.mailbox.hasSelection
         case .undo: return main.core.undoLabel != nil
         case .junk: return main.mailbox.hasSelection && !main.mailbox.inJunk
         case .notJunk: return main.mailbox.hasSelection && main.mailbox.inJunk

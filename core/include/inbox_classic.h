@@ -116,6 +116,11 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_AGENT_ASK = 18,
   // What AI agents did changed: `pe_agent_log`
   PE_EVENT_KIND_AGENT_LOG_CHANGED = 19,
+  // Messages are going to another account: `message` says how far ("Moving 3 of 12 messages to Archive..."), and at
+  // the end what was done ("Moved 12 messages to Archive")
+  PE_EVENT_KIND_TRANSFERRING = 20,
+  // The folder `folder` of `account` made with `pe_folder_create` is there (to choose it in the window that made it)
+  PE_EVENT_KIND_FOLDER_CREATED = 21,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -226,10 +231,21 @@ typedef enum PeAction {
   PE_ACTION_NOT_JUNK = 5,
   // Into Deleted Items, or for good (ask first: `pe_selection_delete_question`)
   PE_ACTION_DELETE = 6,
-  // Into the folder `to`, of the same account
+  // Into the folder `to`, of the same account or another (in the background then: `Transferring`)
   PE_ACTION_MOVE = 7,
   PE_ACTION_COPY = 8,
 } PeAction;
+
+typedef enum PeTargetKind {
+  // "Recent", over the folders used last
+  PE_TARGET_KIND_HEADING = 0,
+  // A folder used last, named with its account when there are several
+  PE_TARGET_KIND_RECENT = 1,
+  // An account, over its folders
+  PE_TARGET_KIND_ACCOUNT = 2,
+  // A folder of the account above it
+  PE_TARGET_KIND_FOLDER = 3,
+} PeTargetKind;
 
 // The accounts; free with `pe_account_list_free`
 typedef struct PeAccountList PeAccountList;
@@ -280,6 +296,9 @@ typedef struct PeSignInAppList PeSignInAppList;
 
 // The presets; free with `pe_sign_in_preset_list_free`
 typedef struct PeSignInPresetList PeSignInPresetList;
+
+// The rows of the Move and Copy window; free with `pe_target_list_free`
+typedef struct PeTargetList PeTargetList;
 
 // A program that wants to connect
 typedef struct PeAgentConnect {
@@ -362,7 +381,7 @@ typedef struct PeEvent {
   uint64_t uid;
   enum PeFailureKind failure;
   // UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; who
-  // it is from, for `NewMail`. NULL otherwise
+  // it is from, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
   const char *message;
   // UTF-8: the Message-ID of the draft, for `DraftSaved`; the subject, for `NewMail`. NULL otherwise
   const char *detail;
@@ -682,6 +701,22 @@ typedef struct PeSelectionSummary {
   // How many of them Delete removes for good
   uint64_t for_good;
 } PeSelectionSummary;
+
+// A row of the Move and Copy window; its strings belong to the list
+typedef struct PeTarget {
+  enum PeTargetKind kind;
+  int64_t account;
+  // 0 for a heading or an account
+  int64_t folder;
+  // UTF-8: "Inbox (current)", "Archive (Work)"
+  const char *label;
+  // How deep under its account (0 for the account and the rows of Recent)
+  uint32_t depth;
+  // UTF-8: its icon ("inbox", "sent", "drafts", "deleted", "junk", "archive", "" for a plain folder)
+  const char *icon;
+  // Messages can go there
+  bool choosable;
+} PeTarget;
 
 #ifdef __cplusplus
 extern "C" {
@@ -1801,6 +1836,16 @@ char *pe_selection_page(const struct PeSelectionSummary *summary);
 // `summary` must be a valid pointer.
 char *pe_selection_delete_question(const struct PeSelectionSummary *summary);
 
+// The Move or Copy window's words for the messages of `summary`: its title ("Move 3 Messages", `prompt` false) or
+// what it says over the folders ("Move the 3 selected messages to:", `prompt` true); `copy` for Copy to Folder. Free
+// with `pe_string_free`.
+//
+// # Safety
+// `summary` must be a valid pointer.
+char *pe_selection_move_text(const struct PeSelectionSummary *summary,
+                             bool copy,
+                             bool prompt);
+
 // Whether Flag flags the messages of `summary` (one is not flagged) or takes the flags away (all are), for the label
 // of the command
 //
@@ -1820,6 +1865,30 @@ char *pe_selection_act(const struct PeCore *core,
                        enum PeAction action,
                        int64_t to,
                        char **error);
+
+// The rows of the Move and Copy window for messages all in `current` (0 for messages of several folders), what
+// `filter` (UTF-8, NULL or empty for none) leaves of them: "Recent" and the folders used last while nothing is typed,
+// then every account with its folders, a folder that matches with those above it. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `filter` NULL or a NUL-terminated string.
+struct PeTargetList *pe_move_targets(const struct PeCore *core,
+                                     int64_t current,
+                                     const char *filter);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+size_t pe_target_list_count(const struct PeTargetList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+const struct PeTarget *pe_target_list_get(const struct PeTargetList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet, freed once.
+void pe_target_list_free(struct PeTargetList *list);
 
 // What Edit > Undo says, "Undo Move"; NULL when there is nothing to take back. Free with `pe_string_free`.
 //

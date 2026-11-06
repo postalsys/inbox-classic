@@ -6,6 +6,8 @@ pub enum Command {
     NewAccount,
     Exit,
     Sync,
+    Undo,
+    SelectAll,
     MarkRead,
     MarkUnread,
     Pictures,
@@ -17,6 +19,7 @@ pub enum Command {
     Help,
     Delete,
     Move,
+    Copy,
     Flag,
     NewFolder,
     RenameFolder,
@@ -36,8 +39,6 @@ pub enum Command {
     DefaultApp,
     ViewSource,
     AiAgents,
-    SelectAll,
-    Undo,
 }
 
 impl Command {
@@ -45,6 +46,8 @@ impl Command {
         Command::NewAccount,
         Command::Exit,
         Command::Sync,
+        Command::Undo,
+        Command::SelectAll,
         Command::MarkRead,
         Command::MarkUnread,
         Command::Pictures,
@@ -56,6 +59,7 @@ impl Command {
         Command::Help,
         Command::Delete,
         Command::Move,
+        Command::Copy,
         Command::Flag,
         Command::NewFolder,
         Command::RenameFolder,
@@ -75,8 +79,6 @@ impl Command {
         Command::DefaultApp,
         Command::ViewSource,
         Command::AiAgents,
-        Command::SelectAll,
-        Command::Undo,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -85,6 +87,8 @@ impl Command {
             Command::NewAccount => "new-account",
             Command::Exit => "exit",
             Command::Sync => "sync",
+            Command::Undo => "undo",
+            Command::SelectAll => "select-all",
             Command::MarkRead => "mark-read",
             Command::MarkUnread => "mark-unread",
             Command::Pictures => "pictures",
@@ -96,6 +100,7 @@ impl Command {
             Command::Help => "help",
             Command::Delete => "delete",
             Command::Move => "move",
+            Command::Copy => "copy",
             Command::Flag => "flag",
             Command::NewFolder => "new-folder",
             Command::RenameFolder => "rename-folder",
@@ -115,8 +120,6 @@ impl Command {
             Command::DefaultApp => "default-app",
             Command::ViewSource => "view-source",
             Command::AiAgents => "ai-agents",
-            Command::SelectAll => "select-all",
-            Command::Undo => "undo",
         }
     }
 
@@ -126,6 +129,8 @@ impl Command {
             Command::NewAccount => "file",
             Command::Exit => "file",
             Command::Sync => "tools",
+            Command::Undo => "edit",
+            Command::SelectAll => "edit",
             Command::MarkRead => "edit",
             Command::MarkUnread => "edit",
             Command::Pictures => "view",
@@ -137,6 +142,7 @@ impl Command {
             Command::Help => "help",
             Command::Delete => "edit",
             Command::Move => "edit",
+            Command::Copy => "edit",
             Command::Flag => "message",
             Command::NewFolder => "file",
             Command::RenameFolder => "file",
@@ -156,8 +162,6 @@ impl Command {
             Command::DefaultApp => "tools",
             Command::ViewSource => "view",
             Command::AiAgents => "tools",
-            Command::SelectAll => "edit",
-            Command::Undo => "edit",
         }
     }
 
@@ -166,6 +170,8 @@ impl Command {
             Command::NewAccount => "New Account…",
             Command::Exit => "Exit",
             Command::Sync => "Send and Receive All",
+            Command::Undo => "Undo",
+            Command::SelectAll => "Select All",
             Command::MarkRead => "Mark as Read",
             Command::MarkUnread => "Mark as Unread",
             Command::Pictures => "Download Pictures",
@@ -177,6 +183,7 @@ impl Command {
             Command::Help => "Contents",
             Command::Delete => "Delete Message",
             Command::Move => "Move to Folder…",
+            Command::Copy => "Copy to Folder…",
             Command::Flag => "Flag Message",
             Command::NewFolder => "New Folder…",
             Command::RenameFolder => "Rename Folder…",
@@ -196,8 +203,6 @@ impl Command {
             Command::DefaultApp => "Make Default Mail App…",
             Command::ViewSource => "Message Source",
             Command::AiAgents => "AI Agents…",
-            Command::SelectAll => "Select All",
-            Command::Undo => "Undo",
         }
     }
 
@@ -207,6 +212,8 @@ impl Command {
             Command::NewAccount => None,
             Command::Exit => None,
             Command::Sync => Some("F5"),
+            Command::Undo => Some("<Primary>z"),
+            Command::SelectAll => Some("<Primary>a"),
             Command::MarkRead => Some("<Primary>q"),
             Command::MarkUnread => None,
             Command::Pictures => None,
@@ -218,6 +225,7 @@ impl Command {
             Command::Help => Some("F1"),
             Command::Delete => Some("Delete"),
             Command::Move => Some("<Primary><Shift>v"),
+            Command::Copy => None,
             Command::Flag => None,
             Command::NewFolder => None,
             Command::RenameFolder => None,
@@ -237,8 +245,6 @@ impl Command {
             Command::DefaultApp => None,
             Command::ViewSource => Some("<Primary>u"),
             Command::AiAgents => None,
-            Command::SelectAll => Some("<Primary>a"),
-            Command::Undo => Some("<Primary>z"),
         }
     }
 
@@ -248,6 +254,8 @@ impl Command {
             Command::NewAccount => false,
             Command::Exit => false,
             Command::Sync => false,
+            Command::Undo => false,
+            Command::SelectAll => false,
             Command::MarkRead => false,
             Command::MarkUnread => false,
             Command::Pictures => false,
@@ -259,6 +267,7 @@ impl Command {
             Command::Help => false,
             Command::Delete => false,
             Command::Move => false,
+            Command::Copy => false,
             Command::Flag => false,
             Command::NewFolder => false,
             Command::RenameFolder => false,
@@ -278,8 +287,6 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => false,
             Command::AiAgents => false,
-            Command::SelectAll => false,
-            Command::Undo => false,
         }
     }
 
@@ -289,6 +296,8 @@ impl Command {
             Command::NewAccount => false,
             Command::Exit => false,
             Command::Sync => false,
+            Command::Undo => false,
+            Command::SelectAll => false,
             Command::MarkRead => false,
             Command::MarkUnread => false,
             Command::Pictures => true,
@@ -300,6 +309,7 @@ impl Command {
             Command::Help => false,
             Command::Delete => false,
             Command::Move => false,
+            Command::Copy => false,
             Command::Flag => false,
             Command::NewFolder => false,
             Command::RenameFolder => false,
@@ -319,8 +329,6 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => true,
             Command::AiAgents => false,
-            Command::SelectAll => false,
-            Command::Undo => false,
         }
     }
 }

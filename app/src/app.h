@@ -42,6 +42,23 @@ std::wstring FormatSize(uint64_t bytes);
 // the brush of dialog backgrounds, for WM_CTLCOLORSTATIC
 LRESULT ButtonFaceColor(HDC dc);
 
+// the Move and Copy window (folderpicker.cpp): its rows and their filtering come from the core (pe_move_targets)
+struct FolderPick {
+    PeCore* core = nullptr;
+    std::wstring title;
+    std::wstring prompt;
+    // the button: Move or Copy
+    std::wstring verb;
+    // the folder the messages are all in, 0 for several
+    int64_t current = 0;
+    // New Folder in `parent` (0: at the top of `account`), from the window `owner`
+    std::function<void(HWND owner, int64_t account, int64_t parent)> newFolder;
+};
+// shows it until a folder is chosen (its id) or it is cancelled (0)
+int64_t PickFolder(HWND owner, FolderPick& pick);
+// the open one shows its folders again (they changed), with `highlight` highlighted when not 0
+void RefreshFolderPick(int64_t highlight);
+
 struct FormField {
     enum class Kind { Text, Password, Number, Choice };
     std::wstring label;
@@ -74,6 +91,11 @@ enum class BarIcons { Big, Small };
 HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons);
 // a button on a bar of CreateBar, with its icon (icons.h) or I_IMAGENONE; id 0 is a separator
 void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON, int image = I_IMAGENONE);
+
+// a tree row with its text, data, boldness and icon of the folder strip, last under `parent`
+HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPARAM data, bool bold, int icon);
+// how wide the words of a control are in `font` (the dialog font when NULL), its & left out
+int TextWidth(HWND control, HFONT font);
 
 // a modal form with a label and an input for each field; true with the values filled in when OK was clicked.
 // `validate` gets the values and returns an error to show, or an empty string to accept them.
@@ -322,7 +344,8 @@ public:
     // the selected messages into Deleted Items (for good from there, asked first), the next one selected
     void DeleteSelected();
     // asks for a folder of their account and moves the selected messages there
-    void MoveSelected(HWND owner);
+    // Move to Folder, or Copy to Folder with `copy`
+    void MoveSelected(HWND owner, bool copy = false);
     // flags the selected messages, or takes their flags away when all of them have one
     void FlagSelected();
     // a folder in the selected one (at the top of the selected account), renaming and deleting the selected one
@@ -502,6 +525,8 @@ private:
         int64_t target = 0;
     };
     std::optional<Drag> drag_;
+    // a folder made with New Folder in the Move and Copy window: highlighted there once it exists (FolderCreated)
+    bool newInPick_ = false;
     // the selected messages, as the core knows them: kept when the list changes under them, so an action reaches the
     // messages that were selected; and what they are in numbers
     core::Selection selection_{pe_selection_new()};

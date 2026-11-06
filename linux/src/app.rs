@@ -299,6 +299,9 @@ impl Shell {
                 spawn(async move { crate::agents::question(request).await });
             }
             Event::AgentLogChanged => crate::agents::refresh(),
+            // messages going to another account: how far, and what was done
+            Event::Transferring { text } => main.set_status(text),
+            Event::FolderCreated { folder, .. } => crate::move_dialog::folder_created(*folder),
             Event::Failed { account, kind, message } => {
                 self.failing.borrow_mut().insert(*account);
                 main.set_status(&format!("{}: {message}", main.account_name(*account)));
@@ -594,7 +597,8 @@ pub fn run_command(command: Command) {
         Command::Forward => shell.reply(DraftKind::Forward),
         Command::Help => crate::help::open(),
         Command::Delete => spawn(async move { main.delete_selected().await }),
-        Command::Move => spawn(async move { main.move_selected().await }),
+        Command::Move => spawn(async move { main.move_selected(false).await }),
+        Command::Copy => spawn(async move { main.move_selected(true).await }),
         Command::Flag => main.flag_selected(),
         Command::NewFolder => spawn(async move { main.new_folder().await }),
         Command::RenameFolder => spawn(async move { main.rename_folder().await }),
