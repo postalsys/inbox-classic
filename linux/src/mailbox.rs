@@ -897,6 +897,9 @@ impl Mailbox {
             self.enable(*command, !several);
         }
         let any = !self.refs.borrow().is_empty();
+        for command in Command::ALL.iter().filter(|c| c.needs_some()) {
+            self.enable(*command, any);
+        }
         self.enable(Command::Move, any);
         self.enable(Command::Copy, any);
     }

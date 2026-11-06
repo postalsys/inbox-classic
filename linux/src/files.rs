@@ -30,9 +30,9 @@ pub async fn with_downloads<T: Send + 'static>(
     work: impl FnOnce(&pe_core::Core, &[MessageRef]) -> pe_core::Result<T> + Send + 'static,
 ) -> Result<T, String> {
     let core = shell().core.clone();
-    let downloading = !core.all_downloaded(&refs).unwrap_or(true);
-    if downloading {
-        shell().main().set_status(&pe_core::downloading_text(refs.len() as u64));
+    let downloading = core.downloading_text(&refs).ok().flatten();
+    if let Some(text) = &downloading {
+        shell().main().set_status(text);
     }
     let done = match gio::spawn_blocking(move || work(&core, &refs)).await {
         Ok(done) => done.map_err(|e| e.to_string()),
@@ -43,7 +43,7 @@ pub async fn with_downloads<T: Send + 'static>(
             .or_else(|| panic.downcast_ref::<String>().cloned())
             .unwrap_or_default()),
     };
-    if downloading {
+    if downloading.is_some() {
         shell().main().set_status("Done");
     }
     done
