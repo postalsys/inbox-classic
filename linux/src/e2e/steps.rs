@@ -989,6 +989,18 @@ pub async fn all_inboxes(d: &Driver) {
     select_row(0).await;
     pause(500).await;
     d.shot(&main_window(), "all-inboxes-1-list").await;
+    // its right-click menu: Mark All Read alone, no folder commands
+    let tree: gtk::Widget = main.folders.view.clone().upcast();
+    main.folder_menu(&tree, 180.0, 20.0);
+    let labels = menu_labels(main.folder_popover.borrow().as_ref());
+    d.check(
+        labels == ["Mark All Read"],
+        &format!("its right-click menu has Mark All Read alone ({})", labels.join(", ")),
+    );
+    d.shot(&main_window(), "all-inboxes-2-menu").await;
+    if let Some(popover) = main.folder_popover.borrow().as_ref() {
+        popover.popdown();
+    }
     if let Some(index) = folders.iter().position(|f| *f == second) {
         select_row(index as u32).await;
     }

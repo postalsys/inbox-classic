@@ -179,6 +179,13 @@ const sections = [
                 ]
             },
             {
+                shot: 'all-inboxes-2-menu',
+                name: "All Inboxes' menu",
+                what: 'A right-click on All Inboxes offers Mark All Read, which marks every Inbox read; the folder commands (New Folder, Rename, Delete) are left out, as All Inboxes is no folder of one account.',
+                how: 'Right-click All Inboxes in the folder tree.',
+                checked: ['The menu has Mark All Read alone']
+            },
+            {
                 shot: 'accounts-1-list',
                 name: 'Accounts: change and remove',
                 what: "File > Accounts lists the accounts with their address and incoming server. Properties (or a double-click) changes one (leave the password empty to keep it; an account that signs in through the browser only has its name changed, its servers are the provider's). Remove (or Delete) takes it out with its downloaded mail and saved password; the mail on the server stays.",
@@ -754,6 +761,7 @@ const notYet = {
         'read-4-save',
         // a menu runs in a tracking loop of its own, which a picture taken from inside the app does not see
         'read-14-menu',
+        'all-inboxes-2-menu',
         'files-1-save-as',
         'files-2-import',
         'tray-2-taskbar',
