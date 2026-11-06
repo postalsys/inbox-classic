@@ -52,7 +52,7 @@ pub struct Summary {
     pub count: u64,
     pub unread: u64,
     pub flagged: u64,
-    /// The colour all the flagged ones have, None when none is flagged or their colours differ
+    /// The colour all of them are flagged in; None when one is not flagged or their colours differ
     pub flag_color: Option<FlagColor>,
     /// Every one of them is in a Junk folder (Mark as Not Junk applies, not Mark as Junk)
     pub in_junk: bool,
@@ -177,12 +177,13 @@ impl Core {
             summary.unread += group.iter().filter(|p| !p.seen()).count() as u64;
             summary.flagged += group.iter().filter(|p| p.flagged()).count() as u64;
             for color in group.iter().filter_map(|p| p.flag_color()) {
-                colors.insert(color as u8);
+                colors.insert(color);
             }
         }
         summary.accounts = accounts.len() as u64;
+        // the colour of the Flag menu's check mark: all of them flagged, in one colour
         summary.flag_color = match colors.len() {
-            1 => colors.first().and_then(|c| FlagColor::from_number(*c)),
+            1 if summary.flagged == summary.count => colors.first().copied(),
             _ => None,
         };
         Ok(summary)
@@ -300,16 +301,20 @@ impl Core {
                 Action::Flag(true) => self.set_flag_many(folder, chunk, "\\Flagged", true)?,
                 // the colour goes with the flag
                 Action::Flag(false) => {
-                    self.set_flag_many(folder, chunk, "\\Flagged", false)?;
-                    for bit in FLAG_COLOR_BITS {
-                        self.set_flag_many(folder, chunk, bit, false)?;
-                    }
+                    let mut remove = vec!["\\Flagged"];
+                    remove.extend(FLAG_COLOR_BITS);
+                    self.change_flags_many(folder, chunk, &[], &remove)?
                 }
                 Action::FlagColor(color) => {
-                    self.set_flag_many(folder, chunk, "\\Flagged", true)?;
+                    let (mut add, mut remove) = (vec!["\\Flagged"], Vec::new());
                     for (i, bit) in FLAG_COLOR_BITS.iter().enumerate() {
-                        self.set_flag_many(folder, chunk, bit, color.bits() & (1 << i) != 0)?;
+                        if color.bits() & (1 << i) != 0 {
+                            add.push(*bit);
+                        } else {
+                            remove.push(*bit);
+                        }
                     }
+                    self.change_flags_many(folder, chunk, &add, &remove)?
                 }
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,

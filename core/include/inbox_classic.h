@@ -704,8 +704,8 @@ typedef struct PeSelectionSummary {
   uint64_t count;
   uint64_t unread;
   uint64_t flagged;
-  // The colour all the flagged ones have (1 red to 7 gray, as `PeMessage.flag_color`), 0 when none is flagged or
-  // their colours differ
+  // The colour all of them are flagged in (1 red to 7 gray, as `PeMessage.flag_color`), 0 when one is not flagged
+  // or their colours differ
   uint8_t flag_color;
   // Every one is in a Junk folder: Mark as Not Junk applies, not Mark as Junk
   bool in_junk;

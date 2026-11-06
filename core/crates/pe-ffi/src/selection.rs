@@ -212,8 +212,8 @@ pub struct PeSelectionSummary {
     pub count: u64,
     pub unread: u64,
     pub flagged: u64,
-    /// The colour all the flagged ones have (1 red to 7 gray, as `PeMessage.flag_color`), 0 when none is flagged or
-    /// their colours differ
+    /// The colour all of them are flagged in (1 red to 7 gray, as `PeMessage.flag_color`), 0 when one is not flagged
+    /// or their colours differ
     pub flag_color: u8,
     /// Every one is in a Junk folder: Mark as Not Junk applies, not Mark as Junk
     pub in_junk: bool,
@@ -396,7 +396,13 @@ pub unsafe extern "C" fn pe_selection_act(
         PeAction::ToggleFlag => Action::ToggleFlag,
         PeAction::FlagColor => match u8::try_from(to).ok().and_then(pe_core::FlagColor::from_number) {
             Some(color) => Action::FlagColor(color),
-            None => Action::Flag(true),
+            None => {
+                if !error.is_null() {
+                    // SAFETY: the caller gave a valid pointer
+                    unsafe { *error = into_c_string("not a flag colour".to_string()) };
+                }
+                return null_mut();
+            }
         },
         PeAction::Junk => Action::Junk(true),
         PeAction::NotJunk => Action::Junk(false),

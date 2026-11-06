@@ -756,7 +756,14 @@ impl Core {
                 if self.store().message(folder, uid)?.is_none() {
                     return Err(Error::Unavailable("the message is no longer in that folder".into()));
                 }
-                self.set_flag_many(folder, &[uid], flag, was)?;
+                if flag == "\\Flagged" && !was {
+                    // a flag taken away takes its colour along
+                    let mut remove = vec!["\\Flagged"];
+                    remove.extend(pe_store::FLAG_COLOR_BITS);
+                    self.change_flags_many(folder, &[uid], &[], &remove)?;
+                } else {
+                    self.set_flag_many(folder, &[uid], flag, was)?;
+                }
             }
             Undo::Move { from, to, message_id } => {
                 let uid = self

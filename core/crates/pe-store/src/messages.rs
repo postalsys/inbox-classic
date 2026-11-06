@@ -39,7 +39,7 @@ pub struct MessageInfo {
 
 /// The colour of a flag, as Apple Mail keeps it: `\\Flagged` with three keyword bits, `$MailFlagBit0` to
 /// `$MailFlagBit2`, none of them for red. Other mail programs see a flag; Apple Mail and this one see its colour.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum FlagColor {
     Red = 1,
@@ -305,15 +305,23 @@ impl Store {
     /// Sets or clears one flag of messages of a folder in one transaction; the UIDs whose flags changed. Refused
     /// (`QueryReturnedNoRows`) when one of them is not there, and then none changes.
     pub fn set_flag_many(&self, folder: FolderId, uids: &[u64], flag: &str, on: bool) -> Result<Vec<u64>> {
+        if on {
+            self.change_flags_many(folder, uids, &[flag], &[])
+        } else {
+            self.change_flags_many(folder, uids, &[], &[flag])
+        }
+    }
+
+    /// Adds the flags `add` to messages of a folder and takes `remove` away, in one transaction; the UIDs of those
+    /// that changed. Refused when one of them is not there.
+    pub fn change_flags_many(&self, folder: FolderId, uids: &[u64], add: &[&str], remove: &[&str]) -> Result<Vec<u64>> {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let mut changed = Vec::new();
         for &uid in uids {
             let message = self.message(folder, uid)?.ok_or(rusqlite::Error::QueryReturnedNoRows)?;
             let mut flags = message.info.flags;
-            flags.retain(|f| !f.eq_ignore_ascii_case(flag));
-            if on {
-                flags.push(flag.to_string());
-            }
+            flags.retain(|f| !add.iter().chain(remove).any(|x| f.eq_ignore_ascii_case(x)));
+            flags.extend(add.iter().map(|f| f.to_string()));
             if self.set_flags(folder, uid, &flags, None)? {
                 changed.push(uid);
             }

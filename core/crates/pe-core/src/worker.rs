@@ -35,6 +35,13 @@ pub(crate) enum Command {
         flag: &'static str,
         on: bool,
     },
+    /// Flags added and taken away in one go (a flag's colour)
+    SetFlags {
+        folder: FolderId,
+        uids: Vec<u64>,
+        add: Vec<&'static str>,
+        remove: Vec<&'static str>,
+    },
     /// `removed` are the rows taken out of the store, put back when the server does not do it
     Move {
         folder: FolderId,
@@ -679,6 +686,12 @@ impl Worker {
             Command::SetFlag { folder, uids, flag, on } => {
                 Ok(set_flag(self.client(store).await?, store, folder, &uids, flag, on).await?)
             }
+            Command::SetFlags {
+                folder,
+                uids,
+                add,
+                remove,
+            } => Ok(pe_sync::change_flags(self.client(store).await?, store, folder, &uids, &add, &remove).await?),
             Command::Move {
                 folder,
                 uids,

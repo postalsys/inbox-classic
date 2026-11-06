@@ -465,24 +465,46 @@ pub async fn set_flag(
     flag: &str,
     on: bool,
 ) -> Result<()> {
+    if on {
+        change_flags(client, store, folder, uids, &[flag], &[]).await
+    } else {
+        change_flags(client, store, folder, uids, &[], &[flag]).await
+    }
+}
+
+/// Adds flags to messages of a folder on the server and takes others away: at most one command for each. Keywords
+/// the folder does not keep ($Junk, a colour bit) are left out: the server would refuse them, and nothing else
+/// depends on them.
+pub async fn change_flags(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uids: &[u64],
+    add: &[&str],
+    remove: &[&str],
+) -> Result<()> {
     let Some(set) = SequenceSet::from_numbers(uids) else {
         return Ok(());
     };
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
-    if !keeps_flag(
-        client
-            .selected()
-            .map(|s| s.permanent_flags.as_slice())
-            .unwrap_or_default(),
-        flag,
-    ) {
-        // a keyword ($Junk) the folder does not keep: the server would refuse it, and nothing else depends on it
-        return Ok(());
-    }
-    let action = if on { StoreAction::Add } else { StoreAction::Remove };
+    let permanent: Vec<String> = client.selected().map(|s| s.permanent_flags.clone()).unwrap_or_default();
+    let kept = |flags: &[&str]| -> Vec<String> {
+        flags
+            .iter()
+            .filter(|f| keeps_flag(&permanent, f))
+            .map(|f| f.to_string())
+            .collect()
+    };
     // the store has the change already: the flags the server would report for it could overwrite a newer one
-    client.store_silent(&Messages::Uids(set), action, &[flag]).await?;
+    for (action, flags) in [(StoreAction::Add, kept(add)), (StoreAction::Remove, kept(remove))] {
+        if !flags.is_empty() {
+            let flags: Vec<&str> = flags.iter().map(String::as_str).collect();
+            client
+                .store_silent(&Messages::Uids(set.clone()), action, &flags)
+                .await?;
+        }
+    }
     Ok(())
 }
 
