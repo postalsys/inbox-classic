@@ -1,5 +1,64 @@
 # Changelog
 
+## [0.8.0](https://github.com/postalsys/inbox-classic/compare/v0.7.0...v0.8.0) (2026-11-06)
+
+
+### Features
+
+* All Inboxes, and opening on the newest message ([4607c7f](https://github.com/postalsys/inbox-classic/commit/4607c7f7537948ace9f3d9e662de662d0eaa28dc))
+* All Inboxes, the mail of every account's Inbox in one list ([0c88472](https://github.com/postalsys/inbox-classic/commit/0c88472d391f6021d455925ab6a740e1f9acadc7))
+* **core:** files put in a folder say so in the status bar ([88ffc8f](https://github.com/postalsys/inbox-classic/commit/88ffc8fc1a72355d5c254d077d6fe716d2aad300))
+* **core:** flag colours as Apple Mail keeps them ([6f6073a](https://github.com/postalsys/inbox-classic/commit/6f6073a2ae2d62d6236e92568787e9f84ceec788))
+* **core:** Forward and Save As for several messages, their status texts ([8d945a2](https://github.com/postalsys/inbox-classic/commit/8d945a296257c5e26c58efa7f9390944beb2294f))
+* **core:** German, Estonian, French and Spanish catalogs (drafts) ([513da8d](https://github.com/postalsys/inbox-classic/commit/513da8dd34fec93f79add61bfad3a936ea866f3f))
+* **core:** messages as .eml files, several saved or forwarded at once ([ae7fb42](https://github.com/postalsys/inbox-classic/commit/ae7fb424410c5ea8a815b7836caa0ea560f156bc))
+* **core:** move and copy messages between accounts ([ccb9e00](https://github.com/postalsys/inbox-classic/commit/ccb9e00c350a754e69b79dbd71d078ef0350af46))
+* **core:** selections of messages, batch actions and undo ([75c602d](https://github.com/postalsys/inbox-classic/commit/75c602db583533dc2bbf8edb8769e084025f2c5c))
+* **core:** the help in German, Estonian, French and Spanish (drafts) ([739e4d3](https://github.com/postalsys/inbox-classic/commit/739e4d349717aced89bfc7502f7b3210acd8c48b))
+* **core:** the Move and Copy window's words ([40b9a9c](https://github.com/postalsys/inbox-classic/commit/40b9a9cd56d9ddc8ece3333ab1c0c6b4bbf8f770))
+* **core:** the Options command, its help, scenario and feature map ([bf76ec7](https://github.com/postalsys/inbox-classic/commit/bf76ec7d3f71927ca00130f24e63af61fd922e72))
+* **core:** the words of the windows in Fluent catalogs, the language API ([1352e13](https://github.com/postalsys/inbox-classic/commit/1352e1345d9e7ee27eecc511ec2aa28d421ba953))
+* flag colours as Apple Mail keeps them ([fdade16](https://github.com/postalsys/inbox-classic/commit/fdade1685857d065cf94e5dee046bc4e8634caa7))
+* flag colours on the Mac and Linux ([de3a22f](https://github.com/postalsys/inbox-classic/commit/de3a22f12548383dbcf19398f63eae6661524046))
+* flag colours on Windows; the message menu with the Flag submenu alone ([5b36af3](https://github.com/postalsys/inbox-classic/commit/5b36af35396c33e1c3735d74cd0ae0ec9a3136fe))
+* **i18n:** the reviewed German, Estonian, French and Spanish translations ([5b2155a](https://github.com/postalsys/inbox-classic/commit/5b2155ab7763fc4a66d01afaf10d30e4b5037f3c))
+* **linux:** files put in a folder say so in the status bar ([5b1e988](https://github.com/postalsys/inbox-classic/commit/5b1e98829f91f0951227f4623f763bf12b2221ae))
+* **linux:** the windows in five languages, Preferences with the language; Archive named in the language ([2c9b953](https://github.com/postalsys/inbox-classic/commit/2c9b953f96f82178707aa0e024e6b6e2d52d6d1e))
+* **mac:** files put in a folder say so in the status bar ([1bba909](https://github.com/postalsys/inbox-classic/commit/1bba9095c9a6d31d0a1e90f562d1a5d7b42dca12))
+* **mac:** the windows in five languages, Settings with the language, the app's own language in macOS ([d0d2dd2](https://github.com/postalsys/inbox-classic/commit/d0d2dd22684e7a132efd1a1c934a87118cc2b97c))
+* messages as files on the Mac and Linux, the list without the envelope column ([1178459](https://github.com/postalsys/inbox-classic/commit/1178459b29a99f00d8ce9971dd38b23c94a121a9))
+* messages as files: drag out, drop in, Save As and Forward several ([177a837](https://github.com/postalsys/inbox-classic/commit/177a837d91fff24faa50826fdbb02072df557d05))
+* move and copy messages between accounts ([34ce542](https://github.com/postalsys/inbox-classic/commit/34ce54208ca977020a91c7be0ef9c6eebea0aa1d))
+* move and copy messages between accounts on the Mac and Linux, the Move and Copy window ([3f7f447](https://github.com/postalsys/inbox-classic/commit/3f7f447b176f96e8cc5fffeeb7943bf981c6e824))
+* move and copy messages between accounts on Windows, the Move and Copy window ([57aeb87](https://github.com/postalsys/inbox-classic/commit/57aeb871c5a592ab31a8f9accabe68df634a048e))
+* open on the newest message of the first Inbox, Save As in View Source ([a1cf5ec](https://github.com/postalsys/inbox-classic/commit/a1cf5ec12bb449666178a7b774ead328d9358e63))
+* select several messages, act on all of them, and undo ([03b6d72](https://github.com/postalsys/inbox-classic/commit/03b6d7201f983d38eae30311ed1fd4b44d39326a))
+* select several messages, act on all of them, and undo ([61e4c72](https://github.com/postalsys/inbox-classic/commit/61e4c725465649131d197470e32012ddedb4b4c9))
+* the windows in five languages (draft translations) ([222d8d6](https://github.com/postalsys/inbox-classic/commit/222d8d6ceb6b83ef4b33fcf7b24f742ab71fe22e))
+* **windows:** every word from the catalogs, Tools &gt; Options with the language, the installer in five languages ([d189bea](https://github.com/postalsys/inbox-classic/commit/d189bea79e33e4ab9dc688b3d2215e8dea263ecc))
+* **windows:** messages as files, OLE drag and drop, the list without the envelope column ([41b9f73](https://github.com/postalsys/inbox-classic/commit/41b9f73bcc4f9fd356ff697b630f635ef5bac719))
+
+
+### Bug Fixes
+
+* All Inboxes' right-click menu has Mark All Read alone ([44478c4](https://github.com/postalsys/inbox-classic/commit/44478c421903257cbe21f46542130f5b49f4f2eb))
+* All Inboxes' right-click menu has Mark All Read alone ([6e09f20](https://github.com/postalsys/inbox-classic/commit/6e09f2052329cc588e57213eaa97658080a31b85))
+* **core:** attachments of drafts and forwards written to a folder of the user's own ([f50547d](https://github.com/postalsys/inbox-classic/commit/f50547d826c63b5da5727cb92bc5f0e14d18fa8b))
+* **core:** file names that fit every file system, the downloading text for what is missing, commands for several messages ([724d27f](https://github.com/postalsys/inbox-classic/commit/724d27fb01d687e4b9c19dc405d86a3e447ed3e6))
+* **core:** flag changes stored silently, so an older reply never shows over a newer change ([f0981b2](https://github.com/postalsys/inbox-classic/commit/f0981b29b9da9f142d3a842fcd36f44039a42f77))
+* **core:** only leftovers a day old are cleared, not another running core's files ([37a309d](https://github.com/postalsys/inbox-classic/commit/37a309d6dcff894174d85e128ed10aef73739cac))
+* **core:** status texts agree with the number of messages in every language ([e1d2cb4](https://github.com/postalsys/inbox-classic/commit/e1d2cb405153831f141ce36307dcee69ea5fa27f))
+* folder names from the core on every platform, the Archive folder in the language on the Mac ([c6031cb](https://github.com/postalsys/inbox-classic/commit/c6031cb09f7d67e0be0fcf50a351304ea2054769))
+* folder names from the core, Archive translated on the Mac ([cc3d517](https://github.com/postalsys/inbox-classic/commit/cc3d517344ecebe526531fcbf93837ebe25a4da2))
+* **mac:** restart only when the app really quits, the language actually used for dates, a restart asked only when the language changes ([e4908d0](https://github.com/postalsys/inbox-classic/commit/e4908d0fe468b04d593e49b6a8e6bd4f41a7be94))
+* registration hint translated, toolbar buttons never under the Find box ([3038164](https://github.com/postalsys/inbox-classic/commit/3038164ad316ee76031d8c92d3a4cfa1ab9d047f))
+* texts with values keep their ampersands and leading zeros, English leftovers gone, plurals for repeats ([25fb498](https://github.com/postalsys/inbox-classic/commit/25fb4981b5dfb4a6bf4d88dea82fdd700761d3db))
+* the sign-in app's registration hint in the language, toolbar buttons never under the Find box ([082a568](https://github.com/postalsys/inbox-classic/commit/082a568154a4ac0d7451a99356b4279340acfb8b))
+* **windows:** an Archive folder named in the language, as on the Mac and Linux ([81d6eb9](https://github.com/postalsys/inbox-classic/commit/81d6eb9119fcc512eef5422e06276e681a267b81))
+* **windows:** flags white on selected rows, one-message items greyed in the message menu again ([59337c5](https://github.com/postalsys/inbox-classic/commit/59337c538ec2dee2fabf6a4fa0a1a3df2ffdd89f))
+* **windows:** the Find box gives way to longer toolbar words, Options without group boxes ([37f7316](https://github.com/postalsys/inbox-classic/commit/37f731635fac71cc762c75d20c7e77fbcb081a6d))
+* **windows:** window titles without the menu's "...", and the UI test's language steps ([4bab623](https://github.com/postalsys/inbox-classic/commit/4bab623ffe3ab9b12e2a0ce31845647669a8895b))
+
 ## [0.7.0](https://github.com/postalsys/inbox-classic/compare/v0.6.0...v0.7.0) (2026-11-05)
 
 
