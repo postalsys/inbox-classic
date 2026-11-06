@@ -1636,16 +1636,17 @@ impl Mailbox {
     /// Save As with several selected: a folder asked for, each message saved there under its subject, never over a
     /// file there; those not downloaded yet are downloaded for it
     async fn save_selected_into_folder(&self) {
-        let refs = self.selected_refs();
         let window = self.window.clone().upcast::<gtk::Window>();
         let Some(dir) = ui::choose_folder(&window, "Save Messages In").await else {
             return;
         };
-        match crate::files::save(refs, dir.clone()).await {
-            Ok(written) => self.set_status(&pe_core::saved_text(
-                written.len() as u64,
-                &crate::files::place_name(&dir),
-            )),
+        let into = dir.clone();
+        let saved = crate::files::with_downloads(self.selected_refs(), move |core, refs| {
+            core.save_messages(refs, &into, crate::files::WAIT)
+        })
+        .await;
+        match saved {
+            Ok(written) => self.set_status(&pe_core::saved_text(written.len() as u64, &dir)),
             Err(why) => ui::alert(&window, TITLE, &why).await,
         }
     }
@@ -1658,12 +1659,9 @@ impl Mailbox {
             return;
         };
         let account = self.folder_accounts.borrow().get(&first.folder).copied().unwrap_or(0);
-        let wanted = refs.clone();
-        let draft = crate::files::with_downloads(&wanted, move |core| {
-            core.forward_as_attachments(&refs, crate::files::WAIT)
-                .map_err(|e| e.to_string())
-        })
-        .await;
+        let draft =
+            crate::files::with_downloads(refs, |core, refs| core.forward_as_attachments(refs, crate::files::WAIT))
+                .await;
         match draft {
             Ok(draft) => crate::compose::open(account, Some(draft)),
             Err(why) => ui::alert(&self.window, TITLE, &why).await,
@@ -1838,19 +1836,12 @@ impl Mailbox {
     }
 
     async fn import_into(&self, folder: i64, files: &[std::path::PathBuf]) {
-        let mut problems = String::new();
-        for file in files {
-            if let Err(reason) = shell().core.import_message(folder, file) {
-                problems.push_str(&format!("{}: {reason}\n", file.display()));
-            }
-        }
-        if !problems.is_empty() {
-            ui::alert(
-                &self.window,
-                "Import Messages",
-                &format!("These were not imported:\n\n{problems}"),
-            )
-            .await;
+        let report = match shell().core.import_files(folder, files) {
+            Ok(report) => report,
+            Err(error) => Some(error.to_string()),
+        };
+        if let Some(report) = report {
+            ui::alert(&self.window, "Import Messages", &report).await;
         }
     }
 

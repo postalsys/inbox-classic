@@ -3,7 +3,7 @@
 //! downloads what is not here yet; that blocks, so it runs on a thread of its own and the window waits for it.
 
 use std::cell::RefCell;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::pin::Pin;
 use std::time::Duration;
 
@@ -23,66 +23,75 @@ pub const WAIT: Duration = Duration::from_secs(120);
 #[boxed_type(name = "InboxClassicMessages")]
 pub struct DraggedMessages(pub Vec<MessageRef>);
 
-/// Where dragged messages are written for the program they are dropped on to copy: under $XDG_RUNTIME_DIR, the
-/// user's own and gone at logout, else the cache
-pub fn drag_dir() -> PathBuf {
-    glib::user_runtime_dir().join("inbox-classic").join("drag")
-}
-
-/// Empties [`drag_dir`]: at start (what a crash left) and at the end
-pub fn clear_drag_dir() {
-    let _ = std::fs::remove_dir_all(drag_dir());
-}
-
-/// A new folder of [`drag_dir`] for one drag, so two drags of messages with one subject do not meet
-fn new_drag_dir() -> std::io::Result<PathBuf> {
-    let nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0, |d| d.as_nanos());
-    let dir = drag_dir().join(nanos.to_string());
-    std::fs::create_dir_all(&dir)?;
-    Ok(dir)
-}
-
-/// Runs `work` with the core on a thread of its own, the status bar saying while messages of `refs` are downloaded
-/// for it (and "Done" once they are)
+/// Runs `work` on `refs` with the core on a thread of its own, the status bar saying while messages of them are
+/// downloaded for it (and "Done" once they are)
 pub async fn with_downloads<T: Send + 'static>(
-    refs: &[MessageRef],
-    work: impl FnOnce(&pe_core::Core) -> Result<T, String> + Send + 'static,
+    refs: Vec<MessageRef>,
+    work: impl FnOnce(&pe_core::Core, &[MessageRef]) -> pe_core::Result<T> + Send + 'static,
 ) -> Result<T, String> {
     let core = shell().core.clone();
-    let downloading = !core.all_downloaded(refs).unwrap_or(true);
+    let downloading = !core.all_downloaded(&refs).unwrap_or(true);
     if downloading {
         shell().main().set_status(&pe_core::downloading_text(refs.len() as u64));
     }
-    let done = gio::spawn_blocking(move || work(&core))
-        .await
-        .unwrap_or_else(|_| Err("the messages could not be had".into()));
+    let done = match gio::spawn_blocking(move || work(&core, &refs)).await {
+        Ok(done) => done.map_err(|e| e.to_string()),
+        // the core caught it; what it said is its panic's
+        Err(panic) => Err(panic
+            .downcast_ref::<&str>()
+            .map(|s| (*s).to_string())
+            .or_else(|| panic.downcast_ref::<String>().cloned())
+            .unwrap_or_default()),
+    };
     if downloading {
         shell().main().set_status("Done");
     }
     done
 }
 
-/// Saves messages into `dir` (never over a file there): the files written, or why not
-pub async fn save(refs: Vec<MessageRef>, dir: PathBuf) -> Result<Vec<PathBuf>, String> {
-    let wanted = refs.clone();
-    with_downloads(&wanted, move |core| {
-        core.save_messages(&refs, &dir, WAIT).map_err(|e| e.to_string())
-    })
-    .await
+/// Where the files of a drag are while a program waits for them, so a second request gets the same ones
+#[derive(Default)]
+enum DragFiles {
+    #[default]
+    NotAsked,
+    /// Being written: those who asked meanwhile, told when they are
+    Writing(Vec<async_channel::Sender<Result<Vec<PathBuf>, String>>>),
+    Written(Result<Vec<PathBuf>, String>),
 }
 
-/// The files of `refs` for a drag: written once, into a folder of their own, when a program asks for them
+/// The files of a drag: written once, into the core's folder for them, when a program first asks for them; whoever
+/// asks while they are written gets the same ones
 async fn drag_files(provider: &MessageFiles) -> Result<Vec<PathBuf>, String> {
-    if let Some(written) = provider.imp().written.borrow().clone() {
-        return Ok(written);
+    let waiting = {
+        let mut state = provider.imp().files.borrow_mut();
+        match &mut *state {
+            DragFiles::Written(written) => return written.clone(),
+            DragFiles::Writing(waiters) => {
+                let (send, receive) = async_channel::bounded(1);
+                waiters.push(send);
+                Some(receive)
+            }
+            DragFiles::NotAsked => {
+                *state = DragFiles::Writing(Vec::new());
+                None
+            }
+        }
+    };
+    if let Some(receive) = waiting {
+        return receive.recv().await.unwrap_or_else(|e| Err(e.to_string()));
     }
     let refs = provider.imp().refs.borrow().clone();
-    let dir = new_drag_dir().map_err(|e| e.to_string())?;
-    let written = save(refs, dir).await?;
-    *provider.imp().written.borrow_mut() = Some(written.clone());
-    Ok(written)
+    let written = with_downloads(refs, |core, refs| core.drag_files(refs, WAIT)).await;
+    let state = std::mem::replace(
+        &mut *provider.imp().files.borrow_mut(),
+        DragFiles::Written(written.clone()),
+    );
+    if let DragFiles::Writing(waiters) = state {
+        for waiter in waiters {
+            let _ = waiter.try_send(written.clone());
+        }
+    }
+    written
 }
 
 mod imp {
@@ -91,8 +100,7 @@ mod imp {
     #[derive(Default)]
     pub struct MessageFiles {
         pub refs: RefCell<Vec<MessageRef>>,
-        /// The files once written: a program that asks again gets the same ones
-        pub written: RefCell<Option<Vec<PathBuf>>>,
+        pub(super) files: RefCell<DragFiles>,
     }
 
     #[glib::object_subclass]
@@ -149,11 +157,6 @@ impl MessageFiles {
         *provider.imp().refs.borrow_mut() = refs;
         provider
     }
-
-    /// The files, written when they are not yet: what a file manager gets (the test asks for them so)
-    pub async fn files(&self) -> Result<Vec<PathBuf>, String> {
-        drag_files(self).await
-    }
 }
 
 /// `text/uri-list`: a `file://` URI a line, CR LF after each (RFC 2483)
@@ -170,12 +173,9 @@ pub fn drag_content(refs: Vec<MessageRef>) -> gdk::ContentProvider {
     gdk::ContentProvider::new_union(&[inside, MessageFiles::new(refs).upcast()])
 }
 
-/// Whether dropped files can be put in a folder as messages: every one an `.eml`
-pub fn all_messages(files: &[PathBuf]) -> bool {
-    !files.is_empty()
-        && files
-            .iter()
-            .all(|f| f.extension().is_some_and(|e| e.eq_ignore_ascii_case("eml")))
+/// Whether dropped files can go into a folder: one of them at least is a message file; the core reports the others
+pub fn takes(files: &[PathBuf]) -> bool {
+    files.iter().any(|f| pe_core::is_message_file(f))
 }
 
 /// The local paths of a dropped file list
@@ -183,38 +183,20 @@ pub fn paths_of(list: &gdk::FileList) -> Vec<PathBuf> {
     list.files().iter().filter_map(|f| f.path()).collect()
 }
 
-/// The name a folder of the file system goes by in the status bar: its own name, the whole path for the root
-pub fn place_name(dir: &Path) -> String {
-    dir.file_name()
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_else(|| dir.display().to_string())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn only_eml_files_are_messages() {
-        assert!(all_messages(&[
-            PathBuf::from("/tmp/a.eml"),
-            PathBuf::from("/tmp/B.EML")
-        ]));
-        assert!(!all_messages(&[
-            PathBuf::from("/tmp/a.eml"),
-            PathBuf::from("/tmp/b.txt")
-        ]));
-        assert!(!all_messages(&[]));
+    fn a_drop_with_a_message_file_is_taken() {
+        assert!(takes(&[PathBuf::from("/tmp/a.eml"), PathBuf::from("/tmp/b.txt")]));
+        assert!(!takes(&[PathBuf::from("/tmp/b.txt")]));
+        assert!(!takes(&[]));
     }
 
     #[test]
     fn uri_lists_end_lines_with_crlf() {
         let list = uri_list(&[PathBuf::from("/tmp/a b.eml")]);
         assert_eq!(list, "file:///tmp/a%20b.eml\r\n");
-    }
-
-    #[test]
-    fn places_by_their_names() {
-        assert_eq!(place_name(Path::new("/home/ann/Desktop")), "Desktop");
     }
 }

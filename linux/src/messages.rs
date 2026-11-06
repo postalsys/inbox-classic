@@ -548,7 +548,7 @@ fn file_drop_target() -> gtk::DropTarget {
             return false;
         };
         let paths = crate::files::paths_of(&list);
-        if !crate::files::all_messages(&paths) {
+        if !crate::files::takes(&paths) {
             return false;
         }
         let main = shell().main();

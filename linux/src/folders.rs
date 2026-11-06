@@ -419,7 +419,7 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
             return (handlers.can_drop)(&dragged.0, folder).then(|| action_for(target));
         }
         let files = crate::files::paths_of(&value.get::<gtk::gdk::FileList>().ok()?);
-        (folder > 0 && crate::files::all_messages(&files)).then_some(gtk::gdk::DragAction::COPY)
+        (folder > 0 && crate::files::takes(&files)).then_some(gtk::gdk::DragAction::COPY)
     };
     let can = handlers.clone();
     let folder = folder_of.clone();

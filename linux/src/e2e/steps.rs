@@ -815,14 +815,29 @@ pub async fn messages_as_files(d: &Driver) {
     let text = drop_dir.join("notes.txt");
     let _ = std::fs::write(&text, "not a message");
     let mut with_text = dropped.clone();
-    with_text.push(text);
+    with_text.push(text.clone());
     d.check(
-        !crate::files::all_messages(&with_text),
+        !crate::files::takes(std::slice::from_ref(&text)),
         "a file that is not a message is turned away",
     );
     match folder_id("Archive") {
-        Some(archive) => main.drop_files(Some(archive), dropped).await,
+        Some(archive) => {
+            let mailbox = main.clone();
+            crate::app::spawn(async move { mailbox.drop_files(Some(archive), with_text).await });
+        }
         None => d.check(false, "the tree has Archive"),
+    }
+    // the messages go in; the file that is not one is named
+    match wait_alert(30).await {
+        Some(report) => {
+            let text = alert_text(&report);
+            d.check(
+                text.contains("notes.txt"),
+                &format!("dropped with them, it is left out and named ({text})"),
+            );
+            answer(&report, "OK");
+        }
+        None => d.check(false, "dropped with them, it is left out and named"),
     }
     d.check(
         wait_until(30, || {

@@ -67,8 +67,6 @@ pub fn spawn(future: impl std::future::Future<Output = ()> + 'static) {
 
 /// The first start: the core opened for the store of the command line, the main window, the first account
 pub fn start(application: &adw::Application, arguments: Arguments) {
-    // what drags of an earlier run left
-    crate::files::clear_drag_dir();
     let store = arguments.store.clone().unwrap_or_else(crate::default_store);
     if let Some(dir) = store.parent() {
         let _ = std::fs::create_dir_all(dir);
@@ -131,8 +129,6 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
     application.connect_shutdown(|_| {
         let shell = shell();
         shell.settings.flush();
-        // the files of drags are for the programs they went to, which copied them by now
-        crate::files::clear_drag_dir();
         // the server lets go of the engine before the app ends
         if let Some(mut mcp) = shell.mcp.borrow_mut().take() {
             mcp.stop();
