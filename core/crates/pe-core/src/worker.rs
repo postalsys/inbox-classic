@@ -13,8 +13,8 @@ use pe_imap::{Client, Credentials, ErrorKind, Event as ImapEvent};
 use pe_net::Trust;
 use pe_store::{AccountId, FolderId, Store};
 use pe_sync::{
-    Change, apply_event, copy_message, expunge_message, fetch_source, imap_config, move_message, set_flag, smtp_config,
-    sync_folder, sync_folders,
+    Change, apply_event, copy_messages, expunge_messages, fetch_source, imap_config, move_message, set_flag,
+    smtp_config, sync_folder, sync_folders,
 };
 use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 
@@ -40,16 +40,17 @@ pub(crate) enum Command {
         to: FolderId,
         removed: Vec<pe_store::MessageInfo>,
     },
-    /// a copy of a message into another folder of the account
+    /// a copy of messages into another folder of the account
     Copy {
         folder: FolderId,
-        uid: u64,
+        uids: Vec<u64>,
         to: FolderId,
     },
+    /// messages deleted for good; `removed` as for [`Command::Move`]
     Expunge {
         folder: FolderId,
-        uid: u64,
-        removed: Box<pe_store::MessageInfo>,
+        uids: Vec<u64>,
+        removed: Vec<pe_store::MessageInfo>,
     },
     /// A message from a file into a folder, read
     Append {
@@ -74,6 +75,10 @@ pub(crate) enum Command {
         not_before: Option<i64>,
     },
     SendOutbox,
+    /// Edit > Undo: messages back to the folders they came from (selection.rs)
+    UndoMoves {
+        moves: Vec<crate::selection::UndoMove>,
+    },
     /// Into the Drafts folder, in place of the earlier copy; `outgoing` has its Message-ID
     SaveDraft {
         outgoing: Box<crate::Outgoing>,
@@ -375,6 +380,46 @@ impl Worker {
         Ok(())
     }
 
+    /// Moves messages back where they came from, found by their Message-IDs in the folders they went to: after the
+    /// move this takes back, which this worker ran before, and the sync of those folders that came with it. A folder
+    /// the store does not show them in yet is synced first.
+    async fn undo_moves(&mut self, store: &mut Store, moves: Vec<crate::selection::UndoMove>) -> Outcome {
+        for m in moves {
+            let mut uids = store.uids_of_message_ids(m.to, &m.message_ids)?;
+            if uids.len() < m.message_ids.len() {
+                self.sync_one(store, m.to).await?;
+                uids = store.uids_of_message_ids(m.to, &m.message_ids)?;
+            }
+            if uids.is_empty() {
+                continue;
+            }
+            if let Some(flag) = m.flag {
+                store.set_flag_many(m.to, &uids, flag, false)?;
+                set_flag(self.client(store).await?, store, m.to, &uids, flag, false).await?;
+            }
+            let mut removed = Vec::with_capacity(uids.len());
+            for &uid in &uids {
+                if let Some(message) = store.message(m.to, uid)? {
+                    removed.push(message.info);
+                }
+            }
+            store.remove_messages(m.to, &uids)?;
+            self.emit(Event::FolderChanged {
+                account: self.account,
+                folder: m.to,
+            });
+            let moved = match self.client(store).await {
+                Ok(client) => move_message(client, store, m.to, &uids, m.from)
+                    .await
+                    .map_err(Failure::from),
+                Err(failure) => Err(failure),
+            };
+            self.restore_on_failure(store, m.to, &removed, moved)?;
+            self.sync_one(store, m.from).await?;
+        }
+        Ok(())
+    }
+
     /// The access token is no good: the next connect of either worker refreshes it
     fn forget_token(&self) {
         if let Ok(mut token) = self.access_token.try_lock() {
@@ -581,17 +626,20 @@ impl Worker {
                 // the message shows up in the folder it went to
                 self.sync_one(store, to).await
             }
-            Command::Copy { folder, uid, to } => {
-                copy_message(self.client(store).await?, store, folder, uid, to).await?;
+            Command::UndoMoves { moves } => self.undo_moves(store, moves).await,
+            Command::Copy { folder, uids, to } => {
+                copy_messages(self.client(store).await?, store, folder, &uids, to).await?;
                 // the copy shows up in the folder it went to
                 self.sync_one(store, to).await
             }
-            Command::Expunge { folder, uid, removed } => {
+            Command::Expunge { folder, uids, removed } => {
                 let expunged = match self.client(store).await {
-                    Ok(client) => expunge_message(client, store, folder, uid).await.map_err(Failure::from),
+                    Ok(client) => expunge_messages(client, store, folder, &uids)
+                        .await
+                        .map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                self.restore_on_failure(store, folder, &[*removed], expunged)
+                self.restore_on_failure(store, folder, &removed, expunged)
             }
             Command::Append { folder, raw, date } => {
                 let path = store.folder(folder)?.info.path;

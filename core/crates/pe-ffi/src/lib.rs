@@ -8,11 +8,13 @@
 
 mod agents;
 mod core;
+mod selection;
 #[cfg(windows)]
 mod windows;
 
 pub use agents::*;
 pub use core::*;
+pub use selection::*;
 
 use std::ffi::{CString, c_char};
 use std::panic::{AssertUnwindSafe, catch_unwind};

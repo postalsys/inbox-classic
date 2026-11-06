@@ -96,11 +96,63 @@ void UpdateJunkButton() {
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
 }
 
+// the toolbar's buttons for one message off while several are selected
+void UpdateSelectionButtons() {
+    bool one = g_mailbox.SelectedCount() <= 1;
+    int count = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
+    for (int i = 0; i < count; i++) {
+        TBBUTTON button = {};
+        SendMessageW(g_toolbar, TB_GETBUTTON, i, reinterpret_cast<LPARAM>(&button));
+        if (CommandNeedsOne(static_cast<unsigned>(button.idCommand))) {
+            SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(one ? TRUE : FALSE, 0));
+        }
+    }
+}
+
+// an edit control has the keyboard: Ctrl+A and Ctrl+Z are its own there (the Find box)
+HWND FocusedEdit() {
+    HWND focus = GetFocus();
+    wchar_t name[16] = L"";
+    if (focus && GetClassNameW(focus, name, 16) && _wcsicmp(name, WC_EDITW) == 0) {
+        return focus;
+    }
+    return nullptr;
+}
+
+// the Edit and Message menus as they open: Undo names what it takes back, and with several messages selected what
+// works on one message alone is off
+void UpdateMenu(HMENU menu) {
+    bool several = g_mailbox.SelectedCount() > 1;
+    for (int i = 0, count = GetMenuItemCount(menu); i < count; i++) {
+        UINT id = GetMenuItemID(menu, i);
+        if (CommandNeedsOne(id)) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (several ? MF_GRAYED : MF_ENABLED));
+        }
+    }
+    EnableMenuItem(menu, IDM_MOVE, MF_BYCOMMAND | (g_mailbox.Summary().accounts > 1 ? MF_GRAYED : MF_ENABLED));
+    if (GetMenuState(menu, IDM_UNDO, MF_BYCOMMAND) == static_cast<UINT>(-1)) {
+        return;
+    }
+    // in the Find box, its own undo
+    bool inEdit = FocusedEdit() != nullptr;
+    std::wstring label = inEdit ? L"Undo" : g_mailbox.UndoLabel();
+    bool can = inEdit || !label.empty();
+    std::wstring text = L"&" + (label.empty() ? std::wstring(L"Undo") : label) + L"\tCtrl+Z";
+    ModifyMenuW(menu, IDM_UNDO, MF_BYCOMMAND | MF_STRING | (can ? MF_ENABLED : MF_GRAYED), IDM_UNDO, text.c_str());
+}
+
 void ShowCounts() {
     std::wstring counts = g_mailbox.Counts();
     SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
     // the folder bar says how many a search found
     ShowFolderName();
+}
+
+// the selection of the list taken, or another folder: Junk or Not Junk, the buttons for one message, the counts
+void OnSelectionTaken() {
+    UpdateJunkButton();
+    UpdateSelectionButtons();
+    ShowCounts();
 }
 
 // ---- the tray ----
@@ -390,6 +442,9 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_STRING, IDM_JUNK, L"Mark as &Junk\tCtrl+J");
     AppendMenuW(compose, MF_STRING, IDM_NOT_JUNK, L"Mark as N&ot Junk");
     HMENU edit = CreatePopupMenu();
+    AppendMenuW(edit, MF_STRING | MF_GRAYED, IDM_UNDO, L"&Undo\tCtrl+Z");
+    AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(edit, MF_STRING, IDM_SELECT_ALL, L"Select &All\tCtrl+A");
     AppendMenuW(edit, MF_STRING, IDM_FIND, L"&Find Message\tCtrl+Shift+F");
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(edit, MF_STRING, IDM_MARK_READ, L"Mark as &Read\tCtrl+Q");
@@ -439,6 +494,8 @@ HACCEL BuildAccelerators() {
         {FVIRTKEY | FCONTROL, 'P', IDM_PRINT},
         {FVIRTKEY | FALT, VK_RETURN, IDM_PROPERTIES},
         {FVIRTKEY | FCONTROL, 'U', IDM_VIEW_SOURCE},
+        {FVIRTKEY | FCONTROL, 'A', IDM_SELECT_ALL},
+        {FVIRTKEY | FCONTROL, 'Z', IDM_UNDO},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -880,6 +937,20 @@ void OnCommand(WORD id, WORD code) {
     case IDM_SYNC:
         SyncAll();
         return;
+    case IDM_SELECT_ALL:
+        if (HWND edit = FocusedEdit()) {
+            SendMessageW(edit, EM_SETSEL, 0, -1);
+        } else {
+            g_mailbox.SelectAll();
+        }
+        return;
+    case IDM_UNDO:
+        if (HWND edit = FocusedEdit()) {
+            SendMessageW(edit, WM_UNDO, 0, 0);
+        } else {
+            g_mailbox.Undo();
+        }
+        return;
     case IDM_MARK_READ:
         g_mailbox.MarkSelected(true);
         return;
@@ -929,6 +1000,13 @@ void OnCommand(WORD id, WORD code) {
     case IDC_TREE:
         ShowCounts();
         ShowFolderName();
+        return;
+    case IDC_LIST:
+        // the list's selection taken, or what an action on messages did
+        if (code == kSaid) {
+            SetStatus(g_mailbox.Said());
+        }
+        OnSelectionTaken();
         return;
     }
     g_mailbox.OnCommand(id, code);
@@ -1049,6 +1127,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                      suggested->bottom - suggested->top, SWP_NOZORDER | SWP_NOACTIVATE);
         return 0;
     }
+    case WM_INITMENUPOPUP:
+        UpdateMenu(reinterpret_cast<HMENU>(wParam));
+        break;
     case WM_CONTEXTMENU:
         // the menu key or Shift+F10 in the message list (a right click comes as NM_RCLICK)
         if (reinterpret_cast<HWND>(wParam) == g_mailbox.List()) {
@@ -1064,10 +1145,6 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         LRESULT result = 0;
         if (g_mailbox.OnNotify(header, result)) {
-            // another message or folder: Junk or Not Junk
-            if (header->code == LVN_ITEMCHANGED || header->code == TVN_SELCHANGEDW) {
-                UpdateJunkButton();
-            }
             return result;
         }
         break;

@@ -215,6 +215,22 @@ typedef enum PeSecretChange {
   PE_SECRET_CHANGE_REMOVE = 2,
 } PeSecretChange;
 
+typedef enum PeAction {
+  PE_ACTION_READ = 0,
+  PE_ACTION_UNREAD = 1,
+  PE_ACTION_FLAG = 2,
+  PE_ACTION_UNFLAG = 3,
+  // Flag them when one is not flagged, take the flags away when all are (`pe_selection_flags`)
+  PE_ACTION_TOGGLE_FLAG = 9,
+  PE_ACTION_JUNK = 4,
+  PE_ACTION_NOT_JUNK = 5,
+  // Into Deleted Items, or for good (ask first: `pe_selection_delete_question`)
+  PE_ACTION_DELETE = 6,
+  // Into the folder `to`, of the same account
+  PE_ACTION_MOVE = 7,
+  PE_ACTION_COPY = 8,
+} PeAction;
+
 // The accounts; free with `pe_account_list_free`
 typedef struct PeAccountList PeAccountList;
 
@@ -252,6 +268,12 @@ typedef struct PeMessageView PeMessageView;
 
 // The Outbox; free with `pe_outbox_free`
 typedef struct PeOutbox PeOutbox;
+
+// Positions in a list; free with `pe_positions_free`
+typedef struct PePositions PePositions;
+
+// Selected messages; free with `pe_selection_free`
+typedef struct PeSelection PeSelection;
 
 // The sign-in apps; free with `pe_sign_in_app_list_free`
 typedef struct PeSignInAppList PeSignInAppList;
@@ -646,6 +668,20 @@ typedef struct PeSignInPreset {
   uint16_t smtp_port;
   enum PeSecurity smtp_security;
 } PeSignInPreset;
+
+// The selected messages in numbers (those gone meanwhile are not counted)
+typedef struct PeSelectionSummary {
+  uint64_t count;
+  uint64_t unread;
+  uint64_t flagged;
+  // Every one is in a Junk folder: Mark as Not Junk applies, not Mark as Junk
+  bool in_junk;
+  // How many accounts and folders they are in
+  uint64_t accounts;
+  uint64_t folders;
+  // How many of them Delete removes for good
+  uint64_t for_good;
+} PeSelectionSummary;
 
 #ifdef __cplusplus
 extern "C" {
@@ -1228,65 +1264,6 @@ bool pe_folder_mark_all_read(const struct PeCore *core,
 // `core` must be a live handle.
 bool pe_mark_all_inboxes_read(const struct PeCore *core);
 
-// Flags a message or takes its flag away: in the store now (`FolderChanged` follows), on the server in the
-// background
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_set_flagged(const struct PeCore *core,
-                            int64_t folder,
-                            uint64_t uid,
-                            bool flagged);
-
-// Moves a message to another folder of its account: out of the list now (`FolderChanged`), into the other
-// folder once the server has it (`FolderChanged` of that folder). False for a folder of another account, the
-// folder it is in, or one that holds no messages.
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_move(const struct PeCore *core,
-                     int64_t folder,
-                     uint64_t uid,
-                     int64_t to);
-
-// Marks a message junk (`$Junk`) and moves it to the account's Junk folder, or not junk (`$NotJunk`) and moves it to
-// the Inbox (`FolderChanged` of both). False when the account has no such folder.
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_mark_junk(const struct PeCore *core,
-                          int64_t folder,
-                          uint64_t uid,
-                          bool junk);
-
-// Copies a message into another folder of its account, on the server in the background (`FolderChanged` of that
-// folder once it is there). False for a folder of another account, the folder it is in, or one that holds no
-// messages.
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_copy(const struct PeCore *core,
-                     int64_t folder,
-                     uint64_t uid,
-                     int64_t to);
-
-// Whether deleting a message of `folder` removes it for good (it is Deleted Items, or the account has none), so the
-// window can ask first
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_folder_deletes_for_good(const struct PeCore *core,
-                                int64_t folder);
-
-// Deletes a message: into Deleted Items, or for good when it is in there or the account has none. Out of the list
-// now (`FolderChanged`), on the server in the background.
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_message_delete(const struct PeCore *core,
-                       int64_t folder,
-                       uint64_t uid);
-
 // Creates the folder `name` (UTF-8) in `parent`, or at the top of the account when `parent` is 0:
 // `FoldersChanged` follows once the server has it. False with the reason in `error` (NULL or a pointer to a
 // string to free with `pe_string_free`) for a name that can not be one.
@@ -1726,6 +1703,152 @@ char *pe_sign_in_redirect_uri(const char *issuer);
 // # Safety
 // `issuer` must be NULL or a NUL-terminated string.
 char *pe_sign_in_register_hint(const char *issuer);
+
+// An empty selection
+struct PeSelection *pe_selection_new(void);
+
+// # Safety
+// `selection` must be NULL or a selection that was not freed yet.
+void pe_selection_free(struct PeSelection *selection);
+
+// Empties it
+//
+// # Safety
+// `selection` must be NULL or a live selection.
+void pe_selection_clear(struct PeSelection *selection);
+
+// Adds the message `uid` of `folder`
+//
+// # Safety
+// `selection` must be NULL or a live selection.
+void pe_selection_add(struct PeSelection *selection, int64_t folder, uint64_t uid);
+
+// How many messages it has
+//
+// # Safety
+// `selection` must be NULL or a live selection.
+size_t pe_selection_count(const struct PeSelection *selection);
+
+// Message `index` of it (in the list's order when it was filled from ranges); false past the end
+//
+// # Safety
+// `selection` must be NULL or a live selection, `folder` and `uid` valid pointers.
+bool pe_selection_get(const struct PeSelection *selection,
+                      size_t index,
+                      int64_t *folder,
+                      uint64_t *uid);
+
+// Fills it with the messages at the positions `starts[i]` (included) to `ends[i]` (not) of the list `search` and
+// `sort` make, in place of what it had. A list selection is ranges of positions; the messages they are stay the same
+// when the list changes.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection, `search` a valid search, `starts` and `ends` NULL or
+// `count` values each.
+bool pe_selection_set_ranges(const struct PeCore *core,
+                             struct PeSelection *selection,
+                             const struct PeSearch *search,
+                             enum PeSortField sort,
+                             bool ascending,
+                             const uint64_t *starts,
+                             const uint64_t *ends,
+                             size_t count);
+
+// Where the selected messages are now in the list `search` and `sort` make, ascending, to select them again after it
+// changed; those no longer in it are left out. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection, `search` a valid search.
+struct PePositions *pe_selection_positions(const struct PeCore *core,
+                                           const struct PeSelection *selection,
+                                           const struct PeSearch *search,
+                                           enum PeSortField sort,
+                                           bool ascending);
+
+// # Safety
+// `positions` must be NULL or from `pe_selection_positions`, not freed yet.
+size_t pe_positions_count(const struct PePositions *positions);
+
+// Position `index`; 0 past the end
+//
+// # Safety
+// `positions` must be NULL or from `pe_selection_positions`, not freed yet.
+uint64_t pe_positions_get(const struct PePositions *positions, size_t index);
+
+// # Safety
+// `positions` must be NULL or from `pe_selection_positions`, freed once.
+void pe_positions_free(struct PePositions *positions);
+
+// Fills `summary`; false on failure
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection, `summary` a valid pointer.
+bool pe_selection_summary(const struct PeCore *core,
+                          const struct PeSelection *selection,
+                          struct PeSelectionSummary *summary);
+
+// The reading pane's page over several messages ("3 messages selected", "2 unread" under it), in the style of
+// `pe_reader_page`. Free with `pe_string_free`.
+//
+// # Safety
+// `summary` must be a valid pointer.
+char *pe_selection_page(const struct PeSelectionSummary *summary);
+
+// What to ask before Delete when it removes some of the messages of `summary` for good, NULL when it removes none.
+// Free with `pe_string_free`.
+//
+// # Safety
+// `summary` must be a valid pointer.
+char *pe_selection_delete_question(const struct PeSelectionSummary *summary);
+
+// Whether Flag flags the messages of `summary` (one is not flagged) or takes the flags away (all are), for the label
+// of the command
+//
+// # Safety
+// `summary` must be a valid pointer.
+bool pe_selection_flags(const struct PeSelectionSummary *summary);
+
+// Does `action` to the selected messages, each folder's with one command: in the store now (`FolderChanged`), on the
+// server in the background. Returns what the status bar says ("Moved 3 messages to Archive"), or NULL with the
+// reason in `error` (NULL or a pointer to a string to free with `pe_string_free`). Free the text with
+// `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection, `error` NULL or a valid pointer.
+char *pe_selection_act(const struct PeCore *core,
+                       const struct PeSelection *selection,
+                       enum PeAction action,
+                       int64_t to,
+                       char **error);
+
+// What Edit > Undo says, "Undo Move"; NULL when there is nothing to take back. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_undo_label(const struct PeCore *core);
+
+// Takes back the last move, delete or junk. Returns what the status bar says, or NULL with the reason in `error` as
+// `pe_selection_act` does.
+//
+// # Safety
+// `core` must be a live handle, `error` NULL or a valid pointer.
+char *pe_undo(const struct PeCore *core,
+              char **error);
+
+// Fills `selection` with the messages the last `pe_undo` brought back that are in their folders again, to select
+// them after the list reloads; empty while none is there yet. Forgotten once all are there. False on failure.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection.
+bool pe_undo_restored(const struct PeCore *core,
+                      struct PeSelection *selection);
+
+// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search
+// (`searching`), with ", 2 selected" when more than one is. Free with `pe_string_free`.
+char *pe_list_counts(uint64_t total,
+                     uint64_t unread,
+                     uint64_t selected,
+                     bool searching);
 
 #ifdef __cplusplus
 }  // extern "C"

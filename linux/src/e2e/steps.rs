@@ -1,6 +1,7 @@
 //! The later steps of the UI test, in the order of scripts/ui-e2e.ps1: unsubscribing from a list, a calendar
-//! invitation, a brand's logo, Mark All Read, dragging onto a folder, junk, folders, closing a message, an e-mail link
-//! handed over by a second start, address completion, a signature, a Gmail address, and closing the app.
+//! invitation, a brand's logo, Mark All Read, dragging onto a folder, several messages and Undo, junk, folders,
+//! closing a message, an e-mail link handed over by a second start, address completion, a signature, a Gmail address,
+//! and closing the app.
 
 use super::*;
 
@@ -470,7 +471,12 @@ pub async fn dragging(d: &Driver) {
         return;
     };
     let in_inbox = rows();
-    let payload = |m: &pe_store::Message| crate::messages::drag_payload(m.folder_id, m.info.uid);
+    let payload = |m: &pe_store::Message| {
+        crate::messages::drag_payload(&[pe_store::MessageRef {
+            folder: m.folder_id,
+            uid: m.info.uid,
+        }])
+    };
     // what the drop target of a folder does with the row dragged onto it
     if let Some((_, message)) = main.list.selected() {
         d.check(
@@ -502,6 +508,138 @@ pub async fn dragging(d: &Driver) {
         "with Ctrl it is copied there",
     );
     d.check(d.find("INBOX", "Subject: Copy me").is_some(), "and stays in the Inbox");
+}
+
+pub async fn several_messages(d: &Driver) {
+    d.step("several messages");
+    let main = shell().main();
+    let core = &shell().core;
+    select_folder("Inbox");
+    wait_until(10, || rows() >= 5).await;
+    let listed = rows();
+    // the first row stays out of it: the junk step after this one takes it
+    select_row(1).await;
+    main.list.selection.select_item(2, false);
+    main.list.selection.select_item(3, false);
+    pause(500).await;
+    d.check(
+        main.list.selected_count() == 3,
+        "Ctrl+click adds two more messages: three are selected",
+    );
+    let refs = main.selected_refs();
+    let subjects: Vec<String> = refs
+        .iter()
+        .filter_map(|r| core.message(r.folder, r.uid).ok().flatten())
+        .map(|m| m.info.subject)
+        .collect();
+    let needles: Vec<String> = subjects.iter().map(|s| format!("Subject: {s}")).collect();
+    let all_on_server = |mailbox: &str| needles.iter().all(|n| d.find(mailbox, n).is_some());
+    let none_on_server = |mailbox: &str| needles.iter().all(|n| d.find(mailbox, n).is_none());
+    run_command(Command::MarkUnread);
+    let summary = || main.reader.summary_shown().unwrap_or_default();
+    let said = wait_until(10, || summary().0 == "3 messages selected" && summary().1 == "3 unread").await;
+    d.check(
+        said,
+        &format!(
+            "the reading pane says 3 messages are selected, and how many of them are unread ({:?})",
+            summary()
+        ),
+    );
+    let counts = main.status_texts().2;
+    d.check(
+        counts.ends_with(", 3 selected"),
+        &format!("the status bar says 3 selected ({counts})"),
+    );
+    let enabled = |command: Command| {
+        main.window()
+            .lookup_action(command.name())
+            .is_some_and(|a| a.is_enabled())
+    };
+    d.check(
+        !enabled(Command::Reply) && enabled(Command::MarkRead),
+        "Reply is off for several, Mark as Read is on",
+    );
+    d.shot(main.window(), "select-1-several").await;
+    run_command(Command::MarkRead);
+    d.check(
+        wait_until(20, || needles.iter().all(|n| d.seen(n))).await,
+        "Mark as Read marks the three read on the server",
+    );
+    command(Command::Move);
+    match wait_dialog(10, "move-dialog").await {
+        Some(dialog) => {
+            if let Some(combo) = named_in(dialog.upcast_ref(), "form-0").and_downcast::<adw::ComboRow>() {
+                let model = combo.model().and_downcast::<gtk::StringList>();
+                let archive = model.and_then(|m| (0..m.n_items()).find(|i| m.string(*i).as_deref() == Some("Archive")));
+                if let Some(index) = archive {
+                    combo.set_selected(index);
+                }
+            }
+            click(dialog.upcast_ref(), "dialog-ok");
+        }
+        None => d.check(false, "Move to Folder asks where"),
+    }
+    d.check(
+        wait_until(20, || all_on_server("Archive")).await,
+        &format!("Move to Folder moves the three to Archive ({})", subjects.join(", ")),
+    );
+    d.check(wait_until(10, || rows() == listed - 3).await, "and out of the list");
+    let status = main.status_texts().0;
+    d.check(
+        status == "Moved 3 messages to Archive",
+        &format!("the status bar says they were moved to Archive ({status})"),
+    );
+    run_command(Command::Undo);
+    let back = wait_until(10, || main.status_texts().0 == "Moved 3 messages back to Inbox").await;
+    d.check(
+        back,
+        &format!(
+            "Edit > Undo Move brings them back to the Inbox ({})",
+            main.status_texts().0
+        ),
+    );
+    d.check(
+        wait_until(20, || all_on_server("INBOX") && none_on_server("Archive")).await,
+        "and on the server",
+    );
+    wait_until(10, || rows() == listed).await;
+    let selected_subjects = || {
+        let mut found: Vec<String> = main
+            .selected_refs()
+            .iter()
+            .filter_map(|r| core.message(r.folder, r.uid).ok().flatten())
+            .map(|m| m.info.subject)
+            .collect();
+        found.sort();
+        found
+    };
+    let mut expected = subjects.clone();
+    expected.sort();
+    d.check(
+        wait_until(20, || selected_subjects() == expected).await,
+        &format!(
+            "the three that came back are selected ({})",
+            selected_subjects().join(", ")
+        ),
+    );
+    pause(500).await;
+    d.shot(main.window(), "select-2-undo").await;
+    run_command(Command::SelectAll);
+    pause(300).await;
+    d.check(
+        main.list.selected_count() == u64::from(rows()),
+        &format!(
+            "Select All selects every message of the list ({} of {})",
+            main.list.selected_count(),
+            rows()
+        ),
+    );
+    select_row(0).await;
+    let shown = wait_until(10, || {
+        main.reader.summary_shown().is_none() && !main.reader.header_text().starts_with(" |")
+    })
+    .await;
+    d.check(shown, "one message selected again is shown in the reading pane");
 }
 
 pub async fn junk(d: &Driver) {
@@ -982,7 +1120,7 @@ pub async fn all_inboxes(d: &Driver) {
     );
     let counts = main.status_texts().2;
     d.check(
-        counts.starts_with(&format!("{expected} message(s)")),
+        counts.starts_with(&format!("{expected} messages")),
         &format!("the status bar counts both Inboxes ({counts})"),
     );
     // the newest message, the second account's

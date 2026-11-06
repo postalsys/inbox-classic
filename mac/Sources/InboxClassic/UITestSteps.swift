@@ -426,6 +426,8 @@ extension UITest {
         check(await waitUntil(20) { await unreadOnServer() == 0 }, "and none on the server")
         await shot(main.window, "organize-5-all-read")
 
+        try await severalMessages()
+
         step("junk and not junk")
         await selectRow(0)
         let first = list.selectedRow >= 0 ? main.mailbox.selectedRow?.subject ?? "" : ""
@@ -442,6 +444,91 @@ extension UITest {
         let back = await waitFor(20) { await findMessage("INBOX", "Subject: \(NSRegularExpression.escapedPattern(for: first))") }
         check((back?["flags"] as? [String])?.contains("$NotJunk") == true, "Not Junk moves it back to the Inbox, with $NotJunk")
         selectFolder(named: "Inbox")
+    }
+
+    // ---- several messages ----
+
+    func severalMessages() async throws {
+        step("several messages")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil { list.numberOfRows >= 5 }
+        let listed = list.numberOfRows
+        await selectRow(0)
+        // Command+click adds two more
+        list.selectRowIndexes(IndexSet([1, 2]), byExtendingSelection: true)
+        await pause(1)
+        check(main.mailbox.selectedCount == 3, "Command+click adds two more messages: three are selected")
+        let subjects = (0..<3).compactMap { main.mailbox.row($0)?.subject }
+        let patterns = subjects.map { "Subject: \(NSRegularExpression.escapedPattern(for: $0))" }
+        // unread, so the pane has something to count
+        command(.markUnread)
+        check(await waitUntil(10) {
+            let summary = main.mailbox.summary
+            return main.mailbox.reader.showsSummary && summary.count == 3 && summary.unread == 3
+        }, "the reading pane says 3 messages are selected, and how many of them are unread (\(main.mailbox.summary.unread))")
+        let counts: NSTextField? = find("status.counts", in: main.window)
+        check(counts?.stringValue.hasSuffix(", 3 selected") == true, "the status bar says 3 selected (\(counts?.stringValue ?? ""))")
+        let enabled = { (command: Command) -> Bool in
+            let item = NSMenuItem(title: command.label, action: #selector(AppDelegate.runCommand(_:)), keyEquivalent: "")
+            item.tag = command.rawValue
+            return AppDelegate.shared.validateMenuItem(item)
+        }
+        check(!enabled(.reply) && !enabled(.forward) && enabled(.markRead) && enabled(.move),
+              "Reply is off for several, Mark as Read is on")
+        await shot(main.window, "select-1-several")
+        command(.markRead)
+        check(await waitUntil(20) {
+            var all = true
+            for pattern in patterns where !(await seen(pattern)) { all = false }
+            return all
+        }, "Mark as Read marks the three read on the server")
+
+        command(.move)
+        let move = await waitWindow("form", 10)
+        check(alertText(move).contains("Move the 3 selected messages"), "Move to Folder asks where the three go")
+        if let move {
+            let choice: NSPopUpButton? = find("form.field.0", in: move)
+            choice?.selectItem(at: choice?.itemTitles.firstIndex(of: "Archive") ?? 0)
+            press(find("form.ok", in: move))
+        }
+        check(await waitUntil(20) {
+            var all = true
+            for pattern in patterns where await findMessage("Archive", pattern) == nil { all = false }
+            return all
+        }, "Move to Folder moves the three to Archive")
+        check(await waitUntil(10) { list.numberOfRows == listed - 3 }, "and out of the list")
+        let status: NSTextField? = find("status.text", in: main.window)
+        check(status?.stringValue == "Moved 3 messages to Archive", "the status bar says they were moved to Archive (\(status?.stringValue ?? ""))")
+        check(main.core.undoLabel == "Undo Move", "Edit names Undo Move (\(main.core.undoLabel ?? "nothing"))")
+        command(.undo)
+        check(await waitUntil(10) { list.numberOfRows == listed }, "Edit > Undo Move brings them back to the Inbox")
+        check(await waitUntil(20) {
+            var all = true
+            for pattern in patterns {
+                let inInbox = await findMessage("INBOX", pattern) != nil
+                let inArchive = await findMessage("Archive", pattern) != nil
+                if !inInbox || inArchive { all = false }
+            }
+            return all
+        }, "and on the server")
+        // what came back is selected, in sight
+        let restored = { () -> Bool in
+            let rows = self.list.selectedRowIndexes
+            let visible = self.list.rows(in: self.list.visibleRect)
+            return rows.count == 3 && rows.allSatisfy { visible.contains($0) }
+                && Set(rows.compactMap { self.main.mailbox.row($0)?.subject }) == Set(subjects)
+        }
+        check(await waitUntil(20) { restored() }, "the three that came back are selected, in sight")
+        await pause(0.5)
+        await shot(main.window, "select-2-undo")
+
+        command(.selectAll)
+        await pause(0.5)
+        check(main.mailbox.selectedCount == list.numberOfRows && list.numberOfRows > 0, "Select All selects every message of the list")
+        await selectRow(0)
+        let header: NSTextField? = find("reader.header", in: main.window)
+        check(!main.mailbox.reader.showsSummary && header?.stringValue.isEmpty == false,
+              "one message selected again is shown in the reading pane")
     }
 
     // ---- folders ----
@@ -686,7 +773,7 @@ extension UITest {
         check(column?.title == "Account" && cell?.textField?.stringValue == "Work",
               "the Account column names the account of each (\(column?.title ?? ""): \(cell?.textField?.stringValue ?? ""))")
         let counts: NSTextField? = find("status.counts", in: main.window)
-        check(counts?.stringValue.hasPrefix("\(expected) message(s)") == true,
+        check(counts?.stringValue.hasPrefix("\(expected) messages") == true,
               "the status bar counts both Inboxes (\(counts?.stringValue ?? ""))")
         let menu = main.mailbox.folderMenu().items.filter { !$0.isSeparatorItem }.map(\.title)
         check(menu == [Command.markAllRead.label], "its right-click menu has Mark All Read alone (\(menu))")

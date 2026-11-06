@@ -409,6 +409,24 @@ const sections = [
                 ]
             },
             {
+                shot: 'select-1-several',
+                name: 'Several messages at once',
+                what: "Ctrl+click (Command+click on the Mac) and Shift+click select several messages, Select All every message of the list. The reading pane then says how many are selected and how many of them are unread or flagged, the status bar counts them, and Mark Read, Mark Unread, Flag, Junk, Delete, Move and dragging act on all of them, each folder's with one command to the server. Reply, Print and the other commands for one message are off.",
+                how: 'Ctrl+click or Shift+click messages in the list; Edit > Select All (Ctrl+A).',
+                checked: [
+                    'Three messages selected: the reading pane says so, with how many are unread, and so does the status bar',
+                    'Reply is off for several, Mark as Read is on',
+                    'Mark as Read and Move to Folder act on the three, on the server'
+                ]
+            },
+            {
+                shot: 'select-2-undo',
+                name: 'Undo',
+                what: 'Edit > Undo takes back the last move, delete or junk, however many messages it was: they go back to the folders they came from, found by their Message-IDs where they went, and the keyword junk set is taken away. The menu names what it takes back; the status bar says what was done.',
+                how: 'Edit > Undo (Ctrl+Z) after moving, deleting or junking messages.',
+                checked: ['The status bar says the messages were moved to Archive', 'Edit > Undo Move brings them back to the Inbox, on the server']
+            },
+            {
                 shot: 'organize-7-junk',
                 name: 'Junk / Not Junk',
                 what: "Junk moves a message to Junk E-mail with the $Junk keyword of RFC 9051 (and $NotJunk taken away), so the server's spam filter can learn from it. In Junk E-mail the button is Not Junk, which moves it back to the Inbox with $NotJunk. A folder that does not keep keywords still gets the move.",

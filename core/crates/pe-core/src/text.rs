@@ -11,6 +11,32 @@ pub fn format_size(bytes: u64) -> String {
     }
 }
 
+/// "1 message", "3 messages"
+pub fn messages(count: u64) -> String {
+    if count == 1 {
+        "1 message".into()
+    } else {
+        format!("{count} messages")
+    }
+}
+
+/// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search
+/// ("No messages found" for none), and ", 2 selected" when more than one is
+pub fn list_counts(total: u64, unread: u64, selected: u64, searching: bool) -> String {
+    if searching && total == 0 {
+        return "No messages found".into();
+    }
+    let mut text = if searching {
+        format!("{total} found, {unread} unread")
+    } else {
+        format!("{}, {unread} unread", messages(total))
+    };
+    if selected > 1 {
+        text.push_str(&format!(", {selected} selected"));
+    }
+    text
+}
+
 /// "Name <address>", the address alone when the name is empty or the same: how From and the account menus show an
 /// account
 pub fn account_label(name: &str, email: &str) -> String {

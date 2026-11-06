@@ -40,6 +40,8 @@ pub struct Reader {
     pub preview: DocumentView,
     /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
     downloading: Rc<RefCell<Option<glib::SourceId>>>,
+    /// The words over several messages while they are shown
+    summary: RefCell<Option<(String, String)>>,
 }
 
 /// The pane says the message is being downloaded, without Try Again
@@ -203,6 +205,7 @@ impl Reader {
             try_again,
             preview,
             downloading: Rc::default(),
+            summary: RefCell::default(),
         };
         reader.clear(false);
         reader
@@ -211,6 +214,7 @@ impl Reader {
     /// Emptied; saying there is no message selected unless one is `loading`. The bars of the message before stay
     /// while the next one loads, and go when it is there without them: the message does not jump down and up again
     pub fn clear(&self, loading: bool) {
+        self.summary.borrow_mut().take();
         if !loading {
             self.attachments.set_visible(false);
             self.pictures.set_visible(false);
@@ -225,6 +229,29 @@ impl Reader {
         self.note.set_visible(false);
         self.header.set_visible(loading);
         self.preview.show(&no_message(!loading), false);
+    }
+
+    /// Several messages selected: how many, and how many of them are unread or flagged, as the page of no message
+    /// says there is none. The page stays when it would say the same.
+    pub fn summary(&self, summary: &pe_core::Summary) {
+        let words = (summary.title(), summary.detail());
+        if self.summary.borrow().as_ref() == Some(&words) {
+            return;
+        }
+        self.header.set_visible(false);
+        self.preview.show(&summary.page(), false);
+        *self.summary.borrow_mut() = Some(words);
+    }
+
+    /// Whether the pane shows the page over several messages
+    pub fn shows_summary(&self) -> bool {
+        self.summary.borrow().is_some()
+    }
+
+    /// What the pane says over several messages, the title and the line under it; None when it does not
+    #[cfg(feature = "e2e")]
+    pub fn summary_shown(&self) -> Option<(String, String)> {
+        self.summary.borrow().clone()
     }
 
     /// A message asked for: its header from the list at once (the window says it is downloading a moment later, should

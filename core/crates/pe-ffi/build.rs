@@ -24,6 +24,8 @@ struct Command {
     linux: Option<String>,
     #[serde(default)]
     toggle: bool,
+    #[serde(default)]
+    one: bool,
 }
 
 const MENUS: [&str; 7] = ["file", "edit", "view", "tools", "message", "help", "tray"];
@@ -117,7 +119,12 @@ fn c_header(table: &Table) -> String {
     for command in &table.command {
         writeln!(out, "    IDM_{} = {},", command.id.to_uppercase(), command.windows).unwrap();
     }
-    out.push_str("};\n");
+    out.push_str("};\n\n// whether a command acts on one message only, off while several are selected\n");
+    out.push_str("inline bool CommandNeedsOne(unsigned id) {\n    switch (id) {\n");
+    for command in table.command.iter().filter(|c| c.one) {
+        writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
+    }
+    out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
     out
 }
 
@@ -281,6 +288,16 @@ fn swift(table: &Table) -> String {
         )
         .unwrap();
     }
+    out.push_str("        }\n    }\n\n    /// Acts on one message only: off while several are selected\n    var needsOne: Bool {\n        switch self {\n");
+    for command in &table.command {
+        writeln!(
+            out,
+            "        case .{}: return {}",
+            camel(&command.id, false),
+            command.one
+        )
+        .unwrap();
+    }
     out.push_str("        }\n    }\n}\n");
     out
 }
@@ -346,6 +363,16 @@ fn rust(table: &Table) -> String {
             "            Command::{} => {},",
             camel(&command.id, true),
             command.toggle
+        )
+        .unwrap();
+    }
+    out.push_str("        }\n    }\n\n    /// Acts on one message only: off while several are selected\n    pub fn needs_one(self) -> bool {\n        match self {\n");
+    for command in &table.command {
+        writeln!(
+            out,
+            "            Command::{} => {},",
+            camel(&command.id, true),
+            command.one
         )
         .unwrap();
     }

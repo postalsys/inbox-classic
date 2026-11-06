@@ -268,6 +268,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         assert(file.allSatisfy { command in fileItems.contains { $0.tag == command.rawValue } })
         _ = submenu("File", fileItems)
 
+        // Undo and Select All go to the first responder: a text field's own, or the message list's (Command.undo and
+        // Command.selectAll, which the list and the tree answer)
         let edit: [NSMenuItem] = [
             NSMenuItem(title: "Undo", action: Selector(("undo:")), keyEquivalent: "z"),
             {
@@ -357,6 +359,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .defaultApp: main.makeDefaultMailApp()
         case .viewSource: main.mailbox.showSource()
         case .aiAgents: AgentsWindow.open(core: core)
+        case .selectAll: main.mailbox.selectAllMessages()
+        case .undo: main.mailbox.undo()
         }
     }
 
@@ -368,10 +372,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         guard let main, core != nil else { return command == .exit || command == .about || command == .help }
         // the main window's commands work on what it shows; with the keyboard in a text field Delete is the field's
         let typing = NSApp.keyWindow?.firstResponder is NSText
+        // the commands of one message are off for several
+        if command.needsOne && !main.mailbox.hasOne {
+            return false
+        }
         switch command {
         case .delete: return !typing && main.mailbox.hasSelection
-        case .markRead, .markUnread, .flag, .move, .reply, .replyAll, .forward, .saveAs, .print, .properties, .viewSource:
-            return main.mailbox.hasSelection
+        case .markRead, .markUnread, .flag: return main.mailbox.hasSelection
+        case .move: return main.mailbox.canMove
+        case .undo: return main.core.undoLabel != nil
         case .junk: return main.mailbox.hasSelection && !main.mailbox.inJunk
         case .notJunk: return main.mailbox.hasSelection && main.mailbox.inJunk
         case .pictures: return main.mailbox.picturesBlocked

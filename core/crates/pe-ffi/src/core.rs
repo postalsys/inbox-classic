@@ -1069,7 +1069,7 @@ pub struct PeSearch {
 
 /// # Safety
 /// `search` must be NULL or point to a search whose text is NULL or NUL-terminated.
-unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Search> {
+pub(crate) unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Search> {
     // SAFETY: as the caller guarantees
     let s = unsafe { search.as_ref() }?;
     Some(pe_core::Search {
@@ -1154,6 +1154,14 @@ pub enum PeSortField {
     Size = 4,
 }
 
+/// The order a list is in, from C
+pub(crate) fn sort_of(field: PeSortField, ascending: bool) -> Sort {
+    Sort {
+        field: field.into(),
+        ascending,
+    }
+}
+
 impl From<PeSortField> for SortField {
     fn from(value: PeSortField) -> Self {
         match value {
@@ -1207,10 +1215,7 @@ pub unsafe extern "C" fn pe_messages(
     let Some(search) = (unsafe { search_of(search) }) else {
         return null_mut();
     };
-    let sort = Sort {
-        field: sort.into(),
-        ascending,
-    };
+    let sort = sort_of(sort, ascending);
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
@@ -1256,10 +1261,7 @@ pub unsafe extern "C" fn pe_message_index(
     let Some(search) = (unsafe { search_of(search) }) else {
         return -1;
     };
-    let sort = Sort {
-        field: sort.into(),
-        ascending,
-    };
+    let sort = sort_of(sort, ascending);
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, -1, |core| match core.search_index(&search, sort, folder, uid) {
@@ -1348,74 +1350,6 @@ pub unsafe extern "C" fn pe_mark_all_inboxes_read(core: *const PeCore) -> bool {
     unsafe { with(core, false, |core| core.mark_all_inboxes_read().is_ok()) }
 }
 
-/// Flags a message or takes its flag away: in the store now (`FolderChanged` follows), on the server in the
-/// background
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_set_flagged(core: *const PeCore, folder: i64, uid: u64, flagged: bool) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.set_flagged(folder, uid, flagged).is_ok()) }
-}
-
-/// Moves a message to another folder of its account: out of the list now (`FolderChanged`), into the other
-/// folder once the server has it (`FolderChanged` of that folder). False for a folder of another account, the
-/// folder it is in, or one that holds no messages.
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_move(core: *const PeCore, folder: i64, uid: u64, to: i64) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.move_message(folder, uid, to).is_ok()) }
-}
-
-/// Marks a message junk (`$Junk`) and moves it to the account's Junk folder, or not junk (`$NotJunk`) and moves it to
-/// the Inbox (`FolderChanged` of both). False when the account has no such folder.
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_mark_junk(core: *const PeCore, folder: i64, uid: u64, junk: bool) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.mark_junk(folder, uid, junk).is_ok()) }
-}
-
-/// Copies a message into another folder of its account, on the server in the background (`FolderChanged` of that
-/// folder once it is there). False for a folder of another account, the folder it is in, or one that holds no
-/// messages.
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_copy(core: *const PeCore, folder: i64, uid: u64, to: i64) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.copy_message(folder, uid, to).is_ok()) }
-}
-
-/// Whether deleting a message of `folder` removes it for good (it is Deleted Items, or the account has none), so the
-/// window can ask first
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_folder_deletes_for_good(core: *const PeCore, folder: i64) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.deletes_for_good(folder).unwrap_or(false)) }
-}
-
-/// Deletes a message: into Deleted Items, or for good when it is in there or the account has none. Out of the list
-/// now (`FolderChanged`), on the server in the background.
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_delete(core: *const PeCore, folder: i64, uid: u64) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.delete_message(folder, uid).is_ok()) }
-}
-
 // ---- folders ----
 
 /// Runs a folder change, handing its refusal (a name that can not be one, a special folder) to `error`
@@ -1438,7 +1372,11 @@ unsafe fn folder_change(
 ///
 /// # Safety
 /// `error` must be NULL or a valid pointer.
-unsafe fn refused<T>(error: *mut *mut c_char, outcome: Result<T, Option<pe_core::Error>>, fallback: &str) -> Option<T> {
+pub(crate) unsafe fn refused<T>(
+    error: *mut *mut c_char,
+    outcome: Result<T, Option<pe_core::Error>>,
+    fallback: &str,
+) -> Option<T> {
     match outcome {
         Ok(value) => Some(value),
         Err(reason) => {

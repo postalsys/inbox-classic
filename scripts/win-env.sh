@@ -8,5 +8,12 @@ WIN_DIR_FWD=${WIN_DIR//\\//}
 # copies the working tree (not the build outputs) to the Windows machine
 win_sync() {
     ssh "$WIN_HOST" "if not exist $WIN_DIR mkdir $WIN_DIR"
-    COPYFILE_DISABLE=1 tar -czf - --exclude build --exclude dist --exclude .git --exclude core/target --exclude node_modules . | ssh "$WIN_HOST" "tar -xzf - -C $WIN_DIR_FWD"
+    # as a file, copied with scp and unpacked there: a tar piped into ssh can hang once the remote end is done
+    local archive
+    archive=$(mktemp -t inbox-classic-src).tgz
+    COPYFILE_DISABLE=1 tar -czf "$archive" --exclude build --exclude dist --exclude .git --exclude core/target \
+        --exclude core/fuzz/target --exclude node_modules .
+    scp -q "$archive" "$WIN_HOST:$WIN_DIR_FWD/../inbox-classic-src.tgz"
+    rm -f "$archive"
+    ssh "$WIN_HOST" "tar -xzf $WIN_DIR_FWD/../inbox-classic-src.tgz -C $WIN_DIR_FWD && del $WIN_DIR\\..\\inbox-classic-src.tgz"
 }

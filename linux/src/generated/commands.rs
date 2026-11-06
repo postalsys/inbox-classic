@@ -36,6 +36,8 @@ pub enum Command {
     DefaultApp,
     ViewSource,
     AiAgents,
+    SelectAll,
+    Undo,
 }
 
 impl Command {
@@ -73,6 +75,8 @@ impl Command {
         Command::DefaultApp,
         Command::ViewSource,
         Command::AiAgents,
+        Command::SelectAll,
+        Command::Undo,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -111,6 +115,8 @@ impl Command {
             Command::DefaultApp => "default-app",
             Command::ViewSource => "view-source",
             Command::AiAgents => "ai-agents",
+            Command::SelectAll => "select-all",
+            Command::Undo => "undo",
         }
     }
 
@@ -150,6 +156,8 @@ impl Command {
             Command::DefaultApp => "tools",
             Command::ViewSource => "view",
             Command::AiAgents => "tools",
+            Command::SelectAll => "edit",
+            Command::Undo => "edit",
         }
     }
 
@@ -188,6 +196,8 @@ impl Command {
             Command::DefaultApp => "Make Default Mail App…",
             Command::ViewSource => "Message Source",
             Command::AiAgents => "AI Agents…",
+            Command::SelectAll => "Select All",
+            Command::Undo => "Undo",
         }
     }
 
@@ -227,6 +237,8 @@ impl Command {
             Command::DefaultApp => None,
             Command::ViewSource => Some("<Primary>u"),
             Command::AiAgents => None,
+            Command::SelectAll => Some("<Primary>a"),
+            Command::Undo => Some("<Primary>z"),
         }
     }
 
@@ -266,6 +278,49 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => false,
             Command::AiAgents => false,
+            Command::SelectAll => false,
+            Command::Undo => false,
+        }
+    }
+
+    /// Acts on one message only: off while several are selected
+    pub fn needs_one(self) -> bool {
+        match self {
+            Command::NewAccount => false,
+            Command::Exit => false,
+            Command::Sync => false,
+            Command::MarkRead => false,
+            Command::MarkUnread => false,
+            Command::Pictures => true,
+            Command::About => false,
+            Command::NewMail => false,
+            Command::Reply => true,
+            Command::ReplyAll => true,
+            Command::Forward => true,
+            Command::Help => false,
+            Command::Delete => false,
+            Command::Move => false,
+            Command::Flag => false,
+            Command::NewFolder => false,
+            Command::RenameFolder => false,
+            Command::DeleteFolder => false,
+            Command::Accounts => false,
+            Command::Find => false,
+            Command::SaveAs => true,
+            Command::Print => true,
+            Command::Import => false,
+            Command::Outbox => false,
+            Command::Properties => true,
+            Command::MarkAllRead => false,
+            Command::Junk => false,
+            Command::NotJunk => false,
+            Command::Notify => false,
+            Command::Open => false,
+            Command::DefaultApp => false,
+            Command::ViewSource => true,
+            Command::AiAgents => false,
+            Command::SelectAll => false,
+            Command::Undo => false,
         }
     }
 }

@@ -16,6 +16,7 @@ pub mod mailto;
 mod requests;
 mod search;
 mod secrets;
+mod selection;
 mod sign_in_apps;
 mod text;
 pub mod unsubscribe;
@@ -30,7 +31,8 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
-pub use pe_store::{Scope, Search, Show};
+pub use pe_store::{MessageRef, Scope, Search, Show};
+pub use selection::{Action, Summary};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
@@ -43,7 +45,7 @@ use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
 pub use text::{
     HiddenUnread, RETRY_NOTE, ReaderState, account_label, account_title, folder_kind, folder_name, format_size,
-    hidden_unread, reader_page,
+    hidden_unread, list_counts, messages, reader_page,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, SharedToken, Worker};
@@ -300,6 +302,10 @@ pub struct Core {
     discoveries: Discoveries,
     oauth: OAuthProviders,
     next_request: std::sync::atomic::AtomicU64,
+    /// What Edit > Undo takes back (selection.rs)
+    undo: Mutex<Option<selection::Undo>>,
+    /// What the last Undo brought back, by folder and Message-ID, for the window to select once it is there
+    restored: Mutex<Vec<(FolderId, Vec<String>)>>,
 }
 
 impl Core {
@@ -362,6 +368,8 @@ impl Core {
             discoveries: Discoveries::default(),
             oauth: OAuthProviders(Arc::new(options.oauth_providers)),
             next_request: std::sync::atomic::AtomicU64::new(1),
+            undo: Mutex::new(None),
+            restored: Mutex::default(),
         })
     }
 
@@ -1089,11 +1097,6 @@ impl Core {
         self.set_flag(folder, uid, "\\Seen", seen)
     }
 
-    /// Flags a message or takes its flag away: in the store now, on the server in the background
-    pub fn set_flagged(&self, folder: FolderId, uid: u64, flagged: bool) -> Result<()> {
-        self.set_flag(folder, uid, "\\Flagged", flagged)
-    }
-
     fn set_flag(&self, folder: FolderId, uid: u64, flag: &'static str, on: bool) -> Result<()> {
         self.set_flag_many(folder, &[uid], flag, on)
     }
@@ -1128,13 +1131,7 @@ impl Core {
         Ok(())
     }
 
-    /// Moves a message to another folder of its account: out of the store now, on the server in the background,
-    /// which then syncs the folder it went to. When the server does not move it, it comes back into the folder.
-    pub fn move_message(&self, folder: FolderId, uid: u64, to: FolderId) -> Result<()> {
-        self.move_messages(folder, &[uid], to)
-    }
-
-    /// Moves messages to another folder of their account with one command, as [`Core::move_message`] moves one.
+    /// Moves messages to another folder of their account with one command, as a move of one would.
     /// Refused when one of them is not there, and then none moves.
     pub fn move_messages(&self, folder: FolderId, uids: &[u64], to: FolderId) -> Result<()> {
         let account = self.target_of(folder, to)?;
@@ -1207,30 +1204,12 @@ impl Core {
         )
     }
 
-    /// Marks a message junk (RFC 9051 `$Junk`, `$NotJunk` taken away) and moves it to the account's Junk folder, or
+    /// Marks messages of a folder junk (RFC 9051 `$Junk`, `$NotJunk` taken away) and moves it to the account's Junk folder, or
     /// not junk (`$NotJunk`) and moves it to the Inbox: in the store now, on the server in the background. Refused
-    /// when the account has no such folder.
-    pub fn mark_junk(&self, folder: FolderId, uid: u64, junk: bool) -> Result<()> {
-        self.mark_junk_many(folder, &[uid], junk)
-    }
-
-    /// [`Core::mark_junk`] for messages of a folder, with one command for each step
+    /// when the account has no such folder. One command for each step, whatever the number of messages.
     pub fn mark_junk_many(&self, folder: FolderId, uids: &[u64], junk: bool) -> Result<()> {
-        let target = {
-            let store = self.store();
-            let account = store.folder(folder)?.account_id;
-            let target = if junk {
-                store.special_folder(account, "\\Junk")?
-            } else {
-                store.find_folder(account, "INBOX")?
-            };
-            target.ok_or(Error::NotFound)?.id
-        };
-        let (on, off) = if junk {
-            ("$Junk", "$NotJunk")
-        } else {
-            ("$NotJunk", "$Junk")
-        };
+        let target = self.junk_target(folder, junk)?;
+        let (on, off) = junk_keywords(junk);
         // the flags first, which the server keeps on the messages as they move; the move says the folder changed
         self.set_flag_many(folder, uids, on, true)?;
         self.set_flag_many(folder, uids, off, false)?;
@@ -1240,12 +1219,26 @@ impl Core {
         Ok(())
     }
 
-    /// Copies a message into another folder of its account, on the server in the background, which then syncs the
-    /// folder it went to
-    pub fn copy_message(&self, folder: FolderId, uid: u64, to: FolderId) -> Result<()> {
+    /// Copies messages of a folder into another folder of their account with one command, as a copy of one would. Refused when one of them is not there.
+    pub fn copy_messages(&self, folder: FolderId, uids: &[u64], to: FolderId) -> Result<()> {
         let account = self.target_of(folder, to)?;
-        self.store().message(folder, uid)?.ok_or(Error::NotFound)?;
-        self.send_command(account, Command::Copy { folder, uid, to })
+        if uids.is_empty() {
+            return Ok(());
+        }
+        {
+            let store = self.store();
+            for &uid in uids {
+                store.message(folder, uid)?.ok_or(Error::NotFound)?;
+            }
+        }
+        self.send_command(
+            account,
+            Command::Copy {
+                folder,
+                uids: uids.to_vec(),
+                to,
+            },
+        )
     }
 
     /// The account of `folder` when a message of it can go to `to`: another folder of that account, one that holds
@@ -1260,13 +1253,17 @@ impl Core {
         Ok(account)
     }
 
-    /// Deletes a message as Outlook Express does: into Deleted Items (the account's `\\Trash`), or for good when it
+    /// Deletes messages of a folder as Outlook Express does: into Deleted Items (the account's `\\Trash`), or for good when it
     /// is in there already or the account has none ([`Core::deletes_for_good`]). Out of the store now, on the server
-    /// in the background.
-    pub fn delete_message(&self, folder: FolderId, uid: u64) -> Result<()> {
+    /// in the background, with one command.
+    pub fn delete_messages(&self, folder: FolderId, uids: &[u64]) -> Result<()> {
         match self.trash_for(folder)? {
-            Some(trash) => self.move_message(folder, uid, trash),
-            None => self.remove_then(folder, uid, |removed| Command::Expunge { folder, uid, removed }),
+            Some(trash) => self.move_messages(folder, uids, trash),
+            None => self.remove_then(folder, uids, |removed| Command::Expunge {
+                folder,
+                uids: uids.to_vec(),
+                removed,
+            }),
         }
     }
 
@@ -1277,12 +1274,23 @@ impl Core {
 
     /// The Deleted Items folder a message of `folder` goes to, None when it is that folder or there is none
     fn trash_for(&self, folder: FolderId) -> Result<Option<FolderId>> {
+        trash_in(&self.store(), folder)
+    }
+
+    /// The folder junk (or not junk) goes to from `folder`: the account's Junk folder, or its Inbox. Refused, saying
+    /// so, when the account has none.
+    pub(crate) fn junk_target(&self, folder: FolderId, junk: bool) -> Result<FolderId> {
         let store = self.store();
         let account = store.folder(folder)?.account_id;
-        Ok(store
-            .special_folder(account, "\\Trash")?
-            .map(|trash| trash.id)
-            .filter(|&trash| trash != folder))
+        let target = if junk {
+            store.special_folder(account, "\\Junk")?
+        } else {
+            store.find_folder(account, "INBOX")?
+        };
+        let missing = if junk { "Junk E-mail" } else { "Inbox" };
+        target
+            .map(|f| f.id)
+            .ok_or_else(|| Error::Unavailable(format!("This account has no {missing} folder to move the messages to.")))
     }
 
     /// Takes a message out of the store, tells the windows, and hands the server the work `command` makes of the row
@@ -1290,18 +1298,24 @@ impl Core {
     fn remove_then(
         &self,
         folder: FolderId,
-        uid: u64,
-        command: impl FnOnce(Box<pe_store::MessageInfo>) -> Command,
+        uids: &[u64],
+        command: impl FnOnce(Vec<pe_store::MessageInfo>) -> Command,
     ) -> Result<()> {
+        if uids.is_empty() {
+            return Ok(());
+        }
         let (account, removed) = {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
-            let removed = store.message(folder, uid)?.ok_or(Error::NotFound)?.info;
-            store.remove_messages(folder, &[uid])?;
+            let removed = uids
+                .iter()
+                .map(|&uid| Ok(store.message(folder, uid)?.ok_or(Error::NotFound)?.info))
+                .collect::<Result<Vec<_>>>()?;
+            store.remove_messages(folder, uids)?;
             (account, removed)
         };
         self.post(Event::FolderChanged { account, folder })?;
-        self.send_command(account, command(Box::new(removed)))
+        self.send_command(account, command(removed))
     }
 
     /// Creates a folder `name` in `parent`, or at the top of the account: on the server in the background, then
@@ -1397,6 +1411,24 @@ impl Core {
         self.workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
         self.readers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
         self.tokens.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
+    }
+}
+
+/// The Deleted Items folder a message of `folder` goes to in `store`, None when it is that folder or there is none
+pub(crate) fn trash_in(store: &Store, folder: FolderId) -> Result<Option<FolderId>> {
+    let account = store.folder(folder)?.account_id;
+    Ok(store
+        .special_folder(account, "\\Trash")?
+        .map(|trash| trash.id)
+        .filter(|&trash| trash != folder))
+}
+
+/// The keyword junk sets and the one it takes away, `$Junk` and `$NotJunk` (RFC 9051), the other way round for not junk
+pub(crate) fn junk_keywords(junk: bool) -> (&'static str, &'static str) {
+    if junk {
+        ("$Junk", "$NotJunk")
+    } else {
+        ("$NotJunk", "$Junk")
     }
 }
 

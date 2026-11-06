@@ -36,4 +36,23 @@ enum PeCommandId : unsigned short {
     IDM_DEFAULT_APP = 131,
     IDM_VIEW_SOURCE = 132,
     IDM_AI_AGENTS = 133,
+    IDM_SELECT_ALL = 134,
+    IDM_UNDO = 135,
 };
+
+// whether a command acts on one message only, off while several are selected
+inline bool CommandNeedsOne(unsigned id) {
+    switch (id) {
+    case IDM_PICTURES:
+    case IDM_REPLY:
+    case IDM_REPLY_ALL:
+    case IDM_FORWARD:
+    case IDM_SAVE_AS:
+    case IDM_PRINT:
+    case IDM_PROPERTIES:
+    case IDM_VIEW_SOURCE:
+        return true;
+    default:
+        return false;
+    }
+}

@@ -20,6 +20,8 @@ final class Reader: NSObject {
     /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
     private var downloadingTimer: Timer?
     private(set) var picturesOffered = false
+    /// over several messages: the numbers the core's page shows
+    private var summary: PeSelectionSummary?
     /// the logo's side in pixels, for the core to draw it at
     var logoPixels: Int { Int(48 * (view.window?.backingScaleFactor ?? 2)) }
 
@@ -95,9 +97,26 @@ final class Reader: NSObject {
         clear(loading: false)
     }
 
+    /// several messages selected: none is shown, the core's page says how many and what they are (loaded again only
+    /// when that changed)
+    func showSummary(_ numbers: PeSelectionSummary) {
+        if let summary, same(summary, numbers) { return }
+        summary = numbers
+        var numbers = numbers
+        preview.show(taken(pe_selection_page(&numbers)) ?? "")
+    }
+
+    var showsSummary: Bool { summary != nil }
+
+    private func same(_ a: PeSelectionSummary, _ b: PeSelectionSummary) -> Bool {
+        a.count == b.count && a.unread == b.unread && a.flagged == b.flagged && a.in_junk == b.in_junk
+            && a.accounts == b.accounts && a.folders == b.folders && a.for_good == b.for_good
+    }
+
     // ---- what it shows ----
 
     func clear(loading: Bool) {
+        summary = nil
         downloadingTimer?.invalidate()
         retry.isHidden = true
         header.stringValue = ""

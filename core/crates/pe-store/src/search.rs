@@ -96,7 +96,18 @@ impl Search {
 
     /// The WHERE of the search and its values, ?1 on. `in_order`: for a page in an order that has an index over every
     /// folder (date, received), which then walks it rather than sort all the Inboxes have.
-    fn condition(&self, in_order: bool) -> (String, Vec<Value>) {
+    /// What it finds with each message's place in the order of `sort` (from 0): `folder_id`, `uid`, `position`, as SQL
+    /// to select from, with its values
+    pub(crate) fn positioned(&self, sort: Sort) -> (String, Vec<Value>) {
+        let (condition, values) = self.condition(false);
+        let sql = format!(
+            "SELECT folder_id, uid, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS position FROM messages WHERE {condition}",
+            sort.order_by()
+        );
+        (sql, values)
+    }
+
+    pub(crate) fn condition(&self, in_order: bool) -> (String, Vec<Value>) {
         let mut query = Query::parse(&self.text, now());
         // the Show choice is a term like the one typed for it
         query.terms.extend(match self.show {
@@ -237,14 +248,12 @@ impl Store {
 
     /// Where the message `uid` of `folder` is in what `search` finds in the order of `sort`; None when it is not there
     pub fn search_index(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<u64>> {
-        let (condition, mut values) = search.condition(false);
+        let (positioned, mut values) = search.positioned(sort);
         let at = values.len();
         values.push(Value::Integer(folder));
         values.push(Value::Integer(uid as i64));
         let mut statement = self.db.prepare_cached(&format!(
-            "SELECT position FROM (SELECT folder_id, uid, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS position \
-             FROM messages WHERE {condition}) WHERE folder_id = ?{} AND uid = ?{}",
-            sort.order_by(),
+            "SELECT position FROM ({positioned}) WHERE folder_id = ?{} AND uid = ?{}",
             at + 1,
             at + 2
         ))?;

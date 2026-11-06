@@ -200,11 +200,44 @@ final class Core {
         search.with { pe_message_index(handle, $0, sort, ascending, folder, uid) }
     }
 
+    /// where the messages of `selection` are in the list now, the rows to select again
+    func positions(of selection: OpaquePointer, in search: Search, sort: PeSortField, ascending: Bool) -> IndexSet {
+        guard let found = search.with({ pe_selection_positions(handle, selection, $0, sort, ascending) }) else { return [] }
+        defer { pe_positions_free(found) }
+        return IndexSet((0..<pe_positions_count(found)).map { Int(pe_positions_get(found, $0)) })
+    }
+
+    /// `action` on the messages of `selection`: what the status bar says, or why not
+    func act(_ selection: OpaquePointer, _ action: PeAction, to: Int64 = 0) -> Result<String, Refusal> {
+        var reason: UnsafeMutablePointer<CChar>?
+        if let done = taken(pe_selection_act(handle, selection, action, to, &reason)) {
+            return .success(done)
+        }
+        return .failure(Refusal(taken(reason) ?? "The messages could not be changed."))
+    }
+
+    /// what Edit > Undo takes back, "Undo Move"; nil when nothing
+    var undoLabel: String? { taken(pe_undo_label(handle)) }
+
+    func undo() -> Result<String, Refusal> {
+        var reason: UnsafeMutablePointer<CChar>?
+        if let done = taken(pe_undo(handle, &reason)) {
+            return .success(done)
+        }
+        return .failure(Refusal(taken(reason) ?? "There is nothing to undo."))
+    }
+
     var unindexedCount: UInt64 { pe_search_unindexed_count(handle) }
 
     static func searchPlace(_ text: String) -> String {
         text.withCString { taken(pe_search_place($0)) } ?? ""
     }
+}
+
+/// Why the core did not do something, in its words
+struct Refusal: Error {
+    let reason: String
+    init(_ reason: String) { self.reason = reason }
 }
 
 /// What the message list shows: a folder, or words searched in every folder (folder 0)

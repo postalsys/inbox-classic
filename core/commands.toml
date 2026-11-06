@@ -12,6 +12,7 @@
 #   key      the shortcut: Mod is Ctrl on Windows and Linux and Command on the Mac; Shift, Alt (Option on the Mac);
 #            a letter, F1 to F12, Enter, Delete. mac and linux override it where those platforms differ.
 #   toggle   a menu item with a check mark
+#   one      acts on one message only: off while several are selected
 
 [[command]]
 id = "new_account"
@@ -53,6 +54,7 @@ id = "pictures"
 windows = 105
 menu = "view"
 label = "Download Pictures"
+one = true
 
 [[command]]
 id = "about"
@@ -73,6 +75,7 @@ windows = 108
 menu = "message"
 label = "Reply to Sender"
 key = "Mod+R"
+one = true
 
 [[command]]
 id = "reply_all"
@@ -80,6 +83,7 @@ windows = 109
 menu = "message"
 label = "Reply to All"
 key = "Mod+Shift+R"
+one = true
 
 [[command]]
 id = "forward"
@@ -88,6 +92,7 @@ menu = "message"
 label = "Forward"
 key = "Mod+F"
 mac = "Mod+Shift+F"
+one = true
 
 [[command]]
 id = "help"
@@ -158,6 +163,7 @@ menu = "file"
 label = "Save As..."
 key = ""
 mac = "Mod+Shift+S"
+one = true
 
 [[command]]
 id = "print"
@@ -165,6 +171,7 @@ windows = 122
 menu = "file"
 label = "Print..."
 key = "Mod+P"
+one = true
 
 [[command]]
 id = "import"
@@ -185,6 +192,7 @@ menu = "file"
 label = "Properties"
 key = "Alt+Enter"
 mac = "Mod+Alt+U"
+one = true
 
 [[command]]
 id = "mark_all_read"
@@ -234,9 +242,24 @@ menu = "view"
 label = "Message Source"
 key = "Mod+U"
 mac = ""
+one = true
 
 [[command]]
 id = "ai_agents"
 windows = 133
 menu = "tools"
 label = "AI Agents..."
+
+[[command]]
+id = "select_all"
+windows = 134
+menu = "edit"
+label = "Select All"
+key = "Mod+A"
+
+[[command]]
+id = "undo"
+windows = 135
+menu = "edit"
+label = "Undo"
+key = "Mod+Z"
