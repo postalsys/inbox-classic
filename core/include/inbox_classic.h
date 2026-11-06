@@ -2045,15 +2045,16 @@ char *pe_write_file(const char *dir,
 bool pe_is_message_file(const char *path);
 
 // Puts the message files of `paths` (`count` UTF-8 paths) into `folder`, as `pe_message_import` does each, those that
-// are not message files left out. True with what to tell the user in `report` (NULL when all went in; free with
-// `pe_string_free`), false on failure.
+// are not message files left out. True with what the status bar says in `said` ("Put 3 messages in Archive") and
+// what to tell the user in `report` (NULL when all went in); free both with `pe_string_free`. False on failure.
 //
 // # Safety
-// `core` must be a live handle, `paths` `count` NUL-terminated strings, `report` NULL or valid.
+// `core` must be a live handle, `paths` `count` NUL-terminated strings, `said` and `report` NULL or valid.
 bool pe_import_files(const struct PeCore *core,
                      int64_t folder,
                      const char *const *paths,
                      size_t count,
+                     char **said,
                      char **report);
 
 // What the status bar says while `count` messages not downloaded yet come for files or a forward: "Downloading 3

@@ -1358,14 +1358,15 @@ fn messages_become_files() {
     // files dropped on a folder: the messages go in, the rest is told
     let notes = dir.path().join("notes.txt");
     std::fs::write(&notes, "not mail").unwrap();
-    let report = s
+    let (said, report) = s
         .core
         .import_files(inbox, &[written[0].clone(), notes.clone()])
-        .unwrap()
         .unwrap();
+    assert_eq!(said, "Put 1 message in Inbox");
+    let report = report.unwrap();
     assert!(report.contains("notes.txt") && !report.contains("Lunch"), "{report}");
     assert!(pe_core::is_message_file(&written[0]) && !pe_core::is_message_file(&notes));
-    assert_eq!(s.core.import_files(inbox, &[written[0].clone()]).unwrap(), None);
+    assert_eq!(s.core.import_files(inbox, &[written[0].clone()]).unwrap().1, None);
 
     // one gone from the server can not be had: told, the others still come
     let gone = s.server.add_message("INBOX", &rfc822("Gone", "x"), &[]);

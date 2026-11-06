@@ -863,17 +863,18 @@ pub unsafe extern "C" fn pe_is_message_file(path: *const c_char) -> bool {
 }
 
 /// Puts the message files of `paths` (`count` UTF-8 paths) into `folder`, as `pe_message_import` does each, those that
-/// are not message files left out. True with what to tell the user in `report` (NULL when all went in; free with
-/// `pe_string_free`), false on failure.
+/// are not message files left out. True with what the status bar says in `said` ("Put 3 messages in Archive") and
+/// what to tell the user in `report` (NULL when all went in); free both with `pe_string_free`. False on failure.
 ///
 /// # Safety
-/// `core` must be a live handle, `paths` `count` NUL-terminated strings, `report` NULL or valid.
+/// `core` must be a live handle, `paths` `count` NUL-terminated strings, `said` and `report` NULL or valid.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_import_files(
     core: *const PeCore,
     folder: i64,
     paths: *const *const c_char,
     count: usize,
+    said: *mut *mut c_char,
     report: *mut *mut c_char,
 ) -> bool {
     let list: Vec<std::path::PathBuf> = if paths.is_null() || count == 0 {
@@ -888,10 +889,14 @@ pub unsafe extern "C" fn pe_import_files(
     };
     // SAFETY: as the caller guarantees
     match unsafe { with(core, None, |core| core.import_files(folder, &list).ok()) } {
-        Some(said) => {
+        Some((status, problems)) => {
+            if !said.is_null() {
+                // SAFETY: the caller gave a valid pointer
+                unsafe { *said = into_c_string(status) };
+            }
             if !report.is_null() {
                 // SAFETY: the caller gave a valid pointer
-                unsafe { *report = said.map_or(null_mut(), into_c_string) };
+                unsafe { *report = problems.map_or(null_mut(), into_c_string) };
             }
             true
         }

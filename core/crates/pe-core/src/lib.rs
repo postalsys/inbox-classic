@@ -921,11 +921,13 @@ impl Core {
     /// Puts a message saved as a file (`.eml`) into a folder: on the server in the background, then
     /// [`Event::FolderChanged`]. A file that is not a message, or is too large, is refused now.
     /// Puts the message files of `paths` into `folder` as [`Core::import_message`] does each, those that are not
-    /// message files ([`is_message_file`]) left out. Returns what to tell the user about those that did not go in
-    /// ("These were not put in the folder: ..."), None when all did. For a drop of files onto a folder or Import.
-    pub fn import_files(&self, folder: FolderId, paths: &[PathBuf]) -> Result<Option<String>> {
-        self.store().folder(folder)?;
+    /// message files ([`is_message_file`]) left out. Returns what the status bar says ("Put 3 messages in Archive"), and
+    /// what to tell the user about those that did not go in ("These were not put in the folder: ..."), None when all
+    /// did. For a drop of files onto a folder or Import.
+    pub fn import_files(&self, folder: FolderId, paths: &[PathBuf]) -> Result<(String, Option<String>)> {
+        let name = text::folder_name(&self.store().folder(folder)?.info);
         let mut problems = Vec::new();
+        let mut put = 0;
         for path in paths {
             let outcome = if is_message_file(path) {
                 self.import_message(folder, path)
@@ -935,11 +937,15 @@ impl Core {
                     path.display()
                 )))
             };
-            if let Err(error) = outcome {
-                problems.push(error.to_string());
+            match outcome {
+                Ok(()) => put += 1,
+                Err(error) => problems.push(error.to_string()),
             }
         }
-        Ok((!problems.is_empty()).then(|| format!("These were not put in the folder:\n\n{}", problems.join("\n"))))
+        let said = format!("Put {} in {name}", text::messages(put));
+        let report =
+            (!problems.is_empty()).then(|| format!("These were not put in the folder:\n\n{}", problems.join("\n")));
+        Ok((said, report))
     }
 
     pub fn import_message(&self, folder: FolderId, path: &std::path::Path) -> Result<()> {
