@@ -89,7 +89,7 @@ bool AskRestart(HWND owner, const std::wstring& name) {
     int textHeight = std::max(Scale(32), static_cast<int>(MeasureText(text, width - 2 * pad).cy));
     int buttonWidth = ButtonWidth({now, later});
     int height = pad + textHeight + Scale(14) + Scale(25) + pad;
-    HWND dialog = CreateModalWindow(owner, kRestartClass, core::Plain(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
+    HWND dialog = CreateModalWindow(owner, kRestartClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
     OptionsState state;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, pad, width - pad, pad + textHeight});
@@ -134,7 +134,7 @@ bool OptionsDialog(HWND owner, bool& notify) {
     int languageHeight = Scale(20) + row + Scale(6) + noteHeight + Scale(10);
     int notifyHeight = Scale(20) + row + Scale(8);
     int height = pad + languageHeight + Scale(10) + notifyHeight + Scale(14) + Scale(25) + pad;
-    HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Plain(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
+    HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
     OptionsState state;
 
     int top = pad;

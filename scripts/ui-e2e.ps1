@@ -193,8 +193,8 @@ public static string RemoteListText(IntPtr list, int row, int column) {
     CloseHandle(process);
     return text;
 }
-// a text a window of another process writes into memory it is given (CB_GETLBTEXT, TB_GETBUTTONTEXTW), its length
-// the result of `message`
+// a text a window of another process writes into memory it is given with a message Windows does not copy between
+// processes (TB_GETBUTTONTEXTW), its length the result of `message`
 public static string RemoteText(IntPtr window, uint message, IntPtr wParam) {
     uint pid;
     GetWindowThreadProcessId(window, out pid);
@@ -273,6 +273,8 @@ $savedLanguage = (Get-ItemProperty -Path $preferencesKey -Name Language -ErrorAc
 Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Out 'result.txt')
 Start-Transcript -Path (Join-Path $Out 'log.txt') -Force | Out-Null
 $failures = @()
+# the apps started again (StartAgain), ended at the end should one hang
+$started = @()
 function Step([string]$text) { Write-Host "== $text" }
 function Check([bool]$ok, [string]$what) {
     if ($ok) { Write-Host "   ok: $what" } else { Write-Host "   FAILED: $what"; $script:failures += $what }
@@ -2749,7 +2751,12 @@ public static class Dragger {
     if ($options) {
         $combo = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_LANGUAGE)
         $count = [int][Native.Win]::SendMessage($combo, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
-        $items = @(for ($i = 0; $i -lt $count; $i++) { [Native.Win]::RemoteText($combo, $CB_GETLBTEXT, [IntPtr]$i) })
+        # CB_GETLBTEXT is one of the messages Windows copies between processes: a buffer of this one
+        $items = @(for ($i = 0; $i -lt $count; $i++) {
+            $item = New-Object System.Text.StringBuilder 256
+            [void][Native.Win]::SendMessage($combo, $CB_GETLBTEXT, [IntPtr]$i, $item)
+            $item.ToString()
+        })
         Check ($items.Count -eq 6 -and $items[0] -like 'System default (*)') "Language starts with System default and the language it is now ($($items[0]))"
         # the names in themselves; the script stays ASCII for Windows PowerShell, which reads it as ANSI
         $names = "English,Deutsch,Eesti,Espa$([char]0xF1)ol,Fran$([char]0xE7)ais"
@@ -2896,10 +2903,16 @@ public static bool HasIcon(IntPtr window) {
     }
     # the app started again with this store; the main window once it shows its folders
     function StartAgain([string[]]$more) {
+        # one that did not close (its failure is reported) would take the new start over
+        if (-not $script:app.HasExited) { $script:app.Kill(); [void]$script:app.WaitForExit(5000) }
+        $script:started += $script:app
         $script:app = Start-Process -FilePath $Exe -ArgumentList ($arguments + $more) -PassThru
         $window = WaitFor {
+            # the window of the new process, not of one still closing
             $w = [Native.Win]::FindWindow('InboxClassicMain', [NullString]::Value)
-            if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w)) { $w }
+            $owner = [uint32]0
+            if ($w -ne [IntPtr]::Zero) { [void][Native.Win]::GetWindowThreadProcessId($w, [ref]$owner) }
+            if ($w -ne [IntPtr]::Zero -and $owner -eq $script:app.Id -and [Native.Win]::IsWindowVisible($w)) { $w }
         } 30
         if ($window) {
             $t = [Native.Win]::GetDlgItem($window, $IDC_TREE)
@@ -2933,9 +2946,11 @@ public static bool HasIcon(IntPtr window) {
                 $style = [Native.Win]::GetWindowLong($control, -16)
                 $kind = $style -band 0x1F
                 # owner drawn (a picture, a link) and group boxes draw their words their own way
-                $drawn = ($class -eq 'Button' -and ($kind -band 0xF) -in 7, 11) -or ($class -eq 'Static' -and $kind -eq 13)
+                $drawn = ($class -eq 'Button' -and (($kind -band 0xF) -in @(7, 11))) -or ($class -eq 'Static' -and $kind -eq 13)
                 if ($wordsOnly -or $drawn) { continue }
-                if (-not [Native.Win]::Fits($control, $text, $class -eq 'Button', ($kind -band 0xF) -in 2, 3, 5, 6)) { $cut += $text }
+                $isButton = $class -eq 'Button'
+                $hasBox = ($kind -band 0xF) -in @(2, 3, 5, 6)
+                if (-not [Native.Win]::Fits($control, $text, $isButton, $hasBox)) { $cut += $text }
             }
         }
         Check ($english.Count -eq 0) "${what}: no word left in English ($($english -join ' | '))"
@@ -3013,7 +3028,10 @@ public static bool HasIcon(IntPtr window) {
 } catch {
     Check $false "unexpected error: $_ at line $($_.InvocationInfo.ScriptLineNumber)"
 } finally {
-    if ($app -and -not $app.HasExited) { $app.Kill() }
+    # this run's app, and any earlier one of it that did not close (a dialog left open by a failed step)
+    foreach ($process in @($app) + $started) {
+        if ($process -and -not $process.HasExited) { $process.Kill() }
+    }
     if ($null -eq $savedLanguage) {
         Remove-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue
     } else {

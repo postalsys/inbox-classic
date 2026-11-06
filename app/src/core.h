@@ -55,6 +55,8 @@ std::wstring Version();
 std::wstring T(PeText text);
 // the same without the menu letter marks
 std::wstring Plain(PeText text);
+// a command as the title of the window it opens: without its menu letter and the "..." that says a window follows
+std::wstring Title(PeText text);
 // a word with its placeables filled: T(PE_TEXT_X, {{"count", L"3"}, {"folder", name}})
 std::wstring T(PeText text, std::initializer_list<std::pair<const char*, std::wstring>> args);
 

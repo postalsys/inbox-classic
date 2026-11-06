@@ -45,6 +45,17 @@ std::wstring Plain(PeText text) {
     return Taken(pe_text_plain(static_cast<uint32_t>(text)));
 }
 
+std::wstring Title(PeText text) {
+    std::wstring title = Plain(text);
+    for (std::wstring_view dots : {std::wstring_view(L"..."), std::wstring_view(L"\u2026")}) {
+        if (title.size() >= dots.size() && title.compare(title.size() - dots.size(), dots.size(), dots) == 0) {
+            title.resize(title.size() - dots.size());
+            break;
+        }
+    }
+    return title;
+}
+
 std::wstring T(PeText text, std::initializer_list<std::pair<const char*, std::wstring>> args) {
     std::vector<std::string> values;
     std::vector<const char*> names;

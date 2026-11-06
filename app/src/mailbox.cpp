@@ -27,7 +27,7 @@ std::wstring ReasonText(char* reason, PeText fallback) {
 // a folder name, asked for; empty when cancelled
 std::wstring AskFolderName(HWND owner, PeText title, const std::wstring& intro, const std::wstring& name) {
     std::vector<FormField> fields = {{core::T(PE_TEXT_WIN_FOLDER_NAME), name}};
-    return FormDialog(owner, core::Plain(title), intro, fields) ? fields[0].value : L"";
+    return FormDialog(owner, core::Title(title), intro, fields) ? fields[0].value : L"";
 }
 
 // the reason the core gave, shown
@@ -1251,7 +1251,7 @@ void Mailbox::ChooseAttachment() {
 }
 
 void Mailbox::SaveAllAttachments() {
-    std::wstring folder = FolderDialog(parent_, core::Plain(PE_TEXT_WIN_SAVE_ATTACHMENTS).c_str());
+    std::wstring folder = FolderDialog(parent_, core::Title(PE_TEXT_WIN_SAVE_ATTACHMENTS).c_str());
     if (folder.empty()) {
         return;
     }
@@ -2014,7 +2014,7 @@ void Mailbox::ShowProperties(HWND owner) {
     }
     const PeMessageInfo* info = pe_message_view_info(view_.get());
     std::wstring subject = info ? Text(info->subject) : L"";
-    TextDialog(owner, subject.empty() ? core::Plain(PE_TEXT_CMD_PROPERTIES) : core::T(PE_TEXT_WIN_PROPERTIES_OF, {{"subject", subject}}),
+    TextDialog(owner, subject.empty() ? core::Title(PE_TEXT_CMD_PROPERTIES) : core::T(PE_TEXT_WIN_PROPERTIES_OF, {{"subject", subject}}),
                core::T(PE_TEXT_WIN_INTERNET_HEADERS), Text(headers.get()));
 }
 
@@ -2108,10 +2108,10 @@ void Mailbox::PrintShown() {
 
 void Mailbox::Import(HWND owner) {
     if (!folder_) {
-        MessageBoxW(owner, core::T(PE_TEXT_WIN_IMPORT_CHOOSE_FOLDER).c_str(), core::Plain(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_IMPORT_CHOOSE_FOLDER).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONINFORMATION);
         return;
     }
-    std::vector<std::wstring> files = OpenFilesDialog(owner, core::Plain(PE_TEXT_CMD_IMPORT).c_str(),
+    std::vector<std::wstring> files = OpenFilesDialog(owner, core::Title(PE_TEXT_CMD_IMPORT).c_str(),
         FileFilter({{core::T(PE_TEXT_WIN_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_WIN_FILTER_ALL), L"*.*"}}).c_str());
     if (!files.empty()) {
         ImportFiles(folder_, files, owner);
@@ -2441,7 +2441,7 @@ void Mailbox::ImportFiles(int64_t folder, const std::vector<std::wstring>& files
         Say(Text(text.get()));
     }
     if (core::String told(report); told) {
-        MessageBoxW(owner, Text(told.get()).c_str(), core::Plain(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxW(owner, Text(told.get()).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONWARNING);
     }
 }
 

@@ -820,7 +820,7 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account, const std::wst
         // a browser sign-in account: the name only, the rest is the provider's
         std::vector<FormField> name = {fields[NAME]};
         std::wstring intro = core::T(PE_TEXT_WIN_SIGNS_IN_WITH, {{"app", signsInWith}});
-        if (!FormDialog(owner, core::Plain(PE_TEXT_CMD_PROPERTIES), intro, name)) {
+        if (!FormDialog(owner, core::Title(PE_TEXT_CMD_PROPERTIES), intro, name)) {
             return false;
         }
         fields[NAME] = name[0];
@@ -834,7 +834,7 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account, const std::wst
     PeSecurity imapSecurity = stored->imap_security;
     PeSecurity smtpSecurity = stored->smtp_security;
     bool saved = false;
-    while (FormDialog(owner, core::Plain(PE_TEXT_CMD_PROPERTIES), intro, fields, Validate)) {
+    while (FormDialog(owner, core::Title(PE_TEXT_CMD_PROPERTIES), intro, fields, Validate)) {
         // warned for a side without encryption, unless it was so already to the same server: not each time such an
         // account is saved, but when the password would go readable somewhere new
         auto newlyPlain = [&](Field security, Field host, PeSecurity was, const std::wstring& wasHost) {
@@ -847,7 +847,7 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account, const std::wst
         std::string utf8[5];
         PeAccountSettings settings = SettingsOf(fields, utf8);
         if (!pe_account_update(core, account, &settings)) {
-            MessageBoxW(owner, core::T(PE_TEXT_WIN_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_CMD_PROPERTIES).c_str(), MB_OK | MB_ICONERROR);
+            MessageBoxW(owner, core::T(PE_TEXT_WIN_ACCOUNT_NOT_SAVED).c_str(), core::Title(PE_TEXT_CMD_PROPERTIES).c_str(), MB_OK | MB_ICONERROR);
             continue;
         }
         if (!fields[PASSWORD].value.empty()) {
