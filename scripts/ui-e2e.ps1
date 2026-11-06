@@ -45,6 +45,7 @@ public delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int InternalGetWindowText(IntPtr hwnd, System.Text.StringBuilder text, int size);
 [DllImport("user32.dll")] public static extern int GetMenuItemCount(IntPtr menu);
 [DllImport("user32.dll")] public static extern IntPtr GetSubMenu(IntPtr menu, int position);
+[DllImport("user32.dll")] public static extern bool GetMenuItemRect(IntPtr hwnd, IntPtr menu, uint item, out RECT rect);
 [DllImport("user32.dll")] public static extern uint GetMenuState(IntPtr menu, uint id, uint flags);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetMenuString(IntPtr menu, uint item, System.Text.StringBuilder text, int size, uint flags);
 // the labels of a menu's items, by position (separators empty)
@@ -1925,6 +1926,30 @@ public static class Dragger {
     Command $main ($IDM_FLAG_COLOR + 5)
     $blue = { param($s) $f = & $flagsOf $s; ($f -contains '\Flagged') -and ($f -contains '$MailFlagBit2') -and ($f -notcontains '$MailFlagBit0') -and ($f -notcontains '$MailFlagBit1') }
     Check ([bool](WaitFor { (& $blue $plain[1]) -and (& $blue $plain[2]) } 20)) 'Blue on two selected messages flags both blue: $MailFlagBit2'
+    # on the selected rows' highlight the flag is drawn white, as the Mac shows it: a blue one would not be seen
+    $selectedFlag = {
+        param($row)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 300
+        $cell = [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32))
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        if ($cell.Right -le $cell.Left -or $cell.Bottom -le $cell.Top) { return $null }
+        $picture = New-Object System.Drawing.Bitmap ($cell.Right - $cell.Left), ($cell.Bottom - $cell.Top)
+        CopyScreen $picture $cell.Left $cell.Top
+        # the lightest pixel of the cell
+        $best = $null; $most = -1
+        for ($x = 0; $x -lt $picture.Width; $x++) {
+            for ($y = 0; $y -lt $picture.Height; $y++) {
+                $p = $picture.GetPixel($x, $y)
+                $light = [Math]::Min($p.R, [Math]::Min($p.G, $p.B))
+                if ($light -gt $most) { $most = $light; $best = $p }
+            }
+        }
+        $best
+    }
+    $white = & $selectedFlag (& $rowOf $plain[1])
+    Check ($white -and $white.R -gt 200 -and $white.G -gt 200 -and $white.B -gt 200) "a selected row's flag is drawn white on its highlight ($white)"
     # the menu checks Blue: its Flag submenu opened as the keys open it
     [void][Native.Win]::PostMessage($main, $WM_CONTEXTMENU, $list, [IntPtr](-1))
     $menu = WaitWindow '#32768' $null 10
@@ -1932,9 +1957,15 @@ public static class Dragger {
     if ($menu) {
         $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
         $labels = [Native.Win]::MenuLabels($hmenu)
+        # with two selected, what acts on one message alone is greyed (MF_GRAYED | MF_DISABLED)
+        $greyed = { param($id) ([Native.Win]::GetMenuState($hmenu, $id, 0) -band 0x3) -ne 0 }
+        Check ((& $greyed $IDM_REPLY) -and (& $greyed $IDM_VIEW_SOURCE) -and (& $greyed $IDM_PROPERTIES) -and -not (& $greyed $IDM_FORWARD)) 'with two selected the menu greys Reply to Sender, View Source and Properties, not Forward'
         $at = [array]::IndexOf($labels, 'Flag')
-        for ($i = 0; $i -le $at; $i++) { if ($labels[$i]) { Key $menu $VK_DOWN } }
-        Key $menu 0x27
+        # Flag clicked where the menu shows it opens its submenu
+        $item = New-Object Native.Win+RECT
+        if ([Native.Win]::GetMenuItemRect([IntPtr]::Zero, $hmenu, [uint32]$at, [ref]$item)) {
+            [Native.Win]::MouseClick([int](($item.Left + $item.Right) / 2), [int](($item.Top + $item.Bottom) / 2))
+        }
         # the submenu: another menu window, besides the one opened first
         $otherMenu = {
             $next = [IntPtr]::Zero

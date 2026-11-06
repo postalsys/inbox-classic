@@ -883,23 +883,11 @@ COLORREF FlagRgb(int color) {
     return colors[(color >= 1 && color <= 7) ? color - 1 : 0];
 }
 
-// a flag in `rgb` in the square at `left`, `top` of `size` pixels: its pole and its cloth, an outline of `edge` around
-// both where it stands on a colour of its own (the selected row)
-void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb, COLORREF edge, bool outline) {
+// a flag in `rgb` in the square at `left`, `top` of `size` pixels: its pole and its cloth
+void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb) {
     int pole = std::max(1, size / 12), cloth = size * 3 / 4;
     int x = left + size / 5, y = top + size / 8, bottom = top + size - size / 10;
     POINT shape[] = {{x, y}, {x + cloth, y + cloth / 4}, {x, y + cloth / 2}};
-    if (outline) {
-        HPEN around = CreatePen(PS_SOLID, std::max(1, size / 16), edge);
-        HGDIOBJ oldPen = SelectObject(dc, around);
-        HGDIOBJ oldBrush = SelectObject(dc, GetStockObject(NULL_BRUSH));
-        Polygon(dc, shape, 3);
-        MoveToEx(dc, x, y, nullptr);
-        LineTo(dc, x, bottom);
-        SelectObject(dc, oldBrush);
-        SelectObject(dc, oldPen);
-        DeleteObject(around);
-    }
     HBRUSH fill = CreateSolidBrush(rgb);
     HPEN line = CreatePen(PS_SOLID, 1, rgb);
     HGDIOBJ oldPen = SelectObject(dc, line);
@@ -934,7 +922,7 @@ HBITMAP FlagBitmap(int color, bool checked) {
             SelectObject(dc, oldPen);
             DeleteObject(pen);
         } else {
-            DrawFlag(dc, 0, 0, size, FlagRgb(color), 0, false);
+            DrawFlag(dc, 0, 0, size, FlagRgb(color));
         }
         SelectObject(dc, old);
         DeleteDC(dc);
@@ -960,13 +948,15 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         draw(COL_ATTACH, LIST_ATTACH);
     }
     if (row.flagged) {
-        // the flag in its colour (red when it has none), with a white edge on the selected row's highlight
+        // the flag in its colour (red when it has none); white on the selected row's highlight, as the Mac shows it,
+        // where a colour (blue on blue) could not be seen
         RECT cell;
         ListView_GetSubItemRect(list_, index, COL_FLAG, LVIR_BOUNDS, &cell);
         int width = ListView_GetColumnWidth(list_, COL_FLAG);
         bool selected = ListView_GetItemState(list_, index, LVIS_SELECTED) != 0;
+        COLORREF rgb = selected ? GetSysColor(COLOR_HIGHLIGHTTEXT) : FlagRgb(row.flag_color ? row.flag_color : 1);
         DrawFlag(dc, cell.left + (width - iconSize_) / 2, cell.top + (cell.bottom - cell.top - iconSize_) / 2, iconSize_,
-                 FlagRgb(row.flag_color ? row.flag_color : 1), RGB(255, 255, 255), selected);
+                 rgb);
     }
 }
 

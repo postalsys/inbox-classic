@@ -124,8 +124,19 @@ HWND FocusedEdit() {
 
 // the Edit and Message menus as they open: Undo names what it takes back, and with several messages selected what
 // works on one message alone is off
+// whether `menu` itself has an item `id` (not one of its submenus, which MF_BYCOMMAND would search too)
+bool HasOwnItem(HMENU menu, UINT id) {
+    for (int i = 0, count = GetMenuItemCount(menu); i < count; i++) {
+        if (GetMenuItemID(menu, i) == id) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UpdateMenu(HMENU menu) {
-    if (GetMenuState(menu, IDM_FLAG_CLEAR, MF_BYCOMMAND) != static_cast<UINT>(-1)) {
+    // the Flag submenu as it opens; the menu it is in is updated as any other
+    if (HasOwnItem(menu, IDM_FLAG_CLEAR)) {
         g_mailbox.UpdateFlagMenu(menu);
         return;
     }
