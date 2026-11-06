@@ -2120,7 +2120,7 @@ void Mailbox::Import(HWND owner) {
 
 // ---- the Find box ----
 
-void Mailbox::PlaceFind(const RECT& row, int buttonsRight) {
+int Mailbox::PlaceFind(const RECT& row, int buttonsRight) {
     // its usual width, narrower down to a minimum where the toolbar's buttons need the room
     int width = std::clamp(static_cast<int>(row.right) - buttonsRight - Scale(16), Scale(150), Scale(280));
     int height = Scale(26), edge = GetSystemMetrics(SM_CXEDGE);
@@ -2139,6 +2139,7 @@ void Mailbox::PlaceFind(const RECT& row, int buttonsRight) {
     int text = metrics.tmHeight + Scale(2);
     MoveWindow(findEdit_, icon, (inner - text) / 2, width - 2 * edge - icon - clear, text, TRUE);
     MoveWindow(findClear_, width - 2 * edge - clear, 0, clear, inner, TRUE);
+    return static_cast<int>(row.right) - width - Scale(8);
 }
 
 bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {

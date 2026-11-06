@@ -50,6 +50,16 @@ fn signing_in_with(accounts: &[pe_store::Account], with: SignInWith) -> impl Ite
     accounts.iter().filter(move |a| a.settings.auth == auth)
 }
 
+/// How to register a client with the provider of `issuer`, in the language in use: Google's and Microsoft's own
+/// steps, or those for any OpenID Connect provider
+pub fn register_hint(issuer: &str) -> String {
+    pe_i18n::tr(match ProviderKind::of_issuer(issuer) {
+        ProviderKind::Google => pe_i18n::Text::SignInRegisterGoogle,
+        ProviderKind::Microsoft => pe_i18n::Text::SignInRegisterMicrosoft,
+        ProviderKind::Oidc => pe_i18n::Text::SignInRegisterOther,
+    })
+}
+
 /// The name a built-in client shows under
 pub fn builtin_name(kind: ProviderKind) -> &'static str {
     match kind {
@@ -493,5 +503,17 @@ mod tests {
         assert_eq!(app_provider(&app, Some("s".into())).client_secret, None);
         app.issuer = "https://accounts.google.com".into();
         assert_eq!(app_provider(&app, None).kind, ProviderKind::Google);
+    }
+
+    #[test]
+    fn register_hint_by_issuer() {
+        use pe_i18n::{Text, tr};
+        let hint = register_hint("https://login.microsoftonline.com/contoso/v2.0");
+        assert_eq!(hint, tr(Text::SignInRegisterMicrosoft));
+        assert_eq!(
+            register_hint("https://accounts.google.com"),
+            tr(Text::SignInRegisterGoogle)
+        );
+        assert_eq!(register_hint("https://sso.example.edu"), tr(Text::SignInRegisterOther));
     }
 }

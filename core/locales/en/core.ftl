@@ -239,6 +239,9 @@ sign-in-app-bad-host = the { $server } server is missing or not a host name
 sign-in-app-plain = the { $server } server has to use SSL/TLS or STARTTLS
 sign-in-app-not-checked = the issuer has not been checked yet
 sign-in-app-issuer-changed = the issuer changed: type the client secret again, or remove it
+sign-in-register-google = In Google Cloud Console, create an OAuth client of the type Desktop app, with the scope https://mail.google.com/ on its consent screen. While the app is in testing, only its test users can sign in.
+sign-in-register-microsoft = In Microsoft Entra, register an app with the platform Mobile and desktop applications, the redirect URI http://localhost and public client flows allowed, and the delegated permissions IMAP.AccessAsUser.All, SMTP.Send and offline_access. For your organization only, use https://login.microsoftonline.com/<tenant ID>/v2.0 as the issuer.
+sign-in-register-other = Register a native (public) client with the redirect URI below; the provider has to allow any port on it (RFC 8252). Add the scope the provider gives mail access with.
 
 ## Calendar invitations
 

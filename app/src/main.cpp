@@ -607,15 +607,49 @@ Panes Measure() {
     return {area, treeWidth, listHeight};
 }
 
+// the Find box gives way to the buttons' longer words in other languages, down to its least width; the buttons that
+// still run under it are hidden from the end, as their commands are all in the menus too
+void FitToolbar(const RECT& bar) {
+    // by index: the separators share the command id 0
+    auto state = [](int index) {
+        TBBUTTON button = {};
+        SendMessageW(g_toolbar, TB_GETBUTTON, index, reinterpret_cast<LPARAM>(&button));
+        return button;
+    };
+    auto setHidden = [](int index, BYTE fsState, bool hidden) {
+        BYTE wanted = hidden ? (fsState | TBSTATE_HIDDEN) : (fsState & ~TBSTATE_HIDDEN);
+        if (wanted != fsState) {
+            TBBUTTONINFOW info = {sizeof(info), TBIF_BYINDEX | TBIF_STATE};
+            info.fsState = wanted;
+            SendMessageW(g_toolbar, TB_SETBUTTONINFOW, index, reinterpret_cast<LPARAM>(&info));
+        }
+    };
+    int buttons = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
+    for (int i = 0; i < buttons; i++) {
+        setHidden(i, state(i).fsState, false);
+    }
+    RECT last = {};
+    SendMessageW(g_toolbar, TB_GETITEMRECT, buttons > 0 ? buttons - 1 : 0, reinterpret_cast<LPARAM>(&last));
+    int findLeft = g_mailbox.PlaceFind(bar, last.right) - Scale(4);
+    // from the end: every button under the box, and a separator that would be left last
+    bool hiding = false;
+    for (int i = buttons - 1; i >= 0; i--) {
+        RECT item = {};
+        SendMessageW(g_toolbar, TB_GETITEMRECT, i, reinterpret_cast<LPARAM>(&item));
+        TBBUTTON button = state(i);
+        if (item.right <= findLeft && !(hiding && (button.fsStyle & BTNS_SEP))) {
+            break;
+        }
+        hiding = true;
+        setHidden(i, button.fsState, true);
+    }
+}
+
 void Layout() {
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
     RECT bar;
     GetClientRect(g_toolbar, &bar);
-    // where the buttons end: the Find box gives way to their longer words in other languages
-    int buttons = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
-    RECT last = {};
-    SendMessageW(g_toolbar, TB_GETITEMRECT, buttons > 0 ? buttons - 1 : 0, reinterpret_cast<LPARAM>(&last));
-    g_mailbox.PlaceFind(bar, last.right);
+    FitToolbar(bar);
     MoveWindow(g_folderBar, 0, bar.bottom, bar.right, FolderBarHeight(), TRUE);
     SendMessageW(g_status, WM_SIZE, 0, 0);
     Panes panes = Measure();

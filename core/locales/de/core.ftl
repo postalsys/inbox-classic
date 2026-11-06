@@ -244,6 +244,9 @@ sign-in-app-bad-host = der { $server }-Server fehlt oder ist kein Hostname
 sign-in-app-plain = der { $server }-Server muss SSL/TLS oder STARTTLS verwenden
 sign-in-app-not-checked = der Aussteller wurde noch nicht geprüft
 sign-in-app-issuer-changed = der Aussteller hat sich geändert: geben Sie das Client-Geheimnis erneut ein oder entfernen Sie es
+sign-in-register-google = Erstellen Sie in der Google Cloud Console einen OAuth-Client vom Typ Desktop-App, mit dem Bereich https://mail.google.com/ auf seinem Zustimmungsbildschirm. Solange die App im Test ist, können sich nur ihre Testnutzer anmelden.
+sign-in-register-microsoft = Registrieren Sie in Microsoft Entra eine App mit der Plattform Mobilgerät- und Desktopanwendungen, dem Umleitungs-URI http://localhost, erlaubten öffentlichen Clientflows und den delegierten Berechtigungen IMAP.AccessAsUser.All, SMTP.Send und offline_access. Nur für Ihre Organisation verwenden Sie https://login.microsoftonline.com/<Mandanten-ID>/v2.0 als Aussteller.
+sign-in-register-other = Registrieren Sie einen nativen (öffentlichen) Client mit dem Umleitungs-URI unten; der Anbieter muss jeden Port darauf erlauben (RFC 8252). Fügen Sie den Bereich hinzu, mit dem der Anbieter Zugriff auf E-Mails gibt.
 
 ## Calendar invitations
 

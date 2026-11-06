@@ -244,6 +244,9 @@ sign-in-app-bad-host = falta el servidor { $server } o no es un nombre de host
 sign-in-app-plain = el servidor { $server } debe usar SSL/TLS o STARTTLS
 sign-in-app-not-checked = el emisor aún no se ha comprobado
 sign-in-app-issuer-changed = el emisor cambió: vuelva a escribir el secreto de cliente o quítelo
+sign-in-register-google = En Google Cloud Console, cree un cliente OAuth de tipo Aplicación de escritorio, con el ámbito https://mail.google.com/ en su pantalla de consentimiento. Mientras la aplicación esté en pruebas, solo sus usuarios de prueba pueden iniciar sesión.
+sign-in-register-microsoft = En Microsoft Entra, registre una aplicación con la plataforma Aplicaciones móviles y de escritorio, el URI de redirección http://localhost, los flujos de cliente público permitidos y los permisos delegados IMAP.AccessAsUser.All, SMTP.Send y offline_access. Solo para su organización, use https://login.microsoftonline.com/<ID de inquilino>/v2.0 como emisor.
+sign-in-register-other = Registre un cliente nativo (público) con el URI de redirección de abajo; el proveedor debe permitir cualquier puerto en él (RFC 8252). Agregue el ámbito con el que el proveedor da acceso al correo.
 
 ## Calendar invitations
 
