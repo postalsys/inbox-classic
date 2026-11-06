@@ -28,6 +28,13 @@ pub extern "C" fn pe_text_plain(text: u32) -> *mut c_char {
     .unwrap_or(null_mut())
 }
 
+/// Command `text` as the title of the window it opens, without its menu letter and its trailing dots. Free with
+/// `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_text_title(text: u32) -> *mut c_char {
+    guard(|| Text::from_index(text).map_or(null_mut(), |t| into_c_string(pe_i18n::title(t)))).unwrap_or(null_mut())
+}
+
 /// Word `text` with its placeables filled: `names[i]` is `values[i]`, a value that is a whole number passed as a number
 /// (plurals choose by it). Free with `pe_string_free`.
 ///

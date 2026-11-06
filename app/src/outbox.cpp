@@ -128,7 +128,7 @@ void OutboxDialog(HWND owner, PeCore* core) {
     AddColumn(state.list, COL_STATUS, core::T(PE_TEXT_UI_COL_STATUS).c_str(), 100);
     // the last column takes the rest of the width, no wider
     ListView_SetColumnWidth(state.list, COL_STATUS, LVSCW_AUTOSIZE_USEHEADER);
-    state.send = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_OUTBOX_SEND_ALL).c_str(), WS_TABSTOP, IDC_OUTBOX_SEND,
+    state.send = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_OUTBOX_SEND_ALL).c_str(), WS_TABSTOP, IDC_OUTBOX_SEND,
                              {width - pad - buttonWidth, pad, width - pad, pad + Scale(25)});
     state.remove = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_DELETE_BUTTON).c_str(), WS_TABSTOP, IDC_OUTBOX_DELETE,
                                {width - pad - buttonWidth, pad + Scale(31), width - pad, pad + Scale(56)});

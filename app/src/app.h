@@ -86,6 +86,8 @@ HIMAGELIST IconList(IconSet set);
 // text for a menu item: a & in it stays a & rather than making the next character a shortcut
 std::wstring MenuText(std::wstring text);
 // a menu item of the catalogs (`&` marking its letter) with its shortcut, the key names in the language in use:
+// Shortcut(L"Ctrl+Shift+R") in the language's key names: "Strg+Umschalt+R" in German
+std::wstring Shortcut(std::wstring_view keys);
 // MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P") is "&Drucken...\tStrg+P" in German
 std::wstring MenuItem(PeText text, std::wstring_view keys = {});
 // a flat toolbar, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles. Its icons (icons.h): the big ones with
@@ -104,6 +106,10 @@ int TextWidth(HWND control, HFONT font);
 SIZE MeasureText(const std::wstring& text, int wrapWidth = 0);
 // a push button wide enough for the longest of `labels`, at least `least` pixels at 96 DPI
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least = 80);
+int ButtonWidth(const std::vector<std::wstring>& labels, int least = 80);
+// a column of labels as wide as its widest label plus `margin`, at least `least` (both unscaled)
+int LabelWidth(std::initializer_list<std::wstring> labels, int least, int margin = 8);
+int LabelWidth(const std::vector<std::wstring>& labels, int least, int margin = 8);
 
 // a modal form with a label and an input for each field; true with the values filled in when OK was clicked.
 // `validate` gets the values and returns an error to show, or an empty string to accept them.
@@ -151,7 +157,7 @@ void SetAppIcons(WNDCLASSEXW& windowClass);
 // a folder chosen in the Windows folder picker, empty when cancelled
 std::wstring FolderDialog(HWND owner, const wchar_t* title);
 // the files chosen in an Open dialog that takes several, none when cancelled
-std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter);
+std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter = nullptr);
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
 // marks a saved file (an attachment, a message) as from the internet, for SmartScreen and Office's Protected View
 void MarkFromInternet(const std::wstring& path);

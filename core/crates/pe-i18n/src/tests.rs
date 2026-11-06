@@ -110,6 +110,9 @@ fn words_in_the_language_set() {
     set_language("en");
     assert_eq!(tr_args(Text::Messages, &[("count", 1u64.into())]), "1 message");
     assert_eq!(tr_args(Text::Messages, &[("count", 3u64.into())]), "3 messages");
+    // a command as the title of the window it opens
+    assert_eq!(title(Text::CmdImport), "Import Messages");
+    assert_eq!(title(Text::CmdReply), "Reply to Sender");
     assert_eq!(set_language("de-CH"), "de");
     assert_eq!(language(), "de");
     assert_eq!(tr_args(Text::Messages, &[("count", 3u64.into())]), "3 Nachrichten");

@@ -599,7 +599,7 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
         let intro = t!(UiSignsInWith, app = &with);
         let form = Form::new(
             parent,
-            &t!(UiProperties),
+            &crate::words::plain(crate::words::Text::UiProperties),
             &intro,
             vec![Field::text(&t!(UiFieldName), &stored.name)],
             &t!(UiOk),
@@ -617,7 +617,7 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     }
     let form = Form::new(
         parent,
-        &t!(UiProperties),
+        &crate::words::plain(crate::words::Text::UiProperties),
         &t!(UiKeepPassword),
         server_fields(&stored),
         &t!(UiOk),
@@ -644,11 +644,23 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
             stored.smtp_security,
             &stored.smtp_host,
         );
-        if warn && !accept_plain(form.widget(), &settings, &t!(UiProperties)).await {
+        if warn
+            && !accept_plain(
+                form.widget(),
+                &settings,
+                &crate::words::plain(crate::words::Text::UiProperties),
+            )
+            .await
+        {
             continue;
         }
         if core.update_account(account, &settings).is_err() {
-            ui::alert(form.widget(), &t!(UiProperties), &t!(UiAccountNotSaved)).await;
+            ui::alert(
+                form.widget(),
+                &crate::words::plain(crate::words::Text::UiProperties),
+                &t!(UiAccountNotSaved),
+            )
+            .await;
             continue;
         }
         let password = form.value(PASSWORD);
@@ -714,7 +726,7 @@ pub async fn accounts_dialog(parent: &impl IsA<gtk::Widget>) -> bool {
         ("add", t!(GtkAccountsAdd)),
         ("properties", t!(GtkAccountsProperties)),
         ("signature", t!(GtkAccountsSignature)),
-        ("remove", t!(UiRemove)),
+        ("remove", crate::words::plain(crate::words::Text::UiRemove)),
         ("sign-in-apps", t!(GtkAccountsSignInApps)),
     ] {
         let button = gtk::Button::with_label(&label);

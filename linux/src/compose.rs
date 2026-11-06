@@ -806,7 +806,10 @@ impl Compose {
             };
             this.attached.select_child(&child);
             let menu = gio::Menu::new();
-            menu.append(Some(&t!(UiRemove)), Some("files.remove"));
+            menu.append(
+                Some(&crate::words::plain(crate::words::Text::UiRemove)),
+                Some("files.remove"),
+            );
             let group = gio::SimpleActionGroup::new();
             let remove = gio::SimpleAction::new("remove", None);
             let removing = Rc::downgrade(&this);

@@ -163,8 +163,8 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
         state.ids.push_back(account->id);
     }
     y += Scale(92) + Scale(16);
-    std::wstring allow = core::T(PE_TEXT_WIN_ALLOW), dontAllow = core::T(PE_TEXT_WIN_DONT_ALLOW);
-    std::wstring turnAway = core::T(PE_TEXT_WIN_TURN_AWAY), cancel = core::T(PE_TEXT_UI_CANCEL);
+    std::wstring allow = core::T(PE_TEXT_UI_ALLOW), dontAllow = core::T(PE_TEXT_WIN_DONT_ALLOW);
+    std::wstring turnAway = core::T(PE_TEXT_UI_TURN_AWAY), cancel = core::T(PE_TEXT_UI_CANCEL);
     int button = ButtonWidth({allow, dontAllow, turnAway, cancel}, 100);
     // Enter does not let a program in: the safe answer is the default
     if (mode == AccessMode::Ask) {
@@ -242,9 +242,8 @@ LRESULT CALLBACK SendProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // a label and its value on one line of the message's header
-void HeaderLine(HWND dialog, int pad, int& y, int width, const std::wstring& label, const std::wstring& value, int id = 0) {
-    int labelWidth = std::max({Scale(64), static_cast<int>(MeasureText(core::T(PE_TEXT_UI_FIELD_FROM)).cx) + Scale(4),
-                               static_cast<int>(MeasureText(core::T(PE_TEXT_UI_FIELD_SUBJECT)).cx) + Scale(4)});
+void HeaderLine(HWND dialog, int pad, int& y, int width, int labelWidth, const std::wstring& label, const std::wstring& value,
+                int id = 0) {
     CreateChild(dialog, L"STATIC", label.c_str(), SS_RIGHT | SS_NOPREFIX, 0, {pad, y, pad + labelWidth, y + Scale(16)});
     CreateChild(dialog, L"STATIC", value.c_str(), SS_LEFT | SS_NOPREFIX | SS_ENDELLIPSIS, id, {pad + labelWidth + Scale(8), y, width - pad, y + Scale(16)});
     y += Scale(20);
@@ -282,7 +281,8 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
                                     {pad, y, width - pad, y + Scale(16)});
         y += Scale(22);
     }
-    HeaderLine(dialog, pad, y, width, core::T(PE_TEXT_UI_FIELD_FROM), Text(send->from));
+    int labelWidth = LabelWidth({core::T(PE_TEXT_UI_FIELD_FROM), core::T(PE_TEXT_UI_FIELD_SUBJECT)}, 64, 4);
+    HeaderLine(dialog, pad, y, width, labelWidth, core::T(PE_TEXT_UI_FIELD_FROM), Text(send->from));
     // every recipient on a row of its own, address first, so a name can not hide where it goes
     HWND list = CreateReportList(dialog, IDC_AGENT_RECIPIENTS, {pad, y, width - pad, y + listHeight});
     AddColumn(list, 0, L"", 40);
@@ -298,9 +298,9 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
     }
     ListView_SetColumnWidth(list, 3, LVSCW_AUTOSIZE_USEHEADER);
     y += listHeight + Scale(8);
-    HeaderLine(dialog, pad, y, width, core::T(PE_TEXT_UI_FIELD_SUBJECT), Text(send->subject));
+    HeaderLine(dialog, pad, y, width, labelWidth, core::T(PE_TEXT_UI_FIELD_SUBJECT), Text(send->subject));
     if (!original.empty()) {
-        HeaderLine(dialog, pad, y, width, L"", original);
+        HeaderLine(dialog, pad, y, width, labelWidth, L"", original);
     }
     y += Scale(4);
     CreateChild(dialog, L"EDIT", WithCrlf(Text(send->text)).c_str(), WS_TABSTOP | WS_VSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL, IDC_AGENT_BODY,
@@ -312,7 +312,7 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
         y += Scale(16);
     }
     y += Scale(14);
-    std::wstring sendLabel = core::T(PE_TEXT_WIN_SEND), editFirst = core::T(PE_TEXT_WIN_EDIT_FIRST), dontSend = core::T(PE_TEXT_WIN_DONT_SEND);
+    std::wstring sendLabel = core::T(PE_TEXT_WIN_SEND), editFirst = core::T(PE_TEXT_UI_EDIT_FIRST), dontSend = core::T(PE_TEXT_WIN_DONT_SEND);
     int button = ButtonWidth({sendLabel, editFirst, dontSend}, 110);
     state.send = CreateChild(dialog, L"BUTTON", sendLabel.c_str(), WS_TABSTOP | WS_DISABLED, IDC_AGENT_SEND,
                              {width - pad - 3 * button - 2 * Scale(8), y, width - pad - 2 * button - 2 * Scale(8), y + Scale(25)});
@@ -563,12 +563,12 @@ void AgentsDialog(HWND owner, PeCore* core) {
     HWND dialog = CreateModalWindow(owner, kAgentsClass, core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), width, height);
     AgentsState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
-    std::wstring change = core::T(PE_TEXT_WIN_CHANGE), remove = core::T(PE_TEXT_WIN_REMOVE_FILE), undo = core::T(PE_TEXT_CMD_UNDO);
-    std::wstring clear = core::T(PE_TEXT_WIN_CLEAR), close = core::T(PE_TEXT_UI_CLOSE), setup = core::T(PE_TEXT_WIN_HOW_TO_CONNECT);
+    std::wstring change = core::T(PE_TEXT_WIN_CHANGE), remove = core::T(PE_TEXT_UI_REMOVE), undo = core::T(PE_TEXT_CMD_UNDO);
+    std::wstring clear = core::T(PE_TEXT_UI_CLEAR_BUTTON), close = core::T(PE_TEXT_UI_CLOSE), setup = core::T(PE_TEXT_WIN_HOW_TO_CONNECT);
     int button = ButtonWidth({change, remove, undo, clear, close}, 100);
     int listRight = width - pad - button - Scale(10);
     int y = pad;
-    state.enabled = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_LET_AGENTS_CONNECT).c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_AGENTS_ENABLED,
+    state.enabled = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_LET_AGENTS_CONNECT).c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_AGENTS_ENABLED,
                                 {pad, y, width - pad, y + Scale(20)});
     y += Scale(28);
     CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_AGENT_PROGRAMS).c_str(), SS_LEFT, 0, {pad, y, listRight, y + Scale(16)});

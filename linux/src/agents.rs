@@ -121,7 +121,10 @@ pub async fn question(request: u64) {
                 &heading,
                 &body,
                 &form.widget,
-                &[("deny", t!(UiDontAllow).as_str()), ("allow", t!(UiAllow).as_str())],
+                &[
+                    ("deny", t!(UiDontAllow).as_str()),
+                    ("allow", crate::words::plain(crate::words::Text::UiAllow).as_str()),
+                ],
                 "agent-connect",
             );
             dialog.set_response_appearance("allow", adw::ResponseAppearance::Suggested);
@@ -143,7 +146,7 @@ pub async fn question(request: u64) {
                 &extra,
                 &[
                     ("dont", t!(UiDontSend).as_str()),
-                    ("compose", t!(UiEditFirst).as_str()),
+                    ("compose", crate::words::plain(crate::words::Text::UiEditFirst).as_str()),
                     ("send", t!(UiTbSend).as_str()),
                 ],
                 "agent-send",
@@ -362,8 +365,8 @@ impl AgentsDialog {
             &form.widget,
             &[
                 ("cancel", t!(UiCancel).as_str()),
-                ("away", t!(UiTurnAway).as_str()),
-                ("allow", t!(UiAllow).as_str()),
+                ("away", crate::words::plain(crate::words::Text::UiTurnAway).as_str()),
+                ("allow", crate::words::plain(crate::words::Text::UiAllow).as_str()),
             ],
             "agent-access",
         );
@@ -454,7 +457,9 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
         button.set_widget_name(name);
         button
     };
-    let enabled = adw::SwitchRow::builder().title(t!(UiLetAgentsConnect)).build();
+    let enabled = adw::SwitchRow::builder()
+        .title(crate::words::plain(crate::words::Text::UiLetAgentsConnect))
+        .build();
     enabled.set_widget_name("agents-enabled");
     let switch = gtk::ListBox::new();
     switch.add_css_class("boxed-list");
@@ -471,9 +476,9 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
         host_ids: RefCell::default(),
         entries: RefCell::default(),
         change: button(&t!(UiChangeButton), "agents-change"),
-        remove: button(&t!(UiRemove), "agents-remove"),
+        remove: button(&crate::words::plain(crate::words::Text::UiRemove), "agents-remove"),
         undo: button(&t!(UiUndoButton), "agents-undo"),
-        clear: button(&t!(UiClearButton), "agents-clear"),
+        clear: button(&crate::words::plain(crate::words::Text::UiClearButton), "agents-clear"),
     });
     agents.dialog.set_widget_name("agents-dialog");
     let setup = button(&t!(UiHowToConnect), "agents-setup");

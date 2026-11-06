@@ -253,7 +253,7 @@ public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr par
 [void][Native.Win]::SetProcessDPIAware()
 
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
-$WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
+$WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $CB_GETCOUNT = 0x0146; $CB_GETLBTEXT = 0x0148; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
 $VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
@@ -2744,7 +2744,7 @@ public static class Dragger {
     # ---- Options and the language ----
 
     Step 'Options and the language'
-    $IDM_OPTIONS = 137; $IDC_OPTIONS_LANGUAGE = 660; $IDC_OPTIONS_NOTIFY = 661; $CB_GETLBTEXT = 0x0148; $CB_GETCOUNT = 0x0146
+    $IDM_OPTIONS = 137; $IDC_OPTIONS_LANGUAGE = 660; $IDC_OPTIONS_NOTIFY = 661
     Command $main $IDM_OPTIONS
     $options = WaitShown 'InboxClassicOptions'
     Check ($null -ne $options) 'Tools > Options opens'
@@ -3012,10 +3012,7 @@ public static bool HasIcon(IntPtr window) {
         }
 
         Command $main $IDM_NEW_ACCOUNT
-        $form = WaitFor {
-            $f = [Native.Win]::FindWindow('InboxClassicAccountStart', [NullString]::Value)
-            if ($f -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($f)) { $f }
-        } 10
+        $form = WaitShown 'InboxClassicAccountStart' 10
         Check ($null -ne $form) 'Add Mail Account opens'
         if ($form) {
             CheckPseudo $form 'the account form'

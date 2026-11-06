@@ -52,6 +52,8 @@ std::string Narrow(std::wstring_view utf16);
 std::wstring Version();
 
 // a word of the catalogs (core/locales) in the language in use, `&` marking a menu letter as the catalog has it
+// Sets the language of the words (once, at start), and forgets the words looked up before
+void SetLanguage(const std::wstring& code);
 std::wstring T(PeText text);
 // the same without the menu letter marks
 std::wstring Plain(PeText text);

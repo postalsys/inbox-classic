@@ -62,6 +62,11 @@ pub fn plain(text: Text) -> String {
     pe_core::i18n::without_mnemonic(&tr(text))
 }
 
+/// Command `text` as the title of the window it opens, without its trailing dots
+pub fn title(text: Text) -> String {
+    pe_core::i18n::title(text)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

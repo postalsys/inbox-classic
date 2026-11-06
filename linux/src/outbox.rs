@@ -70,7 +70,7 @@ pub async fn outbox_dialog(parent: &impl IsA<gtk::Widget>) {
         });
         button
     };
-    let send_now = button(&t!(UiOutboxSendAll), "send");
+    let send_now = button(&crate::words::plain(crate::words::Text::UiOutboxSendAll), "send");
     let delete = button(&t!(UiTbDelete), "delete");
     fill(&list, &ids, 0, &[&send_now, &delete]);
     let keys = gtk::EventControllerKey::new();

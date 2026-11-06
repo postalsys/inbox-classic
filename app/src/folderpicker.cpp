@@ -158,7 +158,7 @@ void Layout(PickerState& state) {
     int buttonTop = client.bottom - pad - buttonHeight;
     MoveWindow(state.tree, pad, top, width, buttonTop - Scale(10) - top, TRUE);
     // the buttons as wide as their words need, at least the usual width
-    auto widthOf = [](HWND button) { return std::max(Scale(80), TextWidth(button, nullptr) + Scale(24)); };
+    auto widthOf = [](HWND button) { return ButtonWidth({GetWindowString(button)}); };
     int cancelWidth = widthOf(state.cancel), okWidth = widthOf(state.ok), newWidth = widthOf(state.newFolder);
     MoveWindow(state.cancel, client.right - pad - cancelWidth, buttonTop, cancelWidth, buttonHeight, TRUE);
     MoveWindow(state.ok, client.right - pad - cancelWidth - Scale(6) - okWidth, buttonTop, okWidth, buttonHeight, TRUE);

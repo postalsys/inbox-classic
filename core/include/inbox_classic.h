@@ -2100,6 +2100,10 @@ char *pe_text(uint32_t text);
 // [`pe_text`] without the menu letter marks, as the Mac shows a word. Free with `pe_string_free`.
 char *pe_text_plain(uint32_t text);
 
+// Command `text` as the title of the window it opens, without its menu letter and its trailing dots. Free with
+// `pe_string_free`.
+char *pe_text_title(uint32_t text);
+
 // Word `text` with its placeables filled: `names[i]` is `values[i]`, a value that is a whole number passed as a number
 // (plurals choose by it). Free with `pe_string_free`.
 //

@@ -112,37 +112,60 @@ void RegisterDialogClass(const wchar_t* name, WNDPROC proc) {
     RegisterClassExW(&windowClass);
 }
 
-int TextWidth(HWND control, HFONT font) {
-    std::wstring text = GetWindowString(control);
-    text.erase(std::remove(text.begin(), text.end(), L'&'), text.end());
-    HDC dc = GetDC(control);
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
-    SIZE size = {};
-    GetTextExtentPoint32W(dc, text.c_str(), static_cast<int>(text.size()), &size);
-    SelectObject(dc, old);
-    ReleaseDC(control, dc);
-    return static_cast<int>(size.cx);
-}
-
-SIZE MeasureText(const std::wstring& text, int wrapWidth) {
+namespace {
+// `text` without its menu letter marks, measured in `font` (the dialog font when null), wrapped at `wrapWidth` if set
+SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0) {
     std::wstring plain = text;
     plain.erase(std::remove(plain.begin(), plain.end(), L'&'), plain.end());
-    HDC dc = GetDC(nullptr);
-    HGDIOBJ old = SelectObject(dc, GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
     RECT bounds = {0, 0, wrapWidth > 0 ? wrapWidth : 0, 0};
     DrawTextW(dc, plain.c_str(), static_cast<int>(plain.size()), &bounds,
               DT_CALCRECT | DT_NOPREFIX | (wrapWidth > 0 ? DT_WORDBREAK : DT_SINGLELINE));
     SelectObject(dc, old);
-    ReleaseDC(nullptr, dc);
     return {bounds.right - bounds.left, bounds.bottom - bounds.top};
 }
 
-int ButtonWidth(std::initializer_list<std::wstring> labels, int least) {
+// the widest of `labels` plus `margin`, at least `least`, measured in one screen DC
+template <typename Labels>
+int Widest(const Labels& labels, int least, int margin) {
+    HDC dc = GetDC(nullptr);
     int width = Scale(least);
     for (const std::wstring& label : labels) {
-        width = std::max(width, static_cast<int>(MeasureText(label).cx) + Scale(20));
+        width = std::max(width, static_cast<int>(Measure(dc, nullptr, label).cx) + Scale(margin));
     }
+    ReleaseDC(nullptr, dc);
     return width;
+}
+}  // namespace
+
+int TextWidth(HWND control, HFONT font) {
+    HDC dc = GetDC(control);
+    int width = static_cast<int>(Measure(dc, font, GetWindowString(control)).cx);
+    ReleaseDC(control, dc);
+    return width;
+}
+
+SIZE MeasureText(const std::wstring& text, int wrapWidth) {
+    HDC dc = GetDC(nullptr);
+    SIZE size = Measure(dc, nullptr, text, wrapWidth);
+    ReleaseDC(nullptr, dc);
+    return size;
+}
+
+int ButtonWidth(std::initializer_list<std::wstring> labels, int least) {
+    return Widest(labels, least, 20);
+}
+
+int ButtonWidth(const std::vector<std::wstring>& labels, int least) {
+    return Widest(labels, least, 20);
+}
+
+int LabelWidth(std::initializer_list<std::wstring> labels, int least, int margin) {
+    return Widest(labels, least, margin);
+}
+
+int LabelWidth(const std::vector<std::wstring>& labels, int least, int margin) {
+    return Widest(labels, least, margin);
 }
 
 void SetScaleWindow(HWND window) {
@@ -686,11 +709,7 @@ std::wstring MenuText(std::wstring text) {
     return text;
 }
 
-std::wstring MenuItem(PeText text, std::wstring_view keys) {
-    std::wstring item = core::T(text);
-    if (keys.empty()) {
-        return item;
-    }
+std::wstring Shortcut(std::wstring_view keys) {
     static const std::pair<const wchar_t*, PeText> names[] = {
         {L"Ctrl", PE_TEXT_KEY_CTRL}, {L"Shift", PE_TEXT_KEY_SHIFT}, {L"Alt", PE_TEXT_KEY_ALT},
         {L"Del", PE_TEXT_KEY_DEL},   {L"Enter", PE_TEXT_KEY_ENTER},
@@ -712,7 +731,12 @@ std::wstring MenuItem(PeText text, std::wstring_view keys) {
         }
         start = end + 1;
     }
-    return item + L"\t" + shortcut;
+    return shortcut;
+}
+
+std::wstring MenuItem(PeText text, std::wstring_view keys) {
+    std::wstring item = core::T(text);
+    return keys.empty() ? item : item + L"\t" + Shortcut(keys);
 }
 
 HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
@@ -831,8 +855,9 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
 std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter) {
     std::vector<wchar_t> buffer(65536, L'\0');
     OPENFILENAMEW dialog = {sizeof(dialog)};
+    std::wstring allFiles = FileFilter({{core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}});
     dialog.hwndOwner = owner;
-    dialog.lpstrFilter = filter;
+    dialog.lpstrFilter = filter ? filter : allFiles.c_str();
     dialog.lpstrFile = buffer.data();
     dialog.nMaxFile = static_cast<DWORD>(buffer.size());
     dialog.lpstrTitle = title;

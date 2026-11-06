@@ -84,7 +84,7 @@ LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 bool AskRestart(HWND owner, const std::wstring& name) {
     RegisterDialogClass(kRestartClass, OptionsProc);
     std::wstring text = core::T(PE_TEXT_WIN_RESTART_ASK, {{"language", name}});
-    std::wstring now = core::T(PE_TEXT_WIN_RESTART_NOW), later = core::T(PE_TEXT_WIN_RESTART_LATER);
+    std::wstring now = core::T(PE_TEXT_UI_RESTART_NOW), later = core::T(PE_TEXT_UI_RESTART_LATER);
     int pad = Scale(12), width = Scale(360);
     int textHeight = std::max(Scale(32), static_cast<int>(MeasureText(text, width - 2 * pad).cy));
     int buttonWidth = ButtonWidth({now, later});
@@ -108,7 +108,7 @@ void StartLanguage(const std::wstring& forced) {
     if (code.empty()) {
         code = SystemLanguage();
     }
-    core::String used(pe_set_language(core::Narrow(code).c_str()));
+    core::SetLanguage(code);
 }
 
 bool OptionsDialog(HWND owner, bool& notify) {

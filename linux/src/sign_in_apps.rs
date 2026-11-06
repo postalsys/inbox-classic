@@ -180,7 +180,7 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
     let group = adw::PreferencesGroup::new();
     let name = entry_row(&t!(UiColName), &text(|a| &a.name), "app-name");
     let issuer = entry_row(&t!(UiColIssuer), &text(|a| &a.issuer), "app-issuer");
-    let check = gtk::Button::with_label(&t!(UiCheck));
+    let check = gtk::Button::with_label(&crate::words::plain(crate::words::Text::UiCheck));
     check.set_valign(gtk::Align::Center);
     check.set_widget_name("app-check");
     issuer.add_suffix(&check);
@@ -219,7 +219,7 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
     let registration = adw::PreferencesGroup::builder().title(t!(UiRegisterIt)).build();
     let redirect = entry_row(&t!(GtkRedirectUri), "", "app-redirect");
     redirect.set_editable(false);
-    let copy = gtk::Button::with_label(&t!(UiButtonCopy));
+    let copy = gtk::Button::with_label(&crate::words::plain(crate::words::Text::UiButtonCopy));
     copy.set_valign(gtk::Align::Center);
     redirect.add_suffix(&copy);
     registration.add(&register);
@@ -301,10 +301,20 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, app: Option<(i64, SignInApp)
                 let issuer = editor.issuer.text().trim().to_string();
                 match check_issuer(&dialog, &issuer).await {
                     Ok(found) => {
-                        ui::alert(&dialog, &t!(UiCheck), &t!(GtkIssuerUsable, found = &found)).await;
+                        ui::alert(
+                            &dialog,
+                            &crate::words::plain(crate::words::Text::UiCheck),
+                            &t!(GtkIssuerUsable, found = &found),
+                        )
+                        .await;
                     }
                     Err(reason) if !reason.is_empty() => {
-                        ui::alert(&dialog, &t!(UiCheck), &t!(UiIssuerUnusable, reason = &reason)).await;
+                        ui::alert(
+                            &dialog,
+                            &crate::words::plain(crate::words::Text::UiCheck),
+                            &t!(UiIssuerUnusable, reason = &reason),
+                        )
+                        .await;
                     }
                     Err(_) => {}
                 }
@@ -474,7 +484,7 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
     };
     let add = button(&t!(GtkAccountsAdd), "add");
     let edit = button(&t!(GtkEditButton), "edit");
-    let remove = button(&t!(UiRemove), "remove");
+    let remove = button(&crate::words::plain(crate::words::Text::UiRemove), "remove");
     let buttons = gtk::Box::new(gtk::Orientation::Vertical, 6);
     buttons.append(&add);
     buttons.append(&edit);

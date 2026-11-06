@@ -1483,7 +1483,11 @@ impl Mailbox {
         let request = crate::move_dialog::Request {
             title: summary.move_title(copy),
             prompt: summary.move_prompt(copy),
-            verb: if copy { t!(UiButtonCopy) } else { t!(UiButtonMove) },
+            verb: if copy {
+                crate::words::plain(crate::words::Text::UiButtonCopy)
+            } else {
+                crate::words::plain(crate::words::Text::UiButtonMove)
+            },
             // the folder they are all in is no choice
             current: (summary.folders == 1).then_some(first.folder),
         };
@@ -1725,7 +1729,7 @@ impl Mailbox {
             .map(|v| v.subject.clone())
             .unwrap_or_default();
         let title = if subject.is_empty() {
-            t!(UiProperties)
+            crate::words::plain(crate::words::Text::UiProperties)
         } else {
             t!(UiPropertiesOf, subject = &subject)
         };
@@ -1807,7 +1811,10 @@ impl Mailbox {
                 }
             });
             group.add_action(&action);
-            open.append(Some(&t!(UiMenuOpen)), Some("message.open"));
+            open.append(
+                Some(&crate::words::plain(crate::words::Text::UiMenuOpen)),
+                Some("message.open"),
+            );
             menu.append_section(None, &open);
         }
         let answer = gio::Menu::new();
@@ -1827,7 +1834,7 @@ impl Mailbox {
             None,
         );
         // the colours and Clear Flag; the Flag Message toggle is the primary menu's, with its key
-        organize.append_submenu(Some(&t!(UiMenuFlag)), &flag_menu());
+        organize.append_submenu(Some(&crate::words::plain(crate::words::Text::UiMenuFlag)), &flag_menu());
         add(
             &organize,
             if summary.in_junk {
@@ -1846,7 +1853,11 @@ impl Mailbox {
         add(&files, Command::Print, None);
         menu.append_section(None, &files);
         let details = gio::Menu::new();
-        add(&details, Command::ViewSource, Some(&t!(UiMenuViewSource)));
+        add(
+            &details,
+            Command::ViewSource,
+            Some(&crate::words::plain(crate::words::Text::UiMenuViewSource)),
+        );
         add(&details, Command::Properties, None);
         menu.append_section(None, &details);
         widget.insert_action_group("message", Some(&group));
@@ -2154,7 +2165,7 @@ fn primary_menu() -> (gio::Menu, gio::Menu) {
             submenu.append_item(&menu_item(command.label(), *command));
             // the colours beside the flag
             if *command == Command::Flag {
-                submenu.append_submenu(Some(&t!(UiMenuFlag)), &flag_menu());
+                submenu.append_submenu(Some(&crate::words::plain(crate::words::Text::UiMenuFlag)), &flag_menu());
             }
         }
         sections.append_submenu(Some(&plain(name)), &submenu);
@@ -2197,7 +2208,10 @@ fn flag_menu() -> gio::Menu {
     }
     menu.append_section(None, &colors);
     let clear = gio::Menu::new();
-    clear.append(Some(&t!(UiClearFlag)), Some(&format!("win.{FLAG_CLEAR}")));
+    clear.append(
+        Some(&crate::words::plain(crate::words::Text::UiClearFlag)),
+        Some(&format!("win.{FLAG_CLEAR}")),
+    );
     menu.append_section(None, &clear);
     menu
 }
@@ -2326,7 +2340,5 @@ fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Label) {
 
 /// The title of Import's windows: the command's name without its dots
 fn import_title() -> String {
-    crate::words::plain(crate::words::Text::CmdImport)
-        .trim_end_matches(['.', '\u{2026}'])
-        .to_string()
+    crate::words::title(crate::words::Text::CmdImport)
 }

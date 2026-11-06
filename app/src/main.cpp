@@ -157,7 +157,7 @@ void UpdateMenu(HMENU menu) {
     bool inEdit = FocusedEdit() != nullptr;
     std::wstring label = inEdit ? std::wstring() : g_mailbox.UndoLabel();
     bool can = inEdit || !label.empty();
-    std::wstring text = label.empty() ? MenuItem(PE_TEXT_CMD_UNDO, L"Ctrl+Z") : L"&" + label + L"\t" + core::Plain(PE_TEXT_KEY_CTRL) + L"+Z";
+    std::wstring text = label.empty() ? MenuItem(PE_TEXT_CMD_UNDO, L"Ctrl+Z") : L"&" + label + L"\t" + Shortcut(L"Ctrl+Z");
     ModifyMenuW(menu, IDM_UNDO, MF_BYCOMMAND | MF_STRING | (can ? MF_ENABLED : MF_GRAYED), IDM_UNDO, text.c_str());
 }
 
@@ -474,7 +474,7 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_STRING, IDM_FORWARD, MenuItem(PE_TEXT_CMD_FORWARD, L"Ctrl+F").c_str());
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(compose, MF_STRING, IDM_FLAG, MenuItem(PE_TEXT_CMD_FLAG).c_str());
-    AppendMenuW(compose, MF_POPUP, reinterpret_cast<UINT_PTR>(g_mailbox.FlagMenu()), MenuItem(PE_TEXT_WIN_FLAG_MENU).c_str());
+    AppendMenuW(compose, MF_POPUP, reinterpret_cast<UINT_PTR>(g_mailbox.FlagMenu()), MenuItem(PE_TEXT_UI_MENU_FLAG).c_str());
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(compose, MF_STRING, IDM_JUNK, MenuItem(PE_TEXT_CMD_JUNK, L"Ctrl+J").c_str());
     AppendMenuW(compose, MF_STRING, IDM_NOT_JUNK, MenuItem(PE_TEXT_CMD_NOT_JUNK).c_str());
@@ -735,20 +735,27 @@ void ReadArguments() {
     }
     int count = 0;
     LPWSTR* argv = CommandLineToArgvW(line.c_str(), &count);
+    // what a restart passes on: the options this start had, but for --background and --language (a restart is how
+    // a language picked in Options takes effect)
+    auto keep = [](const std::wstring& arg) { g_arguments.restart += L" " + QuoteArgument(arg); };
     for (int i = 1; argv && i < count; i++) {
         std::wstring arg = argv[i];
-        if (arg != L"--background") {
-            g_arguments.restart += L" " + QuoteArgument(arg);
-        }
         if (arg == L"--language" && i + 1 < count) {
             g_arguments.language = argv[++i];
-            g_arguments.restart += L" " + QuoteArgument(g_arguments.language);
-        } else if (arg == L"--store" && i + 1 < count) {
+            continue;
+        }
+        if (arg != L"--background") {
+            keep(arg);
+        }
+        if (arg == L"--store" && i + 1 < count) {
             g_arguments.store = argv[++i];
+            keep(g_arguments.store);
         } else if (arg == L"--pin-certificate" && i + 1 < count) {
             g_arguments.certificate = argv[++i];
+            keep(g_arguments.certificate);
         } else if (arg == L"--sign-in-page-file" && i + 1 < count) {
-            SetSignInPageFile(argv[++i]);
+            keep(argv[++i]);
+            SetSignInPageFile(argv[i]);
         } else if (arg == L"--memory-passwords") {
             g_arguments.memoryPasswords = true;
         } else if (arg == L"--version") {

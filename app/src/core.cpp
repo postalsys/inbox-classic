@@ -2,6 +2,8 @@
 
 #include <windows.h>
 
+#include <mutex>
+#include <unordered_map>
 #include <vector>
 
 namespace core {
@@ -37,23 +39,39 @@ std::wstring Taken(char* text) {
 }
 }  // namespace
 
+namespace {
+// the words without placeables, looked up once: the language only changes with a restart, and menus and paints ask
+// for the same words again and again
+std::mutex g_wordsLock;
+std::unordered_map<uint32_t, std::wstring> g_words, g_plainWords;
+
+std::wstring Cached(std::unordered_map<uint32_t, std::wstring>& cache, PeText text, char* (*lookup)(uint32_t)) {
+    std::lock_guard lock(g_wordsLock);
+    auto found = cache.find(static_cast<uint32_t>(text));
+    if (found == cache.end()) {
+        found = cache.emplace(static_cast<uint32_t>(text), Taken(lookup(static_cast<uint32_t>(text)))).first;
+    }
+    return found->second;
+}
+}  // namespace
+
+void SetLanguage(const std::wstring& code) {
+    String used(pe_set_language(Narrow(code).c_str()));
+    std::lock_guard lock(g_wordsLock);
+    g_words.clear();
+    g_plainWords.clear();
+}
+
 std::wstring T(PeText text) {
-    return Taken(pe_text(static_cast<uint32_t>(text)));
+    return Cached(g_words, text, pe_text);
 }
 
 std::wstring Plain(PeText text) {
-    return Taken(pe_text_plain(static_cast<uint32_t>(text)));
+    return Cached(g_plainWords, text, pe_text_plain);
 }
 
 std::wstring Title(PeText text) {
-    std::wstring title = Plain(text);
-    for (std::wstring_view dots : {std::wstring_view(L"..."), std::wstring_view(L"\u2026")}) {
-        if (title.size() >= dots.size() && title.compare(title.size() - dots.size(), dots.size(), dots) == 0) {
-            title.resize(title.size() - dots.size());
-            break;
-        }
-    }
-    return title;
+    return Taken(pe_text_title(static_cast<uint32_t>(text)));
 }
 
 std::wstring T(PeText text, std::initializer_list<std::pair<const char*, std::wstring>> args) {

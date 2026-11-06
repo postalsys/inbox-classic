@@ -3,7 +3,6 @@
 
 ## Das Hauptfenster
 
-win-flag-menu = &Kennzeichnung
 win-still-running-detail = Es sucht hier weiter nach neuer E-Mail. Klicken Sie auf das Symbol, um es zu öffnen, oder klicken Sie mit der rechten Maustaste darauf, um es zu beenden.
 win-new-messages = { $count ->
     [one] { $count } neue Nachricht
@@ -32,13 +31,11 @@ win-too-many-files = Zu viele Dateien auf einmal: Wählen Sie weniger aus.
 
 ## Der Postausgang
 
-win-outbox-send-all = Alle jetzt &senden
 
 ## Das Fenster zum Schreiben
 
 win-editor-failed = Nachrichten können nicht geschrieben werden.
 win-ctrl-click-to-open = ({ $ctrl }+Klick zum Öffnen)
-win-remove-file = &Entfernen
 win-format-bold = Fett ({ $ctrl }+B)
 win-format-italic = Kursiv ({ $ctrl }+I)
 win-format-underline = Unterstrichen ({ $ctrl }+U)
@@ -78,15 +75,9 @@ win-attendees = { $count ->
     [one] { $count } Teilnehmer
    *[other] { $count } Teilnehmer
 }
-win-copy-button = &Kopieren
-win-move-button = &Verschieben
 win-new-folder-in-highlighted = Der neue Ordner kommt in den hervorgehobenen Ordner.
 win-delete-folder-ask = Den Ordner „{ $folder }“ mit seinen Nachrichten und den Ordnern darin löschen? Er wird auch auf dem Server gelöscht.
-win-clear-flag = Kennzeichnung &löschen
 win-rename = &Umbenennen...
-win-open = Ö&ffnen
-win-view-source = &Quelltext anzeigen
-win-properties = &Eigenschaften
 win-messages-not-saved = Die Nachrichten konnten nicht gespeichert werden.
 win-messages-not-forwarded = Die Nachrichten konnten nicht weitergeleitet werden.
 
@@ -104,27 +95,20 @@ win-sign-in-apps-button = &Anmelde-Apps...
 
 ## KI-Agenten
 
-win-allow = &Zulassen
 win-dont-allow = &Nicht zulassen
-win-turn-away = &Abweisen
 win-col-address = Adresse
 win-never-written-to = Nie angeschrieben
 win-send = &Senden
-win-edit-first = Zuerst &bearbeiten
 win-dont-send = &Nicht senden
 win-forget-program-ask = Dieses Programm vergessen und was seine Agenten getan haben? Beim nächsten Verbinden wird erneut gefragt.
 win-clear-log-ask = Die Liste dessen löschen, was Agenten getan haben? Was sie getan haben, bleibt getan.
-win-let-agents-connect = KI-Agenten die Verbindung mit Inbox Classic &erlauben
 win-agent-programs = &Programme, deren Agenten Ihre E-Mail verwenden wollten:
 win-change = Ä&ndern...
 win-what-agents-did = &Was Agenten getan haben:
-win-clear = &Leeren
 win-how-to-connect = So verbinden Sie einen Agenten
 
 ## Anmelde-Apps
 
-win-check-button = &Prüfen
-win-copy = &Kopieren
 win-built-in = (eingebaut)
 win-edit = &Bearbeiten...
 
@@ -134,5 +118,3 @@ win-options-language-label = Inbox Classic &anzeigen in:
 win-options-restart-note = Inbox Classic startet neu, um eine andere Sprache anzuzeigen.
 win-options-notify = Bei neuer E-Mail &benachrichtigen
 win-restart-ask = Inbox Classic zeigt { $language } nach einem Neustart an. Jetzt neu starten?
-win-restart-now = Jetzt &neu starten
-win-restart-later = &Später

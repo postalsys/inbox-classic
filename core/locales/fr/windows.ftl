@@ -3,7 +3,6 @@
 
 ## La fenêtre principale
 
-win-flag-menu = &Indicateur
 win-still-running-detail = Il continue à relever le courrier ici. Cliquez sur l'icône pour l'ouvrir, ou cliquez dessus avec le bouton droit pour le quitter.
 win-new-messages = { $count ->
     [one] { $count } nouveau message
@@ -32,13 +31,11 @@ win-too-many-files = Trop de fichiers à la fois : choisissez-en moins.
 
 ## La Boîte d'envoi
 
-win-outbox-send-all = &Tout envoyer maintenant
 
 ## La fenêtre de rédaction
 
 win-editor-failed = Les messages ne peuvent pas être rédigés.
 win-ctrl-click-to-open = ({ $ctrl }+clic pour ouvrir)
-win-remove-file = &Supprimer
 win-format-bold = Gras ({ $ctrl }+B)
 win-format-italic = Italique ({ $ctrl }+I)
 win-format-underline = Souligné ({ $ctrl }+U)
@@ -78,15 +75,9 @@ win-attendees = { $count ->
     [one] { $count } participant
    *[other] { $count } participants
 }
-win-copy-button = &Copier
-win-move-button = &Déplacer
 win-new-folder-in-highlighted = Le nouveau dossier est créé dans le dossier mis en évidence.
 win-delete-folder-ask = Supprimer le dossier « { $folder } » avec ses messages et les dossiers qu'il contient ? Il est aussi supprimé sur le serveur.
-win-clear-flag = &Effacer l'indicateur
 win-rename = &Renommer...
-win-open = &Ouvrir
-win-view-source = Afficher la &source
-win-properties = &Propriétés
 win-messages-not-saved = Les messages n'ont pas pu être enregistrés.
 win-messages-not-forwarded = Les messages n'ont pas pu être transférés.
 
@@ -104,27 +95,20 @@ win-sign-in-apps-button = Applications de &connexion...
 
 ## Agents d'IA
 
-win-allow = &Autoriser
 win-dont-allow = &Ne pas autoriser
-win-turn-away = &Refuser
 win-col-address = Adresse
 win-never-written-to = Jamais écrit
 win-send = &Envoyer
-win-edit-first = &Modifier d'abord
 win-dont-send = &Ne pas envoyer
 win-forget-program-ask = Oublier ce programme et ce que ses agents ont fait ? La question sera reposée à sa prochaine connexion.
 win-clear-log-ask = Effacer la liste de ce que les agents ont fait ? Ce qu'ils ont fait reste fait.
-win-let-agents-connect = &Laisser les agents d'IA se connecter à Inbox Classic
 win-agent-programs = &Programmes dont les agents ont demandé à utiliser votre courrier :
 win-change = &Modifier...
 win-what-agents-did = Ce que les agents ont &fait :
-win-clear = &Effacer
 win-how-to-connect = Comment connecter un agent
 
 ## Applications de connexion
 
-win-check-button = &Vérifier
-win-copy = &Copier
 win-built-in = (intégrée)
 win-edit = &Modifier...
 
@@ -134,5 +118,3 @@ win-options-language-label = &Afficher Inbox Classic en :
 win-options-restart-note = Inbox Classic redémarre pour afficher une autre langue.
 win-options-notify = &Me prévenir de l'arrivée de nouveaux messages
 win-restart-ask = Inbox Classic s'affichera dans la langue choisie ({ $language }) après un redémarrage. Redémarrer maintenant ?
-win-restart-now = &Redémarrer maintenant
-win-restart-later = &Plus tard

@@ -498,8 +498,7 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     std::wstring cancel = core::T(PE_TEXT_UI_CANCEL), off = core::T(PE_TEXT_UI_OFF_HERE), why = core::T(PE_TEXT_UI_WHY);
     int pad = Scale(10), width = Scale(440), rowHeight = Scale(22);
     // the labels and the texts measured: longer words make the column and the rows grow, not get cut
-    int labelWidth = std::max({Scale(110), static_cast<int>(MeasureText(nameLabel).cx) + Scale(8),
-                               static_cast<int>(MeasureText(emailLabel).cx) + Scale(8)});
+    int labelWidth = LabelWidth({nameLabel, emailLabel}, 110);
     int introHeight = std::max(Scale(30), static_cast<int>(MeasureText(offer.intro, width - 2 * pad).cy) + Scale(4));
     int otherTextHeight = std::max(Scale(30), static_cast<int>(MeasureText(other, width - 2 * pad).cy) + Scale(4));
     int buttonHeight = Scale(40), gap = Scale(12), reasonHeight = Scale(18), linkHeight = Scale(20);
@@ -967,14 +966,15 @@ bool AccountsDialog(HWND owner, PeCore* core) {
     Button buttons[] = {{IDC_ACCOUNT_ADD, core::T(PE_TEXT_WIN_ADD)},
                         {IDC_ACCOUNT_PROPERTIES, core::T(PE_TEXT_WIN_PROPERTIES_BUTTON)},
                         {IDC_ACCOUNT_SIGNATURE, core::T(PE_TEXT_WIN_SIGNATURE_BUTTON)},
-                        {IDC_ACCOUNT_REMOVE, core::T(PE_TEXT_WIN_REMOVE_FILE)},
+                        {IDC_ACCOUNT_REMOVE, core::T(PE_TEXT_UI_REMOVE)},
                         {IDC_ACCOUNT_SIGN_IN_APPS, core::T(PE_TEXT_WIN_SIGN_IN_APPS_BUTTON)}};
     std::wstring close = core::T(PE_TEXT_UI_CLOSE);
     // the column of buttons as wide as the longest of them
-    int buttonWidth = ButtonWidth({close}, 100);
+    std::vector<std::wstring> words = {close};
     for (const Button& button : buttons) {
-        buttonWidth = std::max(buttonWidth, ButtonWidth({button.text}, 100));
+        words.push_back(button.text);
     }
+    int buttonWidth = ButtonWidth(words, 100);
     int listRight = width - pad - buttonWidth - pad;
     state.list = CreateReportList(dialog, IDC_ACCOUNT_LIST, {pad, pad, listRight, height - pad});
     AddColumn(state.list, COL_NAME, core::T(PE_TEXT_UI_COL_ACCOUNT).c_str(), 120);

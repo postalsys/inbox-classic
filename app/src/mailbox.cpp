@@ -1574,7 +1574,7 @@ void Mailbox::MoveSelected(HWND owner, bool copy) {
     pick.core = core_;
     pick.title = Text(core::String(pe_selection_move_text(&summary_, copy, false)).get());
     pick.prompt = Text(core::String(pe_selection_move_text(&summary_, copy, true)).get());
-    pick.verb = core::T(copy ? PE_TEXT_WIN_COPY_BUTTON : PE_TEXT_WIN_MOVE_BUTTON);
+    pick.verb = core::T(copy ? PE_TEXT_UI_BUTTON_COPY : PE_TEXT_UI_BUTTON_MOVE);
     // the folder they are all in is shown but not offered; from several folders, any
     pick.current = summary_.folders == 1 ? first : 0;
     pick.newFolder = [this](HWND window, int64_t account, int64_t parent) {
@@ -1637,7 +1637,7 @@ HMENU Mailbox::FlagMenu() {
         InsertMenuItemW(menu, color - 1, TRUE, &item);
     }
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, IDM_FLAG_CLEAR, MenuItem(PE_TEXT_WIN_CLEAR_FLAG).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_FLAG_CLEAR, MenuItem(PE_TEXT_UI_CLEAR_FLAG).c_str());
     // its checks and greying as it opens (WM_INITMENUPOPUP)
     return menu;
 }
@@ -2069,7 +2069,7 @@ void Mailbox::MessageMenu(POINT screen) {
     bool draft = SelectedCount() == 1 && draftFolders_.contains(message->folder);
     HMENU menu = CreatePopupMenu();
     if (draft) {
-        AppendMenuW(menu, MF_STRING, IDOK, MenuItem(PE_TEXT_WIN_OPEN).c_str());
+        AppendMenuW(menu, MF_STRING, IDOK, MenuItem(PE_TEXT_UI_MENU_OPEN).c_str());
         SetMenuDefaultItem(menu, IDOK, FALSE);
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     }
@@ -2081,7 +2081,7 @@ void Mailbox::MessageMenu(POINT screen) {
     bool read = summary_.unread == 0;
     AppendMenuW(menu, MF_STRING, read ? IDM_MARK_UNREAD : IDM_MARK_READ, MenuItem(read ? PE_TEXT_CMD_MARK_UNREAD : PE_TEXT_CMD_MARK_READ).c_str());
     // the colours and Clear Flag (the menu bar keeps Flag Message, its shortcut, beside it)
-    AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(FlagMenu()), MenuItem(PE_TEXT_WIN_FLAG_MENU).c_str());
+    AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(FlagMenu()), MenuItem(PE_TEXT_UI_MENU_FLAG).c_str());
     bool junk = summary_.in_junk;
     AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, MenuItem(junk ? PE_TEXT_CMD_NOT_JUNK : PE_TEXT_CMD_JUNK).c_str());
     AppendMenuW(menu, MF_STRING, IDM_MOVE, MenuItem(PE_TEXT_CMD_MOVE).c_str());
@@ -2091,8 +2091,8 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING, IDM_SAVE_AS, MenuItem(PE_TEXT_WIN_SAVE_AS_BUTTON).c_str());
     AppendMenuW(menu, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_WIN_VIEW_SOURCE).c_str());
-    AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_WIN_PROPERTIES).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_UI_MENU_VIEW_SOURCE).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_UI_PROPERTIES).c_str());
     lastMenu_ = menu;
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     lastMenu_ = nullptr;

@@ -259,16 +259,13 @@ int64_t SignInAppEditor(HWND owner, PeCore* core, const PeSignInApp* app) {
     state.id = app ? app->id : 0;
     state.hadSecret = app && app->has_secret;
     enum Label { FILL, NAME, ISSUER, CLIENT_ID, SECRET, SCOPES, IMAP, SMTP, REDIRECT };
-    std::wstring labels[] = {core::T(PE_TEXT_UI_FILL_IN_FOR),   core::T(PE_TEXT_UI_APP_NAME),    core::T(PE_TEXT_UI_ISSUER),
+    std::vector<std::wstring> labels = {core::T(PE_TEXT_UI_FILL_IN_FOR),   core::T(PE_TEXT_UI_APP_NAME),    core::T(PE_TEXT_UI_ISSUER),
                              core::T(PE_TEXT_UI_CLIENT_ID),     core::T(PE_TEXT_UI_CLIENT_SECRET), core::T(PE_TEXT_UI_SCOPES),
                              core::T(PE_TEXT_UI_IMAP_SERVER),   core::T(PE_TEXT_UI_SMTP_SERVER), core::T(PE_TEXT_UI_REDIRECT_URI)};
-    std::wstring intro = core::T(PE_TEXT_UI_SIGN_IN_APP_INTRO), check = core::T(PE_TEXT_WIN_CHECK_BUTTON), copy = core::T(PE_TEXT_WIN_COPY);
+    std::wstring intro = core::T(PE_TEXT_UI_SIGN_IN_APP_INTRO), check = core::T(PE_TEXT_UI_CHECK), copy = core::T(PE_TEXT_UI_BUTTON_COPY);
     std::wstring ok = core::T(PE_TEXT_UI_OK), cancel = core::T(PE_TEXT_UI_CANCEL);
     int pad = Scale(10), width = Scale(500), row = Scale(28);
-    int labelWidth = Scale(110);
-    for (const std::wstring& label : labels) {
-        labelWidth = std::max(labelWidth, static_cast<int>(MeasureText(label).cx) + Scale(8));
-    }
+    int labelWidth = LabelWidth(labels, 110);
     // the inputs keep their room when the labels are long
     width = std::max(width, pad + labelWidth + Scale(370) + pad);
     int introHeight = std::max(Scale(32), static_cast<int>(MeasureText(intro, width - 2 * pad).cy) + Scale(2));
@@ -512,7 +509,7 @@ void SignInAppsDialog(HWND owner, PeCore* core) {
         WORD id;
         std::wstring text;
     };
-    Button buttons[] = {{IDC_APPS_ADD, core::T(PE_TEXT_WIN_ADD)}, {IDC_APPS_EDIT, core::T(PE_TEXT_WIN_EDIT)}, {IDC_APPS_REMOVE, core::T(PE_TEXT_WIN_REMOVE_FILE)}};
+    Button buttons[] = {{IDC_APPS_ADD, core::T(PE_TEXT_WIN_ADD)}, {IDC_APPS_EDIT, core::T(PE_TEXT_WIN_EDIT)}, {IDC_APPS_REMOVE, core::T(PE_TEXT_UI_REMOVE)}};
     std::wstring close = core::T(PE_TEXT_UI_CLOSE);
     int buttonWidth = ButtonWidth({buttons[0].text, buttons[1].text, buttons[2].text, close}, 100);
     int listRight = width - pad - buttonWidth - pad;

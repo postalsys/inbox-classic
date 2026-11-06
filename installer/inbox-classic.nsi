@@ -69,8 +69,6 @@ VIAddVersionKey "LegalCopyright" "Copyright (c) ${PUBLISHER}"
 
 Var InstalledVersion
 Var WelcomeText
-; the code of the language chosen for the installer, the app's language on a first install (app/src/options.cpp)
-Var LanguageCode
 
 !define MUI_ABORTWARNING
 ; the app's own icon for the installer and the uninstaller (makensis runs from the repository root, -NOCD)
@@ -104,6 +102,13 @@ Var LanguageCode
 !insertmacro MUI_RESERVEFILE_LANGDLL
 
 ; the installer's own words in each language; ${PRODUCT} and the versions are filled in
+; the code of the language chosen for the installer, the app's language on a first install (app/src/options.cpp)
+LangString LanguageCode ${LANG_ENGLISH} "en"
+LangString LanguageCode ${LANG_GERMAN} "de"
+LangString LanguageCode ${LANG_ESTONIAN} "et"
+LangString LanguageCode ${LANG_SPANISH} "es"
+LangString LanguageCode ${LANG_FRENCH} "fr"
+
 LangString StartApp ${LANG_ENGLISH} "Start ${PRODUCT}"
 LangString StartApp ${LANG_GERMAN} "${PRODUCT} starten"
 LangString StartApp ${LANG_ESTONIAN} "Käivita ${PRODUCT}"
@@ -196,18 +201,6 @@ Function .onInit
     ${IfNot} ${Silent}
         !insertmacro MUI_LANGDLL_DISPLAY
     ${EndIf}
-    ${Select} $LANGUAGE
-        ${Case} ${LANG_GERMAN}
-            StrCpy $LanguageCode "de"
-        ${Case} ${LANG_ESTONIAN}
-            StrCpy $LanguageCode "et"
-        ${Case} ${LANG_SPANISH}
-            StrCpy $LanguageCode "es"
-        ${Case} ${LANG_FRENCH}
-            StrCpy $LanguageCode "fr"
-        ${CaseElse}
-            StrCpy $LanguageCode "en"
-    ${EndSelect}
     ReadRegStr $InstalledVersion HKCU "${UNINSTKEY}" "DisplayVersion"
     ${If} $InstalledVersion == ""
         StrCpy $WelcomeText "$(WelcomeNew)"
@@ -255,7 +248,7 @@ Section "Install"
         ClearErrors
         ReadRegStr $0 HKCU "${REGKEY}" "Language"
         ${If} ${Errors}
-            WriteRegStr HKCU "${REGKEY}" "Language" "$LanguageCode"
+            WriteRegStr HKCU "${REGKEY}" "Language" "$(LanguageCode)"
         ${EndIf}
     ${EndIf}
     WriteRegStr HKCU "${UNINSTKEY}" "DisplayName" "${PRODUCT}"

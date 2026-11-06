@@ -3,7 +3,6 @@
 
 ## The main window
 
-win-flag-menu = Fla&g
 win-still-running-detail = It keeps checking for new mail here. Click the icon to open it, or right-click it to exit.
 win-new-messages = { $count ->
     [one] { $count } new message
@@ -32,13 +31,11 @@ win-too-many-files = Too many files at once: choose fewer.
 
 ## The Outbox
 
-win-outbox-send-all = &Send All Now
 
 ## The compose window
 
 win-editor-failed = Messages can not be written.
 win-ctrl-click-to-open = ({ $ctrl }+click to open)
-win-remove-file = &Remove
 win-format-bold = Bold ({ $ctrl }+B)
 win-format-italic = Italic ({ $ctrl }+I)
 win-format-underline = Underline ({ $ctrl }+U)
@@ -78,15 +75,9 @@ win-attendees = { $count ->
     [one] { $count } attendee
    *[other] { $count } attendees
 }
-win-copy-button = &Copy
-win-move-button = &Move
 win-new-folder-in-highlighted = The new folder goes in the highlighted folder.
 win-delete-folder-ask = Delete the folder "{ $folder }" with its messages and the folders in it? It is deleted on the server too.
-win-clear-flag = &Clear Flag
 win-rename = &Rename...
-win-open = &Open
-win-view-source = View &Source
-win-properties = Propert&ies
 win-messages-not-saved = The messages could not be saved.
 win-messages-not-forwarded = The messages could not be forwarded.
 
@@ -104,27 +95,20 @@ win-sign-in-apps-button = Sign-in A&pps...
 
 ## AI agents
 
-win-allow = &Allow
 win-dont-allow = &Don't Allow
-win-turn-away = &Turn Away
 win-col-address = Address
 win-never-written-to = Never written to
 win-send = &Send
-win-edit-first = &Edit First
 win-dont-send = &Don't Send
 win-forget-program-ask = Forget this program and what its agents did? It is asked about again the next time it connects.
 win-clear-log-ask = Clear the list of what agents did? What they did stays done.
-win-let-agents-connect = &Let AI agents connect to Inbox Classic
 win-agent-programs = &Programs whose agents asked to use your mail:
 win-change = &Change...
 win-what-agents-did = &What agents did:
-win-clear = C&lear
 win-how-to-connect = How to connect an agent
 
 ## Sign-in apps
 
-win-check-button = C&heck
-win-copy = &Copy
 win-built-in = (built-in)
 win-edit = &Edit...
 
@@ -134,5 +118,3 @@ win-options-language-label = &Show Inbox Classic in:
 win-options-restart-note = Inbox Classic restarts to show another language.
 win-options-notify = &Notify me when new mail arrives
 win-restart-ask = Inbox Classic shows { $language } once it restarts. Restart now?
-win-restart-now = &Restart Now
-win-restart-later = &Later

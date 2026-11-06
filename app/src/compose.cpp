@@ -261,7 +261,7 @@ void AddFiles(Compose* state, const std::vector<std::wstring>& files) {
 }
 
 void Attach(HWND hwnd, Compose* state) {
-    AddFiles(state, OpenFilesDialog(hwnd, core::Plain(PE_TEXT_UI_INSERT_ATTACHMENT).c_str(), FileFilter({{core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}}).c_str()));
+    AddFiles(state, OpenFilesDialog(hwnd, core::Plain(PE_TEXT_UI_INSERT_ATTACHMENT).c_str()));
 }
 
 // files dragged from Explorer onto the window
@@ -314,7 +314,7 @@ void FileMenu(HWND hwnd, Compose* state, LPARAM at) {
         return;
     }
     HMENU menu = CreatePopupMenu();
-    AppendMenuW(menu, MF_STRING, 1, MenuItem(PE_TEXT_WIN_REMOVE_FILE, L"Del").c_str());
+    AppendMenuW(menu, MF_STRING, 1, MenuItem(PE_TEXT_UI_REMOVE, L"Del").c_str());
     UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, point.x, point.y, 0, hwnd, nullptr);
     DestroyMenu(menu);
     if (chosen == 1) {

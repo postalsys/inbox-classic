@@ -3,7 +3,6 @@
 
 ## Põhiaken
 
-win-flag-menu = &Lipp
 win-still-running-detail = See kontrollib siin edasi uusi kirju. Avamiseks klõpsake ikooni, sulgemiseks paremklõpsake seda.
 win-new-messages = { $count ->
     [one] { $count } uus kiri
@@ -32,13 +31,11 @@ win-too-many-files = Liiga palju faile korraga: valige vähem.
 
 ## Väljundkaust
 
-win-outbox-send-all = &Saada kõik kohe
 
 ## Kirjutamise aken
 
 win-editor-failed = Kirju ei saa kirjutada.
 win-ctrl-click-to-open = ({ $ctrl }+klõps avab)
-win-remove-file = &Eemalda
 win-format-bold = Paks ({ $ctrl }+B)
 win-format-italic = Kaldkiri ({ $ctrl }+I)
 win-format-underline = Allakriipsutus ({ $ctrl }+U)
@@ -78,15 +75,9 @@ win-attendees = { $count ->
     [one] { $count } osaleja
    *[other] { $count } osalejat
 }
-win-copy-button = &Kopeeri
-win-move-button = &Teisalda
 win-new-folder-in-highlighted = Uus kaust tuleb esiletõstetud kausta.
 win-delete-folder-ask = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja kaustadega? See kustutatakse ka serverist.
-win-clear-flag = &Eemalda lipp
 win-rename = &Nimeta ümber...
-win-open = &Ava
-win-view-source = Vaata &lähteteksti
-win-properties = &Atribuudid
 win-messages-not-saved = Kirju ei saanud salvestada.
 win-messages-not-forwarded = Kirju ei saanud edastada.
 
@@ -104,27 +95,20 @@ win-sign-in-apps-button = &Sisselogimisrakendused...
 
 ## Tehisintellekti agendid
 
-win-allow = &Luba
 win-dont-allow = Ä&ra luba
-win-turn-away = &Keela
 win-col-address = Aadress
 win-never-written-to = Pole kunagi kirjutanud
 win-send = &Saada
-win-edit-first = &Muuda enne
 win-dont-send = Ä&ra saada
 win-forget-program-ask = Kas unustada see programm ja see, mida selle agendid tegid? Järgmisel ühendumisel küsitakse uuesti.
 win-clear-log-ask = Kas tühjendada loend sellest, mida agendid tegid? Mis tehtud, see jääb tehtuks.
-win-let-agents-connect = &Luba tehisintellekti agentidel Inbox Classicuga ühenduda
 win-agent-programs = &Programmid, mille agendid soovisid teie kirju kasutada:
 win-change = &Muuda...
 win-what-agents-did = &Mida agendid tegid:
-win-clear = &Tühjenda
 win-how-to-connect = Kuidas agenti ühendada
 
 ## Sisselogimisrakendused
 
-win-check-button = &Kontrolli
-win-copy = K&opeeri
 win-built-in = (sisseehitatud)
 win-edit = &Muuda...
 
@@ -134,5 +118,3 @@ win-options-language-label = &Inbox Classicu keel:
 win-options-restart-note = Teise keele näitamiseks taaskäivitub Inbox Classic.
 win-options-notify = &Teavita mind uute kirjade saabumisest
 win-restart-ask = Inbox Classic näitab valitud keelt ({ $language }) pärast taaskäivitust. Kas taaskäivitada kohe?
-win-restart-now = &Taaskäivita kohe
-win-restart-later = &Hiljem

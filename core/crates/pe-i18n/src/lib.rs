@@ -233,6 +233,14 @@ pub fn without_mnemonic(label: &str) -> String {
     out
 }
 
+/// Command `text` as the title of the window it opens: without its mnemonic mark and the dots that say it asks for
+/// more ("&Import Messages..." is titled "Import Messages")
+pub fn title(text: Text) -> String {
+    let mut title = without_mnemonic(&tr(text));
+    title.truncate(title.trim_end_matches(['.', '\u{2026}']).trim_end().len());
+    title
+}
+
 /// A menu label of the catalog with GTK's mnemonic mark (`_Reply to Sender`)
 pub fn gtk_mnemonic(label: &str) -> String {
     let mut out = String::with_capacity(label.len() + 1);

@@ -3,7 +3,6 @@
 
 ## La ventana principal
 
-win-flag-menu = &Marca
 win-still-running-detail = Sigue buscando correo nuevo aquí. Haga clic en el icono para abrirlo, o haga clic con el botón derecho para salir.
 win-new-messages = { $count ->
     [one] { $count } mensaje nuevo
@@ -32,13 +31,11 @@ win-too-many-files = Demasiados archivos a la vez: elija menos.
 
 ## La Bandeja de salida
 
-win-outbox-send-all = &Enviar todo ahora
 
 ## La ventana de redacción
 
 win-editor-failed = No se pueden escribir mensajes.
 win-ctrl-click-to-open = ({ $ctrl }+clic para abrir)
-win-remove-file = &Quitar
 win-format-bold = Negrita ({ $ctrl }+B)
 win-format-italic = Cursiva ({ $ctrl }+I)
 win-format-underline = Subrayado ({ $ctrl }+U)
@@ -78,15 +75,9 @@ win-attendees = { $count ->
     [one] { $count } asistente
    *[other] { $count } asistentes
 }
-win-copy-button = &Copiar
-win-move-button = &Mover
 win-new-folder-in-highlighted = La carpeta nueva va dentro de la carpeta resaltada.
 win-delete-folder-ask = ¿Eliminar la carpeta «{ $folder }» con sus mensajes y las carpetas que contiene? También se elimina en el servidor.
-win-clear-flag = &Quitar marca
 win-rename = Cambiar &nombre...
-win-open = &Abrir
-win-view-source = Ver &código fuente
-win-properties = &Propiedades
 win-messages-not-saved = No se pudieron guardar los mensajes.
 win-messages-not-forwarded = No se pudieron reenviar los mensajes.
 
@@ -104,27 +95,20 @@ win-sign-in-apps-button = Aplicaciones de &inicio de sesión...
 
 ## Agentes de IA
 
-win-allow = &Permitir
 win-dont-allow = &No permitir
-win-turn-away = &Rechazar
 win-col-address = Dirección
 win-never-written-to = Nunca escrito
 win-send = &Enviar
-win-edit-first = &Modificar antes
 win-dont-send = &No enviar
 win-forget-program-ask = ¿Olvidar este programa y lo que hicieron sus agentes? Se volverá a preguntar la próxima vez que se conecte.
 win-clear-log-ask = ¿Borrar la lista de lo que hicieron los agentes? Lo que hicieron queda hecho.
-win-let-agents-connect = &Permitir que los agentes de IA se conecten a Inbox Classic
 win-agent-programs = P&rogramas cuyos agentes pidieron usar su correo:
 win-change = &Cambiar...
 win-what-agents-did = &Lo que hicieron los agentes:
-win-clear = &Borrar
 win-how-to-connect = Cómo conectar un agente
 
 ## Aplicaciones de inicio de sesión
 
-win-check-button = Co&mprobar
-win-copy = &Copiar
 win-built-in = (integrada)
 win-edit = &Modificar...
 
@@ -134,5 +118,3 @@ win-options-language-label = &Mostrar Inbox Classic en:
 win-options-restart-note = Inbox Classic se reinicia para mostrar otro idioma.
 win-options-notify = &Avisarme cuando llegue correo nuevo
 win-restart-ask = Inbox Classic se mostrará en el idioma elegido ({ $language }) después de reiniciarse. ¿Reiniciar ahora?
-win-restart-now = &Reiniciar ahora
-win-restart-later = Más &tarde

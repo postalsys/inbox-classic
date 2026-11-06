@@ -116,7 +116,10 @@ fn whole_names() -> gtk::SignalListItemFactory {
 
 /// The language changes at the next start: now, or later
 async fn ask_restart(parent: &adw::PreferencesDialog) {
-    let (later, now) = (t!(UiRestartLater), t!(UiRestartNow));
+    let (later, now) = (
+        crate::words::plain(crate::words::Text::UiRestartLater),
+        crate::words::plain(crate::words::Text::UiRestartNow),
+    );
     let answers = [("later", later.as_str()), ("restart", now.as_str())];
     let answer = ui::ask(
         parent,
