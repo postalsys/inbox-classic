@@ -131,6 +131,8 @@ std::wstring FolderName(const PeFolder& folder) {
         return core::T(PE_TEXT_FOLDER_DRAFTS);
     case PE_SPECIAL_USE_JUNK:
         return core::T(PE_TEXT_FOLDER_JUNK);
+    case PE_SPECIAL_USE_ARCHIVE:
+        return core::T(PE_TEXT_FOLDER_ARCHIVE);
     default:
         return Text(folder.name);
     }
