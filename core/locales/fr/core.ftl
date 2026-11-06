@@ -26,6 +26,7 @@ folder-sent = Éléments envoyés
 folder-deleted = Éléments supprimés
 folder-drafts = Brouillons
 folder-junk = Courrier indésirable
+folder-archive = Archives
 
 ## The reading pane
 

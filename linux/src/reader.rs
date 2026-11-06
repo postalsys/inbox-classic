@@ -78,11 +78,15 @@ impl Reader {
         let fields = gtk::Grid::new();
         fields.set_column_spacing(8);
         fields.set_row_spacing(2);
-        for (row, (name, value)) in [("From:", &from), ("To:", &to), ("Date:", &date)]
-            .into_iter()
-            .enumerate()
+        for (row, (name, value)) in [
+            (t!(GtkReaderFrom), &from),
+            (t!(GtkReaderTo), &to),
+            (t!(GtkReaderDate), &date),
+        ]
+        .into_iter()
+        .enumerate()
         {
-            fields.attach(&field_label(name), 0, row as i32, 1, 1);
+            fields.attach(&field_label(&name), 0, row as i32, 1, 1);
             fields.attach(value, 1, row as i32, 1, 1);
         }
         let note = gtk::Label::new(None);
@@ -113,7 +117,7 @@ impl Reader {
         let attachments = gtk::MenuButton::new();
         attachments.set_child(Some(&clip));
         attachments.set_valign(gtk::Align::Center);
-        attachments.set_tooltip_text(Some("The files of the message"));
+        attachments.set_tooltip_text(Some(&t!(GtkReaderFiles)));
         attachments.set_widget_name("reader-attachments");
         attachments.set_visible(false);
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 12);
@@ -133,7 +137,7 @@ impl Reader {
         lines.set_hexpand(true);
         lines.append(&invitation_title);
         lines.append(&invitation_details);
-        let open_calendar = gtk::Button::with_label("Open in Calendar");
+        let open_calendar = gtk::Button::with_label(&t!(GtkOpenInCalendar));
         open_calendar.set_valign(gtk::Align::Center);
         open_calendar.set_widget_name("reader-open-calendar");
         let invitation = gtk::Box::new(gtk::Orientation::Horizontal, 10);
@@ -144,13 +148,11 @@ impl Reader {
         invitation.append(&open_calendar);
         invitation.set_visible(false);
 
-        let blocked = gtk::Label::new(Some(
-            "Some pictures have been blocked to help prevent the sender from identifying your computer.",
-        ));
+        let blocked = gtk::Label::new(Some(&t!(GtkPicturesBlocked)));
         blocked.set_xalign(0.0);
         blocked.set_hexpand(true);
         blocked.set_ellipsize(gtk::pango::EllipsizeMode::End);
-        let download_pictures = gtk::Button::with_label("Download Pictures");
+        let download_pictures = gtk::Button::with_label(&t!(GtkDownloadPictures));
         download_pictures.set_widget_name("reader-download-pictures");
         let pictures = gtk::Box::new(gtk::Orientation::Horizontal, 10);
         pictures.add_css_class("info-bar");
@@ -164,7 +166,7 @@ impl Reader {
         note_retry.set_xalign(0.0);
         note_retry.set_hexpand(true);
         note_retry.set_ellipsize(gtk::pango::EllipsizeMode::End);
-        let try_again = gtk::Button::with_label("Try Again");
+        let try_again = gtk::Button::with_label(&t!(GtkTryAgain));
         try_again.set_widget_name("reader-try-again");
         let retry = gtk::Box::new(gtk::Orientation::Horizontal, 10);
         retry.add_css_class("info-bar");
@@ -309,7 +311,7 @@ impl Reader {
         self.header.set_visible(true);
         self.fields.set_visible(false);
         self.subject.set_text("");
-        self.note.set_text("The message could not be shown.");
+        self.note.set_text(&t!(GtkMessageNotShown));
         self.note.set_visible(true);
         self.attachments.set_visible(false);
         self.pictures.set_visible(false);
@@ -364,7 +366,7 @@ impl Reader {
         let menu = gio::Menu::new();
         menu.append_section(None, &files);
         let all = gio::Menu::new();
-        all.append(Some("Save Attachments..."), Some("reader.save-all"));
+        all.append(Some(&t!(GtkSaveAttachmentsMenu)), Some("reader.save-all"));
         menu.append_section(None, &all);
         self.attachments.set_menu_model(Some(&menu));
     }
@@ -376,27 +378,26 @@ impl Reader {
             return;
         };
         let kind = match event.method {
-            Method::Request => "Invitation: ",
-            Method::Update => "Updated invitation: ",
-            Method::Cancel => "Canceled: ",
-            Method::Reply => "Answer to an invitation: ",
+            Method::Request => "request",
+            Method::Update => "update",
+            Method::Cancel => "cancel",
+            Method::Reply => "reply",
         };
+        let untitled = t!(GtkNoTitle);
         let summary = if event.summary.is_empty() {
-            "(no title)"
+            &untitled
         } else {
             &event.summary
         };
-        self.invitation_title.set_text(&format!("{kind}{summary}"));
+        self.invitation_title
+            .set_text(&t!(GtkInvitation, kind = kind, summary = summary));
         let mut parts = vec![when(event), event.location.clone()];
         if !event.organizer.is_empty() {
-            parts.push(format!("Organizer: {}", event.organizer));
+            parts.push(t!(GtkOrganizer, organizer = &event.organizer));
         }
         parts.push(event.repeats.clone());
         if event.attendees > 0 {
-            parts.push(match event.attendees {
-                1 => "1 attendee".into(),
-                n => format!("{n} attendees"),
-            });
+            parts.push(t!(GtkAttendees, count = event.attendees));
         }
         parts.retain(|part| !part.is_empty());
         self.invitation_details.set_text(&parts.join("   \u{00B7}   "));
@@ -472,7 +473,9 @@ fn long_date(time: &glib::DateTime) -> String {
 }
 
 fn time_of_day(time: &glib::DateTime) -> String {
-    time.format("%H:%M").map(|t| t.to_string()).unwrap_or_default()
+    time.format(crate::ui::time_format())
+        .map(|t| t.to_string())
+        .unwrap_or_default()
 }
 
 fn same_day(a: &glib::DateTime, b: &glib::DateTime) -> bool {
@@ -489,20 +492,19 @@ fn when(event: &Invitation) -> String {
         .and_then(|e| event_time(e - if event.all_day { 86400 } else { 0 }, event.floating));
     if event.all_day {
         return match end {
-            Some(end) if !same_day(&start, &end) => format!("{} to {}", long_date(&start), long_date(&end)),
+            Some(end) if !same_day(&start, &end) => t!(GtkFromTo, start = &long_date(&start), end = &long_date(&end)),
             _ => long_date(&start),
         };
     }
-    let mut text = format!("{}, {}", long_date(&start), time_of_day(&start));
-    if let Some(end) = end {
-        if same_day(&start, &end) {
-            text.push_str(&format!(" to {}", time_of_day(&end)));
-        } else {
-            text.push_str(&format!(" to {}, {}", long_date(&end), time_of_day(&end)));
-        }
-    }
+    let at = |time: &glib::DateTime| t!(GtkDayAndTime, day = &long_date(time), time = &time_of_day(time));
+    let text = match end {
+        Some(end) if same_day(&start, &end) => t!(GtkFromTo, start = &at(&start), end = &time_of_day(&end)),
+        Some(end) => t!(GtkFromTo, start = &at(&start), end = &at(&end)),
+        None => at(&start),
+    };
     if event.floating {
-        text.push_str(" (the sender's time)");
+        t!(GtkSendersTime, when = &text)
+    } else {
+        text
     }
-    text
 }

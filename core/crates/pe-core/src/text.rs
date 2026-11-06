@@ -105,6 +105,7 @@ pub fn folder_name(folder: &pe_store::FolderInfo) -> String {
         Some(SpecialUse::Trash) => tr(Text::FolderDeleted),
         Some(SpecialUse::Drafts) => tr(Text::FolderDrafts),
         Some(SpecialUse::Junk) => tr(Text::FolderJunk),
+        Some(SpecialUse::Archive) => tr(Text::FolderArchive),
         _ => folder.name.clone(),
     }
 }

@@ -4,6 +4,10 @@
   <id>com.inboxclassic.InboxClassic</id>
   <name>Inbox Classic</name>
   <summary>A fast, simple mail program</summary>
+  <summary xml:lang="de">Ein schnelles, einfaches E-Mail-Programm</summary>
+  <summary xml:lang="et">Kiire ja lihtne meiliprogramm</summary>
+  <summary xml:lang="es">Un programa de correo rápido y sencillo</summary>
+  <summary xml:lang="fr">Un programme de messagerie rapide et simple</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <developer id="com.postalsys">
@@ -15,11 +19,47 @@
       below, as mail programs used to. It works with any IMAP and SMTP account, and signs in to Outlook.com and
       Microsoft 365 through the browser.
     </p>
+    <p xml:lang="de">
+      Inbox Classic liest und schreibt E-Mails mit den Ordnern links, den Nachrichten oben und der Nachricht darunter,
+      wie es E-Mail-Programme früher taten. Es funktioniert mit jedem IMAP- und SMTP-Konto und meldet sich über den
+      Browser bei Outlook.com und Microsoft 365 an.
+    </p>
+    <p xml:lang="et">
+      Inbox Classic loeb ja kirjutab e-kirju nii, et kaustad on vasakul, kirjad üleval ja kiri nende all, nagu
+      meiliprogrammides varem. See töötab mis tahes IMAP- ja SMTP-kontoga ning logib brauseri kaudu sisse Outlook.com-i
+      ja Microsoft 365-sse.
+    </p>
+    <p xml:lang="es">
+      Inbox Classic lee y escribe correo con las carpetas a la izquierda, los mensajes arriba y el mensaje debajo,
+      como lo hacían los programas de correo. Funciona con cualquier cuenta IMAP y SMTP, e inicia sesión en
+      Outlook.com y Microsoft 365 mediante el navegador.
+    </p>
+    <p xml:lang="fr">
+      Inbox Classic lit et écrit les e-mails avec les dossiers à gauche, les messages en haut et le message en
+      dessous, comme le faisaient les programmes de messagerie. Il fonctionne avec tout compte IMAP et SMTP, et se
+      connecte à Outlook.com et Microsoft 365 par le navigateur.
+    </p>
     <ul>
       <li>Every message is shown sanitized, without scripts, and pictures from the internet only when you allow them</li>
       <li>A search that finds words in the subject, the people, the file names and the text, with Gmail's operators</li>
       <li>Replies fold away the earlier messages they quote</li>
       <li>Mail stays readable offline; passwords are kept in your keyring</li>
+      <li xml:lang="de">Jede Nachricht wird bereinigt angezeigt, ohne Skripte, und Bilder aus dem Internet nur, wenn Sie es erlauben</li>
+      <li xml:lang="de">Eine Suche, die Wörter im Betreff, in den Personen, in den Dateinamen und im Text findet, mit den Operatoren von Gmail</li>
+      <li xml:lang="de">Antworten falten die früheren Nachrichten ein, die sie zitieren</li>
+      <li xml:lang="de">E-Mails bleiben offline lesbar; Kennwörter liegen in Ihrem Schlüsselbund</li>
+      <li xml:lang="et">Iga kiri kuvatakse puhastatuna, ilma skriptideta, ja Interneti pildid ainult siis, kui te seda lubate</li>
+      <li xml:lang="et">Otsing, mis leiab sõnu teemast, inimestest, failinimedest ja tekstist, Gmaili operaatoritega</li>
+      <li xml:lang="et">Vastused peidavad varasemad kirjad, mida nad tsiteerivad</li>
+      <li xml:lang="et">Post jääb võrguühenduseta loetavaks; paroolid hoitakse teie võtmerõngas</li>
+      <li xml:lang="es">Cada mensaje se muestra depurado, sin scripts, y las imágenes de Internet solo cuando usted lo permite</li>
+      <li xml:lang="es">Una búsqueda que encuentra palabras en el asunto, las personas, los nombres de archivo y el texto, con los operadores de Gmail</li>
+      <li xml:lang="es">Las respuestas pliegan los mensajes anteriores que citan</li>
+      <li xml:lang="es">El correo sigue legible sin conexión; las contraseñas se guardan en su llavero</li>
+      <li xml:lang="fr">Chaque message est affiché nettoyé, sans scripts, et les images d'Internet seulement quand vous le permettez</li>
+      <li xml:lang="fr">Une recherche qui trouve des mots dans l'objet, les personnes, les noms de fichiers et le texte, avec les opérateurs de Gmail</li>
+      <li xml:lang="fr">Les réponses replient les messages précédents qu'elles citent</li>
+      <li xml:lang="fr">Le courrier reste lisible hors ligne ; les mots de passe sont gardés dans votre trousseau</li>
     </ul>
   </description>
   <launchable type="desktop-id">com.inboxclassic.InboxClassic.desktop</launchable>

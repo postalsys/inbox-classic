@@ -36,6 +36,26 @@ impl Settings {
         self.file.integer(GROUP, key).unwrap_or(fallback)
     }
 
+    /// A text value, None when it is not set or empty
+    pub fn text(&self, key: &str) -> Option<String> {
+        self.file
+            .string(GROUP, key)
+            .ok()
+            .map(|s| s.to_string())
+            .filter(|s| !s.is_empty())
+    }
+
+    /// Sets a text value, or removes it for None, and saves
+    pub fn set_text(&self, key: &str, value: Option<&str>) {
+        match value {
+            Some(value) => self.file.set_string(GROUP, key, value),
+            None => {
+                let _ = self.file.remove_key(GROUP, key);
+            }
+        }
+        self.save();
+    }
+
     pub fn set_bool(&self, key: &str, value: bool) {
         self.file.set_boolean(GROUP, key, value);
         self.save();
@@ -69,3 +89,5 @@ pub const NOTIFY: &str = "NewMailNotifications";
 pub const TRAY_NOTE: &str = "TrayNoteShown";
 pub const TREE_WIDTH: &str = "TreeWidth";
 pub const LIST_HEIGHT: &str = "ListHeight";
+/// The language of the windows chosen in Preferences ("de"); not set for the system's
+pub const LANGUAGE: &str = "Language";

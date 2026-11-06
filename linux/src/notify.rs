@@ -27,11 +27,7 @@ pub fn note(application: &adw::Application, title: &str, text: &str) {
 
 /// "No unread messages", "1 unread message", "3 unread messages": the tray's tooltip
 pub fn unread_text(unread: u64) -> String {
-    match unread {
-        0 => "No unread messages".into(),
-        1 => "1 unread message".into(),
-        n => format!("{n} unread messages"),
-    }
+    t!(GtkUnreadMessages, count = unread)
 }
 
 thread_local! {

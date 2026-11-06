@@ -26,6 +26,7 @@ folder-sent = Elementos enviados
 folder-deleted = Elementos eliminados
 folder-drafts = Borradores
 folder-junk = Correo no deseado
+folder-archive = Archivo
 
 ## The reading pane
 

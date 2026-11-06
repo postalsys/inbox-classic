@@ -32,6 +32,7 @@ The terms of Outlook Express and Outlook in each language, kept the same everywh
 | Deleted Items      | Gelöschte Objekte      | Kustutatud kirjad     | Éléments supprimés        | Elementos eliminados           |
 | Drafts             | Entwürfe               | Mustandid             | Brouillons                | Borradores                     |
 | Junk E-mail        | Junk-E-Mail            | Rämpspost             | Courrier indésirable      | Correo no deseado              |
+| Archive            | Archiv                 | Arhiiv                | Archives                  | Archivo                        |
 | All Inboxes        | Alle Posteingänge      | Kõik sisendkaustad    | Toutes les boîtes         | Todas las bandejas de entrada  |
 | message            | Nachricht              | kiri                  | message                   | mensaje                        |
 | folder             | Ordner                 | kaust                 | dossier                   | carpeta                        |

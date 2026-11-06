@@ -26,6 +26,7 @@ folder-sent = Saadetud kirjad
 folder-deleted = Kustutatud kirjad
 folder-drafts = Mustandid
 folder-junk = Rämpspost
+folder-archive = Arhiiv
 
 ## The reading pane
 

@@ -26,6 +26,7 @@ folder-sent = Gesendete Objekte
 folder-deleted = Gelöschte Objekte
 folder-drafts = Entwürfe
 folder-junk = Junk-E-Mail
+folder-archive = Archiv
 
 ## The reading pane
 

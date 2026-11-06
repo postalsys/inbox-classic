@@ -53,7 +53,7 @@ pub async fn choose(parent: &impl IsA<gtk::Widget>, request: Request) -> Option<
     prompt.set_widget_name("move-prompt");
     content.append(&prompt);
     let filter = gtk::SearchEntry::new();
-    filter.set_placeholder_text(Some("Find a folder"));
+    filter.set_placeholder_text(Some(&t!(GtkFindFolder)));
     filter.set_widget_name("move-filter");
     content.append(&filter);
     let list = gtk::ListBox::new();
@@ -70,7 +70,7 @@ pub async fn choose(parent: &impl IsA<gtk::Widget>, request: Request) -> Option<
     let frame = gtk::Frame::new(None);
     frame.set_child(Some(&scrolled));
     content.append(&frame);
-    let new_folder = gtk::Button::with_label("New Folder...");
+    let new_folder = gtk::Button::with_label(&crate::words::plain(crate::words::Text::CmdNewFolder));
     new_folder.set_widget_name("move-new-folder");
     new_folder.set_halign(gtk::Align::Start);
     content.append(&new_folder);
@@ -158,11 +158,11 @@ pub async fn choose(parent: &impl IsA<gtk::Widget>, request: Request) -> Option<
 async fn make_folder(dialog: &adw::Dialog, rows: &Rows) -> Option<i64> {
     let (account, parent, name) = rows.highlighted()?;
     let intro = if parent.is_some() {
-        format!("The new folder goes in {name}.")
+        t!(GtkNewFolderIn, folder = &*name)
     } else {
-        format!("The new folder goes at the top of {name}.")
+        t!(GtkNewFolderAtTopOf, account = &*name)
     };
-    let folder = ui::ask_folder_name(dialog, "New Folder", &intro, "").await?;
+    let folder = ui::ask_folder_name(dialog, &t!(GtkNewFolderTitle), &intro, "").await?;
     let (sender, created) = async_channel::bounded(1);
     CREATED.with(|waiting| *waiting.borrow_mut() = Some(sender.clone()));
     if let Err(reason) = shell().core.create_folder(account, parent, &folder) {

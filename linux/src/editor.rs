@@ -227,9 +227,12 @@ impl Editor {
                 }
             });
             menu.insert(&webkit::ContextMenuItem::new_separator(), 0);
-            menu.insert(&webkit::ContextMenuItem::from_gaction(&remove, "Remove Link", None), 0);
-            menu.insert(&webkit::ContextMenuItem::from_gaction(&edit, "Edit Link...", None), 0);
-            menu.insert(&webkit::ContextMenuItem::from_gaction(&open, "Open Link", None), 0);
+            menu.insert(
+                &webkit::ContextMenuItem::from_gaction(&remove, &t!(GtkRemoveLink), None),
+                0,
+            );
+            menu.insert(&webkit::ContextMenuItem::from_gaction(&edit, &t!(GtkEditLink), None), 0);
+            menu.insert(&webkit::ContextMenuItem::from_gaction(&open, &t!(GtkOpenLink), None), 0);
             false
         });
     }

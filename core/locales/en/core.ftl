@@ -31,6 +31,7 @@ folder-sent = Sent Items
 folder-deleted = Deleted Items
 folder-drafts = Drafts
 folder-junk = Junk E-mail
+folder-archive = Archive
 
 ## The reading pane
 
