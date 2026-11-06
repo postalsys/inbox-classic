@@ -1001,12 +1001,13 @@ pub async fn flag_colors(d: &Driver) {
         .await,
         "Blue on two selected messages flags both blue: $MailFlagBit2",
     );
+    let marks = wait_until(10, || {
+        main.window().action_state("flag-color").and_then(|v| v.get::<i32>()) == Some(5)
+    })
+    .await;
     let marked = main.window().action_state("flag-color").and_then(|v| v.get::<i32>());
     d.check(
-        wait_until(10, || {
-            main.window().action_state("flag-color").and_then(|v| v.get::<i32>()) == Some(5)
-        })
-        .await,
+        marks,
         &format!("the Flag menu marks the colour the selected messages have ({marked:?})"),
     );
 

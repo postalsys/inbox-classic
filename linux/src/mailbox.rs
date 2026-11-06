@@ -331,7 +331,7 @@ impl Mailbox {
             .and_downcast::<gio::SimpleAction>()
         {
             action.set_enabled(any);
-            let marked = summary.flag_color.filter(|_| summary.flagged == summary.count);
+            let marked = summary.flag_color;
             action.set_state(&i32::from(marked.map_or(0, |c| c as u8)).to_variant());
         }
         if let Some(action) = self
@@ -1595,7 +1595,7 @@ impl Mailbox {
             menu.append_section(None, &rest);
         }
         widget.insert_action_group("folder", Some(&group));
-        *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, false, x, y));
+        *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
     }
 
     /// A folder in the selected one, or at the top of the selected account
@@ -1787,7 +1787,7 @@ impl Mailbox {
     /// picture (a submenu can not be opened from outside the popover)
     #[cfg(feature = "e2e")]
     pub fn flag_menu_at(&self, widget: &gtk::Widget, x: f64, y: f64) {
-        *self.message_popover.borrow_mut() = Some(popup_menu(widget, &flag_menu(), true, x, y));
+        *self.message_popover.borrow_mut() = Some(popup_menu(widget, &flag_menu(), x, y));
     }
 
     pub fn message_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
@@ -1863,7 +1863,7 @@ impl Mailbox {
         add(&details, Command::Properties, None);
         menu.append_section(None, &details);
         widget.insert_action_group("message", Some(&group));
-        *self.message_popover.borrow_mut() = Some(popup_menu(widget, &menu, true, x, y));
+        *self.message_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
     }
 
     /// File > Print: the message as it is shown, with the pictures the user allowed, through the print dialog
@@ -2067,12 +2067,10 @@ fn folder_icon(special: Option<SpecialUse>) -> &'static str {
 }
 
 /// A right-click menu of `menu` at (`x`, `y`) of `widget`, let go of once it closed
-/// `menu` at `x`, `y` of `widget`; `flags` when it has the Flag menu, whose rows are put in
-fn popup_menu(widget: &gtk::Widget, menu: &gio::Menu, flags: bool, x: f64, y: f64) -> gtk::PopoverMenu {
+/// `menu` at `x`, `y` of `widget`, with the rows of the Flag menu where it has one (none is put in a menu without)
+fn popup_menu(widget: &gtk::Widget, menu: &gio::Menu, x: f64, y: f64) -> gtk::PopoverMenu {
     let popover = gtk::PopoverMenu::from_model(Some(menu));
-    if flags {
-        flag_rows(&popover);
-    }
+    flag_rows(&popover);
     popover.set_parent(widget);
     popover.set_has_arrow(false);
     popover.set_pointing_to(Some(&gdk::Rectangle::new(x as i32, y as i32, 1, 1)));

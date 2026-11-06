@@ -489,8 +489,10 @@ fn flag_column() -> gtk::ColumnViewColumn {
             .and_downcast::<MessageRow>()
             .and_then(|row| row.with(|m| m.info.flag_color()))
             .flatten();
-        // what the e2e test reads of the row
-        area.set_tooltip_text(color.map(pe_core::color_name));
+        // the colour by its name: on hover, and for a screen reader (and for those who tell colours apart badly)
+        let name = color.map(pe_core::color_name);
+        area.set_tooltip_text(name);
+        area.update_property(&[gtk::accessible::Property::Label(name.unwrap_or_default())]);
         area.set_draw_func(move |_, cr, _, _| {
             if let Some(color) = color {
                 draw_flag(cr, 0.0, 0.0, color);
