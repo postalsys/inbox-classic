@@ -26,6 +26,8 @@ struct Command {
     toggle: bool,
     #[serde(default)]
     one: bool,
+    #[serde(default)]
+    some: bool,
 }
 
 const MENUS: [&str; 7] = ["file", "edit", "view", "tools", "message", "help", "tray"];
@@ -122,6 +124,12 @@ fn c_header(table: &Table) -> String {
     out.push_str("};\n\n// whether a command acts on one message only, off while several are selected\n");
     out.push_str("inline bool CommandNeedsOne(unsigned id) {\n    switch (id) {\n");
     for command in table.command.iter().filter(|c| c.one) {
+        writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
+    }
+    out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
+    out.push_str("\n// whether a command acts on one or several messages: off with none selected\n");
+    out.push_str("inline bool CommandNeedsSome(unsigned id) {\n    switch (id) {\n");
+    for command in table.command.iter().filter(|c| c.some) {
         writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
     }
     out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
@@ -288,6 +296,16 @@ fn swift(table: &Table) -> String {
         )
         .unwrap();
     }
+    out.push_str("        }\n    }\n\n    /// Acts on one or several messages: off with none selected\n    var needsSome: Bool {\n        switch self {\n");
+    for command in &table.command {
+        writeln!(
+            out,
+            "        case .{}: return {}",
+            camel(&command.id, false),
+            command.some
+        )
+        .unwrap();
+    }
     out.push_str("        }\n    }\n\n    /// Acts on one message only: off while several are selected\n    var needsOne: Bool {\n        switch self {\n");
     for command in &table.command {
         writeln!(
@@ -363,6 +381,16 @@ fn rust(table: &Table) -> String {
             "            Command::{} => {},",
             camel(&command.id, true),
             command.toggle
+        )
+        .unwrap();
+    }
+    out.push_str("        }\n    }\n\n    /// Acts on one or several messages: off with none selected\n    pub fn needs_some(self) -> bool {\n        match self {\n");
+    for command in &table.command {
+        writeln!(
+            out,
+            "            Command::{} => {},",
+            camel(&command.id, true),
+            command.some
         )
         .unwrap();
     }

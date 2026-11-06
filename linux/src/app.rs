@@ -594,6 +594,10 @@ pub fn run_command(command: Command) {
         Command::NewMail => shell.new_message(0),
         Command::Reply => shell.reply(DraftKind::Reply),
         Command::ReplyAll => shell.reply(DraftKind::ReplyAll),
+        Command::Forward if shell.main().several() => {
+            let main = shell.main();
+            spawn(async move { main.forward_selected().await });
+        }
         Command::Forward => shell.reply(DraftKind::Forward),
         Command::Help => crate::help::open(),
         Command::Delete => spawn(async move { main.delete_selected().await }),

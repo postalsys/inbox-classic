@@ -354,7 +354,7 @@ fn editable(list: &[ParsedAddress]) -> String {
 }
 
 /// `Re: ` or `Fw: ` in front, unless the subject already has it
-fn prefixed(prefix: &str, subject: &str) -> String {
+pub(crate) fn prefixed(prefix: &str, subject: &str) -> String {
     let trimmed = subject.trim();
     let already = trimmed
         .get(..prefix.len())

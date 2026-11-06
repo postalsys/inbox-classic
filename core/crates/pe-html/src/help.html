@@ -218,7 +218,7 @@
                 only <b>Mark All Read</b>: folders can not be made in it or messages imported into it, as it is no folder of one account.
             </li>
             <li>
-                Unread messages are <b>bold</b> in the list, with a closed envelope; read ones have an open envelope. A message is marked read after it has been
+                Unread messages are <b>bold</b> in the list. A message is marked read after it has been
                 shown for a second. Use <b>Mark Read</b> and <b>Mark Unread</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd> marks read) to change it yourself.
                 <b>Edit &gt; Mark All Read</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>), or <b>Mark All Read</b> on a folder's right-click menu, marks
                 every message of the folder read.
@@ -348,10 +348,18 @@
 
         <h3>Saving, printing and importing messages</h3>
         <ul>
-            <li><b>File &gt; Save As</b> saves the message shown as an <code>.eml</code> file, which other mail programs open.</li>
             <li>
-                <b>File &gt; Import Messages</b> puts <code>.eml</code> files into the selected folder, on the server too. A file that is not a message is not
-                imported.
+                <b>File &gt; Save As</b> saves the message shown as an <code>.eml</code> file, which other mail programs open. With several messages selected
+                it asks for a folder and saves each of them there, named after its subject; a file already there is never replaced (the new one is called
+                <i>Lunch (2).eml</i> then).
+            </li>
+            <li>
+                Drag messages from the list onto the desktop or a folder window<!--os:mac--> in the Finder<!--/os--> to save them there as
+                <code>.eml</code> files the same way. One that is not downloaded yet is downloaded for it.
+            </li>
+            <li>
+                <b>File &gt; Import Messages</b> puts <code>.eml</code> files into the selected folder, on the server too. Dragging <code>.eml</code> files
+                onto a folder in the folder list does the same. A file that is not a message is not imported.
             </li>
             <li>
                 <b>File &gt; Print</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) opens the print preview of the message shown in a window over Inbox Classic: choose the
@@ -371,6 +379,10 @@
                 You always write with formatting at hand. A message without any (no bold, colors, lists, links or pictures) goes as plain text, which every mail
                 program shows the same; with formatting it goes as HTML with a plain text copy. A reply or forward follows the original: to a plain text message
                 it is plain text too (the original quoted with <b>&gt;</b>) unless you format something, to an HTML message it is HTML.
+            </li>
+            <li>
+                <b>Forward</b> with several messages selected writes one new message with all of them attached as <code>.eml</code> files, its subject the
+                first one's.
             </li>
             <li>
                 <b>From</b>, at the top of the message, shows who it goes from: the name and address of the account. A reply or forward goes from the account

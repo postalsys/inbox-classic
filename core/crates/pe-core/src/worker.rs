@@ -450,6 +450,40 @@ impl Worker {
         Ok(())
     }
 
+    /// Downloads the sources of `refs` (of this account) into the store, for files made of them
+    /// ([`crate::Core::export_messages`]), on a connection of this worker's own that it closes after. Returns the
+    /// messages that could not be had, with why.
+    pub(crate) async fn fetch_sources(&mut self, refs: &[pe_store::MessageRef]) -> Vec<(pe_store::MessageRef, String)> {
+        let mut store = match Store::open(&self.path) {
+            Ok(store) => store,
+            Err(error) => return refs.iter().map(|r| (*r, error.to_string())).collect(),
+        };
+        let mut failed = Vec::new();
+        for r in refs {
+            let outcome = match self.client(&mut store).await {
+                Ok(client) => fetch_source(client, &mut store, r.folder, r.uid)
+                    .await
+                    .map(|_| ())
+                    .map_err(Failure::from),
+                Err(failure) => Err(failure),
+            };
+            match outcome {
+                Ok(()) => {}
+                // the server is not reachable, or does not take the sign-in: the rest would fail the same way
+                Err(failure) if failure.kind != FailureKind::Other => {
+                    let at = refs.iter().position(|x| x == r).unwrap_or(0);
+                    failed.extend(refs[at..].iter().map(|x| (*x, failure.message.clone())));
+                    break;
+                }
+                Err(failure) => failed.push((*r, failure.message)),
+            }
+        }
+        if let Some((mut client, _)) = self.connection.take() {
+            let _ = client.logout().await;
+        }
+        failed
+    }
+
     /// The access token is no good: the next connect of either worker refreshes it
     fn forget_token(&self) {
         if let Ok(mut token) = self.access_token.try_lock() {

@@ -3,9 +3,15 @@
 // document the core made, shown in the web view as it is.
 import AppKit
 import CInboxClassic
+import UniformTypeIdentifiers
 
 /// The pasteboard type of a message dragged from the list onto a folder: "<folder> <uid>"
 let messagePasteboardType = NSPasteboard.PasteboardType("com.inboxclassic.message")
+
+/// A file the Finder can drop that is a message, as the core takes them
+func isMessageFile(_ url: URL) -> Bool {
+    url.path.withCString { pe_is_message_file($0) }
+}
 
 @MainActor
 public final class Mailbox: NSObject {
@@ -71,6 +77,11 @@ public final class Mailbox: NSObject {
     private var restorePending = false
 
     var selectedCount: Int { list.numberOfSelectedRows }
+    /// the messages being dragged out of the list, as files for the Finder
+    private var dragExport: DragExport?
+    /// how many of them were written, for the status bar
+    private var dragWritten = 0
+    private let promiseWriter = PromiseWriter()
     private var reloadTimer: Timer?
     private var logoRequest: UInt64 = 0
     private var unsubscribeRequest: UInt64 = 0
@@ -352,7 +363,7 @@ public final class Mailbox: NSObject {
     }
 
     private enum ColumnID: String, CaseIterable {
-        case read, attach, flag, from, subject, received, size, folder
+        case attach, flag, from, subject, received, size, folder
     }
 
     private func setUpList() {
@@ -367,10 +378,15 @@ public final class Mailbox: NSObject {
         list.target = self
         list.doubleAction = #selector(openSelected)
         list.setAccessibilityIdentifier("list")
-        list.registerForDraggedTypes([])
+        // .eml files from the Finder onto the list go into the folder shown
+        list.registerForDraggedTypes([.fileURL])
         list.setDraggingSourceOperationMask([.move, .copy], forLocal: true)
+        // out of the app: files where they are dropped, the messages stay
+        list.setDraggingSourceOperationMask(.copy, forLocal: false)
+        promiseWriter.wrote = { [weak self] dir, problem in self?.wroteFile(dir, problem) }
         let columns: [(ColumnID, String, CGFloat)] = [
-            (.read, "", 22), (.attach, "", 22), (.flag, "", 22), (.from, "From", 180), (.subject, "Subject", 320),
+            // no envelope column: bold says a message is unread, and From and Subject get the room
+            (.attach, "", 22), (.flag, "", 22), (.from, "From", 200), (.subject, "Subject", 342),
             (.received, "Received", 130), (.size, "Size", 84),
         ]
         for (id, title, width) in columns {
@@ -386,7 +402,7 @@ public final class Mailbox: NSObject {
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(id.rawValue))
         column.title = title
         column.width = width
-        if [.read, .attach, .flag].contains(id) {
+        if [.attach, .flag].contains(id) {
             column.minWidth = width
             column.maxWidth = width
             column.resizingMask = []
@@ -988,6 +1004,10 @@ public final class Mailbox: NSObject {
     // ---- files and printing ----
 
     func saveShownAs() {
+        if selectedCount > 1 {
+            saveSelected()
+            return
+        }
         guard uid != 0 else { return }
         var length = 0
         var name: UnsafeMutablePointer<CChar>?
@@ -1089,17 +1109,116 @@ public final class Mailbox: NSObject {
             inform("Choose the folder to put the messages in first.", title: "Import Messages")
             return
         }
-        var problems = ""
-        for file in openFilesPanel(title: "Import Messages", types: [.emailMessage, .data]) {
-            var reason: UnsafeMutablePointer<CChar>?
-            if !file.path.withCString({ pe_message_import(core.handle, folder, $0, &reason) }) {
-                problems += (taken(reason) ?? file.path) + "\n"
-            }
+        importFiles(openFilesPanel(title: "Import Messages", types: [.emailMessage, .data]), into: folder)
+    }
+
+    /// files into `folder` as Import Messages puts them: the message files, what the core says of the others shown
+    func importFiles(_ files: [URL], into folder: Int64) {
+        guard !files.isEmpty else { return }
+        let paths = files.map { strdup($0.path) }
+        defer { paths.forEach { free($0) } }
+        var said: UnsafeMutablePointer<CChar>?
+        var report: UnsafeMutablePointer<CChar>?
+        let ok = paths.map { UnsafePointer($0) }.withUnsafeBufferPointer {
+            pe_import_files(core.handle, folder, $0.baseAddress, paths.count, &said, &report)
         }
-        if !problems.isEmpty {
-            inform("These were not imported:\n\n" + problems, title: "Import Messages", style: .warning)
+        // what went in in the status bar, what did not in a window
+        if let said = taken(said) {
+            status(said)
+        }
+        if let report = taken(report) {
+            inform(report, title: "Import Messages", style: ok ? .information : .warning)
         }
     }
+
+    /// Save As with several selected: a folder to save them in, each as an .eml file named after its subject, never
+    /// over a file there
+    func saveSelected() {
+        guard let dir = folderPanel(title: "Save Messages") else { return }
+        withDownloads(title: "Save Messages", { core, selection, error in
+            takenTexts(dir.path.withCString { pe_selection_save(core, selection, $0, exportTimeout, &error) })
+        }, then: { [weak self] written in
+            for path in written {
+                markFromInternet(URL(fileURLWithPath: path))
+            }
+            self?.status(dir.path.withCString { taken(pe_saved_text(UInt64(written.count), $0)) } ?? "")
+        })
+    }
+
+    /// Forward with several selected: one new message with them attached as .eml files, from the account of the first,
+    /// once those not downloaded yet are here
+    func forwardSelected(_ open: @escaping @MainActor (Draft, Int64) -> Void) {
+        guard let first = refs(of: selection).first else { return }
+        let account = folderNodes[first.0]?.folder.account ?? currentAccount
+        withDownloads(title: "Forward", { core, selection, error in
+            Handed(value: pe_selection_forward(core, selection, exportTimeout, &error))
+        }, then: { draft in
+            if let made = Draft(draft.value) {
+                open(made, account)
+            }
+        })
+    }
+
+    /// `work` on the selected messages on a thread of its own, once those not downloaded yet are here ("Downloading 3
+    /// messages..." in the status bar meanwhile), then `done` with what it made; the core's reason shown when it
+    /// refused
+    private func withDownloads<T>(title: String,
+                                  _ work: @escaping (OpaquePointer, OpaquePointer, inout UnsafeMutablePointer<CChar>?) -> T,
+                                  then done: @escaping @MainActor (T) -> Void) {
+        let selection = Handed(value: newSelection(refs(of: selection)))
+        let handle = Handed(value: core.handle)
+        if let downloading = taken(pe_selection_downloading_text(core.handle, selection.value)) {
+            status(downloading)
+        }
+        inBackground({ () -> (T, String?) in
+            defer { pe_selection_free(selection.value) }
+            var error: UnsafeMutablePointer<CChar>?
+            let made = work(handle.value, selection.value, &error)
+            return (made, taken(error))
+        }, then: { [weak self] made, problem in
+            if let problem {
+                self?.status("")
+                inform(problem, title: title, style: .warning)
+                return
+            }
+            done(made)
+        })
+    }
+
+    /// a file of a drag out of the list was written into `dir`, or could not be
+    private func wroteFile(_ dir: URL?, _ problem: String?) {
+        // a drop on the Finder runs on, so what went wrong goes in the status bar rather than a window per file
+        if let problem {
+            status(problem)
+            return
+        }
+        guard let dir else { return }
+        dragWritten += 1
+        status(dir.path.withCString { taken(pe_saved_text(UInt64(dragWritten), $0)) } ?? "")
+    }
+
+    /// the files the drag out of the list offers, one per message: the selection when the row is selected, else the row
+    /// alone (the Finder asks for each row's writer as the drag starts)
+    func promise(forRow index: Int) -> MessagePromise? {
+        guard let message = row(index) else { return nil }
+        let ref = (message.folder, message.uid)
+        if dragExport == nil || !(dragExport!.refs.contains { $0 == ref }) {
+            let rows = list.selectedRowIndexes.contains(index) ? Array(list.selectedRowIndexes) : [index]
+            let refs = rows.compactMap { row($0) }.map { ($0.folder, $0.uid) }
+            dragExport = DragExport(core: core.handle, refs: refs)
+            dragWritten = 0
+        }
+        guard let drag = dragExport, let at = drag.refs.firstIndex(where: { $0 == ref }) else { return nil }
+        return MessagePromise(drag: drag, index: at, delegate: promiseWriter)
+    }
+
+    /// the drag out of the list ended: the next one names its own files
+    func dragEnded() {
+        dragExport = nil
+    }
+
+    /// the writer of the files the Finder was promised, for the UI test to write them as a drop on the Finder does
+    var filePromises: PromiseWriter { promiseWriter }
 
     // ---- attachments ----
 
@@ -1208,11 +1327,8 @@ public final class Mailbox: NSObject {
     /// which then leaves the list as Move leaves it
     @discardableResult
     func drop(_ messages: [(Int64, UInt64)], to: Int64, copy: Bool) -> Bool {
-        let dragged: OpaquePointer = pe_selection_new()
+        let dragged = newSelection(messages)
         defer { pe_selection_free(dragged) }
-        for (folder, uid) in messages {
-            pe_selection_add(dragged, folder, uid)
-        }
         if copy {
             return act(PE_ACTION_COPY, to: to, on: dragged)
         }
@@ -1368,6 +1484,13 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
     public func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem item: Any?,
                             proposedChildIndex index: Int) -> NSDragOperation {
+        // .eml files from the Finder go into the folder they are dropped on
+        let files = droppedFiles(info)
+        if !files.isEmpty {
+            guard let node = item as? FolderNode, node.folder.selectable, index == NSOutlineViewDropOnItemIndex,
+                  files.contains(where: isMessageFile) else { return [] }
+            return .copy
+        }
         let messages = draggedMessages(info)
         guard dropTarget(item, from: messages.map { $0.0 }) != nil, index == NSOutlineViewDropOnItemIndex else { return [] }
         // Option copies, as in the Finder
@@ -1375,9 +1498,33 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
     }
 
     public func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
+        let files = droppedFiles(info)
+        if !files.isEmpty {
+            guard let node = item as? FolderNode, node.folder.selectable else { return false }
+            return dropFiles(files, into: node.folder.id)
+        }
         let messages = draggedMessages(info)
         guard let to = dropTarget(item, from: messages.map { $0.0 }) else { return false }
         return drop(messages, to: to, copy: NSEvent.modifierFlags.contains(.option))
+    }
+
+    /// files dropped from the Finder into `folder`: the messages are put in it
+    @discardableResult
+    func dropFiles(_ files: [URL], into folder: Int64) -> Bool {
+        // taken when one of them is a message; what became of the others the core says
+        guard files.contains(where: isMessageFile) else { return false }
+        importFiles(files, into: folder)
+        return true
+    }
+
+    /// the folder files dropped on the message list go into: the one shown, not a search or All Inboxes
+    var listDropFolder: Int64? {
+        folder != 0 && !searching && !allInboxes ? folder : nil
+    }
+
+    /// the files on a drag's pasteboard
+    func droppedFiles(_ info: NSDraggingInfo) -> [URL] {
+        info.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
     }
 
     /// the messages on the pasteboard, one item each
@@ -1402,10 +1549,9 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
         guard let column = tableColumn, let message = row(index) else { return nil }
         let id = column.identifier
         switch ColumnID(rawValue: id.rawValue) {
-        case .read, .attach, .flag:
+        case .attach, .flag:
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? IconCell) ?? IconCell(id)
             switch ColumnID(rawValue: id.rawValue) {
-            case .read: cell.show(Icons.list(message.seen ? "mail_read" : "mail"))
             case .attach: cell.show(message.hasAttachments ? Icons.list("attach") : nil)
             default: cell.show(message.flagged ? Icons.list("flag") : nil)
             }
@@ -1440,10 +1586,27 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
     }
 
     public func tableView(_ tableView: NSTableView, pasteboardWriterForRow index: Int) -> NSPasteboardWriting? {
-        guard let message = row(index) else { return nil }
-        let item = NSPasteboardItem()
-        item.setString("\(message.folder) \(message.uid)", forType: messagePasteboardType)
-        return item
+        promise(forRow: index)
+    }
+
+    public func tableView(_ tableView: NSTableView, draggingSession session: NSDraggingSession, endedAt screenPoint: NSPoint,
+                          operation: NSDragOperation) {
+        dragEnded()
+    }
+
+    public func tableView(_ tableView: NSTableView, validateDrop info: NSDraggingInfo, proposedRow row: Int,
+                          proposedDropOperation dropOperation: NSTableView.DropOperation) -> NSDragOperation {
+        let files = droppedFiles(info)
+        guard listDropFolder != nil, files.contains(where: isMessageFile) else { return [] }
+        // onto the list as a whole, not between rows
+        tableView.setDropRow(-1, dropOperation: .on)
+        return .copy
+    }
+
+    public func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int,
+                          dropOperation: NSTableView.DropOperation) -> Bool {
+        guard let folder = listDropFolder else { return false }
+        return dropFiles(droppedFiles(info), into: folder)
     }
 }
 
@@ -1575,7 +1738,7 @@ public final class FolderOutline: NSOutlineView {
         rowSizeStyle = .default
         indentationPerLevel = 14
         autoresizesOutlineColumn = true
-        registerForDraggedTypes([messagePasteboardType])
+        registerForDraggedTypes([messagePasteboardType, .fileURL])
         draggingDestinationFeedbackStyle = .sourceList
         setAccessibilityIdentifier("tree")
     }

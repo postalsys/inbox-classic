@@ -290,6 +290,48 @@ impl Command {
         }
     }
 
+    /// Acts on one or several messages: off with none selected
+    pub fn needs_some(self) -> bool {
+        match self {
+            Command::NewAccount => false,
+            Command::Exit => false,
+            Command::Sync => false,
+            Command::Undo => false,
+            Command::SelectAll => false,
+            Command::MarkRead => false,
+            Command::MarkUnread => false,
+            Command::Pictures => false,
+            Command::About => false,
+            Command::NewMail => false,
+            Command::Reply => false,
+            Command::ReplyAll => false,
+            Command::Forward => true,
+            Command::Help => false,
+            Command::Delete => false,
+            Command::Move => false,
+            Command::Copy => false,
+            Command::Flag => false,
+            Command::NewFolder => false,
+            Command::RenameFolder => false,
+            Command::DeleteFolder => false,
+            Command::Accounts => false,
+            Command::Find => false,
+            Command::SaveAs => true,
+            Command::Print => false,
+            Command::Import => false,
+            Command::Outbox => false,
+            Command::Properties => false,
+            Command::MarkAllRead => false,
+            Command::Junk => false,
+            Command::NotJunk => false,
+            Command::Notify => false,
+            Command::Open => false,
+            Command::DefaultApp => false,
+            Command::ViewSource => false,
+            Command::AiAgents => false,
+        }
+    }
+
     /// Acts on one message only: off while several are selected
     pub fn needs_one(self) -> bool {
         match self {
@@ -305,7 +347,7 @@ impl Command {
             Command::NewMail => false,
             Command::Reply => true,
             Command::ReplyAll => true,
-            Command::Forward => true,
+            Command::Forward => false,
             Command::Help => false,
             Command::Delete => false,
             Command::Move => false,
@@ -316,7 +358,7 @@ impl Command {
             Command::DeleteFolder => false,
             Command::Accounts => false,
             Command::Find => false,
-            Command::SaveAs => true,
+            Command::SaveAs => false,
             Command::Print => true,
             Command::Import => false,
             Command::Outbox => false,

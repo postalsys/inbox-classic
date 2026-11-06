@@ -173,16 +173,10 @@ impl MessageList {
         view.add_css_class("message-list");
         view.set_widget_name("message-list");
         view.set_reorderable(false);
-        view.append_column(&icon_column(|m| {
-            Some(if m.info.seen() {
-                "ic-mail-read-symbolic"
-            } else {
-                "ic-mail-symbolic"
-            })
-        }));
+        // no read/unread column: an unread message is bold, which says it; its space is the sender's and the subject's
         view.append_column(&icon_column(|m| m.info.has_attachments.then_some("ic-attach-symbolic")));
         view.append_column(&icon_column(|m| m.info.flagged().then_some("ic-flag-symbolic")));
-        let from = text_column("From", 180, false, 0.0, |m| m.info.sender().to_string());
+        let from = text_column("From", 200, false, 0.0, |m| m.info.sender().to_string());
         let subject = text_column("Subject", SUBJECT_WIDTH, true, 0.0, |m| m.info.subject.clone());
         let received = text_column("Received", 130, false, 0.0, |m| {
             m.info.display_date().map(crate::ui::format_date).unwrap_or_default()
@@ -201,6 +195,7 @@ impl MessageList {
             column.set_sorter(Some(&gtk::CustomSorter::new(|_, _| gtk::Ordering::Equal)));
         }
         view.sort_by_column(Some(&received), gtk::SortType::Descending);
+        view.add_controller(file_drop_target());
         Rc::new(MessageList {
             view,
             selection,
@@ -475,13 +470,16 @@ fn text_column(
     column
 }
 
-/// Rows dragged onto a folder of the tree: a selected row brings the whole selection, another row itself alone, as
-/// their folders and uids in text
+/// Rows dragged out of the list: a selected row brings the whole selection, another row itself alone. Onto a folder of
+/// the tree they move (Ctrl copies); onto a file manager or another program they become .eml files there. Several
+/// show how many on the drag icon.
 fn add_drag_source(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
     add_menu(widget, item);
     let source = gtk::DragSource::new();
     source.set_actions(gdk::DragAction::MOVE | gdk::DragAction::COPY);
     let item = item.downgrade();
+    let count = std::rc::Rc::new(std::cell::Cell::new(0usize));
+    let counted = count.clone();
     source.connect_prepare(move |_, _, _| {
         let item = item.upgrade()?;
         let main = shell().main();
@@ -497,7 +495,22 @@ fn add_drag_source(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
         if refs.is_empty() {
             return None;
         }
-        Some(gdk::ContentProvider::for_value(&drag_payload(&refs).to_value()))
+        counted.set(refs.len());
+        Some(crate::files::drag_content(refs))
+    });
+    source.connect_drag_begin(move |_, drag| {
+        if count.get() > 1 {
+            let label = gtk::Label::new(Some(&pe_core::messages(count.get() as u64)));
+            label.add_css_class("drag-count");
+            label.set_margin_top(4);
+            label.set_margin_bottom(4);
+            label.set_margin_start(10);
+            label.set_margin_end(10);
+            let frame = gtk::Frame::new(None);
+            frame.set_child(Some(&label));
+            frame.add_css_class("view");
+            gtk::DragIcon::for_drag(drag).set_child(Some(&frame));
+        }
     });
     widget.add_controller(source);
 }
@@ -521,41 +534,26 @@ fn add_menu(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
     widget.add_controller(click);
 }
 
-/// Messages as a drag carries them: "folder uid" each, a line each
-pub fn drag_payload(refs: &[MessageRef]) -> String {
-    refs.iter()
-        .map(|r| format!("{} {}", r.folder, r.uid))
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
-/// The messages of a drag; None when it is anything else
-pub fn parse_payload(payload: &str) -> Option<Vec<MessageRef>> {
-    let refs = payload
-        .lines()
-        .map(|line| {
-            let (folder, uid) = line.split_once(' ')?;
-            Some(MessageRef {
-                folder: folder.parse().ok()?,
-                uid: uid.parse().ok()?,
-            })
-        })
-        .collect::<Option<Vec<_>>>()?;
-    (!refs.is_empty()).then_some(refs)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn dragged_rows_name_their_messages() {
-        let refs = [MessageRef { folder: 12, uid: 345 }, MessageRef { folder: 13, uid: 1 }];
-        assert_eq!(parse_payload(&drag_payload(&refs)), Some(refs.to_vec()));
-        assert_eq!(parse_payload(&drag_payload(&refs[..1])), Some(refs[..1].to_vec()));
-        assert_eq!(parse_payload("12"), None);
-        assert_eq!(parse_payload("x 1"), None);
-        assert_eq!(parse_payload("12 1\nhello"), None);
-        assert_eq!(parse_payload(""), None);
-    }
+/// .eml files dropped onto the list from a file manager: into the folder it shows, as Import does. The list's own rows
+/// dragged back onto it are not files to put anywhere.
+fn file_drop_target() -> gtk::DropTarget {
+    let target = gtk::DropTarget::new(gdk::FileList::static_type(), gdk::DragAction::COPY);
+    target.connect_accept(|_, drop| {
+        !drop
+            .formats()
+            .contains_type(crate::files::DraggedMessages::static_type())
+    });
+    target.connect_drop(|_, value, _, _| {
+        let Ok(list) = value.get::<gdk::FileList>() else {
+            return false;
+        };
+        let paths = crate::files::paths_of(&list);
+        if !crate::files::takes(&paths) {
+            return false;
+        }
+        let main = shell().main();
+        crate::app::spawn(async move { main.drop_files(None, paths).await });
+        true
+    });
+    target
 }

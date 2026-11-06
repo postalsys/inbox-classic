@@ -11,6 +11,7 @@ mod authres;
 pub mod bimi;
 pub mod calendar;
 mod compose;
+mod export;
 mod fold;
 pub mod mailto;
 mod requests;
@@ -38,6 +39,7 @@ pub use targets::{TargetKind, TargetRow};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
+pub use export::{Exported, write_file};
 /// The rules of the folder tree the windows show: how deep a folder is, and which stay as they are
 pub use pe_sync::{is_special as is_fixed_folder, tree_depths};
 use requests::Requests;
@@ -46,8 +48,8 @@ use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
 pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
 pub use text::{
-    HiddenUnread, RETRY_NOTE, ReaderState, account_label, account_title, folder_kind, folder_name, format_size,
-    hidden_unread, list_counts, messages, reader_page,
+    HiddenUnread, RETRY_NOTE, ReaderState, account_label, account_title, downloading_text, folder_kind, folder_name,
+    format_size, hidden_unread, list_counts, messages, reader_page, saved_text,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -345,6 +347,7 @@ impl Core {
             .map_err(|_| Error::Closed)?;
         // the patterns that fold earlier messages compile meanwhile, not when the first message is shown
         runtime.spawn_blocking(fold::warm_up);
+        runtime.spawn_blocking(clear_private_dirs);
         // what was cached before the search index read sources (an older version), on a connection of its own
         let indexed = path.clone();
         runtime.spawn_blocking(move || {
@@ -885,14 +888,7 @@ impl Core {
             return Ok(None);
         };
         let subject = store.message(folder, uid)?.map(|m| m.info.subject).unwrap_or_default();
-        // the subject made safe first, the extension after: a subject of only `???` is not left without one
-        let stem = pe_mime::parser::safe_filename(Some(&subject.replace(['/', '\\'], "-")), "message/rfc822");
-        let stem = if stem.starts_with("attachment.") {
-            "message".to_string()
-        } else {
-            stem
-        };
-        Ok(Some((format!("{stem}.eml"), source)))
+        Ok(Some((export::eml_name(&subject), source)))
     }
 
     /// The whole source of a message for View Source, as text safe to show, and the title of its window; None when it
@@ -924,6 +920,34 @@ impl Core {
 
     /// Puts a message saved as a file (`.eml`) into a folder: on the server in the background, then
     /// [`Event::FolderChanged`]. A file that is not a message, or is too large, is refused now.
+    /// Puts the message files of `paths` into `folder` as [`Core::import_message`] does each, those that are not
+    /// message files ([`is_message_file`]) left out. Returns what the status bar says ("Put 3 messages in Archive"), and
+    /// what to tell the user about those that did not go in ("These were not put in the folder: ..."), None when all
+    /// did. For a drop of files onto a folder or Import.
+    pub fn import_files(&self, folder: FolderId, paths: &[PathBuf]) -> Result<(String, Option<String>)> {
+        let name = text::folder_name(&self.store().folder(folder)?.info);
+        let mut problems = Vec::new();
+        let mut put = 0;
+        for path in paths {
+            let outcome = if is_message_file(path) {
+                self.import_message(folder, path)
+            } else {
+                Err(Error::Unavailable(format!(
+                    "{} is not an e-mail message",
+                    path.display()
+                )))
+            };
+            match outcome {
+                Ok(()) => put += 1,
+                Err(error) => problems.push(error.to_string()),
+            }
+        }
+        let said = format!("Put {} in {name}", text::messages(put));
+        let report =
+            (!problems.is_empty()).then(|| format!("These were not put in the folder:\n\n{}", problems.join("\n")));
+        Ok((said, report))
+    }
+
     pub fn import_message(&self, folder: FolderId, path: &std::path::Path) -> Result<()> {
         const LIMIT: u64 = 50 * 1024 * 1024;
         let account = self.store().folder(folder)?.account_id;
@@ -1049,13 +1073,7 @@ impl Core {
         };
         let (mut draft, files) = compose::reopen(&source);
         if !files.is_empty() {
-            let nanos = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map_or(0, |d| d.as_nanos());
-            let base = std::env::temp_dir()
-                .join("InboxClassic")
-                .join(format!("draft-{folder}-{uid}-{nanos}"));
-            draft.attachments = write_out(&base, files).map_err(|error| {
+            draft.attachments = write_out(&format!("draft-{folder}-{uid}"), files).map_err(|error| {
                 Error::Unavailable(format!("an attachment of the draft could not be kept: {error}"))
             })?;
         }
@@ -1416,6 +1434,12 @@ impl Core {
     }
 }
 
+/// Whether `path` names a message file the app takes when files are dropped on a folder: an `.eml` (what it is in it
+/// is checked when it is put in)
+pub fn is_message_file(path: &std::path::Path) -> bool {
+    path.extension().is_some_and(|x| x.eq_ignore_ascii_case("eml"))
+}
+
 /// The Deleted Items folder a message of `folder` goes to in `store`, None when it is that folder or there is none
 pub(crate) fn trash_in(store: &Store, folder: FolderId) -> Result<Option<FolderId>> {
     let account = store.folder(folder)?.account_id;
@@ -1434,19 +1458,111 @@ pub(crate) fn junk_keywords(junk: bool) -> (&'static str, &'static str) {
     }
 }
 
-/// Writes files (name, content) under `base`, each in a folder of its own so two of one name stay apart; their paths
-fn write_out(base: &std::path::Path, files: Vec<(String, Vec<u8>)>) -> std::io::Result<Vec<PathBuf>> {
+/// Writes files (name, content) into a new folder of this user's own (`name` and a number that makes it new), each in
+/// a folder of its own there so two of one name stay apart; their paths. Under the runtime folder on Linux (the system's
+/// temporary folder there is shared by every user), under the temporary folder elsewhere (the Mac's and Windows' are
+/// each user's own); readable by this user only.
+fn write_out(name: &str, files: Vec<(String, Vec<u8>)>) -> std::io::Result<Vec<PathBuf>> {
+    let base = private_dir(name)?;
     files
         .into_iter()
         .enumerate()
-        .map(|(index, (name, content))| {
+        .map(|(index, (file, content))| {
             let dir = base.join(index.to_string());
-            std::fs::create_dir_all(&dir)?;
-            let path = dir.join(name);
+            new_dir(&dir)?;
+            let path = dir.join(file);
             std::fs::write(&path, content)?;
             Ok(path)
         })
         .collect()
+}
+
+/// A new folder of this user's own for files the app writes out, `name` with a number that makes it new
+pub(crate) fn private_dir(name: &str) -> std::io::Result<PathBuf> {
+    let parent = private_root().join("InboxClassic");
+    match new_dir(&parent) {
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+        other => other?,
+    }
+    // a link to elsewhere is not followed
+    if !std::fs::symlink_metadata(&parent)?.is_dir() {
+        return Err(std::io::Error::other(format!("{} is not a folder", parent.display())));
+    }
+    for _ in 0..100 {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_nanos());
+        let dir = parent.join(format!("{name}-{nanos}"));
+        match new_dir(&dir) {
+            Ok(()) => {
+                // a parent another user made first (and left open to others) is not used: the folder made in it
+                // is this user's, so their owners differ
+                if !same_owner(&parent, &dir)? {
+                    let _ = std::fs::remove_dir(&dir);
+                    return Err(std::io::Error::other(format!("{} is another user's", parent.display())));
+                }
+                return Ok(dir);
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    Err(std::io::Error::other("no new folder could be made"))
+}
+
+#[cfg(unix)]
+fn same_owner(a: &std::path::Path, b: &std::path::Path) -> std::io::Result<bool> {
+    use std::os::unix::fs::MetadataExt;
+    Ok(std::fs::symlink_metadata(a)?.uid() == std::fs::symlink_metadata(b)?.uid())
+}
+
+#[cfg(not(unix))]
+fn same_owner(_a: &std::path::Path, _b: &std::path::Path) -> std::io::Result<bool> {
+    Ok(true)
+}
+
+/// Where the folders of [`private_dir`] are: the runtime folder on Linux (its temporary folder is shared by every user),
+/// the temporary folder elsewhere (each user's own on the Mac and Windows)
+fn private_root() -> PathBuf {
+    if cfg!(all(unix, not(target_os = "macos"))) {
+        std::env::var_os("XDG_RUNTIME_DIR")
+            .map(PathBuf::from)
+            .filter(|dir| dir.is_absolute())
+            .unwrap_or_else(std::env::temp_dir)
+    } else {
+        std::env::temp_dir()
+    }
+}
+
+/// Removes what [`private_dir`] folders earlier runs left (drafts' and forwards' attachments, dragged files), those a
+/// day old: one written by another core running now (another profile, a test) is left alone
+fn clear_private_dirs() {
+    const AGE: std::time::Duration = std::time::Duration::from_secs(24 * 60 * 60);
+    let parent = private_root().join("InboxClassic");
+    // only a folder of this user's: not a link, and the folders in it removed one by one
+    if std::fs::symlink_metadata(&parent).is_ok_and(|m| m.is_dir())
+        && let Ok(entries) = std::fs::read_dir(&parent)
+    {
+        for entry in entries.flatten() {
+            let old = entry
+                .metadata()
+                .and_then(|m| m.modified())
+                .ok()
+                .and_then(|at| at.elapsed().ok())
+                .is_some_and(|age| age > AGE);
+            if old && entry.file_type().is_ok_and(|t| t.is_dir()) {
+                let _ = std::fs::remove_dir_all(entry.path());
+            }
+        }
+    }
+}
+
+/// Makes a folder, failing when it is there; on Unix readable by this user only
+fn new_dir(dir: &std::path::Path) -> std::io::Result<()> {
+    let mut builder = std::fs::DirBuilder::new();
+    #[cfg(unix)]
+    std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
+    builder.create(dir)
 }
 
 fn store_security(security: pe_net::Security) -> pe_store::Security {
@@ -1496,4 +1612,26 @@ fn finish_view(
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(received);
     Some(view)
+}
+
+#[cfg(test)]
+mod write_out_tests {
+    #[test]
+    fn files_written_out_in_a_folder_of_this_users_own() {
+        let files = vec![
+            ("a.eml".to_string(), b"one".to_vec()),
+            ("a.eml".to_string(), b"two".to_vec()),
+        ];
+        let paths = super::write_out("test", files).unwrap();
+        assert_eq!(std::fs::read(&paths[0]).unwrap(), b"one");
+        assert_eq!(std::fs::read(&paths[1]).unwrap(), b"two");
+        assert_ne!(paths[0].parent(), paths[1].parent());
+        let dir = paths[0].parent().unwrap().parent().unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(std::fs::metadata(dir).unwrap().permissions().mode() & 0o777, 0o700);
+        }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
 }

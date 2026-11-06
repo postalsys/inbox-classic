@@ -47,11 +47,20 @@ inline bool CommandNeedsOne(unsigned id) {
     case IDM_PICTURES:
     case IDM_REPLY:
     case IDM_REPLY_ALL:
-    case IDM_FORWARD:
-    case IDM_SAVE_AS:
     case IDM_PRINT:
     case IDM_PROPERTIES:
     case IDM_VIEW_SOURCE:
+        return true;
+    default:
+        return false;
+    }
+}
+
+// whether a command acts on one or several messages: off with none selected
+inline bool CommandNeedsSome(unsigned id) {
+    switch (id) {
+    case IDM_FORWARD:
+    case IDM_SAVE_AS:
         return true;
     default:
         return false;

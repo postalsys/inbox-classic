@@ -20,6 +20,20 @@ pub fn messages(count: u64) -> String {
     }
 }
 
+/// What the status bar says once messages are saved as files into the folder `place`, by its name: "Saved 3 messages
+/// to Desktop"
+pub fn saved_text(count: u64, place: &std::path::Path) -> String {
+    let name = place
+        .file_name()
+        .map_or_else(|| place.display().to_string(), |n| n.to_string_lossy().into_owned());
+    format!("Saved {} to {name}", messages(count))
+}
+
+/// What the status bar says while messages not downloaded yet come for files or a forward: "Downloading 3 messages..."
+pub fn downloading_text(count: u64) -> String {
+    format!("Downloading {}...", messages(count))
+}
+
 /// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search
 /// ("No messages found" for none), and ", 2 selected" when more than one is
 pub fn list_counts(total: u64, unread: u64, selected: u64, searching: bool) -> String {

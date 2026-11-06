@@ -984,10 +984,11 @@ fn acts_on_selected_messages_and_undoes() {
     assert_eq!((summary.unread, summary.flagged), (0, 2));
     assert!(summary.flags());
     // toggled: one is not flagged, so all are; then all are, so none
+    // (what the server says of the flags meanwhile can show an older state for a moment; it settles on the last)
     s.core.act(&three, Action::ToggleFlag).unwrap();
-    assert!(!s.core.summary(&three).unwrap().flags());
+    eventually(&|| !s.core.summary(&three).unwrap().flags());
     s.core.act(&three, Action::ToggleFlag).unwrap();
-    assert_eq!(s.core.summary(&three).unwrap().flagged, 0);
+    eventually(&|| s.core.summary(&three).unwrap().flagged == 0);
     eventually(&|| {
         uids[..3]
             .iter()
@@ -1276,6 +1277,117 @@ fn a_move_between_accounts_cut_short_goes_on_without_a_second_copy() {
     });
     assert_eq!(other_server.subjects("Archive"), ["Half moved"]);
     assert!(s.server.subjects("INBOX").is_empty());
+}
+
+#[test]
+fn messages_become_files() {
+    let Some(s) = setup() else { return };
+    let lunch = s.server.add_message("INBOX", &rfc822("Lunch", "first"), &[]);
+    let lunch2 = s.server.add_message("INBOX", &rfc822("Lunch", "second"), &[]);
+    let other = s.server.add_message("INBOX", &rfc822("Other", "third"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let refs: Vec<MessageRef> = [lunch, lunch2, other]
+        .iter()
+        .map(|&uid| MessageRef { folder: inbox, uid })
+        .collect();
+    assert_eq!(
+        s.core.export_names(&refs).unwrap(),
+        ["Lunch.eml", "Lunch (2).eml", "Other.eml"]
+    );
+    // none was opened: they are downloaded for the files, and kept
+    assert!(!s.core.all_downloaded(&refs).unwrap());
+    let files = s.core.export_messages(&refs, Duration::from_secs(20)).unwrap();
+    assert_eq!(files.len(), 3);
+    let body = |f: &pe_core::Exported| String::from_utf8(f.source.clone().unwrap()).unwrap();
+    assert!(body(&files[0]).contains("first") && body(&files[1]).contains("second"));
+    assert!(s.core.all_downloaded(&refs).unwrap());
+
+    // saved into a folder, never over a file there
+    let dir = TempDir::new("export");
+    std::fs::write(dir.path().join("Other.eml"), "mine").unwrap();
+    let written = s
+        .core
+        .save_messages(&refs, dir.path(), Duration::from_secs(20))
+        .unwrap();
+    let mut names: Vec<String> = written
+        .iter()
+        .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
+        .collect();
+    names.sort();
+    assert_eq!(names, ["Lunch (2).eml", "Lunch.eml", "Other (2).eml"]);
+    assert_eq!(std::fs::read_to_string(dir.path().join("Other.eml")).unwrap(), "mine");
+
+    // forwarded as attachments, the subject the first one's
+    let draft = s
+        .core
+        .forward_as_attachments(&refs[1..], Duration::from_secs(20))
+        .unwrap();
+    assert_eq!(draft.subject, "Fw: Lunch");
+    assert_eq!(draft.attachments.len(), 2);
+    assert!(
+        std::fs::read_to_string(&draft.attachments[1])
+            .unwrap()
+            .contains("third")
+    );
+
+    // for a drag: written into a folder of the user's own
+    let dragged = s.core.drag_files(&refs[..2], Duration::from_secs(20)).unwrap();
+    assert_eq!(dragged.len(), 2);
+    assert!(std::fs::read_to_string(&dragged[1]).unwrap().contains("second"));
+    // a file a drag promised: never over one there
+    let promised = pe_core::write_file(dir.path(), "Other.eml", b"x").unwrap();
+    assert_eq!(promised.file_name().unwrap().to_string_lossy(), "Other (3).eml");
+    assert_eq!(
+        pe_core::saved_text(3, dir.path()),
+        format!(
+            "Saved 3 messages to {}",
+            dir.path().file_name().unwrap().to_string_lossy()
+        )
+    );
+
+    // files dropped on a folder: the messages go in, the rest is told
+    let notes = dir.path().join("notes.txt");
+    std::fs::write(&notes, "not mail").unwrap();
+    let (said, report) = s
+        .core
+        .import_files(inbox, &[written[0].clone(), notes.clone()])
+        .unwrap();
+    assert_eq!(said, "Put 1 message in Inbox");
+    let report = report.unwrap();
+    assert!(report.contains("notes.txt") && !report.contains("Lunch"), "{report}");
+    assert!(pe_core::is_message_file(&written[0]) && !pe_core::is_message_file(&notes));
+    assert_eq!(s.core.import_files(inbox, &[written[0].clone()]).unwrap().1, None);
+
+    // one gone from the server can not be had: told, the others still come
+    let gone = s.server.add_message("INBOX", &rfc822("Gone", "x"), &[]);
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    s.server.expunge("INBOX", &[gone]);
+    let files = s
+        .core
+        .export_messages(
+            &[
+                MessageRef {
+                    folder: inbox,
+                    uid: gone,
+                },
+                refs[2],
+            ],
+            Duration::from_secs(20),
+        )
+        .unwrap();
+    assert!(files[0].source.is_err());
+    assert!(files[1].source.is_ok());
 }
 
 #[test]

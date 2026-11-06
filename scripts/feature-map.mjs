@@ -161,7 +161,7 @@ const sections = [
             {
                 shot: 'main-1-inbox',
                 name: 'Folders and the message list',
-                what: 'Laid out as Outlook Express: each account with its folders, each with its icon (Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items), folders with unread mail bold with the count. The grey folder bar and the title name the selected folder. In the list a closed envelope marks unread mail (also bold), an open one read mail, with columns for the paper clip and the flag. Click a column heading to sort, again to reverse. With nothing selected the reading pane says so. The toolbar has the Fluent icons over their labels, in groups.',
+                what: 'Laid out as Outlook Express: each account with its folders, each with its icon (Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items), folders with unread mail bold with the count. The grey folder bar and the title name the selected folder. In the list unread mail is bold, with columns for the paper clip and the flag. Click a column heading to sort, again to reverse. With nothing selected the reading pane says so. The toolbar has the Fluent icons over their labels, in groups.',
                 how: 'Always there. Drag the borders between the parts to resize them.',
                 checked: ['All 7 folders of the account appear', 'The messages are listed', 'The title names the folder']
             },
@@ -569,6 +569,31 @@ const sections = [
                 what: 'Puts .eml files into the selected folder, on the server too. Files that are not messages, or larger than 50 MB, are named and left out.',
                 how: 'File > Import Messages.',
                 checked: ['The saved message is in Archive on the server']
+            },
+            {
+                shot: 'files-4-drag-out',
+                name: 'Drag messages to the desktop',
+                what: 'Messages dragged out of the list onto the desktop, a Finder, Explorer or file manager window, or another program become .eml files there, named after their subjects (Lunch.eml, Lunch (2).eml). A message not downloaded yet is downloaded for it. On Windows the files carry the mark of a download from the internet when they can, on the Mac the quarantine flag.',
+                how: 'Drag messages from the list onto the desktop or a folder window.',
+                checked: [
+                    'Three messages dragged out become three .eml files, named after their subjects',
+                    'Each is the message byte for byte, one not downloaded yet included',
+                    'Save As with three selected saves the three into a folder, never over a file there'
+                ]
+            },
+            {
+                shot: 'files-5-forward',
+                name: 'Forward several messages',
+                what: "Forward with several messages selected writes one new message with them attached as .eml files, its subject the first one's with Fw:.",
+                how: 'Select messages, then Forward (Ctrl+F).',
+                checked: ['One new message with the three attached as .eml files', "Its subject is the first one's, with Fw:"]
+            },
+            {
+                shot: 'files-6-drop-in',
+                name: 'Drop .eml files onto a folder',
+                what: 'Files dropped from the desktop or a file window onto a folder in the tree (or onto the message list, for the folder shown) are put in that folder as Import Messages does, on the server too. Files that are not messages are turned away.',
+                how: 'Drag .eml files onto a folder in the tree.',
+                checked: ['.eml files dropped onto Archive are in it, on the server', 'A file that is not a message is turned away']
             },
             {
                 shot: 'files-3-print',

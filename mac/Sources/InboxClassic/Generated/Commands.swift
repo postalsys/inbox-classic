@@ -207,6 +207,48 @@ enum Command: Int, CaseIterable {
         }
     }
 
+    /// Acts on one or several messages: off with none selected
+    var needsSome: Bool {
+        switch self {
+        case .newAccount: return false
+        case .exit: return false
+        case .sync: return false
+        case .undo: return false
+        case .selectAll: return false
+        case .markRead: return false
+        case .markUnread: return false
+        case .pictures: return false
+        case .about: return false
+        case .newMail: return false
+        case .reply: return false
+        case .replyAll: return false
+        case .forward: return true
+        case .help: return false
+        case .delete: return false
+        case .move: return false
+        case .copy: return false
+        case .flag: return false
+        case .newFolder: return false
+        case .renameFolder: return false
+        case .deleteFolder: return false
+        case .accounts: return false
+        case .find: return false
+        case .saveAs: return true
+        case .print: return false
+        case .import: return false
+        case .outbox: return false
+        case .properties: return false
+        case .markAllRead: return false
+        case .junk: return false
+        case .notJunk: return false
+        case .notify: return false
+        case .open: return false
+        case .defaultApp: return false
+        case .viewSource: return false
+        case .aiAgents: return false
+        }
+    }
+
     /// Acts on one message only: off while several are selected
     var needsOne: Bool {
         switch self {
@@ -222,7 +264,7 @@ enum Command: Int, CaseIterable {
         case .newMail: return false
         case .reply: return true
         case .replyAll: return true
-        case .forward: return true
+        case .forward: return false
         case .help: return false
         case .delete: return false
         case .move: return false
@@ -233,7 +275,7 @@ enum Command: Int, CaseIterable {
         case .deleteFolder: return false
         case .accounts: return false
         case .find: return false
-        case .saveAs: return true
+        case .saveAs: return false
         case .print: return true
         case .import: return false
         case .outbox: return false

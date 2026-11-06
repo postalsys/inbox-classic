@@ -99,12 +99,15 @@ void UpdateJunkButton() {
 // the toolbar's buttons for one message off while several are selected
 void UpdateSelectionButtons() {
     bool one = g_mailbox.SelectedCount() <= 1;
+    bool any = g_mailbox.SelectedCount() > 0;
     int count = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
     for (int i = 0; i < count; i++) {
         TBBUTTON button = {};
         SendMessageW(g_toolbar, TB_GETBUTTON, i, reinterpret_cast<LPARAM>(&button));
         if (CommandNeedsOne(static_cast<unsigned>(button.idCommand))) {
             SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(one ? TRUE : FALSE, 0));
+        } else if (CommandNeedsSome(static_cast<unsigned>(button.idCommand))) {
+            SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(any ? TRUE : FALSE, 0));
         }
     }
 }
@@ -127,6 +130,8 @@ void UpdateMenu(HMENU menu) {
         UINT id = GetMenuItemID(menu, i);
         if (CommandNeedsOne(id)) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (several ? MF_GRAYED : MF_ENABLED));
+        } else if (CommandNeedsSome(id)) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.SelectedCount() > 0 ? MF_ENABLED : MF_GRAYED));
         }
     }
     if (GetMenuState(menu, IDM_UNDO, MF_BYCOMMAND) == static_cast<UINT>(-1)) {
@@ -643,6 +648,8 @@ struct Arguments {
     bool mcp = false;
     // --background: started for an agent (by --mcp), in the tray without its window
     bool background = false;
+    // --test-hooks: the UI test drops and drags in place of Explorer (WM_COPYDATA kTestDragOut, kTestDropFiles)
+    bool testHooks = false;
 };
 Arguments g_arguments;
 
@@ -685,6 +692,8 @@ void ReadArguments() {
             g_arguments.mcp = true;
         } else if (arg == L"--background") {
             g_arguments.background = true;
+        } else if (arg == L"--test-hooks") {
+            g_arguments.testHooks = true;
         }
     }
     LocalFree(argv);
@@ -777,6 +786,10 @@ void OpenMailto(const std::wstring& link) {
 const wchar_t* kStoreProperty = L"InboxClassic.Store";
 // WM_COPYDATA from another start: a mailto: link to write, or empty to show the window
 constexpr ULONG_PTR kCopyMailto = 1;
+// with --test-hooks only: the selected messages dragged into a folder (its path), files dropped onto a tree item
+// ("<item>|<path>|<path>..."); the result is what the message returns
+constexpr ULONG_PTR kTestDragOut = 0x44524F55;
+constexpr ULONG_PTR kTestDropFiles = 0x44524F50;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -867,7 +880,12 @@ void OnCommand(WORD id, WORD code) {
         g_mailbox.FocusFind();
         return;
     case IDM_SAVE_AS:
-        g_mailbox.SaveShownAs(g_main);
+        // several: into a folder, each named after its subject
+        if (g_mailbox.SelectedCount() > 1) {
+            g_mailbox.SaveSelectedInto(g_main);
+        } else {
+            g_mailbox.SaveShownAs(g_main);
+        }
         return;
     case IDM_PRINT:
         g_mailbox.PrintShown();
@@ -904,7 +922,12 @@ void OnCommand(WORD id, WORD code) {
         Reply(PE_DRAFT_KIND_REPLY_ALL);
         return;
     case IDM_FORWARD:
-        Reply(PE_DRAFT_KIND_FORWARD);
+        // several: one new message with them attached
+        if (g_mailbox.SelectedCount() > 1) {
+            g_mailbox.ForwardSelected();
+        } else {
+            Reply(PE_DRAFT_KIND_FORWARD);
+        }
         return;
     case IDM_NEW_ACCOUNT:
         AddAccount();
@@ -1062,6 +1085,23 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_COPYDATA: {
         auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lParam);
+        if (g_arguments.testHooks && (data->dwData == kTestDragOut || data->dwData == kTestDropFiles) &&
+            data->cbData % sizeof(wchar_t) == 0) {
+            std::wstring text(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            if (data->dwData == kTestDragOut) {
+                return g_mailbox.TestDragOut(text);
+            }
+            std::vector<std::wstring> parts;
+            for (size_t start = 0, bar; start <= text.size(); start = bar + 1) {
+                bar = text.find(L'|', start);
+                if (bar == std::wstring::npos) {
+                    bar = text.size();
+                }
+                parts.push_back(text.substr(start, bar - start));
+            }
+            auto item = reinterpret_cast<HTREEITEM>(static_cast<INT_PTR>(_wtoi64(parts[0].c_str())));
+            return g_mailbox.TestDropFiles(item, std::vector<std::wstring>(parts.begin() + 1, parts.end()));
+        }
         if (data->dwData != kCopyMailto || data->cbData % sizeof(wchar_t) != 0 || data->cbData > 64 * 1024 * sizeof(wchar_t)) {
             return FALSE;
         }
@@ -1107,18 +1147,12 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     case WM_MOUSEMOVE:
-        if (g_mailbox.OnDragMouse(message)) {
-            return 0;
-        }
         if (g_dragging) {
             DragSplitter({static_cast<short>(LOWORD(lParam)), static_cast<short>(HIWORD(lParam))});
         }
         return 0;
     case WM_LBUTTONUP:
     case WM_CAPTURECHANGED:
-        if (g_mailbox.OnDragMouse(message)) {
-            return 0;
-        }
         if (g_dragging) {
             g_dragging = 0;
             if (message == WM_LBUTTONUP) {
@@ -1162,11 +1196,15 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             SyncAll();
         } else {
             g_mailbox.OnTimer(wParam);
-            // a reload or a search changes the counts; a drag does not
-            if (wParam != TIMER_DRAG) {
-                ShowCounts();
-            }
+            // a reload or a search changes the counts
+            ShowCounts();
         }
+        return 0;
+    case WM_FILES_DONE:
+        g_mailbox.FilesDone(lParam);
+        return 0;
+    case WM_IMPORT_DROPPED:
+        g_mailbox.ImportDropped(wParam, lParam);
         return 0;
     case WM_CORE_EVENT: {
         std::unique_ptr<UiEvent> event(reinterpret_cast<UiEvent*>(lParam));
@@ -1259,7 +1297,8 @@ void FirstRun() {
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     // DLLs only from System32 and the app's own directory, never from the current directory
     SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-    if (FAILED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED))) {
+    // OLE for dragging messages out of the app and files into it (COM in a single-threaded apartment with it)
+    if (FAILED(OleInitialize(nullptr))) {
         return 1;
     }
     ReadArguments();
@@ -1268,18 +1307,18 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         std::string text = "Inbox Classic " + std::string(pe_version()) + "\n";
         DWORD written = 0;
         WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
-        CoUninitialize();
+        OleUninitialize();
         return 0;
     }
     if (g_arguments.mcp) {
         int result = RelayMcp();
-        CoUninitialize();
+        OleUninitialize();
         return result;
     }
     // the app is open already for this mail store: it takes the link, or comes to the front (not for a start in the
     // background: the agent that asked for it finds it running)
     if (g_arguments.background ? RunningWindow() != nullptr : HandOver()) {
-        CoUninitialize();
+        OleUninitialize();
         return 0;
     }
     INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_TREEVIEW_CLASSES | ICC_LISTVIEW_CLASSES | ICC_BAR_CLASSES};
@@ -1334,6 +1373,6 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         DispatchMessageW(&msg);
     }
     DestroyAcceleratorTable(g_accelerators);
-    CoUninitialize();
+    OleUninitialize();
     return static_cast<int>(msg.wParam);
 }
