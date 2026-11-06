@@ -424,6 +424,7 @@ Screenshots: `all-inboxes-1-list`
 - newest first, the two accounts' messages among each other
 - the Account column names the account of each
 - the status bar counts both Inboxes
+- its right-click menu has Mark All Read alone (the Mac)
 - a reply goes from the account of the message
 - Mark All Read marks both Inboxes read on the servers
 

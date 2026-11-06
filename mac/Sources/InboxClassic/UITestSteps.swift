@@ -688,6 +688,8 @@ extension UITest {
         let counts: NSTextField? = find("status.counts", in: main.window)
         check(counts?.stringValue.hasPrefix("\(expected) message(s)") == true,
               "the status bar counts both Inboxes (\(counts?.stringValue ?? ""))")
+        let menu = main.mailbox.folderMenu().items.filter { !$0.isSeparatorItem }.map(\.title)
+        check(menu == [Command.markAllRead.label], "its right-click menu has Mark All Read alone (\(menu))")
         await selectRow(0)
         await shot(main.window, "all-inboxes-1-list")
         if let index = folders.firstIndex(of: second) {

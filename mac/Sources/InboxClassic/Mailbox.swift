@@ -851,19 +851,20 @@ public final class Mailbox: NSObject {
     }
 
     /// the folder menu (a right-click in the tree): Mark All Read, New, Rename, Delete
-    fileprivate func folderMenu() -> NSMenu {
+    func folderMenu() -> NSMenu {
         let menu = NSMenu()
         let someUnread = allInboxes ? core.inboxUnread > 0 : folder != 0 && core.folderCounts(folder).unread > 0
         let editable = folder != 0 && !(folderNodes[folder]?.folder.fixed ?? true)
-        // All Inboxes is no folder of one account to make a folder in
-        for (command, enabled) in [(Command.markAllRead, someUnread), (.newFolder, !allInboxes), (.renameFolder, editable),
-                                   (.deleteFolder, editable)] {
+        // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none
+        let folderCommands: [(Command, Bool)] = allInboxes ? []
+            : [(.newFolder, true), (.renameFolder, editable), (.deleteFolder, editable)]
+        for (command, enabled) in [(Command.markAllRead, someUnread)] + folderCommands {
             let item = NSMenuItem(title: command.label, action: #selector(folderMenuItem(_:)), keyEquivalent: "")
             item.target = self
             item.tag = command.rawValue
             item.isEnabled = enabled
             menu.addItem(item)
-            if command == .markAllRead {
+            if command == .markAllRead && !folderCommands.isEmpty {
                 menu.addItem(.separator())
             }
         }

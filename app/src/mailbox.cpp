@@ -1354,14 +1354,16 @@ void Mailbox::FolderMenu() {
     bool someUnread = allInboxes_ ? pe_inbox_unread(core_) > 0
                                   : folder_ && pe_folder_counts(core_, folder_, &total, &unread) && unread > 0;
     AppendMenuW(menu, someUnread ? MF_STRING : MF_STRING | MF_GRAYED, IDM_MARK_ALL_READ, L"Mark &All Read");
-    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    // All Inboxes is no folder of one account to make a folder in
-    AppendMenuW(menu, allInboxes_ ? MF_STRING | MF_GRAYED : MF_STRING, IDM_NEW_FOLDER, L"&New Folder...");
-    std::wstring name;
-    bool fixed = true;
-    UINT special = folder_ && FolderOf(folder_, name, fixed) && !fixed ? MF_STRING : MF_STRING | MF_GRAYED;
-    AppendMenuW(menu, special, IDM_RENAME_FOLDER, L"&Rename...");
-    AppendMenuW(menu, special, IDM_DELETE_FOLDER, L"&Delete");
+    // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none
+    if (!allInboxes_) {
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+        AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, L"&New Folder...");
+        std::wstring name;
+        bool fixed = true;
+        UINT special = folder_ && FolderOf(folder_, name, fixed) && !fixed ? MF_STRING : MF_STRING | MF_GRAYED;
+        AppendMenuW(menu, special, IDM_RENAME_FOLDER, L"&Rename...");
+        AppendMenuW(menu, special, IDM_DELETE_FOLDER, L"&Delete");
+    }
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     DestroyMenu(menu);
 }
