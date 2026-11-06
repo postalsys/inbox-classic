@@ -1,5 +1,7 @@
 #include "webview.h"
 
+#include "core.h"
+
 #include <shellapi.h>
 #include <shlobj.h>
 #include <shlwapi.h>
@@ -105,7 +107,7 @@ void CreateIn(HWND parent, ICoreWebView2Environment* environment,
         parent, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
                     [kept, ready, failed](HRESULT created, ICoreWebView2Controller* controller) {
                         if (FAILED(created) || !controller) {
-                            failed(L"Creating the WebView2 failed.");
+                            failed(core::T(PE_TEXT_WIN_WEBVIEW_FAILED));
                         } else {
                             ready(kept.Get(), controller);
                         }
@@ -113,7 +115,7 @@ void CreateIn(HWND parent, ICoreWebView2Environment* environment,
                     })
                     .Get());
     if (FAILED(hr)) {
-        failed(L"Creating the WebView2 failed.");
+        failed(core::T(PE_TEXT_WIN_WEBVIEW_FAILED));
     }
 }
 
@@ -125,7 +127,7 @@ void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebV
         Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
             [parent, ready, failed](HRESULT result, ICoreWebView2Environment* environment) {
                 if (FAILED(result) || !environment) {
-                    failed(L"The WebView2 runtime is not available.");
+                    failed(core::T(PE_TEXT_WIN_WEBVIEW_MISSING));
                     return S_OK;
                 }
                 CreateIn(parent, environment, ready, failed);
@@ -133,7 +135,7 @@ void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebV
             })
             .Get());
     if (FAILED(hr)) {
-        failed(L"The WebView2 runtime is not available.");
+        failed(core::T(PE_TEXT_WIN_WEBVIEW_MISSING));
     }
 }
 

@@ -281,15 +281,15 @@ int64_t PickFolder(HWND owner, FolderPick& pick) {
     state.pick = &pick;
     state.dialog = dialog;
     state.prompt = CreateChild(dialog, L"STATIC", pick.prompt.c_str(), SS_LEFT | SS_NOPREFIX, 0, {});
-    state.findLabel = CreateChild(dialog, L"STATIC", L"&Find:", SS_LEFT, 0, {});
+    state.findLabel = CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_FIND_LABEL).c_str(), SS_LEFT, 0, {});
     state.filter = CreateChild(dialog, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_PICKER_FILTER, {}, WS_EX_CLIENTEDGE);
     state.tree = CreateChild(dialog, WC_TREEVIEWW, nullptr,
                              WS_TABSTOP | TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_SHOWSELALWAYS, IDC_PICKER_TREE, {},
                              WS_EX_CLIENTEDGE);
     TreeView_SetImageList(state.tree, IconList(IconSet::Folders), TVSIL_NORMAL);
-    state.newFolder = CreateChild(dialog, L"BUTTON", L"&New Folder...", WS_TABSTOP, IDC_PICKER_NEW, {});
+    state.newFolder = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_CMD_NEW_FOLDER).c_str(), WS_TABSTOP, IDC_PICKER_NEW, {});
     state.ok = CreateChild(dialog, L"BUTTON", pick.verb.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
-    state.cancel = CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL, {});
+    state.cancel = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_CANCEL).c_str(), WS_TABSTOP, IDCANCEL, {});
     SetWindowSubclass(state.tree, TreeKeysProc, 0, reinterpret_cast<DWORD_PTR>(&state));
     SetWindowSubclass(state.filter, FilterKeysProc, 0, reinterpret_cast<DWORD_PTR>(&state));
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));

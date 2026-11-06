@@ -124,6 +124,27 @@ int TextWidth(HWND control, HFONT font) {
     return static_cast<int>(size.cx);
 }
 
+SIZE MeasureText(const std::wstring& text, int wrapWidth) {
+    std::wstring plain = text;
+    plain.erase(std::remove(plain.begin(), plain.end(), L'&'), plain.end());
+    HDC dc = GetDC(nullptr);
+    HGDIOBJ old = SelectObject(dc, GetStockObject(DEFAULT_GUI_FONT));
+    RECT bounds = {0, 0, wrapWidth > 0 ? wrapWidth : 0, 0};
+    DrawTextW(dc, plain.c_str(), static_cast<int>(plain.size()), &bounds,
+              DT_CALCRECT | DT_NOPREFIX | (wrapWidth > 0 ? DT_WORDBREAK : DT_SINGLELINE));
+    SelectObject(dc, old);
+    ReleaseDC(nullptr, dc);
+    return {bounds.right - bounds.left, bounds.bottom - bounds.top};
+}
+
+int ButtonWidth(std::initializer_list<std::wstring> labels, int least) {
+    int width = Scale(least);
+    for (const std::wstring& label : labels) {
+        width = std::max(width, static_cast<int>(MeasureText(label).cx) + Scale(20));
+    }
+    return width;
+}
+
 void SetScaleWindow(HWND window) {
     g_scaleWindow = window;
 }
@@ -267,11 +288,21 @@ void SetAccessibleDescription(HWND control, const std::wstring& text) {
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
                 bool (*validate)(const std::vector<FormField>&, std::wstring&), const wchar_t* okLabel, size_t focus) {
     RegisterDialogClass(kFormClass, FormProc);
+    std::wstring ok = okLabel ? okLabel : core::T(PE_TEXT_WIN_OK);
+    std::wstring cancel = core::T(PE_TEXT_WIN_CANCEL);
     int pad = Scale(10);
+    // the label column as wide as the longest label, the inputs keep at least their usual width
     int labelWidth = Scale(130);
-    int clientWidth = Scale(420);
+    for (const FormField& field : fields) {
+        labelWidth = std::max(labelWidth, static_cast<int>(MeasureText(field.label).cx) + Scale(8));
+    }
+    int buttonWidth = ButtonWidth({ok, cancel});
+    int clientWidth = std::max({Scale(420), pad + labelWidth + Scale(280) + pad, pad + 2 * buttonWidth + Scale(6) + pad});
     int rowHeight = Scale(22);
-    int introHeight = intro.empty() ? 0 : Scale(36);
+    int introHeight = 0;
+    if (!intro.empty()) {
+        introHeight = std::max(Scale(36), static_cast<int>(MeasureText(intro, clientWidth - 2 * pad).cy) + Scale(8));
+    }
     int clientHeight = pad + introHeight + static_cast<int>(fields.size()) * (rowHeight + Scale(6)) + Scale(32) + pad;
 
     HWND dialog = CreateModalWindow(owner, kFormClass, title.c_str(), clientWidth, clientHeight);
@@ -290,16 +321,24 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
             CreateInput(dialog, fields[i], 100 + static_cast<int>(i), {pad + labelWidth, top, clientWidth - pad, top + rowHeight}));
         top += rowHeight + Scale(6);
     }
-    int buttonWidth = Scale(80);
     int buttonTop = clientHeight - pad - Scale(25);
-    CreateChild(dialog, L"BUTTON", okLabel, WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
+    CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
                 {clientWidth - pad - 2 * buttonWidth - Scale(6), buttonTop, clientWidth - pad - buttonWidth - Scale(6),
                  buttonTop + Scale(25)});
-    CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL,
+    CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP, IDCANCEL,
                 {clientWidth - pad - buttonWidth, buttonTop, clientWidth - pad, buttonTop + Scale(25)});
 
     RunModal(dialog, focus < state.inputs.size() ? state.inputs[focus] : nullptr, state.done);
     return state.accepted;
+}
+
+std::wstring FileFilter(std::initializer_list<std::pair<std::wstring, std::wstring>> kinds) {
+    std::wstring filter;
+    for (const auto& [name, patterns] : kinds) {
+        filter += name + L" (" + patterns + L")" + L'\0' + patterns + L'\0';
+    }
+    // the string's own terminator ends the list
+    return filter;
 }
 
 std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title, const wchar_t* filter,
@@ -308,11 +347,13 @@ std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t*
     wchar_t buffer[MAX_PATH] = L"";
     wcsncpy_s(buffer, name.c_str(), _TRUNCATE);
     OPENFILENAMEW dialog = {sizeof(dialog)};
+    std::wstring allFiles = FileFilter({{core::T(PE_TEXT_WIN_FILTER_ALL), L"*.*"}});
+    std::wstring attachment = core::Plain(PE_TEXT_WIN_SAVE_ATTACHMENT_AS);
     dialog.hwndOwner = owner;
-    dialog.lpstrFilter = filter;
+    dialog.lpstrFilter = filter ? filter : allFiles.c_str();
     dialog.lpstrFile = buffer;
     dialog.nMaxFile = MAX_PATH;
-    dialog.lpstrTitle = title;
+    dialog.lpstrTitle = title ? title : attachment.c_str();
     // added to a name typed without an extension
     dialog.lpstrDefExt = extension;
     // Downloads the first time; after that Windows starts where the user saved last
@@ -365,9 +406,10 @@ void LayoutSource(HWND hwnd, const SourceState& state) {
     int buttonHeight = Scale(25);
     MoveWindow(state.box, pad, pad, client.right - 2 * pad, client.bottom - 3 * pad - buttonHeight, TRUE);
     int buttonTop = client.bottom - pad - buttonHeight;
-    MoveWindow(state.close, client.right - pad - Scale(80), buttonTop, Scale(80), buttonHeight, TRUE);
+    int closeWidth = ButtonWidth({GetWindowString(state.close)});
+    MoveWindow(state.close, client.right - pad - closeWidth, buttonTop, closeWidth, buttonHeight, TRUE);
     // a button that does not close the window on the other side
-    MoveWindow(state.save, pad, buttonTop, Scale(90), buttonHeight, TRUE);
+    MoveWindow(state.save, pad, buttonTop, ButtonWidth({GetWindowString(state.save)}, 90), buttonHeight, TRUE);
 }
 
 LRESULT CALLBACK SourceProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -434,8 +476,8 @@ void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& tex
                              CLEARTYPE_QUALITY, FIXED_PITCH | FF_MODERN, L"Consolas");
     SendMessageW(state.box, WM_SETFONT, reinterpret_cast<WPARAM>(state.font), FALSE);
     SetWindowTextW(state.box, text.c_str());
-    state.save = CreateChild(dialog, L"BUTTON", L"Save &As...", WS_TABSTOP, IDM_SAVE_AS, {});
-    state.close = CreateChild(dialog, L"BUTTON", L"Close", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
+    state.save = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_SAVE_AS_BUTTON).c_str(), WS_TABSTOP, IDM_SAVE_AS, {});
+    state.close = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_CLOSE).c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
     LayoutSource(dialog, state);
     RunModal(dialog, state.box, state.done);
     DeleteObject(state.font);
@@ -453,8 +495,9 @@ void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     HWND box = CreateChild(dialog, L"EDIT", text.c_str(),
                            WS_TABSTOP | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | ES_AUTOHSCROLL, 0,
                            {pad, pad + Scale(22), width - pad, height - pad - Scale(35)}, WS_EX_CLIENTEDGE);
-    CreateChild(dialog, L"BUTTON", L"OK", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
-                {width - pad - Scale(80), height - pad - Scale(25), width - pad, height - pad});
+    std::wstring ok = core::T(PE_TEXT_WIN_OK);
+    CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
+                {width - pad - ButtonWidth({ok}), height - pad - Scale(25), width - pad, height - pad});
     RunModal(dialog, box, done);
 }
 
@@ -567,6 +610,21 @@ void SetPreference(const wchar_t* name, DWORD value) {
     RegSetKeyValueW(HKEY_CURRENT_USER, kPreferencesKey, name, REG_DWORD, &value, sizeof(value));
 }
 
+std::wstring GetTextPreference(const wchar_t* name) {
+    // a short code: a value longer than this is not one the app wrote
+    wchar_t value[64] = L"";
+    DWORD size = sizeof(value);
+    if (RegGetValueW(HKEY_CURRENT_USER, kPreferencesKey, name, RRF_RT_REG_SZ, nullptr, value, &size) != ERROR_SUCCESS) {
+        return L"";
+    }
+    return value;
+}
+
+void SetTextPreference(const wchar_t* name, const std::wstring& value) {
+    RegSetKeyValueW(HKEY_CURRENT_USER, kPreferencesKey, name, REG_SZ, value.c_str(),
+                    static_cast<DWORD>((value.size() + 1) * sizeof(wchar_t)));
+}
+
 void SetAppIcons(WNDCLASSEXW& windowClass) {
     windowClass.hIcon = AppIcon(false);
     windowClass.hIconSm = AppIcon(true);
@@ -626,6 +684,35 @@ std::wstring MenuText(std::wstring text) {
         text.insert(at, 1, L'&');
     }
     return text;
+}
+
+std::wstring MenuItem(PeText text, std::wstring_view keys) {
+    std::wstring item = core::T(text);
+    if (keys.empty()) {
+        return item;
+    }
+    static const std::pair<const wchar_t*, PeText> names[] = {
+        {L"Ctrl", PE_TEXT_KEY_CTRL}, {L"Shift", PE_TEXT_KEY_SHIFT}, {L"Alt", PE_TEXT_KEY_ALT},
+        {L"Del", PE_TEXT_KEY_DEL},   {L"Enter", PE_TEXT_KEY_ENTER},
+    };
+    std::wstring shortcut;
+    size_t start = 0;
+    while (start <= keys.size()) {
+        size_t end = keys.find(L'+', start);
+        std::wstring_view part = keys.substr(start, end == std::wstring_view::npos ? std::wstring_view::npos : end - start);
+        std::wstring word(part);
+        for (const auto& [english, id] : names) {
+            if (part == english) {
+                word = core::Plain(id);
+            }
+        }
+        shortcut += (shortcut.empty() ? L"" : L"+") + word;
+        if (end == std::wstring_view::npos) {
+            break;
+        }
+        start = end + 1;
+    }
+    return item + L"\t" + shortcut;
 }
 
 HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
@@ -752,7 +839,7 @@ std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, cons
     dialog.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_NOCHANGEDIR;
     if (!GetOpenFileNameW(&dialog)) {
         if (CommDlgExtendedError() == FNERR_BUFFERTOOSMALL) {
-            MessageBoxW(owner, L"Too many files at once: choose fewer.", title, MB_OK | MB_ICONWARNING);
+            MessageBoxW(owner, core::T(PE_TEXT_WIN_TOO_MANY_FILES).c_str(), title, MB_OK | MB_ICONWARNING);
         }
         return {};
     }

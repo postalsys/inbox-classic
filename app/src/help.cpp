@@ -14,7 +14,7 @@ std::wstring HelpDocument() {
     // one help for every platform, the core leaves out the parts of the others
     core::String page(pe_help_page("windows"));
     if (!page) {
-        return L"<p>The help is missing from this copy of Inbox Classic.</p>";
+        return L"<p>" + core::T(PE_TEXT_WIN_HELP_MISSING) + L"</p>";
     }
     return core::Widen(page.get());
 }
@@ -68,7 +68,7 @@ void OpenHelp() {
         registered = true;
     }
     // not owned by the main window: the help stays usable while a dialog of the main window is open
-    g_help = CreateWindowExW(0, kHelpClass, L"Inbox Classic Help", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT,
+    g_help = CreateWindowExW(0, kHelpClass, core::T(PE_TEXT_WIN_HELP_TITLE).c_str(), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT,
                              CW_USEDEFAULT, Scale(820), Scale(700), nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!g_help) {
         return;

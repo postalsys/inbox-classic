@@ -95,7 +95,7 @@ LRESULT CALLBACK PrintProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
 void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const char* document, bool remoteImages, const std::wstring& subject) {
     core::String page(pe_print_page(document));
     if (!page) {
-        MessageBoxW(owner, L"The message could not be printed.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_PRINT_FAILED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
     }
     static bool registered = false;
@@ -113,7 +113,7 @@ void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const ch
     // over the app, the size of its window, as large as the preview can be
     RECT area;
     GetWindowRect(owner, &area);
-    std::wstring title = subject.empty() ? L"Print" : L"Print - " + subject;
+    std::wstring title = subject.empty() ? core::T(PE_TEXT_WIN_PRINT_TITLE) : core::T(PE_TEXT_WIN_PRINT_TITLE_OF, {{"subject", subject}});
     HWND hwnd = CreateWindowExW(0, kPrintClass, title.c_str(), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, area.left, area.top,
                                 area.right - area.left, area.bottom - area.top, owner, nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!hwnd) {

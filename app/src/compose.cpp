@@ -150,7 +150,7 @@ void SetComposeStatus(Compose* state, const std::wstring& text) {
 
 // where the link under the mouse, or else the one the cursor is in, goes; the status as it was without either
 void ShowLink(Compose* state, const std::wstring& link) {
-    std::wstring text = link.empty() ? state->statusText : link + L"    (Ctrl+click to open)";
+    std::wstring text = link.empty() ? state->statusText : link + L"    " + core::T(PE_TEXT_WIN_CTRL_CLICK_TO_OPEN, {{"ctrl", core::Plain(PE_TEXT_KEY_CTRL)}});
     SendMessageW(state->status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
 }
 
@@ -183,7 +183,11 @@ void Layout(HWND hwnd, Compose* state) {
     GetWindowRect(state->status, &statusBar);
     client.bottom -= statusBar.bottom - statusBar.top;
     int pad = Scale(6);
+    // the label column as wide as the longest label shown
     int labelWidth = Scale(60);
+    for (HWND label : state->labels) {
+        labelWidth = std::max(labelWidth, TextWidth(label, nullptr) + Scale(6));
+    }
     int rowHeight = Scale(22);
     int y = bar.bottom - bar.top + pad;
     HWND fields[] = {state->from, state->to, state->cc, state->bcc, state->subject, state->attached};
@@ -191,7 +195,7 @@ void Layout(HWND hwnd, Compose* state) {
     // From, To and Subject always; Cc and Bcc when they have something or were opened; Attach once there are files
     bool shown[] = {true, true, state->showCc, state->showBcc, true, !state->files.empty()};
     // the Cc and Bcc buttons at the end of the To row, for the rows not shown yet
-    int buttonWidth = Scale(40);
+    int buttonWidth = ButtonWidth({GetWindowString(state->ccButton), GetWindowString(state->bccButton)}, 40);
     int buttons = (state->showCc ? 0 : 1) + (state->showBcc ? 0 : 1);
     int right = client.right - pad;
     int toRight = right - buttons * (buttonWidth + Scale(4));
@@ -257,7 +261,7 @@ void AddFiles(Compose* state, const std::vector<std::wstring>& files) {
 }
 
 void Attach(HWND hwnd, Compose* state) {
-    AddFiles(state, OpenFilesDialog(hwnd, L"Insert Attachment", L"All files (*.*)\0*.*\0"));
+    AddFiles(state, OpenFilesDialog(hwnd, core::Plain(PE_TEXT_WIN_INSERT_ATTACHMENT).c_str(), FileFilter({{core::T(PE_TEXT_WIN_FILTER_ALL), L"*.*"}}).c_str()));
 }
 
 // files dragged from Explorer onto the window
@@ -310,7 +314,7 @@ void FileMenu(HWND hwnd, Compose* state, LPARAM at) {
         return;
     }
     HMENU menu = CreatePopupMenu();
-    AppendMenuW(menu, MF_STRING, 1, L"&Remove\tDel");
+    AppendMenuW(menu, MF_STRING, 1, MenuItem(PE_TEXT_WIN_REMOVE_FILE, L"Del").c_str());
     UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, point.x, point.y, 0, hwnd, nullptr);
     DestroyMenu(menu);
     if (chosen == 1) {
@@ -362,9 +366,9 @@ struct Fields {
 };
 
 // the reason the core gave, or `fallback`
-void ShowRefusal(HWND hwnd, char* reason, const wchar_t* fallback) {
+void ShowRefusal(HWND hwnd, char* reason, PeText fallback) {
     core::String error(reason);
-    std::wstring why = error ? Text(error.get()) : fallback;
+    std::wstring why = error ? Text(error.get()) : core::T(fallback);
     MessageBoxW(hwnd, why.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
@@ -374,7 +378,7 @@ void Send(HWND hwnd, Compose* state, const std::wstring& html) {
     char* reason = nullptr;
     if (!pe_message_send(state->core, state->account, &fields.outgoing, &reason)) {
         // a typo in an address or a file that is gone: the message stays open to fix it
-        ShowRefusal(hwnd, reason, L"The message could not be sent.");
+        ShowRefusal(hwnd, reason, PE_TEXT_WIN_NOT_SENT);
         return;
     }
     // the main window shows whether the server took it
@@ -389,7 +393,7 @@ void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
     char* messageId = nullptr;
     char* reason = nullptr;
     if (!pe_draft_save(state->core, state->account, &fields.outgoing, &messageId, &reason)) {
-        ShowRefusal(hwnd, reason, L"The message could not be saved.");
+        ShowRefusal(hwnd, reason, PE_TEXT_WIN_NOT_SAVED);
         // not closing after all: the main window does not wait for it
         if (close) {
             PostMessageW(state->main, WM_COMPOSE_KEPT, 0, 0);
@@ -402,7 +406,7 @@ void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
     state->dirty = false;
     state->editor.Clean();
     // the server's answer follows (ComposeDraftSaved)
-    SetComposeStatus(state, L"Saving to Drafts...");
+    SetComposeStatus(state, core::T(PE_TEXT_WIN_SAVING_DRAFT));
     if (close) {
         DestroyWindow(hwnd);
     }
@@ -436,7 +440,7 @@ bool ValidLink(const std::wstring& url, std::wstring& error) {
     if (webview::IsLinkScheme(url.c_str()) && url.find_first_not_of(L'/', url.find(L':') + 1) != std::wstring::npos) {
         return true;
     }
-    error = L"Type a web address (https://...) or an e-mail link (mailto:...).";
+    error = core::T(PE_TEXT_WIN_LINK_INVALID);
     return false;
 }
 
@@ -445,7 +449,7 @@ bool ValidLink(const std::wstring& url, std::wstring& error) {
 void InsertLink(HWND hwnd, Writing* state) {
     const std::wstring& current = state->editor.CaretLink();
     bool editing = !current.empty();
-    std::vector<FormField> fields = {{L"Address:", editing ? current : L"https://"}};
+    std::vector<FormField> fields = {{core::T(PE_TEXT_WIN_LINK_ADDRESS), editing ? current : L"https://"}};
     bool (*newLink)(const std::vector<FormField>&, std::wstring&) = [](const std::vector<FormField>& values, std::wstring& error) {
         return ValidLink(values[0].value, error);
     };
@@ -453,9 +457,9 @@ void InsertLink(HWND hwnd, Writing* state) {
     bool (*changedLink)(const std::vector<FormField>&, std::wstring&) = [](const std::vector<FormField>& values, std::wstring& error) {
         return values[0].value.empty() || ValidLink(values[0].value, error);
     };
-    if (FormDialog(hwnd, editing ? L"Edit Hyperlink" : L"Hyperlink",
-                   editing ? L"Where the link goes. Empty the address to remove the link and keep its text." : L"The address the selected text links to.",
-                   fields, editing ? changedLink : newLink)) {
+    if (FormDialog(hwnd, core::Plain(editing ? PE_TEXT_WIN_EDIT_HYPERLINK : PE_TEXT_WIN_HYPERLINK),
+                   core::T(editing ? PE_TEXT_WIN_EDIT_HYPERLINK_INTRO : PE_TEXT_WIN_HYPERLINK_INTRO), fields,
+                   editing ? changedLink : newLink)) {
         state->editor.Link(fields[0].value);
     }
 }
@@ -488,17 +492,18 @@ void InsertPicture(HWND hwnd, Writing* state) {
     wchar_t path[MAX_PATH] = L"";
     OPENFILENAMEW dialog = {sizeof(dialog)};
     dialog.hwndOwner = hwnd;
-    dialog.lpstrFilter = L"Pictures (*.png;*.jpg;*.jpeg;*.gif)\0*.png;*.jpg;*.jpeg;*.gif\0";
+    std::wstring filter = FileFilter({{core::T(PE_TEXT_WIN_FILTER_PICTURES), L"*.png;*.jpg;*.jpeg;*.gif"}});
+    std::wstring title = core::Plain(PE_TEXT_WIN_INSERT_PICTURE);
+    dialog.lpstrFilter = filter.c_str();
     dialog.lpstrFile = path;
     dialog.nMaxFile = MAX_PATH;
-    dialog.lpstrTitle = L"Insert Picture";
+    dialog.lpstrTitle = title.c_str();
     dialog.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
     if (!GetOpenFileNameW(&dialog)) {
         return;
     }
     if (!InsertPictureFile(state, path)) {
-        MessageBoxW(hwnd, L"This file is not a PNG, JPEG or GIF picture, or it is larger than 10 MB.", L"Insert Picture",
-                    MB_OK | MB_ICONWARNING);
+        MessageBoxW(hwnd, core::T(PE_TEXT_WIN_NOT_A_PICTURE).c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
     }
 }
 
@@ -583,31 +588,33 @@ void CreateFormatBar(HWND hwnd, Writing* state) {
     struct Button {
         int id;
         // the tooltip
-        const wchar_t* text;
+        PeText text;
         BYTE style;
         int icon;
     };
     Button buttons[] = {
-        {IDF_BOLD, L"Bold (Ctrl+B)", BTNS_CHECK, FORMAT_TEXT_BOLD},
-        {IDF_ITALIC, L"Italic (Ctrl+I)", BTNS_CHECK, FORMAT_TEXT_ITALIC},
-        {IDF_UNDERLINE, L"Underline (Ctrl+U)", BTNS_CHECK, FORMAT_TEXT_UNDERLINE},
-        {IDF_COLOR, L"Font Color", 0, FORMAT_TEXT_COLOR},
-        {0, nullptr, 0, 0},
-        {IDF_NUMBERS, L"Numbered List", BTNS_CHECK, FORMAT_TEXT_NUMBER_LIST_LTR},
-        {IDF_BULLETS, L"Bulleted List", BTNS_CHECK, FORMAT_TEXT_BULLET_LIST_LTR},
-        {IDF_OUTDENT, L"Decrease Indent", 0, FORMAT_TEXT_INDENT_DECREASE_LTR},
-        {IDF_INDENT, L"Increase Indent", 0, FORMAT_TEXT_INDENT_INCREASE_LTR},
-        {0, nullptr, 0, 0},
-        {IDF_LEFT, L"Align Left", BTNS_CHECK, FORMAT_TEXT_ALIGN_LEFT},
-        {IDF_CENTER, L"Center", BTNS_CHECK, FORMAT_TEXT_ALIGN_CENTER},
-        {IDF_RIGHT, L"Align Right", BTNS_CHECK, FORMAT_TEXT_ALIGN_RIGHT},
-        {0, nullptr, 0, 0},
-        {IDF_LINK, L"Hyperlink (Ctrl+K)", 0, FORMAT_LINK},
-        {IDF_LINE, L"Insert Horizontal Line", 0, FORMAT_LINE_HORIZONTAL_1},
-        {IDF_PICTURE, L"Insert Picture", 0, FORMAT_IMAGE},
+        {IDF_BOLD, PE_TEXT_WIN_FORMAT_BOLD, BTNS_CHECK, FORMAT_TEXT_BOLD},
+        {IDF_ITALIC, PE_TEXT_WIN_FORMAT_ITALIC, BTNS_CHECK, FORMAT_TEXT_ITALIC},
+        {IDF_UNDERLINE, PE_TEXT_WIN_FORMAT_UNDERLINE, BTNS_CHECK, FORMAT_TEXT_UNDERLINE},
+        {IDF_COLOR, PE_TEXT_WIN_FORMAT_COLOR, 0, FORMAT_TEXT_COLOR},
+        {0, PE_TEXT_MENU_FILE, 0, 0},
+        {IDF_NUMBERS, PE_TEXT_WIN_FORMAT_NUMBERS, BTNS_CHECK, FORMAT_TEXT_NUMBER_LIST_LTR},
+        {IDF_BULLETS, PE_TEXT_WIN_FORMAT_BULLETS, BTNS_CHECK, FORMAT_TEXT_BULLET_LIST_LTR},
+        {IDF_OUTDENT, PE_TEXT_WIN_FORMAT_OUTDENT, 0, FORMAT_TEXT_INDENT_DECREASE_LTR},
+        {IDF_INDENT, PE_TEXT_WIN_FORMAT_INDENT, 0, FORMAT_TEXT_INDENT_INCREASE_LTR},
+        {0, PE_TEXT_MENU_FILE, 0, 0},
+        {IDF_LEFT, PE_TEXT_WIN_FORMAT_LEFT, BTNS_CHECK, FORMAT_TEXT_ALIGN_LEFT},
+        {IDF_CENTER, PE_TEXT_WIN_FORMAT_CENTER, BTNS_CHECK, FORMAT_TEXT_ALIGN_CENTER},
+        {IDF_RIGHT, PE_TEXT_WIN_FORMAT_RIGHT, BTNS_CHECK, FORMAT_TEXT_ALIGN_RIGHT},
+        {0, PE_TEXT_MENU_FILE, 0, 0},
+        {IDF_LINK, PE_TEXT_WIN_FORMAT_LINK, 0, FORMAT_LINK},
+        {IDF_LINE, PE_TEXT_WIN_FORMAT_LINE, 0, FORMAT_LINE_HORIZONTAL_1},
+        {IDF_PICTURE, PE_TEXT_WIN_INSERT_PICTURE, 0, FORMAT_IMAGE},
     };
     for (const Button& button : buttons) {
-        AddButton(state->formatBar, button.id, button.text, static_cast<BYTE>(BTNS_BUTTON | button.style), button.icon);
+        std::wstring tip = button.id ? core::T(button.text, {{"ctrl", core::Plain(PE_TEXT_KEY_CTRL)}}) : std::wstring();
+        AddButton(state->formatBar, button.id, button.id ? tip.c_str() : nullptr, static_cast<BYTE>(BTNS_BUTTON | button.style),
+                  button.icon);
     }
 }
 
@@ -615,22 +622,23 @@ void CreateFields(HWND hwnd, Compose* state) {
     state->status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0, hwnd,
                                     nullptr, GetModuleHandleW(nullptr), nullptr);
     state->toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP, 0, BarIcons::Big);
-    AddButton(state->toolbar, IDC_SEND, L"Send", BTNS_BUTTON, ICON_SEND);
+    AddButton(state->toolbar, IDC_SEND, core::T(PE_TEXT_WIN_TB_SEND).c_str(), BTNS_BUTTON, ICON_SEND);
     AddButton(state->toolbar, 0, nullptr);
-    AddButton(state->toolbar, IDC_SAVE, L"Save", BTNS_BUTTON, ICON_SAVE);
+    AddButton(state->toolbar, IDC_SAVE, core::T(PE_TEXT_WIN_TB_SAVE).c_str(), BTNS_BUTTON, ICON_SAVE);
     AddButton(state->toolbar, 0, nullptr);
-    AddButton(state->toolbar, IDC_ATTACH, L"Attach", BTNS_BUTTON, ICON_ATTACH);
-    const wchar_t* labels[] = {L"From:", L"To:", L"Cc:", L"Bcc:", L"Subject:", L"Attach:"};
+    AddButton(state->toolbar, IDC_ATTACH, core::T(PE_TEXT_WIN_TB_ATTACH).c_str(), BTNS_BUTTON, ICON_ATTACH);
+    PeText labels[] = {PE_TEXT_WIN_FIELD_FROM,    PE_TEXT_WIN_FIELD_TO,      PE_TEXT_WIN_FIELD_CC,
+                       PE_TEXT_WIN_FIELD_BCC,     PE_TEXT_WIN_FIELD_SUBJECT, PE_TEXT_WIN_FIELD_ATTACH};
     static_assert(std::size(labels) == Compose::kRows);
     for (int i = 0; i < Compose::kRows; i++) {
-        state->labels[i] = CreateChild(hwnd, L"STATIC", labels[i], SS_LEFT, 0, {});
+        state->labels[i] = CreateChild(hwnd, L"STATIC", core::T(labels[i]).c_str(), SS_LEFT, 0, {});
     }
     // who the message goes from: always shown, so it is clear even with one account, and the account it is sent with
     state->from = CreateChild(hwnd, L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, IDC_FROM, {});
     state->to = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_TO, {}, WS_EX_CLIENTEDGE);
     // Cc and Bcc wait behind these until needed (Alt+C, Alt+B), as most mail programs have it now
-    state->ccButton = CreateChild(hwnd, L"BUTTON", L"&Cc", BS_PUSHBUTTON, IDC_SHOW_CC, {});
-    state->bccButton = CreateChild(hwnd, L"BUTTON", L"&Bcc", BS_PUSHBUTTON, IDC_SHOW_BCC, {});
+    state->ccButton = CreateChild(hwnd, L"BUTTON", core::T(PE_TEXT_WIN_SHOW_CC).c_str(), BS_PUSHBUTTON, IDC_SHOW_CC, {});
+    state->bccButton = CreateChild(hwnd, L"BUTTON", core::T(PE_TEXT_WIN_SHOW_BCC).c_str(), BS_PUSHBUTTON, IDC_SHOW_BCC, {});
     state->cc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_CC, {}, WS_EX_CLIENTEDGE);
     state->bcc = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_BCC, {}, WS_EX_CLIENTEDGE);
     // the people written to and heard from, completed as an address is typed
@@ -707,7 +715,7 @@ bool MayClose(HWND hwnd, Compose* state) {
     if (!state->dirty) {
         return true;
     }
-    switch (MessageBoxW(hwnd, L"Do you want to save changes to this message in Drafts?", L"Inbox Classic", MB_YESNOCANCEL | MB_ICONQUESTION)) {
+    switch (MessageBoxW(hwnd, core::T(PE_TEXT_WIN_SAVE_CHANGES_ASK).c_str(), L"Inbox Classic", MB_YESNOCANCEL | MB_ICONQUESTION)) {
     case IDYES:
         Request(state, Compose::Pending::SaveAndClose);
         return false;
@@ -848,7 +856,8 @@ struct Signature : Writing {
 void LayoutSignature(HWND hwnd, Signature* state) {
     RECT client;
     GetClientRect(hwnd, &client);
-    int pad = Scale(10), buttonWidth = Scale(88), buttonHeight = Scale(25);
+    int pad = Scale(10), buttonWidth = ButtonWidth({GetWindowString(state->ok), GetWindowString(state->cancel)}, 88),
+        buttonHeight = Scale(25);
     int top = PlaceFormatBar(state, pad, pad, client.right - pad);
     int buttons = client.bottom - pad - buttonHeight;
     state->editor.Resize({pad, top, client.right - pad, std::max(top, buttons - pad)});
@@ -903,22 +912,22 @@ bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring
     if (!current) {
         return false;
     }
-    HWND dialog = CreateModalWindow(owner, kSignatureClass, (L"Signature - " + name).c_str(), Scale(620), Scale(330));
+    HWND dialog = CreateModalWindow(owner, kSignatureClass, core::T(PE_TEXT_WIN_SIGNATURE_TITLE, {{"account", name}}).c_str(), Scale(620), Scale(330));
     Signature state;
     state.core = core;
     state.account = account;
     CreateFormatBar(dialog, &state);
-    state.hint = CreateChild(dialog, L"STATIC", L"Added to new messages, replies and forwards from this account.",
+    state.hint = CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_SIGNATURE_HINT).c_str(),
                              SS_LEFT | SS_CENTERIMAGE | SS_ENDELLIPSIS, 0, {});
-    state.ok = CreateChild(dialog, L"BUTTON", L"OK", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
-    state.cancel = CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL, {});
+    state.ok = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_OK).c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
+    state.cancel = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_CANCEL).c_str(), WS_TABSTOP, IDCANCEL, {});
     core::String page(pe_editor_document(nullptr, false, current.get()));
     Editor::Handlers handlers;
     handlers.error = [dialog](const std::wstring& error) { MessageBoxW(dialog, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
     handlers.html = [dialog, &state](const std::wstring& html, EditorQuote, const std::wstring&) {
         state.saved = pe_account_set_signature(state.core, state.account, core::Narrow(html).c_str());
         if (!state.saved) {
-            MessageBoxW(dialog, L"The signature could not be saved.", L"Signature", MB_OK | MB_ICONERROR);
+            MessageBoxW(dialog, core::T(PE_TEXT_WIN_SIGNATURE_NOT_SAVED).c_str(), core::Plain(PE_TEXT_WIN_SIGNATURE).c_str(), MB_OK | MB_ICONERROR);
             state.saving = false;
             return;
         }
@@ -967,7 +976,7 @@ void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
         RegisterClassExW(&windowClass);
         registered = true;
     }
-    std::wstring title = draft && draft->subject && *draft->subject ? Text(draft->subject) : L"New Message";
+    std::wstring title = draft && draft->subject && *draft->subject ? Text(draft->subject) : core::Plain(PE_TEXT_WIN_NEW_MESSAGE_TITLE);
     // no owner: a window of its own, as in Outlook Express, that the main window can come in front of
     HWND hwnd = CreateWindowExW(WS_EX_CONTROLPARENT | WS_EX_APPWINDOW, kComposeClass, title.c_str(),
                                 WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, Scale(760), Scale(620), nullptr,
@@ -1058,10 +1067,10 @@ bool ComposeDraftSaved(const std::string& messageId, const std::wstring& problem
             continue;
         }
         if (!problem.empty()) {
-            SetComposeStatus(state, L"Not saved in Drafts: " + problem);
+            SetComposeStatus(state, core::T(PE_TEXT_WIN_COMPOSE_NOT_SAVED, {{"reason", problem}}));
             return true;
         }
-        SetComposeStatus(state, L"Saved in Drafts at " + TimeNow());
+        SetComposeStatus(state, core::T(PE_TEXT_WIN_COMPOSE_SAVED_AT, {{"time", TimeNow()}}));
         return true;
     }
     return false;

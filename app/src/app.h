@@ -85,6 +85,9 @@ enum class IconSet { Toolbar, Format, Folders, List };
 HIMAGELIST IconList(IconSet set);
 // text for a menu item: a & in it stays a & rather than making the next character a shortcut
 std::wstring MenuText(std::wstring text);
+// a menu item of the catalogs (`&` marking its letter) with its shortcut, the key names in the language in use:
+// MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P") is "&Drucken...\tStrg+P" in German
+std::wstring MenuItem(PeText text, std::wstring_view keys = {});
 // a flat toolbar, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles. Its icons (icons.h): the big ones with
 // the label under them (main and compose windows), or the small ones of the format bar, the label as the tooltip
 enum class BarIcons { Big, Small };
@@ -97,11 +100,16 @@ HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPAR
 // how wide the words of a control are in `font` (the dialog font when NULL), its & left out
 int TextWidth(HWND control, HFONT font);
 
+// how big `text` is in the dialog font, its & left out: one line, or wrapped at `wrapWidth` when it is not 0
+SIZE MeasureText(const std::wstring& text, int wrapWidth = 0);
+// a push button wide enough for the longest of `labels`, at least `least` pixels at 96 DPI
+int ButtonWidth(std::initializer_list<std::wstring> labels, int least = 80);
+
 // a modal form with a label and an input for each field; true with the values filled in when OK was clicked.
 // `validate` gets the values and returns an error to show, or an empty string to accept them.
-// `focus`: the field to start in
+// `okLabel`: the default button, OK when null. `focus`: the field to start in
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
-                bool (*validate)(const std::vector<FormField>&, std::wstring& error) = nullptr, const wchar_t* okLabel = L"OK",
+                bool (*validate)(const std::vector<FormField>&, std::wstring& error) = nullptr, const wchar_t* okLabel = nullptr,
                 size_t focus = 0);
 // an owner-drawn button (CreateLinkButton) drawn as a link: underlined, in the link color, a focus rectangle around
 // the words
@@ -117,8 +125,11 @@ void SetAccessibleDescription(HWND control, const std::wstring& text);
 HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight);
 void RunModal(HWND dialog, HWND focus, const bool& done);
 // the path to save an attachment to, starting from the safe name the core made; empty when cancelled
-std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title = L"Save Attachment As",
-                           const wchar_t* filter = L"All files (*.*)\0*.*\0", const wchar_t* extension = nullptr);
+// (title and filter those of an attachment when null)
+std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title = nullptr, const wchar_t* filter = nullptr,
+                           const wchar_t* extension = nullptr);
+// the filter of a file dialog (lpstrFilter): each kind a name and its patterns, "*.eml" or "*.png;*.gif"
+std::wstring FileFilter(std::initializer_list<std::pair<std::wstring, std::wstring>> kinds);
 // `text` with its line breaks as CRLF, as an edit box shows them
 std::wstring WithCrlf(const std::wstring& text);
 // a modal window that can be resized with `text` (a message's source) in a fixed-width font to read and copy, Save
@@ -194,7 +205,7 @@ void RequestDone(uint64_t request);
 // waits for the event of `request` with a small window titled `title` that says `text` and can cancel it; false when
 // it was cancelled
 bool WaitForRequest(HWND owner, PeCore* core, uint64_t request, void (*cancel)(const PeCore*, uint64_t),
-                    const std::wstring& text, const wchar_t* title);
+                    const std::wstring& text, const std::wstring& title);
 // what a sign-in uses: a built-in client (GOOGLE, MICROSOFT) or the sign-in app `app` (APP)
 struct SignInChoice {
     PeOAuthProvider provider = PE_O_AUTH_PROVIDER_NONE;
@@ -280,6 +291,18 @@ TrayAction TrayMessage(HWND main, UINT message, WPARAM wParam, LPARAM lParam, in
 // not set
 DWORD GetPreference(const wchar_t* name, DWORD fallback);
 void SetPreference(const wchar_t* name, DWORD value);
+// a text preference there, empty when it is not set
+std::wstring GetTextPreference(const wchar_t* name);
+void SetTextPreference(const wchar_t* name, const std::wstring& value);
+
+// ---- options.cpp ----
+
+// the language of the windows, before the first window reads a word: `forced` (--language), else the one chosen in
+// Options, else the first of Windows' display languages there is a catalog of
+void StartLanguage(const std::wstring& forced);
+// Tools > Options: the language and the new mail notifications (`notify`, changed when OK is clicked). True when the
+// user chose to restart now for a new language
+bool OptionsDialog(HWND owner, bool& notify);
 
 // ---- complete.cpp ----
 
@@ -733,6 +756,13 @@ enum AgentControlId : WORD {
     IDC_AGENTS_UNDO,
     IDC_AGENTS_CLEAR,
     IDC_AGENTS_SETUP,
+};
+
+// the controls of Tools > Options (options.cpp), which the UI test finds by them
+enum OptionsControlId : WORD {
+    IDC_OPTIONS_LANGUAGE = 660,
+    IDC_OPTIONS_NOTIFY,
+    IDC_OPTIONS_NOTE,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

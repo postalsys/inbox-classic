@@ -9,15 +9,19 @@
 
 namespace {
 
-const wchar_t* kSecurity[] = {L"SSL/TLS", L"STARTTLS", L"None (unencrypted)"};
+// the choices of the security lists, as PeSecurity orders them: SSL/TLS, STARTTLS, none
+std::vector<std::wstring> SecurityChoices() {
+    return {L"SSL/TLS", L"STARTTLS", core::T(PE_TEXT_WIN_SECURITY_NONE)};
+}
 
 enum Field { NAME, EMAIL, USERNAME, PASSWORD, IMAP_HOST, IMAP_PORT, IMAP_SECURITY, SMTP_HOST, SMTP_PORT, SMTP_SECURITY };
 
 PeSecurity SecurityOf(const std::wstring& choice) {
-    if (choice == kSecurity[1]) {
+    std::vector<std::wstring> choices = SecurityChoices();
+    if (choice == choices[1]) {
         return PE_SECURITY_START_TLS;
     }
-    return choice == kSecurity[2] ? PE_SECURITY_PLAIN : PE_SECURITY_TLS;
+    return choice == choices[2] ? PE_SECURITY_PLAIN : PE_SECURITY_TLS;
 }
 
 bool ValidPort(const std::wstring& text) {
@@ -31,16 +35,21 @@ bool ValidPort(const std::wstring& text) {
 bool Validate(const std::vector<FormField>& fields, std::wstring& error) {
     for (Field required : {EMAIL, IMAP_HOST, SMTP_HOST}) {
         if (fields[required].value.empty()) {
-            error = fields[required].label + L" is required.";
+            std::wstring label = fields[required].label;
+            // the label without its colon ("E-mail address:", "Adresse e-mail :")
+            while (!label.empty() && (label.back() == L':' || iswspace(label.back()))) {
+                label.pop_back();
+            }
+            error = core::T(PE_TEXT_WIN_FIELD_REQUIRED, {{"field", label}});
             return false;
         }
     }
     if (fields[EMAIL].value.find(L'@') == std::wstring::npos) {
-        error = L"The e-mail address is not valid.";
+        error = core::T(PE_TEXT_WIN_EMAIL_INVALID);
         return false;
     }
     if (!ValidPort(fields[IMAP_PORT].value) || !ValidPort(fields[SMTP_PORT].value)) {
-        error = L"Ports are numbers from 1 to 65535.";
+        error = core::T(PE_TEXT_WIN_PORTS_INVALID);
         return false;
     }
     return true;
@@ -72,7 +81,7 @@ LRESULT CALLBACK WaitProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 }  // namespace
 
 bool WaitForRequest(HWND owner, PeCore* core, uint64_t request, void (*cancel)(const PeCore*, uint64_t),
-                    const std::wstring& text, const wchar_t* title) {
+                    const std::wstring& text, const std::wstring& title) {
     g_wait = {core, request, cancel, false};
     if (!request) {
         return false;
@@ -92,13 +101,17 @@ bool WaitForRequest(HWND owner, PeCore* core, uint64_t request, void (*cancel)(c
     RECT ownerRect;
     GetWindowRect(root, &ownerRect);
     int width = Scale(360);
-    int height = Scale(130);
-    HWND wait = CreateWindowExW(WS_EX_DLGMODALFRAME, kWaitClass, title, WS_POPUP | WS_CAPTION | WS_SYSMENU,
+    // the words wrap; a longer text makes the window taller
+    int textHeight = std::max(Scale(40), static_cast<int>(MeasureText(text, width - Scale(36)).cy));
+    int height = Scale(90) + textHeight;
+    std::wstring cancelLabel = core::T(PE_TEXT_WIN_CANCEL);
+    int buttonWidth = ButtonWidth({cancelLabel}, 84);
+    HWND wait = CreateWindowExW(WS_EX_DLGMODALFRAME, kWaitClass, title.c_str(), WS_POPUP | WS_CAPTION | WS_SYSMENU,
                                 (ownerRect.left + ownerRect.right - width) / 2, (ownerRect.top + ownerRect.bottom - height) / 2,
                                 width, height, root, nullptr, GetModuleHandleW(nullptr), nullptr);
-    CreateChild(wait, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {Scale(12), Scale(12), width - Scale(24), Scale(52)});
-    CreateChild(wait, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL,
-                {width - Scale(100), Scale(58), width - Scale(16), Scale(83)});
+    CreateChild(wait, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {Scale(12), Scale(12), width - Scale(24), Scale(12) + textHeight});
+    CreateChild(wait, L"BUTTON", cancelLabel.c_str(), WS_TABSTOP, IDCANCEL,
+                {width - Scale(16) - buttonWidth, Scale(18) + textHeight, width - Scale(16), Scale(43) + textHeight});
     bool wasEnabled = IsWindowEnabled(root);
     EnableWindow(root, FALSE);
     ShowWindow(wait, SW_SHOW);
@@ -126,8 +139,8 @@ namespace {
 core::Autoconfig WaitForLookup(HWND owner, PeCore* core, const std::wstring& email) {
     uint64_t request = pe_autoconfig_start(core, core::Narrow(email).c_str(), nullptr);
     size_t at = email.find_last_of(L'@');
-    std::wstring text = L"Looking up the settings of " + email.substr(at == std::wstring::npos ? 0 : at + 1) + L"...";
-    if (!WaitForRequest(owner, core, request, pe_autoconfig_cancel, text, L"Add Mail Account")) {
+    std::wstring text = core::T(PE_TEXT_WIN_LOOKING_UP, {{"domain", email.substr(at == std::wstring::npos ? 0 : at + 1)}});
+    if (!WaitForRequest(owner, core, request, pe_autoconfig_cancel, text, core::Plain(PE_TEXT_WIN_ADD_ACCOUNT_TITLE))) {
         return core::Autoconfig();
     }
     return core::Autoconfig(pe_autoconfig_result(core, request));
@@ -136,20 +149,20 @@ core::Autoconfig WaitForLookup(HWND owner, PeCore* core, const std::wstring& ema
 // the first line of the server settings form: where the settings came from
 std::wstring FoundIntro(const PeAutoconfigInfo* info) {
     if (!info) {
-        return L"Enter the account details your e-mail provider gave you.";
+        return core::T(PE_TEXT_WIN_FOUND_NONE);
     }
-    const wchar_t* change = L" Change them if your provider gave you others.";
+    std::wstring change = L" " + core::T(PE_TEXT_WIN_FOUND_CHANGE);
     switch (info->source) {
     case PE_AUTOCONFIG_SOURCE_GUESS:
-        return L"No settings were found for this address: these are the usual names, check them with your provider.";
+        return core::T(PE_TEXT_WIN_FOUND_GUESS);
     case PE_AUTOCONFIG_SOURCE_MX:
-        return std::wstring(L"Your mail is handled by a provider Inbox Classic knows; these are its servers.") + change;
+        return core::T(PE_TEXT_WIN_FOUND_MX) + change;
     case PE_AUTOCONFIG_SOURCE_SRV:
-        return std::wstring(L"These settings were found in the DNS records of your domain.") + change;
+        return core::T(PE_TEXT_WIN_FOUND_SRV) + change;
     case PE_AUTOCONFIG_SOURCE_AUTODISCOVER:
-        return std::wstring(L"These settings were found by Microsoft Autodiscover (Exchange).") + change;
+        return core::T(PE_TEXT_WIN_FOUND_AUTODISCOVER) + change;
     default:
-        return std::wstring(L"These settings were found for this address.") + change;
+        return core::T(PE_TEXT_WIN_FOUND_OTHER) + change;
     }
 }
 
@@ -162,26 +175,23 @@ void ExplainAppPassword(HWND owner, const PeAutoconfigInfo* info) {
     std::wstring provider = Text(info->app_password_provider);
     std::wstring text = info->app_password_warning
                             ? Text(info->app_password_warning)
-                            : provider + L" does not take your normal password in mail programs. Create an app password in your " +
-                                  provider + L" account and type it in the Password field of the next form.";
+                            : core::T(PE_TEXT_WIN_APP_PASSWORD_NEEDED, {{"provider", provider}});
     std::wstring page = info->app_password_instructions ? Text(info->app_password_instructions) : L"";
     bool linkable = page.rfind(L"https://", 0) == 0;
     if (linkable) {
-        text += L"\n\nOpen " + provider + L"'s instructions in your browser?";
+        text += L"\n\n" + core::T(PE_TEXT_WIN_APP_PASSWORD_OPEN, {{"provider", provider}});
     }
-    int answer = MessageBoxW(owner, text.c_str(), L"Add Mail Account", (linkable ? MB_YESNO : MB_OK) | MB_ICONINFORMATION);
+    int answer = MessageBoxW(owner, text.c_str(), core::Plain(PE_TEXT_WIN_ADD_ACCOUNT_TITLE).c_str(), (linkable ? MB_YESNO : MB_OK) | MB_ICONINFORMATION);
     if (linkable && answer == IDYES) {
         ShellExecuteW(owner, L"open", page.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
     }
 }
 
 // the warning before a connection without encryption: true to go on
-bool AcceptPlain(HWND owner, const std::vector<FormField>& fields, const wchar_t* title) {
+bool AcceptPlain(HWND owner, const std::vector<FormField>& fields, PeText title) {
     bool plain = SecurityOf(fields[IMAP_SECURITY].value) == PE_SECURITY_PLAIN || SecurityOf(fields[SMTP_SECURITY].value) == PE_SECURITY_PLAIN;
-    return !plain || MessageBoxW(owner,
-                                 L"Without encryption your password and mail travel the network readable by anyone on "
-                                 L"the way. Use this only for a server on your own computer or network.\n\nContinue?",
-                                 title, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES;
+    std::wstring warning = core::T(PE_TEXT_WIN_PLAIN_WARNING) + L"\n\n" + core::T(PE_TEXT_WIN_CONTINUE_ASK);
+    return !plain || MessageBoxW(owner, warning.c_str(), core::Plain(title).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES;
 }
 
 // the settings of the server form; `utf8` keeps the strings they point to
@@ -208,7 +218,7 @@ PeAccountSettings SettingsOf(const std::vector<FormField>& fields, std::string (
 }
 
 std::wstring SecurityName(PeSecurity security) {
-    return kSecurity[security == PE_SECURITY_START_TLS ? 1 : security == PE_SECURITY_PLAIN ? 2 : 0];
+    return SecurityChoices()[security == PE_SECURITY_START_TLS ? 1 : security == PE_SECURITY_PLAIN ? 2 : 0];
 }
 
 }  // namespace
@@ -243,13 +253,13 @@ struct SignInButton {
     PeOAuthProvider provider;
     int id;
     int picture;
-    const wchar_t* label;
+    PeText label;
     const wchar_t* company;
     int why;
 };
 const SignInButton kSignIns[] = {
-    {PE_O_AUTH_PROVIDER_GOOGLE, IDC_SIGN_IN_GOOGLE, IDR_GOOGLE_SIGN_IN, L"Sign in with Google", L"Google", IDC_WHY_GOOGLE},
-    {PE_O_AUTH_PROVIDER_MICROSOFT, IDC_SIGN_IN_MICROSOFT, IDR_MICROSOFT_SIGN_IN, L"Sign in with Microsoft", L"Microsoft",
+    {PE_O_AUTH_PROVIDER_GOOGLE, IDC_SIGN_IN_GOOGLE, IDR_GOOGLE_SIGN_IN, PE_TEXT_WIN_SIGN_IN_GOOGLE, L"Google", IDC_WHY_GOOGLE},
+    {PE_O_AUTH_PROVIDER_MICROSOFT, IDC_SIGN_IN_MICROSOFT, IDR_MICROSOFT_SIGN_IN, PE_TEXT_WIN_SIGN_IN_MICROSOFT, L"Microsoft",
      IDC_WHY_MICROSOFT},
 };
 
@@ -350,7 +360,7 @@ bool ChooseMore(HWND hwnd, StartState& state) {
     if (!apps.empty()) {
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     }
-    AppendMenuW(menu, MF_STRING, kAdd, L"Add a sign-in app...");
+    AppendMenuW(menu, MF_STRING, kAdd, MenuItem(PE_TEXT_WIN_ADD_SIGN_IN_APP).c_str());
     RECT link;
     GetWindowRect(state.more, &link);
     // a popup menu of a window that is not in front would not close when clicking elsewhere
@@ -376,8 +386,8 @@ bool Choose(HWND hwnd, StartState& state, int id) {
     const SignInButton* signIn = SignInOf(id);
     if (signIn && id == signIn->why) {
         const PeSignInApp* app = state.apps->Builtin(signIn->provider);
-        std::wstring text = std::wstring(signIn->label) + L" is turned off on this computer.\n\n" + (app ? Text(app->off_reason) : L"");
-        MessageBoxW(hwnd, text.c_str(), L"Add Mail Account", MB_OK | MB_ICONINFORMATION);
+        std::wstring text = core::T(PE_TEXT_WIN_TURNED_OFF, {{"name", core::T(signIn->label)}}) + L"\n\n" + (app ? Text(app->off_reason) : L"");
+        MessageBoxW(hwnd, text.c_str(), core::Plain(PE_TEXT_WIN_ADD_ACCOUNT_TITLE).c_str(), MB_OK | MB_ICONINFORMATION);
         return false;
     }
     if (signIn) {
@@ -390,7 +400,7 @@ bool Choose(HWND hwnd, StartState& state, int id) {
     } else if (id == IDOK) {
         // the page of another account wants an address to look up
         if (state.emailInput && GetWindowString(state.emailInput).find(L'@') == std::wstring::npos) {
-            MessageBoxW(hwnd, L"Type your e-mail address, name@example.com.", L"Inbox Classic", MB_OK | MB_ICONWARNING);
+            MessageBoxW(hwnd, core::T(PE_TEXT_WIN_TYPE_EMAIL).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
             SetFocus(state.emailInput);
             return false;
         }
@@ -446,7 +456,7 @@ struct StartOffer {
     std::vector<PeOAuthProvider> providers;
     bool more = false;
     bool fields = false;
-    const wchar_t* nextLabel = L"Next >";
+    std::wstring nextLabel = core::T(PE_TEXT_WIN_NEXT);
 };
 
 // a tooltip over the area of the turned-off button `button`: a turned-off control gets no mouse messages, so the tool
@@ -483,28 +493,41 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
         shown.clear();
         anyOff = false;
     }
-    int pad = Scale(10), width = Scale(440), rowHeight = Scale(22), labelWidth = Scale(110);
-    int introHeight = Scale(30), buttonHeight = Scale(40), gap = Scale(12), reasonHeight = Scale(18), linkHeight = Scale(20);
-    int buttonsHeight = shown.empty() ? 0 : buttonHeight + (anyOff ? reasonHeight : 0) + Scale(8);
-    int moreHeight = offer.more ? linkHeight + Scale(6) : 0;
-    int otherHeight = offer.fields ? Scale(12) + Scale(30) + 2 * (rowHeight + Scale(6)) : 0;
-    int height = pad + introHeight + Scale(8) + buttonsHeight + moreHeight + Scale(6) + otherHeight + Scale(25) + pad;
-    HWND dialog = CreateModalWindow(owner, kStartClass, L"Add Mail Account", width, height);
-    StartState state{core, &apps};
-
-    int top = pad;
-    CreateChild(dialog, L"STATIC", offer.intro.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + introHeight});
-    top += introHeight + Scale(8);
-    // centered, each as wide as its picture is at this height
+    std::wstring nameLabel = core::T(PE_TEXT_WIN_FIELD_NAME), emailLabel = core::T(PE_TEXT_WIN_FIELD_EMAIL);
+    std::wstring other = core::T(PE_TEXT_WIN_OTHER_ACCOUNT), more = core::T(PE_TEXT_WIN_MORE_SIGN_IN);
+    std::wstring cancel = core::T(PE_TEXT_WIN_CANCEL), off = core::T(PE_TEXT_WIN_OFF_HERE), why = core::T(PE_TEXT_WIN_WHY);
+    int pad = Scale(10), width = Scale(440), rowHeight = Scale(22);
+    // the labels and the texts measured: longer words make the column and the rows grow, not get cut
+    int labelWidth = std::max({Scale(110), static_cast<int>(MeasureText(nameLabel).cx) + Scale(8),
+                               static_cast<int>(MeasureText(emailLabel).cx) + Scale(8)});
+    int introHeight = std::max(Scale(30), static_cast<int>(MeasureText(offer.intro, width - 2 * pad).cy) + Scale(4));
+    int otherTextHeight = std::max(Scale(30), static_cast<int>(MeasureText(other, width - 2 * pad).cy) + Scale(4));
+    int buttonHeight = Scale(40), gap = Scale(12), reasonHeight = Scale(18), linkHeight = Scale(20);
+    // the buttons centered, each as wide as its picture is at this height; under one that is off, its words wrap
+    // beside Why? (the row as tall as the longest of them)
     std::vector<HBITMAP> pictures;
     std::vector<int> widths;
     int total = -gap;
+    int whyWidth = static_cast<int>(MeasureText(why).cx) + Scale(8);
     for (const SignInButton* button : shown) {
         int buttonWidth = Scale(200);
         pictures.push_back(LoadPicture(button->picture, buttonHeight, GetSysColor(COLOR_BTNFACE), buttonWidth));
         widths.push_back(buttonWidth);
         total += buttonWidth + gap;
+        if (!apps.On(button->provider)) {
+            reasonHeight = std::max(reasonHeight, static_cast<int>(MeasureText(off, buttonWidth - whyWidth - Scale(2)).cy) + Scale(2));
+        }
     }
+    int buttonsHeight = shown.empty() ? 0 : buttonHeight + (anyOff ? reasonHeight : 0) + Scale(8);
+    int moreHeight = offer.more ? linkHeight + Scale(6) : 0;
+    int otherHeight = offer.fields ? Scale(12) + otherTextHeight + 2 * (rowHeight + Scale(6)) : 0;
+    int height = pad + introHeight + Scale(8) + buttonsHeight + moreHeight + Scale(6) + otherHeight + Scale(25) + pad;
+    HWND dialog = CreateModalWindow(owner, kStartClass, core::Plain(PE_TEXT_WIN_ADD_ACCOUNT_TITLE).c_str(), width, height);
+    StartState state{core, &apps};
+
+    int top = pad;
+    CreateChild(dialog, L"STATIC", offer.intro.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + introHeight});
+    top += introHeight + Scale(8);
     HWND firstButton = nullptr, tooltip = nullptr;
     std::vector<std::wstring> reasons(shown.size());
     int left = (width - total) / 2;
@@ -512,7 +535,7 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
         const SignInButton* button = shown[i];
         bool on = apps.On(button->provider);
         // the text is what a screen reader says; the picture shows the same words. A turned-off one is skipped by Tab
-        HWND control = CreateChild(dialog, L"BUTTON", button->label, (on ? WS_TABSTOP : WS_DISABLED) | BS_OWNERDRAW, button->id,
+        HWND control = CreateChild(dialog, L"BUTTON", core::T(button->label).c_str(), (on ? WS_TABSTOP : WS_DISABLED) | BS_OWNERDRAW, button->id,
                                    {left, top, left + widths[i], top + buttonHeight});
         SetWindowLongPtrW(control, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pictures[i]));
         if (on) {
@@ -520,45 +543,44 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
         } else {
             // why, without hovering: a line under it with Why?, the same words as its tooltip and for a screen reader
             const PeSignInApp* app = apps.Builtin(button->provider);
-            reasons[i] = std::wstring(button->label) + L" is turned off on this computer. " + (app ? Text(app->off_reason) : L"");
+            reasons[i] = core::T(PE_TEXT_WIN_TURNED_OFF, {{"name", core::T(button->label)}}) + L" " + (app ? Text(app->off_reason) : L"");
             SetAccessibleDescription(control, reasons[i]);
             AddReasonTip(dialog, tooltip, control, reasons[i]);
             int lineTop = top + buttonHeight + Scale(2);
-            CreateChild(dialog, L"STATIC", L"Turned off on this computer.", SS_LEFT | SS_NOPREFIX, 0,
-                        {left, lineTop, left + widths[i] - Scale(40), lineTop + reasonHeight});
-            CreateLinkButton(dialog, L"Why?", button->why, {left + widths[i] - Scale(38), lineTop - Scale(1), left + widths[i], lineTop + reasonHeight});
+            CreateChild(dialog, L"STATIC", off.c_str(), SS_LEFT | SS_NOPREFIX, 0,
+                        {left, lineTop, left + widths[i] - whyWidth - Scale(2), lineTop + reasonHeight});
+            CreateLinkButton(dialog, why.c_str(), button->why,
+                             {left + widths[i] - whyWidth, lineTop - Scale(1), left + widths[i], lineTop + Scale(18)});
         }
         left += widths[i] + gap;
     }
     top += buttonsHeight;
     if (offer.more) {
-        state.more = CreateLinkButton(dialog, L"More sign-in options...", IDC_SIGN_IN_MORE, {pad, top, pad + Scale(160), top + linkHeight});
+        int moreWidth = std::max(Scale(160), static_cast<int>(MeasureText(more).cx) + Scale(12));
+        state.more = CreateLinkButton(dialog, more.c_str(), IDC_SIGN_IN_MORE, {pad, top, pad + moreWidth, top + linkHeight});
         top += moreHeight;
     }
     top += Scale(6);
     if (offer.fields) {
         CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {pad, top, width - pad, top + 2});
         top += Scale(12);
-        CreateChild(dialog, L"STATIC",
-                    L"Any other e-mail account: your name as others see it and your e-mail address. Its servers are "
-                    L"looked up next.",
-                    SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + Scale(30)});
-        top += Scale(30);
-        CreateChild(dialog, L"STATIC", L"Display name:", SS_LEFT, 0, {pad, top + Scale(3), pad + labelWidth, top + rowHeight});
+        CreateChild(dialog, L"STATIC", other.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + otherTextHeight});
+        top += otherTextHeight;
+        CreateChild(dialog, L"STATIC", nameLabel.c_str(), SS_LEFT, 0, {pad, top + Scale(3), pad + labelWidth, top + rowHeight});
         state.nameInput = CreateChild(dialog, L"EDIT", name.c_str(), WS_TABSTOP | ES_AUTOHSCROLL, IDC_START_NAME,
                                       {pad + labelWidth, top, width - pad, top + rowHeight}, WS_EX_CLIENTEDGE);
         top += rowHeight + Scale(6);
-        CreateChild(dialog, L"STATIC", L"E-mail address:", SS_LEFT, 0, {pad, top + Scale(3), pad + labelWidth, top + rowHeight});
+        CreateChild(dialog, L"STATIC", emailLabel.c_str(), SS_LEFT, 0, {pad, top + Scale(3), pad + labelWidth, top + rowHeight});
         state.emailInput = CreateChild(dialog, L"EDIT", email.c_str(), WS_TABSTOP | ES_AUTOHSCROLL, IDC_START_EMAIL,
                                        {pad + labelWidth, top, width - pad, top + rowHeight}, WS_EX_CLIENTEDGE);
         state.name = &name;
         state.email = &email;
     }
-    int buttonWidth = Scale(110), buttonTop = height - pad - Scale(25);
+    int buttonWidth = ButtonWidth({offer.nextLabel}, 110), cancelWidth = ButtonWidth({cancel}), buttonTop = height - pad - Scale(25);
     // the default where it goes on with what was typed; beside a provider's button, the other way only
-    CreateChild(dialog, L"BUTTON", offer.nextLabel, WS_TABSTOP | (offer.fields ? BS_DEFPUSHBUTTON : BS_PUSHBUTTON), IDOK,
-                {width - pad - buttonWidth - Scale(86), buttonTop, width - pad - Scale(86), buttonTop + Scale(25)});
-    CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL, {width - pad - Scale(80), buttonTop, width - pad, buttonTop + Scale(25)});
+    CreateChild(dialog, L"BUTTON", offer.nextLabel.c_str(), WS_TABSTOP | (offer.fields ? BS_DEFPUSHBUTTON : BS_PUSHBUTTON), IDOK,
+                {width - pad - buttonWidth - cancelWidth - Scale(6), buttonTop, width - pad - cancelWidth - Scale(6), buttonTop + Scale(25)});
+    CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP, IDCANCEL, {width - pad - cancelWidth, buttonTop, width - pad, buttonTop + Scale(25)});
 
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     // typing comes first on the page with the fields; the provider's button on the page that offers it
@@ -588,7 +610,7 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const st
     // the core makes the page, and gives only an https page or one of a provider on this computer (a test server)
     std::wstring address = url ? Text(url.get()) : L"";
     if (!request || address.empty()) {
-        MessageBoxW(owner, L"Signing in through the browser could not start.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_SIGN_IN_NOT_STARTED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return 0;
     }
     if (g_signInPageFile.empty()) {
@@ -596,15 +618,16 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const st
     } else {
         WriteFileBytes(g_signInPageFile, reinterpret_cast<const uint8_t*>(url.get()), strlen(url.get()));
     }
-    std::wstring account = email.empty() ? L"your account" : email;
-    if (!WaitForRequest(owner, core, request, pe_sign_in_cancel,
-                        L"Sign in to " + account + L" in the browser window that opened, then come back here.", L"Add Mail Account")) {
+    std::wstring account = email.empty() ? core::T(PE_TEXT_WIN_YOUR_ACCOUNT) : email;
+    if (!WaitForRequest(owner, core, request, pe_sign_in_cancel, core::T(PE_TEXT_WIN_SIGN_IN_IN_BROWSER, {{"account", account}}),
+                        core::Plain(PE_TEXT_WIN_ADD_ACCOUNT_TITLE))) {
         return 0;
     }
     char* why = nullptr;
     if (!pe_sign_in_result(core, request, &why)) {
         core::String reason(why);
-        std::wstring text = L"Signing in did not work: " + (reason ? Text(reason.get()) : L"unknown reason");
+        std::wstring text =
+            core::T(PE_TEXT_WIN_SIGN_IN_FAILED, {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_WIN_UNKNOWN_REASON)}});
         MessageBoxW(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
         return 0;
     }
@@ -622,7 +645,8 @@ int64_t AddSignedIn(HWND owner, PeCore* core, SignInChoice with, const std::wstr
     }
     int64_t account = pe_account_add_signed_in(core, request, core::Narrow(name).c_str());
     if (account <= 0) {
-        MessageBoxW(owner, L"The account could not be saved.", L"Add Mail Account", MB_OK | MB_ICONERROR);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_WIN_ADD_ACCOUNT_TITLE).c_str(),
+                    MB_OK | MB_ICONERROR);
     }
     return account;
 }
@@ -638,10 +662,8 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
     first.more = true;
     first.fields = true;
     first.intro = apps.On(PE_O_AUTH_PROVIDER_GOOGLE) || apps.On(PE_O_AUTH_PROVIDER_MICROSOFT)
-                      ? L"Gmail, Google Workspace, Outlook.com and Microsoft 365: sign in on Google's or Microsoft's own page. "
-                        L"Your password is typed there, never into Inbox Classic."
-                      : L"Sign in through the browser with one of your sign-in apps (More sign-in options), or add any "
-                        L"e-mail account with your name and address below.";
+                      ? core::T(PE_TEXT_WIN_START_INTRO)
+                      : core::T(PE_TEXT_WIN_START_INTRO_APPS);
     Start start = StartPage(owner, core, apps, first, name, email, chosen);
     if (start == Start::Cancel) {
         return 0;
@@ -658,19 +680,15 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
     PeOAuthProvider provider = info ? pe_oauth_provider_for(core, info->imap_host) : PE_O_AUTH_PROVIDER_NONE;
     StartOffer offer;
     offer.more = !apps.AddedOn().empty();
-    offer.nextLabel = L"Use App Password";
+    offer.nextLabel = core::T(PE_TEXT_WIN_USE_APP_PASSWORD);
     if (provider != PE_O_AUTH_PROVIDER_NONE && (apps.On(provider) || offer.more)) {
         const SignInButton* signIn = SignInOf(0, provider);
-        std::wstring company = signIn ? signIn->company : L"the provider";
+        std::wstring company = signIn ? signIn->company : core::T(PE_TEXT_WIN_THE_PROVIDER);
         if (apps.On(provider)) {
             offer.providers = {provider};
-            offer.intro = email + L" signs in on " + company +
-                          L"'s own page, without giving Inbox Classic your password. Or use an app password made in your "
-                          L"account's security settings.";
+            offer.intro = core::T(PE_TEXT_WIN_PROVIDER_INTRO, {{"email", email}, {"provider", company}});
         } else {
-            offer.intro = email + L" can sign in on " + company +
-                          L"'s own page with one of your sign-in apps (More sign-in options). Or use an app password made "
-                          L"in your account's security settings.";
+            offer.intro = core::T(PE_TEXT_WIN_PROVIDER_INTRO_APPS, {{"email", email}, {"provider", company}});
         }
         Start choice = StartPage(owner, core, apps, offer, name, email, chosen);
         if (choice == Start::Cancel) {
@@ -683,22 +701,23 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
 
     ExplainAppPassword(owner, info);
     using Kind = FormField::Kind;
-    std::vector<std::wstring> security(std::begin(kSecurity), std::end(kSecurity));
+    std::vector<std::wstring> security = SecurityChoices();
     std::vector<FormField> fields = {
-        {L"Display name:", name},
-        {L"E-mail address:", email},
-        {L"User name:", info ? Text(info->username) : L""},
-        {L"Password:", L"", Kind::Password},
-        {L"Incoming (IMAP) server:", info ? Text(info->imap_host) : L""},
-        {L"IMAP port:", info ? std::to_wstring(info->imap_port) : L"993", Kind::Number},
-        {L"IMAP security:", info ? SecurityName(info->imap_security) : kSecurity[0], Kind::Choice, security},
-        {L"Outgoing (SMTP) server:", info ? Text(info->smtp_host) : L""},
-        {L"SMTP port:", info ? std::to_wstring(info->smtp_port) : L"465", Kind::Number},
-        {L"SMTP security:", info ? SecurityName(info->smtp_security) : kSecurity[0], Kind::Choice, security},
+        {core::T(PE_TEXT_WIN_FIELD_NAME), name},
+        {core::T(PE_TEXT_WIN_FIELD_EMAIL), email},
+        {core::T(PE_TEXT_WIN_FIELD_USER), info ? Text(info->username) : L""},
+        {core::T(PE_TEXT_WIN_FIELD_PASSWORD), L"", Kind::Password},
+        {core::T(PE_TEXT_WIN_FIELD_IMAP_HOST), info ? Text(info->imap_host) : L""},
+        {core::T(PE_TEXT_WIN_FIELD_IMAP_PORT), info ? std::to_wstring(info->imap_port) : L"993", Kind::Number},
+        {core::T(PE_TEXT_WIN_FIELD_IMAP_SECURITY), info ? SecurityName(info->imap_security)   : security[0], Kind::Choice, security},
+        {core::T(PE_TEXT_WIN_FIELD_SMTP_HOST), info ? Text(info->smtp_host) : L""},
+        {core::T(PE_TEXT_WIN_FIELD_SMTP_PORT), info ? std::to_wstring(info->smtp_port) : L"465", Kind::Number},
+        {core::T(PE_TEXT_WIN_FIELD_SMTP_SECURITY), info ? SecurityName(info->smtp_security)   : security[0], Kind::Choice, security},
     };
     // the name and address were typed already: the password is next
-    while (FormDialog(owner, L"Add Mail Account", intro, fields, Validate, L"Finish", PASSWORD)) {
-        if (!AcceptPlain(owner, fields, L"Add Mail Account")) {
+    std::wstring finish = core::T(PE_TEXT_WIN_FINISH);
+    while (FormDialog(owner, core::Plain(PE_TEXT_WIN_ADD_ACCOUNT_TITLE), intro, fields, Validate, finish.c_str(), PASSWORD)) {
+        if (!AcceptPlain(owner, fields, PE_TEXT_WIN_ADD_ACCOUNT_TITLE)) {
             continue;
         }
         std::string utf8[5];
@@ -710,16 +729,17 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
             SecureZeroMemory(fields[PASSWORD].value.data(), fields[PASSWORD].value.size() * sizeof(wchar_t));
             return account;
         }
-        MessageBoxW(owner, L"The account could not be saved.", L"Add Mail Account", MB_OK | MB_ICONERROR);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_WIN_ADD_ACCOUNT_TITLE).c_str(),
+                    MB_OK | MB_ICONERROR);
     }
     SecureZeroMemory(fields[PASSWORD].value.data(), fields[PASSWORD].value.size() * sizeof(wchar_t));
     return 0;
 }
 
 bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password) {
-    std::vector<FormField> fields = {{L"Password:", L"", FormField::Kind::Password}};
-    std::wstring intro = L"Enter the password of " + account + L".";
-    if (!FormDialog(owner, L"Logon", intro, fields)) {
+    std::vector<FormField> fields = {{core::T(PE_TEXT_WIN_FIELD_PASSWORD), L"", FormField::Kind::Password}};
+    std::wstring intro = core::T(PE_TEXT_WIN_ENTER_PASSWORD, {{"account", account}});
+    if (!FormDialog(owner, core::Plain(PE_TEXT_WIN_LOGON), intro, fields)) {
         return false;
     }
     password = fields[0].value;
@@ -766,7 +786,7 @@ void FillAccounts(AccountsState* state, int select = 0) {
         int row = AddRow(state->list, static_cast<int>(i), Text(account->name));
         bool oauth = account->oauth != PE_O_AUTH_PROVIDER_NONE;
         SetCell(state->list, row, COL_EMAIL, Text(account->email));
-        SetCell(state->list, row, COL_SERVER, Text(account->imap_host) + (oauth ? L" (browser sign-in)" : L""));
+        SetCell(state->list, row, COL_SERVER, Text(account->imap_host) + (oauth ? L" " + core::T(PE_TEXT_WIN_BROWSER_SIGN_IN) : L""));
         state->ids.push_back(account->id);
         state->signsInWith.push_back(oauth ? Text(account->signs_in_with) : L"");
     }
@@ -782,25 +802,25 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account, const std::wst
     if (!stored) {
         return false;
     }
-    std::vector<std::wstring> security(std::begin(kSecurity), std::end(kSecurity));
+    std::vector<std::wstring> security = SecurityChoices();
     using Kind = FormField::Kind;
     std::vector<FormField> fields = {
-        {L"Display name:", Text(stored->name)},
-        {L"E-mail address:", Text(stored->email)},
-        {L"User name:", Text(stored->username)},
-        {L"Password:", L"", Kind::Password},
-        {L"Incoming (IMAP) server:", Text(stored->imap_host)},
-        {L"IMAP port:", std::to_wstring(stored->imap_port), Kind::Number},
-        {L"IMAP security:", SecurityName(stored->imap_security), Kind::Choice, security},
-        {L"Outgoing (SMTP) server:", Text(stored->smtp_host)},
-        {L"SMTP port:", std::to_wstring(stored->smtp_port), Kind::Number},
-        {L"SMTP security:", SecurityName(stored->smtp_security), Kind::Choice, security},
+        {core::T(PE_TEXT_WIN_FIELD_NAME), Text(stored->name)},
+        {core::T(PE_TEXT_WIN_FIELD_EMAIL), Text(stored->email)},
+        {core::T(PE_TEXT_WIN_FIELD_USER), Text(stored->username)},
+        {core::T(PE_TEXT_WIN_FIELD_PASSWORD), L"", Kind::Password},
+        {core::T(PE_TEXT_WIN_FIELD_IMAP_HOST), Text(stored->imap_host)},
+        {core::T(PE_TEXT_WIN_FIELD_IMAP_PORT), std::to_wstring(stored->imap_port), Kind::Number},
+        {core::T(PE_TEXT_WIN_FIELD_IMAP_SECURITY), SecurityName(stored->imap_security), Kind::Choice, security},
+        {core::T(PE_TEXT_WIN_FIELD_SMTP_HOST), Text(stored->smtp_host)},
+        {core::T(PE_TEXT_WIN_FIELD_SMTP_PORT), std::to_wstring(stored->smtp_port), Kind::Number},
+        {core::T(PE_TEXT_WIN_FIELD_SMTP_SECURITY), SecurityName(stored->smtp_security), Kind::Choice, security},
     };
     if (!signsInWith.empty()) {
         // a browser sign-in account: the name only, the rest is the provider's
         std::vector<FormField> name = {fields[NAME]};
-        std::wstring intro = L"Signs in with: " + signsInWith + L". It signs in through the browser and uses the servers of its sign-in.";
-        if (!FormDialog(owner, L"Properties", intro, name)) {
+        std::wstring intro = core::T(PE_TEXT_WIN_SIGNS_IN_WITH, {{"app", signsInWith}});
+        if (!FormDialog(owner, core::Plain(PE_TEXT_CMD_PROPERTIES), intro, name)) {
             return false;
         }
         fields[NAME] = name[0];
@@ -808,26 +828,26 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account, const std::wst
         PeAccountSettings settings = SettingsOf(fields, utf8);
         return pe_account_update(core, account, &settings);
     }
-    std::wstring intro = L"Leave the password empty to keep the one you have.";
+    std::wstring intro = core::T(PE_TEXT_WIN_KEEP_PASSWORD);
     std::wstring imapHost = Text(stored->imap_host);
     std::wstring smtpHost = Text(stored->smtp_host);
     PeSecurity imapSecurity = stored->imap_security;
     PeSecurity smtpSecurity = stored->smtp_security;
     bool saved = false;
-    while (FormDialog(owner, L"Properties", intro, fields, Validate)) {
+    while (FormDialog(owner, core::Plain(PE_TEXT_CMD_PROPERTIES), intro, fields, Validate)) {
         // warned for a side without encryption, unless it was so already to the same server: not each time such an
         // account is saved, but when the password would go readable somewhere new
         auto newlyPlain = [&](Field security, Field host, PeSecurity was, const std::wstring& wasHost) {
             return SecurityOf(fields[security].value) == PE_SECURITY_PLAIN && (was != PE_SECURITY_PLAIN || fields[host].value != wasHost);
         };
         bool warn = newlyPlain(IMAP_SECURITY, IMAP_HOST, imapSecurity, imapHost) || newlyPlain(SMTP_SECURITY, SMTP_HOST, smtpSecurity, smtpHost);
-        if (warn && !AcceptPlain(owner, fields, L"Properties")) {
+        if (warn && !AcceptPlain(owner, fields, PE_TEXT_CMD_PROPERTIES)) {
             continue;
         }
         std::string utf8[5];
         PeAccountSettings settings = SettingsOf(fields, utf8);
         if (!pe_account_update(core, account, &settings)) {
-            MessageBoxW(owner, L"The account could not be saved.", L"Properties", MB_OK | MB_ICONERROR);
+            MessageBoxW(owner, core::T(PE_TEXT_WIN_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_CMD_PROPERTIES).c_str(), MB_OK | MB_ICONERROR);
             continue;
         }
         if (!fields[PASSWORD].value.empty()) {
@@ -869,10 +889,8 @@ void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id) {
         }
         return;
     case IDC_ACCOUNT_REMOVE:
-        if (account && MessageBoxW(hwnd,
-                                   L"Remove this account from Inbox Classic? Its mail stays on the server; the copy on this "
-                                   L"computer and the saved password are removed.",
-                                   L"Remove Account", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+        if (account && MessageBoxW(hwnd, core::T(PE_TEXT_WIN_REMOVE_ACCOUNT_ASK).c_str(), core::Plain(PE_TEXT_WIN_REMOVE_ACCOUNT).c_str(),
+                                   MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
             pe_account_remove(state->core, account);
             state->changed = true;
             FillAccounts(state, index);
@@ -939,31 +957,36 @@ bool AccountsDialog(HWND owner, PeCore* core) {
     int pad = Scale(10);
     int width = Scale(600);
     int height = Scale(240);
-    HWND dialog = CreateModalWindow(owner, kAccountsClass, L"Accounts", width, height);
+    HWND dialog = CreateModalWindow(owner, kAccountsClass, core::Plain(PE_TEXT_WIN_ACCOUNTS_TITLE).c_str(), width, height);
     AccountsState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
-    int buttonWidth = Scale(100);
-    int listRight = width - pad - buttonWidth - pad;
-    state.list = CreateReportList(dialog, IDC_ACCOUNT_LIST, {pad, pad, listRight, height - pad});
-    AddColumn(state.list, COL_NAME, L"Account", 120);
-    AddColumn(state.list, COL_EMAIL, L"E-mail address", 170);
-    AddColumn(state.list, COL_SERVER, L"Incoming server", 100);
-    ListView_SetColumnWidth(state.list, COL_SERVER, LVSCW_AUTOSIZE_USEHEADER);
     struct Button {
         WORD id;
-        const wchar_t* text;
+        std::wstring text;
     };
-    Button buttons[] = {{IDC_ACCOUNT_ADD, L"&Add..."},
-                        {IDC_ACCOUNT_PROPERTIES, L"&Properties..."},
-                        {IDC_ACCOUNT_SIGNATURE, L"Si&gnature..."},
-                        {IDC_ACCOUNT_REMOVE, L"&Remove"},
-                        {IDC_ACCOUNT_SIGN_IN_APPS, L"Sign-in A&pps..."}};
+    Button buttons[] = {{IDC_ACCOUNT_ADD, core::T(PE_TEXT_WIN_ADD)},
+                        {IDC_ACCOUNT_PROPERTIES, core::T(PE_TEXT_WIN_PROPERTIES_BUTTON)},
+                        {IDC_ACCOUNT_SIGNATURE, core::T(PE_TEXT_WIN_SIGNATURE_BUTTON)},
+                        {IDC_ACCOUNT_REMOVE, core::T(PE_TEXT_WIN_REMOVE_FILE)},
+                        {IDC_ACCOUNT_SIGN_IN_APPS, core::T(PE_TEXT_WIN_SIGN_IN_APPS_BUTTON)}};
+    std::wstring close = core::T(PE_TEXT_WIN_CLOSE);
+    // the column of buttons as wide as the longest of them
+    int buttonWidth = ButtonWidth({close}, 100);
+    for (const Button& button : buttons) {
+        buttonWidth = std::max(buttonWidth, ButtonWidth({button.text}, 100));
+    }
+    int listRight = width - pad - buttonWidth - pad;
+    state.list = CreateReportList(dialog, IDC_ACCOUNT_LIST, {pad, pad, listRight, height - pad});
+    AddColumn(state.list, COL_NAME, core::T(PE_TEXT_WIN_COL_ACCOUNT).c_str(), 120);
+    AddColumn(state.list, COL_EMAIL, core::T(PE_TEXT_WIN_COL_EMAIL).c_str(), 170);
+    AddColumn(state.list, COL_SERVER, core::T(PE_TEXT_WIN_COL_INCOMING).c_str(), 100);
+    ListView_SetColumnWidth(state.list, COL_SERVER, LVSCW_AUTOSIZE_USEHEADER);
     int top = pad;
     for (const Button& button : buttons) {
-        CreateChild(dialog, L"BUTTON", button.text, WS_TABSTOP, button.id, {width - pad - buttonWidth, top, width - pad, top + Scale(25)});
+        CreateChild(dialog, L"BUTTON", button.text.c_str(), WS_TABSTOP, button.id, {width - pad - buttonWidth, top, width - pad, top + Scale(25)});
         top += Scale(31);
     }
-    CreateChild(dialog, L"BUTTON", L"Close", WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_ACCOUNT_CLOSE,
+    CreateChild(dialog, L"BUTTON", close.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_ACCOUNT_CLOSE,
                 {width - pad - buttonWidth, height - pad - Scale(25), width - pad, height - pad});
     FillAccounts(&state);
 

@@ -125,7 +125,7 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
     int detailHeight = TextHeight(owner, detail, inner);
     int height = pad + Scale(24) + detailHeight + Scale(10) + Scale(18) + Scale(10) + Scale(20) + 4 * Scale(22) + Scale(10) + Scale(18) +
                  Scale(92) + Scale(16) + Scale(25) + pad;
-    HWND dialog = CreateModalWindow(owner, kAccessClass, mode == AccessMode::Ask ? L"AI Agent" : L"AI Agent Access", width, height);
+    HWND dialog = CreateModalWindow(owner, kAccessClass, core::Plain(mode == AccessMode::Ask ? PE_TEXT_WIN_AI_AGENT : PE_TEXT_WIN_AI_AGENT_ACCESS).c_str(), width, height);
     AccessState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     int y = pad;
@@ -133,12 +133,12 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
     y += Scale(24);
     CreateChild(dialog, L"STATIC", detail.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + detailHeight});
     y += detailHeight + Scale(10);
-    std::wstring program = L"Program: " + path;
+    std::wstring program = core::T(PE_TEXT_WIN_PROGRAM_PATH, {{"path", path}});
     HWND file = CreateChild(dialog, L"STATIC", program.c_str(), SS_LEFT | SS_NOPREFIX | SS_PATHELLIPSIS, IDC_AGENT_PATH,
                             {pad, y, width - pad, y + Scale(16)});
     SetAccessibleDescription(file, path);
     y += Scale(18) + Scale(10);
-    CreateChild(dialog, L"STATIC", L"It may:", SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + Scale(16)});
+    CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_IT_MAY).c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + Scale(16)});
     y += Scale(20);
     for (size_t i = 0; i < PE_AGENT_LEVEL_COUNT; i++) {
         state.levels[i] = CreateChild(dialog, L"BUTTON", Text(pe_agent_level_label(i)).c_str(),
@@ -148,12 +148,12 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
         y += Scale(22);
     }
     y += Scale(10);
-    CreateChild(dialog, L"STATIC", L"Accounts it may use:", SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + Scale(16)});
+    CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_ACCOUNTS_IT_MAY_USE).c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + Scale(16)});
     y += Scale(18);
     state.accounts = CreateChild(dialog, WC_LISTVIEWW, L"", WS_TABSTOP | LVS_REPORT | LVS_NOCOLUMNHEADER | LVS_SINGLESEL | LVS_SHOWSELALWAYS,
                                  IDC_AGENT_ACCOUNTS, {pad, y, width - pad, y + Scale(92)}, WS_EX_CLIENTEDGE);
     ListView_SetExtendedListViewStyle(state.accounts, LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT);
-    AddColumn(state.accounts, 0, L"Account", 400);
+    AddColumn(state.accounts, 0, core::T(PE_TEXT_WIN_COL_ACCOUNT).c_str(), 400);
     ListView_SetColumnWidth(state.accounts, 0, LVSCW_AUTOSIZE_USEHEADER);
     core::AccountList list(pe_accounts(core));
     for (size_t i = 0; i < pe_account_list_count(list.get()); i++) {
@@ -163,16 +163,18 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
         state.ids.push_back(account->id);
     }
     y += Scale(92) + Scale(16);
-    int button = Scale(100);
+    std::wstring allow = core::T(PE_TEXT_WIN_ALLOW), dontAllow = core::T(PE_TEXT_WIN_DONT_ALLOW);
+    std::wstring turnAway = core::T(PE_TEXT_WIN_TURN_AWAY), cancel = core::T(PE_TEXT_WIN_CANCEL);
+    int button = ButtonWidth({allow, dontAllow, turnAway, cancel}, 100);
     // Enter does not let a program in: the safe answer is the default
     if (mode == AccessMode::Ask) {
-        CreateChild(dialog, L"BUTTON", L"&Allow", WS_TABSTOP, IDOK, {width - pad - 2 * button - Scale(8), y, width - pad - button - Scale(8), y + Scale(25)});
-        CreateChild(dialog, L"BUTTON", L"&Don't Allow", WS_TABSTOP | BS_DEFPUSHBUTTON, IDNO, {width - pad - button, y, width - pad, y + Scale(25)});
+        CreateChild(dialog, L"BUTTON", allow.c_str(), WS_TABSTOP, IDOK, {width - pad - 2 * button - Scale(8), y, width - pad - button - Scale(8), y + Scale(25)});
+        CreateChild(dialog, L"BUTTON", dontAllow.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDNO, {width - pad - button, y, width - pad, y + Scale(25)});
     } else {
-        CreateChild(dialog, L"BUTTON", L"&Turn Away", WS_TABSTOP, IDNO, {pad, y, pad + button, y + Scale(25)});
-        CreateChild(dialog, L"BUTTON", L"&Allow", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
+        CreateChild(dialog, L"BUTTON", turnAway.c_str(), WS_TABSTOP, IDNO, {pad, y, pad + button, y + Scale(25)});
+        CreateChild(dialog, L"BUTTON", allow.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
                     {width - pad - 2 * button - Scale(8), y, width - pad - button - Scale(8), y + Scale(25)});
-        CreateChild(dialog, L"BUTTON", L"Cancel", WS_TABSTOP, IDCANCEL, {width - pad - button, y, width - pad, y + Scale(25)});
+        CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP, IDCANCEL, {width - pad - button, y, width - pad, y + Scale(25)});
     }
     RunModal(dialog, state.levels[0], state.done);
     levels = state.chosenLevels;
@@ -240,9 +242,10 @@ LRESULT CALLBACK SendProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // a label and its value on one line of the message's header
-void HeaderLine(HWND dialog, int pad, int& y, int width, const wchar_t* label, const std::wstring& value, int id = 0) {
-    int labelWidth = Scale(64);
-    CreateChild(dialog, L"STATIC", label, SS_RIGHT | SS_NOPREFIX, 0, {pad, y, pad + labelWidth, y + Scale(16)});
+void HeaderLine(HWND dialog, int pad, int& y, int width, const std::wstring& label, const std::wstring& value, int id = 0) {
+    int labelWidth = std::max({Scale(64), static_cast<int>(MeasureText(core::T(PE_TEXT_WIN_FIELD_FROM)).cx) + Scale(4),
+                               static_cast<int>(MeasureText(core::T(PE_TEXT_WIN_FIELD_SUBJECT)).cx) + Scale(4)});
+    CreateChild(dialog, L"STATIC", label.c_str(), SS_RIGHT | SS_NOPREFIX, 0, {pad, y, pad + labelWidth, y + Scale(16)});
     CreateChild(dialog, L"STATIC", value.c_str(), SS_LEFT | SS_NOPREFIX | SS_ENDELLIPSIS, id, {pad + labelWidth + Scale(8), y, width - pad, y + Scale(16)});
     y += Scale(20);
 }
@@ -266,7 +269,7 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
     int listHeight = Scale(26) + std::min(recipients, 5) * Scale(18);
     int height = pad + Scale(24) + detailHeight + Scale(8) + (warning.empty() ? 0 : Scale(22)) + Scale(20) + listHeight + Scale(8) +
                  Scale(20) * (original.empty() ? 1 : 2) + Scale(4) + Scale(200) + (files.empty() ? 0 : Scale(22)) + Scale(14) + Scale(25) + pad;
-    HWND dialog = CreateModalWindow(owner, kSendClass, L"Send Message?", width, height);
+    HWND dialog = CreateModalWindow(owner, kSendClass, core::Plain(PE_TEXT_WIN_SEND_MESSAGE_ASK).c_str(), width, height);
     SendState state;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     int y = pad;
@@ -279,23 +282,23 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
                                     {pad, y, width - pad, y + Scale(16)});
         y += Scale(22);
     }
-    HeaderLine(dialog, pad, y, width, L"From:", Text(send->from));
+    HeaderLine(dialog, pad, y, width, core::T(PE_TEXT_WIN_FIELD_FROM), Text(send->from));
     // every recipient on a row of its own, address first, so a name can not hide where it goes
     HWND list = CreateReportList(dialog, IDC_AGENT_RECIPIENTS, {pad, y, width - pad, y + listHeight});
     AddColumn(list, 0, L"", 40);
-    AddColumn(list, 1, L"Address", 230);
-    AddColumn(list, 2, L"Name", 160);
+    AddColumn(list, 1, core::T(PE_TEXT_WIN_COL_ADDRESS).c_str(), 230);
+    AddColumn(list, 2, core::T(PE_TEXT_WIN_COL_NAME).c_str(), 160);
     AddColumn(list, 3, L"", 120);
     for (int i = 0; i < recipients; i++) {
         const PeAgentRecipient* recipient = pe_agent_send_recipient(info.get(), static_cast<size_t>(i));
         int row = AddRow(list, i, Text(recipient->field) + L":");
         SetCell(list, row, 1, Text(recipient->address));
         SetCell(list, row, 2, Text(recipient->name));
-        SetCell(list, row, 3, recipient->new_address ? L"Never written to" : L"");
+        SetCell(list, row, 3, recipient->new_address ? core::T(PE_TEXT_WIN_NEVER_WRITTEN_TO) : L"");
     }
     ListView_SetColumnWidth(list, 3, LVSCW_AUTOSIZE_USEHEADER);
     y += listHeight + Scale(8);
-    HeaderLine(dialog, pad, y, width, L"Subject:", Text(send->subject));
+    HeaderLine(dialog, pad, y, width, core::T(PE_TEXT_WIN_FIELD_SUBJECT), Text(send->subject));
     if (!original.empty()) {
         HeaderLine(dialog, pad, y, width, L"", original);
     }
@@ -309,16 +312,17 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
         y += Scale(16);
     }
     y += Scale(14);
-    int button = Scale(110);
-    state.send = CreateChild(dialog, L"BUTTON", L"&Send", WS_TABSTOP | WS_DISABLED, IDC_AGENT_SEND,
+    std::wstring sendLabel = core::T(PE_TEXT_WIN_SEND), editFirst = core::T(PE_TEXT_WIN_EDIT_FIRST), dontSend = core::T(PE_TEXT_WIN_DONT_SEND);
+    int button = ButtonWidth({sendLabel, editFirst, dontSend}, 110);
+    state.send = CreateChild(dialog, L"BUTTON", sendLabel.c_str(), WS_TABSTOP | WS_DISABLED, IDC_AGENT_SEND,
                              {width - pad - 3 * button - 2 * Scale(8), y, width - pad - 2 * button - 2 * Scale(8), y + Scale(25)});
-    CreateChild(dialog, L"BUTTON", L"&Edit First", WS_TABSTOP, IDC_AGENT_COMPOSE,
+    CreateChild(dialog, L"BUTTON", editFirst.c_str(), WS_TABSTOP, IDC_AGENT_COMPOSE,
                 {width - pad - 2 * button - Scale(8), y, width - pad - button - Scale(8), y + Scale(25)});
-    HWND dontSend = CreateChild(dialog, L"BUTTON", L"&Don't Send", WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_AGENT_DONT_SEND,
-                                {width - pad - button, y, width - pad, y + Scale(25)});
+    HWND dontSendButton = CreateChild(dialog, L"BUTTON", dontSend.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_AGENT_DONT_SEND,
+                                      {width - pad - button, y, width - pad, y + Scale(25)});
     SetTimer(dialog, kSendTimer, 1500, nullptr);
     int64_t account = send->account;
-    RunModal(dialog, dontSend, state.done);
+    RunModal(dialog, dontSendButton, state.done);
     core::Draft draft(pe_agent_answer_send(core, request, state.answer));
     if (draft) {
         OpenCompose(GetAncestor(owner, GA_ROOT), core, account, pe_draft_info(draft.get()));
@@ -368,7 +372,7 @@ void FillAgents(AgentsState* state) {
         const PeAgentHost* agent = pe_agent_host_list_get(hosts.get(), i);
         int row = AddRow(state->hosts, static_cast<int>(i), Text(agent->name));
         SetCell(state->hosts, row, 1, Text(agent->access));
-        SetCell(state->hosts, row, 2, agent->last_used ? FormatDate(agent->last_used) : L"Never");
+        SetCell(state->hosts, row, 2, agent->last_used ? FormatDate(agent->last_used) : core::T(PE_TEXT_WIN_NEVER));
         state->hostIds.push_back(agent->id);
     }
     if (!state->hostIds.empty()) {
@@ -425,8 +429,7 @@ void ChangeHost(HWND hwnd, AgentsState* state) {
 void RemoveHost(HWND hwnd, AgentsState* state) {
     int index = Selected(state->hosts);
     if (index >= 0 && static_cast<size_t>(index) < state->hostIds.size() &&
-        MessageBoxW(hwnd, L"Forget this program and what its agents did? It is asked about again the next time it connects.",
-                    L"AI Agents", MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
+        MessageBoxW(hwnd, core::T(PE_TEXT_WIN_FORGET_PROGRAM_ASK).c_str(), core::Plain(PE_TEXT_WIN_AI_AGENTS).c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
         pe_agent_host_remove(state->core, state->hostIds[index]);
         FillAgents(state);
     }
@@ -439,7 +442,7 @@ void UndoEntry(HWND hwnd, AgentsState* state) {
     }
     core::String why(pe_agent_undo(state->core, state->entries[index].first));
     if (why) {
-        MessageBoxW(hwnd, Text(why.get()).c_str(), L"AI Agents", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(hwnd, Text(why.get()).c_str(), core::Plain(PE_TEXT_WIN_AI_AGENTS).c_str(), MB_OK | MB_ICONINFORMATION);
     }
     FillAgents(state);
 }
@@ -467,7 +470,7 @@ LRESULT CALLBACK AgentsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
             UndoEntry(hwnd, state);
             return 0;
         case IDC_AGENTS_CLEAR:
-            if (MessageBoxW(hwnd, L"Clear the list of what agents did? What they did stays done.", L"AI Agents",
+            if (MessageBoxW(hwnd, core::T(PE_TEXT_WIN_CLEAR_LOG_ASK).c_str(), core::Plain(PE_TEXT_WIN_AI_AGENTS).c_str(),
                             MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
                 pe_agent_log_clear(state->core);
                 FillAgents(state);
@@ -513,8 +516,7 @@ LRESULT CALLBACK AgentsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 
 void ShowSetup(HWND hwnd, PeCore*) {
     core::String config(pe_mcp_config(StoreArgument()));
-    TextDialog(hwnd, L"Connect an AI Agent",
-               L"Add this to the MCP servers of your agent (Claude Desktop: Settings > Developer > Edit Config):",
+    TextDialog(hwnd, core::Plain(PE_TEXT_WIN_CONNECT_AGENT), core::T(PE_TEXT_WIN_CONNECT_AGENT_INTRO),
                WithCrlf(Text(config.get())));
 }
 
@@ -558,40 +560,43 @@ void AgentsDialog(HWND owner, PeCore* core) {
     int pad = Scale(12);
     int width = Scale(680);
     int height = Scale(500);
-    HWND dialog = CreateModalWindow(owner, kAgentsClass, L"AI Agents", width, height);
+    HWND dialog = CreateModalWindow(owner, kAgentsClass, core::Plain(PE_TEXT_WIN_AI_AGENTS).c_str(), width, height);
     AgentsState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
-    int button = Scale(100);
+    std::wstring change = core::T(PE_TEXT_WIN_CHANGE), remove = core::T(PE_TEXT_WIN_REMOVE_FILE), undo = core::T(PE_TEXT_CMD_UNDO);
+    std::wstring clear = core::T(PE_TEXT_WIN_CLEAR), close = core::T(PE_TEXT_WIN_CLOSE), setup = core::T(PE_TEXT_WIN_HOW_TO_CONNECT);
+    int button = ButtonWidth({change, remove, undo, clear, close}, 100);
     int listRight = width - pad - button - Scale(10);
     int y = pad;
-    state.enabled = CreateChild(dialog, L"BUTTON", L"&Let AI agents connect to Inbox Classic", WS_TABSTOP | BS_AUTOCHECKBOX, IDC_AGENTS_ENABLED,
+    state.enabled = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_WIN_LET_AGENTS_CONNECT).c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_AGENTS_ENABLED,
                                 {pad, y, width - pad, y + Scale(20)});
     y += Scale(28);
-    CreateChild(dialog, L"STATIC", L"&Programs whose agents asked to use your mail:", SS_LEFT, 0, {pad, y, listRight, y + Scale(16)});
+    CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_AGENT_PROGRAMS).c_str(), SS_LEFT, 0, {pad, y, listRight, y + Scale(16)});
     y += Scale(18);
     state.hosts = CreateReportList(dialog, IDC_AGENTS_HOSTS, {pad, y, listRight, y + Scale(120)});
-    AddColumn(state.hosts, 0, L"Program", 120);
-    AddColumn(state.hosts, 1, L"May", 290);
-    AddColumn(state.hosts, 2, L"Last used", 110);
+    AddColumn(state.hosts, 0, core::T(PE_TEXT_WIN_COL_PROGRAM).c_str(), 120);
+    AddColumn(state.hosts, 1, core::T(PE_TEXT_WIN_COL_MAY).c_str(), 290);
+    AddColumn(state.hosts, 2, core::T(PE_TEXT_WIN_COL_LAST_USED).c_str(), 110);
     ListView_SetColumnWidth(state.hosts, 2, LVSCW_AUTOSIZE_USEHEADER);
-    state.change = CreateChild(dialog, L"BUTTON", L"&Change...", WS_TABSTOP, IDC_AGENTS_CHANGE, {width - pad - button, y, width - pad, y + Scale(25)});
-    state.remove = CreateChild(dialog, L"BUTTON", L"&Remove", WS_TABSTOP, IDC_AGENTS_REMOVE,
+    state.change = CreateChild(dialog, L"BUTTON", change.c_str(), WS_TABSTOP, IDC_AGENTS_CHANGE, {width - pad - button, y, width - pad, y + Scale(25)});
+    state.remove = CreateChild(dialog, L"BUTTON", remove.c_str(), WS_TABSTOP, IDC_AGENTS_REMOVE,
                                {width - pad - button, y + Scale(31), width - pad, y + Scale(56)});
     y += Scale(120) + Scale(14);
-    CreateChild(dialog, L"STATIC", L"&What agents did:", SS_LEFT, 0, {pad, y, listRight, y + Scale(16)});
+    CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_WHAT_AGENTS_DID).c_str(), SS_LEFT, 0, {pad, y, listRight, y + Scale(16)});
     y += Scale(18);
     int logBottom = height - pad - Scale(25) - Scale(12);
     state.log = CreateReportList(dialog, IDC_AGENTS_LOG, {pad, y, listRight, logBottom});
-    AddColumn(state.log, 0, L"When", 110);
-    AddColumn(state.log, 1, L"Program", 90);
-    AddColumn(state.log, 2, L"What", 320);
+    AddColumn(state.log, 0, core::T(PE_TEXT_WIN_COL_WHEN).c_str(), 110);
+    AddColumn(state.log, 1, core::T(PE_TEXT_WIN_COL_PROGRAM).c_str(), 90);
+    AddColumn(state.log, 2, core::T(PE_TEXT_WIN_COL_WHAT).c_str(), 320);
     ListView_SetColumnWidth(state.log, 2, LVSCW_AUTOSIZE_USEHEADER);
-    state.undo = CreateChild(dialog, L"BUTTON", L"&Undo", WS_TABSTOP, IDC_AGENTS_UNDO, {width - pad - button, y, width - pad, y + Scale(25)});
-    state.clear = CreateChild(dialog, L"BUTTON", L"C&lear", WS_TABSTOP, IDC_AGENTS_CLEAR,
+    state.undo = CreateChild(dialog, L"BUTTON", undo.c_str(), WS_TABSTOP, IDC_AGENTS_UNDO, {width - pad - button, y, width - pad, y + Scale(25)});
+    state.clear = CreateChild(dialog, L"BUTTON", clear.c_str(), WS_TABSTOP, IDC_AGENTS_CLEAR,
                               {width - pad - button, y + Scale(31), width - pad, y + Scale(56)});
     int bottom = height - pad - Scale(25);
-    CreateLinkButton(dialog, L"How to connect an agent", IDC_AGENTS_SETUP, {pad, bottom + Scale(4), pad + Scale(200), bottom + Scale(21)});
-    CreateChild(dialog, L"BUTTON", L"Close", WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {width - pad - button, bottom, width - pad, height - pad});
+    int setupWidth = std::max(Scale(200), static_cast<int>(MeasureText(setup).cx) + Scale(12));
+    CreateLinkButton(dialog, setup.c_str(), IDC_AGENTS_SETUP, {pad, bottom + Scale(4), pad + setupWidth, bottom + Scale(21)});
+    CreateChild(dialog, L"BUTTON", close.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {width - pad - button, bottom, width - pad, height - pad});
     FillAgents(&state);
     g_agents = dialog;
     RunModal(dialog, state.hosts, state.done);

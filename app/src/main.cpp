@@ -89,7 +89,8 @@ void UpdateJunkButton() {
     TBBUTTONINFOW info = {sizeof(info)};
     info.dwMask = TBIF_COMMAND | TBIF_TEXT | TBIF_IMAGE;
     info.idCommand = to;
-    info.pszText = const_cast<wchar_t*>(inJunk ? L"Not Junk" : L"Junk");
+    std::wstring label = core::T(inJunk ? PE_TEXT_WIN_TB_NOT_JUNK : PE_TEXT_WIN_TB_JUNK);
+    info.pszText = label.data();
     info.iImage = inJunk ? ICON_MAIL_CHECKMARK : ICON_MAIL_PROHIBITED;
     SendMessageW(g_toolbar, TB_SETBUTTONINFOW, from, reinterpret_cast<LPARAM>(&info));
     // the row of buttons as wide as their labels again
@@ -154,9 +155,9 @@ void UpdateMenu(HMENU menu) {
     }
     // in the Find box, its own undo
     bool inEdit = FocusedEdit() != nullptr;
-    std::wstring label = inEdit ? L"Undo" : g_mailbox.UndoLabel();
+    std::wstring label = inEdit ? std::wstring() : g_mailbox.UndoLabel();
     bool can = inEdit || !label.empty();
-    std::wstring text = L"&" + (label.empty() ? std::wstring(L"Undo") : label) + L"\tCtrl+Z";
+    std::wstring text = label.empty() ? MenuItem(PE_TEXT_CMD_UNDO, L"Ctrl+Z") : L"&" + label + L"\t" + core::Plain(PE_TEXT_KEY_CTRL) + L"+Z";
     ModifyMenuW(menu, IDM_UNDO, MF_BYCOMMAND | MF_STRING | (can ? MF_ENABLED : MF_GRAYED), IDM_UNDO, text.c_str());
 }
 
@@ -178,11 +179,20 @@ void OnSelectionTaken() {
 
 // File > Exit, the tray's Exit or Windows shutting down: closing ends the app rather than hiding it in the tray
 bool g_exiting = false;
+// Options chose another language and Restart Now: the app starts again once it has closed
+bool g_restart = false;
 
 const wchar_t* kNotifyPreference = L"NewMailNotifications";
 // Tools > Notify of New Mail, read once
 bool g_notify = GetPreference(kNotifyPreference, 1) != 0;
 const wchar_t* kTrayNotePreference = L"TrayNoteShown";
+
+// the new mail notifications on or off (Tools, the tray's menu, Options), kept for the next start
+void SetNotify(bool on) {
+    g_notify = on;
+    SetPreference(kNotifyPreference, on ? 1 : 0);
+    CheckMenuItem(GetMenu(g_main), IDM_NOTIFY, MF_BYCOMMAND | (on ? MF_CHECKED : MF_UNCHECKED));
+}
 
 // the window back from the tray (or the taskbar), in front
 void ShowMain() {
@@ -201,8 +211,7 @@ void HideToTray() {
     ShowWindow(g_main, SW_HIDE);
     if (!GetPreference(kTrayNotePreference, 0)) {
         SetPreference(kTrayNotePreference, 1);
-        TrayNotify(g_main, L"Inbox Classic is still running",
-                   L"It keeps checking for new mail here. Click the icon to open it, or right-click it to exit.", 0, 0);
+        TrayNotify(g_main, core::T(PE_TEXT_WIN_STILL_RUNNING), core::T(PE_TEXT_WIN_STILL_RUNNING_DETAIL), 0, 0);
     }
 }
 
@@ -216,24 +225,24 @@ void NotifyNewMail(const UiEvent& event) {
     }
     std::wstring subject = core::Widen(event.detail.c_str());
     if (subject.empty()) {
-        subject = L"(no subject)";
+        subject = core::T(PE_TEXT_WIN_NO_SUBJECT);
     }
     if (event.count <= 1) {
         TrayNotify(g_main, event.message, subject, event.folder, event.uid);
     } else {
-        TrayNotify(g_main, std::to_wstring(event.count) + L" new messages", L"The newest from " + event.message + L": " + subject, event.folder,
-                   event.uid);
+        TrayNotify(g_main, core::T(PE_TEXT_WIN_NEW_MESSAGES, {{"count", std::to_wstring(event.count)}}),
+                   core::T(PE_TEXT_WIN_NEWEST_FROM, {{"sender", event.message}, {"subject", subject}}), event.folder, event.uid);
     }
 }
 
 void TrayMenu() {
     HMENU menu = CreatePopupMenu();
-    AppendMenuW(menu, MF_STRING, IDM_OPEN, L"&Open Inbox Classic");
+    AppendMenuW(menu, MF_STRING, IDM_OPEN, MenuItem(PE_TEXT_CMD_OPEN).c_str());
     SetMenuDefaultItem(menu, IDM_OPEN, FALSE);
-    AppendMenuW(menu, MF_STRING, IDM_SYNC, L"&Check for New Mail");
-    AppendMenuW(menu, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, L"&Notify of New Mail");
+    AppendMenuW(menu, MF_STRING, IDM_SYNC, MenuItem(PE_TEXT_TRAY_CHECK).c_str());
+    AppendMenuW(menu, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, MenuItem(PE_TEXT_CMD_NOTIFY).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, IDM_EXIT, L"E&xit");
+    AppendMenuW(menu, MF_STRING, IDM_EXIT, MenuItem(PE_TEXT_CMD_EXIT).c_str());
     POINT at;
     GetCursorPos(&at);
     // in front, or the menu would not close when clicked away from
@@ -252,7 +261,7 @@ HWND g_lastFocus = nullptr;
 
 // "Subject" in quotes, or "(no subject)"
 std::wstring Quoted(const std::wstring& subject) {
-    return subject.empty() ? L"(no subject)" : L"\u201C" + subject + L"\u201D";
+    return subject.empty() ? core::T(PE_TEXT_WIN_NO_SUBJECT) : core::T(PE_TEXT_WIN_QUOTED, {{"subject", subject}});
 }
 
 // the outgoing pane of the status bar, which other work does not write over: what is being sent, what waits in the
@@ -266,11 +275,11 @@ void ShowOutbox() {
         std::wstring subject = first && first->subject ? Text(first->subject) : L"";
         bool failed = first && first->problem && *first->problem;
         if (waiting > 1) {
-            text = std::to_wstring(waiting) + L" messages in the Outbox";
+            text = core::T(PE_TEXT_WIN_OUTBOX_WAITING, {{"count", std::to_wstring(waiting)}});
         } else if (failed) {
-            text = Quoted(subject) + L" waits in the Outbox";
+            text = core::T(PE_TEXT_WIN_OUTBOX_WAITS, {{"subject", Quoted(subject)}});
         } else {
-            text = L"Sending " + Quoted(subject) + L"...";
+            text = core::T(PE_TEXT_WIN_OUTBOX_SENDING, {{"subject", Quoted(subject)}});
         }
     }
     SendMessageW(g_status, SB_SETTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
@@ -293,7 +302,7 @@ void AccountMenu(const NMTOOLBARW* button) {
     bool sync = button->iItem == IDM_SYNC;
     HMENU menu = CreatePopupMenu();
     if (sync) {
-        AppendMenuW(menu, MF_STRING, 1, L"Send and Receive &All\tF5");
+        AppendMenuW(menu, MF_STRING, 1, MenuItem(PE_TEXT_CMD_SYNC, L"F5").c_str());
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     }
     core::AccountList accounts(pe_accounts(g_core.get()));
@@ -301,11 +310,12 @@ void AccountMenu(const NMTOOLBARW* button) {
     const UINT first = 100;
     for (size_t i = 0; i < count; i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
-        std::wstring item = MenuText((sync ? L"" : L"From ") + Text(account->label));
+        std::wstring label = MenuText(Text(account->label));
+        std::wstring item = sync ? label : core::T(PE_TEXT_WIN_FROM_ACCOUNT, {{"account", label}});
         AppendMenuW(menu, MF_STRING, first + static_cast<UINT>(i), item.c_str());
     }
     if (count == 0) {
-        AppendMenuW(menu, MF_STRING | MF_GRAYED, 0, L"No accounts yet");
+        AppendMenuW(menu, MF_STRING | MF_GRAYED, 0, core::T(PE_TEXT_TRAY_NO_ACCOUNTS).c_str());
     }
     RECT bounds = button->rcButton;
     MapWindowPoints(g_toolbar, nullptr, reinterpret_cast<POINT*>(&bounds), 2);
@@ -325,7 +335,8 @@ void AccountMenu(const NMTOOLBARW* button) {
 
 // an account that signs in through the browser signs in again
 void SignInAgain(int64_t account) {
-    std::wstring text = L"The sign-in of " + g_mailbox.AccountName(account) + L" was refused or ran out.\n\nSign in again in the browser?";
+    std::wstring text = core::T(PE_TEXT_WIN_SIGN_IN_REFUSED, {{"account", g_mailbox.AccountName(account)}}) + L"\n\n" +
+                        core::T(PE_TEXT_WIN_SIGN_IN_AGAIN_ASK);
     if (MessageBoxW(g_main, text.c_str(), kTitle, MB_YESNO | MB_ICONQUESTION) != IDYES) {
         return;
     }
@@ -340,7 +351,8 @@ void SignInAgain(int64_t account) {
         return;
     }
     core::String reason(why);
-    std::wstring refused = L"Signing in again did not work: " + (reason ? Text(reason.get()) : L"unknown reason");
+    std::wstring refused = core::T(PE_TEXT_WIN_SIGN_IN_AGAIN_FAILED,
+                                   {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_WIN_UNKNOWN_REASON)}});
     MessageBoxW(g_main, refused.c_str(), kTitle, MB_OK | MB_ICONWARNING);
 }
 
@@ -368,12 +380,12 @@ void OnEvent(const UiEvent& event) {
     switch (event.kind) {
     case PE_EVENT_KIND_SYNC_STARTED:
         g_failing.erase(event.account);
-        SetStatus(L"Checking for new messages on " + g_mailbox.AccountName(event.account) + L"...");
+        SetStatus(core::T(PE_TEXT_WIN_CHECKING, {{"account", g_mailbox.AccountName(event.account)}}));
         break;
     case PE_EVENT_KIND_SYNC_FINISHED:
         // a failure stays in the status bar until the account syncs without one
         if (g_failing.empty()) {
-            SetStatus(L"Done");
+            SetStatus(core::T(PE_TEXT_WIN_DONE));
         }
         // how much text the search still has to read
         ShowFolderName();
@@ -393,12 +405,13 @@ void OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_MESSAGE_SENT:
         // shown by the OutboxChanged that follows it
-        g_lastSent = L"Sent " + Quoted(event.message) + L" at " + TimeNow();
+        g_lastSent = core::T(PE_TEXT_WIN_SENT_AT, {{"subject", Quoted(event.message)}, {"time", TimeNow()}});
         break;
     case PE_EVENT_KIND_DRAFT_SAVED:
         // the window that saved it says so; one that closed after saving leaves it to the status bar
         if (!ComposeDraftSaved(event.detail, event.message)) {
-            SetStatus(event.message.empty() ? L"Message saved in Drafts." : L"The message was not saved in Drafts: " + event.message);
+            SetStatus(event.message.empty() ? core::T(PE_TEXT_WIN_DRAFT_SAVED)
+                                            : core::T(PE_TEXT_WIN_DRAFT_NOT_SAVED, {{"reason", event.message}}));
         }
         break;
     case PE_EVENT_KIND_OUTBOX_CHANGED:
@@ -438,69 +451,71 @@ void OnEvent(const UiEvent& event) {
 
 HMENU BuildMenu() {
     HMENU file = CreatePopupMenu();
-    AppendMenuW(file, MF_STRING, IDM_NEW_ACCOUNT, L"&New Account...");
-    AppendMenuW(file, MF_STRING, IDM_ACCOUNTS, L"&Accounts...");
+    AppendMenuW(file, MF_STRING, IDM_NEW_ACCOUNT, MenuItem(PE_TEXT_CMD_NEW_ACCOUNT).c_str());
+    AppendMenuW(file, MF_STRING, IDM_ACCOUNTS, MenuItem(PE_TEXT_CMD_ACCOUNTS).c_str());
     HMENU folder = CreatePopupMenu();
-    AppendMenuW(folder, MF_STRING, IDM_NEW_FOLDER, L"&New Folder...");
-    AppendMenuW(folder, MF_STRING, IDM_RENAME_FOLDER, L"&Rename...");
-    AppendMenuW(folder, MF_STRING, IDM_DELETE_FOLDER, L"&Delete");
-    AppendMenuW(file, MF_POPUP, reinterpret_cast<UINT_PTR>(folder), L"&Folder");
+    AppendMenuW(folder, MF_STRING, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
+    AppendMenuW(folder, MF_STRING, IDM_RENAME_FOLDER, MenuItem(PE_TEXT_CMD_RENAME_FOLDER).c_str());
+    AppendMenuW(folder, MF_STRING, IDM_DELETE_FOLDER, MenuItem(PE_TEXT_CMD_DELETE_FOLDER).c_str());
+    AppendMenuW(file, MF_POPUP, reinterpret_cast<UINT_PTR>(folder), MenuItem(PE_TEXT_MENU_FOLDER).c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(file, MF_STRING, IDM_SAVE_AS, L"&Save As...");
-    AppendMenuW(file, MF_STRING, IDM_IMPORT, L"&Import Messages...");
-    AppendMenuW(file, MF_STRING, IDM_PRINT, L"&Print...\tCtrl+P");
+    AppendMenuW(file, MF_STRING, IDM_SAVE_AS, MenuItem(PE_TEXT_CMD_SAVE_AS).c_str());
+    AppendMenuW(file, MF_STRING, IDM_IMPORT, MenuItem(PE_TEXT_CMD_IMPORT).c_str());
+    AppendMenuW(file, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P").c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(file, MF_STRING, IDM_PROPERTIES, L"P&roperties\tAlt+Enter");
+    AppendMenuW(file, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_CMD_PROPERTIES, L"Alt+Enter").c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(file, MF_STRING, IDM_EXIT, L"E&xit");
+    AppendMenuW(file, MF_STRING, IDM_EXIT, MenuItem(PE_TEXT_CMD_EXIT).c_str());
     HMENU compose = CreatePopupMenu();
-    AppendMenuW(compose, MF_STRING, IDM_NEW_MAIL, L"&New Message\tCtrl+N");
+    AppendMenuW(compose, MF_STRING, IDM_NEW_MAIL, MenuItem(PE_TEXT_CMD_NEW_MAIL, L"Ctrl+N").c_str());
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(compose, MF_STRING, IDM_REPLY, L"&Reply to Sender\tCtrl+R");
-    AppendMenuW(compose, MF_STRING, IDM_REPLY_ALL, L"Reply to &All\tCtrl+Shift+R");
-    AppendMenuW(compose, MF_STRING, IDM_FORWARD, L"&Forward\tCtrl+F");
+    AppendMenuW(compose, MF_STRING, IDM_REPLY, MenuItem(PE_TEXT_CMD_REPLY, L"Ctrl+R").c_str());
+    AppendMenuW(compose, MF_STRING, IDM_REPLY_ALL, MenuItem(PE_TEXT_CMD_REPLY_ALL, L"Ctrl+Shift+R").c_str());
+    AppendMenuW(compose, MF_STRING, IDM_FORWARD, MenuItem(PE_TEXT_CMD_FORWARD, L"Ctrl+F").c_str());
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(compose, MF_STRING, IDM_FLAG, L"F&lag Message");
-    AppendMenuW(compose, MF_POPUP, reinterpret_cast<UINT_PTR>(g_mailbox.FlagMenu()), L"Fla&g");
+    AppendMenuW(compose, MF_STRING, IDM_FLAG, MenuItem(PE_TEXT_CMD_FLAG).c_str());
+    AppendMenuW(compose, MF_POPUP, reinterpret_cast<UINT_PTR>(g_mailbox.FlagMenu()), MenuItem(PE_TEXT_WIN_FLAG_MENU).c_str());
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(compose, MF_STRING, IDM_JUNK, L"Mark as &Junk\tCtrl+J");
-    AppendMenuW(compose, MF_STRING, IDM_NOT_JUNK, L"Mark as N&ot Junk");
+    AppendMenuW(compose, MF_STRING, IDM_JUNK, MenuItem(PE_TEXT_CMD_JUNK, L"Ctrl+J").c_str());
+    AppendMenuW(compose, MF_STRING, IDM_NOT_JUNK, MenuItem(PE_TEXT_CMD_NOT_JUNK).c_str());
     HMENU edit = CreatePopupMenu();
-    AppendMenuW(edit, MF_STRING | MF_GRAYED, IDM_UNDO, L"&Undo\tCtrl+Z");
+    AppendMenuW(edit, MF_STRING | MF_GRAYED, IDM_UNDO, MenuItem(PE_TEXT_CMD_UNDO, L"Ctrl+Z").c_str());
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(edit, MF_STRING, IDM_SELECT_ALL, L"Select &All\tCtrl+A");
-    AppendMenuW(edit, MF_STRING, IDM_FIND, L"&Find Message\tCtrl+Shift+F");
+    AppendMenuW(edit, MF_STRING, IDM_SELECT_ALL, MenuItem(PE_TEXT_CMD_SELECT_ALL, L"Ctrl+A").c_str());
+    AppendMenuW(edit, MF_STRING, IDM_FIND, MenuItem(PE_TEXT_CMD_FIND, L"Ctrl+Shift+F").c_str());
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(edit, MF_STRING, IDM_MARK_READ, L"Mark as &Read\tCtrl+Q");
-    AppendMenuW(edit, MF_STRING, IDM_MARK_UNREAD, L"Mark as &Unread");
-    AppendMenuW(edit, MF_STRING, IDM_MARK_ALL_READ, L"Mark &All Read\tCtrl+Shift+A");
+    AppendMenuW(edit, MF_STRING, IDM_MARK_READ, MenuItem(PE_TEXT_CMD_MARK_READ, L"Ctrl+Q").c_str());
+    AppendMenuW(edit, MF_STRING, IDM_MARK_UNREAD, MenuItem(PE_TEXT_CMD_MARK_UNREAD).c_str());
+    AppendMenuW(edit, MF_STRING, IDM_MARK_ALL_READ, MenuItem(PE_TEXT_CMD_MARK_ALL_READ, L"Ctrl+Shift+A").c_str());
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(edit, MF_STRING, IDM_MOVE, L"Mo&ve to Folder...\tCtrl+Shift+V");
-    AppendMenuW(edit, MF_STRING, IDM_COPY, L"&Copy to Folder...");
-    AppendMenuW(edit, MF_STRING, IDM_DELETE, L"&Delete Message\tDel");
+    AppendMenuW(edit, MF_STRING, IDM_MOVE, MenuItem(PE_TEXT_CMD_MOVE, L"Ctrl+Shift+V").c_str());
+    AppendMenuW(edit, MF_STRING, IDM_COPY, MenuItem(PE_TEXT_CMD_COPY).c_str());
+    AppendMenuW(edit, MF_STRING, IDM_DELETE, MenuItem(PE_TEXT_CMD_DELETE, L"Del").c_str());
     HMENU view = CreatePopupMenu();
-    AppendMenuW(view, MF_STRING, IDM_PICTURES, L"Download &Pictures");
+    AppendMenuW(view, MF_STRING, IDM_PICTURES, MenuItem(PE_TEXT_CMD_PICTURES).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(view, MF_STRING, IDM_VIEW_SOURCE, L"Message &Source\tCtrl+U");
+    AppendMenuW(view, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_CMD_VIEW_SOURCE, L"Ctrl+U").c_str());
     HMENU tools = CreatePopupMenu();
-    AppendMenuW(tools, MF_STRING, IDM_SYNC, L"Send and Recei&ve All\tF5");
-    AppendMenuW(tools, MF_STRING, IDM_OUTBOX, L"&Outbox...");
+    AppendMenuW(tools, MF_STRING, IDM_SYNC, MenuItem(PE_TEXT_CMD_SYNC, L"F5").c_str());
+    AppendMenuW(tools, MF_STRING, IDM_OUTBOX, MenuItem(PE_TEXT_CMD_OUTBOX).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(tools, MF_STRING, IDM_AI_AGENTS, L"&AI Agents...");
+    AppendMenuW(tools, MF_STRING, IDM_AI_AGENTS, MenuItem(PE_TEXT_CMD_AI_AGENTS).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(tools, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, L"&Notify of New Mail");
-    AppendMenuW(tools, MF_STRING, IDM_DEFAULT_APP, L"Make &Default Mail App...");
+    AppendMenuW(tools, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, MenuItem(PE_TEXT_CMD_NOTIFY).c_str());
+    AppendMenuW(tools, MF_STRING, IDM_DEFAULT_APP, MenuItem(PE_TEXT_CMD_DEFAULT_APP).c_str());
+    AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(tools, MF_STRING, IDM_OPTIONS, MenuItem(PE_TEXT_CMD_OPTIONS).c_str());
     HMENU help = CreatePopupMenu();
-    AppendMenuW(help, MF_STRING, IDM_HELP, L"&Contents\tF1");
+    AppendMenuW(help, MF_STRING, IDM_HELP, MenuItem(PE_TEXT_CMD_HELP, L"F1").c_str());
     AppendMenuW(help, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(help, MF_STRING, IDM_ABOUT, L"&About Inbox Classic");
+    AppendMenuW(help, MF_STRING, IDM_ABOUT, MenuItem(PE_TEXT_CMD_ABOUT).c_str());
     HMENU bar = CreateMenu();
-    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(file), L"&File");
-    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(edit), L"&Edit");
-    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(view), L"&View");
-    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(tools), L"&Tools");
-    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(compose), L"&Message");
-    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(help), L"&Help");
+    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(file), MenuItem(PE_TEXT_MENU_FILE).c_str());
+    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(edit), MenuItem(PE_TEXT_MENU_EDIT).c_str());
+    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(view), MenuItem(PE_TEXT_MENU_VIEW).c_str());
+    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(tools), MenuItem(PE_TEXT_MENU_TOOLS).c_str());
+    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(compose), MenuItem(PE_TEXT_MENU_MESSAGE).c_str());
+    AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(help), MenuItem(PE_TEXT_MENU_HELP).c_str());
     return bar;
 }
 
@@ -530,31 +545,32 @@ void CreateToolbar(HWND hwnd) {
     g_toolbar = CreateBar(hwnd, CCS_NODIVIDER | CCS_TOP | WS_CLIPSIBLINGS, 0, BarIcons::Big);
     struct Button {
         WORD id;
-        const wchar_t* text;
+        PeText text;
         int icon;
         // BTNS_DROPDOWN: a menu of the accounts beside it, as Outlook Express has
         BYTE style = BTNS_BUTTON;
     };
     // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state (0 separates)
     Button buttons[] = {
-        {IDM_NEW_MAIL, L"Create Mail", ICON_MAIL_ADD, BTNS_DROPDOWN},
-        {0, nullptr, 0},
-        {IDM_REPLY, L"Reply", ICON_ARROW_REPLY},
-        {IDM_REPLY_ALL, L"Reply All", ICON_ARROW_REPLY_ALL},
-        {IDM_FORWARD, L"Forward", ICON_ARROW_FORWARD},
-        {0, nullptr, 0},
-        {IDM_PRINT, L"Print", ICON_PRINT},
-        {IDM_DELETE, L"Delete", ICON_DELETE},
+        {IDM_NEW_MAIL, PE_TEXT_WIN_TB_CREATE_MAIL, ICON_MAIL_ADD, BTNS_DROPDOWN},
+        {0, PE_TEXT_MENU_FILE, 0},
+        {IDM_REPLY, PE_TEXT_WIN_TB_REPLY, ICON_ARROW_REPLY},
+        {IDM_REPLY_ALL, PE_TEXT_WIN_TB_REPLY_ALL, ICON_ARROW_REPLY_ALL},
+        {IDM_FORWARD, PE_TEXT_WIN_TB_FORWARD, ICON_ARROW_FORWARD},
+        {0, PE_TEXT_MENU_FILE, 0},
+        {IDM_PRINT, PE_TEXT_WIN_TB_PRINT, ICON_PRINT},
+        {IDM_DELETE, PE_TEXT_WIN_TB_DELETE, ICON_DELETE},
         // Not Junk in place of it in a Junk folder (UpdateJunkButton)
-        {IDM_JUNK, L"Junk", ICON_MAIL_PROHIBITED},
-        {0, nullptr, 0},
-        {IDM_SYNC, L"Send/Recv", ICON_ARROW_SYNC, BTNS_DROPDOWN},
-        {0, nullptr, 0},
-        {IDM_MARK_READ, L"Mark Read", ICON_MAIL_READ},
-        {IDM_MARK_UNREAD, L"Mark Unread", ICON_MAIL_UNREAD},
+        {IDM_JUNK, PE_TEXT_WIN_TB_JUNK, ICON_MAIL_PROHIBITED},
+        {0, PE_TEXT_MENU_FILE, 0},
+        {IDM_SYNC, PE_TEXT_WIN_TB_SYNC, ICON_ARROW_SYNC, BTNS_DROPDOWN},
+        {0, PE_TEXT_MENU_FILE, 0},
+        {IDM_MARK_READ, PE_TEXT_WIN_TB_MARK_READ, ICON_MAIL_READ},
+        {IDM_MARK_UNREAD, PE_TEXT_WIN_TB_MARK_UNREAD, ICON_MAIL_UNREAD},
     };
     for (const Button& button : buttons) {
-        AddButton(g_toolbar, button.id, button.text, button.style, button.icon);
+        std::wstring label = button.id ? core::T(button.text) : std::wstring();
+        AddButton(g_toolbar, button.id, button.id ? label.c_str() : nullptr, button.style, button.icon);
     }
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
 }
@@ -666,6 +682,12 @@ struct Arguments {
     bool background = false;
     // --test-hooks: the UI test drops and drags in place of Explorer (WM_COPYDATA kTestDragOut, kTestDropFiles)
     bool testHooks = false;
+    // --language <code>: the windows in that language (`de`; `qps` the pseudo-language of the UI test), whatever
+    // Options says
+    std::wstring language;
+    // the options again, for a restart in another language: without a mailto: link (it was handled) and without
+    // --background (the window is in use)
+    std::wstring restart;
 };
 Arguments g_arguments;
 
@@ -677,6 +699,23 @@ size_t MailtoStart(const std::wstring& line) {
         }
     }
     return std::wstring::npos;
+}
+
+// `arg` as CommandLineToArgvW reads it back: in quotes, a quote and the backslashes before one escaped
+std::wstring QuoteArgument(const std::wstring& arg) {
+    std::wstring quoted = L"\"";
+    size_t backslashes = 0;
+    for (wchar_t c : arg) {
+        if (c == L'\\') {
+            backslashes++;
+            continue;
+        }
+        quoted.append(c == L'"' ? 2 * backslashes + 1 : backslashes, L'\\');
+        backslashes = 0;
+        quoted += c;
+    }
+    quoted.append(2 * backslashes, L'\\');
+    return quoted + L"\"";
 }
 
 void ReadArguments() {
@@ -694,7 +733,13 @@ void ReadArguments() {
     LPWSTR* argv = CommandLineToArgvW(line.c_str(), &count);
     for (int i = 1; argv && i < count; i++) {
         std::wstring arg = argv[i];
-        if (arg == L"--store" && i + 1 < count) {
+        if (arg != L"--background") {
+            g_arguments.restart += L" " + QuoteArgument(arg);
+        }
+        if (arg == L"--language" && i + 1 < count) {
+            g_arguments.language = argv[++i];
+            g_arguments.restart += L" " + QuoteArgument(g_arguments.language);
+        } else if (arg == L"--store" && i + 1 < count) {
             g_arguments.store = argv[++i];
         } else if (arg == L"--pin-certificate" && i + 1 < count) {
             g_arguments.certificate = argv[++i];
@@ -769,14 +814,15 @@ void AddAccount() {
 }
 
 void ShowAbout() {
-    std::wstring text = std::wstring(L"Inbox Classic ") + APP_VERSION_W + L"\nCore " + core::Version() + L"\n\nPostal Systems OÜ";
-    MessageBoxW(g_main, text.c_str(), L"About Inbox Classic", MB_OK | MB_ICONINFORMATION);
+    std::wstring text = std::wstring(L"Inbox Classic ") + APP_VERSION_W + L"\n" +
+                        core::T(PE_TEXT_WIN_ABOUT_CORE, {{"version", core::Version()}}) + L"\n\nPostal Systems OÜ";
+    MessageBoxW(g_main, text.c_str(), core::Plain(PE_TEXT_CMD_ABOUT).c_str(), MB_OK | MB_ICONINFORMATION);
 }
 
 void NewMessage(int64_t account) {
     account = account ? account : g_mailbox.CurrentAccount();
     if (!account) {
-        MessageBoxW(g_main, L"Add a mail account first.", kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(g_main, core::T(PE_TEXT_WIN_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), account, nullptr);
@@ -790,7 +836,7 @@ void OpenMailto(const std::wstring& link) {
     }
     int64_t account = g_mailbox.CurrentAccount();
     if (!account) {
-        MessageBoxW(g_main, L"Add a mail account first, then click the e-mail link again.", kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(g_main, core::T(PE_TEXT_WIN_ADD_ACCOUNT_FIRST_LINK).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
@@ -865,18 +911,18 @@ void MakeDefaultMailApp() {
         bool ours = _wcsicmp(current, kMailtoClass) == 0;
         CoTaskMemFree(current);
         if (ours) {
-            MessageBoxW(g_main, L"Inbox Classic is your default mail app: e-mail links open a new message here.", kTitle, MB_OK | MB_ICONINFORMATION);
+            MessageBoxW(g_main, core::T(PE_TEXT_WIN_DEFAULT_APP_IS).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
             return;
         }
     }
     DWORD size = 0;
     if (RegGetValueW(HKEY_CURRENT_USER, L"Software\\RegisteredApplications", kRegisteredName, RRF_RT_REG_SZ, nullptr, nullptr, &size) !=
         ERROR_SUCCESS) {
-        MessageBoxW(g_main, L"This copy of Inbox Classic was not installed, so Windows does not list it as a mail app. Install it to choose it.",
+        MessageBoxW(g_main, core::T(PE_TEXT_WIN_DEFAULT_APP_NOT_INSTALLED).c_str(),
                     kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
-    MessageBoxW(g_main, L"Windows opens its Default apps settings for Inbox Classic. Choose it for MAILTO there.", kTitle,
+    MessageBoxW(g_main, core::T(PE_TEXT_WIN_DEFAULT_APP_SETTINGS).c_str(), kTitle,
                 MB_OK | MB_ICONINFORMATION);
     ShellExecuteW(g_main, L"open", L"ms-settings:defaultapps?registeredAppUser=Inbox%20Classic", nullptr, nullptr, SW_SHOWNORMAL);
 }
@@ -884,7 +930,7 @@ void MakeDefaultMailApp() {
 void Reply(PeDraftKind kind) {
     core::Draft draft = g_mailbox.DraftOfShown(kind);
     if (!draft) {
-        MessageBoxW(g_main, L"Select a message first.", kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(g_main, core::T(PE_TEXT_WIN_SELECT_MESSAGE_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), g_mailbox.CurrentAccount(), pe_draft_info(draft.get()));
@@ -978,10 +1024,20 @@ void OnCommand(WORD id, WORD code) {
         return;
     }
     case IDM_NOTIFY:
-        g_notify = !g_notify;
-        SetPreference(kNotifyPreference, g_notify ? 1 : 0);
-        CheckMenuItem(GetMenu(g_main), IDM_NOTIFY, MF_BYCOMMAND | (g_notify ? MF_CHECKED : MF_UNCHECKED));
+        SetNotify(!g_notify);
         return;
+    case IDM_OPTIONS: {
+        bool notify = g_notify;
+        bool restart = OptionsDialog(g_main, notify);
+        SetNotify(notify);
+        if (restart) {
+            // as File > Exit, the messages being written asked first; started again once the window is gone
+            g_restart = true;
+            g_exiting = true;
+            PostMessageW(g_main, WM_CLOSE, 0, 0);
+        }
+        return;
+    }
     case IDM_SYNC:
         SyncAll();
         return;
@@ -1090,9 +1146,8 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_main = hwnd;
         SetScaleWindow(hwnd);
         if (!OpenCore(hwnd)) {
-            const wchar_t* why = g_arguments.certificate.empty() ? L"The mail store could not be opened."
-                                                                 : L"The mail store or the certificate file could not be opened.";
-            MessageBoxW(hwnd, why, kTitle, MB_OK | MB_ICONERROR);
+            std::wstring why = core::T(g_arguments.certificate.empty() ? PE_TEXT_WIN_STORE_NOT_OPENED : PE_TEXT_WIN_STORE_OR_CERT_NOT_OPENED);
+            MessageBoxW(hwnd, why.c_str(), kTitle, MB_OK | MB_ICONERROR);
             return -1;
         }
         CreateChildren(hwnd);
@@ -1264,6 +1319,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             return 0;
         case ComposeClose::Kept:
             g_exiting = false;
+            g_restart = false;
             return 0;
         }
         break;
@@ -1284,6 +1340,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_COMPOSE_KEPT:
         g_quitAfterCompose = false;
+        g_restart = false;
         return 0;
     case WM_DESTROY:
         RemovePropW(hwnd, kStoreProperty);
@@ -1301,6 +1358,22 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+// the app again with the options of this run (Options, another language): its window and core are gone, so it is
+// the one the new one finds running
+void Restart() {
+    wchar_t exe[MAX_PATH] = L"";
+    if (!GetModuleFileNameW(nullptr, exe, MAX_PATH)) {
+        return;
+    }
+    std::wstring line = QuoteArgument(exe) + g_arguments.restart;
+    STARTUPINFOW startup = {sizeof(startup)};
+    PROCESS_INFORMATION process = {};
+    if (CreateProcessW(exe, line.data(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startup, &process)) {
+        CloseHandle(process.hThread);
+        CloseHandle(process.hProcess);
+    }
 }
 
 // the first start: an account to read mail from
@@ -1342,6 +1415,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         OleUninitialize();
         return 0;
     }
+    // the words of every window in the language in use, from here on
+    StartLanguage(g_arguments.language);
     INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_TREEVIEW_CLASSES | ICC_LISTVIEW_CLASSES | ICC_BAR_CLASSES};
     InitCommonControlsEx(&controls);
 
@@ -1395,5 +1470,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     }
     DestroyAcceleratorTable(g_accelerators);
     OleUninitialize();
+    if (g_restart) {
+        Restart();
+    }
     return static_cast<int>(msg.wParam);
 }

@@ -19,19 +19,19 @@
 namespace {
 
 // the reason the core gave for a refusal, or `fallback` when it gave none
-std::wstring ReasonText(char* reason, const wchar_t* fallback) {
+std::wstring ReasonText(char* reason, PeText fallback) {
     core::String why(reason);
-    return why ? Text(why.get()) : fallback;
+    return why ? Text(why.get()) : core::T(fallback);
 }
 
 // a folder name, asked for; empty when cancelled
-std::wstring AskFolderName(HWND owner, const wchar_t* title, const std::wstring& intro, const std::wstring& name) {
-    std::vector<FormField> fields = {{L"Folder name:", name}};
-    return FormDialog(owner, title, intro, fields) ? fields[0].value : L"";
+std::wstring AskFolderName(HWND owner, PeText title, const std::wstring& intro, const std::wstring& name) {
+    std::vector<FormField> fields = {{core::T(PE_TEXT_WIN_FOLDER_NAME), name}};
+    return FormDialog(owner, core::Plain(title), intro, fields) ? fields[0].value : L"";
 }
 
 // the reason the core gave, shown
-void ShowRefusal(HWND owner, char* reason, const wchar_t* fallback) {
+void ShowRefusal(HWND owner, char* reason, PeText fallback) {
     MessageBoxW(owner, ReasonText(reason, fallback).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
@@ -41,15 +41,17 @@ constexpr size_t kPagesKept = 8;
 constexpr int kHeaderLines = 4;
 // the data of the All Inboxes item: neither a folder (positive) nor an account (a negated id)
 constexpr LPARAM kAllInboxesItem = std::numeric_limits<LPARAM>::min();
-const wchar_t* kAllInboxes = L"All Inboxes";
+std::wstring AllInboxes() {
+    return core::T(PE_TEXT_WIN_ALL_INBOXES);
+}
 
 // as Outlook Express has them: the envelope (read or not), the paper clip and the flag, then the text columns
 // no read and unread column: bold says it
 enum Column { COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE, COL_FOLDER };
 
-// what the Find box takes, shown when the mouse rests on it
-const wchar_t* kFindTip =
-    L"Finds words in the subject, the people, the file names and the text of messages.\r\n"
+// what the Find box takes, shown when the mouse rests on it: the words of the query syntax are the same in every
+// language
+const wchar_t* kFindSyntax =
     L"\"exact phrase\"    -leave out    this OR that\r\n"
     L"from:ann    to:bob    subject:report    filename:pdf\r\n"
     L"is:unread    is:read    is:starred    has:attachment\r\n"
@@ -57,8 +59,6 @@ const wchar_t* kFindTip =
     L"before:2025/01/31    after:2025/01/01    older_than:2d    newer_than:1m\r\n"
     L"larger:5M    smaller:100k";
 
-// what the empty search field says, grey, until it has the focus
-const wchar_t* kFindHint = L"Search mail";
 
 // the Find box: as an edit, with the grey hint drawn over it while it is empty and not focused
 LRESULT CALLBACK FindEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR) {
@@ -73,7 +73,7 @@ LRESULT CALLBACK FindEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
         RECT area;
         GetClientRect(hwnd, &area);
         area.left += LOWORD(SendMessageW(hwnd, EM_GETMARGINS, 0, 0));
-        DrawTextW(dc, kFindHint, -1, &area, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+        DrawTextW(dc, core::T(PE_TEXT_WIN_FIND_HINT).c_str(), -1, &area, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
         SelectObject(dc, old);
         ReleaseDC(hwnd, dc);
     }
@@ -122,15 +122,15 @@ HWND CreateFindField(HWND parent) {
 std::wstring FolderName(const PeFolder& folder) {
     switch (folder.special_use) {
     case PE_SPECIAL_USE_INBOX:
-        return L"Inbox";
+        return core::T(PE_TEXT_FOLDER_INBOX);
     case PE_SPECIAL_USE_SENT:
-        return L"Sent Items";
+        return core::T(PE_TEXT_FOLDER_SENT);
     case PE_SPECIAL_USE_TRASH:
-        return L"Deleted Items";
+        return core::T(PE_TEXT_FOLDER_DELETED);
     case PE_SPECIAL_USE_DRAFTS:
-        return L"Drafts";
+        return core::T(PE_TEXT_FOLDER_DRAFTS);
     case PE_SPECIAL_USE_JUNK:
-        return L"Junk E-mail";
+        return core::T(PE_TEXT_FOLDER_JUNK);
     default:
         return Text(folder.name);
     }
@@ -232,8 +232,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     findEdit_ = CreateChild(findField_, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_FIND, {});
     SetWindowSubclass(findEdit_, FindEditProc, 0, 0);
     // what a screen reader says for it
-    SetAccessibleDescription(findEdit_, L"Search mail");
-    findClear_ = CreateChild(findField_, L"BUTTON", L"Clear search", BS_OWNERDRAW, IDC_FIND_CLEAR, {});
+    SetAccessibleDescription(findEdit_, core::T(PE_TEXT_WIN_FIND_HINT));
+    findClear_ = CreateChild(findField_, L"BUTTON", core::T(PE_TEXT_WIN_CLEAR_SEARCH).c_str(), BS_OWNERDRAW, IDC_FIND_CLEAR, {});
     ShowWindow(findClear_, SW_HIDE);
     // what the box takes, when the mouse rests on it
     HWND tip = CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
@@ -243,49 +243,50 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     TOOLINFOW tool = {sizeof(tool)};
     tool.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
     tool.hwnd = parent;
-    tool.lpszText = const_cast<wchar_t*>(kFindTip);
+    // the tooltip keeps a copy
+    std::wstring findTip = core::T(PE_TEXT_WIN_FIND_TIP) + L"\r\n" + kFindSyntax;
+    tool.lpszText = findTip.data();
     for (HWND window : {findField_, findEdit_}) {
         tool.uId = reinterpret_cast<UINT_PTR>(window);
         SendMessageW(tip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tool));
     }
     IconColumn(list_, COL_ATTACH, LIST_ATTACH);
     IconColumn(list_, COL_FLAG, LIST_FLAG);
-    AddColumn(list_, COL_FROM, L"From", 200);
-    AddColumn(list_, COL_SUBJECT, L"Subject", 320);
-    AddColumn(list_, COL_RECEIVED, L"Received", 130);
-    AddColumn(list_, COL_SIZE, L"Size", 84, LVCFMT_RIGHT);
+    AddColumn(list_, COL_FROM, core::T(PE_TEXT_WIN_COL_FROM).c_str(), 200);
+    AddColumn(list_, COL_SUBJECT, core::T(PE_TEXT_WIN_COL_SUBJECT).c_str(), 320);
+    AddColumn(list_, COL_RECEIVED, core::T(PE_TEXT_WIN_COL_RECEIVED).c_str(), 130);
+    AddColumn(list_, COL_SIZE, core::T(PE_TEXT_WIN_COL_SIZE).c_str(), 84, LVCFMT_RIGHT);
 
     // not drawn over the Unsubscribe link that lies on it
     header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN | WS_CLIPSIBLINGS, 0, {});
-    unsubscribe_ = CreateChild(parent, L"STATIC", L"Unsubscribe", SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
+    unsubscribe_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_WIN_UNSUBSCRIBE).c_str(), SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
     ShowWindow(unsubscribe_, SW_HIDE);
     invitation_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_INVITATION, {});
     logo_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW, IDC_LOGO, {});
     ShowWindow(logo_, SW_HIDE);
-    openCalendar_ = CreateChild(parent, L"BUTTON", L"Open in Calendar", WS_TABSTOP | BS_PUSHBUTTON, IDC_OPEN_CALENDAR, {});
+    openCalendar_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_WIN_OPEN_IN_CALENDAR).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_OPEN_CALENDAR, {});
     ShowWindow(invitation_, SW_HIDE);
     ShowWindow(openCalendar_, SW_HIDE);
     // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
     attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_ATTACHMENTS, BarIcons::Big);
     // a label from the start, so the bar keeps a row for it under the icon ("2 files" once a message is shown)
-    AddButton(attachments_, IDC_ATTACHMENTS, L"1 file", BTNS_WHOLEDROPDOWN, ICON_ATTACH);
+    AddButton(attachments_, IDC_ATTACHMENTS, core::T(PE_TEXT_WIN_FILES, {{"count", L"1"}}).c_str(), BTNS_WHOLEDROPDOWN, ICON_ATTACH);
     // the information bar of Outlook Express over a message whose pictures on the internet are blocked; a click
     // shows them
-    pictures_ = CreateChild(parent, L"STATIC",
-                            L" Some pictures have been blocked to help prevent the sender from identifying your computer. "
-                            L"Click here to download pictures.",
+    std::wstring blocked = L" " + core::T(PE_TEXT_WIN_PICTURES_BLOCKED);
+    pictures_ = CreateChild(parent, L"STATIC", blocked.c_str(),
                             SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER, IDC_PICTURES, {});
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
     // the same bar over a message that could not be downloaded: a click tries again
     core::String note(pe_retry_note());
-    std::wstring retry = L" " + Text(note.get()) + L" Click here to try again.";
+    std::wstring retry = L" " + Text(note.get()) + L" " + core::T(PE_TEXT_WIN_CLICK_TO_RETRY);
     retry_ = CreateChild(parent, L"STATIC", retry.c_str(), SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER,
                          IDC_RETRY, {});
     ShowWindow(retry_, SW_HIDE);
     // over the list while searching, in the colors of the information bar: what was found, and a link to end it
     searchBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_SEARCH_BAR, {});
-    searchClear_ = CreateChild(parent, L"STATIC", L"Clear search", SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
+    searchClear_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_WIN_CLEAR_SEARCH).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
                                IDC_SEARCH_CLEAR, {});
     ShowWindow(searchBar_, SW_HIDE);
     ShowWindow(searchClear_, SW_HIDE);
@@ -354,11 +355,15 @@ void Mailbox::UpdateSearchBar() {
     std::wstring summary;
     if (Searching()) {
         // what was found, for what, where: the words stay in view while the list changes under them
-        summary = total_ == 0 ? L"No results" : std::to_wstring(total_) + (total_ == 1 ? L" result" : L" results");
-        summary += L" for \u201C" + find_ + L"\u201D " + (findPlace_.empty() ? L"in all folders" : L"in " + findPlace_);
+        std::wstring count = std::to_wstring(total_);
+        if (findPlace_.empty()) {
+            summary = core::T(PE_TEXT_WIN_SEARCH_FOUND_ALL, {{"count", count}, {"words", find_}});
+        } else {
+            summary = core::T(PE_TEXT_WIN_SEARCH_FOUND_IN, {{"count", count}, {"words", find_}, {"folder", findPlace_}});
+        }
         if (uint64_t left = pe_search_unindexed_count(core_)) {
             // the words of these are found once their text is in (subjects, people and file names are found already)
-            summary += L"  \u00B7  still indexing the text of " + std::to_wstring(left) + (left == 1 ? L" message" : L" messages");
+            summary += L"  \u00B7  " + core::T(PE_TEXT_WIN_SEARCH_INDEXING, {{"count", std::to_wstring(left)}});
         }
     }
     bool shown = IsWindowVisible(searchBar_) != FALSE;
@@ -500,8 +505,8 @@ void Mailbox::Reload() {
     size_t count = pe_account_list_count(accounts.get());
     if (pe_all_inboxes_shown(count)) {
         // above the accounts, the mail of every Inbox; its unread count as a folder's
-        allInboxesItem_ = InsertItem(tree_, TVI_ROOT, kAllInboxes, kAllInboxesItem, false, FOLDER_MAIL_INBOX);
-        rows_[allInboxesItem_] = {kAllInboxes, pe_inbox_unread(core_), 0};
+        allInboxesItem_ = InsertItem(tree_, TVI_ROOT, AllInboxes(), kAllInboxesItem, false, FOLDER_MAIL_INBOX);
+        rows_[allInboxesItem_] = {AllInboxes(), pe_inbox_unread(core_), 0};
         ShowRow(allInboxesItem_);
     }
     for (size_t i = 0; i < count; i++) {
@@ -623,7 +628,7 @@ void Mailbox::UpdateFolders(int64_t account) {
 
 std::wstring Mailbox::AccountName(int64_t account) const {
     auto name = accountNames_.find(account);
-    return name != accountNames_.end() ? name->second : L"the account";
+    return name != accountNames_.end() ? name->second : core::T(PE_TEXT_WIN_THE_ACCOUNT);
 }
 
 std::wstring Mailbox::AccountEmail(int64_t account) const {
@@ -686,11 +691,11 @@ bool Mailbox::SeveralFolders() const {
 // all in an Inbox, the Account column
 void Mailbox::ShowFolderColumn() {
     bool wanted = SeveralFolders();
-    const wchar_t* title = Searching() ? L"Folder" : L"Account";
+    std::wstring title = core::T(Searching() ? PE_TEXT_WIN_COL_FOLDER : PE_TEXT_WIN_COL_ACCOUNT);
     if (wanted && folderColumn_) {
         LVCOLUMNW column = {};
         column.mask = LVCF_TEXT;
-        column.pszText = const_cast<wchar_t*>(title);
+        column.pszText = title.data();
         ListView_SetColumn(list_, COL_FOLDER, &column);
     }
     if (wanted == folderColumn_) {
@@ -701,7 +706,7 @@ void Mailbox::ShowFolderColumn() {
     int subject = ListView_GetColumnWidth(list_, COL_SUBJECT);
     int folder = Scale(130);
     if (wanted) {
-        AddColumn(list_, COL_FOLDER, title, 130);
+        AddColumn(list_, COL_FOLDER, title.c_str(), 130);
         ListView_SetColumnWidth(list_, COL_SUBJECT, std::max(Scale(120), subject - folder));
     } else {
         folder = ListView_GetColumnWidth(list_, COL_FOLDER);
@@ -966,11 +971,13 @@ namespace {
 
 // the header's lines (Cc, when there is one, beside To), from a message's view or its row in the list
 std::wstring HeaderText(const char* from, bool hasDate, int64_t date, const char* to, const char* cc, const char* subject) {
-    std::wstring header = L" From:  " + Text(from) + L"\r\n Date:  " + (hasDate ? FormatDate(date) : L"") + L"\r\n To:  " + Text(to);
+    auto label = [](PeText name) { return core::Plain(name) + L":  "; };
+    std::wstring header = L" " + label(PE_TEXT_HEADER_FROM) + Text(from) + L"\r\n " + label(PE_TEXT_HEADER_DATE) +
+                          (hasDate ? FormatDate(date) : L"") + L"\r\n " + label(PE_TEXT_HEADER_TO) + Text(to);
     if (cc && *cc) {
-        header += L"    Cc:  " + Text(cc);
+        header += L"    " + label(PE_TEXT_HEADER_CC) + Text(cc);
     }
-    return header + L"\r\n Subject:  " + Text(subject);
+    return header + L"\r\n " + label(PE_TEXT_HEADER_SUBJECT) + Text(subject);
 }
 
 }  // namespace
@@ -1149,7 +1156,7 @@ void Mailbox::ShowMessage() {
     }
     viewRequest_ = pe_message_view_start(core_, messageFolder_, uid_, remoteImages_);
     if (!viewRequest_) {
-        SetWindowTextW(header_, L" The message could not be shown.");
+        SetWindowTextW(header_, (L" " + core::T(PE_TEXT_WIN_NOT_SHOWN)).c_str());
     }
 }
 
@@ -1158,7 +1165,7 @@ void Mailbox::ShowView() {
     viewRequest_ = 0;
     const PeMessageInfo* info = pe_message_view_info(view_.get());
     if (!info) {
-        SetWindowTextW(header_, L" The message could not be shown.");
+        SetWindowTextW(header_, (L" " + core::T(PE_TEXT_WIN_NOT_SHOWN)).c_str());
         ShowReaderBars(false, false);
         return;
     }
@@ -1183,7 +1190,7 @@ void Mailbox::ShowHeader(const PeMessageInfo* info) {
     SetWindowTextW(header_, HeaderText(info->from, info->has_date, info->date, info->to, info->cc, info->subject).c_str());
     if (info->attachment_count > 0) {
         // the paper clip says how many files there are
-        std::wstring label = info->attachment_count == 1 ? L"1 file" : std::to_wstring(info->attachment_count) + L" files";
+        std::wstring label = core::T(PE_TEXT_WIN_FILES, {{"count", std::to_wstring(info->attachment_count)}});
         TBBUTTONINFOW button = {sizeof(button)};
         button.dwMask = TBIF_TEXT;
         button.pszText = label.data();
@@ -1210,7 +1217,7 @@ void Mailbox::ChooseAttachment() {
     // after the files' own items
     const UINT kSaveAll = static_cast<UINT>(info->attachment_count) + 1;
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, kSaveAll, L"&Save Attachments...");
+    AppendMenuW(menu, MF_STRING, kSaveAll, MenuItem(PE_TEXT_WIN_SAVE_ATTACHMENTS).c_str());
     RECT button;
     GetWindowRect(attachments_, &button);
     UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTALIGN | TPM_TOPALIGN, button.right, button.bottom, 0, parent_, nullptr);
@@ -1227,7 +1234,7 @@ void Mailbox::ChooseAttachment() {
     uint8_t* data = pe_attachment_data(core_, messageFolder_, uid_, static_cast<size_t>(chosen - 1), &length, &name);
     core::String safeName(name);
     if (!data) {
-        MessageBoxW(parent_, L"The attachment could not be read.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxW(parent_, core::T(PE_TEXT_WIN_ATTACHMENT_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
     }
     std::wstring path = SaveFileDialog(parent_, Text(safeName.get()));
@@ -1235,14 +1242,14 @@ void Mailbox::ChooseAttachment() {
         if (WriteFileBytes(path, data, length)) {
             MarkFromInternet(path);
         } else {
-            MessageBoxW(parent_, L"The attachment could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+            MessageBoxW(parent_, core::T(PE_TEXT_WIN_ATTACHMENT_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         }
     }
     pe_bytes_free(data, length);
 }
 
 void Mailbox::SaveAllAttachments() {
-    std::wstring folder = FolderDialog(parent_, L"Save Attachments");
+    std::wstring folder = FolderDialog(parent_, core::Plain(PE_TEXT_WIN_SAVE_ATTACHMENTS).c_str());
     if (folder.empty()) {
         return;
     }
@@ -1251,9 +1258,10 @@ void Mailbox::SaveAllAttachments() {
     size_t total = 0;
     std::string dir = core::Narrow(folder);
     if (!pe_save_attachments(core_, messageFolder_, uid_, dir.c_str(), &saved, &total)) {
-        MessageBoxW(parent_, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(parent_, core::T(PE_TEXT_WIN_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     } else if (saved < total) {
-        std::wstring text = std::to_wstring(total - saved) + L" of the " + std::to_wstring(total) + L" files could not be saved.";
+        std::wstring text =
+            core::T(PE_TEXT_WIN_FILES_NOT_SAVED, {{"failed", std::to_wstring(total - saved)}, {"count", std::to_wstring(total)}});
         MessageBoxW(parent_, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
     }
 }
@@ -1335,25 +1343,23 @@ std::wstring Mailbox::Unsubscribe(std::wstring& mailto) {
     const std::wstring& target = unsubscribeTarget_;
     switch (unsubscribeKind_) {
     case PE_UNSUBSCRIBE_ONE_CLICK: {
-        std::wstring question = L"Leave this mailing list?\n\nInbox Classic asks " + target +
-                                L" to stop sending it to you. No page opens and no message is sent.";
-        if (MessageBoxW(parent_, question.c_str(), L"Unsubscribe", MB_YESNO | MB_ICONQUESTION) != IDYES) {
+        std::wstring question = core::T(PE_TEXT_WIN_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_WIN_LEAVE_ONE_CLICK, {{"target", target}});
+        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_WIN_UNSUBSCRIBE).c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
             return L"";
         }
         unsubscribeRequest_ = pe_unsubscribe(core_, messageFolder_, uid_);
-        return unsubscribeRequest_ ? L"Unsubscribing from " + target + L"..." : L"This message can not unsubscribe you.";
+        return unsubscribeRequest_ ? core::T(PE_TEXT_WIN_UNSUBSCRIBING, {{"target", target}}) : core::T(PE_TEXT_WIN_CANNOT_UNSUBSCRIBE);
     }
     case PE_UNSUBSCRIBE_MAIL: {
-        std::wstring question = L"Leave this mailing list?\n\nThe list wants a message to " + target +
-                                L". Inbox Classic writes it for you; send it to unsubscribe.";
-        if (MessageBoxW(parent_, question.c_str(), L"Unsubscribe", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
+        std::wstring question = core::T(PE_TEXT_WIN_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_WIN_LEAVE_MAIL, {{"target", target}});
+        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_WIN_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
             mailto = unsubscribeLink_;
         }
         return L"";
     }
     case PE_UNSUBSCRIBE_WEB: {
-        std::wstring question = L"Leave this mailing list?\n\nThe list's page for it opens in your browser (" + target + L").";
-        if (MessageBoxW(parent_, question.c_str(), L"Unsubscribe", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
+        std::wstring question = core::T(PE_TEXT_WIN_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_WIN_LEAVE_WEB, {{"target", target}});
+        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_WIN_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
             webview::OpenExternally(unsubscribeLink_.c_str());
         }
         return L"";
@@ -1368,7 +1374,7 @@ std::wstring Mailbox::Unsubscribed(uint64_t request, const std::wstring& problem
         return L"";
     }
     unsubscribeRequest_ = 0;
-    return problem.empty() ? L"Unsubscribed. The list says it will stop sending this mail." : L"Could not unsubscribe: " + problem;
+    return problem.empty() ? core::T(PE_TEXT_WIN_UNSUBSCRIBED) : core::T(PE_TEXT_WIN_NOT_UNSUBSCRIBED, {{"reason", problem}});
 }
 
 namespace {
@@ -1395,13 +1401,15 @@ std::wstring When(const PeInvitation& event) {
     }
     bool hasEnd = event.has_end && EventTime(event.end - (event.all_day ? 86400 : 0), event.floating, end);
     if (event.all_day) {
-        return hasEnd && !SameDay(start, end) ? LongDate(start) + L" to " + LongDate(end) : LongDate(start);
+        return hasEnd && !SameDay(start, end) ? core::T(PE_TEXT_WIN_EVENT_SPAN, {{"start", LongDate(start)}, {"end", LongDate(end)}})
+                                              : LongDate(start);
     }
     std::wstring when = LongDate(start) + L", " + FormatTime(start);
     if (hasEnd) {
-        when += SameDay(start, end) ? L" to " + FormatTime(end) : L" to " + LongDate(end) + L", " + FormatTime(end);
+        std::wstring until = SameDay(start, end) ? FormatTime(end) : LongDate(end) + L", " + FormatTime(end);
+        when = core::T(PE_TEXT_WIN_EVENT_SPAN, {{"start", when}, {"end", until}});
     }
-    return event.floating ? when + L" (the sender's time)" : when;
+    return event.floating ? core::T(PE_TEXT_WIN_EVENT_FLOATING, {{"when", when}}) : when;
 }
 }  // namespace
 
@@ -1425,16 +1433,18 @@ void Mailbox::ShowInvitation(const PeInvitation* event) {
         ShowWindow(openCalendar_, SW_HIDE);
         return;
     }
-    const wchar_t* kinds[] = {L"Invitation: ", L"Updated invitation: ", L"Canceled: ", L"Answer to an invitation: "};
+    PeText kinds[] = {PE_TEXT_WIN_INVITATION, PE_TEXT_WIN_INVITATION_UPDATED, PE_TEXT_WIN_INVITATION_CANCELED,
+                      PE_TEXT_WIN_INVITATION_ANSWER};
     std::wstring summary = Text(event->summary);
-    invitationTitle_ = kinds[std::clamp(static_cast<int>(event->kind), 0, 3)] + (summary.empty() ? std::wstring(L"(no title)") : summary);
+    invitationTitle_ = core::T(kinds[std::clamp(static_cast<int>(event->kind), 0, 3)],
+                               {{"title", summary.empty() ? core::T(PE_TEXT_WIN_NO_TITLE) : summary}});
     std::vector<std::wstring> parts = {When(*event), Text(event->location)};
     if (std::wstring organizer = Text(event->organizer); !organizer.empty()) {
-        parts.push_back(L"Organizer: " + organizer);
+        parts.push_back(core::T(PE_TEXT_WIN_ORGANIZER, {{"name", organizer}}));
     }
     parts.push_back(Text(event->repeats));
     if (event->attendees > 0) {
-        parts.push_back(std::to_wstring(event->attendees) + (event->attendees == 1 ? L" attendee" : L" attendees"));
+        parts.push_back(core::T(PE_TEXT_WIN_ATTENDEES, {{"count", std::to_wstring(event->attendees)}}));
     }
     invitationDetails_.clear();
     for (const std::wstring& part : parts) {
@@ -1454,13 +1464,13 @@ void Mailbox::OpenInCalendar() {
     std::wstring dir = std::wstring(temp) + L"InboxClassic\\Invitations";
     core::String path(pe_invitation_file(core_, messageFolder_, uid_, core::Narrow(dir).c_str()));
     if (!path) {
-        MessageBoxW(parent_, L"The invitation could not be read.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxW(parent_, core::T(PE_TEXT_WIN_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
     }
     // marked as from the internet by the core, which wrote it
     std::wstring file = Text(path.get());
     if (reinterpret_cast<INT_PTR>(ShellExecuteW(parent_, L"open", file.c_str(), nullptr, nullptr, SW_SHOWNORMAL)) <= 32) {
-        MessageBoxW(parent_, L"No calendar program on this computer opens invitations (.ics files).", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(parent_, core::T(PE_TEXT_WIN_NO_CALENDAR).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     }
 }
 
@@ -1489,7 +1499,7 @@ bool Mailbox::Act(PeAction action, int64_t to) {
     int after = leaves ? RowAfterSelection() : -1;
     char* reason = nullptr;
     core::String done(pe_selection_act(core_, selection_.get(), action, to, &reason));
-    Say(done ? Text(done.get()) : ReasonText(reason, L"The messages could not be changed."));
+    Say(done ? Text(done.get()) : ReasonText(reason, PE_TEXT_WIN_MESSAGES_NOT_CHANGED));
     if (done && leaves) {
         SelectAfterRemoval(after);
     }
@@ -1519,7 +1529,7 @@ void Mailbox::Undo() {
     core::String done(pe_undo(core_, &reason));
     // selected once the list has them again
     undoPending_ = done != nullptr;
-    Say(done ? Text(done.get()) : ReasonText(reason, L"There is nothing to undo."));
+    Say(done ? Text(done.get()) : ReasonText(reason, PE_TEXT_NOTHING_TO_UNDO));
 }
 
 std::wstring Mailbox::UndoLabel() const {
@@ -1562,18 +1572,18 @@ void Mailbox::MoveSelected(HWND owner, bool copy) {
     pick.core = core_;
     pick.title = Text(core::String(pe_selection_move_text(&summary_, copy, false)).get());
     pick.prompt = Text(core::String(pe_selection_move_text(&summary_, copy, true)).get());
-    pick.verb = copy ? L"&Copy" : L"&Move";
+    pick.verb = core::T(copy ? PE_TEXT_WIN_COPY_BUTTON : PE_TEXT_WIN_MOVE_BUTTON);
     // the folder they are all in is shown but not offered; from several folders, any
     pick.current = summary_.folders == 1 ? first : 0;
     pick.newFolder = [this](HWND window, int64_t account, int64_t parent) {
-        std::wstring where = parent ? L"The new folder goes in the highlighted folder." : L"The new folder goes at the top of the account.";
-        std::wstring name = AskFolderName(window, L"New Folder", where, L"");
+        std::wstring where = core::T(parent ? PE_TEXT_WIN_NEW_FOLDER_IN_HIGHLIGHTED : PE_TEXT_WIN_NEW_FOLDER_AT_TOP);
+        std::wstring name = AskFolderName(window, PE_TEXT_CMD_NEW_FOLDER, where, L"");
         if (name.empty()) {
             return;
         }
         char* reason = nullptr;
         if (!pe_folder_create(core_, account, parent, core::Narrow(name).c_str(), &reason)) {
-            ShowRefusal(window, reason, L"The folder could not be created.");
+            ShowRefusal(window, reason, PE_TEXT_WIN_FOLDER_NOT_CREATED);
             return;
         }
         // highlighted once the server made it (FolderCreated)
@@ -1625,7 +1635,7 @@ HMENU Mailbox::FlagMenu() {
         InsertMenuItemW(menu, color - 1, TRUE, &item);
     }
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, IDM_FLAG_CLEAR, L"&Clear Flag");
+    AppendMenuW(menu, MF_STRING, IDM_FLAG_CLEAR, MenuItem(PE_TEXT_WIN_CLEAR_FLAG).c_str());
     // its checks and greying as it opens (WM_INITMENUPOPUP)
     return menu;
 }
@@ -1657,16 +1667,16 @@ void Mailbox::FolderMenu() {
     uint64_t total = 0, unread = 0;
     bool someUnread = allInboxes_ ? pe_inbox_unread(core_) > 0
                                   : folder_ && pe_folder_counts(core_, folder_, &total, &unread) && unread > 0;
-    AppendMenuW(menu, someUnread ? MF_STRING : MF_STRING | MF_GRAYED, IDM_MARK_ALL_READ, L"Mark &All Read");
+    AppendMenuW(menu, someUnread ? MF_STRING : MF_STRING | MF_GRAYED, IDM_MARK_ALL_READ, MenuItem(PE_TEXT_CMD_MARK_ALL_READ).c_str());
     // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none
     if (!allInboxes_) {
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-        AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, L"&New Folder...");
+        AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
         std::wstring name;
         bool fixed = true;
         UINT special = folder_ && FolderOf(folder_, name, fixed) && !fixed ? MF_STRING : MF_STRING | MF_GRAYED;
-        AppendMenuW(menu, special, IDM_RENAME_FOLDER, L"&Rename...");
-        AppendMenuW(menu, special, IDM_DELETE_FOLDER, L"&Delete");
+        AppendMenuW(menu, special, IDM_RENAME_FOLDER, MenuItem(PE_TEXT_WIN_RENAME).c_str());
+        AppendMenuW(menu, special, IDM_DELETE_FOLDER, MenuItem(PE_TEXT_WIN_DELETE_BUTTON).c_str());
     }
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     DestroyMenu(menu);
@@ -1675,10 +1685,10 @@ void Mailbox::FolderMenu() {
 std::wstring Mailbox::SelectedName() const {
     if (Searching()) {
         // where the search looks; what it found is on the search bar
-        return findPlace_.empty() ? L"All folders" : findPlace_;
+        return findPlace_.empty() ? core::T(PE_TEXT_WIN_ALL_FOLDERS) : findPlace_;
     }
     if (allInboxes_) {
-        return kAllInboxes;
+        return AllInboxes();
     }
     if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
         return found->second.first;
@@ -1693,18 +1703,15 @@ std::wstring Mailbox::SelectedName() const {
 void Mailbox::DrawEmptyList(HDC dc) const {
     std::wstring title, more;
     if (Searching()) {
-        title = L"No messages match \u201C" + find_ + L"\u201D.";
-        more = L"The search looks at the subject, the people, the file names and the text of the messages " +
-               (findPlace_.empty() ? std::wstring(L"in every folder") : L"in " + findPlace_) +
-               L". Check the spelling, or try fewer words.";
+        title = core::T(PE_TEXT_WIN_NO_MATCH, {{"words", find_}});
+        more = findPlace_.empty() ? core::T(PE_TEXT_WIN_NO_MATCH_ALL) : core::T(PE_TEXT_WIN_NO_MATCH_IN, {{"folder", findPlace_}});
         if (uint64_t left = pe_search_unindexed_count(core_)) {
-            more += L"\n\nThe text of " + std::to_wstring(left) + (left == 1 ? L" message is" : L" messages are") +
-                    L" still being indexed, so more may be found soon.";
+            more += L"\n\n" + core::T(PE_TEXT_WIN_NO_MATCH_INDEXING, {{"count", std::to_wstring(left)}});
         }
     } else if (folder_ || allInboxes_) {
-        title = L"There are no items in this view.";
+        title = core::T(PE_TEXT_WIN_NO_ITEMS);
     } else if (selectedAccount_) {
-        title = L"Choose a folder to see its messages.";
+        title = core::T(PE_TEXT_WIN_CHOOSE_FOLDER);
     } else {
         return;
     }
@@ -1749,14 +1756,14 @@ void Mailbox::NewFolder(HWND owner) {
     if (!account || allInboxes_) {
         return;
     }
-    std::wstring where = folder_ ? L"The new folder goes in the selected folder." : L"The new folder goes at the top of the account.";
-    std::wstring name = AskFolderName(owner, L"New Folder", where, L"");
+    std::wstring where = core::T(folder_ ? PE_TEXT_WIN_NEW_FOLDER_IN_SELECTED : PE_TEXT_WIN_NEW_FOLDER_AT_TOP);
+    std::wstring name = AskFolderName(owner, PE_TEXT_CMD_NEW_FOLDER, where, L"");
     if (name.empty()) {
         return;
     }
     char* reason = nullptr;
     if (!pe_folder_create(core_, account, folder_, core::Narrow(name).c_str(), &reason)) {
-        ShowRefusal(owner, reason, L"The folder could not be created.");
+        ShowRefusal(owner, reason, PE_TEXT_WIN_FOLDER_NOT_CREATED);
     }
 }
 
@@ -1767,13 +1774,13 @@ void Mailbox::RenameFolder(HWND owner) {
     std::wstring current;
     bool fixed = false;
     FolderOf(folder_, current, fixed);
-    std::wstring name = AskFolderName(owner, L"Rename Folder", L"The new name of the folder " + current + L".", current);
+    std::wstring name = AskFolderName(owner, PE_TEXT_CMD_RENAME_FOLDER, core::T(PE_TEXT_WIN_RENAME_FOLDER_INTRO, {{"folder", current}}), current);
     if (name.empty() || name == current) {
         return;
     }
     char* reason = nullptr;
     if (!pe_folder_rename(core_, folder_, core::Narrow(name).c_str(), &reason)) {
-        ShowRefusal(owner, reason, L"The folder could not be renamed.");
+        ShowRefusal(owner, reason, PE_TEXT_WIN_FOLDER_NOT_RENAMED);
     }
 }
 
@@ -1783,13 +1790,13 @@ void Mailbox::DeleteFolder(HWND owner) {
     if (!folder_ || !FolderOf(folder_, name, fixed)) {
         return;
     }
-    std::wstring question = L"Delete the folder \"" + name + L"\" with its messages and the folders in it? It is deleted on the server too.";
+    std::wstring question = core::T(PE_TEXT_WIN_DELETE_FOLDER_ASK, {{"folder", name}});
     if (MessageBoxW(owner, question.c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
     char* reason = nullptr;
     if (!pe_folder_delete(core_, folder_, &reason)) {
-        ShowRefusal(owner, reason, L"The folder could not be deleted.");
+        ShowRefusal(owner, reason, PE_TEXT_WIN_FOLDER_NOT_DELETED);
     }
 }
 
@@ -1907,7 +1914,7 @@ struct FilesDoneInfo {
 
 void Mailbox::SaveSelectedInto(HWND owner) {
     FlushSelection();
-    std::wstring dir = FolderDialog(owner, L"Save Messages In");
+    std::wstring dir = FolderDialog(owner, core::Plain(PE_TEXT_WIN_SAVE_MESSAGES_IN).c_str());
     if (dir.empty()) {
         return;
     }
@@ -1923,7 +1930,7 @@ void Mailbox::SaveSelectedInto(HWND owner) {
             done->saved = pe_text_list_count(paths);
             pe_text_list_free(paths);
         } else {
-            done->problem = ReasonText(reason, L"The messages could not be saved.");
+            done->problem = ReasonText(reason, PE_TEXT_WIN_MESSAGES_NOT_SAVED);
         }
         PostMessageW(window, WM_FILES_DONE, 0, reinterpret_cast<LPARAM>(done.release()));
     }).detach();
@@ -1948,7 +1955,7 @@ void Mailbox::ForwardSelected() {
         char* reason = nullptr;
         done->draft.reset(pe_selection_forward(core, selection.get(), 120000, &reason));
         if (!done->draft) {
-            done->problem = ReasonText(reason, L"The messages could not be forwarded.");
+            done->problem = ReasonText(reason, PE_TEXT_WIN_MESSAGES_NOT_FORWARDED);
         }
         PostMessageW(window, WM_FILES_DONE, 0, reinterpret_cast<LPARAM>(done.release()));
     }).detach();
@@ -1978,16 +1985,16 @@ void Mailbox::SaveShownAs(HWND owner) {
     uint8_t* data = pe_message_source(core_, messageFolder_, uid_, &length, &name);
     core::String safeName(name);
     if (!data) {
-        MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
-    std::wstring path = SaveFileDialog(owner, Text(safeName.get()), L"Save Message As", L"Mail messages (*.eml)\0*.eml\0All files (*.*)\0*.*\0",
-                                       L"eml");
+    std::wstring filter = FileFilter({{core::T(PE_TEXT_WIN_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_WIN_FILTER_ALL), L"*.*"}});
+    std::wstring path = SaveFileDialog(owner, Text(safeName.get()), core::Plain(PE_TEXT_WIN_SAVE_MESSAGE_AS).c_str(), filter.c_str(), L"eml");
     if (!path.empty()) {
         if (WriteFileBytes(path, data, length)) {
             MarkFromInternet(path);
         } else {
-            MessageBoxW(owner, L"The message could not be saved.", L"Inbox Classic", MB_OK | MB_ICONERROR);
+            MessageBoxW(owner, core::T(PE_TEXT_WIN_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         }
     }
     pe_bytes_free(data, length);
@@ -1995,29 +2002,30 @@ void Mailbox::SaveShownAs(HWND owner) {
 
 void Mailbox::ShowProperties(HWND owner) {
     if (!uid_) {
-        MessageBoxW(owner, L"Select a message first.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     core::String headers(pe_message_headers(core_, messageFolder_, uid_));
     if (!headers) {
-        MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     const PeMessageInfo* info = pe_message_view_info(view_.get());
     std::wstring subject = info ? Text(info->subject) : L"";
-    TextDialog(owner, subject.empty() ? L"Properties" : subject + L" Properties", L"Internet headers for this message:", Text(headers.get()));
+    TextDialog(owner, subject.empty() ? core::Plain(PE_TEXT_CMD_PROPERTIES) : core::T(PE_TEXT_WIN_PROPERTIES_OF, {{"subject", subject}}),
+               core::T(PE_TEXT_WIN_INTERNET_HEADERS), Text(headers.get()));
 }
 
 void Mailbox::ShowSource(HWND owner) {
     if (!uid_) {
-        MessageBoxW(owner, L"Select a message first.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     char* title = nullptr;
     core::String text(pe_message_source_text(core_, messageFolder_, uid_, &title));
     core::String titleText(title);
     if (!text) {
-        MessageBoxW(owner, L"The message is not downloaded yet.", L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     // Save As from here saves the message shown, as File > Save As does
@@ -2059,30 +2067,30 @@ void Mailbox::MessageMenu(POINT screen) {
     bool draft = SelectedCount() == 1 && draftFolders_.contains(message->folder);
     HMENU menu = CreatePopupMenu();
     if (draft) {
-        AppendMenuW(menu, MF_STRING, IDOK, L"&Open");
+        AppendMenuW(menu, MF_STRING, IDOK, MenuItem(PE_TEXT_WIN_OPEN).c_str());
         SetMenuDefaultItem(menu, IDOK, FALSE);
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     }
-    AppendMenuW(menu, MF_STRING, IDM_REPLY, L"&Reply to Sender");
-    AppendMenuW(menu, MF_STRING, IDM_REPLY_ALL, L"Reply to A&ll");
-    AppendMenuW(menu, MF_STRING, IDM_FORWARD, L"&Forward");
+    AppendMenuW(menu, MF_STRING, IDM_REPLY, MenuItem(PE_TEXT_CMD_REPLY).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_REPLY_ALL, MenuItem(PE_TEXT_CMD_REPLY_ALL).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_FORWARD, MenuItem(PE_TEXT_CMD_FORWARD).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     // read when any of them is unread
     bool read = summary_.unread == 0;
-    AppendMenuW(menu, MF_STRING, read ? IDM_MARK_UNREAD : IDM_MARK_READ, read ? L"Mark as &Unread" : L"Mark as &Read");
+    AppendMenuW(menu, MF_STRING, read ? IDM_MARK_UNREAD : IDM_MARK_READ, MenuItem(read ? PE_TEXT_CMD_MARK_UNREAD : PE_TEXT_CMD_MARK_READ).c_str());
     // the colours and Clear Flag (the menu bar keeps Flag Message, its shortcut, beside it)
-    AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(FlagMenu()), L"Fla&g");
+    AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(FlagMenu()), MenuItem(PE_TEXT_WIN_FLAG_MENU).c_str());
     bool junk = summary_.in_junk;
-    AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, junk ? L"Mark as &Not Junk" : L"Mark as &Junk");
-    AppendMenuW(menu, MF_STRING, IDM_MOVE, L"&Move to Folder...");
-    AppendMenuW(menu, MF_STRING, IDM_COPY, L"&Copy to Folder...");
-    AppendMenuW(menu, MF_STRING, IDM_DELETE, L"&Delete");
+    AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, MenuItem(junk ? PE_TEXT_CMD_NOT_JUNK : PE_TEXT_CMD_JUNK).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_MOVE, MenuItem(PE_TEXT_CMD_MOVE).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_COPY, MenuItem(PE_TEXT_CMD_COPY).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_DELETE, MenuItem(PE_TEXT_WIN_DELETE_BUTTON).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, IDM_SAVE_AS, L"Save &As...");
-    AppendMenuW(menu, MF_STRING, IDM_PRINT, L"&Print...");
+    AppendMenuW(menu, MF_STRING, IDM_SAVE_AS, MenuItem(PE_TEXT_WIN_SAVE_AS_BUTTON).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, IDM_VIEW_SOURCE, L"View &Source");
-    AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, L"Propert&ies");
+    AppendMenuW(menu, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_WIN_VIEW_SOURCE).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_WIN_PROPERTIES).c_str());
     lastMenu_ = menu;
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     lastMenu_ = nullptr;
@@ -2098,10 +2106,11 @@ void Mailbox::PrintShown() {
 
 void Mailbox::Import(HWND owner) {
     if (!folder_) {
-        MessageBoxW(owner, L"Choose the folder to put the messages in first.", L"Import Messages", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(owner, core::T(PE_TEXT_WIN_IMPORT_CHOOSE_FOLDER).c_str(), core::Plain(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONINFORMATION);
         return;
     }
-    std::vector<std::wstring> files = OpenFilesDialog(owner, L"Import Messages", L"Mail messages (*.eml)\0*.eml\0All files (*.*)\0*.*\0");
+    std::vector<std::wstring> files = OpenFilesDialog(owner, core::Plain(PE_TEXT_CMD_IMPORT).c_str(),
+        FileFilter({{core::T(PE_TEXT_WIN_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_WIN_FILTER_ALL), L"*.*"}}).c_str());
     if (!files.empty()) {
         ImportFiles(folder_, files, owner);
     }
@@ -2430,7 +2439,7 @@ void Mailbox::ImportFiles(int64_t folder, const std::vector<std::wstring>& files
         Say(Text(text.get()));
     }
     if (core::String told(report); told) {
-        MessageBoxW(owner, Text(told.get()).c_str(), L"Import Messages", MB_OK | MB_ICONWARNING);
+        MessageBoxW(owner, Text(told.get()).c_str(), core::Plain(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONWARNING);
     }
 }
 
