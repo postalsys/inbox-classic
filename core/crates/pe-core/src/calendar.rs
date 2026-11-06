@@ -239,10 +239,12 @@ fn repeats(rule: &str) -> String {
         }
     }
     if let Some(count) = part("COUNT") {
-        words = tr_args(
-            Text::RepeatsTimes,
-            &[("repeats", (&words).into()), ("count", (&count).into())],
-        );
+        // a number, so the language can choose "1 time" or "3 times"; as written when it is not one
+        let count = match count.parse::<u64>() {
+            Ok(n) => pe_i18n::Arg::from(n),
+            Err(_) => (&count).into(),
+        };
+        words = tr_args(Text::RepeatsTimes, &[("repeats", (&words).into()), ("count", count)]);
     }
     words
 }

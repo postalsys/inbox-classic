@@ -24,7 +24,7 @@ pub const SEND_DELAY: i64 = 30;
 /// How many messages one agent may send from one account in an hour
 pub const SENDS_PER_HOUR: u64 = 20;
 
-/// What level `bit` lets an agent do, in the language in use ([`LEVELS`] has it in English)
+/// What level `bit` lets an agent do, in the language in use
 pub fn level_text(bit: u32) -> String {
     match bit {
         AgentLevels::READ => tr(Text::AgentLevelRead),
@@ -35,18 +35,12 @@ pub fn level_text(bit: u32) -> String {
     }
 }
 
-/// What an agent may do, as the windows offer it: the level and its description (in English: [`level_text`])
-pub const LEVELS: [(u32, &str); 4] = [
-    (
-        AgentLevels::READ,
-        "Read mail: folders, the message list, search and messages",
-    ),
-    (
-        AgentLevels::ORGANIZE,
-        "Organize mail: read state, flags, junk, moving, deleting to Deleted Items",
-    ),
-    (AgentLevels::DRAFTS, "Write drafts for you to send"),
-    (AgentLevels::SEND, "Send mail, each message only after you say yes"),
+/// The levels of what an agent may do, in the order the windows offer them ([`level_text`] says what each lets it do)
+pub const LEVEL_BITS: [u32; 4] = [
+    AgentLevels::READ,
+    AgentLevels::ORGANIZE,
+    AgentLevels::DRAFTS,
+    AgentLevels::SEND,
 ];
 
 /// The levels as kept: none without reading, which everything else builds on
@@ -919,7 +913,7 @@ mod tests {
         );
         assert_eq!(normalized(AgentLevels(15 | 64)), AgentLevels(15));
         assert_eq!(normalized(AgentLevels::DEFAULT), AgentLevels::DEFAULT);
-        assert_eq!(LEVELS.iter().map(|(bit, _)| bit).sum::<u32>(), 15);
+        assert_eq!(LEVEL_BITS.iter().sum::<u32>(), 15);
     }
 
     #[test]

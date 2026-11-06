@@ -1257,7 +1257,8 @@ enum Text: UInt32 {
         return String(cString: text)
     }
 
-    /// With its placeables filled: numbers as numbers (they choose plurals), the rest as text
+    /// With its placeables filled: numbers as numbers (they choose plurals), the rest as text, as given (a
+    /// text with values is never a menu label, so nothing in it is a menu mark)
     func text(_ args: [String: CustomStringConvertible]) -> String {
         let names = args.keys.map { strdup($0) }
         let values = args.values.map { strdup($0.description) }
@@ -1269,6 +1270,6 @@ enum Text: UInt32 {
         let valuePointers = values.map { UnsafePointer($0) }
         guard let text = pe_text_args(rawValue, namePointers, valuePointers, names.count) else { return "" }
         defer { pe_string_free(text) }
-        return String(cString: text).replacingOccurrences(of: "&", with: "")
+        return String(cString: text)
     }
 }

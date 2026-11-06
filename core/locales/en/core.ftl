@@ -264,7 +264,10 @@ repeats-every = { $unit ->
 # "Every week on Monday, Wednesday"
 repeats-on = { $repeats } on { $days }
 # "Every week, 10 times"
-repeats-times = { $repeats }, { $count } times
+repeats-times = { $count ->
+    [one] { $repeats }, once
+   *[other] { $repeats }, { $count } times
+}
 day-monday = Monday
 day-tuesday = Tuesday
 day-wednesday = Wednesday

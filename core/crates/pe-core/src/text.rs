@@ -165,10 +165,6 @@ pub fn folder_kind(folder: &pe_store::FolderInfo) -> &'static str {
     }
 }
 
-/// What the windows say beside Try Again over a message that could not be downloaded, in English: [`retry_note`] is
-/// in the language in use
-pub const RETRY_NOTE: &str = "Not downloaded. It is tried again once the account is back online.";
-
 /// What the windows say beside Try Again over a message that could not be downloaded
 pub fn retry_note() -> String {
     tr(Text::ReaderRetryNote)
@@ -186,7 +182,7 @@ pub enum ReaderState<'a> {
 }
 
 /// The page of the reading pane for `state` (pe_html::status_page): the same words on every platform. A failure says
-/// what happened; the windows put [`RETRY_NOTE`] and Try Again over it, and try again on their own once the account
+/// what happened; the windows put [`retry_note`] and Try Again over it, and try again on their own once the account
 /// syncs.
 pub fn reader_page(state: ReaderState) -> String {
     use crate::FailureKind;

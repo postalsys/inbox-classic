@@ -267,7 +267,10 @@ repeats-every = { $unit ->
     }
 }
 repeats-on = { $repeats } le { $days }
-repeats-times = { $repeats }, { $count } fois
+repeats-times = { $count ->
+    [one] { $repeats }, une fois
+   *[other] { $repeats }, { $count } fois
+}
 day-monday = lundi
 day-tuesday = mardi
 day-wednesday = mercredi

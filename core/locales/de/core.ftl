@@ -267,7 +267,10 @@ repeats-every = { $unit ->
     }
 }
 repeats-on = { $repeats } am { $days }
-repeats-times = { $repeats }, { $count } Mal
+repeats-times = { $count ->
+    [one] { $repeats }, einmal
+   *[other] { $repeats }, { $count } Mal
+}
 day-monday = Montag
 day-tuesday = Dienstag
 day-wednesday = Mittwoch

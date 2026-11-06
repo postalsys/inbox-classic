@@ -261,7 +261,7 @@ thread_local! {
 
 async fn choose_color(window: &gtk::Window, editor: &Editor) {
     let dialog = gtk::ColorDialog::builder()
-        .title(tr(Text::GtkFormatFontColor))
+        .title(t!(GtkFormatFontColor))
         .with_alpha(false)
         .build();
     let initial = LAST_COLOR.with(|c| *c.borrow());

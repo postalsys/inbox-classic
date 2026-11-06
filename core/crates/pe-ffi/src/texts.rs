@@ -57,9 +57,10 @@ pub unsafe extern "C" fn pe_text_args(
         let args: Vec<(&str, Arg)> = pairs
             .iter()
             .map(|(name, value)| {
-                let value = match value.parse::<i64>() {
-                    Ok(number) => Arg::Num(number),
-                    Err(_) => Arg::Str(value),
+                // a number only when it reads back the same: "007" or "+1" (a subject, a folder) stays as written
+                let value = match value.parse::<i64>().ok().filter(|n| &n.to_string() == value) {
+                    Some(number) => Arg::Num(number),
+                    None => Arg::Str(value),
                 };
                 (name.as_str(), value)
             })
@@ -170,5 +171,19 @@ mod tests {
         // the generated headers number the words as pe-i18n does
         let ids: Vec<&str> = Text::ALL.iter().map(|t| t.id()).collect();
         assert_eq!(ids, TEXT_IDS);
+    }
+
+    #[test]
+    fn values_that_only_look_like_numbers_stay_as_written() {
+        let text = Text::SavedTo as u32;
+        let names = [c"count".as_ptr(), c"messages".as_ptr(), c"folder".as_ptr()];
+        let values = [c"3".as_ptr(), c"3 messages".as_ptr(), c"007".as_ptr()];
+        // SAFETY: three names and three values, NUL-terminated
+        let said = unsafe { pe_text_args(text, names.as_ptr(), values.as_ptr(), 3) };
+        // SAFETY: from pe_text_args
+        let text = unsafe { std::ffi::CStr::from_ptr(said) }.to_string_lossy().into_owned();
+        // SAFETY: from pe_text_args, freed once
+        unsafe { crate::pe_string_free(said) };
+        assert_eq!(text, "Saved 3 messages to 007");
     }
 }

@@ -137,13 +137,14 @@ fn texts_swift(ids: &[String]) -> String {
         "\n    /// In the language in use, menu marks (&) left out\n    var text: String {\n        \
          guard let text = pe_text_plain(rawValue) else { return \"\" }\n        \
          defer { pe_string_free(text) }\n        return String(cString: text)\n    }\n\n    \
-         /// With its placeables filled: numbers as numbers (they choose plurals), the rest as text\n    \
+         /// With its placeables filled: numbers as numbers (they choose plurals), the rest as text, as given (a\n    \
+         /// text with values is never a menu label, so nothing in it is a menu mark)\n    \
          func text(_ args: [String: CustomStringConvertible]) -> String {\n        \
          let names = args.keys.map { strdup($0) }\n        let values = args.values.map { strdup($0.description) }\n        \
          defer {\n            names.forEach { free($0) }\n            values.forEach { free($0) }\n        }\n        \
          let namePointers = names.map { UnsafePointer($0) }\n        let valuePointers = values.map { UnsafePointer($0) }\n        \
          guard let text = pe_text_args(rawValue, namePointers, valuePointers, names.count) else { return \"\" }\n        \
-         defer { pe_string_free(text) }\n        return String(cString: text).replacingOccurrences(of: \"&\", with: \"\")\n    }\n}\n",
+         defer { pe_string_free(text) }\n        return String(cString: text)\n    }\n}\n",
     );
     out
 }

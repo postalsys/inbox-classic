@@ -56,7 +56,7 @@ fn main() {
         writeln!(out, "    {} = {index},", camel(id)).unwrap();
     }
     out.push_str("}\n\n");
-    writeln!(out, "pub(crate) const IDS: [&str; {}] = [", ids.len()).unwrap();
+    writeln!(out, "pub(crate) static IDS: [&str; {}] = [", ids.len()).unwrap();
     for id in &ids {
         writeln!(out, "    {id:?},").unwrap();
     }

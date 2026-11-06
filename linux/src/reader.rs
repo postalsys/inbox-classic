@@ -93,7 +93,10 @@ impl Reader {
         note.set_xalign(0.0);
         note.set_widget_name("reader-note");
         let unsubscribe = gtk::Label::new(None);
-        unsubscribe.set_markup("<a href=\"unsubscribe\">Unsubscribe</a>");
+        unsubscribe.set_markup(&format!(
+            "<a href=\"unsubscribe\">{}</a>",
+            gtk::glib::markup_escape_text(&t!(GtkUnsubscribe))
+        ));
         unsubscribe.set_widget_name("reader-unsubscribe");
         unsubscribe.set_valign(gtk::Align::Start);
         unsubscribe.set_visible(false);
@@ -162,7 +165,7 @@ impl Reader {
         pictures.append(&download_pictures);
         pictures.set_visible(false);
 
-        let note_retry = gtk::Label::new(Some(pe_core::RETRY_NOTE));
+        let note_retry = gtk::Label::new(Some(&pe_core::retry_note()));
         note_retry.set_xalign(0.0);
         note_retry.set_hexpand(true);
         note_retry.set_ellipsize(gtk::pango::EllipsizeMode::End);

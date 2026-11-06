@@ -67,18 +67,6 @@ pub fn builtin_off_text(kind: ProviderKind) -> String {
     }
 }
 
-/// [`builtin_off_text`] in English
-pub fn builtin_off_reason(kind: ProviderKind) -> &'static str {
-    match kind {
-        ProviderKind::Google => {
-            "Google has not verified Inbox Classic yet, so it lets only test users sign in with it. Use your own \
-             Google sign-in app or an app password, or turn it on in Sign-in Apps (File > Accounts) if you are a \
-             test user."
-        }
-        _ => "It was turned off in Sign-in Apps (File > Accounts), where it can be turned on again.",
-    }
-}
-
 /// A sign-in app as the manager lists it
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignInAppEntry {

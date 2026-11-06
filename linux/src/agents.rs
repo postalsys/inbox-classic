@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::glib;
-use pe_core::agents::{self, AgentAnswer, AgentAsk, AgentLevels, LEVELS};
+use pe_core::agents::{self, AgentAnswer, AgentAsk, AgentLevels, LEVEL_BITS};
 
 use crate::app::{shell, spawn};
 use crate::ui;
@@ -39,7 +39,7 @@ impl AccessForm {
         };
         widget.append(&heading(&t!(GtkAgentItMay)));
         let mut boxes = Vec::new();
-        for (index, (bit, _)) in LEVELS.iter().enumerate() {
+        for (index, bit) in LEVEL_BITS.iter().enumerate() {
             let check = gtk::CheckButton::with_label(&agents::level_text(*bit));
             check.set_active(levels.has(*bit));
             check.set_widget_name(&format!("agent-level-{index}"));
@@ -73,7 +73,7 @@ impl AccessForm {
     /// The levels checked (none without reading) and the accounts ticked
     fn chosen(&self) -> (AgentLevels, Vec<i64>) {
         let mut levels = 0;
-        for ((bit, _), check) in LEVELS.iter().zip(&self.levels) {
+        for (bit, check) in LEVEL_BITS.iter().zip(&self.levels) {
             if check.is_active() {
                 levels |= bit;
             }

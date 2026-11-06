@@ -264,7 +264,10 @@ repeats-every = { $unit ->
     }
 }
 repeats-on = { $repeats }: { $days }
-repeats-times = { $repeats }, { $count } korda
+repeats-times = { $count ->
+    [one] { $repeats }, üks kord
+   *[other] { $repeats }, { $count } korda
+}
 day-monday = esmaspäeval
 day-tuesday = teisipäeval
 day-wednesday = kolmapäeval
