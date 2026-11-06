@@ -353,7 +353,22 @@ Screenshots: `select-1-several`, `select-2-undo`
 - Select All selects every message of the list
 - one message selected again is shown in the reading pane
 
-## 32. Junk and not junk
+## 32. Messages as files
+
+Screenshots: `files-4-drag-out`, `files-5-forward`, `files-6-drop-in`
+
+The system's drag and file panels run outside the app: each test gives the drop and the panels their answer through the platform's own drag data (what Explorer, Finder or the file manager would read from it).
+
+- three messages dragged out of the list become three .eml files where they are dropped, named after their subjects
+- with what each message is, byte for byte
+- one not downloaded yet is downloaded for it
+- Save As with three selected asks for a folder and saves the three there, never over a file that is there
+- Forward with three selected writes one new message with the three attached as .eml files
+- its subject is the first one's, with Fw:
+- .eml files dropped onto Archive in the folder tree are put in it, on the server
+- a file that is not a message is turned away
+
+## 33. Junk and not junk
 
 Screenshots: `organize-7-junk`
 
@@ -364,7 +379,7 @@ Screenshots: `organize-7-junk`
 - the search field is still drawn over the toolbar (edge $edgePixel, inside $insidePixel)
 - Not Junk moves it back to the Inbox
 
-## 33. Folders
+## 34. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
 
@@ -376,7 +391,7 @@ Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
 - and Yes deletes it on the server
 - renaming the Inbox is refused with the reason
 
-## 34. Closing a message that was written
+## 35. Closing a message that was written
 
 Screenshots: `write-6-close`
 
@@ -384,14 +399,14 @@ Screenshots: `write-6-close`
 - No closes it
 - without saving it
 
-## 35. An e-mail link
+## 36. An e-mail link
 
 Screenshots: `write-18-mailto`
 
 - a second start with a mailto: link hands it over and ends
 - the running app opens a new message from it
 
-## 36. Completing an address
+## 37. Completing an address
 
 Screenshots: `write-17-complete`
 
@@ -400,7 +415,7 @@ Screenshots: `write-17-complete`
 - Enter takes the first, with a comma for the next
 - and closes the list
 
-## 37. A signature
+## 38. A signature
 
 Screenshots: `signature-1-editor`, `signature-2-new`, `signature-3-reply-left`
 
@@ -414,7 +429,7 @@ Screenshots: `signature-1-editor`, `signature-2-new`, `signature-3-reply-left`
 - a reply takes typing
 - a reply has the signature above the quote
 
-## 38. A Gmail address
+## 39. A Gmail address
 
 Screenshots: `account-5-app-password`, `account-6-gmail`
 
@@ -422,7 +437,7 @@ Screenshots: `account-5-app-password`, `account-6-gmail`
 - with Google turned off, a Gmail address goes to the app password way
 - its servers were found
 
-## 39. A wrong password
+## 40. A wrong password
 
 Screenshots: `trouble-1-password`
 
@@ -432,7 +447,7 @@ The second account is on a second ImapKit server (`second` in the harness config
 - the status bar says why
 - with the right password typed, the account syncs
 
-## 40. All Inboxes
+## 41. All Inboxes
 
 Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the test checks the menu's items there without a picture of it)
 
@@ -445,7 +460,7 @@ Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the
 - a reply goes from the account of the message
 - Mark All Read marks both Inboxes read on the servers
 
-## 41. Moving between accounts
+## 42. Moving between accounts
 
 Screenshots: `move-1-dialog`, `move-2-accounts`
 
@@ -464,7 +479,7 @@ With the second account still there:
 - the next Move to Folder offers Archive of the second account under Recent
 - a message dragged onto a folder of the second account is moved there
 
-## 42. Accounts
+## 43. Accounts
 
 Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, `accounts-3-after`
 
@@ -479,7 +494,7 @@ Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, 
 - the account leaves the tree
 - All Inboxes goes with the second account
 
-## 43. Sign-in apps
+## 44. Sign-in apps
 
 Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not yet on the Mac, not yet on Linux), `signin-4-editor` (not yet on Linux), `signin-5-apps-added`, `signin-6-first-page` (not yet on the Mac, not yet on Linux), `signin-7-why` (not yet on the Mac, not yet on Linux), `signin-8-more` (not yet on the Mac, not yet on Linux), `signin-9-waiting`, `signin-10-added` (not yet on the Mac, not yet on Linux), `signin-11-in-use` (not yet on the Mac, not yet on Linux), `signin-12-toggled`, `signin-13-properties` (not yet on the Mac, not yet on Linux), `account-5b-browser-sign-in` (not yet on the Mac, not yet on Linux)
 
@@ -508,19 +523,19 @@ Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not ye
 - a sign-in app turned off is left out of More sign-in options
 - a Gmail address is offered Sign in with Google
 
-## 44. About
+## 45. About
 
 Screenshots: `help-1-about`
 
 - About shows the version
 
-## 45. Help
+## 46. Help
 
 Screenshots: `help-2-contents`
 
 - F1 opens the help
 
-## 46. Printing
+## 47. Printing
 
 Screenshots: `files-3-print-missing`, `files-3-print`
 
@@ -528,7 +543,7 @@ Screenshots: `files-3-print-missing`, `files-3-print`
 - as wide as the app
 - and closing it prints nothing
 
-## 47. The tray
+## 48. The tray
 
 Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not yet on Linux)
 
@@ -538,7 +553,7 @@ Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not ye
 - a click on the icon shows the window again
 - with the new message in the list, which came without a sync
 
-## 48. Closing
+## 49. Closing
 
 Screenshots: `write-12-close-app`
 
