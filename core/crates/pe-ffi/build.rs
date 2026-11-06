@@ -4,6 +4,9 @@
 //   core/include/commands.h                 the command ids of core/commands.toml for the Windows app
 //   mac/Sources/InboxClassic/Generated/Commands.swift   the same commands for the Mac
 //   linux/src/generated/commands.rs         and for Linux
+//   core/include/texts.h                    the ids of the words of core/locales/en/*.ftl for C (PeText)
+//   mac/Sources/InboxClassic/Generated/Texts.swift      the same for the Mac
+// A command's label is the catalog's `cmd-<id>` (core/locales/en/app.ftl), which every command must have.
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
@@ -17,7 +20,6 @@ struct Command {
     id: String,
     windows: u16,
     menu: String,
-    label: String,
     #[serde(default)]
     key: String,
     mac: Option<String>,
@@ -46,6 +48,25 @@ fn main() {
     let table: Table = toml::from_str(&std::fs::read_to_string(root.join("core/commands.toml")).unwrap())
         .expect("reading core/commands.toml");
     check(&table);
+    let ids = text_ids(&root.join("core/locales/en"));
+    for command in &table.command {
+        let id = format!("cmd-{}", command.id.replace('_', "-"));
+        assert!(
+            ids.contains(&id),
+            "{}: core/locales/en/app.ftl has no {id}, its label",
+            command.id
+        );
+    }
+    write(&root.join("core/include/texts.h"), &texts_c(&ids));
+    write(
+        &root.join("mac/Sources/InboxClassic/Generated/Texts.swift"),
+        &texts_swift(&ids),
+    );
+    let out = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    write(
+        &out.join("text_ids.rs"),
+        &format!("const TEXT_IDS: &[&str] = &{ids:?};\n"),
+    );
     write(&root.join("core/include/commands.h"), &c_header(&table));
     write(
         &root.join("mac/Sources/InboxClassic/Generated/Commands.swift"),
@@ -56,6 +77,75 @@ fn main() {
     println!("cargo:rerun-if-changed=src");
     println!("cargo:rerun-if-changed=cbindgen.toml");
     println!("cargo:rerun-if-changed=../../commands.toml");
+    println!("cargo:rerun-if-changed=../../locales/en");
+}
+
+/// The ids of the English catalog, in the order pe-i18n numbers them: its files sorted by name, each message as it
+/// comes (pe-i18n's build.rs reads them the same way; a test checks the two agree)
+fn text_ids(dir: &Path) -> Vec<String> {
+    let mut files: Vec<PathBuf> = std::fs::read_dir(dir)
+        .expect("core/locales/en")
+        .filter_map(|e| e.ok())
+        .map(|e| e.path())
+        .filter(|p| p.extension().is_some_and(|x| x == "ftl"))
+        .collect();
+    files.sort();
+    let mut ids = Vec::new();
+    for file in files {
+        println!("cargo:rerun-if-changed={}", file.display());
+        for line in std::fs::read_to_string(&file).unwrap().lines() {
+            if let Some((id, _)) = line.split_once(" =")
+                && !id.is_empty()
+                && id
+                    .bytes()
+                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
+            {
+                ids.push(id.to_string());
+            }
+        }
+    }
+    ids
+}
+
+const TEXT_NOTE: &str = "Generated from core/locales/en/*.ftl by core/crates/pe-ffi/build.rs, do not edit";
+
+fn texts_c(ids: &[String]) -> String {
+    let mut out = format!(
+        "// {TEXT_NOTE}\n#pragma once\n\n// the words of the windows: pe_text(PE_TEXT_...) gives one in the language in use\nenum PeText {{\n"
+    );
+    for (index, id) in ids.iter().enumerate() {
+        writeln!(out, "    PE_TEXT_{} = {index},", id.replace('-', "_").to_uppercase()).unwrap();
+    }
+    out.push_str("};\n");
+    out
+}
+
+fn texts_swift(ids: &[String]) -> String {
+    let mut out = format!(
+        "// {TEXT_NOTE}\nimport CInboxClassic\n\n/// The words of the windows, in the language in use (`Text.reply.text`)\nenum Text: UInt32 {{\n"
+    );
+    for (index, id) in ids.iter().enumerate() {
+        let name = camel(&id.replace('-', "_"), false);
+        let name = if ["import", "default", "case", "in", "is", "as", "repeat", "repeats"].contains(&name.as_str()) {
+            format!("`{name}`")
+        } else {
+            name
+        };
+        writeln!(out, "    case {name} = {index}").unwrap();
+    }
+    out.push_str(
+        "\n    /// In the language in use, menu marks (&) left out\n    var text: String {\n        \
+         guard let text = pe_text_plain(rawValue) else { return \"\" }\n        \
+         defer { pe_string_free(text) }\n        return String(cString: text)\n    }\n\n    \
+         /// With its placeables filled: numbers as numbers (they choose plurals), the rest as text\n    \
+         func text(_ args: [String: CustomStringConvertible]) -> String {\n        \
+         let names = args.keys.map { strdup($0) }\n        let values = args.values.map { strdup($0.description) }\n        \
+         defer {\n            names.forEach { free($0) }\n            values.forEach { free($0) }\n        }\n        \
+         let namePointers = names.map { UnsafePointer($0) }\n        let valuePointers = values.map { UnsafePointer($0) }\n        \
+         guard let text = pe_text_args(rawValue, namePointers, valuePointers, names.count) else { return \"\" }\n        \
+         defer { pe_string_free(text) }\n        return String(cString: text).replacingOccurrences(of: \"&\", with: \"\")\n    }\n}\n",
+    );
+    out
 }
 
 fn check(table: &Table) {
@@ -116,7 +206,7 @@ fn camel(id: &str, upper_first: bool) -> String {
 
 fn c_header(table: &Table) -> String {
     let mut out = format!(
-        "// {NOTE}\n#pragma once\n\n// the commands of the menus, toolbar and tray, posted as WM_COMMAND\nenum PeCommandId : unsigned short {{\n"
+        "// {NOTE}\n#pragma once\n\n#include \"texts.h\"\n\n// the commands of the menus, toolbar and tray, posted as WM_COMMAND\nenum PeCommandId : unsigned short {{\n"
     );
     for command in &table.command {
         writeln!(out, "    IDM_{} = {},", command.id.to_uppercase(), command.windows).unwrap();
@@ -133,6 +223,20 @@ fn c_header(table: &Table) -> String {
         writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
     }
     out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
+    out.push_str(
+        "\n// the label of a command in the catalog (& marks the menu letter): pe_text(CommandText(IDM_...))\n\
+         inline PeText CommandText(PeCommandId id) {\n    switch (id) {\n",
+    );
+    for command in &table.command {
+        writeln!(
+            out,
+            "    case IDM_{}: return PE_TEXT_CMD_{};",
+            command.id.to_uppercase(),
+            command.id.to_uppercase()
+        )
+        .unwrap();
+    }
+    out.push_str("    }\n    return PE_TEXT_CMD_NEW_ACCOUNT;\n}\n");
     out
 }
 
@@ -259,15 +363,14 @@ fn swift(table: &Table) -> String {
         )
         .unwrap();
     }
-    out.push_str("        }\n    }\n\n    var label: String {\n        switch self {\n");
+    out.push_str(
+        "        }\n    }\n\n    /// In the language in use, from the catalog (cmd-<id>)\n    var label: String {\n        \
+         labelText.text.replacingOccurrences(of: \"...\", with: \"\u{2026}\")\n    }\n\n    \
+         /// Its label in the catalog\n    var labelText: Text {\n        switch self {\n",
+    );
     for command in &table.command {
-        writeln!(
-            out,
-            "        case .{}: return \"{}\"",
-            camel(&command.id, false),
-            command.label.replace("...", "\u{2026}")
-        )
-        .unwrap();
+        let text = camel(&format!("cmd_{}", command.id), false);
+        writeln!(out, "        case .{}: return .{text}", camel(&command.id, false)).unwrap();
     }
     out.push_str("        }\n    }\n\n    /// The key equivalent and its modifiers, or nil\n    var key: (String, NSEvent.ModifierFlags)? {\n        switch self {\n");
     for command in &table.command {
@@ -351,17 +454,35 @@ fn rust(table: &Table) -> String {
         )
         .unwrap();
     }
-    out.push_str("        }\n    }\n\n    pub fn label(self) -> &'static str {\n        match self {\n");
+    out.push_str(
+        "        }\n    }\n\n    /// Its label in the catalog (cmd-<id>), its menu letter marked with &\n    \
+         pub fn text(self) -> pe_core::i18n::Text {\n        match self {\n",
+    );
     for command in &table.command {
         writeln!(
             out,
-            "            Command::{} => \"{}\",",
+            "            Command::{} => pe_core::i18n::Text::Cmd{},",
             camel(&command.id, true),
-            command.label.replace("...", "\u{2026}")
+            camel(&command.id, true)
         )
         .unwrap();
     }
-    out.push_str("        }\n    }\n\n    /// Its GTK accelerator, or None\n    pub fn accel(self) -> Option<&'static str> {\n        match self {\n");
+    out.push_str(
+        "        }\n    }\n\n    /// In the language in use, without its menu letter; kept for the run (one string a command and \
+         language)\n    pub fn label(self) -> &'static str {\n        \
+         type Labels = std::collections::HashMap<(&'static str, Command), &'static str>;\n        \
+         static LABELS: std::sync::Mutex<Option<Labels>> = std::sync::Mutex::new(None);\n        \
+         let mut labels = LABELS.lock().unwrap_or_else(|e| e.into_inner());\n        \
+         let labels = labels.get_or_insert_with(Labels::new);\n        \
+         labels.entry((pe_core::i18n::language(), self)).or_insert_with(|| {\n            \
+         let text = pe_core::i18n::without_mnemonic(&pe_core::i18n::tr(self.text())).replace(\"...\", \"\u{2026}\");\n            \
+         Box::leak(text.into_boxed_str())\n        })\n    }\n\n    \
+         /// In the language in use with its menu letter as GTK marks it (`_Reply to Sender`)\n    \
+         #[allow(dead_code)]\n    \
+         pub fn mnemonic_label(self) -> String {\n        \
+         pe_core::i18n::gtk_mnemonic(&pe_core::i18n::tr(self.text())).replace(\"...\", \"\u{2026}\")\n    }\n",
+    );
+    out.push_str("\n    /// Its GTK accelerator, or None\n    pub fn accel(self) -> Option<&'static str> {\n        match self {\n");
     for command in &table.command {
         match key_for(command, command.linux.as_ref()) {
             Some(key) => writeln!(

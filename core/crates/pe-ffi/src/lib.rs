@@ -9,12 +9,14 @@
 mod agents;
 mod core;
 mod selection;
+mod texts;
 #[cfg(windows)]
 mod windows;
 
 pub use agents::*;
 pub use core::*;
 pub use selection::*;
+pub use texts::*;
 
 use std::ffi::{CString, c_char};
 use std::panic::{AssertUnwindSafe, catch_unwind};
@@ -134,7 +136,7 @@ pub unsafe extern "C" fn pe_reader_page(
 /// What the windows say beside Try Again over a message that could not be downloaded. Free with `pe_string_free`.
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_retry_note() -> *mut c_char {
-    guard(|| into_c_string(pe_core::RETRY_NOTE.to_string())).unwrap_or(null_mut())
+    guard(|| into_c_string(pe_core::retry_note())).unwrap_or(null_mut())
 }
 
 /// A size as the windows show it (`512 bytes`, `13 KB`, `2.4 MB`). Free with `pe_string_free`.

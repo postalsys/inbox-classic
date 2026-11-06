@@ -31,6 +31,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
+use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
 pub use pe_store::FlagColor;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
@@ -41,16 +42,20 @@ use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
 pub use export::{Exported, write_file};
+/// The words of the windows in the language in use
+pub use pe_i18n as i18n;
 /// The rules of the folder tree the windows show: how deep a folder is, and which stay as they are
 pub use pe_sync::{is_special as is_fixed_folder, tree_depths};
 use requests::Requests;
 pub use secrets::PasswordStore;
 use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
-pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason};
+pub use sign_in_apps::{
+    SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_reason, builtin_off_text,
+};
 pub use text::{
     HiddenUnread, RETRY_NOTE, ReaderState, account_label, account_title, downloading_text, folder_kind, folder_name,
-    format_size, hidden_unread, list_counts, messages, reader_page, saved_text,
+    format_size, hidden_unread, list_counts, messages, reader_page, retry_note, saved_text,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -205,23 +210,33 @@ pub enum Error {
     TurnedOff,
 }
 
+/// Why a folder name can not be, in words
+pub(crate) fn folder_refusal(refusal: &pe_sync::FolderRefusal) -> String {
+    match refusal {
+        pe_sync::FolderRefusal::BadName => tr(Text::ErrorFolderName),
+        pe_sync::FolderRefusal::Separator(separator) => {
+            tr_args(Text::ErrorFolderSeparator, &[("separator", separator.into())])
+        }
+        pe_sync::FolderRefusal::Special => tr(Text::ErrorFolderSpecial),
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::Store(error) => write!(f, "local store: {error}"),
-            Error::NotFound => f.write_str("not found"),
-            Error::Closed => f.write_str("shutting down"),
+            Error::Store(error) => f.write_str(&tr_args(Text::ErrorStore, &[("error", (&error.to_string()).into())])),
+            Error::NotFound => f.write_str(&tr(Text::ErrorNotFound)),
+            Error::Closed => f.write_str(&tr(Text::ErrorClosed)),
             Error::Compose(error) => write!(f, "{error}"),
             Error::Unavailable(reason) => write!(f, "{reason}"),
-            Error::Folder(refusal) => write!(f, "{refusal}"),
-            Error::OtherAccount(email) => write!(f, "the browser signed in to {email}, not to this account"),
+            Error::Folder(refusal) => f.write_str(&folder_refusal(refusal)),
+            Error::OtherAccount(email) => f.write_str(&tr_args(Text::ErrorOtherAccount, &[("email", email.into())])),
             Error::Invalid(reason) => f.write_str(reason),
-            Error::InUse(accounts) => write!(
-                f,
-                "it can not be removed while accounts sign in with it: {}",
-                accounts.join(", ")
-            ),
-            Error::TurnedOff => f.write_str("this sign-in app is turned off for new accounts"),
+            Error::InUse(accounts) => f.write_str(&tr_args(
+                Text::ErrorInUse,
+                &[("accounts", (&accounts.join(", ")).into())],
+            )),
+            Error::TurnedOff => f.write_str(&tr(Text::ErrorTurnedOff)),
         }
     }
 }
@@ -420,7 +435,7 @@ impl Core {
             let _ = self.post(Event::Failed {
                 account,
                 kind: FailureKind::Other,
-                message: format!("the password could not be saved for the next start: {error}"),
+                message: tr_args(Text::ErrorPasswordNotSaved, &[("error", (&error.to_string()).into())]),
             });
         }
     }
@@ -602,7 +617,10 @@ impl Core {
             .await;
             let problem = match answer {
                 Ok(response) if (200..300).contains(&response.status) => None,
-                Ok(response) => Some(format!("the list answered {}", response.status)),
+                Ok(response) => Some(tr_args(
+                    Text::ErrorListAnswered,
+                    &[("status", u32::from(response.status).into())],
+                )),
                 Err(error) => Some(error.to_string()),
             };
             events(Event::Unsubscribed { request, problem });
@@ -713,10 +731,8 @@ impl Core {
                 .finish(pe_oauth::SIGN_IN_TIMEOUT)
                 .await
                 .map_err(|e| e.to_string())?;
-            let refresh_token = tokens.refresh_token.ok_or("the provider gave no refresh token")?;
-            let identity = tokens
-                .identity
-                .ok_or("the provider did not say which account signed in")?;
+            let refresh_token = tokens.refresh_token.ok_or_else(|| tr(Text::SignInNoRefresh))?;
+            let identity = tokens.identity.ok_or_else(|| tr(Text::SignInNoAccount))?;
             Ok(SignedIn {
                 with,
                 provider,
@@ -738,7 +754,7 @@ impl Core {
             Ok(_) => (Ok(()), true),
             Err(reason) => (Err(reason.clone()), false),
         });
-        found.unwrap_or_else(|| Err("signing in has not finished".into()))
+        found.unwrap_or_else(|| Err(tr(Text::SignInNotFinished)))
     }
 
     /// Stops a sign-in the user no longer waits for, and forgets it
@@ -906,9 +922,12 @@ impl Core {
             (source, size, info.map(|i| i.subject).unwrap_or_default())
         };
         let title = if subject.trim().is_empty() {
-            "Message Source".to_string()
+            tr(Text::MessageSourceUntitled)
         } else {
-            format!("Message Source: {}", view::header_text(subject.as_bytes()).trim_end())
+            tr_args(
+                Text::MessageSourceTitle,
+                &[("subject", view::header_text(subject.as_bytes()).trim_end().into())],
+            )
         };
         Ok(Some((title, view::source_text(&source, size))))
     }
@@ -933,9 +952,9 @@ impl Core {
             let outcome = if is_message_file(path) {
                 self.import_message(folder, path)
             } else {
-                Err(Error::Unavailable(format!(
-                    "{} is not an e-mail message",
-                    path.display()
+                Err(Error::Unavailable(tr_args(
+                    Text::ErrorImportNotMail,
+                    &[("path", (&path.display().to_string()).into())],
                 )))
             };
             match outcome {
@@ -943,29 +962,35 @@ impl Core {
                 Err(error) => problems.push(error.to_string()),
             }
         }
-        let said = format!("Put {} in {name}", text::messages(put));
+        let said = tr_args(
+            Text::ImportPut,
+            &[("messages", (&text::messages(put)).into()), ("folder", (&name).into())],
+        );
         let report =
-            (!problems.is_empty()).then(|| format!("These were not put in the folder:\n\n{}", problems.join("\n")));
+            (!problems.is_empty()).then(|| tr_args(Text::ImportNotPut, &[("problems", (&problems.join("\n")).into())]));
         Ok((said, report))
     }
 
     pub fn import_message(&self, folder: FolderId, path: &std::path::Path) -> Result<()> {
         const LIMIT: u64 = 50 * 1024 * 1024;
         let account = self.store().folder(folder)?.account_id;
-        let not_one = |why: &str| Error::Unavailable(format!("{} {why}", path.display()));
+        let shown = path.display().to_string();
+        let not_one = |text: Text, error: &str| {
+            Error::Unavailable(tr_args(text, &[("path", (&shown).into()), ("error", error.into())]))
+        };
         // opened once, read up to just past the limit: a file that grows meanwhile is still refused
-        let file = std::fs::File::open(path).map_err(|e| not_one(&format!("can not be read: {e}")))?;
+        let file = std::fs::File::open(path).map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
         let mut raw = Vec::new();
         std::io::Read::read_to_end(&mut std::io::Read::take(file, LIMIT + 1), &mut raw)
-            .map_err(|e| not_one(&format!("can not be read: {e}")))?;
+            .map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
         if raw.len() as u64 > LIMIT {
-            return Err(not_one("is larger than 50 MB"));
+            return Err(not_one(Text::ErrorImportTooLarge, ""));
         }
-        let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one("is not an e-mail message"))?;
+        let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one(Text::ErrorImportNotMail, ""))?;
         // a message has headers a mail program wrote; a text file parsed as one has none of these
         let looks_like_one = parsed.from.is_some() || parsed.message_id.is_some() || parsed.timestamp.is_some();
         if !looks_like_one {
-            return Err(not_one("is not an e-mail message"));
+            return Err(not_one(Text::ErrorImportNotMail, ""));
         }
         self.send_command(
             account,
@@ -1048,7 +1073,7 @@ impl Core {
     pub fn save_draft(&self, account: AccountId, mut outgoing: Outgoing) -> Result<String> {
         let email = self.store().account(account)?.settings.email;
         if compose::drafts_folder(&self.store(), account)?.is_none() {
-            return Err(Error::Unavailable(compose::NO_DRAFTS.into()));
+            return Err(Error::Unavailable(tr(Text::ErrorNoDrafts)));
         }
         // an ID that does not tell this draft apart is replaced: the copy saved under it stays
         let message_id = outgoing
@@ -1075,7 +1100,10 @@ impl Core {
         let (mut draft, files) = compose::reopen(&source);
         if !files.is_empty() {
             draft.attachments = write_out(&format!("draft-{folder}-{uid}"), files).map_err(|error| {
-                Error::Unavailable(format!("an attachment of the draft could not be kept: {error}"))
+                Error::Unavailable(tr_args(
+                    Text::ErrorDraftAttachment,
+                    &[("error", (&error.to_string()).into())],
+                ))
             })?;
         }
         Ok(Some(draft))
@@ -1353,10 +1381,8 @@ impl Core {
         } else {
             store.find_folder(account, "INBOX")?
         };
-        let missing = if junk { "Junk E-mail" } else { "Inbox" };
-        target
-            .map(|f| f.id)
-            .ok_or_else(|| Error::Unavailable(format!("This account has no {missing} folder to move the messages to.")))
+        let missing = if junk { Text::NoJunkFolder } else { Text::NoInboxFolder };
+        target.map(|f| f.id).ok_or_else(|| Error::Unavailable(tr(missing)))
     }
 
     /// Takes a message out of the store, tells the windows, and hands the server the work `command` makes of the row

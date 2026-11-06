@@ -4,13 +4,11 @@
 use std::path::PathBuf;
 
 use pe_html::InlineImage;
+use pe_i18n::{Text, tr, tr_args};
 use pe_mime::Address;
 use pe_mime::parser::{self, ParsedAddress, html_to_text, parse_addresses, text_addresses, text_to_html};
 use pe_smtp::{Attachment, Message};
 use pe_store::AccountSettings;
-
-/// Why a draft can not be saved
-pub(crate) const NO_DRAFTS: &str = "the account has no Drafts folder to save the message in";
 
 /// The Drafts folder of an account, where drafts are saved
 pub(crate) fn drafts_folder(
@@ -120,9 +118,14 @@ pub enum ComposeError {
 impl std::fmt::Display for ComposeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ComposeError::NoRecipients => f.write_str("the message has no recipients"),
-            ComposeError::BadAddress(address) => write!(f, "{address:?} is not an e-mail address"),
-            ComposeError::Attachment(path, error) => write!(f, "{} could not be read: {error}", path.display()),
+            ComposeError::NoRecipients => f.write_str(&tr(Text::ErrorNoRecipients)),
+            ComposeError::BadAddress(address) => {
+                f.write_str(&tr_args(Text::ErrorBadAddress, &[("address", address.into())]))
+            }
+            ComposeError::Attachment(path, error) => f.write_str(&tr_args(
+                Text::ErrorAttachment,
+                &[("path", (&path.display().to_string()).into()), ("error", error.into())],
+            )),
         }
     }
 }
@@ -159,7 +162,7 @@ pub fn check(outgoing: &Outgoing) -> Result<(), ComposeError> {
     }
     for path in &outgoing.attachments {
         if !path.is_file() {
-            return Err(ComposeError::Attachment(path.clone(), "there is no such file".into()));
+            return Err(ComposeError::Attachment(path.clone(), tr(Text::ErrorNoSuchFile)));
         }
     }
     Ok(())
@@ -284,7 +287,7 @@ fn quoted_lines(header: Vec<String>, body: &str, reply: bool) -> String {
 
 /// The plain text quote of a plain text original: its header lines and its own lines, as they came
 fn text_quote(header: &[(&str, String)], text: &str, reply: bool) -> String {
-    let mut lines = vec!["----- Original Message -----".to_string()];
+    let mut lines = vec![tr(Text::QuoteOriginal)];
     lines.extend(
         header
             .iter()
@@ -397,12 +400,16 @@ pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Dr
     let (to, cc) = (text_addresses(&message.to), text_addresses(&message.cc));
     let sent = date.map(pe_smtp::message::format_date).unwrap_or_default();
     let header = [
-        ("From", text_addresses(from)),
-        ("To", to),
-        ("Cc", cc),
-        ("Sent", sent),
-        ("Subject", message.subject.clone().unwrap_or_default()),
+        (tr(Text::HeaderFrom), text_addresses(from)),
+        (tr(Text::HeaderTo), to),
+        (tr(Text::HeaderCc), cc),
+        (tr(Text::HeaderSent), sent),
+        (tr(Text::HeaderSubject), message.subject.clone().unwrap_or_default()),
     ];
+    let header: Vec<(&str, String)> = header
+        .iter()
+        .map(|(name, value)| (name.as_str(), value.clone()))
+        .collect();
     let mut draft = Draft {
         quote: pe_html::quote_html(&header, &body, &images, reply),
         quote_folded: reply,

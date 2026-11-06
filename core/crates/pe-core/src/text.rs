@@ -1,23 +1,23 @@
-//! Words and numbers the windows of every platform show the same way, made here so the three agree
+//! Words and numbers the windows of every platform show the same way, made here so the three agree, in the language in
+//! use (pe-i18n)
+
+use pe_i18n::{Text, tr, tr_args};
 
 /// A size as the windows show it: `512 bytes`, `13 KB` (rounded up, as Explorer does), `2.4 MB`
 pub fn format_size(bytes: u64) -> String {
     if bytes < 1024 {
-        format!("{bytes} bytes")
+        tr_args(Text::SizeBytes, &[("count", bytes.into())])
     } else if bytes < 1024 * 1024 {
-        format!("{} KB", bytes.div_ceil(1024))
+        tr_args(Text::SizeKb, &[("size", (&bytes.div_ceil(1024).to_string()).into())])
     } else {
-        format!("{:.1} MB", bytes as f64 / (1024.0 * 1024.0))
+        let size = format!("{:.1}", bytes as f64 / (1024.0 * 1024.0)).replace('.', &tr(Text::DecimalSeparator));
+        tr_args(Text::SizeMb, &[("size", (&size).into())])
     }
 }
 
 /// "1 message", "3 messages"
 pub fn messages(count: u64) -> String {
-    if count == 1 {
-        "1 message".into()
-    } else {
-        format!("{count} messages")
-    }
+    tr_args(Text::Messages, &[("count", count.into())])
 }
 
 /// What the status bar says once messages are saved as files into the folder `place`, by its name: "Saved 3 messages
@@ -26,29 +26,37 @@ pub fn saved_text(count: u64, place: &std::path::Path) -> String {
     let name = place
         .file_name()
         .map_or_else(|| place.display().to_string(), |n| n.to_string_lossy().into_owned());
-    format!("Saved {} to {name}", messages(count))
+    tr_args(
+        Text::SavedTo,
+        &[("messages", (&messages(count)).into()), ("folder", (&name).into())],
+    )
 }
 
 /// What the status bar says while messages not downloaded yet come for files or a forward: "Downloading 3 messages..."
 pub fn downloading_text(count: u64) -> String {
-    format!("Downloading {}...", messages(count))
+    tr_args(Text::DownloadingMessages, &[("messages", (&messages(count)).into())])
 }
 
 /// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search
 /// ("No messages found" for none), and ", 2 selected" when more than one is
 pub fn list_counts(total: u64, unread: u64, selected: u64, searching: bool) -> String {
     if searching && total == 0 {
-        return "No messages found".into();
+        return tr(Text::ListCountsNone);
     }
-    let mut text = if searching {
-        format!("{total} found, {unread} unread")
-    } else {
-        format!("{}, {unread} unread", messages(total))
+    let messages = messages(total);
+    let args = [
+        ("messages", (&messages).into()),
+        ("found", total.into()),
+        ("unread", unread.into()),
+        ("selected", selected.into()),
+    ];
+    let text = match (searching, selected > 1) {
+        (false, false) => Text::ListCounts,
+        (false, true) => Text::ListCountsSelected,
+        (true, false) => Text::ListCountsFound,
+        (true, true) => Text::ListCountsFoundSelected,
     };
-    if selected > 1 {
-        text.push_str(&format!(", {selected} selected"));
-    }
-    text
+    tr_args(text, &args)
 }
 
 /// "Name <address>", the address alone when the name is empty or the same: how From and the account menus show an
@@ -85,11 +93,11 @@ pub fn account_title(name: &str, email: &str, names: &[&str]) -> String {
 pub fn folder_name(folder: &pe_store::FolderInfo) -> String {
     use pe_imap::SpecialUse;
     match folder.special_use.as_deref().and_then(SpecialUse::from_flag) {
-        Some(SpecialUse::Inbox) => "Inbox".into(),
-        Some(SpecialUse::Sent) => "Sent Items".into(),
-        Some(SpecialUse::Trash) => "Deleted Items".into(),
-        Some(SpecialUse::Drafts) => "Drafts".into(),
-        Some(SpecialUse::Junk) => "Junk E-mail".into(),
+        Some(SpecialUse::Inbox) => tr(Text::FolderInbox),
+        Some(SpecialUse::Sent) => tr(Text::FolderSent),
+        Some(SpecialUse::Trash) => tr(Text::FolderDeleted),
+        Some(SpecialUse::Drafts) => tr(Text::FolderDrafts),
+        Some(SpecialUse::Junk) => tr(Text::FolderJunk),
         _ => folder.name.clone(),
     }
 }
@@ -149,8 +157,14 @@ pub fn folder_kind(folder: &pe_store::FolderInfo) -> &'static str {
     }
 }
 
-/// What the windows say beside Try Again over a message that could not be downloaded
+/// What the windows say beside Try Again over a message that could not be downloaded, in English: [`retry_note`] is
+/// in the language in use
 pub const RETRY_NOTE: &str = "Not downloaded. It is tried again once the account is back online.";
+
+/// What the windows say beside Try Again over a message that could not be downloaded
+pub fn retry_note() -> String {
+    tr(Text::ReaderRetryNote)
+}
 
 /// What the reading pane shows when it shows no message
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -169,27 +183,21 @@ pub enum ReaderState<'a> {
 pub fn reader_page(state: ReaderState) -> String {
     use crate::FailureKind;
     match state {
-        ReaderState::NoMessage => pe_html::status_page("There is no message selected.", "", false),
-        ReaderState::Downloading => pe_html::status_page(
-            "Downloading the message\u{2026}",
-            "It is shown here as soon as it has arrived.",
-            true,
-        ),
+        ReaderState::NoMessage => pe_html::status_page(&tr(Text::ReaderNoMessage), "", false),
+        ReaderState::Downloading => {
+            pe_html::status_page(&tr(Text::ReaderDownloading), &tr(Text::ReaderDownloadingDetail), true)
+        }
         ReaderState::Failed { kind, reason } => {
             let reason = reason.trim().trim_end_matches('.');
             // what happened, and for a sign-in what to do; what happens next is beside Try Again
-            let detail = match kind {
-                FailureKind::Network => format!("The mail server could not be reached ({reason})."),
-                FailureKind::Authentication => format!(
-                    "The mail server did not accept the sign-in ({reason}). Check the password or sign in again \
-                     in File > Accounts."
-                ),
-                FailureKind::Security => {
-                    format!("The connection to the mail server could not be made secure ({reason}).")
-                }
-                FailureKind::Other => format!("The mail server answered: {reason}."),
+            let text = match kind {
+                FailureKind::Network => Text::ReaderFailedNetwork,
+                FailureKind::Authentication => Text::ReaderFailedSignIn,
+                FailureKind::Security => Text::ReaderFailedSecurity,
+                FailureKind::Other => Text::ReaderFailedOther,
             };
-            pe_html::status_page("The message could not be downloaded", &detail, false)
+            let detail = tr_args(text, &[("reason", reason.into())]);
+            pe_html::status_page(&tr(Text::ReaderFailed), &detail, false)
         }
     }
 }

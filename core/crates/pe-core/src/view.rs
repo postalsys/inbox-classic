@@ -63,7 +63,10 @@ pub(crate) fn build_unless(
     let message = match parser::parse(source) {
         Ok(message) => message,
         Err(error) => {
-            let text = format!("This message can not be shown: {error}");
+            let text = pe_i18n::tr_args(
+                pe_i18n::Text::ReaderUnreadable,
+                &[("error", (&error.to_string()).into())],
+            );
             return Some(MessageView {
                 document: pe_html::render_document(&text_to_html(&text), &options),
                 ..Default::default()
@@ -87,12 +90,20 @@ pub(crate) fn build_unless(
     let subject = message.subject.clone().unwrap_or_default();
     let date = message.timestamp.map(pe_smtp::message::format_date).unwrap_or_default();
     // for a printout: on screen the window shows these above the message
+    use pe_i18n::{Text, tr};
+    let names = [
+        tr(Text::HeaderFrom),
+        tr(Text::HeaderDate),
+        tr(Text::HeaderTo),
+        tr(Text::HeaderCc),
+        tr(Text::HeaderSubject),
+    ];
     let header = [
-        ("From", from.as_str()),
-        ("Date", date.as_str()),
-        ("To", to.as_str()),
-        ("Cc", cc.as_str()),
-        ("Subject", subject.as_str()),
+        (names[0].as_str(), from.as_str()),
+        (names[1].as_str(), date.as_str()),
+        (names[2].as_str(), to.as_str()),
+        (names[3].as_str(), cc.as_str()),
+        (names[4].as_str(), subject.as_str()),
     ];
     let rendered = pe_html::render_view(&body, &options, &images, &header);
     Some(MessageView {

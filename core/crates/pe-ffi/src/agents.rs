@@ -125,17 +125,22 @@ pub extern "C" fn pe_agent_level_bit(index: usize) -> u32 {
     pe_core::agents::LEVELS.get(index).map_or(0, |(bit, _)| *bit)
 }
 
-/// What level `index` lets an agent do, a static string that is not freed; NULL past the end
+/// What level `index` lets an agent do, in the language in use: a string kept for the rest of the run, not freed;
+/// NULL past the end
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_agent_level_label(index: usize) -> *const c_char {
-    static LABELS: std::sync::OnceLock<Vec<std::ffi::CString>> = std::sync::OnceLock::new();
-    let labels = LABELS.get_or_init(|| {
+    type Labels = std::collections::HashMap<&'static str, Vec<std::ffi::CString>>;
+    // one set a language: a handful of strings at most, so the pointers handed out stay valid
+    static LABELS: std::sync::Mutex<Option<Labels>> = std::sync::Mutex::new(None);
+    let mut labels = LABELS.lock().unwrap_or_else(|e| e.into_inner());
+    let labels = labels.get_or_insert_with(Labels::new);
+    let set = labels.entry(pe_i18n::language()).or_insert_with(|| {
         pe_core::agents::LEVELS
             .iter()
-            .map(|(_, label)| crate::c_string((*label).to_string()))
+            .map(|(bit, _)| crate::c_string(pe_core::agents::level_text(*bit)))
             .collect()
     });
-    labels.get(index).map_or(null(), |label| label.as_ptr())
+    set.get(index).map_or(null(), |label| label.as_ptr())
 }
 
 /// What an agent's settings name to start this app as its MCP server: a JSON block for the `mcpServers` of Claude

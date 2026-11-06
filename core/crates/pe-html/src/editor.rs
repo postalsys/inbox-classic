@@ -112,7 +112,10 @@ pub fn signature_block(signature: &str) -> String {
 /// The quoted message of a reply or forward for the editor and for sending: the header block in the manner of
 /// Outlook Express, then the message, sanitized, its `cid:` pictures embedded. A reply is indented by a bar.
 pub fn quote_html(header: &[(&str, String)], html: &str, images: &[InlineImage], reply: bool) -> String {
-    let mut block = String::from("<div style=\"font:10pt Arial,sans-serif\">----- Original Message -----</div>");
+    let mut block = format!(
+        "<div style=\"font:10pt Arial,sans-serif\">{}</div>",
+        text(&pe_i18n::tr(pe_i18n::Text::QuoteOriginal))
+    );
     for (name, value) in header.iter().filter(|(_, value)| !value.is_empty()) {
         block.push_str(&format!(
             "<div style=\"font:10pt Arial,sans-serif\"><b>{}:</b> {}</div>",

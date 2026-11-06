@@ -5,6 +5,8 @@
 use pe_store::{AccountId, FolderId};
 use unicode_normalization::UnicodeNormalization;
 
+use pe_i18n::{Text, tr, tr_args};
+
 use crate::{Core, Result};
 
 /// How many folders "Recent" lists
@@ -74,7 +76,7 @@ impl Core {
                         account: account.id,
                         folder: folder.id,
                         label: if is_current {
-                            format!("{name} (current)")
+                            tr_args(Text::TargetCurrent, &[("folder", (&name).into())])
                         } else {
                             name.clone()
                         },
@@ -99,7 +101,10 @@ impl Core {
                                 kind: TargetKind::Recent,
                                 depth: 0,
                                 label: if accounts.len() > 1 {
-                                    format!("{} ({title})", row.label)
+                                    tr_args(
+                                        Text::TargetRecent,
+                                        &[("folder", (&row.label).into()), ("account", title.into())],
+                                    )
                                 } else {
                                     row.label.clone()
                                 },
@@ -113,7 +118,7 @@ impl Core {
                     kind: TargetKind::Heading,
                     account: 0,
                     folder: 0,
-                    label: "Recent".into(),
+                    label: tr(Text::TargetsRecent),
                     depth: 0,
                     icon: "",
                     choosable: false,

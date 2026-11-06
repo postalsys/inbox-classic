@@ -82,44 +82,50 @@ enum Command: Int, CaseIterable {
         }
     }
 
+    /// In the language in use, from the catalog (cmd-<id>)
     var label: String {
+        labelText.text.replacingOccurrences(of: "...", with: "…")
+    }
+
+    /// Its label in the catalog
+    var labelText: Text {
         switch self {
-        case .newAccount: return "New Account…"
-        case .exit: return "Exit"
-        case .sync: return "Send and Receive All"
-        case .undo: return "Undo"
-        case .selectAll: return "Select All"
-        case .markRead: return "Mark as Read"
-        case .markUnread: return "Mark as Unread"
-        case .pictures: return "Download Pictures"
-        case .about: return "About Inbox Classic"
-        case .newMail: return "New Message"
-        case .reply: return "Reply to Sender"
-        case .replyAll: return "Reply to All"
-        case .forward: return "Forward"
-        case .help: return "Contents"
-        case .delete: return "Delete Message"
-        case .move: return "Move to Folder…"
-        case .copy: return "Copy to Folder…"
-        case .flag: return "Flag Message"
-        case .newFolder: return "New Folder…"
-        case .renameFolder: return "Rename Folder…"
-        case .deleteFolder: return "Delete Folder"
-        case .accounts: return "Accounts…"
-        case .find: return "Find Message"
-        case .saveAs: return "Save As…"
-        case .print: return "Print…"
-        case .import: return "Import Messages…"
-        case .outbox: return "Outbox…"
-        case .properties: return "Properties"
-        case .markAllRead: return "Mark All Read"
-        case .junk: return "Mark as Junk"
-        case .notJunk: return "Mark as Not Junk"
-        case .notify: return "Notify of New Mail"
-        case .open: return "Open Inbox Classic"
-        case .defaultApp: return "Make Default Mail App…"
-        case .viewSource: return "Message Source"
-        case .aiAgents: return "AI Agents…"
+        case .newAccount: return .cmdNewAccount
+        case .exit: return .cmdExit
+        case .sync: return .cmdSync
+        case .undo: return .cmdUndo
+        case .selectAll: return .cmdSelectAll
+        case .markRead: return .cmdMarkRead
+        case .markUnread: return .cmdMarkUnread
+        case .pictures: return .cmdPictures
+        case .about: return .cmdAbout
+        case .newMail: return .cmdNewMail
+        case .reply: return .cmdReply
+        case .replyAll: return .cmdReplyAll
+        case .forward: return .cmdForward
+        case .help: return .cmdHelp
+        case .delete: return .cmdDelete
+        case .move: return .cmdMove
+        case .copy: return .cmdCopy
+        case .flag: return .cmdFlag
+        case .newFolder: return .cmdNewFolder
+        case .renameFolder: return .cmdRenameFolder
+        case .deleteFolder: return .cmdDeleteFolder
+        case .accounts: return .cmdAccounts
+        case .find: return .cmdFind
+        case .saveAs: return .cmdSaveAs
+        case .print: return .cmdPrint
+        case .import: return .cmdImport
+        case .outbox: return .cmdOutbox
+        case .properties: return .cmdProperties
+        case .markAllRead: return .cmdMarkAllRead
+        case .junk: return .cmdJunk
+        case .notJunk: return .cmdNotJunk
+        case .notify: return .cmdNotify
+        case .open: return .cmdOpen
+        case .defaultApp: return .cmdDefaultApp
+        case .viewSource: return .cmdViewSource
+        case .aiAgents: return .cmdAiAgents
         }
     }
 

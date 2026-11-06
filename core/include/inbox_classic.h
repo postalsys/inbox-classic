@@ -281,6 +281,9 @@ typedef struct PeExport PeExport;
 // The folders of an account; free with `pe_folder_list_free`
 typedef struct PeFolderList PeFolderList;
 
+// The languages; free with `pe_language_list_free`
+typedef struct PeLanguageList PeLanguageList;
+
 // A page of the message list; free with `pe_message_list_free`
 typedef struct PeMessageList PeMessageList;
 
@@ -732,6 +735,14 @@ typedef struct PeTarget {
   bool choosable;
 } PeTarget;
 
+// A language there is a catalog of
+typedef struct PeLanguage {
+  // `de`
+  const char *code;
+  // Its name in itself, `Deutsch`
+  const char *name;
+} PeLanguage;
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -827,7 +838,8 @@ int32_t pe_mcp_relay(const char *store,
 // The bit (PE_AGENT_*) of level `index`, 0 past the end
 uint32_t pe_agent_level_bit(size_t index);
 
-// What level `index` lets an agent do, a static string that is not freed; NULL past the end
+// What level `index` lets an agent do, in the language in use: a string kept for the rest of the run, not freed;
+// NULL past the end
 const char *pe_agent_level_label(size_t index);
 
 // What an agent's settings name to start this app as its MCP server: a JSON block for the `mcpServers` of Claude
@@ -2080,6 +2092,58 @@ char *pe_selection_downloading_text(const struct PeCore *core,
 // The name of the flag colour `color` (1 red to 7 gray) as the Flag menu lists it ("Orange"); NULL for another
 // number. Free with `pe_string_free`.
 char *pe_flag_color_name(uint8_t color);
+
+// Word `text` (PE_TEXT_...) in the language in use, `&` marking a menu letter as the catalog has it. Free with
+// `pe_string_free`; NULL for a number that is no word.
+char *pe_text(uint32_t text);
+
+// [`pe_text`] without the menu letter marks, as the Mac shows a word. Free with `pe_string_free`.
+char *pe_text_plain(uint32_t text);
+
+// Word `text` with its placeables filled: `names[i]` is `values[i]`, a value that is a whole number passed as a number
+// (plurals choose by it). Free with `pe_string_free`.
+//
+// # Safety
+// `names` and `values` must be NULL or `count` NUL-terminated strings each.
+char *pe_text_args(uint32_t text,
+                   const char *const *names,
+                   const char *const *values,
+                   size_t count);
+
+// The languages there is a catalog of, English first, as the language choice lists them
+struct PeLanguageList *pe_languages(void);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+size_t pe_language_list_count(const struct PeLanguageList *list);
+
+// Language `index`, valid until the list is freed; NULL past the end
+//
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+const struct PeLanguage *pe_language_list_get(const struct PeLanguageList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet, freed once.
+void pe_language_list_free(struct PeLanguageList *list);
+
+// Uses the catalog of `code` (`de`, `de-AT`; `qps` the test pseudo-language) from now on, English for one there is
+// none of. Call it at start, before the windows read any word. Returns the code used; free with `pe_string_free`.
+//
+// # Safety
+// `code` must be NULL or a NUL-terminated string.
+char *pe_set_language(const char *code);
+
+// The language for the system's preferred languages (`preferred`, most preferred first: `de-AT`, `en-US`): the
+// first there is a catalog of, `en` when none. Free with `pe_string_free`.
+//
+// # Safety
+// `preferred` must be NULL or `count` NUL-terminated strings.
+char *pe_resolve_language(const char *const *preferred,
+                          size_t count);
+
+// The code of the language in use (`en` before one was set). Free with `pe_string_free`.
+char *pe_language(void);
 
 #ifdef __cplusplus
 }  // extern "C"
