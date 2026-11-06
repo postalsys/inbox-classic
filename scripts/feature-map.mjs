@@ -161,7 +161,7 @@ const sections = [
             {
                 shot: 'main-1-inbox',
                 name: 'Folders and the message list',
-                what: 'Laid out as Outlook Express: each account with its folders, each with its icon (Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items), folders with unread mail bold with the count. The grey folder bar and the title name the selected folder. In the list a closed envelope marks unread mail (also bold), an open one read mail, with columns for the paper clip and the flag. Click a column heading to sort, again to reverse. With nothing selected the reading pane says so. The toolbar has the Fluent icons over their labels, in groups.',
+                what: 'Laid out as Outlook Express: each account with its folders, each with its icon (Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items), folders with unread mail bold with the count. The grey folder bar and the title name the selected folder. In the list unread mail is bold, with columns for the paper clip and the flag. Click a column heading to sort, again to reverse. With nothing selected the reading pane says so. The toolbar has the Fluent icons over their labels, in groups.',
                 how: 'Always there. Drag the borders between the parts to resize them.',
                 checked: ['All 7 folders of the account appear', 'The messages are listed', 'The title names the folder']
             },
