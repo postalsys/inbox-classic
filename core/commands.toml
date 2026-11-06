@@ -234,3 +234,11 @@ one = true
 id = "ai_agents"
 windows = 133
 menu = "tools"
+
+[[command]]
+id = "options"
+windows = 137
+menu = "tools"
+key = ""
+mac = "Mod+,"
+linux = "Mod+,"

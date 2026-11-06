@@ -41,6 +41,7 @@ enum PeCommandId : unsigned short {
     IDM_DEFAULT_APP = 131,
     IDM_VIEW_SOURCE = 132,
     IDM_AI_AGENTS = 133,
+    IDM_OPTIONS = 137,
 };
 
 // whether a command acts on one message only, off while several are selected
@@ -108,6 +109,7 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_DEFAULT_APP: return PE_TEXT_CMD_DEFAULT_APP;
     case IDM_VIEW_SOURCE: return PE_TEXT_CMD_VIEW_SOURCE;
     case IDM_AI_AGENTS: return PE_TEXT_CMD_AI_AGENTS;
+    case IDM_OPTIONS: return PE_TEXT_CMD_OPTIONS;
     }
     return PE_TEXT_CMD_NEW_ACCOUNT;
 }

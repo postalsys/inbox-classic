@@ -803,6 +803,37 @@ const sections = [
                 checked: ['F1 opens it']
             },
             {
+                shot: 'options-1-language',
+                name: 'Options and the language',
+                what: "Tools > Options (Settings on the Mac, Preferences on Linux) chooses the language of the windows: System default, or English, Deutsch, Eesti, Español or Français, each named in itself. The app starts again in it. Notify of New Mail is there too. On Windows the installer asks for the language on a first install; on the Mac the system's own per-app language setting chooses it too.",
+                how: 'Tools > Options, Language.',
+                checked: [
+                    'Language lists System default and the five languages by their own names',
+                    'A language chosen says the app starts again to change it, with Restart Now and Later'
+                ]
+            },
+            {
+                shot: 'lang-1-german',
+                name: 'In German',
+                what: 'Every word of the windows comes from the catalogs of the core (Fluent), the same on every platform: menus, toolbar, dialogs, status bar, the reading pane, the help. Dates and sizes follow the language too.',
+                how: 'Choose Deutsch in Options.',
+                checked: ['Started in German, the menus, the toolbar and the status bar are in German']
+            },
+            {
+                shot: 'lang-2-pseudo-main',
+                name: 'Pseudo-language: the main window',
+                what: 'A test language made from English, 40% longer and bracketed, that shows any word not yet in the catalogs and any layout too narrow for longer languages.',
+                how: 'Started with --language qps (tests only).',
+                checked: ['Nothing in the main window is left in English, and nothing is cut off']
+            },
+            {
+                shot: 'lang-3-pseudo-form',
+                name: 'Pseudo-language: a form',
+                what: 'The Add Mail Account form in the pseudo-language: its labels and buttons fit their longer words.',
+                how: 'Started with --language qps (tests only).',
+                checked: ['Nothing in the account form is left in English, and nothing is cut off']
+            },
+            {
                 shot: 'help-1-about',
                 name: 'About',
                 what: 'The version of the program and of its Rust core.',

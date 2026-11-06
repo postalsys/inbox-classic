@@ -39,6 +39,7 @@ pub enum Command {
     DefaultApp,
     ViewSource,
     AiAgents,
+    Options,
 }
 
 impl Command {
@@ -79,6 +80,7 @@ impl Command {
         Command::DefaultApp,
         Command::ViewSource,
         Command::AiAgents,
+        Command::Options,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -120,6 +122,7 @@ impl Command {
             Command::DefaultApp => "default-app",
             Command::ViewSource => "view-source",
             Command::AiAgents => "ai-agents",
+            Command::Options => "options",
         }
     }
 
@@ -162,6 +165,7 @@ impl Command {
             Command::DefaultApp => "tools",
             Command::ViewSource => "view",
             Command::AiAgents => "tools",
+            Command::Options => "tools",
         }
     }
 
@@ -204,6 +208,7 @@ impl Command {
             Command::DefaultApp => pe_core::i18n::Text::CmdDefaultApp,
             Command::ViewSource => pe_core::i18n::Text::CmdViewSource,
             Command::AiAgents => pe_core::i18n::Text::CmdAiAgents,
+            Command::Options => pe_core::i18n::Text::CmdOptions,
         }
     }
 
@@ -264,6 +269,7 @@ impl Command {
             Command::DefaultApp => None,
             Command::ViewSource => Some("<Primary>u"),
             Command::AiAgents => None,
+            Command::Options => Some("<Primary>comma"),
         }
     }
 
@@ -306,6 +312,7 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => false,
             Command::AiAgents => false,
+            Command::Options => false,
         }
     }
 
@@ -348,6 +355,7 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => false,
             Command::AiAgents => false,
+            Command::Options => false,
         }
     }
 
@@ -390,6 +398,7 @@ impl Command {
             Command::DefaultApp => false,
             Command::ViewSource => true,
             Command::AiAgents => false,
+            Command::Options => false,
         }
     }
 }
