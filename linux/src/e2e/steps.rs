@@ -101,7 +101,10 @@ pub async fn unsubscribing(d: &Driver) {
         posted,
         &format!("Yes posts List-Unsubscribe=One-Click to the list ({first})"),
     );
-    let done = wait_until(10, || shell().main().status_texts().0.contains("Unsubscribe request accepted")).await;
+    let done = wait_until(10, || {
+        shell().main().status_texts().0.contains("Unsubscribe request accepted")
+    })
+    .await;
     d.check(
         done,
         &format!(
