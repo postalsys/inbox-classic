@@ -123,6 +123,11 @@ impl ImapKit {
         );
     }
 
+    /// Deletes a mailbox as another client would
+    pub fn delete_folder(&self, mailbox: &str) {
+        self.request("DELETE", &format!("/v1/mailboxes/{}", encode_path(mailbox)), None);
+    }
+
     /// The messages of a mailbox as ImapKit stores them
     pub fn messages(&self, mailbox: &str) -> Vec<Value> {
         match self.request("GET", &messages_path(mailbox, "?raw=true"), None) {

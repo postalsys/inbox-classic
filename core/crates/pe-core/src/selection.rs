@@ -169,10 +169,12 @@ impl Core {
             Action::ToggleFlag => Action::Flag(picked.iter().any(|p| !p.flagged())),
             other => other,
         };
+        let mut crossed = false;
         if let Action::Move(to) | Action::Copy(to) = action {
-            // checked for all before any of them goes
-            for folder in groups.keys().filter(|&&folder| folder != to) {
-                self.target_of(*folder, to)?;
+            self.check_target(to)?;
+            self.store().note_target(to)?;
+            for folder in groups.keys() {
+                crossed |= self.crosses(*folder, to)?;
             }
         }
         let undo_name = action.undo_name();
@@ -189,13 +191,55 @@ impl Core {
                 });
             }
         }
-        let text = self.done_text(action, picked.len() as u64, &undo)?;
+        let text = self.done_text(action, picked.len() as u64, &undo, crossed)?;
         // what moved can be taken back; what is gone for good ends what came before it
         if let Some(what) = undo_name {
             *self.undo.lock().unwrap_or_else(|e| e.into_inner()) =
                 (!undo.is_empty()).then_some(Undo { what, moves: undo });
         }
         Ok(text)
+    }
+
+    /// Where messages can go: a folder that holds messages, of their account or another. Checked before any of them
+    /// moves.
+    fn check_target(&self, to: FolderId) -> Result<()> {
+        if !self.store().folder(to)?.info.selectable {
+            return Err(Error::NotFound);
+        }
+        Ok(())
+    }
+
+    /// Whether messages of `folder` going to `to` go to another account
+    fn crosses(&self, folder: FolderId, to: FolderId) -> Result<bool> {
+        let store = self.store();
+        Ok(store.folder(folder)?.account_id != store.folder(to)?.account_id)
+    }
+
+    /// Moves (or copies) messages of `folder` to `to`: in their account with one command, to another account through
+    /// the store's transfers ([`Core::transfer_messages`])
+    fn move_anywhere(&self, folder: FolderId, uids: &[u64], to: FolderId, copy: bool) -> Result<()> {
+        if self.crosses(folder, to)? {
+            return self.transfer_messages(folder, uids, to, copy);
+        }
+        for chunk in uids.chunks(PER_COMMAND) {
+            if copy {
+                self.copy_messages(folder, chunk, to)?;
+            } else {
+                self.move_messages(folder, chunk, to)?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Moves or copies messages of `folder` to a folder of another account: each kept in the store with what it takes
+    /// (its source when it is here, its flags and date), a move out of the list now; the worker of their account does
+    /// the rest in the background ([`Event::Transferring`] says how far it is)
+    fn transfer_messages(&self, folder: FolderId, uids: &[u64], to: FolderId, copy: bool) -> Result<()> {
+        let account = self.store().start_transfers(folder, uids, to, copy)?;
+        if !copy {
+            self.post(crate::Event::FolderChanged { account, folder })?;
+        }
+        self.send_command(account, crate::worker::Command::Transfer)
     }
 
     /// One folder's part of [`Core::act`], a command per [`PER_COMMAND`] messages. Returns where they went and the
@@ -222,17 +266,21 @@ impl Core {
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,
                 // already there: nothing to do
-                Action::Move(to) | Action::Copy(to) if to == folder => {}
-                Action::Move(to) => self.move_messages(folder, chunk, to)?,
-                Action::Copy(to) => self.copy_messages(folder, chunk, to)?,
+                Action::Move(_) | Action::Copy(_) => {}
                 Action::ToggleFlag => unreachable!("resolved by act"),
             }
+        }
+        match action {
+            Action::Move(to) | Action::Copy(to) if to != folder => {
+                self.move_anywhere(folder, uids, to, matches!(action, Action::Copy(_)))?
+            }
+            _ => {}
         }
         Ok(went)
     }
 
     /// What the status bar says once `action` is done to `count` messages
-    fn done_text(&self, action: Action, count: u64, moved: &[UndoMove]) -> Result<String> {
+    fn done_text(&self, action: Action, count: u64, moved: &[UndoMove], crossed: bool) -> Result<String> {
         let n = messages(count);
         Ok(match action {
             Action::ToggleFlag => unreachable!("resolved by act"),
@@ -242,6 +290,9 @@ impl Core {
             Action::Flag(false) => format!("Took the flag off {n}"),
             Action::Delete if moved.is_empty() => format!("Deleted {n} for good"),
             Action::Delete | Action::Junk(_) => format!("Moved {n} to {}", self.places(moved.iter().map(|m| m.to))?),
+            // to another account they go in the background, Event::Transferring says how far
+            Action::Move(to) if crossed => format!("Moving {n} to {}...", self.places([to].into_iter())?),
+            Action::Copy(to) if crossed => format!("Copying {n} to {}...", self.places([to].into_iter())?),
             Action::Move(to) => format!("Moved {n} to {}", self.places([to].into_iter())?),
             Action::Copy(to) => format!("Copied {n} to {}", self.places([to].into_iter())?),
         })
@@ -256,6 +307,11 @@ impl Core {
             [one] => Ok(crate::text::folder_name(&self.store().folder(*one)?.info)),
             _ => Ok("their folders".into()),
         }
+    }
+
+    /// The folders messages were moved or copied to last, the newest first, for the Move and Copy window
+    pub fn recent_targets(&self, limit: u64) -> Result<Vec<FolderId>> {
+        Ok(self.store().recent_targets(limit)?)
     }
 
     /// What Edit > Undo says it takes back, "Undo Move"; None when there is nothing

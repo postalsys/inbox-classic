@@ -116,6 +116,9 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_AGENT_ASK = 18,
   // What AI agents did changed: `pe_agent_log`
   PE_EVENT_KIND_AGENT_LOG_CHANGED = 19,
+  // Messages are going to another account: `message` says how far ("Moving 3 of 12 messages to Archive..."), NULL
+  // once they are all done
+  PE_EVENT_KIND_TRANSFERRING = 20,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -226,7 +229,7 @@ typedef enum PeAction {
   PE_ACTION_NOT_JUNK = 5,
   // Into Deleted Items, or for good (ask first: `pe_selection_delete_question`)
   PE_ACTION_DELETE = 6,
-  // Into the folder `to`, of the same account
+  // Into the folder `to`, of the same account or another (in the background then: `Transferring`)
   PE_ACTION_MOVE = 7,
   PE_ACTION_COPY = 8,
 } PeAction;
@@ -362,7 +365,7 @@ typedef struct PeEvent {
   uint64_t uid;
   enum PeFailureKind failure;
   // UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; who
-  // it is from, for `NewMail`. NULL otherwise
+  // it is from, for `NewMail`; how far it is, for `Transferring` (NULL once done). NULL otherwise
   const char *message;
   // UTF-8: the Message-ID of the draft, for `DraftSaved`; the subject, for `NewMail`. NULL otherwise
   const char *detail;
@@ -1820,6 +1823,15 @@ char *pe_selection_act(const struct PeCore *core,
                        enum PeAction action,
                        int64_t to,
                        char **error);
+
+// The folders messages were moved or copied to last, newest first, for the Move and Copy window: up to `max` ids
+// written to `folders`; returns how many
+//
+// # Safety
+// `core` must be a live handle, `folders` NULL or room for `max` ids.
+size_t pe_recent_targets(const struct PeCore *core,
+                         int64_t *folders,
+                         size_t max);
 
 // What Edit > Undo says, "Undo Move"; NULL when there is nothing to take back. Free with `pe_string_free`.
 //

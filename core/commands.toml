@@ -263,3 +263,9 @@ windows = 135
 menu = "edit"
 label = "Undo"
 key = "Mod+Z"
+
+[[command]]
+id = "copy"
+windows = 136
+menu = "edit"
+label = "Copy to Folder..."

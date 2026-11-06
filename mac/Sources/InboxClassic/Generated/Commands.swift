@@ -38,6 +38,7 @@ enum Command: Int, CaseIterable {
     case aiAgents = 133
     case selectAll = 134
     case undo = 135
+    case copy = 136
 
     /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu)
     var menu: String {
@@ -77,6 +78,7 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return "tools"
         case .selectAll: return "edit"
         case .undo: return "edit"
+        case .copy: return "edit"
         }
     }
 
@@ -117,6 +119,7 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return "AI Agents…"
         case .selectAll: return "Select All"
         case .undo: return "Undo"
+        case .copy: return "Copy to Folder…"
         }
     }
 
@@ -158,6 +161,7 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return nil
         case .selectAll: return ("a", [.command])
         case .undo: return ("z", [.command])
+        case .copy: return nil
         }
     }
 
@@ -199,6 +203,7 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return false
         case .selectAll: return false
         case .undo: return false
+        case .copy: return false
         }
     }
 
@@ -240,6 +245,7 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return false
         case .selectAll: return false
         case .undo: return false
+        case .copy: return false
         }
     }
 }

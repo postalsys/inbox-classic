@@ -17,6 +17,7 @@ mod schema;
 mod search;
 mod selection;
 mod sign_in_apps;
+mod transfers;
 
 use std::path::Path;
 
@@ -33,6 +34,7 @@ pub use rusqlite::Error;
 pub use search::{IndexText, Scope, Search, Show};
 pub use selection::{MessageRef, Picked};
 pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
+pub use transfers::Transfer;
 
 pub type Result<T> = std::result::Result<T, Error>;
 

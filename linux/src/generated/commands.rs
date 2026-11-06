@@ -38,6 +38,7 @@ pub enum Command {
     AiAgents,
     SelectAll,
     Undo,
+    Copy,
 }
 
 impl Command {
@@ -77,6 +78,7 @@ impl Command {
         Command::AiAgents,
         Command::SelectAll,
         Command::Undo,
+        Command::Copy,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -117,6 +119,7 @@ impl Command {
             Command::AiAgents => "ai-agents",
             Command::SelectAll => "select-all",
             Command::Undo => "undo",
+            Command::Copy => "copy",
         }
     }
 
@@ -158,6 +161,7 @@ impl Command {
             Command::AiAgents => "tools",
             Command::SelectAll => "edit",
             Command::Undo => "edit",
+            Command::Copy => "edit",
         }
     }
 
@@ -198,6 +202,7 @@ impl Command {
             Command::AiAgents => "AI Agents…",
             Command::SelectAll => "Select All",
             Command::Undo => "Undo",
+            Command::Copy => "Copy to Folder…",
         }
     }
 
@@ -239,6 +244,7 @@ impl Command {
             Command::AiAgents => None,
             Command::SelectAll => Some("<Primary>a"),
             Command::Undo => Some("<Primary>z"),
+            Command::Copy => None,
         }
     }
 
@@ -280,6 +286,7 @@ impl Command {
             Command::AiAgents => false,
             Command::SelectAll => false,
             Command::Undo => false,
+            Command::Copy => false,
         }
     }
 
@@ -321,6 +328,7 @@ impl Command {
             Command::AiAgents => false,
             Command::SelectAll => false,
             Command::Undo => false,
+            Command::Copy => false,
         }
     }
 }

@@ -323,7 +323,7 @@ pub enum PeAction {
     NotJunk = 5,
     /// Into Deleted Items, or for good (ask first: `pe_selection_delete_question`)
     Delete = 6,
-    /// Into the folder `to`, of the same account
+    /// Into the folder `to`, of the same account or another (in the background then: `Transferring`)
     Move = 7,
     Copy = 8,
 }
@@ -361,6 +361,29 @@ pub unsafe extern "C" fn pe_selection_act(
     let outcome = unsafe { with(core, Err(None), |core| core.act(&refs, action).map_err(Some)) };
     // SAFETY: as the caller guarantees
     unsafe { refused(error, outcome, "the messages could not be changed") }.map_or(null_mut(), into_c_string)
+}
+
+/// The folders messages were moved or copied to last, newest first, for the Move and Copy window: up to `max` ids
+/// written to `folders`; returns how many
+///
+/// # Safety
+/// `core` must be a live handle, `folders` NULL or room for `max` ids.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_recent_targets(core: *const PeCore, folders: *mut i64, max: usize) -> usize {
+    if folders.is_null() || max == 0 {
+        return 0;
+    }
+    // SAFETY: as the caller guarantees
+    let found = unsafe {
+        with(core, Vec::new(), |core| {
+            core.recent_targets(max as u64).unwrap_or_default()
+        })
+    };
+    for (i, folder) in found.iter().take(max).enumerate() {
+        // SAFETY: the caller gave room for `max`
+        unsafe { *folders.add(i) = *folder };
+    }
+    found.len().min(max)
 }
 
 /// What Edit > Undo says, "Undo Move"; NULL when there is nothing to take back. Free with `pe_string_free`.

@@ -48,7 +48,7 @@ pub use text::{
     hidden_unread, list_counts, messages, reader_page,
 };
 pub use view::{AttachmentView, MessageView};
-use worker::{Command, Role, SharedToken, Worker};
+use worker::{Command, Role, Worker};
 
 /// The version of the core, which the About boxes show
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -152,6 +152,10 @@ pub enum Event {
     },
     /// What agents did changed ([`Core::agent_log`])
     AgentLogChanged,
+    /// Messages going to another account: how far it is ("Moving 3 of 12 messages to Archive..."), None when done
+    Transferring {
+        text: Option<String>,
+    },
 }
 
 /// What a failure asks of the user
@@ -277,7 +281,7 @@ pub struct Core {
     /// The readers of the accounts: their own connections that download the messages opened (`worker::Role::Reader`)
     readers: Workers,
     /// The access token of each OAuth account, which its worker and its reader share
-    tokens: Mutex<HashMap<AccountId, SharedToken>>,
+    tokens: worker::Tokens,
     secrets: Secrets,
     trust: Trust,
     events: EventSink,
@@ -348,7 +352,7 @@ impl Core {
             runtime: Some(runtime),
             workers: Mutex::default(),
             readers: Mutex::default(),
-            tokens: Mutex::default(),
+            tokens: worker::Tokens::default(),
             secrets,
             trust,
             events: Arc::new(move |event| {
@@ -1366,16 +1370,6 @@ impl Core {
         self.send_to(&self.workers, Role::Main, account, command)
     }
 
-    /// The access token both workers of `account` use
-    fn token(&self, account: AccountId) -> SharedToken {
-        self.tokens
-            .lock()
-            .unwrap_or_else(|p| p.into_inner())
-            .entry(account)
-            .or_default()
-            .clone()
-    }
-
     /// Hands `command` to the worker of `account` in `workers` (of `role`), started when there is none or it stopped
     fn send_to(&self, workers: &Workers, role: Role, account: AccountId, command: Command) -> Result<()> {
         let mut workers = workers.lock().unwrap_or_else(|p| p.into_inner());
@@ -1397,7 +1391,7 @@ impl Core {
             self.secrets.clone(),
             self.trust.clone(),
             self.oauth.clone(),
-            self.token(account),
+            self.tokens.clone(),
             self.events.clone(),
         );
         let task = self.runtime()?.spawn(worker.run(receiver));

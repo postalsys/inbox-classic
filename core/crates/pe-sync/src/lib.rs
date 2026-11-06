@@ -348,6 +348,52 @@ pub async fn fetch_source(client: &mut Client, store: &mut Store, folder: Folder
     Ok(source)
 }
 
+/// A message as the server keeps it, fetched without keeping it in the store (one on its way to another account,
+/// whose row is out of the list already)
+pub async fn fetch_raw(client: &mut Client, store: &mut Store, folder: FolderId, uid: u64) -> Result<Vec<u8>> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let query = FetchQuery {
+        source: true,
+        ..Default::default()
+    };
+    let fetched = client.fetch(&Messages::uid(uid), &query).await?;
+    fetched
+        .into_iter()
+        .find(|m| m.uid == Some(uid))
+        .and_then(|m| m.source)
+        .ok_or(Error::MessageGone)
+}
+
+/// Whether `folder` on the server has a message with this Message-ID (SEARCH HEADER, the match checked as the header
+/// may hold it inside a longer one)
+pub async fn has_message_id(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    message_id: &str,
+) -> Result<bool> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let found = client
+        .search(&SearchKey::Header("Message-ID".into(), message_id.into()))
+        .await?;
+    let Some(set) = SequenceSet::from_numbers(&found) else {
+        return Ok(false);
+    };
+    let query = FetchQuery {
+        envelope: true,
+        ..Default::default()
+    };
+    let fetched = client.fetch(&Messages::Uids(set), &query).await?;
+    Ok(fetched.iter().any(|m| {
+        m.envelope
+            .as_ref()
+            .and_then(|e| e.message_id.as_deref())
+            .is_some_and(|id| id.trim().eq_ignore_ascii_case(message_id.trim()))
+    }))
+}
+
 /// The text part of a message, fetched for the search index (only that part, and only its start), with what decoding it
 /// needs: the bytes as the server keeps them
 #[derive(Debug, Clone, PartialEq, Eq)]

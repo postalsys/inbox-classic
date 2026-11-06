@@ -38,6 +38,7 @@ enum PeCommandId : unsigned short {
     IDM_AI_AGENTS = 133,
     IDM_SELECT_ALL = 134,
     IDM_UNDO = 135,
+    IDM_COPY = 136,
 };
 
 // whether a command acts on one message only, off while several are selected
