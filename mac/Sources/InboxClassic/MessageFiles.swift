@@ -54,19 +54,6 @@ func takenTexts(_ list: OpaquePointer?) -> [String] {
     return (0..<pe_text_list_count(list)).map { text(pe_text_list_get(list, $0)) }
 }
 
-/// `name` in `dir`, or `name (2).eml`, `name (3).eml`... when that is taken: a file there is never replaced
-func freeURL(in dir: URL, for name: String) -> URL {
-    let url = dir.appendingPathComponent(name)
-    guard FileManager.default.fileExists(atPath: url.path) else { return url }
-    let stem = url.deletingPathExtension().lastPathComponent
-    let ext = url.pathExtension
-    for n in 2... {
-        let candidate = dir.appendingPathComponent(ext.isEmpty ? "\(stem) (\(n))" : "\(stem) (\(n)).\(ext)")
-        if !FileManager.default.fileExists(atPath: candidate.path) { return candidate }
-    }
-    return url
-}
-
 /// The messages of one drag out of the list: their file names at once (the Finder asks for them as the drag starts),
 /// their sources once, when the first file is to be written
 final class DragExport: @unchecked Sendable {
@@ -81,18 +68,18 @@ final class DragExport: @unchecked Sendable {
         self.refs = refs
         let selection = newSelection(refs)
         defer { pe_selection_free(selection) }
-        let names = takenTexts(pe_selection_file_names(core, selection))
-        self.names = names.count == refs.count ? names : refs.map { _ in "message.eml" }
+        names = takenTexts(pe_selection_file_names(core, selection))
     }
 
-    /// The bytes of message `index`, or why not; the first call downloads what is missing, for all of them. Blocks.
+    /// The bytes of message `index`, or the core's reason why not; the first call downloads what is missing, for all
+    /// of them. Blocks.
     func file(_ index: Int) -> (data: Data?, problem: String?) {
         lock.lock()
         defer { lock.unlock() }
         if files == nil {
             let selection = newSelection(refs)
             defer { pe_selection_free(selection) }
-            var got: [(data: Data?, problem: String?)] = refs.map { _ in (nil, "The message could not be downloaded.") }
+            var got: [(data: Data?, problem: String?)] = refs.map { _ in (nil, nil) }
             if let export = pe_selection_export(core, selection, exportTimeout) {
                 defer { pe_export_free(export) }
                 for i in 0..<min(pe_export_count(export), got.count) {
@@ -101,16 +88,12 @@ final class DragExport: @unchecked Sendable {
                     var length = 0
                     var error: UnsafePointer<CChar>?
                     guard pe_export_get(export, i, &name, &data, &length, &error) else { continue }
-                    if let data {
-                        got[i] = (Data(bytes: data, count: length), nil)
-                    } else {
-                        got[i] = (nil, error.map { text($0) } ?? "The message could not be downloaded.")
-                    }
+                    got[i] = (data.map { Data(bytes: $0, count: length) }, error.map { text($0) })
                 }
             }
             files = got
         }
-        return files![index]
+        return index < files!.count ? files![index] : (nil, nil)
     }
 }
 
@@ -164,8 +147,9 @@ final class PromiseWriter: NSObject, NSFilePromiseProviderDelegate, @unchecked S
     var wrote: @MainActor (URL?, String?) -> Void = { _, _ in }
 
     func filePromiseProvider(_ provider: NSFilePromiseProvider, fileNameForType fileType: String) -> String {
-        guard let promise = provider as? MessagePromise, let drag = promise.drag else { return "message.eml" }
-        return drag.names[promise.index]
+        guard let promise = provider as? MessagePromise, let names = promise.drag?.names,
+              promise.index < names.count else { return "" }
+        return names[promise.index]
     }
 
     func operationQueue(for provider: NSFilePromiseProvider) -> OperationQueue {
@@ -182,22 +166,34 @@ final class PromiseWriter: NSObject, NSFilePromiseProviderDelegate, @unchecked S
         completionHandler(error.map { CocoaError(.fileWriteUnknown, userInfo: [NSLocalizedDescriptionKey: $0]) })
     }
 
-    /// Message `index` of `drag` into `url`'s folder, then what the status bar says of it; why not when it could not
-    /// be. Blocks: the download and the write happen on the calling thread, only the report on the main one.
+    /// Message `index` of `drag` into `url`'s folder, under the name the Finder was given or the next free one (the
+    /// core's rule: never over a file there), marked as from the internet; then what the status bar says of it. The
+    /// reason when it could not be. Blocks: the download and the write happen on the calling thread, only the report
+    /// on the main one.
     @discardableResult
     func write(_ drag: DragExport, _ index: Int, to url: URL) -> String? {
         let file = drag.file(index)
-        var error: String?
+        let dir = url.deletingLastPathComponent()
+        var problem = file.problem
         if let data = file.data {
-            let target = freeURL(in: url.deletingLastPathComponent(), for: url.lastPathComponent)
-            error = writeDownloaded(data, to: target) ? nil : "The file could not be written."
-        } else {
-            error = file.problem ?? "The message could not be downloaded."
+            var error: UnsafeMutablePointer<CChar>?
+            let written = data.withUnsafeBytes { bytes in
+                dir.path.withCString { dirPath in
+                    url.lastPathComponent.withCString { name in
+                        pe_write_file(dirPath, name, bytes.bindMemory(to: UInt8.self).baseAddress, data.count, &error)
+                    }
+                }
+            }
+            if let path = taken(written) {
+                markFromInternet(URL(fileURLWithPath: path))
+            }
+            problem = taken(error)
         }
         let wrote = Handed(value: self.wrote)
-        let dir = url.deletingLastPathComponent()
-        let report = error.map { "\(drag.names[index]): \($0)" }
-        onMain { wrote.value(error == nil ? dir : nil, report) }
-        return error
+        let name = index < drag.names.count ? drag.names[index] : url.lastPathComponent
+        let report = problem.map { "\(name): \($0)" }
+        let ok = file.data != nil && problem == nil
+        onMain { wrote.value(ok ? dir : nil, report) }
+        return ok ? nil : (problem ?? "")
     }
 }
