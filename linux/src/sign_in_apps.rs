@@ -95,7 +95,7 @@ impl Editor {
         let issuer = issuer.trim();
         self.redirect
             .set_text(&pe_oauth::ProviderKind::of_issuer(issuer).redirect_uri());
-        self.register.set_text(pe_oauth::Preset::register_hint(issuer));
+        self.register.set_text(&pe_core::register_hint(issuer));
     }
 
     /// A preset fills in everything but the client; the name only when there is none yet

@@ -209,14 +209,12 @@ pub struct Preset {
     pub scopes: Vec<String>,
     pub imap: Endpoint,
     pub smtp: Endpoint,
-    /// How to register a client there
-    pub register: &'static str,
 }
 
 impl Preset {
     /// The providers the editor can fill in for: Google and Microsoft, as the built-in clients use them
     pub fn all() -> Vec<Preset> {
-        let from = |kind, name, issuer, register| {
+        let from = |kind, name, issuer| {
             let provider = Provider::builtin(kind);
             Preset {
                 name,
@@ -224,38 +222,16 @@ impl Preset {
                 scopes: provider.scopes,
                 imap: provider.imap,
                 smtp: provider.smtp,
-                register,
             }
         };
         vec![
-            from(
-                ProviderKind::Google,
-                "Google",
-                "https://accounts.google.com",
-                "In Google Cloud Console, create an OAuth client of the type Desktop app, with the scope \
-                 https://mail.google.com/ on its consent screen. While the app is in testing, only its test users \
-                 can sign in.",
-            ),
+            from(ProviderKind::Google, "Google", "https://accounts.google.com"),
             from(
                 ProviderKind::Microsoft,
                 "Microsoft",
                 "https://login.microsoftonline.com/common/v2.0",
-                "In Microsoft Entra, register an app with the platform Mobile and desktop applications, the redirect \
-                 URI http://localhost and public client flows allowed, and the delegated permissions \
-                 IMAP.AccessAsUser.All, SMTP.Send and offline_access. For your organization only, use \
-                 https://login.microsoftonline.com/<tenant ID>/v2.0 as the issuer.",
             ),
         ]
-    }
-
-    /// How to register a client with the provider of `issuer`: its preset's words, or those for any provider
-    pub fn register_hint(issuer: &str) -> &'static str {
-        let presets = Preset::all();
-        match ProviderKind::of_issuer(issuer) {
-            ProviderKind::Google => presets[0].register,
-            ProviderKind::Microsoft => presets[1].register,
-            ProviderKind::Oidc => Preset::other().register,
-        }
     }
 
     /// The empty form: any OpenID Connect provider
@@ -271,8 +247,6 @@ impl Preset {
             scopes: ["openid", "email", "offline_access"].map(String::from).to_vec(),
             imap: endpoint.clone(),
             smtp: Endpoint { port: 465, ..endpoint },
-            register: "Register a native (public) client with the redirect URI below; the provider has to allow \
-                       any port on it (RFC 8252). Add the scope the provider gives mail access with.",
         }
     }
 
@@ -661,14 +635,8 @@ mod tests {
                 (&preset.scopes, &preset.imap, &preset.smtp),
                 (&builtin.scopes, &builtin.imap, &builtin.smtp)
             );
-            assert!(
-                issuer(preset.issuer).is_ok() && !preset.register.contains("  "),
-                "{preset:?}"
-            );
+            assert!(issuer(preset.issuer).is_ok(), "{preset:?}");
         }
-        assert!(Preset::register_hint("https://login.microsoftonline.com/contoso/v2.0").contains("Entra"));
-        assert!(Preset::register_hint("https://accounts.google.com").contains("Desktop app"));
-        assert!(Preset::register_hint("https://sso.example.edu").contains("native (public) client"));
         let other = Provider::builtin(ProviderKind::Oidc);
         assert!(other.client_id.is_empty() && other.scopes.contains(&"openid".to_string()));
     }

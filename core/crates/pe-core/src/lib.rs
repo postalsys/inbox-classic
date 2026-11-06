@@ -50,7 +50,9 @@ use requests::Requests;
 pub use secrets::PasswordStore;
 use secrets::Secrets;
 use sign_in_apps::{Discoveries, with_provider};
-pub use sign_in_apps::{SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_text};
+pub use sign_in_apps::{
+    SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_text, register_hint,
+};
 pub use text::{
     HiddenUnread, ReaderState, account_label, account_title, downloading_text, folder_kind, folder_name, format_size,
     hidden_unread, list_counts, messages, reader_page, retry_note, saved_text,

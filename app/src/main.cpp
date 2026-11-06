@@ -80,6 +80,14 @@ void ShowFolderName() {
 }
 
 // the toolbar's Junk button, Not Junk for a message in a Junk folder
+// where the main toolbar's buttons end with all of them shown, and which are separators (FitToolbar)
+struct ToolbarEdge {
+    int right;
+    bool separator;
+};
+std::vector<ToolbarEdge> g_toolbarEdges;
+void Layout();
+
 void UpdateJunkButton() {
     bool inJunk = g_mailbox.InJunk();
     int from = inJunk ? IDM_JUNK : IDM_NOT_JUNK, to = inJunk ? IDM_NOT_JUNK : IDM_JUNK;
@@ -93,8 +101,10 @@ void UpdateJunkButton() {
     info.pszText = label.data();
     info.iImage = inJunk ? ICON_MAIL_CHECKMARK : ICON_MAIL_PROHIBITED;
     SendMessageW(g_toolbar, TB_SETBUTTONINFOW, from, reinterpret_cast<LPARAM>(&info));
-    // the row of buttons as wide as their labels again
+    // the row of buttons as wide as their labels again, and the Find box and the buttons fitted to it
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
+    g_toolbarEdges.clear();
+    Layout();
 }
 
 // the toolbar's buttons for one message off while several are selected
@@ -607,15 +617,53 @@ Panes Measure() {
     return {area, treeWidth, listHeight};
 }
 
+// the Find box gives way to the buttons' longer words in other languages, down to its least width; the buttons that
+// still run under it are hidden from the end, as their commands are all in the menus too
+void FitToolbar(const RECT& bar) {
+    // by index: the separators share the command id 0
+    auto stateOf = [](int index) {
+        TBBUTTON button = {};
+        SendMessageW(g_toolbar, TB_GETBUTTON, index, reinterpret_cast<LPARAM>(&button));
+        return button;
+    };
+    auto setHidden = [&](int index, bool hidden) {
+        BYTE now = stateOf(index).fsState;
+        BYTE wanted = hidden ? (now | TBSTATE_HIDDEN) : (now & ~TBSTATE_HIDDEN);
+        if (wanted != now) {
+            TBBUTTONINFOW info = {sizeof(info), TBIF_BYINDEX | TBIF_STATE};
+            info.fsState = wanted;
+            SendMessageW(g_toolbar, TB_SETBUTTONINFOW, index, reinterpret_cast<LPARAM>(&info));
+        }
+    };
+    int buttons = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
+    // where each button ends with all of them shown, measured again only when the buttons change
+    if (static_cast<int>(g_toolbarEdges.size()) != buttons) {
+        g_toolbarEdges.clear();
+        for (int i = 0; i < buttons; i++) {
+            setHidden(i, false);
+        }
+        for (int i = 0; i < buttons; i++) {
+            RECT item = {};
+            SendMessageW(g_toolbar, TB_GETITEMRECT, i, reinterpret_cast<LPARAM>(&item));
+            g_toolbarEdges.push_back({static_cast<int>(item.right), (stateOf(i).fsStyle & BTNS_SEP) != 0});
+        }
+    }
+    int findLeft = g_mailbox.PlaceFind(bar, buttons > 0 ? g_toolbarEdges.back().right : 0) - Scale(4);
+    // from the end: every button under the box, and a separator that would be left last
+    int shown = buttons;
+    while (shown > 0 && (g_toolbarEdges[shown - 1].right > findLeft || (shown < buttons && g_toolbarEdges[shown - 1].separator))) {
+        shown--;
+    }
+    for (int i = 0; i < buttons; i++) {
+        setHidden(i, i >= shown);
+    }
+}
+
 void Layout() {
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
     RECT bar;
     GetClientRect(g_toolbar, &bar);
-    // where the buttons end: the Find box gives way to their longer words in other languages
-    int buttons = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
-    RECT last = {};
-    SendMessageW(g_toolbar, TB_GETITEMRECT, buttons > 0 ? buttons - 1 : 0, reinterpret_cast<LPARAM>(&last));
-    g_mailbox.PlaceFind(bar, last.right);
+    FitToolbar(bar);
     MoveWindow(g_folderBar, 0, bar.bottom, bar.right, FolderBarHeight(), TRUE);
     SendMessageW(g_status, WM_SIZE, 0, 0);
     Panes panes = Measure();

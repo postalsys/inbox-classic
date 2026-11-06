@@ -2929,5 +2929,5 @@ pub unsafe extern "C" fn pe_sign_in_redirect_uri(issuer: *const c_char) -> *mut 
 pub unsafe extern "C" fn pe_sign_in_register_hint(issuer: *const c_char) -> *mut c_char {
     // SAFETY: as the caller guarantees
     let issuer = unsafe { arg(issuer) }.unwrap_or_default().to_string();
-    guard(move || into_c_string(pe_oauth::Preset::register_hint(issuer.trim()).to_string())).unwrap_or(null_mut())
+    guard(move || into_c_string(pe_core::register_hint(issuer.trim()))).unwrap_or(null_mut())
 }

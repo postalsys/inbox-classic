@@ -2990,6 +2990,18 @@ public static bool HasIcon(IntPtr window) {
         Check ($english.Count -eq 0) "no menu item is left in English ($($english -join ' | '))"
         $buttons = @($IDM_NEW_MAIL, $IDM_REPLY, $IDM_REPLY_ALL, $IDM_FORWARD, $IDM_PRINT, $IDM_DELETE, $IDM_SYNC | ForEach-Object { ToolbarText $main $_ })
         Check (@($buttons | Where-Object { -not $_.StartsWith('[') }).Count -eq 0) "no toolbar button is left in English ($($buttons -join ' | '))"
+        # the longer words take room from the Find box down to its least width, and a button that would still run
+        # under it is hidden (its command is in the menus)
+        $findLeft = 0; $box = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($main, 205), [ref]$box); $findLeft = $box.Left
+        $under = @()
+        foreach ($bar in [Native.Win]::FindDescendants($main, 'ToolbarWindow32')) {
+            foreach ($id in $IDM_NEW_MAIL, $IDM_REPLY, $IDM_REPLY_ALL, $IDM_FORWARD, $IDM_PRINT, $IDM_DELETE, 127, $IDM_SYNC, $IDM_MARK_READ, $IDM_MARK_UNREAD) {
+                $r = [Native.Win]::RemoteRect($bar, 0x0433, [IntPtr]$id, 0)
+                if ($r.Right -gt $r.Left -and $r.Right -gt $findLeft -and $r.Left -lt $box.Right -and $r.Top -lt $box.Bottom -and $r.Bottom -gt $box.Top) { $under += $id }
+            }
+        }
+        Check ($under.Count -eq 0) "no toolbar button runs under the Find box ($($under -join ', '))"
         $folders = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)))
         Check (@($folders | Where-Object { $_.StartsWith('[') }).Count -ge 3) "the special folders and All Inboxes are pseudo ($($folders -join ', '))"
         CheckPseudo $main 'the main window' $true

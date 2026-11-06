@@ -355,7 +355,8 @@ public:
     bool OnNotify(NMHDR* header, LRESULT& result);
     bool OnCommand(WORD id, WORD code);
     // the Find box: placed at the right of the toolbar row, focused (Ctrl+Shift+F), cleared (Esc)
-    void PlaceFind(const RECT& row, int buttonsRight);
+    // places the Find box at the right of the toolbar row, as wide as the buttons leave room for; returns its left
+    int PlaceFind(const RECT& row, int buttonsRight);
     // the UI test's stand-ins for what the system does: a drag of the selected messages dropped into the folder `dir`
     // as Explorer drops it (the files written, -1 for none), and files dropped onto the tree item `item`; the effect
     int TestDragOut(const std::wstring& dir);
