@@ -1165,11 +1165,10 @@ public final class Mailbox: NSObject {
     private func withDownloads<T>(title: String,
                                   _ work: @escaping (OpaquePointer, OpaquePointer, inout UnsafeMutablePointer<CChar>?) -> T,
                                   then done: @escaping @MainActor (T) -> Void) {
-        let picked = refs(of: selection)
-        let selection = Handed(value: newSelection(picked))
+        let selection = Handed(value: newSelection(refs(of: selection)))
         let handle = Handed(value: core.handle)
-        if !pe_selection_all_downloaded(core.handle, selection.value) {
-            status(taken(pe_downloading_text(UInt64(picked.count))) ?? "")
+        if let downloading = taken(pe_selection_downloading_text(core.handle, selection.value)) {
+            status(downloading)
         }
         inBackground({ () -> (T, String?) in
             defer { pe_selection_free(selection.value) }

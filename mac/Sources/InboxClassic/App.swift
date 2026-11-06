@@ -374,13 +374,13 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         // the main window's commands work on what it shows; with the keyboard in a text field Delete is the field's
         let typing = NSApp.keyWindow?.firstResponder is NSText
         // the commands of one message are off for several
-        if command.needsOne && !main.mailbox.hasOne {
+        if command.needsOne && !main.mailbox.hasOne || command.needsSome && !main.mailbox.hasSelection {
             return false
         }
         switch command {
         case .delete: return !typing && main.mailbox.hasSelection
         case .markRead, .markUnread, .flag: return main.mailbox.hasSelection
-        case .move, .copy, .forward, .saveAs: return main.mailbox.hasSelection
+        case .move, .copy: return main.mailbox.hasSelection
         case .undo: return main.core.undoLabel != nil
         case .junk: return main.mailbox.hasSelection && !main.mailbox.inJunk
         case .notJunk: return main.mailbox.hasSelection && main.mailbox.inJunk

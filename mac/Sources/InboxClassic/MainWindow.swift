@@ -480,7 +480,8 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         guard let id = Item(rawValue: item.itemIdentifier.rawValue), let command = command(of: id) else { return true }
         switch command {
         case _ where command.needsOne: return mailbox.hasOne
-        case .delete, .junk, .markRead, .markUnread, .forward: return mailbox.hasSelection
+        case _ where command.needsSome: return mailbox.hasSelection
+        case .delete, .junk, .markRead, .markUnread: return mailbox.hasSelection
         default: return true
         }
     }
