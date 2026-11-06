@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="et">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'" />
+        <meta name="color-scheme" content="light" />
+        <title>Inbox Classicu spikker</title>
+        <style>
+            html {
+                background: #fff;
+            }
+            body {
+                font:
+                    10pt Tahoma,
+                    Arial,
+                    sans-serif;
+                margin: 12px 18px;
+                color: #000;
+                max-width: 760px;
+            }
+            h1 {
+                font-size: 16pt;
+                color: #036;
+                margin: 4px 0 8px;
+            }
+            h2 {
+                font-size: 12pt;
+                color: #036;
+                border-bottom: 1px solid #9ab;
+                margin: 22px 0 6px;
+                padding-bottom: 2px;
+            }
+            h3 {
+                font-size: 10pt;
+                margin: 14px 0 4px;
+            }
+            p,
+            li {
+                line-height: 1.45;
+            }
+            ul,
+            ol {
+                margin: 4px 0 8px 22px;
+                padding: 0;
+            }
+            kbd {
+                font:
+                    9pt Tahoma,
+                    Arial,
+                    sans-serif;
+                border: 1px solid #999;
+                border-bottom-width: 2px;
+                background: #f4f4f4;
+                padding: 0 4px;
+            }
+            table {
+                border-collapse: collapse;
+                margin: 6px 0;
+            }
+            td,
+            th {
+                border: 1px solid #bbb;
+                padding: 3px 8px;
+                text-align: left;
+                vertical-align: top;
+            }
+            th {
+                background: #e8eef4;
+            }
+            .note {
+                background: #fffbe6;
+                border: 1px solid #e0c97a;
+                padding: 6px 10px;
+                margin: 8px 0;
+            }
+            code {
+                font:
+                    9pt Consolas,
+                    monospace;
+                background: #f4f4f4;
+                padding: 0 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Inbox Classicu spikker</h1>
+        <p>
+            Inbox Classic loeb ja saadab e-posti IMAP- ja SMTP-kontodelt: Gmail, Outlook.com, Fastmail, teie ettevõtte meiliserver ja enamik teisi. See
+            hoiab teie e-postist koopiat selles arvutis, nii et juba alla laaditud kirju saab lugeda ka ilma ühenduseta.
+        </p>
+
+        <h2>Sisukord</h2>
+        <ol>
+            <li>Konto lisamine</li>
+            <li>Kirjade lugemine</li>
+            <li>Pildid, lingid ja manused</li>
+            <li>Kirjutamine, vastamine ja edastamine</li>
+            <li>Uue posti toomine</li>
+            <li>Kiirklahvid</li>
+            <li>Tehisintellekti agendid</li>
+            <li>Kui miski ei tööta</li>
+            <li>Kus teie e-posti ja paroole hoitakse</li>
+        </ol>
+
+        <h2>1. Konto lisamine</h2>
+        <p>Esimesel käivitamisel küsib Inbox Classic kontot. Hiljem uue lisamiseks valige <b>Fail &gt; Uus konto</b>. Igal käivitamisel avab see esimese
+            konto sisendkausta, kus on valitud uusim kiri, või kahe või enama konto korral <b>Kõik sisendkaustad</b>, kus on valitud uusim kiri neist
+            kõigist.</p>
+        <ol>
+            <li>
+                Gmaili, Google Workspace'i, Outlook.com-i või Microsoft 365 jaoks klõpsake <b>Logi sisse Google'iga</b> või <b>Logi sisse Microsoftiga</b> ja
+                logige sisse avanevas brauseriaknas. See on kõik: konto on see, kuhu sisse logisite, ja kannab teie nime Google'is või Microsoftis, kui te ise
+                nime ei sisestanud. Vt allpool <i>Gmail ja Outlook.com</i>. Hägune nupp on selles arvutis välja lülitatud; selle all olev <b>Miks?</b> ütleb,
+                miks.
+            </li>
+            <li>
+                Oma sisselogimisrakendusega sisselogimiseks (vt allpool <i>Teie oma sisselogimisrakendus</i>) klõpsake <b>Muud sisselogimisvõimalused</b> ja
+                valige see või <b>Lisa sisselogimisrakendus</b>. Sisestage kõigepealt oma aadress, siis algab teenusepakkuja leht sellega.
+            </li>
+            <li>Mis tahes muu konto puhul sisestage oma nimi nii, nagu teised peaksid seda nägema, ja oma e-posti aadress ning klõpsake <b>Edasi</b>.</li>
+            <li>
+                Inbox Classic otsib teie meiliteenuse pakkuja sätted: teenusepakkujalt, kes teie domeeni e-posti haldab, teie domeeni DNS-kirjetest, teie
+                teenusepakkuja sättefailist, Thunderbirdi teenusepakkujate loendist ja Exchange'i puhul Microsoft Autodiscoverist. See võtab mõne sekundi;
+                <b>Loobu</b> jätab selle vahele. Google'i või Microsofti aadressile pakutakse ka siin nende sisselogimisnuppu.
+            </li>
+            <li>Kui teie teenusepakkuja tahab tavalise parooli asemel rakenduse parooli, ütleb Inbox Classic seda ja pakub avada selle juhised.</li>
+            <li>
+                Sisestage oma parool, kontrollige leitud serverisätteid ja klõpsake <b>Valmis</b>. Kui midagi ei leitud, täidab see tavapärased nimed
+                (<code>imap.</code> ja <code>smtp.</code>, millele järgneb teie domeen); võrrelge neid teenusepakkuja antud teabega.
+            </li>
+        </ol>
+        <h3>Konto muutmine või eemaldamine</h3>
+        <p>
+            <b>Fail &gt; Kontod</b> loetleb teie kontod. <b>Atribuudid</b> (või topeltklõps) muudab konto nime, aadressi, servereid ja parooli; jätke parool
+            tühjaks, et see alles jätta. <b>Eemalda</b> (või klahv <kbd>Del</kbd>) võtab konto Inbox Classicust välja koos selle jaoks alla laaditud posti ja
+            salvestatud parooliga; serveris olev post jääb alles. <b>Lisa</b> lisab veel ühe konto.
+        </p>
+        <h3>Gmail ja Outlook.com</h3>
+        <p>Need teenusepakkujad ei võta meiliprogrammidelt teie tavalist parooli vastu. Kas:</p>
+        <ul>
+            <li>
+                logige sisse veebibrauseri kaudu nupuga <b>Logi sisse Google'iga</b> või <b>Logi sisse Microsoftiga</b>: teie parool sisestatakse Google'i või
+                Microsofti enda lehel ja Inbox Classic ei näe seda kunagi (Microsoft 365 organisatsioon peab võib-olla Inbox Classicu esmalt lubama: Microsoft
+                näitab siis <i>Vaja on administraatori kinnitust</i> ja Inbox Classic ütleb teile aadressi, kus teie administraator selle kinnitab); või
+            </li>
+            <li>
+                looge oma konto turvasätetes <b>rakenduse parool</b> (Google: <i>Turvalisus &gt; Kaheastmeline kinnitamine &gt; Rakenduste paroolid</i>;
+                Microsoft: <i>Turvalisus &gt; Täpsemad turbesuvandid &gt; Rakenduse paroolid</i>), sisestage oma aadress, klõpsake <b>Edasi</b>, siis
+                <b>Kasuta rakenduse parooli</b> ja sisestage tavalise parooli asemel rakenduse parool.
+            </li>
+        </ul>
+        <h3>Teie oma sisselogimisrakendus</h3>
+        <p>
+            Brauseri kaudu sisselogimine kasutab teenusepakkuja juures registreeritud OAuth-klienti. Inbox Classicul on oma kliendid Google'i ja Microsofti
+            jaoks. Google lubab sisse logida ainult Inbox Classicu testkasutajatel, kuni Google on rakenduse kinnitanud, seetõttu on <b>Logi sisse
+            Google'iga</b> algselt välja lülitatud. Saate registreerida oma kliendi (oma Google Cloudi projektiga, oma Microsoft Entra rentnikuga või mis tahes
+            OpenID Connecti toetava teenusepakkuja juures) ja lisada selle sisselogimisrakendusena:
+        </p>
+        <ol>
+            <li>Avage <b>Fail &gt; Kontod</b> ja klõpsake <b>Sisselogimisrakendused</b>, seejärel <b>Lisa</b>.</li>
+            <li>
+                Klõpsake pärast <i>Täida</i> nuppu <b>Google</b> või <b>Microsoft</b>, et täita väljaandja, õigused ja serverid, või sisestage need muu
+                teenusepakkuja jaoks. All olev kast ütleb, kuidas seal klienti registreerida, ja nimetab registreeritava ümbersuunamis-URI; <b>Kopeeri</b>
+                kopeerib selle.
+            </li>
+            <li>
+                Sisestage kliendi ID ja kliendi saladus, kui teenusepakkuja selle andis (seda hoitakse <!--os:windows-->Windowsi mandaadihalduris<!--/os--><!--os:mac-->teie võtmehoidjas<!--/os--><!--os:linux-->teie võtmehoidjas<!--/os--> ja seda ei näidata enam kunagi).
+                <b>Kontrolli</b> loeb teenusepakkuja sätted, et näha, kas väljaandja on õige; <b>OK</b> teeb seda enne salvestamist samuti.
+            </li>
+            <li>Lisage konto nupuga <b>Muud sisselogimisvõimalused</b> lehe <b>Fail &gt; Uus konto</b> esimesel sammul.</li>
+        </ol>
+        <p>
+            Jaotises <b>Sisselogimisrakendused</b> näitab iga rakenduse märkeruut, ka sisseehitatud rakenduste puhul, kas seda pakutakse uutele kontodele.
+            Märkimata rakendus jäetakse välja; kontod, mis sellega juba sisse logivad, töötavad edasi. Rakenduse saab eemaldada, kui ükski konto seda enam ei
+            kasuta. Konto <b>Atribuudid</b> ütlevad, millega see sisse logib. Kui meiliserver lükkab sisselogimisrakenduse loa tagasi, kontrollige, et selle
+            õigused (scopes) annavad juurdepääsu e-postile.
+        </p>
+        <h3>Turvasätted</h3>
+        <table>
+            <tr>
+                <th>Säte</th>
+                <th>Tähendus</th>
+            </tr>
+            <tr>
+                <td>SSL/TLS</td>
+                <td>Ühendus on algusest peale krüptitud. Tavaliselt port 993 IMAP-i ja 465 SMTP jaoks.</td>
+            </tr>
+            <tr>
+                <td>STARTTLS</td>
+                <td>
+                    Ühendus krüptitakse kohe pärast avamist. Tavaliselt port 143 IMAP-i ja 587 SMTP jaoks. Inbox Classic ei jätka, kui server krüptimist ei
+                    paku.
+                </td>
+            </tr>
+            <tr>
+                <td>Puudub (krüptimata)</td>
+                <td>
+                    Teie parool ja post liiguvad võrgus kõigile loetavana. Kasutage seda ainult oma arvutis või võrgus oleva serveri puhul; Inbox Classic
+                    hoiatab enne kasutamist.
+                </td>
+            </tr>
+        </table>
+
+        <h2>2. Kirjade lugemine</h2>
+        <p>
+            Aknal on kolm osa: teie kontod ja kaustad vasakul, valitud kausta kirjad üleval paremal ja valitud kiri nende all. Lohistage osade vahelisi
+            piire, et muuta nende suurust.
+        </p>
+        <ul>
+            <li>
+                Igal kaustal on oma ikoon ja lugemata kirjadega kaustad on <b>paksus kirjas</b>, nime järel lugemata kirjade arv. Kokku pandud konto või kokku
+                pandud kaust, milles on kaustu, on paksus kirjas koos nende kaustade lugemata kirjadega, mida see peidab (Rämpspost ja Kustutatud kirjad ei
+                lähe arvesse), nii et uus post pole kunagi silmist kadunud. Paanide kohal olev hall riba ja akna pealkiri nimetavad valitud kausta.
+            </li>
+            <li>
+                Kahe või enama konto korral näitab kaustade loendi ülaosas olev <b>Kõik sisendkaustad</b> iga konto sisendkausta posti ühes loendis, uusim
+                eespool, veeruga <b>Konto</b>, mis nimetab iga kirja konto. Vastamine, edastamine, teisaldamine ja kustutamine toimivad kirjale tema enda
+                kontos ning uus kiri algab valitud kirja kontost. <b>Märgi kõik loetuks</b> märgib seal iga sisendkausta loetuks. Selle paremklõpsumenüüs on
+                ainult <b>Märgi kõik loetuks</b>: sinna ei saa kaustu luua ega kirju importida, sest see pole ühe konto kaust.
+            </li>
+            <li>
+                Lugemata kirjad on loendis <b>paksus kirjas</b>. Kiri märgitakse loetuks, kui seda on sekund aega
+                näidatud. Kasutage nuppe <b>Märgi loetuks</b> ja <b>Märgi lugemata</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd> märgib loetuks), et seda ise muuta.
+                <b>Redigeeri &gt; Märgi kõik loetuks</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>) või kausta paremklõpsumenüü <b>Märgi kõik
+                loetuks</b> märgib kausta iga kirja loetuks.
+            </li>
+            <li>Kirjaklambri veerg näitab, millistel kirjadel on manused, lipu veerg, millised on lipuga märgitud.</li>
+            <li>
+                Logo avaldava kaubamärgi (BIMI) post näitab seda logo päise kõrval, kuid ainult siis, kui teie meiliserver kontrollis, et post tuleb tõesti
+                kaubamärgi domeenist (DMARC), ja kinnitas logo. Logo tuleb koos kirjaga või, kui mitte, kaubamärgi https-aadressilt üks kord käivituse kohta;
+                see joonistatakse selles arvutis kontrollitud SVG-failist ja muud sellest ei laadita.
+            </li>
+            <li>
+                Kalendrikutse (kirjas olev <code>.ics</code>) näitab teksti kohal oma sündmust: mis see on (kutse, muudatus või tühistamine), millal teie
+                ajavööndis, kus, kes seda korraldab ja kuidas see kordub. <b>Ava kalendris</b> avab selle teie kalendriprogrammis, kus saate selle vastu võtta.
+            </li>
+            <li>
+                Postiloendi kirjal, mis ütleb, kuidas loendist lahkuda, on päise paremas servas <b>Loobu tellimusest</b>. Sellel klõpsamine ütleb, mis juhtub,
+                ja küsib enne. Kui loendi server allkirjastas kirja selleks (DKIM, nagu RFC 8058 nõuab), palub Inbox Classic loendil lõpetada, ilma lehe ja
+                kirjata; muul juhul kirjutab see kirja, mida loend soovib, et saaksite selle saata, või avab loendi lehe teie brauseris.
+            </li>
+            <li>
+                <b>Fail &gt; Atribuudid</b> (<!--os:windows,linux--><kbd>Alt</kbd>+<kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd><!--/os-->) näitab kirja Interneti-päiseid: kes selle saatis, milliste serverite kaudu ja
+                millal. <b>Vaade &gt; Kirja lähtekood</b><!--os:windows,linux--> (<kbd>Ctrl</kbd>+<kbd>U</kbd>)<!--/os--> näitab kogu kirja nii, nagu server
+                seda hoiab: iga päis ja iga osa tekstina. Selle akna <b>Salvesta nimega</b> salvestab selle <code>.eml</code>-failina.
+            </li>
+            <li>
+                Paremklõpsake kirja<!--os:windows,linux--> (või vajutage menüüklahvi)<!--/os-->, et näha, mida sellega teha saab: vastata, edastada, märkida
+                loetuks või lugemata, märkida lipuga, märkida rämpspostiks, teisaldada kausta, kustutada, salvestada või printida ning vaadata selle
+                lähtekoodi või atribuute.
+            </li>
+            <li>Klõpsake veeru päist, et selle järgi sortida; uuesti klõpsates pöördub järjekord ümber.</li>
+            <li>
+                Tööriistariba paremas servas olev otsinguväli (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) leiab tippimise ajal kirju iga konto igast
+                kaustast nende teema, saatjate ja adressaatide, failinimede ja teksti sõnade järgi. Kollane riba loendi kohal ütleb, mitu kirja leiti ja
+                milliste sõnade järgi, paremal <b>Tühjenda otsing</b>, ja kaustariba ütleb, kust otsitakse. Tulemused on üks loend veeruga <b>Kaust</b>, mis
+                ütleb, kus iga kiri on. Sõnad sobivad sõnade algusest (<code>eelar</code> leiab <i>eelarve</i>) ning rõhumärgid ja suurtähed pole olulised.
+                <kbd>Esc</kbd>, välja lõpus olev <b>&times;</b> või välja tühjendamine näitab taas kausta, nagu ka kausta valimine.
+            </li>
+            <li>
+                Otsing mõistab sedasama, mida Gmaili otsingukast, nii et <code>is:unread</code> loetleb lugemata kirjad ja <code>in:inbox</code> otsib ainult
+                sisendkaustast: <code>"täpne fraas"</code>, <code>-sõna</code> välja jätmiseks, <code>see OR teine</code>, <code>from:</code>,
+                <code>to:</code> (ka <code>cc:</code>, <code>bcc:</code>), <code>subject:</code>, <code>filename:</code>, <code>is:unread</code>,
+                <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>, <code>has:attachment</code>, <code>in:inbox</code>,
+                <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:anywhere</code> või <code>in:</code> ja
+                kausta nimi, <code>before:2025/01/31</code>, <code>after:2025/01/01</code>, <code>older_than:2d</code> (või <code>3m</code>,
+                <code>1y</code>), <code>newer_than:1m</code>, <code>larger:5M</code> ja <code>smaller:100k</code>. Osutage otsinguväljale, et neid näha.
+            </li>
+            <li>
+                Otsing töötab selles arvutis, serverilt küsimata. Inbox Classic loeb selle jaoks taustal iga kirja teksti, uusimad eespool, tuues ainult
+                teksti (ei manuseid ega pilte ning kirjad jäävad lugemata). Kohe pärast konto lisamist leitakse kirjad kohe teema, inimeste ja failinimede
+                järgi ning teksti järgi siis, kui see on loetud; kaustariba ütleb, mitu on veel lugeda.
+            </li>
+            <li>
+                <b>Kustuta</b> (tööriistariba, <b>Redigeeri &gt; Kustuta kiri</b> või loendis klahv <kbd>Del</kbd>) teisaldab kirja kausta <b>Kustutatud
+                kirjad</b>; sealt kustutamine eemaldab selle pärast küsimist jäädavalt. (UIDPLUS-laiendita serveris eemaldab jäädav kustutamine ka selle kausta
+                teised kirjad, mille mõni teine meiliprogramm on kustutatuks märkinud.) <b>Redigeeri &gt; Teisalda kausta</b>
+                (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) teisaldab selle teise kausta, sama või mõne teise konto omasse, ja <b>Redigeeri &gt; Kopeeri kausta</b> kopeerib selle sinna. Mõlemad näitavad
+                kõigi kontode kaustu puuna: kausta leidmiseks tippige osa nimest selle kohal olevasse kasti, viimati kasutatud kaustad on üleval jaotises
+                <b>Viimati kasutatud</b> ja <b>Uus kaust</b> loob uue. Ka selle lohistamine loendist puu kaustale teisaldab selle; hoidke lahti laskmisel
+                all <kbd>Ctrl</kbd>, et see hoopis kopeerida. Teise kontosse minev kiri kopeeritakse koos lippude ja kuupäevaga esmalt selle konto
+                serverisse ja alles siis eemaldatakse oma serverist, nii et see ei lähe teel kunagi kaduma: olekuriba ütleb, kui kaugel see on, ja kui ühendus
+                katkeb või te programmi sulgete, jätkub see järgmisel kirjade kontrollimisel. (Gmaili kaustast teisaldatud kiri jääb Gmaili kausta Kõik
+                kirjad, sest Gmail hoiab iga kirja seal.) Kaust, mille kohal seda hetke hoiate, avaneb ja puu kerib oma ülemises ja
+                alumises servas; <kbd>Esc</kbd> tühistab lohistamise. Tööriistariba <b>Rämps</b> (<b>Kiri &gt; Märgi rämpspostiks</b>,
+                <kbd>Ctrl</kbd>+<kbd>J</kbd>) teisaldab kirja kausta <b>Rämpspost</b> ja ütleb serverile, et see on rämpspost (märksõna <code>$Junk</code>,
+                millest rämpspostifiltrid õpivad); kaustas Rämpspost on nupp <b>Pole rämps</b>, mis teisaldab selle tagasi sisendkausta. <b>Kiri &gt; Lipuga
+                märgi kiri</b> märgib selle lipuga (<b>!</b> loendis) või eemaldab lipu. <b>Kiri &gt; Lipp</b> märgib selle värvilise lipuga: punane, oranž, kollane,
+                roheline, sinine, lilla või hall, nagu Apple Mail, nii et ühes määratud värv paistab ka teises (teised meiliprogrammid näitavad tavalist
+                lippu). <b>Eemalda lipp</b> eemaldab lipu ja selle värvi. Kõik see toimub ka serveris, nii et teie teised meiliprogrammid näevad
+                seda.
+            </li>
+            <li>
+                Mitme kirjaga korraga töötamiseks hoidke all <kbd>Ctrl</kbd> ja klõpsake igaüht, või klõpsake esimest ja hoidke viimase klõpsamisel all
+                <kbd>Shift</kbd> (<kbd>Shift</kbd> koos nooleklahvidega teeb sama); <b>Redigeeri &gt; Vali kõik</b> (<kbd>Ctrl</kbd>+<kbd>A</kbd>) valib loendi
+                kõik kirjad. Lugemispaan ütleb siis, mitu on valitud ja mitu neist on lugemata või lipuga, ning olekuriba loendab need samuti. Loetuks ja
+                lugemata märkimine, lipp, rämpspost, kustutamine ja kausta teisaldamine toimivad kõigile ning ühe lohistamine lohistab kõik; vastamine,
+                printimine ja muu selline toimib ainult ühele kirjale.
+            </li>
+            <li>
+                <b>Redigeeri &gt; Võta tagasi</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) võtab tagasi viimase teisaldamise, kustutamise või rämpspostiks märkimise,
+                olenemata kirjade arvust: need lähevad tagasi kaustadesse, kust nad tulid, ja on seal valitud, kui nad on tagasi. Menüü ütleb, mida see tagasi võtab (<b>Võta teisaldamine
+                tagasi</b>), ja olekuriba ütleb, mis tehti. Jäädavalt kustutatud kiri ei saa tagasi tulla.
+            </li>
+            <li>
+                <b>Fail &gt; Kaust</b> või paremklõps kaustade loendis loob valitud kausta <b>Uue kausta</b> (konto ülaossa, kui konto on valitud) ning
+                <b>nimetab ümber</b> või <b>kustutab</b> valitud kausta. Kausta kustutamine kustutab pärast küsimist selles olevad kirjad. Sisendkaust ja
+                erikaustad (Saadetud kirjad, Mustandid, Kustutatud kirjad ja muud sellised) jäävad, nagu nad on.
+            </li>
+            <li>Kirja kohal on selle saatja, kuupäev, adressaadid ja teema.</li>
+        </ul>
+
+        <h3>Varasemad kirjad vastustes</h3>
+        <p>
+            Vastus kannab sageli kaasas sellele eelnenud kirju. Inbox Classic paneb need kokku nupu <b>&bull;&bull;&bull;</b> taha saatja kirjutatu alla;
+            klõpsake seda, et neid näha. Kokku pannakse ainult tekst, mis on selgelt varasem kiri, kõik ebakindel jääb nähtavale.
+        </p>
+
+        <h3>Veel alla laadimata kirjad</h3>
+        <p>
+            Kiri laaditakse alla esimesel avamisel, nii et kohe pärast konto lisamist pole enamik kirju veel siin. Selle saatja ja teema ilmuvad kohe; kui
+            kirjaga läheb kauem kui hetk, ütleb paan, et seda laaditakse alla. Kui meiliserveriga ei saa ühendust, ütleb paan, miks, ja kiri laaditakse ise
+            alla, kui konto on taas võrgus. Kohe proovimiseks
+            <!--os:windows-->klõpsake kirja kohal olevat riba<!--/os--><!--os:mac,linux-->klõpsake <b>Proovi uuesti</b><!--/os-->.
+        </p>
+
+        <h2>3. Pildid, lingid ja manused</h2>
+        <h3>Pildid</h3>
+        <p>
+            Pilte, mida saatja hoiab Internetis, alla ei laadita, sest nende allalaadimine ütleb saatjale, et avasite kirja, millal ja kust. Kirjas endas
+            saadetud pilte näidatakse. Kui kirjas on selliseid pilte, ütleb selle kohal olev kollane riba, et need blokeeriti; usaldusväärses kirjas nende
+            nägemiseks klõpsake riba (või <b>Vaade &gt; Laadi pildid alla</b>).
+        </p>
+        <h3>Lingid ja skriptid</h3>
+        <p>
+            Kirjades olevaid skripte ei käivitata kunagi. Lingil klõpsamine avab selle teie veebibrauseris, mitte kunagi Inbox Classicus. Enne kui sisestate
+            parooli lehel, kuhu jõudsite e-kirja kaudu, kontrollige brauseris aadressi.
+        </p>
+        <h3>Manused</h3>
+        <p>
+            Kui kirjal on manused, ilmub kirja päise paremasse serva kirjaklamber koos failide arvuga. Klõpsake seda ja valige fail selle salvestamiseks või
+            <b>Salvesta manused</b>, et salvestada need kõik kausta (sama nimega fail, mis seal juba on, jääb alles ja uus saab numbri). Failid salvestatakse,
+            neid ei avata kunagi Inbox Classicust. See pakub turvalise failinime: kaustanimed, märgid, mida <!--os:windows-->Windows ei luba<!--/os--><!--os:mac,linux-->Windows
+            ja teised süsteemid ei luba<!--/os-->, ning märgid, mis võivad panna nime näima teistsugusena, kui see on, eemaldatakse.
+        </p>
+        <div class="note">
+            Avage manuseid ainult inimestelt, kellelt neid ootate. Programm (<code>.exe</code>, <code>.js</code>, <code>.vbs</code>, <code>.msi</code>,
+            <code>.bat</code>, <code>.scr</code>) või dokument, mis palub teil „lubada sisu“, võib teie arvuti üle võtta.
+        </div>
+
+        <h3>Kirjade salvestamine, printimine ja importimine</h3>
+        <ul>
+            <li>
+                <b>Fail &gt; Salvesta nimega</b> salvestab kuvatud kirja <code>.eml</code>-failina, mida teised meiliprogrammid avavad. Mitme valitud
+                kirjaga küsib see kausta ja salvestab igaühe sinna, nimetatuna teema järgi; juba olemasolevat faili ei asendata kunagi (uus kannab siis nime
+                <i>Lõuna (2).eml</i>).
+            </li>
+            <li>
+                Lohistage kirjad loendist töölauale või kaustaaknasse<!--os:mac--> Finderis<!--/os-->, et salvestada need sinna samamoodi
+                <code>.eml</code>-failidena. Kiri, mida pole veel alla laaditud, laaditakse selleks alla.
+            </li>
+            <li>
+                <b>Fail &gt; Impordi kirjad</b> paneb <code>.eml</code>-failid valitud kausta, ka serveris. <code>.eml</code>-failide lohistamine kaustaloendi kaustale teeb sama. Faili, mis pole kiri, ei impordita.
+            </li>
+            <li>
+                <b>Fail &gt; Prindi</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) avab kuvatud kirja prindieelvaate Inbox Classicu kohal olevas aknas: valige printer (või
+                salvestamine PDF-ina), koopiad ja lehed ning kiri prinditakse koos saatja, kuupäeva, adressaatide ja teemaga. Aken sulgub, kui printimine on
+                tehtud või tühistatud.
+            </li>
+        </ul>
+
+        <h2>4. Kirjutamine, vastamine ja edastamine</h2>
+        <ul>
+            <li><b>Loo kiri</b> (<kbd>Ctrl</kbd>+<kbd>N</kbd>) alustab uut kirja valitud kausta kontost.</li>
+            <li>
+                <b>Koopia</b> ja <b>Pimekoopia</b> ilmuvad ainult siis, kui neis on keegi; rea <b>Adressaat</b> lõpus olevad nupud <b>Koopia</b> ja
+                <b>Pimekoopia</b> <!--os:windows,linux-->(<kbd>Alt</kbd>+<kbd>C</kbd>, <kbd>Alt</kbd>+<kbd>B</kbd>) <!--/os-->avavad need. Rida <b>Manus</b>
+                ilmub, kui fail on manustatud.
+            </li>
+            <li>
+                Kirjutate alati vormingu käeulatuses. Kiri ilma igasuguse vorminguta (ei paksu kirja, värve, loendeid, linke ega pilte) läheb lihttekstina,
+                mida iga meiliprogramm näitab ühtemoodi; vorminguga läheb see HTML-ina koos lihttekstikoopiaga. Vastus või edastus järgib originaali:
+                lihttekstkirjale on see samuti lihttekst (originaal tsiteeritud märgiga <b>&gt;</b>), kui te midagi ei vorminda, HTML-kirjale on see HTML.
+            </li>
+            <li>
+                <b>Edasta</b> mitme valitud kirjaga kirjutab ühe uue kirja, millele on need kõik lisatud <code>.eml</code>-failidena, teemaks esimese kirja
+                teema.
+            </li>
+            <li>
+                <b>Saatja</b> kirja ülaosas näitab, kellelt see läheb: konto nimi ja aadress. Vastus või edastus läheb kontost, kus algne kiri on. Mitme konto
+                korral valige seal teine; kiri saadetakse siis selle konto serveritega ja hoitakse selle saadetud kirjades (või mustandites). Nimi, mida teised
+                näevad, on konto kuvatav nimi, mida muudetakse jaotises <b>Fail &gt; Kontod &gt; Atribuudid</b>.
+            </li>
+            <li>
+                <b>Vasta</b> (<kbd>Ctrl</kbd>+<kbd>R</kbd>) vastab saatjale, <b>Vasta kõigile</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>) kõigile,
+                kellele kiri läks, <b>Edasta</b> (<kbd>Ctrl</kbd>+<kbd>F</kbd>) saadab selle edasi.
+            </li>
+            <li>
+                Vastuses on algne kiri kokku pandud teie teksti all oleva nupu <b>&bull;&bull;&bull;</b> taha, nii et näete ainult seda, mida kirjutate.
+                Klõpsake seda (või valige kõik klahvidega <kbd>Ctrl</kbd>+<kbd>A</kbd>), et tuua see oma teksti, kus saate seda lühendada; see saadetakse teie
+                vastusega igal juhul. Edastuses on originaal tekstis algusest peale, sest just seda te saadate.
+            </li>
+            <li>
+                Teksti kohal olev riba vormindab seda: font ja selle suurus, <b>P</b>aks, <b>K</b>aldkiri, <b>A</b>llakriipsutus (või
+                <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd>), <b>Värv</b>, nummerdatud ja täpploendid,
+                taande vähendamine ja suurendamine (<b>&laquo;</b> ja <b>&raquo;</b>), joondus, <b>Link</b> veebiaadressi jaoks valitud tekstil, <b>Joon</b>
+                eraldusjoone jaoks ja <b>Pilt</b> pildi tekstisse panemiseks (või lohistage pildifail <!--os:windows-->Explorerist<!--/os--><!--os:mac-->Finderist<!--/os--><!--os:linux-->failihaldurist<!--/os-->
+                teksti: see läheb sinna, kuhu selle lahti lasete). Pildid lähevad kirja sees, mitte eraldi manustena. Kiri läheb vormindatud HTML-ina koos
+                lihttekstikoopiaga meiliprogrammidele, mis näitavad ainult teksti.
+            </li>
+            <li>
+                Lingid: kui kursor on lingis või hiir selle kohal, näitab all olev olekuriba, kuhu see viib. <kbd>Ctrl</kbd>+klõps lingil avab selle teie
+                brauseris. <b>Link</b> (või <kbd>Ctrl</kbd>+<kbd>K</kbd>) lingil näitab selle aadressi muutmiseks; tühjendage aadress, et link eemaldada ja
+                selle tekst alles jätta. Paremklõpsake linki, et valida <b>Ava link</b>, <b>Muuda linki</b> ja <b>Eemalda link</b>.
+            </li>
+            <li>Valesti kirjutatud sõnad on alla kriipsutatud; paremklõpsake sõna soovituste nägemiseks. Lõikamine, kopeerimine ja kleepimine töötavad nagu igal pool.</li>
+            <li>
+                Eraldage mitu aadressi väljadel <b>Adressaat</b>, <b>Koopia</b> ja <b>Pimekoopia</b> komadega, näiteks
+                <code>Mari Tamm &lt;mari@example.com&gt;, juhan@example.com</code>. Pange komaga nimi jutumärkidesse:
+                <code>"Tamm, Mari" &lt;mari@example.com&gt;</code>.
+            </li>
+            <li>Väljal <b>Pimekoopia</b> olevad inimesed saavad kirja, kuid teised adressaadid neid ei näe.</li>
+            <li>
+                <b>Manusta</b> lisab faile, nagu ka nende lohistamine <!--os:windows-->Explorerist<!--/os--><!--os:mac-->Finderist<!--/os--><!--os:linux-->failihaldurist<!--/os-->
+                aadressiväljadele või faili, mis pole pilt, tekstile. Need on loetletud real <b>Manus</b> koos suurusega; ühe eemaldamiseks valige see ja
+                vajutage <kbd>Del</kbd> või paremklõpsake seda ja valige <b>Eemalda</b>. Failid loetakse kirja saatmisel.
+            </li>
+            <li>
+                <b>Saada</b> paneb kirja <b>väljundkausta</b> ja saadab selle kohe. Kui see ei saa minna (ühendust pole, server lükkab selle tagasi), jääb see
+                väljundkausta ja läheb järgmise <b>saatmise ja vastuvõtmisega</b>; midagi kirjutatust ei lähe kaduma. <b>Saada/Võta vastu</b> töötab ka ise
+                iga kümne minuti järel. Põhiakna olekuriba keskosa ütleb, mis teie saadetava postiga toimub: <i>Saatmine</i>, kui see läheb, <i>Saadetud</i>
+                koos teema ja kellaajaga, kui server selle vastu võttis, või et see ootab väljundkaustas. <b>Tööriistad &gt; Väljundkaust</b> loetleb, mis ootab
+                ja miks see ei läinud, ning saadab või kustutab selle.
+            </li>
+            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> saadab tekstist.</li>
+            <li>
+                <b>Salvesta</b> (või <kbd>Ctrl</kbd>+<kbd>S</kbd>) hoiab kirja konto kaustas <b>Mustandid</b>, serveris, et see hiljem lõpetada; uuesti
+                salvestamine asendab varem salvestatud koopia. Kirja olekuriba ütleb <i>Salvestatud mustanditesse</i> koos kellaajaga, kui server selle
+                kätte sai, või miks seda ei salvestatud. Muudatustega kirja sulgemisel küsitakse, kas muudatused salvestada: <b>Jah</b> salvestab selle
+                mustanditesse, <b>Ei</b> viskab selle ära, <b>Loobu</b> läheb selle juurde tagasi. Edasi kirjutamiseks topeltklõpsake mustandit kaustas
+                Mustandid (või valige see ja vajutage <kbd>Enter</kbd>): see avaneb koos adressaatide, teksti ja manustatud failidega. Kui see on saadetud,
+                eemaldatakse mustand kaustast Mustandid. Kiri, mida kirjutate, on omaette aken<!--os:windows--> tegumiribal<!--/os-->: saate minna tagasi
+                põhiaknasse ja posti lugeda, kuni see jääb avatuks. Inbox Classicu sulgemine sulgeb esmalt kirjad, mida kirjutate, ja küsib muudatustega kirjade
+                kohta.
+            </li>
+            <li>
+                <b>Saada</b> saadab kirja. Kui aadress on valesti kirjutatud või fail on kadunud, ütleb Inbox Classic seda ja jätab kirja avatuks, et saaksite
+                selle parandada. Iga saadetud kirja koopiat hoitakse kaustas <b>Saadetud kirjad</b>.
+            </li>
+            <li>
+                <b>E-posti lingid</b> (<code>mailto:</code>) veebilehtedel ja teistes programmides avavad Inbox Classicus uue kirja, kui see on teie
+                vaikimisi meiliprogramm: <b>Tööriistad &gt; Määra vaikimisi meiliprogrammiks</b> <!--os:windows-->avab Windowsi sätete lehe, kus selle
+                valite.<!--/os--><!--os:mac,linux-->teeb selle vaikeprogrammiks.<!--/os--> Lingi aadressid, teema ja tekst täidetakse; muud lingist ei
+                kasutata.
+            </li>
+            <li>
+                Väljadele <b>Adressaat</b>, <b>Koopia</b> või <b>Pimekoopia</b> tippimisel loetletakse inimesed, kes see võib olla: kõigepealt need, kellele
+                kirjutate kõige rohkem, siis need, kes teile kirjutavad; loend tunneb kõiki Inbox Classicus oleva posti inimesi (mitte rämpsposti). Valige
+                nooleklahvidega ja võtke üks klahviga <kbd>Enter</kbd> või <kbd>Tab</kbd> (või klõpsuga); <kbd>Esc</kbd> sulgeb loendi ja
+                <kbd>Shift</kbd>+<kbd>Del</kbd> eemaldab valitud inimese sealt jäädavalt.
+            </li>
+            <li>
+                <b>Allkiri</b> igale kontole: <b>Fail &gt; Kontod</b>, valige konto, seejärel <b>Allkiri</b>. See kirjutatakse sama vorminguga nagu kiri
+                (paks kiri, värvid, lingid, pilt). Konto uued kirjad, vastused ja edastused algavad sellega, kirjutamiseks mõeldud tühja rea ja tavapärase rea
+                <code>--</code> all, tsiteeritud kirja kohal. Teise konto valimine väljal <b>Saatja</b> paneb selle asemele selle konto allkirja.
+            </li>
+        </ul>
+
+        <h2>5. Uue posti toomine</h2>
+        <p>
+            Inbox Classic kontrollib iga kontot käivitamisel ja seejärel iga kümne minuti järel. Klõpsake <b>Saada/Võta vastu</b> või vajutage <!--os:windows,linux--><kbd>F5</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd><!--/os-->,
+            et kohe kontrollida; nupu <b>Saada/Võta vastu</b> kõrval olev nool kontrollib üht kontot ja nupu <b>Loo kiri</b> kõrval olev alustab kirja teie
+            valitud kontost. All olev olekuriba näitab, mida see teeb, ja viimast probleemi, mis tal oli.
+        </p>
+        <p>
+            See jälgib ka iga konto sisendkausta, nii et uus post ilmub saabumisel, mitte alles järgmisel kontrollimisel. Kui selle aken pole esiplaanil,
+            ütleb teatis, kes kirjutas ja millest; klõpsake seda kirja avamiseks. <b>Tööriistad &gt; Teavita uuest postist</b> lülitab teatised välja ja
+            sisse.
+        </p>
+        <!--os:windows--><p>
+            Akna sulgemine jätab Inbox Classicu teavitusalale tööle, kus see jätkab posti kontrollimist; selle ikoon seal ütleb, mitu kirja on lugemata,
+            nagu ka arv tegumiriba nupul. Klõpsake ikooni, et see uuesti avada; paremklõpsake, et valida <b>Kontrolli uut posti</b> ja <b>Välju</b>.
+            <b>Fail &gt; Välju</b> lõpetab selle.
+        </p><!--/os--><!--os:mac--><p>
+            Akna sulgemine jätab Inbox Classicu Docki tööle, kus see jätkab posti kontrollimist; Docki ikoon näitab, mitu kirja on sisendkaustades lugemata.
+            Klõpsake Docki ikooni, et aken uuesti avada. <b>Inbox Classic &gt; Lõpeta Inbox Classic</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd>) lõpetab selle.
+        </p><!--/os--><!--os:linux--><p>
+            Akna sulgemine jätab Inbox Classicu ülemisele ribale tööle (Ubuntu näitab seal selle ikooni), kus see jätkab posti kontrollimist; ikooni menüüs on
+            <b>Ava Inbox Classic</b>, <b>Kontrolli uut posti</b> ja <b>Lõpeta</b> ning dokk näitab, mitu kirja on sisendkaustades lugemata. Kus töölaual
+            pole ikooni jaoks kohta, lõpetab akna sulgemine Inbox Classicu. Põhimenüü <b>Lõpeta</b> lõpetab selle.
+        </p><!--/os-->
+
+        <h2>6. Kiirklahvid</h2>
+        <table>
+            <tr>
+                <th>Klahvid</th>
+                <th>Toiming</th>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>F5</kbd></td>
+                <td>Kontrolli kõigi kontode uut posti</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td>
+                <td>Kontrolli kõigi kontode uut posti</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>N</kbd></td>
+                <td>Uus kiri</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>R</kbd></td>
+                <td>Vasta saatjale</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td>
+                <td>Vasta kõigile</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
+                <td>Edasta</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
+                <td>Edasta</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td>
+                <td>Märgi kiri loetuks</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd></td>
+                <td>Märgi kiri loetuks</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>A</kbd></td>
+                <td>Vali loendi kõik kirjad</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td>
+                <td>Võta tagasi viimane teisaldamine, kustutamine või rämpspostiks märkimine</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>J</kbd></td>
+                <td>Märgi kiri rämpspostiks</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd></td>
+                <td>Märgi kiri rämpspostiks</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+                <td>Märgi kausta kõik kirjad loetuks</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+                <td>Märgi kausta kõik kirjad loetuks</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
+                <td>Otsi kaustast kirju</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
+                <td>Otsi kaustast kirju</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>P</kbd></td>
+                <td>Prindi kiri</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Alt</kbd>+<kbd>Enter</kbd></td>
+                <td>Kirja päised (Atribuudid)</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd></td>
+                <td>Kirja päised (Atribuudid)</td>
+            </tr>
+            <!--/os--><!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>U</kbd></td>
+                <td>Kogu kiri (Kirja lähtekood)</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Del</kbd></td>
+                <td>Kustuta kiri (kirjade loendis)</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Del</kbd></td>
+                <td>Kustuta kiri (kirjade loendis)</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd></td>
+                <td>Teisalda kiri teise kausta</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td>
+                <td>Saada kirjutatav kiri</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
+                <td>Salvesta kirjutatav kiri mustanditesse</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd></td>
+                <td>Paks kiri, kaldkiri, allakriipsutus kirjutamisel</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>F1</kbd></td>
+                <td>See spikker</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>?</kbd></td>
+                <td>See spikker</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Tab</kbd></td>
+                <td>Liigu kaustade, kirjade loendi ja akna väljade vahel</td>
+            </tr>
+        </table>
+
+        <h2>7. Tehisintellekti agendid</h2>
+        <p>
+            Kui kasutate tehisintellekti agenti (Claude, Cursor või mõni muu Model Context Protocoli ehk MCP-d rääkiv programm), saate lasta sellel siin oma
+            posti lugeda ja korraldada. Inbox Classicus pole tehisintellekti ja midagi ei saadeta tehisintellekti teenusele: agent töötab ainult siis, kui
+            lasete selle programmi sisse, ja ainult teie valitud kontodega.
+        </p>
+        <ul>
+            <li>
+                <b>Ühendamine.</b> <b>Tööriistad &gt; Tehisintellekti agendid &gt; Kuidas agenti ühendada</b> annab read, mis lisada oma agendi sätetesse
+                (Claude Desktopi puhul: <b>Settings &gt; Developer &gt; Edit Config</b>). Agent käivitab Inbox Classicu võtmega <code>--mcp</code>, mis ühendab
+                selle töötava Inbox Classicuga või käivitab ühe taustal. Sellele pääsevad ligi ainult programmid, mis töötavad selles arvutis teie nime all.
+            </li>
+            <li>
+                <b>Esimesel korral</b>, kui programmi agent ühendub, küsib Inbox Classic teilt programmi nimetades, mida see teha tohib: lugeda posti; seda
+                korraldada (märkida loetuks, lipuga, rämpspostiks, teisaldada, kustutada kausta Kustutatud kirjad); kirjutada mustandeid, mille teie saadate;
+                ja saata posti, iga kiri alles pärast teie nõusolekut. Valige kontod, mida see näha tohib. <b>Ära luba</b> keelab programmi ja teilt selle
+                kohta enam ei küsita.
+            </li>
+            <li>
+                <b>Saatmine.</b> Iga kiri, mida agent saata soovib, näidatakse teile kõigepealt, iga adressaat aadressiga ja aadressid, kuhu te pole kunagi
+                kirjutanud, märgitud. <b>Saada</b> muutub aktiivseks hetke pärast; <b>Muuda enne</b> avab selle muutmiseks uues kirjas; <b>Ära saada</b> on
+                vaikevalik. Mida saadate, ootab 30 sekundit väljundkaustas, kus saate selle veel kustutada.
+            </li>
+            <li>
+                <b>Mis muutub</b>, ilmub akendesse kohe, justkui oleksite seda ise teinud. Agent ei kustuta kunagi midagi jäädavalt ega muuda kunagi teie
+                kontosätteid. Kirja lugemine ei märgi seda loetuks.
+            </li>
+            <li>
+                <b>Tööriistad &gt; Tehisintellekti agendid</b> loetleb programmid, mille lubasite või keelasite (<b>Muuda</b>, mida üks tohib teha, või
+                <b>Eemalda</b>, et teilt uuesti küsitaks), ja kõik, mida agendid tegid, uusimad eespool. <b>Võta tagasi</b> võtab tagasi lugemise oleku, lipu,
+                teisaldamise või kustutamise ja kirja, mis on veel väljundkaustas. <b>Luba tehisintellekti agentidel ühenduda</b> lülitab need kõik korraga
+                välja.
+            </li>
+            <li>
+                <b>Mõelge, mida palute.</b> Posti kirjutavad teised inimesed ja kiri võib proovida agenti millekski ära rääkida: teie posti edastama,
+                kustutama, kellelegi kirjutama. Inbox Classic peidab agentide eest teksti, mida kiri teie eest peidab, ja ütleb neile, et post pole juhised,
+                kuid agenti võib siiski petta. Lugege iga kiri, mida see saata soovib, enne nõustumist läbi ja laske agendil saata ainult siis, kui seda vajate.
+                Agent, millel on ka muid tööriistu (veebi sirvimine, teie failide lugemine), võib loetu nende kaudu edasi anda; Inbox Classic neid ei näe.
+            </li>
+        </ul>
+
+        <h2>8. Kui miski ei tööta</h2>
+        <h3>„authentication failed“ või Inbox Classic küsib uuesti parooli</h3>
+        <p>
+            Server lükkas parooli tagasi. Sisestage see uuesti; Gmaili ja Outlook.com-i puhul kasutage rakenduse parooli või logige sisse brauseri kaudu (vt
+            <i>Konto lisamine</i>). Kui teie teenusepakkuja küsib veebis sisselogimisel teist sammu, vajab see ka meiliprogrammide jaoks rakenduse parooli.
+            Brauseri kaudu sisse logiva konto puhul pakub Inbox Classic uuesti sisse logida.
+        </p>
+        <h3>„TLS error“ või sertifikaadiviga</h3>
+        <p>
+            Inbox Classic ei saanud kinnitada, et suhtleb õige serveriga, seega ei saatnud see teie parooli. Kontrollige konto sätetes serveri nime: see
+            peab olema nimi, mille jaoks serveri sertifikaat on tehtud (sageli <code>imap.teenusepakkuja.ee</code>, mitte teie oma domeen). Krüptitud
+            liiklust kontrollivas võrgus pöörduge selle administraatori poole.
+        </p>
+        <h3>„the server does not offer STARTTLS“</h3>
+        <p>
+            Konto on seatud STARTTLS-ile, kuid server ei pakkunud krüptimist. Proovige <b>SSL/TLS</b> pordil 993 (IMAP) või 465 (SMTP). Kui miski muu ei
+            tööta, ei saa serverit turvaliselt kasutada.
+        </p>
+        <h3>„the server takes the password only over an encrypted connection“</h3>
+        <p>
+            Väljuvate kirjade (SMTP) server on seatud valikule <b>Puudub (krüptimata)</b>. Teie parool on korras; muutke SMTP turvalisuseks <b>STARTTLS</b>
+            (port 587) või <b>SSL/TLS</b> (port 465).
+        </p>
+        <h3>„connection error“ või „the server did not answer in time“</h3>
+        <p>
+            Kontrollige oma Interneti-ühendust, serveri nime ja porti. Tulemüürid blokeerivad mõnikord meiliporte, eriti porti 25; kasutage saatmiseks
+            porti 465 või 587. Inbox Classic proovib järgmisel kontrollimisel uuesti.
+        </p>
+        <h3>Kiri, mida ei saa kuvada</h3>
+        <p>
+            Mõned kirjad on rikutud või üles ehitatud nii, et ükski meiliprogramm ei saa neid lugeda. Inbox Classic näitab kirja asemel märkust; ülejäänud
+            postile see ei mõju.
+        </p>
+
+        <h2>9. Kus teie e-posti ja paroole hoitakse</h2>
+        <ul>
+            <li>
+                Alla laaditud post ja kontosätted: <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->.
+                Teie post jääb ka serverisse; siinne koopia on kiireks ja võrguühenduseta lugemiseks.
+            </li>
+            <li>
+                Paroolid, brauseri kaudu sisselogimised ja sisselogimisrakenduste kliendisaladused: <!--os:windows-->Windowsi mandaadihaldur, nime
+                <b>Inbox Classic</b> all. Need on krüptitud teie Windowsi konto jaoks.<!--/os--><!--os:mac-->teie sisselogimise võtmehoidja, nime
+                <b>InboxClassic</b> all (Võtmehoidjale juurdepääs näitab neid). Need on krüptitud teie Maci konto jaoks.<!--/os--><!--os:linux-->teie
+                võtmehoidja (GNOME Keyring, Secret Service'i kaudu), nime <b>InboxClassic</b> all. Need on krüptitud teie sisselogimise jaoks. Ilma
+                võtmehoidjata hoitakse neid, kuni Inbox Classic suletakse.<!--/os-->
+            </li>
+            <!--os:windows--><li>Inbox Classicu desinstallimisel küsitakse, kas alla laaditud post eemaldada. Teie serverites olevat posti ei eemaldata kunagi.</li><!--/os--><!--os:mac--><li>Inbox Classicu eemaldamiseks lõpetage see ja teisaldage prügikasti; alla laaditud post jääb ülalnimetatud kausta, kuni kustutate ka selle. Teie serverites olevat posti ei eemaldata kunagi.</li><!--/os--><!--os:linux--><li>Paketi eemaldamine (<code>sudo apt remove inbox-classic</code>) jätab alla laaditud posti ülalnimetatud kausta, kuni kustutate ka selle. Teie serverites olevat posti ei eemaldata kunagi.</li><!--/os-->
+        </ul>
+        <p>
+            Testimiseks kasutab <!--os:windows--><code>InboxClassic.exe<!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"<!--/os--><!--os:linux--><code>inbox-classic<!--/os--> --store &lt;fail&gt;</code> teist postihoidlat,
+            <code>--memory-passwords</code> hoiab paroole ainult praeguse käivituse ajaks, <code>--pin-certificate &lt;fail&gt;</code> aktsepteerib süsteemi
+            usaldatute asemel ainult selles failis olevat serveri sertifikaati (PEM või DER) isesigneeritud sertifikaadiga testserveri jaoks ja
+            <code>--sign-in-page-file &lt;fail&gt;</code> kirjutab brauseri kaudu sisselogimise lehe sellesse faili, selle asemel et brauser avada.
+            <code>--mcp</code> on see, mida tehisintellekti agent käivitab (vt ülal); <code>--background</code> käivitab Inbox Classicu ilma aknata.
+        </p>
+    </body>
+</html>

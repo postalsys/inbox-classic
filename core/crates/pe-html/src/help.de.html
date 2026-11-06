@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'" />
+        <meta name="color-scheme" content="light" />
+        <title>Hilfe zu Inbox Classic</title>
+        <style>
+            html {
+                background: #fff;
+            }
+            body {
+                font:
+                    10pt Tahoma,
+                    Arial,
+                    sans-serif;
+                margin: 12px 18px;
+                color: #000;
+                max-width: 760px;
+            }
+            h1 {
+                font-size: 16pt;
+                color: #036;
+                margin: 4px 0 8px;
+            }
+            h2 {
+                font-size: 12pt;
+                color: #036;
+                border-bottom: 1px solid #9ab;
+                margin: 22px 0 6px;
+                padding-bottom: 2px;
+            }
+            h3 {
+                font-size: 10pt;
+                margin: 14px 0 4px;
+            }
+            p,
+            li {
+                line-height: 1.45;
+            }
+            ul,
+            ol {
+                margin: 4px 0 8px 22px;
+                padding: 0;
+            }
+            kbd {
+                font:
+                    9pt Tahoma,
+                    Arial,
+                    sans-serif;
+                border: 1px solid #999;
+                border-bottom-width: 2px;
+                background: #f4f4f4;
+                padding: 0 4px;
+            }
+            table {
+                border-collapse: collapse;
+                margin: 6px 0;
+            }
+            td,
+            th {
+                border: 1px solid #bbb;
+                padding: 3px 8px;
+                text-align: left;
+                vertical-align: top;
+            }
+            th {
+                background: #e8eef4;
+            }
+            .note {
+                background: #fffbe6;
+                border: 1px solid #e0c97a;
+                padding: 6px 10px;
+                margin: 8px 0;
+            }
+            code {
+                font:
+                    9pt Consolas,
+                    monospace;
+                background: #f4f4f4;
+                padding: 0 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Hilfe zu Inbox Classic</h1>
+        <p>
+            Inbox Classic liest und sendet E-Mail von IMAP- und SMTP-Konten: Gmail, Outlook.com, Fastmail, dem Mailserver Ihrer Firma und den meisten
+            anderen. Es behält eine Kopie Ihrer E-Mail auf diesem Computer, sodass Sie bereits Heruntergeladenes auch ohne Verbindung lesen können.
+        </p>
+
+        <h2>Inhalt</h2>
+        <ol>
+            <li>Ein Konto hinzufügen</li>
+            <li>E-Mail lesen</li>
+            <li>Bilder, Links und Anlagen</li>
+            <li>Schreiben, Antworten und Weiterleiten</li>
+            <li>Neue E-Mail abrufen</li>
+            <li>Tastenkombinationen</li>
+            <li>KI-Agenten</li>
+            <li>Wenn etwas nicht funktioniert</li>
+            <li>Wo Ihre E-Mail und Kennwörter aufbewahrt werden</li>
+        </ol>
+
+        <h2>1. Ein Konto hinzufügen</h2>
+        <p>Beim ersten Start fragt Inbox Classic nach einem Konto. Um später ein weiteres hinzuzufügen, wählen Sie <b>Datei &gt; Neues Konto</b>. Bei jedem
+            Start öffnet es den Posteingang des ersten Kontos mit der neuesten Nachricht ausgewählt, oder bei zwei oder mehr Konten <b>Alle Posteingänge</b>
+            mit der neuesten Nachricht aller Konten.</p>
+        <ol>
+            <li>
+                Für Gmail, Google Workspace, Outlook.com oder Microsoft 365 klicken Sie auf <b>Mit Google anmelden</b> oder <b>Mit Microsoft anmelden</b> und
+                melden sich im Browserfenster an, das sich öffnet. Das ist alles: Das Konto ist das, bei dem Sie sich angemeldet haben, und trägt Ihren Namen
+                bei Google oder Microsoft, sofern Sie keinen eingegeben haben. Siehe <i>Gmail und Outlook.com</i> unten. Eine blasse Schaltfläche ist auf diesem
+                Computer ausgeschaltet; <b>Warum?</b> darunter sagt, warum.
+            </li>
+            <li>
+                Um sich mit einer eigenen Anmelde-App anzumelden (siehe <i>Ihre eigene Anmelde-App</i> unten), klicken Sie auf <b>Weitere
+                Anmeldeoptionen</b> und wählen sie aus, oder auf <b>Anmelde-App hinzufügen</b>. Geben Sie zuerst Ihre Adresse ein, dann beginnt die Seite des
+                Anbieters damit.
+            </li>
+            <li>Für jedes andere Konto geben Sie Ihren Namen so ein, wie andere ihn sehen sollen, und Ihre E-Mail-Adresse, und klicken auf <b>Weiter</b>.</li>
+            <li>
+                Inbox Classic sucht die Einstellungen Ihres E-Mail-Anbieters: beim Anbieter, der die E-Mail Ihrer Domäne verarbeitet, in den DNS-Einträgen Ihrer
+                Domäne, in der Einstellungsdatei Ihres Anbieters, in der Anbieterliste von Thunderbird und für Exchange über Microsoft Autodiscover. Das dauert
+                einige Sekunden; <b>Abbrechen</b> überspringt es. Einer Adresse bei Google oder Microsoft wird auch hier deren Anmeldeschaltfläche angeboten.
+            </li>
+            <li>Wenn Ihr Anbieter statt Ihres normalen Kennworts ein App-Kennwort verlangt, sagt Inbox Classic das und bietet an, die Anleitung zu öffnen.</li>
+            <li>
+                Geben Sie Ihr Kennwort ein, prüfen Sie die gefundenen Servereinstellungen und klicken Sie auf <b>Fertig stellen</b>. Wurde nichts gefunden,
+                trägt es die üblichen Namen ein (<code>imap.</code> und <code>smtp.</code> gefolgt von Ihrer Domäne); vergleichen Sie sie mit den Angaben Ihres
+                Anbieters.
+            </li>
+        </ol>
+        <h3>Ein Konto ändern oder entfernen</h3>
+        <p>
+            <b>Datei &gt; Konten</b> listet Ihre Konten auf. <b>Eigenschaften</b> (oder ein Doppelklick) ändert Namen, Adresse, Server und Kennwort eines
+            Kontos; lassen Sie das Kennwort leer, um es zu behalten. <b>Entfernen</b> (oder die Taste <kbd>Del</kbd>) nimmt das Konto mit der dafür
+            heruntergeladenen E-Mail und seinem gespeicherten Kennwort aus Inbox Classic heraus; die E-Mail auf dem Server bleibt. <b>Hinzufügen</b> fügt ein
+            weiteres Konto hinzu.
+        </p>
+        <h3>Gmail und Outlook.com</h3>
+        <p>Diese Anbieter nehmen Ihr normales Kennwort von E-Mail-Programmen nicht an. Entweder:</p>
+        <ul>
+            <li>
+                Sie melden sich mit <b>Mit Google anmelden</b> oder <b>Mit Microsoft anmelden</b> über Ihren Webbrowser an: Ihr Kennwort wird auf der eigenen
+                Seite von Google oder Microsoft eingegeben, und Inbox Classic sieht es nie (eine Microsoft 365-Organisation muss Inbox Classic eventuell
+                erst zulassen: Microsoft zeigt dann <i>Administratorgenehmigung erforderlich</i>, und Inbox Classic nennt Ihnen die Adresse, unter der Ihr
+                Administrator es genehmigt); oder
+            </li>
+            <li>
+                Sie erstellen in den Sicherheitseinstellungen Ihres Kontos ein <b>App-Kennwort</b> (Google: <i>Sicherheit &gt; Bestätigung in zwei Schritten
+                &gt; App-Passwörter</i>; Microsoft: <i>Sicherheit &gt; Erweiterte Sicherheitsoptionen &gt; App-Kennwörter</i>), geben Ihre Adresse ein,
+                klicken auf <b>Weiter</b>, dann auf <b>App-Kennwort verwenden</b>, und geben das App-Kennwort statt Ihres normalen ein.
+            </li>
+        </ul>
+        <h3>Ihre eigene Anmelde-App</h3>
+        <p>
+            Die Anmeldung über den Browser verwendet einen beim Anbieter registrierten OAuth-Client. Inbox Classic hat eigene für Google und Microsoft. Google
+            lässt nur die Testbenutzer von Inbox Classic damit anmelden, bis Google die App überprüft hat, daher ist <b>Mit Google anmelden</b> anfangs
+            ausgeschaltet. Sie können einen eigenen Client registrieren (mit Ihrem eigenen Google Cloud-Projekt, Ihrem Microsoft Entra-Mandanten oder bei
+            jedem Anbieter, der OpenID Connect unterstützt) und ihn als Anmelde-App hinzufügen:
+        </p>
+        <ol>
+            <li>Öffnen Sie <b>Datei &gt; Konten</b> und klicken Sie auf <b>Anmelde-Apps</b>, dann auf <b>Hinzufügen</b>.</li>
+            <li>
+                Klicken Sie nach <i>Ausfüllen für</i> auf <b>Google</b> oder <b>Microsoft</b>, um Aussteller, Bereiche und Server einzutragen, oder geben Sie
+                sie für einen anderen Anbieter ein. Das Feld unten sagt, wie Sie dort einen Client registrieren, und nennt die zu registrierende
+                Umleitungs-URI; <b>Kopieren</b> kopiert sie.
+            </li>
+            <li>
+                Geben Sie die Client-ID ein, und das Client-Geheimnis, falls der Anbieter Ihnen eines gegeben hat (es wird in <!--os:windows-->der Windows-Anmeldeinformationsverwaltung<!--/os--><!--os:mac-->Ihrem Schlüsselbund<!--/os--><!--os:linux-->Ihrem Schlüsselbund<!--/os--> aufbewahrt und nie wieder angezeigt).
+                <b>Prüfen</b> liest die Einstellungen des Anbieters, um festzustellen, ob der Aussteller stimmt; <b>OK</b> tut das vor dem Speichern ebenfalls.
+            </li>
+            <li>Fügen Sie das Konto mit <b>Weitere Anmeldeoptionen</b> auf der ersten Seite von <b>Datei &gt; Neues Konto</b> hinzu.</li>
+        </ol>
+        <p>
+            In <b>Anmelde-Apps</b> sagt das Kontrollkästchen jeder App, auch der eingebauten, ob sie für neue Konten angeboten wird. Eine App ohne Häkchen
+            wird weggelassen; die Konten, die sich bereits damit anmelden, funktionieren weiter. Eine App kann entfernt werden, sobald kein Konto sie mehr
+            verwendet. <b>Eigenschaften</b> eines Kontos sagt, womit es sich anmeldet. Wenn der Mailserver das Token einer Anmelde-App ablehnt, prüfen Sie,
+            ob ihre Bereiche (Scopes) Zugriff auf E-Mail geben.
+        </p>
+        <h3>Sicherheitseinstellungen</h3>
+        <table>
+            <tr>
+                <th>Einstellung</th>
+                <th>Bedeutung</th>
+            </tr>
+            <tr>
+                <td>SSL/TLS</td>
+                <td>Die Verbindung ist von Anfang an verschlüsselt. Meist Port 993 für IMAP und 465 für SMTP.</td>
+            </tr>
+            <tr>
+                <td>STARTTLS</td>
+                <td>
+                    Die Verbindung wird gleich nach dem Öffnen verschlüsselt. Meist Port 143 für IMAP und 587 für SMTP. Inbox Classic bricht ab, wenn der
+                    Server keine Verschlüsselung anbietet.
+                </td>
+            </tr>
+            <tr>
+                <td>Keine (unverschlüsselt)</td>
+                <td>
+                    Ihr Kennwort und Ihre E-Mail sind für jeden im Netzwerk lesbar. Verwenden Sie das nur für einen Server auf Ihrem eigenen Computer oder in
+                    Ihrem eigenen Netzwerk; Inbox Classic warnt vorher.
+                </td>
+            </tr>
+        </table>
+
+        <h2>2. E-Mail lesen</h2>
+        <p>
+            Das Fenster hat drei Teile: Ihre Konten und Ordner links, die Nachrichten des ausgewählten Ordners oben rechts und die ausgewählte Nachricht
+            darunter. Ziehen Sie die Grenzen dazwischen, um ihre Größe zu ändern.
+        </p>
+        <ul>
+            <li>
+                Jeder Ordner hat sein Symbol, und Ordner mit ungelesenen Nachrichten erscheinen <b>fett</b>, mit der Zahl der ungelesenen Nachrichten nach
+                dem Namen. Ein zugeklapptes Konto oder ein zugeklappter Ordner mit Unterordnern ist fett mit den ungelesenen Nachrichten der Ordner, die er
+                verbirgt (Junk-E-Mail und Gelöschte Objekte zählen nicht), sodass neue E-Mail nie aus dem Blick gerät. Die graue Leiste über den Bereichen
+                und der Fenstertitel nennen den ausgewählten Ordner.
+            </li>
+            <li>
+                Bei zwei oder mehr Konten zeigt <b>Alle Posteingänge</b> oben in der Ordnerliste die E-Mail aller Posteingänge in einer Liste, neueste zuerst,
+                mit einer Spalte <b>Konto</b>, die das Konto jeder Nachricht nennt. Antworten, Weiterleiten, Verschieben und Löschen wirken auf eine Nachricht
+                in ihrem eigenen Konto, und eine neue Nachricht beginnt mit dem Konto der ausgewählten. <b>Alle als gelesen markieren</b> markiert dort jeden
+                Posteingang als gelesen. Sein Kontextmenü hat nur <b>Alle als gelesen markieren</b>: Darin können keine Ordner erstellt und keine Nachrichten
+                importiert werden, da es kein Ordner eines einzelnen Kontos ist.
+            </li>
+            <li>
+                Ungelesene Nachrichten sind in der Liste <b>fett</b>. Eine Nachricht wird als
+                gelesen markiert, nachdem sie eine Sekunde lang angezeigt wurde. Mit <b>Als gelesen markieren</b> und <b>Als ungelesen markieren</b>
+                (<kbd>Ctrl</kbd>+<kbd>Q</kbd> markiert als gelesen) ändern Sie das selbst. <b>Bearbeiten &gt; Alle als gelesen markieren</b>
+                (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>) oder <b>Alle als gelesen markieren</b> im Kontextmenü eines Ordners markiert jede Nachricht
+                des Ordners als gelesen.
+            </li>
+            <li>Die Spalte mit der Büroklammer zeigt, welche Nachrichten Anlagen haben, die Spalte mit der Fahne, welche gekennzeichnet sind.</li>
+            <li>
+                E-Mail einer Marke, die ein Logo veröffentlicht (BIMI), zeigt dieses Logo neben dem Kopf, aber nur, wenn Ihr Mailserver geprüft hat, dass die
+                E-Mail wirklich von der Domäne der Marke kommt (DMARC), und das Logo bestätigt hat. Das Logo kommt mit der Nachricht oder, falls nicht, einmal
+                pro Programmlauf von der https-Adresse der Marke; es wird auf diesem Computer aus einer geprüften SVG-Datei gezeichnet, und sonst wird nichts
+                davon geladen.
+            </li>
+            <li>
+                Eine Kalendereinladung (eine <code>.ics</code> in der Nachricht) zeigt ihren Termin über dem Text: was sie ist (Einladung, Änderung oder
+                Absage), wann in Ihrer Ortszeit, wo, wer sie organisiert und wie sie sich wiederholt. <b>Im Kalender öffnen</b> öffnet sie in Ihrem
+                Kalenderprogramm, wo Sie sie annehmen können.
+            </li>
+            <li>
+                Eine Nachricht einer Mailingliste, die sagt, wie man sie verlässt, hat <b>Abbestellen</b> rechts in ihrem Kopf. Ein Klick darauf sagt, was
+                geschehen wird, und fragt vorher. Hat der Server der Liste die Nachricht dafür signiert (DKIM, wie RFC 8058 es verlangt), bittet Inbox Classic
+                die Liste ohne Seite oder Nachricht, aufzuhören; sonst schreibt es die Nachricht, die die Liste möchte, damit Sie sie senden, oder öffnet die
+                Seite der Liste in Ihrem Browser.
+            </li>
+            <li>
+                <b>Datei &gt; Eigenschaften</b> (<!--os:windows,linux--><kbd>Alt</kbd>+<kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd><!--/os-->) zeigt die Internetkopfzeilen der Nachricht: wer sie gesendet hat,
+                über welche Server und wann. <b>Ansicht &gt; Quelltext der Nachricht</b><!--os:windows,linux--> (<kbd>Ctrl</kbd>+<kbd>U</kbd>)<!--/os--> zeigt
+                die ganze Nachricht so, wie der Server sie aufbewahrt: jede Kopfzeile und jeden Teil, als Text. <b>Speichern unter</b> in diesem Fenster
+                speichert sie als <code>.eml</code>-Datei.
+            </li>
+            <li>
+                Klicken Sie mit der rechten Maustaste auf eine Nachricht<!--os:windows,linux--> (oder drücken Sie die Menütaste)<!--/os-->, um zu sehen, was
+                Sie damit tun können: antworten, weiterleiten, als gelesen oder ungelesen markieren, kennzeichnen, als Junk markieren, in einen Ordner
+                verschieben, löschen, speichern oder drucken und ihren Quelltext oder ihre Eigenschaften ansehen.
+            </li>
+            <li>Klicken Sie auf eine Spaltenüberschrift, um danach zu sortieren; ein weiterer Klick kehrt die Reihenfolge um.</li>
+            <li>
+                Das Suchfeld rechts in der Symbolleiste (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) findet beim Tippen Nachrichten in jedem Ordner jedes
+                Kontos nach den Wörtern im Betreff, den Absendern und Empfängern, den Namen ihrer Dateien und ihrem Text. Eine gelbe Leiste über der Liste sagt,
+                wie viele es für welche Wörter gefunden hat, mit <b>Suche löschen</b> rechts, und die Ordnerleiste sagt, wo es sucht. Die Ergebnisse sind eine
+                Liste mit einer Spalte <b>Ordner</b>, die sagt, wo jede Nachricht ist. Wörter passen dort, wo Wörter beginnen (<code>bud</code> findet
+                <i>Budget</i>), und Akzente sowie Groß- und Kleinschreibung spielen keine Rolle. <kbd>Esc</kbd>, das <b>&times;</b> am Ende des Felds oder
+                das Leeren des Felds zeigt wieder den Ordner, ebenso die Wahl eines Ordners.
+            </li>
+            <li>
+                Die Suche versteht, was das Suchfeld von Gmail versteht, sodass <code>is:unread</code> die ungelesenen Nachrichten auflistet und
+                <code>in:inbox</code> nur im Posteingang sucht: <code>"genaue Wortgruppe"</code>, <code>-wort</code> zum Ausschließen,
+                <code>dies OR das</code>, <code>from:</code>, <code>to:</code> (auch <code>cc:</code>, <code>bcc:</code>), <code>subject:</code>,
+                <code>filename:</code>, <code>is:unread</code>, <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>,
+                <code>has:attachment</code>, <code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>,
+                <code>in:spam</code>, <code>in:anywhere</code> oder <code>in:</code> und der Name eines Ordners, <code>before:2025/01/31</code>,
+                <code>after:2025/01/01</code>, <code>older_than:2d</code> (oder <code>3m</code>, <code>1y</code>), <code>newer_than:1m</code>,
+                <code>larger:5M</code> und <code>smaller:100k</code>. Zeigen Sie auf das Suchfeld, um sie zu sehen.
+            </li>
+            <li>
+                Die Suche arbeitet auf diesem Computer, ohne den Server zu fragen. Inbox Classic liest dafür im Hintergrund den Text jeder Nachricht, die
+                neuesten zuerst, und holt nur den Text (keine Anlagen oder Bilder, und die Nachrichten bleiben ungelesen). Gleich nach dem Hinzufügen eines
+                Kontos werden Nachrichten sofort nach Betreff, Personen und Dateinamen gefunden und nach ihrem Text, sobald er gelesen ist; die Ordnerleiste
+                sagt, wie viele noch zu lesen sind.
+            </li>
+            <li>
+                <b>Löschen</b> (die Symbolleiste, <b>Bearbeiten &gt; Nachricht löschen</b> oder die Taste <kbd>Del</kbd> in der Liste) verschiebt die
+                Nachricht nach <b>Gelöschte Objekte</b>; dort gelöscht, wird sie nach einer Rückfrage endgültig entfernt. (Auf einem Server ohne die
+                Erweiterung UIDPLUS entfernt das endgültige Löschen auch die anderen Nachrichten dieses Ordners, die ein anderes E-Mail-Programm als
+                gelöscht markiert hat.) <b>Bearbeiten &gt; In Ordner verschieben</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) verschiebt sie in einen anderen Ordner, desselben Kontos oder eines anderen, und <b>Bearbeiten &gt; In Ordner kopieren</b> kopiert sie dorthin.
+                Beide zeigen die Ordner aller Konten in einem Baum: Geben Sie einen Teil eines Namens in das Feld darüber ein, um einen Ordner zu finden;
+                die zuletzt verwendeten Ordner stehen oben unter <b>Zuletzt verwendet</b>, und <b>Neuer Ordner</b> erstellt einen. Auch das Ziehen aus der
+                Liste auf einen Ordner im Baum verschiebt sie; halten Sie beim Loslassen <kbd>Ctrl</kbd> gedrückt, um sie stattdessen zu kopieren. Eine
+                Nachricht, die in ein anderes Konto geht, wird zuerst mit ihren Kennzeichnungen und ihrem Datum auf den Server dieses Kontos kopiert und erst
+                dann vom eigenen Server genommen, sodass sie unterwegs nie verloren geht: Die Statusleiste sagt, wie weit es ist, und wenn die Verbindung
+                abbricht oder Sie das Programm beenden, geht es mit dem nächsten Abrufen weiter. (Eine aus einem Gmail-Ordner verschobene Nachricht bleibt in
+                Gmails Alle Nachrichten, da Gmail jede Nachricht dort behält.) Ein Ordner, über dem Sie sie einen Moment halten, klappt auf, und der Baum rollt an seinem oberen
+                und unteren Rand; <kbd>Esc</kbd> bricht das Ziehen ab. <b>Junk</b> in der Symbolleiste (<b>Nachricht &gt; Als Junk markieren</b>,
+                <kbd>Ctrl</kbd>+<kbd>J</kbd>) verschiebt eine Nachricht nach <b>Junk-E-Mail</b> und sagt dem Server, dass sie Junk ist (das Schlüsselwort
+                <code>$Junk</code>, von dem Spamfilter lernen); in Junk-E-Mail heißt die Schaltfläche <b>Kein Junk</b> und verschiebt sie zurück in den
+                Posteingang. <b>Nachricht &gt; Nachricht kennzeichnen</b> kennzeichnet sie (<b>!</b> in der Liste) oder nimmt die Kennzeichnung weg. <b>Nachricht &gt; Kennzeichnung</b> kennzeichnet sie in einer
+                Farbe: Rot, Orange, Gelb, Grün, Blau, Lila oder Grau, wie Apple Mail, sodass eine in einem der beiden gesetzte Farbe im anderen erscheint
+                (andere E-Mail-Programme zeigen eine einfache Kennzeichnung). <b>Kennzeichnung löschen</b> nimmt die Kennzeichnung und ihre Farbe weg. All das
+                geschieht auch auf dem Server, sodass Ihre anderen E-Mail-Programme es sehen.
+            </li>
+            <li>
+                Um mit mehreren Nachrichten gleichzeitig zu arbeiten, halten Sie <kbd>Ctrl</kbd> gedrückt und klicken Sie jede an, oder klicken Sie die
+                erste an und halten Sie <kbd>Shift</kbd> gedrückt, während Sie die letzte anklicken (<kbd>Shift</kbd> mit den Pfeiltasten tut dasselbe);
+                <b>Bearbeiten &gt; Alles auswählen</b> (<kbd>Ctrl</kbd>+<kbd>A</kbd>) wählt jede Nachricht der Liste aus. Der Lesebereich sagt dann, wie
+                viele ausgewählt sind und wie viele davon ungelesen oder gekennzeichnet sind, und die Statusleiste zählt sie ebenfalls. Als gelesen und als
+                ungelesen markieren, Kennzeichnen, Junk, Löschen und In Ordner verschieben wirken auf alle, und das Ziehen einer davon zieht alle; Antworten,
+                Drucken und Ähnliches wirken nur auf eine Nachricht.
+            </li>
+            <li>
+                <b>Bearbeiten &gt; Rückgängig</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) macht das letzte Verschieben, Löschen oder Markieren als Junk rückgängig,
+                ganz gleich, wie viele Nachrichten es waren: Sie kehren in die Ordner zurück, aus denen sie kamen, und sind dort ausgewählt, sobald sie zurück sind. Das Menü sagt, was es rückgängig macht
+                (<b>Verschieben rückgängig machen</b>), und die Statusleiste sagt, was getan wurde. Eine endgültig gelöschte Nachricht kann nicht
+                zurückkommen.
+            </li>
+            <li>
+                <b>Datei &gt; Ordner</b> oder ein Rechtsklick in der Ordnerliste erstellt einen <b>Neuen Ordner</b> im ausgewählten Ordner (oben in einem
+                Konto, wenn das Konto ausgewählt ist) und <b>benennt</b> den ausgewählten Ordner <b>um</b> oder <b>löscht</b> ihn. Das Löschen eines
+                Ordners löscht nach einer Rückfrage die Nachrichten darin. Der Posteingang und die besonderen Ordner (Gesendete Objekte, Entwürfe, Gelöschte
+                Objekte und dergleichen) bleiben, wie sie sind.
+            </li>
+            <li>Über der Nachricht stehen ihr Absender, Datum, Empfänger und Betreff.</li>
+        </ul>
+
+        <h3>Frühere Nachrichten in Antworten</h3>
+        <p>
+            Eine Antwort trägt oft die Nachrichten vor ihr mit sich. Inbox Classic klappt sie hinter einer Schaltfläche <b>&bull;&bull;&bull;</b> unter
+            dem weg, was der Absender geschrieben hat; klicken Sie darauf, um sie zu sehen. Nur Text, der eindeutig eine frühere Nachricht ist, wird
+            weggeklappt, alles Unsichere bleibt sichtbar.
+        </p>
+
+        <h3>Noch nicht heruntergeladene Nachrichten</h3>
+        <p>
+            Eine Nachricht wird beim ersten Öffnen heruntergeladen, daher sind gleich nach dem Hinzufügen eines Kontos die meisten Nachrichten noch nicht
+            hier. Absender und Betreff erscheinen sofort; dauert die Nachricht länger als einen Moment, sagt der Bereich, dass sie heruntergeladen wird. Ist
+            der Mailserver nicht erreichbar, sagt der Bereich warum, und die Nachricht wird von selbst heruntergeladen, sobald das Konto wieder online ist.
+            Um es sofort zu versuchen,
+            <!--os:windows-->klicken Sie auf die Leiste über der Nachricht<!--/os--><!--os:mac,linux-->klicken Sie auf <b>Erneut versuchen</b><!--/os-->.
+        </p>
+
+        <h2>3. Bilder, Links und Anlagen</h2>
+        <h3>Bilder</h3>
+        <p>
+            Bilder, die der Absender im Internet bereithält, werden nicht heruntergeladen, weil das Herunterladen dem Absender verrät, dass Sie die Nachricht
+            geöffnet haben, wann und von wo. Bilder, die in der Nachricht mitgeschickt wurden, werden angezeigt. Hat eine Nachricht solche Bilder, sagt eine
+            gelbe Leiste darüber, dass sie blockiert wurden; um sie bei einer Nachricht zu sehen, der Sie vertrauen, klicken Sie auf die Leiste (oder
+            <b>Ansicht &gt; Bilder herunterladen</b>).
+        </p>
+        <h3>Links und Skripte</h3>
+        <p>
+            Skripte in Nachrichten laufen nie. Ein Klick auf einen Link öffnet ihn in Ihrem Webbrowser, nie in Inbox Classic. Bevor Sie auf einer Seite, die
+            Sie über eine E-Mail erreicht haben, ein Kennwort eingeben, prüfen Sie die Adresse in Ihrem Browser.
+        </p>
+        <h3>Anlagen</h3>
+        <p>
+            Hat eine Nachricht Anlagen, erscheint rechts im Nachrichtenkopf eine Büroklammer mit der Zahl der Dateien. Klicken Sie darauf und wählen Sie
+            eine Datei, um sie zu speichern, oder <b>Anlagen speichern</b>, um alle in einem Ordner zu speichern (eine gleichnamige Datei dort bleibt
+            erhalten, und die neue bekommt eine Nummer). Dateien werden gespeichert, nie aus Inbox Classic geöffnet. Es schlägt einen sicheren Dateinamen
+            vor: Ordnernamen, Zeichen, die <!--os:windows-->Windows<!--/os--><!--os:mac,linux-->Windows und andere Systeme<!--/os--> nicht erlauben, und
+            Zeichen, die einen Namen anders aussehen lassen können, als er ist, werden entfernt.
+        </p>
+        <div class="note">
+            Öffnen Sie Anlagen nur von Personen, von denen Sie sie erwarten. Ein Programm (<code>.exe</code>, <code>.js</code>, <code>.vbs</code>,
+            <code>.msi</code>, <code>.bat</code>, <code>.scr</code>) oder ein Dokument, das Sie bittet, „Inhalte zu aktivieren“, kann Ihren Computer
+            übernehmen.
+        </div>
+
+        <h3>Nachrichten speichern, drucken und importieren</h3>
+        <ul>
+            <li>
+                <b>Datei &gt; Speichern unter</b> speichert die angezeigte Nachricht als <code>.eml</code>-Datei, die andere E-Mail-Programme öffnen. Mit
+                mehreren ausgewählten Nachrichten fragt es nach einem Ordner und speichert jede dort, nach ihrem Betreff benannt; eine schon vorhandene Datei
+                wird nie ersetzt (die neue heißt dann <i>Mittagessen (2).eml</i>).
+            </li>
+            <li>
+                Ziehen Sie Nachrichten aus der Liste auf den Schreibtisch oder in ein Ordnerfenster<!--os:mac--> im Finder<!--/os-->, um sie dort auf
+                dieselbe Weise als <code>.eml</code>-Dateien zu speichern. Eine noch nicht heruntergeladene wird dafür heruntergeladen.
+            </li>
+            <li>
+                <b>Datei &gt; Nachrichten importieren</b> legt <code>.eml</code>-Dateien in den ausgewählten Ordner, auch auf dem Server. Das Ziehen von <code>.eml</code>-Dateien auf einen Ordner in der Ordnerliste tut dasselbe. Eine Datei, die keine Nachricht ist, wird nicht importiert.
+            </li>
+            <li>
+                <b>Datei &gt; Drucken</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) öffnet die Druckvorschau der angezeigten Nachricht in einem Fenster über Inbox
+                Classic: Wählen Sie den Drucker (oder Als PDF speichern), Exemplare und Seiten, und die Nachricht wird mit Absender, Datum, Empfängern und
+                Betreff gedruckt. Das Fenster schließt sich nach dem Drucken oder Abbrechen.
+            </li>
+        </ul>
+
+        <h2>4. Schreiben, Antworten und Weiterleiten</h2>
+        <ul>
+            <li><b>E-Mail erstellen</b> (<kbd>Ctrl</kbd>+<kbd>N</kbd>) beginnt eine neue Nachricht mit dem Konto des ausgewählten Ordners.</li>
+            <li>
+                <b>Cc</b> und <b>Bcc</b> erscheinen nur, wenn jemand darin steht; die Schaltflächen <b>Cc</b> und <b>Bcc</b> am Ende der Zeile <b>An</b>
+                <!--os:windows,linux-->(<kbd>Alt</kbd>+<kbd>C</kbd>, <kbd>Alt</kbd>+<kbd>B</kbd>) <!--/os-->öffnen sie. Die Zeile <b>Anfügen</b> erscheint, sobald
+                eine Datei angehängt ist.
+            </li>
+            <li>
+                Sie schreiben immer mit Formatierung zur Hand. Eine Nachricht ohne jede Formatierung (kein Fett, keine Farben, Listen, Links oder Bilder) geht als
+                reiner Text, den jedes E-Mail-Programm gleich zeigt; mit Formatierung geht sie als HTML mit einer Kopie als reiner Text. Eine Antwort oder
+                Weiterleitung folgt dem Original: Auf eine reine Textnachricht ist sie ebenfalls reiner Text (das Original mit <b>&gt;</b> zitiert), außer Sie
+                formatieren etwas, auf eine HTML-Nachricht ist sie HTML.
+            </li>
+            <li>
+                <b>Weiterleiten</b> mit mehreren ausgewählten Nachrichten schreibt eine neue Nachricht mit allen als angehängten <code>.eml</code>-Dateien,
+                ihr Betreff der der ersten.
+            </li>
+            <li>
+                <b>Von</b> oben in der Nachricht zeigt, von wem sie geht: Name und Adresse des Kontos. Eine Antwort oder Weiterleitung geht von dem Konto, in
+                dem die ursprüngliche Nachricht liegt. Mit mehreren Konten wählen Sie dort ein anderes; die Nachricht wird dann über die Server dieses Kontos
+                gesendet und in seinen Gesendeten Objekten (oder Entwürfen) aufbewahrt. Der Name, den andere sehen, ist der Anzeigename des Kontos, geändert in
+                <b>Datei &gt; Konten &gt; Eigenschaften</b>.
+            </li>
+            <li>
+                <b>Antworten</b> (<kbd>Ctrl</kbd>+<kbd>R</kbd>) antwortet dem Absender, <b>Allen antworten</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>)
+                allen, an die die Nachricht ging, <b>Weiterleiten</b> (<kbd>Ctrl</kbd>+<kbd>F</kbd>) schickt sie weiter.
+            </li>
+            <li>
+                In einer Antwort ist die ursprüngliche Nachricht hinter einer Schaltfläche <b>&bull;&bull;&bull;</b> unter Ihrem Text weggeklappt, sodass Sie nur
+                sehen, was Sie schreiben. Klicken Sie darauf (oder wählen Sie mit <kbd>Ctrl</kbd>+<kbd>A</kbd> alles aus), um sie in Ihren Text zu holen, wo Sie
+                sie kürzen können; sie wird so oder so mit Ihrer Antwort gesendet. In einer Weiterleitung steht das Original von Anfang an im Text, denn es ist
+                das, was Sie senden.
+            </li>
+            <li>
+                Die Leiste über dem Text formatiert ihn: Schriftart und -größe, <b>F</b>ett, <b>K</b>ursiv, <b>U</b>nterstrichen (oder
+                <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd>), <b>Farbe</b>, nummerierte Listen und
+                Aufzählungen, Einzug verkleinern und vergrößern (<b>&laquo;</b> und <b>&raquo;</b>), Ausrichtung, <b>Link</b> für eine Webadresse auf dem
+                markierten Text, <b>Linie</b> für eine Trennlinie und <b>Bild</b>, um ein Bild in den Text zu setzen (oder ziehen Sie eine Bilddatei aus
+                <!--os:windows-->dem Explorer<!--/os--><!--os:mac-->dem Finder<!--/os--><!--os:linux-->dem Dateimanager<!--/os--> in den Text: Es landet dort,
+                wo Sie es ablegen). Bilder gehen in der Nachricht mit, nicht als einzelne Anlagen. Die Nachricht geht als formatiertes HTML mit einer Kopie als
+                reiner Text für E-Mail-Programme, die nur Text zeigen.
+            </li>
+            <li>
+                Links: Steht der Cursor in einem Link oder ist die Maus darüber, zeigt die Statusleiste unten, wohin er führt. <kbd>Ctrl</kbd>+Klick auf einen
+                Link öffnet ihn in Ihrem Browser. <b>Link</b> (oder <kbd>Ctrl</kbd>+<kbd>K</kbd>) auf einem Link zeigt seine Adresse zum Ändern; leeren Sie die
+                Adresse, um den Link zu entfernen und seinen Text zu behalten. Ein Rechtsklick auf einen Link bietet <b>Link öffnen</b>, <b>Link
+                bearbeiten</b> und <b>Link entfernen</b>.
+            </li>
+            <li>Falsch geschriebene Wörter sind unterstrichen; ein Rechtsklick darauf zeigt Vorschläge. Ausschneiden, Kopieren und Einfügen funktionieren wie überall.</li>
+            <li>
+                Trennen Sie mehrere Adressen in <b>An</b>, <b>Cc</b> und <b>Bcc</b> mit Kommas, zum Beispiel
+                <code>Maria Schmidt &lt;maria@example.com&gt;, hans@example.com</code>. Setzen Sie einen Namen mit Komma in Anführungszeichen:
+                <code>"Schmidt, Maria" &lt;maria@example.com&gt;</code>.
+            </li>
+            <li>Personen in <b>Bcc</b> erhalten die Nachricht, aber die anderen Empfänger sehen sie nicht.</li>
+            <li>
+                <b>Anfügen</b> fügt Dateien hinzu, ebenso das Ziehen aus <!--os:windows-->dem Explorer<!--/os--><!--os:mac-->dem Finder<!--/os--><!--os:linux-->dem
+                Dateimanager<!--/os--> auf die Adressfelder, oder einer Datei, die kein Bild ist, auf den Text. Sie werden in der Zeile <b>Anfügen</b> mit ihrer
+                Größe aufgeführt; um eine zu entfernen, wählen Sie sie aus und drücken <kbd>Del</kbd>, oder klicken mit der rechten Maustaste darauf und wählen
+                <b>Entfernen</b>. Die Dateien werden beim Senden der Nachricht gelesen.
+            </li>
+            <li>
+                <b>Senden</b> legt die Nachricht in den <b>Postausgang</b> und sendet sie sofort. Kann sie nicht gehen (keine Verbindung, der Server lehnt sie
+                ab), bleibt sie im Postausgang und geht beim nächsten <b>Senden/Empfangen</b>; nichts, was Sie geschrieben haben, geht verloren.
+                <b>Senden/Empfangen</b> läuft außerdem alle zehn Minuten von selbst. Die Mitte der Statusleiste des Hauptfensters sagt, was mit der E-Mail
+                geschieht, die Sie senden: <i>Wird gesendet</i>, während sie geht, <i>Gesendet</i> mit Betreff und Uhrzeit, sobald der Server sie angenommen
+                hat, oder dass sie im Postausgang wartet. <b>Extras &gt; Postausgang</b> listet auf, was wartet, und warum es nicht ging, und sendet oder
+                löscht es.
+            </li>
+            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> sendet aus dem Text heraus.</li>
+            <li>
+                <b>Speichern</b> (oder <kbd>Ctrl</kbd>+<kbd>S</kbd>) legt die Nachricht im Ordner <b>Entwürfe</b> des Kontos ab, auf dem Server, um sie
+                später fertigzustellen; erneutes Speichern ersetzt die zuvor gespeicherte Kopie. Die Statusleiste der Nachricht sagt <i>In Entwürfen
+                gespeichert</i> mit der Uhrzeit, sobald der Server sie hat, oder warum sie nicht gespeichert wurde. Beim Schließen einer geänderten Nachricht wird
+                gefragt, ob die Änderungen gespeichert werden sollen: <b>Ja</b> speichert sie in Entwürfen, <b>Nein</b> verwirft sie, <b>Abbrechen</b> kehrt
+                zu ihr zurück. Um weiterzuschreiben, doppelklicken Sie auf den Entwurf in Entwürfe (oder wählen Sie ihn aus und drücken <kbd>Enter</kbd>): Er
+                öffnet sich mit Empfängern, Text und angehängten Dateien. Sobald er gesendet ist, wird der Entwurf aus Entwürfe entfernt. Eine Nachricht, die
+                Sie schreiben, ist ein eigenes Fenster<!--os:windows--> in der Taskleiste<!--/os-->: Sie können zum Hauptfenster zurückkehren und E-Mail lesen,
+                während es offen bleibt. Das Schließen von Inbox Classic schließt zuerst die Nachrichten, die Sie schreiben, und fragt bei geänderten nach.
+            </li>
+            <li>
+                <b>Senden</b> sendet die Nachricht. Ist eine Adresse falsch geschrieben oder eine Datei verschwunden, sagt Inbox Classic das und lässt die
+                Nachricht offen, damit Sie es korrigieren können. Eine Kopie jeder gesendeten Nachricht wird in <b>Gesendete Objekte</b> aufbewahrt.
+            </li>
+            <li>
+                <b>E-Mail-Links</b> (<code>mailto:</code>) auf Webseiten und in anderen Programmen öffnen eine neue Nachricht in Inbox Classic, sobald es Ihr
+                Standard-E-Mail-Programm ist: <b>Extras &gt; Als Standard-E-Mail-Programm festlegen</b> <!--os:windows-->öffnet die Seite der
+                Windows-Einstellungen, auf der Sie es wählen.<!--/os--><!--os:mac,linux-->macht es dazu.<!--/os--> Adressen, Betreff und Text des Links werden
+                eingetragen; sonst wird nichts vom Link verwendet.
+            </li>
+            <li>
+                Beim Tippen in <b>An</b>, <b>Cc</b> oder <b>Bcc</b> werden die Personen aufgelistet, die gemeint sein können, zuerst die, denen Sie am meisten
+                schreiben, dann die, die Ihnen schreiben; die Liste kennt jeden in der E-Mail, die Inbox Classic hat (nicht in Junk-E-Mail). Wählen Sie mit den
+                Pfeiltasten und übernehmen Sie mit <kbd>Enter</kbd> oder <kbd>Tab</kbd> (oder einem Klick); <kbd>Esc</kbd> schließt die Liste, und
+                <kbd>Shift</kbd>+<kbd>Del</kbd> nimmt die gewählte Person endgültig heraus.
+            </li>
+            <li>
+                <b>Eine Signatur</b> für jedes Konto: <b>Datei &gt; Konten</b>, das Konto auswählen, dann <b>Signatur</b>. Sie wird mit derselben Formatierung
+                geschrieben wie eine Nachricht (Fett, Farben, Links, ein Bild). Neue Nachrichten, Antworten und Weiterleitungen des Kontos beginnen damit, unter
+                einer leeren Zeile zum Schreiben und der üblichen Zeile <code>--</code>, über der zitierten Nachricht. Die Wahl eines anderen Kontos in
+                <b>Von</b> setzt die Signatur dieses Kontos an ihre Stelle.
+            </li>
+        </ul>
+
+        <h2>5. Neue E-Mail abrufen</h2>
+        <p>
+            Inbox Classic prüft jedes Konto beim Start und danach alle zehn Minuten. Klicken Sie auf <b>Senden/Empfangen</b> oder drücken Sie <!--os:windows,linux--><kbd>F5</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd><!--/os-->,
+            um jetzt zu prüfen; der Pfeil neben <b>Senden/Empfangen</b> prüft ein einzelnes Konto, und der neben <b>E-Mail erstellen</b> beginnt eine
+            Nachricht mit dem Konto Ihrer Wahl. Die Statusleiste unten zeigt, was es gerade tut und das letzte Problem, das es hatte.
+        </p>
+        <p>
+            Es beobachtet außerdem den Posteingang jedes Kontos, sodass neue E-Mail beim Eintreffen erscheint, nicht erst bei der nächsten Prüfung. Solange
+            sein Fenster nicht im Vordergrund ist, sagt eine Benachrichtigung, wer worüber geschrieben hat; ein Klick darauf öffnet die Nachricht.
+            <b>Extras &gt; Bei neuer E-Mail benachrichtigen</b> schaltet die Benachrichtigungen aus und ein.
+        </p>
+        <!--os:windows--><p>
+            Das Schließen des Fensters lässt Inbox Classic im Infobereich weiterlaufen, wo es weiter E-Mail abruft; sein Symbol dort sagt, wie viele
+            Nachrichten ungelesen sind, ebenso eine Zahl auf seiner Taskleistenschaltfläche. Klicken Sie auf das Symbol, um es wieder zu öffnen; ein
+            Rechtsklick bietet <b>Auf neue E-Mail prüfen</b> und <b>Beenden</b>. <b>Datei &gt; Beenden</b> beendet es.
+        </p><!--/os--><!--os:mac--><p>
+            Das Schließen des Fensters lässt Inbox Classic im Dock weiterlaufen, wo es weiter E-Mail abruft; das Dock-Symbol zeigt, wie viele Nachrichten in
+            den Posteingängen ungelesen sind. Klicken Sie auf das Dock-Symbol, um das Fenster wieder zu öffnen. <b>Inbox Classic &gt; Inbox Classic
+            beenden</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd>) beendet es.
+        </p><!--/os--><!--os:linux--><p>
+            Das Schließen des Fensters lässt Inbox Classic in der oberen Leiste weiterlaufen (Ubuntu zeigt sein Symbol dort), wo es weiter E-Mail abruft;
+            das Menü des Symbols hat <b>Inbox Classic öffnen</b>, <b>Auf neue E-Mail prüfen</b> und <b>Beenden</b>, und das Dock zeigt, wie viele Nachrichten
+            in den Posteingängen ungelesen sind. Wo die Arbeitsumgebung keinen Platz für das Symbol hat, beendet das Schließen des Fensters Inbox Classic.
+            <b>Beenden</b> im Hauptmenü beendet es.
+        </p><!--/os-->
+
+        <h2>6. Tastenkombinationen</h2>
+        <table>
+            <tr>
+                <th>Tasten</th>
+                <th>Wirkung</th>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>F5</kbd></td>
+                <td>Alle Konten auf neue E-Mail prüfen</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td>
+                <td>Alle Konten auf neue E-Mail prüfen</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>N</kbd></td>
+                <td>Neue Nachricht</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>R</kbd></td>
+                <td>Dem Absender antworten</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td>
+                <td>Allen antworten</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
+                <td>Weiterleiten</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
+                <td>Weiterleiten</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td>
+                <td>Die Nachricht als gelesen markieren</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd></td>
+                <td>Die Nachricht als gelesen markieren</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>A</kbd></td>
+                <td>Jede Nachricht der Liste auswählen</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td>
+                <td>Das letzte Verschieben, Löschen oder Markieren als Junk rückgängig machen</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>J</kbd></td>
+                <td>Die Nachricht als Junk markieren</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd></td>
+                <td>Die Nachricht als Junk markieren</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+                <td>Jede Nachricht des Ordners als gelesen markieren</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+                <td>Jede Nachricht des Ordners als gelesen markieren</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
+                <td>Nachrichten im Ordner suchen</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
+                <td>Nachrichten im Ordner suchen</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>P</kbd></td>
+                <td>Die Nachricht drucken</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Alt</kbd>+<kbd>Enter</kbd></td>
+                <td>Die Kopfzeilen der Nachricht (Eigenschaften)</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd></td>
+                <td>Die Kopfzeilen der Nachricht (Eigenschaften)</td>
+            </tr>
+            <!--/os--><!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>U</kbd></td>
+                <td>Die ganze Nachricht (Quelltext der Nachricht)</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Del</kbd></td>
+                <td>Die Nachricht löschen (in der Nachrichtenliste)</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Del</kbd></td>
+                <td>Die Nachricht löschen (in der Nachrichtenliste)</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd></td>
+                <td>Die Nachricht in einen anderen Ordner verschieben</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td>
+                <td>Die Nachricht senden, die Sie schreiben</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
+                <td>Die Nachricht, die Sie schreiben, in Entwürfen speichern</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd></td>
+                <td>Fett, kursiv, unterstrichen beim Schreiben</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>F1</kbd></td>
+                <td>Diese Hilfe</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>?</kbd></td>
+                <td>Diese Hilfe</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Tab</kbd></td>
+                <td>Zwischen Ordnern, Nachrichtenliste und den Feldern eines Fensters wechseln</td>
+            </tr>
+        </table>
+
+        <h2>7. KI-Agenten</h2>
+        <p>
+            Wenn Sie einen KI-Agenten verwenden (Claude, Cursor oder ein anderes Programm, das das Model Context Protocol, MCP, spricht), können Sie ihn
+            hier Ihre E-Mail lesen und ordnen lassen. In Inbox Classic gibt es keine KI, und nichts wird an einen KI-Dienst gesendet: Ein Agent arbeitet
+            nur, wenn Sie sein Programm zulassen, und nur mit den Konten, die Sie wählen.
+        </p>
+        <ul>
+            <li>
+                <b>Verbinden.</b> <b>Extras &gt; KI-Agenten &gt; Einen Agenten verbinden</b> gibt die Zeilen an, die Sie in die Einstellungen Ihres Agenten
+                einfügen (für Claude Desktop: <b>Settings &gt; Developer &gt; Edit Config</b>). Der Agent startet Inbox Classic mit <code>--mcp</code>, was
+                ihn mit dem laufenden Inbox Classic verbindet oder eines im Hintergrund startet. Nur Programme, die unter Ihrem Benutzer auf diesem Computer
+                laufen, können es erreichen.
+            </li>
+            <li>
+                <b>Beim ersten Mal</b>, wenn sich der Agent eines Programms verbindet, fragt Inbox Classic Sie unter Nennung des Programms, was es tun darf:
+                E-Mail lesen; sie ordnen (als gelesen markieren, kennzeichnen, Junk, verschieben, nach Gelöschte Objekte löschen); Entwürfe schreiben, die Sie
+                senden; und E-Mail senden, jede Nachricht erst nach Ihrer Zustimmung. Wählen Sie die Konten, die es sehen darf. <b>Nicht zulassen</b> weist
+                das Programm ab, und Sie werden nicht mehr danach gefragt.
+            </li>
+            <li>
+                <b>Senden.</b> Jede Nachricht, die ein Agent senden möchte, wird Ihnen zuerst gezeigt, mit jedem Empfänger nach Adresse und den Adressen, an
+                die Sie nie geschrieben haben, markiert. <b>Senden</b> wird nach einem Moment aktiv; <b>Erst bearbeiten</b> öffnet sie in einer neuen
+                Nachricht zum Ändern; <b>Nicht senden</b> ist die Vorgabe. Was Sie senden, wartet 30 Sekunden im Postausgang, wo Sie es noch löschen können.
+            </li>
+            <li>
+                <b>Was sich ändert</b>, zeigt sich sofort in den Fenstern, als hätten Sie es getan. Ein Agent löscht nie etwas endgültig und ändert nie Ihre
+                Kontoeinstellungen. Das Lesen einer Nachricht markiert sie nicht als gelesen.
+            </li>
+            <li>
+                <b>Extras &gt; KI-Agenten</b> listet die Programme auf, die Sie zugelassen oder abgewiesen haben (<b>Ändern</b>, was eines tun darf, oder
+                <b>Entfernen</b>, um wieder gefragt zu werden), und alles, was Agenten getan haben, neueste zuerst. <b>Rückgängig</b> nimmt einen Lesestatus,
+                eine Kennzeichnung, ein Verschieben oder Löschen sowie eine Nachricht, die noch im Postausgang ist, zurück. <b>KI-Agenten verbinden lassen</b>
+                schaltet sie alle auf einmal aus.
+            </li>
+            <li>
+                <b>Überlegen Sie, worum Sie bitten.</b> E-Mail wird von anderen geschrieben, und eine Nachricht kann versuchen, einen Agenten zu etwas zu
+                überreden: Ihre E-Mail weiterzuleiten, sie zu löschen, jemandem zu schreiben. Inbox Classic verbirgt vor Agenten den Text, den eine Nachricht vor
+                Ihnen verbirgt, und sagt ihnen, dass E-Mail keine Anweisungen sind, aber ein Agent kann dennoch getäuscht werden. Lesen Sie jede Nachricht, die
+                er senden möchte, bevor Sie zustimmen, und lassen Sie einen Agenten nur senden, wenn Sie es brauchen. Ein Agent, der auch andere Werkzeuge hat
+                (im Web surfen, Ihre Dateien lesen), könnte das Gelesene über diese weitergeben; Inbox Classic kann diese nicht sehen.
+            </li>
+        </ul>
+
+        <h2>8. Wenn etwas nicht funktioniert</h2>
+        <h3>„authentication failed“ oder Inbox Classic fragt erneut nach dem Kennwort</h3>
+        <p>
+            Der Server hat das Kennwort abgelehnt. Geben Sie es erneut ein; für Gmail und Outlook.com verwenden Sie ein App-Kennwort oder melden Sie sich
+            über den Browser an (siehe <i>Ein Konto hinzufügen</i>). Verlangt Ihr Anbieter bei der Anmeldung im Web einen zweiten Schritt, braucht er auch
+            für E-Mail-Programme ein App-Kennwort. Bei einem Konto, das sich über den Browser anmeldet, bietet Inbox Classic an, sich erneut anzumelden.
+        </p>
+        <h3>„TLS error“ oder ein Zertifikatfehler</h3>
+        <p>
+            Inbox Classic konnte nicht bestätigen, dass es mit dem echten Server spricht, und hat Ihr Kennwort daher nicht gesendet. Prüfen Sie den
+            Servernamen in den Kontoeinstellungen: Er muss der Name sein, für den das Zertifikat des Servers ausgestellt ist (oft
+            <code>imap.anbieter.de</code>, nicht Ihre eigene Domäne). In einem Netzwerk, das verschlüsselten Verkehr untersucht, fragen Sie dessen
+            Administrator.
+        </p>
+        <h3>„the server does not offer STARTTLS“</h3>
+        <p>
+            Das Konto ist auf STARTTLS eingestellt, aber der Server hat keine Verschlüsselung angeboten. Versuchen Sie <b>SSL/TLS</b> mit Port 993 (IMAP)
+            oder 465 (SMTP). Funktioniert nichts anderes, kann der Server nicht sicher verwendet werden.
+        </p>
+        <h3>„the server takes the password only over an encrypted connection“</h3>
+        <p>
+            Der Postausgangsserver (SMTP) ist auf <b>Keine (unverschlüsselt)</b> eingestellt. Ihr Kennwort ist in Ordnung; ändern Sie die SMTP-Sicherheit
+            auf <b>STARTTLS</b> (Port 587) oder <b>SSL/TLS</b> (Port 465).
+        </p>
+        <h3>„connection error“ oder „the server did not answer in time“</h3>
+        <p>
+            Prüfen Sie Ihre Internetverbindung, den Servernamen und den Port. Firewalls sperren manchmal die Mail-Ports, besonders Port 25; verwenden Sie
+            zum Senden 465 oder 587. Inbox Classic versucht es bei der nächsten Prüfung erneut.
+        </p>
+        <h3>Eine Nachricht, die nicht angezeigt werden kann</h3>
+        <p>
+            Manche Nachrichten sind beschädigt oder so aufgebaut, dass kein E-Mail-Programm sie lesen kann. Inbox Classic zeigt statt der Nachricht einen
+            Hinweis; Ihre übrige E-Mail ist nicht betroffen.
+        </p>
+
+        <h2>9. Wo Ihre E-Mail und Kennwörter aufbewahrt werden</h2>
+        <ul>
+            <li>
+                Heruntergeladene E-Mail und Kontoeinstellungen: <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->.
+                Ihre E-Mail bleibt auch auf dem Server; die Kopie hier ist zum schnellen Lesen und zum Lesen ohne Verbindung.
+            </li>
+            <li>
+                Kennwörter, Browseranmeldungen und die Client-Geheimnisse von Anmelde-Apps: <!--os:windows-->die Windows-Anmeldeinformationsverwaltung, unter
+                <b>Inbox Classic</b>. Sie sind für Ihr Windows-Konto verschlüsselt.<!--/os--><!--os:mac-->Ihr Anmeldeschlüsselbund, unter
+                <b>InboxClassic</b> (die Schlüsselbundverwaltung zeigt sie). Sie sind für Ihren Mac-Benutzer verschlüsselt.<!--/os--><!--os:linux-->Ihr
+                Schlüsselbund (GNOME Keyring, über den Secret Service), unter <b>InboxClassic</b>. Sie sind für Ihre Anmeldung verschlüsselt. Ohne
+                Schlüsselbund werden sie aufbewahrt, bis Inbox Classic beendet wird.<!--/os-->
+            </li>
+            <!--os:windows--><li>Beim Deinstallieren fragt Inbox Classic, ob die heruntergeladene E-Mail entfernt werden soll. Die E-Mail auf Ihren Servern wird nie entfernt.</li><!--/os--><!--os:mac--><li>Um Inbox Classic zu entfernen, beenden Sie es und legen Sie es in den Papierkorb; die heruntergeladene E-Mail bleibt im oben genannten Ordner, bis Sie auch diesen löschen. Die E-Mail auf Ihren Servern wird nie entfernt.</li><!--/os--><!--os:linux--><li>Das Entfernen des Pakets (<code>sudo apt remove inbox-classic</code>) lässt die heruntergeladene E-Mail im oben genannten Ordner, bis Sie auch diesen löschen. Die E-Mail auf Ihren Servern wird nie entfernt.</li><!--/os-->
+        </ul>
+        <p>
+            Zum Testen verwendet <!--os:windows--><code>InboxClassic.exe<!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"<!--/os--><!--os:linux--><code>inbox-classic<!--/os--> --store &lt;Datei&gt;</code> einen anderen E-Mail-Speicher,
+            <code>--memory-passwords</code> behält Kennwörter nur für den aktuellen Lauf, <code>--pin-certificate &lt;Datei&gt;</code> akzeptiert statt der
+            vom System vertrauten nur das Serverzertifikat in dieser Datei (PEM oder DER), für einen Testserver mit selbstsigniertem Zertifikat, und
+            <code>--sign-in-page-file &lt;Datei&gt;</code> schreibt die Seite einer Browseranmeldung in diese Datei, statt den Browser zu öffnen.
+            <code>--mcp</code> ist das, was ein KI-Agent startet (siehe oben); <code>--background</code> startet Inbox Classic ohne sein Fenster.
+        </p>
+    </body>
+</html>

@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'" />
+        <meta name="color-scheme" content="light" />
+        <title>Ayuda de Inbox Classic</title>
+        <style>
+            html {
+                background: #fff;
+            }
+            body {
+                font:
+                    10pt Tahoma,
+                    Arial,
+                    sans-serif;
+                margin: 12px 18px;
+                color: #000;
+                max-width: 760px;
+            }
+            h1 {
+                font-size: 16pt;
+                color: #036;
+                margin: 4px 0 8px;
+            }
+            h2 {
+                font-size: 12pt;
+                color: #036;
+                border-bottom: 1px solid #9ab;
+                margin: 22px 0 6px;
+                padding-bottom: 2px;
+            }
+            h3 {
+                font-size: 10pt;
+                margin: 14px 0 4px;
+            }
+            p,
+            li {
+                line-height: 1.45;
+            }
+            ul,
+            ol {
+                margin: 4px 0 8px 22px;
+                padding: 0;
+            }
+            kbd {
+                font:
+                    9pt Tahoma,
+                    Arial,
+                    sans-serif;
+                border: 1px solid #999;
+                border-bottom-width: 2px;
+                background: #f4f4f4;
+                padding: 0 4px;
+            }
+            table {
+                border-collapse: collapse;
+                margin: 6px 0;
+            }
+            td,
+            th {
+                border: 1px solid #bbb;
+                padding: 3px 8px;
+                text-align: left;
+                vertical-align: top;
+            }
+            th {
+                background: #e8eef4;
+            }
+            .note {
+                background: #fffbe6;
+                border: 1px solid #e0c97a;
+                padding: 6px 10px;
+                margin: 8px 0;
+            }
+            code {
+                font:
+                    9pt Consolas,
+                    monospace;
+                background: #f4f4f4;
+                padding: 0 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Ayuda de Inbox Classic</h1>
+        <p>
+            Inbox Classic lee y envía correo de cuentas IMAP y SMTP: Gmail, Outlook.com, Fastmail, el servidor de correo de su empresa y la mayoría de los
+            demás. Guarda una copia de su correo en este equipo, así que puede leer lo ya descargado sin conexión.
+        </p>
+
+        <h2>Contenido</h2>
+        <ol>
+            <li>Agregar una cuenta</li>
+            <li>Leer el correo</li>
+            <li>Imágenes, vínculos y archivos adjuntos</li>
+            <li>Escribir, responder y reenviar</li>
+            <li>Recibir correo nuevo</li>
+            <li>Métodos abreviados de teclado</li>
+            <li>Agentes de IA</li>
+            <li>Cuando algo no funciona</li>
+            <li>Dónde se guardan su correo y sus contraseñas</li>
+        </ol>
+
+        <h2>1. Agregar una cuenta</h2>
+        <p>La primera vez que se inicia, Inbox Classic pide una cuenta. Para agregar otra más tarde, elija <b>Archivo &gt; Nueva cuenta</b>. Cada vez que
+            se inicia, abre la Bandeja de entrada de la primera cuenta con su mensaje más reciente seleccionado, o con dos o más cuentas <b>Todas las bandejas
+            de entrada</b> con el mensaje más reciente de cualquiera de ellas.</p>
+        <ol>
+            <li>
+                Para Gmail, Google Workspace, Outlook.com o Microsoft 365, haga clic en <b>Iniciar sesión con Google</b> o <b>Iniciar sesión con
+                Microsoft</b> e inicie sesión en la ventana del navegador que se abre. Eso es todo: la cuenta es aquella en la que inició sesión, con el nombre
+                que tiene en Google o Microsoft salvo que haya escrito uno. Vea <i>Gmail y Outlook.com</i> más abajo. Un botón atenuado está desactivado en este
+                equipo; <b>¿Por qué?</b> debajo explica el motivo.
+            </li>
+            <li>
+                Para iniciar sesión con una aplicación de inicio de sesión propia (vea <i>Su propia aplicación de inicio de sesión</i> más abajo), haga clic en
+                <b>Más opciones de inicio de sesión</b> y elíjala, o en <b>Agregar una aplicación de inicio de sesión</b>. Escriba primero su dirección y la
+                página del proveedor empezará con ella.
+            </li>
+            <li>Para cualquier otra cuenta, escriba su nombre tal como deben verlo los demás y su dirección de correo, y haga clic en <b>Siguiente</b>.</li>
+            <li>
+                Inbox Classic busca la configuración de su proveedor de correo: en el proveedor que gestiona el correo de su dominio, en los registros DNS de su
+                dominio, en el archivo de configuración de su proveedor, en la lista de proveedores de Thunderbird y, para Exchange, mediante Microsoft
+                Autodiscover. Esto tarda unos segundos; <b>Cancelar</b> lo omite. A una dirección de Google o Microsoft también se le ofrece aquí su botón de
+                inicio de sesión.
+            </li>
+            <li>Si su proveedor quiere una contraseña de aplicación en lugar de la normal, Inbox Classic lo indica y ofrece abrir sus instrucciones.</li>
+            <li>
+                Escriba su contraseña, compruebe la configuración de servidores encontrada y haga clic en <b>Finalizar</b>. Si no encontró nada, rellena los
+                nombres habituales (<code>imap.</code> y <code>smtp.</code> seguidos de su dominio); compárelos con lo que le indica su proveedor.
+            </li>
+        </ol>
+        <h3>Cambiar o quitar una cuenta</h3>
+        <p>
+            <b>Archivo &gt; Cuentas</b> muestra sus cuentas. <b>Propiedades</b> (o un doble clic) cambia el nombre, la dirección, los servidores y la contraseña
+            de una; deje la contraseña vacía para conservarla. <b>Quitar</b> (o la tecla <kbd>Del</kbd>) saca la cuenta de Inbox Classic con el correo
+            descargado para ella y su contraseña guardada; el correo del servidor se queda. <b>Agregar</b> agrega otra cuenta.
+        </p>
+        <h3>Gmail y Outlook.com</h3>
+        <p>Estos proveedores no aceptan su contraseña normal desde programas de correo. Puede:</p>
+        <ul>
+            <li>
+                iniciar sesión mediante el navegador con <b>Iniciar sesión con Google</b> o <b>Iniciar sesión con Microsoft</b>: su contraseña se escribe en la
+                propia página de Google o Microsoft e Inbox Classic nunca la ve (puede que una organización de Microsoft 365 tenga que permitir antes Inbox
+                Classic: Microsoft muestra entonces <i>Se necesita la aprobación del administrador</i>, e Inbox Classic le indica la dirección donde su
+                administrador lo aprueba); o
+            </li>
+            <li>
+                crear una <b>contraseña de aplicación</b> en la configuración de seguridad de su cuenta (Google: <i>Seguridad &gt; Verificación en dos pasos
+                &gt; Contraseñas de aplicaciones</i>; Microsoft: <i>Seguridad &gt; Opciones de seguridad avanzadas &gt; Contraseñas de aplicación</i>),
+                escribir su dirección, hacer clic en <b>Siguiente</b> y luego en <b>Usar contraseña de aplicación</b>, y escribir la contraseña de aplicación
+                en lugar de la normal.
+            </li>
+        </ul>
+        <h3>Su propia aplicación de inicio de sesión</h3>
+        <p>
+            Iniciar sesión mediante el navegador usa un cliente OAuth registrado en el proveedor. Inbox Classic tiene los suyos para Google y Microsoft. Google
+            solo permite iniciar sesión a los usuarios de prueba de Inbox Classic hasta que verifique la aplicación, por eso <b>Iniciar sesión con Google</b>
+            viene desactivado. Puede registrar un cliente propio (con su propio proyecto de Google Cloud, su inquilino de Microsoft Entra o cualquier proveedor
+            compatible con OpenID Connect) y agregarlo como aplicación de inicio de sesión:
+        </p>
+        <ol>
+            <li>Abra <b>Archivo &gt; Cuentas</b> y haga clic en <b>Aplicaciones de inicio de sesión</b>, luego en <b>Agregar</b>.</li>
+            <li>
+                Haga clic en <b>Google</b> o <b>Microsoft</b> después de <i>Rellenar para</i> para rellenar el emisor, los ámbitos y los servidores, o
+                escríbalos para otro proveedor. El cuadro de abajo explica cómo registrar allí un cliente y el URI de redirección que hay que registrar;
+                <b>Copiar</b> lo copia.
+            </li>
+            <li>
+                Escriba el ID de cliente, y el secreto de cliente si el proveedor le dio uno (se guarda en <!--os:windows-->el Administrador de credenciales de Windows<!--/os--><!--os:mac-->su llavero<!--/os--><!--os:linux-->su llavero<!--/os--> y nunca se vuelve a mostrar).
+                <b>Comprobar</b> lee la configuración del proveedor para ver si el emisor es correcto; <b>Aceptar</b> también lo hace antes de guardar.
+            </li>
+            <li>Agregue la cuenta con <b>Más opciones de inicio de sesión</b> en la primera página de <b>Archivo &gt; Nueva cuenta</b>.</li>
+        </ol>
+        <p>
+            En <b>Aplicaciones de inicio de sesión</b>, la casilla de cada aplicación, incluidas las integradas, indica si se ofrece para cuentas nuevas. Una
+            aplicación sin marcar queda fuera; las cuentas que ya inician sesión con ella siguen funcionando. Una aplicación se puede quitar en cuanto ninguna
+            cuenta la usa. Las <b>Propiedades</b> de una cuenta dicen con qué inicia sesión. Si el servidor de correo rechaza el token de una aplicación de
+            inicio de sesión, compruebe que sus ámbitos (scopes) dan acceso al correo.
+        </p>
+        <h3>Configuración de seguridad</h3>
+        <table>
+            <tr>
+                <th>Opción</th>
+                <th>Significado</th>
+            </tr>
+            <tr>
+                <td>SSL/TLS</td>
+                <td>La conexión está cifrada desde el principio. Normalmente el puerto 993 para IMAP y el 465 para SMTP.</td>
+            </tr>
+            <tr>
+                <td>STARTTLS</td>
+                <td>
+                    La conexión se cifra justo después de abrirse. Normalmente el puerto 143 para IMAP y el 587 para SMTP. Inbox Classic se niega a continuar
+                    si el servidor no ofrece cifrado.
+                </td>
+            </tr>
+            <tr>
+                <td>Ninguna (sin cifrar)</td>
+                <td>
+                    Su contraseña y su correo viajan legibles para cualquiera en la red. Úsela solo para un servidor en su propio equipo o red; Inbox Classic
+                    avisa antes de usarla.
+                </td>
+            </tr>
+        </table>
+
+        <h2>2. Leer el correo</h2>
+        <p>
+            La ventana tiene tres partes: sus cuentas y carpetas a la izquierda, los mensajes de la carpeta seleccionada arriba a la derecha y el mensaje
+            seleccionado debajo. Arrastre los bordes entre ellas para cambiar su tamaño.
+        </p>
+        <ul>
+            <li>
+                Cada carpeta tiene su icono, y las carpetas con mensajes sin leer se muestran en <b>negrita</b>, con el número de mensajes sin leer tras el
+                nombre. Una cuenta contraída, o una carpeta contraída con carpetas dentro, aparece en negrita con los mensajes sin leer de las carpetas que oculta
+                (Correo no deseado y Elementos eliminados no cuentan), para que el correo nuevo nunca quede fuera de la vista. La barra gris sobre los paneles y
+                el título de la ventana nombran la carpeta seleccionada.
+            </li>
+            <li>
+                Con dos o más cuentas, <b>Todas las bandejas de entrada</b> en la parte superior de la lista de carpetas muestra el correo de la Bandeja de
+                entrada de cada cuenta en una sola lista, el más reciente primero, con una columna <b>Cuenta</b> que nombra la cuenta de cada mensaje.
+                Responder, Reenviar, Mover y Eliminar actúan sobre un mensaje en su propia cuenta, y un mensaje nuevo parte de la cuenta del seleccionado.
+                <b>Marcar todo como leído</b> en ella marca como leídas todas las bandejas de entrada. Su menú contextual solo tiene <b>Marcar todo como
+                leído</b>: en ella no se pueden crear carpetas ni importar mensajes, porque no es una carpeta de una sola cuenta.
+            </li>
+            <li>
+                Los mensajes sin leer aparecen en <b>negrita</b> en la lista. Un mensaje se marca como
+                leído después de mostrarse durante un segundo. Use <b>Marcar como leído</b> y <b>Marcar como no leído</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd> marca
+                como leído) para cambiarlo usted. <b>Edición &gt; Marcar todo como leído</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>), o <b>Marcar todo
+                como leído</b> en el menú contextual de una carpeta, marca como leídos todos los mensajes de la carpeta.
+            </li>
+            <li>La columna del clip muestra qué mensajes tienen archivos adjuntos; la de la marca, cuáles están marcados.</li>
+            <li>
+                El correo de una marca que publica un logotipo (BIMI) muestra ese logotipo junto al encabezado, pero solo cuando su servidor de correo comprobó
+                que el correo viene realmente del dominio de la marca (DMARC) y aprobó el logotipo. El logotipo viene con el mensaje o, si no, de la dirección
+                https de la marca una vez por sesión; se dibuja en este equipo a partir de un archivo SVG comprobado, y no se carga nada más de él.
+            </li>
+            <li>
+                Una invitación de calendario (un <code>.ics</code> en el mensaje) muestra su evento sobre el texto: qué es (una invitación, una actualización o
+                una cancelación), cuándo en su propia hora, dónde, quién lo organiza y cómo se repite. <b>Abrir en Calendario</b> lo abre en su programa de
+                calendario, donde puede aceptarlo.
+            </li>
+            <li>
+                Un mensaje de una lista de correo que indica cómo salir de ella tiene <b>Cancelar suscripción</b> a la derecha de su encabezado. Al hacer clic
+                se explica qué ocurrirá y se pregunta antes. Cuando el servidor de la lista firmó el mensaje para ello (DKIM, como pide la RFC 8058), Inbox
+                Classic pide a la lista que pare, sin página ni mensaje; si no, escribe el mensaje que la lista quiere para que usted lo envíe, o abre la página
+                de la lista en su navegador.
+            </li>
+            <li>
+                <b>Archivo &gt; Propiedades</b> (<!--os:windows,linux--><kbd>Alt</kbd>+<kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd><!--/os-->) muestra los encabezados de Internet del mensaje: quién lo envió, por
+                qué servidores y cuándo. <b>Ver &gt; Código fuente del mensaje</b><!--os:windows,linux--> (<kbd>Ctrl</kbd>+<kbd>U</kbd>)<!--/os--> muestra
+                el mensaje completo tal como lo guarda el servidor: cada encabezado y cada parte, como texto. <b>Guardar como</b> en esa ventana lo guarda como
+                archivo <code>.eml</code>.
+            </li>
+            <li>
+                Haga clic con el botón derecho en un mensaje<!--os:windows,linux--> (o pulse la tecla de menú)<!--/os--> para ver qué puede hacer con él:
+                responder, reenviar, marcarlo como leído o no leído, marcarlo con marca, marcarlo como correo no deseado, moverlo a una carpeta, eliminarlo,
+                guardarlo o imprimirlo, y ver su código fuente o sus propiedades.
+            </li>
+            <li>Haga clic en el encabezado de una columna para ordenar por ella; haga clic otra vez para invertir el orden.</li>
+            <li>
+                El campo de búsqueda a la derecha de la barra de herramientas (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) encuentra mensajes, mientras
+                escribe, en todas las carpetas de todas las cuentas por las palabras de su asunto, las personas que los envían y reciben, los nombres de sus
+                archivos y su texto. Una barra amarilla sobre la lista dice cuántos encontró para qué palabras, con <b>Borrar búsqueda</b> a su derecha, y la
+                barra de la carpeta dice dónde busca. Los resultados son una sola lista, con una columna <b>Carpeta</b> que indica dónde está cada mensaje. Las
+                palabras coinciden donde empiezan las palabras (<code>presu</code> encuentra <i>presupuesto</i>), y los acentos y las mayúsculas no importan.
+                <kbd>Esc</kbd>, la <b>&times;</b> al final del campo o vaciarlo muestra de nuevo la carpeta, igual que elegir una carpeta.
+            </li>
+            <li>
+                La búsqueda admite lo mismo que el cuadro de búsqueda de Gmail, así que <code>is:unread</code> muestra los mensajes sin leer e
+                <code>in:inbox</code> busca solo en la Bandeja de entrada: <code>"frase exacta"</code>, <code>-palabra</code> para excluir,
+                <code>esto OR aquello</code>, <code>from:</code>, <code>to:</code> (también <code>cc:</code>, <code>bcc:</code>), <code>subject:</code>,
+                <code>filename:</code>, <code>is:unread</code>, <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>,
+                <code>has:attachment</code>, <code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>,
+                <code>in:spam</code>, <code>in:anywhere</code> o <code>in:</code> y el nombre de una carpeta, <code>before:2025/01/31</code>,
+                <code>after:2025/01/01</code>, <code>older_than:2d</code> (o <code>3m</code>, <code>1y</code>), <code>newer_than:1m</code>,
+                <code>larger:5M</code> y <code>smaller:100k</code>. Señale el campo de búsqueda para verlos.
+            </li>
+            <li>
+                La búsqueda funciona en este equipo, sin preguntar al servidor. Inbox Classic lee para ella el texto de cada mensaje en segundo plano, los más
+                recientes primero, obteniendo solo el texto (sin archivos adjuntos ni imágenes, y los mensajes siguen sin leer). Justo después de agregar una
+                cuenta, los mensajes se encuentran enseguida por su asunto, sus personas y sus nombres de archivo, y por su texto a medida que se lee; la barra
+                de la carpeta dice cuántos quedan por leer.
+            </li>
+            <li>
+                <b>Eliminar</b> (la barra de herramientas, <b>Edición &gt; Eliminar mensaje</b> o la tecla <kbd>Del</kbd> en la lista) mueve el mensaje a
+                <b>Elementos eliminados</b>; eliminarlo allí lo borra definitivamente, después de preguntar. (En un servidor sin la extensión UIDPLUS, eliminar
+                definitivamente también borra los demás mensajes de esa carpeta que otro programa de correo marcó como eliminados.) <b>Edición &gt; Mover a
+                carpeta</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) lo mueve a otra carpeta, de la misma cuenta o de otra, y <b>Edición &gt; Copiar a carpeta</b> lo copia allí. Ambos muestran las carpetas de
+                todas las cuentas en un árbol: escriba parte de un nombre en el cuadro de arriba para encontrar una carpeta, las carpetas usadas por última
+                vez están arriba en <b>Recientes</b>, y <b>Nueva carpeta</b> crea una. Arrastrarlo de la lista a una carpeta del árbol también lo mueve;
+                mantenga <kbd>Ctrl</kbd> al soltar para copiarlo en su lugar. Un mensaje que va a otra cuenta se copia primero al servidor de esa cuenta, con
+                sus marcas y su fecha, y solo después se quita de su propio servidor, así que nunca se pierde por el camino: la barra de estado indica cuánto
+                falta, y si la conexión se corta o sale del programa, continúa con la siguiente comprobación del correo. (Un mensaje movido fuera de una
+                carpeta de Gmail se queda en Todos los correos de Gmail, porque Gmail guarda allí cada mensaje.) Una carpeta sobre la que lo mantiene un momento se abre, y el
+                árbol se desplaza en sus bordes superior e inferior; <kbd>Esc</kbd> cancela el arrastre. <b>No deseado</b> en la barra de herramientas
+                (<b>Mensaje &gt; Marcar como correo no deseado</b>, <kbd>Ctrl</kbd>+<kbd>J</kbd>) mueve un mensaje a <b>Correo no deseado</b> e indica al
+                servidor que es correo no deseado (la palabra clave <code>$Junk</code>, de la que aprenden los filtros de spam); en Correo no deseado el botón es
+                <b>Deseado</b>, que lo devuelve a la Bandeja de entrada. <b>Mensaje &gt; Marcar mensaje con marca</b> lo marca (<b>!</b> en la lista) o le quita la marca. <b>Mensaje &gt; Marca</b> lo marca con un color: rojo, naranja, amarillo, verde,
+                azul, morado o gris, como Apple Mail, de modo que un color puesto en uno se ve en el otro (los demás programas de correo muestran una marca
+                simple). <b>Quitar marca</b> quita la marca y su color. Todo esto ocurre también en el servidor, así que sus otros programas de correo lo ven.
+            </li>
+            <li>
+                Para trabajar con varios mensajes a la vez, mantenga <kbd>Ctrl</kbd> y haga clic en cada uno, o haga clic en el primero y mantenga
+                <kbd>Shift</kbd> al hacer clic en el último (<kbd>Shift</kbd> con las flechas hace lo mismo); <b>Edición &gt; Seleccionar todo</b>
+                (<kbd>Ctrl</kbd>+<kbd>A</kbd>) selecciona todos los mensajes de la lista. El panel de lectura indica entonces cuántos están seleccionados y
+                cuántos de ellos están sin leer o con marca, y la barra de estado también los cuenta. Marcar como leído o no leído, la marca, No deseado,
+                Eliminar y Mover a carpeta actúan sobre todos, y arrastrar uno de ellos los arrastra todos; Responder, Imprimir y similares actúan solo sobre un
+                mensaje.
+            </li>
+            <li>
+                <b>Edición &gt; Deshacer</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) deshace el último movimiento, eliminación o marca de correo no deseado, sean
+                cuantos sean los mensajes: vuelven a las carpetas de las que vinieron, y allí quedan seleccionados una vez de vuelta. El menú dice qué deshace (<b>Deshacer Mover</b>), y la barra de estado dice
+                qué se hizo. Un mensaje eliminado definitivamente no puede volver.
+            </li>
+            <li>
+                <b>Archivo &gt; Carpeta</b>, o un clic derecho en la lista de carpetas, crea una <b>Nueva carpeta</b> en la carpeta seleccionada (en la parte
+                superior de una cuenta cuando la cuenta está seleccionada), y <b>Cambia el nombre</b> o <b>Elimina</b> la carpeta seleccionada. Eliminar una
+                carpeta elimina los mensajes que contiene, después de preguntar. La Bandeja de entrada y las carpetas especiales (Elementos enviados,
+                Borradores, Elementos eliminados y similares) se quedan como están.
+            </li>
+            <li>Sobre el mensaje están su remitente, su fecha, sus destinatarios y su asunto.</li>
+        </ul>
+
+        <h3>Mensajes anteriores en las respuestas</h3>
+        <p>
+            Una respuesta suele llevar los mensajes anteriores. Inbox Classic los pliega tras un botón <b>&bull;&bull;&bull;</b> bajo lo que escribió el
+            remitente; haga clic en él para verlos. Solo se pliega el texto que es claramente un mensaje anterior; todo lo dudoso queda a la vista.
+        </p>
+
+        <h3>Mensajes aún no descargados</h3>
+        <p>
+            Un mensaje se descarga la primera vez que lo abre, así que justo después de agregar una cuenta la mayoría de los mensajes aún no están aquí. Su
+            remitente y su asunto aparecen enseguida; si el mensaje tarda más de un momento, el panel indica que se está descargando. Si no se puede conectar
+            con el servidor de correo, el panel dice por qué, y el mensaje se descarga solo cuando la cuenta vuelve a estar en línea. Para intentarlo ya,
+            <!--os:windows-->haga clic en la barra sobre el mensaje<!--/os--><!--os:mac,linux-->haga clic en <b>Reintentar</b><!--/os-->.
+        </p>
+
+        <h2>3. Imágenes, vínculos y archivos adjuntos</h2>
+        <h3>Imágenes</h3>
+        <p>
+            Las imágenes que el remitente guarda en Internet no se descargan, porque descargarlas le dice al remitente que abrió el mensaje, cuándo y desde
+            dónde. Las imágenes enviadas dentro del mensaje sí se muestran. Cuando un mensaje tiene esas imágenes, una barra amarilla indica que se
+            bloquearon; para verlas en un mensaje de confianza, haga clic en la barra (o en <b>Ver &gt; Descargar imágenes</b>).
+        </p>
+        <h3>Vínculos y scripts</h3>
+        <p>
+            Los scripts de los mensajes nunca se ejecutan. Hacer clic en un vínculo lo abre en su navegador web, nunca dentro de Inbox Classic. Antes de
+            escribir una contraseña en una página a la que llegó desde un correo, compruebe la dirección en su navegador.
+        </p>
+        <h3>Archivos adjuntos</h3>
+        <p>
+            Cuando un mensaje tiene archivos adjuntos, aparece un clip con el número de archivos a la derecha del encabezado del mensaje. Haga clic en él y
+            elija un archivo para guardarlo, o <b>Guardar archivos adjuntos</b> para guardarlos todos en una carpeta (un archivo con el mismo nombre que ya
+            esté allí se conserva, y el nuevo recibe un número). Los archivos se guardan, nunca se abren desde Inbox Classic. Propone un nombre de archivo
+            seguro: se quitan los nombres de carpetas, los caracteres que <!--os:windows-->Windows no permite<!--/os--><!--os:mac,linux-->Windows y otros
+            sistemas no permiten<!--/os--> y los caracteres que pueden hacer que un nombre parezca distinto de lo que es.
+        </p>
+        <div class="note">
+            Abra archivos adjuntos solo de personas de las que los espera. Un programa (<code>.exe</code>, <code>.js</code>, <code>.vbs</code>,
+            <code>.msi</code>, <code>.bat</code>, <code>.scr</code>) o un documento que le pide "habilitar contenido" puede tomar el control de su equipo.
+        </div>
+
+        <h3>Guardar, imprimir e importar mensajes</h3>
+        <ul>
+            <li>
+                <b>Archivo &gt; Guardar como</b> guarda el mensaje mostrado como archivo <code>.eml</code>, que otros programas de correo abren. Con varios
+                mensajes seleccionados pide una carpeta y guarda cada uno allí, con el nombre de su asunto; un archivo que ya está allí nunca se reemplaza
+                (el nuevo se llama entonces <i>Almuerzo (2).eml</i>).
+            </li>
+            <li>
+                Arrastre mensajes de la lista al escritorio o a una ventana de carpeta<!--os:mac--> del Finder<!--/os--> para guardarlos allí del mismo modo
+                como archivos <code>.eml</code>. Uno que aún no se ha descargado se descarga para ello.
+            </li>
+            <li>
+                <b>Archivo &gt; Importar mensajes</b> coloca archivos <code>.eml</code> en la carpeta seleccionada, también en el servidor. Arrastrar archivos <code>.eml</code> a una carpeta de la lista de carpetas hace lo mismo. Un archivo que no es un mensaje no se importa.
+            </li>
+            <li>
+                <b>Archivo &gt; Imprimir</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) abre la vista previa de impresión del mensaje mostrado en una ventana sobre Inbox
+                Classic: elija la impresora (o guardar como PDF), las copias y las páginas, y el mensaje se imprime con su remitente, su fecha, sus destinatarios
+                y su asunto. La ventana se cierra una vez impreso o cancelado.
+            </li>
+        </ul>
+
+        <h2>4. Escribir, responder y reenviar</h2>
+        <ul>
+            <li><b>Crear correo</b> (<kbd>Ctrl</kbd>+<kbd>N</kbd>) empieza un mensaje nuevo desde la cuenta de la carpeta seleccionada.</li>
+            <li>
+                <b>CC</b> y <b>CCO</b> aparecen solo cuando tienen a alguien; los botones <b>CC</b> y <b>CCO</b> al final de la línea <b>Para</b>
+                <!--os:windows,linux-->(<kbd>Alt</kbd>+<kbd>C</kbd>, <kbd>Alt</kbd>+<kbd>B</kbd>) <!--/os-->los abren. La línea <b>Adjuntar</b> aparece en cuanto
+                se adjunta un archivo.
+            </li>
+            <li>
+                Siempre escribe con el formato a mano. Un mensaje sin formato alguno (sin negrita, colores, listas, vínculos ni imágenes) se envía como texto sin
+                formato, que todos los programas de correo muestran igual; con formato se envía como HTML con una copia en texto sin formato. Una respuesta o un
+                reenvío sigue al original: a un mensaje de texto sin formato es también texto sin formato (el original citado con <b>&gt;</b>) salvo que dé
+                formato a algo; a un mensaje HTML es HTML.
+            </li>
+            <li>
+                <b>Reenviar</b> con varios mensajes seleccionados escribe un solo mensaje nuevo con todos ellos adjuntos como archivos <code>.eml</code>, y
+                su asunto es el del primero.
+            </li>
+            <li>
+                <b>De</b>, en la parte superior del mensaje, muestra desde quién sale: el nombre y la dirección de la cuenta. Una respuesta o un reenvío sale de
+                la cuenta en la que está el mensaje original. Con varias cuentas, elija otra ahí; el mensaje se envía entonces con los servidores de esa cuenta y
+                se guarda en sus Elementos enviados (o Borradores). El nombre que ven los demás es el nombre para mostrar de la cuenta, que se cambia en
+                <b>Archivo &gt; Cuentas &gt; Propiedades</b>.
+            </li>
+            <li>
+                <b>Responder</b> (<kbd>Ctrl</kbd>+<kbd>R</kbd>) contesta al remitente, <b>Responder a todos</b>
+                (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>) a todos a quienes fue el mensaje, <b>Reenviar</b> (<kbd>Ctrl</kbd>+<kbd>F</kbd>) lo envía a
+                otros.
+            </li>
+            <li>
+                En una respuesta, el mensaje original queda plegado tras un botón <b>&bull;&bull;&bull;</b> bajo su texto, para que vea solo lo que escribe.
+                Haga clic en él (o seleccione todo con <kbd>Ctrl</kbd>+<kbd>A</kbd>) para ponerlo en su texto, donde puede acortarlo; se envía con su respuesta
+                en cualquier caso. En un reenvío el original está en el texto desde el principio, ya que es lo que envía.
+            </li>
+            <li>
+                La barra sobre el texto le da formato: la fuente y su tamaño, <b>N</b>egrita, <b>C</b>ursiva, <b>S</b>ubrayado (o
+                <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd>), <b>Color</b>, listas numeradas y con viñetas,
+                reducir y aumentar sangría (<b>&laquo;</b> y <b>&raquo;</b>), alineación, <b>Vínculo</b> para una dirección web sobre el texto seleccionado,
+                <b>Línea</b> para una línea divisoria e <b>Imagen</b> para poner una imagen en el texto (o arrastre un archivo de imagen desde
+                <!--os:windows-->el Explorador<!--/os--><!--os:mac-->el Finder<!--/os--><!--os:linux-->el gestor de archivos<!--/os--> al texto: queda donde
+                lo suelta). Las imágenes van dentro del mensaje, no como archivos adjuntos aparte. El mensaje se envía como HTML con formato y una copia en texto
+                sin formato para los programas de correo que solo muestran texto.
+            </li>
+            <li>
+                Vínculos: con el cursor en un vínculo, o el ratón sobre él, la barra de estado de abajo muestra adónde lleva. <kbd>Ctrl</kbd>+clic en un
+                vínculo lo abre en su navegador. <b>Vínculo</b> (o <kbd>Ctrl</kbd>+<kbd>K</kbd>) sobre un vínculo muestra su dirección para cambiarla; vacíe la
+                dirección para quitar el vínculo y conservar su texto. Haga clic con el botón derecho en un vínculo para <b>Abrir vínculo</b>, <b>Editar
+                vínculo</b> y <b>Quitar vínculo</b>.
+            </li>
+            <li>Las palabras mal escritas se subrayan; haga clic con el botón derecho en una para ver sugerencias. Cortar, copiar y pegar funcionan como en todas partes.</li>
+            <li>
+                Separe varias direcciones en <b>Para</b>, <b>CC</b> y <b>CCO</b> con comas, por ejemplo
+                <code>María García &lt;maria@example.com&gt;, juan@example.com</code>. Ponga entre comillas un nombre que tenga una coma:
+                <code>"García, María" &lt;maria@example.com&gt;</code>.
+            </li>
+            <li>Las personas en <b>CCO</b> reciben el mensaje, pero los demás destinatarios no las ven.</li>
+            <li>
+                <b>Adjuntar</b> agrega archivos, igual que arrastrarlos desde <!--os:windows-->el Explorador<!--/os--><!--os:mac-->el Finder<!--/os--><!--os:linux-->el
+                gestor de archivos<!--/os--> a los campos de dirección, o un archivo que no sea una imagen al texto. Aparecen en la línea <b>Adjuntar</b> con
+                su tamaño; para quitar uno, selecciónelo y pulse <kbd>Del</kbd>, o haga clic con el botón derecho y elija <b>Quitar</b>. Los archivos se leen
+                al enviar el mensaje.
+            </li>
+            <li>
+                <b>Enviar</b> pone el mensaje en la <b>Bandeja de salida</b> y lo envía enseguida. Cuando no puede salir (sin conexión, el servidor lo rechaza),
+                se queda en la Bandeja de salida y sale con el próximo <b>Enviar y recibir</b>; no se pierde nada de lo que escribió. <b>Enviar y recibir</b>
+                también se ejecuta solo cada diez minutos. El centro de la barra de estado de la ventana principal indica qué pasa con el correo que envía:
+                <i>Enviando</i> mientras sale, <i>Enviado</i> con su asunto y la hora en cuanto el servidor lo aceptó, o que espera en la Bandeja de salida.
+                <b>Herramientas &gt; Bandeja de salida</b> muestra lo que espera, con el motivo por el que no salió, y lo envía o lo elimina.
+            </li>
+            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> envía desde el texto.</li>
+            <li>
+                <b>Guardar</b> (o <kbd>Ctrl</kbd>+<kbd>S</kbd>) guarda el mensaje en la carpeta <b>Borradores</b> de la cuenta, en el servidor, para terminarlo
+                más tarde; guardar de nuevo sustituye la copia guardada antes. La barra de estado del mensaje dice <i>Guardado en Borradores</i> con la hora en
+                cuanto el servidor lo tiene, o por qué no se guardó. Al cerrar un mensaje con cambios se pregunta si guardarlos: <b>Sí</b> lo guarda en
+                Borradores, <b>No</b> lo descarta, <b>Cancelar</b> vuelve a él. Para seguir escribiendo, haga doble clic en el borrador en Borradores (o
+                selecciónelo y pulse <kbd>Enter</kbd>): se abre con sus destinatarios, su texto y sus archivos adjuntos. Una vez enviado, el borrador se quita
+                de Borradores. Un mensaje que escribe es una ventana propia<!--os:windows--> en la barra de tareas<!--/os-->: puede volver a la ventana
+                principal y leer correo mientras sigue abierto. Al cerrar Inbox Classic se cierran primero los mensajes que está escribiendo, preguntando por los
+                que tienen cambios.
+            </li>
+            <li>
+                <b>Enviar</b> envía el mensaje. Si una dirección está mal escrita o falta un archivo, Inbox Classic lo indica y deja el mensaje abierto para que
+                pueda corregirlo. Se guarda una copia de cada mensaje enviado en <b>Elementos enviados</b>.
+            </li>
+            <li>
+                Los <b>vínculos de correo</b> (<code>mailto:</code>) de las páginas web y de otros programas abren un mensaje nuevo en Inbox Classic cuando es
+                su programa de correo predeterminado: <b>Herramientas &gt; Usar como programa de correo predeterminado</b> <!--os:windows-->abre la página de
+                la Configuración de Windows donde lo elige.<!--/os--><!--os:mac,linux-->lo convierte en el predeterminado.<!--/os--> Las direcciones, el
+                asunto y el texto del vínculo se rellenan; no se usa nada más del vínculo.
+            </li>
+            <li>
+                Al escribir en <b>Para</b>, <b>CC</b> o <b>CCO</b> se muestran las personas que pueden ser, primero aquellas a las que más escribe y después las
+                que le escriben; la lista conoce a todos los del correo que tiene Inbox Classic (no el Correo no deseado). Elija con las flechas y tome una con
+                <kbd>Enter</kbd> o <kbd>Tab</kbd> (o un clic); <kbd>Esc</kbd> cierra la lista, y <kbd>Shift</kbd>+<kbd>Del</kbd> quita de ella para siempre a
+                la persona elegida.
+            </li>
+            <li>
+                <b>Una firma</b> para cada cuenta: <b>Archivo &gt; Cuentas</b>, seleccione la cuenta y luego <b>Firma</b>. Se escribe con el mismo formato que
+                un mensaje (negrita, colores, vínculos, una imagen). Los mensajes nuevos, respuestas y reenvíos de la cuenta empiezan con ella, bajo una línea
+                vacía para escribir y la habitual línea <code>--</code>, sobre el mensaje citado. Elegir otra cuenta en <b>De</b> pone en su lugar la firma de
+                esa cuenta.
+            </li>
+        </ul>
+
+        <h2>5. Recibir correo nuevo</h2>
+        <p>
+            Inbox Classic comprueba cada cuenta al iniciarse y cada diez minutos después. Haga clic en <b>Enviar y recibir</b> o pulse <!--os:windows,linux--><kbd>F5</kbd><!--/os--><!--os:mac--><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd><!--/os-->
+            para comprobar ahora; la flecha junto a <b>Enviar y recibir</b> comprueba una sola cuenta, y la de junto a <b>Crear correo</b> empieza un mensaje
+            desde la cuenta que elija. La barra de estado de abajo muestra lo que está haciendo y el último problema que tuvo.
+        </p>
+        <p>
+            También vigila la Bandeja de entrada de cada cuenta, así que el correo nuevo aparece al llegar, no solo en la próxima comprobación. Mientras su
+            ventana no está al frente, una notificación dice quién escribió y sobre qué; haga clic en ella para abrir el mensaje. <b>Herramientas &gt; Avisar
+            de correo nuevo</b> desactiva y activa las notificaciones.
+        </p>
+        <!--os:windows--><p>
+            Cerrar la ventana deja Inbox Classic funcionando en el área de notificación, donde sigue comprobando el correo; su icono allí indica cuántos
+            mensajes están sin leer, igual que un número en su botón de la barra de tareas. Haga clic en el icono para abrirlo de nuevo; haga clic con el
+            botón derecho para <b>Comprobar si hay correo nuevo</b> y <b>Salir</b>. <b>Archivo &gt; Salir</b> lo cierra.
+        </p><!--/os--><!--os:mac--><p>
+            Cerrar la ventana deja Inbox Classic funcionando en el Dock, donde sigue comprobando el correo; el icono del Dock muestra cuántos mensajes están
+            sin leer en las bandejas de entrada. Haga clic en el icono del Dock para abrir de nuevo la ventana. <b>Inbox Classic &gt; Salir de Inbox
+            Classic</b> (<kbd>Ctrl</kbd>+<kbd>Q</kbd>) lo cierra.
+        </p><!--/os--><!--os:linux--><p>
+            Cerrar la ventana deja Inbox Classic funcionando en la barra superior (Ubuntu muestra allí su icono), donde sigue comprobando el correo; el menú
+            del icono tiene <b>Abrir Inbox Classic</b>, <b>Comprobar si hay correo nuevo</b> y <b>Salir</b>, y el dock muestra cuántos mensajes están sin
+            leer en las bandejas de entrada. Donde el escritorio no tiene sitio para el icono, cerrar la ventana cierra Inbox Classic. <b>Salir</b> en el menú
+            principal lo cierra.
+        </p><!--/os-->
+
+        <h2>6. Métodos abreviados de teclado</h2>
+        <table>
+            <tr>
+                <th>Teclas</th>
+                <th>Acción</th>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>F5</kbd></td>
+                <td>Comprobar si hay correo nuevo en todas las cuentas</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td>
+                <td>Comprobar si hay correo nuevo en todas las cuentas</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>N</kbd></td>
+                <td>Mensaje nuevo</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>R</kbd></td>
+                <td>Responder al remitente</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td>
+                <td>Responder a todos</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
+                <td>Reenviar</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
+                <td>Reenviar</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td>
+                <td>Marcar el mensaje como leído</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd></td>
+                <td>Marcar el mensaje como leído</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>A</kbd></td>
+                <td>Seleccionar todos los mensajes de la lista</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td>
+                <td>Deshacer el último movimiento, eliminación o marca de correo no deseado</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>J</kbd></td>
+                <td>Marcar el mensaje como correo no deseado</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd></td>
+                <td>Marcar el mensaje como correo no deseado</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+                <td>Marcar como leídos todos los mensajes de la carpeta</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></td>
+                <td>Marcar como leídos todos los mensajes de la carpeta</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td>
+                <td>Buscar mensajes en la carpeta</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>F</kbd></td>
+                <td>Buscar mensajes en la carpeta</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>P</kbd></td>
+                <td>Imprimir el mensaje</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Alt</kbd>+<kbd>Enter</kbd></td>
+                <td>Los encabezados del mensaje (Propiedades)</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>U</kbd></td>
+                <td>Los encabezados del mensaje (Propiedades)</td>
+            </tr>
+            <!--/os--><!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>U</kbd></td>
+                <td>El mensaje completo (Código fuente del mensaje)</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Del</kbd></td>
+                <td>Eliminar el mensaje (en la lista de mensajes)</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Del</kbd></td>
+                <td>Eliminar el mensaje (en la lista de mensajes)</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd></td>
+                <td>Mover el mensaje a otra carpeta</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td>
+                <td>Enviar el mensaje que está escribiendo</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
+                <td>Guardar en Borradores el mensaje que está escribiendo</td>
+            </tr>
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd></td>
+                <td>Negrita, cursiva, subrayado al escribir</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>F1</kbd></td>
+                <td>Esta ayuda</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>?</kbd></td>
+                <td>Esta ayuda</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>Tab</kbd></td>
+                <td>Pasar entre las carpetas, la lista de mensajes y los campos de una ventana</td>
+            </tr>
+        </table>
+
+        <h2>7. Agentes de IA</h2>
+        <p>
+            Si usa un agente de IA (Claude, Cursor u otro programa que hable el Model Context Protocol, MCP), puede dejar que lea y organice su correo aquí.
+            Inbox Classic no tiene IA y no se envía nada a ningún servicio de IA: un agente solo trabaja cuando usted deja entrar a su programa, y solo con
+            las cuentas que elija.
+        </p>
+        <ul>
+            <li>
+                <b>Conectar.</b> <b>Herramientas &gt; Agentes de IA &gt; Cómo conectar un agente</b> da las líneas que hay que agregar a la configuración de su
+                agente (para Claude Desktop: <b>Settings &gt; Developer &gt; Edit Config</b>). El agente inicia Inbox Classic con <code>--mcp</code>, que lo
+                conecta con el Inbox Classic en ejecución, o inicia uno en segundo plano. Solo los programas que se ejecutan con su usuario en este equipo pueden
+                alcanzarlo.
+            </li>
+            <li>
+                <b>La primera vez</b> que se conecta el agente de un programa, Inbox Classic le pregunta, nombrando el programa, qué puede hacer: leer el correo;
+                organizarlo (marcar como leído, marcar, correo no deseado, mover, eliminar a Elementos eliminados); escribir borradores para que usted los
+                envíe; y enviar correo, cada mensaje solo después de que usted lo apruebe. Elija las cuentas que puede ver. <b>No permitir</b> rechaza el
+                programa, y no se le vuelve a preguntar.
+            </li>
+            <li>
+                <b>Enviar.</b> Cada mensaje que un agente quiere enviar se le muestra primero, con cada destinatario por su dirección y marcadas las
+                direcciones a las que nunca escribió. <b>Enviar</b> se activa tras un momento; <b>Editar primero</b> lo abre en un mensaje nuevo para
+                cambiarlo; <b>No enviar</b> es la opción predeterminada. Lo que envía espera 30 segundos en la Bandeja de salida, donde aún puede eliminarlo.
+            </li>
+            <li>
+                <b>Lo que cambia</b> se ve enseguida en las ventanas, como si lo hubiera hecho usted. Un agente nunca elimina nada definitivamente y nunca cambia
+                la configuración de sus cuentas. Leer un mensaje no lo marca como leído.
+            </li>
+            <li>
+                <b>Herramientas &gt; Agentes de IA</b> muestra los programas que dejó entrar o rechazó (<b>Cambiar</b> lo que uno puede hacer, o <b>Quitarlo</b>
+                para que se le vuelva a preguntar), y todo lo que hicieron los agentes, lo más reciente primero. <b>Deshacer</b> revierte un estado de lectura,
+                una marca, un movimiento o una eliminación, y un mensaje que siga en la Bandeja de salida. <b>Permitir que se conecten agentes de IA</b> los
+                desactiva todos a la vez.
+            </li>
+            <li>
+                <b>Tenga cuidado con lo que pide.</b> El correo lo escriben otras personas, y un mensaje puede intentar convencer a un agente de algo: reenviar su
+                correo, eliminarlo, escribir a alguien. Inbox Classic oculta a los agentes el texto que un mensaje le oculta a usted y les dice que el correo no
+                son instrucciones, pero un agente puede ser engañado de todos modos. Lea cada mensaje que quiera enviar antes de aceptar, y deje que un agente
+                envíe solo si lo necesita. Un agente que también tiene otras herramientas (navegar por la web, leer sus archivos) podría transmitir lo que lee
+                por ellas; Inbox Classic no puede verlas.
+            </li>
+        </ul>
+
+        <h2>8. Cuando algo no funciona</h2>
+        <h3>"authentication failed" o Inbox Classic vuelve a pedir la contraseña</h3>
+        <p>
+            El servidor rechazó la contraseña. Escríbala de nuevo; para Gmail y Outlook.com use una contraseña de aplicación o inicie sesión mediante el
+            navegador (vea <i>Agregar una cuenta</i>). Si su proveedor pide un segundo paso al iniciar sesión en la web, también necesita una contraseña de
+            aplicación para los programas de correo. Para una cuenta que inicia sesión mediante el navegador, Inbox Classic ofrece volver a iniciar sesión.
+        </p>
+        <h3>"TLS error" o un error de certificado</h3>
+        <p>
+            Inbox Classic no pudo confirmar que habla con el servidor real, así que no envió su contraseña. Compruebe el nombre del servidor en la
+            configuración de la cuenta: tiene que ser el nombre para el que está hecho el certificado del servidor (a menudo <code>imap.proveedor.es</code>,
+            no su propio dominio). En una red que inspecciona el tráfico cifrado, consulte a su administrador.
+        </p>
+        <h3>"the server does not offer STARTTLS"</h3>
+        <p>
+            La cuenta está configurada con STARTTLS pero el servidor no ofreció cifrado. Pruebe <b>SSL/TLS</b> en el puerto 993 (IMAP) o 465 (SMTP). Si no
+            funciona nada más, el servidor no se puede usar de forma segura.
+        </p>
+        <h3>"the server takes the password only over an encrypted connection"</h3>
+        <p>
+            El servidor saliente (SMTP) está configurado como <b>Ninguna (sin cifrar)</b>. Su contraseña está bien; cambie la seguridad SMTP a
+            <b>STARTTLS</b> (puerto 587) o <b>SSL/TLS</b> (puerto 465).
+        </p>
+        <h3>"connection error" o "the server did not answer in time"</h3>
+        <p>
+            Compruebe su conexión a Internet, el nombre del servidor y el puerto. Los cortafuegos a veces bloquean los puertos de correo, sobre todo el 25;
+            use el 465 o el 587 para enviar. Inbox Classic lo vuelve a intentar en la próxima comprobación.
+        </p>
+        <h3>Un mensaje que no se puede mostrar</h3>
+        <p>
+            Algunos mensajes están dañados o construidos de formas que ningún programa de correo puede leer. Inbox Classic muestra una nota en lugar del
+            mensaje; el resto de su correo no se ve afectado.
+        </p>
+
+        <h2>9. Dónde se guardan su correo y sus contraseñas</h2>
+        <ul>
+            <li>
+                Correo descargado y configuración de las cuentas: <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->.
+                Su correo se queda también en el servidor; la copia de aquí sirve para leer rápido y sin conexión.
+            </li>
+            <li>
+                Contraseñas, inicios de sesión mediante el navegador y secretos de cliente de las aplicaciones de inicio de sesión: <!--os:windows-->el
+                Administrador de credenciales de Windows, en <b>Inbox Classic</b>. Están cifrados para su cuenta de Windows.<!--/os--><!--os:mac-->su llavero de
+                inicio de sesión, en <b>InboxClassic</b> (Acceso a Llaveros los muestra). Están cifrados para su cuenta de Mac.<!--/os--><!--os:linux-->su
+                llavero (GNOME Keyring, mediante el Secret Service), en <b>InboxClassic</b>. Están cifrados para su sesión. Sin llavero se guardan hasta que
+                se cierra Inbox Classic.<!--/os-->
+            </li>
+            <!--os:windows--><li>Al desinstalar Inbox Classic se pregunta si quitar el correo descargado. El correo de sus servidores nunca se quita.</li><!--/os--><!--os:mac--><li>Para quitar Inbox Classic, ciérrelo y muévalo a la Papelera; el correo descargado queda en la carpeta de arriba hasta que la elimine también. El correo de sus servidores nunca se quita.</li><!--/os--><!--os:linux--><li>Quitar el paquete (<code>sudo apt remove inbox-classic</code>) deja el correo descargado en la carpeta de arriba hasta que la elimine también. El correo de sus servidores nunca se quita.</li><!--/os-->
+        </ul>
+        <p>
+            Para pruebas, <!--os:windows--><code>InboxClassic.exe<!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"<!--/os--><!--os:linux--><code>inbox-classic<!--/os--> --store &lt;archivo&gt;</code> usa otro almacén de
+            correo, <code>--memory-passwords</code> guarda las contraseñas solo para la sesión actual, <code>--pin-certificate &lt;archivo&gt;</code> acepta
+            solo el certificado de servidor de ese archivo (PEM o DER) en lugar de los que confía el sistema, para un servidor de prueba con un certificado
+            autofirmado, y <code>--sign-in-page-file &lt;archivo&gt;</code> escribe la página de un inicio de sesión mediante el navegador en ese archivo en
+            lugar de abrir el navegador. <code>--mcp</code> es lo que inicia un agente de IA (vea arriba); <code>--background</code> inicia Inbox Classic sin
+            su ventana.
+        </p>
+    </body>
+</html>
