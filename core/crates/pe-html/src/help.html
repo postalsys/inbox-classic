@@ -275,8 +275,13 @@
                 <b>Delete</b> (the toolbar, <b>Edit &gt; Delete Message</b> or the <kbd>Del</kbd> key in the list) moves the message to <b>Deleted Items</b>;
                 deleting it there removes it for good, after asking. (On a server without the UIDPLUS extension, deleting for good also removes the other
                 messages of that folder that another mail program marked as deleted.)
-                <b>Edit &gt; Move to Folder</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) moves it to another folder of the account, and so does dragging
-                it from the list onto a folder in the tree; hold <kbd>Ctrl</kbd> while you let go to copy it instead. A folder you hold it over for a moment
+                <b>Edit &gt; Move to Folder</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) moves it to another folder, of the same account or of
+                another one, and <b>Edit &gt; Copy to Folder</b> copies it there. Both show the folders of every account in a tree: type part of a name in the
+                box above it to find a folder, the folders you used last are at the top under <b>Recent</b>, and <b>New Folder</b> makes one. Dragging it
+                from the list onto a folder in the tree moves it too; hold <kbd>Ctrl</kbd> while you let go to copy it instead. A message going to another
+                account is copied to that account's server first, with its flags and date, and only then taken off its own server, so it is never lost on
+                the way: the status bar says how far it is, and if the connection drops or you quit, it goes on with the next check for mail. (A message
+                moved out of a Gmail folder stays in Gmail's All Mail, as Gmail keeps every message there.) A folder you hold it over for a moment
                 opens, and the tree scrolls at its top and bottom edges; <kbd>Esc</kbd> cancels the drag. <b>Junk</b> on the toolbar (<b
                     >Message &gt; Mark as Junk</b
                 >, <kbd>Ctrl</kbd>+<kbd>J</kbd>) moves a message to <b>Junk E-mail</b> and tells the server it is junk (the <code>$Junk</code> keyword, which

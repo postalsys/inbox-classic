@@ -179,6 +179,28 @@ const sections = [
                 ]
             },
             {
+                shot: 'move-1-dialog',
+                name: 'Move and Copy to Folder',
+                what: 'Move to Folder and Copy to Folder show the folders of every account in a tree, with a filter box at the top (type part of a name to narrow it), the last folders used under Recent, and New Folder. The folder the messages are in is shown but can not be chosen, and the button says what it does: Move or Copy.',
+                how: 'Edit > Move to Folder (Ctrl+Shift+V) or Edit > Copy to Folder, or the message menu.',
+                checked: [
+                    'The folders of both accounts are in the tree, with a filter box',
+                    'The folder the message is in can not be chosen, and the button says Move',
+                    'The filter narrows the tree; the folder used last is under Recent'
+                ]
+            },
+            {
+                shot: 'move-2-accounts',
+                name: 'Moving between accounts',
+                what: "Messages move or copy to a folder of another account through the dialog or by dragging them onto it. The message is copied to the other account's server first, with its flags and date, and only then removed from its own, so nothing is lost when the connection drops or the app quits on the way; it goes on with the next sync. The status bar says how far it is, and Edit > Undo moves it back.",
+                how: 'Move to Folder or Copy to Folder and a folder of another account, or drag messages onto one (Ctrl, Option on the Mac, copies).',
+                checked: [
+                    "A message moved to the second account's Archive is there on its server, with its flags, and gone from the first",
+                    'Undo brings it back to the first account',
+                    'Copy keeps it in the Inbox; a drag onto the other account moves it'
+                ]
+            },
+            {
                 shot: 'all-inboxes-2-menu',
                 name: "All Inboxes' menu",
                 what: 'A right-click on All Inboxes offers Mark All Read, which marks every Inbox read; the folder commands (New Folder, Rename, Delete) are left out, as All Inboxes is no folder of one account.',
