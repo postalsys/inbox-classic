@@ -161,6 +161,14 @@ impl Core {
         Ok(written)
     }
 
+    /// The messages `refs` written as `.eml` files into a new folder of the user's own (as drafts' attachments are),
+    /// for a drag onto the desktop or a file window that wants files that are there; their paths. Blocks as
+    /// [`Core::export_messages`] does.
+    pub fn drag_files(&self, refs: &[MessageRef], timeout: Duration) -> Result<Vec<PathBuf>> {
+        let dir = crate::private_dir("drag").map_err(|e| Error::Unavailable(e.to_string()))?;
+        self.save_messages(refs, &dir, timeout)
+    }
+
     /// A new message forwarding `refs` as attached `.eml` files (the window writes it from the account of the first):
     /// its subject that one's with "Fw: ". Downloads what is not here yet, as [`Core::export_messages`] does, and blocks as it does.
     pub fn forward_as_attachments(&self, refs: &[MessageRef], timeout: Duration) -> Result<Draft> {
@@ -186,6 +194,14 @@ impl Core {
             ..Draft::default()
         })
     }
+}
+
+/// Writes `content` into `dir` as `name`, or as `name (2).eml` and so on when that is taken, never over a file there,
+/// marked as from the internet where the system has such a mark (Windows; the Mac app sets its own); its path. For a
+/// file a drag promised into a folder the system chose.
+pub fn write_file(dir: &Path, name: &str, content: &[u8]) -> Result<PathBuf> {
+    let name = pe_mime::parser::safe_filename(Some(name), "message/rfc822");
+    crate::view::write_new(dir, &name, content).map_err(|e| Error::Unavailable(format!("{name}: {e}")))
 }
 
 #[cfg(test)]

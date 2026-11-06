@@ -467,8 +467,15 @@ impl Worker {
                     .map_err(Failure::from),
                 Err(failure) => Err(failure),
             };
-            if let Err(failure) = outcome {
-                failed.push((*r, failure.message));
+            match outcome {
+                Ok(()) => {}
+                // the server is not reachable, or does not take the sign-in: the rest would fail the same way
+                Err(failure) if failure.kind != FailureKind::Other => {
+                    let at = refs.iter().position(|x| x == r).unwrap_or(0);
+                    failed.extend(refs[at..].iter().map(|x| (*x, failure.message.clone())));
+                    break;
+                }
+                Err(failure) => failed.push((*r, failure.message)),
             }
         }
         if let Some((mut client, _)) = self.connection.take() {

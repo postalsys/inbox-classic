@@ -1340,6 +1340,33 @@ fn messages_become_files() {
             .contains("third")
     );
 
+    // for a drag: written into a folder of the user's own
+    let dragged = s.core.drag_files(&refs[..2], Duration::from_secs(20)).unwrap();
+    assert_eq!(dragged.len(), 2);
+    assert!(std::fs::read_to_string(&dragged[1]).unwrap().contains("second"));
+    // a file a drag promised: never over one there
+    let promised = pe_core::write_file(dir.path(), "Other.eml", b"x").unwrap();
+    assert_eq!(promised.file_name().unwrap().to_string_lossy(), "Other (3).eml");
+    assert_eq!(
+        pe_core::saved_text(3, dir.path()),
+        format!(
+            "Saved 3 messages to {}",
+            dir.path().file_name().unwrap().to_string_lossy()
+        )
+    );
+
+    // files dropped on a folder: the messages go in, the rest is told
+    let notes = dir.path().join("notes.txt");
+    std::fs::write(&notes, "not mail").unwrap();
+    let report = s
+        .core
+        .import_files(inbox, &[written[0].clone(), notes.clone()])
+        .unwrap()
+        .unwrap();
+    assert!(report.contains("notes.txt") && !report.contains("Lunch"), "{report}");
+    assert!(pe_core::is_message_file(&written[0]) && !pe_core::is_message_file(&notes));
+    assert_eq!(s.core.import_files(inbox, &[written[0].clone()]).unwrap(), None);
+
     // one gone from the server can not be had: told, the others still come
     let gone = s.server.add_message("INBOX", &rfc822("Gone", "x"), &[]);
     s.core.sync(account).unwrap();

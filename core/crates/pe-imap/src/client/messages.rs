@@ -63,19 +63,17 @@ impl Client {
         silent: bool,
     ) -> Result<(), Error> {
         self.require_selected()?;
-        let item = match action {
-            StoreAction::Add => "+FLAGS",
-            StoreAction::Remove => "-FLAGS",
-            StoreAction::Set => "FLAGS",
-        };
-        let item = if silent {
-            format!("{item}.SILENT")
-        } else {
-            item.to_string()
+        let item = match (action, silent) {
+            (StoreAction::Add, false) => "+FLAGS",
+            (StoreAction::Remove, false) => "-FLAGS",
+            (StoreAction::Set, false) => "FLAGS",
+            (StoreAction::Add, true) => "+FLAGS.SILENT",
+            (StoreAction::Remove, true) => "-FLAGS.SILENT",
+            (StoreAction::Set, true) => "FLAGS.SILENT",
         };
         let args = vec![
             Arg::Sequence(messages.set().to_string()),
-            Arg::atom(&item),
+            Arg::atom(item),
             Arg::List(flags.iter().map(|f| Arg::atom(*f)).collect()),
         ];
         self.simple(&messages.command("STORE"), args).await

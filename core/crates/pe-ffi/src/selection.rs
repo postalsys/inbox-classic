@@ -13,6 +13,15 @@ use crate::{guard, into_c_string};
 #[derive(Default)]
 pub struct PeSelection(Vec<MessageRef>);
 
+/// The messages of `selection`, none for NULL
+///
+/// # Safety
+/// `selection` must be NULL or a live selection.
+unsafe fn refs_of(selection: *const PeSelection) -> Vec<MessageRef> {
+    // SAFETY: as the caller guarantees
+    unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default()
+}
+
 /// An empty selection
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_selection_new() -> *mut PeSelection {
@@ -371,7 +380,7 @@ pub unsafe extern "C" fn pe_selection_act(
     error: *mut *mut c_char,
 ) -> *mut c_char {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    let refs = unsafe { refs_of(selection) };
     let action = match action {
         PeAction::Read => Action::Read(true),
         PeAction::Unread => Action::Read(false),
@@ -593,7 +602,7 @@ pub unsafe extern "C" fn pe_selection_file_names(
     selection: *const PeSelection,
 ) -> *mut PeTextList {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    let refs = unsafe { refs_of(selection) };
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
@@ -609,7 +618,7 @@ pub unsafe extern "C" fn pe_selection_file_names(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_selection_all_downloaded(core: *const PeCore, selection: *const PeSelection) -> bool {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    let refs = unsafe { refs_of(selection) };
     // SAFETY: as the caller guarantees
     unsafe { with(core, false, |core| core.all_downloaded(&refs).unwrap_or(false)) }
 }
@@ -632,7 +641,7 @@ pub unsafe extern "C" fn pe_selection_export(
     timeout_ms: u64,
 ) -> *mut PeExport {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    let refs = unsafe { refs_of(selection) };
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
@@ -720,7 +729,7 @@ pub unsafe extern "C" fn pe_selection_save(
     error: *mut *mut c_char,
 ) -> *mut PeTextList {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    let refs = unsafe { refs_of(selection) };
     // SAFETY: as the caller guarantees
     let dir = unsafe { crate::core::arg(dir) }.unwrap_or_default().to_string();
     // SAFETY: as the caller guarantees
@@ -754,7 +763,7 @@ pub unsafe extern "C" fn pe_selection_forward(
     error: *mut *mut c_char,
 ) -> *mut crate::core::PeDraft {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default();
+    let refs = unsafe { refs_of(selection) };
     // SAFETY: as the caller guarantees
     let outcome = unsafe {
         with(core, Err(None), |core| {
@@ -767,8 +776,8 @@ pub unsafe extern "C" fn pe_selection_forward(
         .map_or(null_mut(), |draft| crate::core::draft_handle(&draft))
 }
 
-/// What the status bar says once `count` messages are saved as files into the folder named `place` (UTF-8): "Saved 3
-/// messages to Desktop". Free with `pe_string_free`.
+/// What the status bar says once `count` messages are saved as files into the folder `place` (its path, UTF-8), by
+/// its name: "Saved 3 messages to Desktop". Free with `pe_string_free`.
 ///
 /// # Safety
 /// `place` must be NULL or a NUL-terminated string.
@@ -776,7 +785,118 @@ pub unsafe extern "C" fn pe_selection_forward(
 pub unsafe extern "C" fn pe_saved_text(count: u64, place: *const c_char) -> *mut c_char {
     // SAFETY: as the caller guarantees
     let place = unsafe { crate::core::arg(place) }.unwrap_or_default().to_string();
-    guard(|| into_c_string(pe_core::saved_text(count, &place))).unwrap_or(null_mut())
+    guard(|| into_c_string(pe_core::saved_text(count, std::path::Path::new(&place)))).unwrap_or(null_mut())
+}
+
+/// The selected messages written as `.eml` files into a new folder of the user's own, for a drag onto the desktop or a
+/// file window; their paths, or NULL with the reason in `error` (free with `pe_string_free`). BLOCKS as
+/// `pe_selection_export` does.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` a live selection, `error` NULL or valid.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_drag_files(
+    core: *const PeCore,
+    selection: *const PeSelection,
+    timeout_ms: u64,
+    error: *mut *mut c_char,
+) -> *mut PeTextList {
+    // SAFETY: as the caller guarantees
+    let refs = unsafe { refs_of(selection) };
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe {
+        with(core, Err(None), |core| {
+            core.drag_files(&refs, std::time::Duration::from_millis(timeout_ms))
+                .map_err(Some)
+        })
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the messages could not be written") }.map_or(null_mut(), |paths| {
+        text_list(paths.into_iter().map(|p| p.to_string_lossy().into_owned()))
+    })
+}
+
+/// Writes `len` bytes of `data` into the folder `dir` as `name` (made safe), or `name (2).eml` and so on, never over a
+/// file there (marked as from the internet on Windows); the path written, or NULL with the reason in `error`. Free
+/// with `pe_string_free`. For a file a drag promised into a folder the system chose.
+///
+/// # Safety
+/// `dir` and `name` must be NUL-terminated strings, `data` `len` bytes, `error` NULL or valid.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_write_file(
+    dir: *const c_char,
+    name: *const c_char,
+    data: *const u8,
+    len: usize,
+    error: *mut *mut c_char,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let (dir, name) = unsafe { (crate::core::arg(dir), crate::core::arg(name)) };
+    let (Some(dir), Some(name)) = (dir, name) else {
+        return null_mut();
+    };
+    if data.is_null() && len > 0 {
+        return null_mut();
+    }
+    let content = if len == 0 {
+        &[][..]
+    } else {
+        // SAFETY: the caller gave `len` bytes
+        unsafe { std::slice::from_raw_parts(data, len) }
+    };
+    let outcome =
+        guard(|| pe_core::write_file(std::path::Path::new(dir), name, content).map_err(Some)).unwrap_or(Err(None));
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the file could not be written") }
+        .map_or(null_mut(), |path| into_c_string(path.to_string_lossy().into_owned()))
+}
+
+/// Whether `path` (UTF-8) is a message file the app takes when files are dropped on a folder (an `.eml`), to accept or
+/// refuse a drop as the mouse moves
+///
+/// # Safety
+/// `path` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_is_message_file(path: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { crate::core::arg(path) }.is_some_and(|p| pe_core::is_message_file(std::path::Path::new(p)))
+}
+
+/// Puts the message files of `paths` (`count` UTF-8 paths) into `folder`, as `pe_message_import` does each, those that
+/// are not message files left out. True with what to tell the user in `report` (NULL when all went in; free with
+/// `pe_string_free`), false on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `paths` `count` NUL-terminated strings, `report` NULL or valid.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_import_files(
+    core: *const PeCore,
+    folder: i64,
+    paths: *const *const c_char,
+    count: usize,
+    report: *mut *mut c_char,
+) -> bool {
+    let list: Vec<std::path::PathBuf> = if paths.is_null() || count == 0 {
+        Vec::new()
+    } else {
+        // SAFETY: the caller gave `count` strings
+        unsafe { std::slice::from_raw_parts(paths, count) }
+            .iter()
+            // SAFETY: as the caller guarantees
+            .filter_map(|p| unsafe { crate::core::arg(*p) }.map(std::path::PathBuf::from))
+            .collect()
+    };
+    // SAFETY: as the caller guarantees
+    match unsafe { with(core, None, |core| core.import_files(folder, &list).ok()) } {
+        Some(said) => {
+            if !report.is_null() {
+                // SAFETY: the caller gave a valid pointer
+                unsafe { *report = said.map_or(null_mut(), into_c_string) };
+            }
+            true
+        }
+        None => false,
+    }
 }
 
 /// What the status bar says while `count` messages not downloaded yet come for files or a forward: "Downloading 3

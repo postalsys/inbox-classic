@@ -2006,13 +2006,55 @@ struct PeDraft *pe_selection_forward(const struct PeCore *core,
                                      uint64_t timeout_ms,
                                      char **error);
 
-// What the status bar says once `count` messages are saved as files into the folder named `place` (UTF-8): "Saved 3
-// messages to Desktop". Free with `pe_string_free`.
+// What the status bar says once `count` messages are saved as files into the folder `place` (its path, UTF-8), by
+// its name: "Saved 3 messages to Desktop". Free with `pe_string_free`.
 //
 // # Safety
 // `place` must be NULL or a NUL-terminated string.
 char *pe_saved_text(uint64_t count,
                     const char *place);
+
+// The selected messages written as `.eml` files into a new folder of the user's own, for a drag onto the desktop or a
+// file window; their paths, or NULL with the reason in `error` (free with `pe_string_free`). BLOCKS as
+// `pe_selection_export` does.
+//
+// # Safety
+// `core` must be a live handle, `selection` a live selection, `error` NULL or valid.
+struct PeTextList *pe_selection_drag_files(const struct PeCore *core,
+                                           const struct PeSelection *selection,
+                                           uint64_t timeout_ms,
+                                           char **error);
+
+// Writes `len` bytes of `data` into the folder `dir` as `name` (made safe), or `name (2).eml` and so on, never over a
+// file there (marked as from the internet on Windows); the path written, or NULL with the reason in `error`. Free
+// with `pe_string_free`. For a file a drag promised into a folder the system chose.
+//
+// # Safety
+// `dir` and `name` must be NUL-terminated strings, `data` `len` bytes, `error` NULL or valid.
+char *pe_write_file(const char *dir,
+                    const char *name,
+                    const uint8_t *data,
+                    size_t len,
+                    char **error);
+
+// Whether `path` (UTF-8) is a message file the app takes when files are dropped on a folder (an `.eml`), to accept or
+// refuse a drop as the mouse moves
+//
+// # Safety
+// `path` must be NULL or a NUL-terminated string.
+bool pe_is_message_file(const char *path);
+
+// Puts the message files of `paths` (`count` UTF-8 paths) into `folder`, as `pe_message_import` does each, those that
+// are not message files left out. True with what to tell the user in `report` (NULL when all went in; free with
+// `pe_string_free`), false on failure.
+//
+// # Safety
+// `core` must be a live handle, `paths` `count` NUL-terminated strings, `report` NULL or valid.
+bool pe_import_files(const struct PeCore *core,
+                     int64_t folder,
+                     const char *const *paths,
+                     size_t count,
+                     char **report);
 
 // What the status bar says while `count` messages not downloaded yet come for files or a forward: "Downloading 3
 // messages...". Free with `pe_string_free`.
