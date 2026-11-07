@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_core::{Action, DraftKind, Event, FlagColor, MessageRef, MessageView, SignInWith, Summary};
+use pe_core::{Action, DraftKind, Event, FlagColor, MessageRef, SignInWith, Summary};
 use pe_imap::SpecialUse;
 use pe_store::Folder;
 
@@ -17,7 +17,7 @@ use crate::app::{run_command, shell, spawn};
 use crate::commands::Command;
 use crate::folders::{ALL_INBOXES, Entry, FolderTree, Handlers};
 use crate::messages::MessageList;
-use crate::reader::Reader;
+use crate::reader::{Loaded, Reader};
 use crate::settings;
 use crate::ui::{self, TITLE};
 
@@ -29,9 +29,6 @@ is:unread    is:read    is:starred    has:attachment\n\
 in:inbox    in:sent    in:anywhere    in:<folder name>\n\
 before:2025/01/31    after:2025/01/01    older_than:2d    newer_than:1m\n\
 larger:5M    smaller:100k";
-
-/// The size the logo of a brand is drawn at
-const LOGO_SIZE: i32 = 48;
 
 /// The commands whose keys a text field has too: the field with the focus has them first
 const TEXT_KEYS: [Command; 3] = [Command::Delete, Command::SelectAll, Command::Undo];
@@ -53,7 +50,7 @@ pub struct Mailbox {
     title: adw::WindowTitle,
     pub folders: Rc<FolderTree>,
     pub list: Rc<MessageList>,
-    pub reader: Reader,
+    pub reader: Rc<Reader>,
     pub find: gtk::SearchEntry,
     search_bar: gtk::Box,
     search_summary: gtk::Label,
@@ -93,9 +90,6 @@ pub struct Mailbox {
     find_place: RefCell<String>,
     total: Cell<u64>,
     unread: Cell<u64>,
-    /// The message shown and its folder (its row's: in a search of every folder not the selected one), 0 for none
-    uid: Cell<u64>,
-    message_folder: Cell<i64>,
     /// The selected messages (one or many) and what they are in numbers
     refs: RefCell<Vec<MessageRef>>,
     summary: RefCell<Summary>,
@@ -104,18 +98,12 @@ pub struct Mailbox {
     undone: Cell<bool>,
     /// What Edit > Undo says now
     undo_label: RefCell<Option<String>>,
-    remote_images: Cell<bool>,
-    view: RefCell<Option<MessageView>>,
-    /// The view being built for the reading pane, 0 for none
-    view_request: Cell<u64>,
     /// The selected draft opens once its source is fetched
     open_when_ready: Cell<bool>,
     /// True while the list is reloaded: its selection changes are the reload's, not the user's
     reloading: Cell<bool>,
     mark_read: RefCell<Option<glib::SourceId>>,
     reload_later: RefCell<Option<glib::SourceId>>,
-    unsubscribe_request: Cell<u64>,
-    logo_request: Cell<u64>,
 }
 
 impl Mailbox {
@@ -232,21 +220,14 @@ impl Mailbox {
             find_place: RefCell::default(),
             total: Cell::new(0),
             unread: Cell::new(0),
-            uid: Cell::new(0),
-            message_folder: Cell::new(0),
             refs: RefCell::default(),
             summary: RefCell::default(),
             undone: Cell::new(false),
             undo_label: RefCell::default(),
-            remote_images: Cell::new(false),
-            view: RefCell::new(None),
-            view_request: Cell::new(0),
             open_when_ready: Cell::new(false),
             reloading: Cell::new(false),
             mark_read: RefCell::new(None),
             reload_later: RefCell::new(None),
-            unsubscribe_request: Cell::new(0),
-            logo_request: Cell::new(0),
         });
         mailbox.install_actions(application);
         mailbox.connect(&clear);
@@ -293,7 +274,6 @@ impl Mailbox {
         self.window.add_action(&from);
         self.window.add_action(&sync);
         self.install_flag_actions();
-        self.install_reader_actions();
     }
 
     /// The Flag menu's actions: a colour for the selected messages (its state the colour they all have, 0 for none or
@@ -343,27 +323,6 @@ impl Mailbox {
         }
     }
 
-    fn install_reader_actions(self: &Rc<Self>) {
-        let group = gio::SimpleActionGroup::new();
-        let save = gio::SimpleAction::new("save-attachment", Some(glib::VariantTy::UINT32));
-        let this = Rc::downgrade(self);
-        save.connect_activate(move |_, index| {
-            if let (Some(this), Some(index)) = (this.upgrade(), index.and_then(|i| i.get::<u32>())) {
-                spawn(async move { this.save_attachment(index as usize).await });
-            }
-        });
-        let all = gio::SimpleAction::new("save-all", None);
-        let this = Rc::downgrade(self);
-        all.connect_activate(move |_, _| {
-            if let Some(this) = this.upgrade() {
-                spawn(async move { this.save_all_attachments().await });
-            }
-        });
-        group.add_action(&save);
-        group.add_action(&all);
-        self.window.insert_action_group("reader", Some(&group));
-    }
-
     fn connect(self: &Rc<Self>, clear: &gtk::Button) {
         let weak = Rc::downgrade(self);
         let on = move |f: fn(&Rc<Mailbox>)| {
@@ -395,23 +354,6 @@ impl Mailbox {
             this.clear_find();
         });
         clear.connect_clicked(move |_| cleared());
-        let pictures = on(|this| this.load_pictures());
-        self.reader.download_pictures.connect_clicked(move |_| pictures());
-        let again = on(|this| this.retry_download());
-        self.reader.try_again.connect_clicked(move |_| again());
-        let calendar = on(|this| {
-            let this = this.clone();
-            spawn(async move { this.open_in_calendar().await });
-        });
-        self.reader.open_calendar.connect_clicked(move |_| calendar());
-        let leave = on(|this| {
-            let this = this.clone();
-            spawn(async move { this.unsubscribe().await });
-        });
-        self.reader.unsubscribe.connect_activate_link(move |_, _| {
-            leave();
-            glib::Propagation::Stop
-        });
         self.connect_tree();
         self.connect_menu_key();
         // Esc: the search goes first
@@ -707,6 +649,20 @@ impl Mailbox {
         self.account(account).and_then(|a| a.sign_in)
     }
 
+    /// The account of a folder, 0 when the window does not know the folder
+    pub fn folder_account(&self, folder: i64) -> i64 {
+        self.folder_accounts.borrow().get(&folder).copied().unwrap_or(0)
+    }
+
+    /// The name of a folder as the tree gives it, empty when the window does not know the folder
+    pub fn folder_name(&self, folder: i64) -> String {
+        self.folder_names
+            .borrow()
+            .get(&folder)
+            .map(|(name, _)| name.clone())
+            .unwrap_or_default()
+    }
+
     fn account(&self, account: i64) -> Option<AccountInfo> {
         self.accounts.borrow().iter().find(|a| a.id == account).cloned()
     }
@@ -714,8 +670,8 @@ impl Mailbox {
     /// The account of the message shown (in a search of every folder, not the selected folder's), else of the
     /// folder, else the account selected or the first one; 0 when there is none
     pub fn current_account(&self) -> i64 {
-        let folder = if self.message_folder.get() != 0 {
-            self.message_folder.get()
+        let folder = if self.reader.folder() != 0 {
+            self.reader.folder()
         } else {
             self.folder.get()
         };
@@ -818,8 +774,8 @@ impl Mailbox {
         } else if self.several() {
             core.positions(&search, self.list.sort(), &self.refs.borrow())
                 .unwrap_or_default()
-        } else if self.uid.get() != 0 {
-            core.search_index(&search, self.list.sort(), self.message_folder.get(), self.uid.get())
+        } else if self.reader.uid() != 0 {
+            core.search_index(&search, self.list.sort(), self.reader.folder(), self.reader.uid())
                 .ok()
                 .flatten()
                 .into_iter()
@@ -925,22 +881,17 @@ impl Mailbox {
         let refs: Vec<MessageRef> = selected.iter().map(|_| MessageRef { folder, uid }).collect();
         *self.summary.borrow_mut() = core.summary(&refs).unwrap_or_default();
         *self.refs.borrow_mut() = refs;
-        if uid == self.uid.get() && folder == self.message_folder.get() && !self.reader.shows_summary() {
+        if uid == self.reader.uid() && folder == self.reader.folder() && !self.reader.shows_summary() {
             self.selection_shown();
             return;
         }
         self.clear_reader(uid != 0);
         self.selection_shown();
-        if uid == 0 {
-            return;
+        if uid != 0 {
+            let account = self.folder_account(folder);
+            self.reader
+                .open(account, folder, uid, selected.as_ref().map(|(_, m)| &m.info));
         }
-        self.uid.set(uid);
-        self.message_folder.set(folder);
-        if let Some((_, message)) = &selected {
-            self.reader.loading(&message.info);
-        }
-        // MessageReady follows, right away when the message is cached, or MessageFailed
-        let _ = shell().core.open_message(folder, uid);
     }
 
     /// What follows the selection: the counts in the status bar, Junk or Not Junk, the commands for one message off
@@ -978,7 +929,7 @@ impl Mailbox {
     }
 
     /// Undo on or off, saying what it takes back ("Undo Move"); after what can change it
-    fn update_undo(&self) {
+    pub fn update_undo(&self) {
         let undo = shell().core.undo_label();
         self.enable(Command::Undo, undo.is_some());
         if *self.undo_label.borrow() == undo {
@@ -1004,68 +955,23 @@ impl Mailbox {
         self.refs.borrow().clone()
     }
 
-    /// Try Again, or the account synced again after the message could not be downloaded
-    fn retry_download(&self) {
-        if self.uid.get() == 0 {
-            return;
-        }
-        self.reader.downloading();
-        let _ = shell().core.open_message(self.message_folder.get(), self.uid.get());
-    }
-
     /// The reading pane emptied; with "There is no message selected." in it unless a message is `loading`
     fn clear_reader(&self, loading: bool) {
-        let core = &shell().core;
-        if self.view_request.get() != 0 {
-            core.message_view_cancel(self.view_request.replace(0));
-        }
-        self.uid.set(0);
-        self.message_folder.set(0);
         self.open_when_ready.set(false);
-        self.remote_images.set(false);
-        self.view.borrow_mut().take();
         if let Some(timer) = self.mark_read.borrow_mut().take() {
             timer.remove();
         }
-        self.logo_request.set(0);
         self.reader.clear(loading);
     }
 
-    /// The view of the selected message asked for, built on a worker; [`Mailbox::show_view`] shows it when it comes
-    fn show_message_view(&self) {
-        // fetched now: a draft that was opened before opens
-        if self.open_when_ready.replace(false) {
-            self.open_selected();
-        }
-        let core = &shell().core;
-        if self.view_request.get() != 0 {
-            core.message_view_cancel(self.view_request.get());
-        }
-        let request = core
-            .message_view_start(self.message_folder.get(), self.uid.get(), self.remote_images.get())
-            .unwrap_or(0);
-        self.view_request.set(request);
-        if request == 0 {
-            self.reader.failed();
-        }
-    }
-
-    fn show_view(self: &Rc<Self>) {
-        let core = &shell().core;
-        let view = core.message_view_result(self.view_request.replace(0));
-        let Some(view) = view else {
-            self.reader.failed();
+    /// The reading pane's message fetched (a draft opened before opens now), or on screen (read after a moment)
+    fn message_loaded(self: &Rc<Self>, loaded: Loaded) {
+        if let Loaded::Fetched = loaded {
+            if self.open_when_ready.replace(false) {
+                self.open_selected();
+            }
             return;
-        };
-        self.reader.show(&view, self.remote_images.get());
-        self.reader.hide_logo();
-        if view.has_logo {
-            let request = core
-                .logo_start(self.message_folder.get(), self.uid.get(), LOGO_SIZE as u32)
-                .unwrap_or(0);
-            self.logo_request.set(request);
         }
-        *self.view.borrow_mut() = Some(view);
         // read after a moment on screen, not while the user moves through the list
         if let Some(timer) = self.mark_read.borrow_mut().take() {
             timer.remove();
@@ -1075,7 +981,7 @@ impl Mailbox {
             let Some(this) = this.upgrade() else { return };
             this.mark_read.borrow_mut().take();
             if let Some((_, message)) = this.list.selected()
-                && message.info.uid == this.uid.get()
+                && message.info.uid == this.reader.uid()
                 && !message.info.seen()
             {
                 let _ = shell().core.set_seen(message.folder_id, message.info.uid, true);
@@ -1084,11 +990,16 @@ impl Mailbox {
         *self.mark_read.borrow_mut() = Some(timer);
     }
 
-    /// The selected message of a Drafts folder in a compose window, to go on writing it (double-click or Enter);
-    /// once it is fetched when it is not yet
+    /// The selected message in a window of its own (double-click or Enter), Previous and Next going through the
+    /// list as it is now; a draft in a compose window instead, to go on writing it, once it is fetched when it is not
+    /// yet
     pub fn open_selected(&self) {
-        let (folder, uid) = (self.message_folder.get(), self.uid.get());
-        if uid == 0 || !self.draft_folders.borrow().contains(&folder) {
+        let Some(message) = self.reader.message().filter(|_| !self.several()) else {
+            return;
+        };
+        let (folder, uid) = (message.folder, message.uid);
+        if !self.draft_folders.borrow().contains(&folder) {
+            crate::message_window::open(message, self.search(), self.list.sort());
             return;
         }
         match shell().core.reopen_draft(folder, uid) {
@@ -1100,12 +1011,12 @@ impl Mailbox {
 
     /// A reply, a reply to all or a forward of the message shown, None when no message is shown
     pub fn draft_of_shown(&self, kind: DraftKind) -> Option<pe_core::Draft> {
-        if self.uid.get() == 0 || self.view.borrow().is_none() {
+        if self.reader.uid() == 0 || !self.reader.has_view() {
             return None;
         }
         shell()
             .core
-            .draft(self.message_folder.get(), self.uid.get(), kind)
+            .draft(self.reader.folder(), self.reader.uid(), kind)
             .ok()
             .flatten()
     }
@@ -1324,6 +1235,9 @@ impl Mailbox {
     // ---- the core's events ----
 
     pub fn on_event(self: &Rc<Self>, event: &Event) {
+        if let Some(loaded) = self.reader.on_event(event) {
+            self.message_loaded(loaded);
+        }
         match event {
             Event::FoldersChanged { .. } => self.reload(),
             Event::FolderChanged { account, folder } => {
@@ -1335,42 +1249,7 @@ impl Mailbox {
                     self.reload_soon();
                 }
             }
-            Event::MessageReady { folder, uid } => {
-                if *folder == self.message_folder.get() && *uid == self.uid.get() {
-                    self.reader.stop_downloading_note();
-                    self.show_message_view();
-                }
-            }
-            Event::MessageFailed {
-                folder,
-                uid,
-                kind,
-                message,
-            } => {
-                if *folder == self.message_folder.get() && *uid == self.uid.get() {
-                    self.reader.not_downloaded(*kind, message);
-                }
-            }
-            Event::ViewReady { request } => {
-                // a view for a message that is no longer selected was cancelled, its event is not this one
-                if self.view_request.get() != 0 && *request == self.view_request.get() {
-                    self.show_view();
-                }
-            }
-            Event::LogoReady { request } => {
-                if self.logo_request.get() != 0 && *request == self.logo_request.get() {
-                    self.logo_request.set(0);
-                    self.reader.show_logo(shell().core.logo_result(*request), LOGO_SIZE);
-                }
-            }
-            Event::SyncFinished { account, failure } => {
-                self.show_folder_name();
-                // the account is back: a message it could not give is tried again
-                let failed_here = self.folder_accounts.borrow().get(&self.message_folder.get()) == Some(account);
-                if failure.is_none() && self.reader.shows_failure() && failed_here {
-                    self.retry_download();
-                }
-            }
+            Event::SyncFinished { .. } => self.show_folder_name(),
             _ => {}
         }
     }
@@ -1445,10 +1324,7 @@ impl Mailbox {
     }
 
     pub fn load_pictures(&self) {
-        if self.uid.get() != 0 && self.view.borrow().is_some() && !self.remote_images.get() {
-            self.remote_images.set(true);
-            self.show_message_view();
-        }
+        self.reader.load_pictures();
     }
 
     /// Flags the selected messages, or takes the flag away when they all have it
@@ -1724,11 +1600,11 @@ impl Mailbox {
             self.save_selected_into_folder().await;
             return;
         }
-        if self.uid.get() == 0 {
+        if self.reader.uid() == 0 {
             return;
         }
         let window = self.window.clone().upcast::<gtk::Window>();
-        let Ok(Some((name, data))) = shell().core.message_source(self.message_folder.get(), self.uid.get()) else {
+        let Ok(Some((name, data))) = shell().core.message_source(self.reader.folder(), self.reader.uid()) else {
             ui::alert(&window, TITLE, &t!(UiNotDownloaded)).await;
             return;
         };
@@ -1779,20 +1655,15 @@ impl Mailbox {
 
     /// File > Properties: the Internet headers of the message shown
     pub async fn show_properties(&self) {
-        if self.uid.get() == 0 {
+        if self.reader.uid() == 0 {
             ui::alert(&self.window, TITLE, &t!(UiSelectMessageFirst)).await;
             return;
         }
-        let Ok(Some(headers)) = shell().core.message_headers(self.message_folder.get(), self.uid.get()) else {
+        let Ok(Some(headers)) = shell().core.message_headers(self.reader.folder(), self.reader.uid()) else {
             ui::alert(&self.window, TITLE, &t!(UiNotDownloaded)).await;
             return;
         };
-        let subject = self
-            .view
-            .borrow()
-            .as_ref()
-            .map(|v| v.subject.clone())
-            .unwrap_or_default();
+        let subject = self.reader.subject().unwrap_or_default();
         let title = if subject.is_empty() {
             crate::words::plain(crate::words::Text::UiProperties)
         } else {
@@ -1809,13 +1680,13 @@ impl Mailbox {
 
     /// View Source: the whole message as the server has it
     pub async fn show_source(&self) {
-        if self.uid.get() == 0 {
+        if self.reader.uid() == 0 {
             ui::alert(&self.window, TITLE, &t!(UiSelectMessageFirst)).await;
             return;
         }
         let Ok(Some((title, text))) = shell()
             .core
-            .message_source_text(self.message_folder.get(), self.uid.get())
+            .message_source_text(self.reader.folder(), self.reader.uid())
         else {
             ui::alert(&self.window, TITLE, &t!(UiNotDownloaded)).await;
             return;
@@ -1932,11 +1803,7 @@ impl Mailbox {
 
     /// File > Print: the message as it is shown, with the pictures the user allowed, through the print dialog
     pub fn print_shown(&self) {
-        if self.uid.get() == 0 || self.view.borrow().is_none() {
-            return;
-        }
-        let operation = webkit::PrintOperation::new(&self.reader.preview.view);
-        operation.run_dialog(Some(&self.window));
+        self.reader.print(&self.window);
     }
 
     /// File > Import Messages: .eml files into the selected folder
@@ -1983,116 +1850,6 @@ impl Mailbox {
         let question = t!(GtkImportOneQuestion, file = &*name, folder = &*folder_name);
         if ui::confirm(&self.window, &import_title(), &question, false).await {
             self.import_files(&[file.to_path_buf()]).await;
-        }
-    }
-
-    async fn save_attachment(&self, index: usize) {
-        let window = self.window.clone().upcast::<gtk::Window>();
-        let Ok(Some((name, data))) = shell()
-            .core
-            .attachment(self.message_folder.get(), self.uid.get(), index)
-        else {
-            ui::alert(&window, TITLE, &t!(UiAttachmentNotRead)).await;
-            return;
-        };
-        let Some(path) = ui::save_file(&window, &t!(UiSaveAttachmentAs), &name, None).await else {
-            return;
-        };
-        if std::fs::write(&path, data).is_err() {
-            ui::alert(&window, TITLE, &t!(UiAttachmentNotSaved)).await;
-        }
-    }
-
-    /// Every file of the message into a folder; the core saves them all from one reading of the message, a file
-    /// already there kept and the new one numbered
-    async fn save_all_attachments(&self) {
-        let window = self.window.clone().upcast::<gtk::Window>();
-        let Some(dir) = ui::choose_folder(&window, &t!(UiSaveAttachments)).await else {
-            return;
-        };
-        match shell()
-            .core
-            .save_attachments(self.message_folder.get(), self.uid.get(), &dir)
-        {
-            Ok(Some((saved, total))) if saved < total => {
-                let text = t!(GtkFilesNotSaved, failed = total - saved, total = total);
-                ui::alert(&window, TITLE, &text).await;
-            }
-            Ok(Some(_)) => {}
-            _ => ui::alert(&window, TITLE, &t!(UiNotDownloaded)).await,
-        }
-    }
-
-    /// The calendar part as a file of its own (the core writes it, and only it), for the calendar program
-    async fn open_in_calendar(&self) {
-        let dir = glib::tmp_dir().join("InboxClassic").join("Invitations");
-        let Ok(Some(path)) = shell()
-            .core
-            .invitation_file(self.message_folder.get(), self.uid.get(), &dir)
-        else {
-            ui::alert(&self.window, TITLE, &t!(UiInvitationNotRead)).await;
-            return;
-        };
-        let launcher = gtk::FileLauncher::new(Some(&gio::File::for_path(&path)));
-        if launcher.launch_future(Some(&self.window)).await.is_err() {
-            let text = t!(UiNoCalendar);
-            ui::alert(&self.window, TITLE, &text).await;
-        }
-    }
-
-    // ---- unsubscribing ----
-
-    /// The Unsubscribe link of the message shown, after asking
-    async fn unsubscribe(&self) {
-        use pe_core::unsubscribe::Unsubscribe;
-        let Some(how) = self.view.borrow().as_ref().and_then(|v| v.unsubscribe.clone()) else {
-            return;
-        };
-        let target = how.target();
-        let (cancel, okay) = (t!(UiCancel), t!(UiOk));
-        let ok = [("cancel", cancel.as_str()), ("ok", okay.as_str())];
-        let title = t!(UiUnsubscribe);
-        match how {
-            Unsubscribe::OneClick { .. } => {
-                let question = t!(GtkUnsubscribeOneClick, target = &*target);
-                if !ui::confirm(&self.window, &title, &question, false).await {
-                    return;
-                }
-                let request = shell()
-                    .core
-                    .unsubscribe(self.message_folder.get(), self.uid.get())
-                    .unwrap_or(0);
-                self.unsubscribe_request.set(request);
-                self.set_status(&if request != 0 {
-                    t!(UiUnsubscribing, target = &*target)
-                } else {
-                    t!(UiCannotUnsubscribe)
-                });
-            }
-            Unsubscribe::Mail { link } => {
-                let question = t!(GtkUnsubscribeMail, target = &*target);
-                if ui::ask(&self.window, &title, &question, &ok, "ok", "cancel", None).await == "ok" {
-                    shell().open_mailto(&link).await;
-                }
-            }
-            Unsubscribe::Web { url } => {
-                let question = t!(GtkUnsubscribeWeb, target = &*target);
-                if ui::ask(&self.window, &title, &question, &ok, "ok", "cancel", None).await == "ok" {
-                    ui::open_externally(&url, Some(self.window.upcast_ref()));
-                }
-            }
-        }
-    }
-
-    /// The one-click unsubscribe `request` done, or not for `problem`: what the status bar says, empty for another
-    pub fn unsubscribed(&self, request: u64, problem: Option<&str>) -> String {
-        if request != self.unsubscribe_request.get() {
-            return String::new();
-        }
-        self.unsubscribe_request.set(0);
-        match problem {
-            None => t!(UiUnsubscribed),
-            Some(problem) => t!(GtkUnsubscribeFailed, problem = problem),
         }
     }
 }
