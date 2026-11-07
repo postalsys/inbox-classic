@@ -400,6 +400,28 @@ const sections = [
                 checked: ['With the option off the three messages are three rows; on again, one']
             },
             {
+                shot: 'threads-4-watch',
+                name: 'Watch Conversation',
+                what: "Message > Watch Conversation puts glasses in the Watch column of a conversation, as Outlook Express did: a new message in it is always announced, even from a folder of the user's other than the Inbox, and the notification says the conversation is watched. Choosing it again takes the mark away; a mark lasts when a late message joins two conversations, Watch winning over Ignore.",
+                how: 'Message > Watch Conversation, W in the message list.',
+                checked: [
+                    'Watch Conversation shows the glasses and checks the menu item',
+                    'A new reply to the watched conversation is announced',
+                    'Watch Conversation again takes the glasses away'
+                ]
+            },
+            {
+                shot: 'threads-5-ignore',
+                name: 'Ignore Conversation',
+                what: 'Message > Ignore Conversation turns a conversation grey and marks it read, on the server too; a new message in it arrives read, without a notification. View > Hide Ignored Conversations leaves ignored conversations out of the list.',
+                how: 'Message > Ignore Conversation, K in the message list; View > Hide Ignored Conversations.',
+                checked: [
+                    'Ignore Conversation greys the row and marks its messages read on the server',
+                    'A new reply to the ignored conversation arrives read, without a notification',
+                    'Hide Ignored Conversations hides it, and shows it again when turned off'
+                ]
+            },
+            {
                 shot: 'read-16-window',
                 name: 'A message in a window of its own',
                 what: "Double-click (or Enter) opens a message in a window of its own, as in Outlook Express: its header, pictures, files and text as the reading pane shows them, with Reply, Reply All, Forward, Print, Delete, Archive and Junk, and Previous and Next through the list it came from. Several can be open at once. A draft opens to be finished instead.",

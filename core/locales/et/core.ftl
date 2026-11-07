@@ -100,6 +100,26 @@ done-copying = { $count ->
 done-moved-back = { $count ->
    *[other] Tagasi teisaldatud: { $messages }. Sihtkoht: { $folder }
 }
+# review: new
+done-watched = { $count ->
+    [one] Vestlust jälgitakse
+   *[other] { $count } vestlust jälgitakse
+}
+# review: new
+done-unwatched = { $count ->
+    [one] Vestluse jälgimine lõpetati
+   *[other] { $count } vestluse jälgimine lõpetati
+}
+# review: new
+done-ignored = { $count ->
+    [one] Vestlust ignoreeritakse
+   *[other] { $count } vestlust ignoreeritakse
+}
+# review: new
+done-unignored = { $count ->
+    [one] Vestluse ignoreerimine lõpetati
+   *[other] { $count } vestluse ignoreerimine lõpetati
+}
 their-folders = vastavad kaustad
 undo-move = Võta teisaldamine tagasi
 undo-delete = Võta kustutamine tagasi

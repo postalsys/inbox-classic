@@ -47,6 +47,10 @@ cmd-not-junk = Märgi &tavapostiks
 # review: new
 cmd-archive = A&rhiveeri
 # review: new
+cmd-watch-conversation = &Jälgi vestlust
+# review: new
+cmd-ignore-conversation = &Ignoreeri vestlust
+# review: new
 cmd-next-message = &Järgmine kiri
 # review: new
 cmd-previous-message = &Eelmine kiri
@@ -62,11 +66,14 @@ ui-go-to-prompt = Mine kausta:
 ui-find-in-message-hint = Otsi sellest kirjast
 # review: new
 ui-find-not-found = „{ $words }“ ei ole selles kirjas
+# review: new
 cmd-expand-all-threads = &Laienda kõik vestlused
 # review: new
 cmd-collapse-all-threads = &Ahenda kõik vestlused
 # review: new
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
+# review: new
+cmd-hide-ignored = Peida &ignoreeritud vestlused
 cmd-notify = Teavita &uuest postist
 cmd-open = &Ava Inbox Classic
 cmd-default-app = Määra &vaikimisi meiliprogrammiks...
@@ -141,6 +148,10 @@ ui-col-subject = Teema
 ui-col-from = Saatja
 ui-col-to = Saaja
 ui-col-received = Saabunud
+# review: new
+ui-col-watch = Jälgi
+# review: new
+ui-watched-conversation = Jälgitav vestlus
 # review: new
 ui-col-sent = Saadetud
 ui-col-size = Suurus

@@ -107,6 +107,26 @@ done-moved-back = { $count ->
     [one] { $messages } zurück in { $folder } verschoben
    *[other] { $messages } zurück in { $folder } verschoben
 }
+# review: new
+done-watched = { $count ->
+    [one] Unterhaltung wird beobachtet
+   *[other] { $count } Unterhaltungen werden beobachtet
+}
+# review: new
+done-unwatched = { $count ->
+    [one] Unterhaltung wird nicht mehr beobachtet
+   *[other] { $count } Unterhaltungen werden nicht mehr beobachtet
+}
+# review: new
+done-ignored = { $count ->
+    [one] Unterhaltung wird ignoriert
+   *[other] { $count } Unterhaltungen werden ignoriert
+}
+# review: new
+done-unignored = { $count ->
+    [one] Unterhaltung wird nicht mehr ignoriert
+   *[other] { $count } Unterhaltungen werden nicht mehr ignoriert
+}
 their-folders = die jeweiligen Ordner
 undo-move = Verschieben rückgängig machen
 undo-delete = Löschen rückgängig machen

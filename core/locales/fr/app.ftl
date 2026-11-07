@@ -47,6 +47,10 @@ cmd-not-junk = Marquer comme non indé&sirable
 # review: new
 cmd-archive = A&rchiver
 # review: new
+cmd-watch-conversation = Sur&veiller la conversation
+# review: new
+cmd-ignore-conversation = I&gnorer la conversation
+# review: new
 cmd-next-message = Message &suivant
 # review: new
 cmd-previous-message = Message &précédent
@@ -62,11 +66,14 @@ ui-go-to-prompt = Aller au dossier :
 ui-find-in-message-hint = Rechercher dans ce message
 # review: new
 ui-find-not-found = « { $words } » n'est pas dans ce message
+# review: new
 cmd-expand-all-threads = &Développer toutes les conversations
 # review: new
 cmd-collapse-all-threads = Ré&duire toutes les conversations
 # review: new
 ui-group-by-conversation = &Regrouper les messages par conversation
+# review: new
+cmd-hide-ignored = &Masquer les conversations ignorées
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...
@@ -141,6 +148,10 @@ ui-col-subject = Objet
 ui-col-from = De
 ui-col-to = À
 ui-col-received = Reçu
+# review: new
+ui-col-watch = Surveiller
+# review: new
+ui-watched-conversation = Conversation surveillée
 # review: new
 ui-col-sent = Envoyé
 ui-col-size = Taille
