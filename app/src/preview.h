@@ -34,6 +34,9 @@ public:
     // the keys that do not type (Esc, Delete, those with Ctrl or Alt) pressed while it has the keyboard, for its window:
     // true when the window handled one, which the page then does not get
     void SetKeys(std::function<bool(UINT key)> keys) { keys_ = std::move(keys); }
+    // a link clicked in the document that its window follows itself (the bounce card's): true when it took it, which
+    // the browser then does not open
+    void SetLinks(std::function<bool(const wchar_t* uri)> links) { links_ = std::move(links); }
     // `words` found in the document shown with WebView2's own find, every place marked and the first in view (no script
     // runs for it); `done` gets how many places there are, 0 for none, -1 when this WebView2 can not find
     void Find(const std::wstring& words, std::function<void(int count)> done);
@@ -58,6 +61,9 @@ private:
     bool remoteImages_ = false;
     std::function<void(const std::wstring&)> onError_;
     std::function<bool(UINT key)> keys_;
+    std::function<bool(const wchar_t* uri)> links_;
+    // a link clicked: to the window when it is one of its own, else to the browser
+    void Follow(const wchar_t* uri);
     // the find going on in the document shown, and what is told how many places it found once that is known
     Microsoft::WRL::ComPtr<ICoreWebView2Find> find_;
     std::function<void(int count)> findDone_;
