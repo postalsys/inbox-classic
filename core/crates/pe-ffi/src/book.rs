@@ -638,3 +638,17 @@ pub unsafe extern "C" fn pe_address_field_add(field: *const c_char, added: *cons
     let (field, added) = unsafe { (arg(field).unwrap_or_default(), arg(added).unwrap_or_default()) };
     guard(|| into_c_string(pe_core::book::add_to_field(field, added))).unwrap_or(null_mut())
 }
+
+/// Whether `address` is one mailbox alone (`mary@example.com`): what Contact Properties checks a typed address with
+/// before saving it, the way the core keeps only such addresses on a card. False for NULL.
+///
+/// # Safety
+/// `address` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_address_is_mailbox(address: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(address) = (unsafe { arg(address) }) else {
+        return false;
+    };
+    guard(|| pe_core::book::is_mailbox(address)).unwrap_or(false)
+}

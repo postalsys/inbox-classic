@@ -1271,6 +1271,13 @@ bool pe_book_export(const struct PeCore *core,
 char *pe_address_field_add(const char *field,
                            const char *added);
 
+// Whether `address` is one mailbox alone (`mary@example.com`): what Contact Properties checks a typed address with
+// before saving it, the way the core keeps only such addresses on a card. False for NULL.
+//
+// # Safety
+// `address` must be NULL or a NUL-terminated string.
+bool pe_address_is_mailbox(const char *address);
+
 // Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
 // the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
 //

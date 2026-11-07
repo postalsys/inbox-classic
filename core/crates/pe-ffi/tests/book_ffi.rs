@@ -324,3 +324,16 @@ fn null_and_bad_arguments_of_the_book() {
         pe_string_free(field);
     }
 }
+
+#[test]
+fn an_address_is_checked_as_one_mailbox() {
+    // SAFETY: NUL-terminated strings, or NULL
+    unsafe {
+        assert!(pe_address_is_mailbox(c("mary@example.com").as_ptr()));
+        assert!(!pe_address_is_mailbox(
+            c("boss@corp.example>, attacker@evil.example").as_ptr()
+        ));
+        assert!(!pe_address_is_mailbox(c("not an address").as_ptr()));
+        assert!(!pe_address_is_mailbox(null()));
+    }
+}

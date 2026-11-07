@@ -21,7 +21,7 @@ pub struct Completion {
 
 /// Whether `address` is one mailbox alone (`mary@example.com`), nothing that would make a field of more recipients
 /// or another one than it seems (`a@x>, b@y`, `"a@x" <b@y>`)
-fn is_mailbox(address: &str) -> bool {
+pub fn is_mailbox(address: &str) -> bool {
     let address = address.trim();
     !address.is_empty()
         && !address
