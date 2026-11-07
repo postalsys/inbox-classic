@@ -51,15 +51,25 @@ struct BookCard {
 extension Core {
     /// the people of the book, by name; with `filter`, those whose name, nickname, company or address starts with it
     func bookCards(_ filter: String = "") -> [BookEntry] {
-        guard let list = filter.withCString({ pe_cards(handle, $0) }) else { return [] }
+        cardRows(filter.withCString { pe_cards(handle, $0) })
+    }
+
+    /// the people of group `id` as the book lists people (an address typed into it with card 0), found by `filter`
+    func bookGroupPeople(_ id: Int64, _ filter: String = "") -> [BookEntry] {
+        cardRows(filter.withCString { pe_group_people(handle, id, $0) })
+    }
+
+    private func cardRows(_ list: OpaquePointer?) -> [BookEntry] {
+        guard let list else { return [] }
         defer { pe_card_list_free(list) }
         return (0..<pe_card_list_count(list)).compactMap { pe_card_list_get(list, $0)?.pointee }.map {
             BookEntry(card: $0.id, name: text($0.name), address: text($0.address), phone: text($0.phone), label: text($0.label))
         }
     }
 
-    func bookGroups() -> [BookGroup] {
-        guard let list = pe_groups(handle) else { return [] }
+    /// the groups, by name; with `filter`, those whose name (a word of it) starts with it
+    func bookGroups(_ filter: String = "") -> [BookGroup] {
+        guard let list = filter.withCString({ pe_groups(handle, $0) }) else { return [] }
         defer { pe_group_list_free(list) }
         return (0..<pe_group_list_count(list)).compactMap { pe_group_list_get(list, $0)?.pointee }.map {
             BookGroup(id: $0.id, name: text($0.name), count: $0.member_count, label: text($0.label))
@@ -129,6 +139,24 @@ func isMailbox(_ typed: String) -> Bool {
     typed.withCString { pe_address_is_mailbox($0) }
 }
 
+/// The name shown that follows the first and last name as they are typed, as the core makes it
+func bookDisplayName(first: String, last: String) -> String {
+    first.withCString { first in last.withCString { taken(pe_book_display_name(first, $0)) } } ?? ""
+}
+
+/// What is typed in `field` when it is one e-mail address alone, "" when nothing is; nil (with why said) when what is
+/// typed is not one
+@MainActor
+func typedMailbox(_ field: NSTextField, in window: NSWindow) -> String? {
+    let typed = field.stringValue.trimmingCharacters(in: .whitespaces)
+    guard typed.isEmpty || isMailbox(typed) else {
+        inform(Text.uiContactAddressInvalid.text(["address": typed]), title: window.title, style: .warning)
+        window.makeFirstResponder(field)
+        return nil
+    }
+    return typed
+}
+
 // ---- the small parts the windows share ----
 
 /// a symbol of the system, for the Address Book's toolbar and lists (the first of `names` there is)
@@ -144,11 +172,11 @@ func bookSymbol(_ names: String...) -> NSImage? {
 
 @MainActor
 enum BookIcons {
-    static var person: NSImage? { bookSymbol("person.crop.circle") }
-    static var group: NSImage? { bookSymbol("person.2.fill", "person.2") }
-    static var all: NSImage? { bookSymbol("person.crop.rectangle.stack", "book.closed") }
+    static let person = bookSymbol("person.crop.circle")
+    static let group = bookSymbol("person.2.fill", "person.2")
+    static let all = bookSymbol("person.crop.rectangle.stack", "book.closed")
     /// an address typed in a group, of no card
-    static var typed: NSImage? { bookSymbol("envelope") }
+    static let typed = bookSymbol("envelope")
 }
 
 /// A table that hands Delete (the key) and a double-click to closures
@@ -455,24 +483,7 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     /// the people of the group selected (or all), those the find box finds
     private func fillPeople(select cards: Set<Int64> = []) {
         let words = searchField.stringValue.trimmingCharacters(in: .whitespaces)
-        if let group = selectedGroup {
-            let all = core.bookCards()
-            let phones = Dictionary(all.map { ($0.card, $0.phone) }, uniquingKeysWith: { first, _ in first })
-            let found = words.isEmpty ? nil : Set(core.bookCards(words).map(\.card))
-            let lower = words.lowercased()
-            rows = (core.bookGroup(group.id)?.members ?? []).map { member in
-                var member = member
-                member.phone = phones[member.card] ?? ""
-                return member
-            }.filter { member in
-                guard let found else { return true }
-                if member.card != 0 { return found.contains(member.card) }
-                return member.address.lowercased().hasPrefix(lower)
-                    || member.name.lowercased().split(separator: " ").contains { $0.hasPrefix(lower) }
-            }
-        } else {
-            rows = core.bookCards(words)
-        }
+        rows = selectedGroup.map { core.bookGroupPeople($0.id, words) } ?? core.bookCards(words)
         people.reloadData()
         let selected = IndexSet(rows.indices.filter { rows[$0].card != 0 && cards.contains(rows[$0].card) })
         people.selectRowIndexes(selected, byExtendingSelection: false)
@@ -517,7 +528,7 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         }
         let entry = rows[row]
         switch column?.identifier.rawValue {
-        case "name": return bookCell(tableView, entry.title, secondary: entry.name.isEmpty)
+        case "name": return bookCell(tableView, entry.title, secondary: entry.card == 0)
         case "email": return bookCell(tableView, entry.address)
         default: return bookCell(tableView, entry.phone)
         }
@@ -554,12 +565,13 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         if clicked >= 0 && !people.selectedRowIndexes.contains(clicked) {
             people.selectRowIndexes(IndexSet(integer: clicked), byExtendingSelection: false)
         }
-        let some = !selectedPeople.isEmpty
+        let selected = selectedPeople
+        let some = !selected.isEmpty
         for (title, action, on) in [(Text.uiMenuNewContact.text, #selector(newContact), true),
                                     (Text.uiMenuNewGroup.text, #selector(newGroup), true),
                                     ("-", nil, true),
-                                    (Command.properties.label, #selector(propertiesClicked), some && selectedPeople.count == 1),
-                                    (Text.uiMenuDelete.text, #selector(deleteClicked), some && selectedPeople.contains { $0.card != 0 }),
+                                    (Command.properties.label, #selector(propertiesClicked), selected.count == 1 && selected[0].card != 0),
+                                    (Text.uiMenuDelete.text, #selector(deleteClicked), some),
                                     ("-", nil, true),
                                     (Text.uiMenuWriteTo.text, #selector(writeTo), some)] as [(String, Selector?, Bool)] {
             if title == "-" {
@@ -627,7 +639,7 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         switch item.itemIdentifier.rawValue {
         case "book.properties": return canShowProperties
         case "book.delete": return canDelete
-        case "book.writeTo": return !selectedPeople.isEmpty || selectedGroup != nil
+        case "book.writeTo": return people.numberOfSelectedRows > 0 || selectedGroup != nil
         default: return true
         }
     }
@@ -638,11 +650,14 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     }
 
     var canShowProperties: Bool {
-        groupInFront || selectedPeople.count == 1 && selectedPeople[0].card != 0 || selectedPeople.isEmpty && selectedGroup != nil
+        let selected = people.selectedRowIndexes
+        return groupInFront || selected.isEmpty && selectedGroup != nil
+            || selected.count == 1 && rows.indices.contains(selected.first!) && rows[selected.first!].card != 0
     }
 
+    /// people selected (cards, or addresses typed into the group shown), or a group
     var canDelete: Bool {
-        groupInFront || selectedPeople.contains { $0.card != 0 } || selectedPeople.isEmpty && selectedGroup != nil
+        groupInFront || people.numberOfSelectedRows > 0 || selectedGroup != nil
     }
 
     // ---- what it does ----
@@ -693,12 +708,18 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             fill(selectGroup: 0)
             return
         }
-        let ids = selectedPeople.map(\.card).filter { $0 != 0 }
-        guard !ids.isEmpty,
-              ask(Text.uiBookDeleteAsk.text(["count": ids.count]), title: window.title, yes: Text.uiTbDelete.text,
+        let selected = selectedPeople
+        guard !selected.isEmpty,
+              ask(Text.uiBookDeleteAsk.text(["count": selected.count]), title: window.title, yes: Text.uiTbDelete.text,
                   no: Text.uiCancel.text, destructive: true) else { return }
         let next = people.selectedRowIndexes.first ?? 0
-        _ = ids.withUnsafeBufferPointer { pe_cards_delete(core.handle, $0.baseAddress, ids.count) }
+        // cards out of the book, addresses typed into the group shown out of the group
+        let ids = selected.map(\.card).filter { $0 != 0 }
+        let strings = CStrings()
+        let typed = selected.filter { $0.card == 0 }.map(\.address)
+        _ = ids.withUnsafeBufferPointer {
+            pe_book_delete(core.handle, selectedGroup?.id ?? 0, $0.baseAddress, ids.count, strings.array(typed), typed.count)
+        }
         fill(selectCard: 0)
         // the one after the deleted ones selected, where they were
         if !rows.isEmpty {
@@ -756,12 +777,11 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
 /// Adds the sender of message `uid` of `folder` to the book: what the status bar says
 @MainActor
 func addSenderToAddressBook(core: Core, folder: Int64, uid: UInt64) -> String {
-    var added = false
-    let id = pe_book_add_sender(core.handle, folder, uid, &added)
-    guard id != 0 else { return Text.uiSenderNone.text }
-    let name = core.bookCard(id).map { $0.name.isEmpty ? $0.addresses.first ?? "" : $0.name } ?? ""
-    AddressBookWindow.refresh()
-    return (added ? Text.uiSenderAdded : Text.uiSenderKnown).text(["name": name])
+    var status: UnsafeMutablePointer<CChar>?
+    if pe_book_add_sender(core.handle, folder, uid, nil, &status) != 0 {
+        AddressBookWindow.refresh()
+    }
+    return taken(status) ?? ""
 }
 
 @MainActor
@@ -770,17 +790,22 @@ enum AddressBookFiles {
     static func importFile(core: Core) {
         let title = Text.cmdImportAddressBook.title
         let types = [UTType.vCard, .commaSeparatedText, UTType(filenameExtension: "vcf"), UTType(filenameExtension: "csv")]
-        guard let file = openFilesPanel(title: title, types: types.compactMap { $0 }, multiple: false).first else { return }
+        let files = openFilesPanel(title: title, types: types.compactMap { $0 })
+        guard !files.isEmpty else { return }
         var added: UInt64 = 0
         var skipped: UInt64 = 0
         var error: UnsafeMutablePointer<CChar>?
-        let ok = file.path.withCString { pe_book_import(core.handle, $0, &added, &skipped, &error) }
+        let strings = CStrings()
+        let ok = pe_book_import(core.handle, strings.array(files.map(\.path)), files.count, &added, &skipped, &error)
         let reason = taken(error) ?? ""
         AddressBookWindow.refresh()
+        let counts = Text.uiBookImported.text(["added": added, "skipped": skipped])
         if ok {
-            inform(Text.uiBookImported.text(["added": added, "skipped": skipped]), title: title)
+            inform(counts, title: title)
         } else {
-            inform(Text.uiBookNotImported.text(["reason": reason]), title: title, style: .warning)
+            // the files that could be read were, those that could not are named
+            let failed = Text.uiBookNotImported.text(["reason": reason])
+            inform(added + skipped > 0 ? counts + "\n\n" + failed : failed, title: title, style: .warning)
         }
     }
 
@@ -832,7 +857,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         self.core = core
         let editing = card ?? BookCard()
         self.card = editing
-        let made = "\(editing.first) \(editing.last)".trimmingCharacters(in: .whitespaces)
+        let made = bookDisplayName(first: editing.first, last: editing.last)
         displayFollows = card == nil || editing.name.isEmpty || editing.name == made
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 600), styleMask: [.titled], backing: .buffered,
                           defer: true)
@@ -1004,7 +1029,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         if field === display {
             displayFollows = display.stringValue.isEmpty
         } else if (field === first || field === last) && displayFollows {
-            display.stringValue = "\(first.stringValue) \(last.stringValue)".trimmingCharacters(in: .whitespaces)
+            display.stringValue = bookDisplayName(first: first.stringValue, last: last.stringValue)
         }
     }
 
@@ -1025,13 +1050,8 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     /// the address typed into the list; false when it is not one
     @discardableResult
     private func addTypedAddress() -> Bool {
-        let typed = addressField.stringValue.trimmingCharacters(in: .whitespaces)
+        guard let typed = typedMailbox(addressField, in: window) else { return false }
         guard !typed.isEmpty else { return true }
-        guard isMailbox(typed) else {
-            inform(Text.uiContactAddressInvalid.text(["address": typed]), title: window.title, style: .warning)
-            window.makeFirstResponder(addressField)
-            return false
-        }
         if !card.addresses.contains(where: { $0.caseInsensitiveCompare(typed) == .orderedSame }) {
             card.addresses.append(typed)
         }
@@ -1095,15 +1115,6 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         card.nickname = trim(nickname)
         card.company = trim(company)
         card.notes = notes.string
-        if card.first.isEmpty && card.last.isEmpty && card.name.isEmpty && card.addresses.isEmpty {
-            inform(Text.uiContactNameNeeded.text, title: window.title, style: .warning)
-            window.makeFirstResponder(first)
-            return
-        }
-        // no name at all: the default address is the name shown
-        if card.first.isEmpty && card.last.isEmpty && card.name.isEmpty {
-            card.name = card.addresses[0]
-        }
         switch core.saveBookCard(card) {
         case .success(let id):
             saved = id
@@ -1241,18 +1252,23 @@ final class GroupSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, NS
         return true
     }
 
-    /// whether the group has this one already: the same card, or the same address
-    private func has(_ entry: BookEntry) -> Bool {
-        members.contains { member in
-            entry.card != 0 && member.card == entry.card
-                || !entry.address.isEmpty && member.address.caseInsensitiveCompare(entry.address) == .orderedSame
-        }
-    }
-
+    /// `entries` added to the members, those the group does not have yet, as the core decides
     private func add(_ entries: [BookEntry]) {
-        for entry in entries where !has(entry) {
-            members.append(entry)
+        let strings = CStrings()
+        let member = { (entry: BookEntry) in
+            PeMember(card: entry.card, name: strings.add(entry.name), address: strings.add(entry.address), label: nil)
         }
+        let have = members.map(member)
+        let adding = entries.map(member)
+        var keep = [Bool](repeating: false, count: adding.count)
+        have.withUnsafeBufferPointer { have in
+            adding.withUnsafeBufferPointer { adding in
+                keep.withUnsafeMutableBufferPointer {
+                    _ = pe_book_members_add(have.baseAddress, have.count, adding.baseAddress, adding.count, $0.baseAddress)
+                }
+            }
+        }
+        members += entries.indices.filter { keep[$0] }.map { entries[$0] }
         memberList.reloadData()
         showCount()
     }
@@ -1268,12 +1284,8 @@ final class GroupSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, NS
     }
 
     private func addTypedAddress() -> Bool {
-        let typed = addressField.stringValue.trimmingCharacters(in: .whitespaces)
+        guard let typed = typedMailbox(addressField, in: window) else { return false }
         guard !typed.isEmpty else { return true }
-        guard isMailbox(typed) else {
-            inform(Text.uiContactAddressInvalid.text(["address": typed]), title: window.title, style: .warning)
-            return false
-        }
         add([BookEntry(name: "", address: typed, label: typed)])
         addressField.stringValue = ""
         return true
@@ -1426,12 +1438,9 @@ final class PeoplePicker: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     /// the groups (for recipients) and the people the find box finds
     private func fill() {
         let words = searchField.stringValue.trimmingCharacters(in: .whitespaces)
-        let lower = words.lowercased()
         var entries: [BookEntry] = []
         if kind == .recipients {
-            entries = core.bookGroups().filter { group in
-                words.isEmpty || group.name.lowercased().split(separator: " ").contains { $0.hasPrefix(lower) }
-            }.map { BookEntry(group: $0.id, name: $0.name, address: "", label: $0.label, count: $0.count) }
+            entries = core.bookGroups(words).map { BookEntry(group: $0.id, name: $0.name, address: "", label: $0.label, count: $0.count) }
         }
         entries += core.bookCards(words)
         found = entries
