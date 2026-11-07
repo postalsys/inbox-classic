@@ -333,6 +333,9 @@ impl Store {
     /// The first unread message after message `uid` of `folder` in what `search` finds in the order of `sort` (from the
     /// top when it is not in that list, or `uid` is 0): what Next Unread opens
     pub fn next_unread(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<MessageRef>> {
+        if search.threads.is_some() {
+            return self.next_unread_in_threads(search, sort, folder, uid);
+        }
         if uid == 0 && search.show == Show::All {
             // from the top: the first unread one, without ranking the list
             let mut unread = search.clone();

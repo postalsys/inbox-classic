@@ -368,6 +368,54 @@ impl Store {
         statement.query_map(params_from_iter(values), from_row)?.collect()
     }
 
+    /// Next Unread in the list grouped by conversation, as if every conversation were open: an unread message after
+    /// the message `uid` of `folder` in its own conversation, or else the first unread message of the next
+    /// conversation that has one (from the top when `uid` is 0 or not in the list). The list opens its conversation.
+    pub(crate) fn next_unread_in_threads(
+        &self,
+        search: &Search,
+        sort: Sort,
+        folder: FolderId,
+        uid: u64,
+    ) -> Result<Option<MessageRef>> {
+        let first_unread = |thread: i64, after: Option<i64>| -> Result<Option<MessageRef>> {
+            let messages = self.thread_messages(search, thread)?;
+            let start = after
+                .and_then(|id| messages.iter().position(|m| m.id == id))
+                .map_or(0, |at| at + 1);
+            Ok(messages[start.min(messages.len())..]
+                .iter()
+                .find(|m| !m.info.seen())
+                .map(|m| MessageRef {
+                    folder: m.folder_id,
+                    uid: m.info.uid,
+                }))
+        };
+        let current = self.message(folder, uid)?.and_then(|m| Some((m.info.thread_id?, m.id)));
+        if let Some((thread, id)) = current
+            && let Some(found) = first_unread(thread, Some(id))?
+        {
+            return Ok(Some(found));
+        }
+        let (condition, mut values) = search.condition(false);
+        values.push(Value::Integer(current.map_or(0, |(thread, _)| thread)));
+        let mut statement = self.db.prepare_cached(&format!(
+            "{}, ranked AS (SELECT t, u, ROW_NUMBER() OVER (ORDER BY {}) AS r FROM g) \
+             SELECT t FROM ranked WHERE u > 0 AND r > COALESCE((SELECT r FROM ranked WHERE t = ?{}), 0) \
+             ORDER BY r LIMIT 1",
+            groups(&condition, sort),
+            group_order(sort),
+            values.len()
+        ))?;
+        let next: Option<i64> = statement
+            .query_row(params_from_iter(values), |row| row.get(0))
+            .optional()?;
+        match next {
+            Some(thread) => first_unread(thread, None),
+            None => Ok(None),
+        }
+    }
+
     /// The conversations in what `search` finds, and how many of their messages are unread
     fn thread_counts(&self, search: &Search) -> Result<(u64, u64)> {
         let (condition, values) = search.condition(false);
@@ -717,6 +765,23 @@ mod tests {
             (Some(1), Some(4)),
             "the rows around b"
         );
+        // Next Unread finds the unread reply b in the collapsed conversation, from the top and from a
+        let collapsed = Search {
+            threads: Some(Vec::new()),
+            ..Search::folder(inbox)
+        };
+        for from in [0, 1] {
+            assert_eq!(
+                store
+                    .next_unread(&collapsed, newest, inbox, from)
+                    .unwrap()
+                    .map(|r| r.uid),
+                Some(3),
+                "from {from}"
+            );
+        }
+        // after b, the rest is read
+        assert_eq!(store.next_unread(&collapsed, newest, inbox, 3).unwrap(), None);
     }
 
     #[test]
