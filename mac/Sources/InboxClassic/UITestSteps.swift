@@ -481,6 +481,7 @@ extension UITest {
 
         try await messageWindow()
         try await keyboardReading()
+        try await conversations()
     }
 
     // ---- reading with the keyboard ----
@@ -577,6 +578,152 @@ extension UITest {
                                       charactersIgnoringModifiers: "\u{1b}", isARepeat: false, keyCode: 53)
         onMain { if let escape { _ = self.main.window.performKeyEquivalent(with: escape) } }
         check(await waitUntil(3) { bar.isHidden }, "Esc closes the bar")
+    }
+
+    // ---- conversations ----
+
+    /// the rows of the list whose subject is the conversation's
+    func tripRows() -> [(index: Int, message: Message)] {
+        (0..<list.numberOfRows).compactMap { at in
+            guard let message = main.mailbox.row(at), message.subject.hasSuffix("Plans for the trip") else { return nil }
+            return (at, message)
+        }
+    }
+
+    /// the Subject cell of a row as the list draws it
+    func subjectCell(_ index: Int) -> SubjectCell? {
+        guard let column = list.tableColumns.firstIndex(where: { $0.identifier.rawValue == "subject" }) else { return nil }
+        return list.view(atColumn: column, row: index, makeIfNecessary: true) as? SubjectCell
+    }
+
+    /// an arrow key on the list, as the keyboard sends it
+    func arrowKey(_ code: UInt16) {
+        let character = String(UnicodeScalar(code == 124 ? 0xF703 : 0xF702)!)
+        let event = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [.numericPad, .function], timestamp: 0,
+                                     windowNumber: main.window.windowNumber, context: nil, characters: character,
+                                     charactersIgnoringModifiers: character, isARepeat: false, keyCode: code)
+        onMain { if let event { self.list.keyDown(with: event) } }
+    }
+
+    func conversations() async throws {
+        step("conversations")
+        selectFolder(named: "Inbox")
+        // the first read, its two replies not; the newest of them puts the conversation at the top
+        let tripStart = Date()
+        try await addMessage("From: Dave <dave@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Plans for the trip\r\n"
+            + "Message-ID: <trip1@example.com>\r\nDate: \(rfc2822(tripStart.addingTimeInterval(-7200)))\r\n\r\nWhere do we go?\r\n",
+            flags: ["\\Seen"])
+        try await addMessage("From: Carol <carol@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: Plans for the trip\r\n"
+            + "Message-ID: <trip2@example.com>\r\nIn-Reply-To: <trip1@example.com>\r\nReferences: <trip1@example.com>\r\n"
+            + "Date: \(rfc2822(tripStart.addingTimeInterval(-3600)))\r\n\r\nThe lake.\r\n")
+        try await addMessage("From: Bob Harris <bob@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: Plans for the trip\r\n"
+            + "Message-ID: <trip3@example.com>\r\nIn-Reply-To: <trip2@example.com>\r\n"
+            + "References: <trip1@example.com> <trip2@example.com>\r\nDate: \(rfc2822(tripStart))\r\n\r\nThe lake it is.\r\n")
+        command(.sync)
+        check(await waitUntil(30) { tripRows().count == 1 && tripRows().first?.message.threadCount == 3 },
+              "the Inbox lists the conversation once (\(tripRows().count) rows)")
+        guard let tripHead = tripRows().first else { throw Failed(description: "the conversation is not in the list") }
+        check(tripHead.message.subject == "Plans for the trip" && tripHead.message.seen,
+              "on its first message (\(tripHead.message.subject))")
+        let headCell = subjectCell(tripHead.index)
+        check(headCell?.textField?.stringValue == "Plans for the trip (3)" && headCell?.disclosure.isHidden == false,
+              "with the count of its messages and a triangle to open it (\(headCell?.textField?.stringValue ?? ""))")
+        check(headCell?.textField?.font?.fontDescriptor.symbolicTraits.contains(.bold) == true,
+              "bold while one is unread, though the first is read")
+        await selectRow(tripHead.index)
+        await shot(main.window, "threads-1-collapsed")
+
+        press(subjectCell(tripHead.index)?.disclosure)
+        check(await waitUntil(5) { tripRows().count == 3 }, "the triangle opens it: its replies under it")
+        let opened = tripRows()
+        check(opened.map(\.index) == [tripHead.index, tripHead.index + 1, tripHead.index + 2]
+              && opened.dropFirst().allSatisfy { $0.message.threadDepth == 1 && $0.message.subject == "Re: Plans for the trip" },
+              "right under it, oldest first")
+        let headLeft = subjectCell(tripHead.index)?.textField?.frame.minX ?? 0
+        let replyLeft = subjectCell(tripHead.index + 1)?.textField?.frame.minX ?? 0
+        check(replyLeft > headLeft, "indented (\(headLeft) and \(replyLeft))")
+        check(subjectCell(tripHead.index)?.textField?.font?.fontDescriptor.symbolicTraits.contains(.bold) == false,
+              "the open conversation's first row in bold only when it is unread itself")
+        await selectRow(tripHead.index + 1)
+        await shot(main.window, "threads-2-expanded")
+
+        arrowKey(123)
+        check(await waitUntil(5) { tripRows().count == 1 && list.selectedRow == tripHead.index },
+              "Left on a reply closes it, its row selected")
+        arrowKey(124)
+        check(await waitUntil(5) { tripRows().count == 3 }, "Right opens it again")
+        command(.collapseAllThreads)
+        check(await waitUntil(5) { tripRows().count == 1 }, "Collapse All Conversations closes it")
+        command(.expandAllThreads)
+        check(await waitUntil(5) { tripRows().count == 3 }, "Expand All Conversations opens it")
+        command(.collapseAllThreads)
+        _ = await waitUntil(5) { tripRows().count == 1 }
+
+        await selectRow(tripRows().first?.index ?? 0)
+        command(.markRead)
+        check(await waitUntil(20) {
+            let all = await messages("INBOX").filter { raw($0).contains("@example.com>") && raw($0).contains("Plans for the trip") }
+            return all.count == 3 && all.allSatisfy { ($0["flags"] as? [String])?.contains("\\Seen") == true }
+        }, "Mark Read on the closed conversation marks all three read on the server")
+
+        // dragged out: the closed row carries the three messages, to the Finder as to a folder
+        let tripRow = tripRows().first?.index ?? 0
+        // the item the list makes for the row, over the row
+        let tripItems: [NSDraggingItem] = main.mailbox.promise(forRow: tripRow).map { promise -> [NSDraggingItem] in
+            let item = NSDraggingItem(pasteboardWriter: promise)
+            item.setDraggingFrame(list.rect(ofRow: tripRow), contents: nil)
+            return main.mailbox.completeDrag([item])
+        } ?? []
+        let tripPromises = tripItems.compactMap { $0.item as? MessagePromise }
+        let tripDropped = emptyFolder("dragged-conversation")
+        let tripWriter = main.mailbox.filePromises
+        var tripWritten = 0
+        for promise in tripPromises {
+            guard let drag = promise.drag else { continue }
+            let name = tripWriter.filePromiseProvider(promise, fileNameForType: emlType.identifier)
+            let job = Handed(value: (tripWriter, drag, promise.index, tripDropped.appendingPathComponent(name)))
+            Thread.detachNewThread {
+                let (writer, drag, index, url) = job.value
+                writer.write(drag, index, to: url)
+                onMain { tripWritten += 1 }
+            }
+        }
+        _ = await waitUntil(60) { tripWritten == tripPromises.count }
+        main.mailbox.dragEnded()
+        let tripFiles = (try? FileManager.default.contentsOfDirectory(atPath: tripDropped.path)) ?? []
+        check(tripPromises.count == 3 && tripFiles.count == 3,
+              "the closed conversation dragged to the Finder becomes its three .eml files (\(tripFiles.sorted().joined(separator: ", ")))")
+        let tripRefs = tripPromises.compactMap { promise in promise.drag.map { $0.refs[promise.index] } }
+        if let archiveId = folderNode("Archive")?.folder.id {
+            check(main.mailbox.drop(tripRefs, to: archiveId, copy: false), "dropped onto Archive, it is taken")
+            check(await waitUntil(30) {
+                let moved = await messages("Archive").filter { raw($0).contains("Plans for the trip") }
+                let left = await messages("INBOX").filter { raw($0).contains("Plans for the trip") }
+                return moved.count == 3 && left.isEmpty
+            }, "and all three are moved there on the server")
+            command(.undo)
+            check(await waitUntil(30) { await messages("INBOX").filter { raw($0).contains("Plans for the trip") }.count == 3 },
+                  "Undo puts the three back in the Inbox")
+            _ = await waitUntil(20) { tripRows().count == 1 }
+        }
+
+        command(.options)
+        guard await waitWindow("settings", 10) != nil, let options = SettingsWindow.current else {
+            throw Failed(description: "Settings did not open")
+        }
+        check(options.grouping.state == .on, "Group messages by conversation is on in Settings")
+        onMain { options.grouping.state = .off; options.groupingChanged() }
+        check(await waitUntil(5) { tripRows().count == 3 && tripRows().allSatisfy { $0.message.thread == 0 } },
+              "turned off, the three messages are each a row of their own")
+        // the list from its top, the main window in front
+        onMain {
+            self.list.scrollRowToVisible(0)
+            self.main.window.makeKeyAndOrderFront(nil)
+        }
+        await shot(main.window, "threads-3-options-off")
+        onMain { options.grouping.state = .on; options.groupingChanged() }
+        check(await waitUntil(5) { tripRows().count == 1 }, "turned on again, the conversation is one row again")
+        onMain { options.window.close() }
     }
 
     // ---- a message in a window of its own ----
@@ -1153,8 +1300,9 @@ extension UITest {
         check(tree.item(atRow: 0) is Mailbox.AllInboxesNode, "All Inboxes is at the top of the tree, above the accounts")
         tree.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         let expected = (inbox(ofAccount: 0)?.total ?? 0) + (inbox(ofAccount: 1)?.total ?? 0)
-        check(await waitUntil(10) { UInt64(list.numberOfRows) == expected },
-              "it lists the mail of both accounts' Inboxes (\(list.numberOfRows) of \(expected))")
+        // grouped by conversation the rows are fewer: the messages they list are counted
+        check(await waitUntil(10) { main.mailbox.total == expected },
+              "it lists the mail of both accounts' Inboxes (\(main.mailbox.total) of \(expected))")
         let folders = (0..<min(4, list.numberOfRows)).compactMap { main.mailbox.row($0)?.folder }
         check(folders.contains(first) && folders.contains(second), "newest first, the two accounts' messages among each other")
         let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("folder"))

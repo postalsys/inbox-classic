@@ -72,7 +72,7 @@ enum Languages {
     }
 }
 
-/// Inbox Classic > Settings: the language of the windows and Notify of New Mail. As Mac settings windows do, a
+/// Inbox Classic > Settings: the language of the windows, Notify of New Mail and Group messages by conversation. As Mac settings windows do, a
 /// change counts at once; a language counts once the app starts again, which it offers to do.
 @MainActor
 final class SettingsWindow: NSObject, NSWindowDelegate {
@@ -80,6 +80,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let window: NSWindow
     let language = NSPopUpButton()
     let notify: NSButton
+    let grouping: NSButton
     /// the codes of the popup's items, nil for System default
     private var codes: [String?] = []
 
@@ -101,6 +102,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 440, height: 160), styleMask: [.titled, .closable],
                           backing: .buffered, defer: false)
         notify = NSButton(checkboxWithTitle: Text.macNotifyNewMail.text, target: nil, action: nil)
+        grouping = NSButton(checkboxWithTitle: Text.uiGroupByConversation.text, target: nil, action: nil)
         super.init()
         window.title = Text.macSettingsTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("settings")
@@ -129,12 +131,18 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         notify.action = #selector(notifyChanged)
         notify.setAccessibilityIdentifier("settings.notify")
 
+        grouping.state = AppDelegate.shared?.groupByConversation ?? true ? .on : .off
+        grouping.target = self
+        grouping.action = #selector(groupingChanged)
+        grouping.setAccessibilityIdentifier("settings.grouping")
+
         let label = NSTextField(labelWithString: Text.macLanguageLabel.text)
         label.alignment = .right
         let grid = NSGridView(views: [
             [label, language],
             [NSGridCell.emptyContentView, hint],
             [NSGridCell.emptyContentView, notify],
+            [NSGridCell.emptyContentView, grouping],
         ])
         grid.rowSpacing = 8
         grid.columnSpacing = 8
@@ -160,6 +168,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
     @objc func notifyChanged() {
         AppDelegate.shared?.notify = notify.state == .on
+    }
+
+    @objc func groupingChanged() {
+        AppDelegate.shared?.groupByConversation = grouping.state == .on
     }
 
     @objc func languageChosen() {

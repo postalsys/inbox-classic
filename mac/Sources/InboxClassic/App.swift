@@ -86,6 +86,20 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         get { UserDefaults.standard.object(forKey: "NewMailNotifications") as? Bool ?? true }
         set { UserDefaults.standard.set(newValue, forKey: "NewMailNotifications") }
     }
+    /// Settings > Group messages by conversation, on unless turned off (the UI test keeps it in memory, so a run never
+    /// changes the setting of whoever runs it)
+    var groupByConversation: Bool {
+        get { TestHooks.testing ? testGrouping : UserDefaults.standard.object(forKey: "GroupByConversation") as? Bool ?? true }
+        set {
+            if TestHooks.testing {
+                testGrouping = newValue
+            } else {
+                UserDefaults.standard.set(newValue, forKey: "GroupByConversation")
+            }
+            main?.mailbox.groupingChanged()
+        }
+    }
+    private var testGrouping = true
     /// the app ends after the compose windows that are saving have closed
     var quitAfterCompose = false
     /// Restart Now was chosen: a new copy starts once this one has ended
@@ -419,6 +433,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             main.show()
             main.mailbox.chooseFolder()
         case .findInMessage: main.mailbox.reader.findCommand()
+        case .expandAllThreads: main.mailbox.expandAll()
+        case .collapseAllThreads: main.mailbox.collapseAll()
         }
     }
 
@@ -504,6 +520,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .emptyFolder: return main.mailbox.canEmptyFolder
         case .nextMessage, .previousMessage: return main.mailbox.list.numberOfRows > 0
         case .findInMessage: return main.mailbox.hasOne && main.mailbox.reader.messageView != nil
+        case .expandAllThreads, .collapseAllThreads: return main.mailbox.grouped && main.mailbox.list.numberOfRows > 0
         default: return true
         }
     }

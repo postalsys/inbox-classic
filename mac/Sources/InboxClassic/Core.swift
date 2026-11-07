@@ -236,6 +236,17 @@ final class Core {
         }
     }
 
+    /// the conversations of the list with more than one message there: what Expand All opens
+    func threadsWithReplies(_ search: Search) -> [Int64] {
+        search.with { search in
+            let count = pe_threads_with_replies(handle, search, nil, 0)
+            guard count > 0 else { return [] }
+            var found = [Int64](repeating: 0, count: count)
+            let filled = found.withUnsafeMutableBufferPointer { pe_threads_with_replies(handle, search, $0.baseAddress, count) }
+            return Array(found.prefix(min(filled, count)))
+        }
+    }
+
     /// whether the message `uid` is (still) in `folder`
     func messageExists(folder: Int64, uid: UInt64) -> Bool {
         pe_message_exists(handle, folder, uid)
@@ -304,11 +315,20 @@ struct Search {
     /// with `folder` 0: every account's Inbox rather than every folder
     var allInboxes = false
     var text: String
+    /// one row a conversation, the conversations `expanded` open
+    var threads = false
+    var expanded: [Int64] = []
+
+    /// the same list a row a message: what the counts of the status bar count
+    var ungrouped: Search { Search(folder: folder, allInboxes: allInboxes, text: text) }
 
     func with<T>(_ body: (UnsafePointer<PeSearch>) -> T) -> T {
         text.withCString { words in
-            var search = PeSearch(folder: folder, all_inboxes: allInboxes, show: PE_SHOW_ALL, text: words)
-            return withUnsafePointer(to: &search) { body($0) }
+            expanded.withUnsafeBufferPointer { open in
+                var search = PeSearch(folder: folder, all_inboxes: allInboxes, show: PE_SHOW_ALL, text: words,
+                                      threads: threads, expanded: open.baseAddress, expanded_count: open.count)
+                return withUnsafePointer(to: &search) { body($0) }
+            }
         }
     }
 }
@@ -386,6 +406,14 @@ struct Message {
     let flagColor: UInt8
     let answered: Bool
     let hasAttachments: Bool
+    /// its place in a list grouped by conversation: the conversation (0 when not grouped), 0 for the conversation's
+    /// row and 1 for a message under it, how many messages the conversation has there and how many are unread, and
+    /// whether it is open
+    let thread: Int64
+    let threadDepth: UInt32
+    let threadCount: UInt32
+    let threadUnread: UInt32
+    let threadExpanded: Bool
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -401,7 +429,18 @@ struct Message {
         flagColor = message.flag_color
         answered = message.answered
         hasAttachments = message.has_attachments
+        thread = message.thread
+        threadDepth = message.thread_depth
+        threadCount = message.thread_count
+        threadUnread = message.thread_unread
+        threadExpanded = message.thread_expanded
     }
+
+    /// a conversation's row with more messages under it, which a disclosure triangle opens and closes
+    var opens: Bool { thread != 0 && threadDepth == 0 && threadCount > 1 }
+
+    /// bold: unread, or a closed conversation with an unread message in it
+    var bold: Bool { !seen || opens && !threadExpanded && threadUnread > 0 }
 }
 
 /// A message view of the core: the header, the sanitized document, the attachments; freed with it
