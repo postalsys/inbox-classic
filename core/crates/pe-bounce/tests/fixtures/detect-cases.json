@@ -1,0 +1,2119 @@
+[
+ {
+  "name": "163.eml",
+  "recipient": "jgfhhoiyfjhhugjhv@ethereal.email",
+  "action": "failed",
+  "response": {
+   "source": "SMTP",
+   "message": "SMTP error, RCPT TO: Host ethereal.email(54.36.85.113) RCPT TO said 550 No such user here",
+   "status": "5.0.0"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": "<cc799ab9-ab11-0960-f3c2-2e4b9a5e8fb6@163.com>",
+  "messageHeaders": {
+   "received": [
+    "from emailengine.srv.dev (unknown [141.94.68.31])\n\tby smtp1 (Coremail) with SMTP id GdxpCgC3M60hsENjS53mjA--.9680S2;\n\tMon, 10 Oct 2022 13:39:46 +0800 (CST)"
+   ],
+   "content-type": [
+    "multipart/alternative;\n boundary=\"--_NmP-1999641024376130-Part_1\""
+   ],
+   "from": [
+    "EmailEngine 163 <emailengine_test@163.com>"
+   ],
+   "to": [
+    "Ethereal <jgfhhoiyfjhhugjhv@ethereal.email>"
+   ],
+   "subject": [
+    "Test message"
+   ],
+   "message-id": [
+    "<cc799ab9-ab11-0960-f3c2-2e4b9a5e8fb6@163.com>"
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 05:39:44 +0000"
+   ],
+   "mime-version": [
+    "1.0"
+   ],
+   "x-cm-transid": [
+    "GdxpCgC3M60hsENjS53mjA--.9680S2"
+   ],
+   "x-coremail-antispam": [
+    "1Uf129KBjDUn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7v73\n\tVFW2AGmfu7bjvjm3AaLaJ3UbIYCTnIWIevJa73UjIFyTuYvjxUIBHqUUUUU"
+   ],
+   "x-originating-ip": [
+    "[141.94.68.31]"
+   ]
+  },
+  "original": {
+   "subject": "Test message",
+   "date": "Mon, 10 Oct 2022 05:39:44 +0000",
+   "to": "Ethereal <jgfhhoiyfjhhugjhv@ethereal.email>"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.4394879639148712,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.00028877099975943565,
+    "domain_blacklisted": 0.0001320496667176485,
+    "geo_blocked": 0.000005835331648995634,
+    "greylisting": 0.000016888096070033498,
+    "invalid_address": 0.000993560068309307,
+    "ip_blacklisted": 0.00002989150380017236,
+    "mailbox_disabled": 0.0005077917594462633,
+    "mailbox_full": 0.00009208021219819784,
+    "policy_blocked": 0.0017813615268096328,
+    "rate_limited": 0.000001524701360722247,
+    "relay_denied": 1.5276829401500436e-7,
+    "server_error": 0.2672902047634125,
+    "spam_blocked": 0.07530725002288818,
+    "unknown": 0.2136067897081375,
+    "user_unknown": 0.4394879639148712,
+    "virus_detected": 0.0004578907391987741
+   },
+   "usedFallback": true
+  },
+  "file": "163.eml"
+ },
+ {
+  "name": "delayed.eml",
+  "recipient": "user@example.com",
+  "action": "delayed",
+  "response": {
+   "status": "4.4.1"
+  },
+  "mta": "mx.example.com",
+  "queueId": null,
+  "messageId": "<orig@example.com>",
+  "messageHeaders": {
+   "message-id": [
+    "<orig@example.com>"
+   ],
+   "from": [
+    "sender@example.com"
+   ],
+   "to": [
+    "user@example.com"
+   ],
+   "subject": [
+    "Hello"
+   ]
+  },
+  "original": {
+   "subject": "Hello",
+   "date": null,
+   "to": "user@example.com"
+  },
+  "file": "delayed.eml"
+ },
+ {
+  "name": "fastmail.eml",
+  "recipient": "htfgvhyufthdgcvhgjyfthgc@ethereal.email",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 No such user here",
+   "status": "5.0.0"
+  },
+  "mta": "mx.ethereal.email",
+  "queueId": "38C145C00A7",
+  "messageId": "<e85f1c9b-9b51-4028-8ec0-0a657155028e@app.fastmail.com>",
+  "messageHeaders": {
+   "return-path": [
+    "<andrisreinman@fastmail.com>"
+   ],
+   "received": [
+    "from compute2.internal (compute2.nyi.internal [10.202.2.46])\n\tby mailout.nyi.internal (Postfix) with ESMTP id 38C145C00A7\n\tfor <htfgvhyufthdgcvhgjyfthgc@ethereal.email>; Mon, 10 Oct 2022 01:37:21 -0400 (EDT)",
+    "from imap52 ([10.202.2.102])\n  by compute2.internal (MEProxy); Mon, 10 Oct 2022 01:37:21 -0400",
+    "by mailuser.nyi.internal (Postfix, from userid 501)\n\tid 0A24FC60091; Mon, 10 Oct 2022 01:37:21 -0400 (EDT)"
+   ],
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed; d=fastmail.com; h=\n\tcc:content-type:date:date:from:from:in-reply-to:message-id\n\t:mime-version:reply-to:sender:subject:subject:to:to; s=fm3; t=\n\t1665380241; x=1665466641; bh=4Dck+/GBx1OBIiq7W9OxkDNSMPHjTIytyZQ\n\tvO9ev/Sw=; b=e82wM1gA2Sz6+FkmXxqxQAaZCGEf8+XgkC0oJWl5mBUSG+hKPps\n\tpCN8zw+2dGJCzSFFCQvgBxQmkiu1hk/dYZM9lTUtbaRl0pzFP0rtCDzGD9dOMqM4\n\tDho0YCbg573y3y+mBiOq+WWPVN0sUDx5LngKPH2jk16e7AqBmsgZBbLU/QSpMgXE\n\tuHiP8yysNvkmBQSze4hcgpz2XcixycD3Kzi14IH1VokVW/CQixltNorpRMlEFdyp\n\tAwHJVj43+JDo+6VaXJIXt166TQK4swzxxoRjtOfnaE3wLRHTRZiLyoKqoWF8EnaR\n\t5iVG2yNrpPwKDxL1viS27lJsaXCHqmmNdBg==",
+    "v=1; a=rsa-sha256; c=relaxed/relaxed; d=\n\tmessagingengine.com; h=cc:content-type:date:date:feedback-id\n\t:feedback-id:from:from:in-reply-to:message-id:mime-version\n\t:reply-to:sender:subject:subject:to:to:x-me-proxy:x-me-proxy\n\t:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1665380241; x=\n\t1665466641; bh=4Dck+/GBx1OBIiq7W9OxkDNSMPHjTIytyZQvO9ev/Sw=; b=Z\n\tj+2dow+p7L44ToFnzPGfEY0QGMgUqPORgijx7JIN9xbbnLaq/bBzzeZ/dxOI8QcH\n\tFw7rkrVFGI+BWhLzlwczc2fyqNy3H/Agf2UZ3zYo6t6Yw9KLUyict/sMKw2qe2+d\n\tOHW7CvNDTnncq9F8+cWy+1+m8qBFIfL3yq5SGAjNrcHn1mSeFR68P6inJsIcqHgq\n\t9IWsvKGT4dEUdUUKoLg2R+WwEXva54dXMflQjrR5SjiH8O2t/Or3IlyxkpsdByKa\n\teO72oRAnVH4LZ9oTMQqdk6/z6K/THGLgxi5yx9a8GcM7nWfQ5rjYsxKOmuMoyhNV\n\tCeXLIuIk7CICOz4mtiGFQ=="
+   ],
+   "x-me-sender": [
+    "<xms:ka9DYx_VymI-Eh8GlRleErJy_ucfYZYu2PcG5ulj97kW0ud2hLqHJQ>\n    <xme:ka9DY1u0YO5H1321N90nocpaJQ5nnxZnh_6sLszX-N_dOWS20Spdf7zoW9J6HZzBB\n    YdxVmyyByBTOZe4Gsc>"
+   ],
+   "x-me-proxy-cause": [
+    "gggruggvucftvghtrhhoucdtuddrgedvfedrfeejvddgleelucetufdoteggodetrfdotf\n    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen\n    uceurghilhhouhhtmecufedttdenucenucfjughrpefofgggkfffhffvufgtsegrtderre\n    erreejnecuhfhrohhmpedftehnughrihhsucftvghinhhmrghnfdcuoegrnhgurhhishhr\n    vghinhhmrghnsehfrghsthhmrghilhdrtghomheqnecuggftrfgrthhtvghrnhepgeehtd\n    fgteffjeefjeeivddtjeekjeevtdekgeeujedujeevgedvkeeuudegjeevnecuvehluhhs\n    thgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprghnughrihhsrhgvih\n    hnmhgrnhesfhgrshhtmhgrihhlrdgtohhm"
+   ],
+   "x-me-proxy": [
+    "<xmx:ka9DY_DkeoaeErn-vnn-UmHMMW3cdWBajoNCQxjPW45X8FuKHWWemA>\n    <xmx:ka9DY1eGJh6oVmLl-rDF4sUABZoSOlS6aMf5G5VGcM0FH8R5q_oBwA>\n    <xmx:ka9DY2MhkfkvsIhCL7_-hsBebOVFdF8WOhstdPFyozGLerTby9VtdQ>\n    <xmx:ka9DY8YkT1GgMLsgw1JXXzb27VsK9Vy5oj8PpAHxgvc6cEx3qVxf0Q>"
+   ],
+   "feedback-id": [
+    "i786146f2:Fastmail"
+   ],
+   "x-mailer": [
+    "MessagingEngine.com Webmail Interface"
+   ],
+   "fastmail-sender-identity": [
+    "123489720"
+   ],
+   "user-agent": [
+    "Cyrus-JMAP/3.7.0-alpha0-1015-gaf7d526680-fm-20220929.001-gaf7d5266"
+   ],
+   "mime-version": [
+    "1.0"
+   ],
+   "x-personalityid": [
+    "123489720"
+   ],
+   "message-id": [
+    "<e85f1c9b-9b51-4028-8ec0-0a657155028e@app.fastmail.com>"
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 08:37:00 +0300"
+   ],
+   "from": [
+    "\"Andris Reinman\" <andrisreinman@fastmail.com>"
+   ],
+   "to": [
+    "htfgvhyufthdgcvhgjyfthgc@ethereal.email"
+   ],
+   "subject": [
+    "Proovikiri"
+   ],
+   "content-type": [
+    "multipart/alternative;\n boundary=faafbc6258b640bbace4cf9bc4fac276"
+   ]
+  },
+  "original": {
+   "subject": "Proovikiri",
+   "date": "Mon, 10 Oct 2022 08:37:00 +0300",
+   "to": "htfgvhyufthdgcvhgjyfthgc@ethereal.email"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.8611039519309998,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.00002411490277154371,
+    "domain_blacklisted": 0.00006529719394166023,
+    "geo_blocked": 0.00014346858370117843,
+    "greylisting": 0.0000011259839993726928,
+    "invalid_address": 0.013160542584955692,
+    "ip_blacklisted": 0.00008149001223500818,
+    "mailbox_disabled": 0.0012789795873686671,
+    "mailbox_full": 0.00001086506927094888,
+    "policy_blocked": 0.003800640581175685,
+    "rate_limited": 3.3364395335411245e-7,
+    "relay_denied": 0.000003463931079750182,
+    "server_error": 0.0012379902182146907,
+    "spam_blocked": 0.0013625291176140308,
+    "unknown": 0.11762833595275879,
+    "user_unknown": 0.8611039519309998,
+    "virus_detected": 0.00009689520084066316
+   },
+   "usedFallback": true
+  },
+  "file": "fastmail.eml"
+ },
+ {
+  "name": "gmail.eml",
+  "recipient": "jhfthgfuyfhvjkugjhvjuyfv@hot.ee",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 5.1.1 <jhfthgfuyfhvjkugjhvjuyfv@hot.ee>: Recipient address rejected: User unknown in relay recipient table",
+   "status": "5.1.1"
+  },
+  "mta": "mx1.hot.ee. (194.126.101.119, the server for the domain hot.ee.)",
+  "queueId": null,
+  "messageId": "<CAPacwgw3pCyVcmW4nVy8VPX5u5ksn_wZB2jZ_tLUM2es7LaiEA@mail.gmail.com>",
+  "messageHeaders": {
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed;\n        d=gmail.com; s=20210112;\n        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject\n         :date:message-id:reply-to;\n        bh=nnVtM9pzwXTdt1o/7mH+EPq2FJKPRxlOpHKe5Ce3xwM=;\n        b=N+jZ2z1r/8wpUfnjALBvs9dXcv85Dn1Rdf0dMRImaU2LhWSLhJFaVCl4PqgLhIYfi+\n         zvgNebGi2TGtiTcjLxFpO7pm74fMEMVSixs3GH3kcfoooMwzrsAnOXXep/c9o297WUCb\n         JEIc6SodAJY7TZ0adQF/GSz9YwttlX6SsH3RjmYGyQ9WRmvUPnkT/dTqgRbCBsi21C4a\n         SzUNq9QyB/9UL3S32ml3ERDCQMzak07e5gCgO6MQ0Q6q0vyy6xdIvMhaD+Yjymfdvbhn\n         fAhiTXsyu4kyGyK9kYWw6eP+n7gj9zi+yKQ0oIrUtudMCk7siGTffTaSnE6Jb/zPREhs\n         uL2Q=="
+   ],
+   "x-google-dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed;\n        d=1e100.net; s=20210112;\n        h=to:subject:message-id:date:from:mime-version:x-gm-message-state\n         :from:to:cc:subject:date:message-id:reply-to;\n        bh=nnVtM9pzwXTdt1o/7mH+EPq2FJKPRxlOpHKe5Ce3xwM=;\n        b=YrFJJxET1RwNI93lmTtJ50UFWJV9sTm1XClaEul/PqPn1gTCjXUNRkJ9DtitLOHMJB\n         Ga87yiUWUN6ugIjHBcF0HhtCeZVcZsykcmFFu+7/jTcE3hICNcOF7hGSt00bHQSnbv3P\n         xW+xny64O4UiT5iplp+iX69+099SilfdWWXRK869uXTbZxQAmtQfEYNmYyP/xJD5wi6N\n         BFwpUeqpC9opTTSdTDqplW2JwxbIZWziHFYylf2/n+ydHF90tCNfQvqzC7fu+ckBxH2n\n         mYh6hJ0psgFm4qQKR6W3UDnQWDiqrtfywY3DNMC5ByCxPXYw9VD5CtNT5lmpht83baB2\n         BNhQ=="
+   ],
+   "x-gm-message-state": [
+    "ACrzQf1eWMQxiNhAw5CTEw9p0C/C0M1RPAWtOhT6SJcxAihNRjFJtKK1\n\tx7rPqtI7lclUIePZ4Xv0kxE7I12ypOecjhsWU33m6ujw"
+   ],
+   "x-google-smtp-source": [
+    "AMsMyM6wJHR9A+WGVXLLtAlCAiAUPM2ILV/b0k2vK90km/32hWIh8aD6wHRBlpUSh+CHxM8ng1MnMTWOw2r7Aa/VP9M="
+   ],
+   "x-received": [
+    "by 2002:a05:6808:1496:b0:350:4640:5462 with SMTP id\n e22-20020a056808149600b0035046405462mr13351667oiw.47.1665379854972; Sun, 09\n Oct 2022 22:30:54 -0700 (PDT)"
+   ],
+   "mime-version": [
+    "1.0"
+   ],
+   "from": [
+    "Andris Reinman <andris.reinman@gmail.com>"
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 08:30:44 +0300"
+   ],
+   "message-id": [
+    "<CAPacwgw3pCyVcmW4nVy8VPX5u5ksn_wZB2jZ_tLUM2es7LaiEA@mail.gmail.com>"
+   ],
+   "subject": [
+    "proovikiri"
+   ],
+   "to": [
+    "jhfthgfuyfhvjkugjhvjuyfv@hot.ee"
+   ],
+   "content-type": [
+    "multipart/alternative; boundary=\"000000000000abfb3b05eaa77631\""
+   ]
+  },
+  "original": {
+   "subject": "proovikiri",
+   "date": "Mon, 10 Oct 2022 08:30:44 +0300",
+   "to": "jhfthgfuyfhvjkugjhvjuyfv@hot.ee"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2803373336791992,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.005075195804238319,
+    "domain_blacklisted": 0.3438330888748169,
+    "geo_blocked": 0.070526123046875,
+    "greylisting": 0.0007611372857354581,
+    "invalid_address": 0.006014170125126839,
+    "ip_blacklisted": 0.0004570686141960323,
+    "mailbox_disabled": 0.05474574863910675,
+    "mailbox_full": 0.06538021564483643,
+    "policy_blocked": 0.026955991983413696,
+    "rate_limited": 0.001100229797884822,
+    "relay_denied": 0.005443303845822811,
+    "server_error": 0.000507867312990129,
+    "spam_blocked": 0.09730768203735352,
+    "unknown": 0.004761526361107826,
+    "user_unknown": 0.2803373336791992,
+    "virus_detected": 0.03679332137107849
+   },
+   "usedFallback": true,
+   "modelLabel": "domain_blacklisted"
+  },
+  "file": "gmail.eml"
+ },
+ {
+  "name": "hotmail.eml",
+  "recipient": "sdfadsdfwedsfcasfeqwefwq@hot.ee",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 5.1.1 <sdfadsdfwedsfcasfeqwefwq@hot.ee>: Recipient address rejected: User unknown in relay recipient table",
+   "status": "5.1.1"
+  },
+  "mta": "gv1pr09mb6052.eurprd09.prod.outlook.com",
+  "queueId": null,
+  "messageId": "<DB6PR0902MB194406730EDCF3E12EE16DCF90209@DB6PR0902MB1944.eurprd09.prod.outlook.com>",
+  "messageHeaders": {
+   "arc-seal": [
+    "i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;\n b=hkgXsUnsvJ5/BxWLyZDRZuPOw0tRaoJ3CGfs4qH1D0oOfUkccLwQW4CBY21gIEbqsBlc3vmBZgDBJSluMIukHQt0tSFjwQJCrmF5JADI89TBBJpVrMbPGRQ4sX507H9fuTGAiD+cF6HdfJiduOfr6+9Lyy7JWEtnfPgE5I7PBf6IFJu0TlvtJbhk1pwRebUjGWi7XOaZfgOMKqyRAxFO6W0U8PLIY7Y+S/KIeyBg4xl8KBYuqdtzWizPYw7DkjP4zLpqkx3Sisy6m9FcByRdSswe0e8BytqMrzFVB1VvqKUyuT2183j4vJI3zj+cjmKyv+P6IYTQx/i1zDZHnsEVXA=="
+   ],
+   "arc-message-signature": [
+    "i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;\n s=arcselector9901;\n h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;\n bh=XldiBeOF01N+wjdYUCeeR+A3BvuRJZYebjcA+dQFcbg=;\n b=R+Zz/0QNN46lJd2RUseGXdmnvTdsmt09mabBbsiqV4Jg07SlUfKZrR8wQQavzaFdYpMbJjNTEYbRe6No8tMUw8ks5CJERBi9+ALOdSpGsxVdfuC78uxIRsUlg/ml5oHWKUE4REVbpxPAL7dtQYe5sGq+DAF66Jv8ihY5brt0gCHrCIBQZjfDHTK4dzwt+n7XSBHbrcqfzLMiA+9xTgxgRVNIUJEGlFbBa2qvp3ujOyu1SV44Q52wpysO5HvGZKsV5laj484h+xF7EgzvYGA7glF9T+w+1YUA8V2azt7KuCh2WtD8xwKEVF5zdO+N+pEz7oJzVgSEWMMiQXYmijNjKA=="
+   ],
+   "arc-authentication-results": [
+    "i=1; mx.microsoft.com 1; spf=none; dmarc=none;\n dkim=none; arc=none"
+   ],
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed; d=hotmail.com;\n s=selector1;\n h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;\n bh=XldiBeOF01N+wjdYUCeeR+A3BvuRJZYebjcA+dQFcbg=;\n b=JZWO5b+URl6Xy4pIEiH7lrIjJqo3ATLAnuVCqIqjE9Ay+LQW2KYCHnlcvCYuc8tQ9PHEPxIlXGRB8A9hh2QhVKaHeBayV3zpvPwmReeT8wWWhKH0rErQtih7cFBFLojFzWXrt4K+F8LODtiU16M3qA+oAnKVQffzVYjVicB9FdqIdfduwa9N1ORfJC0KmLZQ1q1te73KZDAHrwo+vU/7cdFLAzhwjiqDjA3oqrudky4dICcK7LqarwS3vY2CBe92Vx1vpKp6GlmWx0OsdSo1M+6HGFQ/bldmeDcGsA6UxVrG+eRiUG22N11tMcOsGBXKFOK9ez1ab918ikplmhlLwQ=="
+   ],
+   "received": [
+    "from DB6PR0902MB1944.eurprd09.prod.outlook.com (2603:10a6:6:b::24)\n by GV1PR09MB6052.eurprd09.prod.outlook.com (2603:10a6:150:80::20) with\n Microsoft SMTP Server (version=TLS1_2,\n cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5676.38; Mon, 10 Oct\n 2022 05:32:36 +0000",
+    "from DB6PR0902MB1944.eurprd09.prod.outlook.com\n ([fe80::85bc:5224:d5ac:a5a4]) by DB6PR0902MB1944.eurprd09.prod.outlook.com\n ([fe80::85bc:5224:d5ac:a5a4%3]) with mapi id 15.20.5709.015; Mon, 10 Oct 2022\n 05:32:36 +0000"
+   ],
+   "from": [
+    "Andris Reinman <andris.reinman@hotmail.com>"
+   ],
+   "to": [
+    "\"sdfadsdfwedsfcasfeqwefwq@hot.ee\" <sdfadsdfwedsfcasfeqwefwq@hot.ee>"
+   ],
+   "subject": [
+    "Proov"
+   ],
+   "thread-topic": [
+    "Proov"
+   ],
+   "thread-index": [
+    "AQHY3Gm0E6WyS+eLsk+gReLFnjMUAg=="
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 05:32:36 +0000"
+   ],
+   "message-id": [
+    "<DB6PR0902MB194406730EDCF3E12EE16DCF90209@DB6PR0902MB1944.eurprd09.prod.outlook.com>"
+   ],
+   "accept-language": [
+    "et-EE, en-US"
+   ],
+   "content-language": [
+    "et-EE"
+   ],
+   "x-ms-has-attach": [
+    ""
+   ],
+   "x-ms-tnef-correlator": [
+    ""
+   ],
+   "msip_labels": [
+    ""
+   ],
+   "x-tmn": [
+    "[kmsOKhCZdBWKB4zAr0zf9oayZcl0M7Ou]"
+   ],
+   "x-ms-publictraffictype": [
+    "Email"
+   ],
+   "x-ms-traffictypediagnostic": [
+    "DB6PR0902MB1944:EE_|GV1PR09MB6052:EE_"
+   ],
+   "x-ms-office365-filtering-correlation-id": [
+    "0e0b6c9d-38da-40d6-9caf-08daaa80d703"
+   ],
+   "x-microsoft-antispam": [
+    "BCL:0;"
+   ],
+   "x-microsoft-antispam-message-info": [
+    "y6S4ZoAm2PFPdjcxNXVtkNLpjRRnYXAzehKDH2K26GvDDudQ1PuzUGpuFxeLLo2Ae01R7T67eWGRzkvXGOHJJVmxqN2oL0D+zCOqhbXTIMxoYLNWPnmtdnvmx43sGY2FeCUbyadfMd7oQeEOJL7L61BaihmZnh/8BCPz127e1gEC/gFwFwahOwEAONRk/JUwjBP1wxhKpheNpLvm0uYJ9YV6jfrSF01VZPmYwBx5038NSB1NOzj7UVBQEHBeO5bPGKxvBB5mhDvDLIKn1XduXv2vqDBhs2HMZR9HmejCaWtyTv9ZQI0FpeKu4M96x2Lmz7Q11xvvQ/n1+YBM2Gf2OJZoY7c+i0uGfV+nrWMxAdY8UiMinEly5AvGOE1wFtzn"
+   ],
+   "x-ms-exchange-antispam-messagedata-chunkcount": [
+    "1"
+   ],
+   "x-ms-exchange-antispam-messagedata-0": [
+    "=?iso-8859-15?Q?oqBMLkCu5PKvONAmct/BYF/BU/q22I2ZMx6tfaYqBJbj9m/GtSRALK+cy?=\n =?iso-8859-15?Q?O2Oe03rX6xxJDIV61gPY0X0EWC7RwzV8mUTOToQoxWjEt6Z+9wftRsHOz?=\n =?iso-8859-15?Q?9zW57tpRB3lK/JSmkUv1ms6O550vzF5uU4tOuvs2S0eB5A34PC+UOhTaz?=\n =?iso-8859-15?Q?1VJQffYLe8Pk5CzWOlSxbLGy3NOEnCdzGOPah7Fqyxpqn23ivLoWiDRMQ?=\n =?iso-8859-15?Q?IHr/ubF/zxRvlvw3koKVy7nTh8CiR94eSb/qnnrRRXasbtz8x+XLSNq8F?=\n =?iso-8859-15?Q?4YgOXVTmdxc7qtPW4LklFWC1s41KXx+ri4EyZUEUItJaOB/xERQMoiVrJ?=\n =?iso-8859-15?Q?LsuT+6WVGt/xrsj8xUTlVC44k+ZddOx3e+v/mXqrhhld08v4mlhzsayUY?=\n =?iso-8859-15?Q?uF9WcCbmL0KhyzaqT4hy4oyAEYMeeq/NvHsaWz9VZRJBeYQr0RHMde1Rc?=\n =?iso-8859-15?Q?LMDncRo1uJ+8WecSCu3vwDL8uxkrVggjxlYK7pl1iyZPwJ60aml9VIllp?=\n =?iso-8859-15?Q?zdeZDsbkzjvcL4HwdgZdPHon0/cB4HY5VW3TG8MoNemj4iRamdDCX+aoM?=\n =?iso-8859-15?Q?gtD4rwK+n1ZzBKiptYtN4vErmGxgArFAWAdzf7DZ/tOQZR3WMDnjVfGT6?=\n =?iso-8859-15?Q?HWSA1Scfa1FLxoTM0iiyuUaZLYcVmVowsTWv0jTeMJF9uhMi+FNDSGRGQ?=\n =?iso-8859-15?Q?/vJe4Kjkn0Phqz+v1EmKuw19Xjh44+03E4Zgpe6JsuDyTAkKpg5f8+Mel?=\n =?iso-8859-15?Q?SUNoWF4NKI0VqlwR1dpcklxhaW6IHcSNkoE30VGK0HMP0V/pwbmWzeLJV?=\n =?iso-8859-15?Q?/vlIYATUXn4LSmCp64SexYoix/mRK1k+ohFMGm3NMjQt8ZKQOD3fj9h9D?=\n =?iso-8859-15?Q?CZnBQ2ROVgRPnzuILO5QiIyio+kpVRRS7B+ZT0m0oUlEU+1ZSm9oMv0QF?=\n =?iso-8859-15?Q?Xg8FyzZU12vgY+XYTDLUqn/8h2NhFUgql88++DUxh1z1sECofVCyvDArN?=\n =?iso-8859-15?Q?A5HoiH2CR+zxVwekm9M8EFn1cMlqxfE7vl2gT2nsT2bSDU/NLFNb6H9os?=\n =?iso-8859-15?Q?+iw4dzUqxeM1wnV3K+kgFxKDSYZ6/mp+MRhT6GS8DHNhMKZNvk6xKN9ts?=\n =?iso-8859-15?Q?nF9O5Ayuu8zcYWpk1FF7X6h0EPzwW1TjWJrLRRd8gHtkrx5A2ddVpnXpK?=\n =?iso-8859-15?Q?3GIzFQlI5U5y0Frq/T+dMa8Yv0zmTm6feKZboGlqBpV5YGe78joRjXUVe?=\n =?iso-8859-15?Q?Q9am482LubBV1iLu6AaRvsY9yWzDOEqCz3LGo9aBahHPieF6olWPfcY3h?=\n =?iso-8859-15?Q?6rZhgdiZNTcUbSKrr5Rchr00r/isUk0rImoTi15z+zOzt5TA=3D=3D?="
+   ],
+   "content-type": [
+    "multipart/alternative;\n\tboundary=\"_000_DB6PR0902MB194406730EDCF3E12EE16DCF90209DB6PR0902MB1944_\""
+   ],
+   "x-originatororg": [
+    "sct-15-20-4755-11-msonline-outlook-64da6.templateTenant"
+   ],
+   "x-ms-exchange-crosstenant-authas": [
+    "Internal"
+   ],
+   "x-ms-exchange-crosstenant-authsource": [
+    "DB6PR0902MB1944.eurprd09.prod.outlook.com"
+   ],
+   "x-ms-exchange-crosstenant-rms-persistedconsumerorg": [
+    "00000000-0000-0000-0000-000000000000",
+    "00000000-0000-0000-0000-000000000000"
+   ],
+   "x-ms-exchange-crosstenant-network-message-id": [
+    "0e0b6c9d-38da-40d6-9caf-08daaa80d703"
+   ],
+   "x-ms-exchange-crosstenant-originalarrivaltime": [
+    "10 Oct 2022 05:32:36.5907\n (UTC)"
+   ],
+   "x-ms-exchange-crosstenant-fromentityheader": [
+    "Hosted"
+   ],
+   "x-ms-exchange-crosstenant-id": [
+    "84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa"
+   ],
+   "x-ms-exchange-transport-crosstenantheadersstamped": [
+    "GV1PR09MB6052"
+   ],
+   "mime-version": [
+    "1.0"
+   ]
+  },
+  "original": {
+   "subject": "Proov",
+   "date": "Mon, 10 Oct 2022 05:32:36 +0000",
+   "to": "\"sdfadsdfwedsfcasfeqwefwq@hot.ee\" <sdfadsdfwedsfcasfeqwefwq@hot.ee>"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2803373336791992,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.005075195804238319,
+    "domain_blacklisted": 0.3438330888748169,
+    "geo_blocked": 0.070526123046875,
+    "greylisting": 0.0007611372857354581,
+    "invalid_address": 0.006014170125126839,
+    "ip_blacklisted": 0.0004570686141960323,
+    "mailbox_disabled": 0.05474574863910675,
+    "mailbox_full": 0.06538021564483643,
+    "policy_blocked": 0.026955991983413696,
+    "rate_limited": 0.001100229797884822,
+    "relay_denied": 0.005443303845822811,
+    "server_error": 0.000507867312990129,
+    "spam_blocked": 0.09730768203735352,
+    "unknown": 0.004761526361107826,
+    "user_unknown": 0.2803373336791992,
+    "virus_detected": 0.03679332137107849
+   },
+   "usedFallback": true,
+   "modelLabel": "domain_blacklisted"
+  },
+  "file": "hotmail.eml"
+ },
+ {
+  "name": "mailru.eml",
+  "recipient": "tfhgyuftghjyftghv@hot.ee",
+  "action": "failed",
+  "response": {
+   "status": "5.0.0",
+   "message": "550 5.1.1 <tfhgyuftghjyftghv@hot.ee>: Recipient address rejected: User unknown in relay recipient table"
+  },
+  "mta": "fallback17.m.smailru.net",
+  "queueId": null,
+  "messageId": "<1665380146.431729680@f705.i.mail.ru>",
+  "messageHeaders": {
+   "return-path": [
+    "<node.mailer@mail.ru>"
+   ],
+   "received": [
+    "from [10.14.55.72] (port=47048 helo=f705.i.mail.ru)\n\tby fallback17.m.smailru.net with esmtp (envelope-from <node.mailer@mail.ru>)\n\tid 1ohlSE-0004cE-7s\n\tfor tfhgyuftghjyftghv@hot.ee; Mon, 10 Oct 2022 08:35:54 +0300",
+    "by f705.i.mail.ru with local (envelope-from <node.mailer@mail.ru>)\n\tid 1ohlS7-0001zC-0b\n\tfor tfhgyuftghjyftghv@hot.ee; Mon, 10 Oct 2022 08:35:47 +0300",
+    "by e.mail.ru with HTTP;\n\tMon, 10 Oct 2022 08:35:46 +0300"
+   ],
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mail.ru; s=mail4;\n\th=Content-Type:Message-ID:Reply-To:Date:MIME-Version:Subject:To:From:From:Subject:Content-Type:Content-Transfer-Encoding:To:Cc; bh=X5pMcin9Ce1CZ070y/KcDYyesMxEnjdhx8OPqU+t21c=;\n\tt=1665380154;x=1665470154; \n\tb=KMvxxHsNJjuZAq1TRKLCwB1w+pl8mh3k5TZgkX4SEPGqj9WDodMIJJxz0b6uTtWDQXf5KcEgGQrSZnNsNgVPF3I7cq5S/34+GM0lAFsS2MuorXmgaPe3GGl6ppy3NfJywf7VDcRAagL6NHv2F4QPvwbJH6WEXLv6BUzFVKT/qNjvdLPicWrgLC8meqM9XlfZkwOFwyG1DWycbokB/aeWCZWaP1Xd0iSgTuSHkkU+fE/gotTlREXrncFPSs7mUuf/yj7fMp9BVXtfbOvdL81xTUip/nsLH0G0G/uZa3K8NJK0c5jCqxdaZ+hOlbd3cjTb79PICvepONgOTuTZ4MhL0g==;"
+   ],
+   "from": [
+    "=?UTF-8?B?Tm9kZSBNYWlsZXI=?= <node.mailer@mail.ru>"
+   ],
+   "to": [
+    "tfhgyuftghjyftghv@hot.ee"
+   ],
+   "subject": [
+    "=?UTF-8?B?UHJvb3Zpa2lyaQ==?="
+   ],
+   "mime-version": [
+    "1.0"
+   ],
+   "x-mailer": [
+    "Mail.Ru Mailer 1.0"
+   ],
+   "x-senderfield-remind": [
+    "0"
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 08:35:46 +0300"
+   ],
+   "reply-to": [
+    "=?UTF-8?B?Tm9kZSBNYWlsZXI=?= <node.mailer@mail.ru>"
+   ],
+   "x-priority": [
+    "3 (Normal)"
+   ],
+   "message-id": [
+    "<1665380146.431729680@f705.i.mail.ru>"
+   ],
+   "content-type": [
+    "multipart/alternative;\n\tboundary=\"--ALT--d953AdD44AdDF1697A4cf66681E9b5541665380146\""
+   ],
+   "x-7564579a": [
+    "B8F34718100C35BD",
+    "B8F34718100C35BD"
+   ],
+   "x-77f55803": [
+    "119C1F4DF6A9251C6A1F9B8425C0C38217FE8095CA0D5BACD4B37F28952E7F5D8FD872164937FA4CB5A65D66DB4942DEE4DE6618DBBB969E607FF6292640127844D531C2042F2958",
+    "6242723A09DB00B4CB7E74F60B51C7269AF9952FA665C9807DDB04C2301BA090049FFFDB7839CE9E8F4919BB99B10C864B111FE58E79538C90A44905914C309BFBF34F765DB147C3"
+   ],
+   "x-7fa49cb5": [
+    "70AAF3C13DB7016878DA827A17800CE75AE2BCDAFFF293B5D82A6BABE6F325ACACBFF42033827DA7BCF491FFA38154B613377AFFFEAFD269176DF2183F8FC7C05644E22E05AA81AEB287FD4696A6DC2FA8DF7F3B2552694A4E2F5AFA99E116B42401471946AA11AF0E30A4C9C8E338DAC8F626AC60F7C5938F08D7030A58E5AD1A62830130A00468AEEEE3FBA3A834EE7353EFBB55337566D14CA5A13263E1EF73A515AF8EF8DA345C811117457FDD151DF9E95F17B0083B26EA987F6312C9EC9ECD01F8117BC8BEA471835C12D1D9774AD6D5ED66289B5278DA827A17800CE749E2213E709ACCBA9FA2833FD35BB23D2EF20D2F80756B5F868A13BD56FB6657A471835C12D1D977725E5C173C3A84C3E478A468B35FE767117882F4460429728AD0CFFFB425014E868A13BD56FB6657E2021AF6380DFAD1A18204E546F3947CB11811A4A51E3B096D1867E19FE1407959CC434672EE6371089D37D7C0E48F6C8AA50765F7900637681EFEAF4CE27A4AEFF80C71ABB335746BA297DBC24807EABDAD6C7F3747799A",
+    "0D63561A33F958A51F6E7A3E085C260D0122CD3F1260413CE52CCD2C197C5938CACD7DF95DA8FC8BD5E8D9A59859A8B64071617579528AACCC7F00164DA146DAFE8445B8C89999728AA50765F79006375A3B25A3A11CE7E4389733CBF5DBD5E9C8A9BA7A39EFB766F5D81C698A659EA7CC7F00164DA146DA9985D098DBDEAEC86633242DC0339950F6B57BC7E6449061A352F6E88A58FB86F5D81C698A659EA775ECD9A6C639B01B78DA827A17800CE78CEEE38C14B24B1F731C566533BA786AA5CC5B56E945C8DA"
+   ],
+   "x-c8649e89": [
+    "4E36BF7865823D7055A7F0CF078B5EC49A30900B95165D34E20F2278F74481A19E9573F996AD227113A8EB35A61768E6536D85EB04AAF26F0E0126954A1200F91D7E09C32AA3244C14CF62DBDD17255CB410A84237D31B985A1673A01BA68E403EB3F6AD6EA9203E"
+   ],
+   "x-d57d3aed": [
+    "3ZO7eAau8CL7WIMRKs4sN3D3tLDjz0dLbV79QFUyzQ2Ujvy7cMT6pYYqY16iZVKkSc3dCLJ7zSJH7+u4VD18S7Vl4ZUrpaVfd2+vE6kuoey4m4VkSEu530nj6fImhcD4MUrOEAnl0W826KZ9Q+tr5+wYjsrrSY/u8Y3PrTqANeitKFiSd6Yd7yPpbiiZ/d5BsxIjK0jGQgCHUM3Ry2Lt2G3MDkMauH3h0dBdQGj+BB/iPzQYh7XS3xyn40EmMxrmzGyQ9/nTnF14FUmlrpRe95zUdJfQ/bjz",
+    "3ZO7eAau8CL7WIMRKs4sN3D3tLDjz0dLbV79QFUyzQ2Ujvy7cMT6pYYqY16iZVKkSc3dCLJ7zSJH7+u4VD18S7Vl4ZUrpaVfd2+vE6kuoey4m4VkSEu530nj6fImhcD4MUrOEAnl0W826KZ9Q+tr5+wYjsrrSY/u8Y3PrTqANeitKFiSd6Yd7yPpbiiZ/d5BsxIjK0jGQgCHUM3Ry2Lt2G3MDkMauH3h0dBdQGj+BB/iPzQYh7XS329fgu+/vnDhVoBtCHlaOqJ3o3wl70AVxQ=="
+   ],
+   "x-mailru-sender": [
+    "B67AEDD05F1F631D975B127588298849364E5A9CD510B8EBD4B4C9F37438B32A051351E1FD7DB0550423B639AF5057086AF2532DF2AB40B3B9A4D12DAFEE5EDA1E60DA90B68B17488C687AEA06D7B4150DACDBF337005A970D4ABDE8C577C2ED"
+   ],
+   "x-mras": [
+    "Ok",
+    "Ok"
+   ],
+   "x-spam": [
+    "undefined"
+   ]
+  },
+  "original": {
+   "subject": "Proovikiri",
+   "date": "Mon, 10 Oct 2022 08:35:46 +0300",
+   "to": "tfhgyuftghjyftghv@hot.ee"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2803373336791992,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.005075195804238319,
+    "domain_blacklisted": 0.3438330888748169,
+    "geo_blocked": 0.070526123046875,
+    "greylisting": 0.0007611372857354581,
+    "invalid_address": 0.006014170125126839,
+    "ip_blacklisted": 0.0004570686141960323,
+    "mailbox_disabled": 0.05474574863910675,
+    "mailbox_full": 0.06538021564483643,
+    "policy_blocked": 0.026955991983413696,
+    "rate_limited": 0.001100229797884822,
+    "relay_denied": 0.005443303845822811,
+    "server_error": 0.000507867312990129,
+    "spam_blocked": 0.09730768203735352,
+    "unknown": 0.004761526361107826,
+    "user_unknown": 0.2803373336791992,
+    "virus_detected": 0.03679332137107849
+   },
+   "usedFallback": true,
+   "modelLabel": "domain_blacklisted"
+  },
+  "file": "mailru.eml"
+ },
+ {
+  "name": "outlook.eml",
+  "recipient": "wfsddaSdasffasdqwqw@hot.ee",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 5.1.1 <wfsddaSdasffasdqwqw@hot.ee>: Recipient address rejected: User unknown in relay recipient table",
+   "status": "5.1.1"
+  },
+  "mta": "gv2pr07mb9059.eurprd07.prod.outlook.com",
+  "queueId": null,
+  "messageId": "<PR1PR07MB57558E5D11D6C2BA6F950391D7209@PR1PR07MB5755.eurprd07.prod.outlook.com>",
+  "messageHeaders": {
+   "arc-seal": [
+    "i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;\n b=mM0HeSpXDUuJaZEac2D8n9sY8fv5eCxPyf2W6OHhnGPf77/vMCnmHgv5/ZI++j7+7jseodk6CVP2OVhwlNHB72iozw29036Ue80nUHWhbClqakpr0rQRkEqSb3yqPuI0IaRUYiVGWOavHv0USzPVkJSVaItECjbXUZF8hCbcvYs4bqsANTEvxDz7UK530/m/AmOJzkOYwdVjj6cw7NgqBAblWJzn6FzZ8RJPY1HBbBoTLPRYxU3TVCrIRbZYvk93JZzAQLPkLGagcCb5YE9f6eP+siQeEqnngzXf7NOks5V7ZPd34M/jzfhba7qwpdrdINwFmvLIQ6qEH9Ufs/UvLg=="
+   ],
+   "arc-message-signature": [
+    "i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;\n s=arcselector9901;\n h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;\n bh=QYBJrKuABRFr0tqiV7J782ZgV2i0sVT05plRdPnWWb0=;\n b=nHOPEnSpKJI/IW+9LXZ+Y+UkW/A6rStHYk1HnL2n/7XXECfzD+buIDEhOIWHvhdsK3b3Q7+R8FplbQp6dneQeQJUwIG3LC+9LBuuegW8TdDVMukW+gyCyWho64rpvEY6qoqI2AKAIbd+ZrkUwJJZIE0JNYmhQ0SieZ4q+59UV01qsCuDAU0dnMnKvQvC7oOH95cmAff2cMJGQeBWfl3bfXQHPNeIJ9dgHM+Ey7lbzogDKmelejfe4mw8UFxd4FtoLo3beQwfWr/J4N9YlZRiZndBCoknRPPvzLgn4subhUC8t8tyOPJ/FCwiD61+fMBClziuegUFUHvHVonOC0aFew=="
+   ],
+   "arc-authentication-results": [
+    "i=1; mx.microsoft.com 1; spf=pass\n smtp.mailfrom=srv.dev; dmarc=pass action=none header.from=srv.dev; dkim=pass\n header.d=srv.dev; arc=none"
+   ],
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed; d=srv.dev; s=selector1;\n h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;\n bh=QYBJrKuABRFr0tqiV7J782ZgV2i0sVT05plRdPnWWb0=;\n b=Sh7ssXote/0HwDBqIWSR4MB7SF9nS4yGyHWbBwvjbWkHtg5tlqLBhn5IEj5vGrM8GL4/rqmg3ErUaFWfAz3lyElzrYQoOUrDc2aCBRjEAY1DcQ+oYoRdufLh+RLjTwhC8itoqbV0eNUAjnDXx3nB+Zl1LlV1dsxNcwDzLIQDL4ugbbQHBxW1VvxZiytbz5S/Bi/H1KcYAmru/s+IbmUYndlpmuBxKeNEEclUBpqMp4ixZg3fYGZIJACRr5Y1FVJTFohYCHuwZ+2OBIzdI+Eh00xtTjB8IBDr+Fg+MkrAGmMp1ApdBhG32e+5KSCBJ/aoiUwDKLQKB5ggvqQzorOcWQ=="
+   ],
+   "received": [
+    "from PR1PR07MB5755.eurprd07.prod.outlook.com (2603:10a6:102:c::20)\n by GV2PR07MB9059.eurprd07.prod.outlook.com (2603:10a6:150:b0::22) with\n Microsoft SMTP Server (version=TLS1_2,\n cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5709.10; Mon, 10 Oct\n 2022 05:31:55 +0000",
+    "from PR1PR07MB5755.eurprd07.prod.outlook.com\n ([fe80::1c1e:214b:afe9:4b1f]) by PR1PR07MB5755.eurprd07.prod.outlook.com\n ([fe80::1c1e:214b:afe9:4b1f%5]) with mapi id 15.20.5723.014; Mon, 10 Oct 2022\n 05:31:55 +0000"
+   ],
+   "from": [
+    "Andris Reinman <andris@srv.dev>"
+   ],
+   "to": [
+    "\"wfsddaSdasffasdqwqw@hot.ee\" <wfsddaSdasffasdqwqw@hot.ee>"
+   ],
+   "subject": [
+    "Proovikiri"
+   ],
+   "thread-topic": [
+    "Proovikiri"
+   ],
+   "thread-index": [
+    "AQHY3Gmc879DhJSO3USpckCCysTw6Q=="
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 05:31:55 +0000"
+   ],
+   "message-id": [
+    "<PR1PR07MB57558E5D11D6C2BA6F950391D7209@PR1PR07MB5755.eurprd07.prod.outlook.com>"
+   ],
+   "accept-language": [
+    "et-EE, en-US"
+   ],
+   "content-language": [
+    "et-EE"
+   ],
+   "x-ms-has-attach": [
+    ""
+   ],
+   "x-ms-tnef-correlator": [
+    ""
+   ],
+   "msip_labels": [
+    ""
+   ],
+   "authentication-results": [
+    "dkim=none (message not signed)\n header.d=none;dmarc=none action=none header.from=srv.dev;"
+   ],
+   "x-ms-publictraffictype": [
+    "Email"
+   ],
+   "x-ms-traffictypediagnostic": [
+    "PR1PR07MB5755:EE_|GV2PR07MB9059:EE_"
+   ],
+   "x-ms-office365-filtering-correlation-id": [
+    "9fdab5f3-55a9-41b9-30b9-08daaa80be8a"
+   ],
+   "x-ms-exchange-senderadcheck": [
+    "1"
+   ],
+   "x-ms-exchange-antispam-relay": [
+    "0"
+   ],
+   "x-microsoft-antispam": [
+    "BCL:0;"
+   ],
+   "x-microsoft-antispam-message-info": [
+    "+hkf2Gry5Wp9xwgapbD057khVclDgG2yqrn8XOAezZiGUYbk+KQPeD2ePf9a/7jZjTihAUPJeS8sHXId0hhR+upYYxZL1vy3VM2VRWVHEAQwKsPaOHeQxEFI6uaiwHn7vzLiyZUKOpZi+FUz+AEaswIB0Wj6WcQSS7UsnVGXGH33s5QzzLqN0tOLENog8SufYVHVSC5GQuYGjt7O+hVwJ2A4+in3BiX7XTnnKKOPQrfIKZoeoA8jhqlg6B42r0aSLaMkRJPmB1yn0Aq3d9eOvWHJLrcjB02LUrYx9QwXotcuSRTlGLCjzMkV/lO6Yi4EURtNvRcudYXZ2ozW0o2hhmyFLySNpPqEuOb47TIuK5G/qf1HPoIqmJZP3OCfHW1C3bpjgNMoVuauEIY0x8NgjPs51aEYOnpxnj4S+d2dSSwd96sDB7k8aKtLkIxHN/Z1nWcblhkgj2F9hc3ZcGeqwGmkO7sp+5WIckYma+wi+MuEjAAvRWkScmV7Ny76Vge6"
+   ],
+   "x-forefront-antispam-report": [
+    "CIP:255.255.255.255;CTRY:;LANG:et;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PR1PR07MB5755.eurprd07.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(366004)(376002)(346002)(136003)(39830400003)(396003)(451199015)(66446008)(33656002)(558084003)(86362001)(19627405001)(122000001)(38100700002)(5660300002)(6916009)(38070700005)(71200400001)(4270600006)(3480700007)(186003)(91956017)(8676002)(478600001)(6506007)(8936002)(52536014)(9686003)(66946007)(76116006)(66476007)(66556008)(55236004)(41300700001)(26005)(2906002)(7116003)(7696005)(316002)(64756008)(55016003);DIR:OUT;SFP:1102;"
+   ],
+   "x-ms-exchange-antispam-messagedata-chunkcount": [
+    "1"
+   ],
+   "x-ms-exchange-antispam-messagedata-0": [
+    "=?iso-8859-15?Q?JDh7ZzP8g5zs2TKvQLYT+qbW1XCXeQxIpXhKJWxpy8Z45g8KAVXo2vXv1?=\n =?iso-8859-15?Q?B40niZx89Wd9a+/vhcQNygyl1REQdBzE4/yWcqRRJuuxfrUV1Jhfj2ysv?=\n =?iso-8859-15?Q?c+6kVoeVA2xIPYHI7u+Bv+SVdhk5CA6yMoBBsj9q1kX5b1VhVIYIiwube?=\n =?iso-8859-15?Q?dZkytPfZPqxEDE6rl4xmG5KxIxmwcUlUAPTVhuVrpogd+qCYCcgeLIbd2?=\n =?iso-8859-15?Q?Td8uNkx9UOhHD00nvBO4yx6P8EgkysBeZFseiDwmUJ90yMaC+UJz17vvo?=\n =?iso-8859-15?Q?l7Kfa25xecVCz/qD6NECm+VQj9FlvrfFvRCzO3urZvbzMZLnIfaXkwLHV?=\n =?iso-8859-15?Q?DcV5bS/msPyXzjpqyurGDZh/+F7Z/88U/yF7w7G8ql/tVnWi6MXwOXcAP?=\n =?iso-8859-15?Q?msLvjnjOed5gMvEDVNDrwh6vVl0661hwIQDuUsSGGCg6dfbII8RiXhWnG?=\n =?iso-8859-15?Q?YTeTRRGVBH1LIJeb7BT0Pl25wD9drH58BL8VSUqC/jvqkIF9WfvWS9+RG?=\n =?iso-8859-15?Q?91I7XZuNiwNCi7ekTBXcHMog6P81pigGAolWuV605v9axUoZCpnpVDyiY?=\n =?iso-8859-15?Q?WnG9OlFfKxOvHX+XqYGKZ7aZsVNKJFpGHtZj0W9SHlBDPX7aD+n5rK7vH?=\n =?iso-8859-15?Q?NB3w5DJ8HjGgJA6M7hLawxCHaHKcfci+jONI0TZxtVEmP6sq0XEz2quub?=\n =?iso-8859-15?Q?MdpwgscvljLix9hkqt2MxfxBSzRNg+Vjg/dT3Ouh3nagBFk4g9rbaMclb?=\n =?iso-8859-15?Q?SXxumrOgvPvqyKklhwqO7mih+OFLePpF58WZ+1Mdpe3l7A0tyER23lzCL?=\n =?iso-8859-15?Q?vrzxidECSp5EClmeh/0CnvRgGbKg9HScGIxpql/xNipaTesra5G6PP1qt?=\n =?iso-8859-15?Q?Dv/W+uD2uzB0cjVR5KCbIHyMIVfEIc4fSBiDhD3pzthlZNkXvQQcMYTSs?=\n =?iso-8859-15?Q?OXOcEljHBdlRXfknSN3EzgOZejZGZX1JcrSuWtMq8c0f/4PHqCPhVJqTk?=\n =?iso-8859-15?Q?DgFqtZ9k4ossXZCrXKPrUyOL7TtEcblX03QEBbKdKbh85nQTgZotxfPzm?=\n =?iso-8859-15?Q?25IeG1R5wMsOveMGudmGy9VVFTY7ydGuQ2p3DD7DZRsNSNcdt9I8ciGVB?=\n =?iso-8859-15?Q?7fFUkq1fv/7/mGK8SpBI7Nn6wWygzOj+tvtAChCILk6dyY+6Y/9dWKkO+?=\n =?iso-8859-15?Q?280HVmpYDrSP20cxG3BzK/V2pCRWnEosyjbUgyquz9G0Uu6vm2GEFa8ir?=\n =?iso-8859-15?Q?oNz+Ao46WxWniTRrqdJndzymn+PiEc62C29I8yELQAn16fh+lB3a5ptul?=\n =?iso-8859-15?Q?nYBpVpdiODTevZzIGMfzF+uuGATKe+kmwfuk6uPS/NzPZcbN9JPJ+PzDN?=\n =?iso-8859-15?Q?PA7qRd5QLBZkhbzzFlTifRsrmgZc2Zk3ViRp8sFG4W3gcR7kZjPZchvbh?=\n =?iso-8859-15?Q?WWpNPyNl7+vCgydTICUlXoYhrEROIXNhT/cSHiBk315VmPPc+CpKQuFZY?=\n =?iso-8859-15?Q?Dh4bDpw27MyPux5Tzy3rhXQJM8XvD2oEW6fbqH9JGwigAx1kXOX3TvszS?=\n =?iso-8859-15?Q?6xWUkFZy+teKl+600diC5/K2sNzvAvEqPDZn13HMvgECeHiObZsOCeTDS?=\n =?iso-8859-15?Q?eK2QVZWNDBYA12QVs/UgBNey/4XfC7MC7vHgqwas=3D?="
+   ],
+   "content-type": [
+    "multipart/alternative;\n\tboundary=\"_000_PR1PR07MB57558E5D11D6C2BA6F950391D7209PR1PR07MB5755eurp_\""
+   ],
+   "x-originatororg": [
+    "srv.dev"
+   ],
+   "x-ms-exchange-crosstenant-authas": [
+    "Internal"
+   ],
+   "x-ms-exchange-crosstenant-authsource": [
+    "PR1PR07MB5755.eurprd07.prod.outlook.com"
+   ],
+   "x-ms-exchange-crosstenant-network-message-id": [
+    "9fdab5f3-55a9-41b9-30b9-08daaa80be8a"
+   ],
+   "x-ms-exchange-crosstenant-originalarrivaltime": [
+    "10 Oct 2022 05:31:55.4984\n (UTC)"
+   ],
+   "x-ms-exchange-crosstenant-fromentityheader": [
+    "Hosted"
+   ],
+   "x-ms-exchange-crosstenant-id": [
+    "c2cc5f9c-e346-412b-b9fc-819d1486a8b7"
+   ],
+   "x-ms-exchange-crosstenant-mailboxtype": [
+    "HOSTED"
+   ],
+   "x-ms-exchange-crosstenant-userprincipalname": [
+    "XlJ3jSdopM+z+0V1d9gDszRYFRZplu8SsS2I689ScvrvnOqJxSvclq9SNqJv7fmN"
+   ],
+   "x-ms-exchange-transport-crosstenantheadersstamped": [
+    "GV2PR07MB9059"
+   ],
+   "mime-version": [
+    "1.0"
+   ]
+  },
+  "original": {
+   "subject": "Proovikiri",
+   "date": "Mon, 10 Oct 2022 05:31:55 +0000",
+   "to": "\"wfsddaSdasffasdqwqw@hot.ee\" <wfsddaSdasffasdqwqw@hot.ee>"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2803373336791992,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.005075195804238319,
+    "domain_blacklisted": 0.3438330888748169,
+    "geo_blocked": 0.070526123046875,
+    "greylisting": 0.0007611372857354581,
+    "invalid_address": 0.006014170125126839,
+    "ip_blacklisted": 0.0004570686141960323,
+    "mailbox_disabled": 0.05474574863910675,
+    "mailbox_full": 0.06538021564483643,
+    "policy_blocked": 0.026955991983413696,
+    "rate_limited": 0.001100229797884822,
+    "relay_denied": 0.005443303845822811,
+    "server_error": 0.000507867312990129,
+    "spam_blocked": 0.09730768203735352,
+    "unknown": 0.004761526361107826,
+    "user_unknown": 0.2803373336791992,
+    "virus_detected": 0.03679332137107849
+   },
+   "usedFallback": true,
+   "modelLabel": "domain_blacklisted"
+  },
+  "file": "outlook.eml"
+ },
+ {
+  "name": "postfix.eml",
+  "recipient": "sdagfsdfgdasfsdf@hot.ee",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 5.1.1 <sdagfsdfgdasfsdf@hot.ee>: Recipient address rejected: User unknown in relay recipient table",
+   "status": "5.1.1"
+  },
+  "mta": "mx1.hot.ee",
+  "queueId": "DF59B82305",
+  "messageId": "<0f51267b17be7a93bb0017205b6c4fca@ekiri.ee>",
+  "messageHeaders": {
+   "return-path": [
+    "<andris@ekiri.ee>"
+   ],
+   "received": [
+    "from turvaline.ekiri.ee (localhost.localdomain [127.0.0.1])\n\tby uvn-67-33.tll01.zonevs.eu (Postfix) with ESMTP id DF59B82305\n\tfor <sdagfsdfgdasfsdf@hot.ee>; Mon, 10 Oct 2022 08:23:51 +0300 (EEST)"
+   ],
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/simple; d=ekiri.ee; s=default;\n\tt=1665379431; bh=IP93/XJyNpbKriYfJ+zyC8Je46iWUylwjWuuYVEU4Vc=;\n\th=Date:From:To:Subject;\n\tb=ZpWbcgMo5chcXQ6vDunnP2Q/49yN7//QfuHmN8CP60nN8ZAs8T+s3rXfWSyfSIWaW\n\t jy3WH2QjJ9mq5msHEpEJUKn501r8GgedlgygmtUZe2J0XkJHh5jFaEjhmvb08UP4f+\n\t G2nLkgn5Di83zrillwNA236rtp8IWRLfYFbjeMS4="
+   ],
+   "mime-version": [
+    "1.0"
+   ],
+   "content-type": [
+    "multipart/alternative;\n boundary=\"=_c1963e55830646fc56388b60f4b595d9\""
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 08:23:51 +0300"
+   ],
+   "from": [
+    "andris <andris@ekiri.ee>"
+   ],
+   "to": [
+    "sdagfsdfgdasfsdf@hot.ee"
+   ],
+   "subject": [
+    "proovikas"
+   ],
+   "message-id": [
+    "<0f51267b17be7a93bb0017205b6c4fca@ekiri.ee>"
+   ],
+   "x-sender": [
+    "andris@ekiri.ee"
+   ],
+   "user-agent": [
+    "Roundcube Webmail/1.1-git"
+   ]
+  },
+  "original": {
+   "subject": "proovikas",
+   "date": "Mon, 10 Oct 2022 08:23:51 +0300",
+   "to": "sdagfsdfgdasfsdf@hot.ee"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2803373336791992,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.005075195804238319,
+    "domain_blacklisted": 0.3438330888748169,
+    "geo_blocked": 0.070526123046875,
+    "greylisting": 0.0007611372857354581,
+    "invalid_address": 0.006014170125126839,
+    "ip_blacklisted": 0.0004570686141960323,
+    "mailbox_disabled": 0.05474574863910675,
+    "mailbox_full": 0.06538021564483643,
+    "policy_blocked": 0.026955991983413696,
+    "rate_limited": 0.001100229797884822,
+    "relay_denied": 0.005443303845822811,
+    "server_error": 0.000507867312990129,
+    "spam_blocked": 0.09730768203735352,
+    "unknown": 0.004761526361107826,
+    "user_unknown": 0.2803373336791992,
+    "virus_detected": 0.03679332137107849
+   },
+   "usedFallback": true,
+   "modelLabel": "domain_blacklisted"
+  },
+  "file": "postfix.eml"
+ },
+ {
+  "name": "rambler.eml",
+  "recipient": "yhfgcvjyutfdchgyufthgc@ethereal.email",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 No such user here",
+   "status": "5.0.0"
+  },
+  "mta": "mx.ethereal.email",
+  "queueId": "600CA140267",
+  "messageId": "<18c57ad7166403358c3893f62d7e3a7f@mail.rambler.ru>",
+  "messageHeaders": {
+   "return-path": [
+    "<node.mailer@rambler.ru>"
+   ],
+   "received": [
+    "from localhost (1vm0068.prod.mail.rambler.tech [10.140.200.201])\n\tby mxout4.rambler.ru (Postfix) with ESMTP id 600CA140267\n\tfor <yhfgcvjyutfdchgyufthgc@ethereal.email>; Mon, 10 Oct 2022 08:45:14 +0300 (MSK)"
+   ],
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed; d=rambler.ru; s=mail;\n\tt=1665380714; bh=Uh4GFch7TqQv83t8nE2mzVIKyRYpQ3pa8Lotzz2shu0=;\n\th=Date:Reply-To:From:To:Subject;\n\tb=gMujGjAVof/rDwF5cv0T2uLPpoH1/KWrP0oVN8wZHRcGVluNS7wI9uC79Ryzz7NLp\n\t COSCNf2kw52U+2FRTOsmpEERJYPCU9ctBXmoKTN0zKNGAi84uk7RPQPF4lN8YmFZAJ\n\t oBPTxDxPTCZXZJ7OXXwpqwjhPkkQLQaOqkNptlak="
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 05:45:14 +0000"
+   ],
+   "mime-version": [
+    "1.0"
+   ],
+   "message-id": [
+    "<18c57ad7166403358c3893f62d7e3a7f@mail.rambler.ru>"
+   ],
+   "reply-to": [
+    "\"Node Mailer\" <node.mailer@rambler.ru>"
+   ],
+   "from": [
+    "\"Node Mailer\" <node.mailer@rambler.ru>"
+   ],
+   "to": [
+    "yhfgcvjyutfdchgyufthgc@ethereal.email"
+   ],
+   "subject": [
+    "Proovikiri"
+   ],
+   "content-transfer-encoding": [
+    "7bit"
+   ],
+   "x-mailer": [
+    "Rambler Compose (2.6.0), https://mail.rambler.ru"
+   ],
+   "content-type": [
+    "multipart/alternative;\n\tboundary=\"==bound.0.81e1291358529a9894ca19cbac4ac173.mail.rambler.ru==\""
+   ]
+  },
+  "original": {
+   "subject": "Proovikiri",
+   "date": "Mon, 10 Oct 2022 05:45:14 +0000",
+   "to": "yhfgcvjyutfdchgyufthgc@ethereal.email"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.8611039519309998,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.00002411490277154371,
+    "domain_blacklisted": 0.00006529719394166023,
+    "geo_blocked": 0.00014346858370117843,
+    "greylisting": 0.0000011259839993726928,
+    "invalid_address": 0.013160542584955692,
+    "ip_blacklisted": 0.00008149001223500818,
+    "mailbox_disabled": 0.0012789795873686671,
+    "mailbox_full": 0.00001086506927094888,
+    "policy_blocked": 0.003800640581175685,
+    "rate_limited": 3.3364395335411245e-7,
+    "relay_denied": 0.000003463931079750182,
+    "server_error": 0.0012379902182146907,
+    "spam_blocked": 0.0013625291176140308,
+    "unknown": 0.11762833595275879,
+    "user_unknown": 0.8611039519309998,
+    "virus_detected": 0.00009689520084066316
+   },
+   "usedFallback": true
+  },
+  "file": "rambler.eml"
+ },
+ {
+  "name": "workmail.eml",
+  "recipient": "gfdutydrfghutydrfcuftydh@hot.ee",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 5.1.1 <gfdutydrfghutydrfcuftydh@hot.ee>: Recipient address rejected: User unknown in relay recipient table",
+   "status": "5.1.1"
+  },
+  "mta": "a2-75.smtp-out.eu-west-1.amazonses.com",
+  "queueId": null,
+  "messageId": "<mail.6343b157.093e.5156c64350ef7e50@storage.wm.amazon.com>",
+  "messageHeaders": {
+   "subject": [
+    "Proovikiri"
+   ],
+   "from": [
+    "=?utf-8?Q?Andris_Reinman?= <andris@headless.email>"
+   ],
+   "to": [
+    "=?utf-8?Q?gfdutydrfghutydrfcuftydh=40hot=2Eee?=\n  <gfdutydrfghutydrfcuftydh@hot.ee>"
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 05:44:59 +0000"
+   ],
+   "mime-version": [
+    "1.0"
+   ],
+   "content-type": [
+    "multipart/alternative; boundary=\"=_WM_generated_sub_0\""
+   ],
+   "references": [
+    "<mail.6343b157.093e.288186530424f2a2@storage.wm.amazon.com>"
+   ],
+   "message-id": [
+    "<mail.6343b157.093e.5156c64350ef7e50@storage.wm.amazon.com>"
+   ],
+   "x-priority": [
+    "3 (Normal)"
+   ],
+   "x-mailer": [
+    "Amazon WorkMail"
+   ],
+   "thread-index": [
+    "AQHY3Gtm4GXmNu/PRnmqyNRLXeGByg=="
+   ],
+   "thread-topic": [
+    "Proovikiri"
+   ],
+   "x-wm-sent-timestamp": [
+    "1665380695"
+   ],
+   "x-original-mailer": [
+    "Amazon WorkMail"
+   ]
+  },
+  "original": {
+   "subject": "Proovikiri",
+   "date": "Mon, 10 Oct 2022 05:44:59 +0000",
+   "to": "gfdutydrfghutydrfcuftydh@hot.ee <gfdutydrfghutydrfcuftydh@hot.ee>"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2803373336791992,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.005075195804238319,
+    "domain_blacklisted": 0.3438330888748169,
+    "geo_blocked": 0.070526123046875,
+    "greylisting": 0.0007611372857354581,
+    "invalid_address": 0.006014170125126839,
+    "ip_blacklisted": 0.0004570686141960323,
+    "mailbox_disabled": 0.05474574863910675,
+    "mailbox_full": 0.06538021564483643,
+    "policy_blocked": 0.026955991983413696,
+    "rate_limited": 0.001100229797884822,
+    "relay_denied": 0.005443303845822811,
+    "server_error": 0.000507867312990129,
+    "spam_blocked": 0.09730768203735352,
+    "unknown": 0.004761526361107826,
+    "user_unknown": 0.2803373336791992,
+    "virus_detected": 0.03679332137107849
+   },
+   "usedFallback": true,
+   "modelLabel": "domain_blacklisted"
+  },
+  "file": "workmail.eml"
+ },
+ {
+  "name": "yahoo.eml",
+  "recipient": "thgdcgrfchvutycfgxcvg@hot.ee",
+  "action": "failed",
+  "response": {
+   "message": "550: 5.1.1 <thgdcgrfchvutycfgxcvg@hot.ee>: Recipient address rejected: User unknown in relay recipient table"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": "<1956854879.3770605.1665380049620@mail.yahoo.com>",
+  "messageHeaders": {
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1665380171; bh=hxtr7lb7E5PcYlJdVTZ3d3gEJGpv7Dxja26+Oxf7THY=; h=Date:From:Reply-To:To:Subject:References:From:Subject:Reply-To; b=boUzqzCHoOd6OpOQifp1njIu9xSAgFTg3dGQwg4gq1uIiy84VLTnWo3DyvnMOOqSnzDPSr1Lh66kIfzy8v7YsmPY/M/qngxuCEjXwVPTYdQUaxUtJ80mnd5Kh14005wUhy+kWJlRO/d5bs96KDBUp7eSQQOps3HxGCeHp9BPZSU97v72FWpOCqjq/8him36iHGh7bxS89yu6gZVbJOIoDI4j5a3TaDU5hmMw6N8lLV1uneLt9UAvCG0s858E3uouLKuQLV6ZIme1K2PVx1bASfGAX1hwJXTtywWPpwoh3LHaD28rVownowcBj4gSDNadF+CqVt/whFWZTvIORGmDrw=="
+   ],
+   "x-sonic-dkim-sign": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1665380171; bh=YFzwe2yg1M5pRL0PTeV+5LdcM05pr5PJv2g9gnC/7AS=; h=X-Sonic-MF:Date:From:To:Subject:From:Subject; b=raxKyL0lE/RSYyEbrvz3TJnG4zIKkpqIg9QGBVSHFrjGdQg8JXFt3HELBTQfUMyXpRZnwBCJhYrJwHOTCqXYSouA/fS01ijvALzVFUiEbVkAI89mMP6fk1tvoCxAbIJcWCOKVdWoGwTPmqth4rZeNQM+b/gv/w5RHtLjpmh5WfXz2NRzZLdc83QfzI+Epep0zNyQjQREFxZXB44zm8SrLXIHbI2qjsxjDV5T2M9stNuKhLkLmq9PZA0829BMdEN7ofdWZ7FpiSElFO78G1eB3HRyWP5jWP3WETTeN5tdvzij9Zqp19kt3UJ7qSyUGqmvDPhCM4bJRdQDh8Qy1nJUJw=="
+   ],
+   "x-ymail-osg": [
+    "oKAI6q8VM1mUaKbZMIXdisXv51svQehTQrUHgkFMH2BT7zAueCqKykQPa19zKu.\n tQyIJDrV7Emu_H2WkcoBR1V5Smja5.qeJcvfO0Jf2pbIedNuSdDrgH_FqltYfa1Bh_KGeKcD2sXz\n i7WRL3prJn1ImQJgVnCmpeKGplrv3xdQ7jHZIb9WMABXAhzGPaBrfuGzi.Zmm5Kg6Pcj0.2TfpmH\n g2jC8yv.sxg0ZLu9b29PDnkdlwjlb1rRVJw6jk4Aq6G8UkOtYqGPQMMPm5zh2ifI8L_Vg4NRYKjN\n pXcAaK9Z9cP8cs72NCkH.q5ZHSap_qcVcrw5Ciothw9GnpS870GghPh2.FdHrbpxx0xxDaMSdQHo\n QFKWtpIOMYjCNmistn2Bo4K0ier0DXRxWcRiUS.BWhx4115bV5W4N0bWeMQFKOueN.TfdoknK.le\n mTpM.6isWQKjcJF6KmxItCpvuTb2gLcceulvLSjiaWweHqayNHJdTUumgsEo7ESr5LkPCuJ6j2FP\n d4xIOxO6Z3EyK63Rug_JLnR5aLOP5d8ZWKWaRlB1aUHXmBEUh6pZEFcUddrGumgpuqAxwq_oEvWn\n SpZNfzckcx8bW70OYm3vFjU27sgkN1ng3Se2cTxcVfeq2voRW.ZPVGp.KXqY0RysstdJ_GdOK6YY\n ezd4jbGrvw512buWw85lwQZjhyNalCiesPpHJRFD5iU_lbtEEhEAsx1mEtf0_r76MQAR09wRb64y\n FkmRI1JRfM.KAcnRkFLeOZyBoodCF2vlj6kL.sU7A7zb.MYSs.MLi0F0oO2lkK2m3r_EbljPU7tc\n u_EMkMRawtcP5w9IeXGIzNhWQ67Z0U6SioKTNAi6Ek8wxGVV_36WRDrgY9uBlj1aVCfqe0QGh.zy\n plHgvPa39r2uQgrcYwEM3mRaaBIlaQboNVoojA4dAWPPIZk65p8CZgsYQl2Cx7zV4_hEeqEQjOXa\n aYtBv14k6NZD9cr7ze4DFDNUFOzIF3tBd5Cb5SJgPMj1yEkUvVoQfxNfGY4g4XmjQoIP5C6JhPVE\n lhS5yo0MydPDheKJCMJR44koTbeI0NMB_MaQ8NPDb3uWA5l2B4KS9HIdfUduhsWFqeY_u3tVrwhU\n qw80vbqqWvTa8IkTG4WOCAgVUqxCiGXjBbZpsyAyZXa32vuCKUBblKvAToqzWEV65HIV72vItW85\n XUSqX3hSedSDg3MOQ7hfTwaXuayV9w29K.ezTpFSwbNEvlqvtNmjg0v3K44DLDHQZfnlWm0SRSI7\n jJvPiltPU_9QYYbmheGq6g4j9WTNmeHLnUhJo7zdY3bTCL6nC.I_GOH9enNhk8GPXQnqpi1cAqT5\n 53hFA2Px.aj0XZk.MnEx5kyiY.pNhPT04Wc1rXFGq1Oeh3aVe2oCnetO2o8vA6pJeSxbDvQXtGZL\n 5oruFwouK0DGLnbxeCzYpgdsXLsQhjozNvOO8sLkrRdqni8HrB3qkgNGZfGPAgJHbwXwHKzd7KAS\n idED1lwbCeSaBZNWrFhRdeJ6AOMVNz8VjJYGl.U7x0cLsYbnak9L3UqJ_XL1P9nN3zrAA6vy1ytj\n O_zaGYUta7ZvxDpYfnGuEfo4Dqy8znSyEbWbQAbv7U6CZDkxnDR5zt1ZoqXlAMjtcqRxoXT2gjJC\n eUMwIbZdD8d.L0y7LNUufbVP9Sdd.tAUfgtW_hG4g9gKZyBZ0rVriN77zNAT.GWDn5vs5Vdl10PZ\n 0yzYexlQwXxX3M5HQnC04brTfy13huqh_aszlQ.PEGQnOZCQowHdL.icE1YxhaqHDMshzylS5gGR\n Iw3THig5SoT1._WiJKjEc4TzKoFJ4DbDVSyFlyUJ66z7ZOa_tskJOUPzdNu0Si4cwuADLfEP41oC\n nVFvXdeFYqgw8ylhav5h7zeCa6ihim0deFEjpFwlvSKW1SZ7MZheLiPtbYpszjx2caSryFxlnHRX\n QoekjWuzsruYR3jD46zToJ2AxmnyecKY.HWk_4pEoExbWgvlnHR3KiJDBz2twZvvKXM0RVPNFe.w\n 6KIYh6QGADY8ZSQq.cxqbIQU69q9VPL7iGGZ6PRcdXVpGk76K7K6Ah.iPEk8m9hKc.0L2.PnMGjT\n DldjZBgR3IJ408H2_VPLA6abPpzFAtN6NqltpcRt23XgYquntuZAlBgEFMnkZ.u_1VkjwnNUK5mG\n 1Pmh0AEFDa9HyR4AXp6kCCIiLV._Ojo0hcVPJL4oUYxVUUsJHPLXvVss6fczIcZmCoHmimdd2WwX\n B0X5xbU.KPCkygrh2RJcoODjhZTVMC1RMhJV9kp2W"
+   ],
+   "x-sonic-mf": [
+    "<andris.reinman@yahoo.com>"
+   ],
+   "received": [
+    "from sonic.gate.mail.ne1.yahoo.com by sonic314.consmr.mail.bf2.yahoo.com with HTTP; Mon, 10 Oct 2022 05:36:11 +0000"
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 05:34:09 +0000 (UTC)"
+   ],
+   "from": [
+    "Andris Reinman <andris.reinman@yahoo.com>"
+   ],
+   "reply-to": [
+    "Andris Reinman <andris.reinman@yahoo.com>"
+   ],
+   "to": [
+    "\"thgdcgrfchvutycfgxcvg@hot.ee\" <thgdcgrfchvutycfgxcvg@hot.ee>"
+   ],
+   "message-id": [
+    "<1956854879.3770605.1665380049620@mail.yahoo.com>"
+   ],
+   "subject": [
+    "Proov"
+   ],
+   "mime-version": [
+    "1.0"
+   ],
+   "content-type": [
+    "multipart/alternative; \n\tboundary=\"----=_Part_3770604_1904401109.1665380049619\""
+   ],
+   "references": [
+    "<1956854879.3770605.1665380049620.ref@mail.yahoo.com>"
+   ],
+   "x-mailer": [
+    "WebService/1.1.20702 YMailNorrin"
+   ],
+   "content-length": [
+    "518"
+   ]
+  },
+  "original": {
+   "subject": "Proov",
+   "date": "Mon, 10 Oct 2022 05:34:09 +0000 (UTC)",
+   "to": "\"thgdcgrfchvutycfgxcvg@hot.ee\" <thgdcgrfchvutycfgxcvg@hot.ee>"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2803373336791992,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.005075195804238319,
+    "domain_blacklisted": 0.3438330888748169,
+    "geo_blocked": 0.070526123046875,
+    "greylisting": 0.0007611372857354581,
+    "invalid_address": 0.006014170125126839,
+    "ip_blacklisted": 0.0004570686141960323,
+    "mailbox_disabled": 0.05474574863910675,
+    "mailbox_full": 0.06538021564483643,
+    "policy_blocked": 0.026955991983413696,
+    "rate_limited": 0.001100229797884822,
+    "relay_denied": 0.005443303845822811,
+    "server_error": 0.000507867312990129,
+    "spam_blocked": 0.09730768203735352,
+    "unknown": 0.004761526361107826,
+    "user_unknown": 0.2803373336791992,
+    "virus_detected": 0.03679332137107849
+   },
+   "usedFallback": true,
+   "modelLabel": "domain_blacklisted"
+  },
+  "file": "yahoo.eml"
+ },
+ {
+  "name": "zoho.eml",
+  "recipient": "recipient@example.com",
+  "action": "failed",
+  "response": {
+   "message": "5.2.1 The email account that you tried to reach is disabled. Learn more at 5.2.1  https://support.google.com/mail/?p=DisabledUser j8-20020a170903024800b001946612570csi19333477plh.316 - gsmtp",
+   "status": "550"
+  },
+  "mta": "mx.zohomail.com",
+  "queueId": null,
+  "messageId": "<63d982c2660381675199170@smtppro.zoho.com>",
+  "messageHeaders": {
+   "received": [
+    "from app.postaga.com (106.109.197.104.bc.googleusercontent.com [104.197.109.106]) by mx.zohomail.com with SMTPS id 16751991711571017.8204286637366; Tue, 31 Jan 2023 13:06:11 -0800 (PST)"
+   ],
+   "message-id": [
+    "<63d982c2660381675199170@smtppro.zoho.com>"
+   ],
+   "date": [
+    "Tue, 31 Jan 2023 21:06:10 +0000"
+   ],
+   "from": [
+    "Sender Name <sender@example.com>"
+   ],
+   "to": [
+    "recipient@example.com"
+   ],
+   "subject": [
+    "Example"
+   ],
+   "content-type": [
+    "multipart/alternative;"
+   ],
+   "": [
+    ""
+   ]
+  },
+  "original": {
+   "subject": "Example",
+   "date": "Tue, 31 Jan 2023 21:06:10 +0000",
+   "to": "recipient@example.com"
+  },
+  "classification": {
+   "label": "mailbox_disabled",
+   "confidence": 0.7768577933311462,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.006387258879840374,
+    "domain_blacklisted": 0.0004358279693406075,
+    "geo_blocked": 0.007079660426825285,
+    "greylisting": 1.219400900254186e-7,
+    "invalid_address": 0.005444876849651337,
+    "ip_blacklisted": 0.000009892843991110567,
+    "mailbox_disabled": 0.7768577933311462,
+    "mailbox_full": 0.003012860892340541,
+    "policy_blocked": 0.011656536720693111,
+    "rate_limited": 0.00022217122022993863,
+    "relay_denied": 0.11745689064264297,
+    "server_error": 0.00007485582318622619,
+    "spam_blocked": 0.000018921011360362172,
+    "unknown": 0.06736129522323608,
+    "user_unknown": 0.0029073755722492933,
+    "virus_detected": 0.0010736510157585144
+   }
+  },
+  "file": "zoho.eml"
+ },
+ {
+  "name": "zonemta.eml",
+  "recipient": "sdffasdfgfasfadas@hot.ee",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 5.1.1 <sdffasdfgfasfadas@hot.ee>: Recipient address rejected: User unknown in relay recipient table",
+   "status": "5.0.0"
+  },
+  "mta": "mx1.hot.ee",
+  "queueId": null,
+  "messageId": "<48a84e64-d471-cfa6-3ea5-f10cd8571135@zone.ee>",
+  "messageHeaders": {
+   "dkim-signature": [
+    "v=1; a=rsa-sha256; c=relaxed/relaxed; d=zone.ee; q=dns/txt; s=zone; bh=VA9a5dH3ChQ4o1/sHrEPbvqxUVCr7FZx9vq6l8rWFp0=; h=from:subject:date:message-id:to:mime-version:content-type; b=B27LMu0kiNk6skaFTSYAe1a2byZoC+F4YRodDNmBwsuKTY0ihVmgunoiDg3AvhVqOeuzzOiwk +/kMeI0iltc7de6wOUdwwRq0N8mpgL7/WikuhmdE/YXjbrb4fFDSd0zHyTmATdEFoAkOcJ9KNfM p6A83s2DAudPTjyqmh16C9qUDSU4jhpydUdUqLTkyK/ieLQ3WDN45kfCfA51jnti4NJTPjokxBn KPws1I0dkoaG0/KVeHn2E2aj5gxzVyV3vQ+BDe/uH5oCxXx3Blj/qCkuq2LyjnFVy1mlJSMVgpq M1TUBN98hrJJRWUoKSZf2LD6g2jdbJ9bAH5P2Gb+9mVw=="
+   ],
+   "received": [
+    "from localhost (Authenticated sender: andris@zone.ee) by MTA-244-116.TLL07.ZONEAS.EU (ZoneMTA Forwarder) with API id 183c05a3c6f0002819.001 for <sdffasdfgfasfadas@hot.ee>; Mon, 10 Oct 2022 05:24:42 +0000"
+   ],
+   "content-type": [
+    "multipart/alternative; boundary=\"--_NmP-3d8f319c9d7060cb-Part_1\""
+   ],
+   "from": [
+    "Andris Reinman <andris@zone.ee>"
+   ],
+   "to": [
+    "sdffasdfgfasfadas@hot.ee"
+   ],
+   "subject": [
+    "proovikas"
+   ],
+   "date": [
+    "Mon, 10 Oct 2022 05:24:49 +0000"
+   ],
+   "message-id": [
+    "<48a84e64-d471-cfa6-3ea5-f10cd8571135@zone.ee>"
+   ],
+   "mime-version": [
+    "1.0"
+   ]
+  },
+  "original": {
+   "subject": "proovikas",
+   "date": "Mon, 10 Oct 2022 05:24:49 +0000",
+   "to": "sdffasdfgfasfadas@hot.ee"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2803373336791992,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.005075195804238319,
+    "domain_blacklisted": 0.3438330888748169,
+    "geo_blocked": 0.070526123046875,
+    "greylisting": 0.0007611372857354581,
+    "invalid_address": 0.006014170125126839,
+    "ip_blacklisted": 0.0004570686141960323,
+    "mailbox_disabled": 0.05474574863910675,
+    "mailbox_full": 0.06538021564483643,
+    "policy_blocked": 0.026955991983413696,
+    "rate_limited": 0.001100229797884822,
+    "relay_denied": 0.005443303845822811,
+    "server_error": 0.000507867312990129,
+    "spam_blocked": 0.09730768203735352,
+    "unknown": 0.004761526361107826,
+    "user_unknown": 0.2803373336791992,
+    "virus_detected": 0.03679332137107849
+   },
+   "usedFallback": true,
+   "modelLabel": "domain_blacklisted"
+  },
+  "file": "zonemta.eml"
+ },
+ {
+  "name": "postfix-host-said",
+  "recipient": "bob@example.com",
+  "action": "failed",
+  "response": {
+   "message": "550 5.1.1 No such user here (in reply to RCPT TO command)",
+   "status": "5.1.1"
+  },
+  "mta": "mx.example.com",
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.5085144639015198,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.00016176416829694062,
+    "domain_blacklisted": 0.0004129268927499652,
+    "geo_blocked": 0.00862521305680275,
+    "greylisting": 0.000008597418855060823,
+    "invalid_address": 0.12548702955245972,
+    "ip_blacklisted": 0.009708764031529427,
+    "mailbox_disabled": 0.0031978439074009657,
+    "mailbox_full": 0.00000906011337065138,
+    "policy_blocked": 0.11219075322151184,
+    "rate_limited": 0.000015940257071633823,
+    "relay_denied": 0.0005870152963325381,
+    "server_error": 0.0006636222242377698,
+    "spam_blocked": 0.0010068010305985808,
+    "unknown": 0.22857557237148285,
+    "user_unknown": 0.5085144639015198,
+    "virus_detected": 0.0008346241666004062
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n<bob@example.com>: host mx.example.com[203.0.113.4] said: 550 5.1.1 No such user here\r\n(in reply to RCPT TO command)\r\n"
+ },
+ {
+  "name": "x-failed-recipients",
+  "recipient": "carol@example.com",
+  "action": "failed",
+  "response": {
+   "message": "message could not be delivered"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "unknown",
+   "confidence": 0.9203404188156128,
+   "action": "review",
+   "scores": {
+    "auth_failure": 0.0013784368056803942,
+    "domain_blacklisted": 0.00031371027580462396,
+    "geo_blocked": 0.0017743007047101855,
+    "greylisting": 0.0007448163814842701,
+    "invalid_address": 0.00938752293586731,
+    "ip_blacklisted": 0.0037127556279301643,
+    "mailbox_disabled": 0.0012654714519158006,
+    "mailbox_full": 0.00015298702055588365,
+    "policy_blocked": 0.011824092827737331,
+    "rate_limited": 0.005603247322142124,
+    "relay_denied": 0.0006044412730261683,
+    "server_error": 0.019808564335107803,
+    "spam_blocked": 0.0027892193756997585,
+    "unknown": 0.9203404188156128,
+    "user_unknown": 0.0039072344079613686,
+    "virus_detected": 0.016392765566706657
+   }
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nX-Failed-Recipients: carol@example.com\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nYour message could not be delivered."
+ },
+ {
+  "name": "x-failed-recipients-several",
+  "recipient": "first@example.com",
+  "action": null,
+  "response": null,
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nX-Failed-Recipients: first@example.com, second@example.com\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nDelivery problem."
+ },
+ {
+  "name": "google-legacy",
+  "recipient": "dave@example.com",
+  "action": "failed",
+  "response": null,
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nDelivery to the following recipient failed permanently:\r\n\r\n     dave@example.com\r\n\r\nTechnical details of permanent failure:\r\nGoogle tried to deliver your message, but it was rejected by the recipient domain.\r\n"
+ },
+ {
+  "name": "recipient-block",
+  "recipient": "erin@example.com",
+  "action": "failed",
+  "response": {
+   "message": "550: 5.1.1 <erin@example.com>: Recipient address rejected: User unknown in relay recipient table"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.2968938946723938,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.0031312222126871347,
+    "domain_blacklisted": 0.2872675359249115,
+    "geo_blocked": 0.05114411190152168,
+    "greylisting": 0.001376474043354392,
+    "invalid_address": 0.0024786542635411024,
+    "ip_blacklisted": 0.0012357818195596337,
+    "mailbox_disabled": 0.016497360542416573,
+    "mailbox_full": 0.01518923882395029,
+    "policy_blocked": 0.020624253898859024,
+    "rate_limited": 0.0006870267679914832,
+    "relay_denied": 0.0012465928448364139,
+    "server_error": 0.0006193764274939895,
+    "spam_blocked": 0.2512798011302948,
+    "unknown": 0.006696278695017099,
+    "user_unknown": 0.2968938946723938,
+    "virus_detected": 0.0436323881149292
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nSorry, we were unable to deliver your message to the following address.\r\n\r\n<erin@example.com>:\r\n550: 5.1.1 <erin@example.com>: Recipient address rejected: User unknown in relay recipient table\r\n"
+ },
+ {
+  "name": "bare-status-line",
+  "recipient": null,
+  "action": "failed",
+  "response": {
+   "message": "550 5.7.1 Message rejected due to content policy",
+   "status": "5.7.1"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "spam_blocked",
+   "confidence": 0.9779453873634338,
+   "action": "review",
+   "scores": {
+    "auth_failure": 0.0020868664141744375,
+    "domain_blacklisted": 0.0023375463206321,
+    "geo_blocked": 0.00021758749790024012,
+    "greylisting": 0.000029710174203501083,
+    "invalid_address": 4.040669665528185e-8,
+    "ip_blacklisted": 0.0014704930363222957,
+    "mailbox_disabled": 0.0000032080317851068685,
+    "mailbox_full": 6.743627523064788e-7,
+    "policy_blocked": 0.0007306721527129412,
+    "rate_limited": 0.00002050418515864294,
+    "relay_denied": 0.0000010267791594742448,
+    "server_error": 0.0001680682908045128,
+    "spam_blocked": 0.9779453873634338,
+    "unknown": 0.0014080259716138244,
+    "user_unknown": 0.00012593288556672633,
+    "virus_detected": 0.013454227708280087
+   }
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nTechnical details of permanent failure:\r\n\r\n550 5.7.1 Message rejected due to content policy\r\n"
+ },
+ {
+  "name": "warning-message-only",
+  "recipient": "frank@example.com",
+  "action": null,
+  "response": {
+   "message": "Sorry, I wasn't able to establish an SMTP connection. (#4.4.1) I'll keep trying for a while longer.",
+   "status": "4.4.1"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "server_error",
+   "confidence": 0.002777084242552519,
+   "action": "retry",
+   "scores": {
+    "auth_failure": 0.00007039701449684799,
+    "domain_blacklisted": 6.471576057265338e-7,
+    "geo_blocked": 0.00008576103573432192,
+    "greylisting": 0.0006298639927990735,
+    "invalid_address": 0.002692681970074773,
+    "ip_blacklisted": 0.0003292408655397594,
+    "mailbox_disabled": 0.00006309105083346367,
+    "mailbox_full": 0.00001478979265812086,
+    "policy_blocked": 0.00020831151050515473,
+    "rate_limited": 0.21766026318073273,
+    "relay_denied": 0.0012719978112727404,
+    "server_error": 0.002777084242552519,
+    "spam_blocked": 0.0000011594386251090327,
+    "unknown": 0.7705299854278564,
+    "user_unknown": 8.574680236961285e-7,
+    "virus_detected": 0.003663848852738738
+   },
+   "usedFallback": true,
+   "modelLabel": "unknown"
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nHi. This is the mail delivery program at mail.example.com.\r\nI'm afraid I wasn't able to deliver your message to the following addresses yet.\r\nTHIS IS A WARNING MESSAGE ONLY.\r\nYOU DO NOT NEED TO RESEND YOUR MESSAGE.\r\n\r\n<frank@example.com>:\r\nSorry, I wasn't able to establish an SMTP connection. (#4.4.1)\r\nI'll keep trying for a while longer.\r\n"
+ },
+ {
+  "name": "quoted-4xx-said",
+  "recipient": "grace@example.com",
+  "action": null,
+  "response": {
+   "message": "450 4.2.1 Mailbox temporarily unavailable (in reply to RCPT TO command)",
+   "status": "4.2.1"
+  },
+  "mta": "mx.example.com",
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "rate_limited",
+   "confidence": 0.004935407545417547,
+   "action": "retry",
+   "scores": {
+    "auth_failure": 0.006156704854220152,
+    "domain_blacklisted": 0.00439029186964035,
+    "geo_blocked": 0.0013883020728826523,
+    "greylisting": 0.0016080498462542892,
+    "invalid_address": 0.23223979771137238,
+    "ip_blacklisted": 0.0010083693778142333,
+    "mailbox_disabled": 0.015657909214496613,
+    "mailbox_full": 0.01844213344156742,
+    "policy_blocked": 0.1290450543165207,
+    "rate_limited": 0.004935407545417547,
+    "relay_denied": 0.0016583893448114395,
+    "server_error": 0.3647651672363281,
+    "spam_blocked": 0.004176774527877569,
+    "unknown": 0.10965152084827423,
+    "user_unknown": 0.09756661206483841,
+    "virus_detected": 0.007309512700885534
+   },
+   "usedFallback": true,
+   "modelLabel": "server_error"
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n<grace@example.com>: host mx.example.com[203.0.113.4] said: 450 4.2.1 Mailbox temporarily unavailable\r\n(in reply to RCPT TO command)\r\n"
+ },
+ {
+  "name": "qmail-gave-up",
+  "recipient": "heidi@example.com",
+  "action": "failed",
+  "response": {
+   "message": "Sorry, I wasn't able to establish an SMTP connection. (#4.4.1) I'm not going to try again; this message has been in the queue too long.",
+   "status": "4.4.1"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "server_error",
+   "confidence": 0.00015177737805061042,
+   "action": "retry",
+   "scores": {
+    "auth_failure": 7.82520032771572e-7,
+    "domain_blacklisted": 0.0000025090694180107675,
+    "geo_blocked": 0.0003307904698885977,
+    "greylisting": 0.32568079233169556,
+    "invalid_address": 0.000006217348982318072,
+    "ip_blacklisted": 0.17716549336910248,
+    "mailbox_disabled": 1.48104568609142e-8,
+    "mailbox_full": 4.156067046068301e-9,
+    "policy_blocked": 0.000010919437954726163,
+    "rate_limited": 0.06662461161613464,
+    "relay_denied": 2.478879252976185e-7,
+    "server_error": 0.00015177737805061042,
+    "spam_blocked": 0.002520868321880698,
+    "unknown": 0.34732937812805176,
+    "user_unknown": 4.358753642463853e-7,
+    "virus_detected": 0.08017514646053314
+   },
+   "usedFallback": true,
+   "modelLabel": "unknown"
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nHi. This is the qmail-send program at mail.example.com.\r\nI'm afraid I wasn't able to deliver your message to the following addresses.\r\nThis is a permanent error; I've given up. Sorry it didn't work out.\r\n\r\n<heidi@example.com>:\r\nSorry, I wasn't able to establish an SMTP connection. (#4.4.1)\r\nI'm not going to try again; this message has been in the queue too long.\r\n"
+ },
+ {
+  "name": "undeliverable-to",
+  "recipient": "ivan@example.com",
+  "action": null,
+  "response": null,
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe following message to <ivan@example.com> was undeliverable.\r\nThe reason for the problem: user unknown\r\n"
+ },
+ {
+  "name": "remote-host-said",
+  "recipient": "judy@example.com",
+  "action": null,
+  "response": {
+   "message": "550 No such user"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.8206612467765808,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.00013152920291759074,
+    "domain_blacklisted": 0.0002443309349473566,
+    "geo_blocked": 0.0006835098611190915,
+    "greylisting": 8.61691717091162e-7,
+    "invalid_address": 0.019400304183363914,
+    "ip_blacklisted": 0.00012420448183547705,
+    "mailbox_disabled": 0.00657703448086977,
+    "mailbox_full": 0.00004077609264641069,
+    "policy_blocked": 0.01332910917699337,
+    "rate_limited": 0.0000010695604260035907,
+    "relay_denied": 0.000046436311095021665,
+    "server_error": 0.0008691687253303826,
+    "spam_blocked": 0.001615404151380062,
+    "unknown": 0.1360434591770172,
+    "user_unknown": 0.8206612467765808,
+    "virus_detected": 0.00023156029055826366
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nYour message could not be delivered to the following address: <judy@example.com>\r\n\r\nRemote host said: 550 No such user\r\n"
+ },
+ {
+  "name": "reason-for-problem",
+  "recipient": "kim@example.com",
+  "action": "failed",
+  "response": {
+   "message": "5.1.0 - Unknown address error 550-'kim@example.com... No such user'",
+   "status": "5.1.0"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.9822372198104858,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.000001855875439105148,
+    "domain_blacklisted": 0.00006311581819318235,
+    "geo_blocked": 0.0000326979388773907,
+    "greylisting": 2.668907654879149e-7,
+    "invalid_address": 0.007988138124346733,
+    "ip_blacklisted": 0.000003372227865838795,
+    "mailbox_disabled": 0.0004182897391729057,
+    "mailbox_full": 0.000012108246664865874,
+    "policy_blocked": 0.0006378855323418975,
+    "rate_limited": 2.2897152618384098e-8,
+    "relay_denied": 3.5035017731388507e-7,
+    "server_error": 0.00015831073687877506,
+    "spam_blocked": 0.000537996762432158,
+    "unknown": 0.00789697840809822,
+    "user_unknown": 0.9822372198104858,
+    "virus_detected": 0.00001136468563345261
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe following message to <kim@example.com> was undeliverable.\r\nThe reason for the problem:\r\n5.1.0 - Unknown address error 550-'kim@example.com... No such user'\r\n"
+ },
+ {
+  "name": "exim-failed-addresses",
+  "recipient": "info@example.com",
+  "action": "failed",
+  "response": {
+   "message": "Domain example.org has exceeded the max defers and failures per hour (5/5 (100%)) allowed. Message discarded."
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "rate_limited",
+   "confidence": 0.7432299256324768,
+   "action": "retry",
+   "scores": {
+    "auth_failure": 0.00025240436661988497,
+    "domain_blacklisted": 0.0004676497483160347,
+    "geo_blocked": 0.0040657841600477695,
+    "greylisting": 0.06943447887897491,
+    "invalid_address": 0.0006453646346926689,
+    "ip_blacklisted": 0.0044301352463662624,
+    "mailbox_disabled": 0.00006904415931785479,
+    "mailbox_full": 0.00023316708393394947,
+    "policy_blocked": 0.0004693679802585393,
+    "rate_limited": 0.7432299256324768,
+    "relay_denied": 0.0012013498926535249,
+    "server_error": 0.0012341069523245096,
+    "spam_blocked": 0.0007728759665042162,
+    "unknown": 0.06252319365739822,
+    "user_unknown": 0.00001520838304713834,
+    "virus_detected": 0.11095596104860306
+   }
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nX-Failed-Recipients: info@example.com\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThis message was created automatically by mail delivery software.\r\n\r\nA message that you sent could not be delivered to one or more of its\r\nrecipients. This is a permanent error. The following address(es) failed:\r\n\r\n  info@example.com\r\n    Domain example.org has exceeded the max defers and failures per hour (5/5 (100%)) allowed. Message discarded.\r\n"
+ },
+ {
+  "name": "kddi-could-not-be-delivered",
+  "recipient": "kijitora@example.com",
+  "action": "failed",
+  "response": null,
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nCould not be delivered to: <kijitora@example.com>\r\nAs their mailbox is full.\r\n"
+ },
+ {
+  "name": "permanent-errors",
+  "recipient": "kijitora@example.com",
+  "action": "failed",
+  "response": null,
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe following recipients returned permanent errors: kijitora@example.com\r\n"
+ },
+ {
+  "name": "carrier-error",
+  "recipient": null,
+  "action": "failed",
+  "response": {
+   "message": "Message could not be delivered"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "unknown",
+   "confidence": 0.9203404188156128,
+   "action": "review",
+   "scores": {
+    "auth_failure": 0.0013784368056803942,
+    "domain_blacklisted": 0.00031371027580462396,
+    "geo_blocked": 0.0017743007047101855,
+    "greylisting": 0.0007448163814842701,
+    "invalid_address": 0.00938752293586731,
+    "ip_blacklisted": 0.0037127556279301643,
+    "mailbox_disabled": 0.0012654714519158006,
+    "mailbox_full": 0.00015298702055588365,
+    "policy_blocked": 0.011824092827737331,
+    "rate_limited": 0.005603247322142124,
+    "relay_denied": 0.0006044412730261683,
+    "server_error": 0.019808564335107803,
+    "spam_blocked": 0.0027892193756997585,
+    "unknown": 0.9203404188156128,
+    "user_unknown": 0.0039072344079613686,
+    "virus_detected": 0.016392765566706657
+   }
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nMessage could not be delivered to mobile.\r\nError: No valid recipients for this MM\r\n"
+ },
+ {
+  "name": "rcpt-to",
+  "recipient": "000000000000@example.com",
+  "action": "failed",
+  "response": {
+   "message": "550 Requested action not taken: no such user here"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.958708643913269,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.0000019744054498005426,
+    "domain_blacklisted": 0.000011566652574401814,
+    "geo_blocked": 0.00005214066186454147,
+    "greylisting": 5.988363227515947e-8,
+    "invalid_address": 0.008181639946997166,
+    "ip_blacklisted": 0.00002930827577074524,
+    "mailbox_disabled": 0.00030645140213891864,
+    "mailbox_full": 6.166189905343344e-7,
+    "policy_blocked": 0.0016411987598985434,
+    "rate_limited": 1.1016191514556795e-8,
+    "relay_denied": 6.043374014552683e-7,
+    "server_error": 0.00008925086876843125,
+    "spam_blocked": 0.00023388762201648206,
+    "unknown": 0.030733410269021988,
+    "user_unknown": 0.958708643913269,
+    "virus_detected": 0.000009234086064680014
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nRCPT TO: 000000000000@example.com\r\n550 - Requested action not taken: no such user here\r\n"
+ },
+ {
+  "name": "affected-recipients",
+  "recipient": "lee@example.com",
+  "action": "failed",
+  "response": {
+   "message": "550 5.1.1 user unknown",
+   "status": "5.1.1"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.7402135133743286,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.00013899280747864395,
+    "domain_blacklisted": 0.002425395417958498,
+    "geo_blocked": 0.012551229447126389,
+    "greylisting": 0.00009840635175351053,
+    "invalid_address": 0.03645181283354759,
+    "ip_blacklisted": 0.004222990479320288,
+    "mailbox_disabled": 0.0035235125105828047,
+    "mailbox_full": 0.0000708521984051913,
+    "policy_blocked": 0.023032844066619873,
+    "rate_limited": 0.00003912371175829321,
+    "relay_denied": 0.00017036928329616785,
+    "server_error": 0.0006864952156320214,
+    "spam_blocked": 0.00948662031441927,
+    "unknown": 0.16346582770347595,
+    "user_unknown": 0.7402135133743286,
+    "virus_detected": 0.003422003937885165
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe following recipients were affected:\r\n    lee@example.com\r\n\r\n550 5.1.1 user unknown\r\n"
+ },
+ {
+  "name": "host-said-no-brackets",
+  "recipient": "bob@example.com",
+  "action": "failed",
+  "response": {
+   "message": "550 5.1.1 No such user here",
+   "status": "5.1.1"
+  },
+  "mta": "mx.example.com",
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.5167079567909241,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.000012976785910723265,
+    "domain_blacklisted": 0.00010578988440101966,
+    "geo_blocked": 0.0018272444140166044,
+    "greylisting": 0.0000390979039366357,
+    "invalid_address": 0.05455037206411362,
+    "ip_blacklisted": 0.003458058461546898,
+    "mailbox_disabled": 0.0005741234635934234,
+    "mailbox_full": 0.000003980354449595325,
+    "policy_blocked": 0.006913366727530956,
+    "rate_limited": 0.000008307971256726887,
+    "relay_denied": 0.000016763238818384707,
+    "server_error": 0.0007870353874750435,
+    "spam_blocked": 0.0013214508071541786,
+    "unknown": 0.41305074095726013,
+    "user_unknown": 0.5167079567909241,
+    "virus_detected": 0.0006227290141396224
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n<bob@example.com>: host mx.example.com said: 550 5.1.1 No such user here\n"
+ },
+ {
+  "name": "leading-reply-hyphen",
+  "recipient": null,
+  "action": "failed",
+  "response": {
+   "message": "550-5.7.1 [1.2.3.4 11] Message rejected",
+   "status": "5.7.1"
+  },
+  "mta": null,
+  "queueId": null,
+  "messageId": null,
+  "messageHeaders": null,
+  "original": {
+   "subject": null,
+   "date": null,
+   "to": null
+  },
+  "classification": {
+   "label": "policy_blocked",
+   "confidence": 0.0009850995847955346,
+   "action": "review",
+   "scores": {
+    "auth_failure": 0.00005132873047841713,
+    "domain_blacklisted": 0.0007600403041578829,
+    "geo_blocked": 0.004386278800666332,
+    "greylisting": 0.031091859564185143,
+    "invalid_address": 0.000009003980267152656,
+    "ip_blacklisted": 0.49178290367126465,
+    "mailbox_disabled": 0.0000010590807733024121,
+    "mailbox_full": 1.2846832930790697e-7,
+    "policy_blocked": 0.0009850995847955346,
+    "rate_limited": 0.0017506694421172142,
+    "relay_denied": 0.000001287078930545249,
+    "server_error": 0.00043865875340998173,
+    "spam_blocked": 0.32792234420776367,
+    "unknown": 0.050391968339681625,
+    "user_unknown": 0.0003000666038133204,
+    "virus_detected": 0.09012731909751892
+   },
+   "usedFallback": true,
+   "modelLabel": "ip_blacklisted"
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nTechnical details:\n\n550-5.7.1 [1.2.3.4 11] Message rejected\n"
+ },
+ {
+  "name": "embedded-headers",
+  "recipient": "mia@example.com",
+  "action": "failed",
+  "response": {
+   "message": "550 5.1.1 No such user",
+   "status": "5.1.1"
+  },
+  "mta": "mx.example.com",
+  "queueId": null,
+  "messageId": "<embedded@example.com>",
+  "messageHeaders": {
+   "return-path": [
+    "<sender@example.com>"
+   ],
+   "received": [
+    "from mail.example.com by mx.example.com"
+   ],
+   "message-id": [
+    "<embedded@example.com>"
+   ],
+   "subject": [
+    "Embedded"
+   ],
+   "to": [
+    "mia@example.com"
+   ]
+  },
+  "original": {
+   "subject": "Embedded",
+   "date": null,
+   "to": "mia@example.com"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.44883084297180176,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.00006703241524519399,
+    "domain_blacklisted": 0.0003586115490179509,
+    "geo_blocked": 0.007800702471286058,
+    "greylisting": 0.00002653322007972747,
+    "invalid_address": 0.07390094548463821,
+    "ip_blacklisted": 0.004716457799077034,
+    "mailbox_disabled": 0.002826723037287593,
+    "mailbox_full": 0.000013959301213617437,
+    "policy_blocked": 0.022547125816345215,
+    "rate_limited": 0.000024778990336926654,
+    "relay_denied": 0.00021763017866760492,
+    "server_error": 0.0005173078388907015,
+    "spam_blocked": 0.001383408554829657,
+    "unknown": 0.43538784980773926,
+    "user_unknown": 0.44883084297180176,
+    "virus_detected": 0.0013800717424601316
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <mailer-daemon@mta.example.com>\r\nTo: sender@example.com\r\nSubject: Mail delivery failed\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n<mia@example.com>: host mx.example.com[203.0.113.4] said: 550 5.1.1 No such user\r\n\r\n--- Below this line is a copy of the message.\r\n\r\nReturn-Path: <sender@example.com>\r\nReceived: from mail.example.com by mx.example.com\r\nMessage-ID: <embedded@example.com>\r\nSubject: Embedded\r\nTo: mia@example.com\r\n\r\nbody"
+ },
+ {
+  "name": "original-headers-prototype-names",
+  "recipient": "bob@example.com",
+  "action": "failed",
+  "response": {
+   "status": "5.1.1"
+  },
+  "mta": "mx.example.com",
+  "queueId": null,
+  "messageId": "<orig@example.com>",
+  "messageHeaders": {
+   "subject": [
+    "original subject"
+   ],
+   "message-id": [
+    "<orig@example.com>"
+   ],
+   "from": [
+    "sender@example.com"
+   ],
+   "to": [
+    "bob@example.com"
+   ]
+  },
+  "original": {
+   "subject": "original subject",
+   "date": null,
+   "to": "bob@example.com"
+  },
+  "raw": "From: mailer-daemon@example.com\r\nTo: sender@example.com\r\nSubject: Undelivered Mail Returned to Sender\r\nContent-Type: multipart/report; report-type=delivery-status; boundary=\"B\"\r\nMIME-Version: 1.0\r\n\r\n--B\r\nContent-Type: text/plain\r\n\r\ndelivery failed\r\n\r\n--B\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; mx.example.com\r\n\r\nFinal-Recipient: rfc822; bob@example.com\r\nAction: failed\r\nStatus: 5.1.1\r\n\r\n--B\r\nContent-Type: message/rfc822\r\n\r\nSubject: original subject\r\n__proto__: injected\r\nconstructor: c\r\nMessage-ID: <orig@example.com>\r\nFrom: sender@example.com\r\nTo: bob@example.com\r\n\r\noriginal body\r\n\r\n--B--\r\n"
+ },
+ {
+  "name": "original-headers-clean",
+  "recipient": "bob@example.com",
+  "action": "failed",
+  "response": {
+   "status": "5.1.1"
+  },
+  "mta": "mx.example.com",
+  "queueId": null,
+  "messageId": "<orig@example.com>",
+  "messageHeaders": {
+   "subject": [
+    "original subject"
+   ],
+   "message-id": [
+    "<orig@example.com>"
+   ],
+   "from": [
+    "sender@example.com"
+   ],
+   "to": [
+    "bob@example.com"
+   ]
+  },
+  "original": {
+   "subject": "original subject",
+   "date": null,
+   "to": "bob@example.com"
+  },
+  "raw": "From: mailer-daemon@example.com\r\nTo: sender@example.com\r\nSubject: Undelivered Mail Returned to Sender\r\nContent-Type: multipart/report; report-type=delivery-status; boundary=\"B\"\r\nMIME-Version: 1.0\r\n\r\n--B\r\nContent-Type: text/plain\r\n\r\ndelivery failed\r\n\r\n--B\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; mx.example.com\r\n\r\nFinal-Recipient: rfc822; bob@example.com\r\nAction: failed\r\nStatus: 5.1.1\r\n\r\n--B\r\nContent-Type: message/rfc822\r\n\r\nSubject: original subject\r\nMessage-ID: <orig@example.com>\r\nFrom: sender@example.com\r\nTo: bob@example.com\r\n\r\noriginal body\r\n\r\n--B--\r\n"
+ },
+ {
+  "name": "dsn-several-recipients",
+  "recipient": "first@example.com",
+  "action": "failed",
+  "response": {
+   "source": "smtp",
+   "message": "550 5.1.1 <first@example.com>: Recipient address rejected: User unknown",
+   "status": "5.1.1"
+  },
+  "mta": "mx.first.example",
+  "queueId": null,
+  "messageId": "<two@example.com>",
+  "messageHeaders": {
+   "message-id": [
+    "<two@example.com>"
+   ],
+   "subject": [
+    "=?UTF-8?Q?Tere_=C3=B5htust?="
+   ],
+   "date": [
+    "Wed, 01 Jan 2025 00:00:00 +0000"
+   ],
+   "to": [
+    "first@example.com, second@example.com"
+   ]
+  },
+  "original": {
+   "subject": "Tere õhtust",
+   "date": "Wed, 01 Jan 2025 00:00:00 +0000",
+   "to": "first@example.com, second@example.com"
+  },
+  "classification": {
+   "label": "user_unknown",
+   "confidence": 0.8963737487792969,
+   "action": "remove",
+   "scores": {
+    "auth_failure": 0.00007659634138690308,
+    "domain_blacklisted": 0.0118633434176445,
+    "geo_blocked": 0.0022491253912448883,
+    "greylisting": 0.00009719088848214597,
+    "invalid_address": 0.004070216789841652,
+    "ip_blacklisted": 0.0003949249512515962,
+    "mailbox_disabled": 0.0016432087868452072,
+    "mailbox_full": 0.00028377483249641955,
+    "policy_blocked": 0.007558585610240698,
+    "rate_limited": 0.0000055197033361764625,
+    "relay_denied": 0.000008795416761131492,
+    "server_error": 0.000713749264832586,
+    "spam_blocked": 0.06664790958166122,
+    "unknown": 0.006513950414955616,
+    "user_unknown": 0.8963737487792969,
+    "virus_detected": 0.001499354955740273
+   },
+   "usedFallback": true
+  },
+  "raw": "From: Mail Delivery System <MAILER-DAEMON@mx.example.com>\r\nTo: sender@example.com\r\nSubject: Undelivered Mail Returned to Sender\r\nMIME-Version: 1.0\r\nContent-Type: multipart/report; report-type=delivery-status; boundary=\"B\"\r\n\r\n--B\r\nContent-Type: text/plain\r\n\r\nTwo recipients failed.\r\n--B\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; MX.Example.com\r\n\r\nFinal-Recipient: rfc822; first@example.com\r\nAction: failed\r\nStatus: 5.1.1\r\nRemote-MTA: dns; mx.first.example\r\nDiagnostic-Code: smtp; 550 5.1.1 <first@example.com>: Recipient address\r\n    rejected: User unknown\r\n\r\nFinal-Recipient: rfc822; second@example.com\r\nAction: failed\r\nStatus: 5.2.2\r\nDiagnostic-Code: smtp; 552 5.2.2 Mailbox full\r\n--B\r\nContent-Type: text/rfc822-headers\r\n\r\nMessage-ID: <two@example.com>\r\nSubject: =?UTF-8?Q?Tere_=C3=B5htust?=\r\nDate: Wed, 01 Jan 2025 00:00:00 +0000\r\nTo: first@example.com, second@example.com\r\n--B--\r\n"
+ }
+]
