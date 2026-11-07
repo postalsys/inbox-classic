@@ -87,22 +87,10 @@ pub struct BounceCard {
 const MAX_VALUE: usize = 320;
 const MAX_WORDS: usize = 4000;
 
-/// A value of the notice as text in HTML: control characters and direction marks (which could make it read as
-/// something else) as spaces, cut at `max` characters, escaped
+/// A value of the card as text in HTML: cut at `max` characters, escaped. The core has made it safe to show already
+/// (control characters and direction marks as spaces).
 fn shown(value: &str, max: usize) -> String {
-    let direction =
-        |c: char| matches!(c, '\u{61c}' | '\u{200e}' | '\u{200f}' | '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}');
-    let mut out: String = value
-        .chars()
-        .take(max)
-        .map(|c| {
-            if c == '\n' || !(c.is_control() || direction(c)) {
-                c
-            } else {
-                ' '
-            }
-        })
-        .collect();
+    let mut out: String = value.chars().take(max).collect();
     if value.chars().nth(max).is_some() {
         out.push('…');
     }
@@ -177,11 +165,9 @@ const RULES: &[(&str, &str)] = &[
         "fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;visibility:visible",
     ),
     ("C .b", "display:block;flex:1 1 auto;min-width:0"),
-    ("C .a", "display:block;font-weight:600;color:#1f1f1f"),
-    ("C .t", "display:block;font-weight:600;color:#1f1f1f"),
+    ("C .a,C .t", "display:block;font-weight:600;color:#1f1f1f"),
     ("C .e", "display:block;color:#4d4d4d"),
-    ("C .w", "display:block;margin:3px 0 0"),
-    ("C .v", "display:block;margin:3px 0 0"),
+    ("C .w,C .v", "display:block;margin:3px 0 0"),
     ("C .v b", "font-weight:600"),
     ("C .n", "display:block;margin:3px 0 0;color:#4d4d4d"),
     (
@@ -219,6 +205,69 @@ fn style(class: &str) -> String {
     css
 }
 
+/// A reason of the card, its picture beside its words
+fn push_reason(out: &mut String, reason: &CardReason, advice_label: &str) {
+    out.push_str(if reason.delayed {
+        "<div class=\"r y\">"
+    } else {
+        "<div class=\"r\">"
+    });
+    if let Some(kind) = reason.picture {
+        out.push_str(&format!(
+            "<span class=\"p\"><svg viewBox=\"0 0 20 20\" aria-hidden=\"true\">{}</svg></span>",
+            picture(kind)
+        ));
+    }
+    out.push_str("<div class=\"b\">");
+    out.push_str(&format!("<div class=\"t\">{}</div>", shown(&reason.title, MAX_VALUE)));
+    if !reason.addresses.is_empty() {
+        let addresses: Vec<String> = reason.addresses.iter().map(|a| shown(a, MAX_VALUE)).collect();
+        out.push_str(&format!("<div class=\"e\">{}</div>", addresses.join(", ")));
+    }
+    out.push_str(&format!(
+        "<div class=\"w\">{}</div><div class=\"v\"><b>{}</b> {}</div>",
+        shown(&reason.why, MAX_VALUE),
+        shown(advice_label, MAX_VALUE),
+        shown(&reason.advice, MAX_VALUE),
+    ));
+    for note in &reason.notes {
+        out.push_str(&format!("<div class=\"n\">{}</div>", shown(note, MAX_VALUE)));
+    }
+    out.push_str("</div></div>");
+}
+
+/// Details, folded: what the notice says of each recipient and the server that wrote it; nothing when it says none
+fn push_details(out: &mut String, card: &BounceCard) {
+    if card.details.is_empty() && card.details_note.is_empty() {
+        return;
+    }
+    out.push_str(&format!(
+        "<details><summary>{}</summary>",
+        shown(&card.details_label, MAX_VALUE)
+    ));
+    for detail in &card.details {
+        out.push_str("<div class=\"d\">");
+        if !detail.address.is_empty() {
+            out.push_str(&format!("<div class=\"a\">{}</div>", shown(&detail.address, MAX_VALUE)));
+        }
+        if !detail.lines.is_empty() {
+            let lines: Vec<String> = detail.lines.iter().map(|l| shown(l, MAX_VALUE)).collect();
+            out.push_str(&format!("<div class=\"s\">{}</div>", lines.join(" \u{b7} ")));
+        }
+        if !detail.words.is_empty() {
+            out.push_str(&format!("<pre>{}</pre>", shown(&detail.words, MAX_WORDS)));
+        }
+        out.push_str("</div>");
+    }
+    if !card.details_note.is_empty() {
+        out.push_str(&format!(
+            "<div class=\"d s\">{}</div>",
+            shown(&card.details_note, MAX_VALUE)
+        ));
+    }
+    out.push_str("</details>");
+}
+
 /// The card as markup for the top of the reading pane's document, with its own style element
 pub fn bounce_card(card: &BounceCard) -> String {
     let class = format!("pe-bounce-{}", nonce());
@@ -238,61 +287,9 @@ pub fn bounce_card(card: &BounceCard) -> String {
         ));
     }
     for reason in &card.reasons {
-        out.push_str(if reason.delayed {
-            "<div class=\"r y\">"
-        } else {
-            "<div class=\"r\">"
-        });
-        if let Some(kind) = reason.picture {
-            out.push_str(&format!(
-                "<span class=\"p\"><svg viewBox=\"0 0 20 20\" aria-hidden=\"true\">{}</svg></span>",
-                picture(kind)
-            ));
-        }
-        out.push_str("<div class=\"b\">");
-        out.push_str(&format!("<div class=\"t\">{}</div>", shown(&reason.title, MAX_VALUE)));
-        if !reason.addresses.is_empty() {
-            let addresses: Vec<String> = reason.addresses.iter().map(|a| shown(a, MAX_VALUE)).collect();
-            out.push_str(&format!("<div class=\"e\">{}</div>", addresses.join(", ")));
-        }
-        out.push_str(&format!(
-            "<div class=\"w\">{}</div><div class=\"v\"><b>{}</b> {}</div>",
-            shown(&reason.why, MAX_VALUE),
-            shown(&card.advice_label, MAX_VALUE),
-            shown(&reason.advice, MAX_VALUE),
-        ));
-        for note in &reason.notes {
-            out.push_str(&format!("<div class=\"n\">{}</div>", shown(note, MAX_VALUE)));
-        }
-        out.push_str("</div></div>");
+        push_reason(&mut out, reason, &card.advice_label);
     }
-    if !card.details.is_empty() || !card.details_note.is_empty() {
-        out.push_str(&format!(
-            "<details><summary>{}</summary>",
-            shown(&card.details_label, MAX_VALUE)
-        ));
-        for detail in &card.details {
-            out.push_str("<div class=\"d\">");
-            if !detail.address.is_empty() {
-                out.push_str(&format!("<div class=\"a\">{}</div>", shown(&detail.address, MAX_VALUE)));
-            }
-            if !detail.lines.is_empty() {
-                let lines: Vec<String> = detail.lines.iter().map(|l| shown(l, MAX_VALUE)).collect();
-                out.push_str(&format!("<div class=\"s\">{}</div>", lines.join(" \u{b7} ")));
-            }
-            if !detail.words.is_empty() {
-                out.push_str(&format!("<pre>{}</pre>", shown(&detail.words, MAX_WORDS)));
-            }
-            out.push_str("</div>");
-        }
-        if !card.details_note.is_empty() {
-            out.push_str(&format!(
-                "<div class=\"d s\">{}</div>",
-                shown(&card.details_note, MAX_VALUE)
-            ));
-        }
-        out.push_str("</details>");
-    }
+    push_details(&mut out, card);
     out.push_str("</div>");
     out
 }
@@ -322,7 +319,7 @@ mod tests {
             details: vec![CardDetail {
                 address: "user@example.com".into(),
                 lines: vec!["Server: mx.example.com".into()],
-                words: "550 <script>alert(1)</script> \u{202e}evil & \"quoted\"</pre></details><img src=x onerror=alert(2)>"
+                words: "550 <script>alert(1)</script> evil & \"quoted\"</pre></details><img src=x onerror=alert(2)>"
                     .into(),
             }],
             details_note: "Reported by: mta.example.com".into(),
@@ -338,14 +335,12 @@ mod tests {
         );
         assert!(html.contains("&lt;b&gt;x&lt;/b&gt;@example.com"), "{html}");
         assert!(
-            html.contains("550 &lt;script&gt;alert(1)&lt;/script&gt;  evil &amp; \"quoted\"&lt;/pre&gt;"),
+            html.contains("550 &lt;script&gt;alert(1)&lt;/script&gt; evil &amp; \"quoted\"&lt;/pre&gt;"),
             "{html}"
         );
         // only the card's own elements close
         assert_eq!(html.matches("</pre>").count(), 1);
         assert_eq!(html.matches("</details>").count(), 1);
-        // no direction marks reach the page
-        assert!(!html.contains('\u{202e}'));
         // the link of the bounced message, which the apps take
         assert!(html.contains(&format!(
             "<a href=\"{BOUNCED_MESSAGE_LINK}\">Show the message that bounced</a>"

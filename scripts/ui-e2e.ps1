@@ -1909,18 +1909,26 @@ public static class Dragger {
     SelectFolder 0
     $rowOf = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $subject })[0] }
     [void](WaitFor { $null -ne (& $rowOf $apple) } 20)
-    # the colour of a row's flag: the most coloured pixel of its flag cell, as the screen shows it
-    $flagColor = {
-        param($row)
+    # a picture of a part of the list's row $row as the screen shows it, the main window in front: the part $rect gives
+    # for the row (asked while the window is in front); $null when it is empty
+    function CellPicture($row, [scriptblock]$rect) {
         [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
         [void][Native.Win]::SetForegroundWindow($main)
         Start-Sleep -Milliseconds 300
-        # LVM_GETSUBITEMRECT of the flag column (1), its bounds
-        $cell = [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32))
+        $cell = & $rect $row
         [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
         if ($cell.Right -le $cell.Left -or $cell.Bottom -le $cell.Top) { return $null }
         $picture = New-Object System.Drawing.Bitmap ($cell.Right - $cell.Left), ($cell.Bottom - $cell.Top)
         CopyScreen $picture $cell.Left $cell.Top
+        $picture
+    }
+    # LVM_GETSUBITEMRECT of the flag column (1), its bounds
+    $flagCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32)) }
+    # the colour of a row's flag: the most coloured pixel of its flag cell, as the screen shows it
+    $flagColor = {
+        param($row)
+        $picture = CellPicture $row $flagCell
+        if (-not $picture) { return $null }
         $best = $null; $most = -1
         for ($x = 0; $x -lt $picture.Width; $x++) {
             for ($y = 0; $y -lt $picture.Height; $y++) {
@@ -1981,14 +1989,8 @@ public static class Dragger {
     # on the selected rows' highlight the flag is drawn white, as the Mac shows it: a blue one would not be seen
     $selectedFlag = {
         param($row)
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
-        [void][Native.Win]::SetForegroundWindow($main)
-        Start-Sleep -Milliseconds 300
-        $cell = [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32))
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
-        if ($cell.Right -le $cell.Left -or $cell.Bottom -le $cell.Top) { return $null }
-        $picture = New-Object System.Drawing.Bitmap ($cell.Right - $cell.Left), ($cell.Bottom - $cell.Top)
-        CopyScreen $picture $cell.Left $cell.Top
+        $picture = CellPicture $row $flagCell
+        if (-not $picture) { return $null }
         # the lightest pixel of the cell
         $best = $null; $most = -1
         for ($x = 0; $x -lt $picture.Width; $x++) {
@@ -2293,24 +2295,22 @@ public static class Dragger {
     Command $main $IDM_SYNC
     # the message that bounced in the store, so the card can link to it
     SelectFolder 1
-    $rowWith = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $subject })[0] }
-    Check ([bool](WaitFor { $null -ne (& $rowWith $bounced) } 20)) 'the message is in Sent Items'
+    Check ([bool](WaitFor { $null -ne (& $rowOf $bounced) } 20)) 'the message is in Sent Items'
     SelectFolder 0
-    Check ([bool](WaitFor { ($null -ne (& $rowWith $failedSubject)) -and ($null -ne (& $rowWith $delayedSubject)) } 20)) 'the report and the delay notice are in the Inbox'
+    Check ([bool](WaitFor { ($null -ne (& $rowOf $failedSubject)) -and ($null -ne (& $rowOf $delayedSubject)) } 20)) 'the report and the delay notice are in the Inbox'
 
     # the dark pixels of a row's attachment column (0), as the screen shows them: where its icon is
-    $markOf = {
+    $markCell = {
         param($row)
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
-        [void][Native.Win]::SetForegroundWindow($main)
-        Start-Sleep -Milliseconds 300
         $bounds = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr]$row, 0)
         # LVM_GETCOLUMNWIDTH
         $width = [int][Native.Win]::SendMessage($list, 0x101D, [IntPtr]0, [IntPtr]::Zero)
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
-        if ($width -le 0 -or $bounds.Bottom -le $bounds.Top) { return '' }
-        $picture = New-Object System.Drawing.Bitmap $width, ($bounds.Bottom - $bounds.Top)
-        CopyScreen $picture $bounds.Left $bounds.Top
+        [pscustomobject]@{ Left = $bounds.Left; Top = $bounds.Top; Right = $bounds.Left + $width; Bottom = $bounds.Bottom }
+    }
+    $markOf = {
+        param($row)
+        $picture = CellPicture $row $markCell
+        if (-not $picture) { return '' }
         $dark = @()
         for ($x = 0; $x -lt $picture.Width; $x++) {
             for ($y = 0; $y -lt $picture.Height; $y++) {
@@ -2321,9 +2321,9 @@ public static class Dragger {
         $dark -join ' '
     }
     # another row selected, so the marks are drawn on the list's white
-    $failedRow = & $rowWith $failedSubject
-    $delayedRow = & $rowWith $delayedSubject
-    $clipRow = & $rowWith $newsletter
+    $failedRow = & $rowOf $failedSubject
+    $delayedRow = & $rowOf $delayedSubject
+    $clipRow = & $rowOf $newsletter
     $otherRow = @(0..((Rows) - 1) | Where-Object { $_ -ne $failedRow -and $_ -ne $delayedRow -and $_ -ne $clipRow })[0]
     SelectRow $otherRow
     $failedMark = & $markOf $failedRow
@@ -2387,8 +2387,8 @@ public static class Dragger {
         Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), 3) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
     }
     SelectFolder 0
-    [void](WaitFor { $null -ne (& $rowWith $failedSubject) } 20)
-    SelectRow (& $rowWith $failedSubject)
+    [void](WaitFor { $null -ne (& $rowOf $failedSubject) } 20)
+    SelectRow (& $rowOf $failedSubject)
     [void](WaitFor { $null -ne (& $cardPoint 196 43 28) } 15)
     Check (& $foundInMessage 'Your message was not delivered') 'the card says the message was not delivered'
     Check (& $foundInMessage 'sam.nobody@example.org') 'it names the recipient'
@@ -2398,7 +2398,7 @@ public static class Dragger {
     Check (& $foundInMessage $serverWords) "its Details show the server's own words"
     Shot $main 'bounce-1-failed'
 
-    SelectRow (& $rowWith $delayedSubject)
+    SelectRow (& $rowOf $delayedSubject)
     Check ([bool](WaitFor { $null -ne (& $cardPoint 154 91 0) } 15)) 'a delay notice shows the amber card'
     Check (& $foundInMessage 'Your message has not been delivered yet') 'it says the message is not delivered yet'
     Check (& $foundInMessage 'still trying to deliver it') 'and that it is still being tried'
@@ -2421,7 +2421,7 @@ public static class Dragger {
     if ($sentCopy) { [void](Invoke-RestMethod -Method Delete "$rest/Sent/messages/$($sentCopy.uid)") }
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { $null -eq (& $rowWith $failedSubject) -and $null -eq (& $rowWith $delayedSubject) } 20)
+    [void](WaitFor { $null -eq (& $rowOf $failedSubject) -and $null -eq (& $rowOf $delayedSubject) } 20)
 
     # ---- folders ----
 

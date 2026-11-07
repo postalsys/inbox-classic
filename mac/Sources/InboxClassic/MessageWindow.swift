@@ -110,7 +110,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         // the message that bounced, in the main window
         reader.bouncedHandler = { [weak mailbox] folder, uid in
             AppDelegate.shared?.main?.show()
-            mailbox?.showBounced(folder: folder, uid: uid)
+            mailbox?.showMessage(folder: folder, uid: uid)
         }
         reader.shownHandler = { [weak self] in
             guard let self else { return }

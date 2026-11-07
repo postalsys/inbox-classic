@@ -5,6 +5,15 @@ use rusqlite::{OptionalExtension, params};
 
 use crate::{AccountId, FolderId, MessageRef, Result, Store};
 
+/// The message of an account (?1) with a Message-ID (?2), through its conversation, which every message has a key of
+/// from when it is stored: the folders of the account, each on its conversation index. Sent Items first, the newest
+/// copy of a folder.
+const FIND_MESSAGE_ID: &str = "SELECT m.folder_id, m.uid FROM thread_ids t \
+     JOIN folders f ON f.account_id = t.account_id \
+     JOIN messages m ON m.folder_id = f.id AND m.thread_id = t.thread_id \
+     WHERE t.account_id = ?1 AND t.key = ?2 AND m.message_id = ?2 \
+     ORDER BY f.special_use IS NOT '\\Sent', m.uid DESC LIMIT 1";
+
 impl Store {
     /// Marks a message as a bounce; false when it already was one, or there is no such message
     pub fn mark_bounce(&self, folder: FolderId, uid: u64) -> Result<bool> {
@@ -22,17 +31,9 @@ impl Store {
         if id.len() <= 2 {
             return Ok(None);
         }
-        // through its conversation, which every message has a key of from when it is stored: the folders of the
-        // account, each on its conversation index
         let found = self
             .db
-            .prepare_cached(
-                "SELECT m.folder_id, m.uid FROM thread_ids t \
-                 JOIN folders f ON f.account_id = t.account_id \
-                 JOIN messages m ON m.folder_id = f.id AND m.thread_id = t.thread_id \
-                 WHERE t.account_id = ?1 AND t.key = ?2 AND m.message_id = ?2 \
-                 ORDER BY f.special_use IS NOT '\\Sent', m.uid DESC LIMIT 1",
-            )?
+            .prepare_cached(FIND_MESSAGE_ID)?
             .query_row(params![account, id], |row| {
                 Ok(MessageRef {
                     folder: row.get(0)?,
@@ -165,14 +166,9 @@ mod tests {
         let (store, ..) = store();
         let plan: Vec<String> = store
             .db
-            .prepare(
-                "EXPLAIN QUERY PLAN SELECT m.folder_id, m.uid FROM thread_ids t \
-                 JOIN folders f ON f.account_id = t.account_id \
-                 JOIN messages m ON m.folder_id = f.id AND m.thread_id = t.thread_id \
-                 WHERE t.account_id = 1 AND t.key = 'x' AND m.message_id = 'x'",
-            )
+            .prepare(&format!("EXPLAIN QUERY PLAN {}", super::FIND_MESSAGE_ID))
             .unwrap()
-            .query_map([], |row| row.get::<_, String>(3))
+            .query_map(rusqlite::params![1, "x"], |row| row.get::<_, String>(3))
             .unwrap()
             .map(Result::unwrap)
             .collect();

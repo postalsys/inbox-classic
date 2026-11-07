@@ -63,7 +63,7 @@ const REPORT_PARTS: [&str; 4] = [
 fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
     attachments
         .iter()
-        .filter(|a| !a.related && !REPORT_PARTS.contains(&a.mime_type.to_ascii_lowercase().as_str()))
+        .filter(|a| !a.related && !REPORT_PARTS.iter().any(|p| a.mime_type.eq_ignore_ascii_case(p)))
 }
 
 #[cfg(test)]
@@ -195,6 +195,18 @@ pub(crate) fn header_text(source: &[u8]) -> String {
 fn push_shown(out: &mut String, line: &str) {
     let shown = |c: char| c == '\t' || !(c.is_control() || parser::is_direction_mark(c));
     out.extend(line.chars().map(|c| if shown(c) { c } else { ' ' }));
+}
+
+/// Text of mail as a window may show it, line by line as [`push_shown`] makes a line, its line breaks (`\n`) kept
+pub(crate) fn shown_text(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for (index, line) in text.split('\n').enumerate() {
+        if index > 0 {
+            out.push('\n');
+        }
+        push_shown(&mut out, line);
+    }
+    out
 }
 
 /// The most of a message's source View Source shows
@@ -650,6 +662,8 @@ mod tests {
             "{}",
             view.document
         );
+        // no direction marks reach the page
+        assert!(!view.document.contains('\u{202e}'), "{}", view.document);
         // the link the words name stays text: the card has none, the message was not found
         assert!(!view.document.contains("<a "), "{}", view.document);
         assert!(

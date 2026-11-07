@@ -129,7 +129,7 @@ public final class Mailbox: NSObject {
         reader.openMailto = { [weak self] in self?.openMailto($0) }
         reader.arrivedHandler = { [weak self] in self?.messageArrived() }
         reader.shownHandler = { [weak self] in self?.messageShown() }
-        reader.bouncedHandler = { [weak self] in self?.showBounced(folder: $0, uid: $1) }
+        reader.bouncedHandler = { [weak self] in self?.showMessage(folder: $0, uid: $1) }
         reader.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120).isActive = true
         rightSplit.addArrangedSubview(listArea)
         rightSplit.addArrangedSubview(reader.view)
@@ -776,16 +776,14 @@ public final class Mailbox: NSObject {
             reloadList(keepSelection: true)
             if selectInList(folder: id, uid: message) { return }
         }
+        // another folder selected ends a search; the folder selected already is not selected again, its search is
+        // ended here
+        if searching && !allInboxes && folder == id {
+            clearFind()
+        }
         selectTreeNode(node)
         guard folder == id else { return }
         selectInList(folder: id, uid: message)
-    }
-
-    /// "Show the message that bounced" on a bounce's card: the message selected in its folder (Sent Items), a search
-    /// ended, as Go to Folder shows a folder
-    func showBounced(folder id: Int64, uid message: UInt64) {
-        clearFind()
-        showMessage(folder: id, uid: message)
     }
 
     // ---- reading with the keyboard ----

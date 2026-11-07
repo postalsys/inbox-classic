@@ -1039,21 +1039,15 @@ impl Mailbox {
                 return;
             }
         }
+        // selecting another folder ends a search; the folder selected already is not selected again, its search is
+        // ended here
+        if self.searching() && self.folder.get() == folder && !self.all_inboxes.get() {
+            self.clear_find();
+        }
         if !self.folders.select(folder) || self.folder.get() != folder {
             return;
         }
         self.select_in_list(folder, uid);
-    }
-
-    /// "Show the message that bounced" on a bounce's card: the message it returns shown in its folder, a search
-    /// dropped too when that folder is the one selected already
-    pub fn show_bounced_message(&self, folder: i64, uid: u64) {
-        if self.searching() && self.folder.get() == folder && !self.all_inboxes.get() {
-            self.reset_find();
-            self.reload_list(false);
-            self.show_folder_name();
-        }
-        self.show_message(folder, uid);
     }
 
     /// The row of the message `uid` of `folder` selected in the list; false when it is not there

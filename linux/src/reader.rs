@@ -310,15 +310,23 @@ impl Reader {
             glib::Propagation::Stop
         });
         // "Show the message that bounced" on a bounce's card: the message selected in the main window, its folder
-        // shown, as Go to Folder shows one (from a message window too, which then gives way to the main window)
-        self.preview.on_bounced_message(on(|this| {
+        // shown, as Go to Folder shows one (from a message window too, which then gives way to the main window). The
+        // core says which link it is, the view names the message.
+        let bounced = on(|this| {
             let Some(message) = this.bounced_message() else {
                 return;
             };
-            let main = shell().main();
-            main.show_bounced_message(message.folder, message.uid);
-            main.window().present();
-        }));
+            shell().show_main();
+            shell().main().show_message(message.folder, message.uid);
+        });
+        self.preview.set_links(move |uri| {
+            if !pe_html::is_bounced_message_link(uri) {
+                return false;
+            }
+            // after the view's signal, as selecting the message shows another document in this view
+            glib::idle_add_local_once(bounced.clone());
+            true
+        });
         let group = gio::SimpleActionGroup::new();
         let save = gio::SimpleAction::new("save-attachment", Some(glib::VariantTy::UINT32));
         let this = Rc::downgrade(self);

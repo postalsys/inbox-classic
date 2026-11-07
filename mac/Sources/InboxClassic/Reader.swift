@@ -108,7 +108,12 @@ final class Reader: NSObject {
         retry.clicked = { [weak self] in self?.retryDownload() }
         retry.setAccessibilityIdentifier("reader.retry")
         retry.isHidden = true
-        preview.bouncedMessage = { [weak self] in self?.showBounced() }
+        // the bounce card's link: the core says which link it is, the view names the message
+        preview.links = { [weak self] link in
+            guard pe_reader_link(link) == PE_READER_LINK_BOUNCED_MESSAGE else { return false }
+            self?.showBounced()
+            return true
+        }
         invitation.setAccessibilityIdentifier("reader.invitation")
         invitation.isHidden = true
         pictures.isHidden = true
@@ -387,7 +392,7 @@ final class Reader: NSObject {
     /// the card's link was clicked: the message the bounce shown returns, where the core found it (nothing is read
     /// from the link)
     private func showBounced() {
-        guard let info = messageView?.info?.pointee, info.bounce, info.has_bounced_message else { return }
+        guard let info = messageView?.info?.pointee, info.has_bounced_message else { return }
         bouncedHandler(info.bounced_folder, info.bounced_uid)
     }
 

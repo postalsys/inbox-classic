@@ -340,6 +340,9 @@ pub struct Core {
     views: Requests<Option<MessageView>>,
     /// The view request the reading pane waits for; an older one gives up
     newest_view: Arc<std::sync::atomic::AtomicU64>,
+    /// The connection the views built in the background look up and mark bounces with, opened by the first that
+    /// needs it
+    view_store: ViewStore,
     /// Sign-ins in the browser: the provider and the refresh token, or why not
     sign_ins: Requests<std::result::Result<SignedIn, String>>,
     /// Checks of a sign-in app's issuer, and the discovery documents they read
@@ -409,6 +412,7 @@ impl Core {
             logo_svgs: Arc::default(),
             views: Requests::default(),
             newest_view: Arc::default(),
+            view_store: Arc::default(),
             sign_ins: Requests::default(),
             checks: Requests::default(),
             discoveries: Discoveries::default(),
@@ -1016,13 +1020,16 @@ impl Core {
     /// The source of a message and the date the server got it, for a view
     fn view_source(&self, folder: FolderId, uid: u64) -> Result<Option<ViewSource>> {
         let store = self.store();
-        let received = store.message(folder, uid)?.and_then(|m| m.info.internal_date);
+        let (received, marked) = store
+            .message(folder, uid)?
+            .map_or((None, false), |m| (m.info.internal_date, m.info.bounce));
         // with the store at hand: trusted() takes it again
         let account = store.folder(folder)?.account_id;
         let trusted = authres::trusted(&store.account(account)?.settings);
         Ok(store.source(folder, uid)?.map(|source| ViewSource {
             source,
             received,
+            marked,
             trusted,
             account,
             folder,
@@ -1066,14 +1073,13 @@ impl Core {
         self.newest_view.store(request, Ordering::Relaxed);
         let newest = self.newest_view.clone();
         let path = self.path.clone();
+        let view_store = self.view_store.clone();
         let events = self.events.clone();
         let work = async move {
             let found = found?;
             let dropped = move || newest.load(Ordering::Relaxed) != request;
             let built = tokio::task::spawn_blocking(move || {
-                // a connection of its own, opened only for a bounce, to find the message it returns and mark it
-                let store = std::cell::OnceCell::new();
-                let opened = || store.get_or_init(|| Store::open(&path).ok()).as_ref();
+                let opened = || OpenStore::open(&view_store, &path);
                 finish_view(&found, allow_remote_images, &dropped, opened, &*events)
             });
             built.await.ok().flatten()
@@ -1970,10 +1976,38 @@ impl Drop for Core {
     }
 }
 
-/// The source of a message, the date the server got it, the domains whose verdicts its account trusts, and where it is
+/// The store connection of the views built in the background (a connection of its own, opened only for a bounce, to
+/// find the message it returns and mark it), None until one needs it
+type ViewStore = Arc<Mutex<Option<Store>>>;
+
+/// [`ViewStore`]'s connection, held while it is used
+struct OpenStore<'a>(MutexGuard<'a, Option<Store>>);
+
+impl<'a> OpenStore<'a> {
+    /// The connection, opened when it is not yet; None when it can not be
+    fn open(store: &'a ViewStore, path: &Path) -> Option<Self> {
+        let mut held = store.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        if held.is_none() {
+            *held = Store::open(path).ok();
+        }
+        held.is_some().then_some(OpenStore(held))
+    }
+}
+
+impl std::ops::Deref for OpenStore<'_> {
+    type Target = Store;
+
+    fn deref(&self) -> &Store {
+        self.0.as_ref().expect("opened")
+    }
+}
+
+/// The source of a message, the date the server got it, whether the list marks it a bounce, the domains whose
+/// verdicts its account trusts, and where it is
 struct ViewSource {
     source: Vec<u8>,
     received: Option<i64>,
+    marked: bool,
     trusted: Vec<String>,
     account: AccountId,
     folder: FolderId,
@@ -2001,7 +2035,10 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     let mut view = view::build_unless(&found.source, allow_remote_images, &found.trusted, dropped, &find)?;
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(found.received);
-    if view.bounce && store().is_some_and(|store| store.mark_bounce(found.folder, found.uid).unwrap_or(false)) {
+    if view.bounce
+        && !found.marked
+        && store().is_some_and(|store| store.mark_bounce(found.folder, found.uid).unwrap_or(false))
+    {
         events(Event::FolderChanged {
             account: found.account,
             folder: found.folder,

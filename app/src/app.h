@@ -361,6 +361,8 @@ void DestroyMessageWindows();
 
 // ---- main.cpp ----
 
+// the main window back from the tray (or the taskbar), in front
+void ShowMain();
 // a new message from a mailto: link (the core reads it), from `account`, or from the account of what the main window
 // shows when 0
 void OpenMailto(const std::wstring& link, int64_t account = 0);

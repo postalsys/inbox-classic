@@ -1035,7 +1035,11 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
             return;
         }
     }
-    // the folder (which ends a search), then the message in it
+    // the folder (which ends a search), then the message in it; the folder selected already does not change, its
+    // search is ended here
+    if (Searching() && !allInboxes_ && folder_ == folder) {
+        ClearFind();
+    }
     TreeView_SelectItem(tree_, item->second);
     if (folder_ == folder) {
         SelectInList(folder, uid);

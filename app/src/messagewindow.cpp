@@ -462,8 +462,7 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, const MessageL
     };
     // the message a bounce names: selected in the main window, which comes to the front
     state->reader.onBouncedMessage = [state](int64_t folder, uint64_t uid) {
-        ShowWindow(state->main, IsIconic(state->main) ? SW_RESTORE : SW_SHOW);
-        SetForegroundWindow(state->main);
+        ShowMain();
         state->mailbox->ShowMessage(folder, uid);
     };
     // the subject from the message itself once it is there

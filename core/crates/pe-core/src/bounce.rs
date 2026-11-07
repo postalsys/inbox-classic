@@ -129,6 +129,28 @@ fn delayed_advice(label: Label, kind: BounceKind, card: BounceKind) -> Option<Te
     }
 }
 
+/// The note that names the blocklists `members` were refused by, None when they name none
+fn blocklist_note(members: &[&Recipient]) -> Option<String> {
+    let mut lists: Vec<&str> = Vec::new();
+    for list in members
+        .iter()
+        .filter_map(|r| r.blocklist.as_ref())
+        .flat_map(|b| b.lists())
+    {
+        if !lists.contains(&list.name) {
+            lists.push(list.name);
+        }
+    }
+    // a list's family named beside one of its lists: the list says more (Spamhaus beside Spamhaus ZEN)
+    let named = lists.clone();
+    lists.retain(|list| {
+        !named
+            .iter()
+            .any(|other| other.len() > list.len() && other.starts_with(&format!("{list} ")))
+    });
+    (!lists.is_empty()).then(|| tr_args(Text::BounceBlocklist, &[("lists", (&lists.join(", ")).into())]))
+}
+
 /// The reasons of the card: recipients with the same reason (and both failed, or both delayed) together, in the
 /// order the notice names them
 fn reasons(bounce: &Bounce) -> Vec<CardReason> {
@@ -150,26 +172,7 @@ fn reasons(bounce: &Bounce) -> Vec<CardReason> {
             if let Some(seconds) = members.iter().filter_map(|r| r.retry_after).max() {
                 notes.push(retry_note(seconds));
             }
-            let mut lists: Vec<&str> = Vec::new();
-            for list in members
-                .iter()
-                .filter_map(|r| r.blocklist.as_ref())
-                .flat_map(|b| b.lists())
-            {
-                if !lists.contains(&list.name) {
-                    lists.push(list.name);
-                }
-            }
-            // a list's family named beside one of its lists: the list says more (Spamhaus beside Spamhaus ZEN)
-            let named = lists.clone();
-            lists.retain(|list| {
-                !named
-                    .iter()
-                    .any(|other| other.len() > list.len() && other.starts_with(&format!("{list} ")))
-            });
-            if !lists.is_empty() {
-                notes.push(tr_args(Text::BounceBlocklist, &[("lists", (&lists.join(", ")).into())]));
-            }
+            notes.extend(blocklist_note(&members));
             CardReason {
                 picture: Some(picture(label)),
                 // a reason the notice gives without naming anyone stands on its own
@@ -210,6 +213,31 @@ fn details(bounce: &Bounce) -> Vec<CardDetail> {
         .collect()
 }
 
+/// The card with its values made safe to show: control characters and direction marks (which could make a value
+/// of the notice read as something else) as spaces, as a window shows a line of mail
+fn shown(mut card: BounceCard) -> BounceCard {
+    let clean = |value: &mut String| *value = crate::view::shown_text(value);
+    clean(&mut card.heading);
+    card.lines.iter_mut().for_each(clean);
+    card.link.iter_mut().for_each(clean);
+    clean(&mut card.advice_label);
+    for reason in &mut card.reasons {
+        reason.addresses.iter_mut().for_each(clean);
+        clean(&mut reason.title);
+        clean(&mut reason.why);
+        clean(&mut reason.advice);
+        reason.notes.iter_mut().for_each(clean);
+    }
+    clean(&mut card.details_label);
+    for detail in &mut card.details {
+        clean(&mut detail.address);
+        detail.lines.iter_mut().for_each(clean);
+        clean(&mut detail.words);
+    }
+    clean(&mut card.details_note);
+    card
+}
+
 /// The card of `bounce`; `linked` when the message it returns is in the store, for the card to link to
 pub(crate) fn card(bounce: &Bounce, linked: bool) -> BounceCard {
     let delayed = bounce.kind == BounceKind::Delayed;
@@ -220,7 +248,7 @@ pub(crate) fn card(bounce: &Bounce, linked: bool) -> BounceCard {
     if let Some(subject) = bounce.original.as_ref().and_then(|o| o.subject.as_deref()) {
         lines.push(format!("{}: {subject}", tr(Text::HeaderSubject)));
     }
-    BounceCard {
+    shown(BounceCard {
         delayed,
         heading: tr(if delayed {
             Text::BounceDelayed
@@ -238,7 +266,7 @@ pub(crate) fn card(bounce: &Bounce, linked: bool) -> BounceCard {
             .as_ref()
             .map(|server| tr_args(Text::BounceReportedBy, &[("server", server.into())]))
             .unwrap_or_default(),
-    }
+    })
 }
 
 #[cfg(test)]
@@ -275,6 +303,26 @@ mod tests {
         );
         assert_eq!(delayed_advice(Label::Greylisting, Delayed, Failed), None);
         assert_eq!(delayed_advice(Label::Greylisting, Delayed, Delayed), None);
+    }
+
+    #[test]
+    fn values_lose_their_direction_marks() {
+        let card = shown(BounceCard {
+            heading: "a\u{202e}b".into(),
+            reasons: vec![CardReason {
+                addresses: vec!["\u{2066}x@example.com\u{200f}".into()],
+                ..Default::default()
+            }],
+            details: vec![CardDetail {
+                words: "550\u{61c} no\u{7}\nsuch\tuser".into(),
+                ..Default::default()
+            }],
+            ..Default::default()
+        });
+        assert_eq!(card.heading, "a b");
+        assert_eq!(card.reasons[0].addresses, [" x@example.com "]);
+        // line breaks and tabs kept, other control characters as spaces
+        assert_eq!(card.details[0].words, "550  no \nsuch\tuser");
     }
 
     #[test]
