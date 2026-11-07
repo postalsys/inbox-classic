@@ -9,6 +9,7 @@
 mod agents;
 mod book;
 mod core;
+mod list_view;
 mod selection;
 mod texts;
 #[cfg(windows)]
@@ -17,6 +18,7 @@ mod windows;
 pub use agents::*;
 pub use book::*;
 pub use core::*;
+pub use list_view::*;
 pub use selection::*;
 pub use texts::*;
 
