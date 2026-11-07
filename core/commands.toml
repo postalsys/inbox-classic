@@ -310,7 +310,7 @@ id = "collapse_all_threads"
 windows = 146
 menu = "view"
 
-# the messages of ignored conversations left out of the list (PeSearch.hide_ignored), a setting each app keeps
+# the messages of ignored conversations left out of the list (pe_list_view_set_hide_ignored), a setting each app keeps
 [[command]]
 id = "hide_ignored"
 windows = 153

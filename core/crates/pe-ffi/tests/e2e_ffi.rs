@@ -171,7 +171,11 @@ fn reads_mail_through_the_c_api() {
         ),
         ("INBOX".into(), "Inbox".into(), 2, 1, 0)
     );
-    assert!(rows.iter().any(|f| f.special_use == PeSpecialUse::Sent));
+    let sent = rows
+        .iter()
+        .find(|f| f.special_use == PeSpecialUse::Sent)
+        .expect("Sent")
+        .id;
     // what a collapsed account shows: the unread messages of its folders, none hidden under the Inbox
     assert_eq!(inbox.unread_below, 0);
     assert_eq!(unsafe { pe_folder_list_unread(folders) }, 1);
@@ -179,58 +183,37 @@ fn reads_mail_through_the_c_api() {
     let inbox = inbox.id;
     unsafe { pe_folder_list_free(folders) };
 
-    // a search: what it finds, counted the same, in the folder or in every folder, by state, with Gmail's operators
-    let find = c("report");
-    let folder_search = |text: *const c_char| PeSearch {
-        folder: inbox,
-        all_inboxes: false,
-        show: PeShow::All,
-        text,
-        threads: false,
-        expanded: std::ptr::null(),
-        expanded_count: 0,
-        hide_ignored: false,
-    };
-    let found = unsafe { pe_messages(core, &folder_search(find.as_ptr()), PeSortField::Subject, true, 0, 50) };
+    // a search: what it finds, counted the same, in every folder (the words search them all), by state, with Gmail's
+    // operators
+    let found_view = view_of(inbox, Some("report"));
+    assert!(unsafe { pe_list_view_searching(found_view) } && unsafe { pe_list_view_several_folders(found_view) });
+    let found = unsafe { pe_list_view_messages(core, found_view, 0, 50) };
     assert_eq!(unsafe { pe_message_list_count(found) }, 1);
     assert_eq!(unsafe { &*pe_message_list_get(found, 0) }.folder, inbox);
     unsafe { pe_message_list_free(found) };
-    let (mut total, mut unread) = (0u64, 0u64);
-    assert!(unsafe { pe_message_count(core, &folder_search(find.as_ptr()), &mut total, &mut unread) });
-    assert_eq!((total, unread), (1, 1));
-    assert!(unsafe { pe_message_count(core, &folder_search(std::ptr::null()), &mut total, &mut unread) });
-    assert_eq!(total, 2);
-    let everywhere = PeSearch {
-        folder: 0,
-        all_inboxes: false,
-        show: PeShow::Unread,
-        text: std::ptr::null(),
-        threads: false,
-        expanded: std::ptr::null(),
-        expanded_count: 0,
-        hide_ignored: false,
-    };
-    assert!(unsafe { pe_message_count(core, &everywhere, &mut total, &mut unread) });
-    assert_eq!((total, unread), (1, 1));
-    // the Inbox of every account (one account here): its two messages, one unread
-    let all_inboxes = PeSearch {
-        folder: 0,
-        all_inboxes: true,
-        show: PeShow::All,
-        text: std::ptr::null(),
-        threads: false,
-        expanded: std::ptr::null(),
-        expanded_count: 0,
-        hide_ignored: false,
-    };
-    assert!(unsafe { pe_message_count(core, &all_inboxes, &mut total, &mut unread) });
-    assert_eq!((total, unread), (2, 1));
+    assert_eq!(counts(core, found_view), (1, 1));
+    unsafe { pe_list_view_free(found_view) };
+    let folder = view_of(inbox, None);
+    assert!(!unsafe { pe_list_view_several_folders(folder) });
+    assert_eq!(counts(core, folder).0, 2);
+    // the Sent folder names whom its messages went to, the Inbox who sent them
+    assert!(!unsafe { pe_list_view_lists_recipients(core, folder) });
+    let sent_view = view_of(sent, None);
+    assert!(unsafe { pe_list_view_lists_recipients(core, sent_view) });
+    unsafe { pe_list_view_free(sent_view) };
+    // the Inbox of every account (one account here): its two messages, one unread, and the unread one alone
+    let all_inboxes = view_of(0, None);
+    assert!(unsafe { pe_list_view_several_folders(all_inboxes) });
+    assert_eq!(counts(core, all_inboxes), (2, 1));
+    let unread_only = unsafe { pe_list_view_clone(all_inboxes) };
+    unsafe { pe_list_view_set_show(unread_only, PeShow::Unread) };
+    assert_eq!(counts(core, unread_only), (1, 1));
+    assert_eq!(counts(core, all_inboxes), (2, 1), "the copy goes on by itself");
+    unsafe { pe_list_view_free(unread_only) };
     // grouped by conversation: two messages that do not answer each other are two conversations of one each
-    let grouped = PeSearch {
-        threads: true,
-        ..all_inboxes
-    };
-    let rows = unsafe { pe_messages(core, &grouped, PeSortField::Date, false, 0, 50) };
+    let grouped = unsafe { pe_list_view_clone(all_inboxes) };
+    assert!(unsafe { pe_list_view_set_grouped(grouped, true) });
+    let rows = unsafe { pe_list_view_messages(core, grouped, 0, 50) };
     assert_eq!(unsafe { pe_message_list_count(rows) }, 2);
     let first = unsafe { &*pe_message_list_get(rows, 0) };
     assert!(first.thread != 0 && first.thread_count == 1 && first.thread_depth == 0 && !first.thread_expanded);
@@ -242,34 +225,26 @@ fn reads_mail_through_the_c_api() {
     let (first_folder, first_uid) = (first.folder, first.uid);
     unsafe { pe_message_list_free(rows) };
     // the rows, the messages counted all the same, and none hidden
-    assert_eq!(unsafe { pe_list_rows(core, &grouped) }, 2);
-    assert_eq!(unsafe { pe_list_rows(core, &all_inboxes) }, 2);
-    assert!(unsafe { pe_message_count(core, &grouped, &mut total, &mut unread) });
-    assert_eq!((total, unread), (2, 1));
-    assert_eq!(
-        unsafe { pe_message_hidden_thread(core, &grouped, first_folder, first_uid) },
-        0
+    assert_eq!(unsafe { pe_list_view_row_count(core, grouped) }, 2);
+    assert_eq!(unsafe { pe_list_view_row_count(core, all_inboxes) }, 2);
+    assert_eq!(counts(core, grouped), (2, 1));
+    assert!(
+        !unsafe { pe_list_view_reveal(core, grouped, first_folder, first_uid) },
+        "a row of its own"
     );
-    let replies = unsafe { pe_threads_with_replies(core, &grouped) };
-    assert!(!replies.is_null());
-    assert_eq!(unsafe { pe_thread_list_count(replies) }, 0);
-    assert_eq!(unsafe { pe_thread_list_get(replies, 0) }, 0, "past the end");
-    unsafe { pe_thread_list_free(replies) };
-    watches_and_ignores(core, &all_inboxes);
+    assert!(
+        !unsafe { pe_list_view_expand_all(core, grouped) },
+        "no conversation of several messages"
+    );
+    unsafe { pe_list_view_free(grouped) };
+    watches_and_ignores(core, all_inboxes);
+    unsafe { pe_list_view_free(all_inboxes) };
     assert!(!pe_all_inboxes_shown(1) && pe_all_inboxes_shown(2));
-    let operators = c("has:attachment -is:read");
-    assert!(unsafe { pe_message_count(core, &folder_search(operators.as_ptr()), &mut total, &mut unread) });
-    assert_eq!(total, 1);
-    let list = unsafe {
-        pe_messages(
-            core,
-            &folder_search(std::ptr::null()),
-            PeSortField::Subject,
-            true,
-            0,
-            50,
-        )
-    };
+    let operators = view_of(inbox, Some("has:attachment -is:read"));
+    assert_eq!(counts(core, operators).0, 1);
+    unsafe { pe_list_view_free(operators) };
+    unsafe { pe_list_view_set_sort(folder, PeSortField::Subject, true) };
+    let list = unsafe { pe_list_view_messages(core, folder, 0, 50) };
     assert_eq!(unsafe { pe_message_list_count(list) }, 2);
     let first = unsafe { &*pe_message_list_get(list, 0) };
     assert_eq!(text(first.subject), "Other");
@@ -279,45 +254,11 @@ fn reads_mail_through_the_c_api() {
         ("Report".into(), "Sender".into(), uid)
     );
     assert!(second.has_attachments && !second.seen);
-    assert_eq!(
-        unsafe {
-            pe_message_index(
-                core,
-                &folder_search(std::ptr::null()),
-                PeSortField::Subject,
-                true,
-                inbox,
-                uid,
-            )
-        },
-        1
-    );
-    assert_eq!(
-        unsafe {
-            pe_message_index(
-                core,
-                &folder_search(std::ptr::null()),
-                PeSortField::Subject,
-                false,
-                inbox,
-                uid,
-            )
-        },
-        0
-    );
-    assert_eq!(
-        unsafe {
-            pe_message_index(
-                core,
-                &folder_search(std::ptr::null()),
-                PeSortField::Subject,
-                true,
-                inbox,
-                uid + 99,
-            )
-        },
-        -1
-    );
+    assert_eq!(unsafe { pe_list_view_index(core, folder, inbox, uid) }, 1);
+    assert_eq!(unsafe { pe_list_view_index(core, folder, inbox, uid + 99) }, -1);
+    unsafe { pe_list_view_set_sort(folder, PeSortField::Subject, false) };
+    assert_eq!(unsafe { pe_list_view_index(core, folder, inbox, uid) }, 0);
+    unsafe { pe_list_view_free(folder) };
     let (mut total, mut unread) = (0u64, 0u64);
     assert!(unsafe { pe_folder_counts(core, inbox, &mut total, &mut unread) });
     assert_eq!((total, unread), (2, 1));
@@ -550,11 +491,27 @@ fn reads_mail_through_the_c_api() {
     drop(unsafe { Box::from_raw(context) });
 }
 
-/// Sign-in apps through the C API, against ImapKit's OpenID Connect provider: the presets, a check, saving, the
-/// manager's rows (no secret in them), signing in with the app and the account that names it
-/// The mark of the row of `folder`/`uid` in the list `search` makes
-fn mark_in(core: *const PeCore, search: &PeSearch, folder: i64, uid: u64) -> Option<PeThreadMark> {
-    let rows = unsafe { pe_messages(core, search, PeSortField::Date, false, 0, 50) };
+/// A list view of `folder` (0 for All Inboxes), searching for `text` when given
+fn view_of(folder: i64, text: Option<&str>) -> *mut PeListView {
+    let view = pe_list_view_new();
+    assert!(unsafe { pe_list_view_set_scope(view, folder, folder == 0) });
+    if let Some(text) = text {
+        let text = CString::new(text).unwrap();
+        assert!(unsafe { pe_list_view_set_text(view, text.as_ptr()) });
+    }
+    view
+}
+
+/// The messages of the list of `view`, and how many of them are unread
+fn counts(core: *const PeCore, view: *const PeListView) -> (u64, u64) {
+    let (mut total, mut unread) = (0u64, 0u64);
+    assert!(unsafe { pe_list_view_counts(core, view, &mut total, &mut unread) });
+    (total, unread)
+}
+
+/// The mark of the row of `folder`/`uid` in the list of `view`
+fn mark_in(core: *const PeCore, view: *const PeListView, folder: i64, uid: u64) -> Option<PeThreadMark> {
+    let rows = unsafe { pe_list_view_messages(core, view, 0, 50) };
     let found = (0..unsafe { pe_message_list_count(rows) })
         .map(|i| unsafe { &*pe_message_list_get(rows, i) })
         .find(|m| m.folder == folder && m.uid == uid)
@@ -565,14 +522,17 @@ fn mark_in(core: *const PeCore, search: &PeSearch, folder: i64, uid: u64) -> Opt
 
 /// Watch and Ignore Conversation on the read message of `list` (two messages, one read, each a conversation of its
 /// own): a toggle, the summary's check marks, the rows' mark, and Hide Ignored Conversations
-fn watches_and_ignores(core: *const PeCore, list: &PeSearch) {
-    let rows = unsafe { pe_messages(core, list, PeSortField::Date, false, 0, 50) };
+fn watches_and_ignores(core: *const PeCore, list: *const PeListView) {
+    let rows = unsafe { pe_list_view_messages(core, list, 0, 50) };
     let read = (0..unsafe { pe_message_list_count(rows) })
         .map(|i| unsafe { &*pe_message_list_get(rows, i) })
         .find(|m| m.seen)
         .map(|m| (m.folder, m.uid))
         .expect("a read message");
     unsafe { pe_message_list_free(rows) };
+    // the same list with View > Hide Ignored Conversations
+    let hidden = unsafe { pe_list_view_clone(list) };
+    unsafe { pe_list_view_set_hide_ignored(hidden, true) };
     let selection = pe_selection_new();
     unsafe { pe_selection_add(selection, read.0, read.1) };
     let act = |action: PeAction| {
@@ -593,8 +553,10 @@ fn watches_and_ignores(core: *const PeCore, list: &PeSearch) {
     };
     // whether an action takes the rows out of the list: Ignore only while ignored conversations are hidden, and not
     // when it takes the mark away
-    let leaves =
-        |action: PeAction, hide_ignored: bool| unsafe { pe_selection_leaves_list(&numbers(), action, 0, hide_ignored) };
+    let leaves = |action: PeAction, hide_ignored: bool| {
+        let view = if hide_ignored { hidden.cast_const() } else { list };
+        unsafe { pe_list_view_leaves_list(view, &numbers(), action, 0) }
+    };
     assert_eq!(summary(), (false, false));
     act(PeAction::Watch);
     assert_eq!(summary(), (true, false));
@@ -609,23 +571,20 @@ fn watches_and_ignores(core: *const PeCore, list: &PeSearch) {
         "Ignore again takes the mark away: the rows stay"
     );
     assert_eq!(mark_in(core, list, read.0, read.1), Some(PeThreadMark::Ignore));
-    let hidden = PeSearch {
-        hide_ignored: true,
-        ..*list
-    };
-    assert_eq!(unsafe { pe_list_rows(core, &hidden) }, 1);
-    assert_eq!(mark_in(core, &hidden, read.0, read.1), None);
-    let (mut total, mut unread) = (0u64, 0u64);
-    assert!(unsafe { pe_message_count(core, &hidden, &mut total, &mut unread) });
-    assert_eq!((total, unread), (1, 1));
+    assert_eq!(unsafe { pe_list_view_row_count(core, hidden) }, 1);
+    assert_eq!(mark_in(core, hidden, read.0, read.1), None);
+    assert_eq!(counts(core, hidden), (1, 1));
     // Ignore again takes it away
     act(PeAction::Ignore);
     assert_eq!(summary(), (false, false));
     assert_eq!(mark_in(core, list, read.0, read.1), Some(PeThreadMark::None));
-    assert_eq!(unsafe { pe_list_rows(core, &hidden) }, 2);
+    assert_eq!(unsafe { pe_list_view_row_count(core, hidden) }, 2);
     unsafe { pe_selection_free(selection) };
+    unsafe { pe_list_view_free(hidden) };
 }
 
+/// Sign-in apps through the C API, against ImapKit's OpenID Connect provider: the presets, a check, saving, the
+/// manager's rows (no secret in them), signing in with the app and the account that names it
 #[test]
 fn sign_in_apps_through_the_c_api() {
     let config = json!({ "users": { "alice@example.com": { "password": "pw", "displayName": "Alice" } }, "oauth": {} });
@@ -808,9 +767,9 @@ fn null_and_bad_arguments() {
         assert_eq!(pe_account_add(std::ptr::null(), std::ptr::null(), std::ptr::null()), 0);
         assert_eq!(pe_account_list_count(std::ptr::null()), 0);
         assert!(pe_message_list_get(std::ptr::null(), 0).is_null());
-        assert!(pe_messages(std::ptr::null(), std::ptr::null(), PeSortField::Date, false, 0, 10).is_null());
+        assert!(pe_list_view_messages(std::ptr::null(), std::ptr::null(), 0, 10).is_null());
         let (mut total, mut unread) = (0u64, 0u64);
-        assert!(!pe_message_count(
+        assert!(!pe_list_view_counts(
             std::ptr::null(),
             std::ptr::null(),
             &mut total,

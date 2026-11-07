@@ -104,9 +104,10 @@ pub unsafe extern "C" fn pe_list_view_set_scope(view: *mut PeListView, folder: i
     unsafe { change(view, false, |view| view.set_scope(scope)) }
 }
 
-/// The words typed in the Find box (UTF-8, Gmail's syntax as `PeSearch.text`; NULL or empty for none): with words the
-/// list is of every folder of every account (`in:` narrows that). Every conversation is closed when they change.
-/// False when they are the same (or for NULL).
+/// The words typed in the Find box (UTF-8, NULL or empty for none), in Gmail's syntax: words, "phrases", -word, OR,
+/// from: to: subject: filename: is:unread is:starred has:attachment in: before: after: older_than: newer_than: larger:
+/// smaller:. With words the list is of every folder of every account (`in:` narrows that). Every conversation is
+/// closed when they change. False when they are the same (or for NULL).
 ///
 /// # Safety
 /// `view` must be NULL or a live view, `text` NULL or a NUL-terminated string.
@@ -397,10 +398,10 @@ pub unsafe extern "C" fn pe_list_view_neighbours(
     unsafe { put_neighbours(found, previous_folder, previous_uid, next_folder, next_uid) }
 }
 
-/// One step of Next Unread from the message `uid` of `folder` (0 for none) in the list, as `pe_next_unread_step`: the
-/// next unread message of the list (to select after `pe_list_view_reveal`), or the next folder with unread mail and
-/// the question to ask before going there (free it with `pe_string_free`), or nothing (also when the list lists
-/// nothing).
+/// One step of Next Unread from the message `uid` of `folder` (0 for none) in the list: the next unread message of the
+/// list (to select after `pe_list_view_reveal`), or the next folder with unread mail and the question to ask before
+/// going there (a heading, a blank line, the question; free it with `pe_string_free`), or nothing (also when the list
+/// lists nothing).
 ///
 /// # Safety
 /// `core` must be a live handle, `view` NULL or a live view, the three out pointers valid.
