@@ -397,12 +397,10 @@ struct UiEvent {
     uint64_t uid;
     PeFailureKind failure;
     std::wstring message;
-    // the Message-ID of a draft, for DraftSaved; the subject, for NewMail
+    // the Message-ID of a draft, for DraftSaved; the notification's text, for NewMail (`message` its title)
     std::string detail;
     // how many messages, for NewMail
     uint64_t count = 0;
-    // NewMail: the newest is in a watched conversation (perhaps in a folder other than the Inbox)
-    bool watched = false;
 };
 
 // the folder tree, the message list and the reading pane
@@ -623,6 +621,8 @@ private:
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
     // a row's font: bold as the core says (unread, or a collapsed conversation with an unread message), or the list's
     HFONT RowFont(const PeMessage& row) const;
+    // the selected messages in numbers (summary_), as the core knows them now
+    void RefreshSummary();
     // the text of an ignored conversation's row grey, unless the row is selected
     void GreyIgnored(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const;
     // the Subject cell of a list grouped by conversation, drawn whole: a conversation's + or - box, the subject indented

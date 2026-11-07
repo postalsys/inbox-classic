@@ -41,12 +41,6 @@ mac-outbox-waiting =
 mac-sending = { $subject } wird gesendet…
 mac-checking = Neue Nachrichten von { $account } werden abgerufen…
 mac-account-said = { $account }: { $message }
-mac-new-messages =
-    { $count ->
-        [one] { $count } neue Nachricht
-       *[other] { $count } neue Nachrichten
-    }
-mac-newest-from = Neueste Nachricht von { $from }: { $subject }
 mac-not-bundle = Diese Kopie von Inbox Classic ist kein App-Paket und kann daher nicht die Standard-E-Mail-App sein.
 mac-not-made-default = Inbox Classic konnte nicht als Standard-E-Mail-App festgelegt werden: { $reason }
 mac-tool-search = Suchen

@@ -59,7 +59,7 @@ void OnCoreEvent(void* context, const PeEvent* event) noexcept {
     try {
         auto* copy = new UiEvent{event->kind, event->account, event->folder, event->uid, event->failure,
                                  event->message ? core::Widen(event->message) : std::wstring(),
-                                 event->detail ? std::string(event->detail) : std::string(), event->count, event->watched};
+                                 event->detail ? std::string(event->detail) : std::string(), event->count};
         if (!PostMessageW(static_cast<HWND>(context), WM_CORE_EVENT, 0, reinterpret_cast<LPARAM>(copy))) {
             delete copy;
         }
@@ -151,6 +151,8 @@ void UpdateMenu(HMENU menu) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanArchive() ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_EXPAND_ALL_THREADS || id == IDM_COLLAPSE_ALL_THREADS) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.Grouped() ? MF_ENABLED : MF_GRAYED));
+        } else if (id == IDM_HIDE_IGNORED) {
+            CheckMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.HideIgnored() ? MF_CHECKED : MF_UNCHECKED));
         } else if (id == IDM_EMPTY_FOLDER) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanEmptyFolder() ? MF_ENABLED : MF_GRAYED));
         } else if (CommandNeedsOne(id)) {
@@ -234,8 +236,7 @@ void HideToTray() {
 // the heading of the last new mail notification, until the UI test asks for it (kTestNotification)
 std::wstring g_lastNotification;
 
-// new mail: a notification, unless the window is in front (the list shows it) or notifications are off. Mail in a
-// watched conversation says so in its heading
+// new mail: a notification, unless the window is in front (the list shows it) or notifications are off
 void NotifyNewMail(const UiEvent& event) {
     if (!g_notify) {
         return;
@@ -243,22 +244,10 @@ void NotifyNewMail(const UiEvent& event) {
     if (IsWindowVisible(g_main) && !IsIconic(g_main) && GetForegroundWindow() == g_main) {
         return;
     }
-    std::wstring subject = core::Widen(event.detail.c_str());
-    if (subject.empty()) {
-        subject = core::T(PE_TEXT_UI_NO_SUBJECT);
-    }
-    if (event.watched) {
-        g_lastNotification = core::T(PE_TEXT_UI_WATCHED_CONVERSATION);
-        TrayNotify(g_main, g_lastNotification, core::T(PE_TEXT_UI_NEWEST_FROM, {{"sender", event.message}, {"subject", subject}}),
-                   event.folder, event.uid);
-    } else if (event.count <= 1) {
-        g_lastNotification = event.message;
-        TrayNotify(g_main, event.message, subject, event.folder, event.uid);
-    } else {
-        g_lastNotification = core::T(PE_TEXT_WIN_NEW_MESSAGES, {{"count", std::to_wstring(event.count)}});
-        TrayNotify(g_main, g_lastNotification,
-                   core::T(PE_TEXT_UI_NEWEST_FROM, {{"sender", event.message}, {"subject", subject}}), event.folder, event.uid);
-    }
+    // the core's words: who it is from over its subject, or how many over the newest, a watched conversation's
+    // saying so in the title
+    g_lastNotification = event.message;
+    TrayNotify(g_main, event.message, core::Widen(event.detail.c_str()), event.folder, event.uid);
 }
 
 void TrayMenu() {
@@ -910,7 +899,6 @@ void CreateChildren(HWND hwnd) {
     g_status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS, 0, 0, 0, 0, hwnd, nullptr,
                                GetModuleHandleW(nullptr), nullptr);
     g_mailbox.Create(hwnd, g_core.get());
-    CheckMenuItem(GetMenu(hwnd), IDM_HIDE_IGNORED, MF_BYCOMMAND | (g_mailbox.HideIgnored() ? MF_CHECKED : MF_UNCHECKED));
 }
 
 void AddAccount() {
@@ -1263,7 +1251,6 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_HIDE_IGNORED:
         g_mailbox.SetHideIgnored(!g_mailbox.HideIgnored());
-        CheckMenuItem(GetMenu(g_main), IDM_HIDE_IGNORED, MF_BYCOMMAND | (g_mailbox.HideIgnored() ? MF_CHECKED : MF_UNCHECKED));
         return;
     case IDM_FIND_IN_MESSAGE:
         // F3 again finds the next place; the menu asks for the words

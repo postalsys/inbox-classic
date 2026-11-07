@@ -100,6 +100,10 @@ ui-still-running = Inbox Classic is still running
 ui-no-subject = (no subject)
 ui-quoted = “{ $subject }”
 ui-newest-from = Latest message from { $sender }: { $subject }
+ui-new-messages = { $count ->
+    [one] { $count } new message
+   *[other] { $count } new messages
+}
 ui-outbox-waiting = { $count ->
     [one] 1 message in the Outbox
    *[other] { $count } messages in the Outbox

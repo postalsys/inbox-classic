@@ -66,6 +66,30 @@ pub fn list_counts(total: u64, unread: u64, selected: u64, searching: bool) -> S
     tr_args(text, &args)
 }
 
+/// The title and the text of the notification of new mail (`count` messages, the newest from `from` about
+/// `subject`): who it is from over its subject, or how many over the newest; a watched conversation's says so in the
+/// title
+pub(crate) fn new_mail_words(count: usize, from: &str, subject: &str, watched: bool) -> (String, String) {
+    let no_subject = tr(Text::UiNoSubject);
+    let subject = if subject.is_empty() {
+        no_subject.as_str()
+    } else {
+        subject
+    };
+    let newest = || {
+        tr_args(
+            Text::UiNewestFrom,
+            &[("sender", from.into()), ("subject", subject.into())],
+        )
+    };
+    match (watched, count <= 1) {
+        (true, true) => (tr(Text::UiWatchedConversation), format!("{from}\n{subject}")),
+        (true, false) => (tr(Text::UiWatchedConversation), newest()),
+        (false, true) => (from.to_string(), subject.to_string()),
+        (false, false) => (tr_args(Text::UiNewMessages, &[("count", count.into())]), newest()),
+    }
+}
+
 /// "Name <address>", the address alone when the name is empty or the same: how From and the account menus show an
 /// account
 pub fn account_label(name: &str, email: &str) -> String {
@@ -248,6 +272,22 @@ mod tests {
         // Junk and Deleted Items do not light up the account
         assert_eq!(hidden.account, 10);
         assert_eq!(hidden_unread(&[], &[]), HiddenUnread::default());
+    }
+
+    #[test]
+    fn new_mail_notification_words() {
+        let words = |count, subject, watched| new_mail_words(count, "Pat Doe", subject, watched);
+        assert_eq!(words(1, "Trip", false), ("Pat Doe".into(), "Trip".into()));
+        assert_eq!(
+            words(1, "Re: Trip", true),
+            ("Watched conversation".into(), "Pat Doe\nRe: Trip".into())
+        );
+        assert_eq!(words(2, "Trip", true).0, "Watched conversation");
+        assert_eq!(words(2, "", true).1, "Latest message from Pat Doe: (no subject)");
+        assert_eq!(
+            words(3, "Trip", false),
+            ("3 new messages".into(), "Latest message from Pat Doe: Trip".into())
+        );
     }
 
     #[test]

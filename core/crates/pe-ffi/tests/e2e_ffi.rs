@@ -582,18 +582,32 @@ fn watches_and_ignores(core: *const PeCore, list: &PeSearch) {
         assert!(!text(done).is_empty(), "what the status bar says");
         unsafe { pe_string_free(done) };
     };
-    let summary = || {
+    let numbers = || {
         let mut summary = PeSelectionSummary::default();
         assert!(unsafe { pe_selection_summary(core, selection, &mut summary) });
+        summary
+    };
+    let summary = || {
+        let summary = numbers();
         (summary.watched, summary.ignored)
     };
+    // whether an action takes the rows out of the list: Ignore only while ignored conversations are hidden, and not
+    // when it takes the mark away
+    let leaves =
+        |action: PeAction, hide_ignored: bool| unsafe { pe_selection_leaves_list(&numbers(), action, 0, hide_ignored) };
     assert_eq!(summary(), (false, false));
     act(PeAction::Watch);
     assert_eq!(summary(), (true, false));
     assert_eq!(mark_in(core, list, read.0, read.1), Some(PeThreadMark::Watch));
+    assert!(leaves(PeAction::Ignore, true) && !leaves(PeAction::Ignore, false));
+    assert!(leaves(PeAction::Delete, false) && !leaves(PeAction::Watch, true));
     // Ignore in its place, then Hide Ignored Conversations leaves it out
     act(PeAction::Ignore);
     assert_eq!(summary(), (false, true));
+    assert!(
+        !leaves(PeAction::Ignore, true),
+        "Ignore again takes the mark away: the rows stay"
+    );
     assert_eq!(mark_in(core, list, read.0, read.1), Some(PeThreadMark::Ignore));
     let hidden = PeSearch {
         hide_ignored: true,

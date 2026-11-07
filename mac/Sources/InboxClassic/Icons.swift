@@ -69,7 +69,7 @@ enum Icons {
     }
 
     /// the glasses over the Watch column, as the paper clip and the flag are over theirs
-    static var watchHeader: NSImage? { symbol("eyeglasses", key: "watch", template: true) }
+    static var watchHeader: NSImage? { threadMark(PE_THREAD_MARK_WATCH) }
 
     /// A system symbol at the list's size, cached under `key`: a template the cell tints, or drawn in `colors`
     private static func symbol(_ name: String, key: String, colors: [NSColor] = [], template: Bool = false) -> NSImage? {

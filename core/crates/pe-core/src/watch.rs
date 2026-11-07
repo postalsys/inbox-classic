@@ -11,7 +11,8 @@
 //! - New mail in the Inbox is announced as before; a message that arrives in a watched conversation in a folder of the
 //!   user's (not Sent, Drafts, Junk, Trash, All Mail or another special folder) is announced too, and
 //!   [`crate::Event::NewMail::watched`] says the newest is in a watched conversation.
-//! - When a late message joins two conversations with different marks, Watch wins (pe-store's `marks.rs`).
+//! - When a late message joins two conversations, the joined one is watched when either was and ignored only when both
+//!   were (pe-store's `marks.rs`).
 
 use pe_i18n::{Text, tr, tr_args};
 use pe_store::{FolderInfo, Message, MessageRef, ThreadMark};
@@ -53,14 +54,16 @@ impl Core {
                 store.folders_of_threads(&threads)?,
             )
         };
-        for (folder, uids) in unseen {
+        for (folder, uids) in &unseen {
             for chunk in uids.chunks(PER_COMMAND) {
-                self.set_flag_many(folder, chunk, "\\Seen", true)?;
+                self.set_flag_many(*folder, chunk, "\\Seen", true)?;
             }
         }
-        // every list with a message of theirs shows the mark
+        // every list with a message of theirs shows the mark; set_flag_many announced those it marked read
         for (account, folder) in folders {
-            self.post(Event::FolderChanged { account, folder })?;
+            if !unseen.contains_key(&folder) {
+                self.post(Event::FolderChanged { account, folder })?;
+            }
         }
         let text = match (mark, set) {
             (ThreadMark::Watch, ThreadMark::Watch) => Text::DoneWatched,

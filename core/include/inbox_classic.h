@@ -110,8 +110,9 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_DRAFT_SAVED = 12,
   // The check `uid` of `pe_sign_in_app_check` is done: `pe_sign_in_app_check_result`
   PE_EVENT_KIND_SIGN_IN_APP_CHECKED = 13,
-  // New unread mail in the Inbox `folder` of `account`, or in a watched conversation in another folder of the user's
-  // (`watched`): `count` messages, `uid` the newest, `message` who it is from and `detail` its subject
+  // New unread mail in the Inbox `folder` of `account`, or in a watched conversation in another folder of the
+  // user's: `count` messages, `uid` the newest, `message` the notification's title and `detail` its text, to show as
+  // they are
   PE_EVENT_KIND_NEW_MAIL = 14,
   // The unsubscribe `uid` of `pe_unsubscribe` is done; `message` says why not when it is not NULL
   PE_EVENT_KIND_UNSUBSCRIBED = 15,
@@ -521,16 +522,13 @@ typedef struct PeEvent {
   int64_t folder;
   uint64_t uid;
   enum PeFailureKind failure;
-  // UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; who
-  // it is from, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
+  // UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
+  // notification's title, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
   const char *message;
-  // UTF-8: the Message-ID of the draft, for `DraftSaved`; the subject, for `NewMail`. NULL otherwise
+  // UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
   const char *detail;
   // How many messages, for `NewMail`; 0 otherwise
   uint64_t count;
-  // For `NewMail`: the newest is in a watched conversation (the notification can say so, with the words of
-  // `PE_TEXT_UI_WATCHED_CONVERSATION`); false otherwise
-  bool watched;
 } PeEvent;
 
 // Called on a worker thread, never on the thread that called into the core: copy what is
@@ -668,6 +666,8 @@ typedef struct PeMessage {
   // Its conversation's mark: watched (the Watch column's glasses) or ignored (the Watch column's sign, and the row
   // grey)
   enum PeThreadMark mark;
+  // The row is grey, as its conversation is ignored. The apps read this rather than decide from `mark`.
+  bool dimmed;
   // A notice that a message was not delivered, or not yet (a bounce): the list shows its icon in the attachment
   // column's place
   bool bounce;
@@ -1635,7 +1635,8 @@ bool pe_start_message(const struct PeCore *core,
 bool pe_all_inboxes_shown(size_t accounts);
 
 // How many messages `search` finds, and how many of them are unread: grouped by conversation (`threads`) too, all of
-// their messages (the list's rows are `pe_list_rows`)
+// their messages (the list's rows are `pe_list_rows`). The counts of the status bar: a folder shown whole counted
+// from its indexes, as `pe_folder_counts`
 //
 // # Safety
 // `core` must be a live handle, `search` a valid search, `total` and `unread` valid pointers.
@@ -2397,6 +2398,16 @@ char *pe_selection_move_text(const struct PeSelectionSummary *summary,
 // # Safety
 // `summary` must be a valid pointer.
 bool pe_selection_flags(const struct PeSelectionSummary *summary);
+
+// Whether `action` (to `to`) on the messages of `summary` takes them out of the list, a list that hides ignored
+// conversations when `hide_ignored`: then the app selects the row after them, as it does after Delete
+//
+// # Safety
+// `summary` must be a valid pointer.
+bool pe_selection_leaves_list(const struct PeSelectionSummary *summary,
+                              enum PeAction action,
+                              int64_t to,
+                              bool hide_ignored);
 
 // Does `action` to the selected messages, each folder's with one command: in the store now (`FolderChanged`), on the
 // server in the background. Returns what the status bar says ("Moved 3 messages to Archive"), or NULL with the

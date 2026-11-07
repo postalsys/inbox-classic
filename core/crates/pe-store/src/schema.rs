@@ -338,6 +338,11 @@ CREATE TABLE thread_marks (
 );
 CREATE INDEX thread_marks_by_account ON thread_marks (account_id);
 "#,
+    // a conversation's messages in every folder (marks.rs: the unread ones Ignore marks read, the lists that show a
+    // mark; threads.rs: joining conversations), which messages_by_thread, by folder first, cannot find
+    r#"
+CREATE INDEX messages_of_thread ON messages (thread_id);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

@@ -4,10 +4,6 @@
 ## The main window
 
 win-still-running-detail = Inbox Classic keeps checking for new mail in the background. Click the icon to open it. To exit, right-click the icon and use its menu.
-win-new-messages = { $count ->
-    [one] { $count } new message
-   *[other] { $count } new messages
-}
 win-default-app-not-installed = This copy of Inbox Classic was not installed, so Windows does not list it as a mail app. Install it to choose it.
 win-default-app-settings = Windows will open its Default apps settings. Choose Inbox Classic to open MAILTO links.
 win-no-unread = No unread messages

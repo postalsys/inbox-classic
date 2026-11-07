@@ -4,10 +4,6 @@
 ## Põhiaken
 
 win-still-running-detail = Inbox Classic kontrollib taustal uute kirjade saabumist. Avamiseks klõpsake ikooni. Väljumiseks avage paremklõpsuga ikooni menüü.
-win-new-messages = { $count ->
-    [one] { $count } uus kiri
-   *[other] { $count } uut kirja
-}
 win-default-app-not-installed = Seda Inbox Classicu koopiat pole installitud, seega ei näita Windows seda meiliprogrammina. Selle valimiseks installige see.
 win-default-app-settings = Windows avab vaikerakenduste sätted. Määrake Inbox Classic seal MAILTO-linkide avamiseks.
 win-no-unread = Lugemata kirju pole

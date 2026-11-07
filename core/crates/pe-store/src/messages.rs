@@ -161,6 +161,11 @@ impl Message {
         !self.info.seen() || self.thread.is_some_and(|t| t.collapsed() && t.unread > 0)
     }
 
+    /// Whether its row is grey: its conversation is ignored (Ignore Conversation)
+    pub fn dimmed(&self) -> bool {
+        self.mark == crate::ThreadMark::Ignore
+    }
+
     /// Where it is
     pub fn at(&self) -> crate::MessageRef {
         crate::MessageRef {

@@ -124,6 +124,10 @@ ui-still-running = Inbox Classic töötab edasi
 ui-no-subject = (teema puudub)
 ui-quoted = „{ $subject }“
 ui-newest-from = Uusim saatjalt { $sender }: { $subject }
+ui-new-messages = { $count ->
+    [one] { $count } uus kiri
+   *[other] { $count } uut kirja
+}
 ui-outbox-waiting = { $count ->
     [one] { $count } kiri väljundkaustas
    *[other] { $count } kirja väljundkaustas

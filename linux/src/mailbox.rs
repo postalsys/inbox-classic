@@ -771,14 +771,10 @@ impl Mailbox {
         let search = self.search();
         let several = self.several_folders();
         let active = several || self.folder.get() != 0;
-        // the counts of the folder come from its indexes; a search, All Inboxes and a folder without its ignored
-        // conversations count what they find
-        let (total, unread) = if several || (search.hide_ignored && active) {
-            core.count_search(&search).unwrap_or((0, 0))
-        } else if self.folder.get() != 0 {
-            core.folder(self.folder.get())
-                .map(|f| (f.total, f.unread))
-                .unwrap_or((0, 0))
+        // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
+        // conversations what they find; an account's own item lists nothing
+        let (total, unread) = if active {
+            core.list_counts(&search).unwrap_or((0, 0))
         } else {
             (0, 0)
         };
@@ -960,7 +956,7 @@ impl Mailbox {
     }
 
     /// The check mark of a toggle of the menus
-    fn set_toggled(&self, command: Command, on: bool) {
+    pub fn set_toggled(&self, command: Command, on: bool) {
         if let Some(action) = self
             .window
             .lookup_action(command.name())
@@ -1409,12 +1405,9 @@ impl Mailbox {
         if refs.is_empty() {
             return;
         }
-        // ignored while ignored conversations are hidden, they go as moved ones do
-        let leaves = match action {
-            Action::Delete | Action::Move(_) | Action::Junk(_) | Action::Archive => true,
-            Action::Ignore => hide_ignored() && !self.summary.borrow().ignored,
-            _ => false,
-        };
+        // the core says which actions take the selection out of the list: those that move it, and Ignore while
+        // ignored conversations are hidden
+        let leaves = self.summary.borrow().leaves_list(action, hide_ignored());
         // the row that takes the place of the last one going
         let after = (refs == self.selected_refs())
             .then(|| self.list.last_selected())

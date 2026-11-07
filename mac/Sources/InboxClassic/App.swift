@@ -75,6 +75,32 @@ public func runApp(_ arguments: Arguments = Arguments(CommandLine.arguments)) ->
     exit(0)
 }
 
+/// A setting of the app in the user defaults; the UI test keeps it in memory, so a run never changes the setting of
+/// whoever runs it
+@MainActor
+private struct Preference {
+    let key: String
+    private var testValue: Bool
+    private let fallback: Bool
+
+    init(_ key: String, default fallback: Bool) {
+        self.key = key
+        self.fallback = fallback
+        testValue = fallback
+    }
+
+    var value: Bool {
+        get { TestHooks.testing ? testValue : UserDefaults.standard.object(forKey: key) as? Bool ?? fallback }
+        set {
+            if TestHooks.testing {
+                testValue = newValue
+            } else {
+                UserDefaults.standard.set(newValue, forKey: key)
+            }
+        }
+    }
+}
+
 @MainActor
 public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation, UNUserNotificationCenterDelegate {
     public static private(set) var shared: AppDelegate!
@@ -86,33 +112,24 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         get { UserDefaults.standard.object(forKey: "NewMailNotifications") as? Bool ?? true }
         set { UserDefaults.standard.set(newValue, forKey: "NewMailNotifications") }
     }
-    /// Settings > Group messages by conversation, on unless turned off (the UI test keeps it in memory, so a run never
-    /// changes the setting of whoever runs it)
+    /// Settings > Group messages by conversation, on unless turned off
     var groupByConversation: Bool {
-        get { TestHooks.testing ? testGrouping : UserDefaults.standard.object(forKey: "GroupByConversation") as? Bool ?? true }
+        get { grouping.value }
         set {
-            if TestHooks.testing {
-                testGrouping = newValue
-            } else {
-                UserDefaults.standard.set(newValue, forKey: "GroupByConversation")
-            }
+            grouping.value = newValue
             main?.mailbox.groupingChanged()
         }
     }
-    private var testGrouping = true
-    /// View > Hide Ignored Conversations, off unless turned on (kept in memory by the UI test, as grouping is)
+    private var grouping = Preference("GroupByConversation", default: true)
+    /// View > Hide Ignored Conversations, off unless turned on
     var hideIgnored: Bool {
-        get { TestHooks.testing ? testHideIgnored : UserDefaults.standard.bool(forKey: "HideIgnored") }
+        get { hidingIgnored.value }
         set {
-            if TestHooks.testing {
-                testHideIgnored = newValue
-            } else {
-                UserDefaults.standard.set(newValue, forKey: "HideIgnored")
-            }
+            hidingIgnored.value = newValue
             main?.mailbox.hideIgnoredChanged()
         }
     }
-    private var testHideIgnored = false
+    private var hidingIgnored = Preference("HideIgnored", default: false)
     /// the app ends after the compose windows that are saving have closed
     var quitAfterCompose = false
     /// Restart Now was chosen: a new copy starts once this one has ended
@@ -438,8 +455,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .junk: main.mailbox.markJunk(true)
         case .notJunk: main.mailbox.markJunk(false)
         case .archive: main.mailbox.archiveSelected()
-        case .watchConversation: main.mailbox.watchSelected()
-        case .ignoreConversation: main.mailbox.ignoreSelected()
+        case .watchConversation: main.mailbox.markConversations(PE_ACTION_WATCH)
+        case .ignoreConversation: main.mailbox.markConversations(PE_ACTION_IGNORE)
         case .hideIgnored: hideIgnored.toggle()
         case .notify: notify.toggle()
         case .open: main.show()

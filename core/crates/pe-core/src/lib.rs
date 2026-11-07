@@ -123,8 +123,11 @@ pub enum Event {
         from: String,
         subject: String,
         /// The newest is in a watched conversation (Watch Conversation): announced even from a folder other than the
-        /// Inbox, and the notification can say so ([`pe_i18n::Text::UiWatchedConversation`])
+        /// Inbox, and the notification says so
         watched: bool,
+        /// The notification's title and text, in the language in use: the apps show them as they are
+        title: String,
+        text: String,
     },
     /// A message was sent, and is in the Sent folder when the account has one
     MessageSent {
@@ -588,6 +591,19 @@ impl Core {
     /// How many messages [`Core::search`] finds, and how many of them are unread, grouped by conversation or not
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
         Ok(self.store().count_search(search)?)
+    }
+
+    /// The counts of the status bar for the list of `search`: those of a folder shown whole from its indexes, those
+    /// of a search, All Inboxes or a folder without its ignored conversations (Hide Ignored) counted from what they
+    /// find
+    pub fn list_counts(&self, search: &Search) -> Result<(u64, u64)> {
+        match search.scope {
+            Scope::Folder(folder) if search.text.is_empty() && search.show == Show::All && !search.hide_ignored => {
+                let folder = self.folder(folder)?;
+                Ok((folder.total, folder.unread))
+            }
+            _ => self.count_search(search),
+        }
     }
 
     /// How many rows the list of [`Core::search`] has: grouped by conversation one a conversation and the other

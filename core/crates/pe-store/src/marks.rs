@@ -3,15 +3,18 @@
 //! the core marks a message arriving in an ignored conversation read and announces one arriving in a watched one, and
 //! [`crate::Search::hide_ignored`] leaves ignored conversations out of the list.
 //!
-//! When a late message joins two conversations into one ([`Store::thread_of`]), their marks go with it; when both
-//! were marked differently, Watch wins: missing a reply one watches for is worse than seeing one of an ignored
-//! conversation.
+//! When a late message joins two conversations into one ([`Store::thread_of`]), the joined one is watched when either
+//! was (missing a reply one watches for is worse than seeing one of an ignored conversation), and ignored only when
+//! both were: a crafted reply naming an ignored conversation and one without a mark must not silence the other's
+//! later replies.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap, HashSet};
 
-use rusqlite::{OptionalExtension, params};
+use rusqlite::types::Value;
+use rusqlite::{OptionalExtension, params, params_from_iter};
 
-use crate::{AccountId, MessageRef, Result, Store};
+use crate::selection::{CHUNK, numbered_marks};
+use crate::{AccountId, FolderId, MessageRef, Result, Store};
 
 /// A conversation's mark
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash, PartialOrd, Ord)]
@@ -24,7 +27,7 @@ pub enum ThreadMark {
     Ignore,
 }
 
-/// The number `thread_marks.mark` keeps of a mark that is not None; the lower one wins when conversations join
+/// The number `thread_marks.mark` keeps of a mark that is not None
 const WATCH: i64 = 1;
 pub(crate) const IGNORE: i64 = 2;
 
@@ -59,30 +62,46 @@ impl Store {
     /// The conversations of the messages `refs` (those still in the store), each once, in the order of `refs`. A
     /// message stored before conversations were kept is put into its conversation first, so a mark set on it lasts.
     pub fn conversations_of(&self, refs: &[MessageRef]) -> Result<Vec<Conversation>> {
-        let mut found: Vec<Conversation> = Vec::new();
-        let mut statement = self.db.prepare_cached(
-            "SELECT m.id, f.account_id, m.thread_id FROM messages m JOIN folders f ON f.id = m.folder_id \
-             WHERE m.folder_id = ?1 AND m.uid = ?2",
-        )?;
+        // each message's row id, account and conversation, a folder's messages at a time
+        let mut rows: HashMap<MessageRef, (i64, AccountId, i64)> = HashMap::new();
+        for (folder, uids) in MessageRef::by_folder(refs) {
+            for chunk in uids.chunks(CHUNK) {
+                let mut values = vec![Value::Integer(folder)];
+                let ids: Vec<i64> = chunk.iter().map(|&uid| uid as i64).collect();
+                let places = numbered_marks(&mut values, &ids);
+                let mut statement = self.db.prepare(&format!(
+                    "SELECT m.uid, m.id, f.account_id, m.thread_id FROM messages m JOIN folders f ON f.id = m.folder_id \
+                     WHERE m.folder_id = ?1 AND m.uid IN ({places})"
+                ))?;
+                let mut found = statement.query(params_from_iter(values))?;
+                while let Some(row) = found.next()? {
+                    let at = MessageRef {
+                        folder,
+                        uid: row.get(0)?,
+                    };
+                    rows.insert(at, (row.get(1)?, row.get(2)?, row.get(3)?));
+                }
+            }
+        }
+        let mut seen = HashSet::new();
+        let mut found = Vec::new();
         for r in refs {
-            let Some((id, account, mut thread)) = statement
-                .query_row(params![r.folder, r.uid], |row| {
-                    Ok((row.get::<_, i64>(0)?, row.get(1)?, row.get::<_, i64>(2)?))
-                })
-                .optional()?
-            else {
+            let Some(&(id, account, mut thread)) = rows.get(r) else {
                 continue;
             };
             if thread < 0 {
                 thread = self.thread_message(id)?;
             }
-            if !found.iter().any(|c| c.thread == thread) {
+            if seen.insert(thread) {
                 found.push(Conversation {
                     account,
                     thread,
-                    mark: self.thread_mark(thread)?,
+                    mark: ThreadMark::None,
                 });
             }
+        }
+        for c in &mut found {
+            c.mark = self.thread_mark(c.thread)?;
         }
         Ok(found)
     }
@@ -116,53 +135,62 @@ impl Store {
     }
 
     /// The unread messages of the conversations `threads` in every folder, by folder (for one command a folder)
-    pub fn unseen_in_threads(&self, threads: &[i64]) -> Result<BTreeMap<crate::FolderId, Vec<u64>>> {
-        let mut found: BTreeMap<crate::FolderId, Vec<u64>> = BTreeMap::new();
-        let mut statement = self
-            .db
-            .prepare_cached("SELECT folder_id, uid FROM messages WHERE thread_id = ?1 AND seen = 0 ORDER BY uid")?;
-        for &thread in threads {
-            for row in statement.query_map([thread], |row| Ok((row.get(0)?, row.get(1)?)))? {
+    pub fn unseen_in_threads(&self, threads: &[i64]) -> Result<BTreeMap<FolderId, Vec<u64>>> {
+        let mut found: BTreeMap<FolderId, Vec<u64>> = BTreeMap::new();
+        for chunk in threads.chunks(CHUNK) {
+            let mut values = Vec::new();
+            let places = numbered_marks(&mut values, chunk);
+            let mut statement = self.db.prepare(&format!(
+                "SELECT folder_id, uid FROM messages WHERE thread_id IN ({places}) AND seen = 0 ORDER BY folder_id, uid"
+            ))?;
+            for row in statement.query_map(params_from_iter(values), |row| Ok((row.get(0)?, row.get(1)?)))? {
                 let (folder, uid) = row?;
                 found.entry(folder).or_default().push(uid);
             }
+        }
+        // in order across the chunks too
+        for uids in found.values_mut() {
+            uids.sort_unstable();
         }
         Ok(found)
     }
 
     /// The folders the conversations `threads` have messages in, with their accounts: the lists that show their mark
-    pub fn folders_of_threads(&self, threads: &[i64]) -> Result<Vec<(AccountId, crate::FolderId)>> {
-        let mut found: Vec<(AccountId, crate::FolderId)> = Vec::new();
-        let mut statement = self.db.prepare_cached(
-            "SELECT DISTINCT f.account_id, m.folder_id FROM messages m JOIN folders f ON f.id = m.folder_id \
-             WHERE m.thread_id = ?1",
-        )?;
-        for &thread in threads {
-            for row in statement.query_map([thread], |row| Ok((row.get(0)?, row.get(1)?)))? {
-                let row = row?;
-                if !found.contains(&row) {
-                    found.push(row);
-                }
+    pub fn folders_of_threads(&self, threads: &[i64]) -> Result<Vec<(AccountId, FolderId)>> {
+        let mut found: Vec<(AccountId, FolderId)> = Vec::new();
+        for chunk in threads.chunks(CHUNK) {
+            let mut values = Vec::new();
+            let places = numbered_marks(&mut values, chunk);
+            let mut statement = self.db.prepare(&format!(
+                "SELECT DISTINCT f.account_id, m.folder_id FROM messages m JOIN folders f ON f.id = m.folder_id \
+                 WHERE m.thread_id IN ({places})"
+            ))?;
+            for row in statement.query_map(params_from_iter(values), |row| Ok((row.get(0)?, row.get(1)?)))? {
+                found.push(row?);
             }
         }
         found.sort_unstable();
+        found.dedup();
         Ok(found)
     }
 
-    /// The conversation `from` of `account` joined into `into`: its mark goes with it, Watch winning over Ignore
+    /// The conversation `from` of `account` joined into `into`: the joined one is watched when either was, ignored
+    /// only when both were, and has no mark otherwise
     pub(crate) fn merge_marks(&self, account: AccountId, from: i64, into: i64) -> Result<()> {
         let moved: Option<i64> = self
             .db
             .prepare_cached("DELETE FROM thread_marks WHERE thread_id = ?1 RETURNING mark")?
             .query_row([from], |row| row.get(0))
             .optional()?;
-        if let Some(mark) = moved {
-            self.db
-                .prepare_cached(
-                    "INSERT INTO thread_marks (thread_id, account_id, mark) VALUES (?1, ?2, ?3) \
-                     ON CONFLICT (thread_id) DO UPDATE SET mark = MIN(mark, excluded.mark)",
-                )?
-                .execute(params![into, account, mark])?;
+        let from = moved.map_or(ThreadMark::None, ThreadMark::of);
+        let into_mark = self.thread_mark(into)?;
+        let joined = match (from, into_mark) {
+            (ThreadMark::Watch, _) | (_, ThreadMark::Watch) => ThreadMark::Watch,
+            (ThreadMark::Ignore, ThreadMark::Ignore) => ThreadMark::Ignore,
+            _ => ThreadMark::None,
+        };
+        if joined != into_mark {
+            self.set_thread_mark(account, into, joined)?;
         }
         Ok(())
     }
@@ -171,7 +199,7 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AccountSettings, FolderId, FolderInfo, MessageInfo, Search, Sort};
+    use crate::{AccountSettings, FolderInfo, Message, MessageInfo, Search, Sort};
 
     fn setup() -> (Store, AccountId, FolderId) {
         let store = Store::open_in_memory().unwrap();
@@ -245,7 +273,7 @@ mod tests {
     }
 
     #[test]
-    fn joined_conversations_keep_a_mark_and_watch_wins() {
+    fn joined_conversations_are_watched_if_either_was_and_ignored_if_both_were() {
         let (store, account, inbox) = setup();
         // a and c start two conversations; b, arriving later, answers both and joins them
         store
@@ -270,7 +298,7 @@ mod tests {
             .unwrap();
         assert_eq!(marks, 1, "the joined one's mark is gone with it");
 
-        // an ignored one joining one without a mark stays ignored
+        // an ignored one joining one without a mark loses it: a reply naming both must not silence the other
         store
             .add_messages(
                 inbox,
@@ -283,8 +311,47 @@ mod tests {
             .add_messages(inbox, &[mail(6, 600, "<g@x>", &["<f@x>", "<e@x>"], false)])
             .unwrap();
         for uid in 4..=6 {
+            assert_eq!(mark_of(&store, inbox, uid), ThreadMark::None, "message {uid}");
+        }
+
+        // the other way round too: one without a mark joining an ignored one
+        store
+            .add_messages(
+                inbox,
+                &[mail(7, 700, "<h@x>", &[], true), mail(8, 800, "<i@x>", &[], true)],
+            )
+            .unwrap();
+        let i = store.conversations_of(&[at(inbox, 8)]).unwrap()[0].thread;
+        store.set_thread_mark(account, i, ThreadMark::Ignore).unwrap();
+        store
+            .add_messages(inbox, &[mail(9, 900, "<j@x>", &["<h@x>", "<i@x>"], false)])
+            .unwrap();
+        for uid in 7..=9 {
+            assert_eq!(mark_of(&store, inbox, uid), ThreadMark::None, "message {uid}");
+        }
+
+        // two ignored ones stay ignored
+        store
+            .add_messages(
+                inbox,
+                &[mail(10, 1000, "<k@x>", &[], true), mail(11, 1100, "<l@x>", &[], true)],
+            )
+            .unwrap();
+        for uid in [10, 11] {
+            let thread = store.conversations_of(&[at(inbox, uid)]).unwrap()[0].thread;
+            store.set_thread_mark(account, thread, ThreadMark::Ignore).unwrap();
+        }
+        store
+            .add_messages(inbox, &[mail(12, 1200, "<m@x>", &["<k@x>", "<l@x>"], false)])
+            .unwrap();
+        for uid in 10..=12 {
             assert_eq!(mark_of(&store, inbox, uid), ThreadMark::Ignore, "message {uid}");
         }
+        let marks: i64 = store
+            .db
+            .query_row("SELECT COUNT(*) FROM thread_marks", [], |row| row.get(0))
+            .unwrap();
+        assert_eq!(marks, 2, "the watched one and the two ignored ones joined");
     }
 
     #[test]
@@ -375,6 +442,12 @@ mod tests {
                 ThreadMark::Ignore,
                 ThreadMark::Ignore
             ]
+        );
+        let dimmed: Vec<bool> = rows.iter().map(Message::dimmed).collect();
+        assert_eq!(
+            dimmed,
+            [false, false, false, true, true],
+            "an ignored conversation's rows grey"
         );
 
         // grouped by conversation, collapsed and expanded

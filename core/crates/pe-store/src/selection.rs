@@ -57,7 +57,7 @@ impl Picked {
 }
 
 /// SQLite's limit on the values of one statement is 32766; picked messages go in by this many at a time
-const CHUNK: usize = 400;
+pub(crate) const CHUNK: usize = 400;
 
 /// `?, ?, ?` for `n` values
 fn marks(n: usize) -> String {

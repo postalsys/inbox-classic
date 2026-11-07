@@ -4,10 +4,6 @@
 ## La fenêtre principale
 
 win-still-running-detail = Inbox Classic continue de relever le courrier en arrière-plan. Cliquez sur son icône pour l’ouvrir. Pour quitter l’application, ouvrez le menu de l’icône avec le bouton droit.
-win-new-messages = { $count ->
-    [one] { $count } nouveau message
-   *[other] { $count } nouveaux messages
-}
 win-default-app-not-installed = Inbox Classic n’est pas installé et ne figure donc pas dans la liste des applications de messagerie de Windows. Installez-le pour le choisir comme application par défaut.
 win-default-app-settings = Windows ouvre les paramètres des applications par défaut. Choisissez Inbox Classic pour ouvrir les liens MAILTO.
 win-no-unread = Aucun message non lu

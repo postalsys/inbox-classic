@@ -484,7 +484,7 @@ fn icon_column(
         let (name, tip, ignored) = item
             .item()
             .and_downcast::<MessageRow>()
-            .and_then(|row| row.with(|m| (icon(m), tip(m), m.mark == ThreadMark::Ignore)))
+            .and_then(|row| row.with(|m| (icon(m), tip(m), m.dimmed())))
             .unwrap_or_default();
         image.set_icon_name(name);
         image.set_tooltip_text(tip.as_deref());
@@ -557,7 +557,7 @@ fn flag_column() -> gtk::ColumnViewColumn {
         let (color, ignored) = item
             .item()
             .and_downcast::<MessageRow>()
-            .and_then(|row| row.with(|m| (m.info.flag_color(), m.mark == ThreadMark::Ignore)))
+            .and_then(|row| row.with(|m| (m.info.flag_color(), m.dimmed())))
             .unwrap_or_default();
         set_grey(&area, ignored);
         // the colour by its name: on hover, and for a screen reader (and for those who tell colours apart badly)
@@ -604,9 +604,7 @@ fn text_column(
         let Some(row) = item.item().and_downcast::<MessageRow>() else {
             return;
         };
-        let (words, unread, ignored) = row
-            .with(|m| (text(m), m.bold(), m.mark == ThreadMark::Ignore))
-            .unwrap_or_default();
+        let (words, unread, ignored) = row.with(|m| (text(m), m.bold(), m.dimmed())).unwrap_or_default();
         label.set_text(&words);
         set_bold(&label, unread);
         set_grey(&label, ignored);
@@ -692,7 +690,7 @@ fn subject_column() -> gtk::ColumnViewColumn {
             return;
         };
         let Some((subject, thread, unread, ignored)) =
-            row.with(|m| (m.info.subject.clone(), m.thread, m.bold(), m.mark == ThreadMark::Ignore))
+            row.with(|m| (m.info.subject.clone(), m.thread, m.bold(), m.dimmed()))
         else {
             return;
         };

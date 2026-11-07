@@ -2469,12 +2469,17 @@ fn ignored_conversations_arrive_read_and_watched_ones_are_announced() {
         folder,
         subject,
         watched,
+        title,
+        text,
         ..
     } = event
     else {
         unreachable!()
     };
     assert_eq!((folder, subject.as_str(), watched), (lists, "Re: Release plan", true));
+    // the notification's words, made by the core for every app
+    assert_eq!(title, "Watched conversation");
+    assert!(text.ends_with("\nRe: Release plan"), "{text}");
 
     // hidden from a list that hides ignored conversations
     let hidden = Search {
@@ -2489,6 +2494,13 @@ fn ignored_conversations_arrive_read_and_watched_ones_are_announced() {
         .map(|m| m.info.subject)
         .collect();
     assert_eq!(shown, ["Lunch?"]);
+    // the status bar counts what the list shows: the folder's own counts, or what is left with ignored ones hidden
+    let folder = s.core.folder(inbox).unwrap();
+    assert_eq!(
+        s.core.list_counts(&Search::folder(inbox)).unwrap(),
+        (folder.total, folder.unread)
+    );
+    assert_eq!(s.core.list_counts(&hidden).unwrap(), (1, 1));
 }
 
 #[test]

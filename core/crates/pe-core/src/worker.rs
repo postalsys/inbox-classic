@@ -1249,14 +1249,19 @@ impl Worker {
             self.read_ignored(store, folder, &fresh.read).await?;
             if let Some(newest) = fresh.announced.first() {
                 let from = newest.info.sender().to_string();
+                let count = fresh.announced.len();
+                let watched = newest.mark == pe_store::ThreadMark::Watch;
+                let (title, text) = crate::text::new_mail_words(count, &from, &newest.info.subject, watched);
                 self.emit(Event::NewMail {
                     account: self.account,
                     folder,
                     uid: newest.info.uid,
-                    count: fresh.announced.len(),
+                    count,
                     from,
                     subject: newest.info.subject.clone(),
-                    watched: newest.mark == pe_store::ThreadMark::Watch,
+                    watched,
+                    title,
+                    text,
                 });
             }
         }

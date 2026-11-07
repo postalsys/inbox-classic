@@ -124,6 +124,10 @@ ui-still-running = Inbox Classic sigue abierto
 ui-no-subject = (sin asunto)
 ui-quoted = «{ $subject }»
 ui-newest-from = Último mensaje de { $sender }: { $subject }
+ui-new-messages = { $count ->
+    [one] { $count } mensaje nuevo
+   *[other] { $count } mensajes nuevos
+}
 ui-outbox-waiting = { $count ->
     [one] { $count } mensaje en la Bandeja de salida
    *[other] { $count } mensajes en la Bandeja de salida

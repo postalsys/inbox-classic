@@ -68,10 +68,6 @@ gtk-outbox-row = Para: { $to }  ·  En cola desde { $queued }  ·  { $status }
 
 ## The app
 
-gtk-new-messages = { $count ->
-    [one] { $count } mensaje nuevo
-   *[other] { $count } mensajes nuevos
-}
 gtk-still-running-detail = Inbox Classic sigue buscando correo nuevo en segundo plano. Utilice su icono en la barra superior para abrir la aplicación o salir de ella.
 gtk-sign-in-again-ask =
     Se rechazó el inicio de sesión en { $account } o la sesión ha caducado.

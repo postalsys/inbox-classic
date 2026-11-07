@@ -36,6 +36,8 @@ pub enum Action {
     Archive,
     Move(FolderId),
     Copy(FolderId),
+    // Watch and Ignore act on conversations, which can have messages in any folder: `act` hands them to
+    // `mark_conversations` (watch.rs) before anything else, so they never reach the per-folder path below it.
     /// Watch Conversation: their conversations watched, or no longer when all of them are ([`Summary::watched`])
     Watch,
     /// Ignore Conversation: their conversations ignored (and read), or no longer when all of them are
@@ -101,6 +103,17 @@ impl Summary {
             parts.push(tr_args(Text::SelectionFlagged, &[("count", self.flagged.into())]));
         }
         parts.join(", ")
+    }
+
+    /// Whether `action` on them takes them out of the list, which then selects the row after them: Delete, Move,
+    /// Junk, Not Junk and Archive, and Ignore Conversation while the list hides ignored conversations (`hide_ignored`)
+    /// unless all of them are ignored already, when it takes the mark away
+    pub fn leaves_list(&self, action: Action, hide_ignored: bool) -> bool {
+        match action {
+            Action::Delete | Action::Move(_) | Action::Junk(_) | Action::Archive => true,
+            Action::Ignore => hide_ignored && !self.ignored,
+            _ => false,
+        }
     }
 
     /// Whether Flag flags them (one is not flagged) or takes the flags away (all are)

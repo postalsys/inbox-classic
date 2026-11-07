@@ -505,12 +505,11 @@ public final class Mailbox: NSObject {
         rows = 0
         showFolderColumn()
         showPersonColumn()
-        // the counts of the folder come from its indexes; a search and All Inboxes count what they find; an account
-        // lists nothing. Grouped by conversation the list has fewer rows than messages: the core counts them
-        if severalFolders {
+        // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
+        // conversations what they find; an account lists nothing. Grouped by conversation the list has fewer rows than
+        // messages: the core counts them
+        if severalFolders || folder != 0 {
             (total, unread) = core.messageCount(search)
-        } else if folder != 0 {
-            (total, unread) = core.folderCounts(folder)
         }
         rows = grouped && total > 0 ? core.listRows(search) : total
         indentSubjectHeader()
@@ -890,13 +889,13 @@ public final class Mailbox: NSObject {
         reloadList(keepSelection: true)
     }
 
-    /// grouping turned on or off in Settings: the list again, the message shown still selected
     /// View > Hide Ignored Conversations turned on or off
     func hideIgnoredChanged() {
         reloadList(keepSelection: true)
         changed()
     }
 
+    /// grouping turned on or off in Settings: the list again, the message shown still selected
     func groupingChanged() {
         expanded = []
         reloadList(keepSelection: true)
@@ -1025,16 +1024,22 @@ public final class Mailbox: NSObject {
         actAndRemove(PE_ACTION_ARCHIVE)
     }
 
-    /// Watch Conversation: the conversations of the selected messages watched, or no longer when all of them are
-    func watchSelected() {
+    /// Watch Conversation (`PE_ACTION_WATCH`) or Ignore Conversation (`PE_ACTION_IGNORE`): the conversations of the
+    /// selected messages watched, or ignored and read, or no longer when all of them are. The core says whether that
+    /// takes them out of the list (Ignore while ignored conversations are hidden)
+    func markConversations(_ action: PeAction) {
         guard hasSelection else { return }
-        act(PE_ACTION_WATCH)
+        if leavesList(action) {
+            actAndRemove(action)
+        } else {
+            act(action)
+        }
     }
 
-    /// Ignore Conversation: the conversations of the selected messages ignored and read, or no longer when all are
-    func ignoreSelected() {
-        guard hasSelection else { return }
-        act(PE_ACTION_IGNORE)
+    /// whether `action` takes the selected messages out of the list, as the core says from the selection now
+    private func leavesList(_ action: PeAction, to: Int64 = 0) -> Bool {
+        updateSummary()
+        return pe_selection_leaves_list(&summary, action, to, AppDelegate.shared?.hideIgnored ?? false)
     }
 
     /// the text of the rows of an ignored conversation: grey, as what is turned off is
@@ -1733,7 +1738,7 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             }
             // unread messages in bold, as Outlook Express shows them, and closed conversations with unread mail
             cell.show(value, bold: message.bold, right: id.rawValue == ColumnID.size.rawValue,
-                      grey: message.mark == PE_THREAD_MARK_IGNORE)
+                      grey: message.dimmed)
             return cell
         }
     }
@@ -1970,7 +1975,7 @@ final class SubjectCell: NSTableCellView {
         // the count is a number alone, which needs no words of a language
         label.stringValue = message.opens ? "\(message.subject) (\(message.threadCount))" : message.subject
         label.font = message.bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
-        label.textColor = message.mark == PE_THREAD_MARK_IGNORE ? Mailbox.ignoredColor : .labelColor
+        label.textColor = message.dimmed ? Mailbox.ignoredColor : .labelColor
         disclosure.isHidden = !message.opens
         disclosure.state = message.threadExpanded ? .on : .off
         indent.constant = !grouped ? SubjectCell.inset : SubjectCell.glyph + CGFloat(message.threadDepth) * SubjectCell.step
@@ -2097,9 +2102,9 @@ public final class MessageTable: NSTableView {
             mailbox?.nextUnread()
         // W watches the conversation, K ignores it ("kill"), as in Thunderbird
         case 13 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
-            mailbox?.watchSelected()
+            mailbox?.markConversations(PE_ACTION_WATCH)
         case 40 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
-            mailbox?.ignoreSelected()
+            mailbox?.markConversations(PE_ACTION_IGNORE)
         // Right opens the selected conversation, Left closes it (from a message under it too)
         case 124 where mailbox?.openOrClose(true) == true, 123 where mailbox?.openOrClose(false) == true:
             break

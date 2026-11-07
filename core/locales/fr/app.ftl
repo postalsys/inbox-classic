@@ -124,6 +124,10 @@ ui-still-running = Inbox Classic fonctionne en arrière-plan
 ui-no-subject = (sans objet)
 ui-quoted = « { $subject } »
 ui-newest-from = Dernier message de { $sender } : { $subject }
+ui-new-messages = { $count ->
+    [one] { $count } nouveau message
+   *[other] { $count } nouveaux messages
+}
 ui-outbox-waiting = { $count ->
     [one] { $count } message dans la Boîte d'envoi
    *[other] { $count } messages dans la Boîte d'envoi

@@ -423,7 +423,7 @@ const sections = [
             {
                 shot: 'threads-4-watch',
                 name: 'Watch Conversation',
-                what: "Message > Watch Conversation puts glasses in the Watch column of a conversation, as Outlook Express did: a new message in it is always announced, even from a folder of the user's other than the Inbox, and the notification says the conversation is watched. Choosing it again takes the mark away; a mark lasts when a late message joins two conversations, Watch winning over Ignore.",
+                what: "Message > Watch Conversation puts glasses in the Watch column of a conversation, as Outlook Express did: a new message in it is always announced, even from a folder of the user's other than the Inbox, and the notification says the conversation is watched. Choosing it again takes the mark away; when a late message joins two conversations, the joined one is watched if either was, and ignored only if both were.",
                 how: 'Message > Watch Conversation, W in the message list.',
                 checked: [
                     'Watch Conversation shows the glasses and checks the menu item',

@@ -239,20 +239,9 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         if TestHooks.notified == nil && window.isVisible && !window.isMiniaturized && NSApp.isActive && window.isKeyWindow {
             return
         }
-        let subject = event.detail.isEmpty ? Text.uiNoSubject.text : event.detail
-        if event.watched {
-            // a watched conversation says so in the title, over who wrote and the subject (of the newest)
-            notifyUser(title: Text.uiWatchedConversation.text,
-                       text: event.count <= 1 ? "\(event.message)\n\(subject)"
-                           : Text.macNewestFrom.text(["from": event.message, "subject": subject]),
-                       folder: event.folder, uid: event.uid)
-        } else if event.count <= 1 {
-            notifyUser(title: event.message, text: subject, folder: event.folder, uid: event.uid)
-        } else {
-            notifyUser(title: Text.macNewMessages.text(["count": event.count]),
-                       text: Text.macNewestFrom.text(["from": event.message, "subject": subject]),
-                       folder: event.folder, uid: event.uid)
-        }
+        // the core's words: who it is from over its subject, or how many over the newest, a watched conversation's
+        // saying so in the title
+        notifyUser(title: event.message, text: event.detail, folder: event.folder, uid: event.uid)
     }
 
     /// a notification of the system; a click on it opens the message (`folder`, `uid`), or the window

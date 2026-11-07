@@ -680,12 +680,10 @@ void Mailbox::ReloadList(bool keepSelection) {
     ShowFolderColumn();
     PeSearch search = Search();
     ShowPersonColumn(search);
-    // the counts of the folder come from its indexes; a search, of every folder, and All Inboxes count what they find.
-    // An account's own item lists nothing
-    if (SeveralFolders()) {
+    // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
+    // conversations what they find. An account's own item lists nothing
+    if (SeveralFolders() || folder_) {
         pe_message_count(core_, &search, &total_, &unread_);
-    } else if (folder_) {
-        pe_folder_counts(core_, folder_, &total_, &unread_);
     }
     // the status bar counts messages; grouped by conversation the list has fewer rows
     rowCount_ = !threads_ ? total_ : SeveralFolders() || folder_ ? pe_list_rows(core_, &search) : 0;
@@ -885,7 +883,7 @@ HBITMAP FlagBitmap(int color, bool checked) {
 
 // an ignored conversation's row in grey, but where it is selected: the highlight's own colours there
 void Mailbox::GreyIgnored(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const {
-    if (row && row->mark == PE_THREAD_MARK_IGNORE && !(ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED)) {
+    if (row && row->dimmed && !(ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED)) {
         draw->clrText = GetSysColor(COLOR_GRAYTEXT);
     }
 }
@@ -914,7 +912,7 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
     bool active = GetFocus() == list_;
     int back = !selected ? COLOR_WINDOW : active ? COLOR_HIGHLIGHT : COLOR_BTNFACE;
-    int fore = selected ? (active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT) : row.mark == PE_THREAD_MARK_IGNORE ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT;
+    int fore = selected ? (active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT) : row.dimmed ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT;
     FillRect(dc, &cell, GetSysColorBrush(back));
     RECT box = ThreadBox(cell);
     if (row.thread_opens) {
@@ -1063,10 +1061,7 @@ void Mailbox::TakeSelection(bool rebuild) {
         PeSearch search = Search();
         pe_selection_set_ranges(core_, selection_.get(), &search, sort_, ascending_, starts.data(), ends.data(), starts.size());
     }
-    summary_ = {};
-    if (pe_selection_count(selection_.get()) > 0) {
-        pe_selection_summary(core_, selection_.get(), &summary_);
-    }
+    RefreshSummary();
     if (count <= 1) {
         return;
     }
@@ -1235,9 +1230,10 @@ bool Mailbox::Act(PeAction action, int64_t to) {
     if (pe_selection_count(selection_.get()) == 0) {
         return false;
     }
-    // what takes the place of rows that leave the list: the row after the last of them
-    bool leaves = action == PE_ACTION_DELETE || action == PE_ACTION_MOVE || action == PE_ACTION_JUNK || action == PE_ACTION_NOT_JUNK ||
-                  action == PE_ACTION_ARCHIVE;
+    // what takes the place of rows that leave the list: the row after the last of them. The core says which actions
+    // take them out, from the selection as it is now (Ignore while ignored conversations are hidden)
+    RefreshSummary();
+    bool leaves = pe_selection_leaves_list(&summary_, action, to, hideIgnored_);
     int after = leaves ? RowAfterSelection() : -1;
     char* reason = nullptr;
     core::String done(pe_selection_act(core_, selection_.get(), action, to, &reason));
@@ -1246,6 +1242,13 @@ bool Mailbox::Act(PeAction action, int64_t to) {
         SelectAfterRemoval(after);
     }
     return done != nullptr;
+}
+
+void Mailbox::RefreshSummary() {
+    summary_ = {};
+    if (pe_selection_count(selection_.get()) > 0) {
+        pe_selection_summary(core_, selection_.get(), &summary_);
+    }
 }
 
 void Mailbox::Say(const std::wstring& text) {
@@ -1666,10 +1669,7 @@ void Mailbox::MarkConversations(PeAction action) {
 void Mailbox::UpdateConversationMarks(HMENU menu) {
     // the selection as the core knows it now: an action since it was taken may have changed the marks
     FlushSelection();
-    summary_ = {};
-    if (pe_selection_count(selection_.get()) > 0) {
-        pe_selection_summary(core_, selection_.get(), &summary_);
-    }
+    RefreshSummary();
     CheckMenuItem(menu, IDM_WATCH_CONVERSATION, MF_BYCOMMAND | (summary_.watched ? MF_CHECKED : MF_UNCHECKED));
     CheckMenuItem(menu, IDM_IGNORE_CONVERSATION, MF_BYCOMMAND | (summary_.ignored ? MF_CHECKED : MF_UNCHECKED));
 }

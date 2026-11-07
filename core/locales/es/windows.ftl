@@ -4,10 +4,6 @@
 ## La ventana principal
 
 win-still-running-detail = Inbox Classic sigue buscando correo nuevo en segundo plano. Haga clic en su icono para abrirlo. Para salir, abra el menú del icono con el botón derecho.
-win-new-messages = { $count ->
-    [one] { $count } mensaje nuevo
-   *[other] { $count } mensajes nuevos
-}
 win-default-app-not-installed = Inbox Classic no está instalado, por lo que Windows no lo muestra entre las aplicaciones de correo. Instálelo para elegirlo como aplicación predeterminada.
 win-default-app-settings = Windows abrirá la configuración de aplicaciones predeterminadas. Seleccione Inbox Classic para abrir los enlaces MAILTO.
 win-no-unread = No hay mensajes sin leer

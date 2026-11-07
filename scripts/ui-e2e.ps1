@@ -674,6 +674,8 @@ try {
     $main = [Native.Win]::FindWindow('InboxClassicMain', [NullString]::Value)
     $tree = [Native.Win]::GetDlgItem($main, $IDC_TREE)
     $list = [Native.Win]::GetDlgItem($main, $IDC_LIST)
+    # the message list's columns (Column in mailbox.cpp)
+    $COL_WATCH = 2; $COL_FROM = 3; $COL_SUBJECT = 4; $COL_FOLDER = 7
     $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
     Check ($null -ne $folders) "the folders of the account are in the tree ($folders)"
     # the first account's item: the first at the top of the tree with folders under it (All Inboxes, above the
@@ -693,7 +695,7 @@ try {
     }
     function Rows { ListCount $list }
     # the rows of the list with this subject
-    function SubjectRows([string]$s) { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 4) -eq $s }) }
+    function SubjectRows([string]$s) { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) -eq $s }) }
     # a tree's row by its account and folder, their unread counts and "(current)" left out; Zero when it is not there
     function TreeRow([IntPtr]$t, [string]$account, [string]$folder) {
         $name = { param($item) ([Native.Win]::RemoteTreeText($t, $item)) -replace ' \((\d+|current)\)$', '' }
@@ -1324,7 +1326,7 @@ public static class Dragger {
     SelectFolder 1
     Check ($null -ne (WaitFor { if ((Rows) -ge 2) { Rows } })) 'Sent Items has what was sent'
     SelectRow 0
-    $firstTo = [Native.Win]::RemoteListText($list, 0, 3)
+    $firstTo = [Native.Win]::RemoteListText($list, 0, $COL_FROM)
     Check ($firstTo -eq 'Fay') "Sent Items names whom each message went to, in a To column ($firstTo)"
     Shot $main 'main-3-sent-items'
     SelectFolder 0
@@ -1709,7 +1711,7 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     SelectFolder 0
-    $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, 4) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, 4) -eq 'Copy me') { Rows } } 30
+    $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, $COL_SUBJECT) -eq 'Copy me') { Rows } } 30
     # the first row and Archive (the fourth folder) on the screen
     $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
     for ($i = 0; $i -lt 3; $i++) { $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $archiveItem) }
@@ -1761,7 +1763,7 @@ public static class Dragger {
         [Native.Win]::MouseClick($box.Left + 120, [int](($box.Top + $box.Bottom) / 2))
     }
     [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
-    $subjects = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
+    $subjects = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) })
     $onServer = { param($mailbox) @($subjects | Where-Object { $s = $_; Find $mailbox "Subject: $([regex]::Escape($s))" }).Count }
     # Archive may have one of them already (the copy the drag made)
     $inArchive = & $onServer 'Archive'
@@ -1798,7 +1800,7 @@ public static class Dragger {
     }
     $restored = {
         $rows = @(& $selectedRows)
-        $names = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) } | Sort-Object)
+        $names = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) } | Sort-Object)
         $top = [int][Native.Win]::SendMessage($list, 0x1027, [IntPtr]::Zero, [IntPtr]::Zero)
         $page = [int][Native.Win]::SendMessage($list, 0x1028, [IntPtr]::Zero, [IntPtr]::Zero)
         $rows.Count -eq 3 -and (($names -join '|') -eq (($subjects | Sort-Object) -join '|')) -and $rows[0] -ge $top -and $rows[0] -lt $top + $page
@@ -1822,7 +1824,7 @@ public static class Dragger {
         flags = @() } | ConvertTo-Json)
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { (Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $notOpened } 30)
+    [void](WaitFor { (Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT) -eq $notOpened } 30)
     # the newest three, the one not downloaded among them
     SelectRow 0
     [void][Native.Win]::SetForegroundWindow($main)
@@ -1833,7 +1835,7 @@ public static class Dragger {
     }
     [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
     [void](WaitFor { (StatusPart $mainStatus 2) -match ', 3 selected$' } 10)
-    $three = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
+    $three = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) })
     # the file a subject becomes: what Windows does not allow in a name taken out
     $fileOf = { param($subject) (($subject -replace '[/\\]', '-') -replace '[<>:"|?*]', '') + '.eml' }
     $sameBytes = { param($dir)
@@ -1906,7 +1908,7 @@ public static class Dragger {
     $effect = [Native.Win]::SendText($main, $kDropFiles, "$($archive.ToInt64())|$text")
     Check ($effect -eq 0) "a file that is not a message is turned away ($effect)"
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $archive)
-    [void](WaitFor { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 4) -like 'Dropped*' }).Count -eq 3 } 20)
+    [void](WaitFor { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) -like 'Dropped*' }).Count -eq 3 } 20)
     # one of them shown
     $droppedRow = @(SubjectRows 'Dropped one')[0]
     if ($null -ne $droppedRow) { SelectRow $droppedRow }
@@ -1916,7 +1918,7 @@ public static class Dragger {
     [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)")
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { [Native.Win]::RemoteListText($list, 0, 4) -ne $notOpened } 20)
+    [void](WaitFor { [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT) -ne $notOpened } 20)
 
     Step 'flag colours'
     $IDM_FLAG_COLOR = 900; $IDM_FLAG_CLEAR = 908; $MF_CHECKED = 0x8
@@ -1941,22 +1943,28 @@ public static class Dragger {
         CopyScreen $picture $cell.Left $cell.Top
         $picture
     }
+    # every pixel of the part $rect gives of the row $row (CellPicture) handed to $visit; false when the part is empty.
+    # $visit keeps what it finds in a hashtable of its caller's
+    function ScanCell($row, [scriptblock]$rect, [scriptblock]$visit) {
+        $picture = CellPicture $row $rect
+        if (-not $picture) { return $false }
+        for ($x = 0; $x -lt $picture.Width; $x++) {
+            for ($y = 0; $y -lt $picture.Height; $y++) { $null = & $visit $picture.GetPixel($x, $y) }
+        }
+        $true
+    }
     # LVM_GETSUBITEMRECT of the flag column (1), its bounds
     $flagCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32)) }
     # the colour of a row's flag: the most coloured pixel of its flag cell, as the screen shows it
     $flagColor = {
         param($row)
-        $picture = CellPicture $row $flagCell
-        if (-not $picture) { return $null }
-        $best = $null; $most = -1
-        for ($x = 0; $x -lt $picture.Width; $x++) {
-            for ($y = 0; $y -lt $picture.Height; $y++) {
-                $p = $picture.GetPixel($x, $y)
-                $spread = [Math]::Max($p.R, [Math]::Max($p.G, $p.B)) - [Math]::Min($p.R, [Math]::Min($p.G, $p.B))
-                if ($spread -gt $most) { $most = $spread; $best = $p }
-            }
+        $found = @{ best = $null; most = -1 }
+        $null = ScanCell $row $flagCell {
+            param($p)
+            $spread = [Math]::Max($p.R, [Math]::Max($p.G, $p.B)) - [Math]::Min($p.R, [Math]::Min($p.G, $p.B))
+            if ($spread -gt $found.most) { $found.most = $spread; $found.best = $p }
         }
-        $best
+        $found.best
     }
     $near = { param($c, $r, $g, $b) $c -and [Math]::Abs($c.R - $r) -lt 40 -and [Math]::Abs($c.G - $g) -lt 40 -and [Math]::Abs($c.B - $b) -lt 40 }
     # another row selected, so the flag is drawn on the list's white
@@ -1965,7 +1973,7 @@ public static class Dragger {
     Check (& $near $purple 136 23 152) "a message flagged purple by another program (Apple Mail) shows a purple flag ($purple)"
 
     # three rows without a flag for the colours
-    $plain = @(0..([Math]::Min(8, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) } |
+    $plain = @(0..([Math]::Min(8, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) } |
         Where-Object { $_ -and $_ -ne $apple -and ((Find 'INBOX' "Subject: $([regex]::Escape($_))").flags -notcontains '\Flagged') } | Select-Object -First 3)
     $flagsOf = { param($subject) @((Find 'INBOX' "Subject: $([regex]::Escape($subject))").flags) }
 
@@ -2008,18 +2016,14 @@ public static class Dragger {
     # on the selected rows' highlight the flag is drawn white, as the Mac shows it: a blue one would not be seen
     $selectedFlag = {
         param($row)
-        $picture = CellPicture $row $flagCell
-        if (-not $picture) { return $null }
         # the lightest pixel of the cell
-        $best = $null; $most = -1
-        for ($x = 0; $x -lt $picture.Width; $x++) {
-            for ($y = 0; $y -lt $picture.Height; $y++) {
-                $p = $picture.GetPixel($x, $y)
-                $light = [Math]::Min($p.R, [Math]::Min($p.G, $p.B))
-                if ($light -gt $most) { $most = $light; $best = $p }
-            }
+        $found = @{ best = $null; most = -1 }
+        $null = ScanCell $row $flagCell {
+            param($p)
+            $light = [Math]::Min($p.R, [Math]::Min($p.G, $p.B))
+            if ($light -gt $found.most) { $found.most = $light; $found.best = $p }
         }
-        $best
+        $found.best
     }
     $white = & $selectedFlag (& $rowOf $plain[1])
     Check ($white -and $white.R -gt 200 -and $white.G -gt 200 -and $white.B -gt 200) "a selected row's flag is drawn white on its highlight ($white)"
@@ -2160,8 +2164,8 @@ public static class Dragger {
     Step 'message window'
     $IDC_PREVIOUS = 231; $IDC_NEXT = 232
     [void](WaitFor { if ((Rows) -ge 2) { Rows } } 20)
-    $firstSubject = [Native.Win]::RemoteListText($list, 0, 4)
-    $secondSubject = [Native.Win]::RemoteListText($list, 1, 4)
+    $firstSubject = [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT)
+    $secondSubject = [Native.Win]::RemoteListText($list, 1, $COL_SUBJECT)
     $firstPattern = "Subject: $([regex]::Escape($firstSubject))"
     SelectRow 0
     # unread again, so that the window is what marks it read
@@ -2214,7 +2218,7 @@ public static class Dragger {
     Command $main $IDM_MARK_ALL_READ
     AddMessage "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Unread in Archive`r`n`r`nStill unread.`r`n" @() 'Archive'
     Command $main $IDM_SYNC
-    $thirdSubject = [Native.Win]::RemoteListText($list, 2, 4)
+    $thirdSubject = [Native.Win]::RemoteListText($list, 2, $COL_SUBJECT)
     $thirdPattern = "Subject: $([regex]::Escape($thirdSubject))"
     [void](WaitFor { Seen $thirdPattern } 20)
     SelectRow 2
@@ -2321,7 +2325,7 @@ public static class Dragger {
         Shot $main 'threads-1-collapsed'
         Key $list $VK_RIGHT
         Check ([bool](WaitFor { (Rows) -eq $grouped + 2 } 10)) "Right expands it ($(Rows) rows)"
-        $under = @(($at + 1), ($at + 2) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
+        $under = @(($at + 1), ($at + 2) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) })
         Check (($under | Where-Object { $_ -eq "Re: $topic" }).Count -eq 2) "its replies are under it ($($under -join ', '))"
         Shot $main 'threads-2-expanded'
         Key $list $VK_LEFT
@@ -2367,35 +2371,21 @@ public static class Dragger {
         SelectFolder 0
         Start-Sleep -Seconds 1
     }
-    # the dark pixels of the Watch column (2) of a row: its glasses or its sign
-    $watchCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]2 -shl 32)) }
+    # the dark pixels of the Watch column of a row: its glasses or its sign
+    $watchCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]$COL_WATCH -shl 32)) }
     $watchMark = {
         param($row)
-        $picture = CellPicture $row $watchCell
-        if (-not $picture) { return 0 }
-        $dark = 0
-        for ($x = 0; $x -lt $picture.Width; $x++) {
-            for ($y = 0; $y -lt $picture.Height; $y++) {
-                $p = $picture.GetPixel($x, $y)
-                if ($p.R -lt 100 -and $p.G -lt 100 -and $p.B -lt 100) { $dark++ }
-            }
-        }
-        $dark
+        $found = @{ dark = 0 }
+        $null = ScanCell $row $watchCell { param($p) if ($p.R -lt 100 -and $p.G -lt 100 -and $p.B -lt 100) { $found.dark++ } }
+        $found.dark
     }
-    # the darkest pixel of a row's From cell (3): black for its words, grey for an ignored conversation's
-    $fromCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]3 -shl 32)) }
+    # the darkest pixel of a row's From cell: black for its words, grey for an ignored conversation's
+    $fromCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]$COL_FROM -shl 32)) }
     $darkest = {
         param($row)
-        $picture = CellPicture $row $fromCell
-        if (-not $picture) { return 255 }
-        $least = 255
-        for ($x = 0; $x -lt $picture.Width; $x++) {
-            for ($y = 0; $y -lt $picture.Height; $y++) {
-                $p = $picture.GetPixel($x, $y)
-                $least = [Math]::Min($least, [Math]::Max($p.R, [Math]::Max($p.G, $p.B)))
-            }
-        }
-        $least
+        $found = @{ least = 255 }
+        $null = ScanCell $row $fromCell { param($p) $found.least = [Math]::Min($found.least, [Math]::Max($p.R, [Math]::Max($p.G, $p.B))) }
+        $found.least
     }
     $coastRow = { @(SubjectRows $topic)[0] }
     SelectRow (& $coastRow)
@@ -2602,7 +2592,7 @@ public static class Dragger {
         Start-Sleep -Milliseconds 300
         [Native.Win]::MouseClick($link[0], $link[1])
         [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
-        Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), 4) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
+        Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), $COL_SUBJECT) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
     }
     SelectFolder 0
     [void](WaitFor { $null -ne (& $rowOf $failedSubject) } 20)
@@ -2624,7 +2614,7 @@ public static class Dragger {
 
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:bounce')
     $both = WaitFor {
-        $found = @(0..([Math]::Max(0, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
+        $found = @(0..([Math]::Max(0, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) })
         if ((Rows) -eq 2 -and $found -contains $failedSubject -and $found -contains $delayedSubject) { $true }
     } 15
     Check ([bool]$both) "is:bounce finds the two notices and nothing else ($(Rows))"
@@ -3108,7 +3098,6 @@ public static class Dragger {
     # grouped by conversation the rows are fewer (replies share a row): the messages the list has are counted
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     Check ([bool](WaitFor { (Rows) -ge 1 -and (StatusPart $mainStatus 2) -match "^$expected message" } 20)) "it lists the mail of both accounts' Inboxes ($(Rows) rows, $(StatusPart $mainStatus 2) of $expected)"
-    $COL_FOLDER = 7
     $places = @(0..([Math]::Min(4, (Rows)) - 1) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_FOLDER) })
     Check (($places -contains 'Work') -and ($places -contains 'Alex Morgan')) "newest first, the two accounts' messages among each other, the Account column naming each ($($places -join ', '))"
     Check ((StatusPart $mainStatus 2) -match "^$expected message") "the status bar counts both Inboxes ($(StatusPart $mainStatus 2))"
@@ -3149,7 +3138,7 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT) -eq $across) { Rows } } 30)
     SelectRow 0
     Command $main $IDM_MOVE
     $move = WaitPicker 'Move Message'
@@ -3182,7 +3171,7 @@ public static class Dragger {
     # the second account's Archive in the main tree, with the message in it
     $workArchive = TreeRow $tree 'Work' 'Archive'
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $workArchive)
-    [void](WaitFor { if ((Rows) -ge 1 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 20)
+    [void](WaitFor { if ((Rows) -ge 1 -and [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT) -eq $across) { Rows } } 20)
     SelectRow 0
     Shot $main 'move-2-accounts'
     SelectFolder 0
@@ -3190,7 +3179,7 @@ public static class Dragger {
     Check ([bool](WaitFor { $null -ne (Find 'INBOX' "Subject: $across") } 30)) 'Edit > Undo Move brings it back to the first account'
     Check ([bool](WaitFor { -not ((Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $across" }) } 20)) 'and out of the second account''s Archive'
     # Copy to Folder: the second account's Archive is under Recent now
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 1, 4) -eq $copied) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 1, $COL_SUBJECT) -eq $copied) { Rows } } 30)
     SelectRow 1
     Command $main $IDM_COPY
     $copy = WaitPicker 'Copy Message'
@@ -3207,7 +3196,7 @@ public static class Dragger {
     Check ($null -ne (Find 'INBOX' "Subject: $copied")) 'and keeps it in the Inbox'
     # dragged onto the second account's Archive in the folder tree
     SelectFolder 0
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 2, 4) -eq $dragged) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 2, $COL_SUBJECT) -eq $dragged) { Rows } } 30)
     SelectRow 2
     [void][Native.Win]::SetForegroundWindow($main)
     $workArchive = TreeRow $tree 'Work' 'Archive'
