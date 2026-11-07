@@ -267,7 +267,7 @@ impl Key {
                     if !key.key.is_empty() {
                         return None;
                     }
-                    let known = matches!(other, "Enter" | "Delete" | "/" | ",")
+                    let known = matches!(other, "Enter" | "Delete" | "/" | "," | "." | "[" | "]")
                         || (other.len() == 1 && other.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()))
                         || other
                             .strip_prefix('F')
@@ -329,6 +329,9 @@ impl Key {
             "Enter" => out.push_str("Return"),
             "/" => out.push_str("slash"),
             "," => out.push_str("comma"),
+            "." => out.push_str("period"),
+            "[" => out.push_str("bracketleft"),
+            "]" => out.push_str("bracketright"),
             other if other.len() == 1 => out.push_str(&other.to_lowercase()),
             other => out.push_str(other),
         }

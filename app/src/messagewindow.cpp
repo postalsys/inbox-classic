@@ -6,12 +6,15 @@
 #include "icons.h"
 
 #include <algorithm>
+#include <utility>
 #include <vector>
 
 namespace {
 
 const wchar_t* kMessageClass = L"InboxClassicMessage";
 const wchar_t* kTitle = L"Inbox Classic";
+// a find in the message found nothing: said in a message box, outside the WebView2 event
+constexpr UINT WM_NOT_FOUND = WM_APP + 70;
 
 struct MessageWindow {
     HWND hwnd = nullptr;
@@ -35,6 +38,8 @@ struct MessageWindow {
     // the tooltips of Previous and Next, kept while the toolbar may ask for them
     std::wstring previousTip;
     std::wstring nextTip;
+    // what a find that found nothing says (WM_NOT_FOUND)
+    std::wstring notFound;
     Reader reader;
 
     PeSearch Search() const { return {order.folder, order.allInboxes, PE_SHOW_ALL, order.text.c_str()}; }
@@ -127,6 +132,23 @@ void Show(MessageWindow* state, int64_t folder, uint64_t uid, const PeMessage* r
     Layout(state);
 }
 
+// the next unread message of its list; at the end of it, the main window says none is left (the window stays in its
+// list, it does not go on to another folder)
+void NextUnread(MessageWindow* state) {
+    PeSearch search = state->Search();
+    int64_t folder = 0;
+    uint64_t uid = 0;
+    char* question = nullptr;
+    PeNextUnread step = pe_next_unread_step(state->core, &search, state->order.sort, state->order.ascending, state->folder, state->uid,
+                                            &folder, &uid, &question);
+    core::String unused(question);
+    if (step == PE_NEXT_UNREAD_MESSAGE && uid) {
+        Show(state, folder, uid);
+    } else {
+        state->mailbox->Say(core::T(PE_TEXT_NO_UNREAD_LEFT));
+    }
+}
+
 void Go(MessageWindow* state, bool forward) {
     int64_t folder = forward ? state->nextFolder : state->previousFolder;
     uint64_t uid = forward ? state->nextUid : state->previousUid;
@@ -189,7 +211,7 @@ void Unsubscribe(MessageWindow* state) {
 }
 
 // the command of a shortcut of the window, 0 for a key that is none: Esc closes it, the others are the main window's
-WORD KeyCommand(UINT key) {
+WORD ShortcutCommand(UINT key) {
     // Esc with any keys held (Ctrl+Esc never reaches a window): a modifier the window thinks is still held does not
     // keep it open
     if (key == VK_ESCAPE) {
@@ -202,7 +224,11 @@ WORD KeyCommand(UINT key) {
         return 0;
     }
     if (!control) {
-        return key == VK_DELETE && !shift ? WORD{IDM_DELETE} : WORD{0};
+        if (shift) {
+            return 0;
+        }
+        // N: the next unread message, as in the list
+        return key == VK_DELETE ? WORD{IDM_DELETE} : key == 'N' ? WORD{IDM_NEXT_UNREAD} : WORD{0};
     }
     if (key == 'R') {
         return shift ? WORD{IDM_REPLY_ALL} : WORD{IDM_REPLY};
@@ -216,6 +242,14 @@ WORD KeyCommand(UINT key) {
     return key == 'P' ? WORD{IDM_PRINT} : WORD{0};
 }
 
+// the WM_COMMAND of a key of the window, 0 for none: the keys for reading come with code 1, as from accelerators
+WPARAM KeyCommand(UINT key) {
+    if (WORD reading = ReadingKey(key)) {
+        return MAKEWPARAM(reading, 1);
+    }
+    return ShortcutCommand(key);
+}
+
 bool OnCommand(MessageWindow* state, WORD id, WORD code) {
     switch (id) {
     case IDCANCEL:
@@ -223,7 +257,15 @@ bool OnCommand(MessageWindow* state, WORD id, WORD code) {
         return true;
     case IDC_PREVIOUS:
     case IDC_NEXT:
-        Go(state, id == IDC_NEXT);
+    case IDM_PREVIOUS_MESSAGE:
+    case IDM_NEXT_MESSAGE:
+        Go(state, id == IDC_NEXT || id == IDM_NEXT_MESSAGE);
+        return true;
+    case IDM_FIND_IN_MESSAGE:
+        state->reader.FindInMessage(state->hwnd, code == 1);
+        return true;
+    case IDM_NEXT_UNREAD:
+        NextUnread(state);
         return true;
     case IDM_REPLY:
         Reply(state, PE_DRAFT_KIND_REPLY);
@@ -285,6 +327,12 @@ LRESULT CALLBACK MessageProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
     }
     case WM_TIMER:
         state->reader.OnTimer(wParam);
+        return 0;
+    case WM_NOT_FOUND:
+        if (!state->notFound.empty()) {
+            MessageBoxW(hwnd, std::exchange(state->notFound, {}).c_str(), core::Title(PE_TEXT_CMD_FIND_IN_MESSAGE).c_str(),
+                        MB_OK | MB_ICONINFORMATION);
+        }
         return 0;
     case WM_DRAWITEM:
         if (state->reader.OnDrawItem(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam))) {
@@ -399,12 +447,19 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, const MessageL
     state->reader.Create(hwnd, core);
     // what the window does on a key also while the message has the keyboard
     state->reader.SetKeys([hwnd](UINT key) {
-        WORD id = KeyCommand(key);
-        if (id) {
-            PostMessageW(hwnd, WM_COMMAND, id, 0);
+        WPARAM command = KeyCommand(key);
+        if (command) {
+            PostMessageW(hwnd, WM_COMMAND, command, 0);
         }
-        return id != 0;
+        return command != 0;
     });
+    // words not found: said once the find is over (not in the WebView2 event that tells it)
+    state->reader.onFound = [state](const std::wstring& said) {
+        state->notFound = said;
+        if (!said.empty()) {
+            PostMessageW(state->hwnd, WM_NOT_FOUND, 0, 0);
+        }
+    };
     // the subject from the message itself once it is there
     state->reader.onShown = [state] {
         if (const PeMessageInfo* info = state->reader.Info()) {
@@ -466,11 +521,11 @@ bool MessageWindowKey(const MSG& msg) {
     if (std::find(g_messageWindows.begin(), g_messageWindows.end(), root) == g_messageWindows.end()) {
         return false;
     }
-    WORD id = KeyCommand(static_cast<UINT>(msg.wParam));
-    if (!id) {
+    WPARAM command = KeyCommand(static_cast<UINT>(msg.wParam));
+    if (!command) {
         return false;
     }
-    PostMessageW(root, WM_COMMAND, id, 0);
+    PostMessageW(root, WM_COMMAND, command, 0);
     return true;
 }
 

@@ -234,6 +234,15 @@ void Mailbox::Create(HWND parent, PeCore* core) {
 
     reader_.Create(parent, core);
     reader_.onShown = [this] { OnMessageShown(); };
+    reader_.onFound = [this](const std::wstring& said) { Say(said); };
+    // the keys for reading also while the message has the keyboard, sent as the accelerators send them
+    reader_.SetKeys([parent](UINT key) {
+        WORD id = ReadingKey(key);
+        if (id) {
+            PostMessageW(parent, WM_COMMAND, MAKEWPARAM(id, 1), 0);
+        }
+        return id != 0;
+    });
     // over the list while searching, in the colors of the information bar: what was found, and a link to end it
     searchBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_SEARCH_BAR, {});
     searchClear_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_CLEAR_SEARCH).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
@@ -1428,6 +1437,70 @@ void Mailbox::EmptyFolder(HWND owner) {
     Say(done ? Text(done.get()) : ReasonText(reason, PE_TEXT_UI_MESSAGES_NOT_CHANGED));
 }
 
+void Mailbox::SelectNeighbour(bool forward) {
+    FlushSelection();
+    int count = static_cast<int>(std::min<uint64_t>(total_, INT_MAX));
+    int focused = ListView_GetNextItem(list_, -1, LVNI_FOCUSED);
+    int at = focused < 0 ? (forward ? 0 : -1) : focused + (forward ? 1 : -1);
+    if (at < 0 || at >= count) {
+        return;
+    }
+    ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
+    ListView_SetItemState(list_, at, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+    ListView_EnsureVisible(list_, at, FALSE);
+    FlushSelection();
+}
+
+void Mailbox::NextUnread(HWND owner) {
+    FlushSelection();
+    PeSearch search = Search();
+    int64_t folder = 0;
+    uint64_t uid = 0;
+    char* question = nullptr;
+    PeNextUnread step = pe_next_unread_step(core_, &search, sort_, ascending_, reader_.Folder(), reader_.Uid(), &folder, &uid, &question);
+    core::String asked(question);
+    if (step == PE_NEXT_UNREAD_MESSAGE) {
+        SelectInList(folder, uid);
+        return;
+    }
+    auto item = items_.find(folder);
+    if (step != PE_NEXT_UNREAD_ASK || !asked || item == items_.end()) {
+        Say(core::T(PE_TEXT_NO_UNREAD_LEFT));
+        return;
+    }
+    // none left here: on to the folder the core names, after asking, from its top
+    if (MessageBoxW(owner, Text(asked.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONQUESTION) != IDYES) {
+        return;
+    }
+    TreeView_SelectItem(tree_, item->second);
+    search = Search();
+    int64_t first = folder;
+    char* again = nullptr;
+    step = pe_next_unread_step(core_, &search, sort_, ascending_, first, 0, &folder, &uid, &again);
+    core::String unused(again);
+    if (step == PE_NEXT_UNREAD_MESSAGE) {
+        SelectInList(folder, uid);
+    }
+}
+
+void Mailbox::GoToFolder(HWND owner) {
+    FolderPick pick;
+    pick.core = core_;
+    pick.title = core::Title(PE_TEXT_CMD_GO_TO_FOLDER);
+    pick.prompt = core::T(PE_TEXT_UI_GO_TO_PROMPT);
+    pick.verb = core::T(PE_TEXT_UI_OK);
+    auto item = items_.find(PickFolder(owner, pick));
+    if (item != items_.end()) {
+        TreeView_SelectItem(tree_, item->second);
+        SetFocus(list_);
+    }
+}
+
+void Mailbox::FindInMessage(HWND owner, bool again) {
+    FlushSelection();
+    reader_.FindInMessage(owner, again);
+}
+
 bool Mailbox::CanEmptyFolder() const {
     return !allInboxes_ && !Searching() && emptiableFolders_.contains(folder_) && total_ > 0;
 }
@@ -1514,6 +1587,11 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
         // A archives, as in Thunderbird; with Ctrl or Alt it is another command's
         if (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey == 'A' && GetKeyState(VK_CONTROL) >= 0 && GetKeyState(VK_MENU) >= 0) {
             ArchiveSelected();
+        }
+        // N goes to the next unread message, only without Ctrl, Alt or Shift
+        if (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey == 'N' && GetKeyState(VK_CONTROL) >= 0 && GetKeyState(VK_MENU) >= 0 &&
+            GetKeyState(VK_SHIFT) >= 0) {
+            NextUnread(parent_);
         }
         return true;
     case LVN_COLUMNCLICK: {

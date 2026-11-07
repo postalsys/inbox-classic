@@ -361,6 +361,24 @@ const sections = [
                 checked: ["The suggested name is the attachment's", 'The saved file is byte for byte what was sent']
             },
             {
+                shot: 'read-17-find',
+                name: 'Reading with the keyboard',
+                what: "View > Next Message and Previous Message step through the list; Next Unread Message (N in the list) finds the next unread message and offers the next folder with unread mail when none is left, as Outlook Express does. Edit > Find in This Message finds words in the message shown, with the web view's own find (no script runs in the message).",
+                how: 'Ctrl+. and Ctrl+, (Cmd+] and Cmd+[ on the Mac, Ctrl+< for Previous on Linux), N in the list, F3 (Cmd+Option+F).',
+                checked: [
+                    'Next and Previous Message select the rows below and above',
+                    'Next Unread selects the next unread message, then offers the next folder with unread mail',
+                    'Find in This Message finds a word of the message, and says when it is not there'
+                ]
+            },
+            {
+                shot: 'read-18-go-to',
+                name: 'Go to Folder',
+                what: 'View > Go to Folder shows the folders of every account in a tree, narrowed as a part of a name is typed, the ones used last at the top; choosing one shows it.',
+                how: 'View > Go to Folder, Ctrl+Y (Cmd+Shift+Y on the Mac).',
+                checked: ['Go to Folder lists the folders of every account and typing narrows them', 'Choosing Sent Items there shows Sent Items']
+            },
+            {
                 shot: 'read-16-window',
                 name: 'A message in a window of its own',
                 what: "Double-click (or Enter) opens a message in a window of its own, as in Outlook Express: its header, pictures, files and text as the reading pane shows them, with Reply, Reply All, Forward, Print, Delete, Archive and Junk, and Previous and Next through the list it came from. Several can be open at once. A draft opens to be finished instead.",

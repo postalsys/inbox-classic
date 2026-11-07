@@ -16,14 +16,12 @@ use crate::commands::Command;
 use crate::reader::Reader;
 use crate::ui::{self, TITLE};
 
-/// The window's own actions besides the commands it shares with the main window (and their keys)
-const PREVIOUS: &str = "previous";
-const NEXT: &str = "next";
-
 pub struct MessageWindow {
     pub window: adw::ApplicationWindow,
     pub reader: Rc<Reader>,
     title: adw::WindowTitle,
+    /// Where the window says what it can not do (no unread message left)
+    toasts: adw::ToastOverlay,
     /// Junk, or Not Junk for a message in a Junk folder
     junk: gtk::Button,
     /// The message shown
@@ -84,7 +82,9 @@ impl MessageWindow {
         let (header, junk) = header_bar(&title);
         let toolbar = adw::ToolbarView::new();
         toolbar.add_top_bar(&header);
-        toolbar.set_content(Some(&reader.widget));
+        let toasts = adw::ToastOverlay::new();
+        toasts.set_child(Some(&reader.widget));
+        toolbar.set_content(Some(&toasts));
         let window = adw::ApplicationWindow::builder()
             .application(&shell().application)
             .default_width(860)
@@ -97,6 +97,7 @@ impl MessageWindow {
             window,
             reader,
             title,
+            toasts,
             junk,
             message: Cell::new(message),
             search,
@@ -110,7 +111,8 @@ impl MessageWindow {
     }
 
     /// The actions of the header bar's buttons. Those of the commands have the commands' names, so the keys the main
-    /// window gives them (Ctrl+R, Ctrl+Shift+R, Ctrl+F, Ctrl+P, Ctrl+J) act on this message here
+    /// window gives them (Ctrl+R, Ctrl+Shift+R, Ctrl+F, Ctrl+P, Ctrl+J, Ctrl+. and Ctrl+Shift+comma, F3) act on this message
+    /// here
     fn install_actions(self: &Rc<Self>) {
         let add = |name: &str, run: fn(&Rc<MessageWindow>)| {
             let action = gio::SimpleAction::new(name, None);
@@ -133,8 +135,10 @@ impl MessageWindow {
         add(Command::Archive.name(), |this| this.act(Action::Archive));
         add(Command::Junk.name(), |this| this.act(Action::Junk(true)));
         add(Command::NotJunk.name(), |this| this.act(Action::Junk(false)));
-        add(PREVIOUS, |this| this.step(false));
-        add(NEXT, |this| this.step(true));
+        add(Command::PreviousMessage.name(), |this| this.step(false));
+        add(Command::NextMessage.name(), |this| this.step(true));
+        add(Command::NextUnread.name(), |this| this.next_unread());
+        add(Command::FindInMessage.name(), |this| this.reader.find_in_message());
         add(Command::Help.name(), |_| crate::help::open());
     }
 
@@ -146,6 +150,8 @@ impl MessageWindow {
             ("Escape", "window.close"),
             ("<Primary>w", "window.close"),
             ("Delete", "win.delete"),
+            // N goes to the next unread message, as in the main window's list
+            ("n", "win.next-unread"),
         ] {
             shortcuts.add_shortcut(gtk::Shortcut::new(
                 gtk::ShortcutTrigger::parse_string(keys),
@@ -200,8 +206,8 @@ impl MessageWindow {
         }
         let summary = core.summary(&[message]).unwrap_or_default();
         let (previous, next) = self.neighbours.get();
-        self.enable(PREVIOUS, previous.is_some());
-        self.enable(NEXT, next.is_some());
+        self.enable(Command::PreviousMessage.name(), previous.is_some());
+        self.enable(Command::NextMessage.name(), next.is_some());
         self.enable(Command::Archive.name(), summary.archivable);
         let (command, icon, tooltip) = if summary.in_junk {
             (Command::NotJunk, "ic-mail-checkmark-symbolic", t!(UiTbNotJunk))
@@ -225,6 +231,19 @@ impl MessageWindow {
         let (previous, next) = self.neighbours.get();
         if let Some(message) = if forward { next } else { previous } {
             self.show(message);
+        }
+    }
+
+    /// Next Unread Message: the next unread message of the list the window came from; it does not go on to other
+    /// folders (the main window does), so with none left it says so
+    fn next_unread(&self) {
+        let message = self.message.get();
+        match shell()
+            .core
+            .next_unread_step(&self.search, self.sort, message.folder, message.uid)
+        {
+            Ok(pe_core::NextUnread::Message(next)) => self.show(next),
+            _ => self.toasts.add_toast(adw::Toast::new(&t!(NoUnreadLeft))),
         }
     }
 
@@ -347,8 +366,16 @@ fn header_bar(title: &adw::WindowTitle) -> (adw::HeaderBar, gtk::Button) {
     }
     // flat as the other buttons of the bar, not a linked pair, which GNOME draws raised
     let steps = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-    steps.append(&button("ic-arrow-up-symbolic", &t!(UiPreviousTip), PREVIOUS));
-    steps.append(&button("ic-arrow-down-symbolic", &t!(UiNextTip), NEXT));
+    steps.append(&button(
+        "ic-arrow-up-symbolic",
+        &t!(UiPreviousTip),
+        Command::PreviousMessage.name(),
+    ));
+    steps.append(&button(
+        "ic-arrow-down-symbolic",
+        &t!(UiNextTip),
+        Command::NextMessage.name(),
+    ));
     header.pack_end(&steps);
     (header, junk)
 }

@@ -113,6 +113,10 @@ messages-gone = The messages are no longer there.
 folder-holds-no-messages = This folder cannot contain messages.
 not-archived-here = Messages in this folder can not be archived.
 not-emptied-here = Only Deleted Items and Junk E-mail can be emptied.
+next-unread-question = There are no more unread messages in { $folder }.
+
+    Go to { $next }, the next folder with unread messages?
+no-unread-left = There are no unread messages left.
 empty-question = { $count ->
     [one] Empty { $folder }?
 

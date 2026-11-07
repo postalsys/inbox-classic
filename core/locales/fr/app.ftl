@@ -46,6 +46,22 @@ cmd-junk = Marquer comme in&désirable
 cmd-not-junk = Marquer comme non indé&sirable
 # review: new
 cmd-archive = A&rchiver
+# review: new
+cmd-next-message = Message &suivant
+# review: new
+cmd-previous-message = Message &précédent
+# review: new
+cmd-next-unread = Message non &lu suivant
+# review: new
+cmd-go-to-folder = &Aller au dossier...
+# review: new
+cmd-find-in-message = Rechercher dans &ce message...
+# review: new
+ui-go-to-prompt = Aller au dossier :
+# review: new
+ui-find-in-message-hint = Rechercher dans ce message
+# review: new
+ui-find-not-found = « { $words } » n'est pas dans ce message
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...
