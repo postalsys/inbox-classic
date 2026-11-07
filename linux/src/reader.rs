@@ -309,6 +309,16 @@ impl Reader {
             leave();
             glib::Propagation::Stop
         });
+        // "Show the message that bounced" on a bounce's card: the message selected in the main window, its folder
+        // shown, as Go to Folder shows one (from a message window too, which then gives way to the main window)
+        self.preview.on_bounced_message(on(|this| {
+            let Some(message) = this.bounced_message() else {
+                return;
+            };
+            let main = shell().main();
+            main.show_bounced_message(message.folder, message.uid);
+            main.window().present();
+        }));
         let group = gio::SimpleActionGroup::new();
         let save = gio::SimpleAction::new("save-attachment", Some(glib::VariantTy::UINT32));
         let this = Rc::downgrade(self);
@@ -434,6 +444,11 @@ impl Reader {
     /// The subject of the message on screen
     pub fn subject(&self) -> Option<String> {
         self.view.borrow().as_ref().map(|v| v.subject.clone())
+    }
+
+    /// The message the bounce on screen returns, when it is in the account
+    pub fn bounced_message(&self) -> Option<MessageRef> {
+        self.view.borrow().as_ref().and_then(|v| v.bounced_message)
     }
 
     /// The message `uid` of `folder` (of `account`) asked for: its header from the list at once when there is `info`,

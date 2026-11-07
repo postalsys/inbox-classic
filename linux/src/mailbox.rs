@@ -1045,6 +1045,17 @@ impl Mailbox {
         self.select_in_list(folder, uid);
     }
 
+    /// "Show the message that bounced" on a bounce's card: the message it returns shown in its folder, a search
+    /// dropped too when that folder is the one selected already
+    pub fn show_bounced_message(&self, folder: i64, uid: u64) {
+        if self.searching() && self.folder.get() == folder && !self.all_inboxes.get() {
+            self.reset_find();
+            self.reload_list(false);
+            self.show_folder_name();
+        }
+        self.show_message(folder, uid);
+    }
+
     /// The row of the message `uid` of `folder` selected in the list; false when it is not there
     fn select_in_list(&self, folder: i64, uid: u64) -> bool {
         let core = &shell().core;

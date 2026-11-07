@@ -163,7 +163,12 @@ pub struct DocumentView {
     kind: &'static str,
     /// The URI of the document shown, the only one it may navigate to
     current: Rc<RefCell<String>>,
+    /// What "Show the message that bounced" on a bounce's card does; nothing without it
+    bounced: Bounced,
 }
+
+/// The handler of the link of a bounce's card, shared by the view and its policy decisions
+type Bounced = Rc<RefCell<Option<Rc<dyn Fn()>>>>;
 
 impl DocumentView {
     /// `kind` names the documents (`preview`, `help`, `compose`); `javascript` for the editor only
@@ -180,7 +185,9 @@ impl DocumentView {
         view.set_hexpand(true);
         let current: Rc<RefCell<String>> = Rc::default();
         let own = current.clone();
-        view.connect_decide_policy(move |view, decision, kind| decide(view, decision, kind, &own.borrow()));
+        let bounced: Bounced = Rc::default();
+        let link = bounced.clone();
+        view.connect_decide_policy(move |view, decision, kind| decide(view, decision, kind, &own.borrow(), &link));
         // no window opens from a document
         view.connect_create(|_, _| None);
         // the page's own menu without what makes no sense here (reload, back, inspect)
@@ -193,7 +200,14 @@ impl DocumentView {
             manager,
             kind,
             current,
+            bounced,
         }
+    }
+
+    /// `show` runs when "Show the message that bounced" on a bounce's card is clicked; the link itself says nothing,
+    /// the owner knows the message from the view it shows
+    pub fn on_bounced_message(&self, show: impl Fn() + 'static) {
+        *self.bounced.borrow_mut() = Some(Rc::new(show));
     }
 
     pub fn manager(&self) -> &webkit::UserContentManager {
@@ -237,12 +251,13 @@ impl DocumentView {
 }
 
 /// What a document may do: show itself (and its own anchors), nothing else; a link the user follows opens in the
-/// browser
+/// browser, but the link of a bounce's card, which goes to `bounced`
 fn decide(
     view: &webkit::WebView,
     decision: &webkit::PolicyDecision,
     kind: webkit::PolicyDecisionType,
     own: &str,
+    bounced: &Bounced,
 ) -> bool {
     use webkit::PolicyDecisionType as Kind;
     match kind {
@@ -259,7 +274,14 @@ fn decide(
                 decision.use_();
             } else {
                 decision.ignore();
-                if !same {
+                if pe_html::is_bounced_message_link(&uri) {
+                    // taken out first: the handler may show another document in this view
+                    let show = bounced.borrow().clone();
+                    if let Some(show) = show {
+                        // after this signal, as the view may be asked to load meanwhile
+                        glib::idle_add_local_once(move || show());
+                    }
+                } else if !same {
                     crate::ui::open_externally(&uri, crate::ui::window_of(view).as_ref());
                 }
             }
