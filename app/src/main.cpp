@@ -148,6 +148,8 @@ void UpdateMenu(HMENU menu) {
         UINT id = GetMenuItemID(menu, i);
         if (id == IDM_ARCHIVE) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanArchive() ? MF_ENABLED : MF_GRAYED));
+        } else if (id == IDM_EXPAND_ALL_THREADS || id == IDM_COLLAPSE_ALL_THREADS) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.Grouped() ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_EMPTY_FOLDER) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanEmptyFolder() ? MF_ENABLED : MF_GRAYED));
         } else if (CommandNeedsOne(id)) {
@@ -508,6 +510,9 @@ HMENU BuildMenu() {
     AppendMenuW(view, MF_STRING, IDM_PREVIOUS_MESSAGE, MenuItem(PE_TEXT_CMD_PREVIOUS_MESSAGE, L"Ctrl+,").c_str());
     AppendMenuW(view, MF_STRING, IDM_NEXT_UNREAD, MenuItem(PE_TEXT_CMD_NEXT_UNREAD, L"N").c_str());
     AppendMenuW(view, MF_STRING, IDM_GO_TO_FOLDER, MenuItem(PE_TEXT_CMD_GO_TO_FOLDER, L"Ctrl+Y").c_str());
+    AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(view, MF_STRING, IDM_EXPAND_ALL_THREADS, MenuItem(PE_TEXT_CMD_EXPAND_ALL_THREADS).c_str());
+    AppendMenuW(view, MF_STRING, IDM_COLLAPSE_ALL_THREADS, MenuItem(PE_TEXT_CMD_COLLAPSE_ALL_THREADS).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_PICTURES, MenuItem(PE_TEXT_CMD_PICTURES).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
@@ -1102,8 +1107,10 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_OPTIONS: {
         bool notify = g_notify;
-        bool restart = OptionsDialog(g_main, notify);
+        bool threads = g_mailbox.Grouped();
+        bool restart = OptionsDialog(g_main, notify, threads);
         SetNotify(notify);
+        g_mailbox.SetGrouped(threads);
         if (restart) {
             // as File > Exit, the messages being written asked first; started again once the window is gone
             g_restart = true;
@@ -1185,6 +1192,10 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_GO_TO_FOLDER:
         g_mailbox.GoToFolder(g_main);
+        return;
+    case IDM_EXPAND_ALL_THREADS:
+    case IDM_COLLAPSE_ALL_THREADS:
+        g_mailbox.ExpandAll(id == IDM_EXPAND_ALL_THREADS);
         return;
     case IDM_FIND_IN_MESSAGE:
         // F3 again finds the next place; the menu asks for the words
