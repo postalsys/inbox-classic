@@ -676,6 +676,8 @@ try {
     $list = [Native.Win]::GetDlgItem($main, $IDC_LIST)
     # the message list's columns (Column in mailbox.cpp)
     $COL_WATCH = 2; $COL_FROM = 3; $COL_SUBJECT = 4; $COL_FOLDER = 7
+    # the columns of a folder's list: attachment, flag, Watch, From, Subject, Received, Size; a search adds Folder
+    $FOLDER_COLUMNS = 7
     $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
     Check ($null -ne $folders) "the folders of the account are in the tree ($folders)"
     # the first account's item: the first at the top of the tree with folders under it (All Inboxes, above the
@@ -1357,12 +1359,12 @@ public static class Dragger {
     }
     $listHeader = [Native.Win]::SendMessage($list, 0x101F, [IntPtr]::Zero, [IntPtr]::Zero)
     $columns = { [int][Native.Win]::SendMessage($listHeader, 0x1200, [IntPtr]::Zero, [IntPtr]::Zero) }
-    Check ((& $columns) -eq 6) 'a folder has no Folder column'
+    Check ((& $columns) -eq $FOLDER_COLUMNS) 'a folder has no Folder column'
     # the folder bar: the static whose text starts with a space
     $folderBar = { ([Native.Win]::FindDescendants($main, 'Static') | ForEach-Object { WindowText $_ } | Where-Object { $_.StartsWith(' ') } | Select-Object -First 1) }
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
     Check ([bool](WaitFor { (Rows) -eq 1 })) 'typing in it narrows the list to what has it (the subject)'
-    Check ([bool](WaitFor { (& $columns) -eq 7 } 5)) 'it searches every folder: the list has a Folder column'
+    Check ([bool](WaitFor { (& $columns) -eq ($FOLDER_COLUMNS + 1) } 5)) 'it searches every folder: the list has a Folder column'
     # the search bar over the list says what was found for what, the folder bar where
     $IDC_SEARCH_BAR = 208; $IDC_SEARCH_CLEAR = 209
     $searchBar = { WindowText ([Native.Win]::GetDlgItem($main, $IDC_SEARCH_BAR)) }
@@ -1378,7 +1380,7 @@ public static class Dragger {
     Check ([bool](WaitFor { (& $searchBar) -match '^No results for .nothing has this.' } 5)) "the search bar says there are no results ($(& $searchBar))"
     Shot $main 'find-3-no-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
-    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 6 })) 'clearing it shows the folder again, without the Folder column'
+    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq $FOLDER_COLUMNS })) 'clearing it shows the folder again, without the Folder column'
     Check (-not (Visible $main $IDC_SEARCH_BAR)) 'and without the search bar'
     # the clear button is there only while there is something to clear, and clears it
     Check (-not (Visible $field $IDC_FIND_CLEAR)) 'an empty Find box has no clear button'
@@ -1421,7 +1423,7 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos')
     [void](WaitFor { (Rows) -ge 1 -and (& $foundCount) -eq $everywhere })
     Key $find $VK_ESCAPE
-    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 6 })) 'Esc ends the search: the folder again, without the Folder column'
+    Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq $FOLDER_COLUMNS })) 'Esc ends the search: the folder again, without the Folder column'
 
     # ---- files ----
 
