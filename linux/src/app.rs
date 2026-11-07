@@ -636,6 +636,7 @@ pub fn run_command(command: Command) {
         Command::NewFolder => spawn(async move { main.new_folder().await }),
         Command::RenameFolder => spawn(async move { main.rename_folder().await }),
         Command::DeleteFolder => spawn(async move { main.delete_folder().await }),
+        Command::EmptyFolder => spawn(async move { main.empty_folder().await }),
         Command::Accounts => spawn(async move {
             if crate::accounts::accounts_dialog(main.window()).await {
                 main.reload();

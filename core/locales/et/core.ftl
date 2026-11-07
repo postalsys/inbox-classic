@@ -112,6 +112,17 @@ messages-gone = Neid kirju pole enam.
 folder-holds-no-messages = Selles kaustas ei saa kirju hoida.
 # review: new
 not-archived-here = Selle kausta kirju ei saa arhiveerida.
+# review: new
+not-emptied-here = Tühjendada saab ainult kaustu Kustutatud kirjad ja Rämpspost.
+# review: new
+empty-question = { $count ->
+    [one] Kas tühjendada kaust { $folder }?
+
+        Selles olev kiri kustutatakse jäädavalt. Seda ei saa tagasi tuua.
+   *[other] Kas tühjendada kaust { $folder }?
+
+        Selles olevad kirjad ({ $messages }) kustutatakse jäädavalt. Neid ei saa tagasi tuua.
+}
 no-junk-folder = Sellel kontol pole rämpspostikausta, kuhu kirjad teisaldada.
 no-inbox-folder = Sellel kontol pole sisendkausta, kuhu kirjad teisaldada.
 done-flagged-color = { $messages } märgiti { $color ->

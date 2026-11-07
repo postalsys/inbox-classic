@@ -332,6 +332,45 @@ fn archives_into_an_archive_folder_made_for_it() {
 }
 
 #[test]
+fn empties_deleted_items_and_junk() {
+    let Some(s) = setup() else { return };
+    s.server.add_message("Trash", &rfc822("Old one", "Gone"), &[]);
+    s.server.add_message("Trash", &rfc822("Old two", "Gone"), &[]);
+    s.server.add_message("Junk", &rfc822("Spam", "Buy"), &[]);
+    s.server.add_message("INBOX", &rfc822("Keep", "Stays"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (trash, junk, inbox) = (id("Trash"), id("Junk"), id("INBOX"));
+
+    assert!(s.core.can_empty(trash).unwrap() && s.core.can_empty(junk).unwrap());
+    assert!(!s.core.can_empty(inbox).unwrap());
+    assert_eq!(
+        s.core.empty_folder_question(trash).unwrap().as_deref(),
+        Some("Empty Deleted Items?\n\nThe 2 messages in it are deleted for good. They can not be brought back.")
+    );
+    assert_eq!(s.core.empty_folder_question(inbox).unwrap(), None);
+    assert!(s.core.empty_folder(inbox).is_err(), "the Inbox is not emptied");
+
+    assert_eq!(s.core.empty_folder(trash).unwrap(), "Deleted 2 messages for good");
+    assert!(
+        s.core.messages(trash, Sort::default(), 0, 10).unwrap().is_empty(),
+        "out of the list at once"
+    );
+    eventually(|| s.server.subjects("Trash").is_empty(), "gone from the server");
+    assert_eq!(
+        s.core.empty_folder_question(trash).unwrap(),
+        None,
+        "nothing left to empty"
+    );
+    s.core.empty_folder(junk).unwrap();
+    eventually(|| s.server.subjects("Junk").is_empty(), "Junk E-mail emptied too");
+    assert_eq!(s.server.subjects("INBOX"), ["Keep"], "and nothing else");
+}
+
+#[test]
 fn archives_on_gmail_by_taking_every_label_off() {
     let Some(s) = setup_with(json!({ "storage": {
         "INBOX": {},

@@ -142,6 +142,12 @@ id = "delete_folder"
 windows = 117
 menu = "file"
 
+# Deleted Items or Junk E-mail: every message of it deleted for good, after asking
+[[command]]
+id = "empty_folder"
+windows = 139
+menu = "file"
+
 [[command]]
 id = "accounts"
 windows = 118

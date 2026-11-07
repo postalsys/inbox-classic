@@ -462,6 +462,8 @@ typedef struct PeFolder {
   uint32_t depth;
   // The Inbox or a special folder: not renamed or deleted
   bool fixed;
+  // Deleted Items or Junk E-mail: Empty Folder applies when it has messages (`total`)
+  bool emptiable;
   enum PeSpecialUse special_use;
   // False for a folder that only holds other folders
   bool selectable;
@@ -1367,6 +1369,25 @@ bool pe_folder_rename(const struct PeCore *core,
 // # Safety
 // `core` must be a live handle, `error` NULL or a valid pointer.
 bool pe_folder_delete(const struct PeCore *core,
+                      int64_t folder,
+                      char **error);
+
+// What to ask before emptying `folder` ("Delete the 12 messages in Deleted Items for good?"), NULL when it can not be
+// emptied or has nothing in it (Empty Folder is off then). Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_folder_empty_question(const struct PeCore *core,
+                               int64_t folder);
+
+// Empties Deleted Items or Junk E-mail, after the window asked `pe_folder_empty_question`: every message of it
+// deleted for good (`FolderChanged` now, the server in the background). Returns what the status bar says, or NULL
+// with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`). Free the text with
+// `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `error` NULL or a valid pointer.
+char *pe_folder_empty(const struct PeCore *core,
                       int64_t folder,
                       char **error);
 

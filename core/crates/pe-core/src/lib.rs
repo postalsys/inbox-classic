@@ -1416,6 +1416,72 @@ impl Core {
         })
     }
 
+    /// Whether `folder` can be emptied (see [`emptiable`])
+    pub fn can_empty(&self, folder: FolderId) -> Result<bool> {
+        Ok(emptiable(&self.store().folder(folder)?.info))
+    }
+
+    /// What to ask before emptying `folder`: "Empty Deleted Items?", a blank line, and that its 12 messages go for
+    /// good; None when it can not be emptied or has nothing in it
+    pub fn empty_folder_question(&self, folder: FolderId) -> Result<Option<String>> {
+        let found = self.store().folder(folder)?;
+        if !emptiable(&found.info) || found.total == 0 {
+            return Ok(None);
+        }
+        let name = crate::text::folder_name(&found.info);
+        Ok(Some(tr_args(
+            Text::EmptyQuestion,
+            &[
+                ("messages", (&crate::text::messages(found.total)).into()),
+                ("count", found.total.into()),
+                ("folder", (&name).into()),
+            ],
+        )))
+    }
+
+    /// Empties Deleted Items or Junk E-mail: every message of it deleted for good, out of the list now (one change for
+    /// the windows) and on the server in the background, a command per 1000 (only these messages: one that arrives
+    /// meanwhile stays). Edit > Undo can not take it back, and what it could take back before is forgotten. Returns
+    /// what the status bar says.
+    pub fn empty_folder(&self, folder: FolderId) -> Result<String> {
+        let (account, uids, removed) = {
+            let store = self.store();
+            let found = store.folder(folder)?;
+            if !emptiable(&found.info) {
+                return Err(Error::Unavailable(tr(Text::NotEmptiedHere)));
+            }
+            let uids = store.uids(folder)?;
+            let removed = uids
+                .iter()
+                .map(|&uid| Ok(store.message(folder, uid)?.ok_or(Error::NotFound)?.info))
+                .collect::<Result<Vec<_>>>()?;
+            store.remove_messages(folder, &uids)?;
+            (found.account_id, uids, removed)
+        };
+        let count = uids.len() as u64;
+        if count > 0 {
+            self.post(Event::FolderChanged { account, folder })?;
+        }
+        for (chunk, gone) in uids.chunks(1000).zip(removed.chunks(1000)) {
+            self.send_command(
+                account,
+                Command::Expunge {
+                    folder,
+                    uids: chunk.to_vec(),
+                    removed: gone.to_vec(),
+                },
+            )?;
+        }
+        *self.undo.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        Ok(tr_args(
+            Text::DoneDeletedForGood,
+            &[
+                ("messages", (&crate::text::messages(count)).into()),
+                ("count", count.into()),
+            ],
+        ))
+    }
+
     /// Whether deleting from `folder` removes a message for good: it is Deleted Items, or the account has none
     pub fn deletes_for_good(&self, folder: FolderId) -> Result<bool> {
         Ok(self.trash_for(folder)?.is_none())
@@ -1564,6 +1630,15 @@ pub(crate) fn trash_in(store: &Store, folder: FolderId) -> Result<Option<FolderI
         .special_folder(account, "\\Trash")?
         .map(|trash| trash.id)
         .filter(|&trash| trash != folder))
+}
+
+/// Whether a folder can be emptied: Deleted Items or Junk E-mail, the folders whose messages are on their way out
+pub fn emptiable(folder: &pe_store::FolderInfo) -> bool {
+    use pe_imap::SpecialUse;
+    matches!(
+        folder.special_use.as_deref().and_then(SpecialUse::from_flag),
+        Some(SpecialUse::Trash | SpecialUse::Junk)
+    )
 }
 
 /// Whether messages of a folder can be archived: from the Inbox and the user's own folders, not from the special ones

@@ -112,6 +112,15 @@ messages-gone = The messages are no longer there.
 # A non-selectable IMAP folder cannot contain messages; this does not mean it is empty.
 folder-holds-no-messages = This folder cannot contain messages.
 not-archived-here = Messages in this folder can not be archived.
+not-emptied-here = Only Deleted Items and Junk E-mail can be emptied.
+empty-question = { $count ->
+    [one] Empty { $folder }?
+
+        The message in it is deleted for good. It can not be brought back.
+   *[other] Empty { $folder }?
+
+        The { $messages } in it are deleted for good. They can not be brought back.
+}
 no-junk-folder = This account has no Junk E-mail folder to move the messages to.
 no-inbox-folder = This account has no Inbox folder to move the messages to.
 # the status bar after a flag in a colour: "Flagged 2 messages blue"

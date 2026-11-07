@@ -1140,6 +1140,33 @@ async fn archive(d: &Driver) {
     run_command(Command::Undo);
     let back = wait_for(20, || d.find("INBOX", "Subject: Copy me")).await;
     d.check(back.is_some(), "Undo puts it back in the Inbox");
+    empty_folder(d).await;
+}
+
+/// Empty Folder on Junk E-mail: after asking, every message of it gone for good
+async fn empty_folder(d: &Driver) {
+    d.step("empty folder");
+    let added = d.add_message_to(
+        "Junk",
+        "From: Spammer <spam@example.net>\r\nTo: testuser@inboxclassic.test\r\nSubject: Win a prize\r\n\r\nClick.\r\n",
+    );
+    d.check(added.is_ok(), "a message is put into Junk on the server");
+    select_folder("Junk E-mail");
+    run_command(Command::Sync);
+    wait_until(20, || rows() >= 1).await;
+    run_command(Command::EmptyFolder);
+    let sure = wait_alert(10).await;
+    d.check(sure.is_some(), "Empty Folder asks first, saying how many go");
+    if let Some(sure) = sure {
+        d.shot(&sure, "organize-9-empty").await;
+        answer(&sure, "Empty");
+    }
+    d.check(
+        wait_until(20, || d.find("Junk", "Subject: Win a prize").is_none()).await,
+        "Junk E-mail is empty on the server",
+    );
+    d.check(wait_until(10, || rows() == 0).await, "and in the list");
+    select_folder("Inbox");
 }
 
 /// The form that asks for a folder's name: the name typed and OK clicked

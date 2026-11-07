@@ -1014,21 +1014,45 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// the folder menu (a right-click in the tree): Mark All Read, New, Rename, Delete
+    /// what to ask before emptying the folder shown (Deleted Items or Junk E-mail with messages), nil when Empty
+    /// Folder does not apply
+    var canEmptyFolder: Bool {
+        !allInboxes && !searching && folderNodes[folder]?.folder.emptiable == true && total > 0
+    }
+
+    /// Deleted Items or Junk E-mail emptied for good, after asking (the core words the question, with how many go)
+    func emptyFolder() {
+        guard canEmptyFolder, let question = taken(pe_folder_empty_question(core.handle, folder)),
+              ask(question, yes: Text.uiEmptyButton.text, no: Text.uiCancel.text, destructive: true) else { return }
+        var reason: UnsafeMutablePointer<CChar>?
+        if let done = taken(pe_folder_empty(core.handle, folder, &reason)) {
+            status(done)
+        } else {
+            refused(reason, Text.uiMessagesNotChanged.text)
+        }
+    }
+
+    /// the folder menu (a right-click in the tree): Mark All Read, New, Rename, Delete, and Empty Folder for Deleted
+    /// Items and Junk E-mail
     func folderMenu() -> NSMenu {
         let menu = NSMenu()
         let someUnread = allInboxes ? core.inboxUnread > 0 : folder != 0 && core.folderCounts(folder).unread > 0
         let editable = folder != 0 && !(folderNodes[folder]?.folder.fixed ?? true)
         // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none
-        let folderCommands: [(Command, Bool)] = allInboxes ? []
+        var folderCommands: [(Command, Bool)] = allInboxes ? []
             : [(.newFolder, true), (.renameFolder, editable), (.deleteFolder, editable)]
+        // Deleted Items and Junk E-mail can be emptied, as in Outlook Express
+        if !allInboxes && folderNodes[folder]?.folder.emptiable == true {
+            folderCommands.append((.emptyFolder, canEmptyFolder))
+        }
         for (command, enabled) in [(Command.markAllRead, someUnread)] + folderCommands {
             let item = NSMenuItem(title: command.label, action: #selector(folderMenuItem(_:)), keyEquivalent: "")
             item.target = self
             item.tag = command.rawValue
             item.isEnabled = enabled
             menu.addItem(item)
-            if command == .markAllRead && !folderCommands.isEmpty {
+            // Empty Folder in a group of its own, under the folder commands
+            if command == .markAllRead && !folderCommands.isEmpty || command == .deleteFolder && folderCommands.last?.0 == .emptyFolder {
                 menu.addItem(.separator())
             }
         }

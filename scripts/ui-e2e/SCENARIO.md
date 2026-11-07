@@ -401,6 +401,15 @@ Screenshots: `organize-8-archive`
 - the status bar says it was archived
 - Undo puts it back in the Inbox
 
+## 34b. Empty Folder
+
+Screenshots: `organize-9-empty`
+
+- a message is put into Junk on the server
+- Empty Folder asks first, saying how many go
+- Junk E-mail is empty on the server
+- and in the list
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`

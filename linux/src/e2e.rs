@@ -294,10 +294,27 @@ impl Driver {
         self.add_message_at(self.ports.rest, raw, flags)
     }
 
+    /// A message into `mailbox` of the server
+    pub fn add_message_to(&self, mailbox: &str, raw: &str) -> Result<(), String> {
+        let body = serde_json::json!({ "raw": raw, "flags": [] }).to_string();
+        http(
+            self.ports.rest,
+            "POST",
+            &format!("/v1/mailboxes/{mailbox}/messages"),
+            Some(&body),
+        )
+        .map(|_| ())
+    }
+
     /// A message into the Inbox of the server whose REST API is at `rest`
     fn add_message_at(&self, rest: u16, raw: &str, flags: &[&str]) -> Result<(), String> {
+        self.add_message_in(rest, "INBOX", raw, flags)
+    }
+
+    /// A message into `mailbox` of the server whose REST API is at `rest`
+    fn add_message_in(&self, rest: u16, mailbox: &str, raw: &str, flags: &[&str]) -> Result<(), String> {
         let body = serde_json::json!({ "raw": raw, "flags": flags }).to_string();
-        http(rest, "POST", "/v1/mailboxes/INBOX/messages", Some(&body)).map(|_| ())
+        http(rest, "POST", &format!("/v1/mailboxes/{mailbox}/messages"), Some(&body)).map(|_| ())
     }
 }
 

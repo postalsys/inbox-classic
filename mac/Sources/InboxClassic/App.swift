@@ -271,7 +271,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         // the commands of each menu in the order of the table, grouped as the Windows menus group them
         let file = commands("file").filter { $0 != .exit }
         let fileItems: [NSMenuItem] = [item(for: .newAccount), item(for: .accounts), separator(),
-                                       item(for: .newFolder), item(for: .renameFolder), item(for: .deleteFolder), separator(),
+                                       item(for: .newFolder), item(for: .renameFolder), item(for: .deleteFolder), item(for: .emptyFolder), separator(),
                                        item(for: .saveAs), item(for: .import), item(for: .print), separator(),
                                        item(for: .properties), separator(),
                                        NSMenuItem(title: Text.macCloseWindow.text, action: #selector(NSWindow.performClose(_:)),
@@ -388,6 +388,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .newFolder: main.mailbox.newFolder()
         case .renameFolder: main.mailbox.renameFolder()
         case .deleteFolder: main.mailbox.deleteFolder()
+        case .emptyFolder: main.mailbox.emptyFolder()
         case .accounts: main.showAccounts()
         case .find: main.focusFind()
         case .saveAs: main.mailbox.saveShownAs()
@@ -474,6 +475,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .pictures: return main.mailbox.picturesBlocked
         // All Inboxes is no folder of one account to make a folder in or import into
         case .newFolder, .import: return !main.mailbox.allInboxes
+        case .emptyFolder: return main.mailbox.canEmptyFolder
         default: return true
         }
     }
