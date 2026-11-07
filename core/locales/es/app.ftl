@@ -503,13 +503,13 @@ ui-pick-recipients = Destinatarios del mensaje:
 # review: new
 ui-pick-members = Miembros del grupo:
 # review: new
-ui-pick-to = &Para ->
+ui-pick-to = &Para →
 # review: new
-ui-pick-cc = &CC ->
+ui-pick-cc = &CC →
 # review: new
-ui-pick-bcc = CC&O ->
+ui-pick-bcc = CC&O →
 # review: new
-ui-pick-add = &Añadir ->
+ui-pick-add = &Añadir →
 # review: new
 ui-pick-tip = Elegir destinatarios de la libreta de direcciones
 # review: new

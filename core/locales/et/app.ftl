@@ -503,13 +503,13 @@ ui-pick-recipients = Kirja adressaadid:
 # review: new
 ui-pick-members = Grupi liikmed:
 # review: new
-ui-pick-to = &Saaja ->
+ui-pick-to = &Saaja →
 # review: new
-ui-pick-cc = &Koopia ->
+ui-pick-cc = &Koopia →
 # review: new
-ui-pick-bcc = &Pimekoopia ->
+ui-pick-bcc = &Pimekoopia →
 # review: new
-ui-pick-add = &Lisa ->
+ui-pick-add = &Lisa →
 # review: new
 ui-pick-tip = Valige adressaadid aadressiraamatust
 # review: new
