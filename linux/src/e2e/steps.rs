@@ -1368,6 +1368,184 @@ pub async fn keyboard_reading(d: &Driver) {
     search("").await;
 }
 
+/// The subject cells of the message list on screen whose text is `text`
+fn subject_labels(text: &str) -> Vec<gtk::Label> {
+    named("message-list")
+        .map(|list| descendants::<gtk::Label>(&list))
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|label| label.is_mapped() && label.text() == text)
+        .collect()
+}
+
+/// Group messages by conversation turned on or off in Preferences, the dialog closed again
+async fn group_by_conversation(d: &Driver, on: bool) {
+    command(Command::Options);
+    let Some(dialog) = wait_dialog(10, "preferences-dialog").await else {
+        d.check(false, "Preferences opens");
+        return;
+    };
+    let root = dialog.clone().upcast::<gtk::Widget>();
+    match named_in(&root, "preferences-group-threads").and_downcast::<adw::SwitchRow>() {
+        Some(row) => {
+            d.check(
+                row.is_active() != on,
+                &format!(
+                    "Preferences has Group messages by conversation, {}",
+                    if on { "off" } else { "on" }
+                ),
+            );
+            row.set_active(on);
+        }
+        None => d.check(false, "Preferences has Group messages by conversation"),
+    }
+    pause(300).await;
+    dialog.close();
+    wait_gone(10, "preferences-dialog").await;
+}
+
+/// Conversations: three messages of one conversation are one row of the Inbox, with their count, bold while one is
+/// unread; expanded, the replies are under it, indented; Mark Read on the collapsed row marks all three; with Group
+/// messages by conversation off they are three rows
+pub async fn conversations(d: &Driver) {
+    d.step("conversations");
+    let main = shell().main();
+    let core = &shell().core;
+    let subject = "Plans for the trip";
+    let first = format!(
+        "From: Pat Doe <pat@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\n\
+         Message-ID: <trip1@example.com>\r\nDate: {}\r\n\r\nShall we take the early train?\r\n",
+        date_now(0)
+    );
+    let second = format!(
+        "From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: {subject}\r\n\
+         Message-ID: <trip2@example.com>\r\nIn-Reply-To: <trip1@example.com>\r\nReferences: <trip1@example.com>\r\n\
+         Date: {}\r\n\r\nThe early one, yes.\r\n",
+        date_now(1)
+    );
+    let third = format!(
+        "From: Pat Doe <pat@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: {subject}\r\n\
+         Message-ID: <trip3@example.com>\r\nIn-Reply-To: <trip2@example.com>\r\n\
+         References: <trip1@example.com> <trip2@example.com>\r\nDate: {}\r\n\r\nTickets bought.\r\n",
+        date_now(2)
+    );
+    // the first one read, the replies not
+    let added = d.add_message_in(d.ports.rest, "INBOX", &first, &["\\Seen"]).is_ok()
+        && d.add_message_to("INBOX", &second).is_ok()
+        && d.add_message_to("INBOX", &third).is_ok();
+    d.check(
+        added,
+        "three messages of one conversation are put into the Inbox on the server",
+    );
+    select_folder("Inbox");
+    run_command(Command::Sync);
+    // the row of the conversation, once the three are threaded
+    let head = || {
+        core.search(&main.search(), main.list.sort(), 0, 100)
+            .ok()?
+            .into_iter()
+            .enumerate()
+            .find(|(_, m)| m.info.subject == subject && m.thread.is_some_and(|t| t.count == 3))
+    };
+    let Some((at, message)) = wait_for(30, head).await else {
+        d.check(false, "the Inbox lists the conversation once, with its three messages");
+        return;
+    };
+    let Some(place) = message.thread else { return };
+    let collapsed_rows = rows();
+    let listed = core.count_search(&main.search()).map_or(0, |(rows, _)| rows);
+    d.check(
+        place.depth == 0 && !place.expanded && u64::from(collapsed_rows) == listed,
+        &format!("the Inbox lists the conversation once, on its first message ({collapsed_rows} rows)"),
+    );
+    select_row(at as u32).await;
+    let counted = format!("{subject} (3)");
+    let bold = wait_until(5, || {
+        subject_labels(&counted)
+            .first()
+            .is_some_and(|l| l.has_css_class("unread"))
+    })
+    .await;
+    d.check(
+        bold && message.info.seen(),
+        "with the count of its messages, bold while one is unread though the first is read",
+    );
+    d.shot(main.window(), "threads-1-collapsed").await;
+
+    // what a click on its triangle does
+    main.set_thread_expanded(place.thread, true);
+    let opened = wait_until(5, || rows() == collapsed_rows + 2).await;
+    let replies = core
+        .search(&main.search(), main.list.sort(), at as u64 + 1, 2)
+        .unwrap_or_default();
+    let under = replies.len() == 2
+        && replies
+            .iter()
+            .all(|m| m.thread.is_some_and(|t| t.depth == 1 && t.thread == place.thread));
+    let indented = wait_until(5, || {
+        let labels = subject_labels(&format!("Re: {subject}"));
+        labels.len() == 2
+            && labels.iter().all(|l| {
+                l.parent()
+                    .is_some_and(|cell| cell.margin_start() > 0 && l.has_css_class("unread"))
+            })
+    })
+    .await;
+    d.check(
+        opened && under && indented,
+        "expanding it shows its replies under it, indented",
+    );
+    d.check(
+        main.list
+            .selected()
+            .is_some_and(|(row, m)| row as usize == at && m.info.uid == message.info.uid),
+        "the first message stays selected",
+    );
+    d.shot(main.window(), "threads-2-expanded").await;
+    main.set_thread_expanded(place.thread, false);
+    d.check(
+        wait_until(5, || rows() == collapsed_rows).await,
+        "collapsing it hides them again",
+    );
+
+    // Mark Read on the collapsed row: all three
+    select_row(at as u32).await;
+    run_command(Command::MarkRead);
+    let all_read = wait_until(20, || {
+        ["<trip1@example.com>", "<trip2@example.com>", "<trip3@example.com>"]
+            .iter()
+            .all(|id| d.seen(&format!("Message-ID: {id}")))
+    })
+    .await;
+    d.check(
+        all_read,
+        "Mark Read on the collapsed row marks all three read on the server",
+    );
+
+    group_by_conversation(d, false).await;
+    let apart = wait_until(10, || {
+        rows() == messages_listed()
+            && core
+                .search(&main.search(), main.list.sort(), 0, 100)
+                .unwrap_or_default()
+                .iter()
+                .filter(|m| m.info.subject.ends_with(subject))
+                .count()
+                == 3
+    })
+    .await;
+    d.check(
+        apart && main.search().threads.is_none(),
+        "with Group messages by conversation off, the three messages are each on a row of their own",
+    );
+    d.shot(main.window(), "threads-3-options-off").await;
+    group_by_conversation(d, true).await;
+    d.check(
+        wait_until(10, || rows() == collapsed_rows).await,
+        "turned on again, the conversation is one row again",
+    );
+}
+
 /// The form that asks for a folder's name: the name typed and OK clicked
 async fn answer_name(d: &Driver, title: &str, name: &str, shot: Option<&str>) {
     let form = wait_dialog(10, "folder-name-dialog").await;
@@ -1783,8 +1961,11 @@ pub async fn all_inboxes(d: &Driver) {
     let both = |f: i64| shell().core.folder(f).map_or(0, |f| f.total);
     let expected = both(inbox) + both(second);
     d.check(
-        wait_until(10, || u64::from(rows()) == expected).await,
-        &format!("it lists the mail of both accounts' Inboxes ({} of {expected})", rows()),
+        wait_until(10, || u64::from(messages_listed()) == expected).await,
+        &format!(
+            "it lists the mail of both accounts' Inboxes ({} of {expected})",
+            messages_listed()
+        ),
     );
     // the rows as the list has them, from the core
     let all = pe_core::Search {

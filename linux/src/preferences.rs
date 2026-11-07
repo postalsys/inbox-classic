@@ -1,6 +1,6 @@
-//! Preferences (the main menu, Ctrl+,): the language of the windows and Notify of New Mail, in a libadwaita
-//! preferences dialog as GNOME apps have it. A language chosen is saved in settings.ini and used from the next start;
-//! the app offers to start again in it at once.
+//! Preferences (the main menu, Ctrl+,): the language of the windows, Group messages by conversation and Notify of New
+//! Mail, in a libadwaita preferences dialog as GNOME apps have it. A language chosen is saved in settings.ini and used
+//! from the next start; the app offers to start again in it at once.
 
 use adw::prelude::*;
 
@@ -66,8 +66,26 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     let mail = adw::PreferencesGroup::builder().title(t!(GtkNewMailGroup)).build();
     mail.add(&notify);
 
+    let grouped = adw::SwitchRow::builder()
+        .title(plain(Text::UiGroupByConversation))
+        .active(crate::mailbox::grouped())
+        .build();
+    grouped.set_widget_name("preferences-group-threads");
+    grouped.connect_active_notify(|row| {
+        let shell = shell();
+        if crate::mailbox::grouped() != row.is_active() {
+            shell
+                .settings
+                .set_bool(settings::GROUP_BY_CONVERSATION, row.is_active());
+            shell.main().regroup();
+        }
+    });
+    let list = adw::PreferencesGroup::new();
+    list.add(&grouped);
+
     let page = adw::PreferencesPage::new();
     page.add(&words);
+    page.add(&list);
     page.add(&mail);
     let dialog = adw::PreferencesDialog::builder()
         .title(t!(GtkPreferences))

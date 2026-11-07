@@ -187,7 +187,7 @@ impl MessageList {
                 m.info.sender().to_string()
             }
         });
-        let subject = text_column(&t!(UiColSubject), SUBJECT_WIDTH, true, 0.0, |m| m.info.subject.clone());
+        let subject = subject_column();
         let received = text_column(&t!(UiColReceived), 130, false, 0.0, |m| {
             m.info.display_date().map(crate::ui::format_date).unwrap_or_default()
         });
@@ -568,17 +568,117 @@ fn text_column(
         let Some(row) = item.item().and_downcast::<MessageRow>() else {
             return;
         };
-        let (words, unread) = row.with(|m| (text(m), !m.info.seen())).unwrap_or_default();
+        let (words, unread) = row.with(|m| (text(m), bold(m))).unwrap_or_default();
         label.set_text(&words);
-        if unread {
-            label.add_css_class("unread");
-        } else {
-            label.remove_css_class("unread");
-        }
+        set_bold(&label, unread);
     });
     let column = gtk::ColumnViewColumn::new(Some(title), Some(factory));
     column.set_fixed_width(width);
     column.set_expand(expand);
+    column.set_resizable(true);
+    column
+}
+
+/// A row in bold: an unread message, or a collapsed conversation with one of its messages unread (an expanded one's
+/// unread replies are bold on their own rows)
+fn bold(m: &Message) -> bool {
+    !m.info.seen()
+        || m.thread
+            .is_some_and(|t| t.depth == 0 && t.count > 1 && !t.expanded && t.unread > 0)
+}
+
+fn set_bold(label: &gtk::Label, bold: bool) {
+    if bold {
+        label.add_css_class("unread");
+    } else {
+        label.remove_css_class("unread");
+    }
+}
+
+/// How far a reply's subject is indented under its conversation's first message
+const REPLY_INDENT: i32 = 18;
+
+/// The Subject column. In a list grouped by conversation each subject has the room of the disclosure triangle in front
+/// of it (the tree's own, pan-end or pan-down, shown on a conversation of more than one message, a click on it opens or
+/// closes the conversation), the conversation's count after it, and a reply indented under the first message.
+fn subject_column() -> gtk::ColumnViewColumn {
+    let factory = gtk::SignalListItemFactory::new();
+    factory.connect_setup(|_, item| {
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let cell = gtk::Box::new(gtk::Orientation::Horizontal, 4);
+        let expander = gtk::Image::new();
+        expander.set_pixel_size(16);
+        expander.add_css_class("thread-expander");
+        let click = gtk::GestureClick::new();
+        let weak = item.downgrade();
+        click.connect_pressed(move |gesture, _, _, _| {
+            // the click opens or closes, it does not select
+            gesture.set_state(gtk::EventSequenceState::Claimed);
+            let thread = weak
+                .upgrade()
+                .and_then(|item| item.item().and_downcast::<MessageRow>())
+                .and_then(|row| row.with(|m| m.thread))
+                .flatten();
+            if let Some(place) = thread.filter(|t| t.depth == 0 && t.count > 1) {
+                shell().main().set_thread_expanded(place.thread, !place.expanded);
+            }
+        });
+        expander.add_controller(click);
+        let label = gtk::Label::new(None);
+        label.set_xalign(0.0);
+        label.set_hexpand(true);
+        label.set_ellipsize(gtk::pango::EllipsizeMode::End);
+        cell.append(&expander);
+        cell.append(&label);
+        add_drag_source(&label, item);
+        item.set_child(Some(&cell));
+    });
+    factory.connect_bind(|_, item| {
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let Some(cell) = item.child().and_downcast::<gtk::Box>() else {
+            return;
+        };
+        let (Some(expander), Some(label)) = (
+            cell.first_child().and_downcast::<gtk::Image>(),
+            cell.last_child().and_downcast::<gtk::Label>(),
+        ) else {
+            return;
+        };
+        let Some(row) = item.item().and_downcast::<MessageRow>() else {
+            return;
+        };
+        let Some((subject, thread, unread)) = row.with(|m| (m.info.subject.clone(), m.thread, bold(m))) else {
+            return;
+        };
+        set_bold(&label, unread);
+        // one row a message: the subject alone
+        let Some(place) = thread else {
+            expander.set_visible(false);
+            cell.set_margin_start(0);
+            label.set_text(&subject);
+            return;
+        };
+        expander.set_visible(true);
+        cell.set_margin_start(if place.depth > 0 { REPLY_INDENT } else { 0 });
+        let head = place.depth == 0 && place.count > 1;
+        expander.set_icon_name(match (head, place.expanded) {
+            (false, _) => None,
+            (true, false) => Some("pan-end-symbolic"),
+            (true, true) => Some("pan-down-symbolic"),
+        });
+        if head {
+            label.set_text(&format!("{subject} ({})", place.count));
+        } else {
+            label.set_text(&subject);
+        }
+    });
+    let column = gtk::ColumnViewColumn::new(Some(&t!(UiColSubject)), Some(factory));
+    column.set_fixed_width(SUBJECT_WIDTH);
+    column.set_expand(true);
     column.set_resizable(true);
     column
 }

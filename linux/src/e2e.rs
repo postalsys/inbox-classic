@@ -767,6 +767,17 @@ fn rows() -> u32 {
     shell().main().list.rows()
 }
 
+/// How many messages the list has, each conversation's counted (its rows are fewer while it is grouped by
+/// conversation)
+fn messages_listed() -> u32 {
+    let messages = pe_core::Search {
+        threads: None,
+        ..shell().main().search()
+    };
+    let count = shell().core.count_search(&messages).map_or(0, |(count, _)| count);
+    u32::try_from(count).unwrap_or(u32::MAX)
+}
+
 /// Selects the folder of the first account named so in the tree (the display name: Inbox, Sent Items, Drafts)
 fn select_folder(name: &str) -> bool {
     let core = &shell().core;
@@ -847,6 +858,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::junk(&d).await;
     steps::message_window(&d).await;
     steps::keyboard_reading(&d).await;
+    steps::conversations(&d).await;
     steps::folders(&d).await;
     steps::closing_a_message(&d).await;
     steps::mailto(&d).await;
@@ -1554,14 +1566,18 @@ async fn finding(d: &Driver) {
     d.check(wait_until(10, || rows() == 1).await, "Gmail operators work: from:");
     search("").await;
     search("photos in:inbox").await;
-    let in_inbox = wait_for(10, || (rows() >= 1 && rows() < all).then(rows)).await;
+    // messages, not rows: a reply in Sent Items and the message it answers are one conversation's row
+    let in_inbox = wait_for(10, || {
+        (messages_listed() >= 1 && messages_listed() < all).then(messages_listed)
+    })
+    .await;
     let summary = mailbox.search_summary().unwrap_or_default();
     d.check(
         summary.ends_with(" in Inbox") && mailbox.selected_name() == "Inbox",
         &format!("in:inbox: the title and the search bar say the Inbox ({summary})"),
     );
     search("photos").await;
-    let everywhere = wait_for(10, || (rows() > in_inbox.unwrap_or(0)).then(rows)).await;
+    let everywhere = wait_for(10, || (messages_listed() > in_inbox.unwrap_or(0)).then(messages_listed)).await;
     d.check(in_inbox.is_some() && everywhere.is_some(), &format!("the messages of other folders are found too ({everywhere:?}), in:inbox narrows them to the Inbox ({in_inbox:?})"));
     select_row(0).await;
     d.shot(&main, "find-2-every-folder").await;

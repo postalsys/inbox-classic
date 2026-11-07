@@ -91,3 +91,5 @@ pub const TREE_WIDTH: &str = "TreeWidth";
 pub const LIST_HEIGHT: &str = "ListHeight";
 /// The language of the windows chosen in Preferences ("de"); not set for the system's
 pub const LANGUAGE: &str = "Language";
+/// Preferences > Group messages by conversation (on when not set)
+pub const GROUP_BY_CONVERSATION: &str = "GroupByConversation";
