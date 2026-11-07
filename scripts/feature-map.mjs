@@ -379,6 +379,27 @@ const sections = [
                 checked: ['Go to Folder lists the folders of every account and typing narrows them', 'Choosing Sent Items there shows Sent Items']
             },
             {
+                shot: 'bounce-1-failed',
+                name: 'Why a message bounced',
+                what: "A delivery notice opened in the reading pane gets a card above it: not delivered (or not delivered yet), each recipient with the reason in plain words (the address does not exist, the mailbox is full, blocked as spam, a blocklist, and so on) and what you can do, the server's own words under Details. The reasons are told by a neural network built into the app (bounce-classifier), nothing is sent anywhere. Show the message that bounced selects it in Sent Items.",
+                how: 'Open a delivery notice.',
+                checked: ['The card names the recipient and the reason', "Details show the server's words", 'Show the message that bounced selects it in Sent Items']
+            },
+            {
+                shot: 'bounce-2-delayed',
+                name: 'A delayed message',
+                what: 'A notice that delivery is only delayed shows an amber card: the server is still trying, nothing to do yet, and when a wait was asked for, how long.',
+                how: 'Open a delay notice.',
+                checked: ['The delay card says it is still being tried']
+            },
+            {
+                shot: 'bounce-3-list',
+                name: 'Bounces in the list',
+                what: 'Delivery notices have an undelivered mark in the list, and is:bounce finds them.',
+                how: 'Search for is:bounce.',
+                checked: ['The notice has the mark in the list', 'is:bounce finds the two notices and nothing else']
+            },
+            {
                 shot: 'read-16-window',
                 name: 'A message in a window of its own',
                 what: "Double-click (or Enter) opens a message in a window of its own, as in Outlook Express: its header, pictures, files and text as the reading pane shows them, with Reply, Reply All, Forward, Print, Delete, Archive and Junk, and Previous and Next through the list it came from. Several can be open at once. A draft opens to be finished instead.",

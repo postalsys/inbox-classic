@@ -61,6 +61,19 @@ fn every_fixture_is_a_failure_but_the_delayed_one() {
 }
 
 #[test]
+fn every_fixture_may_be_a_bounce_by_any_parse() {
+    for entry in std::fs::read_dir(format!("{}/tests/fixtures/bounces", env!("CARGO_MANIFEST_DIR"))).unwrap() {
+        let path = entry.unwrap().path();
+        let raw = std::fs::read(&path).unwrap();
+        // the reading pane's parse, which shows attached messages inline
+        let parsed = pe_mime::parser::parse(&raw).unwrap();
+        assert!(detect::may_be_bounce(&parsed), "{}", path.display());
+    }
+    let ordinary = message("Ann <ann@example.com>", &[], "550 5.1.1 User unknown, said the server");
+    assert!(!detect::may_be_bounce(&pe_mime::parser::parse(&ordinary).unwrap()));
+}
+
+#[test]
 fn gmail_in_full() {
     let bounce = analyze(&fixture("gmail.eml")).unwrap();
     let recipient = &bounce.recipients[0];

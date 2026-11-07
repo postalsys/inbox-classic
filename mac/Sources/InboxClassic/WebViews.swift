@@ -109,6 +109,9 @@ func lockedConfiguration(server: DocumentServer, scripts: Bool) -> WKWebViewConf
 /// that would navigate (a refresh, a form, a script) goes nowhere, and no window opens
 final class StayOnPage: NSObject, WKNavigationDelegate, WKUIDelegate {
     var loaded: (() -> Void)?
+    /// asked of a link clicked in the document before the browser opens it: true when its owner took it (the bounce
+    /// card's), which the browser then does not open
+    var links: ((String) -> Bool)?
 
     func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -119,8 +122,12 @@ final class StayOnPage: NSObject, WKNavigationDelegate, WKUIDelegate {
             return
         }
         decisionHandler(.cancel)
-        if action.navigationType == .linkActivated && scheme != documentScheme {
-            openExternally(action.request.url)
+        guard action.navigationType == .linkActivated, let url = action.request.url else { return }
+        if links?(url.absoluteString) == true {
+            return
+        }
+        if scheme != documentScheme {
+            openExternally(url)
         }
     }
 
@@ -149,6 +156,11 @@ final class Preview: NSObject {
     private var shown = 0
     private var pending: (String, Bool)?
     private var ready = false
+    /// asked of a link clicked in the document before the browser opens it: true when the reading pane took it
+    var links: ((String) -> Bool)? {
+        get { navigation.links }
+        set { navigation.links = newValue }
+    }
 
     override init() {
         view = WKWebView(frame: .zero, configuration: lockedConfiguration(server: server, scripts: false))

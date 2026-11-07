@@ -377,6 +377,8 @@ void DestroyMessageWindows();
 
 // ---- main.cpp ----
 
+// the main window back from the tray (or the taskbar), in front
+void ShowMain();
 // a new message from a mailto: link (the core reads it), from `account`, or from the account of what the main window
 // shows when 0
 void OpenMailto(const std::wstring& link, int64_t account = 0);
@@ -777,6 +779,9 @@ enum ControlId : WORD {
     IDC_LOGO,
     // under the header of a message that could not be downloaded: a click tries again
     IDC_RETRY,
+    // no control: the reading pane's "Show the message that bounced" clicked, sent to its window once the WebView2's
+    // event is over
+    IDC_BOUNCED_MESSAGE,
     // the toolbar of a message window, and its Previous and Next buttons
     IDC_MESSAGE_TOOLBAR = 230,
     IDC_PREVIOUS,

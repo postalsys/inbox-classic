@@ -107,6 +107,11 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         window.contentView = reader.view
         reader.status = { [weak mailbox] in mailbox?.status($0) }
         reader.openMailto = { [weak mailbox] in mailbox?.openMailto($0) }
+        // the message that bounced, in the main window
+        reader.bouncedHandler = { [weak mailbox] folder, uid in
+            AppDelegate.shared?.main?.show()
+            mailbox?.showMessage(folder: folder, uid: uid)
+        }
         reader.shownHandler = { [weak self] in
             guard let self else { return }
             showTitle(reader.subject)

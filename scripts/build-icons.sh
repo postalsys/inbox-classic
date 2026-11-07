@@ -23,8 +23,8 @@ INK='#242424'
 TOOLBAR=(mail_add arrow_reply arrow_reply_all arrow_forward print delete arrow_sync mail_read mail_unread send save attach mail_prohibited mail_checkmark archive arrow_up arrow_down person_add people_add contact_card mail_edit)
 # the folder tree: the account, then a folder of each kind
 FOLDERS=(mailbox folder mail_inbox send drafts delete mail_prohibited archive flag mail_multiple)
-# the message list: attachment, flag
-LIST=(attach flag search dismiss calendar_ltr)
+# the message list: attachment, flag, the search field, a bounce
+LIST=(attach flag search dismiss calendar_ltr mail_error)
 # the small ones of the format bar
 FORMAT=(text_bold text_italic text_underline text_color text_number_list_ltr text_bullet_list_ltr text_indent_decrease_ltr
     text_indent_increase_ltr text_align_left text_align_center text_align_right link line_horizontal_1 image)

@@ -235,6 +235,7 @@
             <!--review--><li>In Gesendete Objekte und Entwürfe nennt die Liste in der Spalte <b>An</b>, an wen jede Nachricht geht, statt von wem sie kommt.</li><!--/review-->
             <!--review--><li>Doppelklicken Sie auf eine Nachricht (oder wählen Sie sie aus und drücken Sie <kbd>Enter</kbd>), um sie in einem eigenen Fenster zu öffnen, wie der Lesebereich sie zeigt, mit <b>Antworten</b>, <b>Allen antworten</b>, <b>Weiterleiten</b>, <b>Drucken</b>, <b>Löschen</b>, <b>Archivieren</b> und <b>Junk</b>. <b>Vorherige</b> und <b>Nächste</b> gehen durch die Liste, aus der sie geöffnet wurde. Ein Entwurf wird stattdessen zum Fertigstellen geöffnet.</li><!--/review-->
             <!--review--><li><b>Ansicht &gt; Nächste Nachricht</b> und <b>Vorherige Nachricht</b> gehen ohne Maus in der Liste nach unten und oben; <b>Nächste ungelesene Nachricht</b> (oder <kbd>N</kbd> in der Liste) findet die nächste Nachricht, die Sie nicht gelesen haben, und bietet, wenn der Ordner keine mehr hat, den nächsten Ordner an, der welche hat. <b>Ansicht &gt; Gehe zu Ordner</b> öffnet jeden Ordner jedes Kontos, gefunden durch Eintippen eines Teils seines Namens. <b>Bearbeiten &gt; In dieser Nachricht suchen</b> findet Wörter in der angezeigten Nachricht.</li><!--/review-->
+            <!--review--><li>Eine <b>Unzustellbarkeitsnachricht</b> (eine zurückgekommene Nachricht) hat in der Liste ein Zeichen für nicht zugestellt, und beim Öffnen zeigt eine Karte darüber, ob die Nachricht nicht zugestellt wurde oder nur verzögert ist, für jeden Empfänger den Grund in einfachen Worten und was Sie tun können, und unter <b>Details</b> die Worte des Servers. <b>Die zurückgekommene Nachricht anzeigen</b> wählt die Nachricht aus, die Sie gesendet haben. Der Grund wird auf Ihrem Computer ermittelt; nichts wird irgendwohin gesendet.</li><!--/review-->
             <li>
                 E-Mail einer Marke, die ein Logo veröffentlicht (BIMI), zeigt dieses Logo neben dem Kopf, aber nur, wenn Ihr Mailserver geprüft hat, dass die
                 E-Mail wirklich von der Domäne der Marke kommt (DMARC), und das Logo bestätigt hat. Das Logo kommt mit der Nachricht oder, falls nicht, einmal
@@ -276,7 +277,7 @@
                 Die Suche versteht, was das Suchfeld von Gmail versteht, sodass <code>is:unread</code> die ungelesenen Nachrichten auflistet und
                 <code>in:inbox</code> nur im Posteingang sucht: <code>"genaue Wortgruppe"</code>, <code>-wort</code> zum Ausschließen,
                 <code>dies OR das</code>, <code>from:</code>, <code>to:</code> (auch <code>cc:</code>, <code>bcc:</code>), <code>subject:</code>,
-                <code>filename:</code>, <code>is:unread</code>, <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>,
+                <code>filename:</code>, <code>is:unread</code>, <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>, <code>is:bounce</code>,
                 <code>has:attachment</code>, <code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>,
                 <code>in:spam</code>, <code>in:anywhere</code> oder <code>in:</code> und der Name eines Ordners, <code>before:2025/01/31</code>,
                 <code>after:2025/01/01</code>, <code>older_than:2d</code> (oder <code>3m</code>, <code>1y</code>), <code>newer_than:1m</code>,

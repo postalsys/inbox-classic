@@ -200,6 +200,8 @@ void SetNotify(bool on) {
     CheckMenuItem(GetMenu(g_main), IDM_NOTIFY, MF_BYCOMMAND | (on ? MF_CHECKED : MF_UNCHECKED));
 }
 
+}  // namespace
+
 // the window back from the tray (or the taskbar), in front
 void ShowMain() {
     if (IsIconic(g_main)) {
@@ -211,6 +213,8 @@ void ShowMain() {
     // started in the tray: shown now for the first time
     g_mailbox.SelectStart();
 }
+
+namespace {
 
 // the window's close button: the app keeps checking mail from the tray; the first time it says so
 void HideToTray() {

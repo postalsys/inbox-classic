@@ -1039,6 +1039,11 @@ impl Mailbox {
                 return;
             }
         }
+        // selecting another folder ends a search; the folder selected already is not selected again, its search is
+        // ended here
+        if self.searching() && self.folder.get() == folder && !self.all_inboxes.get() {
+            self.clear_find();
+        }
         if !self.folders.select(folder) || self.folder.get() != folder {
             return;
         }

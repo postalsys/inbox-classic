@@ -8,6 +8,7 @@
 
 mod accounts;
 mod agents;
+mod bounces;
 mod cards;
 mod contacts;
 mod folders;

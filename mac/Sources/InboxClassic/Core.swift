@@ -386,6 +386,8 @@ struct Message {
     let flagColor: UInt8
     let answered: Bool
     let hasAttachments: Bool
+    /// a notice that a message was not delivered, or not yet: its mark in the attachment column's place
+    let bounce: Bool
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -401,6 +403,7 @@ struct Message {
         flagColor = message.flag_color
         answered = message.answered
         hasAttachments = message.has_attachments
+        bounce = message.bounce
     }
 }
 

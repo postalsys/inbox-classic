@@ -432,6 +432,18 @@ Screenshots: `read-17-find`, `read-18-go-to`
 - choosing Sent Items there shows Sent Items
 - Find in This Message finds a word of the message shown, and says when it is not there
 
+## 34f. A message that bounced
+
+Screenshots: `bounce-1-failed`, `bounce-2-delayed`, `bounce-3-list`
+
+- a message is put into Sent Items on the server, and a delivery report saying it could not be delivered to one recipient (the mailbox does not exist) into the Inbox
+- the report's row in the Inbox has the undelivered mark in the attachment column's place
+- opening it shows the card above the message: not delivered, the recipient, why and what to do
+- the card's Details show the server's own words
+- Show the message that bounced selects the message in Sent Items
+- a notice that delivery is delayed shows the amber card, saying it is still being tried
+- searching for `is:bounce` finds the two notices and nothing else
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
