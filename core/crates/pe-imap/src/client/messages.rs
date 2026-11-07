@@ -36,6 +36,13 @@ fn copy_uid(response: &Response) -> Option<CopyUid> {
     })
 }
 
+/// A Gmail label as STORE takes it: a system label as an atom, a label folder's name quoted (as it came, in modified
+/// UTF-7 or UTF-8), never written into the command as it stands
+fn label_arg(label: &str) -> Arg {
+    let system = label.len() > 1 && label.starts_with('\\') && label[1..].bytes().all(|b| b.is_ascii_alphanumeric());
+    if system { Arg::atom(label) } else { Arg::string(label) }
+}
+
 impl Client {
     /// Changes flags. The new flags arrive as [`super::Event::Flags`] when the server reports
     /// them, as it does for changes by other clients.
@@ -71,12 +78,40 @@ impl Client {
             (StoreAction::Remove, true) => "-FLAGS.SILENT",
             (StoreAction::Set, true) => "FLAGS.SILENT",
         };
+        let values = flags.iter().map(|f| Arg::atom(*f)).collect();
+        self.store_items(messages, item, values).await
+    }
+
+    /// STORE of `item` (`+FLAGS.SILENT`, `-X-GM-LABELS.SILENT`) with `values`
+    async fn store_items(&mut self, messages: &Messages, item: &str, values: Vec<Arg>) -> Result<(), Error> {
         let args = vec![
             Arg::Sequence(messages.set().to_string()),
             Arg::atom(item),
-            Arg::List(flags.iter().map(|f| Arg::atom(*f)).collect()),
+            Arg::List(values),
         ];
         self.simple(&messages.command("STORE"), args).await
+    }
+
+    /// Adds or takes away Gmail labels (X-GM-EXT-1), without the server telling the new ones back. `labels` as
+    /// [`super::FetchedMessage::labels`] has them: a system label (`\\Inbox`) as an atom, a label folder's name as
+    /// the server sent it, quoted. Taking away `\\Inbox` and every label folder's leaves a message only in All Mail.
+    pub async fn store_labels(
+        &mut self,
+        messages: &Messages,
+        action: StoreAction,
+        labels: &[String],
+    ) -> Result<(), Error> {
+        self.require_selected()?;
+        if !self.has_capability("X-GM-EXT-1") {
+            return Err(Error::Unsupported("X-GM-EXT-1"));
+        }
+        let item = match action {
+            StoreAction::Add => "+X-GM-LABELS.SILENT",
+            StoreAction::Remove => "-X-GM-LABELS.SILENT",
+            StoreAction::Set => "X-GM-LABELS.SILENT",
+        };
+        let values = labels.iter().map(|label| label_arg(label)).collect();
+        self.store_items(messages, item, values).await
     }
 
     pub async fn copy(&mut self, messages: &Messages, destination: &str) -> Result<Option<CopyUid>, Error> {
@@ -157,6 +192,15 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn labels_are_atoms_or_quoted() {
+        assert_eq!(label_arg("\\Inbox"), Arg::atom("\\Inbox"));
+        assert_eq!(label_arg("Work"), Arg::string("Work"));
+        // a label folder's name is never a bare word on the wire, whatever it holds
+        assert_eq!(label_arg("\\Inbox) (x"), Arg::string("\\Inbox) (x"));
+        assert_eq!(label_arg("a\r\nA2 DELETE INBOX"), Arg::string("a\r\nA2 DELETE INBOX"));
+    }
 
     #[test]
     fn reads_copyuid() {
