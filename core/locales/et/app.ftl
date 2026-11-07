@@ -83,6 +83,14 @@ cmd-options = &Seaded...
 cmd-select-all = Vali &kõik
 cmd-undo = &Võta tagasi
 cmd-copy = Kopeeri k&austa...
+# review: new
+cmd-address-book = &Aadressiraamat...
+# review: new
+cmd-add-sender-to-book = Lisa saatja aa&dressiraamatusse
+# review: new
+cmd-import-address-book = Impordi aadressi&raamat...
+# review: new
+cmd-export-address-book = &Ekspordi aadressiraamat...
 
 ## The tray icon's menu
 
@@ -399,3 +407,147 @@ ui-agent-programs = Programmid, mille agendid on taotlenud juurdepääsu teie e-
 ui-what-agents-did = Agentide tegevusajalugu
 ui-restart-now = &Taaskäivita kohe
 ui-restart-later = &Hiljem
+
+## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
+
+# review: new
+ui-tb-new-contact = Uus kontakt
+# review: new
+ui-tb-new-group = Uus grupp
+# review: new
+ui-tb-properties = Atribuudid
+# review: new
+ui-tb-write-to = Kirjuta
+# review: new
+ui-menu-new-contact = Uus &kontakt...
+# review: new
+ui-menu-new-group = Uus &grupp...
+# review: new
+ui-menu-write-to = Kir&juta
+# review: new
+ui-menu-delete = &Kustuta
+# review: new
+ui-book-find-hint = Sisestage nimi või e-posti aadress
+# review: new
+ui-book-all-contacts = Kõik kontaktid
+# review: new
+ui-col-phone = Telefon
+# review: new
+ui-book-empty = Aadressiraamat on tühi. Klõpsake nuppu Uus kontakt, et kedagi lisada, või importige vCard- või CSV-fail menüüst Fail.
+# review: new
+ui-book-no-match = Päringule „{ $words }“ ei vasta ükski kontakt.
+# review: new
+ui-book-delete-ask = { $count ->
+    [one] Kas kustutada see kontakt aadressiraamatust?
+   *[other] Kas kustutada need { $count } kontakti aadressiraamatust?
+}
+# review: new
+ui-group-delete-ask = Kas kustutada grupp „{ $name }“? Selle liikmed jäävad aadressiraamatusse.
+# review: new
+ui-book-no-address = Kontaktil { $name } pole e-posti aadressi.
+# review: new
+ui-new-contact-title = Uus kontakt
+# review: new
+ui-contact-title = { $name }: atribuudid
+# review: new
+ui-contact-first = Eesnimi:
+# review: new
+ui-contact-last = Perekonnanimi:
+# review: new
+ui-contact-display = Kuvatav nimi:
+# review: new
+ui-contact-nickname = Hüüdnimi:
+# review: new
+ui-contact-company = Ettevõte:
+# review: new
+ui-contact-addresses = E-posti aadressid:
+# review: new
+ui-contact-address-hint = Sisestage e-posti aadress
+# review: new
+ui-contact-add = &Lisa
+# review: new
+ui-contact-set-default = Määra &vaikeaadressiks
+# review: new
+ui-contact-default = { $address } (vaikimisi)
+# review: new
+ui-contact-phones = Telefoninumbrid:
+# review: new
+ui-phone-home = Kodu
+# review: new
+ui-phone-work = Töö
+# review: new
+ui-phone-mobile = Mobiil
+# review: new
+ui-phone-other = Muu
+# review: new
+ui-contact-notes = Märkmed:
+# review: new
+ui-contact-name-needed = Sisestage kontakti nimi või e-posti aadress.
+# review: new
+ui-contact-address-invalid = „{ $address }“ pole sobiv e-posti aadress.
+# review: new
+ui-contact-not-saved = Kontakti ei saanud salvestada: { $reason }
+# review: new
+ui-new-group-title = Uus grupp
+# review: new
+ui-group-title = { $name }: atribuudid
+# review: new
+ui-group-name = Grupi nimi:
+# review: new
+ui-group-members = Liikmed:
+# review: new
+ui-group-select-members = &Vali liikmed...
+# review: new
+ui-group-new-member = Lisage e-posti aadress, mida aadressiraamatus pole:
+# review: new
+ui-group-name-needed = Sisestage grupi nimi.
+# review: new
+ui-group-not-saved = Gruppi ei saanud salvestada: { $reason }
+# review: new
+ui-group-members-count = { $count ->
+    [one] 1 liige
+   *[other] { $count } liiget
+}
+# review: new
+ui-select-recipients = Adressaatide valimine
+# review: new
+ui-select-members = Grupi liikmete valimine
+# review: new
+ui-pick-intro = Sisestage nimi või valige see loendist:
+# review: new
+ui-pick-recipients = Kirja adressaadid:
+# review: new
+ui-pick-members = Grupi liikmed:
+# review: new
+ui-pick-to = &Saaja →
+# review: new
+ui-pick-cc = &Koopia →
+# review: new
+ui-pick-bcc = &Pimekoopia →
+# review: new
+ui-pick-add = &Lisa →
+# review: new
+ui-pick-tip = Valige adressaadid aadressiraamatust
+# review: new
+ui-filter-address-books = Aadressiraamatud (vCard, CSV)
+# review: new
+ui-filter-vcard = vCard-failid
+# review: new
+ui-book-export-name = Aadressiraamat
+# review: new
+ui-book-imported = { $added ->
+    [one] Lisati 1 kontakt
+   *[other] Lisati { $added } kontakti
+}, { $skipped ->
+    [one] 1 oli juba aadressiraamatus ja jäeti vahele.
+   *[other] { $skipped } olid juba aadressiraamatus ja jäeti vahele.
+}
+# review: new
+ui-book-not-imported = Aadressiraamatut ei saanud importida: { $reason }
+# review: new
+ui-book-exported = { $count ->
+    [one] 1 kontakt salvestati faili { $file }.
+   *[other] { $count } kontakti salvestati faili { $file }.
+}
+# review: new
+ui-book-not-exported = Aadressiraamatut ei saanud salvestada: { $reason }

@@ -59,6 +59,84 @@ header-subject = Subject
 quote-original = ----- Original Message -----
 fold-show-earlier = Show the earlier messages
 
+## Bounces: the card at the top of a notice that a message was not delivered
+
+bounce-failed = Your message was not delivered
+bounce-delayed = Your message has not been delivered yet
+bounce-delayed-note = Your mail server is still trying to deliver it. You do not need to send it again.
+# the link to the message the notice is about, in Sent Items or another folder
+bounce-show-message = Show the message that bounced
+bounce-what-to-do = What you can do:
+# what to do about a recipient the message is still on its way to: in the card of a delay, and in the card of a failure
+bounce-delayed-do = Nothing yet. If it still cannot be delivered, you will get another notice.
+bounce-delayed-row-do = Nothing yet. Your mail server is still trying to deliver it, and you will get another notice if it cannot.
+# folds the receiving server's own words
+bounce-details = Details
+# a recipient the notice does not name
+bounce-someone = A recipient
+# in Details: the server that refused the message, the status code it gave, and the server that wrote the notice
+bounce-server = Server: { $server }
+bounce-status = Status: { $status }
+bounce-reported-by = Reported by: { $server }
+bounce-retry-minutes = The receiving server asked to wait { $count ->
+    [one] a minute
+   *[other] { $count } minutes
+} before the next try.
+bounce-retry-hours = The receiving server asked to wait { $count ->
+    [one] an hour
+   *[other] { $count } hours
+} before the next try.
+# the names of the blocklists, "Spamhaus ZEN, Barracuda"
+bounce-blocklist = Blocklist: { $lists }
+bounce-user-unknown = The address does not exist
+bounce-user-unknown-why = The receiving server has no mailbox with this address. It may be mistyped, or the person may have moved on.
+bounce-user-unknown-do = Check the spelling of the address, or ask the person for the address they use now.
+bounce-invalid-address = The address is not valid
+bounce-invalid-address-why = The address is not written in a form mail can be sent to.
+bounce-invalid-address-do = Look for typing mistakes, such as a space, a missing letter or nothing after the @.
+bounce-mailbox-disabled = The mailbox is closed
+bounce-mailbox-disabled-why = The address exists, but its mailbox has been switched off or is no longer used.
+bounce-mailbox-disabled-do = Reach the person another way and ask for an address they use now.
+bounce-mailbox-full = The mailbox is full
+bounce-mailbox-full-why = The recipient's mailbox has no room for new mail.
+bounce-mailbox-full-do = Send it again in a few days, or let the person know another way. Large attachments are refused first.
+bounce-spam-blocked = Refused as spam
+bounce-spam-blocked-why = The receiving server took the message for spam.
+bounce-spam-blocked-do = Send it again without what looks like spam, such as many links, shortened links or a large attachment. If it keeps happening, ask your mail provider.
+bounce-virus-detected = Refused for a virus
+bounce-virus-detected-why = The receiving server found a virus or other harmful content in the message or its attachments.
+bounce-virus-detected-do = Check the attachments with a virus scanner. Some servers refuse every program or archive, so share such files as a link instead.
+bounce-ip-blocklisted = Your mail server is on a blocklist
+bounce-ip-blocklisted-why = The receiving server refuses mail from the server that sent yours, because that server's address is on a blocklist.
+bounce-ip-blocklisted-do = The message is not the problem. Forward this notice to your mail provider and ask them to have the server taken off the list.
+bounce-domain-blocklisted = A domain is on a blocklist
+bounce-domain-blocklisted-why = The receiving server refuses the message because your address's domain, or a domain in the message's links, is on a blocklist.
+bounce-domain-blocklisted-do = If the message has links, try it without them. Otherwise forward this notice to whoever runs mail for your domain.
+bounce-policy-blocked = Refused by the receiving server's rules
+bounce-policy-blocked-why = The rules of the receiving server do not let this message through, for example because of its size, its attachments or who sent it.
+bounce-policy-blocked-do = The server's own words under Details often give the reason. Ask the recipient whether they can accept such mail.
+bounce-geo-blocked = Refused for where it came from
+bounce-geo-blocked-why = The receiving server does not take mail from the country or network your mail server is in.
+bounce-geo-blocked-do = Reach the person another way, or ask your mail provider about it.
+bounce-relay-denied = The server would not pass it on
+bounce-relay-denied-why = A server refused to deliver the message onward, often because it was sent without signing in or through a server that does not handle this recipient.
+bounce-relay-denied-do = Check the outgoing server of the account in File > Accounts, and that it signs in.
+bounce-auth-failure = Your sender address could not be verified
+bounce-auth-failure-why = The receiving server could not confirm that the message really came from your domain (SPF, DKIM or DMARC).
+bounce-auth-failure-do = Forward this notice to whoever runs mail for your domain: its settings need fixing. Sending through your provider's own server may help meanwhile.
+bounce-rate-limited = Too much mail at once
+bounce-rate-limited-why = The receiving server takes fewer messages from your mail server for now.
+bounce-rate-limited-do = Wait a while and send it again. When writing to many people, send to fewer at a time.
+bounce-greylisting = Held back for a moment
+bounce-greylisting-why = The receiving server asks unknown senders to try again a little later, a common check against spam.
+bounce-greylisting-do = Nothing. Mail servers try again on their own, and the message is usually delivered within the hour.
+bounce-server-error = The receiving server had a problem
+bounce-server-error-why = The receiving server could not be reached, or could not take the message because of a problem of its own.
+bounce-server-error-do = Send it again later. If it keeps failing, check the part of the address after the @ for typing mistakes.
+bounce-unknown = Not delivered
+bounce-unknown-why = The notice does not say clearly why.
+bounce-unknown-do = The server's own words under Details may tell more. If they do not help, forward this notice to your mail provider.
+
 ## Several messages selected
 
 selection-title = { $count ->
@@ -395,3 +473,10 @@ secrets-windows = the Credential Manager
 secrets-mac = the keychain
 secrets-linux = the system keyring (Secret Service)
 error-no-such-file = there is no such file
+cards-file-too-big = This file is too big to be an address book.
+ui-sender-added = { $name } was added to the Address Book.
+ui-sender-known = { $name } is already in the Address Book.
+ui-sender-none = The sender of this message has no e-mail address to add.
+card-name-needed = The contact has no name and no e-mail address.
+# a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
+cards-file-failed = { $file }: { $reason }

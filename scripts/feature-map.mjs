@@ -400,6 +400,27 @@ const sections = [
                 checked: ['With the option off the three messages are three rows; on again, one']
             },
             {
+                shot: 'bounce-1-failed',
+                name: 'Why a message bounced',
+                what: "A delivery notice opened in the reading pane gets a card above it: not delivered (or not delivered yet), each recipient with the reason in plain words (the address does not exist, the mailbox is full, blocked as spam, a blocklist, and so on) and what you can do, the server's own words under Details. The reasons are told by a neural network built into the app (bounce-classifier), nothing is sent anywhere. Show the message that bounced selects it in Sent Items.",
+                how: 'Open a delivery notice.',
+                checked: ['The card names the recipient and the reason', "Details show the server's words", 'Show the message that bounced selects it in Sent Items']
+            },
+            {
+                shot: 'bounce-2-delayed',
+                name: 'A delayed message',
+                what: 'A notice that delivery is only delayed shows an amber card: the server is still trying, nothing to do yet, and when a wait was asked for, how long.',
+                how: 'Open a delay notice.',
+                checked: ['The delay card says it is still being tried']
+            },
+            {
+                shot: 'bounce-3-list',
+                name: 'Bounces in the list',
+                what: 'Delivery notices have an undelivered mark in the list, and is:bounce finds them.',
+                how: 'Search for is:bounce.',
+                checked: ['The notice has the mark in the list', 'is:bounce finds the two notices and nothing else']
+            },
+            {
                 shot: 'threads-4-watch',
                 name: 'Watch Conversation',
                 what: "Message > Watch Conversation puts glasses in the Watch column of a conversation, as Outlook Express did: a new message in it is always announced, even from a folder of the user's other than the Inbox, and the notification says the conversation is watched. Choosing it again takes the mark away; a mark lasts when a late message joins two conversations, Watch winning over Ignore.",
@@ -867,6 +888,55 @@ const sections = [
                 what: 'What is written goes above the signature, and a reply has it above the quoted message.',
                 how: 'Create Mail, Reply, Reply All or Forward.',
                 checked: ['The message went with the signature, after what was written and the "-- " line', 'A reply has the signature above the quote']
+            }
+        ]
+    },
+    {
+        title: 'The Address Book',
+        intro: 'People and groups the user keeps, as in Outlook Express: Tools > Address Book, Select Recipients behind the To, Cc and Bcc buttons of a message, completion that offers the book first, Add Sender to Address Book, and vCard and CSV files in and out.',
+        features: [
+            {
+                shot: 'contacts-1-book',
+                name: 'The Address Book',
+                what: 'Groups on the left, people on the right with their name, default e-mail address and phone, a find box that finds them by the start of a name, nickname, company or address, and New Contact, New Group, Properties, Delete and Write To. The book is kept in the local store, never on the server.',
+                how: 'Tools > Address Book, or Ctrl+Shift+B.',
+                checked: ['It opens empty with its toolbar', 'It lists the contact saved, found by part of the name and not by other words']
+            },
+            {
+                shot: 'contacts-2-person',
+                name: 'Contact Properties',
+                what: 'First and last name, the name shown, nickname, company, several e-mail addresses with the default first (Set as Default), phone numbers by kind and notes. An address that is not one mailbox alone is refused; what a vCard brought that the form does not show is kept.',
+                how: 'New Contact, or Properties or a double-click on a contact.',
+                checked: ['A contact with a name and two addresses is saved, the first the default']
+            },
+            {
+                shot: 'contacts-3-group',
+                name: 'Group Properties',
+                what: 'A name and members: people from the Address Book (Select Members), who follow their card when it changes, and addresses typed that are in no card.',
+                how: 'New Group, or Properties on a group.',
+                checked: ['A group of the contact and a typed address is saved and listed with its two members']
+            },
+            {
+                shot: 'contacts-4-pick',
+                name: 'Select Recipients',
+                what: "Outlook Express's picker: the To, Cc and Bcc labels of a message are buttons that open the Address Book's people and groups, with To ->, Cc -> and Bcc -> to choose where each goes. A group puts its members in the field, and an address already there is not added again. Typing a group's name in a field completes to its members, the book's people and groups offered before those only written to or heard from.",
+                how: 'Click To, Cc or Bcc in a message.',
+                checked: [
+                    'To opens Select Recipients with the group and the contact',
+                    'The group and the contact go to To, each address once',
+                    "Typing the group's name completes to its members"
+                ]
+            },
+            {
+                shot: 'contacts-5-import',
+                name: 'Import and export, Add Sender',
+                what: "File > Import Address Book reads vCard (.vcf) and CSV files as Outlook, Thunderbird, Google Contacts and Apple's Contacts write them, and skips a contact whose addresses are all in the book; File > Export Address Book writes a vCard file. Add Sender to Address Book (Tools and the message's right-click menu) adds the sender of a message once.",
+                how: 'File > Import Address Book, File > Export Address Book, Tools > Add Sender to Address Book.',
+                checked: [
+                    'Add Sender adds the sender once',
+                    'A file of two contacts, one in the book already, adds 1 and skips 1',
+                    'The export holds every contact'
+                ]
             }
         ]
     },

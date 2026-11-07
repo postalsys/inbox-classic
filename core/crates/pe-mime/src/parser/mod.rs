@@ -221,6 +221,8 @@ struct Parser<'a> {
     has_html: bool,
     attachments: Vec<Attachment>,
     force_rfc822_attachments: bool,
+    /// Every attached message stays an attachment, as in a delivery report
+    keep_attached_messages: bool,
 }
 
 /// Parses a message
@@ -231,6 +233,16 @@ pub fn parse(raw: &[u8]) -> Result<Message, Error> {
 pub fn parse_with(raw: &[u8], limits: Limits) -> Result<Message, Error> {
     let mut counters = Counters::default();
     let mut parser = Parser::new(limits, &mut counters, 0)?;
+    parser.run(raw)
+}
+
+/// Parses a message keeping every attached message (message/rfc822) as an attachment, the way a
+/// message with a delivery or feedback report is parsed, rather than showing an inline one as part
+/// of the text. For reading a returned message out of a bounce that carries no report part.
+pub fn parse_keeping_attached_messages(raw: &[u8]) -> Result<Message, Error> {
+    let mut counters = Counters::default();
+    let mut parser = Parser::new(Limits::default(), &mut counters, 0)?;
+    parser.keep_attached_messages = true;
     parser.run(raw)
 }
 
@@ -251,6 +263,7 @@ impl<'a> Parser<'a> {
             has_html: false,
             attachments: Vec::new(),
             force_rfc822_attachments: false,
+            keep_attached_messages: false,
         };
         parser.add_node(None)?;
         Ok(parser)
@@ -290,7 +303,7 @@ impl<'a> Parser<'a> {
             pos = next;
             self.process_line(line, line_break, pos >= raw.len())?;
         }
-        self.force_rfc822_attachments = self.has_report_parts();
+        self.force_rfc822_attachments = self.keep_attached_messages || self.has_report_parts();
         self.collect(0, None, false)?;
         let mut message = self.build_message();
         if self.rfc822_depth == 0 {
@@ -660,6 +673,19 @@ mod tests {
             name: name.into(),
             address: address.into(),
         })
+    }
+
+    #[test]
+    fn keeps_attached_messages_when_asked() {
+        let raw = b"Subject: Returned\r\nContent-Type: multipart/mixed; boundary=\"b\"\r\n\r\n--b\r\nContent-Type: text/plain\r\n\r\nNotice\r\n--b\r\nContent-Type: message/rfc822\r\n\r\nSubject: Original\r\nMessage-ID: <o@example.com>\r\n\r\nOriginal body\r\n--b--\r\n";
+        let inline = parse(raw).unwrap();
+        assert!(inline.attachments.is_empty());
+        assert!(inline.text.unwrap().contains("Original body"));
+        let kept = parse_keeping_attached_messages(raw).unwrap();
+        assert_eq!(kept.text.as_deref(), Some("Notice"));
+        assert_eq!(kept.attachments.len(), 1);
+        assert_eq!(kept.attachments[0].mime_type, "message/rfc822");
+        assert!(kept.attachments[0].content.starts_with(b"Subject: Original"));
     }
 
     #[test]

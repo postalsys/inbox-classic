@@ -235,6 +235,7 @@
             <!--review--><li>In Gesendete Objekte und Entwürfe nennt die Liste in der Spalte <b>An</b>, an wen jede Nachricht geht, statt von wem sie kommt.</li><!--/review-->
             <!--review--><li>Doppelklicken Sie auf eine Nachricht (oder wählen Sie sie aus und drücken Sie <kbd>Enter</kbd>), um sie in einem eigenen Fenster zu öffnen, wie der Lesebereich sie zeigt, mit <b>Antworten</b>, <b>Allen antworten</b>, <b>Weiterleiten</b>, <b>Drucken</b>, <b>Löschen</b>, <b>Archivieren</b> und <b>Junk</b>. <b>Vorherige</b> und <b>Nächste</b> gehen durch die Liste, aus der sie geöffnet wurde. Ein Entwurf wird stattdessen zum Fertigstellen geöffnet.</li><!--/review-->
             <!--review--><li><b>Ansicht &gt; Nächste Nachricht</b> und <b>Vorherige Nachricht</b> gehen ohne Maus in der Liste nach unten und oben; <b>Nächste ungelesene Nachricht</b> (oder <kbd>N</kbd> in der Liste) findet die nächste Nachricht, die Sie nicht gelesen haben, und bietet, wenn der Ordner keine mehr hat, den nächsten Ordner an, der welche hat. <b>Ansicht &gt; Gehe zu Ordner</b> öffnet jeden Ordner jedes Kontos, gefunden durch Eintippen eines Teils seines Namens. <b>Bearbeiten &gt; In dieser Nachricht suchen</b> findet Wörter in der angezeigten Nachricht.</li><!--/review-->
+            <!--review--><li>Eine <b>Unzustellbarkeitsnachricht</b> (eine zurückgekommene Nachricht) hat in der Liste ein Zeichen für nicht zugestellt, und beim Öffnen zeigt eine Karte darüber, ob die Nachricht nicht zugestellt wurde oder nur verzögert ist, für jeden Empfänger den Grund in einfachen Worten und was Sie tun können, und unter <b>Details</b> die Worte des Servers. <b>Die zurückgekommene Nachricht anzeigen</b> wählt die Nachricht aus, die Sie gesendet haben. Der Grund wird auf Ihrem Computer ermittelt; nichts wird irgendwohin gesendet.</li><!--/review-->
             <li>
                 E-Mail einer Marke, die ein Logo veröffentlicht (BIMI), zeigt dieses Logo neben dem Kopf, aber nur, wenn Ihr Mailserver geprüft hat, dass die
                 E-Mail wirklich von der Domäne der Marke kommt (DMARC), und das Logo bestätigt hat. Das Logo kommt mit der Nachricht oder, falls nicht, einmal
@@ -278,7 +279,7 @@
                 Die Suche versteht, was das Suchfeld von Gmail versteht, sodass <code>is:unread</code> die ungelesenen Nachrichten auflistet und
                 <code>in:inbox</code> nur im Posteingang sucht: <code>"genaue Wortgruppe"</code>, <code>-wort</code> zum Ausschließen,
                 <code>dies OR das</code>, <code>from:</code>, <code>to:</code> (auch <code>cc:</code>, <code>bcc:</code>), <code>subject:</code>,
-                <code>filename:</code>, <code>is:unread</code>, <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>,
+                <code>filename:</code>, <code>is:unread</code>, <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>, <code>is:bounce</code>,
                 <code>has:attachment</code>, <code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>,
                 <code>in:spam</code>, <code>in:anywhere</code> oder <code>in:</code> und der Name eines Ordners, <code>before:2025/01/31</code>,
                 <code>after:2025/01/01</code>, <code>older_than:2d</code> (oder <code>3m</code>, <code>1y</code>), <code>newer_than:1m</code>,
@@ -504,6 +505,44 @@
                 <b>Von</b> setzt die Signatur dieses Kontos an ihre Stelle.
             </li>
         </ul>
+
+        <!--review--><h3>Das Adressbuch</h3>
+        <p>
+            <b>Extras &gt; Adressbuch</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) bewahrt die Personen auf, denen Sie schreiben, mit ihren Namen,
+            E-Mail-Adressen, Telefonnummern und Notizen, dazu Gruppen von ihnen, um allen auf einmal zu schreiben. Die Gruppen stehen links; rechts stehen
+            die Personen mit Name, E-Mail-Adresse und Telefonnummer.
+        </p>
+        <ul>
+            <li>
+                <b>Neuer Kontakt</b> fügt jemanden hinzu: Vor- und Nachname, Anzeigename, Spitzname, Firma, eine oder mehrere E-Mail-Adressen,
+                Telefonnummern und Notizen. Nachrichten gehen an die erste Adresse oder an die, die Sie <b>Als Standard festlegen</b>. <b>Eigenschaften</b>
+                (oder ein Doppelklick) ändert einen Kontakt, <b>Löschen</b> entfernt die ausgewählten.
+            </li>
+            <li>
+                <b>Neue Gruppe</b> legt eine Gruppe an: Geben Sie ihr einen Namen und fügen Sie dann mit <b>Mitglieder auswählen</b> Personen aus dem
+                Adressbuch hinzu oder geben Sie eine Adresse ein, die nicht darin steht. Ein im Adressbuch geänderter Kontakt ändert sich auch in den Gruppen.
+            </li>
+            <li>
+                Das Suchfeld über der Liste findet Personen am Anfang ihres Namens, Spitznamens, ihrer Firma oder Adresse. <b>Schreiben an</b> beginnt eine
+                Nachricht an die ausgewählten Personen oder die Gruppe.
+            </li>
+            <li>
+                Klicken Sie in einer Nachricht am Anfang der Zeile auf <b>An</b>, <b>Cc</b> oder <b>Bcc</b>, um <b>Empfänger auswählen</b> zu öffnen: Wählen
+                Sie Personen oder Gruppen aus und klicken Sie auf <b>An -&gt;</b>, <b>Cc -&gt;</b> oder <b>Bcc -&gt;</b>. Beim Tippen in diesen Feldern
+                kommen die Personen und Gruppen des Adressbuchs zuerst; eine Gruppe setzt alle ihre Mitglieder in das Feld.
+            </li>
+            <li>
+                <b>Extras &gt; Absender zum Adressbuch hinzufügen</b>, auch im Kontextmenü einer Nachricht, fügt den Absender der ausgewählten Nachricht
+                hinzu. Wer schon im Adressbuch steht, wird nicht doppelt hinzugefügt.
+            </li>
+            <li>
+                <b>Datei &gt; Adressbuch importieren</b> liest eine vCard-Datei (<code>.vcf</code>) oder CSV-Datei, wie Outlook, Thunderbird, Google
+                Kontakte und die meisten anderen Programme sie exportieren; ein Kontakt, dessen Adressen alle schon im Adressbuch stehen, wird übersprungen.
+                <b>Datei &gt; Adressbuch exportieren</b> schreibt alle in eine vCard-Datei, die andere Programme lesen.<!--os:mac--> Um Ihre Kontakte aus der
+                App Kontakte zu übernehmen, wählen Sie sie dort aus, wählen Sie <b>Ablage &gt; Exportieren &gt; vCard exportieren</b> und importieren Sie
+                diese Datei.<!--/os-->
+            </li>
+        </ul><!--/review-->
 
         <h2>5. Neue E-Mail abrufen</h2>
         <p>
@@ -748,6 +787,10 @@
                 <td><kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd></td>
                 <td>Fett, kursiv, unterstrichen beim Schreiben</td>
             </tr>
+            <!--review--><tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd></td>
+                <td>Das Adressbuch öffnen</td>
+            </tr><!--/review-->
             <!--os:windows,linux-->
             <tr>
                 <td><kbd>F1</kbd></td>

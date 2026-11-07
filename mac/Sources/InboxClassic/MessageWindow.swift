@@ -107,6 +107,11 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         window.contentView = reader.view
         reader.status = { [weak mailbox] in mailbox?.status($0) }
         reader.openMailto = { [weak mailbox] in mailbox?.openMailto($0) }
+        // the message that bounced, in the main window
+        reader.bouncedHandler = { [weak mailbox] folder, uid in
+            AppDelegate.shared?.main?.show()
+            mailbox?.showMessage(folder: folder, uid: uid)
+        }
         reader.shownHandler = { [weak self] in
             guard let self else { return }
             showTitle(reader.subject)
@@ -217,6 +222,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .saveAs: mailbox?.saveMessageAs(folder: folder, uid: uid)
         case .properties: mailbox?.showProperties(folder: folder, uid: uid, subject: reader.subject)
         case .viewSource: mailbox?.showSource(folder: folder, uid: uid)
+        case .addSenderToBook: mailbox?.status(addSenderToAddressBook(core: core, folder: folder, uid: uid))
         default: return false
         }
         return true
@@ -227,7 +233,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         let shown = reader.messageView != nil
         switch command {
         case .reply, .replyAll, .forward, .print: return shown
-        case .delete, .markRead, .markUnread, .flag, .saveAs, .properties, .viewSource: return true
+        case .delete, .markRead, .markUnread, .flag, .saveAs, .properties, .viewSource, .addSenderToBook: return true
         case .archive: return summary.archivable
         case .junk: return !summary.in_junk
         case .notJunk: return summary.in_junk

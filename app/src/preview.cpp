@@ -61,7 +61,7 @@ void Preview::Configure() {
 
     // links open in the browser, the pane only ever shows the documents it is given
     view_->add_NavigationStarting(
-        Callback<ICoreWebView2NavigationStartingEventHandler>([](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
+        Callback<ICoreWebView2NavigationStartingEventHandler>([this](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
             LPWSTR uri = nullptr;
             args->get_Uri(&uri);
             if (!webview::IsOwnPage(uri, kPageUrl)) {
@@ -70,7 +70,7 @@ void Preview::Configure() {
                 args->get_IsUserInitiated(&user);
                 // a relative link of the message points into the made-up address, not anywhere
                 if (user && !StartsWith(uri, kPageUrl)) {
-                    OpenExternally(uri);
+                    Follow(uri);
                 }
             }
             CoTaskMemFree(uri);
@@ -78,11 +78,11 @@ void Preview::Configure() {
         }).Get(),
         nullptr);
     view_->add_NewWindowRequested(
-        Callback<ICoreWebView2NewWindowRequestedEventHandler>([](ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) {
+        Callback<ICoreWebView2NewWindowRequestedEventHandler>([this](ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) {
             LPWSTR uri = nullptr;
             args->get_Uri(&uri);
             args->put_Handled(TRUE);
-            OpenExternally(uri);
+            Follow(uri);
             CoTaskMemFree(uri);
             return S_OK;
         }).Get(),
@@ -108,6 +108,13 @@ void Preview::Configure() {
     } else {
         Clear();
     }
+}
+
+void Preview::Follow(const wchar_t* uri) {
+    if (uri && links_ && links_(uri)) {
+        return;
+    }
+    OpenExternally(uri);
 }
 
 void Preview::Show(const std::wstring& html, bool remoteImages) {

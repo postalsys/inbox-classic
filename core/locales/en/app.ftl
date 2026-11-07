@@ -68,6 +68,10 @@ cmd-options = O&ptions...
 cmd-select-all = Select A&ll
 cmd-undo = &Undo
 cmd-copy = &Copy to Folder...
+cmd-address-book = Address &Book...
+cmd-add-sender-to-book = Add Sender to Address Boo&k
+cmd-import-address-book = Import Address &Book...
+cmd-export-address-book = &Export Address Book...
 
 ## The tray icon's menu
 
@@ -379,3 +383,84 @@ ui-agent-programs = Programs whose agents have requested access to your mail
 ui-what-agents-did = Agent activity
 ui-restart-now = &Restart Now
 ui-restart-later = &Later
+
+## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
+
+ui-tb-new-contact = New Contact
+ui-tb-new-group = New Group
+ui-tb-properties = Properties
+ui-tb-write-to = Write To
+ui-menu-new-contact = New &Contact...
+ui-menu-new-group = New &Group...
+ui-menu-write-to = &Write To
+ui-menu-delete = &Delete
+ui-book-find-hint = Type a name or e-mail address
+ui-book-all-contacts = All Contacts
+ui-col-phone = Phone
+ui-book-empty = The Address Book is empty. Click New Contact to add someone, or import a vCard or CSV file from the File menu.
+ui-book-no-match = No contacts match “{ $words }”.
+ui-book-delete-ask = { $count ->
+    [one] Delete this contact from the Address Book?
+   *[other] Delete these { $count } contacts from the Address Book?
+}
+ui-group-delete-ask = Delete the group “{ $name }”? The people in it stay in the Address Book.
+ui-book-no-address = { $name } has no e-mail address.
+ui-new-contact-title = New Contact
+ui-contact-title = { $name } Properties
+ui-contact-first = First name:
+ui-contact-last = Last name:
+ui-contact-display = Display name:
+ui-contact-nickname = Nickname:
+ui-contact-company = Company:
+ui-contact-addresses = E-mail addresses:
+ui-contact-address-hint = Type an e-mail address
+ui-contact-add = &Add
+ui-contact-set-default = Set as Defa&ult
+ui-contact-default = { $address } (default)
+ui-contact-phones = Phone numbers:
+ui-phone-home = Home
+ui-phone-work = Work
+ui-phone-mobile = Mobile
+ui-phone-other = Other
+ui-contact-notes = Notes:
+ui-contact-name-needed = Type a name or an e-mail address for the contact.
+ui-contact-address-invalid = “{ $address }” is not a valid e-mail address.
+ui-contact-not-saved = The contact could not be saved: { $reason }
+ui-new-group-title = New Group
+ui-group-title = { $name } Properties
+ui-group-name = Group name:
+ui-group-members = Members:
+ui-group-select-members = &Select Members...
+ui-group-new-member = Add an e-mail address that is not in the Address Book:
+ui-group-name-needed = Type a name for the group.
+ui-group-not-saved = The group could not be saved: { $reason }
+ui-group-members-count = { $count ->
+    [one] 1 member
+   *[other] { $count } members
+}
+ui-select-recipients = Select Recipients
+ui-select-members = Select Group Members
+ui-pick-intro = Type a name or select it from the list:
+ui-pick-recipients = Message recipients:
+ui-pick-members = Group members:
+ui-pick-to = &To →
+ui-pick-cc = &Cc →
+ui-pick-bcc = &Bcc →
+ui-pick-add = &Add →
+ui-pick-tip = Choose recipients from the Address Book
+ui-filter-address-books = Address books (vCard, CSV)
+ui-filter-vcard = vCard files
+ui-book-export-name = Address Book
+ui-book-imported = { $added ->
+    [one] Added 1 contact
+   *[other] Added { $added } contacts
+}, { $skipped ->
+    [one] skipped 1 already in the Address Book.
+   *[other] skipped { $skipped } already in the Address Book.
+}
+ui-book-not-imported = The address book could not be imported: { $reason }
+ui-book-exported = { $count ->
+    [one] 1 contact saved to { $file }.
+   *[other] { $count } contacts saved to { $file }.
+}
+ui-book-not-exported = The address book could not be saved: { $reason }

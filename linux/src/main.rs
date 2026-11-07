@@ -8,8 +8,10 @@
 mod words;
 
 mod accounts;
+mod address_book;
 mod agents;
 mod app;
+mod book_dialogs;
 mod complete;
 mod compose;
 #[cfg(feature = "e2e")]
@@ -26,6 +28,7 @@ mod notify;
 mod outbox;
 mod preferences;
 mod reader;
+mod recipients;
 mod settings;
 mod sign_in_apps;
 mod tray;

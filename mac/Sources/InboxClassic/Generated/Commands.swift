@@ -52,6 +52,10 @@ enum Command: Int, CaseIterable {
     case hideIgnored = 153
     case aiAgents = 133
     case options = 137
+    case addressBook = 147
+    case addSenderToBook = 148
+    case importAddressBook = 149
+    case exportAddressBook = 150
 
     /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu)
     var menu: String {
@@ -105,6 +109,10 @@ enum Command: Int, CaseIterable {
         case .hideIgnored: return "view"
         case .aiAgents: return "tools"
         case .options: return "tools"
+        case .addressBook: return "tools"
+        case .addSenderToBook: return "tools"
+        case .importAddressBook: return "file"
+        case .exportAddressBook: return "file"
         }
     }
 
@@ -165,6 +173,10 @@ enum Command: Int, CaseIterable {
         case .hideIgnored: return .cmdHideIgnored
         case .aiAgents: return .cmdAiAgents
         case .options: return .cmdOptions
+        case .addressBook: return .cmdAddressBook
+        case .addSenderToBook: return .cmdAddSenderToBook
+        case .importAddressBook: return .cmdImportAddressBook
+        case .exportAddressBook: return .cmdExportAddressBook
         }
     }
 
@@ -220,6 +232,10 @@ enum Command: Int, CaseIterable {
         case .hideIgnored: return nil
         case .aiAgents: return nil
         case .options: return (",", [.command])
+        case .addressBook: return ("b", [.command, .shift])
+        case .addSenderToBook: return nil
+        case .importAddressBook: return nil
+        case .exportAddressBook: return nil
         }
     }
 
@@ -275,6 +291,10 @@ enum Command: Int, CaseIterable {
         case .hideIgnored: return true
         case .aiAgents: return false
         case .options: return false
+        case .addressBook: return false
+        case .addSenderToBook: return false
+        case .importAddressBook: return false
+        case .exportAddressBook: return false
         }
     }
 
@@ -330,6 +350,10 @@ enum Command: Int, CaseIterable {
         case .hideIgnored: return false
         case .aiAgents: return false
         case .options: return false
+        case .addressBook: return false
+        case .addSenderToBook: return false
+        case .importAddressBook: return false
+        case .exportAddressBook: return false
         }
     }
 
@@ -385,6 +409,10 @@ enum Command: Int, CaseIterable {
         case .hideIgnored: return false
         case .aiAgents: return false
         case .options: return false
+        case .addressBook: return false
+        case .addSenderToBook: return true
+        case .importAddressBook: return false
+        case .exportAddressBook: return false
         }
     }
 }

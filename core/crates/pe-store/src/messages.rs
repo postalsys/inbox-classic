@@ -41,6 +41,9 @@ pub struct MessageInfo {
     pub gmail_thread: Option<u64>,
     /// The conversation it is in, below 0 until threaded (read from the store; not written by `add_messages`)
     pub thread_id: Option<i64>,
+    /// A delivery failure or delay notice: its BODYSTRUCTURE is a delivery report, or the core found it to be one
+    /// when it was opened ([`Store::mark_bounce`])
+    pub bounce: bool,
 }
 
 /// The colour of a flag, as Apple Mail keeps it: `\\Flagged` with three keyword bits, `$MailFlagBit0` to
@@ -229,7 +232,7 @@ fn is_seen(canonical: &str) -> bool {
 pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_date, date, size, subject, from_name, \
      from_address, recipients, message_id, in_reply_to, has_attachments, \
      EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id), sender_people, recipient_people, \
-     attachment_names, attachment_count, refs, thread_id, \
+     attachment_names, attachment_count, refs, thread_id, bounce, \
      COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0)";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
@@ -238,7 +241,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
         folder_id: row.get(1)?,
         cached: row.get(15)?,
         thread: None,
-        mark: crate::ThreadMark::of(row.get(22)?),
+        mark: crate::ThreadMark::of(row.get(23)?),
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,
@@ -261,6 +264,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             references: crate::threads::split_references(&row.get::<_, Option<String>>(20)?.unwrap_or_default()),
             gmail_thread: None,
             thread_id: row.get(21)?,
+            bounce: row.get(22)?,
         },
     })
 }
@@ -282,8 +286,8 @@ impl Store {
         let mut statement = self.db.prepare_cached(
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
-             attachment_names, attachment_count, refs) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20) \
+             attachment_names, attachment_count, refs, bounce) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
@@ -313,7 +317,8 @@ impl Store {
                 m.recipient_people,
                 m.attachment_names,
                 m.attachment_count,
-                m.references.join(" ")
+                m.references.join(" "),
+                m.bounce
             ])?;
             // a message new to the store goes into its conversation at once (one already here keeps its own)
             if new {

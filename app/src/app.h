@@ -317,11 +317,27 @@ void StartLanguage(const std::wstring& forced);
 // (`threads`), these two changed when OK is clicked. True when the user chose to restart now for a new language
 bool OptionsDialog(HWND owner, bool& notify, bool& threads);
 
+// ---- addressbook.cpp ----
+
+// Tools > Address Book: a window of its own with the groups and the people, brought to the front when it is open
+void OpenAddressBook(PeCore* core);
+// the book changed outside the window (Add Sender, an import): an open Address Book shows it again
+void AddressBookChanged();
+// the Address Book window, gone, before the core it uses is
+void DestroyAddressBook();
+// Select Recipients of a compose window: the book's people and groups put into To, Cc and Bcc (`fields`, their texts,
+// changed in place); true when OK was clicked
+bool SelectRecipients(HWND owner, PeCore* core, std::wstring (&fields)[3]);
+// File > Import Address Book and Export Address Book: what the status bar says, empty when cancelled (a failure is
+// told in a message box)
+std::wstring ImportAddressBook(HWND owner, PeCore* core);
+std::wstring ExportAddressBook(HWND owner, PeCore* core);
+
 // ---- complete.cpp ----
 
-// completes the address the cursor is in, in an address field (To, Cc, Bcc), from the people written to and heard
-// from: a list under the field as you type, arrows to choose, Enter or Tab to take one, Esc to close it, Shift+Delete
-// to forget someone
+// completes the address the cursor is in, in an address field (To, Cc, Bcc), from the address book and the people
+// written to and heard from: a list under the field as you type, arrows to choose, Enter or Tab to take one, Esc to
+// close it, Shift+Delete to forget someone
 void CompleteAddresses(HWND edit, PeCore* core);
 
 // the signature of an account in an editor of its own (Accounts > Signature); whether it was saved
@@ -361,9 +377,13 @@ void DestroyMessageWindows();
 
 // ---- main.cpp ----
 
+// the main window back from the tray (or the taskbar), in front
+void ShowMain();
 // a new message from a mailto: link (the core reads it), from `account`, or from the account of what the main window
 // shows when 0
 void OpenMailto(const std::wstring& link, int64_t account = 0);
+// a new message to `to` (as it goes in the To field), from the account of what the main window shows (Write To)
+void WriteTo(const std::wstring& to);
 
 // ---- mailbox.cpp ----
 
@@ -417,6 +437,8 @@ public:
     void ShowProperties(HWND owner);
     // View Source: the whole message as the server has it
     void ShowSource(HWND owner);
+    // Add Sender to Address Book: the sender of the message shown, what was done said in the status bar
+    void AddSenderToBook(HWND owner);
     // the message list's right-click menu at `screen`, or at the selected row for (-1, -1) (the menu key)
     void MessageMenu(POINT screen);
     HWND List() const { return list_; }
@@ -587,13 +609,19 @@ private:
     // the row of the message `uid` of `folder` selected in the list; false when it is not there
     bool SelectInList(int64_t folder, uint64_t uid);
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
-    // a row in bold: unread, or a collapsed conversation with an unread message
-    static bool RowBold(const PeMessage& row);
+    // a row's font: bold as the core says (unread, or a collapsed conversation with an unread message), or the list's
+    HFONT RowFont(const PeMessage& row) const;
     // the Subject cell of a list grouped by conversation, drawn whole: a conversation's + or - box, the subject indented
     // under its first message, and how many messages it has
     void DrawSubject(HDC dc, int index, const PeMessage& row);
-    // where the + or - box of the row `index` is
-    RECT ThreadBox(int index) const;
+    // the Subject cell of the row `index`, and where the + or - box is in such a cell
+    RECT SubjectCell(int index) const;
+    static RECT ThreadBox(const RECT& cell);
+    // a click at `at` on a + or - box, and Right (`right`) or Left on the focused row; true when handled
+    bool OnThreadClick(POINT at);
+    bool OnThreadArrow(bool right);
+    // the row `row` alone selected, focused and in view, and followed at once
+    void SelectOnly(int row);
     // the conversation `thread` opened or closed, the list shown again
     void SetThreadExpanded(int64_t thread, bool open);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
@@ -608,6 +636,8 @@ private:
     // not the selected one)
     Reader reader_;
     HFONT bold_ = nullptr;
+    // the list's font, for the rows not in bold
+    HFONT normal_ = nullptr;
     HFONT link_ = nullptr;
     // where the list goes, with the search bar over it while searching
     RECT listArea_ = {};
@@ -778,6 +808,9 @@ enum ControlId : WORD {
     IDC_LOGO,
     // under the header of a message that could not be downloaded: a click tries again
     IDC_RETRY,
+    // no control: the reading pane's "Show the message that bounced" clicked, sent to its window once the WebView2's
+    // event is over
+    IDC_BOUNCED_MESSAGE,
     // the toolbar of a message window, and its Previous and Next buttons
     IDC_MESSAGE_TOOLBAR = 230,
     IDC_PREVIOUS,
@@ -823,6 +856,55 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_NOTIFY,
     IDC_OPTIONS_NOTE,
     IDC_OPTIONS_THREADS,
+};
+
+// the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them
+enum BookControlId : WORD {
+    // the Address Book: the groups, the people, the find box, the toolbar and its buttons
+    IDC_BOOK_TREE = 700,
+    IDC_BOOK_LIST,
+    IDC_BOOK_FIND,
+    IDC_BOOK_TOOLBAR,
+    IDC_BOOK_NEW_CONTACT = 710,
+    IDC_BOOK_NEW_GROUP,
+    IDC_BOOK_PROPERTIES,
+    IDC_BOOK_DELETE,
+    IDC_BOOK_WRITE_TO,
+    // Contact Properties
+    IDC_CONTACT_FIRST = 720,
+    IDC_CONTACT_LAST,
+    IDC_CONTACT_DISPLAY,
+    IDC_CONTACT_NICKNAME,
+    IDC_CONTACT_COMPANY,
+    IDC_CONTACT_ADDRESS,
+    IDC_CONTACT_ADD,
+    IDC_CONTACT_ADDRESSES,
+    IDC_CONTACT_DEFAULT,
+    IDC_CONTACT_REMOVE,
+    IDC_CONTACT_PHONE_KIND,
+    IDC_CONTACT_PHONE,
+    IDC_CONTACT_PHONE_ADD,
+    IDC_CONTACT_PHONES,
+    IDC_CONTACT_PHONE_REMOVE,
+    IDC_CONTACT_NOTES,
+    // Group Properties
+    IDC_GROUP_NAME = 750,
+    IDC_GROUP_MEMBERS,
+    IDC_GROUP_SELECT,
+    IDC_GROUP_REMOVE,
+    IDC_GROUP_ADDRESS,
+    IDC_GROUP_ADD,
+    IDC_GROUP_COUNT,
+    // Select Recipients and Select Group Members: the find box, the book, To ->, Cc -> and Bcc -> (or Add ->) and the
+    // lists they fill
+    IDC_PICK_FIND = 770,
+    IDC_PICK_LIST,
+    IDC_PICK_TO,
+    IDC_PICK_CC,
+    IDC_PICK_BCC,
+    IDC_PICK_TO_LIST = 780,
+    IDC_PICK_CC_LIST,
+    IDC_PICK_BCC_LIST,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

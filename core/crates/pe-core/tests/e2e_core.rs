@@ -588,6 +588,108 @@ fn gmail_labels(server: &ImapKit, mailbox: &str, uid: u64) -> Vec<String> {
 }
 
 #[test]
+fn keeps_an_address_book() {
+    let Some(s) = setup() else { return };
+    s.server.add_message(
+        "INBOX",
+        "From: Mary Smith <mary@example.com>\r\nSubject: Hello\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHi\r\n",
+        &[],
+    );
+    s.server.add_message(
+        "INBOX",
+        "From: Marko Polo <marko@example.net>\r\nSubject: Travel\r\nDate: Mon, 6 Oct 2025 11:00:00 +0000\r\n\r\nHi\r\n",
+        &[],
+    );
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let mary = s
+        .core
+        .search(&Search::folder(inbox), Sort::default(), 0, 10)
+        .unwrap()
+        .into_iter()
+        .find(|m| m.info.subject == "Hello")
+        .unwrap();
+
+    // the sender added, once
+    let added = s.core.add_sender(inbox, mary.info.uid).unwrap();
+    let card = added.card;
+    assert!(added.added);
+    let again = s.core.add_sender(inbox, mary.info.uid).unwrap();
+    assert_eq!((again.card, again.added), (card, false), "the same card again");
+    let saved = s.core.card(card).unwrap().unwrap();
+    assert_eq!((saved.first.as_str(), saved.last.as_str()), ("Mary", "Smith"));
+
+    // a vCard and a CSV file read in, a card whose address is known left out
+    let dir = TempDir::new("cards");
+    let vcf = dir.path().join("cards.vcf");
+    std::fs::write(
+        &vcf,
+        "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Team Lead\r\nEMAIL:lead@example.org\r\nEND:VCARD\r\n",
+    )
+    .unwrap();
+    assert_eq!(
+        s.core.import_cards(&[&vcf]),
+        pe_core::book::Imported {
+            added: 1,
+            ..Default::default()
+        }
+    );
+    let csv = dir.path().join("cards.csv");
+    std::fs::write(
+        &csv,
+        "First Name,Last Name,E-mail Address\nMary,Smith,mary@example.com\nJohn,Doe,john@example.org\n",
+    )
+    .unwrap();
+    assert_eq!(
+        s.core.import_cards(&[&csv]),
+        pe_core::book::Imported {
+            added: 1,
+            skipped: 1,
+            ..Default::default()
+        }
+    );
+    assert_eq!(s.core.cards("").unwrap().len(), 3);
+
+    // written out, and read back the same
+    let out = dir.path().join("out.vcf");
+    assert_eq!(s.core.export_cards(&[], &out).unwrap(), 3);
+    let again = pe_core::vcard::read_vcards(&std::fs::read_to_string(&out).unwrap());
+    assert_eq!(again.len(), 3);
+
+    // a group, and the completion: the book first, its groups, then people heard from, no address twice
+    s.core
+        .save_group(&pe_store::Group {
+            name: "Marketing".into(),
+            members: vec![pe_store::Member {
+                card: Some(card),
+                ..Default::default()
+            }],
+            ..Default::default()
+        })
+        .unwrap();
+    let found = s.core.completions("mar", 10).unwrap();
+    let labels: Vec<&str> = found.iter().map(|c| c.label.as_str()).collect();
+    assert_eq!(
+        labels,
+        [
+            "Mary Smith <mary@example.com>",
+            "Mary Smith <mary@example.com>",
+            "Marko Polo <marko@example.net>"
+        ]
+    );
+    assert!(found[1].group && found[1].name == "Marketing");
+}
+
+#[test]
 fn all_inboxes_list_and_mark_every_account() {
     let Some(s) = setup() else { return };
     // a second account on a server of its own (ImapKit has one mailbox a server)
@@ -2670,4 +2772,131 @@ fn a_message_opened_during_a_sync_comes_at_once() {
         "the message waited for the sync"
     );
     s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+}
+
+#[test]
+fn bounces_are_marked_and_explained() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let inbox = folders.iter().find(|f| f.info.path == "INBOX").unwrap().id;
+    let sent = folders
+        .iter()
+        .find(|f| f.info.special_use.as_deref() == Some("\\Sent"))
+        .unwrap();
+    // the message that bounced, in Sent Items
+    let sent_uid = s.server.add_message(
+        &sent.info.path,
+        "From: Me <me@example.com>\r\nTo: nobody@example.org\r\nSubject: The quarterly report\r\n\
+         Message-ID: <report-1@example.com>\r\n\r\nHere it is.\r\n",
+        &[],
+    );
+    let sent = sent.id;
+    // a delivery report, which the list marks from its structure
+    let report = s.server.add_message(
+        "INBOX",
+        "From: Mail Delivery System <MAILER-DAEMON@mx.example.com>\r\nTo: me@example.com\r\n\
+         Subject: Undelivered Mail Returned to Sender\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/report; report-type=delivery-status; boundary=\"B\"\r\n\r\n\
+         --B\r\nContent-Type: text/plain\r\n\r\nYour message could not be delivered.\r\n\
+         --B\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; mx.example.com\r\n\r\n\
+         Final-Recipient: rfc822; nobody@example.org\r\nAction: failed\r\nStatus: 5.1.1\r\n\
+         Diagnostic-Code: smtp; 550 5.1.1 <nobody@example.org>: User unknown\r\n\
+         --B\r\nContent-Type: text/rfc822-headers\r\n\r\nFrom: Me <me@example.com>\r\nTo: nobody@example.org\r\n\
+         Subject: The quarterly report\r\nMessage-ID: <report-1@example.com>\r\n--B--\r\n",
+        &[],
+    );
+    // a notice in plain text, a bounce only the heuristics find once it is opened
+    let plain = s.server.add_message(
+        "INBOX",
+        "From: Mail Delivery System <MAILER-DAEMON@mx.example.com>\r\nTo: me@example.com\r\n\
+         Subject: Undelivered Mail\r\nContent-Type: text/plain\r\n\r\n\
+         <grace@example.org>: host mx.example.org[203.0.113.4] said: 552 5.2.2 Mailbox full\r\n\
+         (in reply to RCPT TO command)\r\n",
+        &[],
+    );
+    let ordinary = s.server.add_message(
+        "INBOX",
+        "From: Ann <ann@example.com>\r\nSubject: Lunch\r\n\r\nNoon?\r\n",
+        &[],
+    );
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+
+    let marked = |text: &str| -> Vec<u64> {
+        let search = Search {
+            text: text.into(),
+            ..Search::folder(inbox)
+        };
+        let mut uids: Vec<u64> = s
+            .core
+            .search(&search, Sort::default(), 0, 10)
+            .unwrap()
+            .into_iter()
+            .map(|m| m.info.uid)
+            .collect();
+        uids.sort();
+        uids
+    };
+    assert_eq!(marked("is:bounce"), [report]);
+    let listed = s.core.search(&Search::folder(inbox), Sort::default(), 0, 10).unwrap();
+    let bounce_of = |uid: u64| listed.iter().find(|m| m.info.uid == uid).unwrap().info.bounce;
+    assert!(bounce_of(report) && !bounce_of(plain) && !bounce_of(ordinary));
+
+    // opened: the card, with the link to the message in Sent Items
+    s.core.open_message(inbox, report).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: report,
+        }
+    });
+    let view = s.core.message_view(inbox, report, false).unwrap().unwrap();
+    assert!(view.bounce);
+    assert_eq!(
+        view.bounced_message,
+        Some(MessageRef {
+            folder: sent,
+            uid: sent_uid
+        })
+    );
+    assert!(
+        view.document.contains("The address does not exist"),
+        "{}",
+        view.document
+    );
+    assert!(view.document.contains(pe_html::BOUNCED_MESSAGE_LINK));
+
+    // the plain notice gets its mark once opened, on a worker as the reading pane builds it
+    s.core.open_message(inbox, plain).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: plain,
+        }
+    });
+    let request = s.core.message_view_start(inbox, plain, false).unwrap();
+    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
+    s.wait(|e| *e == Event::ViewReady { request });
+    let view = s.core.message_view_result(request).unwrap();
+    assert!(view.bounce);
+    assert!(view.document.contains("The mailbox is full"), "{}", view.document);
+    // it names no message of the account
+    assert_eq!(view.bounced_message, None);
+    assert_eq!(marked("is:bounce"), [report, plain]);
+    assert_eq!(marked("-is:bounce"), [ordinary]);
+
+    // ordinary mail stays as it was
+    s.core.open_message(inbox, ordinary).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: ordinary,
+        }
+    });
+    let view = s.core.message_view(inbox, ordinary, false).unwrap().unwrap();
+    assert!(!view.bounce && !view.document.contains("pe-bounce-"));
+    assert_eq!(marked("is:bounce"), [report, plain]);
 }

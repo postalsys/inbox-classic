@@ -83,6 +83,14 @@ cmd-options = &Options...
 cmd-select-all = Sélectionner &tout
 cmd-undo = &Annuler
 cmd-copy = &Copier vers un dossier...
+# review: new
+cmd-address-book = &Carnet d'adresses...
+# review: new
+cmd-add-sender-to-book = Ajouter l'e&xpéditeur au carnet d'adresses
+# review: new
+cmd-import-address-book = Importer le carnet d'&adresses...
+# review: new
+cmd-export-address-book = &Exporter le carnet d'adresses...
 
 ## The tray icon's menu
 
@@ -399,3 +407,147 @@ ui-agent-programs = Programmes dont les agents ont demandé à utiliser votre co
 ui-what-agents-did = Historique des agents
 ui-restart-now = &Redémarrer maintenant
 ui-restart-later = &Plus tard
+
+## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
+
+# review: new
+ui-tb-new-contact = Nouveau contact
+# review: new
+ui-tb-new-group = Nouveau groupe
+# review: new
+ui-tb-properties = Propriétés
+# review: new
+ui-tb-write-to = Écrire à
+# review: new
+ui-menu-new-contact = Nouveau &contact...
+# review: new
+ui-menu-new-group = Nouveau &groupe...
+# review: new
+ui-menu-write-to = É&crire à
+# review: new
+ui-menu-delete = &Supprimer
+# review: new
+ui-book-find-hint = Tapez un nom ou une adresse e-mail
+# review: new
+ui-book-all-contacts = Tous les contacts
+# review: new
+ui-col-phone = Téléphone
+# review: new
+ui-book-empty = Le carnet d'adresses est vide. Cliquez sur Nouveau contact pour ajouter quelqu'un, ou importez un fichier vCard ou CSV depuis le menu Fichier.
+# review: new
+ui-book-no-match = Aucun contact ne correspond à « { $words } ».
+# review: new
+ui-book-delete-ask = { $count ->
+    [one] Supprimer ce contact du carnet d'adresses ?
+   *[other] Supprimer ces { $count } contacts du carnet d'adresses ?
+}
+# review: new
+ui-group-delete-ask = Supprimer le groupe « { $name } » ? Les personnes qu'il contient restent dans le carnet d'adresses.
+# review: new
+ui-book-no-address = { $name } n'a pas d'adresse e-mail.
+# review: new
+ui-new-contact-title = Nouveau contact
+# review: new
+ui-contact-title = Propriétés de { $name }
+# review: new
+ui-contact-first = Prénom :
+# review: new
+ui-contact-last = Nom :
+# review: new
+ui-contact-display = Nom affiché :
+# review: new
+ui-contact-nickname = Surnom :
+# review: new
+ui-contact-company = Société :
+# review: new
+ui-contact-addresses = Adresses e-mail :
+# review: new
+ui-contact-address-hint = Tapez une adresse e-mail
+# review: new
+ui-contact-add = &Ajouter
+# review: new
+ui-contact-set-default = Définir par &défaut
+# review: new
+ui-contact-default = { $address } (par défaut)
+# review: new
+ui-contact-phones = Numéros de téléphone :
+# review: new
+ui-phone-home = Domicile
+# review: new
+ui-phone-work = Travail
+# review: new
+ui-phone-mobile = Mobile
+# review: new
+ui-phone-other = Autre
+# review: new
+ui-contact-notes = Notes :
+# review: new
+ui-contact-name-needed = Tapez un nom ou une adresse e-mail pour le contact.
+# review: new
+ui-contact-address-invalid = « { $address } » n'est pas une adresse e-mail valide.
+# review: new
+ui-contact-not-saved = Le contact n'a pas pu être enregistré : { $reason }
+# review: new
+ui-new-group-title = Nouveau groupe
+# review: new
+ui-group-title = Propriétés de { $name }
+# review: new
+ui-group-name = Nom du groupe :
+# review: new
+ui-group-members = Membres :
+# review: new
+ui-group-select-members = &Sélectionner les membres...
+# review: new
+ui-group-new-member = Ajouter une adresse e-mail qui n'est pas dans le carnet d'adresses :
+# review: new
+ui-group-name-needed = Tapez un nom pour le groupe.
+# review: new
+ui-group-not-saved = Le groupe n'a pas pu être enregistré : { $reason }
+# review: new
+ui-group-members-count = { $count ->
+    [one] 1 membre
+   *[other] { $count } membres
+}
+# review: new
+ui-select-recipients = Sélectionner les destinataires
+# review: new
+ui-select-members = Sélectionner les membres du groupe
+# review: new
+ui-pick-intro = Tapez un nom ou sélectionnez-le dans la liste :
+# review: new
+ui-pick-recipients = Destinataires du message :
+# review: new
+ui-pick-members = Membres du groupe :
+# review: new
+ui-pick-to = &À →
+# review: new
+ui-pick-cc = &Cc →
+# review: new
+ui-pick-bcc = Cc&i →
+# review: new
+ui-pick-add = &Ajouter →
+# review: new
+ui-pick-tip = Choisir les destinataires dans le carnet d'adresses
+# review: new
+ui-filter-address-books = Carnets d'adresses (vCard, CSV)
+# review: new
+ui-filter-vcard = Fichiers vCard
+# review: new
+ui-book-export-name = Carnet d'adresses
+# review: new
+ui-book-imported = { $added ->
+    [one] 1 contact ajouté
+   *[other] { $added } contacts ajoutés
+}, { $skipped ->
+    [one] 1 déjà dans le carnet d'adresses ignoré.
+   *[other] { $skipped } déjà dans le carnet d'adresses ignorés.
+}
+# review: new
+ui-book-not-imported = Le carnet d'adresses n'a pas pu être importé : { $reason }
+# review: new
+ui-book-exported = { $count ->
+    [one] 1 contact enregistré dans { $file }.
+   *[other] { $count } contacts enregistrés dans { $file }.
+}
+# review: new
+ui-book-not-exported = Le carnet d'adresses n'a pas pu être enregistré : { $reason }

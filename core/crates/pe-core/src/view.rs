@@ -3,6 +3,7 @@
 
 use pe_html::RenderOptions;
 use pe_mime::parser::{self, Attachment, text_addresses, text_to_html};
+use pe_store::MessageRef;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AttachmentView {
@@ -33,7 +34,15 @@ pub struct MessageView {
     pub invitation: Option<crate::calendar::Invitation>,
     /// The brand has a BIMI logo the receiving server passed ([`crate::Core::logo_start`] draws it)
     pub has_logo: bool,
+    /// It is a bounce, a notice that a message was not delivered or not yet: the document starts with its card
+    pub bounce: bool,
+    /// The message the bounce returns, found in the account by its Message-ID (Sent Items first): the card links to
+    /// it with [`pe_html::BOUNCED_MESSAGE_LINK`], and the apps select this one when that link is clicked
+    pub bounced_message: Option<MessageRef>,
 }
+
+/// Finds a message of the account by its Message-ID, for the link of a bounce's card
+pub(crate) type FindMessage<'a> = &'a dyn Fn(&str) -> Option<MessageRef>;
 
 /// The calendar part of a message (`text/calendar`, `application/ics`)
 pub(crate) fn calendar_part(attachments: &[Attachment]) -> Option<&Attachment> {
@@ -42,22 +51,34 @@ pub(crate) fn calendar_part(attachments: &[Attachment]) -> Option<&Attachment> {
         .find(|a| matches!(a.mime_type.as_str(), "text/calendar" | "application/ics"))
 }
 
-/// The attachments the attachment bar lists: not the images of an HTML body
+/// The parts of a delivery report written for mail servers (RFC 3464 and 6533): the bounce's card says what they say
+const REPORT_PARTS: [&str; 4] = [
+    "message/delivery-status",
+    "message/global-delivery-status",
+    "text/rfc822-headers",
+    "message/global-headers",
+];
+
+/// The attachments the attachment bar lists: not the images of an HTML body, nor a delivery report's parts for servers
 fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
-    attachments.iter().filter(|a| !a.related)
+    attachments
+        .iter()
+        .filter(|a| !a.related && !REPORT_PARTS.iter().any(|p| a.mime_type.eq_ignore_ascii_case(p)))
 }
 
 #[cfg(test)]
 pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
-    build_unless(source, allow_remote_images, &[], &|| false).unwrap_or_default()
+    build_unless(source, allow_remote_images, &[], &|| false, &|_| None).unwrap_or_default()
 }
 
-/// [`build`], given up (None) between its steps once `dropped` says nobody waits for it anymore
+/// [`build`], given up (None) between its steps once `dropped` says nobody waits for it anymore; `find` looks up the
+/// message a bounce returns
 pub(crate) fn build_unless(
     source: &[u8],
     allow_remote_images: bool,
     trusted: &[String],
     dropped: &dyn Fn() -> bool,
+    find: FindMessage,
 ) -> Option<MessageView> {
     let options = RenderOptions { allow_remote_images };
     let message = match parser::parse(source) {
@@ -105,7 +126,21 @@ pub(crate) fn build_unless(
         (names[3].as_str(), cc.as_str()),
         (names[4].as_str(), subject.as_str()),
     ];
-    let rendered = pe_html::render_view(&body, &options, &images, &header);
+    // a bounce: parsed again the way pe-bounce reads one, only when it may be one
+    let bounce = pe_bounce::detect::may_be_bounce(&message)
+        .then(|| pe_bounce::analyze(source))
+        .flatten();
+    if dropped() {
+        return None;
+    }
+    let bounced_message = bounce
+        .as_ref()
+        .and_then(|b| b.original.as_ref()?.message_id.as_deref())
+        .and_then(find);
+    let card = bounce
+        .as_ref()
+        .map(|b| crate::bounce::card(b, bounced_message.is_some()));
+    let rendered = pe_html::render_view_with(&body, &options, &images, &header, card.as_ref());
     Some(MessageView {
         subject,
         from,
@@ -127,6 +162,8 @@ pub(crate) fn build_unless(
         invitation: calendar_part(&message.attachments).and_then(|part| {
             crate::calendar::invitation(&String::from_utf8_lossy(&part.content), part.method.as_deref())
         }),
+        bounce: bounce.is_some(),
+        bounced_message,
     })
 }
 
@@ -158,6 +195,18 @@ pub(crate) fn header_text(source: &[u8]) -> String {
 fn push_shown(out: &mut String, line: &str) {
     let shown = |c: char| c == '\t' || !(c.is_control() || parser::is_direction_mark(c));
     out.extend(line.chars().map(|c| if shown(c) { c } else { ' ' }));
+}
+
+/// Text of mail as a window may show it, line by line as [`push_shown`] makes a line, its line breaks (`\n`) kept
+pub(crate) fn shown_text(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for (index, line) in text.split('\n').enumerate() {
+        if index > 0 {
+            out.push('\n');
+        }
+        push_shown(&mut out, line);
+    }
+    out
 }
 
 /// The most of a message's source View Source shows
@@ -262,15 +311,15 @@ mod tests {
 
     #[test]
     fn a_view_nobody_waits_for_gives_up() {
-        assert!(build_unless(MESSAGE, false, &[], &|| true).is_none());
-        assert!(build_unless(MESSAGE, false, &[], &|| false).is_some());
+        assert!(build_unless(MESSAGE, false, &[], &|| true, &|_| None).is_none());
+        assert!(build_unless(MESSAGE, false, &[], &|| false, &|_| None).is_some());
         // once it is dropped halfway, after parsing
         let asked = std::cell::Cell::new(0);
         let dropped = || {
             asked.set(asked.get() + 1);
             asked.get() > 1
         };
-        assert!(build_unless(MESSAGE, false, &[], &dropped).is_none());
+        assert!(build_unless(MESSAGE, false, &[], &dropped, &|_| None).is_none());
     }
 
     #[test]
@@ -389,6 +438,321 @@ mod tests {
             view.document
         );
         assert!(!view.document.contains("<b>"));
+    }
+
+    fn bounce_fixture(name: &str) -> Vec<u8> {
+        std::fs::read(format!(
+            "{}/../pe-bounce/tests/fixtures/bounces/{name}",
+            env!("CARGO_MANIFEST_DIR")
+        ))
+        .unwrap()
+    }
+
+    /// A delivery report for `recipient` with the server's `words`, returning the message `<sent@example.com>`
+    fn report(recipient: &str, action: &str, status: &str, words: &str) -> Vec<u8> {
+        [
+            "From: Mail Delivery System <MAILER-DAEMON@mx.example.com>",
+            "To: me@example.com",
+            "Subject: Undelivered Mail Returned to Sender",
+            "MIME-Version: 1.0",
+            "Content-Type: multipart/report; report-type=delivery-status; boundary=\"B\"",
+            "",
+            "--B",
+            "Content-Type: text/plain",
+            "",
+            "Your message could not be delivered.",
+            "--B",
+            "Content-Type: message/delivery-status",
+            "",
+            "Reporting-MTA: dns; mx.example.com",
+            "",
+            &format!("Final-Recipient: rfc822; {recipient}"),
+            &format!("Action: {action}"),
+            &format!("Status: {status}"),
+            "Remote-MTA: dns; mx.remote.example",
+            &format!("Diagnostic-Code: smtp; {words}"),
+            "--B",
+            "Content-Type: text/rfc822-headers",
+            "",
+            "From: me@example.com",
+            "To: someone@example.com",
+            "Subject: The quarterly report",
+            "Message-ID: <sent@example.com>",
+            "--B--",
+            "",
+        ]
+        .join("\r\n")
+        .into_bytes()
+    }
+
+    /// The text of a document, tags dropped, for looking for words in it
+    fn shown(document: &str) -> String {
+        let mut out = String::new();
+        let mut inside = false;
+        for c in document.chars() {
+            match c {
+                '<' => inside = true,
+                '>' => inside = false,
+                _ if !inside => out.push(c),
+                _ => {}
+            }
+        }
+        out
+    }
+
+    #[test]
+    fn a_bounce_starts_with_its_card() {
+        let view = build(&bounce_fixture("gmail.eml"), false);
+        assert!(view.bounce);
+        assert!(
+            view.attachments
+                .iter()
+                .all(|a| !REPORT_PARTS.contains(&a.mime_type.as_str())),
+            "the report's parts for servers are not listed: {:?}",
+            view.attachments.iter().map(|a| &a.mime_type).collect::<Vec<_>>()
+        );
+        let document = &view.document;
+        assert!(document.contains("role=\"note\""), "{document}");
+        let text = shown(document);
+        for words in [
+            "Your message was not delivered",
+            "Subject: proovikiri",
+            "jhfthgfuyfhvjkugjhvjuyfv@hot.ee",
+            "The address does not exist",
+            "What you can do:",
+            "Details",
+            "550 5.1.1 &lt;jhfthgfuyfhvjkugjhvjuyfv@hot.ee&gt;: Recipient address rejected",
+            "Status: 5.1.1",
+            "Reported by: googlemail.com",
+        ] {
+            assert!(text.contains(words), "{words} in {text}");
+        }
+        // the card above the notice's own text, the CSP as for any message
+        assert!(document.contains("</div></div><style>@layer pe-bounce-"), "{document}");
+        assert!(document.contains("default-src 'none'") && !document.contains("<script"));
+        // the message it returns is not in the store here: no link to it
+        assert!(!document.contains(pe_html::BOUNCED_MESSAGE_LINK));
+        assert_eq!(view.bounced_message, None);
+    }
+
+    #[test]
+    fn every_fixture_gets_a_card() {
+        let dir = format!("{}/../pe-bounce/tests/fixtures/bounces", env!("CARGO_MANIFEST_DIR"));
+        for entry in std::fs::read_dir(dir).unwrap() {
+            let path = entry.unwrap().path();
+            let view = build(&std::fs::read(&path).unwrap(), false);
+            assert!(view.bounce, "{}", path.display());
+            assert!(view.document.contains("role=\"note\""), "{}", path.display());
+        }
+    }
+
+    #[test]
+    fn a_delay_says_it_is_still_on_its_way() {
+        let view = build(&bounce_fixture("delayed.eml"), false);
+        assert!(view.bounce);
+        let text = shown(&view.document);
+        assert!(text.contains("Your message has not been delivered yet"), "{text}");
+        assert!(text.contains("You do not need to send it again"), "{text}");
+        assert!(text.contains("user@example.com"), "{text}");
+        assert!(text.contains("The receiving server had a problem"), "{text}");
+        // what to do about a delay, not a failure's advice
+        assert!(text.contains("Nothing yet. If it still cannot be delivered"), "{text}");
+        assert!(!text.contains("Send it again later"), "{text}");
+        // greylisted, with the wait the server asked for
+        let view = build(
+            &report(
+                "grey@example.com",
+                "delayed",
+                "4.2.0",
+                "450 4.2.0 Greylisted, try again in 5 minutes",
+            ),
+            false,
+        );
+        let text = shown(&view.document);
+        assert!(text.contains("Your message has not been delivered yet"), "{text}");
+        assert!(text.contains("Held back for a moment"), "{text}");
+        assert!(text.contains("asked to wait 5 minutes"), "{text}");
+    }
+
+    #[test]
+    fn a_delay_among_failures_is_drawn_and_advised_as_one() {
+        let raw = [
+            "From: Mail Delivery System <MAILER-DAEMON@mx.example.com>",
+            "Content-Type: multipart/report; report-type=delivery-status; boundary=\"B\"",
+            "",
+            "--B",
+            "Content-Type: message/delivery-status",
+            "",
+            "Reporting-MTA: dns; mx.example.com",
+            "",
+            "Final-Recipient: rfc822; first@example.com",
+            "Action: failed",
+            "Status: 5.1.1",
+            "Diagnostic-Code: smtp; 550 5.1.1 User unknown",
+            "",
+            "Final-Recipient: rfc822; later@example.com",
+            "Action: delayed",
+            "Status: 4.2.2",
+            "Diagnostic-Code: smtp; 452 4.2.2 Mailbox full",
+            "--B--",
+            "",
+        ]
+        .join("\r\n");
+        let view = build(raw.as_bytes(), false);
+        let document = &view.document;
+        assert_eq!(document.matches("<div class=\"r y\">").count(), 1, "{document}");
+        let text = shown(document);
+        assert!(text.contains("Your message was not delivered"), "{text}");
+        assert!(text.contains("Nothing yet. Your mail server is still trying"), "{text}");
+        // the full mailbox's advice is for a failure; the note it replaces is not said twice
+        assert!(!text.contains("Send it again in a few days"), "{text}");
+        assert!(!text.contains("You do not need to send it again"), "{text}");
+    }
+
+    #[test]
+    fn names_the_blocklist() {
+        let view = build(
+            &report(
+                "user@example.org",
+                "failed",
+                "5.7.1",
+                "554 5.7.1 Service unavailable; Client host [203.0.113.5] blocked using zen.spamhaus.org",
+            ),
+            false,
+        );
+        let text = shown(&view.document);
+        assert!(text.contains("Your mail server is on a blocklist"), "{text}");
+        assert!(text.contains("Blocklist: Spamhaus"), "{text}");
+    }
+
+    #[test]
+    fn links_the_message_it_returns_when_it_is_there() {
+        let sent = MessageRef { folder: 7, uid: 42 };
+        let raw = report("nobody@example.com", "failed", "5.1.1", "550 5.1.1 User unknown");
+        let asked = std::cell::RefCell::new(Vec::new());
+        let find = |id: &str| {
+            asked.borrow_mut().push(id.to_string());
+            Some(sent)
+        };
+        let view = build_unless(&raw, false, &[], &|| false, &find).unwrap();
+        assert_eq!(asked.borrow().as_slice(), ["<sent@example.com>"]);
+        assert_eq!(view.bounced_message, Some(sent));
+        assert!(
+            view.document.contains(&format!(
+                "<a href=\"{}\">Show the message that bounced</a>",
+                pe_html::BOUNCED_MESSAGE_LINK
+            )),
+            "{}",
+            view.document
+        );
+    }
+
+    #[test]
+    fn hostile_words_stay_text() {
+        let raw = report(
+            "<img src=x onerror=alert(1)>@example.com",
+            "failed",
+            "5.1.1",
+            "550 <script>alert(2)</script></pre></details><a href=\"inboxclassic:bounced-message\">x</a> \u{202e}",
+        );
+        let view = build(&raw, false);
+        assert!(view.bounce);
+        assert!(
+            !view.document.contains("<script") && !view.document.contains("<img"),
+            "{}",
+            view.document
+        );
+        // no direction marks reach the page
+        assert!(!view.document.contains('\u{202e}'), "{}", view.document);
+        // the link the words name stays text: the card has none, the message was not found
+        assert!(!view.document.contains("<a "), "{}", view.document);
+        assert!(
+            view.document
+                .contains("550 &lt;script&gt;alert(2)&lt;/script&gt;&lt;/pre&gt;"),
+            "{}",
+            view.document
+        );
+    }
+
+    #[test]
+    fn ordinary_mail_has_no_card() {
+        let view = build(MESSAGE, false);
+        assert!(!view.bounce);
+        assert!(!view.document.contains("pe-bounce-"));
+    }
+
+    /// The card of a failure, a delay and a blocklist as documents to look at, written to the folder in
+    /// PE_BOUNCE_PREVIEW (`PE_BOUNCE_PREVIEW=../build/bounce-preview cargo test -p pe-core bounce_previews`)
+    #[test]
+    fn bounce_previews() {
+        let Some(dir) = std::env::var_os("PE_BOUNCE_PREVIEW") else {
+            return;
+        };
+        let dir = std::path::PathBuf::from(dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let several = [
+            "From: Mail Delivery System <MAILER-DAEMON@mx.example.com>",
+            "Subject: Undelivered Mail Returned to Sender",
+            "MIME-Version: 1.0",
+            "Content-Type: multipart/report; report-type=delivery-status; boundary=\"B\"",
+            "",
+            "--B",
+            "Content-Type: text/plain",
+            "",
+            "Some recipients failed.",
+            "--B",
+            "Content-Type: message/delivery-status",
+            "",
+            "Reporting-MTA: dns; mx.example.com",
+            "",
+            "Final-Recipient: rfc822; first@example.com",
+            "Action: failed",
+            "Status: 5.1.1",
+            "Remote-MTA: dns; mx.first.example",
+            "Diagnostic-Code: smtp; 550 5.1.1 User unknown",
+            "",
+            "Final-Recipient: rfc822; second@example.com",
+            "Action: delayed",
+            "Status: 4.2.0",
+            "Diagnostic-Code: smtp; 450 4.2.0 Greylisted, try again in 5 minutes",
+            "",
+            "Final-Recipient: rfc822; fourth@example.com",
+            "Action: failed",
+            "Status: 5.2.2",
+            "Diagnostic-Code: smtp; 552 5.2.2 Mailbox full",
+            "--B--",
+            "",
+        ]
+        .join("\r\n");
+        let linked = |id: &str| (id == "<sent@example.com>").then_some(MessageRef { folder: 1, uid: 1 });
+        let pages: [(&str, Vec<u8>); 6] = [
+            ("failed.html", bounce_fixture("gmail.eml")),
+            ("delayed.html", bounce_fixture("delayed.eml")),
+            (
+                "blocklist.html",
+                report(
+                    "user@example.org",
+                    "failed",
+                    "5.7.1",
+                    "554 5.7.1 Service unavailable; Client host [203.0.113.5] blocked using zen.spamhaus.org; https://www.spamhaus.org/query/ip/203.0.113.5",
+                ),
+            ),
+            ("several.html", several.into_bytes()),
+            (
+                "delayed-blocklist.html",
+                report(
+                    "user@example.org",
+                    "delayed",
+                    "4.7.1",
+                    "451 4.7.1 Client host [203.0.113.5] blocked using zen.spamhaus.org; try again later",
+                ),
+            ),
+            ("outlook.html", bounce_fixture("outlook.eml")),
+        ];
+        for (name, raw) in pages {
+            let view = build_unless(&raw, false, &[], &|| false, &linked).unwrap();
+            std::fs::write(dir.join(name), view.document).unwrap();
+        }
     }
 
     #[test]

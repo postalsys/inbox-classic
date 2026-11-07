@@ -427,6 +427,8 @@ struct Message {
     let opens: Bool
     /// the row stands for all of its conversation's messages, not shown under it
     let collapsed: Bool
+    /// a notice that a message was not delivered, or not yet: its mark in the attachment column's place
+    let bounce: Bool
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -450,6 +452,7 @@ struct Message {
         bold = message.bold
         opens = message.thread_opens
         collapsed = message.thread_collapsed
+        bounce = message.bounce
     }
 }
 

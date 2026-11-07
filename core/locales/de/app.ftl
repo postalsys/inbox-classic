@@ -83,6 +83,14 @@ cmd-options = &Optionen...
 cmd-select-all = &Alles auswählen
 cmd-undo = &Rückgängig
 cmd-copy = In Ordner &kopieren...
+# review: new
+cmd-address-book = &Adressbuch...
+# review: new
+cmd-add-sender-to-book = Absender zum Adressbuch &hinzufügen
+# review: new
+cmd-import-address-book = &Adressbuch importieren...
+# review: new
+cmd-export-address-book = Adressbuch e&xportieren...
 
 ## The tray icon's menu
 
@@ -399,3 +407,147 @@ ui-agent-programs = Programme, deren Agenten Zugriff auf Ihre E-Mails angeforder
 ui-what-agents-did = Aktivitätsverlauf der Agenten
 ui-restart-now = Jetzt &neu starten
 ui-restart-later = &Später
+
+## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
+
+# review: new
+ui-tb-new-contact = Neuer Kontakt
+# review: new
+ui-tb-new-group = Neue Gruppe
+# review: new
+ui-tb-properties = Eigenschaften
+# review: new
+ui-tb-write-to = Schreiben an
+# review: new
+ui-menu-new-contact = Neuer &Kontakt...
+# review: new
+ui-menu-new-group = Neue &Gruppe...
+# review: new
+ui-menu-write-to = &Schreiben an
+# review: new
+ui-menu-delete = &Löschen
+# review: new
+ui-book-find-hint = Namen oder E-Mail-Adresse eingeben
+# review: new
+ui-book-all-contacts = Alle Kontakte
+# review: new
+ui-col-phone = Telefon
+# review: new
+ui-book-empty = Das Adressbuch ist leer. Klicken Sie auf „Neuer Kontakt“, um jemanden hinzuzufügen, oder importieren Sie eine vCard- oder CSV-Datei über das Menü „Datei“.
+# review: new
+ui-book-no-match = Keine Kontakte für „{ $words }“ gefunden.
+# review: new
+ui-book-delete-ask = { $count ->
+    [one] Diesen Kontakt aus dem Adressbuch löschen?
+   *[other] Diese { $count } Kontakte aus dem Adressbuch löschen?
+}
+# review: new
+ui-group-delete-ask = Die Gruppe „{ $name }“ löschen? Die Personen darin bleiben im Adressbuch.
+# review: new
+ui-book-no-address = { $name } hat keine E-Mail-Adresse.
+# review: new
+ui-new-contact-title = Neuer Kontakt
+# review: new
+ui-contact-title = Eigenschaften von { $name }
+# review: new
+ui-contact-first = Vorname:
+# review: new
+ui-contact-last = Nachname:
+# review: new
+ui-contact-display = Anzeigename:
+# review: new
+ui-contact-nickname = Spitzname:
+# review: new
+ui-contact-company = Firma:
+# review: new
+ui-contact-addresses = E-Mail-Adressen:
+# review: new
+ui-contact-address-hint = E-Mail-Adresse eingeben
+# review: new
+ui-contact-add = &Hinzufügen
+# review: new
+ui-contact-set-default = Als &Standard festlegen
+# review: new
+ui-contact-default = { $address } (Standard)
+# review: new
+ui-contact-phones = Telefonnummern:
+# review: new
+ui-phone-home = Privat
+# review: new
+ui-phone-work = Geschäftlich
+# review: new
+ui-phone-mobile = Mobil
+# review: new
+ui-phone-other = Andere
+# review: new
+ui-contact-notes = Notizen:
+# review: new
+ui-contact-name-needed = Geben Sie einen Namen oder eine E-Mail-Adresse für den Kontakt ein.
+# review: new
+ui-contact-address-invalid = „{ $address }“ ist keine gültige E-Mail-Adresse.
+# review: new
+ui-contact-not-saved = Der Kontakt konnte nicht gespeichert werden: { $reason }
+# review: new
+ui-new-group-title = Neue Gruppe
+# review: new
+ui-group-title = Eigenschaften von { $name }
+# review: new
+ui-group-name = Gruppenname:
+# review: new
+ui-group-members = Mitglieder:
+# review: new
+ui-group-select-members = Mitglieder &auswählen...
+# review: new
+ui-group-new-member = E-Mail-Adresse hinzufügen, die nicht im Adressbuch steht:
+# review: new
+ui-group-name-needed = Geben Sie einen Namen für die Gruppe ein.
+# review: new
+ui-group-not-saved = Die Gruppe konnte nicht gespeichert werden: { $reason }
+# review: new
+ui-group-members-count = { $count ->
+    [one] 1 Mitglied
+   *[other] { $count } Mitglieder
+}
+# review: new
+ui-select-recipients = Empfänger auswählen
+# review: new
+ui-select-members = Gruppenmitglieder auswählen
+# review: new
+ui-pick-intro = Namen eingeben oder aus der Liste auswählen:
+# review: new
+ui-pick-recipients = Empfänger der Nachricht:
+# review: new
+ui-pick-members = Gruppenmitglieder:
+# review: new
+ui-pick-to = &An →
+# review: new
+ui-pick-cc = &Cc →
+# review: new
+ui-pick-bcc = &Bcc →
+# review: new
+ui-pick-add = &Hinzufügen →
+# review: new
+ui-pick-tip = Empfänger aus dem Adressbuch auswählen
+# review: new
+ui-filter-address-books = Adressbücher (vCard, CSV)
+# review: new
+ui-filter-vcard = vCard-Dateien
+# review: new
+ui-book-export-name = Adressbuch
+# review: new
+ui-book-imported = { $added ->
+    [one] 1 Kontakt hinzugefügt
+   *[other] { $added } Kontakte hinzugefügt
+}, { $skipped ->
+    [one] 1 bereits im Adressbuch vorhandener übersprungen.
+   *[other] { $skipped } bereits im Adressbuch vorhandene übersprungen.
+}
+# review: new
+ui-book-not-imported = Das Adressbuch konnte nicht importiert werden: { $reason }
+# review: new
+ui-book-exported = { $count ->
+    [one] 1 Kontakt in { $file } gespeichert.
+   *[other] { $count } Kontakte in { $file } gespeichert.
+}
+# review: new
+ui-book-not-exported = Das Adressbuch konnte nicht gespeichert werden: { $reason }

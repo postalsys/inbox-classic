@@ -78,6 +78,141 @@ header-subject = Objet
 quote-original = ----- Message d'origine -----
 fold-show-earlier = Afficher les messages précédents
 
+## Messages non remis : la carte au-dessus d'un avis de non-remise
+
+# review: new
+bounce-failed = Votre message n'a pas été remis
+# review: new
+bounce-delayed = Votre message n'a pas encore été remis
+# review: new
+bounce-delayed-note = Votre serveur de messagerie essaie toujours de le remettre. Vous n'avez pas besoin de le renvoyer.
+# review: new
+bounce-show-message = Afficher le message non remis
+# review: new
+bounce-what-to-do = Ce que vous pouvez faire :
+# review: new
+bounce-delayed-do = Rien pour l'instant. S'il ne peut toujours pas être remis, vous recevrez un autre avis.
+# review: new
+bounce-delayed-row-do = Rien pour l'instant. Votre serveur de messagerie essaie toujours de le remettre, et vous recevrez un autre avis s'il n'y parvient pas.
+# review: new
+bounce-details = Détails
+# review: new
+bounce-someone = Un destinataire
+# review: new
+bounce-server = Serveur : { $server }
+# review: new
+bounce-status = État : { $status }
+# review: new
+bounce-reported-by = Signalé par : { $server }
+# review: new
+bounce-retry-minutes = Le serveur de réception a demandé d'attendre { $count ->
+    [one] une minute
+   *[other] { $count } minutes
+} avant le prochain essai.
+# review: new
+bounce-retry-hours = Le serveur de réception a demandé d'attendre { $count ->
+    [one] une heure
+   *[other] { $count } heures
+} avant le prochain essai.
+# review: new
+bounce-blocklist = Liste de blocage : { $lists }
+# review: new
+bounce-user-unknown = L'adresse n'existe pas
+# review: new
+bounce-user-unknown-why = Le serveur de réception n'a aucune boîte aux lettres à cette adresse. Elle est peut-être mal écrite, ou la personne n'y est plus.
+# review: new
+bounce-user-unknown-do = Vérifiez l'orthographe de l'adresse, ou demandez à la personne l'adresse qu'elle utilise maintenant.
+# review: new
+bounce-invalid-address = L'adresse n'est pas valide
+# review: new
+bounce-invalid-address-why = L'adresse n'est pas écrite sous une forme à laquelle on peut envoyer du courrier.
+# review: new
+bounce-invalid-address-do = Cherchez les fautes de frappe, comme une espace, une lettre manquante ou rien après le @.
+# review: new
+bounce-mailbox-disabled = La boîte aux lettres est fermée
+# review: new
+bounce-mailbox-disabled-why = L'adresse existe, mais sa boîte aux lettres a été désactivée ou n'est plus utilisée.
+# review: new
+bounce-mailbox-disabled-do = Joignez la personne autrement et demandez-lui une adresse qu'elle utilise maintenant.
+# review: new
+bounce-mailbox-full = La boîte aux lettres est pleine
+# review: new
+bounce-mailbox-full-why = La boîte aux lettres du destinataire n'a plus de place pour le nouveau courrier.
+# review: new
+bounce-mailbox-full-do = Renvoyez-le dans quelques jours, ou prévenez la personne autrement. Les grosses pièces jointes sont refusées en premier.
+# review: new
+bounce-spam-blocked = Refusé comme courrier indésirable
+# review: new
+bounce-spam-blocked-why = Le serveur de réception a pris le message pour du courrier indésirable.
+# review: new
+bounce-spam-blocked-do = Renvoyez-le sans ce qui ressemble à du courrier indésirable, comme de nombreux liens, des liens raccourcis ou une grosse pièce jointe. Si cela se reproduit, contactez votre fournisseur de messagerie.
+# review: new
+bounce-virus-detected = Refusé pour un virus
+# review: new
+bounce-virus-detected-why = Le serveur de réception a trouvé un virus ou un autre contenu dangereux dans le message ou ses pièces jointes.
+# review: new
+bounce-virus-detected-do = Vérifiez les pièces jointes avec un antivirus. Certains serveurs refusent tout programme ou toute archive : partagez plutôt ces fichiers par un lien.
+# review: new
+bounce-ip-blocklisted = Votre serveur de messagerie est sur une liste de blocage
+# review: new
+bounce-ip-blocklisted-why = Le serveur de réception refuse le courrier du serveur qui a envoyé le vôtre, car l'adresse de ce serveur est sur une liste de blocage.
+# review: new
+bounce-ip-blocklisted-do = Le message n'est pas en cause. Transférez cet avis à votre fournisseur de messagerie et demandez-lui de faire retirer le serveur de la liste.
+# review: new
+bounce-domain-blocklisted = Un domaine est sur une liste de blocage
+# review: new
+bounce-domain-blocklisted-why = Le serveur de réception refuse le message car le domaine de votre adresse, ou un domaine des liens du message, est sur une liste de blocage.
+# review: new
+bounce-domain-blocklisted-do = Si le message contient des liens, essayez sans eux. Sinon, transférez cet avis à la personne qui gère le courrier de votre domaine.
+# review: new
+bounce-policy-blocked = Refusé par les règles du serveur de réception
+# review: new
+bounce-policy-blocked-why = Les règles du serveur de réception ne laissent pas passer ce message, par exemple à cause de sa taille, de ses pièces jointes ou de son expéditeur.
+# review: new
+bounce-policy-blocked-do = Les propres mots du serveur sous Détails donnent souvent la raison. Demandez au destinataire s'il peut accepter ce type de courrier.
+# review: new
+bounce-geo-blocked = Refusé pour sa provenance
+# review: new
+bounce-geo-blocked-why = Le serveur de réception n'accepte pas le courrier du pays ou du réseau où se trouve votre serveur de messagerie.
+# review: new
+bounce-geo-blocked-do = Joignez la personne autrement, ou contactez votre fournisseur de messagerie.
+# review: new
+bounce-relay-denied = Le serveur ne l'a pas transmis
+# review: new
+bounce-relay-denied-why = Un serveur a refusé de transmettre le message, souvent parce qu'il a été envoyé sans connexion ou par un serveur qui ne dessert pas ce destinataire.
+# review: new
+bounce-relay-denied-do = Vérifiez le serveur sortant du compte dans Fichier > Comptes, et qu'il se connecte.
+# review: new
+bounce-auth-failure = Votre adresse d'expéditeur n'a pas pu être vérifiée
+# review: new
+bounce-auth-failure-why = Le serveur de réception n'a pas pu confirmer que le message venait bien de votre domaine (SPF, DKIM ou DMARC).
+# review: new
+bounce-auth-failure-do = Transférez cet avis à la personne qui gère le courrier de votre domaine : ses réglages doivent être corrigés. En attendant, envoyer par le serveur de votre fournisseur peut aider.
+# review: new
+bounce-rate-limited = Trop de courrier à la fois
+# review: new
+bounce-rate-limited-why = Le serveur de réception accepte pour l'instant moins de messages de votre serveur de messagerie.
+# review: new
+bounce-rate-limited-do = Attendez un moment et renvoyez-le. Si vous écrivez à de nombreuses personnes, envoyez à moins de personnes à la fois.
+# review: new
+bounce-greylisting = Retenu un instant
+# review: new
+bounce-greylisting-why = Le serveur de réception demande aux expéditeurs inconnus de réessayer un peu plus tard, une vérification courante contre le courrier indésirable.
+# review: new
+bounce-greylisting-do = Rien. Les serveurs de messagerie réessaient d'eux-mêmes, et le message est généralement remis dans l'heure.
+# review: new
+bounce-server-error = Le serveur de réception a eu un problème
+# review: new
+bounce-server-error-why = Le serveur de réception n'a pas pu être joint, ou n'a pas pu accepter le message à cause d'un problème de son côté.
+# review: new
+bounce-server-error-do = Renvoyez-le plus tard. Si l'échec persiste, cherchez des fautes de frappe dans la partie de l'adresse après le @.
+# review: new
+bounce-unknown = Non remis
+# review: new
+bounce-unknown-why = L'avis ne dit pas clairement pourquoi.
+# review: new
+bounce-unknown-do = Les propres mots du serveur sous Détails peuvent en dire plus. S'ils n'aident pas, transférez cet avis à votre fournisseur de messagerie.
+
 ## Several messages selected
 
 selection-title = { $count ->
@@ -434,3 +569,16 @@ secrets-windows = le Gestionnaire d'identification
 secrets-mac = le trousseau
 secrets-linux = le trousseau du système (Secret Service)
 error-no-such-file = ce fichier n'existe pas
+# review: new
+cards-file-too-big = Ce fichier est trop volumineux pour être un carnet d'adresses.
+# review: new
+ui-sender-added = { $name } a été ajouté au carnet d'adresses.
+# review: new
+ui-sender-known = { $name } est déjà dans le carnet d'adresses.
+# review: new
+ui-sender-none = L'expéditeur de ce message n'a pas d'adresse e-mail à ajouter.
+# review: new
+card-name-needed = Le contact n'a ni nom ni adresse e-mail.
+# a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
+# review: new
+cards-file-failed = { $file }: { $reason }

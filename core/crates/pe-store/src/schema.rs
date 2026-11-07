@@ -274,6 +274,60 @@ CREATE INDEX thread_ids_by_thread ON thread_ids (account_id, thread_id);
 -- the conversation ids handed out, one row each: a new one is atomic whatever connection asks
 CREATE TABLE threads (id INTEGER PRIMARY KEY AUTOINCREMENT);
 "#,
+    // the address book the user keeps (cards.rs): people, their addresses (the default first), and groups of them
+    r#"
+CREATE TABLE cards (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL DEFAULT '',
+    first TEXT NOT NULL DEFAULT '',
+    last TEXT NOT NULL DEFAULT '',
+    nickname TEXT NOT NULL DEFAULT '',
+    company TEXT NOT NULL DEFAULT '',
+    notes TEXT NOT NULL DEFAULT '',
+    -- kind TAB number, a line each
+    phones TEXT NOT NULL DEFAULT '',
+    -- the vCard lines not edited here, written out again on export
+    extra TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE card_addresses (
+    card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+    address TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    PRIMARY KEY (card_id, address)
+) WITHOUT ROWID;
+CREATE INDEX card_addresses_by_address ON card_addresses (address COLLATE NOCASE);
+CREATE TABLE card_groups (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
+);
+CREATE TABLE card_members (
+    group_id INTEGER NOT NULL REFERENCES card_groups(id) ON DELETE CASCADE,
+    -- a card, or NULL for an address of no card
+    card_id INTEGER REFERENCES cards(id) ON DELETE CASCADE,
+    name TEXT NOT NULL DEFAULT '',
+    address TEXT NOT NULL DEFAULT '',
+    position INTEGER NOT NULL
+);
+CREATE INDEX card_members_by_group ON card_members (group_id, position);
+"#,
+    // bounces (delivery failure and delay notices), marked in the list: by the sync from the BODYSTRUCTURE
+    // (multipart/report; report-type=delivery-status), by the core when one is opened. Mail stored before is marked
+    // from its cached source: the content type of its header, which ends at the first empty line
+    r#"
+ALTER TABLE messages ADD COLUMN bounce INTEGER NOT NULL DEFAULT 0;
+UPDATE messages SET bounce = 1 WHERE id IN (
+    SELECT message_id FROM (
+        SELECT message_id, lower(CAST(substr(source, 1, min(16384, coalesce(min(crlf, lf), crlf, lf, 16384))) AS TEXT))
+            AS header
+        FROM (
+            SELECT message_id, source, nullif(instr(source, X'0D0A0D0A'), 0) AS crlf,
+                nullif(instr(source, X'0A0A'), 0) AS lf
+            FROM bodies
+        )
+    )
+    WHERE instr(header, 'multipart/report') > 0 AND instr(header, 'delivery-status') > 0
+);
+"#,
     // Watch and Ignore Conversation (marks.rs): a conversation's mark, 1 watched and 2 ignored, by its conversation id,
     // moved along when conversations are joined
     r#"
@@ -308,6 +362,66 @@ mod tests {
         migrate(&mut db).unwrap();
         let version: usize = db.pragma_query_value(None, "user_version", |row| row.get(0)).unwrap();
         assert_eq!(version, MIGRATIONS.len());
+    }
+
+    #[test]
+    fn stored_bounces_are_marked_from_their_cached_header() {
+        let mut db = Connection::open_in_memory().unwrap();
+        // the schema before the bounce mark
+        let bounce = MIGRATIONS.iter().position(|m| m.contains("ADD COLUMN bounce")).unwrap();
+        for migration in &MIGRATIONS[..bounce] {
+            db.execute_batch(migration).unwrap();
+        }
+        db.pragma_update(None, "user_version", bounce).unwrap();
+        db.execute_batch(
+            "INSERT INTO accounts (id, name, email, username, imap_host, imap_port, imap_security, smtp_host, \
+             smtp_port, smtp_security) VALUES (1, 'A', 'a@x', 'a', 'h', 993, 'tls', 'h', 465, 'tls');
+             INSERT INTO folders (id, account_id, path, name, flags, subscribed, selectable, position) \
+             VALUES (1, 1, 'INBOX', 'INBOX', '', 1, 1, 0);",
+        )
+        .unwrap();
+        let sources: [&[u8]; 5] = [
+            // a delivery report, its parameter folded onto a line of its own
+            b"From: MAILER-DAEMON@x\r\nContent-Type: Multipart/Report;\r\n\treport-type=\"delivery-status\"; boundary=b\r\n\r\n--b\r\n",
+            // a message that only quotes one in its body
+            b"From: a@x\r\nContent-Type: text/plain\r\n\r\nContent-Type: multipart/report; report-type=delivery-status\r\n",
+            // another kind of report
+            b"Content-Type: multipart/report; report-type=disposition-notification\r\n\r\nx",
+            // no body
+            b"Content-Type: multipart/report; report-type=delivery-status",
+            // bare line feeds, the body quoting one
+            b"Subject: hi\n\nContent-Type: multipart/report; report-type=delivery-status\n",
+        ];
+        for (index, source) in sources.iter().enumerate() {
+            let id = index as i64 + 1;
+            db.execute(
+                "INSERT INTO messages (id, folder_id, uid, flags, seen, subject, from_name, from_address, recipients, \
+                 has_attachments) VALUES (?1, 1, ?1, '', 0, '', '', '', '', 0)",
+                [id],
+            )
+            .unwrap();
+            db.execute(
+                "INSERT INTO bodies (message_id, source) VALUES (?1, ?2)",
+                rusqlite::params![id, source],
+            )
+            .unwrap();
+        }
+        // one without a cached source stays unmarked until the sync or the core marks it
+        db.execute(
+            "INSERT INTO messages (id, folder_id, uid, flags, seen, subject, from_name, from_address, recipients, \
+             has_attachments) VALUES (6, 1, 6, '', 0, '', '', '', '', 0)",
+            [],
+        )
+        .unwrap();
+        migrate(&mut db).unwrap();
+        let marked: Vec<i64> = db
+            .prepare("SELECT id FROM messages WHERE bounce = 1 ORDER BY id")
+            .unwrap()
+            .query_map([], |row| row.get(0))
+            .unwrap()
+            .map(Result::unwrap)
+            .collect();
+        assert_eq!(marked, [1, 4]);
     }
 
     /// The query plan of `sql`, its steps joined
