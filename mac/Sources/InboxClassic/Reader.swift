@@ -19,6 +19,8 @@ final class Reader: NSObject {
     var arrivedHandler: () -> Void = {}
     /// the message is shown
     var shownHandler: () -> Void = {}
+    /// "Show the message that bounced" on a bounce's card: the message it returns, to select in its folder
+    var bouncedHandler: (_ folder: Int64, _ uid: UInt64) -> Void = { _, _ in }
     /// the message shown, or asked for; 0 for none
     private(set) var folder: Int64 = 0
     private(set) var uid: UInt64 = 0
@@ -106,6 +108,7 @@ final class Reader: NSObject {
         retry.clicked = { [weak self] in self?.retryDownload() }
         retry.setAccessibilityIdentifier("reader.retry")
         retry.isHidden = true
+        preview.bouncedMessage = { [weak self] in self?.showBounced() }
         invitation.setAccessibilityIdentifier("reader.invitation")
         invitation.isHidden = true
         pictures.isHidden = true
@@ -379,6 +382,13 @@ final class Reader: NSObject {
         default:
             break
         }
+    }
+
+    /// the card's link was clicked: the message the bounce shown returns, where the core found it (nothing is read
+    /// from the link)
+    private func showBounced() {
+        guard let info = messageView?.info?.pointee, info.bounce, info.has_bounced_message else { return }
+        bouncedHandler(info.bounced_folder, info.bounced_uid)
     }
 
     /// a reply, a reply to all or a forward of the message shown

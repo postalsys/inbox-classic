@@ -50,11 +50,25 @@ enum Icons {
     /// A flag on a selected row: white, whatever its colour
     static var selectedFlag: NSImage? { flagImage(.white, key: "flag.fill@white") }
 
-    private static func flagImage(_ color: NSColor, key: String) -> NSImage? {
+    private static func flagImage(_ color: NSColor, key: String) -> NSImage? { symbol("flag.fill", [color], key: key) }
+
+    /// The mark of a delivery notice (a bounce) in the list: an outlined exclamation mark in a circle, a template
+    /// drawn in the paper clip's colour (white on a selected row, as the clip is); the card says how bad it is
+    static var bounce: NSImage? {
+        if let image = cache["bounce"] { return image }
+        let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .regular)
+        guard let image = NSImage(systemSymbolName: "exclamationmark.circle", accessibilityDescription: nil)?
+            .withSymbolConfiguration(config) else { return nil }
+        image.isTemplate = true
+        cache["bounce"] = image
+        return image
+    }
+
+    private static func symbol(_ name: String, _ colors: [NSColor], key: String) -> NSImage? {
         if let image = cache[key] { return image }
         let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .regular)
-            .applying(NSImage.SymbolConfiguration(paletteColors: [color]))
-        guard let image = NSImage(systemSymbolName: "flag.fill", accessibilityDescription: nil)?
+            .applying(NSImage.SymbolConfiguration(paletteColors: colors))
+        guard let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
             .withSymbolConfiguration(config) else { return nil }
         image.isTemplate = false
         cache[key] = image
