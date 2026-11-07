@@ -345,6 +345,40 @@ impl Store {
         Ok(rows)
     }
 
+    /// A collapsed conversation's row shows the dates of its newest message, as the list places it by them
+    fn date_collapsed(&self, search: &Search, open: &HashSet<i64>, heads: &mut [ThreadRow]) -> Result<()> {
+        let threads: Vec<i64> = heads
+            .iter()
+            .filter(|h| h.count > 1 && !open.contains(&h.thread))
+            .map(|h| h.thread)
+            .collect();
+        if threads.is_empty() {
+            return Ok(());
+        }
+        let (condition, mut values) = search.condition(false);
+        let first = values.len() + 1;
+        let marks: Vec<String> = (0..threads.len()).map(|i| format!("?{}", first + i)).collect();
+        values.extend(threads.iter().map(|&t| Value::Integer(t)));
+        let mut statement = self.db.prepare(&format!(
+            "SELECT thread_id, MAX(date), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({}) \
+             GROUP BY thread_id",
+            marks.join(", ")
+        ))?;
+        let newest: HashMap<i64, (Option<i64>, Option<i64>)> = statement
+            .query_map(params_from_iter(values), |row| {
+                Ok((row.get(0)?, (row.get(1)?, row.get(2)?)))
+            })?
+            .collect::<Result<_>>()?;
+        for head in heads {
+            if let Some(&(date, received)) = newest.get(&head.thread) {
+                let info = &mut head.message.info;
+                info.date = date.or(info.date);
+                info.internal_date = received.or(info.internal_date);
+            }
+        }
+        Ok(())
+    }
+
     /// The first message of the conversation `thread` in what `search` finds
     fn thread_first(&self, search: &Search, thread: i64) -> Result<Option<Message>> {
         let (condition, mut values) = search.condition(false);
@@ -490,7 +524,8 @@ impl Store {
         }
         let open: HashSet<i64> = ranks.iter().map(|&(_, t, _)| t).collect();
         let mut rows = Vec::new();
-        let heads = self.thread_heads(search, sort, head, limit)?;
+        let mut heads = self.thread_heads(search, sort, head, limit)?;
+        self.date_collapsed(search, &open, &mut heads)?;
         for (i, row) in heads.into_iter().enumerate() {
             if rows.len() as u64 >= limit {
                 break;
@@ -716,6 +751,11 @@ mod tests {
         let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
         assert_eq!(subjects(&rows), [("a@x".into(), 0), ("d@x".into(), 0)]);
         assert_eq!(
+            rows[0].message.info.date,
+            Some(400),
+            "collapsed: the date of its newest message"
+        );
+        assert_eq!(
             (rows[0].count, rows[0].unread),
             (3, 1),
             "the conversation's messages in this folder"
@@ -738,6 +778,7 @@ mod tests {
             ]
         );
         assert_eq!(store.count_thread_rows(&list, newest, &open).unwrap().0, 4);
+        assert_eq!(rows[0].message.info.date, Some(100), "expanded: its own");
         let paged: Vec<(String, u32)> = (0..4)
             .flat_map(|at| subjects(&store.thread_rows(&list, newest, &open, at, 1).unwrap()))
             .collect();
