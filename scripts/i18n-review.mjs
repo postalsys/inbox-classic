@@ -58,8 +58,11 @@ function parse(text) {
             current = null;
             comments.push(line);
         } else if (!line.trim()) {
-            // a blank line ends the message; a comment above a blank line belongs to no message
-            current = null;
+            // a blank line inside a message's indented lines is part of it (a paragraph break); a comment above a
+            // blank line belongs to no message
+            if (current) {
+                current.text += '\n';
+            }
             comments = [];
         } else {
             current = null;

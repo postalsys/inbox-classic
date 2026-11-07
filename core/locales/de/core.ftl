@@ -119,6 +119,17 @@ messages-gone = Die Nachrichten sind nicht mehr da.
 folder-holds-no-messages = In diesem Ordner können keine Nachrichten gespeichert werden.
 # review: new
 not-archived-here = Nachrichten in diesem Ordner können nicht archiviert werden.
+# review: new
+not-emptied-here = Nur Gelöschte Objekte und Junk-E-Mail können geleert werden.
+# review: new
+empty-question = { $count ->
+    [one] { $folder } leeren?
+
+        Die Nachricht darin wird endgültig gelöscht. Sie kann nicht wiederhergestellt werden.
+   *[other] { $folder } leeren?
+
+        Die { $messages } darin werden endgültig gelöscht. Sie können nicht wiederhergestellt werden.
+}
 no-junk-folder = Dieses Konto hat keinen Junk-E-Mail-Ordner, in den die Nachrichten verschoben werden könnten.
 no-inbox-folder = Dieses Konto hat keinen Posteingang, in den die Nachrichten verschoben werden könnten.
 done-flagged-color = { $messages } { $color ->

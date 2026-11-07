@@ -146,6 +146,17 @@ messages-gone = Les messages ne sont plus là.
 folder-holds-no-messages = Ce dossier ne peut pas contenir de messages.
 # review: new
 not-archived-here = Les messages de ce dossier ne peuvent pas être archivés.
+# review: new
+not-emptied-here = Seuls Éléments supprimés et Courrier indésirable peuvent être vidés.
+# review: new
+empty-question = { $count ->
+    [one] Vider { $folder } ?
+
+        Le message qu'il contient sera supprimé définitivement. Il ne pourra pas être récupéré.
+   *[other] Vider { $folder } ?
+
+        Les { $messages } qu'il contient seront supprimés définitivement. Ils ne pourront pas être récupérés.
+}
 no-junk-folder = Ce compte n'a pas de dossier Courrier indésirable où déplacer les messages.
 no-inbox-folder = Ce compte n'a pas de Boîte de réception où déplacer les messages.
 done-flagged-color = Indicateur { $color ->

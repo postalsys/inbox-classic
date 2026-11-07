@@ -130,6 +130,17 @@ messages-gone = Los mensajes ya no están.
 folder-holds-no-messages = Esta carpeta no puede contener mensajes.
 # review: new
 not-archived-here = Los mensajes de esta carpeta no se pueden archivar.
+# review: new
+not-emptied-here = Solo se pueden vaciar Elementos eliminados y Correo no deseado.
+# review: new
+empty-question = { $count ->
+    [one] ¿Vaciar { $folder }?
+
+        El mensaje que contiene se eliminará definitivamente. No se podrá recuperar.
+   *[other] ¿Vaciar { $folder }?
+
+        Los { $messages } que contiene se eliminarán definitivamente. No se podrán recuperar.
+}
 no-junk-folder = Esta cuenta no tiene una carpeta de correo no deseado a la que mover los mensajes.
 no-inbox-folder = Esta cuenta no tiene una bandeja de entrada a la que mover los mensajes.
 done-flagged-color = Marca { $color ->
