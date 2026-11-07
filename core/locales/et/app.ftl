@@ -40,6 +40,8 @@ cmd-properties = Atri&buudid
 cmd-mark-all-read = Märgi kõik lo&etuks
 cmd-junk = Märgi &rämpspostiks
 cmd-not-junk = Märgi &tavapostiks
+# review: new
+cmd-archive = A&rhiveeri
 cmd-notify = Teavita &uuest postist
 cmd-open = &Ava Inbox Classic
 cmd-default-app = Määra &vaikimisi meiliprogrammiks...
@@ -65,6 +67,8 @@ ui-tb-print = Prindi
 ui-tb-delete = Kustuta
 ui-tb-junk = Rämpspost
 ui-tb-not-junk = Pole rämpspost
+# review: new
+ui-tb-archive = Arhiveeri
 ui-tb-sync = Saada/Võta vastu
 ui-tb-mark-read = Märgi loetuks
 ui-tb-mark-unread = Märgi lugemata

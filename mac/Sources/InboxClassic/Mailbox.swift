@@ -890,6 +890,15 @@ public final class Mailbox: NSObject {
         return true
     }
 
+    /// every selected message can be archived (from the Inbox or a folder of the user's)
+    var canArchive: Bool { summary.archivable }
+
+    /// out of the Inbox into the account's Archive (on Gmail every label taken off)
+    func archiveSelected() {
+        guard canArchive else { return }
+        actAndRemove(PE_ACTION_ARCHIVE)
+    }
+
     func markJunk(_ junk: Bool) {
         guard hasSelection else { return }
         actAndRemove(junk ? PE_ACTION_JUNK : PE_ACTION_NOT_JUNK)
@@ -1118,6 +1127,7 @@ public final class Mailbox: NSObject {
         // several: read if any is unread; Flag in a colour or Clear Flag (the toggle is the Message menu's, by its key)
         add(summary.unread > 0 ? .markRead : .markUnread)
         menu.addItem(AppDelegate.shared.flagMenu())
+        add(.archive)
         add(inJunk ? .notJunk : .junk)
         add(.move)
         add(.copy)
@@ -1879,6 +1889,9 @@ public final class MessageTable: NSTableView {
             mailbox?.openSelected()
         case 51, 117:
             mailbox?.deleteSelected()
+        // A archives, as in Thunderbird; with a modifier it is another command's
+        case 0 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
+            mailbox?.archiveSelected()
         default:
             super.keyDown(with: event)
         }

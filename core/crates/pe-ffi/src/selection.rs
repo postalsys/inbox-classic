@@ -217,6 +217,8 @@ pub struct PeSelectionSummary {
     pub flag_color: u8,
     /// Every one is in a Junk folder: Mark as Not Junk applies, not Mark as Junk
     pub in_junk: bool,
+    /// Every one can be archived (from the Inbox or a folder of the user's): Archive applies
+    pub archivable: bool,
     /// How many accounts and folders they are in
     pub accounts: u64,
     pub folders: u64,
@@ -232,6 +234,7 @@ impl From<&PeSelectionSummary> for Summary {
             flagged: s.flagged,
             flag_color: pe_core::FlagColor::from_number(s.flag_color),
             in_junk: s.in_junk,
+            archivable: s.archivable,
             accounts: s.accounts,
             folders: s.folders,
             for_good: s.for_good,
@@ -247,6 +250,7 @@ impl From<Summary> for PeSelectionSummary {
             flagged: s.flagged,
             flag_color: s.flag_color.map_or(0, |c| c as u8),
             in_junk: s.in_junk,
+            archivable: s.archivable,
             accounts: s.accounts,
             folders: s.folders,
             for_good: s.for_good,
@@ -369,6 +373,9 @@ pub enum PeAction {
     /// Into the folder `to`, of the same account or another (in the background then: `Transferring`)
     Move = 7,
     Copy = 8,
+    /// Into the account's Archive (made when there is none), on Gmail every label taken off; where
+    /// `PeSelectionSummary.archivable`
+    Archive = 11,
 }
 
 /// Does `action` to the selected messages, each folder's with one command: in the store now (`FolderChanged`), on the
@@ -407,6 +414,7 @@ pub unsafe extern "C" fn pe_selection_act(
         PeAction::Junk => Action::Junk(true),
         PeAction::NotJunk => Action::Junk(false),
         PeAction::Delete => Action::Delete,
+        PeAction::Archive => Action::Archive,
         PeAction::Move => Action::Move(to),
         PeAction::Copy => Action::Copy(to),
     };

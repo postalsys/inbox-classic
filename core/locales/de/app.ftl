@@ -40,6 +40,8 @@ cmd-properties = &Eigenschaften
 cmd-mark-all-read = Alle als gelesen &markieren
 cmd-junk = Als &Junk markieren
 cmd-not-junk = Als kein J&unk markieren
+# review: new
+cmd-archive = A&rchivieren
 cmd-notify = Bei neuer E-Mail be&nachrichtigen
 cmd-open = Inbox Classic ö&ffnen
 cmd-default-app = Als &Standard-E-Mail-Programm festlegen...
@@ -65,6 +67,8 @@ ui-tb-print = Drucken
 ui-tb-delete = Löschen
 ui-tb-junk = Junk
 ui-tb-not-junk = Kein Junk
+# review: new
+ui-tb-archive = Archivieren
 ui-tb-sync = Senden/Empfangen
 ui-tb-mark-read = Als gelesen markieren
 ui-tb-mark-unread = Als ungelesen markieren

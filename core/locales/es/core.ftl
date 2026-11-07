@@ -93,6 +93,11 @@ done-deleted-for-good = { $count ->
     [one] { $messages } eliminado definitivamente
    *[other] { $messages } eliminados definitivamente
 }
+# review: new
+done-archived = { $count ->
+    [one] { $messages } archivado
+   *[other] { $messages } archivados
+}
 done-moved = { $count ->
     [one] { $messages } movido a { $folder }
    *[other] { $messages } movidos a { $folder }
@@ -116,11 +121,15 @@ done-moved-back = { $count ->
 their-folders = sus carpetas
 undo-move = Deshacer Mover
 undo-delete = Deshacer Eliminar
+# review: new
+undo-archive = Deshacer Archivar
 undo-junk = Deshacer Marcar como correo no deseado
 undo-not-junk = Deshacer Marcar como correo deseado
 nothing-to-undo = No hay nada que deshacer.
 messages-gone = Los mensajes ya no están.
 folder-holds-no-messages = Esta carpeta no puede contener mensajes.
+# review: new
+not-archived-here = Los mensajes de esta carpeta no se pueden archivar.
 no-junk-folder = Esta cuenta no tiene una carpeta de correo no deseado a la que mover los mensajes.
 no-inbox-folder = Esta cuenta no tiene una bandeja de entrada a la que mover los mensajes.
 done-flagged-color = Marca { $color ->
@@ -348,6 +357,8 @@ agent-log-deleted = Se eliminó «{ $subject }»
 agent-log-moved = «{ $subject }» movido a { $folder }
 agent-log-junk = «{ $subject }» marcado como correo no deseado
 agent-log-not-junk = «{ $subject }» marcado como correo deseado
+# review: new
+agent-log-archived = Se archivó «{ $subject }»
 agent-log-folder = Se creó la carpeta «{ $name }»
 agent-log-unsubscribed = Suscripción cancelada a la lista que envió «{ $subject }»
 

@@ -391,6 +391,16 @@ Screenshots: `organize-7-junk`
 - the search field is still drawn over the toolbar (edge $edgePixel, inside $insidePixel)
 - Not Junk moves it back to the Inbox
 
+## 34a. Archive
+
+Screenshots: `organize-8-archive`
+
+- Archive is on for a message of the Inbox
+- Archive moves the message to Archive on the server
+- and out of the Inbox
+- the status bar says it was archived
+- Undo puts it back in the Inbox
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`

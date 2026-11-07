@@ -82,6 +82,11 @@ done-deleted-for-good = { $count ->
     [one] { $messages } endgültig gelöscht
    *[other] { $messages } endgültig gelöscht
 }
+# review: new
+done-archived = { $count ->
+    [one] { $messages } archiviert
+   *[other] { $messages } archiviert
+}
 done-moved = { $count ->
     [one] { $messages } in { $folder } verschoben
    *[other] { $messages } in { $folder } verschoben
@@ -105,11 +110,15 @@ done-moved-back = { $count ->
 their-folders = die jeweiligen Ordner
 undo-move = Verschieben rückgängig machen
 undo-delete = Löschen rückgängig machen
+# review: new
+undo-archive = Archivieren rückgängig machen
 undo-junk = Als Junk markieren rückgängig machen
 undo-not-junk = Als Nicht-Junk markieren rückgängig machen
 nothing-to-undo = Es gibt nichts rückgängig zu machen.
 messages-gone = Die Nachrichten sind nicht mehr da.
 folder-holds-no-messages = In diesem Ordner können keine Nachrichten gespeichert werden.
+# review: new
+not-archived-here = Nachrichten in diesem Ordner können nicht archiviert werden.
 no-junk-folder = Dieses Konto hat keinen Junk-E-Mail-Ordner, in den die Nachrichten verschoben werden könnten.
 no-inbox-folder = Dieses Konto hat keinen Posteingang, in den die Nachrichten verschoben werden könnten.
 done-flagged-color = { $messages } { $color ->
@@ -337,6 +346,8 @@ agent-log-deleted = „{ $subject }“ gelöscht
 agent-log-moved = „{ $subject }“ nach { $folder } verschoben
 agent-log-junk = „{ $subject }“ als Junk markiert
 agent-log-not-junk = „{ $subject }“ als Nicht-Junk markiert
+# review: new
+agent-log-archived = „{ $subject }“ archiviert
 agent-log-folder = Ordner „{ $name }“ erstellt
 agent-log-unsubscribed = Mailingliste der Nachricht „{ $subject }“ abbestellt
 

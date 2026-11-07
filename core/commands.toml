@@ -206,6 +206,13 @@ id = "not_junk"
 windows = 128
 menu = "message"
 
+# out of the Inbox into the Archive folder (on Gmail every label taken off); A in the message list. On where the
+# selection summary says (archivable), not by count alone
+[[command]]
+id = "archive"
+windows = 138
+menu = "message"
+
 [[command]]
 id = "notify"
 windows = 129

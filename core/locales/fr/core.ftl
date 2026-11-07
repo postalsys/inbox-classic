@@ -109,6 +109,11 @@ done-deleted-for-good = { $count ->
     [one] { $messages } supprimé définitivement
    *[other] { $messages } supprimés définitivement
 }
+# review: new
+done-archived = { $count ->
+    [one] { $messages } archivé
+   *[other] { $messages } archivés
+}
 done-moved = { $count ->
     [one] { $messages } déplacé vers { $folder }
    *[other] { $messages } déplacés vers { $folder }
@@ -132,11 +137,15 @@ done-moved-back = { $count ->
 their-folders = leurs dossiers
 undo-move = Annuler le déplacement
 undo-delete = Annuler la suppression
+# review: new
+undo-archive = Annuler l'archivage
 undo-junk = Annuler le marquage comme indésirable
 undo-not-junk = Annuler le marquage comme non indésirable
 nothing-to-undo = Il n'y a rien à annuler.
 messages-gone = Les messages ne sont plus là.
 folder-holds-no-messages = Ce dossier ne peut pas contenir de messages.
+# review: new
+not-archived-here = Les messages de ce dossier ne peuvent pas être archivés.
 no-junk-folder = Ce compte n'a pas de dossier Courrier indésirable où déplacer les messages.
 no-inbox-folder = Ce compte n'a pas de Boîte de réception où déplacer les messages.
 done-flagged-color = Indicateur { $color ->
@@ -364,6 +373,8 @@ agent-log-deleted = « { $subject } » supprimé
 agent-log-moved = « { $subject } » déplacé vers { $folder }
 agent-log-junk = « { $subject } » marqué comme indésirable
 agent-log-not-junk = « { $subject } » marqué comme non indésirable
+# review: new
+agent-log-archived = « { $subject } » archivé
 agent-log-folder = Dossier « { $name } » créé
 agent-log-unsubscribed = Désabonnement de la liste ayant envoyé « { $subject } »
 

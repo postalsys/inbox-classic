@@ -83,6 +83,9 @@ done-unflagged = Took the flag off { $messages }
 done-deleted-for-good = { $count ->
    *[other] Deleted { $messages } for good
 }
+done-archived = { $count ->
+   *[other] Archived { $messages }
+}
 done-moved = { $count ->
    *[other] Moved { $messages } to { $folder }
 }
@@ -101,12 +104,14 @@ done-moved-back = { $count ->
 their-folders = their folders
 undo-move = Undo Move
 undo-delete = Undo Delete
+undo-archive = Undo Archive
 undo-junk = Undo Mark as Junk
 undo-not-junk = Undo Mark as Not Junk
 nothing-to-undo = There is nothing to undo.
 messages-gone = The messages are no longer there.
 # A non-selectable IMAP folder cannot contain messages; this does not mean it is empty.
 folder-holds-no-messages = This folder cannot contain messages.
+not-archived-here = Messages in this folder can not be archived.
 no-junk-folder = This account has no Junk E-mail folder to move the messages to.
 no-inbox-folder = This account has no Inbox folder to move the messages to.
 # the status bar after a flag in a colour: "Flagged 2 messages blue"
@@ -337,6 +342,7 @@ agent-log-deleted = Deleted "{ $subject }"
 agent-log-moved = Moved "{ $subject }" to { $folder }
 agent-log-junk = Marked "{ $subject }" as junk
 agent-log-not-junk = Marked "{ $subject }" as not junk
+agent-log-archived = Archived "{ $subject }"
 agent-log-folder = Made the folder "{ $name }"
 agent-log-unsubscribed = Unsubscribed from the list of "{ $subject }"
 

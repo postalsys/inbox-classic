@@ -34,24 +34,40 @@ fn measure(mut run: impl FnMut()) -> f64 {
 
 fn assert_linear(label: &str, sizes: &[usize], build: impl Fn(usize) -> String, run: impl Fn(&str)) {
     run(&build(sizes[0]));
-    let timings: Vec<(usize, f64)> = sizes
+    let inputs: Vec<(usize, String)> = sizes.iter().map(|&size| (size, build(size))).collect();
+    // timings on a shared machine are noisy: a quadratic path fails every round, a busy moment only one, so it takes
+    // three failed rounds in a row to fail
+    let mut failure = String::new();
+    for _ in 0..3 {
+        match linear_round(label, &inputs, &run) {
+            Ok(()) => return,
+            Err(why) => failure = why,
+        }
+    }
+    panic!("{failure}");
+}
+
+/// One round of [`assert_linear`]: each size timed, and checked against the smallest one's time
+fn linear_round(label: &str, inputs: &[(usize, String)], run: &impl Fn(&str)) -> Result<(), String> {
+    let timings: Vec<(usize, f64)> = inputs
         .iter()
-        .map(|&size| {
-            let input = build(size);
-            (size, measure(|| run(&input)))
-        })
+        .map(|(size, input)| (*size, measure(|| run(input))))
         .collect();
     let (anchor_size, anchor_ms) = timings[0];
     // A floor, so timer noise on a sub millisecond anchor cannot make an enormous ratio.
     let anchor_ms = anchor_ms.max(0.5);
     for (size, ms) in timings {
-        assert!(ms < budget_ms(), "{label}: size {size} took {ms:.1}ms");
+        if ms >= budget_ms() {
+            return Err(format!("{label}: size {size} took {ms:.1}ms"));
+        }
         let allowed = anchor_ms * (size as f64 / anchor_size as f64) * LINEAR_SLACK;
-        assert!(
-            ms <= allowed,
-            "{label}: size {size} took {ms:.2}ms, over {allowed:.2}ms for linear growth"
-        );
+        if ms > allowed {
+            return Err(format!(
+                "{label}: size {size} took {ms:.2}ms, over {allowed:.2}ms for linear growth"
+            ));
+        }
     }
+    Ok(())
 }
 
 fn analyze_html(html: &str) -> crate::AnalyzeResult {

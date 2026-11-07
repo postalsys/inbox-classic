@@ -34,6 +34,7 @@ enum Command: Int, CaseIterable {
     case markAllRead = 126
     case junk = 127
     case notJunk = 128
+    case archive = 138
     case notify = 129
     case open = 130
     case defaultApp = 131
@@ -75,6 +76,7 @@ enum Command: Int, CaseIterable {
         case .markAllRead: return "edit"
         case .junk: return "message"
         case .notJunk: return "message"
+        case .archive: return "message"
         case .notify: return "tools"
         case .open: return "tray"
         case .defaultApp: return "tools"
@@ -123,6 +125,7 @@ enum Command: Int, CaseIterable {
         case .markAllRead: return .cmdMarkAllRead
         case .junk: return .cmdJunk
         case .notJunk: return .cmdNotJunk
+        case .archive: return .cmdArchive
         case .notify: return .cmdNotify
         case .open: return .cmdOpen
         case .defaultApp: return .cmdDefaultApp
@@ -166,6 +169,7 @@ enum Command: Int, CaseIterable {
         case .markAllRead: return ("a", [.command, .shift, .option])
         case .junk: return ("j", [.command, .shift])
         case .notJunk: return nil
+        case .archive: return nil
         case .notify: return nil
         case .open: return nil
         case .defaultApp: return nil
@@ -209,6 +213,7 @@ enum Command: Int, CaseIterable {
         case .markAllRead: return false
         case .junk: return false
         case .notJunk: return false
+        case .archive: return false
         case .notify: return true
         case .open: return false
         case .defaultApp: return false
@@ -252,6 +257,7 @@ enum Command: Int, CaseIterable {
         case .markAllRead: return false
         case .junk: return false
         case .notJunk: return false
+        case .archive: return false
         case .notify: return false
         case .open: return false
         case .defaultApp: return false
@@ -295,6 +301,7 @@ enum Command: Int, CaseIterable {
         case .markAllRead: return false
         case .junk: return false
         case .notJunk: return false
+        case .archive: return false
         case .notify: return false
         case .open: return false
         case .defaultApp: return false

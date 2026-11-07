@@ -300,7 +300,7 @@ pub async fn agent(d: &Driver) {
     let tools = agent_said(&out, "tools")
         .and_then(|t| t.as_array().map(Vec::len))
         .unwrap_or(0);
-    d.check(tools == 14, &format!("with the tools of what it may do ({tools})"));
+    d.check(tools == 15, &format!("with the tools of what it may do ({tools})"));
     let read = agent_said(&out, "read").unwrap_or_default();
     d.check(
         read["notice"]
@@ -1107,6 +1107,39 @@ pub async fn junk(d: &Driver) {
         &format!("with $NotJunk in place of $Junk ({})", flags.join(" ")),
     );
     select_folder("Inbox");
+    archive(d).await;
+}
+
+/// Archive: the message into the Archive folder, then back with Undo
+async fn archive(d: &Driver) {
+    d.step("archive");
+    let main = shell().main();
+    wait_until(20, || rows() >= 3).await;
+    let row = wait_for(20, || {
+        let all = pe_core::Search::folder(folder_id("Inbox")?);
+        shell()
+            .core
+            .search(&all, main.list.sort(), 0, 50)
+            .ok()?
+            .iter()
+            .position(|m| m.info.subject == "Copy me")
+    })
+    .await;
+    select_row(row.unwrap_or(0) as u32).await;
+    d.check(main.can_archive(), "Archive is on for a message of the Inbox");
+    run_command(Command::Archive);
+    let archived = wait_for(20, || d.find("Archive", "Subject: Copy me")).await;
+    d.check(archived.is_some(), "Archive moves the message to Archive on the server");
+    d.check(d.find("INBOX", "Subject: Copy me").is_none(), "and out of the Inbox");
+    let said = wait_until(10, || main.status_texts().0.starts_with("Archived 1 message")).await;
+    d.check(
+        said,
+        &format!("the status bar says it was archived ({})", main.status_texts().0),
+    );
+    d.shot(main.window(), "organize-8-archive").await;
+    run_command(Command::Undo);
+    let back = wait_for(20, || d.find("INBOX", "Subject: Copy me")).await;
+    d.check(back.is_some(), "Undo puts it back in the Inbox");
 }
 
 /// The form that asks for a folder's name: the name typed and OK clicked

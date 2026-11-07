@@ -30,6 +30,10 @@ pub struct FetchQuery {
     pub source: bool,
     /// Only messages whose MODSEQ is higher (CONDSTORE)
     pub changed_since: Option<u64>,
+    /// Gmail's labels (X-GM-LABELS), where the server has X-GM-EXT-1
+    pub gmail_labels: bool,
+    /// Gmail's conversation (X-GM-THRID), where the server has X-GM-EXT-1
+    pub gmail_thread: bool,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -46,10 +50,16 @@ pub struct FetchedMessage {
     pub headers: Option<Vec<u8>>,
     pub parts: BTreeMap<String, Vec<u8>>,
     pub source: Option<Vec<u8>>,
+    /// Gmail's labels as the server sent them: system labels such as `\\Inbox` and `\\Starred`, and the names of
+    /// label folders as mailbox names go on the wire (modified UTF-7 unless UTF8=ACCEPT is enabled), so they can be
+    /// handed back to [`Client::store_labels`] as they are
+    pub labels: Option<Vec<String>>,
+    /// Gmail's conversation id
+    pub thread_id: Option<u64>,
 }
 
 impl FetchQuery {
-    fn items(&self, condstore: bool) -> Vec<Arg> {
+    fn items(&self, condstore: bool, gmail: bool) -> Vec<Arg> {
         let wanted = [
             (true, "UID"),
             (self.flags, "FLAGS"),
@@ -58,6 +68,8 @@ impl FetchQuery {
             (self.internal_date, "INTERNALDATE"),
             (self.size, "RFC822.SIZE"),
             (self.modseq && condstore, "MODSEQ"),
+            (self.gmail_labels && gmail, "X-GM-LABELS"),
+            (self.gmail_thread && gmail, "X-GM-THRID"),
         ];
         let mut items: Vec<Arg> = wanted
             .into_iter()
@@ -138,9 +150,10 @@ impl Client {
     ) -> Result<Completion, Error> {
         let exists = u64::from(self.require_selected()?.exists);
         let condstore = self.has_capability("CONDSTORE");
+        let gmail = self.has_capability("X-GM-EXT-1");
         let mut args = vec![
             Arg::Sequence(messages.set().to_string()),
-            Arg::List(query.items(condstore)),
+            Arg::List(query.items(condstore, gmail)),
         ];
         if let (Some(modseq), true) = (query.changed_since, condstore) {
             args.push(Arg::List(vec![Arg::atom("CHANGEDSINCE"), Arg::Number(modseq)]));
@@ -174,6 +187,8 @@ fn merge(into: &mut FetchedMessage, from: FetchedMessage) {
     into.modseq = from.modseq.or(into.modseq);
     into.headers = from.headers.or(into.headers.take());
     into.source = from.source.or(into.source.take());
+    into.labels = from.labels.or(into.labels.take());
+    into.thread_id = into.thread_id.or(from.thread_id);
     into.parts.extend(from.parts);
 }
 
@@ -210,6 +225,10 @@ pub(crate) fn parse_fetch(seq: u32, response: Response) -> FetchedMessage {
             message.size = value.number();
         } else if is("MODSEQ") {
             message.modseq = value.as_list().and_then(|l| l.first()).and_then(Token::number);
+        } else if is("X-GM-LABELS") {
+            message.labels = value.as_list().map(|_| value.texts());
+        } else if is("X-GM-THRID") {
+            message.thread_id = value.number();
         } else if (is("BODY") || is("BINARY"))
             && let Some(section) = &key.section
         {
@@ -277,14 +296,48 @@ mod tests {
         let command = Command {
             tag: "A1".into(),
             name: "UID FETCH".into(),
-            args: vec![Arg::Sequence("1:*".into()), Arg::List(query.items(true))],
+            args: vec![Arg::Sequence("1:*".into()), Arg::List(query.items(true, false))],
         };
         let wire = compile(&command, &CompileOptions::default()).unwrap().concat();
         assert_eq!(
             String::from_utf8(wire).unwrap(),
             "A1 UID FETCH 1:* (UID FLAGS ENVELOPE MODSEQ BODY.PEEK[HEADER.FIELDS (SUBJECT REFERENCES)] BODY.PEEK[1.2] BODY.PEEK[])\r\n"
         );
-        assert!(!query.items(false).iter().any(|a| *a == Arg::atom("MODSEQ")));
+        assert!(!query.items(false, false).iter().any(|a| *a == Arg::atom("MODSEQ")));
+    }
+
+    #[test]
+    fn gmail_items_only_where_the_server_has_them() {
+        let query = FetchQuery {
+            gmail_labels: true,
+            gmail_thread: true,
+            ..Default::default()
+        };
+        assert_eq!(
+            query.items(false, true),
+            [Arg::atom("UID"), Arg::atom("X-GM-LABELS"), Arg::atom("X-GM-THRID")]
+        );
+        assert_eq!(query.items(false, false), [Arg::atom("UID")]);
+    }
+
+    #[test]
+    fn parses_gmail_labels_and_thread() {
+        let response = crate::parse(
+            b"* 3 FETCH (UID 7 X-GM-THRID 1278455344230334865 X-GM-LABELS (\\Inbox \\Starred Work \"Re&AOk-sum&AOk-\"))",
+            Vec::new(),
+        )
+        .unwrap();
+        let message = parse_fetch(3, response);
+        assert_eq!(message.thread_id, Some(1278455344230334865));
+        assert_eq!(
+            message.labels,
+            Some(vec![
+                "\\Inbox".to_string(),
+                "\\Starred".to_string(),
+                "Work".to_string(),
+                "Re&AOk-sum&AOk-".to_string()
+            ])
+        );
     }
 
     /// The start of a part only, and its answer, whose key carries where it starts
@@ -298,7 +351,7 @@ mod tests {
         let command = Command {
             tag: "A1".into(),
             name: "UID FETCH".into(),
-            args: vec![Arg::Sequence("5".into()), Arg::List(query.items(false))],
+            args: vec![Arg::Sequence("5".into()), Arg::List(query.items(false, false))],
         };
         let wire = compile(&command, &CompileOptions::default()).unwrap().concat();
         assert_eq!(

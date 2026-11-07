@@ -31,6 +31,9 @@ pub enum Action {
     Junk(bool),
     /// Into Deleted Items, or for good from there and from an account without one ([`Summary::delete_question`])
     Delete,
+    /// Out of the Inbox (or a folder of the user's) into the account's Archive; on Gmail every label taken off, so they
+    /// are left in All Mail ([`Core::can_archive`] says where it applies)
+    Archive,
     Move(FolderId),
     Copy(FolderId),
 }
@@ -41,6 +44,7 @@ impl Action {
         match self {
             Action::Move(_) => Some(Text::UndoMove),
             Action::Delete => Some(Text::UndoDelete),
+            Action::Archive => Some(Text::UndoArchive),
             Action::Junk(true) => Some(Text::UndoJunk),
             Action::Junk(false) => Some(Text::UndoNotJunk),
             _ => None,
@@ -58,6 +62,8 @@ pub struct Summary {
     pub flag_color: Option<FlagColor>,
     /// Every one of them is in a Junk folder (Mark as Not Junk applies, not Mark as Junk)
     pub in_junk: bool,
+    /// Every one of them can be archived (Archive applies), see [`crate::archivable`]
+    pub archivable: bool,
     /// How many accounts and folders they are in
     pub accounts: u64,
     pub folders: u64,
@@ -144,6 +150,9 @@ pub(crate) struct UndoMove {
     pub(crate) message_ids: Vec<String>,
     /// A keyword junk set, taken away again before they go back
     pub(crate) flag: Option<&'static str>,
+    /// They were archived: the worker finds them where that put them (`to` is `from` then), and on Gmail puts their
+    /// labels back
+    pub(crate) archived: bool,
 }
 
 impl Core {
@@ -167,6 +176,7 @@ impl Core {
         let mut summary = Summary {
             count: picked.len() as u64,
             in_junk: !picked.is_empty(),
+            archivable: !picked.is_empty(),
             ..Summary::default()
         };
         let mut accounts = BTreeSet::new();
@@ -176,6 +186,7 @@ impl Core {
             accounts.insert(info.account_id);
             summary.folders += 1;
             summary.in_junk &= info.info.special_use.as_deref() == Some("\\Junk");
+            summary.archivable &= crate::archivable(&info.info);
             if crate::trash_in(&store, folder)?.is_none() {
                 summary.for_good += group.len() as u64;
             }
@@ -237,6 +248,7 @@ impl Core {
                     to,
                     message_ids: group.iter().filter_map(|p| p.message_id.clone()).collect(),
                     flag,
+                    archived: action == Action::Archive,
                 });
             }
         }
@@ -298,6 +310,8 @@ impl Core {
                 let to = self.junk_target(folder, junk)?;
                 (to != folder).then_some((to, Some(crate::junk_keywords(junk).0)))
             }
+            // where they go the worker knows: the Archive folder, made if need be, or All Mail on Gmail
+            Action::Archive => Some((folder, None)),
             _ => None,
         };
         for chunk in uids.chunks(PER_COMMAND) {
@@ -323,6 +337,7 @@ impl Core {
                 }
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,
+                Action::Archive => self.archive_messages(folder, chunk)?,
                 Action::Move(_) | Action::Copy(_) | Action::ToggleFlag => unreachable!("handled before"),
             }
         }
@@ -345,6 +360,7 @@ impl Core {
                 ));
             }
             Action::Delete if moved.is_empty() => (Text::DoneDeletedForGood, None),
+            Action::Archive => (Text::DoneArchived, None),
             Action::Delete | Action::Junk(_) => (Text::DoneMoved, Some(self.places(moved.iter().map(|m| m.to))?)),
             // to another account they go in the background, Event::Transferring says how far
             Action::Move(to) if crossed => (Text::DoneMoving, Some(self.places([to].into_iter())?)),

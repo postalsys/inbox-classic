@@ -403,6 +403,8 @@ pub enum Undo {
     },
     /// The message with `message_id` waits in the Outbox of `account`
     Unsend { account: AccountId, message_id: String },
+    /// The message with `message_id` was archived from `from` (into the Archive folder, or off its Gmail labels)
+    Archive { from: FolderId, message_id: String },
 }
 
 impl Undo {
@@ -411,6 +413,7 @@ impl Undo {
             Undo::Flag { folder, uid, flag, was } => format!("flag {folder} {uid} {} {flag}", u8::from(*was)),
             Undo::Move { from, to, message_id } => format!("move {from} {to} {message_id}"),
             Undo::Unsend { account, message_id } => format!("unsend {account} {message_id}"),
+            Undo::Archive { from, message_id } => format!("archive {from} {message_id}"),
         }
     }
 
@@ -431,6 +434,13 @@ impl Undo {
                 [_, from, to, message_id] => Some(Undo::Move {
                     from: from.parse().ok()?,
                     to: to.parse().ok()?,
+                    message_id: message_id.to_string(),
+                }),
+                _ => None,
+            },
+            "archive" => match words(3)[..] {
+                [_, from, message_id] => Some(Undo::Archive {
+                    from: from.parse().ok()?,
                     message_id: message_id.to_string(),
                 }),
                 _ => None,
@@ -781,6 +791,21 @@ impl Core {
                     .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoNotArrived)))?;
                 self.move_messages(to, &[uid], from)?;
             }
+            Undo::Archive { from, message_id } => {
+                let account = self.store().folder(from)?.account_id;
+                self.send_command(
+                    account,
+                    crate::worker::Command::UndoMoves {
+                        moves: vec![crate::selection::UndoMove {
+                            from,
+                            to: from,
+                            message_ids: vec![message_id],
+                            flag: None,
+                            archived: true,
+                        }],
+                    },
+                )?;
+            }
             Undo::Unsend { account, message_id } => {
                 let queued = self
                     .store()
@@ -928,6 +953,10 @@ mod tests {
             Undo::Move {
                 from: 1,
                 to: 2,
+                message_id: "<a b@c>".into(),
+            },
+            Undo::Archive {
+                from: 3,
                 message_id: "<a b@c>".into(),
             },
             Undo::Unsend {

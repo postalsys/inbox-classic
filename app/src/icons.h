@@ -28,6 +28,7 @@ enum ToolbarIcon : int {
     ICON_ATTACH = 11,
     ICON_MAIL_PROHIBITED = 12,
     ICON_MAIL_CHECKMARK = 13,
+    ICON_ARCHIVE = 14,
 };
 
 enum FormatIcon : int {

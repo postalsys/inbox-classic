@@ -1470,6 +1470,16 @@ void Mailbox::MarkJunk(bool junk) {
     Act(junk ? PE_ACTION_JUNK : PE_ACTION_NOT_JUNK);
 }
 
+void Mailbox::ArchiveSelected() {
+    if (CanArchive()) {
+        Act(PE_ACTION_ARCHIVE);
+    }
+}
+
+bool Mailbox::CanArchive() const {
+    return summary_.archivable;
+}
+
 bool Mailbox::InJunk() const {
     if (summary_.count > 0) {
         return summary_.in_junk;
@@ -1487,7 +1497,8 @@ bool Mailbox::Act(PeAction action, int64_t to) {
         return false;
     }
     // what takes the place of rows that leave the list: the row after the last of them
-    bool leaves = action == PE_ACTION_DELETE || action == PE_ACTION_MOVE || action == PE_ACTION_JUNK || action == PE_ACTION_NOT_JUNK;
+    bool leaves = action == PE_ACTION_DELETE || action == PE_ACTION_MOVE || action == PE_ACTION_JUNK || action == PE_ACTION_NOT_JUNK ||
+                  action == PE_ACTION_ARCHIVE;
     int after = leaves ? RowAfterSelection() : -1;
     char* reason = nullptr;
     core::String done(pe_selection_act(core_, selection_.get(), action, to, &reason));
@@ -1873,6 +1884,10 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
         if (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey == VK_DELETE) {
             DeleteSelected();
         }
+        // A archives, as in Thunderbird; with Ctrl or Alt it is another command's
+        if (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey == 'A' && GetKeyState(VK_CONTROL) >= 0 && GetKeyState(VK_MENU) >= 0) {
+            ArchiveSelected();
+        }
         return true;
     case LVN_COLUMNCLICK: {
         PeSortField sort = SortOf(reinterpret_cast<NMLISTVIEW*>(header)->iSubItem);
@@ -2072,6 +2087,7 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING, read ? IDM_MARK_UNREAD : IDM_MARK_READ, MenuItem(read ? PE_TEXT_CMD_MARK_UNREAD : PE_TEXT_CMD_MARK_READ).c_str());
     // the colours and Clear Flag (the menu bar keeps Flag Message, its shortcut, beside it)
     AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(FlagMenu()), MenuItem(PE_TEXT_UI_MENU_FLAG).c_str());
+    AppendMenuW(menu, MF_STRING | (CanArchive() ? 0 : MF_GRAYED), IDM_ARCHIVE, MenuItem(PE_TEXT_CMD_ARCHIVE, L"A").c_str());
     bool junk = summary_.in_junk;
     AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, MenuItem(junk ? PE_TEXT_CMD_NOT_JUNK : PE_TEXT_CMD_JUNK).c_str());
     AppendMenuW(menu, MF_STRING, IDM_MOVE, MenuItem(PE_TEXT_CMD_MOVE).c_str());

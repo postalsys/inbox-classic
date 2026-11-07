@@ -263,11 +263,30 @@ impl Client {
 
     /// Creates a mailbox, returns false when it existed already
     pub async fn create(&mut self, path: &str) -> Result<bool, Error> {
-        match self.run("CREATE", vec![self.encode_path(path)]).await {
+        let args = vec![self.encode_path(path)];
+        self.run_create(args).await
+    }
+
+    /// CREATE with `args`: false when the mailbox existed already
+    async fn run_create(&mut self, args: Vec<Arg>) -> Result<bool, Error> {
+        match self.run("CREATE", args).await {
             Ok(_) => Ok(true),
             Err(Error::Refused { code: Some(code), .. }) if code == "ALREADYEXISTS" => Ok(false),
             Err(error) => Err(error),
         }
+    }
+
+    /// Creates a mailbox for a special use (`\\Archive`), saying so where the server takes it (CREATE-SPECIAL-USE,
+    /// RFC 6154); a plain CREATE otherwise, the name then telling what it is for. False when it existed already.
+    pub async fn create_special(&mut self, path: &str, special_use: &str) -> Result<bool, Error> {
+        if !self.has_capability("CREATE-SPECIAL-USE") {
+            return self.create(path).await;
+        }
+        let args = vec![
+            self.encode_path(path),
+            Arg::List(vec![Arg::atom("USE"), Arg::List(vec![Arg::atom(special_use)])]),
+        ];
+        self.run_create(args).await
     }
 
     pub async fn delete(&mut self, path: &str) -> Result<(), Error> {

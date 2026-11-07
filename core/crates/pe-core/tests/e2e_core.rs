@@ -19,7 +19,12 @@ struct Setup {
 }
 
 fn setup() -> Option<Setup> {
-    let server = ImapKit::start(json!({}))?;
+    setup_with(json!({}))
+}
+
+/// [`setup`] with ImapKit started with `config` (its mailboxes, its plugins)
+fn setup_with(config: serde_json::Value) -> Option<Setup> {
+    let server = ImapKit::start(config)?;
     let dir = TempDir::new("core");
     let (sender, events) = channel();
     let trust = pe_net::Trust::Pinned(vec![server.cert.clone()]);
@@ -259,6 +264,172 @@ fn sent_items_and_drafts_list_the_recipients() {
         .map(|m| m.info.recipients)
         .collect();
     assert_eq!(listed, ["Adam", "Zoe"]);
+}
+
+/// Waits up to 10 seconds for `done`
+fn eventually(done: impl Fn() -> bool, what: &str) {
+    for _ in 0..400 {
+        if done() {
+            return;
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    panic!("did not get there: {what}");
+}
+
+#[test]
+fn archives_into_an_archive_folder_made_for_it() {
+    // no Archive folder on the server
+    let Some(s) = setup_with(json!({ "storage": {
+        "INBOX": {},
+        "": { "separator": "/", "folders": {
+            "Sent": { "special-use": "\\Sent" },
+            "Trash": { "special-use": "\\Trash" }
+        } }
+    } })) else {
+        return;
+    };
+    s.server.add_message("INBOX", &rfc822("Keep this", "One"), &[]);
+    s.server.add_message("INBOX", &rfc822("And this", "Two"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let inbox = folders.iter().find(|f| f.info.path == "INBOX").unwrap().id;
+    let sent = folders.iter().find(|f| f.info.path == "Sent").unwrap().id;
+    assert!(s.core.can_archive(inbox).unwrap());
+    assert!(!s.core.can_archive(sent).unwrap(), "Sent Items is not archived from");
+
+    let all = s
+        .core
+        .refs_in_ranges(&Search::folder(inbox), Sort::default(), &[(0, 2)])
+        .unwrap();
+    assert_eq!(s.core.act(&all, Action::Archive).unwrap(), "Archived 2 messages");
+    assert!(
+        s.core.messages(inbox, Sort::default(), 0, 10).unwrap().is_empty(),
+        "out of the list at once"
+    );
+    eventually(
+        || {
+            s.core
+                .folders(account)
+                .unwrap()
+                .iter()
+                .any(|f| f.info.special_use.as_deref() == Some("\\Archive"))
+        },
+        "the new folder is the account's Archive",
+    );
+    eventually(
+        || s.server.subjects("Archive").len() == 2,
+        "the Archive folder made, the messages in it",
+    );
+    assert!(s.server.subjects("INBOX").is_empty());
+
+    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Archive"));
+    s.core.undo().unwrap();
+    eventually(|| s.server.subjects("INBOX").len() == 2, "back in the Inbox with Undo");
+    assert!(s.server.subjects("Archive").is_empty());
+}
+
+#[test]
+fn archives_on_gmail_by_taking_every_label_off() {
+    let Some(s) = setup_with(json!({ "storage": {
+        "INBOX": {},
+        "": { "separator": "/", "folders": {
+            "Work": {},
+            "[Gmail]": { "folders": {
+                "All Mail": { "special-use": "\\All" },
+                "Sent Mail": { "special-use": "\\Sent" },
+                "Trash": { "special-use": "\\Trash" }
+            } }
+        } }
+    } })) else {
+        return;
+    };
+    let uid = s.server.add_message("INBOX", &rfc822("Labelled", "Hi"), &[]);
+    // Gmail keeps every message in All Mail too (one message there: ImapKit keeps a copy a mailbox, whose labels are
+    // its own, so Undo's labels are looked for on the copy in All Mail)
+    let all_mail = s.server.add_message("[Gmail]/All Mail", &rfc822("Labelled", "Hi"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let labels = || gmail_labels(&s.server, "INBOX", uid);
+    assert!(labels().contains(&"\\Inbox".to_string()), "{:?}", labels());
+
+    let picked = [MessageRef { folder: inbox, uid }];
+    assert_eq!(s.core.act(&picked, Action::Archive).unwrap(), "Archived 1 message");
+    assert!(
+        s.core.messages(inbox, Sort::default(), 0, 10).unwrap().is_empty(),
+        "out of the list at once"
+    );
+    eventually(
+        || !labels().contains(&"\\Inbox".to_string()),
+        "the Inbox label taken off",
+    );
+
+    s.core.undo().unwrap();
+    eventually(
+        || gmail_labels(&s.server, "[Gmail]/All Mail", all_mail).contains(&"\\Inbox".to_string()),
+        "and put back with Undo, where Gmail keeps the message",
+    );
+
+    // from a label's folder: that label goes
+    let work_uid = s.server.add_message("Work", &rfc822("Filed", "For work"), &[]);
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let work = s
+        .core
+        .folders(account)
+        .unwrap()
+        .iter()
+        .find(|f| f.info.path == "Work")
+        .unwrap()
+        .id;
+    assert!(s.core.can_archive(work).unwrap());
+    assert!(gmail_labels(&s.server, "Work", work_uid).contains(&"Work".to_string()));
+    s.core
+        .act(
+            &[MessageRef {
+                folder: work,
+                uid: work_uid,
+            }],
+            Action::Archive,
+        )
+        .unwrap();
+    eventually(
+        || !gmail_labels(&s.server, "Work", work_uid).contains(&"Work".to_string()),
+        "the Work label taken off",
+    );
+}
+
+/// The Gmail labels of message `uid` of `mailbox`, over an IMAP connection of the test's own
+fn gmail_labels(server: &ImapKit, mailbox: &str, uid: u64) -> Vec<String> {
+    use pe_imap::client::FetchQuery;
+    use pe_imap::{Client, Messages, SequenceSet};
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let config = server.imap_config(pe_net::Security::Plain, pe_testkit::password());
+        let (mut client, _events) = Client::connect(config).await.expect("connect");
+        client.select(mailbox).await.expect("select");
+        let query = FetchQuery {
+            gmail_labels: true,
+            ..Default::default()
+        };
+        let set = SequenceSet::from_numbers(&[uid]).unwrap();
+        let fetched = client.fetch(&Messages::Uids(set), &query).await.expect("fetch");
+        fetched.into_iter().next().and_then(|m| m.labels).unwrap_or_default()
+    })
 }
 
 #[test]

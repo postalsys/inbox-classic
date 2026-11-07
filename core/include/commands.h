@@ -36,6 +36,7 @@ enum PeCommandId : unsigned short {
     IDM_MARK_ALL_READ = 126,
     IDM_JUNK = 127,
     IDM_NOT_JUNK = 128,
+    IDM_ARCHIVE = 138,
     IDM_NOTIFY = 129,
     IDM_OPEN = 130,
     IDM_DEFAULT_APP = 131,
@@ -104,6 +105,7 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_MARK_ALL_READ: return PE_TEXT_CMD_MARK_ALL_READ;
     case IDM_JUNK: return PE_TEXT_CMD_JUNK;
     case IDM_NOT_JUNK: return PE_TEXT_CMD_NOT_JUNK;
+    case IDM_ARCHIVE: return PE_TEXT_CMD_ARCHIVE;
     case IDM_NOTIFY: return PE_TEXT_CMD_NOTIFY;
     case IDM_OPEN: return PE_TEXT_CMD_OPEN;
     case IDM_DEFAULT_APP: return PE_TEXT_CMD_DEFAULT_APP;
