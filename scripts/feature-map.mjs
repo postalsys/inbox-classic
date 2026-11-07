@@ -276,9 +276,9 @@ const sections = [
             {
                 shot: 'main-3-sent-items',
                 name: 'Sent Items',
-                what: 'A copy of everything sent is kept in the Sent folder on the server, so other mail programs see it too.',
+                what: 'A copy of everything sent is kept in the Sent folder on the server, so other mail programs see it too. Sent Items and Drafts name whom each message went to, in a To column, instead of the sender.',
                 how: 'Select Sent Items in the folder tree.',
-                checked: ['Sent Items lists the reply and the new message']
+                checked: ['Sent Items lists the reply and the new message', 'Its person column is To, with the recipients']
             }
         ]
     },

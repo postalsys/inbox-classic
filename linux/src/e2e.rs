@@ -1457,6 +1457,11 @@ async fn send_receive(d: &Driver) {
     select_folder("Sent Items");
     d.check(wait_until(20, || rows() >= 2).await, "Sent Items has what was sent");
     select_row(0).await;
+    let (title, recipients) = shell().main().list.person_column();
+    d.check(
+        title == "To" && recipients,
+        &format!("Sent Items names whom each message went to, in a To column ({title})"),
+    );
     d.shot(&main, "main-3-sent-items").await;
     select_folder("Inbox");
 }
