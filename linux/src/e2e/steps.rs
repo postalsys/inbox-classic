@@ -666,8 +666,7 @@ pub async fn messages_as_files(d: &Driver) {
     );
     // the one added and the two after it in the list
     let position = folder_id("Inbox").and_then(|inbox| {
-        core.search(&pe_core::Search::folder(inbox), main.list.sort(), 0, 200)
-            .unwrap_or_default()
+        listed_in_folder(inbox, 0, 200)
             .iter()
             .position(|m| m.info.subject == "Not opened yet")
     });
@@ -860,8 +859,7 @@ pub async fn messages_as_files(d: &Driver) {
     wait_until(20, || rows() >= 3).await;
     // one of them shown, as it came
     let dropped_at = folder_id("Archive").and_then(|archive| {
-        core.search(&pe_core::Search::folder(archive), main.list.sort(), 0, 200)
-            .unwrap_or_default()
+        listed_in_folder(archive, 0, 200)
             .iter()
             .position(|m| m.info.subject == "Dropped three")
     });
@@ -895,10 +893,7 @@ pub async fn flag_colors(d: &Driver) {
         d.check(false, "the tree has the Inbox");
         return;
     };
-    let listing = || {
-        core.search(&pe_core::Search::folder(inbox), main.list.sort(), 0, 200)
-            .unwrap_or_default()
-    };
+    let listing = || listed_in_folder(inbox, 0, 200);
     // the flags the list draws, by the colour each says
     let drawn = || -> Vec<String> {
         let view: gtk::Widget = main.list.view.clone().upcast();
@@ -1119,11 +1114,7 @@ async fn archive(d: &Driver) {
     let main = shell().main();
     wait_until(20, || rows() >= 3).await;
     let row = wait_for(20, || {
-        let all = pe_core::Search::folder(folder_id("Inbox")?);
-        shell()
-            .core
-            .search(&all, main.list.sort(), 0, 50)
-            .ok()?
+        listed_in_folder(folder_id("Inbox")?, 0, 50)
             .iter()
             .position(|m| m.info.subject == "Copy me")
     })
@@ -1183,8 +1174,7 @@ pub async fn message_window(d: &Driver) {
     select_folder("Inbox");
     wait_until(20, || rows() >= 3).await;
     let subjects: Vec<String> = folder_id("Inbox")
-        .map(pe_core::Search::folder)
-        .and_then(|all| shell().core.search(&all, main.list.sort(), 0, 3).ok())
+        .map(|inbox| listed_in_folder(inbox, 0, 3))
         .unwrap_or_default()
         .into_iter()
         .map(|m| m.info.subject)
@@ -1278,11 +1268,7 @@ pub async fn keyboard_reading(d: &Driver) {
     let inbox = folder_id("Inbox").unwrap_or(0);
     let _ = core.mark_all_read(inbox);
     wait_until(10, || core.folder(inbox).is_ok_and(|f| f.unread == 0)).await;
-    let third = core
-        .search(&pe_core::Search::folder(inbox), main.list.sort(), 2, 1)
-        .unwrap_or_default()
-        .into_iter()
-        .next();
+    let third = listed_in_folder(inbox, 2, 1).into_iter().next();
     let Some(third) = third else {
         d.check(false, "the Inbox has a third message");
         return;
@@ -1447,7 +1433,8 @@ pub async fn conversations(d: &Driver) {
     run_command(Command::Sync);
     // the row of the conversation, once the three are threaded
     let head = || {
-        core.search(&main.search(), main.list.sort(), 0, 100)
+        main.list_view()
+            .rows(core, 0, 100)
             .ok()?
             .into_iter()
             .enumerate()
@@ -1459,7 +1446,7 @@ pub async fn conversations(d: &Driver) {
     };
     let Some(place) = message.thread else { return };
     let collapsed_rows = rows();
-    let listed = core.count_rows(&main.search()).unwrap_or(0);
+    let listed = main.list_view().row_count(core).unwrap_or(0);
     d.check(
         place.depth == 0 && !place.expanded && u64::from(collapsed_rows) == listed,
         &format!("the Inbox lists the conversation once, on its first message ({collapsed_rows} rows)"),
@@ -1481,9 +1468,7 @@ pub async fn conversations(d: &Driver) {
     // what a click on its triangle does
     main.set_thread_expanded(place.thread, true);
     let opened = wait_until(5, || rows() == collapsed_rows + 2).await;
-    let replies = core
-        .search(&main.search(), main.list.sort(), at as u64 + 1, 2)
-        .unwrap_or_default();
+    let replies = main.list_view().rows(core, at as u64 + 1, 2).unwrap_or_default();
     let under = replies.len() == 2
         && replies
             .iter()
@@ -1531,8 +1516,9 @@ pub async fn conversations(d: &Driver) {
     group_by_conversation(d, false).await;
     let apart = wait_until(10, || {
         rows() == messages_listed()
-            && core
-                .search(&main.search(), main.list.sort(), 0, 100)
+            && main
+                .list_view()
+                .rows(core, 0, 100)
                 .unwrap_or_default()
                 .iter()
                 .filter(|m| m.info.subject.ends_with(subject))
@@ -1541,7 +1527,7 @@ pub async fn conversations(d: &Driver) {
     })
     .await;
     d.check(
-        apart && main.search().threads.is_none(),
+        apart && !main.list_view().grouped(),
         "with Group messages by conversation off, the three messages are each on a row of their own",
     );
     d.shot(main.window(), "threads-3-options-off").await;
@@ -1640,9 +1626,9 @@ fn document_text(document: &str) -> String {
 async fn open_by_subject(folder: i64, subject: &str) -> bool {
     let main = shell().main();
     // the list's own rows: grouped by conversation, a row is not a message's place in the folder
-    let found = shell()
-        .core
-        .search(&main.search(), main.list.sort(), 0, 500)
+    let found = main
+        .list_view()
+        .rows(&shell().core, 0, 500)
         .unwrap_or_default()
         .iter()
         .position(|m| m.folder_id == folder && m.info.subject == subject);
@@ -1668,7 +1654,6 @@ fn undelivered_marks() -> usize {
 pub async fn bounces(d: &Driver) {
     d.step("a message that bounced");
     let main = shell().main();
-    let core = &shell().core;
     let (Some(inbox), Some(sent)) = (folder_id("Inbox"), folder_id("Sent Items")) else {
         d.check(false, "the tree has the Inbox and Sent Items");
         return;
@@ -1680,8 +1665,7 @@ pub async fn bounces(d: &Driver) {
     let _ = d.add_message(&delay_report(&at(-60), &at(-290), &at(60 * 24 * 5)), &["\\Seen"]);
     run_command(Command::Sync);
     let has = |folder: i64, subject: &str| {
-        core.search(&pe_core::Search::folder(folder), main.list.sort(), 0, 500)
-            .unwrap_or_default()
+        listed_in_folder(folder, 0, 500)
             .into_iter()
             .find(|m| m.info.subject == subject)
     };
@@ -2204,11 +2188,7 @@ pub async fn all_inboxes(d: &Driver) {
         ),
     );
     // the rows as the list has them, from the core
-    let all = pe_core::Search {
-        scope: pe_core::Scope::AllInboxes,
-        ..Default::default()
-    };
-    let listed = shell().core.search(&all, main.list.sort(), 0, 4).unwrap_or_default();
+    let listed = listed_in(pe_core::Scope::AllInboxes, 0, 4);
     let folders: Vec<i64> = listed.iter().map(|m| m.folder_id).collect();
     d.check(
         folders.contains(&inbox) && folders.contains(&second),
@@ -2305,8 +2285,7 @@ pub async fn between_accounts(d: &Driver) {
     command(Command::Sync);
     select_folder("Inbox");
     let listed = |subject: &str| {
-        core.search(&pe_core::Search::folder(inbox), main.list.sort(), 0, 100)
-            .unwrap_or_default()
+        listed_in_folder(inbox, 0, 100)
             .iter()
             .position(|m| m.info.subject == subject)
     };

@@ -86,7 +86,6 @@ pub struct Mailbox {
     /// select_start has run: later showings of the window keep what is selected
     started: Cell<bool>,
     /// What the Find box searches for, empty when the list is the folder's, and the one folder it names (in:sent)
-    find_text: RefCell<String>,
     find_place: RefCell<String>,
     total: Cell<u64>,
     unread: Cell<u64>,
@@ -104,14 +103,16 @@ pub struct Mailbox {
     reloading: Cell<bool>,
     mark_read: RefCell<Option<glib::SourceId>>,
     reload_later: RefCell<Option<glib::SourceId>>,
-    /// The conversations open in the list (grouped by conversation), until another folder is shown
-    expanded: RefCell<Vec<i64>>,
+    /// What the list shows, kept by the core: the folder, the words of the Find box, the order, the grouping and the
+    /// open conversations, Hide Ignored
+    view: RefCell<pe_core::ListView>,
 }
 
 impl Mailbox {
     pub fn new(application: &adw::Application) -> Rc<Mailbox> {
         let folders = FolderTree::new();
         let list = MessageList::new();
+        let sort = list.sort();
         let reader = Reader::new();
         let find = gtk::SearchEntry::builder()
             .placeholder_text(t!(UiFindHint))
@@ -218,7 +219,6 @@ impl Mailbox {
             folder: Cell::new(0),
             all_inboxes: Cell::new(false),
             started: Cell::new(false),
-            find_text: RefCell::default(),
             find_place: RefCell::default(),
             total: Cell::new(0),
             unread: Cell::new(0),
@@ -230,7 +230,7 @@ impl Mailbox {
             reloading: Cell::new(false),
             mark_read: RefCell::new(None),
             reload_later: RefCell::new(None),
-            expanded: RefCell::default(),
+            view: RefCell::new(start_view(sort)),
         });
         mailbox.install_actions(application);
         mailbox.connect(&clear);
@@ -345,7 +345,10 @@ impl Mailbox {
         self.list.selection.connect_selection_changed(move |_, _, _| changed());
         let activated = on(|this| this.open_selected());
         self.list.view.connect_activate(move |_, _| activated());
-        let sorted = on(|this| this.reload_list(true));
+        let sorted = on(|this| {
+            this.view.borrow_mut().set_sort(this.list.sort());
+            this.reload_list(true);
+        });
         self.list.connect_sort(sorted);
         let searched = on(|this| this.on_find_changed());
         self.find.connect_search_changed(move |_| searched());
@@ -653,7 +656,12 @@ impl Mailbox {
         // the message of the folder before is not this folder's, nor is the search
         self.folder.set(folder);
         self.all_inboxes.set(all_inboxes);
-        self.expanded.borrow_mut().clear();
+        let scope = if all_inboxes {
+            Some(pe_core::Scope::AllInboxes)
+        } else {
+            (folder != 0).then_some(pe_core::Scope::Folder(folder))
+        };
+        self.view.borrow_mut().set_scope(scope);
         self.reset_find();
         self.clear_reader(false);
         self.reload_list(false);
@@ -739,59 +747,37 @@ impl Mailbox {
     // ---- the message list ----
 
     fn searching(&self) -> bool {
-        !self.find_text.borrow().is_empty()
+        self.view.borrow().searching()
     }
 
-    /// Whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
-    fn several_folders(&self) -> bool {
-        self.searching() || self.all_inboxes.get()
+    /// The words searched for, as typed
+    fn find_text(&self) -> String {
+        self.view.borrow().text().to_string()
     }
 
-    /// What the list shows: words typed search every folder of every account (in: narrows that); without, the
-    /// folder, or every Inbox
-    pub fn search(&self) -> pe_core::Search {
-        let scope = if self.searching() {
-            pe_core::Scope::Everywhere
-        } else if self.all_inboxes.get() {
-            pe_core::Scope::AllInboxes
-        } else {
-            pe_core::Scope::Folder(self.folder.get())
-        };
-        pe_core::Search {
-            scope,
-            show: pe_core::Show::All,
-            text: self.find_text.borrow().clone(),
-            threads: grouped().then(|| self.expanded.borrow().clone()),
-            hide_ignored: hide_ignored(),
-        }
+    /// What the list shows, as it is now: a copy of its view
+    pub fn list_view(&self) -> pe_core::ListView {
+        self.view.borrow().clone()
     }
 
     fn reload_list(&self, keep_selection: bool) {
         let core = &shell().core;
-        let search = self.search();
-        let several = self.several_folders();
-        let active = several || self.folder.get() != 0;
+        let view = self.list_view();
+        let several = view.several_folders();
         // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
         // conversations what they find; an account's own item lists nothing
-        let (total, unread) = if active {
-            core.list_counts(&search).unwrap_or((0, 0))
-        } else {
-            (0, 0)
-        };
+        let (total, unread) = view.counts(core).unwrap_or((0, 0));
         self.total.set(total);
         self.unread.set(unread);
         // grouped by conversation, a row for each conversation
-        let rows = match &search.threads {
-            Some(_) if active => core.count_rows(&search).unwrap_or(0),
-            _ => total,
-        };
-        let on = search.threads.is_some() && active;
+        let rows = view.row_count(core).unwrap_or(0);
+        let on = view.grouped() && view.active();
         self.enable(Command::ExpandAllThreads, on);
         self.enable(Command::CollapseAllThreads, on);
         // Deleted Items or Junk E-mail with messages: the folder read for the counts above says
         self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
         self.list
-            .show_person_column(core.lists_recipients(&search).unwrap_or(false));
+            .show_person_column(view.lists_recipients(core).unwrap_or(false));
         self.list.show_folder_column(
             several,
             &if self.searching() {
@@ -804,10 +790,9 @@ impl Mailbox {
         let positions: Vec<u64> = if !keep_selection {
             Vec::new()
         } else if self.several() {
-            core.positions(&search, self.list.sort(), &self.refs.borrow())
-                .unwrap_or_default()
+            view.positions(core, &self.refs.borrow()).unwrap_or_default()
         } else if self.reader.uid() != 0 {
-            core.search_index(&search, self.list.sort(), self.reader.folder(), self.reader.uid())
+            view.index_of(core, self.reader.folder(), self.reader.uid())
                 .ok()
                 .flatten()
                 .into_iter()
@@ -816,7 +801,7 @@ impl Mailbox {
             Vec::new()
         };
         self.reloading.set(true);
-        self.list.reset(search, rows, active, &positions);
+        self.list.reset(view, rows, &positions);
         self.reloading.set(false);
         self.show_empty_list();
         self.show_counts();
@@ -844,9 +829,7 @@ impl Mailbox {
         }
         let core = &shell().core;
         let refs = core.restored().unwrap_or_default();
-        let positions = core
-            .positions(&self.search(), self.list.sort(), &refs)
-            .unwrap_or_default();
+        let positions = self.view.borrow().positions(core, &refs).unwrap_or_default();
         let Some(&first) = positions.first() else {
             return false;
         };
@@ -876,7 +859,7 @@ impl Mailbox {
                 more.push_str("\n\n");
                 more.push_str(&t!(GtkSearchStillIndexing, count = left));
             }
-            (t!(UiNoMatch, words = &*self.find_text.borrow()), more)
+            (t!(UiNoMatch, words = &*self.find_text()), more)
         } else if self.folder.get() != 0 || self.all_inboxes.get() {
             (t!(UiNoItems), String::new())
         } else if self.selected_account.get() != 0 {
@@ -896,8 +879,10 @@ impl Mailbox {
         }
         let core = &shell().core;
         if self.list.selected_count() > 1 {
-            let refs = core
-                .refs_in_ranges(&self.search(), self.list.sort(), &self.list.selected_ranges())
+            let refs = self
+                .view
+                .borrow()
+                .refs_in_ranges(core, &self.list.selected_ranges())
                 .unwrap_or_default();
             *self.summary.borrow_mut() = core.summary(&refs).unwrap_or_default();
             *self.refs.borrow_mut() = refs;
@@ -911,9 +896,11 @@ impl Mailbox {
         let selected = self.list.selected();
         let (folder, uid) = selected.as_ref().map_or((0, 0), |(_, m)| (m.folder_id, m.info.uid));
         // grouped, the core says what the row stands for: a collapsed conversation's row all of its messages
-        let search = self.search();
-        let refs: Vec<MessageRef> = if search.threads.is_some() {
-            core.refs_in_ranges(&search, self.list.sort(), &self.list.selected_ranges())
+        let grouped = self.view.borrow().grouped();
+        let refs: Vec<MessageRef> = if grouped {
+            self.view
+                .borrow()
+                .refs_in_ranges(core, &self.list.selected_ranges())
                 .unwrap_or_default()
         } else {
             selected.iter().map(|_| MessageRef { folder, uid }).collect()
@@ -1053,7 +1040,7 @@ impl Mailbox {
         };
         let (folder, uid) = (message.folder, message.uid);
         if !self.draft_folders.borrow().contains(&folder) {
-            crate::message_window::open(message, self.search(), self.list.sort());
+            crate::message_window::open(message, self.list_view());
             return;
         }
         match shell().core.reopen_draft(folder, uid) {
@@ -1103,10 +1090,12 @@ impl Mailbox {
     /// in it; false when it is not there
     fn select_in_list(&self, folder: i64, uid: u64) -> bool {
         let core = &shell().core;
-        if let Ok(Some(thread)) = core.hidden_in(&self.search(), folder, uid) {
-            self.set_thread_expanded(thread, true);
+        let revealed = self.view.borrow_mut().reveal(core, folder, uid).unwrap_or(false);
+        if revealed {
+            self.reload_list(true);
         }
-        let Ok(Some(index)) = core.search_index(&self.search(), self.list.sort(), folder, uid) else {
+        let index = self.view.borrow().index_of(core, folder, uid);
+        let Ok(Some(index)) = index else {
             return false;
         };
         let Ok(index) = u32::try_from(index) else {
@@ -1120,38 +1109,46 @@ impl Mailbox {
     /// The conversation `thread` opened (its other messages under its first) or closed, the selection kept on its
     /// row
     pub fn set_thread_expanded(&self, thread: i64, open: bool) {
-        {
-            let mut expanded = self.expanded.borrow_mut();
-            let at = expanded.iter().position(|t| *t == thread);
-            match (at, open) {
-                (None, true) => expanded.push(thread),
-                (Some(at), false) => {
-                    expanded.remove(at);
-                }
-                _ => return,
+        let changed = {
+            let mut view = self.view.borrow_mut();
+            if open {
+                view.expand(thread)
+            } else {
+                view.collapse(thread)
             }
+        };
+        if changed {
+            self.reload_list(true);
         }
+    }
+
+    /// The + or - of a conversation's row: the conversation `thread` opened or closed
+    pub fn toggle_thread(&self, thread: i64) {
+        self.view.borrow_mut().toggle(thread);
         self.reload_list(true);
     }
 
     /// View > Expand All Conversations (`open`) and Collapse All Conversations
     pub fn expand_all_threads(&self, open: bool) {
-        let search = self.search();
-        if search.threads.is_none() {
-            return;
-        }
-        *self.expanded.borrow_mut() = if open {
-            shell().core.threads_with_replies(&search).unwrap_or_default()
-        } else {
-            Vec::new()
+        let changed = {
+            let mut view = self.view.borrow_mut();
+            if open {
+                view.expand_all(&shell().core).unwrap_or(false)
+            } else {
+                view.collapse_all()
+            }
         };
-        self.reload_list(true);
+        if changed {
+            self.reload_list(true);
+        }
     }
 
     /// Group messages by conversation turned on or off in Preferences: the list again, every conversation closed
     pub fn regroup(&self) {
-        self.expanded.borrow_mut().clear();
-        self.reload_list(true);
+        let changed = self.view.borrow_mut().set_grouped(grouped());
+        if changed {
+            self.reload_list(true);
+        }
     }
 
     /// Right and Left in the list: Right opens the conversation of the selected row, Left closes it (from a reply
@@ -1199,11 +1196,11 @@ impl Mailbox {
     fn on_find_changed(&self) {
         // what only has spaces finds everything, as the core reads it
         let text = self.find.text().trim().to_string();
-        if text == *self.find_text.borrow() {
+        if text == self.view.borrow().text() {
             return;
         }
         *self.find_place.borrow_mut() = pe_core::Core::search_place(&text).unwrap_or_default();
-        *self.find_text.borrow_mut() = text;
+        self.view.borrow_mut().set_text(&text);
         self.reload_list(true);
         self.show_folder_name();
     }
@@ -1215,7 +1212,7 @@ impl Mailbox {
 
     /// The Find box emptied and the search dropped, without the list following it (the caller reloads)
     fn reset_find(&self) {
-        self.find_text.borrow_mut().clear();
+        self.view.borrow_mut().set_text("");
         self.find_place.borrow_mut().clear();
         if !self.find.text().is_empty() {
             self.find.set_text("");
@@ -1277,7 +1274,7 @@ impl Mailbox {
         }
         let total = self.total.get();
         let place = self.find_place.borrow();
-        let words = self.find_text.borrow();
+        let words = self.find_text();
         let mut summary = if place.is_empty() {
             t!(GtkSearchResultsEverywhere, count = total, words = &*words)
         } else {
@@ -1367,7 +1364,7 @@ impl Mailbox {
                 self.update_folders(*account);
                 if *folder == self.folder.get() && !self.searching() {
                     self.reload_list(true);
-                } else if self.several_folders() {
+                } else if self.view.borrow().several_folders() {
                     // a list of several folders follows their changes once a sync of many of them is done
                     self.reload_soon();
                 }
@@ -1407,7 +1404,7 @@ impl Mailbox {
         }
         // the core says which actions take the selection out of the list: those that move it, and Ignore while
         // ignored conversations are hidden
-        let leaves = self.summary.borrow().leaves_list(action, hide_ignored());
+        let leaves = self.view.borrow().leaves_list(&self.summary.borrow(), action);
         // the row that takes the place of the last one going
         let after = (refs == self.selected_refs())
             .then(|| self.list.last_selected())
@@ -1476,6 +1473,7 @@ impl Mailbox {
     pub fn set_hide_ignored(&self, on: bool) {
         shell().settings.set_bool(settings::HIDE_IGNORED, on);
         self.set_toggled(Command::HideIgnored, on);
+        self.view.borrow_mut().set_hide_ignored(on);
         self.reload_list(true);
     }
 
@@ -1554,7 +1552,8 @@ impl Mailbox {
         let core = &shell().core;
         let (mut folder, mut uid) = (self.reader.folder(), self.reader.uid());
         loop {
-            match core.next_unread_step(&self.search(), self.list.sort(), folder, uid) {
+            let step = self.view.borrow().next_unread_step(core, folder, uid);
+            match step {
                 Ok(pe_core::NextUnread::Message(next)) => {
                     self.select_in_list(next.folder, next.uid);
                     return;
@@ -2077,6 +2076,16 @@ impl Mailbox {
 /// Preferences > Group messages by conversation, on unless turned off
 pub fn grouped() -> bool {
     shell().settings.bool(settings::GROUP_BY_CONVERSATION, true)
+}
+
+/// The list's view as the window starts: no folder, in the order `sort`, grouped and hiding ignored conversations as
+/// the settings say
+fn start_view(sort: pe_store::Sort) -> pe_core::ListView {
+    let mut view = pe_core::ListView::new();
+    view.set_sort(sort);
+    view.set_grouped(grouped());
+    view.set_hide_ignored(hide_ignored());
+    view
 }
 
 /// The command of a letter in the message list, as in Thunderbird: A archives, N goes to the next unread message, W
