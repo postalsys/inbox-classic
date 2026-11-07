@@ -682,6 +682,8 @@ try {
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $item)
     }
     function Rows { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    # the rows of the list with this subject
+    function SubjectRows([string]$s) { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $s }) }
     # a tree's row by its account and folder, their unread counts and "(current)" left out; Zero when it is not there
     function TreeRow([IntPtr]$t, [string]$account, [string]$folder) {
         $name = { param($item) ([Native.Win]::RemoteTreeText($t, $item)) -replace ' \((\d+|current)\)$', '' }
@@ -1584,7 +1586,7 @@ public static class Dragger {
 
     Step 'an AI agent'
     $IDC_AGENT_LEVEL = 600; $IDC_AGENT_PATH = 611; $IDC_AGENT_RECIPIENTS = 612; $IDC_AGENT_WARNING = 614; $IDC_AGENT_SEND = 615
-    $IDC_AGENTS_HOSTS = 631; $IDC_AGENTS_LOG = 634; $IDC_AGENTS_UNDO = 635; $BM_SETCHECK = 0x00F1
+    $IDC_AGENTS_HOSTS = 631; $IDC_AGENTS_LOG = 634; $IDC_AGENTS_UNDO = 635; $BM_GETCHECK = 0x00F0; $BM_SETCHECK = 0x00F1
     # two new messages for the agent to read, whatever the steps before left unread
     $inboxBefore = @(Messages 'INBOX').Count
     foreach ($new in @(@('Maria Lopez <maria@example.org>', 'Quarterly report draft', 'Here is the draft of the quarterly report. Comments by Thursday?'),
@@ -1718,7 +1720,7 @@ public static class Dragger {
     Check ($null -ne (WaitFor { Find 'Archive' "Subject: $first" } 20)) "a message dragged onto Archive is moved there ($first)"
     Check ([bool](WaitFor { -not (Find 'INBOX' "Subject: $first") } 10)) 'and out of the Inbox'
     # by its subject: mail arriving meanwhile changes the number of rows
-    $listed = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $subject }).Count -gt 0 }
+    $listed = { param($subject) (SubjectRows $subject).Count -gt 0 }
     Check ([bool](WaitFor { -not (& $listed $first) } 10)) "and out of the list ($(Rows) rows, $inInbox before)"
     $second = 'Copy me'
     DragFirstRow $true ''
@@ -1896,7 +1898,7 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $archive)
     [void](WaitFor { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -like 'Dropped*' }).Count -eq 3 } 20)
     # one of them shown
-    $droppedRow = @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq 'Dropped one' })[0]
+    $droppedRow = @(SubjectRows 'Dropped one')[0]
     if ($null -ne $droppedRow) { SelectRow $droppedRow }
     [void](WaitFor { (StatusPart $mainStatus 2) -notmatch 'selected' } 5)
     Shot $main 'files-6-drop-in'
@@ -1914,7 +1916,7 @@ public static class Dragger {
         "Date: $([DateTime]::UtcNow.ToString('r'))`r`n`r`nFlagged purple in Apple Mail.`r`n") @('\Flagged', '$MailFlagBit0', '$MailFlagBit2')
     Command $main $IDM_SYNC
     SelectFolder 0
-    $rowOf = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $subject })[0] }
+    $rowOf = { param($subject) @(SubjectRows $subject)[0] }
     [void](WaitFor { $null -ne (& $rowOf $apple) } 20)
     # the colour of a row's flag: the most coloured pixel of its flag cell, as the screen shows it
     $flagColor = {
@@ -2107,7 +2109,8 @@ public static class Dragger {
     $IDM_ARCHIVE = 138; $IDM_UNDO = 135; $TB_ISBUTTONENABLED = 0x0409
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     [void](WaitFor { if ((Rows) -ge 3) { Rows } })
-    $copyRow = WaitFor { $r = @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq 'Copy me' }); if ($r.Count) { $r[0] } } 20
+    # as text: row 0 would read as nothing found
+    $copyRow = WaitFor { $r = @(SubjectRows 'Copy me'); if ($r.Count) { "$($r[0])" } } 20
     SelectRow ([int]$copyRow)
     $archiveOn = WaitFor { [int][Native.Win]::SendMessage($toolbar, $TB_ISBUTTONENABLED, [IntPtr]$IDM_ARCHIVE, [IntPtr]::Zero) -ne 0 } 5
     Check ([bool]$archiveOn) 'Archive is on for a message of the Inbox'
@@ -2236,7 +2239,7 @@ public static class Dragger {
     }
     SelectFolder 0
     [void](WaitFor { if ((Rows) -ge 3) { Rows } } 20)
-    $newsRow = WaitFor { $r = @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $newsletter }); if ($r.Count) { "$($r[0])" } } 10
+    $newsRow = WaitFor { $r = @(SubjectRows $newsletter); if ($r.Count) { "$($r[0])" } } 10
     if ($newsRow) { SelectRow ([int]$newsRow) }
     Command $main $IDM_FIND_IN_MESSAGE
     $findForm = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
@@ -2264,9 +2267,6 @@ public static class Dragger {
 
     Step 'conversations'
     $IDM_EXPAND_ALL_THREADS = 145; $IDM_COLLAPSE_ALL_THREADS = 146; $IDM_OPTIONS = 137; $IDC_OPTIONS_THREADS = 663
-    $VK_LEFT = 0x25; $VK_RIGHT = 0x27; $BM_SETCHECK = 0x00F1
-    # the rows of the list with this subject
-    function SubjectRows([string]$s) { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $s }) }
     # Tools > Options with Group messages by conversation turned on or off, and OK; whether the box was there
     function SetGrouping([bool]$on, [string]$shot = $null) {
         Command $main $IDM_OPTIONS

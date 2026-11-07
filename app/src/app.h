@@ -587,13 +587,19 @@ private:
     // the row of the message `uid` of `folder` selected in the list; false when it is not there
     bool SelectInList(int64_t folder, uint64_t uid);
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
-    // a row in bold: unread, or a collapsed conversation with an unread message
-    static bool RowBold(const PeMessage& row);
+    // a row's font: bold as the core says (unread, or a collapsed conversation with an unread message), or the list's
+    HFONT RowFont(const PeMessage& row) const;
     // the Subject cell of a list grouped by conversation, drawn whole: a conversation's + or - box, the subject indented
     // under its first message, and how many messages it has
     void DrawSubject(HDC dc, int index, const PeMessage& row);
-    // where the + or - box of the row `index` is
-    RECT ThreadBox(int index) const;
+    // the Subject cell of the row `index`, and where the + or - box is in such a cell
+    RECT SubjectCell(int index) const;
+    static RECT ThreadBox(const RECT& cell);
+    // a click at `at` on a + or - box, and Right (`right`) or Left on the focused row; true when handled
+    bool OnThreadClick(POINT at);
+    bool OnThreadArrow(bool right);
+    // the row `row` alone selected, focused and in view, and followed at once
+    void SelectOnly(int row);
     // the conversation `thread` opened or closed, the list shown again
     void SetThreadExpanded(int64_t thread, bool open);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
@@ -608,6 +614,8 @@ private:
     // not the selected one)
     Reader reader_;
     HFONT bold_ = nullptr;
+    // the list's font, for the rows not in bold
+    HFONT normal_ = nullptr;
     HFONT link_ = nullptr;
     // where the list goes, with the search bar over it while searching
     RECT listArea_ = {};
