@@ -791,8 +791,9 @@ impl Mailbox {
             Some(_) if active => core.count_rows(&search).unwrap_or(0),
             _ => total,
         };
-        self.enable(Command::ExpandAllThreads, search.threads.is_some() && active);
-        self.enable(Command::CollapseAllThreads, search.threads.is_some() && active);
+        let on = search.threads.is_some() && active;
+        self.enable(Command::ExpandAllThreads, on);
+        self.enable(Command::CollapseAllThreads, on);
         // Deleted Items or Junk E-mail with messages: the folder read for the counts above says
         self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
         self.list
@@ -915,12 +916,10 @@ impl Mailbox {
         }
         let selected = self.list.selected();
         let (folder, uid) = selected.as_ref().map_or((0, 0), |(_, m)| (m.folder_id, m.info.uid));
-        let collapsed = selected
-            .as_ref()
-            .and_then(|(_, m)| m.thread)
-            .is_some_and(|t| t.depth == 0 && t.count > 1 && !t.expanded);
-        let refs: Vec<MessageRef> = if collapsed {
-            core.refs_in_ranges(&self.search(), self.list.sort(), &self.list.selected_ranges())
+        // grouped, the core says what the row stands for: a collapsed conversation's row all of its messages
+        let search = self.search();
+        let refs: Vec<MessageRef> = if search.threads.is_some() {
+            core.refs_in_ranges(&search, self.list.sort(), &self.list.selected_ranges())
                 .unwrap_or_default()
         } else {
             selected.iter().map(|_| MessageRef { folder, uid }).collect()
@@ -1091,7 +1090,9 @@ impl Mailbox {
     /// in it; false when it is not there
     fn select_in_list(&self, folder: i64, uid: u64) -> bool {
         let core = &shell().core;
-        self.open_thread_of(folder, uid);
+        if let Ok(Some(thread)) = core.hidden_in(&self.search(), folder, uid) {
+            self.set_thread_expanded(thread, true);
+        }
         let Ok(Some(index)) = core.search_index(&self.search(), self.list.sort(), folder, uid) else {
             return false;
         };
@@ -1101,28 +1102,6 @@ impl Mailbox {
         self.list.select(index);
         self.list.view.grab_focus();
         true
-    }
-
-    /// The conversation the message `uid` of `folder` is hidden in (its row is another message's, its collapsed
-    /// conversation's) opened in the list
-    fn open_thread_of(&self, folder: i64, uid: u64) {
-        let core = &shell().core;
-        let search = self.search();
-        if search.threads.is_none() {
-            return;
-        }
-        let Ok(Some(index)) = core.search_index(&search, self.list.sort(), folder, uid) else {
-            return;
-        };
-        let row = core.search(&search, self.list.sort(), index, 1).unwrap_or_default();
-        let Some(row) = row.first() else { return };
-        if row.folder_id == folder && row.info.uid == uid {
-            return;
-        }
-        if let Some(place) = row.thread {
-            self.expanded.borrow_mut().push(place.thread);
-            self.reload_list(true);
-        }
     }
 
     /// The conversation `thread` opened (its other messages under its first) or closed, the selection kept on its
@@ -1171,7 +1150,7 @@ impl Mailbox {
         let Some(place) = message.thread else {
             return false;
         };
-        if place.depth == 0 && place.count < 2 {
+        if place.depth == 0 && !place.opens() {
             return false;
         }
         if open && place.depth > 0 {

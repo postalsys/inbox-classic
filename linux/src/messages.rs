@@ -568,7 +568,7 @@ fn text_column(
         let Some(row) = item.item().and_downcast::<MessageRow>() else {
             return;
         };
-        let (words, unread) = row.with(|m| (text(m), bold(m))).unwrap_or_default();
+        let (words, unread) = row.with(|m| (text(m), m.bold())).unwrap_or_default();
         label.set_text(&words);
         set_bold(&label, unread);
     });
@@ -577,14 +577,6 @@ fn text_column(
     column.set_expand(expand);
     column.set_resizable(true);
     column
-}
-
-/// A row in bold: an unread message, or a collapsed conversation with one of its messages unread (an expanded one's
-/// unread replies are bold on their own rows)
-fn bold(m: &Message) -> bool {
-    !m.info.seen()
-        || m.thread
-            .is_some_and(|t| t.depth == 0 && t.count > 1 && !t.expanded && t.unread > 0)
 }
 
 fn set_bold(label: &gtk::Label, bold: bool) {
@@ -621,7 +613,7 @@ fn subject_column() -> gtk::ColumnViewColumn {
                 .and_then(|item| item.item().and_downcast::<MessageRow>())
                 .and_then(|row| row.with(|m| m.thread))
                 .flatten();
-            if let Some(place) = thread.filter(|t| t.depth == 0 && t.count > 1) {
+            if let Some(place) = thread.filter(|t| t.opens()) {
                 shell().main().set_thread_expanded(place.thread, !place.expanded);
             }
         });
@@ -651,7 +643,7 @@ fn subject_column() -> gtk::ColumnViewColumn {
         let Some(row) = item.item().and_downcast::<MessageRow>() else {
             return;
         };
-        let Some((subject, thread, unread)) = row.with(|m| (m.info.subject.clone(), m.thread, bold(m))) else {
+        let Some((subject, thread, unread)) = row.with(|m| (m.info.subject.clone(), m.thread, m.bold())) else {
             return;
         };
         set_bold(&label, unread);
@@ -664,13 +656,12 @@ fn subject_column() -> gtk::ColumnViewColumn {
         };
         expander.set_visible(true);
         cell.set_margin_start(if place.depth > 0 { REPLY_INDENT } else { 0 });
-        let head = place.depth == 0 && place.count > 1;
-        expander.set_icon_name(match (head, place.expanded) {
+        expander.set_icon_name(match (place.opens(), place.collapsed()) {
             (false, _) => None,
-            (true, false) => Some("pan-end-symbolic"),
-            (true, true) => Some("pan-down-symbolic"),
+            (true, true) => Some("pan-end-symbolic"),
+            (true, false) => Some("pan-down-symbolic"),
         });
-        if head {
+        if place.opens() {
             label.set_text(&format!("{subject} ({})", place.count));
         } else {
             label.set_text(&subject);
