@@ -41,7 +41,8 @@ pub struct Search {
     pub show: Show,
     /// The words searched for, as typed; empty for none
     pub text: String,
-    /// Grouped by conversation, with these conversations expanded; None for one row a message
+    /// Grouped by conversation, with these conversations expanded (any number, see `selection::id_list`); None for one
+    /// row a message
     pub threads: Option<Vec<i64>>,
     /// View > Hide Ignored Conversations: the messages of ignored conversations left out
     pub hide_ignored: bool,

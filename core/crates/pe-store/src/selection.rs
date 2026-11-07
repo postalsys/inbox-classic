@@ -75,6 +75,29 @@ pub(crate) fn numbered_marks(values: &mut Vec<Value>, ids: &[i64]) -> String {
         .join(", ")
 }
 
+/// More ids than this go into a statement as one value ([`id_list`])
+const INLINE_IDS: usize = 500;
+
+/// `ids` for an `IN (...)`, of any number: a few as their numbered places ([`numbered_marks`]), more as one value, a
+/// JSON array that `json_each` reads (`SELECT value FROM json_each(?7)`), so that a list of every conversation of a
+/// huge folder (Expand All) stays within SQLite's limit of 32766 values a statement
+pub(crate) fn id_list(values: &mut Vec<Value>, ids: &[i64]) -> String {
+    if ids.len() <= INLINE_IDS {
+        return numbered_marks(values, ids);
+    }
+    let mut json = String::with_capacity(ids.len() * 8 + 2);
+    json.push('[');
+    for (i, id) in ids.iter().enumerate() {
+        if i > 0 {
+            json.push(',');
+        }
+        json.push_str(&id.to_string());
+    }
+    json.push(']');
+    values.push(Value::Text(json));
+    format!("SELECT value FROM json_each(?{})", values.len())
+}
+
 impl Store {
     /// The messages at positions `ranges` (start included, end not) of what `search` finds in the order of `sort`, in
     /// that order

@@ -9,7 +9,7 @@ use rusqlite::types::Value;
 use rusqlite::{OptionalExtension, params, params_from_iter};
 
 use crate::messages::{COLUMNS, from_row};
-use crate::selection::numbered_marks;
+use crate::selection::id_list;
 use crate::{AccountId, FolderId, Message, MessageInfo, MessageRef, Result, Search, Sort, SortField, Store};
 
 /// At most this many References a message brings: the last ones, nearest to it (a long thread's header lists every
@@ -360,7 +360,7 @@ impl Store {
         limit: u64,
     ) -> Result<(Vec<Group>, u64)> {
         let (condition, mut values) = search.condition(false);
-        let open = numbered_marks(&mut values, expanded);
+        let open = id_list(&mut values, expanded);
         let at = values.len();
         values.push(Value::Integer(offset as i64));
         values.push(Value::Integer(offset.saturating_add(limit) as i64));
@@ -399,7 +399,7 @@ impl Store {
             return Ok(HashMap::new());
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, threads);
+        let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             "SELECT {COLUMNS} FROM messages WHERE id IN (SELECT id FROM (SELECT id, ROW_NUMBER() OVER \
              (PARTITION BY thread_id ORDER BY {WHEN}, uid, id) AS k FROM messages \
@@ -418,7 +418,7 @@ impl Store {
             return Ok(lists);
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, threads);
+        let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             // the conversations' rows found by their index, then ordered (+ keeps the planner off the date index)
             "SELECT {COLUMNS} FROM messages WHERE {condition} AND thread_id IN ({marks}) ORDER BY +{WHEN}, uid, id"
@@ -446,7 +446,7 @@ impl Store {
             return Ok(());
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, &threads);
+        let marks = id_list(&mut values, &threads);
         let mut statement = self.db.prepare(&format!(
             "SELECT thread_id, MAX(date), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
              GROUP BY thread_id"
@@ -528,7 +528,7 @@ impl Store {
             return Ok(Vec::new());
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, threads);
+        let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             "{} SELECT r, t, n FROM (SELECT t, n, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS r FROM g) \
              WHERE t IN ({marks}) ORDER BY r",
@@ -555,7 +555,7 @@ impl Store {
         if expanded.is_empty() {
             return Ok(conversations);
         }
-        let marks = numbered_marks(&mut values, expanded);
+        let marks = id_list(&mut values, expanded);
         let mut statement = self.db.prepare(&format!(
             "SELECT COUNT(*) FROM messages WHERE {condition} AND thread_id IN ({marks}) GROUP BY thread_id"
         ))?;
@@ -780,7 +780,7 @@ impl Store {
             return Ok(Vec::new());
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, threads);
+        let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             "SELECT thread_id, folder_id, uid FROM messages WHERE {condition} AND thread_id IN ({marks}) \
              ORDER BY +{WHEN}, uid, id"
