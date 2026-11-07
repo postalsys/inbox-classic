@@ -30,7 +30,7 @@ fn the_core_speaks_the_language_set() {
         path: "/x".into(),
         name: "Claude".into(),
     });
-    assert_eq!(title, "Claude möchte Ihre E-Mail verwenden");
+    assert_eq!(title, "Claude möchte auf Ihre E-Mails zugreifen");
     assert!(detail.contains("ändern.\n\nAgenten lesen"), "{detail}");
 
     // what came with several messages, moves and files
