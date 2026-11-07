@@ -920,6 +920,8 @@ pub struct PeFolder {
     pub depth: u32,
     /// The Inbox or a special folder: not renamed or deleted
     pub fixed: bool,
+    /// Deleted Items or Junk E-mail: Empty Folder applies when it has messages (`total`)
+    pub emptiable: bool,
     pub special_use: PeSpecialUse,
     /// False for a folder that only holds other folders
     pub selectable: bool,
@@ -957,6 +959,7 @@ pub unsafe extern "C" fn pe_folders(core: *const PeCore, account: i64) -> *mut P
                 name: strings.add(&pe_core::folder_name(&f.info)),
                 depth: u32::try_from(*depth).unwrap_or(u32::MAX),
                 fixed: pe_core::is_fixed_folder(&f.info),
+                emptiable: pe_core::emptiable(&f.info),
                 special_use: special_use(f.info.special_use.as_deref()),
                 selectable: f.info.selectable,
                 total: f.total,
@@ -1466,6 +1469,39 @@ pub unsafe extern "C" fn pe_folder_rename(
 pub unsafe extern "C" fn pe_folder_delete(core: *const PeCore, folder: i64, error: *mut *mut c_char) -> bool {
     // SAFETY: as the caller guarantees
     unsafe { folder_change(core, error, |core| core.delete_folder(folder)) }
+}
+
+/// What to ask before emptying `folder` ("Delete the 12 messages in Deleted Items for good?"), NULL when it can not be
+/// emptied or has nothing in it (Empty Folder is off then). Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_empty_question(core: *const PeCore, folder: i64) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.empty_folder_question(folder)
+                .ok()
+                .flatten()
+                .map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
+/// Empties Deleted Items or Junk E-mail, after the window asked `pe_folder_empty_question`: every message of it
+/// deleted for good (`FolderChanged` now, the server in the background). Returns what the status bar says, or NULL
+/// with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`). Free the text with
+/// `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_empty(core: *const PeCore, folder: i64, error: *mut *mut c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe { with(core, Err(None), |core| core.empty_folder(folder).map_err(Some)) };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, outcome, "the folder could not be emptied") }.map_or(null_mut(), into_c_string)
 }
 
 // ---- the message view ----

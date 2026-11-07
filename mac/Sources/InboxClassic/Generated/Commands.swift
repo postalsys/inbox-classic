@@ -24,6 +24,7 @@ enum Command: Int, CaseIterable {
     case newFolder = 115
     case renameFolder = 116
     case deleteFolder = 117
+    case emptyFolder = 139
     case accounts = 118
     case find = 120
     case saveAs = 121
@@ -66,6 +67,7 @@ enum Command: Int, CaseIterable {
         case .newFolder: return "file"
         case .renameFolder: return "file"
         case .deleteFolder: return "file"
+        case .emptyFolder: return "file"
         case .accounts: return "file"
         case .find: return "edit"
         case .saveAs: return "file"
@@ -115,6 +117,7 @@ enum Command: Int, CaseIterable {
         case .newFolder: return .cmdNewFolder
         case .renameFolder: return .cmdRenameFolder
         case .deleteFolder: return .cmdDeleteFolder
+        case .emptyFolder: return .cmdEmptyFolder
         case .accounts: return .cmdAccounts
         case .find: return .cmdFind
         case .saveAs: return .cmdSaveAs
@@ -159,6 +162,7 @@ enum Command: Int, CaseIterable {
         case .newFolder: return nil
         case .renameFolder: return nil
         case .deleteFolder: return nil
+        case .emptyFolder: return nil
         case .accounts: return nil
         case .find: return ("f", [.command])
         case .saveAs: return ("s", [.command, .shift])
@@ -203,6 +207,7 @@ enum Command: Int, CaseIterable {
         case .newFolder: return false
         case .renameFolder: return false
         case .deleteFolder: return false
+        case .emptyFolder: return false
         case .accounts: return false
         case .find: return false
         case .saveAs: return false
@@ -247,6 +252,7 @@ enum Command: Int, CaseIterable {
         case .newFolder: return false
         case .renameFolder: return false
         case .deleteFolder: return false
+        case .emptyFolder: return false
         case .accounts: return false
         case .find: return false
         case .saveAs: return true
@@ -291,6 +297,7 @@ enum Command: Int, CaseIterable {
         case .newFolder: return false
         case .renameFolder: return false
         case .deleteFolder: return false
+        case .emptyFolder: return false
         case .accounts: return false
         case .find: return false
         case .saveAs: return false

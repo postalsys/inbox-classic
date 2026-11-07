@@ -26,6 +26,7 @@ enum PeCommandId : unsigned short {
     IDM_NEW_FOLDER = 115,
     IDM_RENAME_FOLDER = 116,
     IDM_DELETE_FOLDER = 117,
+    IDM_EMPTY_FOLDER = 139,
     IDM_ACCOUNTS = 118,
     IDM_FIND = 120,
     IDM_SAVE_AS = 121,
@@ -95,6 +96,7 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_NEW_FOLDER: return PE_TEXT_CMD_NEW_FOLDER;
     case IDM_RENAME_FOLDER: return PE_TEXT_CMD_RENAME_FOLDER;
     case IDM_DELETE_FOLDER: return PE_TEXT_CMD_DELETE_FOLDER;
+    case IDM_EMPTY_FOLDER: return PE_TEXT_CMD_EMPTY_FOLDER;
     case IDM_ACCOUNTS: return PE_TEXT_CMD_ACCOUNTS;
     case IDM_FIND: return PE_TEXT_CMD_FIND;
     case IDM_SAVE_AS: return PE_TEXT_CMD_SAVE_AS;
