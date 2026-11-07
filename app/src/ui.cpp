@@ -675,6 +675,13 @@ void AddColumn(HWND list, int index, const wchar_t* name, int width, int format)
     ListView_InsertColumn(list, index, &column);
 }
 
+void SetColumnTitle(HWND list, int index, const std::wstring& title) {
+    LVCOLUMNW column = {};
+    column.mask = LVCF_TEXT;
+    column.pszText = const_cast<wchar_t*>(title.c_str());
+    ListView_SetColumn(list, index, &column);
+}
+
 // ---- toolbars ----
 
 HIMAGELIST IconList(IconSet set) {

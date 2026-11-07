@@ -123,7 +123,7 @@ void OutboxDialog(HWND owner, PeCore* core) {
     int buttonWidth = Scale(110);
     state.list = CreateReportList(dialog, IDC_OUTBOX_LIST, {pad, pad, width - pad - buttonWidth - pad, height - pad});
     AddColumn(state.list, COL_SUBJECT, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 150);
-    AddColumn(state.list, COL_TO, core::T(PE_TEXT_WIN_COL_TO).c_str(), 110);
+    AddColumn(state.list, COL_TO, core::T(PE_TEXT_UI_COL_TO).c_str(), 110);
     AddColumn(state.list, COL_QUEUED, core::T(PE_TEXT_UI_COL_QUEUED).c_str(), 100);
     AddColumn(state.list, COL_STATUS, core::T(PE_TEXT_UI_COL_STATUS).c_str(), 100);
     // the last column takes the rest of the width, no wider

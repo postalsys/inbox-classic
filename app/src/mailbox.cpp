@@ -675,10 +675,7 @@ void Mailbox::ShowFolderColumn() {
     bool wanted = SeveralFolders();
     std::wstring title = core::T(Searching() ? PE_TEXT_UI_COL_FOLDER : PE_TEXT_UI_COL_ACCOUNT);
     if (wanted && folderColumn_) {
-        LVCOLUMNW column = {};
-        column.mask = LVCF_TEXT;
-        column.pszText = title.data();
-        ListView_SetColumn(list_, COL_FOLDER, &column);
+        SetColumnTitle(list_, COL_FOLDER, title);
     }
     if (wanted == folderColumn_) {
         return;
@@ -695,6 +692,18 @@ void Mailbox::ShowFolderColumn() {
         ListView_DeleteColumn(list_, COL_FOLDER);
         ListView_SetColumnWidth(list_, COL_SUBJECT, subject + folder);
     }
+}
+
+// From, or To in Sent Items and Drafts (the core says which, and sorts a From sort by the recipients there): its
+// title and its values follow, and the date column is Sent there, as Outlook Express names it
+void Mailbox::ShowPersonColumn(const PeSearch& search) {
+    bool wanted = pe_lists_recipients(core_, &search);
+    if (wanted == recipientsColumn_) {
+        return;
+    }
+    recipientsColumn_ = wanted;
+    SetColumnTitle(list_, COL_FROM, core::T(wanted ? PE_TEXT_UI_COL_TO : PE_TEXT_UI_COL_FROM));
+    SetColumnTitle(list_, COL_RECEIVED, core::T(wanted ? PE_TEXT_UI_COL_SENT : PE_TEXT_UI_COL_RECEIVED));
 }
 
 // the folder of a row in a list of several folders: its name, with its account's when there are several accounts; in
@@ -732,6 +741,7 @@ void Mailbox::ReloadList(bool keepSelection) {
     unread_ = 0;
     ShowFolderColumn();
     PeSearch search = Search();
+    ShowPersonColumn(search);
     // the counts of the folder come from its indexes; a search, of every folder, and All Inboxes count what they find.
     // An account's own item lists nothing
     if (SeveralFolders()) {
@@ -818,7 +828,7 @@ void Mailbox::DisplayInfo(NMLVDISPINFOW* info) {
     if (row) {
         switch (info->item.iSubItem) {
         case COL_FROM:
-            cell_ = Text(row->from);
+            cell_ = Text(recipientsColumn_ ? row->recipients : row->from);
             break;
         case COL_SUBJECT:
             cell_ = Text(row->subject);
