@@ -330,6 +330,45 @@ impl Store {
             .optional()
     }
 
+    /// The first unread message after message `uid` of `folder` in what `search` finds in the order of `sort` (from the
+    /// top when it is not in that list, or `uid` is 0): what Next Unread opens
+    pub fn next_unread(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<MessageRef>> {
+        if uid == 0 && search.show == Show::All {
+            // from the top: the first unread one, without ranking the list
+            let mut unread = search.clone();
+            unread.show = Show::Unread;
+            return Ok(self
+                .search(&unread, sort, 0, 1)?
+                .into_iter()
+                .next()
+                .map(|m| MessageRef {
+                    folder: m.folder_id,
+                    uid: m.info.uid,
+                }));
+        }
+        let (condition, mut values) = search.condition(false);
+        let order = sort.order_by();
+        let at = values.len();
+        values.push(Value::Integer(folder));
+        values.push(Value::Integer(uid as i64));
+        let mut statement = self.db.prepare_cached(&format!(
+            "WITH ranked AS (SELECT folder_id, uid, seen, ROW_NUMBER() OVER (ORDER BY {order}) AS position \
+             FROM messages WHERE {condition}) \
+             SELECT folder_id, uid FROM ranked WHERE seen = 0 AND position > \
+             COALESCE((SELECT position FROM ranked WHERE folder_id = ?{} AND uid = ?{}), 0) ORDER BY position LIMIT 1",
+            at + 1,
+            at + 2
+        ))?;
+        statement
+            .query_row(params_from_iter(values), |row| {
+                Ok(MessageRef {
+                    folder: row.get(0)?,
+                    uid: row.get::<_, i64>(1)? as u64,
+                })
+            })
+            .optional()
+    }
+
     /// Cached sources the index does not have the text of yet, a few at a time: (message id, source)
     pub fn sources_to_index(&self, limit: usize) -> Result<Vec<(i64, Vec<u8>)>> {
         let mut statement = self

@@ -226,6 +226,7 @@
             <li>The paper clip column shows which messages have attachments, the flag column which ones are flagged.</li>
             <li>In Sent Items and Drafts the list names whom each message is to, in a <b>To</b> column, instead of who it is from.</li>
             <li>Double-click a message (or select it and press <kbd>Enter</kbd>) to open it in a window of its own, as the reading pane shows it, with <b>Reply</b>, <b>Reply All</b>, <b>Forward</b>, <b>Print</b>, <b>Delete</b>, <b>Archive</b> and <b>Junk</b>. <b>Previous</b> and <b>Next</b> go through the list it was opened from. A draft opens to be finished instead.</li>
+            <li><b>View &gt; Next Message</b> and <b>Previous Message</b> go down and up the list without the mouse; <b>Next Unread Message</b> (or <kbd>N</kbd> in the list) finds the next message you have not read and, when the folder has none left, offers the next folder that has. <b>View &gt; Go to Folder</b> opens any folder of any account, found by typing part of its name. <b>Edit &gt; Find in This Message</b> finds words in the message shown.</li>
             <li>
                 Mail from a brand that publishes a logo (BIMI) shows that logo beside the header, but only when your mail server checked that the mail really
                 comes from the brand's domain (DMARC) and approved the logo. The logo comes with the message or, if not, from the brand's https address once per
@@ -563,6 +564,59 @@
                 <td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td>
                 <td>Undo the last move, delete or junk</td>
             </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>.</kbd></td>
+                <td>The next message of the list</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>]</kbd></td>
+                <td>The next message of the list</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>,</kbd></td>
+                <td>The message before it</td>
+            </tr>
+            <!--/os--><!--os:linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>,</kbd></td>
+                <td>The message before it</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>[</kbd></td>
+                <td>The message before it</td>
+            </tr>
+            <!--/os-->
+            <tr>
+                <td><kbd>N</kbd></td>
+                <td>The next unread message (in the message list)</td>
+            </tr>
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Y</kbd></td>
+                <td>Go to a folder</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Y</kbd></td>
+                <td>Go to a folder</td>
+            </tr>
+            <!--/os-->
+            <!--os:windows,linux-->
+            <tr>
+                <td><kbd>F3</kbd></td>
+                <td>Find words in the message shown</td>
+            </tr>
+            <!--/os--><!--os:mac-->
+            <tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F</kbd></td>
+                <td>Find words in the message shown</td>
+            </tr>
+            <!--/os-->
             <tr>
                 <td><kbd>A</kbd></td>
                 <td>Archive the message (in the message list)</td>

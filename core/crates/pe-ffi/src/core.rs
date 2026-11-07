@@ -1187,6 +1187,72 @@ pub unsafe extern "C" fn pe_message_neighbours(
     true
 }
 
+/// What Next Unread does next, see `pe_next_unread_step`
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeNextUnread {
+    /// Nothing unread anywhere else (or a failure)
+    None = 0,
+    /// Select the message `next_folder`, `next_uid` of the list
+    Message = 1,
+    /// Ask `question`; on yes show the folder `next_folder` and take the step again from its top (uid 0)
+    Ask = 2,
+}
+
+/// One step of Next Unread from the message `uid` of `folder` (0 for none) in the list `search`, `sort` and `ascending`
+/// make: the next unread message of the list, or the next folder with unread mail and the question to ask before going
+/// there (a heading, a blank line, the question; free it with `pe_string_free`), or nothing.
+///
+/// # Safety
+/// `core` must be a live handle, `search` a valid search, the three out pointers valid.
+#[unsafe(no_mangle)]
+#[allow(clippy::too_many_arguments)]
+pub unsafe extern "C" fn pe_next_unread_step(
+    core: *const PeCore,
+    search: *const PeSearch,
+    sort: PeSortField,
+    ascending: bool,
+    folder: i64,
+    uid: u64,
+    next_folder: *mut i64,
+    next_uid: *mut u64,
+    question: *mut *mut c_char,
+) -> PeNextUnread {
+    if next_folder.is_null() || next_uid.is_null() || question.is_null() {
+        return PeNextUnread::None;
+    }
+    // SAFETY: as the caller guarantees
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return PeNextUnread::None;
+    };
+    let sort = sort_of(sort, ascending);
+    // SAFETY: as the caller guarantees
+    let step = unsafe {
+        with(core, None, |core| {
+            core.next_unread_step(&search, sort, folder, uid).ok()
+        })
+    };
+    // SAFETY: the caller gave valid pointers
+    unsafe {
+        *question = null_mut();
+        match step {
+            Some(pe_core::NextUnread::Message(found)) => {
+                (*next_folder, *next_uid) = (found.folder, found.uid);
+                PeNextUnread::Message
+            }
+            Some(pe_core::NextUnread::Ask {
+                folder,
+                question: asked,
+            }) => {
+                (*next_folder, *next_uid) = (folder, 0);
+                *question = into_c_string(asked);
+                PeNextUnread::Ask
+            }
+            _ => PeNextUnread::None,
+        }
+    }
+}
+
 /// Whether the message `uid` is (still) in `folder`: a single row looked up. False on failure.
 ///
 /// # Safety

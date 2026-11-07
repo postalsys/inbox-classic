@@ -47,6 +47,21 @@ cmd-not-junk = Als kein J&unk markieren
 # review: new
 cmd-archive = A&rchivieren
 # review: new
+cmd-next-message = &Nächste Nachricht
+# review: new
+cmd-previous-message = &Vorherige Nachricht
+# review: new
+cmd-next-unread = Nächste &ungelesene Nachricht
+# review: new
+cmd-go-to-folder = &Gehe zu Ordner...
+# review: new
+cmd-find-in-message = In &dieser Nachricht suchen...
+# review: new
+ui-go-to-prompt = Zu diesem Ordner wechseln:
+# review: new
+ui-find-in-message-hint = In dieser Nachricht suchen
+# review: new
+ui-find-not-found = „{ $words }“ kommt in dieser Nachricht nicht vor
 cmd-expand-all-threads = Alle Unterhaltungen &erweitern
 # review: new
 cmd-collapse-all-threads = Alle Unterhaltungen &reduzieren

@@ -24,6 +24,11 @@ enum Command: Int, CaseIterable {
     case newFolder = 115
     case renameFolder = 116
     case deleteFolder = 117
+    case nextMessage = 140
+    case previousMessage = 141
+    case nextUnread = 142
+    case goToFolder = 143
+    case findInMessage = 144
     case emptyFolder = 139
     case accounts = 118
     case find = 120
@@ -40,6 +45,8 @@ enum Command: Int, CaseIterable {
     case open = 130
     case defaultApp = 131
     case viewSource = 132
+    case expandAllThreads = 145
+    case collapseAllThreads = 146
     case aiAgents = 133
     case options = 137
 
@@ -67,6 +74,11 @@ enum Command: Int, CaseIterable {
         case .newFolder: return "file"
         case .renameFolder: return "file"
         case .deleteFolder: return "file"
+        case .nextMessage: return "view"
+        case .previousMessage: return "view"
+        case .nextUnread: return "view"
+        case .goToFolder: return "view"
+        case .findInMessage: return "edit"
         case .emptyFolder: return "file"
         case .accounts: return "file"
         case .find: return "edit"
@@ -83,6 +95,8 @@ enum Command: Int, CaseIterable {
         case .open: return "tray"
         case .defaultApp: return "tools"
         case .viewSource: return "view"
+        case .expandAllThreads: return "view"
+        case .collapseAllThreads: return "view"
         case .aiAgents: return "tools"
         case .options: return "tools"
         }
@@ -117,6 +131,11 @@ enum Command: Int, CaseIterable {
         case .newFolder: return .cmdNewFolder
         case .renameFolder: return .cmdRenameFolder
         case .deleteFolder: return .cmdDeleteFolder
+        case .nextMessage: return .cmdNextMessage
+        case .previousMessage: return .cmdPreviousMessage
+        case .nextUnread: return .cmdNextUnread
+        case .goToFolder: return .cmdGoToFolder
+        case .findInMessage: return .cmdFindInMessage
         case .emptyFolder: return .cmdEmptyFolder
         case .accounts: return .cmdAccounts
         case .find: return .cmdFind
@@ -133,6 +152,8 @@ enum Command: Int, CaseIterable {
         case .open: return .cmdOpen
         case .defaultApp: return .cmdDefaultApp
         case .viewSource: return .cmdViewSource
+        case .expandAllThreads: return .cmdExpandAllThreads
+        case .collapseAllThreads: return .cmdCollapseAllThreads
         case .aiAgents: return .cmdAiAgents
         case .options: return .cmdOptions
         }
@@ -162,6 +183,11 @@ enum Command: Int, CaseIterable {
         case .newFolder: return nil
         case .renameFolder: return nil
         case .deleteFolder: return nil
+        case .nextMessage: return ("]", [.command])
+        case .previousMessage: return ("[", [.command])
+        case .nextUnread: return nil
+        case .goToFolder: return ("y", [.command, .shift])
+        case .findInMessage: return ("f", [.command, .option])
         case .emptyFolder: return nil
         case .accounts: return nil
         case .find: return ("f", [.command])
@@ -178,6 +204,8 @@ enum Command: Int, CaseIterable {
         case .open: return nil
         case .defaultApp: return nil
         case .viewSource: return nil
+        case .expandAllThreads: return nil
+        case .collapseAllThreads: return nil
         case .aiAgents: return nil
         case .options: return (",", [.command])
         }
@@ -207,6 +235,11 @@ enum Command: Int, CaseIterable {
         case .newFolder: return false
         case .renameFolder: return false
         case .deleteFolder: return false
+        case .nextMessage: return false
+        case .previousMessage: return false
+        case .nextUnread: return false
+        case .goToFolder: return false
+        case .findInMessage: return false
         case .emptyFolder: return false
         case .accounts: return false
         case .find: return false
@@ -223,6 +256,8 @@ enum Command: Int, CaseIterable {
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return false
+        case .expandAllThreads: return false
+        case .collapseAllThreads: return false
         case .aiAgents: return false
         case .options: return false
         }
@@ -252,6 +287,11 @@ enum Command: Int, CaseIterable {
         case .newFolder: return false
         case .renameFolder: return false
         case .deleteFolder: return false
+        case .nextMessage: return false
+        case .previousMessage: return false
+        case .nextUnread: return false
+        case .goToFolder: return false
+        case .findInMessage: return false
         case .emptyFolder: return false
         case .accounts: return false
         case .find: return false
@@ -268,6 +308,8 @@ enum Command: Int, CaseIterable {
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return false
+        case .expandAllThreads: return false
+        case .collapseAllThreads: return false
         case .aiAgents: return false
         case .options: return false
         }
@@ -297,6 +339,11 @@ enum Command: Int, CaseIterable {
         case .newFolder: return false
         case .renameFolder: return false
         case .deleteFolder: return false
+        case .nextMessage: return false
+        case .previousMessage: return false
+        case .nextUnread: return false
+        case .goToFolder: return false
+        case .findInMessage: return false
         case .emptyFolder: return false
         case .accounts: return false
         case .find: return false
@@ -313,6 +360,8 @@ enum Command: Int, CaseIterable {
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return true
+        case .expandAllThreads: return false
+        case .collapseAllThreads: return false
         case .aiAgents: return false
         case .options: return false
         }

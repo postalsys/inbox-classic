@@ -382,6 +382,72 @@ fn steps_to_the_next_and_previous_message_of_a_list() {
 }
 
 #[test]
+fn next_unread_goes_on_to_the_next_folder() {
+    let Some(s) = setup() else { return };
+    let dated = |subject: &str, date: &str| {
+        format!("From: Sender <sender@example.com>\r\nSubject: {subject}\r\nDate: {date}\r\n\r\nHi\r\n")
+    };
+    let read = s
+        .server
+        .add_message("INBOX", &dated("Read", "Wed, 8 Oct 2025 10:00:00 +0000"), &["\\Seen"]);
+    let unread = s
+        .server
+        .add_message("INBOX", &dated("Unread", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
+    s.server
+        .add_message("Archive", &dated("Filed", "Mon, 6 Oct 2025 10:00:00 +0000"), &[]);
+    s.server
+        .add_message("Junk", &dated("Spam", "Mon, 6 Oct 2025 10:00:00 +0000"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive) = (id("INBOX"), id("Archive"));
+    let list = Search::folder(inbox);
+    let next = |uid| s.core.next_unread(&list, Sort::default(), inbox, uid).unwrap();
+    // newest first: the read one, then the unread one
+    assert_eq!(
+        next(read),
+        Some(MessageRef {
+            folder: inbox,
+            uid: unread
+        })
+    );
+    assert_eq!(
+        next(0),
+        Some(MessageRef {
+            folder: inbox,
+            uid: unread
+        }),
+        "from the top"
+    );
+    assert_eq!(next(unread), None, "none after the last unread");
+    // on to the Archive, not Junk E-mail, whose unread mail does not count
+    assert_eq!(s.core.next_unread_folder(inbox).unwrap(), Some(archive));
+    assert_eq!(
+        s.core.next_unread_question(inbox, archive).unwrap(),
+        "There are no more unread messages in Inbox.\n\nGo to Archive, the next folder with unread messages?"
+    );
+    // around to the first: from the Archive back to the Inbox
+    assert_eq!(s.core.next_unread_folder(archive).unwrap(), Some(inbox));
+    // as one step: the message, then the question, then from the next folder's top
+    let step = |search: &Search, uid| s.core.next_unread_step(search, Sort::default(), inbox, uid).unwrap();
+    assert_eq!(
+        step(&list, read),
+        pe_core::NextUnread::Message(MessageRef {
+            folder: inbox,
+            uid: unread
+        })
+    );
+    assert!(matches!(step(&list, unread), pe_core::NextUnread::Ask { folder, .. } if folder == archive));
+    let filed = Search::folder(archive);
+    assert!(matches!(
+        s.core.next_unread_step(&filed, Sort::default(), archive, 0).unwrap(),
+        pe_core::NextUnread::Message(MessageRef { folder, .. }) if folder == archive
+    ));
+}
+
+#[test]
 fn empties_deleted_items_and_junk() {
     let Some(s) = setup() else { return };
     s.server.add_message("Trash", &rfc822("Old one", "Gone"), &[]);

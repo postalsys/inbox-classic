@@ -780,6 +780,54 @@ public final class Mailbox: NSObject {
         selectInList(folder: id, uid: message)
     }
 
+    // ---- reading with the keyboard ----
+
+    /// Next Message and Previous Message: the row below (`step` 1) or above (-1) selected, shown as a click shows it;
+    /// with none selected the first
+    func selectNeighbour(_ step: Int) {
+        guard list.numberOfRows > 0 else { return }
+        let rows = list.selectedRowIndexes
+        let at = rows.isEmpty ? 0 : (step > 0 ? rows.last! : rows.first!) + step
+        guard at >= 0 && at < list.numberOfRows else { return }
+        list.selectRowIndexes(IndexSet(integer: at), byExtendingSelection: false)
+        list.scrollRowToVisible(at)
+    }
+
+    /// Next Unread Message (N in the list): the next unread message after the one shown, or from the top; with none
+    /// left, the next folder with unread mail is offered, as Outlook Express does
+    func nextUnread() {
+        switch core.nextUnread(search, sort: sort, ascending: ascending, folder: messageFolder, uid: uid) {
+        case .message(let folder, let uid):
+            selectInList(folder: folder, uid: uid)
+        case .ask(let next, let question):
+            guard ask(question, style: .information) else { return }
+            goToFolder(next)
+            // from the top of that folder's list, which the core may answer with another question
+            if case .message(let folder, let uid) = core.nextUnread(search, sort: sort, ascending: ascending, folder: 0, uid: 0) {
+                selectInList(folder: folder, uid: uid)
+            }
+        case .none:
+            status(Text.noUnreadLeft.text)
+        }
+    }
+
+    /// the folder `id` shown, a search ended
+    func goToFolder(_ id: Int64) {
+        guard let node = folderNodes[id] else { return }
+        clearFind()
+        selectTreeNode(node)
+    }
+
+    /// Go to Folder: the folders of every account to choose one of, as Move to Folder shows them
+    func chooseFolder() {
+        let window = MoveWindow(core: core, title: Command.goToFolder.labelText.title, prompt: Text.uiGoToPrompt.text, verb: Text.uiOk.text, current: 0,
+                                canMakeFolders: false)
+        if let chosen = window.run() {
+            goToFolder(chosen)
+            list.window?.makeFirstResponder(list)
+        }
+    }
+
     /// the row of the message `uid` of `folder` selected in the list; false when it is not there
     @discardableResult
     private func selectInList(folder id: Int64, uid message: UInt64) -> Bool {
@@ -1793,6 +1841,9 @@ public final class MessageTable: NSTableView {
         // A archives, as in Thunderbird; with a modifier it is another command's
         case 0 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
             mailbox?.archiveSelected()
+        // N: the next unread message, as in Thunderbird
+        case 45 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
+            mailbox?.nextUnread()
         default:
             super.keyDown(with: event)
         }

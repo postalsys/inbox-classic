@@ -421,6 +421,17 @@ Screenshots: `read-16-window`
 - Reply in the window opens a reply to that message
 - closing the window leaves the main window as it was
 
+## 34d. Reading with the keyboard
+
+Screenshots: `read-17-find`, `read-18-go-to`
+
+- Next Message selects the message below in the list, Previous Message the one above
+- Next Unread Message selects the next unread message
+- with none left in the folder it asks to go on to the next folder with unread mail, and Yes goes there
+- Go to Folder shows the folders of every account, and typing narrows them
+- choosing Sent Items there shows Sent Items
+- Find in This Message finds a word of the message shown, and says when it is not there
+
 ## 34e. Conversations
 
 Screenshots: `threads-1-collapsed`, `threads-2-expanded`, `threads-3-options-off`

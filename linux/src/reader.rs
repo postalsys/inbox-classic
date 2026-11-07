@@ -11,6 +11,7 @@ use pe_core::calendar::{Invitation, Method};
 use pe_core::{Event, MessageRef, MessageView};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use webkit::prelude::*;
 
 use crate::app::{shell, spawn};
 use crate::ui::{self, TITLE};
@@ -54,6 +55,12 @@ pub struct Reader {
     retry: gtk::Box,
     pub try_again: gtk::Button,
     pub preview: DocumentView,
+    /// Find in This Message: the bar over the message and its box
+    find_bar: gtk::SearchBar,
+    pub find_entry: gtk::SearchEntry,
+    /// Whether the words typed are in the message, None while nothing is looked for (the UI test reads it)
+    #[cfg(feature = "e2e")]
+    found: Rc<Cell<Option<bool>>>,
     /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
     downloading: Rc<RefCell<Option<glib::SourceId>>>,
     /// The words over several messages while they are shown
@@ -75,6 +82,21 @@ pub struct Reader {
 fn show_downloading(preview: &DocumentView, retry: &gtk::Box) {
     retry.set_visible(false);
     preview.show(&pe_core::reader_page(pe_core::ReaderState::Downloading), false);
+}
+
+/// The find bar over the message: a box to type in, closed with its button or Esc
+fn find_bar() -> (gtk::SearchBar, gtk::SearchEntry) {
+    let entry = gtk::SearchEntry::new();
+    entry.set_placeholder_text(Some(&t!(UiFindInMessageHint)));
+    entry.update_property(&[gtk::accessible::Property::Label(&t!(UiFindInMessageHint))]);
+    entry.set_width_chars(32);
+    entry.set_widget_name("reader-find");
+    let bar = gtk::SearchBar::new();
+    bar.set_child(Some(&entry));
+    bar.connect_entry(&entry);
+    bar.set_show_close_button(true);
+    bar.set_widget_name("reader-find-bar");
+    (bar, entry)
 }
 
 fn field_label(text: &str) -> gtk::Label {
@@ -208,11 +230,13 @@ impl Reader {
 
         let preview = DocumentView::new("preview", false);
         preview.view.set_widget_name("reader-preview");
+        let (find_bar, find_entry) = find_bar();
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 0);
         widget.append(&header);
         widget.append(&retry);
         widget.append(&invitation);
         widget.append(&pictures);
+        widget.append(&find_bar);
         widget.append(&preview.view);
         let reader = Reader {
             widget,
@@ -236,6 +260,10 @@ impl Reader {
             retry,
             try_again,
             preview,
+            find_bar,
+            find_entry,
+            #[cfg(feature = "e2e")]
+            found: Rc::default(),
             downloading: Rc::default(),
             summary: RefCell::default(),
             account: Cell::new(0),
@@ -299,6 +327,80 @@ impl Reader {
         group.add_action(&save);
         group.add_action(&all);
         self.widget.insert_action_group("reader", Some(&group));
+        self.connect_find();
+    }
+
+    /// The find bar searches the message as the words are typed, Enter (and F3) goes to the next place they are,
+    /// Shift+Enter to the one before; the box turns red when they are not in the message. WebKit finds them in the
+    /// page it shows, with no script in it
+    fn connect_find(&self) {
+        let Some(controller) = self.preview.view.find_controller() else {
+            return;
+        };
+        let entry = self.find_entry.clone();
+        #[cfg(feature = "e2e")]
+        let found = self.found.clone();
+        controller.connect_found_text(move |_, _| {
+            #[cfg(feature = "e2e")]
+            found.set(Some(true));
+            entry.remove_css_class("error");
+        });
+        let entry = self.find_entry.clone();
+        #[cfg(feature = "e2e")]
+        let found = self.found.clone();
+        controller.connect_failed_to_find_text(move |_| {
+            #[cfg(feature = "e2e")]
+            found.set(Some(false));
+            entry.add_css_class("error");
+        });
+        #[cfg(feature = "e2e")]
+        let found = self.found.clone();
+        let finder = controller.clone();
+        self.find_entry.connect_search_changed(move |entry| {
+            #[cfg(feature = "e2e")]
+            found.set(None);
+            let text = entry.text();
+            if text.is_empty() {
+                entry.remove_css_class("error");
+                finder.search_finish();
+                return;
+            }
+            let options = webkit::FindOptions::CASE_INSENSITIVE | webkit::FindOptions::WRAP_AROUND;
+            finder.search(&text, options.bits(), u32::MAX);
+        });
+        let finder = controller.clone();
+        self.find_entry.connect_activate(move |_| finder.search_next());
+        let finder = controller.clone();
+        self.find_entry.connect_next_match(move |_| finder.search_next());
+        let finder = controller.clone();
+        self.find_entry
+            .connect_previous_match(move |_| finder.search_previous());
+        self.find_bar.connect_search_mode_enabled_notify(move |bar| {
+            if !bar.is_search_mode() {
+                controller.search_finish();
+            }
+        });
+    }
+
+    /// Find in This Message (F3): the find bar opened with its words selected to type over; F3 again, with words in
+    /// it, goes to the next place they are
+    pub fn find_in_message(&self) {
+        if self.uid.get() == 0 {
+            return;
+        }
+        if self.find_bar.is_search_mode() && !self.find_entry.text().is_empty() {
+            self.find_entry.emit_next_match();
+            return;
+        }
+        self.find_bar.set_search_mode(true);
+        self.find_entry.grab_focus();
+        self.find_entry.select_region(0, -1);
+    }
+
+    /// Whether the words typed in the find bar are in the message, None while nothing is looked for (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn find_result(&self) -> Option<bool> {
+        self.find_bar.is_search_mode().then(|| self.found.get()).flatten()
     }
 
     /// The window the reader is in, for its dialogs
@@ -458,6 +560,8 @@ impl Reader {
         self.remote_images.set(false);
         self.view.borrow_mut().take();
         self.logo_request.set(0);
+        // what was looked for is not in the next message
+        self.find_bar.set_search_mode(false);
         self.summary.borrow_mut().take();
         if !loading {
             self.attachments.set_visible(false);

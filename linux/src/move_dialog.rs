@@ -1,4 +1,4 @@
-//! The Move and Copy window: the folders used last under "Recent", every account's folders as a tree, a box that
+//! The Move and Copy window, and Go to Folder's: the folders used last under "Recent", every account's folders as a tree, a box that
 //! narrows it to the folders whose names match, and New Folder. The rows, their words, what can be chosen and what a
 //! filter leaves all come from the core (`Core::move_targets`); this only shows them.
 
@@ -19,6 +19,8 @@ pub struct Request {
     /// "Move" or "Copy", the button that does it
     pub verb: String,
     pub current: Option<i64>,
+    /// New Folder under the list (Move and Copy; Go to Folder goes to a folder there is)
+    pub new_folder: bool,
 }
 
 thread_local! {
@@ -69,10 +71,13 @@ pub async fn choose(parent: &impl IsA<gtk::Widget>, request: Request) -> Option<
         .build();
     let frame = gtk::Frame::new(None);
     frame.set_child(Some(&scrolled));
+    // the list takes the height the dialog has, with or without New Folder under it
+    frame.set_vexpand(true);
     content.append(&frame);
     let new_folder = gtk::Button::with_label(&crate::words::plain(crate::words::Text::CmdNewFolder));
     new_folder.set_widget_name("move-new-folder");
     new_folder.set_halign(gtk::Align::Start);
+    new_folder.set_visible(request.new_folder);
     content.append(&new_folder);
 
     let (dialog, ok) = ui::dialog_with_buttons(&request.title, &content, &request.verb, 460);

@@ -173,6 +173,16 @@ typedef enum PeSortField {
   PE_SORT_FIELD_SIZE = 4,
 } PeSortField;
 
+// What Next Unread does next, see `pe_next_unread_step`
+typedef enum PeNextUnread {
+  // Nothing unread anywhere else (or a failure)
+  PE_NEXT_UNREAD_NONE = 0,
+  // Select the message `next_folder`, `next_uid` of the list
+  PE_NEXT_UNREAD_MESSAGE = 1,
+  // Ask `question`; on yes show the folder `next_folder` and take the step again from its top (uid 0)
+  PE_NEXT_UNREAD_ASK = 2,
+} PeNextUnread;
+
 // How a message lets its reader leave its mailing list
 typedef enum PeUnsubscribe {
   // It does not say
@@ -1280,6 +1290,22 @@ bool pe_message_neighbours(const struct PeCore *core,
                            uint64_t *previous_uid,
                            int64_t *next_folder,
                            uint64_t *next_uid);
+
+// One step of Next Unread from the message `uid` of `folder` (0 for none) in the list `search`, `sort` and `ascending`
+// make: the next unread message of the list, or the next folder with unread mail and the question to ask before going
+// there (a heading, a blank line, the question; free it with `pe_string_free`), or nothing.
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search, the three out pointers valid.
+enum PeNextUnread pe_next_unread_step(const struct PeCore *core,
+                                      const struct PeSearch *search,
+                                      enum PeSortField sort,
+                                      bool ascending,
+                                      int64_t folder,
+                                      uint64_t uid,
+                                      int64_t *next_folder,
+                                      uint64_t *next_uid,
+                                      char **question);
 
 // Whether the message `uid` is (still) in `folder`: a single row looked up. False on failure.
 //
