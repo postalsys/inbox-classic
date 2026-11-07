@@ -800,6 +800,8 @@ impl Mailbox {
         };
         self.total.set(total);
         self.unread.set(unread);
+        // Deleted Items or Junk E-mail with messages: the folder read for the counts above says
+        self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
         self.list
             .show_person_column(core.lists_recipients(&search).unwrap_or(false));
         self.list.show_folder_column(
@@ -1591,6 +1593,9 @@ impl Mailbox {
         add("new", true, Command::NewFolder);
         add("rename", changeable, Command::RenameFolder);
         add("delete", changeable, Command::DeleteFolder);
+        // Deleted Items and Junk E-mail can be emptied, as in Outlook Express
+        let emptiable = self.can_empty_folder();
+        add("empty", emptiable && self.total.get() > 0, Command::EmptyFolder);
         let menu = gio::Menu::new();
         let first = gio::Menu::new();
         first.append(
@@ -1608,9 +1613,47 @@ impl Mailbox {
             rest.append(Some(&t!(GtkMenuRename)), Some("folder.rename"));
             rest.append(Some(&t!(UiTbDelete)), Some("folder.delete"));
             menu.append_section(None, &rest);
+            if emptiable {
+                let empty = gio::Menu::new();
+                empty.append(
+                    Some(&crate::words::plain(crate::words::Text::CmdEmptyFolder)),
+                    Some("folder.empty"),
+                );
+                menu.append_section(None, &empty);
+            }
         }
         widget.insert_action_group("folder", Some(&group));
         *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
+    }
+
+    /// What to ask before emptying the folder shown (Deleted Items or Junk E-mail with messages); None when Empty
+    /// Folder does not apply
+    fn empty_question(&self) -> Option<String> {
+        shell().core.empty_folder_question(self.folder.get()).ok().flatten()
+    }
+
+    /// The folder shown is Deleted Items or Junk E-mail, not All Inboxes or a search
+    fn can_empty_folder(&self) -> bool {
+        !self.all_inboxes.get() && !self.searching() && shell().core.can_empty(self.folder.get()).unwrap_or(false)
+    }
+
+    /// Deleted Items or Junk E-mail emptied for good, after asking (the core words the question, with how many go)
+    pub async fn empty_folder(&self) {
+        let Some(question) = self.empty_question() else {
+            return;
+        };
+        // the question as the heading, what happens under it, as GNOME's dialogs have it
+        let (heading, body) = question.split_once("\n\n").unwrap_or((TITLE, &question));
+        // the buttons say what they do, as GNOME's dialogs have them: Cancel, and Empty in red
+        let buttons = [("cancel", t!(UiCancel)), ("empty", t!(UiEmptyButton))];
+        let buttons: Vec<(&str, &str)> = buttons.iter().map(|(id, label)| (*id, label.as_str())).collect();
+        if ui::ask(&self.window, heading, body, &buttons, "cancel", "cancel", Some("empty")).await != "empty" {
+            return;
+        }
+        match shell().core.empty_folder(self.folder.get()) {
+            Ok(done) => self.set_status(&done),
+            Err(reason) => ui::alert(&self.window, TITLE, &reason.to_string()).await,
+        }
     }
 
     /// A folder in the selected one, or at the top of the selected account
