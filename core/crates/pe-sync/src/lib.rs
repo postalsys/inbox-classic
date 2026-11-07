@@ -266,6 +266,9 @@ fn summary_query() -> FetchQuery {
         internal_date: true,
         size: true,
         modseq: true,
+        // the ids it answers, and Gmail's conversation, for conversations
+        headers: Some(vec!["References".into()]),
+        gmail_thread: true,
         ..Default::default()
     }
 }
@@ -550,6 +553,30 @@ pub async fn copy_messages(
     ensure_selected(client, &from).await?;
     client.copy(&Messages::Uids(set), &to).await?;
     Ok(())
+}
+
+/// The References of messages of `folder` (stored before they were kept), by UID: one FETCH of that header field
+pub async fn fetch_references(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uids: &[u64],
+) -> Result<Vec<(u64, Vec<String>)>> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(Vec::new());
+    };
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let query = FetchQuery {
+        headers: Some(vec!["References".into()]),
+        ..Default::default()
+    };
+    Ok(client
+        .fetch(&Messages::Uids(set), &query)
+        .await?
+        .into_iter()
+        .filter_map(|m| Some((m.uid?, summary::references_of(m.headers.as_deref().unwrap_or_default()))))
+        .collect())
 }
 
 /// Gmail's labels that say what a message is rather than where it was filed: they stay when it is archived

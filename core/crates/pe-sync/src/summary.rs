@@ -46,6 +46,8 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         .map(|a| (a.name.clone(), a.address.clone()))
         .collect();
     let from = envelope.from.into_iter().next().unwrap_or_default();
+    // the ids it answers, from the References header fetched with it
+    let references = message.headers.as_deref().map(references_of).unwrap_or_default();
     Some(MessageInfo {
         uid,
         modseq: message.modseq,
@@ -65,7 +67,33 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         attachment_names,
         attachment_count,
         correspondents,
+        references,
+        gmail_thread: message.thread_id,
+        thread_id: None,
     })
+}
+
+/// The Message-IDs of the References field of a header block (folded or not)
+pub(crate) fn references_of(header: &[u8]) -> Vec<String> {
+    let text = String::from_utf8_lossy(header);
+    let mut value = String::new();
+    let mut inside = false;
+    for line in text.lines() {
+        if line.starts_with([' ', '\t']) {
+            if inside {
+                value.push(' ');
+                value.push_str(line.trim());
+            }
+            continue;
+        }
+        inside = line
+            .split_once(':')
+            .is_some_and(|(name, _)| name.trim().eq_ignore_ascii_case("References"));
+        if inside {
+            value.push_str(line.split_once(':').map_or("", |(_, v)| v));
+        }
+    }
+    pe_store::parse_references(&value)
 }
 
 #[cfg(test)]

@@ -342,6 +342,14 @@ impl Worker {
                     failure,
                 });
             }
+            // the conversations of mail stored before they were kept, then its References from the server, a batch at a
+            // time while nothing else waits (as the text below)
+            while commands.is_empty() {
+                match self.thread_stored(&mut store).await {
+                    Ok(0) | Err(_) => break,
+                    Ok(_) => {}
+                }
+            }
             // the text of the mail for the search, a batch at a time while nothing else waits; a batch that fails is
             // tried again after the next command
             while commands.is_empty() {
@@ -682,6 +690,39 @@ impl Worker {
         client.idle(stop).await?;
         self.held = held;
         Ok(wake)
+    }
+
+    /// One batch of conversations for mail stored before they were kept: messages put into theirs from what the store
+    /// has, else the References of the newest ones fetched (one folder's, one FETCH) and joined by. How many messages
+    /// that was (0: all are done). The windows hear of the folders whose conversations changed.
+    async fn thread_stored(&mut self, store: &mut Store) -> Result<usize, Failure> {
+        let threaded = store.thread_unthreaded(self.account, crate::THREAD_BATCH)?;
+        if threaded > 0 {
+            self.emit(Event::FoldersChanged { account: self.account });
+            return Ok(threaded);
+        }
+        let batch = store.messages_without_references(self.account, crate::THREAD_BATCH)?;
+        let Some(&(_, folder, _)) = batch.first() else {
+            return Ok(0);
+        };
+        let uids: Vec<u64> = batch.iter().map(|(_, _, uid)| *uid).collect();
+        let fetched = pe_sync::fetch_references(self.client(store).await?, store, folder, &uids).await?;
+        let joined = store.transaction(|store| {
+            let mut joined = false;
+            for (message, _, uid) in &batch {
+                let references = fetched
+                    .iter()
+                    .find(|(found, _)| found == uid)
+                    .map(|(_, refs)| refs.as_slice())
+                    .unwrap_or_default();
+                joined |= store.set_references(*message, references)?;
+            }
+            Ok(joined)
+        })?;
+        if joined {
+            self.emit(Event::FoldersChanged { account: self.account });
+        }
+        Ok(batch.len())
     }
 
     /// Fetches the text parts of the newest messages the search index does not have the text of, and indexes them;

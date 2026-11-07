@@ -267,6 +267,9 @@ impl OAuthProviders {
     }
 }
 
+/// How many messages the worker threads, or fetches the References of, at a time in the background
+pub(crate) const THREAD_BATCH: usize = 200;
+
 /// What the main window selects when it opens, see [`Core::start_message`]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Start {
@@ -618,6 +621,46 @@ impl Core {
     /// Whether the message `uid` is (still) in `folder`, a single row looked up
     pub fn has_message(&self, folder: FolderId, uid: u64) -> Result<bool> {
         Ok(self.store().message(folder, uid)?.is_some())
+    }
+
+    /// `limit` rows of the list `search` and `sort` make grouped by conversation, from `offset` on: each
+    /// conversation's first message, and under the conversations `expanded` their other messages
+    pub fn thread_rows(
+        &self,
+        search: &Search,
+        sort: Sort,
+        expanded: &[i64],
+        offset: u64,
+        limit: u64,
+    ) -> Result<Vec<pe_store::ThreadRow>> {
+        let sort = self.list_sort(search, sort)?;
+        Ok(self.store().thread_rows(search, sort, expanded, offset, limit)?)
+    }
+
+    /// How many rows that list has, and how many of its messages are unread
+    pub fn count_thread_rows(&self, search: &Search, sort: Sort, expanded: &[i64]) -> Result<(u64, u64)> {
+        let sort = self.list_sort(search, sort)?;
+        Ok(self.store().count_thread_rows(search, sort, expanded)?)
+    }
+
+    /// The row of the message `uid` of `folder` in that list: its own when its conversation is open or it is the
+    /// first, its conversation's otherwise
+    pub fn thread_row_index(
+        &self,
+        search: &Search,
+        sort: Sort,
+        expanded: &[i64],
+        folder: FolderId,
+        uid: u64,
+    ) -> Result<Option<u64>> {
+        let sort = self.list_sort(search, sort)?;
+        Ok(self.store().thread_row_index(search, sort, expanded, folder, uid)?)
+    }
+
+    /// The messages of the conversations `threads` in the list `search` makes: what an action on their collapsed rows
+    /// acts on
+    pub fn thread_refs(&self, search: &Search, threads: &[i64]) -> Result<Vec<MessageRef>> {
+        Ok(self.store().thread_refs(search, threads)?)
     }
 
     /// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it; `None` for every
