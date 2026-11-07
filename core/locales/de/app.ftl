@@ -62,6 +62,7 @@ ui-go-to-prompt = Zu diesem Ordner wechseln:
 ui-find-in-message-hint = In dieser Nachricht suchen
 # review: new
 ui-find-not-found = „{ $words }“ kommt in dieser Nachricht nicht vor
+# review: new
 cmd-expand-all-threads = Alle Unterhaltungen &erweitern
 # review: new
 cmd-collapse-all-threads = Alle Unterhaltungen &reduzieren

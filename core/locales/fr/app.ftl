@@ -62,6 +62,7 @@ ui-go-to-prompt = Aller au dossier :
 ui-find-in-message-hint = Rechercher dans ce message
 # review: new
 ui-find-not-found = « { $words } » n'est pas dans ce message
+# review: new
 cmd-expand-all-threads = &Développer toutes les conversations
 # review: new
 cmd-collapse-all-threads = Ré&duire toutes les conversations
