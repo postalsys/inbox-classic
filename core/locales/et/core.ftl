@@ -115,6 +115,12 @@ not-archived-here = Selle kausta kirju ei saa arhiveerida.
 # review: new
 not-emptied-here = Tühjendada saab ainult kaustu Kustutatud kirjad ja Rämpspost.
 # review: new
+next-unread-question = Kaustas { $folder } pole rohkem lugemata kirju.
+
+    Kas minna kausta { $next }, järgmisse kausta, kus on lugemata kirju?
+# review: new
+no-unread-left = Lugemata kirju pole enam.
+# review: new
 empty-question = { $count ->
     [one] Kas tühjendada kaust { $folder }?
 
