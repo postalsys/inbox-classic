@@ -29,6 +29,9 @@ public:
     void Resize(const RECT& bounds);
     // WebView2 stops drawing while its window is hidden, the page tells it when it is on screen again
     void SetVisible(bool visible);
+    // the keys that do not type (Esc, Delete, those with Ctrl or Alt) pressed while it has the keyboard, for its window:
+    // true when the window handled one, which the page then does not get
+    void SetKeys(std::function<bool(UINT key)> keys) { keys_ = std::move(keys); }
 
 private:
     void Configure();
@@ -43,6 +46,7 @@ private:
     unsigned shown_ = 0;
     bool remoteImages_ = false;
     std::function<void(const std::wstring&)> onError_;
+    std::function<bool(UINT key)> keys_;
     Microsoft::WRL::ComPtr<ICoreWebView2Environment> environment_;
     Microsoft::WRL::ComPtr<ICoreWebView2Controller> controller_;
     Microsoft::WRL::ComPtr<ICoreWebView2> view_;

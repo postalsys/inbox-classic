@@ -18,12 +18,6 @@
 
 namespace {
 
-// the reason the core gave for a refusal, or `fallback` when it gave none
-std::wstring ReasonText(char* reason, PeText fallback) {
-    core::String why(reason);
-    return why ? Text(why.get()) : core::T(fallback);
-}
-
 // a folder name, asked for; empty when cancelled
 std::wstring AskFolderName(HWND owner, PeText title, const std::wstring& intro, const std::wstring& name) {
     std::vector<FormField> fields = {{core::T(PE_TEXT_UI_FOLDER_NAME), name}};
@@ -38,7 +32,6 @@ void ShowRefusal(HWND owner, char* reason, PeText fallback) {
 constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
 constexpr size_t kPagesKept = 8;
-constexpr int kHeaderLines = 4;
 // the data of the All Inboxes item: neither a folder (positive) nor an account (a negated id)
 constexpr LPARAM kAllInboxesItem = std::numeric_limits<LPARAM>::min();
 std::wstring AllInboxes() {
@@ -239,48 +232,20 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     AddColumn(list_, COL_RECEIVED, core::T(PE_TEXT_UI_COL_RECEIVED).c_str(), 130);
     AddColumn(list_, COL_SIZE, core::T(PE_TEXT_UI_COL_SIZE).c_str(), 84, LVCFMT_RIGHT);
 
-    // not drawn over the Unsubscribe link that lies on it
-    header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN | WS_CLIPSIBLINGS, 0, {});
-    unsubscribe_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
-    ShowWindow(unsubscribe_, SW_HIDE);
-    invitation_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_INVITATION, {});
-    logo_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW, IDC_LOGO, {});
-    ShowWindow(logo_, SW_HIDE);
-    openCalendar_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_OPEN_IN_CALENDAR).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_OPEN_CALENDAR, {});
-    ShowWindow(invitation_, SW_HIDE);
-    ShowWindow(openCalendar_, SW_HIDE);
-    // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
-    attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_ATTACHMENTS, BarIcons::Big);
-    // a label from the start, so the bar keeps a row for it under the icon ("2 files" once a message is shown)
-    AddButton(attachments_, IDC_ATTACHMENTS, core::T(PE_TEXT_WIN_FILES, {{"count", L"1"}}).c_str(), BTNS_WHOLEDROPDOWN, ICON_ATTACH);
-    // the information bar of Outlook Express over a message whose pictures on the internet are blocked; a click
-    // shows them
-    std::wstring blocked = L" " + core::T(PE_TEXT_UI_PICTURES_BLOCKED);
-    pictures_ = CreateChild(parent, L"STATIC", blocked.c_str(),
-                            SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER, IDC_PICTURES, {});
-    ShowWindow(attachments_, SW_HIDE);
-    ShowWindow(pictures_, SW_HIDE);
-    // the same bar over a message that could not be downloaded: a click tries again
-    core::String note(pe_retry_note());
-    std::wstring retry = L" " + Text(note.get()) + L" " + core::T(PE_TEXT_WIN_CLICK_TO_RETRY);
-    retry_ = CreateChild(parent, L"STATIC", retry.c_str(), SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER,
-                         IDC_RETRY, {});
-    ShowWindow(retry_, SW_HIDE);
+    reader_.Create(parent, core);
+    reader_.onShown = [this] { OnMessageShown(); };
     // over the list while searching, in the colors of the information bar: what was found, and a link to end it
     searchBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_SEARCH_BAR, {});
     searchClear_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_CLEAR_SEARCH).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
                                IDC_SEARCH_CLEAR, {});
     ShowWindow(searchBar_, SW_HIDE);
     ShowWindow(searchClear_, SW_HIDE);
-    previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN, 0, {});
-    preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); });
 
     LOGFONTW font = {};
     GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
     font.lfUnderline = TRUE;
     link_ = CreateFontIndirectW(&font);
     SendMessageW(searchClear_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
-    SendMessageW(unsubscribe_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
     font.lfUnderline = FALSE;
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
@@ -291,12 +256,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
 void Mailbox::Destroy() {
     RevokeDropSite(tree_, treeTarget_);
     RevokeDropSite(list_, listTarget_);
-    if (logoBitmap_) {
-        DeleteObject(logoBitmap_);
-        logoBitmap_ = nullptr;
-    }
-    preview_.Close();
-    view_.reset();
+    reader_.Destroy();
     pages_.clear();
     DeleteObject(bold_);
     bold_ = nullptr;
@@ -308,8 +268,7 @@ void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
     MoveWindow(tree_, tree.left, tree.top, tree.right - tree.left, tree.bottom - tree.top, TRUE);
     listArea_ = list;
     LayoutList();
-    reader_ = reader;
-    LayoutReader();
+    reader_.Layout(reader);
 }
 
 // how wide the words of a link are, in the link font
@@ -361,106 +320,30 @@ void Mailbox::UpdateSearchBar() {
     }
 }
 
-// the paper clip and the information bar shown or not, the pane laid out again only when that changes
-void Mailbox::ShowReaderBars(bool files, bool pictures) {
-    bool changed = (IsWindowVisible(attachments_) != FALSE) != files || (IsWindowVisible(pictures_) != FALSE) != pictures;
-    ShowWindow(attachments_, files ? SW_SHOW : SW_HIDE);
-    ShowWindow(pictures_, pictures ? SW_SHOW : SW_HIDE);
-    if (changed || files) {
-        LayoutReader();
-    }
-}
-
-void Mailbox::ShowRetry(bool shown) {
-    if ((IsWindowVisible(retry_) != FALSE) != shown) {
-        ShowWindow(retry_, shown ? SW_SHOW : SW_HIDE);
-        LayoutReader();
-    }
-}
-
 bool Mailbox::OnSetCursor(HWND window) {
-    if (window != pictures_ && window != retry_ && window != searchClear_ && window != unsubscribe_) {
+    if (reader_.OnSetCursor(window)) {
+        return true;
+    }
+    if (window != searchClear_) {
         return false;
     }
-    // the information bar is clicked like a link
+    // the link on the information bar
     SetCursor(LoadCursorW(nullptr, IDC_HAND));
     return true;
 }
 
 bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
-    if (window == unsubscribe_ || window == searchClear_) {
-        // a link, on the header or on the information bar
-        int background = window == unsubscribe_ ? COLOR_BTNFACE : COLOR_INFOBK;
-        SetTextColor(dc, GetSysColor(COLOR_HOTLIGHT));
-        SetBkColor(dc, GetSysColor(background));
-        brush = reinterpret_cast<LRESULT>(GetSysColorBrush(background));
+    if (reader_.OnCtlColor(window, dc, brush)) {
         return true;
     }
-    if (window != pictures_ && window != retry_) {
+    if (window != searchClear_) {
         return false;
     }
-    // the colors of tooltips and information bars of the Windows scheme
-    SetTextColor(dc, GetSysColor(COLOR_INFOTEXT));
+    // a link on the information bar
+    SetTextColor(dc, GetSysColor(COLOR_HOTLIGHT));
     SetBkColor(dc, GetSysColor(COLOR_INFOBK));
     brush = reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_INFOBK));
     return true;
-}
-
-// the reading pane: the header, with the paper clip at its right when the message has files; the information bar
-// under it when pictures are blocked; the message below
-void Mailbox::LayoutReader() {
-    const RECT& reader = reader_;
-    int headerHeight = kHeaderLines * Scale(15) + Scale(8);
-    int width = reader.right - reader.left;
-    bool files = IsWindowVisible(attachments_);
-    RECT button = {};
-    if (files) {
-        SendMessageW(attachments_, TB_AUTOSIZE, 0, 0);
-        SendMessageW(attachments_, TB_GETITEMRECT, 0, reinterpret_cast<LPARAM>(&button));
-    }
-    // the header to the paper clip, which is as wide as its button; the brand's logo, when there is one, at its left
-    int clipWidth = files ? static_cast<int>(button.right - button.left) + Scale(8) : 0;
-    int logoWidth = 0;
-    if (IsWindowVisible(logo_)) {
-        logoWidth = logoSize_ + Scale(12);
-        MoveWindow(logo_, reader.left, reader.top, logoWidth - Scale(4), headerHeight, TRUE);
-    }
-    MoveWindow(header_, reader.left + logoWidth, reader.top, width - clipWidth - logoWidth, headerHeight, TRUE);
-    // Unsubscribe at the right end of the Subject line, inside the header's edge
-    if (IsWindowVisible(unsubscribe_)) {
-        int linkWidth = LinkWidth(unsubscribe_) + Scale(8), edge = GetSystemMetrics(SM_CXEDGE);
-        MoveWindow(unsubscribe_, reader.left + width - clipWidth - linkWidth - edge - Scale(4), reader.top + headerHeight - edge - Scale(26),
-                   linkWidth, Scale(16), TRUE);
-        SetWindowPos(unsubscribe_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-    }
-    if (files) {
-        int buttonHeight = button.bottom - button.top;
-        MoveWindow(attachments_, reader.right - clipWidth, reader.top + std::max(0, (headerHeight - buttonHeight) / 2), clipWidth, buttonHeight,
-                   TRUE);
-    }
-    int top = reader.top + headerHeight + Scale(2);
-    if (IsWindowVisible(retry_)) {
-        int barHeight = Scale(22);
-        MoveWindow(retry_, reader.left, top, width, barHeight, TRUE);
-        top += barHeight + Scale(2);
-    }
-    if (IsWindowVisible(invitation_)) {
-        int barHeight = Scale(40), buttonWidth = Scale(120), buttonHeight = Scale(25);
-        MoveWindow(invitation_, reader.left, top, width, barHeight, TRUE);
-        MoveWindow(openCalendar_, reader.left + width - buttonWidth - Scale(8), top + (barHeight - buttonHeight) / 2, buttonWidth, buttonHeight,
-                   TRUE);
-        SetWindowPos(openCalendar_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        top += barHeight + Scale(2);
-    }
-    if (IsWindowVisible(pictures_)) {
-        int barHeight = Scale(22);
-        MoveWindow(pictures_, reader.left, top, width, barHeight, TRUE);
-        top += barHeight + Scale(2);
-    }
-    MoveWindow(previewHost_, reader.left, top, width, std::max(0L, reader.bottom - top), TRUE);
-    RECT inner;
-    GetClientRect(previewHost_, &inner);
-    preview_.Resize(inner);
 }
 
 // ---- the folder tree ----
@@ -481,6 +364,7 @@ void Mailbox::Reload() {
     unselectable_.clear();
     allInboxesItem_ = nullptr;
     draftFolders_.clear();
+    inboxFolders_.clear();
     junkFolders_.clear();
     emptiableFolders_.clear();
     firstAccount_ = 0;
@@ -556,6 +440,9 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
         if (folder->special_use == PE_SPECIAL_USE_DRAFTS) {
             draftFolders_.insert(folder->id);
         }
+        if (folder->special_use == PE_SPECIAL_USE_INBOX) {
+            inboxFolders_.insert(folder->id);
+        }
         if (folder->special_use == PE_SPECIAL_USE_JUNK) {
             junkFolders_.insert(folder->id);
         }
@@ -629,19 +516,29 @@ SignInChoice Mailbox::SignIn(int64_t account) const {
 
 int64_t Mailbox::CurrentAccount() const {
     // the account of the message shown (in a search of every folder, not the selected folder's), else of the folder
-    auto account = folderAccounts_.find(messageFolder_ ? messageFolder_ : folder_);
-    if (account != folderAccounts_.end()) {
-        return account->second;
+    if (int64_t account = AccountOf(reader_.Folder() ? reader_.Folder() : folder_)) {
+        return account;
     }
     return selectedAccount_ ? selectedAccount_ : firstAccount_;
 }
 
+int64_t Mailbox::AccountOf(int64_t folder) const {
+    auto account = folderAccounts_.find(folder);
+    return account != folderAccounts_.end() ? account->second : 0;
+}
+
 void Mailbox::OpenSelected() {
     FlushSelection();
-    if (!uid_ || !draftFolders_.contains(messageFolder_)) {
+    int64_t folder = reader_.Folder();
+    uint64_t uid = reader_.Uid();
+    if (!uid) {
         return;
     }
-    core::Draft draft(pe_draft_open(core_, messageFolder_, uid_));
+    if (!draftFolders_.contains(folder)) {
+        OpenMessageWindow(parent_, core_, this, ListOrder(), folder, uid, SelectedRow());
+        return;
+    }
+    core::Draft draft(pe_draft_open(core_, folder, uid));
     if (!draft) {
         // not fetched yet: MessageReady follows
         openWhenReady_ = true;
@@ -651,10 +548,7 @@ void Mailbox::OpenSelected() {
 }
 
 core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
-    if (!uid_ || !view_) {
-        return core::Draft();
-    }
-    return core::Draft(pe_message_draft(core_, messageFolder_, uid_, kind));
+    return reader_.DraftOf(kind);
 }
 
 // ---- the message list ----
@@ -663,6 +557,11 @@ core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
 // Inbox's
 PeSearch Mailbox::Search() const {
     return {Searching() ? 0 : folder_, !Searching() && allInboxes_, PE_SHOW_ALL, findUtf8_.c_str()};
+}
+
+MessageListOrder Mailbox::ListOrder() const {
+    PeSearch search = Search();
+    return {search.folder, search.all_inboxes, findUtf8_, sort_, ascending_};
 }
 
 bool Mailbox::Searching() const {
@@ -755,8 +654,9 @@ void Mailbox::ReloadList(bool keepSelection) {
     }
     // the selection follows the message to where it is now, without a flicker of the reading pane; several selected
     // messages are found again where they are now
-    int64_t index = keepSelection && uid_ && !pending ? pe_message_index(core_, &search, sort_, ascending_, messageFolder_, uid_) : -1;
-    core::Positions several(keepSelection && (pending || !uid_) && pe_selection_count(selection_.get()) > 0
+    uint64_t shown = reader_.Uid();
+    int64_t index = keepSelection && shown && !pending ? pe_message_index(core_, &search, sort_, ascending_, reader_.Folder(), shown) : -1;
+    core::Positions several(keepSelection && (pending || !shown) && pe_selection_count(selection_.get()) > 0
                                 ? pe_selection_positions(core_, selection_.get(), &search, sort_, ascending_)
                                 : nullptr);
     reloading_ = true;
@@ -963,47 +863,16 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
 
 // ---- the reading pane ----
 
-namespace {
-
-// the header's lines (Cc, when there is one, beside To), from a message's view or its row in the list
-std::wstring HeaderText(const char* from, bool hasDate, int64_t date, const char* to, const char* cc, const char* subject) {
-    auto label = [](PeText name) { return core::Plain(name) + L":  "; };
-    std::wstring header = L" " + label(PE_TEXT_HEADER_FROM) + Text(from) + L"\r\n " + label(PE_TEXT_HEADER_DATE) +
-                          (hasDate ? FormatDate(date) : L"") + L"\r\n " + label(PE_TEXT_HEADER_TO) + Text(to);
-    if (cc && *cc) {
-        header += L"    " + label(PE_TEXT_HEADER_CC) + Text(cc);
-    }
-    return header + L"\r\n " + label(PE_TEXT_HEADER_SUBJECT) + Text(subject);
+void Mailbox::ClearReader(bool loading) {
+    reader_.Clear(loading);
+    openWhenReady_ = false;
+    KillTimer(parent_, TIMER_MARK_READ);
+    summaryPage_.clear();
 }
 
-}  // namespace
-
-void Mailbox::ClearReader(bool loading) {
-    if (viewRequest_) {
-        pe_message_view_cancel(core_, viewRequest_);
-        viewRequest_ = 0;
-    }
-    uid_ = 0;
-    messageFolder_ = 0;
-    openWhenReady_ = false;
-    remoteImages_ = false;
-    view_.reset();
-    KillTimer(parent_, TIMER_MARK_READ);
-    KillTimer(parent_, TIMER_DOWNLOADING);
-    ShowRetry(false);
-    // the bars of the message before stay while the next one loads, and go when it is there without them: the
-    // message does not jump down and up again
-    if (!loading) {
-        ShowReaderBars(false, false);
-    }
-    SetWindowTextW(header_, L"");
-    unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
-    ShowWindow(unsubscribe_, SW_HIDE);
-    ShowInvitation(nullptr);
-    ShowLogo(false);
-    // says so rather than a blank pane, unless a message is about to be shown
-    preview_.Clear(!loading);
-    summaryPage_.clear();
+void Mailbox::OnMessageShown() {
+    // read after a moment on screen, not while the user moves through the list
+    SetTimer(parent_, TIMER_MARK_READ, 1000, nullptr);
 }
 
 void Mailbox::OnSelectionChanged(bool rebuild) {
@@ -1016,21 +885,14 @@ void Mailbox::OnSelectionChanged(bool rebuild) {
     const PeMessage* row = SelectedRow();
     uint64_t uid = row ? row->uid : 0;
     int64_t folder = row ? row->folder : 0;
-    if (uid == uid_ && folder == messageFolder_) {
+    if (uid == reader_.Uid() && folder == reader_.Folder()) {
         return;
     }
     ClearReader(uid != 0);
     if (!uid) {
         return;
     }
-    uid_ = uid;
-    messageFolder_ = folder;
-    // the header from the list at once; the pane says the message is being downloaded a moment later, should it not
-    // be here yet
-    SetWindowTextW(header_, HeaderText(row->from, row->has_date, row->date, row->recipients, nullptr, row->subject).c_str());
-    SetTimer(parent_, TIMER_DOWNLOADING, 250, nullptr);
-    // MessageReady follows, right away when the message is cached, or MessageFailed
-    pe_message_open(core_, folder, uid);
+    reader_.Open(folder, uid, AccountOf(folder), row);
 }
 
 void Mailbox::ScheduleSelection() {
@@ -1090,16 +952,16 @@ void Mailbox::TakeSelection(bool rebuild) {
         return;
     }
     // several: none of them is opened, the pane says how many (again only when that changed)
-    if (uid_) {
+    if (reader_.Uid()) {
         ClearReader();
         // the header without the logo and bars of the message that was shown
-        LayoutReader();
+        reader_.Layout();
     }
     core::String page(pe_selection_page(&summary_));
     std::wstring html = page ? core::Widen(page.get()) : L"";
     if (html != summaryPage_) {
         summaryPage_ = html;
-        preview_.Show(html);
+        reader_.ShowPage(html);
     }
 }
 
@@ -1117,15 +979,6 @@ bool Mailbox::SelectRestored(const PeSearch& search) {
     return SelectPositions(at.get(), true);
 }
 
-void Mailbox::RetryDownload() {
-    if (!uid_) {
-        return;
-    }
-    ShowRetry(false);
-    preview_.ShowState(PE_READER_STATE_DOWNLOADING);
-    pe_message_open(core_, messageFolder_, uid_);
-}
-
 bool Mailbox::OnFolderSelected(int64_t folder, bool allInboxes) {
     if (folder == folder_ && allInboxes == allInboxes_) {
         return false;
@@ -1141,132 +994,8 @@ bool Mailbox::OnFolderSelected(int64_t folder, bool allInboxes) {
     return true;
 }
 
-void Mailbox::ShowMessage() {
-    // fetched now: a draft that was double-clicked before opens
-    if (std::exchange(openWhenReady_, false)) {
-        OpenSelected();
-    }
-    // parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows
-    if (viewRequest_) {
-        pe_message_view_cancel(core_, viewRequest_);
-    }
-    viewRequest_ = pe_message_view_start(core_, messageFolder_, uid_, remoteImages_);
-    if (!viewRequest_) {
-        SetWindowTextW(header_, (L" " + core::T(PE_TEXT_UI_NOT_SHOWN)).c_str());
-    }
-}
-
-void Mailbox::ShowView() {
-    view_.reset(pe_message_view_result(core_, viewRequest_));
-    viewRequest_ = 0;
-    const PeMessageInfo* info = pe_message_view_info(view_.get());
-    if (!info) {
-        SetWindowTextW(header_, (L" " + core::T(PE_TEXT_UI_NOT_SHOWN)).c_str());
-        ShowReaderBars(false, false);
-        return;
-    }
-    ShowHeader(info);
-    // a mailing list that says how to leave it
-    unsubscribeKind_ = info->unsubscribe;
-    unsubscribeLink_ = Text(info->unsubscribe_link);
-    unsubscribeTarget_ = Text(info->unsubscribe_target);
-    ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
-    ShowInvitation(info->invitation);
-    ShowLogo(info->has_logo);
-    LayoutReader();
-    InvalidateRect(unsubscribe_, nullptr, TRUE);
-    preview_.Show(Text(info->document), remoteImages_);
-    // offered only for a message with pictures on the internet, until they are shown
-    ShowReaderBars(info->attachment_count > 0, info->remote_images && !remoteImages_);
-    // read after a moment on screen, not while the user moves through the list
-    SetTimer(parent_, TIMER_MARK_READ, 1000, nullptr);
-}
-
-void Mailbox::ShowHeader(const PeMessageInfo* info) {
-    SetWindowTextW(header_, HeaderText(info->from, info->has_date, info->date, info->to, info->cc, info->subject).c_str());
-    if (info->attachment_count > 0) {
-        // the paper clip says how many files there are
-        std::wstring label = core::T(PE_TEXT_WIN_FILES, {{"count", std::to_wstring(info->attachment_count)}});
-        TBBUTTONINFOW button = {sizeof(button)};
-        button.dwMask = TBIF_TEXT;
-        button.pszText = label.data();
-        SendMessageW(attachments_, TB_SETBUTTONINFOW, IDC_ATTACHMENTS, reinterpret_cast<LPARAM>(&button));
-    }
-}
-
-void Mailbox::ChooseAttachment() {
-    const PeMessageInfo* info = pe_message_view_info(view_.get());
-    if (!info) {
-        return;
-    }
-    // each file to save (the name the sender gave, its size), then all of them into a folder, as Outlook Express
-    // has it; files are saved, never opened from here
-    HMENU menu = CreatePopupMenu();
-    for (size_t i = 0; i < info->attachment_count; i++) {
-        const PeAttachment* attachment = pe_message_view_attachment(view_.get(), i);
-        if (!attachment) {
-            continue;
-        }
-        std::wstring label = MenuText(Text(attachment->filename) + L" (" + FormatSize(attachment->size) + L")");
-        AppendMenuW(menu, MF_STRING, 1 + i, label.c_str());
-    }
-    // after the files' own items
-    const UINT kSaveAll = static_cast<UINT>(info->attachment_count) + 1;
-    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, kSaveAll, MenuItem(PE_TEXT_WIN_SAVE_ATTACHMENTS).c_str());
-    RECT button;
-    GetWindowRect(attachments_, &button);
-    UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTALIGN | TPM_TOPALIGN, button.right, button.bottom, 0, parent_, nullptr);
-    DestroyMenu(menu);
-    if (chosen == kSaveAll) {
-        SaveAllAttachments();
-        return;
-    }
-    if (chosen == 0) {
-        return;
-    }
-    size_t length = 0;
-    char* name = nullptr;
-    uint8_t* data = pe_attachment_data(core_, messageFolder_, uid_, static_cast<size_t>(chosen - 1), &length, &name);
-    core::String safeName(name);
-    if (!data) {
-        MessageBoxW(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
-        return;
-    }
-    std::wstring path = SaveFileDialog(parent_, Text(safeName.get()));
-    if (!path.empty()) {
-        if (WriteFileBytes(path, data, length)) {
-            MarkFromInternet(path);
-        } else {
-            MessageBoxW(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
-        }
-    }
-    pe_bytes_free(data, length);
-}
-
-void Mailbox::SaveAllAttachments() {
-    std::wstring folder = FolderDialog(parent_, core::Title(PE_TEXT_WIN_SAVE_ATTACHMENTS).c_str());
-    if (folder.empty()) {
-        return;
-    }
-    // the core saves them all from one reading of the message, a file already there kept and the new one numbered
-    size_t saved = 0;
-    size_t total = 0;
-    std::string dir = core::Narrow(folder);
-    if (!pe_save_attachments(core_, messageFolder_, uid_, dir.c_str(), &saved, &total)) {
-        MessageBoxW(parent_, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
-    } else if (saved < total) {
-        std::wstring text =
-            core::T(PE_TEXT_WIN_FILES_NOT_SAVED, {{"failed", std::to_wstring(total - saved)}, {"count", std::to_wstring(total)}});
-        MessageBoxW(parent_, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
-    }
-}
-
 void Mailbox::LoadPictures() {
-    if (uid_ && view_ && !remoteImages_) {
-        remoteImages_ = true;
-        ShowMessage();
-    }
+    reader_.LoadPictures();
 }
 
 void Mailbox::MarkAllRead() {
@@ -1336,138 +1065,11 @@ void Mailbox::SelectStart() {
 }
 
 std::wstring Mailbox::Unsubscribe(std::wstring& mailto) {
-    const std::wstring& target = unsubscribeTarget_;
-    switch (unsubscribeKind_) {
-    case PE_UNSUBSCRIBE_ONE_CLICK: {
-        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_ONE_CLICK, {{"target", target}});
-        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
-            return L"";
-        }
-        unsubscribeRequest_ = pe_unsubscribe(core_, messageFolder_, uid_);
-        return unsubscribeRequest_ ? core::T(PE_TEXT_UI_UNSUBSCRIBING, {{"target", target}}) : core::T(PE_TEXT_UI_CANNOT_UNSUBSCRIBE);
-    }
-    case PE_UNSUBSCRIBE_MAIL: {
-        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_MAIL, {{"target", target}});
-        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
-            mailto = unsubscribeLink_;
-        }
-        return L"";
-    }
-    case PE_UNSUBSCRIBE_WEB: {
-        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_WEB, {{"target", target}});
-        if (MessageBoxW(parent_, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
-            webview::OpenExternally(unsubscribeLink_.c_str());
-        }
-        return L"";
-    }
-    default:
-        return L"";
-    }
+    return reader_.Unsubscribe(parent_, mailto);
 }
 
 std::wstring Mailbox::Unsubscribed(uint64_t request, const std::wstring& problem) {
-    if (request != unsubscribeRequest_) {
-        return L"";
-    }
-    unsubscribeRequest_ = 0;
-    return problem.empty() ? core::T(PE_TEXT_UI_UNSUBSCRIBED) : core::T(PE_TEXT_UI_NOT_UNSUBSCRIBED, {{"reason", problem}});
-}
-
-namespace {
-// an instant as the reader's local time, or as written (floating: in no zone the invitation defines)
-bool EventTime(int64_t seconds, bool floating, SYSTEMTIME& time) {
-    return UnixToSystemTime(seconds, !floating, time);
-}
-
-std::wstring LongDate(const SYSTEMTIME& time) {
-    wchar_t date[96] = L"";
-    GetDateFormatEx(LOCALE_NAME_USER_DEFAULT, DATE_LONGDATE, &time, nullptr, date, 96, nullptr);
-    return date;
-}
-
-bool SameDay(const SYSTEMTIME& a, const SYSTEMTIME& b) {
-    return a.wYear == b.wYear && a.wMonth == b.wMonth && a.wDay == b.wDay;
-}
-
-// when an event is, in words: its day (or days) and times
-std::wstring When(const PeInvitation& event) {
-    SYSTEMTIME start, end;
-    if (!event.has_start || !EventTime(event.start, event.floating, start)) {
-        return L"";
-    }
-    bool hasEnd = event.has_end && EventTime(event.end - (event.all_day ? 86400 : 0), event.floating, end);
-    if (event.all_day) {
-        return hasEnd && !SameDay(start, end) ? core::T(PE_TEXT_UI_EVENT_SPAN, {{"start", LongDate(start)}, {"end", LongDate(end)}})
-                                              : LongDate(start);
-    }
-    std::wstring when = LongDate(start) + L", " + FormatTime(start);
-    if (hasEnd) {
-        std::wstring until = SameDay(start, end) ? FormatTime(end) : LongDate(end) + L", " + FormatTime(end);
-        when = core::T(PE_TEXT_UI_EVENT_SPAN, {{"start", when}, {"end", until}});
-    }
-    return event.floating ? core::T(PE_TEXT_UI_EVENT_FLOATING, {{"when", when}}) : when;
-}
-}  // namespace
-
-// the logo is asked for when the message has one the server passed, and shown once it is drawn (LogoReady)
-void Mailbox::ShowLogo(bool wanted) {
-    if (logoBitmap_) {
-        DeleteObject(logoBitmap_);
-        logoBitmap_ = nullptr;
-    }
-    logoRequest_ = 0;
-    ShowWindow(logo_, SW_HIDE);
-    if (wanted) {
-        logoSize_ = Scale(48);
-        logoRequest_ = pe_logo_start(core_, messageFolder_, uid_, static_cast<uint32_t>(logoSize_));
-    }
-}
-
-void Mailbox::ShowInvitation(const PeInvitation* event) {
-    if (!event) {
-        ShowWindow(invitation_, SW_HIDE);
-        ShowWindow(openCalendar_, SW_HIDE);
-        return;
-    }
-    PeText kinds[] = {PE_TEXT_UI_INVITATION, PE_TEXT_UI_INVITATION_UPDATED, PE_TEXT_UI_INVITATION_CANCELED,
-                      PE_TEXT_UI_INVITATION_ANSWER};
-    std::wstring summary = Text(event->summary);
-    invitationTitle_ = core::T(kinds[std::clamp(static_cast<int>(event->kind), 0, 3)],
-                               {{"title", summary.empty() ? core::T(PE_TEXT_UI_NO_TITLE) : summary}});
-    std::vector<std::wstring> parts = {When(*event), Text(event->location)};
-    if (std::wstring organizer = Text(event->organizer); !organizer.empty()) {
-        parts.push_back(core::T(PE_TEXT_UI_ORGANIZER, {{"name", organizer}}));
-    }
-    parts.push_back(Text(event->repeats));
-    if (event->attendees > 0) {
-        parts.push_back(core::T(PE_TEXT_WIN_ATTENDEES, {{"count", std::to_wstring(event->attendees)}}));
-    }
-    invitationDetails_.clear();
-    for (const std::wstring& part : parts) {
-        if (!part.empty()) {
-            invitationDetails_ += (invitationDetails_.empty() ? L"" : L"   \u00B7   ") + part;
-        }
-    }
-    ShowWindow(invitation_, SW_SHOW);
-    ShowWindow(openCalendar_, SW_SHOW);
-    InvalidateRect(invitation_, nullptr, TRUE);
-}
-
-// the calendar part as a file of its own (the core writes it, and only it), for the calendar program
-void Mailbox::OpenInCalendar() {
-    wchar_t temp[MAX_PATH] = L"";
-    GetTempPathW(MAX_PATH, temp);
-    std::wstring dir = std::wstring(temp) + L"InboxClassic\\Invitations";
-    core::String path(pe_invitation_file(core_, messageFolder_, uid_, core::Narrow(dir).c_str()));
-    if (!path) {
-        MessageBoxW(parent_, core::T(PE_TEXT_UI_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
-        return;
-    }
-    // marked as from the internet by the core, which wrote it
-    std::wstring file = Text(path.get());
-    if (reinterpret_cast<INT_PTR>(ShellExecuteW(parent_, L"open", file.c_str(), nullptr, nullptr, SW_SHOWNORMAL)) <= 32) {
-        MessageBoxW(parent_, core::T(PE_TEXT_UI_NO_CALENDAR).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
-    }
+    return reader_.Unsubscribed(request, problem);
 }
 
 void Mailbox::MarkJunk(bool junk) {
@@ -1865,9 +1467,7 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
         }
         return header->code == TVN_SELCHANGEDW;
     }
-    if (header->hwndFrom == attachments_ && header->code == TBN_DROPDOWN) {
-        ChooseAttachment();
-        result = TBDDRET_DEFAULT;
+    if (reader_.OnNotify(header, result)) {
         return true;
     }
     return header->hwndFrom == list_ && OnListNotify(header, result);
@@ -2011,12 +1611,12 @@ void Mailbox::FilesDone(LPARAM lParam) {
 }
 
 void Mailbox::SaveShownAs(HWND owner) {
-    if (!uid_) {
+    if (!reader_.Uid()) {
         return;
     }
     size_t length = 0;
     char* name = nullptr;
-    uint8_t* data = pe_message_source(core_, messageFolder_, uid_, &length, &name);
+    uint8_t* data = pe_message_source(core_, reader_.Folder(), reader_.Uid(), &length, &name);
     core::String safeName(name);
     if (!data) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
@@ -2035,28 +1635,28 @@ void Mailbox::SaveShownAs(HWND owner) {
 }
 
 void Mailbox::ShowProperties(HWND owner) {
-    if (!uid_) {
+    if (!reader_.Uid()) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
-    core::String headers(pe_message_headers(core_, messageFolder_, uid_));
+    core::String headers(pe_message_headers(core_, reader_.Folder(), reader_.Uid()));
     if (!headers) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
-    const PeMessageInfo* info = pe_message_view_info(view_.get());
+    const PeMessageInfo* info = reader_.Info();
     std::wstring subject = info ? Text(info->subject) : L"";
     TextDialog(owner, subject.empty() ? core::Title(PE_TEXT_CMD_PROPERTIES) : core::T(PE_TEXT_UI_PROPERTIES_OF, {{"subject", subject}}),
                core::T(PE_TEXT_UI_INTERNET_HEADERS), Text(headers.get()));
 }
 
 void Mailbox::ShowSource(HWND owner) {
-    if (!uid_) {
+    if (!reader_.Uid()) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     char* title = nullptr;
-    core::String text(pe_message_source_text(core_, messageFolder_, uid_, &title));
+    core::String text(pe_message_source_text(core_, reader_.Folder(), reader_.Uid(), &title));
     core::String titleText(title);
     if (!text) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
@@ -2133,10 +1733,7 @@ void Mailbox::MessageMenu(POINT screen) {
 }
 
 void Mailbox::PrintShown() {
-    if (const PeMessageInfo* info = uid_ ? pe_message_view_info(view_.get()) : nullptr) {
-        // the message as it is shown, with the pictures the user allowed
-        OpenPrintWindow(parent_, preview_.Environment(), info->document, remoteImages_, Text(info->subject));
-    }
+    reader_.Print(parent_);
 }
 
 void Mailbox::Import(HWND owner) {
@@ -2177,42 +1774,7 @@ int Mailbox::PlaceFind(const RECT& row, int buttonsRight) {
 }
 
 bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
-    if (item.hwndItem == logo_) {
-        // the logo, its own transparency kept, in the middle of its place beside the header
-        FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
-        if (logoBitmap_) {
-            HDC source = CreateCompatibleDC(item.hDC);
-            HGDIOBJ old = SelectObject(source, logoBitmap_);
-            BLENDFUNCTION blend = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
-            int x = (item.rcItem.left + item.rcItem.right - logoSize_) / 2;
-            int y = (item.rcItem.top + item.rcItem.bottom - logoSize_) / 2;
-            AlphaBlend(item.hDC, x, y, logoSize_, logoSize_, source, 0, 0, logoSize_, logoSize_, blend);
-            SelectObject(source, old);
-            DeleteDC(source);
-        }
-        return true;
-    }
-    if (item.hwndItem == invitation_) {
-        // the calendar, then the event in two lines, on the information bar's yellow
-        RECT area = item.rcItem;
-        FillRect(item.hDC, &area, GetSysColorBrush(COLOR_INFOBK));
-        int pad = Scale(8);
-        ImageList_Draw(listIcons_, LIST_CALENDAR_LTR, item.hDC, area.left + pad, (area.top + area.bottom - iconSize_) / 2, ILD_TRANSPARENT);
-        area.left += pad + iconSize_ + pad;
-        RECT button;
-        GetWindowRect(openCalendar_, &button);
-        area.right -= (button.right - button.left) + 2 * pad;
-        SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
-        SetBkMode(item.hDC, TRANSPARENT);
-        UINT format = DT_LEFT | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS;
-        int middle = (area.top + area.bottom) / 2;
-        RECT title = {area.left, area.top + Scale(3), area.right, middle};
-        HGDIOBJ old = SelectObject(item.hDC, bold_);
-        DrawTextW(item.hDC, invitationTitle_.c_str(), -1, &title, format | DT_BOTTOM);
-        SelectObject(item.hDC, reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0)));
-        RECT details = {area.left, middle + Scale(1), area.right, area.bottom - Scale(3)};
-        DrawTextW(item.hDC, invitationDetails_.c_str(), -1, &details, format | DT_TOP);
-        SelectObject(item.hDC, old);
+    if (reader_.OnDrawItem(item)) {
         return true;
     }
     if (item.hwndItem == searchBar_) {
@@ -2295,24 +1857,11 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
         OpenSelected();
         return true;
     }
-    switch (id) {
-    case IDC_ATTACHMENTS:
-        ChooseAttachment();
-        return true;
-    case IDC_PICTURES:
-        LoadPictures();
-        return true;
-    case IDC_RETRY:
-        RetryDownload();
-        return true;
-    case IDC_SEARCH_CLEAR:
+    if (id == IDC_SEARCH_CLEAR) {
         ClearFind();
         return true;
-    case IDC_OPEN_CALENDAR:
-        OpenInCalendar();
-        return true;
     }
-    return false;
+    return reader_.OnCommand(id, code);
 }
 
 // ---- dragging messages: onto a folder, out of the app as files, files into a folder ----
@@ -2518,9 +2067,7 @@ void Mailbox::OnTimer(UINT_PTR id) {
         FlushSelection();
         return;
     }
-    if (id == TIMER_DOWNLOADING) {
-        KillTimer(parent_, TIMER_DOWNLOADING);
-        preview_.ShowState(PE_READER_STATE_DOWNLOADING);
+    if (reader_.OnTimer(id)) {
         return;
     }
     if (id == TIMER_RELOAD) {
@@ -2550,9 +2097,9 @@ void Mailbox::OnTimer(UINT_PTR id) {
     }
     KillTimer(parent_, TIMER_MARK_READ);
     const PeMessage* row = SelectedRow();
-    if (row && row->uid == uid_ && !row->seen) {
+    if (row && row->uid == reader_.Uid() && row->folder == reader_.Folder() && !row->seen) {
         // read after a moment on screen: no word of it in the status bar
-        pe_message_set_seen(core_, messageFolder_, uid_, true);
+        pe_message_set_seen(core_, row->folder, row->uid, true);
     }
 }
 
@@ -2579,60 +2126,13 @@ void Mailbox::OnEvent(const UiEvent& event) {
         }
         break;
     case PE_EVENT_KIND_MESSAGE_READY:
-        if (event.folder == messageFolder_ && event.uid == uid_) {
-            KillTimer(parent_, TIMER_DOWNLOADING);
-            ShowRetry(false);
-            ShowMessage();
-        }
-        break;
-    case PE_EVENT_KIND_MESSAGE_FAILED:
-        if (event.folder == messageFolder_ && event.uid == uid_) {
-            KillTimer(parent_, TIMER_DOWNLOADING);
-            ShowReaderBars(false, false);
-            ShowRetry(true);
-            preview_.ShowState(PE_READER_STATE_FAILED, event.failure, core::Narrow(event.message));
-        }
-        break;
-    case PE_EVENT_KIND_SYNC_FINISHED:
-        // the account is back: a message it could not give is tried again
-        if (event.failure == PE_FAILURE_KIND_NONE && IsWindowVisible(retry_)) {
-            auto account = folderAccounts_.find(messageFolder_);
-            if (account != folderAccounts_.end() && account->second == event.account) {
-                RetryDownload();
-            }
-        }
-        break;
-    case PE_EVENT_KIND_VIEW_READY:
-        // a view for a message that is no longer selected was cancelled, its event is not this one
-        if (viewRequest_ && event.uid == viewRequest_) {
-            ShowView();
-        }
-        break;
-    case PE_EVENT_KIND_LOGO_READY:
-        if (logoRequest_ && event.uid == logoRequest_) {
-            logoRequest_ = 0;
-            size_t length = 0;
-            uint8_t* pixels = pe_logo_result(core_, event.uid, &length);
-            size_t expected = static_cast<size_t>(logoSize_) * logoSize_ * 4;
-            if (pixels && length == expected) {
-                // the core's pixels, BGRA with the alpha multiplied in, as AlphaBlend takes them
-                BITMAPINFO info = {};
-                info.bmiHeader = {sizeof(BITMAPINFOHEADER), logoSize_, -logoSize_, 1, 32, BI_RGB};
-                void* bits = nullptr;
-                logoBitmap_ = CreateDIBSection(nullptr, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
-                if (logoBitmap_ && bits) {
-                    memcpy(bits, pixels, expected);
-                    ShowWindow(logo_, SW_SHOW);
-                    LayoutReader();
-                    InvalidateRect(logo_, nullptr, TRUE);
-                }
-            }
-            if (pixels) {
-                pe_bytes_free(pixels, length);
-            }
+        // fetched now: a draft that was double-clicked before opens
+        if (event.folder == reader_.Folder() && event.uid == reader_.Uid() && std::exchange(openWhenReady_, false)) {
+            OpenSelected();
         }
         break;
     default:
         break;
     }
+    reader_.OnEvent(event);
 }

@@ -89,20 +89,10 @@ std::vector<ToolbarEdge> g_toolbarEdges;
 void Layout();
 
 void UpdateJunkButton() {
-    bool inJunk = g_mailbox.InJunk();
-    int from = inJunk ? IDM_JUNK : IDM_NOT_JUNK, to = inJunk ? IDM_NOT_JUNK : IDM_JUNK;
-    if (SendMessageW(g_toolbar, TB_COMMANDTOINDEX, from, 0) < 0) {
+    if (!SetJunkButton(g_toolbar, g_mailbox.InJunk())) {
         return;
     }
-    TBBUTTONINFOW info = {sizeof(info)};
-    info.dwMask = TBIF_COMMAND | TBIF_TEXT | TBIF_IMAGE;
-    info.idCommand = to;
-    std::wstring label = core::T(inJunk ? PE_TEXT_UI_TB_NOT_JUNK : PE_TEXT_UI_TB_JUNK);
-    info.pszText = label.data();
-    info.iImage = inJunk ? ICON_MAIL_CHECKMARK : ICON_MAIL_PROHIBITED;
-    SendMessageW(g_toolbar, TB_SETBUTTONINFOW, from, reinterpret_cast<LPARAM>(&info));
-    // the row of buttons as wide as their labels again, and the Find box and the buttons fitted to it
-    SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
+    // the Find box and the buttons fitted to the row again
     g_toolbarEdges.clear();
     Layout();
 }
@@ -456,6 +446,8 @@ void OnEvent(const UiEvent& event) {
         break;
     }
     g_mailbox.OnEvent(event);
+    // the messages open in windows of their own: shown once ready, closed once gone
+    MessageWindowsEvent(event);
     // the tray and the taskbar button: what is unread in the Inboxes, when a folder changed
     if (event.kind == PE_EVENT_KIND_FOLDER_CHANGED || event.kind == PE_EVENT_KIND_SYNC_FINISHED) {
         TrayCount(g_main, pe_inbox_unread(g_core.get()));
@@ -897,19 +889,22 @@ void NewMessage(int64_t account) {
     OpenCompose(g_main, g_core.get(), account, nullptr);
 }
 
-// a new message from a mailto: link, from the account of what is shown (the core reads the link)
-void OpenMailto(const std::wstring& link) {
+}  // namespace
+
+void OpenMailto(const std::wstring& link, int64_t account) {
     core::Draft draft(pe_mailto_draft(core::Narrow(link).c_str()));
     if (!draft) {
         return;
     }
-    int64_t account = g_mailbox.CurrentAccount();
+    account = account ? account : g_mailbox.CurrentAccount();
     if (!account) {
         MessageBoxW(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST_LINK).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
 }
+
+namespace {
 
 // ---- one app for each mail store ----
 
@@ -1422,6 +1417,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         KillTimer(hwnd, TIMER_SYNC);
         TrayRemove(hwnd);
         DestroyComposeWindows();
+        DestroyMessageWindows();
         // the WebView2s go before COM does, the core before its events are dropped
         CloseHelp();
         g_mailbox.Destroy();
@@ -1532,7 +1528,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
         if (GetAncestor(msg.hwnd, GA_ROOT) == hwnd && TranslateAcceleratorW(hwnd, g_accelerators, &msg)) {
             continue;
         }
-        if (ComposeKey(msg)) {
+        if (ComposeKey(msg) || MessageWindowKey(msg)) {
             continue;
         }
         // Tab moves between the panes of the main window and the fields of a compose window
