@@ -1453,7 +1453,7 @@ pub async fn conversations(d: &Driver) {
     };
     let Some(place) = message.thread else { return };
     let collapsed_rows = rows();
-    let listed = core.count_search(&main.search()).map_or(0, |(rows, _)| rows);
+    let listed = core.count_rows(&main.search()).unwrap_or(0);
     d.check(
         place.depth == 0 && !place.expanded && u64::from(collapsed_rows) == listed,
         &format!("the Inbox lists the conversation once, on its first message ({collapsed_rows} rows)"),

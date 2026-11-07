@@ -176,12 +176,15 @@ async fn replies_are_grouped_into_conversations() {
     sync_folders(&mut s.client, &mut s.store, s.account).await.unwrap();
     let inbox = s.folder("INBOX").await;
     s.sync(inbox).await;
-    let list = pe_store::Search::folder(inbox);
-    let rows = s
-        .store
-        .thread_rows(&list, pe_store::Sort::default(), &[], 0, 10)
-        .unwrap();
-    let mut counts: Vec<(String, u32)> = rows.iter().map(|r| (r.message.info.subject.clone(), r.count)).collect();
+    let list = pe_store::Search {
+        threads: Some(Vec::new()),
+        ..pe_store::Search::folder(inbox)
+    };
+    let rows = s.store.search(&list, pe_store::Sort::default(), 0, 10).unwrap();
+    let mut counts: Vec<(String, u32)> = rows
+        .iter()
+        .map(|r| (r.info.subject.clone(), r.thread.map_or(0, |t| t.count)))
+        .collect();
     counts.sort();
     assert_eq!(counts, [("Alone".to_string(), 1), ("Start".to_string(), 2)]);
     let reply = s.store.messages(inbox, pe_store::Sort::default(), 0, 10).unwrap();

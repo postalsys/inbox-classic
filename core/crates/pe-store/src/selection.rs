@@ -62,6 +62,17 @@ fn marks(n: usize) -> String {
     vec!["?"; n].join(", ")
 }
 
+/// `ids` added to `values`, and their numbered places (`?4, ?5, ?6`) for an `IN (...)`: numbered, so that a statement
+/// can name the same list twice, and can come after the values of a search's condition
+pub(crate) fn numbered_marks(values: &mut Vec<Value>, ids: &[i64]) -> String {
+    let first = values.len() + 1;
+    values.extend(ids.iter().map(|&id| Value::Integer(id)));
+    (first..first + ids.len())
+        .map(|at| format!("?{at}"))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 impl Store {
     /// The messages at positions `ranges` (start included, end not) of what `search` finds in the order of `sort`, in
     /// that order
@@ -104,18 +115,27 @@ impl Store {
         if refs.is_empty() {
             return Ok(Vec::new());
         }
-        if search.threads.is_some() {
-            // each message's row: its conversation's while that is collapsed, so several fall on one
-            let mut found = Vec::new();
-            for r in refs {
-                if let Some(at) = self.search_index(search, sort, r.folder, r.uid)? {
-                    found.push(at);
-                }
+        self.with_picked_refs(refs, || {
+            if let Some(expanded) = &search.threads {
+                // each message's row: its conversation's while that is collapsed, so several fall on one
+                let mut found = self.thread_positions(search, sort, expanded, &self.picked_threads(search)?)?;
+                found.sort_unstable();
+                found.dedup();
+                return Ok(found);
             }
-            found.sort_unstable();
-            found.dedup();
-            return Ok(found);
-        }
+            let (positioned, values) = search.positioned(sort);
+            let mut statement = self.db.prepare(&format!(
+                "SELECT l.position FROM ({positioned}) l JOIN temp.picked_refs p \
+                 ON p.folder_id = l.folder_id AND p.uid = l.uid ORDER BY l.position"
+            ))?;
+            statement
+                .query_map(params_from_iter(values), |row| row.get(0))?
+                .collect()
+        })
+    }
+
+    /// `f` run with `refs` in the table `temp.picked_refs` (folder_id, uid), emptied again after
+    fn with_picked_refs<T>(&self, refs: &[MessageRef], f: impl FnOnce() -> Result<T>) -> Result<T> {
         self.db.execute_batch(
             "CREATE TEMP TABLE IF NOT EXISTS picked_refs (folder_id INTEGER, uid INTEGER, PRIMARY KEY (folder_id, uid)) \
              WITHOUT ROWID; DELETE FROM temp.picked_refs;",
@@ -128,18 +148,30 @@ impl Store {
                 insert.execute(rusqlite::params![r.folder, r.uid])?;
             }
         }
-        let (positioned, values) = search.positioned(sort);
-        let found: Result<Vec<u64>> = {
-            let mut statement = self.db.prepare(&format!(
-                "SELECT l.position FROM ({positioned}) l JOIN temp.picked_refs p \
-                 ON p.folder_id = l.folder_id AND p.uid = l.uid ORDER BY l.position"
-            ))?;
-            statement
-                .query_map(params_from_iter(values), |row| row.get(0))?
-                .collect()
-        };
+        let found = f();
         self.db.execute("DELETE FROM temp.picked_refs", [])?;
         found
+    }
+
+    /// The messages of `temp.picked_refs` in the list `search` makes, each with its conversation
+    fn picked_threads(&self, search: &Search) -> Result<Vec<(MessageRef, i64)>> {
+        let (condition, values) = search.condition(false);
+        let mut statement = self.db.prepare(&format!(
+            // found by their own rows, not by a pass over the list
+            "SELECT folder_id, uid, thread_id FROM messages WHERE id IN (SELECT m.id FROM temp.picked_refs p \
+             JOIN messages m ON m.folder_id = p.folder_id AND m.uid = p.uid) AND {condition}"
+        ))?;
+        statement
+            .query_map(params_from_iter(values), |row| {
+                Ok((
+                    MessageRef {
+                        folder: row.get(0)?,
+                        uid: row.get(1)?,
+                    },
+                    row.get(2)?,
+                ))
+            })?
+            .collect()
     }
 
     /// The messages of `refs` still in the store, with their flags and Message-IDs, in the order of `refs`

@@ -9,6 +9,7 @@ use rusqlite::types::Value;
 use rusqlite::{OptionalExtension, params, params_from_iter};
 
 use crate::messages::{COLUMNS, from_row};
+use crate::selection::numbered_marks;
 use crate::{AccountId, FolderId, Message, MessageInfo, MessageRef, Result, Search, Sort, SortField, Store};
 
 /// At most this many References a message brings: the last ones, nearest to it (a long thread's header lists every
@@ -218,7 +219,8 @@ impl Store {
     }
 }
 
-/// A row's place in a list grouped by conversation ([`Search::threads`])
+/// A row's place in a list grouped by conversation ([`Search::threads`]). The apps read [`ThreadPlace::opens`],
+/// [`ThreadPlace::collapsed`] and [`Message::bold`] rather than decide from these numbers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ThreadPlace {
     pub thread: i64,
@@ -231,33 +233,30 @@ pub struct ThreadPlace {
     pub expanded: bool,
 }
 
-/// A row of [`Store::thread_rows`] as a message of the list
-pub(crate) fn placed(row: ThreadRow, expanded: &[i64]) -> Message {
-    Message {
-        thread: Some(ThreadPlace {
-            thread: row.thread,
-            depth: row.depth,
-            count: row.count,
-            unread: row.unread,
-            expanded: expanded.contains(&row.thread),
-        }),
-        ..row.message
+impl ThreadPlace {
+    /// The row is the first of a conversation of several messages: it opens and closes (a + or a -)
+    pub fn opens(&self) -> bool {
+        self.depth == 0 && self.count > 1
+    }
+
+    /// The row stands for all of its conversation's messages, as they are not shown under it
+    pub fn collapsed(&self) -> bool {
+        self.opens() && !self.expanded
     }
 }
 
 /// A message to thread: its row id, its Message-ID, In-Reply-To and References as stored
 type Unthreaded = (i64, Option<String>, Option<String>, String);
 
-/// A row of the message list grouped by conversation: a conversation's first message (depth 0), standing for all of
-/// them while it is collapsed, or, under one that is expanded, one of the others (depth 1)
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ThreadRow {
-    pub message: Message,
-    pub thread: i64,
-    pub depth: u32,
-    /// The messages of the conversation in the list, and how many of them are unread (the same on each of its rows)
-    pub count: u32,
-    pub unread: u32,
+/// A conversation of the grouped list: its id, how many messages it has in the list and how many of them are unread
+type Group = (i64, u32, u32);
+
+/// A row of the grouped list as an action on it sees it
+enum RowRefs {
+    /// A message of its own
+    Message(MessageRef),
+    /// A collapsed conversation: all of its messages in the list
+    Conversation(i64),
 }
 
 const WHEN: &str = "COALESCE(date, internal_date)";
@@ -308,7 +307,7 @@ impl Store {
     /// The conversations in what `search` finds, in the order of `sort` ([`group_order`]): `limit` of them from
     /// `offset` on, with how many messages each has there and how many of those are unread. One pass over the
     /// list's messages, grouped by conversation on its index.
-    fn thread_page(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<(i64, u32, u32)>> {
+    fn thread_page(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Group>> {
         let (condition, mut values) = search.condition(false);
         let at = values.len();
         values.push(Value::Integer(limit as i64));
@@ -327,51 +326,119 @@ impl Store {
             .collect()
     }
 
-    /// The first message of each conversation in what `search` finds, with the conversation's numbers, in the order of
-    /// `sort`: `limit` of them from `offset` on
-    fn thread_heads(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<ThreadRow>> {
-        let mut rows = Vec::new();
-        for (thread, count, unread) in self.thread_page(search, sort, offset, limit)? {
-            if let Some(first) = self.thread_first(search, thread)? {
-                rows.push(ThreadRow {
-                    message: first,
-                    thread,
-                    depth: 0,
-                    count,
-                    unread,
-                });
-            }
-        }
-        Ok(rows)
+    /// The conversations with rows in `offset..offset + limit` of the grouped list, with the conversations `expanded`
+    /// open, and how many rows of the first one are above `offset`. One ranking of the list's conversations, each
+    /// counted as its rows (one, or all of its messages when open) on from those above it.
+    fn thread_window(
+        &self,
+        search: &Search,
+        sort: Sort,
+        expanded: &[i64],
+        offset: u64,
+        limit: u64,
+    ) -> Result<(Vec<Group>, u64)> {
+        let (condition, mut values) = search.condition(false);
+        let open = numbered_marks(&mut values, expanded);
+        let at = values.len();
+        values.push(Value::Integer(offset as i64));
+        values.push(Value::Integer(offset.saturating_add(limit) as i64));
+        values.push(Value::Integer(limit as i64));
+        let mut statement = self.db.prepare(&format!(
+            "{}, spans AS (SELECT t, n, u, h, SUM(h) OVER (ORDER BY {} ROWS UNBOUNDED PRECEDING) AS e \
+             FROM (SELECT *, CASE WHEN t IN ({open}) THEN n ELSE 1 END AS h FROM g)) \
+             SELECT t, n, u, e - h FROM spans WHERE e > ?{} AND e - h < ?{} ORDER BY e LIMIT ?{}",
+            groups(&condition, sort),
+            group_order(sort),
+            at + 1,
+            at + 2,
+            at + 3
+        ))?;
+        let mut above = 0;
+        let page = statement
+            .query_map(params_from_iter(values), |row| {
+                Ok(((row.get(0)?, row.get(1)?, row.get(2)?), row.get::<_, u64>(3)?))
+            })?
+            .enumerate()
+            .map(|(i, found)| {
+                let (group, start) = found?;
+                if i == 0 {
+                    above = offset.saturating_sub(start);
+                }
+                Ok(group)
+            })
+            .collect::<Result<_>>()?;
+        Ok((page, above))
     }
 
-    /// A collapsed conversation's row shows the dates of its newest message, as the list places it by them
-    fn date_collapsed(&self, search: &Search, open: &HashSet<i64>, heads: &mut [ThreadRow]) -> Result<()> {
-        let threads: Vec<i64> = heads
+    /// The first message of each of the conversations `threads` in what `search` finds, by conversation: one query,
+    /// whose numbering finds each conversation's first on its index and reads only those rows whole
+    fn thread_firsts(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Message>> {
+        if threads.is_empty() {
+            return Ok(HashMap::new());
+        }
+        let (condition, mut values) = search.condition(false);
+        let marks = numbered_marks(&mut values, threads);
+        let mut statement = self.db.prepare(&format!(
+            "SELECT {COLUMNS} FROM messages WHERE id IN (SELECT id FROM (SELECT id, ROW_NUMBER() OVER \
+             (PARTITION BY thread_id ORDER BY {WHEN}, uid, id) AS k FROM messages \
+             WHERE {condition} AND thread_id IN ({marks})) WHERE k = 1)"
+        ))?;
+        statement
+            .query_map(params_from_iter(values), from_row)?
+            .map(|found| found.map(|m| (m.info.thread_id.unwrap_or_default(), m)))
+            .collect()
+    }
+
+    /// The messages of the conversations `threads` in what `search` finds, by conversation, each's first first
+    fn thread_lists(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Vec<Message>>> {
+        let mut lists: HashMap<i64, Vec<Message>> = HashMap::new();
+        if threads.is_empty() {
+            return Ok(lists);
+        }
+        let (condition, mut values) = search.condition(false);
+        let marks = numbered_marks(&mut values, threads);
+        let mut statement = self.db.prepare(&format!(
+            // the conversations' rows found by their index, then ordered (+ keeps the planner off the date index)
+            "SELECT {COLUMNS} FROM messages WHERE {condition} AND thread_id IN ({marks}) ORDER BY +{WHEN}, uid, id"
+        ))?;
+        for found in statement.query_map(params_from_iter(values), from_row)? {
+            let message = found?;
+            lists
+                .entry(message.info.thread_id.unwrap_or_default())
+                .or_default()
+                .push(message);
+        }
+        Ok(lists)
+    }
+
+    /// A collapsed conversation's row shows the dates of its newest message, as the list places it by them. Its own
+    /// small query on the conversations' index rather than a MAX in [`groups`]: with a MAX there besides the MIN, SQLite
+    /// would no longer take the key sorts' bare column (`k`) from the first message's row.
+    fn date_collapsed(&self, search: &Search, rows: &mut [Message]) -> Result<()> {
+        let threads: Vec<i64> = rows
             .iter()
-            .filter(|h| h.count > 1 && !open.contains(&h.thread))
-            .map(|h| h.thread)
+            .filter_map(|m| m.thread.filter(ThreadPlace::collapsed))
+            .map(|t| t.thread)
             .collect();
         if threads.is_empty() {
             return Ok(());
         }
         let (condition, mut values) = search.condition(false);
-        let first = values.len() + 1;
-        let marks: Vec<String> = (0..threads.len()).map(|i| format!("?{}", first + i)).collect();
-        values.extend(threads.iter().map(|&t| Value::Integer(t)));
+        let marks = numbered_marks(&mut values, &threads);
         let mut statement = self.db.prepare(&format!(
-            "SELECT thread_id, MAX(date), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({}) \
-             GROUP BY thread_id",
-            marks.join(", ")
+            "SELECT thread_id, MAX(date), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
+             GROUP BY thread_id"
         ))?;
         let newest: HashMap<i64, (Option<i64>, Option<i64>)> = statement
             .query_map(params_from_iter(values), |row| {
                 Ok((row.get(0)?, (row.get(1)?, row.get(2)?)))
             })?
             .collect::<Result<_>>()?;
-        for head in heads {
-            if let Some(&(date, received)) = newest.get(&head.thread) {
-                let info = &mut head.message.info;
+        for row in rows {
+            if let Some(place) = row.thread.filter(ThreadPlace::collapsed)
+                && let Some(&(date, received)) = newest.get(&place.thread)
+            {
+                let info = &mut row.info;
                 info.date = date.or(info.date);
                 info.internal_date = received.or(info.internal_date);
             }
@@ -379,27 +446,12 @@ impl Store {
         Ok(())
     }
 
-    /// The first message of the conversation `thread` in what `search` finds
-    fn thread_first(&self, search: &Search, thread: i64) -> Result<Option<Message>> {
-        let (condition, mut values) = search.condition(false);
-        values.push(Value::Integer(thread));
-        let mut statement = self.db.prepare_cached(&format!(
-            // the conversation's rows found by its index, then ordered (+ keeps the planner off the date index)
-            "SELECT {COLUMNS} FROM messages WHERE {condition} AND thread_id = ?{} ORDER BY +{WHEN}, uid, id LIMIT 1",
-            values.len()
-        ))?;
-        statement.query_row(params_from_iter(values), from_row).optional()
-    }
-
     /// The messages of the conversation `thread` in what `search` finds, the first first
     pub fn thread_messages(&self, search: &Search, thread: i64) -> Result<Vec<Message>> {
-        let (condition, mut values) = search.condition(false);
-        values.push(Value::Integer(thread));
-        let mut statement = self.db.prepare_cached(&format!(
-            "SELECT {COLUMNS} FROM messages WHERE {condition} AND thread_id = ?{} ORDER BY +{WHEN}, uid, id",
-            values.len()
-        ))?;
-        statement.query_map(params_from_iter(values), from_row)?.collect()
+        Ok(self
+            .thread_lists(search, &[thread])?
+            .remove(&thread)
+            .unwrap_or_default())
     }
 
     /// Next Unread in the list grouped by conversation, as if every conversation were open: an unread message after
@@ -420,10 +472,7 @@ impl Store {
             Ok(messages[start.min(messages.len())..]
                 .iter()
                 .find(|m| !m.info.seen())
-                .map(|m| MessageRef {
-                    folder: m.folder_id,
-                    uid: m.info.uid,
-                }))
+                .map(Message::at))
         };
         let current = self.message(folder, uid)?.and_then(|m| Some((m.info.thread_id?, m.id)));
         if let Some((thread, id)) = current
@@ -450,15 +499,6 @@ impl Store {
         }
     }
 
-    /// The conversations in what `search` finds, and how many of their messages are unread
-    fn thread_counts(&self, search: &Search) -> Result<(u64, u64)> {
-        let (condition, values) = search.condition(false);
-        let mut statement = self.db.prepare_cached(&format!(
-            "SELECT COUNT(DISTINCT thread_id), COALESCE(SUM(NOT seen), 0) FROM messages WHERE {condition}"
-        ))?;
-        statement.query_row(params_from_iter(values), |row| Ok((row.get(0)?, row.get(1)?)))
-    }
-
     /// Where the conversations `threads` are among the conversations of the list (their first message's row without
     /// the expanded ones above), and how many messages each has there; those not in the list left out
     fn thread_ranks(&self, search: &Search, sort: Sort, threads: &[i64]) -> Result<Vec<(u64, i64, u64)>> {
@@ -466,15 +506,12 @@ impl Store {
             return Ok(Vec::new());
         }
         let (condition, mut values) = search.condition(false);
-        let first = values.len() + 1;
-        let marks: Vec<String> = (0..threads.len()).map(|i| format!("?{}", first + i)).collect();
-        values.extend(threads.iter().map(|&t| Value::Integer(t)));
+        let marks = numbered_marks(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             "{} SELECT r, t, n FROM (SELECT t, n, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS r FROM g) \
-             WHERE t IN ({}) ORDER BY r",
+             WHERE t IN ({marks}) ORDER BY r",
             groups(&condition, sort),
             group_order(sort),
-            marks.join(", ")
         ))?;
         statement
             .query_map(params_from_iter(values), |row| {
@@ -483,84 +520,101 @@ impl Store {
             .collect()
     }
 
-    /// How many rows the list grouped by conversation has, with the conversations `expanded` open, and how many of
-    /// its messages are unread
-    pub fn count_thread_rows(&self, search: &Search, sort: Sort, expanded: &[i64]) -> Result<(u64, u64)> {
-        let (heads, unread) = self.thread_counts(search)?;
-        let opened: u64 = self
-            .thread_ranks(search, sort, expanded)?
-            .iter()
-            .map(|(_, _, n)| n.saturating_sub(1))
-            .sum();
-        Ok((heads + opened, unread))
+    /// How many rows the list grouped by conversation has, with the conversations `expanded` open: one a
+    /// conversation, and the others of the open ones' messages
+    pub(crate) fn count_thread_rows(&self, search: &Search, expanded: &[i64]) -> Result<u64> {
+        let (condition, mut values) = search.condition(false);
+        let conversations: u64 = self
+            .db
+            .prepare_cached(&format!(
+                "SELECT COUNT(DISTINCT thread_id) FROM messages WHERE {condition}"
+            ))?
+            .query_row(params_from_iter(values.clone()), |row| row.get(0))?;
+        if expanded.is_empty() {
+            return Ok(conversations);
+        }
+        let marks = numbered_marks(&mut values, expanded);
+        let mut statement = self.db.prepare(&format!(
+            "SELECT COUNT(*) FROM messages WHERE {condition} AND thread_id IN ({marks}) GROUP BY thread_id"
+        ))?;
+        let opened = statement
+            .query_map(params_from_iter(values), |row| row.get::<_, u64>(0))?
+            .try_fold(0u64, |sum, n| Ok::<_, crate::Error>(sum + n?.saturating_sub(1)))?;
+        Ok(conversations + opened)
     }
 
     /// `limit` rows of the list grouped by conversation from `offset` on: each conversation's first message, and
-    /// under each of the conversations `expanded` its other messages, oldest first
-    pub fn thread_rows(
+    /// under each of the conversations `expanded` its other messages, oldest first; each with its place
+    pub(crate) fn thread_rows(
         &self,
         search: &Search,
         sort: Sort,
         expanded: &[i64],
         offset: u64,
         limit: u64,
-    ) -> Result<Vec<ThreadRow>> {
-        let ranks = self.thread_ranks(search, sort, expanded)?;
-        // the conversation row the page starts at, and how far under it (0: the row itself)
-        let (mut head, mut under) = (offset, 0u64);
-        for &(rank, _, n) in &ranks {
-            let opened = n.saturating_sub(1);
-            if rank < head {
-                if head - rank <= opened {
-                    // inside this one's messages
-                    under = head - rank;
-                    head = rank;
+    ) -> Result<Vec<Message>> {
+        let open: HashSet<i64> = expanded.iter().copied().collect();
+        // the conversations with rows on the page, and how many rows of the first one are above it
+        let (page, mut above) = if open.is_empty() {
+            (self.thread_page(search, sort, offset, limit)?, 0)
+        } else {
+            self.thread_window(search, sort, expanded, offset, limit)?
+        };
+        let (opened, closed): (Vec<i64>, Vec<i64>) = page.iter().map(|g| g.0).partition(|t| open.contains(t));
+        let mut firsts = self.thread_firsts(search, &closed)?;
+        let mut lists = self.thread_lists(search, &opened)?;
+        let mut rows = Vec::new();
+        for (thread, count, unread) in page {
+            let expanded = open.contains(&thread);
+            let messages = if expanded {
+                lists.remove(&thread).unwrap_or_default()
+            } else {
+                firsts.remove(&thread).into_iter().collect()
+            };
+            let place = ThreadPlace {
+                thread,
+                depth: 0,
+                count,
+                unread,
+                expanded,
+            };
+            let skip = std::mem::take(&mut above) as usize;
+            for (at, message) in messages.into_iter().enumerate().skip(skip) {
+                if rows.len() as u64 >= limit {
                     break;
                 }
-                head -= opened;
-            } else {
-                break;
+                rows.push(Message {
+                    thread: Some(ThreadPlace {
+                        depth: u32::from(at > 0),
+                        ..place
+                    }),
+                    ..message
+                });
             }
         }
-        let open: HashSet<i64> = ranks.iter().map(|&(_, t, _)| t).collect();
-        let mut rows = Vec::new();
-        let mut heads = self.thread_heads(search, sort, head, limit)?;
-        self.date_collapsed(search, &open, &mut heads)?;
-        for (i, row) in heads.into_iter().enumerate() {
-            if rows.len() as u64 >= limit {
-                break;
-            }
-            let thread = row.thread;
-            let (count, unread) = (row.count, row.unread);
-            if !(i == 0 && under > 0) {
-                rows.push(row);
-            }
-            if open.contains(&thread) {
-                let skip = if i == 0 { under.saturating_sub(1) } else { 0 };
-                for message in self
-                    .thread_messages(search, thread)?
-                    .into_iter()
-                    .skip(1 + skip as usize)
-                {
-                    if rows.len() as u64 >= limit {
-                        break;
-                    }
-                    rows.push(ThreadRow {
-                        message,
-                        thread,
-                        depth: 1,
-                        count,
-                        unread,
-                    });
-                }
-            }
-        }
+        self.date_collapsed(search, &mut rows)?;
         Ok(rows)
+    }
+
+    /// The conversation of the message `uid` of `folder`, None when that message is not in what `search` finds
+    fn thread_in_list(&self, search: &Search, folder: FolderId, uid: u64) -> Result<Option<i64>> {
+        let (condition, mut values) = search.condition(false);
+        let at = values.len();
+        values.push(Value::Integer(folder));
+        values.push(Value::Integer(uid as i64));
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT thread_id FROM messages WHERE folder_id = ?{} AND uid = ?{} AND {condition}",
+            at + 1,
+            at + 2
+        ))?;
+        statement
+            .query_row(params_from_iter(values), |row| row.get(0))
+            .optional()
     }
 
     /// Where the message `uid` of `folder` is in the list grouped by conversation: its own row when its conversation is
     /// open or it is the first, its conversation's row otherwise; None when it is not in the list
-    pub fn thread_row_index(
+    pub(crate) fn thread_row_index(
         &self,
         search: &Search,
         sort: Sort,
@@ -568,38 +622,81 @@ impl Store {
         folder: FolderId,
         uid: u64,
     ) -> Result<Option<u64>> {
-        let Some(thread) = self
-            .db
-            .query_row(
-                "SELECT thread_id FROM messages WHERE folder_id = ?1 AND uid = ?2",
-                params![folder, uid],
-                |row| row.get::<_, i64>(0),
-            )
-            .optional()?
-        else {
+        let Some(thread) = self.thread_in_list(search, folder, uid)? else {
             return Ok(None);
         };
-        // its conversation's rank and the open ones above it, with one ranking of the list
-        let mut wanted = expanded.to_vec();
-        wanted.push(thread);
-        let ranks = self.thread_ranks(search, sort, &wanted)?;
-        let Some(&(rank, _, _)) = ranks.iter().find(|(_, t, _)| *t == thread) else {
-            return Ok(None);
-        };
-        let above: u64 = ranks
-            .iter()
-            .filter(|(r, t, _)| *r < rank && expanded.contains(t))
-            .map(|(_, _, n)| n.saturating_sub(1))
-            .sum();
-        let at = rank + above;
-        if !expanded.contains(&thread) {
-            return Ok(Some(at));
+        let at = MessageRef { folder, uid };
+        Ok(self
+            .thread_positions(search, sort, expanded, &[(at, thread)])?
+            .first()
+            .copied())
+    }
+
+    /// The rows of the messages `found` (each with its conversation, all in the list) in the list grouped by
+    /// conversation, in the order of `found`: one ranking of their conversations and the open ones, and the order of
+    /// the open ones among them
+    pub(crate) fn thread_positions(
+        &self,
+        search: &Search,
+        sort: Sort,
+        expanded: &[i64],
+        found: &[(MessageRef, i64)],
+    ) -> Result<Vec<u64>> {
+        if found.is_empty() {
+            return Ok(Vec::new());
         }
-        let members = self.thread_messages(search, thread)?;
-        Ok(members
+        let open: HashSet<i64> = expanded.iter().copied().collect();
+        let mut wanted: Vec<i64> = found.iter().map(|&(_, t)| t).chain(open.iter().copied()).collect();
+        wanted.sort_unstable();
+        wanted.dedup();
+        // each conversation's first row: its rank, and the rows of the open ones above it
+        let mut first_rows: HashMap<i64, u64> = HashMap::new();
+        let mut opened_above = 0;
+        for (rank, thread, n) in self.thread_ranks(search, sort, &wanted)? {
+            first_rows.insert(thread, rank + opened_above);
+            if open.contains(&thread) {
+                opened_above += n.saturating_sub(1);
+            }
+        }
+        // in an open conversation each message has its own row, in the conversation's order
+        let mut opened: Vec<i64> = found.iter().map(|&(_, t)| t).filter(|t| open.contains(t)).collect();
+        opened.sort_unstable();
+        opened.dedup();
+        let mut under: HashMap<MessageRef, u64> = HashMap::new();
+        let mut counted: HashMap<i64, u64> = HashMap::new();
+        for (thread, member) in self.thread_members(search, &opened)? {
+            let at = counted.entry(thread).or_default();
+            under.insert(member, *at);
+            *at += 1;
+        }
+        Ok(found
             .iter()
-            .position(|m| m.folder_id == folder && m.info.uid == uid)
-            .map(|i| at + i as u64))
+            .filter_map(|(at, thread)| {
+                let first = *first_rows.get(thread)?;
+                if open.contains(thread) {
+                    Some(first + under.get(at)?)
+                } else {
+                    Some(first)
+                }
+            })
+            .collect())
+    }
+
+    /// The conversation the message `uid` of `folder` is hidden in, in the list `search` makes: its conversation when
+    /// the list is grouped, that conversation is not expanded and the message is not its first there (whose row stands
+    /// for it). None when the message has its own row, or is not in the list.
+    pub fn hidden_in(&self, search: &Search, folder: FolderId, uid: u64) -> Result<Option<i64>> {
+        let Some(expanded) = &search.threads else {
+            return Ok(None);
+        };
+        let Some(thread) = self.thread_in_list(search, folder, uid)? else {
+            return Ok(None);
+        };
+        if expanded.contains(&thread) {
+            return Ok(None);
+        }
+        let first = self.thread_firsts(search, &[thread])?.remove(&thread);
+        Ok(first.filter(|m| m.at() != MessageRef { folder, uid }).map(|_| thread))
     }
 
     /// The conversations in what `search` finds that have more than one message there: what Expand All opens
@@ -622,19 +719,22 @@ impl Store {
         ranges: &[(u64, u64)],
     ) -> Result<Vec<MessageRef>> {
         // the rows in list order; a collapsed conversation's row stands for its messages, oldest first, in its place
-        let mut rows: Vec<std::result::Result<MessageRef, i64>> = Vec::new();
+        let mut rows = Vec::new();
         for &(start, end) in ranges {
             for message in self.search(search, sort, start, end - start)? {
-                rows.push(match message.thread {
-                    Some(place) if place.depth == 0 && !place.expanded && place.count > 1 => Err(place.thread),
-                    _ => Ok(MessageRef {
-                        folder: message.folder_id,
-                        uid: message.info.uid,
-                    }),
+                rows.push(match message.thread.filter(ThreadPlace::collapsed) {
+                    Some(place) => RowRefs::Conversation(place.thread),
+                    None => RowRefs::Message(message.at()),
                 });
             }
         }
-        let collapsed: Vec<i64> = rows.iter().filter_map(|row| row.err()).collect();
+        let collapsed: Vec<i64> = rows
+            .iter()
+            .filter_map(|row| match row {
+                RowRefs::Conversation(thread) => Some(*thread),
+                RowRefs::Message(_) => None,
+            })
+            .collect();
         let mut members: HashMap<i64, Vec<MessageRef>> = HashMap::new();
         for (thread, found) in self.thread_members(search, &collapsed)? {
             members.entry(thread).or_default().push(found);
@@ -643,8 +743,8 @@ impl Store {
         let mut refs = Vec::new();
         for row in rows {
             let found = match row {
-                Ok(found) => vec![found],
-                Err(thread) => members.remove(&thread).unwrap_or_default(),
+                RowRefs::Message(found) => vec![found],
+                RowRefs::Conversation(thread) => members.remove(&thread).unwrap_or_default(),
             };
             refs.extend(found.into_iter().filter(|r| seen.insert(*r)));
         }
@@ -658,13 +758,10 @@ impl Store {
             return Ok(Vec::new());
         }
         let (condition, mut values) = search.condition(false);
-        let first = values.len() + 1;
-        let marks: Vec<String> = (0..threads.len()).map(|i| format!("?{}", first + i)).collect();
-        values.extend(threads.iter().map(|&t| Value::Integer(t)));
+        let marks = numbered_marks(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
-            "SELECT thread_id, folder_id, uid FROM messages WHERE {condition} AND thread_id IN ({}) \
-             ORDER BY +{WHEN}, uid, id",
-            marks.join(", ")
+            "SELECT thread_id, folder_id, uid FROM messages WHERE {condition} AND thread_id IN ({marks}) \
+             ORDER BY +{WHEN}, uid, id"
         ))?;
         statement
             .query_map(params_from_iter(values), |row| {
@@ -677,16 +774,6 @@ impl Store {
                 ))
             })?
             .collect()
-    }
-
-    /// The messages of the conversations of `refs` in the list `search` makes: what an action on a collapsed
-    /// conversation's row acts on
-    pub fn thread_refs(&self, search: &Search, threads: &[i64]) -> Result<Vec<MessageRef>> {
-        Ok(self
-            .thread_members(search, threads)?
-            .into_iter()
-            .map(|(_, found)| found)
-            .collect())
     }
 }
 
@@ -722,8 +809,12 @@ mod tests {
         }
     }
 
-    fn subjects(rows: &[ThreadRow]) -> Vec<(String, u32)> {
-        rows.iter().map(|r| (r.message.info.subject.clone(), r.depth)).collect()
+    fn place(row: &Message) -> ThreadPlace {
+        row.thread.expect("a row of a grouped list")
+    }
+
+    fn subjects(rows: &[Message]) -> Vec<(String, u32)> {
+        rows.iter().map(|r| (r.info.subject.clone(), place(r).depth)).collect()
     }
 
     #[test]
@@ -751,18 +842,18 @@ mod tests {
         let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
         assert_eq!(subjects(&rows), [("a@x".into(), 0), ("d@x".into(), 0)]);
         assert_eq!(
-            rows[0].message.info.date,
+            rows[0].info.date,
             Some(400),
             "collapsed: the date of its newest message"
         );
         assert_eq!(
-            (rows[0].count, rows[0].unread),
+            (place(&rows[0]).count, place(&rows[0]).unread),
             (3, 1),
             "the conversation's messages in this folder"
         );
-        assert_eq!(store.count_thread_rows(&list, newest, &[]).unwrap(), (2, 1));
+        assert_eq!(store.count_thread_rows(&list, &[]).unwrap(), 2);
         // the reply in Sent Items is in the same conversation, not in this list
-        let a = rows[0].thread;
+        let a = place(&rows[0]).thread;
         assert_eq!(store.message(sent, 1).unwrap().unwrap().info.thread_id, Some(a));
 
         // expanded: its other messages under it, oldest first, and the pages agree
@@ -777,8 +868,8 @@ mod tests {
                 ("d@x".into(), 0)
             ]
         );
-        assert_eq!(store.count_thread_rows(&list, newest, &open).unwrap().0, 4);
-        assert_eq!(rows[0].message.info.date, Some(100), "expanded: its own");
+        assert_eq!(store.count_thread_rows(&list, &open).unwrap(), 4);
+        assert_eq!(rows[0].info.date, Some(100), "expanded: its own");
         let paged: Vec<(String, u32)> = (0..4)
             .flat_map(|at| subjects(&store.thread_rows(&list, newest, &open, at, 1).unwrap()))
             .collect();
@@ -791,8 +882,6 @@ mod tests {
         assert_eq!(store.thread_row_index(&list, newest, &open, inbox, 4).unwrap(), Some(2));
         assert_eq!(store.thread_row_index(&list, newest, &[], inbox, 4).unwrap(), Some(0));
         assert_eq!(store.thread_row_index(&list, newest, &open, inbox, 2).unwrap(), Some(3));
-        // what an action on the collapsed row acts on
-        assert_eq!(store.thread_refs(&list, &[a]).unwrap().len(), 3);
         assert_eq!(store.threads_with_replies(&list).unwrap(), [a]);
 
         // the same through the list's own calls, grouped: a collapsed row selects its conversation
@@ -800,7 +889,13 @@ mod tests {
             threads: Some(Vec::new()),
             ..Search::folder(inbox)
         };
-        assert_eq!(store.count_search(&grouped).unwrap(), (2, 1));
+        assert_eq!(
+            store.count_search(&grouped).unwrap(),
+            (4, 1),
+            "messages, grouped or not"
+        );
+        assert_eq!(store.count_rows(&grouped).unwrap(), 2, "rows: a conversation's one");
+        assert_eq!(store.count_rows(&list).unwrap(), 4, "ungrouped: one a message");
         let picked = store.refs_in_ranges(&grouped, newest, &[(0, 1)]).unwrap();
         assert_eq!(picked.len(), 3, "the three messages of the collapsed conversation");
         let both = store.refs_in_ranges(&grouped, newest, &[(0, 2)]).unwrap();
@@ -854,6 +949,191 @@ mod tests {
         assert_eq!(store.next_unread(&collapsed, newest, inbox, 3).unwrap(), None);
     }
 
+    /// Four conversations in the Inbox: G (7, 8) newest at 500, A (1, 3, 4) at 400 with a reply in Sent Items, E (5,
+    /// 6) at 250, D (2) alone at 200; 3 and 6 unread
+    fn four_conversations() -> (Store, FolderId, FolderId) {
+        let (store, _, inbox, sent) = setup();
+        store
+            .add_messages(
+                inbox,
+                &[
+                    mail(1, 100, "<a@x>", &[], true),
+                    mail(2, 200, "<d@x>", &[], true),
+                    mail(3, 300, "<b@x>", &["<a@x>"], false),
+                    mail(4, 400, "<c@x>", &["<a@x>", "<b@x>"], true),
+                    mail(5, 150, "<e@x>", &[], true),
+                    mail(6, 250, "<f@x>", &["<e@x>"], false),
+                    mail(7, 50, "<g@x>", &[], true),
+                    mail(8, 500, "<h@x>", &["<g@x>"], true),
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(sent, &[mail(1, 350, "<x@x>", &["<a@x>"], true)])
+            .unwrap();
+        (store, inbox, sent)
+    }
+
+    #[test]
+    fn grouped_list_calls_agree_with_its_rows() {
+        let (store, inbox, sent) = four_conversations();
+        let thread = |uid: u64| store.message(inbox, uid).unwrap().unwrap().info.thread_id.unwrap();
+        let (a, e, g) = (thread(1), thread(5), thread(7));
+        let refs: Vec<MessageRef> = (1..=8)
+            .map(|uid| MessageRef { folder: inbox, uid })
+            .chain([MessageRef { folder: sent, uid: 1 }])
+            .collect();
+        let sorts = [
+            Sort::default(),
+            Sort {
+                ascending: true,
+                ..Sort::default()
+            },
+            Sort {
+                field: SortField::Subject,
+                ascending: true,
+            },
+            Sort {
+                field: SortField::Received,
+                ascending: false,
+            },
+        ];
+        for expanded in [vec![], vec![a], vec![a, g], vec![e, a], vec![a, e, g, 12345]] {
+            let search = Search {
+                threads: Some(expanded.clone()),
+                ..Search::folder(inbox)
+            };
+            for sort in sorts {
+                let what = format!("{expanded:?} {sort:?}");
+                let all = store.search(&search, sort, 0, 100).unwrap();
+                // where each message is, read off the rows: a collapsed row stands for its conversation's messages
+                let mut oracle: HashMap<MessageRef, u64> = HashMap::new();
+                for (i, row) in all.iter().enumerate() {
+                    if place(row).collapsed() {
+                        for member in store.thread_messages(&search, place(row).thread).unwrap() {
+                            oracle.insert(member.at(), i as u64);
+                        }
+                    } else {
+                        oracle.insert(row.at(), i as u64);
+                    }
+                }
+                assert_eq!(oracle.len(), 8, "{what}");
+                assert_eq!(store.count_rows(&search).unwrap(), all.len() as u64, "{what}");
+                assert_eq!(store.count_search(&search).unwrap(), (8, 2), "{what}");
+                let mut expected: Vec<u64> = oracle.values().copied().collect();
+                expected.sort_unstable();
+                expected.dedup();
+                assert_eq!(store.positions(&search, sort, &refs).unwrap(), expected, "{what}");
+                for r in &refs {
+                    assert_eq!(
+                        store.search_index(&search, sort, r.folder, r.uid).unwrap(),
+                        oracle.get(r).copied(),
+                        "{what} {r:?}"
+                    );
+                }
+                // pages of any size agree with the whole list
+                for size in [1, 2, 3] {
+                    let paged: Vec<Message> = (0..all.len() as u64)
+                        .step_by(size)
+                        .flat_map(|at| store.search(&search, sort, at, size as u64).unwrap())
+                        .collect();
+                    assert_eq!(paged, all, "{what} pages of {size}");
+                }
+                // the neighbours of the top row, and of one in the middle
+                let top = all[0].at();
+                assert_eq!(
+                    store.neighbours(&search, sort, top.folder, top.uid).unwrap(),
+                    Some((None, Some(all[1].at()))),
+                    "{what}"
+                );
+                let middle = all[2].at();
+                assert_eq!(
+                    store.neighbours(&search, sort, middle.folder, middle.uid).unwrap(),
+                    Some((Some(all[1].at()), all.get(3).map(Message::at))),
+                    "{what}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn hidden_in_its_collapsed_conversation() {
+        let (store, inbox, sent) = four_conversations();
+        let thread = |uid: u64| store.message(inbox, uid).unwrap().unwrap().info.thread_id.unwrap();
+        let a = thread(1);
+        let collapsed = Search {
+            threads: Some(Vec::new()),
+            ..Search::folder(inbox)
+        };
+        assert_eq!(store.hidden_in(&collapsed, inbox, 3).unwrap(), Some(a), "a reply");
+        assert_eq!(store.hidden_in(&collapsed, inbox, 4).unwrap(), Some(a));
+        assert_eq!(
+            store.hidden_in(&collapsed, inbox, 1).unwrap(),
+            None,
+            "the first has the row"
+        );
+        assert_eq!(store.hidden_in(&collapsed, inbox, 2).unwrap(), None, "alone");
+        assert_eq!(store.hidden_in(&collapsed, sent, 1).unwrap(), None, "not in the list");
+        assert_eq!(store.hidden_in(&collapsed, inbox, 99).unwrap(), None, "gone");
+        let open = Search {
+            threads: Some(vec![a]),
+            ..Search::folder(inbox)
+        };
+        assert_eq!(store.hidden_in(&open, inbox, 3).unwrap(), None, "expanded");
+        assert_eq!(
+            store.hidden_in(&Search::folder(inbox), inbox, 3).unwrap(),
+            None,
+            "ungrouped"
+        );
+    }
+
+    #[test]
+    fn bold_rows() {
+        let (store, inbox, _) = four_conversations();
+        let thread = |uid: u64| store.message(inbox, uid).unwrap().unwrap().info.thread_id.unwrap();
+        let bold = |search: &Search| -> Vec<(u64, bool)> {
+            store
+                .search(search, Sort::default(), 0, 100)
+                .unwrap()
+                .iter()
+                .map(|m| (m.info.uid, m.bold()))
+                .collect()
+        };
+        let collapsed = Search {
+            threads: Some(Vec::new()),
+            ..Search::folder(inbox)
+        };
+        // G read; A and E stand for their unread replies; D read
+        assert_eq!(bold(&collapsed), [(7, false), (1, true), (5, true), (2, false)]);
+        let open = Search {
+            threads: Some(vec![thread(1)]),
+            ..Search::folder(inbox)
+        };
+        // open, each row its own message's
+        assert_eq!(
+            bold(&open),
+            [(7, false), (1, false), (3, true), (4, false), (5, true), (2, false)]
+        );
+        let rows = store.search(&open, Sort::default(), 0, 100).unwrap();
+        let places: Vec<(bool, bool)> = rows.iter().map(|m| (place(m).opens(), place(m).collapsed())).collect();
+        assert_eq!(
+            places,
+            [
+                (true, true),
+                (true, false),
+                (false, false),
+                (false, false),
+                (true, true),
+                (false, false)
+            ]
+        );
+        assert!(
+            bold(&Search::folder(inbox))
+                .iter()
+                .all(|&(uid, bold)| bold == (uid == 3 || uid == 6))
+        );
+    }
+
     #[test]
     fn a_reply_that_comes_first_joins_its_parent_later() {
         let (store, _, inbox, _) = setup();
@@ -872,8 +1152,8 @@ mod tests {
             .thread_rows(&Search::folder(inbox), Sort::default(), &[], 0, 10)
             .unwrap();
         assert_eq!(rows.len(), 1, "one conversation: {:?}", subjects(&rows));
-        assert_eq!(rows[0].count, 4);
-        assert_eq!(rows[0].message.info.subject, "p@x", "its first message stands for it");
+        assert_eq!(place(&rows[0]).count, 4);
+        assert_eq!(rows[0].info.subject, "p@x", "its first message stands for it");
     }
 
     /// How long a page of a big folder grouped by conversation takes (cargo test --release -- --ignored big_folder)
@@ -921,13 +1201,48 @@ mod tests {
         let rows = store.thread_rows(&list, Sort::default(), &[], 0, 100).unwrap();
         let first = started.elapsed();
         let started = std::time::Instant::now();
-        let counts = store.count_thread_rows(&list, Sort::default(), &[]).unwrap();
+        let counts = store.count_thread_rows(&list, &[]).unwrap();
         let count = started.elapsed();
-        let open = [rows[3].thread];
+        let open = [place(&rows[3]).thread];
         let started = std::time::Instant::now();
         store.thread_rows(&list, Sort::default(), &open, 20_000, 100).unwrap();
         let deep = started.elapsed();
         eprintln!("first page {first:?}, count {count:?} ({counts:?}), a deep page with one open {deep:?}");
+        // through the list's own calls
+        let grouped = Search {
+            threads: Some(Vec::new()),
+            ..Search::folder(inbox)
+        };
+        let time = |what: &str, f: &dyn Fn()| {
+            let started = std::time::Instant::now();
+            f();
+            eprintln!("{what}: {:?}", started.elapsed());
+        };
+        time("grouped first page", &|| {
+            store.search(&grouped, Sort::default(), 0, 100).unwrap();
+        });
+        time("grouped page 500", &|| {
+            store.search(&grouped, Sort::default(), 50_000, 100).unwrap();
+        });
+        let refs: Vec<MessageRef> = (1..=1000u64)
+            .map(|i| MessageRef {
+                folder: inbox,
+                uid: i * 97,
+            })
+            .collect();
+        time("positions of 1000 refs, collapsed", &|| {
+            store.positions(&grouped, Sort::default(), &refs).unwrap();
+        });
+        let open = Search {
+            threads: Some(store.threads_with_replies(&grouped).unwrap()[..2000].to_vec()),
+            ..Search::folder(inbox)
+        };
+        time("positions of 1000 refs, 2000 open", &|| {
+            store.positions(&open, Sort::default(), &refs).unwrap();
+        });
+        time("first page, 2000 open", &|| {
+            store.search(&open, Sort::default(), 0, 100).unwrap();
+        });
     }
 
     #[test]

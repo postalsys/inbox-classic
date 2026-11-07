@@ -42,6 +42,18 @@ fn into_c_string(text: String) -> *mut c_char {
     c_string(text).into_raw()
 }
 
+/// `count` ids at `ids`, none when `ids` is NULL
+///
+/// # Safety
+/// `ids` must point to `count` values, or be NULL.
+unsafe fn ids(ids: *const i64, count: usize) -> Vec<i64> {
+    if ids.is_null() || count == 0 {
+        return Vec::new();
+    }
+    // SAFETY: as the caller guarantees
+    unsafe { std::slice::from_raw_parts(ids, count) }.to_vec()
+}
+
 /// The version of the core, a static string that is not freed.
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_version() -> *const c_char {

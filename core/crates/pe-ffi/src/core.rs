@@ -12,7 +12,7 @@ use pe_core::{Core, DraftKind, Event, FailureKind, Outgoing, SignInWith};
 use pe_imap::SpecialUse;
 use pe_store::{AccountSettings, Security, Sort, SortField};
 
-use crate::{c_string, guard, into_c_string};
+use crate::{c_string, guard, ids, into_c_string};
 
 /// Owns the strings of rows handed to C
 #[derive(Default)]
@@ -1103,18 +1103,13 @@ pub(crate) unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Searc
         },
         // SAFETY: as the caller guarantees
         text: unsafe { arg(s.text) }.unwrap_or_default().to_string(),
-        threads: s.threads.then(|| {
-            if s.expanded.is_null() || s.expanded_count == 0 {
-                Vec::new()
-            } else {
-                // SAFETY: as the caller guarantees
-                unsafe { std::slice::from_raw_parts(s.expanded, s.expanded_count) }.to_vec()
-            }
-        }),
+        // SAFETY: as the caller guarantees
+        threads: s.threads.then(|| unsafe { ids(s.expanded, s.expanded_count) }),
     })
 }
 
-/// How many messages `pe_messages` lists for `search`, and how many of them are unread
+/// How many messages `search` finds, and how many of them are unread: grouped by conversation (`threads`) too, all of
+/// their messages (the list's rows are `pe_list_rows`)
 ///
 /// # Safety
 /// `core` must be a live handle, `search` a valid search, `total` and `unread` valid pointers.
@@ -1139,6 +1134,22 @@ pub unsafe extern "C" fn pe_message_count(
     // SAFETY: the caller gave valid pointers
     unsafe { (*total, *unread) = counts };
     true
+}
+
+/// How many rows `pe_messages` lists for `search`: what the list's size is. Grouped by conversation (`threads`) one a
+/// conversation, and under each expanded one its other messages; otherwise one a message, as `pe_message_count`
+/// counts. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `search` a valid search.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_rows(core: *const PeCore, search: *const PeSearch) -> u64 {
+    // SAFETY: as the caller guarantees
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.count_rows(&search).unwrap_or(0)) }
 }
 
 /// The messages before and after the message `uid` of `folder` in the list `search`, `sort` and `ascending` make, with
@@ -1359,15 +1370,23 @@ pub struct PeMessage {
     pub flag_color: u8,
     pub answered: bool,
     pub has_attachments: bool,
+    /// Whether the row is bold: the message is unread, or the row is a collapsed conversation's with an unread message.
+    /// The apps read this rather than decide from `seen` and the thread numbers.
+    pub bold: bool,
     /// Its row's place in a list grouped by conversation (`PeSearch.threads`), all 0 and false otherwise: the
     /// conversation; 0 for its first message's row, 1 for the others under it when expanded; how many messages it has
-    /// in the list and how many are unread (a collapsed row of several shows a +, and is bold when any is unread);
-    /// whether it is expanded
+    /// in the list and how many are unread; whether it is expanded
     pub thread: i64,
     pub thread_depth: u32,
     pub thread_count: u32,
     pub thread_unread: u32,
     pub thread_expanded: bool,
+    /// The row opens and closes its conversation (the first row of one of several messages: a + or a -). The apps
+    /// read this rather than decide from the numbers above.
+    pub thread_opens: bool,
+    /// The row stands for all of its conversation's messages, which are not shown under it (it shows a +, and an action
+    /// on it acts on them all). The apps read this rather than decide from the numbers above.
+    pub thread_collapsed: bool,
 }
 
 /// A page of the message list; free with `pe_message_list_free`
@@ -1414,47 +1433,95 @@ pub unsafe extern "C" fn pe_messages(
                     flag_color: info.flag_color().map_or(0, |c| c as u8),
                     answered: info.answered(),
                     has_attachments: info.has_attachments,
+                    bold: m.bold(),
                     thread: m.thread.map_or(0, |t| t.thread),
                     thread_depth: m.thread.map_or(0, |t| t.depth),
                     thread_count: m.thread.map_or(0, |t| t.count),
                     thread_unread: m.thread.map_or(0, |t| t.unread),
                     thread_expanded: m.thread.is_some_and(|t| t.expanded),
+                    thread_opens: m.thread.is_some_and(|t| t.opens()),
+                    thread_collapsed: m.thread.is_some_and(|t| t.collapsed()),
                 }
             })))
         })
     }
 }
 
-/// The conversations of the list `search` makes that have more than one message there (what View > Expand All
-/// Conversations opens), into `threads`, at most `capacity`; how many there are (call again with a larger buffer when
-/// that is more than `capacity`). 0 on failure.
+/// Conversation ids; free with `pe_thread_list_free`
+pub struct PeThreadList(Vec<i64>);
+
+/// The conversations of the list `search` makes that have more than one message there: what View > Expand All
+/// Conversations opens (as `PeSearch.expanded`). NULL on failure.
 ///
 /// # Safety
-/// `core` must be a live handle, `search` a valid search, `threads` NULL or room for `capacity` ids.
+/// `core` must be a live handle, `search` a valid search.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_threads_with_replies(
+pub unsafe extern "C" fn pe_threads_with_replies(core: *const PeCore, search: *const PeSearch) -> *mut PeThreadList {
+    // SAFETY: as the caller guarantees
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return null_mut();
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.threads_with_replies(&search)
+                .map_or(null_mut(), |found| handed(PeThreadList(found)))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or from `pe_threads_with_replies`, not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_thread_list_count(list: *const PeThreadList) -> usize {
+    // SAFETY: as the caller guarantees
+    unsafe { list.as_ref() }.map_or(0, |l| l.0.len())
+}
+
+/// Conversation `index`; 0 past the end
+///
+/// # Safety
+/// `list` must be NULL or from `pe_threads_with_replies`, not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_thread_list_get(list: *const PeThreadList, index: usize) -> i64 {
+    // SAFETY: as the caller guarantees
+    unsafe { list.as_ref() }
+        .and_then(|l| l.0.get(index).copied())
+        .unwrap_or(0)
+}
+
+/// # Safety
+/// `list` must be NULL or from `pe_threads_with_replies`, freed once.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_thread_list_free(list: *mut PeThreadList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+/// The conversation the message `uid` of `folder` is hidden in, in the list `search` makes: grouped by conversation,
+/// that conversation collapsed and the message not its first there (whose row stands for it). The list opens it (adds
+/// it to `PeSearch.expanded`) to show or select the message. 0 when the message has its own row, is not in the list,
+/// or on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `search` a valid search.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_hidden_thread(
     core: *const PeCore,
     search: *const PeSearch,
-    threads: *mut i64,
-    capacity: usize,
-) -> usize {
+    folder: i64,
+    uid: u64,
+) -> i64 {
     // SAFETY: as the caller guarantees
     let Some(search) = (unsafe { search_of(search) }) else {
         return 0;
     };
     // SAFETY: as the caller guarantees
-    let found = unsafe {
-        with(core, Vec::new(), |core| {
-            core.threads_with_replies(&search).unwrap_or_default()
+    unsafe {
+        with(core, 0, |core| {
+            core.hidden_in(&search, folder, uid).ok().flatten().unwrap_or(0)
         })
-    };
-    if !threads.is_null() {
-        for (at, thread) in found.iter().take(capacity).enumerate() {
-            // SAFETY: the caller gave room for `capacity`
-            unsafe { *threads.add(at) = *thread };
-        }
     }
-    found.len()
 }
 
 /// Where message `uid` of `folder` is in what `search` finds in this order, -1 when it is not there

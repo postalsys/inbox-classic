@@ -776,11 +776,7 @@ impl Mailbox {
         let active = several || self.folder.get() != 0;
         // the counts of the folder come from its indexes; a search and All Inboxes count what they find
         let (total, unread) = if several {
-            let messages = pe_core::Search {
-                threads: None,
-                ..search.clone()
-            };
-            core.count_search(&messages).unwrap_or((0, 0))
+            core.count_search(&search).unwrap_or((0, 0))
         } else if self.folder.get() != 0 {
             core.folder(self.folder.get())
                 .map(|f| (f.total, f.unread))
@@ -792,7 +788,7 @@ impl Mailbox {
         self.unread.set(unread);
         // grouped by conversation, a row for each conversation
         let rows = match &search.threads {
-            Some(_) if active => core.count_search(&search).map_or(0, |(rows, _)| rows),
+            Some(_) if active => core.count_rows(&search).unwrap_or(0),
             _ => total,
         };
         self.enable(Command::ExpandAllThreads, search.threads.is_some() && active);

@@ -573,9 +573,15 @@ impl Core {
         Ok(self.store().search(search, sort, offset, limit)?)
     }
 
-    /// How many messages [`Core::search`] finds, and how many of them are unread
+    /// How many messages [`Core::search`] finds, and how many of them are unread, grouped by conversation or not
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
         Ok(self.store().count_search(search)?)
+    }
+
+    /// How many rows the list of [`Core::search`] has: grouped by conversation one a conversation and the other
+    /// messages of the expanded ones, otherwise one a message
+    pub fn count_rows(&self, search: &Search) -> Result<u64> {
+        Ok(self.store().count_rows(search)?)
     }
 
     /// Where the message `uid` of `folder` is in what [`Core::search`] finds
@@ -711,10 +717,11 @@ impl Core {
         Ok(self.store().threads_with_replies(search)?)
     }
 
-    /// The messages of the conversations `threads` in the list `search` makes: what an action on their collapsed rows
-    /// acts on
-    pub fn thread_refs(&self, search: &Search, threads: &[i64]) -> Result<Vec<MessageRef>> {
-        Ok(self.store().thread_refs(search, threads)?)
+    /// The conversation the message `uid` of `folder` is hidden in, in the list `search` makes: grouped by
+    /// conversation, that conversation collapsed and the message not its first there (whose row stands for it). None
+    /// when it has its own row or is not in the list. The list opens that conversation to select it.
+    pub fn hidden_in(&self, search: &Search, folder: FolderId, uid: u64) -> Result<Option<i64>> {
+        Ok(self.store().hidden_in(search, folder, uid)?)
     }
 
     /// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it; `None` for every

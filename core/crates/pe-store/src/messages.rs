@@ -150,6 +150,21 @@ pub struct Message {
     pub thread: Option<crate::ThreadPlace>,
 }
 
+impl Message {
+    /// Whether its row is bold: it is unread, or it is a collapsed conversation's row and one of its messages is
+    pub fn bold(&self) -> bool {
+        !self.info.seen() || self.thread.is_some_and(|t| t.collapsed() && t.unread > 0)
+    }
+
+    /// Where it is
+    pub fn at(&self) -> crate::MessageRef {
+        crate::MessageRef {
+            folder: self.folder_id,
+            uid: self.info.uid,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum SortField {
     /// The Date header, the received date when there is none

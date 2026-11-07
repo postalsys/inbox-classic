@@ -8,7 +8,7 @@ use std::ptr::{null, null_mut};
 use pe_core::agents::{AgentAnswer, AgentAsk, AgentLevels};
 
 use crate::core::{PeCore, Rows, Strings, arg, draft_handle, handed, take_back, with};
-use crate::{PeDraft, guard, into_c_string};
+use crate::{PeDraft, guard, ids, into_c_string};
 
 // literals, as cbindgen writes only those to the header; the test below keeps them the core's
 
@@ -281,18 +281,6 @@ pub unsafe extern "C" fn pe_agent_answer_connect(
             core.agent_answer(request, answer).is_ok()
         })
     }
-}
-
-/// `count` ids at `ids`
-///
-/// # Safety
-/// `ids` must point to `count` values, or be NULL with 0.
-unsafe fn ids(ids: *const i64, count: usize) -> Vec<i64> {
-    if ids.is_null() || count == 0 {
-        return Vec::new();
-    }
-    // SAFETY: as the caller guarantees
-    unsafe { std::slice::from_raw_parts(ids, count) }.to_vec()
 }
 
 /// A recipient of a message an agent wants to send

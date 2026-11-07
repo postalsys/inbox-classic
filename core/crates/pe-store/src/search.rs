@@ -96,6 +96,14 @@ impl Search {
         }
     }
 
+    /// The same list, one row a message
+    pub fn ungrouped(&self) -> Search {
+        Search {
+            threads: None,
+            ..self.clone()
+        }
+    }
+
     /// The WHERE of the search and its values, ?1 on. `in_order`: for a page in an order that has an index over every
     /// folder (date, received), which then walks it rather than sort all the Inboxes have.
     /// What it finds with each message's place in the order of `sort` (from 0): `folder_id`, `uid`, `position`, as SQL
@@ -220,11 +228,7 @@ impl Store {
     /// A page of what `search` finds, in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
         if let Some(expanded) = &search.threads {
-            return Ok(self
-                .thread_rows(search, sort, expanded, offset, limit)?
-                .into_iter()
-                .map(|row| crate::threads::placed(row, expanded))
-                .collect());
+            return self.thread_rows(search, sort, expanded, offset, limit);
         }
         let in_order = matches!(sort.field, SortField::Date | SortField::Received);
         let (condition, mut values) = search.condition(in_order);
@@ -246,16 +250,23 @@ impl Store {
         statement.query_map([], |row| row.get(0))?.collect()
     }
 
-    /// How many messages `search` finds, and how many of them are unread
+    /// How many messages `search` finds, and how many of them are unread, grouped by conversation or not (see
+    /// [`Store::count_rows`] for the rows of the list)
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
-        if let Some(expanded) = &search.threads {
-            return self.count_thread_rows(search, Sort::default(), expanded);
-        }
         let (condition, values) = search.condition(false);
         let mut statement = self.db.prepare_cached(&format!(
             "SELECT COUNT(*), COALESCE(SUM(NOT seen), 0) FROM messages WHERE {condition}"
         ))?;
         statement.query_row(params_from_iter(values), |row| Ok((row.get(0)?, row.get(1)?)))
+    }
+
+    /// How many rows the list of `search` has: grouped by conversation one a conversation, and under each expanded
+    /// one its other messages; otherwise one a message, as [`Store::count_search`] counts
+    pub fn count_rows(&self, search: &Search) -> Result<u64> {
+        match &search.threads {
+            Some(expanded) => self.count_thread_rows(search, expanded),
+            None => Ok(self.count_search(search)?.0),
+        }
     }
 
     /// Where the message `uid` of `folder` is in what `search` finds in the order of `sort`; None when it is not there
@@ -288,22 +299,21 @@ impl Store {
         uid: u64,
     ) -> Result<Option<(Option<MessageRef>, Option<MessageRef>)>> {
         if search.threads.is_some() {
-            // the rows above and below its row
+            // the rows above and below its row, read as one page from the row above (from its own at the top)
             let Some(at) = self.search_index(search, sort, folder, uid)? else {
                 return Ok(None);
             };
-            let row = |at: u64| -> Result<Option<MessageRef>> {
-                Ok(self
-                    .search(search, sort, at, 1)?
-                    .into_iter()
-                    .next()
-                    .map(|m| MessageRef {
-                        folder: m.folder_id,
-                        uid: m.info.uid,
-                    }))
+            let rows: Vec<MessageRef> = self
+                .search(search, sort, at.saturating_sub(1), if at == 0 { 2 } else { 3 })?
+                .iter()
+                .map(Message::at)
+                .collect();
+            let (before, after) = if at == 0 {
+                (None, rows.get(1))
+            } else {
+                (rows.first(), rows.get(2))
             };
-            let before = if at == 0 { None } else { row(at - 1)? };
-            return Ok(Some((before, row(at + 1)?)));
+            return Ok(Some((before.copied(), after.copied())));
         }
         let (condition, mut values) = search.condition(false);
         let order = sort.order_by();

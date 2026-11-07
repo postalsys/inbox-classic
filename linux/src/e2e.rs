@@ -770,11 +770,10 @@ fn rows() -> u32 {
 /// How many messages the list has, each conversation's counted (its rows are fewer while it is grouped by
 /// conversation)
 fn messages_listed() -> u32 {
-    let messages = pe_core::Search {
-        threads: None,
-        ..shell().main().search()
-    };
-    let count = shell().core.count_search(&messages).map_or(0, |(count, _)| count);
+    let count = shell()
+        .core
+        .count_search(&shell().main().search().ungrouped())
+        .map_or(0, |(count, _)| count);
     u32::try_from(count).unwrap_or(u32::MAX)
 }
 
