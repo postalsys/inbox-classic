@@ -176,7 +176,8 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         case PE_EVENT_KIND_NEW_MAIL:
             notifyNewMail(event)
         case PE_EVENT_KIND_UNSUBSCRIBED:
-            if let said = mailbox.unsubscribed(event.uid, problem: event.message) {
+            if let said = mailbox.unsubscribed(event.uid, problem: event.message)
+                ?? MessageWindow.unsubscribed(event.uid, problem: event.message) {
                 setStatus(said)
             }
         case PE_EVENT_KIND_MESSAGE_SENT:
@@ -215,6 +216,8 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             break
         }
         mailbox.onEvent(event)
+        // the messages open in windows of their own
+        MessageWindow.onEvent(event)
         // the Dock: what is unread in the Inboxes, when a folder changed
         if event.kind == PE_EVENT_KIND_FOLDER_CHANGED || event.kind == PE_EVENT_KIND_SYNC_FINISHED {
             showUnread()

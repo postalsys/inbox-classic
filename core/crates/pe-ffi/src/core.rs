@@ -1127,6 +1127,62 @@ pub unsafe extern "C" fn pe_message_count(
     true
 }
 
+/// The messages before and after the message `uid` of `folder` in the list `search`, `sort` and `ascending` make, with
+/// one pass over the list: what Previous and Next open, into `previous_*` and `next_*` (a folder of 0 at an end).
+/// False when the message is not in that list (any more), or on failure: a window keeps the pair it had then.
+///
+/// # Safety
+/// `core` must be a live handle, `search` a valid search, the four out pointers valid.
+#[unsafe(no_mangle)]
+#[allow(clippy::too_many_arguments)]
+pub unsafe extern "C" fn pe_message_neighbours(
+    core: *const PeCore,
+    search: *const PeSearch,
+    sort: PeSortField,
+    ascending: bool,
+    folder: i64,
+    uid: u64,
+    previous_folder: *mut i64,
+    previous_uid: *mut u64,
+    next_folder: *mut i64,
+    next_uid: *mut u64,
+) -> bool {
+    if previous_folder.is_null() || previous_uid.is_null() || next_folder.is_null() || next_uid.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return false;
+    };
+    let sort = sort_of(sort, ascending);
+    // SAFETY: as the caller guarantees
+    let found = unsafe {
+        with(core, None, |core| {
+            core.neighbours(&search, sort, folder, uid).ok().flatten()
+        })
+    };
+    let Some((previous, next)) = found else {
+        return false;
+    };
+    let parts = |r: Option<pe_store::MessageRef>| r.map_or((0, 0), |r| (r.folder, r.uid));
+    // SAFETY: the caller gave valid pointers
+    unsafe {
+        (*previous_folder, *previous_uid) = parts(previous);
+        (*next_folder, *next_uid) = parts(next);
+    }
+    true
+}
+
+/// Whether the message `uid` is (still) in `folder`: a single row looked up. False on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_exists(core: *const PeCore, folder: i64, uid: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.has_message(folder, uid).unwrap_or(false)) }
+}
+
 /// Whether the list of `search` names whom its messages went to (Sent Items, Drafts): its person column is then To
 /// and shows `recipients`, its date column is Sent, and `PE_SORT_FIELD_FROM` sorts it by the recipients. False on
 /// failure.

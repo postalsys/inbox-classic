@@ -283,7 +283,10 @@ impl Shell {
             }
             Event::NewMail { .. } => self.notify_new_mail(&event),
             Event::Unsubscribed { request, problem } => {
-                let said = main.unsubscribed(*request, problem.as_deref());
+                let mut said = main.reader.unsubscribed(*request, problem.as_deref());
+                if said.is_empty() {
+                    said = crate::message_window::unsubscribed(*request, problem.as_deref());
+                }
                 if !said.is_empty() {
                     main.set_status(&said);
                 }
@@ -324,6 +327,7 @@ impl Shell {
             _ => {}
         }
         main.on_event(&event);
+        crate::message_window::on_event(&event);
         // the tray and the dock: what is unread in the Inboxes, when a folder changed
         if matches!(event, Event::FolderChanged { .. } | Event::SyncFinished { .. }) {
             self.show_unread();

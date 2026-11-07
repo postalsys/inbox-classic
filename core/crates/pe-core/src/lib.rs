@@ -600,6 +600,26 @@ impl Core {
         Ok(sort)
     }
 
+    /// The messages before and after the message `uid` of `folder` in the list `search` and `sort` make: what Previous
+    /// and Next open, with one pass over the list. None when the message is not in that list (any more): a window
+    /// keeps the pair it had then, so Next still goes on from where it was.
+    #[allow(clippy::type_complexity)]
+    pub fn neighbours(
+        &self,
+        search: &Search,
+        sort: Sort,
+        folder: FolderId,
+        uid: u64,
+    ) -> Result<Option<(Option<MessageRef>, Option<MessageRef>)>> {
+        let sort = self.list_sort(search, sort)?;
+        Ok(self.store().neighbours(search, sort, folder, uid)?)
+    }
+
+    /// Whether the message `uid` is (still) in `folder`, a single row looked up
+    pub fn has_message(&self, folder: FolderId, uid: u64) -> Result<bool> {
+        Ok(self.store().message(folder, uid)?.is_some())
+    }
+
     /// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it; `None` for every
     /// folder
     pub fn search_place(text: &str) -> Option<String> {

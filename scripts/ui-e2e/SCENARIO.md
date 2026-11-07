@@ -410,6 +410,17 @@ Screenshots: `organize-9-empty`
 - Junk E-mail is empty on the server
 - and in the list
 
+## 34c. A message in a window of its own
+
+Screenshots: `read-16-window`
+
+- Enter on a message of the Inbox opens it in a window of its own, titled with its subject
+- the window shows the message, and it is marked read on the server
+- Next shows the message after it in the list, and the title follows
+- Previous goes back
+- Reply in the window opens a reply to that message
+- closing the window leaves the main window as it was
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`

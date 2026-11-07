@@ -17,6 +17,7 @@
 #include "commands.h"
 #include "core.h"
 #include "preview.h"
+#include "reader.h"
 
 // ---- ui.cpp ----
 
@@ -41,6 +42,11 @@ std::wstring TimeNow();
 std::wstring FormatSize(uint64_t bytes);
 // the brush of dialog backgrounds, for WM_CTLCOLORSTATIC
 LRESULT ButtonFaceColor(HDC dc);
+// the reason the core gave for a refusal (freed here), or `fallback` when it gave none
+std::wstring ReasonText(char* reason, PeText fallback);
+// the Junk button of a toolbar (main and message windows) as Not Junk for messages in a Junk folder (`inJunk`), or
+// back as Junk; true when it changed, the toolbar sized again then
+bool SetJunkButton(HWND toolbar, bool inJunk);
 
 // the Move and Copy window (folderpicker.cpp): its rows and their filtering come from the core (pe_move_targets)
 struct FolderPick {
@@ -328,6 +334,37 @@ bool ComposeDraftSaved(const std::string& messageId, const std::wstring& problem
 // Ctrl+S in a compose window (its fields; the editor has its own): saves the message in Drafts; true when handled
 bool ComposeKey(const MSG& msg);
 
+// ---- messagewindow.cpp ----
+
+class Mailbox;
+// the list a message window was opened from, for Previous and Next: what it shows (its words copied), in which order
+struct MessageListOrder {
+    int64_t folder = 0;
+    bool allInboxes = false;
+    std::string text;
+    PeSortField sort = PE_SORT_FIELD_DATE;
+    bool ascending = false;
+};
+// the message `uid` of `folder` in a window of its own (double-click or Enter in the list), marked read; brought to the
+// front when it is open already. A window of its own on the taskbar, as a compose window is; what it does to the
+// message the status bar of `main` says (through `mailbox`)
+// (`row`: its row of the list, for the header until the message is there; NULL for none)
+void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, const MessageListOrder& order, int64_t folder, uint64_t uid,
+                       const PeMessage* row);
+// an event of the core for the open message windows: their message ready or failed, gone from its folder
+void MessageWindowsEvent(const UiEvent& event);
+// a key in a message window that is one of its shortcuts (Esc, Delete, Ctrl+R, Ctrl+Shift+R, Ctrl+F, Ctrl+P): true when
+// handled
+bool MessageWindowKey(const MSG& msg);
+// the message windows, gone, before the core and the mailbox they use are
+void DestroyMessageWindows();
+
+// ---- main.cpp ----
+
+// a new message from a mailto: link (the core reads it), from `account`, or from the account of what the main window
+// shows when 0
+void OpenMailto(const std::wstring& link, int64_t account = 0);
+
 // ---- mailbox.cpp ----
 
 // an event of the core, copied on the worker thread and posted to the window thread
@@ -425,6 +462,8 @@ public:
     std::wstring Unsubscribe(std::wstring& mailto);
     // the one-click unsubscribe `request` done, or not for `problem`: what the status bar says, empty for another
     std::wstring Unsubscribed(uint64_t request, const std::wstring& problem);
+    // what was done to messages, in the main window's status bar (the message windows say it there too)
+    void Say(const std::wstring& text);
     // the selected messages into Deleted Items (for good from there, asked first), the next one selected
     void DeleteSelected();
     // asks for a folder of their account and moves the selected messages there
@@ -468,11 +507,17 @@ public:
     SignInChoice SignIn(int64_t account) const;
     // the account of the selected folder, the first account without one; 0 when there is none
     int64_t CurrentAccount() const;
+    // the account `folder` is in, 0 when it is not known
+    int64_t AccountOf(int64_t folder) const;
+    // whether `folder` is the Inbox of its account
+    bool IsInbox(int64_t folder) const { return inboxFolders_.contains(folder); }
     // a reply, reply to all or forward of the message shown, empty when no message is shown
     core::Draft DraftOfShown(PeDraftKind kind) const;
-    // the selected message of a Drafts folder in a compose window, to go on writing it (double-click or Enter); once
-    // it is fetched when it is not yet
+    // the selected message in a window of its own (double-click or Enter); a draft in a compose window instead, to go
+    // on writing it, once it is fetched when it is not yet
     void OpenSelected();
+    // the list as it is now: what it shows and in which order, for Previous and Next in a message window
+    MessageListOrder ListOrder() const;
 
 private:
     struct Page {
@@ -495,6 +540,8 @@ private:
     const PeMessage* SelectedRow();
     // the reading pane emptied; with "There is no message selected." in it unless a message is `loading`
     void ClearReader(bool loading = false);
+    // the message of the reading pane marked read a moment after it is shown (TIMER_MARK_READ)
+    void OnMessageShown();
     // in the middle of the list while it has no rows: why, and what to do about it
     void DrawEmptyList(HDC dc) const;
     void SelectAfterRemoval(int index);
@@ -507,7 +554,6 @@ private:
     // `action` done to the selected messages, the status bar told what was done, and the row after them selected when
     // they left the list; true when it was done
     bool Act(PeAction action, int64_t to = 0);
-    void Say(const std::wstring& text);
     // the list changed its selection: taken once it is done changing it (TIMER_SELECTION)
     void ScheduleSelection();
     // the row the selection is replaced by once the selected rows left the list: the one after the last of them
@@ -524,18 +570,6 @@ private:
     bool SeveralFolders() const;
     // the row of the message `uid` of `folder` selected in the list; false when it is not there
     bool SelectInList(int64_t folder, uint64_t uid);
-    // asks the core for the view of the selected message, built on a worker; ShowView() shows it when it comes
-    void ShowMessage();
-    void ShowView();
-    void ShowHeader(const PeMessageInfo* info);
-    void ChooseAttachment();
-    void SaveAllAttachments();
-    void LayoutReader();
-    void ShowReaderBars(bool files, bool pictures);
-    // the bar over a message that could not be downloaded, shown or not
-    void ShowRetry(bool shown);
-    // Try Again, or the account synced again after the message could not be downloaded
-    void RetryDownload();
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
     void DisplayInfo(NMLVDISPINFOW* info);
@@ -545,37 +579,14 @@ private:
     HWND parent_ = nullptr;
     HWND tree_ = nullptr;
     HWND list_ = nullptr;
-    HWND header_ = nullptr;
-    // the paper clip button (a toolbar of one) and the information bar of blocked pictures
-    HWND attachments_ = nullptr;
-    HWND pictures_ = nullptr;
-    HWND retry_ = nullptr;
-    RECT reader_ = {};
-    HWND previewHost_ = nullptr;
+    // the reading pane under the list, with the message shown and its folder (its row's: in a search of every folder
+    // not the selected one)
+    Reader reader_;
     HFONT bold_ = nullptr;
     HFONT link_ = nullptr;
     // where the list goes, with the search bar over it while searching
     RECT listArea_ = {};
     HWND searchBar_ = nullptr;
-    // the Unsubscribe link, and how the message shown lets its reader leave its list (PeMessageInfo)
-    HWND unsubscribe_ = nullptr;
-    // the BIMI logo of the message shown, once the core drew it, and the request it was drawn for
-    HWND logo_ = nullptr;
-    HBITMAP logoBitmap_ = nullptr;
-    uint64_t logoRequest_ = 0;
-    int logoSize_ = 0;
-    void ShowLogo(bool wanted);
-    // the event of the message shown, its two lines as the bar shows them
-    HWND invitation_ = nullptr;
-    HWND openCalendar_ = nullptr;
-    std::wstring invitationTitle_;
-    std::wstring invitationDetails_;
-    void ShowInvitation(const PeInvitation* event);
-    void OpenInCalendar();
-    PeUnsubscribe unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
-    std::wstring unsubscribeLink_;
-    std::wstring unsubscribeTarget_;
-    uint64_t unsubscribeRequest_ = 0;
     HWND searchClear_ = nullptr;
     std::wstring searchSummary_;
     // the one folder the words typed name (in:sent), empty for every folder
@@ -585,7 +596,6 @@ private:
     // the icons the list draws on its rows, and their size
     HIMAGELIST listIcons_ = nullptr;
     int iconSize_ = 16;
-    Preview preview_;
     // the tree items of the folders, by folder id; a tree item's data is its folder id, 0 for an account
     std::unordered_map<int64_t, HTREEITEM> items_;
     // the account's own item of each account
@@ -667,7 +677,8 @@ private:
     void ChangeTreeUnderDrag(const std::function<void()>& change);
     // the Drafts folders, whose messages open in a compose window
     std::unordered_set<int64_t> draftFolders_;
-    // the Junk folders of the accounts
+    // the Inboxes and the Junk folders of the accounts
+    std::unordered_set<int64_t> inboxFolders_;
     std::unordered_set<int64_t> junkFolders_;
     // the selected draft opens once its source is fetched
     bool openWhenReady_ = false;
@@ -698,13 +709,6 @@ private:
     bool reloading_ = false;
     // SelectStart has run: later showings of the window keep what is selected
     bool started_ = false;
-    // the message shown and its folder (its row's: in a search of every folder not the selected one), 0 for none
-    uint64_t uid_ = 0;
-    int64_t messageFolder_ = 0;
-    bool remoteImages_ = false;
-    core::MessageView view_;
-    // the view being built for the reading pane, 0 for none
-    uint64_t viewRequest_ = 0;
     // the text of the list cells, kept until the list asks for the next one
     std::wstring cell_;
 };
@@ -744,6 +748,10 @@ enum ControlId : WORD {
     IDC_LOGO,
     // under the header of a message that could not be downloaded: a click tries again
     IDC_RETRY,
+    // the toolbar of a message window, and its Previous and Next buttons
+    IDC_MESSAGE_TOOLBAR = 230,
+    IDC_PREVIOUS,
+    IDC_NEXT,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag

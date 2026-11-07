@@ -83,6 +83,19 @@ void Preview::Configure() {
         }).Get(),
         nullptr);
 
+    controller_->add_AcceleratorKeyPressed(
+        Callback<ICoreWebView2AcceleratorKeyPressedEventHandler>([this](ICoreWebView2Controller*, ICoreWebView2AcceleratorKeyPressedEventArgs* args) {
+            COREWEBVIEW2_KEY_EVENT_KIND kind;
+            UINT key = 0;
+            args->get_KeyEventKind(&kind);
+            args->get_VirtualKey(&key);
+            if (keys_ && kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && keys_(key)) {
+                args->put_Handled(TRUE);
+            }
+            return S_OK;
+        }).Get(),
+        nullptr);
+
     controller_->put_Bounds(bounds_);
     controller_->put_IsVisible(IsWindowVisible(parent_) ? TRUE : FALSE);
     if (pending_) {

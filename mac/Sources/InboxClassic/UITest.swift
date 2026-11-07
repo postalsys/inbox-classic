@@ -569,7 +569,7 @@ final class UITest {
         await shot(main.window, "read-2-pictures")
 
         step("saving the attachment")
-        let menu = main.mailbox.attachmentMenu()
+        let menu = main.mailbox.reader.attachmentMenu()
         check(menu.items.first?.title.hasPrefix("report.pdf") == true, "the paper clip offers the files to save")
         if let item = menu.items.first, let action = item.action {
             onMain { NSApp.sendAction(action, to: item.target, from: item) }

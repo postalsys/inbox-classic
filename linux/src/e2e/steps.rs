@@ -1169,6 +1169,86 @@ async fn empty_folder(d: &Driver) {
     select_folder("Inbox");
 }
 
+/// A message in a window of its own: Enter (activating the row) on a message of the Inbox opens it there, marked
+/// read; Next and Previous go through the list, Reply answers it, and closing it leaves the main window as it was
+pub async fn message_window(d: &Driver) {
+    d.step("a message in a window of its own");
+    let main = shell().main();
+    select_folder("Inbox");
+    wait_until(20, || rows() >= 3).await;
+    let subjects: Vec<String> = folder_id("Inbox")
+        .map(pe_core::Search::folder)
+        .and_then(|all| shell().core.search(&all, main.list.sort(), 0, 3).ok())
+        .unwrap_or_default()
+        .into_iter()
+        .map(|m| m.info.subject)
+        .collect();
+    let [_, first, second] = subjects.as_slice() else {
+        d.check(false, "the Inbox has three messages to go through");
+        return;
+    };
+    // the second row, with a message before and after it, unread so opening it has something to mark
+    select_row(1).await;
+    main.mark_selected(false);
+    let on_server = format!("Subject: {first}");
+    let seen = || d.flags("INBOX", &on_server).iter().any(|f| f == "\\Seen");
+    wait_until(20, || !seen()).await;
+    main.list.view.emit_by_name::<()>("activate", &[&1u32]);
+    let window = wait_for(10, || crate::message_window::windows().into_iter().next()).await;
+    let Some(window) = window else {
+        d.check(false, "Enter opens the message in a window of its own");
+        return;
+    };
+    let title = || window.window.title().map(|t| t.to_string()).unwrap_or_default();
+    d.check(
+        title() == *first,
+        &format!(
+            "Enter opens the message in a window of its own, titled with its subject ({})",
+            title()
+        ),
+    );
+    d.check(
+        wait_until(15, || window.reader.has_view()).await,
+        "the window shows the message",
+    );
+    d.check(wait_until(20, seen).await, "and it is marked read on the server");
+    click(window.window.upcast_ref(), "message-next");
+    d.check(
+        wait_until(10, || title() == *second).await,
+        &format!("Next shows the message after it, and the title follows ({})", title()),
+    );
+    click(window.window.upcast_ref(), "message-previous");
+    d.check(
+        wait_until(10, || title() == *first).await,
+        &format!("Previous goes back ({})", title()),
+    );
+    wait_until(15, || window.reader.has_view()).await;
+    d.shot(&window.window, "read-16-window").await;
+    click(window.window.upcast_ref(), "message-reply");
+    match wait_compose(10).await {
+        Some(c) => {
+            let expected = if first.starts_with("Re: ") {
+                first.clone()
+            } else {
+                format!("Re: {first}")
+            };
+            d.check(
+                c.subject.text() == expected,
+                &format!(
+                    "Reply in the window opens a reply to that message ({})",
+                    c.subject.text()
+                ),
+            );
+            close_compose(&c).await;
+        }
+        None => d.check(false, "Reply in the window opens a compose window"),
+    }
+    let _ = WidgetExt::activate_action(&window.window, "window.close", None);
+    let closed = wait_until(10, || crate::message_window::windows().is_empty()).await;
+    let kept = main.list.selected().is_some_and(|(_, m)| m.info.subject == *first);
+    d.check(closed && kept, "closing the window leaves the main window as it was");
+}
+
 /// The form that asks for a folder's name: the name typed and OK clicked
 async fn answer_name(d: &Driver, title: &str, name: &str, shot: Option<&str>) {
     let form = wait_dialog(10, "folder-name-dialog").await;

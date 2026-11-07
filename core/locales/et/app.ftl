@@ -73,6 +73,14 @@ ui-tb-junk = Rämpspost
 ui-tb-not-junk = Pole rämpspost
 # review: new
 ui-tb-archive = Arhiveeri
+# review: new
+ui-tb-previous = Eelmine
+# review: new
+ui-tb-next = Järgmine
+# review: new
+ui-previous-tip = Eelmine kiri
+# review: new
+ui-next-tip = Järgmine kiri
 ui-tb-sync = Saada/Võta vastu
 ui-tb-mark-read = Märgi loetuks
 ui-tb-mark-unread = Märgi lugemata

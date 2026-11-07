@@ -746,6 +746,28 @@ std::wstring MenuItem(PeText text, std::wstring_view keys) {
     return keys.empty() ? item : item + L"\t" + Shortcut(keys);
 }
 
+std::wstring ReasonText(char* reason, PeText fallback) {
+    core::String why(reason);
+    return why ? Text(why.get()) : core::T(fallback);
+}
+
+bool SetJunkButton(HWND toolbar, bool inJunk) {
+    int from = inJunk ? IDM_JUNK : IDM_NOT_JUNK, to = inJunk ? IDM_NOT_JUNK : IDM_JUNK;
+    if (SendMessageW(toolbar, TB_COMMANDTOINDEX, from, 0) < 0) {
+        return false;
+    }
+    TBBUTTONINFOW info = {sizeof(info)};
+    info.dwMask = TBIF_COMMAND | TBIF_TEXT | TBIF_IMAGE;
+    info.idCommand = to;
+    std::wstring label = core::T(inJunk ? PE_TEXT_UI_TB_NOT_JUNK : PE_TEXT_UI_TB_JUNK);
+    info.pszText = label.data();
+    info.iImage = inJunk ? ICON_MAIL_CHECKMARK : ICON_MAIL_PROHIBITED;
+    SendMessageW(toolbar, TB_SETBUTTONINFOW, from, reinterpret_cast<LPARAM>(&info));
+    // the row of buttons as wide as their labels again
+    SendMessageW(toolbar, TB_AUTOSIZE, 0, 0);
+    return true;
+}
+
 HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
     // big icons with the label under them, as Outlook Express has it; small ones beside nothing, the label a tooltip
     DWORD layout = icons == BarIcons::Big ? 0 : TBSTYLE_LIST | TBSTYLE_TOOLTIPS;

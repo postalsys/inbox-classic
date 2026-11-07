@@ -73,6 +73,14 @@ ui-tb-junk = Junk
 ui-tb-not-junk = Kein Junk
 # review: new
 ui-tb-archive = Archivieren
+# review: new
+ui-tb-previous = Vorherige
+# review: new
+ui-tb-next = Nächste
+# review: new
+ui-previous-tip = Vorherige Nachricht
+# review: new
+ui-next-tip = Nächste Nachricht
 ui-tb-sync = Senden/Empfangen
 ui-tb-mark-read = Als gelesen markieren
 ui-tb-mark-unread = Als ungelesen markieren

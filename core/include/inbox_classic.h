@@ -1250,6 +1250,29 @@ bool pe_message_count(const struct PeCore *core,
                       uint64_t *total,
                       uint64_t *unread);
 
+// The messages before and after the message `uid` of `folder` in the list `search`, `sort` and `ascending` make, with
+// one pass over the list: what Previous and Next open, into `previous_*` and `next_*` (a folder of 0 at an end).
+// False when the message is not in that list (any more), or on failure: a window keeps the pair it had then.
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search, the four out pointers valid.
+bool pe_message_neighbours(const struct PeCore *core,
+                           const struct PeSearch *search,
+                           enum PeSortField sort,
+                           bool ascending,
+                           int64_t folder,
+                           uint64_t uid,
+                           int64_t *previous_folder,
+                           uint64_t *previous_uid,
+                           int64_t *next_folder,
+                           uint64_t *next_uid);
+
+// Whether the message `uid` is (still) in `folder`: a single row looked up. False on failure.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_exists(const struct PeCore *core, int64_t folder, uint64_t uid);
+
 // Whether the list of `search` names whom its messages went to (Sent Items, Drafts): its person column is then To
 // and shows `recipients`, its date column is Sent, and `PE_SORT_FIELD_FROM` sorts it by the recipients. False on
 // failure.
