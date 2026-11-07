@@ -673,6 +673,14 @@ pub fn run_command(command: Command) {
         Command::NextUnread => spawn(async move { main.next_unread().await }),
         Command::GoToFolder => spawn(async move { main.go_to_folder().await }),
         Command::FindInMessage => main.reader.find_in_message(),
+        Command::AddressBook => crate::address_book::open(),
+        Command::AddSenderToBook => spawn(async move { main.add_sender_to_book().await }),
+        Command::ImportAddressBook => {
+            spawn(async move { crate::address_book::import(main.window().upcast_ref()).await })
+        }
+        Command::ExportAddressBook => {
+            spawn(async move { crate::address_book::export(main.window().upcast_ref()).await })
+        }
     }
 }
 

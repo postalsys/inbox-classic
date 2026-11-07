@@ -25,6 +25,9 @@ use crate::ui::FILE_ANSWERS;
 /// The steps after organizing: lists, invitations, logos, dragging, junk, folders, links, completion, signatures
 mod steps;
 
+/// Step 39a: the Address Book
+mod contacts;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
@@ -852,6 +855,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::mailto(&d).await;
     steps::completing(&d).await;
     steps::signature(&d).await;
+    contacts::address_book(&d).await;
     steps::gmail(&d).await;
     wrong_password(&d).await;
     steps::all_inboxes(&d).await;

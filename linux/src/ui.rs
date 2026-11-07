@@ -27,6 +27,8 @@ const STYLE: &str = "
 .empty-list .more { opacity: 0.6; }
 .compose-fields { padding: 6px 10px; }
 .compose-fields label.field { opacity: 0.8; }
+.compose-fields button.field-button { padding: 2px 6px; min-height: 0; margin-right: -6px; }
+.compose-fields button.field-button label { font-weight: normal; }
 .format-bar { padding: 2px 8px; border-bottom: 1px solid alpha(@borders, 0.6); }
 .editor-frame { border-top: 1px solid alpha(@borders, 0.6); }
 .attachment { padding: 2px 8px; border-radius: 6px; background-color: alpha(@view_fg_color, 0.06); }
