@@ -494,6 +494,7 @@ HMENU BuildMenu() {
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(edit, MF_STRING, IDM_SELECT_ALL, MenuItem(PE_TEXT_CMD_SELECT_ALL, L"Ctrl+A").c_str());
     AppendMenuW(edit, MF_STRING, IDM_FIND, MenuItem(PE_TEXT_CMD_FIND, L"Ctrl+Shift+F").c_str());
+    AppendMenuW(edit, MF_STRING, IDM_FIND_IN_MESSAGE, MenuItem(PE_TEXT_CMD_FIND_IN_MESSAGE, L"F3").c_str());
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(edit, MF_STRING, IDM_MARK_READ, MenuItem(PE_TEXT_CMD_MARK_READ, L"Ctrl+Q").c_str());
     AppendMenuW(edit, MF_STRING, IDM_MARK_UNREAD, MenuItem(PE_TEXT_CMD_MARK_UNREAD).c_str());
@@ -503,6 +504,11 @@ HMENU BuildMenu() {
     AppendMenuW(edit, MF_STRING, IDM_COPY, MenuItem(PE_TEXT_CMD_COPY).c_str());
     AppendMenuW(edit, MF_STRING, IDM_DELETE, MenuItem(PE_TEXT_CMD_DELETE, L"Del").c_str());
     HMENU view = CreatePopupMenu();
+    AppendMenuW(view, MF_STRING, IDM_NEXT_MESSAGE, MenuItem(PE_TEXT_CMD_NEXT_MESSAGE, L"Ctrl+.").c_str());
+    AppendMenuW(view, MF_STRING, IDM_PREVIOUS_MESSAGE, MenuItem(PE_TEXT_CMD_PREVIOUS_MESSAGE, L"Ctrl+,").c_str());
+    AppendMenuW(view, MF_STRING, IDM_NEXT_UNREAD, MenuItem(PE_TEXT_CMD_NEXT_UNREAD, L"N").c_str());
+    AppendMenuW(view, MF_STRING, IDM_GO_TO_FOLDER, MenuItem(PE_TEXT_CMD_GO_TO_FOLDER, L"Ctrl+Y").c_str());
+    AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_PICTURES, MenuItem(PE_TEXT_CMD_PICTURES).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_CMD_VIEW_SOURCE, L"Ctrl+U").c_str());
@@ -547,6 +553,10 @@ HACCEL BuildAccelerators() {
         {FVIRTKEY | FCONTROL, 'U', IDM_VIEW_SOURCE},
         {FVIRTKEY | FCONTROL, 'A', IDM_SELECT_ALL},
         {FVIRTKEY | FCONTROL, 'Z', IDM_UNDO},
+        {FVIRTKEY | FCONTROL, VK_OEM_PERIOD, IDM_NEXT_MESSAGE},
+        {FVIRTKEY | FCONTROL, VK_OEM_COMMA, IDM_PREVIOUS_MESSAGE},
+        {FVIRTKEY | FCONTROL, 'Y', IDM_GO_TO_FOLDER},
+        {FVIRTKEY, VK_F3, IDM_FIND_IN_MESSAGE},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -1165,6 +1175,20 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_PICTURES:
         g_mailbox.LoadPictures();
+        return;
+    case IDM_NEXT_MESSAGE:
+    case IDM_PREVIOUS_MESSAGE:
+        g_mailbox.SelectNeighbour(id == IDM_NEXT_MESSAGE);
+        return;
+    case IDM_NEXT_UNREAD:
+        g_mailbox.NextUnread(g_main);
+        return;
+    case IDM_GO_TO_FOLDER:
+        g_mailbox.GoToFolder(g_main);
+        return;
+    case IDM_FIND_IN_MESSAGE:
+        // F3 again finds the next place; the menu asks for the words
+        g_mailbox.FindInMessage(g_main, code == 1);
         return;
     case IDM_ABOUT:
         ShowAbout();

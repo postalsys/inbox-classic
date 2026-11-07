@@ -45,7 +45,8 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
     private var roots: [Node] = []
     private var chosen: Int64?
 
-    init(core: Core, title: String, prompt: String, verb: String, current: Int64) {
+    /// `canMakeFolders` false: no New Folder (Go to Folder, which only shows one)
+    init(core: Core, title: String, prompt: String, verb: String, current: Int64, canMakeFolders: Bool = true) {
         self.core = core
         self.current = current
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 460), styleMask: [.titled, .resizable],
@@ -85,6 +86,7 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
 
         let newFolder = NSButton(title: Text.macNewFolderButton.text, target: self, action: #selector(makeFolder))
         newFolder.setAccessibilityIdentifier("move.new")
+        newFolder.isHidden = !canMakeFolders
         let cancelButton = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancel))
         cancelButton.keyEquivalent = "\u{1b}"
         cancelButton.setAccessibilityIdentifier("move.cancel")
@@ -159,7 +161,10 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
         let kept = chosen
         outline.reloadData()
         outline.expandItem(nil, expandChildren: true)
+        // the folder chosen before stays chosen only while it is shown, so Return never takes a folder out of sight
+        outline.deselectAll(nil)
         if let kept { highlight(kept, inRecent: false) }
+        update()
     }
 
     /// selects the row of `folder` (under Recent first when `inRecent`)

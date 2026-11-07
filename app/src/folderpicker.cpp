@@ -288,6 +288,10 @@ int64_t PickFolder(HWND owner, FolderPick& pick) {
                              WS_EX_CLIENTEDGE);
     TreeView_SetImageList(state.tree, IconList(IconSet::Folders), TVSIL_NORMAL);
     state.newFolder = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_CMD_NEW_FOLDER).c_str(), WS_TABSTOP, IDC_PICKER_NEW, {});
+    // Go to Folder makes none
+    if (!pick.newFolder) {
+        ShowWindow(state.newFolder, SW_HIDE);
+    }
     state.ok = CreateChild(dialog, L"BUTTON", pick.verb.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
     state.cancel = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_CANCEL).c_str(), WS_TABSTOP, IDCANCEL, {});
     SetWindowSubclass(state.tree, TreeKeysProc, 0, reinterpret_cast<DWORD_PTR>(&state));

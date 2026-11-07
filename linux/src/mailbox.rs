@@ -389,9 +389,14 @@ impl Mailbox {
                 run_command(Command::Delete);
                 return glib::Propagation::Stop;
             }
-            // A archives, as in Thunderbird
-            if matches!(key, gdk::Key::a | gdk::Key::A) && (modifiers - gdk::ModifierType::SHIFT_MASK).is_empty() {
+            // A archives, N goes to the next unread message, as in Thunderbird
+            let plain = (modifiers - gdk::ModifierType::SHIFT_MASK).is_empty();
+            if matches!(key, gdk::Key::a | gdk::Key::A) && plain {
                 run_command(Command::Archive);
+                return glib::Propagation::Stop;
+            }
+            if matches!(key, gdk::Key::n | gdk::Key::N) && plain {
+                run_command(Command::NextUnread);
                 return glib::Propagation::Stop;
             }
             glib::Propagation::Proceed
@@ -1390,9 +1395,69 @@ impl Mailbox {
             },
             // the folder they are all in is no choice
             current: (summary.folders == 1).then_some(first.folder),
+            new_folder: true,
         };
         if let Some(to) = crate::move_dialog::choose(&self.window, request).await {
             self.act(if copy { Action::Copy(to) } else { Action::Move(to) });
+        }
+    }
+
+    /// Next Message (`forward`) or Previous Message: the row below the selection or above it selected and shown, as
+    /// a click on it does; the first row when none is selected
+    pub fn step_message(&self, forward: bool) {
+        let ranges = self.list.selected_ranges();
+        let target = match (ranges.first(), ranges.last()) {
+            (Some(&(first, _)), Some(&(_, end))) if forward => (first < end).then_some(end),
+            (Some(&(first, _)), Some(_)) => first.checked_sub(1),
+            _ => Some(0),
+        };
+        if let Some(row) = target.and_then(|t| u32::try_from(t).ok())
+            && row < self.list.rows()
+        {
+            self.list.select(row);
+        }
+    }
+
+    /// Next Unread Message: the first unread message below the one shown (from the top when none is); with none
+    /// left, after asking, the folder the core goes on to and its first unread message
+    pub async fn next_unread(&self) {
+        let core = &shell().core;
+        let (mut folder, mut uid) = (self.reader.folder(), self.reader.uid());
+        loop {
+            match core.next_unread_step(&self.search(), self.list.sort(), folder, uid) {
+                Ok(pe_core::NextUnread::Message(next)) => {
+                    self.select_in_list(next.folder, next.uid);
+                    return;
+                }
+                Ok(pe_core::NextUnread::Ask { folder: to, question }) => {
+                    // the question as the heading, what happens under it, as GNOME's dialogs have it
+                    let (heading, body) = question.split_once("\n\n").unwrap_or((TITLE, &question));
+                    if !ui::confirm(&self.window, heading, body, false).await || !self.folders.select(to) {
+                        return;
+                    }
+                    (folder, uid) = (to, 0);
+                }
+                _ => {
+                    self.set_status(&t!(NoUnreadLeft));
+                    return;
+                }
+            }
+        }
+    }
+
+    /// Go to Folder: a folder of any account chosen as Move to Folder chooses one (typed to find it), then shown
+    pub async fn go_to_folder(&self) {
+        let request = crate::move_dialog::Request {
+            title: crate::words::title(crate::words::Text::CmdGoToFolder),
+            prompt: t!(UiGoToPrompt),
+            verb: t!(UiOk),
+            current: None,
+            new_folder: false,
+        };
+        if let Some(folder) = crate::move_dialog::choose(&self.window, request).await
+            && self.folders.select(folder)
+        {
+            self.list.view.grab_focus();
         }
     }
 

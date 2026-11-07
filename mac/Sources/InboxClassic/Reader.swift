@@ -5,6 +5,7 @@
 // (MessageWindow.swift) are each one of these.
 import AppKit
 import CInboxClassic
+import WebKit
 
 @MainActor
 final class Reader: NSObject {
@@ -33,6 +34,8 @@ final class Reader: NSObject {
     private var logoRequest: UInt64 = 0
     private var unsubscribeRequest: UInt64 = 0
     private let preview = Preview()
+    /// Find in This Message: a bar over the message, as Safari and Mail have
+    private let findBar = FindBar()
     private let header = NSTextField(wrappingLabelWithString: "")
     private let logo = NSImageView()
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
@@ -110,7 +113,12 @@ final class Reader: NSObject {
         view.orientation = .vertical
         view.spacing = 0
         view.alignment = .leading
-        for part in [headerBox, line, retry, invitation, pictures, preview.view] as [NSView] {
+        findBar.find = { [weak self] words, backwards, done in self?.find(words, backwards: backwards, done: done) }
+        findBar.closed = { [weak self] in
+            guard let self else { return }
+            view.window?.makeFirstResponder(preview.view)
+        }
+        for part in [headerBox, line, retry, invitation, pictures, findBar, preview.view] as [NSView] {
             view.addArrangedSubview(part)
             part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         }
@@ -119,6 +127,7 @@ final class Reader: NSObject {
         invitation.heightAnchor.constraint(equalToConstant: 44).isActive = true
         pictures.heightAnchor.constraint(equalToConstant: 26).isActive = true
         retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        findBar.heightAnchor.constraint(equalToConstant: 36).isActive = true
         clearView(loading: false)
     }
 
@@ -382,6 +391,23 @@ final class Reader: NSObject {
     func print() {
         guard uid != 0, let info = messageView?.info else { return }
         Printer.print(text(info.pointee.document), pictures: remoteImages, title: text(info.pointee.subject), owner: view.window)
+    }
+
+    // ---- Find in This Message ----
+
+    /// Find in This Message: the find bar over the message opened, its words selected to type over
+    func findCommand() {
+        guard messageView != nil else { return }
+        findBar.open()
+    }
+
+    /// the words of the find bar looked for in the message, by the web view's own find (no script runs in the
+    /// message), after the place found last or before it (`backwards`); whether they are there
+    private func find(_ words: String, backwards: Bool, done: @escaping (Bool) -> Void) {
+        let configuration = WKFindConfiguration()
+        configuration.wraps = true
+        configuration.backwards = backwards
+        preview.view.find(words, configuration: configuration) { result in done(result.matchFound) }
     }
 
     /// the subject of the message shown, empty before it is
@@ -657,5 +683,157 @@ final class InfoBar: NSView {
     override func accessibilityPerformPress() -> Bool {
         clicked()
         return true
+    }
+}
+
+/// The find bar of a message, as Safari and Mail have it: the words, the place before and after, Done. Return and
+/// Cmd+G find the next place, Shift with them the one before, Esc closes it; it says when the words are not there.
+@MainActor
+final class FindBar: NSView, NSSearchFieldDelegate {
+    /// looks for the words after (or before, `backwards`) the place found last, and says whether they are there
+    var find: (String, Bool, @escaping (Bool) -> Void) -> Void = { _, _, _ in }
+    /// the bar closed: the message takes the keyboard back
+    var closed: () -> Void = {}
+    let field = NSSearchField()
+    private let steps = NSSegmentedControl()
+    private let note = NSTextField(labelWithString: "")
+    private var typingTimer: Timer?
+
+    init() {
+        super.init(frame: .zero)
+        wantsLayer = true
+        isHidden = true
+        setAccessibilityIdentifier("find.bar")
+        field.placeholderString = Text.uiFindInMessageHint.text
+        field.delegate = self
+        field.sendsSearchStringImmediately = false
+        field.sendsWholeSearchString = true
+        field.setAccessibilityIdentifier("find.words")
+        field.widthAnchor.constraint(equalToConstant: 240).isActive = true
+        field.controlSize = .small
+        field.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        steps.segmentCount = 2
+        steps.trackingMode = .momentary
+        steps.controlSize = .small
+        steps.setImage(Icons.list("arrow_up"), forSegment: 0)
+        steps.setImage(Icons.list("arrow_down"), forSegment: 1)
+        steps.setToolTip(Text.uiTbPrevious.text, forSegment: 0)
+        steps.setToolTip(Text.uiTbNext.text, forSegment: 1)
+        steps.target = self
+        steps.action = #selector(stepped)
+        steps.setAccessibilityIdentifier("find.steps")
+        note.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        note.textColor = .systemRed
+        note.lineBreakMode = .byTruncatingTail
+        note.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        note.setAccessibilityIdentifier("find.note")
+        let done = NSButton(title: Text.uiDone.text, target: self, action: #selector(close))
+        done.controlSize = .small
+        done.bezelStyle = .push
+        done.setAccessibilityIdentifier("find.done")
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        let row = NSStackView(views: [field, steps, note, spacer, done])
+        row.spacing = 8
+        row.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        let line = NSBox()
+        line.boxType = .separator
+        let stack = NSStackView(views: [row, line])
+        stack.orientation = .vertical
+        stack.spacing = 0
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            row.widthAnchor.constraint(equalTo: stack.widthAnchor),
+            line.widthAnchor.constraint(equalTo: stack.widthAnchor),
+            row.heightAnchor.constraint(equalTo: stack.heightAnchor, constant: -1),
+        ])
+        updateSteps()
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func updateLayer() {
+        layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+    }
+
+    override var wantsUpdateLayer: Bool { true }
+
+    /// shown, the words selected to type over
+    func open() {
+        isHidden = false
+        window?.makeFirstResponder(field)
+        field.currentEditor()?.selectAll(nil)
+    }
+
+    @objc func close() {
+        typingTimer?.invalidate()
+        isHidden = true
+        note.stringValue = ""
+        closed()
+    }
+
+    /// the place after the one found last (`backwards`: before it)
+    func next(backwards: Bool = false) {
+        typingTimer?.invalidate()
+        let words = field.stringValue.trimmingCharacters(in: .whitespaces)
+        guard !words.isEmpty else {
+            note.stringValue = ""
+            return
+        }
+        find(words, backwards) { [weak self] found in
+            self?.note.stringValue = found ? "" : Text.uiFindNotFound.text(["words": words])
+        }
+    }
+
+    private func updateSteps() {
+        let some = !field.stringValue.trimmingCharacters(in: .whitespaces).isEmpty
+        steps.setEnabled(some, forSegment: 0)
+        steps.setEnabled(some, forSegment: 1)
+    }
+
+    @objc private func stepped() {
+        next(backwards: steps.selectedSegment == 0)
+    }
+
+    // the words looked for as they are typed, a moment after the last key
+    func controlTextDidChange(_ notification: Notification) {
+        updateSteps()
+        typingTimer?.invalidate()
+        typingTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.next() }
+        }
+    }
+
+    func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
+        switch selector {
+        case #selector(NSResponder.insertNewline(_:)):
+            next(backwards: NSApp.currentEvent?.modifierFlags.contains(.shift) == true)
+            return true
+        case #selector(NSResponder.cancelOperation(_:)):
+            close()
+            return true
+        default:
+            return false
+        }
+    }
+
+    // Cmd+G and Shift+Cmd+G while the bar is open, wherever the keyboard is in the window; Esc closes it first
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        guard !isHidden else { return super.performKeyEquivalent(with: event) }
+        let modifiers = event.modifierFlags.intersection([.command, .shift, .option, .control])
+        if event.charactersIgnoringModifiers?.lowercased() == "g" && (modifiers == .command || modifiers == [.command, .shift]) {
+            next(backwards: modifiers.contains(.shift))
+            return true
+        }
+        if event.keyCode == 53 && modifiers.isEmpty {
+            close()
+            return true
+        }
+        return super.performKeyEquivalent(with: event)
     }
 }

@@ -60,6 +60,21 @@ std::wstring When(const PeInvitation& event) {
 
 }  // namespace
 
+WORD ReadingKey(UINT key) {
+    bool control = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+    bool others = (GetKeyState(VK_SHIFT) & 0x8000) != 0 || (GetKeyState(VK_MENU) & 0x8000) != 0;
+    if (others) {
+        return 0;
+    }
+    if (!control) {
+        return key == VK_F3 ? WORD{IDM_FIND_IN_MESSAGE} : WORD{0};
+    }
+    if (key == VK_OEM_PERIOD) {
+        return IDM_NEXT_MESSAGE;
+    }
+    return key == VK_OEM_COMMA ? WORD{IDM_PREVIOUS_MESSAGE} : WORD{0};
+}
+
 void Reader::Create(HWND parent, PeCore* core) {
     parent_ = parent;
     core_ = core;
@@ -93,7 +108,8 @@ void Reader::Create(HWND parent, PeCore* core) {
                          IDC_RETRY, {});
     ShowWindow(retry_, SW_HIDE);
     previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN, 0, {});
-    preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); });
+    preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); }, parent,
+                    TIMER_FIND_SETTLED);
 
     LOGFONTW font = {};
     GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
@@ -403,6 +419,26 @@ void Reader::SaveAllAttachments() {
     }
 }
 
+void Reader::FindInMessage(HWND owner, bool again) {
+    if (!Info()) {
+        return;
+    }
+    if (again && preview_.Finding() && preview_.FindNext()) {
+        return;
+    }
+    std::vector<FormField> fields = {{core::T(PE_TEXT_WIN_FIND_LABEL), findWords_}};
+    if (!FormDialog(owner, core::Title(PE_TEXT_CMD_FIND_IN_MESSAGE), core::T(PE_TEXT_UI_FIND_IN_MESSAGE_HINT), fields) ||
+        fields[0].value.empty()) {
+        return;
+    }
+    findWords_ = fields[0].value;
+    preview_.Find(findWords_, [this, words = findWords_](int count) {
+        if (onFound && count >= 0) {
+            onFound(count > 0 ? L"" : core::T(PE_TEXT_UI_FIND_NOT_FOUND, {{"words", words}}));
+        }
+    });
+}
+
 void Reader::LoadPictures() {
     if (uid_ && view_ && !remoteImages_) {
         remoteImages_ = true;
@@ -593,6 +629,10 @@ bool Reader::OnCommand(WORD id, WORD) {
 }
 
 bool Reader::OnTimer(UINT_PTR id) {
+    if (id == TIMER_FIND_SETTLED) {
+        preview_.FindSettled();
+        return true;
+    }
     if (id != TIMER_DOWNLOADING) {
         return false;
     }

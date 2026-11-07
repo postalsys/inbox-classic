@@ -480,6 +480,103 @@ extension UITest {
         selectFolder(named: "Inbox")
 
         try await messageWindow()
+        try await keyboardReading()
+    }
+
+    // ---- reading with the keyboard ----
+
+    /// the selection of the reading pane's document: what Find in This Message found
+    func readerSelection() async -> String {
+        guard let web = views(WKWebView.self, in: main.mailbox.reader.view).first else { return "" }
+        return (try? await web.evaluateJavaScript("String(window.getSelection())")) as? String ?? ""
+    }
+
+    func keyboardReading() async throws {
+        step("keyboard reading")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(20) { list.numberOfRows >= 4 }
+        await selectRow(1)
+        command(.nextMessage)
+        check(await waitUntil(5) { list.selectedRow == 2 && main.mailbox.selectedRow?.uid != nil },
+              "Next Message selects the message below in the list")
+        command(.previousMessage)
+        check(await waitUntil(5) { list.selectedRow == 1 }, "Previous Message the one above")
+
+        // one unread message below, and unread mail in Archive
+        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Unread in the archive\r\n"
+            + "Message-ID: <unread-archive@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nStill unread.\r\n", to: "Archive")
+        command(.sync)
+        _ = await waitUntil(20) { (folderNode("Archive")?.folder.unread ?? 0) >= 1 }
+        await selectRow(3)
+        command(.markUnread)
+        _ = await waitUntil(10) { main.mailbox.row(3)?.seen == false }
+        let unread = main.mailbox.row(3)?.uid
+        await selectRow(0)
+        command(.nextUnread)
+        check(await waitUntil(5) { list.selectedRow == 3 && main.mailbox.selectedRow?.uid == unread },
+              "Next Unread Message selects the next unread message")
+        // read once shown; none after it in the Inbox
+        _ = await waitUntil(10) { main.mailbox.row(3)?.seen == true }
+        command(.nextUnread)
+        let goOn = await waitWindow("alert", 10)
+        check(alertText(goOn).contains("no more unread messages in Inbox"),
+              "with none left in the folder it asks to go on to the next folder with unread mail (\(alertText(goOn)))")
+        answer(goOn, "Yes")
+        check(await waitUntil(10) { main.mailbox.selectedName == "Archive" && main.mailbox.selectedRow?.subject == "Unread in the archive" },
+              "and Yes goes there, its unread message selected (\(main.mailbox.selectedName): \(main.mailbox.selectedRow?.subject ?? "none"))")
+
+        command(.goToFolder)
+        guard let goTo = await waitWindow("move", 10) else { throw Failed(description: "Go to Folder opened nothing") }
+        check(goTo.title == "Go to Folder" && moveRows(goTo).contains { $0.kind == .account }
+              && moveRows(goTo).contains { $0.name == "Sent Items" },
+              "Go to Folder shows the folders of every account (\(goTo.title))")
+        if let filter: NSSearchField = find("move.filter", in: goTo) {
+            filter.stringValue = "sent"
+            (goTo.delegate as? MoveWindow)?.controlTextDidChange(Notification(name: NSControl.textDidChangeNotification))
+        }
+        let narrowed = moveRows(goTo).filter { $0.kind == .folder }
+        check(!narrowed.isEmpty && narrowed.allSatisfy { $0.name.localizedCaseInsensitiveContains("sent") }, "and typing narrows them")
+        if let sent = narrowed.first(where: { $0.name == "Sent Items" }) {
+            choose(sent.folder, in: goTo)
+        }
+        await shot(goTo, "read-18-go-to")
+        press(find("move.ok", in: goTo))
+        if !(await waitUntil(5) { !goTo.isVisible }) {
+            press(find("move.cancel", in: goTo))
+        }
+        check(await waitUntil(10) { main.mailbox.selectedName == "Sent Items" }, "choosing Sent Items there shows Sent Items")
+
+        step("find in this message")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(20) { list.numberOfRows >= 2 }
+        await selectRow(0)
+        _ = await waitUntil(15) {
+            guard main.mailbox.reader.messageView != nil else { return false }
+            return await !readerText().isEmpty
+        }
+        let words = (await readerText()).split(whereSeparator: { !$0.isLetter }).map(String.init)
+        guard let word = words.first(where: { $0.count >= 4 }) else { throw Failed(description: "no word in the message") }
+        command(.findInMessage)
+        guard let bar: FindBar = find("find.bar", in: main.window) else { throw Failed(description: "no find bar") }
+        check(await waitUntil(5) { !bar.isHidden && (main.window.firstResponder as? NSText)?.delegate === bar.field },
+              "Find in This Message opens a find bar over the message, the keyboard in it")
+        check(bar.field.placeholderString == Text.uiFindInMessageHint.text, "which asks for the words")
+        type(word, into: bar.field)
+        check(await waitUntil(5) { (await readerSelection()).caseInsensitiveCompare(word) == .orderedSame },
+              "it finds a word of the message shown as it is typed (\(word))")
+        await shot(main.window, "read-17-find")
+        onMain { bar.next() }
+        let note: NSTextField? = find("find.note", in: main.window)
+        check(await waitUntil(3) { (await readerSelection()).caseInsensitiveCompare(word) == .orderedSame } && note?.stringValue.isEmpty == true,
+              "Return finds the next place")
+        type("zqxjvbnotthere", into: bar.field)
+        check(await waitUntil(5) { note?.stringValue == Text.uiFindNotFound.text(["words": "zqxjvbnotthere"]) },
+              "and the bar says when it is not there (\(note?.stringValue ?? ""))")
+        let escape = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+                                      windowNumber: main.window.windowNumber, context: nil, characters: "\u{1b}",
+                                      charactersIgnoringModifiers: "\u{1b}", isARepeat: false, keyCode: 53)
+        onMain { if let escape { _ = self.main.window.performKeyEquivalent(with: escape) } }
+        check(await waitUntil(3) { bar.isHidden }, "Esc closes the bar")
     }
 
     // ---- a message in a window of its own ----

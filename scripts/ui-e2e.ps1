@@ -2174,6 +2174,85 @@ public static class Dragger {
         Check ((WindowText $main) -eq 'Inbox - Inbox Classic') "the main window is as it was ($(WindowText $main))"
     }
 
+    # ---- reading with the keyboard ----
+
+    Step 'keyboard reading'
+    $IDM_NEXT_MESSAGE = 140; $IDM_PREVIOUS_MESSAGE = 141; $IDM_NEXT_UNREAD = 142; $IDM_GO_TO_FOLDER = 143; $IDM_FIND_IN_MESSAGE = 144
+    $IDM_MARK_ALL_READ = 126; $LVM_GETNEXTITEM = 0x100C
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    function SelectedRow { [int][Native.Win]::SendMessage($list, $LVM_GETNEXTITEM, [IntPtr](-1), [IntPtr]2) }
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 3) { Rows } } 20)
+    SelectRow 0
+    Command $main $IDM_NEXT_MESSAGE
+    Check ([bool](WaitFor { (SelectedRow) -eq 1 } 5)) "Next Message selects the message below ($(SelectedRow))"
+    Command $main $IDM_PREVIOUS_MESSAGE
+    Check ([bool](WaitFor { (SelectedRow) -eq 0 } 5)) "Previous Message selects the one above ($(SelectedRow))"
+    # one unread message in the Inbox, the third, and one in Archive to go on to
+    Command $main $IDM_MARK_ALL_READ
+    AddMessage "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Unread in Archive`r`n`r`nStill unread.`r`n" @() 'Archive'
+    Command $main $IDM_SYNC
+    $thirdSubject = [Native.Win]::RemoteListText($list, 2, 3)
+    $thirdPattern = "Subject: $([regex]::Escape($thirdSubject))"
+    [void](WaitFor { Seen $thirdPattern } 20)
+    SelectRow 2
+    [void](WaitFor { Seen $thirdPattern } 10)
+    Command $main $IDM_MARK_UNREAD
+    [void](WaitFor { -not (Seen $thirdPattern) } 20)
+    SelectRow 0
+    Command $main $IDM_NEXT_UNREAD
+    Check ([bool](WaitFor { (SelectedRow) -eq 2 } 5)) "Next Unread Message selects the next unread message ($(SelectedRow))"
+    [void](WaitFor { Seen $thirdPattern } 20)
+    Command $main $IDM_NEXT_UNREAD
+    $goOn = WaitWindow '#32770' 'Inbox Classic' 10
+    $asked = if ($goOn) { Statics $goOn } else { '' }
+    Check ($asked -match 'Archive') "with none left it asks to go on to the next folder with unread mail ($asked)"
+    if ($goOn) {
+        Click $goOn 6
+        Check ([bool](WaitFor { (WindowText $main) -eq 'Archive - Inbox Classic' -and (SelectedRow) -ge 0 } 10)) "and Yes goes there, to its unread message ($(WindowText $main))"
+    }
+    Command $main $IDM_GO_TO_FOLDER
+    $goTo = WaitPicker 'Go to Folder'
+    Check ($null -ne $goTo) 'Go to Folder opens'
+    if ($goTo) {
+        $pickerTree = [Native.Win]::GetDlgItem($goTo, 102)
+        $texts = @(TreeTexts $pickerTree)
+        Check (($texts -contains 'Alex Morgan') -and ($texts -contains 'Sent Items')) "it shows the folders of every account ($($texts -join ', '))"
+        Check (-not (Visible $goTo 103)) 'without New Folder'
+        SetText $goTo 101 'sent'
+        $narrowed = @(TreeTexts $pickerTree)
+        Check (($narrowed -contains 'Sent Items') -and -not ($narrowed -contains 'Drafts')) "typing narrows them ($($narrowed -join ', '))"
+        Shot $goTo 'read-18-go-to'
+        Check (PickIn $goTo 'Alex Morgan' 'Sent Items') 'Sent Items can be chosen'
+        Click $goTo 1
+        Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' } 10)) "choosing Sent Items shows Sent Items ($(WindowText $main))"
+    }
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 3) { Rows } } 20)
+    $newsRow = WaitFor { $r = @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $newsletter }); if ($r.Count) { "$($r[0])" } } 10
+    if ($newsRow) { SelectRow ([int]$newsRow) }
+    Command $main $IDM_FIND_IN_MESSAGE
+    $findForm = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+    Check ($null -ne $findForm) 'Find in This Message asks for the words'
+    if ($findForm) {
+        SetText $findForm 100 'larches'
+        Click $findForm 1
+        Start-Sleep -Milliseconds 1500
+        $said = StatusPart $mainStatus 0
+        Check ($said -notmatch 'not in this message') "it finds a word of the message shown ($said)"
+        Shot $main 'read-17-find'
+    }
+    Command $main $IDM_FIND_IN_MESSAGE
+    $findForm = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+    if ($findForm) {
+        SetText $findForm 100 'zeppelins'
+        Click $findForm 1
+        $said = WaitFor { $t = StatusPart $mainStatus 0; if ($t -match 'zeppelins.*not in this message') { $t } } 10
+        Check ($null -ne $said) "and says when it is not there ($(StatusPart $mainStatus 0))"
+    } else {
+        Check $false 'Find in This Message asks again'
+    }
+
     # ---- folders ----
 
     Step 'folders'

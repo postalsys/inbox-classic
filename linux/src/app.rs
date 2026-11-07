@@ -668,6 +668,11 @@ pub fn run_command(command: Command) {
         Command::SelectAll => main.select_all(),
         Command::Undo => spawn(async move { main.undo().await }),
         Command::Options => crate::preferences::run(),
+        Command::NextMessage => main.step_message(true),
+        Command::PreviousMessage => main.step_message(false),
+        Command::NextUnread => spawn(async move { main.next_unread().await }),
+        Command::GoToFolder => spawn(async move { main.go_to_folder().await }),
+        Command::FindInMessage => main.reader.find_in_message(),
     }
 }
 

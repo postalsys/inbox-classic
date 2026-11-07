@@ -268,6 +268,17 @@ impl OAuthProviders {
     }
 }
 
+/// What Next Unread does next, see [`Core::next_unread_step`]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum NextUnread {
+    /// Select this message of the list
+    Message(MessageRef),
+    /// Ask `question`, and on yes show `folder` and take the step again from its top
+    Ask { folder: FolderId, question: String },
+    /// No unread mail anywhere else
+    None,
+}
+
 /// How many messages the worker threads, or fetches the References of, at a time in the background
 pub(crate) const THREAD_BATCH: usize = 200;
 
@@ -617,6 +628,78 @@ impl Core {
     ) -> Result<Option<(Option<MessageRef>, Option<MessageRef>)>> {
         let sort = self.list_sort(search, sort)?;
         Ok(self.store().neighbours(search, sort, folder, uid)?)
+    }
+
+    /// The first unread message after the message `uid` of `folder` in the list `search` and `sort` make (from the top
+    /// when `uid` is 0 or not in the list): what Next Unread opens. None when there is no unread one after it.
+    pub fn next_unread(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<MessageRef>> {
+        let sort = self.list_sort(search, sort)?;
+        Ok(self.store().next_unread(search, sort, folder, uid)?)
+    }
+
+    /// The next folder after `folder` in the folder tree with unread mail, of its account and then of the accounts
+    /// after it, around to the first (Junk E-mail and Deleted Items left out, as the counts of collapsed folders leave
+    /// them out): where Next Unread goes on, after asking. None when no other folder has unread mail.
+    pub fn next_unread_folder(&self, folder: FolderId) -> Result<Option<FolderId>> {
+        let store = self.store();
+        let mut tree = Vec::new();
+        for account in store.accounts()? {
+            tree.extend(store.folders(account.id)?);
+        }
+        let start = tree.iter().position(|f| f.id == folder).map_or(0, |at| at + 1);
+        // Junk E-mail and Deleted Items, the folders that can be emptied, do not count
+        let counted = |f: &Folder| f.info.selectable && f.unread > 0 && !emptiable(&f.info);
+        Ok((0..tree.len())
+            .map(|step| &tree[(start + step) % tree.len()])
+            .find(|f| f.id != folder && counted(f))
+            .map(|f| f.id))
+    }
+
+    /// What Next Unread asks before it goes on to the folder `to`: "There are no more unread messages in Inbox." and,
+    /// after a blank line, "Go to Archive, the next folder with unread messages?"
+    pub fn next_unread_question(&self, from: FolderId, to: FolderId) -> Result<String> {
+        let store = self.store();
+        let several = store.accounts()?.len() > 1;
+        let name = |id: FolderId| -> Result<String> {
+            let folder = store.folder(id)?;
+            let mut name = crate::text::folder_name(&folder.info);
+            if several {
+                let account = store.account(folder.account_id)?;
+                name = format!(
+                    "{name} ({})",
+                    crate::text::account_label(&account.settings.name, &account.settings.email)
+                );
+            }
+            Ok(name)
+        };
+        Ok(tr_args(
+            Text::NextUnreadQuestion,
+            &[("folder", (&name(from)?).into()), ("next", (&name(to)?).into())],
+        ))
+    }
+
+    /// One step of Next Unread from the message `uid` of `folder` (0 for none) in the list `search` and `sort` make: the
+    /// next unread message of that list; else, when another folder has unread mail, that folder and the question to
+    /// ask before going there (the window then shows that folder and takes the step again from its top); else nothing.
+    pub fn next_unread_step(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<NextUnread> {
+        if let Some(found) = self.next_unread(search, sort, folder, uid)? {
+            return Ok(NextUnread::Message(found));
+        }
+        // on from the folder the list shows, or from the message's when it shows several
+        let from = match search.scope {
+            Scope::Folder(shown) if search.text.trim().is_empty() => shown,
+            _ => folder,
+        };
+        if from == 0 {
+            return Ok(NextUnread::None);
+        }
+        Ok(match self.next_unread_folder(from)? {
+            Some(next) => NextUnread::Ask {
+                folder: next,
+                question: self.next_unread_question(from, next)?,
+            },
+            None => NextUnread::None,
+        })
     }
 
     /// Whether the message `uid` is (still) in `folder`, a single row looked up

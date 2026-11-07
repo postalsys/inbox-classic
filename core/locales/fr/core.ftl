@@ -284,6 +284,12 @@ not-archived-here = Les messages de ce dossier ne peuvent pas être archivés.
 # review: new
 not-emptied-here = Seuls Éléments supprimés et Courrier indésirable peuvent être vidés.
 # review: new
+next-unread-question = Il n'y a plus de messages non lus dans { $folder }.
+
+    Aller à { $next }, le dossier suivant qui a des messages non lus ?
+# review: new
+no-unread-left = Il ne reste aucun message non lu.
+# review: new
 empty-question = { $count ->
     [one] Vider { $folder } ?
 

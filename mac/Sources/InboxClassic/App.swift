@@ -294,7 +294,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             NSMenuItem(title: Text.macPaste.text, action: #selector(NSText.paste(_:)), keyEquivalent: "v"),
             NSMenuItem(title: Text.cmdSelectAll.text, action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"),
             separator(),
-            item(for: .find), separator(),
+            item(for: .find), item(for: .findInMessage), separator(),
             item(for: .markRead), item(for: .markUnread), item(for: .markAllRead), separator(),
             item(for: .move), item(for: .delete),
         ]
@@ -412,6 +412,13 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .selectAll: main.mailbox.selectAllMessages()
         case .undo: main.mailbox.undo()
         case .options: SettingsWindow.open(core: core)
+        case .nextMessage: main.mailbox.selectNeighbour(1)
+        case .previousMessage: main.mailbox.selectNeighbour(-1)
+        case .nextUnread: main.mailbox.nextUnread()
+        case .goToFolder:
+            main.show()
+            main.mailbox.chooseFolder()
+        case .findInMessage: main.mailbox.reader.findCommand()
         }
     }
 
@@ -495,6 +502,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         // All Inboxes is no folder of one account to make a folder in or import into
         case .newFolder, .import: return !main.mailbox.allInboxes
         case .emptyFolder: return main.mailbox.canEmptyFolder
+        case .nextMessage, .previousMessage: return main.mailbox.list.numberOfRows > 0
+        case .findInMessage: return main.mailbox.hasOne && main.mailbox.reader.messageView != nil
         default: return true
         }
     }

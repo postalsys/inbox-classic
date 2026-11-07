@@ -15,7 +15,9 @@
 class Preview {
 public:
     // creates the WebView2 in `parent` (asynchronously), `onError` gets a message when that fails
-    void Create(HWND parent, std::function<void(const std::wstring&)> onError);
+    // a find waits for its count on the timer `findTimer` of `owner`, which hands it to FindSettled (none for a view
+    // that never finds, the help)
+    void Create(HWND parent, std::function<void(const std::wstring&)> onError, HWND owner = nullptr, UINT_PTR findTimer = 0);
     // remoteImages lets images from the network load, for this document only
     void Show(const std::wstring& html, bool remoteImages = false);
     // empty; with "There is no message selected." centered in it, as Outlook Express has it, when `noMessage`
@@ -32,6 +34,15 @@ public:
     // the keys that do not type (Esc, Delete, those with Ctrl or Alt) pressed while it has the keyboard, for its window:
     // true when the window handled one, which the page then does not get
     void SetKeys(std::function<bool(UINT key)> keys) { keys_ = std::move(keys); }
+    // `words` found in the document shown with WebView2's own find, every place marked and the first in view (no script
+    // runs for it); `done` gets how many places there are, 0 for none, -1 when this WebView2 can not find
+    void Find(const std::wstring& words, std::function<void(int count)> done);
+    // the next place of the words found, while the document they were found in is shown; false when there is none
+    bool FindNext();
+    // whether words were found in the document shown, for F3 to go to their next place
+    bool Finding() const { return find_ && found_ > 0; }
+    // the timer of Create: the count of a find is told as it is now
+    void FindSettled();
 
 private:
     void Configure();
@@ -47,6 +58,16 @@ private:
     bool remoteImages_ = false;
     std::function<void(const std::wstring&)> onError_;
     std::function<bool(UINT key)> keys_;
+    // the find going on in the document shown, and what is told how many places it found once that is known
+    Microsoft::WRL::ComPtr<ICoreWebView2Find> find_;
+    std::function<void(int count)> findDone_;
+    // how many places it found, 0 until it is known
+    int found_ = 0;
+    HWND owner_ = nullptr;
+    UINT_PTR findTimer_ = 0;
+    void StopFind();
+    // the count told: as soon as there is a place, else once it settled (FindSettled, a moment after the find started)
+    void FoundCount(int count, bool settled);
     Microsoft::WRL::ComPtr<ICoreWebView2Environment> environment_;
     Microsoft::WRL::ComPtr<ICoreWebView2Controller> controller_;
     Microsoft::WRL::ComPtr<ICoreWebView2> view_;

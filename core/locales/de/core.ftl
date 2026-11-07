@@ -257,6 +257,12 @@ not-archived-here = Nachrichten in diesem Ordner können nicht archiviert werden
 # review: new
 not-emptied-here = Nur Gelöschte Objekte und Junk-E-Mail können geleert werden.
 # review: new
+next-unread-question = In { $folder } gibt es keine ungelesenen Nachrichten mehr.
+
+    Zu { $next } wechseln, dem nächsten Ordner mit ungelesenen Nachrichten?
+# review: new
+no-unread-left = Es gibt keine ungelesenen Nachrichten mehr.
+# review: new
 empty-question = { $count ->
     [one] { $folder } leeren?
 

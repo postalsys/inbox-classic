@@ -220,6 +220,22 @@ final class Core {
         return (previousFolder != 0 ? (previousFolder, previousUid) : nil, nextFolder != 0 ? (nextFolder, nextUid) : nil)
     }
 
+    /// the first unread message after the message `uid` of `folder` (0 for from the top) in the list; nil when none is
+    func nextUnread(_ search: Search, sort: PeSortField, ascending: Bool, folder: Int64, uid: UInt64) -> NextUnread {
+        var nextFolder: Int64 = 0
+        var nextUid: UInt64 = 0
+        var question: UnsafeMutablePointer<CChar>?
+        let step = search.with {
+            pe_next_unread_step(handle, $0, sort, ascending, folder, uid, &nextFolder, &nextUid, &question)
+        }
+        let asked = taken(question) ?? ""
+        switch step {
+        case PE_NEXT_UNREAD_MESSAGE: return .message(folder: nextFolder, uid: nextUid)
+        case PE_NEXT_UNREAD_ASK: return .ask(folder: nextFolder, question: asked)
+        default: return .none
+        }
+    }
+
     /// whether the message `uid` is (still) in `folder`
     func messageExists(folder: Int64, uid: UInt64) -> Bool {
         pe_message_exists(handle, folder, uid)
@@ -256,6 +272,23 @@ final class Core {
 
     static func searchPlace(_ text: String) -> String {
         text.withCString { taken(pe_search_place($0)) } ?? ""
+    }
+}
+
+/// What Next Unread does next, as the core decides: select a message of the list, ask before going on to the folder
+/// with unread mail (a heading, a blank line, the question), or nothing is left
+enum NextUnread {
+    case message(folder: Int64, uid: UInt64)
+    case ask(folder: Int64, question: String)
+    case none
+}
+
+extension Text {
+    /// a command's word as the title of the window it opens, without its menu letter and its trailing dots
+    var title: String {
+        guard let title = pe_text_title(rawValue) else { return "" }
+        defer { pe_string_free(title) }
+        return String(cString: title)
     }
 }
 
