@@ -271,6 +271,8 @@ CREATE TABLE thread_ids (
     PRIMARY KEY (account_id, key)
 ) WITHOUT ROWID;
 CREATE INDEX thread_ids_by_thread ON thread_ids (account_id, thread_id);
+-- the conversation ids handed out, one row each: a new one is atomic whatever connection asks
+CREATE TABLE threads (id INTEGER PRIMARY KEY AUTOINCREMENT);
 "#,
 ];
 

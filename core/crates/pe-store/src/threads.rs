@@ -3,7 +3,7 @@
 //! conversation id. Each account keeps a map from those ids to a conversation id (`thread_ids`); a message that names
 //! ids of two conversations joins them into one.
 
-use std::collections::HashMap;
+use std::collections::HashSet;
 
 use rusqlite::types::Value;
 use rusqlite::{OptionalExtension, params, params_from_iter};
@@ -51,6 +51,21 @@ pub(crate) fn split_references(stored: &str) -> Vec<String> {
 
 /// The keys a message joins its conversation by: its own Message-ID, the ids it answers, and Gmail's conversation id
 pub(crate) fn thread_keys(message: &MessageInfo) -> Vec<String> {
+    keys_of(
+        message.message_id.as_deref(),
+        message.in_reply_to.as_deref(),
+        &message.references,
+        message.gmail_thread,
+    )
+}
+
+/// [`thread_keys`] from the ids themselves
+fn keys_of(
+    message_id: Option<&str>,
+    in_reply_to: Option<&str>,
+    references: &[String],
+    gmail: Option<u64>,
+) -> Vec<String> {
     let mut keys: Vec<String> = Vec::new();
     let mut add = |id: &str| {
         let id = id.trim();
@@ -58,18 +73,18 @@ pub(crate) fn thread_keys(message: &MessageInfo) -> Vec<String> {
             keys.push(id.to_string());
         }
     };
-    if let Some(id) = &message.message_id {
+    if let Some(id) = message_id {
         add(id);
     }
-    for id in &message.references {
+    for id in references {
         add(id);
     }
-    if let Some(parent) = &message.in_reply_to {
+    if let Some(parent) = in_reply_to {
         for id in parse_references(parent) {
             add(&id);
         }
     }
-    if let Some(gmail) = message.gmail_thread {
+    if let Some(gmail) = gmail {
         add(&format!("gm:{gmail}"));
     }
     keys
@@ -119,14 +134,10 @@ impl Store {
         Ok(thread)
     }
 
-    /// A conversation id no message has: one past the largest so far (ids are not reused, a joined one is left)
+    /// A conversation id no message has, from the sequence of handed out ones (never reused: a joined one is left)
     fn new_thread(&self) -> Result<i64> {
-        self.db.query_row(
-            "SELECT MAX(COALESCE((SELECT MAX(thread_id) FROM thread_ids), 0), \
-             COALESCE((SELECT MAX(thread_id) FROM messages), 0)) + 1",
-            [],
-            |row| row.get(0),
-        )
+        self.db.execute("INSERT INTO threads DEFAULT VALUES", [])?;
+        Ok(self.db.last_insert_rowid())
     }
 
     /// Puts up to `limit` messages that are in no conversation yet (stored before conversations were kept) into
@@ -134,26 +145,26 @@ impl Store {
     pub fn thread_unthreaded(&self, account: AccountId, limit: usize) -> Result<usize> {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let mut statement = self.db.prepare_cached(
-            "SELECT m.id, f.account_id, m.message_id, m.in_reply_to, COALESCE(m.refs, '') FROM messages m \
+            "SELECT m.id, m.message_id, m.in_reply_to, COALESCE(m.refs, '') FROM messages m \
              JOIN folders f ON f.id = m.folder_id WHERE m.thread_id < 0 AND f.account_id = ?2 \
              ORDER BY COALESCE(m.date, m.internal_date) LIMIT ?1",
         )?;
         let rows: Vec<Unthreaded> = statement
             .query_map(params![limit as i64, account], |row| {
-                Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?, row.get(4)?))
+                Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?))
             })?
             .collect::<rusqlite::Result<_>>()?;
         let mut set = self
             .db
             .prepare_cached("UPDATE messages SET thread_id = ?2 WHERE id = ?1")?;
-        for (id, account, message_id, in_reply_to, refs) in &rows {
-            let info = MessageInfo {
-                message_id: message_id.clone(),
-                in_reply_to: in_reply_to.clone(),
-                references: split_references(refs),
-                ..MessageInfo::default()
-            };
-            let thread = self.thread_of(*account, &thread_keys(&info))?;
+        for (id, message_id, in_reply_to, refs) in &rows {
+            let keys = keys_of(
+                message_id.as_deref(),
+                in_reply_to.as_deref(),
+                &split_references(refs),
+                None,
+            );
+            let thread = self.thread_of(account, &keys)?;
             set.execute(params![id, thread])?;
         }
         tx.commit()?;
@@ -195,13 +206,8 @@ impl Store {
             // nothing new to join by, or not threaded yet (thread_unthreaded reads the References now kept)
             return Ok(false);
         }
-        let info = MessageInfo {
-            message_id,
-            in_reply_to,
-            references: references.to_vec(),
-            ..MessageInfo::default()
-        };
-        let joined = self.thread_of(account, &thread_keys(&info))?;
+        let keys = keys_of(message_id.as_deref(), in_reply_to.as_deref(), references, None);
+        let joined = self.thread_of(account, &keys)?;
         if joined != thread {
             self.db.execute(
                 "UPDATE messages SET thread_id = ?2 WHERE id = ?1",
@@ -212,8 +218,8 @@ impl Store {
     }
 }
 
-/// A message to thread: its row id, its account, its Message-ID, In-Reply-To and References as stored
-type Unthreaded = (i64, AccountId, Option<String>, Option<String>, String);
+/// A message to thread: its row id, its Message-ID, In-Reply-To and References as stored
+type Unthreaded = (i64, Option<String>, Option<String>, String);
 
 /// A row of the message list grouped by conversation: a conversation's first message (depth 0), standing for all of
 /// them while it is collapsed, or, under one that is expanded, one of the others (depth 1)
@@ -407,7 +413,7 @@ impl Store {
                 break;
             }
         }
-        let open: HashMap<i64, ()> = ranks.iter().map(|&(_, t, _)| (t, ())).collect();
+        let open: HashSet<i64> = ranks.iter().map(|&(_, t, _)| t).collect();
         let mut rows = Vec::new();
         let heads = self.thread_heads(search, sort, head, limit)?;
         for (i, row) in heads.into_iter().enumerate() {
@@ -419,7 +425,7 @@ impl Store {
             if !(i == 0 && under > 0) {
                 rows.push(row);
             }
-            if open.contains_key(&thread) {
+            if open.contains(&thread) {
                 let skip = if i == 0 { under.saturating_sub(1) } else { 0 };
                 for message in self
                     .thread_messages(search, thread)?
@@ -463,14 +469,16 @@ impl Store {
         else {
             return Ok(None);
         };
-        let Some(&(rank, _, _)) = self.thread_ranks(search, sort, &[thread])?.first() else {
+        // its conversation's rank and the open ones above it, with one ranking of the list
+        let mut wanted = expanded.to_vec();
+        wanted.push(thread);
+        let ranks = self.thread_ranks(search, sort, &wanted)?;
+        let Some(&(rank, _, _)) = ranks.iter().find(|(_, t, _)| *t == thread) else {
             return Ok(None);
         };
-        // the rows the open conversations above it add
-        let above: u64 = self
-            .thread_ranks(search, sort, expanded)?
+        let above: u64 = ranks
             .iter()
-            .filter(|(r, _, _)| *r < rank)
+            .filter(|(r, t, _)| *r < rank && expanded.contains(t))
             .map(|(_, _, n)| n.saturating_sub(1))
             .sum();
         let at = rank + above;
@@ -487,14 +495,25 @@ impl Store {
     /// The messages of the conversations of `refs` in the list `search` makes: what an action on a collapsed
     /// conversation's row acts on
     pub fn thread_refs(&self, search: &Search, threads: &[i64]) -> Result<Vec<MessageRef>> {
-        let mut refs = Vec::new();
-        for &thread in threads {
-            refs.extend(self.thread_messages(search, thread)?.into_iter().map(|m| MessageRef {
-                folder: m.folder_id,
-                uid: m.info.uid,
-            }));
+        if threads.is_empty() {
+            return Ok(Vec::new());
         }
-        Ok(refs)
+        let (condition, mut values) = search.condition(false);
+        let first = values.len() + 1;
+        let marks: Vec<String> = (0..threads.len()).map(|i| format!("?{}", first + i)).collect();
+        values.extend(threads.iter().map(|&t| Value::Integer(t)));
+        let mut statement = self.db.prepare(&format!(
+            "SELECT folder_id, uid FROM messages WHERE {condition} AND thread_id IN ({})",
+            marks.join(", ")
+        ))?;
+        statement
+            .query_map(params_from_iter(values), |row| {
+                Ok(MessageRef {
+                    folder: row.get(0)?,
+                    uid: row.get::<_, i64>(1)? as u64,
+                })
+            })?
+            .collect()
     }
 }
 
