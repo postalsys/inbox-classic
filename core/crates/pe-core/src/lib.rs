@@ -9,8 +9,10 @@
 pub mod agents;
 mod authres;
 pub mod bimi;
+pub mod book;
 pub mod calendar;
 mod compose;
+mod contentline;
 mod export;
 mod fold;
 pub mod mailto;
@@ -22,6 +24,7 @@ mod sign_in_apps;
 mod targets;
 mod text;
 pub mod unsubscribe;
+pub mod vcard;
 mod view;
 mod worker;
 

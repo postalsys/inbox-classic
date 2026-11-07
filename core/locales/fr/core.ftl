@@ -408,3 +408,5 @@ secrets-windows = le Gestionnaire d'identification
 secrets-mac = le trousseau
 secrets-linux = le trousseau du système (Secret Service)
 error-no-such-file = ce fichier n'existe pas
+# review: new
+cards-file-too-big = Ce fichier est trop volumineux pour être un carnet d'adresses.

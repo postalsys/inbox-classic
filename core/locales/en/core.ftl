@@ -374,3 +374,4 @@ secrets-windows = the Credential Manager
 secrets-mac = the keychain
 secrets-linux = the system keyring (Secret Service)
 error-no-such-file = there is no such file
+cards-file-too-big = This file is too big to be an address book.
