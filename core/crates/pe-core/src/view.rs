@@ -51,9 +51,19 @@ pub(crate) fn calendar_part(attachments: &[Attachment]) -> Option<&Attachment> {
         .find(|a| matches!(a.mime_type.as_str(), "text/calendar" | "application/ics"))
 }
 
-/// The attachments the attachment bar lists: not the images of an HTML body
+/// The parts of a delivery report written for mail servers (RFC 3464 and 6533): the bounce's card says what they say
+const REPORT_PARTS: [&str; 4] = [
+    "message/delivery-status",
+    "message/global-delivery-status",
+    "text/rfc822-headers",
+    "message/global-headers",
+];
+
+/// The attachments the attachment bar lists: not the images of an HTML body, nor a delivery report's parts for servers
 fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
-    attachments.iter().filter(|a| !a.related)
+    attachments
+        .iter()
+        .filter(|a| !a.related && !REPORT_PARTS.contains(&a.mime_type.to_ascii_lowercase().as_str()))
 }
 
 #[cfg(test)]
@@ -482,6 +492,13 @@ mod tests {
     fn a_bounce_starts_with_its_card() {
         let view = build(&bounce_fixture("gmail.eml"), false);
         assert!(view.bounce);
+        assert!(
+            view.attachments
+                .iter()
+                .all(|a| !REPORT_PARTS.contains(&a.mime_type.as_str())),
+            "the report's parts for servers are not listed: {:?}",
+            view.attachments.iter().map(|a| &a.mime_type).collect::<Vec<_>>()
+        );
         let document = &view.document;
         assert!(document.contains("role=\"note\""), "{document}");
         let text = shown(document);
