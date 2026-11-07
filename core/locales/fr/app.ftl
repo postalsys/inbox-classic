@@ -43,7 +43,7 @@ cmd-not-junk = Marquer comme non indé&sirable
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...
-cmd-view-source = &Source du message
+cmd-view-source = Code &source du message
 cmd-ai-agents = &Agents d'IA...
 cmd-options = &Options...
 cmd-select-all = Sélectionner &tout
@@ -57,7 +57,7 @@ tray-no-accounts = Aucun compte pour l'instant
 
 ## Words the windows of more than one platform share
 
-ui-tb-create-mail = Créer un message
+ui-tb-create-mail = Écrire
 ui-tb-reply = Répondre
 ui-tb-reply-all = Répondre à tous
 ui-tb-forward = Transférer
@@ -294,7 +294,7 @@ ui-client-secret = Secret client :
 ui-scopes = Autorisations (scopes) :
 ui-imap-server = Serveur IMAP :
 ui-smtp-server = Serveur SMTP :
-ui-redirect-uri = URI de redirection :
+ui-redirect-uri = Adresse de redirection :
 ui-sign-in-app-intro = Une application de connexion est un client OAuth enregistré auprès de votre fournisseur pour vous connecter dans le navigateur. Choisissez un fournisseur pour préremplir les paramètres, puis ajoutez l’ID client et le secret client, si votre fournisseur en a attribué un.
 ui-remove-secret = Un secret client est enregistré. Saisissez-en un nouveau pour le remplacer ou supprimez celui qui est enregistré
 ui-register-it = Enregistrer l’application auprès du fournisseur

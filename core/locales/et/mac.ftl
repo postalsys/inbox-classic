@@ -8,7 +8,7 @@ mac-services = Teenused
 mac-hide = Peida Inbox Classic
 mac-hide-others = Peida teised
 mac-show-all = Näita kõiki
-mac-check-updates = Otsi uuendusi…
+mac-check-updates = Kontrolli uuendusi…
 mac-close-window = Sulge aken
 mac-redo = Tee uuesti
 mac-cut = Lõika
@@ -87,9 +87,9 @@ mac-unsubscribing = Loobutakse tellimusest { $target }…
 
 ## The compose window
 
-mac-bold = Paks kiri
+mac-bold = Paks
 mac-italic = Kaldkiri
-mac-underline = Allajoonitud
+mac-underline = Allakriipsutus
 mac-bcc = Pimekoopia
 mac-command-click-to-open = avamiseks ⌘-klõps
 mac-saving-to-drafts = Salvestatakse mustanditesse…

@@ -70,7 +70,7 @@ done-read = { $count ->
    *[other] { $messages } märgiti loetuks
 }
 done-unread = { $count ->
-   *[other] { $messages } märgiti lugemata kirjaks
+   *[other] { $messages } märgiti mitteloetuks
 }
 done-flagged = { $count ->
     [one] { $messages } märgiti lipuga
@@ -272,7 +272,7 @@ day-sunday = pühapäeval
 ## AI agents
 
 agent-level-read = Lugeda e-posti: vaadata kaustu ja kirju ning kasutada otsingut
-agent-level-organize = Hallata e-posti: märkida kirju loetuks või lugemata kirjaks, lisada lippe, hallata rämpsposti, teisaldada kirju ja kustutada neid kausta Kustutatud kirjad
+agent-level-organize = Hallata e-posti: märkida kirju loetuks või mitteloetuks, lisada lippe, hallata rämpsposti, teisaldada kirju ja kustutada neid kausta Kustutatud kirjad
 agent-level-drafts = Koostada mustandeid, mille saadate ise
 agent-level-send = Saata kirju, küsides iga kirja jaoks teie nõusolekut
 agent-connect-title = { $program } soovib kasutada teie e-posti
@@ -317,7 +317,7 @@ agent-log-refused = Te ei saatnud kirja „{ $subject }“
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
 agent-log-draft = Mustand „{ $subject }“ salvestati
 agent-log-read = „{ $subject }“ märgiti loetuks
-agent-log-unread = „{ $subject }“ märgiti lugemata kirjaks
+agent-log-unread = „{ $subject }“ märgiti mitteloetuks
 agent-log-flagged = „{ $subject }“ märgiti lipuga
 agent-log-unflagged = Kirjalt „{ $subject }“ eemaldati lipp
 agent-log-deleted = „{ $subject }“ kustutati

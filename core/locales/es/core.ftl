@@ -52,8 +52,8 @@ reader-failed-security = No se pudo establecer una conexión segura con el servi
 reader-failed-other = El servidor de correo respondió: { $reason }.
 reader-retry-note = El mensaje no se ha descargado. Se volverá a intentar cuando se restablezca la conexión con la cuenta.
 reader-unreadable = Este mensaje no se puede mostrar: { $error }
-message-source-title = Código fuente del mensaje: { $subject }
-message-source-untitled = Código fuente del mensaje
+message-source-title = Formato original del mensaje: { $subject }
+message-source-untitled = Formato original del mensaje
 
 ## Printing and quoting
 

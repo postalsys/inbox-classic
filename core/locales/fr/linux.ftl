@@ -146,7 +146,7 @@ gtk-issuer-found =
 gtk-client-id = ID client
 gtk-client-secret = Secret client
 gtk-scopes = Autorisations (scopes)
-gtk-redirect-uri = URI de redirection
+gtk-redirect-uri = Adresse de redirection
 gtk-issuer-usable =
     L'émetteur peut être utilisé.
 

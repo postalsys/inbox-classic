@@ -22,7 +22,7 @@ gtk-search-indexing = { $count ->
     [one] aún se indexa el texto de { $count } mensaje
    *[other] aún se indexa el texto de { $count } mensajes
 }
-gtk-menu-rename = Cambiar nombre...
+gtk-menu-rename = Renombrar...
 gtk-import-one-question = ¿Importar el mensaje { $file } a la carpeta { $folder }?
 gtk-files-not-saved = Archivos sin guardar: { $failed } de { $total }.
 gtk-unsubscribe-one-click =
@@ -78,7 +78,7 @@ gtk-sign-in-again-ask =
 
     ¿Iniciar sesión de nuevo en el navegador?
 gtk-default-app-not-installed = Inbox Classic no está instalado, por lo que no aparece entre las aplicaciones de correo del sistema. Instálelo para elegirlo como aplicación predeterminada.
-gtk-default-app-now = Inbox Classic es ahora su aplicación de correo predeterminada: los vínculos de correo abren aquí un mensaje nuevo.
+gtk-default-app-now = Inbox Classic es ahora su aplicación de correo predeterminada: los enlaces de correo abren aquí un mensaje nuevo.
 gtk-default-app-failed = No se pudo establecer Inbox Classic como aplicación de correo predeterminada.
 
 ## Buttons and words used in many windows
@@ -108,8 +108,8 @@ gtk-day-and-time = { $day }, { $time }
 gtk-format-bold = Negrita (Ctrl+B)
 gtk-format-italic = Cursiva (Ctrl+I)
 gtk-format-underline = Subrayado (Ctrl+U)
-gtk-format-hyperlink = Hipervínculo (Ctrl+K)
-gtk-font = Fuente
+gtk-format-hyperlink = Enlace (Ctrl+K)
+gtk-font = Tipo de letra
 gtk-show-cc = _CC
 gtk-show-bcc = CC_O
 gtk-save-tip = Guardar (Ctrl+S)

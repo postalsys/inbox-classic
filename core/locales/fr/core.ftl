@@ -64,8 +64,8 @@ reader-failed-security = Impossible d’établir une connexion sécurisée au se
 reader-failed-other = Le serveur de messagerie a répondu : { $reason }.
 reader-retry-note = Message non téléchargé. Une nouvelle tentative aura lieu dès que la connexion au compte sera rétablie.
 reader-unreadable = Ce message ne peut pas être affiché : { $error }
-message-source-title = Source du message : { $subject }
-message-source-untitled = Source du message
+message-source-title = Code source du message : { $subject }
+message-source-untitled = Code source du message
 
 ## Printing and quoting
 
@@ -272,8 +272,8 @@ sign-in-app-plain = le serveur { $server } doit utiliser SSL/TLS ou STARTTLS
 sign-in-app-not-checked = l'émetteur n'a pas encore été vérifié
 sign-in-app-issuer-changed = l'émetteur a changé : saisissez à nouveau le secret client, ou supprimez-le
 sign-in-register-google = Dans Google Cloud Console, créez un client OAuth de type Application de bureau, avec l’autorisation (scope) https://mail.google.com/ sur son écran de consentement. Tant que l'application est en test, seuls ses utilisateurs test peuvent se connecter.
-sign-in-register-microsoft = Dans Microsoft Entra, inscrivez une application avec la plateforme Applications mobiles et de bureau, l'URI de redirection http://localhost, les flux de clients publics autorisés et les autorisations déléguées IMAP.AccessAsUser.All, SMTP.Send et offline_access. Pour votre organisation uniquement, utilisez https://login.microsoftonline.com/<ID du locataire>/v2.0 comme émetteur.
-sign-in-register-other = Inscrivez un client natif (public) avec l'URI de redirection ci-dessous ; le fournisseur doit y autoriser n'importe quel port (RFC 8252). Ajoutez l’autorisation (scope) prévue par le fournisseur pour accéder à la messagerie.
+sign-in-register-microsoft = Dans Microsoft Entra, inscrivez une application avec la plateforme Applications mobiles et de bureau, l'adresse de redirection http://localhost, les flux de clients publics autorisés et les autorisations déléguées IMAP.AccessAsUser.All, SMTP.Send et offline_access. Pour votre organisation uniquement, utilisez https://login.microsoftonline.com/<ID du locataire>/v2.0 comme émetteur.
+sign-in-register-other = Inscrivez un client natif (public) avec l'adresse de redirection ci-dessous ; le fournisseur doit y autoriser n'importe quel port (RFC 8252). Ajoutez l’autorisation (scope) prévue par le fournisseur pour accéder à la messagerie.
 
 ## Calendar invitations
 

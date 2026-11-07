@@ -9,7 +9,7 @@ win-new-messages = { $count ->
    *[other] { $count } mensajes nuevos
 }
 win-default-app-not-installed = Inbox Classic no está instalado, por lo que Windows no lo muestra entre las aplicaciones de correo. Instálelo para elegirlo como aplicación predeterminada.
-win-default-app-settings = Windows abrirá la configuración de aplicaciones predeterminadas. Seleccione Inbox Classic para abrir los vínculos MAILTO.
+win-default-app-settings = Windows abrirá la configuración de aplicaciones predeterminadas. Seleccione Inbox Classic para abrir los enlaces MAILTO.
 win-no-unread = No hay mensajes sin leer
 win-unread-messages = { $count ->
     [one] { $count } mensaje sin leer
@@ -39,7 +39,7 @@ win-ctrl-click-to-open = ({ $ctrl }+clic para abrir)
 win-format-bold = Negrita ({ $ctrl }+B)
 win-format-italic = Cursiva ({ $ctrl }+I)
 win-format-underline = Subrayado ({ $ctrl }+U)
-win-format-link = Hipervínculo ({ $ctrl }+K)
+win-format-link = Enlace ({ $ctrl }+K)
 win-show-cc = &CC
 win-show-bcc = CC&O
 win-signature-title = Firma: { $account }
@@ -77,7 +77,7 @@ win-attendees = { $count ->
 }
 win-new-folder-in-highlighted = La nueva carpeta se creará dentro de la carpeta seleccionada.
 win-delete-folder-ask = ¿Eliminar la carpeta «{ $folder }», todos sus mensajes y sus subcarpetas? También se eliminarán del servidor.
-win-rename = Cambiar &nombre...
+win-rename = Re&nombrar...
 win-messages-not-saved = No se pudieron guardar los mensajes.
 win-messages-not-forwarded = No se pudieron reenviar los mensajes.
 
@@ -110,7 +110,7 @@ win-how-to-connect = Cómo conectar un agente
 ## Aplicaciones de inicio de sesión
 
 win-built-in = (integrada)
-win-edit = &Modificar...
+win-edit = &Editar...
 
 ## Opciones
 

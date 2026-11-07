@@ -118,7 +118,7 @@ gtk-link-status = { $link }    (Strg+Klick zum Öffnen)
 ## Accounts
 
 gtk-plain-warning =
-    Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Kennwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
+    Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
 
     Fortfahren?
 gtk-display-name-title = Anzeigename
@@ -128,8 +128,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Weiter >
-gtk-provider-sign-in = Melden Sie sich für { $address } auf der Webseite von { $provider } an. Ihr Kennwort wird nicht an Inbox Classic weitergegeben. Alternativ können Sie ein App-Kennwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
-gtk-provider-sign-in-apps = Melden Sie sich für { $address } auf der Webseite von { $provider } mit einer Ihrer Anmelde-Apps an („Weitere Anmeldeoptionen“). Alternativ können Sie ein App-Kennwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
+gtk-provider-sign-in = Melden Sie sich für { $address } auf der Webseite von { $provider } an. Ihr Passwort wird nicht an Inbox Classic weitergegeben. Alternativ können Sie ein App-Passwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
+gtk-provider-sign-in-apps = Melden Sie sich für { $address } auf der Webseite von { $provider } mit einer Ihrer Anmelde-Apps an („Weitere Anmeldeoptionen“). Alternativ können Sie ein App-Passwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
 gtk-accounts-add = Hinzufügen...
 gtk-accounts-properties = Eigenschaften...
 gtk-accounts-signature = Signatur...
@@ -146,7 +146,7 @@ gtk-issuer-found =
 gtk-client-id = Client-ID
 gtk-client-secret = Client-Geheimnis
 gtk-scopes = Berechtigungen (Scopes)
-gtk-redirect-uri = Umleitungs-URI
+gtk-redirect-uri = Weiterleitungs-URI
 gtk-issuer-usable =
     Der Aussteller kann verwendet werden.
 

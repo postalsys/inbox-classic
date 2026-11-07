@@ -95,7 +95,7 @@ win-sign-in-apps-button = &Anmelde-Apps...
 
 ## KI-Agenten
 
-win-dont-allow = &Nicht zulassen
+win-dont-allow = &Nicht erlauben
 win-col-address = Adresse
 win-never-written-to = Nie angeschrieben
 win-send = &Senden

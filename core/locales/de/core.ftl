@@ -35,13 +35,13 @@ reader-downloading = Die Nachricht wird heruntergeladen…
 reader-downloading-detail = Die Nachricht wird angezeigt, sobald der Download abgeschlossen ist.
 reader-failed = Die Nachricht konnte nicht heruntergeladen werden
 reader-failed-network = Der Mailserver war nicht erreichbar ({ $reason }).
-reader-failed-sign-in = Der Mailserver hat die Anmeldung nicht angenommen ({ $reason }). Prüfen Sie das Kennwort oder melden Sie sich unter Datei > Konten erneut an.
+reader-failed-sign-in = Der Mailserver hat die Anmeldung nicht angenommen ({ $reason }). Prüfen Sie das Passwort oder melden Sie sich unter Datei > Konten erneut an.
 reader-failed-security = Es konnte keine sichere Verbindung zum Mailserver hergestellt werden ({ $reason }).
 reader-failed-other = Der Mailserver antwortete: { $reason }.
 reader-retry-note = Noch nicht heruntergeladen. Der Download wird erneut versucht, sobald die Verbindung zum Konto wiederhergestellt ist.
 reader-unreadable = Diese Nachricht kann nicht angezeigt werden: { $error }
 message-source-title = Nachrichtenquelltext: { $subject }
-message-source-untitled = Nachrichtenquelltext
+message-source-untitled = Nachrichten-Quelltext
 
 ## Printing and quoting
 
@@ -211,7 +211,7 @@ error-bad-address = „{ $address }“ ist keine E-Mail-Adresse
 error-attachment = { $path } konnte nicht gelesen werden: { $error }
 error-no-drafts = das Konto hat keinen Entwürfe-Ordner, in dem die Nachricht gespeichert werden kann
 error-draft-attachment = eine Anlage des Entwurfs konnte nicht übernommen werden: { $error }
-error-password-not-saved = das Kennwort konnte für den nächsten Start nicht gespeichert werden: { $error }
+error-password-not-saved = das Passwort konnte für den nächsten Start nicht gespeichert werden: { $error }
 error-sign-in-not-saved = die neuen Anmeldedaten konnten für den nächsten Start nicht gespeichert werden: { $error }
 error-import-unreadable = { $path } kann nicht gelesen werden: { $error }
 error-import-too-large = { $path } ist größer als 50 MB
@@ -226,7 +226,7 @@ error-draft-not-removed = der frühere Entwurf der Nachricht konnte nicht aus de
 error-sent-but = die Nachricht wurde gesendet, aber { $problem }
 error-sent-still-in-outbox = sie ist noch im Postausgang: { $error }
 error-sent-no-copy = es konnte keine Kopie in Gesendete Objekte gespeichert werden: { $reason }
-error-no-password = kein Kennwort für dieses Konto
+error-no-password = kein Passwort für dieses Konto
 error-no-sign-in = keine Anmeldedaten für dieses Konto vorhanden
 error-provider-missing = diese Version kann sich nicht bei { $provider } anmelden: wurde die Anmelde-App entfernt?
 error-provider-servers = die Server dieses Kontos stimmen nicht mit denen der Anmelde-App überein
@@ -235,7 +235,7 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google hat Inbox Classic noch nicht verifiziert. Deshalb können sich damit nur Testnutzer anmelden. Verwenden Sie Ihre eigene Google-Anmelde-App oder ein App-Kennwort. Als Testnutzer können Sie die integrierte App unter Anmelde-Apps (Datei > Konten) aktivieren.
+sign-in-off-google = Google hat Inbox Classic noch nicht verifiziert. Deshalb können sich damit nur Testnutzer anmelden. Verwenden Sie Ihre eigene Google-Anmelde-App oder ein App-Passwort. Als Testnutzer können Sie die integrierte App unter Anmelde-Apps (Datei > Konten) aktivieren.
 sign-in-off-other = Sie wurde unter Anmelde-Apps (Datei > Konten) ausgeschaltet und kann dort wieder eingeschaltet werden.
 sign-in-app-no-name = die Anmelde-App braucht einen Namen
 sign-in-app-no-client = die Client-ID fehlt
@@ -245,8 +245,8 @@ sign-in-app-plain = der { $server }-Server muss SSL/TLS oder STARTTLS verwenden
 sign-in-app-not-checked = der Aussteller wurde noch nicht geprüft
 sign-in-app-issuer-changed = der Aussteller hat sich geändert: geben Sie das Client-Geheimnis erneut ein oder entfernen Sie es
 sign-in-register-google = Erstellen Sie in der Google Cloud Console einen OAuth-Client vom Typ Desktop-App, mit der Berechtigung (Scope) https://mail.google.com/ auf seinem Zustimmungsbildschirm. Solange die App im Test ist, können sich nur ihre Testnutzer anmelden.
-sign-in-register-microsoft = Registrieren Sie in Microsoft Entra eine App mit der Plattform Mobilgerät- und Desktopanwendungen, dem Umleitungs-URI http://localhost, erlaubten öffentlichen Clientflows und den delegierten Berechtigungen IMAP.AccessAsUser.All, SMTP.Send und offline_access. Nur für Ihre Organisation verwenden Sie https://login.microsoftonline.com/<Mandanten-ID>/v2.0 als Aussteller.
-sign-in-register-other = Registrieren Sie einen nativen (öffentlichen) Client mit dem Umleitungs-URI unten; der Anbieter muss jeden Port darauf erlauben (RFC 8252). Fügen Sie die vom Anbieter vorgegebene Berechtigung (Scope) für den Zugriff auf E-Mails hinzu.
+sign-in-register-microsoft = Registrieren Sie in Microsoft Entra eine App mit der Plattform Mobilgerät- und Desktopanwendungen, dem Weiterleitungs-URI http://localhost, erlaubten öffentlichen Clientflows und den delegierten Berechtigungen IMAP.AccessAsUser.All, SMTP.Send und offline_access. Nur für Ihre Organisation verwenden Sie https://login.microsoftonline.com/<Mandanten-ID>/v2.0 als Aussteller.
+sign-in-register-other = Registrieren Sie einen nativen (öffentlichen) Client mit dem Weiterleitungs-URI unten; der Anbieter muss jeden Port darauf erlauben (RFC 8252). Fügen Sie die vom Anbieter vorgegebene Berechtigung (Scope) für den Zugriff auf E-Mails hinzu.
 
 ## Calendar invitations
 
