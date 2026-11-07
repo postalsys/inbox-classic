@@ -37,6 +37,7 @@ endif()
 
 add_executable(InboxClassic WIN32
     src/main.cpp
+    src/addressbook.cpp
     src/accounts.cpp
     src/agents.cpp
     src/signinapps.cpp

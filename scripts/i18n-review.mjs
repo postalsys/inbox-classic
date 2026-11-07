@@ -105,7 +105,7 @@ for (const language of languages) {
     const then = catalogs(language, reviewed);
     // the pairs (English, translation) the review saw: under the same id, or under an id that is gone now (a message
     // moved to another id or file). The same words reviewed in another place do not count, the context differs.
-    const pair = (english, message) => `${english.text}\u0000${message.text}`;
+    const pair = (english, message) => `${english.text.trimEnd()}\u0000${message.text.trimEnd()}`;
     const moved = new Set();
     for (const [id, message] of then) {
         const english = englishThen.get(id);
@@ -159,8 +159,12 @@ for (const language of languages) {
         if (inside && bare) {
             passage.push(bare);
         }
-        // a line of markup alone (platform marks, tags) has nothing to translate
-        const words = bare.replace(/<!--.*?-->/g, '').replace(/<[^>]*>/g, '').trim();
+        // a line of markup alone (platform marks, tags, search keywords in <code>) has nothing to translate
+        const words = bare
+            .replace(/<!--.*?-->/g, '')
+            .replace(/<code>.*?<\/code>/g, '')
+            .replace(/<[^>]*>/g, '')
+            .replace(/[\s,.;:()]/g, '');
         if (!inside && words && !known.has(bare)) {
             helpUnmarked.push({ language, line: index + 1, text: bare });
         }

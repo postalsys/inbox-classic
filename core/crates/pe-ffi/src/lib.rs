@@ -7,6 +7,7 @@
 //!   on a malformed message would come back on every start, so aborting is not an option.
 
 mod agents;
+mod book;
 mod core;
 mod selection;
 mod texts;
@@ -14,6 +15,7 @@ mod texts;
 mod windows;
 
 pub use agents::*;
+pub use book::*;
 pub use core::*;
 pub use selection::*;
 pub use texts::*;
@@ -286,6 +288,16 @@ mod tests {
         assert!(unsafe { pe_picture_uri(missing.as_ptr()) }.is_null());
         assert!(unsafe { pe_picture_uri(std::ptr::null()) }.is_null());
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn tells_the_cards_link_from_the_messages() {
+        use crate::core::{PeReaderLink, pe_reader_link};
+        let link = |uri: &str| unsafe { pe_reader_link(CString::new(uri).unwrap().as_ptr()) };
+        assert_eq!(link(pe_html::BOUNCED_MESSAGE_LINK), PeReaderLink::BouncedMessage);
+        assert_eq!(link("https://example.com/"), PeReaderLink::Other);
+        assert_eq!(link("mailto:a@example.com"), PeReaderLink::Other);
+        assert_eq!(unsafe { pe_reader_link(std::ptr::null()) }, PeReaderLink::Other);
     }
 
     #[test]

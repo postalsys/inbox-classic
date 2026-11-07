@@ -228,6 +228,7 @@
             <!--review--><li>Kaustades Saadetud kirjad ja Mustandid näitab loend veerus <b>Saaja</b>, kellele iga kiri läheb, mitte seda, kellelt see tuleb.</li><!--/review-->
             <!--review--><li>Topeltklõpsake kirja (või valige see ja vajutage <kbd>Enter</kbd>), et avada see omaette aknas, nagu lugemispaan seda näitab, nuppudega <b>Vasta</b>, <b>Vasta kõigile</b>, <b>Edasta</b>, <b>Prindi</b>, <b>Kustuta</b>, <b>Arhiveeri</b> ja <b>Rämpspost</b>. <b>Eelmine</b> ja <b>Järgmine</b> liiguvad läbi loendi, kust see avati. Mustand avatakse selle asemel lõpetamiseks.</li><!--/review-->
             <!--review--><li><b>Vaade &gt; Järgmine kiri</b> ja <b>Eelmine kiri</b> liiguvad loendis ilma hiireta alla ja üles; <b>Järgmine lugemata kiri</b> (või <kbd>N</kbd> loendis) leiab järgmise kirja, mida te pole lugenud, ja kui kaustas neid enam pole, pakub järgmist kausta, kus neid on. <b>Vaade &gt; Mine kausta</b> avab mis tahes konto mis tahes kausta, mille leiate selle nime osa tippides. <b>Redigeeri &gt; Otsi sellest kirjast</b> leiab sõnu näidatud kirjast.</li><!--/review-->
+            <!--review--><li><b>Kättetoimetamise teatel</b> (tagasi tulnud kirjal) on loendis kätte toimetamata märk, ja selle avamisel näitab kaart selle kohal, kas kiri jäi kätte toimetamata või on ainult viibinud, iga saaja juures põhjust lihtsate sõnadega ja mida saate teha, ning <b>Üksikasjade</b> all serveri enda sõnu. <b>Näita tagasi tulnud kirja</b> valib teie saadetud kirja. Põhjus leitakse teie arvutis; midagi ei saadeta kuhugi.</li><!--/review-->
             <li>
                 Logo avaldava kaubamärgi (BIMI) post näitab seda logo päise kõrval, kuid ainult siis, kui teie meiliserver kontrollis, et post tuleb tõesti
                 kaubamärgi domeenist (DMARC), ja kinnitas logo. Logo tuleb koos kirjaga või, kui mitte, kaubamärgi https-aadressilt üks kord käivituse kohta;
@@ -265,7 +266,7 @@
                 Otsing mõistab sedasama, mida Gmaili otsingukast, nii et <code>is:unread</code> loetleb lugemata kirjad ja <code>in:inbox</code> otsib ainult
                 sisendkaustast: <code>"täpne fraas"</code>, <code>-sõna</code> välja jätmiseks, <code>see OR teine</code>, <code>from:</code>,
                 <code>to:</code> (ka <code>cc:</code>, <code>bcc:</code>), <code>subject:</code>, <code>filename:</code>, <code>is:unread</code>,
-                <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>, <code>has:attachment</code>, <code>in:inbox</code>,
+                <code>is:read</code>, <code>is:starred</code>, <code>is:answered</code>, <code>is:bounce</code>, <code>has:attachment</code>, <code>in:inbox</code>,
                 <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:anywhere</code> või <code>in:</code> ja
                 kausta nimi, <code>before:2025/01/31</code>, <code>after:2025/01/01</code>, <code>older_than:2d</code> (või <code>3m</code>,
                 <code>1y</code>), <code>newer_than:1m</code>, <code>larger:5M</code> ja <code>smaller:100k</code>. Osutage otsinguväljale, et neid näha.
@@ -472,6 +473,43 @@
                 <code>--</code> all, tsiteeritud kirja kohal. Teise konto valimine väljal <b>Saatja</b> paneb selle asemele selle konto allkirja.
             </li>
         </ul>
+
+        <!--review--><h3>Aadressiraamat</h3>
+        <p>
+            <b>Tööriistad &gt; Aadressiraamat</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) hoiab inimesi, kellele te kirjutate, koos nende nimede,
+            e-posti aadresside, telefoninumbrite ja märkmetega, ning nende gruppe, et kirjutada kõigile korraga. Grupid on vasakul; paremal on inimesed
+            nime, e-posti aadressi ja telefoninumbriga.
+        </p>
+        <ul>
+            <li>
+                <b>Uus kontakt</b> lisab kellegi: ees- ja perekonnanimi, kuvatav nimi, hüüdnimi, ettevõte, üks või mitu e-posti aadressi, telefoninumbrid ja
+                märkmed. Kirjad lähevad esimesele aadressile või sellele, mille te <b>Määrate vaikeaadressiks</b>. <b>Atribuudid</b> (või topeltklõps) muudab
+                kontakti, <b>Kustuta</b> eemaldab valitud kontaktid.
+            </li>
+            <li>
+                <b>Uus grupp</b> loob grupi: andke sellele nimi ja lisage siis nupuga <b>Vali liikmed</b> inimesi aadressiraamatust või sisestage aadress, mida
+                seal pole. Aadressiraamatus muudetud kontakt muutub ka gruppides.
+            </li>
+            <li>
+                Loendi kohal olev otsinguväli leiab inimesi nime, hüüdnime, ettevõtte või aadressi alguse järgi. <b>Kirjuta</b> alustab kirja valitud
+                inimestele või grupile.
+            </li>
+            <li>
+                Klõpsake kirjas rea alguses nuppu <b>Saaja</b>, <b>Koopia</b> või <b>Pimekoopia</b>, et avada <b>Adressaatide valimine</b>: valige inimesed
+                või grupid ja klõpsake <b>Saaja -&gt;</b>, <b>Koopia -&gt;</b> või <b>Pimekoopia -&gt;</b>. Nendesse väljadesse tippides pakutakse esmalt
+                aadressiraamatu inimesi ja gruppe; grupp paneb väljale kõik oma liikmed.
+            </li>
+            <li>
+                <b>Tööriistad &gt; Lisa saatja aadressiraamatusse</b>, ka kirja paremklõpsumenüüs, lisab valitud kirja saatja. Kedagi, kes on juba
+                aadressiraamatus, teist korda ei lisata.
+            </li>
+            <li>
+                <b>Fail &gt; Impordi aadressiraamat</b> loeb vCard-faili (<code>.vcf</code>) või CSV-faili, nagu Outlook, Thunderbird, Google Contacts ja
+                enamik teisi programme neid ekspordivad; kontakt, mille kõik aadressid on juba aadressiraamatus, jäetakse vahele. <b>Fail &gt; Ekspordi
+                aadressiraamat</b> kirjutab kõik vCard-faili, mida teised programmid loevad.<!--os:mac--> Kontaktide toomiseks rakendusest Kontaktid valige
+                need seal, valige <b>Fail &gt; Ekspordi &gt; Ekspordi vCard</b> ja importige see fail.<!--/os-->
+            </li>
+        </ul><!--/review-->
 
         <h2>5. Uue posti toomine</h2>
         <p>
@@ -704,6 +742,10 @@
                 <td><kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>Ctrl</kbd>+<kbd>I</kbd>, <kbd>Ctrl</kbd>+<kbd>U</kbd></td>
                 <td>Paks kiri, kaldkiri, allakriipsutus kirjutamisel</td>
             </tr>
+            <!--review--><tr>
+                <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd></td>
+                <td>Ava aadressiraamat</td>
+            </tr><!--/review-->
             <!--os:windows,linux-->
             <tr>
                 <td><kbd>F1</kbd></td>

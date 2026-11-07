@@ -482,6 +482,7 @@ extension UITest {
         try await messageWindow()
         try await keyboardReading()
         try await conversations()
+        try await bounces()
     }
 
     // ---- reading with the keyboard ----
@@ -731,6 +732,118 @@ extension UITest {
         onMain { options.grouping.state = .on; options.groupingChanged() }
         check(await waitUntil(5) { tripRows().count == 1 }, "turned on again, the conversation is one row again")
         onMain { options.window.close() }
+    }
+
+    // ---- a message that bounced ----
+
+    /// the bounce mark (or the paper clip) the list shows on row `index`
+    func listMark(_ index: Int) -> NSImage? {
+        let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("attach"))
+        guard column >= 0, let cell = list.view(atColumn: column, row: index, makeIfNecessary: true) else { return nil }
+        return views(NSImageView.self, in: cell).first?.image
+    }
+
+    /// the row of the list whose subject is `subject`
+    func listIndex(subject: String) -> Int? {
+        (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == subject }
+    }
+
+    /// the delivery report of a message sent to an address that does not exist, as Postfix writes one, and a notice
+    /// that another is delayed; dated before the other messages, so the later steps find their lists as they were
+    func bounces() async throws {
+        step("a message that bounced")
+        let bouncedSubject = "Tickets for the concert"
+        let bouncedId = "<concert-tickets@inboxclassic.test>"
+        let failedSubject = "Undelivered Mail Returned to Sender"
+        let delayedSubject = "Delayed Mail (still being retried)"
+        try await addMessage("From: Test User <testuser@inboxclassic.test>\r\nTo: Robin <robin.nobody@example.org>\r\n"
+            + "Subject: \(bouncedSubject)\r\nDate: Mon, 8 Sep 2025 09:30:00 +0000\r\nMessage-ID: \(bouncedId)\r\n"
+            + "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nHi Robin,\r\n\r\nI got us two tickets for Friday.\r\n",
+            flags: ["\\Seen"], to: "Sent")
+        let reportBoundary = "5FC8B823C7.1757324000/mx.inboxclassic.test"
+        try await addMessage("Return-Path: <>\r\nDate: Mon, 8 Sep 2025 09:30:05 +0000\r\n"
+            + "From: MAILER-DAEMON@mx.inboxclassic.test (Mail Delivery System)\r\nSubject: \(failedSubject)\r\n"
+            + "To: testuser@inboxclassic.test\r\nAuto-Submitted: auto-replied\r\nMIME-Version: 1.0\r\n"
+            + "Content-Type: multipart/report; report-type=delivery-status;\r\n\tboundary=\"\(reportBoundary)\"\r\n"
+            + "Message-Id: <20250908093005.5FC8B823C7@mx.inboxclassic.test>\r\n\r\nThis is a MIME-encapsulated message.\r\n\r\n"
+            + "--\(reportBoundary)\r\nContent-Description: Notification\r\nContent-Type: text/plain; charset=us-ascii\r\n\r\n"
+            + "This is the mail system at host mx.inboxclassic.test.\r\n\r\n"
+            + "I'm sorry to have to inform you that your message could not\r\nbe delivered to one or more recipients. It's attached below.\r\n\r\n"
+            + "                   The mail system\r\n\r\n"
+            + "<robin.nobody@example.org>: host mx.example.org[192.0.2.25] said: 550 5.1.1\r\n"
+            + "    The email account that you tried to reach does not exist. (in reply to RCPT\r\n    TO command)\r\n\r\n"
+            + "--\(reportBoundary)\r\nContent-Description: Delivery report\r\nContent-Type: message/delivery-status\r\n\r\n"
+            + "Reporting-MTA: dns; mx.inboxclassic.test\r\nArrival-Date: Mon, 8 Sep 2025 09:30:00 +0000\r\n\r\n"
+            + "Final-Recipient: rfc822; robin.nobody@example.org\r\nOriginal-Recipient: rfc822;robin.nobody@example.org\r\n"
+            + "Action: failed\r\nStatus: 5.1.1\r\nRemote-MTA: dns; mx.example.org\r\n"
+            + "Diagnostic-Code: smtp; 550 5.1.1 The email account that you tried to reach does not exist\r\n\r\n"
+            + "--\(reportBoundary)\r\nContent-Description: Undelivered Message Headers\r\nContent-Type: text/rfc822-headers\r\n\r\n"
+            + "From: Test User <testuser@inboxclassic.test>\r\nTo: Robin <robin.nobody@example.org>\r\n"
+            + "Subject: \(bouncedSubject)\r\nDate: Mon, 8 Sep 2025 09:30:00 +0000\r\nMessage-ID: \(bouncedId)\r\n\r\n"
+            + "--\(reportBoundary)--\r\n", flags: ["\\Seen"])
+        try await addMessage("From: Mail Delivery System <MAILER-DAEMON@mx.inboxclassic.test>\r\nTo: testuser@inboxclassic.test\r\n"
+            + "Subject: \(delayedSubject)\r\nMessage-ID: <delayed-notice@mx.inboxclassic.test>\r\n"
+            + "Date: Sun, 7 Sep 2025 18:00:00 +0000\r\nMIME-Version: 1.0\r\n"
+            + "Content-Type: multipart/report; report-type=delivery-status; boundary=\"delay\"\r\n\r\n"
+            + "--delay\r\nContent-Type: text/plain\r\n\r\nThis is a warning message only. Delivery is still being retried.\r\n"
+            + "--delay\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; mx.inboxclassic.test\r\n\r\n"
+            + "Final-Recipient: rfc822; sam@slow.example.net\r\nAction: delayed\r\nStatus: 4.4.1\r\n"
+            + "Diagnostic-Code: smtp; 421 4.4.1 Connection timed out\r\nWill-Retry-Until: Mon, 8 Sep 2025 18:00:00 +0000\r\n"
+            + "--delay\r\nContent-Type: text/rfc822-headers\r\n\r\nMessage-ID: <slow-reply@inboxclassic.test>\r\n"
+            + "From: testuser@inboxclassic.test\r\nTo: sam@slow.example.net\r\nSubject: Re: The garden plan\r\n--delay--\r\n",
+            flags: ["\\Seen"])
+        command(.sync)
+        // the sent message in the store, for the card to link to
+        selectFolder(named: "Sent Items")
+        check(await waitUntil(30) { listIndex(subject: bouncedSubject) != nil }, "the message that bounces is in Sent Items")
+
+        selectFolder(named: "Inbox")
+        guard let failedRow = await waitFor(30, { listIndex(subject: failedSubject) }) else {
+            throw Failed(description: "the delivery report did not arrive")
+        }
+        check(main.mailbox.row(failedRow)?.bounce == true && listMark(failedRow) === Icons.bounce,
+              "the report's row has the undelivered mark in the attachment column's place")
+        list.scrollRowToVisible(failedRow)
+        await selectRow(failedRow)
+        check(await waitUntil(15) { (await readerText()).contains("Your message was not delivered") },
+              "opening it shows the card above the message: not delivered")
+        let failedCard = await readerText()
+        check(failedCard.contains("robin.nobody@example.org") && failedCard.contains("The address does not exist")
+              && failedCard.contains("What you can do"),
+              "the card names the recipient, why and what to do")
+        let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
+        _ = try? await preview?.evaluateJavaScript("document.querySelector('details').open = true")
+        check(await waitUntil(5) { (await readerText()).contains("550 5.1.1 The email account that you tried to reach does not exist") },
+              "the card's Details show the server's own words")
+        await shot(main.window, "bounce-1-failed")
+
+        // the link, clicked as the user clicks it: the web view's navigation, which the app takes
+        _ = try? await preview?.evaluateJavaScript("document.querySelector('a[href=\"inboxclassic:bounced-message\"]').click()")
+        check(await waitUntil(10) { main.mailbox.selectedName == "Sent Items" && main.mailbox.selectedRow?.subject == bouncedSubject },
+              "Show the message that bounced selects the message in Sent Items (\(main.mailbox.selectedName): \(main.mailbox.selectedRow?.subject ?? "none"))")
+
+        selectFolder(named: "Inbox")
+        guard let delayedRow = await waitFor(20, { listIndex(subject: delayedSubject) }) else {
+            throw Failed(description: "the delay notice did not arrive")
+        }
+        list.scrollRowToVisible(delayedRow)
+        await selectRow(delayedRow)
+        check(await waitUntil(15) { (await readerText()).contains("Your message has not been delivered yet") },
+              "a delay notice shows the amber card")
+        check((await readerText()).contains("still trying"), "saying it is still being tried")
+        await shot(main.window, "bounce-2-delayed")
+
+        search("is:bounce")
+        check(await waitUntil(20) { list.numberOfRows == 2 }, "is:bounce finds the two notices and nothing else (\(list.numberOfRows))")
+        let foundSubjects = Set((0..<list.numberOfRows).compactMap { main.mailbox.row($0)?.subject })
+        check(foundSubjects == [failedSubject, delayedSubject], "the report and the delay notice")
+        if let shownRow = listIndex(subject: failedSubject) {
+            await selectRow(shownRow)
+        }
+        await shot(main.window, "bounce-3-list")
+        search("")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(20) { list.numberOfRows >= 4 }
     }
 
     // ---- a message in a window of its own ----
@@ -1596,4 +1709,215 @@ extension UITest {
             _ = await waitUntil { !outbox.isVisible }
         }
     }
+
+    // ---- the Address Book ----
+
+    /// the people the Address Book lists, by name
+    func bookNames(_ book: AddressBookWindow) -> [String] {
+        book.rows.map(\.title)
+    }
+
+    func addressBook() async throws {
+        step("the Address Book")
+        command(.addressBook)
+        guard let bookWindow = await waitWindow("addressbook", 10), let book = AddressBookWindow.shown else {
+            throw Failed(description: "no Address Book")
+        }
+        await pause(0.5)
+        let groupsWidth = book.groupList.enclosingScrollView?.frame.width ?? 0
+        check(groupsWidth > 150 && groupsWidth < 260, "the groups take a narrow column at the left (\(groupsWidth) of \(bookWindow.frame.width))")
+        let bookToolbar = bookWindow.toolbar?.items.map(\.itemIdentifier.rawValue) ?? []
+        check(book.rows.isEmpty && (find("book.empty", in: bookWindow) as NSTextField?)?.isHidden == false,
+              "Tools > Address Book opens the Address Book, empty")
+        check(["book.newContact", "book.newGroup", "book.properties", "book.delete", "book.writeTo", "book.search"]
+            .allSatisfy(bookToolbar.contains), "with New Contact, New Group, Properties, Delete, Write To and the find box")
+        check(Command.addressBook.key?.0 == "b" && Command.addressBook.key?.1 == [.command, .shift], "Shift-Command-B opens it")
+
+        // a contact with two addresses
+        onMain { book.newContact() }
+        guard let person = await waitWindow("contact", 10) else { throw Failed(description: "no Contact Properties") }
+        check(person.title == "New Contact", "New Contact opens Contact Properties (\(person.title))")
+        type("Mary", into: find("contact.first", in: person))
+        type("Smith", into: find("contact.last", in: person))
+        check((find("contact.display", in: person) as NSTextField?)?.stringValue == "Mary Smith", "the name shown follows the first and last name")
+        type("mary@example.com", into: find("contact.address", in: person))
+        press(find("contact.add", in: person))
+        await pause(0.3)
+        type("mary.smith@work.example", into: find("contact.address", in: person))
+        press(find("contact.add", in: person))
+        await pause(0.3)
+        type("+1 555 0100", into: find("contact.phone", in: person))
+        press(find("contact.phone.add", in: person))
+        await pause(0.3)
+        let personAddresses: NSTableView? = find("contact.addresses", in: person)
+        check(personAddresses?.numberOfRows == 2, "with two addresses, mary@example.com the default")
+        await shot(person, "contacts-2-person")
+        press(find("contact.ok", in: person))
+        check(await waitUntil(10) { !person.isVisible }, "OK saves the contact")
+        check(book.rows.count == 1 && book.rows.first?.title == "Mary Smith" && book.rows.first?.address == "mary@example.com"
+              && book.rows.first?.phone == "+1 555 0100", "and the book lists it: Mary Smith, mary@example.com")
+        let mary = book.rows.first?.card ?? 0
+        check(core().bookCard(mary)?.addresses == ["mary@example.com", "mary.smith@work.example"], "both addresses kept, the first the default")
+        book.find("smi")
+        check(bookNames(book) == ["Mary Smith"], "the find box finds her by \"smi\"")
+        book.find("zed")
+        check(book.rows.isEmpty && (find("book.empty", in: bookWindow) as NSTextField?)?.stringValue.contains("zed") == true,
+              "and lists no one for \"zed\"")
+        book.find("")
+
+        // a group of her and a typed address
+        onMain { book.newGroup() }
+        guard let groupSheet = await waitWindow("group", 10) else { throw Failed(description: "no Group Properties") }
+        check(groupSheet.title == "New Group", "New Group opens Group Properties")
+        type("Team", into: find("group.name", in: groupSheet))
+        press(find("group.select", in: groupSheet))
+        guard let members = await waitWindow("pick", 10) else { throw Failed(description: "no Select Group Members") }
+        check(members.title == "Select Group Members", "Select Members opens the book's people")
+        let memberSource: NSTableView? = find("pick.list", in: members)
+        memberSource?.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        press(find("pick.add", in: members))
+        await pause(0.3)
+        press(find("pick.ok", in: members))
+        _ = await waitUntil(10) { !members.isVisible }
+        type("dave@example.com", into: find("group.address", in: groupSheet))
+        press(find("group.add", in: groupSheet))
+        await pause(0.3)
+        let groupMembers: NSTableView? = find("group.members", in: groupSheet)
+        check(groupMembers?.numberOfRows == 2, "with Mary Smith from Select Members and dave@example.com typed")
+        await shot(groupSheet, "contacts-3-group")
+        press(find("group.ok", in: groupSheet))
+        check(await waitUntil(10) { !groupSheet.isVisible }, "OK saves the group")
+        check(book.groups.count == 1 && book.groups.first?.name == "Team" && book.groups.first?.count == 2,
+              "and it is listed on the left with its two members")
+        check(book.selectedGroup?.name == "Team" && Set(bookNames(book)) == ["Mary Smith", "dave@example.com"],
+              "selected, it lists its members")
+        onMain { book.groupList.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false) }
+        await pause(0.3)
+        book.people.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        bookWindow.makeFirstResponder(book.people)
+        await shot(bookWindow, "contacts-1-book")
+
+        // Select Recipients in a new message
+        command(.newMail)
+        guard let picking = await waitCompose() else { throw Failed(description: "no compose window") }
+        let pickTo: NSButton? = find("compose.pick.to", in: picking)
+        check(pickTo != nil, "the To label of a message is a button")
+        press(pickTo)
+        guard let picker = await waitWindow("pick", 10) else { throw Failed(description: "no Select Recipients") }
+        check(picker.title == "Select Recipients", "To opens Select Recipients")
+        let pickSource: NSTableView? = find("pick.list", in: picker)
+        let pickerNames = (0..<(pickSource?.numberOfRows ?? 0)).compactMap {
+            ((pickSource?.view(atColumn: 0, row: $0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue)
+        }
+        check(pickerNames == ["Team", "Mary Smith"], "it lists the group and the contact (\(pickerNames))")
+        pickSource?.selectRowIndexes(IndexSet([0, 1]), byExtendingSelection: false)
+        press(find("pick.to", in: picker))
+        await pause(0.3)
+        let pickedTo: NSTableView? = find("pick.chosen.to", in: picker)
+        check(pickedTo?.numberOfRows == 2, "To -> puts them in the message's recipients")
+        await shot(picker, "contacts-4-pick")
+        press(find("pick.ok", in: picker))
+        _ = await waitUntil(10) { !picker.isVisible }
+        let pickedField = field("compose.to", picking)?.stringValue ?? ""
+        check(pickedField == "Mary Smith <mary@example.com>, dave@example.com",
+              "OK puts them in To, each address once (\(pickedField))")
+        // a group completes by its name
+        let ccField = field("compose.cc", picking) as? AddressField
+        let offered = ccField?.people("tea") ?? []
+        check(offered.first?.hasSuffix("Team") == true, "typing \"tea\" offers the group by its name (\(offered))")
+        press(find("compose.show-cc", in: picking))
+        await pause(0.3)
+        if let editor = ccField?.currentEditor() as? NSTextView {
+            editor.insertText("tea", replacementRange: editor.selectedRange())
+            onMain { editor.complete(nil) }
+            await pause(1)
+        }
+        let ccText = ccField?.stringValue ?? ""
+        check(ccText.hasPrefix("Mary Smith <mary@example.com>, dave@example.com"), "taking it puts its members in Cc (\(ccText))")
+        await closeWithoutSaving(picking)
+
+        // Add Sender to Address Book
+        bookWindow.orderOut(nil)
+        main.window.makeKeyAndOrderFront(nil)
+        selectFolder(named: "Inbox")
+        _ = await waitUntil { list.numberOfRows > 0 }
+        let senderRow = (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == "October newsletter" }
+            ?? (0..<list.numberOfRows).first { !(main.mailbox.row($0)?.fromAddress ?? "").isEmpty } ?? 0
+        await selectRow(senderRow)
+        let sender = main.mailbox.row(senderRow)
+        let senderName = sender?.from ?? ""
+        let senderAddress = sender?.fromAddress ?? ""
+        let rightClick = main.mailbox.messageMenu()?.items.map(\.title) ?? []
+        check(rightClick.contains("Add Sender to Address Book"), "the message list's right-click menu has Add Sender to Address Book")
+        command(.addSenderToBook)
+        let statusLabel: NSTextField? = find("status.text", in: main.window)
+        check(await waitUntil(5) { statusLabel?.stringValue.hasSuffix("was added to the Address Book.") == true },
+              "Add Sender adds \(senderName) (\(statusLabel?.stringValue ?? ""))")
+        check(core().bookCards().contains { $0.address == senderAddress }, "with the address \(senderAddress)")
+        command(.addSenderToBook)
+        check(await waitUntil(5) { statusLabel?.stringValue.hasSuffix("is already in the Address Book.") == true },
+              "and again says the sender is in the Address Book already (\(statusLabel?.stringValue ?? ""))")
+        check(core().bookCards().filter { $0.address == senderAddress }.count == 1, "without a second card")
+
+        // import and export
+        let vcf = out.appendingPathComponent("contacts.vcf")
+        try "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Mary Smith\r\nN:Smith;Mary;;;\r\nEMAIL:mary@example.com\r\nEND:VCARD\r\n"
+            .appending("BEGIN:VCARD\r\nVERSION:3.0\r\nFN:John Doe\r\nN:Doe;John;;;\r\nEMAIL:john@example.org\r\nEND:VCARD\r\n")
+            .write(to: vcf, atomically: true, encoding: .utf8)
+        TestHooks.open = { _ in [vcf] }
+        command(.importAddressBook)
+        let imported = await waitWindow("alert", 10)
+        let importedText = alertText(imported)
+        check(importedText.contains("Added 1 contact, skipped 1 already in the Address Book."),
+              "File > Import Address Book adds 1 and skips 1 (\(importedText))")
+        answer(imported, "OK")
+        TestHooks.open = nil
+        _ = await waitUntil(5) { window("alert") == nil }
+        command(.addressBook)
+        _ = await waitUntil(5) { bookWindow.isVisible }
+        onMain { book.groupList.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false) }
+        await pause(0.5)
+        let afterImport = bookNames(book)
+        check(afterImport.contains("John Doe") && afterImport.contains("Mary Smith") && afterImport.contains(senderName),
+              "and the book lists John Doe beside Mary Smith and \(senderName) (\(afterImport))")
+        if let john = book.rows.firstIndex(where: { $0.title == "John Doe" }) {
+            book.people.selectRowIndexes(IndexSet(integer: john), byExtendingSelection: false)
+        }
+        await shot(bookWindow, "contacts-5-import")
+        let exported = out.appendingPathComponent("exported.vcf")
+        try? FileManager.default.removeItem(at: exported)
+        var exportName: String?
+        TestHooks.save = { name in
+            exportName = name
+            return exported
+        }
+        command(.exportAddressBook)
+        let exportSaid = await waitWindow("alert", 10)
+        let exportText = alertText(exportSaid)
+        check(exportName == "Address Book.vcf" && exportText.contains("3 contacts saved to exported.vcf"),
+              "File > Export Address Book writes a vCard file (\(exportText))")
+        answer(exportSaid, "OK")
+        TestHooks.save = nil
+        let card = (try? String(contentsOf: exported, encoding: .utf8)) ?? ""
+        check(card.contains("Mary Smith") && card.contains("John Doe") && card.contains(senderAddress),
+              "with Mary Smith, John Doe and \(senderName) in it")
+        _ = await waitUntil(5) { window("alert") == nil }
+
+        // Delete asks first
+        bookWindow.makeKeyAndOrderFront(nil)
+        if let john = book.rows.firstIndex(where: { $0.title == "John Doe" }) {
+            book.people.selectRowIndexes(IndexSet(integer: john), byExtendingSelection: false)
+        }
+        bookWindow.makeFirstResponder(book.people)
+        onMain { book.deleteSelected() }
+        let sure = await waitWindow("alert", 10)
+        check(alertText(sure).contains("Delete this contact from the Address Book?"), "Delete asks first")
+        answer(sure, "Delete")
+        check(await waitUntil(5) { !bookNames(book).contains("John Doe") && bookNames(book).contains("Mary Smith") },
+              "then removes the selected contact")
+        onMain { bookWindow.performClose(nil) }
+        _ = await waitUntil(5) { !bookWindow.isVisible }
+    }
+
+    func core() -> Core { main.core }
 }

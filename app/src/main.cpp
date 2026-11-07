@@ -202,6 +202,8 @@ void SetNotify(bool on) {
     CheckMenuItem(GetMenu(g_main), IDM_NOTIFY, MF_BYCOMMAND | (on ? MF_CHECKED : MF_UNCHECKED));
 }
 
+}  // namespace
+
 // the window back from the tray (or the taskbar), in front
 void ShowMain() {
     if (IsIconic(g_main)) {
@@ -213,6 +215,8 @@ void ShowMain() {
     // started in the tray: shown now for the first time
     g_mailbox.SelectStart();
 }
+
+namespace {
 
 // the window's close button: the app keeps checking mail from the tray; the first time it says so
 void HideToTray() {
@@ -473,6 +477,8 @@ HMENU BuildMenu() {
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_SAVE_AS, MenuItem(PE_TEXT_CMD_SAVE_AS).c_str());
     AppendMenuW(file, MF_STRING, IDM_IMPORT, MenuItem(PE_TEXT_CMD_IMPORT).c_str());
+    AppendMenuW(file, MF_STRING, IDM_IMPORT_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_IMPORT_ADDRESS_BOOK).c_str());
+    AppendMenuW(file, MF_STRING, IDM_EXPORT_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_EXPORT_ADDRESS_BOOK).c_str());
     AppendMenuW(file, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P").c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_CMD_PROPERTIES, L"Alt+Enter").c_str());
@@ -521,6 +527,9 @@ HMENU BuildMenu() {
     AppendMenuW(tools, MF_STRING, IDM_SYNC, MenuItem(PE_TEXT_CMD_SYNC, L"F5").c_str());
     AppendMenuW(tools, MF_STRING, IDM_OUTBOX, MenuItem(PE_TEXT_CMD_OUTBOX).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(tools, MF_STRING, IDM_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_ADDRESS_BOOK, L"Ctrl+Shift+B").c_str());
+    AppendMenuW(tools, MF_STRING, IDM_ADD_SENDER_TO_BOOK, MenuItem(PE_TEXT_CMD_ADD_SENDER_TO_BOOK).c_str());
+    AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(tools, MF_STRING, IDM_AI_AGENTS, MenuItem(PE_TEXT_CMD_AI_AGENTS).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(tools, MF_STRING | (g_notify ? MF_CHECKED : 0), IDM_NOTIFY, MenuItem(PE_TEXT_CMD_NOTIFY).c_str());
@@ -562,6 +571,7 @@ HACCEL BuildAccelerators() {
         {FVIRTKEY | FCONTROL, VK_OEM_COMMA, IDM_PREVIOUS_MESSAGE},
         {FVIRTKEY | FCONTROL, 'Y', IDM_GO_TO_FOLDER},
         {FVIRTKEY, VK_F3, IDM_FIND_IN_MESSAGE},
+        {FVIRTKEY | FCONTROL | FSHIFT, 'B', IDM_ADDRESS_BOOK},
     };
     return CreateAcceleratorTableW(keys, static_cast<int>(std::size(keys)));
 }
@@ -919,6 +929,18 @@ void OpenMailto(const std::wstring& link, int64_t account) {
     OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
 }
 
+void WriteTo(const std::wstring& to) {
+    int64_t account = g_mailbox.CurrentAccount();
+    if (!account) {
+        MessageBoxW(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    std::string recipients = core::Narrow(to);
+    PeDraftInfo draft = {};
+    draft.to = recipients.c_str();
+    OpenCompose(g_main, g_core.get(), account, &draft);
+}
+
 namespace {
 
 // ---- one app for each mail store ----
@@ -1051,6 +1073,19 @@ void OnCommand(WORD id, WORD code) {
     case IDM_OUTBOX:
         OutboxDialog(g_main, g_core.get());
         ShowOutbox();
+        return;
+    case IDM_ADDRESS_BOOK:
+        OpenAddressBook(g_core.get());
+        return;
+    case IDM_ADD_SENDER_TO_BOOK:
+        g_mailbox.AddSenderToBook(g_main);
+        return;
+    case IDM_IMPORT_ADDRESS_BOOK:
+    case IDM_EXPORT_ADDRESS_BOOK:
+        if (std::wstring said = id == IDM_IMPORT_ADDRESS_BOOK ? ImportAddressBook(g_main, g_core.get()) : ExportAddressBook(g_main, g_core.get());
+            !said.empty()) {
+            SetStatus(said);
+        }
         return;
     case IDCANCEL:
         // Esc: the search goes first
@@ -1453,6 +1488,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         TrayRemove(hwnd);
         DestroyComposeWindows();
         DestroyMessageWindows();
+        DestroyAddressBook();
         // the WebView2s go before COM does, the core before its events are dropped
         CloseHelp();
         g_mailbox.Destroy();

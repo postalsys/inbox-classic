@@ -675,6 +675,14 @@ pub fn run_command(command: Command) {
         Command::FindInMessage => main.reader.find_in_message(),
         Command::ExpandAllThreads => main.expand_all_threads(true),
         Command::CollapseAllThreads => main.expand_all_threads(false),
+        Command::AddressBook => crate::address_book::open(),
+        Command::AddSenderToBook => spawn(async move { main.add_sender_to_book().await }),
+        Command::ImportAddressBook => {
+            spawn(async move { crate::address_book::import(main.window().upcast_ref()).await })
+        }
+        Command::ExportAddressBook => {
+            spawn(async move { crate::address_book::export(main.window().upcast_ref()).await })
+        }
     }
 }
 

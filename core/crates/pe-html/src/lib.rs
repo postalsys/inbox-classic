@@ -12,9 +12,13 @@ use std::sync::{Arc, OnceLock};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 
+mod bounce;
 mod editor;
 mod platform;
 mod visible;
+pub use bounce::{
+    BOUNCED_MESSAGE_LINK, BounceCard, CardDetail, CardPicture, CardReason, bounce_card, is_bounced_message_link,
+};
 pub use editor::{
     PICTURE_FILE_LIMIT, PICTURE_HEAD, Picture, draft_body, editor_document, is_plain, outgoing_html, picture_type,
     picture_uri, quote_html, quote_parts, signature_block, signature_html,
@@ -211,12 +215,24 @@ pub struct Rendered {
 /// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows (on
 /// screen the window shows them above the message), and whether the message has pictures on the internet
 pub fn render_view(html: &str, options: &RenderOptions, images: &[InlineImage], header: &[(&str, &str)]) -> Rendered {
+    render_view_with(html, options, images, header, None)
+}
+
+/// [`render_view`] with the card of a bounce above the message
+pub fn render_view_with(
+    html: &str,
+    options: &RenderOptions,
+    images: &[InlineImage],
+    header: &[(&str, &str)],
+    card: Option<&BounceCard>,
+) -> Rendered {
     let remote = Arc::new(AtomicBool::new(false));
     let body = builder_noting(images, Some(remote.clone())).clean(html).to_string();
+    let card = card.map(bounce_card).unwrap_or_default();
     Rendered {
         // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
         remote_images: remote.load(Ordering::Relaxed) || style_elements_load_remote(&body),
-        document: wrap(&body, options, header),
+        document: wrap(&body, options, header, &card),
     }
 }
 
@@ -275,8 +291,8 @@ pub fn print_page(document: &str) -> Option<String> {
     ))
 }
 
-/// The preview document around a sanitized body
-fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)]) -> String {
+/// The preview document around a sanitized body, with `card` (markup of ours, [`bounce_card`]) above it
+fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str) -> String {
     let image_sources = if options.allow_remote_images {
         "data: http: https:"
     } else {
@@ -322,7 +338,7 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)]) -> String 
          @layer {class}{{.{class}{{display:none}}\
          @media print{{.{class}{{{shown};border-bottom:1px solid #999!important;padding-bottom:6px!important;margin-bottom:10px!important}}}}}}\
          </style>\
-         </head><body>{printed}{body}{DOCUMENT_END}"
+         </head><body>{printed}{card}{body}{DOCUMENT_END}"
     )
 }
 

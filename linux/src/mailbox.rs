@@ -1080,6 +1080,11 @@ impl Mailbox {
                 return;
             }
         }
+        // selecting another folder ends a search; the folder selected already is not selected again, its search is
+        // ended here
+        if self.searching() && self.folder.get() == folder && !self.all_inboxes.get() {
+            self.clear_find();
+        }
         if !self.folders.select(folder) || self.folder.get() != folder {
             return;
         }
@@ -1960,6 +1965,7 @@ impl Mailbox {
         add(&files, Command::Print, None);
         menu.append_section(None, &files);
         let details = gio::Menu::new();
+        add(&details, Command::AddSenderToBook, None);
         add(
             &details,
             Command::ViewSource,
@@ -1969,6 +1975,23 @@ impl Mailbox {
         menu.append_section(None, &details);
         widget.insert_action_group("message", Some(&group));
         *self.message_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
+    }
+
+    /// Tools > Add Sender to Address Book: the sender of the message selected (or shown) into the book, said in the
+    /// status bar
+    pub async fn add_sender_to_book(&self) {
+        let (folder, uid) = match self.selected_refs().as_slice() {
+            [one] => (one.folder, one.uid),
+            _ => (self.reader.folder(), self.reader.uid()),
+        };
+        if uid == 0 {
+            ui::alert(&self.window, TITLE, &t!(UiSelectMessageFirst)).await;
+            return;
+        }
+        match crate::address_book::add_sender(folder, uid) {
+            Ok(said) => self.set_status(&said),
+            Err(why) => ui::alert(&self.window, TITLE, &why).await,
+        }
     }
 
     /// File > Print: the message as it is shown, with the pictures the user allowed, through the print dialog

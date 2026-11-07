@@ -51,12 +51,23 @@ enum Icons {
     static var selectedFlag: NSImage? { flagImage(.white, key: "flag.fill@white") }
 
     private static func flagImage(_ color: NSColor, key: String) -> NSImage? {
+        symbol("flag.fill", key: key, colors: [color])
+    }
+
+    /// The mark of a delivery notice (a bounce) in the list: an outlined exclamation mark in a circle, a template
+    /// drawn in the paper clip's colour (white on a selected row, as the clip is); the card says how bad it is
+    static var bounce: NSImage? { symbol("exclamationmark.circle", key: "bounce", template: true) }
+
+    /// A system symbol at the list's size, cached under `key`: a template the cell tints, or drawn in `colors`
+    private static func symbol(_ name: String, key: String, colors: [NSColor] = [], template: Bool = false) -> NSImage? {
         if let image = cache[key] { return image }
-        let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .regular)
-            .applying(NSImage.SymbolConfiguration(paletteColors: [color]))
-        guard let image = NSImage(systemSymbolName: "flag.fill", accessibilityDescription: nil)?
+        var config = NSImage.SymbolConfiguration(pointSize: 12, weight: .regular)
+        if !colors.isEmpty {
+            config = config.applying(NSImage.SymbolConfiguration(paletteColors: colors))
+        }
+        guard let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
             .withSymbolConfiguration(config) else { return nil }
-        image.isTemplate = false
+        image.isTemplate = template
         cache[key] = image
         return image
     }

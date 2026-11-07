@@ -444,6 +444,18 @@ Screenshots: `threads-1-collapsed`, `threads-2-expanded`, `threads-3-options-off
 - with Group messages by conversation turned off in Options, the list has the three messages each on a row of its own
 - turned on again, the conversation is one row again
 
+## 34f. A message that bounced
+
+Screenshots: `bounce-1-failed`, `bounce-2-delayed`, `bounce-3-list`
+
+- a message is put into Sent Items on the server, and a delivery report saying it could not be delivered to one recipient (the mailbox does not exist) into the Inbox
+- the report's row in the Inbox has the undelivered mark in the attachment column's place
+- opening it shows the card above the message: not delivered, the recipient, why and what to do
+- the card's Details show the server's own words
+- Show the message that bounced selects the message in Sent Items
+- a notice that delivery is delayed shows the amber card, saying it is still being tried
+- searching for `is:bounce` finds the two notices and nothing else
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
@@ -493,6 +505,34 @@ Screenshots: `signature-1-editor`, `signature-2-new`, `signature-3-reply-left`
 - the message went with the signature
 - a reply takes typing
 - a reply has the signature above the quote
+
+## 39a. The Address Book
+
+Screenshots: `contacts-1-book`, `contacts-2-person`, `contacts-3-group`, `contacts-4-pick`, `contacts-5-import`
+
+- Tools > Address Book (Ctrl+Shift+B) opens the Address Book, empty, with New Contact, New Group, Properties, Delete and Write To
+- New Contact opens Contact Properties
+- with Mary Smith's first and last name and two addresses, mary@example.com and mary.smith@work.example, the first the default
+- OK saves the contact and the book lists it: Mary Smith, mary@example.com
+- the find box finds her by "smi" and lists no one for "zed"
+- New Group opens Group Properties
+- named Team, with Mary Smith from Select Members and dave@example.com typed
+- OK saves the group, and it is listed on the left with its two members
+- in a new message, To opens Select Recipients
+- it lists the group and the contact
+- the group and the contact picked with To -> go to the message's recipients
+- OK puts them in To: Mary Smith <mary@example.com>, dave@example.com, each address once
+- typing "tea" in Cc offers the group by its name
+- taking it puts its members in Cc
+- the message is closed without saving
+- Add Sender to Address Book (Tools, and the message list's right-click menu) on a message adds its sender to the book, and on it again says the sender is there already
+- and again says the sender is in the Address Book already, without a second card
+- File > Import Address Book reads a vCard file of two contacts, Mary Smith (mary@example.com) and John Doe (john@example.org)
+- it says it added 1 and skipped 1 already in the Address Book
+- and the book lists John Doe beside Mary Smith and Sender
+- File > Export Address Book writes a vCard file
+- with Mary Smith, John Doe and Sender in it
+- Delete in the Address Book asks first, then removes the selected contact
 
 ## 40. A Gmail address
 

@@ -803,20 +803,28 @@ pub unsafe extern "C" fn pe_inbox_unread(core: *const PeCore) -> u64 {
     unsafe { with(core, 0, |core| core.inbox_unread().unwrap_or(0)) }
 }
 
-// ---- the address book ----
+// ---- completing addresses ----
 
-/// Someone to complete an address with
+/// Someone (or a group of the address book) to complete an address with
 #[repr(C)]
 pub struct PeContact {
+    /// The person's name, or the group's
     pub name: *const c_char,
+    /// Empty for a group
     pub address: *const c_char,
-    /// As it goes in an address field: `Name <address>`, the name quoted where it needs it, or the address alone
+    /// As it goes in an address field: `Name <address>`, the name quoted where it needs it, or the address alone; for
+    /// a group its members so, separated by commas
     pub label: *const c_char,
+    /// A group of the address book: shown by its `name`, it puts its members (`label`) in the field, and is not
+    /// forgotten with `pe_contact_forget`
+    pub group: bool,
 }
 
 pub struct PeContactList(Rows<PeContact>);
 
-/// The people whose address or name (a word of it) starts with `typed`, best first, at most `limit`; NULL on failure
+/// What completes an address field from `typed`: the people of the address book (each of their addresses) and its
+/// groups whose name, nickname or address (a word of the name) starts with it, then those written to or heard from,
+/// best first, at most `limit`, no address twice; NULL on failure
 ///
 /// # Safety
 /// `core` must be a live handle, `typed` NULL or a NUL-terminated string.
@@ -827,13 +835,14 @@ pub unsafe extern "C" fn pe_contacts(core: *const PeCore, typed: *const c_char, 
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
-            let Ok(contacts) = core.contacts(&typed, limit) else {
+            let Ok(found) = core.completions(&typed, limit) else {
                 return null_mut();
             };
-            handed(PeContactList(Rows::new(&contacts, |c, strings| PeContact {
+            handed(PeContactList(Rows::new(&found, |c, strings| PeContact {
                 name: strings.add(&c.name),
                 address: strings.add(&c.address),
-                label: strings.add(&pe_core::address_label(&c.name, &c.address)),
+                label: strings.add(&c.label),
+                group: c.group,
             })))
         })
     }
@@ -865,7 +874,7 @@ pub unsafe extern "C" fn pe_contact_list_free(list: *mut PeContactList) {
     unsafe { take_back(list) }
 }
 
-/// Takes someone out of the completions for good
+/// Takes someone out of the people written to or heard from for good (a person of the address book stays there)
 ///
 /// # Safety
 /// `core` must be a live handle, `address` NULL or a NUL-terminated string.
@@ -1387,6 +1396,9 @@ pub struct PeMessage {
     /// The row stands for all of its conversation's messages, which are not shown under it (it shows a +, and an action
     /// on it acts on them all). The apps read this rather than decide from the numbers above.
     pub thread_collapsed: bool,
+    /// A notice that a message was not delivered, or not yet (a bounce): the list shows its icon in the attachment
+    /// column's place
+    pub bounce: bool,
 }
 
 /// A page of the message list; free with `pe_message_list_free`
@@ -1441,6 +1453,7 @@ pub unsafe extern "C" fn pe_messages(
                     thread_expanded: m.thread.is_some_and(|t| t.expanded),
                     thread_opens: m.thread.is_some_and(|t| t.opens()),
                     thread_collapsed: m.thread.is_some_and(|t| t.collapsed()),
+                    bounce: info.bounce,
                 }
             })))
         })
@@ -1834,6 +1847,14 @@ pub struct PeMessageInfo {
     pub invitation: *const PeInvitation,
     /// The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
     pub has_logo: bool,
+    /// A notice that a message was not delivered, or not yet: `document` starts with a card that explains it
+    pub bounce: bool,
+    /// The message the bounce returns is in the account (Sent Items first), at `bounced_folder` and `bounced_uid`:
+    /// the card links to it, and a click on that link (`pe_reader_link` says `PE_READER_LINK_BOUNCED_MESSAGE`)
+    /// selects it
+    pub has_bounced_message: bool,
+    pub bounced_folder: i64,
+    pub bounced_uid: u64,
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
@@ -1899,6 +1920,10 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         unsubscribe_target: strings.add(&view.unsubscribe.as_ref().map(Unsubscribe::target).unwrap_or_default()),
         invitation: invitation.as_deref().map_or(null(), |i| i as *const PeInvitation),
         has_logo: view.has_logo,
+        bounce: view.bounce,
+        has_bounced_message: view.bounced_message.is_some(),
+        bounced_folder: view.bounced_message.map_or(0, |m| m.folder),
+        bounced_uid: view.bounced_message.map_or(0, |m| m.uid),
     };
     handed(PeMessageView {
         info,
@@ -1906,6 +1931,39 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         _invitation: invitation,
         _strings: strings,
     })
+}
+
+/// What a link clicked in the reading pane is to the app
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeReaderLink {
+    /// A link of the message: the browser opens it, as before
+    Other = 0,
+    /// "Show the message that bounced" on a bounce's card: select the message at `bounced_folder` and
+    /// `bounced_uid` of the view's `PeMessageInfo`
+    BouncedMessage = 1,
+}
+
+/// What `uri`, a link clicked in the reading pane (the URI the web view's navigation names), is: one of the
+/// document's own, which the app handles itself, or one to open in the browser. The web views cancel every navigation
+/// as before; the app asks this first.
+///
+/// # Safety
+/// `uri` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
+    // SAFETY: as the caller guarantees
+    let Some(uri) = (unsafe { arg(uri) }) else {
+        return PeReaderLink::Other;
+    };
+    guard(|| {
+        if pe_html::is_bounced_message_link(uri) {
+            PeReaderLink::BouncedMessage
+        } else {
+            PeReaderLink::Other
+        }
+    })
+    .unwrap_or(PeReaderLink::Other)
 }
 
 /// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the

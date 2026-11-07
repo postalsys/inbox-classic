@@ -1,7 +1,7 @@
 //! The later steps of the UI test, in the order of scripts/ui-e2e.ps1: unsubscribing from a list, a calendar
-//! invitation, a brand's logo, Mark All Read, dragging onto a folder, several messages and Undo, junk, folders,
-//! closing a message, an e-mail link handed over by a second start, address completion, a signature, a Gmail address,
-//! and closing the app.
+//! invitation, a brand's logo, Mark All Read, dragging onto a folder, several messages and Undo, junk, a bounce,
+//! folders, closing a message, an e-mail link handed over by a second start, address completion, a signature, a Gmail
+//! address, and closing the app.
 
 use super::*;
 
@@ -1546,6 +1546,240 @@ pub async fn conversations(d: &Driver) {
     );
 }
 
+/// A message in Sent Items that bounced, as its delivery report (Gmail's) says: the address does not exist
+fn bounced_message(date: &str) -> String {
+    format!(
+        "From: Alex Morgan <testuser@inboxclassic.test>\r\nTo: Jordan Lee <jordan.lee@example.org>\r\n\
+         Subject: Rooms for the team offsite\r\nMessage-ID: <offsite-venue@inboxclassic.test>\r\nDate: {date}\r\n\
+         MIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n\
+         Hi Jordan,\r\n\r\nthe hotel by the lake has a room for all of us on the 14th. Shall I book it?\r\n\r\nAlex\r\n"
+    )
+}
+
+/// The words of the receiving server in the delivery report of [`bounced_message`]
+const NO_SUCH_ACCOUNT: &str = "550 5.1.1 The email account that you tried to reach does not exist. Please try \
+    double-checking the recipient's email address for typos or unnecessary spaces.";
+
+/// The delivery report of [`bounced_message`], as Gmail writes one: what happened in words, the report for the
+/// recipient (5.1.1) and the headers of the message it returns
+fn failure_report(date: &str, sent: &str) -> String {
+    format!(
+        "From: Mail Delivery Subsystem <mailer-daemon@inboxclassic.test>\r\nTo: testuser@inboxclassic.test\r\n\
+         Subject: Delivery Status Notification (Failure)\r\nMessage-ID: <dsn-offsite@inboxclassic.test>\r\n\
+         Date: {date}\r\nAuto-Submitted: auto-replied\r\nX-Failed-Recipients: jordan.lee@example.org\r\n\
+         MIME-Version: 1.0\r\n\
+         Content-Type: multipart/report; boundary=\"report\"; report-type=delivery-status\r\n\r\n\
+         --report\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n\
+         ** Address not found **\r\n\r\n\
+         Your message wasn't delivered to jordan.lee@example.org because the address couldn't be found, or is \
+         unable to receive mail.\r\n\r\nThe response from the remote server was:\r\n{NO_SUCH_ACCOUNT}\r\n\r\n\
+         --report\r\nContent-Type: message/delivery-status\r\n\r\n\
+         Reporting-MTA: dns; googlemail.com\r\nArrival-Date: {sent}\r\n\
+         X-Original-Message-ID: <offsite-venue@inboxclassic.test>\r\n\r\n\
+         Final-Recipient: rfc822; jordan.lee@example.org\r\nAction: failed\r\nStatus: 5.1.1\r\n\
+         Remote-MTA: dns; mx.example.org. (192.0.2.10, the server for the domain example.org.)\r\n\
+         Diagnostic-Code: smtp; {NO_SUCH_ACCOUNT}\r\nLast-Attempt-Date: {date}\r\n\r\n\
+         --report\r\nContent-Type: text/rfc822-headers\r\n\r\n\
+         From: Alex Morgan <testuser@inboxclassic.test>\r\nTo: Jordan Lee <jordan.lee@example.org>\r\n\
+         Subject: Rooms for the team offsite\r\nMessage-ID: <offsite-venue@inboxclassic.test>\r\nDate: {sent}\r\n\r\n\
+         --report--\r\n"
+    )
+}
+
+/// A notice that a message is not delivered yet, as Postfix writes one: the receiving server could not be reached
+/// (4.4.1), tried again for days
+fn delay_report(date: &str, sent: &str, until: &str) -> String {
+    format!(
+        "From: Mail Delivery System <MAILER-DAEMON@mail.inboxclassic.test>\r\nTo: testuser@inboxclassic.test\r\n\
+         Subject: Delayed Mail (still being retried)\r\nMessage-ID: <dsn-agenda@mail.inboxclassic.test>\r\n\
+         Date: {date}\r\nAuto-Submitted: auto-replied\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/report; report-type=delivery-status; boundary=\"delay\"\r\n\r\n\
+         --delay\r\nContent-Description: Notification\r\nContent-Type: text/plain; charset=us-ascii\r\n\r\n\
+         This is the mail system at host mail.inboxclassic.test.\r\n\r\n\
+         ####################################################################\r\n\
+         # THIS IS A WARNING ONLY.  YOU DO NOT NEED TO RESEND YOUR MESSAGE. #\r\n\
+         ####################################################################\r\n\r\n\
+         Your message could not be delivered for more than 4 hour(s).\r\n\
+         It will be retried until it is 5 day(s) old.\r\n\r\n\
+         <sam.taylor@example.net>: connect to mx.example.net[192.0.2.25]:25: Connection timed out\r\n\r\n\
+         --delay\r\nContent-Description: Delivery report\r\nContent-Type: message/delivery-status\r\n\r\n\
+         Reporting-MTA: dns; mail.inboxclassic.test\r\nArrival-Date: {sent}\r\n\r\n\
+         Final-Recipient: rfc822; sam.taylor@example.net\r\nOriginal-Recipient: rfc822;sam.taylor@example.net\r\n\
+         Action: delayed\r\nStatus: 4.4.1\r\n\
+         Diagnostic-Code: X-Postfix; connect to mx.example.net[192.0.2.25]:25: Connection timed out\r\n\
+         Will-Retry-Until: {until}\r\n\r\n\
+         --delay\r\nContent-Description: Undelivered Message Headers\r\nContent-Type: text/rfc822-headers\r\n\r\n\
+         From: Alex Morgan <testuser@inboxclassic.test>\r\nTo: Sam Taylor <sam.taylor@example.net>\r\n\
+         Subject: Agenda for Monday\r\nMessage-ID: <agenda-monday@inboxclassic.test>\r\nDate: {sent}\r\n\r\n\
+         --delay--\r\n"
+    )
+}
+
+/// The text of a document, its tags left out, to look for words in it
+fn document_text(document: &str) -> String {
+    let mut text = String::new();
+    let mut inside = false;
+    for c in document.chars() {
+        match c {
+            '<' => inside = true,
+            '>' => inside = false,
+            _ if !inside => text.push(c),
+            _ => {}
+        }
+    }
+    text
+}
+
+/// The row of the message of `folder` with `subject` selected in the list (the folder shown), and its view there
+async fn open_by_subject(folder: i64, subject: &str) -> bool {
+    let main = shell().main();
+    // the list's own rows: grouped by conversation, a row is not a message's place in the folder
+    let found = shell()
+        .core
+        .search(&main.search(), main.list.sort(), 0, 500)
+        .unwrap_or_default()
+        .iter()
+        .position(|m| m.folder_id == folder && m.info.subject == subject);
+    let Some(row) = found.and_then(|at| u32::try_from(at).ok()) else {
+        return false;
+    };
+    select_row(row).await;
+    wait_until(15, || {
+        main.reader.has_view() && main.reader.subject().as_deref() == Some(subject)
+    })
+    .await
+}
+
+/// The undelivered marks the list draws in its rows on screen
+fn undelivered_marks() -> usize {
+    let view: gtk::Widget = shell().main().list.view.clone().upcast();
+    descendants::<gtk::Image>(&view)
+        .iter()
+        .filter(|i| i.is_mapped() && i.icon_name().as_deref() == Some(crate::messages::UNDELIVERED_ICON))
+        .count()
+}
+
+pub async fn bounces(d: &Driver) {
+    d.step("a message that bounced");
+    let main = shell().main();
+    let core = &shell().core;
+    let (Some(inbox), Some(sent)) = (folder_id("Inbox"), folder_id("Sent Items")) else {
+        d.check(false, "the tree has the Inbox and Sent Items");
+        return;
+    };
+    // read, and older than what the later steps add, so they find the lists as before
+    let at = |minutes| date_now(minutes);
+    let _ = d.add_message_in(d.ports.rest, "Sent", &bounced_message(&at(-300)), &["\\Seen"]);
+    let _ = d.add_message(&failure_report(&at(-298), &at(-300)), &["\\Seen"]);
+    let _ = d.add_message(&delay_report(&at(-60), &at(-290), &at(60 * 24 * 5)), &["\\Seen"]);
+    run_command(Command::Sync);
+    let has = |folder: i64, subject: &str| {
+        core.search(&pe_core::Search::folder(folder), main.list.sort(), 0, 500)
+            .unwrap_or_default()
+            .into_iter()
+            .find(|m| m.info.subject == subject)
+    };
+    let returned = wait_for(30, || has(sent, "Rooms for the team offsite")).await;
+    let notices = wait_until(30, || {
+        has(inbox, "Delivery Status Notification (Failure)").is_some()
+            && has(inbox, "Delayed Mail (still being retried)").is_some()
+    })
+    .await;
+    d.check(
+        returned.is_some() && notices,
+        "a message in Sent Items, and a delivery report and a delay notice in the Inbox",
+    );
+
+    select_folder("Inbox");
+    wait_until(10, || main.selected_name() == "Inbox").await;
+    let opened = open_by_subject(inbox, "Delivery Status Notification (Failure)").await;
+    let marked = main.list.selected().is_some_and(|(_, m)| m.info.bounce);
+    d.check(
+        opened && marked && wait_until(5, || undelivered_marks() > 0).await,
+        "the report's row has the undelivered mark in the attachment column's place",
+    );
+    let failed = wait_for(15, || {
+        let text = document_text(&main.reader.preview.shown());
+        text.contains("Your message was not delivered").then_some(text)
+    })
+    .await
+    .unwrap_or_default();
+    d.check(
+        [
+            "jordan.lee@example.org",
+            "The address does not exist",
+            "What you can do:",
+        ]
+        .iter()
+        .all(|w| failed.contains(w)),
+        "opening it shows the card: not delivered, the recipient, why and what to do",
+    );
+    d.check(
+        failed.contains("Details")
+            && failed.contains("The email account that you tried to reach does not exist")
+            && failed.contains("Status: 5.1.1"),
+        "the card's Details show the server's own words",
+    );
+    d.check(
+        main.reader.bounced_message()
+            == returned.as_ref().map(|m| pe_core::MessageRef {
+                folder: sent,
+                uid: m.info.uid,
+            }),
+        "the card links to the message in Sent Items",
+    );
+    d.shot(main.window(), "bounce-1-failed").await;
+
+    // the link, as a click on it asks for it: the page's navigation to it
+    main.reader.preview.view.load_uri(pe_html::BOUNCED_MESSAGE_LINK);
+    let shown = wait_until(10, || {
+        main.selected_name() == "Sent Items"
+            && main
+                .list
+                .selected()
+                .is_some_and(|(_, m)| m.folder_id == sent && m.info.subject == "Rooms for the team offsite")
+    })
+    .await;
+    d.check(shown, "Show the message that bounced selects the message in Sent Items");
+
+    select_folder("Inbox");
+    wait_until(10, || main.selected_name() == "Inbox").await;
+    open_by_subject(inbox, "Delayed Mail (still being retried)").await;
+    let delayed = wait_for(15, || {
+        let text = document_text(&main.reader.preview.shown());
+        text.contains("Your message has not been delivered yet").then_some(text)
+    })
+    .await
+    .unwrap_or_default();
+    d.check(
+        delayed.contains("still trying to deliver it") && delayed.contains("sam.taylor@example.net"),
+        "a notice that delivery is delayed shows the amber card, saying it is still being tried",
+    );
+    d.shot(main.window(), "bounce-2-delayed").await;
+
+    search("is:bounce").await;
+    let two = wait_until(20, || rows() == 2).await;
+    let subjects: Vec<String> = (0..rows())
+        .filter_map(|row| {
+            main.list.select(row);
+            main.list.selected().map(|(_, m)| m.info.subject)
+        })
+        .collect();
+    d.check(
+        two && subjects
+            .iter()
+            .all(|s| s.starts_with("Delivery Status") || s.starts_with("Delayed Mail")),
+        &format!(
+            "searching for is:bounce finds the two notices and nothing else ({})",
+            subjects.join(", ")
+        ),
+    );
+    select_row(0).await;
+    d.check(undelivered_marks() == 2, "both with the undelivered mark");
+    d.shot(main.window(), "bounce-3-list").await;
+    search("").await;
+}
+
 /// The form that asks for a folder's name: the name typed and OK clicked
 async fn answer_name(d: &Driver, title: &str, name: &str, shot: Option<&str>) {
     let form = wait_dialog(10, "folder-name-dialog").await;
@@ -1665,11 +1899,7 @@ pub async fn completing(d: &Driver) {
     let Some(c) = wait_compose(10).await else { return };
     c.to.grab_focus();
     // typed, a letter at a time
-    if let Some(text) = c.to.delegate() {
-        for letter in ["a", "n", "n"] {
-            text.emit_by_name::<()>("insert-at-cursor", &[&letter]);
-        }
-    }
+    type_letters(&c.to, "ann");
     let listed = wait_for(10, || crate::complete::shown_rows(&c.to).filter(|r| !r.is_empty())).await;
     d.check(
         listed.is_some(),
@@ -1788,7 +2018,7 @@ pub async fn gmail(d: &Driver) {
             );
             d.shot(&servers, "account-6-gmail").await;
             click(servers.upcast_ref(), "dialog-cancel");
-            wait_gone(10, "account-servers").await;
+            d.check(wait_gone(10, "account-servers").await, "Cancel closes the server form");
         }
         None => d.check(false, "its servers were found"),
     }

@@ -54,6 +54,141 @@ header-subject = Teema
 quote-original = ----- Algne kiri -----
 fold-show-earlier = Näita varasemaid kirju
 
+## Tagastatud kirjad: kaart kirja kohal, mis teatab, et kirja ei saanud kätte toimetada
+
+# review: new
+bounce-failed = Teie kirja ei toimetatud kohale
+# review: new
+bounce-delayed = Teie kirja pole veel kohale toimetatud
+# review: new
+bounce-delayed-note = Teie meiliserver proovib seda endiselt kohale toimetada. Teil pole vaja seda uuesti saata.
+# review: new
+bounce-show-message = Näita tagastatud kirja
+# review: new
+bounce-what-to-do = Mida teha:
+# review: new
+bounce-delayed-do = Praegu mitte midagi. Kui kirja ikka kohale toimetada ei õnnestu, saate uue teate.
+# review: new
+bounce-delayed-row-do = Praegu mitte midagi. Teie meiliserver proovib seda endiselt kohale toimetada ja kui see ei õnnestu, saate uue teate.
+# review: new
+bounce-details = Üksikasjad
+# review: new
+bounce-someone = Üks saaja
+# review: new
+bounce-server = Server: { $server }
+# review: new
+bounce-status = Olek: { $status }
+# review: new
+bounce-reported-by = Teatas: { $server }
+# review: new
+bounce-retry-minutes = Vastuvõttev server palus enne järgmist katset oodata { $count ->
+    [one] üks minut
+   *[other] { $count } minutit
+}.
+# review: new
+bounce-retry-hours = Vastuvõttev server palus enne järgmist katset oodata { $count ->
+    [one] üks tund
+   *[other] { $count } tundi
+}.
+# review: new
+bounce-blocklist = Blokeerimisloend: { $lists }
+# review: new
+bounce-user-unknown = Seda aadressi pole olemas
+# review: new
+bounce-user-unknown-why = Vastuvõtval serveril pole selle aadressiga postkasti. Aadress võib olla valesti kirjutatud või inimene on sealt lahkunud.
+# review: new
+bounce-user-unknown-do = Kontrollige aadressi õigekirja või küsige inimeselt aadressi, mida ta praegu kasutab.
+# review: new
+bounce-invalid-address = Aadress pole kehtiv
+# review: new
+bounce-invalid-address-why = Aadress pole kirjutatud kujul, millele saab kirju saata.
+# review: new
+bounce-invalid-address-do = Otsige trükivigu, näiteks tühikut, puuduvat tähte või tühja kohta pärast @-märki.
+# review: new
+bounce-mailbox-disabled = Postkast on suletud
+# review: new
+bounce-mailbox-disabled-why = Aadress on olemas, kuid selle postkast on välja lülitatud või pole enam kasutusel.
+# review: new
+bounce-mailbox-disabled-do = Võtke inimesega muul viisil ühendust ja küsige aadressi, mida ta praegu kasutab.
+# review: new
+bounce-mailbox-full = Postkast on täis
+# review: new
+bounce-mailbox-full-why = Saaja postkastis pole uute kirjade jaoks ruumi.
+# review: new
+bounce-mailbox-full-do = Saatke kiri mõne päeva pärast uuesti või andke inimesele muul viisil teada. Suured manused lükatakse tagasi esimesena.
+# review: new
+bounce-spam-blocked = Tagasi lükatud rämpspostina
+# review: new
+bounce-spam-blocked-why = Vastuvõttev server pidas kirja rämpspostiks.
+# review: new
+bounce-spam-blocked-do = Saatke kiri uuesti ilma selleta, mis paistab rämpspostina, näiteks paljude või lühendatud linkide või suure manuseta. Kui see kordub, küsige oma e-posti teenusepakkujalt.
+# review: new
+bounce-virus-detected = Tagasi lükatud viiruse tõttu
+# review: new
+bounce-virus-detected-why = Vastuvõttev server leidis kirjast või selle manustest viiruse või muu kahjuliku sisu.
+# review: new
+bounce-virus-detected-do = Kontrollige manuseid viirusetõrjega. Mõni server lükkab tagasi kõik programmid ja arhiivid, nii et jagage selliseid faile lingina.
+# review: new
+bounce-ip-blocklisted = Teie meiliserver on blokeerimisloendis
+# review: new
+bounce-ip-blocklisted-why = Vastuvõttev server ei võta vastu kirju serverilt, mis teie kirja saatis, sest selle serveri aadress on blokeerimisloendis.
+# review: new
+bounce-ip-blocklisted-do = Viga pole kirjas. Edastage see teade oma e-posti teenusepakkujale ja paluge tal server loendist eemaldada.
+# review: new
+bounce-domain-blocklisted = Domeen on blokeerimisloendis
+# review: new
+bounce-domain-blocklisted-why = Vastuvõttev server lükkab kirja tagasi, sest teie aadressi domeen või mõni kirja linkides olev domeen on blokeerimisloendis.
+# review: new
+bounce-domain-blocklisted-do = Kui kirjas on linke, proovige ilma nendeta. Muidu edastage see teade sellele, kes teie domeeni e-posti haldab.
+# review: new
+bounce-policy-blocked = Tagasi lükatud vastuvõtva serveri reeglite tõttu
+# review: new
+bounce-policy-blocked-why = Vastuvõtva serveri reeglid ei lase seda kirja läbi, näiteks selle suuruse, manuste või saatja tõttu.
+# review: new
+bounce-policy-blocked-do = Serveri enda sõnad jaotises Üksikasjad nimetavad sageli põhjuse. Küsige saajalt, kas ta saab selliseid kirju vastu võtta.
+# review: new
+bounce-geo-blocked = Tagasi lükatud päritolu tõttu
+# review: new
+bounce-geo-blocked-why = Vastuvõttev server ei võta kirju vastu riigist või võrgust, kus teie meiliserver asub.
+# review: new
+bounce-geo-blocked-do = Võtke inimesega muul viisil ühendust või küsige oma e-posti teenusepakkujalt.
+# review: new
+bounce-relay-denied = Server ei saatnud kirja edasi
+# review: new
+bounce-relay-denied-why = Server keeldus kirja edasi toimetamast, sageli seetõttu, et see saadeti sisse logimata või serveri kaudu, mis seda saajat ei teeninda.
+# review: new
+bounce-relay-denied-do = Kontrollige konto väljuvat serverit menüüs Fail > Kontod ja seda, et see logib sisse.
+# review: new
+bounce-auth-failure = Teie saatjaaadressi ei saanud kinnitada
+# review: new
+bounce-auth-failure-why = Vastuvõttev server ei saanud kinnitada, et kiri tuli tõesti teie domeenist (SPF, DKIM või DMARC).
+# review: new
+bounce-auth-failure-do = Edastage see teade sellele, kes teie domeeni e-posti haldab: selle seaded vajavad parandamist. Seni võib aidata saatmine teenusepakkuja enda serveri kaudu.
+# review: new
+bounce-rate-limited = Liiga palju kirju korraga
+# review: new
+bounce-rate-limited-why = Vastuvõttev server võtab teie meiliserverilt praegu vähem kirju vastu.
+# review: new
+bounce-rate-limited-do = Oodake veidi ja saatke kiri uuesti. Kui kirjutate paljudele, saatke korraga vähematele.
+# review: new
+bounce-greylisting = Hetkeks kinni peetud
+# review: new
+bounce-greylisting-why = Vastuvõttev server palub tundmatutel saatjatel veidi hiljem uuesti proovida, see on levinud kontroll rämpsposti vastu.
+# review: new
+bounce-greylisting-do = Midagi pole vaja teha. Meiliserverid proovivad ise uuesti ja kiri jõuab tavaliselt kohale tunni jooksul.
+# review: new
+bounce-server-error = Vastuvõtval serveril oli probleem
+# review: new
+bounce-server-error-why = Vastuvõtvat serverit ei saanud kätte või see ei saanud kirja oma probleemi tõttu vastu võtta.
+# review: new
+bounce-server-error-do = Saatke kiri hiljem uuesti. Kui see ikka ei õnnestu, kontrollige aadressi osa pärast @-märki trükivigade suhtes.
+# review: new
+bounce-unknown = Kohale toimetamata
+# review: new
+bounce-unknown-why = Teade ei ütle selgelt, miks.
+# review: new
+bounce-unknown-do = Serveri enda sõnad jaotises Üksikasjad võivad öelda rohkem. Kui need ei aita, edastage see teade oma e-posti teenusepakkujale.
+
 ## Several messages selected
 
 selection-title = { $count ->
@@ -373,3 +508,16 @@ secrets-windows = mandaadihaldur
 secrets-mac = võtmehoidja
 secrets-linux = süsteemi võtmehoidja (Secret Service)
 error-no-such-file = sellist faili pole
+# review: new
+cards-file-too-big = See fail on aadressiraamatu jaoks liiga suur.
+# review: new
+ui-sender-added = { $name } lisati aadressiraamatusse.
+# review: new
+ui-sender-known = { $name } on juba aadressiraamatus.
+# review: new
+ui-sender-none = Selle kirja saatjal pole e-posti aadressi, mida lisada.
+# review: new
+card-name-needed = Kontaktil pole nime ega e-posti aadressi.
+# a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
+# review: new
+cards-file-failed = { $file }: { $reason }

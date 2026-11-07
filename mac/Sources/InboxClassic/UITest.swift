@@ -213,6 +213,18 @@ final class UITest {
         for (picture, rect) in pictures {
             picture.draw(in: rect)
         }
+        // a list's header floats over its rows, its material blurring what scrolled under it, which a cached
+        // drawing leaves out: the header drawn again over an opaque background, so no row shows through it
+        for header in views(NSTableHeaderView.self, in: frame) where !header.isHiddenOrHasHiddenAncestor && header.bounds.width > 0 {
+            guard let headerRep = header.bitmapImageRepForCachingDisplay(in: header.bounds) else { continue }
+            header.cacheDisplay(in: header.bounds, to: headerRep)
+            let rect = header.convert(header.bounds, to: frame)
+            window.effectiveAppearance.performAsCurrentDrawingAppearance {
+                NSColor.controlBackgroundColor.setFill()
+                rect.fill()
+            }
+            headerRep.draw(in: rect)
+        }
         composed.unlockFocus()
         guard let tiff = composed.tiffRepresentation, let bitmap = NSBitmapImageRep(data: tiff),
               let png = bitmap.representation(using: .png, properties: [:]) else { return }
@@ -440,6 +452,7 @@ final class UITest {
         try await folders()
         try await writingMore()
         try await signature()
+        try await addressBook()
         try await accountTrouble()
         try await allInboxes()
         try await betweenAccounts()

@@ -425,6 +425,36 @@ fn reads_mail_through_the_c_api() {
     let contacts = unsafe { pe_contacts(core, typed.as_ptr(), 5) };
     assert_eq!(unsafe { pe_contact_list_count(contacts) }, 0);
     unsafe { pe_contact_list_free(contacts) };
+    // Add Sender to Address Book: a new card with the sender's name and address, the same one again after; the
+    // completion then offers the book's person
+    // with what the status bar says each time
+    pe_i18n::set_language("en");
+    let mut added = false;
+    let mut status: *mut c_char = std::ptr::null_mut();
+    let card = unsafe { pe_book_add_sender(core, inbox, uid, &mut added, &mut status) };
+    assert!(card > 0 && added);
+    assert_eq!(text(status), "Sender was added to the Address Book.");
+    unsafe { pe_string_free(status) };
+    assert_eq!(
+        unsafe { pe_book_add_sender(core, inbox, uid, &mut added, &mut status) },
+        card
+    );
+    assert!(!added);
+    assert_eq!(text(status), "Sender is already in the Address Book.");
+    unsafe { pe_string_free(status) };
+    assert_eq!(
+        unsafe { pe_book_add_sender(core, inbox, 999_999, &mut added, std::ptr::null_mut()) },
+        0
+    );
+    let contacts = unsafe { pe_contacts(core, typed.as_ptr(), 5) };
+    assert_eq!(unsafe { pe_contact_list_count(contacts) }, 1);
+    let first = unsafe { &*pe_contact_list_get(contacts, 0) };
+    assert_eq!(
+        (text(first.label), first.group),
+        ("Sender <sender@example.com>".to_string(), false)
+    );
+    unsafe { pe_contact_list_free(contacts) };
+    assert!(unsafe { pe_book_delete(core, 0, &card, 1, std::ptr::null(), 0) });
     assert!(!unsafe { pe_folder_mark_all_read(core, 999_999) });
 
     // a reply drafted in Rust, sent through the C API

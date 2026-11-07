@@ -165,6 +165,7 @@ impl Search {
                     format!("NOT {answered}")
                 }),
                 Term::Attachment(on) => parts.push(format!("has_attachments = {}", i64::from(*on))),
+                Term::Bounce(on) => parts.push(format!("bounce = {}", i64::from(*on))),
                 Term::In { place, negated } => {
                     let folders = match place {
                         Place::Anywhere => continue,

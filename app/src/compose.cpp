@@ -37,6 +37,10 @@ enum ComposeId : WORD {
     // the buttons at the end of the To row that open the Cc and Bcc rows
     IDC_SHOW_CC,
     IDC_SHOW_BCC,
+    // the To, Cc and Bcc labels, buttons that open Select Recipients
+    IDC_PICK_TO_BUTTON,
+    IDC_PICK_CC_BUTTON,
+    IDC_PICK_BCC_BUTTON,
     IDC_FONT = 320,
     IDC_FONT_SIZE,
     IDC_FORMATBAR,
@@ -172,6 +176,11 @@ void FitFiles(Compose* state) {
 
 int PlaceFormatBar(Writing* state, int left, int top, int right);
 
+// the rows whose label is a button that opens Select Recipients: To, Cc and Bcc
+bool IsPickRow(int row) {
+    return row >= 1 && row <= 3;
+}
+
 void Layout(HWND hwnd, Compose* state) {
     RECT client;
     GetClientRect(hwnd, &client);
@@ -183,10 +192,10 @@ void Layout(HWND hwnd, Compose* state) {
     GetWindowRect(state->status, &statusBar);
     client.bottom -= statusBar.bottom - statusBar.top;
     int pad = Scale(6);
-    // the label column as wide as the longest label shown
+    // the label column as wide as the longest label shown, the To, Cc and Bcc buttons with room for their frame
     int labelWidth = Scale(60);
-    for (HWND label : state->labels) {
-        labelWidth = std::max(labelWidth, TextWidth(label, nullptr) + Scale(6));
+    for (int i = 0; i < Compose::kRows; i++) {
+        labelWidth = std::max(labelWidth, TextWidth(state->labels[i], nullptr) + Scale(IsPickRow(i) ? 22 : 6));
     }
     int rowHeight = Scale(22);
     int y = bar.bottom - bar.top + pad;
@@ -209,7 +218,11 @@ void Layout(HWND hwnd, Compose* state) {
         if (fields[i] == state->to) {
             toTop = y;
         }
-        MoveWindow(state->labels[i], pad, y + Scale(3), labelWidth, rowHeight, TRUE);
+        if (IsPickRow(i)) {
+            MoveWindow(state->labels[i], pad, y, labelWidth - Scale(6), rowHeight, TRUE);
+        } else {
+            MoveWindow(state->labels[i], pad, y + Scale(3), labelWidth, rowHeight, TRUE);
+        }
         // a combo box's height is that of its open list
         int height = fields[i] == state->from ? Scale(200) : rowHeight;
         int fieldRight = fields[i] == state->to ? toRight : right;
@@ -630,8 +643,26 @@ void CreateFields(HWND hwnd, Compose* state) {
     PeText labels[] = {PE_TEXT_UI_FIELD_FROM,    PE_TEXT_UI_FIELD_TO,      PE_TEXT_UI_FIELD_CC,
                        PE_TEXT_UI_FIELD_BCC,     PE_TEXT_UI_FIELD_SUBJECT, PE_TEXT_UI_FIELD_ATTACH};
     static_assert(std::size(labels) == Compose::kRows);
+    // To, Cc and Bcc are buttons that open the Address Book's people, as in Outlook Express; not in the Tab order,
+    // which goes from field to field
+    HWND tip = CreateWindowExW(0, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+                               CW_USEDEFAULT, hwnd, nullptr, GetModuleHandleW(nullptr), nullptr);
+    std::wstring tipText = core::T(PE_TEXT_UI_PICK_TIP);
     for (int i = 0; i < Compose::kRows; i++) {
-        state->labels[i] = CreateChild(hwnd, L"STATIC", core::T(labels[i]).c_str(), SS_LEFT, 0, {});
+        if (!IsPickRow(i)) {
+            state->labels[i] = CreateChild(hwnd, L"STATIC", core::T(labels[i]).c_str(), SS_LEFT, 0, {});
+            continue;
+        }
+        state->labels[i] = CreateChild(hwnd, L"BUTTON", core::T(labels[i]).c_str(), BS_PUSHBUTTON, IDC_PICK_TO_BUTTON + i - 1, {});
+        // the classic tooltips take the size of their first version
+        TOOLINFOW info = {};
+        info.cbSize = TTTOOLINFOW_V2_SIZE;
+        info.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+        info.hwnd = hwnd;
+        info.uId = reinterpret_cast<UINT_PTR>(state->labels[i]);
+        info.lpszText = tipText.data();
+        SendMessageW(tip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&info));
+        SetAccessibleDescription(state->labels[i], tipText);
     }
     // who the message goes from: always shown, so it is clear even with one account, and the account it is sent with
     state->from = CreateChild(hwnd, L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, IDC_FROM, {});
@@ -650,6 +681,26 @@ void CreateFields(HWND hwnd, Compose* state) {
     state->attached = CreateChild(hwnd, L"LISTBOX", L"", WS_TABSTOP | LBS_MULTICOLUMN | LBS_NOINTEGRALHEIGHT | LBS_WANTKEYBOARDINPUT,
                                   IDC_FILES, {}, WS_EX_CLIENTEDGE);
     CreateFormatBar(hwnd, state);
+}
+
+// Select Recipients: the people and groups chosen go into To, Cc and Bcc, whose rows open when they get someone
+void PickRecipients(HWND hwnd, Compose* state) {
+    HWND fields[] = {state->to, state->cc, state->bcc};
+    std::wstring texts[3];
+    for (int i = 0; i < 3; i++) {
+        texts[i] = GetWindowString(fields[i]);
+    }
+    if (!SelectRecipients(hwnd, state->core, texts)) {
+        return;
+    }
+    for (int i = 0; i < 3; i++) {
+        if (texts[i] != GetWindowString(fields[i])) {
+            SetWindowTextW(fields[i], texts[i].c_str());
+        }
+    }
+    state->showCc = state->showCc || !texts[1].empty();
+    state->showBcc = state->showBcc || !texts[2].empty();
+    Layout(hwnd, state);
 }
 
 // the From list: each account as "Name <address>", the one the message goes from selected
@@ -756,6 +807,10 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         if (LOWORD(wParam) == IDC_ATTACH) {
             Attach(hwnd, state);
+            return 0;
+        }
+        if (LOWORD(wParam) >= IDC_PICK_TO_BUTTON && LOWORD(wParam) <= IDC_PICK_BCC_BUTTON) {
+            PickRecipients(hwnd, state);
             return 0;
         }
         if (HIWORD(wParam) == CBN_SELCHANGE && LOWORD(wParam) == IDC_FROM) {

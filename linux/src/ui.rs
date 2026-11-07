@@ -27,6 +27,8 @@ const STYLE: &str = "
 .empty-list .more { opacity: 0.6; }
 .compose-fields { padding: 6px 10px; }
 .compose-fields label.field { opacity: 0.8; }
+.compose-fields button.field-button { padding: 2px 6px; min-height: 0; margin-right: -6px; }
+.compose-fields button.field-button label { font-weight: normal; }
 .format-bar { padding: 2px 8px; border-bottom: 1px solid alpha(@borders, 0.6); }
 .editor-frame { border-top: 1px solid alpha(@borders, 0.6); }
 .attachment { padding: 2px 8px; border-radius: 6px; background-color: alpha(@view_fg_color, 0.06); }
@@ -376,6 +378,19 @@ pub fn dialog_with_buttons(
         }
     });
     (dialog, ok)
+}
+
+/// The answers of a dialog with OK: true for each click on `ok`, false once it closed
+pub fn answers(dialog: &adw::Dialog, ok: &gtk::Button) -> async_channel::Receiver<bool> {
+    let (send, answers) = async_channel::unbounded();
+    let closed = send.clone();
+    dialog.connect_closed(move |_| {
+        let _ = closed.try_send(false);
+    });
+    ok.connect_clicked(move |_| {
+        let _ = send.try_send(true);
+    });
+    answers
 }
 
 pub fn wrapped_label(text: &str) -> gtk::Label {

@@ -176,7 +176,14 @@ impl MessageList {
         view.set_widget_name("message-list");
         view.set_reorderable(false);
         // no read/unread column: an unread message is bold, which says it; its space is the sender's and the subject's
-        view.append_column(&icon_column(|m| m.info.has_attachments.then_some("ic-attach-symbolic")));
+        // a bounce's mark in the paper clip's place: what matters about a delivery notice is that it is one
+        view.append_column(&icon_column(|m| {
+            if m.info.bounce {
+                Some(UNDELIVERED_ICON)
+            } else {
+                m.info.has_attachments.then_some("ic-attach-symbolic")
+            }
+        }));
         view.append_column(&flag_column());
         let recipients = Rc::new(Cell::new(false));
         let shows = recipients.clone();
@@ -431,6 +438,10 @@ impl MessageList {
         self.selection.select_all();
     }
 }
+
+/// The mark of a notice that a message was not delivered (or not yet): Fluent's envelope with an exclamation mark, as
+/// the Windows app has it, in the paper clip's colour; the card in the reading pane says how bad it is
+pub const UNDELIVERED_ICON: &str = "ic-mail-error-symbolic";
 
 /// A column of the envelope, the paper clip or the flag: an icon, or none, for each row
 fn icon_column(icon: fn(&Message) -> Option<&'static str>) -> gtk::ColumnViewColumn {

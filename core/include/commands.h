@@ -51,6 +51,10 @@ enum PeCommandId : unsigned short {
     IDM_COLLAPSE_ALL_THREADS = 146,
     IDM_AI_AGENTS = 133,
     IDM_OPTIONS = 137,
+    IDM_ADDRESS_BOOK = 147,
+    IDM_ADD_SENDER_TO_BOOK = 148,
+    IDM_IMPORT_ADDRESS_BOOK = 149,
+    IDM_EXPORT_ADDRESS_BOOK = 150,
 };
 
 // whether a command acts on one message only, off while several are selected
@@ -62,6 +66,7 @@ inline bool CommandNeedsOne(unsigned id) {
     case IDM_PRINT:
     case IDM_PROPERTIES:
     case IDM_VIEW_SOURCE:
+    case IDM_ADD_SENDER_TO_BOOK:
         return true;
     default:
         return false;
@@ -128,6 +133,10 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_COLLAPSE_ALL_THREADS: return PE_TEXT_CMD_COLLAPSE_ALL_THREADS;
     case IDM_AI_AGENTS: return PE_TEXT_CMD_AI_AGENTS;
     case IDM_OPTIONS: return PE_TEXT_CMD_OPTIONS;
+    case IDM_ADDRESS_BOOK: return PE_TEXT_CMD_ADDRESS_BOOK;
+    case IDM_ADD_SENDER_TO_BOOK: return PE_TEXT_CMD_ADD_SENDER_TO_BOOK;
+    case IDM_IMPORT_ADDRESS_BOOK: return PE_TEXT_CMD_IMPORT_ADDRESS_BOOK;
+    case IDM_EXPORT_ADDRESS_BOOK: return PE_TEXT_CMD_EXPORT_ADDRESS_BOOK;
     }
     return PE_TEXT_CMD_NEW_ACCOUNT;
 }

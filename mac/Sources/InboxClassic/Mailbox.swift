@@ -135,6 +135,7 @@ public final class Mailbox: NSObject {
         reader.openMailto = { [weak self] in self?.openMailto($0) }
         reader.arrivedHandler = { [weak self] in self?.messageArrived() }
         reader.shownHandler = { [weak self] in self?.messageShown() }
+        reader.bouncedHandler = { [weak self] in self?.showMessage(folder: $0, uid: $1) }
         reader.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120).isActive = true
         rightSplit.addArrangedSubview(listArea)
         rightSplit.addArrangedSubview(reader.view)
@@ -806,6 +807,11 @@ public final class Mailbox: NSObject {
             reloadList(keepSelection: true)
             if selectInList(folder: id, uid: message) { return }
         }
+        // another folder selected ends a search; the folder selected already is not selected again, its search is
+        // ended here
+        if searching && !allInboxes && folder == id {
+            clearFind()
+        }
         selectTreeNode(node)
         guard folder == id else { return }
         selectInList(folder: id, uid: message)
@@ -1289,7 +1295,17 @@ public final class Mailbox: NSObject {
         menu.addItem(.separator())
         add(.viewSource, Text.uiMenuViewSource.text)
         add(.properties)
+        if message != nil {
+            menu.addItem(.separator())
+            add(.addSenderToBook)
+        }
         return menu
+    }
+
+    /// Add Sender to Address Book for the message shown, what was done in the status bar
+    func addSenderToBook() {
+        guard uid != 0 else { return }
+        status(addSenderToAddressBook(core: core, folder: messageFolder, uid: uid))
     }
 
     func printShown() {
@@ -1665,6 +1681,8 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
         case .attach, .flag:
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? IconCell) ?? IconCell(id)
             switch ColumnID(rawValue: id.rawValue) {
+            // a bounce's mark in the paper clip's place, whether or not it has files
+            case .attach where message.bounce: cell.show(Icons.bounce)
             case .attach: cell.show(message.hasAttachments ? Icons.list("attach") : nil)
             default:
                 cell.show(message.flagged ? Icons.coloredFlag(message.flagColor) : nil,
