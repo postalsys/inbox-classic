@@ -71,6 +71,14 @@ cmd-options = &Opciones...
 cmd-select-all = Seleccionar &todo
 cmd-undo = &Deshacer
 cmd-copy = &Copiar a carpeta...
+# review: new
+cmd-address-book = &Libreta de direcciones...
+# review: new
+cmd-add-sender-to-book = Añadir remitente a la li&breta de direcciones
+# review: new
+cmd-import-address-book = Importar &libreta de direcciones...
+# review: new
+cmd-export-address-book = &Exportar libreta de direcciones...
 
 ## The tray icon's menu
 
@@ -383,3 +391,153 @@ ui-agent-programs = Programas cuyos agentes pidieron usar su correo
 ui-what-agents-did = Historial de los agentes
 ui-restart-now = &Reiniciar ahora
 ui-restart-later = Más &tarde
+
+## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
+
+# review: new
+ui-tb-new-contact = Nuevo contacto
+# review: new
+ui-tb-new-group = Nuevo grupo
+# review: new
+ui-tb-properties = Propiedades
+# review: new
+ui-tb-write-to = Escribir a
+# review: new
+ui-menu-new-contact = Nuevo &contacto...
+# review: new
+ui-menu-new-group = Nuevo &grupo...
+# review: new
+ui-menu-write-to = &Escribir a
+# review: new
+ui-menu-delete = E&liminar
+# review: new
+ui-book-find-hint = Escriba un nombre o una dirección de correo
+# review: new
+ui-book-all-contacts = Todos los contactos
+# review: new
+ui-col-phone = Teléfono
+# review: new
+ui-book-empty = La libreta de direcciones está vacía. Haga clic en Nuevo contacto para añadir a alguien, o importe un archivo vCard o CSV desde el menú Archivo.
+# review: new
+ui-book-no-match = Ningún contacto coincide con «{ $words }».
+# review: new
+ui-book-delete-ask = { $count ->
+    [one] ¿Eliminar este contacto de la libreta de direcciones?
+   *[other] ¿Eliminar estos { $count } contactos de la libreta de direcciones?
+}
+# review: new
+ui-group-delete-ask = ¿Eliminar el grupo «{ $name }»? Sus miembros permanecen en la libreta de direcciones.
+# review: new
+ui-book-no-address = { $name } no tiene dirección de correo electrónico.
+# review: new
+ui-new-contact-title = Nuevo contacto
+# review: new
+ui-contact-title = Propiedades de { $name }
+# review: new
+ui-contact-first = Nombre:
+# review: new
+ui-contact-last = Apellidos:
+# review: new
+ui-contact-display = Nombre para mostrar:
+# review: new
+ui-contact-nickname = Alias:
+# review: new
+ui-contact-company = Empresa:
+# review: new
+ui-contact-addresses = Direcciones de correo electrónico:
+# review: new
+ui-contact-address-hint = Escriba una dirección de correo electrónico
+# review: new
+ui-contact-add = &Añadir
+# review: new
+ui-contact-set-default = Establecer como &predeterminada
+# review: new
+ui-contact-default = { $address } (predeterminada)
+# review: new
+ui-contact-phones = Números de teléfono:
+# review: new
+ui-phone-home = Casa
+# review: new
+ui-phone-work = Trabajo
+# review: new
+ui-phone-mobile = Móvil
+# review: new
+ui-phone-other = Otro
+# review: new
+ui-contact-notes = Notas:
+# review: new
+ui-contact-name-needed = Escriba un nombre o una dirección de correo electrónico para el contacto.
+# review: new
+ui-contact-address-invalid = «{ $address }» no es una dirección de correo electrónico válida.
+# review: new
+ui-contact-not-saved = No se pudo guardar el contacto: { $reason }
+# review: new
+ui-new-group-title = Nuevo grupo
+# review: new
+ui-group-title = Propiedades de { $name }
+# review: new
+ui-group-name = Nombre del grupo:
+# review: new
+ui-group-members = Miembros:
+# review: new
+ui-group-select-members = &Seleccionar miembros...
+# review: new
+ui-group-new-member = Añada una dirección de correo electrónico que no esté en la libreta de direcciones:
+# review: new
+ui-group-name-needed = Escriba un nombre para el grupo.
+# review: new
+ui-group-not-saved = No se pudo guardar el grupo: { $reason }
+# review: new
+ui-group-members-count = { $count ->
+    [one] 1 miembro
+   *[other] { $count } miembros
+}
+# review: new
+ui-select-recipients = Seleccionar destinatarios
+# review: new
+ui-select-members = Seleccionar miembros del grupo
+# review: new
+ui-pick-intro = Escriba un nombre o selecciónelo en la lista:
+# review: new
+ui-pick-recipients = Destinatarios del mensaje:
+# review: new
+ui-pick-members = Miembros del grupo:
+# review: new
+ui-pick-to = &Para ->
+# review: new
+ui-pick-cc = &CC ->
+# review: new
+ui-pick-bcc = CC&O ->
+# review: new
+ui-pick-add = &Añadir ->
+# review: new
+ui-pick-tip = Elegir destinatarios de la libreta de direcciones
+# review: new
+ui-sender-added = { $name } se ha añadido a la libreta de direcciones.
+# review: new
+ui-sender-known = { $name } ya está en la libreta de direcciones.
+# review: new
+ui-sender-none = El remitente de este mensaje no tiene una dirección de correo electrónico que añadir.
+# review: new
+ui-filter-address-books = Libretas de direcciones (vCard, CSV)
+# review: new
+ui-filter-vcard = Archivos vCard
+# review: new
+ui-book-export-name = Libreta de direcciones
+# review: new
+ui-book-imported = { $added ->
+    [one] Se añadió 1 contacto
+   *[other] Se añadieron { $added } contactos
+}, { $skipped ->
+    [one] se omitió 1 que ya estaba en la libreta de direcciones.
+   *[other] se omitieron { $skipped } que ya estaban en la libreta de direcciones.
+}
+# review: new
+ui-book-not-imported = No se pudo importar la libreta de direcciones: { $reason }
+# review: new
+ui-book-exported = { $count ->
+    [one] 1 contacto guardado en { $file }.
+   *[other] { $count } contactos guardados en { $file }.
+}
+# review: new
+ui-book-not-exported = No se pudo guardar la libreta de direcciones: { $reason }
