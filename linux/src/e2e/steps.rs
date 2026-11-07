@@ -14,7 +14,7 @@ async fn show_found(query: &str) -> bool {
 }
 
 /// The time now (and `minutes` later) as a Date header writes it
-fn date_now(minutes: i32) -> String {
+pub(super) fn date_now(minutes: i32) -> String {
     glib::DateTime::now_utc()
         .and_then(|t| t.add_minutes(minutes))
         .and_then(|t| t.format("%a, %d %b %Y %H:%M:%S +0000"))

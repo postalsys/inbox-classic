@@ -93,3 +93,5 @@ pub const LIST_HEIGHT: &str = "ListHeight";
 pub const LANGUAGE: &str = "Language";
 /// Preferences > Group messages by conversation (on when not set)
 pub const GROUP_BY_CONVERSATION: &str = "GroupByConversation";
+/// View > Hide Ignored Conversations (off when not set)
+pub const HIDE_IGNORED: &str = "HideIgnoredConversations";

@@ -345,34 +345,15 @@ impl Shell {
 
     /// New mail: a notification, unless the window is in front (the list shows it) or notifications are off
     fn notify_new_mail(&self, event: &Event) {
-        let Event::NewMail {
-            folder,
-            uid,
-            count,
-            from,
-            subject,
-            ..
-        } = event
-        else {
+        let Event::NewMail { folder, uid, .. } = event else {
             return;
         };
         let window = self.main().window().clone();
         if !self.notify.get() || (window.is_visible() && window.is_active()) {
             return;
         }
-        let no_subject = t!(UiNoSubject);
-        let subject = if subject.is_empty() { &no_subject } else { subject };
-        if *count <= 1 {
-            notify::new_mail(&self.application, from, subject, *folder, *uid);
-        } else {
-            let text = t!(UiNewestFrom, sender = from, subject = subject);
-            notify::new_mail(
-                &self.application,
-                &t!(GtkNewMessages, count = *count),
-                &text,
-                *folder,
-                *uid,
-            );
+        if let Some((title, text)) = new_mail_words(event) {
+            notify::new_mail(&self.application, &title, &text, *folder, *uid);
         }
     }
 
@@ -487,6 +468,35 @@ impl Shell {
             tray.refresh();
         }
     }
+}
+
+/// The title and the text of the notification of new mail: who it is from over its subject, or how many over the
+/// newest; a watched conversation's says so in the title
+fn new_mail_words(event: &Event) -> Option<(String, String)> {
+    let Event::NewMail {
+        count,
+        from,
+        subject,
+        watched,
+        ..
+    } = event
+    else {
+        return None;
+    };
+    let no_subject = t!(UiNoSubject);
+    let subject = if subject.is_empty() { &no_subject } else { subject };
+    Some(match (*watched, *count <= 1) {
+        (true, true) => (t!(UiWatchedConversation), format!("{from}\n{subject}")),
+        (true, false) => (
+            t!(UiWatchedConversation),
+            t!(UiNewestFrom, sender = from, subject = subject),
+        ),
+        (false, true) => (from.clone(), subject.to_string()),
+        (false, false) => (
+            t!(GtkNewMessages, count = *count),
+            t!(UiNewestFrom, sender = from, subject = subject),
+        ),
+    })
 }
 
 /// "Subject" in quotes, or "(no subject)"
@@ -660,6 +670,9 @@ pub fn run_command(command: Command) {
         Command::Junk => main.mark_junk(true),
         Command::NotJunk => main.mark_junk(false),
         Command::Archive => main.archive_selected(),
+        Command::WatchConversation => main.mark_conversations(false),
+        Command::IgnoreConversation => main.mark_conversations(true),
+        Command::HideIgnored => main.set_hide_ignored(!crate::mailbox::hide_ignored()),
         Command::Notify => shell.set_notify(!shell.notify.get()),
         Command::Open => shell.show_main(),
         Command::DefaultApp => spawn(make_default_mail_app()),
@@ -701,4 +714,34 @@ fn install_app_actions(application: &adw::Application) {
     let open = gio::SimpleAction::new("open", None);
     open.connect_activate(|_, _| shell().show_main());
     application.add_action(&open);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn new_mail(count: usize, subject: &str, watched: bool) -> Event {
+        Event::NewMail {
+            account: 1,
+            folder: 2,
+            uid: 3,
+            count,
+            from: "Pat Doe".into(),
+            subject: subject.into(),
+            watched,
+        }
+    }
+
+    #[test]
+    fn new_mail_notification_words() {
+        let words = |count, subject, watched| new_mail_words(&new_mail(count, subject, watched)).unwrap();
+        assert_eq!(words(1, "Trip", false), ("Pat Doe".into(), "Trip".into()));
+        assert_eq!(
+            words(1, "Re: Trip", true),
+            ("Watched conversation".into(), "Pat Doe\nRe: Trip".into())
+        );
+        assert_eq!(words(2, "Trip", true).0, "Watched conversation");
+        assert_eq!(words(2, "", true).1, "Latest message from Pat Doe: (no subject)");
+        assert_eq!(words(3, "Trip", false).1, "Latest message from Pat Doe: Trip");
+    }
 }
