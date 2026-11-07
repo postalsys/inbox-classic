@@ -171,5 +171,5 @@ gtk-preferences = Preferencias
 gtk-language = Idioma
 gtk-language-subtitle = Idioma de la interfaz y de la ayuda
 gtk-new-mail-group = Correo nuevo
-gtk-notify-subtitle = Una notificación cuando llegan mensajes nuevos mientras la ventana está en segundo plano
+gtk-notify-subtitle = Recibir una notificación cuando lleguen mensajes nuevos y la ventana esté en segundo plano
 gtk-restart-to-change = Inbox Classic se reinicia para cambiar el idioma.

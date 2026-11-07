@@ -30,9 +30,7 @@ cmd-flag = Nachricht &kennzeichnen
 cmd-new-folder = Neuer &Ordner...
 cmd-rename-folder = Ordner um&benennen...
 cmd-delete-folder = Ordner &löschen
-# review: new
 cmd-empty-folder = Ordner &leeren
-# review: new
 ui-empty-button = Leeren
 cmd-accounts = &Konten...
 cmd-find = Nachricht &suchen
@@ -44,35 +42,20 @@ cmd-properties = &Eigenschaften
 cmd-mark-all-read = Alle als gelesen &markieren
 cmd-junk = Als &Junk markieren
 cmd-not-junk = Als kein J&unk markieren
-# review: new
 cmd-archive = A&rchivieren
-# review: new
 cmd-watch-conversation = Unterhaltung &beobachten
-# review: new
 cmd-ignore-conversation = Unterhaltung &ignorieren
-# review: new
 cmd-next-message = &Nächste Nachricht
-# review: new
 cmd-previous-message = &Vorherige Nachricht
-# review: new
 cmd-next-unread = Nächste &ungelesene Nachricht
-# review: new
 cmd-go-to-folder = &Gehe zu Ordner...
-# review: new
 cmd-find-in-message = In &dieser Nachricht suchen...
-# review: new
 ui-go-to-prompt = Zu diesem Ordner wechseln:
-# review: new
 ui-find-in-message-hint = In dieser Nachricht suchen
-# review: new
 ui-find-not-found = „{ $words }“ kommt in dieser Nachricht nicht vor
-# review: new
 cmd-expand-all-threads = Alle Unterhaltungen &erweitern
-# review: new
 cmd-collapse-all-threads = Alle Unterhaltungen &reduzieren
-# review: new
 ui-group-by-conversation = Nachrichten nach &Unterhaltung gruppieren
-# review: new
 cmd-hide-ignored = &Ignorierte Unterhaltungen ausblenden
 cmd-notify = Bei neuer E-Mail be&nachrichtigen
 cmd-open = Inbox Classic ö&ffnen
@@ -83,13 +66,9 @@ cmd-options = &Optionen...
 cmd-select-all = &Alles auswählen
 cmd-undo = &Rückgängig
 cmd-copy = In Ordner &kopieren...
-# review: new
 cmd-address-book = &Adressbuch...
-# review: new
 cmd-add-sender-to-book = Absender zum Adressbuch &hinzufügen
-# review: new
 cmd-import-address-book = &Adressbuch importieren...
-# review: new
 cmd-export-address-book = Adressbuch e&xportieren...
 
 ## The tray icon's menu
@@ -107,15 +86,10 @@ ui-tb-print = Drucken
 ui-tb-delete = Löschen
 ui-tb-junk = Junk
 ui-tb-not-junk = Kein Junk
-# review: new
 ui-tb-archive = Archivieren
-# review: new
 ui-tb-previous = Vorherige
-# review: new
 ui-tb-next = Nächste
-# review: new
 ui-previous-tip = Vorherige Nachricht
-# review: new
 ui-next-tip = Nächste Nachricht
 ui-tb-sync = Senden/Empfangen
 ui-tb-mark-read = Als gelesen markieren
@@ -135,15 +109,15 @@ ui-outbox-waiting = { $count ->
 ui-outbox-waits = { $subject } wartet im Postausgang
 ui-outbox-sending = { $subject } wird gesendet...
 ui-from-account = Von { $account }
-ui-sign-in-refused = Die Anmeldung für { $account } wurde abgelehnt oder ist abgelaufen.
+ui-sign-in-refused = Die Anmeldung bei { $account } wurde abgelehnt oder die Sitzung ist abgelaufen.
 ui-sign-in-again-ask = Im Browser erneut anmelden?
 ui-sign-in-again-failed = Die erneute Anmeldung ist fehlgeschlagen: { $reason }
 ui-unknown-reason = unbekannter Grund
 ui-checking = Neue Nachrichten von { $account } werden abgerufen...
 ui-done = Fertig
 ui-sent-at = { $subject } um { $time } gesendet
-ui-draft-saved = Nachricht in Entwürfe gespeichert.
-ui-draft-not-saved = Die Nachricht wurde nicht in Entwürfe gespeichert: { $reason }
+ui-draft-saved = Nachricht im Ordner „Entwürfe“ gespeichert.
+ui-draft-not-saved = Die Nachricht wurde nicht im Ordner „Entwürfe“ gespeichert: { $reason }
 ui-about-core = Kern { $version }
 ui-add-account-first = Fügen Sie zuerst ein E-Mail-Konto hinzu.
 ui-add-account-first-link = Fügen Sie zuerst ein E-Mail-Konto hinzu und klicken Sie dann erneut auf den E-Mail-Link.
@@ -160,11 +134,8 @@ ui-col-subject = Betreff
 ui-col-from = Von
 ui-col-to = An
 ui-col-received = Empfangen
-# review: new
 ui-col-watch = Beobachten
-# review: new
 ui-watched-conversation = Beobachtete Unterhaltung
-# review: new
 ui-col-sent = Gesendet
 ui-col-size = Größe
 ui-col-folder = Ordner
@@ -174,7 +145,7 @@ ui-col-status = Status
 ui-outbox-title = Postausgang
 ui-outbox-status-waiting = Wartet
 ui-outbox-status-not-sent = Nicht gesendet: { $reason }
-ui-outbox-status-agent = Vom KI-Agenten eingereiht; wird um { $time } gesendet
+ui-outbox-status-agent = Von einem KI-Agenten zum Senden vorgemerkt; wird um { $time } gesendet
 ui-outbox-delete-ask = Diese Nachricht löschen, ohne sie zu senden?
 ui-open-link = Link öffnen
 ui-edit-link = Link bearbeiten...
@@ -187,10 +158,10 @@ ui-filter-messages = E-Mail-Nachrichten
 ui-save-attachment-as = Anlage speichern unter
 ui-not-sent = Die Nachricht konnte nicht gesendet werden.
 ui-not-saved = Die Nachricht konnte nicht gespeichert werden.
-ui-saving-draft = Wird in Entwürfe gespeichert...
-ui-compose-saved-at = Um { $time } in Entwürfe gespeichert
-ui-compose-not-saved = Nicht in Entwürfe gespeichert: { $reason }
-ui-save-changes-ask = Möchten Sie die Änderungen an dieser Nachricht in Entwürfe speichern?
+ui-saving-draft = Wird im Ordner „Entwürfe“ gespeichert...
+ui-compose-saved-at = Um { $time } im Ordner „Entwürfe“ gespeichert
+ui-compose-not-saved = Nicht im Ordner „Entwürfe“ gespeichert: { $reason }
+ui-save-changes-ask = Möchten Sie die Änderungen an dieser Nachricht im Ordner „Entwürfe“ speichern?
 ui-new-message-title = Neue Nachricht
 ui-link-invalid = Geben Sie eine Webadresse (https://...) oder einen E-Mail-Link (mailto:...) ein.
 ui-link-address = Adresse:
@@ -200,7 +171,7 @@ ui-edit-hyperlink = Hyperlink bearbeiten
 ui-edit-hyperlink-intro = Zieladresse des Links. Löschen Sie die Adresse, um den Link zu entfernen. Der Text bleibt erhalten.
 ui-not-a-picture = Diese Datei ist kein PNG-, JPEG- oder GIF-Bild, oder sie ist größer als 10 MB.
 ui-format-color = Schriftfarbe
-ui-format-numbers = Nummerierte Aufzählung
+ui-format-numbers = Nummerierte Liste
 ui-format-bullets = Aufzählungszeichen
 ui-format-outdent = Einzug verkleinern
 ui-format-indent = Einzug vergrößern
@@ -216,7 +187,7 @@ ui-field-to = An:
 ui-field-cc = Cc:
 ui-field-bcc = Bcc:
 ui-field-subject = Betreff:
-ui-field-attach = Anlage:
+ui-field-attach = Anlagen:
 ui-signature = Signatur
 ui-signature-hint = Wird neuen Nachrichten, Antworten und Weiterleitungen von diesem Konto angefügt.
 ui-signature-not-saved = Die Signatur konnte nicht gespeichert werden.
@@ -297,7 +268,7 @@ ui-field-name = Anzeigename:
 ui-field-email = E-Mail-Adresse:
 ui-field-user = Benutzername:
 ui-field-password = Passwort:
-ui-field-imap-host = Posteingangs-Server (IMAP):
+ui-field-imap-host = Posteingangsserver (IMAP):
 ui-field-imap-port = IMAP-Port:
 ui-field-imap-security = IMAP-Sicherheit:
 ui-field-smtp-host = Postausgangsserver (SMTP):
@@ -321,7 +292,7 @@ ui-keep-password = Lassen Sie das Passwortfeld leer, um das bisherige Passwort b
 ui-remove-account = Konto entfernen
 ui-remove-account-ask = Dieses Konto aus Inbox Classic entfernen? Seine E-Mails bleiben auf dem Server; die Kopie auf diesem Computer und das gespeicherte Passwort werden entfernt.
 ui-col-email = E-Mail-Adresse
-ui-col-incoming = Posteingangs-Server
+ui-col-incoming = Posteingangsserver
 ui-type-email = Geben Sie Ihre E-Mail-Adresse ein, name@example.com.
 ui-ai-agent = KI-Agent
 ui-ai-agent-access = Zugriff für KI-Agenten
@@ -414,144 +385,82 @@ ui-restart-later = &Später
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 
-# review: new
 ui-tb-new-contact = Neuer Kontakt
-# review: new
 ui-tb-new-group = Neue Gruppe
-# review: new
 ui-tb-properties = Eigenschaften
-# review: new
 ui-tb-write-to = Schreiben an
-# review: new
 ui-menu-new-contact = Neuer &Kontakt...
-# review: new
 ui-menu-new-group = Neue &Gruppe...
-# review: new
 ui-menu-write-to = &Schreiben an
-# review: new
 ui-menu-delete = &Löschen
-# review: new
 ui-book-find-hint = Namen oder E-Mail-Adresse eingeben
-# review: new
 ui-book-all-contacts = Alle Kontakte
-# review: new
 ui-col-phone = Telefon
-# review: new
 ui-book-empty = Das Adressbuch ist leer. Klicken Sie auf „Neuer Kontakt“, um jemanden hinzuzufügen, oder importieren Sie eine vCard- oder CSV-Datei über das Menü „Datei“.
-# review: new
 ui-book-no-match = Keine Kontakte für „{ $words }“ gefunden.
-# review: new
 ui-book-delete-ask = { $count ->
     [one] Diesen Kontakt aus dem Adressbuch löschen?
    *[other] Diese { $count } Kontakte aus dem Adressbuch löschen?
 }
-# review: new
-ui-group-delete-ask = Die Gruppe „{ $name }“ löschen? Die Personen darin bleiben im Adressbuch.
-# review: new
+ui-group-delete-ask = Die Gruppe „{ $name }“ löschen? Die Kontakte bleiben im Adressbuch erhalten.
 ui-book-no-address = { $name } hat keine E-Mail-Adresse.
-# review: new
 ui-new-contact-title = Neuer Kontakt
-# review: new
 ui-contact-title = Eigenschaften von { $name }
-# review: new
 ui-contact-first = Vorname:
-# review: new
 ui-contact-last = Nachname:
-# review: new
 ui-contact-display = Anzeigename:
-# review: new
 ui-contact-nickname = Spitzname:
-# review: new
 ui-contact-company = Firma:
-# review: new
 ui-contact-addresses = E-Mail-Adressen:
-# review: new
 ui-contact-address-hint = E-Mail-Adresse eingeben
-# review: new
 ui-contact-add = &Hinzufügen
-# review: new
 ui-contact-set-default = Als &Standard festlegen
-# review: new
 ui-contact-default = { $address } (Standard)
-# review: new
 ui-contact-phones = Telefonnummern:
-# review: new
 ui-phone-home = Privat
-# review: new
 ui-phone-work = Geschäftlich
-# review: new
 ui-phone-mobile = Mobil
-# review: new
 ui-phone-other = Andere
-# review: new
 ui-contact-notes = Notizen:
-# review: new
 ui-contact-name-needed = Geben Sie einen Namen oder eine E-Mail-Adresse für den Kontakt ein.
-# review: new
 ui-contact-address-invalid = „{ $address }“ ist keine gültige E-Mail-Adresse.
-# review: new
 ui-contact-not-saved = Der Kontakt konnte nicht gespeichert werden: { $reason }
-# review: new
 ui-new-group-title = Neue Gruppe
-# review: new
 ui-group-title = Eigenschaften von { $name }
-# review: new
 ui-group-name = Gruppenname:
-# review: new
 ui-group-members = Mitglieder:
-# review: new
 ui-group-select-members = Mitglieder &auswählen...
-# review: new
 ui-group-new-member = E-Mail-Adresse hinzufügen, die nicht im Adressbuch steht:
-# review: new
 ui-group-name-needed = Geben Sie einen Namen für die Gruppe ein.
-# review: new
 ui-group-not-saved = Die Gruppe konnte nicht gespeichert werden: { $reason }
-# review: new
 ui-group-members-count = { $count ->
     [one] 1 Mitglied
    *[other] { $count } Mitglieder
 }
-# review: new
 ui-select-recipients = Empfänger auswählen
-# review: new
 ui-select-members = Gruppenmitglieder auswählen
-# review: new
 ui-pick-intro = Namen eingeben oder aus der Liste auswählen:
-# review: new
 ui-pick-recipients = Empfänger der Nachricht:
-# review: new
 ui-pick-members = Gruppenmitglieder:
-# review: new
 ui-pick-to = &An →
-# review: new
 ui-pick-cc = &Cc →
-# review: new
 ui-pick-bcc = &Bcc →
-# review: new
 ui-pick-add = &Hinzufügen →
-# review: new
 ui-pick-tip = Empfänger aus dem Adressbuch auswählen
-# review: new
 ui-filter-address-books = Adressbücher (vCard, CSV)
-# review: new
 ui-filter-vcard = vCard-Dateien
-# review: new
 ui-book-export-name = Adressbuch
-# review: new
 ui-book-imported = { $added ->
-    [one] 1 Kontakt hinzugefügt
-   *[other] { $added } Kontakte hinzugefügt
-}, { $skipped ->
-    [one] 1 bereits im Adressbuch vorhandener übersprungen.
-   *[other] { $skipped } bereits im Adressbuch vorhandene übersprungen.
+    [one] 1 Kontakt hinzugefügt.
+   *[other] { $added } Kontakte hinzugefügt.
+} { $skipped ->
+    [0] Keine doppelten Kontakte gefunden.
+    [one] 1 Kontakt übersprungen, da er bereits im Adressbuch vorhanden ist.
+   *[other] { $skipped } Kontakte übersprungen, da sie bereits im Adressbuch vorhanden sind.
 }
-# review: new
 ui-book-not-imported = Das Adressbuch konnte nicht importiert werden: { $reason }
-# review: new
 ui-book-exported = { $count ->
     [one] 1 Kontakt in { $file } gespeichert.
    *[other] { $count } Kontakte in { $file } gespeichert.
 }
-# review: new
 ui-book-not-exported = Das Adressbuch konnte nicht gespeichert werden: { $reason }

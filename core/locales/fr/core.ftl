@@ -80,138 +80,75 @@ fold-show-earlier = Afficher les messages précédents
 
 ## Messages non remis : la carte au-dessus d'un avis de non-remise
 
-# review: new
 bounce-failed = Votre message n'a pas été remis
-# review: new
 bounce-delayed = Votre message n'a pas encore été remis
-# review: new
 bounce-delayed-note = Votre serveur de messagerie essaie toujours de le remettre. Vous n'avez pas besoin de le renvoyer.
-# review: new
 bounce-show-message = Afficher le message non remis
-# review: new
 bounce-what-to-do = Ce que vous pouvez faire :
-# review: new
-bounce-delayed-do = Rien pour l'instant. S'il ne peut toujours pas être remis, vous recevrez un autre avis.
-# review: new
-bounce-delayed-row-do = Rien pour l'instant. Votre serveur de messagerie essaie toujours de le remettre, et vous recevrez un autre avis s'il n'y parvient pas.
-# review: new
+bounce-delayed-do = Vous n'avez rien à faire pour l'instant. Si le message ne peut pas être remis, vous recevrez un nouvel avis.
+bounce-delayed-row-do = Vous n'avez rien à faire pour l'instant. Votre serveur de messagerie poursuit ses tentatives de remise. Vous recevrez un nouvel avis s'il n'y parvient pas.
 bounce-details = Détails
-# review: new
 bounce-someone = Un destinataire
-# review: new
 bounce-server = Serveur : { $server }
-# review: new
 bounce-status = État : { $status }
-# review: new
 bounce-reported-by = Signalé par : { $server }
-# review: new
 bounce-retry-minutes = Le serveur de réception a demandé d'attendre { $count ->
     [one] une minute
    *[other] { $count } minutes
 } avant le prochain essai.
-# review: new
 bounce-retry-hours = Le serveur de réception a demandé d'attendre { $count ->
     [one] une heure
    *[other] { $count } heures
 } avant le prochain essai.
-# review: new
 bounce-blocklist = Liste de blocage : { $lists }
-# review: new
 bounce-user-unknown = L'adresse n'existe pas
-# review: new
-bounce-user-unknown-why = Le serveur de réception n'a aucune boîte aux lettres à cette adresse. Elle est peut-être mal écrite, ou la personne n'y est plus.
-# review: new
-bounce-user-unknown-do = Vérifiez l'orthographe de l'adresse, ou demandez à la personne l'adresse qu'elle utilise maintenant.
-# review: new
+bounce-user-unknown-why = Le serveur de réception ne possède aucune boîte aux lettres à cette adresse. L'adresse contient peut-être une faute de frappe ou n'est plus utilisée par le destinataire.
+bounce-user-unknown-do = Vérifiez l'orthographe de l'adresse ou demandez au destinataire son adresse e-mail actuelle.
 bounce-invalid-address = L'adresse n'est pas valide
-# review: new
-bounce-invalid-address-why = L'adresse n'est pas écrite sous une forme à laquelle on peut envoyer du courrier.
-# review: new
-bounce-invalid-address-do = Cherchez les fautes de frappe, comme une espace, une lettre manquante ou rien après le @.
-# review: new
-bounce-mailbox-disabled = La boîte aux lettres est fermée
-# review: new
+bounce-invalid-address-why = Le format de l'adresse est incorrect. Aucun message ne peut être envoyé à cette adresse.
+bounce-invalid-address-do = Vérifiez qu'il n'y a pas d'espaces superflus ni de lettres manquantes et qu'un nom de domaine figure après le signe @.
+bounce-mailbox-disabled = La boîte aux lettres est désactivée
 bounce-mailbox-disabled-why = L'adresse existe, mais sa boîte aux lettres a été désactivée ou n'est plus utilisée.
-# review: new
-bounce-mailbox-disabled-do = Joignez la personne autrement et demandez-lui une adresse qu'elle utilise maintenant.
-# review: new
+bounce-mailbox-disabled-do = Contactez le destinataire par un autre moyen et demandez-lui son adresse e-mail actuelle.
 bounce-mailbox-full = La boîte aux lettres est pleine
-# review: new
 bounce-mailbox-full-why = La boîte aux lettres du destinataire n'a plus de place pour le nouveau courrier.
-# review: new
-bounce-mailbox-full-do = Renvoyez-le dans quelques jours, ou prévenez la personne autrement. Les grosses pièces jointes sont refusées en premier.
-# review: new
+bounce-mailbox-full-do = Renvoyez le message dans quelques jours ou prévenez le destinataire par un autre moyen. Les messages contenant des pièces jointes volumineuses sont refusés en premier.
 bounce-spam-blocked = Refusé comme courrier indésirable
-# review: new
 bounce-spam-blocked-why = Le serveur de réception a pris le message pour du courrier indésirable.
-# review: new
-bounce-spam-blocked-do = Renvoyez-le sans ce qui ressemble à du courrier indésirable, comme de nombreux liens, des liens raccourcis ou une grosse pièce jointe. Si cela se reproduit, contactez votre fournisseur de messagerie.
-# review: new
-bounce-virus-detected = Refusé pour un virus
-# review: new
+bounce-spam-blocked-do = Retirez les éléments susceptibles de faire classer le message comme indésirable, par exemple les liens trop nombreux ou raccourcis et les pièces jointes volumineuses, puis renvoyez-le. Si le problème persiste, contactez votre fournisseur de messagerie.
+bounce-virus-detected = Refusé en raison d'un virus
 bounce-virus-detected-why = Le serveur de réception a trouvé un virus ou un autre contenu dangereux dans le message ou ses pièces jointes.
-# review: new
 bounce-virus-detected-do = Vérifiez les pièces jointes avec un antivirus. Certains serveurs refusent tout programme ou toute archive : partagez plutôt ces fichiers par un lien.
-# review: new
 bounce-ip-blocklisted = Votre serveur de messagerie est sur une liste de blocage
-# review: new
-bounce-ip-blocklisted-why = Le serveur de réception refuse le courrier du serveur qui a envoyé le vôtre, car l'adresse de ce serveur est sur une liste de blocage.
-# review: new
+bounce-ip-blocklisted-why = Le serveur de réception refuse les messages de votre serveur de messagerie, car son adresse IP figure sur une liste de blocage.
 bounce-ip-blocklisted-do = Le message n'est pas en cause. Transférez cet avis à votre fournisseur de messagerie et demandez-lui de faire retirer le serveur de la liste.
-# review: new
 bounce-domain-blocklisted = Un domaine est sur une liste de blocage
-# review: new
 bounce-domain-blocklisted-why = Le serveur de réception refuse le message car le domaine de votre adresse, ou un domaine des liens du message, est sur une liste de blocage.
-# review: new
-bounce-domain-blocklisted-do = Si le message contient des liens, essayez sans eux. Sinon, transférez cet avis à la personne qui gère le courrier de votre domaine.
-# review: new
-bounce-policy-blocked = Refusé par les règles du serveur de réception
-# review: new
+bounce-domain-blocklisted-do = Si le message contient des liens, essayez de l'envoyer sans ces liens. Si cela ne résout pas le problème ou si le message ne contient pas de liens, transmettez cet avis à la personne qui gère la messagerie de votre domaine.
+bounce-policy-blocked = Refusé en application des règles du serveur de réception
 bounce-policy-blocked-why = Les règles du serveur de réception ne laissent pas passer ce message, par exemple à cause de sa taille, de ses pièces jointes ou de son expéditeur.
-# review: new
-bounce-policy-blocked-do = Les propres mots du serveur sous Détails donnent souvent la raison. Demandez au destinataire s'il peut accepter ce type de courrier.
-# review: new
-bounce-geo-blocked = Refusé pour sa provenance
-# review: new
+bounce-policy-blocked-do = La réponse du serveur, dans la section Détails, indique souvent la raison du refus. Demandez au destinataire si sa messagerie accepte ce type de message.
+bounce-geo-blocked = Refusé en raison de sa provenance
 bounce-geo-blocked-why = Le serveur de réception n'accepte pas le courrier du pays ou du réseau où se trouve votre serveur de messagerie.
-# review: new
-bounce-geo-blocked-do = Joignez la personne autrement, ou contactez votre fournisseur de messagerie.
-# review: new
-bounce-relay-denied = Le serveur ne l'a pas transmis
-# review: new
-bounce-relay-denied-why = Un serveur a refusé de transmettre le message, souvent parce qu'il a été envoyé sans connexion ou par un serveur qui ne dessert pas ce destinataire.
-# review: new
-bounce-relay-denied-do = Vérifiez le serveur sortant du compte dans Fichier > Comptes, et qu'il se connecte.
-# review: new
+bounce-geo-blocked-do = Contactez le destinataire par un autre moyen ou demandez de l’aide à votre fournisseur de messagerie.
+bounce-relay-denied = Le serveur a refusé de relayer le message
+bounce-relay-denied-why = Un serveur a refusé de relayer le message, souvent parce qu'il a été envoyé sans authentification ou par un serveur qui ne prend pas en charge ce destinataire.
+bounce-relay-denied-do = Dans Fichier > Comptes, vérifiez les paramètres du serveur sortant et assurez-vous que l'authentification auprès de ce serveur est configurée.
 bounce-auth-failure = Votre adresse d'expéditeur n'a pas pu être vérifiée
-# review: new
 bounce-auth-failure-why = Le serveur de réception n'a pas pu confirmer que le message venait bien de votre domaine (SPF, DKIM ou DMARC).
-# review: new
-bounce-auth-failure-do = Transférez cet avis à la personne qui gère le courrier de votre domaine : ses réglages doivent être corrigés. En attendant, envoyer par le serveur de votre fournisseur peut aider.
-# review: new
-bounce-rate-limited = Trop de courrier à la fois
-# review: new
-bounce-rate-limited-why = Le serveur de réception accepte pour l'instant moins de messages de votre serveur de messagerie.
-# review: new
-bounce-rate-limited-do = Attendez un moment et renvoyez-le. Si vous écrivez à de nombreuses personnes, envoyez à moins de personnes à la fois.
-# review: new
-bounce-greylisting = Retenu un instant
-# review: new
-bounce-greylisting-why = Le serveur de réception demande aux expéditeurs inconnus de réessayer un peu plus tard, une vérification courante contre le courrier indésirable.
-# review: new
-bounce-greylisting-do = Rien. Les serveurs de messagerie réessaient d'eux-mêmes, et le message est généralement remis dans l'heure.
-# review: new
+bounce-auth-failure-do = Transmettez cet avis à la personne qui gère la messagerie de votre domaine pour qu'elle en corrige les paramètres. En attendant, essayez d'envoyer le message via le serveur de votre fournisseur.
+bounce-rate-limited = Trop de messages à la fois
+bounce-rate-limited-why = Le serveur de réception limite temporairement le nombre de messages acceptés en provenance de votre serveur de messagerie.
+bounce-rate-limited-do = Patientez un moment, puis renvoyez le message. Si vous écrivez à de nombreuses personnes, réduisez le nombre de destinataires par envoi.
+bounce-greylisting = Remise temporairement différée
+bounce-greylisting-why = Le serveur de réception demande aux expéditeurs inconnus de réessayer un peu plus tard. Il s'agit d'une mesure courante de protection contre le courrier indésirable.
+bounce-greylisting-do = Vous n'avez rien à faire. Les serveurs de messagerie réessaient automatiquement, et le message est généralement remis dans l'heure.
 bounce-server-error = Le serveur de réception a eu un problème
-# review: new
 bounce-server-error-why = Le serveur de réception n'a pas pu être joint, ou n'a pas pu accepter le message à cause d'un problème de son côté.
-# review: new
-bounce-server-error-do = Renvoyez-le plus tard. Si l'échec persiste, cherchez des fautes de frappe dans la partie de l'adresse après le @.
-# review: new
+bounce-server-error-do = Renvoyez le message plus tard. Si le problème persiste, vérifiez que la partie de l'adresse située après le signe @ ne contient pas de fautes de frappe.
 bounce-unknown = Non remis
-# review: new
-bounce-unknown-why = L'avis ne dit pas clairement pourquoi.
-# review: new
-bounce-unknown-do = Les propres mots du serveur sous Détails peuvent en dire plus. S'ils n'aident pas, transférez cet avis à votre fournisseur de messagerie.
+bounce-unknown-why = L'avis ne précise pas clairement la raison de l'échec.
+bounce-unknown-do = La réponse du serveur, dans la section Détails, peut fournir des précisions. Si cela ne vous aide pas, transmettez cet avis à votre fournisseur de messagerie.
 
 ## Several messages selected
 
@@ -244,7 +181,6 @@ done-deleted-for-good = { $count ->
     [one] { $messages } supprimé définitivement
    *[other] { $messages } supprimés définitivement
 }
-# review: new
 done-archived = { $count ->
     [one] { $messages } archivé
    *[other] { $messages } archivés
@@ -269,22 +205,18 @@ done-moved-back = { $count ->
     [one] { $messages } replacé dans { $folder }
    *[other] { $messages } replacés dans { $folder }
 }
-# review: new
 done-watched = { $count ->
     [one] Conversation surveillée
    *[other] { $count } conversations surveillées
 }
-# review: new
 done-unwatched = { $count ->
     [one] La conversation n'est plus surveillée
    *[other] Les { $count } conversations ne sont plus surveillées
 }
-# review: new
 done-ignored = { $count ->
     [one] Conversation ignorée
    *[other] { $count } conversations ignorées
 }
-# review: new
 done-unignored = { $count ->
     [one] La conversation n'est plus ignorée
    *[other] Les { $count } conversations ne sont plus ignorées
@@ -292,24 +224,18 @@ done-unignored = { $count ->
 their-folders = leurs dossiers
 undo-move = Annuler le déplacement
 undo-delete = Annuler la suppression
-# review: new
 undo-archive = Annuler l'archivage
 undo-junk = Annuler le marquage comme indésirable
 undo-not-junk = Annuler le marquage comme non indésirable
 nothing-to-undo = Il n'y a rien à annuler.
 messages-gone = Les messages ne sont plus là.
 folder-holds-no-messages = Ce dossier ne peut pas contenir de messages.
-# review: new
 not-archived-here = Les messages de ce dossier ne peuvent pas être archivés.
-# review: new
-not-emptied-here = Seuls Éléments supprimés et Courrier indésirable peuvent être vidés.
-# review: new
+not-emptied-here = Seuls les dossiers Éléments supprimés et Courrier indésirable peuvent être vidés.
 next-unread-question = Il n'y a plus de messages non lus dans { $folder }.
 
-    Aller à { $next }, le dossier suivant qui a des messages non lus ?
-# review: new
+    Ouvrir { $next }, le prochain dossier contenant des messages non lus ?
 no-unread-left = Il ne reste aucun message non lu.
-# review: new
 empty-question = { $count ->
     [one] Vider { $folder } ?
 
@@ -328,7 +254,7 @@ done-flagged-color = Indicateur { $color ->
     [blue] bleu
     [purple] violet
    *[gray] gris
-} mis sur { $messages }
+} ajouté à { $messages }
 flag-color = { $color ->
     [red] Rouge
     [orange] Orange
@@ -492,14 +418,14 @@ day-sunday = dimanche
 
 ## AI agents
 
-agent-level-read = Lire le courrier : dossiers, liste des messages, recherche et messages
+agent-level-read = Lire le courrier : consulter les dossiers et les messages, et effectuer des recherches
 agent-level-organize = Gérer le courrier : marquer comme lu ou non lu, ajouter des indicateurs, gérer les indésirables, déplacer et supprimer des messages. Les messages supprimés vont dans Éléments supprimés.
 agent-level-drafts = Rédiger des brouillons que vous enverrez vous-même
 agent-level-send = Envoyer du courrier, chaque message seulement après votre accord
 agent-connect-title = { $program } souhaite utiliser votre messagerie
-agent-connect-detail = Un agent d'IA demande à travailler avec Inbox Classic. Choisissez ce qu'il peut faire et quels comptes il peut voir ; vous pourrez le modifier plus tard dans Outils > Agents d'IA.
+agent-connect-detail = Un agent d'IA souhaite accéder à Inbox Classic. Choisissez les actions autorisées et les comptes auxquels il peut accéder. Vous pourrez modifier ces autorisations dans Outils > Agents d'IA.
 
-    Les agents lisent du courrier écrit par d'autres personnes, et un message peut tenter de les tromper. Inbox Classic vous demande toujours votre accord avant qu'un agent envoie quoi que ce soit.
+    Les agents lisent des messages écrits par d'autres personnes. Ces messages peuvent contenir des instructions destinées à tromper les agents. Inbox Classic vous demande toujours votre accord avant qu'un agent envoie un message.
 agent-reply-to = Réponse à « { $subject } »
 agent-reply-all-on = Réponse à tous sur « { $subject } »
 agent-forward-of = Transfert de « { $subject } »
@@ -533,7 +459,7 @@ agent-accounts = { $count ->
 }
 agent-access = { $can } ; { $accounts }
 agent-unreadable = Ce message ne peut pas être lu.
-agent-log-composed = « { $subject } » ouvert dans un nouveau message que vous terminerez
+agent-log-composed = « { $subject } » ouvert dans un nouveau message à compléter
 agent-log-refused = Vous n'avez pas envoyé « { $subject } »
 agent-log-sent = « { $subject } » envoyé à { $to }
 agent-log-draft = Brouillon « { $subject } » enregistré
@@ -545,7 +471,6 @@ agent-log-deleted = « { $subject } » supprimé
 agent-log-moved = « { $subject } » déplacé vers { $folder }
 agent-log-junk = « { $subject } » marqué comme indésirable
 agent-log-not-junk = « { $subject } » marqué comme non indésirable
-# review: new
 agent-log-archived = « { $subject } » archivé
 agent-log-folder = Dossier « { $name } » créé
 agent-log-unsubscribed = Désabonnement de la liste ayant envoyé « { $subject } »
@@ -569,16 +494,10 @@ secrets-windows = le Gestionnaire d'identification
 secrets-mac = le trousseau
 secrets-linux = le trousseau du système (Secret Service)
 error-no-such-file = ce fichier n'existe pas
-# review: new
-cards-file-too-big = Ce fichier est trop volumineux pour être un carnet d'adresses.
-# review: new
+cards-file-too-big = Ce fichier est trop volumineux pour être importé comme carnet d'adresses.
 ui-sender-added = { $name } a été ajouté au carnet d'adresses.
-# review: new
 ui-sender-known = { $name } est déjà dans le carnet d'adresses.
-# review: new
 ui-sender-none = L'expéditeur de ce message n'a pas d'adresse e-mail à ajouter.
-# review: new
 card-name-needed = Le contact n'a ni nom ni adresse e-mail.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
-# review: new
-cards-file-failed = { $file }: { $reason }
+cards-file-failed = { $file } : { $reason }

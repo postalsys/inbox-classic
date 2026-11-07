@@ -68,138 +68,75 @@ fold-show-earlier = Mostrar los mensajes anteriores
 
 ## Rebotes: la tarjeta sobre un aviso de que un mensaje no se entregó
 
-# review: new
 bounce-failed = Su mensaje no se entregó
-# review: new
 bounce-delayed = Su mensaje aún no se ha entregado
-# review: new
 bounce-delayed-note = Su servidor de correo sigue intentando entregarlo. No necesita enviarlo de nuevo.
-# review: new
 bounce-show-message = Mostrar el mensaje que no se entregó
-# review: new
 bounce-what-to-do = Qué puede hacer:
-# review: new
-bounce-delayed-do = Nada por ahora. Si sigue sin poder entregarse, recibirá otro aviso.
-# review: new
-bounce-delayed-row-do = Nada por ahora. Su servidor de correo sigue intentando entregarlo, y recibirá otro aviso si no lo consigue.
-# review: new
+bounce-delayed-do = No necesita hacer nada por ahora. Si el mensaje no se puede entregar, recibirá otro aviso.
+bounce-delayed-row-do = No necesita hacer nada por ahora. Su servidor de correo sigue intentando entregar el mensaje. Recibirá otro aviso si no lo consigue.
 bounce-details = Detalles
-# review: new
 bounce-someone = Un destinatario
-# review: new
 bounce-server = Servidor: { $server }
-# review: new
 bounce-status = Estado: { $status }
-# review: new
-bounce-reported-by = Informado por: { $server }
-# review: new
+bounce-reported-by = Aviso enviado por: { $server }
 bounce-retry-minutes = El servidor receptor pidió esperar { $count ->
     [one] un minuto
    *[other] { $count } minutos
 } antes del siguiente intento.
-# review: new
 bounce-retry-hours = El servidor receptor pidió esperar { $count ->
     [one] una hora
    *[other] { $count } horas
 } antes del siguiente intento.
-# review: new
 bounce-blocklist = Lista de bloqueo: { $lists }
-# review: new
 bounce-user-unknown = La dirección no existe
-# review: new
 bounce-user-unknown-why = El servidor receptor no tiene ningún buzón con esta dirección. Puede estar mal escrita, o la persona ya no la usa.
-# review: new
-bounce-user-unknown-do = Revise cómo está escrita la dirección, o pida a la persona la dirección que usa ahora.
-# review: new
+bounce-user-unknown-do = Compruebe que la dirección esté bien escrita o pida al destinatario su dirección de correo actual.
 bounce-invalid-address = La dirección no es válida
-# review: new
-bounce-invalid-address-why = La dirección no está escrita de una forma a la que se pueda enviar correo.
-# review: new
-bounce-invalid-address-do = Busque errores de escritura, como un espacio, una letra que falta o nada después de la @.
-# review: new
-bounce-mailbox-disabled = El buzón está cerrado
-# review: new
+bounce-invalid-address-why = El formato de la dirección es incorrecto, por lo que no se puede enviar correo a ella.
+bounce-invalid-address-do = Compruebe que no haya espacios de más ni letras que falten, y que aparezca el nombre de dominio después del signo @.
+bounce-mailbox-disabled = El buzón está desactivado
 bounce-mailbox-disabled-why = La dirección existe, pero su buzón se ha desactivado o ya no se usa.
-# review: new
-bounce-mailbox-disabled-do = Contacte con la persona de otra forma y pídale una dirección que use ahora.
-# review: new
+bounce-mailbox-disabled-do = Contacte con el destinatario por otro medio y pídale su dirección de correo actual.
 bounce-mailbox-full = El buzón está lleno
-# review: new
 bounce-mailbox-full-why = El buzón del destinatario no tiene espacio para correo nuevo.
-# review: new
-bounce-mailbox-full-do = Envíelo de nuevo dentro de unos días, o avise a la persona de otra forma. Los archivos adjuntos grandes son los primeros en rechazarse.
-# review: new
+bounce-mailbox-full-do = Vuelva a enviar el mensaje dentro de unos días o avise al destinatario por otro medio. Los mensajes con archivos adjuntos grandes son los primeros en rechazarse.
 bounce-spam-blocked = Rechazado como correo no deseado
-# review: new
-bounce-spam-blocked-why = El servidor receptor tomó el mensaje por correo no deseado.
-# review: new
-bounce-spam-blocked-do = Envíelo de nuevo sin lo que parece correo no deseado, como muchos vínculos, vínculos acortados o un archivo adjunto grande. Si vuelve a ocurrir, consulte a su proveedor de correo.
-# review: new
+bounce-spam-blocked-why = El servidor receptor clasificó el mensaje como correo no deseado.
+bounce-spam-blocked-do = Quite los elementos que puedan hacer que el mensaje se clasifique como correo no deseado, como un exceso de enlaces, enlaces acortados o archivos adjuntos grandes, y vuelva a enviarlo. Si el problema persiste, contacte con su proveedor de correo.
 bounce-virus-detected = Rechazado por un virus
-# review: new
 bounce-virus-detected-why = El servidor receptor encontró un virus u otro contenido dañino en el mensaje o en sus archivos adjuntos.
-# review: new
-bounce-virus-detected-do = Revise los archivos adjuntos con un antivirus. Algunos servidores rechazan cualquier programa o archivo comprimido, así que comparta esos archivos con un vínculo.
-# review: new
+bounce-virus-detected-do = Analice los archivos adjuntos con un antivirus. Algunos servidores rechazan todos los programas y archivos comprimidos. En ese caso, comparta los archivos mediante un enlace.
 bounce-ip-blocklisted = Su servidor de correo está en una lista de bloqueo
-# review: new
-bounce-ip-blocklisted-why = El servidor receptor rechaza el correo del servidor que envió el suyo, porque la dirección de ese servidor está en una lista de bloqueo.
-# review: new
-bounce-ip-blocklisted-do = El problema no es el mensaje. Reenvíe este aviso a su proveedor de correo y pídale que saque el servidor de la lista.
-# review: new
+bounce-ip-blocklisted-why = El servidor receptor rechaza los mensajes de su servidor de correo porque su dirección IP figura en una lista de bloqueo.
+bounce-ip-blocklisted-do = El problema no está en el mensaje. Reenvíe este aviso a su proveedor de correo y pídale que solicite la retirada del servidor de la lista.
 bounce-domain-blocklisted = Un dominio está en una lista de bloqueo
-# review: new
-bounce-domain-blocklisted-why = El servidor receptor rechaza el mensaje porque el dominio de su dirección, o un dominio de los vínculos del mensaje, está en una lista de bloqueo.
-# review: new
-bounce-domain-blocklisted-do = Si el mensaje tiene vínculos, pruebe sin ellos. Si no, reenvíe este aviso a quien gestione el correo de su dominio.
-# review: new
+bounce-domain-blocklisted-why = El servidor receptor rechaza el mensaje porque el dominio de su dirección de correo, o alguno de los dominios de los enlaces del mensaje, figura en una lista de bloqueo.
+bounce-domain-blocklisted-do = Si el mensaje contiene enlaces, intente enviarlo sin ellos. Si el problema persiste o el mensaje no contiene enlaces, reenvíe este aviso a quien gestione el correo de su dominio.
 bounce-policy-blocked = Rechazado por las reglas del servidor receptor
-# review: new
 bounce-policy-blocked-why = Las reglas del servidor receptor no dejan pasar este mensaje, por ejemplo por su tamaño, sus archivos adjuntos o quién lo envió.
-# review: new
-bounce-policy-blocked-do = Las propias palabras del servidor en Detalles suelen dar el motivo. Pregunte al destinatario si puede aceptar ese correo.
-# review: new
+bounce-policy-blocked-do = La respuesta del servidor, en la sección Detalles, suele indicar el motivo. Pregunte al destinatario si su servicio de correo admite ese tipo de mensajes.
 bounce-geo-blocked = Rechazado por su procedencia
-# review: new
 bounce-geo-blocked-why = El servidor receptor no acepta correo del país o la red donde está su servidor de correo.
-# review: new
-bounce-geo-blocked-do = Contacte con la persona de otra forma, o consulte a su proveedor de correo.
-# review: new
-bounce-relay-denied = El servidor no lo reenvió
-# review: new
+bounce-geo-blocked-do = Contacte con el destinatario por otro medio o consulte a su proveedor de correo.
+bounce-relay-denied = El servidor rechazó la retransmisión del mensaje
 bounce-relay-denied-why = Un servidor se negó a entregar el mensaje, a menudo porque se envió sin iniciar sesión o por un servidor que no atiende a este destinatario.
-# review: new
-bounce-relay-denied-do = Revise el servidor de salida de la cuenta en Archivo > Cuentas, y que inicie sesión.
-# review: new
+bounce-relay-denied-do = En Archivo > Cuentas, revise la configuración del servidor saliente y compruebe que el inicio de sesión en ese servidor esté configurado.
 bounce-auth-failure = No se pudo verificar su dirección de remitente
-# review: new
 bounce-auth-failure-why = El servidor receptor no pudo confirmar que el mensaje viniera realmente de su dominio (SPF, DKIM o DMARC).
-# review: new
-bounce-auth-failure-do = Reenvíe este aviso a quien gestione el correo de su dominio: hay que corregir su configuración. Mientras tanto, enviar por el servidor de su proveedor puede ayudar.
-# review: new
-bounce-rate-limited = Demasiado correo a la vez
-# review: new
-bounce-rate-limited-why = El servidor receptor acepta por ahora menos mensajes de su servidor de correo.
-# review: new
-bounce-rate-limited-do = Espere un rato y envíelo de nuevo. Si escribe a muchas personas, envíelo a menos a la vez.
-# review: new
-bounce-greylisting = Retenido un momento
-# review: new
-bounce-greylisting-why = El servidor receptor pide a los remitentes desconocidos que lo intenten un poco más tarde, una comprobación habitual contra el correo no deseado.
-# review: new
-bounce-greylisting-do = Nada. Los servidores de correo lo intentan de nuevo por sí solos, y el mensaje suele entregarse en menos de una hora.
-# review: new
+bounce-auth-failure-do = Reenvíe este aviso a quien gestione el correo de su dominio para que corrija la configuración. Mientras tanto, puede intentar enviar el mensaje a través del servidor de su proveedor.
+bounce-rate-limited = Demasiados mensajes a la vez
+bounce-rate-limited-why = El servidor receptor está limitando temporalmente la cantidad de mensajes que acepta de su servidor de correo.
+bounce-rate-limited-do = Espere un rato y vuelva a enviar el mensaje. Si escribe a muchas personas, reduzca el número de destinatarios por envío.
+bounce-greylisting = Entrega aplazada temporalmente
+bounce-greylisting-why = El servidor receptor pide a los remitentes desconocidos que lo intenten un poco más tarde. Es una medida habitual de protección contra el correo no deseado.
+bounce-greylisting-do = No necesita hacer nada. Los servidores de correo vuelven a intentarlo automáticamente y el mensaje suele entregarse en menos de una hora.
 bounce-server-error = El servidor receptor tuvo un problema
-# review: new
 bounce-server-error-why = No se pudo contactar con el servidor receptor, o no pudo aceptar el mensaje por un problema propio.
-# review: new
-bounce-server-error-do = Envíelo de nuevo más tarde. Si sigue fallando, busque errores de escritura en la parte de la dirección después de la @.
-# review: new
+bounce-server-error-do = Vuelva a enviar el mensaje más tarde. Si el problema persiste, compruebe que no haya errores en la parte de la dirección situada después del signo @.
 bounce-unknown = No entregado
-# review: new
-bounce-unknown-why = El aviso no dice con claridad por qué.
-# review: new
-bounce-unknown-do = Las propias palabras del servidor en Detalles pueden decir más. Si no ayudan, reenvíe este aviso a su proveedor de correo.
+bounce-unknown-why = El aviso no indica claramente por qué no se pudo entregar el mensaje.
+bounce-unknown-do = La respuesta del servidor, en la sección Detalles, puede ofrecer más información. Si no le resulta útil, reenvíe este aviso a su proveedor de correo.
 
 ## Several messages selected
 
@@ -228,7 +165,6 @@ done-deleted-for-good = { $count ->
     [one] { $messages } eliminado definitivamente
    *[other] { $messages } eliminados definitivamente
 }
-# review: new
 done-archived = { $count ->
     [one] { $messages } archivado
    *[other] { $messages } archivados
@@ -253,22 +189,18 @@ done-moved-back = { $count ->
     [one] { $messages } devuelto a { $folder }
    *[other] { $messages } devueltos a { $folder }
 }
-# review: new
 done-watched = { $count ->
     [one] Siguiendo la conversación
    *[other] Siguiendo { $count } conversaciones
 }
-# review: new
 done-unwatched = { $count ->
     [one] Ya no se sigue la conversación
    *[other] Ya no se siguen { $count } conversaciones
 }
-# review: new
 done-ignored = { $count ->
     [one] Ignorando la conversación
    *[other] Ignorando { $count } conversaciones
 }
-# review: new
 done-unignored = { $count ->
     [one] Ya no se ignora la conversación
    *[other] Ya no se ignoran { $count } conversaciones
@@ -276,24 +208,18 @@ done-unignored = { $count ->
 their-folders = sus carpetas
 undo-move = Deshacer Mover
 undo-delete = Deshacer Eliminar
-# review: new
 undo-archive = Deshacer Archivar
 undo-junk = Deshacer Marcar como correo no deseado
 undo-not-junk = Deshacer Marcar como correo deseado
 nothing-to-undo = No hay nada que deshacer.
 messages-gone = Los mensajes ya no están.
 folder-holds-no-messages = Esta carpeta no puede contener mensajes.
-# review: new
 not-archived-here = Los mensajes de esta carpeta no se pueden archivar.
-# review: new
-not-emptied-here = Solo se pueden vaciar Elementos eliminados y Correo no deseado.
-# review: new
+not-emptied-here = Solo se pueden vaciar las carpetas Elementos eliminados y Correo no deseado.
 next-unread-question = No quedan mensajes sin leer en { $folder }.
 
     ¿Ir a { $next }, la siguiente carpeta con mensajes sin leer?
-# review: new
 no-unread-left = No quedan mensajes sin leer.
-# review: new
 empty-question = { $count ->
     [one] ¿Vaciar { $folder }?
 
@@ -304,7 +230,7 @@ empty-question = { $count ->
 }
 no-junk-folder = Esta cuenta no tiene una carpeta de correo no deseado a la que mover los mensajes.
 no-inbox-folder = Esta cuenta no tiene una bandeja de entrada a la que mover los mensajes.
-done-flagged-color = Marca { $color ->
+done-flagged-color = Se añadió una marca { $color ->
     [red] roja
     [orange] naranja
     [yellow] amarilla
@@ -312,7 +238,7 @@ done-flagged-color = Marca { $color ->
     [blue] azul
     [purple] morada
    *[gray] gris
-} puesta en { $messages }
+} a { $messages }
 flag-color = { $color ->
     [red] Rojo
     [orange] Naranja
@@ -380,8 +306,8 @@ downloading-messages = { $count ->
    *[other] Descargando { $messages }...
 }
 import-put = { $count ->
-    [one] { $messages } colocado en { $folder }
-   *[other] { $messages } colocados en { $folder }
+    [one] { $messages } importado a { $folder }
+   *[other] { $messages } importados a { $folder }
 }
 import-not-put = No se pudieron importar los siguientes mensajes:
 
@@ -476,14 +402,14 @@ day-sunday = domingo
 
 ## AI agents
 
-agent-level-read = Leer el correo: carpetas, lista de mensajes, búsqueda y mensajes
+agent-level-read = Leer el correo: consultar carpetas y mensajes, y realizar búsquedas
 agent-level-organize = Organizar el correo: marcar como leído o no leído, añadir marcas, gestionar el correo no deseado, mover mensajes y enviarlos a Elementos eliminados
 agent-level-drafts = Escribir borradores para que usted los envíe
 agent-level-send = Enviar correo, cada mensaje solo después de que usted lo apruebe
-agent-connect-title = { $program } quiere usar su correo
-agent-connect-detail = Un agente de IA pidió trabajar con Inbox Classic. Elija qué puede hacer y qué cuentas puede ver; puede cambiarlo más tarde en Herramientas > Agentes de IA.
+agent-connect-title = { $program } solicita acceso a su correo
+agent-connect-detail = Un agente de IA solicita acceso a Inbox Classic. Elija qué puede hacer y a qué cuentas puede acceder. Podrá cambiar estos permisos en Herramientas > Agentes de IA.
 
-    Los agentes leen correo escrito por otras personas, y un mensaje puede intentar engañarlos. Inbox Classic siempre le pregunta antes de que un agente envíe algo.
+    Los agentes leen mensajes escritos por otras personas. Estos mensajes pueden contener instrucciones destinadas a engañarlos. Inbox Classic siempre le pide confirmación antes de que un agente envíe un mensaje.
 agent-reply-to = Respuesta a «{ $subject }»
 agent-reply-all-on = Respuesta a todos sobre «{ $subject }»
 agent-forward-of = Reenvío de «{ $subject }»
@@ -529,7 +455,6 @@ agent-log-deleted = Se eliminó «{ $subject }»
 agent-log-moved = «{ $subject }» movido a { $folder }
 agent-log-junk = «{ $subject }» marcado como correo no deseado
 agent-log-not-junk = «{ $subject }» marcado como correo deseado
-# review: new
 agent-log-archived = Se archivó «{ $subject }»
 agent-log-folder = Se creó la carpeta «{ $name }»
 agent-log-unsubscribed = Suscripción cancelada a la lista que envió «{ $subject }»
@@ -553,16 +478,10 @@ secrets-windows = el Administrador de credenciales
 secrets-mac = el llavero
 secrets-linux = el llavero del sistema (Secret Service)
 error-no-such-file = ese archivo no existe
-# review: new
-cards-file-too-big = Este archivo es demasiado grande para ser una libreta de direcciones.
-# review: new
+cards-file-too-big = Este archivo es demasiado grande para importarlo como libreta de direcciones.
 ui-sender-added = { $name } se ha añadido a la libreta de direcciones.
-# review: new
 ui-sender-known = { $name } ya está en la libreta de direcciones.
-# review: new
 ui-sender-none = El remitente de este mensaje no tiene una dirección de correo electrónico que añadir.
-# review: new
 card-name-needed = El contacto no tiene nombre ni dirección de correo electrónico.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
-# review: new
 cards-file-failed = { $file }: { $reason }
