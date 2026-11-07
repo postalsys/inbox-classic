@@ -414,6 +414,10 @@ public:
     void SelectStart();
     // the selected messages junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     void MarkJunk(bool junk);
+    // out of the Inbox into the account's Archive (on Gmail every label taken off)
+    void ArchiveSelected();
+    // every selected message can be archived
+    bool CanArchive() const;
     // whether the selected messages, or else the folder, are in a Junk folder: the toolbar offers Not Junk there
     bool InJunk() const;
     // the Unsubscribe link of the message shown, after asking: what the status bar says; a mailto: link to write a

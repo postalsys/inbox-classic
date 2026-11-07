@@ -115,7 +115,9 @@ void UpdateSelectionButtons() {
     for (int i = 0; i < count; i++) {
         TBBUTTON button = {};
         SendMessageW(g_toolbar, TB_GETBUTTON, i, reinterpret_cast<LPARAM>(&button));
-        if (CommandNeedsOne(static_cast<unsigned>(button.idCommand))) {
+        if (button.idCommand == IDM_ARCHIVE) {
+            SendMessageW(g_toolbar, TB_ENABLEBUTTON, IDM_ARCHIVE, MAKELONG(g_mailbox.CanArchive() ? TRUE : FALSE, 0));
+        } else if (CommandNeedsOne(static_cast<unsigned>(button.idCommand))) {
             SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(one ? TRUE : FALSE, 0));
         } else if (CommandNeedsSome(static_cast<unsigned>(button.idCommand))) {
             SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(any ? TRUE : FALSE, 0));
@@ -154,7 +156,9 @@ void UpdateMenu(HMENU menu) {
     bool several = g_mailbox.SelectedCount() > 1;
     for (int i = 0, count = GetMenuItemCount(menu); i < count; i++) {
         UINT id = GetMenuItemID(menu, i);
-        if (CommandNeedsOne(id)) {
+        if (id == IDM_ARCHIVE) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanArchive() ? MF_ENABLED : MF_GRAYED));
+        } else if (CommandNeedsOne(id)) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (several ? MF_GRAYED : MF_ENABLED));
         } else if (CommandNeedsSome(id)) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.SelectedCount() > 0 ? MF_ENABLED : MF_GRAYED));
@@ -486,6 +490,7 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_STRING, IDM_FLAG, MenuItem(PE_TEXT_CMD_FLAG).c_str());
     AppendMenuW(compose, MF_POPUP, reinterpret_cast<UINT_PTR>(g_mailbox.FlagMenu()), MenuItem(PE_TEXT_UI_MENU_FLAG).c_str());
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(compose, MF_STRING, IDM_ARCHIVE, MenuItem(PE_TEXT_CMD_ARCHIVE, L"A").c_str());
     AppendMenuW(compose, MF_STRING, IDM_JUNK, MenuItem(PE_TEXT_CMD_JUNK, L"Ctrl+J").c_str());
     AppendMenuW(compose, MF_STRING, IDM_NOT_JUNK, MenuItem(PE_TEXT_CMD_NOT_JUNK).c_str());
     HMENU edit = CreatePopupMenu();
@@ -570,6 +575,7 @@ void CreateToolbar(HWND hwnd) {
         {0, PE_TEXT_MENU_FILE, 0},
         {IDM_PRINT, PE_TEXT_UI_TB_PRINT, ICON_PRINT},
         {IDM_DELETE, PE_TEXT_UI_TB_DELETE, ICON_DELETE},
+        {IDM_ARCHIVE, PE_TEXT_UI_TB_ARCHIVE, ICON_ARCHIVE},
         // Not Junk in place of it in a Junk folder (UpdateJunkButton)
         {IDM_JUNK, PE_TEXT_UI_TB_JUNK, ICON_MAIL_PROHIBITED},
         {0, PE_TEXT_MENU_FILE, 0},
@@ -1129,6 +1135,9 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_DELETE:
         g_mailbox.DeleteSelected();
+        return;
+    case IDM_ARCHIVE:
+        g_mailbox.ArchiveSelected();
         return;
     case IDM_MOVE:
     case IDM_COPY:
