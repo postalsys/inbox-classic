@@ -45,6 +45,8 @@ enum Command: Int, CaseIterable {
     case open = 130
     case defaultApp = 131
     case viewSource = 132
+    case expandAllThreads = 145
+    case collapseAllThreads = 146
     case aiAgents = 133
     case options = 137
     case addressBook = 147
@@ -97,6 +99,8 @@ enum Command: Int, CaseIterable {
         case .open: return "tray"
         case .defaultApp: return "tools"
         case .viewSource: return "view"
+        case .expandAllThreads: return "view"
+        case .collapseAllThreads: return "view"
         case .aiAgents: return "tools"
         case .options: return "tools"
         case .addressBook: return "tools"
@@ -156,6 +160,8 @@ enum Command: Int, CaseIterable {
         case .open: return .cmdOpen
         case .defaultApp: return .cmdDefaultApp
         case .viewSource: return .cmdViewSource
+        case .expandAllThreads: return .cmdExpandAllThreads
+        case .collapseAllThreads: return .cmdCollapseAllThreads
         case .aiAgents: return .cmdAiAgents
         case .options: return .cmdOptions
         case .addressBook: return .cmdAddressBook
@@ -210,6 +216,8 @@ enum Command: Int, CaseIterable {
         case .open: return nil
         case .defaultApp: return nil
         case .viewSource: return nil
+        case .expandAllThreads: return nil
+        case .collapseAllThreads: return nil
         case .aiAgents: return nil
         case .options: return (",", [.command])
         case .addressBook: return ("b", [.command, .shift])
@@ -264,6 +272,8 @@ enum Command: Int, CaseIterable {
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return false
+        case .expandAllThreads: return false
+        case .collapseAllThreads: return false
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false
@@ -318,6 +328,8 @@ enum Command: Int, CaseIterable {
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return false
+        case .expandAllThreads: return false
+        case .collapseAllThreads: return false
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false
@@ -372,6 +384,8 @@ enum Command: Int, CaseIterable {
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return true
+        case .expandAllThreads: return false
+        case .collapseAllThreads: return false
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false

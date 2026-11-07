@@ -55,8 +55,14 @@ public final class Mailbox: NSObject {
     private var ascending = false
     private var findText = ""
     private var findPlace = ""
+    /// the messages listed and how many are unread, what the status bar counts
     private(set) var total: UInt64 = 0
     private var unread: UInt64 = 0
+    /// the rows of the list: the messages, or grouped by conversation the conversations and the messages of the open
+    /// ones
+    private(set) var rows: UInt64 = 0
+    /// the conversations opened in this list, until another folder is shown
+    private var expanded: [Int64] = []
     private var pages: [(offset: UInt64, rows: [Message])] = []
     private let pageSize: UInt64 = 100
     private var folderColumn = false
@@ -311,6 +317,7 @@ public final class Mailbox: NSObject {
         // the message of the folder before is not this folder's, nor is the search
         folder = id
         allInboxes = all
+        expanded = []
         resetFind()
         clearReader()
         reloadList(keepSelection: false)
@@ -360,8 +367,22 @@ public final class Mailbox: NSObject {
     /// words typed search every folder of every account (in: narrows that); without, the list is the folder's, or
     /// every Inbox's
     private var search: Search {
-        Search(folder: searching ? 0 : folder, allInboxes: !searching && allInboxes, text: findText)
+        Search(folder: searching ? 0 : folder, allInboxes: !searching && allInboxes, text: findText, threads: grouped,
+               expanded: grouped ? expanded : [])
     }
+
+    /// the Subject title over the subjects, which make room for the triangles while grouped
+    private func indentSubjectHeader() {
+        guard let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.subject.rawValue)),
+              let header = column.headerCell as? IndentedHeaderCell else { return }
+        let indent = grouped ? SubjectCell.glyph - SubjectCell.inset : 0
+        guard header.indent != indent else { return }
+        header.indent = indent
+        list.headerView?.needsDisplay = true
+    }
+
+    /// Settings > Group messages by conversation
+    var grouped: Bool { AppDelegate.shared?.groupByConversation ?? true }
 
     private enum ColumnID: String, CaseIterable {
         case attach, flag, from, subject, received, size, folder
@@ -407,6 +428,9 @@ public final class Mailbox: NSObject {
 
     private func makeColumn(_ id: ColumnID, title: String, width: CGFloat) -> NSTableColumn {
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(id.rawValue))
+        if id == .subject {
+            column.headerCell = IndentedHeaderCell(textCell: title)
+        }
         column.title = title
         column.width = width
         if [.attach, .flag].contains(id) {
@@ -477,15 +501,18 @@ public final class Mailbox: NSObject {
         pages = []
         total = 0
         unread = 0
+        rows = 0
         showFolderColumn()
         showPersonColumn()
         // the counts of the folder come from its indexes; a search and All Inboxes count what they find; an account
-        // lists nothing
+        // lists nothing. Grouped by conversation the list has fewer rows than messages: the core counts them
         if severalFolders {
             (total, unread) = core.messageCount(search)
         } else if folder != 0 {
             (total, unread) = core.folderCounts(folder)
         }
+        rows = grouped && total > 0 ? core.listRows(search) : total
+        indentSubjectHeader()
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let several = keepSelection && selectedCount > 1
             ? core.positions(of: selection, in: search, sort: sort, ascending: ascending) : nil
@@ -524,7 +551,7 @@ public final class Mailbox: NSObject {
     }
 
     func row(_ index: Int) -> Message? {
-        guard index >= 0, UInt64(index) < total else { return nil }
+        guard index >= 0, UInt64(index) < rows else { return nil }
         let offset = UInt64(index) / pageSize * pageSize
         if let at = pages.firstIndex(where: { $0.offset == offset }) {
             // the most recently used page goes last, the least recently used is dropped first
@@ -546,9 +573,10 @@ public final class Mailbox: NSObject {
     private func updateSelection() {
         let rows = list.selectedRowIndexes
         pe_selection_clear(selection)
-        if rows.count == 1, let row = row(rows.first!) {
+        // grouped, a row may stand for a collapsed conversation's messages, which the core finds from its range
+        if rows.count == 1, !grouped, let row = row(rows.first!) {
             pe_selection_add(selection, row.folder, row.uid)
-        } else if rows.count > 1 {
+        } else if rows.count > 0 {
             let ranges = rows.rangeView
             let starts = ranges.map { UInt64($0.lowerBound) }
             let ends = ranges.map { UInt64($0.upperBound) }
@@ -565,7 +593,7 @@ public final class Mailbox: NSObject {
     }
 
     func selectAllMessages() {
-        guard total > 0 else { return }
+        guard rows > 0 else { return }
         list.window?.makeFirstResponder(list)
         list.selectAll(nil)
     }
@@ -758,7 +786,10 @@ public final class Mailbox: NSObject {
         markReadTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self, let row = self.selectedRow, row.uid == self.uid, !row.seen else { return }
-                self.markSelected(seen: true, quiet: true)
+                // the message shown alone, not the rest of a closed conversation whose row it is
+                let shown = newSelection([(row.folder, row.uid)])
+                defer { pe_selection_free(shown) }
+                self.act(PE_ACTION_READ, on: shown, quiet: true)
             }
         }
     }
@@ -817,6 +848,54 @@ public final class Mailbox: NSObject {
         }
     }
 
+    // ---- conversations ----
+
+    /// the conversation of `row` opened (`open`) or closed; closed from a message under it, its row is selected
+    func setExpanded(_ open: Bool, row index: Int) {
+        guard grouped, let message = row(index), message.thread != 0, open != expanded.contains(message.thread) else { return }
+        if open {
+            guard message.opens else { return }
+            expanded.append(message.thread)
+        } else {
+            expanded.removeAll { $0 == message.thread }
+        }
+        // the message shown stays selected, or the conversation's row that now stands for it
+        reloadList(keepSelection: true)
+    }
+
+    /// Right on the list: the selected conversation opened; Left: closed, from its row or a message under it. False
+    /// when there is nothing to do, for the list to take the key
+    func openOrClose(_ open: Bool) -> Bool {
+        guard grouped, list.numberOfSelectedRows == 1, let message = row(list.selectedRow), message.thread != 0 else {
+            return false
+        }
+        if open && !message.collapsed { return false }
+        if !open && !(message.opens && message.threadExpanded) && message.threadDepth == 0 { return false }
+        setExpanded(open, row: list.selectedRow)
+        return true
+    }
+
+    /// View > Expand All Conversations
+    func expandAll() {
+        guard grouped else { return }
+        expanded = core.threadsWithReplies(search)
+        reloadList(keepSelection: true)
+    }
+
+    /// View > Collapse All Conversations
+    func collapseAll() {
+        guard grouped else { return }
+        expanded = []
+        reloadList(keepSelection: true)
+    }
+
+    /// grouping turned on or off in Settings: the list again, the message shown still selected
+    func groupingChanged() {
+        expanded = []
+        reloadList(keepSelection: true)
+        changed()
+    }
+
     /// the folder `id` shown, a search ended
     func goToFolder(_ id: Int64) {
         guard let node = folderNodes[id] else { return }
@@ -834,9 +913,17 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// the row of the message `uid` of `folder` selected in the list; false when it is not there
+    /// the row of the message `uid` of `folder` selected in the list, its conversation opened when it hides it; false
+    /// when it is not there
     @discardableResult
     private func selectInList(folder id: Int64, uid message: UInt64) -> Bool {
+        if grouped {
+            let hidden = core.hiddenThread(search, folder: id, uid: message)
+            if hidden != 0 && !expanded.contains(hidden) {
+                expanded.append(hidden)
+                reloadList(keepSelection: true)
+            }
+        }
         let index = core.messageIndex(search, sort: sort, ascending: ascending, folder: id, uid: message)
         guard index >= 0 else { return false }
         list.selectRowIndexes(IndexSet(integer: Int(index)), byExtendingSelection: false)
@@ -958,8 +1045,8 @@ public final class Mailbox: NSObject {
     /// after messages left the list: the one that took their place selected, or the last one
     private func selectAfterRemoval(_ index: Int) {
         reloadList(keepSelection: false)
-        if index >= 0 && total > 0 {
-            let next = min(index, Int(total) - 1)
+        if index >= 0 && rows > 0 {
+            let next = min(index, Int(rows) - 1)
             list.selectRowIndexes(IndexSet(integer: next), byExtendingSelection: false)
             list.scrollRowToVisible(next)
         }
@@ -1324,13 +1411,46 @@ public final class Mailbox: NSObject {
         guard let message = row(index) else { return nil }
         let ref = (message.folder, message.uid)
         if dragExport == nil || !(dragExport!.refs.contains { $0 == ref }) {
-            let rows = list.selectedRowIndexes.contains(index) ? Array(list.selectedRowIndexes) : [index]
-            let refs = rows.compactMap { row($0) }.map { ($0.folder, $0.uid) }
-            dragExport = DragExport(core: core.handle, refs: refs)
+            dragExport = DragExport(core: core.handle, refs: dragRefs(forRow: index))
             dragWritten = 0
         }
         guard let drag = dragExport, let at = drag.refs.firstIndex(where: { $0 == ref }) else { return nil }
         return MessagePromise(drag: drag, index: at, delegate: promiseWriter)
+    }
+
+    /// the messages a drag from the row `index` carries, in the list's order: the selection's when the row is selected,
+    /// else the row's; a closed conversation's row all of its messages, as the core's selection has them
+    private func dragRefs(forRow index: Int) -> [(Int64, UInt64)] {
+        if list.selectedRowIndexes.contains(index) {
+            return refs(of: selection)
+        }
+        let one: OpaquePointer = pe_selection_new()
+        defer { pe_selection_free(one) }
+        let start = [UInt64(index)]
+        let end = [UInt64(index + 1)]
+        _ = search.with { pe_selection_set_ranges(core.handle, one, $0, sort, ascending, start, end, 1) }
+        return refs(of: one)
+    }
+
+    /// the items of a drag out of the list made whole: the list gives one a row, and a closed conversation's row
+    /// stands for several messages, whose others are added (one file each for the Finder, one message each for a
+    /// folder of the tree)
+    func completeDrag(_ items: [NSDraggingItem]) -> [NSDraggingItem] {
+        let promises = items.compactMap { $0.item as? MessagePromise }
+        guard let drag = promises.first?.drag, promises.allSatisfy({ $0.drag === drag }) else { return items }
+        let covered = Set(promises.map(\.index))
+        guard covered.count < drag.refs.count, var frame = items.first?.draggingFrame else { return items }
+        // a dragging item refuses an empty frame
+        if frame.isEmpty {
+            frame.size = NSSize(width: 1, height: 1)
+        }
+        let more = (0..<drag.refs.count).filter { !covered.contains($0) }.map { at in
+            let item = NSDraggingItem(pasteboardWriter: MessagePromise(drag: drag, index: at, delegate: promiseWriter))
+            // under the rows dragged, without a picture of their own
+            item.setDraggingFrame(frame, contents: nil)
+            return item
+        }
+        return items + more
     }
 
     /// the drag out of the list ended: the next one names its own files
@@ -1367,7 +1487,7 @@ public final class Mailbox: NSObject {
             return act(PE_ACTION_COPY, to: to, on: dragged)
         }
         // from this list when they are what is selected here
-        if messages.count == selectedCount, let first = messages.first, let selected = firstSelected,
+        if messages.count == pe_selection_count(selection), let first = messages.first, let selected = firstSelected,
            first.0 == selected.folder && first.1 == selected.uid {
             return actAndRemove(PE_ACTION_MOVE, to: to, on: dragged)
         }
@@ -1551,7 +1671,7 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
 extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
     public func numberOfRows(in tableView: NSTableView) -> Int {
-        Int(min(total, UInt64(Int32.max)))
+        Int(min(rows, UInt64(Int32.max)))
     }
 
     public func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row index: Int) -> NSView? {
@@ -1569,19 +1689,27 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
                           selected: message.flagged ? Icons.selectedFlag : nil)
             }
             return cell
+        case .subject:
+            let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? SubjectCell) ?? SubjectCell(id)
+            cell.toggled = { [weak self, weak tableView, weak cell] open in
+                guard let self, let tableView, let cell else { return }
+                let at = tableView.row(for: cell)
+                if at >= 0 { self.setExpanded(open, row: at) }
+            }
+            cell.show(message, grouped: grouped)
+            return cell
         default:
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? TextCell) ?? TextCell(id)
             let value: String
             switch ColumnID(rawValue: id.rawValue) {
             case .from: value = recipientsColumn ? message.recipients : message.from
-            case .subject: value = message.subject
             case .received: value = message.date.map(formatDate) ?? ""
             case .size: value = formatSize(message.size)
             case .folder: value = rowFolder(message.folder)
             default: value = ""
             }
-            // unread messages in bold, as Outlook Express shows them
-            cell.show(value, bold: !message.seen, right: id.rawValue == ColumnID.size.rawValue)
+            // unread messages in bold, as Outlook Express shows them, and closed conversations with unread mail
+            cell.show(value, bold: message.bold, right: id.rawValue == ColumnID.size.rawValue)
             return cell
         }
     }
@@ -1710,6 +1838,18 @@ final class IconCell: NSTableCellView {
     }
 }
 
+/// The Subject header: its title moved in as far as the subjects are, over the room of the triangles
+final class IndentedHeaderCell: NSTableHeaderCell {
+    var indent: CGFloat = 0
+
+    override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
+        var frame = cellFrame
+        frame.origin.x += indent
+        frame.size.width = max(0, frame.size.width - indent)
+        super.drawInterior(withFrame: frame, in: controlView)
+    }
+}
+
 /// A column header that shows an icon in place of a title (the paper clip, the flag), in the colour of the titles
 final class IconHeaderCell: NSTableHeaderCell {
     /// the icon, tinted once in the colour of the titles
@@ -1751,6 +1891,64 @@ final class TextCell: NSTableCellView {
         label.stringValue = value
         label.font = bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
         label.alignment = right ? .right : .left
+    }
+}
+
+/// The subject of a row; grouped by conversation, a conversation's row of several has a disclosure triangle and the
+/// count of its messages, and the messages under an open one are indented
+final class SubjectCell: NSTableCellView {
+    private let label = NSTextField(labelWithString: "")
+    let disclosure = NSButton()
+    private var indent: NSLayoutConstraint!
+    /// the triangle clicked: open (true) or close the conversation
+    var toggled: (Bool) -> Void = { _ in }
+
+    /// the room of the triangle, and how much further the messages under it are in
+    static let glyph: CGFloat = 16
+    static let step: CGFloat = 14
+    /// where the subject starts in a list that is not grouped
+    static let inset: CGFloat = 2
+
+    init(_ id: NSUserInterfaceItemIdentifier) {
+        super.init(frame: .zero)
+        identifier = id
+        disclosure.bezelStyle = .disclosure
+        disclosure.setButtonType(.onOff)
+        disclosure.title = ""
+        disclosure.controlSize = .small
+        disclosure.target = self
+        disclosure.action = #selector(clicked)
+        disclosure.setAccessibilityIdentifier("list.disclosure")
+        disclosure.translatesAutoresizingMaskIntoConstraints = false
+        label.lineBreakMode = .byTruncatingTail
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.cell?.usesSingleLineMode = true
+        addSubview(disclosure)
+        addSubview(label)
+        indent = label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: SubjectCell.inset)
+        NSLayoutConstraint.activate([
+            disclosure.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 1),
+            disclosure.centerYAnchor.constraint(equalTo: centerYAnchor),
+            indent,
+            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+        textField = label
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    func show(_ message: Message, grouped: Bool) {
+        // the count is a number alone, which needs no words of a language
+        label.stringValue = message.opens ? "\(message.subject) (\(message.threadCount))" : message.subject
+        label.font = message.bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
+        disclosure.isHidden = !message.opens
+        disclosure.state = message.threadExpanded ? .on : .off
+        indent.constant = !grouped ? SubjectCell.inset : SubjectCell.glyph + CGFloat(message.threadDepth) * SubjectCell.step
+    }
+
+    @objc private func clicked() {
+        toggled(disclosure.state == .on)
     }
 }
 
@@ -1818,8 +2016,8 @@ public final class FolderOutline: NSOutlineView {
     }
 }
 
-/// The message list: Return opens a draft, Delete deletes, as the list of the Windows app does; a right click opens the
-/// message's menu
+/// The message list: Return opens a draft, Delete deletes, Right and Left open and close a conversation, as the list of
+/// the Windows app does; a right click opens the message's menu
 public final class MessageTable: NSTableView {
     weak var mailbox: Mailbox?
 
@@ -1850,6 +2048,12 @@ public final class MessageTable: NSTableView {
         return super.validateUserInterfaceItem(item)
     }
 
+    /// a drag out of the list: a closed conversation's row carries all of its messages
+    public override func beginDraggingSession(with items: [NSDraggingItem], event: NSEvent,
+                                              source: NSDraggingSource) -> NSDraggingSession {
+        super.beginDraggingSession(with: mailbox?.completeDrag(items) ?? items, event: event, source: source)
+    }
+
     public override func keyDown(with event: NSEvent) {
         switch event.keyCode {
         case 36, 76:
@@ -1862,6 +2066,9 @@ public final class MessageTable: NSTableView {
         // N: the next unread message, as in Thunderbird
         case 45 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
             mailbox?.nextUnread()
+        // Right opens the selected conversation, Left closes it (from a message under it too)
+        case 124 where mailbox?.openOrClose(true) == true, 123 where mailbox?.openOrClose(false) == true:
+            break
         default:
             super.keyDown(with: event)
         }

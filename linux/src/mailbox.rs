@@ -104,6 +104,8 @@ pub struct Mailbox {
     reloading: Cell<bool>,
     mark_read: RefCell<Option<glib::SourceId>>,
     reload_later: RefCell<Option<glib::SourceId>>,
+    /// The conversations open in the list (grouped by conversation), until another folder is shown
+    expanded: RefCell<Vec<i64>>,
 }
 
 impl Mailbox {
@@ -228,6 +230,7 @@ impl Mailbox {
             reloading: Cell::new(false),
             mark_read: RefCell::new(None),
             reload_later: RefCell::new(None),
+            expanded: RefCell::default(),
         });
         mailbox.install_actions(application);
         mailbox.connect(&clear);
@@ -402,10 +405,30 @@ impl Mailbox {
             glib::Propagation::Proceed
         });
         self.list.view.add_controller(keys);
+        self.connect_thread_keys();
         self.window.connect_close_request(|_| {
             shell().close_main();
             glib::Propagation::Stop
         });
+    }
+
+    /// Right and Left in the message list open and close a conversation, before the list moves the focus with them
+    fn connect_thread_keys(self: &Rc<Self>) {
+        let keys = gtk::EventControllerKey::new();
+        keys.set_propagation_phase(gtk::PropagationPhase::Capture);
+        let this = Rc::downgrade(self);
+        keys.connect_key_pressed(move |_, key, _, modifiers| {
+            let open = match key {
+                gdk::Key::Right | gdk::Key::KP_Right => true,
+                gdk::Key::Left | gdk::Key::KP_Left => false,
+                _ => return glib::Propagation::Proceed,
+            };
+            match this.upgrade() {
+                Some(this) if modifiers.is_empty() && this.thread_key(open) => glib::Propagation::Stop,
+                _ => glib::Propagation::Proceed,
+            }
+        });
+        self.list.view.add_controller(keys);
     }
 
     /// The menu key and Shift+F10 in the message list open the selected message's menu, as a right click does
@@ -634,6 +657,7 @@ impl Mailbox {
         // the message of the folder before is not this folder's, nor is the search
         self.folder.set(folder);
         self.all_inboxes.set(all_inboxes);
+        self.expanded.borrow_mut().clear();
         self.reset_find();
         self.clear_reader(false);
         self.reload_list(false);
@@ -729,7 +753,7 @@ impl Mailbox {
 
     /// What the list shows: words typed search every folder of every account (in: narrows that); without, the
     /// folder, or every Inbox
-    fn search(&self) -> pe_core::Search {
+    pub fn search(&self) -> pe_core::Search {
         let scope = if self.searching() {
             pe_core::Scope::Everywhere
         } else if self.all_inboxes.get() {
@@ -741,6 +765,7 @@ impl Mailbox {
             scope,
             show: pe_core::Show::All,
             text: self.find_text.borrow().clone(),
+            threads: grouped().then(|| self.expanded.borrow().clone()),
         }
     }
 
@@ -761,6 +786,14 @@ impl Mailbox {
         };
         self.total.set(total);
         self.unread.set(unread);
+        // grouped by conversation, a row for each conversation
+        let rows = match &search.threads {
+            Some(_) if active => core.count_rows(&search).unwrap_or(0),
+            _ => total,
+        };
+        let on = search.threads.is_some() && active;
+        self.enable(Command::ExpandAllThreads, on);
+        self.enable(Command::CollapseAllThreads, on);
         // Deleted Items or Junk E-mail with messages: the folder read for the counts above says
         self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
         self.list
@@ -789,7 +822,7 @@ impl Mailbox {
             Vec::new()
         };
         self.reloading.set(true);
-        self.list.reset(search, total, active, &positions);
+        self.list.reset(search, rows, active, &positions);
         self.reloading.set(false);
         self.show_empty_list();
         self.show_counts();
@@ -883,7 +916,14 @@ impl Mailbox {
         }
         let selected = self.list.selected();
         let (folder, uid) = selected.as_ref().map_or((0, 0), |(_, m)| (m.folder_id, m.info.uid));
-        let refs: Vec<MessageRef> = selected.iter().map(|_| MessageRef { folder, uid }).collect();
+        // grouped, the core says what the row stands for: a collapsed conversation's row all of its messages
+        let search = self.search();
+        let refs: Vec<MessageRef> = if search.threads.is_some() {
+            core.refs_in_ranges(&search, self.list.sort(), &self.list.selected_ranges())
+                .unwrap_or_default()
+        } else {
+            selected.iter().map(|_| MessageRef { folder, uid }).collect()
+        };
         *self.summary.borrow_mut() = core.summary(&refs).unwrap_or_default();
         *self.refs.borrow_mut() = refs;
         if uid == self.reader.uid() && folder == self.reader.folder() && !self.reader.shows_summary() {
@@ -928,9 +968,10 @@ impl Mailbox {
         }
     }
 
-    /// Several messages are selected: the reading pane says how many, none is shown
+    /// Several rows are selected: the reading pane says how many messages, none is shown (one collapsed
+    /// conversation's row shows its first message, though what is done to it is done to all of its messages)
     pub fn several(&self) -> bool {
-        self.refs.borrow().len() > 1
+        self.list.selected_count() > 1
     }
 
     /// Undo on or off, saying what it takes back ("Undo Move"); after what can change it
@@ -1050,9 +1091,13 @@ impl Mailbox {
         self.select_in_list(folder, uid);
     }
 
-    /// The row of the message `uid` of `folder` selected in the list; false when it is not there
+    /// The row of the message `uid` of `folder` selected in the list, its conversation opened when it is a reply hidden
+    /// in it; false when it is not there
     fn select_in_list(&self, folder: i64, uid: u64) -> bool {
         let core = &shell().core;
+        if let Ok(Some(thread)) = core.hidden_in(&self.search(), folder, uid) {
+            self.set_thread_expanded(thread, true);
+        }
         let Ok(Some(index)) = core.search_index(&self.search(), self.list.sort(), folder, uid) else {
             return false;
         };
@@ -1061,6 +1106,66 @@ impl Mailbox {
         };
         self.list.select(index);
         self.list.view.grab_focus();
+        true
+    }
+
+    /// The conversation `thread` opened (its other messages under its first) or closed, the selection kept on its
+    /// row
+    pub fn set_thread_expanded(&self, thread: i64, open: bool) {
+        {
+            let mut expanded = self.expanded.borrow_mut();
+            let at = expanded.iter().position(|t| *t == thread);
+            match (at, open) {
+                (None, true) => expanded.push(thread),
+                (Some(at), false) => {
+                    expanded.remove(at);
+                }
+                _ => return,
+            }
+        }
+        self.reload_list(true);
+    }
+
+    /// View > Expand All Conversations (`open`) and Collapse All Conversations
+    pub fn expand_all_threads(&self, open: bool) {
+        let search = self.search();
+        if search.threads.is_none() {
+            return;
+        }
+        *self.expanded.borrow_mut() = if open {
+            shell().core.threads_with_replies(&search).unwrap_or_default()
+        } else {
+            Vec::new()
+        };
+        self.reload_list(true);
+    }
+
+    /// Group messages by conversation turned on or off in Preferences: the list again, every conversation closed
+    pub fn regroup(&self) {
+        self.expanded.borrow_mut().clear();
+        self.reload_list(true);
+    }
+
+    /// Right and Left in the list: Right opens the conversation of the selected row, Left closes it (from a reply
+    /// too, whose conversation's row is then selected). False when the key does nothing here.
+    fn thread_key(&self, open: bool) -> bool {
+        let Some((_, message)) = self.list.selected() else {
+            return false;
+        };
+        let Some(place) = message.thread else {
+            return false;
+        };
+        if place.depth == 0 && !place.opens() {
+            return false;
+        }
+        if open && place.depth > 0 {
+            return true;
+        }
+        // a reply's row goes with it: the selection follows its message onto its conversation's row
+        self.set_thread_expanded(place.thread, open);
+        if let Some((at, _)) = self.list.selected() {
+            self.list.view.scroll_to(at, None, gtk::ListScrollFlags::FOCUS, None);
+        }
         true
     }
 
@@ -1296,7 +1401,7 @@ impl Mailbox {
         let after = (refs == self.selected_refs())
             .then(|| self.list.last_selected())
             .flatten()
-            .map(|last| (last + 1).saturating_sub(refs.len() as u32));
+            .map(|last| (last + 1).saturating_sub(self.list.selected_count() as u32));
         let outcome = shell().core.act(&refs, action);
         self.update_undo();
         match outcome {
@@ -1940,6 +2045,11 @@ impl Mailbox {
             self.import_files(&[file.to_path_buf()]).await;
         }
     }
+}
+
+/// Preferences > Group messages by conversation, on unless turned off
+pub fn grouped() -> bool {
+    shell().settings.bool(settings::GROUP_BY_CONVERSATION, true)
 }
 
 fn special_use(folder: &Folder) -> Option<SpecialUse> {

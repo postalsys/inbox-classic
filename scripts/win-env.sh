@@ -15,12 +15,14 @@ win_sync() {
         --exclude core/fuzz/target --exclude node_modules .
     scp -q "$archive" "$WIN_HOST:$WIN_DIR_FWD/../inbox-classic-src.tgz"
     rm -f "$archive"
-    # from another checkout than last time, the files get the time of the copy (-m): their own times can be older than
-    # what was built from the other checkout, which cargo and CMake would then take as up to date
+    # from another checkout than last time, the sources it left go first (a crate only it has would join the cargo
+    # workspace), keeping the build outputs, and the files get the time of the copy (-m): their own times can be older
+    # than what was built from the other checkout, which cargo and CMake would then take as up to date
     local here keep=""
     here=$(pwd -P)
     if [ "$(ssh -n "$WIN_HOST" "type $WIN_DIR\\..\\inbox-classic-src.from 2>nul" | tr -d "\r")" != "$here" ]; then
         keep="-m"
+        ssh -n "$WIN_HOST" "powershell -NoProfile -Command \"Get-ChildItem -Force '$WIN_DIR' | Where-Object { \$_.Name -notin 'build','dist','core' } | Remove-Item -Recurse -Force; Get-ChildItem -Force '$WIN_DIR\\core' -ErrorAction SilentlyContinue | Where-Object { \$_.Name -ne 'target' } | Remove-Item -Recurse -Force\""
     fi
     ssh -n "$WIN_HOST" "tar $keep -xzf $WIN_DIR_FWD/../inbox-classic-src.tgz -C $WIN_DIR_FWD && del $WIN_DIR\\..\\inbox-classic-src.tgz"
     ssh -n "$WIN_HOST" "echo $here> $WIN_DIR\\..\\inbox-classic-src.from"

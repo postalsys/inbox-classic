@@ -62,6 +62,12 @@ ui-go-to-prompt = Ir a la carpeta:
 ui-find-in-message-hint = Buscar en este mensaje
 # review: new
 ui-find-not-found = «{ $words }» no está en este mensaje
+# review: new
+cmd-expand-all-threads = &Expandir todas las conversaciones
+# review: new
+cmd-collapse-all-threads = &Contraer todas las conversaciones
+# review: new
+ui-group-by-conversation = &Agrupar los mensajes por conversación
 cmd-notify = &Avisar de correo nuevo
 cmd-open = &Abrir Inbox Classic
 cmd-default-app = Usar como programa de correo &predeterminado...

@@ -313,9 +313,9 @@ void SetTextPreference(const wchar_t* name, const std::wstring& value);
 // the language of the windows, before the first window reads a word: `forced` (--language), else the one chosen in
 // Options, else the first of Windows' display languages there is a catalog of
 void StartLanguage(const std::wstring& forced);
-// Tools > Options: the language and the new mail notifications (`notify`, changed when OK is clicked). True when the
-// user chose to restart now for a new language
-bool OptionsDialog(HWND owner, bool& notify);
+// Tools > Options: the language, the new mail notifications (`notify`) and the list grouped by conversation
+// (`threads`), these two changed when OK is clicked. True when the user chose to restart now for a new language
+bool OptionsDialog(HWND owner, bool& notify, bool& threads);
 
 // ---- addressbook.cpp ----
 
@@ -549,6 +549,13 @@ public:
     void OpenSelected();
     // the list as it is now: what it shows and in which order, for Previous and Next in a message window
     MessageListOrder ListOrder() const;
+    // whether the list has a row a conversation (Tools > Options, kept for the next start), and turning that on or off
+    bool Grouped() const { return threads_; }
+    void SetGrouped(bool on);
+    // View > Expand All Conversations (`open`) and Collapse All Conversations
+    void ExpandAll(bool open);
+    // the list subclassed for the conversations: Right and Left, and a click on a + or - box; true when handled
+    bool OnListInput(UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
     struct Page {
@@ -602,6 +609,21 @@ private:
     // the row of the message `uid` of `folder` selected in the list; false when it is not there
     bool SelectInList(int64_t folder, uint64_t uid);
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
+    // a row's font: bold as the core says (unread, or a collapsed conversation with an unread message), or the list's
+    HFONT RowFont(const PeMessage& row) const;
+    // the Subject cell of a list grouped by conversation, drawn whole: a conversation's + or - box, the subject indented
+    // under its first message, and how many messages it has
+    void DrawSubject(HDC dc, int index, const PeMessage& row);
+    // the Subject cell of the row `index`, and where the + or - box is in such a cell
+    RECT SubjectCell(int index) const;
+    static RECT ThreadBox(const RECT& cell);
+    // a click at `at` on a + or - box, and Right (`right`) or Left on the focused row; true when handled
+    bool OnThreadClick(POINT at);
+    bool OnThreadArrow(bool right);
+    // the row `row` alone selected, focused and in view, and followed at once
+    void SelectOnly(int row);
+    // the conversation `thread` opened or closed, the list shown again
+    void SetThreadExpanded(int64_t thread, bool open);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
     void DisplayInfo(NMLVDISPINFOW* info);
     bool OnListNotify(NMHDR* header, LRESULT& result);
@@ -614,6 +636,8 @@ private:
     // not the selected one)
     Reader reader_;
     HFONT bold_ = nullptr;
+    // the list's font, for the rows not in bold
+    HFONT normal_ = nullptr;
     HFONT link_ = nullptr;
     // where the list goes, with the search bar over it while searching
     RECT listArea_ = {};
@@ -732,6 +756,11 @@ private:
     int64_t folder_ = 0;
     uint64_t total_ = 0;
     uint64_t unread_ = 0;
+    // the rows of the list: the messages, or with conversations grouped the conversations and the open ones' replies
+    uint64_t rowCount_ = 0;
+    // a row a conversation, and the conversations opened (sorted) in the folder shown
+    bool threads_ = true;
+    std::vector<int64_t> expanded_;
     PeSortField sort_ = PE_SORT_FIELD_DATE;
     bool ascending_ = false;
     // the pages of the list, the most recently used last
@@ -826,6 +855,7 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_LANGUAGE = 660,
     IDC_OPTIONS_NOTIFY,
     IDC_OPTIONS_NOTE,
+    IDC_OPTIONS_THREADS,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them

@@ -282,6 +282,17 @@ key = "Mod+U"
 mac = ""
 one = true
 
+# every conversation of the list open (its other messages under its first), and every one closed again
+[[command]]
+id = "expand_all_threads"
+windows = 145
+menu = "view"
+
+[[command]]
+id = "collapse_all_threads"
+windows = 146
+menu = "view"
+
 [[command]]
 id = "ai_agents"
 windows = 133

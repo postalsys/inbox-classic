@@ -1,4 +1,4 @@
-// Tools > Options: the language of the windows and the new mail notifications; and the language the app starts in.
+// Tools > Options: the language of the windows, the new mail notifications and the list grouped by conversation; and the language the app starts in.
 // The words come from the core's catalogs; the language is read once, at start, so another one takes a restart.
 #include "app.h"
 
@@ -59,8 +59,10 @@ struct OptionsState {
     // Options: its controls, and what they had when OK was clicked
     HWND combo = nullptr;
     HWND check = nullptr;
+    HWND threadsCheck = nullptr;
     int picked = 0;
     bool notify = false;
+    bool threads = false;
 };
 
 LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -70,6 +72,7 @@ LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         if (state->accepted && state->combo) {
             state->picked = static_cast<int>(SendMessageW(state->combo, CB_GETCURSEL, 0, 0));
             state->notify = Button_GetCheck(state->check) == BST_CHECKED;
+            state->threads = Button_GetCheck(state->threadsCheck) == BST_CHECKED;
         }
         state->done = true;
         return 0;
@@ -111,7 +114,7 @@ void StartLanguage(const std::wstring& forced) {
     core::SetLanguage(code);
 }
 
-bool OptionsDialog(HWND owner, bool& notify) {
+bool OptionsDialog(HWND owner, bool& notify, bool& threads) {
     RegisterDialogClass(kOptionsClass, OptionsProc);
     std::vector<Language> languages = Languages();
     std::wstring chosen = GetTextPreference(kLanguagePreference);
@@ -123,15 +126,17 @@ bool OptionsDialog(HWND owner, bool& notify) {
 
     std::wstring label = core::T(PE_TEXT_WIN_OPTIONS_LANGUAGE_LABEL), note = core::T(PE_TEXT_WIN_OPTIONS_RESTART_NOTE);
     std::wstring notifyText = core::T(PE_TEXT_WIN_OPTIONS_NOTIFY);
+    std::wstring threadsText = core::T(PE_TEXT_UI_GROUP_BY_CONVERSATION);
     std::wstring ok = core::T(PE_TEXT_UI_OK), cancel = core::T(PE_TEXT_UI_CANCEL);
     int pad = Scale(12), row = Scale(22);
     int labelWidth = static_cast<int>(MeasureText(label).cx) + Scale(8);
-    // wide enough for the longest language name and the check box's words
-    int inner = std::max({Scale(360), labelWidth + Scale(200), static_cast<int>(MeasureText(notifyText).cx) + Scale(24)});
+    // wide enough for the longest language name and the check boxes' words
+    int inner = std::max({Scale(360), labelWidth + Scale(200), static_cast<int>(MeasureText(notifyText).cx) + Scale(24),
+                          static_cast<int>(MeasureText(threadsText).cx) + Scale(24)});
     int width = 2 * pad + inner;
     int noteHeight = std::max(Scale(16), static_cast<int>(MeasureText(note, inner - labelWidth).cy));
-    // the language and its note, a line, the notifications, the buttons
-    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + row + Scale(16) + Scale(25) + pad;
+    // the language and its note, a line, the notifications and the conversations, the buttons
+    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 2 * row + Scale(4) + Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
     OptionsState state;
 
@@ -159,6 +164,10 @@ bool OptionsDialog(HWND owner, bool& notify) {
     HWND check = CreateChild(dialog, L"BUTTON", notifyText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_OPTIONS_NOTIFY,
                              {left, y, right, y + row});
     Button_SetCheck(check, notify ? BST_CHECKED : BST_UNCHECKED);
+    y += row + Scale(4);
+    HWND threadsCheck = CreateChild(dialog, L"BUTTON", threadsText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_OPTIONS_THREADS,
+                                    {left, y, right, y + row});
+    Button_SetCheck(threadsCheck, threads ? BST_CHECKED : BST_UNCHECKED);
     int buttonWidth = ButtonWidth({ok, cancel}), buttonTop = height - pad - Scale(25);
     CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
                 {width - pad - 2 * buttonWidth - Scale(6), buttonTop, width - pad - buttonWidth - Scale(6), buttonTop + Scale(25)});
@@ -166,12 +175,14 @@ bool OptionsDialog(HWND owner, bool& notify) {
 
     state.combo = combo;
     state.check = check;
+    state.threadsCheck = threadsCheck;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     RunModal(dialog, combo, state.done);
     if (!state.accepted) {
         return false;
     }
     notify = state.notify;
+    threads = state.threads;
     int picked = state.picked;
     std::wstring code = picked > 0 && static_cast<size_t>(picked) <= languages.size() ? languages[picked - 1].code : L"";
     if (code == chosen) {

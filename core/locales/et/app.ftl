@@ -62,6 +62,12 @@ ui-go-to-prompt = Mine kausta:
 ui-find-in-message-hint = Otsi sellest kirjast
 # review: new
 ui-find-not-found = „{ $words }“ ei ole selles kirjas
+# review: new
+cmd-expand-all-threads = &Laienda kõik vestlused
+# review: new
+cmd-collapse-all-threads = &Ahenda kõik vestlused
+# review: new
+ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
 cmd-notify = Teavita &uuest postist
 cmd-open = &Ava Inbox Classic
 cmd-default-app = Määra &vaikimisi meiliprogrammiks...

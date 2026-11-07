@@ -353,6 +353,9 @@ typedef struct PeTargetList PeTargetList;
 // Texts (file names, paths); free with `pe_text_list_free`
 typedef struct PeTextList PeTextList;
 
+// Conversation ids; free with `pe_thread_list_free`
+typedef struct PeThreadList PeThreadList;
+
 // A program that wants to connect
 typedef struct PeAgentConnect {
   // Its file
@@ -599,6 +602,11 @@ typedef struct PeSearch {
   enum PeShow show;
   // UTF-8, NULL or empty for no words
   const char *text;
+  // One row a conversation (`PeMessage.thread` says each row's place), with the conversations `expanded` open
+  // (`expanded_count` of them); false for one row a message
+  bool threads;
+  const int64_t *expanded;
+  size_t expanded_count;
 } PeSearch;
 
 // A row of the message list
@@ -622,6 +630,23 @@ typedef struct PeMessage {
   uint8_t flag_color;
   bool answered;
   bool has_attachments;
+  // Whether the row is bold: the message is unread, or the row is a collapsed conversation's with an unread message.
+  // The apps read this rather than decide from `seen` and the thread numbers.
+  bool bold;
+  // Its row's place in a list grouped by conversation (`PeSearch.threads`), all 0 and false otherwise: the
+  // conversation; 0 for its first message's row, 1 for the others under it when expanded; how many messages it has
+  // in the list and how many are unread; whether it is expanded
+  int64_t thread;
+  uint32_t thread_depth;
+  uint32_t thread_count;
+  uint32_t thread_unread;
+  bool thread_expanded;
+  // The row opens and closes its conversation (the first row of one of several messages: a + or a -). The apps
+  // read this rather than decide from the numbers above.
+  bool thread_opens;
+  // The row stands for all of its conversation's messages, which are not shown under it (it shows a +, and an action
+  // on it acts on them all). The apps read this rather than decide from the numbers above.
+  bool thread_collapsed;
   // A notice that a message was not delivered, or not yet (a bounce): the list shows its icon in the attachment
   // column's place
   bool bounce;
@@ -1584,7 +1609,8 @@ bool pe_start_message(const struct PeCore *core,
 // Whether the folder tree has All Inboxes above the accounts, for this many accounts
 bool pe_all_inboxes_shown(size_t accounts);
 
-// How many messages `pe_messages` lists for `search`, and how many of them are unread
+// How many messages `search` finds, and how many of them are unread: grouped by conversation (`threads`) too, all of
+// their messages (the list's rows are `pe_list_rows`)
 //
 // # Safety
 // `core` must be a live handle, `search` a valid search, `total` and `unread` valid pointers.
@@ -1592,6 +1618,15 @@ bool pe_message_count(const struct PeCore *core,
                       const struct PeSearch *search,
                       uint64_t *total,
                       uint64_t *unread);
+
+// How many rows `pe_messages` lists for `search`: what the list's size is. Grouped by conversation (`threads`) one a
+// conversation, and under each expanded one its other messages; otherwise one a message, as `pe_message_count`
+// counts. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search.
+uint64_t pe_list_rows(const struct PeCore *core,
+                      const struct PeSearch *search);
 
 // The messages before and after the message `uid` of `folder` in the list `search`, `sort` and `ascending` make, with
 // one pass over the list: what Previous and Next open, into `previous_*` and `next_*` (a folder of 0 at an end).
@@ -1665,6 +1700,40 @@ struct PeMessageList *pe_messages(const struct PeCore *core,
                                   bool ascending,
                                   uint64_t offset,
                                   uint64_t limit);
+
+// The conversations of the list `search` makes that have more than one message there: what View > Expand All
+// Conversations opens (as `PeSearch.expanded`). NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search.
+struct PeThreadList *pe_threads_with_replies(const struct PeCore *core,
+                                             const struct PeSearch *search);
+
+// # Safety
+// `list` must be NULL or from `pe_threads_with_replies`, not freed yet.
+size_t pe_thread_list_count(const struct PeThreadList *list);
+
+// Conversation `index`; 0 past the end
+//
+// # Safety
+// `list` must be NULL or from `pe_threads_with_replies`, not freed yet.
+int64_t pe_thread_list_get(const struct PeThreadList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or from `pe_threads_with_replies`, freed once.
+void pe_thread_list_free(struct PeThreadList *list);
+
+// The conversation the message `uid` of `folder` is hidden in, in the list `search` makes: grouped by conversation,
+// that conversation collapsed and the message not its first there (whose row stands for it). The list opens it (adds
+// it to `PeSearch.expanded`) to show or select the message. 0 when the message has its own row, is not in the list,
+// or on failure.
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search.
+int64_t pe_message_hidden_thread(const struct PeCore *core,
+                                 const struct PeSearch *search,
+                                 int64_t folder,
+                                 uint64_t uid);
 
 // Where message `uid` of `folder` is in what `search` finds in this order, -1 when it is not there
 //

@@ -38,7 +38,7 @@ pub use rusqlite::Error;
 pub use search::{IndexText, Scope, Search, Show};
 pub use selection::{MessageRef, Picked};
 pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
-pub use threads::{MAX_REFERENCES, ThreadRow, parse_references};
+pub use threads::{MAX_REFERENCES, ThreadPlace, parse_references};
 pub use transfers::Transfer;
 
 pub type Result<T> = std::result::Result<T, Error>;

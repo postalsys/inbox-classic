@@ -186,6 +186,9 @@ fn reads_mail_through_the_c_api() {
         all_inboxes: false,
         show: PeShow::All,
         text,
+        threads: false,
+        expanded: std::ptr::null(),
+        expanded_count: 0,
     };
     let found = unsafe { pe_messages(core, &folder_search(find.as_ptr()), PeSortField::Subject, true, 0, 50) };
     assert_eq!(unsafe { pe_message_list_count(found) }, 1);
@@ -201,6 +204,9 @@ fn reads_mail_through_the_c_api() {
         all_inboxes: false,
         show: PeShow::Unread,
         text: std::ptr::null(),
+        threads: false,
+        expanded: std::ptr::null(),
+        expanded_count: 0,
     };
     assert!(unsafe { pe_message_count(core, &everywhere, &mut total, &mut unread) });
     assert_eq!((total, unread), (1, 1));
@@ -210,9 +216,42 @@ fn reads_mail_through_the_c_api() {
         all_inboxes: true,
         show: PeShow::All,
         text: std::ptr::null(),
+        threads: false,
+        expanded: std::ptr::null(),
+        expanded_count: 0,
     };
     assert!(unsafe { pe_message_count(core, &all_inboxes, &mut total, &mut unread) });
     assert_eq!((total, unread), (2, 1));
+    // grouped by conversation: two messages that do not answer each other are two conversations of one each
+    let grouped = PeSearch {
+        threads: true,
+        ..all_inboxes
+    };
+    let rows = unsafe { pe_messages(core, &grouped, PeSortField::Date, false, 0, 50) };
+    assert_eq!(unsafe { pe_message_list_count(rows) }, 2);
+    let first = unsafe { &*pe_message_list_get(rows, 0) };
+    assert!(first.thread != 0 && first.thread_count == 1 && first.thread_depth == 0 && !first.thread_expanded);
+    assert!(
+        !first.thread_opens && !first.thread_collapsed,
+        "a conversation of one does not open"
+    );
+    assert_eq!(first.bold, !first.seen, "bold as its own message");
+    let (first_folder, first_uid) = (first.folder, first.uid);
+    unsafe { pe_message_list_free(rows) };
+    // the rows, the messages counted all the same, and none hidden
+    assert_eq!(unsafe { pe_list_rows(core, &grouped) }, 2);
+    assert_eq!(unsafe { pe_list_rows(core, &all_inboxes) }, 2);
+    assert!(unsafe { pe_message_count(core, &grouped, &mut total, &mut unread) });
+    assert_eq!((total, unread), (2, 1));
+    assert_eq!(
+        unsafe { pe_message_hidden_thread(core, &grouped, first_folder, first_uid) },
+        0
+    );
+    let replies = unsafe { pe_threads_with_replies(core, &grouped) };
+    assert!(!replies.is_null());
+    assert_eq!(unsafe { pe_thread_list_count(replies) }, 0);
+    assert_eq!(unsafe { pe_thread_list_get(replies, 0) }, 0, "past the end");
+    unsafe { pe_thread_list_free(replies) };
     assert!(!pe_all_inboxes_shown(1) && pe_all_inboxes_shown(2));
     let operators = c("has:attachment -is:read");
     assert!(unsafe { pe_message_count(core, &folder_search(operators.as_ptr()), &mut total, &mut unread) });

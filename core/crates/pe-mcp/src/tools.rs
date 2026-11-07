@@ -562,7 +562,7 @@ fn list_messages(call: &Call, args: &Args) -> Outcome {
         } else {
             Show::All
         },
-        text: String::new(),
+        ..Default::default()
     };
     let rows = call
         .core
@@ -600,6 +600,7 @@ fn search_messages(call: &Call, args: &Args) -> Outcome {
         scope: Scope::Everywhere,
         show: Show::All,
         text: query,
+        ..Default::default()
     };
     // the search covers every account: what this agent may not see is passed over, page by page
     let mut found = Vec::new();

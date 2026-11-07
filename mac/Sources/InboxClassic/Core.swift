@@ -187,6 +187,18 @@ final class Core {
         return (total, unread)
     }
 
+    /// how many rows the list has: one a message, or grouped by conversation one a conversation and the messages
+    /// under the open ones
+    func listRows(_ search: Search) -> UInt64 {
+        search.with { pe_list_rows(handle, $0) }
+    }
+
+    /// the conversation that hides the message `uid` of `folder` in the list (collapsed, the message not its first),
+    /// which the list opens to select it; 0 when the message has a row of its own
+    func hiddenThread(_ search: Search, folder: Int64, uid: UInt64) -> Int64 {
+        search.with { pe_message_hidden_thread(handle, $0, folder, uid) }
+    }
+
     /// whether the list names whom its messages went to (Sent Items, Drafts): the person column is then To
     func listsRecipients(_ search: Search) -> Bool {
         search.with { pe_lists_recipients(handle, $0) }
@@ -233,6 +245,15 @@ final class Core {
         case PE_NEXT_UNREAD_MESSAGE: return .message(folder: nextFolder, uid: nextUid)
         case PE_NEXT_UNREAD_ASK: return .ask(folder: nextFolder, question: asked)
         default: return .none
+        }
+    }
+
+    /// the conversations of the list with more than one message there: what Expand All opens
+    func threadsWithReplies(_ search: Search) -> [Int64] {
+        search.with { search in
+            guard let list = pe_threads_with_replies(handle, search) else { return [] }
+            defer { pe_thread_list_free(list) }
+            return (0..<pe_thread_list_count(list)).map { pe_thread_list_get(list, $0) }
         }
     }
 
@@ -304,11 +325,17 @@ struct Search {
     /// with `folder` 0: every account's Inbox rather than every folder
     var allInboxes = false
     var text: String
+    /// one row a conversation, the conversations `expanded` open
+    var threads = false
+    var expanded: [Int64] = []
 
     func with<T>(_ body: (UnsafePointer<PeSearch>) -> T) -> T {
         text.withCString { words in
-            var search = PeSearch(folder: folder, all_inboxes: allInboxes, show: PE_SHOW_ALL, text: words)
-            return withUnsafePointer(to: &search) { body($0) }
+            expanded.withUnsafeBufferPointer { open in
+                var search = PeSearch(folder: folder, all_inboxes: allInboxes, show: PE_SHOW_ALL, text: words,
+                                      threads: threads, expanded: open.baseAddress, expanded_count: open.count)
+                return withUnsafePointer(to: &search) { body($0) }
+            }
         }
     }
 }
@@ -386,6 +413,20 @@ struct Message {
     let flagColor: UInt8
     let answered: Bool
     let hasAttachments: Bool
+    /// bold: unread, or a collapsed conversation's row with an unread message (the core decides)
+    let bold: Bool
+    /// its place in a list grouped by conversation: the conversation (0 when not grouped), 0 for the conversation's
+    /// row and 1 for a message under it, how many messages the conversation has there and how many are unread, and
+    /// whether it is open
+    let thread: Int64
+    let threadDepth: UInt32
+    let threadCount: UInt32
+    let threadUnread: UInt32
+    let threadExpanded: Bool
+    /// the row opens and closes its conversation (a disclosure triangle)
+    let opens: Bool
+    /// the row stands for all of its conversation's messages, not shown under it
+    let collapsed: Bool
     /// a notice that a message was not delivered, or not yet: its mark in the attachment column's place
     let bounce: Bool
 
@@ -403,6 +444,14 @@ struct Message {
         flagColor = message.flag_color
         answered = message.answered
         hasAttachments = message.has_attachments
+        thread = message.thread
+        threadDepth = message.thread_depth
+        threadCount = message.thread_count
+        threadUnread = message.thread_unread
+        threadExpanded = message.thread_expanded
+        bold = message.bold
+        opens = message.thread_opens
+        collapsed = message.thread_collapsed
         bounce = message.bounce
     }
 }

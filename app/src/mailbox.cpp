@@ -29,6 +29,9 @@ void ShowRefusal(HWND owner, char* reason, PeText fallback) {
     MessageBoxW(owner, ReasonText(reason, fallback).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
+// Tools > Options: a row a conversation (on unless turned off)
+const wchar_t* kThreadsPreference = L"GroupByConversation";
+
 constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
 constexpr size_t kPagesKept = 8;
@@ -153,6 +156,14 @@ int IconOfFolder(PeSpecialUse use) {
     }
 }
 
+// the message list: its keys and clicks for the conversations first
+LRESULT CALLBACK ListProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data) {
+    if (reinterpret_cast<Mailbox*>(data)->OnListInput(message, wParam, lParam)) {
+        return 0;
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
 // a column that shows an icon of the list strip in its header (the paper clip, the flag) and nothing else
 void IconColumn(HWND list, int index, int icon) {
     AddColumn(list, index, L"", 28);
@@ -190,6 +201,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
                         WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA, IDC_LIST, {},
                         WS_EX_CLIENTEDGE);
     ListView_SetExtendedListViewStyle(list_, LVS_EX_FULLROWSELECT);
+    SetWindowSubclass(list_, ListProc, 0, reinterpret_cast<DWORD_PTR>(this));
+    threads_ = GetPreference(kThreadsPreference, 1) != 0;
     // the icons of the list: for the headers of the paper clip and flag columns, and drawn on the rows in CustomDraw
     listIcons_ = IconList(IconSet::List);
     ImageList_GetIconSize(listIcons_, &iconSize_, &iconSize_);
@@ -259,6 +272,11 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     font.lfUnderline = FALSE;
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
+    // the list's own (a stock font, not deleted)
+    normal_ = reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0));
+    if (!normal_) {
+        normal_ = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+    }
     ClearReader();
     Reload();
 }
@@ -566,10 +584,12 @@ core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
 // words typed search every folder of every account (in: narrows that); without, the list is the folder's, or every
 // Inbox's
 PeSearch Mailbox::Search() const {
-    return {Searching() ? 0 : folder_, !Searching() && allInboxes_, PE_SHOW_ALL, findUtf8_.c_str()};
+    return {Searching() ? 0 : folder_, !Searching() && allInboxes_, PE_SHOW_ALL, findUtf8_.c_str(), threads_, expanded_.data(),
+            expanded_.size()};
 }
 
 MessageListOrder Mailbox::ListOrder() const {
+    // a message window goes through the messages one by one, the conversations left out
     PeSearch search = Search();
     return {search.folder, search.all_inboxes, findUtf8_, sort_, ascending_};
 }
@@ -652,6 +672,7 @@ void Mailbox::ReloadList(bool keepSelection) {
     pages_.clear();
     total_ = 0;
     unread_ = 0;
+    rowCount_ = 0;
     ShowFolderColumn();
     PeSearch search = Search();
     ShowPersonColumn(search);
@@ -662,6 +683,8 @@ void Mailbox::ReloadList(bool keepSelection) {
     } else if (folder_) {
         pe_folder_counts(core_, folder_, &total_, &unread_);
     }
+    // the status bar counts messages; grouped by conversation the list has fewer rows
+    rowCount_ = !threads_ ? total_ : SeveralFolders() || folder_ ? pe_list_rows(core_, &search) : 0;
     // the selection follows the message to where it is now, without a flicker of the reading pane; several selected
     // messages are found again where they are now
     uint64_t shown = reader_.Uid();
@@ -670,7 +693,7 @@ void Mailbox::ReloadList(bool keepSelection) {
                                 ? pe_selection_positions(core_, selection_.get(), &search, sort_, ascending_)
                                 : nullptr);
     reloading_ = true;
-    ListView_SetItemCountEx(list_, static_cast<int>(std::min<uint64_t>(total_, INT_MAX)), LVSICF_NOSCROLL);
+    ListView_SetItemCountEx(list_, static_cast<int>(std::min<uint64_t>(rowCount_, INT_MAX)), LVSICF_NOSCROLL);
     // an empty list says why, and that may have changed with the same count
     InvalidateRect(list_, nullptr, TRUE);
     ListView_SetItemState(list_, -1, 0, LVIS_SELECTED | LVIS_FOCUSED);
@@ -707,7 +730,7 @@ bool Mailbox::SelectPositions(const PePositions* positions, bool focusFirst) {
 }
 
 const PeMessage* Mailbox::Row(int index) {
-    if (index < 0 || static_cast<uint64_t>(index) >= total_) {
+    if (index < 0 || static_cast<uint64_t>(index) >= rowCount_) {
         return nullptr;
     }
     uint64_t offset = static_cast<uint64_t>(index) / kPageSize * kPageSize;
@@ -771,13 +794,23 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
             DrawEmptyList(draw->nmcd.hdc);
         }
     } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT) {
-        // unread messages in bold, as Outlook Express shows them; the icons once the row is painted
+        // unread messages in bold, as Outlook Express shows them; the icons once the row is painted. Grouped by
+        // conversation, the Subject cell is drawn here, the font then chosen for each cell
         const PeMessage* row = Row(index);
-        result = CDRF_NOTIFYPOSTPAINT;
-        if (row && !row->seen) {
+        result = CDRF_NOTIFYPOSTPAINT | (threads_ ? CDRF_NOTIFYSUBITEMDRAW : 0);
+        if (row && row->bold) {
             SelectObject(draw->nmcd.hdc, bold_);
             result |= CDRF_NEWFONT;
         }
+    } else if (draw->nmcd.dwDrawStage == (CDDS_ITEMPREPAINT | CDDS_SUBITEM)) {
+        const PeMessage* row = Row(index);
+        if (row && draw->iSubItem == COL_SUBJECT) {
+            DrawSubject(draw->nmcd.hdc, index, *row);
+            result = CDRF_SKIPDEFAULT;
+            return;
+        }
+        SelectObject(draw->nmcd.hdc, row ? RowFont(*row) : normal_);
+        result = CDRF_NEWFONT;
     } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT) {
         if (const PeMessage* row = Row(index)) {
             DrawRowIcons(draw->nmcd.hdc, index, *row);
@@ -843,6 +876,59 @@ HBITMAP FlagBitmap(int color, bool checked) {
 }
 
 } // namespace
+
+HFONT Mailbox::RowFont(const PeMessage& row) const {
+    return row.bold ? bold_ : normal_;
+}
+
+RECT Mailbox::SubjectCell(int index) const {
+    RECT cell = {};
+    ListView_GetSubItemRect(list_, index, COL_SUBJECT, LVIR_BOUNDS, &cell);
+    return cell;
+}
+
+RECT Mailbox::ThreadBox(const RECT& cell) {
+    // odd, so that the + and - are in its middle
+    int size = Scale(9) | 1;
+    int left = cell.left + Scale(4), top = cell.top + (cell.bottom - cell.top - size) / 2;
+    return {left, top, left + size, top + size};
+}
+
+// as Outlook Express draws a conversation: a small box with a + (closed) or a - (open) before its first message, the
+// messages under it indented; the colours the list gives a row, selected (with the keyboard or not) or not
+void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
+    RECT cell = SubjectCell(index);
+    bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
+    bool active = GetFocus() == list_;
+    int back = !selected ? COLOR_WINDOW : active ? COLOR_HIGHLIGHT : COLOR_BTNFACE;
+    int fore = !selected ? COLOR_WINDOWTEXT : active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT;
+    FillRect(dc, &cell, GetSysColorBrush(back));
+    RECT box = ThreadBox(cell);
+    if (row.thread_opens) {
+        FillRect(dc, &box, GetSysColorBrush(COLOR_WINDOW));
+        FrameRect(dc, &box, GetSysColorBrush(COLOR_BTNSHADOW));
+        int middleX = (box.left + box.right) / 2, middleY = (box.top + box.bottom) / 2, arm = (box.right - box.left) / 2 - Scale(2);
+        RECT across = {middleX - arm, middleY, middleX + arm + 1, middleY + 1};
+        FillRect(dc, &across, GetSysColorBrush(COLOR_WINDOWTEXT));
+        if (row.thread_collapsed) {
+            RECT down = {middleX, middleY - arm, middleX + 1, middleY + arm + 1};
+            FillRect(dc, &down, GetSysColorBrush(COLOR_WINDOWTEXT));
+        }
+    }
+    // the replies of an open conversation under its first message's subject
+    RECT text = cell;
+    text.left = box.right + Scale(5) + (row.thread_depth > 0 ? Scale(12) : 0);
+    text.right -= Scale(4);
+    std::wstring words = Text(row.subject);
+    if (row.thread_opens) {
+        words += L" (" + std::to_wstring(row.thread_count) + L")";
+    }
+    HGDIOBJ old = SelectObject(dc, RowFont(row));
+    SetBkMode(dc, TRANSPARENT);
+    SetTextColor(dc, GetSysColor(fore));
+    DrawTextW(dc, words.c_str(), -1, &text, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+    SelectObject(dc, old);
+}
 
 // the paper clip (or a bounce's mark) and the flag of a row, drawn over the row as the list painted it:
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
@@ -936,15 +1022,16 @@ std::vector<int> Mailbox::SelectedRows() const {
 
 void Mailbox::TakeSelection(bool rebuild) {
     size_t count = SelectedCount();
-    if (count == 1) {
+    if (count == 1 && !threads_) {
         pe_selection_clear(selection_.get());
         if (const PeMessage* row = SelectedRow()) {
             pe_selection_add(selection_.get(), row->folder, row->uid);
         }
     } else if (count == 0) {
         pe_selection_clear(selection_.get());
-    } else if (rebuild) {
-        // the selected rows as ranges of positions: Select All on a long list is one range, not every row
+    } else if (rebuild || count == 1) {
+        // the selected rows as ranges of positions: Select All on a long list is one range, not every row. Grouped by
+        // conversation a single row too: the core gives every message of a collapsed row
         std::vector<uint64_t> starts, ends;
         for (int i : SelectedRows()) {
             if (!ends.empty() && ends.back() == static_cast<uint64_t>(i)) {
@@ -1000,6 +1087,8 @@ bool Mailbox::OnFolderSelected(int64_t folder, bool allInboxes) {
     folder_ = folder;
     allInboxes_ = allInboxes;
     undoPending_ = false;
+    // the conversations opened were the folder's
+    expanded_.clear();
     ResetFind();
     ClearReader();
     ReloadList(false);
@@ -1048,18 +1137,26 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
 
 bool Mailbox::SelectInList(int64_t folder, uint64_t uid) {
     PeSearch search = Search();
+    // a message hidden in a collapsed conversation (Next Unread finds those): the conversation opened first
+    if (int64_t hidden = pe_message_hidden_thread(core_, &search, folder, uid)) {
+        SetThreadExpanded(hidden, true);
+        search = Search();
+    }
     int64_t index = pe_message_index(core_, &search, sort_, ascending_, folder, uid);
     if (index < 0 || index > INT_MAX) {
         return false;
     }
-    int row = static_cast<int>(index);
+    SetFocus(list_);
+    // chosen by the app, not clicked through: followed at once
+    SelectOnly(static_cast<int>(index));
+    return true;
+}
+
+void Mailbox::SelectOnly(int row) {
     ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
     ListView_SetItemState(list_, row, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
     ListView_EnsureVisible(list_, row, FALSE);
-    SetFocus(list_);
-    // chosen by the app, not clicked through: followed at once
     FlushSelection();
-    return true;
 }
 
 void Mailbox::SelectStart() {
@@ -1166,8 +1263,8 @@ std::wstring Mailbox::UndoLabel() const {
 // after a message left the list: the one that took its place selected, or the last one
 void Mailbox::SelectAfterRemoval(int index) {
     ReloadList(false);
-    if (index >= 0 && total_ > 0) {
-        int next = std::min(index, static_cast<int>(std::min<uint64_t>(total_, INT_MAX)) - 1);
+    if (index >= 0 && rowCount_ > 0) {
+        int next = std::min(index, static_cast<int>(std::min<uint64_t>(rowCount_, INT_MAX)) - 1);
         ListView_SetItemState(list_, next, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
         ListView_EnsureVisible(list_, next, FALSE);
         FlushSelection();
@@ -1447,16 +1544,13 @@ void Mailbox::EmptyFolder(HWND owner) {
 
 void Mailbox::SelectNeighbour(bool forward) {
     FlushSelection();
-    int count = static_cast<int>(std::min<uint64_t>(total_, INT_MAX));
+    int count = static_cast<int>(std::min<uint64_t>(rowCount_, INT_MAX));
     int focused = ListView_GetNextItem(list_, -1, LVNI_FOCUSED);
     int at = focused < 0 ? (forward ? 0 : -1) : focused + (forward ? 1 : -1);
     if (at < 0 || at >= count) {
         return;
     }
-    ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
-    ListView_SetItemState(list_, at, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-    ListView_EnsureVisible(list_, at, FALSE);
-    FlushSelection();
+    SelectOnly(at);
 }
 
 void Mailbox::NextUnread(HWND owner) {
@@ -1511,6 +1605,105 @@ void Mailbox::FindInMessage(HWND owner, bool again) {
 
 bool Mailbox::CanEmptyFolder() const {
     return !allInboxes_ && !Searching() && emptiableFolders_.contains(folder_) && total_ > 0;
+}
+
+void Mailbox::SetThreadExpanded(int64_t thread, bool open) {
+    auto at = std::lower_bound(expanded_.begin(), expanded_.end(), thread);
+    bool there = at != expanded_.end() && *at == thread;
+    if (open == there) {
+        return;
+    }
+    if (open) {
+        expanded_.insert(at, thread);
+    } else {
+        expanded_.erase(at);
+    }
+    FlushSelection();
+    ReloadList(true);
+}
+
+void Mailbox::ExpandAll(bool open) {
+    if (!threads_) {
+        return;
+    }
+    expanded_.clear();
+    if (open) {
+        PeSearch search = Search();
+        PeThreadList* threads = pe_threads_with_replies(core_, &search);
+        for (size_t i = 0, count = pe_thread_list_count(threads); i < count; i++) {
+            expanded_.push_back(pe_thread_list_get(threads, i));
+        }
+        pe_thread_list_free(threads);
+        std::sort(expanded_.begin(), expanded_.end());
+    }
+    FlushSelection();
+    ReloadList(true);
+}
+
+void Mailbox::SetGrouped(bool on) {
+    if (on == threads_) {
+        return;
+    }
+    SetPreference(kThreadsPreference, on ? 1 : 0);
+    threads_ = on;
+    expanded_.clear();
+    FlushSelection();
+    ReloadList(true);
+}
+
+bool Mailbox::OnListInput(UINT message, WPARAM wParam, LPARAM lParam) {
+    if (!threads_) {
+        return false;
+    }
+    if (message == WM_LBUTTONDOWN || message == WM_LBUTTONDBLCLK) {
+        return OnThreadClick({static_cast<short>(LOWORD(lParam)), static_cast<short>(HIWORD(lParam))});
+    }
+    if (message != WM_KEYDOWN || (wParam != VK_RIGHT && wParam != VK_LEFT) || GetKeyState(VK_CONTROL) < 0 || GetKeyState(VK_SHIFT) < 0 ||
+        GetKeyState(VK_MENU) < 0) {
+        return false;
+    }
+    return OnThreadArrow(wParam == VK_RIGHT);
+}
+
+// a click on a + or - box (or left of it) opens or closes the conversation, the selection as it was
+bool Mailbox::OnThreadClick(POINT at) {
+    LVHITTESTINFO hit = {};
+    hit.pt = at;
+    if (ListView_SubItemHitTest(list_, &hit) < 0 || hit.iSubItem != COL_SUBJECT) {
+        return false;
+    }
+    const PeMessage* row = Row(hit.iItem);
+    if (!row || !row->thread_opens || at.x > ThreadBox(SubjectCell(hit.iItem)).right + Scale(3)) {
+        return false;
+    }
+    SetFocus(list_);
+    SetThreadExpanded(row->thread, row->thread_collapsed);
+    return true;
+}
+
+// as in a tree: Right opens a conversation, then goes to its first reply; Left closes it, from a reply too. Closed,
+// the list is shown again with the message of the reading pane selected where it is now: a reply's conversation row
+bool Mailbox::OnThreadArrow(bool right) {
+    const PeMessage* row = Row(ListView_GetNextItem(list_, -1, LVNI_FOCUSED));
+    if (!row || (row->thread_depth == 0 && !row->thread_opens)) {
+        return false;
+    }
+    if (right) {
+        if (!row->thread_opens) {
+            return false;
+        }
+        if (row->thread_collapsed) {
+            SetThreadExpanded(row->thread, true);
+        } else {
+            SelectNeighbour(true);
+        }
+        return true;
+    }
+    if (row->thread_collapsed) {
+        return false;
+    }
+    SetThreadExpanded(row->thread, false);
+    return true;
 }
 
 std::wstring Mailbox::Counts() const {
