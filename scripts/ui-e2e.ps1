@@ -337,6 +337,15 @@ function WindowText([IntPtr]$window) {
     return $buffer.ToString()
 }
 function GetText([IntPtr]$window, [int]$id) { WindowText ([Native.Win]::GetDlgItem($window, $id)) }
+# the rows of a list view, and the rows and the text of a row of a list box (LB_GETTEXT, which Windows copies between
+# processes)
+function ListCount([IntPtr]$list) { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+function ListBoxCount([IntPtr]$box) { [int][Native.Win]::SendMessage($box, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+function ListBoxText([IntPtr]$box, [int]$row) {
+    $text = New-Object System.Text.StringBuilder 1024
+    [void][Native.Win]::SendMessage($box, $LB_GETTEXT, [IntPtr]$row, $text)
+    $text.ToString()
+}
 # the words of a window's static texts (a message box, a form's intro)
 function Statics([IntPtr]$window) { ([Native.Win]::FindDescendants($window, 'Static') | ForEach-Object { WindowText $_ }) -join ' ' }
 # the text of a part of a status bar: SB_GETTEXT writes it to memory of the app's own process, read back from there
@@ -678,7 +687,7 @@ try {
         for ($i = 0; $i -lt $index; $i++) { $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item) }
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $item)
     }
-    function Rows { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    function Rows { ListCount $list }
     # a tree's row by its account and folder, their unread counts and "(current)" left out; Zero when it is not there
     function TreeRow([IntPtr]$t, [string]$account, [string]$folder) {
         $name = { param($item) ([Native.Win]::RemoteTreeText($t, $item)) -replace ' \((\d+|current)\)$', '' }
@@ -981,7 +990,7 @@ try {
     Set-Content (Join-Path $files 'trail-map.txt') 'the attachment that goes'
     Set-Content (Join-Path $files 'packing-list.txt') 'attached by mistake'
     $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
-    $count = { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    $count = { ListBoxCount $attached }
     foreach ($file in 'trail-map.txt', 'packing-list.txt') {
         $before = & $count
         # once more if the dialog did not take the file, after closing what is left of it
@@ -1074,7 +1083,7 @@ public static class Dragger {
     $dropped = [Dragger]::Drag(@($pictureFile, $noteFile), 40, 40, $toX, $toY)
     Check $dropped 'the text takes files dropped on it'
     $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
-    Check ([bool](WaitFor { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 } 10)) 'a file that is no picture is attached'
+    Check ([bool](WaitFor { (ListBoxCount $attached) -eq 1 } 10)) 'a file that is no picture is attached'
     Start-Sleep -Seconds 1
     Shot $compose 'write-13-dropped-picture'
     Command $compose $IDC_SEND
@@ -1230,7 +1239,7 @@ public static class Dragger {
     $outbox = WaitWindow 'InboxClassicOutbox' 'Outbox'
     Check ($null -ne $outbox) 'Tools > Outbox lists what waits'
     if ($outbox) {
-        $waiting = [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+        $waiting = (ListCount ([Native.Win]::GetDlgItem($outbox, 450)))
         Check ($waiting -eq 1) 'the message is in it'
         Shot $outbox 'write-7-outbox'
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
@@ -1663,7 +1672,7 @@ public static class Dragger {
     Command $main $IDM_OUTBOX
     $outbox = WaitShown 'InboxClassicOutbox' 10
     if ($outbox) {
-        Check ([int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'and the Outbox is empty'
+        Check ((ListCount ([Native.Win]::GetDlgItem($outbox, 450))) -eq 0) 'and the Outbox is empty'
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
     }
@@ -1859,7 +1868,7 @@ public static class Dragger {
     Check ($null -ne $compose) 'Forward with three selected writes one new message'
     if ($compose) {
         $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
-        $files = WaitFor { if ([int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 3) { 3 } } 10
+        $files = WaitFor { if ((ListBoxCount $attached) -eq 3) { 3 } } 10
         Check ($files -eq 3) 'with the three attached as .eml files'
         Check ((GetText $compose $IDC_SUBJECT) -eq "Fw: $($three[0])") "its subject is the first one's, with Fw: ($(GetText $compose $IDC_SUBJECT))"
         # the mouse out of the way: no tooltip of the format bar in the picture
@@ -2369,8 +2378,7 @@ public static class Dragger {
             if ($w -ne [IntPtr]::Zero) { $w }
         } 10
         Check ($null -ne $completion) 'typing in To lists the people it may be'
-        $LB_GETCOUNT = 0x018B
-        Check ($completion -and [int][Native.Win]::SendMessage($completion, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -ge 1) 'with someone heard from'
+        Check ($completion -and (ListBoxCount $completion) -ge 1) 'with someone heard from'
         if ($completion) { Shot $compose 'write-17-complete' $completion }
         Key $to $VK_RETURN
         Check ([bool](WaitFor { (GetText $compose $IDC_TO) -eq 'Ann Example <ann@example.com>, ' } 5)) "Enter takes the first, with a comma for the next ($(GetText $compose $IDC_TO))"
@@ -2456,13 +2464,6 @@ public static class Dragger {
     $IDC_PICK_LIST = 771; $IDC_PICK_TO = 772; $IDC_PICK_TO_LIST = 780; $IDC_PICK_TO_BUTTON = 313
     $TVM_SELECTITEM_CARET = [IntPtr]9
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
-    function ListBoxText([IntPtr]$box, [int]$row) {
-        $text = New-Object System.Text.StringBuilder 1024
-        [void][Native.Win]::SendMessage($box, $LB_GETTEXT, [IntPtr]$row, $text)
-        $text.ToString()
-    }
-    function ListBoxCount([IntPtr]$box) { [int][Native.Win]::SendMessage($box, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
-    function ListCount([IntPtr]$l) { [int][Native.Win]::SendMessage($l, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
     # the Name column of a list of the book, top to bottom
     function Names([IntPtr]$l) {
         $n = ListCount $l
@@ -2846,7 +2847,7 @@ public static class Dragger {
     Check ($null -ne $accounts) 'File > Accounts lists the accounts'
     if ($accounts) {
         $accountList = [Native.Win]::GetDlgItem($accounts, 400)
-        Check ([int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 2) 'both accounts are listed'
+        Check ((ListCount $accountList) -eq 2) 'both accounts are listed'
         Shot $accounts 'accounts-1-list'
         # Properties of the first: a new display name
         # the first account is selected when the list opens, and stays so after a change
@@ -2888,7 +2889,7 @@ public static class Dragger {
         $sure = WaitWindow '#32770' 'Remove Account' 10
         Check ($null -ne $sure) 'Remove (or Delete) asks first'
         if ($sure) { Click $sure 6 }
-        Check ([bool](WaitFor { [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 })) 'and removes it'
+        Check ([bool](WaitFor { (ListCount $accountList) -eq 1 })) 'and removes it'
         Click $accounts 404
         [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
         $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }
@@ -2906,7 +2907,6 @@ public static class Dragger {
     function Checked([IntPtr]$list, [int]$row) {
         (([int][Native.Win]::SendMessage($list, $LVM_GETITEMSTATE, [IntPtr]$row, [IntPtr]0xF000)) -shr 12) -eq 2
     }
-    function ListRows([IntPtr]$list) { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
     # a row selected with the keys, from the first
     function KeyToRow([IntPtr]$list, [int]$row) {
         Key $list $VK_HOME
@@ -2935,7 +2935,7 @@ public static class Dragger {
     if ($windows -and $windows[1]) {
         $apps = $windows[1]
         $appList = [Native.Win]::GetDlgItem($apps, 700)
-        Check ((ListRows $appList) -eq 2) 'the built-in Microsoft and Google clients are listed'
+        Check ((ListCount $appList) -eq 2) 'the built-in Microsoft and Google clients are listed'
         Check ((Checked $appList 0) -and -not (Checked $appList 1)) 'Microsoft is on and Google off out of the box'
         Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($apps, 702)) -and -not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($apps, 703))) 'a built-in client can not be edited or removed'
         Check ((WindowText ([Native.Win]::GetDlgItem($apps, 704))) -match 'built in') 'a built-in client says what it is'
@@ -2973,7 +2973,7 @@ public static class Dragger {
             Click $editor 1
             Check ([bool](WaitFor { -not [Native.Win]::IsWindow($editor) } 20)) 'OK saves the sign-in app'
         }
-        Check ([bool](WaitFor { (ListRows $appList) -eq 3 } 5) -and (Checked $appList 2)) 'it is listed, turned on'
+        Check ([bool](WaitFor { (ListCount $appList) -eq 3 } 5) -and (Checked $appList 2)) 'it is listed, turned on'
         Shot $apps 'signin-5-apps-added'
         CloseSignInApps $windows
     }
@@ -3062,7 +3062,7 @@ public static class Dragger {
         # once the window has its list, and the list its rows (the window is there a moment before them)
         $count = WaitFor {
             $accountList = [Native.Win]::GetDlgItem($accounts, 400)
-            $n = [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+            $n = ListCount $accountList
             if ($n -ge 2) { $n }
         } 10
         $accountList = [Native.Win]::GetDlgItem($accounts, 400)

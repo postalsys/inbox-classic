@@ -1734,15 +1734,10 @@ void Mailbox::AddSenderToBook(HWND owner) {
         return;
     }
     bool added = false;
-    int64_t card = pe_book_add_sender(core_, reader_.Folder(), reader_.Uid(), &added);
-    if (!card) {
-        Say(core::T(PE_TEXT_UI_SENDER_NONE));
-        return;
-    }
-    core::CardView view(pe_card(core_, card));
-    const PeCard* info = view ? pe_card_info(view.get()) : nullptr;
-    std::wstring name = info ? Text(info->name) : L"";
-    Say(core::T(added ? PE_TEXT_UI_SENDER_ADDED : PE_TEXT_UI_SENDER_KNOWN, {{"name", name}}));
+    char* status = nullptr;
+    pe_book_add_sender(core_, reader_.Folder(), reader_.Uid(), &added, &status);
+    core::String said(status);
+    Say(said ? Text(said.get()) : L"");
     if (added) {
         AddressBookChanged();
     }
