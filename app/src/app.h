@@ -485,6 +485,15 @@ public:
     void DeleteFolder(HWND owner);
     // Deleted Items or Junk E-mail emptied for good, after asking
     void EmptyFolder(HWND owner);
+    // the message below the one shown in the list (`forward`), or above it, selected and shown as a click would
+    void SelectNeighbour(bool forward);
+    // the next unread message of the list after the one shown; with none, after asking, the next folder with unread
+    // mail and its first unread message
+    void NextUnread(HWND owner);
+    // a folder chosen in the Move and Copy window's tree of every account, selected in the tree
+    void GoToFolder(HWND owner);
+    // Find in This Message in the reading pane (`again`: F3, the next place of the words)
+    void FindInMessage(HWND owner, bool again);
     // the folder shown is Deleted Items or Junk E-mail with messages in it
     bool CanEmptyFolder() const;
     void LoadPictures();
@@ -805,3 +814,5 @@ constexpr UINT_PTR TIMER_DOWNLOADING = 6;
 // the selection of the message list taken once the list has done changing it: a click or a key in a list of several
 // selected rows takes every row away first, which is no change the reading pane should follow
 constexpr UINT_PTR TIMER_SELECTION = 7;
+// a moment after a find in a message started, how many places it found is told as it is then
+constexpr UINT_PTR TIMER_FIND_SETTLED = 8;

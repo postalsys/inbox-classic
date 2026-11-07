@@ -52,8 +52,13 @@ public:
     // the keys pressed while the message has the keyboard that its window handles (Esc, Delete, the shortcuts with
     // Ctrl): true when handled
     void SetKeys(std::function<bool(UINT key)> keys) { preview_.SetKeys(std::move(keys)); }
+    // Find in This Message: the words asked for over `owner` (the last ones filled in), then found and marked; with
+    // `again` (F3) while a find of this message goes on, its next place
+    void FindInMessage(HWND owner, bool again);
     // called once the message is shown (the main window marks it read a moment later)
     std::function<void()> onShown;
+    // called once a find is done: what to say, empty when the words were found
+    std::function<void(const std::wstring& said)> onFound;
 
     void OnEvent(const UiEvent& event);
     bool OnCommand(WORD id, WORD code);
@@ -118,4 +123,10 @@ private:
     core::MessageView view_;
     // the view being built, 0 for none
     uint64_t viewRequest_ = 0;
+    // the words of the last Find in This Message
+    std::wstring findWords_;
 };
+
+// the keys for reading that work while a message has the keyboard as in the list (F3, Ctrl+. and Ctrl+,): the
+// command, sent with 1 as its code as the accelerators send theirs; 0 for another key
+WORD ReadingKey(UINT key);
