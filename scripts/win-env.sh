@@ -15,5 +15,13 @@ win_sync() {
         --exclude core/fuzz/target --exclude node_modules .
     scp -q "$archive" "$WIN_HOST:$WIN_DIR_FWD/../inbox-classic-src.tgz"
     rm -f "$archive"
-    ssh -n "$WIN_HOST" "tar -xzf $WIN_DIR_FWD/../inbox-classic-src.tgz -C $WIN_DIR_FWD && del $WIN_DIR\\..\\inbox-classic-src.tgz"
+    # from another checkout than last time, the files get the time of the copy (-m): their own times can be older than
+    # what was built from the other checkout, which cargo and CMake would then take as up to date
+    local here keep=""
+    here=$(pwd -P)
+    if [ "$(ssh -n "$WIN_HOST" "type $WIN_DIR\\..\\inbox-classic-src.from 2>nul" | tr -d "\r")" != "$here" ]; then
+        keep="-m"
+    fi
+    ssh -n "$WIN_HOST" "tar $keep -xzf $WIN_DIR_FWD/../inbox-classic-src.tgz -C $WIN_DIR_FWD && del $WIN_DIR\\..\\inbox-classic-src.tgz"
+    ssh -n "$WIN_HOST" "echo $here> $WIN_DIR\\..\\inbox-classic-src.from"
 }
