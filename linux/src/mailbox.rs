@@ -447,6 +447,11 @@ impl Mailbox {
                 run_command(Command::Delete);
                 return glib::Propagation::Stop;
             }
+            // A archives, as in Thunderbird
+            if matches!(key, gdk::Key::a | gdk::Key::A) && (modifiers - gdk::ModifierType::SHIFT_MASK).is_empty() {
+                run_command(Command::Archive);
+                return glib::Propagation::Stop;
+            }
             glib::Propagation::Proceed
         });
         self.list.view.add_controller(keys);
@@ -951,6 +956,7 @@ impl Mailbox {
         }
         self.enable(Command::Move, any);
         self.enable(Command::Copy, any);
+        self.enable(Command::Archive, self.can_archive());
         self.update_flag_actions();
     }
 
@@ -1405,7 +1411,7 @@ impl Mailbox {
         match outcome {
             Ok(text) => {
                 self.set_status(&text);
-                if matches!(action, Action::Delete | Action::Move(_) | Action::Junk(_))
+                if matches!(action, Action::Delete | Action::Move(_) | Action::Junk(_) | Action::Archive)
                     && let Some(after) = after
                 {
                     self.select_after_removal(after);
@@ -1444,6 +1450,18 @@ impl Mailbox {
     /// Flags the selected messages, or takes the flag away when they all have it
     pub fn flag_selected(&self) {
         self.act(Action::ToggleFlag);
+    }
+
+    /// Every selected message can be archived (from the Inbox or a folder of the user's)
+    pub fn can_archive(&self) -> bool {
+        self.summary.borrow().archivable
+    }
+
+    /// The selected messages out of the Inbox into the account's Archive (on Gmail every label taken off)
+    pub fn archive_selected(&self) {
+        if self.can_archive() {
+            self.act(Action::Archive);
+        }
     }
 
     /// The selected messages junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
@@ -1837,6 +1855,7 @@ impl Mailbox {
         );
         // the colours and Clear Flag; the Flag Message toggle is the primary menu's, with its key
         organize.append_submenu(Some(&crate::words::plain(crate::words::Text::UiMenuFlag)), &flag_menu());
+        add(&organize, Command::Archive, None);
         add(
             &organize,
             if summary.in_junk {
@@ -2113,6 +2132,7 @@ fn header_bar(
         vec![
             button("ic-print-symbolic", &t!(UiTbPrint), Command::Print).upcast(),
             button("ic-delete-symbolic", &t!(UiTbDelete), Command::Delete).upcast(),
+            button("ic-archive-symbolic", &t!(UiTbArchive), Command::Archive).upcast(),
             junk.clone().upcast(),
         ],
         vec![send_receive.clone().upcast()],

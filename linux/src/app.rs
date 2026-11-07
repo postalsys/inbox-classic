@@ -654,6 +654,7 @@ pub fn run_command(command: Command) {
         Command::MarkAllRead => main.mark_all_read(),
         Command::Junk => main.mark_junk(true),
         Command::NotJunk => main.mark_junk(false),
+        Command::Archive => main.archive_selected(),
         Command::Notify => shell.set_notify(!shell.notify.get()),
         Command::Open => shell.show_main(),
         Command::DefaultApp => spawn(make_default_mail_app()),
