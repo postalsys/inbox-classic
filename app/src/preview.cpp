@@ -5,6 +5,9 @@
 
 #include <shellapi.h>
 
+#include <algorithm>
+#include <utility>
+
 #include "core.h"
 #include "webview.h"
 
@@ -21,8 +24,10 @@ const wchar_t* kPageUrl = L"https://preview.inboxclassic.invalid/";
 
 }  // namespace
 
-void Preview::Create(HWND parent, std::function<void(const std::wstring&)> onError) {
+void Preview::Create(HWND parent, std::function<void(const std::wstring&)> onError, HWND owner, UINT_PTR findTimer) {
     parent_ = parent;
+    owner_ = owner;
+    findTimer_ = findTimer;
     onError_ = std::move(onError);
     webview::Create(
         parent_,
@@ -106,6 +111,8 @@ void Preview::Configure() {
 }
 
 void Preview::Show(const std::wstring& html, bool remoteImages) {
+    // the places found were in the document before
+    StopFind();
     remoteImages_ = remoteImages;
     document_ = html;
     if (!view_) {
@@ -146,7 +153,86 @@ void Preview::Resize(const RECT& bounds) {
     }
 }
 
+void Preview::Find(const std::wstring& words, std::function<void(int count)> done) {
+    StopFind();
+    ComPtr<ICoreWebView2_28> view;
+    ComPtr<ICoreWebView2Environment15> environment;
+    ComPtr<ICoreWebView2Find> find;
+    ComPtr<ICoreWebView2FindOptions> options;
+    if (!view_ || FAILED(view_.As(&view)) || FAILED(environment_.As(&environment)) || FAILED(view->get_Find(&find)) || !find ||
+        FAILED(environment->CreateFindOptions(&options)) || !options) {
+        done(-1);
+        return;
+    }
+    options->put_FindTerm(words.c_str());
+    // the app says what was found; the browser's own find bar stays away
+    options->put_SuppressDefaultFindDialog(TRUE);
+    options->put_ShouldHighlightAllMatches(TRUE);
+    find_ = find;
+    findDone_ = std::move(done);
+    // the count can come after the find has started: told once there is a place, or after a moment as it is then
+    find_->add_MatchCountChanged(
+        Callback<ICoreWebView2FindMatchCountChangedEventHandler>([this](ICoreWebView2Find* sender, IUnknown*) {
+            INT32 count = 0;
+            if (sender == find_.Get() && SUCCEEDED(sender->get_MatchCount(&count))) {
+                FoundCount(count, false);
+            }
+            return S_OK;
+        }).Get(),
+        nullptr);
+    find_->Start(options.Get(), Callback<ICoreWebView2FindStartCompletedHandler>([this, find](HRESULT result) {
+                     if (find.Get() != find_.Get()) {
+                         return S_OK;
+                     }
+                     INT32 count = 0;
+                     if (FAILED(result)) {
+                         FoundCount(-1, true);
+                     } else if (SUCCEEDED(find->get_MatchCount(&count))) {
+                         FoundCount(count, false);
+                     }
+                     if (findDone_ && owner_) {
+                         SetTimer(owner_, findTimer_, 500, nullptr);
+                     }
+                     return S_OK;
+                 }).Get());
+}
+
+void Preview::FoundCount(int count, bool settled) {
+    if (!findDone_ || (count <= 0 && !settled)) {
+        return;
+    }
+    KillTimer(owner_, findTimer_);
+    found_ = std::max(count, 0);
+    auto done = std::exchange(findDone_, nullptr);
+    done(count);
+}
+
+void Preview::FindSettled() {
+    KillTimer(owner_, findTimer_);
+    INT32 count = 0;
+    if (find_ && SUCCEEDED(find_->get_MatchCount(&count))) {
+        FoundCount(std::max(count, 0), true);
+    }
+}
+
+bool Preview::FindNext() {
+    return find_ && SUCCEEDED(find_->FindNext());
+}
+
+void Preview::StopFind() {
+    if (find_) {
+        find_->Stop();
+        find_.Reset();
+    }
+    findDone_ = nullptr;
+    found_ = 0;
+    if (owner_) {
+        KillTimer(owner_, findTimer_);
+    }
+}
+
 void Preview::Close() {
+    StopFind();
     if (controller_) {
         controller_->Close();
     }

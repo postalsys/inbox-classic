@@ -46,6 +46,22 @@ cmd-junk = Marcar como correo no &deseado
 cmd-not-junk = Marcar como correo de&seado
 # review: new
 cmd-archive = A&rchivar
+# review: new
+cmd-next-message = Mensaje &siguiente
+# review: new
+cmd-previous-message = Mensaje &anterior
+# review: new
+cmd-next-unread = Siguiente mensaje &no leído
+# review: new
+cmd-go-to-folder = &Ir a la carpeta...
+# review: new
+cmd-find-in-message = Buscar en es&te mensaje...
+# review: new
+ui-go-to-prompt = Ir a la carpeta:
+# review: new
+ui-find-in-message-hint = Buscar en este mensaje
+# review: new
+ui-find-not-found = «{ $words }» no está en este mensaje
 cmd-notify = &Avisar de correo nuevo
 cmd-open = &Abrir Inbox Classic
 cmd-default-app = Usar como programa de correo &predeterminado...

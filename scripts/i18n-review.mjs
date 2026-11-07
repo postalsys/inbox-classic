@@ -159,7 +159,9 @@ for (const language of languages) {
         if (inside && bare) {
             passage.push(bare);
         }
-        if (!inside && bare && !known.has(bare)) {
+        // a line of markup alone (platform marks, tags) has nothing to translate
+        const words = bare.replace(/<!--.*?-->/g, '').replace(/<[^>]*>/g, '').trim();
+        if (!inside && words && !known.has(bare)) {
             helpUnmarked.push({ language, line: index + 1, text: bare });
         }
         if (closes) {

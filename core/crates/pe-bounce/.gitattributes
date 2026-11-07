@@ -1,0 +1,2 @@
+tests/fixtures/bounces/*.eml -text
+model/*.bin binary

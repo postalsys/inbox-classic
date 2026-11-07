@@ -142,6 +142,45 @@ id = "delete_folder"
 windows = 117
 menu = "file"
 
+# the message below the one shown in the list, and the one above (Outlook Express's Ctrl+> and Ctrl+<; on Linux
+# Ctrl+, is Preferences, so Previous is Ctrl+<)
+[[command]]
+id = "next_message"
+windows = 140
+menu = "view"
+key = "Mod+."
+mac = "Mod+]"
+
+[[command]]
+id = "previous_message"
+windows = 141
+menu = "view"
+key = "Mod+,"
+mac = "Mod+["
+linux = "Mod+Shift+,"
+
+# the first unread message below the one shown, on to the next folder with unread mail after asking; N in the list
+[[command]]
+id = "next_unread"
+windows = 142
+menu = "view"
+
+# a folder chosen from the tree of every account, typed to find it (Outlook Express's Ctrl+Y)
+[[command]]
+id = "go_to_folder"
+windows = 143
+menu = "view"
+key = "Mod+Y"
+mac = "Mod+Shift+Y"
+
+# the words typed found in the message shown, in its web view
+[[command]]
+id = "find_in_message"
+windows = 144
+menu = "edit"
+key = "F3"
+mac = "Mod+Alt+F"
+
 # Deleted Items or Junk E-mail: every message of it deleted for good, after asking
 [[command]]
 id = "empty_folder"

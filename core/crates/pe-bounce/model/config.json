@@ -1,0 +1,10 @@
+{
+  "max_tokens": 5000,
+  "max_length": 100,
+  "embedding_dim": 64,
+  "num_labels": 16,
+  "validation_accuracy": 0.9589040875434875,
+  "training_samples": 22630,
+  "model_hash": "0ff16930da422067",
+  "trained_at": "2026-03-16T15:42:16Z"
+}

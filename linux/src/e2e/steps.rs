@@ -1212,12 +1212,12 @@ pub async fn message_window(d: &Driver) {
         "the window shows the message",
     );
     d.check(wait_until(20, seen).await, "and it is marked read on the server");
-    click(window.window.upcast_ref(), "message-next");
+    click(window.window.upcast_ref(), "message-next-message");
     d.check(
         wait_until(10, || title() == *second).await,
         &format!("Next shows the message after it, and the title follows ({})", title()),
     );
-    click(window.window.upcast_ref(), "message-previous");
+    click(window.window.upcast_ref(), "message-previous-message");
     d.check(
         wait_until(10, || title() == *first).await,
         &format!("Previous goes back ({})", title()),
@@ -1247,6 +1247,125 @@ pub async fn message_window(d: &Driver) {
     let closed = wait_until(10, || crate::message_window::windows().is_empty()).await;
     let kept = main.list.selected().is_some_and(|(_, m)| m.info.subject == *first);
     d.check(closed && kept, "closing the window leaves the main window as it was");
+}
+
+/// Reading with the keyboard: Next and Previous Message, Next Unread Message (on to the next folder after asking),
+/// Go to Folder, and Find in This Message
+pub async fn keyboard_reading(d: &Driver) {
+    d.step("keyboard reading");
+    let main = shell().main();
+    let core = &shell().core;
+    select_folder("Inbox");
+    wait_until(20, || rows() >= 3).await;
+    select_row(0).await;
+    let position = || main.list.selected().map(|(at, _)| at);
+    run_command(Command::NextMessage);
+    let below = wait_until(5, || position() == Some(1)).await;
+    run_command(Command::PreviousMessage);
+    let above = wait_until(5, || position() == Some(0)).await;
+    d.check(
+        below && above,
+        "Next Message selects the message below in the list, Previous Message the one above",
+    );
+
+    // every message of the Inbox read but the third, a message unread in Archive for the next folder
+    let inbox = folder_id("Inbox").unwrap_or(0);
+    let _ = core.mark_all_read(inbox);
+    wait_until(10, || core.folder(inbox).is_ok_and(|f| f.unread == 0)).await;
+    let third = core
+        .search(&pe_core::Search::folder(inbox), main.list.sort(), 2, 1)
+        .unwrap_or_default()
+        .into_iter()
+        .next();
+    let Some(third) = third else {
+        d.check(false, "the Inbox has a third message");
+        return;
+    };
+    let _ = core.set_seen(inbox, third.info.uid, false);
+    let _ = d.add_message_to(
+        "Archive",
+        "From: Pat Doe <pat@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Unread in Archive\r\n\r\nHello.\r\n",
+    );
+    run_command(Command::Sync);
+    let archive = folder_id("Archive").unwrap_or(0);
+    wait_until(20, || {
+        core.folder(archive).is_ok_and(|f| f.unread > 0) && core.folder(inbox).is_ok_and(|f| f.unread == 1)
+    })
+    .await;
+    select_row(0).await;
+    run_command(Command::NextUnread);
+    let unread = wait_until(5, || {
+        main.list.selected().is_some_and(|(_, m)| m.info.uid == third.info.uid)
+    })
+    .await;
+    d.check(
+        unread,
+        &format!(
+            "Next Unread Message selects the next unread message ({})",
+            third.info.subject
+        ),
+    );
+    // read once shown a moment; then none is left in the Inbox
+    wait_until(10, || core.folder(inbox).is_ok_and(|f| f.unread == 0)).await;
+    command(Command::NextUnread);
+    let ask = wait_alert(10).await;
+    let named = ask.as_ref().map(alert_text).unwrap_or_default();
+    d.check(
+        named.contains("no more unread messages"),
+        &format!("with none left in the folder it asks to go on to the next folder ({named})"),
+    );
+    if let Some(ask) = ask {
+        answer(&ask, "Yes");
+    }
+    let went = wait_until(10, || {
+        let name = main.selected_name();
+        !name.is_empty() && name != "Inbox" && named.contains(&name) && main.list.selected().is_some()
+    })
+    .await;
+    d.check(
+        went,
+        &format!("and Yes goes there, to its unread message ({})", main.selected_name()),
+    );
+
+    command(Command::GoToFolder);
+    match wait_dialog(10, "move-dialog").await {
+        Some(dialog) => {
+            let root: &gtk::Widget = dialog.upcast_ref();
+            let sent = folder_id("Sent Items").unwrap_or(0);
+            let shows = |id: i64| named_in(root, &format!("move-folder-{id}")).is_some();
+            d.check(
+                shows(sent) && shows(archive) && named_in(root, "move-new-folder").is_none(),
+                "Go to Folder shows the folders of every account",
+            );
+            set_text(root, "move-filter", "sent");
+            let narrowed = wait_until(5, || shows(sent) && !shows(archive)).await;
+            d.check(narrowed, "and typing narrows them");
+            d.shot(&dialog, "read-18-go-to").await;
+            click(root, "dialog-ok");
+            d.check(
+                wait_until(10, || main.selected_name() == "Sent Items").await,
+                "choosing Sent Items there shows Sent Items",
+            );
+        }
+        None => d.check(false, "Go to Folder asks which folder"),
+    }
+
+    select_folder("Inbox");
+    show_found("subject:\"Team lunch on Friday\"").await;
+    wait_until(15, || main.reader.has_view()).await;
+    run_command(Command::FindInMessage);
+    main.reader.find_entry.set_text("noon");
+    let found = wait_until(10, || main.reader.find_result() == Some(true)).await;
+    d.check(found, "Find in This Message finds a word of the message shown");
+    d.shot(main.window(), "read-17-find").await;
+    main.reader.find_entry.set_text("zebra");
+    let missing = wait_until(10, || main.reader.find_result() == Some(false)).await;
+    d.check(
+        missing && main.reader.find_entry.has_css_class("error"),
+        "and says when it is not there",
+    );
+    main.reader.find_entry.set_text("");
+    search("").await;
 }
 
 /// The form that asks for a folder's name: the name typed and OK clicked

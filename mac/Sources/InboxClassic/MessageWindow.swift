@@ -10,13 +10,17 @@ final class MessageFrame: NSWindow {
         performClose(sender)
     }
 
-    // the web view of the message takes the keys it is given, Esc among them: the window has it first
+    // the web view of the message takes the keys it is given, Esc among them: the window has it first, after the
+    // find bar, whose Esc closes the bar
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if super.performKeyEquivalent(with: event) {
+            return true
+        }
         if event.keyCode == 53 && event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty {
             performClose(nil)
             return true
         }
-        return super.performKeyEquivalent(with: event)
+        return false
     }
 }
 
@@ -206,6 +210,10 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .markUnread: act(PE_ACTION_UNREAD)
         case .flag: act(PE_ACTION_TOGGLE_FLAG)
         case .pictures: reader.loadPictures()
+        case .nextMessage: goNext()
+        case .previousMessage: goPrevious()
+        case .nextUnread: nextUnread()
+        case .findInMessage: reader.findCommand()
         case .saveAs: mailbox?.saveMessageAs(folder: folder, uid: uid)
         case .properties: mailbox?.showProperties(folder: folder, uid: uid, subject: reader.subject)
         case .viewSource: mailbox?.showSource(folder: folder, uid: uid)
@@ -224,6 +232,10 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .junk: return !summary.in_junk
         case .notJunk: return summary.in_junk
         case .pictures: return reader.picturesBlocked
+        case .nextMessage: return next != nil
+        case .previousMessage: return previous != nil
+        case .nextUnread: return true
+        case .findInMessage: return shown
         // the commands of the main window's selection are not this window's
         case .move, .copy, .selectAll: return false
         default: return nil
@@ -278,6 +290,16 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
             return
         }
         show(folder: after.folder, uid: after.uid)
+    }
+
+    /// the next unread message of the list it came from; none left is said in the status bar
+    private func nextUnread() {
+        guard case .message(let next, let message) = core.nextUnread(search, sort: sort, ascending: ascending, folder: folder,
+                                                                     uid: uid) else {
+            mailbox?.status(Text.noUnreadLeft.text)
+            return
+        }
+        show(folder: next, uid: message)
     }
 
     @objc private func goPrevious() {

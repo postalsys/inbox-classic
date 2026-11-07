@@ -133,6 +133,12 @@ not-archived-here = Los mensajes de esta carpeta no se pueden archivar.
 # review: new
 not-emptied-here = Solo se pueden vaciar Elementos eliminados y Correo no deseado.
 # review: new
+next-unread-question = No quedan mensajes sin leer en { $folder }.
+
+    ¿Ir a { $next }, la siguiente carpeta con mensajes sin leer?
+# review: new
+no-unread-left = No quedan mensajes sin leer.
+# review: new
 empty-question = { $count ->
     [one] ¿Vaciar { $folder }?
 

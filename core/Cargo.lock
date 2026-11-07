@@ -1406,6 +1406,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "pe-bounce"
+version = "0.8.0"
+dependencies = [
+ "pe-mime",
+ "regex",
+ "serde_json",
+]
+
+[[package]]
 name = "pe-content"
 version = "0.8.0"
 dependencies = [
