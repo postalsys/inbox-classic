@@ -20,7 +20,7 @@ WINDOW='#FFFFFF'
 INK='#242424'
 
 # the big buttons of the main window and the compose window, in strip order
-TOOLBAR=(mail_add arrow_reply arrow_reply_all arrow_forward print delete arrow_sync mail_read mail_unread send save attach mail_prohibited mail_checkmark archive arrow_up arrow_down)
+TOOLBAR=(mail_add arrow_reply arrow_reply_all arrow_forward print delete arrow_sync mail_read mail_unread send save attach mail_prohibited mail_checkmark archive arrow_up arrow_down person_add people_add contact_card mail_edit)
 # the folder tree: the account, then a folder of each kind
 FOLDERS=(mailbox folder mail_inbox send drafts delete mail_prohibited archive flag mail_multiple)
 # the message list: attachment, flag, the search field, a bounce

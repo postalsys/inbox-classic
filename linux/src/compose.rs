@@ -438,6 +438,18 @@ fn row_label(text: &str) -> gtk::Label {
     label
 }
 
+/// The To, Cc or Bcc label as a button that opens Select Recipients, as in Outlook Express
+fn field_button(text: &str, name: &str) -> gtk::Button {
+    let button = gtk::Button::new();
+    button.set_child(Some(&row_label(text)));
+    button.add_css_class("flat");
+    button.add_css_class("field-button");
+    button.set_halign(gtk::Align::End);
+    button.set_tooltip_text(Some(&t!(UiPickTip)));
+    button.set_widget_name(name);
+    button
+}
+
 fn field_entry(name: &str) -> gtk::Entry {
     let entry = gtk::Entry::new();
     entry.set_hexpand(true);
@@ -502,11 +514,23 @@ impl Compose {
             (t!(UiFieldAttach), attached.clone().upcast()),
         ];
         let mut placed: Vec<[gtk::Widget; 2]> = Vec::new();
+        let mut pick_buttons = Vec::new();
         for (index, (label, field)) in rows.into_iter().enumerate() {
-            let label = row_label(&label);
+            // To, Cc and Bcc open Select Recipients
+            let label: gtk::Widget = match index {
+                1..=3 => {
+                    let button = field_button(
+                        &label,
+                        ["compose-pick-to", "compose-pick-cc", "compose-pick-bcc"][index - 1],
+                    );
+                    pick_buttons.push(button.clone());
+                    button.upcast()
+                }
+                _ => row_label(&label).upcast(),
+            };
             grid.attach(&label, 0, index as i32, 1, 1);
             grid.attach(&field, 1, index as i32, 1, 1);
-            placed.push([label.upcast(), field]);
+            placed.push([label, field]);
         }
         let saved = draft.is_some_and(|d| d.message_id.is_some());
         let mut body = draft.map(|d| d.body.clone()).unwrap_or_default();
@@ -607,6 +631,7 @@ impl Compose {
         }
         compose.show_rows();
         compose.connect(&send, &save, &attach);
+        compose.connect_pick(&pick_buttons);
         compose.filling.set(false);
         compose
     }
@@ -650,6 +675,30 @@ impl Compose {
         for widget in &self.attach_row {
             widget.set_visible(files);
         }
+    }
+
+    /// The To, Cc and Bcc buttons: Select Recipients, and what was chosen added to the fields, each address once
+    fn connect_pick(self: &Rc<Self>, buttons: &[gtk::Button]) {
+        for (index, button) in buttons.iter().enumerate() {
+            let this = Rc::downgrade(self);
+            button.connect_clicked(move |_| {
+                if let Some(this) = this.upgrade() {
+                    spawn(async move { this.pick_recipients(index).await });
+                }
+            });
+        }
+    }
+
+    pub async fn pick_recipients(self: Rc<Self>, start: usize) {
+        let Some(picked) = crate::recipients::pick_recipients(&self.window, start).await else {
+            return;
+        };
+        for (field, added) in [&self.to, &self.cc, &self.bcc].into_iter().zip(picked) {
+            if !added.is_empty() {
+                field.set_text(&pe_core::book::add_to_field(&field.text(), &added));
+            }
+        }
+        self.show_rows();
     }
 
     fn open_row(&self, cc: bool) {

@@ -457,3 +457,9 @@ secrets-mac = the keychain
 secrets-linux = the system keyring (Secret Service)
 error-no-such-file = there is no such file
 cards-file-too-big = This file is too big to be an address book.
+ui-sender-added = { $name } was added to the Address Book.
+ui-sender-known = { $name } is already in the Address Book.
+ui-sender-none = The sender of this message has no e-mail address to add.
+card-name-needed = The contact has no name and no e-mail address.
+# a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
+cards-file-failed = { $file }: { $reason }

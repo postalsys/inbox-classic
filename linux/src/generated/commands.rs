@@ -47,6 +47,10 @@ pub enum Command {
     ViewSource,
     AiAgents,
     Options,
+    AddressBook,
+    AddSenderToBook,
+    ImportAddressBook,
+    ExportAddressBook,
 }
 
 impl Command {
@@ -95,6 +99,10 @@ impl Command {
         Command::ViewSource,
         Command::AiAgents,
         Command::Options,
+        Command::AddressBook,
+        Command::AddSenderToBook,
+        Command::ImportAddressBook,
+        Command::ExportAddressBook,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -144,6 +152,10 @@ impl Command {
             Command::ViewSource => "view-source",
             Command::AiAgents => "ai-agents",
             Command::Options => "options",
+            Command::AddressBook => "address-book",
+            Command::AddSenderToBook => "add-sender-to-book",
+            Command::ImportAddressBook => "import-address-book",
+            Command::ExportAddressBook => "export-address-book",
         }
     }
 
@@ -194,6 +206,10 @@ impl Command {
             Command::ViewSource => "view",
             Command::AiAgents => "tools",
             Command::Options => "tools",
+            Command::AddressBook => "tools",
+            Command::AddSenderToBook => "tools",
+            Command::ImportAddressBook => "file",
+            Command::ExportAddressBook => "file",
         }
     }
 
@@ -244,6 +260,10 @@ impl Command {
             Command::ViewSource => pe_core::i18n::Text::CmdViewSource,
             Command::AiAgents => pe_core::i18n::Text::CmdAiAgents,
             Command::Options => pe_core::i18n::Text::CmdOptions,
+            Command::AddressBook => pe_core::i18n::Text::CmdAddressBook,
+            Command::AddSenderToBook => pe_core::i18n::Text::CmdAddSenderToBook,
+            Command::ImportAddressBook => pe_core::i18n::Text::CmdImportAddressBook,
+            Command::ExportAddressBook => pe_core::i18n::Text::CmdExportAddressBook,
         }
     }
 
@@ -312,6 +332,10 @@ impl Command {
             Command::ViewSource => Some("<Primary>u"),
             Command::AiAgents => None,
             Command::Options => Some("<Primary>comma"),
+            Command::AddressBook => Some("<Primary><Shift>b"),
+            Command::AddSenderToBook => None,
+            Command::ImportAddressBook => None,
+            Command::ExportAddressBook => None,
         }
     }
 
@@ -362,6 +386,10 @@ impl Command {
             Command::ViewSource => false,
             Command::AiAgents => false,
             Command::Options => false,
+            Command::AddressBook => false,
+            Command::AddSenderToBook => false,
+            Command::ImportAddressBook => false,
+            Command::ExportAddressBook => false,
         }
     }
 
@@ -412,6 +440,10 @@ impl Command {
             Command::ViewSource => false,
             Command::AiAgents => false,
             Command::Options => false,
+            Command::AddressBook => false,
+            Command::AddSenderToBook => false,
+            Command::ImportAddressBook => false,
+            Command::ExportAddressBook => false,
         }
     }
 
@@ -462,6 +494,10 @@ impl Command {
             Command::ViewSource => true,
             Command::AiAgents => false,
             Command::Options => false,
+            Command::AddressBook => false,
+            Command::AddSenderToBook => true,
+            Command::ImportAddressBook => false,
+            Command::ExportAddressBook => false,
         }
     }
 }

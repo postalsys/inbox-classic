@@ -1736,6 +1736,21 @@ void Mailbox::ShowProperties(HWND owner) {
                core::T(PE_TEXT_UI_INTERNET_HEADERS), Text(headers.get()));
 }
 
+void Mailbox::AddSenderToBook(HWND owner) {
+    if (!reader_.Uid()) {
+        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    bool added = false;
+    char* status = nullptr;
+    pe_book_add_sender(core_, reader_.Folder(), reader_.Uid(), &added, &status);
+    core::String said(status);
+    Say(said ? Text(said.get()) : L"");
+    if (added) {
+        AddressBookChanged();
+    }
+}
+
 void Mailbox::ShowSource(HWND owner) {
     if (!reader_.Uid()) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
@@ -1809,6 +1824,8 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_SAVE_AS, MenuItem(PE_TEXT_WIN_SAVE_AS_BUTTON).c_str());
     AppendMenuW(menu, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT).c_str());
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING | (SelectedCount() > 1 ? MF_GRAYED : 0), IDM_ADD_SENDER_TO_BOOK, MenuItem(PE_TEXT_CMD_ADD_SENDER_TO_BOOK).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_UI_MENU_VIEW_SOURCE).c_str());
     AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_UI_PROPERTIES).c_str());

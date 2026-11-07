@@ -551,3 +551,14 @@ secrets-linux = le trousseau du système (Secret Service)
 error-no-such-file = ce fichier n'existe pas
 # review: new
 cards-file-too-big = Ce fichier est trop volumineux pour être un carnet d'adresses.
+# review: new
+ui-sender-added = { $name } a été ajouté au carnet d'adresses.
+# review: new
+ui-sender-known = { $name } est déjà dans le carnet d'adresses.
+# review: new
+ui-sender-none = L'expéditeur de ce message n'a pas d'adresse e-mail à ajouter.
+# review: new
+card-name-needed = Le contact n'a ni nom ni adresse e-mail.
+# a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
+# review: new
+cards-file-failed = { $file }: { $reason }

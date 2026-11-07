@@ -1,5 +1,6 @@
 // Address completion in the To, Cc and Bcc fields: the address being typed (the text between the commas around the
-// cursor) is looked up in the core's address book, and the people found are listed under the field. The list never
+// cursor) is looked up in the core (the Address Book's people and groups, then those written to and heard from), and
+// what it found is listed under the field. The list never
 // takes the focus: the keys stay with the field, which moves the choice, takes it or closes the list.
 #include "app.h"
 #include "core.h"
@@ -18,10 +19,12 @@ struct Completion {
     PeCore* core = nullptr;
     HWND edit = nullptr;
     HWND list = nullptr;
-    // the rows of the list: what goes in the field, and the address to forget
+    // the rows of the list: what goes in the field, and the address to forget (none for a group of the Address
+    // Book, which is listed by its name and puts its members in the field)
     struct Row {
         std::wstring label;
         std::wstring address;
+        bool group = false;
     };
     std::vector<Row> rows;
     // a key the list took (Enter, Tab, Esc): its character does not go in the field either
@@ -148,8 +151,9 @@ void Update(Completion* state) {
     state->rows.clear();
     for (size_t i = 0; i < count; i++) {
         const PeContact* contact = pe_contact_list_get(found.get(), i);
-        state->rows.push_back({Text(contact->label), Text(contact->address)});
-        SendMessageW(state->list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(state->rows.back().label.c_str()));
+        state->rows.push_back({Text(contact->label), Text(contact->address), contact->group});
+        std::wstring shown = contact->group ? Text(contact->name) : state->rows.back().label;
+        SendMessageW(state->list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(shown.c_str()));
     }
     // the best one chosen: Enter or Tab takes it
     SendMessageW(state->list, LB_SETCURSEL, 0, 0);
@@ -168,10 +172,11 @@ void Move(Completion* state, int by) {
     SendMessageW(state->list, LB_SETCURSEL, std::clamp(current + by, 0, count - 1), 0);
 }
 
-// Shift+Delete on a person in the list: out of the address book for good
+// Shift+Delete on a person in the list: out of those written to and heard from for good (not a group, nor someone of
+// the Address Book, who stays)
 void Forget(Completion* state) {
     int index = static_cast<int>(SendMessageW(state->list, LB_GETCURSEL, 0, 0));
-    if (index >= 0 && static_cast<size_t>(index) < state->rows.size()) {
+    if (index >= 0 && static_cast<size_t>(index) < state->rows.size() && !state->rows[index].group) {
         pe_contact_forget(state->core, core::Narrow(state->rows[index].address).c_str());
         Update(state);
     }

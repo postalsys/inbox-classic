@@ -28,7 +28,7 @@ use rusqlite::OptionalExtension;
 
 pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_provider};
 pub use agents::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry, NewLogEntry};
-pub use cards::{Card, CardId, Group, GroupId, Member};
+pub use cards::{Card, CardId, Group, GroupId, Member, MemberRow, display_name};
 pub use contacts::Contact;
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Sort, SortField};

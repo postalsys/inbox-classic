@@ -25,6 +25,9 @@ use crate::ui::FILE_ANSWERS;
 /// The steps after organizing: lists, invitations, logos, dragging, junk, folders, links, completion, signatures
 mod steps;
 
+/// Step 39a: the Address Book
+mod contacts;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
@@ -817,6 +820,15 @@ async fn close_compose(compose: &crate::compose::Compose) {
     wait_until(10, || !compose.window.is_visible()).await;
 }
 
+/// Typed into an entry a letter at a time, as the keyboard does
+fn type_letters(entry: &gtk::Entry, text: &str) {
+    if let Some(delegate) = entry.delegate() {
+        for letter in text.chars() {
+            delegate.emit_by_name::<()>("insert-at-cursor", &[&letter.to_string()]);
+        }
+    }
+}
+
 /// Runs a command as the menu would, outside the driver's own turn (a command may open a dialog with its own loop)
 fn command(command: Command) {
     glib::idle_add_local_once(move || run_command(command));
@@ -853,6 +865,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::mailto(&d).await;
     steps::completing(&d).await;
     steps::signature(&d).await;
+    contacts::address_book(&d).await;
     steps::gmail(&d).await;
     wrong_password(&d).await;
     steps::all_inboxes(&d).await;
@@ -873,6 +886,11 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
         (d.ports.imap, d.ports.smtp)
     };
     d.step(&format!("adding the account {name}"));
+    // a server form an earlier step cancelled may still be closing; the one this step waits for must be its own
+    d.check(
+        wait_gone(20, "account-servers").await,
+        "no server form of an earlier step is left open",
+    );
     let Some(first) = wait_dialog(20, "account-start").await else {
         d.check(false, &format!("the account form opens ({name})"));
         return;
@@ -907,13 +925,15 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     };
     let second = second.upcast::<gtk::Widget>();
     d.check(true, "the server settings form follows the lookup");
+    let guessed = text_of(&second, "form-4");
     d.check(
-        text_of(&second, "form-4") == "imap.inboxclassic.test",
-        "the lookup guessed the IMAP server",
+        guessed == "imap.inboxclassic.test",
+        &format!("the lookup guessed the IMAP server ({guessed})"),
     );
+    let kept = text_of(&second, "form-0");
     d.check(
-        text_of(&second, "form-0") == name,
-        "the server form keeps the name typed first",
+        kept == name,
+        &format!("the server form keeps the name typed first ({kept})"),
     );
     set_text(&second, "form-2", user);
     set_text(&second, "form-3", password);

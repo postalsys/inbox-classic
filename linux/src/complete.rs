@@ -1,6 +1,7 @@
 //! Address completion in the To, Cc and Bcc fields: the address being typed (the text between the commas around the
-//! cursor) is looked up in the core's address book, and the people found are listed under the field. The list never
-//! takes the focus: the keys stay with the field, which moves the choice, takes it or closes the list.
+//! cursor) is looked up by the core, and what it found is listed under the field: the Address Book's people and its
+//! groups (by their name, with the group icon; taking one puts its members in), then those written to or heard from.
+//! The list never takes the focus: the keys stay with the field, which moves the choice, takes it or closes the list.
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -17,7 +18,7 @@ struct Completion {
     entry: gtk::Entry,
     popover: gtk::Popover,
     list: gtk::ListBox,
-    /// What goes in the field for each row, and the address to forget
+    /// What goes in the field for each row, and the address to forget (empty for a group, which is never forgotten)
     rows: RefCell<Vec<(String, String)>>,
     /// The field's text is being set from here: not typing
     taking: Cell<bool>,
@@ -88,7 +89,7 @@ impl Completion {
             self.hide();
             return;
         }
-        let found = shell().core.contacts(typed, SHOWN).unwrap_or_default();
+        let found = shell().core.completions(typed, SHOWN).unwrap_or_default();
         if found.is_empty() {
             self.hide();
             return;
@@ -97,12 +98,16 @@ impl Completion {
             self.list.remove(&row);
         }
         let mut rows = Vec::new();
-        for contact in found {
-            let label = pe_core::address_label(&contact.name, &contact.address);
-            let row = gtk::Label::new(Some(&label));
-            row.set_xalign(0.0);
+        for found in found {
+            let row = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+            if found.group {
+                row.append(&gtk::Image::from_icon_name("system-users-symbolic"));
+            }
+            let label = gtk::Label::new(Some(if found.group { &found.name } else { &found.label }));
+            label.set_xalign(0.0);
+            row.append(&label);
             self.list.append(&row);
-            rows.push((label, contact.address));
+            rows.push((found.label, if found.group { String::new() } else { found.address }));
         }
         *self.rows.borrow_mut() = rows;
         // the best one chosen: Enter or Tab takes it
@@ -137,11 +142,13 @@ impl Completion {
         self.list.select_row(self.list.row_at_index(next).as_ref());
     }
 
-    /// Shift+Delete on a person in the list: out of the address book for good
+    /// Shift+Delete on a person in the list: out of those written to and heard from for good (the Address Book keeps
+    /// its own, and a group is never forgotten)
     fn forget(&self) {
         if let Some(address) = self
             .chosen()
             .and_then(|i| self.rows.borrow().get(i).map(|r| r.1.clone()))
+            .filter(|address| !address.is_empty())
         {
             let _ = shell().core.forget_contact(&address);
             self.update();
@@ -164,7 +171,7 @@ impl Completion {
     }
 }
 
-/// Completes the addresses typed in `entry` from the people written to and heard from
+/// Completes the addresses typed in `entry` from the Address Book and the people written to and heard from
 pub fn attach(entry: &gtk::Entry) {
     let list = gtk::ListBox::new();
     list.set_selection_mode(gtk::SelectionMode::Single);
@@ -239,8 +246,13 @@ pub fn shown_rows(entry: &gtk::Entry) -> Option<Vec<String>> {
             let mut rows = Vec::new();
             let mut row = list.first_child();
             while let Some(r) = row {
-                if let Some(label) = r.first_child().and_downcast::<gtk::Label>() {
-                    rows.push(label.text().to_string());
+                // the row's box: the group icon, then its words
+                let mut part = r.first_child().and_then(|b| b.first_child());
+                while let Some(widget) = part {
+                    if let Some(label) = widget.downcast_ref::<gtk::Label>() {
+                        rows.push(label.text().to_string());
+                    }
+                    part = widget.next_sibling();
                 }
                 row = r.next_sibling();
             }

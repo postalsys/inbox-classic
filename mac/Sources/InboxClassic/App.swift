@@ -273,6 +273,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         let fileItems: [NSMenuItem] = [item(for: .newAccount), item(for: .accounts), separator(),
                                        item(for: .newFolder), item(for: .renameFolder), item(for: .deleteFolder), item(for: .emptyFolder), separator(),
                                        item(for: .saveAs), item(for: .import), item(for: .print), separator(),
+                                       item(for: .importAddressBook), item(for: .exportAddressBook), separator(),
                                        item(for: .properties), separator(),
                                        NSMenuItem(title: Text.macCloseWindow.text, action: #selector(NSWindow.performClose(_:)),
                                                   keyEquivalent: "w")]
@@ -303,7 +304,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         _ = submenu(Text.menuMessage.text, [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
                                 separator(), item(for: .flag), flagMenu(), separator(), item(for: .archive), item(for: .junk),
                                 item(for: .notJunk)])
-        _ = submenu(Text.menuTools.text, [item(for: .sync), item(for: .outbox), separator(), item(for: .aiAgents), separator(), item(for: .notify),
+        _ = submenu(Text.menuTools.text, [item(for: .sync), item(for: .outbox), separator(), item(for: .addressBook),
+                                                  item(for: .addSenderToBook), separator(), item(for: .aiAgents), separator(), item(for: .notify),
                               item(for: .defaultApp)])
         let window = submenu(Text.macMenuWindow.text, [
             NSMenuItem(title: Text.macMinimize.text, action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"),
@@ -372,6 +374,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         if let message = MessageWindow.key, message.perform(command) {
             return
         }
+        // the Address Book in front: Delete, Properties, Select All and Find are its own
+        if let book = AddressBookWindow.key, book.perform(command) {
+            return
+        }
         switch command {
         case .newAccount: main.addAccount()
         case .exit: NSApp.terminate(nil)
@@ -419,6 +425,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             main.show()
             main.mailbox.chooseFolder()
         case .findInMessage: main.mailbox.reader.findCommand()
+        case .addressBook: AddressBookWindow.show(core: core)
+        case .addSenderToBook: main.mailbox.addSenderToBook()
+        case .importAddressBook: AddressBookFiles.importFile(core: core)
+        case .exportAddressBook: AddressBookFiles.exportFile(core: core)
         }
     }
 
@@ -482,6 +492,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         guard let main, core != nil else { return command == .exit || command == .about || command == .help }
         if let message = MessageWindow.key, let on = message.validate(command) {
+            return on
+        }
+        if let book = AddressBookWindow.key, let on = book.validate(command) {
             return on
         }
         // the main window's commands work on what it shows; with the keyboard in a text field Delete is the field's

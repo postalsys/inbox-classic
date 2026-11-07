@@ -80,6 +80,9 @@ The terms of Outlook Express and Outlook in each language, kept the same everywh
 | client secret      | Client-Geheimnis        | kliendi saladus             | secret client                 | secreto de cliente             |
 | issuer (OAuth)     | Aussteller              | väljaandja                  | émetteur                      | emisor                         |
 | scopes (OAuth)     | Berechtigungen (Scopes) | juurdepääsuõigused (scopes) | autorisations (scopes)        | permisos (scopes)              |
+| Address Book       | Adressbuch              | Aadressiraamat              | Carnet d'adresses             | Libreta de direcciones         |
+| contact            | Kontakt                 | kontakt                     | contact                       | contacto                       |
+| group              | Gruppe                  | grupp                       | groupe                        | grupo                          |
 | File > Accounts    | Datei > Konten          | Fail > Kontod               | Fichier > Comptes             | Archivo > Cuentas              |
 | Tools              | Extras                  | Tööriistad                  | Outils                        | Herramientas                   |
 | Ctrl / Shift / Del | Strg / Umschalt / Entf  | Ctrl / Shift / Del          | Ctrl / Maj / Suppr            | Ctrl / Mayús / Supr            |
@@ -95,6 +98,8 @@ Context notes:
   again. Clearing the history alone does not undo the agents' changes.
 - `folder-holds-no-messages` refers to a folder that cannot contain messages (IMAP `\Noselect`), not an empty folder.
 - Keep help references to menu items and buttons in sync when changing their labels.
+- "Contact" and "group" are a person and a group of the Address Book (Tools > Address Book), not the people Inbox
+  Classic offers on its own when an address is typed.
 
 Notes for translators:
 

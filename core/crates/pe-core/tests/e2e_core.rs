@@ -620,13 +620,11 @@ fn keeps_an_address_book() {
         .unwrap();
 
     // the sender added, once
-    let (card, new) = s.core.add_sender(inbox, mary.info.uid).unwrap();
-    assert!(new);
-    assert_eq!(
-        s.core.add_sender(inbox, mary.info.uid).unwrap(),
-        (card, false),
-        "the same card again"
-    );
+    let added = s.core.add_sender(inbox, mary.info.uid).unwrap();
+    let card = added.card;
+    assert!(added.added);
+    let again = s.core.add_sender(inbox, mary.info.uid).unwrap();
+    assert_eq!((again.card, again.added), (card, false), "the same card again");
     let saved = s.core.card(card).unwrap().unwrap();
     assert_eq!((saved.first.as_str(), saved.last.as_str()), ("Mary", "Smith"));
 
@@ -639,8 +637,11 @@ fn keeps_an_address_book() {
     )
     .unwrap();
     assert_eq!(
-        s.core.import_cards(&vcf).unwrap(),
-        pe_core::book::Imported { added: 1, skipped: 0 }
+        s.core.import_cards(&[&vcf]),
+        pe_core::book::Imported {
+            added: 1,
+            ..Default::default()
+        }
     );
     let csv = dir.path().join("cards.csv");
     std::fs::write(
@@ -649,8 +650,12 @@ fn keeps_an_address_book() {
     )
     .unwrap();
     assert_eq!(
-        s.core.import_cards(&csv).unwrap(),
-        pe_core::book::Imported { added: 1, skipped: 1 }
+        s.core.import_cards(&[&csv]),
+        pe_core::book::Imported {
+            added: 1,
+            skipped: 1,
+            ..Default::default()
+        }
     );
     assert_eq!(s.core.cards("").unwrap().len(), 3);
 

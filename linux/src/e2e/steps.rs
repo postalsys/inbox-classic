@@ -1720,11 +1720,7 @@ pub async fn completing(d: &Driver) {
     let Some(c) = wait_compose(10).await else { return };
     c.to.grab_focus();
     // typed, a letter at a time
-    if let Some(text) = c.to.delegate() {
-        for letter in ["a", "n", "n"] {
-            text.emit_by_name::<()>("insert-at-cursor", &[&letter]);
-        }
-    }
+    type_letters(&c.to, "ann");
     let listed = wait_for(10, || crate::complete::shown_rows(&c.to).filter(|r| !r.is_empty())).await;
     d.check(
         listed.is_some(),
@@ -1843,7 +1839,7 @@ pub async fn gmail(d: &Driver) {
             );
             d.shot(&servers, "account-6-gmail").await;
             click(servers.upcast_ref(), "dialog-cancel");
-            wait_gone(10, "account-servers").await;
+            d.check(wait_gone(10, "account-servers").await, "Cancel closes the server form");
         }
         None => d.check(false, "its servers were found"),
     }

@@ -337,6 +337,15 @@ function WindowText([IntPtr]$window) {
     return $buffer.ToString()
 }
 function GetText([IntPtr]$window, [int]$id) { WindowText ([Native.Win]::GetDlgItem($window, $id)) }
+# the rows of a list view, and the rows and the text of a row of a list box (LB_GETTEXT, which Windows copies between
+# processes)
+function ListCount([IntPtr]$list) { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+function ListBoxCount([IntPtr]$box) { [int][Native.Win]::SendMessage($box, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+function ListBoxText([IntPtr]$box, [int]$row) {
+    $text = New-Object System.Text.StringBuilder 1024
+    [void][Native.Win]::SendMessage($box, $LB_GETTEXT, [IntPtr]$row, $text)
+    $text.ToString()
+}
 # the words of a window's static texts (a message box, a form's intro)
 function Statics([IntPtr]$window) { ([Native.Win]::FindDescendants($window, 'Static') | ForEach-Object { WindowText $_ }) -join ' ' }
 # the text of a part of a status bar: SB_GETTEXT writes it to memory of the app's own process, read back from there
@@ -678,7 +687,7 @@ try {
         for ($i = 0; $i -lt $index; $i++) { $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item) }
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $item)
     }
-    function Rows { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    function Rows { ListCount $list }
     # a tree's row by its account and folder, their unread counts and "(current)" left out; Zero when it is not there
     function TreeRow([IntPtr]$t, [string]$account, [string]$folder) {
         $name = { param($item) ([Native.Win]::RemoteTreeText($t, $item)) -replace ' \((\d+|current)\)$', '' }
@@ -981,7 +990,7 @@ try {
     Set-Content (Join-Path $files 'trail-map.txt') 'the attachment that goes'
     Set-Content (Join-Path $files 'packing-list.txt') 'attached by mistake'
     $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
-    $count = { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
+    $count = { ListBoxCount $attached }
     foreach ($file in 'trail-map.txt', 'packing-list.txt') {
         $before = & $count
         # once more if the dialog did not take the file, after closing what is left of it
@@ -1074,7 +1083,7 @@ public static class Dragger {
     $dropped = [Dragger]::Drag(@($pictureFile, $noteFile), 40, 40, $toX, $toY)
     Check $dropped 'the text takes files dropped on it'
     $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
-    Check ([bool](WaitFor { [int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 } 10)) 'a file that is no picture is attached'
+    Check ([bool](WaitFor { (ListBoxCount $attached) -eq 1 } 10)) 'a file that is no picture is attached'
     Start-Sleep -Seconds 1
     Shot $compose 'write-13-dropped-picture'
     Command $compose $IDC_SEND
@@ -1230,7 +1239,7 @@ public static class Dragger {
     $outbox = WaitWindow 'InboxClassicOutbox' 'Outbox'
     Check ($null -ne $outbox) 'Tools > Outbox lists what waits'
     if ($outbox) {
-        $waiting = [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+        $waiting = (ListCount ([Native.Win]::GetDlgItem($outbox, 450)))
         Check ($waiting -eq 1) 'the message is in it'
         Shot $outbox 'write-7-outbox'
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
@@ -1663,7 +1672,7 @@ public static class Dragger {
     Command $main $IDM_OUTBOX
     $outbox = WaitShown 'InboxClassicOutbox' 10
     if ($outbox) {
-        Check ([int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($outbox, 450), $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'and the Outbox is empty'
+        Check ((ListCount ([Native.Win]::GetDlgItem($outbox, 450))) -eq 0) 'and the Outbox is empty'
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
     }
@@ -1859,7 +1868,7 @@ public static class Dragger {
     Check ($null -ne $compose) 'Forward with three selected writes one new message'
     if ($compose) {
         $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
-        $files = WaitFor { if ([int][Native.Win]::SendMessage($attached, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 3) { 3 } } 10
+        $files = WaitFor { if ((ListBoxCount $attached) -eq 3) { 3 } } 10
         Check ($files -eq 3) 'with the three attached as .eml files'
         Check ((GetText $compose $IDC_SUBJECT) -eq "Fw: $($three[0])") "its subject is the first one's, with Fw: ($(GetText $compose $IDC_SUBJECT))"
         # the mouse out of the way: no tooltip of the format bar in the picture
@@ -2390,18 +2399,18 @@ public static class Dragger {
     [void](WaitFor { $null -ne (& $rowOf $failedSubject) } 20)
     SelectRow (& $rowOf $failedSubject)
     [void](WaitFor { $null -ne (& $cardPoint 196 43 28) } 15)
-    Check (& $foundInMessage 'Your message was not delivered') 'the card says the message was not delivered'
-    Check (& $foundInMessage 'sam.nobody@example.org') 'it names the recipient'
-    Check (& $foundInMessage 'The address does not exist') 'why'
-    Check (& $foundInMessage 'Check the spelling of the address') 'and what to do'
+    Check ([bool](WaitFor { & $foundInMessage 'Your message was not delivered' } 5)) 'the card says the message was not delivered'
+    Check ([bool](WaitFor { & $foundInMessage 'sam.nobody@example.org' } 5)) 'it names the recipient'
+    Check ([bool](WaitFor { & $foundInMessage 'The address does not exist' } 5)) 'why'
+    Check ([bool](WaitFor { & $foundInMessage 'Check the spelling of the address' } 5)) 'and what to do'
     # Details, folded, opened by the find
-    Check (& $foundInMessage $serverWords) "its Details show the server's own words"
+    Check ([bool](WaitFor { & $foundInMessage $serverWords } 5)) "its Details show the server's own words"
     Shot $main 'bounce-1-failed'
 
     SelectRow (& $rowOf $delayedSubject)
     Check ([bool](WaitFor { $null -ne (& $cardPoint 154 91 0) } 15)) 'a delay notice shows the amber card'
-    Check (& $foundInMessage 'Your message has not been delivered yet') 'it says the message is not delivered yet'
-    Check (& $foundInMessage 'still trying to deliver it') 'and that it is still being tried'
+    Check ([bool](WaitFor { & $foundInMessage 'Your message has not been delivered yet' } 5)) 'it says the message is not delivered yet'
+    Check ([bool](WaitFor { & $foundInMessage 'still trying to deliver it' } 5)) 'and that it is still being tried'
     Shot $main 'bounce-2-delayed'
 
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:bounce')
@@ -2539,8 +2548,7 @@ public static class Dragger {
             if ($w -ne [IntPtr]::Zero) { $w }
         } 10
         Check ($null -ne $completion) 'typing in To lists the people it may be'
-        $LB_GETCOUNT = 0x018B
-        Check ($completion -and [int][Native.Win]::SendMessage($completion, $LB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -ge 1) 'with someone heard from'
+        Check ($completion -and (ListBoxCount $completion) -ge 1) 'with someone heard from'
         if ($completion) { Shot $compose 'write-17-complete' $completion }
         Key $to $VK_RETURN
         Check ([bool](WaitFor { (GetText $compose $IDC_TO) -eq 'Ann Example <ann@example.com>, ' } 5)) "Enter takes the first, with a comma for the next ($(GetText $compose $IDC_TO))"
@@ -2615,6 +2623,210 @@ public static class Dragger {
     $at = $plain.IndexOf('Ann, signed by the UI test'); $quoteAt = $plain.IndexOf('Original Message')
     Check ($at -ge 0 -and $quoteAt -ge 0 -and $at -lt $quoteAt) "a reply has the signature above the quote ($at, $quoteAt)"
     if (-not ($at -ge 0 -and $at -lt $quoteAt)) { Set-Content (Join-Path $out 'signature-reply.eml') $raw }
+
+    Step 'the Address Book'
+    # core/commands.toml and app/src/app.h, compose.cpp
+    $IDM_ADDRESS_BOOK = 147; $IDM_ADD_SENDER_TO_BOOK = 148; $IDM_IMPORT_ADDRESS_BOOK = 149; $IDM_EXPORT_ADDRESS_BOOK = 150
+    $IDC_BOOK_TREE = 700; $IDC_BOOK_LIST = 701; $IDC_BOOK_FIND = 702; $IDC_BOOK_TOOLBAR = 703
+    $IDC_BOOK_NEW_CONTACT = 710; $IDC_BOOK_NEW_GROUP = 711; $IDC_BOOK_PROPERTIES = 712; $IDC_BOOK_DELETE = 713; $IDC_BOOK_WRITE_TO = 714
+    $IDC_CONTACT_FIRST = 720; $IDC_CONTACT_LAST = 721; $IDC_CONTACT_ADDRESS = 725; $IDC_CONTACT_ADD = 726; $IDC_CONTACT_ADDRESSES = 727
+    $IDC_GROUP_NAME = 750; $IDC_GROUP_MEMBERS = 751; $IDC_GROUP_SELECT = 752; $IDC_GROUP_ADDRESS = 754; $IDC_GROUP_ADD = 755
+    $IDC_PICK_LIST = 771; $IDC_PICK_TO = 772; $IDC_PICK_TO_LIST = 780; $IDC_PICK_TO_BUTTON = 313
+    $TVM_SELECTITEM_CARET = [IntPtr]9
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    # the Name column of a list of the book, top to bottom
+    function Names([IntPtr]$l) {
+        $n = ListCount $l
+        if ($n -eq 0) { return @() }
+        @(0..($n - 1) | ForEach-Object { [Native.Win]::RemoteListText($l, $_, 0) })
+    }
+    Command $main $IDM_ADDRESS_BOOK
+    $book = WaitShown 'InboxClassicAddressBook' 10
+    Check ($null -ne $book) 'Tools > Address Book opens the Address Book'
+    if ($book) {
+        $bookList = [Native.Win]::GetDlgItem($book, $IDC_BOOK_LIST)
+        $bookTree = [Native.Win]::GetDlgItem($book, $IDC_BOOK_TREE)
+        $bookBar = [Native.Win]::GetDlgItem($book, $IDC_BOOK_TOOLBAR)
+        # TB_GETBUTTONTEXTW of each button
+        $buttons = @($IDC_BOOK_NEW_CONTACT, $IDC_BOOK_NEW_GROUP, $IDC_BOOK_PROPERTIES, $IDC_BOOK_DELETE, $IDC_BOOK_WRITE_TO) |
+            ForEach-Object { [Native.Win]::RemoteText($bookBar, 0x044B, [IntPtr]$_) }
+        Check (($buttons -join ', ') -eq 'New Contact, New Group, Properties, Delete, Write To') "with New Contact, New Group, Properties, Delete and Write To ($($buttons -join ', '))"
+        Check ((ListCount $bookList) -eq 0) 'it starts empty'
+        Check ((TreeTexts $bookTree) -contains 'All Contacts') "the groups start with All Contacts ($((TreeTexts $bookTree) -join ', '))"
+
+        # a person with two addresses, the first the default
+        Click $book $IDC_BOOK_NEW_CONTACT
+        $contact = WaitShown 'InboxClassicContact' 10
+        Check ($null -ne $contact) 'New Contact opens Contact Properties'
+        if ($contact) {
+            SetText $contact $IDC_CONTACT_FIRST 'Mary'
+            SetText $contact $IDC_CONTACT_LAST 'Smith'
+            SetText $contact $IDC_CONTACT_ADDRESS 'mary@example.com'
+            Click $contact $IDC_CONTACT_ADD
+            SetText $contact $IDC_CONTACT_ADDRESS 'mary.smith@work.example'
+            Click $contact $IDC_CONTACT_ADD
+            $addresses = [Native.Win]::GetDlgItem($contact, $IDC_CONTACT_ADDRESSES)
+            Check ([bool](WaitFor { (ListBoxCount $addresses) -eq 2 } 5)) 'it takes two addresses'
+            Check ((ListBoxText $addresses 0) -eq 'mary@example.com (default)' -and (ListBoxText $addresses 1) -eq 'mary.smith@work.example') "the first the default ($(ListBoxText $addresses 0); $(ListBoxText $addresses 1))"
+            Shot $contact 'contacts-2-person'
+            Click $contact 1
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($contact) } 10)) 'OK saves the contact'
+        }
+        Check ([bool](WaitFor { (ListCount $bookList) -eq 1 -and [Native.Win]::RemoteListText($bookList, 0, 0) -eq 'Mary Smith' -and [Native.Win]::RemoteListText($bookList, 0, 1) -eq 'mary@example.com' } 10)) "the book lists her: Mary Smith, mary@example.com ($(Names $bookList))"
+        Shot $book 'contacts-1-book'
+        SetText $book $IDC_BOOK_FIND 'smi'
+        Check ([bool](WaitFor { (ListCount $bookList) -eq 1 } 5)) 'the find box finds her by "smi"'
+        SetText $book $IDC_BOOK_FIND 'zed'
+        Check ([bool](WaitFor { (ListCount $bookList) -eq 0 } 5)) 'and lists no one for "zed"'
+        SetText $book $IDC_BOOK_FIND ''
+        [void](WaitFor { (ListCount $bookList) -eq 1 } 5)
+
+        # a group of her and an address typed
+        Click $book $IDC_BOOK_NEW_GROUP
+        $group = WaitShown 'InboxClassicGroup' 10
+        Check ($null -ne $group) 'New Group opens Group Properties'
+        if ($group) {
+            SetText $group $IDC_GROUP_NAME 'Team'
+            Click $group $IDC_GROUP_SELECT
+            $members = WaitShown 'InboxClassicPick' 10
+            Check ($null -ne $members) 'Select Members opens the book'
+            if ($members) {
+                $pickList = [Native.Win]::GetDlgItem($members, $IDC_PICK_LIST)
+                [void](WaitFor { (ListCount $pickList) -ge 1 } 5)
+                Key $pickList $VK_HOME
+                Start-Sleep -Milliseconds 300
+                Click $members $IDC_PICK_TO
+                [void](WaitFor { (ListBoxCount ([Native.Win]::GetDlgItem($members, $IDC_PICK_TO_LIST))) -eq 1 } 5)
+                Click $members 1
+                [void](WaitFor { -not [Native.Win]::IsWindow($members) } 10)
+            }
+            SetText $group $IDC_GROUP_ADDRESS 'dave@example.com'
+            Click $group $IDC_GROUP_ADD
+            $memberList = [Native.Win]::GetDlgItem($group, $IDC_GROUP_MEMBERS)
+            Check ([bool](WaitFor { (ListBoxCount $memberList) -eq 2 } 5)) "with Mary Smith from Select Members and dave@example.com typed ($(ListBoxText $memberList 0); $(ListBoxText $memberList 1))"
+            Shot $group 'contacts-3-group'
+            Click $group 1
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($group) } 10)) 'OK saves the group'
+        }
+        Check ([bool](WaitFor { (TreeTexts $bookTree) -contains 'Team' } 5)) "it is listed on the left ($((TreeTexts $bookTree) -join ', '))"
+        Check ([bool](WaitFor { (ListCount $bookList) -eq 2 } 5)) "with its two members ($(Names $bookList))"
+        # back to everyone
+        [void][Native.Win]::SendMessage($bookTree, $TVM_SELECTITEM, $TVM_SELECTITEM_CARET, [Native.Win]::SendMessage($bookTree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+        [void](WaitFor { (ListCount $bookList) -eq 1 } 5)
+    }
+
+    # the To button of a message: Select Recipients
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    if ($compose) {
+        Click $compose $IDC_PICK_TO_BUTTON
+        $pick = WaitShown 'InboxClassicPick' 10
+        Check ($null -ne $pick) 'in a new message, To opens Select Recipients'
+        if ($pick) {
+            $pickList = [Native.Win]::GetDlgItem($pick, $IDC_PICK_LIST)
+            [void](WaitFor { (ListCount $pickList) -ge 2 } 5)
+            Check ((((Names $pickList) -join ', ')) -eq 'Team, Mary Smith') "it lists the group and the contact ($((Names $pickList) -join ', '))"
+            Key $pickList $VK_HOME
+            Start-Sleep -Milliseconds 300
+            Click $pick $IDC_PICK_TO
+            Key $pickList $VK_DOWN
+            Start-Sleep -Milliseconds 300
+            Click $pick $IDC_PICK_TO
+            $toList = [Native.Win]::GetDlgItem($pick, $IDC_PICK_TO_LIST)
+            Check ([bool](WaitFor { (ListBoxCount $toList) -eq 2 } 5)) "To -> puts the group and the contact in the message's recipients ($(ListBoxText $toList 0); $(ListBoxText $toList 1))"
+            Shot $pick 'contacts-4-pick'
+            Click $pick 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($pick) } 10)
+        }
+        Check ([bool](WaitFor { (GetText $compose $IDC_TO) -eq 'Mary Smith <mary@example.com>, dave@example.com' } 5)) "OK puts them in To, each address once ($(GetText $compose $IDC_TO))"
+        # a group completes by its name, to its members
+        Click $compose $IDC_SHOW_CC
+        $cc = [Native.Win]::GetDlgItem($compose, $IDC_CC)
+        foreach ($c in 'tea'.ToCharArray()) { [void][Native.Win]::PostMessage($cc, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
+        $appPid = [uint32]0
+        [void][Native.Win]::GetWindowThreadProcessId($compose, [ref]$appPid)
+        $completion = WaitFor {
+            $w = [IntPtr]::Zero
+            do {
+                $w = [Native.Win]::FindWindowEx([IntPtr]::Zero, $w, 'ListBox', [NullString]::Value)
+                $owner = [uint32]0
+                if ($w -ne [IntPtr]::Zero) { [void][Native.Win]::GetWindowThreadProcessId($w, [ref]$owner) }
+            } while ($w -ne [IntPtr]::Zero -and -not ($owner -eq $appPid -and [Native.Win]::IsWindowVisible($w)))
+            if ($w -ne [IntPtr]::Zero) { $w }
+        } 10
+        Check ($completion -and (ListBoxText $completion 0) -eq 'Team') "typing ""tea"" in Cc offers the group by its name ($(if ($completion) { ListBoxText $completion 0 }))"
+        Key $cc $VK_RETURN
+        Check ([bool](WaitFor { (GetText $compose $IDC_CC) -eq 'Mary Smith <mary@example.com>, dave@example.com, ' } 5)) "taking it puts its members in Cc ($(GetText $compose $IDC_CC))"
+        [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        $ask = WaitWindow '#32770' 'Inbox Classic' 5
+        if ($ask) { Click $ask 7 }
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) } 10)) 'the message is closed without saving'
+    }
+
+    # the sender of a message into the book, once
+    AddMessage ("From: Sender <sender@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Add me to the Address Book`r`n" +
+        "Message-ID: <book-sender@example.com>`r`nDate: Thu, 9 Oct 2025 08:00:00 +0000`r`nMIME-Version: 1.0`r`n" +
+        "Content-Type: text/html; charset=utf-8`r`n`r`n<p>Please keep my address.</p>`r`n")
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    $findBox = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 205), 204)
+    [void](WaitFor {
+        [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Add me to the Address Book"')
+        Start-Sleep -Milliseconds 800
+        (Rows) -eq 1
+    } 30)
+    SelectRow 0
+    $WM_CONTEXTMENU = 0x007B
+    [void][Native.Win]::PostMessage($main, $WM_CONTEXTMENU, $list, [IntPtr](-1))
+    $menu = WaitWindow '#32768' $null 10
+    if ($menu) {
+        $labels = [Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero))
+        Check ($labels -contains 'Add Sender to Address Book') "the message list's right-click menu has Add Sender to Address Book ($($labels -join ', '))"
+        Key $menu $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+    }
+    Command $main $IDM_ADD_SENDER_TO_BOOK
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -eq 'Sender was added to the Address Book.' } 10)) "Add Sender to Address Book adds Sender ($(StatusPart $mainStatus 0))"
+    Command $main $IDM_ADD_SENDER_TO_BOOK
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -eq 'Sender is already in the Address Book.' } 10)) "and again says the sender is in it already ($(StatusPart $mainStatus 0))"
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
+    if ($book) {
+        Check ([bool](WaitFor { (ListCount $bookList) -eq 2 } 5)) "without a second card ($((Names $bookList) -join ', '))"
+        Check (@(Names $bookList | Where-Object { $_ -eq 'Sender' }).Count -eq 1) 'Sender is listed once'
+    }
+
+    # a vCard file of two contacts, one in the book already
+    $vcf = Join-Path (Resolve-Path $Out) 'contacts-import.vcf'
+    $cards = "BEGIN:VCARD`r`nVERSION:3.0`r`nFN:Mary Smith`r`nN:Smith;Mary;;;`r`nEMAIL:mary@example.com`r`nEND:VCARD`r`n" +
+        "BEGIN:VCARD`r`nVERSION:3.0`r`nFN:John Doe`r`nN:Doe;John;;;`r`nEMAIL:john@example.org`r`nTEL;TYPE=CELL:+1 555 0100`r`nEND:VCARD`r`n"
+    [IO.File]::WriteAllText($vcf, $cards, (New-Object Text.UTF8Encoding $false))
+    Command $main $IDM_IMPORT_ADDRESS_BOOK
+    Check (AnswerFileDialog 'Import Address Book' $vcf $null) 'File > Import Address Book asks for a file'
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -eq 'Added 1 contact, skipped 1 already in the Address Book.' } 10)) "it added 1 and skipped 1 ($(StatusPart $mainStatus 0))"
+    if ($book) {
+        Check ([bool](WaitFor { ((Names $bookList) -join ', ') -eq 'John Doe, Mary Smith, Sender' } 5)) "the book lists John Doe beside Mary Smith and Sender ($((Names $bookList) -join ', '))"
+        Shot $book 'contacts-5-import'
+    }
+    $exported = Join-Path (Resolve-Path $Out) 'contacts-export.vcf'
+    Remove-Item -Force -ErrorAction SilentlyContinue $exported
+    Command $main $IDM_EXPORT_ADDRESS_BOOK
+    Check (AnswerFileDialog 'Export Address Book' $exported $null 'Address Book*') 'File > Export Address Book asks where, as "Address Book"'
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match '^3 contacts saved to ' } 10)) "it says how many it saved ($(StatusPart $mainStatus 0))"
+    $vcards = if (Test-Path $exported) { Get-Content -Raw $exported } else { '' }
+    Check ($vcards -match 'FN:Mary Smith' -and $vcards -match 'FN:John Doe' -and $vcards -match 'FN:Sender' -and $vcards -match 'mary.smith@work.example') 'the vCard file has Mary Smith (both addresses), John Doe and Sender'
+
+    # Delete asks first
+    if ($book) {
+        Key $bookList $VK_HOME
+        Start-Sleep -Milliseconds 300
+        Key $bookList $VK_DELETE
+        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        Check ($ask -and (Statics $ask) -match 'Delete this contact from the Address Book\?') "Delete asks first ($(if ($ask) { Statics $ask }))"
+        if ($ask) { Click $ask 6 }
+        Check ([bool](WaitFor { ((Names $bookList) -join ', ') -eq 'Mary Smith, Sender' } 10)) "then removes the selected contact ($((Names $bookList) -join ', '))"
+        [void][Native.Win]::PostMessage($book, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($book) } 10)) 'the Address Book closes'
+    }
 
     Step 'a Gmail address'
     Command $main $IDM_NEW_ACCOUNT
@@ -2805,7 +3017,7 @@ public static class Dragger {
     Check ($null -ne $accounts) 'File > Accounts lists the accounts'
     if ($accounts) {
         $accountList = [Native.Win]::GetDlgItem($accounts, 400)
-        Check ([int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 2) 'both accounts are listed'
+        Check ((ListCount $accountList) -eq 2) 'both accounts are listed'
         Shot $accounts 'accounts-1-list'
         # Properties of the first: a new display name
         # the first account is selected when the list opens, and stays so after a change
@@ -2847,7 +3059,7 @@ public static class Dragger {
         $sure = WaitWindow '#32770' 'Remove Account' 10
         Check ($null -ne $sure) 'Remove (or Delete) asks first'
         if ($sure) { Click $sure 6 }
-        Check ([bool](WaitFor { [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 })) 'and removes it'
+        Check ([bool](WaitFor { (ListCount $accountList) -eq 1 })) 'and removes it'
         Click $accounts 404
         [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
         $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }
@@ -2865,7 +3077,6 @@ public static class Dragger {
     function Checked([IntPtr]$list, [int]$row) {
         (([int][Native.Win]::SendMessage($list, $LVM_GETITEMSTATE, [IntPtr]$row, [IntPtr]0xF000)) -shr 12) -eq 2
     }
-    function ListRows([IntPtr]$list) { [int][Native.Win]::SendMessage($list, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) }
     # a row selected with the keys, from the first
     function KeyToRow([IntPtr]$list, [int]$row) {
         Key $list $VK_HOME
@@ -2894,7 +3105,7 @@ public static class Dragger {
     if ($windows -and $windows[1]) {
         $apps = $windows[1]
         $appList = [Native.Win]::GetDlgItem($apps, 700)
-        Check ((ListRows $appList) -eq 2) 'the built-in Microsoft and Google clients are listed'
+        Check ((ListCount $appList) -eq 2) 'the built-in Microsoft and Google clients are listed'
         Check ((Checked $appList 0) -and -not (Checked $appList 1)) 'Microsoft is on and Google off out of the box'
         Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($apps, 702)) -and -not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($apps, 703))) 'a built-in client can not be edited or removed'
         Check ((WindowText ([Native.Win]::GetDlgItem($apps, 704))) -match 'built in') 'a built-in client says what it is'
@@ -2932,7 +3143,7 @@ public static class Dragger {
             Click $editor 1
             Check ([bool](WaitFor { -not [Native.Win]::IsWindow($editor) } 20)) 'OK saves the sign-in app'
         }
-        Check ([bool](WaitFor { (ListRows $appList) -eq 3 } 5) -and (Checked $appList 2)) 'it is listed, turned on'
+        Check ([bool](WaitFor { (ListCount $appList) -eq 3 } 5) -and (Checked $appList 2)) 'it is listed, turned on'
         Shot $apps 'signin-5-apps-added'
         CloseSignInApps $windows
     }
@@ -3021,7 +3232,7 @@ public static class Dragger {
         # once the window has its list, and the list its rows (the window is there a moment before them)
         $count = WaitFor {
             $accountList = [Native.Win]::GetDlgItem($accounts, 400)
-            $n = [int][Native.Win]::SendMessage($accountList, $LVM_GETITEMCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+            $n = ListCount $accountList
             if ($n -ge 2) { $n }
         } 10
         $accountList = [Native.Win]::GetDlgItem($accounts, 400)

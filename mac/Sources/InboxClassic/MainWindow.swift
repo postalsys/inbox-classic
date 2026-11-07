@@ -323,13 +323,14 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     // ---- writing ----
 
     /// a new message from `account`, or from the account of the selected folder when 0
-    func newMessage(_ account: Int64 = 0) {
+    @discardableResult
+    func newMessage(_ account: Int64 = 0) -> ComposeWindow? {
         let account = account != 0 ? account : mailbox.currentAccount
         guard account != 0 else {
             inform(Text.uiAddAccountFirst.text)
-            return
+            return nil
         }
-        ComposeWindow.open(core: core, account: account, draft: nil)
+        return ComposeWindow.open(core: core, account: account, draft: nil)
     }
 
     /// a new message from a mailto: link, from the account of what is shown (the core reads the link)
