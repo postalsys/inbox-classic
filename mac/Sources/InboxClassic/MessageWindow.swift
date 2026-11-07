@@ -32,10 +32,10 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     let window: MessageFrame
     let reader: Reader
     private weak var mailbox: Mailbox?
-    /// the list it was opened from, as it was then: what Previous and Next go through
-    private let search: Search
-    private let sort: PeSortField
-    private let ascending: Bool
+    /// the list it was opened from, as it was then, one row a message: what Previous and Next go through
+    private let listView: ListView?
+    /// the folder that list showed (0 for All Inboxes)
+    private let listFolder: Int64
     /// the message shown
     private(set) var folder: Int64 = 0
     private(set) var uid: UInt64 = 0
@@ -85,7 +85,8 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     private init(core: Core, mailbox: Mailbox) {
         self.core = core
         self.mailbox = mailbox
-        (search, sort, ascending) = mailbox.listOrder
+        listView = mailbox.listCopy()
+        listFolder = mailbox.folder
         reader = Reader(core: core)
         window = MessageFrame(contentRect: NSRect(x: 0, y: 0, width: 820, height: 680),
                               styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
@@ -147,24 +148,26 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
 
     /// the row of the message in the list it was opened from, for its header before the message is here
     private func row(folder id: Int64, uid message: UInt64) -> Message? {
-        let index = core.messageIndex(search, sort: sort, ascending: ascending, folder: id, uid: message)
+        guard let listView else { return nil }
+        let index = core.messageIndex(listView, folder: id, uid: message)
         guard index >= 0 else { return nil }
-        return core.messages(search, sort: sort, ascending: ascending, offset: UInt64(index), limit: 1)
+        return core.messages(listView, offset: UInt64(index), limit: 1)
             .first { $0.folder == id && $0.uid == message }
     }
 
     /// a message no longer in the list (read out of a list of unread ones) keeps the neighbours it had
     private func findNeighbours() {
-        guard let found = core.neighbours(search, sort: sort, ascending: ascending, folder: folder, uid: uid) else { return }
+        guard let listView, let found = core.neighbours(listView, folder: folder, uid: uid) else { return }
         (previous, next) = found
     }
 
     /// whether the list the window came from can have messages of the folder `id`: its own folder, any Inbox for All
     /// Inboxes, any folder for a search
     private func listHas(_ id: Int64) -> Bool {
-        if !search.text.isEmpty { return true }
-        if search.allInboxes { return mailbox?.isInbox(id) ?? true }
-        return id == search.folder || id == folder
+        guard let listView else { return id == folder }
+        if listView.searching { return true }
+        if listView.severalFolders { return mailbox?.isInbox(id) ?? true }
+        return id == listFolder || id == folder
     }
 
     /// the message as a selection of one, for the core's actions; freed by the caller
@@ -305,8 +308,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
 
     /// the next unread message of the list it came from; none left is said in the status bar
     private func nextUnread() {
-        guard case .message(let next, let message) = core.nextUnread(search, sort: sort, ascending: ascending, folder: folder,
-                                                                     uid: uid) else {
+        guard let listView, case .message(let next, let message) = core.nextUnread(listView, folder: folder, uid: uid) else {
             mailbox?.status(Text.noUnreadLeft.text)
             return
         }

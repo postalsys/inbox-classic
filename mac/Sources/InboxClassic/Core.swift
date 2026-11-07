@@ -179,67 +179,67 @@ final class Core {
         return pe_start_message(handle, &allInboxes, &folder, &uid) ? (allInboxes, folder, uid) : nil
     }
 
-    /// what a search finds
-    func messageCount(_ search: Search) -> (total: UInt64, unread: UInt64) {
+    /// the counts of the status bar: the messages of the list (grouped or not, all of them) and how many are unread
+    func counts(_ view: ListView) -> (total: UInt64, unread: UInt64) {
         var total: UInt64 = 0
         var unread: UInt64 = 0
-        _ = search.with { pe_message_count(handle, $0, &total, &unread) }
+        _ = pe_list_view_counts(handle, view.handle, &total, &unread)
         return (total, unread)
     }
 
     /// how many rows the list has: one a message, or grouped by conversation one a conversation and the messages
     /// under the open ones
-    func listRows(_ search: Search) -> UInt64 {
-        search.with { pe_list_rows(handle, $0) }
+    func rowCount(_ view: ListView) -> UInt64 {
+        pe_list_view_row_count(handle, view.handle)
     }
 
-    /// the conversation that hides the message `uid` of `folder` in the list (collapsed, the message not its first),
-    /// which the list opens to select it; 0 when the message has a row of its own
-    func hiddenThread(_ search: Search, folder: Int64, uid: UInt64) -> Int64 {
-        search.with { pe_message_hidden_thread(handle, $0, folder, uid) }
+    /// the conversation that hides the message `uid` of `folder` in the list opened, to show or select the message;
+    /// false when it has a row of its own already (the list is the same)
+    func reveal(_ view: ListView, folder: Int64, uid: UInt64) -> Bool {
+        pe_list_view_reveal(handle, view.handle, folder, uid)
+    }
+
+    /// View > Expand All Conversations: every conversation of the list with more than one message there opened; false
+    /// when that changed nothing
+    func expandAll(_ view: ListView) -> Bool {
+        pe_list_view_expand_all(handle, view.handle)
     }
 
     /// whether the list names whom its messages went to (Sent Items, Drafts): the person column is then To
-    func listsRecipients(_ search: Search) -> Bool {
-        search.with { pe_lists_recipients(handle, $0) }
+    func listsRecipients(_ view: ListView) -> Bool {
+        pe_list_view_lists_recipients(handle, view.handle)
     }
 
-    func messages(_ search: Search, sort: PeSortField, ascending: Bool, offset: UInt64, limit: UInt64) -> [Message] {
-        search.with { search in
-            guard let list = pe_messages(handle, search, sort, ascending, offset, limit) else { return [] }
-            defer { pe_message_list_free(list) }
-            return (0..<pe_message_list_count(list)).compactMap { pe_message_list_get(list, $0).map { Message($0.pointee) } }
-        }
+    func messages(_ view: ListView, offset: UInt64, limit: UInt64) -> [Message] {
+        guard let list = pe_list_view_messages(handle, view.handle, offset, limit) else { return [] }
+        defer { pe_message_list_free(list) }
+        return (0..<pe_message_list_count(list)).compactMap { pe_message_list_get(list, $0).map { Message($0.pointee) } }
     }
 
-    /// where a message is in the list, -1 when it is not there
-    func messageIndex(_ search: Search, sort: PeSortField, ascending: Bool, folder: Int64, uid: UInt64) -> Int64 {
-        search.with { pe_message_index(handle, $0, sort, ascending, folder, uid) }
+    /// where a message is in the list (its conversation's row while that is collapsed), -1 when it is not there
+    func messageIndex(_ view: ListView, folder: Int64, uid: UInt64) -> Int64 {
+        pe_list_view_index(handle, view.handle, folder, uid)
     }
 
     /// the messages before and after the message `uid` of `folder` in the list, in one pass: what Previous and Next
     /// show, each nil at its end; nil as a whole when the message is not in the list (any more)
-    func neighbours(_ search: Search, sort: PeSortField, ascending: Bool, folder: Int64, uid: UInt64)
+    func neighbours(_ view: ListView, folder: Int64, uid: UInt64)
         -> (previous: (folder: Int64, uid: UInt64)?, next: (folder: Int64, uid: UInt64)?)? {
         var previousFolder: Int64 = 0
         var previousUid: UInt64 = 0
         var nextFolder: Int64 = 0
         var nextUid: UInt64 = 0
-        let found = search.with {
-            pe_message_neighbours(handle, $0, sort, ascending, folder, uid, &previousFolder, &previousUid, &nextFolder, &nextUid)
-        }
-        guard found else { return nil }
+        guard pe_list_view_neighbours(handle, view.handle, folder, uid, &previousFolder, &previousUid, &nextFolder,
+                                      &nextUid) else { return nil }
         return (previousFolder != 0 ? (previousFolder, previousUid) : nil, nextFolder != 0 ? (nextFolder, nextUid) : nil)
     }
 
     /// the first unread message after the message `uid` of `folder` (0 for from the top) in the list; nil when none is
-    func nextUnread(_ search: Search, sort: PeSortField, ascending: Bool, folder: Int64, uid: UInt64) -> NextUnread {
+    func nextUnread(_ view: ListView, folder: Int64, uid: UInt64) -> NextUnread {
         var nextFolder: Int64 = 0
         var nextUid: UInt64 = 0
         var question: UnsafeMutablePointer<CChar>?
-        let step = search.with {
-            pe_next_unread_step(handle, $0, sort, ascending, folder, uid, &nextFolder, &nextUid, &question)
-        }
+        let step = pe_list_view_next_unread_step(handle, view.handle, folder, uid, &nextFolder, &nextUid, &question)
         let asked = taken(question) ?? ""
         switch step {
         case PE_NEXT_UNREAD_MESSAGE: return .message(folder: nextFolder, uid: nextUid)
@@ -248,23 +248,22 @@ final class Core {
         }
     }
 
-    /// the conversations of the list with more than one message there: what Expand All opens
-    func threadsWithReplies(_ search: Search) -> [Int64] {
-        search.with { search in
-            guard let list = pe_threads_with_replies(handle, search) else { return [] }
-            defer { pe_thread_list_free(list) }
-            return (0..<pe_thread_list_count(list)).map { pe_thread_list_get(list, $0) }
-        }
-    }
-
     /// whether the message `uid` is (still) in `folder`
     func messageExists(folder: Int64, uid: UInt64) -> Bool {
         pe_message_exists(handle, folder, uid)
     }
 
+    /// `selection` filled with the messages of the rows `ranges` of the list: a collapsed conversation's row stands
+    /// for all of its messages
+    func select(_ ranges: [Range<Int>], of view: ListView, into selection: OpaquePointer) {
+        let starts = ranges.map { UInt64($0.lowerBound) }
+        let ends = ranges.map { UInt64($0.upperBound) }
+        _ = pe_list_view_select_ranges(handle, view.handle, selection, starts, ends, starts.count)
+    }
+
     /// where the messages of `selection` are in the list now, the rows to select again
-    func positions(of selection: OpaquePointer, in search: Search, sort: PeSortField, ascending: Bool) -> IndexSet {
-        guard let found = search.with({ pe_selection_positions(handle, selection, $0, sort, ascending) }) else { return [] }
+    func positions(of selection: OpaquePointer, in view: ListView) -> IndexSet {
+        guard let found = pe_list_view_positions(handle, view.handle, selection) else { return [] }
         defer { pe_positions_free(found) }
         return IndexSet((0..<pe_positions_count(found)).map { Int(pe_positions_get(found, $0)) })
     }
@@ -319,27 +318,84 @@ struct Refusal: Error {
     init(_ reason: String) { self.reason = reason }
 }
 
-/// What the message list shows: a folder, or words searched in every folder (folder 0)
-struct Search {
-    var folder: Int64
-    /// with `folder` 0: every account's Inbox rather than every folder
-    var allInboxes = false
-    var text: String
-    /// one row a conversation, the conversations `expanded` open
-    var threads = false
-    var expanded: [Int64] = []
-    /// View > Hide Ignored Conversations: the messages of ignored conversations left out
-    var hideIgnored = false
+/// What a message list shows, kept by the core: the folder (or All Inboxes), the words searched for, what is shown,
+/// the order, grouping and the conversations open. The handle is freed with this.
+final class ListView {
+    let handle: OpaquePointer
 
-    func with<T>(_ body: (UnsafePointer<PeSearch>) -> T) -> T {
-        text.withCString { words in
-            expanded.withUnsafeBufferPointer { open in
-                var search = PeSearch(folder: folder, all_inboxes: allInboxes, show: PE_SHOW_ALL, text: words,
-                                      threads: threads, expanded: open.baseAddress, expanded_count: open.count,
-                                      hide_ignored: hideIgnored)
-                return withUnsafePointer(to: &search) { body($0) }
-            }
-        }
+    init() {
+        handle = pe_list_view_new()!
+    }
+
+    private init(handle: OpaquePointer) {
+        self.handle = handle
+    }
+
+    deinit {
+        pe_list_view_free(handle)
+    }
+
+    /// a copy, its open conversations too: what a message window goes through
+    func copy() -> ListView? {
+        pe_list_view_clone(handle).map { ListView(handle: $0) }
+    }
+
+    /// the folder, or with `folder` 0 every Inbox (`allInboxes`) or nothing; false when it was shown already
+    @discardableResult
+    func setScope(folder: Int64, allInboxes: Bool) -> Bool {
+        pe_list_view_set_scope(handle, folder, allInboxes)
+    }
+
+    /// the words typed in the search box, which search every folder; false when they are the same
+    @discardableResult
+    func setText(_ text: String) -> Bool {
+        text.withCString { pe_list_view_set_text(handle, $0) }
+    }
+
+    func setSort(_ sort: PeSortField, ascending: Bool) {
+        pe_list_view_set_sort(handle, sort, ascending)
+    }
+
+    /// one row a conversation, or one a message; false when it was so already
+    @discardableResult
+    func setGrouped(_ grouped: Bool) -> Bool {
+        pe_list_view_set_grouped(handle, grouped)
+    }
+
+    func setHideIgnored(_ hide: Bool) {
+        pe_list_view_set_hide_ignored(handle, hide)
+    }
+
+    var searching: Bool { pe_list_view_searching(handle) }
+    /// a search or All Inboxes: messages of several folders
+    var severalFolders: Bool { pe_list_view_several_folders(handle) }
+    /// a folder, All Inboxes or words: not an account's own item
+    var active: Bool { pe_list_view_active(handle) }
+    var grouped: Bool { pe_list_view_grouped(handle) }
+
+    func isExpanded(_ thread: Int64) -> Bool {
+        pe_list_view_is_expanded(handle, thread)
+    }
+
+    /// the conversation `thread` opened; false when it was open or the list is not grouped
+    func expand(_ thread: Int64) -> Bool {
+        pe_list_view_expand(handle, thread)
+    }
+
+    /// the conversation `thread` closed; false when it was not open
+    func collapse(_ thread: Int64) -> Bool {
+        pe_list_view_collapse(handle, thread)
+    }
+
+    /// View > Collapse All Conversations; false when none was open
+    func collapseAll() -> Bool {
+        pe_list_view_collapse_all(handle)
+    }
+
+    /// whether `action` (to `to`) on the messages of `summary` takes them out of the list
+    func leavesList(_ summary: PeSelectionSummary, _ action: PeAction, to: Int64 = 0) -> Bool {
+        var summary = summary
+        return pe_list_view_leaves_list(handle, &summary, action, to)
     }
 }
 

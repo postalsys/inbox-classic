@@ -61,8 +61,9 @@ public final class Mailbox: NSObject {
     /// the rows of the list: the messages, or grouped by conversation the conversations and the messages of the open
     /// ones
     private(set) var rows: UInt64 = 0
-    /// the conversations opened in this list, until another folder is shown
-    private var expanded: [Int64] = []
+    /// what the list shows, as the core keeps it: the folder, the words, the order, grouping and the open
+    /// conversations
+    private let listView = ListView()
     private var pages: [(offset: UInt64, rows: [Message])] = []
     private let pageSize: UInt64 = 100
     private var folderColumn = false
@@ -96,6 +97,9 @@ public final class Mailbox: NSObject {
         view = NSSplitView()
         reader = Reader(core: core)
         super.init()
+        listView.setGrouped(AppDelegate.shared?.groupByConversation ?? true)
+        listView.setHideIgnored(AppDelegate.shared?.hideIgnored ?? false)
+        listView.setSort(sort, ascending: ascending)
         view.isVertical = true
         view.dividerStyle = .thin
         view.autosaveName = TestHooks.testing ? nil : "Panes"
@@ -319,7 +323,7 @@ public final class Mailbox: NSObject {
         // the message of the folder before is not this folder's, nor is the search
         folder = id
         allInboxes = all
-        expanded = []
+        listView.setScope(folder: id, allInboxes: all)
         resetFind()
         clearReader()
         reloadList(keepSelection: false)
@@ -342,7 +346,7 @@ public final class Mailbox: NSObject {
     }
 
     var counts: String {
-        if folder == 0 && !allInboxes && !searching { return "" }
+        guard listView.active else { return "" }
         return taken(pe_list_counts(total, unread, UInt64(selectedCount), searching)) ?? ""
     }
 
@@ -361,17 +365,12 @@ public final class Mailbox: NSObject {
 
     // ---- the message list ----
 
-    private var searching: Bool { !findText.isEmpty }
-
-    /// whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
-    private var severalFolders: Bool { searching || allInboxes }
-
     /// words typed search every folder of every account (in: narrows that); without, the list is the folder's, or
     /// every Inbox's
-    private var search: Search {
-        Search(folder: searching ? 0 : folder, allInboxes: !searching && allInboxes, text: findText, threads: grouped,
-               expanded: grouped ? expanded : [], hideIgnored: AppDelegate.shared?.hideIgnored ?? false)
-    }
+    private var searching: Bool { listView.searching }
+
+    /// whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
+    private var severalFolders: Bool { listView.severalFolders }
 
     /// the Subject title over the subjects, which make room for the triangles while grouped
     private func indentSubjectHeader() {
@@ -384,7 +383,7 @@ public final class Mailbox: NSObject {
     }
 
     /// Settings > Group messages by conversation
-    var grouped: Bool { AppDelegate.shared?.groupByConversation ?? true }
+    var grouped: Bool { listView.grouped }
 
     private enum ColumnID: String, CaseIterable {
         case attach, flag, watch, from, subject, received, size, folder
@@ -488,7 +487,7 @@ public final class Mailbox: NSObject {
     /// From, or To in Sent Items and Drafts (the core says which, and sorts a From sort by the recipients there): its
     /// title and its values follow, and the date column is Sent there, as Outlook Express names it
     private func showPersonColumn() {
-        let wanted = core.listsRecipients(search)
+        let wanted = core.listsRecipients(listView)
         guard wanted != recipientsColumn else { return }
         recipientsColumn = wanted
         for (id, title) in [(ColumnID.from, wanted ? Text.uiColTo : Text.uiColFrom),
@@ -521,16 +520,14 @@ public final class Mailbox: NSObject {
         // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
         // conversations what they find; an account lists nothing. Grouped by conversation the list has fewer rows than
         // messages: the core counts them
-        if severalFolders || folder != 0 {
-            (total, unread) = core.messageCount(search)
-        }
-        rows = grouped && total > 0 ? core.listRows(search) : total
+        (total, unread) = core.counts(listView)
+        rows = grouped && total > 0 ? core.rowCount(listView) : total
         indentSubjectHeader()
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let several = keepSelection && selectedCount > 1
-            ? core.positions(of: selection, in: search, sort: sort, ascending: ascending) : nil
+            ? core.positions(of: selection, in: listView) : nil
         let index = keepSelection && several == nil && uid != 0
-            ? core.messageIndex(search, sort: sort, ascending: ascending, folder: messageFolder, uid: uid) : -1
+            ? core.messageIndex(listView, folder: messageFolder, uid: uid) : -1
         reloading = true
         list.reloadData()
         if let several, !several.isEmpty {
@@ -556,7 +553,7 @@ public final class Mailbox: NSObject {
         let restored: OpaquePointer = pe_selection_new()
         defer { pe_selection_free(restored) }
         guard pe_undo_restored(core.handle, restored), pe_selection_count(restored) > 0 else { return }
-        let rows = core.positions(of: restored, in: search, sort: sort, ascending: ascending)
+        let rows = core.positions(of: restored, in: listView)
         guard let first = rows.first else { return }
         restorePending = false
         list.selectRowIndexes(rows, byExtendingSelection: false)
@@ -572,7 +569,7 @@ public final class Mailbox: NSObject {
             pages.append(page)
         } else {
             if pages.count >= 8 { pages.removeFirst() }
-            pages.append((offset, core.messages(search, sort: sort, ascending: ascending, offset: offset, limit: pageSize)))
+            pages.append((offset, core.messages(listView, offset: offset, limit: pageSize)))
         }
         let rows = pages.last!.rows
         let at = Int(UInt64(index) - offset)
@@ -590,10 +587,7 @@ public final class Mailbox: NSObject {
         if rows.count == 1, !grouped, let row = row(rows.first!) {
             pe_selection_add(selection, row.folder, row.uid)
         } else if rows.count > 0 {
-            let ranges = rows.rangeView
-            let starts = ranges.map { UInt64($0.lowerBound) }
-            let ends = ranges.map { UInt64($0.upperBound) }
-            _ = search.with { pe_selection_set_ranges(core.handle, selection, $0, sort, ascending, starts, ends, starts.count) }
+            core.select(Array(rows.rangeView), of: listView, into: selection)
         }
         updateSummary()
     }
@@ -622,6 +616,7 @@ public final class Mailbox: NSObject {
         // the same column again turns the order around; dates and sizes start with the largest
         ascending = field == sort ? !ascending : field != PE_SORT_FIELD_DATE && field != PE_SORT_FIELD_SIZE
         sort = field
+        listView.setSort(sort, ascending: ascending)
         showSortIndicator()
         reloadList(keepSelection: true)
     }
@@ -697,6 +692,7 @@ public final class Mailbox: NSObject {
         guard text != findText else { return }
         findText = text
         findPlace = Core.searchPlace(text)
+        listView.setText(text)
         reloadList(keepSelection: true)
         changed()
     }
@@ -704,6 +700,7 @@ public final class Mailbox: NSObject {
     private func resetFind() {
         findText = ""
         findPlace = ""
+        listView.setText("")
         AppDelegate.shared?.main?.searchCleared()
     }
 
@@ -846,14 +843,14 @@ public final class Mailbox: NSObject {
     /// Next Unread Message (N in the list): the next unread message after the one shown, or from the top; with none
     /// left, the next folder with unread mail is offered, as Outlook Express does
     func nextUnread() {
-        switch core.nextUnread(search, sort: sort, ascending: ascending, folder: messageFolder, uid: uid) {
+        switch core.nextUnread(listView, folder: messageFolder, uid: uid) {
         case .message(let folder, let uid):
             selectInList(folder: folder, uid: uid)
         case .ask(let next, let question):
             guard ask(question, style: .information) else { return }
             goToFolder(next)
             // from the top of that folder's list, which the core may answer with another question
-            if case .message(let folder, let uid) = core.nextUnread(search, sort: sort, ascending: ascending, folder: 0, uid: 0) {
+            if case .message(let folder, let uid) = core.nextUnread(listView, folder: 0, uid: 0) {
                 selectInList(folder: folder, uid: uid)
             }
         case .none:
@@ -865,12 +862,13 @@ public final class Mailbox: NSObject {
 
     /// the conversation of `row` opened (`open`) or closed; closed from a message under it, its row is selected
     func setExpanded(_ open: Bool, row index: Int) {
-        guard grouped, let message = row(index), message.thread != 0, open != expanded.contains(message.thread) else { return }
+        guard grouped, let message = row(index), message.thread != 0, open != listView.isExpanded(message.thread) else {
+            return
+        }
         if open {
-            guard message.opens else { return }
-            expanded.append(message.thread)
+            guard message.opens, listView.expand(message.thread) else { return }
         } else {
-            expanded.removeAll { $0 == message.thread }
+            guard listView.collapse(message.thread) else { return }
         }
         // the message shown stays selected, or the conversation's row that now stands for it
         reloadList(keepSelection: true)
@@ -890,27 +888,26 @@ public final class Mailbox: NSObject {
 
     /// View > Expand All Conversations
     func expandAll() {
-        guard grouped else { return }
-        expanded = core.threadsWithReplies(search)
+        guard core.expandAll(listView) else { return }
         reloadList(keepSelection: true)
     }
 
     /// View > Collapse All Conversations
     func collapseAll() {
-        guard grouped else { return }
-        expanded = []
+        guard listView.collapseAll() else { return }
         reloadList(keepSelection: true)
     }
 
     /// View > Hide Ignored Conversations turned on or off
     func hideIgnoredChanged() {
+        listView.setHideIgnored(AppDelegate.shared?.hideIgnored ?? false)
         reloadList(keepSelection: true)
         changed()
     }
 
     /// grouping turned on or off in Settings: the list again, the message shown still selected
     func groupingChanged() {
-        expanded = []
+        listView.setGrouped(AppDelegate.shared?.groupByConversation ?? true)
         reloadList(keepSelection: true)
         changed()
     }
@@ -936,14 +933,10 @@ public final class Mailbox: NSObject {
     /// when it is not there
     @discardableResult
     private func selectInList(folder id: Int64, uid message: UInt64) -> Bool {
-        if grouped {
-            let hidden = core.hiddenThread(search, folder: id, uid: message)
-            if hidden != 0 && !expanded.contains(hidden) {
-                expanded.append(hidden)
-                reloadList(keepSelection: true)
-            }
+        if core.reveal(listView, folder: id, uid: message) {
+            reloadList(keepSelection: true)
         }
-        let index = core.messageIndex(search, sort: sort, ascending: ascending, folder: id, uid: message)
+        let index = core.messageIndex(listView, folder: id, uid: message)
         guard index >= 0 else { return false }
         list.selectRowIndexes(IndexSet(integer: Int(index)), byExtendingSelection: false)
         list.scrollRowToVisible(Int(index))
@@ -967,8 +960,12 @@ public final class Mailbox: NSObject {
 
     // ---- the message's own actions ----
 
-    /// the list as it is shown: what it lists and in what order, which Previous and Next of a message's window follow
-    var listOrder: (search: Search, sort: PeSortField, ascending: Bool) { (search, sort, ascending) }
+    /// a copy of the list as it is shown, one row a message: what Previous and Next of a message's window go through
+    func listCopy() -> ListView? {
+        guard let copy = listView.copy() else { return nil }
+        copy.setGrouped(false)
+        return copy
+    }
 
     /// Enter or a double-click: the message in a window of its own, a draft in the compose window to be finished
     @objc func openSelected() {
@@ -1052,7 +1049,7 @@ public final class Mailbox: NSObject {
     /// whether `action` takes the selected messages out of the list, as the core says from the selection now
     private func leavesList(_ action: PeAction, to: Int64 = 0) -> Bool {
         updateSummary()
-        return pe_selection_leaves_list(&summary, action, to, AppDelegate.shared?.hideIgnored ?? false)
+        return listView.leavesList(summary, action, to: to)
     }
 
     /// the text of the rows of an ignored conversation: grey, as what is turned off is
@@ -1466,9 +1463,7 @@ public final class Mailbox: NSObject {
         }
         let one: OpaquePointer = pe_selection_new()
         defer { pe_selection_free(one) }
-        let start = [UInt64(index)]
-        let end = [UInt64(index + 1)]
-        _ = search.with { pe_selection_set_ranges(core.handle, one, $0, sort, ascending, start, end, 1) }
+        core.select([index..<index + 1], of: listView, into: one)
         return refs(of: one)
     }
 
