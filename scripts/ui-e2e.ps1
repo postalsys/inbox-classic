@@ -2399,18 +2399,18 @@ public static class Dragger {
     [void](WaitFor { $null -ne (& $rowOf $failedSubject) } 20)
     SelectRow (& $rowOf $failedSubject)
     [void](WaitFor { $null -ne (& $cardPoint 196 43 28) } 15)
-    Check (& $foundInMessage 'Your message was not delivered') 'the card says the message was not delivered'
-    Check (& $foundInMessage 'sam.nobody@example.org') 'it names the recipient'
-    Check (& $foundInMessage 'The address does not exist') 'why'
-    Check (& $foundInMessage 'Check the spelling of the address') 'and what to do'
+    Check ([bool](WaitFor { & $foundInMessage 'Your message was not delivered' } 5)) 'the card says the message was not delivered'
+    Check ([bool](WaitFor { & $foundInMessage 'sam.nobody@example.org' } 5)) 'it names the recipient'
+    Check ([bool](WaitFor { & $foundInMessage 'The address does not exist' } 5)) 'why'
+    Check ([bool](WaitFor { & $foundInMessage 'Check the spelling of the address' } 5)) 'and what to do'
     # Details, folded, opened by the find
-    Check (& $foundInMessage $serverWords) "its Details show the server's own words"
+    Check ([bool](WaitFor { & $foundInMessage $serverWords } 5)) "its Details show the server's own words"
     Shot $main 'bounce-1-failed'
 
     SelectRow (& $rowOf $delayedSubject)
     Check ([bool](WaitFor { $null -ne (& $cardPoint 154 91 0) } 15)) 'a delay notice shows the amber card'
-    Check (& $foundInMessage 'Your message has not been delivered yet') 'it says the message is not delivered yet'
-    Check (& $foundInMessage 'still trying to deliver it') 'and that it is still being tried'
+    Check ([bool](WaitFor { & $foundInMessage 'Your message has not been delivered yet' } 5)) 'it says the message is not delivered yet'
+    Check ([bool](WaitFor { & $foundInMessage 'still trying to deliver it' } 5)) 'and that it is still being tried'
     Shot $main 'bounce-2-delayed'
 
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:bounce')
