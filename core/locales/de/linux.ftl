@@ -69,8 +69,7 @@ gtk-outbox-row = An: { $to }  ·  In Warteschlange seit: { $queued }  ·  { $sta
 ## The app
 
 gtk-still-running-detail = Inbox Classic prüft im Hintergrund auf neue E-Mails. Über das Symbol in der oberen Leiste können Sie das Programm öffnen oder beenden.
-gtk-sign-in-again-ask =
-    Die Anmeldung für { $account } wurde abgelehnt oder ist abgelaufen.
+gtk-sign-in-again-ask = Die Anmeldung bei { $account } wurde abgelehnt oder die Sitzung ist abgelaufen.
 
     Im Browser erneut anmelden?
 gtk-default-app-not-installed = Inbox Classic ist nicht installiert und wird deshalb vom System nicht als E-Mail-Programm aufgeführt. Installieren Sie Inbox Classic, um es als Standard auszuwählen.
@@ -171,5 +170,5 @@ gtk-preferences = Einstellungen
 gtk-language = Sprache
 gtk-language-subtitle = Sprache der Benutzeroberfläche und der Hilfe
 gtk-new-mail-group = Neue E-Mail
-gtk-notify-subtitle = Eine Benachrichtigung, wenn neue Nachrichten eintreffen, während das Fenster im Hintergrund ist
+gtk-notify-subtitle = Bei neuen Nachrichten benachrichtigen, wenn das Fenster im Hintergrund ist
 gtk-restart-to-change = Inbox Classic startet neu, um die Sprache zu ändern.

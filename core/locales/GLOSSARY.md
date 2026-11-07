@@ -26,6 +26,8 @@ Rules for every language:
   work with those values as well as actual folder names.
 - Plurals: use the categories of the language (`[one]`, `[few]`, `[many]`, `*[other]`, as CLDR has them); `*[other]`
   is the default.
+- French `[one]` also covers zero. Use the count placeholder, not a literal `1`, unless an explicit `[0]` branch
+  handles zero. Empty address-book groups and imports or exports with no contacts can display these messages.
 - Counts in the same message are independent: agreement for unread, selected or failed items follows that count,
   not the total number of messages or files.
 - An `&` marks the menu letter on Windows and Linux; choose a letter of your own word, different within one menu.
@@ -97,6 +99,10 @@ Context notes:
 - Removing an agent program deletes its permissions and activity history; the next connection asks for permission
   again. Clearing the history alone does not undo the agents' changes.
 - `folder-holds-no-messages` refers to a folder that cannot contain messages (IMAP `\Noselect`), not an empty folder.
+- Provider sign-in prompts also receive `ui-the-provider` when the provider has no known name. The sentence must
+  work with both this fallback and names such as Google or Microsoft, without requiring an inflected name.
+- `ui-event-span` joins dates or date-and-time values; for a same-day event, `$end` is just a time.
+- `agent-original-not-downloaded` applies to both replies and forwards.
 - Keep help references to menu items and buttons in sync when changing their labels.
 - "Contact" and "group" are a person and a group of the Address Book (Tools > Address Book), not the people Inbox
   Classic offers on its own when an address is typed.

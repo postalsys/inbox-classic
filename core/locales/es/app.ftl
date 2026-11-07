@@ -30,9 +30,7 @@ cmd-flag = Añadir una &marca al mensaje
 cmd-new-folder = Nueva car&peta...
 cmd-rename-folder = Renom&brar carpeta...
 cmd-delete-folder = &Eliminar carpeta
-# review: new
 cmd-empty-folder = &Vaciar carpeta
-# review: new
 ui-empty-button = Vaciar
 cmd-accounts = &Cuentas...
 cmd-find = &Buscar mensaje
@@ -44,35 +42,20 @@ cmd-properties = P&ropiedades
 cmd-mark-all-read = Marcar todos como leíd&os
 cmd-junk = Marcar como correo no &deseado
 cmd-not-junk = Marcar como correo de&seado
-# review: new
 cmd-archive = A&rchivar
-# review: new
 cmd-watch-conversation = Se&guir la conversación
-# review: new
 cmd-ignore-conversation = &Ignorar la conversación
-# review: new
 cmd-next-message = Mensaje &siguiente
-# review: new
 cmd-previous-message = Mensaje &anterior
-# review: new
 cmd-next-unread = Siguiente mensaje &no leído
-# review: new
 cmd-go-to-folder = &Ir a la carpeta...
-# review: new
 cmd-find-in-message = Buscar en es&te mensaje...
-# review: new
 ui-go-to-prompt = Ir a la carpeta:
-# review: new
 ui-find-in-message-hint = Buscar en este mensaje
-# review: new
-ui-find-not-found = «{ $words }» no está en este mensaje
-# review: new
+ui-find-not-found = No se encontró «{ $words }» en este mensaje
 cmd-expand-all-threads = &Expandir todas las conversaciones
-# review: new
 cmd-collapse-all-threads = &Contraer todas las conversaciones
-# review: new
 ui-group-by-conversation = &Agrupar los mensajes por conversación
-# review: new
 cmd-hide-ignored = &Ocultar las conversaciones ignoradas
 cmd-notify = &Avisar de correo nuevo
 cmd-open = &Abrir Inbox Classic
@@ -83,13 +66,9 @@ cmd-options = &Opciones...
 cmd-select-all = Seleccionar &todo
 cmd-undo = &Deshacer
 cmd-copy = &Copiar a carpeta...
-# review: new
 cmd-address-book = &Libreta de direcciones...
-# review: new
 cmd-add-sender-to-book = Añadir remitente a la li&breta de direcciones
-# review: new
 cmd-import-address-book = Importar &libreta de direcciones...
-# review: new
 cmd-export-address-book = &Exportar libreta de direcciones...
 
 ## The tray icon's menu
@@ -107,15 +86,10 @@ ui-tb-print = Imprimir
 ui-tb-delete = Eliminar
 ui-tb-junk = No deseado
 ui-tb-not-junk = Deseado
-# review: new
 ui-tb-archive = Archivar
-# review: new
 ui-tb-previous = Anterior
-# review: new
 ui-tb-next = Siguiente
-# review: new
 ui-previous-tip = Mensaje anterior
-# review: new
 ui-next-tip = Mensaje siguiente
 ui-tb-sync = Enviar y recibir
 ui-tb-mark-read = Marcar como leído
@@ -160,11 +134,8 @@ ui-col-subject = Asunto
 ui-col-from = De
 ui-col-to = Para
 ui-col-received = Recibido
-# review: new
 ui-col-watch = Seguir
-# review: new
 ui-watched-conversation = Conversación seguida
-# review: new
 ui-col-sent = Enviado
 ui-col-size = Tamaño
 ui-col-folder = Carpeta
@@ -174,7 +145,7 @@ ui-col-status = Estado
 ui-outbox-title = Bandeja de salida
 ui-outbox-status-waiting = En espera
 ui-outbox-status-not-sent = No enviado: { $reason }
-ui-outbox-status-agent = En cola por un agente de IA; se enviará a las { $time }
+ui-outbox-status-agent = Un agente de IA ha puesto el mensaje en cola; se enviará a las { $time }
 ui-outbox-delete-ask = ¿Eliminar este mensaje sin enviarlo?
 ui-open-link = Abrir enlace
 ui-edit-link = Editar enlace...
@@ -336,7 +307,7 @@ ui-connect-agent = Conectar un agente de IA
 ui-connect-agent-intro = Agregue esto a los servidores MCP de su agente (Claude Desktop: Settings > Developer > Edit Config):
 ui-col-program = Programa
 ui-col-may = Permisos
-ui-col-last-used = Usada por última vez
+ui-col-last-used = Último uso
 ui-col-when = Fecha
 ui-col-what = Acción
 ui-sign-in-app = Aplicación de inicio de sesión
@@ -405,7 +376,7 @@ ui-clear-agent-log-detail = Esto no deshará los cambios realizados por los agen
 ui-let-agents-connect = &Permitir que los agentes de IA se conecten a Inbox Classic
 ui-change-button = Cambiar…
 ui-undo-button = Deshacer
-ui-clear-button = &Limpiar
+ui-clear-button = &Borrar
 ui-how-to-connect = Cómo conectar un agente…
 ui-agent-programs = Programas cuyos agentes pidieron usar su correo
 ui-what-agents-did = Historial de los agentes
@@ -414,144 +385,82 @@ ui-restart-later = Más &tarde
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 
-# review: new
 ui-tb-new-contact = Nuevo contacto
-# review: new
 ui-tb-new-group = Nuevo grupo
-# review: new
 ui-tb-properties = Propiedades
-# review: new
 ui-tb-write-to = Escribir a
-# review: new
 ui-menu-new-contact = Nuevo &contacto...
-# review: new
 ui-menu-new-group = Nuevo &grupo...
-# review: new
 ui-menu-write-to = &Escribir a
-# review: new
 ui-menu-delete = E&liminar
-# review: new
 ui-book-find-hint = Escriba un nombre o una dirección de correo
-# review: new
 ui-book-all-contacts = Todos los contactos
-# review: new
 ui-col-phone = Teléfono
-# review: new
-ui-book-empty = La libreta de direcciones está vacía. Haga clic en Nuevo contacto para añadir a alguien, o importe un archivo vCard o CSV desde el menú Archivo.
-# review: new
+ui-book-empty = La libreta de direcciones está vacía. Haga clic en «Nuevo contacto» para añadir un contacto o importe un archivo vCard o CSV desde el menú Archivo.
 ui-book-no-match = Ningún contacto coincide con «{ $words }».
-# review: new
 ui-book-delete-ask = { $count ->
     [one] ¿Eliminar este contacto de la libreta de direcciones?
    *[other] ¿Eliminar estos { $count } contactos de la libreta de direcciones?
 }
-# review: new
 ui-group-delete-ask = ¿Eliminar el grupo «{ $name }»? Sus miembros permanecen en la libreta de direcciones.
-# review: new
 ui-book-no-address = { $name } no tiene dirección de correo electrónico.
-# review: new
 ui-new-contact-title = Nuevo contacto
-# review: new
 ui-contact-title = Propiedades de { $name }
-# review: new
 ui-contact-first = Nombre:
-# review: new
 ui-contact-last = Apellidos:
-# review: new
 ui-contact-display = Nombre para mostrar:
-# review: new
 ui-contact-nickname = Alias:
-# review: new
 ui-contact-company = Empresa:
-# review: new
 ui-contact-addresses = Direcciones de correo electrónico:
-# review: new
 ui-contact-address-hint = Escriba una dirección de correo electrónico
-# review: new
 ui-contact-add = &Añadir
-# review: new
 ui-contact-set-default = Establecer como &predeterminada
-# review: new
 ui-contact-default = { $address } (predeterminada)
-# review: new
 ui-contact-phones = Números de teléfono:
-# review: new
 ui-phone-home = Casa
-# review: new
 ui-phone-work = Trabajo
-# review: new
 ui-phone-mobile = Móvil
-# review: new
 ui-phone-other = Otro
-# review: new
 ui-contact-notes = Notas:
-# review: new
 ui-contact-name-needed = Escriba un nombre o una dirección de correo electrónico para el contacto.
-# review: new
 ui-contact-address-invalid = «{ $address }» no es una dirección de correo electrónico válida.
-# review: new
 ui-contact-not-saved = No se pudo guardar el contacto: { $reason }
-# review: new
 ui-new-group-title = Nuevo grupo
-# review: new
 ui-group-title = Propiedades de { $name }
-# review: new
 ui-group-name = Nombre del grupo:
-# review: new
 ui-group-members = Miembros:
-# review: new
 ui-group-select-members = &Seleccionar miembros...
-# review: new
 ui-group-new-member = Añada una dirección de correo electrónico que no esté en la libreta de direcciones:
-# review: new
 ui-group-name-needed = Escriba un nombre para el grupo.
-# review: new
 ui-group-not-saved = No se pudo guardar el grupo: { $reason }
-# review: new
 ui-group-members-count = { $count ->
     [one] 1 miembro
    *[other] { $count } miembros
 }
-# review: new
 ui-select-recipients = Seleccionar destinatarios
-# review: new
 ui-select-members = Seleccionar miembros del grupo
-# review: new
 ui-pick-intro = Escriba un nombre o selecciónelo en la lista:
-# review: new
 ui-pick-recipients = Destinatarios del mensaje:
-# review: new
 ui-pick-members = Miembros del grupo:
-# review: new
 ui-pick-to = &Para →
-# review: new
 ui-pick-cc = &CC →
-# review: new
 ui-pick-bcc = CC&O →
-# review: new
 ui-pick-add = &Añadir →
-# review: new
 ui-pick-tip = Elegir destinatarios de la libreta de direcciones
-# review: new
 ui-filter-address-books = Libretas de direcciones (vCard, CSV)
-# review: new
 ui-filter-vcard = Archivos vCard
-# review: new
 ui-book-export-name = Libreta de direcciones
-# review: new
 ui-book-imported = { $added ->
-    [one] Se añadió 1 contacto
-   *[other] Se añadieron { $added } contactos
-}, { $skipped ->
-    [one] se omitió 1 que ya estaba en la libreta de direcciones.
-   *[other] se omitieron { $skipped } que ya estaban en la libreta de direcciones.
+    [one] Se añadió 1 contacto.
+   *[other] Se añadieron { $added } contactos.
+} { $skipped ->
+    [0] No se encontraron contactos duplicados.
+    [one] Se omitió 1 contacto que ya estaba en la libreta de direcciones.
+   *[other] Se omitieron { $skipped } contactos que ya estaban en la libreta de direcciones.
 }
-# review: new
 ui-book-not-imported = No se pudo importar la libreta de direcciones: { $reason }
-# review: new
 ui-book-exported = { $count ->
     [one] 1 contacto guardado en { $file }.
    *[other] { $count } contactos guardados en { $file }.
 }
-# review: new
 ui-book-not-exported = No se pudo guardar la libreta de direcciones: { $reason }

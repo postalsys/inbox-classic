@@ -22,7 +22,7 @@ mac-no-updates = Cette version d’Inbox Classic ne prend pas en charge les mise
 
 mac-settings-title = Réglages
 mac-language-label = Langue :
-mac-restart-hint = Inbox Classic redémarre pour changer de langue.
+mac-restart-hint = Redémarrez Inbox Classic pour changer de langue.
 mac-notify-new-mail = M'avertir à l'arrivée de nouveaux messages
 mac-restart-question = Redémarrer Inbox Classic maintenant pour changer de langue ?
 
@@ -87,7 +87,7 @@ mac-italic = Italique
 mac-underline = Souligné
 mac-bcc = Cci
 mac-command-click-to-open = ⌘-clic pour ouvrir
-mac-saving-to-drafts = Enregistrement dans Brouillons…
+mac-saving-to-drafts = Enregistrement dans le dossier Brouillons…
 mac-dont-save = Ne pas enregistrer
 
 ## The reading pane

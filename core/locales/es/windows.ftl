@@ -92,7 +92,7 @@ win-sign-in-apps-button = Aplicaciones de &inicio de sesión...
 
 win-dont-allow = &No permitir
 win-col-address = Dirección
-win-never-written-to = Nunca escrito
+win-never-written-to = Nunca le ha escrito
 win-send = &Enviar
 win-dont-send = &No enviar
 win-forget-program-ask = ¿Quitar este programa, sus permisos y el historial de sus agentes? Se le volverá a pedir autorización la próxima vez que el programa se conecte.
