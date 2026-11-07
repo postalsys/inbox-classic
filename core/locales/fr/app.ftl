@@ -40,6 +40,8 @@ cmd-properties = &Propriétés
 cmd-mark-all-read = Marquer tous les messages comme l&us
 cmd-junk = Marquer comme in&désirable
 cmd-not-junk = Marquer comme non indé&sirable
+# review: new
+cmd-archive = A&rchiver
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...
@@ -65,6 +67,8 @@ ui-tb-print = Imprimer
 ui-tb-delete = Supprimer
 ui-tb-junk = Indésirable
 ui-tb-not-junk = Non indésirable
+# review: new
+ui-tb-archive = Archiver
 ui-tb-sync = Envoyer/Recevoir
 ui-tb-mark-read = Marquer comme lu
 ui-tb-mark-unread = Marquer comme non lu

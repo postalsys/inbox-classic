@@ -81,6 +81,10 @@ done-deleted-for-good = { $count ->
     [one] { $messages } kustutati jäädavalt
    *[other] { $messages } kustutati jäädavalt
 }
+# review: new
+done-archived = { $count ->
+   *[other] Arhiveeritud: { $messages }
+}
 done-moved = { $count ->
    *[other] Teisaldatud: { $messages }. Sihtkoht: { $folder }
 }
@@ -99,11 +103,15 @@ done-moved-back = { $count ->
 their-folders = vastavad kaustad
 undo-move = Võta teisaldamine tagasi
 undo-delete = Võta kustutamine tagasi
+# review: new
+undo-archive = Võta arhiveerimine tagasi
 undo-junk = Võta rämpspostiks märkimine tagasi
 undo-not-junk = Võta tavapostiks märkimine tagasi
 nothing-to-undo = Pole midagi tagasi võtta.
 messages-gone = Neid kirju pole enam.
 folder-holds-no-messages = Selles kaustas ei saa kirju hoida.
+# review: new
+not-archived-here = Selle kausta kirju ei saa arhiveerida.
 no-junk-folder = Sellel kontol pole rämpspostikausta, kuhu kirjad teisaldada.
 no-inbox-folder = Sellel kontol pole sisendkausta, kuhu kirjad teisaldada.
 done-flagged-color = { $messages } märgiti { $color ->
@@ -324,6 +332,8 @@ agent-log-deleted = „{ $subject }“ kustutati
 agent-log-moved = „{ $subject }“ teisaldati kausta { $folder }
 agent-log-junk = „{ $subject }“ märgiti rämpspostiks
 agent-log-not-junk = „{ $subject }“ märgiti tavapostiks
+# review: new
+agent-log-archived = „{ $subject }“ arhiveeriti
 agent-log-folder = Loodi kaust „{ $name }“
 agent-log-unsubscribed = Loobuti kirja „{ $subject }“ saatnud meililisti tellimusest
 
