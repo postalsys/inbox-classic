@@ -1243,6 +1243,15 @@ bool pe_message_count(const struct PeCore *core,
                       uint64_t *total,
                       uint64_t *unread);
 
+// Whether the list of `search` names whom its messages went to (Sent Items, Drafts): its person column is then To
+// and shows `recipients`, its date column is Sent, and `PE_SORT_FIELD_FROM` sorts it by the recipients. False on
+// failure.
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search.
+bool pe_lists_recipients(const struct PeCore *core,
+                         const struct PeSearch *search);
+
 // The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it ("Sent Items"); NULL for
 // every folder. Free with `pe_string_free`.
 //

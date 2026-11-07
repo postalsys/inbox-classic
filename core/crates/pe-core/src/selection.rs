@@ -150,11 +150,13 @@ impl Core {
     /// The messages at positions `ranges` (start included, end not) of the list `search` and `sort` make, as the
     /// windows' selections are kept: in the list's order
     pub fn refs_in_ranges(&self, search: &Search, sort: Sort, ranges: &[(u64, u64)]) -> Result<Vec<MessageRef>> {
+        let sort = self.list_sort(search, sort)?;
         Ok(self.store().refs_in_ranges(search, sort, ranges)?)
     }
 
     /// Where the messages `refs` are now in that list, ascending, to select them again after it changed
     pub fn positions(&self, search: &Search, sort: Sort, refs: &[MessageRef]) -> Result<Vec<u64>> {
+        let sort = self.list_sort(search, sort)?;
         Ok(self.store().positions(search, sort, refs)?)
     }
 

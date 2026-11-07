@@ -1124,6 +1124,22 @@ pub unsafe extern "C" fn pe_message_count(
     true
 }
 
+/// Whether the list of `search` names whom its messages went to (Sent Items, Drafts): its person column is then To
+/// and shows `recipients`, its date column is Sent, and `PE_SORT_FIELD_FROM` sorts it by the recipients. False on
+/// failure.
+///
+/// # Safety
+/// `core` must be a live handle, `search` a valid search.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_lists_recipients(core: *const PeCore, search: *const PeSearch) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.lists_recipients(&search).unwrap_or(false)) }
+}
+
 /// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it ("Sent Items"); NULL for
 /// every folder. Free with `pe_string_free`.
 ///
