@@ -552,6 +552,151 @@ pub async fn copy_messages(
     Ok(())
 }
 
+/// Gmail's labels that say what a message is rather than where it was filed: they stay when it is archived
+const STATE_LABELS: [&str; 4] = ["\\Sent", "\\Draft", "\\Starred", "\\Important"];
+
+/// Whether the account's server is Gmail's: labels (X-GM-EXT-1) over an All Mail folder that holds every message,
+/// where an archive takes every label away. A server with the extension but no All Mail is not taken for Gmail.
+pub fn has_labels(client: &Client, store: &Store, account: AccountId) -> Result<bool> {
+    Ok(client.has_capability("X-GM-EXT-1") && store.special_folder(account, "\\All")?.is_some())
+}
+
+/// The Gmail label a message has for being in the folder at `path`: `\\Inbox` for the Inbox, the folder's own name
+/// (as the server names it) for a label folder
+pub fn folder_label(path: &str) -> String {
+    if path.eq_ignore_ascii_case("INBOX") {
+        "\\Inbox".into()
+    } else {
+        path.to_string()
+    }
+}
+
+/// Archives messages on Gmail: `\\Inbox` and every label folder's label taken off them, so they are left in All Mail
+/// only; the state labels (sent, draft, starred, important) stay. Returns the labels each one lost, by UID, for an
+/// Undo to put back.
+pub async fn archive_labels(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uids: &[u64],
+) -> Result<Vec<(u64, Vec<String>)>> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(Vec::new());
+    };
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let messages = Messages::Uids(set);
+    let query = FetchQuery {
+        gmail_labels: true,
+        ..Default::default()
+    };
+    let lost: Vec<(u64, Vec<String>)> = client
+        .fetch(&messages, &query)
+        .await?
+        .into_iter()
+        .filter_map(|m| {
+            let mut labels: Vec<String> = m
+                .labels
+                .unwrap_or_default()
+                .into_iter()
+                .filter(|label| !STATE_LABELS.iter().any(|kept| kept.eq_ignore_ascii_case(label)))
+                .collect();
+            // in a folder a message has its label, whether or not the server lists it
+            let own = folder_label(&path);
+            if !labels.iter().any(|l| l.eq_ignore_ascii_case(&own)) {
+                labels.push(own);
+            }
+            Some((m.uid?, labels))
+        })
+        .collect();
+    // one command for all of them: taking away a label a message does not have changes nothing
+    let mut every: Vec<String> = lost.iter().flat_map(|(_, labels)| labels.iter().cloned()).collect();
+    every.sort();
+    every.dedup();
+    if !every.is_empty() {
+        client.store_labels(&messages, StoreAction::Remove, &every).await?;
+    }
+    Ok(lost)
+}
+
+/// Puts labels back on messages of `folder` (All Mail), as [`archive_labels`] took them: each found on the server by
+/// its Message-ID (one search each, so All Mail need not be in the store), one command a set of labels
+pub async fn restore_labels(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    labelled: &[(String, Vec<String>)],
+) -> Result<()> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let mut by_labels: std::collections::BTreeMap<&[String], Vec<u64>> = std::collections::BTreeMap::new();
+    for (message_id, labels) in labelled {
+        if labels.is_empty() || message_id.trim().is_empty() {
+            continue;
+        }
+        // SEARCH HEADER matches a part of the header: only the messages whose Message-ID is this one, whole
+        let found = client
+            .search(&SearchKey::Header("Message-ID".into(), message_id.clone()))
+            .await?;
+        let Some(set) = SequenceSet::from_numbers(&found) else {
+            continue;
+        };
+        let query = FetchQuery {
+            headers: Some(vec!["Message-ID".into()]),
+            ..Default::default()
+        };
+        let same: Vec<u64> = client
+            .fetch(&Messages::Uids(set), &query)
+            .await?
+            .into_iter()
+            .filter(|m| m.headers.as_deref().and_then(header_message_id).as_deref() == Some(message_id.trim()))
+            .filter_map(|m| m.uid)
+            .collect();
+        by_labels.entry(labels.as_slice()).or_default().extend(same);
+    }
+    for (labels, uids) in by_labels {
+        if let Some(set) = SequenceSet::from_numbers(&uids) {
+            client
+                .store_labels(&Messages::Uids(set), StoreAction::Add, labels)
+                .await?;
+        }
+    }
+    Ok(())
+}
+
+/// The Message-ID of a header block that holds it (`Message-ID: <a@b>`, folded or not), trimmed
+fn header_message_id(header: &[u8]) -> Option<String> {
+    let text = String::from_utf8_lossy(header);
+    let unfolded = text.replace("\r\n ", " ").replace("\r\n\t", " ").replace("\n ", " ");
+    unfolded.lines().find_map(|line| {
+        let (name, value) = line.split_once(':')?;
+        name.trim()
+            .eq_ignore_ascii_case("Message-ID")
+            .then(|| value.trim().to_string())
+    })
+}
+
+/// The account's Archive folder: the one the server names for it, or one made at the top (with its special use
+/// where the server takes that, named "Archive" so that every server and mail program knows it otherwise). The folder
+/// list is synced by the caller when it was made, which `made` says.
+pub async fn archive_folder(
+    client: &mut Client,
+    store: &mut Store,
+    account: AccountId,
+) -> Result<(std::result::Result<String, FolderRefusal>, bool)> {
+    if let Some(folder) = store.special_folder(account, "\\Archive")? {
+        return Ok((Ok(folder.info.path), false));
+    }
+    let namespace = client.namespace().cloned();
+    let path = match new_folder_path(store, account, None, "Archive", namespace.as_ref())? {
+        Ok(path) => path,
+        Err(refusal) => return Ok((Err(refusal), false)),
+    };
+    let made = client.create_special(&path, "\\Archive").await?;
+    let _ = client.subscribe(&path).await;
+    Ok((Ok(path), made))
+}
+
 /// Deletes messages for good on the server: `\\Deleted`, then expunged. With UIDPLUS only these messages are
 /// expunged; without it, EXPUNGE takes every message of the folder marked deleted, as other mail programs do too.
 pub async fn expunge_messages(client: &mut Client, store: &mut Store, folder: FolderId, uids: &[u64]) -> Result<()> {
@@ -843,6 +988,24 @@ fn futures_are_send(client: &mut Client, store: &mut Store, event: &Event) {
     send(fetch_source(&mut *client, &mut *store, 1, 1));
     send(set_flag(&mut *client, &mut *store, 1, &[1], "\\Seen", true));
     let _ = apply_event(store, 1, event);
+}
+
+#[cfg(test)]
+mod archive_tests {
+    use super::header_message_id;
+
+    #[test]
+    fn reads_the_message_id_of_a_header() {
+        assert_eq!(
+            header_message_id(b"Message-ID: <a@b>\r\n\r\n").as_deref(),
+            Some("<a@b>")
+        );
+        assert_eq!(
+            header_message_id(b"message-id:\r\n <a@b>\r\n").as_deref(),
+            Some("<a@b>")
+        );
+        assert_eq!(header_message_id(b"Subject: x\r\n"), None);
+    }
 }
 
 #[cfg(test)]

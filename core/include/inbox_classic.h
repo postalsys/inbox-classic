@@ -236,6 +236,9 @@ typedef enum PeAction {
   // Into the folder `to`, of the same account or another (in the background then: `Transferring`)
   PE_ACTION_MOVE = 7,
   PE_ACTION_COPY = 8,
+  // Into the account's Archive (made when there is none), on Gmail every label taken off; where
+  // `PeSelectionSummary.archivable`
+  PE_ACTION_ARCHIVE = 11,
 } PeAction;
 
 typedef enum PeTargetKind {
@@ -712,6 +715,8 @@ typedef struct PeSelectionSummary {
   uint8_t flag_color;
   // Every one is in a Junk folder: Mark as Not Junk applies, not Mark as Junk
   bool in_junk;
+  // Every one can be archived (from the Inbox or a folder of the user's): Archive applies
+  bool archivable;
   // How many accounts and folders they are in
   uint64_t accounts;
   uint64_t folders;

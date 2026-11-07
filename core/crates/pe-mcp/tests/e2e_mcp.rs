@@ -180,7 +180,7 @@ fn an_agent_works_on_the_mailbox() {
         let hosts = core.agent_hosts().unwrap();
         assert_eq!((hosts.len(), hosts[0].name.as_str(), hosts[0].allowed), (1, "Test Agent", true));
         let tools = agent.request("tools/list", json!({})).await;
-        assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 15);
+        assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 16);
 
         let accounts = agent.call("list_accounts", json!({})).await.unwrap();
         assert_eq!(accounts["accounts"][0]["account"], account);
@@ -233,6 +233,27 @@ fn an_agent_works_on_the_mailbox() {
         // taken back once the message is in the folder it went to
         assert!(eventually(10, || core.agent_undo(moved).is_ok()));
         assert!(eventually(10, || server.subjects("INBOX").contains(&"News".to_string())));
+
+        // archived (into Archive here; on Gmail its labels would go), and taken back from the log
+        let back = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
+        let news_now = back["messages"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|m| m["subject"] == "News")
+            .map(|m| m["uid"].clone())
+            .unwrap();
+        agent
+            .call("archive_messages", json!({ "folder": inbox, "uids": [news_now] }))
+            .await
+            .unwrap();
+        assert!(eventually(10, || server.subjects("Archive").contains(&"News".to_string())));
+        assert_eq!(core.agent_log(1).unwrap()[0].entry.summary, "Archived \"News\"");
+        let archived = core.agent_log(1).unwrap()[0].id;
+        core.agent_undo(archived).unwrap();
+        assert!(eventually(10, || server.subjects("INBOX").contains(&"News".to_string())));
+        let refused = agent.call("archive_messages", json!({ "folder": trash, "uids": [1] })).await;
+        assert!(refused.unwrap_err().contains("not archived"));
 
         agent.call("delete_messages", json!({ "folder": inbox, "uids": [lunch] })).await.unwrap();
         assert!(eventually(10, || server.subjects("Trash").contains(&"Lunch".to_string())));

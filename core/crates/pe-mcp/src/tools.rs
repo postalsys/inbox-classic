@@ -233,6 +233,18 @@ const TOOLS: &[Tool] = &[
         },
     },
     Tool {
+        name: "archive_messages",
+        level: AgentLevels::ORGANIZE,
+        read_only: false,
+        description: "Archives messages of the Inbox or of a folder of the user's: into the account's Archive folder (made when there is none), or on Gmail with every label taken off, so they are left in All Mail. Not for messages of Sent Items, Drafts, Junk E-mail, Deleted Items or the Archive itself.",
+        schema: || {
+            object(
+                json!({ "folder": integer("The folder."), "uids": ids("The messages.") }),
+                &["folder", "uids"],
+            )
+        },
+    },
+    Tool {
         name: "create_folder",
         level: AgentLevels::ORGANIZE,
         read_only: false,
@@ -497,6 +509,7 @@ pub(crate) async fn call(core: &Arc<Core>, host_id: i64, name: &str, arguments: 
         "move_messages" => move_messages(&call, &args, false),
         "delete_messages" => move_messages(&call, &args, true),
         "mark_junk" => mark_junk(&call, &args),
+        "archive_messages" => archive_messages(&call, &args),
         "create_folder" => create_folder(&call, &args),
         "unsubscribe" => unsubscribe(&call, &args),
         "save_draft" => save_draft(&call, &args),
@@ -825,6 +838,45 @@ fn mark_junk(call: &Call, args: &Args) -> Outcome {
             };
             let summary = tr_args(text, &[("subject", subject(&message.info).into())]);
             call.message_entry(&folder, message.info.uid, summary, None)
+        })
+        .collect();
+    call.log(&entries)?;
+    Ok(json!({ "done": true, "messages": uids.len() }))
+}
+
+fn archive_messages(call: &Call, args: &Args) -> Outcome {
+    let folder = call.folder(args.int("folder")?)?;
+    if !call.core.can_archive(folder.id).map_err(engine)? {
+        return Err(
+            "messages of this folder are not archived: only those of the Inbox and the user's own folders".into(),
+        );
+    }
+    let uids = args.uids()?;
+    let messages: Vec<pe_store::Message> = uids
+        .iter()
+        .map(|&uid| call.message(folder.id, uid))
+        .collect::<Result<_, String>>()?;
+    call.core
+        .archive_messages(folder.id, &uids)
+        .map_err(|error| match error {
+            pe_core::Error::Unavailable(_) => {
+                "messages of this folder are not archived: only those of the Inbox and the user's own folders"
+                    .to_string()
+            }
+            other => engine(other),
+        })?;
+    let entries: Vec<NewLogEntry> = messages
+        .iter()
+        .map(|message| {
+            let summary = tr_args(Text::AgentLogArchived, &[("subject", subject(&message.info).into())]);
+            let undo = message.info.message_id.clone().map(|message_id| Undo::Archive {
+                from: folder.id,
+                message_id,
+            });
+            NewLogEntry {
+                message_id: message.info.message_id.clone(),
+                ..call.message_entry(&folder, message.info.uid, summary, undo)
+            }
         })
         .collect();
     call.log(&entries)?;

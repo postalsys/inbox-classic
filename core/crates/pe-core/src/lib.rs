@@ -1397,6 +1397,25 @@ impl Core {
         }
     }
 
+    /// Whether messages of `folder` can be archived (see [`archivable`])
+    pub fn can_archive(&self, folder: FolderId) -> Result<bool> {
+        Ok(archivable(&self.store().folder(folder)?.info))
+    }
+
+    /// Archives messages: out of the list now, into the account's Archive folder on the server (made when it has
+    /// none), or on Gmail with every label taken off (left in All Mail), in the background. Refused where
+    /// [`Core::can_archive`] says no.
+    pub fn archive_messages(&self, folder: FolderId, uids: &[u64]) -> Result<()> {
+        if !self.can_archive(folder)? {
+            return Err(Error::Unavailable(tr(Text::NotArchivedHere)));
+        }
+        self.remove_then(folder, uids, |removed| Command::Archive {
+            folder,
+            uids: uids.to_vec(),
+            removed,
+        })
+    }
+
     /// Whether deleting from `folder` removes a message for good: it is Deleted Items, or the account has none
     pub fn deletes_for_good(&self, folder: FolderId) -> Result<bool> {
         Ok(self.trash_for(folder)?.is_none())
@@ -1545,6 +1564,17 @@ pub(crate) fn trash_in(store: &Store, folder: FolderId) -> Result<Option<FolderI
         .special_folder(account, "\\Trash")?
         .map(|trash| trash.id)
         .filter(|&trash| trash != folder))
+}
+
+/// Whether messages of a folder can be archived: from the Inbox and the user's own folders, not from the special ones
+/// (Archive, All Mail, Sent, Drafts, Junk, Deleted Items), where they are filed already or go elsewhere
+pub(crate) fn archivable(folder: &pe_store::FolderInfo) -> bool {
+    use pe_imap::SpecialUse;
+    folder.selectable
+        && matches!(
+            folder.special_use.as_deref().and_then(SpecialUse::from_flag),
+            None | Some(SpecialUse::Inbox)
+        )
 }
 
 /// The keyword junk sets and the one it takes away, `$Junk` and `$NotJunk` (RFC 9051), the other way round for not junk

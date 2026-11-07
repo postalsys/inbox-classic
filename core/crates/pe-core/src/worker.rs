@@ -3,7 +3,7 @@
 //! on a connection of its own, only downloads the messages the user opens, so one opened during a long sync (the
 //! first of a new account) comes at once and not after it.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -56,6 +56,13 @@ pub(crate) enum Command {
         folder: FolderId,
         uids: Vec<u64>,
         to: FolderId,
+    },
+    /// messages archived: into the Archive folder (made when there is none), on Gmail with their labels taken off;
+    /// `removed` as for [`Command::Move`]
+    Archive {
+        folder: FolderId,
+        uids: Vec<u64>,
+        removed: Vec<pe_store::MessageInfo>,
     },
     /// messages deleted for good; `removed` as for [`Command::Move`]
     Expunge {
@@ -257,6 +264,8 @@ pub(crate) struct Worker {
     behind: Option<u64>,
     /// A command ran since the last wait: what the server has to tell since then comes with a NOOP
     worked: bool,
+    /// The Gmail labels archived messages lost, by Message-ID, for Undo to put back
+    archived_labels: HashMap<String, Vec<String>>,
 }
 
 /// What ended a wait on the Inbox
@@ -299,6 +308,7 @@ impl Worker {
             held: None,
             behind: None,
             worked: false,
+            archived_labels: HashMap::new(),
         }
     }
 
@@ -405,11 +415,84 @@ impl Worker {
         Ok(())
     }
 
+    /// Archives messages already out of the store's `folder`: on Gmail their labels taken off (kept for Undo), elsewhere
+    /// moved into the Archive folder, made first when the account has none
+    async fn archive(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        uids: &[u64],
+        removed: &[pe_store::MessageInfo],
+    ) -> Outcome {
+        let account = self.account;
+        let client = self.client(store).await?;
+        if pe_sync::has_labels(client, store, account)? {
+            let lost = pe_sync::archive_labels(client, store, folder, uids).await?;
+            for (uid, labels) in lost {
+                if let Some(id) = removed.iter().find(|m| m.uid == uid).and_then(|m| m.message_id.clone()) {
+                    self.archived_labels.insert(id, labels);
+                }
+            }
+            return Ok(());
+        }
+        let (path, made) = pe_sync::archive_folder(client, store, account).await?;
+        let path = path.map_err(|refusal| Failure {
+            kind: FailureKind::Other,
+            message: crate::folder_refusal(&refusal),
+        })?;
+        if made {
+            self.sync_folder_list(store).await?;
+        }
+        let Some(to) = store.find_folder(self.account, &path)? else {
+            return Err(Failure {
+                kind: FailureKind::Other,
+                message: tr(Text::NotArchivedHere),
+            });
+        };
+        pe_sync::move_message(self.client(store).await?, store, folder, uids, to.id).await?;
+        self.sync_one(store, to.id).await
+    }
+
+    /// Takes back an archive on Gmail: the labels the messages lost put back on them in All Mail, found there by
+    /// their Message-IDs (the Inbox's label alone, or the label of the folder they came from, when this worker does
+    /// not know them, as after a restart)
+    async fn unarchive_labels(&mut self, store: &mut Store, m: &crate::selection::UndoMove) -> Outcome {
+        let Some(all) = store.special_folder(self.account, "\\All")? else {
+            return Ok(());
+        };
+        let fallback = pe_sync::folder_label(&store.folder(m.from)?.info.path);
+        let labelled: Vec<(String, Vec<String>)> = m
+            .message_ids
+            .iter()
+            .map(|id| {
+                let labels = self
+                    .archived_labels
+                    .remove(id)
+                    .unwrap_or_else(|| vec![fallback.clone()]);
+                (id.clone(), labels)
+            })
+            .collect();
+        pe_sync::restore_labels(self.client(store).await?, store, all.id, &labelled).await?;
+        self.sync_one(store, m.from).await
+    }
+
     /// Moves messages back where they came from, found by their Message-IDs in the folders they went to: after the
     /// move this takes back, which this worker ran before, and the sync of those folders that came with it. A folder
     /// the store does not show them in yet is synced first.
     async fn undo_moves(&mut self, store: &mut Store, moves: Vec<crate::selection::UndoMove>) -> Outcome {
-        for m in moves {
+        for mut m in moves {
+            if m.archived {
+                let account = self.account;
+                if pe_sync::has_labels(self.client(store).await?, store, account)? {
+                    self.unarchive_labels(store, &m).await?;
+                    continue;
+                }
+                // back from the Archive folder, as a move is taken back
+                match store.special_folder(self.account, "\\Archive")? {
+                    Some(archive) => m.to = archive.id,
+                    None => continue,
+                }
+            }
             let mut uids = store.uids_of_message_ids(m.to, &m.message_ids)?;
             if uids.len() < m.message_ids.len() {
                 self.sync_one(store, m.to).await?;
@@ -707,6 +790,10 @@ impl Worker {
                 self.sync_one(store, to).await
             }
             Command::UndoMoves { moves } => self.undo_moves(store, moves).await,
+            Command::Archive { folder, uids, removed } => {
+                let archived = self.archive(store, folder, &uids, &removed).await;
+                self.restore_on_failure(store, folder, &removed, archived)
+            }
             Command::Copy { folder, uids, to } => {
                 copy_messages(self.client(store).await?, store, folder, &uids, to).await?;
                 // the copy shows up in the folder it went to
