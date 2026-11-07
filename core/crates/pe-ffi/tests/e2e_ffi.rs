@@ -386,6 +386,23 @@ fn reads_mail_through_the_c_api() {
     let contacts = unsafe { pe_contacts(core, typed.as_ptr(), 5) };
     assert_eq!(unsafe { pe_contact_list_count(contacts) }, 0);
     unsafe { pe_contact_list_free(contacts) };
+    // Add Sender to Address Book: a new card with the sender's name and address, the same one again after; the
+    // completion then offers the book's person
+    let mut added = false;
+    let card = unsafe { pe_book_add_sender(core, inbox, uid, &mut added) };
+    assert!(card > 0 && added);
+    assert_eq!(unsafe { pe_book_add_sender(core, inbox, uid, &mut added) }, card);
+    assert!(!added);
+    assert_eq!(unsafe { pe_book_add_sender(core, inbox, 999_999, &mut added) }, 0);
+    let contacts = unsafe { pe_contacts(core, typed.as_ptr(), 5) };
+    assert_eq!(unsafe { pe_contact_list_count(contacts) }, 1);
+    let first = unsafe { &*pe_contact_list_get(contacts, 0) };
+    assert_eq!(
+        (text(first.label), first.group),
+        ("Sender <sender@example.com>".to_string(), false)
+    );
+    unsafe { pe_contact_list_free(contacts) };
+    assert!(unsafe { pe_cards_delete(core, &card, 1) });
     assert!(!unsafe { pe_folder_mark_all_read(core, 999_999) });
 
     // a reply drafted in Rust, sent through the C API

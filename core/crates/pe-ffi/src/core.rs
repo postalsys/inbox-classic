@@ -803,20 +803,28 @@ pub unsafe extern "C" fn pe_inbox_unread(core: *const PeCore) -> u64 {
     unsafe { with(core, 0, |core| core.inbox_unread().unwrap_or(0)) }
 }
 
-// ---- the address book ----
+// ---- completing addresses ----
 
-/// Someone to complete an address with
+/// Someone (or a group of the address book) to complete an address with
 #[repr(C)]
 pub struct PeContact {
+    /// The person's name, or the group's
     pub name: *const c_char,
+    /// Empty for a group
     pub address: *const c_char,
-    /// As it goes in an address field: `Name <address>`, the name quoted where it needs it, or the address alone
+    /// As it goes in an address field: `Name <address>`, the name quoted where it needs it, or the address alone; for
+    /// a group its members so, separated by commas
     pub label: *const c_char,
+    /// A group of the address book: shown by its `name`, it puts its members (`label`) in the field, and is not
+    /// forgotten with `pe_contact_forget`
+    pub group: bool,
 }
 
 pub struct PeContactList(Rows<PeContact>);
 
-/// The people whose address or name (a word of it) starts with `typed`, best first, at most `limit`; NULL on failure
+/// What completes an address field from `typed`: the people of the address book (each of their addresses) and its
+/// groups whose name, nickname or address (a word of the name) starts with it, then those written to or heard from,
+/// best first, at most `limit`, no address twice; NULL on failure
 ///
 /// # Safety
 /// `core` must be a live handle, `typed` NULL or a NUL-terminated string.
@@ -827,13 +835,14 @@ pub unsafe extern "C" fn pe_contacts(core: *const PeCore, typed: *const c_char, 
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
-            let Ok(contacts) = core.contacts(&typed, limit) else {
+            let Ok(found) = core.completions(&typed, limit) else {
                 return null_mut();
             };
-            handed(PeContactList(Rows::new(&contacts, |c, strings| PeContact {
+            handed(PeContactList(Rows::new(&found, |c, strings| PeContact {
                 name: strings.add(&c.name),
                 address: strings.add(&c.address),
-                label: strings.add(&pe_core::address_label(&c.name, &c.address)),
+                label: strings.add(&c.label),
+                group: c.group,
             })))
         })
     }
@@ -865,7 +874,7 @@ pub unsafe extern "C" fn pe_contact_list_free(list: *mut PeContactList) {
     unsafe { take_back(list) }
 }
 
-/// Takes someone out of the completions for good
+/// Takes someone out of the people written to or heard from for good (a person of the address book stays there)
 ///
 /// # Safety
 /// `core` must be a live handle, `address` NULL or a NUL-terminated string.

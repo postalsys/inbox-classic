@@ -294,3 +294,29 @@ menu = "tools"
 key = ""
 mac = "Mod+,"
 linux = "Mod+,"
+
+# the Address Book window: its people and groups (Outlook Express's Ctrl+Shift+B)
+[[command]]
+id = "address_book"
+windows = 147
+menu = "tools"
+key = "Mod+Shift+B"
+
+# the sender of the message selected into the Address Book; also on the message list's right-click menu
+[[command]]
+id = "add_sender_to_book"
+windows = 148
+menu = "tools"
+one = true
+
+# a vCard (.vcf) or CSV file read into the Address Book
+[[command]]
+id = "import_address_book"
+windows = 149
+menu = "file"
+
+# the Address Book written to a vCard (.vcf) file
+[[command]]
+id = "export_address_book"
+windows = 150
+menu = "file"

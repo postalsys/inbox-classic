@@ -7,6 +7,7 @@
 //!   on a malformed message would come back on every start, so aborting is not an option.
 
 mod agents;
+mod book;
 mod core;
 mod selection;
 mod texts;
@@ -14,6 +15,7 @@ mod texts;
 mod windows;
 
 pub use agents::*;
+pub use book::*;
 pub use core::*;
 pub use selection::*;
 pub use texts::*;

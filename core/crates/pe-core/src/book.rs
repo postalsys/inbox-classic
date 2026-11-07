@@ -50,6 +50,33 @@ pub struct Imported {
     pub skipped: u64,
 }
 
+/// The text of an address field with `added` put at its end after a comma: the labels of people and groups as
+/// [`Completion`] gives them (or the address book's rows), separated by commas. An address already in the field, or
+/// given twice, goes in once. What Select Recipients and Write To put in To, Cc or Bcc.
+pub fn add_to_field(field: &str, added: &str) -> String {
+    use pe_mime::parser::parse_addresses;
+    let mut known: Vec<String> = parse_addresses(field)
+        .iter()
+        .flat_map(|parsed| parsed.mailboxes())
+        .map(|mailbox| mailbox.address.to_lowercase())
+        .collect();
+    let mut out = field.trim_end().trim_end_matches([',', ';']).trim_end().to_string();
+    for parsed in parse_addresses(added) {
+        for mailbox in parsed.mailboxes() {
+            let address = mailbox.address.trim();
+            if !address.contains('@') || known.contains(&address.to_lowercase()) {
+                continue;
+            }
+            known.push(address.to_lowercase());
+            if !out.is_empty() {
+                out.push_str(", ");
+            }
+            out.push_str(&address_label(&mailbox.name, address));
+        }
+    }
+    out
+}
+
 impl Core {
     /// The people of the address book, by name; with `filter`, those whose name, nickname, company or an address
     /// starts with it
@@ -206,6 +233,27 @@ impl Core {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn adds_to_a_field_once() {
+        assert_eq!(
+            add_to_field("", "Mary Smith <mary@example.com>, dave@example.com"),
+            "Mary Smith <mary@example.com>, dave@example.com"
+        );
+        // what is there stays as typed; an address there already, or twice in what is added, goes in once
+        assert_eq!(
+            add_to_field(
+                "ann@example.com, ",
+                "Mary Smith <mary@example.com>, ANN@example.com, \"Smith, Mary\" <mary@example.com>, nobody"
+            ),
+            "ann@example.com, Mary Smith <mary@example.com>"
+        );
+        assert_eq!(
+            add_to_field("x", "\"Doe, John\" <john@example.org>"),
+            "x, \"Doe, John\" <john@example.org>"
+        );
+        assert_eq!(add_to_field("ann@example.com", ""), "ann@example.com");
+    }
 
     #[test]
     fn an_address_is_one_mailbox() {

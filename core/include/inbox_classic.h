@@ -74,6 +74,14 @@ typedef enum PeAgentSendAnswer {
   PE_AGENT_SEND_ANSWER_DONT_SEND = 2,
 } PeAgentSendAnswer;
 
+// What a phone number is
+typedef enum PePhoneKind {
+  PE_PHONE_KIND_OTHER = 0,
+  PE_PHONE_KIND_HOME = 1,
+  PE_PHONE_KIND_WORK = 2,
+  PE_PHONE_KIND_MOBILE = 3,
+} PePhoneKind;
+
 typedef enum PeEventKind {
   PE_EVENT_KIND_SYNC_STARTED = 1,
   // Comes after everything the sync found, failures included; `failure` is what kept it from finishing, `None`
@@ -280,6 +288,12 @@ typedef struct PeAgentSendInfo PeAgentSendInfo;
 // A lookup's result; free with `pe_autoconfig_free`
 typedef struct PeAutoconfig PeAutoconfig;
 
+// The people of the address book; free with `pe_card_list_free`
+typedef struct PeCardList PeCardList;
+
+// One card for its Properties: a handle whose `PeCard` comes from `pe_card_info`; free with `pe_card_free`
+typedef struct PeCardView PeCardView;
+
 typedef struct PeContactList PeContactList;
 
 // The mail engine
@@ -293,6 +307,12 @@ typedef struct PeExport PeExport;
 
 // The folders of an account; free with `pe_folder_list_free`
 typedef struct PeFolderList PeFolderList;
+
+// The groups; free with `pe_group_list_free`
+typedef struct PeGroupList PeGroupList;
+
+// One group for its Properties: a handle whose `PeGroup` comes from `pe_group_info`; free with `pe_group_free`
+typedef struct PeGroupView PeGroupView;
 
 // The languages; free with `pe_language_list_free`
 typedef struct PeLanguageList PeLanguageList;
@@ -397,6 +417,76 @@ typedef struct PeAgentLogEntry {
   bool undone;
 } PeAgentLogEntry;
 
+// A person of the address book as its list shows them
+typedef struct PeCardRow {
+  int64_t id;
+  // The name shown (Name column)
+  const char *name;
+  // The default address (E-mail column), empty for none
+  const char *address;
+  // The first phone number (Phone column), empty for none
+  const char *phone;
+  const char *company;
+  // As it goes in an address field (`Name <address>`, the name quoted where it needs it), empty without an address:
+  // what Write To and Select Recipients put in To, Cc or Bcc
+  const char *label;
+} PeCardRow;
+
+// A phone number of a card
+typedef struct PePhone {
+  enum PePhoneKind kind;
+  const char *number;
+} PePhone;
+
+// A person with every field Contact Properties edits. From `pe_card`, its strings and arrays belong to the handle;
+// to `pe_card_save`, to the caller.
+typedef struct PeCard {
+  // 0 for a new one
+  int64_t id;
+  // The name shown and written to; empty when saved, it is made of `first` and `last`
+  const char *name;
+  const char *first;
+  const char *last;
+  const char *nickname;
+  const char *company;
+  const char *notes;
+  // The addresses, the default one first
+  const char *const *addresses;
+  size_t address_count;
+  const struct PePhone *phones;
+  size_t phone_count;
+} PeCard;
+
+// A group of the address book as its list shows it
+typedef struct PeGroupRow {
+  int64_t id;
+  const char *name;
+  size_t member_count;
+  // Its members as they go in an address field, separated by commas: what Write To and Select Recipients put in
+  // To, Cc or Bcc for the group
+  const char *label;
+} PeGroupRow;
+
+// Someone in a group: a card of the book, or an address typed in
+typedef struct PeMember {
+  // The card, 0 for an address of no card. Saved, a card member follows its card (its name and default address)
+  int64_t card;
+  const char *name;
+  const char *address;
+  // As it goes in an address field (from `pe_group` only; not read by `pe_group_save`)
+  const char *label;
+} PeMember;
+
+// A group with its members. From `pe_group`, its strings and array belong to the handle; to `pe_group_save`, to the
+// caller.
+typedef struct PeGroup {
+  // 0 for a new one
+  int64_t id;
+  const char *name;
+  const struct PeMember *members;
+  size_t member_count;
+} PeGroup;
+
 // An event; valid only during the callback
 typedef struct PeEvent {
   enum PeEventKind kind;
@@ -452,12 +542,18 @@ typedef struct PeAccount {
   const char *title;
 } PeAccount;
 
-// Someone to complete an address with
+// Someone (or a group of the address book) to complete an address with
 typedef struct PeContact {
+  // The person's name, or the group's
   const char *name;
+  // Empty for a group
   const char *address;
-  // As it goes in an address field: `Name <address>`, the name quoted where it needs it, or the address alone
+  // As it goes in an address field: `Name <address>`, the name quoted where it needs it, or the address alone; for
+  // a group its members so, separated by commas
   const char *label;
+  // A group of the address book: shown by its `name`, it puts its members (`label`) in the field, and is not
+  // forgotten with `pe_contact_forget`
+  bool group;
 } PeContact;
 
 // A folder as the folder tree shows it, in tree order
@@ -1019,6 +1115,162 @@ char *pe_agent_undo(const struct PeCore *core, int64_t id);
 // `core` must be a live handle.
 bool pe_agent_log_clear(const struct PeCore *core);
 
+// The people of the address book, by name; with `filter` (NULL or empty for everyone), those whose name (a word of
+// it), nickname, company or an address starts with it. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `filter` NULL or a NUL-terminated string.
+struct PeCardList *pe_cards(const struct PeCore *core,
+                            const char *filter);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_card_list_count(const struct PeCardList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeCardRow *pe_card_list_get(const struct PeCardList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_card_list_free(struct PeCardList *list);
+
+// Card `id` with all its fields, NULL when there is none
+//
+// # Safety
+// `core` must be a live handle.
+struct PeCardView *pe_card(const struct PeCore *core, int64_t id);
+
+// The card of a `pe_card` handle
+//
+// # Safety
+// `view` must be NULL or a handle that was not freed yet.
+const struct PeCard *pe_card_info(const struct PeCardView *view);
+
+// # Safety
+// `view` must be NULL or a handle that was not freed yet.
+void pe_card_free(struct PeCardView *view);
+
+// Saves a card: a new one when its `id` is 0, else in place of card `id` (what a vCard brought that the form does
+// not show is kept). An address that is not one mailbox alone is left out. Its id, or 0 with the reason in `error`
+// (NULL or a pointer to a string to free with `pe_string_free`).
+//
+// # Safety
+// `core` must be a live handle, `card` a valid card whose strings are NULL or NUL-terminated and whose arrays hold
+// `address_count` and `phone_count` items (or are NULL), `error` NULL or a valid pointer.
+int64_t pe_card_save(const struct PeCore *core,
+                     const struct PeCard *card,
+                     char **error);
+
+// Deletes `count` cards (out of the groups they are in too)
+//
+// # Safety
+// `core` must be a live handle, `ids` NULL or `count` ids.
+bool pe_cards_delete(const struct PeCore *core, const int64_t *ids, size_t count);
+
+// The groups of the address book, by name; NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeGroupList *pe_groups(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_group_list_count(const struct PeGroupList *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeGroupRow *pe_group_list_get(const struct PeGroupList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_group_list_free(struct PeGroupList *list);
+
+// Group `id` with its members, NULL when there is none
+//
+// # Safety
+// `core` must be a live handle.
+struct PeGroupView *pe_group(const struct PeCore *core, int64_t id);
+
+// The group of a `pe_group` handle
+//
+// # Safety
+// `view` must be NULL or a handle that was not freed yet.
+const struct PeGroup *pe_group_info(const struct PeGroupView *view);
+
+// # Safety
+// `view` must be NULL or a handle that was not freed yet.
+void pe_group_free(struct PeGroupView *view);
+
+// Saves a group: a new one when its `id` is 0, else in place of group `id`. A member of no card without an address
+// is left out. Its id, or 0 with the reason in `error` (NULL or a pointer to a string to free with
+// `pe_string_free`).
+//
+// # Safety
+// `core` must be a live handle, `group` a valid group whose strings are NULL or NUL-terminated and whose `members`
+// holds `member_count` of them (or is NULL), `error` NULL or a valid pointer.
+int64_t pe_group_save(const struct PeCore *core,
+                      const struct PeGroup *group,
+                      char **error);
+
+// Deletes a group (not the people in it)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_group_delete(const struct PeCore *core, int64_t id);
+
+// Adds the sender of message `uid` of `folder` to the address book (Add Sender to Address Book): the id of the card
+// that has their address already, or of a new one with their name and address, `added` (when not NULL) true for a
+// new one. 0 when the message is not there or its sender has no address.
+//
+// # Safety
+// `core` must be a live handle, `added` NULL or a valid pointer.
+int64_t pe_book_add_sender(const struct PeCore *core,
+                           int64_t folder,
+                           uint64_t uid,
+                           bool *added);
+
+// Reads the vCard (`.vcf`) or CSV file at `path` (UTF-8) into the address book (File > Import > Address Book): a
+// card whose addresses are all in the book already is left out. `added` and `skipped` (when not NULL) get the
+// counts. False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) for a file
+// that can not be read or is too big.
+//
+// # Safety
+// `core` must be a live handle, `path` a NUL-terminated string, `added`, `skipped` and `error` NULL or valid
+// pointers.
+bool pe_book_import(const struct PeCore *core,
+                    const char *path,
+                    uint64_t *added,
+                    uint64_t *skipped,
+                    char **error);
+
+// Writes `count` cards (`ids`; every card when `count` is 0) to a vCard file at `path` (UTF-8), replacing one that
+// is there (File > Export > Address Book). `written` (when not NULL) gets how many. False with the reason in `error`
+// (NULL or a pointer to a string to free with `pe_string_free`) when the file can not be written.
+//
+// # Safety
+// `core` must be a live handle, `ids` NULL or `count` ids, `path` a NUL-terminated string, `written` and `error`
+// NULL or valid pointers.
+bool pe_book_export(const struct PeCore *core,
+                    const int64_t *ids,
+                    size_t count,
+                    const char *path,
+                    uint64_t *written,
+                    char **error);
+
+// The text of an address field (`field`, as typed so far) with `added` put at its end after a comma: the `label`s of
+// card, group and completion rows, separated by commas. An address already in the field, or given twice, goes in
+// once. What Select Recipients and Write To put in To, Cc or Bcc. Free with `pe_string_free`; NULL on failure.
+//
+// # Safety
+// `field` and `added` must be NULL or NUL-terminated strings.
+char *pe_address_field_add(const char *field,
+                           const char *added);
+
 // Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
 // the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
 //
@@ -1176,7 +1428,9 @@ uint64_t pe_unsubscribe(const struct PeCore *core,
 // `core` must be a live handle.
 uint64_t pe_inbox_unread(const struct PeCore *core);
 
-// The people whose address or name (a word of it) starts with `typed`, best first, at most `limit`; NULL on failure
+// What completes an address field from `typed`: the people of the address book (each of their addresses) and its
+// groups whose name, nickname or address (a word of the name) starts with it, then those written to or heard from,
+// best first, at most `limit`, no address twice; NULL on failure
 //
 // # Safety
 // `core` must be a live handle, `typed` NULL or a NUL-terminated string.
@@ -1198,11 +1452,12 @@ const struct PeContact *pe_contact_list_get(const struct PeContactList *list, si
 // `list` must be NULL or a list that was not freed yet.
 void pe_contact_list_free(struct PeContactList *list);
 
-// Takes someone out of the completions for good
+// Takes someone out of the people written to or heard from for good (a person of the address book stays there)
 //
 // # Safety
 // `core` must be a live handle, `address` NULL or a NUL-terminated string.
-bool pe_contact_forget(const struct PeCore *core, const char *address);
+bool pe_contact_forget(const struct PeCore *core,
+                       const char *address);
 
 // The folders of an account, NULL on failure
 //
