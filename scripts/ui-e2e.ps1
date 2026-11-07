@@ -269,6 +269,8 @@ New-Item -ItemType Directory -Force -Path $Out | Out-Null
 # the app's preferences, where Options keeps the language: the one of whoever runs the test is put back at the end
 $preferencesKey = 'HKCU:\Software\Postal Systems\InboxClassic'
 $savedLanguage = (Get-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue).Language
+# and Group messages by conversation, left out for the run so it is on, as it is out of the box
+$savedGrouping = (Get-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue).GroupByConversation
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
 Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Out 'result.txt')
 Start-Transcript -Path (Join-Path $Out 'log.txt') -Force | Out-Null
@@ -599,6 +601,7 @@ try {
     Remove-Item -Force -ErrorAction SilentlyContinue $signInPage
     $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"",
         '--sign-in-page-file', "`"$signInPage`"", '--test-hooks')
+    Remove-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
     # the first page of Add Mail Account, with the address fields when $fields, else the page that offers a
@@ -1380,18 +1383,21 @@ public static class Dragger {
     # from the folder (the whole of it), so what is counted is what this search found
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
     [void](WaitFor { (Rows) -eq $all })
+    # the messages found, as the search bar counts them: grouped by conversation a reply in Sent Items shares a row
+    # with the message it answers, so the rows do not tell
+    $foundCount = { if ((& $searchBar) -match '^(\d+) results? for') { [int]$Matches[1] } else { 0 } }
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos in:inbox')
-    $inInbox = WaitFor { if ((Rows) -ge 1 -and (Rows) -lt $all) { Rows } }
+    $inInbox = WaitFor { if ((Rows) -ge 1 -and (& $searchBar) -match ' in Inbox' -and (& $foundCount) -ge 1) { & $foundCount } }
     Check ([bool](WaitFor { (& $folderBar) -eq ' Inbox' -and (& $searchBar) -match ' in Inbox$' } 5)) "in:inbox: the folder bar and the search bar say the Inbox ($(& $folderBar), $(& $searchBar))"
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos')
-    $everywhere = WaitFor { if ((Rows) -gt $inInbox) { Rows } }
+    $everywhere = WaitFor { if ((& $searchBar) -match ' in all folders' -and (& $foundCount) -gt $inInbox) { & $foundCount } }
     Check ([bool]$inInbox -and [bool]$everywhere) "the messages of other folders are found too ($everywhere), in:inbox narrows them to the Inbox ($inInbox)"
     Shot $main 'find-2-every-folder'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:unread')
     Check ([bool](WaitFor { (Rows) -ge 1 -and (Rows) -lt $all })) 'is:unread lists the unread messages'
     # a result from another folder opens where it is
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos')
-    [void](WaitFor { (Rows) -eq $everywhere })
+    [void](WaitFor { (Rows) -ge 1 -and (& $foundCount) -eq $everywhere })
     SelectRow 0
     Check ([bool](WaitFor { (WindowText ([Native.Win]::FindDescendants($main, 'Static') | Where-Object { (WindowText $_) -match 'From:' } | Select-Object -First 1)) -match 'Subject:' } 10)) 'a result is shown in the reading pane'
     # Clear search on the search bar ends it
@@ -1399,7 +1405,7 @@ public static class Dragger {
     Check ([bool](WaitFor { (Rows) -eq $all -and (WindowText $find) -eq '' -and -not (Visible $main $IDC_SEARCH_BAR) })) 'Clear search on the search bar ends the search'
     # and so does Esc, back in the folder
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'photos')
-    [void](WaitFor { (Rows) -eq $everywhere })
+    [void](WaitFor { (Rows) -ge 1 -and (& $foundCount) -eq $everywhere })
     Key $find $VK_ESCAPE
     Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq 6 })) 'Esc ends the search: the folder again, without the Folder column'
 
@@ -1578,7 +1584,7 @@ public static class Dragger {
 
     Step 'an AI agent'
     $IDC_AGENT_LEVEL = 600; $IDC_AGENT_PATH = 611; $IDC_AGENT_RECIPIENTS = 612; $IDC_AGENT_WARNING = 614; $IDC_AGENT_SEND = 615
-    $IDC_AGENTS_HOSTS = 631; $IDC_AGENTS_LOG = 634; $IDC_AGENTS_UNDO = 635; $BM_GETCHECK = 0x00F0; $BM_SETCHECK = 0x00F1
+    $IDC_AGENTS_HOSTS = 631; $IDC_AGENTS_LOG = 634; $IDC_AGENTS_UNDO = 635; $BM_SETCHECK = 0x00F1
     # two new messages for the agent to read, whatever the steps before left unread
     $inboxBefore = @(Messages 'INBOX').Count
     foreach ($new in @(@('Maria Lopez <maria@example.org>', 'Quarterly report draft', 'Here is the draft of the quarterly report. Comments by Thursday?'),
@@ -1588,7 +1594,8 @@ public static class Dragger {
     }
     SelectFolder 0
     Command $main $IDM_SYNC
-    [void](WaitFor { if ((Rows) -ge $inboxBefore + 2) { Rows } } 20)
+    # the messages the status bar counts: the rows are fewer where replies share a conversation's row
+    [void](WaitFor { (StatusPart $mainStatus 2) -match '^(\d+) message' -and [int]$Matches[1] -ge $inboxBefore + 2 } 20)
     $unreadBefore = @(Messages 'INBOX' | Where-Object { $_.flags -notcontains '\Seen' }).Count
     Start-Sleep -Seconds 1
     Shot $main 'agents-1-before'
@@ -2253,6 +2260,86 @@ public static class Dragger {
         Check $false 'Find in This Message asks again'
     }
 
+    # ---- conversations ----
+
+    Step 'conversations'
+    $IDM_EXPAND_ALL_THREADS = 145; $IDM_COLLAPSE_ALL_THREADS = 146; $IDM_OPTIONS = 137; $IDC_OPTIONS_THREADS = 663
+    $VK_LEFT = 0x25; $VK_RIGHT = 0x27; $BM_SETCHECK = 0x00F1
+    # the rows of the list with this subject
+    function SubjectRows([string]$s) { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $s }) }
+    # Tools > Options with Group messages by conversation turned on or off, and OK; whether the box was there
+    function SetGrouping([bool]$on, [string]$shot = $null) {
+        Command $main $IDM_OPTIONS
+        $o = WaitShown 'InboxClassicOptions' 10
+        if (-not $o) { return $false }
+        $box = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_THREADS)
+        [void][Native.Win]::SendMessage($box, $BM_SETCHECK, [IntPtr]([int]$on), [IntPtr]::Zero)
+        if ($shot) { Shot $o $shot }
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+        $box -ne [IntPtr]::Zero
+    }
+    $topic = 'Trip to the coast'
+    $coast = @('coast1@example.com', 'coast2@example.com', 'coast3@example.com')
+    $coastSeen = { @($coast | Where-Object { Seen "Message-ID: <$([regex]::Escape($_))>" }).Count }
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 3) { Rows } } 20)
+    # three messages of one conversation, each answering the one before
+    $date = [DateTime]::UtcNow
+    AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $topic`r`n" +
+        "Message-ID: <$($coast[0])>`r`nDate: $($date.AddMinutes(1).ToString('r'))`r`n`r`nShall we go to the coast on Sunday?`r`n")
+    AddMessage ("From: Bob Harris <bob@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: $topic`r`n" +
+        "Message-ID: <$($coast[1])>`r`nIn-Reply-To: <$($coast[0])>`r`nReferences: <$($coast[0])>`r`n" +
+        "Date: $($date.AddMinutes(2).ToString('r'))`r`n`r`nI am in.`r`n")
+    AddMessage ("From: Carol <carol@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: $topic`r`n" +
+        "Message-ID: <$($coast[2])>`r`nIn-Reply-To: <$($coast[1])>`r`nReferences: <$($coast[0])> <$($coast[1])>`r`n" +
+        "Date: $($date.AddMinutes(3).ToString('r'))`r`n`r`nMe too, I will bring the sandwiches.`r`n")
+    Command $main $IDM_SYNC
+    # grouped, as it is out of the box: the three are one row, on the first message
+    $grouped = WaitFor { if ((SubjectRows $topic).Count -eq 1 -and (SubjectRows "Re: $topic").Count -eq 0 -and
+        (StatusPart $mainStatus 2) -match '^(\d+) message' -and [int]$Matches[1] -eq @(Messages 'INBOX').Count) { Rows } } 30
+    # every message of the Inbox, a row each when nothing is grouped
+    $flat = @(Messages 'INBOX').Count
+    $head = @(SubjectRows $topic)
+    Check ($null -ne $grouped -and $head.Count -eq 1 -and $grouped -lt $flat) "the Inbox lists the conversation once, on its first message ($(Rows) rows of $flat messages)"
+    if ($head.Count -eq 1) {
+        $at = [int]$head[0]
+        SelectRow $at
+        Check ((SelectedRow) -eq $at) "its row can be selected ($(SelectedRow))"
+        Shot $main 'threads-1-collapsed'
+        Key $list $VK_RIGHT
+        Check ([bool](WaitFor { (Rows) -eq $grouped + 2 } 10)) "Right expands it ($(Rows) rows)"
+        $under = @(($at + 1), ($at + 2) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) })
+        Check (($under | Where-Object { $_ -eq "Re: $topic" }).Count -eq 2) "its replies are under it ($($under -join ', '))"
+        Shot $main 'threads-2-expanded'
+        Key $list $VK_LEFT
+        Check ([bool](WaitFor { (Rows) -eq $grouped } 10)) "Left collapses it again ($(Rows) rows)"
+        Check ((SelectedRow) -eq $at) "its row stays selected ($(SelectedRow))"
+        Command $main $IDM_EXPAND_ALL_THREADS
+        Check ([bool](WaitFor { (Rows) -eq $flat } 10)) "Expand All Conversations shows every message ($(Rows) of $flat)"
+        Command $main $IDM_COLLAPSE_ALL_THREADS
+        Check ([bool](WaitFor { (Rows) -eq $grouped } 10)) "Collapse All Conversations hides the replies again ($(Rows))"
+        # the replies are still unread; the first message is read once it was shown
+        Check ((& $coastSeen) -lt 3) "not all of the conversation is read yet ($(& $coastSeen))"
+        $at = [int](@(SubjectRows $topic)[0])
+        SelectRow $at
+        Command $main $IDM_MARK_READ
+        Check ([bool](WaitFor { (& $coastSeen) -eq 3 } 20)) "Mark Read on the collapsed row marks all three read on the server ($(& $coastSeen))"
+    }
+    Check (SetGrouping $false) 'Group messages by conversation can be turned off'
+    Check ([bool](WaitFor { (Rows) -eq $flat -and (SubjectRows "Re: $topic").Count -eq 2 } 10)) "with it off the three messages are three rows ($(Rows))"
+    Check ((Get-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue).GroupByConversation -eq 0) 'and that is kept for the next start'
+    Shot $main 'threads-3-options-off'
+    Check (SetGrouping $true) 'and on again'
+    Check ([bool](WaitFor { (Rows) -eq $grouped -and (SubjectRows $topic).Count -eq 1 -and (SubjectRows "Re: $topic").Count -eq 0 } 10)) "turned on again, the conversation is one row again ($(Rows))"
+    # the Inbox as the steps after expect it, without the conversation
+    foreach ($id in $coast) {
+        $m = Find 'INBOX' "Message-ID: <$([regex]::Escape($id))>"
+        if ($m) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($m.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { (SubjectRows $topic).Count -eq 0 } 20)
+
     # ---- folders ----
 
     Step 'folders'
@@ -2514,11 +2601,12 @@ public static class Dragger {
     Check (([Native.Win]::RemoteTreeText($tree, $top)) -match '^All Inboxes') "All Inboxes is at the top of the tree, above the accounts ($([Native.Win]::RemoteTreeText($tree, $top)))"
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
     $expected = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
-    Check ([bool](WaitFor { (Rows) -eq $expected } 20)) "it lists the mail of both accounts' Inboxes ($(Rows) of $expected)"
+    # grouped by conversation the rows are fewer (replies share a row): the messages the list has are counted
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    Check ([bool](WaitFor { (Rows) -ge 1 -and (StatusPart $mainStatus 2) -match "^$expected message" } 20)) "it lists the mail of both accounts' Inboxes ($(Rows) rows, $(StatusPart $mainStatus 2) of $expected)"
     $COL_FOLDER = 6
     $places = @(0..([Math]::Min(4, (Rows)) - 1) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_FOLDER) })
     Check (($places -contains 'Work') -and ($places -contains 'Alex Morgan')) "newest first, the two accounts' messages among each other, the Account column naming each ($($places -join ', '))"
-    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     Check ((StatusPart $mainStatus 2) -match "^$expected message") "the status bar counts both Inboxes ($(StatusPart $mainStatus 2))"
     SelectRow 0
     Shot $main 'all-inboxes-1-list'
@@ -3206,6 +3294,11 @@ public static bool HasIcon(IntPtr window) {
         Remove-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue
     } else {
         Set-ItemProperty -Path $preferencesKey -Name Language -Value $savedLanguage
+    }
+    if ($null -eq $savedGrouping) {
+        Remove-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue
+    } else {
+        Set-ItemProperty -Path $preferencesKey -Name GroupByConversation -Value $savedGrouping -Type DWord
     }
     $harness.StandardInput.Close()
     if (-not $harness.WaitForExit(5000)) { $harness.Kill() }

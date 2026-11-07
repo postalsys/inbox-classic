@@ -388,8 +388,8 @@ const sections = [
             {
                 shot: 'threads-2-expanded',
                 name: 'Expanding a conversation',
-                what: 'The + in front of a conversation (or the Right key) shows its other messages under it, indented, oldest first; the - (or Left) hides them. View > Expand All Conversations and Collapse All Conversations do it for every conversation of the list.',
-                how: 'Click the + or -, Right and Left, or the View menu.',
+                what: 'The + in front of a conversation (a triangle on the Mac and Linux) or the Right key shows its other messages under it, indented, oldest first; the - (or Left) hides them. View > Expand All Conversations and Collapse All Conversations do it for every conversation of the list.',
+                how: 'Click the + or - (the triangle on the Mac and Linux), Right and Left, or the View menu.',
                 checked: ['Expanding shows the replies under the first message, collapsing hides them']
             },
             {
