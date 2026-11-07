@@ -35,60 +35,11 @@ pub struct Invitation {
     pub repeats: String,
 }
 
-/// A content line: its name (uppercase), its parameters (names uppercase) and its value
-type Line = (String, Vec<(String, String)>, String);
-
-/// The content lines of a calendar: folded lines unfolded (RFC 5545 3.1)
-fn lines(text: &str) -> Vec<Line> {
-    let mut unfolded: Vec<String> = Vec::new();
-    for line in text.split('\n').map(|l| l.trim_end_matches('\r')) {
-        match (
-            line.strip_prefix(' ').or_else(|| line.strip_prefix('\t')),
-            unfolded.last_mut(),
-        ) {
-            (Some(rest), Some(last)) => last.push_str(rest),
-            _ => unfolded.push(line.to_string()),
-        }
-    }
-    unfolded
-        .into_iter()
-        .filter_map(|line| {
-            // the value starts at the first colon outside a quoted parameter
-            let mut quoted = false;
-            let colon = line.char_indices().find(|&(_, c)| {
-                if c == '"' {
-                    quoted = !quoted;
-                }
-                c == ':' && !quoted
-            })?;
-            let (head, value) = (&line[..colon.0], &line[colon.0 + 1..]);
-            let mut parts = head.split(';');
-            let name = parts.next()?.trim().to_ascii_uppercase();
-            let params = parts
-                .filter_map(|p| p.split_once('='))
-                .map(|(k, v)| (k.trim().to_ascii_uppercase(), v.trim().trim_matches('"').to_string()))
-                .collect();
-            Some((name, params, value.to_string()))
-        })
-        .collect()
-}
+use crate::contentline::{Line, lines};
 
 /// A TEXT value unescaped (RFC 5545 3.3.11)
 fn text(value: &str) -> String {
-    let mut out = String::with_capacity(value.len());
-    let mut chars = value.chars();
-    while let Some(c) = chars.next() {
-        if c == '\\' {
-            match chars.next() {
-                Some('n' | 'N') => out.push('\n'),
-                Some(other) => out.push(other),
-                None => {}
-            }
-        } else {
-            out.push(c);
-        }
-    }
-    out.trim().to_string()
+    crate::contentline::unescape(value).trim().to_string()
 }
 
 fn param<'a>(params: &'a [(String, String)], name: &str) -> Option<&'a str> {

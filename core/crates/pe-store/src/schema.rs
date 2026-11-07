@@ -274,6 +274,42 @@ CREATE INDEX thread_ids_by_thread ON thread_ids (account_id, thread_id);
 -- the conversation ids handed out, one row each: a new one is atomic whatever connection asks
 CREATE TABLE threads (id INTEGER PRIMARY KEY AUTOINCREMENT);
 "#,
+    // the address book the user keeps (cards.rs): people, their addresses (the default first), and groups of them
+    r#"
+CREATE TABLE cards (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL DEFAULT '',
+    first TEXT NOT NULL DEFAULT '',
+    last TEXT NOT NULL DEFAULT '',
+    nickname TEXT NOT NULL DEFAULT '',
+    company TEXT NOT NULL DEFAULT '',
+    notes TEXT NOT NULL DEFAULT '',
+    -- kind TAB number, a line each
+    phones TEXT NOT NULL DEFAULT '',
+    -- the vCard lines not edited here, written out again on export
+    extra TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE card_addresses (
+    card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+    address TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    PRIMARY KEY (card_id, address)
+) WITHOUT ROWID;
+CREATE INDEX card_addresses_by_address ON card_addresses (address COLLATE NOCASE);
+CREATE TABLE card_groups (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
+);
+CREATE TABLE card_members (
+    group_id INTEGER NOT NULL REFERENCES card_groups(id) ON DELETE CASCADE,
+    -- a card, or NULL for an address of no card
+    card_id INTEGER REFERENCES cards(id) ON DELETE CASCADE,
+    name TEXT NOT NULL DEFAULT '',
+    address TEXT NOT NULL DEFAULT '',
+    position INTEGER NOT NULL
+);
+CREATE INDEX card_members_by_group ON card_members (group_id, position);
+"#,
     // bounces (delivery failure and delay notices), marked in the list: by the sync from the BODYSTRUCTURE
     // (multipart/report; report-type=delivery-status), by the core when one is opened. Mail stored before is marked
     // from its cached source: the content type of its header, which ends at the first empty line

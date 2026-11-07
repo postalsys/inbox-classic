@@ -508,3 +508,5 @@ secrets-windows = mandaadihaldur
 secrets-mac = võtmehoidja
 secrets-linux = süsteemi võtmehoidja (Secret Service)
 error-no-such-file = sellist faili pole
+# review: new
+cards-file-too-big = See fail on aadressiraamatu jaoks liiga suur.

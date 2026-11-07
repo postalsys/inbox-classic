@@ -588,6 +588,103 @@ fn gmail_labels(server: &ImapKit, mailbox: &str, uid: u64) -> Vec<String> {
 }
 
 #[test]
+fn keeps_an_address_book() {
+    let Some(s) = setup() else { return };
+    s.server.add_message(
+        "INBOX",
+        "From: Mary Smith <mary@example.com>\r\nSubject: Hello\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHi\r\n",
+        &[],
+    );
+    s.server.add_message(
+        "INBOX",
+        "From: Marko Polo <marko@example.net>\r\nSubject: Travel\r\nDate: Mon, 6 Oct 2025 11:00:00 +0000\r\n\r\nHi\r\n",
+        &[],
+    );
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let mary = s
+        .core
+        .search(&Search::folder(inbox), Sort::default(), 0, 10)
+        .unwrap()
+        .into_iter()
+        .find(|m| m.info.subject == "Hello")
+        .unwrap();
+
+    // the sender added, once
+    let (card, new) = s.core.add_sender(inbox, mary.info.uid).unwrap();
+    assert!(new);
+    assert_eq!(
+        s.core.add_sender(inbox, mary.info.uid).unwrap(),
+        (card, false),
+        "the same card again"
+    );
+    let saved = s.core.card(card).unwrap().unwrap();
+    assert_eq!((saved.first.as_str(), saved.last.as_str()), ("Mary", "Smith"));
+
+    // a vCard and a CSV file read in, a card whose address is known left out
+    let dir = TempDir::new("cards");
+    let vcf = dir.path().join("cards.vcf");
+    std::fs::write(
+        &vcf,
+        "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Team Lead\r\nEMAIL:lead@example.org\r\nEND:VCARD\r\n",
+    )
+    .unwrap();
+    assert_eq!(
+        s.core.import_cards(&vcf).unwrap(),
+        pe_core::book::Imported { added: 1, skipped: 0 }
+    );
+    let csv = dir.path().join("cards.csv");
+    std::fs::write(
+        &csv,
+        "First Name,Last Name,E-mail Address\nMary,Smith,mary@example.com\nJohn,Doe,john@example.org\n",
+    )
+    .unwrap();
+    assert_eq!(
+        s.core.import_cards(&csv).unwrap(),
+        pe_core::book::Imported { added: 1, skipped: 1 }
+    );
+    assert_eq!(s.core.cards("").unwrap().len(), 3);
+
+    // written out, and read back the same
+    let out = dir.path().join("out.vcf");
+    assert_eq!(s.core.export_cards(&[], &out).unwrap(), 3);
+    let again = pe_core::vcard::read_vcards(&std::fs::read_to_string(&out).unwrap());
+    assert_eq!(again.len(), 3);
+
+    // a group, and the completion: the book first, its groups, then people heard from, no address twice
+    s.core
+        .save_group(&pe_store::Group {
+            name: "Marketing".into(),
+            members: vec![pe_store::Member {
+                card: Some(card),
+                ..Default::default()
+            }],
+            ..Default::default()
+        })
+        .unwrap();
+    let found = s.core.completions("mar", 10).unwrap();
+    let labels: Vec<&str> = found.iter().map(|c| c.label.as_str()).collect();
+    assert_eq!(
+        labels,
+        [
+            "Mary Smith <mary@example.com>",
+            "Mary Smith <mary@example.com>",
+            "Marko Polo <marko@example.net>"
+        ]
+    );
+    assert!(found[1].group && found[1].name == "Marketing");
+}
+
+#[test]
 fn all_inboxes_list_and_mark_every_account() {
     let Some(s) = setup() else { return };
     // a second account on a server of its own (ImapKit has one mailbox a server)

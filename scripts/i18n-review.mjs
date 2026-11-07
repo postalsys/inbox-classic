@@ -105,7 +105,7 @@ for (const language of languages) {
     const then = catalogs(language, reviewed);
     // the pairs (English, translation) the review saw: under the same id, or under an id that is gone now (a message
     // moved to another id or file). The same words reviewed in another place do not count, the context differs.
-    const pair = (english, message) => `${english.text}\u0000${message.text}`;
+    const pair = (english, message) => `${english.text.trimEnd()}\u0000${message.text.trimEnd()}`;
     const moved = new Set();
     for (const [id, message] of then) {
         const english = englishThen.get(id);
