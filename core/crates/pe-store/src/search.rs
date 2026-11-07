@@ -7,7 +7,7 @@ use rusqlite::{OptionalExtension, params, params_from_iter};
 
 use crate::messages::{COLUMNS, from_row};
 use crate::query::{Field, Place, Query, Term, Word};
-use crate::{AccountId, FolderId, Message, Result, Sort, SortField, Store};
+use crate::{AccountId, FolderId, Message, MessageRef, Result, Sort, SortField, Store};
 
 /// Which messages of the list are shown, whatever words are searched for
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -259,6 +259,41 @@ impl Store {
         ))?;
         statement
             .query_row(params_from_iter(values), |row| row.get(0))
+            .optional()
+    }
+
+    /// The messages before and after message `uid` of `folder` in what `search` finds in the order of `sort`, with one
+    /// pass over the list (LAG and LEAD of the ranked rows); None when the message is not in it
+    #[allow(clippy::type_complexity)]
+    pub fn neighbours(
+        &self,
+        search: &Search,
+        sort: Sort,
+        folder: FolderId,
+        uid: u64,
+    ) -> Result<Option<(Option<MessageRef>, Option<MessageRef>)>> {
+        let (condition, mut values) = search.condition(false);
+        let order = sort.order_by();
+        let at = values.len();
+        values.push(Value::Integer(folder));
+        values.push(Value::Integer(uid as i64));
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT pf, pu, nf, nu FROM (SELECT folder_id, uid, \
+             LAG(folder_id) OVER w AS pf, LAG(uid) OVER w AS pu, LEAD(folder_id) OVER w AS nf, LEAD(uid) OVER w AS nu \
+             FROM messages WHERE {condition} WINDOW w AS (ORDER BY {order})) WHERE folder_id = ?{} AND uid = ?{}",
+            at + 1,
+            at + 2
+        ))?;
+        let reference = |folder: Option<FolderId>, uid: Option<i64>| {
+            Some(MessageRef {
+                folder: folder?,
+                uid: uid? as u64,
+            })
+        };
+        statement
+            .query_row(params_from_iter(values), |row| {
+                Ok((reference(row.get(0)?, row.get(1)?), reference(row.get(2)?, row.get(3)?)))
+            })
             .optional()
     }
 

@@ -332,6 +332,56 @@ fn archives_into_an_archive_folder_made_for_it() {
 }
 
 #[test]
+fn steps_to_the_next_and_previous_message_of_a_list() {
+    let Some(s) = setup() else { return };
+    let dated = |subject: &str, date: &str| {
+        format!("From: Sender <sender@example.com>\r\nSubject: {subject}\r\nDate: {date}\r\n\r\nHi\r\n")
+    };
+    let oldest = s
+        .server
+        .add_message("INBOX", &dated("Oldest", "Mon, 6 Oct 2025 10:00:00 +0000"), &[]);
+    let middle = s
+        .server
+        .add_message("INBOX", &dated("Middle", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
+    let newest = s
+        .server
+        .add_message("INBOX", &dated("Newest", "Wed, 8 Oct 2025 10:00:00 +0000"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let list = Search::folder(inbox);
+    let at = |uid| MessageRef { folder: inbox, uid };
+    // newest first: Next goes to older mail, as the list reads down
+    let pair = |uid| s.core.neighbours(&list, Sort::default(), inbox, uid).unwrap();
+    assert_eq!(pair(newest), Some((None, Some(at(middle)))), "nothing before the first");
+    assert_eq!(pair(middle), Some((Some(at(newest)), Some(at(oldest)))));
+    assert_eq!(pair(oldest), Some((Some(at(middle)), None)), "nothing after the last");
+    assert_eq!(pair(9999), None, "a message not in the list");
+    assert!(s.core.has_message(inbox, middle).unwrap() && !s.core.has_message(inbox, 9999).unwrap());
+    // the list that is not all of the folder: only the unread
+    let unread = Search {
+        show: pe_core::Show::Unread,
+        ..Search::folder(inbox)
+    };
+    s.core.set_seen(inbox, middle, true).unwrap();
+    let pair = |uid| s.core.neighbours(&unread, Sort::default(), inbox, uid).unwrap();
+    assert_eq!(
+        pair(newest),
+        Some((None, Some(at(oldest)))),
+        "the read one is not in that list"
+    );
+    assert_eq!(pair(middle), None);
+}
+
+#[test]
 fn empties_deleted_items_and_junk() {
     let Some(s) = setup() else { return };
     s.server.add_message("Trash", &rfc822("Old one", "Gone"), &[]);
