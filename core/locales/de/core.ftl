@@ -54,6 +54,141 @@ header-subject = Betreff
 quote-original = ----- Ursprüngliche Nachricht -----
 fold-show-earlier = Frühere Nachrichten anzeigen
 
+## Unzustellbarkeitsberichte: die Karte über einer Nachricht, die nicht zugestellt wurde
+
+# review: new
+bounce-failed = Ihre Nachricht wurde nicht zugestellt
+# review: new
+bounce-delayed = Ihre Nachricht wurde noch nicht zugestellt
+# review: new
+bounce-delayed-note = Ihr Mailserver versucht weiterhin, sie zuzustellen. Sie müssen sie nicht erneut senden.
+# review: new
+bounce-show-message = Nachricht anzeigen, die nicht zugestellt wurde
+# review: new
+bounce-what-to-do = Was Sie tun können:
+# review: new
+bounce-delayed-do = Noch nichts. Wenn sie weiterhin nicht zugestellt werden kann, erhalten Sie einen weiteren Bericht.
+# review: new
+bounce-delayed-row-do = Noch nichts. Ihr Mailserver versucht weiterhin, sie zuzustellen, und Sie erhalten einen weiteren Bericht, wenn es nicht gelingt.
+# review: new
+bounce-details = Details
+# review: new
+bounce-someone = Ein Empfänger
+# review: new
+bounce-server = Server: { $server }
+# review: new
+bounce-status = Status: { $status }
+# review: new
+bounce-reported-by = Gemeldet von: { $server }
+# review: new
+bounce-retry-minutes = Der empfangende Server bittet, { $count ->
+    [one] eine Minute
+   *[other] { $count } Minuten
+} bis zum nächsten Versuch zu warten.
+# review: new
+bounce-retry-hours = Der empfangende Server bittet, { $count ->
+    [one] eine Stunde
+   *[other] { $count } Stunden
+} bis zum nächsten Versuch zu warten.
+# review: new
+bounce-blocklist = Sperrliste: { $lists }
+# review: new
+bounce-user-unknown = Die Adresse existiert nicht
+# review: new
+bounce-user-unknown-why = Der empfangende Server hat kein Postfach mit dieser Adresse. Sie ist vielleicht falsch geschrieben, oder die Person ist nicht mehr dort.
+# review: new
+bounce-user-unknown-do = Prüfen Sie die Schreibweise der Adresse, oder fragen Sie die Person nach ihrer aktuellen Adresse.
+# review: new
+bounce-invalid-address = Die Adresse ist ungültig
+# review: new
+bounce-invalid-address-why = Die Adresse ist nicht so geschrieben, dass E-Mail an sie gesendet werden kann.
+# review: new
+bounce-invalid-address-do = Suchen Sie nach Tippfehlern, etwa einem Leerzeichen, einem fehlenden Buchstaben oder nichts nach dem @.
+# review: new
+bounce-mailbox-disabled = Das Postfach ist geschlossen
+# review: new
+bounce-mailbox-disabled-why = Die Adresse existiert, aber ihr Postfach wurde abgeschaltet oder wird nicht mehr verwendet.
+# review: new
+bounce-mailbox-disabled-do = Erreichen Sie die Person auf anderem Weg, und fragen Sie nach einer Adresse, die sie jetzt verwendet.
+# review: new
+bounce-mailbox-full = Das Postfach ist voll
+# review: new
+bounce-mailbox-full-why = Im Postfach des Empfängers ist kein Platz für neue E-Mail.
+# review: new
+bounce-mailbox-full-do = Senden Sie sie in ein paar Tagen erneut, oder benachrichtigen Sie die Person auf anderem Weg. Große Anlagen werden zuerst abgelehnt.
+# review: new
+bounce-spam-blocked = Als Spam abgelehnt
+# review: new
+bounce-spam-blocked-why = Der empfangende Server hat die Nachricht für Spam gehalten.
+# review: new
+bounce-spam-blocked-do = Senden Sie sie erneut ohne das, was nach Spam aussieht, etwa viele Links, gekürzte Links oder eine große Anlage. Wenn es wieder passiert, fragen Sie Ihren E-Mail-Anbieter.
+# review: new
+bounce-virus-detected = Wegen eines Virus abgelehnt
+# review: new
+bounce-virus-detected-why = Der empfangende Server hat in der Nachricht oder ihren Anlagen einen Virus oder andere schädliche Inhalte gefunden.
+# review: new
+bounce-virus-detected-do = Prüfen Sie die Anlagen mit einem Virenscanner. Manche Server lehnen jedes Programm und jedes Archiv ab; teilen Sie solche Dateien stattdessen als Link.
+# review: new
+bounce-ip-blocklisted = Ihr Mailserver steht auf einer Sperrliste
+# review: new
+bounce-ip-blocklisted-why = Der empfangende Server lehnt E-Mail von dem Server ab, der Ihre gesendet hat, weil dessen Adresse auf einer Sperrliste steht.
+# review: new
+bounce-ip-blocklisted-do = Es liegt nicht an der Nachricht. Leiten Sie diesen Bericht an Ihren E-Mail-Anbieter weiter, und bitten Sie ihn, den Server von der Liste entfernen zu lassen.
+# review: new
+bounce-domain-blocklisted = Eine Domain steht auf einer Sperrliste
+# review: new
+bounce-domain-blocklisted-why = Der empfangende Server lehnt die Nachricht ab, weil die Domain Ihrer Adresse oder eine Domain in den Links der Nachricht auf einer Sperrliste steht.
+# review: new
+bounce-domain-blocklisted-do = Wenn die Nachricht Links enthält, versuchen Sie es ohne sie. Andernfalls leiten Sie diesen Bericht an die Person weiter, die E-Mail für Ihre Domain betreut.
+# review: new
+bounce-policy-blocked = Von den Regeln des empfangenden Servers abgelehnt
+# review: new
+bounce-policy-blocked-why = Die Regeln des empfangenden Servers lassen diese Nachricht nicht durch, zum Beispiel wegen ihrer Größe, ihrer Anlagen oder ihres Absenders.
+# review: new
+bounce-policy-blocked-do = Die eigenen Worte des Servers unter Details nennen oft den Grund. Fragen Sie den Empfänger, ob er solche E-Mail annehmen kann.
+# review: new
+bounce-geo-blocked = Wegen der Herkunft abgelehnt
+# review: new
+bounce-geo-blocked-why = Der empfangende Server nimmt keine E-Mail aus dem Land oder Netz an, in dem Ihr Mailserver steht.
+# review: new
+bounce-geo-blocked-do = Erreichen Sie die Person auf anderem Weg, oder fragen Sie Ihren E-Mail-Anbieter.
+# review: new
+bounce-relay-denied = Der Server hat sie nicht weitergeleitet
+# review: new
+bounce-relay-denied-why = Ein Server hat die Zustellung abgelehnt, oft weil ohne Anmeldung gesendet wurde oder über einen Server, der für diesen Empfänger nicht zuständig ist.
+# review: new
+bounce-relay-denied-do = Prüfen Sie den Postausgangsserver des Kontos unter Datei > Konten, und ob er sich anmeldet.
+# review: new
+bounce-auth-failure = Ihre Absenderadresse konnte nicht bestätigt werden
+# review: new
+bounce-auth-failure-why = Der empfangende Server konnte nicht bestätigen, dass die Nachricht wirklich von Ihrer Domain kommt (SPF, DKIM oder DMARC).
+# review: new
+bounce-auth-failure-do = Leiten Sie diesen Bericht an die Person weiter, die E-Mail für Ihre Domain betreut: Ihre Einstellungen müssen korrigiert werden. Bis dahin hilft es vielleicht, über den Server Ihres Anbieters zu senden.
+# review: new
+bounce-rate-limited = Zu viele Nachrichten auf einmal
+# review: new
+bounce-rate-limited-why = Der empfangende Server nimmt von Ihrem Mailserver vorerst weniger Nachrichten an.
+# review: new
+bounce-rate-limited-do = Warten Sie eine Weile, und senden Sie sie erneut. Wenn Sie an viele Personen schreiben, senden Sie an weniger auf einmal.
+# review: new
+bounce-greylisting = Kurz zurückgehalten
+# review: new
+bounce-greylisting-why = Der empfangende Server bittet unbekannte Absender, es etwas später erneut zu versuchen, eine übliche Prüfung gegen Spam.
+# review: new
+bounce-greylisting-do = Nichts. Mailserver versuchen es von selbst erneut, und die Nachricht wird meist innerhalb einer Stunde zugestellt.
+# review: new
+bounce-server-error = Der empfangende Server hatte ein Problem
+# review: new
+bounce-server-error-why = Der empfangende Server war nicht erreichbar oder konnte die Nachricht wegen eines eigenen Problems nicht annehmen.
+# review: new
+bounce-server-error-do = Senden Sie sie später erneut. Wenn es weiter fehlschlägt, prüfen Sie den Teil der Adresse nach dem @ auf Tippfehler.
+# review: new
+bounce-unknown = Nicht zugestellt
+# review: new
+bounce-unknown-why = Der Bericht sagt nicht klar, warum.
+# review: new
+bounce-unknown-do = Die eigenen Worte des Servers unter Details sagen vielleicht mehr. Wenn nicht, leiten Sie diesen Bericht an Ihren E-Mail-Anbieter weiter.
+
 ## Several messages selected
 
 selection-title = { $count ->
