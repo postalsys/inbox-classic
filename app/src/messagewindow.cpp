@@ -41,10 +41,6 @@ struct MessageWindow {
     // what a find that found nothing says (WM_NOT_FOUND)
     std::wstring notFound;
     Reader reader;
-
-    PeSearch Search() const {
-        return {order.folder, order.allInboxes, PE_SHOW_ALL, order.text.c_str(), false, nullptr, 0, order.hideIgnored};
-    }
 };
 
 // the message windows open, in the order they opened
@@ -57,11 +53,10 @@ MessageWindow* StateOf(HWND hwnd) {
 // the messages before and after it in its list, while the list has it; one that left it (read, in a list of unread
 // ones) keeps those it had
 void FindNeighbours(MessageWindow* state) {
-    PeSearch search = state->Search();
     int64_t previousFolder = 0, nextFolder = 0;
     uint64_t previousUid = 0, nextUid = 0;
-    if (pe_message_neighbours(state->core, &search, state->order.sort, state->order.ascending, state->folder, state->uid, &previousFolder,
-                              &previousUid, &nextFolder, &nextUid)) {
+    if (pe_list_view_neighbours(state->core, state->order.view.get(), state->folder, state->uid, &previousFolder, &previousUid,
+                                &nextFolder, &nextUid)) {
         state->previousFolder = previousFolder;
         state->previousUid = previousFolder ? previousUid : 0;
         state->nextFolder = nextFolder;
@@ -137,12 +132,11 @@ void Show(MessageWindow* state, int64_t folder, uint64_t uid, const PeMessage* r
 // the next unread message of its list; at the end of it, the main window says none is left (the window stays in its
 // list, it does not go on to another folder)
 void NextUnread(MessageWindow* state) {
-    PeSearch search = state->Search();
     int64_t folder = 0;
     uint64_t uid = 0;
     char* question = nullptr;
-    PeNextUnread step = pe_next_unread_step(state->core, &search, state->order.sort, state->order.ascending, state->folder, state->uid,
-                                            &folder, &uid, &question);
+    PeNextUnread step =
+        pe_list_view_next_unread_step(state->core, state->order.view.get(), state->folder, state->uid, &folder, &uid, &question);
     core::String unused(question);
     if (step == PE_NEXT_UNREAD_MESSAGE && uid) {
         Show(state, folder, uid);
@@ -408,7 +402,7 @@ std::vector<HWND> MessageWindows() {
 
 }  // namespace
 
-void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, const MessageListOrder& order, int64_t folder, uint64_t uid,
+void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrder order, int64_t folder, uint64_t uid,
                        const PeMessage* row) {
     // open already: brought to the front
     for (HWND hwnd : g_messageWindows) {
@@ -444,7 +438,7 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, const MessageL
     state->main = main;
     state->core = core;
     state->mailbox = mailbox;
-    state->order = order;
+    state->order = std::move(order);
     CreateToolbar(state);
     state->reader.Create(hwnd, core);
     // what the window does on a key also while the message has the keyboard
