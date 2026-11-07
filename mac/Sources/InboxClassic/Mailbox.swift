@@ -66,6 +66,8 @@ public final class Mailbox: NSObject {
     private var pages: [(offset: UInt64, rows: [Message])] = []
     private let pageSize: UInt64 = 100
     private var folderColumn = false
+    /// what Subject and From gave the Folder column, given back when it goes
+    private var folderRoom: [CGFloat] = []
     /// Sent Items and Drafts: the person column is To, with the recipients
     private var recipientsColumn = false
 
@@ -454,12 +456,20 @@ public final class Mailbox: NSObject {
         list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue))?.title = title
         guard severalFolders != folderColumn else { return }
         folderColumn = severalFolders
-        // the Subject column gives the Folder column its room, and gets it back: the list stays as wide as its pane
+        // Subject, then From, give the Folder column its room, and get it back: the list stays as wide as its pane, and
+        // Received and Size stay whole
         let id = NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue)
-        let subject = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.subject.rawValue))
+        let givers = [ColumnID.subject, .from].compactMap { list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier($0.rawValue)) }
         if folderColumn {
             let column = makeColumn(.folder, title: title, width: 130)
-            subject.map { $0.width = max(120, $0.width - column.width) }
+            // its width and the gap a column adds
+            var needed = column.width + list.intercellSpacing.width
+            folderRoom = givers.map { giver in
+                let given = min(needed, max(0, giver.width - 100))
+                giver.width -= given
+                needed -= given
+                return given
+            }
             list.addTableColumn(column)
             // after Subject, before Received, as the Windows list has it at its end
             if let at = list.tableColumns.firstIndex(of: column),
@@ -467,7 +477,10 @@ public final class Mailbox: NSObject {
                 list.moveColumn(at, toColumn: received)
             }
         } else if let column = list.tableColumn(withIdentifier: id) {
-            subject.map { $0.width += column.width }
+            for (giver, given) in zip(givers, folderRoom) {
+                giver.width += given
+            }
+            folderRoom = []
             list.removeTableColumn(column)
         }
     }
