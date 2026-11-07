@@ -46,6 +46,12 @@ cmd-junk = Märgi &rämpspostiks
 cmd-not-junk = Märgi &tavapostiks
 # review: new
 cmd-archive = A&rhiveeri
+# review: new
+cmd-expand-all-threads = &Laienda kõik vestlused
+# review: new
+cmd-collapse-all-threads = &Ahenda kõik vestlused
+# review: new
+ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
 cmd-notify = Teavita &uuest postist
 cmd-open = &Ava Inbox Classic
 cmd-default-app = Määra &vaikimisi meiliprogrammiks...

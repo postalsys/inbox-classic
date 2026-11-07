@@ -1076,10 +1076,16 @@ pub struct PeSearch {
     pub show: PeShow,
     /// UTF-8, NULL or empty for no words
     pub text: *const c_char,
+    /// One row a conversation (`PeMessage.thread` says each row's place), with the conversations `expanded` open
+    /// (`expanded_count` of them); false for one row a message
+    pub threads: bool,
+    pub expanded: *const i64,
+    pub expanded_count: usize,
 }
 
 /// # Safety
-/// `search` must be NULL or point to a search whose text is NULL or NUL-terminated.
+/// `search` must be NULL or point to a search whose text is NULL or NUL-terminated, and whose `expanded` is NULL or
+/// points to `expanded_count` conversation ids.
 pub(crate) unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Search> {
     // SAFETY: as the caller guarantees
     let s = unsafe { search.as_ref() }?;
@@ -1097,6 +1103,14 @@ pub(crate) unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Searc
         },
         // SAFETY: as the caller guarantees
         text: unsafe { arg(s.text) }.unwrap_or_default().to_string(),
+        threads: s.threads.then(|| {
+            if s.expanded.is_null() || s.expanded_count == 0 {
+                Vec::new()
+            } else {
+                // SAFETY: as the caller guarantees
+                unsafe { std::slice::from_raw_parts(s.expanded, s.expanded_count) }.to_vec()
+            }
+        }),
     })
 }
 
@@ -1279,6 +1293,15 @@ pub struct PeMessage {
     pub flag_color: u8,
     pub answered: bool,
     pub has_attachments: bool,
+    /// Its row's place in a list grouped by conversation (`PeSearch.threads`), all 0 and false otherwise: the
+    /// conversation; 0 for its first message's row, 1 for the others under it when expanded; how many messages it has
+    /// in the list and how many are unread (a collapsed row of several shows a +, and is bold when any is unread);
+    /// whether it is expanded
+    pub thread: i64,
+    pub thread_depth: u32,
+    pub thread_count: u32,
+    pub thread_unread: u32,
+    pub thread_expanded: bool,
 }
 
 /// A page of the message list; free with `pe_message_list_free`
@@ -1325,10 +1348,47 @@ pub unsafe extern "C" fn pe_messages(
                     flag_color: info.flag_color().map_or(0, |c| c as u8),
                     answered: info.answered(),
                     has_attachments: info.has_attachments,
+                    thread: m.thread.map_or(0, |t| t.thread),
+                    thread_depth: m.thread.map_or(0, |t| t.depth),
+                    thread_count: m.thread.map_or(0, |t| t.count),
+                    thread_unread: m.thread.map_or(0, |t| t.unread),
+                    thread_expanded: m.thread.is_some_and(|t| t.expanded),
                 }
             })))
         })
     }
+}
+
+/// The conversations of the list `search` makes that have more than one message there (what View > Expand All
+/// Conversations opens), into `threads`, at most `capacity`; how many there are (call again with a larger buffer when
+/// that is more than `capacity`). 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `search` a valid search, `threads` NULL or room for `capacity` ids.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_threads_with_replies(
+    core: *const PeCore,
+    search: *const PeSearch,
+    threads: *mut i64,
+    capacity: usize,
+) -> usize {
+    // SAFETY: as the caller guarantees
+    let Some(search) = (unsafe { search_of(search) }) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    let found = unsafe {
+        with(core, Vec::new(), |core| {
+            core.threads_with_replies(&search).unwrap_or_default()
+        })
+    };
+    if !threads.is_null() {
+        for (at, thread) in found.iter().take(capacity).enumerate() {
+            // SAFETY: the caller gave room for `capacity`
+            unsafe { *threads.add(at) = *thread };
+        }
+    }
+    found.len()
 }
 
 /// Where message `uid` of `folder` is in what `search` finds in this order, -1 when it is not there

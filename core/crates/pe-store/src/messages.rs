@@ -146,6 +146,8 @@ pub struct Message {
     pub info: MessageInfo,
     /// Whether the source is cached
     pub cached: bool,
+    /// Its row's place in a list grouped by conversation; None in a list of one row a message
+    pub thread: Option<crate::ThreadPlace>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -217,6 +219,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
         id: row.get(0)?,
         folder_id: row.get(1)?,
         cached: row.get(15)?,
+        thread: None,
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,

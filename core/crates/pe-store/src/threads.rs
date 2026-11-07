@@ -218,6 +218,33 @@ impl Store {
     }
 }
 
+/// A row's place in a list grouped by conversation ([`Search::threads`])
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct ThreadPlace {
+    pub thread: i64,
+    /// 0 for a conversation's first message, 1 for the others under it when it is expanded
+    pub depth: u32,
+    /// The messages of the conversation in the list, and how many of them are unread
+    pub count: u32,
+    pub unread: u32,
+    /// The conversation is expanded (its other messages under this row)
+    pub expanded: bool,
+}
+
+/// A row of [`Store::thread_rows`] as a message of the list
+pub(crate) fn placed(row: ThreadRow, expanded: &[i64]) -> Message {
+    Message {
+        thread: Some(ThreadPlace {
+            thread: row.thread,
+            depth: row.depth,
+            count: row.count,
+            unread: row.unread,
+            expanded: expanded.contains(&row.thread),
+        }),
+        ..row.message
+    }
+}
+
 /// A message to thread: its row id, its Message-ID, In-Reply-To and References as stored
 type Unthreaded = (i64, Option<String>, Option<String>, String);
 
@@ -492,6 +519,46 @@ impl Store {
             .map(|i| at + i as u64))
     }
 
+    /// The conversations in what `search` finds that have more than one message there: what Expand All opens
+    pub fn threads_with_replies(&self, search: &Search) -> Result<Vec<i64>> {
+        let (condition, values) = search.condition(false);
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT thread_id FROM messages WHERE {condition} GROUP BY thread_id HAVING COUNT(*) > 1"
+        ))?;
+        statement
+            .query_map(params_from_iter(values), |row| row.get(0))?
+            .collect()
+    }
+
+    /// The messages of the rows in `ranges` (start included, end not) of the list grouped by conversation: a collapsed
+    /// conversation's row stands for all of its messages in the list
+    pub(crate) fn thread_refs_in_ranges(
+        &self,
+        search: &Search,
+        sort: Sort,
+        ranges: &[(u64, u64)],
+    ) -> Result<Vec<MessageRef>> {
+        let mut refs = Vec::new();
+        let mut collapsed = Vec::new();
+        for &(start, end) in ranges {
+            for message in self.search(search, sort, start, end - start)? {
+                match message.thread {
+                    Some(place) if place.depth == 0 && !place.expanded && place.count > 1 => {
+                        collapsed.push(place.thread)
+                    }
+                    _ => refs.push(MessageRef {
+                        folder: message.folder_id,
+                        uid: message.info.uid,
+                    }),
+                }
+            }
+        }
+        refs.extend(self.thread_refs(search, &collapsed)?);
+        refs.sort_by_key(|r| (r.folder, r.uid));
+        refs.dedup();
+        Ok(refs)
+    }
+
     /// The messages of the conversations of `refs` in the list `search` makes: what an action on a collapsed
     /// conversation's row acts on
     pub fn thread_refs(&self, search: &Search, threads: &[i64]) -> Result<Vec<MessageRef>> {
@@ -614,6 +681,42 @@ mod tests {
         assert_eq!(store.thread_row_index(&list, newest, &open, inbox, 2).unwrap(), Some(3));
         // what an action on the collapsed row acts on
         assert_eq!(store.thread_refs(&list, &[a]).unwrap().len(), 3);
+        assert_eq!(store.threads_with_replies(&list).unwrap(), [a]);
+
+        // the same through the list's own calls, grouped: a collapsed row selects its conversation
+        let grouped = Search {
+            threads: Some(Vec::new()),
+            ..Search::folder(inbox)
+        };
+        assert_eq!(store.count_search(&grouped).unwrap(), (2, 1));
+        let picked = store.refs_in_ranges(&grouped, newest, &[(0, 1)]).unwrap();
+        assert_eq!(picked.len(), 3, "the three messages of the collapsed conversation");
+        assert_eq!(
+            store.positions(&grouped, newest, &picked).unwrap(),
+            [0],
+            "all on its one row"
+        );
+        let open = Search {
+            threads: Some(vec![a]),
+            ..Search::folder(inbox)
+        };
+        assert_eq!(
+            store.refs_in_ranges(&open, newest, &[(1, 2)]).unwrap().len(),
+            1,
+            "an open one's row is one message"
+        );
+        assert_eq!(
+            store.search(&open, newest, 0, 10).unwrap()[0]
+                .thread
+                .map(|t| t.expanded),
+            Some(true)
+        );
+        let (before, after) = store.neighbours(&open, newest, inbox, 3).unwrap().unwrap();
+        assert_eq!(
+            (before.map(|r| r.uid), after.map(|r| r.uid)),
+            (Some(1), Some(4)),
+            "the rows around b"
+        );
     }
 
     #[test]

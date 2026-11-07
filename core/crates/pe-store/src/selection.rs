@@ -70,6 +70,9 @@ impl Store {
         if ranges.is_empty() {
             return Ok(Vec::new());
         }
+        if search.threads.is_some() {
+            return self.thread_refs_in_ranges(search, sort, &ranges);
+        }
         let (positioned, mut values) = search.positioned(sort);
         let mut wanted = Vec::with_capacity(ranges.len());
         for (start, end) in &ranges {
@@ -100,6 +103,18 @@ impl Store {
     pub fn positions(&self, search: &Search, sort: Sort, refs: &[MessageRef]) -> Result<Vec<u64>> {
         if refs.is_empty() {
             return Ok(Vec::new());
+        }
+        if search.threads.is_some() {
+            // each message's row: its conversation's while that is collapsed, so several fall on one
+            let mut found = Vec::new();
+            for r in refs {
+                if let Some(at) = self.search_index(search, sort, r.folder, r.uid)? {
+                    found.push(at);
+                }
+            }
+            found.sort_unstable();
+            found.dedup();
+            return Ok(found);
         }
         self.db.execute_batch(
             "CREATE TEMP TABLE IF NOT EXISTS picked_refs (folder_id INTEGER, uid INTEGER, PRIMARY KEY (folder_id, uid)) \

@@ -482,6 +482,11 @@ typedef struct PeSearch {
   enum PeShow show;
   // UTF-8, NULL or empty for no words
   const char *text;
+  // One row a conversation (`PeMessage.thread` says each row's place), with the conversations `expanded` open
+  // (`expanded_count` of them); false for one row a message
+  bool threads;
+  const int64_t *expanded;
+  size_t expanded_count;
 } PeSearch;
 
 // A row of the message list
@@ -505,6 +510,15 @@ typedef struct PeMessage {
   uint8_t flag_color;
   bool answered;
   bool has_attachments;
+  // Its row's place in a list grouped by conversation (`PeSearch.threads`), all 0 and false otherwise: the
+  // conversation; 0 for its first message's row, 1 for the others under it when expanded; how many messages it has
+  // in the list and how many are unread (a collapsed row of several shows a +, and is bold when any is unread);
+  // whether it is expanded
+  int64_t thread;
+  uint32_t thread_depth;
+  uint32_t thread_count;
+  uint32_t thread_unread;
+  bool thread_expanded;
 } PeMessage;
 
 // The event of a message's calendar part, as the reading pane shows it
@@ -1306,6 +1320,17 @@ struct PeMessageList *pe_messages(const struct PeCore *core,
                                   bool ascending,
                                   uint64_t offset,
                                   uint64_t limit);
+
+// The conversations of the list `search` makes that have more than one message there (what View > Expand All
+// Conversations opens), into `threads`, at most `capacity`; how many there are (call again with a larger buffer when
+// that is more than `capacity`). 0 on failure.
+//
+// # Safety
+// `core` must be a live handle, `search` a valid search, `threads` NULL or room for `capacity` ids.
+size_t pe_threads_with_replies(const struct PeCore *core,
+                               const struct PeSearch *search,
+                               int64_t *threads,
+                               size_t capacity);
 
 // Where message `uid` of `folder` is in what `search` finds in this order, -1 when it is not there
 //

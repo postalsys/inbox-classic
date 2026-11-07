@@ -421,6 +421,18 @@ Screenshots: `read-16-window`
 - Reply in the window opens a reply to that message
 - closing the window leaves the main window as it was
 
+## 34e. Conversations
+
+Screenshots: `threads-1-collapsed`, `threads-2-expanded`, `threads-3-options-off`
+
+- three messages of one conversation (replies naming the first in References) are put into the Inbox on the server
+- the Inbox lists the conversation once, on its first message, with the count of its messages, bold while one is unread
+- expanding it shows its replies under it, indented
+- collapsing it hides them again
+- Mark Read on the collapsed row marks all three read on the server
+- with Group messages by conversation turned off in Options, the list has the three messages each on a row of its own
+- turned on again, the conversation is one row again
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`

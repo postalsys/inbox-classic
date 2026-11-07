@@ -46,6 +46,12 @@ cmd-junk = Marcar como correo no &deseado
 cmd-not-junk = Marcar como correo de&seado
 # review: new
 cmd-archive = A&rchivar
+# review: new
+cmd-expand-all-threads = &Expandir todas las conversaciones
+# review: new
+cmd-collapse-all-threads = &Contraer todas las conversaciones
+# review: new
+ui-group-by-conversation = &Agrupar los mensajes por conversación
 cmd-notify = &Avisar de correo nuevo
 cmd-open = &Abrir Inbox Classic
 cmd-default-app = Usar como programa de correo &predeterminado...

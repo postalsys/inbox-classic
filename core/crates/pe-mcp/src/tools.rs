@@ -563,6 +563,7 @@ fn list_messages(call: &Call, args: &Args) -> Outcome {
             Show::All
         },
         text: String::new(),
+        threads: None,
     };
     let rows = call
         .core
@@ -600,6 +601,7 @@ fn search_messages(call: &Call, args: &Args) -> Outcome {
         scope: Scope::Everywhere,
         show: Show::All,
         text: query,
+        threads: None,
     };
     // the search covers every account: what this agent may not see is passed over, page by page
     let mut found = Vec::new();

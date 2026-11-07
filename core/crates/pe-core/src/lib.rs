@@ -657,6 +657,11 @@ impl Core {
         Ok(self.store().thread_row_index(search, sort, expanded, folder, uid)?)
     }
 
+    /// The conversations of the list `search` makes that have more than one message there: what Expand All opens
+    pub fn threads_with_replies(&self, search: &Search) -> Result<Vec<i64>> {
+        Ok(self.store().threads_with_replies(search)?)
+    }
+
     /// The messages of the conversations `threads` in the list `search` makes: what an action on their collapsed rows
     /// acts on
     pub fn thread_refs(&self, search: &Search, threads: &[i64]) -> Result<Vec<MessageRef>> {

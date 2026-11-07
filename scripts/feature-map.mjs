@@ -361,6 +361,27 @@ const sections = [
                 checked: ["The suggested name is the attachment's", 'The saved file is byte for byte what was sent']
             },
             {
+                shot: 'threads-1-collapsed',
+                name: 'Conversations',
+                what: "The list groups the messages that answer each other into conversations (by their Message-IDs, In-Reply-To and References; on Gmail by Gmail's own conversations), one row each on its first message with how many it has, bold while one is unread, placed by its newest message. An action on a collapsed conversation acts on all of its messages.",
+                how: 'On by default; Tools > Options > Group messages by conversation turns it off.',
+                checked: ['The Inbox lists the conversation once, with its count', 'Mark Read on the collapsed row marks all three read on the server']
+            },
+            {
+                shot: 'threads-2-expanded',
+                name: 'Expanding a conversation',
+                what: 'The + in front of a conversation (or the Right key) shows its other messages under it, indented, oldest first; the - (or Left) hides them. View > Expand All Conversations and Collapse All Conversations do it for every conversation of the list.',
+                how: 'Click the + or -, Right and Left, or the View menu.',
+                checked: ['Expanding shows the replies under the first message, collapsing hides them']
+            },
+            {
+                shot: 'threads-3-options-off',
+                name: 'One row a message',
+                what: 'With Group messages by conversation turned off in Options, every message is a row of its own again.',
+                how: 'Tools > Options (Inbox Classic > Settings on the Mac, Preferences on Linux).',
+                checked: ['With the option off the three messages are three rows; on again, one']
+            },
+            {
                 shot: 'read-16-window',
                 name: 'A message in a window of its own',
                 what: "Double-click (or Enter) opens a message in a window of its own, as in Outlook Express: its header, pictures, files and text as the reading pane shows them, with Reply, Reply All, Forward, Print, Delete, Archive and Junk, and Previous and Next through the list it came from. Several can be open at once. A draft opens to be finished instead.",

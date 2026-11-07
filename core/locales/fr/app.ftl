@@ -46,6 +46,12 @@ cmd-junk = Marquer comme in&désirable
 cmd-not-junk = Marquer comme non indé&sirable
 # review: new
 cmd-archive = A&rchiver
+# review: new
+cmd-expand-all-threads = &Développer toutes les conversations
+# review: new
+cmd-collapse-all-threads = Ré&duire toutes les conversations
+# review: new
+ui-group-by-conversation = &Regrouper les messages par conversation
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...

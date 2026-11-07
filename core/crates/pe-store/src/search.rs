@@ -41,6 +41,8 @@ pub struct Search {
     pub show: Show,
     /// The words searched for, as typed; empty for none
     pub text: String,
+    /// Grouped by conversation, with these conversations expanded; None for one row a message
+    pub threads: Option<Vec<i64>>,
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
@@ -217,6 +219,13 @@ pub struct IndexText {
 impl Store {
     /// A page of what `search` finds, in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
+        if let Some(expanded) = &search.threads {
+            return Ok(self
+                .thread_rows(search, sort, expanded, offset, limit)?
+                .into_iter()
+                .map(|row| crate::threads::placed(row, expanded))
+                .collect());
+        }
         let in_order = matches!(sort.field, SortField::Date | SortField::Received);
         let (condition, mut values) = search.condition(in_order);
         let at = values.len();
@@ -239,6 +248,9 @@ impl Store {
 
     /// How many messages `search` finds, and how many of them are unread
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
+        if let Some(expanded) = &search.threads {
+            return self.count_thread_rows(search, Sort::default(), expanded);
+        }
         let (condition, values) = search.condition(false);
         let mut statement = self.db.prepare_cached(&format!(
             "SELECT COUNT(*), COALESCE(SUM(NOT seen), 0) FROM messages WHERE {condition}"
@@ -248,6 +260,9 @@ impl Store {
 
     /// Where the message `uid` of `folder` is in what `search` finds in the order of `sort`; None when it is not there
     pub fn search_index(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<u64>> {
+        if let Some(expanded) = &search.threads {
+            return self.thread_row_index(search, sort, expanded, folder, uid);
+        }
         let (positioned, mut values) = search.positioned(sort);
         let at = values.len();
         values.push(Value::Integer(folder));
@@ -272,6 +287,24 @@ impl Store {
         folder: FolderId,
         uid: u64,
     ) -> Result<Option<(Option<MessageRef>, Option<MessageRef>)>> {
+        if search.threads.is_some() {
+            // the rows above and below its row
+            let Some(at) = self.search_index(search, sort, folder, uid)? else {
+                return Ok(None);
+            };
+            let row = |at: u64| -> Result<Option<MessageRef>> {
+                Ok(self
+                    .search(search, sort, at, 1)?
+                    .into_iter()
+                    .next()
+                    .map(|m| MessageRef {
+                        folder: m.folder_id,
+                        uid: m.info.uid,
+                    }))
+            };
+            let before = if at == 0 { None } else { row(at - 1)? };
+            return Ok(Some((before, row(at + 1)?)));
+        }
         let (condition, mut values) = search.condition(false);
         let order = sort.order_by();
         let at = values.len();
@@ -541,6 +574,7 @@ mod tests {
             scope: Scope::Everywhere,
             show: Show::Unread,
             text: "old".into(),
+            threads: None,
         };
         assert_eq!(found(&store, &search), [9]);
     }
