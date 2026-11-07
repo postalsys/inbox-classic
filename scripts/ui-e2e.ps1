@@ -20,6 +20,7 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr FindWindow(string cls, string title);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr FindWindowEx(IntPtr parent, IntPtr after, string cls, string title);
 [DllImport("user32.dll")] public static extern IntPtr GetDlgItem(IntPtr hwnd, int id);
+[DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
 [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr SendMessage(IntPtr hwnd, uint message, IntPtr wParam, string lParam);
@@ -692,7 +693,7 @@ try {
     }
     function Rows { ListCount $list }
     # the rows of the list with this subject
-    function SubjectRows([string]$s) { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $s }) }
+    function SubjectRows([string]$s) { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 4) -eq $s }) }
     # a tree's row by its account and folder, their unread counts and "(current)" left out; Zero when it is not there
     function TreeRow([IntPtr]$t, [string]$account, [string]$folder) {
         $name = { param($item) ([Native.Win]::RemoteTreeText($t, $item)) -replace ' \((\d+|current)\)$', '' }
@@ -1323,7 +1324,7 @@ public static class Dragger {
     SelectFolder 1
     Check ($null -ne (WaitFor { if ((Rows) -ge 2) { Rows } })) 'Sent Items has what was sent'
     SelectRow 0
-    $firstTo = [Native.Win]::RemoteListText($list, 0, 2)
+    $firstTo = [Native.Win]::RemoteListText($list, 0, 3)
     Check ($firstTo -eq 'Fay') "Sent Items names whom each message went to, in a To column ($firstTo)"
     Shot $main 'main-3-sent-items'
     SelectFolder 0
@@ -1708,7 +1709,7 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     SelectFolder 0
-    $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, 3) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, 3) -eq 'Copy me') { Rows } } 30
+    $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, 4) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, 4) -eq 'Copy me') { Rows } } 30
     # the first row and Archive (the fourth folder) on the screen
     $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
     for ($i = 0; $i -lt 3; $i++) { $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $archiveItem) }
@@ -1760,7 +1761,7 @@ public static class Dragger {
         [Native.Win]::MouseClick($box.Left + 120, [int](($box.Top + $box.Bottom) / 2))
     }
     [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
-    $subjects = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) })
+    $subjects = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
     $onServer = { param($mailbox) @($subjects | Where-Object { $s = $_; Find $mailbox "Subject: $([regex]::Escape($s))" }).Count }
     # Archive may have one of them already (the copy the drag made)
     $inArchive = & $onServer 'Archive'
@@ -1797,7 +1798,7 @@ public static class Dragger {
     }
     $restored = {
         $rows = @(& $selectedRows)
-        $names = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) } | Sort-Object)
+        $names = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) } | Sort-Object)
         $top = [int][Native.Win]::SendMessage($list, 0x1027, [IntPtr]::Zero, [IntPtr]::Zero)
         $page = [int][Native.Win]::SendMessage($list, 0x1028, [IntPtr]::Zero, [IntPtr]::Zero)
         $rows.Count -eq 3 -and (($names -join '|') -eq (($subjects | Sort-Object) -join '|')) -and $rows[0] -ge $top -and $rows[0] -lt $top + $page
@@ -1821,7 +1822,7 @@ public static class Dragger {
         flags = @() } | ConvertTo-Json)
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { (Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 3) -eq $notOpened } 30)
+    [void](WaitFor { (Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $notOpened } 30)
     # the newest three, the one not downloaded among them
     SelectRow 0
     [void][Native.Win]::SetForegroundWindow($main)
@@ -1832,7 +1833,7 @@ public static class Dragger {
     }
     [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
     [void](WaitFor { (StatusPart $mainStatus 2) -match ', 3 selected$' } 10)
-    $three = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) })
+    $three = @(0, 1, 2 | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
     # the file a subject becomes: what Windows does not allow in a name taken out
     $fileOf = { param($subject) (($subject -replace '[/\\]', '-') -replace '[<>:"|?*]', '') + '.eml' }
     $sameBytes = { param($dir)
@@ -1905,7 +1906,7 @@ public static class Dragger {
     $effect = [Native.Win]::SendText($main, $kDropFiles, "$($archive.ToInt64())|$text")
     Check ($effect -eq 0) "a file that is not a message is turned away ($effect)"
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $archive)
-    [void](WaitFor { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -like 'Dropped*' }).Count -eq 3 } 20)
+    [void](WaitFor { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 4) -like 'Dropped*' }).Count -eq 3 } 20)
     # one of them shown
     $droppedRow = @(SubjectRows 'Dropped one')[0]
     if ($null -ne $droppedRow) { SelectRow $droppedRow }
@@ -1915,7 +1916,7 @@ public static class Dragger {
     [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)")
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { [Native.Win]::RemoteListText($list, 0, 3) -ne $notOpened } 20)
+    [void](WaitFor { [Native.Win]::RemoteListText($list, 0, 4) -ne $notOpened } 20)
 
     Step 'flag colours'
     $IDM_FLAG_COLOR = 900; $IDM_FLAG_CLEAR = 908; $MF_CHECKED = 0x8
@@ -1964,7 +1965,7 @@ public static class Dragger {
     Check (& $near $purple 136 23 152) "a message flagged purple by another program (Apple Mail) shows a purple flag ($purple)"
 
     # three rows without a flag for the colours
-    $plain = @(0..([Math]::Min(8, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) } |
+    $plain = @(0..([Math]::Min(8, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) } |
         Where-Object { $_ -and $_ -ne $apple -and ((Find 'INBOX' "Subject: $([regex]::Escape($_))").flags -notcontains '\Flagged') } | Select-Object -First 3)
     $flagsOf = { param($subject) @((Find 'INBOX' "Subject: $([regex]::Escape($subject))").flags) }
 
@@ -2159,8 +2160,8 @@ public static class Dragger {
     Step 'message window'
     $IDC_PREVIOUS = 231; $IDC_NEXT = 232
     [void](WaitFor { if ((Rows) -ge 2) { Rows } } 20)
-    $firstSubject = [Native.Win]::RemoteListText($list, 0, 3)
-    $secondSubject = [Native.Win]::RemoteListText($list, 1, 3)
+    $firstSubject = [Native.Win]::RemoteListText($list, 0, 4)
+    $secondSubject = [Native.Win]::RemoteListText($list, 1, 4)
     $firstPattern = "Subject: $([regex]::Escape($firstSubject))"
     SelectRow 0
     # unread again, so that the window is what marks it read
@@ -2213,7 +2214,7 @@ public static class Dragger {
     Command $main $IDM_MARK_ALL_READ
     AddMessage "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Unread in Archive`r`n`r`nStill unread.`r`n" @() 'Archive'
     Command $main $IDM_SYNC
-    $thirdSubject = [Native.Win]::RemoteListText($list, 2, 3)
+    $thirdSubject = [Native.Win]::RemoteListText($list, 2, 4)
     $thirdPattern = "Subject: $([regex]::Escape($thirdSubject))"
     [void](WaitFor { Seen $thirdPattern } 20)
     SelectRow 2
@@ -2320,7 +2321,7 @@ public static class Dragger {
         Shot $main 'threads-1-collapsed'
         Key $list $VK_RIGHT
         Check ([bool](WaitFor { (Rows) -eq $grouped + 2 } 10)) "Right expands it ($(Rows) rows)"
-        $under = @(($at + 1), ($at + 2) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) })
+        $under = @(($at + 1), ($at + 2) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
         Check (($under | Where-Object { $_ -eq "Re: $topic" }).Count -eq 2) "its replies are under it ($($under -join ', '))"
         Shot $main 'threads-2-expanded'
         Key $list $VK_LEFT
@@ -2343,7 +2344,128 @@ public static class Dragger {
     Shot $main 'threads-3-options-off'
     Check (SetGrouping $true) 'and on again'
     Check ([bool](WaitFor { (Rows) -eq $grouped -and (SubjectRows $topic).Count -eq 1 -and (SubjectRows "Re: $topic").Count -eq 0 } 10)) "turned on again, the conversation is one row again ($(Rows))"
-    # the Inbox as the steps after expect it, without the conversation
+    # ---- watch and ignore conversation ----
+
+    Step 'watch and ignore conversation'
+    $IDM_WATCH_CONVERSATION = 151; $IDM_IGNORE_CONVERSATION = 152; $IDM_HIDE_IGNORED = 153
+    $kTestNotification = 0x4E4F5445; $VK_K = 0x4B
+    $WM_INITMENUPOPUP = 0x0117; $WM_SYSCOMMAND = 0x0112; $SC_MINIMIZE = 0xF020; $WM_TRAY = 0x8000 + 60; $NIN_SELECT = 0x0400
+    $bar = [Native.Win]::GetMenu($main)
+    # whether an item of a menu of the bar (View is the third, Message the fifth) is checked, as the menu opens
+    function MenuChecked([int]$position, [int]$id) {
+        $sub = [Native.Win]::GetSubMenu($bar, $position)
+        [void][Native.Win]::SendMessage($main, $WM_INITMENUPOPUP, $sub, [IntPtr]$position)
+        ([Native.Win]::GetMenuState($sub, $id, 0) -band 0x8) -ne 0
+    }
+    # whether the last new mail notification since the last ask had this heading ('' for none)
+    function Notified([string]$heading) { [Native.Win]::SendText($main, $kTestNotification, $heading) -eq 1 }
+    # the window minimized, so new mail is announced, and back
+    function Minimize { [void][Native.Win]::PostMessage($main, $WM_SYSCOMMAND, [IntPtr]$SC_MINIMIZE, [IntPtr]::Zero); Start-Sleep -Seconds 1 }
+    function Restore {
+        [void][Native.Win]::PostMessage($main, $WM_TRAY, [IntPtr]::Zero, [IntPtr]$NIN_SELECT)
+        [void](WaitFor { -not [Native.Win]::IsIconic($main) } 10)
+        SelectFolder 0
+        Start-Sleep -Seconds 1
+    }
+    # the dark pixels of the Watch column (2) of a row: its glasses or its sign
+    $watchCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]2 -shl 32)) }
+    $watchMark = {
+        param($row)
+        $picture = CellPicture $row $watchCell
+        if (-not $picture) { return 0 }
+        $dark = 0
+        for ($x = 0; $x -lt $picture.Width; $x++) {
+            for ($y = 0; $y -lt $picture.Height; $y++) {
+                $p = $picture.GetPixel($x, $y)
+                if ($p.R -lt 100 -and $p.G -lt 100 -and $p.B -lt 100) { $dark++ }
+            }
+        }
+        $dark
+    }
+    # the darkest pixel of a row's From cell (3): black for its words, grey for an ignored conversation's
+    $fromCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]3 -shl 32)) }
+    $darkest = {
+        param($row)
+        $picture = CellPicture $row $fromCell
+        if (-not $picture) { return 255 }
+        $least = 255
+        for ($x = 0; $x -lt $picture.Width; $x++) {
+            for ($y = 0; $y -lt $picture.Height; $y++) {
+                $p = $picture.GetPixel($x, $y)
+                $least = [Math]::Min($least, [Math]::Max($p.R, [Math]::Max($p.G, $p.B)))
+            }
+        }
+        $least
+    }
+    $coastRow = { @(SubjectRows $topic)[0] }
+    SelectRow (& $coastRow)
+    Command $main $IDM_WATCH_CONVERSATION
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Watching' } 10)) "Watch Conversation says so ($(StatusPart $mainStatus 0))"
+    Check ([bool](WaitFor { (& $watchMark (& $coastRow)) -gt 3 } 10)) 'the conversation has glasses in its Watch column'
+    Check (MenuChecked 4 $IDM_WATCH_CONVERSATION) 'and Watch Conversation is checked in the Message menu'
+    Check (-not (MenuChecked 4 $IDM_IGNORE_CONVERSATION)) 'Ignore Conversation is not'
+    Shot $main 'threads-4-watch'
+    # a reply to it while the window is minimized: announced as a watched conversation
+    [void](Notified '')
+    Minimize
+    $coast += 'coast4@example.com'
+    AddMessage ("From: Dan <dan@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: $topic`r`n" +
+        "Message-ID: <$($coast[3])>`r`nIn-Reply-To: <$($coast[2])>`r`nReferences: <$($coast[0])> <$($coast[2])>`r`n" +
+        "Date: $($date.AddMinutes(4).ToString('r'))`r`n`r`nCount me in as well.`r`n")
+    Command $main $IDM_SYNC
+    Check ([bool](WaitFor { Notified 'Watched conversation' } 30)) 'a new reply to it is announced as a watched conversation'
+    Restore
+    SelectRow (& $coastRow)
+    Command $main $IDM_WATCH_CONVERSATION
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Stopped watching' } 10)) "Watch Conversation again stops watching it ($(StatusPart $mainStatus 0))"
+    Check ([bool](WaitFor { (& $watchMark (& $coastRow)) -eq 0 } 10)) 'and takes the glasses away'
+    Check (-not (MenuChecked 4 $IDM_WATCH_CONVERSATION)) 'and the menu item is no longer checked'
+
+    # another conversation, ignored with K
+    $party = 'Garden party'
+    $garden = @('garden1@example.com', 'garden2@example.com', 'garden3@example.com')
+    $gardenSeen = { @($garden | Where-Object { Seen "Message-ID: <$([regex]::Escape($_))>" }).Count }
+    AddMessage ("From: Erin <erin@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $party`r`n" +
+        "Message-ID: <$($garden[0])>`r`nDate: $($date.AddMinutes(5).ToString('r'))`r`n`r`nA garden party on Saturday, who is coming?`r`n")
+    AddMessage ("From: Frank <frank@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: $party`r`n" +
+        "Message-ID: <$($garden[1])>`r`nIn-Reply-To: <$($garden[0])>`r`nReferences: <$($garden[0])>`r`n" +
+        "Date: $($date.AddMinutes(6).ToString('r'))`r`n`r`nI will bring a cake.`r`n")
+    Command $main $IDM_SYNC
+    $partyRow = { @(SubjectRows $party)[0] }
+    Check ([bool](WaitFor { $null -ne (& $partyRow) } 30)) 'a second conversation is in the Inbox'
+    SelectRow (& $partyRow)
+    Key $list $VK_K
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Ignoring' } 10)) "K ignores the conversation ($(StatusPart $mainStatus 0))"
+    Check ([bool](WaitFor { (& $gardenSeen) -eq 2 } 20)) "and marks its messages read on the server ($(& $gardenSeen))"
+    Check ([bool](WaitFor { (& $watchMark (& $partyRow)) -gt 3 } 10)) 'its Watch column has the ignored sign'
+    Check (MenuChecked 4 $IDM_IGNORE_CONVERSATION) 'and Ignore Conversation is checked in the Message menu'
+    # another row selected, so the ignored one is drawn on the list's white
+    SelectRow (& $coastRow)
+    $grey = & $darkest (& $partyRow)
+    Check ($grey -gt 60) "its row is grey (darkest $grey, $(& $darkest (& $coastRow)) for another)"
+    Shot $main 'threads-5-ignore'
+    # a reply to it while the window is minimized: read on the server, not announced
+    [void](Notified '')
+    Minimize
+    AddMessage ("From: Gail <gail@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: $party`r`n" +
+        "Message-ID: <$($garden[2])>`r`nIn-Reply-To: <$($garden[1])>`r`nReferences: <$($garden[0])> <$($garden[1])>`r`n" +
+        "Date: $($date.AddMinutes(7).ToString('r'))`r`n`r`nCan I bring my dog?`r`n")
+    Command $main $IDM_SYNC
+    Check ([bool](WaitFor { (& $gardenSeen) -eq 3 } 30)) "a new reply to it arrives read on the server ($(& $gardenSeen))"
+    Start-Sleep -Seconds 2
+    Check (Notified '') 'without a notification'
+    Restore
+    # View > Hide Ignored Conversations leaves it out, kept for the next start
+    Command $main $IDM_HIDE_IGNORED
+    Check ([bool](WaitFor { (SubjectRows $party).Count -eq 0 -and (SubjectRows $topic).Count -eq 1 } 10)) 'Hide Ignored Conversations leaves the ignored conversation out of the list'
+    Check (MenuChecked 2 $IDM_HIDE_IGNORED) 'and is checked in the View menu'
+    Check ((Get-ItemProperty -Path $preferencesKey -Name HideIgnoredConversations -ErrorAction SilentlyContinue).HideIgnoredConversations -eq 1) 'and that is kept for the next start'
+    Command $main $IDM_HIDE_IGNORED
+    Check ([bool](WaitFor { (SubjectRows $party).Count -eq 1 } 10)) 'turned off again, it is back'
+    Check (-not (MenuChecked 2 $IDM_HIDE_IGNORED)) 'and the menu item is no longer checked'
+    $coast += $garden
+
+    # the Inbox as the steps after expect it, without the conversations
     foreach ($id in $coast) {
         $m = Find 'INBOX' "Message-ID: <$([regex]::Escape($id))>"
         if ($m) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($m.uid)") }
@@ -2480,7 +2602,7 @@ public static class Dragger {
         Start-Sleep -Milliseconds 300
         [Native.Win]::MouseClick($link[0], $link[1])
         [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
-        Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), 3) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
+        Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), 4) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
     }
     SelectFolder 0
     [void](WaitFor { $null -ne (& $rowOf $failedSubject) } 20)
@@ -2502,7 +2624,7 @@ public static class Dragger {
 
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:bounce')
     $both = WaitFor {
-        $found = @(0..([Math]::Max(0, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) })
+        $found = @(0..([Math]::Max(0, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 4) })
         if ((Rows) -eq 2 -and $found -contains $failedSubject -and $found -contains $delayedSubject) { $true }
     } 15
     Check ([bool]$both) "is:bounce finds the two notices and nothing else ($(Rows))"
@@ -2986,7 +3108,7 @@ public static class Dragger {
     # grouped by conversation the rows are fewer (replies share a row): the messages the list has are counted
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     Check ([bool](WaitFor { (Rows) -ge 1 -and (StatusPart $mainStatus 2) -match "^$expected message" } 20)) "it lists the mail of both accounts' Inboxes ($(Rows) rows, $(StatusPart $mainStatus 2) of $expected)"
-    $COL_FOLDER = 6
+    $COL_FOLDER = 7
     $places = @(0..([Math]::Min(4, (Rows)) - 1) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_FOLDER) })
     Check (($places -contains 'Work') -and ($places -contains 'Alex Morgan')) "newest first, the two accounts' messages among each other, the Account column naming each ($($places -join ', '))"
     Check ((StatusPart $mainStatus 2) -match "^$expected message") "the status bar counts both Inboxes ($(StatusPart $mainStatus 2))"
@@ -3027,7 +3149,7 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 3) -eq $across) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 30)
     SelectRow 0
     Command $main $IDM_MOVE
     $move = WaitPicker 'Move Message'
@@ -3060,7 +3182,7 @@ public static class Dragger {
     # the second account's Archive in the main tree, with the message in it
     $workArchive = TreeRow $tree 'Work' 'Archive'
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $workArchive)
-    [void](WaitFor { if ((Rows) -ge 1 -and [Native.Win]::RemoteListText($list, 0, 3) -eq $across) { Rows } } 20)
+    [void](WaitFor { if ((Rows) -ge 1 -and [Native.Win]::RemoteListText($list, 0, 4) -eq $across) { Rows } } 20)
     SelectRow 0
     Shot $main 'move-2-accounts'
     SelectFolder 0
@@ -3068,7 +3190,7 @@ public static class Dragger {
     Check ([bool](WaitFor { $null -ne (Find 'INBOX' "Subject: $across") } 30)) 'Edit > Undo Move brings it back to the first account'
     Check ([bool](WaitFor { -not ((Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $across" }) } 20)) 'and out of the second account''s Archive'
     # Copy to Folder: the second account's Archive is under Recent now
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 1, 3) -eq $copied) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 1, 4) -eq $copied) { Rows } } 30)
     SelectRow 1
     Command $main $IDM_COPY
     $copy = WaitPicker 'Copy Message'
@@ -3085,7 +3207,7 @@ public static class Dragger {
     Check ($null -ne (Find 'INBOX' "Subject: $copied")) 'and keeps it in the Inbox'
     # dragged onto the second account's Archive in the folder tree
     SelectFolder 0
-    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 2, 3) -eq $dragged) { Rows } } 30)
+    [void](WaitFor { if ((Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 2, 4) -eq $dragged) { Rows } } 30)
     SelectRow 2
     [void][Native.Win]::SetForegroundWindow($main)
     $workArchive = TreeRow $tree 'Work' 'Archive'
