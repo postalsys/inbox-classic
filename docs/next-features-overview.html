@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inbox Classic Next Features</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d66; --line: #dddad2;
+  --accent: #2456a6; --accent-soft: #e6eefb; --warn: #9a5b00; --warn-soft: #fdf2df;
+  --bad: #a3271f; --bad-soft: #fbe7e5; --good: #1f6b3a; --good-soft: #e3f3e8;
+  --code: #f0eee8; --win: #ece9d8; --sel: #316ac5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+    --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+    --bad: #f0928a; --bad-soft: #3d2220; --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31;
+    --win: #2a2c31; --sel: #3d6fc4;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+  --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+  --bad: #f0928a; --bad-soft: #3d2220; --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31;
+  --win: #2a2c31; --sel: #3d6fc4;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 1000px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; margin: 48px 0 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.05rem; margin: 24px 0 6px; }
+.lede { color: var(--muted); font-size: 1.08rem; margin-top: 4px; }
+code { font: 0.86em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.card .k { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.card .v { font-size: 1.35rem; font-weight: 650; margin: 2px 0; }
+.card .s { font-size: 0.88rem; color: var(--muted); }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.good { border-left-color: var(--good); background: var(--good-soft); }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); font-size: 0.92rem; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--code); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+.tw { overflow-x: auto; margin: 12px 0; border-radius: 10px; border: 1px solid var(--line); }
+.tw table { border: none; }
+.pill { display: inline-block; font-size: 0.74rem; font-weight: 650; padding: 1px 8px; border-radius: 99px; white-space: nowrap; }
+.S { background: var(--good-soft); color: var(--good); }
+.M { background: var(--accent-soft); color: var(--accent); }
+.L { background: var(--warn-soft); color: var(--warn); }
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.decisions div { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--good); border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; }
+.decisions.def div { border-left-color: var(--accent); }
+.decisions b { display: block; }
+.prs { display: grid; gap: 10px; margin: 16px 0; }
+.pr { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; display: grid; grid-template-columns: 44px 1fr; gap: 4px 12px; }
+.pr .n { grid-row: span 2; font-size: 1.4rem; font-weight: 700; color: var(--accent); text-align: center; }
+.pr .t { font-weight: 600; }
+.pr .t code { font-weight: 400; }
+.pr ul { margin: 2px 0 0; padding-left: 18px; font-size: 0.92rem; color: var(--ink); }
+.pr li { margin: 2px 0; }
+.group { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin: 26px 0 4px; font-weight: 650; }
+ol.steps { padding-left: 22px; }
+ol.steps li { margin: 4px 0; }
+.mock { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin: 14px 0; overflow-x: auto; }
+.mock-title { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+.list { font: 12px Tahoma, "Segoe UI", sans-serif; border: 1px solid #888; background: #fff; color: #000; min-width: 560px; }
+.list .h, .list .r { display: grid; grid-template-columns: 22px 22px 150px 1fr 120px; }
+.list .h { background: var(--win); border-bottom: 1px solid #999; }
+.list .h span { padding: 2px 6px; border-right: 1px solid #bbb; }
+.list .r span { padding: 1px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list .b { font-weight: bold; }
+.list .sel { background: #316ac5; color: #fff; }
+.list .ig { color: #999; }
+.tw2 { display: inline-block; width: 11px; height: 11px; border: 1px solid #888; font: 9px/9px Tahoma, sans-serif; text-align: center; margin-right: 4px; background: #fff; color: #000; vertical-align: -1px; }
+.ind { display: inline-block; width: 16px; }
+.bounce { font: 13px/1.45 -apple-system, "Segoe UI", system-ui, sans-serif; border: 1px solid #e3b4ae; background: #fdf1ef; color: #3b1512; border-radius: 8px; padding: 12px 14px; max-width: 640px; display: grid; grid-template-columns: 48px 1fr; gap: 12px; }
+.bounce.delay { border-color: #e6cf9b; background: #fdf6e6; color: #3a2a06; }
+.bounce h4 { margin: 0 0 2px; font-size: 14px; }
+.bounce .who { font-weight: 600; }
+.bounce .todo { margin-top: 6px; }
+.bounce details { margin-top: 6px; font-size: 12px; }
+.bounce pre { margin: 4px 0 0; white-space: pre-wrap; font: 11.5px ui-monospace, Menlo, Consolas, monospace; background: rgba(0,0,0,0.05); padding: 6px 8px; border-radius: 4px; }
+.icons { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0; }
+.icons figure { margin: 0; text-align: center; font-size: 0.78rem; color: var(--muted); width: 92px; }
+.icons svg { width: 40px; height: 40px; display: block; margin: 0 auto 4px; }
+.timeline svg { width: 100%; height: auto; display: block; }
+.timeline text { font: 12px -apple-system, "Segoe UI", system-ui, sans-serif; fill: var(--ink); }
+.timeline .sub { font-size: 10.5px; fill: var(--muted); }
+footer { margin-top: 56px; color: var(--muted); font-size: 0.85rem; }
+@media (max-width: 600px) { h1 { font-size: 1.6rem; } .pr { grid-template-columns: 32px 1fr; } }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Next features for Inbox Classic</h1>
+<p class="lede">The plan for five quick UX fixes, conversations, an address book, and bounce messages explained in plain words. Reviewed against the code at 0.8.0, November 2026. Twelve pull requests, each one landing on Windows, the Mac and Linux at once, merged to master one after the other. The plan in text is <code>docs/next-features-plan.md</code>.</p>
+
+<div class="cards">
+  <div class="card"><div class="k">Pull requests</div><div class="v">12</div><div class="s">5 small UX, 3 conversations, 2 address book, 2 bounces</div></div>
+  <div class="card"><div class="k">New crate</div><div class="v">pe-bounce</div><div class="s">Port of EmailEngine's bounce detection and bounce-classifier</div></div>
+  <div class="card"><div class="k">Binary growth</div><div class="v">about +1.6 MB</div><div class="s">Mostly the bounce model's weights (1.3 MB)</div></div>
+  <div class="card"><div class="k">Ends with</div><div class="v">master, 0.9.0</div><div class="s">Release PR left for you; homepage screenshots refreshed</div></div>
+</div>
+
+<h3>Decisions taken</h3>
+<div class="decisions">
+  <div><b>Gmail Archive removes every label</b><code>STORE -X-GM-LABELS</code> takes off <code>\Inbox</code> and every user label; the message stays in All Mail. <code>\Sent</code>, <code>\Draft</code>, <code>\Starred</code> and <code>\Important</code> stay. Undo puts the labels back.</div>
+  <div><b>Conversations within one folder</b>As in Outlook Express and Thunderbird. All Inboxes threads each Inbox on its own; search results stay flat.</div>
+  <div><b>Local address book</b>Contacts, groups, vCard import and export, CSV import. No CardDAV this round.</div>
+  <div><b>Bounce model embedded</b>One pinned model version in the repo, checked against the JS library's output.</div>
+  <div><b>Bounces marked in the list</b>An "undelivered" icon from the BODYSTRUCTURE at sync time, and <code>is:bounce</code> in the search.</div>
+  <div><b>Merged on green CI</b>Each PR is merged once CI passes and a design review round finds nothing left to improve; you review afterwards or stop the work at any point.</div>
+  <div><b>Keys confirmed</b>As in the table below, single letters included (only while the message list has focus).</div>
+</div>
+
+<h3>Defaults chosen (say if you want otherwise)</h3>
+<div class="decisions def">
+  <div><b>Archive elsewhere</b>Moves to <code>\Archive</code>; the first Archive creates the folder if the account has none. Off in Archive, Drafts and the Outbox.</div>
+  <div><b>Collapsed conversation rows</b>Delete, Move, Archive, Junk, Mark Read and Flag act on the whole conversation; Reply and Print on its newest message.</div>
+  <div><b>Watch and Ignore</b>Kept locally. Watched: glasses icon, new mail always notifies. Ignored: greyed, new mail marked read silently, hidden by default.</div>
+  <div><b>Groups in To</b>Complete by name and put in the members' addresses, so you see who gets it.</div>
+  <div><b>The bounce card</b>Drawn by the core into the sanitized reading pane document: one implementation, inline SVG, no script.</div>
+  <div><b>Empty folder</b>Asks with the count first, can not be undone, and agents can not do it.</div>
+</div>
+
+<h2>The order of work</h2>
+<div class="mock timeline">
+<svg viewBox="0 0 960 200" role="img" aria-label="Twelve pull requests in four groups, merged in order; PR 11 can be built in parallel">
+  <g font-weight="600">
+    <text x="10" y="22">Quick UX fixes</text>
+    <text x="360" y="22">Conversations</text>
+    <text x="580" y="22">Address book</text>
+    <text x="760" y="22">Bounces</text>
+  </g>
+  <line x1="20" y1="70" x2="940" y2="70" stroke="var(--line)" stroke-width="3"/>
+  <g>
+    <circle cx="30" cy="70" r="15" fill="var(--good-soft)" stroke="var(--good)"/><text x="30" y="74" text-anchor="middle">1</text>
+    <circle cx="95" cy="70" r="15" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="95" y="74" text-anchor="middle">2</text>
+    <circle cx="160" cy="70" r="15" fill="var(--good-soft)" stroke="var(--good)"/><text x="160" y="74" text-anchor="middle">3</text>
+    <circle cx="225" cy="70" r="15" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="225" y="74" text-anchor="middle">4</text>
+    <circle cx="290" cy="70" r="15" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="290" y="74" text-anchor="middle">5</text>
+    <circle cx="375" cy="70" r="15" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="375" y="74" text-anchor="middle">6</text>
+    <circle cx="445" cy="70" r="15" fill="var(--warn-soft)" stroke="var(--warn)"/><text x="445" y="74" text-anchor="middle">7</text>
+    <circle cx="515" cy="70" r="15" fill="var(--good-soft)" stroke="var(--good)"/><text x="515" y="74" text-anchor="middle">8</text>
+    <circle cx="600" cy="70" r="15" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="600" y="74" text-anchor="middle">9</text>
+    <circle cx="680" cy="70" r="15" fill="var(--warn-soft)" stroke="var(--warn)"/><text x="680" y="74" text-anchor="middle">10</text>
+    <circle cx="790" cy="70" r="15" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="790" y="74" text-anchor="middle">11</text>
+    <circle cx="870" cy="70" r="15" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="870" y="74" text-anchor="middle">12</text>
+  </g>
+  <g class="sub">
+    <text class="sub" x="30" y="105" text-anchor="middle">To column</text>
+    <text class="sub" x="95" y="105" text-anchor="middle">Archive</text>
+    <text class="sub" x="160" y="105" text-anchor="middle">Empty</text>
+    <text class="sub" x="225" y="105" text-anchor="middle">Window</text>
+    <text class="sub" x="290" y="105" text-anchor="middle">Keys</text>
+    <text class="sub" x="375" y="105" text-anchor="middle">core</text>
+    <text class="sub" x="445" y="105" text-anchor="middle">apps</text>
+    <text class="sub" x="515" y="105" text-anchor="middle">Watch</text>
+    <text class="sub" x="600" y="105" text-anchor="middle">core</text>
+    <text class="sub" x="680" y="105" text-anchor="middle">window</text>
+    <text class="sub" x="790" y="105" text-anchor="middle">pe-bounce</text>
+    <text class="sub" x="870" y="105" text-anchor="middle">card</text>
+  </g>
+  <path d="M790 125 C 790 165, 420 165, 400 135" fill="none" stroke="var(--muted)" stroke-dasharray="4 4"/>
+  <text class="sub" x="430" y="185">PR 11 touches only a new crate: built in a worktree alongside 6 to 10, merged in its turn</text>
+  <g class="sub">
+    <circle cx="30" cy="140" r="6" fill="var(--good-soft)" stroke="var(--good)"/><text class="sub" x="42" y="144">small</text>
+    <circle cx="100" cy="140" r="6" fill="var(--accent-soft)" stroke="var(--accent)"/><text class="sub" x="112" y="144">medium</text>
+    <circle cx="180" cy="140" r="6" fill="var(--warn-soft)" stroke="var(--warn)"/><text class="sub" x="192" y="144">large</text>
+  </g>
+</svg>
+</div>
+
+<h2>1. Quick UX fixes</h2>
+<div class="prs">
+  <div class="pr"><div class="n">1</div><div class="t">The recipients column in Sent Items, Drafts and the Outbox <span class="pill S">S</span></div>
+    <ul><li>The core decides the column (from <code>\Sent</code>, <code>\Drafts</code>) and gives its text: the first recipient and "+2" for more. New <code>SortField::To</code>.</li><li>Search results and All Inboxes keep From. This PR also commits this plan.</li></ul></div>
+  <div class="pr"><div class="n">2</div><div class="t">Archive <span class="pill M">M</span></div>
+    <ul><li><code>pe-imap</code>: <code>X-GM-LABELS</code> in FETCH and <code>UID STORE +/-X-GM-LABELS</code>, labels quoted as mailbox names.</li><li><code>archive_messages</code>: Gmail removes every label but the state ones and drops the local copies at once; other servers move to <code>\Archive</code>, made with <code>CREATE ... USE (\Archive)</code> when missing. Undo for both.</li><li>Toolbar button between Delete and Junk, Message menu, right-click menu; agents get it with "organize".</li><li>Tested against ImapKit with its <code>x-gm-ext-1</code> plugin and without it; real Gmail once by hand.</li></ul></div>
+  <div class="pr"><div class="n">3</div><div class="t">Empty Deleted Items and Empty Junk E-mail <span class="pill S">S</span></div>
+    <ul><li><code>STORE 1:* +FLAGS (\Deleted)</code> and <code>EXPUNGE</code>, after a question that names the count. Folder right-click menu and Edit.</li></ul></div>
+  <div class="pr"><div class="n">4</div><div class="t">A message in a window of its own <span class="pill M">M</span></div>
+    <ul><li>Double-click or Enter. The message toolbar plus Previous and Next, around the same locked-down reading pane. Several at once; each follows moves and deletions.</li><li>Drafts still open as a message to finish.</li></ul></div>
+  <div class="pr"><div class="n">5</div><div class="t">Keyboard reading <span class="pill M">M</span></div>
+    <ul><li>Next and previous message, next unread (moving on to the next folder with unread mail after asking), Go to Folder (the Move dialog's tree and filter), Find in This Message.</li><li>Find uses each web view's own find: WebView2 <code>ICoreWebView2Find</code>, <code>WKWebView.find</code>, WebKitGTK <code>FindController</code>. No script.</li></ul></div>
+</div>
+
+<h3>Keys</h3>
+<div class="tw"><table>
+<tr><th>Action</th><th>Windows and Linux</th><th>Mac</th><th>Borrowed from</th></tr>
+<tr><td>Archive</td><td><code>A</code> in the list</td><td><code>A</code> in the list, Ctrl+Cmd+A</td><td>Thunderbird, Apple Mail</td></tr>
+<tr><td>Next / previous message</td><td>Ctrl+. / Ctrl+,</td><td>Cmd+] / Cmd+[</td><td>Outlook Express (Ctrl+&gt;)</td></tr>
+<tr><td>Next unread</td><td><code>N</code> in the list</td><td><code>N</code> in the list</td><td>Thunderbird; Ctrl+U is Message Source here</td></tr>
+<tr><td>Go to Folder</td><td>Ctrl+Y</td><td>Cmd+Shift+Y</td><td>Outlook Express</td></tr>
+<tr><td>Find in This Message</td><td>F3</td><td>Cmd+Option+F</td><td>Outlook Express, Mail</td></tr>
+<tr><td>Expand / collapse</td><td>Right / Left, <code>*</code> and <code>\</code> for all</td><td>the same</td><td>Outlook Express, Thunderbird</td></tr>
+<tr><td>Watch / Ignore Conversation</td><td><code>W</code> / <code>K</code> in the list</td><td>the same</td><td>Thunderbird</td></tr>
+<tr><td>Address Book</td><td>Ctrl+Shift+B</td><td>Cmd+Shift+B</td><td>Outlook Express</td></tr>
+</table></div>
+
+<h2>2. Conversations</h2>
+<p>The core builds the conversations and hands the apps a flat list in which each row says its depth, whether it has replies and whether it is open. The apps only draw an indent and a +/- button, so their virtual lists keep paging by offset as they do today.</p>
+
+<div class="mock">
+  <div class="mock-title">The message list with conversations, as Outlook Express drew them</div>
+  <div class="list">
+    <div class="h"><span></span><span></span><span>From</span><span>Subject</span><span>Received</span></div>
+    <div class="r b"><span></span><span></span><span>Ann Example</span><span><i class="tw2">-</i>Photos from Saturday (3)</span><span>10/6/2026 10:00</span></div>
+    <div class="r"><span></span><span></span><span>Bob Harris</span><span><i class="ind"></i><i class="ind"></i>Re: Photos from Saturday</span><span>10/6/2026 11:20</span></div>
+    <div class="r sel b"><span></span><span></span><span>Ann Example</span><span><i class="ind"></i><i class="ind"></i><i class="ind"></i>Re: Photos from Saturday</span><span>10/6/2026 12:02</span></div>
+    <div class="r b"><span></span><span></span><span>Trail Notes</span><span><i class="tw2">+</i>October newsletter (2)</span><span>10/8/2026 8:00</span></div>
+    <div class="r"><span></span><span></span><span>Carol</span><span><i class="ind"></i>Re: Lunch on Friday</span><span>9/29/2026 12:00</span></div>
+    <div class="r ig"><span></span><span></span><span>List Robot</span><span><i class="tw2">+</i>[dev] build failures (14)</span><span>9/28/2026 9:41</span></div>
+  </div>
+</div>
+
+<div class="prs">
+  <div class="pr"><div class="n">6</div><div class="t">Conversations in the store (core only) <span class="pill M">M</span></div>
+    <ul><li>Fetch <code>References</code> with every summary; a background pass fills it in for stored mail, newest first. <code>In-Reply-To</code>, already stored, covers most replies meanwhile.</li><li>Migration: <code>references</code>, <code>thread_id</code>, an index on <code>(folder_id, thread_id)</code>. Threading per account by Message-ID, References and In-Reply-To (no subject merging); Gmail's <code>X-GM-THRID</code> decides on Gmail.</li><li>Hostile input: References capped at 50 ids, cycles broken. Measured on the 489,000 message store; first page under 20 ms or a summary table.</li></ul></div>
+  <div class="pr"><div class="n">7</div><div class="t">Conversations in the three apps <span class="pill L">L</span></div>
+    <ul><li>Options: "Group messages by conversation", on by default. View: Expand All and Collapse All.</li><li>Windows draws the indent with <code>LVIF_INDENT</code> and a state image; the Mac and Linux in their cells. Right and Left keys open and close.</li><li>Actions on a closed row act on the whole conversation, with one Undo.</li></ul></div>
+  <div class="pr"><div class="n">8</div><div class="t">Watch and Ignore Conversation <span class="pill S">S</span></div>
+    <ul><li>A local table keyed by the conversation's first Message-ID; new mail inherits the mark. A Watch column with glasses; View: Hide Ignored Conversations.</li></ul></div>
+</div>
+
+<h2>3. Address book</h2>
+<div class="prs">
+  <div class="pr"><div class="n">9</div><div class="t">The address book in the store (core only) <span class="pill M">M</span></div>
+    <ul><li>Tables for cards, their addresses, groups and members. Today's auto-complete list stays as "recent people"; completion ranks the book first.</li><li><code>vcard.rs</code>: vCard 3.0 and 4.0, read and written, unknown properties kept for export. CSV import knows Outlook's, Thunderbird's and Google's columns. Size caps; no URL followed.</li></ul></div>
+  <div class="pr"><div class="n">10</div><div class="t">The Address Book window <span class="pill L">L</span></div>
+    <ul><li>Tools &gt; Address Book: groups on the left, people on the right; New Contact, New Group, Properties, Delete, Write To, a find box.</li><li>Add Sender to Address Book; the To, Cc and Bcc labels open Select Recipients; groups complete by name.</li><li>Import (vCard, CSV) and Export (vCard).</li></ul></div>
+</div>
+
+<h2>4. Bounces explained</h2>
+<p><code>bounce-classifier</code> classifies one SMTP reply, not a whole message, so the port has two halves: <b>finding</b> the bounce and its recipients, codes and server words (EmailEngine's <code>lib/bounce-detect.js</code>, 1,200 lines), and <b>classifying</b> each server reply into one of 16 labels (<code>bounce-classifier</code>, a 325,000 weight network with rules on top). Both port cleanly to Rust: the network is an embedding lookup, an average and two small dense layers.</p>
+
+<div class="mock">
+  <div class="mock-title">The card at the top of the reading pane (sketch)</div>
+  <div class="bounce">
+    <svg viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="4" y="10" width="40" height="28" rx="3" fill="#fff" stroke="#a3271f" stroke-width="2"/><path d="M5 12 L24 27 L43 12" fill="none" stroke="#a3271f" stroke-width="2"/><circle cx="36" cy="34" r="9" fill="#a3271f"/><path d="M32 30 L40 38 M40 30 L32 38" stroke="#fff" stroke-width="2.4"/></svg>
+    <div>
+      <h4>Your message was not delivered</h4>
+      <div><span class="who">mary.smith@example.org</span>: this address does not exist at example.org.</div>
+      <div class="todo">Check the address for a typing mistake, or ask Mary for her current one. Sending again to the same address will fail the same way.</div>
+      <div class="todo"><u>Show the message that bounced</u> &nbsp;"Trail map for Sunday", sent 11/6/2026 11:13</div>
+      <details><summary>Details from the receiving server</summary><pre>mx.example.org said: 550 5.1.1 &lt;mary.smith@example.org&gt;: Recipient address rejected: User unknown in virtual mailbox table</pre></details>
+    </div>
+  </div>
+  <div class="mock-title" style="margin-top:14px">A delay, not yet a failure</div>
+  <div class="bounce delay">
+    <svg viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="#fff" stroke="#9a5b00" stroke-width="2.4"/><path d="M24 13 V24 L32 29" fill="none" stroke="#9a5b00" stroke-width="2.4" stroke-linecap="round"/></svg>
+    <div>
+      <h4>Your message has not been delivered yet</h4>
+      <div><span class="who">team@example.net</span>: the receiving server asked to try again later (greylisting). Your server keeps trying for up to 5 days; nothing to do for now.</div>
+    </div>
+  </div>
+</div>
+
+<p>Six pictures cover the 16 labels:</p>
+<div class="icons">
+  <figure><svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="7" fill="none" stroke="var(--bad)" stroke-width="2"/><path d="M7 35 C9 25 31 25 33 35" fill="none" stroke="var(--bad)" stroke-width="2"/><path d="M28 6 L36 14 M36 6 L28 14" stroke="var(--bad)" stroke-width="2"/></svg>No such address<br>user_unknown, invalid_address, mailbox_disabled</figure>
+  <figure><svg viewBox="0 0 40 40"><rect x="6" y="8" width="28" height="26" rx="2" fill="none" stroke="var(--warn)" stroke-width="2"/><rect x="9" y="14" width="22" height="17" fill="var(--warn)" opacity="0.5"/><path d="M6 14 H34" stroke="var(--warn)" stroke-width="2"/></svg>Mailbox full<br>mailbox_full</figure>
+  <figure><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="var(--bad)" stroke-width="2.4"/><path d="M10 10 L30 30" stroke="var(--bad)" stroke-width="2.4"/></svg>Blocked<br>ip/domain_blacklisted, policy_blocked, geo_blocked, relay_denied, auth_failure</figure>
+  <figure><svg viewBox="0 0 40 40"><path d="M20 4 L34 10 V20 C34 28 27 34 20 36 C13 34 6 28 6 20 V10 Z" fill="none" stroke="var(--bad)" stroke-width="2"/><path d="M20 12 V22 M20 26 V28" stroke="var(--bad)" stroke-width="2.4"/></svg>Spam or virus<br>spam_blocked, virus_detected</figure>
+  <figure><svg viewBox="0 0 40 40"><rect x="8" y="6" width="24" height="10" rx="2" fill="none" stroke="var(--muted)" stroke-width="2"/><rect x="8" y="20" width="24" height="10" rx="2" fill="none" stroke="var(--muted)" stroke-width="2"/><circle cx="13" cy="11" r="1.6" fill="var(--muted)"/><circle cx="13" cy="25" r="1.6" fill="var(--muted)"/></svg>Server trouble<br>server_error, unknown</figure>
+  <figure><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="var(--warn)" stroke-width="2"/><path d="M20 11 V20 L26 24" fill="none" stroke="var(--warn)" stroke-width="2" stroke-linecap="round"/></svg>Try later<br>greylisting, rate_limited, delays</figure>
+</div>
+
+<div class="prs">
+  <div class="pr"><div class="n">11</div><div class="t"><code>pe-bounce</code> (core only) <span class="pill M">M</span></div>
+    <ul><li><code>detect.rs</code>: RFC 3464 delivery-status per recipient, <code>X-Failed-Recipients</code>, Gmail, Exchange, Postfix, Exim, qmail, WorkMail and Zoho formats, delay told from failure, the original message's headers. Heuristics only for mail from mailer-daemon or postmaster or with <code>Auto-Submitted</code>.</li><li><code>classify.rs</code>: tokenizer with ASCII <code>\w</code> as in JS, the forward pass, the text and SMTP code rules, retry timing, blocklist names. Model files built in with <code>include_bytes!</code>; <code>scripts/update-bounce-model.sh</code> refreshes them.</li><li>Conformance against the JS output (labels, scores to 1e-5, fields found) over both projects' fixtures, as <code>pe-content</code> does; EmailEngine's hostile input tests ported. Rust's linear-time regex removes the ReDoS risk.</li></ul></div>
+  <div class="pr"><div class="n">12</div><div class="t">The card in the reading pane <span class="pill M">M</span></div>
+    <ul><li><code>view.rs</code> finds the bounce when the message is opened; <code>pe-html</code> draws the card: failed or delayed, each recipient with a plain explanation and what to do, the server's words escaped under Details, the blocklist named with a link to its own removal page (from a fixed table, never from the message).</li><li>"Show the message that bounced" when it is in Sent Items. 16 explanations in <code>core.ftl</code>, in five languages.</li><li>In the list: an "undelivered" icon for messages whose BODYSTRUCTURE is <code>multipart/report</code> with delivery-status (marked at sync, a migration fills stored mail), and <code>is:bounce</code> in the search.</li></ul></div>
+</div>
+
+<h2>How each pull request is done</h2>
+<ol class="steps">
+  <li>On master, <code>git pull</code>, then a branch <code>feat/&lt;name&gt;</code>.</li>
+  <li>The core and its tests first: unit, migration, and <code>e2e_core</code> against ImapKit for anything that talks IMAP.</li>
+  <li><code>commands.toml</code> or the C API; rebuild <code>pe-ffi</code>, commit the header and generated command tables.</li>
+  <li>Windows, the Mac and Linux.</li>
+  <li><b>Translations</b>: English, then draft German, Estonian, Spanish and French per <code>GLOSSARY.md</code>, each draft marked for your review (below); the <code>pe-i18n</code> tests; a pseudo-language run for leftovers and cut-off text.</li>
+  <li><b>Help</b> in all five languages, the key table included; <code>docs/shells.md</code>.</li>
+  <li><b>UI end-to-end</b>: the step in <code>SCENARIO.md</code> and all three tests, screenshots in <code>feature-map.mjs</code>; run the three locally, look at the pictures, <code>--check</code> each platform.</li>
+  <li><b>UX and design review, repeated until nothing is left to improve</b>: for every visible change, review the screenshots of all three platforms (English and pseudo-language, light and dark) as a UX designer and mail app product expert: layout, spacing, wording, control and menu order, keyboard use, what a new user expects, and how Outlook Express, Thunderbird and Apple Mail do it. Improve, take new screenshots, review again; stop only when a round finds nothing. The rounds go in the PR description; fixes are committed as <code>fix(ux)</code>, in the platform's own look. The rounds run on the Mac and Linux screenshots; Windows follows (below).</li>
+  <li><b>/simplify</b>, with the maintainability check on the functions that grew.</li>
+  <li><b>/security-review</b>; fix what it finds.</li>
+  <li><code>cargo fmt</code>, <code>clippy -D warnings</code>, <code>cargo test --workspace</code>, prettier, <code>check-shells.sh</code>.</li>
+  <li>Commits in order: <code>feat(core)</code>, <code>feat(windows)</code>, <code>feat(mac)</code>, <code>feat(linux)</code>, <code>feat(i18n)</code>, <code>docs(help)</code>, <code>test(e2e)</code>, then <code>fix(ux)</code>, <code>refactor</code> and <code>fix</code> from the reviews.</li>
+  <li>Push, open the PR, watch CI; fix real failures, rerun flaky jobs at most three times.</li>
+  <li>Merge with a merge commit once CI is green and the last design review round found nothing to improve, without waiting for a review; the next PR starts from the new master.</li>
+</ol>
+
+<h3>Marking new translations</h3>
+<p>The four languages had their native review at <code>097322f</code>. Every translation made after it is a draft for you to edit once all the PRs are in, and is marked where it is:</p>
+<div class="tw"><table>
+<tr><th>Where</th><th>The mark</th></tr>
+<tr><td>Fluent files</td><td><code># review: new</code> above a new message, <code># review: changed</code> above one whose English changed. Comments to Fluent; the app ignores them.</td></tr>
+<tr><td>Help pages</td><td><code>&lt;!--review--&gt;</code> ... <code>&lt;!--/review--&gt;</code> around each new or changed passage, dropped from the shown page.</td></tr>
+<tr><td><code>core/locales/REVIEWED</code></td><td>The commit of the last native review.</td></tr>
+<tr><td><code>scripts/i18n-review.mjs</code></td><td>Lists every marked draft by language, file and id, with the English beside it (text, or an HTML page). <code>--check</code> in CI fails when a message is new or its English changed since <code>REVIEWED</code> without a mark, so no draft goes in unmarked.</td></tr>
+<tr><td>After your edit</td><td>Remove the marks you reviewed; when none are left, put the current commit in <code>REVIEWED</code>.</td></tr>
+</table></div>
+
+<h3>The Windows build machine</h3>
+<div class="note warn"><b>The connection is unstable.</b> SSH to <code>andri@10.8.0.8</code> comes back after a while, but a dropped RDP session does not come back while you are away, and without an active desktop the screenshots are blank (<code>query user</code> says <code>Disc</code>).</div>
+<div class="tw"><table>
+<tr><th>Work</th><th>How it is done</th></tr>
+<tr><td>UX review rounds</td><td>On the Mac and Linux screenshots; Windows is assumed to follow, since the three apps share the core, the words and the layout decisions.</td></tr>
+<tr><td>Build and Rust tests</td><td><code>win-build.sh</code> and <code>win-test.sh</code> need only SSH: wait and retry when it is down. CI builds and tests Windows on every push anyway.</td></tr>
+<tr><td>Windows screenshots</td><td>From the desktop when RDP is active; otherwise CI's own run, the <code>ui-e2e</code> artifact (<code>gh run download &lt;run&gt; -n ui-e2e</code>), for Windows-only issues such as classic controls, toolbar strips and cut-off text.</td></tr>
+<tr><td>Checks that could not run</td><td>Logged in <code>build/windows-ux-pending.md</code> (not committed): the PR, the screens and checks owed, and why. They do not hold up a merge when CI's Windows jobs pass.</td></tr>
+<tr><td>When RDP is back</td><td><code>query user</code> says <code>Active</code>: rerun <code>win-ui-e2e.sh</code> for the logged items, review, fix in a <code>fix(ux): windows ...</code> PR, strike them from the log. The log is checked at the start of each PR and before the release.</td></tr>
+</table></div>
+
+<div class="note good"><b>At the end</b>: all twelve merged to master, the release-please PR collects them as 0.9.0 for you to merge, the Windows log is empty (or lists for you what is still open and why), <code>i18n-review.mjs</code> gives you the full list of draft translations to edit, and the homepage screenshots are refreshed in <code>postalsys/inboxclassic.com</code>.</div>
+
+<h2>Security notes</h2>
+<div class="tw"><table>
+<tr><th>Feature</th><th>What could go wrong</th><th>What the plan does</th></tr>
+<tr><td>Gmail Archive</td><td>Label names from the server put into commands</td><td>Quoted as mailbox names, never raw</td></tr>
+<tr><td>Empty folder</td><td>Mail lost for good by a slip, or by an agent</td><td>Asks with the count; not an agent tool</td></tr>
+<tr><td>Message window, Find</td><td>A new web view with looser settings</td><td>The reading pane's lockdown reused; native find, no script</td></tr>
+<tr><td>Conversations</td><td>Hostile References (huge, cyclic)</td><td>Capped, normalized, cycles broken, no quadratic work</td></tr>
+<tr><td>Address book</td><td>Hostile vCard or CSV files</td><td>Size caps, parsed in Rust, no URLs or photos fetched</td></tr>
+<tr><td>Bounces</td><td>Attacker text in the card, links to look-alike "delisting" pages</td><td>Escaped in the sanitized document; blocklist links only from a fixed table</td></tr>
+</table></div>
+
+<footer>Inbox Classic, plan of November 2026, from the code at 0.8.0.</footer>
+</main>
+</body>
+</html>
