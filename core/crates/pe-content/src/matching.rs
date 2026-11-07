@@ -12,9 +12,9 @@ use unicode_normalization::UnicodeNormalization;
 use crate::Representation;
 use crate::block::Block;
 use crate::html_text::strip_tags_to_text;
-use crate::jsre::is_js_ws;
 use crate::text::canonicalise_plain_text;
 use crate::util::js_trim;
+use pe_jsre::is_space;
 
 /// Minimum tokens before a block is worth matching: short blocks match by coincidence.
 const MIN_MATCH_TOKENS: usize = 9;
@@ -64,7 +64,7 @@ pub(crate) fn normalise_for_match(text: &str) -> String {
         }
     }
     let mut out = String::with_capacity(folded.len());
-    for word in folded.split(is_js_ws).filter(|w| !w.is_empty()) {
+    for word in folded.split(is_space).filter(|w| !w.is_empty()) {
         if !out.is_empty() {
             out.push(' ');
         }

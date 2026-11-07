@@ -5,9 +5,9 @@ use std::collections::BTreeSet;
 use std::sync::LazyLock;
 
 use crate::block::{BlockFeatures, Evidence, EvidenceKind};
-use crate::jsre::JsRegex;
 use crate::patterns::patterns;
 use crate::util::{js_len, js_trim};
+use pe_jsre::JsRegex;
 
 /// Longest run of blank lines tolerated inside an embedded header block.
 const MAX_GAP: usize = 1;

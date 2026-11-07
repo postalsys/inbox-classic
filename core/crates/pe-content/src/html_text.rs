@@ -6,8 +6,8 @@
 
 use std::sync::LazyLock;
 
-use crate::jsre::JsRegex;
 use crate::util::advance_units;
+use pe_jsre::JsRegex;
 
 /// Entities common in mail. Numeric references are handled separately.
 const NAMED_ENTITIES: &[(&str, &str)] = &[
@@ -170,7 +170,7 @@ fn find_close_tag(html: &str, name: &str, from: usize) -> Option<usize> {
         if bytes.len() >= name_end && bytes[start + 2..name_end].eq_ignore_ascii_case(name.as_bytes()) {
             match html[name_end..].chars().next() {
                 Some('>') => return Some(name_end + 1),
-                Some(c) if crate::jsre::is_js_ws(c) => {
+                Some(c) if pe_jsre::is_space(c) => {
                     // `[^>]*>`: when no `>` follows, no later candidate can match either.
                     let gt = html[name_end..].find('>')?;
                     return Some(name_end + gt + 1);

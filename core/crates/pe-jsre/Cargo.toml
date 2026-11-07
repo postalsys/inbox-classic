@@ -1,0 +1,10 @@
+[package]
+name = "pe-jsre"
+version.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+regex = "1.13.1"

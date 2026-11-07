@@ -15,9 +15,9 @@ use crate::detect::{
     detect_quoted_header_block, detect_rule_separator, detect_signature_delimiter, detect_signature_phrases,
     detect_signature_shape,
 };
-use crate::jsre::JsRegex;
 use crate::text::{CanonicalText, TextLine, canonicalise_text};
 use crate::util::js_trim;
+use pe_jsre::JsRegex;
 
 #[derive(Clone, Default)]
 struct Boundary {

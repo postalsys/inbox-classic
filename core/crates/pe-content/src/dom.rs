@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use crate::html_text::decode_entities;
-use crate::jsre::{JsRegex, is_js_ws};
+use pe_jsre::{JsRegex, is_space};
 
 const FRAME: &str = "documentfragmentcontainer";
 /// Length of `<documentfragmentcontainer>`, which the source is wrapped in.
@@ -206,7 +206,7 @@ impl Tokenizer<'_> {
 
     fn skip_ws(&self, mut at: usize) -> usize {
         while let Some(c) = self.char_at(at) {
-            if !is_js_ws(c) {
+            if !is_space(c) {
                 break;
             }
             at += c.len_utf8();
@@ -240,7 +240,7 @@ impl Tokenizer<'_> {
     /// never needs to backtrack.
     fn tail(&mut self, q: usize) -> Option<(usize, usize, bool)> {
         let first = self.char_at(q)?;
-        if !is_js_ws(first) {
+        if !is_space(first) {
             return self.exit(q).map(|(end, slash)| (q, end, slash));
         }
         let mut j = self.skip_ws(q);
@@ -253,7 +253,7 @@ impl Tokenizer<'_> {
                 && let Some(close) = self.find_char(c, j + 1)
             {
                 let after = close + 1;
-                if self.char_at(after).is_some_and(is_js_ws) {
+                if self.char_at(after).is_some_and(is_space) {
                     let next = self.skip_ws(after);
                     if self.has_gt_from(next) {
                         j = next;
@@ -264,7 +264,7 @@ impl Tokenizer<'_> {
                     return Some((after, end, slash));
                 }
             }
-            if is_js_ws(c) {
+            if is_space(c) {
                 let next = self.skip_ws(j);
                 if !self.has_gt_from(next) {
                     return None;
@@ -325,7 +325,7 @@ impl Tokenizer<'_> {
             if !is_name_char(c) {
                 break;
             }
-            if is_js_ws(c) {
+            if is_space(c) {
                 ws_inside.push(base + at);
             }
             name_end = base + at + c.len_utf8();
@@ -511,7 +511,7 @@ pub(crate) fn parse(html: &str) -> Dom {
                 let close_markup = format!("</{name}>");
                 let close = tokenizer.finder.find(&data, &close_markup, tag_end);
                 let text_end = close.unwrap_or(data_end);
-                if text_end > tag_end && !data[tag_end..text_end].chars().all(is_js_ws) {
+                if text_end > tag_end && !data[tag_end..text_end].chars().all(is_space) {
                     new_text(&mut dom, current, tag_end, text_end);
                 }
                 match close {
