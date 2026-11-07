@@ -20,7 +20,6 @@ mod classify;
 mod detect;
 mod dom;
 mod html_text;
-mod jsre;
 mod matching;
 mod patterns;
 mod segment_html;

@@ -9,7 +9,7 @@ use rusqlite::types::Value;
 use rusqlite::{OptionalExtension, params, params_from_iter};
 
 use crate::messages::{COLUMNS, from_row};
-use crate::selection::numbered_marks;
+use crate::selection::id_list;
 use crate::{AccountId, FolderId, Message, MessageInfo, MessageRef, Result, Search, Sort, SortField, Store};
 
 /// At most this many References a message brings: the last ones, nearest to it (a long thread's header lists every
@@ -281,17 +281,26 @@ enum RowRefs {
     Conversation(i64),
 }
 
+/// When a message was written, by its Date header (the server's arrival time when it has none): what the list orders
+/// conversations by when sorted by Date, by their newest message, as it orders messages without conversations
 const WHEN: &str = "COALESCE(date, internal_date)";
 
+/// When a message arrived, by the server's internal date (its Date header when the server gave none): what orders the
+/// messages of a conversation, and so picks its first message, whose row stands for the collapsed conversation. Not
+/// the Date header, which the sender writes: a stranger who knows a Message-ID of the conversation could otherwise
+/// name it in a message with an early Date and have their subject and sender shown on the conversation's row.
+const ARRIVED: &str = "COALESCE(internal_date, date)";
+
 /// The conversations of the messages `condition` finds, as a `WITH g` of their id (`t`), their numbers (`n`, `u`), and
-/// what they are ordered by: their newest date, or for another column their first message's value of it (`k`)
+/// what they are ordered by: their newest date, or for another column their first message's value of it (`k`), the
+/// first by arrival ([`ARRIVED`])
 fn groups(condition: &str, sort: Sort) -> String {
     let ordered = match sort.field {
         SortField::Date => format!("MAX({WHEN}) AS newest"),
         SortField::Received => "MAX(internal_date) AS newest_received".to_string(),
         // the first message's: with one MIN and no other MIN or MAX, SQLite takes a bare column from that row
         field => format!(
-            "MIN({WHEN} * 1000000000000 + uid) AS first_at, {} AS k",
+            "MIN({ARRIVED} * 1000000000000 + uid) AS first_at, {} AS k",
             key_column(field)
         ),
     };
@@ -360,7 +369,7 @@ impl Store {
         limit: u64,
     ) -> Result<(Vec<Group>, u64)> {
         let (condition, mut values) = search.condition(false);
-        let open = numbered_marks(&mut values, expanded);
+        let open = id_list(&mut values, expanded);
         let at = values.len();
         values.push(Value::Integer(offset as i64));
         values.push(Value::Integer(offset.saturating_add(limit) as i64));
@@ -392,17 +401,18 @@ impl Store {
         Ok((page, above))
     }
 
-    /// The first message of each of the conversations `threads` in what `search` finds, by conversation: one query,
-    /// whose numbering finds each conversation's first on its index and reads only those rows whole
+    /// The first message of each of the conversations `threads` in what `search` finds, by conversation (the first to
+    /// arrive, [`ARRIVED`]): one query, whose numbering finds each conversation's first on its index and reads only those
+    /// rows whole
     fn thread_firsts(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Message>> {
         if threads.is_empty() {
             return Ok(HashMap::new());
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, threads);
+        let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             "SELECT {COLUMNS} FROM messages WHERE id IN (SELECT id FROM (SELECT id, ROW_NUMBER() OVER \
-             (PARTITION BY thread_id ORDER BY {WHEN}, uid, id) AS k FROM messages \
+             (PARTITION BY thread_id ORDER BY {ARRIVED}, uid, id) AS k FROM messages \
              WHERE {condition} AND thread_id IN ({marks})) WHERE k = 1)"
         ))?;
         statement
@@ -411,17 +421,18 @@ impl Store {
             .collect()
     }
 
-    /// The messages of the conversations `threads` in what `search` finds, by conversation, each's first first
+    /// The messages of the conversations `threads` in what `search` finds, by conversation, each's in the order they
+    /// arrived ([`ARRIVED`])
     fn thread_lists(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Vec<Message>>> {
         let mut lists: HashMap<i64, Vec<Message>> = HashMap::new();
         if threads.is_empty() {
             return Ok(lists);
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, threads);
+        let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             // the conversations' rows found by their index, then ordered (+ keeps the planner off the date index)
-            "SELECT {COLUMNS} FROM messages WHERE {condition} AND thread_id IN ({marks}) ORDER BY +{WHEN}, uid, id"
+            "SELECT {COLUMNS} FROM messages WHERE {condition} AND thread_id IN ({marks}) ORDER BY +{ARRIVED}, uid, id"
         ))?;
         for found in statement.query_map(params_from_iter(values), from_row)? {
             let message = found?;
@@ -446,7 +457,7 @@ impl Store {
             return Ok(());
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, &threads);
+        let marks = id_list(&mut values, &threads);
         let mut statement = self.db.prepare(&format!(
             "SELECT thread_id, MAX(date), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
              GROUP BY thread_id"
@@ -468,7 +479,7 @@ impl Store {
         Ok(())
     }
 
-    /// The messages of the conversation `thread` in what `search` finds, the first first
+    /// The messages of the conversation `thread` in what `search` finds, in the order they arrived, the first first
     pub fn thread_messages(&self, search: &Search, thread: i64) -> Result<Vec<Message>> {
         Ok(self
             .thread_lists(search, &[thread])?
@@ -528,7 +539,7 @@ impl Store {
             return Ok(Vec::new());
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, threads);
+        let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             "{} SELECT r, t, n FROM (SELECT t, n, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS r FROM g) \
              WHERE t IN ({marks}) ORDER BY r",
@@ -555,7 +566,7 @@ impl Store {
         if expanded.is_empty() {
             return Ok(conversations);
         }
-        let marks = numbered_marks(&mut values, expanded);
+        let marks = id_list(&mut values, expanded);
         let mut statement = self.db.prepare(&format!(
             "SELECT COUNT(*) FROM messages WHERE {condition} AND thread_id IN ({marks}) GROUP BY thread_id"
         ))?;
@@ -566,7 +577,7 @@ impl Store {
     }
 
     /// `limit` rows of the list grouped by conversation from `offset` on: each conversation's first message, and
-    /// under each of the conversations `expanded` its other messages, oldest first; each with its place
+    /// under each of the conversations `expanded` its other messages, in the order they arrived; each with its place
     pub(crate) fn thread_rows(
         &self,
         search: &Search,
@@ -740,7 +751,7 @@ impl Store {
         sort: Sort,
         ranges: &[(u64, u64)],
     ) -> Result<Vec<MessageRef>> {
-        // the rows in list order; a collapsed conversation's row stands for its messages, oldest first, in its place
+        // the rows in list order; a collapsed conversation's row stands for its messages, as they arrived, in its place
         let mut rows = Vec::new();
         for &(start, end) in ranges {
             for message in self.search(search, sort, start, end - start)? {
@@ -773,17 +784,17 @@ impl Store {
         Ok(refs)
     }
 
-    /// The messages of the conversations `threads` in the list `search` makes, each with its conversation, oldest
-    /// first
+    /// The messages of the conversations `threads` in the list `search` makes, each with its conversation, in the order
+    /// they arrived ([`ARRIVED`])
     fn thread_members(&self, search: &Search, threads: &[i64]) -> Result<Vec<(i64, MessageRef)>> {
         if threads.is_empty() {
             return Ok(Vec::new());
         }
         let (condition, mut values) = search.condition(false);
-        let marks = numbered_marks(&mut values, threads);
+        let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             "SELECT thread_id, folder_id, uid FROM messages WHERE {condition} AND thread_id IN ({marks}) \
-             ORDER BY +{WHEN}, uid, id"
+             ORDER BY +{ARRIVED}, uid, id"
         ))?;
         statement
             .query_map(params_from_iter(values), |row| {
@@ -1320,6 +1331,119 @@ mod tests {
         assert_eq!(store.thread_unthreaded(account, 10).unwrap(), 2);
         assert_eq!(store.thread_unthreaded(account, 10).unwrap(), 0);
         assert_eq!(store.thread_rows(&list, Sort::default(), &[], 0, 10).unwrap().len(), 1);
+    }
+
+    #[test]
+    fn the_first_message_is_the_first_to_arrive() {
+        let (store, _, inbox, _) = setup();
+        let arrived = |uid: u64, date: i64, received: i64, id: &str, answers: &[&str]| MessageInfo {
+            internal_date: Some(received),
+            ..mail(uid, date, id, answers, true)
+        };
+        // b names a but claims an earlier Date than a; it arrived after a. c stands alone between them.
+        store
+            .add_messages(
+                inbox,
+                &[
+                    arrived(1, 100, 100, "<a@x>", &[]),
+                    arrived(2, 10, 300, "<b@x>", &["<a@x>"]),
+                    arrived(3, 150, 150, "<c@x>", &[]),
+                ],
+            )
+            .unwrap();
+        let list = Search::folder(inbox);
+        let newest = Sort::default();
+        let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
+        // by Date the conversations stay where their newest Date puts them: c (150) above a's (100)
+        assert_eq!(
+            subjects(&rows),
+            [("c@x".into(), 0), ("a@x".into(), 0)],
+            "a's row, not b's"
+        );
+        let a = place(&rows[1]).thread;
+        assert_eq!(
+            store
+                .hidden_in(
+                    &Search {
+                        threads: Some(Vec::new()),
+                        ..list.clone()
+                    },
+                    inbox,
+                    2
+                )
+                .unwrap(),
+            Some(a)
+        );
+        assert_eq!(
+            subjects(&store.thread_rows(&list, newest, &[a], 0, 10).unwrap()),
+            [("c@x".into(), 0), ("a@x".into(), 0), ("b@x".into(), 1)],
+            "under it in the order they arrived"
+        );
+        // by Received, a's conversation arrived last (300)
+        let received = Sort {
+            field: SortField::Received,
+            ascending: false,
+        };
+        assert_eq!(
+            subjects(&store.thread_rows(&list, received, &[], 0, 10).unwrap()),
+            [("a@x".into(), 0), ("c@x".into(), 0)]
+        );
+        // by Subject, a conversation is placed by its first message's
+        let by_subject = Sort {
+            field: SortField::Subject,
+            ascending: true,
+        };
+        assert_eq!(
+            subjects(&store.thread_rows(&list, by_subject, &[], 0, 10).unwrap()),
+            [("a@x".into(), 0), ("c@x".into(), 0)]
+        );
+        // with no internal date the Date header decides
+        store
+            .db
+            .execute("UPDATE messages SET internal_date = NULL", [])
+            .unwrap();
+        let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
+        assert_eq!(subjects(&rows), [("c@x".into(), 0), ("b@x".into(), 0)]);
+    }
+
+    #[test]
+    fn any_number_of_conversations_can_be_open() {
+        let (store, inbox, _) = four_conversations();
+        let collapsed = Search {
+            threads: Some(Vec::new()),
+            ..Search::folder(inbox)
+        };
+        let real = store.threads_with_replies(&collapsed).unwrap();
+        // Expand All as a huge folder makes it: more conversations open than SQLite takes values in a statement, most
+        // of them not in this list
+        let mut expanded: Vec<i64> = (1_000_000..1_040_000).collect();
+        expanded.extend(&real);
+        let open = Search {
+            threads: Some(expanded),
+            ..Search::folder(inbox)
+        };
+        let all_open = Search {
+            threads: Some(real),
+            ..Search::folder(inbox)
+        };
+        let newest = Sort::default();
+        let rows = store.search(&open, newest, 0, 100).unwrap();
+        assert_eq!(
+            subjects(&rows),
+            subjects(&store.search(&all_open, newest, 0, 100).unwrap())
+        );
+        assert_eq!(rows.len(), 8);
+        assert_eq!(store.count_rows(&open).unwrap(), 8);
+        let refs: Vec<MessageRef> = rows.iter().map(Message::at).collect();
+        assert_eq!(
+            store.positions(&open, newest, &refs).unwrap(),
+            (0..8).collect::<Vec<u64>>()
+        );
+        let at = refs.iter().position(|r| r.uid == 4).map(|at| at as u64);
+        assert_eq!(store.search_index(&open, newest, inbox, 4).unwrap(), at);
+        assert_eq!(store.refs_in_ranges(&open, newest, &[(0, 8)]).unwrap(), refs);
+        assert!(store.next_unread(&open, newest, inbox, 0).unwrap().is_some());
+        assert_eq!(store.hidden_in(&open, inbox, 4).unwrap(), None);
     }
 
     #[test]

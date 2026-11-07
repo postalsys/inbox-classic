@@ -8,7 +8,7 @@ use std::sync::LazyLock;
 
 use serde_json::Value;
 
-use crate::jsre::JsRegex;
+use pe_jsre::JsRegex;
 
 pub(crate) struct LinePattern {
     pub id: String,

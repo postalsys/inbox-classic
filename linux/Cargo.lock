@@ -1753,6 +1753,7 @@ dependencies = [
 name = "pe-bounce"
 version = "0.8.0"
 dependencies = [
+ "pe-jsre",
  "pe-mime",
  "regex",
  "serde_json",
@@ -1762,6 +1763,7 @@ dependencies = [
 name = "pe-content"
 version = "0.8.0"
 dependencies = [
+ "pe-jsre",
  "regex",
  "serde_json",
  "unicode-normalization",
@@ -1820,6 +1822,13 @@ dependencies = [
  "pe-net",
  "tokio",
  "unicode-normalization",
+]
+
+[[package]]
+name = "pe-jsre"
+version = "0.8.0"
+dependencies = [
+ "regex",
 ]
 
 [[package]]

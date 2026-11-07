@@ -7,6 +7,7 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+pe-jsre.workspace = true
 pe-mime.workspace = true
 regex = "1.13.1"
 serde_json = "1"

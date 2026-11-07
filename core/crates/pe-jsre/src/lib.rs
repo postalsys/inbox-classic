@@ -1,26 +1,41 @@
-//! JavaScript regular expressions on the `regex` crate.
+//! JavaScript regular expressions on the `regex` crate, shared by the ports of JavaScript
+//! libraries (pe-content, pe-bounce) so their patterns can be kept as the original writes them.
 //!
-//! The detector patterns are data written for JavaScript (`patterns/*.json`), and the hard coded
-//! expressions of email-content are JavaScript too. Both are translated here so they keep their
-//! JavaScript meaning: `\d`, `\w` and `\b` are ASCII only, `\s` is the JavaScript whitespace set,
-//! and `.` stops at the four JavaScript line terminators.
+//! A pattern keeps the meaning JavaScript gives it:
 //!
-//! The `regex` crate has no lookaround. The patterns use it in one shape only, a run of lookaheads
-//! right after a leading `^\s*`, and that shape is evaluated exactly: the lookaheads and the rest
-//! are separate expressions tried at every place the leading whitespace run can end, which is what
-//! a backtracking engine does. Any other lookaround is reported as a pattern that does not compile.
+//! - `\d`, `\w` and `\b` are ASCII only, `\s` is JavaScript's whitespace ([`is_space`]), and `.`
+//!   stops at the four line terminators (`\n`, `\r`, U+2028, U+2029) unless the `s` flag is set.
+//! - `i` without `u` folds case as JavaScript does ([`fold`]): every letter of the BMP folds to
+//!   its single uppercase, never from outside ASCII into ASCII (the Kelvin sign is not `k`, `ſ` is
+//!   not `s`), and nothing outside the BMP folds. The folding is written into the translated
+//!   pattern as classes, so Rust's own `(?i)` is not used. With `u` as well, JavaScript folds by
+//!   Unicode simple case folding, which is what `(?i)` does.
+//! - `m` ends lines at `\n` and `\r` (Rust's CRLF mode). Two places differ from JavaScript, as
+//!   the `regex` crate cannot express them: `^` and `$` never match between the `\r` and `\n` of a
+//!   CRLF, and U+2028 and U+2029 do not end lines. None of the patterns of the ports depends on
+//!   either.
+//! - `g` is accepted and changes nothing; the caller decides how to iterate.
+//!
+//! Rust's engine runs in linear time, so none of the care a JavaScript pattern takes against
+//! backtracking is needed. It has no lookaround and no backreferences. Lookaround is supported in
+//! one shape only, a run of lookaheads right after a leading `^\s*`, and that shape is evaluated
+//! exactly: the lookaheads and the rest are separate expressions tried at every place the leading
+//! whitespace run can end, which is what a backtracking engine does. Any other lookaround is
+//! reported as a pattern that does not compile.
+#![forbid(unsafe_code)]
+
+pub mod fold;
+mod text;
+
+pub use text::{SPACE_CLASS, advance_utf16, collapse, is_blank, is_space, trim, truncate_utf16, utf16_len, words};
 
 use regex::{Regex, RegexBuilder};
-
-/// The JavaScript `\s` set, as the inside of a character class.
-pub(crate) const JS_WS_CLASS: &str =
-    r"\t\n\x0B\x0C\r \x{A0}\x{1680}\x{2000}-\x{200A}\x{2028}\x{2029}\x{202F}\x{205F}\x{3000}\x{FEFF}";
 
 const WORD_CLASS: &str = "0-9A-Za-z_";
 
 /// A compiled JavaScript regular expression.
 #[derive(Debug)]
-pub(crate) struct JsRegex {
+pub struct JsRegex {
     kind: Kind,
 }
 
@@ -34,43 +49,69 @@ enum Kind {
     },
 }
 
+/// The flags that change how a pattern is translated.
+#[derive(Clone, Copy, Default)]
+struct Flags {
+    dot_all: bool,
+    unicode: bool,
+    /// `i` without `u`: folding written into the pattern.
+    fold: bool,
+}
+
 impl JsRegex {
-    /// Compile `source` with JavaScript `flags`. Only `i`, `m`, `s` and `u` are accepted.
-    pub(crate) fn new(source: &str, flags: &str) -> Result<JsRegex, String> {
+    /// Compile `source` with JavaScript `flags`. `i`, `m`, `s`, `u` and `g` are accepted.
+    pub fn new(source: &str, flags: &str) -> Result<JsRegex, String> {
         let mut prefix = String::new();
-        let mut dot_all = false;
-        let mut unicode = false;
+        let mut ignore_case = false;
+        let mut multiline = false;
+        let mut f = Flags::default();
         for flag in flags.chars() {
             match flag {
-                'i' => prefix.push_str("(?i)"),
-                'm' => prefix.push_str("(?m)"),
-                's' => dot_all = true,
-                'u' => unicode = true,
+                'i' => ignore_case = true,
+                'm' => multiline = true,
+                's' => f.dot_all = true,
+                'u' => f.unicode = true,
+                'g' => {}
                 _ => return Err(format!("unsupported flag {flag}")),
             }
         }
+        if ignore_case && f.unicode {
+            prefix.push_str("(?i)");
+        }
+        f.fold = ignore_case && !f.unicode;
+        if multiline {
+            prefix.push_str("(?mR)");
+        }
         if let Some((looks, rest)) = split_leading_lookaheads(source)? {
+            if multiline {
+                // `^` could then start at any line, which the evaluation below does not try.
+                return Err("lookaheads with the m flag are not supported".into());
+            }
             let mut compiled = Vec::with_capacity(looks.len());
             for (negative, body) in looks {
-                let body = translate(body, dot_all, unicode)?;
-                compiled.push((negative, build(&format!("{prefix}^(?:{body})"))?));
+                let body = translate(body, f)?;
+                compiled.push((negative, build(&format!(r"{prefix}\A(?:{body})"))?));
             }
-            let rest = translate(rest, dot_all, unicode)?;
+            let rest = translate(rest, f)?;
             return Ok(JsRegex {
                 kind: Kind::Lookahead {
                     looks: compiled,
-                    rest: build(&format!("{prefix}^(?:{rest})"))?,
+                    rest: build(&format!(r"{prefix}\A(?:{rest})"))?,
                 },
             });
         }
-        let body = translate(source, dot_all, unicode)?;
+        let body = translate(source, f)?;
         Ok(JsRegex {
             kind: Kind::Plain(build(&format!("{prefix}{body}"))?),
         })
     }
 
-    /// Compile an expression known to be valid. For the hard coded expressions of the port.
-    pub(crate) fn fixed(source: &str, flags: &str) -> JsRegex {
+    /// Compile an expression known to be valid, for the expressions written into a port.
+    ///
+    /// # Panics
+    ///
+    /// When it does not compile.
+    pub fn fixed(source: &str, flags: &str) -> JsRegex {
         match JsRegex::new(source, flags) {
             Ok(regex) => regex,
             Err(err) => panic!("built in expression {source:?} does not compile: {err}"),
@@ -78,14 +119,14 @@ impl JsRegex {
     }
 
     /// `RegExp.prototype.test`.
-    pub(crate) fn is_match(&self, text: &str) -> bool {
+    pub fn is_match(&self, text: &str) -> bool {
         match &self.kind {
             Kind::Plain(regex) => regex.is_match(text),
             Kind::Lookahead { looks, rest } => {
                 // Every place the leading `\s*` can stop, longest first like the engine.
                 let mut ends = vec![0];
                 for (at, c) in text.char_indices() {
-                    if !is_js_ws(c) {
+                    if !is_space(c) {
                         break;
                     }
                     ends.push(at + c.len_utf8());
@@ -98,12 +139,29 @@ impl JsRegex {
         }
     }
 
-    /// The underlying expression, for expressions without lookaheads.
-    pub(crate) fn re(&self) -> &Regex {
+    /// The underlying expression.
+    ///
+    /// # Panics
+    ///
+    /// For an expression with lookaheads, which has no single one.
+    pub fn re(&self) -> &Regex {
         match &self.kind {
             Kind::Plain(regex) => regex,
             Kind::Lookahead { .. } => panic!("expression with lookaheads has no single regex"),
         }
+    }
+}
+
+/// A JavaScript regular expression without lookarounds as a plain [`Regex`], for the expressions
+/// written into a port.
+///
+/// # Panics
+///
+/// When it does not compile or has lookaheads.
+pub fn regex(source: &str, flags: &str) -> Regex {
+    match JsRegex::fixed(source, flags).kind {
+        Kind::Plain(regex) => regex,
+        Kind::Lookahead { .. } => panic!("{source:?} has lookaheads; use JsRegex"),
     }
 }
 
@@ -113,15 +171,6 @@ fn build(pattern: &str) -> Result<Regex, String> {
         .dfa_size_limit(16 << 20)
         .build()
         .map_err(|err| err.to_string())
-}
-
-/// JavaScript whitespace: what `\s` matches and what `String.prototype.trim` removes.
-pub(crate) fn is_js_ws(c: char) -> bool {
-    matches!(
-        c,
-        '\t' | '\n' | '\u{0B}' | '\u{0C}' | '\r' | ' ' | '\u{A0}' | '\u{1680}' | '\u{2000}'
-            ..='\u{200A}' | '\u{2028}' | '\u{2029}' | '\u{202F}' | '\u{205F}' | '\u{3000}' | '\u{FEFF}'
-    )
 }
 
 /// Split `^\s*(?=..)(?!..)rest` into its lookaheads and the rest. `None` when the source does not
@@ -204,8 +253,18 @@ fn hex_char(c: char) -> String {
     format!("\\x{{{:X}}}", c as u32)
 }
 
-/// A literal character outside a class.
-fn literal(c: char) -> String {
+/// A literal character outside a class, as a class of what it matches when the case folds.
+fn literal(c: char, f: Flags) -> String {
+    if f.fold
+        && let Some(group) = fold::equivalents(c)
+    {
+        let mut out = String::from("[");
+        for &e in group {
+            out.push_str(&class_literal(e));
+        }
+        out.push(']');
+        return out;
+    }
     if c.is_ascii_alphanumeric() || c == ' ' || !c.is_ascii() {
         c.to_string()
     } else {
@@ -215,7 +274,7 @@ fn literal(c: char) -> String {
 
 /// A literal character inside a class.
 fn class_literal(c: char) -> String {
-    if c.is_ascii_alphanumeric() || (!c.is_ascii() && !is_js_ws(c)) {
+    if c.is_ascii_alphanumeric() || (!c.is_ascii() && !is_space(c)) {
         c.to_string()
     } else {
         hex_char(c)
@@ -252,8 +311,8 @@ fn escape(chars: &[char], i: &mut usize, in_class: bool, unicode: bool) -> Resul
         'D' => set("0-9", true),
         'w' => set(WORD_CLASS, false),
         'W' => set(WORD_CLASS, true),
-        's' => set(JS_WS_CLASS, false),
-        'S' => set(JS_WS_CLASS, true),
+        's' => set(SPACE_CLASS, false),
+        'S' => set(SPACE_CLASS, true),
         'b' if in_class => ClassItem::Char('\u{8}'),
         'b' => ClassItem::Set(r"(?-u:\b)".into()),
         'B' => ClassItem::Set(r"(?-u:\B)".into()),
@@ -298,7 +357,7 @@ fn escape(chars: &[char], i: &mut usize, in_class: bool, unicode: bool) -> Resul
 }
 
 /// Translate a JavaScript pattern (without lookarounds) to `regex` syntax.
-fn translate(source: &str, dot_all: bool, unicode: bool) -> Result<String, String> {
+fn translate(source: &str, f: Flags) -> Result<String, String> {
     let chars: Vec<char> = source.chars().collect();
     let mut out = String::with_capacity(source.len() * 2);
     let mut i = 0;
@@ -306,12 +365,16 @@ fn translate(source: &str, dot_all: bool, unicode: bool) -> Result<String, Strin
         let c = chars[i];
         i += 1;
         match c {
-            '\\' => match escape(&chars, &mut i, false, unicode)? {
-                ClassItem::Char(c) => out.push_str(&literal(c)),
+            '\\' => match escape(&chars, &mut i, false, f.unicode)? {
+                ClassItem::Char(c) => out.push_str(&literal(c, f)),
                 ClassItem::Set(set) => out.push_str(&set),
             },
-            '[' => i = class(&chars, i, &mut out, unicode)?,
-            '.' => out.push_str(if dot_all { r"(?s:.)" } else { r"[^\n\r\x{2028}\x{2029}]" }),
+            '[' => i = class(&chars, i, &mut out, f)?,
+            '.' => out.push_str(if f.dot_all {
+                r"(?s:.)"
+            } else {
+                r"[^\n\r\x{2028}\x{2029}]"
+            }),
             '(' => {
                 if chars.get(i) == Some(&'?') {
                     match chars.get(i + 1) {
@@ -353,14 +416,17 @@ fn translate(source: &str, dot_all: bool, unicode: bool) -> Result<String, Strin
             }
             '}' => out.push_str(r"\}"),
             '^' | '$' | '|' | ')' | '*' | '+' | '?' => out.push(c),
-            other => out.push_str(&literal(other)),
+            other => out.push_str(&literal(other, f)),
         }
     }
     Ok(out)
 }
 
 /// Translate a class starting after its `[`. Returns the index after its `]`.
-fn class(chars: &[char], mut i: usize, out: &mut String, unicode: bool) -> Result<usize, String> {
+///
+/// When the case folds, what the class's characters fold to is added to it; a negated class then
+/// leaves all of that out, as JavaScript's does.
+fn class(chars: &[char], mut i: usize, out: &mut String, f: Flags) -> Result<usize, String> {
     let negated = chars.get(i) == Some(&'^');
     if negated {
         i += 1;
@@ -371,6 +437,8 @@ fn class(chars: &[char], mut i: usize, out: &mut String, unicode: bool) -> Resul
         return Ok(i + 1);
     }
     let mut items = String::new();
+    // What the class's characters and ranges fold to, when the case folds.
+    let mut folded = Vec::new();
     loop {
         let c = *chars.get(i).ok_or("unterminated class")?;
         if c == ']' {
@@ -379,7 +447,7 @@ fn class(chars: &[char], mut i: usize, out: &mut String, unicode: bool) -> Resul
         }
         i += 1;
         let first = if c == '\\' {
-            escape(chars, &mut i, true, unicode)?
+            escape(chars, &mut i, true, f.unicode)?
         } else {
             ClassItem::Char(c)
         };
@@ -390,7 +458,7 @@ fn class(chars: &[char], mut i: usize, out: &mut String, unicode: bool) -> Resul
                 let next = chars[i];
                 i += 1;
                 let high = if next == '\\' {
-                    escape(chars, &mut i, true, unicode)?
+                    escape(chars, &mut i, true, f.unicode)?
                 } else {
                     ClassItem::Char(next)
                 };
@@ -402,18 +470,35 @@ fn class(chars: &[char], mut i: usize, out: &mut String, unicode: bool) -> Resul
                         items.push_str(&class_literal(low));
                         items.push('-');
                         items.push_str(&class_literal(high));
+                        if f.fold {
+                            fold::range_equivalents(low, high, &mut folded);
+                        }
                     }
                     ClassItem::Set(set) => {
                         // `[a-\d]`: in JavaScript the dash is then a literal.
                         items.push_str(&class_literal(low));
                         items.push_str(&class_literal('-'));
                         items.push_str(&set);
+                        if f.fold {
+                            folded.extend(fold::equivalents(low).unwrap_or_default());
+                        }
                     }
                 }
             }
-            ClassItem::Char(c) => items.push_str(&class_literal(c)),
+            ClassItem::Char(c) => {
+                items.push_str(&class_literal(c));
+                if f.fold {
+                    folded.extend(fold::equivalents(c).unwrap_or_default());
+                }
+            }
+            // The escapes (`\d`, `\w`, `\s` and their negations) are closed under folding without `u`.
             ClassItem::Set(set) => items.push_str(&set),
         }
+    }
+    folded.sort_unstable();
+    folded.dedup();
+    for c in folded {
+        items.push_str(&class_literal(c));
     }
     out.push('[');
     if negated {
@@ -457,5 +542,72 @@ mod tests {
         assert!(timed.is_match("12:30 Bob skrev:"));
         assert!(!timed.is_match("Bob skrev:"));
         assert!(JsRegex::new(r"a(?=b)", "").is_err());
+    }
+
+    #[test]
+    fn folds_case_like_javascript_without_u() {
+        let spam = JsRegex::fixed("spam", "i");
+        assert!(spam.is_match("SPAM"));
+        assert!(!spam.is_match("\u{17F}pam"), "ſ is not s");
+        assert!(
+            !JsRegex::fixed("kelvin", "i").is_match("\u{212A}elvin"),
+            "the Kelvin sign is not k"
+        );
+        assert!(JsRegex::fixed("straße", "i").is_match("STRAßE"));
+        assert!(
+            !JsRegex::fixed("ß", "i").is_match("\u{1E9E}"),
+            "ß has no single uppercase"
+        );
+        assert!(JsRegex::fixed("überweisung", "i").is_match("ÜBERWEISUNG"));
+        assert!(JsRegex::fixed("ответ", "i").is_match("ОТВЕТ"));
+        assert!(JsRegex::fixed("σ", "i").is_match("ς"));
+        assert!(
+            !JsRegex::fixed("\u{10428}", "i").is_match("\u{10400}"),
+            "nothing outside the BMP folds"
+        );
+        assert!(JsRegex::fixed("[a-c]x", "i").is_match("BX"));
+        assert!(JsRegex::fixed("[à-ä]", "i").is_match("Â"));
+        assert!(!JsRegex::fixed("[^a-c]", "i").is_match("B"));
+        assert!(JsRegex::fixed("[^a-c]", "i").is_match("d"));
+        assert!(!JsRegex::fixed("[k]", "i").is_match("\u{212A}"));
+        assert!(JsRegex::fixed(r"\u0041", "i").is_match("a"));
+        assert!(!JsRegex::fixed(r"\w", "i").is_match("\u{17F}"));
+        // A pattern without i stays case sensitive.
+        assert!(!JsRegex::fixed("spam", "").is_match("SPAM"));
+    }
+
+    #[test]
+    fn folds_case_like_javascript_with_u() {
+        // With u, JavaScript folds by simple case folding: ſ is s and the Kelvin sign is k.
+        assert!(JsRegex::fixed("spam", "iu").is_match("\u{17F}pam"));
+        assert!(JsRegex::fixed("kelvin", "iu").is_match("\u{212A}elvin"));
+    }
+
+    #[test]
+    fn multiline_ends_lines_at_cr_and_lf() {
+        let b = regex("^b$", "m");
+        assert_eq!(b.find("a\rb").map(|m| m.start()), Some(2));
+        assert_eq!(b.find("a\nb\r\nc").map(|m| m.start()), Some(2));
+        assert_eq!(b.find("a\r\nb").map(|m| m.start()), Some(3));
+        assert!(!regex("^b", "").is_match("a\nb"));
+        assert!(JsRegex::new(r"^\s*(?=a)a", "m").is_err());
+    }
+
+    #[test]
+    fn flags_and_plain_regex() {
+        assert!(JsRegex::new("a", "x").is_err());
+        assert!(JsRegex::new("a", "g").is_ok());
+        assert!(regex("a.b", "s").is_match("a\nb"));
+        assert!(!regex("a.b", "").is_match("a\rb"));
+        assert!(regex(r"[^<>\s]+", "").is_match("ä"));
+        assert!(!regex(r"a\sb", "").is_match("a\u{85}b"));
+        let caps = regex(r"(\d{3})[\s-](?:x|y)", "").captures("550-x").unwrap();
+        assert_eq!(&caps[1], "550");
+    }
+
+    #[test]
+    #[should_panic(expected = "lookaheads")]
+    fn plain_regex_refuses_lookaheads() {
+        regex(r"^\s*(?=a)a", "");
     }
 }

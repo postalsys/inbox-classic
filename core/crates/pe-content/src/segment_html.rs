@@ -19,9 +19,9 @@ use crate::detect::{
 };
 use crate::dom::{Dom, NodeKind, ROOT, parse};
 use crate::html_text::{collapse_projection, decode_entities, strip_tags_to_text};
-use crate::jsre::{JsRegex, is_js_ws};
 use crate::patterns::{Selector, SelectorRole, patterns};
 use crate::util::{is_blank, js_len, js_trim};
+use pe_jsre::{JsRegex, is_space};
 
 /// Elements that break a run of inline content.
 const BLOCK_TAGS: &[&str] = &[
@@ -103,7 +103,7 @@ struct Run {
 fn class_matches(dom: &Dom, node: usize, wanted: &str) -> bool {
     dom.attribute(node, "class")
         .unwrap_or("")
-        .split(is_js_ws)
+        .split(is_space)
         .filter(|name| !name.is_empty())
         .any(|name| {
             let lowered = name.to_lowercase();
@@ -145,13 +145,13 @@ fn has_top_border(dom: &Dom, node: usize) -> bool {
     while let Some(found) = lower[from..].find("border-top") {
         let mut at = from + found + "border-top".len();
         from = at;
-        at += style[at..].len() - style[at..].trim_start_matches(is_js_ws).len();
+        at += style[at..].len() - style[at..].trim_start_matches(is_space).len();
         if !style[at..].starts_with(':') {
             continue;
         }
         let colon_end = at + 1;
         let value = &style[colon_end..];
-        let spaces = value.len() - value.trim_start_matches(is_js_ws).len();
+        let spaces = value.len() - value.trim_start_matches(is_space).len();
         if spaces > 0 {
             return true;
         }
@@ -202,7 +202,7 @@ fn project_text(dom: &Dom, html: &str, nodes: &[usize]) -> String {
         }
     }
     let out = out.replace("\r\n", "\n").replace('\r', "\n");
-    collapse_projection(&out, |c| c != '\n' && is_js_ws(c))
+    collapse_projection(&out, |c| c != '\n' && is_space(c))
 }
 
 fn evidence_from_ancestry(ancestors: &[usize], matches: &HashMap<usize, Vec<Matched>>) -> Vec<Evidence> {
@@ -361,7 +361,7 @@ pub(crate) fn scan_markup(html: &str) -> (usize, usize) {
             continue;
         }
         let name_end = html[name_start..]
-            .find(|c: char| is_js_ws(c) || c == '>')
+            .find(|c: char| is_space(c) || c == '>')
             .map_or(html.len(), |at| name_start + at);
 
         let mut gt = None;

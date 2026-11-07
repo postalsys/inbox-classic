@@ -372,7 +372,7 @@ checksum = "7e036b411754132fd6b74e94b74e9a13c5cf606fa93d1885c35860d3060820b1"
 
 [[package]]
 name = "pe-autoconfig"
-version = "0.1.0"
+version = "0.8.0"
 dependencies = [
  "base64",
  "idna",
@@ -384,8 +384,9 @@ dependencies = [
 
 [[package]]
 name = "pe-content"
-version = "0.1.0"
+version = "0.8.0"
 dependencies = [
+ "pe-jsre",
  "regex",
  "serde_json",
  "unicode-normalization",
@@ -404,7 +405,7 @@ dependencies = [
 
 [[package]]
 name = "pe-imap"
-version = "0.1.0"
+version = "0.8.0"
 dependencies = [
  "base64",
  "pe-mime",
@@ -414,8 +415,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "pe-jsre"
+version = "0.8.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
 name = "pe-mime"
-version = "0.1.0"
+version = "0.8.0"
 dependencies = [
  "base64",
  "encoding_rs",
@@ -424,7 +432,7 @@ dependencies = [
 
 [[package]]
 name = "pe-net"
-version = "0.1.0"
+version = "0.8.0"
 dependencies = [
  "rustls",
  "rustls-platform-verifier",

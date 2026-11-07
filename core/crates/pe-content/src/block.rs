@@ -10,9 +10,9 @@
 use std::sync::LazyLock;
 
 use crate::Representation;
-use crate::jsre::JsRegex;
 use crate::patterns::patterns;
 use crate::util::{js_len, js_trim, js_words};
+use pe_jsre::JsRegex;
 
 /// Structural kind assigned during segmentation, before classification.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

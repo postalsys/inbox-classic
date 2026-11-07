@@ -139,7 +139,7 @@ fn reattach_wrap_continuations(text: &str, lines: &mut [TextLine]) {
         }
         let ended = previous
             .content(text)
-            .trim_end_matches(crate::jsre::is_js_ws)
+            .trim_end_matches(pe_jsre::is_space)
             .ends_with(['.', '!', '?', ':', ';', ')', ']', '"', '\'']);
         if ended {
             continue;
