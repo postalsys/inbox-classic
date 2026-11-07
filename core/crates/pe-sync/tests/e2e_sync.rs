@@ -157,6 +157,47 @@ async fn full_sync(config: Value) {
 }
 
 #[tokio::test]
+async fn replies_are_grouped_into_conversations() {
+    let mut s = setup!(json!({}));
+    let mail = |id: &str, references: &str, subject: &str| {
+        format!(
+            "From: A <a@example.com>\r\nSubject: {subject}\r\nMessage-ID: {id}\r\n{references}\
+             Date: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHi\r\n"
+        )
+    };
+    s.server.add_message("INBOX", &mail("<start@x>", "", "Start"), &[]);
+    // the reply names its parent only in References (no In-Reply-To), folded over two lines
+    s.server.add_message(
+        "INBOX",
+        &mail("<reply@x>", "References: <before@x>\r\n <start@x>\r\n", "Re: Start"),
+        &[],
+    );
+    s.server.add_message("INBOX", &mail("<alone@x>", "", "Alone"), &[]);
+    sync_folders(&mut s.client, &mut s.store, s.account).await.unwrap();
+    let inbox = s.folder("INBOX").await;
+    s.sync(inbox).await;
+    let list = pe_store::Search::folder(inbox);
+    let rows = s
+        .store
+        .thread_rows(&list, pe_store::Sort::default(), &[], 0, 10)
+        .unwrap();
+    let mut counts: Vec<(String, u32)> = rows.iter().map(|r| (r.message.info.subject.clone(), r.count)).collect();
+    counts.sort();
+    assert_eq!(counts, [("Alone".to_string(), 1), ("Start".to_string(), 2)]);
+    let reply = s.store.messages(inbox, pe_store::Sort::default(), 0, 10).unwrap();
+    let reply = reply.iter().find(|m| m.info.subject == "Re: Start").unwrap();
+    assert_eq!(reply.info.references, ["<before@x>", "<start@x>"]);
+
+    // what the background pass fetches for mail stored before References were kept
+    let uids: Vec<u64> = s.store.uids(inbox).unwrap();
+    let fetched = pe_sync::fetch_references(&mut s.client, &mut s.store, inbox, &uids)
+        .await
+        .unwrap();
+    let with: Vec<&Vec<String>> = fetched.iter().map(|(_, r)| r).filter(|r| !r.is_empty()).collect();
+    assert_eq!(with, [&vec!["<before@x>".to_string(), "<start@x>".to_string()]]);
+}
+
+#[tokio::test]
 async fn syncs_with_condstore() {
     full_sync(json!({})).await;
 }
