@@ -274,6 +274,16 @@ CREATE INDEX thread_ids_by_thread ON thread_ids (account_id, thread_id);
 -- the conversation ids handed out, one row each: a new one is atomic whatever connection asks
 CREATE TABLE threads (id INTEGER PRIMARY KEY AUTOINCREMENT);
 "#,
+    // Watch and Ignore Conversation (marks.rs): a conversation's mark, 1 watched and 2 ignored, by its conversation id,
+    // moved along when conversations are joined
+    r#"
+CREATE TABLE thread_marks (
+    thread_id INTEGER PRIMARY KEY,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    mark INTEGER NOT NULL
+);
+CREATE INDEX thread_marks_by_account ON thread_marks (account_id);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

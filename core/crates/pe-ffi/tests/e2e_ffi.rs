@@ -189,6 +189,7 @@ fn reads_mail_through_the_c_api() {
         threads: false,
         expanded: std::ptr::null(),
         expanded_count: 0,
+        hide_ignored: false,
     };
     let found = unsafe { pe_messages(core, &folder_search(find.as_ptr()), PeSortField::Subject, true, 0, 50) };
     assert_eq!(unsafe { pe_message_list_count(found) }, 1);
@@ -207,6 +208,7 @@ fn reads_mail_through_the_c_api() {
         threads: false,
         expanded: std::ptr::null(),
         expanded_count: 0,
+        hide_ignored: false,
     };
     assert!(unsafe { pe_message_count(core, &everywhere, &mut total, &mut unread) });
     assert_eq!((total, unread), (1, 1));
@@ -219,6 +221,7 @@ fn reads_mail_through_the_c_api() {
         threads: false,
         expanded: std::ptr::null(),
         expanded_count: 0,
+        hide_ignored: false,
     };
     assert!(unsafe { pe_message_count(core, &all_inboxes, &mut total, &mut unread) });
     assert_eq!((total, unread), (2, 1));
@@ -252,6 +255,7 @@ fn reads_mail_through_the_c_api() {
     assert_eq!(unsafe { pe_thread_list_count(replies) }, 0);
     assert_eq!(unsafe { pe_thread_list_get(replies, 0) }, 0, "past the end");
     unsafe { pe_thread_list_free(replies) };
+    watches_and_ignores(core, &all_inboxes);
     assert!(!pe_all_inboxes_shown(1) && pe_all_inboxes_shown(2));
     let operators = c("has:attachment -is:read");
     assert!(unsafe { pe_message_count(core, &folder_search(operators.as_ptr()), &mut total, &mut unread) });
@@ -518,6 +522,66 @@ fn reads_mail_through_the_c_api() {
 
 /// Sign-in apps through the C API, against ImapKit's OpenID Connect provider: the presets, a check, saving, the
 /// manager's rows (no secret in them), signing in with the app and the account that names it
+/// The mark of the row of `folder`/`uid` in the list `search` makes
+fn mark_in(core: *const PeCore, search: &PeSearch, folder: i64, uid: u64) -> Option<PeThreadMark> {
+    let rows = unsafe { pe_messages(core, search, PeSortField::Date, false, 0, 50) };
+    let found = (0..unsafe { pe_message_list_count(rows) })
+        .map(|i| unsafe { &*pe_message_list_get(rows, i) })
+        .find(|m| m.folder == folder && m.uid == uid)
+        .map(|m| m.mark);
+    unsafe { pe_message_list_free(rows) };
+    found
+}
+
+/// Watch and Ignore Conversation on the read message of `list` (two messages, one read, each a conversation of its
+/// own): a toggle, the summary's check marks, the rows' mark, and Hide Ignored Conversations
+fn watches_and_ignores(core: *const PeCore, list: &PeSearch) {
+    let rows = unsafe { pe_messages(core, list, PeSortField::Date, false, 0, 50) };
+    let read = (0..unsafe { pe_message_list_count(rows) })
+        .map(|i| unsafe { &*pe_message_list_get(rows, i) })
+        .find(|m| m.seen)
+        .map(|m| (m.folder, m.uid))
+        .expect("a read message");
+    unsafe { pe_message_list_free(rows) };
+    let selection = pe_selection_new();
+    unsafe { pe_selection_add(selection, read.0, read.1) };
+    let act = |action: PeAction| {
+        let mut error = null_mut();
+        let done = unsafe { pe_selection_act(core, selection, action, 0, &mut error) };
+        assert!(!done.is_null() && error.is_null());
+        assert!(!text(done).is_empty(), "what the status bar says");
+        unsafe { pe_string_free(done) };
+    };
+    let summary = || {
+        let mut summary = PeSelectionSummary::default();
+        assert!(unsafe { pe_selection_summary(core, selection, &mut summary) });
+        (summary.watched, summary.ignored)
+    };
+    assert_eq!(summary(), (false, false));
+    act(PeAction::Watch);
+    assert_eq!(summary(), (true, false));
+    assert_eq!(mark_in(core, list, read.0, read.1), Some(PeThreadMark::Watch));
+    // Ignore in its place, then Hide Ignored Conversations leaves it out
+    act(PeAction::Ignore);
+    assert_eq!(summary(), (false, true));
+    assert_eq!(mark_in(core, list, read.0, read.1), Some(PeThreadMark::Ignore));
+    let hidden = PeSearch {
+        hide_ignored: true,
+        ..*list
+    };
+    assert_eq!(unsafe { pe_list_rows(core, &hidden) }, 1);
+    assert_eq!(mark_in(core, &hidden, read.0, read.1), None);
+    let (mut total, mut unread) = (0u64, 0u64);
+    assert!(unsafe { pe_message_count(core, &hidden, &mut total, &mut unread) });
+    assert_eq!((total, unread), (1, 1));
+    // Ignore again takes it away
+    act(PeAction::Ignore);
+    assert_eq!(summary(), (false, false));
+    assert_eq!(mark_in(core, list, read.0, read.1), Some(PeThreadMark::None));
+    assert_eq!(unsafe { pe_list_rows(core, &hidden) }, 2);
+    unsafe { pe_selection_free(selection) };
+}
+
 #[test]
 fn sign_in_apps_through_the_c_api() {
     let config = json!({ "users": { "alice@example.com": { "password": "pw", "displayName": "Alice" } }, "oauth": {} });

@@ -41,12 +41,15 @@ enum Command: Int, CaseIterable {
     case junk = 127
     case notJunk = 128
     case archive = 138
+    case watchConversation = 151
+    case ignoreConversation = 152
     case notify = 129
     case open = 130
     case defaultApp = 131
     case viewSource = 132
     case expandAllThreads = 145
     case collapseAllThreads = 146
+    case hideIgnored = 153
     case aiAgents = 133
     case options = 137
 
@@ -91,12 +94,15 @@ enum Command: Int, CaseIterable {
         case .junk: return "message"
         case .notJunk: return "message"
         case .archive: return "message"
+        case .watchConversation: return "message"
+        case .ignoreConversation: return "message"
         case .notify: return "tools"
         case .open: return "tray"
         case .defaultApp: return "tools"
         case .viewSource: return "view"
         case .expandAllThreads: return "view"
         case .collapseAllThreads: return "view"
+        case .hideIgnored: return "view"
         case .aiAgents: return "tools"
         case .options: return "tools"
         }
@@ -148,12 +154,15 @@ enum Command: Int, CaseIterable {
         case .junk: return .cmdJunk
         case .notJunk: return .cmdNotJunk
         case .archive: return .cmdArchive
+        case .watchConversation: return .cmdWatchConversation
+        case .ignoreConversation: return .cmdIgnoreConversation
         case .notify: return .cmdNotify
         case .open: return .cmdOpen
         case .defaultApp: return .cmdDefaultApp
         case .viewSource: return .cmdViewSource
         case .expandAllThreads: return .cmdExpandAllThreads
         case .collapseAllThreads: return .cmdCollapseAllThreads
+        case .hideIgnored: return .cmdHideIgnored
         case .aiAgents: return .cmdAiAgents
         case .options: return .cmdOptions
         }
@@ -200,12 +209,15 @@ enum Command: Int, CaseIterable {
         case .junk: return ("j", [.command, .shift])
         case .notJunk: return nil
         case .archive: return nil
+        case .watchConversation: return nil
+        case .ignoreConversation: return nil
         case .notify: return nil
         case .open: return nil
         case .defaultApp: return nil
         case .viewSource: return nil
         case .expandAllThreads: return nil
         case .collapseAllThreads: return nil
+        case .hideIgnored: return nil
         case .aiAgents: return nil
         case .options: return (",", [.command])
         }
@@ -252,12 +264,15 @@ enum Command: Int, CaseIterable {
         case .junk: return false
         case .notJunk: return false
         case .archive: return false
+        case .watchConversation: return true
+        case .ignoreConversation: return true
         case .notify: return true
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return false
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
+        case .hideIgnored: return true
         case .aiAgents: return false
         case .options: return false
         }
@@ -304,12 +319,15 @@ enum Command: Int, CaseIterable {
         case .junk: return false
         case .notJunk: return false
         case .archive: return false
+        case .watchConversation: return true
+        case .ignoreConversation: return true
         case .notify: return false
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return false
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
+        case .hideIgnored: return false
         case .aiAgents: return false
         case .options: return false
         }
@@ -356,12 +374,15 @@ enum Command: Int, CaseIterable {
         case .junk: return false
         case .notJunk: return false
         case .archive: return false
+        case .watchConversation: return false
+        case .ignoreConversation: return false
         case .notify: return false
         case .open: return false
         case .defaultApp: return false
         case .viewSource: return true
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
+        case .hideIgnored: return false
         case .aiAgents: return false
         case .options: return false
         }

@@ -33,6 +33,8 @@ pub struct Picked {
     pub at: MessageRef,
     pub flags: Vec<String>,
     pub message_id: Option<String>,
+    /// Its conversation's mark (Watch or Ignore Conversation)
+    pub mark: crate::ThreadMark,
 }
 
 impl Picked {
@@ -180,7 +182,9 @@ impl Store {
         for (folder, uids) in MessageRef::by_folder(refs) {
             for chunk in uids.chunks(CHUNK) {
                 let mut statement = self.db.prepare(&format!(
-                    "SELECT uid, flags, message_id FROM messages WHERE folder_id = ? AND uid IN ({})",
+                    "SELECT uid, flags, message_id, \
+                     COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0) \
+                     FROM messages WHERE folder_id = ? AND uid IN ({})",
                     marks(chunk.len())
                 ))?;
                 let values = std::iter::once(Value::Integer(folder))
@@ -192,17 +196,19 @@ impl Store {
                         folder,
                         uid: row.get(0)?,
                     };
-                    found.insert(at, (split_flags(&row.get::<_, String>(1)?), row.get(2)?));
+                    let mark = crate::ThreadMark::of(row.get(3)?);
+                    found.insert(at, (split_flags(&row.get::<_, String>(1)?), row.get(2)?, mark));
                 }
             }
         }
         Ok(refs
             .iter()
             .filter_map(|r| {
-                found.remove(r).map(|(flags, message_id)| Picked {
+                found.remove(r).map(|(flags, message_id, mark)| Picked {
                     at: *r,
                     flags,
                     message_id,
+                    mark,
                 })
             })
             .collect())

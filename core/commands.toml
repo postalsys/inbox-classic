@@ -258,6 +258,23 @@ id = "archive"
 windows = 138
 menu = "message"
 
+# Watch and Ignore Conversation: the conversations of the selected messages marked, or the mark taken away when all of
+# them have it (the check mark: PeSelectionSummary.watched and .ignored). W and K in the message list, as in
+# Thunderbird
+[[command]]
+id = "watch_conversation"
+windows = 151
+menu = "message"
+toggle = true
+some = true
+
+[[command]]
+id = "ignore_conversation"
+windows = 152
+menu = "message"
+toggle = true
+some = true
+
 [[command]]
 id = "notify"
 windows = 129
@@ -292,6 +309,13 @@ menu = "view"
 id = "collapse_all_threads"
 windows = 146
 menu = "view"
+
+# the messages of ignored conversations left out of the list (PeSearch.hide_ignored), a setting each app keeps
+[[command]]
+id = "hide_ignored"
+windows = 153
+menu = "view"
+toggle = true
 
 [[command]]
 id = "ai_agents"

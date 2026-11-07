@@ -114,8 +114,8 @@ pub enum PeEventKind {
     DraftSaved = 12,
     /// The check `uid` of `pe_sign_in_app_check` is done: `pe_sign_in_app_check_result`
     SignInAppChecked = 13,
-    /// New unread mail in the Inbox `folder` of `account`: `count` messages, `uid` the newest, `message` who it is
-    /// from and `detail` its subject
+    /// New unread mail in the Inbox `folder` of `account`, or in a watched conversation in another folder of the user's
+    /// (`watched`): `count` messages, `uid` the newest, `message` who it is from and `detail` its subject
     NewMail = 14,
     /// The unsubscribe `uid` of `pe_unsubscribe` is done; `message` says why not when it is not NULL
     Unsubscribed = 15,
@@ -185,6 +185,9 @@ pub struct PeEvent {
     pub detail: *const c_char,
     /// How many messages, for `NewMail`; 0 otherwise
     pub count: u64,
+    /// For `NewMail`: the newest is in a watched conversation (the notification can say so, with the words of
+    /// `PE_TEXT_UI_WATCHED_CONVERSATION`); false otherwise
+    pub watched: bool,
 }
 
 /// Called on a worker thread, never on the thread that called into the core: copy what is
@@ -229,10 +232,10 @@ impl Callback {
             Event::Transferring { .. } => (PeEventKind::Transferring, 0, 0, 0),
             Event::FolderCreated { account, folder } => (PeEventKind::FolderCreated, *account, *folder, 0),
         };
-        let count = if let Event::NewMail { count, .. } = &event {
-            *count as u64
+        let (count, watched) = if let Event::NewMail { count, watched, .. } = &event {
+            (*count as u64, *watched)
         } else {
-            0
+            (0, false)
         };
         let (failure, message, detail) = match event {
             Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
@@ -258,6 +261,7 @@ impl Callback {
             message: message.as_ref().map_or(null(), |m| m.as_ptr()),
             detail: detail.as_ref().map_or(null(), |d| d.as_ptr()),
             count,
+            watched,
         };
         // a panic must not unwind into C; the callback must not throw (see PeEventCallback)
         let _ = guard(|| {
@@ -1081,6 +1085,8 @@ pub struct PeSearch {
     pub threads: bool,
     pub expanded: *const i64,
     pub expanded_count: usize,
+    /// View > Hide Ignored Conversations: the messages of ignored conversations left out
+    pub hide_ignored: bool,
 }
 
 /// # Safety
@@ -1105,6 +1111,7 @@ pub(crate) unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Searc
         text: unsafe { arg(s.text) }.unwrap_or_default().to_string(),
         // SAFETY: as the caller guarantees
         threads: s.threads.then(|| unsafe { ids(s.expanded, s.expanded_count) }),
+        hide_ignored: s.hide_ignored,
     })
 }
 
@@ -1387,6 +1394,28 @@ pub struct PeMessage {
     /// The row stands for all of its conversation's messages, which are not shown under it (it shows a +, and an action
     /// on it acts on them all). The apps read this rather than decide from the numbers above.
     pub thread_collapsed: bool,
+    /// Its conversation's mark: watched (the Watch column's glasses) or ignored (the Watch column's sign, and the row
+    /// grey)
+    pub mark: PeThreadMark,
+}
+
+/// A conversation's mark (Message > Watch Conversation, Ignore Conversation)
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeThreadMark {
+    None = 0,
+    Watch = 1,
+    Ignore = 2,
+}
+
+impl From<pe_core::ThreadMark> for PeThreadMark {
+    fn from(mark: pe_core::ThreadMark) -> Self {
+        match mark {
+            pe_core::ThreadMark::None => PeThreadMark::None,
+            pe_core::ThreadMark::Watch => PeThreadMark::Watch,
+            pe_core::ThreadMark::Ignore => PeThreadMark::Ignore,
+        }
+    }
 }
 
 /// A page of the message list; free with `pe_message_list_free`
@@ -1441,6 +1470,7 @@ pub unsafe extern "C" fn pe_messages(
                     thread_expanded: m.thread.is_some_and(|t| t.expanded),
                     thread_opens: m.thread.is_some_and(|t| t.opens()),
                     thread_collapsed: m.thread.is_some_and(|t| t.collapsed()),
+                    mark: m.mark.into(),
                 }
             })))
         })

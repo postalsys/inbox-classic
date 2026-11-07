@@ -23,6 +23,7 @@ mod targets;
 mod text;
 pub mod unsubscribe;
 mod view;
+mod watch;
 mod worker;
 
 use std::collections::HashMap;
@@ -35,7 +36,7 @@ use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
 pub use pe_store::FlagColor;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
-pub use pe_store::{MessageRef, Scope, Search, Show};
+pub use pe_store::{MessageRef, Scope, Search, Show, ThreadMark};
 pub use selection::{Action, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
@@ -108,8 +109,8 @@ pub enum Event {
         request: u64,
         problem: Option<String>,
     },
-    /// New unread mail came in the Inbox of `account` (`count` messages), `uid` the newest, from `from` about
-    /// `subject`
+    /// New unread mail came in the Inbox of `account` (`count` messages), or in a watched conversation in another folder
+    /// of the user's ([`Core::mark_conversations`]), `uid` the newest, from `from` about `subject`
     NewMail {
         account: AccountId,
         folder: FolderId,
@@ -117,6 +118,9 @@ pub enum Event {
         count: usize,
         from: String,
         subject: String,
+        /// The newest is in a watched conversation (Watch Conversation): announced even from a folder other than the
+        /// Inbox, and the notification can say so ([`pe_i18n::Text::UiWatchedConversation`])
+        watched: bool,
     },
     /// A message was sent, and is in the Sent folder when the account has one
     MessageSent {

@@ -766,6 +766,7 @@ impl Mailbox {
             show: pe_core::Show::All,
             text: self.find_text.borrow().clone(),
             threads: grouped().then(|| self.expanded.borrow().clone()),
+            hide_ignored: false,
         }
     }
 

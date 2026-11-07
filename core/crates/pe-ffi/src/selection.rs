@@ -224,6 +224,10 @@ pub struct PeSelectionSummary {
     pub folders: u64,
     /// How many of them Delete removes for good
     pub for_good: u64,
+    /// Every one is in a watched conversation, or in an ignored one: the check marks of Watch Conversation and Ignore
+    /// Conversation (`PE_ACTION_WATCH`, `PE_ACTION_IGNORE`), which then take the mark away
+    pub watched: bool,
+    pub ignored: bool,
 }
 
 impl From<&PeSelectionSummary> for Summary {
@@ -238,6 +242,8 @@ impl From<&PeSelectionSummary> for Summary {
             accounts: s.accounts,
             folders: s.folders,
             for_good: s.for_good,
+            watched: s.watched,
+            ignored: s.ignored,
         }
     }
 }
@@ -254,6 +260,8 @@ impl From<Summary> for PeSelectionSummary {
             accounts: s.accounts,
             folders: s.folders,
             for_good: s.for_good,
+            watched: s.watched,
+            ignored: s.ignored,
         }
     }
 }
@@ -376,6 +384,12 @@ pub enum PeAction {
     /// Into the account's Archive (made when there is none), on Gmail every label taken off; where
     /// `PeSelectionSummary.archivable`
     Archive = 11,
+    /// Watch Conversation: the conversations of the messages watched, or no longer when all are
+    /// (`PeSelectionSummary.watched`)
+    Watch = 12,
+    /// Ignore Conversation: the conversations of the messages ignored and their unread messages read, or no longer
+    /// ignored when all are (`PeSelectionSummary.ignored`)
+    Ignore = 13,
 }
 
 /// Does `action` to the selected messages, each folder's with one command: in the store now (`FolderChanged`), on the
@@ -417,6 +431,8 @@ pub unsafe extern "C" fn pe_selection_act(
         PeAction::Archive => Action::Archive,
         PeAction::Move => Action::Move(to),
         PeAction::Copy => Action::Copy(to),
+        PeAction::Watch => Action::Watch,
+        PeAction::Ignore => Action::Ignore,
     };
     // SAFETY: as the caller guarantees
     let outcome = unsafe { with(core, Err(None), |core| core.act(&refs, action).map_err(Some)) };

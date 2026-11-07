@@ -10,6 +10,7 @@ mod accounts;
 mod agents;
 mod contacts;
 mod folders;
+mod marks;
 mod messages;
 mod outbox;
 mod query;
@@ -28,6 +29,7 @@ pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_prov
 pub use agents::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry, NewLogEntry};
 pub use contacts::Contact;
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
+pub use marks::{Conversation, ThreadMark};
 pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Sort, SortField};
 pub use outbox::Queued;
 pub use query::Query;
