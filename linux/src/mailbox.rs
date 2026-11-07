@@ -1411,8 +1411,10 @@ impl Mailbox {
         match outcome {
             Ok(text) => {
                 self.set_status(&text);
-                if matches!(action, Action::Delete | Action::Move(_) | Action::Junk(_) | Action::Archive)
-                    && let Some(after) = after
+                if matches!(
+                    action,
+                    Action::Delete | Action::Move(_) | Action::Junk(_) | Action::Archive
+                ) && let Some(after) = after
                 {
                     self.select_after_removal(after);
                 }

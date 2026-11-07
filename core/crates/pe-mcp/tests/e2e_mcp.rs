@@ -235,14 +235,22 @@ fn an_agent_works_on_the_mailbox() {
         assert!(eventually(10, || server.subjects("INBOX").contains(&"News".to_string())));
 
         // archived (into Archive here; on Gmail its labels would go), and taken back from the log
-        let back = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
-        let news_now = back["messages"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|m| m["subject"] == "News")
-            .map(|m| m["uid"].clone())
-            .unwrap();
+        // once the store has it back in the Inbox too, not only the server
+        let mut news_now = None;
+        for _ in 0..200 {
+            let back = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
+            news_now = back["messages"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|m| m["subject"] == "News")
+                .map(|m| m["uid"].clone());
+            if news_now.is_some() {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        }
+        let news_now = news_now.expect("News back in the Inbox's list");
         agent
             .call("archive_messages", json!({ "folder": inbox, "uids": [news_now] }))
             .await

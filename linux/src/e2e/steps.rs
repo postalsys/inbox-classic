@@ -1132,7 +1132,10 @@ async fn archive(d: &Driver) {
     d.check(archived.is_some(), "Archive moves the message to Archive on the server");
     d.check(d.find("INBOX", "Subject: Copy me").is_none(), "and out of the Inbox");
     let said = wait_until(10, || main.status_texts().0.starts_with("Archived 1 message")).await;
-    d.check(said, &format!("the status bar says it was archived ({})", main.status_texts().0));
+    d.check(
+        said,
+        &format!("the status bar says it was archived ({})", main.status_texts().0),
+    );
     d.shot(main.window(), "organize-8-archive").await;
     run_command(Command::Undo);
     let back = wait_for(20, || d.find("INBOX", "Subject: Copy me")).await;
