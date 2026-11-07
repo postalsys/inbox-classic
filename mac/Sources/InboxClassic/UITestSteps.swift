@@ -478,6 +478,55 @@ extension UITest {
         check(await waitUntil(20) { await findMessage("Junk", "Subject: Win a prize") == nil }, "Junk E-mail is empty on the server")
         check(await waitUntil(10) { list.numberOfRows == 0 }, "and in the list")
         selectFolder(named: "Inbox")
+
+        try await messageWindow()
+    }
+
+    // ---- a message in a window of its own ----
+
+    func messageWindow() async throws {
+        step("a message in a window of its own")
+        _ = await waitUntil(20) { list.numberOfRows >= 3 }
+        // a message with one after it, whose reply is "Re: " and its subject
+        guard let index = (0..<(list.numberOfRows - 1)).first(where: { row in
+            let subject = main.mailbox.row(row)?.subject ?? ""
+            return !subject.isEmpty && !subject.hasPrefix("Re:") && !subject.hasPrefix("Fw:")
+        }), let first = main.mailbox.row(index), let after = main.mailbox.row(index + 1) else {
+            throw Failed(description: "no message to open")
+        }
+        await selectRow(index)
+        // unread first, so that opening it is what marks it read
+        command(.markUnread)
+        let pattern = "Subject: \(NSRegularExpression.escapedPattern(for: first.subject))"
+        check(await waitUntil(20) { await !seen(pattern) }, "the message is unread on the server before it is opened")
+        // Enter on the list, as the keyboard sends it
+        let enter = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+                                     windowNumber: main.window.windowNumber, context: nil, characters: "\r",
+                                     charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36)
+        onMain { if let enter { self.list.keyDown(with: enter) } }
+        guard let shown = await waitWindow("message", 10), let opened = MessageWindow.open.last else {
+            throw Failed(description: "Enter did not open the message in a window")
+        }
+        check(shown.title == first.subject, "Enter opens it in a window of its own, titled with its subject (\(shown.title))")
+        check(shown.subtitle == "Inbox", "with the folder it is in under it (\(shown.subtitle))")
+        let header: NSTextField? = find("reader.header", in: shown)
+        check(await waitUntil(15) { opened.reader.messageView != nil && header?.stringValue.contains(first.from) == true },
+              "the window shows the message with its header")
+        check(await waitUntil(20) { await seen(pattern) }, "opening it marks it read on the server")
+        opened.press("next")
+        check(await waitUntil(10) { shown.title == after.subject }, "Next shows the message after it, and the title follows (\(shown.title))")
+        opened.press("previous")
+        check(await waitUntil(10) { shown.title == first.subject }, "Previous goes back")
+        _ = await waitUntil(15) { opened.reader.messageView != nil && opened.uid == first.uid }
+        await pause(1)
+        await shot(shown, "read-16-window")
+        opened.press("reply")
+        guard let compose = await waitCompose() else { throw Failed(description: "Reply in the window opened nothing") }
+        check(field("compose.subject", compose)?.stringValue == "Re: \(first.subject)", "Reply in the window opens a reply to that message")
+        await closeCompose(compose)
+        onMain { shown.performClose(nil) }
+        check(await waitUntil(10) { !shown.isVisible && MessageWindow.open.isEmpty }, "the window closes")
+        check(main.mailbox.selectedRow?.uid == first.uid, "and the main window is as it was, the message still selected")
     }
 
     // ---- several messages ----

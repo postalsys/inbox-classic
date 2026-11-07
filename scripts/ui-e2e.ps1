@@ -2133,6 +2133,47 @@ public static class Dragger {
     Check ([bool](WaitFor { (Rows) -eq 0 } 10)) 'and in the list'
     SelectFolder 0
 
+    # ---- a message in a window of its own ----
+
+    Step 'message window'
+    $IDC_PREVIOUS = 231; $IDC_NEXT = 232
+    [void](WaitFor { if ((Rows) -ge 2) { Rows } } 20)
+    $firstSubject = [Native.Win]::RemoteListText($list, 0, 3)
+    $secondSubject = [Native.Win]::RemoteListText($list, 1, 3)
+    $firstPattern = "Subject: $([regex]::Escape($firstSubject))"
+    SelectRow 0
+    # unread again, so that the window is what marks it read
+    [void](WaitFor { Seen $firstPattern } 10)
+    Command $main $IDM_MARK_UNREAD
+    Check ([bool](WaitFor { -not (Seen $firstPattern) } 20)) "the first message is unread before it is opened ($firstSubject)"
+    [void][Native.Win]::SetForegroundWindow($main)
+    Key $list $VK_RETURN
+    $messageWindow = WaitShown 'InboxClassicMessage' 10
+    Check ($null -ne $messageWindow) 'Enter opens the message in a window of its own'
+    if ($messageWindow) {
+        Check ([Native.Win]::GetWindow($messageWindow, 4) -eq [IntPtr]::Zero) 'a window of its own, not owned by the main window'
+        $windowTitle = WindowText $messageWindow
+        Check ($windowTitle -eq "$firstSubject - Inbox Classic") "titled with its subject ($windowTitle)"
+        Check ([bool](WaitFor { Seen $firstPattern } 20)) 'opening it marked it read on the server'
+        Command $messageWindow $IDC_NEXT
+        Check ([bool](WaitFor { (WindowText $messageWindow) -eq "$secondSubject - Inbox Classic" } 10)) "Next shows the message after it, the title follows ($(WindowText $messageWindow))"
+        Command $messageWindow $IDC_PREVIOUS
+        Check ([bool](WaitFor { (WindowText $messageWindow) -eq "$firstSubject - Inbox Classic" } 10)) "Previous goes back ($(WindowText $messageWindow))"
+        Start-Sleep -Milliseconds 1000
+        Shot $messageWindow 'read-16-window'
+        Command $messageWindow $IDM_REPLY
+        $compose = WaitCompose
+        Check ($null -ne $compose) 'Reply in the window opens a compose window'
+        if ($compose) {
+            $replySubject = GetText $compose $IDC_SUBJECT
+            Check ($replySubject -eq "Re: $firstSubject" -or ($firstSubject -like 'Re:*' -and $replySubject -eq $firstSubject)) "a reply to that message ($replySubject)"
+            CloseCompose $compose
+        }
+        Key $messageWindow $VK_ESCAPE
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($messageWindow) } 10)) 'Esc closes the window'
+        Check ((WindowText $main) -eq 'Inbox - Inbox Classic') "the main window is as it was ($(WindowText $main))"
+    }
+
     # ---- folders ----
 
     Step 'folders'

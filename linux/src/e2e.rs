@@ -845,6 +845,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::messages_as_files(&d).await;
     steps::flag_colors(&d).await;
     steps::junk(&d).await;
+    steps::message_window(&d).await;
     steps::folders(&d).await;
     steps::closing_a_message(&d).await;
     steps::mailto(&d).await;
@@ -1090,7 +1091,7 @@ async fn reading(d: &Driver) {
     let _ = std::fs::remove_file(&saved);
     FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![saved.clone()]));
     let _ = WidgetExt::activate_action(
-        shell().main().window(),
+        &shell().main().reader.widget,
         "reader.save-attachment",
         Some(&0u32.to_variant()),
     );

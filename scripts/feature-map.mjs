@@ -361,6 +361,17 @@ const sections = [
                 checked: ["The suggested name is the attachment's", 'The saved file is byte for byte what was sent']
             },
             {
+                shot: 'read-16-window',
+                name: 'A message in a window of its own',
+                what: "Double-click (or Enter) opens a message in a window of its own, as in Outlook Express: its header, pictures, files and text as the reading pane shows them, with Reply, Reply All, Forward, Print, Delete, Archive and Junk, and Previous and Next through the list it came from. Several can be open at once. A draft opens to be finished instead.",
+                how: 'Double-click a message in the list, or select it and press Enter.',
+                checked: [
+                    'Enter opens the message in its own window, titled with its subject, marked read',
+                    'Next and Previous step through the list, the title following',
+                    'Reply in the window answers that message'
+                ]
+            },
+            {
                 shot: 'read-5-unread',
                 name: 'Mark Read and Mark Unread',
                 what: 'Changes the read state on the server, so other mail programs agree.',
