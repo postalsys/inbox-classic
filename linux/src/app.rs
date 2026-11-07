@@ -348,9 +348,8 @@ impl Shell {
         let Event::NewMail {
             folder,
             uid,
-            count,
-            from,
-            subject,
+            title,
+            text,
             ..
         } = event
         else {
@@ -360,20 +359,7 @@ impl Shell {
         if !self.notify.get() || (window.is_visible() && window.is_active()) {
             return;
         }
-        let no_subject = t!(UiNoSubject);
-        let subject = if subject.is_empty() { &no_subject } else { subject };
-        if *count <= 1 {
-            notify::new_mail(&self.application, from, subject, *folder, *uid);
-        } else {
-            let text = t!(UiNewestFrom, sender = from, subject = subject);
-            notify::new_mail(
-                &self.application,
-                &t!(GtkNewMessages, count = *count),
-                &text,
-                *folder,
-                *uid,
-            );
-        }
+        notify::new_mail(&self.application, title, text, *folder, *uid);
     }
 
     /// The outgoing part of the status bar, which other work does not write over: what is being sent, what waits in
@@ -480,9 +466,7 @@ impl Shell {
     pub fn set_notify(&self, on: bool) {
         self.notify.set(on);
         self.settings.set_bool(settings::NOTIFY, on);
-        if let Some(action) = self.main().window().lookup_action(Command::Notify.name()) {
-            action.change_state(&on.to_variant());
-        }
+        self.main().set_toggled(Command::Notify, on);
         if let Some(tray) = &*self.tray.borrow() {
             tray.refresh();
         }
@@ -660,6 +644,9 @@ pub fn run_command(command: Command) {
         Command::Junk => main.mark_junk(true),
         Command::NotJunk => main.mark_junk(false),
         Command::Archive => main.archive_selected(),
+        Command::WatchConversation => main.mark_conversations(false),
+        Command::IgnoreConversation => main.mark_conversations(true),
+        Command::HideIgnored => main.set_hide_ignored(!crate::mailbox::hide_ignored()),
         Command::Notify => shell.set_notify(!shell.notify.get()),
         Command::Open => shell.show_main(),
         Command::DefaultApp => spawn(make_default_mail_app()),

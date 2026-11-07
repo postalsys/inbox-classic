@@ -2355,6 +2355,154 @@ fn new_mail_comes_in_while_watching_the_inbox() {
     assert!(matches!(next, Event::FolderChanged { .. }), "{next:?}");
 }
 
+/// A message with its own Message-ID that answers `answers` (none for the start of a conversation)
+fn in_conversation(subject: &str, id: &str, answers: &[&str]) -> String {
+    let references = if answers.is_empty() {
+        String::new()
+    } else {
+        let ids: Vec<String> = answers.iter().map(|a| format!("<{a}>")).collect();
+        format!(
+            "In-Reply-To: {}\r\nReferences: {}\r\n",
+            ids.last().unwrap(),
+            ids.join(" ")
+        )
+    };
+    format!(
+        "From: Nora Example <nora@example.com>\r\nSubject: {subject}\r\nMessage-ID: <{id}>\r\n{references}\r\nHi\r\n"
+    )
+}
+
+#[test]
+fn ignored_conversations_arrive_read_and_watched_ones_are_announced() {
+    let Some(s) = setup_with(json!({ "storage": {
+        "INBOX": {},
+        "": { "separator": "/", "folders": {
+            "Lists": {},
+            "Sent": { "special-use": "\\Sent" }
+        } }
+    } })) else {
+        return;
+    };
+    s.server
+        .add_message("INBOX", &in_conversation("Noisy", "noisy@x", &[]), &["\\Seen"]);
+    s.server
+        .add_message("INBOX", &in_conversation("Noisy again", "noisy2@x", &["noisy@x"]), &[]);
+    s.server
+        .add_message("Lists", &in_conversation("Release plan", "plan@x", &[]), &["\\Seen"]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folder = |path: &str| {
+        s.core
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .find(|f| f.info.path == path)
+            .unwrap()
+            .id
+    };
+    let (inbox, lists) = (folder("INBOX"), folder("Lists"));
+    let uid_of = |folder, subject: &str| {
+        s.core
+            .messages(folder, Sort::default(), 0, 50)
+            .unwrap()
+            .into_iter()
+            .find(|m| m.info.subject == subject)
+            .map(|m| m.info.uid)
+    };
+
+    // Ignore Conversation: its unread message is read at once, on the server too
+    let noisy = MessageRef {
+        folder: inbox,
+        uid: uid_of(inbox, "Noisy").unwrap(),
+    };
+    s.core.act(&[noisy], Action::Ignore).unwrap();
+    assert!(s.core.summary(&[noisy]).unwrap().ignored);
+    let again = uid_of(inbox, "Noisy again").unwrap();
+    eventually(
+        || s.server.flags("INBOX", again).iter().any(|f| f == "\\Seen"),
+        "the ignored conversation's unread message read on the server",
+    );
+    // Watch Conversation on the list's message
+    let plan = MessageRef {
+        folder: lists,
+        uid: uid_of(lists, "Release plan").unwrap(),
+    };
+    s.core.act(&[plan], Action::Watch).unwrap();
+    assert!(s.core.summary(&[plan]).unwrap().watched);
+
+    // a reply in the ignored conversation arrives read and unannounced: the next announcement is of mail after it
+    let reply = s.server.add_message(
+        "INBOX",
+        &in_conversation("Re: Noisy", "noisy3@x", &["noisy@x", "noisy2@x"]),
+        &[],
+    );
+    eventually(
+        || s.server.flags("INBOX", reply).iter().any(|f| f == "\\Seen"),
+        "the reply in the ignored conversation read on the server",
+    );
+    s.server
+        .add_message("INBOX", &in_conversation("Lunch?", "lunch@x", &[]), &[]);
+    let event = s.wait(|e| matches!(e, Event::NewMail { .. }));
+    let Event::NewMail {
+        count,
+        subject,
+        watched,
+        ..
+    } = event
+    else {
+        unreachable!()
+    };
+    assert_eq!((count, subject.as_str(), watched), (1, "Lunch?", false));
+    let stored = s.core.message(inbox, reply).unwrap().unwrap();
+    assert!(stored.info.seen() && stored.mark == pe_core::ThreadMark::Ignore);
+
+    // a reply in the watched conversation is announced from a folder of the user's too
+    s.server.add_message(
+        "Lists",
+        &in_conversation("Re: Release plan", "plan2@x", &["plan@x"]),
+        &[],
+    );
+    s.core.sync(account).unwrap();
+    let event = s.wait(|e| matches!(e, Event::NewMail { .. }));
+    let Event::NewMail {
+        folder,
+        subject,
+        watched,
+        title,
+        text,
+        ..
+    } = event
+    else {
+        unreachable!()
+    };
+    assert_eq!((folder, subject.as_str(), watched), (lists, "Re: Release plan", true));
+    // the notification's words, made by the core for every app
+    assert_eq!(title, "Watched conversation");
+    assert!(text.ends_with("\nRe: Release plan"), "{text}");
+
+    // hidden from a list that hides ignored conversations
+    let hidden = Search {
+        hide_ignored: true,
+        ..Search::folder(inbox)
+    };
+    let shown: Vec<String> = s
+        .core
+        .search(&hidden, Sort::default(), 0, 50)
+        .unwrap()
+        .into_iter()
+        .map(|m| m.info.subject)
+        .collect();
+    assert_eq!(shown, ["Lunch?"]);
+    // the status bar counts what the list shows: the folder's own counts, or what is left with ignored ones hidden
+    let folder = s.core.folder(inbox).unwrap();
+    assert_eq!(
+        s.core.list_counts(&Search::folder(inbox)).unwrap(),
+        (folder.total, folder.unread)
+    );
+    assert_eq!(s.core.list_counts(&hidden).unwrap(), (1, 1));
+}
+
 #[test]
 fn unsubscribes_with_one_click() {
     let Some(s) = setup() else { return };

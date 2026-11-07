@@ -224,6 +224,10 @@ pub struct PeSelectionSummary {
     pub folders: u64,
     /// How many of them Delete removes for good
     pub for_good: u64,
+    /// Every one is in a watched conversation, or in an ignored one: the check marks of Watch Conversation and Ignore
+    /// Conversation (`PE_ACTION_WATCH`, `PE_ACTION_IGNORE`), which then take the mark away
+    pub watched: bool,
+    pub ignored: bool,
 }
 
 impl From<&PeSelectionSummary> for Summary {
@@ -238,6 +242,8 @@ impl From<&PeSelectionSummary> for Summary {
             accounts: s.accounts,
             folders: s.folders,
             for_good: s.for_good,
+            watched: s.watched,
+            ignored: s.ignored,
         }
     }
 }
@@ -254,6 +260,8 @@ impl From<Summary> for PeSelectionSummary {
             accounts: s.accounts,
             folders: s.folders,
             for_good: s.for_good,
+            watched: s.watched,
+            ignored: s.ignored,
         }
     }
 }
@@ -376,6 +384,52 @@ pub enum PeAction {
     /// Into the account's Archive (made when there is none), on Gmail every label taken off; where
     /// `PeSelectionSummary.archivable`
     Archive = 11,
+    /// Watch Conversation: the conversations of the messages watched, or no longer when all are
+    /// (`PeSelectionSummary.watched`)
+    Watch = 12,
+    /// Ignore Conversation: the conversations of the messages ignored and their unread messages read, or no longer
+    /// ignored when all are (`PeSelectionSummary.ignored`)
+    Ignore = 13,
+}
+
+/// The action `action` with its folder or colour `to`; None for a colour that is none
+fn action_of(action: PeAction, to: i64) -> Option<Action> {
+    Some(match action {
+        PeAction::Read => Action::Read(true),
+        PeAction::Unread => Action::Read(false),
+        PeAction::Flag => Action::Flag(true),
+        PeAction::Unflag => Action::Flag(false),
+        PeAction::ToggleFlag => Action::ToggleFlag,
+        PeAction::FlagColor => Action::FlagColor(u8::try_from(to).ok().and_then(pe_core::FlagColor::from_number)?),
+        PeAction::Junk => Action::Junk(true),
+        PeAction::NotJunk => Action::Junk(false),
+        PeAction::Delete => Action::Delete,
+        PeAction::Archive => Action::Archive,
+        PeAction::Move => Action::Move(to),
+        PeAction::Copy => Action::Copy(to),
+        PeAction::Watch => Action::Watch,
+        PeAction::Ignore => Action::Ignore,
+    })
+}
+
+/// Whether `action` (to `to`) on the messages of `summary` takes them out of the list, a list that hides ignored
+/// conversations when `hide_ignored`: then the app selects the row after them, as it does after Delete
+///
+/// # Safety
+/// `summary` must be a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_leaves_list(
+    summary: *const PeSelectionSummary,
+    action: PeAction,
+    to: i64,
+    hide_ignored: bool,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(summary) = (unsafe { summary.as_ref() }) else {
+        return false;
+    };
+    guard(|| action_of(action, to).is_some_and(|action| Summary::from(summary).leaves_list(action, hide_ignored)))
+        .unwrap_or(false)
 }
 
 /// Does `action` to the selected messages, each folder's with one command: in the store now (`FolderChanged`), on the
@@ -395,28 +449,12 @@ pub unsafe extern "C" fn pe_selection_act(
 ) -> *mut c_char {
     // SAFETY: as the caller guarantees
     let refs = unsafe { refs_of(selection) };
-    let action = match action {
-        PeAction::Read => Action::Read(true),
-        PeAction::Unread => Action::Read(false),
-        PeAction::Flag => Action::Flag(true),
-        PeAction::Unflag => Action::Flag(false),
-        PeAction::ToggleFlag => Action::ToggleFlag,
-        PeAction::FlagColor => match u8::try_from(to).ok().and_then(pe_core::FlagColor::from_number) {
-            Some(color) => Action::FlagColor(color),
-            None => {
-                if !error.is_null() {
-                    // SAFETY: the caller gave a valid pointer
-                    unsafe { *error = into_c_string("not a flag colour".to_string()) };
-                }
-                return null_mut();
-            }
-        },
-        PeAction::Junk => Action::Junk(true),
-        PeAction::NotJunk => Action::Junk(false),
-        PeAction::Delete => Action::Delete,
-        PeAction::Archive => Action::Archive,
-        PeAction::Move => Action::Move(to),
-        PeAction::Copy => Action::Copy(to),
+    let Some(action) = action_of(action, to) else {
+        if !error.is_null() {
+            // SAFETY: the caller gave a valid pointer
+            unsafe { *error = into_c_string("not a flag colour".to_string()) };
+        }
+        return null_mut();
     };
     // SAFETY: as the caller guarantees
     let outcome = unsafe { with(core, Err(None), |core| core.act(&refs, action).map_err(Some)) };

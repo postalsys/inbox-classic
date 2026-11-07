@@ -68,10 +68,6 @@ gtk-outbox-row = An: { $to }  ·  In Warteschlange seit: { $queued }  ·  { $sta
 
 ## The app
 
-gtk-new-messages = { $count ->
-    [one] { $count } neue Nachricht
-   *[other] { $count } neue Nachrichten
-}
 gtk-still-running-detail = Inbox Classic prüft im Hintergrund auf neue E-Mails. Über das Symbol in der oberen Leiste können Sie das Programm öffnen oder beenden.
 gtk-sign-in-again-ask =
     Die Anmeldung für { $account } wurde abgelehnt oder ist abgelaufen.

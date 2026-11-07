@@ -45,6 +45,8 @@ cmd-mark-all-read = Mark &All Read
 cmd-junk = Mark as &Junk
 cmd-not-junk = Mark as N&ot Junk
 cmd-archive = &Archive
+cmd-watch-conversation = &Watch Conversation
+cmd-ignore-conversation = &Ignore Conversation
 cmd-next-message = &Next Message
 cmd-previous-message = &Previous Message
 cmd-next-unread = Next &Unread Message
@@ -56,6 +58,7 @@ ui-find-not-found = “{ $words }” is not in this message
 cmd-expand-all-threads = &Expand All Conversations
 cmd-collapse-all-threads = C&ollapse All Conversations
 ui-group-by-conversation = &Group messages by conversation
+cmd-hide-ignored = &Hide Ignored Conversations
 cmd-notify = &Notify of New Mail
 cmd-open = &Open Inbox Classic
 cmd-default-app = Make &Default Mail App...
@@ -97,6 +100,10 @@ ui-still-running = Inbox Classic is still running
 ui-no-subject = (no subject)
 ui-quoted = “{ $subject }”
 ui-newest-from = Latest message from { $sender }: { $subject }
+ui-new-messages = { $count ->
+    [one] { $count } new message
+   *[other] { $count } new messages
+}
 ui-outbox-waiting = { $count ->
     [one] 1 message in the Outbox
    *[other] { $count } messages in the Outbox
@@ -129,6 +136,10 @@ ui-col-subject = Subject
 ui-col-from = From
 ui-col-to = To
 ui-col-received = Received
+# the column of the glasses of a watched conversation (and the sign of an ignored one)
+ui-col-watch = Watch
+# a notification of new mail in a watched conversation, over who it is from
+ui-watched-conversation = Watched conversation
 ui-col-sent = Sent
 ui-col-size = Size
 ui-col-folder = Folder

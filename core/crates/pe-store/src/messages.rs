@@ -151,12 +151,19 @@ pub struct Message {
     pub cached: bool,
     /// Its row's place in a list grouped by conversation; None in a list of one row a message
     pub thread: Option<crate::ThreadPlace>,
+    /// Its conversation's mark (Watch or Ignore Conversation): the list's Watch column, and an ignored one's row grey
+    pub mark: crate::ThreadMark,
 }
 
 impl Message {
     /// Whether its row is bold: it is unread, or it is a collapsed conversation's row and one of its messages is
     pub fn bold(&self) -> bool {
         !self.info.seen() || self.thread.is_some_and(|t| t.collapsed() && t.unread > 0)
+    }
+
+    /// Whether its row is grey: its conversation is ignored (Ignore Conversation)
+    pub fn dimmed(&self) -> bool {
+        self.mark == crate::ThreadMark::Ignore
     }
 
     /// Where it is
@@ -230,7 +237,8 @@ fn is_seen(canonical: &str) -> bool {
 pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_date, date, size, subject, from_name, \
      from_address, recipients, message_id, in_reply_to, has_attachments, \
      EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id), sender_people, recipient_people, \
-     attachment_names, attachment_count, refs, thread_id, bounce";
+     attachment_names, attachment_count, refs, thread_id, bounce, \
+     COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0)";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     Ok(Message {
@@ -238,6 +246,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
         folder_id: row.get(1)?,
         cached: row.get(15)?,
         thread: None,
+        mark: crate::ThreadMark::of(row.get(23)?),
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,

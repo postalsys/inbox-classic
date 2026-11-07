@@ -765,7 +765,7 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         case .selectAll, .find: return true
         // the commands of the messages of the main window
         case .reply, .replyAll, .forward, .markRead, .markUnread, .markAllRead, .flag, .move, .copy, .junk, .notJunk, .archive,
-             .print, .saveAs, .viewSource, .pictures, .nextMessage, .previousMessage, .nextUnread, .findInMessage, .undo:
+             .watchConversation, .ignoreConversation, .print, .saveAs, .viewSource, .pictures, .nextMessage, .previousMessage, .nextUnread, .findInMessage, .undo:
             return false
         default: return nil
         }

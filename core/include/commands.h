@@ -43,12 +43,15 @@ enum PeCommandId : unsigned short {
     IDM_JUNK = 127,
     IDM_NOT_JUNK = 128,
     IDM_ARCHIVE = 138,
+    IDM_WATCH_CONVERSATION = 151,
+    IDM_IGNORE_CONVERSATION = 152,
     IDM_NOTIFY = 129,
     IDM_OPEN = 130,
     IDM_DEFAULT_APP = 131,
     IDM_VIEW_SOURCE = 132,
     IDM_EXPAND_ALL_THREADS = 145,
     IDM_COLLAPSE_ALL_THREADS = 146,
+    IDM_HIDE_IGNORED = 153,
     IDM_AI_AGENTS = 133,
     IDM_OPTIONS = 137,
     IDM_ADDRESS_BOOK = 147,
@@ -78,6 +81,8 @@ inline bool CommandNeedsSome(unsigned id) {
     switch (id) {
     case IDM_FORWARD:
     case IDM_SAVE_AS:
+    case IDM_WATCH_CONVERSATION:
+    case IDM_IGNORE_CONVERSATION:
         return true;
     default:
         return false;
@@ -125,12 +130,15 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_JUNK: return PE_TEXT_CMD_JUNK;
     case IDM_NOT_JUNK: return PE_TEXT_CMD_NOT_JUNK;
     case IDM_ARCHIVE: return PE_TEXT_CMD_ARCHIVE;
+    case IDM_WATCH_CONVERSATION: return PE_TEXT_CMD_WATCH_CONVERSATION;
+    case IDM_IGNORE_CONVERSATION: return PE_TEXT_CMD_IGNORE_CONVERSATION;
     case IDM_NOTIFY: return PE_TEXT_CMD_NOTIFY;
     case IDM_OPEN: return PE_TEXT_CMD_OPEN;
     case IDM_DEFAULT_APP: return PE_TEXT_CMD_DEFAULT_APP;
     case IDM_VIEW_SOURCE: return PE_TEXT_CMD_VIEW_SOURCE;
     case IDM_EXPAND_ALL_THREADS: return PE_TEXT_CMD_EXPAND_ALL_THREADS;
     case IDM_COLLAPSE_ALL_THREADS: return PE_TEXT_CMD_COLLAPSE_ALL_THREADS;
+    case IDM_HIDE_IGNORED: return PE_TEXT_CMD_HIDE_IGNORED;
     case IDM_AI_AGENTS: return PE_TEXT_CMD_AI_AGENTS;
     case IDM_OPTIONS: return PE_TEXT_CMD_OPTIONS;
     case IDM_ADDRESS_BOOK: return PE_TEXT_CMD_ADDRESS_BOOK;

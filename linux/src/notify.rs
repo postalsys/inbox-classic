@@ -11,10 +11,18 @@ use gtk::prelude::*;
 
 /// A notification that a click on opens the message `uid` of `folder`
 pub fn new_mail(application: &adw::Application, title: &str, text: &str, folder: i64, uid: u64) {
+    #[cfg(feature = "e2e")]
+    SENT.with(|sent| sent.borrow_mut().push((title.to_string(), text.to_string())));
     let notification = gio::Notification::new(title);
     notification.set_body(Some(text));
     notification.set_default_action_and_target_value("app.show-message", Some(&(folder, uid).to_variant()));
     application.send_notification(Some("new-mail"), &notification);
+}
+
+#[cfg(feature = "e2e")]
+thread_local! {
+    /// The notifications of new mail sent, as (title, text), for the UI test
+    pub static SENT: std::cell::RefCell<Vec<(String, String)>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 
 /// A notification that a click on brings the window back

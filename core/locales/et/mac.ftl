@@ -41,12 +41,6 @@ mac-outbox-waiting =
 mac-sending = Saadetakse { $subject }…
 mac-checking = Kontrollitakse konto { $account } uusi kirju…
 mac-account-said = { $account }: { $message }
-mac-new-messages =
-    { $count ->
-        [one] { $count } uus kiri
-       *[other] { $count } uut kirja
-    }
-mac-newest-from = Uusim saatjalt { $from }: { $subject }
 mac-not-bundle = See Inbox Classicu koopia ei ole rakenduse pakett, seega ei saa see olla vaikimisi e-posti rakendus.
 mac-not-made-default = Inbox Classicut ei õnnestunud vaikimisi meilirakenduseks määrata: { $reason }
 mac-tool-search = Otsi

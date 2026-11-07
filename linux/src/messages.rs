@@ -1,7 +1,8 @@
 //! The message list: a column view over a list model that pages through the core, 100 rows at a time, as the virtual
 //! list view of the Windows app does. The columns as Outlook Express has them: the envelope (read or not), the paper
-//! clip, the flag, From, Subject, Received, Size, and Folder while a search lists several folders. Unread messages in
-//! bold. Every string comes from the core as it decoded it.
+//! clip, the flag, Watch (glasses for a watched conversation, a muted sign for an ignored one), From, Subject,
+//! Received, Size, and Folder while a search lists several folders. Unread messages in bold, ignored conversations
+//! grey. Every string comes from the core as it decoded it.
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -9,7 +10,7 @@ use std::rc::Rc;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_store::{Message, MessageRef, Sort, SortField};
+use pe_store::{Message, MessageRef, Sort, SortField, ThreadMark};
 
 use crate::app::shell;
 
@@ -177,14 +178,26 @@ impl MessageList {
         view.set_reorderable(false);
         // no read/unread column: an unread message is bold, which says it; its space is the sender's and the subject's
         // a bounce's mark in the paper clip's place: what matters about a delivery notice is that it is one
-        view.append_column(&icon_column(|m| {
-            if m.info.bounce {
-                Some(UNDELIVERED_ICON)
-            } else {
-                m.info.has_attachments.then_some("ic-attach-symbolic")
-            }
-        }));
+        view.append_column(&icon_column(
+            |m| {
+                if m.info.bounce {
+                    Some(UNDELIVERED_ICON)
+                } else {
+                    m.info.has_attachments.then_some("ic-attach-symbolic")
+                }
+            },
+            |_| None,
+        ));
         view.append_column(&flag_column());
+        // Watch: the glasses of a watched conversation, the muted sign of an ignored one, as Outlook Express has them
+        view.append_column(&icon_column(
+            |m| match m.mark {
+                ThreadMark::Watch => Some(WATCHED_ICON),
+                ThreadMark::Ignore => Some(IGNORED_ICON),
+                ThreadMark::None => None,
+            },
+            |m| (m.mark == ThreadMark::Watch).then(|| t!(UiWatchedConversation)),
+        ));
         let recipients = Rc::new(Cell::new(false));
         let shows = recipients.clone();
         let from = text_column(&t!(UiColFrom), 200, false, 0.0, move |m| {
@@ -443,8 +456,16 @@ impl MessageList {
 /// the Windows app has it, in the paper clip's colour; the card in the reading pane says how bad it is
 pub const UNDELIVERED_ICON: &str = "ic-mail-error-symbolic";
 
-/// A column of the envelope, the paper clip or the flag: an icon, or none, for each row
-fn icon_column(icon: fn(&Message) -> Option<&'static str>) -> gtk::ColumnViewColumn {
+/// The marks of the Watch column: Fluent's glasses for a watched conversation, its muted speaker for an ignored one
+pub const WATCHED_ICON: &str = "ic-glasses-symbolic";
+pub const IGNORED_ICON: &str = "ic-speaker-mute-symbolic";
+
+/// A column of the paper clip or the Watch mark: an icon, or none, for each row, and what it says on hover and to a
+/// screen reader
+fn icon_column(
+    icon: fn(&Message) -> Option<&'static str>,
+    tip: fn(&Message) -> Option<String>,
+) -> gtk::ColumnViewColumn {
     let factory = gtk::SignalListItemFactory::new();
     factory.connect_setup(|_, item| {
         if let Some(item) = item.downcast_ref::<gtk::ListItem>() {
@@ -460,12 +481,15 @@ fn icon_column(icon: fn(&Message) -> Option<&'static str>) -> gtk::ColumnViewCol
         let Some(image) = item.child().and_downcast::<gtk::Image>() else {
             return;
         };
-        let name = item
+        let (name, tip, ignored) = item
             .item()
             .and_downcast::<MessageRow>()
-            .and_then(|row| row.with(icon))
-            .flatten();
+            .and_then(|row| row.with(|m| (icon(m), tip(m), m.dimmed())))
+            .unwrap_or_default();
         image.set_icon_name(name);
+        image.set_tooltip_text(tip.as_deref());
+        image.update_property(&[gtk::accessible::Property::Label(tip.as_deref().unwrap_or_default())]);
+        set_grey(&image, ignored);
     });
     let column = gtk::ColumnViewColumn::new(None, Some(factory));
     column.set_fixed_width(30);
@@ -530,11 +554,12 @@ fn flag_column() -> gtk::ColumnViewColumn {
         let Some(area) = item.child().and_downcast::<gtk::DrawingArea>() else {
             return;
         };
-        let color = item
+        let (color, ignored) = item
             .item()
             .and_downcast::<MessageRow>()
-            .and_then(|row| row.with(|m| m.info.flag_color()))
-            .flatten();
+            .and_then(|row| row.with(|m| (m.info.flag_color(), m.dimmed())))
+            .unwrap_or_default();
+        set_grey(&area, ignored);
         // the colour by its name: on hover, and for a screen reader (and for those who tell colours apart badly)
         let name = color.map(pe_core::color_name);
         area.set_tooltip_text(name);
@@ -579,15 +604,25 @@ fn text_column(
         let Some(row) = item.item().and_downcast::<MessageRow>() else {
             return;
         };
-        let (words, unread) = row.with(|m| (text(m), m.bold())).unwrap_or_default();
+        let (words, unread, ignored) = row.with(|m| (text(m), m.bold(), m.dimmed())).unwrap_or_default();
         label.set_text(&words);
         set_bold(&label, unread);
+        set_grey(&label, ignored);
     });
     let column = gtk::ColumnViewColumn::new(Some(title), Some(factory));
     column.set_fixed_width(width);
     column.set_expand(expand);
     column.set_resizable(true);
     column
+}
+
+/// An ignored conversation's cells grey
+fn set_grey(widget: &impl IsA<gtk::Widget>, grey: bool) {
+    if grey {
+        widget.add_css_class("dim-label");
+    } else {
+        widget.remove_css_class("dim-label");
+    }
 }
 
 fn set_bold(label: &gtk::Label, bold: bool) {
@@ -654,10 +689,13 @@ fn subject_column() -> gtk::ColumnViewColumn {
         let Some(row) = item.item().and_downcast::<MessageRow>() else {
             return;
         };
-        let Some((subject, thread, unread)) = row.with(|m| (m.info.subject.clone(), m.thread, m.bold())) else {
+        let Some((subject, thread, unread, ignored)) =
+            row.with(|m| (m.info.subject.clone(), m.thread, m.bold(), m.dimmed()))
+        else {
             return;
         };
         set_bold(&label, unread);
+        set_grey(&cell, ignored);
         // one row a message: the subject alone
         let Some(place) = thread else {
             expander.set_visible(false);

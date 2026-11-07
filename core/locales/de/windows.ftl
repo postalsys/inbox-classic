@@ -4,10 +4,6 @@
 ## Das Hauptfenster
 
 win-still-running-detail = Inbox Classic prüft im Hintergrund auf neue E-Mails. Klicken Sie zum Öffnen auf das Symbol. Zum Beenden öffnen Sie mit der rechten Maustaste das Symbolmenü.
-win-new-messages = { $count ->
-    [one] { $count } neue Nachricht
-   *[other] { $count } neue Nachrichten
-}
 win-default-app-not-installed = Inbox Classic ist nicht installiert und wird deshalb von Windows nicht als E-Mail-Programm aufgeführt. Installieren Sie Inbox Classic, um es als Standard auszuwählen.
 win-default-app-settings = Windows öffnet die Einstellungen für Standard-Apps. Legen Sie dort Inbox Classic zum Öffnen von MAILTO-Links fest.
 win-no-unread = Keine ungelesenen Nachrichten

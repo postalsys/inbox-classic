@@ -328,6 +328,21 @@ UPDATE messages SET bounce = 1 WHERE id IN (
     WHERE instr(header, 'multipart/report') > 0 AND instr(header, 'delivery-status') > 0
 );
 "#,
+    // Watch and Ignore Conversation (marks.rs): a conversation's mark, 1 watched and 2 ignored, by its conversation id,
+    // moved along when conversations are joined
+    r#"
+CREATE TABLE thread_marks (
+    thread_id INTEGER PRIMARY KEY,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    mark INTEGER NOT NULL
+);
+CREATE INDEX thread_marks_by_account ON thread_marks (account_id);
+"#,
+    // a conversation's messages in every folder (marks.rs: the unread ones Ignore marks read, the lists that show a
+    // mark; threads.rs: joining conversations), which messages_by_thread, by folder first, cannot find
+    r#"
+CREATE INDEX messages_of_thread ON messages (thread_id);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
@@ -358,10 +373,11 @@ mod tests {
     fn stored_bounces_are_marked_from_their_cached_header() {
         let mut db = Connection::open_in_memory().unwrap();
         // the schema before the bounce mark
-        for migration in &MIGRATIONS[..MIGRATIONS.len() - 1] {
+        let bounce = MIGRATIONS.iter().position(|m| m.contains("ADD COLUMN bounce")).unwrap();
+        for migration in &MIGRATIONS[..bounce] {
             db.execute_batch(migration).unwrap();
         }
-        db.pragma_update(None, "user_version", MIGRATIONS.len() - 1).unwrap();
+        db.pragma_update(None, "user_version", bounce).unwrap();
         db.execute_batch(
             "INSERT INTO accounts (id, name, email, username, imap_host, imap_port, imap_security, smtp_host, \
              smtp_port, smtp_security) VALUES (1, 'A', 'a@x', 'a', 'h', 993, 'tls', 'h', 465, 'tls');

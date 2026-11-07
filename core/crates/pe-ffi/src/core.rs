@@ -114,8 +114,9 @@ pub enum PeEventKind {
     DraftSaved = 12,
     /// The check `uid` of `pe_sign_in_app_check` is done: `pe_sign_in_app_check_result`
     SignInAppChecked = 13,
-    /// New unread mail in the Inbox `folder` of `account`: `count` messages, `uid` the newest, `message` who it is
-    /// from and `detail` its subject
+    /// New unread mail in the Inbox `folder` of `account`, or in a watched conversation in another folder of the
+    /// user's: `count` messages, `uid` the newest, `message` the notification's title and `detail` its text, to show as
+    /// they are
     NewMail = 14,
     /// The unsubscribe `uid` of `pe_unsubscribe` is done; `message` says why not when it is not NULL
     Unsubscribed = 15,
@@ -178,10 +179,10 @@ pub struct PeEvent {
     pub folder: i64,
     pub uid: u64,
     pub failure: PeFailureKind,
-    /// UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; who
-    /// it is from, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
+    /// UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
+    /// notification's title, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
     pub message: *const c_char,
-    /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the subject, for `NewMail`. NULL otherwise
+    /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
     pub detail: *const c_char,
     /// How many messages, for `NewMail`; 0 otherwise
     pub count: u64,
@@ -240,9 +241,7 @@ impl Callback {
             Event::DraftSaved {
                 message_id, problem, ..
             } => (PeFailureKind::None, problem.map(c_string), Some(c_string(message_id))),
-            Event::NewMail { from, subject, .. } => {
-                (PeFailureKind::None, Some(c_string(from)), Some(c_string(subject)))
-            }
+            Event::NewMail { title, text, .. } => (PeFailureKind::None, Some(c_string(title)), Some(c_string(text))),
             Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
             Event::MessageFailed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
             Event::SyncFinished { failure, .. } => (failure.map_or(PeFailureKind::None, Into::into), None, None),
@@ -1090,6 +1089,8 @@ pub struct PeSearch {
     pub threads: bool,
     pub expanded: *const i64,
     pub expanded_count: usize,
+    /// View > Hide Ignored Conversations: the messages of ignored conversations left out
+    pub hide_ignored: bool,
 }
 
 /// # Safety
@@ -1114,11 +1115,13 @@ pub(crate) unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Searc
         text: unsafe { arg(s.text) }.unwrap_or_default().to_string(),
         // SAFETY: as the caller guarantees
         threads: s.threads.then(|| unsafe { ids(s.expanded, s.expanded_count) }),
+        hide_ignored: s.hide_ignored,
     })
 }
 
 /// How many messages `search` finds, and how many of them are unread: grouped by conversation (`threads`) too, all of
-/// their messages (the list's rows are `pe_list_rows`)
+/// their messages (the list's rows are `pe_list_rows`). The counts of the status bar: a folder shown whole counted
+/// from its indexes, as `pe_folder_counts`
 ///
 /// # Safety
 /// `core` must be a live handle, `search` a valid search, `total` and `unread` valid pointers.
@@ -1137,7 +1140,7 @@ pub unsafe extern "C" fn pe_message_count(
         return false;
     };
     // SAFETY: as the caller guarantees
-    let Some(counts) = (unsafe { with(core, None, |core| core.count_search(&search).ok()) }) else {
+    let Some(counts) = (unsafe { with(core, None, |core| core.list_counts(&search).ok()) }) else {
         return false;
     };
     // SAFETY: the caller gave valid pointers
@@ -1396,9 +1399,33 @@ pub struct PeMessage {
     /// The row stands for all of its conversation's messages, which are not shown under it (it shows a +, and an action
     /// on it acts on them all). The apps read this rather than decide from the numbers above.
     pub thread_collapsed: bool,
+    /// Its conversation's mark: watched (the Watch column's glasses) or ignored (the Watch column's sign, and the row
+    /// grey)
+    pub mark: PeThreadMark,
+    /// The row is grey, as its conversation is ignored. The apps read this rather than decide from `mark`.
+    pub dimmed: bool,
     /// A notice that a message was not delivered, or not yet (a bounce): the list shows its icon in the attachment
     /// column's place
     pub bounce: bool,
+}
+
+/// A conversation's mark (Message > Watch Conversation, Ignore Conversation)
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeThreadMark {
+    None = 0,
+    Watch = 1,
+    Ignore = 2,
+}
+
+impl From<pe_core::ThreadMark> for PeThreadMark {
+    fn from(mark: pe_core::ThreadMark) -> Self {
+        match mark {
+            pe_core::ThreadMark::None => PeThreadMark::None,
+            pe_core::ThreadMark::Watch => PeThreadMark::Watch,
+            pe_core::ThreadMark::Ignore => PeThreadMark::Ignore,
+        }
+    }
 }
 
 /// A page of the message list; free with `pe_message_list_free`
@@ -1454,6 +1481,8 @@ pub unsafe extern "C" fn pe_messages(
                     thread_opens: m.thread.is_some_and(|t| t.opens()),
                     thread_collapsed: m.thread.is_some_and(|t| t.collapsed()),
                     bounce: info.bounce,
+                    mark: m.mark.into(),
+                    dimmed: m.dimmed(),
                 }
             })))
         })

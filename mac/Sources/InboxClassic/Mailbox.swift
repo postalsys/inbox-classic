@@ -368,7 +368,7 @@ public final class Mailbox: NSObject {
     /// every Inbox's
     private var search: Search {
         Search(folder: searching ? 0 : folder, allInboxes: !searching && allInboxes, text: findText, threads: grouped,
-               expanded: grouped ? expanded : [])
+               expanded: grouped ? expanded : [], hideIgnored: AppDelegate.shared?.hideIgnored ?? false)
     }
 
     /// the Subject title over the subjects, which make room for the triangles while grouped
@@ -385,7 +385,7 @@ public final class Mailbox: NSObject {
     var grouped: Bool { AppDelegate.shared?.groupByConversation ?? true }
 
     private enum ColumnID: String, CaseIterable {
-        case attach, flag, from, subject, received, size, folder
+        case attach, flag, watch, from, subject, received, size, folder
     }
 
     private func setUpList() {
@@ -408,7 +408,7 @@ public final class Mailbox: NSObject {
         promiseWriter.wrote = { [weak self] dir, problem in self?.wroteFile(dir, problem) }
         let columns: [(ColumnID, String, CGFloat)] = [
             // no envelope column: bold says a message is unread, and From and Subject get the room
-            (.attach, "", 22), (.flag, "", 22), (.from, Text.uiColFrom.text, 200), (.subject, Text.headerSubject.text, 342),
+            (.attach, "", 22), (.flag, "", 22), (.watch, "", 22), (.from, Text.uiColFrom.text, 200), (.subject, Text.headerSubject.text, 303),
             (.received, Text.uiColReceived.text, 130), (.size, Text.uiColSize.text, 96),
         ]
         for (id, title, width) in columns {
@@ -416,13 +416,14 @@ public final class Mailbox: NSObject {
         }
         // the paper clip and the flag in their headers, as Outlook Express has them (a header cell does not draw the
         // image of a column without a title on its own)
-        for (id, icon) in [("attach", "attach"), ("flag", "flag")] {
-            guard let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id)),
-                  let image = Icons.list(icon) else { continue }
+        for (id, image) in [("attach", Icons.list("attach")), ("flag", Icons.list("flag")), ("watch", Icons.watchHeader)] {
+            guard let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id)), let image else { continue }
             let header = IconHeaderCell(textCell: "")
             header.icon = image
             column.headerCell = header
         }
+        // the glasses say nothing on their own: the header names the column
+        list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("watch"))?.headerToolTip = Text.uiColWatch.text
         showSortIndicator()
     }
 
@@ -433,7 +434,7 @@ public final class Mailbox: NSObject {
         }
         column.title = title
         column.width = width
-        if [.attach, .flag].contains(id) {
+        if [.attach, .flag, .watch].contains(id) {
             column.minWidth = width
             column.maxWidth = width
             column.resizingMask = []
@@ -504,12 +505,11 @@ public final class Mailbox: NSObject {
         rows = 0
         showFolderColumn()
         showPersonColumn()
-        // the counts of the folder come from its indexes; a search and All Inboxes count what they find; an account
-        // lists nothing. Grouped by conversation the list has fewer rows than messages: the core counts them
-        if severalFolders {
+        // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
+        // conversations what they find; an account lists nothing. Grouped by conversation the list has fewer rows than
+        // messages: the core counts them
+        if severalFolders || folder != 0 {
             (total, unread) = core.messageCount(search)
-        } else if folder != 0 {
-            (total, unread) = core.folderCounts(folder)
         }
         rows = grouped && total > 0 ? core.listRows(search) : total
         indentSubjectHeader()
@@ -889,6 +889,12 @@ public final class Mailbox: NSObject {
         reloadList(keepSelection: true)
     }
 
+    /// View > Hide Ignored Conversations turned on or off
+    func hideIgnoredChanged() {
+        reloadList(keepSelection: true)
+        changed()
+    }
+
     /// grouping turned on or off in Settings: the list again, the message shown still selected
     func groupingChanged() {
         expanded = []
@@ -1017,6 +1023,27 @@ public final class Mailbox: NSObject {
         guard canArchive else { return }
         actAndRemove(PE_ACTION_ARCHIVE)
     }
+
+    /// Watch Conversation (`PE_ACTION_WATCH`) or Ignore Conversation (`PE_ACTION_IGNORE`): the conversations of the
+    /// selected messages watched, or ignored and read, or no longer when all of them are. The core says whether that
+    /// takes them out of the list (Ignore while ignored conversations are hidden)
+    func markConversations(_ action: PeAction) {
+        guard hasSelection else { return }
+        if leavesList(action) {
+            actAndRemove(action)
+        } else {
+            act(action)
+        }
+    }
+
+    /// whether `action` takes the selected messages out of the list, as the core says from the selection now
+    private func leavesList(_ action: PeAction, to: Int64 = 0) -> Bool {
+        updateSummary()
+        return pe_selection_leaves_list(&summary, action, to, AppDelegate.shared?.hideIgnored ?? false)
+    }
+
+    /// the text of the rows of an ignored conversation: grey, as what is turned off is
+    static let ignoredColor = NSColor.tertiaryLabelColor
 
     func markJunk(_ junk: Bool) {
         guard hasSelection else { return }
@@ -1678,12 +1705,13 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
         guard let column = tableColumn, let message = row(index) else { return nil }
         let id = column.identifier
         switch ColumnID(rawValue: id.rawValue) {
-        case .attach, .flag:
+        case .attach, .flag, .watch:
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? IconCell) ?? IconCell(id)
             switch ColumnID(rawValue: id.rawValue) {
             // a bounce's mark in the paper clip's place, whether or not it has files
             case .attach where message.bounce: cell.show(Icons.bounce)
             case .attach: cell.show(message.hasAttachments ? Icons.list("attach") : nil)
+            case .watch: cell.show(Icons.threadMark(message.mark))
             default:
                 cell.show(message.flagged ? Icons.coloredFlag(message.flagColor) : nil,
                           selected: message.flagged ? Icons.selectedFlag : nil)
@@ -1709,7 +1737,8 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             default: value = ""
             }
             // unread messages in bold, as Outlook Express shows them, and closed conversations with unread mail
-            cell.show(value, bold: message.bold, right: id.rawValue == ColumnID.size.rawValue)
+            cell.show(value, bold: message.bold, right: id.rawValue == ColumnID.size.rawValue,
+                      grey: message.dimmed)
             return cell
         }
     }
@@ -1861,7 +1890,9 @@ final class IconHeaderCell: NSTableHeaderCell {
     override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
         super.drawInterior(withFrame: cellFrame, in: controlView)
         guard let tinted else { return }
-        let size = NSSize(width: 14, height: 14)
+        // in a box of 14 points, or 16 wide for a wide one (the glasses), its shape kept
+        let scale = min(16 / max(1, tinted.size.width), 14 / max(1, tinted.size.height))
+        let size = NSSize(width: tinted.size.width * scale, height: tinted.size.height * scale)
         tinted.draw(in: NSRect(x: cellFrame.midX - size.width / 2, y: cellFrame.midY - size.height / 2,
                                width: size.width, height: size.height))
     }
@@ -1887,9 +1918,11 @@ final class TextCell: NSTableCellView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    func show(_ value: String, bold: Bool, right: Bool) {
+    /// `grey`: a message of an ignored conversation, in the colour of what is turned off
+    func show(_ value: String, bold: Bool, right: Bool, grey: Bool = false) {
         label.stringValue = value
         label.font = bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
+        label.textColor = grey ? Mailbox.ignoredColor : .labelColor
         label.alignment = right ? .right : .left
     }
 }
@@ -1942,6 +1975,7 @@ final class SubjectCell: NSTableCellView {
         // the count is a number alone, which needs no words of a language
         label.stringValue = message.opens ? "\(message.subject) (\(message.threadCount))" : message.subject
         label.font = message.bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
+        label.textColor = message.dimmed ? Mailbox.ignoredColor : .labelColor
         disclosure.isHidden = !message.opens
         disclosure.state = message.threadExpanded ? .on : .off
         indent.constant = !grouped ? SubjectCell.inset : SubjectCell.glyph + CGFloat(message.threadDepth) * SubjectCell.step
@@ -2066,6 +2100,11 @@ public final class MessageTable: NSTableView {
         // N: the next unread message, as in Thunderbird
         case 45 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
             mailbox?.nextUnread()
+        // W watches the conversation, K ignores it ("kill"), as in Thunderbird
+        case 13 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
+            mailbox?.markConversations(PE_ACTION_WATCH)
+        case 40 where event.modifierFlags.intersection([.command, .control, .option]).isEmpty:
+            mailbox?.markConversations(PE_ACTION_IGNORE)
         // Right opens the selected conversation, Left closes it (from a message under it too)
         case 124 where mailbox?.openOrClose(true) == true, 123 where mailbox?.openOrClose(false) == true:
             break

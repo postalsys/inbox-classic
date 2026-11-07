@@ -47,6 +47,10 @@ cmd-not-junk = Marquer comme non indé&sirable
 # review: new
 cmd-archive = A&rchiver
 # review: new
+cmd-watch-conversation = Sur&veiller la conversation
+# review: new
+cmd-ignore-conversation = I&gnorer la conversation
+# review: new
 cmd-next-message = Message &suivant
 # review: new
 cmd-previous-message = Message &précédent
@@ -68,6 +72,8 @@ cmd-expand-all-threads = &Développer toutes les conversations
 cmd-collapse-all-threads = Ré&duire toutes les conversations
 # review: new
 ui-group-by-conversation = &Regrouper les messages par conversation
+# review: new
+cmd-hide-ignored = &Masquer les conversations ignorées
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...
@@ -118,6 +124,10 @@ ui-still-running = Inbox Classic fonctionne en arrière-plan
 ui-no-subject = (sans objet)
 ui-quoted = « { $subject } »
 ui-newest-from = Dernier message de { $sender } : { $subject }
+ui-new-messages = { $count ->
+    [one] { $count } nouveau message
+   *[other] { $count } nouveaux messages
+}
 ui-outbox-waiting = { $count ->
     [one] { $count } message dans la Boîte d'envoi
    *[other] { $count } messages dans la Boîte d'envoi
@@ -150,6 +160,10 @@ ui-col-subject = Objet
 ui-col-from = De
 ui-col-to = À
 ui-col-received = Reçu
+# review: new
+ui-col-watch = Surveiller
+# review: new
+ui-watched-conversation = Conversation surveillée
 # review: new
 ui-col-sent = Envoyé
 ui-col-size = Taille

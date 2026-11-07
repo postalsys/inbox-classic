@@ -31,6 +31,8 @@ void ShowRefusal(HWND owner, char* reason, PeText fallback) {
 
 // Tools > Options: a row a conversation (on unless turned off)
 const wchar_t* kThreadsPreference = L"GroupByConversation";
+// View > Hide Ignored Conversations (off unless turned on)
+const wchar_t* kHideIgnoredPreference = L"HideIgnoredConversations";
 
 constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
@@ -41,9 +43,9 @@ std::wstring AllInboxes() {
     return core::T(PE_TEXT_UI_ALL_INBOXES);
 }
 
-// as Outlook Express has them: the envelope (read or not), the paper clip and the flag, then the text columns
-// no read and unread column: bold says it
-enum Column { COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE, COL_FOLDER };
+// as Outlook Express has them: the paper clip, the flag and the Watch column (glasses, or the sign of an ignored
+// conversation), then the text columns; no read and unread column: bold says it
+enum Column { COL_ATTACH, COL_FLAG, COL_WATCH, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE, COL_FOLDER };
 
 // what the Find box takes, shown when the mouse rests on it: the words of the query syntax are the same in every
 // language
@@ -164,7 +166,7 @@ LRESULT CALLBACK ListProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
     return DefSubclassProc(hwnd, message, wParam, lParam);
 }
 
-// a column that shows an icon of the list strip in its header (the paper clip, the flag) and nothing else
+// a column that shows an icon of the list strip in its header (the paper clip, the flag, the glasses) and nothing else
 void IconColumn(HWND list, int index, int icon) {
     AddColumn(list, index, L"", 28);
     LVCOLUMNW column = {};
@@ -203,6 +205,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     ListView_SetExtendedListViewStyle(list_, LVS_EX_FULLROWSELECT);
     SetWindowSubclass(list_, ListProc, 0, reinterpret_cast<DWORD_PTR>(this));
     threads_ = GetPreference(kThreadsPreference, 1) != 0;
+    hideIgnored_ = GetPreference(kHideIgnoredPreference, 0) != 0;
     // the icons of the list: for the headers of the paper clip and flag columns, and drawn on the rows in CustomDraw
     listIcons_ = IconList(IconSet::List);
     ImageList_GetIconSize(listIcons_, &iconSize_, &iconSize_);
@@ -240,6 +243,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     }
     IconColumn(list_, COL_ATTACH, LIST_ATTACH);
     IconColumn(list_, COL_FLAG, LIST_FLAG);
+    IconColumn(list_, COL_WATCH, LIST_GLASSES);
     AddColumn(list_, COL_FROM, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
     AddColumn(list_, COL_SUBJECT, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 320);
     AddColumn(list_, COL_RECEIVED, core::T(PE_TEXT_UI_COL_RECEIVED).c_str(), 130);
@@ -585,13 +589,13 @@ core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
 // Inbox's
 PeSearch Mailbox::Search() const {
     return {Searching() ? 0 : folder_, !Searching() && allInboxes_, PE_SHOW_ALL, findUtf8_.c_str(), threads_, expanded_.data(),
-            expanded_.size()};
+            expanded_.size(), hideIgnored_};
 }
 
 MessageListOrder Mailbox::ListOrder() const {
     // a message window goes through the messages one by one, the conversations left out
     PeSearch search = Search();
-    return {search.folder, search.all_inboxes, findUtf8_, sort_, ascending_};
+    return {search.folder, search.all_inboxes, findUtf8_, sort_, ascending_, hideIgnored_};
 }
 
 bool Mailbox::Searching() const {
@@ -676,12 +680,10 @@ void Mailbox::ReloadList(bool keepSelection) {
     ShowFolderColumn();
     PeSearch search = Search();
     ShowPersonColumn(search);
-    // the counts of the folder come from its indexes; a search, of every folder, and All Inboxes count what they find.
-    // An account's own item lists nothing
-    if (SeveralFolders()) {
+    // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
+    // conversations what they find. An account's own item lists nothing
+    if (SeveralFolders() || folder_) {
         pe_message_count(core_, &search, &total_, &unread_);
-    } else if (folder_) {
-        pe_folder_counts(core_, folder_, &total_, &unread_);
     }
     // the status bar counts messages; grouped by conversation the list has fewer rows
     rowCount_ = !threads_ ? total_ : SeveralFolders() || folder_ ? pe_list_rows(core_, &search) : 0;
@@ -802,6 +804,7 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
             SelectObject(draw->nmcd.hdc, bold_);
             result |= CDRF_NEWFONT;
         }
+        GreyIgnored(draw, index, row);
     } else if (draw->nmcd.dwDrawStage == (CDDS_ITEMPREPAINT | CDDS_SUBITEM)) {
         const PeMessage* row = Row(index);
         if (row && draw->iSubItem == COL_SUBJECT) {
@@ -810,6 +813,7 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
             return;
         }
         SelectObject(draw->nmcd.hdc, row ? RowFont(*row) : normal_);
+        GreyIgnored(draw, index, row);
         result = CDRF_NEWFONT;
     } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT) {
         if (const PeMessage* row = Row(index)) {
@@ -877,6 +881,13 @@ HBITMAP FlagBitmap(int color, bool checked) {
 
 } // namespace
 
+// an ignored conversation's row in grey, but where it is selected: the highlight's own colours there
+void Mailbox::GreyIgnored(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const {
+    if (row && row->dimmed && !(ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED)) {
+        draw->clrText = GetSysColor(COLOR_GRAYTEXT);
+    }
+}
+
 HFONT Mailbox::RowFont(const PeMessage& row) const {
     return row.bold ? bold_ : normal_;
 }
@@ -901,7 +912,7 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
     bool active = GetFocus() == list_;
     int back = !selected ? COLOR_WINDOW : active ? COLOR_HIGHLIGHT : COLOR_BTNFACE;
-    int fore = !selected ? COLOR_WINDOWTEXT : active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT;
+    int fore = selected ? (active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT) : row.dimmed ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT;
     FillRect(dc, &cell, GetSysColorBrush(back));
     RECT box = ThreadBox(cell);
     if (row.thread_opens) {
@@ -930,7 +941,8 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     SelectObject(dc, old);
 }
 
-// the paper clip (or a bounce's mark) and the flag of a row, drawn over the row as the list painted it:
+// the paper clip (or a bounce's mark), the flag and the Watch column's mark of a row, drawn over the row as the list
+// painted it:
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
 void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
     auto draw = [&](int column, int icon) {
@@ -946,6 +958,11 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         draw(COL_ATTACH, LIST_MAIL_ERROR);
     } else if (row.has_attachments) {
         draw(COL_ATTACH, LIST_ATTACH);
+    }
+    if (row.mark == PE_THREAD_MARK_WATCH) {
+        draw(COL_WATCH, LIST_GLASSES);
+    } else if (row.mark == PE_THREAD_MARK_IGNORE) {
+        draw(COL_WATCH, LIST_SPEAKER_MUTE);
     }
     if (row.flagged) {
         // the flag in its colour (red when it has none); white on the selected row's highlight, as the Mac shows it,
@@ -1044,10 +1061,7 @@ void Mailbox::TakeSelection(bool rebuild) {
         PeSearch search = Search();
         pe_selection_set_ranges(core_, selection_.get(), &search, sort_, ascending_, starts.data(), ends.data(), starts.size());
     }
-    summary_ = {};
-    if (pe_selection_count(selection_.get()) > 0) {
-        pe_selection_summary(core_, selection_.get(), &summary_);
-    }
+    RefreshSummary();
     if (count <= 1) {
         return;
     }
@@ -1216,9 +1230,10 @@ bool Mailbox::Act(PeAction action, int64_t to) {
     if (pe_selection_count(selection_.get()) == 0) {
         return false;
     }
-    // what takes the place of rows that leave the list: the row after the last of them
-    bool leaves = action == PE_ACTION_DELETE || action == PE_ACTION_MOVE || action == PE_ACTION_JUNK || action == PE_ACTION_NOT_JUNK ||
-                  action == PE_ACTION_ARCHIVE;
+    // what takes the place of rows that leave the list: the row after the last of them. The core says which actions
+    // take them out, from the selection as it is now (Ignore while ignored conversations are hidden)
+    RefreshSummary();
+    bool leaves = pe_selection_leaves_list(&summary_, action, to, hideIgnored_);
     int after = leaves ? RowAfterSelection() : -1;
     char* reason = nullptr;
     core::String done(pe_selection_act(core_, selection_.get(), action, to, &reason));
@@ -1227,6 +1242,13 @@ bool Mailbox::Act(PeAction action, int64_t to) {
         SelectAfterRemoval(after);
     }
     return done != nullptr;
+}
+
+void Mailbox::RefreshSummary() {
+    summary_ = {};
+    if (pe_selection_count(selection_.get()) > 0) {
+        pe_selection_summary(core_, selection_.get(), &summary_);
+    }
 }
 
 void Mailbox::Say(const std::wstring& text) {
@@ -1640,6 +1662,28 @@ void Mailbox::ExpandAll(bool open) {
     ReloadList(true);
 }
 
+void Mailbox::MarkConversations(PeAction action) {
+    Act(action);
+}
+
+void Mailbox::UpdateConversationMarks(HMENU menu) {
+    // the selection as the core knows it now: an action since it was taken may have changed the marks
+    FlushSelection();
+    RefreshSummary();
+    CheckMenuItem(menu, IDM_WATCH_CONVERSATION, MF_BYCOMMAND | (summary_.watched ? MF_CHECKED : MF_UNCHECKED));
+    CheckMenuItem(menu, IDM_IGNORE_CONVERSATION, MF_BYCOMMAND | (summary_.ignored ? MF_CHECKED : MF_UNCHECKED));
+}
+
+void Mailbox::SetHideIgnored(bool on) {
+    if (on == hideIgnored_) {
+        return;
+    }
+    SetPreference(kHideIgnoredPreference, on ? 1 : 0);
+    hideIgnored_ = on;
+    FlushSelection();
+    ReloadList(true);
+}
+
 void Mailbox::SetGrouped(bool on) {
     if (on == threads_) {
         return;
@@ -1789,10 +1833,20 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
         if (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey == 'A' && GetKeyState(VK_CONTROL) >= 0 && GetKeyState(VK_MENU) >= 0) {
             ArchiveSelected();
         }
-        // N goes to the next unread message, only without Ctrl, Alt or Shift
-        if (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey == 'N' && GetKeyState(VK_CONTROL) >= 0 && GetKeyState(VK_MENU) >= 0 &&
-            GetKeyState(VK_SHIFT) >= 0) {
-            NextUnread(parent_);
+        // N goes to the next unread message, W watches the conversation and K ignores it (Thunderbird's keys), only
+        // without Ctrl, Alt or Shift
+        if (GetKeyState(VK_CONTROL) >= 0 && GetKeyState(VK_MENU) >= 0 && GetKeyState(VK_SHIFT) >= 0) {
+            switch (reinterpret_cast<NMLVKEYDOWN*>(header)->wVKey) {
+            case 'N':
+                NextUnread(parent_);
+                break;
+            case 'W':
+                MarkConversations(PE_ACTION_WATCH);
+                break;
+            case 'K':
+                MarkConversations(PE_ACTION_IGNORE);
+                break;
+            }
         }
         return true;
     case LVN_COLUMNCLICK: {

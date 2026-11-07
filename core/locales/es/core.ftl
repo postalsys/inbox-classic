@@ -253,6 +253,26 @@ done-moved-back = { $count ->
     [one] { $messages } devuelto a { $folder }
    *[other] { $messages } devueltos a { $folder }
 }
+# review: new
+done-watched = { $count ->
+    [one] Siguiendo la conversación
+   *[other] Siguiendo { $count } conversaciones
+}
+# review: new
+done-unwatched = { $count ->
+    [one] Ya no se sigue la conversación
+   *[other] Ya no se siguen { $count } conversaciones
+}
+# review: new
+done-ignored = { $count ->
+    [one] Ignorando la conversación
+   *[other] Ignorando { $count } conversaciones
+}
+# review: new
+done-unignored = { $count ->
+    [one] Ya no se ignora la conversación
+   *[other] Ya no se ignoran { $count } conversaciones
+}
 their-folders = sus carpetas
 undo-move = Deshacer Mover
 undo-delete = Deshacer Eliminar

@@ -249,7 +249,7 @@ impl Mailbox {
     fn install_actions(self: &Rc<Self>, application: &adw::Application) {
         for &command in Command::ALL {
             let action = if command.is_toggle() {
-                gio::SimpleAction::new_stateful(command.name(), None, &shell().notify.get().to_variant())
+                gio::SimpleAction::new_stateful(command.name(), None, &toggled(command).to_variant())
             } else {
                 gio::SimpleAction::new(command.name(), None)
             };
@@ -392,17 +392,13 @@ impl Mailbox {
                 run_command(Command::Delete);
                 return glib::Propagation::Stop;
             }
-            // A archives, N goes to the next unread message, as in Thunderbird
-            let plain = (modifiers - gdk::ModifierType::SHIFT_MASK).is_empty();
-            if matches!(key, gdk::Key::a | gdk::Key::A) && plain {
-                run_command(Command::Archive);
-                return glib::Propagation::Stop;
+            match list_key(key, modifiers) {
+                Some(command) => {
+                    run_command(command);
+                    glib::Propagation::Stop
+                }
+                None => glib::Propagation::Proceed,
             }
-            if matches!(key, gdk::Key::n | gdk::Key::N) && plain {
-                run_command(Command::NextUnread);
-                return glib::Propagation::Stop;
-            }
-            glib::Propagation::Proceed
         });
         self.list.view.add_controller(keys);
         self.connect_thread_keys();
@@ -766,6 +762,7 @@ impl Mailbox {
             show: pe_core::Show::All,
             text: self.find_text.borrow().clone(),
             threads: grouped().then(|| self.expanded.borrow().clone()),
+            hide_ignored: hide_ignored(),
         }
     }
 
@@ -774,13 +771,10 @@ impl Mailbox {
         let search = self.search();
         let several = self.several_folders();
         let active = several || self.folder.get() != 0;
-        // the counts of the folder come from its indexes; a search and All Inboxes count what they find
-        let (total, unread) = if several {
-            core.count_search(&search).unwrap_or((0, 0))
-        } else if self.folder.get() != 0 {
-            core.folder(self.folder.get())
-                .map(|f| (f.total, f.unread))
-                .unwrap_or((0, 0))
+        // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
+        // conversations what they find; an account's own item lists nothing
+        let (total, unread) = if active {
+            core.list_counts(&search).unwrap_or((0, 0))
         } else {
             (0, 0)
         };
@@ -956,6 +950,20 @@ impl Mailbox {
         self.enable(Command::Copy, any);
         self.enable(Command::Archive, self.can_archive());
         self.update_flag_actions();
+        let summary = self.summary.borrow();
+        self.set_toggled(Command::WatchConversation, any && summary.watched);
+        self.set_toggled(Command::IgnoreConversation, any && summary.ignored);
+    }
+
+    /// The check mark of a toggle of the menus
+    pub fn set_toggled(&self, command: Command, on: bool) {
+        if let Some(action) = self
+            .window
+            .lookup_action(command.name())
+            .and_downcast::<gio::SimpleAction>()
+        {
+            action.set_state(&on.to_variant());
+        }
     }
 
     fn enable(&self, command: Command, on: bool) {
@@ -1397,6 +1405,9 @@ impl Mailbox {
         if refs.is_empty() {
             return;
         }
+        // the core says which actions take the selection out of the list: those that move it, and Ignore while
+        // ignored conversations are hidden
+        let leaves = self.summary.borrow().leaves_list(action, hide_ignored());
         // the row that takes the place of the last one going
         let after = (refs == self.selected_refs())
             .then(|| self.list.last_selected())
@@ -1407,11 +1418,7 @@ impl Mailbox {
         match outcome {
             Ok(text) => {
                 self.set_status(&text);
-                if matches!(
-                    action,
-                    Action::Delete | Action::Move(_) | Action::Junk(_) | Action::Archive
-                ) && let Some(after) = after
-                {
+                if leaves && let Some(after) = after {
                     self.select_after_removal(after);
                 }
             }
@@ -1457,6 +1464,19 @@ impl Mailbox {
         if self.can_archive() {
             self.act(Action::Archive);
         }
+    }
+
+    /// Watch Conversation (`ignore` false) or Ignore Conversation on the conversations of the selected messages, or the
+    /// mark taken away when they all have it
+    pub fn mark_conversations(&self, ignore: bool) {
+        self.act(if ignore { Action::Ignore } else { Action::Watch });
+    }
+
+    /// View > Hide Ignored Conversations turned on or off: kept, and the list again
+    pub fn set_hide_ignored(&self, on: bool) {
+        shell().settings.set_bool(settings::HIDE_IGNORED, on);
+        self.set_toggled(Command::HideIgnored, on);
+        self.reload_list(true);
     }
 
     /// The selected messages junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
@@ -1892,6 +1912,13 @@ impl Mailbox {
         *self.message_popover.borrow_mut() = Some(popup_menu(widget, &flag_menu(), x, y));
     }
 
+    /// A menu of the primary menu ("message", "view") at `x`, `y` of `widget`, for the UI test's picture of its check
+    /// marks, as [`Mailbox::flag_menu_at`]
+    #[cfg(feature = "e2e")]
+    pub fn command_menu_at(&self, id: &str, widget: &gtk::Widget, x: f64, y: f64) {
+        *self.message_popover.borrow_mut() = Some(popup_menu(widget, &command_menu(id), x, y));
+    }
+
     pub fn message_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
         let refs = self.selected_refs();
         let Some(first) = refs.first().copied() else {
@@ -2052,6 +2079,35 @@ pub fn grouped() -> bool {
     shell().settings.bool(settings::GROUP_BY_CONVERSATION, true)
 }
 
+/// The command of a letter in the message list, as in Thunderbird: A archives, N goes to the next unread message, W
+/// watches and K ignores the conversation
+pub fn list_key(key: gdk::Key, modifiers: gdk::ModifierType) -> Option<Command> {
+    if !(modifiers - gdk::ModifierType::SHIFT_MASK).is_empty() {
+        return None;
+    }
+    match key.to_lower() {
+        gdk::Key::a => Some(Command::Archive),
+        gdk::Key::n => Some(Command::NextUnread),
+        gdk::Key::w => Some(Command::WatchConversation),
+        gdk::Key::k => Some(Command::IgnoreConversation),
+        _ => None,
+    }
+}
+
+/// View > Hide Ignored Conversations
+pub fn hide_ignored() -> bool {
+    shell().settings.bool(settings::HIDE_IGNORED, false)
+}
+
+/// The check mark a toggle of the menus starts with
+fn toggled(command: Command) -> bool {
+    match command {
+        Command::Notify => shell().notify.get(),
+        Command::HideIgnored => hide_ignored(),
+        _ => false,
+    }
+}
+
 fn special_use(folder: &Folder) -> Option<SpecialUse> {
     folder.info.special_use.as_deref().and_then(SpecialUse::from_flag)
 }
@@ -2180,16 +2236,7 @@ fn primary_menu() -> (gio::Menu, gio::Menu) {
         ("message", Text::MenuMessage),
         ("help", Text::MenuHelp),
     ] {
-        let submenu = gio::Menu::new();
-        // Quit and Preferences have the places GNOME gives them, at the end
-        let elsewhere = [Command::Exit, Command::Options];
-        for command in Command::ALL.iter().filter(|c| c.menu() == id && !elsewhere.contains(c)) {
-            submenu.append_item(&menu_item(command.label(), *command));
-            // the colours beside the flag
-            if *command == Command::Flag {
-                submenu.append_submenu(Some(&crate::words::plain(crate::words::Text::UiMenuFlag)), &flag_menu());
-            }
-        }
+        let submenu = command_menu(id);
         sections.append_submenu(Some(&plain(name)), &submenu);
         if id == "edit" {
             edit = submenu;
@@ -2211,6 +2258,21 @@ fn primary_menu() -> (gio::Menu, gio::Menu) {
     quit.append(Some(&t!(GtkQuit)), Some(&format!("win.{}", Command::Exit.name())));
     menu.append_section(None, &quit);
     (menu, edit)
+}
+
+/// A menu of the primary menu: the commands of the table that are in `id` ("message")
+fn command_menu(id: &str) -> gio::Menu {
+    let submenu = gio::Menu::new();
+    // Quit and Preferences have the places GNOME gives them, at the end
+    let elsewhere = [Command::Exit, Command::Options];
+    for command in Command::ALL.iter().filter(|c| c.menu() == id && !elsewhere.contains(c)) {
+        submenu.append_item(&menu_item(command.label(), *command));
+        // the colours beside the flag
+        if *command == Command::Flag {
+            submenu.append_submenu(Some(&crate::words::plain(crate::words::Text::UiMenuFlag)), &flag_menu());
+        }
+    }
+    submenu
 }
 
 /// The Flag menu's actions (window actions, so the primary menu and the message menu share them)
@@ -2363,4 +2425,23 @@ fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Label) {
 /// The title of Import's windows: the command's name without its dots
 fn import_title() -> String {
     crate::words::title(crate::words::Text::CmdImport)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn letters_of_the_list() {
+        let none = gdk::ModifierType::empty();
+        assert_eq!(list_key(gdk::Key::w, none), Some(Command::WatchConversation));
+        assert_eq!(
+            list_key(gdk::Key::K, gdk::ModifierType::SHIFT_MASK),
+            Some(Command::IgnoreConversation)
+        );
+        assert_eq!(list_key(gdk::Key::a, none), Some(Command::Archive));
+        assert_eq!(list_key(gdk::Key::n, none), Some(Command::NextUnread));
+        assert_eq!(list_key(gdk::Key::k, gdk::ModifierType::CONTROL_MASK), None);
+        assert_eq!(list_key(gdk::Key::x, none), None);
+    }
 }

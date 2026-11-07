@@ -124,6 +124,7 @@ impl Store {
                  AND folder_id IN (SELECT id FROM folders WHERE account_id = ?1)",
                 params![account, other, thread],
             )?;
+            self.merge_marks(account, other, thread)?;
         }
         let mut add = self.db.prepare_cached(
             "INSERT INTO thread_ids (account_id, key, thread_id) VALUES (?1, ?2, ?3) \
@@ -139,6 +140,27 @@ impl Store {
     fn new_thread(&self) -> Result<i64> {
         self.db.execute("INSERT INTO threads DEFAULT VALUES", [])?;
         Ok(self.db.last_insert_rowid())
+    }
+
+    /// Puts the message with row id `id`, in no conversation yet, into its conversation now, and returns that
+    pub(crate) fn thread_message(&self, id: i64) -> Result<i64> {
+        let (account, message_id, in_reply_to, refs): (AccountId, Option<String>, Option<String>, String) =
+            self.db.query_row(
+                "SELECT f.account_id, m.message_id, m.in_reply_to, COALESCE(m.refs, '') FROM messages m \
+                 JOIN folders f ON f.id = m.folder_id WHERE m.id = ?1",
+                [id],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+            )?;
+        let keys = keys_of(
+            message_id.as_deref(),
+            in_reply_to.as_deref(),
+            &split_references(&refs),
+            None,
+        );
+        let thread = self.thread_of(account, &keys)?;
+        self.db
+            .execute("UPDATE messages SET thread_id = ?2 WHERE id = ?1", params![id, thread])?;
+        Ok(thread)
     }
 
     /// Puts up to `limit` messages that are in no conversation yet (stored before conversations were kept) into

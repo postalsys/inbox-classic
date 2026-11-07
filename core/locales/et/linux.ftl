@@ -67,10 +67,6 @@ gtk-outbox-row = Saaja: { $to }  ·  Lisatud järjekorda: { $queued }  ·  { $st
 
 ## The app
 
-gtk-new-messages = { $count ->
-    [one] { $count } uus kiri
-   *[other] { $count } uut kirja
-}
 gtk-still-running-detail = Inbox Classic kontrollib taustal uute kirjade saabumist. Rakenduse avamiseks või sulgemiseks kasutage ülaribal olevat ikooni.
 gtk-sign-in-again-ask =
     Konto { $account } sisselogimine ebaõnnestus või seanss aegus.

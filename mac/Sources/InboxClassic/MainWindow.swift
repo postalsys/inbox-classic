@@ -235,21 +235,18 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     /// new mail: a notification, unless the window is in front (the list shows it) or notifications are off
     private func notifyNewMail(_ event: CoreEvent) {
         guard AppDelegate.shared.notify else { return }
-        if window.isVisible && !window.isMiniaturized && NSApp.isActive && window.isKeyWindow {
+        // the UI test hears of every one, its window in front or not
+        if TestHooks.notified == nil && window.isVisible && !window.isMiniaturized && NSApp.isActive && window.isKeyWindow {
             return
         }
-        let subject = event.detail.isEmpty ? Text.uiNoSubject.text : event.detail
-        if event.count <= 1 {
-            notifyUser(title: event.message, text: subject, folder: event.folder, uid: event.uid)
-        } else {
-            notifyUser(title: Text.macNewMessages.text(["count": event.count]),
-                       text: Text.macNewestFrom.text(["from": event.message, "subject": subject]),
-                       folder: event.folder, uid: event.uid)
-        }
+        // the core's words: who it is from over its subject, or how many over the newest, a watched conversation's
+        // saying so in the title
+        notifyUser(title: event.message, text: event.detail, folder: event.folder, uid: event.uid)
     }
 
     /// a notification of the system; a click on it opens the message (`folder`, `uid`), or the window
     func notifyUser(title: String, text: String, folder: Int64, uid: UInt64) {
+        TestHooks.notified?(title, text)
         guard AppDelegate.shared.isBundled else { return }
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound]) { granted, _ in

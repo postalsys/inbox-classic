@@ -14,7 +14,7 @@ use crate::{Core, Error, Result};
 
 /// The most UIDs one command carries, so a command line stays short whatever was selected (a UID set of messages
 /// that are not next to each other is as long as its UIDs)
-const PER_COMMAND: usize = 1000;
+pub(crate) const PER_COMMAND: usize = 1000;
 
 /// What to do to the selected messages
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -36,6 +36,13 @@ pub enum Action {
     Archive,
     Move(FolderId),
     Copy(FolderId),
+    // Watch and Ignore act on conversations, which can have messages in any folder: `act` hands them to
+    // `mark_conversations` (watch.rs) before anything else, so they never reach the per-folder path below it.
+    /// Watch Conversation: their conversations watched, or no longer when all of them are ([`Summary::watched`])
+    Watch,
+    /// Ignore Conversation: their conversations ignored (and read), or no longer when all of them are
+    /// ([`Summary::ignored`])
+    Ignore,
 }
 
 impl Action {
@@ -69,6 +76,10 @@ pub struct Summary {
     pub folders: u64,
     /// How many of them Delete removes for good
     pub for_good: u64,
+    /// Every one of them is in a watched conversation, or in an ignored one: the check marks of Watch Conversation
+    /// and Ignore Conversation, which then take the mark away
+    pub watched: bool,
+    pub ignored: bool,
 }
 
 impl Summary {
@@ -92,6 +103,17 @@ impl Summary {
             parts.push(tr_args(Text::SelectionFlagged, &[("count", self.flagged.into())]));
         }
         parts.join(", ")
+    }
+
+    /// Whether `action` on them takes them out of the list, which then selects the row after them: Delete, Move,
+    /// Junk, Not Junk and Archive, and Ignore Conversation while the list hides ignored conversations (`hide_ignored`)
+    /// unless all of them are ignored already, when it takes the mark away
+    pub fn leaves_list(&self, action: Action, hide_ignored: bool) -> bool {
+        match action {
+            Action::Delete | Action::Move(_) | Action::Junk(_) | Action::Archive => true,
+            Action::Ignore => hide_ignored && !self.ignored,
+            _ => false,
+        }
     }
 
     /// Whether Flag flags them (one is not flagged) or takes the flags away (all are)
@@ -197,6 +219,8 @@ impl Core {
             }
         }
         summary.accounts = accounts.len() as u64;
+        summary.watched = !picked.is_empty() && picked.iter().all(|p| p.mark == pe_store::ThreadMark::Watch);
+        summary.ignored = !picked.is_empty() && picked.iter().all(|p| p.mark == pe_store::ThreadMark::Ignore);
         // the colour of the Flag menu's check mark: all of them flagged, in one colour
         summary.flag_color = match colors.len() {
             1 if summary.flagged == summary.count => colors.first().copied(),
@@ -209,6 +233,11 @@ impl Core {
     /// on the server in the background, as the actions on one message do. Returns what the status bar says, "Moved 3
     /// messages to Archive". A move, delete into Deleted Items or junk becomes what Edit > Undo takes back.
     pub fn act(&self, refs: &[MessageRef], action: Action) -> Result<String> {
+        match action {
+            Action::Watch => return self.mark_conversations(refs, pe_store::ThreadMark::Watch),
+            Action::Ignore => return self.mark_conversations(refs, pe_store::ThreadMark::Ignore),
+            _ => {}
+        }
         let picked = self.store().picked(refs)?;
         if picked.is_empty() {
             return Err(Error::Unavailable(tr(Text::MessagesGone)));
@@ -338,7 +367,9 @@ impl Core {
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,
                 Action::Archive => self.archive_messages(folder, chunk)?,
-                Action::Move(_) | Action::Copy(_) | Action::ToggleFlag => unreachable!("handled before"),
+                Action::Move(_) | Action::Copy(_) | Action::ToggleFlag | Action::Watch | Action::Ignore => {
+                    unreachable!("handled before")
+                }
             }
         }
         Ok(went)
@@ -348,7 +379,7 @@ impl Core {
     fn done_text(&self, action: Action, count: u64, moved: &[UndoMove], crossed: bool) -> Result<String> {
         let n = messages(count);
         let (text, folder) = match action {
-            Action::ToggleFlag => unreachable!("resolved by act"),
+            Action::ToggleFlag | Action::Watch | Action::Ignore => unreachable!("resolved by act"),
             Action::Read(true) => (Text::DoneRead, None),
             Action::Read(false) => (Text::DoneUnread, None),
             Action::Flag(true) => (Text::DoneFlagged, None),

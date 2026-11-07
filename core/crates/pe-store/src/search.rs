@@ -43,6 +43,8 @@ pub struct Search {
     pub text: String,
     /// Grouped by conversation, with these conversations expanded; None for one row a message
     pub threads: Option<Vec<i64>>,
+    /// View > Hide Ignored Conversations: the messages of ignored conversations left out
+    pub hide_ignored: bool,
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
@@ -196,6 +198,12 @@ impl Search {
                     parts.push(format!("size < {}", value(&mut values, Value::Integer(*size as i64))))
                 }
             }
+        }
+        if self.hide_ignored {
+            parts.push(format!(
+                "thread_id NOT IN (SELECT thread_id FROM thread_marks WHERE mark = {})",
+                crate::marks::IGNORE
+            ));
         }
         if !words.is_empty() {
             let matched = value(&mut values, Value::Text(words.join(" AND ")));
@@ -628,6 +636,7 @@ mod tests {
             show: Show::Unread,
             text: "old".into(),
             threads: None,
+            hide_ignored: false,
         };
         assert_eq!(found(&store, &search), [9]);
     }

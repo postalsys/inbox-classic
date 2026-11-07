@@ -12,6 +12,7 @@ mod bounces;
 mod cards;
 mod contacts;
 mod folders;
+mod marks;
 mod messages;
 mod outbox;
 mod query;
@@ -31,6 +32,7 @@ pub use agents::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry, NewLogEntry
 pub use cards::{Card, CardId, Group, GroupId, Member, MemberRow, display_name};
 pub use contacts::Contact;
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
+pub use marks::{Conversation, ThreadMark};
 pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Sort, SortField};
 pub use outbox::Queued;
 pub use query::Query;

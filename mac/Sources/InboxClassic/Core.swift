@@ -64,7 +64,7 @@ struct CoreEvent {
     let uid: UInt64
     let failure: PeFailureKind
     let message: String
-    /// the Message-ID of a draft, for DraftSaved; the subject, for NewMail
+    /// the Message-ID of a draft, for DraftSaved; the notification's text, for NewMail (`message` its title)
     let detail: String
     /// how many messages, for NewMail
     let count: UInt64
@@ -328,12 +328,15 @@ struct Search {
     /// one row a conversation, the conversations `expanded` open
     var threads = false
     var expanded: [Int64] = []
+    /// View > Hide Ignored Conversations: the messages of ignored conversations left out
+    var hideIgnored = false
 
     func with<T>(_ body: (UnsafePointer<PeSearch>) -> T) -> T {
         text.withCString { words in
             expanded.withUnsafeBufferPointer { open in
                 var search = PeSearch(folder: folder, all_inboxes: allInboxes, show: PE_SHOW_ALL, text: words,
-                                      threads: threads, expanded: open.baseAddress, expanded_count: open.count)
+                                      threads: threads, expanded: open.baseAddress, expanded_count: open.count,
+                                      hide_ignored: hideIgnored)
                 return withUnsafePointer(to: &search) { body($0) }
             }
         }
@@ -429,6 +432,10 @@ struct Message {
     let collapsed: Bool
     /// a notice that a message was not delivered, or not yet: its mark in the attachment column's place
     let bounce: Bool
+    /// its conversation watched (the Watch column's glasses) or ignored (the Watch column's sign)
+    let mark: PeThreadMark
+    /// the row grey, its conversation ignored (the core decides)
+    let dimmed: Bool
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -453,6 +460,8 @@ struct Message {
         opens = message.thread_opens
         collapsed = message.thread_collapsed
         bounce = message.bounce
+        mark = message.mark
+        dimmed = message.dimmed
     }
 }
 

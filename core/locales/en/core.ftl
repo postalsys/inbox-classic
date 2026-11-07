@@ -179,6 +179,23 @@ done-copying = { $count ->
 done-moved-back = { $count ->
    *[other] Moved { $messages } back to { $folder }
 }
+# the status bar after Watch Conversation and Ignore Conversation, and after either again on a marked one
+done-watched = { $count ->
+    [one] Watching the conversation
+   *[other] Watching { $count } conversations
+}
+done-unwatched = { $count ->
+    [one] Stopped watching the conversation
+   *[other] Stopped watching { $count } conversations
+}
+done-ignored = { $count ->
+    [one] Ignoring the conversation
+   *[other] Ignoring { $count } conversations
+}
+done-unignored = { $count ->
+    [one] Stopped ignoring the conversation
+   *[other] Stopped ignoring { $count } conversations
+}
 their-folders = their folders
 undo-move = Undo Move
 undo-delete = Undo Delete

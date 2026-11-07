@@ -1239,27 +1239,49 @@ impl Worker {
                 folder,
             });
         }
-        // new unread mail in the Inbox, above the UIDs the store knew: not with the first sync of the folder, nor
-        // after a reset, which would call every message new
+        // new unread mail, above the UIDs the store knew: not with the first sync of the folder, nor after a reset,
+        // which would call every message new
         if report.added > 0
             && !report.reset
-            && before.info.path.eq_ignore_ascii_case("INBOX")
             && let Some(next) = before.state.uid_next
         {
-            let fresh = store.unseen_from(folder, next)?;
-            if let Some(newest) = fresh.first() {
+            let fresh = crate::watch::arrived(&before.info, store.unseen_from(folder, next)?);
+            self.read_ignored(store, folder, &fresh.read).await?;
+            if let Some(newest) = fresh.announced.first() {
                 let from = newest.info.sender().to_string();
+                let count = fresh.announced.len();
+                let watched = newest.mark == pe_store::ThreadMark::Watch;
+                let (title, text) = crate::text::new_mail_words(count, &from, &newest.info.subject, watched);
                 self.emit(Event::NewMail {
                     account: self.account,
                     folder,
                     uid: newest.info.uid,
-                    count: fresh.len(),
+                    count,
                     from,
                     subject: newest.info.subject.clone(),
+                    watched,
+                    title,
+                    text,
                 });
             }
         }
         Ok(())
+    }
+
+    /// New mail of ignored conversations marked read, in the store and on the server, as Mark Read does
+    async fn read_ignored(&mut self, store: &mut Store, folder: FolderId, uids: &[u64]) -> Outcome {
+        if uids.is_empty() {
+            return Ok(());
+        }
+        let changed = store.set_flag_many(folder, uids, "\\Seen", true)?;
+        if changed.is_empty() {
+            return Ok(());
+        }
+        self.emit(Event::FolderChanged {
+            account: self.account,
+            folder,
+        });
+        Ok(set_flag(self.client(store).await?, store, folder, &changed, "\\Seen", true).await?)
     }
 
     /// Applies the changes the server reported during the last command; folders that only a

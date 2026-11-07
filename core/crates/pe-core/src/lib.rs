@@ -27,6 +27,7 @@ mod text;
 pub mod unsubscribe;
 pub mod vcard;
 mod view;
+mod watch;
 mod worker;
 
 use std::collections::HashMap;
@@ -39,7 +40,7 @@ use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
 pub use pe_store::FlagColor;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
-pub use pe_store::{MessageRef, Scope, Search, Show};
+pub use pe_store::{MessageRef, Scope, Search, Show, ThreadMark};
 pub use selection::{Action, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
@@ -112,8 +113,8 @@ pub enum Event {
         request: u64,
         problem: Option<String>,
     },
-    /// New unread mail came in the Inbox of `account` (`count` messages), `uid` the newest, from `from` about
-    /// `subject`
+    /// New unread mail came in the Inbox of `account` (`count` messages), or in a watched conversation in another folder
+    /// of the user's ([`Core::mark_conversations`]), `uid` the newest, from `from` about `subject`
     NewMail {
         account: AccountId,
         folder: FolderId,
@@ -121,6 +122,12 @@ pub enum Event {
         count: usize,
         from: String,
         subject: String,
+        /// The newest is in a watched conversation (Watch Conversation): announced even from a folder other than the
+        /// Inbox, and the notification says so
+        watched: bool,
+        /// The notification's title and text, in the language in use: the apps show them as they are
+        title: String,
+        text: String,
     },
     /// A message was sent, and is in the Sent folder when the account has one
     MessageSent {
@@ -584,6 +591,19 @@ impl Core {
     /// How many messages [`Core::search`] finds, and how many of them are unread, grouped by conversation or not
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
         Ok(self.store().count_search(search)?)
+    }
+
+    /// The counts of the status bar for the list of `search`: those of a folder shown whole from its indexes, those
+    /// of a search, All Inboxes or a folder without its ignored conversations (Hide Ignored) counted from what they
+    /// find
+    pub fn list_counts(&self, search: &Search) -> Result<(u64, u64)> {
+        match search.scope {
+            Scope::Folder(folder) if search.text.is_empty() && search.show == Show::All && !search.hide_ignored => {
+                let folder = self.folder(folder)?;
+                Ok((folder.total, folder.unread))
+            }
+            _ => self.count_search(search),
+        }
     }
 
     /// How many rows the list of [`Core::search`] has: grouped by conversation one a conversation and the other

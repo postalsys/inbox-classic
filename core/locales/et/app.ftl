@@ -47,6 +47,10 @@ cmd-not-junk = Märgi &tavapostiks
 # review: new
 cmd-archive = A&rhiveeri
 # review: new
+cmd-watch-conversation = &Jälgi vestlust
+# review: new
+cmd-ignore-conversation = &Ignoreeri vestlust
+# review: new
 cmd-next-message = &Järgmine kiri
 # review: new
 cmd-previous-message = &Eelmine kiri
@@ -68,6 +72,8 @@ cmd-expand-all-threads = &Laienda kõik vestlused
 cmd-collapse-all-threads = &Ahenda kõik vestlused
 # review: new
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
+# review: new
+cmd-hide-ignored = Peida &ignoreeritud vestlused
 cmd-notify = Teavita &uuest postist
 cmd-open = &Ava Inbox Classic
 cmd-default-app = Määra &vaikimisi meiliprogrammiks...
@@ -118,6 +124,10 @@ ui-still-running = Inbox Classic töötab edasi
 ui-no-subject = (teema puudub)
 ui-quoted = „{ $subject }“
 ui-newest-from = Uusim saatjalt { $sender }: { $subject }
+ui-new-messages = { $count ->
+    [one] { $count } uus kiri
+   *[other] { $count } uut kirja
+}
 ui-outbox-waiting = { $count ->
     [one] { $count } kiri väljundkaustas
    *[other] { $count } kirja väljundkaustas
@@ -150,6 +160,10 @@ ui-col-subject = Teema
 ui-col-from = Saatja
 ui-col-to = Saaja
 ui-col-received = Saabunud
+# review: new
+ui-col-watch = Jälgi
+# review: new
+ui-watched-conversation = Jälgitav vestlus
 # review: new
 ui-col-sent = Saadetud
 ui-col-size = Suurus

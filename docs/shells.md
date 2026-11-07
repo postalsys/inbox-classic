@@ -11,6 +11,7 @@ The three apps are thin windows on the same Rust core (`core/`). A feature that 
 | All Inboxes (its item, list, Mark All Read) | `mailbox.cpp`                                | `Mailbox.swift` (`AllInboxesNode`)                  | `folders.rs` (`ALL_INBOXES`), `mailbox.rs`    |
 | Message list, its right-click menu          | `mailbox.cpp`                                | `Mailbox.swift`                                     | `messages.rs`, `mailbox.rs`                   |
 | Conversations: grouped list, +/-, Options   | `mailbox.cpp`, `options.cpp`, `main.cpp`     | `Mailbox.swift`, `Settings.swift`, `App.swift`      | `messages.rs`, `mailbox.rs`, `preferences.rs` |
+| Watch and Ignore Conversation, Hide Ignored | `main.cpp`, `mailbox.cpp`                    | `App.swift`, `Mailbox.swift`                        | `app.rs`, `mailbox.rs`, `messages.rs`         |
 | Several messages selected, Undo             | `mailbox.cpp`                                | `Mailbox.swift`                                     | `messages.rs`, `mailbox.rs`                   |
 | Move and Copy to Folder (folder tree)       | `mailbox.cpp`, `ui.cpp`                      | `Mailbox.swift`, `Dialogs.swift`                    | `mailbox.rs`, `ui.rs`                         |
 | Messages as files: drag out, drop in        | `mailbox.cpp` (OLE drag and drop)            | `Mailbox.swift` (file promises)                     | `messages.rs`, `folders.rs`, `mailbox.rs`     |

@@ -456,6 +456,19 @@ Screenshots: `bounce-1-failed`, `bounce-2-delayed`, `bounce-3-list`
 - a notice that delivery is delayed shows the amber card, saying it is still being tried
 - searching for `is:bounce` finds the two notices and nothing else
 
+## 34g. Watch and Ignore Conversation
+
+Screenshots: `threads-4-watch`, `threads-5-ignore`
+
+- Message > Watch Conversation on the conversation of 34e shows glasses in its Watch column, and the menu item is checked
+- a new reply to it is put into the Inbox on the server, and it is announced (the notification says the conversation is
+  watched)
+- Watch Conversation again takes the glasses away
+- Message > Ignore Conversation (K in the list) on another conversation turns its row grey, with the ignored sign in the
+  Watch column, and marks its messages read on the server
+- a new reply to it is put into the Inbox on the server: it arrives read on the server, without a notification
+- View > Hide Ignored Conversations leaves the ignored conversation out of the list; turned off again, it is back
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`

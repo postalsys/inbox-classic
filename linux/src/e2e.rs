@@ -28,6 +28,9 @@ mod steps;
 /// Step 39a: the Address Book
 mod contacts;
 
+/// Step 34g: Watch and Ignore Conversation
+mod watch;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
@@ -871,6 +874,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::keyboard_reading(&d).await;
     steps::conversations(&d).await;
     steps::bounces(&d).await;
+    watch::watch_and_ignore(&d).await;
     steps::folders(&d).await;
     steps::closing_a_message(&d).await;
     steps::mailto(&d).await;
