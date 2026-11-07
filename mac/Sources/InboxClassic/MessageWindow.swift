@@ -214,6 +214,8 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .markRead: act(PE_ACTION_READ)
         case .markUnread: act(PE_ACTION_UNREAD)
         case .flag: act(PE_ACTION_TOGGLE_FLAG)
+        case .watchConversation: act(PE_ACTION_WATCH)
+        case .ignoreConversation: act(PE_ACTION_IGNORE)
         case .pictures: reader.loadPictures()
         case .nextMessage: goNext()
         case .previousMessage: goPrevious()
@@ -233,7 +235,8 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         let shown = reader.messageView != nil
         switch command {
         case .reply, .replyAll, .forward, .print: return shown
-        case .delete, .markRead, .markUnread, .flag, .saveAs, .properties, .viewSource, .addSenderToBook: return true
+        case .delete, .markRead, .markUnread, .flag, .saveAs, .properties, .viewSource, .addSenderToBook,
+             .watchConversation, .ignoreConversation: return true
         case .archive: return summary.archivable
         case .junk: return !summary.in_junk
         case .notJunk: return summary.in_junk
@@ -254,6 +257,8 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     }
 
     var flagColor: UInt8 { summary.flag_color }
+    /// what the menus know of the message: its conversation watched or ignored, for their check marks
+    var selectionSummary: PeSelectionSummary { summary }
     var flagged: Bool { summary.flagged > 0 }
 
     private func reply(_ kind: PeDraftKind) {

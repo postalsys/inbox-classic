@@ -58,6 +58,19 @@ enum Icons {
     /// drawn in the paper clip's colour (white on a selected row, as the clip is); the card says how bad it is
     static var bounce: NSImage? { symbol("exclamationmark.circle", key: "bounce", template: true) }
 
+    /// The Watch column's mark of a conversation: glasses while it is watched, a muted speaker while it is
+    /// ignored; templates drawn in the paper clip's colour (white on a selected row)
+    static func threadMark(_ mark: PeThreadMark) -> NSImage? {
+        switch mark {
+        case PE_THREAD_MARK_WATCH: return symbol("eyeglasses", key: "watch", template: true)
+        case PE_THREAD_MARK_IGNORE: return symbol("speaker.slash", key: "ignore", template: true)
+        default: return nil
+        }
+    }
+
+    /// the glasses over the Watch column, as the paper clip and the flag are over theirs
+    static var watchHeader: NSImage? { symbol("eyeglasses", key: "watch", template: true) }
+
     /// A system symbol at the list's size, cached under `key`: a template the cell tints, or drawn in `colors`
     private static func symbol(_ name: String, key: String, colors: [NSColor] = [], template: Bool = false) -> NSImage? {
         if let image = cache[key] { return image }

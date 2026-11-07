@@ -68,6 +68,8 @@ struct CoreEvent {
     let detail: String
     /// how many messages, for NewMail
     let count: UInt64
+    /// for NewMail: the newest is in a watched conversation
+    let watched: Bool
 }
 
 /// Where the events go; a box the C callback finds through its context pointer
@@ -83,7 +85,7 @@ private let eventCallback: PeEventCallback = { context, event in
     let copy = CoreEvent(
         kind: event.pointee.kind, account: event.pointee.account, folder: event.pointee.folder, uid: event.pointee.uid,
         failure: event.pointee.failure, message: text(event.pointee.message), detail: text(event.pointee.detail),
-        count: event.pointee.count)
+        count: event.pointee.count, watched: event.pointee.watched)
     onMain { sink.deliver(copy) }
 }
 
@@ -328,12 +330,15 @@ struct Search {
     /// one row a conversation, the conversations `expanded` open
     var threads = false
     var expanded: [Int64] = []
+    /// View > Hide Ignored Conversations: the messages of ignored conversations left out
+    var hideIgnored = false
 
     func with<T>(_ body: (UnsafePointer<PeSearch>) -> T) -> T {
         text.withCString { words in
             expanded.withUnsafeBufferPointer { open in
                 var search = PeSearch(folder: folder, all_inboxes: allInboxes, show: PE_SHOW_ALL, text: words,
-                                      threads: threads, expanded: open.baseAddress, expanded_count: open.count)
+                                      threads: threads, expanded: open.baseAddress, expanded_count: open.count,
+                                      hide_ignored: hideIgnored)
                 return withUnsafePointer(to: &search) { body($0) }
             }
         }
@@ -429,6 +434,8 @@ struct Message {
     let collapsed: Bool
     /// a notice that a message was not delivered, or not yet: its mark in the attachment column's place
     let bounce: Bool
+    /// its conversation watched (the Watch column's glasses) or ignored (the row grey, the Watch column's sign)
+    let mark: PeThreadMark
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -453,6 +460,7 @@ struct Message {
         opens = message.thread_opens
         collapsed = message.thread_collapsed
         bounce = message.bounce
+        mark = message.mark
     }
 }
 

@@ -100,6 +100,19 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
     private var testGrouping = true
+    /// View > Hide Ignored Conversations, off unless turned on (kept in memory by the UI test, as grouping is)
+    var hideIgnored: Bool {
+        get { TestHooks.testing ? testHideIgnored : UserDefaults.standard.bool(forKey: "HideIgnored") }
+        set {
+            if TestHooks.testing {
+                testHideIgnored = newValue
+            } else {
+                UserDefaults.standard.set(newValue, forKey: "HideIgnored")
+            }
+            main?.mailbox.hideIgnoredChanged()
+        }
+    }
+    private var testHideIgnored = false
     /// the app ends after the compose windows that are saving have closed
     var quitAfterCompose = false
     /// Restart Now was chosen: a new copy starts once this one has ended
@@ -316,7 +329,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         _ = submenu(Text.menuEdit.text, edit)
         _ = submenu(Text.menuView.text, commands("view").map { item(for: $0) })
         _ = submenu(Text.menuMessage.text, [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
-                                separator(), item(for: .flag), flagMenu(), separator(), item(for: .archive), item(for: .junk),
+                                separator(), item(for: .flag), flagMenu(), separator(), item(for: .watchConversation),
+                                item(for: .ignoreConversation), separator(), item(for: .archive), item(for: .junk),
                                 item(for: .notJunk)])
         _ = submenu(Text.menuTools.text, [item(for: .sync), item(for: .outbox), separator(), item(for: .addressBook),
                                                   item(for: .addSenderToBook), separator(), item(for: .aiAgents), separator(), item(for: .notify),
@@ -424,6 +438,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .junk: main.mailbox.markJunk(true)
         case .notJunk: main.mailbox.markJunk(false)
         case .archive: main.mailbox.archiveSelected()
+        case .watchConversation: main.mailbox.watchSelected()
+        case .ignoreConversation: main.mailbox.ignoreSelected()
+        case .hideIgnored: hideIgnored.toggle()
         case .notify: notify.toggle()
         case .open: main.show()
         case .defaultApp: main.makeDefaultMailApp()
@@ -506,7 +523,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         if command == .notify {
             item.state = notify ? .on : .off
         }
+        if command == .hideIgnored {
+            item.state = hideIgnored ? .on : .off
+        }
         guard let main, core != nil else { return command == .exit || command == .about || command == .help }
+        // checked while the conversation of every message they are about has the mark, which choosing it again takes away
+        if command == .watchConversation || command == .ignoreConversation {
+            let summary = MessageWindow.key?.selectionSummary ?? main.mailbox.summary
+            item.state = (command == .watchConversation ? summary.watched : summary.ignored) ? .on : .off
+        }
         if let message = MessageWindow.key, let on = message.validate(command) {
             return on
         }

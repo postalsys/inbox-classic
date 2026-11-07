@@ -483,6 +483,7 @@ extension UITest {
         try await keyboardReading()
         try await conversations()
         try await bounces()
+        try await watchAndIgnore()
     }
 
     // ---- reading with the keyboard ----
@@ -732,6 +733,181 @@ extension UITest {
         onMain { options.grouping.state = .on; options.groupingChanged() }
         check(await waitUntil(5) { tripRows().count == 1 }, "turned on again, the conversation is one row again")
         onMain { options.window.close() }
+    }
+
+    // ---- watching and ignoring a conversation ----
+
+    /// the item of `command` in the menu bar, its check mark set as when its menu opens
+    func menuItem(_ command: Command) -> NSMenuItem? {
+        func search(_ menu: NSMenu?) -> NSMenuItem? {
+            for item in menu?.items ?? [] {
+                if item.action == #selector(AppDelegate.runCommand(_:)) && item.tag == command.rawValue { return item }
+                if let found = search(item.submenu) { return found }
+            }
+            return nil
+        }
+        guard let item = search(NSApp.mainMenu) else { return nil }
+        _ = AppDelegate.shared.validateMenuItem(item)
+        return item
+    }
+
+    /// a letter typed on the list, as the keyboard sends it
+    func letterKey(_ letter: String, _ code: UInt16) {
+        let event = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+                                     windowNumber: main.window.windowNumber, context: nil, characters: letter,
+                                     charactersIgnoringModifiers: letter, isARepeat: false, keyCode: code)
+        onMain { if let event { self.list.keyDown(with: event) } }
+    }
+
+    /// the glasses or the ignored sign the Watch column shows on row `index`
+    func watchMark(_ index: Int) -> NSImage? {
+        let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("watch"))
+        guard column >= 0, let cell = list.view(atColumn: column, row: index, makeIfNecessary: true) else { return nil }
+        return views(NSImageView.self, in: cell).first?.image
+    }
+
+    /// the colour of the sender on row `index`
+    func fromColor(_ index: Int) -> NSColor? {
+        let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("from"))
+        guard column >= 0 else { return nil }
+        return (list.view(atColumn: column, row: index, makeIfNecessary: true) as? NSTableCellView)?.textField?.textColor
+    }
+
+    func watchAndIgnore() async throws {
+        step("watch and ignore a conversation")
+        selectFolder(named: "Inbox")
+        final class Announced { var all: [(title: String, text: String)] = [] }
+        let announced = Announced()
+        TestHooks.notified = { title, text in announced.all.append((title, text)) }
+        defer { TestHooks.notified = nil }
+        let watchStatus: NSTextField? = find("status.text", in: main.window)
+
+        // Watch Conversation on the conversation of 34e
+        _ = await waitUntil(20) { tripRows().count == 1 }
+        guard let watchedHead = tripRows().first else { throw Failed(description: "the conversation is not in the list") }
+        await selectRow(watchedHead.index)
+        check(menuItem(.watchConversation)?.state == .off && menuItem(.ignoreConversation)?.state == .off,
+              "Message > Watch Conversation and Ignore Conversation are not checked at first")
+        command(.watchConversation)
+        check(await waitUntil(10) {
+            guard let head = tripRows().first else { return false }
+            return head.message.mark == PE_THREAD_MARK_WATCH && watchMark(head.index) != nil
+                && menuItem(.watchConversation)?.state == .on
+        }, "Watch Conversation shows the glasses and checks the menu item")
+        check(watchStatus?.stringValue == "Watching the conversation", "the status bar says so (\(watchStatus?.stringValue ?? ""))")
+
+        // a new reply to it is announced, saying the conversation is watched
+        try await addMessage("From: Carol <carol@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: Plans for the trip\r\n"
+            + "Message-ID: <trip4@example.com>\r\nIn-Reply-To: <trip3@example.com>\r\n"
+            + "References: <trip1@example.com> <trip2@example.com> <trip3@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\n"
+            + "Shall I book the cabin?\r\n")
+        command(.sync)
+        check(await waitUntil(30) {
+            announced.all.contains { $0.title == Text.uiWatchedConversation.text && $0.text.contains("Re: Plans for the trip") }
+        }, "A new reply to the watched conversation is announced (\(announced.all.map { "\($0.title): \($0.text)" }))")
+        check(announced.all.first { $0.title == Text.uiWatchedConversation.text }?.text == "Carol\nRe: Plans for the trip",
+              "the notification says who wrote and the subject under its title")
+        _ = await waitUntil(20) { tripRows().first?.message.threadCount == 4 }
+        // opened, every message of it has the glasses; the new reply selected
+        command(.expandAllThreads)
+        check(await waitUntil(5) {
+            let rows = tripRows()
+            return rows.count == 4 && rows.allSatisfy { $0.message.mark == PE_THREAD_MARK_WATCH && watchMark($0.index) != nil }
+        }, "every message of the watched conversation has the glasses")
+        if let newest = tripRows().last { await selectRow(newest.index) }
+        await shot(main.window, "threads-4-watch")
+        command(.collapseAllThreads)
+        _ = await waitUntil(5) { tripRows().count == 1 }
+        await selectRow(tripRows().first?.index ?? 0)
+        // read as the others are, for the steps after
+        command(.markRead)
+        letterKey("w", 13)
+        check(await waitUntil(10) {
+            guard let head = tripRows().first else { return false }
+            return head.message.mark == PE_THREAD_MARK_NONE && watchMark(head.index) == nil
+                && menuItem(.watchConversation)?.state == .off
+        }, "Watch Conversation again takes the glasses away (W in the list)")
+        check(watchStatus?.stringValue == "Stopped watching the conversation",
+              "the status bar says so (\(watchStatus?.stringValue ?? ""))")
+
+        // another conversation, older than the rest of the Inbox, its reply unread
+        let partySubject = "Office party"
+        try await addMessage("From: Erin <erin@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: \(partySubject)\r\n"
+            + "Message-ID: <party1@example.com>\r\nDate: Sun, 7 Sep 2025 10:00:00 +0000\r\n\r\nWho brings the cake?\r\n",
+            flags: ["\\Seen"])
+        try await addMessage("From: Frank <frank@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: \(partySubject)\r\n"
+            + "Message-ID: <party2@example.com>\r\nIn-Reply-To: <party1@example.com>\r\nReferences: <party1@example.com>\r\n"
+            + "Date: Sun, 7 Sep 2025 11:00:00 +0000\r\n\r\nI do, and the candles.\r\n")
+        command(.sync)
+        func partyRow() -> (index: Int, message: Message)? {
+            (0..<list.numberOfRows).lazy.compactMap { at in
+                self.main.mailbox.row(at).flatMap { $0.subject.hasSuffix(partySubject) ? (at, $0) : nil }
+            }.first
+        }
+        check(await waitUntil(30) { partyRow()?.message.threadCount == 2 }, "the other conversation is in the Inbox")
+        guard let party = partyRow() else { throw Failed(description: "the other conversation is not in the list") }
+        await selectRow(party.index)
+        letterKey("k", 40)
+        func partyServerSeen() async -> Bool {
+            let all = await messages("INBOX").filter { raw($0).contains("@example.com>") && raw($0).contains(partySubject) }
+            return !all.isEmpty && all.allSatisfy { ($0["flags"] as? [String])?.contains("\\Seen") == true }
+        }
+        check(await waitUntil(20) {
+            guard let row = partyRow(), row.message.mark == PE_THREAD_MARK_IGNORE, watchMark(row.index) != nil,
+                  fromColor(row.index) == Mailbox.ignoredColor else { return false }
+            return await partyServerSeen()
+        }, "Ignore Conversation greys the row and marks its messages read on the server (K in the list)")
+        check(menuItem(.ignoreConversation)?.state == .on, "and checks Message > Ignore Conversation")
+        check(watchStatus?.stringValue == "Ignoring the conversation", "the status bar says so (\(watchStatus?.stringValue ?? ""))")
+
+        // a new reply to it arrives read, and nobody hears of it
+        announced.all.removeAll()
+        try await addMessage("From: Erin <erin@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: \(partySubject)\r\n"
+            + "Message-ID: <party3@example.com>\r\nIn-Reply-To: <party2@example.com>\r\n"
+            + "References: <party1@example.com> <party2@example.com>\r\nDate: Sun, 7 Sep 2025 12:00:00 +0000\r\n\r\n"
+            + "Lovely, thank you.\r\n")
+        command(.sync)
+        let partyArrived = await waitUntil(30) {
+            guard partyRow()?.message.threadCount == 3 else { return false }
+            return await partyServerSeen()
+        }
+        await pause(1)
+        check(partyArrived && announced.all.isEmpty,
+              "A new reply to the ignored conversation arrives read, without a notification (\(announced.all.map(\.text)))")
+        // opened, its messages grey with the sign; the newest selected, the others' grey showing
+        command(.expandAllThreads)
+        _ = await waitUntil(5) {
+            (0..<self.list.numberOfRows).filter { self.main.mailbox.row($0)?.subject.hasSuffix(partySubject) == true }.count == 3
+        }
+        let partyRows = (0..<list.numberOfRows).filter { main.mailbox.row($0)?.subject.hasSuffix(partySubject) == true }
+        check(partyRows.count == 3 && partyRows.allSatisfy { watchMark($0) != nil && fromColor($0) == Mailbox.ignoredColor },
+              "every message of the ignored conversation is grey, with the sign")
+        if let newest = partyRows.last {
+            await selectRow(newest)
+            onMain { self.list.scrollRowToVisible(newest) }
+        }
+        await shot(main.window, "threads-5-ignore")
+        command(.collapseAllThreads)
+        _ = await waitUntil(5) { partyRow()?.message.opens == true && tripRows().count == 1 }
+
+        // View > Hide Ignored Conversations leaves it out, and back when turned off
+        check(menuItem(.hideIgnored)?.state == .off, "View > Hide Ignored Conversations is off at first")
+        command(.hideIgnored)
+        let hidden = await waitUntil(10) { partyRow() == nil && tripRows().count == 1 }
+        check(hidden && menuItem(.hideIgnored)?.state == .on, "it hides the ignored conversation, the others stay")
+        command(.hideIgnored)
+        check(await waitUntil(10) { partyRow() != nil } && menuItem(.hideIgnored)?.state == .off,
+              "Hide Ignored Conversations hides it, and shows it again when turned off")
+
+        // Ignore Conversation again takes the mark away
+        if let row = partyRow() { await selectRow(row.index) }
+        command(.ignoreConversation)
+        check(await waitUntil(10) {
+            guard let row = partyRow() else { return false }
+            return row.message.mark == PE_THREAD_MARK_NONE && watchMark(row.index) == nil && fromColor(row.index) == .labelColor
+        }, "Ignore Conversation again makes it an ordinary conversation")
+        check(watchStatus?.stringValue == "Stopped ignoring the conversation",
+              "the status bar says so (\(watchStatus?.stringValue ?? ""))")
     }
 
     // ---- a message that bounced ----

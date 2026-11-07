@@ -402,6 +402,8 @@ enum TestHooks {
     static var save: ((String) -> URL?)?
     static var open: ((String) -> [URL])?
     static var folder: (() -> URL?)?
+    /// a notification's title and text, as the system would show it
+    static var notified: ((String, String) -> Void)?
 }
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled
