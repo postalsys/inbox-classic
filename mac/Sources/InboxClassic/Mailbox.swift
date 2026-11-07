@@ -62,7 +62,7 @@ public final class Mailbox: NSObject {
     /// ones
     private(set) var rows: UInt64 = 0
     /// the conversations opened in this list, until another folder is shown
-    private var expanded: Set<Int64> = []
+    private var expanded: [Int64] = []
     private var pages: [(offset: UInt64, rows: [Message])] = []
     private let pageSize: UInt64 = 100
     private var folderColumn = false
@@ -367,7 +367,7 @@ public final class Mailbox: NSObject {
     /// every Inbox's
     private var search: Search {
         Search(folder: searching ? 0 : folder, allInboxes: !searching && allInboxes, text: findText, threads: grouped,
-               expanded: grouped ? expanded.sorted() : [])
+               expanded: grouped ? expanded : [])
     }
 
     /// the Subject title over the subjects, which make room for the triangles while grouped
@@ -506,11 +506,11 @@ public final class Mailbox: NSObject {
         // the counts of the folder come from its indexes; a search and All Inboxes count what they find; an account
         // lists nothing. Grouped by conversation the list has fewer rows than messages: the core counts them
         if severalFolders {
-            (total, unread) = core.messageCount(search.ungrouped)
+            (total, unread) = core.messageCount(search)
         } else if folder != 0 {
             (total, unread) = core.folderCounts(folder)
         }
-        rows = grouped && total > 0 ? core.messageCount(search).total : total
+        rows = grouped && total > 0 ? core.listRows(search) : total
         indentSubjectHeader()
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let several = keepSelection && selectedCount > 1
@@ -572,8 +572,8 @@ public final class Mailbox: NSObject {
     private func updateSelection() {
         let rows = list.selectedRowIndexes
         pe_selection_clear(selection)
-        // a closed conversation's row stands for all of its messages, which the core finds from its range
-        if rows.count == 1, let row = row(rows.first!), !(row.opens && !row.threadExpanded) {
+        // grouped, a row may stand for a collapsed conversation's messages, which the core finds from its range
+        if rows.count == 1, !grouped, let row = row(rows.first!) {
             pe_selection_add(selection, row.folder, row.uid)
         } else if rows.count > 0 {
             let ranges = rows.rangeView
@@ -786,9 +786,8 @@ public final class Mailbox: NSObject {
             MainActor.assumeIsolated {
                 guard let self, let row = self.selectedRow, row.uid == self.uid, !row.seen else { return }
                 // the message shown alone, not the rest of a closed conversation whose row it is
-                let shown: OpaquePointer = pe_selection_new()
+                let shown = newSelection([(row.folder, row.uid)])
                 defer { pe_selection_free(shown) }
-                pe_selection_add(shown, row.folder, row.uid)
                 self.act(PE_ACTION_READ, on: shown, quiet: true)
             }
         }
@@ -830,28 +829,17 @@ public final class Mailbox: NSObject {
     func nextUnread() {
         switch core.nextUnread(search, sort: sort, ascending: ascending, folder: messageFolder, uid: uid) {
         case .message(let folder, let uid):
-            selectUnread(folder: folder, uid: uid)
+            selectInList(folder: folder, uid: uid)
         case .ask(let next, let question):
             guard ask(question, style: .information) else { return }
             goToFolder(next)
             // from the top of that folder's list, which the core may answer with another question
             if case .message(let folder, let uid) = core.nextUnread(search, sort: sort, ascending: ascending, folder: 0, uid: 0) {
-                selectUnread(folder: folder, uid: uid)
+                selectInList(folder: folder, uid: uid)
             }
         case .none:
             status(Text.noUnreadLeft.text)
         }
-    }
-
-    /// the unread message Next Unread found selected; a reply in a closed conversation (whose row the core finds for it)
-    /// opens it first
-    private func selectUnread(folder id: Int64, uid message: UInt64) {
-        let index = core.messageIndex(search, sort: sort, ascending: ascending, folder: id, uid: message)
-        if index >= 0, let head = row(Int(index)), head.uid != message || head.folder != id, head.thread != 0 {
-            expanded.insert(head.thread)
-            reloadList(keepSelection: true)
-        }
-        selectInList(folder: id, uid: message)
     }
 
     // ---- conversations ----
@@ -861,9 +849,9 @@ public final class Mailbox: NSObject {
         guard grouped, let message = row(index), message.thread != 0, open != expanded.contains(message.thread) else { return }
         if open {
             guard message.opens else { return }
-            expanded.insert(message.thread)
+            expanded.append(message.thread)
         } else {
-            expanded.remove(message.thread)
+            expanded.removeAll { $0 == message.thread }
         }
         // the message shown stays selected, or the conversation's row that now stands for it
         reloadList(keepSelection: true)
@@ -875,7 +863,7 @@ public final class Mailbox: NSObject {
         guard grouped, list.numberOfSelectedRows == 1, let message = row(list.selectedRow), message.thread != 0 else {
             return false
         }
-        if open && !(message.opens && !message.threadExpanded) { return false }
+        if open && !message.collapsed { return false }
         if !open && !(message.opens && message.threadExpanded) && message.threadDepth == 0 { return false }
         setExpanded(open, row: list.selectedRow)
         return true
@@ -884,7 +872,7 @@ public final class Mailbox: NSObject {
     /// View > Expand All Conversations
     func expandAll() {
         guard grouped else { return }
-        expanded = Set(core.threadsWithReplies(search))
+        expanded = core.threadsWithReplies(search)
         reloadList(keepSelection: true)
     }
 
@@ -919,9 +907,17 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// the row of the message `uid` of `folder` selected in the list; false when it is not there
+    /// the row of the message `uid` of `folder` selected in the list, its conversation opened when it hides it; false
+    /// when it is not there
     @discardableResult
     private func selectInList(folder id: Int64, uid message: UInt64) -> Bool {
+        if grouped {
+            let hidden = core.hiddenThread(search, folder: id, uid: message)
+            if hidden != 0 && !expanded.contains(hidden) {
+                expanded.append(hidden)
+                reloadList(keepSelection: true)
+            }
+        }
         let index = core.messageIndex(search, sort: sort, ascending: ascending, folder: id, uid: message)
         guard index >= 0 else { return false }
         list.selectRowIndexes(IndexSet(integer: Int(index)), byExtendingSelection: false)
@@ -1418,14 +1414,6 @@ public final class Mailbox: NSObject {
         let end = [UInt64(index + 1)]
         _ = search.with { pe_selection_set_ranges(core.handle, one, $0, sort, ascending, start, end, 1) }
         return refs(of: one)
-    }
-
-    private func refs(of messages: OpaquePointer) -> [(Int64, UInt64)] {
-        (0..<pe_selection_count(messages)).compactMap { at in
-            var folder: Int64 = 0
-            var uid: UInt64 = 0
-            return pe_selection_get(messages, at, &folder, &uid) ? (folder, uid) : nil
-        }
     }
 
     /// the items of a drag out of the list made whole: the list gives one a row, and a closed conversation's row

@@ -582,6 +582,26 @@ extension UITest {
 
     // ---- conversations ----
 
+    /// the files of a drag out written into `folder`, as the Finder asks for them where they are dropped: off the main
+    /// thread, as the promises' queue runs them; false when not all were written in time
+    func writePromises(_ promises: [MessagePromise], into folder: URL) async -> Bool {
+        let writer = main.mailbox.filePromises
+        var finished = 0
+        for promise in promises {
+            guard let drag = promise.drag else { continue }
+            let name = writer.filePromiseProvider(promise, fileNameForType: emlType.identifier)
+            let job = Handed(value: (writer, drag, promise.index, folder.appendingPathComponent(name)))
+            Thread.detachNewThread {
+                let (writer, drag, index, url) = job.value
+                writer.write(drag, index, to: url)
+                onMain { finished += 1 }
+            }
+        }
+        let done = await waitUntil(60) { finished == promises.count }
+        main.mailbox.dragEnded()
+        return done
+    }
+
     /// the rows of the list whose subject is the conversation's
     func tripRows() -> [(index: Int, message: Message)] {
         (0..<list.numberOfRows).compactMap { at in
@@ -676,20 +696,7 @@ extension UITest {
         } ?? []
         let tripPromises = tripItems.compactMap { $0.item as? MessagePromise }
         let tripDropped = emptyFolder("dragged-conversation")
-        let tripWriter = main.mailbox.filePromises
-        var tripWritten = 0
-        for promise in tripPromises {
-            guard let drag = promise.drag else { continue }
-            let name = tripWriter.filePromiseProvider(promise, fileNameForType: emlType.identifier)
-            let job = Handed(value: (tripWriter, drag, promise.index, tripDropped.appendingPathComponent(name)))
-            Thread.detachNewThread {
-                let (writer, drag, index, url) = job.value
-                writer.write(drag, index, to: url)
-                onMain { tripWritten += 1 }
-            }
-        }
-        _ = await waitUntil(60) { tripWritten == tripPromises.count }
-        main.mailbox.dragEnded()
+        _ = await writePromises(tripPromises, into: tripDropped)
         let tripFiles = (try? FileManager.default.contentsOfDirectory(atPath: tripDropped.path)) ?? []
         check(tripPromises.count == 3 && tripFiles.count == 3,
               "the closed conversation dragged to the Finder becomes its three .eml files (\(tripFiles.sorted().joined(separator: ", ")))")
@@ -972,21 +979,8 @@ extension UITest {
         // the drag out: the Finder asks each file promise to be written in the folder it is dropped on
         let dropped = emptyFolder("dragged-out")
         let promises = (0..<3).compactMap { main.mailbox.promise(forRow: $0) }
-        let writer = main.mailbox.filePromises
-        let names = promises.map { writer.filePromiseProvider($0, fileNameForType: emlType.identifier) }
-        var finished = 0
-        // the writes run off the main thread, as the promises' queue runs them for the Finder
-        for (promise, name) in zip(promises, names) {
-            guard let drag = promise.drag else { continue }
-            let job = Handed(value: (writer, drag, promise.index, dropped.appendingPathComponent(name)))
-            Thread.detachNewThread {
-                let (writer, drag, index, url) = job.value
-                writer.write(drag, index, to: url)
-                onMain { finished += 1 }
-            }
-        }
-        check(await waitUntil(60) { finished == 3 }, "three messages dragged out become three .eml files where they are dropped")
-        main.mailbox.dragEnded()
+        check(await writePromises(promises, into: dropped) && promises.count == 3,
+              "three messages dragged out become three .eml files where they are dropped")
         let files = ((try? FileManager.default.contentsOfDirectory(atPath: dropped.path)) ?? []).sorted()
         check(Set(files) == Set(subjects.map { "\($0).eml" }), "named after their subjects (\(files.joined(separator: ", ")))")
         var differ: [String] = []
