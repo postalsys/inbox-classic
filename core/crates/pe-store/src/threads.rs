@@ -1334,6 +1334,119 @@ mod tests {
     }
 
     #[test]
+    fn the_first_message_is_the_first_to_arrive() {
+        let (store, _, inbox, _) = setup();
+        let arrived = |uid: u64, date: i64, received: i64, id: &str, answers: &[&str]| MessageInfo {
+            internal_date: Some(received),
+            ..mail(uid, date, id, answers, true)
+        };
+        // b names a but claims an earlier Date than a; it arrived after a. c stands alone between them.
+        store
+            .add_messages(
+                inbox,
+                &[
+                    arrived(1, 100, 100, "<a@x>", &[]),
+                    arrived(2, 10, 300, "<b@x>", &["<a@x>"]),
+                    arrived(3, 150, 150, "<c@x>", &[]),
+                ],
+            )
+            .unwrap();
+        let list = Search::folder(inbox);
+        let newest = Sort::default();
+        let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
+        // by Date the conversations stay where their newest Date puts them: c (150) above a's (100)
+        assert_eq!(
+            subjects(&rows),
+            [("c@x".into(), 0), ("a@x".into(), 0)],
+            "a's row, not b's"
+        );
+        let a = place(&rows[1]).thread;
+        assert_eq!(
+            store
+                .hidden_in(
+                    &Search {
+                        threads: Some(Vec::new()),
+                        ..list.clone()
+                    },
+                    inbox,
+                    2
+                )
+                .unwrap(),
+            Some(a)
+        );
+        assert_eq!(
+            subjects(&store.thread_rows(&list, newest, &[a], 0, 10).unwrap()),
+            [("c@x".into(), 0), ("a@x".into(), 0), ("b@x".into(), 1)],
+            "under it in the order they arrived"
+        );
+        // by Received, a's conversation arrived last (300)
+        let received = Sort {
+            field: SortField::Received,
+            ascending: false,
+        };
+        assert_eq!(
+            subjects(&store.thread_rows(&list, received, &[], 0, 10).unwrap()),
+            [("a@x".into(), 0), ("c@x".into(), 0)]
+        );
+        // by Subject, a conversation is placed by its first message's
+        let by_subject = Sort {
+            field: SortField::Subject,
+            ascending: true,
+        };
+        assert_eq!(
+            subjects(&store.thread_rows(&list, by_subject, &[], 0, 10).unwrap()),
+            [("a@x".into(), 0), ("c@x".into(), 0)]
+        );
+        // with no internal date the Date header decides
+        store
+            .db
+            .execute("UPDATE messages SET internal_date = NULL", [])
+            .unwrap();
+        let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
+        assert_eq!(subjects(&rows), [("c@x".into(), 0), ("b@x".into(), 0)]);
+    }
+
+    #[test]
+    fn any_number_of_conversations_can_be_open() {
+        let (store, inbox, _) = four_conversations();
+        let collapsed = Search {
+            threads: Some(Vec::new()),
+            ..Search::folder(inbox)
+        };
+        let real = store.threads_with_replies(&collapsed).unwrap();
+        // Expand All as a huge folder makes it: more conversations open than SQLite takes values in a statement, most
+        // of them not in this list
+        let mut expanded: Vec<i64> = (1_000_000..1_040_000).collect();
+        expanded.extend(&real);
+        let open = Search {
+            threads: Some(expanded),
+            ..Search::folder(inbox)
+        };
+        let all_open = Search {
+            threads: Some(real),
+            ..Search::folder(inbox)
+        };
+        let newest = Sort::default();
+        let rows = store.search(&open, newest, 0, 100).unwrap();
+        assert_eq!(
+            subjects(&rows),
+            subjects(&store.search(&all_open, newest, 0, 100).unwrap())
+        );
+        assert_eq!(rows.len(), 8);
+        assert_eq!(store.count_rows(&open).unwrap(), 8);
+        let refs: Vec<MessageRef> = rows.iter().map(Message::at).collect();
+        assert_eq!(
+            store.positions(&open, newest, &refs).unwrap(),
+            (0..8).collect::<Vec<u64>>()
+        );
+        let at = refs.iter().position(|r| r.uid == 4).map(|at| at as u64);
+        assert_eq!(store.search_index(&open, newest, inbox, 4).unwrap(), at);
+        assert_eq!(store.refs_in_ranges(&open, newest, &[(0, 8)]).unwrap(), refs);
+        assert!(store.next_unread(&open, newest, inbox, 0).unwrap().is_some());
+        assert_eq!(store.hidden_in(&open, inbox, 4).unwrap(), None);
+    }
+
+    #[test]
     fn reads_the_ids_of_a_references_header() {
         assert_eq!(
             parse_references("<a@x>\r\n <b@x> junk <c @x>"),
