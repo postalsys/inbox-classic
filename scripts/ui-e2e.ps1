@@ -1569,9 +1569,9 @@ public static class Dragger {
     [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: News from the brand') } 20)
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"News from the brand"')
     [void](WaitFor { (Rows) -eq 1 } 20)
-    SelectRow 0
     $IDC_LOGO = 213
-    Check ([bool](WaitFor { Visible $main $IDC_LOGO } 15)) 'a sender whose logo the server passed has it beside the header'
+    # selected again while the search's last reload may still take the selection away
+    Check ([bool](WaitFor { if ([int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2) -ne 0) { SelectRow 0 }; Visible $main $IDC_LOGO } 15)) 'a sender whose logo the server passed has it beside the header'
     Shot $main 'read-11-logo'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
@@ -3112,10 +3112,14 @@ public static class Dragger {
     SelectRow 0
     Shot $main 'all-inboxes-1-list'
     # its right-click menu, as a right-click on its row opens it: Mark All Read alone, no folder commands
+    # topmost for the click, as SetForegroundWindow alone is refused to a background process on a shared desktop
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
     [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
     $at = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $top.ToInt64()))
     foreach ($button in @(0, 0x0008, 0x0010)) { [Native.Win]::Mouse($at[0], $at[1], $button) }
     $menu = WaitWindow '#32768' $null 10
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
     Check ($null -ne $menu) 'All Inboxes has a right-click menu'
     if ($menu) {
         $labels = @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)))
