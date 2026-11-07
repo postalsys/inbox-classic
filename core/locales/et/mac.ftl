@@ -22,7 +22,7 @@ mac-no-updates = See Inbox Classicu versioon ei toeta automaatseid uuendusi. Uus
 
 mac-settings-title = Seaded
 mac-language-label = Keel:
-mac-restart-hint = Keele vahetamiseks käivitub Inbox Classic uuesti.
+mac-restart-hint = Keele vahetamiseks taaskäivitage Inbox Classic.
 mac-notify-new-mail = Teavita mind uue posti saabumisest
 mac-restart-question = Kas käivitada Inbox Classic keele vahetamiseks kohe uuesti?
 
@@ -76,7 +76,7 @@ mac-files-not-saved =
     { $count ->
        *[other] { $count } failist { $failed } ei saanud salvestada.
     }
-mac-no-calendar-app = Ükski selle Maci kalendrirakendus ei ava kutseid (.ics-faile).
+mac-no-calendar-app = Selles Macis pole kalendrirakendust, millega kutseid (.ics-faile) avada.
 mac-unsubscribing = Loobutakse tellimusest { $target }…
 
 ## The compose window

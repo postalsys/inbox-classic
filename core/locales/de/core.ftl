@@ -56,138 +56,75 @@ fold-show-earlier = Frühere Nachrichten anzeigen
 
 ## Unzustellbarkeitsberichte: die Karte über einer Nachricht, die nicht zugestellt wurde
 
-# review: new
 bounce-failed = Ihre Nachricht wurde nicht zugestellt
-# review: new
 bounce-delayed = Ihre Nachricht wurde noch nicht zugestellt
-# review: new
 bounce-delayed-note = Ihr Mailserver versucht weiterhin, sie zuzustellen. Sie müssen sie nicht erneut senden.
-# review: new
 bounce-show-message = Nachricht anzeigen, die nicht zugestellt wurde
-# review: new
 bounce-what-to-do = Was Sie tun können:
-# review: new
-bounce-delayed-do = Noch nichts. Wenn sie weiterhin nicht zugestellt werden kann, erhalten Sie einen weiteren Bericht.
-# review: new
-bounce-delayed-row-do = Noch nichts. Ihr Mailserver versucht weiterhin, sie zuzustellen, und Sie erhalten einen weiteren Bericht, wenn es nicht gelingt.
-# review: new
+bounce-delayed-do = Sie müssen vorerst nichts tun. Falls die Nachricht nicht zugestellt werden kann, erhalten Sie eine weitere Benachrichtigung.
+bounce-delayed-row-do = Sie müssen vorerst nichts tun. Ihr Mailserver versucht weiterhin, die Nachricht zuzustellen. Falls das nicht gelingt, erhalten Sie eine weitere Benachrichtigung.
 bounce-details = Details
-# review: new
 bounce-someone = Ein Empfänger
-# review: new
 bounce-server = Server: { $server }
-# review: new
 bounce-status = Status: { $status }
-# review: new
 bounce-reported-by = Gemeldet von: { $server }
-# review: new
 bounce-retry-minutes = Der empfangende Server bittet, { $count ->
     [one] eine Minute
    *[other] { $count } Minuten
 } bis zum nächsten Versuch zu warten.
-# review: new
 bounce-retry-hours = Der empfangende Server bittet, { $count ->
     [one] eine Stunde
    *[other] { $count } Stunden
 } bis zum nächsten Versuch zu warten.
-# review: new
 bounce-blocklist = Sperrliste: { $lists }
-# review: new
 bounce-user-unknown = Die Adresse existiert nicht
-# review: new
-bounce-user-unknown-why = Der empfangende Server hat kein Postfach mit dieser Adresse. Sie ist vielleicht falsch geschrieben, oder die Person ist nicht mehr dort.
-# review: new
-bounce-user-unknown-do = Prüfen Sie die Schreibweise der Adresse, oder fragen Sie die Person nach ihrer aktuellen Adresse.
-# review: new
+bounce-user-unknown-why = Auf dem empfangenden Server gibt es kein Postfach mit dieser Adresse. Möglicherweise enthält die Adresse einen Tippfehler oder wird vom Empfänger nicht mehr verwendet.
+bounce-user-unknown-do = Prüfen Sie die Schreibweise der Adresse oder fragen Sie den Empfänger nach seiner aktuellen E-Mail-Adresse.
 bounce-invalid-address = Die Adresse ist ungültig
-# review: new
-bounce-invalid-address-why = Die Adresse ist nicht so geschrieben, dass E-Mail an sie gesendet werden kann.
-# review: new
-bounce-invalid-address-do = Suchen Sie nach Tippfehlern, etwa einem Leerzeichen, einem fehlenden Buchstaben oder nichts nach dem @.
-# review: new
-bounce-mailbox-disabled = Das Postfach ist geschlossen
-# review: new
+bounce-invalid-address-why = Das Format der Adresse ist ungültig. An diese Adresse können keine E-Mails gesendet werden.
+bounce-invalid-address-do = Prüfen Sie die Adresse auf Tippfehler, etwa überflüssige Leerzeichen, fehlende Buchstaben oder einen fehlenden Domainnamen nach dem @-Zeichen.
+bounce-mailbox-disabled = Das Postfach ist deaktiviert
 bounce-mailbox-disabled-why = Die Adresse existiert, aber ihr Postfach wurde abgeschaltet oder wird nicht mehr verwendet.
-# review: new
-bounce-mailbox-disabled-do = Erreichen Sie die Person auf anderem Weg, und fragen Sie nach einer Adresse, die sie jetzt verwendet.
-# review: new
+bounce-mailbox-disabled-do = Kontaktieren Sie den Empfänger auf anderem Weg und fragen Sie nach seiner aktuellen E-Mail-Adresse.
 bounce-mailbox-full = Das Postfach ist voll
-# review: new
 bounce-mailbox-full-why = Im Postfach des Empfängers ist kein Platz für neue E-Mail.
-# review: new
-bounce-mailbox-full-do = Senden Sie sie in ein paar Tagen erneut, oder benachrichtigen Sie die Person auf anderem Weg. Große Anlagen werden zuerst abgelehnt.
-# review: new
+bounce-mailbox-full-do = Senden Sie die Nachricht in ein paar Tagen erneut oder benachrichtigen Sie den Empfänger auf anderem Weg. Nachrichten mit großen Anlagen werden zuerst abgelehnt.
 bounce-spam-blocked = Als Spam abgelehnt
-# review: new
 bounce-spam-blocked-why = Der empfangende Server hat die Nachricht für Spam gehalten.
-# review: new
-bounce-spam-blocked-do = Senden Sie sie erneut ohne das, was nach Spam aussieht, etwa viele Links, gekürzte Links oder eine große Anlage. Wenn es wieder passiert, fragen Sie Ihren E-Mail-Anbieter.
-# review: new
+bounce-spam-blocked-do = Entfernen Sie Inhalte, die als Spam eingestuft werden könnten, etwa zahlreiche oder gekürzte Links oder große Anlagen. Senden Sie die Nachricht dann erneut. Wenn das Problem weiterhin auftritt, wenden Sie sich an Ihren E-Mail-Anbieter.
 bounce-virus-detected = Wegen eines Virus abgelehnt
-# review: new
 bounce-virus-detected-why = Der empfangende Server hat in der Nachricht oder ihren Anlagen einen Virus oder andere schädliche Inhalte gefunden.
-# review: new
 bounce-virus-detected-do = Prüfen Sie die Anlagen mit einem Virenscanner. Manche Server lehnen jedes Programm und jedes Archiv ab; teilen Sie solche Dateien stattdessen als Link.
-# review: new
 bounce-ip-blocklisted = Ihr Mailserver steht auf einer Sperrliste
-# review: new
-bounce-ip-blocklisted-why = Der empfangende Server lehnt E-Mail von dem Server ab, der Ihre gesendet hat, weil dessen Adresse auf einer Sperrliste steht.
-# review: new
+bounce-ip-blocklisted-why = Der empfangende Server lehnt Nachrichten von Ihrem Mailserver ab, weil dessen IP-Adresse auf einer Sperrliste steht.
 bounce-ip-blocklisted-do = Es liegt nicht an der Nachricht. Leiten Sie diesen Bericht an Ihren E-Mail-Anbieter weiter, und bitten Sie ihn, den Server von der Liste entfernen zu lassen.
-# review: new
 bounce-domain-blocklisted = Eine Domain steht auf einer Sperrliste
-# review: new
 bounce-domain-blocklisted-why = Der empfangende Server lehnt die Nachricht ab, weil die Domain Ihrer Adresse oder eine Domain in den Links der Nachricht auf einer Sperrliste steht.
-# review: new
-bounce-domain-blocklisted-do = Wenn die Nachricht Links enthält, versuchen Sie es ohne sie. Andernfalls leiten Sie diesen Bericht an die Person weiter, die E-Mail für Ihre Domain betreut.
-# review: new
-bounce-policy-blocked = Von den Regeln des empfangenden Servers abgelehnt
-# review: new
+bounce-domain-blocklisted-do = Wenn die Nachricht Links enthält, versuchen Sie es ohne diese Links. Falls das nicht hilft oder keine Links enthalten sind, leiten Sie diesen Bericht an den E-Mail-Administrator Ihrer Domain weiter.
+bounce-policy-blocked = Aufgrund der Regeln des empfangenden Servers abgelehnt
 bounce-policy-blocked-why = Die Regeln des empfangenden Servers lassen diese Nachricht nicht durch, zum Beispiel wegen ihrer Größe, ihrer Anlagen oder ihres Absenders.
-# review: new
-bounce-policy-blocked-do = Die eigenen Worte des Servers unter Details nennen oft den Grund. Fragen Sie den Empfänger, ob er solche E-Mail annehmen kann.
-# review: new
+bounce-policy-blocked-do = Die Serverantwort unter „Details“ nennt häufig den Grund. Fragen Sie den Empfänger, ob er solche Nachrichten empfangen kann.
 bounce-geo-blocked = Wegen der Herkunft abgelehnt
-# review: new
 bounce-geo-blocked-why = Der empfangende Server nimmt keine E-Mail aus dem Land oder Netz an, in dem Ihr Mailserver steht.
-# review: new
-bounce-geo-blocked-do = Erreichen Sie die Person auf anderem Weg, oder fragen Sie Ihren E-Mail-Anbieter.
-# review: new
-bounce-relay-denied = Der Server hat sie nicht weitergeleitet
-# review: new
+bounce-geo-blocked-do = Kontaktieren Sie den Empfänger auf anderem Weg oder wenden Sie sich an Ihren E-Mail-Anbieter.
+bounce-relay-denied = Der Server hat die Weiterleitung abgelehnt
 bounce-relay-denied-why = Ein Server hat die Zustellung abgelehnt, oft weil ohne Anmeldung gesendet wurde oder über einen Server, der für diesen Empfänger nicht zuständig ist.
-# review: new
-bounce-relay-denied-do = Prüfen Sie den Postausgangsserver des Kontos unter Datei > Konten, und ob er sich anmeldet.
-# review: new
+bounce-relay-denied-do = Prüfen Sie unter Datei > Konten die Einstellungen des Postausgangsservers und ob die Anmeldung am Server eingerichtet ist.
 bounce-auth-failure = Ihre Absenderadresse konnte nicht bestätigt werden
-# review: new
 bounce-auth-failure-why = Der empfangende Server konnte nicht bestätigen, dass die Nachricht wirklich von Ihrer Domain kommt (SPF, DKIM oder DMARC).
-# review: new
-bounce-auth-failure-do = Leiten Sie diesen Bericht an die Person weiter, die E-Mail für Ihre Domain betreut: Ihre Einstellungen müssen korrigiert werden. Bis dahin hilft es vielleicht, über den Server Ihres Anbieters zu senden.
-# review: new
+bounce-auth-failure-do = Leiten Sie diesen Bericht an den E-Mail-Administrator Ihrer Domain weiter, damit er die Domain-Einstellungen korrigieren kann. Bis dahin kann es helfen, über den Server Ihres Anbieters zu senden.
 bounce-rate-limited = Zu viele Nachrichten auf einmal
-# review: new
-bounce-rate-limited-why = Der empfangende Server nimmt von Ihrem Mailserver vorerst weniger Nachrichten an.
-# review: new
-bounce-rate-limited-do = Warten Sie eine Weile, und senden Sie sie erneut. Wenn Sie an viele Personen schreiben, senden Sie an weniger auf einmal.
-# review: new
-bounce-greylisting = Kurz zurückgehalten
-# review: new
-bounce-greylisting-why = Der empfangende Server bittet unbekannte Absender, es etwas später erneut zu versuchen, eine übliche Prüfung gegen Spam.
-# review: new
-bounce-greylisting-do = Nichts. Mailserver versuchen es von selbst erneut, und die Nachricht wird meist innerhalb einer Stunde zugestellt.
-# review: new
+bounce-rate-limited-why = Der empfangende Server begrenzt derzeit die Anzahl der Nachrichten, die er von Ihrem Mailserver annimmt.
+bounce-rate-limited-do = Warten Sie eine Weile und senden Sie die Nachricht erneut. Wenn Sie an viele Personen schreiben, senden Sie jeweils an weniger Empfänger gleichzeitig.
+bounce-greylisting = Zustellung vorübergehend zurückgestellt
+bounce-greylisting-why = Der empfangende Server bittet unbekannte Absender, es etwas später erneut zu versuchen. Das ist eine übliche Maßnahme zum Schutz vor Spam.
+bounce-greylisting-do = Sie müssen nichts tun. Mailserver versuchen die Zustellung automatisch erneut. Meist wird die Nachricht innerhalb einer Stunde zugestellt.
 bounce-server-error = Der empfangende Server hatte ein Problem
-# review: new
 bounce-server-error-why = Der empfangende Server war nicht erreichbar oder konnte die Nachricht wegen eines eigenen Problems nicht annehmen.
-# review: new
-bounce-server-error-do = Senden Sie sie später erneut. Wenn es weiter fehlschlägt, prüfen Sie den Teil der Adresse nach dem @ auf Tippfehler.
-# review: new
+bounce-server-error-do = Senden Sie die Nachricht später erneut. Wenn das Problem weiterhin auftritt, prüfen Sie den Teil der Adresse nach dem @-Zeichen auf Tippfehler.
 bounce-unknown = Nicht zugestellt
-# review: new
-bounce-unknown-why = Der Bericht sagt nicht klar, warum.
-# review: new
-bounce-unknown-do = Die eigenen Worte des Servers unter Details sagen vielleicht mehr. Wenn nicht, leiten Sie diesen Bericht an Ihren E-Mail-Anbieter weiter.
+bounce-unknown-why = Der Bericht enthält keinen eindeutigen Grund für die fehlgeschlagene Zustellung.
+bounce-unknown-do = Die Serverantwort unter „Details“ enthält möglicherweise weitere Informationen. Wenn diese nicht helfen, leiten Sie den Bericht an Ihren E-Mail-Anbieter weiter.
 
 ## Several messages selected
 
@@ -217,7 +154,6 @@ done-deleted-for-good = { $count ->
     [one] { $messages } endgültig gelöscht
    *[other] { $messages } endgültig gelöscht
 }
-# review: new
 done-archived = { $count ->
     [one] { $messages } archiviert
    *[other] { $messages } archiviert
@@ -242,22 +178,18 @@ done-moved-back = { $count ->
     [one] { $messages } zurück in { $folder } verschoben
    *[other] { $messages } zurück in { $folder } verschoben
 }
-# review: new
 done-watched = { $count ->
     [one] Unterhaltung wird beobachtet
    *[other] { $count } Unterhaltungen werden beobachtet
 }
-# review: new
 done-unwatched = { $count ->
     [one] Unterhaltung wird nicht mehr beobachtet
    *[other] { $count } Unterhaltungen werden nicht mehr beobachtet
 }
-# review: new
 done-ignored = { $count ->
     [one] Unterhaltung wird ignoriert
    *[other] { $count } Unterhaltungen werden ignoriert
 }
-# review: new
 done-unignored = { $count ->
     [one] Unterhaltung wird nicht mehr ignoriert
    *[other] { $count } Unterhaltungen werden nicht mehr ignoriert
@@ -265,24 +197,18 @@ done-unignored = { $count ->
 their-folders = die jeweiligen Ordner
 undo-move = Verschieben rückgängig machen
 undo-delete = Löschen rückgängig machen
-# review: new
 undo-archive = Archivieren rückgängig machen
 undo-junk = Als Junk markieren rückgängig machen
 undo-not-junk = Als Nicht-Junk markieren rückgängig machen
 nothing-to-undo = Es gibt nichts rückgängig zu machen.
 messages-gone = Die Nachrichten sind nicht mehr da.
 folder-holds-no-messages = In diesem Ordner können keine Nachrichten gespeichert werden.
-# review: new
 not-archived-here = Nachrichten in diesem Ordner können nicht archiviert werden.
-# review: new
 not-emptied-here = Nur Gelöschte Objekte und Junk-E-Mail können geleert werden.
-# review: new
 next-unread-question = In { $folder } gibt es keine ungelesenen Nachrichten mehr.
 
     Zu { $next } wechseln, dem nächsten Ordner mit ungelesenen Nachrichten?
-# review: new
 no-unread-left = Es gibt keine ungelesenen Nachrichten mehr.
-# review: new
 empty-question = { $count ->
     [one] { $folder } leeren?
 
@@ -406,7 +332,7 @@ error-outbox-waits = { $count ->
 error-draft-not-removed = der frühere Entwurf der Nachricht konnte nicht aus den Entwürfen entfernt werden: { $reason }
 error-sent-but = die Nachricht wurde gesendet, aber { $problem }
 error-sent-still-in-outbox = sie ist noch im Postausgang: { $error }
-error-sent-no-copy = es konnte keine Kopie in Gesendete Objekte gespeichert werden: { $reason }
+error-sent-no-copy = es konnte keine Kopie im Ordner „Gesendete Objekte“ gespeichert werden: { $reason }
 error-no-password = kein Passwort für dieses Konto
 error-no-sign-in = keine Anmeldedaten für dieses Konto vorhanden
 error-provider-missing = diese Version kann sich nicht bei { $provider } anmelden: wurde die Anmelde-App entfernt?
@@ -465,14 +391,14 @@ day-sunday = Sonntag
 
 ## AI agents
 
-agent-level-read = E-Mail lesen: Ordner, Nachrichtenliste, Suche und Nachrichten
+agent-level-read = E-Mails lesen: Ordner und Nachrichten anzeigen und durchsuchen
 agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben und löschen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
 agent-level-drafts = Entwürfe erstellen, die Sie selbst senden
 agent-level-send = E-Mail senden, jede Nachricht erst nach Ihrer Zustimmung
-agent-connect-title = { $program } möchte Ihre E-Mail verwenden
-agent-connect-detail = Ein KI-Agent möchte mit Inbox Classic arbeiten. Wählen Sie, was er tun darf und welche Konten er sehen darf; Sie können das später unter Extras > KI-Agenten ändern.
+agent-connect-title = { $program } möchte auf Ihre E-Mails zugreifen
+agent-connect-detail = Ein KI-Agent möchte auf Inbox Classic zugreifen. Legen Sie fest, was er tun darf und auf welche Konten er zugreifen kann. Sie können diese Berechtigungen später unter Extras > KI-Agenten ändern.
 
-    Agenten lesen E-Mail, die andere geschrieben haben, und eine Nachricht kann versuchen, sie zu täuschen. Inbox Classic fragt Sie immer, bevor ein Agent etwas sendet.
+    Agenten lesen E-Mails von anderen Personen. Diese Nachrichten können Anweisungen enthalten, die den Agenten täuschen sollen. Inbox Classic bittet Sie immer um Bestätigung, bevor ein Agent eine Nachricht sendet.
 agent-reply-to = Antwort auf „{ $subject }“
 agent-reply-all-on = Antwort an alle auf „{ $subject }“
 agent-forward-of = Weiterleitung von „{ $subject }“
@@ -481,7 +407,7 @@ agent-never-written-many = Sie haben noch nie an { $count } dieser Adressen gesc
 agent-send-title = { $program } möchte diese Nachricht senden
 agent-send-detail = Prüfen Sie die Empfänger und den Inhalt. Nach Ihrer Bestätigung wartet die Nachricht { $seconds } Sekunden im Postausgang. Dort können Sie sie noch löschen.
 agent-change-title = Was { $program } tun darf
-agent-change-allowed = Ändern Sie, was die KI-Agenten dieses Programms mit Ihrer E-Mail tun dürfen.
+agent-change-allowed = Ändern Sie, was die KI-Agenten dieses Programms mit Ihren E-Mails tun dürfen.
 agent-change-refused = Sie haben diesem Programm den Zugriff verweigert. Lassen Sie es zu, damit seine Agenten wieder auf Ihre E-Mails zugreifen können.
 agent-log-taken-back = { $entry } (rückgängig gemacht)
 agent-files = Dateien: { $files }
@@ -518,7 +444,6 @@ agent-log-deleted = „{ $subject }“ gelöscht
 agent-log-moved = „{ $subject }“ nach { $folder } verschoben
 agent-log-junk = „{ $subject }“ als Junk markiert
 agent-log-not-junk = „{ $subject }“ als Nicht-Junk markiert
-# review: new
 agent-log-archived = „{ $subject }“ archiviert
 agent-log-folder = Ordner „{ $name }“ erstellt
 agent-log-unsubscribed = Mailingliste der Nachricht „{ $subject }“ abbestellt
@@ -542,16 +467,10 @@ secrets-windows = die Anmeldeinformationsverwaltung
 secrets-mac = der Schlüsselbund
 secrets-linux = der Systemschlüsselbund (Secret Service)
 error-no-such-file = diese Datei gibt es nicht
-# review: new
-cards-file-too-big = Diese Datei ist zu groß für ein Adressbuch.
-# review: new
+cards-file-too-big = Diese Datei ist zu groß, um sie als Adressbuch zu importieren.
 ui-sender-added = { $name } wurde zum Adressbuch hinzugefügt.
-# review: new
 ui-sender-known = { $name } ist bereits im Adressbuch.
-# review: new
 ui-sender-none = Der Absender dieser Nachricht hat keine E-Mail-Adresse, die hinzugefügt werden kann.
-# review: new
 card-name-needed = Der Kontakt hat weder einen Namen noch eine E-Mail-Adresse.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
-# review: new
 cards-file-failed = { $file }: { $reason }

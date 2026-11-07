@@ -123,8 +123,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Edasi >
-gtk-provider-sign-in = Kontole { $address } saate sisse logida teenusepakkuja { $provider } veebilehel. Inbox Classic teie parooli ei näe. Teise võimalusena kasutage konto turvasätetes loodud rakenduse parooli.
-gtk-provider-sign-in-apps = Kontole { $address } saate sisse logida teenusepakkuja { $provider } veebilehel mõne oma sisselogimisrakendusega („Muud sisselogimisviisid“). Teise võimalusena kasutage konto turvasätetes loodud rakenduse parooli.
+gtk-provider-sign-in = Logige kontole { $address } sisse veebilehel, mida haldab { $provider }. Inbox Classic teie parooli ei näe. Võite kasutada ka konto turvasätetes loodud rakenduse parooli.
+gtk-provider-sign-in-apps = Logige kontole { $address } sisse veebilehel, mida haldab { $provider }, kasutades mõnda oma sisselogimisrakendust („Muud sisselogimisviisid“). Võite kasutada ka konto turvasätetes loodud rakenduse parooli.
 gtk-accounts-add = Lisa...
 gtk-accounts-properties = Atribuudid...
 gtk-accounts-signature = Allkiri...
@@ -146,7 +146,7 @@ gtk-issuer-usable =
     Väljaandjat saab kasutada.
 
     { $found }
-gtk-app-built-in = { $app } on sisseehitatud: muuta saab ainult seda, kas seda uute kontode jaoks kasutatakse. { $reason }
+gtk-app-built-in = { $app } on sisseehitatud. Muuta saab ainult seda, kas seda pakutakse uute kontode lisamisel. { $reason }
 gtk-built-in = { $app } (sisseehitatud)
 gtk-offered-for-new = Pakutakse uutele kontodele
 gtk-edit-button = Muuda...
@@ -170,5 +170,5 @@ gtk-preferences = Eelistused
 gtk-language = Keel
 gtk-language-subtitle = Rakenduse ja spikri keel
 gtk-new-mail-group = Uus post
-gtk-notify-subtitle = Teade, kui uusi kirju saabub ajal, mil aken on taustal
+gtk-notify-subtitle = Teavita uute kirjade saabumisest, kui aken on taustal
 gtk-restart-to-change = Inbox Classic taaskäivitub, et keelt muuta.
