@@ -1407,7 +1407,7 @@ impl Mailbox {
     pub fn step_message(&self, forward: bool) {
         let ranges = self.list.selected_ranges();
         let target = match (ranges.first(), ranges.last()) {
-            (Some(&(first, _)), Some(&(_, end))) if forward => Some(end).filter(|_| first < end),
+            (Some(&(first, _)), Some(&(_, end))) if forward => (first < end).then_some(end),
             (Some(&(first, _)), Some(_)) => first.checked_sub(1),
             _ => Some(0),
         };
