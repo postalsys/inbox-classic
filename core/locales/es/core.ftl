@@ -398,3 +398,5 @@ secrets-windows = el Administrador de credenciales
 secrets-mac = el llavero
 secrets-linux = el llavero del sistema (Secret Service)
 error-no-such-file = ese archivo no existe
+# review: new
+cards-file-too-big = Este archivo es demasiado grande para ser una libreta de direcciones.

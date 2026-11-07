@@ -387,3 +387,5 @@ secrets-windows = die Anmeldeinformationsverwaltung
 secrets-mac = der Schlüsselbund
 secrets-linux = der Systemschlüsselbund (Secret Service)
 error-no-such-file = diese Datei gibt es nicht
+# review: new
+cards-file-too-big = Diese Datei ist zu groß für ein Adressbuch.

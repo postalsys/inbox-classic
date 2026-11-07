@@ -16,8 +16,15 @@ pub struct Contact {
 /// How much one message written to someone counts against one heard from them
 const SENT_WEIGHT: i64 = 3;
 
+/// The LIKE patterns of what is typed, matched at the start (`typed%`) and at the start of a word after the first
+/// (`% typed%`), its wildcards taken as themselves
+pub(crate) fn like_starts(typed: &str) -> (String, String) {
+    let escaped = like_escaped(typed.trim());
+    (format!("{escaped}%"), format!("% {escaped}%"))
+}
+
 /// The words of LIKE that match themselves
-fn like_escaped(text: &str) -> String {
+pub(crate) fn like_escaped(text: &str) -> String {
     let mut escaped = String::with_capacity(text.len());
     for c in text.chars() {
         if matches!(c, '%' | '_' | '\\') {
@@ -78,8 +85,7 @@ impl Store {
         if typed.is_empty() {
             return Ok(Vec::new());
         }
-        let start = format!("{}%", like_escaped(typed));
-        let word = format!("% {}%", like_escaped(typed));
+        let (start, word) = like_starts(typed);
         let mut statement = self.db.prepare_cached(
             "SELECT name, address FROM contacts WHERE hidden = 0 \
              AND (address LIKE ?1 ESCAPE '\\' OR name LIKE ?1 ESCAPE '\\' OR name LIKE ?2 ESCAPE '\\') \
