@@ -389,3 +389,14 @@ secrets-linux = der Systemschlüsselbund (Secret Service)
 error-no-such-file = diese Datei gibt es nicht
 # review: new
 cards-file-too-big = Diese Datei ist zu groß für ein Adressbuch.
+# review: new
+ui-sender-added = { $name } wurde zum Adressbuch hinzugefügt.
+# review: new
+ui-sender-known = { $name } ist bereits im Adressbuch.
+# review: new
+ui-sender-none = Der Absender dieser Nachricht hat keine E-Mail-Adresse, die hinzugefügt werden kann.
+# review: new
+card-name-needed = Der Kontakt hat weder einen Namen noch eine E-Mail-Adresse.
+# a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
+# review: new
+cards-file-failed = { $file }: { $reason }

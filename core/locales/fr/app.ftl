@@ -513,12 +513,6 @@ ui-pick-add = &Ajouter →
 # review: new
 ui-pick-tip = Choisir les destinataires dans le carnet d'adresses
 # review: new
-ui-sender-added = { $name } a été ajouté au carnet d'adresses.
-# review: new
-ui-sender-known = { $name } est déjà dans le carnet d'adresses.
-# review: new
-ui-sender-none = L'expéditeur de ce message n'a pas d'adresse e-mail à ajouter.
-# review: new
 ui-filter-address-books = Carnets d'adresses (vCard, CSV)
 # review: new
 ui-filter-vcard = Fichiers vCard

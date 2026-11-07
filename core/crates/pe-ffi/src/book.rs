@@ -5,6 +5,7 @@
 use std::ffi::c_char;
 use std::ptr::{null, null_mut};
 
+use pe_core::book::BookRow;
 use pe_store::{Card, Group, Member};
 
 use crate::core::{PeCore, Rows, Strings, arg, handed, refused, take_back, with};
@@ -43,8 +44,10 @@ impl PePhoneKind {
 /// A person of the address book as its list shows them
 #[repr(C)]
 pub struct PeCardRow {
+    /// The card; 0 for an address typed into a group (`pe_group_people`), which has no Properties and which Delete
+    /// takes out of the group by its `address` (`pe_book_delete`)
     pub id: i64,
-    /// The name shown (Name column)
+    /// The name shown (Name column): the name, or the address of someone without one
     pub name: *const c_char,
     /// The default address (E-mail column), empty for none
     pub address: *const c_char,
@@ -59,6 +62,26 @@ pub struct PeCardRow {
 /// The people of the address book; free with `pe_card_list_free`
 pub struct PeCardList(Rows<PeCardRow>);
 
+fn card_list(rows: &[BookRow]) -> *mut PeCardList {
+    handed(PeCardList(Rows::new(rows, |row, strings| PeCardRow {
+        id: row.card,
+        name: strings.add(&row.name),
+        address: strings.add(&row.address),
+        phone: strings.add(&row.phone),
+        company: strings.add(&row.company),
+        label: strings.add(&row.label),
+    })))
+}
+
+/// The filter argument of the book's lists: NULL, empty or not UTF-8 for everything
+///
+/// # Safety
+/// `filter` must be NULL or a NUL-terminated string.
+unsafe fn filter_of(filter: *const c_char) -> String {
+    // SAFETY: as the caller guarantees
+    unsafe { arg(filter) }.unwrap_or_default().to_string()
+}
+
 /// The people of the address book, by name; with `filter` (NULL or empty for everyone), those whose name (a word of
 /// it), nickname, company or an address starts with it. NULL on failure.
 ///
@@ -67,29 +90,31 @@ pub struct PeCardList(Rows<PeCardRow>);
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_cards(core: *const PeCore, filter: *const c_char) -> *mut PeCardList {
     // SAFETY: as the caller guarantees
-    let filter = unsafe { arg(filter) }.unwrap_or_default().to_string();
+    let filter = unsafe { filter_of(filter) };
     // SAFETY: as the caller guarantees
     unsafe {
-        with(core, null_mut(), |core| {
-            let Ok(cards) = core.cards(&filter) else {
-                return null_mut();
-            };
-            handed(PeCardList(Rows::new(&cards, |card, strings| {
-                let address = card.addresses.first().map_or("", String::as_str);
-                let label = if address.is_empty() {
-                    String::new()
-                } else {
-                    pe_core::address_label(&card.name, address)
-                };
-                PeCardRow {
-                    id: card.id,
-                    name: strings.add(&card.name),
-                    address: strings.add(address),
-                    phone: strings.add(card.phones.first().map_or("", |(_, number)| number.as_str())),
-                    company: strings.add(&card.company),
-                    label: strings.add(&label),
-                }
-            })))
+        with(core, null_mut(), |core| match core.card_rows(&filter) {
+            Ok(rows) => card_list(&rows),
+            Err(_) => null_mut(),
+        })
+    }
+}
+
+/// The people of group `id` in their order, as `pe_cards` lists the book's: a card's row as its card is now, an
+/// address typed into the group with `id` 0; with `filter` (NULL or empty for all), those found by it as `pe_cards`
+/// finds people. NULL when there is no such group or on failure. Free with `pe_card_list_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `filter` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_group_people(core: *const PeCore, id: i64, filter: *const c_char) -> *mut PeCardList {
+    // SAFETY: as the caller guarantees
+    let filter = unsafe { filter_of(filter) };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.group_people(id, &filter) {
+            Ok(rows) => card_list(&rows),
+            Err(_) => null_mut(),
         })
     }
 }
@@ -281,8 +306,9 @@ unsafe fn card_of(card: *const PeCard) -> Option<Card> {
 }
 
 /// Saves a card: a new one when its `id` is 0, else in place of card `id` (what a vCard brought that the form does
-/// not show is kept). An address that is not one mailbox alone is left out. Its id, or 0 with the reason in `error`
-/// (NULL or a pointer to a string to free with `pe_string_free`).
+/// not show is kept). An address that is not one mailbox alone is left out. With no name, first or last name the card
+/// is known by its default address; one with no address either is refused. Its id, or 0 with the reason in `error`
+/// (NULL or a pointer to a string to free with `pe_string_free`), in words for the user.
 ///
 /// # Safety
 /// `core` must be a live handle, `card` a valid card whose strings are NULL or NUL-terminated and whose arrays hold
@@ -311,18 +337,49 @@ pub unsafe extern "C" fn pe_card_save(core: *const PeCore, card: *const PeCard, 
     unsafe { refused(error, outcome, "the contact could not be saved") }.unwrap_or(0)
 }
 
-/// Deletes `count` cards (out of the groups they are in too)
+/// The display name that follows the first and last name as they are typed (Contact Properties): `Mary Smith`,
+/// `Smith`, or empty; what a card saved without a display name gets. Free with `pe_string_free`; NULL on failure.
 ///
 /// # Safety
-/// `core` must be a live handle, `ids` NULL or `count` ids.
+/// `first` and `last` must be NULL or NUL-terminated strings.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_cards_delete(core: *const PeCore, ids: *const i64, count: usize) -> bool {
+pub unsafe extern "C" fn pe_book_display_name(first: *const c_char, last: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let (first, last) = unsafe { (arg(first).unwrap_or_default(), arg(last).unwrap_or_default()) };
+    guard(|| into_c_string(pe_core::book::display_name(first, last))).unwrap_or(null_mut())
+}
+
+/// Delete of the address book: `count` cards (`ids`) out of the book and the groups they are in, and `address_count`
+/// addresses typed into `group` (the `address` of its rows with `id` 0) out of that group; `group` 0 for none.
+/// False on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `ids` NULL or `count` ids, `addresses` NULL or `address_count` NUL-terminated
+/// strings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_book_delete(
+    core: *const PeCore,
+    group: i64,
+    ids: *const i64,
+    count: usize,
+    addresses: *const *const c_char,
+    address_count: usize,
+) -> bool {
     // SAFETY: as the caller guarantees
     let Some(ids) = (unsafe { items(ids, count, |id| Some(*id)) }) else {
         return false;
     };
     // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.delete_cards(&ids).is_ok()) }
+    let Some(addresses) = (unsafe { items(addresses, address_count, |a| field(*a)) }) else {
+        return false;
+    };
+    let group = (group != 0).then_some(group);
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, false, |core| {
+            core.delete_from_book(group, &ids, &addresses).is_ok()
+        })
+    }
 }
 
 /// A group of the address book as its list shows it
@@ -339,33 +396,26 @@ pub struct PeGroupRow {
 /// The groups; free with `pe_group_list_free`
 pub struct PeGroupList(Rows<PeGroupRow>);
 
-/// The members of a group with an address, as they go in an address field
-fn members_label(members: &[Member]) -> String {
-    members
-        .iter()
-        .filter(|m| m.address.contains('@'))
-        .map(|m| pe_core::address_label(&m.name, &m.address))
-        .collect::<Vec<_>>()
-        .join(", ")
-}
-
-/// The groups of the address book, by name; NULL on failure
+/// The groups of the address book, by name; with `filter` (NULL or empty for all), those whose name (a word of it)
+/// starts with it, as `pe_cards` finds people. NULL on failure.
 ///
 /// # Safety
-/// `core` must be a live handle.
+/// `core` must be a live handle, `filter` NULL or a NUL-terminated string.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_groups(core: *const PeCore) -> *mut PeGroupList {
+pub unsafe extern "C" fn pe_groups(core: *const PeCore, filter: *const c_char) -> *mut PeGroupList {
+    // SAFETY: as the caller guarantees
+    let filter = unsafe { filter_of(filter) };
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
-            let Ok(groups) = core.groups() else {
+            let Ok(groups) = core.groups(&filter) else {
                 return null_mut();
             };
             handed(PeGroupList(Rows::new(&groups, |group, strings| PeGroupRow {
                 id: group.id,
                 name: strings.add(&group.name),
                 member_count: group.members.len(),
-                label: strings.add(&members_label(&group.members)),
+                label: strings.add(&pe_core::book::group_label(group)),
             })))
         })
     }
@@ -446,7 +496,7 @@ pub unsafe extern "C" fn pe_group(core: *const PeCore, id: i64) -> *mut PeGroupV
                     card: m.card.unwrap_or(0),
                     name: strings.add(&m.name),
                     address: strings.add(&m.address),
-                    label: strings.add(&pe_core::address_label(&m.name, &m.address)),
+                    label: strings.add(&pe_core::book::member_label(m)),
                 })
                 .collect();
             let info = PeGroup {
@@ -483,7 +533,7 @@ pub unsafe extern "C" fn pe_group_free(view: *mut PeGroupView) {
 }
 
 /// Saves a group: a new one when its `id` is 0, else in place of group `id`. A member of no card without an address
-/// is left out. Its id, or 0 with the reason in `error` (NULL or a pointer to a string to free with
+/// is left out, and a card or an address given twice (a card's default address typed again too) is kept once. Its id, or 0 with the reason in `error` (NULL or a pointer to a string to free with
 /// `pe_string_free`).
 ///
 /// # Safety
@@ -498,13 +548,7 @@ pub unsafe extern "C" fn pe_group_save(core: *const PeCore, group: *const PeGrou
             Some(Group {
                 id: g.id,
                 name: field(g.name)?,
-                members: items(g.members, g.member_count, |m| {
-                    Some(Member {
-                        card: (m.card != 0).then_some(m.card),
-                        name: field(m.name)?,
-                        address: field(m.address)?.trim().to_string(),
-                    })
-                })?,
+                members: members_of(g.members, g.member_count)?,
             })
         }
     });
@@ -519,6 +563,68 @@ pub unsafe extern "C" fn pe_group_save(core: *const PeCore, group: *const PeGrou
     unsafe { refused(error, outcome, "the group could not be saved") }.unwrap_or(0)
 }
 
+/// `count` members at `members`; None when a string is not UTF-8
+///
+/// # Safety
+/// `members` must be NULL or point to `count` members whose strings are NULL or NUL-terminated.
+unsafe fn members_of(members: *const PeMember, count: usize) -> Option<Vec<Member>> {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        items(members, count, |m| {
+            Some(Member {
+                card: (m.card != 0).then_some(m.card),
+                name: field(m.name)?,
+                address: field(m.address)?.trim().to_string(),
+            })
+        })
+    }
+}
+
+/// Which of `added_count` members (`added`) go into a group of `count` members (`members`), the way Group Properties
+/// adds people: `keep[i]` (an array of `added_count`) true for those not in it yet, a card once and an address once
+/// (whether of a card or typed, ignoring case; also against those before it in `added`). Give each member its
+/// `address`, a card's its default one. How many to add; 0 with every `keep` false for an argument that can not be
+/// read.
+///
+/// # Safety
+/// `members` and `added` must be NULL or point to `count` and `added_count` members whose strings are NULL or
+/// NUL-terminated, `keep` NULL or an array of `added_count`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_book_members_add(
+    members: *const PeMember,
+    count: usize,
+    added: *const PeMember,
+    added_count: usize,
+    keep: *mut bool,
+) -> usize {
+    if keep.is_null() || added_count == 0 {
+        return 0;
+    }
+    // SAFETY: as the caller guarantees
+    let keep = unsafe { std::slice::from_raw_parts_mut(keep, added_count) };
+    keep.fill(false);
+    // SAFETY: as the caller guarantees
+    let (Some(members), Some(added)) = (unsafe { members_of(members, count) }, unsafe {
+        members_of(added, added_count)
+    }) else {
+        return 0;
+    };
+    guard(|| {
+        let mut list = members;
+        let mut kept = 0;
+        for (index, member) in added.iter().enumerate() {
+            let longer = pe_core::book::add_members(&list, std::slice::from_ref(member));
+            if longer.len() > list.len() {
+                keep[index] = true;
+                kept += 1;
+                list = longer;
+            }
+        }
+        kept
+    })
+    .unwrap_or(0)
+}
+
 /// Deletes a group (not the people in it)
 ///
 /// # Safety
@@ -531,47 +637,72 @@ pub unsafe extern "C" fn pe_group_delete(core: *const PeCore, id: i64) -> bool {
 
 /// Adds the sender of message `uid` of `folder` to the address book (Add Sender to Address Book): the id of the card
 /// that has their address already, or of a new one with their name and address, `added` (when not NULL) true for a
-/// new one. 0 when the message is not there or its sender has no address.
+/// new one. 0 when the message is not there or its sender has no address. `status` (when not NULL) gets what the
+/// status bar says in every case (added, there already, no address to add, or why it failed); free it with
+/// `pe_string_free`.
 ///
 /// # Safety
-/// `core` must be a live handle, `added` NULL or a valid pointer.
+/// `core` must be a live handle, `added` and `status` NULL or valid pointers.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_book_add_sender(core: *const PeCore, folder: i64, uid: u64, added: *mut bool) -> i64 {
+pub unsafe extern "C" fn pe_book_add_sender(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    added: *mut bool,
+    status: *mut *mut c_char,
+) -> i64 {
     // SAFETY: as the caller guarantees
-    let (id, new) = unsafe {
-        with(core, (0, false), |core| {
-            core.add_sender(folder, uid).unwrap_or((0, false))
+    let outcome = unsafe {
+        with(core, None, |core| {
+            Some(
+                core.add_sender(folder, uid)
+                    .unwrap_or_else(|error| pe_core::book::SenderAdded {
+                        status: error.to_string(),
+                        ..Default::default()
+                    }),
+            )
         })
     };
+    let done = outcome.unwrap_or_default();
     if !added.is_null() {
         // SAFETY: as the caller guarantees
-        unsafe { *added = new };
+        unsafe { *added = done.added };
     }
-    id
+    if !status.is_null() {
+        // SAFETY: as the caller guarantees
+        unsafe { *status = into_c_string(done.status) };
+    }
+    done.card
 }
 
-/// Reads the vCard (`.vcf`) or CSV file at `path` (UTF-8) into the address book (File > Import > Address Book): a
-/// card whose addresses are all in the book already is left out. `added` and `skipped` (when not NULL) get the
-/// counts. False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) for a file
-/// that can not be read or is too big.
+/// Reads the vCard (`.vcf`) and CSV files at `paths` (`count` of them, UTF-8) into the address book (File > Import >
+/// Address Book): a card whose addresses are all in the book already is left out. `added` and `skipped` (when not
+/// NULL) get the counts of every file read. True when every file was read; false when one could not be (or is too
+/// big), the others read all the same, with `error` (NULL or a pointer to a string to free with `pe_string_free`)
+/// naming each such file and why, a line each.
 ///
 /// # Safety
-/// `core` must be a live handle, `path` a NUL-terminated string, `added`, `skipped` and `error` NULL or valid
-/// pointers.
+/// `core` must be a live handle, `paths` NULL or `count` NUL-terminated strings, `added`, `skipped` and `error` NULL
+/// or valid pointers.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_book_import(
     core: *const PeCore,
-    path: *const c_char,
+    paths: *const *const c_char,
+    count: usize,
     added: *mut u64,
     skipped: *mut u64,
     error: *mut *mut c_char,
 ) -> bool {
     // SAFETY: as the caller guarantees
-    let path = unsafe { arg(path) }.map(std::path::PathBuf::from);
+    let paths: Option<Vec<std::path::PathBuf>> = unsafe {
+        items(paths, count, |path| {
+            arg(*path).filter(|p| !p.is_empty()).map(std::path::PathBuf::from)
+        })
+    };
     // SAFETY: as the caller guarantees
     let outcome = unsafe {
-        with(core, Err(None), |core| match &path {
-            Some(path) => core.import_cards(path).map_err(Some),
+        with(core, Err(None), |core| match &paths {
+            Some(paths) => Ok(core.import_cards(paths)),
             None => Err(None),
         })
     };
@@ -585,7 +716,14 @@ pub unsafe extern "C" fn pe_book_import(
             unsafe { *to = value };
         }
     }
-    true
+    if imported.failed.is_empty() {
+        return true;
+    }
+    if !error.is_null() {
+        // SAFETY: as the caller guarantees
+        unsafe { *error = into_c_string(imported.failures()) };
+    }
+    false
 }
 
 /// Writes `count` cards (`ids`; every card when `count` is 0) to a vCard file at `path` (UTF-8), replacing one that

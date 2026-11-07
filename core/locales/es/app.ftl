@@ -513,12 +513,6 @@ ui-pick-add = &Añadir →
 # review: new
 ui-pick-tip = Elegir destinatarios de la libreta de direcciones
 # review: new
-ui-sender-added = { $name } se ha añadido a la libreta de direcciones.
-# review: new
-ui-sender-known = { $name } ya está en la libreta de direcciones.
-# review: new
-ui-sender-none = El remitente de este mensaje no tiene una dirección de correo electrónico que añadir.
-# review: new
 ui-filter-address-books = Libretas de direcciones (vCard, CSV)
 # review: new
 ui-filter-vcard = Archivos vCard

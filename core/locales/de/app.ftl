@@ -513,12 +513,6 @@ ui-pick-add = &Hinzufügen →
 # review: new
 ui-pick-tip = Empfänger aus dem Adressbuch auswählen
 # review: new
-ui-sender-added = { $name } wurde zum Adressbuch hinzugefügt.
-# review: new
-ui-sender-known = { $name } ist bereits im Adressbuch.
-# review: new
-ui-sender-none = Der Absender dieser Nachricht hat keine E-Mail-Adresse, die hinzugefügt werden kann.
-# review: new
 ui-filter-address-books = Adressbücher (vCard, CSV)
 # review: new
 ui-filter-vcard = vCard-Dateien

@@ -173,7 +173,7 @@ pub async fn address_book(d: &Driver) {
     d.shot(&form, "contacts-3-group").await;
     click(&g, "dialog-ok");
     d.check(wait_gone(10, "group-dialog").await, "OK saves the group");
-    let groups = shell().core.groups().unwrap_or_default();
+    let groups = shell().core.groups("").unwrap_or_default();
     let team = groups.iter().find(|g| g.name == "Team");
     d.check(
         team.is_some_and(|t| {

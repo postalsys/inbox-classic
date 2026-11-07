@@ -51,6 +51,42 @@ pub struct Group {
     pub members: Vec<Member>,
 }
 
+/// Someone of a group as the book lists them: a member with what their card has now
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct MemberRow {
+    /// None for an address typed into the group
+    pub card: Option<CardId>,
+    pub name: String,
+    /// The card's default address, or the address typed
+    pub address: String,
+    /// The card's first phone number, empty for none
+    pub phone: String,
+    pub company: String,
+}
+
+/// The name a card without one gets from its first and last name: `Mary Smith`, `Smith`, or empty
+pub fn display_name(first: &str, last: &str) -> String {
+    format!("{} {}", first.trim(), last.trim()).trim().to_string()
+}
+
+/// The phones of a card as the store keeps them: a `kind\tnumber` line each
+fn phones_of(text: &str) -> Vec<(String, String)> {
+    text.lines()
+        .filter_map(|line| line.split_once('\t'))
+        .map(|(kind, number)| (kind.to_string(), number.to_string()))
+        .collect()
+}
+
+/// The LIKE patterns of a filter of the book: (the start of the text, the start of a word of it); for no filter, `%`
+/// for both, which the queries take as everything
+fn filter_patterns(filter: &str) -> (String, String) {
+    if filter.trim().is_empty() {
+        ("%".to_string(), "%".to_string())
+    } else {
+        like_starts(filter)
+    }
+}
+
 /// A card of a row of `id, name, first, last, nickname, company, notes, phones, extra`, without its addresses
 fn card_row(row: &rusqlite::Row) -> rusqlite::Result<Card> {
     let phones: String = row.get(7)?;
@@ -62,11 +98,7 @@ fn card_row(row: &rusqlite::Row) -> rusqlite::Result<Card> {
         nickname: row.get(4)?,
         company: row.get(5)?,
         notes: row.get(6)?,
-        phones: phones
-            .lines()
-            .filter_map(|line| line.split_once('\t'))
-            .map(|(kind, number)| (kind.to_string(), number.to_string()))
-            .collect(),
+        phones: phones_of(&phones),
         extra: row.get(8)?,
         addresses: Vec::new(),
     })
@@ -94,11 +126,7 @@ impl Store {
     /// The cards, by name; with `filter`, those whose name (a word of it), nickname, company or an address starts with
     /// it
     pub fn cards(&self, filter: &str) -> Result<Vec<Card>> {
-        let (start, word) = if filter.trim().is_empty() {
-            ("%".to_string(), "%".to_string())
-        } else {
-            like_starts(filter)
-        };
+        let (start, word) = filter_patterns(filter);
         let mut statement = self.db.prepare_cached(
             "SELECT id FROM cards WHERE ?1 = '%' OR name LIKE ?1 ESCAPE '\\' OR name LIKE ?2 ESCAPE '\\' \
              OR nickname LIKE ?1 ESCAPE '\\' OR company LIKE ?1 ESCAPE '\\' \
@@ -206,7 +234,7 @@ impl Store {
             })
             .collect();
         let name = if card.name.trim().is_empty() {
-            format!("{} {}", card.first.trim(), card.last.trim()).trim().to_string()
+            display_name(&card.first, &card.last)
         } else {
             card.name.clone()
         };
@@ -266,15 +294,72 @@ impl Store {
         Ok(())
     }
 
-    /// The groups, by name, with their members (a card's as its name and default address are now)
-    pub fn groups(&self) -> Result<Vec<Group>> {
-        let mut statement = self
-            .db
-            .prepare_cached("SELECT id FROM card_groups ORDER BY name COLLATE NOCASE, id")?;
+    /// Deletes cards from the book (from the groups they are in too) and takes the addresses typed into `group` out
+    /// of it, in one transaction
+    pub fn delete_from_book(&self, group: Option<GroupId>, cards: &[CardId], addresses: &[String]) -> Result<()> {
+        let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
+        for id in cards {
+            self.db.execute("DELETE FROM cards WHERE id = ?1", [id])?;
+        }
+        if let Some(group) = group {
+            for address in addresses {
+                self.db.execute(
+                    "DELETE FROM card_members WHERE group_id = ?1 AND card_id IS NULL AND address = ?2 COLLATE NOCASE",
+                    params![group, address.trim()],
+                )?;
+            }
+        }
+        tx.commit()?;
+        Ok(())
+    }
+
+    /// The groups, by name, with their members (a card's as its name and default address are now); with `filter`,
+    /// those whose name (a word of it) starts with it
+    pub fn groups(&self, filter: &str) -> Result<Vec<Group>> {
+        let (start, word) = filter_patterns(filter);
+        let mut statement = self.db.prepare_cached(
+            "SELECT id FROM card_groups WHERE ?1 = '%' OR name LIKE ?1 ESCAPE '\\' OR name LIKE ?2 ESCAPE '\\' \
+             ORDER BY name COLLATE NOCASE, id",
+        )?;
         let ids: Vec<GroupId> = statement
-            .query_map([], |row| row.get(0))?
+            .query_map(params![start, word], |row| row.get(0))?
             .collect::<rusqlite::Result<_>>()?;
         ids.into_iter().filter_map(|id| self.group(id).transpose()).collect()
+    }
+
+    /// The members of group `id` in their order, each with what their card has now (name, default address, first
+    /// phone, company); with `filter`, those found by it as [`Store::cards`] finds people: the name (a word of it),
+    /// nickname, company or an address of the card, or the name or address typed
+    pub fn group_people(&self, id: GroupId, filter: &str) -> Result<Vec<MemberRow>> {
+        let (start, word) = filter_patterns(filter);
+        let mut statement = self.db.prepare_cached(
+            "SELECT m.card_id, COALESCE(c.name, m.name), \
+             COALESCE((SELECT address FROM card_addresses a WHERE a.card_id = m.card_id ORDER BY position LIMIT 1), \
+             m.address), COALESCE(c.phones, ''), COALESCE(c.company, '') \
+             FROM card_members m LEFT JOIN cards c ON c.id = m.card_id WHERE m.group_id = ?1 AND (?2 = '%' \
+             OR COALESCE(c.name, m.name) LIKE ?2 ESCAPE '\\' OR COALESCE(c.name, m.name) LIKE ?3 ESCAPE '\\' \
+             OR c.nickname LIKE ?2 ESCAPE '\\' OR c.company LIKE ?2 ESCAPE '\\' \
+             OR (m.card_id IS NULL AND m.address LIKE ?2 ESCAPE '\\') \
+             OR m.card_id IN (SELECT card_id FROM card_addresses WHERE address LIKE ?2 ESCAPE '\\')) \
+             ORDER BY m.position",
+        )?;
+        let rows = statement
+            .query_map(params![id, start, word], |row| {
+                let phones: String = row.get(3)?;
+                Ok(MemberRow {
+                    card: row.get(0)?,
+                    name: row.get(1)?,
+                    address: row.get(2)?,
+                    phone: phones_of(&phones)
+                        .into_iter()
+                        .next()
+                        .map(|(_, n)| n)
+                        .unwrap_or_default(),
+                    company: row.get(4)?,
+                })
+            })?
+            .collect::<rusqlite::Result<_>>()?;
+        Ok(rows)
     }
 
     /// A group by its id
@@ -461,6 +546,86 @@ mod tests {
         store.delete_cards(&[mary]).unwrap();
         assert_eq!(store.group(team).unwrap().unwrap().members.len(), 1);
         store.delete_group(team).unwrap();
-        assert!(store.groups().unwrap().is_empty());
+        assert!(store.groups("").unwrap().is_empty());
+    }
+
+    #[test]
+    fn finds_groups_and_their_people() {
+        let store = Store::open_in_memory().unwrap();
+        let mary = store
+            .save_card(&Card {
+                company: "Acme".into(),
+                phones: vec![
+                    ("work".into(), "+1 555 0100".into()),
+                    ("cell".into(), "+1 555 0101".into()),
+                ],
+                ..card("Mary Smith", &["mary@example.com", "m@work.example"])
+            })
+            .unwrap();
+        let typed = |name: &str, address: &str| Member {
+            card: None,
+            name: name.into(),
+            address: address.into(),
+        };
+        let team = store
+            .save_group(&Group {
+                name: "Sales Team".into(),
+                members: vec![
+                    Member {
+                        card: Some(mary),
+                        ..Default::default()
+                    },
+                    typed("Dave", "dave@example.org"),
+                    typed("", "x_y@example.org"),
+                ],
+                ..Default::default()
+            })
+            .unwrap();
+        store
+            .save_group(&Group {
+                name: "Family".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        let names =
+            |filter: &str| -> Vec<String> { store.groups(filter).unwrap().into_iter().map(|g| g.name).collect() };
+        assert_eq!(names(""), ["Family", "Sales Team"]);
+        assert_eq!(names("team"), ["Sales Team"], "a word of the name");
+        assert_eq!(names("fam"), ["Family"]);
+        assert!(names("%").is_empty(), "wildcards taken as themselves");
+
+        let people = store.group_people(team, "").unwrap();
+        assert_eq!(
+            people[0],
+            MemberRow {
+                card: Some(mary),
+                name: "Mary Smith".into(),
+                address: "mary@example.com".into(),
+                phone: "+1 555 0100".into(),
+                company: "Acme".into(),
+            }
+        );
+        assert_eq!(people.len(), 3);
+        let found = |filter: &str| -> Vec<String> {
+            store
+                .group_people(team, filter)
+                .unwrap()
+                .into_iter()
+                .map(|p| p.address)
+                .collect()
+        };
+        assert_eq!(found("smi"), ["mary@example.com"]);
+        assert_eq!(found("acme"), ["mary@example.com"]);
+        assert_eq!(found("m@work"), ["mary@example.com"], "any address of the card");
+        assert_eq!(found("dave"), ["dave@example.org"]);
+        assert_eq!(found("x_"), ["x_y@example.org"]);
+        assert!(found("xay").is_empty(), "_ is itself");
+
+        // deleted: the card out of the book, a typed address out of the group
+        store
+            .delete_from_book(Some(team), &[mary], &["DAVE@example.org".to_string()])
+            .unwrap();
+        assert!(store.card(mary).unwrap().is_none());
+        assert_eq!(found(""), ["x_y@example.org"]);
     }
 }

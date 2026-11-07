@@ -435,7 +435,7 @@ impl Book {
     /// The groups and the people read again, the group selected kept
     pub fn reload(&self) {
         let kept = self.selected_group();
-        let groups = shell().core.groups().unwrap_or_default();
+        let groups = shell().core.groups("").unwrap_or_default();
         self.filling.set(true);
         while let Some(row) = self.groups.first_child() {
             self.groups.remove(&row);
@@ -771,19 +771,10 @@ fn header_bar(find: &gtk::SearchEntry) -> adw::HeaderBar {
 pub fn add_sender(folder: i64, uid: u64) -> Result<String, String> {
     let core = &shell().core;
     match core.add_sender(folder, uid) {
-        Ok((id, new)) => {
-            let name = core
-                .card(id)
-                .ok()
-                .flatten()
-                .map(|card| Person::of_card(&card).shown().to_string())
-                .unwrap_or_default();
+        Ok(done) if done.card == 0 => Err(done.status),
+        Ok(done) => {
             refresh();
-            Ok(if new {
-                t!(UiSenderAdded, name = &name)
-            } else {
-                t!(UiSenderKnown, name = &name)
-            })
+            Ok(done.status)
         }
         Err(pe_core::Error::NotFound) => Err(t!(UiSenderNone)),
         Err(error) => Err(error.to_string()),
@@ -799,24 +790,18 @@ pub async fn import(parent: &gtk::Window) {
     if files.is_empty() {
         return;
     }
-    let (mut added, mut skipped) = (0u64, 0u64);
-    for file in &files {
-        match shell().core.import_cards(file) {
-            Ok(done) => {
-                added += done.added;
-                skipped += done.skipped;
-            }
-            Err(error) => {
-                refresh();
-                let said = t!(UiBookNotImported, reason = &error.to_string());
-                ui::alert(parent, &title, &said).await;
-                return;
-            }
-        }
-    }
+    let done = shell().core.import_cards(&files);
     // the book shows them before the words do
     refresh();
-    ui::alert(parent, &title, &t!(UiBookImported, added = added, skipped = skipped)).await;
+    if !done.failed.is_empty() {
+        let said = t!(UiBookNotImported, reason = &done.failures());
+        ui::alert(parent, &title, &said).await;
+        if done.added + done.skipped == 0 {
+            return;
+        }
+    }
+    let said = t!(UiBookImported, added = done.added, skipped = done.skipped);
+    ui::alert(parent, &title, &said).await;
 }
 
 /// File > Export Address Book: every contact to a vCard file

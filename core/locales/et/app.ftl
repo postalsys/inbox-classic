@@ -513,12 +513,6 @@ ui-pick-add = &Lisa →
 # review: new
 ui-pick-tip = Valige adressaadid aadressiraamatust
 # review: new
-ui-sender-added = { $name } lisati aadressiraamatusse.
-# review: new
-ui-sender-known = { $name } on juba aadressiraamatus.
-# review: new
-ui-sender-none = Selle kirja saatjal pole e-posti aadressi, mida lisada.
-# review: new
 ui-filter-address-books = Aadressiraamatud (vCard, CSV)
 # review: new
 ui-filter-vcard = vCard-failid

@@ -51,7 +51,7 @@ fn items(typed: &str, with_groups: bool) -> Vec<Item> {
     let core = &shell().core;
     let mut found = Vec::new();
     if with_groups {
-        for group in core.groups().unwrap_or_default() {
+        for group in core.groups("").unwrap_or_default() {
             if name_matches(&group.name, typed) {
                 found.push(Item {
                     card: 0,

@@ -375,3 +375,14 @@ secrets-linux = süsteemi võtmehoidja (Secret Service)
 error-no-such-file = sellist faili pole
 # review: new
 cards-file-too-big = See fail on aadressiraamatu jaoks liiga suur.
+# review: new
+ui-sender-added = { $name } lisati aadressiraamatusse.
+# review: new
+ui-sender-known = { $name } on juba aadressiraamatus.
+# review: new
+ui-sender-none = Selle kirja saatjal pole e-posti aadressi, mida lisada.
+# review: new
+card-name-needed = Kontaktil pole nime ega e-posti aadressi.
+# a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
+# review: new
+cards-file-failed = { $file }: { $reason }

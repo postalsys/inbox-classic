@@ -419,8 +419,10 @@ typedef struct PeAgentLogEntry {
 
 // A person of the address book as its list shows them
 typedef struct PeCardRow {
+  // The card; 0 for an address typed into a group (`pe_group_people`), which has no Properties and which Delete
+  // takes out of the group by its `address` (`pe_book_delete`)
   int64_t id;
-  // The name shown (Name column)
+  // The name shown (Name column): the name, or the address of someone without one
   const char *name;
   // The default address (E-mail column), empty for none
   const char *address;
@@ -1123,6 +1125,16 @@ bool pe_agent_log_clear(const struct PeCore *core);
 struct PeCardList *pe_cards(const struct PeCore *core,
                             const char *filter);
 
+// The people of group `id` in their order, as `pe_cards` lists the book's: a card's row as its card is now, an
+// address typed into the group with `id` 0; with `filter` (NULL or empty for all), those found by it as `pe_cards`
+// finds people. NULL when there is no such group or on failure. Free with `pe_card_list_free`.
+//
+// # Safety
+// `core` must be a live handle, `filter` NULL or a NUL-terminated string.
+struct PeCardList *pe_group_people(const struct PeCore *core,
+                                   int64_t id,
+                                   const char *filter);
+
 // # Safety
 // `list` must be NULL or live.
 size_t pe_card_list_count(const struct PeCardList *list);
@@ -1154,8 +1166,9 @@ const struct PeCard *pe_card_info(const struct PeCardView *view);
 void pe_card_free(struct PeCardView *view);
 
 // Saves a card: a new one when its `id` is 0, else in place of card `id` (what a vCard brought that the form does
-// not show is kept). An address that is not one mailbox alone is left out. Its id, or 0 with the reason in `error`
-// (NULL or a pointer to a string to free with `pe_string_free`).
+// not show is kept). An address that is not one mailbox alone is left out. With no name, first or last name the card
+// is known by its default address; one with no address either is refused. Its id, or 0 with the reason in `error`
+// (NULL or a pointer to a string to free with `pe_string_free`), in words for the user.
 //
 // # Safety
 // `core` must be a live handle, `card` a valid card whose strings are NULL or NUL-terminated and whose arrays hold
@@ -1164,17 +1177,35 @@ int64_t pe_card_save(const struct PeCore *core,
                      const struct PeCard *card,
                      char **error);
 
-// Deletes `count` cards (out of the groups they are in too)
+// The display name that follows the first and last name as they are typed (Contact Properties): `Mary Smith`,
+// `Smith`, or empty; what a card saved without a display name gets. Free with `pe_string_free`; NULL on failure.
 //
 // # Safety
-// `core` must be a live handle, `ids` NULL or `count` ids.
-bool pe_cards_delete(const struct PeCore *core, const int64_t *ids, size_t count);
+// `first` and `last` must be NULL or NUL-terminated strings.
+char *pe_book_display_name(const char *first,
+                           const char *last);
 
-// The groups of the address book, by name; NULL on failure
+// Delete of the address book: `count` cards (`ids`) out of the book and the groups they are in, and `address_count`
+// addresses typed into `group` (the `address` of its rows with `id` 0) out of that group; `group` 0 for none.
+// False on failure.
 //
 // # Safety
-// `core` must be a live handle.
-struct PeGroupList *pe_groups(const struct PeCore *core);
+// `core` must be a live handle, `ids` NULL or `count` ids, `addresses` NULL or `address_count` NUL-terminated
+// strings.
+bool pe_book_delete(const struct PeCore *core,
+                    int64_t group,
+                    const int64_t *ids,
+                    size_t count,
+                    const char *const *addresses,
+                    size_t address_count);
+
+// The groups of the address book, by name; with `filter` (NULL or empty for all), those whose name (a word of it)
+// starts with it, as `pe_cards` finds people. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `filter` NULL or a NUL-terminated string.
+struct PeGroupList *pe_groups(const struct PeCore *core,
+                              const char *filter);
 
 // # Safety
 // `list` must be NULL or live.
@@ -1207,7 +1238,7 @@ const struct PeGroup *pe_group_info(const struct PeGroupView *view);
 void pe_group_free(struct PeGroupView *view);
 
 // Saves a group: a new one when its `id` is 0, else in place of group `id`. A member of no card without an address
-// is left out. Its id, or 0 with the reason in `error` (NULL or a pointer to a string to free with
+// is left out, and a card or an address given twice (a card's default address typed again too) is kept once. Its id, or 0 with the reason in `error` (NULL or a pointer to a string to free with
 // `pe_string_free`).
 //
 // # Safety
@@ -1217,6 +1248,21 @@ int64_t pe_group_save(const struct PeCore *core,
                       const struct PeGroup *group,
                       char **error);
 
+// Which of `added_count` members (`added`) go into a group of `count` members (`members`), the way Group Properties
+// adds people: `keep[i]` (an array of `added_count`) true for those not in it yet, a card once and an address once
+// (whether of a card or typed, ignoring case; also against those before it in `added`). Give each member its
+// `address`, a card's its default one. How many to add; 0 with every `keep` false for an argument that can not be
+// read.
+//
+// # Safety
+// `members` and `added` must be NULL or point to `count` and `added_count` members whose strings are NULL or
+// NUL-terminated, `keep` NULL or an array of `added_count`.
+size_t pe_book_members_add(const struct PeMember *members,
+                           size_t count,
+                           const struct PeMember *added,
+                           size_t added_count,
+                           bool *keep);
+
 // Deletes a group (not the people in it)
 //
 // # Safety
@@ -1225,25 +1271,30 @@ bool pe_group_delete(const struct PeCore *core, int64_t id);
 
 // Adds the sender of message `uid` of `folder` to the address book (Add Sender to Address Book): the id of the card
 // that has their address already, or of a new one with their name and address, `added` (when not NULL) true for a
-// new one. 0 when the message is not there or its sender has no address.
+// new one. 0 when the message is not there or its sender has no address. `status` (when not NULL) gets what the
+// status bar says in every case (added, there already, no address to add, or why it failed); free it with
+// `pe_string_free`.
 //
 // # Safety
-// `core` must be a live handle, `added` NULL or a valid pointer.
+// `core` must be a live handle, `added` and `status` NULL or valid pointers.
 int64_t pe_book_add_sender(const struct PeCore *core,
                            int64_t folder,
                            uint64_t uid,
-                           bool *added);
+                           bool *added,
+                           char **status);
 
-// Reads the vCard (`.vcf`) or CSV file at `path` (UTF-8) into the address book (File > Import > Address Book): a
-// card whose addresses are all in the book already is left out. `added` and `skipped` (when not NULL) get the
-// counts. False with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) for a file
-// that can not be read or is too big.
+// Reads the vCard (`.vcf`) and CSV files at `paths` (`count` of them, UTF-8) into the address book (File > Import >
+// Address Book): a card whose addresses are all in the book already is left out. `added` and `skipped` (when not
+// NULL) get the counts of every file read. True when every file was read; false when one could not be (or is too
+// big), the others read all the same, with `error` (NULL or a pointer to a string to free with `pe_string_free`)
+// naming each such file and why, a line each.
 //
 // # Safety
-// `core` must be a live handle, `path` a NUL-terminated string, `added`, `skipped` and `error` NULL or valid
-// pointers.
+// `core` must be a live handle, `paths` NULL or `count` NUL-terminated strings, `added`, `skipped` and `error` NULL
+// or valid pointers.
 bool pe_book_import(const struct PeCore *core,
-                    const char *path,
+                    const char *const *paths,
+                    size_t count,
                     uint64_t *added,
                     uint64_t *skipped,
                     char **error);

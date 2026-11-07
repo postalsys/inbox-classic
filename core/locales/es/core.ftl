@@ -400,3 +400,14 @@ secrets-linux = el llavero del sistema (Secret Service)
 error-no-such-file = ese archivo no existe
 # review: new
 cards-file-too-big = Este archivo es demasiado grande para ser una libreta de direcciones.
+# review: new
+ui-sender-added = { $name } se ha añadido a la libreta de direcciones.
+# review: new
+ui-sender-known = { $name } ya está en la libreta de direcciones.
+# review: new
+ui-sender-none = El remitente de este mensaje no tiene una dirección de correo electrónico que añadir.
+# review: new
+card-name-needed = El contacto no tiene nombre ni dirección de correo electrónico.
+# a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
+# review: new
+cards-file-failed = { $file }: { $reason }
