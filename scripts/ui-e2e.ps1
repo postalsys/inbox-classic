@@ -2114,6 +2114,25 @@ public static class Dragger {
     Command $main $IDM_UNDO
     Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Copy me' } 20)) 'Undo puts it back in the Inbox'
 
+    # ---- empty folder ----
+
+    Step 'empty folder'
+    $IDM_EMPTY_FOLDER = 139; $IDM_SYNC = 102
+    AddMessage "From: Spammer <spam@example.net>`r`nTo: testuser@inboxclassic.test`r`nSubject: Win a prize`r`n`r`nClick.`r`n" @() 'Junk'
+    SelectFolder 4
+    Command $main $IDM_SYNC
+    [void](WaitFor { if ((Rows) -ge 1) { Rows } } 20)
+    Command $main $IDM_EMPTY_FOLDER
+    $sure = WaitWindow '#32770' 'Inbox Classic' 10
+    Check ($null -ne $sure) 'Empty Folder asks first, saying how many go'
+    if ($sure) {
+        Shot $sure 'organize-9-empty'
+        Click $sure 6
+    }
+    Check ($null -ne (WaitFor { if (@(Messages 'Junk').Count -eq 0) { $true } } 20)) 'Junk E-mail is empty on the server'
+    Check ([bool](WaitFor { (Rows) -eq 0 } 10)) 'and in the list'
+    SelectFolder 0
+
     # ---- folders ----
 
     Step 'folders'

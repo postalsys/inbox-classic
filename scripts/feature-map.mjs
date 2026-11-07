@@ -482,6 +482,13 @@ const sections = [
                 ]
             },
             {
+                shot: 'organize-9-empty',
+                name: 'Empty Deleted Items and Junk E-mail',
+                what: 'Deleted Items and Junk E-mail can be emptied: every message in them deleted for good, after a question that says how many go. It can not be undone, and AI agents can not do it.',
+                how: 'File > Folder > Empty Folder, or the right-click menu of Deleted Items or Junk E-mail.',
+                checked: ['Empty Folder asks first, saying how many go', 'Junk E-mail is empty on the server and in the list']
+            },
+            {
                 shot: 'organize-5-all-read',
                 name: 'Mark All Read',
                 what: 'Marks every message of a folder read at once: in the list right away, on the server with one command.',

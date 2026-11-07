@@ -285,8 +285,8 @@ final class UITest {
         (await findMessage("INBOX", pattern)?["flags"] as? [String])?.contains("\\Seen") ?? false
     }
 
-    func addMessage(_ raw: String, flags: [String] = [], at server: String? = nil) async throws {
-        var request = URLRequest(url: URL(string: "\(server ?? rest)/INBOX/messages")!)
+    func addMessage(_ raw: String, flags: [String] = [], at server: String? = nil, to mailbox: String = "INBOX") async throws {
+        var request = URLRequest(url: URL(string: "\(server ?? rest)/\(mailbox)/messages")!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: ["raw": raw, "flags": flags])

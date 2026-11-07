@@ -462,6 +462,22 @@ extension UITest {
         await shot(main.window, "organize-8-archive")
         command(.undo)
         check(await waitFor(20) { await findMessage("INBOX", pattern) } != nil, "Undo puts it back in the Inbox")
+
+        step("empty folder")
+        try await addMessage("From: Spammer <spam@example.net>\r\nTo: testuser@inboxclassic.test\r\nSubject: Win a prize\r\n\r\nClick.\r\n",
+                             to: "Junk")
+        selectFolder(named: "Junk E-mail")
+        command(.sync)
+        _ = await waitUntil(20) { list.numberOfRows >= 1 }
+        check(main.mailbox.canEmptyFolder, "Empty Folder is on in Junk E-mail")
+        command(.emptyFolder)
+        let emptying = await waitWindow("alert", 10)
+        check(emptying != nil, "Empty Folder asks first, saying how many go")
+        await shot(emptying, "organize-9-empty")
+        answer(emptying, Text.uiEmptyButton.text)
+        check(await waitUntil(20) { await findMessage("Junk", "Subject: Win a prize") == nil }, "Junk E-mail is empty on the server")
+        check(await waitUntil(10) { list.numberOfRows == 0 }, "and in the list")
+        selectFolder(named: "Inbox")
     }
 
     // ---- several messages ----
