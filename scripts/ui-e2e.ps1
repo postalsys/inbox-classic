@@ -2865,11 +2865,14 @@ public static class Dragger {
         if ($contact) {
             SetText $contact $IDC_CONTACT_FIRST 'Mary'
             SetText $contact $IDC_CONTACT_LAST 'Smith'
+            # Click only posts the press: each address is in the list before the next is typed, or the first Add
+            # would read the second address
+            $addresses = [Native.Win]::GetDlgItem($contact, $IDC_CONTACT_ADDRESSES)
             SetText $contact $IDC_CONTACT_ADDRESS 'mary@example.com'
             Click $contact $IDC_CONTACT_ADD
+            [void](WaitFor { (ListBoxCount $addresses) -eq 1 } 5)
             SetText $contact $IDC_CONTACT_ADDRESS 'mary.smith@work.example'
             Click $contact $IDC_CONTACT_ADD
-            $addresses = [Native.Win]::GetDlgItem($contact, $IDC_CONTACT_ADDRESSES)
             Check ([bool](WaitFor { (ListBoxCount $addresses) -eq 2 } 5)) 'it takes two addresses'
             Check ((ListBoxText $addresses 0) -eq 'mary@example.com (default)' -and (ListBoxText $addresses 1) -eq 'mary.smith@work.example') "the first the default ($(ListBoxText $addresses 0); $(ListBoxText $addresses 1))"
             Shot $contact 'contacts-2-person'
