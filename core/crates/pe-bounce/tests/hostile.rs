@@ -232,3 +232,15 @@ fn a_report_of_many_fields_and_recipients_is_read_in_linear_time() {
     assert_eq!(d.recipient.as_deref(), Some("a"));
     assert_linear("fields and recipients", |n| build(n / 12, n / 30));
 }
+
+#[test]
+fn a_report_of_thousands_of_recipients_lists_at_most_the_cap() {
+    let mut report = String::new();
+    for i in 0..1000 {
+        report.push_str(&format!(
+            "\nFinal-Recipient: rfc822; user{i}@example.com\nAction: failed\nStatus: 5.1.1\n"
+        ));
+    }
+    let bounce = pe_bounce::analyze(&report_with_text("x", &report)).expect("a bounce");
+    assert_eq!(bounce.recipients.len(), pe_bounce::MAX_RECIPIENTS);
+}
