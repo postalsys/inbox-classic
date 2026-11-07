@@ -1202,7 +1202,17 @@ public final class Mailbox: NSObject {
         menu.addItem(.separator())
         add(.viewSource, Text.uiMenuViewSource.text)
         add(.properties)
+        if message != nil {
+            menu.addItem(.separator())
+            add(.addSenderToBook)
+        }
         return menu
+    }
+
+    /// Add Sender to Address Book for the message shown, what was done in the status bar
+    func addSenderToBook() {
+        guard uid != 0 else { return }
+        status(addSenderToAddressBook(core: core, folder: messageFolder, uid: uid))
     }
 
     func printShown() {

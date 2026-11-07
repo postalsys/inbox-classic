@@ -217,6 +217,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .saveAs: mailbox?.saveMessageAs(folder: folder, uid: uid)
         case .properties: mailbox?.showProperties(folder: folder, uid: uid, subject: reader.subject)
         case .viewSource: mailbox?.showSource(folder: folder, uid: uid)
+        case .addSenderToBook: mailbox?.status(addSenderToAddressBook(core: core, folder: folder, uid: uid))
         default: return false
         }
         return true
@@ -227,7 +228,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         let shown = reader.messageView != nil
         switch command {
         case .reply, .replyAll, .forward, .print: return shown
-        case .delete, .markRead, .markUnread, .flag, .saveAs, .properties, .viewSource: return true
+        case .delete, .markRead, .markUnread, .flag, .saveAs, .properties, .viewSource, .addSenderToBook: return true
         case .archive: return summary.archivable
         case .junk: return !summary.in_junk
         case .notJunk: return summary.in_junk

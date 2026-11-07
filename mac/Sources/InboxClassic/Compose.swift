@@ -365,10 +365,21 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             label.alignment = .right
             return label
         }
+        // To, Cc and Bcc are buttons that open Select Recipients, as in Outlook Express
+        let pick = { (text: String, index: Int, id: String) -> NSButton in
+            let button = NSButton(title: text, target: self, action: #selector(self.pickRecipients(_:)))
+            button.bezelStyle = .push
+            button.controlSize = .small
+            button.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+            button.tag = index
+            button.toolTip = Text.uiPickTip.text
+            button.setAccessibilityIdentifier(id)
+            return button
+        }
         grid.addRow(with: [label(Text.uiFieldFrom.text), from])
-        grid.addRow(with: [label(Text.uiFieldTo.text), toRow])
-        grid.addRow(with: [label(Text.uiFieldCc.text), cc])
-        grid.addRow(with: [label(Text.uiFieldBcc.text), bcc])
+        grid.addRow(with: [pick(Text.uiFieldTo.text, 0, "compose.pick.to"), toRow])
+        grid.addRow(with: [pick(Text.uiFieldCc.text, 1, "compose.pick.cc"), cc])
+        grid.addRow(with: [pick(Text.uiFieldBcc.text, 2, "compose.pick.bcc"), bcc])
         grid.addRow(with: [label(Text.uiFieldSubject.text), subject])
         grid.addRow(with: [label(Text.uiFieldAttach.text), attached])
         grid.column(at: 0).xPlacement = .trailing
@@ -410,6 +421,27 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         ])
         window.setContentBorderThickness(26, for: .minY)
         return content
+    }
+
+    /// To, Cc or Bcc: Select Recipients, what is chosen added to the fields
+    @objc private func pickRecipients(_ sender: NSButton) {
+        guard let chosen = PeoplePicker(core: core, kind: .recipients).run(on: window) else { return }
+        for (index, entries) in chosen.enumerated() where !entries.isEmpty {
+            addRecipients(entries.map(\.label).filter { !$0.isEmpty }.joined(separator: ", "), field: index)
+        }
+    }
+
+    /// `labels` (people and groups as they go in an address field) added to To (0), Cc (1) or Bcc (2), each address
+    /// once; Cc and Bcc shown when they get some
+    func addRecipients(_ labels: String, field index: Int) {
+        guard !labels.isEmpty else { return }
+        let field = [to, cc, bcc][index]
+        field.stringValue = addressFieldAdding(field.stringValue, labels)
+        if index > 0 {
+            grid.row(at: index + 1).isHidden = false
+            (index == 1 ? ccButton : bccButton).isHidden = true
+        }
+        changed()
     }
 
     @objc private func showCcRow() {
@@ -824,14 +856,28 @@ final class AddressField: NSTextField {
         return NSRange(location: start, length: caret - start)
     }
 
-    /// the people for `typed`, as the core finds them
+    /// what the list shows for a group of the address book, and what choosing it puts in the field: its members
+    private var groupLabels: [String: String] = [:]
+
+    /// the people (and groups) for `typed`, as the core finds them; a group by its name, with the group symbol
     @MainActor
     func people(_ typed: String) -> [String] {
         // a whole address typed with its brackets is not looked up again
         guard let core, !typed.isEmpty, !typed.contains("<") else { return [] }
         guard let list = typed.withCString({ pe_contacts(core.handle, $0, 8) }) else { return [] }
         defer { pe_contact_list_free(list) }
-        return (0..<pe_contact_list_count(list)).compactMap { pe_contact_list_get(list, $0).map { text($0.pointee.label) } }
+        groupLabels = [:]
+        return (0..<pe_contact_list_count(list)).compactMap { pe_contact_list_get(list, $0)?.pointee }.map { contact in
+            guard contact.group else { return text(contact.label) }
+            let shown = "\u{1F465} " + text(contact.name)
+            groupLabels[shown] = text(contact.label)
+            return shown
+        }
+    }
+
+    /// what a choice of the list puts in the field: a group's members, else what it shows
+    func inserted(_ word: String) -> String {
+        groupLabels[word] ?? word
     }
 }
 
@@ -872,6 +918,8 @@ final class AddressEditor: NSTextView {
     override func insertCompletion(_ word: String, forPartialWordRange range: NSRange, movement: Int, isFinal flag: Bool) {
         let taken = flag && (movement == NSTextMovement.return.rawValue || movement == NSTextMovement.tab.rawValue)
         let atEnd = NSMaxRange(range) >= (string as NSString).length
+        // a group of the address book goes in as its members
+        let word = ((delegate as AnyObject?) as? AddressField)?.inserted(word) ?? word
         super.insertCompletion(word + (taken && atEnd ? ", " : ""), forPartialWordRange: range, movement: movement, isFinal: flag)
     }
 }

@@ -440,6 +440,7 @@ final class UITest {
         try await folders()
         try await writingMore()
         try await signature()
+        try await addressBook()
         try await accountTrouble()
         try await allInboxes()
         try await betweenAccounts()

@@ -1454,4 +1454,215 @@ extension UITest {
             _ = await waitUntil { !outbox.isVisible }
         }
     }
+
+    // ---- the Address Book ----
+
+    /// the people the Address Book lists, by name
+    func bookNames(_ book: AddressBookWindow) -> [String] {
+        book.rows.map(\.title)
+    }
+
+    func addressBook() async throws {
+        step("the Address Book")
+        command(.addressBook)
+        guard let bookWindow = await waitWindow("addressbook", 10), let book = AddressBookWindow.shown else {
+            throw Failed(description: "no Address Book")
+        }
+        await pause(0.5)
+        let groupsWidth = book.groupList.enclosingScrollView?.frame.width ?? 0
+        check(groupsWidth > 150 && groupsWidth < 260, "the groups take a narrow column at the left (\(groupsWidth) of \(bookWindow.frame.width))")
+        let bookToolbar = bookWindow.toolbar?.items.map(\.itemIdentifier.rawValue) ?? []
+        check(book.rows.isEmpty && (find("book.empty", in: bookWindow) as NSTextField?)?.isHidden == false,
+              "Tools > Address Book opens the Address Book, empty")
+        check(["book.newContact", "book.newGroup", "book.properties", "book.delete", "book.writeTo", "book.search"]
+            .allSatisfy(bookToolbar.contains), "with New Contact, New Group, Properties, Delete, Write To and the find box")
+        check(Command.addressBook.key?.0 == "b" && Command.addressBook.key?.1 == [.command, .shift], "Shift-Command-B opens it")
+
+        // a contact with two addresses
+        onMain { book.newContact() }
+        guard let person = await waitWindow("contact", 10) else { throw Failed(description: "no Contact Properties") }
+        check(person.title == "New Contact", "New Contact opens Contact Properties (\(person.title))")
+        type("Mary", into: find("contact.first", in: person))
+        type("Smith", into: find("contact.last", in: person))
+        check((find("contact.display", in: person) as NSTextField?)?.stringValue == "Mary Smith", "the name shown follows the first and last name")
+        type("mary@example.com", into: find("contact.address", in: person))
+        press(find("contact.add", in: person))
+        await pause(0.3)
+        type("mary.smith@work.example", into: find("contact.address", in: person))
+        press(find("contact.add", in: person))
+        await pause(0.3)
+        type("+1 555 0100", into: find("contact.phone", in: person))
+        press(find("contact.phone.add", in: person))
+        await pause(0.3)
+        let personAddresses: NSTableView? = find("contact.addresses", in: person)
+        check(personAddresses?.numberOfRows == 2, "with two addresses, mary@example.com the default")
+        await shot(person, "contacts-2-person")
+        press(find("contact.ok", in: person))
+        check(await waitUntil(10) { !person.isVisible }, "OK saves the contact")
+        check(book.rows.count == 1 && book.rows.first?.title == "Mary Smith" && book.rows.first?.address == "mary@example.com"
+              && book.rows.first?.phone == "+1 555 0100", "and the book lists it: Mary Smith, mary@example.com")
+        let mary = book.rows.first?.card ?? 0
+        check(core().bookCard(mary)?.addresses == ["mary@example.com", "mary.smith@work.example"], "both addresses kept, the first the default")
+        book.find("smi")
+        check(bookNames(book) == ["Mary Smith"], "the find box finds her by \"smi\"")
+        book.find("zed")
+        check(book.rows.isEmpty && (find("book.empty", in: bookWindow) as NSTextField?)?.stringValue.contains("zed") == true,
+              "and lists no one for \"zed\"")
+        book.find("")
+
+        // a group of her and a typed address
+        onMain { book.newGroup() }
+        guard let groupSheet = await waitWindow("group", 10) else { throw Failed(description: "no Group Properties") }
+        check(groupSheet.title == "New Group", "New Group opens Group Properties")
+        type("Team", into: find("group.name", in: groupSheet))
+        press(find("group.select", in: groupSheet))
+        guard let members = await waitWindow("pick", 10) else { throw Failed(description: "no Select Group Members") }
+        check(members.title == "Select Group Members", "Select Members opens the book's people")
+        let memberSource: NSTableView? = find("pick.list", in: members)
+        memberSource?.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        press(find("pick.add", in: members))
+        await pause(0.3)
+        press(find("pick.ok", in: members))
+        _ = await waitUntil(10) { !members.isVisible }
+        type("dave@example.com", into: find("group.address", in: groupSheet))
+        press(find("group.add", in: groupSheet))
+        await pause(0.3)
+        let groupMembers: NSTableView? = find("group.members", in: groupSheet)
+        check(groupMembers?.numberOfRows == 2, "with Mary Smith from Select Members and dave@example.com typed")
+        await shot(groupSheet, "contacts-3-group")
+        press(find("group.ok", in: groupSheet))
+        check(await waitUntil(10) { !groupSheet.isVisible }, "OK saves the group")
+        check(book.groups.count == 1 && book.groups.first?.name == "Team" && book.groups.first?.count == 2,
+              "and it is listed on the left with its two members")
+        check(book.selectedGroup?.name == "Team" && Set(bookNames(book)) == ["Mary Smith", "dave@example.com"],
+              "selected, it lists its members")
+        onMain { book.groupList.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false) }
+        await pause(0.3)
+        book.people.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        bookWindow.makeFirstResponder(book.people)
+        await shot(bookWindow, "contacts-1-book")
+
+        // Select Recipients in a new message
+        command(.newMail)
+        guard let picking = await waitCompose() else { throw Failed(description: "no compose window") }
+        let pickTo: NSButton? = find("compose.pick.to", in: picking)
+        check(pickTo != nil, "the To label of a message is a button")
+        press(pickTo)
+        guard let picker = await waitWindow("pick", 10) else { throw Failed(description: "no Select Recipients") }
+        check(picker.title == "Select Recipients", "To opens Select Recipients")
+        let pickSource: NSTableView? = find("pick.list", in: picker)
+        let pickerNames = (0..<(pickSource?.numberOfRows ?? 0)).compactMap {
+            ((pickSource?.view(atColumn: 0, row: $0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue)
+        }
+        check(pickerNames == ["Team", "Mary Smith"], "it lists the group and the contact (\(pickerNames))")
+        pickSource?.selectRowIndexes(IndexSet([0, 1]), byExtendingSelection: false)
+        press(find("pick.to", in: picker))
+        await pause(0.3)
+        let pickedTo: NSTableView? = find("pick.chosen.to", in: picker)
+        check(pickedTo?.numberOfRows == 2, "To -> puts them in the message's recipients")
+        await shot(picker, "contacts-4-pick")
+        press(find("pick.ok", in: picker))
+        _ = await waitUntil(10) { !picker.isVisible }
+        let pickedField = field("compose.to", picking)?.stringValue ?? ""
+        check(pickedField == "Mary Smith <mary@example.com>, dave@example.com",
+              "OK puts them in To, each address once (\(pickedField))")
+        // a group completes by its name
+        let ccField = field("compose.cc", picking) as? AddressField
+        let offered = ccField?.people("tea") ?? []
+        check(offered.first?.hasSuffix("Team") == true, "typing \"tea\" offers the group by its name (\(offered))")
+        press(find("compose.show-cc", in: picking))
+        await pause(0.3)
+        if let editor = ccField?.currentEditor() as? NSTextView {
+            editor.insertText("tea", replacementRange: editor.selectedRange())
+            onMain { editor.complete(nil) }
+            await pause(1)
+        }
+        let ccText = ccField?.stringValue ?? ""
+        check(ccText.hasPrefix("Mary Smith <mary@example.com>, dave@example.com"), "taking it puts its members in Cc (\(ccText))")
+        await closeWithoutSaving(picking)
+
+        // Add Sender to Address Book
+        bookWindow.orderOut(nil)
+        main.window.makeKeyAndOrderFront(nil)
+        selectFolder(named: "Inbox")
+        _ = await waitUntil { list.numberOfRows > 0 }
+        let senderRow = (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == "October newsletter" }
+            ?? (0..<list.numberOfRows).first { !(main.mailbox.row($0)?.fromAddress ?? "").isEmpty } ?? 0
+        await selectRow(senderRow)
+        let sender = main.mailbox.row(senderRow)
+        let senderName = sender?.from ?? ""
+        let senderAddress = sender?.fromAddress ?? ""
+        let rightClick = main.mailbox.messageMenu()?.items.map(\.title) ?? []
+        check(rightClick.contains("Add Sender to Address Book"), "the message list's right-click menu has Add Sender to Address Book")
+        command(.addSenderToBook)
+        let statusLabel: NSTextField? = find("status.text", in: main.window)
+        check(await waitUntil(5) { statusLabel?.stringValue.hasSuffix("was added to the Address Book.") == true },
+              "Add Sender adds \(senderName) (\(statusLabel?.stringValue ?? ""))")
+        check(core().bookCards().contains { $0.address == senderAddress }, "with the address \(senderAddress)")
+        command(.addSenderToBook)
+        check(await waitUntil(5) { statusLabel?.stringValue.hasSuffix("is already in the Address Book.") == true },
+              "and again says the sender is in the Address Book already (\(statusLabel?.stringValue ?? ""))")
+        check(core().bookCards().filter { $0.address == senderAddress }.count == 1, "without a second card")
+
+        // import and export
+        let vcf = out.appendingPathComponent("contacts.vcf")
+        try "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Mary Smith\r\nN:Smith;Mary;;;\r\nEMAIL:mary@example.com\r\nEND:VCARD\r\n"
+            .appending("BEGIN:VCARD\r\nVERSION:3.0\r\nFN:John Doe\r\nN:Doe;John;;;\r\nEMAIL:john@example.org\r\nEND:VCARD\r\n")
+            .write(to: vcf, atomically: true, encoding: .utf8)
+        TestHooks.open = { _ in [vcf] }
+        command(.importAddressBook)
+        let imported = await waitWindow("alert", 10)
+        let importedText = alertText(imported)
+        check(importedText.contains("Added 1 contact, skipped 1 already in the Address Book."),
+              "File > Import Address Book adds 1 and skips 1 (\(importedText))")
+        answer(imported, "OK")
+        TestHooks.open = nil
+        _ = await waitUntil(5) { window("alert") == nil }
+        command(.addressBook)
+        _ = await waitUntil(5) { bookWindow.isVisible }
+        onMain { book.groupList.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false) }
+        await pause(0.5)
+        let afterImport = bookNames(book)
+        check(afterImport.contains("John Doe") && afterImport.contains("Mary Smith") && afterImport.contains(senderName),
+              "and the book lists John Doe beside Mary Smith and \(senderName) (\(afterImport))")
+        if let john = book.rows.firstIndex(where: { $0.title == "John Doe" }) {
+            book.people.selectRowIndexes(IndexSet(integer: john), byExtendingSelection: false)
+        }
+        await shot(bookWindow, "contacts-5-import")
+        let exported = out.appendingPathComponent("exported.vcf")
+        try? FileManager.default.removeItem(at: exported)
+        var exportName: String?
+        TestHooks.save = { name in
+            exportName = name
+            return exported
+        }
+        command(.exportAddressBook)
+        let exportSaid = await waitWindow("alert", 10)
+        let exportText = alertText(exportSaid)
+        check(exportName == "Address Book.vcf" && exportText.contains("3 contacts saved to exported.vcf"),
+              "File > Export Address Book writes a vCard file (\(exportText))")
+        answer(exportSaid, "OK")
+        TestHooks.save = nil
+        let card = (try? String(contentsOf: exported, encoding: .utf8)) ?? ""
+        check(card.contains("Mary Smith") && card.contains("John Doe") && card.contains(senderAddress),
+              "with Mary Smith, John Doe and \(senderName) in it")
+        _ = await waitUntil(5) { window("alert") == nil }
+
+        // Delete asks first
+        bookWindow.makeKeyAndOrderFront(nil)
+        if let john = book.rows.firstIndex(where: { $0.title == "John Doe" }) {
+            book.people.selectRowIndexes(IndexSet(integer: john), byExtendingSelection: false)
+        }
+        bookWindow.makeFirstResponder(book.people)
+        onMain { book.deleteSelected() }
+        let sure = await waitWindow("alert", 10)
+        check(alertText(sure).contains("Delete this contact from the Address Book?"), "Delete asks first")
+        answer(sure, "Delete")
+        check(await waitUntil(5) { !bookNames(book).contains("John Doe") && bookNames(book).contains("Mary Smith") },
+              "then removes the selected contact")
+        onMain { bookWindow.performClose(nil) }
+        _ = await waitUntil(5) { !bookWindow.isVisible }
+    }
+
+    func core() -> Core { main.core }
 }
