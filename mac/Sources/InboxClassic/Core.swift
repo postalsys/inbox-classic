@@ -187,6 +187,11 @@ final class Core {
         return (total, unread)
     }
 
+    /// whether the list names whom its messages went to (Sent Items, Drafts): the person column is then To
+    func listsRecipients(_ search: Search) -> Bool {
+        search.with { pe_lists_recipients(handle, $0) }
+    }
+
     func messages(_ search: Search, sort: PeSortField, ascending: Bool, offset: UInt64, limit: UInt64) -> [Message] {
         search.with { search in
             guard let list = pe_messages(handle, search, sort, ascending, offset, limit) else { return [] }

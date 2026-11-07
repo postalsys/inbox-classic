@@ -60,6 +60,8 @@ public final class Mailbox: NSObject {
     private var pages: [(offset: UInt64, rows: [Message])] = []
     private let pageSize: UInt64 = 100
     private var folderColumn = false
+    /// Sent Items and Drafts: the person column is To, with the recipients
+    private var recipientsColumn = false
 
     // the message shown
     private var messageFolder: Int64 = 0
@@ -386,7 +388,7 @@ public final class Mailbox: NSObject {
         promiseWriter.wrote = { [weak self] dir, problem in self?.wroteFile(dir, problem) }
         let columns: [(ColumnID, String, CGFloat)] = [
             // no envelope column: bold says a message is unread, and From and Subject get the room
-            (.attach, "", 22), (.flag, "", 22), (.from, Text.headerFrom.text, 200), (.subject, Text.headerSubject.text, 342),
+            (.attach, "", 22), (.flag, "", 22), (.from, Text.uiColFrom.text, 200), (.subject, Text.headerSubject.text, 342),
             (.received, Text.uiColReceived.text, 130), (.size, Text.uiColSize.text, 96),
         ]
         for (id, title, width) in columns {
@@ -446,6 +448,18 @@ public final class Mailbox: NSObject {
         }
     }
 
+    /// From, or To in Sent Items and Drafts (the core says which, and sorts a From sort by the recipients there): its
+    /// title and its values follow, and the date column is Sent there, as Outlook Express names it
+    private func showPersonColumn() {
+        let wanted = core.listsRecipients(search)
+        guard wanted != recipientsColumn else { return }
+        recipientsColumn = wanted
+        for (id, title) in [(ColumnID.from, wanted ? Text.uiColTo : Text.uiColFrom),
+                            (ColumnID.received, wanted ? Text.uiColSent : Text.uiColReceived)] {
+            list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id.rawValue))?.title = title.text
+        }
+    }
+
     /// the folder of a row in a list of several folders: its name, with its account's when there are several accounts;
     /// in All Inboxes the account alone, as the tree names it
     private func rowFolder(_ id: Int64) -> String {
@@ -465,6 +479,7 @@ public final class Mailbox: NSObject {
         total = 0
         unread = 0
         showFolderColumn()
+        showPersonColumn()
         // the counts of the folder come from its indexes; a search and All Inboxes count what they find; an account
         // lists nothing
         if severalFolders {
@@ -1581,7 +1596,7 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? TextCell) ?? TextCell(id)
             let value: String
             switch ColumnID(rawValue: id.rawValue) {
-            case .from: value = message.from
+            case .from: value = recipientsColumn ? message.recipients : message.from
             case .subject: value = message.subject
             case .received: value = message.date.map(formatDate) ?? ""
             case .size: value = formatSize(message.size)
