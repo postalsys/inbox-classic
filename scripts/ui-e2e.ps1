@@ -2399,6 +2399,8 @@ public static class Dragger {
     Shot $main 'threads-4-watch'
     # a reply to it while the window is minimized: announced as a watched conversation
     [void](Notified '')
+    $toolbarHeight = { $r = New-Object Native.Win+RECT; [void][Native.Win]::GetWindowRect($toolbar, [ref]$r); $r.Bottom - $r.Top }
+    $tallBefore = & $toolbarHeight
     Minimize
     $coast += 'coast4@example.com'
     AddMessage ("From: Dan <dan@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: $topic`r`n" +
@@ -2407,6 +2409,7 @@ public static class Dragger {
     Command $main $IDM_SYNC
     Check ([bool](WaitFor { Notified 'Watched conversation' } 30)) 'a new reply to it is announced as a watched conversation'
     Restore
+    Check ([bool](WaitFor { (& $toolbarHeight) -eq $tallBefore } 5)) "minimized and restored, the toolbar keeps its labels ($(& $toolbarHeight), was $tallBefore)"
     SelectRow (& $coastRow)
     Command $main $IDM_WATCH_CONVERSATION
     Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Stopped watching' } 10)) "Watch Conversation again stops watching it ($(StatusPart $mainStatus 0))"

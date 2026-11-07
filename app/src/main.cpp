@@ -699,6 +699,9 @@ void Layout() {
     RECT bar;
     GetClientRect(g_toolbar, &bar);
     FitToolbar(bar);
+    // measured again with the buttons that are shown now: a bar autosized while all were hidden has no label row
+    SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
+    GetClientRect(g_toolbar, &bar);
     MoveWindow(g_folderBar, 0, bar.bottom, bar.right, FolderBarHeight(), TRUE);
     SendMessageW(g_status, WM_SIZE, 0, 0);
     Panes panes = Measure();
@@ -1362,7 +1365,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         g_exiting = true;
         return TRUE;
     case WM_SIZE:
-        Layout();
+        // minimized, the window has no width: fitting the toolbar to it would hide every button
+        if (wParam != SIZE_MINIMIZED) {
+            Layout();
+        }
         return 0;
     case WM_SETCURSOR: {
         if (g_mailbox.OnSetCursor(reinterpret_cast<HWND>(wParam))) {
