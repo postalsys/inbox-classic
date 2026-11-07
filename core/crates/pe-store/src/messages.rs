@@ -149,6 +149,9 @@ pub enum SortField {
     Date,
     Received,
     From,
+    /// The recipients, as Sent Items and Drafts list them: the core turns a From sort into this one there. No index:
+    /// those folders are small, and one would cost a write for every message of every folder.
+    To,
     Subject,
     Size,
 }
@@ -166,6 +169,7 @@ impl Sort {
             SortField::Date => "COALESCE(date, internal_date)",
             SortField::Received => "internal_date",
             SortField::From => "(CASE from_name WHEN '' THEN from_address ELSE from_name END) COLLATE NOCASE",
+            SortField::To => "recipients COLLATE NOCASE",
             SortField::Subject => "subject COLLATE NOCASE",
             SortField::Size => "size",
         };

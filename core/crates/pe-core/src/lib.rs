@@ -555,6 +555,7 @@ impl Core {
 
     /// A page of what `search` finds (Gmail's syntax, see [`pe_store::Query`]), in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
+        let sort = self.list_sort(search, sort)?;
         Ok(self.store().search(search, sort, offset, limit)?)
     }
 
@@ -565,7 +566,38 @@ impl Core {
 
     /// Where the message `uid` of `folder` is in what [`Core::search`] finds
     pub fn search_index(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<u64>> {
+        let sort = self.list_sort(search, sort)?;
         Ok(self.store().search_index(search, sort, folder, uid)?)
+    }
+
+    /// Whether the list of `search` names whom its messages went to rather than who sent them, as Sent Items and
+    /// Drafts do; a search's results and All Inboxes name the sender. Its person column is then To, and a From sort
+    /// is by the recipients.
+    pub fn lists_recipients(&self, search: &Search) -> Result<bool> {
+        use pe_imap::SpecialUse;
+        let Scope::Folder(folder) = search.scope else {
+            return Ok(false);
+        };
+        if !search.text.trim().is_empty() {
+            return Ok(false);
+        }
+        let special = self.store().folder(folder)?.info.special_use;
+        Ok(matches!(
+            special.as_deref().and_then(SpecialUse::from_flag),
+            Some(SpecialUse::Sent | SpecialUse::Drafts)
+        ))
+    }
+
+    /// `sort` as the list of `search` means it: by the person column, which is the recipients where
+    /// [`Core::lists_recipients`]
+    pub(crate) fn list_sort(&self, search: &Search, sort: Sort) -> Result<Sort> {
+        if sort.field == pe_store::SortField::From && self.lists_recipients(search)? {
+            return Ok(Sort {
+                field: pe_store::SortField::To,
+                ..sort
+            });
+        }
+        Ok(sort)
     }
 
     /// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it; `None` for every

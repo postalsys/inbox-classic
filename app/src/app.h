@@ -72,6 +72,7 @@ struct FormField {
 
 // a column of a report list view, `width` at 96 DPI
 void AddColumn(HWND list, int index, const wchar_t* name, int width, int format = LVCFMT_LEFT);
+void SetColumnTitle(HWND list, int index, const std::wstring& title);
 // the list of a dialog (Accounts, Outbox): one row selected at a time, full rows, columns that do not sort
 HWND CreateReportList(HWND parent, int id, const RECT& bounds);
 // a row with the text of its first column; its index
@@ -480,6 +481,7 @@ private:
     // whether the list has what words typed found, in every folder (with a Folder column), rather than a folder
     bool Searching() const;
     void ShowFolderColumn();
+    void ShowPersonColumn(const PeSearch& search);
     std::wstring RowFolder(int64_t folder) const;
     const PeMessage* Row(int index);
     const PeMessage* SelectedRow();
@@ -673,6 +675,8 @@ private:
     HWND findEdit_ = nullptr;
     HWND findClear_ = nullptr;
     bool folderColumn_ = false;
+    // Sent Items and Drafts: the person column is To, with the recipients
+    bool recipientsColumn_ = false;
     int64_t folder_ = 0;
     uint64_t total_ = 0;
     uint64_t unread_ = 0;

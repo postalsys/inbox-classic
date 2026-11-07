@@ -163,6 +163,8 @@ pub struct MessageList {
     /// The sort being set from here (not by a click on a header)
     sorting: Cell<bool>,
     sort: Cell<Sort>,
+    /// Sent Items and Drafts: the person column is To, with the recipients (the core says when)
+    recipients: Rc<Cell<bool>>,
 }
 
 impl MessageList {
@@ -176,7 +178,15 @@ impl MessageList {
         // no read/unread column: an unread message is bold, which says it; its space is the sender's and the subject's
         view.append_column(&icon_column(|m| m.info.has_attachments.then_some("ic-attach-symbolic")));
         view.append_column(&flag_column());
-        let from = text_column(&t!(UiColFrom), 200, false, 0.0, |m| m.info.sender().to_string());
+        let recipients = Rc::new(Cell::new(false));
+        let shows = recipients.clone();
+        let from = text_column(&t!(UiColFrom), 200, false, 0.0, move |m| {
+            if shows.get() {
+                m.info.recipients.clone()
+            } else {
+                m.info.sender().to_string()
+            }
+        });
         let subject = text_column(&t!(UiColSubject), SUBJECT_WIDTH, true, 0.0, |m| m.info.subject.clone());
         let received = text_column(&t!(UiColReceived), 130, false, 0.0, |m| {
             m.info.display_date().map(crate::ui::format_date).unwrap_or_default()
@@ -209,6 +219,7 @@ impl MessageList {
             },
             sorting: Cell::new(false),
             sort: Cell::new(Sort::default()),
+            recipients,
         })
     }
 
@@ -255,7 +266,7 @@ impl MessageList {
 
     fn column_of(&self, field: SortField) -> gtk::ColumnViewColumn {
         match field {
-            SortField::From => self.columns.from.clone(),
+            SortField::From | SortField::To => self.columns.from.clone(),
             SortField::Subject => self.columns.subject.clone(),
             SortField::Size => self.columns.size.clone(),
             SortField::Date | SortField::Received => self.columns.received.clone(),
@@ -279,6 +290,30 @@ impl MessageList {
         } else {
             SUBJECT_WIDTH
         });
+    }
+
+    /// From, or To with the recipients when `recipients` (Sent Items and Drafts; the core sorts a From sort by the
+    /// recipients there): its title follows, and the date column is Sent there, as Outlook Express names it
+    pub fn show_person_column(&self, recipients: bool) {
+        if self.recipients.replace(recipients) == recipients {
+            return;
+        }
+        let (person, date) = if recipients {
+            (t!(UiColTo), t!(UiColSent))
+        } else {
+            (t!(UiColFrom), t!(UiColReceived))
+        };
+        self.columns.from.set_title(Some(&person));
+        self.columns.received.set_title(Some(&date));
+    }
+
+    /// The person column's title, and whether it lists the recipients (for the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn person_column(&self) -> (String, bool) {
+        (
+            self.columns.from.title().map(|t| t.to_string()).unwrap_or_default(),
+            self.recipients.get(),
+        )
     }
 
     /// The list again: what `search` finds, `total` of them (nothing when not `active`), the rows `select` selected
@@ -511,7 +546,7 @@ fn text_column(
     width: i32,
     expand: bool,
     xalign: f32,
-    text: fn(&Message) -> String,
+    text: impl Fn(&Message) -> String + 'static,
 ) -> gtk::ColumnViewColumn {
     let factory = gtk::SignalListItemFactory::new();
     factory.connect_setup(move |_, item| {

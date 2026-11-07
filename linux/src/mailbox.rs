@@ -795,6 +795,8 @@ impl Mailbox {
         };
         self.total.set(total);
         self.unread.set(unread);
+        self.list
+            .show_person_column(core.lists_recipients(&search).unwrap_or(false));
         self.list.show_folder_column(
             several,
             &if self.searching() {

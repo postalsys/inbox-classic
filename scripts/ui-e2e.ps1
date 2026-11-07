@@ -1309,6 +1309,8 @@ public static class Dragger {
     SelectFolder 1
     Check ($null -ne (WaitFor { if ((Rows) -ge 2) { Rows } })) 'Sent Items has what was sent'
     SelectRow 0
+    $firstTo = [Native.Win]::RemoteListText($list, 0, 2)
+    Check ($firstTo -eq 'Fay') "Sent Items names whom each message went to, in a To column ($firstTo)"
     Shot $main 'main-3-sent-items'
     SelectFolder 0
 

@@ -715,6 +715,11 @@ final class UITest {
         selectFolder(1)
         _ = await waitUntil { list.numberOfRows >= 2 }
         await selectRow(0)
+        let person = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("from"))
+        let at = list.column(withIdentifier: NSUserInterfaceItemIdentifier("from"))
+        let firstTo = (list.view(atColumn: at, row: 0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue
+        check(person?.title == "To" && firstTo == "Dave",
+              "Sent Items names whom each message went to, in a To column (\(person?.title ?? ""): \(firstTo ?? ""))")
         await shot(main.window, "main-3-sent-items")
         selectFolder(0)
         _ = await waitUntil { list.numberOfRows >= 5 }

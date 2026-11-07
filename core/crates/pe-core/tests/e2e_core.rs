@@ -6,8 +6,8 @@
 use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 
-use pe_core::{Action, Core, Event, FailureKind, MessageRef, Search};
-use pe_store::{AccountSettings, Sort};
+use pe_core::{Action, Core, Event, FailureKind, MessageRef, Scope, Search};
+use pe_store::{AccountSettings, Sort, SortField};
 use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
 use serde_json::json;
 
@@ -198,6 +198,67 @@ fn opens_on_the_newest_message_of_the_first_inbox() {
         uid: Some(newest),
     };
     assert_eq!(s.core.start_message().unwrap(), Some(start));
+}
+
+#[test]
+fn sent_items_and_drafts_list_the_recipients() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let with_use = |special: &str| {
+        folders
+            .iter()
+            .find(|f| f.info.special_use.as_deref() == Some(special))
+            .unwrap_or_else(|| panic!("no {special} folder in {folders:?}"))
+    };
+    let sent = with_use("\\Sent");
+    let to = |name: &str, address: &str, subject: &str| {
+        format!("From: Me <me@example.com>\r\nTo: {name} <{address}>\r\nSubject: {subject}\r\n\r\nHi\r\n")
+    };
+    s.server
+        .add_message(&sent.info.path, &to("Zoe", "zoe@example.com", "First"), &[]);
+    s.server
+        .add_message(&sent.info.path, &to("Adam", "adam@example.com", "Second"), &[]);
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+
+    let inbox = folders.iter().find(|f| f.info.path == "INBOX").unwrap();
+    assert!(s.core.lists_recipients(&Search::folder(sent.id)).unwrap());
+    assert!(
+        s.core
+            .lists_recipients(&Search::folder(with_use("\\Drafts").id))
+            .unwrap()
+    );
+    assert!(!s.core.lists_recipients(&Search::folder(inbox.id)).unwrap());
+    let searching = Search {
+        text: "First".into(),
+        ..Search::folder(sent.id)
+    };
+    assert!(
+        !s.core.lists_recipients(&searching).unwrap(),
+        "a search names the senders"
+    );
+    let all = Search {
+        scope: Scope::AllInboxes,
+        ..Default::default()
+    };
+    assert!(!s.core.lists_recipients(&all).unwrap());
+
+    // the person column there is To: a From sort is by the recipients
+    let by_recipient = Sort {
+        field: SortField::From,
+        ascending: true,
+    };
+    let listed: Vec<String> = s
+        .core
+        .search(&Search::folder(sent.id), by_recipient, 0, 10)
+        .unwrap()
+        .into_iter()
+        .map(|m| m.info.recipients)
+        .collect();
+    assert_eq!(listed, ["Adam", "Zoe"]);
 }
 
 #[test]

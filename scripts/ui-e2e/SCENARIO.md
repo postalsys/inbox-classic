@@ -211,6 +211,7 @@ Screenshots: `main-2-new-mail`, `main-3-sent-items`
 
 - the new mail is in the list
 - Sent Items has what was sent
+- Sent Items names whom each message went to, in a To column
 
 ## 21. Finding
 

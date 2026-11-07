@@ -70,7 +70,9 @@ pub fn help_page(platform: Platform) -> String {
 /// [`help_page`] in `language` (English for one there is no help of)
 pub fn help_page_in(platform: Platform, language: &str) -> String {
     use pe_i18n::{Text, tr};
-    let filtered = filter_platform(help_source(language), platform);
+    let filtered = filter_platform(help_source(language), platform)
+        .replace(REVIEW_START, "")
+        .replace(REVIEW_END, "");
     match platform {
         Platform::Mac => filtered
             .replace("<kbd>Ctrl</kbd>", "<kbd>\u{2318}</kbd>")
@@ -89,6 +91,11 @@ pub fn help_page_in(platform: Platform, language: &str) -> String {
         }
     }
 }
+
+/// The marks around a translated passage that waits for a native review (`scripts/i18n-review.mjs` lists them); the
+/// page shows the passage without them
+const REVIEW_START: &str = "<!--review-->";
+const REVIEW_END: &str = "<!--/review-->";
 
 const PART_START: &str = "<!--os:";
 const PART_END: &str = "<!--/os-->";
@@ -192,6 +199,19 @@ mod tests {
         // one left open runs to the end
         assert_eq!(filter_platform("a<!--os:mac-->M", Platform::Windows), "a");
         assert_eq!(filter_platform("a<!--os:mac-->M", Platform::Mac), "aM");
+    }
+
+    #[test]
+    fn review_marks_are_left_out() {
+        for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
+            for language in ["en", "de", "et", "es", "fr"] {
+                let page = help_page_in(platform, language);
+                assert!(
+                    !page.contains("<!--review") && !page.contains("<!--/review"),
+                    "{language}"
+                );
+            }
+        }
     }
 
     #[test]

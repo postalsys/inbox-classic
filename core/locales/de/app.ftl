@@ -102,7 +102,10 @@ ui-cancel = Abbrechen
 ui-close = Schließen
 ui-col-subject = Betreff
 ui-col-from = Von
+ui-col-to = An
 ui-col-received = Empfangen
+# review: new
+ui-col-sent = Gesendet
 ui-col-size = Größe
 ui-col-folder = Ordner
 ui-col-account = Konto
