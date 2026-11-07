@@ -9,6 +9,13 @@ a word a language does not have yet is shown in English. The user help is `core/
 **Status: the German, Estonian, French and Spanish files and help pages have had a native review. A change to the
 English words needs the same review in every language before a release.**
 
+**Drafts waiting for review.** `REVIEWED` holds the commit of the last native review. A message translated after it
+(new, or its English changed) has `# review: new` or `# review: changed` on the line above it, and a new or changed
+passage of a help page sits between `<!--review-->` and `<!--/review-->` (the page shows it without them). `node
+scripts/i18n-review.mjs` lists them (`--html out.html` as a page with the English beside each draft); `--check`, which
+CI runs, fails when a new or changed message or passage has no mark. Remove a mark once its draft is reviewed, and when
+none are left, put that commit in `REVIEWED`.
+
 Rules for every language:
 
 - Keep the `{ $placeables }` the English message has, no more and no fewer (a test checks it); put them where the

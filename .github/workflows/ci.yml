@@ -39,6 +39,18 @@ jobs:
             - name: Generated files are up to date
               run: git diff --exit-code -- include ../mac/Sources/InboxClassic/Generated ../linux/src/generated
 
+    translations:
+        name: New translations marked for review
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+            # a translated message or help passage that is new or changed since core/locales/REVIEWED carries a review
+            # mark, so the drafts can be found and reviewed later
+            - run: node scripts/i18n-review.mjs --check
+
     shells:
         name: Every app changed with what they share
         if: github.event_name == 'pull_request'
