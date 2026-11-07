@@ -73,6 +73,14 @@ ui-tb-junk = Indésirable
 ui-tb-not-junk = Non indésirable
 # review: new
 ui-tb-archive = Archiver
+# review: new
+ui-tb-previous = Précédent
+# review: new
+ui-tb-next = Suivant
+# review: new
+ui-previous-tip = Message précédent
+# review: new
+ui-next-tip = Message suivant
 ui-tb-sync = Envoyer/Recevoir
 ui-tb-mark-read = Marquer comme lu
 ui-tb-mark-unread = Marquer comme non lu
