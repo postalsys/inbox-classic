@@ -445,6 +445,16 @@ pub fn is_plausible_bounce(parsed: &Message) -> bool {
     auto_submitted || find_attachment(&parsed.attachments, "message/delivery-status").is_some()
 }
 
+/// Whether [`detect`] may find anything in a message, from what any parse of it has (pe-mime's own `parse` too): its
+/// sender, its header and its delivery report. A reader that has parsed the message already asks this first, and
+/// parses it again for [`detect`] only when it says yes
+pub fn may_be_bounce(parsed: &Message) -> bool {
+    is_plausible_bounce(parsed)
+        || has_header(parsed, "x-failed-recipients")
+        || header_values(parsed, "x-mailer").any(|v| js::trim(&v) == "Amazon WorkMail")
+        || (find_attachment(&parsed.attachments, "text/rfc822").is_some() && is_zoho_bounce(parsed))
+}
+
 /// Parses a raw message for [`detect_parsed`]: attached messages stay attachments, as mailparser
 /// keeps them, so the returned message is never mixed into the notice's text
 pub fn parse(raw: &[u8]) -> Option<Message> {

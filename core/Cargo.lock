@@ -1431,6 +1431,7 @@ dependencies = [
  "base64",
  "keyring-core",
  "pe-autoconfig",
+ "pe-bounce",
  "pe-content",
  "pe-html",
  "pe-i18n",

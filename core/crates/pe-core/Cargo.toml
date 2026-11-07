@@ -11,6 +11,7 @@ publish.workspace = true
 pe-i18n.workspace = true
 base64.workspace = true
 pe-autoconfig = { path = "../pe-autoconfig" }
+pe-bounce = { path = "../pe-bounce" }
 pe-content = { path = "../pe-content" }
 pe-html.workspace = true
 pe-imap = { path = "../pe-imap" }

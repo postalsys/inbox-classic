@@ -1345,6 +1345,9 @@ pub struct PeMessage {
     pub flag_color: u8,
     pub answered: bool,
     pub has_attachments: bool,
+    /// A notice that a message was not delivered, or not yet (a bounce): the list shows its icon in the attachment
+    /// column's place
+    pub bounce: bool,
 }
 
 /// A page of the message list; free with `pe_message_list_free`
@@ -1391,6 +1394,7 @@ pub unsafe extern "C" fn pe_messages(
                     flag_color: info.flag_color().map_or(0, |c| c as u8),
                     answered: info.answered(),
                     has_attachments: info.has_attachments,
+                    bounce: info.bounce,
                 }
             })))
         })
@@ -1707,6 +1711,14 @@ pub struct PeMessageInfo {
     pub invitation: *const PeInvitation,
     /// The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
     pub has_logo: bool,
+    /// A notice that a message was not delivered, or not yet: `document` starts with a card that explains it
+    pub bounce: bool,
+    /// The message the bounce returns is in the account (Sent Items first), at `bounced_folder` and `bounced_uid`:
+    /// the card links to it, and a click on that link (`pe_reader_link` says `PE_READER_LINK_BOUNCED_MESSAGE`)
+    /// selects it
+    pub has_bounced_message: bool,
+    pub bounced_folder: i64,
+    pub bounced_uid: u64,
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
@@ -1772,6 +1784,10 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         unsubscribe_target: strings.add(&view.unsubscribe.as_ref().map(Unsubscribe::target).unwrap_or_default()),
         invitation: invitation.as_deref().map_or(null(), |i| i as *const PeInvitation),
         has_logo: view.has_logo,
+        bounce: view.bounce,
+        has_bounced_message: view.bounced_message.is_some(),
+        bounced_folder: view.bounced_message.map_or(0, |m| m.folder),
+        bounced_uid: view.bounced_message.map_or(0, |m| m.uid),
     };
     handed(PeMessageView {
         info,
@@ -1779,6 +1795,39 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         _invitation: invitation,
         _strings: strings,
     })
+}
+
+/// What a link clicked in the reading pane is to the app
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeReaderLink {
+    /// A link of the message: the browser opens it, as before
+    Other = 0,
+    /// "Show the message that bounced" on a bounce's card: select the message at `bounced_folder` and
+    /// `bounced_uid` of the view's `PeMessageInfo`
+    BouncedMessage = 1,
+}
+
+/// What `uri`, a link clicked in the reading pane (the URI the web view's navigation names), is: one of the
+/// document's own, which the app handles itself, or one to open in the browser. The web views cancel every navigation
+/// as before; the app asks this first.
+///
+/// # Safety
+/// `uri` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
+    // SAFETY: as the caller guarantees
+    let Some(uri) = (unsafe { arg(uri) }) else {
+        return PeReaderLink::Other;
+    };
+    guard(|| {
+        if pe_html::is_bounced_message_link(uri) {
+            PeReaderLink::BouncedMessage
+        } else {
+            PeReaderLink::Other
+        }
+    })
+    .unwrap_or(PeReaderLink::Other)
 }
 
 /// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the

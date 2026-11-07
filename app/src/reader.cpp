@@ -110,6 +110,15 @@ void Reader::Create(HWND parent, PeCore* core) {
     previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN, 0, {});
     preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); }, parent,
                     TIMER_FIND_SETTLED);
+    // the bounce card's link: the core says which link it is, the view names the message; followed after the
+    // WebView2's event, as selecting it shows another document in this view
+    preview_.SetLinks([this](const wchar_t* uri) {
+        if (pe_reader_link(core::Narrow(uri).c_str()) != PE_READER_LINK_BOUNCED_MESSAGE) {
+            return false;
+        }
+        PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_BOUNCED_MESSAGE, 0), 0);
+        return true;
+    });
 
     LOGFONTW font = {};
     GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
@@ -623,6 +632,11 @@ bool Reader::OnCommand(WORD id, WORD) {
         return true;
     case IDC_OPEN_CALENDAR:
         OpenInCalendar();
+        return true;
+    case IDC_BOUNCED_MESSAGE:
+        if (const PeMessageInfo* info = Info(); info && info->has_bounced_message && onBouncedMessage) {
+            onBouncedMessage(info->bounced_folder, info->bounced_uid);
+        }
         return true;
     }
     return false;

@@ -1909,18 +1909,26 @@ public static class Dragger {
     SelectFolder 0
     $rowOf = { param($subject) @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq $subject })[0] }
     [void](WaitFor { $null -ne (& $rowOf $apple) } 20)
-    # the colour of a row's flag: the most coloured pixel of its flag cell, as the screen shows it
-    $flagColor = {
-        param($row)
+    # a picture of a part of the list's row $row as the screen shows it, the main window in front: the part $rect gives
+    # for the row (asked while the window is in front); $null when it is empty
+    function CellPicture($row, [scriptblock]$rect) {
         [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
         [void][Native.Win]::SetForegroundWindow($main)
         Start-Sleep -Milliseconds 300
-        # LVM_GETSUBITEMRECT of the flag column (1), its bounds
-        $cell = [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32))
+        $cell = & $rect $row
         [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
         if ($cell.Right -le $cell.Left -or $cell.Bottom -le $cell.Top) { return $null }
         $picture = New-Object System.Drawing.Bitmap ($cell.Right - $cell.Left), ($cell.Bottom - $cell.Top)
         CopyScreen $picture $cell.Left $cell.Top
+        $picture
+    }
+    # LVM_GETSUBITEMRECT of the flag column (1), its bounds
+    $flagCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32)) }
+    # the colour of a row's flag: the most coloured pixel of its flag cell, as the screen shows it
+    $flagColor = {
+        param($row)
+        $picture = CellPicture $row $flagCell
+        if (-not $picture) { return $null }
         $best = $null; $most = -1
         for ($x = 0; $x -lt $picture.Width; $x++) {
             for ($y = 0; $y -lt $picture.Height; $y++) {
@@ -1981,14 +1989,8 @@ public static class Dragger {
     # on the selected rows' highlight the flag is drawn white, as the Mac shows it: a blue one would not be seen
     $selectedFlag = {
         param($row)
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
-        [void][Native.Win]::SetForegroundWindow($main)
-        Start-Sleep -Milliseconds 300
-        $cell = [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32))
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
-        if ($cell.Right -le $cell.Left -or $cell.Bottom -le $cell.Top) { return $null }
-        $picture = New-Object System.Drawing.Bitmap ($cell.Right - $cell.Left), ($cell.Bottom - $cell.Top)
-        CopyScreen $picture $cell.Left $cell.Top
+        $picture = CellPicture $row $flagCell
+        if (-not $picture) { return $null }
         # the lightest pixel of the cell
         $best = $null; $most = -1
         for ($x = 0; $x -lt $picture.Width; $x++) {
@@ -2252,6 +2254,174 @@ public static class Dragger {
     } else {
         Check $false 'Find in This Message asks again'
     }
+
+    # ---- a message that bounced ----
+
+    Step 'a message that bounced'
+    # a message in Sent Items, a report that it could not be delivered to one of its recipients and a notice that it
+    # is delayed for the other, in the forms of pe-bounce's fixtures (Postfix's report, a delay notice)
+    $bounced = 'Plans for the weekend'
+    $failedSubject = 'Undelivered Mail Returned to Sender'
+    $delayedSubject = 'Delayed Mail (still being retried)'
+    $serverWords = 'The email account that you tried to reach does not exist'
+    $now = [DateTime]::UtcNow
+    $original = @(
+        'From: Alex Morgan <testuser@inboxclassic.test>', 'To: Sam Nobody <sam.nobody@example.org>, Kim <kim@example.net>',
+        "Subject: $bounced", 'Message-ID: <bounce-original@inboxclassic.test>', "Date: $($now.AddMinutes(-10).ToString('r'))")
+    AddMessage (($original -join "`r`n") + "`r`n`r`nShall we go to the lake on Saturday?`r`n") @('\Seen') 'Sent'
+    AddMessage ((@(
+        'From: MAILER-DAEMON@mail.inboxclassic.test (Mail Delivery System)', 'To: testuser@inboxclassic.test',
+        "Subject: $failedSubject", 'Message-ID: <bounce-failed@mail.inboxclassic.test>', "Date: $($now.ToString('r'))",
+        'Auto-Submitted: auto-replied', 'MIME-Version: 1.0',
+        'Content-Type: multipart/report; report-type=delivery-status; boundary="failed"', '',
+        'This is a MIME-encapsulated message.', '', '--failed', 'Content-Description: Notification',
+        'Content-Type: text/plain; charset=us-ascii', '', 'This is the mail system at host mail.inboxclassic.test.', '',
+        "I'm sorry to have to inform you that your message could not", "be delivered to one or more recipients. It's attached below.", '',
+        '                   The mail system', '', '--failed', 'Content-Description: Delivery report',
+        'Content-Type: message/delivery-status', '', 'Reporting-MTA: dns; mail.inboxclassic.test', '',
+        'Final-Recipient: rfc822; sam.nobody@example.org', 'Original-Recipient: rfc822;sam.nobody@example.org', 'Action: failed',
+        'Status: 5.1.1', 'Remote-MTA: dns; mx.example.org', "Diagnostic-Code: smtp; 550 5.1.1 $serverWords. Please try double-checking the recipient's email address for typos", '',
+        '--failed', 'Content-Description: Undelivered Message Headers', 'Content-Type: text/rfc822-headers', '') + $original +
+        @('', '--failed--', '')) -join "`r`n")
+    AddMessage ((@(
+        'From: Mail Delivery System <MAILER-DAEMON@mail.inboxclassic.test>', 'To: testuser@inboxclassic.test',
+        "Subject: $delayedSubject", 'Message-ID: <bounce-delayed@mail.inboxclassic.test>', "Date: $($now.AddMinutes(-1).ToString('r'))",
+        'MIME-Version: 1.0', 'Content-Type: multipart/report; report-type=delivery-status; boundary="delayed"', '',
+        '--delayed', 'Content-Type: text/plain', '', 'This is a warning message only. Delivery is still being retried.', '',
+        '--delayed', 'Content-Type: message/delivery-status', '', 'Reporting-MTA: dns; mail.inboxclassic.test', '',
+        'Final-Recipient: rfc822; kim@example.net', 'Action: delayed', 'Status: 4.4.1',
+        "Will-Retry-Until: $($now.AddDays(5).ToString('r'))", 'Diagnostic-Code: smtp; 421 4.4.1 Connection timed out', '',
+        '--delayed', 'Content-Type: text/rfc822-headers', '') + $original + @('', '--delayed--', '')) -join "`r`n")
+    Command $main $IDM_SYNC
+    # the message that bounced in the store, so the card can link to it
+    SelectFolder 1
+    Check ([bool](WaitFor { $null -ne (& $rowOf $bounced) } 20)) 'the message is in Sent Items'
+    SelectFolder 0
+    Check ([bool](WaitFor { ($null -ne (& $rowOf $failedSubject)) -and ($null -ne (& $rowOf $delayedSubject)) } 20)) 'the report and the delay notice are in the Inbox'
+
+    # the dark pixels of a row's attachment column (0), as the screen shows them: where its icon is
+    $markCell = {
+        param($row)
+        $bounds = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr]$row, 0)
+        # LVM_GETCOLUMNWIDTH
+        $width = [int][Native.Win]::SendMessage($list, 0x101D, [IntPtr]0, [IntPtr]::Zero)
+        [pscustomobject]@{ Left = $bounds.Left; Top = $bounds.Top; Right = $bounds.Left + $width; Bottom = $bounds.Bottom }
+    }
+    $markOf = {
+        param($row)
+        $picture = CellPicture $row $markCell
+        if (-not $picture) { return '' }
+        $dark = @()
+        for ($x = 0; $x -lt $picture.Width; $x++) {
+            for ($y = 0; $y -lt $picture.Height; $y++) {
+                $p = $picture.GetPixel($x, $y)
+                if ($p.R -lt 120 -and $p.G -lt 120 -and $p.B -lt 120) { $dark += "$x,$y" }
+            }
+        }
+        $dark -join ' '
+    }
+    # another row selected, so the marks are drawn on the list's white
+    $failedRow = & $rowOf $failedSubject
+    $delayedRow = & $rowOf $delayedSubject
+    $clipRow = & $rowOf $newsletter
+    $otherRow = @(0..((Rows) - 1) | Where-Object { $_ -ne $failedRow -and $_ -ne $delayedRow -and $_ -ne $clipRow })[0]
+    SelectRow $otherRow
+    $failedMark = & $markOf $failedRow
+    $clipMark = if ($null -ne $clipRow) { & $markOf $clipRow } else { '' }
+    Check ($failedMark -ne '' -and $failedMark -ne $clipMark) 'the report has the undelivered mark in the attachment column, not a paper clip'
+    Check ((& $markOf $delayedRow) -eq $failedMark) 'and so has the delay notice'
+
+    # a point of the reading pane in a colour of the card, in screen pixels: the middle of the pixels of that colour
+    # in the band where it is first found, from the top; $null when there is none
+    $pane = [Native.Win]::FindDescendants($main, 'Chrome_RenderWidgetHostHWND') | Select-Object -First 1
+    $cardPoint = {
+        param([int]$r, [int]$g, [int]$b)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 500
+        $box = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($pane, [ref]$box)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        $w = [Math]::Min(560, $box.Right - $box.Left); $h = [Math]::Min(320, $box.Bottom - $box.Top)
+        if ($w -le 0 -or $h -le 0) { return $null }
+        $picture = New-Object System.Drawing.Bitmap $w, $h
+        CopyScreen $picture $box.Left $box.Top
+        $first = -1; $xs = @(); $ys = @()
+        for ($y = 0; $y -lt $h; $y++) {
+            if ($first -ge 0 -and $y -gt $first + 14) { break }
+            for ($x = 0; $x -lt $w; $x++) {
+                $p = $picture.GetPixel($x, $y)
+                if ([Math]::Abs($p.R - $r) -lt 28 -and [Math]::Abs($p.G - $g) -lt 28 -and [Math]::Abs($p.B - $b) -lt 28) {
+                    if ($first -lt 0) { $first = $y }
+                    $xs += $x; $ys += $y
+                }
+            }
+        }
+        if ($first -lt 0) { return $null }
+        $xs = @($xs | Sort-Object); $ys = @($ys | Sort-Object)
+        @(($box.Left + $xs[[int]($xs.Count / 2)]), ($box.Top + $ys[[int]($ys.Count / 2)]))
+    }
+    # words of the message shown found by Find in This Message
+    $foundInMessage = {
+        param([string]$words)
+        Command $main $IDM_FIND_IN_MESSAGE
+        $form = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+        if (-not $form) { return $false }
+        SetText $form 100 $words
+        Click $form 1
+        Start-Sleep -Milliseconds 1500
+        (StatusPart $mainStatus 0) -notmatch 'not in this message'
+    }
+
+    SelectRow $failedRow
+    Check ([bool](WaitFor { $null -ne (& $cardPoint 196 43 28) } 15)) 'opening the report shows the red card of a message not delivered'
+    # Show the message that bounced: the link, in the card's blue, clicked before a find scrolls the pane
+    $link = & $cardPoint 11 92 173
+    Check ($null -ne $link) 'the card has Show the message that bounced'
+    if ($link) {
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 300
+        [Native.Win]::MouseClick($link[0], $link[1])
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), 3) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
+    }
+    SelectFolder 0
+    [void](WaitFor { $null -ne (& $rowOf $failedSubject) } 20)
+    SelectRow (& $rowOf $failedSubject)
+    [void](WaitFor { $null -ne (& $cardPoint 196 43 28) } 15)
+    Check (& $foundInMessage 'Your message was not delivered') 'the card says the message was not delivered'
+    Check (& $foundInMessage 'sam.nobody@example.org') 'it names the recipient'
+    Check (& $foundInMessage 'The address does not exist') 'why'
+    Check (& $foundInMessage 'Check the spelling of the address') 'and what to do'
+    # Details, folded, opened by the find
+    Check (& $foundInMessage $serverWords) "its Details show the server's own words"
+    Shot $main 'bounce-1-failed'
+
+    SelectRow (& $rowOf $delayedSubject)
+    Check ([bool](WaitFor { $null -ne (& $cardPoint 154 91 0) } 15)) 'a delay notice shows the amber card'
+    Check (& $foundInMessage 'Your message has not been delivered yet') 'it says the message is not delivered yet'
+    Check (& $foundInMessage 'still trying to deliver it') 'and that it is still being tried'
+    Shot $main 'bounce-2-delayed'
+
+    [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'is:bounce')
+    $both = WaitFor {
+        $found = @(0..([Math]::Max(0, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, 3) })
+        if ((Rows) -eq 2 -and $found -contains $failedSubject -and $found -contains $delayedSubject) { $true }
+    } 15
+    Check ([bool]$both) "is:bounce finds the two notices and nothing else ($(Rows))"
+    Shot $main 'bounce-3-list'
+    Click $main $IDC_SEARCH_CLEAR
+    [void](WaitFor { -not (Visible $main $IDC_SEARCH_BAR) } 10)
+    # the messages of this step go, so the folders are as the steps after expect them
+    foreach ($added in @((Find 'INBOX' "Subject: $([regex]::Escape($failedSubject))"), (Find 'INBOX' "Subject: $([regex]::Escape($delayedSubject))"))) {
+        if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    }
+    $sentCopy = Find 'Sent' "Subject: $bounced"
+    if ($sentCopy) { [void](Invoke-RestMethod -Method Delete "$rest/Sent/messages/$($sentCopy.uid)") }
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    [void](WaitFor { $null -eq (& $rowOf $failedSubject) -and $null -eq (& $rowOf $delayedSubject) } 20)
 
     # ---- folders ----
 

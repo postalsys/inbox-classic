@@ -481,6 +481,7 @@ extension UITest {
 
         try await messageWindow()
         try await keyboardReading()
+        try await bounces()
     }
 
     // ---- reading with the keyboard ----
@@ -577,6 +578,118 @@ extension UITest {
                                       charactersIgnoringModifiers: "\u{1b}", isARepeat: false, keyCode: 53)
         onMain { if let escape { _ = self.main.window.performKeyEquivalent(with: escape) } }
         check(await waitUntil(3) { bar.isHidden }, "Esc closes the bar")
+    }
+
+    // ---- a message that bounced ----
+
+    /// the bounce mark (or the paper clip) the list shows on row `index`
+    func listMark(_ index: Int) -> NSImage? {
+        let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("attach"))
+        guard column >= 0, let cell = list.view(atColumn: column, row: index, makeIfNecessary: true) else { return nil }
+        return views(NSImageView.self, in: cell).first?.image
+    }
+
+    /// the row of the list whose subject is `subject`
+    func listIndex(subject: String) -> Int? {
+        (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == subject }
+    }
+
+    /// the delivery report of a message sent to an address that does not exist, as Postfix writes one, and a notice
+    /// that another is delayed; dated before the other messages, so the later steps find their lists as they were
+    func bounces() async throws {
+        step("a message that bounced")
+        let bouncedSubject = "Tickets for the concert"
+        let bouncedId = "<concert-tickets@inboxclassic.test>"
+        let failedSubject = "Undelivered Mail Returned to Sender"
+        let delayedSubject = "Delayed Mail (still being retried)"
+        try await addMessage("From: Test User <testuser@inboxclassic.test>\r\nTo: Robin <robin.nobody@example.org>\r\n"
+            + "Subject: \(bouncedSubject)\r\nDate: Mon, 8 Sep 2025 09:30:00 +0000\r\nMessage-ID: \(bouncedId)\r\n"
+            + "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nHi Robin,\r\n\r\nI got us two tickets for Friday.\r\n",
+            flags: ["\\Seen"], to: "Sent")
+        let reportBoundary = "5FC8B823C7.1757324000/mx.inboxclassic.test"
+        try await addMessage("Return-Path: <>\r\nDate: Mon, 8 Sep 2025 09:30:05 +0000\r\n"
+            + "From: MAILER-DAEMON@mx.inboxclassic.test (Mail Delivery System)\r\nSubject: \(failedSubject)\r\n"
+            + "To: testuser@inboxclassic.test\r\nAuto-Submitted: auto-replied\r\nMIME-Version: 1.0\r\n"
+            + "Content-Type: multipart/report; report-type=delivery-status;\r\n\tboundary=\"\(reportBoundary)\"\r\n"
+            + "Message-Id: <20250908093005.5FC8B823C7@mx.inboxclassic.test>\r\n\r\nThis is a MIME-encapsulated message.\r\n\r\n"
+            + "--\(reportBoundary)\r\nContent-Description: Notification\r\nContent-Type: text/plain; charset=us-ascii\r\n\r\n"
+            + "This is the mail system at host mx.inboxclassic.test.\r\n\r\n"
+            + "I'm sorry to have to inform you that your message could not\r\nbe delivered to one or more recipients. It's attached below.\r\n\r\n"
+            + "                   The mail system\r\n\r\n"
+            + "<robin.nobody@example.org>: host mx.example.org[192.0.2.25] said: 550 5.1.1\r\n"
+            + "    The email account that you tried to reach does not exist. (in reply to RCPT\r\n    TO command)\r\n\r\n"
+            + "--\(reportBoundary)\r\nContent-Description: Delivery report\r\nContent-Type: message/delivery-status\r\n\r\n"
+            + "Reporting-MTA: dns; mx.inboxclassic.test\r\nArrival-Date: Mon, 8 Sep 2025 09:30:00 +0000\r\n\r\n"
+            + "Final-Recipient: rfc822; robin.nobody@example.org\r\nOriginal-Recipient: rfc822;robin.nobody@example.org\r\n"
+            + "Action: failed\r\nStatus: 5.1.1\r\nRemote-MTA: dns; mx.example.org\r\n"
+            + "Diagnostic-Code: smtp; 550 5.1.1 The email account that you tried to reach does not exist\r\n\r\n"
+            + "--\(reportBoundary)\r\nContent-Description: Undelivered Message Headers\r\nContent-Type: text/rfc822-headers\r\n\r\n"
+            + "From: Test User <testuser@inboxclassic.test>\r\nTo: Robin <robin.nobody@example.org>\r\n"
+            + "Subject: \(bouncedSubject)\r\nDate: Mon, 8 Sep 2025 09:30:00 +0000\r\nMessage-ID: \(bouncedId)\r\n\r\n"
+            + "--\(reportBoundary)--\r\n", flags: ["\\Seen"])
+        try await addMessage("From: Mail Delivery System <MAILER-DAEMON@mx.inboxclassic.test>\r\nTo: testuser@inboxclassic.test\r\n"
+            + "Subject: \(delayedSubject)\r\nMessage-ID: <delayed-notice@mx.inboxclassic.test>\r\n"
+            + "Date: Sun, 7 Sep 2025 18:00:00 +0000\r\nMIME-Version: 1.0\r\n"
+            + "Content-Type: multipart/report; report-type=delivery-status; boundary=\"delay\"\r\n\r\n"
+            + "--delay\r\nContent-Type: text/plain\r\n\r\nThis is a warning message only. Delivery is still being retried.\r\n"
+            + "--delay\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; mx.inboxclassic.test\r\n\r\n"
+            + "Final-Recipient: rfc822; sam@slow.example.net\r\nAction: delayed\r\nStatus: 4.4.1\r\n"
+            + "Diagnostic-Code: smtp; 421 4.4.1 Connection timed out\r\nWill-Retry-Until: Mon, 8 Sep 2025 18:00:00 +0000\r\n"
+            + "--delay\r\nContent-Type: text/rfc822-headers\r\n\r\nMessage-ID: <slow-reply@inboxclassic.test>\r\n"
+            + "From: testuser@inboxclassic.test\r\nTo: sam@slow.example.net\r\nSubject: Re: The garden plan\r\n--delay--\r\n",
+            flags: ["\\Seen"])
+        command(.sync)
+        // the sent message in the store, for the card to link to
+        selectFolder(named: "Sent Items")
+        check(await waitUntil(30) { listIndex(subject: bouncedSubject) != nil }, "the message that bounces is in Sent Items")
+
+        selectFolder(named: "Inbox")
+        guard let failedRow = await waitFor(30, { listIndex(subject: failedSubject) }) else {
+            throw Failed(description: "the delivery report did not arrive")
+        }
+        check(main.mailbox.row(failedRow)?.bounce == true && listMark(failedRow) === Icons.bounce,
+              "the report's row has the undelivered mark in the attachment column's place")
+        list.scrollRowToVisible(failedRow)
+        await selectRow(failedRow)
+        check(await waitUntil(15) { (await readerText()).contains("Your message was not delivered") },
+              "opening it shows the card above the message: not delivered")
+        let failedCard = await readerText()
+        check(failedCard.contains("robin.nobody@example.org") && failedCard.contains("The address does not exist")
+              && failedCard.contains("What you can do"),
+              "the card names the recipient, why and what to do")
+        let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
+        _ = try? await preview?.evaluateJavaScript("document.querySelector('details').open = true")
+        check(await waitUntil(5) { (await readerText()).contains("550 5.1.1 The email account that you tried to reach does not exist") },
+              "the card's Details show the server's own words")
+        await shot(main.window, "bounce-1-failed")
+
+        // the link, clicked as the user clicks it: the web view's navigation, which the app takes
+        _ = try? await preview?.evaluateJavaScript("document.querySelector('a[href=\"inboxclassic:bounced-message\"]').click()")
+        check(await waitUntil(10) { main.mailbox.selectedName == "Sent Items" && main.mailbox.selectedRow?.subject == bouncedSubject },
+              "Show the message that bounced selects the message in Sent Items (\(main.mailbox.selectedName): \(main.mailbox.selectedRow?.subject ?? "none"))")
+
+        selectFolder(named: "Inbox")
+        guard let delayedRow = await waitFor(20, { listIndex(subject: delayedSubject) }) else {
+            throw Failed(description: "the delay notice did not arrive")
+        }
+        list.scrollRowToVisible(delayedRow)
+        await selectRow(delayedRow)
+        check(await waitUntil(15) { (await readerText()).contains("Your message has not been delivered yet") },
+              "a delay notice shows the amber card")
+        check((await readerText()).contains("still trying"), "saying it is still being tried")
+        await shot(main.window, "bounce-2-delayed")
+
+        search("is:bounce")
+        check(await waitUntil(20) { list.numberOfRows == 2 }, "is:bounce finds the two notices and nothing else (\(list.numberOfRows))")
+        let foundSubjects = Set((0..<list.numberOfRows).compactMap { main.mailbox.row($0)?.subject })
+        check(foundSubjects == [failedSubject, delayedSubject], "the report and the delay notice")
+        if let shownRow = listIndex(subject: failedSubject) {
+            await selectRow(shownRow)
+        }
+        await shot(main.window, "bounce-3-list")
+        search("")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(20) { list.numberOfRows >= 4 }
     }
 
     // ---- a message in a window of its own ----

@@ -235,6 +235,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     reader_.Create(parent, core);
     reader_.onShown = [this] { OnMessageShown(); };
     reader_.onFound = [this](const std::wstring& said) { Say(said); };
+    reader_.onBouncedMessage = [this](int64_t folder, uint64_t uid) { ShowMessage(folder, uid); };
     // the keys for reading also while the message has the keyboard, sent as the accelerators send them
     reader_.SetKeys([parent](UINT key) {
         WORD id = ReadingKey(key);
@@ -843,7 +844,7 @@ HBITMAP FlagBitmap(int color, bool checked) {
 
 } // namespace
 
-// the paper clip and the flag of a row, drawn over the row as the list painted it:
+// the paper clip (or a bounce's mark) and the flag of a row, drawn over the row as the list painted it:
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
 void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
     auto draw = [&](int column, int icon) {
@@ -854,7 +855,10 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         ImageList_Draw(listIcons_, icon, dc, cell.left + (width - iconSize_) / 2, cell.top + (cell.bottom - cell.top - iconSize_) / 2,
                        ILD_TRANSPARENT);
     };
-    if (row.has_attachments) {
+    // a bounce's mark in the paper clip's place, also when it has files
+    if (row.bounce) {
+        draw(COL_ATTACH, LIST_MAIL_ERROR);
+    } else if (row.has_attachments) {
         draw(COL_ATTACH, LIST_ATTACH);
     }
     if (row.flagged) {
@@ -1031,7 +1035,11 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
             return;
         }
     }
-    // the folder (which ends a search), then the message in it
+    // the folder (which ends a search), then the message in it; the folder selected already does not change, its
+    // search is ended here
+    if (Searching() && !allInboxes_ && folder_ == folder) {
+        ClearFind();
+    }
     TreeView_SelectItem(tree_, item->second);
     if (folder_ == folder) {
         SelectInList(folder, uid);

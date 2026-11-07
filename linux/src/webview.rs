@@ -163,7 +163,12 @@ pub struct DocumentView {
     kind: &'static str,
     /// The URI of the document shown, the only one it may navigate to
     current: Rc<RefCell<String>>,
+    /// The links clicked in the document that its owner follows itself, shared with the view's policy decisions
+    links: Links,
 }
+
+/// Asked of a link clicked in a document before the browser opens it: true when the owner took it (the bounce card's)
+type Links = Rc<RefCell<Option<Rc<dyn Fn(&str) -> bool>>>>;
 
 impl DocumentView {
     /// `kind` names the documents (`preview`, `help`, `compose`); `javascript` for the editor only
@@ -180,7 +185,9 @@ impl DocumentView {
         view.set_hexpand(true);
         let current: Rc<RefCell<String>> = Rc::default();
         let own = current.clone();
-        view.connect_decide_policy(move |view, decision, kind| decide(view, decision, kind, &own.borrow()));
+        let links: Links = Rc::default();
+        let asked = links.clone();
+        view.connect_decide_policy(move |view, decision, kind| decide(view, decision, kind, &own.borrow(), &asked));
         // no window opens from a document
         view.connect_create(|_, _| None);
         // the page's own menu without what makes no sense here (reload, back, inspect)
@@ -193,7 +200,14 @@ impl DocumentView {
             manager,
             kind,
             current,
+            links,
         }
+    }
+
+    /// `links` is asked of a link clicked in the document before the browser opens it: true when it took the link
+    /// itself, which the browser then does not open
+    pub fn set_links(&self, links: impl Fn(&str) -> bool + 'static) {
+        *self.links.borrow_mut() = Some(Rc::new(links));
     }
 
     pub fn manager(&self) -> &webkit::UserContentManager {
@@ -237,12 +251,13 @@ impl DocumentView {
 }
 
 /// What a document may do: show itself (and its own anchors), nothing else; a link the user follows opens in the
-/// browser
+/// browser, unless `links` takes it
 fn decide(
     view: &webkit::WebView,
     decision: &webkit::PolicyDecision,
     kind: webkit::PolicyDecisionType,
     own: &str,
+    links: &Links,
 ) -> bool {
     use webkit::PolicyDecisionType as Kind;
     match kind {
@@ -259,7 +274,10 @@ fn decide(
                 decision.use_();
             } else {
                 decision.ignore();
-                if !same {
+                // taken out first: the owner may show another document in this view
+                let links = links.borrow().clone();
+                let taken = links.is_some_and(|links| links(&uri));
+                if !taken && !same {
                     crate::ui::open_externally(&uri, crate::ui::window_of(view).as_ref());
                 }
             }
