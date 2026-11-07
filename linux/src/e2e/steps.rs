@@ -1606,7 +1606,7 @@ pub async fn gmail(d: &Driver) {
             );
             d.shot(&servers, "account-6-gmail").await;
             click(servers.upcast_ref(), "dialog-cancel");
-            wait_gone(10, "account-servers").await;
+            d.check(wait_gone(10, "account-servers").await, "Cancel closes the server form");
         }
         None => d.check(false, "its servers were found"),
     }

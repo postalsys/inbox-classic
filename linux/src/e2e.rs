@@ -885,6 +885,11 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
         (d.ports.imap, d.ports.smtp)
     };
     d.step(&format!("adding the account {name}"));
+    // a server form an earlier step cancelled may still be closing; the one this step waits for must be its own
+    d.check(
+        wait_gone(20, "account-servers").await,
+        "no server form of an earlier step is left open",
+    );
     let Some(first) = wait_dialog(20, "account-start").await else {
         d.check(false, &format!("the account form opens ({name})"));
         return;
@@ -919,13 +924,15 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     };
     let second = second.upcast::<gtk::Widget>();
     d.check(true, "the server settings form follows the lookup");
+    let guessed = text_of(&second, "form-4");
     d.check(
-        text_of(&second, "form-4") == "imap.inboxclassic.test",
-        "the lookup guessed the IMAP server",
+        guessed == "imap.inboxclassic.test",
+        &format!("the lookup guessed the IMAP server ({guessed})"),
     );
+    let kept = text_of(&second, "form-0");
     d.check(
-        text_of(&second, "form-0") == name,
-        "the server form keeps the name typed first",
+        kept == name,
+        &format!("the server form keeps the name typed first ({kept})"),
     );
     set_text(&second, "form-2", user);
     set_text(&second, "form-3", password);
