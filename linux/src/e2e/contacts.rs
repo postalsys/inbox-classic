@@ -9,7 +9,7 @@ use crate::address_book::{self, Book};
 fn listed(book: &Book) -> Vec<(String, String)> {
     book.people()
         .iter()
-        .map(|p| (p.shown().to_string(), p.address.clone()))
+        .map(|p| (p.name.clone(), p.address.clone()))
         .collect()
 }
 
@@ -34,15 +34,6 @@ fn pick_rows(root: &gtk::Widget, list: &str) -> Vec<String> {
         index += 1;
     }
     rows
-}
-
-/// Typed into an entry a letter at a time, as the keyboard does
-fn type_letters(entry: &gtk::Entry, text: &str) {
-    if let Some(delegate) = entry.delegate() {
-        for letter in text.chars() {
-            delegate.emit_by_name::<()>("insert-at-cursor", &[&letter.to_string()]);
-        }
-    }
 }
 
 const VCARDS: &str = "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Mary Smith\r\nN:Smith;Mary;;;\r\nEMAIL:mary@example.com\r\n\

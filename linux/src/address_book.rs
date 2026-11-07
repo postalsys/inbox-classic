@@ -8,67 +8,13 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_store::{Card, CardId, Group, GroupId};
+use pe_core::book::{BookRow, group_label};
+use pe_store::{CardId, GroupId};
 
 use crate::app::{shell, spawn};
 use crate::commands::Command;
 use crate::ui::{self, TITLE};
 use crate::words::{self, Text};
-
-/// A row of the people list: a card, or in a group an address of no card
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Person {
-    /// 0 for an address typed into a group
-    pub card: CardId,
-    pub name: String,
-    /// The default address, empty for none
-    pub address: String,
-    pub phone: String,
-}
-
-impl Person {
-    pub fn of_card(card: &Card) -> Person {
-        Person {
-            card: card.id,
-            name: card.name.clone(),
-            address: card.addresses.first().cloned().unwrap_or_default(),
-            phone: card
-                .phones
-                .first()
-                .map(|(_, number)| number.clone())
-                .unwrap_or_default(),
-        }
-    }
-
-    /// As it goes in an address field, empty without an address
-    pub fn label(&self) -> String {
-        if self.address.is_empty() {
-            String::new()
-        } else {
-            pe_core::address_label(&self.name, &self.address)
-        }
-    }
-
-    /// The name, or the address of someone without one
-    pub fn shown(&self) -> &str {
-        if self.name.trim().is_empty() {
-            &self.address
-        } else {
-            &self.name
-        }
-    }
-}
-
-/// A group's members with an address as they go in an address field, separated by commas
-pub fn group_label(group: &Group) -> String {
-    group
-        .members
-        .iter()
-        .filter(|m| m.address.contains('@'))
-        .map(|m| pe_core::address_label(&m.name, &m.address))
-        .collect::<Vec<_>>()
-        .join(", ")
-}
 
 /// A menu label of the catalogs as a GTK menu shows it: no mnemonic mark, an ellipsis for the dots
 pub fn menu_label(text: Text) -> String {
@@ -125,7 +71,7 @@ const PROPERTIES: &str = "properties";
 const DELETE: &str = "book-delete";
 const WRITE_TO: &str = "book-write-to";
 
-fn text_column(title: &str, width: i32, expand: bool, text: fn(&Person) -> String) -> gtk::ColumnViewColumn {
+fn text_column(title: &str, width: i32, expand: bool, text: fn(&BookRow) -> &str) -> gtk::ColumnViewColumn {
     let factory = gtk::SignalListItemFactory::new();
     factory.connect_setup(|_, item| {
         if let Some(item) = item.downcast_ref::<gtk::ListItem>() {
@@ -146,7 +92,7 @@ fn text_column(title: &str, width: i32, expand: bool, text: fn(&Person) -> Strin
         ) else {
             return;
         };
-        label.set_text(&text(&row.borrow::<Person>()));
+        label.set_text(text(&row.borrow::<BookRow>()));
     });
     let column = gtk::ColumnViewColumn::new(Some(title), Some(factory));
     column.set_fixed_width(width);
@@ -209,9 +155,9 @@ impl Book {
         view.set_widget_name("book-people");
         view.add_css_class("message-list");
         view.set_show_column_separators(true);
-        view.append_column(&text_column(&t!(UiColName), 220, true, |p| p.shown().to_string()));
-        view.append_column(&text_column(&t!(UiColEmail), 240, true, |p| p.address.clone()));
-        view.append_column(&text_column(&t!(UiColPhone), 150, false, |p| p.phone.clone()));
+        view.append_column(&text_column(&t!(UiColName), 220, true, |p| &p.name));
+        view.append_column(&text_column(&t!(UiColEmail), 240, true, |p| &p.address));
+        view.append_column(&text_column(&t!(UiColPhone), 150, false, |p| &p.phone));
         let find = gtk::SearchEntry::new();
         find.set_placeholder_text(Some(&t!(UiBookFindHint)));
         find.set_widget_name("book-find");
@@ -313,12 +259,6 @@ impl Book {
         let this = Rc::downgrade(self);
         self.find.connect_search_changed(move |_| {
             if let Some(this) = this.upgrade() {
-                // the find box finds people in the whole book
-                if this.selected_group().is_some() {
-                    this.filling.set(true);
-                    this.groups.select_row(this.groups.row_at_index(0).as_ref());
-                    this.filling.set(false);
-                }
                 this.fill_people();
             }
         });
@@ -479,36 +419,22 @@ impl Book {
         self.groups.select_row(self.groups.row_at_index(index).as_ref());
     }
 
-    /// The people of the group selected, or of the whole book found by the find box
+    /// All Contacts selected, without filling the people for it (the caller does)
+    fn select_all_contacts(&self) {
+        self.filling.set(true);
+        self.groups.select_row(self.groups.row_at_index(0).as_ref());
+        self.filling.set(false);
+    }
+
+    /// The people of the group selected, or of the whole book, found by the find box
     fn fill_people(&self) {
         let core = &shell().core;
         let filter = self.find.text().trim().to_string();
-        let people: Vec<Person> = match self.selected_group().and_then(|id| core.group(id).ok().flatten()) {
-            None => core
-                .cards(&filter)
-                .unwrap_or_default()
-                .iter()
-                .map(Person::of_card)
-                .collect(),
-            Some(group) => {
-                let cards = core.cards("").unwrap_or_default();
-                group
-                    .members
-                    .iter()
-                    .map(
-                        |member| match member.card.and_then(|id| cards.iter().find(|c| c.id == id)) {
-                            Some(card) => Person::of_card(card),
-                            None => Person {
-                                card: 0,
-                                name: member.name.clone(),
-                                address: member.address.clone(),
-                                phone: String::new(),
-                            },
-                        },
-                    )
-                    .collect()
-            }
-        };
+        let people = match self.selected_group() {
+            None => core.card_rows(&filter),
+            Some(id) => core.group_people(id, &filter),
+        }
+        .unwrap_or_default();
         let objects: Vec<glib::BoxedAnyObject> = people.into_iter().map(glib::BoxedAnyObject::new).collect();
         self.store.splice(0, self.store.n_items(), &objects);
         let empty = if !objects.is_empty() {
@@ -526,11 +452,23 @@ impl Book {
     }
 
     /// The people listed, for the UI test
-    pub fn people(&self) -> Vec<Person> {
-        (0..self.store.n_items())
-            .filter_map(|i| self.store.item(i).and_downcast::<glib::BoxedAnyObject>())
-            .map(|row| row.borrow::<Person>().clone())
-            .collect()
+    #[cfg(feature = "e2e")]
+    pub fn people(&self) -> Vec<BookRow> {
+        (0..self.store.n_items()).filter_map(|i| self.row(i)).collect()
+    }
+
+    /// The person of row `index`
+    fn row(&self, index: u32) -> Option<BookRow> {
+        let item = self.store.item(index).and_downcast::<glib::BoxedAnyObject>()?;
+        Some(item.borrow::<BookRow>().clone())
+    }
+
+    /// Whether row `index` is a card (not an address typed into a group)
+    fn is_card(&self, index: u32) -> bool {
+        self.store
+            .item(index)
+            .and_downcast::<glib::BoxedAnyObject>()
+            .is_some_and(|item| item.borrow::<BookRow>().card != 0)
     }
 
     /// What the empty list says, when it says something (the UI test)
@@ -544,23 +482,23 @@ impl Book {
         self.selection.select_item(index, true);
     }
 
-    fn selected_people(&self) -> Vec<Person> {
+    fn selected_people(&self) -> Vec<BookRow> {
         (0..self.store.n_items())
             .filter(|&i| self.selection.is_selected(i))
-            .filter_map(|i| self.store.item(i).and_downcast::<glib::BoxedAnyObject>())
-            .map(|row| row.borrow::<Person>().clone())
+            .filter_map(|i| self.row(i))
             .collect()
     }
 
     /// Properties, Delete and Write To on while there is something to act on: people selected, or a group
     fn update_actions(&self) {
-        let people = self.selected_people();
+        let selected = self.selection.selection();
+        let any = !selected.is_empty();
+        let one = selected.size() == 1 && self.is_card(selected.minimum());
         let group = self.selected_group().is_some();
-        let one = people.len() == 1 && people[0].card != 0;
         for (name, on) in [
             (PROPERTIES, one || group),
-            (DELETE, !people.is_empty() || group),
-            (WRITE_TO, !people.is_empty() || group),
+            (DELETE, any || group),
+            (WRITE_TO, any || group),
         ] {
             if let Some(action) = self.window.lookup_action(name).and_downcast::<gio::SimpleAction>() {
                 action.set_enabled(on);
@@ -574,9 +512,7 @@ impl Book {
         if let Some(id) = crate::book_dialogs::contact(&self.window, 0).await {
             // the new one shown and selected, in the whole book
             self.find.set_text("");
-            self.filling.set(true);
-            self.groups.select_row(self.groups.row_at_index(0).as_ref());
-            self.filling.set(false);
+            self.select_all_contacts();
             self.reload();
             self.select_card(id);
         }
@@ -590,10 +526,15 @@ impl Book {
     }
 
     fn select_card(&self, id: CardId) {
-        if let Some(index) = self.people().iter().position(|p| p.card == id) {
-            self.selection.select_item(index as u32, true);
-            self.view
-                .scroll_to(index as u32, None, gtk::ListScrollFlags::FOCUS, None);
+        let found = (0..self.store.n_items()).find(|&i| {
+            self.store
+                .item(i)
+                .and_downcast::<glib::BoxedAnyObject>()
+                .is_some_and(|item| item.borrow::<BookRow>().card == id)
+        });
+        if let Some(index) = found {
+            self.selection.select_item(index, true);
+            self.view.scroll_to(index, None, gtk::ListScrollFlags::FOCUS, None);
         }
     }
 
@@ -639,9 +580,7 @@ impl Book {
             let ask = t!(UiGroupDeleteAsk, name = &group.name);
             if ui::confirm(&self.window, TITLE, &ask, true).await {
                 let _ = core.delete_group(id);
-                self.filling.set(true);
-                self.groups.select_row(self.groups.row_at_index(0).as_ref());
-                self.filling.set(false);
+                self.select_all_contacts();
                 self.reload();
             }
             return;
@@ -650,19 +589,16 @@ impl Book {
         if !ui::confirm(&self.window, TITLE, &ask, true).await {
             return;
         }
-        let first = (0..self.store.n_items())
-            .find(|&i| self.selection.is_selected(i))
-            .unwrap_or(0);
+        let first = self.selection.selection().minimum();
         let cards: Vec<CardId> = people.iter().map(|p| p.card).filter(|id| *id != 0).collect();
-        let _ = core.delete_cards(&cards);
         // an address of no card leaves the group it was typed into
-        if people.iter().any(|p| p.card == 0)
-            && let Some(mut group) = self.selected_group().and_then(|id| core.group(id).ok().flatten())
-        {
-            group
-                .members
-                .retain(|m| m.card.is_some() || !people.iter().any(|p| p.card == 0 && p.address == m.address));
-            let _ = core.save_group(&group);
+        let typed: Vec<String> = people
+            .iter()
+            .filter(|p| p.card == 0)
+            .map(|p| p.address.clone())
+            .collect();
+        if let Err(error) = core.delete_from_book(self.selected_group(), &cards, &typed) {
+            ui::alert(&self.window, TITLE, &error.to_string()).await;
         }
         self.reload();
         // the next one selected, where the first deleted was
@@ -683,10 +619,14 @@ impl Book {
                 .filter(|l| !l.is_empty())
                 .collect()
         } else {
-            people.iter().map(Person::label).filter(|l| !l.is_empty()).collect()
+            people
+                .iter()
+                .map(|p| p.label.clone())
+                .filter(|l| !l.is_empty())
+                .collect()
         };
         if labels.is_empty() {
-            let name = people.first().map(|p| p.shown().to_string()).unwrap_or_default();
+            let name = people.first().map(|p| p.name.clone()).unwrap_or_default();
             ui::alert(&self.window, TITLE, &t!(UiBookNoAddress, name = &name)).await;
             return;
         }
@@ -823,50 +763,4 @@ pub async fn export(parent: &gtk::Window) {
         Err(error) => t!(UiBookNotExported, reason = &error.to_string()),
     };
     ui::alert(parent, &title, &said).await;
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn a_person_as_it_goes_in_a_field() {
-        let person = Person {
-            card: 1,
-            name: "Mary Smith".into(),
-            address: "mary@example.com".into(),
-            phone: String::new(),
-        };
-        assert_eq!(person.label(), "Mary Smith <mary@example.com>");
-        let nameless = Person {
-            name: String::new(),
-            ..person.clone()
-        };
-        assert_eq!(nameless.shown(), "mary@example.com");
-        assert_eq!(
-            Person {
-                address: String::new(),
-                ..person
-            }
-            .label(),
-            ""
-        );
-        let group = Group {
-            id: 1,
-            name: "Team".into(),
-            members: vec![
-                pe_store::Member {
-                    card: Some(1),
-                    name: "Mary Smith".into(),
-                    address: "mary@example.com".into(),
-                },
-                pe_store::Member {
-                    card: None,
-                    name: String::new(),
-                    address: "dave@example.com".into(),
-                },
-            ],
-        };
-        assert_eq!(group_label(&group), "Mary Smith <mary@example.com>, dave@example.com");
-    }
 }

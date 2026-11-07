@@ -8,9 +8,9 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, glib};
+use pe_core::book::group_label;
 use pe_store::{CardId, GroupId, Member};
 
-use crate::address_book::{Person, group_label};
 use crate::app::shell;
 use crate::ui::{self, TITLE};
 use crate::words::Text;
@@ -36,44 +36,33 @@ impl Item {
     }
 }
 
-/// Whether a word of `name` starts with `typed`, ignoring case: how the core finds people by name
-fn name_matches(name: &str, typed: &str) -> bool {
-    let typed = typed.trim().to_lowercase();
-    typed.is_empty()
-        || name.to_lowercase().starts_with(&typed)
-        || name
-            .split_whitespace()
-            .any(|word| word.to_lowercase().starts_with(&typed))
-}
-
-/// The groups (when they are offered) and then the people of the book found by `typed`
+/// The groups (when they are offered) and then the people of the book found by `typed`, each kind read once
 fn items(typed: &str, with_groups: bool) -> Vec<Item> {
     let core = &shell().core;
-    let mut found = Vec::new();
-    if with_groups {
-        for group in core.groups("").unwrap_or_default() {
-            if name_matches(&group.name, typed) {
-                found.push(Item {
-                    card: 0,
-                    group: Some(group.id),
-                    label: group_label(&group),
-                    name: group.name,
-                    address: String::new(),
-                });
-            }
-        }
-    }
-    for card in core.cards(typed.trim()).unwrap_or_default() {
-        let person = Person::of_card(&card);
-        found.push(Item {
-            card: card.id,
+    let groups = if with_groups {
+        core.groups(typed.trim()).unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+    let groups = groups.into_iter().map(|group| Item {
+        card: 0,
+        group: Some(group.id),
+        label: group_label(&group),
+        name: group.name,
+        address: String::new(),
+    });
+    let people = core
+        .card_rows(typed.trim())
+        .unwrap_or_default()
+        .into_iter()
+        .map(|row| Item {
+            card: row.card,
             group: None,
-            label: person.label(),
-            name: person.shown().to_string(),
-            address: person.address,
+            label: row.label,
+            name: row.name,
+            address: row.address,
         });
-    }
-    found
+    groups.chain(people).collect()
 }
 
 /// A row of a list: the icon, the name and the address after it, dimmed
@@ -309,14 +298,7 @@ async fn pick(
         });
         picker.targets[index].list.add_controller(keys);
     }
-    let (send, clicks) = async_channel::unbounded();
-    let closed = send.clone();
-    dialog.connect_closed(move |_| {
-        let _ = closed.try_send(false);
-    });
-    ok.connect_clicked(move |_| {
-        let _ = send.try_send(true);
-    });
+    let clicks = ui::answers(&dialog, &ok);
     dialog.present(Some(parent.as_ref()));
     find.grab_focus();
     let answer = clicks.recv().await.unwrap_or(false);
@@ -371,17 +353,4 @@ pub async fn pick_members(parent: &impl IsA<gtk::Widget>) -> Option<Vec<Member>>
             })
             .collect(),
     )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn names_found_by_a_word() {
-        assert!(name_matches("Team", "tea"));
-        assert!(name_matches("The Team", "TEA"));
-        assert!(name_matches("Anything", ""));
-        assert!(!name_matches("Team", "eam"));
-    }
 }

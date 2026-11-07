@@ -13,7 +13,7 @@ use pe_store::{Card, CardId, Group, GroupId, Member};
 use crate::app::shell;
 use crate::ui::{self, TITLE};
 use crate::words::{self, Text};
-use pe_core::book::is_mailbox;
+use pe_core::book::{add_members, display_name, is_mailbox};
 
 /// The kinds of phone numbers as the core names them, in the order of the list
 const PHONE_KINDS: [&str; 4] = ["home", "work", "cell", ""];
@@ -40,6 +40,20 @@ fn row_button(icon: &str, tooltip: &str, name: &str) -> gtk::Button {
     button.set_valign(gtk::Align::Center);
     button.set_widget_name(name);
     button
+}
+
+/// The "+" button of a row or a group's header that adds what was typed (or a row)
+fn add_button(name: &str) -> gtk::Button {
+    let button = row_button("list-add-symbolic", &title_of(Text::UiContactAdd), name);
+    button.set_valign(gtk::Align::Center);
+    button
+}
+
+/// What a click on "+" or Enter did wrong said over the dialog
+fn say_later(dialog: &glib::WeakRef<adw::Dialog>, why: String) {
+    if let Some(dialog) = dialog.upgrade() {
+        glib::spawn_future_local(async move { ui::alert(&dialog, TITLE, &why).await });
+    }
 }
 
 /// The page of a properties dialog: its groups one under the other, scrolled when they do not fit
@@ -72,14 +86,7 @@ fn present(
     let (dialog, ok) = ui::dialog_with_buttons(title, content, &t!(UiOk), 540);
     dialog.set_content_height(height);
     dialog.set_widget_name(name);
-    let (send, clicks) = async_channel::unbounded();
-    let closed = send.clone();
-    dialog.connect_closed(move |_| {
-        let _ = closed.try_send(false);
-    });
-    ok.connect_clicked(move |_| {
-        let _ = send.try_send(true);
-    });
+    let clicks = ui::answers(&dialog, &ok);
     dialog.present(Some(parent.as_ref()));
     (dialog, clicks)
 }
@@ -228,9 +235,171 @@ impl Phones {
     }
 }
 
-/// The name made of the first and last name, as the core makes it when none is given
-fn full_name(first: &str, last: &str) -> String {
-    format!("{} {}", first.trim(), last.trim()).trim().to_string()
+/// The fields of a contact's names
+struct Names {
+    group: adw::PreferencesGroup,
+    first: adw::EntryRow,
+    last: adw::EntryRow,
+    display: adw::EntryRow,
+    nickname: adw::EntryRow,
+    company: adw::EntryRow,
+}
+
+fn names_section(card: &Card) -> Names {
+    let names = Names {
+        group: adw::PreferencesGroup::new(),
+        first: entry_row(Text::UiContactFirst, &card.first, "contact-first"),
+        last: entry_row(Text::UiContactLast, &card.last, "contact-last"),
+        display: entry_row(Text::UiContactDisplay, &card.name, "contact-display"),
+        nickname: entry_row(Text::UiContactNickname, &card.nickname, "contact-nickname"),
+        company: entry_row(Text::UiContactCompany, &card.company, "contact-company"),
+    };
+    for row in [
+        &names.first,
+        &names.last,
+        &names.display,
+        &names.nickname,
+        &names.company,
+    ] {
+        row.set_activates_default(true);
+        names.group.add(row);
+    }
+    follow_names(&names, card);
+    names
+}
+
+/// The name shown follows the first and last name until it is typed over
+fn follow_names(names: &Names, card: &Card) {
+    let following = Rc::new(Cell::new(
+        card.name.trim().is_empty() || card.name == display_name(&card.first, &card.last),
+    ));
+    let setting = Rc::new(Cell::new(false));
+    let (first, last, display) = (
+        names.first.downgrade(),
+        names.last.downgrade(),
+        names.display.downgrade(),
+    );
+    for field in [&names.first, &names.last] {
+        let (first, last, display) = (first.clone(), last.clone(), display.clone());
+        let (following, setting) = (following.clone(), setting.clone());
+        field.connect_changed(move |_| {
+            let (Some(first), Some(last), Some(display)) = (first.upgrade(), last.upgrade(), display.upgrade()) else {
+                return;
+            };
+            if following.get() {
+                setting.set(true);
+                display.set_text(&display_name(&first.text(), &last.text()));
+                setting.set(false);
+            }
+        });
+    }
+    names.display.connect_changed(move |display| {
+        if setting.get() {
+            return;
+        }
+        let (Some(first), Some(last)) = (first.upgrade(), last.upgrade()) else {
+            return;
+        };
+        let text = display.text();
+        following.set(text.trim().is_empty() || text == display_name(&first.text(), &last.text()));
+    });
+}
+
+fn addresses_section(card: &Card, dialog: &glib::WeakRef<adw::Dialog>) -> Rc<Addresses> {
+    let new = adw::EntryRow::builder()
+        .title(title_of(Text::UiContactAddressHint))
+        .input_purpose(gtk::InputPurpose::Email)
+        .build();
+    new.set_widget_name("contact-new-address");
+    let add = add_button("contact-add-address");
+    new.add_suffix(&add);
+    let addresses = Rc::new(Addresses {
+        group: adw::PreferencesGroup::builder()
+            .title(title_of(Text::UiContactAddresses))
+            .build(),
+        rows: RefCell::default(),
+        new: new.clone(),
+        list: RefCell::new(card.addresses.clone()),
+    });
+    addresses.fill();
+    let typed = {
+        let (addresses, dialog) = (Rc::downgrade(&addresses), dialog.clone());
+        move || {
+            if let Some(Err(why)) = addresses.upgrade().map(|a| a.take_typed()) {
+                say_later(&dialog, why);
+            }
+        }
+    };
+    let on_add = typed.clone();
+    add.connect_clicked(move |_| on_add());
+    new.connect_entry_activated(move |_| typed());
+    addresses
+}
+
+fn phones_section(card: &Card) -> Rc<Phones> {
+    let group = adw::PreferencesGroup::builder()
+        .title(title_of(Text::UiContactPhones))
+        .build();
+    let add = add_button("contact-add-phone");
+    group.set_header_suffix(Some(&add));
+    let phones = Rc::new(Phones {
+        group,
+        rows: RefCell::default(),
+    });
+    for (kind, number) in &card.phones {
+        phones.add(kind, number);
+    }
+    if card.phones.is_empty() {
+        phones.add("", "");
+    }
+    let adding = Rc::downgrade(&phones);
+    add.connect_clicked(move |_| {
+        if let Some(phones) = adding.upgrade() {
+            phones.add("", "").grab_focus();
+        }
+    });
+    phones
+}
+
+fn notes_section(card: &Card) -> (adw::PreferencesGroup, gtk::TextView) {
+    let group = adw::PreferencesGroup::builder()
+        .title(title_of(Text::UiContactNotes))
+        .build();
+    let notes = gtk::TextView::new();
+    notes.set_wrap_mode(gtk::WrapMode::WordChar);
+    notes.buffer().set_text(&card.notes);
+    notes.set_top_margin(8);
+    notes.set_bottom_margin(8);
+    notes.set_left_margin(10);
+    notes.set_right_margin(10);
+    notes.set_widget_name("contact-notes");
+    let frame = gtk::ScrolledWindow::builder()
+        .child(&notes)
+        .min_content_height(90)
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .build();
+    frame.add_css_class("card");
+    group.add(&frame);
+    (group, notes)
+}
+
+/// The card of what the form says, on the one read so what it does not show stays
+fn card_from_form(card: &Card, names: &Names, addresses: &Addresses, phones: &Phones, notes: &gtk::TextView) -> Card {
+    let buffer = notes.buffer();
+    Card {
+        name: names.display.text().trim().to_string(),
+        first: names.first.text().trim().to_string(),
+        last: names.last.text().trim().to_string(),
+        nickname: names.nickname.text().trim().to_string(),
+        company: names.company.text().trim().to_string(),
+        notes: buffer
+            .text(&buffer.start_iter(), &buffer.end_iter(), false)
+            .trim()
+            .to_string(),
+        addresses: addresses.list.borrow().clone(),
+        phones: phones.values(),
+        ..card.clone()
+    }
 }
 
 /// Contact Properties of card `id`, or New Contact for 0; the card's id once OK saved it, None for Cancel
@@ -246,134 +415,15 @@ pub async fn contact(parent: &impl IsA<gtk::Widget>, id: CardId) -> Option<CardI
     } else {
         t!(UiContactTitle, name = &card.name)
     };
-    let first = entry_row(Text::UiContactFirst, &card.first, "contact-first");
-    let last = entry_row(Text::UiContactLast, &card.last, "contact-last");
-    let display = entry_row(Text::UiContactDisplay, &card.name, "contact-display");
-    let nickname = entry_row(Text::UiContactNickname, &card.nickname, "contact-nickname");
-    let company = entry_row(Text::UiContactCompany, &card.company, "contact-company");
-    let names = adw::PreferencesGroup::new();
-    for row in [&first, &last, &display, &nickname, &company] {
-        row.set_activates_default(true);
-        names.add(row);
-    }
-    // the name shown follows the first and last name until it is typed over
-    let following = Rc::new(Cell::new(
-        card.name.trim().is_empty() || card.name == full_name(&card.first, &card.last),
-    ));
-    let setting = Rc::new(Cell::new(false));
-    for field in [&first, &last] {
-        let (first, last, display) = (first.downgrade(), last.downgrade(), display.downgrade());
-        let (following, setting) = (following.clone(), setting.clone());
-        field.connect_changed(move |_| {
-            let (Some(first), Some(last), Some(display)) = (first.upgrade(), last.upgrade(), display.upgrade()) else {
-                return;
-            };
-            if following.get() {
-                setting.set(true);
-                display.set_text(&full_name(&first.text(), &last.text()));
-                setting.set(false);
-            }
-        });
-    }
-    {
-        let (first, last) = (first.downgrade(), last.downgrade());
-        let (following, setting) = (following.clone(), setting.clone());
-        display.connect_changed(move |display| {
-            if setting.get() {
-                return;
-            }
-            let (Some(first), Some(last)) = (first.upgrade(), last.upgrade()) else {
-                return;
-            };
-            let text = display.text();
-            following.set(text.trim().is_empty() || text == full_name(&first.text(), &last.text()));
-        });
-    }
-
-    let address_group = adw::PreferencesGroup::builder()
-        .title(title_of(Text::UiContactAddresses))
-        .build();
-    let new = adw::EntryRow::builder()
-        .title(title_of(Text::UiContactAddressHint))
-        .input_purpose(gtk::InputPurpose::Email)
-        .build();
-    new.set_widget_name("contact-new-address");
-    let add = gtk::Button::from_icon_name("list-add-symbolic");
-    add.set_tooltip_text(Some(&title_of(Text::UiContactAdd)));
-    add.add_css_class("flat");
-    add.set_valign(gtk::Align::Center);
-    add.set_widget_name("contact-add-address");
-    new.add_suffix(&add);
-    let addresses = Rc::new(Addresses {
-        group: address_group.clone(),
-        rows: RefCell::default(),
-        new: new.clone(),
-        list: RefCell::new(card.addresses.clone()),
-    });
-    addresses.fill();
-    let dialog_cell: Rc<RefCell<Option<adw::Dialog>>> = Rc::default();
-    let typed = {
-        let addresses = addresses.clone();
-        let dialog_cell = dialog_cell.clone();
-        move || {
-            if let Err(why) = addresses.take_typed() {
-                let dialog = dialog_cell.borrow().clone();
-                if let Some(dialog) = dialog {
-                    glib::spawn_future_local(async move { ui::alert(&dialog, TITLE, &why).await });
-                }
-            }
-        }
-    };
-    let on_add = typed.clone();
-    add.connect_clicked(move |_| on_add());
-    new.connect_entry_activated(move |_| typed());
-
-    let phone_group = adw::PreferencesGroup::builder()
-        .title(title_of(Text::UiContactPhones))
-        .build();
-    let add_phone = gtk::Button::from_icon_name("list-add-symbolic");
-    add_phone.set_tooltip_text(Some(&title_of(Text::UiContactAdd)));
-    add_phone.add_css_class("flat");
-    add_phone.set_widget_name("contact-add-phone");
-    phone_group.set_header_suffix(Some(&add_phone));
-    let phones = Rc::new(Phones {
-        group: phone_group.clone(),
-        rows: RefCell::default(),
-    });
-    for (kind, number) in &card.phones {
-        phones.add(kind, number);
-    }
-    if card.phones.is_empty() {
-        phones.add("", "");
-    }
-    let adding = phones.clone();
-    add_phone.connect_clicked(move |_| {
-        adding.add("", "").grab_focus();
-    });
-
-    let notes_group = adw::PreferencesGroup::builder()
-        .title(title_of(Text::UiContactNotes))
-        .build();
-    let notes = gtk::TextView::new();
-    notes.set_wrap_mode(gtk::WrapMode::WordChar);
-    notes.buffer().set_text(&card.notes);
-    notes.set_top_margin(8);
-    notes.set_bottom_margin(8);
-    notes.set_left_margin(10);
-    notes.set_right_margin(10);
-    notes.set_widget_name("contact-notes");
-    let notes_frame = gtk::ScrolledWindow::builder()
-        .child(&notes)
-        .min_content_height(90)
-        .hscrollbar_policy(gtk::PolicyType::Never)
-        .build();
-    notes_frame.add_css_class("card");
-    notes_group.add(&notes_frame);
-
-    let content = page(&[&names, &address_group, &phone_group, &notes_group]);
+    let names = names_section(&card);
+    let dialog_ref = glib::WeakRef::<adw::Dialog>::new();
+    let addresses = addresses_section(&card, &dialog_ref);
+    let phones = phones_section(&card);
+    let (notes_group, notes) = notes_section(&card);
+    let content = page(&[&names.group, &addresses.group, &phones.group, &notes_group]);
     let (dialog, clicks) = present(parent, &title, &content, "contact-dialog", 680);
-    *dialog_cell.borrow_mut() = Some(dialog.clone());
-    first.grab_focus();
+    dialog_ref.set(Some(&dialog));
+    names.first.grab_focus();
     while let Ok(ok) = clicks.recv().await {
         if !ok {
             return None;
@@ -383,35 +433,8 @@ pub async fn contact(parent: &impl IsA<gtk::Widget>, id: CardId) -> Option<CardI
             ui::alert(&dialog, TITLE, &why).await;
             continue;
         }
-        let buffer = notes.buffer();
-        let card = Card {
-            name: display.text().trim().to_string(),
-            first: first.text().trim().to_string(),
-            last: last.text().trim().to_string(),
-            nickname: nickname.text().trim().to_string(),
-            company: company.text().trim().to_string(),
-            notes: buffer
-                .text(&buffer.start_iter(), &buffer.end_iter(), false)
-                .trim()
-                .to_string(),
-            addresses: addresses.list.borrow().clone(),
-            phones: phones.values(),
-            ..card.clone()
-        };
-        if card.name.is_empty() && full_name(&card.first, &card.last).is_empty() && card.addresses.is_empty() {
-            ui::alert(&dialog, TITLE, &t!(UiContactNameNeeded)).await;
-            continue;
-        }
-        // nameless: known by the default address
-        let card = if card.name.is_empty() && full_name(&card.first, &card.last).is_empty() {
-            Card {
-                name: card.addresses[0].clone(),
-                ..card
-            }
-        } else {
-            card
-        };
-        match core.save_card(&card) {
+        // the core refuses a contact without a name or an address, and says why
+        match core.save_card(&card_from_form(&card, &names, &addresses, &phones, &notes)) {
             Ok(id) => {
                 dialog.close();
                 return Some(id);
@@ -476,22 +499,29 @@ impl Members {
         }
     }
 
-    /// Adds those not in the group yet: a card once, an address of no card once
+    /// Adds those not in the group yet, as the core keeps a group: a card once, an address once
     fn add(self: &Rc<Self>, members: Vec<Member>) {
-        {
-            let mut list = self.list.borrow_mut();
-            for member in members {
-                let known = list.iter().any(|m| match (m.card, member.card) {
-                    (Some(a), Some(b)) => a == b,
-                    (None, None) => m.address.eq_ignore_ascii_case(&member.address),
-                    _ => false,
-                });
-                if !known {
-                    list.push(member);
-                }
-            }
-        }
+        let merged = add_members(&self.list.borrow(), &members);
+        *self.list.borrow_mut() = merged;
         self.fill();
+    }
+
+    /// The address typed in `new` into the group; Err with the words for one that is not an address
+    fn take_typed(self: &Rc<Self>, new: &adw::EntryRow) -> Result<(), String> {
+        let typed = new.text().trim().to_string();
+        if typed.is_empty() {
+            return Ok(());
+        }
+        if !is_mailbox(&typed) {
+            return Err(t!(UiContactAddressInvalid, address = &typed));
+        }
+        self.add(vec![Member {
+            card: None,
+            name: String::new(),
+            address: typed,
+        }]);
+        new.set_text("");
+        Ok(())
     }
 }
 
@@ -534,43 +564,19 @@ pub async fn group(parent: &impl IsA<gtk::Widget>, id: GroupId) -> Option<GroupI
         .input_purpose(gtk::InputPurpose::Email)
         .build();
     new.set_widget_name("group-new-member");
-    let add = gtk::Button::from_icon_name("list-add-symbolic");
-    add.set_tooltip_text(Some(&title_of(Text::UiContactAdd)));
-    add.add_css_class("flat");
-    add.set_valign(gtk::Align::Center);
-    add.set_widget_name("group-add-member");
+    let add = add_button("group-add-member");
     new.add_suffix(&add);
     typed_group.add(&new);
 
     let content = page(&[&names, &member_group, &typed_group]);
     let (dialog, clicks) = present(parent, &title, &content, "group-dialog", 600);
-    let take_typed = {
-        let (members, new) = (members.clone(), new.clone());
-        move || -> Result<(), String> {
-            let typed = new.text().trim().to_string();
-            if typed.is_empty() {
-                return Ok(());
-            }
-            if !is_mailbox(&typed) {
-                return Err(t!(UiContactAddressInvalid, address = &typed));
-            }
-            members.add(vec![Member {
-                card: None,
-                name: String::new(),
-                address: typed,
-            }]);
-            new.set_text("");
-            Ok(())
-        }
-    };
     {
-        let take_typed = take_typed.clone();
-        let dialog = dialog.downgrade();
+        let (members, new_row, dialog) = (Rc::downgrade(&members), new.downgrade(), dialog.downgrade());
         let added = move || {
-            if let Err(why) = take_typed()
-                && let Some(dialog) = dialog.upgrade()
+            if let (Some(members), Some(new)) = (members.upgrade(), new_row.upgrade())
+                && let Err(why) = members.take_typed(&new)
             {
-                glib::spawn_future_local(async move { ui::alert(&dialog, TITLE, &why).await });
+                say_later(&dialog, why);
             }
         };
         let on_add = added.clone();
@@ -596,7 +602,7 @@ pub async fn group(parent: &impl IsA<gtk::Widget>, id: GroupId) -> Option<GroupI
         if !ok {
             return None;
         }
-        if let Err(why) = take_typed() {
+        if let Err(why) = members.take_typed(&new) {
             ui::alert(&dialog, TITLE, &why).await;
             continue;
         }
@@ -626,13 +632,6 @@ pub async fn group(parent: &impl IsA<gtk::Widget>, id: GroupId) -> Option<GroupI
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn the_name_of_first_and_last() {
-        assert_eq!(full_name(" Mary ", "Smith"), "Mary Smith");
-        assert_eq!(full_name("", "Smith"), "Smith");
-        assert_eq!(full_name("", ""), "");
-    }
 
     #[test]
     fn a_kind_for_each_name() {

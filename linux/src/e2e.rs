@@ -820,6 +820,15 @@ async fn close_compose(compose: &crate::compose::Compose) {
     wait_until(10, || !compose.window.is_visible()).await;
 }
 
+/// Typed into an entry a letter at a time, as the keyboard does
+fn type_letters(entry: &gtk::Entry, text: &str) {
+    if let Some(delegate) = entry.delegate() {
+        for letter in text.chars() {
+            delegate.emit_by_name::<()>("insert-at-cursor", &[&letter.to_string()]);
+        }
+    }
+}
+
 /// Runs a command as the menu would, outside the driver's own turn (a command may open a dialog with its own loop)
 fn command(command: Command) {
     glib::idle_add_local_once(move || run_command(command));

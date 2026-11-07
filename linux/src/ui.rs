@@ -380,6 +380,19 @@ pub fn dialog_with_buttons(
     (dialog, ok)
 }
 
+/// The answers of a dialog with OK: true for each click on `ok`, false once it closed
+pub fn answers(dialog: &adw::Dialog, ok: &gtk::Button) -> async_channel::Receiver<bool> {
+    let (send, answers) = async_channel::unbounded();
+    let closed = send.clone();
+    dialog.connect_closed(move |_| {
+        let _ = closed.try_send(false);
+    });
+    ok.connect_clicked(move |_| {
+        let _ = send.try_send(true);
+    });
+    answers
+}
+
 pub fn wrapped_label(text: &str) -> gtk::Label {
     let label = gtk::Label::new(Some(text));
     label.set_wrap(true);
