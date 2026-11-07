@@ -25,7 +25,6 @@ win-webview-missing = WebView2 käituskeskkond pole saadaval.
 
 win-delete-button = &Kustuta
 win-find-label = &Otsi:
-win-col-to = Saaja
 win-save-as-button = Salvesta &nimega...
 win-too-many-files = Liiga palju faile korraga: valige vähem.
 

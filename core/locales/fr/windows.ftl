@@ -25,7 +25,6 @@ win-webview-missing = Le runtime WebView2 n'est pas disponible.
 
 win-delete-button = &Supprimer
 win-find-label = &Rechercher :
-win-col-to = À
 win-save-as-button = Enregistrer &sous...
 win-too-many-files = Trop de fichiers à la fois : choisissez-en moins.
 

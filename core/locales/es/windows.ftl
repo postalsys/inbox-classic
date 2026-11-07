@@ -25,7 +25,6 @@ win-webview-missing = El entorno de ejecución de WebView2 no está disponible.
 
 win-delete-button = &Eliminar
 win-find-label = &Buscar:
-win-col-to = Para
 win-save-as-button = Guardar &como...
 win-too-many-files = Demasiados archivos a la vez: elija menos.
 

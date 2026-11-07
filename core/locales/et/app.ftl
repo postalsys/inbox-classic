@@ -102,7 +102,10 @@ ui-cancel = Loobu
 ui-close = Sulge
 ui-col-subject = Teema
 ui-col-from = Saatja
+ui-col-to = Saaja
 ui-col-received = Saabunud
+# review: new
+ui-col-sent = Saadetud
 ui-col-size = Suurus
 ui-col-folder = Kaust
 ui-col-account = Konto
