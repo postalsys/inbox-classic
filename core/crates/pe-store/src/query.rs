@@ -2,7 +2,8 @@
 //! `"exact phrases"`, `-word` for none of it, `OR` between alternatives, and operators:
 //!
 //! - `from:` `to:` `cc:` `bcc:` `subject:` `filename:` a word in that part (to, cc and bcc all mean the recipients)
-//! - `is:unread` `is:read` `is:starred` (or `is:flagged`) `is:answered`; `has:attachment`
+//! - `is:unread` `is:read` `is:starred` (or `is:flagged`) `is:answered` `is:bounce` (a delivery failure or delay
+//!   notice); `has:attachment`
 //! - `in:inbox` `in:sent` `in:drafts` `in:trash` `in:spam` `in:archive`, `in:<folder name>`, `in:anywhere`
 //!   (`label:` is the same); a search with `in:` looks in every account
 //! - `before:` `after:` a day (2025/01/31 or 2025-01-31), `older_than:` `newer_than:` (2d, 3m, 1y)
@@ -57,6 +58,8 @@ pub enum Term {
     Flagged(bool),
     Answered(bool),
     Attachment(bool),
+    /// A delivery failure or delay notice
+    Bounce(bool),
     In {
         place: Place,
         negated: bool,
@@ -241,6 +244,7 @@ fn term(raw: &Token, now: i64) -> Term {
         ("is", "unstarred" | "unflagged") => Some(Term::Flagged(!yes)),
         ("is", "answered" | "replied") => Some(Term::Answered(yes)),
         ("has", "attachment" | "attachments") => Some(Term::Attachment(yes)),
+        ("is", "bounce" | "bounced") => Some(Term::Bounce(yes)),
         ("in" | "label", _) => Some(Term::In {
             place: place(&raw.text),
             negated: raw.negated,
@@ -413,6 +417,10 @@ mod tests {
             [Term::Seen(true), Term::Flagged(true), Term::Flagged(true)]
         );
         assert_eq!(parse("is:answered"), [Term::Answered(true)]);
+        assert_eq!(
+            parse("is:bounce -is:bounced"),
+            [Term::Bounce(true), Term::Bounce(false)]
+        );
         assert_eq!(
             parse("has:attachment -has:attachment"),
             [Term::Attachment(true), Term::Attachment(false)]

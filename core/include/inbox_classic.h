@@ -173,6 +173,15 @@ typedef enum PeSortField {
   PE_SORT_FIELD_SIZE = 4,
 } PeSortField;
 
+// What a link clicked in the reading pane is to the app
+typedef enum PeReaderLink {
+  // A link of the message: the browser opens it, as before
+  PE_READER_LINK_OTHER = 0,
+  // "Show the message that bounced" on a bounce's card: select the message at `bounced_folder` and
+  // `bounced_uid` of the view's `PeMessageInfo`
+  PE_READER_LINK_BOUNCED_MESSAGE = 1,
+} PeReaderLink;
+
 // How a message lets its reader leave its mailing list
 typedef enum PeUnsubscribe {
   // It does not say
@@ -505,6 +514,9 @@ typedef struct PeMessage {
   uint8_t flag_color;
   bool answered;
   bool has_attachments;
+  // A notice that a message was not delivered, or not yet (a bounce): the list shows its icon in the attachment
+  // column's place
+  bool bounce;
 } PeMessage;
 
 // The event of a message's calendar part, as the reading pane shows it
@@ -550,6 +562,14 @@ typedef struct PeMessageInfo {
   const struct PeInvitation *invitation;
   // The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
   bool has_logo;
+  // A notice that a message was not delivered, or not yet: `document` starts with a card that explains it
+  bool bounce;
+  // The message the bounce returns is in the account (Sent Items first), at `bounced_folder` and `bounced_uid`:
+  // the card links to it, and a click on that link (`pe_reader_link` says `PE_READER_LINK_BOUNCED_MESSAGE`)
+  // selects it
+  bool has_bounced_message;
+  int64_t bounced_folder;
+  uint64_t bounced_uid;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -1413,6 +1433,14 @@ char *pe_folder_empty_question(const struct PeCore *core,
 char *pe_folder_empty(const struct PeCore *core,
                       int64_t folder,
                       char **error);
+
+// What `uri`, a link clicked in the reading pane (the URI the web view's navigation names), is: one of the
+// document's own, which the app handles itself, or one to open in the browser. The web views cancel every navigation
+// as before; the app asks this first.
+//
+// # Safety
+// `uri` must be NULL or a NUL-terminated string.
+enum PeReaderLink pe_reader_link(const char *uri);
 
 // The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the
 // calling thread; the app's windows use `pe_message_view_start`, which builds it on a worker.

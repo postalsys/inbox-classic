@@ -1,7 +1,7 @@
 //! The message list fields of a fetched message
 
-use pe_imap::Address;
 use pe_imap::client::FetchedMessage;
+use pe_imap::{Address, BodyStructure};
 use pe_store::MessageInfo;
 
 fn display(address: &Address) -> &str {
@@ -10,6 +10,15 @@ fn display(address: &Address) -> &str {
     } else {
         &address.name
     }
+}
+
+/// Whether a message is a delivery report (RFC 3464): `multipart/report; report-type=delivery-status`, a bounce or a
+/// delay notice the list marks before it is opened
+pub(crate) fn is_delivery_report(structure: &BodyStructure) -> bool {
+    structure.content_type.eq_ignore_ascii_case("multipart/report")
+        && structure.parameters.iter().any(|(key, value)| {
+            key.eq_ignore_ascii_case("report-type") && value.trim().eq_ignore_ascii_case("delivery-status")
+        })
 }
 
 /// The message list fields of a message fetched with the summary items; None without a UID
@@ -36,6 +45,7 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         .as_ref()
         .map(|b| b.attachments())
         .unwrap_or_default();
+    let bounce = message.body_structure.as_ref().is_some_and(is_delivery_report);
     let attachment_names: Vec<&str> = attachments.iter().filter_map(|part| part.filename()).collect();
     let attachment_names = attachment_names.join("\n");
     let attachment_count = attachments.len() as u32;
@@ -70,6 +80,7 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         references,
         gmail_thread: message.thread_id,
         thread_id: None,
+        bounce,
     })
 }
 
@@ -184,5 +195,42 @@ mod tests {
             ("Aruanne õhtu.pdf\ndata.bin", 2)
         );
         assert!(summary.has_attachments);
+        assert!(!summary.bounce);
+    }
+
+    #[test]
+    fn delivery_reports_are_bounces() {
+        use pe_imap::BodyStructure;
+        let report = |content_type: &str, report_type: &str| FetchedMessage {
+            uid: Some(1),
+            body_structure: Some(BodyStructure {
+                content_type: content_type.into(),
+                parameters: [("report-type".to_string(), report_type.to_string())].into(),
+                children: vec![BodyStructure {
+                    content_type: "text/plain".into(),
+                    ..Default::default()
+                }],
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        assert!(summary(report("multipart/report", "delivery-status")).unwrap().bounce);
+        assert!(summary(report("multipart/report", "Delivery-Status")).unwrap().bounce);
+        // a read receipt and a feedback report are reports of something else
+        assert!(
+            !summary(report("multipart/report", "disposition-notification"))
+                .unwrap()
+                .bounce
+        );
+        assert!(!summary(report("multipart/mixed", "delivery-status")).unwrap().bounce);
+        // without a structure: not known to be one
+        assert!(
+            !summary(FetchedMessage {
+                uid: Some(2),
+                ..Default::default()
+            })
+            .unwrap()
+            .bounce
+        );
     }
 }

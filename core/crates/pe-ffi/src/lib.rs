@@ -277,6 +277,16 @@ mod tests {
     }
 
     #[test]
+    fn tells_the_cards_link_from_the_messages() {
+        use crate::core::{PeReaderLink, pe_reader_link};
+        let link = |uri: &str| unsafe { pe_reader_link(CString::new(uri).unwrap().as_ptr()) };
+        assert_eq!(link(pe_html::BOUNCED_MESSAGE_LINK), PeReaderLink::BouncedMessage);
+        assert_eq!(link("https://example.com/"), PeReaderLink::Other);
+        assert_eq!(link("mailto:a@example.com"), PeReaderLink::Other);
+        assert_eq!(unsafe { pe_reader_link(std::ptr::null()) }, PeReaderLink::Other);
+    }
+
+    #[test]
     fn version_matches_the_crate() {
         let version = unsafe { CStr::from_ptr(pe_version()) };
         assert_eq!(version.to_str().unwrap(), env!("CARGO_PKG_VERSION"));
