@@ -16,6 +16,7 @@ mod compose;
 mod contentline;
 mod export;
 mod fold;
+mod list_view;
 pub mod mailto;
 mod requests;
 mod search;
@@ -36,6 +37,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
+pub use list_view::ListView;
 use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
 pub use pe_store::FlagColor;
