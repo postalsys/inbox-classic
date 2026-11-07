@@ -3,7 +3,7 @@
 //! conversation id. Each account keeps a map from those ids to a conversation id (`thread_ids`); a message that names
 //! ids of two conversations joins them into one.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use rusqlite::types::Value;
 use rusqlite::{OptionalExtension, params, params_from_iter};
@@ -586,30 +586,39 @@ impl Store {
         sort: Sort,
         ranges: &[(u64, u64)],
     ) -> Result<Vec<MessageRef>> {
-        let mut refs = Vec::new();
-        let mut collapsed = Vec::new();
+        // the rows in list order; a collapsed conversation's row stands for its messages, oldest first, in its place
+        let mut rows: Vec<std::result::Result<MessageRef, i64>> = Vec::new();
         for &(start, end) in ranges {
             for message in self.search(search, sort, start, end - start)? {
-                match message.thread {
-                    Some(place) if place.depth == 0 && !place.expanded && place.count > 1 => {
-                        collapsed.push(place.thread)
-                    }
-                    _ => refs.push(MessageRef {
+                rows.push(match message.thread {
+                    Some(place) if place.depth == 0 && !place.expanded && place.count > 1 => Err(place.thread),
+                    _ => Ok(MessageRef {
                         folder: message.folder_id,
                         uid: message.info.uid,
                     }),
-                }
+                });
             }
         }
-        refs.extend(self.thread_refs(search, &collapsed)?);
-        refs.sort_by_key(|r| (r.folder, r.uid));
-        refs.dedup();
+        let collapsed: Vec<i64> = rows.iter().filter_map(|row| row.err()).collect();
+        let mut members: HashMap<i64, Vec<MessageRef>> = HashMap::new();
+        for (thread, found) in self.thread_members(search, &collapsed)? {
+            members.entry(thread).or_default().push(found);
+        }
+        let mut seen = HashSet::new();
+        let mut refs = Vec::new();
+        for row in rows {
+            let found = match row {
+                Ok(found) => vec![found],
+                Err(thread) => members.remove(&thread).unwrap_or_default(),
+            };
+            refs.extend(found.into_iter().filter(|r| seen.insert(*r)));
+        }
         Ok(refs)
     }
 
-    /// The messages of the conversations of `refs` in the list `search` makes: what an action on a collapsed
-    /// conversation's row acts on
-    pub fn thread_refs(&self, search: &Search, threads: &[i64]) -> Result<Vec<MessageRef>> {
+    /// The messages of the conversations `threads` in the list `search` makes, each with its conversation, oldest
+    /// first
+    fn thread_members(&self, search: &Search, threads: &[i64]) -> Result<Vec<(i64, MessageRef)>> {
         if threads.is_empty() {
             return Ok(Vec::new());
         }
@@ -618,17 +627,31 @@ impl Store {
         let marks: Vec<String> = (0..threads.len()).map(|i| format!("?{}", first + i)).collect();
         values.extend(threads.iter().map(|&t| Value::Integer(t)));
         let mut statement = self.db.prepare(&format!(
-            "SELECT folder_id, uid FROM messages WHERE {condition} AND thread_id IN ({})",
+            "SELECT thread_id, folder_id, uid FROM messages WHERE {condition} AND thread_id IN ({}) \
+             ORDER BY +{WHEN}, uid, id",
             marks.join(", ")
         ))?;
         statement
             .query_map(params_from_iter(values), |row| {
-                Ok(MessageRef {
-                    folder: row.get(0)?,
-                    uid: row.get::<_, i64>(1)? as u64,
-                })
+                Ok((
+                    row.get(0)?,
+                    MessageRef {
+                        folder: row.get(1)?,
+                        uid: row.get::<_, i64>(2)? as u64,
+                    },
+                ))
             })?
             .collect()
+    }
+
+    /// The messages of the conversations of `refs` in the list `search` makes: what an action on a collapsed
+    /// conversation's row acts on
+    pub fn thread_refs(&self, search: &Search, threads: &[i64]) -> Result<Vec<MessageRef>> {
+        Ok(self
+            .thread_members(search, threads)?
+            .into_iter()
+            .map(|(_, found)| found)
+            .collect())
     }
 }
 
@@ -739,6 +762,12 @@ mod tests {
         assert_eq!(store.count_search(&grouped).unwrap(), (2, 1));
         let picked = store.refs_in_ranges(&grouped, newest, &[(0, 1)]).unwrap();
         assert_eq!(picked.len(), 3, "the three messages of the collapsed conversation");
+        let both = store.refs_in_ranges(&grouped, newest, &[(0, 2)]).unwrap();
+        assert_eq!(
+            both.iter().map(|r| r.uid).collect::<Vec<_>>(),
+            [1, 3, 4, 2],
+            "in list order: the conversation oldest first in its row's place, then d"
+        );
         assert_eq!(
             store.positions(&grouped, newest, &picked).unwrap(),
             [0],
