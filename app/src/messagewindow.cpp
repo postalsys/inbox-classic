@@ -42,7 +42,9 @@ struct MessageWindow {
     std::wstring notFound;
     Reader reader;
 
-    PeSearch Search() const { return {order.folder, order.allInboxes, PE_SHOW_ALL, order.text.c_str()}; }
+    PeSearch Search() const {
+        return {order.folder, order.allInboxes, PE_SHOW_ALL, order.text.c_str(), false, nullptr, 0, order.hideIgnored};
+    }
 };
 
 // the message windows open, in the order they opened

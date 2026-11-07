@@ -360,6 +360,8 @@ struct MessageListOrder {
     std::string text;
     PeSortField sort = PE_SORT_FIELD_DATE;
     bool ascending = false;
+    // View > Hide Ignored Conversations: their messages left out
+    bool hideIgnored = false;
 };
 // the message `uid` of `folder` in a window of its own (double-click or Enter in the list), marked read; brought to the
 // front when it is open already. A window of its own on the taskbar, as a compose window is; what it does to the
@@ -399,6 +401,8 @@ struct UiEvent {
     std::string detail;
     // how many messages, for NewMail
     uint64_t count = 0;
+    // NewMail: the newest is in a watched conversation (perhaps in a folder other than the Inbox)
+    bool watched = false;
 };
 
 // the folder tree, the message list and the reading pane
@@ -554,6 +558,14 @@ public:
     void SetGrouped(bool on);
     // View > Expand All Conversations (`open`) and Collapse All Conversations
     void ExpandAll(bool open);
+    // Message > Watch Conversation (PE_ACTION_WATCH) and Ignore Conversation (PE_ACTION_IGNORE) on the selected
+    // messages' conversations, or the mark taken away when all of them have it; the status bar says what was done
+    void MarkConversations(PeAction action);
+    // the check marks of those two in `menu`: checked when every selected message has the mark
+    void UpdateConversationMarks(HMENU menu);
+    // View > Hide Ignored Conversations, kept for the next start, and turning it on or off
+    bool HideIgnored() const { return hideIgnored_; }
+    void SetHideIgnored(bool on);
     // the list subclassed for the conversations: Right and Left, and a click on a + or - box; true when handled
     bool OnListInput(UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -611,6 +623,8 @@ private:
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
     // a row's font: bold as the core says (unread, or a collapsed conversation with an unread message), or the list's
     HFONT RowFont(const PeMessage& row) const;
+    // the text of an ignored conversation's row grey, unless the row is selected
+    void GreyIgnored(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const;
     // the Subject cell of a list grouped by conversation, drawn whole: a conversation's + or - box, the subject indented
     // under its first message, and how many messages it has
     void DrawSubject(HDC dc, int index, const PeMessage& row);
@@ -761,6 +775,8 @@ private:
     // a row a conversation, and the conversations opened (sorted) in the folder shown
     bool threads_ = true;
     std::vector<int64_t> expanded_;
+    // View > Hide Ignored Conversations
+    bool hideIgnored_ = false;
     PeSortField sort_ = PE_SORT_FIELD_DATE;
     bool ascending_ = false;
     // the pages of the list, the most recently used last

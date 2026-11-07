@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <functional>
 #include <set>
+#include <utility>
 
 #include "app.h"
 #include "icons.h"
@@ -58,7 +59,7 @@ void OnCoreEvent(void* context, const PeEvent* event) noexcept {
     try {
         auto* copy = new UiEvent{event->kind, event->account, event->folder, event->uid, event->failure,
                                  event->message ? core::Widen(event->message) : std::wstring(),
-                                 event->detail ? std::string(event->detail) : std::string(), event->count};
+                                 event->detail ? std::string(event->detail) : std::string(), event->count, event->watched};
         if (!PostMessageW(static_cast<HWND>(context), WM_CORE_EVENT, 0, reinterpret_cast<LPARAM>(copy))) {
             delete copy;
         }
@@ -158,6 +159,9 @@ void UpdateMenu(HMENU menu) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.SelectedCount() > 0 ? MF_ENABLED : MF_GRAYED));
         }
     }
+    if (HasOwnItem(menu, IDM_WATCH_CONVERSATION)) {
+        g_mailbox.UpdateConversationMarks(menu);
+    }
     if (GetMenuState(menu, IDM_UNDO, MF_BYCOMMAND) == static_cast<UINT>(-1)) {
         return;
     }
@@ -227,7 +231,11 @@ void HideToTray() {
     }
 }
 
-// new mail: a notification, unless the window is in front (the list shows it) or notifications are off
+// the heading of the last new mail notification, until the UI test asks for it (kTestNotification)
+std::wstring g_lastNotification;
+
+// new mail: a notification, unless the window is in front (the list shows it) or notifications are off. Mail in a
+// watched conversation says so in its heading
 void NotifyNewMail(const UiEvent& event) {
     if (!g_notify) {
         return;
@@ -239,10 +247,16 @@ void NotifyNewMail(const UiEvent& event) {
     if (subject.empty()) {
         subject = core::T(PE_TEXT_UI_NO_SUBJECT);
     }
-    if (event.count <= 1) {
+    if (event.watched) {
+        g_lastNotification = core::T(PE_TEXT_UI_WATCHED_CONVERSATION);
+        TrayNotify(g_main, g_lastNotification, core::T(PE_TEXT_UI_NEWEST_FROM, {{"sender", event.message}, {"subject", subject}}),
+                   event.folder, event.uid);
+    } else if (event.count <= 1) {
+        g_lastNotification = event.message;
         TrayNotify(g_main, event.message, subject, event.folder, event.uid);
     } else {
-        TrayNotify(g_main, core::T(PE_TEXT_WIN_NEW_MESSAGES, {{"count", std::to_wstring(event.count)}}),
+        g_lastNotification = core::T(PE_TEXT_WIN_NEW_MESSAGES, {{"count", std::to_wstring(event.count)}});
+        TrayNotify(g_main, g_lastNotification,
                    core::T(PE_TEXT_UI_NEWEST_FROM, {{"sender", event.message}, {"subject", subject}}), event.folder, event.uid);
     }
 }
@@ -497,6 +511,9 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_STRING, IDM_ARCHIVE, MenuItem(PE_TEXT_CMD_ARCHIVE, L"A").c_str());
     AppendMenuW(compose, MF_STRING, IDM_JUNK, MenuItem(PE_TEXT_CMD_JUNK, L"Ctrl+J").c_str());
     AppendMenuW(compose, MF_STRING, IDM_NOT_JUNK, MenuItem(PE_TEXT_CMD_NOT_JUNK).c_str());
+    AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(compose, MF_STRING, IDM_WATCH_CONVERSATION, MenuItem(PE_TEXT_CMD_WATCH_CONVERSATION, L"W").c_str());
+    AppendMenuW(compose, MF_STRING, IDM_IGNORE_CONVERSATION, MenuItem(PE_TEXT_CMD_IGNORE_CONVERSATION, L"K").c_str());
     HMENU edit = CreatePopupMenu();
     AppendMenuW(edit, MF_STRING | MF_GRAYED, IDM_UNDO, MenuItem(PE_TEXT_CMD_UNDO, L"Ctrl+Z").c_str());
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
@@ -519,6 +536,8 @@ HMENU BuildMenu() {
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_EXPAND_ALL_THREADS, MenuItem(PE_TEXT_CMD_EXPAND_ALL_THREADS).c_str());
     AppendMenuW(view, MF_STRING, IDM_COLLAPSE_ALL_THREADS, MenuItem(PE_TEXT_CMD_COLLAPSE_ALL_THREADS).c_str());
+    // checked once the list has read the setting (CreateChildren)
+    AppendMenuW(view, MF_STRING, IDM_HIDE_IGNORED, MenuItem(PE_TEXT_CMD_HIDE_IGNORED).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_PICTURES, MenuItem(PE_TEXT_CMD_PICTURES).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
@@ -759,7 +778,8 @@ struct Arguments {
     bool mcp = false;
     // --background: started for an agent (by --mcp), in the tray without its window
     bool background = false;
-    // --test-hooks: the UI test drops and drags in place of Explorer (WM_COPYDATA kTestDragOut, kTestDropFiles)
+    // --test-hooks: the UI test drops and drags in place of Explorer (WM_COPYDATA kTestDragOut, kTestDropFiles) and
+    // asks which notification was shown (kTestNotification)
     bool testHooks = false;
     // --language <code>: the windows in that language (`de`; `qps` the pseudo-language of the UI test), whatever
     // Options says
@@ -890,6 +910,7 @@ void CreateChildren(HWND hwnd) {
     g_status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS, 0, 0, 0, 0, hwnd, nullptr,
                                GetModuleHandleW(nullptr), nullptr);
     g_mailbox.Create(hwnd, g_core.get());
+    CheckMenuItem(GetMenu(hwnd), IDM_HIDE_IGNORED, MF_BYCOMMAND | (g_mailbox.HideIgnored() ? MF_CHECKED : MF_UNCHECKED));
 }
 
 void AddAccount() {
@@ -950,9 +971,11 @@ const wchar_t* kStoreProperty = L"InboxClassic.Store";
 // WM_COPYDATA from another start: a mailto: link to write, or empty to show the window
 constexpr ULONG_PTR kCopyMailto = 1;
 // with --test-hooks only: the selected messages dragged into a folder (its path), files dropped onto a tree item
-// ("<item>|<path>|<path>..."); the result is what the message returns
+// ("<item>|<path>|<path>..."); the result is what the message returns. kTestNotification: 1 when the heading of the
+// last new mail notification since the last ask is the text (empty: none was shown), which is then forgotten
 constexpr ULONG_PTR kTestDragOut = 0x44524F55;
 constexpr ULONG_PTR kTestDropFiles = 0x44524F50;
+constexpr ULONG_PTR kTestNotification = 0x4E4F5445;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1232,6 +1255,16 @@ void OnCommand(WORD id, WORD code) {
     case IDM_COLLAPSE_ALL_THREADS:
         g_mailbox.ExpandAll(id == IDM_EXPAND_ALL_THREADS);
         return;
+    case IDM_WATCH_CONVERSATION:
+        g_mailbox.MarkConversations(PE_ACTION_WATCH);
+        return;
+    case IDM_IGNORE_CONVERSATION:
+        g_mailbox.MarkConversations(PE_ACTION_IGNORE);
+        return;
+    case IDM_HIDE_IGNORED:
+        g_mailbox.SetHideIgnored(!g_mailbox.HideIgnored());
+        CheckMenuItem(GetMenu(g_main), IDM_HIDE_IGNORED, MF_BYCOMMAND | (g_mailbox.HideIgnored() ? MF_CHECKED : MF_UNCHECKED));
+        return;
     case IDM_FIND_IN_MESSAGE:
         // F3 again finds the next place; the menu asks for the words
         g_mailbox.FindInMessage(g_main, code == 1);
@@ -1301,6 +1334,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_COPYDATA: {
         auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lParam);
+        if (g_arguments.testHooks && data->dwData == kTestNotification && data->cbData % sizeof(wchar_t) == 0) {
+            std::wstring text(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            return std::exchange(g_lastNotification, std::wstring()) == text ? 1 : 0;
+        }
         if (g_arguments.testHooks && (data->dwData == kTestDragOut || data->dwData == kTestDropFiles) &&
             data->cbData % sizeof(wchar_t) == 0) {
             std::wstring text(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));

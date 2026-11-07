@@ -74,4 +74,6 @@ enum ListIcon : int {
     LIST_DISMISS = 3,
     LIST_CALENDAR_LTR = 4,
     LIST_MAIL_ERROR = 5,
+    LIST_GLASSES = 6,
+    LIST_SPEAKER_MUTE = 7,
 };
