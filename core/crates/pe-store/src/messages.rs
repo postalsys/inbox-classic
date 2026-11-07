@@ -2,7 +2,7 @@
 
 use rusqlite::{OptionalExtension, Row, params};
 
-use crate::{FolderId, Result, Store};
+use crate::{AccountId, FolderId, Result, Store};
 
 /// A message as the message list shows it, from ENVELOPE, FLAGS, INTERNALDATE, RFC822.SIZE and
 /// BODYSTRUCTURE
@@ -35,6 +35,12 @@ pub struct MessageInfo {
     /// To, Cc and Bcc as names and addresses, decoded, for the address book ([`crate::contacts`]); not kept with the
     /// message, so empty for one read from the store
     pub correspondents: Vec<(String, String)>,
+    /// The Message-IDs its References header names, oldest first, at most [`crate::threads::MAX_REFERENCES`]
+    pub references: Vec<String>,
+    /// Gmail's conversation id (X-GM-THRID), which decides the conversation on Gmail; not kept with the message
+    pub gmail_thread: Option<u64>,
+    /// The conversation it is in, below 0 until threaded (read from the store; not written by `add_messages`)
+    pub thread_id: Option<i64>,
 }
 
 /// The colour of a flag, as Apple Mail keeps it: `\\Flagged` with three keyword bits, `$MailFlagBit0` to
@@ -204,7 +210,7 @@ fn is_seen(canonical: &str) -> bool {
 pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_date, date, size, subject, from_name, \
      from_address, recipients, message_id, in_reply_to, has_attachments, \
      EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id), sender_people, recipient_people, \
-     attachment_names, attachment_count";
+     attachment_names, attachment_count, refs, thread_id";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     Ok(Message {
@@ -230,6 +236,9 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             attachment_names: row.get(18)?,
             attachment_count: row.get(19)?,
             correspondents: Vec::new(),
+            references: crate::threads::split_references(&row.get::<_, Option<String>>(20)?.unwrap_or_default()),
+            gmail_thread: None,
+            thread_id: row.get(21)?,
         },
     })
 }
@@ -240,15 +249,27 @@ impl Store {
     pub fn add_messages(&self, folder: FolderId, messages: &[MessageInfo]) -> Result<()> {
         // the people of the messages new to the store go in the address book, before they are in the store
         self.note_correspondents(folder, messages)?;
+        let account: AccountId =
+            self.db
+                .query_row("SELECT account_id FROM folders WHERE id = ?1", [folder], |row| {
+                    row.get(0)
+                })?;
+        let mut known = self
+            .db
+            .prepare_cached("SELECT 1 FROM messages WHERE folder_id = ?1 AND uid = ?2")?;
         let mut statement = self.db.prepare_cached(
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
-             attachment_names, attachment_count) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19) \
+             attachment_names, attachment_count, refs) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
+        let mut threaded = self
+            .db
+            .prepare_cached("UPDATE messages SET thread_id = ?3 WHERE folder_id = ?1 AND uid = ?2")?;
         for m in messages {
+            let new = !known.exists(params![folder, m.uid])?;
             let flags = canonical_flags(&m.flags);
             statement.execute(params![
                 folder,
@@ -269,8 +290,14 @@ impl Store {
                 m.sender_people,
                 m.recipient_people,
                 m.attachment_names,
-                m.attachment_count
+                m.attachment_count,
+                m.references.join(" ")
             ])?;
+            // a message new to the store goes into its conversation at once (one already here keeps its own)
+            if new {
+                let thread = self.thread_of(account, &crate::threads::thread_keys(m))?;
+                threaded.execute(params![folder, m.uid, thread])?;
+            }
         }
         Ok(())
     }

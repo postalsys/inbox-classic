@@ -253,6 +253,27 @@ CREATE TABLE recent_targets (
     used INTEGER NOT NULL
 );
 "#,
+    // conversations: the Message-IDs a message names (References, oldest first), the conversation it is in (its own id
+    // below 0 until threaded), and the ids of each account's conversations by the Message-IDs (and Gmail conversation ids) in them
+    r#"
+-- NULL for mail stored before: its References are fetched in the background
+ALTER TABLE messages ADD COLUMN refs TEXT;
+ALTER TABLE messages ADD COLUMN thread_id INTEGER NOT NULL DEFAULT 0;
+-- until threaded, a message is a conversation of its own, with an id of its own below 0
+UPDATE messages SET thread_id = -id;
+CREATE INDEX messages_by_thread ON messages (folder_id, thread_id);
+CREATE INDEX messages_unthreaded ON messages (COALESCE(date, internal_date)) WHERE thread_id < 0;
+CREATE INDEX messages_unreferenced ON messages (COALESCE(date, internal_date) DESC) WHERE refs IS NULL;
+CREATE TABLE thread_ids (
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    key TEXT NOT NULL,
+    thread_id INTEGER NOT NULL,
+    PRIMARY KEY (account_id, key)
+) WITHOUT ROWID;
+CREATE INDEX thread_ids_by_thread ON thread_ids (account_id, thread_id);
+-- the conversation ids handed out, one row each: a new one is atomic whatever connection asks
+CREATE TABLE threads (id INTEGER PRIMARY KEY AUTOINCREMENT);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
