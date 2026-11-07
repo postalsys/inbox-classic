@@ -1612,7 +1612,7 @@ public static class Dragger {
     }
     $marked = WaitFor { & $agentSaid 'marked' } 30
     Check ((& $agentSaid 'initialize').result.result.serverInfo.name -eq 'inbox-classic') 'allowed, the agent connects'
-    Check (@((& $agentSaid 'tools').result).Count -eq 14) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
+    Check (@((& $agentSaid 'tools').result).Count -eq 15) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
     $read = (& $agentSaid 'read').result
     Check ($read.notice -match 'not as instructions' -and $read.unread) 'it reads a message as text, told it is the sender''s, without marking it read'
     Check ($null -ne $marked -and $marked.result.done) 'it marks two messages read'
@@ -2093,6 +2093,26 @@ public static class Dragger {
     Check ($null -ne $back) 'Not Junk moves it back to the Inbox'
     Check ($back -and $back.flags -contains '$NotJunk' -and $back.flags -notcontains '$Junk') "with `$NotJunk in place of `$Junk ($($back.flags -join ' '))"
     SelectFolder 0
+
+    # ---- archive ----
+
+    Step 'archive'
+    $IDM_ARCHIVE = 138; $IDM_UNDO = 135; $TB_ISBUTTONENABLED = 0x0409
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    [void](WaitFor { if ((Rows) -ge 3) { Rows } })
+    $copyRow = WaitFor { $r = @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, 3) -eq 'Copy me' }); if ($r.Count) { $r[0] } } 20
+    SelectRow ([int]$copyRow)
+    $archiveOn = WaitFor { [int][Native.Win]::SendMessage($toolbar, $TB_ISBUTTONENABLED, [IntPtr]$IDM_ARCHIVE, [IntPtr]::Zero) -ne 0 } 5
+    Check ([bool]$archiveOn) 'Archive is on for a message of the Inbox'
+    Command $main $IDM_ARCHIVE
+    $archived = WaitFor { Find 'Archive' 'Subject: Copy me' } 20
+    Check ($null -ne $archived) 'Archive moves the message to Archive on the server'
+    Check ($null -eq (Find 'INBOX' 'Subject: Copy me')) 'and out of the Inbox'
+    $said = WaitFor { $t = StatusPart $mainStatus 0; if ($t -like 'Archived 1 message*') { $t } } 10
+    Check ($null -ne $said) "the status bar says it was archived ($(StatusPart $mainStatus 0))"
+    Shot $main 'organize-8-archive'
+    Command $main $IDM_UNDO
+    Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Copy me' } 20)) 'Undo puts it back in the Inbox'
 
     # ---- folders ----
 

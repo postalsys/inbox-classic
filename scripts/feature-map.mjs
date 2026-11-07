@@ -471,6 +471,17 @@ const sections = [
                 ]
             },
             {
+                shot: 'organize-8-archive',
+                name: 'Archive',
+                what: "Archive takes messages out of the Inbox (or a folder of the user's) into the account's Archive folder, made the first time when the account has none. On Gmail it takes every label off instead (the Inbox and the label folders; sent, draft, starred and important stay), so the message is left in All Mail. Undo puts them back, labels included.",
+                how: 'Archive on the toolbar, Message > Archive, the message menu, or A in the message list.',
+                checked: [
+                    'Archive moves the message to Archive on the server, out of the Inbox',
+                    'The status bar says it was archived',
+                    'Undo puts it back in the Inbox'
+                ]
+            },
+            {
                 shot: 'organize-5-all-read',
                 name: 'Mark All Read',
                 what: 'Marks every message of a folder read at once: in the list right away, on the server with one command.',

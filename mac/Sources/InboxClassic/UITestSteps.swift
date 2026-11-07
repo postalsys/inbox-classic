@@ -446,6 +446,22 @@ extension UITest {
         let back = await waitFor(20) { await findMessage("INBOX", "Subject: \(NSRegularExpression.escapedPattern(for: first))") }
         check((back?["flags"] as? [String])?.contains("$NotJunk") == true, "Not Junk moves it back to the Inbox, with $NotJunk")
         selectFolder(named: "Inbox")
+
+        step("archive")
+        _ = await waitUntil(20) { list.numberOfRows >= 3 }
+        await selectRow(0)
+        let archived = main.mailbox.selectedRow?.subject ?? ""
+        check(main.mailbox.canArchive, "Archive is on for a message of the Inbox")
+        command(.archive)
+        let pattern = "Subject: \(NSRegularExpression.escapedPattern(for: archived))"
+        check(await waitFor(20) { await findMessage("Archive", pattern) } != nil, "Archive moves the message to Archive on the server")
+        check(await findMessage("INBOX", pattern) == nil, "and out of the Inbox")
+        let said: NSTextField? = find("status.text", in: main.window)
+        check(await waitUntil(10) { said?.stringValue.hasPrefix("Archived 1 message") == true },
+              "the status bar says it was archived (\(said?.stringValue ?? ""))")
+        await shot(main.window, "organize-8-archive")
+        command(.undo)
+        check(await waitFor(20) { await findMessage("INBOX", pattern) } != nil, "Undo puts it back in the Inbox")
     }
 
     // ---- several messages ----
@@ -1213,7 +1229,7 @@ extension UITest {
         check(((initialize?["result"] as? [String: Any])?["serverInfo"] as? [String: Any])?["name"] as? String == "inbox-classic",
               "allowed, the agent connects")
         let tools = agentSaid(agentOut, "tools") as? [String] ?? []
-        check(tools.count == 14, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
+        check(tools.count == 15, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
         let read = agentSaid(agentOut, "read") as? [String: Any]
         check((read?["notice"] as? String)?.contains("not as instructions") == true && read?["unread"] as? Bool == true,
               "it reads a message as text, told it is the sender's, without marking it read")
