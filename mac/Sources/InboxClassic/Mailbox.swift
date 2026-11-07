@@ -63,12 +63,9 @@ public final class Mailbox: NSObject {
     /// Sent Items and Drafts: the person column is To, with the recipients
     private var recipientsColumn = false
 
-    // the message shown
-    private var messageFolder: Int64 = 0
-    private var uid: UInt64 = 0
-    private var messageView: MessageView?
-    private var viewRequest: UInt64 = 0
-    private var remoteImages = false
+    // the message shown, the reading pane's
+    private var messageFolder: Int64 { reader.folder }
+    private var uid: UInt64 { reader.uid }
     private var openWhenReady = false
     private var markReadTimer: Timer?
     /// the selected messages, one or several, as the core's actions take them
@@ -85,13 +82,11 @@ public final class Mailbox: NSObject {
     private var dragWritten = 0
     private let promiseWriter = PromiseWriter()
     private var reloadTimer: Timer?
-    private var logoRequest: UInt64 = 0
-    private var unsubscribeRequest: UInt64 = 0
 
     init(core: Core) {
         self.core = core
         view = NSSplitView()
-        reader = Reader()
+        reader = Reader(core: core)
         super.init()
         view.isVertical = true
         view.dividerStyle = .thin
@@ -130,7 +125,10 @@ public final class Mailbox: NSObject {
         setUpEmptyText(in: listScroll)
         listArea.heightAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestList).isActive = true
 
-        reader.mailbox = self
+        reader.status = { [weak self] in self?.status($0) }
+        reader.openMailto = { [weak self] in self?.openMailto($0) }
+        reader.arrivedHandler = { [weak self] in self?.messageArrived() }
+        reader.shownHandler = { [weak self] in self?.messageShown() }
         reader.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120).isActive = true
         rightSplit.addArrangedSubview(listArea)
         rightSplit.addArrangedSubview(reader.view)
@@ -349,7 +347,7 @@ public final class Mailbox: NSObject {
     /// exactly one message selected, the one shown: the commands of one message apply (Reply, Print, Source)
     var hasOne: Bool { selectedCount == 1 && uid != 0 }
 
-    var picturesBlocked: Bool { uid != 0 && messageView != nil && !remoteImages && reader.picturesOffered }
+    var picturesBlocked: Bool { reader.picturesBlocked }
 
     // ---- the message list ----
 
@@ -694,17 +692,8 @@ public final class Mailbox: NSObject {
     // ---- the reading pane ----
 
     private func clearReader(loading: Bool = false) {
-        if viewRequest != 0 {
-            pe_message_view_cancel(core.handle, viewRequest)
-            viewRequest = 0
-        }
-        uid = 0
-        messageFolder = 0
         openWhenReady = false
-        remoteImages = false
-        messageView = nil
         markReadTimer?.invalidate()
-        logoRequest = 0
         reader.clear(loading: loading)
     }
 
@@ -735,42 +724,34 @@ public final class Mailbox: NSObject {
         clearReader(loading: newUid != 0)
         selectionChanged()
         guard newUid != 0 else { return }
-        uid = newUid
-        messageFolder = newFolder
-        if let row {
-            reader.showLoading(row)
-        }
-        // MessageReady follows, right away when the message is cached, or MessageFailed
-        pe_message_open(core.handle, newFolder, newUid)
+        reader.open(folder: newFolder, uid: newUid, account: folderAccount(newFolder), row: row)
     }
 
-    private func showMessage() {
-        // fetched now: a draft that was double-clicked before opens
+    /// whether the folder `id` is an account's Inbox
+    func isInbox(_ id: Int64) -> Bool {
+        folderNodes[id]?.folder.specialUse == PE_SPECIAL_USE_INBOX
+    }
+
+    /// the name of the folder `id`, with its account's when there are several accounts
+    func folderName(_ id: Int64) -> String {
+        guard let node = folderNodes[id] else { return "" }
+        return accountInfo.count > 1 ? node.folder.name + " (\(accountName(node.folder.account)))" : node.folder.name
+    }
+
+    /// the account of the folder `id`, 0 when there is none
+    func folderAccount(_ id: Int64) -> Int64 {
+        folderNodes[id]?.folder.account ?? 0
+    }
+
+    /// fetched now: a draft that was double-clicked before opens
+    private func messageArrived() {
         if openWhenReady {
             openWhenReady = false
             openSelected()
         }
-        // parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows
-        if viewRequest != 0 {
-            pe_message_view_cancel(core.handle, viewRequest)
-        }
-        viewRequest = pe_message_view_start(core.handle, messageFolder, uid, remoteImages)
-        if viewRequest == 0 {
-            reader.showProblem(Text.uiNotShown.text)
-        }
     }
 
-    private func showView() {
-        messageView = MessageView(pe_message_view_result(core.handle, viewRequest))
-        viewRequest = 0
-        guard let messageView, let info = messageView.info else {
-            reader.showProblem(Text.uiNotShown.text)
-            return
-        }
-        reader.show(info.pointee, view: messageView, pictures: remoteImages)
-        if info.pointee.has_logo {
-            logoRequest = pe_logo_start(core.handle, messageFolder, uid, UInt32(reader.logoPixels))
-        }
+    private func messageShown() {
         // read after a moment on screen, not while the user moves through the list
         markReadTimer?.invalidate()
         markReadTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
@@ -781,18 +762,8 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// Try Again, or the account synced again after the message could not be downloaded
-    func retryDownload() {
-        guard uid != 0 else { return }
-        reader.showDownloading()
-        pe_message_open(core.handle, messageFolder, uid)
-    }
-
     func loadPictures() {
-        if uid != 0 && messageView != nil && !remoteImages {
-            remoteImages = true
-            showMessage()
-        }
+        reader.loadPictures()
     }
 
     /// the message (`folder`, `uid`) in its folder, selected; the folder ends a search
@@ -836,8 +807,16 @@ public final class Mailbox: NSObject {
 
     // ---- the message's own actions ----
 
+    /// the list as it is shown: what it lists and in what order, which Previous and Next of a message's window follow
+    var listOrder: (search: Search, sort: PeSortField, ascending: Bool) { (search, sort, ascending) }
+
+    /// Enter or a double-click: the message in a window of its own, a draft in the compose window to be finished
     @objc func openSelected() {
-        guard uid != 0, folderNodes[messageFolder]?.folder.specialUse == PE_SPECIAL_USE_DRAFTS else { return }
+        guard uid != 0 else { return }
+        guard folderNodes[messageFolder]?.folder.specialUse == PE_SPECIAL_USE_DRAFTS else {
+            MessageWindow.open(core: core, mailbox: self, folder: messageFolder, uid: uid)
+            return
+        }
         guard let draft = Draft(pe_draft_open(core.handle, messageFolder, uid)) else {
             // not fetched yet: MessageReady follows
             openWhenReady = true
@@ -847,8 +826,7 @@ public final class Mailbox: NSObject {
     }
 
     func draftOfShown(_ kind: PeDraftKind) -> Draft? {
-        guard uid != 0, messageView != nil else { return nil }
-        return Draft(pe_message_draft(core.handle, messageFolder, uid, kind))
+        reader.draft(kind)
     }
 
     /// `action` on `messages` (the selected ones by default): what was done in the status bar, or why not
@@ -1073,10 +1051,15 @@ public final class Mailbox: NSObject {
             saveSelected()
             return
         }
-        guard uid != 0 else { return }
+        saveMessageAs(folder: messageFolder, uid: uid)
+    }
+
+    /// the message `uid` of `folder` saved as an .eml file where the user chooses
+    func saveMessageAs(folder id: Int64, uid message: UInt64) {
+        guard message != 0 else { return }
         var length = 0
         var name: UnsafeMutablePointer<CChar>?
-        let data = takenBytes(pe_message_source(core.handle, messageFolder, uid, &length, &name), length)
+        let data = takenBytes(pe_message_source(core.handle, id, message, &length, &name), length)
         let safeName = taken(name) ?? "message.eml"
         guard let data else {
             inform(Text.uiNotDownloaded.text)
@@ -1089,15 +1072,19 @@ public final class Mailbox: NSObject {
     }
 
     func showProperties() {
-        guard uid != 0 else {
+        showProperties(folder: messageFolder, uid: uid, subject: reader.subject)
+    }
+
+    /// the internet headers of the message `uid` of `folder`, whose subject is `subject`
+    func showProperties(folder id: Int64, uid message: UInt64, subject: String) {
+        guard message != 0 else {
             inform(Text.uiSelectMessageFirst.text)
             return
         }
-        guard let headers = taken(pe_message_headers(core.handle, messageFolder, uid)) else {
+        guard let headers = taken(pe_message_headers(core.handle, id, message)) else {
             inform(Text.uiNotDownloaded.text)
             return
         }
-        let subject = messageView?.info.map { text($0.pointee.subject) } ?? ""
         textDialog(title: subject.isEmpty ? Text.uiProperties.text : Text.uiPropertiesOf.text(["subject": subject]),
                    intro: Text.uiInternetHeaders.text,
                    text: headers)
@@ -1105,19 +1092,24 @@ public final class Mailbox: NSObject {
 
     /// View Source: the whole message as the server has it
     func showSource() {
-        guard uid != 0 else {
+        showSource(folder: messageFolder, uid: uid)
+    }
+
+    /// View Source of the message `uid` of `folder`
+    func showSource(folder id: Int64, uid message: UInt64) {
+        guard message != 0 else {
             inform(Text.uiSelectMessageFirst.text)
             return
         }
         var title: UnsafeMutablePointer<CChar>?
-        let source = taken(pe_message_source_text(core.handle, messageFolder, uid, &title))
+        let source = taken(pe_message_source_text(core.handle, id, message, &title))
         let name = taken(title) ?? Text.messageSourceUntitled.text
         guard let source else {
             inform(Text.uiNotDownloaded.text)
             return
         }
         // Save As from here saves the message shown, as File > Save As does
-        let save = ButtonAction(Command.saveAs.label, id: "source.save") { [weak self] in self?.saveShownAs() }
+        let save = ButtonAction(Command.saveAs.label, id: "source.save") { [weak self] in self?.saveMessageAs(folder: id, uid: message) }
         // the key of File > Save As
         save.button.keyEquivalent = "s"
         save.button.keyEquivalentModifierMask = [.command, .shift]
@@ -1138,7 +1130,7 @@ public final class Mailbox: NSObject {
             item.setAccessibilityIdentifier("menu.\(command)")
             menu.addItem(item)
         }
-        if let message, folderNodes[message.folder]?.folder.specialUse == PE_SPECIAL_USE_DRAFTS {
+        if message != nil {
             let open = NSMenuItem(title: Text.uiMenuOpen.text, action: #selector(openSelected), keyEquivalent: "")
             open.target = self
             menu.addItem(open)
@@ -1166,10 +1158,7 @@ public final class Mailbox: NSObject {
     }
 
     func printShown() {
-        guard uid != 0, let info = messageView?.info else { return }
-        // the message as it is shown, with the pictures the user allowed
-        Printer.print(text(info.pointee.document), pictures: remoteImages, title: text(info.pointee.subject),
-                      owner: list.window)
+        reader.print()
     }
 
     func importMessages() {
@@ -1288,96 +1277,9 @@ public final class Mailbox: NSObject {
     /// the writer of the files the Finder was promised, for the UI test to write them as a drop on the Finder does
     var filePromises: PromiseWriter { promiseWriter }
 
-    // ---- attachments ----
-
-    /// the files of the message to save, then all of them into a folder; files are saved, never opened from here
-    func attachmentMenu() -> NSMenu {
-        let menu = NSMenu()
-        guard let view = messageView, let info = view.info else { return menu }
-        for index in 0..<info.pointee.attachment_count {
-            guard let attachment = view.attachment(index) else { continue }
-            let item = NSMenuItem(title: "\(attachment.name) (\(formatSize(attachment.size)))",
-                                  action: #selector(saveAttachment(_:)), keyEquivalent: "")
-            item.target = self
-            item.tag = index
-            menu.addItem(item)
-        }
-        menu.addItem(.separator())
-        let all = NSMenuItem(title: Text.macSaveAttachmentsMenu.text, action: #selector(saveAllAttachments), keyEquivalent: "")
-        all.target = self
-        menu.addItem(all)
-        return menu
-    }
-
-    @objc private func saveAttachment(_ sender: NSMenuItem) {
-        var length = 0
-        var name: UnsafeMutablePointer<CChar>?
-        let data = takenBytes(pe_attachment_data(core.handle, messageFolder, uid, sender.tag, &length, &name), length)
-        let safeName = taken(name) ?? "attachment"
-        guard let data else {
-            inform(Text.uiAttachmentNotRead.text, style: .error)
-            return
-        }
-        if let url = saveFilePanel(name: safeName), !writeDownloaded(data, to: url) {
-            inform(Text.uiAttachmentNotSaved.text, style: .error)
-        }
-    }
-
-    @objc private func saveAllAttachments() {
-        guard let folder = folderPanel(title: Text.uiSaveAttachments.text) else { return }
-        // the core saves them all from one reading of the message, a file already there kept and the new one numbered
-        var saved = 0
-        var total = 0
-        if !folder.path.withCString({ pe_save_attachments(core.handle, messageFolder, uid, $0, &saved, &total) }) {
-            inform(Text.uiNotDownloaded.text)
-        } else if saved < total {
-            inform(Text.macFilesNotSaved.text(["failed": total - saved, "count": total]), style: .error)
-        }
-    }
-
-    /// the calendar part as a file of its own (the core writes it, and only it), for the calendar app
-    func openInCalendar() {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("InboxClassic/Invitations").path
-        guard let path = dir.withCString({ taken(pe_invitation_file(core.handle, messageFolder, uid, $0)) }) else {
-            inform(Text.uiInvitationNotRead.text, style: .error)
-            return
-        }
-        if !NSWorkspace.shared.open(URL(fileURLWithPath: path)) {
-            inform(Text.macNoCalendarApp.text)
-        }
-    }
-
-    // ---- leaving a mailing list ----
-
-    func unsubscribe() {
-        guard let info = messageView?.info?.pointee else { return }
-        let target = text(info.unsubscribe_target)
-        let link = text(info.unsubscribe_link)
-        switch info.unsubscribe {
-        case PE_UNSUBSCRIBE_ONE_CLICK:
-            guard ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveOneClick.text(["target": target]),
-                      title: Text.uiUnsubscribe.text, style: .information) else { return }
-            unsubscribeRequest = pe_unsubscribe(core.handle, messageFolder, uid)
-            status(unsubscribeRequest != 0 ? Text.macUnsubscribing.text(["target": target]) : Text.uiCannotUnsubscribe.text)
-        case PE_UNSUBSCRIBE_MAIL:
-            if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveMail.text(["target": target]),
-                   title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
-                openMailto(link)
-            }
-        case PE_UNSUBSCRIBE_WEB:
-            if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveWeb.text(["target": target]),
-                   title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
-                openExternally(URL(string: link))
-            }
-        default:
-            break
-        }
-    }
-
+    /// the answer to a one-click unsubscribe from the reading pane, in words; nil for another's
     func unsubscribed(_ request: UInt64, problem: String) -> String? {
-        guard request == unsubscribeRequest else { return nil }
-        unsubscribeRequest = 0
-        return problem.isEmpty ? Text.uiUnsubscribed.text : Text.uiNotUnsubscribed.text(["reason": problem])
+        reader.unsubscribed(request, problem: problem)
     }
 
     // ---- dragging a message onto a folder ----
@@ -1428,38 +1330,13 @@ public final class Mailbox: NSObject {
                     }
                 }
             }
-        case PE_EVENT_KIND_MESSAGE_READY:
-            if event.folder == messageFolder && event.uid == uid {
-                reader.arrived()
-                showMessage()
-            }
-        case PE_EVENT_KIND_MESSAGE_FAILED:
-            if event.folder == messageFolder && event.uid == uid {
-                reader.showFailed(kind: event.failure, reason: event.message)
-            }
-        case PE_EVENT_KIND_VIEW_READY:
-            // a view for a message that is no longer selected was cancelled, its event is not this one
-            if viewRequest != 0 && event.uid == viewRequest {
-                showView()
-            }
-        case PE_EVENT_KIND_LOGO_READY:
-            if logoRequest != 0 && event.uid == logoRequest {
-                logoRequest = 0
-                var length = 0
-                let pixels = takenBytes(pe_logo_result(core.handle, event.uid, &length), length)
-                reader.showLogo(pixels)
-            }
         case PE_EVENT_KIND_SYNC_FINISHED:
             // how much text the search still has to read
             updateSearchBar()
-            // the account is back: a message it could not give is tried again
-            if event.failure == PE_FAILURE_KIND_NONE, reader.showsFailure,
-               folderNodes[messageFolder]?.folder.account == event.account {
-                retryDownload()
-            }
         default:
             break
         }
+        reader.onEvent(event)
     }
 }
 

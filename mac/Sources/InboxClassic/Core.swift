@@ -205,6 +205,26 @@ final class Core {
         search.with { pe_message_index(handle, $0, sort, ascending, folder, uid) }
     }
 
+    /// the messages before and after the message `uid` of `folder` in the list, in one pass: what Previous and Next
+    /// show, each nil at its end; nil as a whole when the message is not in the list (any more)
+    func neighbours(_ search: Search, sort: PeSortField, ascending: Bool, folder: Int64, uid: UInt64)
+        -> (previous: (folder: Int64, uid: UInt64)?, next: (folder: Int64, uid: UInt64)?)? {
+        var previousFolder: Int64 = 0
+        var previousUid: UInt64 = 0
+        var nextFolder: Int64 = 0
+        var nextUid: UInt64 = 0
+        let found = search.with {
+            pe_message_neighbours(handle, $0, sort, ascending, folder, uid, &previousFolder, &previousUid, &nextFolder, &nextUid)
+        }
+        guard found else { return nil }
+        return (previousFolder != 0 ? (previousFolder, previousUid) : nil, nextFolder != 0 ? (nextFolder, nextUid) : nil)
+    }
+
+    /// whether the message `uid` is (still) in `folder`
+    func messageExists(folder: Int64, uid: UInt64) -> Bool {
+        pe_message_exists(handle, folder, uid)
+    }
+
     /// where the messages of `selection` are in the list now, the rows to select again
     func positions(of selection: OpaquePointer, in search: Search, sort: PeSortField, ascending: Bool) -> IndexSet {
         guard let found = search.with({ pe_selection_positions(handle, selection, $0, sort, ascending) }) else { return [] }

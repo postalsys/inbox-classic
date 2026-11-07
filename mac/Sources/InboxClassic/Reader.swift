@@ -1,13 +1,37 @@
 // The reading pane: the header of the message (From, Date, To, Cc, Subject) with the brand's logo at its left and the
 // attachments and Unsubscribe at its right; under it the bar of a calendar invitation and the bar that offers the
 // pictures from the internet; then the message itself. Every string shown is the core's, decoded and checked there.
+// It asks the core for the message it shows and hears its events, so the main window's pane and a message's own window
+// (MessageWindow.swift) are each one of these.
 import AppKit
 import CInboxClassic
 
 @MainActor
 final class Reader: NSObject {
     let view = NSStackView()
-    weak var mailbox: Mailbox?
+    let core: Core
+    /// what it has to say in the main window's status bar (leaving a mailing list)
+    var status: (String) -> Void = { _ in }
+    /// a mailto: link to write a message for (a mailing list left by mail)
+    var openMailto: (String) -> Void = { _ in }
+    /// the message asked for is here, before it is shown (a draft opened before it was fetched opens then)
+    var arrivedHandler: () -> Void = {}
+    /// the message is shown
+    var shownHandler: () -> Void = {}
+    /// the message shown, or asked for; 0 for none
+    private(set) var folder: Int64 = 0
+    private(set) var uid: UInt64 = 0
+    /// the account of that message, which its sync tries a failed download again for
+    private var account: Int64 = 0
+    /// the core's view of the message once it is shown
+    private(set) var messageView: MessageView?
+    /// its pictures from the internet are shown
+    private(set) var remoteImages = false
+    /// a download asked for and not answered yet: MessageReady or MessageFailed for it is this reader's
+    private var waiting = false
+    private var viewRequest: UInt64 = 0
+    private var logoRequest: UInt64 = 0
+    private var unsubscribeRequest: UInt64 = 0
     private let preview = Preview()
     private let header = NSTextField(wrappingLabelWithString: "")
     private let logo = NSImageView()
@@ -25,7 +49,8 @@ final class Reader: NSObject {
     /// the logo's side in pixels, for the core to draw it at
     var logoPixels: Int { Int(48 * (view.window?.backingScaleFactor ?? 2)) }
 
-    override init() {
+    init(core: Core) {
+        self.core = core
         super.init()
         header.isSelectable = true
         header.setAccessibilityIdentifier("reader.header")
@@ -71,11 +96,11 @@ final class Reader: NSObject {
         line.boxType = .separator
 
         pictures.text = Text.uiPicturesBlocked.text
-        pictures.clicked = { [weak self] in self?.mailbox?.loadPictures() }
+        pictures.clicked = { [weak self] in self?.loadPictures() }
         pictures.setAccessibilityIdentifier("reader.pictures")
-        invitation.clicked = { [weak self] in self?.mailbox?.openInCalendar() }
+        invitation.clicked = { [weak self] in self?.openInCalendar() }
         retry.text = taken(pe_retry_note()) ?? ""
-        retry.clicked = { [weak self] in self?.mailbox?.retryDownload() }
+        retry.clicked = { [weak self] in self?.retryDownload() }
         retry.setAccessibilityIdentifier("reader.retry")
         retry.isHidden = true
         invitation.setAccessibilityIdentifier("reader.invitation")
@@ -94,7 +119,7 @@ final class Reader: NSObject {
         invitation.heightAnchor.constraint(equalToConstant: 44).isActive = true
         pictures.heightAnchor.constraint(equalToConstant: 26).isActive = true
         retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
-        clear(loading: false)
+        clearView(loading: false)
     }
 
     /// several messages selected: none is shown, the core's page says how many and what they are (loaded again only
@@ -115,7 +140,7 @@ final class Reader: NSObject {
 
     // ---- what it shows ----
 
-    func clear(loading: Bool) {
+    private func clearView(loading: Bool) {
         summary = nil
         downloadingTimer?.invalidate()
         retry.isHidden = true
@@ -177,7 +202,7 @@ final class Reader: NSObject {
         picturesOffered = false
     }
 
-    func show(_ info: PeMessageInfo, view: MessageView, pictures allowed: Bool) {
+    private func show(_ info: PeMessageInfo, view: MessageView, pictures allowed: Bool) {
         downloadingTimer?.invalidate()
         retry.isHidden = true
         header.attributedStringValue = headerText(info)
@@ -232,7 +257,227 @@ final class Reader: NSObject {
     }
 
     @objc private func unsubscribeClicked() {
-        mailbox?.unsubscribe()
+        unsubscribeList()
+    }
+
+    // ---- the message it shows ----
+
+    /// no message (`loading`: one is about to be asked for); a view being made for the one before is given up
+    func clear(loading: Bool) {
+        if viewRequest != 0 {
+            pe_message_view_cancel(core.handle, viewRequest)
+            viewRequest = 0
+        }
+        folder = 0
+        uid = 0
+        account = 0
+        waiting = false
+        remoteImages = false
+        messageView = nil
+        logoRequest = 0
+        clearView(loading: loading)
+    }
+
+    /// the message `uid` of `folder` (of `account`) asked for: the header of its row (`row`) at once, the message when
+    /// MessageReady follows (right away when it is cached), or why not when MessageFailed does
+    func open(folder id: Int64, uid message: UInt64, account owner: Int64, row: Message?) {
+        clear(loading: true)
+        folder = id
+        uid = message
+        account = owner
+        if let row {
+            showLoading(row)
+        }
+        waiting = true
+        pe_message_open(core.handle, id, message)
+    }
+
+    /// Try Again, or the account synced again after the message could not be downloaded
+    func retryDownload() {
+        guard uid != 0 else { return }
+        showDownloading()
+        waiting = true
+        pe_message_open(core.handle, folder, uid)
+    }
+
+    /// the pictures from the internet shown, as the user asked
+    func loadPictures() {
+        if uid != 0 && messageView != nil && !remoteImages {
+            remoteImages = true
+            makeView()
+        }
+    }
+
+    var picturesBlocked: Bool { uid != 0 && messageView != nil && !remoteImages && picturesOffered }
+
+    /// parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows
+    private func makeView() {
+        if viewRequest != 0 {
+            pe_message_view_cancel(core.handle, viewRequest)
+        }
+        viewRequest = pe_message_view_start(core.handle, folder, uid, remoteImages)
+        if viewRequest == 0 {
+            showProblem(Text.uiNotShown.text)
+        }
+    }
+
+    private func showView() {
+        messageView = MessageView(pe_message_view_result(core.handle, viewRequest))
+        viewRequest = 0
+        guard let messageView, let info = messageView.info else {
+            showProblem(Text.uiNotShown.text)
+            return
+        }
+        show(info.pointee, view: messageView, pictures: remoteImages)
+        if info.pointee.has_logo {
+            logoRequest = pe_logo_start(core.handle, folder, uid, UInt32(logoPixels))
+        }
+        shownHandler()
+    }
+
+    /// the core's events about the message: here, not here, its view made, its logo drawn, its account back
+    func onEvent(_ event: CoreEvent) {
+        switch event.kind {
+        case PE_EVENT_KIND_MESSAGE_READY:
+            // another window may have asked for the same message: only an answer this one waits for
+            if waiting && event.folder == folder && event.uid == uid {
+                waiting = false
+                arrived()
+                arrivedHandler()
+                makeView()
+            }
+        case PE_EVENT_KIND_MESSAGE_FAILED:
+            if waiting && event.folder == folder && event.uid == uid {
+                waiting = false
+                showFailed(kind: event.failure, reason: event.message)
+            }
+        case PE_EVENT_KIND_VIEW_READY:
+            // a view for a message that is no longer shown was cancelled, its event is not this one
+            if viewRequest != 0 && event.uid == viewRequest {
+                showView()
+            }
+        case PE_EVENT_KIND_LOGO_READY:
+            if logoRequest != 0 && event.uid == logoRequest {
+                logoRequest = 0
+                var length = 0
+                showLogo(takenBytes(pe_logo_result(core.handle, event.uid, &length), length))
+            }
+        case PE_EVENT_KIND_SYNC_FINISHED:
+            // the account is back: a message it could not give is tried again
+            if event.failure == PE_FAILURE_KIND_NONE, showsFailure, account == event.account {
+                retryDownload()
+            }
+        default:
+            break
+        }
+    }
+
+    /// a reply, a reply to all or a forward of the message shown
+    func draft(_ kind: PeDraftKind) -> Draft? {
+        guard uid != 0, messageView != nil else { return nil }
+        return Draft(pe_message_draft(core.handle, folder, uid, kind))
+    }
+
+    /// the message as it is shown, with the pictures the user allowed
+    func print() {
+        guard uid != 0, let info = messageView?.info else { return }
+        Printer.print(text(info.pointee.document), pictures: remoteImages, title: text(info.pointee.subject), owner: view.window)
+    }
+
+    /// the subject of the message shown, empty before it is
+    var subject: String { messageView?.info.map { text($0.pointee.subject) } ?? "" }
+
+    // ---- attachments ----
+
+    /// the files of the message to save, then all of them into a folder; files are saved, never opened from here
+    func attachmentMenu() -> NSMenu {
+        let menu = NSMenu()
+        guard let view = messageView, let info = view.info else { return menu }
+        for index in 0..<info.pointee.attachment_count {
+            guard let attachment = view.attachment(index) else { continue }
+            let item = NSMenuItem(title: "\(attachment.name) (\(formatSize(attachment.size)))",
+                                  action: #selector(saveAttachment(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = index
+            menu.addItem(item)
+        }
+        menu.addItem(.separator())
+        let all = NSMenuItem(title: Text.macSaveAttachmentsMenu.text, action: #selector(saveAllAttachments), keyEquivalent: "")
+        all.target = self
+        menu.addItem(all)
+        return menu
+    }
+
+    @objc private func saveAttachment(_ sender: NSMenuItem) {
+        var length = 0
+        var name: UnsafeMutablePointer<CChar>?
+        let data = takenBytes(pe_attachment_data(core.handle, folder, uid, sender.tag, &length, &name), length)
+        let safeName = taken(name) ?? "attachment"
+        guard let data else {
+            inform(Text.uiAttachmentNotRead.text, style: .error)
+            return
+        }
+        if let url = saveFilePanel(name: safeName), !writeDownloaded(data, to: url) {
+            inform(Text.uiAttachmentNotSaved.text, style: .error)
+        }
+    }
+
+    @objc private func saveAllAttachments() {
+        guard let into = folderPanel(title: Text.uiSaveAttachments.text) else { return }
+        // the core saves them all from one reading of the message, a file already there kept and the new one numbered
+        var saved = 0
+        var total = 0
+        if !into.path.withCString({ pe_save_attachments(core.handle, folder, uid, $0, &saved, &total) }) {
+            inform(Text.uiNotDownloaded.text)
+        } else if saved < total {
+            inform(Text.macFilesNotSaved.text(["failed": total - saved, "count": total]), style: .error)
+        }
+    }
+
+    /// the calendar part as a file of its own (the core writes it, and only it), for the calendar app
+    func openInCalendar() {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("InboxClassic/Invitations").path
+        guard let path = dir.withCString({ taken(pe_invitation_file(core.handle, folder, uid, $0)) }) else {
+            inform(Text.uiInvitationNotRead.text, style: .error)
+            return
+        }
+        if !NSWorkspace.shared.open(URL(fileURLWithPath: path)) {
+            inform(Text.macNoCalendarApp.text)
+        }
+    }
+
+    // ---- leaving a mailing list ----
+
+    func unsubscribeList() {
+        guard let info = messageView?.info?.pointee else { return }
+        let target = text(info.unsubscribe_target)
+        let link = text(info.unsubscribe_link)
+        switch info.unsubscribe {
+        case PE_UNSUBSCRIBE_ONE_CLICK:
+            guard ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveOneClick.text(["target": target]),
+                      title: Text.uiUnsubscribe.text, style: .information) else { return }
+            unsubscribeRequest = pe_unsubscribe(core.handle, folder, uid)
+            status(unsubscribeRequest != 0 ? Text.macUnsubscribing.text(["target": target]) : Text.uiCannotUnsubscribe.text)
+        case PE_UNSUBSCRIBE_MAIL:
+            if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveMail.text(["target": target]),
+                   title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
+                openMailto(link)
+            }
+        case PE_UNSUBSCRIBE_WEB:
+            if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveWeb.text(["target": target]),
+                   title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
+                openExternally(URL(string: link))
+            }
+        default:
+            break
+        }
+    }
+
+    /// the answer to a one-click unsubscribe this reader asked for, in words; nil for another's
+    func unsubscribed(_ request: UInt64, problem: String) -> String? {
+        guard request != 0, request == unsubscribeRequest else { return nil }
+        unsubscribeRequest = 0
+        return problem.isEmpty ? Text.uiUnsubscribed.text : Text.uiNotUnsubscribed.text(["reason": problem])
     }
 
     // ---- a calendar invitation ----
@@ -295,13 +540,13 @@ final class Reader: NSObject {
 // the attachment menu is made when it opens, from the message view
 extension Reader: NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
-        guard let mailbox, menu === attachments.menu else { return }
+        guard menu === attachments.menu else { return }
         let title = menu.items.first?.copy() as? NSMenuItem
         menu.removeAllItems()
         if let title {
             menu.addItem(title)
         }
-        for item in mailbox.attachmentMenu().items {
+        for item in attachmentMenu().items {
             item.menu?.removeItem(item)
             menu.addItem(item)
         }

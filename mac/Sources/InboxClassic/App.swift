@@ -368,6 +368,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     /// what each command does; every command of the table is here, the build fails for one that is not
     func perform(_ command: Command) {
         guard let main else { return }
+        // a message's own window in front: the commands about a message are about that one
+        if let message = MessageWindow.key, message.perform(command) {
+            return
+        }
         switch command {
         case .newAccount: main.addAccount()
         case .exit: NSApp.terminate(nil)
@@ -434,16 +438,28 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     }
 
     @objc func flagColor(_ sender: NSMenuItem) {
+        if let message = MessageWindow.key {
+            message.flag(color: UInt8(clamping: sender.tag))
+            return
+        }
         main?.mailbox.flagSelected(color: UInt8(clamping: sender.tag))
     }
 
     @objc func clearFlag(_ sender: NSMenuItem) {
+        if let message = MessageWindow.key {
+            message.flag(color: 0)
+            return
+        }
         main?.mailbox.clearFlag()
     }
 
     public func validateMenuItem(_ item: NSMenuItem) -> Bool {
         if item.action == #selector(flagColor(_:)) || item.action == #selector(clearFlag(_:)) {
             item.state = .off
+            if let message = MessageWindow.key {
+                item.state = item.action == #selector(flagColor(_:)) && Int(message.flagColor) == item.tag ? .on : .off
+                return item.action == #selector(flagColor(_:)) || message.flagged
+            }
             guard let main, core != nil, main.mailbox.hasSelection else { return false }
             let summary = main.mailbox.summary
             if item.action == #selector(clearFlag(_:)) {
@@ -458,6 +474,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             item.state = notify ? .on : .off
         }
         guard let main, core != nil else { return command == .exit || command == .about || command == .help }
+        if let message = MessageWindow.key, let on = message.validate(command) {
+            return on
+        }
         // the main window's commands work on what it shows; with the keyboard in a text field Delete is the field's
         let typing = NSApp.keyWindow?.firstResponder is NSText
         // the commands of one message are off for several
