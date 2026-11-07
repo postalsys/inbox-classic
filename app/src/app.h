@@ -444,6 +444,10 @@ public:
     void NewFolder(HWND owner);
     void RenameFolder(HWND owner);
     void DeleteFolder(HWND owner);
+    // Deleted Items or Junk E-mail emptied for good, after asking
+    void EmptyFolder(HWND owner);
+    // the folder shown is Deleted Items or Junk E-mail with messages in it
+    bool CanEmptyFolder() const;
     void LoadPictures();
     // WM_SETCURSOR and WM_CTLCOLORSTATIC of the main window for the information bar of blocked pictures (a hand, the
     // information colors); false for other windows
@@ -679,6 +683,8 @@ private:
     HWND findEdit_ = nullptr;
     HWND findClear_ = nullptr;
     bool folderColumn_ = false;
+    // Deleted Items and Junk E-mail of every account: Empty Folder applies to them
+    std::unordered_set<int64_t> emptiableFolders_;
     // Sent Items and Drafts: the person column is To, with the recipients
     bool recipientsColumn_ = false;
     int64_t folder_ = 0;

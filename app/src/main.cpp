@@ -158,6 +158,8 @@ void UpdateMenu(HMENU menu) {
         UINT id = GetMenuItemID(menu, i);
         if (id == IDM_ARCHIVE) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanArchive() ? MF_ENABLED : MF_GRAYED));
+        } else if (id == IDM_EMPTY_FOLDER) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanEmptyFolder() ? MF_ENABLED : MF_GRAYED));
         } else if (CommandNeedsOne(id)) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (several ? MF_GRAYED : MF_ENABLED));
         } else if (CommandNeedsSome(id)) {
@@ -471,6 +473,8 @@ HMENU BuildMenu() {
     AppendMenuW(folder, MF_STRING, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
     AppendMenuW(folder, MF_STRING, IDM_RENAME_FOLDER, MenuItem(PE_TEXT_CMD_RENAME_FOLDER).c_str());
     AppendMenuW(folder, MF_STRING, IDM_DELETE_FOLDER, MenuItem(PE_TEXT_CMD_DELETE_FOLDER).c_str());
+    AppendMenuW(folder, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(folder, MF_STRING, IDM_EMPTY_FOLDER, MenuItem(PE_TEXT_CMD_EMPTY_FOLDER).c_str());
     AppendMenuW(file, MF_POPUP, reinterpret_cast<UINT_PTR>(folder), MenuItem(PE_TEXT_MENU_FOLDER).c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_SAVE_AS, MenuItem(PE_TEXT_CMD_SAVE_AS).c_str());
@@ -1160,6 +1164,9 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_DELETE_FOLDER:
         g_mailbox.DeleteFolder(g_main);
+        return;
+    case IDM_EMPTY_FOLDER:
+        g_mailbox.EmptyFolder(g_main);
         return;
     case IDM_PICTURES:
         g_mailbox.LoadPictures();

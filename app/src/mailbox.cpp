@@ -482,6 +482,7 @@ void Mailbox::Reload() {
     allInboxesItem_ = nullptr;
     draftFolders_.clear();
     junkFolders_.clear();
+    emptiableFolders_.clear();
     firstAccount_ = 0;
     core::AccountList accounts(pe_accounts(core_));
     size_t count = pe_account_list_count(accounts.get());
@@ -557,6 +558,9 @@ void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
         }
         if (folder->special_use == PE_SPECIAL_USE_JUNK) {
             junkFolders_.insert(folder->id);
+        }
+        if (folder->emptiable) {
+            emptiableFolders_.insert(folder->id);
         }
         parents.resize(depth + 1);
         parents.push_back(item);
@@ -1680,6 +1684,11 @@ void Mailbox::FolderMenu() {
         UINT special = folder_ && FolderOf(folder_, name, fixed) && !fixed ? MF_STRING : MF_STRING | MF_GRAYED;
         AppendMenuW(menu, special, IDM_RENAME_FOLDER, MenuItem(PE_TEXT_WIN_RENAME).c_str());
         AppendMenuW(menu, special, IDM_DELETE_FOLDER, MenuItem(PE_TEXT_WIN_DELETE_BUTTON).c_str());
+        // Deleted Items and Junk E-mail can be emptied, as in Outlook Express
+        if (emptiableFolders_.contains(folder_)) {
+            AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+            AppendMenuW(menu, CanEmptyFolder() ? MF_STRING : MF_STRING | MF_GRAYED, IDM_EMPTY_FOLDER, MenuItem(PE_TEXT_CMD_EMPTY_FOLDER).c_str());
+        }
     }
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     DestroyMenu(menu);
@@ -1801,6 +1810,24 @@ void Mailbox::DeleteFolder(HWND owner) {
     if (!pe_folder_delete(core_, folder_, &reason)) {
         ShowRefusal(owner, reason, PE_TEXT_UI_FOLDER_NOT_DELETED);
     }
+}
+
+void Mailbox::EmptyFolder(HWND owner) {
+    if (!CanEmptyFolder()) {
+        return;
+    }
+    // the core words the question, with how many go; none when there is nothing to empty
+    core::String question(pe_folder_empty_question(core_, folder_));
+    if (!question || MessageBoxW(owner, Text(question.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+        return;
+    }
+    char* reason = nullptr;
+    core::String done(pe_folder_empty(core_, folder_, &reason));
+    Say(done ? Text(done.get()) : ReasonText(reason, PE_TEXT_UI_MESSAGES_NOT_CHANGED));
+}
+
+bool Mailbox::CanEmptyFolder() const {
+    return !allInboxes_ && !Searching() && emptiableFolders_.contains(folder_) && total_ > 0;
 }
 
 std::wstring Mailbox::Counts() const {
