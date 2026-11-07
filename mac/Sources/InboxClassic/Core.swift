@@ -293,6 +293,8 @@ struct Folder {
     let name: String
     let depth: Int
     let fixed: Bool
+    /// Deleted Items or Junk E-mail: Empty Folder applies when it has messages
+    let emptiable: Bool
     let specialUse: PeSpecialUse
     let selectable: Bool
     let total: UInt64
@@ -307,6 +309,7 @@ struct Folder {
         name = text(folder.name)
         depth = Int(folder.depth)
         fixed = folder.fixed
+        emptiable = folder.emptiable
         specialUse = folder.special_use
         selectable = folder.selectable
         total = folder.total
