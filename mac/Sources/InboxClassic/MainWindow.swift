@@ -388,7 +388,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     // ---- the toolbar ----
 
     private enum Item: String, CaseIterable {
-        case createMail, reply, replyAll, forward, print, delete, junk, sync, markRead, markUnread, search
+        case createMail, reply, replyAll, forward, print, delete, archive, junk, sync, markRead, markUnread, search
     }
 
     private func command(of item: Item) -> Command? {
@@ -399,6 +399,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         case .forward: return .forward
         case .print: return .print
         case .delete: return .delete
+        case .archive: return .archive
         case .junk: return .junk
         case .sync: return .sync
         case .markRead: return .markRead
@@ -410,7 +411,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     public func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         let id = { (item: Item) in NSToolbarItem.Identifier(item.rawValue) }
         // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state
-        return [id(.createMail), .space, id(.reply), id(.replyAll), id(.forward), .space, id(.print), id(.delete), id(.junk),
+        return [id(.createMail), .space, id(.reply), id(.replyAll), id(.forward), .space, id(.print), id(.delete), id(.archive), id(.junk),
                 .space, id(.sync), .space, id(.markRead), id(.markUnread), .flexibleSpace, id(.search)]
     }
 
@@ -425,6 +426,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             .createMail: (Text.uiTbCreateMail.text, "mail_add"), .reply: (Text.uiTbReply.text, "arrow_reply"),
             .replyAll: (Text.uiTbReplyAll.text, "arrow_reply_all"), .forward: (Text.uiTbForward.text, "arrow_forward"),
             .print: (Text.uiTbPrint.text, "print"), .delete: (Text.uiTbDelete.text, "delete"),
+            .archive: (Text.uiTbArchive.text, "archive"),
             .junk: (Text.uiTbJunk.text, "mail_prohibited"), .sync: (Text.uiTbSync.text, "arrow_sync"),
             .markRead: (Text.uiTbMarkRead.text, "mail_read"), .markUnread: (Text.uiTbMarkUnread.text, "mail_unread"),
         ]
@@ -481,6 +483,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     public func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
         guard let id = Item(rawValue: item.itemIdentifier.rawValue), let command = command(of: id) else { return true }
         switch command {
+        case .archive: return mailbox.canArchive
         case _ where command.needsOne: return mailbox.hasOne
         case _ where command.needsSome: return mailbox.hasSelection
         case .delete, .junk, .markRead, .markUnread: return mailbox.hasSelection

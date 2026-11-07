@@ -301,7 +301,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         _ = submenu(Text.menuEdit.text, edit)
         _ = submenu(Text.menuView.text, commands("view").map { item(for: $0) })
         _ = submenu(Text.menuMessage.text, [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
-                                separator(), item(for: .flag), flagMenu(), separator(), item(for: .junk),
+                                separator(), item(for: .flag), flagMenu(), separator(), item(for: .archive), item(for: .junk),
                                 item(for: .notJunk)])
         _ = submenu(Text.menuTools.text, [item(for: .sync), item(for: .outbox), separator(), item(for: .aiAgents), separator(), item(for: .notify),
                               item(for: .defaultApp)])
@@ -398,6 +398,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .markAllRead: main.mailbox.markAllRead()
         case .junk: main.mailbox.markJunk(true)
         case .notJunk: main.mailbox.markJunk(false)
+        case .archive: main.mailbox.archiveSelected()
         case .notify: notify.toggle()
         case .open: main.show()
         case .defaultApp: main.makeDefaultMailApp()
@@ -468,6 +469,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .move, .copy: return main.mailbox.hasSelection
         case .undo: return main.core.undoLabel != nil
         case .junk: return main.mailbox.hasSelection && !main.mailbox.inJunk
+        case .archive: return !typing && main.mailbox.canArchive
         case .notJunk: return main.mailbox.hasSelection && main.mailbox.inJunk
         case .pictures: return main.mailbox.picturesBlocked
         // All Inboxes is no folder of one account to make a folder in or import into
