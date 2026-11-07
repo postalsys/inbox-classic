@@ -1728,6 +1728,26 @@ void Mailbox::ShowProperties(HWND owner) {
                core::T(PE_TEXT_UI_INTERNET_HEADERS), Text(headers.get()));
 }
 
+void Mailbox::AddSenderToBook(HWND owner) {
+    if (!reader_.Uid()) {
+        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    bool added = false;
+    int64_t card = pe_book_add_sender(core_, reader_.Folder(), reader_.Uid(), &added);
+    if (!card) {
+        Say(core::T(PE_TEXT_UI_SENDER_NONE));
+        return;
+    }
+    core::CardView view(pe_card(core_, card));
+    const PeCard* info = view ? pe_card_info(view.get()) : nullptr;
+    std::wstring name = info ? Text(info->name) : L"";
+    Say(core::T(added ? PE_TEXT_UI_SENDER_ADDED : PE_TEXT_UI_SENDER_KNOWN, {{"name", name}}));
+    if (added) {
+        AddressBookChanged();
+    }
+}
+
 void Mailbox::ShowSource(HWND owner) {
     if (!reader_.Uid()) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
@@ -1801,6 +1821,8 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_SAVE_AS, MenuItem(PE_TEXT_WIN_SAVE_AS_BUTTON).c_str());
     AppendMenuW(menu, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT).c_str());
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING | (SelectedCount() > 1 ? MF_GRAYED : 0), IDM_ADD_SENDER_TO_BOOK, MenuItem(PE_TEXT_CMD_ADD_SENDER_TO_BOOK).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_UI_MENU_VIEW_SOURCE).c_str());
     AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_UI_PROPERTIES).c_str());
