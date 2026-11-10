@@ -128,7 +128,11 @@ fn is_dropped(c: char) -> bool {
 /// 3.2.3, with non-ASCII allowed as RFC 6532 does)
 fn is_atext(c: char) -> bool {
     if c.is_ascii() {
-        ('\u{21}'..'\u{7f}').contains(&c) && !"()<>[]:;@\\,.\"".contains(c)
+        ('\u{21}'..'\u{7f}').contains(&c)
+            && !matches!(
+                c,
+                '(' | ')' | '<' | '>' | '[' | ']' | ':' | ';' | '@' | '\\' | ',' | '.' | '"'
+            )
     } else {
         !is_space(c)
     }
@@ -437,6 +441,15 @@ impl Parts {
             State::Comment => &mut self.comment,
         }
     }
+
+    /// Whether each run left out a control character, for the text and the address (not comments)
+    fn control(&mut self, state: State) -> Option<&mut Vec<bool>> {
+        match state {
+            State::Text => Some(&mut self.text_control),
+            State::Address => Some(&mut self.address_control),
+            State::Comment => None,
+        }
+    }
 }
 
 fn collect_parts(tokens: &Tokens, from: usize, to: usize) -> (Parts, bool) {
@@ -498,18 +511,17 @@ fn collect_parts(tokens: &Tokens, from: usize, to: usize) -> (Parts, bool) {
         // Neither join takes in a second '@' once the run holds one: the address would split at the
         // last '@', and 'user@company(x).com@attacker.net' would go to attacker.net.
         let second_at = last_text_has_at && prev_operator == Some(')') && value.contains('@');
-        let joins_domain = !second_at
-            && last_text_open
+        let joins_domain = last_text_open
             && last_text_has_at
             && prev_operator == Some(')')
             && (last_chars[slot(State::Text)] == Some('.') || first == Some('.'))
             && gaps_folding
             && is_folding_gap(tokens.chars, gap_from, tokens.content_start(i));
-        let joins = joins_domain
-            || (!second_at
-                && prev_no_break
-                && !data.list(state).is_empty()
-                && (prev_operator != Some(')') || last_chars[slot(state)] == Some('@') || first == Some('@')));
+        let joins = !second_at
+            && (joins_domain
+                || (prev_no_break
+                    && !data.list(state).is_empty()
+                    && (prev_operator != Some(')') || last_chars[slot(state)] == Some('@') || first == Some('@'))));
         if joins {
             let last = data.list(state).len() - 1;
             if state == State::Text && !inside_quotes {
@@ -522,19 +534,15 @@ fn collect_parts(tokens: &Tokens, from: usize, to: usize) -> (Parts, bool) {
             if state == State::Text && inside_quotes {
                 data.text_was_quoted[last] = true;
             }
-            if tokens.has_control(i) {
-                match state {
-                    State::Text => data.text_control[last] = true,
-                    State::Address => data.address_control[last] = true,
-                    State::Comment => {}
-                }
+            if tokens.has_control(i)
+                && let Some(control) = data.control(state)
+            {
+                control[last] = true;
             }
         } else {
             data.list(state).push(value.clone());
-            match state {
-                State::Text => data.text_control.push(tokens.has_control(i)),
-                State::Address => data.address_control.push(tokens.has_control(i)),
-                State::Comment => {}
+            if let Some(control) = data.control(state) {
+                control.push(tokens.has_control(i));
             }
             if state == State::Text {
                 data.text_was_quoted.push(inside_quotes || opens_after_empty_quoted);
@@ -648,6 +656,9 @@ fn join_at_spacing(value: &str, at: Option<usize>) -> String {
     let mut end = at + 1;
     while end < chars.len() && is_space(chars[end]) {
         end += 1;
+    }
+    if start == at && end == at + 1 {
+        return join_domain_dot_spacing(&chars, at);
     }
     let mut joined: Vec<char> = chars[..start].to_vec();
     joined.push('@');

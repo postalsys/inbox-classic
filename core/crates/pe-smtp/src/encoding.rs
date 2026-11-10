@@ -5,6 +5,7 @@
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
+use pe_jsre::is_space;
 
 /// The longest line of a quoted-printable or base64 body, and the folding width of headers
 pub const LINE_LENGTH: usize = 76;
@@ -288,10 +289,14 @@ pub fn encode_word(data: &str, encoding: char, max_length: usize) -> String {
 /// encoded words: all of it with `encode_all`, otherwise from the word that holds the first such character to the
 /// word that holds the last. A valid encoded word is passed through as it is.
 pub fn encode_words(value: &str, encoding: char, max_length: usize, encode_all: bool) -> String {
-    let chars: Vec<char> = value.chars().collect();
     let special = |c: &char| *c == '"' || !c.is_ascii();
+    let lookalike = value.contains("=?");
+    if !lookalike && !value.chars().any(|c| special(&c)) {
+        return value.to_string();
+    }
+    let chars: Vec<char> = value.chars().collect();
     let mut range = (chars.iter().position(special), chars.iter().rposition(special));
-    if value.contains("=?") {
+    if lookalike {
         range = mark_invalid_encoded_words(&chars, range);
     }
     let (Some(first), Some(last)) = range else {
@@ -301,11 +306,11 @@ pub fn encode_words(value: &str, encoding: char, max_length: usize, encode_all: 
         return encode_word(value, encoding, max_length);
     }
     let mut start = first;
-    while start > 0 && !is_js_space(chars[start - 1]) {
+    while start > 0 && !is_space(chars[start - 1]) {
         start -= 1;
     }
     let mut end = last + 1;
-    while end < chars.len() && !is_js_space(chars[end]) {
+    while end < chars.len() && !is_space(chars[end]) {
         end += 1;
     }
     let part = |range: std::ops::Range<usize>| chars[range].iter().collect::<String>();
@@ -315,11 +320,6 @@ pub fn encode_words(value: &str, encoding: char, max_length: usize, encode_all: 
         encode_word(&part(start..end), encoding, max_length),
         part(end..chars.len())
     )
-}
-
-/// The white space of JavaScript's `\s`
-fn is_js_space(c: char) -> bool {
-    matches!(c as u32, 0x09..=0x0d | 0x20 | 0xa0 | 0x1680 | 0x2000..=0x200a | 0x2028 | 0x2029 | 0x202f | 0x205f | 0x3000 | 0xfeff)
 }
 
 /// An encoded word as RFC 2047 section 2 spells it: a charset token (with an optional RFC 2231 language), B or Q,
@@ -335,12 +335,10 @@ fn is_valid_encoded_word(word: &[char]) -> bool {
         return false;
     };
     !charset.is_empty()
-        && !charset
-            .chars()
-            .any(|c| is_js_space(c) || "()<>@,;:\"/[]?.=".contains(c))
+        && !charset.chars().any(|c| is_space(c) || "()<>@,;:\"/[]?.=".contains(c))
         && matches!(encoding, "B" | "b" | "Q" | "q")
         && !encoded.is_empty()
-        && !encoded.chars().any(is_js_space)
+        && !encoded.chars().any(is_space)
 }
 
 /// The end of what a lenient decoder reads as an encoded word at `pos` (libmime and Python decode
@@ -367,32 +365,32 @@ fn lenient_encoded_word(chars: &[char], pos: usize) -> Option<usize> {
 fn mark_invalid_encoded_words(chars: &[char], range: (Option<usize>, Option<usize>)) -> (Option<usize>, Option<usize>) {
     let (mut first, mut last) = range;
     let len = chars.len();
-    let (mut word_start, mut word_end) = (0, 0);
-    let mut have_word = false;
-    let mut word_at = |pos: usize, word_start: &mut usize, word_end: &mut usize| {
-        if have_word && pos < *word_end {
-            return;
+    // the word around `pos`: from the white space before it to the white space after it
+    let bounds = |pos: usize| {
+        let mut start = pos;
+        while start > 0 && !is_space(chars[start - 1]) {
+            start -= 1;
         }
-        have_word = true;
-        *word_start = pos;
-        while *word_start > 0 && !is_js_space(chars[*word_start - 1]) {
-            *word_start -= 1;
+        let mut end = pos;
+        while end < len && !is_space(chars[end]) {
+            end += 1;
         }
-        *word_end = pos;
-        while *word_end < len && !is_js_space(chars[*word_end]) {
-            *word_end += 1;
-        }
+        (start, end)
     };
+    // the word last looked at; each word is walked once
+    let (mut word_start, mut word_end) = (0, 0);
     let find = |from: usize| (from..len.saturating_sub(1)).find(|&i| chars[i] == '=' && chars[i + 1] == '?');
     let mut pos = find(0);
     while let Some(at) = pos {
-        word_at(at, &mut word_start, &mut word_end);
+        if at >= word_end {
+            (word_start, word_end) = bounds(at);
+        }
         let start = word_start;
         let matched = lenient_encoded_word(chars, at);
         let end = matched.unwrap_or(word_end);
         if matched.is_some() && end > word_end {
             // the look-alike runs across white space, on to the word it ends in
-            word_at(end - 1, &mut word_start, &mut word_end);
+            (word_start, word_end) = bounds(end - 1);
         }
         // the word is measured only where it starts at this '=?', once per word, so this stays linear
         let word = &chars[start..word_end];

@@ -10,6 +10,7 @@ publish.workspace = true
 base64.workspace = true
 getrandom = "0.4.3"
 idna = "1.1.0"
+pe-jsre.workspace = true
 pe-mime.workspace = true
 pe-net.workspace = true
 tokio = { version = "1.54.1", features = ["rt", "time", "macros"] }

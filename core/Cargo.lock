@@ -1569,6 +1569,7 @@ dependencies = [
  "base64",
  "getrandom 0.4.3",
  "idna",
+ "pe-jsre",
  "pe-mime",
  "pe-net",
  "pe-testkit",

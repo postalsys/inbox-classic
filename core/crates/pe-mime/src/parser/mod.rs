@@ -324,8 +324,8 @@ impl<'a> Parser<'a> {
             let again = self.nodes[current].feed(line, line_break, &mut self.counters.header_size, max)?;
             if in_header && self.nodes[current].state == State::Body && self.nodes[current].boundary.is_some() {
                 // a multipart whose headers just ended opens its boundary
-                let boundary = self.nodes[current].boundary.clone().unwrap_or_default();
-                self.boundaries.push(&boundary, current);
+                self.boundaries
+                    .push(self.nodes[current].boundary.as_deref().unwrap_or_default(), current);
             }
             if again {
                 return self.process_line(line, line_break, last);
