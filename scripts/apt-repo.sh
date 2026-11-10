@@ -8,7 +8,7 @@
 # an ubuntu:26.04 container, Release is signed here with the release GPG key (InRelease and Release.gpg), and the
 # files go by rsync to the Caddy vhost apt.inboxclassic.com on srv-04 (/var/www/apt.inboxclassic.com). The pool
 # keeps every version uploaded; the indexes list only this one. Last, a clean ubuntu:26.04 container of each
-# architecture adds the repository the way the homepage says and installs the app from it.
+# architecture adds the repository the way the homepage says (#linux-apt) and installs the app from it.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 # "Postalsys Releases <releases@postalsys.com>", the key hashes.txt is signed with
@@ -65,14 +65,15 @@ gpg --default-key "$GPG_KEY" --digest-algo SHA512 --clearsign --output "$repo/di
 gpg --default-key "$GPG_KEY" --digest-algo SHA512 --armor --detach-sign --output "$repo/dists/stable/Release.gpg" "$repo/dists/stable/Release"
 gpg --verify --status-fd 1 "$repo/dists/stable/InRelease" 2>/dev/null | grep -q "^\[GNUPG:\] VALIDSIG [0-9A-F]*${GPG_KEY} " ||
     fail "InRelease is not signed with ${GPG_KEY}"
-# the key users add (signed-by), binary as apt wants it
+# the apt source users download (the homepage) and the .deb installs, with the key in it, and the key alone
+cp linux/data/inboxclassic.sources "$repo/"
 gpg --export "$GPG_KEY" >"$repo/inboxclassic.gpg"
 chmod -R u=rwX,go=rX "$repo"
 
 # the packages first, so no index ever names a file that is not there yet, then the indexes in one swap
-rsync -rt "$repo/pool/" "$repo/inboxclassic.gpg" "$HOST:$DIR/staging-pool/"
+rsync -rt "$repo/pool/" "$repo/inboxclassic.gpg" "$repo/inboxclassic.sources" "$HOST:$DIR/staging-pool/"
 rsync -rt "$repo/dists/" "$HOST:$DIR/dists.new/"
-ssh "$HOST" "set -e; cd $DIR; mkdir -p pool; cp -a staging-pool/main pool/; mv staging-pool/inboxclassic.gpg .; rm -rf staging-pool
+ssh "$HOST" "set -e; cd $DIR; mkdir -p pool; cp -a staging-pool/main pool/; mv staging-pool/inboxclassic.gpg staging-pool/inboxclassic.sources .; rm -rf staging-pool
     rm -rf dists.old; [ ! -d dists ] || mv dists dists.old; mv dists.new dists; rm -rf dists.old"
 echo "Published inbox-classic ${version} to ${URL}"
 
@@ -81,8 +82,7 @@ for arch in "${ARCHES[@]}"; do
     said=$(docker run --rm --platform "linux/$arch" ubuntu:26.04 bash -euo pipefail -c "
         apt-get update -qq >/dev/null
         DEBIAN_FRONTEND=noninteractive apt-get install -y -qq wget ca-certificates >/dev/null
-        wget -qO- ${URL}/inboxclassic.gpg >/usr/share/keyrings/inboxclassic.gpg
-        echo 'deb [signed-by=/usr/share/keyrings/inboxclassic.gpg] ${URL} stable main' >/etc/apt/sources.list.d/inboxclassic.list
+        wget -qO /etc/apt/sources.list.d/inboxclassic.sources ${URL}/inboxclassic.sources
         apt-get update -qq >/dev/null
         DEBIAN_FRONTEND=noninteractive apt-get install -y -qq inbox-classic >/dev/null
         inbox-classic --version

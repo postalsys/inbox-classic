@@ -404,19 +404,40 @@ extension UITest {
 
         step("a collapsed account")
         let rowLabel = { (row: Int) -> String in
-            (self.tree.view(atColumn: 0, row: row, makeIfNecessary: true) as? FolderCell)?.accessibilityLabel() ?? ""
+            (self.tree.view(atColumn: 0, row: row, makeIfNecessary: true) as? NSTableCellView)?.accessibilityLabel() ?? ""
         }
+        let heading = { self.tree.view(atColumn: 0, row: 0, makeIfNecessary: true) as? HeadingCell }
+        selectFolder(named: "Inbox")
         let inboxRow = (0..<tree.numberOfRows).first { (tree.item(atRow: $0) as? Mailbox.FolderNode)?.folder.name == "Inbox" } ?? 1
-        let inboxUnread = (tree.item(atRow: inboxRow) as? Mailbox.FolderNode)?.folder.unread ?? 0
+        let inboxNode = tree.item(atRow: inboxRow) as? Mailbox.FolderNode
+        let inboxUnread = inboxNode?.folder.unread ?? 0
+        _ = await waitUntil(5) { self.main.mailbox.folder == inboxNode?.folder.id }
+        let listed = main.mailbox.total
         check(inboxUnread >= 1, "the Inbox has unread messages (\(rowLabel(inboxRow)))")
-        tree.collapseItem(tree.item(atRow: 0))
-        check(await waitUntil(5) { rowLabel(0).hasSuffix("unread") && (tree.view(atColumn: 0, row: 0, makeIfNecessary: true) as? FolderCell)?.unreadShown ?? 0 >= inboxUnread },
-              "collapsed, the account shows the unread messages of its folders (\(rowLabel(0)))")
-        check((tree.view(atColumn: 0, row: 0, makeIfNecessary: true) as? FolderCell)?.isBold == true, "and is bold")
+        check(tree.item(atRow: 0) is Mailbox.AccountNode && heading() != nil
+              && tree.delegate?.outlineView?(tree, shouldSelectItem: tree.item(atRow: 0) as Any) == false,
+              "the account is a heading over its folders, which can not be selected")
+        // the arrow keys pass the heading by: up from the Inbox stays on the Inbox
+        tree.window?.makeFirstResponder(tree)
+        if let up = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+                                     windowNumber: main.window.windowNumber, context: nil,
+                                     characters: String(UnicodeScalar(NSUpArrowFunctionKey)!),
+                                     charactersIgnoringModifiers: String(UnicodeScalar(NSUpArrowFunctionKey)!),
+                                     isARepeat: false, keyCode: 126) {
+            tree.keyDown(with: up)
+        }
+        check(tree.selectedRow == inboxRow, "Up from the Inbox does not select the heading (row \(tree.selectedRow))")
+        main.mailbox.headingClicked(0)
+        check(await waitUntil(5) {
+            !self.tree.isItemExpanded(self.tree.item(atRow: 0)) && rowLabel(0).hasSuffix("unread")
+                && (heading()?.unreadShown ?? 0) >= inboxUnread
+        }, "a click on the heading closes the account, which shows the unread messages of its folders (\(rowLabel(0)))")
+        check(main.mailbox.folder == inboxNode?.folder.id && main.mailbox.total == listed && tree.selectedRow < 0,
+              "the Inbox it hides stays listed, and nothing is selected in the tree (folder \(main.mailbox.folder) of \(inboxNode?.folder.id ?? 0), \(main.mailbox.total) of \(listed), row \(tree.selectedRow))")
         await shot(main.window, "folders-5-collapsed")
-        tree.expandItem(tree.item(atRow: 0))
-        check(await waitUntil(5) { !rowLabel(0).hasSuffix("unread") && rowLabel(inboxRow).hasSuffix("unread") },
-              "expanded, the count is back on the Inbox alone")
+        main.mailbox.headingClicked(0)
+        check(await waitUntil(5) { !rowLabel(0).hasSuffix("unread") && rowLabel(inboxRow).hasSuffix("unread") && self.tree.selectedRow == inboxRow },
+              "a second click opens it again: the count is back on the Inbox, which is selected again (row \(tree.selectedRow) of \(inboxRow), \(rowLabel(0)) / \(rowLabel(inboxRow)))")
 
         try await agent()
 

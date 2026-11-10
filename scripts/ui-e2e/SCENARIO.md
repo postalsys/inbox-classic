@@ -290,8 +290,11 @@ Screenshots: `read-11-logo`
 Screenshots: `folders-5-collapsed`
 
 - the Inbox has unread messages
-- collapsed, the account shows the unread messages of its folders
-- and is bold
+- the Mac and Linux: the account is a heading over its folders, which can not be selected (the arrow keys pass it by);
+  a click on it closes it, the Inbox it hides stays listed with nothing selected in the tree, and a second click opens
+  it again with the Inbox selected. Windows keeps Outlook Express's tree, where the account is an item that can be
+  selected
+- collapsed, the account shows the unread messages of its folders (Windows: in bold)
 - expanded, the count is back on the Inbox alone
 
 ## 28. An AI agent

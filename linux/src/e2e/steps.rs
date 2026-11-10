@@ -189,7 +189,19 @@ pub async fn collapsed_account(d: &Driver) {
         inbox_unread >= 1,
         &format!("the Inbox has unread messages ({})", label(inbox_id)),
     );
-    tree().set_expanded(-account, false);
+    // the Inbox listed; the account a heading over it, which can not be selected
+    select_folder("Inbox");
+    wait_until(5, || shell().main().folder_id() == inbox_id).await;
+    let listed = messages_listed();
+    let heading = tree().position_of(-account);
+    d.check(
+        heading.is_some_and(|at| !tree().selectable(at)),
+        "the account is a heading over its folders, which can not be selected",
+    );
+    // a click on the heading closes it (Enter, or a click, activates it)
+    if let Some(at) = heading {
+        tree().toggle_heading(at);
+    }
     let counted = |markup: &str| {
         markup
             .rsplit_once(" (")
@@ -203,15 +215,20 @@ pub async fn collapsed_account(d: &Driver) {
             label(-account)
         ),
     );
-    d.check(label(-account).starts_with("<b>"), "and is bold");
+    d.check(
+        shell().main().folder_id() == inbox_id && messages_listed() == listed && tree().selected() == 0,
+        "the Inbox it hides stays listed, and nothing is selected in the tree",
+    );
     d.shot(&main_window(), "folders-5-collapsed").await;
-    tree().set_expanded(-account, true);
+    if let Some(at) = heading {
+        tree().toggle_heading(at);
+    }
     d.check(
         wait_until(5, || {
-            counted(&label(-account)) == 0 && counted(&label(inbox_id)) == inbox_unread
+            counted(&label(-account)) == 0 && counted(&label(inbox_id)) == inbox_unread && tree().selected() == inbox_id
         })
         .await,
-        "expanded, the count is back on the Inbox alone",
+        "a second click opens it again: the count is back on the Inbox, which is selected again",
     );
 }
 

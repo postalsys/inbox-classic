@@ -622,9 +622,9 @@ const sections = [
             {
                 shot: 'folders-5-collapsed',
                 name: 'Unread mail in a collapsed account',
-                what: 'A collapsed account, or a collapsed folder with folders in it, is bold with the unread messages of the folders it hides, so new mail is not out of sight. Junk E-mail and Deleted Items do not count. Expanded, each folder shows its own again.',
-                how: 'Click the arrow beside an account or a folder to collapse it.',
-                checked: ['Collapsed, the account shows the unread messages of its folders, bold', 'Expanded, the count is back on the Inbox alone']
+                what: 'A collapsed account, or a collapsed folder with folders in it, shows the unread messages of the folders it hides, so new mail is not out of sight. Junk E-mail and Deleted Items do not count. Expanded, each folder shows its own again. On the Mac and Linux an account is a heading over its folders, as in Mail: a click opens or closes it, it is never selected, and the folder listed stays listed while its account is closed.',
+                how: 'Click an account (on Windows its arrow) or the arrow beside a folder to collapse it.',
+                checked: ['Collapsed, the account shows the unread messages of its folders', 'The account is a heading that can not be selected (Mac, Linux)', 'Expanded, the count is back on the Inbox alone']
             }
         ]
     },
