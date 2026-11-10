@@ -130,6 +130,10 @@ pub struct Message {
     pub date: Option<String>,
     /// The Date header in seconds since the Unix epoch, when it parses
     pub timestamp: Option<i64>,
+    /// The one-time passcode of the message's own OTP-Token header, when it has exactly one and it
+    /// is valid. The header is not authenticated: check that the message is signed by the domain of
+    /// the origin before trusting it.
+    pub otp: Option<crate::OtpToken>,
     pub html: Option<String>,
     pub text: Option<String>,
     pub attachments: Vec<Attachment>,
@@ -606,6 +610,7 @@ impl<'a> Parser<'a> {
             references: words("references"),
             timestamp: date.as_deref().and_then(crate::date::parse_date),
             date,
+            otp: crate::otp_token(&headers),
             headers,
             header_lines,
             ..Default::default()
