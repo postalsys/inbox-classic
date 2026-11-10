@@ -37,7 +37,25 @@ const texts = [
     '你好世界'.repeat(20),
     '  leading and trailing spaces  ',
     'ends with a space ',
-    'emoji 🙂'.repeat(10)
+    'emoji 🙂'.repeat(10),
+    // look-alikes of encoded words that are not valid ones are encoded, valid ones pass (nodemailer 7a7b942)
+    '=?utf-8?X?fake?=',
+    'see =?utf-8?Q?a b?= here',
+    '=?bad charset?Q?x?=',
+    '=??Q?x?=',
+    '=?utf-8?Q??=',
+    'a=?utf-8?Q?x?=',
+    '=?utf-8?Q?x?=b',
+    'see =?utf-8?X?fake?= here',
+    '=?utf-8?Q?fake?=',
+    'see =?utf-8?Q?fake?= here',
+    '=?UTF-8?B?ZmFrZQ==?=',
+    '=?utf-8*en?q?x?=',
+    'a =? b',
+    'a ?= b',
+    'x=?y?=',
+    'x =?=',
+    'Re: =?utf-8?X?fake?= and ünïcödé'
 ];
 
 const bodies = [
@@ -106,7 +124,11 @@ const addressLists = [
         }
     ],
     [{ name: '', address: 'weird local@example.com' }],
-    [{ name: '日本', address: 'jp@example.jp' }]
+    [{ name: '日本', address: 'jp@example.jp' }],
+    // the domain reaches the UTS-46 mapper as supplied (nodemailer 093e4dd)
+    [{ name: '', address: 'user@stra\u1E9Ee.de' }],
+    [{ name: '', address: 'user@\u03A3\u03A3.gr' }],
+    [{ name: '', address: 'User@EXAMPLE.Com' }]
 ];
 for (const list of addressLists) {
     cases.addresses.push({ input: list, encoded: new MimeNode()._convertAddresses(JSON.parse(JSON.stringify(list))) });

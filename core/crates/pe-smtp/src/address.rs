@@ -48,10 +48,12 @@ fn is_plain_address(address: &str) -> bool {
     }
 }
 
-/// The domain in IDNA form, or as Unicode when the address needs SMTPUTF8; as written when it is no domain
+/// The domain in IDNA form, or as Unicode when the address needs SMTPUTF8; lowercased as written when it is no
+/// domain. The mapper gets the domain as supplied, as UTS-46 does its own case mapping and `to_lowercase` differs
+/// from it for some characters (nodemailer 093e4dd, GHSA-2g53-87p2-4qq8).
 fn normalize_domain(domain: &str, unicode: bool) -> String {
     let lower = domain.to_lowercase();
-    match idna::domain_to_ascii(&lower) {
+    match idna::domain_to_ascii(domain) {
         Ok(ascii) if !ascii.is_empty() => {
             if unicode {
                 let (decoded, result) = idna::domain_to_unicode(&ascii);
