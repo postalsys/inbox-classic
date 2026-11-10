@@ -187,6 +187,7 @@ pub fn run(arguments: Arguments, argv: Vec<String>) -> glib::ExitCode {
     application.connect_startup(|_| {
         gio::resources_register_include!("inbox-classic.gresource").expect("the app's resources");
         ui::load_style();
+        reader::set_instant_format();
     });
     let first = std::cell::RefCell::new(Some(arguments));
     application.connect_command_line(move |application, command_line| {

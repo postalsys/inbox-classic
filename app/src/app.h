@@ -34,6 +34,8 @@ std::wstring Text(const char* utf8);
 std::wstring FormatDate(int64_t seconds);
 // a time of day as the user's settings write it, without seconds: of `local`, or now
 std::wstring FormatTime(const SYSTEMTIME& local);
+// the event cards of the core word their days and times as the windows show dates
+void SetInstantFormat();
 // seconds since the Unix epoch as a SYSTEMTIME, the reader's local time when `local`, else UTC; false for a date
 // Windows can not hold
 bool UnixToSystemTime(int64_t seconds, bool local, SYSTEMTIME& time);
@@ -820,7 +822,7 @@ enum ControlId : WORD {
     IDC_SEARCH_CLEAR,
     // at the right of the message header: leaving the message's mailing list
     IDC_UNSUBSCRIBE,
-    // under the header of a message with a calendar part: the event, and a button that opens it in the calendar
+    // no longer used (a calendar event is a card in the message now), kept so the ids after them stay as they were
     IDC_INVITATION,
     IDC_OPEN_CALENDAR,
     // at the left of the message header: the brand's BIMI logo

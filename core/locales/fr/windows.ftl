@@ -66,10 +66,6 @@ win-files = { $count ->
 win-click-to-retry = Cliquez ici pour réessayer.
 win-save-attachments = &Enregistrer les pièces jointes...
 win-files-not-saved = Fichiers non enregistrés : { $failed } sur { $count }.
-win-attendees = { $count ->
-    [one] { $count } participant
-   *[other] { $count } participants
-}
 win-new-folder-in-highlighted = Le nouveau dossier sera créé dans le dossier sélectionné.
 win-delete-folder-ask = Supprimer le dossier « { $folder } », tous ses messages et ses sous-dossiers ? Ils seront également supprimés du serveur.
 win-rename = &Renommer...

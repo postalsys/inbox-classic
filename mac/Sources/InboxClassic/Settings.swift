@@ -16,6 +16,7 @@ enum Languages {
         let used = taken(wanted.withCString { pe_set_language($0) }) ?? "en"
         let code = used == "qps" ? "en" : used
         locale = Locale(identifier: Locale.current.region.map { "\(code)_\($0.identifier)" } ?? code)
+        instantLocale = locale
     }
 
     /// The code of the language the windows are in now

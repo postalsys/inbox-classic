@@ -66,10 +66,6 @@ win-files = { $count ->
 win-click-to-retry = Click here to try again.
 win-save-attachments = &Save Attachments...
 win-files-not-saved = { $failed } of the { $count } files could not be saved.
-win-attendees = { $count ->
-    [one] { $count } attendee
-   *[other] { $count } attendees
-}
 win-new-folder-in-highlighted = The new folder will be created inside the selected folder.
 win-delete-folder-ask = Delete the folder "{ $folder }" with its messages and the folders in it? It is deleted on the server too.
 win-rename = &Rename...

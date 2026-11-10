@@ -87,6 +87,26 @@ private let eventCallback: PeEventCallback = { context, event in
     onMain { sink.deliver(copy) }
 }
 
+/// The locale of the event cards' days and times: the windows' (set with their language), read on worker threads
+nonisolated(unsafe) var instantLocale = Locale.current
+
+/// The days and times of the event cards, as the windows write dates: the full date or the short time, in the reader's
+/// time zone, or as written (UTC) when floating. Called by the core on a worker thread.
+private let formatInstant: PeFormatInstant = { _, seconds, floating, time, out, capacity in
+    guard let out else { return 0 }
+    let formatter = DateFormatter()
+    formatter.locale = instantLocale
+    formatter.timeZone = floating ? TimeZone(secondsFromGMT: 0)! : TimeZone.current
+    formatter.dateStyle = time ? .none : .full
+    formatter.timeStyle = time ? .short : .none
+    let words = Array(formatter.string(from: Date(timeIntervalSince1970: TimeInterval(seconds))).utf8)
+    let length = min(words.count, capacity)
+    words.withUnsafeBytes { bytes in
+        UnsafeMutableRawPointer(out).copyMemory(from: bytes.baseAddress!, byteCount: length)
+    }
+    return length
+}
+
 /// Runs `block` on the main thread from the run loop, in its common modes: also while a modal window or a menu runs
 /// its own loop. (A block of the main dispatch queue that runs a modal window holds up every other one until it
 /// closes, the core's events and the windows' own work included, so nothing here goes through that queue.)
@@ -110,6 +130,7 @@ final class Core {
     /// opens the store at `path`; nil when it (or the certificate file) can not be opened
     init?(path: String, memoryPasswords: Bool, certificate: String?, onEvent: @escaping (CoreEvent) -> Void) {
         let sink = Unmanaged.passRetained(EventSink(onEvent))
+        pe_set_instant_format(formatInstant, nil)
         let flags: UInt32 = memoryPasswords ? UInt32(PE_OPEN_MEMORY_PASSWORDS) : 0
         let opened: OpaquePointer? = path.withCString { path in
             if let certificate {

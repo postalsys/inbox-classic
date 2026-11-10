@@ -3,7 +3,7 @@
 //! fills a [`BounceCard`] with words of the catalog and values from the notice; this writes it as markup of ours, every
 //! value escaped, with inline SVG pictures and no script, in the frame every card of the app has ([`crate::card`]).
 
-use crate::card::{Icon, MAX_VALUE, Tone, is_link, open, shown, style};
+use crate::card::{Icon, MAX_VALUE, Tone, button, is_link, open, shown, style};
 use crate::editor::nonce;
 
 /// The link of "Show the message that bounced": the apps take a click on it (their web views cancel every navigation
@@ -117,7 +117,7 @@ const RULES: &[(&str, &str)] = &[
     ("C .y", "--accent:#9a5b00;--disc:#fbecd0"),
     (
         "C .r",
-        "display:flex;gap:10px;align-items:flex-start;margin:9px 0 0;padding:9px 0 1px;border-top:1px solid var(--line)",
+        "display:flex;gap:10px;align-items:flex-start;margin:9px 0 0 26px;padding:9px 0 1px;border-top:1px solid var(--line)",
     ),
     (
         "C .p",
@@ -132,7 +132,7 @@ const RULES: &[(&str, &str)] = &[
     ("C .n", "display:block;margin:3px 0 0;color:#4d4d4d"),
     (
         "C details",
-        "display:block;margin:8px 0 0;padding:6px 0 0;border-top:1px solid var(--line)",
+        "display:block;margin:8px 0 0 26px;padding:6px 0 0;border-top:1px solid var(--line)",
     ),
     (
         "C summary",
@@ -226,8 +226,8 @@ pub fn bounce_card(card: &BounceCard) -> String {
     }
     if let Some(link) = &card.link {
         out.push_str(&format!(
-            "<div class=\"k\"><a href=\"{BOUNCED_MESSAGE_LINK}\">{}</a></div>",
-            shown(link, MAX_VALUE)
+            "<div class=\"x\">{}</div>",
+            button(BOUNCED_MESSAGE_LINK, link)
         ));
     }
     for reason in &card.reasons {
@@ -287,7 +287,7 @@ mod tests {
         assert_eq!(html.matches("</details>").count(), 1);
         // the link of the bounced message, which the apps take
         assert!(html.contains(&format!(
-            "<a href=\"{BOUNCED_MESSAGE_LINK}\">Show the message that bounced</a>"
+            "<a class=\"btn\" href=\"{BOUNCED_MESSAGE_LINK}\" role=\"button\">Show the message that bounced</a>"
         )));
         assert!(html.contains("<svg viewBox=\"0 0 20 20\""));
         let without = bounce_card(&BounceCard { link: None, ..card() });

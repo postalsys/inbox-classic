@@ -65,10 +65,6 @@ win-files = { $count ->
 win-click-to-retry = Uuesti proovimiseks klõpsake siin.
 win-save-attachments = &Salvesta manused...
 win-files-not-saved = { $count } failist { $failed } ei saanud salvestada.
-win-attendees = { $count ->
-    [one] { $count } osaleja
-   *[other] { $count } osalejat
-}
 win-new-folder-in-highlighted = Uus kaust luuakse valitud kausta alamkaustana.
 win-delete-folder-ask = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
 win-rename = &Nimeta ümber...
