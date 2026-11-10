@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.0](https://github.com/postalsys/inbox-classic/compare/v0.10.0...v0.11.0) (2026-11-10)
+
+
+### Features
+
+* new mail notifications can name a sign-in code ([266d613](https://github.com/postalsys/inbox-classic/commit/266d6134e2941976aec1a4fd081b75343a95f9b2))
+* new mail notifications can name a sign-in code ([2a41d28](https://github.com/postalsys/inbox-classic/commit/2a41d283438066bd8d6299084aef48e3e68bbe1e))
+
 ## [0.10.0](https://github.com/postalsys/inbox-classic/compare/v0.9.0...v0.10.0) (2026-11-10)
 
 
