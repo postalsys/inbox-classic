@@ -470,3 +470,9 @@ otp-copy = Kopeeri
 otp-note = Sisestage see ainult domeeni { $domain } lehel.
 # review: new
 otp-old = See kood saadeti rohkem kui tund enne avamist ja on tõenäoliselt aegunud.
+
+event-attendees =
+    { $count ->
+        [one] { $count } osaleja
+       *[other] { $count } osalejat
+    }

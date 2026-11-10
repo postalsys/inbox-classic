@@ -1,10 +1,10 @@
 //! The card at the top of a bounce (a notice that a message was not delivered, or not yet): what happened to each
 //! recipient in plain words, what to do about it, and the receiving server's own words folded under Details. The core
 //! fills a [`BounceCard`] with words of the catalog and values from the notice; this writes it as markup of ours, every
-//! value escaped, with inline SVG pictures and no script. It sits above the sanitized message, under a class and in a
-//! cascade layer the message can not name, so the message's own style elements can not restyle or hide it.
+//! value escaped, with inline SVG pictures and no script, in the frame every card of the app has ([`crate::card`]).
 
-use crate::editor::{nonce, text};
+use crate::card::{Icon, MAX_VALUE, Tone, is_link, open, shown, style};
+use crate::editor::nonce;
 
 /// The link of "Show the message that bounced": the apps take a click on it (their web views cancel every navigation
 /// and open links in the browser) and select the message of [`crate::Rendered`]'s view instead. It is no URL a message
@@ -14,12 +14,6 @@ pub const BOUNCED_MESSAGE_LINK: &str = "inboxclassic:bounced-message";
 /// Whether a link clicked in the reading pane is the card's [`BOUNCED_MESSAGE_LINK`]
 pub fn is_bounced_message_link(uri: &str) -> bool {
     is_link(uri, BOUNCED_MESSAGE_LINK)
-}
-
-/// Whether `uri`, as a web view names a clicked link, is the document's own `link` (a trailing slash allowed)
-pub(crate) fn is_link(uri: &str, link: &str) -> bool {
-    let uri = uri.trim();
-    uri.strip_suffix('/').unwrap_or(uri).eq_ignore_ascii_case(link)
 }
 
 /// The picture of a reason; the 16 kinds of reason share these six
@@ -87,19 +81,8 @@ pub struct BounceCard {
     pub details_note: String,
 }
 
-/// The longest a value of the notice is shown: an address, a line, the server's words
-const MAX_VALUE: usize = 320;
+/// The longest the server's words are shown
 const MAX_WORDS: usize = 4000;
-
-/// A value of the card as text in HTML: cut at `max` characters, escaped. The core has made it safe to show already
-/// (control characters and direction marks as spaces).
-fn shown(value: &str, max: usize) -> String {
-    let mut out: String = value.chars().take(max).collect();
-    if value.chars().nth(max).is_some() {
-        out.push('…');
-    }
-    text(&out)
-}
 
 /// The SVG of a picture: 20 by 20, strokes in the card's colour (the card's style sets them, a message's can not)
 fn picture(picture: CardPicture) -> &'static str {
@@ -128,45 +111,18 @@ fn picture(picture: CardPicture) -> &'static str {
     }
 }
 
-/// The rules of the card, each declaration important: in the first cascade layer, an important declaration beats
-/// any of the message's, layered or not, whatever its selector. `C` stands for the card's class.
+/// The bounce card's own rules, beside those every card has ([`crate::card`]); `C` stands for its class
 const RULES: &[(&str, &str)] = &[
-    // the elements of the card as the browser draws them, whatever the message's style elements say
-    (
-        "C,C div,C p,C span,C a,C b,C details,C summary,C pre",
-        "all:revert;visibility:visible;opacity:1;position:static;float:none;transform:none;filter:none;clip-path:none",
-    ),
-    (
-        "C",
-        "display:block;box-sizing:border-box;margin:0 0 12px;padding:10px 12px 8px;max-width:720px;\
-         border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;background:var(--tint);\
-         color:#1f1f1f;font:9.5pt/1.4 system-ui,-apple-system,'Segoe UI',Arial,sans-serif;text-align:left;\
-         direction:ltr;overflow-wrap:anywhere",
-    ),
-    ("C.F", "--accent:#c42b1c;--tint:#fdf5f4;--line:#f1d4d0;--disc:#f9e2df"),
-    ("C.D", "--accent:#9a5b00;--tint:#fff9ee;--line:#f0dfbd;--disc:#fbecd0"),
     // a delayed reason in the card of a failure: its picture in the colours of a delay
     ("C .y", "--accent:#9a5b00;--disc:#fbecd0"),
     (
-        "C .h",
-        "display:block;margin:0;font-weight:600;font-size:11pt;line-height:1.3;color:var(--accent)",
-    ),
-    ("C .l", "display:block;margin:2px 0 0;color:#4d4d4d"),
-    ("C a", "color:#0b5cad;text-decoration:underline;cursor:pointer"),
-    ("C .k", "display:block;margin:2px 0 0"),
-    (
         "C .r",
-        "display:flex;gap:10px;align-items:flex-start;margin:8px 0 0;padding:9px 0 1px;border-top:1px solid var(--line)",
+        "display:flex;gap:10px;align-items:flex-start;margin:9px 0 0;padding:9px 0 1px;border-top:1px solid var(--line)",
     ),
     (
         "C .p",
         "display:flex;flex:0 0 auto;align-items:center;justify-content:center;width:30px;height:30px;\
          border-radius:50%;background:var(--disc);color:var(--accent)",
-    ),
-    ("C svg", "display:block;width:20px;height:20px;overflow:visible"),
-    (
-        "C svg *",
-        "fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;visibility:visible",
     ),
     ("C .b", "display:block;flex:1 1 auto;min-width:0"),
     ("C .a,C .t", "display:block;font-weight:600;color:#1f1f1f"),
@@ -186,28 +142,11 @@ const RULES: &[(&str, &str)] = &[
     ("C .s", "display:block;color:#4d4d4d;font-size:9pt"),
     (
         "C pre",
-        "display:block;margin:3px 0 0;padding:6px 8px;background:#fff;border:1px solid var(--line);border-radius:4px;\
+        "display:block;margin:3px 0 0;padding:6px 8px;background:#fff;border:1px solid var(--line);border-radius:3px;\
          font:8.5pt/1.4 ui-monospace,Menlo,Consolas,monospace;color:#1f1f1f;white-space:pre-wrap;\
          overflow-wrap:anywhere;user-select:text",
     ),
 ];
-
-/// The style element of a card with `class`, in a layer of the same name
-fn style(class: &str) -> String {
-    let mut css = format!("<style>@layer {class}{{");
-    for (selectors, declarations) in RULES {
-        let selectors = selectors.replace('C', &format!(".{class}"));
-        css.push_str(&selectors);
-        css.push('{');
-        for declaration in declarations.split(';') {
-            css.push_str(declaration);
-            css.push_str("!important;");
-        }
-        css.push('}');
-    }
-    css.push_str("}</style>");
-    css
-}
 
 /// A reason of the card, its picture beside its words
 fn push_reason(out: &mut String, reason: &CardReason, advice_label: &str) {
@@ -275,12 +214,13 @@ fn push_details(out: &mut String, card: &BounceCard) {
 /// The card as markup for the top of the reading pane's document, with its own style element
 pub fn bounce_card(card: &BounceCard) -> String {
     let class = format!("pe-bounce-{}", nonce());
-    let kind = if card.delayed { "D" } else { "F" };
-    let mut out = style(&class);
-    out.push_str(&format!(
-        "<div class=\"{class} {kind}\" role=\"note\"><div class=\"h\">{}</div>",
-        shown(&card.heading, MAX_VALUE)
-    ));
+    let (tone, icon) = if card.delayed {
+        (Tone::Delay, Icon::Clock)
+    } else {
+        (Tone::Failure, Icon::Envelope)
+    };
+    let mut out = style(&class, RULES);
+    out.push_str(&open(&class, tone, icon, &card.heading));
     for line in &card.lines {
         out.push_str(&format!("<div class=\"l\">{}</div>", shown(line, MAX_VALUE)));
     }
@@ -393,7 +333,11 @@ mod tests {
         let css = html.split("</style>").next().unwrap();
         for block in css.split('{').skip(2) {
             let declarations = block.split('}').next().unwrap();
-            for declaration in declarations.split(';').filter(|d| !d.is_empty()) {
+            // (a selector of the print rules has no declaration of its own)
+            for declaration in declarations
+                .split(';')
+                .filter(|d| d.contains(':') && !d.starts_with('.'))
+            {
                 assert!(declaration.ends_with("!important"), "{declaration}");
             }
         }

@@ -179,6 +179,9 @@ typedef enum PeReaderLink {
   PE_READER_LINK_BOUNCED_MESSAGE = 1,
   // Copy on the card of a one-time code: put `otp_code` of the view's `PeMessageInfo` on the clipboard
   PE_READER_LINK_COPY_CODE = 2,
+  // Open in Calendar on the card of a calendar event: the event of the view (`pe_invitation_file`) opened in the
+  // calendar app
+  PE_READER_LINK_OPEN_CALENDAR = 3,
 } PeReaderLink;
 
 // How a message lets its reader leave its mailing list
@@ -655,6 +658,18 @@ typedef struct PeMessage {
   // column's place
   bool bounce;
 } PeMessage;
+
+// Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
+// day, short (`time` true), in the reader's locale and time zone, or as written when `floating` (the seconds are
+// then the written time read as UTC). Writes UTF-8 into `out`, at most `capacity` bytes and no NUL needed, and
+// returns how many it wrote. Called on worker threads, so it must be safe to call from any thread at any time, and it
+// must not throw.
+typedef size_t (*PeFormatInstant)(void *context,
+                                  int64_t seconds,
+                                  bool floating,
+                                  bool time,
+                                  char *out,
+                                  size_t capacity);
 
 // The event of a message's calendar part, as the reading pane shows it
 typedef struct PeInvitation {
@@ -1735,6 +1750,14 @@ char *pe_folder_empty_question(const struct PeCore *core,
 char *pe_folder_empty(const struct PeCore *core,
                       int64_t folder,
                       char **error);
+
+// How the cards of calendar events word their days and times: the app's own words, as its windows show dates. Set
+// once as the app starts, before any message is shown; without it the cards say UTC dates and times as ISO 8601.
+//
+// # Safety
+// `format` must be safe to call from any thread with `context` for as long as the process runs.
+void pe_set_instant_format(PeFormatInstant format,
+                           void *context);
 
 // What `uri`, a link clicked in the reading pane (the URI the web view's navigation names), is: one of the
 // document's own, which the app handles itself, or one to open in the browser. The web views cancel every navigation

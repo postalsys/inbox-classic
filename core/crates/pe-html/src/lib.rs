@@ -13,7 +13,9 @@ use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 
 mod bounce;
+mod card;
 mod editor;
+mod event;
 mod otp;
 mod platform;
 mod visible;
@@ -24,6 +26,7 @@ pub use editor::{
     PICTURE_FILE_LIMIT, PICTURE_HEAD, Picture, draft_body, editor_document, is_plain, outgoing_html, picture_type,
     picture_uri, quote_html, quote_parts, signature_block, signature_html,
 };
+pub use event::{EventCard, OPEN_CALENDAR_LINK, event_card, is_open_calendar_link};
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, help_page, help_page_in, status_page, webkit_content_rules};
 pub use visible::visible_html;
@@ -234,16 +237,17 @@ pub fn render_view_with(
         images,
         header,
         &Cards {
-            otp: None,
             bounce: card,
+            ..Default::default()
         },
     )
 }
 
-/// The cards of the app above a message: a one-time code's first, then a bounce's
+/// The cards of the app above a message: a one-time code's first, then an event's, then a bounce's
 #[derive(Default)]
 pub struct Cards<'a> {
     pub otp: Option<&'a OtpCard>,
+    pub event: Option<&'a EventCard>,
     pub bounce: Option<&'a BounceCard>,
 }
 
@@ -257,7 +261,14 @@ pub fn render_view_cards(
 ) -> Rendered {
     let remote = Arc::new(AtomicBool::new(false));
     let body = builder_noting(images, Some(remote.clone())).clean(html).to_string();
-    let card = cards.otp.map(otp_card).unwrap_or_default() + &cards.bounce.map(bounce_card).unwrap_or_default();
+    let card = [
+        cards.otp.map(otp_card),
+        cards.event.map(event_card),
+        cards.bounce.map(bounce_card),
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<String>();
     Rendered {
         // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
         remote_images: remote.load(Ordering::Relaxed) || style_elements_load_remote(&body),

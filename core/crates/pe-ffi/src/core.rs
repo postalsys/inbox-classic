@@ -1708,6 +1708,69 @@ pub enum PeReaderLink {
     BouncedMessage = 1,
     /// Copy on the card of a one-time code: put `otp_code` of the view's `PeMessageInfo` on the clipboard
     CopyCode = 2,
+    /// Open in Calendar on the card of a calendar event: the event of the view (`pe_invitation_file`) opened in the
+    /// calendar app
+    OpenCalendar = 3,
+}
+
+/// Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
+/// day, short (`time` true), in the reader's locale and time zone, or as written when `floating` (the seconds are
+/// then the written time read as UTC). Writes UTF-8 into `out`, at most `capacity` bytes and no NUL needed, and
+/// returns how many it wrote. Called on worker threads, so it must be safe to call from any thread at any time, and it
+/// must not throw.
+pub type PeFormatInstant = Option<
+    unsafe extern "C" fn(
+        context: *mut c_void,
+        seconds: i64,
+        floating: bool,
+        time: bool,
+        out: *mut c_char,
+        capacity: usize,
+    ) -> usize,
+>;
+
+struct InstantFormat {
+    function: unsafe extern "C" fn(*mut c_void, i64, bool, bool, *mut c_char, usize) -> usize,
+    context: *mut c_void,
+}
+
+// SAFETY: the C side promises a function and context that may be used from any thread
+unsafe impl Send for InstantFormat {}
+// SAFETY: as above
+unsafe impl Sync for InstantFormat {}
+
+impl InstantFormat {
+    fn word(&self, seconds: i64, floating: bool, time: bool) -> String {
+        let mut out = [0u8; 256];
+        // SAFETY: as the caller of pe_set_instant_format promised; the buffer is ours and its size is told
+        let written = unsafe {
+            (self.function)(
+                self.context,
+                seconds,
+                floating,
+                time,
+                out.as_mut_ptr().cast(),
+                out.len(),
+            )
+        };
+        String::from_utf8_lossy(&out[..written.min(out.len())]).into_owned()
+    }
+}
+
+/// How the cards of calendar events word their days and times: the app's own words, as its windows show dates. Set
+/// once as the app starts, before any message is shown; without it the cards say UTC dates and times as ISO 8601.
+///
+/// # Safety
+/// `format` must be safe to call from any thread with `context` for as long as the process runs.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_instant_format(format: PeFormatInstant, context: *mut c_void) {
+    let Some(function) = format else { return };
+    let format = InstantFormat { function, context };
+    guard(move || {
+        pe_core::calendar::set_instant_format(move |seconds, floating, part| {
+            format.word(seconds, floating, part == pe_core::calendar::InstantPart::Time)
+        });
+    });
 }
 
 /// What `uri`, a link clicked in the reading pane (the URI the web view's navigation names), is: one of the
@@ -1727,6 +1790,8 @@ pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
             PeReaderLink::BouncedMessage
         } else if pe_html::is_copy_code_link(uri) {
             PeReaderLink::CopyCode
+        } else if pe_html::is_open_calendar_link(uri) {
+            PeReaderLink::OpenCalendar
         } else {
             PeReaderLink::Other
         }
