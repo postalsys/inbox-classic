@@ -8,8 +8,7 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gio, glib};
-use pe_core::{Action, DraftKind, Event, MessageRef, Scope, Search, Summary};
-use pe_store::Sort;
+use pe_core::{Action, DraftKind, Event, ListView, MessageRef, Scope, Summary};
 
 use crate::app::{shell, spawn};
 use crate::commands::Command;
@@ -26,9 +25,8 @@ pub struct MessageWindow {
     junk: gtk::Button,
     /// The message shown
     message: Cell<MessageRef>,
-    /// The list it was opened from, as it was then: what Previous and Next go through
-    search: Search,
-    sort: Sort,
+    /// The list it was opened from, as it was then but a row a message: what Previous and Next go through
+    view: ListView,
     /// The messages before and after it in that list. Kept when the message leaves the list (it is moved or deleted
     /// meanwhile), so Next still goes on from where it was
     neighbours: Cell<(Option<MessageRef>, Option<MessageRef>)>,
@@ -45,14 +43,15 @@ pub fn windows() -> Vec<Rc<MessageWindow>> {
     WINDOWS.with(|windows| windows.borrow().clone())
 }
 
-/// `message` in a window of its own, Previous and Next going through the list `search` and `sort` make; the window
-/// that shows it already brought to the front
-pub fn open(message: MessageRef, search: Search, sort: Sort) {
+/// `message` in a window of its own, Previous and Next going through the list `view` shows, message by message (its
+/// grouping turned off); the window that shows it already brought to the front
+pub fn open(message: MessageRef, mut view: ListView) {
+    view.set_grouped(false);
     if let Some(open) = windows().into_iter().find(|w| w.message.get() == message) {
         open.window.present();
         return;
     }
-    let window = MessageWindow::new(message, search, sort);
+    let window = MessageWindow::new(message, view);
     WINDOWS.with(|windows| windows.borrow_mut().push(window.clone()));
     window.window.present();
     window.show(message);
@@ -76,7 +75,7 @@ pub fn unsubscribed(request: u64, problem: Option<&str>) -> String {
 }
 
 impl MessageWindow {
-    fn new(message: MessageRef, search: Search, sort: Sort) -> Rc<MessageWindow> {
+    fn new(message: MessageRef, view: ListView) -> Rc<MessageWindow> {
         let reader = Reader::new();
         let title = adw::WindowTitle::new("", "");
         let (header, junk) = header_bar(&title);
@@ -100,8 +99,7 @@ impl MessageWindow {
             toasts,
             junk,
             message: Cell::new(message),
-            search,
-            sort,
+            view,
             neighbours: Cell::new((None, None)),
             summary: RefCell::default(),
         });
@@ -201,7 +199,7 @@ impl MessageWindow {
         let core = &shell().core;
         let message = self.message.get();
         // not in the list any more: the neighbours it had stay
-        if let Ok(Some(pair)) = core.neighbours(&self.search, self.sort, message.folder, message.uid) {
+        if let Ok(Some(pair)) = self.view.neighbours(core, message.folder, message.uid) {
             self.neighbours.set(pair);
         }
         let summary = core.summary(&[message]).unwrap_or_default();
@@ -238,10 +236,7 @@ impl MessageWindow {
     /// folders (the main window does), so with none left it says so
     fn next_unread(&self) {
         let message = self.message.get();
-        match shell()
-            .core
-            .next_unread_step(&self.search, self.sort, message.folder, message.uid)
-        {
+        match self.view.next_unread_step(&shell().core, message.folder, message.uid) {
             Ok(pe_core::NextUnread::Message(next)) => self.show(next),
             _ => self.toasts.add_toast(adw::Toast::new(&t!(NoUnreadLeft))),
         }
@@ -250,13 +245,14 @@ impl MessageWindow {
     /// Whether the list the window came from could have messages of `folder`: its own folder, an Inbox for All
     /// Inboxes, any folder for a search
     fn lists(&self, folder: i64) -> bool {
-        match self.search.scope {
-            Scope::Folder(own) => own == folder,
-            Scope::AllInboxes => shell()
+        match self.view.search().map(|search| search.scope) {
+            Some(Scope::Folder(own)) => own == folder,
+            Some(Scope::AllInboxes) => shell()
                 .core
                 .folder(folder)
                 .is_ok_and(|f| f.info.path.eq_ignore_ascii_case("INBOX")),
-            Scope::Everywhere => true,
+            Some(Scope::Everywhere) => true,
+            None => false,
         }
     }
 

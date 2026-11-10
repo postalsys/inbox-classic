@@ -204,8 +204,9 @@ void Mailbox::Create(HWND parent, PeCore* core) {
                         WS_EX_CLIENTEDGE);
     ListView_SetExtendedListViewStyle(list_, LVS_EX_FULLROWSELECT);
     SetWindowSubclass(list_, ListProc, 0, reinterpret_cast<DWORD_PTR>(this));
-    threads_ = GetPreference(kThreadsPreference, 1) != 0;
+    pe_list_view_set_grouped(view_.get(), GetPreference(kThreadsPreference, 1) != 0);
     hideIgnored_ = GetPreference(kHideIgnoredPreference, 0) != 0;
+    pe_list_view_set_hide_ignored(view_.get(), hideIgnored_);
     // the icons of the list: for the headers of the paper clip and flag columns, and drawn on the rows in CustomDraw
     listIcons_ = IconList(IconSet::List);
     ImageList_GetIconSize(listIcons_, &iconSize_, &iconSize_);
@@ -585,25 +586,23 @@ core::Draft Mailbox::DraftOfShown(PeDraftKind kind) const {
 
 // ---- the message list ----
 
-// words typed search every folder of every account (in: narrows that); without, the list is the folder's, or every
-// Inbox's
-PeSearch Mailbox::Search() const {
-    return {Searching() ? 0 : folder_, !Searching() && allInboxes_, PE_SHOW_ALL, findUtf8_.c_str(), threads_, expanded_.data(),
-            expanded_.size(), hideIgnored_};
-}
-
 MessageListOrder Mailbox::ListOrder() const {
-    // a message window goes through the messages one by one, the conversations left out
-    PeSearch search = Search();
-    return {search.folder, search.all_inboxes, findUtf8_, sort_, ascending_, hideIgnored_};
+    // a message window goes through the messages one by one, the conversations left out. Words typed search every
+    // folder of every account (in: narrows that); without, the list is the folder's, or every Inbox's
+    MessageListOrder order;
+    order.view.reset(pe_list_view_clone(view_.get()));
+    pe_list_view_set_grouped(order.view.get(), false);
+    order.folder = Searching() ? 0 : folder_;
+    order.allInboxes = !Searching() && allInboxes_;
+    return order;
 }
 
 bool Mailbox::Searching() const {
-    return !find_.empty();
+    return pe_list_view_searching(view_.get());
 }
 
 bool Mailbox::SeveralFolders() const {
-    return Searching() || allInboxes_;
+    return pe_list_view_several_folders(view_.get());
 }
 
 // the Folder column while the list has messages of several folders, and not otherwise; in All Inboxes, whose rows are
@@ -633,8 +632,8 @@ void Mailbox::ShowFolderColumn() {
 
 // From, or To in Sent Items and Drafts (the core says which, and sorts a From sort by the recipients there): its
 // title and its values follow, and the date column is Sent there, as Outlook Express names it
-void Mailbox::ShowPersonColumn(const PeSearch& search) {
-    bool wanted = pe_lists_recipients(core_, &search);
+void Mailbox::ShowPersonColumn() {
+    bool wanted = pe_list_view_lists_recipients(core_, view_.get());
     if (wanted == recipientsColumn_) {
         return;
     }
@@ -678,21 +677,20 @@ void Mailbox::ReloadList(bool keepSelection) {
     unread_ = 0;
     rowCount_ = 0;
     ShowFolderColumn();
-    PeSearch search = Search();
-    ShowPersonColumn(search);
+    ShowPersonColumn();
     // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
-    // conversations what they find. An account's own item lists nothing
-    if (SeveralFolders() || folder_) {
-        pe_message_count(core_, &search, &total_, &unread_);
+    // conversations what they find. An account's own item lists nothing. The status bar counts messages; grouped by
+    // conversation the list has fewer rows
+    if (pe_list_view_active(view_.get())) {
+        pe_list_view_counts(core_, view_.get(), &total_, &unread_);
+        rowCount_ = pe_list_view_row_count(core_, view_.get());
     }
-    // the status bar counts messages; grouped by conversation the list has fewer rows
-    rowCount_ = !threads_ ? total_ : SeveralFolders() || folder_ ? pe_list_rows(core_, &search) : 0;
     // the selection follows the message to where it is now, without a flicker of the reading pane; several selected
     // messages are found again where they are now
     uint64_t shown = reader_.Uid();
-    int64_t index = keepSelection && shown && !pending ? pe_message_index(core_, &search, sort_, ascending_, reader_.Folder(), shown) : -1;
+    int64_t index = keepSelection && shown && !pending ? pe_list_view_index(core_, view_.get(), reader_.Folder(), shown) : -1;
     core::Positions several(keepSelection && (pending || !shown) && pe_selection_count(selection_.get()) > 0
-                                ? pe_selection_positions(core_, selection_.get(), &search, sort_, ascending_)
+                                ? pe_list_view_positions(core_, view_.get(), selection_.get())
                                 : nullptr);
     reloading_ = true;
     ListView_SetItemCountEx(list_, static_cast<int>(std::min<uint64_t>(rowCount_, INT_MAX)), LVSICF_NOSCROLL);
@@ -705,7 +703,7 @@ void Mailbox::ReloadList(bool keepSelection) {
     }
     // the messages selected before are still the selection where they are now: only their numbers change
     bool kept = SelectPositions(several.get(), false);
-    if (undoPending_ && SelectRestored(search)) {
+    if (undoPending_ && SelectRestored()) {
         undoPending_ = false;
         kept = false;
     }
@@ -741,8 +739,7 @@ const PeMessage* Mailbox::Row(int index) {
         if (pages_.size() >= kPagesKept) {
             pages_.erase(pages_.begin());
         }
-        PeSearch search = Search();
-        pages_.push_back({offset, core::MessageList(pe_messages(core_, &search, sort_, ascending_, offset, kPageSize))});
+        pages_.push_back({offset, core::MessageList(pe_list_view_messages(core_, view_.get(), offset, kPageSize))});
     } else if (page != pages_.end() - 1) {
         // the most recently used page goes last, the least recently used is dropped first
         std::rotate(page, page + 1, pages_.end());
@@ -799,7 +796,7 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
         // unread messages in bold, as Outlook Express shows them; the icons once the row is painted. Grouped by
         // conversation, the Subject cell is drawn here, the font then chosen for each cell
         const PeMessage* row = Row(index);
-        result = CDRF_NOTIFYPOSTPAINT | (threads_ ? CDRF_NOTIFYSUBITEMDRAW : 0);
+        result = CDRF_NOTIFYPOSTPAINT | (Grouped() ? CDRF_NOTIFYSUBITEMDRAW : 0);
         if (row && row->bold) {
             SelectObject(draw->nmcd.hdc, bold_);
             result |= CDRF_NEWFONT;
@@ -1039,7 +1036,7 @@ std::vector<int> Mailbox::SelectedRows() const {
 
 void Mailbox::TakeSelection(bool rebuild) {
     size_t count = SelectedCount();
-    if (count == 1 && !threads_) {
+    if (count == 1 && !Grouped()) {
         pe_selection_clear(selection_.get());
         if (const PeMessage* row = SelectedRow()) {
             pe_selection_add(selection_.get(), row->folder, row->uid);
@@ -1058,8 +1055,7 @@ void Mailbox::TakeSelection(bool rebuild) {
                 ends.push_back(static_cast<uint64_t>(i) + 1);
             }
         }
-        PeSearch search = Search();
-        pe_selection_set_ranges(core_, selection_.get(), &search, sort_, ascending_, starts.data(), ends.data(), starts.size());
+        pe_list_view_select_ranges(core_, view_.get(), selection_.get(), starts.data(), ends.data(), starts.size());
     }
     RefreshSummary();
     if (count <= 1) {
@@ -1079,12 +1075,12 @@ void Mailbox::TakeSelection(bool rebuild) {
     }
 }
 
-bool Mailbox::SelectRestored(const PeSearch& search) {
+bool Mailbox::SelectRestored() {
     core::Selection restored(pe_selection_new());
     if (!pe_undo_restored(core_, restored.get()) || pe_selection_count(restored.get()) == 0) {
         return false;
     }
-    core::Positions at(pe_selection_positions(core_, restored.get(), &search, sort_, ascending_));
+    core::Positions at(pe_list_view_positions(core_, view_.get(), restored.get()));
     if (pe_positions_count(at.get()) == 0) {
         return false;
     }
@@ -1101,8 +1097,8 @@ bool Mailbox::OnFolderSelected(int64_t folder, bool allInboxes) {
     folder_ = folder;
     allInboxes_ = allInboxes;
     undoPending_ = false;
-    // the conversations opened were the folder's
-    expanded_.clear();
+    // the view closes the conversations opened, which were the folder's
+    pe_list_view_set_scope(view_.get(), folder, allInboxes);
     ResetFind();
     ClearReader();
     ReloadList(false);
@@ -1150,13 +1146,12 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
 }
 
 bool Mailbox::SelectInList(int64_t folder, uint64_t uid) {
-    PeSearch search = Search();
     // a message hidden in a collapsed conversation (Next Unread finds those): the conversation opened first
-    if (int64_t hidden = pe_message_hidden_thread(core_, &search, folder, uid)) {
-        SetThreadExpanded(hidden, true);
-        search = Search();
+    FlushSelection();
+    if (pe_list_view_reveal(core_, view_.get(), folder, uid)) {
+        ReloadList(true);
     }
-    int64_t index = pe_message_index(core_, &search, sort_, ascending_, folder, uid);
+    int64_t index = pe_list_view_index(core_, view_.get(), folder, uid);
     if (index < 0 || index > INT_MAX) {
         return false;
     }
@@ -1233,7 +1228,7 @@ bool Mailbox::Act(PeAction action, int64_t to) {
     // what takes the place of rows that leave the list: the row after the last of them. The core says which actions
     // take them out, from the selection as it is now (Ignore while ignored conversations are hidden)
     RefreshSummary();
-    bool leaves = pe_selection_leaves_list(&summary_, action, to, hideIgnored_);
+    bool leaves = pe_list_view_leaves_list(view_.get(), &summary_, action, to);
     int after = leaves ? RowAfterSelection() : -1;
     char* reason = nullptr;
     core::String done(pe_selection_act(core_, selection_.get(), action, to, &reason));
@@ -1577,11 +1572,10 @@ void Mailbox::SelectNeighbour(bool forward) {
 
 void Mailbox::NextUnread(HWND owner) {
     FlushSelection();
-    PeSearch search = Search();
     int64_t folder = 0;
     uint64_t uid = 0;
     char* question = nullptr;
-    PeNextUnread step = pe_next_unread_step(core_, &search, sort_, ascending_, reader_.Folder(), reader_.Uid(), &folder, &uid, &question);
+    PeNextUnread step = pe_list_view_next_unread_step(core_, view_.get(), reader_.Folder(), reader_.Uid(), &folder, &uid, &question);
     core::String asked(question);
     if (step == PE_NEXT_UNREAD_MESSAGE) {
         SelectInList(folder, uid);
@@ -1597,10 +1591,9 @@ void Mailbox::NextUnread(HWND owner) {
         return;
     }
     TreeView_SelectItem(tree_, item->second);
-    search = Search();
     int64_t first = folder;
     char* again = nullptr;
-    step = pe_next_unread_step(core_, &search, sort_, ascending_, first, 0, &folder, &uid, &again);
+    step = pe_list_view_next_unread_step(core_, view_.get(), first, 0, &folder, &uid, &again);
     core::String unused(again);
     if (step == PE_NEXT_UNREAD_MESSAGE) {
         SelectInList(folder, uid);
@@ -1630,36 +1623,21 @@ bool Mailbox::CanEmptyFolder() const {
 }
 
 void Mailbox::SetThreadExpanded(int64_t thread, bool open) {
-    auto at = std::lower_bound(expanded_.begin(), expanded_.end(), thread);
-    bool there = at != expanded_.end() && *at == thread;
-    if (open == there) {
-        return;
-    }
-    if (open) {
-        expanded_.insert(at, thread);
-    } else {
-        expanded_.erase(at);
-    }
+    // the selection taken from the rows as they are shown, before they change
     FlushSelection();
-    ReloadList(true);
+    if (open ? pe_list_view_expand(view_.get(), thread) : pe_list_view_collapse(view_.get(), thread)) {
+        ReloadList(true);
+    }
 }
 
 void Mailbox::ExpandAll(bool open) {
-    if (!threads_) {
+    if (!Grouped()) {
         return;
     }
-    expanded_.clear();
-    if (open) {
-        PeSearch search = Search();
-        PeThreadList* threads = pe_threads_with_replies(core_, &search);
-        for (size_t i = 0, count = pe_thread_list_count(threads); i < count; i++) {
-            expanded_.push_back(pe_thread_list_get(threads, i));
-        }
-        pe_thread_list_free(threads);
-        std::sort(expanded_.begin(), expanded_.end());
-    }
     FlushSelection();
-    ReloadList(true);
+    if (open ? pe_list_view_expand_all(core_, view_.get()) : pe_list_view_collapse_all(view_.get())) {
+        ReloadList(true);
+    }
 }
 
 void Mailbox::MarkConversations(PeAction action) {
@@ -1681,22 +1659,23 @@ void Mailbox::SetHideIgnored(bool on) {
     SetPreference(kHideIgnoredPreference, on ? 1 : 0);
     hideIgnored_ = on;
     FlushSelection();
+    pe_list_view_set_hide_ignored(view_.get(), on);
     ReloadList(true);
 }
 
 void Mailbox::SetGrouped(bool on) {
-    if (on == threads_) {
+    if (on == Grouped()) {
         return;
     }
     SetPreference(kThreadsPreference, on ? 1 : 0);
-    threads_ = on;
-    expanded_.clear();
     FlushSelection();
+    // the view closes every conversation
+    pe_list_view_set_grouped(view_.get(), on);
     ReloadList(true);
 }
 
 bool Mailbox::OnListInput(UINT message, WPARAM wParam, LPARAM lParam) {
-    if (!threads_) {
+    if (!Grouped()) {
         return false;
     }
     if (message == WM_LBUTTONDOWN || message == WM_LBUTTONDBLCLK) {
@@ -1751,7 +1730,7 @@ bool Mailbox::OnThreadArrow(bool right) {
 }
 
 std::wstring Mailbox::Counts() const {
-    if (!Searching() && !folder_ && !allInboxes_) {
+    if (!pe_list_view_active(view_.get())) {
         return L"";
     }
     core::String counts(pe_list_counts(total_, unread_, SelectedCount(), Searching()));
@@ -1854,6 +1833,7 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
         // the same column again turns the order around; dates and sizes start with the largest
         ascending_ = sort == sort_ ? !ascending_ : sort != PE_SORT_FIELD_DATE && sort != PE_SORT_FIELD_SIZE;
         sort_ = sort;
+        pe_list_view_set_sort(view_.get(), sort_, ascending_);
         ReloadList(true);
         return true;
     }
@@ -2167,7 +2147,7 @@ void Mailbox::ResetFind() {
     // emptying the box fires EN_CHANGE, which starts the timer again
     KillTimer(parent_, TIMER_FIND);
     find_.clear();
-    findUtf8_.clear();
+    pe_list_view_set_text(view_.get(), nullptr);
     findPlace_.clear();
 }
 
@@ -2434,8 +2414,10 @@ void Mailbox::OnTimer(UINT_PTR id) {
         text = first == std::wstring::npos ? L"" : text.substr(first, text.find_last_not_of(L" \t") - first + 1);
         if (text != find_) {
             find_ = text;
-            findUtf8_ = core::Narrow(find_);
-            core::String place(pe_search_place(findUtf8_.c_str()));
+            std::string utf8 = core::Narrow(find_);
+            // new words close every conversation the view has open
+            pe_list_view_set_text(view_.get(), utf8.c_str());
+            core::String place(pe_search_place(utf8.c_str()));
             findPlace_ = place ? Text(place.get()) : L"";
             ReloadList(true);
             SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);

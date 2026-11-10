@@ -13,9 +13,8 @@ const FOOTBALL: &str = "Fantasy football picks";
 /// The row of the conversation whose first message has `subject`, and that message
 fn head_of(subject: &str) -> Option<(u32, pe_store::Message)> {
     let main = shell().main();
-    shell()
-        .core
-        .search(&main.search(), main.list.sort(), 0, 500)
+    main.list_view()
+        .rows(&shell().core, 0, 500)
         .ok()?
         .into_iter()
         .enumerate()
@@ -253,7 +252,7 @@ pub async fn watch_and_ignore(d: &Driver) {
     })
     .await;
     d.check(
-        hidden && main.search().hide_ignored,
+        hidden && main.list_view().hide_ignored(),
         "Hide Ignored Conversations leaves the ignored conversation out of the list",
     );
     run_command(Command::HideIgnored);

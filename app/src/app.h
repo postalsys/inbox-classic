@@ -353,21 +353,18 @@ bool ComposeKey(const MSG& msg);
 // ---- messagewindow.cpp ----
 
 class Mailbox;
-// the list a message window was opened from, for Previous and Next: what it shows (its words copied), in which order
+// the list a message window was opened from, for Previous and Next: a copy of the main window's list view, one message
+// a row; and the folder it shows (0 with neither it nor All Inboxes: a search), for which messages it can have
 struct MessageListOrder {
+    core::ListView view;
     int64_t folder = 0;
     bool allInboxes = false;
-    std::string text;
-    PeSortField sort = PE_SORT_FIELD_DATE;
-    bool ascending = false;
-    // View > Hide Ignored Conversations: their messages left out
-    bool hideIgnored = false;
 };
 // the message `uid` of `folder` in a window of its own (double-click or Enter in the list), marked read; brought to the
 // front when it is open already. A window of its own on the taskbar, as a compose window is; what it does to the
 // message the status bar of `main` says (through `mailbox`)
 // (`row`: its row of the list, for the header until the message is there; NULL for none)
-void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, const MessageListOrder& order, int64_t folder, uint64_t uid,
+void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrder order, int64_t folder, uint64_t uid,
                        const PeMessage* row);
 // an event of the core for the open message windows: their message ready or failed, gone from its folder
 void MessageWindowsEvent(const UiEvent& event);
@@ -552,7 +549,7 @@ public:
     // the list as it is now: what it shows and in which order, for Previous and Next in a message window
     MessageListOrder ListOrder() const;
     // whether the list has a row a conversation (Tools > Options, kept for the next start), and turning that on or off
-    bool Grouped() const { return threads_; }
+    bool Grouped() const { return pe_list_view_grouped(view_.get()); }
     void SetGrouped(bool on);
     // View > Expand All Conversations (`open`) and Collapse All Conversations
     void ExpandAll(bool open);
@@ -577,12 +574,10 @@ private:
     void UpdateFolders(int64_t account);
     void ShowRow(HTREEITEM item);
     void ReloadList(bool keepSelection);
-    // what the list shows: the folder (or every folder), the Show choice and the words of the Find box
-    PeSearch Search() const;
     // whether the list has what words typed found, in every folder (with a Folder column), rather than a folder
     bool Searching() const;
     void ShowFolderColumn();
-    void ShowPersonColumn(const PeSearch& search);
+    void ShowPersonColumn();
     std::wstring RowFolder(int64_t folder) const;
     const PeMessage* Row(int index);
     const PeMessage* SelectedRow();
@@ -737,7 +732,7 @@ private:
     // Undo brought messages back: they are selected once the list has them again
     bool undoPending_ = false;
     // the messages Undo brought back selected, once they are in the list again; false while none is there yet
-    bool SelectRestored(const PeSearch& search);
+    bool SelectRestored();
     // a drag of the selected messages out of the list (the row `index` picked up): onto a folder, or out of the app
     void BeginDrag(int index);
     // the folder under `screen` a drag of `from` can go to, 0 for none; the item under it in `over`
@@ -756,7 +751,6 @@ private:
     int64_t selectedAccount_ = 0;
     // what the Find box searches for, empty when the list is the folder's
     std::wstring find_;
-    std::string findUtf8_;
     // the search field: a white sunken window with the magnifier, the box and the clear button in it
     HWND findField_ = nullptr;
     HWND findIcon_ = nullptr;
@@ -772,11 +766,12 @@ private:
     uint64_t unread_ = 0;
     // the rows of the list: the messages, or with conversations grouped the conversations and the open ones' replies
     uint64_t rowCount_ = 0;
-    // a row a conversation, and the conversations opened (sorted) in the folder shown
-    bool threads_ = true;
-    std::vector<int64_t> expanded_;
-    // View > Hide Ignored Conversations
+    // what the list shows, kept by the core: the folder, the words of the Find box, the order, a row a conversation or
+    // a message, ignored conversations hidden, and the conversations opened
+    core::ListView view_{pe_list_view_new()};
+    // View > Hide Ignored Conversations, as the view has it
     bool hideIgnored_ = false;
+    // the order of the list, as the view has it: the column sorted by, and which way
     PeSortField sort_ = PE_SORT_FIELD_DATE;
     bool ascending_ = false;
     // the pages of the list, the most recently used last

@@ -777,10 +777,25 @@ fn rows() -> u32 {
 /// conversation)
 fn messages_listed() -> u32 {
     let count = shell()
-        .core
-        .count_search(&shell().main().search().ungrouped())
+        .main()
+        .list_view()
+        .counts(&shell().core)
         .map_or(0, |(count, _)| count);
     u32::try_from(count).unwrap_or(u32::MAX)
+}
+
+/// The messages `scope` lists, a row each, in the order of the list, from `offset` on: what the list shows of it
+/// while it is not grouped and shows everything
+fn listed_in(scope: pe_core::Scope, offset: u64, limit: u64) -> Vec<pe_store::Message> {
+    let mut view = pe_core::ListView::new();
+    view.set_scope(Some(scope));
+    view.set_sort(shell().main().list.sort());
+    view.rows(&shell().core, offset, limit).unwrap_or_default()
+}
+
+/// The messages of `folder`, as [`listed_in`] lists them
+fn listed_in_folder(folder: i64, offset: u64, limit: u64) -> Vec<pe_store::Message> {
+    listed_in(pe_core::Scope::Folder(folder), offset, limit)
 }
 
 /// Selects the folder of the first account named so in the tree (the display name: Inbox, Sent Items, Drafts)

@@ -12,7 +12,7 @@ use pe_core::{Core, DraftKind, Event, FailureKind, Outgoing, SignInWith};
 use pe_imap::SpecialUse;
 use pe_store::{AccountSettings, Security, Sort, SortField};
 
-use crate::{c_string, guard, ids, into_c_string};
+use crate::{c_string, guard, into_c_string};
 
 /// Owns the strings of rows handed to C
 #[derive(Default)]
@@ -1063,9 +1063,7 @@ pub extern "C" fn pe_all_inboxes_shown(accounts: usize) -> bool {
     pe_core::all_inboxes_shown(accounts)
 }
 
-/// What the message list shows: the messages of one folder, or of every folder, by state, and those that what was typed
-/// in the Find box finds (Gmail's syntax: words, "phrases", -word, OR, from: to: subject: filename: is:unread
-/// is:starred has:attachment in: before: after: older_than: newer_than: larger: smaller:)
+/// Which messages the message list shows by their state (`pe_list_view_set_show`)
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PeShow {
@@ -1075,134 +1073,34 @@ pub enum PeShow {
     WithAttachments = 3,
 }
 
-#[repr(C)]
-pub struct PeSearch {
-    /// The folder, 0 for every folder of every account (or of the Inboxes, with `all_inboxes`)
-    pub folder: i64,
-    /// With `folder` 0: the Inbox of every account rather than every folder
-    pub all_inboxes: bool,
-    pub show: PeShow,
-    /// UTF-8, NULL or empty for no words
-    pub text: *const c_char,
-    /// One row a conversation (`PeMessage.thread` says each row's place), with the conversations `expanded` open
-    /// (`expanded_count` of them); false for one row a message
-    pub threads: bool,
-    pub expanded: *const i64,
-    pub expanded_count: usize,
-    /// View > Hide Ignored Conversations: the messages of ignored conversations left out
-    pub hide_ignored: bool,
-}
-
-/// # Safety
-/// `search` must be NULL or point to a search whose text is NULL or NUL-terminated, and whose `expanded` is NULL or
-/// points to `expanded_count` conversation ids.
-pub(crate) unsafe fn search_of(search: *const PeSearch) -> Option<pe_core::Search> {
-    // SAFETY: as the caller guarantees
-    let s = unsafe { search.as_ref() }?;
-    Some(pe_core::Search {
-        scope: match (s.folder, s.all_inboxes) {
-            (0, true) => pe_core::Scope::AllInboxes,
-            (0, false) => pe_core::Scope::Everywhere,
-            (folder, _) => pe_core::Scope::Folder(folder),
-        },
-        show: match s.show {
+impl From<PeShow> for pe_core::Show {
+    fn from(show: PeShow) -> Self {
+        match show {
             PeShow::All => pe_core::Show::All,
             PeShow::Unread => pe_core::Show::Unread,
             PeShow::Flagged => pe_core::Show::Flagged,
             PeShow::WithAttachments => pe_core::Show::WithAttachments,
-        },
-        // SAFETY: as the caller guarantees
-        text: unsafe { arg(s.text) }.unwrap_or_default().to_string(),
-        // SAFETY: as the caller guarantees
-        threads: s.threads.then(|| unsafe { ids(s.expanded, s.expanded_count) }),
-        hide_ignored: s.hide_ignored,
-    })
-}
-
-/// How many messages `search` finds, and how many of them are unread: grouped by conversation (`threads`) too, all of
-/// their messages (the list's rows are `pe_list_rows`). The counts of the status bar: a folder shown whole counted
-/// from its indexes, as `pe_folder_counts`
-///
-/// # Safety
-/// `core` must be a live handle, `search` a valid search, `total` and `unread` valid pointers.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_count(
-    core: *const PeCore,
-    search: *const PeSearch,
-    total: *mut u64,
-    unread: *mut u64,
-) -> bool {
-    if total.is_null() || unread.is_null() {
-        return false;
+        }
     }
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return false;
-    };
-    // SAFETY: as the caller guarantees
-    let Some(counts) = (unsafe { with(core, None, |core| core.list_counts(&search).ok()) }) else {
-        return false;
-    };
-    // SAFETY: the caller gave valid pointers
-    unsafe { (*total, *unread) = counts };
-    true
 }
 
-/// How many rows `pe_messages` lists for `search`: what the list's size is. Grouped by conversation (`threads`) one a
-/// conversation, and under each expanded one its other messages; otherwise one a message, as `pe_message_count`
-/// counts. 0 on failure.
+/// Writes the messages before and after one (a folder of 0 at an end); false for none found
 ///
 /// # Safety
-/// `core` must be a live handle, `search` a valid search.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_list_rows(core: *const PeCore, search: *const PeSearch) -> u64 {
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return 0;
-    };
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, 0, |core| core.count_rows(&search).unwrap_or(0)) }
-}
-
-/// The messages before and after the message `uid` of `folder` in the list `search`, `sort` and `ascending` make, with
-/// one pass over the list: what Previous and Next open, into `previous_*` and `next_*` (a folder of 0 at an end).
-/// False when the message is not in that list (any more), or on failure: a window keeps the pair it had then.
-///
-/// # Safety
-/// `core` must be a live handle, `search` a valid search, the four out pointers valid.
-#[unsafe(no_mangle)]
-#[allow(clippy::too_many_arguments)]
-pub unsafe extern "C" fn pe_message_neighbours(
-    core: *const PeCore,
-    search: *const PeSearch,
-    sort: PeSortField,
-    ascending: bool,
-    folder: i64,
-    uid: u64,
+/// The four pointers must be valid.
+#[allow(clippy::type_complexity)]
+pub(crate) unsafe fn put_neighbours(
+    found: Option<(Option<pe_store::MessageRef>, Option<pe_store::MessageRef>)>,
     previous_folder: *mut i64,
     previous_uid: *mut u64,
     next_folder: *mut i64,
     next_uid: *mut u64,
 ) -> bool {
-    if previous_folder.is_null() || previous_uid.is_null() || next_folder.is_null() || next_uid.is_null() {
-        return false;
-    }
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return false;
-    };
-    let sort = sort_of(sort, ascending);
-    // SAFETY: as the caller guarantees
-    let found = unsafe {
-        with(core, None, |core| {
-            core.neighbours(&search, sort, folder, uid).ok().flatten()
-        })
-    };
     let Some((previous, next)) = found else {
         return false;
     };
     let parts = |r: Option<pe_store::MessageRef>| r.map_or((0, 0), |r| (r.folder, r.uid));
-    // SAFETY: the caller gave valid pointers
+    // SAFETY: as the caller guarantees
     unsafe {
         (*previous_folder, *previous_uid) = parts(previous);
         (*next_folder, *next_uid) = parts(next);
@@ -1210,7 +1108,7 @@ pub unsafe extern "C" fn pe_message_neighbours(
     true
 }
 
-/// What Next Unread does next, see `pe_next_unread_step`
+/// What Next Unread does next, see `pe_list_view_next_unread_step`
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PeNextUnread {
@@ -1222,40 +1120,17 @@ pub enum PeNextUnread {
     Ask = 2,
 }
 
-/// One step of Next Unread from the message `uid` of `folder` (0 for none) in the list `search`, `sort` and `ascending`
-/// make: the next unread message of the list, or the next folder with unread mail and the question to ask before going
-/// there (a heading, a blank line, the question; free it with `pe_string_free`), or nothing.
+/// Writes a step of Next Unread for C
 ///
 /// # Safety
-/// `core` must be a live handle, `search` a valid search, the three out pointers valid.
-#[unsafe(no_mangle)]
-#[allow(clippy::too_many_arguments)]
-pub unsafe extern "C" fn pe_next_unread_step(
-    core: *const PeCore,
-    search: *const PeSearch,
-    sort: PeSortField,
-    ascending: bool,
-    folder: i64,
-    uid: u64,
+/// The three pointers must be valid.
+pub(crate) unsafe fn put_next_unread(
+    step: Option<pe_core::NextUnread>,
     next_folder: *mut i64,
     next_uid: *mut u64,
     question: *mut *mut c_char,
 ) -> PeNextUnread {
-    if next_folder.is_null() || next_uid.is_null() || question.is_null() {
-        return PeNextUnread::None;
-    }
     // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return PeNextUnread::None;
-    };
-    let sort = sort_of(sort, ascending);
-    // SAFETY: as the caller guarantees
-    let step = unsafe {
-        with(core, None, |core| {
-            core.next_unread_step(&search, sort, folder, uid).ok()
-        })
-    };
-    // SAFETY: the caller gave valid pointers
     unsafe {
         *question = null_mut();
         match step {
@@ -1284,22 +1159,6 @@ pub unsafe extern "C" fn pe_next_unread_step(
 pub unsafe extern "C" fn pe_message_exists(core: *const PeCore, folder: i64, uid: u64) -> bool {
     // SAFETY: as the caller guarantees
     unsafe { with(core, false, |core| core.has_message(folder, uid).unwrap_or(false)) }
-}
-
-/// Whether the list of `search` names whom its messages went to (Sent Items, Drafts): its person column is then To
-/// and shows `recipients`, its date column is Sent, and `PE_SORT_FIELD_FROM` sorts it by the recipients. False on
-/// failure.
-///
-/// # Safety
-/// `core` must be a live handle, `search` a valid search.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_lists_recipients(core: *const PeCore, search: *const PeSearch) -> bool {
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return false;
-    };
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.lists_recipients(&search).unwrap_or(false)) }
 }
 
 /// The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it ("Sent Items"); NULL for
@@ -1385,7 +1244,7 @@ pub struct PeMessage {
     /// Whether the row is bold: the message is unread, or the row is a collapsed conversation's with an unread message.
     /// The apps read this rather than decide from `seen` and the thread numbers.
     pub bold: bool,
-    /// Its row's place in a list grouped by conversation (`PeSearch.threads`), all 0 and false otherwise: the
+    /// Its row's place in a list grouped by conversation (`pe_list_view_set_grouped`), all 0 and false otherwise: the
     /// conversation; 0 for its first message's row, 1 for the others under it when expanded; how many messages it has
     /// in the list and how many are unread; whether it is expanded
     pub thread: i64,
@@ -1431,166 +1290,38 @@ impl From<pe_core::ThreadMark> for PeThreadMark {
 /// A page of the message list; free with `pe_message_list_free`
 pub struct PeMessageList(Rows<PeMessage>);
 
-/// `limit` messages of what `search` finds from `offset` on, in the order asked for. NULL on failure.
-///
-/// # Safety
-/// `core` must be a live handle, `search` a valid search.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_messages(
-    core: *const PeCore,
-    search: *const PeSearch,
-    sort: PeSortField,
-    ascending: bool,
-    offset: u64,
-    limit: u64,
-) -> *mut PeMessageList {
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return null_mut();
-    };
-    let sort = sort_of(sort, ascending);
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| {
-            let Ok(messages) = core.search(&search, sort, offset, limit) else {
-                return null_mut();
-            };
-            handed(PeMessageList(Rows::new(&messages, |m, strings| {
-                let info = &m.info;
-                PeMessage {
-                    folder: m.folder_id,
-                    uid: info.uid,
-                    date: info.display_date().unwrap_or(0),
-                    has_date: info.display_date().is_some(),
-                    size: info.size.unwrap_or(0),
-                    subject: strings.add(&info.subject),
-                    from: strings.add(info.sender()),
-                    from_address: strings.add(&info.from_address),
-                    recipients: strings.add(&info.recipients),
-                    seen: info.seen(),
-                    flagged: info.flagged(),
-                    flag_color: info.flag_color().map_or(0, |c| c as u8),
-                    answered: info.answered(),
-                    has_attachments: info.has_attachments,
-                    bold: m.bold(),
-                    thread: m.thread.map_or(0, |t| t.thread),
-                    thread_depth: m.thread.map_or(0, |t| t.depth),
-                    thread_count: m.thread.map_or(0, |t| t.count),
-                    thread_unread: m.thread.map_or(0, |t| t.unread),
-                    thread_expanded: m.thread.is_some_and(|t| t.expanded),
-                    thread_opens: m.thread.is_some_and(|t| t.opens()),
-                    thread_collapsed: m.thread.is_some_and(|t| t.collapsed()),
-                    bounce: info.bounce,
-                    mark: m.mark.into(),
-                    dimmed: m.dimmed(),
-                }
-            })))
-        })
-    }
-}
-
-/// Conversation ids; free with `pe_thread_list_free`
-pub struct PeThreadList(Vec<i64>);
-
-/// The conversations of the list `search` makes that have more than one message there: what View > Expand All
-/// Conversations opens (as `PeSearch.expanded`). NULL on failure.
-///
-/// # Safety
-/// `core` must be a live handle, `search` a valid search.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_threads_with_replies(core: *const PeCore, search: *const PeSearch) -> *mut PeThreadList {
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return null_mut();
-    };
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| {
-            core.threads_with_replies(&search)
-                .map_or(null_mut(), |found| handed(PeThreadList(found)))
-        })
-    }
-}
-
-/// # Safety
-/// `list` must be NULL or from `pe_threads_with_replies`, not freed yet.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_thread_list_count(list: *const PeThreadList) -> usize {
-    // SAFETY: as the caller guarantees
-    unsafe { list.as_ref() }.map_or(0, |l| l.0.len())
-}
-
-/// Conversation `index`; 0 past the end
-///
-/// # Safety
-/// `list` must be NULL or from `pe_threads_with_replies`, not freed yet.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_thread_list_get(list: *const PeThreadList, index: usize) -> i64 {
-    // SAFETY: as the caller guarantees
-    unsafe { list.as_ref() }
-        .and_then(|l| l.0.get(index).copied())
-        .unwrap_or(0)
-}
-
-/// # Safety
-/// `list` must be NULL or from `pe_threads_with_replies`, freed once.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_thread_list_free(list: *mut PeThreadList) {
-    // SAFETY: as the caller guarantees
-    unsafe { take_back(list) }
-}
-
-/// The conversation the message `uid` of `folder` is hidden in, in the list `search` makes: grouped by conversation,
-/// that conversation collapsed and the message not its first there (whose row stands for it). The list opens it (adds
-/// it to `PeSearch.expanded`) to show or select the message. 0 when the message has its own row, is not in the list,
-/// or on failure.
-///
-/// # Safety
-/// `core` must be a live handle, `search` a valid search.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_hidden_thread(
-    core: *const PeCore,
-    search: *const PeSearch,
-    folder: i64,
-    uid: u64,
-) -> i64 {
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return 0;
-    };
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, 0, |core| {
-            core.hidden_in(&search, folder, uid).ok().flatten().unwrap_or(0)
-        })
-    }
-}
-
-/// Where message `uid` of `folder` is in what `search` finds in this order, -1 when it is not there
-///
-/// # Safety
-/// `core` must be a live handle, `search` a valid search.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_index(
-    core: *const PeCore,
-    search: *const PeSearch,
-    sort: PeSortField,
-    ascending: bool,
-    folder: i64,
-    uid: u64,
-) -> i64 {
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return -1;
-    };
-    let sort = sort_of(sort, ascending);
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, -1, |core| match core.search_index(&search, sort, folder, uid) {
-            Ok(Some(index)) => i64::try_from(index).unwrap_or(-1),
-            _ => -1,
-        })
-    }
+/// The rows of a page of the message list, handed to C
+pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList {
+    handed(PeMessageList(Rows::new(messages, |m, strings| {
+        let info = &m.info;
+        PeMessage {
+            folder: m.folder_id,
+            uid: info.uid,
+            date: info.display_date().unwrap_or(0),
+            has_date: info.display_date().is_some(),
+            size: info.size.unwrap_or(0),
+            subject: strings.add(&info.subject),
+            from: strings.add(info.sender()),
+            from_address: strings.add(&info.from_address),
+            recipients: strings.add(&info.recipients),
+            seen: info.seen(),
+            flagged: info.flagged(),
+            flag_color: info.flag_color().map_or(0, |c| c as u8),
+            answered: info.answered(),
+            has_attachments: info.has_attachments,
+            bold: m.bold(),
+            thread: m.thread.map_or(0, |t| t.thread),
+            thread_depth: m.thread.map_or(0, |t| t.depth),
+            thread_count: m.thread.map_or(0, |t| t.count),
+            thread_unread: m.thread.map_or(0, |t| t.unread),
+            thread_expanded: m.thread.is_some_and(|t| t.expanded),
+            thread_opens: m.thread.is_some_and(|t| t.opens()),
+            thread_collapsed: m.thread.is_some_and(|t| t.collapsed()),
+            bounce: info.bounce,
+            mark: m.mark.into(),
+            dimmed: m.dimmed(),
+        }
+    })))
 }
 
 /// # Safety

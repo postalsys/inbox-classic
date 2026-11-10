@@ -39,11 +39,9 @@ mod imp {
 
     #[derive(Default)]
     pub struct MessageModel {
-        pub search: RefCell<pe_core::Search>,
-        pub sort: Cell<Sort>,
+        /// The view the rows are read through
+        pub view: RefCell<pe_core::ListView>,
         pub total: Cell<u32>,
-        /// Whether the list lists anything (an account's own item lists nothing)
-        pub active: Cell<bool>,
         pub pages: RefCell<Vec<(u32, Vec<super::MessageRow>)>>,
     }
 
@@ -83,14 +81,10 @@ mod imp {
                     if pages.len() >= PAGES_KEPT {
                         pages.remove(0);
                     }
-                    let rows = shell()
-                        .core
-                        .search(
-                            &self.search.borrow(),
-                            self.sort.get(),
-                            u64::from(offset),
-                            u64::from(PAGE),
-                        )
+                    let rows = self
+                        .view
+                        .borrow()
+                        .rows(&shell().core, u64::from(offset), u64::from(PAGE))
                         .unwrap_or_default()
                         .into_iter()
                         .map(super::MessageRow::new)
@@ -129,19 +123,13 @@ glib::wrapper! {
 }
 
 impl MessageModel {
-    /// Lists what `search` finds in the order `sort`, `total` messages (none when not `active`)
-    fn reset(&self, search: pe_core::Search, sort: Sort, total: u64, active: bool) {
+    /// Lists the rows of `view`, `total` of them
+    fn reset(&self, view: pe_core::ListView, total: u64) {
         let imp = self.imp();
         let before = imp.total.get();
-        *imp.search.borrow_mut() = search;
-        imp.sort.set(sort);
-        imp.active.set(active);
+        *imp.view.borrow_mut() = view;
         imp.pages.borrow_mut().clear();
-        let now = if active {
-            u32::try_from(total).unwrap_or(u32::MAX)
-        } else {
-            0
-        };
+        let now = u32::try_from(total).unwrap_or(u32::MAX);
         imp.total.set(now);
         self.items_changed(0, before, now);
     }
@@ -336,9 +324,9 @@ impl MessageList {
         )
     }
 
-    /// The list again: what `search` finds, `total` of them (nothing when not `active`), the rows `select` selected
-    pub fn reset(self: &Rc<Self>, search: pe_core::Search, total: u64, active: bool, select: &[u64]) {
-        self.model.reset(search, self.sort.get(), total, active);
+    /// The list again: the rows of `view`, `total` of them, the rows `select` selected
+    pub fn reset(self: &Rc<Self>, view: pe_core::ListView, total: u64, select: &[u64]) {
+        self.model.reset(view, total);
         self.select_positions(select);
         self.reveal(select);
     }
@@ -660,7 +648,7 @@ fn subject_column() -> gtk::ColumnViewColumn {
                 .and_then(|row| row.with(|m| m.thread))
                 .flatten();
             if let Some(place) = thread.filter(|t| t.opens()) {
-                shell().main().set_thread_expanded(place.thread, !place.expanded);
+                shell().main().toggle_thread(place.thread);
             }
         });
         expander.add_controller(click);

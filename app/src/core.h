@@ -47,6 +47,8 @@ using AgentHostList = std::unique_ptr<PeAgentHostList, Deleter<pe_agent_host_lis
 using AgentLog = std::unique_ptr<PeAgentLog, Deleter<pe_agent_log_free>>;
 using Selection = std::unique_ptr<PeSelection, Deleter<pe_selection_free>>;
 using Positions = std::unique_ptr<PePositions, Deleter<pe_positions_free>>;
+// what a message list shows (its folder, words, order, grouping and open conversations), kept by the core
+using ListView = std::unique_ptr<PeListView, Deleter<pe_list_view_free>>;
 using TextList = std::unique_ptr<PeTextList, Deleter<pe_text_list_free>>;
 using Export = std::unique_ptr<PeExport, Deleter<pe_export_free>>;
 

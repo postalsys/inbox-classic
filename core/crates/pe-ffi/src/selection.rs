@@ -6,12 +6,12 @@ use std::ptr::null_mut;
 
 use pe_core::{Action, MessageRef, Summary};
 
-use crate::core::{PeCore, PeSearch, PeSortField, Rows, handed, refused, search_of, take_back, with};
+use crate::core::{PeCore, Rows, handed, refused, take_back, with};
 use crate::{guard, into_c_string};
 
 /// Selected messages; free with `pe_selection_free`
 #[derive(Default)]
-pub struct PeSelection(Vec<MessageRef>);
+pub struct PeSelection(pub(crate) Vec<MessageRef>);
 
 /// The messages of `selection`, none for NULL
 ///
@@ -93,92 +93,29 @@ pub unsafe extern "C" fn pe_selection_get(
     true
 }
 
-/// Fills it with the messages at the positions `starts[i]` (included) to `ends[i]` (not) of the list `search` and
-/// `sort` make, in place of what it had. A list selection is ranges of positions; the messages they are stay the same
-/// when the list changes.
+/// The ranges of positions `starts[i]` (included) to `ends[i]` (not), none when either is NULL
 ///
 /// # Safety
-/// `core` must be a live handle, `selection` a live selection, `search` a valid search, `starts` and `ends` NULL or
-/// `count` values each.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_selection_set_ranges(
-    core: *const PeCore,
-    selection: *mut PeSelection,
-    search: *const PeSearch,
-    sort: PeSortField,
-    ascending: bool,
-    starts: *const u64,
-    ends: *const u64,
-    count: usize,
-) -> bool {
-    // SAFETY: as the caller guarantees
-    let Some(selection) = (unsafe { selection.as_mut() }) else {
-        return false;
-    };
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return false;
-    };
-    let ranges: Vec<(u64, u64)> = if count == 0 || starts.is_null() || ends.is_null() {
-        Vec::new()
-    } else {
-        // SAFETY: the caller gave `count` values in each
-        let (starts, ends) = unsafe {
-            (
-                std::slice::from_raw_parts(starts, count),
-                std::slice::from_raw_parts(ends, count),
-            )
-        };
-        starts.iter().copied().zip(ends.iter().copied()).collect()
-    };
-    let sort = crate::core::sort_of(sort, ascending);
-    // SAFETY: as the caller guarantees
-    let refs = unsafe { with(core, None, |core| core.refs_in_ranges(&search, sort, &ranges).ok()) };
-    match refs {
-        Some(refs) => {
-            selection.0 = refs;
-            true
-        }
-        None => false,
+/// `starts` and `ends` must be NULL or point to `count` values each.
+pub(crate) unsafe fn ranges_of(starts: *const u64, ends: *const u64, count: usize) -> Vec<(u64, u64)> {
+    if count == 0 || starts.is_null() || ends.is_null() {
+        return Vec::new();
     }
+    // SAFETY: as the caller guarantees
+    let (starts, ends) = unsafe {
+        (
+            std::slice::from_raw_parts(starts, count),
+            std::slice::from_raw_parts(ends, count),
+        )
+    };
+    starts.iter().copied().zip(ends.iter().copied()).collect()
 }
 
 /// Positions in a list; free with `pe_positions_free`
-pub struct PePositions(Vec<u64>);
-
-/// Where the selected messages are now in the list `search` and `sort` make, ascending, to select them again after it
-/// changed; those no longer in it are left out. NULL on failure.
-///
-/// # Safety
-/// `core` must be a live handle, `selection` a live selection, `search` a valid search.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_selection_positions(
-    core: *const PeCore,
-    selection: *const PeSelection,
-    search: *const PeSearch,
-    sort: PeSortField,
-    ascending: bool,
-) -> *mut PePositions {
-    // SAFETY: as the caller guarantees
-    let Some(selection) = (unsafe { selection.as_ref() }) else {
-        return null_mut();
-    };
-    // SAFETY: as the caller guarantees
-    let Some(search) = (unsafe { search_of(search) }) else {
-        return null_mut();
-    };
-    let sort = crate::core::sort_of(sort, ascending);
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| {
-            core.positions(&search, sort, &selection.0)
-                .map_or(null_mut(), |found| handed(PePositions(found)))
-        })
-    }
-}
+pub struct PePositions(pub(crate) Vec<u64>);
 
 /// # Safety
-/// `positions` must be NULL or from `pe_selection_positions`, not freed yet.
+/// `positions` must be NULL or from `pe_list_view_positions`, not freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_count(positions: *const PePositions) -> usize {
     // SAFETY: as the caller guarantees
@@ -188,7 +125,7 @@ pub unsafe extern "C" fn pe_positions_count(positions: *const PePositions) -> us
 /// Position `index`; 0 past the end
 ///
 /// # Safety
-/// `positions` must be NULL or from `pe_selection_positions`, not freed yet.
+/// `positions` must be NULL or from `pe_list_view_positions`, not freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_get(positions: *const PePositions, index: usize) -> u64 {
     // SAFETY: as the caller guarantees
@@ -198,7 +135,7 @@ pub unsafe extern "C" fn pe_positions_get(positions: *const PePositions, index: 
 }
 
 /// # Safety
-/// `positions` must be NULL or from `pe_selection_positions`, freed once.
+/// `positions` must be NULL or from `pe_list_view_positions`, freed once.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_free(positions: *mut PePositions) {
     // SAFETY: as the caller guarantees
@@ -393,7 +330,7 @@ pub enum PeAction {
 }
 
 /// The action `action` with its folder or colour `to`; None for a colour that is none
-fn action_of(action: PeAction, to: i64) -> Option<Action> {
+pub(crate) fn action_of(action: PeAction, to: i64) -> Option<Action> {
     Some(match action {
         PeAction::Read => Action::Read(true),
         PeAction::Unread => Action::Read(false),
@@ -410,26 +347,6 @@ fn action_of(action: PeAction, to: i64) -> Option<Action> {
         PeAction::Watch => Action::Watch,
         PeAction::Ignore => Action::Ignore,
     })
-}
-
-/// Whether `action` (to `to`) on the messages of `summary` takes them out of the list, a list that hides ignored
-/// conversations when `hide_ignored`: then the app selects the row after them, as it does after Delete
-///
-/// # Safety
-/// `summary` must be a valid pointer.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_selection_leaves_list(
-    summary: *const PeSelectionSummary,
-    action: PeAction,
-    to: i64,
-    hide_ignored: bool,
-) -> bool {
-    // SAFETY: as the caller guarantees
-    let Some(summary) = (unsafe { summary.as_ref() }) else {
-        return false;
-    };
-    guard(|| action_of(action, to).is_some_and(|action| Summary::from(summary).leaves_list(action, hide_ignored)))
-        .unwrap_or(false)
 }
 
 /// Does `action` to the selected messages, each folder's with one command: in the store now (`FolderChanged`), on the

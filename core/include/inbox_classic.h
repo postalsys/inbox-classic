@@ -163,35 +163,6 @@ typedef enum PeSpecialUse {
   PE_SPECIAL_USE_TRASH = 8,
 } PeSpecialUse;
 
-// What the message list shows: the messages of one folder, or of every folder, by state, and those that what was typed
-// in the Find box finds (Gmail's syntax: words, "phrases", -word, OR, from: to: subject: filename: is:unread
-// is:starred has:attachment in: before: after: older_than: newer_than: larger: smaller:)
-typedef enum PeShow {
-  PE_SHOW_ALL = 0,
-  PE_SHOW_UNREAD = 1,
-  PE_SHOW_FLAGGED = 2,
-  PE_SHOW_WITH_ATTACHMENTS = 3,
-} PeShow;
-
-typedef enum PeSortField {
-  // The Date header, the received date without one
-  PE_SORT_FIELD_DATE = 0,
-  PE_SORT_FIELD_RECEIVED = 1,
-  PE_SORT_FIELD_FROM = 2,
-  PE_SORT_FIELD_SUBJECT = 3,
-  PE_SORT_FIELD_SIZE = 4,
-} PeSortField;
-
-// What Next Unread does next, see `pe_next_unread_step`
-typedef enum PeNextUnread {
-  // Nothing unread anywhere else (or a failure)
-  PE_NEXT_UNREAD_NONE = 0,
-  // Select the message `next_folder`, `next_uid` of the list
-  PE_NEXT_UNREAD_MESSAGE = 1,
-  // Ask `question`; on yes show the folder `next_folder` and take the step again from its top (uid 0)
-  PE_NEXT_UNREAD_ASK = 2,
-} PeNextUnread;
-
 // A conversation's mark (Message > Watch Conversation, Ignore Conversation)
 typedef enum PeThreadMark {
   PE_THREAD_MARK_NONE = 0,
@@ -254,6 +225,33 @@ typedef enum PeSecretChange {
   PE_SECRET_CHANGE_SET = 1,
   PE_SECRET_CHANGE_REMOVE = 2,
 } PeSecretChange;
+
+// Which messages the message list shows by their state (`pe_list_view_set_show`)
+typedef enum PeShow {
+  PE_SHOW_ALL = 0,
+  PE_SHOW_UNREAD = 1,
+  PE_SHOW_FLAGGED = 2,
+  PE_SHOW_WITH_ATTACHMENTS = 3,
+} PeShow;
+
+typedef enum PeSortField {
+  // The Date header, the received date without one
+  PE_SORT_FIELD_DATE = 0,
+  PE_SORT_FIELD_RECEIVED = 1,
+  PE_SORT_FIELD_FROM = 2,
+  PE_SORT_FIELD_SUBJECT = 3,
+  PE_SORT_FIELD_SIZE = 4,
+} PeSortField;
+
+// What Next Unread does next, see `pe_list_view_next_unread_step`
+typedef enum PeNextUnread {
+  // Nothing unread anywhere else (or a failure)
+  PE_NEXT_UNREAD_NONE = 0,
+  // Select the message `next_folder`, `next_uid` of the list
+  PE_NEXT_UNREAD_MESSAGE = 1,
+  // Ask `question`; on yes show the folder `next_folder` and take the step again from its top (uid 0)
+  PE_NEXT_UNREAD_ASK = 2,
+} PeNextUnread;
 
 typedef enum PeAction {
   PE_ACTION_READ = 0,
@@ -340,6 +338,9 @@ typedef struct PeGroupView PeGroupView;
 // The languages; free with `pe_language_list_free`
 typedef struct PeLanguageList PeLanguageList;
 
+// What a message list shows; free with `pe_list_view_free`
+typedef struct PeListView PeListView;
+
 // A page of the message list; free with `pe_message_list_free`
 typedef struct PeMessageList PeMessageList;
 
@@ -366,9 +367,6 @@ typedef struct PeTargetList PeTargetList;
 
 // Texts (file names, paths); free with `pe_text_list_free`
 typedef struct PeTextList PeTextList;
-
-// Conversation ids; free with `pe_thread_list_free`
-typedef struct PeThreadList PeThreadList;
 
 // A program that wants to connect
 typedef struct PeAgentConnect {
@@ -608,23 +606,6 @@ typedef struct PeFolder {
   uint64_t unread_below;
 } PeFolder;
 
-typedef struct PeSearch {
-  // The folder, 0 for every folder of every account (or of the Inboxes, with `all_inboxes`)
-  int64_t folder;
-  // With `folder` 0: the Inbox of every account rather than every folder
-  bool all_inboxes;
-  enum PeShow show;
-  // UTF-8, NULL or empty for no words
-  const char *text;
-  // One row a conversation (`PeMessage.thread` says each row's place), with the conversations `expanded` open
-  // (`expanded_count` of them); false for one row a message
-  bool threads;
-  const int64_t *expanded;
-  size_t expanded_count;
-  // View > Hide Ignored Conversations: the messages of ignored conversations left out
-  bool hide_ignored;
-} PeSearch;
-
 // A row of the message list
 typedef struct PeMessage {
   // The folder it is in (the list of a search in every folder has messages of many)
@@ -649,7 +630,7 @@ typedef struct PeMessage {
   // Whether the row is bold: the message is unread, or the row is a collapsed conversation's with an unread message.
   // The apps read this rather than decide from `seen` and the thread numbers.
   bool bold;
-  // Its row's place in a list grouped by conversation (`PeSearch.threads`), all 0 and false otherwise: the
+  // Its row's place in a list grouped by conversation (`pe_list_view_set_grouped`), all 0 and false otherwise: the
   // conversation; 0 for its first message's row, 1 for the others under it when expanded; how many messages it has
   // in the list and how many are unread; whether it is expanded
   int64_t thread;
@@ -1634,73 +1615,11 @@ bool pe_start_message(const struct PeCore *core,
 // Whether the folder tree has All Inboxes above the accounts, for this many accounts
 bool pe_all_inboxes_shown(size_t accounts);
 
-// How many messages `search` finds, and how many of them are unread: grouped by conversation (`threads`) too, all of
-// their messages (the list's rows are `pe_list_rows`). The counts of the status bar: a folder shown whole counted
-// from its indexes, as `pe_folder_counts`
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search, `total` and `unread` valid pointers.
-bool pe_message_count(const struct PeCore *core,
-                      const struct PeSearch *search,
-                      uint64_t *total,
-                      uint64_t *unread);
-
-// How many rows `pe_messages` lists for `search`: what the list's size is. Grouped by conversation (`threads`) one a
-// conversation, and under each expanded one its other messages; otherwise one a message, as `pe_message_count`
-// counts. 0 on failure.
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search.
-uint64_t pe_list_rows(const struct PeCore *core,
-                      const struct PeSearch *search);
-
-// The messages before and after the message `uid` of `folder` in the list `search`, `sort` and `ascending` make, with
-// one pass over the list: what Previous and Next open, into `previous_*` and `next_*` (a folder of 0 at an end).
-// False when the message is not in that list (any more), or on failure: a window keeps the pair it had then.
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search, the four out pointers valid.
-bool pe_message_neighbours(const struct PeCore *core,
-                           const struct PeSearch *search,
-                           enum PeSortField sort,
-                           bool ascending,
-                           int64_t folder,
-                           uint64_t uid,
-                           int64_t *previous_folder,
-                           uint64_t *previous_uid,
-                           int64_t *next_folder,
-                           uint64_t *next_uid);
-
-// One step of Next Unread from the message `uid` of `folder` (0 for none) in the list `search`, `sort` and `ascending`
-// make: the next unread message of the list, or the next folder with unread mail and the question to ask before going
-// there (a heading, a blank line, the question; free it with `pe_string_free`), or nothing.
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search, the three out pointers valid.
-enum PeNextUnread pe_next_unread_step(const struct PeCore *core,
-                                      const struct PeSearch *search,
-                                      enum PeSortField sort,
-                                      bool ascending,
-                                      int64_t folder,
-                                      uint64_t uid,
-                                      int64_t *next_folder,
-                                      uint64_t *next_uid,
-                                      char **question);
-
 // Whether the message `uid` is (still) in `folder`: a single row looked up. False on failure.
 //
 // # Safety
 // `core` must be a live handle.
 bool pe_message_exists(const struct PeCore *core, int64_t folder, uint64_t uid);
-
-// Whether the list of `search` names whom its messages went to (Sent Items, Drafts): its person column is then To
-// and shows `recipients`, its date column is Sent, and `PE_SORT_FIELD_FROM` sorts it by the recipients. False on
-// failure.
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search.
-bool pe_lists_recipients(const struct PeCore *core,
-                         const struct PeSearch *search);
 
 // The one folder the text of a search narrows it to (`in:sent`), by the name the app gives it ("Sent Items"); NULL for
 // every folder. Free with `pe_string_free`.
@@ -1715,62 +1634,6 @@ char *pe_search_place(const char *text);
 // # Safety
 // `core` must be a live handle.
 uint64_t pe_search_unindexed_count(const struct PeCore *core);
-
-// `limit` messages of what `search` finds from `offset` on, in the order asked for. NULL on failure.
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search.
-struct PeMessageList *pe_messages(const struct PeCore *core,
-                                  const struct PeSearch *search,
-                                  enum PeSortField sort,
-                                  bool ascending,
-                                  uint64_t offset,
-                                  uint64_t limit);
-
-// The conversations of the list `search` makes that have more than one message there: what View > Expand All
-// Conversations opens (as `PeSearch.expanded`). NULL on failure.
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search.
-struct PeThreadList *pe_threads_with_replies(const struct PeCore *core,
-                                             const struct PeSearch *search);
-
-// # Safety
-// `list` must be NULL or from `pe_threads_with_replies`, not freed yet.
-size_t pe_thread_list_count(const struct PeThreadList *list);
-
-// Conversation `index`; 0 past the end
-//
-// # Safety
-// `list` must be NULL or from `pe_threads_with_replies`, not freed yet.
-int64_t pe_thread_list_get(const struct PeThreadList *list, size_t index);
-
-// # Safety
-// `list` must be NULL or from `pe_threads_with_replies`, freed once.
-void pe_thread_list_free(struct PeThreadList *list);
-
-// The conversation the message `uid` of `folder` is hidden in, in the list `search` makes: grouped by conversation,
-// that conversation collapsed and the message not its first there (whose row stands for it). The list opens it (adds
-// it to `PeSearch.expanded`) to show or select the message. 0 when the message has its own row, is not in the list,
-// or on failure.
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search.
-int64_t pe_message_hidden_thread(const struct PeCore *core,
-                                 const struct PeSearch *search,
-                                 int64_t folder,
-                                 uint64_t uid);
-
-// Where message `uid` of `folder` is in what `search` finds in this order, -1 when it is not there
-//
-// # Safety
-// `core` must be a live handle, `search` a valid search.
-int64_t pe_message_index(const struct PeCore *core,
-                         const struct PeSearch *search,
-                         enum PeSortField sort,
-                         bool ascending,
-                         int64_t folder,
-                         uint64_t uid);
 
 // # Safety
 // `list` must be NULL or live.
@@ -2285,6 +2148,255 @@ char *pe_sign_in_redirect_uri(const char *issuer);
 // `issuer` must be NULL or a NUL-terminated string.
 char *pe_sign_in_register_hint(const char *issuer);
 
+// A new view: no folder (it lists nothing until one is set), every message shown, newest first by Date, one row a
+// message, ignored conversations shown. NULL on failure.
+struct PeListView *pe_list_view_new(void);
+
+// A copy of `view`, its open conversations too: what a message window goes through (with
+// `pe_list_view_set_grouped` false, one message at a time). NULL for NULL or on failure.
+//
+// # Safety
+// `view` must be NULL or a live view.
+struct PeListView *pe_list_view_clone(const struct PeListView *view);
+
+// # Safety
+// `view` must be NULL or a view that was not freed yet.
+void pe_list_view_free(struct PeListView *view);
+
+// The folder the list shows: `folder`, or with `folder` 0 the Inbox of every account (`all_inboxes`) or no folder
+// (an account's own item, which lists nothing without words). Every conversation is closed when it is another one.
+// False when it was the one shown already (or for NULL).
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_set_scope(struct PeListView *view,
+                            int64_t folder,
+                            bool all_inboxes);
+
+// The words typed in the Find box (UTF-8, NULL or empty for none), in Gmail's syntax: words, "phrases", -word, OR,
+// from: to: subject: filename: is:unread is:starred has:attachment in: before: after: older_than: newer_than: larger:
+// smaller:. With words the list is of every folder of every account (`in:` narrows that). Every conversation is
+// closed when they change. False when they are the same (or for NULL).
+//
+// # Safety
+// `view` must be NULL or a live view, `text` NULL or a NUL-terminated string.
+bool pe_list_view_set_text(struct PeListView *view,
+                           const char *text);
+
+// Which messages are shown, whatever words are searched for
+//
+// # Safety
+// `view` must be NULL or a live view.
+void pe_list_view_set_show(struct PeListView *view, enum PeShow show);
+
+// The order of the list (a From sort is by the recipients where `pe_list_view_lists_recipients`)
+//
+// # Safety
+// `view` must be NULL or a live view.
+void pe_list_view_set_sort(struct PeListView *view, enum PeSortField sort, bool ascending);
+
+// One row a conversation (`grouped`, `PeMessage.thread` says each row's place) or one a message. Every conversation
+// is closed when it changes. False when it was so already (or for NULL).
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_set_grouped(struct PeListView *view,
+                              bool grouped);
+
+// View > Hide Ignored Conversations: the messages of ignored conversations left out. The open conversations stay
+// open.
+//
+// # Safety
+// `view` must be NULL or a live view.
+void pe_list_view_set_hide_ignored(struct PeListView *view,
+                                   bool hide);
+
+// Whether words are searched for: the list is then of every folder (its Folder column shown)
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_searching(const struct PeListView *view);
+
+// Whether the list has messages of several folders: a search (its Folder column) or All Inboxes (its Account
+// column)
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_several_folders(const struct PeListView *view);
+
+// Whether the list lists anything: a folder, All Inboxes or words; not an account's own item. Expand All and
+// Collapse All apply to a grouped list that does.
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_active(const struct PeListView *view);
+
+// Whether the list is grouped by conversation
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_grouped(const struct PeListView *view);
+
+// Whether the conversation `thread` is open
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_is_expanded(const struct PeListView *view, int64_t thread);
+
+// Opens the conversation `thread` when it is closed and closes it when it is open (the + and - of its row, Right and
+// Left on it); whether it is open now. A list not grouped opens none.
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_toggle(struct PeListView *view,
+                         int64_t thread);
+
+// Opens the conversation `thread`; false when it was open or the list is not grouped (the list is the same)
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_expand(struct PeListView *view,
+                         int64_t thread);
+
+// Closes the conversation `thread`; false when it was not open (the list is the same)
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_collapse(struct PeListView *view, int64_t thread);
+
+// View > Collapse All Conversations; false when none was open
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_collapse_all(struct PeListView *view);
+
+// View > Expand All Conversations: every conversation of the list with more than one message there opened. False
+// when that changed nothing, the list is not grouped, or on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+bool pe_list_view_expand_all(const struct PeCore *core,
+                             struct PeListView *view);
+
+// The message `uid` of `folder` given a row of its own when it is hidden in a collapsed conversation (Next Unread and
+// Show Message find those): its conversation opened. True when one was opened and the list changed; false when the
+// message has its own row already, is not in the list, or on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+bool pe_list_view_reveal(const struct PeCore *core,
+                         struct PeListView *view,
+                         int64_t folder,
+                         uint64_t uid);
+
+// `limit` rows of the list from `offset` on, in its order. NULL on failure; an empty list when it lists nothing.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+struct PeMessageList *pe_list_view_messages(const struct PeCore *core,
+                                            const struct PeListView *view,
+                                            uint64_t offset,
+                                            uint64_t limit);
+
+// How many rows the list has (its size): grouped, one a conversation and under each open one its other messages;
+// otherwise one a message. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+uint64_t pe_list_view_row_count(const struct PeCore *core,
+                                const struct PeListView *view);
+
+// The counts of the status bar: how many messages the list has (grouped or not, all of them) and how many are unread;
+// a folder shown whole counted from its indexes, as `pe_folder_counts`. Both 0 when it lists nothing; false on
+// failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view, `total` and `unread` valid pointers.
+bool pe_list_view_counts(const struct PeCore *core,
+                         const struct PeListView *view,
+                         uint64_t *total,
+                         uint64_t *unread);
+
+// The row of the message `uid` of `folder` (its conversation's while that is collapsed), -1 when it is not in the
+// list
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+int64_t pe_list_view_index(const struct PeCore *core,
+                           const struct PeListView *view,
+                           int64_t folder,
+                           uint64_t uid);
+
+// The messages before and after the message `uid` of `folder` in the list, with one pass over it: what Previous and
+// Next open, into `previous_*` and `next_*` (a folder of 0 at an end). False when the message is not in the list (any
+// more), or on failure: a window keeps the pair it had then.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view, the four out pointers valid.
+bool pe_list_view_neighbours(const struct PeCore *core,
+                             const struct PeListView *view,
+                             int64_t folder,
+                             uint64_t uid,
+                             int64_t *previous_folder,
+                             uint64_t *previous_uid,
+                             int64_t *next_folder,
+                             uint64_t *next_uid);
+
+// One step of Next Unread from the message `uid` of `folder` (0 for none) in the list: the next unread message of the
+// list (to select after `pe_list_view_reveal`), or the next folder with unread mail and the question to ask before
+// going there (a heading, a blank line, the question; free it with `pe_string_free`), or nothing (also when the list
+// lists nothing).
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view, the three out pointers valid.
+enum PeNextUnread pe_list_view_next_unread_step(const struct PeCore *core,
+                                                const struct PeListView *view,
+                                                int64_t folder,
+                                                uint64_t uid,
+                                                int64_t *next_folder,
+                                                uint64_t *next_uid,
+                                                char **question);
+
+// Whether the list names whom its messages went to (Sent Items, Drafts): its person column is then To and shows
+// `recipients`, its date column is Sent, and a From sort is by the recipients. False on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+bool pe_list_view_lists_recipients(const struct PeCore *core,
+                                   const struct PeListView *view);
+
+// Fills `selection` with the messages at the rows `starts[i]` (included) to `ends[i]` (not) of the list, in place of
+// what it had: a collapsed conversation's row stands for all of its messages. False on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view, `selection` NULL or a live selection, `starts` and `ends`
+// NULL or `count` values each.
+bool pe_list_view_select_ranges(const struct PeCore *core,
+                                const struct PeListView *view,
+                                struct PeSelection *selection,
+                                const uint64_t *starts,
+                                const uint64_t *ends,
+                                size_t count);
+
+// Where the messages of `selection` are now in the list, ascending, to select them again after it changed; those no
+// longer in it are left out. Free with `pe_positions_free`. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view, `selection` NULL or a live selection.
+struct PePositions *pe_list_view_positions(const struct PeCore *core,
+                                           const struct PeListView *view,
+                                           const struct PeSelection *selection);
+
+// Whether `action` (to `to`) on the messages of `summary` takes them out of the list (Ignore Conversation does while
+// it hides ignored conversations): then the app selects the row after them, as it does after Delete
+//
+// # Safety
+// `view` must be NULL or a live view, `summary` NULL or a valid pointer.
+bool pe_list_view_leaves_list(const struct PeListView *view,
+                              const struct PeSelectionSummary *summary,
+                              enum PeAction action,
+                              int64_t to);
+
 // An empty selection
 struct PeSelection *pe_selection_new(void);
 
@@ -2319,45 +2431,18 @@ bool pe_selection_get(const struct PeSelection *selection,
                       int64_t *folder,
                       uint64_t *uid);
 
-// Fills it with the messages at the positions `starts[i]` (included) to `ends[i]` (not) of the list `search` and
-// `sort` make, in place of what it had. A list selection is ranges of positions; the messages they are stay the same
-// when the list changes.
-//
 // # Safety
-// `core` must be a live handle, `selection` a live selection, `search` a valid search, `starts` and `ends` NULL or
-// `count` values each.
-bool pe_selection_set_ranges(const struct PeCore *core,
-                             struct PeSelection *selection,
-                             const struct PeSearch *search,
-                             enum PeSortField sort,
-                             bool ascending,
-                             const uint64_t *starts,
-                             const uint64_t *ends,
-                             size_t count);
-
-// Where the selected messages are now in the list `search` and `sort` make, ascending, to select them again after it
-// changed; those no longer in it are left out. NULL on failure.
-//
-// # Safety
-// `core` must be a live handle, `selection` a live selection, `search` a valid search.
-struct PePositions *pe_selection_positions(const struct PeCore *core,
-                                           const struct PeSelection *selection,
-                                           const struct PeSearch *search,
-                                           enum PeSortField sort,
-                                           bool ascending);
-
-// # Safety
-// `positions` must be NULL or from `pe_selection_positions`, not freed yet.
+// `positions` must be NULL or from `pe_list_view_positions`, not freed yet.
 size_t pe_positions_count(const struct PePositions *positions);
 
 // Position `index`; 0 past the end
 //
 // # Safety
-// `positions` must be NULL or from `pe_selection_positions`, not freed yet.
+// `positions` must be NULL or from `pe_list_view_positions`, not freed yet.
 uint64_t pe_positions_get(const struct PePositions *positions, size_t index);
 
 // # Safety
-// `positions` must be NULL or from `pe_selection_positions`, freed once.
+// `positions` must be NULL or from `pe_list_view_positions`, freed once.
 void pe_positions_free(struct PePositions *positions);
 
 // Fills `summary`; false on failure
@@ -2398,16 +2483,6 @@ char *pe_selection_move_text(const struct PeSelectionSummary *summary,
 // # Safety
 // `summary` must be a valid pointer.
 bool pe_selection_flags(const struct PeSelectionSummary *summary);
-
-// Whether `action` (to `to`) on the messages of `summary` takes them out of the list, a list that hides ignored
-// conversations when `hide_ignored`: then the app selects the row after them, as it does after Delete
-//
-// # Safety
-// `summary` must be a valid pointer.
-bool pe_selection_leaves_list(const struct PeSelectionSummary *summary,
-                              enum PeAction action,
-                              int64_t to,
-                              bool hide_ignored);
 
 // Does `action` to the selected messages, each folder's with one command: in the store now (`FolderChanged`), on the
 // server in the background. Returns what the status bar says ("Moved 3 messages to Archive"), or NULL with the
