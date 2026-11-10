@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.10.0](https://github.com/postalsys/inbox-classic/compare/v0.9.0...v0.10.0) (2026-11-10)
+
+
+### Features
+
+* a calendar event is a card like the bounce and code cards ([f7b6594](https://github.com/postalsys/inbox-classic/commit/f7b6594c242dc38fa41f6d514a1d5b7031b3ae50))
+* a one-time code's card with Copy, from the OTP-Token header or the text ([aa5c6bc](https://github.com/postalsys/inbox-classic/commit/aa5c6bc7743ce0df3006a9b2d2b13612e7c11f84))
+* accounts are headings over their folders on the Mac and Linux ([f7105da](https://github.com/postalsys/inbox-classic/commit/f7105daa826903d18cec615287bdfe6c070abc5b))
+* accounts are headings over their folders on the Mac and Linux ([619e8e5](https://github.com/postalsys/inbox-classic/commit/619e8e501630d9c128332cc7808fc453e1125c40))
+* **core:** one frame for the cards above a message, and a card for calendar events ([f4f162b](https://github.com/postalsys/inbox-classic/commit/f4f162b2dbfb6ce386b6658647c2df560a6945fb))
+* one card style for the event, bounce and code cards ([60820d3](https://github.com/postalsys/inbox-classic/commit/60820d31b99d87b70d8503a742ea224b5084e90c))
+* one-time codes in a card with Copy (OTP-Token header and pe-otp) ([c71a72c](https://github.com/postalsys/inbox-classic/commit/c71a72ce218a414e08c5b607d3cc9724f71d0a17))
+* **pe-mime:** parse the OTP-Token header into Message.otp ([78b779a](https://github.com/postalsys/inbox-classic/commit/78b779a24e40e783d821a7d7820a1cf20155fa9d))
+* **pe-otp:** find the one-time code in a message body ([d7098b6](https://github.com/postalsys/inbox-classic/commit/d7098b61b2a78731eb6573243a641a4868b0e2ed))
+* Watch and Ignore in the right-click menu, no Watch or Size column ([4082bff](https://github.com/postalsys/inbox-classic/commit/4082bff1d062a81e7ce1e0d8e0c21af3419d2b7f))
+* Watch and Ignore in the right-click menu, no Watch or Size column ([d0a9f73](https://github.com/postalsys/inbox-classic/commit/d0a9f7340ec56e1848da822f9d587b01321b236b))
+
+
+### Bug Fixes
+
+* a code's domain must be its signer's or a host under it ([5276d25](https://github.com/postalsys/inbox-classic/commit/5276d25732316373680a0764d972cb8cd33c4c91))
+* centre the "..." of a folded quote and the rows of the Mac's lists ([b3baf4a](https://github.com/postalsys/inbox-classic/commit/b3baf4ab00f49d856a786c1521c2c701ce4db8c6))
+* centre the folded quote's dots and the Mac's list rows ([6ecc3d0](https://github.com/postalsys/inbox-classic/commit/6ecc3d0e031ee90b8ef098799c2f866566d3207f))
+* port the latest postal-mime and nodemailer security fixes ([290fb15](https://github.com/postalsys/inbox-classic/commit/290fb1537975b4a94acfafe9c100ab90d88bc167))
+* port the latest postal-mime and nodemailer security fixes ([30dd7db](https://github.com/postalsys/inbox-classic/commit/30dd7db8206371c3b27ee5a8bc32fb7892538b0f))
+* Tab goes from field to field in every form ([c0f176a](https://github.com/postalsys/inbox-classic/commit/c0f176a506ea255b008907099272e79108bf19eb))
+* Tab goes from field to field in every form ([43a63d9](https://github.com/postalsys/inbox-classic/commit/43a63d96ba792b1e8e55543a82e215dff2e2718b))
+* Tab reaches the message, its links and the lists' neighbours ([14d9e41](https://github.com/postalsys/inbox-classic/commit/14d9e419788b9f046aeeafdd45407846057a429d))
+
 ## [0.9.0](https://github.com/postalsys/inbox-classic/compare/v0.8.0...v0.9.0) (2026-11-10)
 
 
