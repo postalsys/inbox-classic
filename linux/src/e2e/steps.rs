@@ -220,9 +220,7 @@ pub async fn collapsed_account(d: &Driver) {
     }
     d.check(
         wait_until(5, || {
-            counted(&label(-account)) == 0
-                && counted(&label(inbox_id)) == inbox_unread
-                && tree().selected() == inbox_id
+            counted(&label(-account)) == 0 && counted(&label(inbox_id)) == inbox_unread && tree().selected() == inbox_id
         })
         .await,
         "a second click opens it again: the count is back on the Inbox, which is selected again",

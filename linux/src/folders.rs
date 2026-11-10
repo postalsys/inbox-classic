@@ -353,7 +353,11 @@ impl FolderTree {
         let Some(model) = self.tree_model() else { return };
         let mut position = 0;
         while let Some(row) = model.row(position) {
-            if row.item().and_downcast::<FolderItem>().is_some_and(|item| item.id() == id) {
+            if row
+                .item()
+                .and_downcast::<FolderItem>()
+                .is_some_and(|item| item.id() == id)
+            {
                 self.selection.set_selected(position);
                 return;
             }
@@ -364,7 +368,10 @@ impl FolderTree {
     /// Opens or closes the account heading at `position`, when there is one there
     pub fn toggle_heading(&self, position: u32) {
         if let Some(row) = self.tree_model().and_then(|model| model.row(position))
-            && row.item().and_downcast::<FolderItem>().is_some_and(|item| is_heading(item.id()))
+            && row
+                .item()
+                .and_downcast::<FolderItem>()
+                .is_some_and(|item| is_heading(item.id()))
         {
             row.set_expanded(!row.is_expanded());
         }
@@ -376,7 +383,11 @@ impl FolderTree {
         let model = self.tree_model()?;
         let mut position = 0;
         while let Some(row) = model.row(position) {
-            if row.item().and_downcast::<FolderItem>().is_some_and(|item| item.id() == id) {
+            if row
+                .item()
+                .and_downcast::<FolderItem>()
+                .is_some_and(|item| item.id() == id)
+            {
                 return Some(position);
             }
             position += 1;
