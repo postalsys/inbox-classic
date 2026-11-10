@@ -435,19 +435,19 @@ const sections = [
             {
                 shot: 'threads-4-watch',
                 name: 'Watch Conversation',
-                what: "Message > Watch Conversation puts glasses in the Watch column of a conversation, as Outlook Express did: a new message in it is always announced, even from a folder of the user's other than the Inbox, and the notification says the conversation is watched. Choosing it again takes the mark away; when a late message joins two conversations, the joined one is watched if either was, and ignored only if both were.",
-                how: 'Message > Watch Conversation, W in the message list.',
+                what: "Message > Watch Conversation, or the message's right-click menu, watches a conversation: a new message in it is always announced, even from a folder of the user's other than the Inbox, and the notification says the conversation is watched. Both menus check the item while it is watched; choosing it again takes the mark away. When a late message joins two conversations, the joined one is watched if either was, and ignored only if both were.",
+                how: 'Message > Watch Conversation, the right-click menu of a message, W in the message list.',
                 checked: [
-                    'Watch Conversation shows the glasses and checks the menu item',
+                    'Watch Conversation checks the menu item, in the Message menu and the right-click menu',
                     'A new reply to the watched conversation is announced',
-                    'Watch Conversation again takes the glasses away'
+                    'Watch Conversation again takes the check marks away'
                 ]
             },
             {
                 shot: 'threads-5-ignore',
                 name: 'Ignore Conversation',
                 what: 'Message > Ignore Conversation turns a conversation grey and marks it read, on the server too; a new message in it arrives read, without a notification. View > Hide Ignored Conversations leaves ignored conversations out of the list.',
-                how: 'Message > Ignore Conversation, K in the message list; View > Hide Ignored Conversations.',
+                how: 'Message > Ignore Conversation, the right-click menu of a message, K in the message list; View > Hide Ignored Conversations.',
                 checked: [
                     'Ignore Conversation greys the row and marks its messages read on the server',
                     'A new reply to the ignored conversation arrives read, without a notification',

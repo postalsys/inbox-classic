@@ -1,11 +1,10 @@
-//! Step 34g of the UI test: Watch and Ignore Conversation. The conversation of 34e watched (its glasses, the menu's
-//! check mark, a new reply announced as in a watched conversation) and no longer; another conversation ignored (grey,
-//! the muted sign, read on the server, a new reply arriving read without a notification) and hidden by View > Hide
-//! Ignored Conversations.
+//! Step 34g of the UI test: Watch and Ignore Conversation. The conversation of 34e watched (the check marks of the
+//! Message menu and the right-click menu, a new reply announced as in a watched conversation) and no longer; another
+//! conversation ignored (grey, checked in the menus, read on the server, a new reply arriving read without a
+//! notification) and hidden by View > Hide Ignored Conversations. The list has no Watch column.
 
 use super::steps::date_now;
 use super::*;
-use crate::messages::{IGNORED_ICON, WATCHED_ICON};
 
 const TRIP: &str = "Plans for the trip";
 const FOOTBALL: &str = "Fantasy football picks";
@@ -22,13 +21,23 @@ fn head_of(subject: &str) -> Option<(u32, pe_store::Message)> {
         .map(|(at, m)| (at as u32, m))
 }
 
-/// How many rows on screen show the mark `icon` in the Watch column
-fn marks(icon: &str) -> usize {
-    let view: gtk::Widget = shell().main().list.view.clone().upcast();
-    descendants::<gtk::Image>(&view)
-        .iter()
-        .filter(|i| i.is_mapped() && i.icon_name().as_deref() == Some(icon))
-        .count()
+/// Whether the right-click menu of the selected rows checks `command`
+fn context_checked(command: Command) -> bool {
+    let main = shell().main();
+    let view: gtk::Widget = main.list.view.clone().upcast();
+    main.message_menu(&view, 40.0, 24.0);
+    let name = format!("{command:?}").to_lowercase();
+    let on = main
+        .message_actions
+        .borrow()
+        .as_ref()
+        .and_then(|group| group.action_state(&name))
+        .and_then(|state| state.get::<bool>())
+        == Some(true);
+    if let Some(popover) = main.message_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+    on
 }
 
 /// Whether the menu item of `command` has its check mark
@@ -101,19 +110,31 @@ pub async fn watch_and_ignore(d: &Driver) {
         return;
     };
     select_row(at).await;
+    let columns: Vec<String> = main
+        .list
+        .view
+        .columns()
+        .iter::<gtk::ColumnViewColumn>()
+        .flatten()
+        .filter(|c| c.is_visible())
+        .filter_map(|c| c.title().map(|t| t.to_string()))
+        .collect();
+    d.check(
+        !columns.iter().any(|t| *t == t!(UiColSize)) && columns.len() == 3,
+        &format!("the list has no Watch or Size column ({columns:?} and the two icons)"),
+    );
     run_command(Command::WatchConversation);
     let watched = wait_until(10, || {
         checked(Command::WatchConversation)
-            && marks(WATCHED_ICON) == 1
             && head_of(TRIP).is_some_and(|(_, m)| m.mark == pe_core::ThreadMark::Watch)
+            && context_checked(Command::WatchConversation)
     })
     .await;
     d.check(
-        watched && !checked(Command::IgnoreConversation),
-        "Watch Conversation shows the glasses in the Watch column and checks the menu item",
+        watched && !checked(Command::IgnoreConversation) && !context_checked(Command::IgnoreConversation),
+        "Watch Conversation checks the menu item, in the Message menu and the right-click menu",
     );
-    let width = f64::from(list_view.width());
-    main.command_menu_at("message", &list_view, width - 160.0, 24.0);
+    main.message_menu(&list_view, 120.0, 24.0);
     pause(400).await;
     d.shot(main.window(), "threads-4-watch").await;
     if let Some(popover) = main.message_popover.borrow().as_ref() {
@@ -152,11 +173,11 @@ pub async fn watch_and_ignore(d: &Driver) {
     d.check(
         wait_until(10, || {
             !checked(Command::WatchConversation)
-                && marks(WATCHED_ICON) == 0
                 && head_of(TRIP).is_some_and(|(_, m)| m.mark == pe_core::ThreadMark::None)
+                && !context_checked(Command::WatchConversation)
         })
         .await,
-        "Watch Conversation again takes the glasses away",
+        "Watch Conversation again takes the check marks away",
     );
 
     // another conversation, unread, ignored with K in the list
@@ -195,12 +216,12 @@ pub async fn watch_and_ignore(d: &Driver) {
     );
     run_command(Command::IgnoreConversation);
     let ignored = wait_until(10, || {
-        checked(Command::IgnoreConversation) && marks(IGNORED_ICON) == 1 && grey(FOOTBALL)
+        checked(Command::IgnoreConversation) && grey(FOOTBALL) && context_checked(Command::IgnoreConversation)
     })
     .await;
     d.check(
         ignored,
-        "Ignore Conversation turns its row grey, with the ignored sign in the Watch column, and checks the menu item",
+        "Ignore Conversation turns its row grey and checks the menu item, in both menus",
     );
     let read = wait_until(20, || {
         d.seen("Message-ID: <football1@example.com>") && d.seen("Message-ID: <football2@example.com>")
@@ -237,6 +258,7 @@ pub async fn watch_and_ignore(d: &Driver) {
         select_row(at).await;
     }
     wait_until(5, || grey(FOOTBALL)).await;
+    let width = f64::from(list_view.width());
     main.command_menu_at("view", &list_view, width - 160.0, 24.0);
     pause(400).await;
     d.shot(main.window(), "threads-5-ignore").await;

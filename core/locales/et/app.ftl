@@ -134,7 +134,6 @@ ui-col-subject = Teema
 ui-col-from = Saatja
 ui-col-to = Saaja
 ui-col-received = Saabunud
-ui-col-watch = Jälgi
 ui-watched-conversation = Jälgitav vestlus
 ui-col-sent = Saadetud
 ui-col-size = Suurus

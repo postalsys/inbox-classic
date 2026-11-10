@@ -1,8 +1,8 @@
 //! The message list: a column view over a list model that pages through the core, 100 rows at a time, as the virtual
-//! list view of the Windows app does. The columns as Outlook Express has them: the envelope (read or not), the paper
-//! clip, the flag, Watch (glasses for a watched conversation, a muted sign for an ignored one), From, Subject,
-//! Received, Size, and Folder while a search lists several folders. Unread messages in bold, ignored conversations
-//! grey. Every string comes from the core as it decoded it.
+//! list view of the Windows app does. The columns: the paper clip, the flag, From, Subject (which takes the room the
+//! others leave), Received, and Folder while a search lists several folders. Unread messages in bold, ignored
+//! conversations grey; the menus check Watch and Ignore Conversation. Every string comes from the core as it decoded
+//! it.
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -10,7 +10,7 @@ use std::rc::Rc;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_store::{Message, MessageRef, Sort, SortField, ThreadMark};
+use pe_store::{Message, MessageRef, Sort, SortField};
 
 use crate::app::shell;
 
@@ -141,7 +141,6 @@ pub struct Columns {
     from: gtk::ColumnViewColumn,
     subject: gtk::ColumnViewColumn,
     received: gtk::ColumnViewColumn,
-    size: gtk::ColumnViewColumn,
 }
 
 pub struct MessageList {
@@ -179,15 +178,7 @@ impl MessageList {
             |_| None,
         ));
         view.append_column(&flag_column());
-        // Watch: the glasses of a watched conversation, the muted sign of an ignored one, as Outlook Express has them
-        view.append_column(&icon_column(
-            |m| match m.mark {
-                ThreadMark::Watch => Some(WATCHED_ICON),
-                ThreadMark::Ignore => Some(IGNORED_ICON),
-                ThreadMark::None => None,
-            },
-            |m| (m.mark == ThreadMark::Watch).then(|| t!(UiWatchedConversation)),
-        ));
+        // no Watch column: the menus check Watch and Ignore Conversation, and an ignored conversation is grey
         let recipients = Rc::new(Cell::new(false));
         let shows = recipients.clone();
         let from = text_column(&t!(UiColFrom), 200, false, 0.0, move |m| {
@@ -201,17 +192,14 @@ impl MessageList {
         let received = text_column(&t!(UiColReceived), 130, false, 0.0, |m| {
             m.info.display_date().map(crate::ui::format_date).unwrap_or_default()
         });
-        let size = text_column(&t!(UiColSize), 92, false, 1.0, |m| {
-            pe_core::format_size(m.info.size.unwrap_or(0))
-        });
         let folder = text_column(&t!(UiColFolder), FOLDER_WIDTH, false, 0.0, |m| {
             shell().main().row_folder(m.folder_id)
         });
         folder.set_visible(false);
-        for column in [&from, &subject, &received, &size, &folder] {
+        for column in [&from, &subject, &received, &folder] {
             view.append_column(column);
         }
-        for column in [&from, &subject, &received, &size] {
+        for column in [&from, &subject, &received] {
             column.set_sorter(Some(&gtk::CustomSorter::new(|_, _| gtk::Ordering::Equal)));
         }
         view.sort_by_column(Some(&received), gtk::SortType::Descending);
@@ -225,7 +213,6 @@ impl MessageList {
                 from,
                 subject,
                 received,
-                size,
             },
             sorting: Cell::new(false),
             sort: Cell::new(Sort::default()),
@@ -244,8 +231,8 @@ impl MessageList {
             }
             let before = list.sort.get();
             let now = list.sort_now();
-            // another column: dates and sizes start with the largest, words with A
-            if now.field != before.field && matches!(now.field, SortField::Date | SortField::Size) && now.ascending {
+            // another column: dates start with the newest, words with A
+            if now.field != before.field && now.field == SortField::Date && now.ascending {
                 list.sorting.set(true);
                 let column = list.column_of(now.field);
                 list.view.sort_by_column(Some(&column), gtk::SortType::Descending);
@@ -265,7 +252,6 @@ impl MessageList {
         let field = match column {
             Some(c) if c == self.columns.from => SortField::From,
             Some(c) if c == self.columns.subject => SortField::Subject,
-            Some(c) if c == self.columns.size => SortField::Size,
             _ => SortField::Date,
         };
         Sort {
@@ -278,8 +264,7 @@ impl MessageList {
         match field {
             SortField::From | SortField::To => self.columns.from.clone(),
             SortField::Subject => self.columns.subject.clone(),
-            SortField::Size => self.columns.size.clone(),
-            SortField::Date | SortField::Received => self.columns.received.clone(),
+            SortField::Date | SortField::Received | SortField::Size => self.columns.received.clone(),
         }
     }
 
@@ -446,12 +431,7 @@ impl MessageList {
 /// the Windows app has it, in the paper clip's colour; the card in the reading pane says how bad it is
 pub const UNDELIVERED_ICON: &str = "ic-mail-error-symbolic";
 
-/// The marks of the Watch column: Fluent's glasses for a watched conversation, its muted speaker for an ignored one
-pub const WATCHED_ICON: &str = "ic-glasses-symbolic";
-pub const IGNORED_ICON: &str = "ic-speaker-mute-symbolic";
-
-/// A column of the paper clip or the Watch mark: an icon, or none, for each row, and what it says on hover and to a
-/// screen reader
+/// The column of the paper clip: an icon, or none, for each row, and what it says on hover and to a screen reader
 fn icon_column(
     icon: fn(&Message) -> Option<&'static str>,
     tip: fn(&Message) -> Option<String>,

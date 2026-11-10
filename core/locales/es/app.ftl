@@ -134,7 +134,6 @@ ui-col-subject = Asunto
 ui-col-from = De
 ui-col-to = Para
 ui-col-received = Recibido
-ui-col-watch = Seguir
 ui-watched-conversation = Conversación seguida
 ui-col-sent = Enviado
 ui-col-size = Tamaño

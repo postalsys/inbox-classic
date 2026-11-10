@@ -137,7 +137,6 @@ ui-col-from = From
 ui-col-to = To
 ui-col-received = Received
 # the column of the glasses of a watched conversation (and the sign of an ignored one)
-ui-col-watch = Watch
 # a notification of new mail in a watched conversation, over who it is from
 ui-watched-conversation = Watched conversation
 ui-col-sent = Sent
