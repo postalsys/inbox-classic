@@ -1854,7 +1854,7 @@ extension UITest {
         command(.outbox)
         if let outbox = await waitWindow("outbox", 10) {
             let table: NSTableView? = find("outbox.list", in: outbox)
-            let status = (table?.view(atColumn: 3, row: 0, makeIfNecessary: true) as? NSTextField)?.stringValue ?? ""
+            let status = (table?.view(atColumn: 3, row: 0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
             check(status.hasPrefix("Queued by an AI agent; sends at"), "it waits in the Outbox, where it can still be deleted (\(status))")
             await shot(outbox, "agents-5-outbox")
             NSApp.stopModal()
@@ -1865,7 +1865,7 @@ extension UITest {
             let hosts: NSTableView? = find("agents.hosts", in: agents)
             let log: NSTableView? = find("agents.log", in: agents)
             let cell = { (table: NSTableView?, column: Int, row: Int) -> String in
-                (table?.view(atColumn: column, row: row, makeIfNecessary: true) as? NSTextField)?.stringValue ?? ""
+                (table?.view(atColumn: column, row: row, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
             }
             check(cell(hosts, 0, 0) == "My AI agent" && cell(hosts, 1, 0).hasPrefix("Read, organize and send with your yes"),
                   "it lists the program and what it may do (\(cell(hosts, 1, 0)))")

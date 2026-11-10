@@ -277,14 +277,14 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
 
     init(core: Core) {
         self.core = core
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 340), styleMask: [.titled, .resizable],
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 820, height: 340), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
         window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiSignInApps.text
         window.identifier = NSUserInterfaceItemIdentifier("signin.apps")
         super.init()
-        for (id, title, width) in [("on", "", 24.0), ("name", Text.uiColName.text, 210.0), ("issuer", Text.uiColIssuer.text, 200.0),
-                                   ("used", Text.uiColUsedBy.text, 110.0)] {
+        for (id, title, width) in [("on", "", 24.0), ("name", Text.uiColName.text, 270.0), ("issuer", Text.uiColIssuer.text, 190.0),
+                                   ("used", Text.uiColUsedBy.text, 150.0)] {
             let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(id))
             column.title = title
             column.width = width
@@ -356,9 +356,9 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
             box.setAccessibilityIdentifier("signin.on.\(row)")
             box.setAccessibilityLabel(Text.macUseForNewAccounts.text(["name": app.name]))
             return box
-        case "name": return NSTextField(labelWithString: builtin ? Text.macBuiltIn.text(["name": app.name]) : app.name)
-        case "issuer": return NSTextField(labelWithString: app.issuer)
-        default: return NSTextField(labelWithString: app.usedBy.isEmpty ? Text.uiNoAccounts.text : app.usedBy)
+        case "name": return listCell(tableView, builtin ? Text.macBuiltIn.text(["name": app.name]) : app.name)
+        case "issuer": return listCell(tableView, app.issuer)
+        default: return listCell(tableView, app.usedBy.isEmpty ? Text.uiNoAccounts.text : app.usedBy)
         }
     }
 

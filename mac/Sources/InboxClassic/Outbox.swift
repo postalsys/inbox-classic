@@ -114,9 +114,7 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
                 value = Text.uiOutboxStatusWaiting.text
             }
         }
-        let label = NSTextField(labelWithString: value)
-        label.lineBreakMode = .byTruncatingTail
-        return label
+        return listCell(tableView, value)
     }
 
     @objc private func sendAll() {

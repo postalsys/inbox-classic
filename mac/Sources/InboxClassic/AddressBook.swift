@@ -218,9 +218,10 @@ func bookTable(_ table: NSTableView, id: String, columns: [(String, String, CGFl
     return scroll
 }
 
-/// A cell of a table: a text, with a picture before it when given, and a count after it when given
+/// A cell of a table: a text centred in the row, with a picture before it when given, and a count after it when given.
+/// Every list window uses it, so their rows line up alike (a bare label would sit at the top of a taller row)
 @MainActor
-func bookCell(_ table: NSTableView, _ value: String, image: NSImage? = nil, count: String? = nil, secondary: Bool = false) -> NSView {
+func listCell(_ table: NSTableView, _ value: String, image: NSImage? = nil, count: String? = nil, secondary: Bool = false) -> NSView {
     let id = NSUserInterfaceItemIdentifier(image == nil ? (count == nil ? "book.text" : "book.count") : (count == nil ? "book.icon" : "book.icon.count"))
     let cell = table.makeView(withIdentifier: id, owner: nil) as? NSTableCellView ?? {
         let made = NSTableCellView()
@@ -520,18 +521,18 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
         if tableView === groupList {
             if row == 0 {
-                return bookCell(tableView, Text.uiBookAllContacts.text, image: BookIcons.all, count: "")
+                return listCell(tableView, Text.uiBookAllContacts.text, image: BookIcons.all, count: "")
             }
             let group = groups[row - 1]
-            let cell = bookCell(tableView, group.name, image: BookIcons.group, count: "\(group.count)")
+            let cell = listCell(tableView, group.name, image: BookIcons.group, count: "\(group.count)")
             cell.toolTip = Text.uiGroupMembersCount.text(["count": group.count])
             return cell
         }
         let entry = rows[row]
         switch column?.identifier.rawValue {
-        case "name": return bookCell(tableView, entry.title, secondary: entry.card == 0)
-        case "email": return bookCell(tableView, entry.address)
-        default: return bookCell(tableView, entry.phone)
+        case "name": return listCell(tableView, entry.title, secondary: entry.card == 0)
+        case "email": return listCell(tableView, entry.address)
+        default: return listCell(tableView, entry.phone)
         }
     }
 
@@ -1007,13 +1008,13 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
         if tableView === addressList {
             let address = card.addresses[row]
-            return bookCell(tableView, row == 0 ? Text.uiContactDefault.text(["address": address]) : address)
+            return listCell(tableView, row == 0 ? Text.uiContactDefault.text(["address": address]) : address)
         }
         let phone = card.phones[row]
         if column?.identifier.rawValue == "kind" {
-            return bookCell(tableView, Self.kinds.first { $0.0 == phone.kind }?.1.text ?? "", secondary: true)
+            return listCell(tableView, Self.kinds.first { $0.0 == phone.kind }?.1.text ?? "", secondary: true)
         }
-        return bookCell(tableView, phone.number)
+        return listCell(tableView, phone.number)
     }
 
     func tableViewSelectionDidChange(_ notification: Notification) {
@@ -1239,10 +1240,10 @@ final class GroupSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, NS
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
         let member = members[row]
         if column?.identifier.rawValue == "name" {
-            return bookCell(tableView, member.title, image: member.card != 0 ? BookIcons.person : BookIcons.typed,
+            return listCell(tableView, member.title, image: member.card != 0 ? BookIcons.person : BookIcons.typed,
                             secondary: member.name.isEmpty)
         }
-        return bookCell(tableView, member.address)
+        return listCell(tableView, member.address)
     }
 
     func tableViewSelectionDidChange(_ notification: Notification) {
@@ -1475,10 +1476,10 @@ final class PeoplePicker: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
             return nil
         }
         if column?.identifier.rawValue == "email" {
-            return bookCell(tableView, entry.isGroup ? Text.uiGroupMembersCount.text(["count": entry.count]) : entry.address,
+            return listCell(tableView, entry.isGroup ? Text.uiGroupMembersCount.text(["count": entry.count]) : entry.address,
                             secondary: entry.isGroup)
         }
-        let cell = bookCell(tableView, entry.title, image: entry.isGroup ? BookIcons.group : BookIcons.person)
+        let cell = listCell(tableView, entry.title, image: entry.isGroup ? BookIcons.group : BookIcons.person)
         cell.toolTip = entry.label
         return cell
     }
