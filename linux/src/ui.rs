@@ -36,6 +36,8 @@ const STYLE: &str = "
 .flag-row { padding: 0 6px; min-height: 30px; border-radius: 6px; }
 .flag-row label { font-weight: normal; }
 .flag-row:hover { background-color: alpha(@view_fg_color, 0.08); }
+.account-heading { margin-top: 6px; }
+.account-heading label { font-size: 0.85em; font-weight: bold; color: alpha(@view_fg_color, 0.6); }
 .new-address { font-size: 0.8em; font-weight: bold; color: white; background-color: @error_bg_color; border-radius: 4px; padding: 1px 6px; }
 ";
 

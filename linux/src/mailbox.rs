@@ -472,9 +472,13 @@ impl Mailbox {
                     spawn(async move { this.drop_files(Some(to), files).await });
                 }
             }),
-            menu: Box::new(move |widget, x, y| {
+            menu: Box::new(move |widget, x, y, id| {
                 if let Some(this) = menu.upgrade() {
-                    this.folder_menu(widget, x, y);
+                    if id < 0 && id != crate::folders::ALL_INBOXES {
+                        this.account_menu(widget, x, y, -id);
+                    } else {
+                        this.folder_menu(widget, x, y);
+                    }
                 }
             }),
         });
@@ -1646,6 +1650,32 @@ impl Mailbox {
 
     /// The right-click menu of a folder: Mark All Read first, as Outlook Express has it, for a folder with unread
     /// messages; New Folder, Rename and Delete for a folder that is not special
+    /// The folder listed (0 for none, or All Inboxes), for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn folder_id(&self) -> i64 {
+        self.folder.get()
+    }
+
+    /// The menu of an account's heading (a right-click on it): New Folder at the top of that account
+    pub fn account_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64, account: i64) {
+        let group = gio::SimpleActionGroup::new();
+        let action = gio::SimpleAction::new("new", None);
+        let this = Rc::downgrade(self);
+        action.connect_activate(move |_, _| {
+            if let Some(this) = this.upgrade() {
+                spawn(async move { this.new_folder_in(account, 0).await });
+            }
+        });
+        group.add_action(&action);
+        let menu = gio::Menu::new();
+        menu.append(
+            Some(&crate::words::plain(crate::words::Text::CmdNewFolder)),
+            Some("account.new"),
+        );
+        widget.insert_action_group("account", Some(&group));
+        *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
+    }
+
     pub fn folder_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64) {
         let folder = self.folder.get();
         let all_inboxes = self.all_inboxes.get();
@@ -1731,11 +1761,17 @@ impl Mailbox {
 
     /// A folder in the selected one, or at the top of the selected account
     pub async fn new_folder(&self) {
-        let account = self.current_account();
-        if account == 0 || self.all_inboxes.get() {
+        if self.all_inboxes.get() {
             return;
         }
-        let folder = self.folder.get();
+        self.new_folder_in(self.current_account(), self.folder.get()).await;
+    }
+
+    /// A new folder in `account`, under folder `folder` (0: at the top of the account)
+    pub async fn new_folder_in(&self, account: i64, folder: i64) {
+        if account == 0 {
+            return;
+        }
         let where_ = if folder != 0 {
             t!(UiNewFolderInSelected)
         } else {
