@@ -17,6 +17,7 @@ pe-autoconfig = { path = "../crates/pe-autoconfig" }
 pe-content = { path = "../crates/pe-content" }
 pe-imap = { path = "../crates/pe-imap" }
 pe-mime = { path = "../crates/pe-mime" }
+pe-otp = { path = "../crates/pe-otp" }
 
 [[bin]]
 name = "imap_response"
@@ -44,6 +45,13 @@ bench = false
 [[bin]]
 name = "autoconfig_parsers"
 path = "fuzz_targets/autoconfig_parsers.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "otp_detect"
+path = "fuzz_targets/otp_detect.rs"
 test = false
 doc = false
 bench = false
