@@ -14,9 +14,7 @@ pub const COPY_CODE_LINK: &str = "inboxclassic:copy-code";
 
 /// Whether a link clicked in the reading pane is the card's [`COPY_CODE_LINK`]
 pub fn is_copy_code_link(uri: &str) -> bool {
-    let uri = uri.trim();
-    let uri = uri.strip_suffix('/').unwrap_or(uri);
-    uri.eq_ignore_ascii_case(COPY_CODE_LINK)
+    crate::bounce::is_link(uri, COPY_CODE_LINK)
 }
 
 /// What the card says, its words from the catalog

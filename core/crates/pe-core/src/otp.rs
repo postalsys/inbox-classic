@@ -80,9 +80,8 @@ fn sender_domain(message: &Message) -> Option<String> {
 /// The card of `code`, saying it is old when the message was sent more than an hour before `now` (seconds since the
 /// Unix epoch, as `sent`)
 pub(crate) fn card(code: &Code, sent: Option<i64>, now: i64) -> pe_html::OtpCard {
-    let domain = || [("domain", code.domain.as_str().into())];
     pe_html::OtpCard {
-        heading: tr_args(Text::OtpHeading, &domain()),
+        heading: tr_args(Text::OtpHeading, &[("domain", code.domain.as_str().into())]),
         code: code.printed.clone(),
         note: tr_args(Text::OtpNote, &[("domain", code.signer.as_str().into())]),
         copy: tr(Text::OtpCopy),

@@ -90,7 +90,6 @@ pub(crate) fn build_unless(
     dropped: &dyn Fn() -> bool,
     find: FindMessage,
 ) -> Option<MessageView> {
-    let trusted = trust.domains;
     let options = RenderOptions { allow_remote_images };
     let message = match parser::parse(source) {
         Ok(message) => message,
@@ -152,11 +151,10 @@ pub(crate) fn build_unless(
         .as_ref()
         .map(|b| crate::bounce::card(b, bounced_message.is_some()));
     // a one-time code the domain it is for signed, above the message
-    let code = trust.codes.then(|| crate::otp::of(&message, trusted)).flatten();
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0, |d| d.as_secs() as i64);
-    let otp_card = code.as_ref().map(|code| crate::otp::card(code, message.timestamp, now));
+    let code = trust.codes.then(|| crate::otp::of(&message, trust.domains)).flatten();
+    let otp_card = code
+        .as_ref()
+        .map(|code| crate::otp::card(code, message.timestamp, crate::worker::unix_now()));
     let cards = pe_html::Cards {
         otp: otp_card.as_ref(),
         bounce: card.as_ref(),
@@ -178,8 +176,8 @@ pub(crate) fn build_unless(
                 size: a.content.len() as u64,
             })
             .collect(),
-        unsubscribe: crate::unsubscribe::of(&message.headers, trusted),
-        has_logo: crate::bimi::of(&message.headers, trusted).is_some(),
+        unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
+        has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
         invitation: calendar_part(&message.attachments).and_then(|part| {
             crate::calendar::invitation(&String::from_utf8_lossy(&part.content), part.method.as_deref())
         }),

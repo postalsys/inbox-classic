@@ -320,12 +320,10 @@ impl Reader {
             shell().main().show_message(message.folder, message.uid);
         });
         // Copy on a one-time code's card: the code the core found on the clipboard (nothing is read from the link)
-        let this = Rc::downgrade(self);
+        let copy = on(|this| this.copy_code());
         self.preview.set_links(move |uri| {
             if pe_html::is_copy_code_link(uri) {
-                if let Some(this) = this.upgrade() {
-                    this.copy_code();
-                }
+                copy();
                 return true;
             }
             if !pe_html::is_bounced_message_link(uri) {
