@@ -34,6 +34,8 @@ const NO_BREAK: u8 = 2;
 const DIRTY: u8 = 4;
 const ESCAPES: u8 = 8;
 const STARTS_ESCAPED: u8 = 16;
+/// The text run held a control character other than a line break or a tab, left out of its value
+const CONTROL: u8 = 32;
 
 #[derive(Clone)]
 struct Token {
@@ -63,6 +65,32 @@ impl Tokens<'_> {
         self.list[i].kind & NO_BREAK != 0
     }
 
+    /// Whether a control character was left out of the value of a token
+    fn has_control(&self, i: usize) -> bool {
+        self.list[i].kind & CONTROL != 0
+    }
+
+    /// Where the value of a token starts in the field: a dirty run still spans the whitespace and
+    /// control characters its value is trimmed of
+    fn content_start(&self, i: usize) -> usize {
+        let token = &self.list[i];
+        let mut start = token.start;
+        while start < token.end && is_dropped(self.chars[start]) {
+            start += 1;
+        }
+        start
+    }
+
+    /// Just past where the value of a token ends in the field
+    fn content_end(&self, i: usize) -> usize {
+        let token = &self.list[i];
+        let mut end = token.end;
+        while end > token.start && is_dropped(self.chars[end - 1]) {
+            end -= 1;
+        }
+        end
+    }
+
     fn value(&self, i: usize) -> String {
         let token = &self.list[i];
         token
@@ -74,6 +102,40 @@ impl Tokens<'_> {
 
 fn is_space(c: char) -> bool {
     matches!(c as u32, 0x20 | 0x09..=0x0d | 0xa0 | 0x1680 | 0x2000..=0x200a | 0x2028 | 0x2029 | 0x202f | 0x205f | 0x3000 | 0xfeff)
+}
+
+/// The whitespace RFC 5322 folding whitespace is made of: SP and HTAB, and the line break of a fold.
+/// The other characters `is_space` accepts are atext under RFC 6532, and readers disagree on them
+/// (mailauth keeps U+00A0 in a domain), so a domain is never joined across one
+fn is_folding_space(c: char) -> bool {
+    matches!(c, ' ' | '\t' | '\r' | '\n')
+}
+
+/// Whether a stretch of the field is nothing but folding whitespace
+fn is_folding_gap(chars: &[char], from: usize, to: usize) -> bool {
+    chars
+        .get(from..to)
+        .is_none_or(|gap| gap.iter().all(|&c| is_folding_space(c)))
+}
+
+/// What the value of a text run is trimmed of at its edges, or leaves out: whitespace, C0 controls
+/// and DEL
+fn is_dropped(c: char) -> bool {
+    (c as u32) < 0x20 || c == '\u{7f}' || is_space(c)
+}
+
+/// A character of an atom: anything but the specials, whitespace and control characters (RFC 5322
+/// 3.2.3, with non-ASCII allowed as RFC 6532 does)
+fn is_atext(c: char) -> bool {
+    if c.is_ascii() {
+        ('\u{21}'..'\u{7f}').contains(&c)
+            && !matches!(
+                c,
+                '(' | ')' | '<' | '>' | '[' | ']' | ':' | ';' | '@' | '\\' | ',' | '.' | '"'
+            )
+    } else {
+        !is_space(c)
+    }
 }
 
 fn is_word(c: Option<char>) -> bool {
@@ -161,7 +223,7 @@ impl<'a> Tokenizer<'a> {
         let mut kept = Vec::with_capacity(self.list.len());
         for mut token in std::mem::take(&mut self.list) {
             if token.kind & DIRTY != 0 {
-                let value = clean_value(chars, &token).trim().to_string();
+                let value = clean_value(chars, &token).trim_matches(is_space).to_string();
                 if value.is_empty() {
                     continue;
                 }
@@ -326,7 +388,7 @@ impl<'a> Tokenizer<'a> {
                 self.after_at = c == '@';
             }
         } else {
-            self.list[node].kind |= DIRTY;
+            self.list[node].kind |= if c == '\r' { DIRTY } else { DIRTY | CONTROL };
         }
         self.escaped = false;
     }
@@ -358,6 +420,10 @@ struct Parts {
     text: Vec<String>,
     text_was_quoted: Vec<bool>,
     quoted_local_at: Vec<Option<usize>>,
+    /// Alongside `text` and `address`: whether a control character was left out of the run, which
+    /// then names no mailbox
+    text_control: Vec<bool>,
+    address_control: Vec<bool>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -375,12 +441,29 @@ impl Parts {
             State::Comment => &mut self.comment,
         }
     }
+
+    /// Whether each run left out a control character, for the text and the address (not comments)
+    fn control(&mut self, state: State) -> Option<&mut Vec<bool>> {
+        match state {
+            State::Text => Some(&mut self.text_control),
+            State::Address => Some(&mut self.address_control),
+            State::Comment => None,
+        }
+    }
 }
 
 fn collect_parts(tokens: &Tokens, from: usize, to: usize) -> (Parts, bool) {
     let mut state = State::Text;
     let mut data = Parts::default();
     let mut last_text_pure_quoted = false;
+    // whether the last text run holds an unquoted '@', so that it runs on into a domain, and
+    // whether nothing but comments has come since it
+    let mut last_text_has_at = false;
+    let mut last_text_open = false;
+    // where the last text run, or the last comment since it, ended in the field, and whether all
+    // between it and the comments since was folding whitespace (the tokens are trimmed of it)
+    let mut gap_from = 0;
+    let mut gaps_folding = true;
     let mut inside_quotes = false;
     let mut last_chars = [None::<char>; 3];
     let slot = |s: State| s as usize;
@@ -393,18 +476,27 @@ fn collect_parts(tokens: &Tokens, from: usize, to: usize) -> (Parts, bool) {
                 "<" => {
                     state = State::Address;
                     inside_quotes = false;
+                    last_text_open = false;
                 }
                 "(" => {
                     state = State::Comment;
                     inside_quotes = false;
+                    gaps_folding = gaps_folding && is_folding_gap(tokens.chars, gap_from, tokens.content_start(i));
                 }
                 "\"" => {
                     inside_quotes = !inside_quotes;
                     state = State::Text;
+                    last_text_open = false;
+                }
+                ")" => {
+                    state = State::Text;
+                    inside_quotes = false;
+                    gap_from = tokens.content_end(i);
                 }
                 _ => {
                     state = State::Text;
                     inside_quotes = false;
+                    last_text_open = false;
                 }
             }
             continue;
@@ -412,9 +504,24 @@ fn collect_parts(tokens: &Tokens, from: usize, to: usize) -> (Parts, bool) {
         let opens_after_empty_quoted =
             prev_operator == Some('"') && prev_no_break && i > from + 1 && tokens.operator(i - 2) == Some('"');
         let first = value.chars().next();
-        let joins = prev_no_break
-            && !data.list(state).is_empty()
-            && (prev_operator != Some(')') || last_chars[slot(state)] == Some('@') || first == Some('@'));
+        // A comment can stand for the whitespace beside an '@', but it cannot join two atoms into
+        // one: 'user@example.com(x)evil.com' is no domain 'example.comevil.com'. A comment beside a
+        // dot of a domain is CFWS inside obs-domain (RFC 5322 4.4), with or without folding
+        // whitespace around it, so 'user@victim.example(x).allowed.example' names one domain.
+        // Neither join takes in a second '@' once the run holds one: the address would split at the
+        // last '@', and 'user@company(x).com@attacker.net' would go to attacker.net.
+        let second_at = last_text_has_at && prev_operator == Some(')') && value.contains('@');
+        let joins_domain = last_text_open
+            && last_text_has_at
+            && prev_operator == Some(')')
+            && (last_chars[slot(State::Text)] == Some('.') || first == Some('.'))
+            && gaps_folding
+            && is_folding_gap(tokens.chars, gap_from, tokens.content_start(i));
+        let joins = !second_at
+            && (joins_domain
+                || (prev_no_break
+                    && !data.list(state).is_empty()
+                    && (prev_operator != Some(')') || last_chars[slot(state)] == Some('@') || first == Some('@'))));
         if joins {
             let last = data.list(state).len() - 1;
             if state == State::Text && !inside_quotes {
@@ -427,8 +534,16 @@ fn collect_parts(tokens: &Tokens, from: usize, to: usize) -> (Parts, bool) {
             if state == State::Text && inside_quotes {
                 data.text_was_quoted[last] = true;
             }
+            if tokens.has_control(i)
+                && let Some(control) = data.control(state)
+            {
+                control[last] = true;
+            }
         } else {
             data.list(state).push(value.clone());
+            if let Some(control) = data.control(state) {
+                control.push(tokens.has_control(i));
+            }
             if state == State::Text {
                 data.text_was_quoted.push(inside_quotes || opens_after_empty_quoted);
                 data.quoted_local_at
@@ -437,17 +552,24 @@ fn collect_parts(tokens: &Tokens, from: usize, to: usize) -> (Parts, bool) {
             }
         }
         last_chars[slot(state)] = value.chars().last();
+        if state == State::Text {
+            last_text_has_at = (joins && last_text_has_at) || (!inside_quotes && value.contains('@'));
+            last_text_open = true;
+            gap_from = tokens.content_end(i);
+            gaps_folding = true;
+        }
     }
     let mut text_from_comment = false;
     if data.text.is_empty() && !data.comment.is_empty() {
         data.text = std::mem::take(&mut data.comment);
+        data.text_control = vec![false; data.text.len()];
         text_from_comment = true;
     }
     (data, text_from_comment)
 }
 
 fn has_whitespace(value: &str) -> bool {
-    value.chars().any(char::is_whitespace)
+    value.chars().any(is_space)
 }
 
 /// `user@host` without white space, or with a domain literal
@@ -463,7 +585,7 @@ fn is_addr_spec(value: &str) -> bool {
         && domain.ends_with(']')
         && !domain[1..domain.len() - 1]
             .chars()
-            .any(|c| matches!(c, '[' | ']' | '\\') || c.is_whitespace())
+            .any(|c| matches!(c, '[' | ']' | '\\') || is_space(c))
 }
 
 /// `user@...` with anything but white space after the `@`
@@ -512,7 +634,7 @@ fn quote_local_part(address: &str) -> String {
         return address.to_string();
     };
     let user = &address[..at];
-    let atom = !user.is_empty() && !user.chars().any(|c| c.is_whitespace() || "\"(),:;<>@[\\]".contains(c));
+    let atom = !user.is_empty() && !user.chars().any(|c| is_space(c) || "\"(),:;<>@[\\]".contains(c));
     if atom || is_quoted_string(user) {
         return address.to_string();
     }
@@ -536,11 +658,57 @@ fn join_at_spacing(value: &str, at: Option<usize>) -> String {
         end += 1;
     }
     if start == at && end == at + 1 {
-        return value.to_string();
+        return join_domain_dot_spacing(&chars, at);
     }
-    let mut out: String = chars[..start].iter().collect();
-    out.push('@');
-    out.extend(&chars[end..]);
+    let mut joined: Vec<char> = chars[..start].to_vec();
+    joined.push('@');
+    joined.extend(&chars[end..]);
+    join_domain_dot_spacing(&joined, start)
+}
+
+/// The whitespace around the dots of the domain behind the '@' at `at` dropped. obs-domain is atoms
+/// with CFWS around the dots (RFC 5322 4.4), so 'user@victim.example .allowed.example' names
+/// user@victim.example.allowed.example; read as two runs, the mailbox shown was victim.example, not
+/// the domain a DMARC verifier reads. A comment around a dot reaches here as whitespace. Only SP,
+/// HTAB and a fold count, and only a dot with an atom on both sides joins, so 'user@example.com .'
+/// keeps its domain. A domain literal is left alone, and all from where the domain ends is kept.
+fn join_domain_dot_spacing(value: &[char], at: usize) -> String {
+    let len = value.len();
+    // '[' is no atext, so a domain literal ends the walk before it starts
+    let mut pos = at + 1;
+    let mut spaced = false;
+    loop {
+        let label_start = pos;
+        while pos < len && is_atext(value[pos]) {
+            pos += 1;
+        }
+        if pos == label_start {
+            break;
+        }
+        let mut next = pos;
+        while next < len && is_folding_space(value[next]) {
+            next += 1;
+        }
+        if value.get(next) != Some(&'.') {
+            break;
+        }
+        next += 1;
+        while next < len && is_folding_space(value[next]) {
+            next += 1;
+        }
+        if next >= len || !is_atext(value[next]) {
+            break;
+        }
+        spaced = spaced || next != pos + 1;
+        pos = next;
+    }
+    if !spaced {
+        return value.iter().collect();
+    }
+    // every whitespace character the walk covered sits beside a dot
+    let mut out: String = value[..=at].iter().collect();
+    out.extend(value[at + 1..pos].iter().filter(|&&c| !is_folding_space(c)));
+    out.extend(&value[pos..]);
     out
 }
 
@@ -610,14 +778,14 @@ fn loose_address_start(text: &[char]) -> Option<usize> {
 /// `\s*\b[^@\s]+@[^\s]+\b\s*` matched at `start`
 fn loose_text_address(text: &[char], start: usize) -> Option<usize> {
     let mut i = start;
-    while i < text.len() && text[i].is_whitespace() {
+    while i < text.len() && is_space(text[i]) {
         i += 1;
     }
     if !is_boundary(text, i) {
         return None;
     }
     let local_start = i;
-    while i < text.len() && text[i] != '@' && !text[i].is_whitespace() {
+    while i < text.len() && text[i] != '@' && !is_space(text[i]) {
         i += 1;
     }
     if i == local_start || text.get(i) != Some(&'@') {
@@ -625,7 +793,7 @@ fn loose_text_address(text: &[char], start: usize) -> Option<usize> {
     }
     i += 1;
     let domain_start = i;
-    while i < text.len() && !text[i].is_whitespace() {
+    while i < text.len() && !is_space(text[i]) {
         i += 1;
     }
     // backtrack to a word boundary, as the greedy [^\s]+ followed by \b does
@@ -637,7 +805,7 @@ fn loose_text_address(text: &[char], start: usize) -> Option<usize> {
         return None;
     }
     let mut stop = end;
-    while stop < text.len() && text[stop].is_whitespace() {
+    while stop < text.len() && is_space(text[stop]) {
         stop += 1;
     }
     Some(stop)
@@ -655,11 +823,11 @@ fn recover_addr_spec(address: &str, text: &str) -> (String, String) {
         && address[quoted..].starts_with('@')
     {
         let after = &address[quoted + 1..];
-        let domain_end = after.find(char::is_whitespace).unwrap_or(after.len());
+        let domain_end = after.find(is_space).unwrap_or(after.len());
         if domain_end == 0 {
             return (address.clone(), text.to_string());
         }
-        let tail = after[domain_end..].trim_start();
+        let tail = after[domain_end..].trim_start_matches(is_space);
         if tail.is_empty() {
             return (address.clone(), text.to_string());
         }
@@ -669,7 +837,11 @@ fn recover_addr_spec(address: &str, text: &str) -> (String, String) {
         if address.contains('"') {
             return (address.clone(), text.to_string());
         }
-        let mut parts: Vec<String> = address.split_whitespace().map(str::to_string).collect();
+        let mut parts: Vec<String> = address
+            .split(is_space)
+            .filter(|p| !p.is_empty())
+            .map(str::to_string)
+            .collect();
         let index = parts
             .iter()
             .position(|p| is_addr_spec(p))
@@ -713,7 +885,7 @@ fn strip_address_comments(address: &str) -> (String, Vec<String>) {
             } else if c == ')' {
                 depth -= 1;
                 if depth == 0 {
-                    comments.push(comment.trim().to_string());
+                    comments.push(comment.trim_matches(is_space).to_string());
                     comment.clear();
                     pending_space = last != Some('@');
                 } else {
@@ -787,10 +959,10 @@ fn strip_address_comments(address: &str) -> (String, Vec<String>) {
         }
     }
     if depth > 0 {
-        comments.push(comment.trim().to_string());
+        comments.push(comment.trim_matches(is_space).to_string());
     }
     comments.retain(|c| !c.is_empty());
-    (result.trim().to_string(), comments)
+    (result.trim_matches(is_space).to_string(), comments)
 }
 
 fn group_name(tokens: &Tokens, from: usize, to: usize) -> String {
@@ -803,28 +975,31 @@ fn is_quoted_local_domain(value: &str) -> bool {
         return false;
     };
     if let Some(literal) = domain.strip_prefix('[').and_then(|d| d.strip_suffix(']')) {
-        return !literal
-            .chars()
-            .any(|c| matches!(c, '[' | ']' | '\\') || c.is_whitespace());
+        return !literal.chars().any(|c| matches!(c, '[' | ']' | '\\') || is_space(c));
     }
-    !domain.is_empty() && !domain.chars().any(|c| c == '@' || c == '"' || c.is_whitespace())
+    !domain.is_empty() && !domain.chars().any(|c| c == '@' || c == '"' || is_space(c))
 }
 
 fn handle_address(tokens: &Tokens, from: usize, to: usize) -> (String, String) {
     let (mut data, mut text_from_comment) = collect_parts(tokens, from, to);
     let mut address_comments = Vec::new();
     let mut address_parts = Vec::new();
-    for part in &data.address {
+    // whether a control character was left out of the run the mailbox is read from
+    let mut address_controlled = false;
+    for (index, part) in data.address.iter().enumerate() {
         let (stripped, comments) = strip_address_comments(part);
         address_comments.extend(comments);
         if !stripped.is_empty() {
+            if address_parts.is_empty() {
+                address_controlled = data.address_control.get(index).copied().unwrap_or(false);
+            }
             address_parts.push(stripped);
         }
     }
     data.address = address_parts;
 
     if data.address.is_empty() && !data.text.is_empty() && !text_from_comment {
-        find_address_in_text(&mut data);
+        address_controlled = find_address_in_text(&mut data);
     }
     if data.text.is_empty() && !data.comment.is_empty() {
         data.text = std::mem::take(&mut data.comment);
@@ -837,19 +1012,21 @@ fn handle_address(tokens: &Tokens, from: usize, to: usize) -> (String, String) {
     let address_from_quoted_text = data.address.is_empty() && data.text_was_quoted.iter().any(|q| *q);
     let mut text = data.text.join(" ");
     let mut address = data.address.join(" ");
-    if address.is_empty() && is_encoded_words_only(text.trim()) {
+    if address.is_empty() && is_encoded_words_only(text.trim_matches(is_space)) {
         return (decode_words(&text), String::new());
     }
     if address_from_quoted_text && text.contains('@') {
         address = quote_local_part(&join_at_spacing(&text, domain_at(&text)));
+        address_controlled = data.text_control.iter().any(|c| *c);
         text.clear();
     }
+    let address_given = !address.is_empty();
     (address, text) = recover_addr_spec(&address, &text);
     if text.is_empty() && !address_comments.is_empty() {
         text = address_comments.join(" ");
         text_from_comment = true;
     }
-    let raw_name = if !text.is_empty() {
+    let mut raw_name = if !text.is_empty() {
         text.clone()
     } else {
         address.clone()
@@ -861,6 +1038,17 @@ fn handle_address(tokens: &Tokens, from: usize, to: usize) -> (String, String) {
     } else {
         text
     };
+    // A control character has no place in an addr-spec. Left out, as it is from a name,
+    // 'ceo@vic\x01tim.example' read as ceo@victim.example where Python keeps it and reads a domain
+    // no one can authenticate for, so a run that held one names no mailbox, nor is it shown as the
+    // name. Decided for the whole run, as a control character read as a delimiter would otherwise
+    // leave a clean address beside it.
+    if !address.is_empty() && (address_controlled || (!address_given && data.text_control.iter().any(|c| *c))) {
+        if raw_name == address {
+            raw_name.clear();
+        }
+        address.clear();
+    }
     let mut name = decode_words(&raw_name);
     if address == raw_name || address == name {
         if address.contains('@') {
@@ -872,8 +1060,9 @@ fn handle_address(tokens: &Tokens, from: usize, to: usize) -> (String, String) {
     (name, address)
 }
 
-/// No angle brackets: an address in the text, a quoted local part, or a loose one in words
-fn find_address_in_text(data: &mut Parts) {
+/// No angle brackets: an address in the text, a quoted local part, or a loose one in words; whether
+/// the run it came from held a control character
+fn find_address_in_text(data: &mut Parts) -> bool {
     let candidates: Vec<String> = data.text.iter().map(|p| collapse_at_spacing(p)).collect();
     for (i, candidate) in candidates.iter().enumerate() {
         let quoted_local = match data.quoted_local_at[i] {
@@ -896,7 +1085,7 @@ fn find_address_in_text(data: &mut Parts) {
             data.text.remove(i);
             data.text_was_quoted.remove(i);
             data.quoted_local_at.remove(i);
-            return;
+            return data.text_control.remove(i);
         }
     }
     for (i, candidate) in candidates.iter().enumerate() {
@@ -908,14 +1097,15 @@ fn find_address_in_text(data: &mut Parts) {
             && let Some(end) = loose_text_address(&part, start)
         {
             let matched: String = part[start..end].iter().collect();
-            data.address = vec![matched.trim().to_string()];
+            data.address = vec![matched.trim_matches(is_space).to_string()];
             let before: String = part[..start].iter().collect();
             let after: String = part[end..].iter().collect();
-            data.text[i] = format!("{before} {after}").trim().to_string();
-            return;
+            data.text[i] = format!("{before} {after}").trim_matches(is_space).to_string();
+            return data.text_control[i];
         }
-        data.text[i] = data.text[i].trim().to_string();
+        data.text[i] = data.text[i].trim_matches(is_space).to_string();
     }
+    false
 }
 
 /// Names without an address followed by an address with a name: the commas were in the name
@@ -1043,6 +1233,53 @@ mod tests {
             }]
         );
         assert_eq!(parse_addresses(""), vec![]);
+    }
+
+    /// GHSA-jh3p-792r-98gm: whitespace or a comment around a dot does not cut the domain short, and
+    /// a control character in an addr-spec names no mailbox (the full cases are in the conformance
+    /// fixtures)
+    #[test]
+    fn whole_domain_and_no_control_characters() {
+        assert_eq!(
+            parse_addresses("ceo@victim.example .evil.example"),
+            vec![mailbox("", "ceo@victim.example.evil.example")]
+        );
+        assert_eq!(
+            parse_addresses("CEO <ceo@victim.example(x).evil.example>"),
+            vec![mailbox("CEO", "ceo@victim.example.evil.example")]
+        );
+        assert_eq!(
+            parse_addresses("user@company(x).com@attacker.net"),
+            vec![mailbox(".com@attacker.net", "user@company")]
+        );
+        assert_eq!(parse_addresses("ceo@vic\x01tim.example"), vec![mailbox("", "")]);
+        assert_eq!(
+            parse_addresses("CEO <ceo@vic\x00tim.example>"),
+            vec![mailbox("CEO", "")]
+        );
+        assert_eq!(
+            parse_addresses("C\x01EO <ceo@victim.example>"),
+            vec![mailbox("CEO", "ceo@victim.example")]
+        );
+    }
+
+    /// The joins stay linear in the length of the field
+    #[test]
+    fn spaced_domains_in_linear_time() {
+        for input in [
+            format!("a@b{}", " . c".repeat(100_000)),
+            format!("a@b{}", "(x).c".repeat(80_000)),
+            "a@b.c (x) .d, ".repeat(28_000),
+        ] {
+            let started = std::time::Instant::now();
+            parse_addresses(&input);
+            assert!(
+                started.elapsed().as_secs() < 5,
+                "{} chars took {:?}",
+                input.len(),
+                started.elapsed()
+            );
+        }
     }
 
     #[test]

@@ -5,6 +5,7 @@
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
+use pe_jsre::is_space;
 
 /// The longest line of a quoted-printable or base64 body, and the folding width of headers
 pub const LINE_LENGTH: usize = 76;
@@ -284,27 +285,130 @@ pub fn encode_word(data: &str, encoding: char, max_length: usize) -> String {
     format!("=?UTF-8?{encoding}?{encoded}{close}")
 }
 
-/// `value` with what needs encoding (non-ASCII, a quote) as encoded words: all of it with `encode_all`, otherwise
-/// from the word that holds the first such character to the word that holds the last
+/// `value` with what needs encoding (non-ASCII, a quote, a look-alike of an encoded word that is not a valid one) as
+/// encoded words: all of it with `encode_all`, otherwise from the word that holds the first such character to the
+/// word that holds the last. A valid encoded word is passed through as it is.
 pub fn encode_words(value: &str, encoding: char, max_length: usize, encode_all: bool) -> String {
-    let special = |c: char| c == '"' || !c.is_ascii();
-    let (Some(first), Some(last)) = (value.find(special), value.rfind(special)) else {
+    let special = |c: &char| *c == '"' || !c.is_ascii();
+    let lookalike = value.contains("=?");
+    if !lookalike && !value.chars().any(|c| special(&c)) {
+        return value.to_string();
+    }
+    let chars: Vec<char> = value.chars().collect();
+    let mut range = (chars.iter().position(special), chars.iter().rposition(special));
+    if lookalike {
+        range = mark_invalid_encoded_words(&chars, range);
+    }
+    let (Some(first), Some(last)) = range else {
         return value.to_string();
     };
     if encode_all {
         return encode_word(value, encoding, max_length);
     }
-    let start = value[..first].rfind(char::is_whitespace).map_or(0, |at| at + 1);
-    let last_end = last + value[last..].chars().next().map_or(0, char::len_utf8);
-    let end = value[last_end..]
-        .find(char::is_whitespace)
-        .map_or(value.len(), |at| last_end + at);
+    let mut start = first;
+    while start > 0 && !is_space(chars[start - 1]) {
+        start -= 1;
+    }
+    let mut end = last + 1;
+    while end < chars.len() && !is_space(chars[end]) {
+        end += 1;
+    }
+    let part = |range: std::ops::Range<usize>| chars[range].iter().collect::<String>();
     format!(
         "{}{}{}",
-        &value[..start],
-        encode_word(&value[start..end], encoding, max_length),
-        &value[end..]
+        part(0..start),
+        encode_word(&part(start..end), encoding, max_length),
+        part(end..chars.len())
     )
+}
+
+/// An encoded word as RFC 2047 section 2 spells it: a charset token (with an optional RFC 2231 language), B or Q,
+/// and encoded text without '?' or white space
+fn is_valid_encoded_word(word: &[char]) -> bool {
+    let text: String = word.iter().collect();
+    let Some(inner) = text.strip_prefix("=?").and_then(|t| t.strip_suffix("?=")) else {
+        return false;
+    };
+    let mut parts = inner.split('?');
+    let (Some(charset), Some(encoding), Some(encoded), None) = (parts.next(), parts.next(), parts.next(), parts.next())
+    else {
+        return false;
+    };
+    !charset.is_empty()
+        && !charset.chars().any(|c| is_space(c) || "()<>@,;:\"/[]?.=".contains(c))
+        && matches!(encoding, "B" | "b" | "Q" | "q")
+        && !encoded.is_empty()
+        && !encoded.chars().any(is_space)
+}
+
+/// The end of what a lenient decoder reads as an encoded word at `pos` (libmime and Python decode
+/// '=?utf-8?Q?a b?=' across the space too): `=?[^?]*?[BbQq]?[^?]*?=`. Every part stops at the next '?', so this
+/// never backtracks.
+fn lenient_encoded_word(chars: &[char], pos: usize) -> Option<usize> {
+    let to_question = |from: usize| (from..chars.len()).find(|&i| chars[i] == '?');
+    if chars.get(pos..pos + 2)? != ['=', '?'] {
+        return None;
+    }
+    let first = to_question(pos + 2)?;
+    if !matches!(chars.get(first + 1)?, 'B' | 'b' | 'Q' | 'q') || chars.get(first + 2)? != &'?' {
+        return None;
+    }
+    let last = to_question(first + 3)?;
+    (chars.get(last + 1)? == &'=').then_some(last + 2)
+}
+
+/// `range` (the first and the last char that needs encoding) widened to the words of every look-alike of an
+/// encoded word that is not one valid encoded word on its own (nodemailer 7a7b942). RFC 2047 section 7 requires a
+/// word that begins with '=?' and ends with '?=' to be a valid encoded word, and decoders also decode a look-alike
+/// that spans white space, so '=?utf-8?X?x?=' and 'see =?utf-8?Q?a b?= here' read differently on every receiver.
+/// The bounds of the word around each '=?' are found once per word, so this stays linear.
+fn mark_invalid_encoded_words(chars: &[char], range: (Option<usize>, Option<usize>)) -> (Option<usize>, Option<usize>) {
+    let (mut first, mut last) = range;
+    let len = chars.len();
+    // the word around `pos`: from the white space before it to the white space after it
+    let bounds = |pos: usize| {
+        let mut start = pos;
+        while start > 0 && !is_space(chars[start - 1]) {
+            start -= 1;
+        }
+        let mut end = pos;
+        while end < len && !is_space(chars[end]) {
+            end += 1;
+        }
+        (start, end)
+    };
+    // the word last looked at; each word is walked once
+    let (mut word_start, mut word_end) = (0, 0);
+    let find = |from: usize| (from..len.saturating_sub(1)).find(|&i| chars[i] == '=' && chars[i + 1] == '?');
+    let mut pos = find(0);
+    while let Some(at) = pos {
+        if at >= word_end {
+            (word_start, word_end) = bounds(at);
+        }
+        let start = word_start;
+        let matched = lenient_encoded_word(chars, at);
+        let end = matched.unwrap_or(word_end);
+        if matched.is_some() && end > word_end {
+            // the look-alike runs across white space, on to the word it ends in
+            (word_start, word_end) = bounds(end - 1);
+        }
+        // the word is measured only where it starts at this '=?', once per word, so this stays linear
+        let word = &chars[start..word_end];
+        let looks_like = matched.is_some() || (start == at && word.len() >= 4 && word.ends_with(&['?', '=']));
+        let valid = || {
+            start == at
+                && word_end == end
+                && word.len() <= 75
+                && word.iter().map(|c| c.len_utf16()).sum::<usize>() <= 75
+                && is_valid_encoded_word(word)
+        };
+        if looks_like && !valid() {
+            first = Some(first.map_or(start, |f| f.min(start)));
+            last = Some(last.map_or(word_end - 1, |l| l.max(word_end - 1)));
+        }
+        pos = find(matched.map_or(at + 2, |_| end));
+    }
+    (first, last)
 }
 
 /// A control character that can not stand in a header: all but TAB, CR and LF, and DEL
@@ -602,6 +706,26 @@ mod tests {
         assert_eq!(encode_word("tere õhtust", 'Q', 0), "=?UTF-8?Q?tere_=C3=B5htust?=");
         assert_eq!(encode_word("日本", 'B', 0), "=?UTF-8?B?5pel5pys?=");
         assert_eq!(encode_words("plain", 'Q', 52, true), "plain");
+        // a look-alike of an encoded word that is not a valid one is encoded, a valid one passes (the full cases are
+        // in the conformance fixtures)
+        assert!(encode_header_text("Re: =?utf-8?X?fake?=").starts_with("=?UTF-8?Q?"));
+        assert_eq!(encode_header_text("=?UTF-8?B?ZmFrZQ==?="), "=?UTF-8?B?ZmFrZQ==?=");
+        let partial = encode_words("see =?utf-8?X?fake?= here", 'Q', 52, false);
+        assert!(
+            partial.starts_with("see =?UTF-8?Q?") && partial.ends_with("?= here"),
+            "{partial}"
+        );
+        for value in [
+            "=? ".repeat(200_000),
+            "=?".repeat(400_000),
+            format!("{}=?", "a".repeat(400_000)),
+            format!("=?x?Q?{}?=", "a".repeat(400_000)),
+        ] {
+            let started = std::time::Instant::now();
+            encode_words(&value, 'Q', 52, true);
+            let elapsed = started.elapsed();
+            assert!(elapsed.as_secs() < 5, "{} chars took {elapsed:?}", value.len());
+        }
         assert_eq!(text_encoding("abc ü"), 'Q');
         assert_eq!(text_encoding("ü"), 'B');
     }

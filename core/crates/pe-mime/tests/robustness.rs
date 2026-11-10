@@ -128,3 +128,39 @@ fn fuzzer_findings() {
         let _ = pe_mime::parser::parse(input);
     }
 }
+
+/// GHSA-q8wm-54mj-r36p: lines that share a long prefix with every boundary of a deeply nested message
+/// cost about what plain lines of the same size do, as each line is looked up once
+#[test]
+fn near_miss_boundaries_cost_like_plain_lines() {
+    let prefix = "x".repeat(60);
+    let mut head = String::new();
+    for i in 0..250 {
+        head.push_str(&format!(
+            "Content-Type: multipart/mixed; boundary=\"{prefix}{i:03}\"\r\n\r\n--{prefix}{i:03}\r\n"
+        ));
+    }
+    let message = |line: &str| {
+        let mut raw = head.clone().into_bytes();
+        for _ in 0..40_000 {
+            raw.extend(line.as_bytes());
+        }
+        raw
+    };
+    let near = message(&format!("--{prefix}99z\r\n"));
+    let plain = message(&format!("{}\r\n", "y".repeat(prefix.len() + 5)));
+    assert_eq!(near.len(), plain.len());
+    let time = |raw: &[u8]| {
+        let started = std::time::Instant::now();
+        parse_with(raw, Limits::default()).unwrap();
+        started.elapsed()
+    };
+    // warm up, then the better of three runs of each
+    time(&plain);
+    let best = |raw: &[u8]| (0..3).map(|_| time(raw)).min().unwrap();
+    let (near, plain) = (best(&near), best(&plain));
+    assert!(
+        near < plain * 4 + std::time::Duration::from_millis(50),
+        "near misses {near:?}, plain {plain:?}"
+    );
+}
