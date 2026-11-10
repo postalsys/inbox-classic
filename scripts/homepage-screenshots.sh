@@ -40,7 +40,8 @@ for platform in "${platforms[@]}"; do
                 # the compose window, as on Windows, down to its fields and the start of the text
                 crop=""
                 [ "$shot" = write-5-new ] && crop="-crop x400+0+0 +repage"
-                magick "$source" -resize 50% $crop -strip "$target"
+                # the Retina pictures are 16 bits a channel, the page needs 8
+                magick "$source" -resize 50% $crop -depth 8 -strip "$target"
                 ;;
             linux)
                 crop=""
