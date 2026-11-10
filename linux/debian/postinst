@@ -1,0 +1,19 @@
+#!/bin/sh
+# Adds the Inbox Classic apt repository (https://apt.inboxclassic.com) when the package is installed, so that a .deb
+# downloaded from the homepage gets its updates with the system's own, as the Chrome and VS Code packages do. The
+# source is linux/data/inboxclassic.sources, the same file the homepage tells to download, with the release key in
+# it. Nothing is added when a source of the repository is already there, or when /etc/default/inbox-classic says
+# APT_REPOSITORY=no. "apt purge inbox-classic" (postrm) removes it.
+set -e
+
+SOURCES=/etc/apt/sources.list.d/inboxclassic.sources
+
+if [ "$1" = configure ]; then
+    APT_REPOSITORY=yes
+    [ ! -r /etc/default/inbox-classic ] || . /etc/default/inbox-classic
+    if [ "$APT_REPOSITORY" != no ] && ! grep -qs apt.inboxclassic.com /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+        install -m 644 /usr/share/inbox-classic/inboxclassic.sources "$SOURCES"
+    fi
+fi
+
+#DEBHELPER#
