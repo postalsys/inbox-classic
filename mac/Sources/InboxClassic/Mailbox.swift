@@ -2124,6 +2124,8 @@ public final class FolderOutline: NSOutlineView {
         selectionHighlightStyle = .regular
         rowSizeStyle = .default
         indentationPerLevel = 14
+        // an account's heading scrolls with its folders, as in Mail, rather than floating over them with a rule under it
+        floatsGroupRows = false
         // the column as wide as the sidebar, so a selection's rounded highlight ends inside it on every row
         autoresizesOutlineColumn = false
         columnAutoresizingStyle = .uniformColumnAutoresizingStyle
