@@ -40,7 +40,8 @@ LRESULT CALLBACK Editor::HostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM
         editor->Focus();
         return 0;
     }
-    if (message == WM_GETDLGCODE) {
+    // the keys are the editor's once it is there; before (or when WebView2 could not start) Tab and Esc are the window's
+    if (message == WM_GETDLGCODE && editor && editor->controller_) {
         return DLGC_WANTALLKEYS;
     }
     return DefWindowProcW(hwnd, message, wParam, lParam);

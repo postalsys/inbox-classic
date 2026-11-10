@@ -90,6 +90,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         reader = Reader(core: core)
         window = MessageFrame(contentRect: NSRect(x: 0, y: 0, width: 820, height: 680),
                               styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window.autorecalculatesKeyViewLoop = true
         super.init()
         window.identifier = NSUserInterfaceItemIdentifier("message")
         window.isReleasedWhenClosed = false

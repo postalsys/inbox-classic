@@ -163,6 +163,8 @@ impl MessageList {
         let view = gtk::ColumnView::new(Some(selection.clone()));
         view.add_css_class("message-list");
         view.set_widget_name("message-list");
+        // Tab goes on to the next control, not through every row (the arrow keys move between them)
+        view.set_tab_behavior(gtk::ListTabBehavior::Item);
         view.set_reorderable(false);
         // no read/unread column: an unread message is bold, which says it; its space is the sender's and the subject's
         // a bounce's mark in the paper clip's place: what matters about a delivery notice is that it is one

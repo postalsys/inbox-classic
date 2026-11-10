@@ -46,6 +46,10 @@ public:
     bool Finding() const { return find_ && found_ > 0; }
     // the timer of Create: the count of a find is told as it is now
     void FindSettled();
+    // the keyboard to the document: at its first link (Tab into it), its last (Shift+Tab), or the document itself; once
+    // the WebView2 is there, when it is not yet
+    enum class FocusFrom { Start, End, Program };
+    void Focus(FocusFrom from);
 
 private:
     void Configure();
@@ -56,6 +60,8 @@ private:
     std::wstring document_;
     // a document was given before the WebView2 was ready
     bool pending_ = false;
+    // the keyboard was given to it before the WebView2 was ready
+    bool focusPending_ = false;
     // documents shown, for an address of each
     unsigned shown_ = 0;
     bool remoteImages_ = false;

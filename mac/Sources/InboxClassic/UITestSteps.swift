@@ -530,9 +530,11 @@ extension UITest {
 
         command(.goToFolder)
         guard let goTo = await waitWindow("move", 10) else { throw Failed(description: "Go to Folder opened nothing") }
-        check(goTo.title == "Go to Folder" && moveRows(goTo).contains { $0.kind == .account }
-              && moveRows(goTo).contains { $0.name == "Sent Items" },
-              "Go to Folder shows the folders of every account (\(goTo.title))")
+        // the folders fill in after the window opens
+        let everyAccount = await waitUntil(10) {
+            moveRows(goTo).contains { $0.kind == .account } && moveRows(goTo).contains { $0.name == "Sent Items" }
+        }
+        check(goTo.title == "Go to Folder" && everyAccount, "Go to Folder shows the folders of every account (\(goTo.title))")
         if let filter: NSSearchField = find("move.filter", in: goTo) {
             filter.stringValue = "sent"
             (goTo.delegate as? MoveWindow)?.controlTextDidChange(Notification(name: NSControl.textDidChangeNotification))

@@ -52,6 +52,8 @@ public:
     // the keys pressed while the message has the keyboard that its window handles (Esc, Delete, the shortcuts with
     // Ctrl): true when handled
     void SetKeys(std::function<bool(UINT key)> keys) { preview_.SetKeys(std::move(keys)); }
+    // the keyboard to the message itself
+    void FocusBody() { SetFocus(previewHost_); }
     // Find in This Message: the words asked for over `owner` (the last ones filled in), then found and marked; with
     // `again` (F3) while a find of this message goes on, its next place
     void FindInMessage(HWND owner, bool again);

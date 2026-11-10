@@ -51,6 +51,7 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
         self.current = current
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 460), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = title
         window.identifier = NSUserInterfaceItemIdentifier("move")
         window.minSize = NSSize(width: 340, height: 340)

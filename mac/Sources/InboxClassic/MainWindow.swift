@@ -27,6 +27,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1100, height: 760),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window.autorecalculatesKeyViewLoop = true
         mailbox = Mailbox(core: core)
         super.init()
         window.title = appName

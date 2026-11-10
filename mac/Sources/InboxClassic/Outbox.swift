@@ -31,6 +31,7 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 280), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiOutboxTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("outbox")
         super.init()

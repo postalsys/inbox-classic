@@ -101,8 +101,30 @@ void Preview::Configure() {
         }).Get(),
         nullptr);
 
+    // Tab past the first or last link of the document: on to the window's next or previous control, as from any other
+    HWND root = GetAncestor(parent_, GA_ROOT);
+    if (root != parent_) {
+        controller_->add_MoveFocusRequested(
+            Callback<ICoreWebView2MoveFocusRequestedEventHandler>(
+                [this, root](ICoreWebView2Controller*, ICoreWebView2MoveFocusRequestedEventArgs* args) {
+                    COREWEBVIEW2_MOVE_FOCUS_REASON reason;
+                    args->get_Reason(&reason);
+                    HWND next = GetNextDlgTabItem(root, parent_, reason == COREWEBVIEW2_MOVE_FOCUS_REASON_PREVIOUS);
+                    if (next && next != parent_) {
+                        SetFocus(next);
+                        args->put_Handled(TRUE);
+                    }
+                    return S_OK;
+                })
+                .Get(),
+            nullptr);
+    }
+
     controller_->put_Bounds(bounds_);
     controller_->put_IsVisible(IsWindowVisible(parent_) ? TRUE : FALSE);
+    if (std::exchange(focusPending_, false) && GetFocus() == parent_) {
+        controller_->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
+    }
     if (pending_) {
         Show(document_, remoteImages_);
     } else {
@@ -145,6 +167,16 @@ void Preview::Clear(bool noMessage) {
 void Preview::ShowState(PeReaderState state, PeFailureKind failure, const std::string& reason) {
     core::String page(pe_reader_page(state, failure, reason.c_str()));
     Show(page ? core::Widen(page.get()) : L"");
+}
+
+void Preview::Focus(FocusFrom from) {
+    if (!controller_) {
+        focusPending_ = true;
+        return;
+    }
+    controller_->MoveFocus(from == FocusFrom::Start  ? COREWEBVIEW2_MOVE_FOCUS_REASON_NEXT
+                           : from == FocusFrom::End  ? COREWEBVIEW2_MOVE_FOCUS_REASON_PREVIOUS
+                                                     : COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
 }
 
 void Preview::SetVisible(bool visible) {

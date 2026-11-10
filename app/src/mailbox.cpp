@@ -113,7 +113,8 @@ HWND CreateFindField(HWND parent) {
         RegisterClassExW(&windowClass);
         registered = true;
     }
-    return CreateChild(parent, L"InboxClassicSearchField", L"", WS_CLIPCHILDREN, IDC_FIND_FIELD, {}, WS_EX_CLIENTEDGE);
+    // a control parent, so Tab goes into its box
+    return CreateChild(parent, L"InboxClassicSearchField", L"", WS_CLIPCHILDREN, IDC_FIND_FIELD, {}, WS_EX_CLIENTEDGE | WS_EX_CONTROLPARENT);
 }
 
 // a row's name with an unread count after it, when there is one

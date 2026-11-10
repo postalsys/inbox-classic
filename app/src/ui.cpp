@@ -299,6 +299,54 @@ HWND CreateLinkButton(HWND parent, const wchar_t* text, int id, const RECT& boun
     return link;
 }
 
+namespace {
+
+LRESULT CALLBACK KeyboardLinkProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR) {
+    switch (message) {
+    case WM_GETDLGCODE: {
+        // Enter is the label's, not the window's default button
+        const auto* msg = reinterpret_cast<const MSG*>(lParam);
+        if (msg && msg->message == WM_KEYDOWN && msg->wParam == VK_RETURN) {
+            return DefSubclassProc(hwnd, message, wParam, lParam) | DLGC_WANTMESSAGE;
+        }
+        break;
+    }
+    case WM_KEYDOWN:
+        if (wParam == VK_RETURN || wParam == VK_SPACE) {
+            SendMessageW(GetParent(hwnd), WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(hwnd), STN_CLICKED), reinterpret_cast<LPARAM>(hwnd));
+            return 0;
+        }
+        break;
+    case WM_SETFOCUS:
+    case WM_KILLFOCUS:
+        InvalidateRect(hwnd, nullptr, TRUE);
+        break;
+    case WM_PAINT: {
+        LRESULT result = DefSubclassProc(hwnd, message, wParam, lParam);
+        if (GetFocus() == hwnd) {
+            HDC dc = GetDC(hwnd);
+            RECT area;
+            GetClientRect(hwnd, &area);
+            InflateRect(&area, -1, -1);
+            DrawFocusRect(dc, &area);
+            ReleaseDC(hwnd, dc);
+        }
+        return result;
+    }
+    case WM_NCDESTROY:
+        RemoveWindowSubclass(hwnd, KeyboardLinkProc, 0);
+        break;
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
+void KeyboardLink(HWND label) {
+    SetWindowLongPtrW(label, GWL_STYLE, GetWindowLongPtrW(label, GWL_STYLE) | WS_TABSTOP);
+    SetWindowSubclass(label, KeyboardLinkProc, 0, 0);
+}
+
 void SetAccessibleDescription(HWND control, const std::wstring& text) {
     // PROPID_ACC_DESCRIPTION of oleacc.h, which only declares it
     constexpr GUID kDescription = {0x4d48dfe4, 0xbd3f, 0x491f, {0xa6, 0x48, 0x49, 0x2d, 0x6f, 0x20, 0xc5, 0x88}};
@@ -843,7 +891,49 @@ HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* titl
                            GetModuleHandleW(nullptr), nullptr);
 }
 
+namespace {
+
+// the button marked the default (BS_DEFPUSHBUTTON) when the window opens
+int DefaultButtonId(HWND dialog) {
+    for (HWND child = GetWindow(dialog, GW_CHILD); child; child = GetWindow(child, GW_HWNDNEXT)) {
+        wchar_t className[16] = L"";
+        GetClassNameW(child, className, 16);
+        if (_wcsicmp(className, L"Button") == 0 && (GetWindowLongPtrW(child, GWL_STYLE) & BS_TYPEMASK) == BS_DEFPUSHBUTTON) {
+            return GetDlgCtrlID(child);
+        }
+    }
+    return 0;
+}
+
+// What a dialog's own window procedure would answer: IsDialogMessage asks for the default button (Enter in a field),
+// and a multi-line edit asks the window to move the focus on Tab. A plain window answers neither, so Enter would take
+// IDOK whichever button is the default, and Tab would stay in the edit.
+LRESULT CALLBACK ModalProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR defaultId) {
+    switch (message) {
+    case DM_GETDEFID:
+        if (defaultId) {
+            return MAKELRESULT(defaultId, DC_HASDEFID);
+        }
+        break;
+    case WM_NEXTDLGCTL: {
+        HWND next = LOWORD(lParam) ? reinterpret_cast<HWND>(wParam) : GetNextDlgTabItem(hwnd, GetFocus(), wParam != 0);
+        if (next) {
+            SetFocus(next);
+            // as Tab into a field selects its text
+            if (SendMessageW(next, WM_GETDLGCODE, 0, 0) & DLGC_HASSETSEL) {
+                SendMessageW(next, EM_SETSEL, 0, -1);
+            }
+        }
+        return 0;
+    }
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
 void RunModal(HWND dialog, HWND focus, const bool& done) {
+    SetWindowSubclass(dialog, ModalProc, 0, static_cast<DWORD_PTR>(DefaultButtonId(dialog)));
     HWND root = GetWindow(dialog, GW_OWNER);
     // a window opened while another one is open leaves its owner disabled when it closes
     bool wasEnabled = IsWindowEnabled(root);
@@ -875,6 +965,7 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     }
     EnableWindow(root, wasEnabled);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, 0);
+    RemoveWindowSubclass(dialog, ModalProc, 0);
     DestroyWindow(dialog);
     if (wasEnabled) {
         SetActiveWindow(root);

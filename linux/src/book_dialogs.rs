@@ -138,6 +138,7 @@ impl Addresses {
                         let address = this.list.borrow_mut().remove(index);
                         this.list.borrow_mut().insert(0, address);
                         this.fill();
+                        this.focus_row(0);
                     }
                 });
                 row.add_prefix(&star);
@@ -152,6 +153,7 @@ impl Addresses {
                 if let Some(this) = this.upgrade() {
                     this.list.borrow_mut().remove(index);
                     this.fill();
+                    this.focus_row(index);
                 }
             });
             row.add_suffix(&remove);
@@ -159,6 +161,16 @@ impl Addresses {
             self.rows.borrow_mut().push(row);
         }
         self.group.add(&self.new);
+    }
+
+    /// The focus, which was on a button of a row taken away, to the row now at `index` (the one before at the end, the
+    /// new address row when none is left)
+    fn focus_row(&self, index: usize) {
+        let rows = self.rows.borrow();
+        match rows.get(index).or(rows.last()) {
+            Some(row) => row.grab_focus(),
+            None => self.new.grab_focus(),
+        };
     }
 
     /// The address typed in the last row into the list: Ok(false) for nothing typed, Err with the words for one that
@@ -212,8 +224,14 @@ impl Phones {
         let removed = row.downgrade();
         remove.connect_clicked(move |_| {
             if let (Some(this), Some(row)) = (this.upgrade(), removed.upgrade()) {
+                let at = this.rows.borrow().iter().position(|(r, _)| *r == row).unwrap_or(0);
                 this.group.remove(&row);
                 this.rows.borrow_mut().retain(|(r, _)| *r != row);
+                // the focus was on its Remove: to the number now in its place
+                let rows = this.rows.borrow();
+                if let Some((next, _)) = rows.get(at).or(rows.last()) {
+                    next.grab_focus();
+                }
             }
         });
         row.add_suffix(&remove);
@@ -325,8 +343,16 @@ fn addresses_section(card: &Card, dialog: &glib::WeakRef<adw::Dialog>) -> Rc<Add
     let typed = {
         let (addresses, dialog) = (Rc::downgrade(&addresses), dialog.clone());
         move || {
-            if let Some(Err(why)) = addresses.upgrade().map(|a| a.take_typed()) {
-                say_later(&dialog, why);
+            let Some(addresses) = addresses.upgrade() else {
+                return;
+            };
+            match addresses.take_typed() {
+                // the row was put back under the new address: the next one is typed there
+                Ok(true) => {
+                    addresses.new.grab_focus();
+                }
+                Ok(false) => {}
+                Err(why) => say_later(&dialog, why),
             }
         }
     };
@@ -367,6 +393,8 @@ fn notes_section(card: &Card) -> (adw::PreferencesGroup, gtk::TextView) {
         .build();
     let notes = gtk::TextView::new();
     notes.set_wrap_mode(gtk::WrapMode::WordChar);
+    // Tab goes on to the next control, as in the other fields
+    notes.set_accepts_tab(false);
     notes.buffer().set_text(&card.notes);
     notes.set_top_margin(8);
     notes.set_bottom_margin(8);
@@ -491,6 +519,11 @@ impl Members {
                 if let Some(this) = this.upgrade() {
                     this.list.borrow_mut().remove(index);
                     this.fill();
+                    // the focus was on its Remove: to the member now in its place
+                    let rows = this.rows.borrow();
+                    if let Some(next) = rows.get(index).or(rows.last()) {
+                        next.grab_focus();
+                    }
                 }
             });
             row.add_suffix(&remove);

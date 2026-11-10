@@ -159,6 +159,8 @@ impl FolderTree {
         let view = gtk::ListView::new(Some(selection.clone()), Some(factory(handlers.clone())));
         view.add_css_class("navigation-sidebar");
         view.set_widget_name("folder-tree");
+        // Tab goes on to the next control, not through every row (the arrow keys move between them)
+        view.set_tab_behavior(gtk::ListTabBehavior::Item);
         let this = Rc::new(FolderTree {
             view,
             selection,
