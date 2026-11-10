@@ -169,6 +169,9 @@ impl FormatBar {
         let size = gtk::DropDown::from_strings(SIZES);
         size.set_selected(1);
         size.set_tooltip_text(Some(&t!(UiColSize)));
+        // a click on the bar leaves the focus in the text, where the next keys go
+        font.set_focus_on_click(false);
+        size.set_focus_on_click(false);
         widget.append(&font);
         widget.append(&size);
         let mut toggles = Vec::new();
@@ -188,6 +191,7 @@ impl FormatBar {
                 button.set_tooltip_text(Some(&tr(spec.tooltip)));
                 button.add_css_class("flat");
                 button.set_widget_name(spec.name);
+                button.set_focus_on_click(false);
                 linked.append(&button);
                 buttons.push((spec, button));
             }
@@ -492,6 +496,9 @@ impl Compose {
         cc_button.set_widget_name("compose-show-cc");
         let bcc_button = gtk::Button::with_mnemonic(&t!(GtkShowBcc));
         bcc_button.set_widget_name("compose-show-bcc");
+        // Tab goes from To on to the next field: these open with their keys
+        cc_button.set_focusable(false);
+        bcc_button.set_focusable(false);
         let to_row = gtk::Box::new(gtk::Orientation::Horizontal, 4);
         to_row.append(&to);
         to_row.append(&cc_button);
@@ -755,6 +762,7 @@ impl Compose {
         self.from.connect_selected_notify(move |_| from());
         self.editor_handlers();
         self.files_keys();
+        self.subject_tab();
         self.window_drops();
         // Ctrl+S in the fields too; F1 the help, as from every window
         let save_key = on(|this| this.request(Pending::Save));
@@ -829,6 +837,23 @@ impl Compose {
                 }
             })),
         });
+    }
+
+    /// Tab in Subject goes on to the text of the message, past the buttons of the format bar between them
+    fn subject_tab(self: &Rc<Self>) {
+        let keys = gtk::EventControllerKey::new();
+        let weak = Rc::downgrade(self);
+        keys.connect_key_pressed(move |_, key, _, modifiers| {
+            if key == gdk::Key::Tab
+                && (modifiers & gtk::accelerator_get_default_mod_mask()).is_empty()
+                && let Some(this) = weak.upgrade()
+            {
+                this.editor.focus();
+                return glib::Propagation::Stop;
+            }
+            glib::Propagation::Proceed
+        });
+        self.subject.add_controller(keys);
     }
 
     /// Delete in the Attach row takes the file off, and so does Remove in its right-click menu

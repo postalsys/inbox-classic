@@ -972,10 +972,6 @@ bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring
     state.core = core;
     state.account = account;
     CreateFormatBar(dialog, &state);
-    state.hint = CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_SIGNATURE_HINT).c_str(),
-                             SS_LEFT | SS_CENTERIMAGE | SS_ENDELLIPSIS, 0, {});
-    state.ok = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_OK).c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
-    state.cancel = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_CANCEL).c_str(), WS_TABSTOP, IDCANCEL, {});
     core::String page(pe_editor_document(nullptr, false, current.get()));
     Editor::Handlers handlers;
     handlers.error = [dialog](const std::wstring& error) { MessageBoxW(dialog, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
@@ -999,6 +995,11 @@ bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring
     };
     handlers.editLink = [dialog, &state] { InsertLink(dialog, &state); };
     state.editor.Create(dialog, IDC_BODY, page ? Text(page.get()) : L"", std::move(handlers));
+    // made after the editor, so Tab goes from the format bar to the signature and then to the buttons, as they are laid out
+    state.hint = CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_SIGNATURE_HINT).c_str(),
+                             SS_LEFT | SS_CENTERIMAGE | SS_ENDELLIPSIS, 0, {});
+    state.ok = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_OK).c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {});
+    state.cancel = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_CANCEL).c_str(), WS_TABSTOP, IDCANCEL, {});
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     LayoutSignature(dialog, &state);
     state.editor.Focus();

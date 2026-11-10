@@ -843,7 +843,49 @@ HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* titl
                            GetModuleHandleW(nullptr), nullptr);
 }
 
+namespace {
+
+// the button marked the default (BS_DEFPUSHBUTTON) when the window opens
+int DefaultButtonId(HWND dialog) {
+    for (HWND child = GetWindow(dialog, GW_CHILD); child; child = GetWindow(child, GW_HWNDNEXT)) {
+        wchar_t className[16] = L"";
+        GetClassNameW(child, className, 16);
+        if (_wcsicmp(className, L"Button") == 0 && (GetWindowLongPtrW(child, GWL_STYLE) & BS_TYPEMASK) == BS_DEFPUSHBUTTON) {
+            return GetDlgCtrlID(child);
+        }
+    }
+    return 0;
+}
+
+// What a dialog's own window procedure would answer: IsDialogMessage asks for the default button (Enter in a field),
+// and a multi-line edit asks the window to move the focus on Tab. A plain window answers neither, so Enter would take
+// IDOK whichever button is the default, and Tab would stay in the edit.
+LRESULT CALLBACK ModalProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR defaultId) {
+    switch (message) {
+    case DM_GETDEFID:
+        if (defaultId) {
+            return MAKELRESULT(defaultId, DC_HASDEFID);
+        }
+        break;
+    case WM_NEXTDLGCTL: {
+        HWND next = LOWORD(lParam) ? reinterpret_cast<HWND>(wParam) : GetNextDlgTabItem(hwnd, GetFocus(), wParam != 0);
+        if (next) {
+            SetFocus(next);
+            // as Tab into a field selects its text
+            if (SendMessageW(next, WM_GETDLGCODE, 0, 0) & DLGC_HASSETSEL) {
+                SendMessageW(next, EM_SETSEL, 0, -1);
+            }
+        }
+        return 0;
+    }
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
 void RunModal(HWND dialog, HWND focus, const bool& done) {
+    SetWindowSubclass(dialog, ModalProc, 0, static_cast<DWORD_PTR>(DefaultButtonId(dialog)));
     HWND root = GetWindow(dialog, GW_OWNER);
     // a window opened while another one is open leaves its owner disabled when it closes
     bool wasEnabled = IsWindowEnabled(root);
@@ -875,6 +917,7 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     }
     EnableWindow(root, wasEnabled);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, 0);
+    RemoveWindowSubclass(dialog, ModalProc, 0);
     DestroyWindow(dialog);
     if (wasEnabled) {
         SetActiveWindow(root);

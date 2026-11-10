@@ -186,8 +186,13 @@ LRESULT CALLBACK FieldProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
     auto* state = reinterpret_cast<Completion*>(data);
     switch (message) {
     case WM_GETDLGCODE:
-        // while the list is open, Enter, Tab and Esc are the field's, not the window's
+        // while the list is open, Enter, Tab and Esc are the field's, not the window's; Shift+Tab still goes back to the
+        // field before (the list closes as the focus leaves)
         if (Shown(state)) {
+            const auto* msg = reinterpret_cast<const MSG*>(lParam);
+            if (msg && msg->message == WM_KEYDOWN && msg->wParam == VK_TAB && GetKeyState(VK_SHIFT) < 0) {
+                break;
+            }
             return DefSubclassProc(hwnd, message, wParam, lParam) | DLGC_WANTALLKEYS;
         }
         break;

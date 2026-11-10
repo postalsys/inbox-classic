@@ -38,7 +38,7 @@ final class Reader: NSObject {
     private let preview = Preview()
     /// Find in This Message: a bar over the message, as Safari and Mail have
     private let findBar = FindBar()
-    private let header = NSTextField(wrappingLabelWithString: "")
+    private let header = HeaderText(wrappingLabelWithString: "")
     private let logo = NSImageView()
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
     private let unsubscribe = NSButton(title: Text.uiUnsubscribe.text, target: nil, action: nil)
@@ -851,4 +851,10 @@ final class FindBar: NSView, NSSearchFieldDelegate {
         }
         return super.performKeyEquivalent(with: event)
     }
+}
+
+/// The header of the message shown: its text can be selected with the mouse, but Tab passes it by, as it would only
+/// select all of it on the way from the list to the message
+final class HeaderText: NSTextField {
+    override var canBecomeKeyView: Bool { false }
 }

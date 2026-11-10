@@ -153,6 +153,8 @@ impl Book {
         let selection = gtk::MultiSelection::new(Some(store.clone()));
         let view = gtk::ColumnView::new(Some(selection.clone()));
         view.set_widget_name("book-people");
+        // Tab goes on to the next control, not through every row (the arrow keys move between them)
+        view.set_tab_behavior(gtk::ListTabBehavior::Item);
         view.add_css_class("message-list");
         view.set_show_column_separators(true);
         view.append_column(&text_column(&t!(UiColName), 220, true, |p| &p.name));

@@ -325,8 +325,16 @@ fn addresses_section(card: &Card, dialog: &glib::WeakRef<adw::Dialog>) -> Rc<Add
     let typed = {
         let (addresses, dialog) = (Rc::downgrade(&addresses), dialog.clone());
         move || {
-            if let Some(Err(why)) = addresses.upgrade().map(|a| a.take_typed()) {
-                say_later(&dialog, why);
+            let Some(addresses) = addresses.upgrade() else {
+                return;
+            };
+            match addresses.take_typed() {
+                // the row was put back under the new address: the next one is typed there
+                Ok(true) => {
+                    addresses.new.grab_focus();
+                }
+                Ok(false) => {}
+                Err(why) => say_later(&dialog, why),
             }
         }
     };
@@ -367,6 +375,8 @@ fn notes_section(card: &Card) -> (adw::PreferencesGroup, gtk::TextView) {
         .build();
     let notes = gtk::TextView::new();
     notes.set_wrap_mode(gtk::WrapMode::WordChar);
+    // Tab goes on to the next control, as in the other fields
+    notes.set_accepts_tab(false);
     notes.buffer().set_text(&card.notes);
     notes.set_top_margin(8);
     notes.set_bottom_margin(8);

@@ -42,6 +42,7 @@ private final class QuestionWindow: NSObject {
     init(title: String, heading: String, detail: String, id: String, accessory: NSView, answers: [(String, String)], safe: Int) {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 560, height: 200), styleMask: [.titled], backing: .buffered,
                           defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = title
         window.identifier = NSUserInterfaceItemIdentifier(id)
         super.init()
@@ -343,6 +344,7 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 860, height: 560), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiAiAgents.text
         window.identifier = NSUserInterfaceItemIdentifier("agents")
         super.init()

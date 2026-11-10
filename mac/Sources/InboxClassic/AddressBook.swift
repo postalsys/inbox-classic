@@ -369,6 +369,7 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 480),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window.autorecalculatesKeyViewLoop = true
         super.init()
         window.title = Text.cmdAddressBook.title
         window.identifier = NSUserInterfaceItemIdentifier("addressbook")
@@ -861,6 +862,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         displayFollows = card == nil || editing.name.isEmpty || editing.name == made
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 600), styleMask: [.titled], backing: .buffered,
                           defer: true)
+        window.autorecalculatesKeyViewLoop = true
         super.init()
         window.title = card.map { Text.uiContactTitle.text(["name": $0.name]) } ?? Text.uiNewContactTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("contact")
@@ -1155,6 +1157,7 @@ final class GroupSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, NS
         self.id = id
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 520, height: 460), styleMask: [.titled], backing: .buffered,
                           defer: true)
+        window.autorecalculatesKeyViewLoop = true
         super.init()
         if id != 0, let group = core.bookGroup(id) {
             name.stringValue = group.name
@@ -1353,6 +1356,7 @@ final class PeoplePicker: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         self.kind = kind
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 700, height: 440), styleMask: [.titled], backing: .buffered,
                           defer: true)
+        window.autorecalculatesKeyViewLoop = true
         super.init()
         window.title = kind == .recipients ? Text.uiSelectRecipients.text : Text.uiSelectMembers.text
         window.identifier = NSUserInterfaceItemIdentifier("pick")

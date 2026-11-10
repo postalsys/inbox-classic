@@ -229,6 +229,7 @@ private final class StartPage: NSObject {
         self.offer = offer
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), styleMask: [.titled], backing: .buffered,
                           defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiAddAccountTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("account.start")
         super.init()
@@ -609,6 +610,7 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 640, height: 280), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiAccountsTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("accounts")
         super.init()

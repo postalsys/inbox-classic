@@ -642,6 +642,19 @@ fn named(name: &str) -> Option<gtk::Widget> {
     windows().iter().find_map(|w| named_in(w.upcast_ref(), name))
 }
 
+/// Tab in the field named `from`, as the window moves the focus for it, lands in the field named `to`
+fn tab_moves(root: &gtk::Widget, from: &str, to: &str) -> bool {
+    let (Some(from), Some(to)) = (named_in(root, from), named_in(root, to)) else {
+        return false;
+    };
+    let Some(window) = root.root().and_downcast::<gtk::Window>() else {
+        return false;
+    };
+    from.grab_focus();
+    window.child_focus(gtk::DirectionType::TabForward);
+    GtkWindowExt::focus(&window).is_some_and(|focused| focused.is_ancestor(&to))
+}
+
 fn named_in(root: &gtk::Widget, name: &str) -> Option<gtk::Widget> {
     descendants::<gtk::Widget>(root)
         .into_iter()
@@ -942,6 +955,10 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     set_text(&first, "start-name", name);
     set_text(&first, "start-email", &format!("{user}@inboxclassic.test"));
     if shots {
+        d.check(
+            tab_moves(&first, "start-name", "start-email"),
+            "Tab goes from the name to the address",
+        );
         d.shot(&first, "account-1-form").await;
     }
     click(&first, "dialog-ok");

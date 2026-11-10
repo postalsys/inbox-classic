@@ -130,6 +130,9 @@ final class FormWindow: NSObject, NSWindowDelegate {
         self.validate = validate
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 200), styleMask: [.titled], backing: .buffered,
                           defer: true)
+        // Tab goes from field to field in the order they are laid out: AppKit builds no key view loop for a window made
+        // in code, so Tab would only select the text of the field again. Every window of the app sets this.
+        window.autorecalculatesKeyViewLoop = true
         window.title = title
         window.identifier = NSUserInterfaceItemIdentifier("form")
         super.init()
@@ -279,6 +282,7 @@ func textDialog(title: String, intro: String?, text: String, ok: String = Text.u
                 size: NSSize = NSSize(width: 640, height: 440), action: ButtonAction? = nil) {
     let window = TextDialogWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: [.titled, .resizable],
                                   backing: .buffered, defer: true)
+    window.autorecalculatesKeyViewLoop = true
     window.title = title
     window.identifier = NSUserInterfaceItemIdentifier(id)
     let scroll = NSTextView.scrollableTextView()
@@ -357,6 +361,7 @@ enum Waiting {
         done = false
         let window = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 380, height: 120), styleMask: [.titled],
                              backing: .buffered, defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = title
         window.identifier = NSUserInterfaceItemIdentifier("wait")
         let spinner = NSProgressIndicator()

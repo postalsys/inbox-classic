@@ -44,6 +44,7 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         hadSecret = app?.hasSecret ?? false
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 520), styleMask: [.titled], backing: .buffered,
                           defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = app == nil ? Text.uiAddSignInAppTitle.text : Text.uiSignInApp.text
         window.identifier = NSUserInterfaceItemIdentifier("signin.editor")
         super.init()
@@ -278,6 +279,7 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
         self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 340), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiSignInApps.text
         window.identifier = NSUserInterfaceItemIdentifier("signin.apps")
         super.init()

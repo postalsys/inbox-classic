@@ -156,6 +156,34 @@ final class UITest {
         NotificationCenter.default.post(name: NSControl.textDidChangeNotification, object: field)
     }
 
+    /// Tab pressed in each field of a form, as the user presses it: each must move on to the next field. Buttons and
+    /// pop-ups on the way are passed over, as Tab stops on them only with the system's Full Keyboard Access on.
+    func checkTabs(_ window: NSWindow?, _ ids: [String], _ what: String) {
+        guard let window else { return check(false, what) }
+        let fields: [NSTextField] = ids.compactMap { find($0, in: window) }
+        guard fields.count == ids.count else { return check(false, "\(what): the fields are there") }
+        // the focus as it was, for the steps after this one
+        let before = window.firstResponder
+        defer { window.makeFirstResponder(before) }
+        let reached = fields.dropLast().map { field -> String in
+            window.makeFirstResponder(field)
+            for _ in 0..<6 {
+                pressTab(window)
+                if let focused = (window.firstResponder as? NSText)?.delegate as? NSTextField {
+                    return focused.accessibilityIdentifier()
+                }
+            }
+            return "nothing"
+        }
+        check(reached == Array(ids.dropFirst()), "\(what) (\(reached.joined(separator: ", ")))")
+    }
+
+    func pressTab(_ window: NSWindow) {
+        let tab = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber,
+                                   context: nil, characters: "\t", charactersIgnoringModifiers: "\t", isARepeat: false, keyCode: 48)
+        tab.map(window.sendEvent)
+    }
+
     /// a click, after this returns: what it opens may run modally, while the test goes on
     func press(_ button: NSButton?) {
         guard let button else { return }
@@ -470,6 +498,7 @@ final class UITest {
               "it starts with the Google and Microsoft sign-in buttons")
         type("Alex Morgan", into: find("account.name", in: first))
         type("testuser@inboxclassic.test", into: find("account.email", in: first))
+        checkTabs(first, ["account.name", "account.email"], "Tab goes from the name to the address")
         await shot(first, "account-1-form")
         press(find("account.next", in: first))
         if let wait = await waitWindow("wait", 5) {
@@ -492,6 +521,7 @@ final class UITest {
         type(port("smtp"), into: field(8))
         // ImapKit's SMTP server takes a password only after STARTTLS
         (find("form.field.9", in: second) as NSPopUpButton?)?.selectItem(at: 1)
+        checkTabs(second, [0, 1, 2, 3, 4, 5, 7, 8].map { "form.field.\($0)" }, "Tab goes through the server form's fields in order")
         await shot(second, "account-3-servers")
         press(find("form.ok", in: second))
         let warning = await waitWindow("alert")
@@ -702,6 +732,14 @@ final class UITest {
         check(from?.titleOfSelectedItem == "Alex Morgan <testuser@inboxclassic.test>", "From names the account it goes from")
         type("dave at example.com", into: field("compose.to", compose))
         type("Trail map for Sunday", into: field("compose.subject", compose))
+        checkTabs(compose, ["compose.to", "compose.subject"], "Tab goes from To to the subject")
+        if let subject = field("compose.subject", compose), let editor: EditorView = views(EditorView.self, in: compose.contentView).first {
+            let before = compose.firstResponder
+            compose.makeFirstResponder(subject)
+            pressTab(compose)
+            check((compose.firstResponder as? NSView)?.isDescendant(of: editor) == true, "and from the subject to the text of the message")
+            compose.makeFirstResponder(before)
+        }
         check(await typeInEditor(compose, "Hi Dave, here is the trail map for Sunday. See you at nine!"), "the editor of a new message takes typing")
         ComposeWindow.open.last.map { window in onMain { window.perform(#selector(ComposeWindow.sendClicked)) } }
         let problem = await waitWindow("alert", 10)

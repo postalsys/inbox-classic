@@ -277,6 +277,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         let title = draft.map { text($0.subject) }.flatMap { $0.isEmpty ? nil : $0 } ?? Text.uiNewMessageTitle.text
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 620),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window.autorecalculatesKeyViewLoop = true
         window.title = title
         window.identifier = NSUserInterfaceItemIdentifier("compose")
         window.isReleasedWhenClosed = false
@@ -949,6 +950,7 @@ final class SignatureEditor: NSObject, NSWindowDelegate {
         self.account = account
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 640, height: 360), styleMask: [.titled, .resizable], backing: .buffered,
                           defer: true)
+        window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiSignatureOf.text(["account": name])
         window.identifier = NSUserInterfaceItemIdentifier("signature")
         super.init()
