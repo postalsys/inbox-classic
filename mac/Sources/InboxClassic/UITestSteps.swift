@@ -752,8 +752,9 @@ extension UITest {
         check(options.signInCodes.state == .off && !pe_codes_in_notifications(),
               "Show sign-in codes in new mail notifications is there, off at first")
         onMain { options.signInCodes.state = .on; options.signInCodesChanged() }
-        check(pe_codes_in_notifications(), "turned on, the core names the codes in the notifications")
+        check(await waitUntil(5) { pe_codes_in_notifications() }, "turned on, the core names the codes in the notifications")
         onMain { options.signInCodes.state = .off; options.signInCodesChanged() }
+        _ = await waitUntil(5) { !pe_codes_in_notifications() }
         onMain { options.grouping.state = .off; options.groupingChanged() }
         check(await waitUntil(5) { tripRows().count == 3 && tripRows().allSatisfy { $0.message.thread == 0 } },
               "turned off, the three messages are each a row of their own")
