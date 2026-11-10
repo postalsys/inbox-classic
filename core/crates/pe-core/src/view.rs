@@ -39,6 +39,16 @@ pub struct MessageView {
     /// The message the bounce returns, found in the account by its Message-ID (Sent Items first): the card links to
     /// it with [`pe_html::BOUNCED_MESSAGE_LINK`], and the apps select this one when that link is clicked
     pub bounced_message: Option<MessageRef>,
+    /// The one-time code of the card at the top of the document (Copy puts it on the clipboard), None without one
+    pub otp_code: Option<String>,
+}
+
+/// Whose word counts for a message: the domains whose Authentication-Results verdicts the account's provider gives,
+/// and whether its folder may show the card of a one-time code (not Junk E-mail, Sent Items or Drafts)
+#[derive(Default)]
+pub(crate) struct Trust<'a> {
+    pub domains: &'a [String],
+    pub codes: bool,
 }
 
 /// Finds a message of the account by its Message-ID, for the link of a bounce's card
@@ -68,7 +78,7 @@ fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
 
 #[cfg(test)]
 pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
-    build_unless(source, allow_remote_images, &[], &|| false, &|_| None).unwrap_or_default()
+    build_unless(source, allow_remote_images, &Trust::default(), &|| false, &|_| None).unwrap_or_default()
 }
 
 /// [`build`], given up (None) between its steps once `dropped` says nobody waits for it anymore; `find` looks up the
@@ -76,10 +86,11 @@ pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
 pub(crate) fn build_unless(
     source: &[u8],
     allow_remote_images: bool,
-    trusted: &[String],
+    trust: &Trust,
     dropped: &dyn Fn() -> bool,
     find: FindMessage,
 ) -> Option<MessageView> {
+    let trusted = trust.domains;
     let options = RenderOptions { allow_remote_images };
     let message = match parser::parse(source) {
         Ok(message) => message,
@@ -140,7 +151,17 @@ pub(crate) fn build_unless(
     let card = bounce
         .as_ref()
         .map(|b| crate::bounce::card(b, bounced_message.is_some()));
-    let rendered = pe_html::render_view_with(&body, &options, &images, &header, card.as_ref());
+    // a one-time code the domain it is for signed, above the message
+    let code = trust.codes.then(|| crate::otp::of(&message, trusted)).flatten();
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs() as i64);
+    let otp_card = code.as_ref().map(|code| crate::otp::card(code, message.timestamp, now));
+    let cards = pe_html::Cards {
+        otp: otp_card.as_ref(),
+        bounce: card.as_ref(),
+    };
+    let rendered = pe_html::render_view_cards(&body, &options, &images, &header, &cards);
     Some(MessageView {
         subject,
         from,
@@ -164,6 +185,7 @@ pub(crate) fn build_unless(
         }),
         bounce: bounce.is_some(),
         bounced_message,
+        otp_code: code.map(|code| code.code),
     })
 }
 
@@ -311,15 +333,15 @@ mod tests {
 
     #[test]
     fn a_view_nobody_waits_for_gives_up() {
-        assert!(build_unless(MESSAGE, false, &[], &|| true, &|_| None).is_none());
-        assert!(build_unless(MESSAGE, false, &[], &|| false, &|_| None).is_some());
+        assert!(build_unless(MESSAGE, false, &Trust::default(), &|| true, &|_| None).is_none());
+        assert!(build_unless(MESSAGE, false, &Trust::default(), &|| false, &|_| None).is_some());
         // once it is dropped halfway, after parsing
         let asked = std::cell::Cell::new(0);
         let dropped = || {
             asked.set(asked.get() + 1);
             asked.get() > 1
         };
-        assert!(build_unless(MESSAGE, false, &[], &dropped, &|_| None).is_none());
+        assert!(build_unless(MESSAGE, false, &Trust::default(), &dropped, &|_| None).is_none());
     }
 
     #[test]
@@ -634,7 +656,7 @@ mod tests {
             asked.borrow_mut().push(id.to_string());
             Some(sent)
         };
-        let view = build_unless(&raw, false, &[], &|| false, &find).unwrap();
+        let view = build_unless(&raw, false, &Trust::default(), &|| false, &find).unwrap();
         assert_eq!(asked.borrow().as_slice(), ["<sent@example.com>"]);
         assert_eq!(view.bounced_message, Some(sent));
         assert!(
@@ -750,7 +772,7 @@ mod tests {
             ("outlook.html", bounce_fixture("outlook.eml")),
         ];
         for (name, raw) in pages {
-            let view = build_unless(&raw, false, &[], &|| false, &linked).unwrap();
+            let view = build_unless(&raw, false, &Trust::default(), &|| false, &linked).unwrap();
             std::fs::write(dir.join(name), view.document).unwrap();
         }
     }

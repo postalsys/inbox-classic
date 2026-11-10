@@ -464,3 +464,5 @@ ui-book-exported = { $count ->
    *[other] { $count } kontakti salvestati faili { $file }.
 }
 ui-book-not-exported = Aadressiraamatut ei saanud salvestada: { $reason }
+# review: new
+ui-code-copied = Kood kopeeriti

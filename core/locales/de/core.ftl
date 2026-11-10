@@ -474,3 +474,12 @@ ui-sender-none = Der Absender dieser Nachricht hat keine E-Mail-Adresse, die hin
 card-name-needed = Der Kontakt hat weder einen Namen noch eine E-Mail-Adresse.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
 cards-file-failed = { $file }: { $reason }
+
+# review: new
+otp-heading = Code von { $domain }
+# review: new
+otp-copy = Kopieren
+# review: new
+otp-note = Geben Sie ihn nur auf einer Seite von { $domain } ein.
+# review: new
+otp-old = Dieser Code wurde mehr als eine Stunde vor dem Öffnen gesendet und ist wahrscheinlich abgelaufen.

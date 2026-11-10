@@ -501,3 +501,12 @@ ui-sender-none = L'expéditeur de ce message n'a pas d'adresse e-mail à ajouter
 card-name-needed = Le contact n'a ni nom ni adresse e-mail.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
 cards-file-failed = { $file } : { $reason }
+
+# review: new
+otp-heading = Code de { $domain }
+# review: new
+otp-copy = Copier
+# review: new
+otp-note = Saisissez-le uniquement sur une page de { $domain }.
+# review: new
+otp-old = Ce code a été envoyé plus d'une heure avant son ouverture et a probablement expiré.

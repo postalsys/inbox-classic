@@ -480,3 +480,11 @@ ui-sender-none = The sender of this message has no e-mail address to add.
 card-name-needed = The contact has no name and no e-mail address.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
 cards-file-failed = { $file }: { $reason }
+
+## One-time codes: the card at the top of a message with a sign-in or verification code
+
+# the domain the code is for, which signed the message
+otp-heading = Code from { $domain }
+otp-copy = Copy
+otp-note = Enter it only on a page of { $domain }.
+otp-old = This code was sent more than an hour before you opened it, and has probably expired.

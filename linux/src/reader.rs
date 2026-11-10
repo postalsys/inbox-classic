@@ -319,7 +319,15 @@ impl Reader {
             shell().show_main();
             shell().main().show_message(message.folder, message.uid);
         });
+        // Copy on a one-time code's card: the code the core found on the clipboard (nothing is read from the link)
+        let this = Rc::downgrade(self);
         self.preview.set_links(move |uri| {
+            if pe_html::is_copy_code_link(uri) {
+                if let Some(this) = this.upgrade() {
+                    this.copy_code();
+                }
+                return true;
+            }
             if !pe_html::is_bounced_message_link(uri) {
                 return false;
             }
@@ -452,6 +460,18 @@ impl Reader {
     /// The subject of the message on screen
     pub fn subject(&self) -> Option<String> {
         self.view.borrow().as_ref().map(|v| v.subject.clone())
+    }
+
+    /// The one-time code of the card on screen, when there is one
+    pub fn otp_code(&self) -> Option<String> {
+        self.view.borrow().as_ref().and_then(|v| v.otp_code.clone())
+    }
+
+    /// The code card's Copy: the code on the clipboard, said in the status bar
+    pub fn copy_code(&self) {
+        let Some(code) = self.otp_code() else { return };
+        self.preview.view.clipboard().set_text(&code);
+        shell().main().set_status(&t!(UiCodeCopied));
     }
 
     /// The message the bounce on screen returns, when it is in the account

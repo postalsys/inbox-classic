@@ -139,15 +139,7 @@ void Reader::Create(HWND parent, PeCore* core) {
     SetWindowSubclass(previewHost_, BodyHostProc, 0, reinterpret_cast<DWORD_PTR>(&preview_));
     preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); }, parent,
                     TIMER_FIND_SETTLED);
-    // the bounce card's link: the core says which link it is, the view names the message; followed after the
-    // WebView2's event, as selecting it shows another document in this view
-    preview_.SetLinks([this](const wchar_t* uri) {
-        if (pe_reader_link(core::Narrow(uri).c_str()) != PE_READER_LINK_BOUNCED_MESSAGE) {
-            return false;
-        }
-        PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_BOUNCED_MESSAGE, 0), 0);
-        return true;
-    });
+    preview_.SetLinks([this](const wchar_t* uri) { return FollowLink(uri); });
 
     LOGFONTW font = {};
     GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
@@ -174,6 +166,25 @@ void Reader::Destroy() {
     bold_ = nullptr;
     DeleteObject(link_);
     link_ = nullptr;
+}
+
+// the links of the document's own cards: the core says which link it is, the view has what it needs. The bounce
+// card's message is selected after the WebView2's event, as selecting it shows another document in this view; the
+// code card's Copy puts the code on the clipboard and says so. False for a link of the message (the browser opens it).
+bool Reader::FollowLink(const wchar_t* uri) {
+    switch (pe_reader_link(core::Narrow(uri).c_str())) {
+    case PE_READER_LINK_BOUNCED_MESSAGE:
+        PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_BOUNCED_MESSAGE, 0), 0);
+        return true;
+    case PE_READER_LINK_COPY_CODE:
+        if (const PeMessageInfo* info = Info(); info && info->otp_code && *info->otp_code &&
+                                                CopyText(parent_, core::Widen(info->otp_code)) && onFound) {
+            onFound(core::T(PE_TEXT_UI_CODE_COPIED));
+        }
+        return true;
+    default:
+        return false;
+    }
 }
 
 const PeMessageInfo* Reader::Info() const {

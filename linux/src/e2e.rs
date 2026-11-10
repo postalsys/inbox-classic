@@ -934,6 +934,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::keyboard_reading(&d).await;
     steps::conversations(&d).await;
     steps::bounces(&d).await;
+    steps::one_time_codes(&d).await;
     watch::watch_and_ignore(&d).await;
     steps::folders(&d).await;
     steps::closing_a_message(&d).await;
