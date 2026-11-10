@@ -95,3 +95,5 @@ pub const LANGUAGE: &str = "Language";
 pub const GROUP_BY_CONVERSATION: &str = "GroupByConversation";
 /// View > Hide Ignored Conversations (off when not set)
 pub const HIDE_IGNORED: &str = "HideIgnoredConversations";
+/// Whether a new message's notification names its sign-in code (the core does it), off unless chosen
+pub const CODES_IN_NOTIFICATIONS: &str = "CodesInNotifications";

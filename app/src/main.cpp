@@ -199,6 +199,8 @@ bool g_restart = false;
 const wchar_t* kNotifyPreference = L"NewMailNotifications";
 // Tools > Notify of New Mail, read once
 bool g_notify = GetPreference(kNotifyPreference, 1) != 0;
+// Tools > Options: whether a new message's notification names its sign-in code (the core does it, off unless chosen)
+const wchar_t* kCodesPreference = L"CodesInNotifications";
 const wchar_t* kTrayNotePreference = L"TrayNoteShown";
 
 // the new mail notifications on or off (Tools, the tray's menu, Options), kept for the next start
@@ -863,6 +865,7 @@ bool OpenCore(HWND hwnd) {
     uint32_t flags = g_arguments.memoryPasswords ? PE_OPEN_MEMORY_PASSWORDS : 0;
     std::string certificate = core::Narrow(g_arguments.certificate);
     SetInstantFormat();
+    pe_set_codes_in_notifications(GetPreference(kCodesPreference, 0) != 0);
     g_core.reset(pe_core_open_with(path.c_str(), flags, certificate.empty() ? nullptr : certificate.c_str(), OnCoreEvent, hwnd));
     if (g_core) {
         // where the user's AI agents reach this app (--mcp); another app with this store open keeps them
@@ -1161,8 +1164,11 @@ void OnCommand(WORD id, WORD code) {
     case IDM_OPTIONS: {
         bool notify = g_notify;
         bool threads = g_mailbox.Grouped();
-        bool restart = OptionsDialog(g_main, notify, threads);
+        bool codes = pe_codes_in_notifications();
+        bool restart = OptionsDialog(g_main, notify, threads, codes);
         SetNotify(notify);
+        SetPreference(kCodesPreference, codes ? 1 : 0);
+        pe_set_codes_in_notifications(codes);
         g_mailbox.SetGrouped(threads);
         if (restart) {
             // as File > Exit, the messages being written asked first; started again once the window is gone

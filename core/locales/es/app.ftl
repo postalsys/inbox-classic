@@ -465,3 +465,5 @@ ui-book-exported = { $count ->
 ui-book-not-exported = No se pudo guardar la libreta de direcciones: { $reason }
 # review: new
 ui-code-copied = Código copiado
+# review: new
+ui-codes-in-notifications = Mostrar los códigos de inicio de sesión en los avisos de correo nuevo

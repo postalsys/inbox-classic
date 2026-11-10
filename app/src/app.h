@@ -322,7 +322,7 @@ void SetTextPreference(const wchar_t* name, const std::wstring& value);
 void StartLanguage(const std::wstring& forced);
 // Tools > Options: the language, the new mail notifications (`notify`) and the list grouped by conversation
 // (`threads`), these two changed when OK is clicked. True when the user chose to restart now for a new language
-bool OptionsDialog(HWND owner, bool& notify, bool& threads);
+bool OptionsDialog(HWND owner, bool& notify, bool& threads, bool& codes);
 
 // ---- addressbook.cpp ----
 
@@ -877,6 +877,8 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_NOTIFY,
     IDC_OPTIONS_NOTE,
     IDC_OPTIONS_THREADS,
+    // under the notifications: whether they name a message's sign-in code
+    IDC_OPTIONS_CODES,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them

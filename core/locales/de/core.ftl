@@ -489,3 +489,6 @@ event-attendees =
         [one] { $count } Teilnehmer
        *[other] { $count } Teilnehmer
     }
+
+# review: new
+otp-notification = { $code } ist Ihr Code für { $domain }

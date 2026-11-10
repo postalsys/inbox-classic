@@ -495,3 +495,6 @@ event-attendees =
         [one] { $count } attendee
        *[other] { $count } attendees
     }
+
+# the first line of a new message's notification when it has a code, for a domain that signed it
+otp-notification = { $code } is your code for { $domain }

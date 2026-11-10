@@ -2342,6 +2342,20 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
         $box -ne [IntPtr]::Zero
     }
+    # Tools > Options: the notifications can name a message's sign-in code, off until chosen, kept for the next start
+    $IDC_OPTIONS_CODES = 664
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        $codes = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_CODES)
+        Check ($codes -ne [IntPtr]::Zero -and [int][Native.Win]::SendMessage($codes, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'Options can show sign-in codes in new mail notifications, off at first'
+        [void][Native.Win]::SendMessage($codes, $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+        Check ((Get-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue).CodesInNotifications -eq 1) 'turned on, that is kept for the next start'
+    } else {
+        Check $false 'Tools > Options opens'
+    }
     $topic = 'Trip to the coast'
     $coast = @('coast1@example.com', 'coast2@example.com', 'coast3@example.com')
     $coastSeen = { @($coast | Where-Object { Seen "Message-ID: <$([regex]::Escape($_))>" }).Count }

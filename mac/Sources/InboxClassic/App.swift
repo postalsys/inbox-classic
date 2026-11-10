@@ -121,6 +121,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
     private var grouping = Preference("GroupByConversation", default: true)
+    /// Settings > Show sign-in codes in new mail notifications, off unless turned on: the core names the code
+    var codesInNotifications: Bool {
+        get { codes.value }
+        set {
+            codes.value = newValue
+            pe_set_codes_in_notifications(newValue)
+        }
+    }
+    private var codes = Preference("CodesInNotifications", default: false)
     /// View > Hide Ignored Conversations, off unless turned on
     var hideIgnored: Bool {
         get { hidingIgnored.value }
@@ -161,6 +170,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             return
         }
         self.core = core
+        pe_set_codes_in_notifications(codesInNotifications)
         // where the user's AI agents reach this app (--mcp); another app with this store open keeps them
         pe_mcp_start(core.handle)
         main = MainWindow(core: core)

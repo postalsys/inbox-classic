@@ -1751,6 +1751,13 @@ char *pe_folder_empty(const struct PeCore *core,
                       int64_t folder,
                       char **error);
 
+// Whether a new message's notification names its one-time code, when it has one the provider says its domain signed:
+// the app's setting (off unless the user turns it on), set as the app starts and when it changes
+void pe_set_codes_in_notifications(bool on);
+
+// What `pe_set_codes_in_notifications` set last, for the UI tests
+bool pe_codes_in_notifications(void);
+
 // How the cards of calendar events word their days and times: the app's own words, as its windows show dates. Set
 // once as the app starts, before any message is shown; without it the cards say UTC dates and times as ISO 8601.
 //

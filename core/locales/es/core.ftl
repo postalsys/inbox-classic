@@ -500,3 +500,6 @@ event-attendees =
         [one] { $count } asistente
        *[other] { $count } asistentes
     }
+
+# review: new
+otp-notification = { $code } es su código para { $domain }

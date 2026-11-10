@@ -476,3 +476,6 @@ event-attendees =
         [one] { $count } osaleja
        *[other] { $count } osalejat
     }
+
+# review: new
+otp-notification = { $code } on teie kood domeeni { $domain } jaoks

@@ -18,7 +18,7 @@ mod export;
 mod fold;
 mod list_view;
 pub mod mailto;
-mod otp;
+pub mod otp;
 mod requests;
 mod search;
 mod secrets;

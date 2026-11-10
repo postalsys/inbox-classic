@@ -1251,7 +1251,11 @@ impl Worker {
                 let from = newest.info.sender().to_string();
                 let count = fresh.announced.len();
                 let watched = newest.mark == pe_store::ThreadMark::Watch;
-                let (title, text) = crate::text::new_mail_words(count, &from, &newest.info.subject, watched);
+                let (title, mut text) = crate::text::new_mail_words(count, &from, &newest.info.subject, watched);
+                // a one-time code of a fresh message, named first when the app asks for it
+                if let Some(code) = self.code_of_new(store, folder, newest).await {
+                    text = crate::otp::notification_text(&code, &text);
+                }
                 self.emit(Event::NewMail {
                     account: self.account,
                     folder,
@@ -1266,6 +1270,40 @@ impl Worker {
             }
         }
         Ok(())
+    }
+
+    /// The one-time code of a message just arrived, for its notification: only when the app turned that on, for a fresh
+    /// message outside Junk E-mail, Sent Items and Drafts, whose domain the provider says signed it (as the card asks).
+    /// Its source is downloaded for that, a few seconds at most; when that is slow it is announced without the code.
+    async fn code_of_new(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        newest: &pe_store::Message,
+    ) -> Option<crate::otp::Code> {
+        if !crate::otp::in_notifications() {
+            return None;
+        }
+        let place = store.folder(folder).ok()?;
+        if matches!(
+            place.info.special_use.as_deref(),
+            Some("\\Junk" | "\\Sent" | "\\Drafts")
+        ) {
+            return None;
+        }
+        let at = newest.info.internal_date.or(newest.info.date)?;
+        if unix_now() - at > crate::otp::FRESH_FOR_NOTIFICATIONS {
+            return None;
+        }
+        let trusted = crate::authres::trusted(&store.account(self.account).ok()?.settings);
+        let uid = newest.info.uid;
+        let client = self.client(store).await.ok()?;
+        let source = tokio::time::timeout(Duration::from_secs(5), fetch_source(client, store, folder, uid))
+            .await
+            .ok()?
+            .ok()?;
+        let message = pe_mime::parser::parse(&source).ok()?;
+        crate::otp::of(&message, &trusted)
     }
 
     /// New mail of ignored conversations marked read, in the store and on the server, as Mark Read does

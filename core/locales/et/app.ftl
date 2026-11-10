@@ -465,3 +465,5 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Aadressiraamatut ei saanud salvestada: { $reason }
 # review: new
 ui-code-copied = Kood kopeeriti
+# review: new
+ui-codes-in-notifications = Näita uue kirja teadetes sisselogimiskoode

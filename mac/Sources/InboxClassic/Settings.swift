@@ -82,6 +82,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let language = NSPopUpButton()
     let notify: NSButton
     let grouping: NSButton
+    let signInCodes: NSButton
     /// the codes of the popup's items, nil for System default
     private var codes: [String?] = []
 
@@ -105,6 +106,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         window.autorecalculatesKeyViewLoop = true
         notify = NSButton(checkboxWithTitle: Text.macNotifyNewMail.text, target: nil, action: nil)
         grouping = NSButton(checkboxWithTitle: Text.uiGroupByConversation.text, target: nil, action: nil)
+        signInCodes = NSButton(checkboxWithTitle: Text.uiCodesInNotifications.text, target: nil, action: nil)
         super.init()
         window.title = Text.macSettingsTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("settings")
@@ -133,10 +135,19 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         notify.action = #selector(notifyChanged)
         notify.setAccessibilityIdentifier("settings.notify")
 
+        signInCodes.state = AppDelegate.shared?.codesInNotifications ?? false ? .on : .off
+        signInCodes.target = self
+        signInCodes.action = #selector(signInCodesChanged)
+        signInCodes.setAccessibilityIdentifier("settings.codes")
+
         grouping.state = AppDelegate.shared?.groupByConversation ?? true ? .on : .off
         grouping.target = self
         grouping.action = #selector(groupingChanged)
         grouping.setAccessibilityIdentifier("settings.grouping")
+
+        // under the notifications, as a choice of theirs
+        let indented = NSStackView(views: [signInCodes])
+        indented.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
 
         let label = NSTextField(labelWithString: Text.macLanguageLabel.text)
         label.alignment = .right
@@ -144,6 +155,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             [label, language],
             [NSGridCell.emptyContentView, hint],
             [NSGridCell.emptyContentView, notify],
+            [NSGridCell.emptyContentView, indented],
             [NSGridCell.emptyContentView, grouping],
         ])
         grid.rowSpacing = 8
@@ -170,6 +182,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
     @objc func notifyChanged() {
         AppDelegate.shared?.notify = notify.state == .on
+    }
+
+    @objc func signInCodesChanged() {
+        AppDelegate.shared?.codesInNotifications = signInCodes.state == .on
     }
 
     @objc func groupingChanged() {

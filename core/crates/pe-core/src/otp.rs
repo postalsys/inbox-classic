@@ -77,6 +77,38 @@ fn sender_domain(message: &Message) -> Option<String> {
     (!domain.is_empty()).then(|| domain.to_ascii_lowercase())
 }
 
+static IN_NOTIFICATIONS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Whether a new message's notification names its one-time code (as the card shows it, for a domain that signed it),
+/// so the code can be read, or offered by the system, without opening the message. Off unless an app turns it on
+/// (its setting); a code there can be read on a locked screen.
+pub fn set_in_notifications(on: bool) {
+    IN_NOTIFICATIONS.store(on, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub fn in_notifications() -> bool {
+    IN_NOTIFICATIONS.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+/// How old a message may be for its notification to name its code: one that waited longer is no sign-in going on
+pub(crate) const FRESH_FOR_NOTIFICATIONS: i64 = 15 * 60;
+
+/// The text of a new message's notification with its code first: "482913 is your code for example.com"
+pub(crate) fn notification_text(code: &Code, text: &str) -> String {
+    let first = tr_args(
+        Text::OtpNotification,
+        &[
+            ("code", code.code.as_str().into()),
+            ("domain", code.domain.as_str().into()),
+        ],
+    );
+    if text.is_empty() {
+        first
+    } else {
+        format!("{first}\n{text}")
+    }
+}
+
 /// The card of `code`, saying it is old when the message was sent more than an hour before `now` (seconds since the
 /// Unix epoch, as `sent`)
 pub(crate) fn card(code: &Code, sent: Option<i64>, now: i64) -> pe_html::OtpCard {

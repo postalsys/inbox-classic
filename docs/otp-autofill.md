@@ -2,7 +2,13 @@
 
 Safari and other apps on the Mac offer one-time codes "From Mail" and "From Messages" in a field marked
 `autocomplete="one-time-code"`. Inbox Classic shows a code in a card with Copy (`pe-core/src/otp.rs`); this note is
-about also offering it to AutoFill. Nothing of it is built yet.
+about also offering it to AutoFill.
+
+**Built: the notification names the code.** With Show sign-in codes in new mail notifications on (Tools > Options,
+Settings on the Mac, Preferences on Linux; off unless chosen), the worker downloads the source of a fresh message
+(at most five seconds, announced without the code when that is slow), runs the same trusted detection as the card
+(`pe-core/src/otp.rs`) and starts the notification's text with "482913 is your code for example.com". Whether macOS
+then offers it to AutoFill is what the test below decides; if it does, the setting's default can be reconsidered.
 
 ## What exists
 
@@ -20,18 +26,15 @@ about also offering it to AutoFill. Nothing of it is built yet.
 
 On a Mac with macOS 26 and Inbox Classic's notifications allowed:
 
-1. Have a code mail arrive while the main window is not in front, so the new mail notification shows. Its text today
-   is the sender and the subject (`pe-core/src/text.rs` `new_mail_words`); for the test, a subject such as
-   "123456 is your code" carries the code.
+1. Turn on Show sign-in codes in new mail notifications, then have a signed code mail arrive while the main window is
+   not in front, so the new mail notification shows with "123456 is your code for ..." first.
 2. Open a page with `<input autocomplete="one-time-code">` in Safari and in Chrome, and see whether the code is offered.
 3. See whether Inbox Classic is listed as a source under System Settings > Passwords > Verification Codes (or AutoFill).
 
 ## If the notification is read
 
-The worker announces new mail from the envelope alone. It would fetch the newest message's headers and text first (a
-few seconds at most, and announce without the code when that is slow), run the same trusted detection as the card,
-and name the code in the notification, for fresh mail only and never for an account whose provider adds no verdict. A
-code in a notification can be read on a locked screen, so Tools > Options gets a setting to turn it off.
+That is built (above): turn the setting on. A code in a notification can be read on a locked screen, which is why it
+is off unless chosen.
 
 ## If it is not
 
