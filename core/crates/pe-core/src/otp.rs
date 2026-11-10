@@ -7,7 +7,6 @@
 use pe_i18n::{Text, tr, tr_args};
 use pe_mime::parser::Message;
 
-use crate::authres::registrable;
 use crate::unsubscribe::passed_domains;
 
 /// A code found in a message and the domain it is for
@@ -19,28 +18,34 @@ pub struct Code {
     pub printed: String,
     /// The host the code is for: the header's origin, or the sender's domain
     pub domain: String,
+    /// The domain whose signature covers it: `domain` or a parent of it
+    pub signer: String,
 }
 
 /// The code of `message`, when the provider says the domain it is for signed it; `trusted` names whose verdicts count
 pub(crate) fn of(message: &Message, trusted: &[String]) -> Option<Code> {
-    let signed: Vec<String> = passed_domains(&message.headers, trusted)
-        .iter()
-        .map(|domain| registrable(domain))
-        .collect();
-    // aligned as DMARC relaxes it: a signature of example.com covers accounts.example.com
-    let aligned = |host: &str| !host.is_empty() && signed.contains(&registrable(host));
+    let signed = passed_domains(&message.headers, trusted);
+    // a signature of example.com covers example.com and the hosts under it (accounts.example.com), never a sibling: a
+    // guess at registrable domains would make two sites under a shared suffix (me.uk, github.io) one
+    let signer = |host: &str| {
+        signed
+            .iter()
+            .filter(|d| !d.is_empty() && (host == d.as_str() || host.ends_with(&format!(".{d}"))))
+            .min_by_key(|d| d.len())
+            .cloned()
+    };
     if let Some(token) = &message.otp {
         let host = origin_host(&token.origin)?;
-        return aligned(&host).then(|| Code {
+        let signer = signer(&host)?;
+        return Some(Code {
             code: token.code.clone(),
             printed: token.code.clone(),
             domain: host,
+            signer,
         });
     }
     let domain = sender_domain(message)?;
-    if !aligned(&domain) {
-        return None;
-    }
+    let signer = signer(&domain)?;
     let found = pe_otp::detect_otp(&pe_otp::MessageInput {
         subject: message.subject.as_deref(),
         text: message.text.as_deref(),
@@ -50,6 +55,7 @@ pub(crate) fn of(message: &Message, trusted: &[String]) -> Option<Code> {
         code: found.code,
         printed: found.raw,
         domain,
+        signer,
     })
 }
 
@@ -78,7 +84,7 @@ pub(crate) fn card(code: &Code, sent: Option<i64>, now: i64) -> pe_html::OtpCard
     pe_html::OtpCard {
         heading: tr_args(Text::OtpHeading, &domain()),
         code: code.printed.clone(),
-        note: tr_args(Text::OtpNote, &[("domain", registrable(&code.domain).as_str().into())]),
+        note: tr_args(Text::OtpNote, &[("domain", code.signer.as_str().into())]),
         copy: tr(Text::OtpCopy),
         old: sent.filter(|sent| now - sent > 3600).map(|_| tr(Text::OtpOld)),
     }
@@ -139,9 +145,27 @@ mod tests {
             BODY,
         );
         assert_eq!(of(&forged, &trusted()), None);
-        // a registrable domain shared by two sites counts as one: the card names the whole host
-        let shared = of(&message("a@site.github.io", Some("github.io"), "", BODY), &trusted()).unwrap();
-        assert_eq!(shared.domain, "site.github.io");
+        // a site's signature covers no other site under the same suffix (me.uk is no domain of one owner)
+        assert_eq!(
+            of(
+                &message("no-reply@acme.me.uk", Some("evil.me.uk"), "", BODY),
+                &trusted()
+            ),
+            None
+        );
+        let origin = "OTP-Token: \"917355\"; origin=\"https://login.acme.me.uk\"\r\n";
+        assert_eq!(
+            of(&message("x@evil.me.uk", Some("evil.me.uk"), origin, BODY), &trusted()),
+            None
+        );
+        // nor a parent's: a signature of accounts.example.com does not cover example.com
+        assert_eq!(
+            of(
+                &message("a@example.com", Some("accounts.example.com"), "", BODY),
+                &trusted()
+            ),
+            None
+        );
     }
 
     #[test]
@@ -182,6 +206,7 @@ mod tests {
             code: "482913".into(),
             printed: "482 913".into(),
             domain: "accounts.example.com".into(),
+            signer: "example.com".into(),
         };
         let fresh = card(&code, Some(1000), 1000 + 600);
         assert_eq!(fresh.code, "482 913");
