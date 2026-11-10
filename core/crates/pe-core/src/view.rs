@@ -662,7 +662,7 @@ mod tests {
         assert_eq!(view.bounced_message, Some(sent));
         assert!(
             view.document.contains(&format!(
-                "<a href=\"{}\">Show the message that bounced</a>",
+                "<a class=\"btn\" href=\"{}\" role=\"button\">Show the message that bounced</a>",
                 pe_html::BOUNCED_MESSAGE_LINK
             )),
             "{}",
