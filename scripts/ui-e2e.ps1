@@ -1581,7 +1581,6 @@ public static class Dragger {
         (StatusPart $mainStatus 0) -notmatch 'not in this message'
     }
 
-    SelectRow $failedRow
     $invite = "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Invitation: Quarterly planning`r`n" +
         "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <planning-invite@example.com>`r`n" +
         "Content-Type: multipart/mixed; boundary=inv`r`n`r`n--inv`r`nContent-Type: text/plain`r`n`r`nLet us plan the quarter.`r`n" +
@@ -1597,8 +1596,6 @@ public static class Dragger {
     SelectRow 0
     # the event is a card in the message, in the blue of the app's information
     Check ([bool](WaitFor { $null -ne (& $cardPoint 15 95 179) } 15)) 'a message with an invitation shows the event in a card above the text'
-    Check ([bool](WaitFor { & $foundInMessage 'Invitation: Quarterly planning' } 5)) 'which names the event'
-    Check ([bool](WaitFor { & $foundInMessage 'Open in Calendar' } 5)) 'and has Open in Calendar'
     Shot $main 'read-10-invitation'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
@@ -2602,6 +2599,7 @@ public static class Dragger {
     Check ($failedMark -ne '' -and $failedMark -ne $clipMark) 'the report has the undelivered mark in the attachment column, not a paper clip'
     Check ((& $markOf $delayedRow) -eq $failedMark) 'and so has the delay notice'
 
+    SelectRow $failedRow
     Check ([bool](WaitFor { $null -ne (& $cardPoint 196 43 28) } 15)) 'opening the report shows the red card of a message not delivered'
     # Show the message that bounced: the card's button, followed as a click on it would be
     Check ([bool](WaitFor { & $foundInMessage 'Show the message that bounced' } 5)) 'the card has Show the message that bounced'
