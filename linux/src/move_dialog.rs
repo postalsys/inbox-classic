@@ -79,6 +79,7 @@ pub async fn choose(parent: &impl IsA<gtk::Widget>, request: Request) -> Option<
     new_folder.set_halign(gtk::Align::Start);
     new_folder.set_visible(request.new_folder);
     content.append(&new_folder);
+    ui::tab_leaves(&list, &filter, &new_folder);
 
     let (dialog, ok) = ui::dialog_with_buttons(&request.title, &content, &request.verb, 460);
     dialog.set_widget_name("move-dialog");

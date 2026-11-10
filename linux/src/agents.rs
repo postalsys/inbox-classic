@@ -502,6 +502,8 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
         220,
     ));
     content.append(&setup);
+    ui::tab_leaves(&agents.hosts, &agents.enabled, &agents.change);
+    ui::tab_leaves(&agents.log, &agents.remove, &agents.undo);
     let view = adw::ToolbarView::new();
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));

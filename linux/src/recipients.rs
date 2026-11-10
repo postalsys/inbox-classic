@@ -242,6 +242,9 @@ async fn pick(
         buttons.push(button);
         lists.push(chosen);
     }
+    if let Some(first) = buttons.first() {
+        ui::tab_leaves(&list, &find, first);
+    }
     let (dialog, ok) = ui::dialog_with_buttons(title, &grid, &t!(UiOk), 800);
     dialog.set_content_height(if targets.len() == 1 { 520 } else { 540 });
     dialog.set_widget_name("pick-dialog");

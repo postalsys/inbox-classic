@@ -129,6 +129,9 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
 void DrawLinkButton(const DRAWITEMSTRUCT& item);
 // a button that looks like a link (draw it with DrawLinkButton); Tab reaches it and Enter or Space clicks it
 HWND CreateLinkButton(HWND parent, const wchar_t* text, int id, const RECT& bounds);
+// a label clicked as a link (SS_NOTIFY) that the keyboard reaches too: a Tab stop with a focus rectangle, Enter or Space
+// clicks it (STN_CLICKED to its window)
+void KeyboardLink(HWND label);
 // for WM_SETCURSOR of the window with the links: the hand over a link; true when it set it
 bool SetLinkCursor(HWND hwnd, WPARAM wParam);
 // what a screen reader says about a control besides its name (the reason a button is turned off)

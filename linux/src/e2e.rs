@@ -655,6 +655,38 @@ fn tab_moves(root: &gtk::Widget, from: &str, to: &str) -> bool {
     GtkWindowExt::focus(&window).is_some_and(|focused| focused.is_ancestor(&to))
 }
 
+/// Tab (Shift+Tab with `back`) in `widget` as its own key handlers take it; false when none of them did
+fn press_tab(widget: &impl IsA<gtk::Widget>, back: bool) -> bool {
+    let (key, state) = if back {
+        (gdk::Key::ISO_Left_Tab, gdk::ModifierType::SHIFT_MASK)
+    } else {
+        (gdk::Key::Tab, gdk::ModifierType::empty())
+    };
+    let controllers = widget.as_ref().observe_controllers();
+    (0..controllers.n_items())
+        .filter_map(|i| controllers.item(i).and_downcast::<gtk::EventControllerKey>())
+        .any(|keys| {
+            keys.emit_by_name::<bool>(
+                "key-pressed",
+                &[&glib::translate::IntoGlib::into_glib(key), &0u32, &state],
+            )
+        })
+}
+
+/// The widget with the keyboard focus in the window of `widget`
+fn focused_in(widget: &impl IsA<gtk::Widget>) -> Option<gtk::Widget> {
+    widget
+        .as_ref()
+        .root()
+        .and_downcast::<gtk::Window>()
+        .and_then(|window| GtkWindowExt::focus(&window))
+}
+
+/// Whether the focus is `widget` or in it
+fn has_focus_in(widget: &impl IsA<gtk::Widget>) -> bool {
+    focused_in(widget).is_some_and(|f| f == *widget.as_ref() || f.is_ancestor(widget))
+}
+
 fn named_in(root: &gtk::Widget, name: &str) -> Option<gtk::Widget> {
     descendants::<gtk::Widget>(root)
         .into_iter()
@@ -1037,6 +1069,21 @@ async fn reading(d: &Driver) {
         wait_until(10, || reader.attachments.is_visible()).await,
         "the paper clip of the attachments is there",
     );
+    // a selectable line of the header would take Tab on the way from the list and select all of itself
+    if let (Some(list), Some(window)) = (named("message-list"), main.root().and_downcast::<gtk::Window>()) {
+        list.grab_focus();
+        window.child_focus(gtk::DirectionType::TabForward);
+        let focused = GtkWindowExt::focus(&window);
+        let name = focused
+            .as_ref()
+            .map(|f| format!("{} {}", f.type_().name(), f.widget_name()));
+        d.check(
+            focused.is_some_and(|f| {
+                !["reader-subject", "reader-from", "reader-to", "reader-date"].contains(&f.widget_name().as_str())
+            }),
+            &format!("Tab from the list passes the lines of the header by ({name:?})"),
+        );
+    }
     d.check(
         reader.pictures_blocked(),
         "the information bar says pictures are blocked",
@@ -1301,6 +1348,12 @@ async fn writing(d: &Driver) {
     );
     c.to.set_text("dave at example.com");
     c.subject.set_text("Trail map for Sunday");
+    c.subject.grab_focus();
+    let took = press_tab(&c.subject, false);
+    d.check(
+        took && wait_until(5, || has_focus_in(&c.editor.document.view)).await,
+        "Tab from the subject goes to the text, past the format bar",
+    );
     c.editor
         .type_text("Hi Dave, here is the trail map for Sunday. See you at nine!");
     pause(500).await;
@@ -1736,6 +1789,15 @@ async fn organizing(d: &Driver) {
         Some(dialog) => {
             if let Some(archive) = steps::folder_of(0, "Archive") {
                 pick_folder(&dialog, archive);
+            }
+            if let (Some(list), Some(new_folder)) = (
+                named_in(dialog.upcast_ref(), "move-folders"),
+                named_in(dialog.upcast_ref(), "move-new-folder"),
+            ) {
+                d.check(
+                    press_tab(&list, false) && has_focus_in(&new_folder),
+                    "Tab leaves the folder list for New Folder, rather than going down its rows",
+                );
             }
             pause(300).await;
             d.shot(&dialog, "organize-2-move").await;

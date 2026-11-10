@@ -75,6 +75,29 @@ WORD ReadingKey(UINT key) {
     return key == VK_OEM_COMMA ? WORD{IDM_PREVIOUS_MESSAGE} : WORD{0};
 }
 
+namespace {
+
+// the window under the message's WebView2: Tab into it (or SetFocus) gives the message the keyboard
+LRESULT CALLBACK BodyHostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data) {
+    switch (message) {
+    case WM_SETFOCUS: {
+        auto* preview = reinterpret_cast<Preview*>(data);
+        if (GetKeyState(VK_TAB) < 0) {
+            preview->Focus(GetKeyState(VK_SHIFT) < 0 ? Preview::FocusFrom::End : Preview::FocusFrom::Start);
+        } else {
+            preview->Focus(Preview::FocusFrom::Program);
+        }
+        return 0;
+    }
+    case WM_NCDESTROY:
+        RemoveWindowSubclass(hwnd, BodyHostProc, 0);
+        break;
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
 void Reader::Create(HWND parent, PeCore* core) {
     parent_ = parent;
     core_ = core;
@@ -107,7 +130,13 @@ void Reader::Create(HWND parent, PeCore* core) {
     retry_ = CreateChild(parent, L"STATIC", retry.c_str(), SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER,
                          IDC_RETRY, {});
     ShowWindow(retry_, SW_HIDE);
-    previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN, 0, {});
+    // the links of the pane: Tab reaches them, Enter clicks them
+    for (HWND link : {unsubscribe_, pictures_, retry_}) {
+        KeyboardLink(link);
+    }
+    // the message itself is a Tab stop too: its host hands the keyboard to the WebView2
+    previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN | WS_TABSTOP, 0, {});
+    SetWindowSubclass(previewHost_, BodyHostProc, 0, reinterpret_cast<DWORD_PTR>(&preview_));
     preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); }, parent,
                     TIMER_FIND_SETTLED);
     // the bounce card's link: the core says which link it is, the view names the message; followed after the

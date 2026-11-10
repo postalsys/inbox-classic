@@ -1630,6 +1630,9 @@ public static class Dragger {
         Check ((& $checked 0) -and (& $checked 1) -and -not (& $checked 2) -and -not (& $checked 3)) 'reading and organizing are offered, sending is not'
         # sending too, for the rest of the test
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($ask, $IDC_AGENT_LEVEL + 3), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        # Enter takes the default button the window names (DM_GETDEFID), which must be Don't Allow (IDNO), not Allow
+        $defId = [int64][Native.Win]::SendMessage($ask, 0x400, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ((($defId -shr 16) -band 0xFFFF) -eq 0x534B -and ($defId -band 0xFFFF) -eq 7) "Enter answers Don't Allow ($('{0:X}' -f $defId))"
         Shot $ask 'agents-2-connect'
         Click $ask 1
     }

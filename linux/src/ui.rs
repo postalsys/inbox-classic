@@ -346,6 +346,28 @@ pub async fn ask_folder_name(parent: &impl IsA<gtk::Widget>, title: &str, intro:
 
 /// A dialog with a header bar of Cancel and `ok_label` around its title, over `content`; the OK button (named
 /// `dialog-ok`) is its default
+/// Tab in `list` goes on to `after` and Shift+Tab back to `before`, where a list box would move from row to row (the
+/// arrow keys do that)
+pub fn tab_leaves(list: &gtk::ListBox, before: &impl IsA<gtk::Widget>, after: &impl IsA<gtk::Widget>) {
+    let keys = gtk::EventControllerKey::new();
+    keys.set_propagation_phase(gtk::PropagationPhase::Capture);
+    let (before, after) = (before.as_ref().downgrade(), after.as_ref().downgrade());
+    keys.connect_key_pressed(move |_, key, _, modifiers| {
+        let modifiers = modifiers & gtk::accelerator_get_default_mod_mask();
+        let target = match key {
+            gdk::Key::Tab if modifiers.is_empty() => &after,
+            gdk::Key::ISO_Left_Tab => &before,
+            gdk::Key::Tab if modifiers == gdk::ModifierType::SHIFT_MASK => &before,
+            _ => return glib::Propagation::Proceed,
+        };
+        match target.upgrade() {
+            Some(target) if target.grab_focus() => glib::Propagation::Stop,
+            _ => glib::Propagation::Proceed,
+        }
+    });
+    list.add_controller(keys);
+}
+
 pub fn dialog_with_buttons(
     title: &str,
     content: &impl IsA<gtk::Widget>,

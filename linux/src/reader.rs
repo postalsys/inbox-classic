@@ -136,7 +136,7 @@ impl Reader {
         .enumerate()
         {
             fields.attach(&field_label(&name), 0, row as i32, 1, 1);
-            fields.attach(value, 1, row as i32, 1, 1);
+            fields.attach(&PassedByTab::new(value), 1, row as i32, 1, 1);
         }
         let note = gtk::Label::new(None);
         note.set_xalign(0.0);
@@ -150,7 +150,7 @@ impl Reader {
         unsubscribe.set_valign(gtk::Align::Start);
         unsubscribe.set_visible(false);
         let top = gtk::Box::new(gtk::Orientation::Horizontal, 8);
-        top.append(&subject);
+        top.append(&PassedByTab::new(&subject));
         top.append(&unsubscribe);
         let text = gtk::Box::new(gtk::Orientation::Vertical, 6);
         text.set_hexpand(true);
@@ -976,5 +976,56 @@ fn when(event: &Invitation) -> String {
         t!(UiEventFloating, when = &text)
     } else {
         text
+    }
+}
+
+glib::wrapper! {
+    /// Text of the header that can be selected with the mouse (and copied), but that Tab and the arrow keys pass by:
+    /// a selectable label is focusable, and Tab into it would select all of it on the way from the list to the message
+    pub struct PassedByTab(ObjectSubclass<passed_by_tab::PassedByTab>)
+        @extends gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
+}
+
+impl PassedByTab {
+    fn new(child: &impl IsA<gtk::Widget>) -> PassedByTab {
+        let this: PassedByTab = glib::Object::new();
+        child.set_parent(&this);
+        this
+    }
+}
+
+mod passed_by_tab {
+    use gtk::glib;
+    use gtk::prelude::*;
+    use gtk::subclass::prelude::*;
+
+    #[derive(Default)]
+    pub struct PassedByTab;
+
+    #[glib::object_subclass]
+    impl ObjectSubclass for PassedByTab {
+        const NAME: &'static str = "InboxClassicPassedByTab";
+        type Type = super::PassedByTab;
+        type ParentType = gtk::Widget;
+
+        fn class_init(class: &mut Self::Class) {
+            class.set_layout_manager_type::<gtk::BinLayout>();
+        }
+    }
+
+    impl ObjectImpl for PassedByTab {
+        fn dispose(&self) {
+            while let Some(child) = self.obj().first_child() {
+                child.unparent();
+            }
+        }
+    }
+
+    impl WidgetImpl for PassedByTab {
+        // the keys move on past it; a click still gives the text the focus (Ctrl+C copies what is selected)
+        fn focus(&self, _direction: gtk::DirectionType) -> bool {
+            false
+        }
     }
 }

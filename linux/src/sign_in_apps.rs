@@ -450,7 +450,13 @@ impl AppsWindow {
                 }
                 let _ = shell().core.set_sign_in_enabled(with, switch.is_active());
                 let refill = this.clone();
-                glib::idle_add_local_once(move || refill.fill(index));
+                glib::idle_add_local_once(move || {
+                    refill.fill(index);
+                    // the list was made again under the switch: the focus to its app's row
+                    if let Some(row) = refill.list.row_at_index(index as i32) {
+                        row.grab_focus();
+                    }
+                });
             });
             row.add_suffix(&switch);
             self.list.append(&row);

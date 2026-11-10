@@ -299,6 +299,54 @@ HWND CreateLinkButton(HWND parent, const wchar_t* text, int id, const RECT& boun
     return link;
 }
 
+namespace {
+
+LRESULT CALLBACK KeyboardLinkProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR) {
+    switch (message) {
+    case WM_GETDLGCODE: {
+        // Enter is the label's, not the window's default button
+        const auto* msg = reinterpret_cast<const MSG*>(lParam);
+        if (msg && msg->message == WM_KEYDOWN && msg->wParam == VK_RETURN) {
+            return DefSubclassProc(hwnd, message, wParam, lParam) | DLGC_WANTMESSAGE;
+        }
+        break;
+    }
+    case WM_KEYDOWN:
+        if (wParam == VK_RETURN || wParam == VK_SPACE) {
+            SendMessageW(GetParent(hwnd), WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(hwnd), STN_CLICKED), reinterpret_cast<LPARAM>(hwnd));
+            return 0;
+        }
+        break;
+    case WM_SETFOCUS:
+    case WM_KILLFOCUS:
+        InvalidateRect(hwnd, nullptr, TRUE);
+        break;
+    case WM_PAINT: {
+        LRESULT result = DefSubclassProc(hwnd, message, wParam, lParam);
+        if (GetFocus() == hwnd) {
+            HDC dc = GetDC(hwnd);
+            RECT area;
+            GetClientRect(hwnd, &area);
+            InflateRect(&area, -1, -1);
+            DrawFocusRect(dc, &area);
+            ReleaseDC(hwnd, dc);
+        }
+        return result;
+    }
+    case WM_NCDESTROY:
+        RemoveWindowSubclass(hwnd, KeyboardLinkProc, 0);
+        break;
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
+}  // namespace
+
+void KeyboardLink(HWND label) {
+    SetWindowLongPtrW(label, GWL_STYLE, GetWindowLongPtrW(label, GWL_STYLE) | WS_TABSTOP);
+    SetWindowSubclass(label, KeyboardLinkProc, 0, 0);
+}
+
 void SetAccessibleDescription(HWND control, const std::wstring& text) {
     // PROPID_ACC_DESCRIPTION of oleacc.h, which only declares it
     constexpr GUID kDescription = {0x4d48dfe4, 0xbd3f, 0x491f, {0xa6, 0x48, 0x49, 0x2d, 0x6f, 0x20, 0xc5, 0x88}};

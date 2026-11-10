@@ -473,7 +473,8 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrd
     Show(state, folder, uid, row);
     ShowWindow(hwnd, SW_SHOW);
     SetForegroundWindow(hwnd);
-    SetFocus(hwnd);
+    // the keyboard in the message, to scroll it and Tab through its links
+    state->reader.FocusBody();
 }
 
 void MessageWindowsEvent(const UiEvent& event) {

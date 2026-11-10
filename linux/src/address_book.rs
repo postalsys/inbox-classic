@@ -195,6 +195,7 @@ impl Book {
         paned.set_position(210);
         paned.set_shrink_start_child(false);
         paned.set_resize_start_child(false);
+        crate::ui::tab_leaves(&groups, &find, &view);
         let header = header_bar(&find);
         let toolbar = adw::ToolbarView::new();
         toolbar.add_top_bar(&header);
