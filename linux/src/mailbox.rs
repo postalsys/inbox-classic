@@ -73,6 +73,8 @@ pub struct Mailbox {
     unselectable: RefCell<HashSet<i64>>,
     /// The message list's right-click menu, the last one opened (the e2e driver reads it)
     pub message_popover: RefCell<Option<gtk::PopoverMenu>>,
+    /// The actions of the message menu last opened, whose Watch and Ignore Conversation carry their check marks
+    pub message_actions: RefCell<Option<gio::SimpleActionGroup>>,
     /// The folder tree's right-click menu, the last one opened (the e2e driver reads it)
     pub folder_popover: RefCell<Option<gtk::PopoverMenu>>,
     draft_folders: RefCell<HashSet<i64>>,
@@ -212,6 +214,7 @@ impl Mailbox {
             folder_names: RefCell::default(),
             unselectable: RefCell::default(),
             message_popover: RefCell::default(),
+            message_actions: RefCell::default(),
             folder_popover: RefCell::default(),
             draft_folders: RefCell::default(),
             junk_folders: RefCell::default(),
@@ -1972,6 +1975,17 @@ impl Mailbox {
         );
         // the colours and Clear Flag; the Flag Message toggle is the primary menu's, with its key
         organize.append_submenu(Some(&crate::words::plain(crate::words::Text::UiMenuFlag)), &flag_menu());
+        // whether the conversations are watched or ignored: the check marks say it, as the list has no column for it
+        for (command, on) in [
+            (Command::WatchConversation, summary.watched),
+            (Command::IgnoreConversation, summary.ignored),
+        ] {
+            let name = format!("{command:?}").to_lowercase();
+            let action = gio::SimpleAction::new_stateful(&name, None, &on.to_variant());
+            action.connect_activate(move |_, _| run_command(command));
+            group.add_action(&action);
+            organize.append(Some(command.label()), Some(&format!("message.{name}")));
+        }
         add(&organize, Command::Archive, None);
         add(
             &organize,
@@ -2000,6 +2014,7 @@ impl Mailbox {
         add(&details, Command::Properties, None);
         menu.append_section(None, &details);
         widget.insert_action_group("message", Some(&group));
+        *self.message_actions.borrow_mut() = Some(group);
         *self.message_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
     }
 

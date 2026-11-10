@@ -675,9 +675,9 @@ try {
     $tree = [Native.Win]::GetDlgItem($main, $IDC_TREE)
     $list = [Native.Win]::GetDlgItem($main, $IDC_LIST)
     # the message list's columns (Column in mailbox.cpp)
-    $COL_WATCH = 2; $COL_FROM = 3; $COL_SUBJECT = 4; $COL_FOLDER = 7
-    # the columns of a folder's list: attachment, flag, Watch, From, Subject, Received, Size; a search adds Folder
-    $FOLDER_COLUMNS = 7
+    $COL_FROM = 2; $COL_SUBJECT = 3; $COL_RECEIVED = 4; $COL_FOLDER = 5
+    # the columns of a folder's list: attachment, flag, From, Subject, Received; a search adds Folder
+    $FOLDER_COLUMNS = 5
     $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
     Check ($null -ne $folders) "the folders of the account are in the tree ($folders)"
     # the first account's item: the first at the top of the tree with folders under it (All Inboxes, above the
@@ -2376,14 +2376,24 @@ public static class Dragger {
         SelectFolder 0
         Start-Sleep -Seconds 1
     }
-    # the dark pixels of the Watch column of a row: its glasses or its sign
-    $watchCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]$COL_WATCH -shl 32)) }
-    $watchMark = {
-        param($row)
-        $found = @{ dark = 0 }
-        $null = ScanCell $row $watchCell { param($p) if ($p.R -lt 100 -and $p.G -lt 100 -and $p.B -lt 100) { $found.dark++ } }
-        $found.dark
+    # whether an item of the selected row's right-click menu is checked: the list has no Watch column, the menu says it
+    function ContextChecked([int]$id) {
+        # WM_CONTEXTMENU from the keyboard: the menu at the selected row
+        [void][Native.Win]::PostMessage($main, 0x007B, $list, [IntPtr](-1))
+        $menu = WaitWindow '#32768' $null 10
+        $checked = $false
+        if ($menu) {
+            $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+            $checked = ([Native.Win]::GetMenuState($hmenu, $id, 0) -band 0x8) -ne 0
+            Key $menu $VK_ESCAPE
+            [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+        }
+        [void][Native.Win]::SetForegroundWindow($main)
+        $checked
     }
+    # the message list's columns, Watch and Size gone, Subject the widest
+    $width = { param($column) [int][Native.Win]::SendMessage($list, 0x101D, [IntPtr]$column, [IntPtr]::Zero) }
+    Check ((& $width $COL_SUBJECT) -gt (& $width $COL_FROM) -and (& $width $COL_SUBJECT) -gt (& $width $COL_RECEIVED)) "the list has no Watch or Size column, and Subject takes the room ($(& $width $COL_SUBJECT) wide)"
     # the darkest pixel of a row's From cell: black for its words, grey for an ignored conversation's
     $fromCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]$COL_FROM -shl 32)) }
     $darkest = {
@@ -2396,7 +2406,7 @@ public static class Dragger {
     SelectRow (& $coastRow)
     Command $main $IDM_WATCH_CONVERSATION
     Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Watching' } 10)) "Watch Conversation says so ($(StatusPart $mainStatus 0))"
-    Check ([bool](WaitFor { (& $watchMark (& $coastRow)) -gt 3 } 10)) 'the conversation has glasses in its Watch column'
+    Check ([bool](WaitFor { ContextChecked $IDM_WATCH_CONVERSATION } 10)) 'the right-click menu checks Watch Conversation'
     Check (MenuChecked 4 $IDM_WATCH_CONVERSATION) 'and Watch Conversation is checked in the Message menu'
     Check (-not (MenuChecked 4 $IDM_IGNORE_CONVERSATION)) 'Ignore Conversation is not'
     Shot $main 'threads-4-watch'
@@ -2416,7 +2426,7 @@ public static class Dragger {
     SelectRow (& $coastRow)
     Command $main $IDM_WATCH_CONVERSATION
     Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Stopped watching' } 10)) "Watch Conversation again stops watching it ($(StatusPart $mainStatus 0))"
-    Check ([bool](WaitFor { (& $watchMark (& $coastRow)) -eq 0 } 10)) 'and takes the glasses away'
+    Check ([bool](WaitFor { -not (ContextChecked $IDM_WATCH_CONVERSATION) } 10)) 'and the right-click menu no longer checks it'
     Check (-not (MenuChecked 4 $IDM_WATCH_CONVERSATION)) 'and the menu item is no longer checked'
 
     # another conversation, ignored with K
@@ -2435,7 +2445,7 @@ public static class Dragger {
     Key $list $VK_K
     Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Ignoring' } 10)) "K ignores the conversation ($(StatusPart $mainStatus 0))"
     Check ([bool](WaitFor { (& $gardenSeen) -eq 2 } 20)) "and marks its messages read on the server ($(& $gardenSeen))"
-    Check ([bool](WaitFor { (& $watchMark (& $partyRow)) -gt 3 } 10)) 'its Watch column has the ignored sign'
+    Check ([bool](WaitFor { ContextChecked $IDM_IGNORE_CONVERSATION } 10)) 'the right-click menu checks Ignore Conversation'
     Check (MenuChecked 4 $IDM_IGNORE_CONVERSATION) 'and Ignore Conversation is checked in the Message menu'
     # another row selected, so the ignored one is drawn on the list's white
     SelectRow (& $coastRow)

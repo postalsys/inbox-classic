@@ -45,7 +45,7 @@ std::wstring AllInboxes() {
 
 // as Outlook Express has them: the paper clip, the flag and the Watch column (glasses, or the sign of an ignored
 // conversation), then the text columns; no read and unread column: bold says it
-enum Column { COL_ATTACH, COL_FLAG, COL_WATCH, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_SIZE, COL_FOLDER };
+enum Column { COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_FOLDER };
 
 // what the Find box takes, shown when the mouse rests on it: the words of the query syntax are the same in every
 // language
@@ -128,8 +128,6 @@ PeSortField SortOf(int column) {
         return PE_SORT_FIELD_FROM;
     case COL_SUBJECT:
         return PE_SORT_FIELD_SUBJECT;
-    case COL_SIZE:
-        return PE_SORT_FIELD_SIZE;
     default:
         return PE_SORT_FIELD_DATE;
     }
@@ -245,11 +243,9 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     }
     IconColumn(list_, COL_ATTACH, LIST_ATTACH);
     IconColumn(list_, COL_FLAG, LIST_FLAG);
-    IconColumn(list_, COL_WATCH, LIST_GLASSES);
     AddColumn(list_, COL_FROM, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
     AddColumn(list_, COL_SUBJECT, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 320);
     AddColumn(list_, COL_RECEIVED, core::T(PE_TEXT_UI_COL_RECEIVED).c_str(), 130);
-    AddColumn(list_, COL_SIZE, core::T(PE_TEXT_UI_COL_SIZE).c_str(), 84, LVCFMT_RIGHT);
 
     reader_.Create(parent, core);
     reader_.onShown = [this] { OnMessageShown(); };
@@ -324,6 +320,22 @@ void Mailbox::LayoutList() {
         list.top += height + Scale(2);
     }
     MoveWindow(list_, list.left, list.top, width, list.bottom - list.top, TRUE);
+    FitSubjectColumn();
+}
+
+// the Subject column takes the width the other columns leave, so a long subject has the room
+void Mailbox::FitSubjectColumn() {
+    RECT client;
+    GetClientRect(list_, &client);
+    HWND header = ListView_GetHeader(list_);
+    int count = Header_GetItemCount(header);
+    int others = 0;
+    for (int column = 0; column < count; column++) {
+        if (column != COL_SUBJECT) {
+            others += ListView_GetColumnWidth(list_, column);
+        }
+    }
+    ListView_SetColumnWidth(list_, COL_SUBJECT, std::max(Scale(120), static_cast<int>(client.right) - others));
 }
 
 void Mailbox::UpdateSearchBar() {
@@ -619,16 +631,12 @@ void Mailbox::ShowFolderColumn() {
     }
     folderColumn_ = wanted;
     // the Subject column gives the Folder column its room, and gets it back: the list stays as wide as its pane
-    int subject = ListView_GetColumnWidth(list_, COL_SUBJECT);
-    int folder = Scale(130);
     if (wanted) {
         AddColumn(list_, COL_FOLDER, title.c_str(), 130);
-        ListView_SetColumnWidth(list_, COL_SUBJECT, std::max(Scale(120), subject - folder));
     } else {
-        folder = ListView_GetColumnWidth(list_, COL_FOLDER);
         ListView_DeleteColumn(list_, COL_FOLDER);
-        ListView_SetColumnWidth(list_, COL_SUBJECT, subject + folder);
     }
+    FitSubjectColumn();
 }
 
 // From, or To in Sent Items and Drafts (the core says which, and sorts a From sort by the recipients there): its
@@ -695,6 +703,8 @@ void Mailbox::ReloadList(bool keepSelection) {
                                 : nullptr);
     reloading_ = true;
     ListView_SetItemCountEx(list_, static_cast<int>(std::min<uint64_t>(rowCount_, INT_MAX)), LVSICF_NOSCROLL);
+    // the scroll bar comes and goes with the rows: Subject fits the width that leaves
+    FitSubjectColumn();
     // an empty list says why, and that may have changed with the same count
     InvalidateRect(list_, nullptr, TRUE);
     ListView_SetItemState(list_, -1, 0, LVIS_SELECTED | LVIS_FOCUSED);
@@ -772,9 +782,6 @@ void Mailbox::DisplayInfo(NMLVDISPINFOW* info) {
             break;
         case COL_RECEIVED:
             cell_ = row->has_date ? FormatDate(row->date) : L"";
-            break;
-        case COL_SIZE:
-            cell_ = FormatSize(row->size);
             break;
         case COL_FOLDER:
             cell_ = RowFolder(row->folder);
@@ -939,8 +946,7 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     SelectObject(dc, old);
 }
 
-// the paper clip (or a bounce's mark), the flag and the Watch column's mark of a row, drawn over the row as the list
-// painted it:
+// the paper clip (or a bounce's mark) and the flag of a row, drawn over the row as the list painted it:
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
 void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
     auto draw = [&](int column, int icon) {
@@ -956,11 +962,6 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         draw(COL_ATTACH, LIST_MAIL_ERROR);
     } else if (row.has_attachments) {
         draw(COL_ATTACH, LIST_ATTACH);
-    }
-    if (row.mark == PE_THREAD_MARK_WATCH) {
-        draw(COL_WATCH, LIST_GLASSES);
-    } else if (row.mark == PE_THREAD_MARK_IGNORE) {
-        draw(COL_WATCH, LIST_SPEAKER_MUTE);
     }
     if (row.flagged) {
         // the flag in its colour (red when it has none); white on the selected row's highlight, as the Mac shows it,
@@ -2043,6 +2044,11 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING, read ? IDM_MARK_UNREAD : IDM_MARK_READ, MenuItem(read ? PE_TEXT_CMD_MARK_UNREAD : PE_TEXT_CMD_MARK_READ).c_str());
     // the colours and Clear Flag (the menu bar keeps Flag Message, its shortcut, beside it)
     AppendMenuW(menu, MF_POPUP, reinterpret_cast<UINT_PTR>(FlagMenu()), MenuItem(PE_TEXT_UI_MENU_FLAG).c_str());
+    // whether the conversations are watched or ignored: the check marks say it, as the list has no column for it
+    AppendMenuW(menu, MF_STRING | (summary_.watched ? MF_CHECKED : 0), IDM_WATCH_CONVERSATION,
+                MenuItem(PE_TEXT_CMD_WATCH_CONVERSATION, L"W").c_str());
+    AppendMenuW(menu, MF_STRING | (summary_.ignored ? MF_CHECKED : 0), IDM_IGNORE_CONVERSATION,
+                MenuItem(PE_TEXT_CMD_IGNORE_CONVERSATION, L"K").c_str());
     AppendMenuW(menu, MF_STRING | (CanArchive() ? 0 : MF_GRAYED), IDM_ARCHIVE, MenuItem(PE_TEXT_CMD_ARCHIVE, L"A").c_str());
     bool junk = summary_.in_junk;
     AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, MenuItem(junk ? PE_TEXT_CMD_NOT_JUNK : PE_TEXT_CMD_JUNK).c_str());
