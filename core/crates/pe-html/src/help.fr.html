@@ -222,7 +222,9 @@
                 dans une seule liste, le plus récent d'abord, avec une colonne <b>Compte</b> qui nomme le compte de chaque message. Répondre, Transférer,
                 Déplacer et Supprimer agissent sur un message dans son propre compte, et un nouveau message part du compte du message sélectionné. <b>Marquer tous les messages
                 comme lus</b> y marque chaque Boîte de réception comme lue. Son menu contextuel n'a que <b>Marquer tous les messages comme lus</b> : on ne peut pas y
-                créer de dossiers ni y importer de messages, car ce n'est pas un dossier d'un seul compte.
+                <!--review-->créer de dossiers ni y importer de messages, car ce n'est pas un dossier d'un seul compte.<!--os:mac,linux--> Le nom de chaque compte est
+                un en-tête au-dessus de ses dossiers, comme dans Mail : un clic dessus affiche ou masque ses dossiers, et le dossier affiché reste affiché
+                pendant qu'ils sont masqués.<!--/os--><!--/review-->
             </li>
             <li>
                 Les messages non lus sont en <b>gras</b> dans la liste. Un message est
@@ -331,7 +333,7 @@
             </li>
             <li>
                 <b>Fichier &gt; Dossier</b>, ou un clic droit dans la liste des dossiers, crée un <b>Nouveau dossier</b> dans le dossier sélectionné (en haut
-                d'un compte quand le compte est sélectionné), et <b>Renomme</b> ou <b>Supprime</b> le dossier sélectionné. Supprimer un dossier supprime les
+                <!--review-->d'un compte <!--os:windows-->quand le compte est sélectionné<!--/os--><!--os:mac,linux-->depuis le menu contextuel de son nom<!--/os-->), et <b>Renomme</b> ou <b>Supprime</b> le dossier sélectionné. Supprimer un dossier supprime les<!--/review-->
                 messages qu'il contient, après confirmation. La Boîte de réception et les dossiers spéciaux (Éléments envoyés, Brouillons, Éléments supprimés et
                 autres) restent tels quels. <b>Fichier &gt; Dossier &gt; Vider le dossier</b>, ou <b>Vider le dossier</b> dans le menu contextuel d'Éléments supprimés ou de Courrier indésirable, supprime définitivement tous les messages qu'il contient, après avoir demandé combien partent ; on ne peut pas l'annuler.
             </li>

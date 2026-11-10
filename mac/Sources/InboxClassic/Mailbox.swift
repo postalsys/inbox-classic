@@ -110,6 +110,9 @@ public final class Mailbox: NSObject {
         tree.dataSource = self
         tree.delegate = self
         tree.mailbox = self
+        // a click on an account's heading opens or closes it, as in Mail
+        tree.target = self
+        tree.action = #selector(treeClicked)
         let treeScroll = scrolled(tree)
         treeScroll.widthAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestTree).isActive = true
 
@@ -1134,14 +1137,33 @@ public final class Mailbox: NSObject {
     // ---- folders ----
 
     func newFolder() {
-        let account = currentAccount
-        guard account != 0, !allInboxes else { return }
-        let where_ = folder != 0 ? Text.uiNewFolderInSelected.text : Text.uiNewFolderAtTop.text
+        guard !allInboxes else { return }
+        newFolder(in: currentAccount, under: folder)
+    }
+
+    /// a new folder in `account`, under the folder `parent` (0: at the top of the account)
+    func newFolder(in account: Int64, under parent: Int64) {
+        guard account != 0 else { return }
+        let where_ = parent != 0 ? Text.uiNewFolderInSelected.text : Text.uiNewFolderAtTop.text
         guard let name = askFolderName(title: Text.uiNewFolderTitle.text, intro: where_, name: ""), !name.isEmpty else { return }
         var reason: UnsafeMutablePointer<CChar>?
-        if !name.withCString({ pe_folder_create(core.handle, account, folder, $0, &reason) }) {
+        if !name.withCString({ pe_folder_create(core.handle, account, parent, $0, &reason) }) {
             refused(reason, Text.uiFolderNotCreated.text)
         }
+    }
+
+    /// the menu of an account's heading (a right-click on it): New Folder at the top of that account
+    func accountMenu(_ account: Int64) -> NSMenu {
+        let menu = NSMenu()
+        let item = NSMenuItem(title: Command.newFolder.label, action: #selector(accountMenuNewFolder(_:)), keyEquivalent: "")
+        item.target = self
+        item.representedObject = NSNumber(value: account)
+        menu.addItem(item)
+        return menu
+    }
+
+    @objc private func accountMenuNewFolder(_ sender: NSMenuItem) {
+        newFolder(in: (sender.representedObject as? NSNumber)?.int64Value ?? 0, under: 0)
     }
 
     func renameFolder() {
@@ -1584,17 +1606,45 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         self.outlineView(outlineView, numberOfChildrenOfItem: item) > 0
     }
 
+    /// An account is a heading over its folders, as in Mail: it opens and closes, and is never selected, so it is not
+    /// taken for a mailbox. All Inboxes, above them, is a mailbox row like the folders.
+    public func outlineView(_ outlineView: NSOutlineView, isGroupItem item: Any) -> Bool {
+        item is AccountNode
+    }
+
+    public func outlineView(_ outlineView: NSOutlineView, shouldSelectItem item: Any) -> Bool {
+        !(item is AccountNode)
+    }
+
+    /// a click on an account's heading opens or closes it
+    @objc private func treeClicked(_ sender: Any?) {
+        headingClicked(tree.clickedRow)
+    }
+
+    /// opens or closes the account heading at `row`, when there is one there
+    func headingClicked(_ row: Int) {
+        guard row >= 0, let account = tree.item(atRow: row) as? AccountNode else { return }
+        if tree.isItemExpanded(account) {
+            tree.animator().collapseItem(account)
+        } else {
+            tree.animator().expandItem(account)
+        }
+    }
+
     public func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
+        if let account = item as? AccountNode {
+            let heading = (outlineView.makeView(withIdentifier: HeadingCell.identifier, owner: nil) as? HeadingCell) ?? HeadingCell()
+            // collapsed, an account shows the unread messages of its folders
+            let unread = outlineView.isItemExpanded(account) ? 0 : account.unread
+            heading.show(name: account.account.title, count: unread)
+            heading.setAccessibilityIdentifier("tree.account.\(account.account.id)")
+            return heading
+        }
         let cell = (outlineView.makeView(withIdentifier: FolderCell.identifier, owner: nil) as? FolderCell) ?? FolderCell()
         switch item {
         case let all as AllInboxesNode:
             cell.show(name: Mailbox.allInboxesName, count: all.unread, icon: Icons.folder("mail_inbox"), bold: all.unread > 0)
             cell.setAccessibilityIdentifier("tree.allInboxes")
-        case let account as AccountNode:
-            // collapsed, an account shows the unread messages of its folders
-            let unread = outlineView.isItemExpanded(account) ? 0 : account.unread
-            cell.show(name: account.account.title, count: unread, icon: Icons.folder("mailbox"), bold: unread > 0)
-            cell.setAccessibilityIdentifier("tree.account.\(account.account.id)")
         case let node as FolderNode:
             // collapsed, a folder adds those of the folders under it
             let unread = node.folder.unread + (outlineView.isItemExpanded(node) ? 0 : node.folder.unreadBelow)
@@ -1616,6 +1666,12 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
     public func outlineViewItemDidExpand(_ notification: Notification) {
         reloadExpanded(notification)
+        // the folder listed while its account was closed is selected again where it shows
+        if !allInboxes, let node = folderNodes[folder], !(tree.item(atRow: tree.selectedRow) is FolderNode) {
+            reloading = true
+            selectTreeNode(node)
+            reloading = false
+        }
     }
 
     private func reloadExpanded(_ notification: Notification) {
@@ -1631,13 +1687,19 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
     public func outlineViewSelectionDidChange(_ notification: Notification) {
         guard !reloading else { return }
         let item = tree.item(atRow: tree.selectedRow)
-        // an account has no messages of its own
+        // closing an account takes the selection off a folder it hides (or moves it onto the account's heading, which
+        // the user can not select): the heading is left unselected, and the folder shown stays shown
+        if item is AccountNode {
+            reloading = true
+            tree.deselectAll(nil)
+            reloading = false
+        }
+        if item == nil || item is AccountNode {
+            return
+        }
         if item is AllInboxesNode {
             selectedAccount = 0
             folderSelected(0, allInboxes: true)
-        } else if let account = item as? AccountNode {
-            selectedAccount = account.account.id
-            folderSelected(0)
         } else if let node = item as? FolderNode {
             selectedAccount = 0
             folderSelected(node.folder.id)
@@ -1787,6 +1849,49 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
 }
 
 // ---- the views of the rows ----
+
+/// An account's heading in the tree: its name, small and grey as Mail's sidebar headings are, and while it is closed
+/// the count of the unread messages of its folders
+final class HeadingCell: NSTableCellView {
+    static let identifier = NSUserInterfaceItemIdentifier("heading")
+    private let name = NSTextField(labelWithString: "")
+    private let count = NSTextField(labelWithString: "")
+
+    init() {
+        super.init(frame: .zero)
+        identifier = HeadingCell.identifier
+        name.lineBreakMode = .byTruncatingTail
+        name.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
+        name.textColor = .secondaryLabelColor
+        count.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        count.textColor = .secondaryLabelColor
+        count.alignment = .right
+        let stack = NSStackView(views: [name, count])
+        stack.spacing = 5
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        count.setContentHuggingPriority(.required, for: .horizontal)
+        addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+        textField = name
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    /// the unread count it shows, for the UI test
+    private(set) var unreadShown: UInt64 = 0
+
+    func show(name text: String, count unread: UInt64) {
+        unreadShown = unread
+        name.stringValue = text
+        count.stringValue = unread > 0 ? "\(unread)" : ""
+        setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": text, "count": unread]) : text)
+    }
+}
 
 /// A folder in the tree: its icon, its name (bold while it has unread mail) and the count of unread messages
 final class FolderCell: NSTableCellView {
@@ -2019,7 +2124,10 @@ public final class FolderOutline: NSOutlineView {
         selectionHighlightStyle = .regular
         rowSizeStyle = .default
         indentationPerLevel = 14
-        autoresizesOutlineColumn = true
+        // the column as wide as the sidebar, so a selection's rounded highlight ends inside it on every row
+        autoresizesOutlineColumn = false
+        columnAutoresizingStyle = .uniformColumnAutoresizingStyle
+        column.resizingMask = .autoresizingMask
         registerForDraggedTypes([messagePasteboardType, .fileURL])
         draggingDestinationFeedbackStyle = .sourceList
         setAccessibilityIdentifier("tree")
@@ -2029,6 +2137,10 @@ public final class FolderOutline: NSOutlineView {
 
     public override func menu(for event: NSEvent) -> NSMenu? {
         let row = self.row(at: convert(event.locationInWindow, from: nil))
+        // an account's heading has its own menu, and stays unselected
+        if row >= 0, let account = item(atRow: row) as? Mailbox.AccountNode {
+            return mailbox?.accountMenu(account.account.id)
+        }
         if row >= 0 {
             selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         }

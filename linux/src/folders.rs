@@ -1,6 +1,7 @@
-//! The folder tree: each account with its folders under it, as the core lists them in tree order with their depth.
-//! A folder with unread messages is bold with their count, as in Outlook Express. Messages dragged from the list are
-//! dropped onto a folder here.
+//! The folder tree: each account a heading over its folders, as the core lists them in tree order with their depth.
+//! A heading opens and closes (a click, Enter) and is never selected, so it is not taken for a mailbox; All Inboxes,
+//! above them, is a row like the folders. A folder with unread messages is bold with their count, as in Outlook
+//! Express. Messages dragged from the list are dropped onto a folder here.
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -104,7 +105,7 @@ pub struct Entry {
 type CanDrop = Box<dyn Fn(&[MessageRef], i64) -> bool>;
 type Dropped = Box<dyn Fn(&[MessageRef], i64, bool)>;
 type FilesDropped = Box<dyn Fn(i64, Vec<std::path::PathBuf>)>;
-type Menu = Box<dyn Fn(&gtk::Widget, f64, f64)>;
+type Menu = Box<dyn Fn(&gtk::Widget, f64, f64, i64)>;
 
 /// What the tree tells the window: a folder (or an account, negated) chosen, and messages dropped onto a folder
 pub struct Handlers {
@@ -115,7 +116,8 @@ pub struct Handlers {
     pub dropped: Dropped,
     /// .eml files dropped onto folder `to` from outside the app, to put in it
     pub files_dropped: FilesDropped,
-    /// The right-click menu of the selected folder, at a point of the widget clicked
+    /// The right-click menu at a point of the widget clicked, for the item clicked: the selected folder, or an
+    /// account's heading (its id negated), which stays unselected
     pub menu: Menu,
 }
 
@@ -128,6 +130,9 @@ pub struct FolderTree {
     parents: RefCell<HashMap<i64, i64>>,
     /// While the tree is built again its selection changes are not the user's
     reloading: Cell<bool>,
+    /// The item last selected: closing an account takes the selection off a folder it hides, which stays the one
+    /// listed, and is selected again when the account opens
+    last: Cell<i64>,
     handlers: Rc<RefCell<Option<Handlers>>>,
 }
 
@@ -168,6 +173,7 @@ impl FolderTree {
             items: RefCell::default(),
             parents: RefCell::default(),
             reloading: Cell::new(false),
+            last: Cell::new(0),
             handlers,
         });
         let weak = Rc::downgrade(&this);
@@ -176,9 +182,38 @@ impl FolderTree {
                 && !tree.reloading.get()
             {
                 let id = tree.selected();
+                // nothing selected: an account was closed over the folder shown, which stays shown
+                if id == 0 {
+                    return;
+                }
+                tree.last.set(id);
                 if let Some(handlers) = &*tree.handlers.borrow() {
                     (handlers.selected)(id);
                 }
+            }
+        });
+        // an account opened again: the folder shown is selected again once its row is back
+        let weak = Rc::downgrade(&this);
+        this.selection.connect_items_changed(move |_, _, _, added| {
+            let Some(tree) = weak.upgrade() else { return };
+            if added == 0 || tree.reloading.get() || tree.selected() != 0 || tree.last.get() == 0 {
+                return;
+            }
+            let weak = Rc::downgrade(&tree);
+            glib::idle_add_local_once(move || {
+                if let Some(tree) = weak.upgrade()
+                    && tree.selected() == 0
+                {
+                    tree.reloading.set(true);
+                    tree.select_shown(tree.last.get());
+                    tree.reloading.set(false);
+                }
+            });
+        });
+        let weak = Rc::downgrade(&this);
+        this.view.connect_activate(move |_, position| {
+            if let Some(tree) = weak.upgrade() {
+                tree.toggle_heading(position);
             }
         });
         this
@@ -257,24 +292,6 @@ impl FolderTree {
         self.items.borrow().get(&id).map(|item| item.markup())
     }
 
-    /// Opens or closes the row of item `id` as a click on its expander would, for the e2e driver
-    #[cfg(feature = "e2e")]
-    pub fn set_expanded(&self, id: i64, expanded: bool) {
-        let Some(model) = self.tree_model() else { return };
-        let mut position = 0;
-        while let Some(row) = model.row(position) {
-            if row
-                .item()
-                .and_downcast::<FolderItem>()
-                .is_some_and(|item| item.id() == id)
-            {
-                row.set_expanded(expanded);
-                return;
-            }
-            position += 1;
-        }
-    }
-
     /// The id of what is selected: a folder, an account negated, [`ALL_INBOXES`], 0 for nothing
     pub fn selected(&self) -> i64 {
         self.selection
@@ -313,6 +330,63 @@ impl FolderTree {
         false
     }
 
+    /// Selects item `id` when its row is in view, leaving closed accounts closed
+    fn select_shown(&self, id: i64) {
+        let Some(model) = self.tree_model() else { return };
+        let mut position = 0;
+        while let Some(row) = model.row(position) {
+            if row
+                .item()
+                .and_downcast::<FolderItem>()
+                .is_some_and(|item| item.id() == id)
+            {
+                self.selection.set_selected(position);
+                return;
+            }
+            position += 1;
+        }
+    }
+
+    /// Opens or closes the account heading at `position`, when there is one there
+    pub fn toggle_heading(&self, position: u32) {
+        if let Some(row) = self.tree_model().and_then(|model| model.row(position))
+            && row
+                .item()
+                .and_downcast::<FolderItem>()
+                .is_some_and(|item| is_heading(item.id()))
+        {
+            row.set_expanded(!row.is_expanded());
+        }
+    }
+
+    /// The position of the heading of account `id` (negated), for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn position_of(&self, id: i64) -> Option<u32> {
+        let model = self.tree_model()?;
+        let mut position = 0;
+        while let Some(row) = model.row(position) {
+            if row
+                .item()
+                .and_downcast::<FolderItem>()
+                .is_some_and(|item| item.id() == id)
+            {
+                return Some(position);
+            }
+            position += 1;
+        }
+        None
+    }
+
+    /// Whether the row at `position` can be selected, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn selectable(&self, position: u32) -> bool {
+        self.tree_model()
+            .and_then(|model| model.row(position))
+            .and_then(|row| row.item())
+            .and_downcast::<FolderItem>()
+            .is_some_and(|item| !is_heading(item.id()))
+    }
+
     /// The id of the first row of the tree, for the e2e driver
     #[cfg(feature = "e2e")]
     pub fn top_id(&self) -> Option<i64> {
@@ -330,7 +404,13 @@ impl FolderTree {
     }
 }
 
-/// The rows: the expander, the icon and the name; a drop target for messages, the right-click menu
+/// Whether item `id` is an account's heading (an account's id negated), not a folder or All Inboxes
+fn is_heading(id: i64) -> bool {
+    id < 0 && id != ALL_INBOXES
+}
+
+/// The rows: the expander, the icon and the name; a drop target for messages, the right-click menu. An account's row
+/// is a heading: small and grey, without an icon, never selected; a click or Enter opens and closes it.
 fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactory {
     let factory = gtk::SignalListItemFactory::new();
     factory.connect_setup(move |_, item| {
@@ -367,19 +447,67 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactor
         let menu_handlers = handlers.clone();
         click.connect_pressed(move |gesture, _, x, y| {
             let Some(item) = weak_item.upgrade() else { return };
-            // the folder under the mouse is the one the menu is for
-            if let Some(view) = gesture.widget().and_then(|w| w.ancestor(gtk::ListView::static_type()))
+            let id = item_id(&item);
+            // the folder under the mouse is the one the menu is for; a heading has its own menu and stays unselected
+            if !is_heading(id)
+                && let Some(view) = gesture.widget().and_then(|w| w.ancestor(gtk::ListView::static_type()))
                 && let Some(selection) = view.downcast_ref::<gtk::ListView>().and_then(|v| v.model())
             {
                 selection.select_item(item.position(), true);
             }
             if let (Some(widget), Some(handlers)) = (gesture.widget(), &*menu_handlers.borrow()) {
-                (handlers.menu)(&widget, x, y);
+                (handlers.menu)(&widget, x, y, id);
             }
         });
         expander.add_controller(click);
+        // a click anywhere on a heading opens or closes it, not only on its arrow
+        let open = gtk::GestureClick::new();
+        open.set_button(gtk::gdk::BUTTON_PRIMARY);
+        let weak_item = item.downgrade();
+        open.connect_released(move |gesture, _, _, _| {
+            let Some(item) = weak_item.upgrade() else { return };
+            if is_heading(item_id(&item))
+                && let Some(row) = item.item().and_downcast::<gtk::TreeListRow>()
+            {
+                row.set_expanded(!row.is_expanded());
+                gesture.set_state(gtk::EventSequenceState::Claimed);
+            }
+        });
+        expander.add_controller(open);
+    });
+    // a heading: not selectable, activated (Enter) to open or close, in the heading style without an icon
+    factory.connect_bind(|_, item| {
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let heading = is_heading(item_id(item));
+        item.set_selectable(!heading);
+        item.set_activatable(heading);
+        if let Some(expander) = item.child() {
+            if heading {
+                expander.add_css_class("account-heading");
+            } else {
+                expander.remove_css_class("account-heading");
+            }
+            if let Some(icon) = expander
+                .downcast_ref::<gtk::TreeExpander>()
+                .and_then(|e| e.child())
+                .and_then(|row| row.first_child())
+            {
+                icon.set_visible(!heading);
+            }
+        }
     });
     factory
+}
+
+/// The id of the item a list item shows: a folder, an account negated, [`ALL_INBOXES`], 0 for none
+fn item_id(item: &gtk::ListItem) -> i64 {
+    item.item()
+        .and_downcast::<gtk::TreeListRow>()
+        .and_then(|row| row.item())
+        .and_downcast::<FolderItem>()
+        .map_or(0, |folder| folder.id())
 }
 
 /// What is dropped onto the row of a folder: messages dragged from the list (moved, copied with Ctrl), or .eml files
