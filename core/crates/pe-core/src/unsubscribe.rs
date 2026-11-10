@@ -41,7 +41,7 @@ fn addresses(value: &str) -> Vec<&str> {
 }
 
 /// The domains the provider says signed the message: its `dkim=pass` results
-fn passed_domains(headers: &[Header], trusted: &[String]) -> Vec<String> {
+pub(crate) fn passed_domains(headers: &[Header], trusted: &[String]) -> Vec<String> {
     verdict(headers, trusted)
         .unwrap_or_default()
         .into_iter()

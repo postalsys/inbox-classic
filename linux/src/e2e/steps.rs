@@ -2677,3 +2677,130 @@ pub async fn languages(d: &Driver) {
     }
     in_language("en").await;
 }
+
+/// A message whose code is in its text, from a domain the provider says signed it; one with an OTP-Token header; one
+/// unsigned. Read and older than what the later steps add, as the bounces are.
+pub async fn one_time_codes(d: &Driver) {
+    d.step("a one-time code");
+    let main = shell().main();
+    let Some(inbox) = folder_id("Inbox") else {
+        d.check(false, "the tree has the Inbox");
+        return;
+    };
+    let message = |verdict: bool, extra: &str, subject: &str, id: &str, body: &str| {
+        format!(
+            "{}{extra}From: Example Accounts <no-reply@accounts.example.com>\r\nTo: testuser@inboxclassic.test\r\n\
+             Subject: {subject}\r\nDate: {}\r\nMessage-ID: <{id}@example.com>\r\nMIME-Version: 1.0\r\n\
+             Content-Type: text/plain; charset=utf-8\r\n\r\n{body}\r\n",
+            if verdict {
+                "Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=example.com\r\n"
+            } else {
+                ""
+            },
+            date_now(-280)
+        )
+    };
+    let code = |digits: &str| {
+        format!(
+            "Hello,\r\n\r\nYour verification code is {digits}.\r\n\r\nIt expires in 10 minutes. If you did not ask for \
+             it, ignore this email."
+        )
+    };
+    let (signed, by_header, unsigned) = ("Your sign-in code", "Sign in to Example", "Your code, unsigned");
+    let header = "OTP-Token: \"917355\"; origin=\"https://login.example.com\"\r\n";
+    let added = d
+        .add_message(&message(true, "", signed, "code-body", &code("482913")), &["\\Seen"])
+        .is_ok()
+        && d.add_message(
+            &message(
+                true,
+                header,
+                by_header,
+                "code-header",
+                "Use the code at the top of this message to sign in.",
+            ),
+            &["\\Seen"],
+        )
+        .is_ok()
+        && d.add_message(
+            &message(false, "", unsigned, "code-unsigned", &code("771204")),
+            &["\\Seen"],
+        )
+        .is_ok();
+    run_command(Command::Sync);
+    let arrived = wait_until(30, || {
+        [signed, by_header, unsigned].iter().all(|subject| {
+            listed_in_folder(inbox, 0, 500)
+                .iter()
+                .any(|m| m.info.subject == *subject)
+        })
+    })
+    .await;
+    d.check(added && arrived, "three messages with codes are in the Inbox");
+    select_folder("Inbox");
+    wait_until(10, || main.selected_name() == "Inbox").await;
+    open_by_subject(inbox, signed).await;
+    let card = wait_for(15, || {
+        let text = document_text(&main.reader.preview.shown());
+        text.contains("Code from accounts.example.com").then_some(text)
+    })
+    .await
+    .unwrap_or_default();
+    d.check(
+        card.contains("482913") && card.contains("Enter it only on a page of example.com"),
+        "a code in the text of a message the domain signed is shown in a card above it, with the domain to enter it on",
+    );
+    d.check(
+        card.contains("probably expired"),
+        "a message older than an hour says the code has probably expired",
+    );
+    d.shot(main.window(), "otp-1-card").await;
+    // Copy, as a click on it asks for it: the page's navigation to it
+    main.reader.preview.view.clipboard().set_text("");
+    main.reader.preview.view.load_uri(pe_html::COPY_CODE_LINK);
+    let clipboard = main.reader.preview.view.clipboard();
+    let mut copied = String::new();
+    for _ in 0..20 {
+        copied = clipboard
+            .read_text_future()
+            .await
+            .ok()
+            .flatten()
+            .map(|t| t.to_string())
+            .unwrap_or_default();
+        if copied == "482913" {
+            break;
+        }
+        pause(250).await;
+    }
+    d.check(
+        copied == "482913",
+        &format!("Copy puts the code on the clipboard ({copied})"),
+    );
+    let said = main.status_texts().0;
+    d.check(
+        said == "Copied the code",
+        &format!("and the status bar says so ({said})"),
+    );
+
+    open_by_subject(inbox, by_header).await;
+    d.check(
+        wait_until(15, || {
+            let text = document_text(&main.reader.preview.shown());
+            text.contains("Code from login.example.com") && text.contains("917355")
+        })
+        .await,
+        "an OTP-Token header gives the code and the domain it is for",
+    );
+    open_by_subject(inbox, unsigned).await;
+    let plain = wait_for(15, || {
+        let text = document_text(&main.reader.preview.shown());
+        text.contains("771204").then_some(text)
+    })
+    .await
+    .unwrap_or_default();
+    d.check(
+        !plain.is_empty() && !plain.contains("Code from"),
+        "an unsigned message has no card: the provider did not say the domain signed it",
+    );
+}

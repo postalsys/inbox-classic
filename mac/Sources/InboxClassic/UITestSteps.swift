@@ -483,6 +483,7 @@ extension UITest {
         try await keyboardReading()
         try await conversations()
         try await bounces()
+        try await oneTimeCodes()
         try await watchAndIgnore()
     }
 
@@ -927,6 +928,63 @@ extension UITest {
     /// the row of the list whose subject is `subject`
     func listIndex(subject: String) -> Int? {
         (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == subject }
+    }
+
+    /// a message with a one-time code: one whose code is in its text, from a domain the provider says signed it; one
+    /// with an OTP-Token header; one unsigned. Dated before the other messages and read, as the bounces are.
+    func oneTimeCodes() async throws {
+        step("a one-time code")
+        let signed = "Your sign-in code"
+        let byHeader = "Sign in to Example"
+        let unsigned = "Your code, unsigned"
+        let message = { (verdict: Bool, extra: String, subject: String, id: String, body: String) in
+            (verdict ? "Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=example.com\r\n" : "") + extra
+                + "From: Example Accounts <no-reply@accounts.example.com>\r\nTo: testuser@inboxclassic.test\r\n"
+                + "Subject: \(subject)\r\nDate: Mon, 8 Sep 2025 08:00:00 +0000\r\nMessage-ID: <\(id)@example.com>\r\n"
+                + "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n\(body)\r\n"
+        }
+        let code = { (digits: String) in
+            "Hello,\r\n\r\nYour verification code is \(digits).\r\n\r\nIt expires in 10 minutes. If you did not ask for it, "
+                + "ignore this email."
+        }
+        try await addMessage(message(true, "", signed, "code-body", code("482913")), flags: ["\\Seen"])
+        try await addMessage(message(true, "OTP-Token: \"917355\"; origin=\"https://login.example.com\"\r\n", byHeader,
+                                     "code-header", "Use the code at the top of this message to sign in."), flags: ["\\Seen"])
+        try await addMessage(message(false, "", unsigned, "code-unsigned", code("771204")), flags: ["\\Seen"])
+        command(.sync)
+        selectFolder(named: "Inbox")
+        guard let row = await waitFor(30, { listIndex(subject: signed) }) else {
+            throw Failed(description: "the message with a code did not arrive")
+        }
+        list.scrollRowToVisible(row)
+        await selectRow(row)
+        check(await waitUntil(15) { (await readerText()).contains("Code from accounts.example.com") },
+              "a code in the text of a message the domain signed is shown in a card above it")
+        let card = await readerText()
+        check(card.contains("482913") && card.contains("Enter it only on a page of example.com"),
+              "with the code, and the domain to enter it on")
+        check(card.contains("probably expired"), "a message older than an hour says the code has probably expired")
+        await shot(main.window, "otp-1-card")
+        NSPasteboard.general.clearContents()
+        let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
+        _ = try? await preview?.evaluateJavaScript("document.querySelector('a[href=\"inboxclassic:copy-code\"]').click()")
+        let status: NSTextField? = find("status.text", in: main.window)
+        check(await waitUntil(5) { NSPasteboard.general.string(forType: .string) == "482913" },
+              "Copy puts the code on the clipboard (\(NSPasteboard.general.string(forType: .string) ?? "nothing"))")
+        check(status?.stringValue == "Copied the code", "and the status bar says so (\(status?.stringValue ?? ""))")
+
+        if let header = listIndex(subject: byHeader) {
+            await selectRow(header)
+        }
+        check(await waitUntil(15) {
+            let text = await readerText()
+            return text.contains("Code from login.example.com") && text.contains("917355")
+        }, "an OTP-Token header gives the code and the domain it is for")
+        if let plain = listIndex(subject: unsigned) {
+            await selectRow(plain)
+        }
+        check(await waitUntil(15) { (await readerText()).contains("771204") }, "the unsigned message is shown")
+        check(!(await readerText()).contains("Code from"), "without a card: the provider did not say the domain signed it")
     }
 
     /// the delivery report of a message sent to an address that does not exist, as Postfix writes one, and a notice

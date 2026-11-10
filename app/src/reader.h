@@ -61,6 +61,8 @@ public:
     std::function<void()> onShown;
     // called once a find is done: what to say, empty when the words were found
     std::function<void(const std::wstring& said)> onFound;
+    // a link clicked in the message: true when it is one of the document's own cards, which this follows
+    bool FollowLink(const wchar_t* uri);
     // called when the bounce card's "Show the message that bounced" is clicked, with the message it names
     std::function<void(int64_t folder, uint64_t uid)> onBouncedMessage;
 

@@ -13,9 +13,13 @@ pub const BOUNCED_MESSAGE_LINK: &str = "inboxclassic:bounced-message";
 
 /// Whether a link clicked in the reading pane is the card's [`BOUNCED_MESSAGE_LINK`]
 pub fn is_bounced_message_link(uri: &str) -> bool {
+    is_link(uri, BOUNCED_MESSAGE_LINK)
+}
+
+/// Whether `uri`, as a web view names a clicked link, is the document's own `link` (a trailing slash allowed)
+pub(crate) fn is_link(uri: &str, link: &str) -> bool {
     let uri = uri.trim();
-    let uri = uri.strip_suffix('/').unwrap_or(uri);
-    uri.eq_ignore_ascii_case(BOUNCED_MESSAGE_LINK)
+    uri.strip_suffix('/').unwrap_or(uri).eq_ignore_ascii_case(link)
 }
 
 /// The picture of a reason; the 16 kinds of reason share these six

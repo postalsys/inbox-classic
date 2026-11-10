@@ -177,6 +177,8 @@ typedef enum PeReaderLink {
   // "Show the message that bounced" on a bounce's card: select the message at `bounced_folder` and
   // `bounced_uid` of the view's `PeMessageInfo`
   PE_READER_LINK_BOUNCED_MESSAGE = 1,
+  // Copy on the card of a one-time code: put `otp_code` of the view's `PeMessageInfo` on the clipboard
+  PE_READER_LINK_COPY_CODE = 2,
 } PeReaderLink;
 
 // How a message lets its reader leave its mailing list
@@ -705,6 +707,9 @@ typedef struct PeMessageInfo {
   bool has_bounced_message;
   int64_t bounced_folder;
   uint64_t bounced_uid;
+  // The one-time code of the card at the top of `document`, empty without one: what its Copy (`pe_reader_link`
+  // says `PE_READER_LINK_COPY_CODE`) puts on the clipboard
+  const char *otp_code;
 } PeMessageInfo;
 
 typedef struct PeAttachment {

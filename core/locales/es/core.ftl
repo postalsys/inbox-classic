@@ -485,3 +485,12 @@ ui-sender-none = El remitente de este mensaje no tiene una dirección de correo 
 card-name-needed = El contacto no tiene nombre ni dirección de correo electrónico.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
 cards-file-failed = { $file }: { $reason }
+
+# review: new
+otp-heading = Código de { $domain }
+# review: new
+otp-copy = Copiar
+# review: new
+otp-note = Introdúzcalo solo en una página de { $domain }.
+# review: new
+otp-old = Este código se envió más de una hora antes de abrirlo y probablemente ha caducado.

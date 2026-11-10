@@ -1,0 +1,293 @@
+[
+    {
+        "name": "otp-detect: html login email",
+        "subject": "Your sign-in code",
+        "html": "<div><p>Hi,</p><p>Use this code to sign in to your Example account:</p><p style=\"font-size:28px;font-weight:bold;letter-spacing:6px\">739104</p><p>The code expires in 10 minutes. If you did not request it, ignore this email.</p><p>Example Inc, 123 Main Street, Springfield 54321</p></div>"
+    },
+    {
+        "name": "otp-detect: plain text email",
+        "subject": "Verify your email",
+        "text": "Hello,\n\nYour verification code is: 284716\n\nIt is valid for 15 minutes. Do not share it with anyone.\n\nThanks,\nThe Example team\n"
+    },
+    {
+        "name": "otp-detect: estonian email",
+        "subject": "Sinu kinnituskood",
+        "text": "Tere!\n\nSinu ühekordne kinnituskood on 913560\n\nKood kehtib 10 minutit.\n"
+    },
+    {
+        "name": "otp-detect: order confirmation",
+        "subject": "Order 58213490 confirmed",
+        "text": "Thank you for your order 58213490.\nTotal: 49.90 EUR\nTracking number: 77341209\nCustomer service: +372 555 0100\n"
+    },
+    {
+        "name": "otp-detect: promotional email",
+        "subject": "Save 20% this weekend",
+        "html": "<p>Get 20% off your next purchase with promo code <b>SPRING24</b> at checkout. Offer valid until Sunday.</p>"
+    },
+    {
+        "name": "otp-detect: styled html with hidden preheader",
+        "html": "<html><head><style>p{}</style></head><body><div style=\"display:none\">preheader 111111</div><p>Your verification code:</p><p style=\"font-size:32px;font-weight:bold;letter-spacing:4px\">530 112</p></body></html>"
+    },
+    {
+        "name": "otp-detect: table cells",
+        "html": "<table><tr><td>1</td><td>2</td></tr></table>"
+    },
+    {
+        "name": "otp-detect: candidates digits",
+        "text": "Your code is 482917"
+    },
+    {
+        "name": "otp-detect: candidates grouped",
+        "text": "Code: 482 917"
+    },
+    {
+        "name": "otp-detect: candidates dashed",
+        "text": "Code: 482-917"
+    },
+    {
+        "name": "otp-detect: candidates capitals",
+        "text": "Steam Guard code: QWKZT"
+    },
+    {
+        "name": "otp-detect: candidates spaced",
+        "text": "Use 4 8 2 9 1 7 to continue"
+    },
+    {
+        "name": "otp-detect: prices and dates",
+        "text": "Total 1,250.00 EUR at 10:30 on 12.05.2025"
+    },
+    {
+        "name": "otp-detect: urls",
+        "text": "Visit https://example.com/reset/837261 or mail help1234@example.com"
+    },
+    {
+        "name": "otp-detect: phone",
+        "text": "Call 372-5-555-0100"
+    },
+    {
+        "name": "otp-detect: measures",
+        "text": "The 21st meeting, 100mg, 1080p"
+    },
+    {
+        "name": "otp-detect: validation code",
+        "text": "validation code: aZ3kQ9mW2xP7rT5v"
+    },
+    {
+        "name": "otp-detect: empty",
+        "subject": "Hello"
+    },
+    {
+        "name": "en html grouped code",
+        "subject": "Your Lumora security code",
+        "html": "<table width=\"100%\"><tr><td align=\"center\"><h2>Confirm it's you</h2></td></tr><tr><td><p>Enter this security code to finish signing in to Lumora:</p></td></tr><tr><td style=\"font-family:'Courier New',monospace;font-size:30px;letter-spacing:8px;font-weight:700\">604 381</td></tr><tr><td><p style=\"color:#888;font-size:12px\">This code expires in 5 minutes. Never share it with anyone, Lumora staff will never ask for it.</p></td></tr></table>"
+    },
+    {
+        "name": "en text alphanumeric code",
+        "subject": "Finish creating your Brightpath account",
+        "text": "Welcome to Brightpath!\r\n\r\nTo verify your email address, enter the following code in the app:\r\n\r\n    K7PX-29QD\r\n\r\nThe code is valid for 30 minutes.\r\n\r\nIf you didn't request this, you can ignore this message.\r\n\r\nBrightpath, 44 Harbour Lane, Portsmouth\r\n"
+    },
+    {
+        "name": "en html one digit per cell",
+        "subject": "Log in to Ferncloud",
+        "html": "<p>Your login code:</p><table><tr><td style=\"font-size:26px\">7</td><td style=\"font-size:26px\">3</td><td style=\"font-size:26px\">0</td><td style=\"font-size:26px\">9</td><td style=\"font-size:26px\">5</td><td style=\"font-size:26px\">2</td></tr></table><p>It works once and expires in 10 minutes.</p>"
+    },
+    {
+        "name": "en text two factor with reply history",
+        "subject": "Re: account access",
+        "text": "Hi Mara,\n\nHere is the two-factor code you asked for: 558203\n\nRegards,\nSupport\n\nOn Tue, 3 Mar 2026 at 09:12, Mara Lind <mara@example.org> wrote:\n> My old code 112233 did not work, order 99881234 is stuck.\n> Thanks\n"
+    },
+    {
+        "name": "en html passcode with entities",
+        "subject": "Your one&#8209;time passcode",
+        "html": "<div style=\"font-family:Arial\">Hello&nbsp;there,<br><br>Your one-time passcode is&nbsp;<strong style=\"font-size:22px\">&#52;&#57;&#49;&#50;&#48;&#54;</strong>.<br>Don&rsquo;t share it.&nbsp;&mdash; The Kestrel Bank team &copy; 2026</div>"
+    },
+    {
+        "name": "en html magic link only",
+        "subject": "Sign in to Driftwood",
+        "html": "<p>Click the button below to sign in. This link expires in 15 minutes.</p><p><a href=\"https://driftwood.example/login?token=Qx8Lm2Pz9Rt4Vw7Y\" style=\"background:#0a7;color:#fff;padding:12px 24px\">Sign in</a></p><p>Or paste this URL into your browser: https://driftwood.example/login?token=Qx8Lm2Pz9Rt4Vw7Y</p>"
+    },
+    {
+        "name": "en text invoice",
+        "subject": "Invoice INV-2026-00417 from Northgate Hosting",
+        "text": "Invoice number: INV-2026-00417\nInvoice date: 2026-10-01\nCustomer ID: 448210\nAmount due: $129.00\nVAT (20%): $21.50\nPlease pay by 2026-10-15 to IBAN GB29 NWBK 6016 1331 9268 19.\n"
+    },
+    {
+        "name": "en html shipping notice",
+        "subject": "Your parcel is on its way",
+        "html": "<h1>Good news!</h1><p>Your package from Owlmart has shipped.</p><p>Tracking number: <a href=\"https://track.example/1Z999AA10123456784\">1Z999AA10123456784</a></p><p>Order #<b>731942</b> &middot; Estimated delivery: Nov 14</p><p>Questions? Call 1-800-555-0199.</p>"
+    },
+    {
+        "name": "en text gift card",
+        "subject": "You received a gift card!",
+        "text": "Jonas sent you a $50 gift card.\nRedeem code: GIFT-8XQ4-T2LM-9KZP\nRedeem at checkout before 31/12/2027.\nShare your referral code FRIEND10 with friends and both of you save 10%.\n"
+    },
+    {
+        "name": "en html meeting invite",
+        "subject": "Invitation: Quarterly review",
+        "html": "<p>You are invited to a meeting.</p><p>Meeting ID: 842 1937 5520<br>Passcode: 482913<br>Dial in: +1 646 555 0142</p><p>Join from a browser at 10:30 AM on 2026-11-20.</p>"
+    },
+    {
+        "name": "en text prices and phone numbers",
+        "subject": "Weekend deals",
+        "text": "Coffee grinder now 89.99 EUR (was 119.99).\nHeadphones 2499 SEK.\nStore hours 9:00-18:00, phone +44 20 7946 0958.\n5000mAh power bank, 1080p webcam, 64GB card.\n"
+    },
+    {
+        "name": "en html bank approval",
+        "subject": "Approve your payment",
+        "html": "<p>We received a request to approve a card payment of <b>€42.10</b> at Pinewood Books.</p><p>Approval code:</p><div style=\"font-size:2em;font-weight:bold;letter-spacing:0.2em\">83 61 47</div><p>Valid for 3 minutes. If you did not attempt this payment, call us at +372 600 0000.</p>"
+    },
+    {
+        "name": "en text security alert without code",
+        "subject": "New sign-in to your account",
+        "text": "We noticed a new sign-in to your Orbitly account from Chrome on Windows (IP 203.0.113.45) on 2026-11-09 at 21:14 UTC.\nIf this was you, you don't need to do anything. If not, reset your password.\nReference: 7F3A9C21\n"
+    },
+    {
+        "name": "et html kinnituskood",
+        "subject": "Teie kinnituskood",
+        "html": "<p>Tere!</p><p>Teie kood sisselogimiseks on</p><p style=\"font-size:24pt;font-weight:bold\">2048 1739</p><p>Kood kehtib 5 minutit. &Auml;ra jaga seda koodi kellegagi.</p><p>Lugupidamisega,<br>Kuusepuu AS</p>"
+    },
+    {
+        "name": "et text tellimus",
+        "subject": "Tellimus 400182 on teel",
+        "text": "Tere!\n\nTeie tellimus nr 400182 on postitatud.\nPakiautomaadi kood: 552901\nSumma kokku: 34,90 EUR\nArve number 2026-1188\nViitenumber 12345678903\n"
+    },
+    {
+        "name": "de html bestaetigungscode",
+        "subject": "Ihr Bestätigungscode",
+        "html": "<p>Hallo,</p><p>Ihr Best&auml;tigungscode lautet:</p><p><span style=\"font-size:28px;letter-spacing:5px\"><b>661 024</b></span></p><p>Bitte geben Sie den Code innerhalb von 10 Minuten ein. Der Code ist 10 Minuten g&uuml;ltig.</p>"
+    },
+    {
+        "name": "de text rechnung",
+        "subject": "Ihre Rechnung 2026-55812",
+        "text": "Sehr geehrte Kundin,\nanbei Ihre Rechnung Nr. 2026-55812 zur Bestellung 7781345.\nKundennummer: 100244\nGesamtbetrag: 59,00 EUR\nGutschein für die nächste Bestellung: DANKE15\n"
+    },
+    {
+        "name": "es html codigo de verificacion",
+        "subject": "Tu código de verificación",
+        "html": "<div><p>Hola,</p><p>Tu c&oacute;digo de verificaci&oacute;n es:</p><h2 style=\"letter-spacing:6px\">507318</h2><p>Ingresa este c&oacute;digo en la aplicaci&oacute;n. Es v&aacute;lido durante 10 minutos.</p></div>"
+    },
+    {
+        "name": "es text pedido",
+        "subject": "Pedido 300917 confirmado",
+        "text": "Gracias por tu pedido 300917.\nFactura: F-2026-0042\nTotal: 75,40 €\nUsa el cupón VERANO20 para un 20% de descuento.\n"
+    },
+    {
+        "name": "fr html code de connexion",
+        "subject": "Votre code de connexion",
+        "html": "<p>Bonjour,</p><p>Voici votre code de connexion&nbsp;:</p><p style=\"font-size:30px;font-weight:600\">K4M9TQ</p><p>Saisissez-le dans les 15 minutes. Ce code est valable une seule fois.</p>"
+    },
+    {
+        "name": "fr text commande",
+        "subject": "Confirmation de commande 88120",
+        "text": "Merci pour votre commande 88120.\nFacture 2026-311, montant 42,00 EUR.\nCode promo pour votre prochaine commande : MERCI10 (réduction de 10 %).\n"
+    },
+    {
+        "name": "ru text kod podtverzhdeniya",
+        "subject": "Код подтверждения",
+        "text": "Здравствуйте!\n\nВаш код подтверждения: 381 905\n\nВведите его на сайте. Код действителен 10 минут.\nНикому не сообщайте этот код.\n"
+    },
+    {
+        "name": "ru text guarded kod",
+        "subject": "Код и кодекс",
+        "text": "Номер заказа 7712045, кодекс 5521, код 448213, КОД: 990177\n"
+    },
+    {
+        "name": "pt html codigo",
+        "subject": "Seu código de acesso",
+        "html": "<p>Ol&aacute;!</p><p>Seu c&oacute;digo de acesso &eacute; <b style=\"font-size:24px\">914 552</b>.</p><p>Ele expira em 5 minutos.</p>"
+    },
+    {
+        "name": "it text codice di verifica",
+        "subject": "Codice di verifica",
+        "text": "Ciao,\nil tuo codice di verifica è 663019.\nScade tra 10 minuti.\n"
+    },
+    {
+        "name": "nl text verificatiecode",
+        "subject": "Je verificatiecode",
+        "text": "Hallo,\n\nJe verificatiecode is 802114. Deze code is 10 minuten geldig.\n"
+    },
+    {
+        "name": "pl text kod weryfikacyjny",
+        "subject": "Kod weryfikacyjny",
+        "text": "Twój kod weryfikacyjny to 427 650. Kod jest ważny przez 5 minut.\n"
+    },
+    {
+        "name": "ja html ninsho code",
+        "subject": "認証コードのお知らせ",
+        "html": "<p>認証コードは以下のとおりです。</p><p style=\"font-size:28px\"><b>305918</b></p><p>有効期限は10分です。</p>"
+    },
+    {
+        "name": "zh text yanzhengma",
+        "subject": "验证码",
+        "text": "您的验证码是 846201，10分钟内有效。请勿泄露给他人。\n"
+    },
+    {
+        "name": "tr text dogrulama kodu",
+        "subject": "Doğrulama kodu",
+        "text": "Doğrulama kodunuz: 552813. Bu kodu kimseyle paylaşmayın.\n"
+    },
+    {
+        "name": "both bodies, same code",
+        "subject": "Your Quillnote code",
+        "text": "Your Quillnote verification code is 319 572. It expires in 10 minutes.",
+        "html": "<p>Your Quillnote verification code is</p><p style=\"font-size:32px;letter-spacing:4px\"><strong>319 572</strong></p><p>It expires in 10 minutes.</p>"
+    },
+    {
+        "name": "emoji and astral characters around a code",
+        "subject": "🔐 Your code",
+        "text": "🔐🔐 Your login code is 😀772914😀 and 🎉:448812 ok.\n𝐂𝐨𝐝𝐞 𝟒𝟓𝟔𝟕 not a code, and 𝐀𝐁 KQZWX 🙂\n",
+        "html": "<p>🔐 Your login code: <b style=\"font-size:26px\">772914</b> 🚀🚀</p>"
+    },
+    {
+        "name": "inherited names in entities, tags and css",
+        "html": "<constructor>Your code &constructor; is <span style=\"font-size: constructor\">558812</span> &toString; &valueOf;</constructor><p style=\"font-size:__proto__\">Code 663321</p><font size=\"+3\">Login code 114477</font>"
+    },
+    {
+        "name": "css lengths and hidden variants",
+        "html": "<div style=\"font-size:12pt\"><p style=\"font-size:1.5em;letter-spacing:.1em\">Code 312094</p><p style=\"font-size:150%\">Your code 448821</p><p style=\"font-size:2rem !IMPORTANT;font-weight:800\">Security code 990321</p><p style=\"opacity:0.0\">hidden 551122</p><p style=\"max-height:0px;overflow:hidden\">hidden 661100</p><p style=\"visibility:hidden\">773311</p><p hidden=\"hidden\">881144</p><p style=\"font-size:0\">991155</p><p style=\"font-size:x-large;font-family:Menlo\">Verification code 204816</p><p style=\"font-size:-2px\">Code 102938</p><p style=\"font-size:.\">Code 564738</p></div>"
+    },
+    {
+        "name": "skipped content and malformed markup",
+        "html": "<!DOCTYPE html><html><head><title>Code 999999</title><script>var x = '<p>123456</p>';</script></head><body><!-- comment 222222 --><? pi 333333 ?><svg/><p>Your code <a title='a > b' href=\"#\">404182</a></p><p>Unclosed <b class=\"x <p>Code 515253</p><template>777777</template><p>a < b and c<d 818283</p><blockquote>Old code 616263</blockquote><div class=\"gmail_quote\">Your code 717273</div><div type=\"CITE\">Code 727374</div></body></html><!-- unterminated 121212"
+    },
+    {
+        "name": "deep nesting and stray close tags",
+        "html": "<div><div><div><span><span>Your code</span></span></div></div></div></td></tr></table><p><b>One-time password</b></p><p><font size=\"7\">83729104</font></p></span></span></div></div><i>expires in 10 minutes</i>"
+    },
+    {
+        "name": "attribution lines",
+        "text": "Here is the new code 662819.\n\n-----Original Message-----\nFrom: Old Sender\nSent: Monday\nYour code 112244\n\n---------- Forwarded message ---------\nCode 445566\n"
+    },
+    {
+        "name": "estonian attribution",
+        "text": "Kood 773355 kehtib 5 minutit.\n\nE, 3. märts 2026 kell 10:00 kirjutas Mari Maasikas <mari@example.ee>:\n> kood 990011\n"
+    },
+    {
+        "name": "mixed code shapes",
+        "text": "Codes: AB12CD34, ab12cd34, Ab12Cd34Ef56Gh78Ij90, QWERTY, WEBINAR, 0000, 1234, 2026, 1999, 000123, G-123456, 4a7c01e9-82f3b6d0, ABCD-1234-EFGH, 12-34-56, 1234 5678, 123 456 789, 12 34 56 78, retry2fa, loginFailedError, 21st, 12px, 5000mAh, 500MB, 60Hz\n"
+    },
+    {
+        "name": "joined punctuation",
+        "text": "a/123456 b@123456 c_123456 123456.d 1,234,567 10:30:45 x=123456 &123456 ?123456 50% 123456% +123456 (123456) #123456 $123456 €123456 123456 EUR usd 654321 rub\n"
+    },
+    {
+        "name": "cr only line breaks and tabs",
+        "text": "Line one\rYour code:\t\t\t 482019\r\rThanks  team﻿\n  > quoted 773310\n"
+    },
+    {
+        "name": "zero width characters",
+        "html": "<p>Your​code‌is‍&zwnj;&zwj;&shy;</p><p>5​1​9​2​0​3</p><p>Verify code 519203</p>"
+    },
+    {
+        "name": "kelvin and long s",
+        "text": "Order KZ: 551234, ſecurity code 662211, PIN 7788, enter ſpin 556677\n"
+    },
+    {
+        "name": "attribution counted in UTF-16 code units",
+        "text": "Your code 551199 expires in 5 minutes.\nOn 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 wrote:\n> Code 662200\n🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂 kirjutas:\n> kood 773311\n"
+    },
+    {
+        "name": "attribution just within the limit",
+        "text": "Your code 551199 expires in 5 minutes.\nOn 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 wrote:\n> Code 662200\n"
+    }
+]

@@ -1441,6 +1441,7 @@ dependencies = [
  "pe-mime",
  "pe-net",
  "pe-oauth",
+ "pe-otp",
  "pe-smtp",
  "pe-store",
  "pe-sync",
@@ -1538,6 +1539,7 @@ dependencies = [
  "encoding_rs",
  "regex",
  "serde_json",
+ "url",
 ]
 
 [[package]]
@@ -1560,6 +1562,15 @@ dependencies = [
  "ring",
  "serde_json",
  "tokio",
+]
+
+[[package]]
+name = "pe-otp"
+version = "0.9.0"
+dependencies = [
+ "pe-jsre",
+ "regex",
+ "serde_json",
 ]
 
 [[package]]
