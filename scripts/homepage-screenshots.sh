@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 HOMEPAGE=${HOMEPAGE:-../inboxclassic.com}
 # the screenshots the page shows
-SHOTS=(read-1-html account-1-form find-2-every-folder write-5-new agents-4-send)
+SHOTS=(read-1-html account-1-form find-2-every-folder write-5-new agents-4-send bounce-1-failed)
 platforms=("$@")
 [ ${#platforms[@]} -gt 0 ] || platforms=(windows mac linux)
 
@@ -55,6 +55,14 @@ for platform in "${platforms[@]}"; do
         # the search results: the window down to the header of the message shown, without the empty rest of its pane
         if [ "$shot" = find-2-every-folder ]; then
             magick "$target" -gravity North -crop 100%x53%+0+0 +repage "$target"
+        fi
+        # the bounce explanation: the window down to the end of what to do, without the server's words under Details
+        if [ "$shot" = bounce-1-failed ]; then
+            case "$platform" in
+                windows) height=646 ;;
+                *) height=618 ;;
+            esac
+            magick "$target" -crop "x$height+0+0" +repage "$target"
         fi
         echo "$target $(magick identify -format '%wx%h' "$target")"
     done
