@@ -2305,6 +2305,53 @@ fn a_draft_follows_from_to_another_account() {
     assert_eq!(other_server.subjects("Drafts"), ["Changing hands"]);
 }
 
+/// With the app's setting on, a fresh message with a code, from a domain the provider says signed it, is announced
+/// with its code first; an unsigned one is announced as any other
+#[test]
+fn new_mail_names_its_code_when_asked() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    pe_core::otp::set_in_notifications(true);
+    let date = pe_smtp::message::format_date(
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64,
+    );
+    let code_mail = |verdict: &str, digits: &str| {
+        format!(
+            "{verdict}From: Example Accounts <no-reply@accounts.example.com>\r\nTo: testuser@inboxclassic.test\r\n\
+             Subject: Your sign-in code\r\nDate: {date}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n\
+             Hello,\r\n\r\nYour verification code is {digits}.\r\n\r\nIt expires in 10 minutes. If you did not ask for it, \
+             ignore this email.\r\n"
+        )
+    };
+    let text_of = |event: Event| match event {
+        Event::NewMail { text, .. } => text,
+        _ => unreachable!(),
+    };
+    s.server.add_message(
+        "INBOX",
+        // the provider of the test account is example.com: its verdict counts
+        &code_mail(
+            "Authentication-Results: mx.example.com; dkim=pass header.d=example.com\r\n",
+            "482913",
+        ),
+        &[],
+    );
+    let text = text_of(s.wait(|e| matches!(e, Event::NewMail { .. })));
+    assert!(
+        text.starts_with("482913 is your code for accounts.example.com\n"),
+        "{text}"
+    );
+    s.server.add_message("INBOX", &code_mail("", "771204"), &[]);
+    let text = text_of(s.wait(|e| matches!(e, Event::NewMail { .. })));
+    assert!(!text.contains("771204") && !text.contains("is your code"), "{text}");
+    pe_core::otp::set_in_notifications(false);
+}
+
 #[test]
 fn new_mail_comes_in_while_watching_the_inbox() {
     let Some(s) = setup() else { return };

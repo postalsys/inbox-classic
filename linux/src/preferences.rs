@@ -63,8 +63,20 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
             shell.set_notify(row.is_active());
         }
     });
+    let codes = adw::SwitchRow::builder()
+        .title(plain(Text::UiCodesInNotifications))
+        .active(pe_core::otp::in_notifications())
+        .build();
+    codes.set_widget_name("preferences-codes");
+    codes.connect_active_notify(|row| {
+        shell()
+            .settings
+            .set_bool(settings::CODES_IN_NOTIFICATIONS, row.is_active());
+        pe_core::otp::set_in_notifications(row.is_active());
+    });
     let mail = adw::PreferencesGroup::builder().title(t!(GtkNewMailGroup)).build();
     mail.add(&notify);
+    mail.add(&codes);
 
     let grouped = adw::SwitchRow::builder()
         .title(plain(Text::UiGroupByConversation))

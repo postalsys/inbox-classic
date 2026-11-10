@@ -472,6 +472,9 @@ Screenshots: `otp-1-card`
 - Copy on the card puts the code on the clipboard, and the status bar says so
 - the second's card has the header's code and the domain of its origin
 - the third has no card
+- Options (Settings on the Mac, Preferences on Linux) has Show sign-in codes in new mail notifications, off at first;
+  turned on, the core is told (the core's own test checks that the notification then names the code of fresh, signed
+  mail and not of unsigned mail)
 
 ## 34g. Watch and Ignore Conversation
 

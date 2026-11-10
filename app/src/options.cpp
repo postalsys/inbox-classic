@@ -60,9 +60,11 @@ struct OptionsState {
     HWND combo = nullptr;
     HWND check = nullptr;
     HWND threadsCheck = nullptr;
+    HWND codesCheck = nullptr;
     int picked = 0;
     bool notify = false;
     bool threads = false;
+    bool codes = false;
 };
 
 LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -73,6 +75,7 @@ LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             state->picked = static_cast<int>(SendMessageW(state->combo, CB_GETCURSEL, 0, 0));
             state->notify = Button_GetCheck(state->check) == BST_CHECKED;
             state->threads = Button_GetCheck(state->threadsCheck) == BST_CHECKED;
+            state->codes = Button_GetCheck(state->codesCheck) == BST_CHECKED;
         }
         state->done = true;
         return 0;
@@ -114,7 +117,7 @@ void StartLanguage(const std::wstring& forced) {
     core::SetLanguage(code);
 }
 
-bool OptionsDialog(HWND owner, bool& notify, bool& threads) {
+bool OptionsDialog(HWND owner, bool& notify, bool& threads, bool& codes) {
     RegisterDialogClass(kOptionsClass, OptionsProc);
     std::vector<Language> languages = Languages();
     std::wstring chosen = GetTextPreference(kLanguagePreference);
@@ -127,16 +130,19 @@ bool OptionsDialog(HWND owner, bool& notify, bool& threads) {
     std::wstring label = core::T(PE_TEXT_WIN_OPTIONS_LANGUAGE_LABEL), note = core::T(PE_TEXT_WIN_OPTIONS_RESTART_NOTE);
     std::wstring notifyText = core::T(PE_TEXT_WIN_OPTIONS_NOTIFY);
     std::wstring threadsText = core::T(PE_TEXT_UI_GROUP_BY_CONVERSATION);
+    std::wstring codesText = core::T(PE_TEXT_UI_CODES_IN_NOTIFICATIONS);
     std::wstring ok = core::T(PE_TEXT_UI_OK), cancel = core::T(PE_TEXT_UI_CANCEL);
     int pad = Scale(12), row = Scale(22);
     int labelWidth = static_cast<int>(MeasureText(label).cx) + Scale(8);
     // wide enough for the longest language name and the check boxes' words
     int inner = std::max({Scale(360), labelWidth + Scale(200), static_cast<int>(MeasureText(notifyText).cx) + Scale(24),
-                          static_cast<int>(MeasureText(threadsText).cx) + Scale(24)});
+                          static_cast<int>(MeasureText(threadsText).cx) + Scale(24),
+                          static_cast<int>(MeasureText(codesText).cx) + Scale(48)});
     int width = 2 * pad + inner;
     int noteHeight = std::max(Scale(16), static_cast<int>(MeasureText(note, inner - labelWidth).cy));
-    // the language and its note, a line, the notifications and the conversations, the buttons
-    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 2 * row + Scale(4) + Scale(16) + Scale(25) + pad;
+    // the language and its note, a line, the notifications (with their codes under them) and the conversations, the
+    // buttons
+    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 3 * row + 2 * Scale(4) + Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
     OptionsState state;
 
@@ -165,6 +171,11 @@ bool OptionsDialog(HWND owner, bool& notify, bool& threads) {
                              {left, y, right, y + row});
     Button_SetCheck(check, notify ? BST_CHECKED : BST_UNCHECKED);
     y += row + Scale(4);
+    // under the notifications, as a choice of theirs
+    HWND codesCheck = CreateChild(dialog, L"BUTTON", codesText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_OPTIONS_CODES,
+                                  {left + Scale(24), y, right, y + row});
+    Button_SetCheck(codesCheck, codes ? BST_CHECKED : BST_UNCHECKED);
+    y += row + Scale(4);
     HWND threadsCheck = CreateChild(dialog, L"BUTTON", threadsText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_OPTIONS_THREADS,
                                     {left, y, right, y + row});
     Button_SetCheck(threadsCheck, threads ? BST_CHECKED : BST_UNCHECKED);
@@ -176,6 +187,7 @@ bool OptionsDialog(HWND owner, bool& notify, bool& threads) {
     state.combo = combo;
     state.check = check;
     state.threadsCheck = threadsCheck;
+    state.codesCheck = codesCheck;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     RunModal(dialog, combo, state.done);
     if (!state.accepted) {
@@ -183,6 +195,7 @@ bool OptionsDialog(HWND owner, bool& notify, bool& threads) {
     }
     notify = state.notify;
     threads = state.threads;
+    codes = state.codes;
     int picked = state.picked;
     std::wstring code = picked > 0 && static_cast<size_t>(picked) <= languages.size() ? languages[picked - 1].code : L"";
     if (code == chosen) {

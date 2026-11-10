@@ -1697,6 +1697,19 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
     })
 }
 
+/// Whether a new message's notification names its one-time code, when it has one the provider says its domain signed:
+/// the app's setting (off unless the user turns it on), set as the app starts and when it changes
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_set_codes_in_notifications(on: bool) {
+    guard(|| pe_core::otp::set_in_notifications(on));
+}
+
+/// What `pe_set_codes_in_notifications` set last, for the UI tests
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_codes_in_notifications() -> bool {
+    guard(pe_core::otp::in_notifications).unwrap_or(false)
+}
+
 /// What a link clicked in the reading pane is to the app
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

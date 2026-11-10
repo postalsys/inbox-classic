@@ -465,3 +465,5 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Le carnet d'adresses n'a pas pu être enregistré : { $reason }
 # review: new
 ui-code-copied = Code copié
+# review: new
+ui-codes-in-notifications = Afficher les codes de connexion dans les notifications de nouveau courrier

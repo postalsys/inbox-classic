@@ -468,3 +468,4 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = The address book could not be saved: { $reason }
 ui-code-copied = Copied the code
+ui-codes-in-notifications = Show sign-in codes in new mail notifications

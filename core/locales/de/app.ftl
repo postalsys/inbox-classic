@@ -465,3 +465,5 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Das Adressbuch konnte nicht gespeichert werden: { $reason }
 # review: new
 ui-code-copied = Code kopiert
+# review: new
+ui-codes-in-notifications = Anmeldecodes in Benachrichtigungen über neue E-Mails anzeigen

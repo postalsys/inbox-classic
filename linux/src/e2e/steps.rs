@@ -1413,6 +1413,24 @@ async fn group_by_conversation(d: &Driver, on: bool) {
         }
         None => d.check(false, "Preferences has Group messages by conversation"),
     }
+    // the notifications can name a message's sign-in code: off at first, the core told when it is turned on
+    if !on {
+        match named_in(&root, "preferences-codes").and_downcast::<adw::SwitchRow>() {
+            Some(row) => {
+                d.check(
+                    !row.is_active() && !pe_core::otp::in_notifications(),
+                    "Preferences can show sign-in codes in new mail notifications, off at first",
+                );
+                row.set_active(true);
+                d.check(
+                    pe_core::otp::in_notifications(),
+                    "turned on, the core names the codes in the notifications",
+                );
+                row.set_active(false);
+            }
+            None => d.check(false, "Preferences has Show sign-in codes in new mail notifications"),
+        }
+    }
     pause(300).await;
     dialog.close();
     wait_gone(10, "preferences-dialog").await;

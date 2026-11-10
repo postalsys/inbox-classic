@@ -87,6 +87,7 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
     };
     let settings = Settings::load();
     let notify = settings.bool(settings::NOTIFY, true);
+    pe_core::otp::set_in_notifications(settings.bool(settings::CODES_IN_NOTIFICATIONS, false));
     let core = std::sync::Arc::new(core);
     // another app with this store open keeps the agents
     let mcp = pe_mcp::McpServer::for_store(core.clone(), &store).ok();
