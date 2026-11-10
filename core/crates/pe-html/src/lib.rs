@@ -352,8 +352,19 @@ mod tests {
     #[test]
     fn the_fold_button_centres_its_dots() {
         let document = render_view("<p>hi</p>", &RenderOptions::default(), &[], &[]).document;
-        let rule = document.split("details.pe-fold>summary{").nth(1).unwrap().split('}').next().unwrap();
-        for part in ["display:inline-flex", "align-items:center", "box-sizing:border-box", "height:17px"] {
+        let rule = document
+            .split("details.pe-fold>summary{")
+            .nth(1)
+            .unwrap()
+            .split('}')
+            .next()
+            .unwrap();
+        for part in [
+            "display:inline-flex",
+            "align-items:center",
+            "box-sizing:border-box",
+            "height:17px",
+        ] {
             assert!(rule.contains(part), "{rule}");
         }
         assert!(!rule.contains("line-height"), "{rule}");
