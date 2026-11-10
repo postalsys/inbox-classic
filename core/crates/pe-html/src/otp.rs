@@ -47,7 +47,7 @@ fn shown(value: &str, max: usize) -> String {
 const RULES: &[(&str, &str)] = &[
     (
         "C",
-        "display:block;margin:0 0 12px;padding:10px 14px;border:1px solid #b9cbe8;border-left:4px solid #2f6fcf;\
+        "display:block;box-sizing:border-box;max-width:720px;margin:0 0 12px;padding:10px 14px;border:1px solid #b9cbe8;border-left:4px solid #2f6fcf;\
          border-radius:6px;background:#f3f7fd;color:#1d1d1f;font:10pt Arial,sans-serif;text-align:left;\
          visibility:visible;opacity:1;position:static",
     ),
