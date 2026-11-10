@@ -15,7 +15,8 @@
 #            image started with --version
 #   Linux    dist/InboxClassic-amd64.deb and dist/InboxClassic-arm64.deb in Docker here (scripts/linux-package.sh),
 #            each installed into a clean Ubuntu container and started with --version, and after the release
-#            published to the apt repository https://apt.inboxclassic.com (scripts/apt-repo.sh)
+#            published to the apt repository https://apt.inboxclassic.com (scripts/apt-repo.sh); Omarchy's
+#            package repository builds the Arch package (linux/arch/PKGBUILD) from the tag by itself
 # then writes hashes.txt signed with the release GPG key, uploads all of it to the draft release and publishes it,
 # and puts the Mac update (Sparkle's appcast.xml, signed with the update key in this Mac's keychain) on the homepage.
 #
@@ -131,6 +132,9 @@ echo "Published ${TAG}: https://github.com/${REPO}/releases/tag/${TAG}"
 # the Linux packages to the apt repository, where Linux users get their updates
 if building linux; then
     ./scripts/apt-repo.sh
+    # Omarchy's package repository builds the release from its source on its own (an upstream watch on our GitHub
+    # Releases, omacom-io/omarchy-pkgs pkgbuilds/inbox-classic); its bot's pull request is where to follow it
+    echo "Omarchy picks up ${TAG} at https://github.com/omacom-io/omarchy-pkgs/pulls?q=inbox-classic"
 fi
 
 # the Mac update: the appcast lists the DMG of the release, signed with the update key, with the release notes

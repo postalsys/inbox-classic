@@ -271,6 +271,62 @@ jobs:
                       build/feature-map-linux.html
                   if-no-files-found: ignore
 
+    # the Linux app on Arch, whose GTK, libadwaita and WebKitGTK run ahead of Ubuntu's: the UI end-to-end test, and
+    # the package of linux/arch/PKGBUILD, which Omarchy's package repository builds from each release
+    arch:
+        name: Build and test on Arch Linux
+        runs-on: ubuntu-latest
+        container: archlinux:latest
+        timeout-minutes: 60
+        # a rolling distribution can break this on its own schedule; not required until it has proven steady
+        continue-on-error: true
+        defaults:
+            run:
+                working-directory: linux
+        steps:
+            - name: Packages
+              working-directory: /
+              run: |
+                  pacman -Syu --noconfirm --needed \
+                      base-devel git rust nodejs npm namcap pkgconf \
+                      gtk4 libadwaita webkitgtk-6.0 glib2-devel \
+                      xorg-server-xvfb xorg-xauth dbus at-spi2-core gnome-keyring libsecret \
+                      ttf-dejavu cantarell-fonts adwaita-icon-theme
+            - uses: actions/checkout@v6
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: linux
+                  key: arch
+            - name: ImapKit for the UI test
+              run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
+            - name: UI end-to-end test
+              run: |
+                  cargo build --locked --features e2e
+                  ../scripts/linux-ui-e2e-run.sh target/debug/inbox-classic ../build/ui-e2e-arch
+            - name: Every feature shown
+              working-directory: .
+              run: node scripts/feature-map.mjs build/ui-e2e-arch --check linux
+            - uses: actions/upload-artifact@v7
+              if: always()
+              with:
+                  name: ui-e2e-arch
+                  path: |
+                      build/ui-e2e-arch/*.png
+                      build/ui-e2e-arch/log.txt
+                  if-no-files-found: ignore
+            # makepkg from a tarball of the checkout under the release tarball's name, so it downloads nothing, with the
+            # crates rust-cache restored (scripts/arch-makepkg.sh, which scripts/arch-package.sh runs too)
+            - name: The package
+              working-directory: .
+              run: |
+                  git config --global --add safe.directory "$PWD"
+                  version=$(sed -n 's/^pkgver=\([0-9.]*\).*/\1/p' linux/arch/PKGBUILD)
+                  mkdir /tmp/pkg
+                  cp linux/arch/PKGBUILD /tmp/pkg/
+                  git archive --prefix "inbox-classic-$version/" -o "/tmp/pkg/inbox-classic-$version.tar.gz" HEAD
+                  CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}" scripts/arch-makepkg.sh /tmp/pkg --install
+
     fuzz:
         name: Fuzz the parsers
         runs-on: ubuntu-24.04

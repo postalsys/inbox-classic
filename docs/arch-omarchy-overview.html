@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inbox Classic on Omarchy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: one reading column, a sticky section index on wide screens, terminal-styled command blocks */
+:root {
+  --bg: #f6f8fa;
+  --surface: #ffffff;
+  --fg: #16202a;
+  --muted: #5b6875;
+  --line: #d9e1e8;
+  --accent: #1478b8;
+  --accent-soft: #e3f0f8;
+  --term-bg: #121a22;
+  --term-fg: #d6e4ef;
+  --term-dim: #7f95a8;
+  --ok: #1d7a46;
+  --ok-soft: #e1f3e8;
+  --check: #9a6200;
+  --check-soft: #fbf0d9;
+  --none: #5b6875;
+  --none-soft: #eceff2;
+  --font-display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151b; --surface: #161e26; --fg: #e3eaf0; --muted: #94a3b1; --line: #26323d;
+    --accent: #5db3e8; --accent-soft: #15293a; --term-bg: #0a0f14; --term-fg: #d6e4ef; --term-dim: #7f95a8;
+    --ok: #5cc98a; --ok-soft: #13291d; --check: #e8b45a; --check-soft: #2c2312; --none: #94a3b1; --none-soft: #1d252d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #161e26; --fg: #e3eaf0; --muted: #94a3b1; --line: #26323d;
+  --accent: #5db3e8; --accent-soft: #15293a; --term-bg: #0a0f14; --term-fg: #d6e4ef; --term-dim: #7f95a8;
+  --ok: #5cc98a; --ok-soft: #13291d; --check: #e8b45a; --check-soft: #2c2312; --none: #94a3b1; --none-soft: #1d252d;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--font-body); }
+.wrap {
+  max-width: 1120px; margin: 0 auto;
+  padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 48px;
+}
+nav.index { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; font-size: 14px; }
+nav.index ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+nav.index a { color: var(--muted); text-decoration: none; }
+nav.index a:hover, nav.index a:focus-visible { color: var(--accent); }
+main { min-width: 0; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 26px; font-weight: 600; }
+h3 { font-size: 18px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+section { display: grid; gap: 18px; scroll-margin-top: 24px; }
+.eyebrow { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 18px; color: var(--muted); }
+code, .mono { font-family: var(--font-mono); font-size: 0.9em; }
+p code, li code, td code { background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+a { color: var(--accent); }
+ul.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 72ch; }
+
+/* the install moment */
+.term { background: var(--term-bg); color: var(--term-fg); border-radius: 10px; overflow: hidden; }
+.term-bar { display: flex; gap: 8px; align-items: center; padding: 10px 14px; border-bottom: 1px solid #ffffff14; font: 12px var(--font-mono); color: var(--term-dim); }
+.term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #ffffff22; display: inline-block; }
+.term pre { margin: 0; padding: 16px 18px; font: 14px/1.7 var(--font-mono); overflow-x: auto; }
+.term .c { color: var(--term-dim); }
+.term .p { color: #6cc4f5; }
+.paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+
+/* decisions */
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.decision { background: var(--surface); padding: 18px; display: grid; gap: 6px; align-content: start; }
+.decision .k { font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.decision .v { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
+.decision p { font-size: 14px; color: var(--muted); }
+
+/* tables */
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 680px; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+th { font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; white-space: nowrap; font: 500 12px var(--font-mono); padding: 2px 8px; border-radius: 999px; }
+.pill.ok { color: var(--ok); background: var(--ok-soft); }
+.pill.check { color: var(--check); background: var(--check-soft); }
+.pill.none { color: var(--none); background: var(--none-soft); }
+
+/* pipeline diagram */
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; }
+.node { flex: 1 1 150px; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+.node b { font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+.node span { font-size: 13px; color: var(--muted); }
+.node.new { border-color: var(--accent); background: var(--accent-soft); }
+.arrow { align-self: center; color: var(--muted); font-family: var(--font-mono); }
+.legend { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.legend i { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--accent); background: var(--accent-soft); display: inline-block; }
+
+/* work steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: step; }
+.step { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 4px 14px; }
+.step::before { content: counter(step); grid-row: span 3; font: 600 22px var(--font-display); color: var(--accent); }
+.step .files { font: 13px var(--font-mono); color: var(--muted); overflow-wrap: anywhere; }
+.step ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 15px; }
+
+/* phases */
+.phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.phase { border-top: 3px solid var(--accent); background: var(--surface); padding: 14px 16px; border-radius: 0 0 8px 8px; display: grid; gap: 6px; align-content: start; }
+.phase .k { font: 500 12px var(--font-mono); color: var(--muted); }
+.phase p { font-size: 14px; }
+.phase.gate { border-top-color: var(--check); }
+
+.checklist { columns: 2 300px; column-gap: 32px; margin: 0; padding-left: 20px; }
+.checklist li { break-inside: avoid; margin-bottom: 6px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+.two > div { min-width: 0; display: grid; gap: 10px; align-content: start; }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  nav.index { display: none; }
+  .arrow { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="index" aria-label="Sections">
+    <ol>
+      <li><a href="#goal">The goal</a></li>
+      <li><a href="#decisions">Decisions</a></li>
+      <li><a href="#repo">Omarchy's repository</a></li>
+      <li><a href="#omarchy">What Omarchy gives</a></li>
+      <li><a href="#work">The work</a></li>
+      <li><a href="#vm">Desktop VM</a></li>
+      <li><a href="#order">Order</a></li>
+      <li><a href="#risks">Risks</a></li>
+      <li><a href="#later">Later</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="goal">
+      <span class="eyebrow">Plan · Arch Linux packaging · revised</span>
+      <h1>Inbox Classic on Omarchy</h1>
+      <p class="lede">Today Linux gets a .deb, the apt repository and a Flatpak manifest. Nothing installs on Arch. The goal: someone who just installed Omarchy finds Inbox Classic in the Omarchy menu, and its updates come with Omarchy's own. The route is Omarchy's own package repository; the AUR follows for plain Arch once its registration reopens.</p>
+      <div class="paths">
+        <div class="term">
+          <div class="term-bar"><i></i><i></i><i></i>&nbsp;Omarchy menu</div>
+          <pre><span class="c"># Super + Alt + Space</span>
+Install › Package › <span class="p">inbox-classic</span>
+<span class="c"># updates arrive with</span>
+Update › Omarchy</pre>
+        </div>
+        <div class="term">
+          <div class="term-bar"><i></i><i></i><i></i>&nbsp;Omarchy terminal</div>
+          <pre><span class="p">$</span> sudo pacman -S inbox-classic
+<span class="p">$</span> inbox-classic --version
+Inbox Classic 0.11.0
+<span class="c"># signed by Omarchy, from pkgs.omarchy.org</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="decisions">
+      <span class="eyebrow">Settled with you</span>
+      <h2>Decisions</h2>
+      <div class="decisions">
+        <div class="decision"><span class="k">First</span><span class="v">Omarchy's repository</span><p>One package, <code>inbox-classic</code>, built from the tag's source by Omarchy's CI for x86_64 and aarch64. Fast ring requested.</p></div>
+        <div class="decision"><span class="k">Updates</span><span class="v">Omarchy's bot</span><p>An upstream watch on our GitHub Releases. No Arch step in release.sh; it only prints where the bot's PR shows up.</p></div>
+        <div class="decision"><span class="k">Later</span><span class="v">AUR for plain Arch</span><p>Registration is closed for now. Same PKGBUILD, <code>postalsys</code> account, key ready at <code>~/.ssh/aur_postalsys</code>.</p></div>
+        <div class="decision"><span class="k">Repository</span><span class="v">None of our own</span><p>No pacman.conf edits or extra keys for users.</p></div>
+        <div class="decision"><span class="k">Desktop test</span><span class="v">VMware on the Windows laptop</span><p>Official x86_64 Omarchy ISO, driven over SSH. Screenshots from inside the guest.</p></div>
+      </div>
+    </section>
+
+    <section id="repo">
+      <span class="eyebrow">omacom-io/omarchy-pkgs</span>
+      <h2>How a package gets into Omarchy</h2>
+      <p>pkgs.omarchy.org comes first in Omarchy's <code>pacman.conf</code>. It already carries outside apps (1password, bitwarden, dropbox, localsend, LM Studio), and its README invites package PRs. Packages are signed with Omarchy's key and appear under Install › Package, the menu Omarchy recommends over the AUR.</p>
+      <div class="flow" role="list">
+        <div class="node new" role="listitem"><b>Our PR</b><span>pkgbuilds/inbox-classic: PKGBUILD and package.json</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" role="listitem"><b>build-approved</b><span>a maintainer's label, once, for a first-time author</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" role="listitem"><b>CI builds</b><span>x86_64 and aarch64, checks green</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" role="listitem"><b>Auto-merge</b><span>signed, published to edge (fast ring: rc and stable too)</span></div>
+      </div>
+      <div class="flow" role="list">
+        <div class="node" role="listitem"><b>Our release vX.Y.Z</b><span>published by release.sh</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" role="listitem"><b>Upstream watch</b><span>Omarchy's bot reads our GitHub Releases</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" role="listitem"><b>Bump PR</b><span>builds, merges itself when green</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" role="listitem"><b>omarchy-update</b><span>users get it</span></div>
+      </div>
+      <div class="legend"><i></i> our part; everything after the first PR runs without us</div>
+    </section>
+
+    <section id="omarchy">
+      <span class="eyebrow">Read from the source at tag v4.5.0</span>
+      <h2>What Omarchy gives the app</h2>
+      <p>Omarchy is Arch and Hyprland with its own Quickshell shell (Waybar is gone), on x86_64 and aarch64.</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>The app uses</th><th>On Omarchy</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Passwords in the Secret Service</td><td><code>gnome-keyring</code> is a base package; install creates an unlocked default keyring</td><td><span class="pill ok">should work</span></td></tr>
+            <tr><td>Tray icon (StatusNotifierItem)</td><td>Quickshell bar has a tray widget</td><td><span class="pill ok">should work</span></td></tr>
+            <tr><td>New-mail notification, click opens the message</td><td>The shell is the freedesktop notification server; a click calls the <code>default</code> action</td><td><span class="pill check">check focus</span></td></tr>
+            <tr><td>Codes in notifications</td><td>Omarchy detects verification codes in notification text itself</td><td><span class="pill check">check overlap</span></td></tr>
+            <tr><td>Browser sign-in, file dialogs</td><td><code>xdg-desktop-portal-gtk</code> and <code>-hyprland</code>, Chromium</td><td><span class="pill ok">should work</span></td></tr>
+            <tr><td>GTK 4.20, libadwaita 1.8, WebKitGTK 6.0</td><td>Arch extra, always at or ahead of Ubuntu 26.04</td><td><span class="pill ok">fine</span></td></tr>
+            <tr><td>Compose, message windows, dialogs</td><td>Hyprland tiles top-level windows; dialogs with a parent float</td><td><span class="pill check">check each</span></td></tr>
+            <tr><td>Unread count on the dock</td><td>No dock</td><td><span class="pill none">nothing to do</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="work">
+      <span class="eyebrow">Seven pieces</span>
+      <h2>The work</h2>
+      <ol class="steps">
+        <li class="step">
+          <h3>The PKGBUILD</h3>
+          <div class="files">linux/arch/PKGBUILD</div>
+          <ul>
+            <li>Source tarball of the tag; <code>cargo fetch --locked</code>, <code>cargo build --frozen --release</code>; the same files as the .deb, without the apt source.</li>
+            <li>Depends on <code>gtk4 libadwaita webkitgtk-6.0</code> and the rest, checked by <code>namcap</code>; <code>gnome-keyring</code> optional.</li>
+            <li>Built locally with omarchy-pkgs' own <code>bin/build</code>, then installed in a clean Arch container and run with <code>--version</code>.</li>
+          </ul>
+        </li>
+        <li class="step">
+          <h3>CI job on Arch</h3>
+          <div class="files">.github/workflows/ci.yml · job arch</div>
+          <ul>
+            <li>Build <code>linux/</code> and run the UI end-to-end test under Xvfb with Arch's newest GTK and WebKitGTK.</li>
+            <li><code>makepkg</code> of the PKGBUILD from the checkout and <code>namcap</code>, so a release never turns red in Omarchy's bot.</li>
+            <li>Non-blocking for a few weeks, then required.</li>
+          </ul>
+        </li>
+        <li class="step">
+          <h3>Omarchy desktop VM</h3>
+          <div class="files">scripts/omarchy-vm.sh · VMware Workstation on andri@10.8.0.8</div>
+          <ul>
+            <li>The checklist below, with the locally built package, before the PR.</li>
+          </ul>
+        </li>
+        <li class="step">
+          <h3>PR to Omarchy's repository</h3>
+          <div class="files">omacom-io/omarchy-pkgs · pkgbuilds/inbox-classic/</div>
+          <ul>
+            <li>PKGBUILD plus <code>.omarchy/package.json</code>: <code>"release_ring": "fast"</code> and a GitHub watch on <code>postalsys/inbox-classic</code>.</li>
+            <li>A short description: what it is, how it was tested on Omarchy 4.5, why fast ring.</li>
+            <li>You read it before it is opened from andris9.</li>
+          </ul>
+        </li>
+        <li class="step">
+          <h3>Following releases</h3>
+          <div class="files">scripts/release.sh</div>
+          <ul>
+            <li>Prints the link to the bot's PRs for inbox-classic. A dependency change goes to omarchy-pkgs as its own PR with <code>pkgrel</code> bumped.</li>
+          </ul>
+        </li>
+        <li class="step">
+          <h3>Help, README, docs</h3>
+          <div class="files">pe-html/src/help.html · README.md · CLAUDE.md · docs/cross-platform-plan.md</div>
+          <ul>
+            <li>The help's Linux removal line names only apt; add <code>sudo pacman -R inbox-classic</code>.</li>
+          </ul>
+        </li>
+        <li class="step">
+          <h3>Homepage</h3>
+          <div class="files">../inboxclassic.com</div>
+          <ul>
+            <li>An "Omarchy" card beside the apt one: Install › Package, <code>sudo pacman -S inbox-classic</code>.</li>
+            <li>An "Omarchy" link beside "Install with apt" under the Linux download buttons.</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <section id="vm">
+      <span class="eyebrow">Real desktop, real tiling</span>
+      <h2>Omarchy in VMware on the Windows laptop</h2>
+      <p>The laptop (Core Ultra 9, 24 cores, 32 GB) already has VMware Workstation, with Hyper-V on. It runs the official x86_64 ISO, the platform most Omarchy users have. The VM is reached through the laptop over SSH, so a locked or disconnected Windows session does not matter.</p>
+      <div class="two">
+        <div>
+          <h3>Setup</h3>
+          <ul class="plain">
+            <li>Trial first: Hyprland with 3D in VMware under Hyper-V. Fallback: software rendering.</li>
+            <li>One install at the VMware console over RDP, enable SSH, snapshot <code>clean</code>.</li>
+            <li><code>vmrun -T ws start … nogui</code>; guest SSH via <code>ssh -J andri@10.8.0.8</code>.</li>
+            <li>Screenshots with <code>grim</code> in the guest, windows moved with <code>hyprctl</code>.</li>
+            <li>About 8 GB and 6 cores, running only for checks.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>When</h3>
+          <ul class="plain">
+            <li>Before the PR: the local build via <code>pacman -U</code>.</li>
+            <li>After publishing: Install › Package › <code>inbox-classic</code> from <code>clean</code>.</li>
+            <li>After the next release: <code>omarchy-update</code> brings it.</li>
+          </ul>
+        </div>
+      </div>
+      <h3>Checklist</h3>
+      <ul class="checklist">
+        <li>Launcher entry, icon, app id <code>com.inboxclassic.InboxClassic</code></li>
+        <li>Passwords kept across a restart, no keyring prompt</li>
+        <li>Tray icon in the bar, its menu, hide to tray</li>
+        <li>New-mail notification; a click opens the message and raises the window</li>
+        <li>Code notification next to Omarchy's own code detection</li>
+        <li>Outlook.com sign-in through Chromium and back</li>
+        <li>Compose, message windows, Options, Add Account, file dialogs, Print under tiling</li>
+        <li>Light and dark Omarchy themes</li>
+        <li><code>mailto:</code> from Chromium opens compose</li>
+      </ul>
+    </section>
+
+    <section id="order">
+      <span class="eyebrow">Sequence</span>
+      <h2>Order</h2>
+      <div class="phases">
+        <div class="phase"><span class="k">Phase 1</span><h3>PKGBUILD</h3><p>Built with Omarchy's own tooling, tried in a clean Arch container.</p></div>
+        <div class="phase"><span class="k">Phase 2</span><h3>CI on Arch</h3><p>Build, UI e2e, makepkg, namcap.</p></div>
+        <div class="phase"><span class="k">Phase 3</span><h3>Desktop checks</h3><p>The VMware VM and the checklist; fixes in linux/.</p></div>
+        <div class="phase gate"><span class="k">Phase 4</span><h3>PR to Omarchy</h3><p>Waits for a maintainer's build approval, then the first publish.</p></div>
+        <div class="phase"><span class="k">Phase 5</span><h3>Tell people</h3><p>Help, README, CLAUDE.md, homepage, once the package is live.</p></div>
+        <div class="phase"><span class="k">Phase 6</span><h3>AUR</h3><p>When registration reopens, for plain Arch.</p></div>
+      </div>
+    </section>
+
+    <section id="risks">
+      <span class="eyebrow">What could go wrong</span>
+      <h2>Risks</h2>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Risk</th><th>Answer</th></tr></thead>
+          <tbody>
+            <tr><td>Omarchy's maintainers decline the package or keep it waiting</td><td>The repository invites PRs and carries other outside apps, but it is their call. Fallback: the AUR with the same PKGBUILD, found under Install › AUR.</td></tr>
+            <tr><td>Source build time on their 4 vCPU aarch64 runners</td><td>Likely 20 to 40 minutes with thin LTO. Ask in the PR; a -bin package from our .deb is the fallback.</td></tr>
+            <tr><td>Rolling release changes GTK or WebKitGTK; a release then fails to build there</td><td>The CI job builds against current Arch on every PR, before a release.</td></tr>
+            <tr><td>Hyprland 3D in VMware under Hyper-V</td><td>Trial first; software rendering is slower but enough for checks.</td></tr>
+            <tr><td>The laptop is also the Windows build machine and sometimes unreachable</td><td>The VM runs only for checks; phases 1 and 2 do not need it.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="later">
+      <span class="eyebrow">Out of scope</span>
+      <h2>Later</h2>
+      <ul class="plain">
+        <li>The AUR for Arch users without Omarchy, once registration reopens.</li>
+        <li>Arch's official <code>extra</code> repository: needs an Arch package maintainer to adopt it.</li>
+        <li>A mention in Omarchy's manual or a default install: the Omarchy team's choice.</li>
+        <li>Flathub, planned separately.</li>
+        <li>aarch64 desktop checks in a QEMU VM on the Mac.</li>
+      </ul>
+    </section>
+
+    <footer>Source: docs/arch-omarchy-plan.md in postalsys/inbox-classic. Omarchy facts read from github.com/omacom/omarchy at v4.5.0 and github.com/omacom-io/omarchy-pkgs.</footer>
+  </main>
+</div>
+</body>
+</html>

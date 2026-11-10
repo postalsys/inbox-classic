@@ -24,6 +24,8 @@ Running the setup of a newer version updates the installed one in place; the acc
 
 **Linux**: install the `.deb` of the [latest release](https://github.com/postalsys/inbox-classic/releases/latest) for your machine, `InboxClassic-amd64.deb` or `InboxClassic-arm64.deb`, with `sudo apt install ./InboxClassic-amd64.deb`. It needs Ubuntu 26.04 or newer (GTK 4, libadwaita and WebKitGTK come from Ubuntu). A newer `.deb` installs over the old one. Mail is in `~/.local/share/inbox-classic`, passwords in the keyring (GNOME Keyring).
 
+**Arch Linux and Omarchy**: build the package from [`linux/arch/PKGBUILD`](linux/arch/PKGBUILD) with `makepkg -si` in a folder with that file; it compiles the release's source.
+
 ## How it is put together
 
 Everything that a remote party writes, such as IMAP responses, message headers and bodies, attachment names and autoconfig documents, is parsed in Rust. The C++ app only draws what the core has already decoded and validated:
