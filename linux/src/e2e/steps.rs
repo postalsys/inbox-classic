@@ -2708,13 +2708,25 @@ pub async fn one_time_codes(d: &Driver) {
     };
     let (signed, by_header, unsigned) = ("Your sign-in code", "Sign in to Example", "Your code, unsigned");
     let header = "OTP-Token: \"917355\"; origin=\"https://login.example.com\"\r\n";
-    let added = d.add_message(&message(true, "", signed, "code-body", &code("482913")), &["\\Seen"]).is_ok()
+    let added = d
+        .add_message(&message(true, "", signed, "code-body", &code("482913")), &["\\Seen"])
+        .is_ok()
         && d.add_message(
-            &message(true, header, by_header, "code-header", "Use the code at the top of this message to sign in."),
+            &message(
+                true,
+                header,
+                by_header,
+                "code-header",
+                "Use the code at the top of this message to sign in.",
+            ),
             &["\\Seen"],
         )
         .is_ok()
-        && d.add_message(&message(false, "", unsigned, "code-unsigned", &code("771204")), &["\\Seen"]).is_ok();
+        && d.add_message(
+            &message(false, "", unsigned, "code-unsigned", &code("771204")),
+            &["\\Seen"],
+        )
+        .is_ok();
     run_command(Command::Sync);
     let arrived = wait_until(30, || {
         [signed, by_header, unsigned].iter().all(|subject| {
@@ -2749,15 +2761,27 @@ pub async fn one_time_codes(d: &Driver) {
     let clipboard = main.reader.preview.view.clipboard();
     let mut copied = String::new();
     for _ in 0..20 {
-        copied = clipboard.read_text_future().await.ok().flatten().map(|t| t.to_string()).unwrap_or_default();
+        copied = clipboard
+            .read_text_future()
+            .await
+            .ok()
+            .flatten()
+            .map(|t| t.to_string())
+            .unwrap_or_default();
         if copied == "482913" {
             break;
         }
         pause(250).await;
     }
-    d.check(copied == "482913", &format!("Copy puts the code on the clipboard ({copied})"));
+    d.check(
+        copied == "482913",
+        &format!("Copy puts the code on the clipboard ({copied})"),
+    );
     let said = main.status_texts().0;
-    d.check(said == "Copied the code", &format!("and the status bar says so ({said})"));
+    d.check(
+        said == "Copied the code",
+        &format!("and the status bar says so ({said})"),
+    );
 
     open_by_subject(inbox, by_header).await;
     d.check(
