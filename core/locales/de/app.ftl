@@ -134,7 +134,6 @@ ui-col-subject = Betreff
 ui-col-from = Von
 ui-col-to = An
 ui-col-received = Empfangen
-ui-col-watch = Beobachten
 ui-watched-conversation = Beobachtete Unterhaltung
 ui-col-sent = Gesendet
 ui-col-size = Größe

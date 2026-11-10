@@ -659,6 +659,7 @@ private:
     // the one folder the words typed name (in:sent), empty for every folder
     std::wstring findPlace_;
     void LayoutList();
+    void FitSubjectColumn();
     int LinkWidth(HWND link) const;
     // the icons the list draws on its rows, and their size
     HIMAGELIST listIcons_ = nullptr;

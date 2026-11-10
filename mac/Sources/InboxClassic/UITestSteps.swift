@@ -761,11 +761,10 @@ extension UITest {
         onMain { if let event { self.list.keyDown(with: event) } }
     }
 
-    /// the glasses or the ignored sign the Watch column shows on row `index`
-    func watchMark(_ index: Int) -> NSImage? {
-        let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("watch"))
-        guard column >= 0, let cell = list.view(atColumn: column, row: index, makeIfNecessary: true) else { return nil }
-        return views(NSImageView.self, in: cell).first?.image
+    /// whether the right-click menu of the selected rows checks `command`: the list has no Watch column, the menu says
+    /// whether a conversation is watched or ignored
+    func contextChecked(_ command: Command) -> Bool {
+        main.mailbox.messageMenu()?.items.first { $0.tag == command.rawValue }?.state == .on
     }
 
     /// the colour of the sender on row `index`
@@ -778,6 +777,10 @@ extension UITest {
     func watchAndIgnore() async throws {
         step("watch and ignore a conversation")
         selectFolder(named: "Inbox")
+        let ids = list.tableColumns.map(\.identifier.rawValue)
+        let width = { (id: String) in self.list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id))?.width ?? 0 }
+        check(!ids.contains("watch") && !ids.contains("size") && width("subject") > width("from") && width("subject") > width("received"),
+              "the list has no Watch or Size column, and Subject takes the room (\(ids), \(Int(width("subject"))) wide)")
         final class Announced { var all: [(title: String, text: String)] = [] }
         let announced = Announced()
         TestHooks.notified = { title, text in announced.all.append((title, text)) }
@@ -793,9 +796,9 @@ extension UITest {
         command(.watchConversation)
         check(await waitUntil(10) {
             guard let head = tripRows().first else { return false }
-            return head.message.mark == PE_THREAD_MARK_WATCH && watchMark(head.index) != nil
-                && menuItem(.watchConversation)?.state == .on
-        }, "Watch Conversation shows the glasses and checks the menu item")
+            return head.message.mark == PE_THREAD_MARK_WATCH && contextChecked(.watchConversation)
+                && !contextChecked(.ignoreConversation) && menuItem(.watchConversation)?.state == .on
+        }, "Watch Conversation checks the menu item, in the Message menu and the right-click menu")
         check(watchStatus?.stringValue == "Watching the conversation", "the status bar says so (\(watchStatus?.stringValue ?? ""))")
 
         // a new reply to it is announced, saying the conversation is watched
@@ -810,12 +813,12 @@ extension UITest {
         check(announced.all.first { $0.title == Text.uiWatchedConversation.text }?.text == "Carol\nRe: Plans for the trip",
               "the notification says who wrote and the subject under its title")
         _ = await waitUntil(20) { tripRows().first?.message.threadCount == 4 }
-        // opened, every message of it has the glasses; the new reply selected
+        // opened, every message of it is watched; the new reply selected
         command(.expandAllThreads)
         check(await waitUntil(5) {
             let rows = tripRows()
-            return rows.count == 4 && rows.allSatisfy { $0.message.mark == PE_THREAD_MARK_WATCH && watchMark($0.index) != nil }
-        }, "every message of the watched conversation has the glasses")
+            return rows.count == 4 && rows.allSatisfy { $0.message.mark == PE_THREAD_MARK_WATCH }
+        }, "every message of the watched conversation is watched")
         if let newest = tripRows().last { await selectRow(newest.index) }
         await shot(main.window, "threads-4-watch")
         command(.collapseAllThreads)
@@ -826,9 +829,9 @@ extension UITest {
         letterKey("w", 13)
         check(await waitUntil(10) {
             guard let head = tripRows().first else { return false }
-            return head.message.mark == PE_THREAD_MARK_NONE && watchMark(head.index) == nil
+            return head.message.mark == PE_THREAD_MARK_NONE && !contextChecked(.watchConversation)
                 && menuItem(.watchConversation)?.state == .off
-        }, "Watch Conversation again takes the glasses away (W in the list)")
+        }, "Watch Conversation again takes the check marks away (W in the list)")
         check(watchStatus?.stringValue == "Stopped watching the conversation",
               "the status bar says so (\(watchStatus?.stringValue ?? ""))")
 
@@ -855,7 +858,7 @@ extension UITest {
             return !all.isEmpty && all.allSatisfy { ($0["flags"] as? [String])?.contains("\\Seen") == true }
         }
         check(await waitUntil(20) {
-            guard let row = partyRow(), row.message.mark == PE_THREAD_MARK_IGNORE, watchMark(row.index) != nil,
+            guard let row = partyRow(), row.message.mark == PE_THREAD_MARK_IGNORE, contextChecked(.ignoreConversation),
                   fromColor(row.index) == Mailbox.ignoredColor else { return false }
             return await partyServerSeen()
         }, "Ignore Conversation greys the row and marks its messages read on the server (K in the list)")
@@ -882,8 +885,8 @@ extension UITest {
             (0..<self.list.numberOfRows).filter { self.main.mailbox.row($0)?.subject.hasSuffix(partySubject) == true }.count == 3
         }
         let partyRows = (0..<list.numberOfRows).filter { main.mailbox.row($0)?.subject.hasSuffix(partySubject) == true }
-        check(partyRows.count == 3 && partyRows.allSatisfy { watchMark($0) != nil && fromColor($0) == Mailbox.ignoredColor },
-              "every message of the ignored conversation is grey, with the sign")
+        check(partyRows.count == 3 && partyRows.allSatisfy { fromColor($0) == Mailbox.ignoredColor },
+              "every message of the ignored conversation is grey")
         if let newest = partyRows.last {
             await selectRow(newest)
             onMain { self.list.scrollRowToVisible(newest) }
@@ -906,7 +909,7 @@ extension UITest {
         command(.ignoreConversation)
         check(await waitUntil(10) {
             guard let row = partyRow() else { return false }
-            return row.message.mark == PE_THREAD_MARK_NONE && watchMark(row.index) == nil && fromColor(row.index) == .labelColor
+            return row.message.mark == PE_THREAD_MARK_NONE && !contextChecked(.ignoreConversation) && fromColor(row.index) == .labelColor
         }, "Ignore Conversation again makes it an ordinary conversation")
         check(watchStatus?.stringValue == "Stopped ignoring the conversation",
               "the status bar says so (\(watchStatus?.stringValue ?? ""))")

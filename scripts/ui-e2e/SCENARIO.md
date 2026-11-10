@@ -460,12 +460,14 @@ Screenshots: `bounce-1-failed`, `bounce-2-delayed`, `bounce-3-list`
 
 Screenshots: `threads-4-watch`, `threads-5-ignore`
 
-- Message > Watch Conversation on the conversation of 34e shows glasses in its Watch column, and the menu item is checked
+- the list has no Watch or Size column, and Subject is its widest column
+- Message > Watch Conversation on the conversation of 34e checks the menu item, in the Message menu and in the message's
+  right-click menu
 - a new reply to it is put into the Inbox on the server, and it is announced (the notification says the conversation is
   watched)
-- Watch Conversation again takes the glasses away
-- Message > Ignore Conversation (K in the list) on another conversation turns its row grey, with the ignored sign in the
-  Watch column, and marks its messages read on the server
+- Watch Conversation again takes the check marks away
+- Message > Ignore Conversation (K in the list) on another conversation turns its row grey, checks the menu item in both
+  menus, and marks its messages read on the server
 - a new reply to it is put into the Inbox on the server: it arrives read on the server, without a notification
 - View > Hide Ignored Conversations leaves the ignored conversation out of the list; turned off again, it is back
 

@@ -386,7 +386,7 @@ public final class Mailbox: NSObject {
     var grouped: Bool { listView.grouped }
 
     private enum ColumnID: String, CaseIterable {
-        case attach, flag, watch, from, subject, received, size, folder
+        case attach, flag, from, subject, received, folder
     }
 
     private func setUpList() {
@@ -408,23 +408,22 @@ public final class Mailbox: NSObject {
         list.setDraggingSourceOperationMask(.copy, forLocal: false)
         promiseWriter.wrote = { [weak self] dir, problem in self?.wroteFile(dir, problem) }
         let columns: [(ColumnID, String, CGFloat)] = [
-            // no envelope column: bold says a message is unread, and From and Subject get the room
-            (.attach, "", 22), (.flag, "", 22), (.watch, "", 22), (.from, Text.uiColFrom.text, 200), (.subject, Text.headerSubject.text, 303),
-            (.received, Text.uiColReceived.text, 130), (.size, Text.uiColSize.text, 96),
+            // no envelope, Watch or Size column: bold says a message is unread, the menus say a conversation is watched,
+            // and the subject gets the room
+            (.attach, "", 22), (.flag, "", 22), (.from, Text.uiColFrom.text, 200), (.subject, Text.headerSubject.text, 420),
+            (.received, Text.uiColReceived.text, 130),
         ]
         for (id, title, width) in columns {
             list.addTableColumn(makeColumn(id, title: title, width: width))
         }
         // the paper clip and the flag in their headers, as Outlook Express has them (a header cell does not draw the
         // image of a column without a title on its own)
-        for (id, image) in [("attach", Icons.list("attach")), ("flag", Icons.list("flag")), ("watch", Icons.watchHeader)] {
+        for (id, image) in [("attach", Icons.list("attach")), ("flag", Icons.list("flag"))] {
             guard let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id)), let image else { continue }
             let header = IconHeaderCell(textCell: "")
             header.icon = image
             column.headerCell = header
         }
-        // the glasses say nothing on their own: the header names the column
-        list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("watch"))?.headerToolTip = Text.uiColWatch.text
         showSortIndicator()
     }
 
@@ -435,15 +434,14 @@ public final class Mailbox: NSObject {
         }
         column.title = title
         column.width = width
-        if [.attach, .flag, .watch].contains(id) {
+        if [.attach, .flag].contains(id) {
             column.minWidth = width
             column.maxWidth = width
             column.resizingMask = []
         } else {
             column.minWidth = 40
-        }
-        if id == .size {
-            column.headerCell.alignment = .right
+            // the Subject column alone follows the width of the list, so a long subject gets the room
+            column.resizingMask = id == .subject ? [.autoresizingMask, .userResizingMask] : .userResizingMask
         }
         return column
     }
@@ -456,7 +454,7 @@ public final class Mailbox: NSObject {
         guard severalFolders != folderColumn else { return }
         folderColumn = severalFolders
         // Subject, then From, give the Folder column its room, and get it back: the list stays as wide as its pane, and
-        // Received and Size stay whole
+        // Received stays whole
         let id = NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue)
         let givers = [ColumnID.subject, .from].compactMap { list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier($0.rawValue)) }
         if folderColumn {
@@ -610,11 +608,10 @@ public final class Mailbox: NSObject {
         switch ColumnID(rawValue: column.identifier.rawValue) {
         case .from: field = PE_SORT_FIELD_FROM
         case .subject: field = PE_SORT_FIELD_SUBJECT
-        case .size: field = PE_SORT_FIELD_SIZE
         default: field = PE_SORT_FIELD_DATE
         }
-        // the same column again turns the order around; dates and sizes start with the largest
-        ascending = field == sort ? !ascending : field != PE_SORT_FIELD_DATE && field != PE_SORT_FIELD_SIZE
+        // the same column again turns the order around; dates start with the newest
+        ascending = field == sort ? !ascending : field != PE_SORT_FIELD_DATE
         sort = field
         listView.setSort(sort, ascending: ascending)
         showSortIndicator()
@@ -626,7 +623,6 @@ public final class Mailbox: NSObject {
         switch sort {
         case PE_SORT_FIELD_FROM: sorted = .from
         case PE_SORT_FIELD_SUBJECT: sorted = .subject
-        case PE_SORT_FIELD_SIZE: sorted = .size
         default: sorted = .received
         }
         for column in list.tableColumns {
@@ -1321,6 +1317,11 @@ public final class Mailbox: NSObject {
         // several: read if any is unread; Flag in a colour or Clear Flag (the toggle is the Message menu's, by its key)
         add(summary.unread > 0 ? .markRead : .markUnread)
         menu.addItem(AppDelegate.shared.flagMenu())
+        // whether the conversations are watched or ignored: the check marks say it, as the list has no column for it
+        add(.watchConversation)
+        menu.items.last?.state = summary.watched ? .on : .off
+        add(.ignoreConversation)
+        menu.items.last?.state = summary.ignored ? .on : .off
         add(.archive)
         add(inJunk ? .notJunk : .junk)
         add(.move)
@@ -1713,13 +1714,12 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
         guard let column = tableColumn, let message = row(index) else { return nil }
         let id = column.identifier
         switch ColumnID(rawValue: id.rawValue) {
-        case .attach, .flag, .watch:
+        case .attach, .flag:
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? IconCell) ?? IconCell(id)
             switch ColumnID(rawValue: id.rawValue) {
             // a bounce's mark in the paper clip's place, whether or not it has files
             case .attach where message.bounce: cell.show(Icons.bounce)
             case .attach: cell.show(message.hasAttachments ? Icons.list("attach") : nil)
-            case .watch: cell.show(Icons.threadMark(message.mark))
             default:
                 cell.show(message.flagged ? Icons.coloredFlag(message.flagColor) : nil,
                           selected: message.flagged ? Icons.selectedFlag : nil)
@@ -1740,13 +1740,11 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             switch ColumnID(rawValue: id.rawValue) {
             case .from: value = recipientsColumn ? message.recipients : message.from
             case .received: value = message.date.map(formatDate) ?? ""
-            case .size: value = formatSize(message.size)
             case .folder: value = rowFolder(message.folder)
             default: value = ""
             }
             // unread messages in bold, as Outlook Express shows them, and closed conversations with unread mail
-            cell.show(value, bold: message.bold, right: id.rawValue == ColumnID.size.rawValue,
-                      grey: message.dimmed)
+            cell.show(value, bold: message.bold, grey: message.dimmed)
             return cell
         }
     }
@@ -1898,7 +1896,7 @@ final class IconHeaderCell: NSTableHeaderCell {
     override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
         super.drawInterior(withFrame: cellFrame, in: controlView)
         guard let tinted else { return }
-        // in a box of 14 points, or 16 wide for a wide one (the glasses), its shape kept
+        // in a box of 14 points, or 16 wide for a wide one, its shape kept
         let scale = min(16 / max(1, tinted.size.width), 14 / max(1, tinted.size.height))
         let size = NSSize(width: tinted.size.width * scale, height: tinted.size.height * scale)
         tinted.draw(in: NSRect(x: cellFrame.midX - size.width / 2, y: cellFrame.midY - size.height / 2,
@@ -1927,11 +1925,10 @@ final class TextCell: NSTableCellView {
     required init?(coder: NSCoder) { fatalError() }
 
     /// `grey`: a message of an ignored conversation, in the colour of what is turned off
-    func show(_ value: String, bold: Bool, right: Bool, grey: Bool = false) {
+    func show(_ value: String, bold: Bool, grey: Bool = false) {
         label.stringValue = value
         label.font = bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
         label.textColor = grey ? Mailbox.ignoredColor : .labelColor
-        label.alignment = right ? .right : .left
     }
 }
 
