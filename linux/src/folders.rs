@@ -292,24 +292,6 @@ impl FolderTree {
         self.items.borrow().get(&id).map(|item| item.markup())
     }
 
-    /// Opens or closes the row of item `id` as a click on its expander would, for the e2e driver
-    #[cfg(feature = "e2e")]
-    pub fn set_expanded(&self, id: i64, expanded: bool) {
-        let Some(model) = self.tree_model() else { return };
-        let mut position = 0;
-        while let Some(row) = model.row(position) {
-            if row
-                .item()
-                .and_downcast::<FolderItem>()
-                .is_some_and(|item| item.id() == id)
-            {
-                row.set_expanded(expanded);
-                return;
-            }
-            position += 1;
-        }
-    }
-
     /// The id of what is selected: a folder, an account negated, [`ALL_INBOXES`], 0 for nothing
     pub fn selected(&self) -> i64 {
         self.selection
