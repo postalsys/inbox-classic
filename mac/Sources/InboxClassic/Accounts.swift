@@ -685,9 +685,7 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         default: value = account.oauth != PE_O_AUTH_PROVIDER_NONE ? Text.uiBrowserSignInServer.text(["server": account.imapHost])
                                                                   : account.imapHost
         }
-        let label = NSTextField(labelWithString: value)
-        label.lineBreakMode = .byTruncatingTail
-        return label
+        return listCell(tableView, value)
     }
 
     private var selected: Account? {

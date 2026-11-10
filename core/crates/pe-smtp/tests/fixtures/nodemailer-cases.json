@@ -124,6 +124,74 @@
    "wrapped": "ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mCZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDw\r\nn5mCZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mCZW1vamkg8J+Zgg=="
   },
   {
+   "input": "=?utf-8?X?fake?=",
+   "wrapped": "PT91dGYtOD9YP2Zha2U/PQ=="
+  },
+  {
+   "input": "see =?utf-8?Q?a b?= here",
+   "wrapped": "c2VlID0/dXRmLTg/UT9hIGI/PSBoZXJl"
+  },
+  {
+   "input": "=?bad charset?Q?x?=",
+   "wrapped": "PT9iYWQgY2hhcnNldD9RP3g/PQ=="
+  },
+  {
+   "input": "=??Q?x?=",
+   "wrapped": "PT8/UT94Pz0="
+  },
+  {
+   "input": "=?utf-8?Q??=",
+   "wrapped": "PT91dGYtOD9RPz89"
+  },
+  {
+   "input": "a=?utf-8?Q?x?=",
+   "wrapped": "YT0/dXRmLTg/UT94Pz0="
+  },
+  {
+   "input": "=?utf-8?Q?x?=b",
+   "wrapped": "PT91dGYtOD9RP3g/PWI="
+  },
+  {
+   "input": "see =?utf-8?X?fake?= here",
+   "wrapped": "c2VlID0/dXRmLTg/WD9mYWtlPz0gaGVyZQ=="
+  },
+  {
+   "input": "=?utf-8?Q?fake?=",
+   "wrapped": "PT91dGYtOD9RP2Zha2U/PQ=="
+  },
+  {
+   "input": "see =?utf-8?Q?fake?= here",
+   "wrapped": "c2VlID0/dXRmLTg/UT9mYWtlPz0gaGVyZQ=="
+  },
+  {
+   "input": "=?UTF-8?B?ZmFrZQ==?=",
+   "wrapped": "PT9VVEYtOD9CP1ptRnJaUT09Pz0="
+  },
+  {
+   "input": "=?utf-8*en?q?x?=",
+   "wrapped": "PT91dGYtOCplbj9xP3g/PQ=="
+  },
+  {
+   "input": "a =? b",
+   "wrapped": "YSA9PyBi"
+  },
+  {
+   "input": "a ?= b",
+   "wrapped": "YSA/PSBi"
+  },
+  {
+   "input": "x=?y?=",
+   "wrapped": "eD0/eT89"
+  },
+  {
+   "input": "x =?=",
+   "wrapped": "eCA9Pz0="
+  },
+  {
+   "input": "Re: =?utf-8?X?fake?= and ünïcödé",
+   "wrapped": "UmU6ID0/dXRmLTg/WD9mYWtlPz0gYW5kIMO8bsOvY8O2ZMOp"
+  },
+  {
    "input": "Hello\r\nworld\r\n",
    "wrapped": "SGVsbG8NCndvcmxkDQo="
   },
@@ -350,6 +418,176 @@
    "b52": "=?UTF-8?B?ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mC?= =?UTF-8?B?ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mC?= =?UTF-8?B?ZW1vamkg8J+ZgmVtb2ppIPCfmYJlbW9qaSDwn5mC?= =?UTF-8?B?ZW1vamkg8J+Zgg==?=",
    "words": "=?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?=",
    "header": "=?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?="
+  },
+  {
+   "input": "=?utf-8?X?fake?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=3D=3Futf-8=3FX=3Ffake=3F=3D?=",
+   "b": "=?UTF-8?B?PT91dGYtOD9YP2Zha2U/PQ==?=",
+   "q52": "=?UTF-8?Q?=3D=3Futf-8=3FX=3Ffake=3F=3D?=",
+   "b52": "=?UTF-8?B?PT91dGYtOD9YP2Zha2U/PQ==?=",
+   "words": "=?UTF-8?Q?=3D=3Futf-8=3FX=3Ffake=3F=3D?=",
+   "header": "=?UTF-8?Q?=3D=3Futf-8=3FX=3Ffake=3F=3D?="
+  },
+  {
+   "input": "see =?utf-8?Q?a b?= here",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?see_=3D=3Futf-8=3FQ=3Fa_b=3F=3D_here?=",
+   "b": "=?UTF-8?B?c2VlID0/dXRmLTg/UT9hIGI/PSBoZXJl?=",
+   "q52": "=?UTF-8?Q?see_=3D=3Futf-8=3FQ=3Fa_b=3F=3D_here?=",
+   "b52": "=?UTF-8?B?c2VlID0/dXRmLTg/UT9hIGI/PSBoZXJl?=",
+   "words": "=?UTF-8?Q?see_=3D=3Futf-8=3FQ=3Fa_b=3F=3D_here?=",
+   "header": "=?UTF-8?Q?see_=3D=3Futf-8=3FQ=3Fa_b=3F=3D_here?="
+  },
+  {
+   "input": "=?bad charset?Q?x?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=3D=3Fbad_charset=3FQ=3Fx=3F=3D?=",
+   "b": "=?UTF-8?B?PT9iYWQgY2hhcnNldD9RP3g/PQ==?=",
+   "q52": "=?UTF-8?Q?=3D=3Fbad_charset=3FQ=3Fx=3F=3D?=",
+   "b52": "=?UTF-8?B?PT9iYWQgY2hhcnNldD9RP3g/PQ==?=",
+   "words": "=?UTF-8?Q?=3D=3Fbad_charset=3FQ=3Fx=3F=3D?=",
+   "header": "=?UTF-8?Q?=3D=3Fbad_charset=3FQ=3Fx=3F=3D?="
+  },
+  {
+   "input": "=??Q?x?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=3D=3F=3FQ=3Fx=3F=3D?=",
+   "b": "=?UTF-8?B?PT8/UT94Pz0=?=",
+   "q52": "=?UTF-8?Q?=3D=3F=3FQ=3Fx=3F=3D?=",
+   "b52": "=?UTF-8?B?PT8/UT94Pz0=?=",
+   "words": "=?UTF-8?Q?=3D=3F=3FQ=3Fx=3F=3D?=",
+   "header": "=?UTF-8?Q?=3D=3F=3FQ=3Fx=3F=3D?="
+  },
+  {
+   "input": "=?utf-8?Q??=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3F=3F=3D?=",
+   "b": "=?UTF-8?B?PT91dGYtOD9RPz89?=",
+   "q52": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3F=3F=3D?=",
+   "b52": "=?UTF-8?B?PT91dGYtOD9RPz89?=",
+   "words": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3F=3F=3D?=",
+   "header": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3F=3F=3D?="
+  },
+  {
+   "input": "a=?utf-8?Q?x?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?a=3D=3Futf-8=3FQ=3Fx=3F=3D?=",
+   "b": "=?UTF-8?B?YT0/dXRmLTg/UT94Pz0=?=",
+   "q52": "=?UTF-8?Q?a=3D=3Futf-8=3FQ=3Fx=3F=3D?=",
+   "b52": "=?UTF-8?B?YT0/dXRmLTg/UT94Pz0=?=",
+   "words": "=?UTF-8?Q?a=3D=3Futf-8=3FQ=3Fx=3F=3D?=",
+   "header": "=?UTF-8?Q?a=3D=3Futf-8=3FQ=3Fx=3F=3D?="
+  },
+  {
+   "input": "=?utf-8?Q?x?=b",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3Fx=3F=3Db?=",
+   "b": "=?UTF-8?B?PT91dGYtOD9RP3g/PWI=?=",
+   "q52": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3Fx=3F=3Db?=",
+   "b52": "=?UTF-8?B?PT91dGYtOD9RP3g/PWI=?=",
+   "words": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3Fx=3F=3Db?=",
+   "header": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3Fx=3F=3Db?="
+  },
+  {
+   "input": "see =?utf-8?X?fake?= here",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?see_=3D=3Futf-8=3FX=3Ffake=3F=3D_here?=",
+   "b": "=?UTF-8?B?c2VlID0/dXRmLTg/WD9mYWtlPz0gaGVyZQ==?=",
+   "q52": "=?UTF-8?Q?see_=3D=3Futf-8=3FX=3Ffake=3F=3D_here?=",
+   "b52": "=?UTF-8?B?c2VlID0/dXRmLTg/WD9mYWtlPz0gaGVyZQ==?=",
+   "words": "=?UTF-8?Q?see_=3D=3Futf-8=3FX=3Ffake=3F=3D_here?=",
+   "header": "=?UTF-8?Q?see_=3D=3Futf-8=3FX=3Ffake=3F=3D_here?="
+  },
+  {
+   "input": "=?utf-8?Q?fake?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3Ffake=3F=3D?=",
+   "b": "=?UTF-8?B?PT91dGYtOD9RP2Zha2U/PQ==?=",
+   "q52": "=?UTF-8?Q?=3D=3Futf-8=3FQ=3Ffake=3F=3D?=",
+   "b52": "=?UTF-8?B?PT91dGYtOD9RP2Zha2U/PQ==?=",
+   "words": "=?utf-8?Q?fake?=",
+   "header": "=?utf-8?Q?fake?="
+  },
+  {
+   "input": "see =?utf-8?Q?fake?= here",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?see_=3D=3Futf-8=3FQ=3Ffake=3F=3D_here?=",
+   "b": "=?UTF-8?B?c2VlID0/dXRmLTg/UT9mYWtlPz0gaGVyZQ==?=",
+   "q52": "=?UTF-8?Q?see_=3D=3Futf-8=3FQ=3Ffake=3F=3D_here?=",
+   "b52": "=?UTF-8?B?c2VlID0/dXRmLTg/UT9mYWtlPz0gaGVyZQ==?=",
+   "words": "see =?utf-8?Q?fake?= here",
+   "header": "see =?utf-8?Q?fake?= here"
+  },
+  {
+   "input": "=?UTF-8?B?ZmFrZQ==?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=3D=3FUTF-8=3FB=3FZmFrZQ=3D=3D=3F=3D?=",
+   "b": "=?UTF-8?B?PT9VVEYtOD9CP1ptRnJaUT09Pz0=?=",
+   "q52": "=?UTF-8?Q?=3D=3FUTF-8=3FB=3FZmFrZQ=3D=3D=3F=3D?=",
+   "b52": "=?UTF-8?B?PT9VVEYtOD9CP1ptRnJaUT09Pz0=?=",
+   "words": "=?UTF-8?B?ZmFrZQ==?=",
+   "header": "=?UTF-8?B?ZmFrZQ==?="
+  },
+  {
+   "input": "=?utf-8*en?q?x?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?=3D=3Futf-8*en=3Fq=3Fx=3F=3D?=",
+   "b": "=?UTF-8?B?PT91dGYtOCplbj9xP3g/PQ==?=",
+   "q52": "=?UTF-8?Q?=3D=3Futf-8*en=3Fq=3Fx=3F=3D?=",
+   "b52": "=?UTF-8?B?PT91dGYtOCplbj9xP3g/PQ==?=",
+   "words": "=?utf-8*en?q?x?=",
+   "header": "=?utf-8*en?q?x?="
+  },
+  {
+   "input": "a =? b",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?a_=3D=3F_b?=",
+   "b": "=?UTF-8?B?YSA9PyBi?=",
+   "q52": "=?UTF-8?Q?a_=3D=3F_b?=",
+   "b52": "=?UTF-8?B?YSA9PyBi?=",
+   "words": "a =? b",
+   "header": "a =? b"
+  },
+  {
+   "input": "a ?= b",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?a_=3F=3D_b?=",
+   "b": "=?UTF-8?B?YSA/PSBi?=",
+   "q52": "=?UTF-8?Q?a_=3F=3D_b?=",
+   "b52": "=?UTF-8?B?YSA/PSBi?=",
+   "words": "a ?= b",
+   "header": "a ?= b"
+  },
+  {
+   "input": "x=?y?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?x=3D=3Fy=3F=3D?=",
+   "b": "=?UTF-8?B?eD0/eT89?=",
+   "q52": "=?UTF-8?Q?x=3D=3Fy=3F=3D?=",
+   "b52": "=?UTF-8?B?eD0/eT89?=",
+   "words": "x=?y?=",
+   "header": "x=?y?="
+  },
+  {
+   "input": "x =?=",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?x_=3D=3F=3D?=",
+   "b": "=?UTF-8?B?eCA9Pz0=?=",
+   "q52": "=?UTF-8?Q?x_=3D=3F=3D?=",
+   "b52": "=?UTF-8?B?eCA9Pz0=?=",
+   "words": "x =?=",
+   "header": "x =?="
+  },
+  {
+   "input": "Re: =?utf-8?X?fake?= and ünïcödé",
+   "encoding": "Q",
+   "q": "=?UTF-8?Q?Re=3A_=3D=3Futf-8=3FX=3Ffake=3F=3D_and_=C3=BCn=C3=AFc=C3=B6d=C3=A9?=",
+   "b": "=?UTF-8?B?UmU6ID0/dXRmLTg/WD9mYWtlPz0gYW5kIMO8bsOvY8O2ZMOp?=",
+   "q52": "=?UTF-8?Q?Re=3A_=3D=3Futf-8=3FX=3Ffake=3F=3D_and_?= =?UTF-8?Q?=C3=BCn=C3=AFc=C3=B6d=C3=A9?=",
+   "b52": "=?UTF-8?B?UmU6ID0/dXRmLTg/WD9mYWtlPz0gYW5kIMO8bsOv?= =?UTF-8?B?Y8O2ZMOp?=",
+   "words": "=?UTF-8?Q?Re=3A_=3D=3Futf-8=3FX=3Ffake=3F=3D_and_?= =?UTF-8?Q?=C3=BCn=C3=AFc=C3=B6d=C3=A9?=",
+   "header": "=?UTF-8?Q?Re=3A_=3D=3Futf-8=3FX=3Ffake=3F=3D_and_?= =?UTF-8?Q?=C3=BCn=C3=AFc=C3=B6d=C3=A9?="
   }
  ],
  "fold": [
@@ -428,6 +666,74 @@
   {
    "input": "Subject: =?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?=",
    "folded": "Subject: =?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?=\r\n =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?=\r\n =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?=\r\n =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?=\r\n =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?=3D=3Futf-8=3FX=3Ffake=3F=3D?=",
+   "folded": "Subject: =?UTF-8?Q?=3D=3Futf-8=3FX=3Ffake=3F=3D?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?see_=3D=3Futf-8=3FQ=3Fa_b=3F=3D_here?=",
+   "folded": "Subject: =?UTF-8?Q?see_=3D=3Futf-8=3FQ=3Fa_b=3F=3D_here?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?=3D=3Fbad_charset=3FQ=3Fx=3F=3D?=",
+   "folded": "Subject: =?UTF-8?Q?=3D=3Fbad_charset=3FQ=3Fx=3F=3D?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?=3D=3F=3FQ=3Fx=3F=3D?=",
+   "folded": "Subject: =?UTF-8?Q?=3D=3F=3FQ=3Fx=3F=3D?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?=3D=3Futf-8=3FQ=3F=3F=3D?=",
+   "folded": "Subject: =?UTF-8?Q?=3D=3Futf-8=3FQ=3F=3F=3D?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?a=3D=3Futf-8=3FQ=3Fx=3F=3D?=",
+   "folded": "Subject: =?UTF-8?Q?a=3D=3Futf-8=3FQ=3Fx=3F=3D?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?=3D=3Futf-8=3FQ=3Fx=3F=3Db?=",
+   "folded": "Subject: =?UTF-8?Q?=3D=3Futf-8=3FQ=3Fx=3F=3Db?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?see_=3D=3Futf-8=3FX=3Ffake=3F=3D_here?=",
+   "folded": "Subject: =?UTF-8?Q?see_=3D=3Futf-8=3FX=3Ffake=3F=3D_here?="
+  },
+  {
+   "input": "Subject: =?utf-8?Q?fake?=",
+   "folded": "Subject: =?utf-8?Q?fake?="
+  },
+  {
+   "input": "Subject: see =?utf-8?Q?fake?= here",
+   "folded": "Subject: see =?utf-8?Q?fake?= here"
+  },
+  {
+   "input": "Subject: =?UTF-8?B?ZmFrZQ==?=",
+   "folded": "Subject: =?UTF-8?B?ZmFrZQ==?="
+  },
+  {
+   "input": "Subject: =?utf-8*en?q?x?=",
+   "folded": "Subject: =?utf-8*en?q?x?="
+  },
+  {
+   "input": "Subject: a =? b",
+   "folded": "Subject: a =? b"
+  },
+  {
+   "input": "Subject: a ?= b",
+   "folded": "Subject: a ?= b"
+  },
+  {
+   "input": "Subject: x=?y?=",
+   "folded": "Subject: x=?y?="
+  },
+  {
+   "input": "Subject: x =?=",
+   "folded": "Subject: x =?="
+  },
+  {
+   "input": "Subject: =?UTF-8?Q?Re=3A_=3D=3Futf-8=3FX=3Ffake=3F=3D_and_?= =?UTF-8?Q?=C3=BCn=C3=AFc=C3=B6d=C3=A9?=",
+   "folded": "Subject: =?UTF-8?Q?Re=3A_=3D=3Futf-8=3FX=3Ffake=3F=3D_and_?=\r\n =?UTF-8?Q?=C3=BCn=C3=AFc=C3=B6d=C3=A9?="
   },
   {
    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -764,6 +1070,180 @@
      "value": "%F0%9F%99%82emoji%20%F0%9F%99%82"
     }
    ]
+  },
+  {
+   "input": "=?utf-8?X?fake?=",
+   "value": "attachment; filename*0*=utf-8''%3D%3Futf-8%3FX%3Ffake%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%3D%3Futf-8%3FX%3Ffake%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "see =?utf-8?Q?a b?= here",
+   "value": "attachment; filename*0*=utf-8''see%20%3D%3Futf-8%3FQ%3Fa%20b%3F%3D%20here",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''see%20%3D%3Futf-8%3FQ%3Fa%20b%3F%3D%20here"
+    }
+   ]
+  },
+  {
+   "input": "=?bad charset?Q?x?=",
+   "value": "attachment; filename*0*=utf-8''%3D%3Fbad%20charset%3FQ%3Fx%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%3D%3Fbad%20charset%3FQ%3Fx%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "=??Q?x?=",
+   "value": "attachment; filename*0*=utf-8''%3D%3F%3FQ%3Fx%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%3D%3F%3FQ%3Fx%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "=?utf-8?Q??=",
+   "value": "attachment; filename*0*=utf-8''%3D%3Futf-8%3FQ%3F%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%3D%3Futf-8%3FQ%3F%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "a=?utf-8?Q?x?=",
+   "value": "attachment; filename*0*=utf-8''a%3D%3Futf-8%3FQ%3Fx%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''a%3D%3Futf-8%3FQ%3Fx%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "=?utf-8?Q?x?=b",
+   "value": "attachment; filename*0*=utf-8''%3D%3Futf-8%3FQ%3Fx%3F%3Db",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%3D%3Futf-8%3FQ%3Fx%3F%3Db"
+    }
+   ]
+  },
+  {
+   "input": "see =?utf-8?X?fake?= here",
+   "value": "attachment; filename*0*=utf-8''see%20%3D%3Futf-8%3FX%3Ffake%3F%3D%20here",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''see%20%3D%3Futf-8%3FX%3Ffake%3F%3D%20here"
+    }
+   ]
+  },
+  {
+   "input": "=?utf-8?Q?fake?=",
+   "value": "attachment; filename*0*=utf-8''%3D%3Futf-8%3FQ%3Ffake%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%3D%3Futf-8%3FQ%3Ffake%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "see =?utf-8?Q?fake?= here",
+   "value": "attachment; filename*0*=utf-8''see%20%3D%3Futf-8%3FQ%3Ffake%3F%3D%20here",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''see%20%3D%3Futf-8%3FQ%3Ffake%3F%3D%20here"
+    }
+   ]
+  },
+  {
+   "input": "=?UTF-8?B?ZmFrZQ==?=",
+   "value": "attachment; filename*0*=utf-8''%3D%3FUTF-8%3FB%3FZmFrZQ%3D%3D%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%3D%3FUTF-8%3FB%3FZmFrZQ%3D%3D%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "=?utf-8*en?q?x?=",
+   "value": "attachment; filename*0*=utf-8''%3D%3Futf-8%2Aen%3Fq%3Fx%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''%3D%3Futf-8%2Aen%3Fq%3Fx%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "a =? b",
+   "value": "attachment; filename*0*=utf-8''a%20%3D%3F%20b",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''a%20%3D%3F%20b"
+    }
+   ]
+  },
+  {
+   "input": "a ?= b",
+   "value": "attachment; filename=\"a ?= b\"",
+   "param": [
+    {
+     "key": "filename",
+     "value": "a ?= b"
+    }
+   ]
+  },
+  {
+   "input": "x=?y?=",
+   "value": "attachment; filename*0*=utf-8''x%3D%3Fy%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''x%3D%3Fy%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "x =?=",
+   "value": "attachment; filename*0*=utf-8''x%20%3D%3F%3D",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''x%20%3D%3F%3D"
+    }
+   ]
+  },
+  {
+   "input": "Re: =?utf-8?X?fake?= and ünïcödé",
+   "value": "attachment; filename*0*=utf-8''Re%3A%20%3D%3Futf-8%3FX%3Ffake%3F%3D%20and; filename*1*=%20%C3%BCn%C3%AFc%C3%B6d%C3%A9",
+   "param": [
+    {
+     "key": "filename*0*",
+     "value": "utf-8''Re%3A%20%3D%3Futf-8%3FX%3Ffake%3F%3D%20and"
+    },
+    {
+     "key": "filename*1*",
+     "value": "%20%C3%BCn%C3%AFc%C3%B6d%C3%A9"
+    }
+   ]
   }
  ],
  "names": [
@@ -842,6 +1322,74 @@
   {
    "input": "emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂emoji 🙂",
    "encoded": "=?UTF-8?Q?emoji_=F0=9F=99=82emoji_=F0=9F=99=82emoj?= =?UTF-8?Q?i_=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82emoji_?= =?UTF-8?Q?=F0=9F=99=82emoji_=F0=9F=99=82?="
+  },
+  {
+   "input": "=?utf-8?X?fake?=",
+   "encoded": "\"=?utf-8?X?fake?=\""
+  },
+  {
+   "input": "see =?utf-8?Q?a b?= here",
+   "encoded": "\"see =?utf-8?Q?a b?= here\""
+  },
+  {
+   "input": "=?bad charset?Q?x?=",
+   "encoded": "\"=?bad charset?Q?x?=\""
+  },
+  {
+   "input": "=??Q?x?=",
+   "encoded": "\"=??Q?x?=\""
+  },
+  {
+   "input": "=?utf-8?Q??=",
+   "encoded": "\"=?utf-8?Q??=\""
+  },
+  {
+   "input": "a=?utf-8?Q?x?=",
+   "encoded": "\"a=?utf-8?Q?x?=\""
+  },
+  {
+   "input": "=?utf-8?Q?x?=b",
+   "encoded": "\"=?utf-8?Q?x?=b\""
+  },
+  {
+   "input": "see =?utf-8?X?fake?= here",
+   "encoded": "\"see =?utf-8?X?fake?= here\""
+  },
+  {
+   "input": "=?utf-8?Q?fake?=",
+   "encoded": "\"=?utf-8?Q?fake?=\""
+  },
+  {
+   "input": "see =?utf-8?Q?fake?= here",
+   "encoded": "\"see =?utf-8?Q?fake?= here\""
+  },
+  {
+   "input": "=?UTF-8?B?ZmFrZQ==?=",
+   "encoded": "\"=?UTF-8?B?ZmFrZQ==?=\""
+  },
+  {
+   "input": "=?utf-8*en?q?x?=",
+   "encoded": "\"=?utf-8*en?q?x?=\""
+  },
+  {
+   "input": "a =? b",
+   "encoded": "\"a =? b\""
+  },
+  {
+   "input": "a ?= b",
+   "encoded": "\"a ?= b\""
+  },
+  {
+   "input": "x=?y?=",
+   "encoded": "\"x=?y?=\""
+  },
+  {
+   "input": "x =?=",
+   "encoded": "\"x =?=\""
+  },
+  {
+   "input": "Re: =?utf-8?X?fake?= and ünïcödé",
+   "encoded": "=?UTF-8?Q?Re=3A_=3D=3Futf-8=3FX=3Ffake=3F=3D_and_?= =?UTF-8?Q?=C3=BCn=C3=AFc=C3=B6d=C3=A9?="
   }
  ],
  "addresses": [
@@ -938,6 +1486,33 @@
     }
    ],
    "encoded": "=?UTF-8?B?5pel5pys?= <jp@example.jp>"
+  },
+  {
+   "input": [
+    {
+     "name": "",
+     "address": "user@straẞe.de"
+    }
+   ],
+   "encoded": "user@xn--strae-oqa.de"
+  },
+  {
+   "input": [
+    {
+     "name": "",
+     "address": "user@ΣΣ.gr"
+    }
+   ],
+   "encoded": "user@xn--4xaa.gr"
+  },
+  {
+   "input": [
+    {
+     "name": "",
+     "address": "User@EXAMPLE.Com"
+    }
+   ],
+   "encoded": "User@example.com"
   }
  ],
  "messages": [

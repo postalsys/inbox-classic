@@ -131,6 +131,28 @@ final class UITest {
     }
 
     /// the view with the accessibility identifier `id` under `root`
+    /// Whether the text of every cell of the first row of `table` is in the middle of the row, within a point
+    func checkCentred(_ table: NSTableView?, _ what: String) {
+        guard let table, table.numberOfRows > 0 else {
+            check(false, what + " (no rows)")
+            return
+        }
+        table.layoutSubtreeIfNeeded()
+        let row = table.rect(ofRow: 0)
+        var off: [String] = []
+        for column in 0..<table.numberOfColumns {
+            guard let cell = table.view(atColumn: column, row: 0, makeIfNecessary: true) else { continue }
+            cell.layoutSubtreeIfNeeded()
+            let text = (cell as? NSTableCellView)?.textField ?? cell as? NSTextField
+            guard let text, !text.stringValue.isEmpty else { continue }
+            let middle = table.convert(text.bounds, from: text).midY
+            if abs(middle - row.midY) > 1 {
+                off.append("\(column): \(Int(middle - row.midY))")
+            }
+        }
+        check(off.isEmpty, what + (off.isEmpty ? "" : " (off by \(off))"))
+    }
+
     func find<T: NSView>(_ id: String, in root: NSView?) -> T? {
         guard let root else { return nil }
         if root.accessibilityIdentifier() == id, let view = root as? T { return view }
@@ -815,11 +837,20 @@ final class UITest {
         check(accounts != nil, "File > Accounts lists the accounts")
         await shot(accounts, "accounts-1-list")
         if let accounts {
+            checkCentred(find("accounts.list", in: accounts), "the text of the accounts sits in the middle of its row")
             press(find("accounts.apps", in: accounts))
             let apps = await waitWindow("signin.apps", 10)
             check(apps != nil, "Sign-in Apps lists the built-in clients")
             await shot(apps, "signin-1-apps")
             if let apps {
+                checkCentred(find("signin.list", in: apps), "and so does the text of the sign-in apps, beside their boxes")
+                let table: NSTableView? = find("signin.list", in: apps)
+                let clipped = (0..<(table?.numberOfColumns ?? 0)).filter { column in
+                    guard let field = (table?.view(atColumn: column, row: 0, makeIfNecessary: true) as? NSTableCellView)?.textField
+                    else { return false }
+                    return field.intrinsicContentSize.width > field.frame.width + 1
+                }
+                check(table != nil && clipped.isEmpty, "the columns of the sign-in apps fit their text (cut: \(clipped))")
                 press(find("signin.add", in: apps))
                 let editor = await waitWindow("signin.editor", 10)
                 check(editor != nil, "Add opens the editor of a sign-in app")

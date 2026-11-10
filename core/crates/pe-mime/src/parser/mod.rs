@@ -7,6 +7,7 @@
 //! differently depending on where it came from.
 
 mod address;
+mod boundaries;
 mod entities;
 mod filename;
 
@@ -217,8 +218,8 @@ struct Parser<'a> {
     /// Text entry key of node 0
     key_base: usize,
     current: usize,
-    /// Multiparts whose boundary is open, in order
-    boundaries: Vec<usize>,
+    /// Multiparts whose boundary is open
+    boundaries: boundaries::Boundaries,
     text_entries: Vec<TextEntry>,
     text_index: HashMap<usize, usize>,
     has_plain: bool,
@@ -260,7 +261,7 @@ impl<'a> Parser<'a> {
             nodes: Vec::new(),
             key_base,
             current: 0,
-            boundaries: Vec::new(),
+            boundaries: boundaries::Boundaries::default(),
             text_entries: Vec::new(),
             text_index: HashMap::new(),
             has_plain: false,
@@ -327,7 +328,8 @@ impl<'a> Parser<'a> {
             let again = self.nodes[current].feed(line, line_break, &mut self.counters.header_size, max)?;
             if in_header && self.nodes[current].state == State::Body && self.nodes[current].boundary.is_some() {
                 // a multipart whose headers just ended opens its boundary
-                self.boundaries.push(current);
+                self.boundaries
+                    .push(self.nodes[current].boundary.as_deref().unwrap_or_default(), current);
             }
             if again {
                 return self.process_line(line, line_break, last);
@@ -341,34 +343,24 @@ impl<'a> Parser<'a> {
 
     /// Handles `line` when it is a boundary of an open multipart
     fn at_boundary(&mut self, line: &[u8]) -> Result<bool, Error> {
-        if line.len() <= 2 || !line.starts_with(b"--") {
+        let Some((node, terminator)) = self.boundaries.matching(line) else {
             return Ok(false);
+        };
+        if terminator {
+            self.finalize(node, true);
+            self.current = self.nodes[node].parent.unwrap_or(0);
+        } else {
+            self.finalize_children(node, true);
+            self.current = self.add_node(Some(node))?;
         }
-        for i in 0..self.boundaries.len() {
-            let node = self.boundaries[i];
-            let Some(terminator) = boundary_match(line, self.nodes[node].boundary.as_deref().unwrap_or_default())
-            else {
-                continue;
-            };
-            if terminator {
-                self.finalize(node, true);
-                self.current = self.nodes[node].parent.unwrap_or(0);
-            } else {
-                self.finalize_children(node, true);
-                self.current = self.add_node(Some(node))?;
-            }
-            return Ok(true);
-        }
-        Ok(false)
+        Ok(true)
     }
 
     fn finalize(&mut self, node: usize, boundary_ended: bool) {
         if self.nodes[node].state == State::Finished {
             return;
         }
-        if let Some(position) = self.boundaries.iter().rposition(|n| *n == node) {
-            self.boundaries.remove(position);
-        }
+        self.boundaries.remove(node);
         self.finalize_children(node, boundary_ended);
         self.nodes[node].finish_body(boundary_ended);
     }
@@ -656,17 +648,6 @@ fn read_line(raw: &[u8], pos: usize) -> (&[u8], LineBreak, usize) {
         .map_or(pos, |p| pos + p + 1);
     let crs = if next == end { 0 } else { end - content_end };
     (&raw[pos..content_end], LineBreak { crs }, next)
-}
-
-/// Whether `line` is `--boundary` (Some(false)) or `--boundary--` (Some(true)), white space after
-/// it allowed
-fn boundary_match(line: &[u8], boundary: &[u8]) -> Option<bool> {
-    let rest = line.strip_prefix(b"--")?.strip_prefix(boundary)?;
-    let (terminator, rest) = match rest.strip_prefix(b"--") {
-        Some(rest) => (true, rest),
-        None => (false, rest),
-    };
-    rest.iter().all(|c| strings::is_wsp(*c)).then_some(terminator)
 }
 
 #[cfg(test)]

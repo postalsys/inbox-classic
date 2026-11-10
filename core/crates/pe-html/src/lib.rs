@@ -327,8 +327,9 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
          <meta name=\"color-scheme\" content=\"light\">\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
          details.pe-fold{{margin:6px 0}}\
-         details.pe-fold>summary{{display:inline-block;list-style:none;font:bold 9pt Arial,sans-serif;letter-spacing:1px;\
-         color:#555;background:#eee;border:1px solid #ccc;border-radius:9px;padding:0 9px;height:17px;line-height:13px;\
+         details.pe-fold>summary{{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;\
+         list-style:none;font:bold 9pt Arial,sans-serif;letter-spacing:1px;\
+         color:#555;background:#eee;border:1px solid #ccc;border-radius:9px;padding:0 9px;height:17px;\
          cursor:pointer;margin-bottom:4px}}\
          details.pe-fold>summary::-webkit-details-marker{{display:none}}\
          details.pe-fold>summary::marker{{content:\"\"}}\
@@ -345,6 +346,29 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The "..." of a folded quote has its dots in the middle of its pill, as the editor's button has them: a 17 pixel
+    /// box with a 13 pixel line left them at the top
+    #[test]
+    fn the_fold_button_centres_its_dots() {
+        let document = render_view("<p>hi</p>", &RenderOptions::default(), &[], &[]).document;
+        let rule = document
+            .split("details.pe-fold>summary{")
+            .nth(1)
+            .unwrap()
+            .split('}')
+            .next()
+            .unwrap();
+        for part in [
+            "display:inline-flex",
+            "align-items:center",
+            "box-sizing:border-box",
+            "height:17px",
+        ] {
+            assert!(rule.contains(part), "{rule}");
+        }
+        assert!(!rule.contains("line-height"), "{rule}");
+    }
 
     #[test]
     fn a_print_page_runs_only_its_own_script() {
