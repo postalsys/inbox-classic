@@ -62,8 +62,8 @@ assets = [
     ["data/com.inboxclassic.InboxClassic.metainfo.xml", "usr/share/metainfo/", "644"],
     ["../app/res/app-icon.svg", "usr/share/icons/hicolor/scalable/apps/com.inboxclassic.InboxClassic.svg", "644"],
     ["../build/linux-notices/THIRD-PARTY-NOTICES.txt", "usr/share/doc/inbox-classic/", "644"],
-    # the release key, which debian/postinst installs for the apt repository apt.inboxclassic.com
-    ["data/inboxclassic.gpg", "usr/share/inbox-classic/", "644"],
+    # the apt source of apt.inboxclassic.com, with the release key in it, which debian/postinst installs
+    ["data/inboxclassic.sources", "usr/share/inbox-classic/", "644"],
 ]
 # postinst adds the apt repository, postrm removes it on purge
 maintainer-scripts = "debian/"

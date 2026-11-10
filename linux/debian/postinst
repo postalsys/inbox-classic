@@ -1,31 +1,18 @@
 #!/bin/sh
 # Adds the Inbox Classic apt repository (https://apt.inboxclassic.com) when the package is installed, so that a .deb
-# downloaded from the homepage gets its updates with the system's own, as the Chrome and VS Code packages do. Nothing
-# is added when a source of the repository is already there (added by hand as the homepage shows, or by an earlier
-# install), or when /etc/default/inbox-classic says APT_REPOSITORY=no. "apt purge inbox-classic" (postrm) removes
-# what this added.
+# downloaded from the homepage gets its updates with the system's own, as the Chrome and VS Code packages do. The
+# source is linux/data/inboxclassic.sources, the same file the homepage tells to download, with the release key in
+# it. Nothing is added when a source of the repository is already there, or when /etc/default/inbox-classic says
+# APT_REPOSITORY=no. "apt purge inbox-classic" (postrm) removes it.
 set -e
 
-KEY=/usr/share/keyrings/inboxclassic.gpg
 SOURCES=/etc/apt/sources.list.d/inboxclassic.sources
 
 if [ "$1" = configure ]; then
     APT_REPOSITORY=yes
     [ ! -r /etc/default/inbox-classic ] || . /etc/default/inbox-classic
     if [ "$APT_REPOSITORY" != no ] && ! grep -qs apt.inboxclassic.com /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-        # the key the repository is signed with, the release key; a copy outside the package's own files, so that
-        # the source keeps working when the package is removed and installed again
-        [ -f "$KEY" ] || install -m 644 /usr/share/inbox-classic/inboxclassic.gpg "$KEY"
-        cat >"$SOURCES" <<SOURCES
-# Updates of Inbox Classic (https://inboxclassic.com), added when it was installed.
-# To leave it out, remove this file and put APT_REPOSITORY=no in /etc/default/inbox-classic.
-Types: deb
-URIs: https://apt.inboxclassic.com
-Suites: stable
-Components: main
-Signed-By: $KEY
-SOURCES
-        chmod 644 "$SOURCES"
+        install -m 644 /usr/share/inbox-classic/inboxclassic.sources "$SOURCES"
     fi
 fi
 

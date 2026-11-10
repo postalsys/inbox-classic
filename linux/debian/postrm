@@ -1,16 +1,10 @@
 #!/bin/sh
-# "apt purge inbox-classic" removes the apt source that postinst added, and the repository's key when no other
-# source uses it. A plain remove keeps both, so that installing again picks up where it was.
+# "apt purge inbox-classic" removes the apt source of the repository (postinst). A plain remove keeps it, so that
+# installing again picks up where it was.
 set -e
 
-KEY=/usr/share/keyrings/inboxclassic.gpg
-SOURCES=/etc/apt/sources.list.d/inboxclassic.sources
-
 if [ "$1" = purge ]; then
-    rm -f "$SOURCES"
-    if ! grep -qs "$KEY" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-        rm -f "$KEY"
-    fi
+    rm -f /etc/apt/sources.list.d/inboxclassic.sources
 fi
 
 #DEBHELPER#
