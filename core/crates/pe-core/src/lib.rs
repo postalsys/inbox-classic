@@ -18,6 +18,7 @@ mod export;
 mod fold;
 mod list_view;
 pub mod mailto;
+mod otp;
 mod requests;
 mod search;
 mod secrets;
@@ -1027,13 +1028,20 @@ impl Core {
             .message(folder, uid)?
             .map_or((None, false), |m| (m.info.internal_date, m.info.bounce));
         // with the store at hand: trusted() takes it again
-        let account = store.folder(folder)?.account_id;
+        let place = store.folder(folder)?;
+        let account = place.account_id;
         let trusted = authres::trusted(&store.account(account)?.settings);
+        // a code in Junk E-mail may be bait, and one in Sent Items or Drafts is the user's own
+        let codes = !matches!(
+            place.info.special_use.as_deref(),
+            Some("\\Junk" | "\\Sent" | "\\Drafts")
+        );
         Ok(store.source(folder, uid)?.map(|source| ViewSource {
             source,
             received,
             marked,
             trusted,
+            codes,
             account,
             folder,
             uid,
@@ -2012,6 +2020,8 @@ struct ViewSource {
     received: Option<i64>,
     marked: bool,
     trusted: Vec<String>,
+    /// The folder may show the card of a one-time code
+    codes: bool,
     account: AccountId,
     folder: FolderId,
     uid: u64,
@@ -2035,7 +2045,11 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
             // the bounce itself is not the message it returns
             .filter(|at| (at.folder, at.uid) != (found.folder, found.uid))
     };
-    let mut view = view::build_unless(&found.source, allow_remote_images, &found.trusted, dropped, &find)?;
+    let trust = view::Trust {
+        domains: &found.trusted,
+        codes: found.codes,
+    };
+    let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(found.received);
     if view.bounce

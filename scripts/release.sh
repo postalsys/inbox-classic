@@ -14,7 +14,8 @@
 #   Mac      dist/InboxClassic.dmg here (scripts/mac-package.sh): Developer ID, notarized and stapled, the app in the
 #            image started with --version
 #   Linux    dist/InboxClassic-amd64.deb and dist/InboxClassic-arm64.deb in Docker here (scripts/linux-package.sh),
-#            each installed into a clean Ubuntu container and started with --version
+#            each installed into a clean Ubuntu container and started with --version, and after the release
+#            published to the apt repository https://apt.inboxclassic.com (scripts/apt-repo.sh)
 # then writes hashes.txt signed with the release GPG key, uploads all of it to the draft release and publishes it,
 # and puts the Mac update (Sparkle's appcast.xml, signed with the update key in this Mac's keychain) on the homepage.
 #
@@ -59,6 +60,7 @@ if building mac; then
 fi
 if building linux; then
     docker info >/dev/null 2>&1 || fail "Docker is not running"
+    [ "$BUILD_ONLY" = "yes" ] || ssh -o ConnectTimeout=10 andris@srv-04.emailengine.dev true || fail "srv-04, the apt repository's server, does not answer"
 fi
 if [ "$BUILD_ONLY" != "yes" ]; then
     gh release view "$TAG" --repo "$REPO" --json isDraft >/dev/null 2>&1 || fail "No release ${TAG}, merge the release PR of release-please first"
@@ -125,6 +127,11 @@ fi
 # the draft becomes the latest release now that every platform's package is there
 gh release edit "$TAG" --repo "$REPO" --draft=false --latest
 echo "Published ${TAG}: https://github.com/${REPO}/releases/tag/${TAG}"
+
+# the Linux packages to the apt repository, where Linux users get their updates
+if building linux; then
+    ./scripts/apt-repo.sh
+fi
 
 # the Mac update: the appcast lists the DMG of the release, signed with the update key, with the release notes
 appcast=$(mktemp -d)

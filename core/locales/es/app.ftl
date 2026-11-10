@@ -463,3 +463,5 @@ ui-book-exported = { $count ->
    *[other] { $count } contactos guardados en { $file }.
 }
 ui-book-not-exported = No se pudo guardar la libreta de direcciones: { $reason }
+# review: new
+ui-code-copied = Código copiado

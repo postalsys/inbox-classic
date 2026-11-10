@@ -2649,6 +2649,53 @@ public static class Dragger {
     SelectFolder 0
     [void](WaitFor { $null -eq (& $rowOf $failedSubject) -and $null -eq (& $rowOf $delayedSubject) } 20)
 
+    # ---- a one-time code ----
+
+    Step 'a one-time code'
+    # a code in the text of a message the provider says example.com signed, one in an OTP-Token header, one unsigned
+    $kTestLink = 0x4C494E4B
+    $codeMessage = {
+        param([bool]$verdict, [string]$extra, [string]$subject, [string]$id, [string]$body)
+        $head = if ($verdict) { "Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=example.com`r`n" } else { '' }
+        $head + $extra + "From: Example Accounts <no-reply@accounts.example.com>`r`nTo: testuser@inboxclassic.test`r`n" +
+            "Subject: $subject`r`nDate: $($now.AddHours(-3).ToString('r'))`r`nMessage-ID: <$id@example.com>`r`n" +
+            "MIME-Version: 1.0`r`nContent-Type: text/plain; charset=utf-8`r`n`r`n$body`r`n"
+    }
+    $codeText = { param($digits) "Hello,`r`n`r`nYour verification code is $digits.`r`n`r`nIt expires in 10 minutes. If you did not ask for it, ignore this email." }
+    $codeSubjects = @('Your sign-in code', 'Sign in to Example', 'Your code, unsigned')
+    AddMessage (& $codeMessage $true '' $codeSubjects[0] 'code-body' (& $codeText '482913')) @('\Seen')
+    AddMessage (& $codeMessage $true "OTP-Token: `"917355`"; origin=`"https://login.example.com`"`r`n" $codeSubjects[1] 'code-header' 'Use the code at the top of this message to sign in.') @('\Seen')
+    AddMessage (& $codeMessage $false '' $codeSubjects[2] 'code-unsigned' (& $codeText '771204')) @('\Seen')
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    $codesIn = WaitFor { if (@($codeSubjects | Where-Object { $null -ne (& $rowOf $_) }).Count -eq 3) { $true } } 30
+    Check ([bool]$codesIn) 'three messages with codes are in the Inbox'
+    # Copy on the card, as a click on it: the link followed, the code on the clipboard
+    $copied = {
+        param($subject)
+        Set-Clipboard -Value 'nothing'
+        SelectRow (& $rowOf $subject)
+        [void](WaitFor { (WindowText $main) -match 'Inbox' } 5)
+        Start-Sleep -Seconds 2
+        [void][Native.Win]::SendText($main, $kTestLink, 'inboxclassic:copy-code')
+        Start-Sleep -Milliseconds 500
+        (Get-Clipboard -Raw)
+    }
+    $first = & $copied $codeSubjects[0]
+    Check ($first -eq '482913') "Copy on the card of a signed message puts its code on the clipboard ($first)"
+    Check ((StatusPart $mainStatus 0) -eq 'Copied the code') "and the status bar says so ($(StatusPart $mainStatus 0))"
+    Shot $main 'otp-1-card'
+    $second = & $copied $codeSubjects[1]
+    Check ($second -eq '917355') "an OTP-Token header gives the code ($second)"
+    $third = & $copied $codeSubjects[2]
+    Check ($third -eq 'nothing') "an unsigned message has no card, so nothing is copied ($third)"
+    foreach ($subject in $codeSubjects) {
+        $added = Find 'INBOX' "Subject: $([regex]::Escape($subject))"
+        if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { @($codeSubjects | Where-Object { $null -ne (& $rowOf $_) }).Count -eq 0 } 20)
+
     # ---- folders ----
 
     Step 'folders'

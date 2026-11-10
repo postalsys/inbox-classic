@@ -459,6 +459,19 @@ Screenshots: `bounce-1-failed`, `bounce-2-delayed`, `bounce-3-list`
 - a notice that delivery is delayed shows the amber card, saying it is still being tried
 - searching for `is:bounce` finds the two notices and nothing else
 
+## 34f2. A one-time code
+
+Screenshots: `otp-1-card`
+
+- three read messages are put into the Inbox, dated hours ago: one with a code in its text, from a domain the provider's
+  Authentication-Results say signed it (`dkim=pass`); one with an `OTP-Token` header for a domain that signed it; one
+  with a code in its text and no verdict
+- opening the first shows a card above it: "Code from" the sender's domain, the code, where to enter it, and that it has
+  probably expired (it is older than an hour)
+- Copy on the card puts the code on the clipboard, and the status bar says so
+- the second's card has the header's code and the domain of its origin
+- the third has no card
+
 ## 34g. Watch and Ignore Conversation
 
 Screenshots: `threads-4-watch`, `threads-5-ignore`

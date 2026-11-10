@@ -242,6 +242,29 @@ std::wstring TimeNow() {
     return FormatTime(now);
 }
 
+bool CopyText(HWND owner, const std::wstring& text) {
+    if (!OpenClipboard(owner)) {
+        return false;
+    }
+    EmptyClipboard();
+    size_t bytes = (text.size() + 1) * sizeof(wchar_t);
+    HGLOBAL memory = GlobalAlloc(GMEM_MOVEABLE, bytes);
+    bool done = false;
+    if (memory) {
+        if (void* to = GlobalLock(memory)) {
+            memcpy(to, text.c_str(), bytes);
+            GlobalUnlock(memory);
+            // the clipboard owns the memory once it took it
+            done = SetClipboardData(CF_UNICODETEXT, memory) != nullptr;
+        }
+        if (!done) {
+            GlobalFree(memory);
+        }
+    }
+    CloseClipboard();
+    return done;
+}
+
 std::wstring FormatSize(uint64_t bytes) {
     // the same words on every platform: the core makes them
     core::String text(pe_format_size(bytes));

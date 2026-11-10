@@ -414,6 +414,18 @@ const sections = [
                 checked: ['The delay card says it is still being tried']
             },
             {
+                shot: 'otp-1-card',
+                name: 'One-time codes',
+                what: "A message with a sign-in or verification code has a card above it with the code in large type, the domain it is for, and Copy. The code comes from the sender's OTP-Token header, or from the text, found by a model trained on real mail (pe-otp, a port of otp-detect). It is shown only when the provider of the account says that domain signed the message, and never in Junk E-mail, Sent Items or Drafts; an old code says it has probably expired.",
+                how: 'Open a message with a code; click Copy on its card.',
+                checked: [
+                    'A code in the text of a message the domain signed is shown in a card above it',
+                    'Copy puts the code on the clipboard',
+                    'An OTP-Token header gives the code and the domain it is for',
+                    'An unsigned message has no card'
+                ]
+            },
+            {
                 shot: 'bounce-3-list',
                 name: 'Bounces in the list',
                 what: 'Delivery notices have an undelivered mark in the list, and is:bounce finds them.',

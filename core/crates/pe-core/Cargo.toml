@@ -18,6 +18,7 @@ pe-imap = { path = "../pe-imap" }
 pe-mime.workspace = true
 pe-net.workspace = true
 pe-oauth = { path = "../pe-oauth" }
+pe-otp = { path = "../pe-otp" }
 pe-smtp = { path = "../pe-smtp" }
 pe-store = { path = "../pe-store" }
 pe-sync = { path = "../pe-sync" }

@@ -40,6 +40,8 @@ bool UnixToSystemTime(int64_t seconds, bool local, SYSTEMTIME& time);
 std::wstring TimeNow();
 // 1.2 KB, 3 MB
 std::wstring FormatSize(uint64_t bytes);
+// `text` on the clipboard, `owner` owning it; false when the clipboard could not be had
+bool CopyText(HWND owner, const std::wstring& text);
 // the brush of dialog backgrounds, for WM_CTLCOLORSTATIC
 LRESULT ButtonFaceColor(HDC dc);
 // the reason the core gave for a refusal (freed here), or `fallback` when it gave none
@@ -420,6 +422,8 @@ public:
     // the UI test's stand-ins for what the system does: a drag of the selected messages dropped into the folder `dir`
     // as Explorer drops it (the files written, -1 for none), and files dropped onto the tree item `item`; the effect
     int TestDragOut(const std::wstring& dir);
+    // the UI test's click on a link of the message shown: whether it was one of the document's own
+    bool TestLink(const std::wstring& uri) { return reader_.FollowLink(uri.c_str()); }
     DWORD TestDropFiles(HTREEITEM item, const std::vector<std::wstring>& paths);
     // what a background save or forward of several messages finished with (WM_FILES_DONE)
     void FilesDone(LPARAM done);

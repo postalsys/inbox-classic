@@ -1615,6 +1615,9 @@ pub struct PeMessageInfo {
     pub has_bounced_message: bool,
     pub bounced_folder: i64,
     pub bounced_uid: u64,
+    /// The one-time code of the card at the top of `document`, empty without one: what its Copy (`pe_reader_link`
+    /// says `PE_READER_LINK_COPY_CODE`) puts on the clipboard
+    pub otp_code: *const c_char,
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
@@ -1684,6 +1687,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         has_bounced_message: view.bounced_message.is_some(),
         bounced_folder: view.bounced_message.map_or(0, |m| m.folder),
         bounced_uid: view.bounced_message.map_or(0, |m| m.uid),
+        otp_code: strings.add(view.otp_code.as_deref().unwrap_or_default()),
     };
     handed(PeMessageView {
         info,
@@ -1702,6 +1706,8 @@ pub enum PeReaderLink {
     /// "Show the message that bounced" on a bounce's card: select the message at `bounced_folder` and
     /// `bounced_uid` of the view's `PeMessageInfo`
     BouncedMessage = 1,
+    /// Copy on the card of a one-time code: put `otp_code` of the view's `PeMessageInfo` on the clipboard
+    CopyCode = 2,
 }
 
 /// What `uri`, a link clicked in the reading pane (the URI the web view's navigation names), is: one of the
@@ -1719,6 +1725,8 @@ pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
     guard(|| {
         if pe_html::is_bounced_message_link(uri) {
             PeReaderLink::BouncedMessage
+        } else if pe_html::is_copy_code_link(uri) {
+            PeReaderLink::CopyCode
         } else {
             PeReaderLink::Other
         }

@@ -14,6 +14,7 @@ use base64::engine::general_purpose::STANDARD;
 
 mod bounce;
 mod editor;
+mod otp;
 mod platform;
 mod visible;
 pub use bounce::{
@@ -23,6 +24,7 @@ pub use editor::{
     PICTURE_FILE_LIMIT, PICTURE_HEAD, Picture, draft_body, editor_document, is_plain, outgoing_html, picture_type,
     picture_uri, quote_html, quote_parts, signature_block, signature_html,
 };
+pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, help_page, help_page_in, status_page, webkit_content_rules};
 pub use visible::visible_html;
 
@@ -226,9 +228,36 @@ pub fn render_view_with(
     header: &[(&str, &str)],
     card: Option<&BounceCard>,
 ) -> Rendered {
+    render_view_cards(
+        html,
+        options,
+        images,
+        header,
+        &Cards {
+            otp: None,
+            bounce: card,
+        },
+    )
+}
+
+/// The cards of the app above a message: a one-time code's first, then a bounce's
+#[derive(Default)]
+pub struct Cards<'a> {
+    pub otp: Option<&'a OtpCard>,
+    pub bounce: Option<&'a BounceCard>,
+}
+
+/// [`render_view`] with the cards of the app above the message
+pub fn render_view_cards(
+    html: &str,
+    options: &RenderOptions,
+    images: &[InlineImage],
+    header: &[(&str, &str)],
+    cards: &Cards,
+) -> Rendered {
     let remote = Arc::new(AtomicBool::new(false));
     let body = builder_noting(images, Some(remote.clone())).clean(html).to_string();
-    let card = card.map(bounce_card).unwrap_or_default();
+    let card = cards.otp.map(otp_card).unwrap_or_default() + &cards.bounce.map(bounce_card).unwrap_or_default();
     Rendered {
         // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
         remote_images: remote.load(Ordering::Relaxed) || style_elements_load_remote(&body),

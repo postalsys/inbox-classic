@@ -10,6 +10,7 @@ publish.workspace = true
 base64.workspace = true
 encoding_rs.workspace = true
 regex = "1.13.1"
+url = "2.5.8"
 
 [dev-dependencies]
 base64.workspace = true

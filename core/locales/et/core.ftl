@@ -461,3 +461,12 @@ ui-sender-none = Selle kirja saatjal pole e-posti aadressi, mida lisada.
 card-name-needed = Kontaktil pole nime ega e-posti aadressi.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
 cards-file-failed = { $file }: { $reason }
+
+# review: new
+otp-heading = Kood saatjalt { $domain }
+# review: new
+otp-copy = Kopeeri
+# review: new
+otp-note = Sisestage see ainult domeeni { $domain } lehel.
+# review: new
+otp-old = See kood saadeti rohkem kui tund enne avamist ja on tõenäoliselt aegunud.

@@ -967,6 +967,9 @@ constexpr ULONG_PTR kCopyMailto = 1;
 constexpr ULONG_PTR kTestDragOut = 0x44524F55;
 constexpr ULONG_PTR kTestDropFiles = 0x44524F50;
 constexpr ULONG_PTR kTestNotification = 0x4E4F5445;
+// with --test-hooks only: a link of the message shown followed as a click on it would be; 1 when it was the
+// document's own (a card's)
+constexpr ULONG_PTR kTestLink = 0x4C494E4B;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1324,6 +1327,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_COPYDATA: {
         auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lParam);
+        if (g_arguments.testHooks && data->dwData == kTestLink && data->cbData % sizeof(wchar_t) == 0) {
+            std::wstring uri(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            return g_mailbox.TestLink(uri) ? 1 : 0;
+        }
         if (g_arguments.testHooks && data->dwData == kTestNotification && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring text(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
             return std::exchange(g_lastNotification, std::wstring()) == text ? 1 : 0;

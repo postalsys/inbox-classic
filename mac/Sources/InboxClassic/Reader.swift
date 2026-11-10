@@ -108,12 +108,8 @@ final class Reader: NSObject {
         retry.clicked = { [weak self] in self?.retryDownload() }
         retry.setAccessibilityIdentifier("reader.retry")
         retry.isHidden = true
-        // the bounce card's link: the core says which link it is, the view names the message
-        preview.links = { [weak self] link in
-            guard pe_reader_link(link) == PE_READER_LINK_BOUNCED_MESSAGE else { return false }
-            self?.showBounced()
-            return true
-        }
+        // the links of the document's own cards: the core says which link it is, the view has what it needs
+        preview.links = { [weak self] link in self?.followLink(link) ?? false }
         invitation.setAccessibilityIdentifier("reader.invitation")
         invitation.isHidden = true
         pictures.isHidden = true
@@ -387,6 +383,31 @@ final class Reader: NSObject {
         default:
             break
         }
+    }
+
+    /// a link clicked in the message: true when it is one of the document's own cards, which this follows (the bounce
+    /// card's message selected, the code card's Copy), false for a link of the message (the browser opens it)
+    func followLink(_ link: String) -> Bool {
+        switch pe_reader_link(link) {
+        case PE_READER_LINK_BOUNCED_MESSAGE:
+            showBounced()
+            return true
+        case PE_READER_LINK_COPY_CODE:
+            copyCode()
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// the code card's Copy: the code the core found, on the clipboard (nothing is read from the link)
+    private func copyCode() {
+        guard let info = messageView?.info?.pointee, let pointer = info.otp_code else { return }
+        let code = String(cString: pointer)
+        guard !code.isEmpty else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(code, forType: .string)
+        status(Text.uiCodeCopied.text)
     }
 
     /// the card's link was clicked: the message the bounce shown returns, where the core found it (nothing is read
