@@ -489,10 +489,9 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
             default: value = entry.summary
             }
         }
-        let label = NSTextField(labelWithString: value)
-        label.lineBreakMode = .byTruncatingTail
-        label.toolTip = value
-        return label
+        let cell = listCell(tableView, value)
+        cell.toolTip = value
+        return cell
     }
 
     func tableViewSelectionDidChange(_ notification: Notification) {
