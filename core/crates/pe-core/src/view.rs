@@ -155,8 +155,13 @@ pub(crate) fn build_unless(
     let otp_card = code
         .as_ref()
         .map(|code| crate::otp::card(code, message.timestamp, crate::worker::unix_now()));
+    // a calendar event: its card says when and where, and opens it in the calendar app
+    let invitation = calendar_part(&message.attachments)
+        .and_then(|part| crate::calendar::invitation(&String::from_utf8_lossy(&part.content), part.method.as_deref()));
+    let event_card = invitation.as_ref().map(crate::calendar::card);
     let cards = pe_html::Cards {
         otp: otp_card.as_ref(),
+        event: event_card.as_ref(),
         bounce: card.as_ref(),
     };
     let rendered = pe_html::render_view_cards(&body, &options, &images, &header, &cards);
@@ -178,9 +183,7 @@ pub(crate) fn build_unless(
             .collect(),
         unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
-        invitation: calendar_part(&message.attachments).and_then(|part| {
-            crate::calendar::invitation(&String::from_utf8_lossy(&part.content), part.method.as_deref())
-        }),
+        invitation,
         bounce: bounce.is_some(),
         bounced_message,
         otp_code: code.map(|code| code.code),

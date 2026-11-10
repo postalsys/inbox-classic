@@ -276,7 +276,8 @@ Screenshots: `read-8-unsubscribe`, `read-9-unsubscribe-ask`
 
 Screenshots: `read-10-invitation`
 
-- a message with an invitation shows the event over the text, with Open in Calendar
+- a message with an invitation shows the event in a card above the text (the frame of the bounce and code cards): its
+  title, when, where, the organizer, and Open in Calendar
 
 ## 26. A brand logo (BIMI)
 

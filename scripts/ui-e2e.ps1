@@ -1539,6 +1539,48 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
     Step 'a calendar invitation'
+    # a point of the reading pane in a colour of the card, in screen pixels: the middle of the pixels of that colour
+    # in the band where it is first found, from the top; $null when there is none
+    $pane = [Native.Win]::FindDescendants($main, 'Chrome_RenderWidgetHostHWND') | Select-Object -First 1
+    $cardPoint = {
+        param([int]$r, [int]$g, [int]$b)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 500
+        $box = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($pane, [ref]$box)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        $w = [Math]::Min(560, $box.Right - $box.Left); $h = [Math]::Min(320, $box.Bottom - $box.Top)
+        if ($w -le 0 -or $h -le 0) { return $null }
+        $picture = New-Object System.Drawing.Bitmap $w, $h
+        CopyScreen $picture $box.Left $box.Top
+        $first = -1; $xs = @(); $ys = @()
+        for ($y = 0; $y -lt $h; $y++) {
+            if ($first -ge 0 -and $y -gt $first + 14) { break }
+            for ($x = 0; $x -lt $w; $x++) {
+                $p = $picture.GetPixel($x, $y)
+                if ([Math]::Abs($p.R - $r) -lt 28 -and [Math]::Abs($p.G - $g) -lt 28 -and [Math]::Abs($p.B - $b) -lt 28) {
+                    if ($first -lt 0) { $first = $y }
+                    $xs += $x; $ys += $y
+                }
+            }
+        }
+        if ($first -lt 0) { return $null }
+        $xs = @($xs | Sort-Object); $ys = @($ys | Sort-Object)
+        @(($box.Left + $xs[[int]($xs.Count / 2)]), ($box.Top + $ys[[int]($ys.Count / 2)]))
+    }
+    # words of the message shown found by Find in This Message
+    $foundInMessage = {
+        param([string]$words)
+        Command $main $IDM_FIND_IN_MESSAGE
+        $form = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+        if (-not $form) { return $false }
+        SetText $form 100 $words
+        Click $form 1
+        Start-Sleep -Milliseconds 1500
+        (StatusPart $mainStatus 0) -notmatch 'not in this message'
+    }
+
     $invite = "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Invitation: Quarterly planning`r`n" +
         "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <planning-invite@example.com>`r`n" +
         "Content-Type: multipart/mixed; boundary=inv`r`n`r`n--inv`r`nContent-Type: text/plain`r`n`r`nLet us plan the quarter.`r`n" +
@@ -1552,8 +1594,8 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Quarterly planning"')
     [void](WaitFor { (Rows) -eq 1 } 20)
     SelectRow 0
-    $IDC_INVITATION = 211; $IDC_OPEN_CALENDAR = 212
-    Check ([bool](WaitFor { (Visible $main $IDC_INVITATION) -and (Visible $main $IDC_OPEN_CALENDAR) } 15)) 'a message with an invitation shows the event over the text, with Open in Calendar'
+    # the event is a card in the message, in the blue of the app's information
+    Check ([bool](WaitFor { $null -ne (& $cardPoint 15 95 179) } 15)) 'a message with an invitation shows the event in a card above the text'
     Shot $main 'read-10-invitation'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
@@ -2557,61 +2599,12 @@ public static class Dragger {
     Check ($failedMark -ne '' -and $failedMark -ne $clipMark) 'the report has the undelivered mark in the attachment column, not a paper clip'
     Check ((& $markOf $delayedRow) -eq $failedMark) 'and so has the delay notice'
 
-    # a point of the reading pane in a colour of the card, in screen pixels: the middle of the pixels of that colour
-    # in the band where it is first found, from the top; $null when there is none
-    $pane = [Native.Win]::FindDescendants($main, 'Chrome_RenderWidgetHostHWND') | Select-Object -First 1
-    $cardPoint = {
-        param([int]$r, [int]$g, [int]$b)
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
-        [void][Native.Win]::SetForegroundWindow($main)
-        Start-Sleep -Milliseconds 500
-        $box = New-Object Native.Win+RECT
-        [void][Native.Win]::GetWindowRect($pane, [ref]$box)
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
-        $w = [Math]::Min(560, $box.Right - $box.Left); $h = [Math]::Min(320, $box.Bottom - $box.Top)
-        if ($w -le 0 -or $h -le 0) { return $null }
-        $picture = New-Object System.Drawing.Bitmap $w, $h
-        CopyScreen $picture $box.Left $box.Top
-        $first = -1; $xs = @(); $ys = @()
-        for ($y = 0; $y -lt $h; $y++) {
-            if ($first -ge 0 -and $y -gt $first + 14) { break }
-            for ($x = 0; $x -lt $w; $x++) {
-                $p = $picture.GetPixel($x, $y)
-                if ([Math]::Abs($p.R - $r) -lt 28 -and [Math]::Abs($p.G - $g) -lt 28 -and [Math]::Abs($p.B - $b) -lt 28) {
-                    if ($first -lt 0) { $first = $y }
-                    $xs += $x; $ys += $y
-                }
-            }
-        }
-        if ($first -lt 0) { return $null }
-        $xs = @($xs | Sort-Object); $ys = @($ys | Sort-Object)
-        @(($box.Left + $xs[[int]($xs.Count / 2)]), ($box.Top + $ys[[int]($ys.Count / 2)]))
-    }
-    # words of the message shown found by Find in This Message
-    $foundInMessage = {
-        param([string]$words)
-        Command $main $IDM_FIND_IN_MESSAGE
-        $form = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
-        if (-not $form) { return $false }
-        SetText $form 100 $words
-        Click $form 1
-        Start-Sleep -Milliseconds 1500
-        (StatusPart $mainStatus 0) -notmatch 'not in this message'
-    }
-
     SelectRow $failedRow
     Check ([bool](WaitFor { $null -ne (& $cardPoint 196 43 28) } 15)) 'opening the report shows the red card of a message not delivered'
-    # Show the message that bounced: the link, in the card's blue, clicked before a find scrolls the pane
-    $link = & $cardPoint 11 92 173
-    Check ($null -ne $link) 'the card has Show the message that bounced'
-    if ($link) {
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
-        [void][Native.Win]::SetForegroundWindow($main)
-        Start-Sleep -Milliseconds 300
-        [Native.Win]::MouseClick($link[0], $link[1])
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
-        Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), $COL_SUBJECT) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
-    }
+    # Show the message that bounced: the card's button, followed as a click on it would be
+    Check ([bool](WaitFor { & $foundInMessage 'Show the message that bounced' } 5)) 'the card has Show the message that bounced'
+    Check ([Native.Win]::SendText($main, 0x4C494E4B, 'inboxclassic:bounced-message') -eq 1) 'which is a link of the card'
+    Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), $COL_SUBJECT) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
     SelectFolder 0
     [void](WaitFor { $null -ne (& $rowOf $failedSubject) } 20)
     SelectRow (& $rowOf $failedSubject)

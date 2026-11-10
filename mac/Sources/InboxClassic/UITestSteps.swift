@@ -376,9 +376,13 @@ extension UITest {
         search("subject:\"Quarterly planning\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
-        let invitation: InfoBar? = find("reader.invitation", in: main.window)
-        check(await waitUntil(15) { invitation?.isHidden == false && invitation?.title.contains("Quarterly planning") == true },
-              "a message with an invitation shows the event over the text, with Open in Calendar")
+        check(await waitUntil(15) {
+            let text = await readerText()
+            return text.contains("Invitation: Quarterly planning") && text.contains("Open in Calendar") && text.contains("Room 2")
+        }, "a message with an invitation shows the event in a card above the text, with Open in Calendar")
+        let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
+        let link = try? await preview?.evaluateJavaScript("document.querySelector('a[href=\"inboxclassic:open-calendar\"]') !== null")
+        check(link as? Bool == true, "its Open in Calendar is the card's own link")
         await shot(main.window, "read-10-invitation")
         search("")
 

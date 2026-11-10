@@ -96,11 +96,6 @@ mac-files =
         [one] { $count } fail
        *[other] { $count } faili
     }
-mac-attendees =
-    { $count ->
-        [one] { $count } osaleja
-       *[other] { $count } osalejat
-    }
 
 ## Accounts
 

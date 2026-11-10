@@ -1,6 +1,6 @@
 // The reading pane: the header of the message (From, Date, To, Cc, Subject) with the brand's logo at its left and the
-// attachments and Unsubscribe at its right; under it the bar of a calendar invitation and the bar that offers the
-// pictures from the internet; then the message itself. Every string shown is the core's, decoded and checked there.
+// attachments and Unsubscribe at its right; under it the bar that offers the pictures from the internet; then the
+// message itself, with the cards of the core above it (a calendar event, a bounce, a one-time code). Every string shown is the core's, decoded and checked there.
 // It asks the core for the message it shows and hears its events, so the main window's pane and a message's own window
 // (MessageWindow.swift) are each one of these.
 import AppKit
@@ -42,7 +42,6 @@ final class Reader: NSObject {
     private let logo = NSImageView()
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
     private let unsubscribe = NSButton(title: Text.uiUnsubscribe.text, target: nil, action: nil)
-    private let invitation = InfoBar(icon: "calendar_ltr", link: nil, button: Text.uiOpenInCalendar.text)
     private let pictures = InfoBar(icon: "image", link: nil)
     /// over a message that could not be downloaded: Try Again
     private let retry = InfoBar(icon: "arrow_sync", link: nil, button: Text.uiTryAgain.text)
@@ -103,15 +102,12 @@ final class Reader: NSObject {
         pictures.text = Text.uiPicturesBlocked.text
         pictures.clicked = { [weak self] in self?.loadPictures() }
         pictures.setAccessibilityIdentifier("reader.pictures")
-        invitation.clicked = { [weak self] in self?.openInCalendar() }
         retry.text = taken(pe_retry_note()) ?? ""
         retry.clicked = { [weak self] in self?.retryDownload() }
         retry.setAccessibilityIdentifier("reader.retry")
         retry.isHidden = true
         // the links of the document's own cards: the core says which link it is, the view has what it needs
         preview.links = { [weak self] link in self?.followLink(link) ?? false }
-        invitation.setAccessibilityIdentifier("reader.invitation")
-        invitation.isHidden = true
         pictures.isHidden = true
 
         view.orientation = .vertical
@@ -122,13 +118,12 @@ final class Reader: NSObject {
             guard let self else { return }
             view.window?.makeFirstResponder(preview.view)
         }
-        for part in [headerBox, line, retry, invitation, pictures, findBar, preview.view] as [NSView] {
+        for part in [headerBox, line, retry, pictures, findBar, preview.view] as [NSView] {
             view.addArrangedSubview(part)
             part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         }
         view.setHuggingPriority(.defaultLow, for: .vertical)
         preview.view.setContentHuggingPriority(.defaultLow, for: .vertical)
-        invitation.heightAnchor.constraint(equalToConstant: 44).isActive = true
         pictures.heightAnchor.constraint(equalToConstant: 26).isActive = true
         retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
         findBar.heightAnchor.constraint(equalToConstant: 36).isActive = true
@@ -165,7 +160,6 @@ final class Reader: NSObject {
             picturesOffered = false
         }
         unsubscribe.isHidden = true
-        invitation.isHidden = true
         logo.isHidden = true
         logo.image = nil
         // says so rather than a blank pane, unless a message is about to be shown
@@ -227,7 +221,6 @@ final class Reader: NSObject {
         attachments.item(at: 0)?.image = Icons.list("attach")
         // a mailing list that says how to leave it
         unsubscribe.isHidden = info.unsubscribe == PE_UNSUBSCRIBE_NONE
-        showInvitation(info.invitation)
         preview.show(text(info.document), pictures: allowed)
         // offered only for a message with pictures on the internet, until they are shown
         picturesOffered = info.remote_images && !allowed
@@ -395,6 +388,9 @@ final class Reader: NSObject {
         case PE_READER_LINK_COPY_CODE:
             copyCode()
             return true
+        case PE_READER_LINK_OPEN_CALENDAR:
+            openInCalendar()
+            return true
         default:
             return false
         }
@@ -542,61 +538,6 @@ final class Reader: NSObject {
         return problem.isEmpty ? Text.uiUnsubscribed.text : Text.uiNotUnsubscribed.text(["reason": problem])
     }
 
-    // ---- a calendar invitation ----
-
-    private func showInvitation(_ event: UnsafePointer<PeInvitation>?) {
-        guard let event = event?.pointee else {
-            invitation.isHidden = true
-            return
-        }
-        let kinds = [Text.uiInvitation, Text.uiInvitationUpdated, Text.uiInvitationCanceled, Text.uiInvitationAnswer]
-        let summary = text(event.summary)
-        let title = kinds[min(Int(event.kind.rawValue), 3)].text(["title": summary.isEmpty ? Text.uiNoTitle.text : summary])
-        var parts = [when(event), text(event.location)]
-        let organizer = text(event.organizer)
-        if !organizer.isEmpty {
-            parts.append(Text.uiOrganizer.text(["name": organizer]))
-        }
-        parts.append(text(event.repeats))
-        if event.attendees > 0 {
-            parts.append(Text.macAttendees.text(["count": event.attendees]))
-        }
-        invitation.title = title
-        invitation.text = parts.filter { !$0.isEmpty }.joined(separator: "   \u{00B7}   ")
-        invitation.isHidden = false
-    }
-
-    /// when an event is, in words: its day (or days) and times, as the reader's local time or as written (floating)
-    private func when(_ event: PeInvitation) -> String {
-        guard event.has_start else { return "" }
-        let zone = event.floating ? TimeZone(secondsFromGMT: 0)! : TimeZone.current
-        let day = DateFormatter()
-        day.locale = Languages.locale
-        day.dateStyle = .full
-        day.timeStyle = .none
-        day.timeZone = zone
-        let time = DateFormatter()
-        time.locale = Languages.locale
-        time.dateStyle = .none
-        time.timeStyle = .short
-        time.timeZone = zone
-        var calendar = Calendar.current
-        calendar.timeZone = zone
-        let start = Date(timeIntervalSince1970: TimeInterval(event.start))
-        let end = event.has_end ? Date(timeIntervalSince1970: TimeInterval(event.end - (event.all_day ? 86400 : 0))) : nil
-        if event.all_day {
-            if let end, !calendar.isDate(start, inSameDayAs: end) {
-                return Text.uiEventSpan.text(["start": day.string(from: start), "end": day.string(from: end)])
-            }
-            return day.string(from: start)
-        }
-        var said = day.string(from: start) + ", " + time.string(from: start)
-        if let end {
-            said = Text.uiEventSpan.text(["start": said, "end": calendar.isDate(start, inSameDayAs: end)
-                ? time.string(from: end) : day.string(from: end) + ", " + time.string(from: end)])
-        }
-        return event.floating ? Text.uiEventFloating.text(["when": said]) : said
-    }
 }
 
 // the attachment menu is made when it opens, from the message view

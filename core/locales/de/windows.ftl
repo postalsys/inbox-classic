@@ -66,10 +66,6 @@ win-files = { $count ->
 win-click-to-retry = Klicken Sie hier, um es erneut zu versuchen.
 win-save-attachments = Anlagen &speichern...
 win-files-not-saved = Nicht gespeicherte Dateien: { $failed } von { $count }.
-win-attendees = { $count ->
-    [one] { $count } Teilnehmer
-   *[other] { $count } Teilnehmer
-}
 win-new-folder-in-highlighted = Der neue Ordner wird im ausgewählten Ordner angelegt.
 win-delete-folder-ask = Den Ordner „{ $folder }“ mit allen Nachrichten und Unterordnern löschen? Diese werden auch auf dem Server gelöscht.
 win-rename = &Umbenennen...

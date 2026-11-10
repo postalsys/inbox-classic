@@ -1,13 +1,12 @@
 //! The reading pane: the header of the message (the brand's logo beside it, Unsubscribe and the paper clip with the
-//! files at its right), the bar of a calendar invitation, the bar that says pictures from the internet are blocked,
-//! and the message itself, the sanitized document of the core in a locked down web view. The main window has one
+//! files at its right), the bar that says pictures from the internet are blocked, and the message itself (with the
+//! cards of the core above it: a calendar event, a bounce, a one-time code), the sanitized document of the core in a locked down web view. The main window has one
 //! under its list, and each message window one of its own: the reader keeps the message it shows, asks the core for
 //! it, follows the core's events about it and answers its own buttons (the files, the pictures, Try Again, the
 //! calendar, Unsubscribe) in the window it is in.
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_core::calendar::{Invitation, Method};
 use pe_core::{Event, MessageRef, MessageView};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -44,10 +43,6 @@ pub struct Reader {
     /// The paper clip with the files of the message
     pub attachments: gtk::MenuButton,
     attachments_label: gtk::Label,
-    invitation: gtk::Box,
-    invitation_title: gtk::Label,
-    invitation_details: gtk::Label,
-    pub open_calendar: gtk::Button,
     /// The bar that says pictures from the internet are blocked; its button shows them
     pictures: gtk::Box,
     pub download_pictures: gtk::Button,
@@ -178,28 +173,6 @@ impl Reader {
         header.append(&text);
         header.append(&attachments);
 
-        let invitation_title = gtk::Label::new(None);
-        invitation_title.add_css_class("title");
-        invitation_title.set_xalign(0.0);
-        invitation_title.set_ellipsize(gtk::pango::EllipsizeMode::End);
-        let invitation_details = gtk::Label::new(None);
-        invitation_details.set_xalign(0.0);
-        invitation_details.set_ellipsize(gtk::pango::EllipsizeMode::End);
-        let lines = gtk::Box::new(gtk::Orientation::Vertical, 2);
-        lines.set_hexpand(true);
-        lines.append(&invitation_title);
-        lines.append(&invitation_details);
-        let open_calendar = gtk::Button::with_label(&t!(UiOpenInCalendar));
-        open_calendar.set_valign(gtk::Align::Center);
-        open_calendar.set_widget_name("reader-open-calendar");
-        let invitation = gtk::Box::new(gtk::Orientation::Horizontal, 10);
-        invitation.add_css_class("info-bar");
-        invitation.set_widget_name("reader-invitation");
-        invitation.append(&gtk::Image::from_icon_name("ic-calendar-ltr-symbolic"));
-        invitation.append(&lines);
-        invitation.append(&open_calendar);
-        invitation.set_visible(false);
-
         let blocked = gtk::Label::new(Some(&t!(GtkPicturesBlocked)));
         blocked.set_xalign(0.0);
         blocked.set_hexpand(true);
@@ -234,7 +207,6 @@ impl Reader {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 0);
         widget.append(&header);
         widget.append(&retry);
-        widget.append(&invitation);
         widget.append(&pictures);
         widget.append(&find_bar);
         widget.append(&preview.view);
@@ -251,10 +223,6 @@ impl Reader {
             unsubscribe,
             attachments,
             attachments_label,
-            invitation,
-            invitation_title,
-            invitation_details,
-            open_calendar,
             pictures,
             download_pictures,
             retry,
@@ -300,7 +268,6 @@ impl Reader {
             let this = this.clone();
             spawn(async move { this.open_in_calendar().await });
         });
-        self.open_calendar.connect_clicked(move |_| calendar());
         let leave = on(|this| {
             let this = this.clone();
             spawn(async move { this.unsubscribe().await });
@@ -324,6 +291,10 @@ impl Reader {
         self.preview.set_links(move |uri| {
             if pe_html::is_copy_code_link(uri) {
                 copy();
+                return true;
+            }
+            if pe_html::is_open_calendar_link(uri) {
+                calendar();
                 return true;
             }
             if !pe_html::is_bounced_message_link(uri) {
@@ -607,7 +578,6 @@ impl Reader {
         if !loading {
             self.attachments.set_visible(false);
             self.pictures.set_visible(false);
-            self.invitation.set_visible(false);
         }
         self.unsubscribe.set_visible(false);
         self.retry.set_visible(false);
@@ -724,7 +694,6 @@ impl Reader {
         self.to.set_text(&to);
         self.unsubscribe.set_visible(view.unsubscribe.is_some());
         self.show_attachments(view);
-        self.show_invitation(view.invitation.as_ref());
         self.preview.show(&view.document, remote_images);
         // offered only for a message with pictures on the internet, until they are shown
         self.pictures.set_visible(view.remote_images && !remote_images);
@@ -758,39 +727,6 @@ impl Reader {
         self.attachments.set_menu_model(Some(&menu));
     }
 
-    /// The event of the message's calendar part, its two lines as the bar shows them
-    fn show_invitation(&self, event: Option<&Invitation>) {
-        let Some(event) = event else {
-            self.invitation.set_visible(false);
-            return;
-        };
-        let kind = match event.method {
-            Method::Request => "request",
-            Method::Update => "update",
-            Method::Cancel => "cancel",
-            Method::Reply => "reply",
-        };
-        let untitled = t!(UiNoTitle);
-        let summary = if event.summary.is_empty() {
-            &untitled
-        } else {
-            &event.summary
-        };
-        self.invitation_title
-            .set_text(&t!(GtkInvitation, kind = kind, summary = summary));
-        let mut parts = vec![when(event), event.location.clone()];
-        if !event.organizer.is_empty() {
-            parts.push(t!(GtkOrganizer, organizer = &event.organizer));
-        }
-        parts.push(event.repeats.clone());
-        if event.attendees > 0 {
-            parts.push(t!(GtkAttendees, count = event.attendees));
-        }
-        parts.retain(|part| !part.is_empty());
-        self.invitation_details.set_text(&parts.join("   \u{00B7}   "));
-        self.invitation.set_visible(true);
-    }
-
     /// The brand's logo beside the header, once the core drew it: `size` pixels square, BGRA with the alpha
     /// multiplied in
     pub fn show_logo(&self, pixels: Option<Vec<u8>>, size: i32) {
@@ -810,11 +746,6 @@ impl Reader {
             }
             _ => self.logo.set_visible(false),
         }
-    }
-
-    #[cfg(feature = "e2e")]
-    pub fn invitation_shown(&self) -> bool {
-        self.invitation.is_visible()
     }
 
     #[cfg(feature = "e2e")]
@@ -966,35 +897,18 @@ fn time_of_day(time: &glib::DateTime) -> String {
         .unwrap_or_default()
 }
 
-fn same_day(a: &glib::DateTime, b: &glib::DateTime) -> bool {
-    a.ymd() == b.ymd()
-}
-
-/// When an event is, in words: its day (or days) and times
-fn when(event: &Invitation) -> String {
-    let Some(start) = event.start.and_then(|s| event_time(s, event.floating)) else {
-        return String::new();
-    };
-    let end = event
-        .end
-        .and_then(|e| event_time(e - if event.all_day { 86400 } else { 0 }, event.floating));
-    if event.all_day {
-        return match end {
-            Some(end) if !same_day(&start, &end) => t!(UiEventSpan, start = &long_date(&start), end = &long_date(&end)),
-            _ => long_date(&start),
+/// The days and times of the event cards of the core, as the windows write dates: the long date or the time of day, in
+/// the reader's time zone, or as written (UTC) when floating
+pub fn set_instant_format() {
+    pe_core::calendar::set_instant_format(|seconds, floating, part| {
+        let Some(time) = event_time(seconds, floating) else {
+            return String::new();
         };
-    }
-    let at = |time: &glib::DateTime| t!(GtkDayAndTime, day = &long_date(time), time = &time_of_day(time));
-    let text = match end {
-        Some(end) if same_day(&start, &end) => t!(UiEventSpan, start = &at(&start), end = &time_of_day(&end)),
-        Some(end) => t!(UiEventSpan, start = &at(&start), end = &at(&end)),
-        None => at(&start),
-    };
-    if event.floating {
-        t!(UiEventFloating, when = &text)
-    } else {
-        text
-    }
+        match part {
+            pe_core::calendar::InstantPart::Date => long_date(&time),
+            pe_core::calendar::InstantPart::Time => time_of_day(&time),
+        }
+    });
 }
 
 glib::wrapper! {

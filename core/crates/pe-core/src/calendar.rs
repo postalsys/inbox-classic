@@ -421,3 +421,201 @@ mod tests {
         assert_eq!(seconds("P9999999999999999999D"), None);
     }
 }
+
+// ---- the event's card ----
+
+/// What the platform words of an instant: its day, or its time of day
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum InstantPart {
+    /// The day, in full: "Tuesday, 1 December 2026"
+    Date,
+    /// The time of day, short: "12:00"
+    Time,
+}
+
+/// Words an instant (seconds since the Unix epoch) as the platform does, in the reader's time zone, or as written when
+/// `floating` (in no zone: the seconds are the written time read as UTC)
+type InstantFormat = std::sync::Arc<dyn Fn(i64, bool, InstantPart) -> String + Send + Sync>;
+
+static INSTANT_FORMAT: std::sync::RwLock<Option<InstantFormat>> = std::sync::RwLock::new(None);
+
+/// How the event cards word their days and times: the app's own words for a date and a time, in the reader's locale and
+/// time zone. Set once as the app starts; without it the cards say UTC dates and times as ISO 8601 has them.
+pub fn set_instant_format(format: impl Fn(i64, bool, InstantPart) -> String + Send + Sync + 'static) {
+    if let Ok(mut slot) = INSTANT_FORMAT.write() {
+        *slot = Some(std::sync::Arc::new(format));
+    }
+}
+
+/// An instant in words, the platform's or ISO 8601's
+fn instant(seconds: i64, floating: bool, part: InstantPart) -> String {
+    let format = INSTANT_FORMAT.read().ok().and_then(|slot| slot.clone());
+    match format {
+        Some(format) => format(seconds, floating, part),
+        None => iso_instant(seconds, part),
+    }
+}
+
+/// `2026-12-01` or `12:00`, in UTC
+fn iso_instant(seconds: i64, part: InstantPart) -> String {
+    let (days, rest) = (seconds.div_euclid(86400), seconds.rem_euclid(86400));
+    match part {
+        InstantPart::Time => format!("{:02}:{:02}", rest / 3600, rest % 3600 / 60),
+        InstantPart::Date => {
+            // days since 1970-01-01 to a civil date (Howard Hinnant's algorithm)
+            let z = days + 719_468;
+            let era = z.div_euclid(146_097);
+            let doe = z.rem_euclid(146_097);
+            let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146_096) / 365;
+            let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+            let mp = (5 * doy + 2) / 153;
+            let day = doy - (153 * mp + 2) / 5 + 1;
+            let month = if mp < 10 { mp + 3 } else { mp - 9 };
+            let year = yoe + era * 400 + i64::from(month <= 2);
+            format!("{year:04}-{month:02}-{day:02}")
+        }
+    }
+}
+
+/// When an event is, in words: its day (or days) and times, as the reader's local time or as written (floating)
+pub(crate) fn when(event: &Invitation) -> String {
+    use pe_i18n::{Text, tr_args};
+    let Some(start) = event.start else {
+        return String::new();
+    };
+    let date = |s| instant(s, event.floating, InstantPart::Date);
+    let time = |s| instant(s, event.floating, InstantPart::Time);
+    // the last day of an all-day event is the day before its end
+    let end = event.end.map(|end| if event.all_day { end - 86400 } else { end });
+    let span = |start: String, end: String| {
+        tr_args(
+            Text::UiEventSpan,
+            &[("start", start.as_str().into()), ("end", end.as_str().into())],
+        )
+    };
+    if event.all_day {
+        return match end.map(date) {
+            Some(last) if last != date(start) => span(date(start), last),
+            _ => date(start),
+        };
+    }
+    let mut said = format!("{}, {}", date(start), time(start));
+    if let Some(end) = end {
+        let until = if date(end) == date(start) {
+            time(end)
+        } else {
+            format!("{}, {}", date(end), time(end))
+        };
+        said = span(said, until);
+    }
+    if event.floating {
+        tr_args(Text::UiEventFloating, &[("when", said.as_str().into())])
+    } else {
+        said
+    }
+}
+
+/// The card of an event, its words from the catalog
+pub(crate) fn card(event: &Invitation) -> pe_html::EventCard {
+    use pe_i18n::{Text, tr, tr_args};
+    let kind = match event.method {
+        Method::Request => Text::UiInvitation,
+        Method::Update => Text::UiInvitationUpdated,
+        Method::Cancel => Text::UiInvitationCanceled,
+        Method::Reply => Text::UiInvitationAnswer,
+    };
+    let title = if event.summary.is_empty() {
+        tr(Text::UiNoTitle)
+    } else {
+        event.summary.clone()
+    };
+    let mut details = vec![event.location.clone()];
+    if !event.organizer.is_empty() {
+        details.push(tr_args(Text::UiOrganizer, &[("name", event.organizer.as_str().into())]));
+    }
+    details.push(event.repeats.clone());
+    if event.attendees > 0 {
+        details.push(tr_args(
+            Text::EventAttendees,
+            &[("count", (event.attendees as i64).into())],
+        ));
+    }
+    pe_html::EventCard {
+        heading: tr_args(kind, &[("title", title.as_str().into())]),
+        when: when(event),
+        details,
+        open: tr(Text::UiOpenInCalendar),
+        canceled: event.method == Method::Cancel,
+    }
+}
+
+#[cfg(test)]
+mod card_tests {
+    use super::*;
+
+    fn event() -> Invitation {
+        Invitation {
+            method: Method::Request,
+            summary: "Quarterly planning".into(),
+            // 2025-12-01 12:00 to 13:30 UTC
+            start: Some(1_764_590_400),
+            end: Some(1_764_595_800),
+            location: "Room 2".into(),
+            organizer: "Ann Example".into(),
+            attendees: 3,
+            repeats: String::new(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn the_card_of_an_invitation() {
+        let card = card(&event());
+        assert_eq!(card.heading, "Invitation: Quarterly planning");
+        assert_eq!(card.when, "2025-12-01, 12:00 to 13:30");
+        assert_eq!(card.details, ["Room 2", "Organizer: Ann Example", "", "3 attendees"]);
+        assert!(!card.canceled);
+        let canceled = super::card(&Invitation {
+            method: Method::Cancel,
+            summary: String::new(),
+            ..event()
+        });
+        assert!(
+            canceled.canceled && canceled.heading == "Canceled: (no title)",
+            "{}",
+            canceled.heading
+        );
+    }
+
+    #[test]
+    fn days_and_spans() {
+        assert_eq!(iso_instant(0, InstantPart::Date), "1970-01-01");
+        assert_eq!(iso_instant(951_782_400, InstantPart::Date), "2000-02-29");
+        assert_eq!(iso_instant(-86_400, InstantPart::Date), "1969-12-31");
+        // an all-day event of one day (its end the next midnight), and of three
+        let day = Invitation {
+            all_day: true,
+            start: Some(1_764_547_200),
+            end: Some(1_764_633_600),
+            ..event()
+        };
+        assert_eq!(when(&day), "2025-12-01");
+        assert_eq!(
+            when(&Invitation {
+                end: Some(1_764_806_400),
+                ..day
+            }),
+            "2025-12-01 to 2025-12-03"
+        );
+        // over midnight, and as written
+        let late = Invitation {
+            end: Some(1_764_633_600 + 3600),
+            floating: true,
+            ..event()
+        };
+        assert_eq!(
+            when(&late),
+            "2025-12-01, 12:00 to 2025-12-02, 01:00 (the sender's time)"
+        );
+    }
+}

@@ -86,18 +86,6 @@ gtk-reader-files = Archivos adjuntos del mensaje
 gtk-pictures-blocked = Se han bloqueado algunas imágenes para impedir que el remitente identifique su equipo.
 gtk-download-pictures = Descargar imágenes
 gtk-save-attachments-menu = Guardar archivos adjuntos...
-gtk-invitation = { $kind ->
-    [update] Invitación actualizada: { $summary }
-    [cancel] Cancelado: { $summary }
-    [reply] Respuesta a una invitación: { $summary }
-   *[request] Invitación: { $summary }
-}
-gtk-organizer = Organizador: { $organizer }
-gtk-attendees = { $count ->
-    [one] { $count } asistente
-   *[other] { $count } asistentes
-}
-gtk-day-and-time = { $day }, { $time }
 
 ## The compose window
 

@@ -488,3 +488,10 @@ otp-heading = Code from { $domain }
 otp-copy = Copy
 otp-note = Enter it only on a page of { $domain }.
 otp-old = This code was sent more than an hour before you opened it, and has probably expired.
+
+# how many are invited, in the card of an event
+event-attendees =
+    { $count ->
+        [one] { $count } attendee
+       *[other] { $count } attendees
+    }

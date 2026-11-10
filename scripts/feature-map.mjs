@@ -510,8 +510,8 @@ const sections = [
                 shot: 'read-10-invitation',
                 name: 'Calendar invitations',
                 what: "A message with a calendar part (iCalendar, read in Rust) shows its first event over the text: invitation, update or cancellation, the title, when in the reader's time zone (the time zones the file defines, with their daylight-saving rules), where, the organizer, how it repeats and how many attend. Open in Calendar writes the calendar part alone to a file and opens it in the calendar program.",
-                how: 'Select a message with an invitation; Open in Calendar on its bar.',
-                checked: ['A message with an invitation shows the event over the text, with Open in Calendar']
+                how: 'Select a message with an invitation; Open in Calendar on its card.',
+                checked: ['A message with an invitation shows the event in a card above the text, with Open in Calendar']
             },
             {
                 shot: 'read-8-unsubscribe',

@@ -85,18 +85,6 @@ gtk-reader-files = Kirja manused
 gtk-pictures-blocked = Mõned pildid blokeeriti, et saatja ei saaks teie arvutit tuvastada.
 gtk-download-pictures = Laadi pildid alla
 gtk-save-attachments-menu = Salvesta manused...
-gtk-invitation = { $kind ->
-    [update] Muudetud kutse: { $summary }
-    [cancel] Tühistatud: { $summary }
-    [reply] Vastus kutsele: { $summary }
-   *[request] Kutse: { $summary }
-}
-gtk-organizer = Korraldaja: { $organizer }
-gtk-attendees = { $count ->
-    [one] { $count } osaleja
-   *[other] { $count } osalejat
-}
-gtk-day-and-time = { $day }, { $time }
 
 ## The compose window
 

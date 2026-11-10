@@ -35,30 +35,23 @@ std::wstring LongDate(const SYSTEMTIME& time) {
     return date;
 }
 
-bool SameDay(const SYSTEMTIME& a, const SYSTEMTIME& b) {
-    return a.wYear == b.wYear && a.wMonth == b.wMonth && a.wDay == b.wDay;
-}
-
-// when an event is, in words: its day (or days) and times
-std::wstring When(const PeInvitation& event) {
-    SYSTEMTIME start, end;
-    if (!event.has_start || !EventTime(event.start, event.floating, start)) {
-        return L"";
-    }
-    bool hasEnd = event.has_end && EventTime(event.end - (event.all_day ? 86400 : 0), event.floating, end);
-    if (event.all_day) {
-        return hasEnd && !SameDay(start, end) ? core::T(PE_TEXT_UI_EVENT_SPAN, {{"start", LongDate(start)}, {"end", LongDate(end)}})
-                                              : LongDate(start);
-    }
-    std::wstring when = LongDate(start) + L", " + FormatTime(start);
-    if (hasEnd) {
-        std::wstring until = SameDay(start, end) ? FormatTime(end) : LongDate(end) + L", " + FormatTime(end);
-        when = core::T(PE_TEXT_UI_EVENT_SPAN, {{"start", when}, {"end", until}});
-    }
-    return event.floating ? core::T(PE_TEXT_UI_EVENT_FLOATING, {{"when", when}}) : when;
-}
-
 }  // namespace
+
+// the days and times of the event cards as the windows show dates: the user's long date and short time
+static size_t FormatInstant(void*, int64_t seconds, bool floating, bool time, char* out, size_t capacity) {
+    SYSTEMTIME at;
+    if (!EventTime(seconds, floating, at)) {
+        return 0;
+    }
+    std::string words = core::Narrow(time ? FormatTime(at) : LongDate(at));
+    size_t length = std::min(words.size(), capacity);
+    memcpy(out, words.data(), length);
+    return length;
+}
+
+void SetInstantFormat() {
+    pe_set_instant_format(FormatInstant, nullptr);
+}
 
 WORD ReadingKey(UINT key) {
     bool control = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
@@ -101,18 +94,12 @@ LRESULT CALLBACK BodyHostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 void Reader::Create(HWND parent, PeCore* core) {
     parent_ = parent;
     core_ = core;
-    icons_ = IconList(IconSet::List);
-    ImageList_GetIconSize(icons_, &iconSize_, &iconSize_);
     // not drawn over the Unsubscribe link that lies on it
     header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN | WS_CLIPSIBLINGS, 0, {});
     unsubscribe_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
     ShowWindow(unsubscribe_, SW_HIDE);
-    invitation_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_INVITATION, {});
     logo_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW, IDC_LOGO, {});
     ShowWindow(logo_, SW_HIDE);
-    openCalendar_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_OPEN_IN_CALENDAR).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_OPEN_CALENDAR, {});
-    ShowWindow(invitation_, SW_HIDE);
-    ShowWindow(openCalendar_, SW_HIDE);
     // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
     attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_ATTACHMENTS, BarIcons::Big);
     // a label from the start, so the bar keeps a row for it under the icon ("2 files" once a message is shown)
@@ -175,6 +162,9 @@ bool Reader::FollowLink(const wchar_t* uri) {
     switch (pe_reader_link(core::Narrow(uri).c_str())) {
     case PE_READER_LINK_BOUNCED_MESSAGE:
         PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_BOUNCED_MESSAGE, 0), 0);
+        return true;
+    case PE_READER_LINK_OPEN_CALENDAR:
+        OpenInCalendar();
         return true;
     case PE_READER_LINK_COPY_CODE:
         if (const PeMessageInfo* info = Info(); info && info->otp_code && *info->otp_code &&
@@ -278,14 +268,6 @@ void Reader::Layout() {
         MoveWindow(retry_, reader.left, top, width, barHeight, TRUE);
         top += barHeight + Scale(2);
     }
-    if (IsWindowVisible(invitation_)) {
-        int barHeight = Scale(40), buttonWidth = Scale(120), buttonHeight = Scale(25);
-        MoveWindow(invitation_, reader.left, top, width, barHeight, TRUE);
-        MoveWindow(openCalendar_, reader.left + width - buttonWidth - Scale(8), top + (barHeight - buttonHeight) / 2, buttonWidth, buttonHeight,
-                   TRUE);
-        SetWindowPos(openCalendar_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        top += barHeight + Scale(2);
-    }
     if (IsWindowVisible(pictures_)) {
         int barHeight = Scale(22);
         MoveWindow(pictures_, reader.left, top, width, barHeight, TRUE);
@@ -317,7 +299,6 @@ void Reader::Clear(bool loading) {
     SetWindowTextW(header_, L"");
     unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
     ShowWindow(unsubscribe_, SW_HIDE);
-    ShowInvitation(nullptr);
     ShowLogo(false);
     // says so rather than a blank pane, unless a message is about to be shown
     preview_.Clear(!loading);
@@ -376,7 +357,6 @@ void Reader::ShowView() {
     unsubscribeLink_ = Text(info->unsubscribe_link);
     unsubscribeTarget_ = Text(info->unsubscribe_target);
     ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
-    ShowInvitation(info->invitation);
     ShowLogo(info->has_logo);
     Layout();
     InvalidateRect(unsubscribe_, nullptr, TRUE);
@@ -561,36 +541,6 @@ void Reader::ShowLogo(bool wanted) {
     }
 }
 
-void Reader::ShowInvitation(const PeInvitation* event) {
-    if (!event) {
-        ShowWindow(invitation_, SW_HIDE);
-        ShowWindow(openCalendar_, SW_HIDE);
-        return;
-    }
-    PeText kinds[] = {PE_TEXT_UI_INVITATION, PE_TEXT_UI_INVITATION_UPDATED, PE_TEXT_UI_INVITATION_CANCELED,
-                      PE_TEXT_UI_INVITATION_ANSWER};
-    std::wstring summary = Text(event->summary);
-    invitationTitle_ = core::T(kinds[std::clamp(static_cast<int>(event->kind), 0, 3)],
-                               {{"title", summary.empty() ? core::T(PE_TEXT_UI_NO_TITLE) : summary}});
-    std::vector<std::wstring> parts = {When(*event), Text(event->location)};
-    if (std::wstring organizer = Text(event->organizer); !organizer.empty()) {
-        parts.push_back(core::T(PE_TEXT_UI_ORGANIZER, {{"name", organizer}}));
-    }
-    parts.push_back(Text(event->repeats));
-    if (event->attendees > 0) {
-        parts.push_back(core::T(PE_TEXT_WIN_ATTENDEES, {{"count", std::to_wstring(event->attendees)}}));
-    }
-    invitationDetails_.clear();
-    for (const std::wstring& part : parts) {
-        if (!part.empty()) {
-            invitationDetails_ += (invitationDetails_.empty() ? L"" : L"   ·   ") + part;
-        }
-    }
-    ShowWindow(invitation_, SW_SHOW);
-    ShowWindow(openCalendar_, SW_SHOW);
-    InvalidateRect(invitation_, nullptr, TRUE);
-}
-
 // the calendar part as a file of its own (the core writes it, and only it), for the calendar program
 void Reader::OpenInCalendar() {
     wchar_t temp[MAX_PATH] = L"";
@@ -624,30 +574,7 @@ bool Reader::OnDrawItem(const DRAWITEMSTRUCT& item) {
         }
         return true;
     }
-    if (item.hwndItem != invitation_) {
-        return false;
-    }
-    // the calendar, then the event in two lines, on the information bar's yellow
-    RECT area = item.rcItem;
-    FillRect(item.hDC, &area, GetSysColorBrush(COLOR_INFOBK));
-    int pad = Scale(8);
-    ImageList_Draw(icons_, LIST_CALENDAR_LTR, item.hDC, area.left + pad, (area.top + area.bottom - iconSize_) / 2, ILD_TRANSPARENT);
-    area.left += pad + iconSize_ + pad;
-    RECT button;
-    GetWindowRect(openCalendar_, &button);
-    area.right -= (button.right - button.left) + 2 * pad;
-    SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
-    SetBkMode(item.hDC, TRANSPARENT);
-    UINT format = DT_LEFT | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS;
-    int middle = (area.top + area.bottom) / 2;
-    RECT title = {area.left, area.top + Scale(3), area.right, middle};
-    HGDIOBJ old = SelectObject(item.hDC, bold_);
-    DrawTextW(item.hDC, invitationTitle_.c_str(), -1, &title, format | DT_BOTTOM);
-    SelectObject(item.hDC, reinterpret_cast<HFONT>(SendMessageW(header_, WM_GETFONT, 0, 0)));
-    RECT details = {area.left, middle + Scale(1), area.right, area.bottom - Scale(3)};
-    DrawTextW(item.hDC, invitationDetails_.c_str(), -1, &details, format | DT_TOP);
-    SelectObject(item.hDC, old);
-    return true;
+    return false;
 }
 
 bool Reader::OnNotify(NMHDR* header, LRESULT& result) {
@@ -669,9 +596,6 @@ bool Reader::OnCommand(WORD id, WORD) {
         return true;
     case IDC_RETRY:
         Retry();
-        return true;
-    case IDC_OPEN_CALENDAR:
-        OpenInCalendar();
         return true;
     case IDC_BOUNCED_MESSAGE:
         if (const PeMessageInfo* info = Info(); info && info->has_bounced_message && onBouncedMessage) {

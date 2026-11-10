@@ -85,7 +85,6 @@ private:
     // Try Again, or the account synced again after the message could not be downloaded
     void Retry();
     void ShowLogo(bool wanted);
-    void ShowInvitation(const PeInvitation* event);
     void OpenInCalendar();
     void ChooseAttachment();
     void SaveAllAttachments();
@@ -101,9 +100,6 @@ private:
     HWND previewHost_ = nullptr;
     HFONT bold_ = nullptr;
     HFONT link_ = nullptr;
-    // the icons the invitation bar draws, and their size
-    HIMAGELIST icons_ = nullptr;
-    int iconSize_ = 16;
     // the Unsubscribe link, and how the message shown lets its reader leave its list (PeMessageInfo)
     HWND unsubscribe_ = nullptr;
     PeUnsubscribe unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
@@ -115,11 +111,6 @@ private:
     HBITMAP logoBitmap_ = nullptr;
     uint64_t logoRequest_ = 0;
     int logoSize_ = 0;
-    // the event of the message shown, its two lines as the bar shows them
-    HWND invitation_ = nullptr;
-    HWND openCalendar_ = nullptr;
-    std::wstring invitationTitle_;
-    std::wstring invitationDetails_;
     Preview preview_;
     // the message shown, its folder and the account of that, 0 for none
     uint64_t uid_ = 0;

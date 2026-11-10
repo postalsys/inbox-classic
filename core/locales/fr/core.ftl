@@ -510,3 +510,9 @@ otp-copy = Copier
 otp-note = Saisissez-le uniquement sur une page de { $domain }.
 # review: new
 otp-old = Ce code a été envoyé plus d'une heure avant son ouverture et a probablement expiré.
+
+event-attendees =
+    { $count ->
+        [one] { $count } participant
+       *[other] { $count } participants
+    }

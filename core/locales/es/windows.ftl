@@ -66,10 +66,6 @@ win-files = { $count ->
 win-click-to-retry = Haga clic aquí para volver a intentarlo.
 win-save-attachments = &Guardar archivos adjuntos...
 win-files-not-saved = Archivos sin guardar: { $failed } de { $count }.
-win-attendees = { $count ->
-    [one] { $count } asistente
-   *[other] { $count } asistentes
-}
 win-new-folder-in-highlighted = La nueva carpeta se creará dentro de la carpeta seleccionada.
 win-delete-folder-ask = ¿Eliminar la carpeta «{ $folder }», todos sus mensajes y sus subcarpetas? También se eliminarán del servidor.
 win-rename = Re&nombrar...

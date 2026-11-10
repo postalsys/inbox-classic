@@ -862,6 +862,7 @@ bool OpenCore(HWND hwnd) {
     std::string path = core::Narrow(g_arguments.store.empty() ? StorePath() : g_arguments.store);
     uint32_t flags = g_arguments.memoryPasswords ? PE_OPEN_MEMORY_PASSWORDS : 0;
     std::string certificate = core::Narrow(g_arguments.certificate);
+    SetInstantFormat();
     g_core.reset(pe_core_open_with(path.c_str(), flags, certificate.empty() ? nullptr : certificate.c_str(), OnCoreEvent, hwnd));
     if (g_core) {
         // where the user's AI agents reach this app (--mcp); another app with this store open keeps them

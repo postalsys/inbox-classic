@@ -135,10 +135,15 @@ pub async fn invitation_and_logo(d: &Driver) {
     pause(1500).await;
     show_found("subject:\"Quarterly planning\"").await;
     let reader = &shell().main().reader;
-    let shown = wait_until(15, || reader.invitation_shown() && reader.open_calendar.is_visible()).await;
+    let card = wait_for(15, || {
+        let text = document_text(&reader.preview.shown());
+        (text.contains("Invitation: Quarterly planning") && text.contains("Room 2")).then_some(text)
+    })
+    .await
+    .unwrap_or_default();
     d.check(
-        shown,
-        "a message with an invitation shows the event over the text, with Open in Calendar",
+        card.contains("Open in Calendar") && reader.preview.shown().contains(pe_html::OPEN_CALENDAR_LINK),
+        "a message with an invitation shows the event in a card above the text, with Open in Calendar",
     );
     d.shot(&main, "read-10-invitation").await;
     search("").await;
@@ -2485,7 +2490,6 @@ fn shown_words(root: &gtk::Widget) -> Vec<(String, bool)> {
         "reader-to",
         "reader-date",
         "reader-attachments",
-        "reader-invitation",
     ]
     .iter()
     .filter_map(|name| named_in(root, name))
