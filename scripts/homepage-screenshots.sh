@@ -46,10 +46,10 @@ for platform in "${platforms[@]}"; do
             linux)
                 crop=""
                 [ "$shot" = write-5-new ] && crop="-crop x400+0+0 +repage"
-                # the account form is a dialog over the main window: the dialog, where it is in a window of 1090x750
-                [ "$shot" = account-1-form ] && crop="-crop 551x459+270+146 +repage"
+                # the account form is a dialog over the main window: the dialog, where it is in a window of 1190x750
+                [ "$shot" = account-1-form ] && crop="-crop 551x459+320+146 +repage"
                 # the send confirmation is a dialog over the main window too
-                [ "$shot" = agents-4-send ] && crop="-crop 528x481+281+135 +repage"
+                [ "$shot" = agents-4-send ] && crop="-crop 528x481+331+135 +repage"
                 magick "$source" $crop -strip "$target"
                 ;;
         esac
