@@ -162,6 +162,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.columnSpacing = 8
         grid.column(at: 0).xPlacement = .trailing
         grid.row(at: 2).topPadding = 8
+        // the label on the pop-up's text line, as the other forms have it
+        grid.row(at: 0).rowAlignment = .firstBaseline
         grid.translatesAutoresizingMaskIntoConstraints = false
         let content = NSView()
         content.addSubview(grid)

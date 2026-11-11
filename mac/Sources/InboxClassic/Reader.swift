@@ -623,13 +623,21 @@ final class InfoBar: NSView {
         words.alignment = .leading
         words.spacing = 1
         var views: [NSView] = [image, words]
+        // takes what is left: a button goes to the trailing edge, a link right after the words
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        spacer.setContentCompressionResistancePriority(.init(1), for: .horizontal)
         if let action {
             action.target = self
             action.action = #selector(fire)
-            views.append(action)
             action.setContentHuggingPriority(.required, for: .horizontal)
+            action.setContentCompressionResistancePriority(.required, for: .horizontal)
+            // a long text gives way in its middle, never under the link
+            textLabel.lineBreakMode = .byTruncatingMiddle
+            views += button != nil ? [spacer, action] : [action, spacer]
         }
         let stack = NSStackView(views: views)
+        stack.distribution = .fill
         stack.spacing = 8
         stack.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
         stack.translatesAutoresizingMaskIntoConstraints = false

@@ -2072,16 +2072,25 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
 
 /// An account's heading in the tree: its name, small and grey as Mail's sidebar headings are, and while it is closed
 /// the count of the unread messages of its folders
+/// an account heading's name: the source list restyles a group row's text field as it redraws, so the font is fixed
+/// here to look the same always, as the section headings of Mail
+final class HeadingName: NSTextField {
+    override var font: NSFont? {
+        get { super.font }
+        set { super.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold) }
+    }
+}
+
 final class HeadingCell: NSTableCellView {
     static let identifier = NSUserInterfaceItemIdentifier("heading")
-    private let name = NSTextField(labelWithString: "")
+    private let name = HeadingName(labelWithString: "")
     private let count = NSTextField(labelWithString: "")
 
     init() {
         super.init(frame: .zero)
         identifier = HeadingCell.identifier
         name.lineBreakMode = .byTruncatingTail
-        name.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
+        name.font = nil // the setter puts the heading's own font
         name.textColor = .secondaryLabelColor
         count.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
         count.textColor = .secondaryLabelColor

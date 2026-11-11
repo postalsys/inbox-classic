@@ -758,9 +758,11 @@ extension UITest {
         onMain { options.grouping.state = .off; options.groupingChanged() }
         check(await waitUntil(5) { tripRows().count == 3 && tripRows().allSatisfy { $0.message.thread == 0 } },
               "turned off, the three messages are each a row of their own")
-        // the list from its top, the main window in front
+        check(main.mailbox.selectedRow?.uid == main.mailbox.reader.uid && main.mailbox.reader.uid != 0,
+              "and the message the pane shows is still selected (\(main.mailbox.selectedRow?.subject ?? "none"))")
+        // the list at that row, the main window in front
         onMain {
-            self.list.scrollRowToVisible(0)
+            self.list.scrollRowToVisible(self.list.selectedRow)
             self.main.window.makeKeyAndOrderFront(nil)
         }
         await shot(main.window, "threads-3-options-off")
