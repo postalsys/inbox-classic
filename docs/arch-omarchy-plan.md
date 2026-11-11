@@ -137,6 +137,13 @@ What it finds is fixed in `linux/` before the PR.
 - **Seen, not changed**: a menu's sliding submenu (File, Tools) can run past the right edge of the screen, cutting off the shortcut column, when the window touches that edge (Hyprland does not move the popover back); Omarchy's first-boot cards sit over the app's menu until dismissed.
 - **The VM itself**: VMware's SVGA3D runs Hyprland, but Quickshell gets no EGL surface and GTK 4's GL renderer loses its Wayland connection (Nautilus as well), so the VM sets `QT_QUICK_BACKEND=software` and `GSK_RENDERER=cairo`; real hardware needs neither, and these checks do not cover GTK's GL renderer, which Omarchy users run. Its guest clock is set to UTC (`rtc.diffFromUTC`), or the install's pacman keys come out "in the future". Snapshots are taken with the VM off (a live one froze the guest), and the console is VNC on the Windows machine's loopback.
 
+## Where it stands
+
+- Steps 1 to 3 are done (this branch): the PKGBUILD, the CI job, the VM and its checks, with the tray fix they found.
+- Step 4 waits for the next release, so Omarchy's first build already has the tray fix: then `scripts/arch-package.sh --release` writes the recipe with that release's checksum, and the pull request to `omacom-io/omarchy-pkgs` goes out with the description in the step above.
+- Until then, each release carries the built packages, `InboxClassic-x86_64.pkg.tar.zst` and `InboxClassic-aarch64.pkg.tar.zst` (`scripts/arch-package.sh --release` in `release.sh`, from the release's tarball, in `hashes.txt`; 0.11.0's were added to its release afterwards), and the homepage shows `curl -LO <url>` and `sudo pacman -U <file>`: an install for testing, without updates. (pacman wants a signature for a package given as a URL, which would mean importing our key into pacman's keyring; a downloaded file it installs without one. A new Omarchy has no package lists until its first Update.) Once the package is in Omarchy's repository, the homepage and the README switch to _Install > Package_ and `pacman -S`; a package installed with `pacman -U` then updates from Omarchy's repository, as the names are the same.
+- Step 6 waits for the AUR's registration to reopen.
+
 ## Risks
 
 - **The Omarchy maintainers decline the package**, or keep it waiting. The repository invites contributions and carries other third-party apps, but inclusion is their call. If they decline, the AUR is the path, with the same PKGBUILD, and the menu's _Install > AUR_ finds it.

@@ -15,8 +15,10 @@
 #            image started with --version
 #   Linux    dist/InboxClassic-amd64.deb and dist/InboxClassic-arm64.deb in Docker here (scripts/linux-package.sh),
 #            each installed into a clean Ubuntu container and started with --version, and after the release
-#            published to the apt repository https://apt.inboxclassic.com (scripts/apt-repo.sh); Omarchy's
-#            package repository builds the Arch package (linux/arch/PKGBUILD) from the tag by itself
+#            published to the apt repository https://apt.inboxclassic.com (scripts/apt-repo.sh), and
+#            dist/InboxClassic-x86_64.pkg.tar.zst and -aarch64 for Arch Linux and Omarchy (scripts/arch-package.sh),
+#            each installed into a clean Arch container and started; Omarchy's package repository also builds
+#            linux/arch/PKGBUILD from the tag by itself
 # then writes hashes.txt signed with the release GPG key, uploads all of it to the draft release and publishes it,
 # and puts the Mac update (Sparkle's appcast.xml, signed with the update key in this Mac's keychain) on the homepage.
 #
@@ -37,7 +39,8 @@ SPARKLE="build/sparkle"
 SPARKLE_VERSION="2.10.0"
 # no version in the names, so https://github.com/<repo>/releases/latest/download/<name> always gets the latest
 # release (the download links of inboxclassic.com)
-FILES=(InboxClassic-Setup.exe InboxClassic.dmg InboxClassic-amd64.deb InboxClassic-arm64.deb)
+FILES=(InboxClassic-Setup.exe InboxClassic.dmg InboxClassic-amd64.deb InboxClassic-arm64.deb
+    InboxClassic-x86_64.pkg.tar.zst InboxClassic-aarch64.pkg.tar.zst)
 
 fail() {
     echo "$*" >&2
@@ -96,6 +99,8 @@ if building mac; then
 fi
 if building linux; then
     ./scripts/linux-package.sh
+    # the Arch packages, from the release's tarball as Omarchy builds it; `curl -LO` then `sudo pacman -U` installs them
+    ./scripts/arch-package.sh --release
 fi
 
 cd dist
