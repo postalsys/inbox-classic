@@ -106,6 +106,8 @@ gtk-plain-warning =
     Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
 
     Fortfahren?
+# review: new
+gtk-account-name-title = Kontoname
 gtk-display-name-title = Anzeigename
 gtk-turned-off-why = Die Option „{ $button }“ ist auf diesem Computer deaktiviert. { $reason }
 gtk-turned-off-why-long =

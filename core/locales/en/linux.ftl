@@ -106,6 +106,7 @@ gtk-plain-warning =
     Without encryption, anyone who intercepts your network traffic can read your password and messages. Only use this connection with a server on your own computer or local network.
 
     Continue?
+gtk-account-name-title = Account name
 gtk-display-name-title = Display name
 gtk-turned-off-why = The “{ $button }” option is disabled on this computer. { $reason }
 gtk-turned-off-why-long =

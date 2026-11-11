@@ -106,6 +106,8 @@ gtk-plain-warning =
     Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Kasutage seda ainult oma arvutis või kohalikus võrgus oleva serveriga.
 
     Kas jätkata?
+# review: new
+gtk-account-name-title = Konto nimi
 gtk-display-name-title = Kuvatav nimi
 gtk-turned-off-why = Valik „{ $button }“ on selles arvutis välja lülitatud. { $reason }
 gtk-turned-off-why-long =

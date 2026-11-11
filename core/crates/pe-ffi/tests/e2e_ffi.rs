@@ -240,6 +240,22 @@ fn reads_mail_through_the_c_api() {
     watches_and_ignores(core, all_inboxes);
     unsafe { pe_list_view_free(all_inboxes) };
     assert!(!pe_all_inboxes_shown(1) && pe_all_inboxes_shown(2));
+    // the rows under All Inboxes: the one account's Inbox, its unread count, the account's title
+    let specials = unsafe { pe_special_folders(core, PeSpecialFolderKind::Inbox) };
+    assert_eq!(unsafe { pe_special_folder_list_count(specials) }, 1);
+    let row = unsafe { &*pe_special_folder_list_get(specials, 0) };
+    assert_eq!((row.folder, row.unread), (inbox, 1));
+    assert!(!unsafe { CStr::from_ptr(row.name) }.to_str().unwrap().is_empty());
+    let row_account = row.account;
+    unsafe { pe_special_folder_list_free(specials) };
+    // an account name of its own is the account's title
+    let named = CString::new("Work").unwrap();
+    assert!(unsafe { pe_account_set_name(core, row_account, named.as_ptr()) });
+    let accounts = unsafe { pe_accounts(core) };
+    let first = unsafe { &*pe_account_list_get(accounts, 0) };
+    assert_eq!(unsafe { CStr::from_ptr(first.title) }.to_str().unwrap(), "Work");
+    assert_eq!(unsafe { CStr::from_ptr(first.account_name) }.to_str().unwrap(), "Work");
+    unsafe { pe_account_list_free(accounts) };
     let operators = view_of(inbox, Some("has:attachment -is:read"));
     assert_eq!(counts(core, operators).0, 1);
     unsafe { pe_list_view_free(operators) };

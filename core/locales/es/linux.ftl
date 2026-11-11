@@ -107,6 +107,8 @@ gtk-plain-warning =
     Sin cifrado, cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Utilice esta conexión solo con un servidor en su propio equipo o en su red local.
 
     ¿Continuar?
+# review: new
+gtk-account-name-title = Nombre de la cuenta
 gtk-display-name-title = Nombre para mostrar
 gtk-turned-off-why = La opción «{ $button }» está desactivada en este equipo. { $reason }
 gtk-turned-off-why-long =

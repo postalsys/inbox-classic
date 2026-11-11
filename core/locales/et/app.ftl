@@ -263,6 +263,8 @@ ui-off-here = Selles arvutis välja lülitatud.
 ui-why = Miks?
 ui-more-sign-in = Muud sisselogimisviisid...
 ui-other-account = Muu meilikonto lisamiseks sisestage oma meiliaadress ja nimi, mida näevad kirjade saajad. Järgmises sammus otsitakse serveri sätteid.
+# review: new
+ui-field-account-name = Konto nimi:
 ui-field-name = Kuvatav nimi:
 ui-field-email = E-posti aadress:
 ui-field-user = Kasutajanimi:
@@ -346,6 +348,10 @@ ui-new-folder-title = Uus kaust
 ui-rename-folder-title = Muuda kausta nime
 ui-delete-folder-question = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
 ui-properties = &Atribuudid
+# review: new
+ui-account-sync = Saada ja võta &vastu
+# review: new
+ui-account-properties = Atri&buudid...
 ui-menu-open = &Ava
 ui-menu-flag = L&ipp
 ui-menu-view-source = Vaata &lähtekoodi

@@ -508,6 +508,31 @@ pub unsafe extern "C" fn pe_account_set_signature(core: *const PeCore, account: 
     unsafe { with(core, false, |core| core.set_signature(account, &html).is_ok()) }
 }
 
+/// Sets the account's own name for the folder list ("Gmail"): the Account name field of its Properties; empty for the
+/// name on its mail
+///
+/// # Safety
+/// `core` must be a live handle, `name` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_set_name(core: *const PeCore, account: i64, name: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let name = unsafe { arg(name) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_account_name(account, &name).is_ok()) }
+}
+
+/// The account name a new account at `email` starts with ("Gmail", or the address's domain), for Add Mail Account to
+/// show before it is added. Free with `pe_string_free`.
+///
+/// # Safety
+/// `email` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_default_account_name(email: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let email = unsafe { arg(email) }.unwrap_or_default().to_string();
+    guard(|| into_c_string(pe_core::default_account_name(&email))).unwrap_or(null_mut())
+}
+
 /// What a new message, reply or forward from an account starts with in the editor: an empty line, then the signature
 /// in a block the editor can swap for another account's; an empty string without a signature. Free with
 /// `pe_string_free`.
@@ -652,8 +677,11 @@ pub struct PeAccount {
     /// "Name <address>", or the address alone when the name is empty or the same: how From and the account menus
     /// show the account
     pub label: *const c_char,
-    /// What the folder tree calls it: its name, with its address too when another account has the same name
+    /// What the folder tree calls it: its account name (`account_name`), or the name on its mail, with its address
+    /// too when another account is called the same
     pub title: *const c_char,
+    /// The account's own name for the folder list ("Gmail"), empty for none: the Account name field of Properties
+    pub account_name: *const c_char,
 }
 
 /// The accounts; free with `pe_account_list_free`
@@ -671,8 +699,9 @@ pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList 
             let Ok(accounts) = core.accounts() else {
                 return null_mut();
             };
-            let names: Vec<&str> = accounts.iter().map(|a| a.settings.name.as_str()).collect();
-            handed(PeAccountList(Rows::new(&accounts, |a, strings| {
+            let titles = pe_core::account_titles(&accounts);
+            let titled: Vec<_> = accounts.iter().zip(&titles).collect();
+            handed(PeAccountList(Rows::new(&titled, |&(a, title), strings| {
                 let with = SignInWith::of_auth_kind(&a.settings.auth);
                 let (oauth, app) = with.map_or((PeOAuthProvider::None, 0), sign_in_pair);
                 let signs_in_with = core.sign_in_name(&a.settings.auth).unwrap_or_default();
@@ -682,7 +711,8 @@ pub unsafe extern "C" fn pe_accounts(core: *const PeCore) -> *mut PeAccountList 
                     email: strings.add(&a.settings.email),
                     imap_host: strings.add(&a.settings.imap_host),
                     label: strings.add(&pe_core::account_label(&a.settings.name, &a.settings.email)),
-                    title: strings.add(&pe_core::account_title(&a.settings.name, &a.settings.email, &names)),
+                    title: strings.add(title),
+                    account_name: strings.add(&a.account_name),
                     oauth,
                     app,
                     signs_in_with: strings.add(&signs_in_with),
@@ -1401,6 +1431,94 @@ pub unsafe extern "C" fn pe_folder_mark_all_read(core: *const PeCore, folder: i6
 pub unsafe extern "C" fn pe_mark_all_inboxes_read(core: *const PeCore) -> bool {
     // SAFETY: as the caller guarantees
     unsafe { with(core, false, |core| core.mark_all_inboxes_read().is_ok()) }
+}
+
+/// Marks every message of every folder of an account read (the account's Mark All Read)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_mark_all_read(core: *const PeCore, account: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.mark_account_read(account).is_ok()) }
+}
+
+/// A special use whose folders the folder list gathers from every account
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeSpecialFolderKind {
+    Inbox,
+}
+
+/// An account's folder of a special use: a row under All Inboxes
+#[repr(C)]
+pub struct PeSpecialFolder {
+    pub account: i64,
+    pub folder: i64,
+    /// The account's title, as `PeAccount` `title` has it
+    pub name: *const c_char,
+    pub unread: u64,
+}
+
+/// The list of `pe_special_folders`
+pub struct PeSpecialFolderList(Rows<PeSpecialFolder>);
+
+/// Each account's folder of a special use (its Inbox), in the accounts' order, for the rows under All Inboxes; NULL on
+/// failure. Free with `pe_special_folder_list_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_special_folders(
+    core: *const PeCore,
+    kind: PeSpecialFolderKind,
+) -> *mut PeSpecialFolderList {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let special = match kind {
+                PeSpecialFolderKind::Inbox => pe_core::SpecialFolderKind::Inbox,
+            };
+            let Ok(found) = core.special_folders(special) else {
+                return null_mut();
+            };
+            handed(PeSpecialFolderList(Rows::new(&found, |f, strings| PeSpecialFolder {
+                account: f.account,
+                folder: f.folder,
+                name: strings.add(&f.name),
+                unread: f.unread,
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_special_folder_list_count(list: *const PeSpecialFolderList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// The row at `index`, NULL past the end; it lives as long as the list
+///
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_special_folder_list_get(
+    list: *const PeSpecialFolderList,
+    index: usize,
+) -> *const PeSpecialFolder {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_special_folder_list_free(list: *mut PeSpecialFolderList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
 }
 
 // ---- folders ----

@@ -107,6 +107,8 @@ gtk-plain-warning =
     Sans chiffrement, toute personne qui intercepte le trafic réseau peut lire votre mot de passe et vos messages. Utilisez cette connexion uniquement avec un serveur sur votre ordinateur ou votre réseau local.
 
     Continuer ?
+# review: new
+gtk-account-name-title = Nom du compte
 gtk-display-name-title = Nom affiché
 gtk-turned-off-why = L’option « { $button } » est désactivée sur cet ordinateur. { $reason }
 gtk-turned-off-why-long =
