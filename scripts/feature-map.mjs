@@ -179,6 +179,27 @@ const sections = [
                 ]
             },
             {
+                shot: 'all-inboxes-3-accounts',
+                name: 'All Inboxes by account',
+                what: "Under All Inboxes each account's Inbox has a row of its own, named as the account is, with its unread count: the same Inbox the account's own section has, a second way to it. All Inboxes lists every Inbox's mail; a row under it lists that Inbox alone, and the folder bar names the Inbox and the account. The folder list remembers which rows were open. Each account has an Account name of its own (Gmail, Work), set in its Properties; a new one starts with its provider's name or its domain.",
+                how: "Open All Inboxes in the folder tree and select an account's row under it; File > Accounts > Properties for the Account name.",
+                checked: [
+                    'All Inboxes has a row for each account, with its unread count',
+                    "An account's row lists its Inbox alone, the folder bar names it",
+                    "The Account name set in Properties is the account's heading and its row's name"
+                ]
+            },
+            {
+                shot: 'account-menu',
+                name: "The account's menu",
+                what: "A right-click on an account in the folder tree offers Send and Receive (that account's server alone), Mark All Read (every folder of the account), New Folder and Properties.",
+                how: 'Right-click an account in the folder tree.',
+                checked: [
+                    'The menu has Send and Receive, Mark All Read, New Folder and Properties',
+                    "Mark All Read marks the account's folders read on its server, not the other account's"
+                ]
+            },
+            {
                 shot: 'move-1-dialog',
                 name: 'Move and Copy to Folder',
                 what: 'Move to Folder and Copy to Folder show the folders of every account in a tree, with a filter box at the top (type part of a name to narrow it), the last folders used under Recent, and New Folder. The folder the messages are in is shown but can not be chosen, and the button says what it does: Move or Copy.',

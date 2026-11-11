@@ -600,6 +600,20 @@ Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the
 - a reply goes from the account of the message
 - Mark All Read marks both Inboxes read on the servers
 
+## 42a. All Inboxes by account, account names, the account's menu
+
+Screenshots: `all-inboxes-3-accounts`, `account-menu`
+
+- All Inboxes has a row for each account under it, in the accounts' order, named as the account is
+- each row shows its Inbox's unread count
+- the second account's row lists that account's Inbox alone (the first account's message is not in it)
+- the folder bar names the Inbox and the account ("Inbox - " and the account's name)
+- All Inboxes again lists both accounts' Inboxes
+- the second account's Properties has the Account name field, filled with its name; set to "Second", the account's heading and its row under All Inboxes say "Second"
+- the first account's right-click menu has Send and Receive, Mark All Read, New Folder and Properties
+- its Mark All Read marks every folder of the first account read on the server, the second account's mail stays unread
+- its Properties opens that account's Properties
+
 ## 43. Moving between accounts
 
 Screenshots: `move-1-dialog`, `move-2-accounts`
