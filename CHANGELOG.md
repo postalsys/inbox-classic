@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.1](https://github.com/postalsys/inbox-classic/compare/v0.12.0...v0.12.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* sign-in buttons in each language, the not downloaded message said once ([96f137e](https://github.com/postalsys/inbox-classic/commit/96f137e52eb43a85d8ba8dc12280d916c7e3b64c))
+* sign-in buttons in each language, the not downloaded message said once ([64af9b6](https://github.com/postalsys/inbox-classic/commit/64af9b6703ca1a5a65dcbb9f4fbeb1fba4e08291))
+
 ## [0.12.0](https://github.com/postalsys/inbox-classic/compare/v0.11.0...v0.12.0) (2026-11-11)
 
 
