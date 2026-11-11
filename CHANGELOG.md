@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.12.0](https://github.com/postalsys/inbox-classic/compare/v0.11.0...v0.12.0) (2026-11-11)
+
+
+### Features
+
+* Arch Linux package for Omarchy ([82b5a9a](https://github.com/postalsys/inbox-classic/commit/82b5a9afda8dd1f9f68b091ef10c559dad546df6))
+* Arch Linux package for Omarchy's package repository ([0965778](https://github.com/postalsys/inbox-classic/commit/0965778c9049e7be8d38990b5ce380392b177449))
+* **core:** account names, each account's special folder, an account's Mark All Read ([b84570e](https://github.com/postalsys/inbox-classic/commit/b84570eed8456c7f10131b5ae8b36383eb06c1f0))
+* each account's Inbox under All Inboxes, account names, the account's menu ([6307745](https://github.com/postalsys/inbox-classic/commit/63077456ad78de57facfda7e51103c02cdfdd472))
+* each account's Inbox under All Inboxes, account names, the account's menu ([2ee3df9](https://github.com/postalsys/inbox-classic/commit/2ee3df93e889c3a2d8de2bad954a56fb7fc4765a))
+* **linux:** a window that fits a tiling window manager's narrow tile ([112655f](https://github.com/postalsys/inbox-classic/commit/112655f01f1b6ded444b97ff6e6b4286effda439))
+* **release:** Arch packages for x86_64 and aarch64 as release assets ([df98e4c](https://github.com/postalsys/inbox-classic/commit/df98e4c9334797f3f2c2b858dd2669f41702a9ba))
+
+
+### Bug Fixes
+
+* a review of every view on the three apps, in every language ([051c526](https://github.com/postalsys/inbox-classic/commit/051c526900e6bf7a96da19686aeaca95dd46fcd1))
+* **core:** the rows under All Inboxes by the store's Inbox rule, with their titles ([0a170ab](https://github.com/postalsys/inbox-classic/commit/0a170abcfb622afc28d02f75e0ce2dc5fe8f3599))
+* **help:** mark the changed Linux removal line for review ([e5d17c3](https://github.com/postalsys/inbox-classic/commit/e5d17c3ea2241591a1a740606bc41cd3bd065f55))
+* **linux:** send the tray icon as pixmaps ([6c1e922](https://github.com/postalsys/inbox-classic/commit/6c1e922b63448412ff69a46e19cb81836778190a))
+* the Windows app's review, commands on messages off with none selected ([2d7f6c4](https://github.com/postalsys/inbox-classic/commit/2d7f6c4b6edd5b1b0b27421316e3ad0b7d0e567a))
+
 ## [0.11.0](https://github.com/postalsys/inbox-classic/compare/v0.10.0...v0.11.0) (2026-11-10)
 
 
