@@ -1,7 +1,17 @@
 //! The words of the windows, from the core's catalogs (core/locales) in the language in use: `t!(UiFindHint)`, or
 //! with what goes into the words, `t!(GtkFrom, account = &label)`. The language is chosen at the start ([`choose`]).
 
-pub use pe_core::i18n::{Arg, Text, tr, tr_args};
+pub use pe_core::i18n::{Arg, Text};
+
+/// A text of the catalogs in the language in use, its three dots the ellipsis GNOME writes ("Properties…")
+pub fn tr(text: Text) -> String {
+    pe_core::i18n::tr(text).replace("...", "\u{2026}")
+}
+
+/// [`tr`] with what goes into the words
+pub fn tr_args(text: Text, args: &[(&str, Arg)]) -> String {
+    pe_core::i18n::tr_args(text, args).replace("...", "\u{2026}")
+}
 
 /// A word or sentence of the catalogs, by its id as the `Text` enum names it, with its placeables filled
 macro_rules! t {
@@ -79,7 +89,7 @@ mod tests {
         assert_eq!(t!(GtkUnreadMessages, count = 3u64), "3 unread messages");
         // a blank line inside a message is kept
         assert!(t!(GtkPlainWarning).ends_with("network.\n\nContinue?"));
-        assert_eq!(plain(Text::CmdOptions), "Options...");
+        assert_eq!(plain(Text::CmdOptions), "Options\u{2026}");
     }
 
     #[test]

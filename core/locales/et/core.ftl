@@ -295,6 +295,12 @@ error-store = kohalik kirjahoidla: { $error }
 error-not-found = ei leitud
 error-closed = suletakse
 error-other-account = brauser logis sisse kontole { $email }, mitte sellele kontole
+# a password or sign-in the mail server refused, with the server's words
+# review: new
+failure-authentication = server ei võtnud sisselogimist vastu ({ $reason })
+# the mail server could not be reached or the connection broke, with the reason
+# review: new
+failure-network = ühendus serveriga ebaõnnestus ({ $reason })
 error-in-use = rakendust ei saa eemaldada, sest seda kasutavad järgmised kontod: { $accounts }
 error-turned-off = see sisselogimisrakendus on uute kontode jaoks välja lülitatud
 error-folder-name = kausta nimi peab olema 1 kuni 200 märki pikk ega tohi sisaldada juhtmärke

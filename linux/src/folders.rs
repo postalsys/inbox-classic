@@ -1,7 +1,8 @@
 //! The folder tree: each account a heading over its folders, as the core lists them in tree order with their depth.
 //! A heading opens and closes (a click, Enter) and is never selected, so it is not taken for a mailbox; All Inboxes,
-//! above them, is a row like the folders. A folder with unread messages is bold with their count, as in Outlook
-//! Express. Messages dragged from the list are dropped onto a folder here.
+//! above them, is a row like the folders, with each account's Inbox again under it (the same folder, a second row:
+//! [`under_all_inboxes`]). A folder with unread messages is bold with their count, as in Outlook Express. Messages
+//! dragged from the list are dropped onto a folder here. Which of the top rows are open is the window's to keep.
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -91,6 +92,24 @@ impl FolderItem {
 /// The id of All Inboxes, at the top of the tree: neither a folder (positive) nor an account (a negated id)
 pub const ALL_INBOXES: i64 = i64::MIN;
 
+/// The mark of a row under All Inboxes in its id: the folder's id with this bit, positive as a folder's, never one
+const UNDER_ALL_INBOXES: i64 = 1 << 62;
+
+/// The id of folder `folder`'s row under All Inboxes
+pub fn under_all_inboxes(folder: i64) -> i64 {
+    folder | UNDER_ALL_INBOXES
+}
+
+/// Whether a row's id is one under All Inboxes
+pub fn is_under_all_inboxes(id: i64) -> bool {
+    id > 0 && id & UNDER_ALL_INBOXES != 0
+}
+
+/// The folder of a row: a folder's own id, the folder of a row under All Inboxes; other ids as they are
+pub fn folder_of(id: i64) -> i64 {
+    if id > 0 { id & !UNDER_ALL_INBOXES } else { id }
+}
+
 /// An item of the tree as it is built: its id, its name, its unread messages and those of the folders under it, the
 /// icon and its depth under the account
 pub struct Entry {
@@ -106,6 +125,7 @@ type CanDrop = Box<dyn Fn(&[MessageRef], i64) -> bool>;
 type Dropped = Box<dyn Fn(&[MessageRef], i64, bool)>;
 type FilesDropped = Box<dyn Fn(i64, Vec<std::path::PathBuf>)>;
 type Menu = Box<dyn Fn(&gtk::Widget, f64, f64, i64)>;
+type Opened = Box<dyn Fn(i64, bool)>;
 
 /// What the tree tells the window: a folder (or an account, negated) chosen, and messages dropped onto a folder
 pub struct Handlers {
@@ -119,6 +139,8 @@ pub struct Handlers {
     /// The right-click menu at a point of the widget clicked, for the item clicked: the selected folder, or an
     /// account's heading (its id negated), which stays unselected
     pub menu: Menu,
+    /// A top row (All Inboxes or an account's heading) opened or closed by the user, for the window to keep
+    pub opened: Opened,
 }
 
 pub struct FolderTree {
@@ -128,8 +150,8 @@ pub struct FolderTree {
     items: RefCell<HashMap<i64, FolderItem>>,
     /// The parent of each item, to open the way to one that is selected from elsewhere
     parents: RefCell<HashMap<i64, i64>>,
-    /// While the tree is built again its selection changes are not the user's
-    reloading: Cell<bool>,
+    /// While the tree is built again its selection changes (and its rows opened) are not the user's
+    reloading: Rc<Cell<bool>>,
     /// The item last selected: closing an account takes the selection off a folder it hides, which stays the one
     /// listed, and is selected again when the account opens
     last: Cell<i64>,
@@ -139,6 +161,9 @@ pub struct FolderTree {
 impl FolderTree {
     pub fn new() -> Rc<FolderTree> {
         let root = gio::ListStore::new::<FolderItem>();
+        let handlers: Rc<RefCell<Option<Handlers>>> = Rc::default();
+        let reloading = Rc::new(Cell::new(false));
+        let (told, quiet) = (handlers.clone(), reloading.clone());
         let tree = gtk::TreeListModel::new(root.clone(), false, false, |item| {
             item.downcast_ref::<FolderItem>()
                 .and_then(|folder| folder.imp().children.borrow().clone())
@@ -147,20 +172,26 @@ impl FolderTree {
         // a row opened or closed changes the rows after it: each item learns whether it is expanded, and shows the
         // unread messages it hides while it is not
         // only the row before the change (the one opened or closed) and the rows it added can have changed
-        tree.connect_items_changed(|model, position, _, added| {
+        tree.connect_items_changed(move |model, position, _, added| {
             for index in position.saturating_sub(1)..position + added {
                 let Some(row) = model.row(index) else { continue };
                 if let Some(item) = row.item().and_downcast::<FolderItem>()
                     && item.imp().expanded.replace(row.is_expanded()) != row.is_expanded()
                 {
                     item.show();
+                    // a top row the user opened or closed: the window keeps it
+                    if row.depth() == 0
+                        && !quiet.get()
+                        && let Some(handlers) = &*told.borrow()
+                    {
+                        (handlers.opened)(item.id(), row.is_expanded());
+                    }
                 }
             }
         });
         let selection = gtk::SingleSelection::new(Some(tree));
         selection.set_autoselect(false);
         selection.set_can_unselect(true);
-        let handlers: Rc<RefCell<Option<Handlers>>> = Rc::default();
         let view = gtk::ListView::new(Some(selection.clone()), Some(factory(handlers.clone())));
         view.add_css_class("navigation-sidebar");
         view.set_widget_name("folder-tree");
@@ -172,7 +203,7 @@ impl FolderTree {
             root,
             items: RefCell::default(),
             parents: RefCell::default(),
-            reloading: Cell::new(false),
+            reloading,
             last: Cell::new(0),
             handlers,
         });
@@ -223,16 +254,28 @@ impl FolderTree {
         *self.handlers.borrow_mut() = Some(handlers);
     }
 
-    /// The tree built again from the accounts, each with its entries in tree order, under `top` (All Inboxes) when
-    /// there is one; the selection kept when its folder is still there (false when it is gone)
-    pub fn rebuild(&self, top: Option<Entry>, accounts: Vec<(Entry, Vec<Entry>)>) -> bool {
+    /// The tree built again from the accounts, each with its entries in tree order, under `top` (All Inboxes, with a
+    /// row for each account's Inbox) when there is one; the top rows open but those in `closed`; the selection kept
+    /// when its folder is still there (false when it is gone)
+    pub fn rebuild(
+        &self,
+        top: Option<(Entry, Vec<Entry>)>,
+        accounts: Vec<(Entry, Vec<Entry>)>,
+        closed: &std::collections::HashSet<i64>,
+    ) -> bool {
         let selected = self.selected();
         self.reloading.set(true);
         self.root.remove_all();
         let mut items = HashMap::new();
         let mut parents = HashMap::new();
-        if let Some(entry) = top {
+        if let Some((entry, inboxes)) = top {
             let item = FolderItem::new(&entry);
+            for inbox in inboxes {
+                let child = FolderItem::new(&inbox);
+                item.add_child(&child);
+                parents.insert(inbox.id, entry.id);
+                items.insert(inbox.id, child);
+            }
             items.insert(entry.id, item.clone());
             self.root.append(&item);
         }
@@ -254,11 +297,14 @@ impl FolderTree {
         }
         *self.items.borrow_mut() = items;
         *self.parents.borrow_mut() = parents;
-        // the accounts open, their folders as they come
+        // the top rows open but those closed before, their folders as they come
         if let Some(model) = self.tree_model() {
             let mut position = 0;
             while let Some(row) = model.row(position) {
-                if row.depth() == 0 {
+                if row.depth() == 0
+                    && let Some(item) = row.item().and_downcast::<FolderItem>()
+                    && !closed.contains(&item.id())
+                {
                     row.set_expanded(true);
                 }
                 position += 1;
@@ -275,15 +321,27 @@ impl FolderTree {
     /// The unread messages of a folder (or an account, its id negated) changed; false when the tree does not have it
     /// (and has to be built again)
     pub fn update(&self, id: i64, unread: u64, below: u64) -> bool {
-        match self.items.borrow().get(&id) {
-            Some(item) => {
-                item.imp().unread.set(unread);
-                item.imp().below.set(below);
-                item.show();
-                true
-            }
-            None => false,
+        let items = self.items.borrow();
+        let Some(item) = items.get(&id) else {
+            return false;
+        };
+        item.imp().unread.set(unread);
+        item.imp().below.set(below);
+        item.show();
+        // an Inbox's row under All Inboxes counts the same, its subfolders being under the account only
+        if let Some(again) = items.get(&under_all_inboxes(id)).filter(|_| id > 0) {
+            again.imp().unread.set(unread);
+            again.show();
         }
+        true
+    }
+
+    /// The unread messages of row `id` and of the rows under it: an account's heading counts its folders'
+    pub fn unread_within(&self, id: i64) -> u64 {
+        self.items
+            .borrow()
+            .get(&id)
+            .map_or(0, |item| item.imp().unread.get() + item.imp().below.get())
     }
 
     /// The label of item `id` as it shows now, for the e2e driver

@@ -29,17 +29,18 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
 
     init(core: Core) {
         self.core = core
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 280), styleMask: [.titled, .resizable],
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 860, height: 300), styleMask: [.titled, .resizable],
                           backing: .buffered, defer: true)
         window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiOutboxTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("outbox")
         super.init()
         for (id, title, width) in [("subject", Text.headerSubject.text, 170.0), ("to", Text.headerTo.text, 130.0),
-                                   ("queued", Text.uiColQueued.text, 120.0), ("status", Text.uiColStatus.text, 120.0)] {
+                                   ("queued", Text.uiColQueued.text, 120.0), ("status", Text.uiColStatus.text, 200.0)] {
             let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(id))
             column.title = title
             column.width = width
+            column.minWidth = 60
             table.addTableColumn(column)
         }
         table.dataSource = self
@@ -94,27 +95,49 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
         // nothing to send or delete in an empty Outbox
         send.isEnabled = !rows.isEmpty
         delete.isEnabled = !rows.isEmpty
+        fitColumns()
+    }
+
+    /// subject, recipients and time as wide as their longest value (a long subject or address within reason), the
+    /// status with the rest of the width, as it says the most
+    private func fitColumns() {
+        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        for column in table.tableColumns where column.identifier.rawValue != "status" {
+            let id = column.identifier.rawValue
+            var widest = column.headerCell.cellSize.width
+            for queued in rows {
+                widest = max(widest, (value(queued, id) as NSString).size(withAttributes: [.font: font]).width)
+            }
+            column.width = min(ceil(widest) + 12, id == "queued" ? 400 : 240)
+        }
+        table.sizeLastColumnToFit()
+    }
+
+    /// what the row shows in the column `id`
+    private func value(_ queued: Queued, _ id: String) -> String {
+        switch id {
+        case "subject": return queued.subject.isEmpty ? Text.uiNoSubject.text : queued.subject
+        case "to": return queued.recipients
+        case "queued": return formatDate(queued.created)
+        default:
+            if let problem = queued.problem {
+                return Text.uiOutboxStatusNotSent.text(["reason": problem])
+            } else if queued.notBefore != 0 {
+                return Text.uiOutboxStatusAgent.text(["time": timeOfDay(queued.notBefore)])
+            }
+            return Text.uiOutboxStatusWaiting.text
+        }
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int { rows.count }
 
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
-        let queued = rows[row]
-        let value: String
-        switch column?.identifier.rawValue {
-        case "subject": value = queued.subject.isEmpty ? Text.uiNoSubject.text : queued.subject
-        case "to": value = queued.recipients
-        case "queued": value = formatDate(queued.created)
-        default:
-            if let problem = queued.problem {
-                value = Text.uiOutboxStatusNotSent.text(["reason": problem])
-            } else if queued.notBefore != 0 {
-                value = Text.uiOutboxStatusAgent.text(["time": timeOfDay(queued.notBefore)])
-            } else {
-                value = Text.uiOutboxStatusWaiting.text
-            }
-        }
-        return listCell(tableView, value)
+        let id = column?.identifier.rawValue ?? ""
+        let shown = value(rows[row], id)
+        let cell = listCell(tableView, shown)
+        // a long reason the server gave is read in full over the cell
+        cell.toolTip = id == "status" ? shown : nil
+        return cell
     }
 
     @objc private func sendAll() {

@@ -176,9 +176,12 @@ impl Reader {
         let blocked = gtk::Label::new(Some(&t!(GtkPicturesBlocked)));
         blocked.set_xalign(0.0);
         blocked.set_hexpand(true);
-        blocked.set_ellipsize(gtk::pango::EllipsizeMode::End);
+        // the whole sentence on more lines in a narrow window, not cut off
+        blocked.set_wrap(true);
+        blocked.set_wrap_mode(gtk::pango::WrapMode::WordChar);
         let download_pictures = gtk::Button::with_label(&t!(GtkDownloadPictures));
         download_pictures.set_widget_name("reader-download-pictures");
+        download_pictures.set_valign(gtk::Align::Center);
         let pictures = gtk::Box::new(gtk::Orientation::Horizontal, 10);
         pictures.add_css_class("info-bar");
         pictures.set_widget_name("reader-pictures");
@@ -190,9 +193,12 @@ impl Reader {
         let note_retry = gtk::Label::new(Some(&pe_core::retry_note()));
         note_retry.set_xalign(0.0);
         note_retry.set_hexpand(true);
-        note_retry.set_ellipsize(gtk::pango::EllipsizeMode::End);
+        // the whole sentence on more lines in a narrow window, not cut off
+        note_retry.set_wrap(true);
+        note_retry.set_wrap_mode(gtk::pango::WrapMode::WordChar);
         let try_again = gtk::Button::with_label(&t!(UiTryAgain));
         try_again.set_widget_name("reader-try-again");
+        try_again.set_valign(gtk::Align::Center);
         let retry = gtk::Box::new(gtk::Orientation::Horizontal, 10);
         retry.add_css_class("info-bar");
         retry.set_widget_name("reader-retry");

@@ -310,6 +310,10 @@ error-store = local store: { $error }
 error-not-found = not found
 error-closed = shutting down
 error-other-account = the browser signed in to { $email }, not to this account
+# a password or sign-in the mail server refused, with the server's words
+failure-authentication = the server did not accept the sign-in ({ $reason })
+# the mail server could not be reached or the connection broke, with the reason
+failure-network = the connection to the server failed ({ $reason })
 error-in-use = it can not be removed while accounts sign in with it: { $accounts }
 error-turned-off = this sign-in app is turned off for new accounts
 error-folder-name = the folder name must be 1 to 200 characters long and cannot contain control characters

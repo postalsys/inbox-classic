@@ -101,6 +101,8 @@ std::wstring MenuText(std::wstring text);
 std::wstring Shortcut(std::wstring_view keys);
 // MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P") is "&Drucken...\tStrg+P" in German
 std::wstring MenuItem(PeText text, std::wstring_view keys = {});
+// a menu item that opens a dialog, with the ellipsis that says so where the catalog's word has none
+std::wstring DialogMenuItem(PeText text, std::wstring_view keys = {});
 // a flat toolbar, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles. Its icons (icons.h): the big ones with
 // the label under them (main and compose windows), or the small ones of the format bar, the label as the tooltip
 enum class BarIcons { Big, Small };
@@ -237,6 +239,8 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const st
 void SetSignInPageFile(const std::wstring& path);
 // File > Accounts: the accounts listed, to add, change (Properties) or remove; true when one changed
 bool AccountsDialog(HWND owner, PeCore* core);
+// the Properties of one account, as File > Accounts > Properties opens them (the account row's menu); true when saved
+bool AccountPropertiesDialog(HWND owner, PeCore* core, int64_t account);
 // asks for the password of an account; false when cancelled
 bool PasswordDialog(HWND owner, const std::wstring& account, std::wstring& password);
 
@@ -546,6 +550,8 @@ public:
     SignInChoice SignIn(int64_t account) const;
     // the account of the selected folder, the first account without one; 0 when there is none
     int64_t CurrentAccount() const;
+    // the account whose own row is selected in the tree (the account row's menu is for it), 0 when another row is
+    int64_t SelectedAccount() const { return selectedAccount_; }
     // the account `folder` is in, 0 when it is not known
     int64_t AccountOf(int64_t folder) const;
     // whether `folder` is the Inbox of its account
@@ -580,6 +586,18 @@ private:
     };
 
     void FillAccount(HTREEITEM root, int64_t account);
+    // the rows under All Inboxes: each account's Inbox, named as the account
+    void FillAllInboxes();
+    // the row a folder chosen from outside the tree is selected on: its row under All Inboxes while the selection is
+    // there (All Inboxes or a row under it), its account's row otherwise; nullptr when the tree has none
+    HTREEITEM RowOf(int64_t folder) const;
+    // the right-click menu of an account's own row
+    void AccountMenu(POINT screen);
+    // which rows are closed (All Inboxes, accounts by id), kept for the next start; read in Reload, written when a
+    // row is opened or closed
+    void LoadClosedRows(const std::vector<int64_t>& accounts);
+    void SaveClosedRows() const;
+    void OnRowExpanded(const NMTREEVIEWW& change);
     void UpdateFolders(int64_t account);
     void ShowRow(HTREEITEM item);
     void ReloadList(bool keepSelection);
@@ -643,6 +661,8 @@ private:
     // the conversation `thread` opened or closed, the list shown again
     void SetThreadExpanded(int64_t thread, bool open);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
+    void FillRowStart(HDC dc, int index) const;
+    int SelectionColor() const;
     void DisplayInfo(NMLVDISPINFOW* info);
     bool OnListNotify(NMHDR* header, LRESULT& result);
 
@@ -670,8 +690,19 @@ private:
     // the icons the list draws on its rows, and their size
     HIMAGELIST listIcons_ = nullptr;
     int iconSize_ = 16;
-    // the tree items of the folders, by folder id; a tree item's data is its folder id, 0 for an account
+    // the tree items of the folders under their accounts, by folder id; a tree item's data is its folder id, the
+    // account's id negated for an account, kAllInboxesItem for All Inboxes, the folder id with kUnderAllInboxes for
+    // the rows under All Inboxes
     std::unordered_map<int64_t, HTREEITEM> items_;
+    // the rows under All Inboxes, each account's Inbox, by folder id
+    std::unordered_map<int64_t, HTREEITEM> inboxItems_;
+    // their titles, "Inbox - Gmail", for the folder bar and the window's
+    std::unordered_map<int64_t, std::wstring> inboxTitles_;
+    // the selected row is one under All Inboxes (its folder is folder_)
+    bool underAllInboxes_ = false;
+    // the rows closed by the user: All Inboxes, and accounts by id (the others are open)
+    bool allInboxesClosed_ = false;
+    std::unordered_set<int64_t> closedAccounts_;
     // the account's own item of each account
     std::unordered_map<int64_t, HTREEITEM> accountItems_;
     // what each row of the tree shows: its name, its own unread messages and those of the folders under it
@@ -836,11 +867,17 @@ enum ControlId : WORD {
     IDC_MESSAGE_TOOLBAR = 230,
     IDC_PREVIOUS,
     IDC_NEXT,
+    // the » after the main toolbar's buttons when some do not fit: a menu of those
+    IDC_TOOLBAR_MORE,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
 constexpr WORD IDM_FLAG_COLOR = 900;
 constexpr WORD IDM_FLAG_CLEAR = 908;
+// the account row's menu in the folder tree: Send and Receive of that account, its Mark All Read, its Properties
+constexpr WORD IDM_ACCOUNT_SYNC = 910;
+constexpr WORD IDM_ACCOUNT_MARK_ALL_READ = 911;
+constexpr WORD IDM_ACCOUNT_PROPERTIES = 912;
 
 // what the message list tells the main window with WM_COMMAND of IDC_LIST: its selection was taken (the buttons and
 // counts follow it), or an action on messages was done (Mailbox::Said for the status bar)

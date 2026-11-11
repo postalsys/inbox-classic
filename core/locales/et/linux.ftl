@@ -106,6 +106,8 @@ gtk-plain-warning =
     Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Kasutage seda ainult oma arvutis või kohalikus võrgus oleva serveriga.
 
     Kas jätkata?
+# review: new
+gtk-account-name-title = Konto nimi
 gtk-display-name-title = Kuvatav nimi
 gtk-turned-off-why = Valik „{ $button }“ on selles arvutis välja lülitatud. { $reason }
 gtk-turned-off-why-long =
@@ -160,5 +162,8 @@ gtk-preferences = Eelistused
 gtk-language = Keel
 gtk-language-subtitle = Rakenduse ja spikri keel
 gtk-new-mail-group = Uus post
+# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
+# review: new
+gtk-notify-new-mail = Teavita uuest postist
 gtk-notify-subtitle = Teavita uute kirjade saabumisest, kui aken on taustal
 gtk-restart-to-change = Inbox Classic taaskäivitub, et keelt muuta.

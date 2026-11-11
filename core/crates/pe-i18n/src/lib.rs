@@ -236,9 +236,13 @@ pub fn without_mnemonic(label: &str) -> String {
 /// Command `text` as the title of the window it opens: without its mnemonic mark and the dots that say it asks for
 /// more ("&Import Messages..." is titled "Import Messages")
 pub fn title(text: Text) -> String {
-    let mut title = without_mnemonic(&tr(text));
-    title.truncate(title.trim_end_matches(['.', '\u{2026}']).trim_end().len());
-    title
+    let title = without_mnemonic(&tr(text));
+    // in the pseudo-language the dots come before its padding: "[Óptíöñš... ~~~~]"
+    let (body, padding) = match title.rfind(" ~") {
+        Some(at) if title.ends_with('~') || title.ends_with("~]") => title.split_at(at),
+        _ => (title.as_str(), ""),
+    };
+    format!("{}{padding}", body.trim_end_matches(['.', '\u{2026}']).trim_end())
 }
 
 /// A menu label of the catalog with GTK's mnemonic mark (`_Reply to Sender`)

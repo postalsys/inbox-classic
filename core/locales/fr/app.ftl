@@ -191,6 +191,7 @@ ui-signature = Signature
 ui-signature-hint = Ajoutée aux nouveaux messages, aux réponses et aux transferts de ce compte.
 ui-signature-not-saved = La signature n'a pas pu être enregistrée.
 ui-all-inboxes = Toutes les boîtes
+# review: changed
 ui-all-folders = Tous les dossiers
 ui-the-account = le compte
 ui-folder-name = Nom du dossier :
@@ -263,6 +264,8 @@ ui-off-here = Désactivé sur cet ordinateur.
 ui-why = Pourquoi ?
 ui-more-sign-in = Autres options de connexion...
 ui-other-account = Pour ajouter un autre compte de messagerie, saisissez votre adresse e-mail et le nom à afficher pour vos destinataires. Les paramètres des serveurs seront recherchés à l’étape suivante.
+# review: new
+ui-field-account-name = Nom du compte :
 ui-field-name = Nom affiché :
 ui-field-email = Adresse e-mail :
 ui-field-user = Nom d'utilisateur :
@@ -346,6 +349,10 @@ ui-new-folder-title = Nouveau dossier
 ui-rename-folder-title = Renommer le dossier
 ui-delete-folder-question = Supprimer le dossier « { $folder } », tous ses messages et ses sous-dossiers ? Ils seront également supprimés du serveur.
 ui-properties = &Propriétés
+# review: new
+ui-account-sync = &Envoyer et recevoir
+# review: new
+ui-account-properties = &Propriétés...
 ui-menu-open = &Ouvrir
 ui-menu-flag = Indi&cateur
 ui-menu-view-source = Afficher la &source

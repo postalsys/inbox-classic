@@ -343,6 +343,10 @@ CREATE INDEX thread_marks_by_account ON thread_marks (account_id);
     r#"
 CREATE INDEX messages_of_thread ON messages (thread_id);
 "#,
+    // the account's own name for the folder list ("Gmail", "Work"), empty for the name on its mail (text.rs)
+    r#"
+ALTER TABLE accounts ADD COLUMN account_name TEXT NOT NULL DEFAULT '';
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

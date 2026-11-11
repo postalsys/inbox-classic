@@ -106,6 +106,8 @@ gtk-plain-warning =
     Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
 
     Fortfahren?
+# review: new
+gtk-account-name-title = Kontoname
 gtk-display-name-title = Anzeigename
 gtk-turned-off-why = Die Option „{ $button }“ ist auf diesem Computer deaktiviert. { $reason }
 gtk-turned-off-why-long =
@@ -160,5 +162,9 @@ gtk-preferences = Einstellungen
 gtk-language = Sprache
 gtk-language-subtitle = Sprache der Benutzeroberfläche und der Hilfe
 gtk-new-mail-group = Neue E-Mail
-gtk-notify-subtitle = Bei neuen Nachrichten benachrichtigen, wenn das Fenster im Hintergrund ist
+# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
+# review: new
+gtk-notify-new-mail = Bei neuen Nachrichten benachrichtigen
+# review: changed
+gtk-notify-subtitle = Eine Benachrichtigung, wenn neue Nachrichten eintreffen, während das Fenster im Hintergrund ist
 gtk-restart-to-change = Inbox Classic startet neu, um die Sprache zu ändern.

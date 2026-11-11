@@ -51,11 +51,13 @@ windows = 103
 menu = "edit"
 key = "Mod+Q"
 mac = "Mod+Shift+U"
+some = true
 
 [[command]]
 id = "mark_unread"
 windows = 104
 menu = "edit"
+some = true
 
 [[command]]
 id = "pictures"
@@ -109,23 +111,27 @@ windows = 112
 menu = "edit"
 key = "Delete"
 mac = "Mod+Delete"
+some = true
 
 [[command]]
 id = "move"
 windows = 113
 menu = "edit"
 key = "Mod+Shift+V"
+some = true
 
 [[command]]
 id = "copy"
 windows = 136
 menu = "edit"
+some = true
 
 [[command]]
 id = "flag"
 windows = 114
 menu = "message"
 mac = "Mod+Shift+L"
+some = true
 
 [[command]]
 id = "new_folder"
@@ -245,11 +251,13 @@ windows = 127
 menu = "message"
 key = "Mod+J"
 mac = "Mod+Shift+J"
+some = true
 
 [[command]]
 id = "not_junk"
 windows = 128
 menu = "message"
+some = true
 
 # out of the Inbox into the Archive folder (on Gmail every label taken off); A in the message list. On where the
 # selection summary says (archivable), not by count alone

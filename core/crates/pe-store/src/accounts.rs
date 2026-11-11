@@ -109,10 +109,12 @@ impl AccountSettings {
 pub struct Account {
     pub id: AccountId,
     pub settings: AccountSettings,
+    /// The account's own name in the folder list ("Gmail", "Work"), set apart from the settings as the signature
+    /// is; empty for the name on its mail (`pe_core::account_title`)
+    pub account_name: String,
 }
 
-const COLUMNS: &str =
-    "id, name, email, username, imap_host, imap_port, imap_security, smtp_host, smtp_port, smtp_security, auth";
+const COLUMNS: &str = "id, name, email, username, imap_host, imap_port, imap_security, smtp_host, smtp_port, smtp_security, auth, account_name";
 
 fn from_row(row: &Row) -> rusqlite::Result<Account> {
     Ok(Account {
@@ -129,6 +131,7 @@ fn from_row(row: &Row) -> rusqlite::Result<Account> {
             smtp_security: Security::parse(&row.get::<_, String>(9)?),
             auth: Auth::parse(&row.get::<_, String>(10)?),
         },
+        account_name: row.get(11)?,
     })
 }
 
@@ -168,6 +171,18 @@ impl Store {
             "UPDATE accounts SET name = ?1, email = ?2, username = ?3, imap_host = ?4, imap_port = ?5, imap_security = ?6, \
              smtp_host = ?7, smtp_port = ?8, smtp_security = ?9, auth = ?10 WHERE id = ?11",
             params.as_slice(),
+        )?;
+        if changed == 0 {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
+        Ok(())
+    }
+
+    /// Sets the account's own name for the folder list; empty for the name on its mail
+    pub fn set_account_name(&self, id: AccountId, name: &str) -> Result<()> {
+        let changed = self.db.execute(
+            "UPDATE accounts SET account_name = ?2 WHERE id = ?1",
+            params![id, name.trim()],
         )?;
         if changed == 0 {
             return Err(rusqlite::Error::QueryReturnedNoRows);
@@ -229,9 +244,15 @@ mod tests {
             store.accounts().unwrap(),
             vec![Account {
                 id,
-                settings: settings.clone()
+                settings: settings.clone(),
+                account_name: String::new(),
             }]
         );
+        // an account name of its own, trimmed, kept when the settings change
+        store.set_account_name(id, " Gmail ").unwrap();
+        store.update_account(id, &settings).unwrap();
+        assert_eq!(store.account(id).unwrap().account_name, "Gmail");
+        assert!(store.set_account_name(id + 1, "x").is_err());
         assert!(store.update_account(id + 1, &AccountSettings::example("x@y")).is_err());
 
         // a signature of its own, none to begin with, kept when the settings change

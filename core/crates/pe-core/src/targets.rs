@@ -57,12 +57,11 @@ impl Core {
     /// above them; "Recent" only while nothing is typed
     pub fn move_targets(&self, current: Option<FolderId>, filter: &str) -> Result<Vec<TargetRow>> {
         let accounts = self.accounts()?;
-        let names: Vec<&str> = accounts.iter().map(|a| a.settings.name.as_str()).collect();
+        let titles = crate::account_titles(&accounts);
         let filter = plain(filter.trim());
         let mut rows = Vec::new();
         let mut all = Vec::new();
-        for account in &accounts {
-            let title = crate::account_title(&account.settings.name, &account.settings.email, &names);
+        for (account, title) in accounts.iter().zip(titles) {
             let folders = self.folders(account.id)?;
             let infos: Vec<&pe_store::FolderInfo> = folders.iter().map(|f| &f.info).collect();
             let depths = crate::tree_depths(&infos);

@@ -18,7 +18,7 @@ private func securityName(_ security: PeSecurity) -> String {
 
 /// the fields of the server form, in order
 private enum Field: Int {
-    case name, email, username, password, imapHost, imapPort, imapSecurity, smtpHost, smtpPort, smtpSecurity
+    case accountName, name, email, username, password, imapHost, imapPort, imapSecurity, smtpHost, smtpPort, smtpSecurity
 }
 
 private func validPort(_ text: String) -> Bool {
@@ -65,9 +65,10 @@ private func settingsOf(_ fields: [FormField], _ strings: CStrings) -> PeAccount
 
 /// the server form's fields, filled in from what was found or stored
 @MainActor
-private func serverFields(name: String, email: String, username: String, imapHost: String, imapPort: UInt16,
+private func serverFields(accountName: String, name: String, email: String, username: String, imapHost: String, imapPort: UInt16,
                           imapSecurity: PeSecurity, smtpHost: String, smtpPort: UInt16, smtpSecurity: PeSecurity) -> [FormField] {
     [
+        FormField(label: Text.uiFieldAccountName.text, value: accountName),
         FormField(label: Text.uiFieldName.text, value: name),
         FormField(label: Text.uiFieldEmail.text, value: email),
         FormField(label: Text.uiFieldUser.text, value: username),
@@ -511,7 +512,7 @@ func newAccountDialog(core: Core) -> Int64 {
 
     explainAppPassword(info)
     var fields = serverFields(
-        name: name, email: email, username: info.map { text($0.username) } ?? "", imapHost: info.map { text($0.imap_host) } ?? "",
+        accountName: taken(email.withCString { pe_default_account_name($0) }) ?? "", name: name, email: email, username: info.map { text($0.username) } ?? "", imapHost: info.map { text($0.imap_host) } ?? "",
         imapPort: info?.imap_port ?? 993, imapSecurity: info?.imap_security ?? PE_SECURITY_TLS,
         smtpHost: info.map { text($0.smtp_host) } ?? "", smtpPort: info?.smtp_port ?? 465,
         smtpSecurity: info?.smtp_security ?? PE_SECURITY_TLS)
@@ -526,6 +527,7 @@ func newAccountDialog(core: Core) -> Int64 {
         let account = pe_account_add(core.handle, &settings, password)
         strings.wipe()
         if account > 0 {
+            setAccountName(core: core, account: account, fields[Field.accountName.rawValue].value)
             return account
         }
         inform(Text.uiAccountNotSaved.text, title: Text.uiAddAccountTitle.text, style: .error)
@@ -542,25 +544,42 @@ func passwordDialog(account: String) -> String? {
 
 // ---- the Accounts window ----
 
+/// the account's own name for the folder list, as typed in its form
+@MainActor
+private func setAccountName(core: Core, account: Int64, _ name: String) {
+    _ = name.trimmingCharacters(in: .whitespaces).withCString { pe_account_set_name(core.handle, account, $0) }
+}
+
+/// the Properties of `account`, from File > Accounts or the account's menu in the folder tree; true when it changed
+@MainActor
+func accountProperties(core: Core, account: Int64) -> Bool {
+    guard let info = core.accounts().first(where: { $0.id == account }) else { return false }
+    return accountProperties(core: core, account: account, accountName: info.accountName,
+                             signsInWith: info.oauth != PE_O_AUTH_PROVIDER_NONE ? info.signsInWith : "")
+}
+
 /// the settings of an account, changed: the server form for a password account, the name for one that signs in
 /// through the browser (its servers are the sign-in's); a password typed in replaces the kept one
 @MainActor
-private func accountProperties(core: Core, account: Int64, signsInWith: String) -> Bool {
+private func accountProperties(core: Core, account: Int64, accountName: String, signsInWith: String) -> Bool {
     guard let view = pe_account_settings(core.handle, account) else { return false }
     defer { pe_account_settings_free(view) }
     guard let stored = pe_account_settings_info(view)?.pointee else { return false }
-    var fields = serverFields(name: text(stored.name), email: text(stored.email), username: text(stored.username),
+    var fields = serverFields(accountName: accountName, name: text(stored.name), email: text(stored.email), username: text(stored.username),
                               imapHost: text(stored.imap_host), imapPort: stored.imap_port, imapSecurity: stored.imap_security,
                               smtpHost: text(stored.smtp_host), smtpPort: stored.smtp_port, smtpSecurity: stored.smtp_security)
     if !signsInWith.isEmpty {
-        // a browser sign-in account: the name only, the rest is the provider's
-        guard let name = formDialog(title: Text.uiProperties.text,
-                                    intro: Text.uiSignsInWith.text(["app": signsInWith]),
-                                    fields: [fields[Field.name.rawValue]]) else { return false }
-        fields[Field.name.rawValue] = name[0]
+        // a browser sign-in account: the names only, the rest is the provider's
+        guard let names = formDialog(title: Text.uiProperties.text,
+                                     intro: Text.uiSignsInWith.text(["app": signsInWith]),
+                                     fields: [fields[Field.accountName.rawValue], fields[Field.name.rawValue]]) else { return false }
+        fields[Field.accountName.rawValue] = names[0]
+        fields[Field.name.rawValue] = names[1]
         let strings = CStrings()
         var settings = settingsOf(fields, strings)
-        return pe_account_update(core.handle, account, &settings)
+        guard pe_account_update(core.handle, account, &settings) else { return false }
+        setAccountName(core: core, account: account, names[0].value)
+        return true
     }
     let was = (imap: stored.imap_security, imapHost: text(stored.imap_host), smtp: stored.smtp_security, smtpHost: text(stored.smtp_host))
     while let filled = formDialog(title: Text.uiProperties.text, intro: Text.uiKeepPassword.text, fields: fields,
@@ -581,6 +600,7 @@ private func accountProperties(core: Core, account: Int64, signsInWith: String) 
             inform(Text.uiAccountNotSaved.text, title: Text.uiProperties.text, style: .error)
             continue
         }
+        setAccountName(core: core, account: account, fields[Field.accountName.rawValue].value)
         let password = fields[Field.password.rawValue].value
         if !password.isEmpty {
             pe_account_set_password(core.handle, account, strings.add(password))
@@ -680,7 +700,7 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         let account = accounts[row]
         let value: String
         switch column?.identifier.rawValue {
-        case "name": value = account.name
+        case "name": value = account.title
         case "email": value = account.email
         default: value = account.oauth != PE_O_AUTH_PROVIDER_NONE ? Text.uiBrowserSignInServer.text(["server": account.imapHost])
                                                                   : account.imapHost
@@ -701,8 +721,7 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
 
     @objc private func properties() {
         guard let account = selected else { return }
-        let signsInWith = account.oauth != PE_O_AUTH_PROVIDER_NONE ? account.signsInWith : ""
-        if accountProperties(core: core, account: account.id, signsInWith: signsInWith) {
+        if accountProperties(core: core, account: account.id) {
             changed = true
             fill(select: table.selectedRow)
         }

@@ -15,7 +15,7 @@ use pe_store::Folder;
 
 use crate::app::{run_command, shell, spawn};
 use crate::commands::Command;
-use crate::folders::{ALL_INBOXES, Entry, FolderTree, Handlers};
+use crate::folders::{ALL_INBOXES, Entry, FolderTree, Handlers, folder_of, is_under_all_inboxes, under_all_inboxes};
 use crate::messages::MessageList;
 use crate::reader::{Loaded, Reader};
 use crate::settings;
@@ -37,7 +37,6 @@ const TEXT_KEYS: [Command; 3] = [Command::Delete, Command::SelectAll, Command::U
 #[derive(Clone)]
 struct AccountInfo {
     id: i64,
-    name: String,
     email: String,
     label: String,
     /// What the folder tree calls it
@@ -56,6 +55,8 @@ pub struct Mailbox {
     find_narrow: gtk::ToggleButton,
     /// In a narrow window, the folder button in place of the folder list
     folder_button: gtk::MenuButton,
+    /// The folder shown was chosen by its row under All Inboxes (an account's Inbox there), not its account's
+    under_all_inboxes: Cell<bool>,
     search_bar: gtk::Box,
     search_summary: gtk::Label,
     empty: gtk::Box,
@@ -73,6 +74,8 @@ pub struct Mailbox {
     /// The account of each folder, the name of each folder and whether it is the Inbox or a special folder
     folder_accounts: RefCell<HashMap<i64, i64>>,
     folder_names: RefCell<HashMap<i64, (String, bool)>>,
+    /// The Inboxes under All Inboxes by folder, with their titles ("Inbox - Gmail")
+    inbox_titles: RefCell<HashMap<i64, String>>,
     /// The folders that hold no messages (only other folders), the Drafts and the Junk folders
     unselectable: RefCell<HashSet<i64>>,
     /// The message list's right-click menu, the last one opened (the e2e driver reads it)
@@ -193,7 +196,8 @@ impl Mailbox {
         let window = adw::ApplicationWindow::builder()
             .application(application)
             .title(TITLE)
-            .default_width(1100)
+            // room for the folder's name in the header bar in every language ("Boîte de réception")
+            .default_width(1200)
             .default_height(760)
             .content(&toolbar)
             .icon_name(crate::APP_ID)
@@ -209,6 +213,7 @@ impl Mailbox {
             find,
             find_narrow: parts.search.clone(),
             folder_button: parts.folders.clone(),
+            under_all_inboxes: Cell::new(false),
             search_bar,
             search_summary,
             empty,
@@ -224,6 +229,7 @@ impl Mailbox {
             accounts: RefCell::default(),
             folder_accounts: RefCell::default(),
             folder_names: RefCell::default(),
+            inbox_titles: RefCell::default(),
             unselectable: RefCell::default(),
             message_popover: RefCell::default(),
             message_actions: RefCell::default(),
@@ -473,17 +479,19 @@ impl Mailbox {
                     this.on_tree_selected(id);
                 }
             }),
-            can_drop: Box::new(move |refs, to| can.upgrade().is_some_and(|this| this.can_drop(refs, to))),
+            // a row under All Inboxes takes what its folder takes
+            can_drop: Box::new(move |refs, to| can.upgrade().is_some_and(|this| this.can_drop(refs, folder_of(to)))),
             dropped: Box::new(move |refs, to, copy| {
                 if let Some(this) = dropped.upgrade() {
-                    this.drop_message(refs, to, copy);
+                    this.drop_message(refs, folder_of(to), copy);
                 }
             }),
             files_dropped: Box::new(move |to, files| {
                 if let Some(this) = imported.upgrade() {
-                    spawn(async move { this.drop_files(Some(to), files).await });
+                    spawn(async move { this.drop_files(Some(folder_of(to)), files).await });
                 }
             }),
+            opened: Box::new(remember_opened),
             menu: Box::new(move |widget, x, y, id| {
                 if let Some(this) = menu.upgrade() {
                     if id < 0 && id != crate::folders::ALL_INBOXES {
@@ -502,7 +510,7 @@ impl Mailbox {
     pub fn reload(&self) {
         let core = &shell().core;
         let accounts = core.accounts().unwrap_or_default();
-        let names: Vec<&str> = accounts.iter().map(|a| a.settings.name.as_str()).collect();
+        let titles = pe_core::account_titles(&accounts);
         let mut infos = Vec::new();
         let mut entries = Vec::new();
         self.folder_accounts.borrow_mut().clear();
@@ -510,12 +518,10 @@ impl Mailbox {
         self.unselectable.borrow_mut().clear();
         self.draft_folders.borrow_mut().clear();
         self.junk_folders.borrow_mut().clear();
-        for account in &accounts {
+        for (account, title) in accounts.iter().zip(titles) {
             let s = &account.settings;
-            let title = pe_core::account_title(&s.name, &s.email, &names);
             infos.push(AccountInfo {
                 id: account.id,
-                name: s.name.clone(),
                 email: s.email.clone(),
                 label: pe_core::account_label(&s.name, &s.email),
                 title: title.clone(),
@@ -537,22 +543,46 @@ impl Mailbox {
         self.fill_account_menus();
         let shown = if self.all_inboxes.get() {
             ALL_INBOXES
+        } else if self.under_all_inboxes.get() {
+            under_all_inboxes(self.folder.get())
         } else if self.folder.get() != 0 {
             self.folder.get()
         } else {
             -self.selected_account.get()
         };
-        // above the accounts, the mail of every Inbox; its unread count as a folder's
-        let top = pe_core::all_inboxes_shown(accounts.len()).then(|| Entry {
-            id: ALL_INBOXES,
-            name: t!(UiAllInboxes),
-            unread: core.inbox_unread().unwrap_or(0),
-            below: 0,
-            icon: folder_icon(Some(SpecialUse::Inbox)),
-            depth: 0,
+        // above the accounts, the mail of every Inbox, and each account's Inbox under it; its count the sum of theirs,
+        // shown while it is closed, as a folder's with subfolders
+        let top = pe_core::all_inboxes_shown(accounts.len()).then(|| {
+            let inboxes = core
+                .special_folders(pe_core::SpecialFolderKind::Inbox)
+                .unwrap_or_default();
+            *self.inbox_titles.borrow_mut() = inboxes
+                .iter()
+                .map(|inbox| (inbox.folder, inbox.title.clone()))
+                .collect();
+            let inboxes = inboxes
+                .into_iter()
+                .map(|inbox| Entry {
+                    id: under_all_inboxes(inbox.folder),
+                    name: inbox.name,
+                    unread: inbox.unread,
+                    below: 0,
+                    icon: folder_icon(Some(SpecialUse::Inbox)),
+                    depth: 1,
+                })
+                .collect();
+            let all = Entry {
+                id: ALL_INBOXES,
+                name: t!(UiAllInboxes),
+                unread: 0,
+                below: core.inbox_unread().unwrap_or(0),
+                icon: folder_icon(Some(SpecialUse::Inbox)),
+                depth: 0,
+            };
+            (all, inboxes)
         });
         self.reloading.set(true);
-        let kept = self.folders.rebuild(top, entries);
+        let kept = self.folders.rebuild(top, entries, &closed_rows());
         if shown != 0 && kept {
             self.folders.select(shown);
         }
@@ -618,7 +648,7 @@ impl Mailbox {
         self.folders.update(-account, 0, hidden.account);
         if pe_core::all_inboxes_shown(self.accounts.borrow().len()) {
             self.folders
-                .update(ALL_INBOXES, shell().core.inbox_unread().unwrap_or(0), 0);
+                .update(ALL_INBOXES, 0, shell().core.inbox_unread().unwrap_or(0));
         }
     }
 
@@ -659,6 +689,9 @@ impl Mailbox {
         }
         self.undone.set(false);
         let all_inboxes = id == ALL_INBOXES;
+        // a row under All Inboxes shows its folder, and says whose Inbox it is
+        self.under_all_inboxes.set(is_under_all_inboxes(id));
+        let id = folder_of(id);
         // an account has no messages of its own
         self.selected_account.set(if id < 0 && !all_inboxes { -id } else { 0 });
         if !self.on_folder_selected(id.max(0), all_inboxes) {
@@ -693,7 +726,7 @@ impl Mailbox {
     }
 
     pub fn account_name(&self, account: i64) -> String {
-        self.account(account).map_or_else(|| t!(UiTheAccount), |a| a.name)
+        self.account(account).map_or_else(|| t!(UiTheAccount), |a| a.title)
     }
 
     pub fn account_email(&self, account: i64) -> String {
@@ -943,21 +976,19 @@ impl Mailbox {
         }
     }
 
-    /// What follows the selection: the counts in the status bar, Junk or Not Junk, the commands for one message off
-    /// while several are selected; Move and Copy with any selected
+    /// What follows the selection: the counts in the status bar, Junk or Not Junk, the commands for one message on
+    /// with exactly one selected, those for messages with any
     fn selection_shown(&self) {
         self.show_counts();
         self.update_junk_button();
-        let several = self.several();
+        let selected = self.refs.borrow().len();
         for command in Command::ALL.iter().filter(|c| c.needs_one()) {
-            self.enable(*command, !several);
+            self.enable(*command, selected == 1);
         }
-        let any = !self.refs.borrow().is_empty();
+        let any = selected > 0;
         for command in Command::ALL.iter().filter(|c| c.needs_some()) {
             self.enable(*command, any);
         }
-        self.enable(Command::Move, any);
-        self.enable(Command::Copy, any);
         self.enable(Command::Archive, self.can_archive());
         self.update_flag_actions();
         let summary = self.summary.borrow();
@@ -1103,10 +1134,18 @@ impl Mailbox {
         if self.searching() && self.folder.get() == folder && !self.all_inboxes.get() {
             self.clear_find();
         }
-        if !self.folders.select(folder) || self.folder.get() != folder {
+        if !self.select_folder_row(folder) || self.folder.get() != folder {
             return;
         }
         self.select_in_list(folder, uid);
+    }
+
+    /// Folder `folder`'s row selected from outside the tree (a notification, Next Unread): its row under All Inboxes
+    /// while the user works there (All Inboxes or one of its rows selected), its account's otherwise; false when the
+    /// tree does not have it
+    fn select_folder_row(&self, folder: i64) -> bool {
+        let there = self.all_inboxes.get() || self.under_all_inboxes.get();
+        (there && self.folders.select(under_all_inboxes(folder))) || self.folders.select(folder)
     }
 
     /// The row of the message `uid` of `folder` selected in the list, its conversation opened when it is a reply hidden
@@ -1272,11 +1311,17 @@ impl Mailbox {
         if self.all_inboxes.get() {
             return t!(UiAllInboxes);
         }
+        // an account's Inbox chosen under All Inboxes: which account's ("Inbox - Gmail")
+        if self.under_all_inboxes.get()
+            && let Some(title) = self.inbox_titles.borrow().get(&self.folder.get())
+        {
+            return title.clone();
+        }
         if let Some((name, _)) = self.folder_names.borrow().get(&self.folder.get()) {
             return name.clone();
         }
         self.account(self.selected_account.get())
-            .map(|a| a.name)
+            .map(|a| a.title)
             .unwrap_or_default()
     }
 
@@ -1448,7 +1493,7 @@ impl Mailbox {
             }
             Err(error) => {
                 let window = self.window.clone();
-                spawn(async move { ui::alert(&window, TITLE, &error.to_string()).await });
+                spawn(async move { ui::alert(&window, TITLE, &pe_core::sentence(&error.to_string())).await });
             }
         }
     }
@@ -1588,7 +1633,7 @@ impl Mailbox {
                 Ok(pe_core::NextUnread::Ask { folder: to, question }) => {
                     // the question as the heading, what happens under it, as GNOME's dialogs have it
                     let (heading, body) = question.split_once("\n\n").unwrap_or((TITLE, &question));
-                    if !ui::confirm(&self.window, heading, body, false).await || !self.folders.select(to) {
+                    if !ui::confirm(&self.window, heading, body, false).await || !self.select_folder_row(to) {
                         return;
                     }
                     (folder, uid) = (to, 0);
@@ -1633,7 +1678,7 @@ impl Mailbox {
                 self.undone.set(true);
                 self.select_restored();
             }
-            Err(error) => ui::alert(&self.window, TITLE, &error.to_string()).await,
+            Err(error) => ui::alert(&self.window, TITLE, &pe_core::sentence(&error.to_string())).await,
         }
     }
 
@@ -1676,22 +1721,64 @@ impl Mailbox {
         self.folder.get()
     }
 
-    /// The menu of an account's heading (a right-click on it): New Folder at the top of that account
+    /// An account's right-click menu: Send and Receive (its server alone), Mark All Read (every folder of it), New
+    /// Folder, Properties
     pub fn account_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64, account: i64) {
+        use crate::words::{Text, plain};
         let group = gio::SimpleActionGroup::new();
-        let action = gio::SimpleAction::new("new", None);
-        let this = Rc::downgrade(self);
-        action.connect_activate(move |_, _| {
-            if let Some(this) = this.upgrade() {
-                spawn(async move { this.new_folder_in(account, 0).await });
-            }
-        });
-        group.add_action(&action);
-        let menu = gio::Menu::new();
-        menu.append(
-            Some(&crate::words::plain(crate::words::Text::CmdNewFolder)),
-            Some("account.new"),
+        let add = |name: &str, enabled: bool, run: Box<dyn Fn(Rc<Mailbox>)>| {
+            let action = gio::SimpleAction::new(name, None);
+            action.set_enabled(enabled);
+            let this = Rc::downgrade(self);
+            action.connect_activate(move |_, _| {
+                if let Some(this) = this.upgrade() {
+                    run(this);
+                }
+            });
+            group.add_action(&action);
+        };
+        add(
+            "sync",
+            true,
+            Box::new(move |_| {
+                let _ = shell().core.sync(account);
+            }),
         );
+        // the counts its folders are drawn with: nothing unread, nothing to mark; the core's events redraw them after
+        add(
+            "mark-all-read",
+            self.folders.unread_within(-account) > 0,
+            Box::new(move |_| {
+                let _ = shell().core.mark_account_read(account);
+            }),
+        );
+        add(
+            "new",
+            true,
+            Box::new(move |this| spawn(async move { this.new_folder_in(account, 0).await })),
+        );
+        add(
+            "properties",
+            true,
+            Box::new(move |this| {
+                spawn(async move {
+                    if crate::accounts::account_properties(&this.window, account).await {
+                        this.reload();
+                    }
+                })
+            }),
+        );
+        let menu = gio::Menu::new();
+        let first = gio::Menu::new();
+        first.append(Some(&plain(Text::UiAccountSync)), Some("account.sync"));
+        first.append(Some(&plain(Text::CmdMarkAllRead)), Some("account.mark-all-read"));
+        menu.append_section(None, &first);
+        let second = gio::Menu::new();
+        second.append(Some(&plain(Text::CmdNewFolder)), Some("account.new"));
+        menu.append_section(None, &second);
+        let third = gio::Menu::new();
+        third.append(Some(&plain(Text::UiAccountProperties)), Some("account.properties"));
+        menu.append_section(None, &third);
         widget.insert_action_group("account", Some(&group));
         *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
     }
@@ -2215,11 +2302,29 @@ fn popup_menu(widget: &gtk::Widget, menu: &gio::Menu, x: f64, y: f64) -> gtk::Po
     popover.set_parent(widget);
     popover.set_has_arrow(false);
     popover.set_pointing_to(Some(&gdk::Rectangle::new(x as i32, y as i32, 1, 1)));
-    popover.connect_closed(|popover| {
+    let reopening = Rc::new(Cell::new(false));
+    let kept = reopening.clone();
+    popover.connect_closed(move |popover| {
+        if kept.get() {
+            return;
+        }
         let popover = popover.clone();
         glib::idle_add_local_once(move || popover.unparent());
     });
     popover.popup();
+    // opened again once GTK has put in the separators between the sections, which it does when idle: a popover keeps
+    // the size it opened with, short by their height, which cuts off its last row
+    let shown = popover.downgrade();
+    glib::idle_add_local_once(move || {
+        if let Some(popover) = shown.upgrade()
+            && popover.is_visible()
+        {
+            reopening.set(true);
+            popover.set_visible(false);
+            popover.set_visible(true);
+            reopening.set(false);
+        }
+    });
     popover
 }
 
@@ -2342,6 +2447,31 @@ fn header_bar(title: &adw::WindowTitle, find: &gtk::SearchEntry) -> HeaderParts 
         folders,
         search,
         search_bar,
+    }
+}
+
+/// The top rows of the folder tree the user closed, from the settings
+fn closed_rows() -> std::collections::HashSet<i64> {
+    shell()
+        .settings
+        .text(settings::CLOSED_ROWS)
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|id| id.trim().parse().ok())
+        .collect()
+}
+
+/// A top row opened or closed by the user, kept for the next start
+fn remember_opened(id: i64, open: bool) {
+    let mut closed = closed_rows();
+    let changed = if open { closed.remove(&id) } else { closed.insert(id) };
+    if changed {
+        let mut ids: Vec<i64> = closed.into_iter().collect();
+        ids.sort_unstable();
+        let text = ids.iter().map(i64::to_string).collect::<Vec<_>>().join(",");
+        shell()
+            .settings
+            .set_text(settings::CLOSED_ROWS, (!text.is_empty()).then_some(text.as_str()));
     }
 }
 

@@ -41,7 +41,8 @@ cmd-outbox = &Postausgang...
 cmd-properties = &Eigenschaften
 cmd-mark-all-read = Alle als gelesen &markieren
 cmd-junk = Als &Junk markieren
-cmd-not-junk = Als kein J&unk markieren
+# review: changed
+cmd-not-junk = Als Nicht-J&unk markieren
 cmd-archive = A&rchivieren
 cmd-watch-conversation = Unterhaltung &beobachten
 cmd-ignore-conversation = Unterhaltung &ignorieren
@@ -191,6 +192,7 @@ ui-signature = Signatur
 ui-signature-hint = Wird neuen Nachrichten, Antworten und Weiterleitungen von diesem Konto angefügt.
 ui-signature-not-saved = Die Signatur konnte nicht gespeichert werden.
 ui-all-inboxes = Alle Posteingänge
+# review: changed
 ui-all-folders = Alle Ordner
 ui-the-account = das Konto
 ui-folder-name = Ordnername:
@@ -263,6 +265,8 @@ ui-off-here = Auf diesem Computer deaktiviert.
 ui-why = Warum?
 ui-more-sign-in = Weitere Anmeldeoptionen...
 ui-other-account = Für ein anderes E-Mail-Konto geben Sie Ihre E-Mail-Adresse und den Namen ein, den Empfänger sehen sollen. Die Servereinstellungen werden im nächsten Schritt gesucht.
+# review: new
+ui-field-account-name = Kontoname:
 ui-field-name = Anzeigename:
 ui-field-email = E-Mail-Adresse:
 ui-field-user = Benutzername:
@@ -346,6 +350,10 @@ ui-new-folder-title = Neuer Ordner
 ui-rename-folder-title = Ordner umbenennen
 ui-delete-folder-question = Den Ordner „{ $folder }“ mit allen Nachrichten und Unterordnern löschen? Diese werden auch auf dem Server gelöscht.
 ui-properties = &Eigenschaften
+# review: new
+ui-account-sync = Senden und &empfangen
+# review: new
+ui-account-properties = &Eigenschaften...
 ui-menu-open = Ö&ffnen
 ui-menu-flag = Kenn&zeichnung
 ui-menu-view-source = &Quelltext anzeigen

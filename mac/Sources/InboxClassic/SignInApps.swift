@@ -91,11 +91,12 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         let check = NSButton(title: Text.uiCheck.text, target: self, action: #selector(checkClicked))
         check.setAccessibilityIdentifier("signin.check")
         let copy = NSButton(title: Text.uiButtonCopy.text, target: self, action: #selector(copyRedirect))
-        let issuerRow = NSStackView(views: [issuer, check])
-        let redirectRow = NSStackView(views: [redirect, copy])
+        let issuerRow = filledRow([issuer, check])
+        // the whole redirect address in sight: the field takes the rest of its row
+        let redirectRow = filledRow([redirect, copy])
         let server = { (host: NSTextField, port: NSTextField, security: NSPopUpButton) -> NSStackView in
             port.widthAnchor.constraint(equalToConstant: 56).isActive = true
-            return NSStackView(views: [host, port, security])
+            return self.filledRow([host, port, security])
         }
         var rows: [[NSView]] = [
             [NSTextField(labelWithString: Text.uiFillInFor.text), presetButtons],
@@ -116,6 +117,7 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         let grid = NSGridView(views: rows)
         grid.column(at: 0).xPlacement = .trailing
         grid.column(at: 1).width = 380
+        grid.column(at: 1).xPlacement = .fill
         grid.rowAlignment = .firstBaseline
         grid.rowSpacing = 8
         let line = NSBox()
@@ -124,6 +126,8 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         registerTitle.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
         let redirectGrid = NSGridView(views: [[NSTextField(labelWithString: Text.uiRedirectUri.text), redirectRow]])
         redirectGrid.column(at: 1).width = 380
+        redirectGrid.cell(atColumnIndex: 1, rowIndex: 0).xPlacement = .fill
+        redirectGrid.rowAlignment = .firstBaseline
         let cancel = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"
         let ok = NSButton(title: Text.uiOk.text, target: self, action: #selector(okClicked))
@@ -142,10 +146,19 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         return stack
     }
 
+    /// a row of the form as wide as its column, the first view (a text field) taking what the others leave
+    private func filledRow(_ views: [NSView]) -> NSStackView {
+        let row = NSStackView(views: views)
+        row.distribution = .fill
+        views[0].setContentHuggingPriority(.init(1), for: .horizontal)
+        return row
+    }
+
     /// the redirect URI and how to register a client, for the issuer typed
     private func showRegistration() {
         issuer.stringValue.withCString { typed in
             redirect.stringValue = taken(pe_sign_in_redirect_uri(typed)) ?? ""
+            redirect.toolTip = redirect.stringValue
             register.stringValue = taken(pe_sign_in_register_hint(typed)) ?? ""
         }
     }

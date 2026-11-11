@@ -47,8 +47,9 @@ int g_listHeight = 260;
 constexpr int kGap = 4;
 // the splitter being dragged: 0 none, 1 between the tree and the rest, 2 between the list and the reading pane
 int g_dragging = 0;
-// accounts whose password prompt is open, so a second failure does not open another
-std::set<int64_t> g_prompting;
+// the account whose password prompt is open, and those waiting for theirs, so a failure does not open another
+int64_t g_prompting = 0;
+std::vector<int64_t> g_promptQueue;
 // accounts whose last sync failed: their failure stays in the status bar
 std::set<int64_t> g_failing;
 
@@ -87,6 +88,14 @@ struct ToolbarEdge {
     bool separator;
 };
 std::vector<ToolbarEdge> g_toolbarEdges;
+// the top and bottom of the buttons, measured with them
+int g_buttonsTop = 0;
+int g_buttonsBottom = 0;
+// how many of the main toolbar's buttons are shown; the rest are in the menu of the chevron after them
+int g_toolbarShown = 0;
+HWND g_chevron = nullptr;
+// while the chevron's menu is open: drawn pressed
+bool g_chevronDown = false;
 void Layout();
 
 void UpdateJunkButton() {
@@ -98,20 +107,30 @@ void UpdateJunkButton() {
     Layout();
 }
 
-// the toolbar's buttons for one message off while several are selected
+// whether a command on messages can run with this many selected; -1 for a command that is not on messages
+int CommandFitsSelection(unsigned id) {
+    size_t selected = g_mailbox.SelectedCount();
+    if (id == IDM_ARCHIVE) {
+        return g_mailbox.CanArchive() ? 1 : 0;
+    }
+    if (CommandNeedsOne(id)) {
+        return selected == 1 ? 1 : 0;
+    }
+    if (CommandNeedsSome(id)) {
+        return selected > 0 ? 1 : 0;
+    }
+    return -1;
+}
+
+// the toolbar's buttons for messages off with none selected, those for one message while several are
 void UpdateSelectionButtons() {
-    bool one = g_mailbox.SelectedCount() <= 1;
-    bool any = g_mailbox.SelectedCount() > 0;
     int count = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
     for (int i = 0; i < count; i++) {
         TBBUTTON button = {};
         SendMessageW(g_toolbar, TB_GETBUTTON, i, reinterpret_cast<LPARAM>(&button));
-        if (button.idCommand == IDM_ARCHIVE) {
-            SendMessageW(g_toolbar, TB_ENABLEBUTTON, IDM_ARCHIVE, MAKELONG(g_mailbox.CanArchive() ? TRUE : FALSE, 0));
-        } else if (CommandNeedsOne(static_cast<unsigned>(button.idCommand))) {
-            SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(one ? TRUE : FALSE, 0));
-        } else if (CommandNeedsSome(static_cast<unsigned>(button.idCommand))) {
-            SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(any ? TRUE : FALSE, 0));
+        int fits = CommandFitsSelection(static_cast<unsigned>(button.idCommand));
+        if (fits >= 0) {
+            SendMessageW(g_toolbar, TB_ENABLEBUTTON, button.idCommand, MAKELONG(fits ? TRUE : FALSE, 0));
         }
     }
 }
@@ -144,21 +163,16 @@ void UpdateMenu(HMENU menu) {
         g_mailbox.UpdateFlagMenu(menu);
         return;
     }
-    bool several = g_mailbox.SelectedCount() > 1;
     for (int i = 0, count = GetMenuItemCount(menu); i < count; i++) {
         UINT id = GetMenuItemID(menu, i);
-        if (id == IDM_ARCHIVE) {
-            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanArchive() ? MF_ENABLED : MF_GRAYED));
+        if (int fits = CommandFitsSelection(id); fits >= 0) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (fits ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_EXPAND_ALL_THREADS || id == IDM_COLLAPSE_ALL_THREADS) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.Grouped() ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_HIDE_IGNORED) {
             CheckMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.HideIgnored() ? MF_CHECKED : MF_UNCHECKED));
         } else if (id == IDM_EMPTY_FOLDER) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanEmptyFolder() ? MF_ENABLED : MF_GRAYED));
-        } else if (CommandNeedsOne(id)) {
-            EnableMenuItem(menu, id, MF_BYCOMMAND | (several ? MF_GRAYED : MF_ENABLED));
-        } else if (CommandNeedsSome(id)) {
-            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.SelectedCount() > 0 ? MF_ENABLED : MF_GRAYED));
         }
     }
     if (HasOwnItem(menu, IDM_WATCH_CONVERSATION)) {
@@ -373,13 +387,9 @@ void SignInAgain(int64_t account) {
     MessageBoxW(g_main, refused.c_str(), kTitle, MB_OK | MB_ICONWARNING);
 }
 
-void AskPassword(int64_t account) {
-    if (!g_prompting.insert(account).second) {
-        return;
-    }
+void PromptFor(int64_t account) {
     if (g_mailbox.SignIn(account).provider != PE_O_AUTH_PROVIDER_NONE) {
         SignInAgain(account);
-        g_prompting.erase(account);
         return;
     }
     std::wstring password;
@@ -390,7 +400,23 @@ void AskPassword(int64_t account) {
         SecureZeroMemory(password.data(), password.size() * sizeof(wchar_t));
         pe_sync(g_core.get(), account);
     }
-    g_prompting.erase(account);
+}
+
+// the password or browser sign-in prompts, one at a time: an account that fails while another's is open waits for it
+void AskPassword(int64_t account) {
+    if (account == g_prompting || std::ranges::find(g_promptQueue, account) != g_promptQueue.end()) {
+        return;
+    }
+    g_promptQueue.push_back(account);
+    if (g_prompting) {
+        return;
+    }
+    while (!g_promptQueue.empty()) {
+        g_prompting = g_promptQueue.front();
+        g_promptQueue.erase(g_promptQueue.begin());
+        PromptFor(g_prompting);
+        g_prompting = 0;
+    }
 }
 
 void OnEvent(const UiEvent& event) {
@@ -486,7 +512,7 @@ HMENU BuildMenu() {
     AppendMenuW(file, MF_STRING, IDM_EXPORT_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_EXPORT_ADDRESS_BOOK).c_str());
     AppendMenuW(file, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P").c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(file, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_CMD_PROPERTIES, L"Alt+Enter").c_str());
+    AppendMenuW(file, MF_STRING, IDM_PROPERTIES, DialogMenuItem(PE_TEXT_CMD_PROPERTIES, L"Alt+Enter").c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_EXIT, MenuItem(PE_TEXT_CMD_EXIT).c_str());
     HMENU compose = CreatePopupMenu();
@@ -620,6 +646,71 @@ void CreateToolbar(HWND hwnd) {
         AddButton(g_toolbar, button.id, button.id ? label.c_str() : nullptr, button.style, button.icon);
     }
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
+    // a static, so a click leaves the keyboard where it was
+    g_chevron = CreateChild(hwnd, L"STATIC", L"", SS_OWNERDRAW | SS_NOTIFY, IDC_TOOLBAR_MORE, {});
+    ShowWindow(g_chevron, SW_HIDE);
+}
+
+int ChevronWidth() {
+    return Scale(16);
+}
+
+// the chevron right after the last button shown, as a rebar puts it; hidden while every button fits
+void PlaceChevron(int buttons) {
+    if (g_toolbarShown >= buttons) {
+        ShowWindow(g_chevron, SW_HIDE);
+        return;
+    }
+    POINT at = {g_toolbarShown > 0 ? g_toolbarEdges[g_toolbarShown - 1].right + Scale(2) : 0, g_buttonsTop};
+    MapWindowPoints(g_toolbar, g_main, &at, 1);
+    SetWindowPos(g_chevron, HWND_TOP, at.x, at.y, ChevronWidth(), g_buttonsBottom - g_buttonsTop, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+}
+
+// a flat button's face, sunk while its menu is open, with » near its top as the rebar's chevron has it
+void DrawChevron(const DRAWITEMSTRUCT& item) {
+    RECT face = item.rcItem;
+    FillRect(item.hDC, &face, GetSysColorBrush(COLOR_BTNFACE));
+    if (g_chevronDown) {
+        DrawEdge(item.hDC, &face, BDR_SUNKENOUTER, BF_RECT);
+        OffsetRect(&face, 1, 1);
+    }
+    face.top += Scale(4);
+    HGDIOBJ old = SelectObject(item.hDC, GetStockObject(DEFAULT_GUI_FONT));
+    SetBkMode(item.hDC, TRANSPARENT);
+    SetTextColor(item.hDC, GetSysColor(COLOR_BTNTEXT));
+    DrawTextW(item.hDC, L"\u00BB", 1, &face, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
+    SelectObject(item.hDC, old);
+}
+
+// the buttons that do not fit, in a menu under the chevron: their words, on or off as the buttons are
+void ShowHiddenButtons() {
+    int buttons = static_cast<int>(SendMessageW(g_toolbar, TB_BUTTONCOUNT, 0, 0));
+    HMENU menu = CreatePopupMenu();
+    bool separate = false;
+    for (int i = g_toolbarShown; i < buttons; i++) {
+        TBBUTTON button = {};
+        SendMessageW(g_toolbar, TB_GETBUTTON, i, reinterpret_cast<LPARAM>(&button));
+        if (button.fsStyle & BTNS_SEP) {
+            separate = GetMenuItemCount(menu) > 0;
+            continue;
+        }
+        if (separate) {
+            AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+            separate = false;
+        }
+        std::wstring label(static_cast<size_t>(SendMessageW(g_toolbar, TB_GETBUTTONTEXTW, button.idCommand, 0)), L'\0');
+        SendMessageW(g_toolbar, TB_GETBUTTONTEXTW, button.idCommand, reinterpret_cast<LPARAM>(label.data()));
+        bool enabled = (button.fsState & TBSTATE_ENABLED) != 0;
+        AppendMenuW(menu, MF_STRING | (enabled ? 0 : MF_GRAYED), button.idCommand, label.c_str());
+    }
+    RECT at;
+    GetWindowRect(g_chevron, &at);
+    g_chevronDown = true;
+    InvalidateRect(g_chevron, nullptr, TRUE);
+    TrackPopupMenu(menu, TPM_LEFTALIGN | TPM_TOPALIGN, at.left, at.bottom, 0, g_main, nullptr);
+    g_chevronDown = false;
+    InvalidateRect(g_chevron, nullptr, TRUE);
+    DestroyMenu(menu);
 }
 
 // the area between the toolbar and the status bar
@@ -654,8 +745,17 @@ Panes Measure() {
     return {area, treeWidth, listHeight};
 }
 
+// how many buttons end before `right`, from the end without every button past it and a separator that would be last
+int ButtonsBefore(int right) {
+    int buttons = static_cast<int>(g_toolbarEdges.size()), shown = buttons;
+    while (shown > 0 && (g_toolbarEdges[shown - 1].right > right || (shown < buttons && g_toolbarEdges[shown - 1].separator))) {
+        shown--;
+    }
+    return shown;
+}
+
 // the Find box gives way to the buttons' longer words in other languages, down to its least width; the buttons that
-// still run under it are hidden from the end, as their commands are all in the menus too
+// still run under it are hidden from the end, in the menu of the chevron after the others
 void FitToolbar(const RECT& bar) {
     // by index: the separators share the command id 0
     auto stateOf = [](int index) {
@@ -683,17 +783,23 @@ void FitToolbar(const RECT& bar) {
             RECT item = {};
             SendMessageW(g_toolbar, TB_GETITEMRECT, i, reinterpret_cast<LPARAM>(&item));
             g_toolbarEdges.push_back({static_cast<int>(item.right), (stateOf(i).fsStyle & BTNS_SEP) != 0});
+            if (i == 0) {
+                g_buttonsTop = item.top;
+                g_buttonsBottom = item.bottom;
+            }
         }
     }
     int findLeft = g_mailbox.PlaceFind(bar, buttons > 0 ? g_toolbarEdges.back().right : 0) - Scale(4);
-    // from the end: every button under the box, and a separator that would be left last
-    int shown = buttons;
-    while (shown > 0 && (g_toolbarEdges[shown - 1].right > findLeft || (shown < buttons && g_toolbarEdges[shown - 1].separator))) {
-        shown--;
+    int shown = ButtonsBefore(findLeft);
+    // some hidden: the chevron needs its room too
+    if (shown < buttons) {
+        shown = ButtonsBefore(findLeft - ChevronWidth() - Scale(2));
     }
     for (int i = 0; i < buttons; i++) {
         setHidden(i, i >= shown);
     }
+    g_toolbarShown = shown;
+    PlaceChevron(buttons);
 }
 
 void Layout() {
@@ -1065,6 +1171,11 @@ void OnCommand(WORD id, WORD code) {
         return;
     }
     switch (id) {
+    case IDC_TOOLBAR_MORE:
+        if (code == STN_CLICKED) {
+            ShowHiddenButtons();
+        }
+        return;
     case IDM_FIND:
         g_mailbox.FocusFind();
         return;
@@ -1225,6 +1336,25 @@ void OnCommand(WORD id, WORD code) {
         if (AccountsDialog(g_main, g_core.get())) {
             g_mailbox.Reload();
             SyncAll();
+        }
+        return;
+    case IDM_ACCOUNT_SYNC:
+        // the account row's menu: that account alone
+        if (int64_t account = g_mailbox.SelectedAccount()) {
+            pe_sync(g_core.get(), account);
+        }
+        return;
+    case IDM_ACCOUNT_MARK_ALL_READ:
+        if (int64_t account = g_mailbox.SelectedAccount()) {
+            pe_account_mark_all_read(g_core.get(), account);
+        }
+        return;
+    case IDM_ACCOUNT_PROPERTIES:
+        if (int64_t account = g_mailbox.SelectedAccount(); account && AccountPropertiesDialog(g_main, g_core.get(), account)) {
+            // its new name in the tree, and in the folder bar while its row is selected
+            g_mailbox.Reload();
+            ShowFolderName();
+            pe_sync(g_core.get(), account);
         }
         return;
     case IDM_NEW_FOLDER:
@@ -1472,6 +1602,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     case WM_DRAWITEM:
+        if (reinterpret_cast<const DRAWITEMSTRUCT*>(lParam)->hwndItem == g_chevron) {
+            DrawChevron(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam));
+            return TRUE;
+        }
         if (g_mailbox.OnDrawItem(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam))) {
             return TRUE;
         }

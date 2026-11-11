@@ -306,8 +306,8 @@ enum Command: Int, CaseIterable {
         case .sync: return false
         case .undo: return false
         case .selectAll: return false
-        case .markRead: return false
-        case .markUnread: return false
+        case .markRead: return true
+        case .markUnread: return true
         case .pictures: return false
         case .about: return false
         case .newMail: return false
@@ -315,10 +315,10 @@ enum Command: Int, CaseIterable {
         case .replyAll: return false
         case .forward: return true
         case .help: return false
-        case .delete: return false
-        case .move: return false
-        case .copy: return false
-        case .flag: return false
+        case .delete: return true
+        case .move: return true
+        case .copy: return true
+        case .flag: return true
         case .newFolder: return false
         case .renameFolder: return false
         case .deleteFolder: return false
@@ -336,8 +336,8 @@ enum Command: Int, CaseIterable {
         case .outbox: return false
         case .properties: return false
         case .markAllRead: return false
-        case .junk: return false
-        case .notJunk: return false
+        case .junk: return true
+        case .notJunk: return true
         case .archive: return false
         case .watchConversation: return true
         case .ignoreConversation: return true

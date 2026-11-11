@@ -90,6 +90,21 @@ pub(crate) fn new_mail_words(count: usize, from: &str, subject: &str, watched: b
     }
 }
 
+/// A reason the core gives, written to follow "Work: " in the status bar ("the Inbox and the special folders can not
+/// be renamed or deleted"), as a sentence of its own for an alert: its first letter capital, a full stop at its end
+pub fn sentence(reason: &str) -> String {
+    let reason = reason.trim();
+    let mut chars = reason.chars();
+    let Some(first) = chars.next() else {
+        return String::new();
+    };
+    let mut text: String = first.to_uppercase().chain(chars).collect();
+    if !text.ends_with(['.', '!', '?', '\u{2026}']) {
+        text.push('.');
+    }
+    text
+}
+
 /// "Name <address>", the address alone when the name is empty or the same: how From and the account menus show an
 /// account
 pub fn account_label(name: &str, email: &str) -> String {
@@ -101,8 +116,61 @@ pub fn account_label(name: &str, email: &str) -> String {
     }
 }
 
-/// What the folder tree calls the account named `name` among accounts with `names`: its name, with its address added
-/// when another one has the same name, the address alone without a name
+/// What an account is called among others: its own name for the folder list ("Gmail") when it has one, the name on
+/// its mail otherwise, its address when it has neither
+pub fn account_shown_name<'a>(account_name: &'a str, name: &'a str, email: &'a str) -> &'a str {
+    [account_name.trim(), name.trim()]
+        .into_iter()
+        .find(|shown| !shown.is_empty())
+        .unwrap_or(email)
+}
+
+/// What the folder tree, All Inboxes and the lists of folders call each of the accounts, in their order: the shown
+/// name (`account_shown_name`), with the address added where two accounts are shown the same
+pub fn account_titles(accounts: &[pe_store::Account]) -> Vec<String> {
+    let shown: Vec<&str> = accounts
+        .iter()
+        .map(|a| account_shown_name(&a.account_name, &a.settings.name, &a.settings.email))
+        .collect();
+    accounts
+        .iter()
+        .zip(&shown)
+        .map(|(a, name)| account_title(name, &a.settings.email, &shown))
+        .collect()
+}
+
+/// The account name a new account starts with: its provider's ("Gmail", "Outlook.com", "iCloud") for an address of a
+/// provider that people know by name, the address's domain otherwise ("example.com"); the user can change it
+pub fn default_account_name(email: &str) -> String {
+    let domain = email
+        .rsplit_once('@')
+        .map(|(_, domain)| domain.trim().trim_end_matches('.').to_lowercase())
+        .unwrap_or_default();
+    let first = domain.split('.').next().unwrap_or_default();
+    let provider = match domain.as_str() {
+        "gmail.com" | "googlemail.com" => Some("Gmail"),
+        "outlook.com" | "hotmail.com" | "live.com" | "msn.com" => Some("Outlook.com"),
+        "icloud.com" | "me.com" | "mac.com" => Some("iCloud"),
+        "aol.com" => Some("AOL"),
+        "proton.me" | "protonmail.com" | "pm.me" => Some("Proton Mail"),
+        "fastmail.com" | "fastmail.fm" => Some("Fastmail"),
+        "zoho.com" | "zohomail.com" => Some("Zoho Mail"),
+        "mail.ru" => Some("Mail.ru"),
+        _ => match first {
+            // the same provider under a country's domain: yahoo.co.uk, outlook.de, gmx.net, yandex.ru
+            "yahoo" | "ymail" => Some("Yahoo"),
+            "outlook" | "hotmail" | "live" => Some("Outlook.com"),
+            "gmx" => Some("GMX"),
+            "yandex" => Some("Yandex"),
+            "web" if domain == "web.de" => Some("WEB.DE"),
+            _ => None,
+        },
+    };
+    provider.map(str::to_string).unwrap_or(domain)
+}
+
+/// What the folder tree calls the account shown as `name` among accounts shown as `names`: its name, with its address
+/// added when another one has the same name, the address alone without a name
 pub fn account_title(name: &str, email: &str, names: &[&str]) -> String {
     let name = name.trim();
     if name.is_empty() {
@@ -314,6 +382,66 @@ mod tests {
         assert_eq!(account_title("Ann", "ann@hotmail.com", &names), "Ann (ann@hotmail.com)");
         assert_eq!(account_title("Work", "ann@work.example", &names), "Work");
         assert_eq!(account_title(" ", "ann@example.com", &names), "ann@example.com");
+    }
+
+    #[test]
+    fn an_account_name_of_its_own_comes_first() {
+        let account = |account_name: &str, name: &str, email: &str| pe_store::Account {
+            id: 1,
+            settings: pe_store::AccountSettings {
+                name: name.into(),
+                email: email.into(),
+                ..Default::default()
+            },
+            account_name: account_name.into(),
+        };
+        let accounts = [
+            account("Gmail", "Andris Reinman", "andris@gmail.com"),
+            account("", "Andris Reinman", "andris@postalsys.com"),
+            account("", "", "support@postalsys.com"),
+        ];
+        assert_eq!(
+            account_titles(&accounts),
+            ["Gmail", "Andris Reinman", "support@postalsys.com"]
+        );
+        // two of the same name, whatever made it, are told apart by their addresses
+        let same = [
+            account("Work", "Ann", "ann@work.example"),
+            account("", "Work", "ann@other.example"),
+        ];
+        assert_eq!(
+            account_titles(&same),
+            ["Work (ann@work.example)", "Work (ann@other.example)"]
+        );
+    }
+
+    #[test]
+    fn a_reason_becomes_a_sentence() {
+        assert_eq!(
+            sentence("the Inbox and the special folders can not be renamed or deleted"),
+            "The Inbox and the special folders can not be renamed or deleted."
+        );
+        assert_eq!(
+            sentence("\"x\" is not an e-mail address"),
+            "\"x\" is not an e-mail address."
+        );
+        assert_eq!(sentence("Already one."), "Already one.");
+        assert_eq!(sentence("ärger?"), "Ärger?");
+        assert_eq!(sentence("  "), "");
+    }
+
+    #[test]
+    fn a_new_account_is_named_by_its_provider_or_domain() {
+        assert_eq!(default_account_name("ann@gmail.com"), "Gmail");
+        assert_eq!(default_account_name("ann@Hotmail.com"), "Outlook.com");
+        assert_eq!(default_account_name("ann@outlook.de"), "Outlook.com");
+        assert_eq!(default_account_name("ann@yahoo.co.uk"), "Yahoo");
+        assert_eq!(default_account_name("ann@me.com"), "iCloud");
+        assert_eq!(default_account_name("ann@gmx.net"), "GMX");
+        assert_eq!(default_account_name("ann@web.de"), "WEB.DE");
+        assert_eq!(default_account_name("andris@postalsys.com"), "postalsys.com");
+        assert_eq!(default_account_name("ann@Gmail.com."), "Gmail");
+        assert_eq!(default_account_name("weird"), "");
     }
 
     #[test]

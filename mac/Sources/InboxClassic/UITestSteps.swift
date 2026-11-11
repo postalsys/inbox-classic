@@ -12,10 +12,10 @@ extension UITest {
 
     /// the outgoing server's port, changed in Accounts > Properties (to one nothing listens on, and back)
     func setSmtpPort(_ port: String) async throws {
-        try await setPort(field: 8, port)
+        try await setPort(field: 9, port)
     }
 
-    /// a port of the account's servers (the field of the Properties form: 5 IMAP, 8 SMTP), changed there
+    /// a port of the account's servers (the field of the Properties form: 6 IMAP, 9 SMTP), changed there
     func setPort(field index: Int, _ port: String) async throws {
         command(.accounts)
         guard let accounts = await waitWindow("accounts", 10) else { throw Failed(description: "no Accounts window") }
@@ -52,7 +52,7 @@ extension UITest {
         _ = await waitUntil(20) { list.numberOfRows >= 9 }
         // a server that takes the connection and says nothing: the download waits
         guard let silent = SilentServer() else { throw Failed(description: "no silent server") }
-        try await setPort(field: 5, "\(silent.port)")
+        try await setPort(field: 6, "\(silent.port)")
         search("subject:\"Waiting on the server\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
@@ -68,7 +68,7 @@ extension UITest {
         check(await waitUntil(5) { await readerText().contains("could not be downloaded") }, "and the pane says why")
         await shot(main.window, "read-12-not-downloaded")
         // the server back: the account syncs, and the message is tried again by itself
-        try await setPort(field: 5, port("imap"))
+        try await setPort(field: 6, port("imap"))
         check(await waitUntil(30) { await readerText().contains("Here at last") }, "once the account is back the message shows by itself")
         check(retry?.isHidden == true, "and Try Again goes")
         search("")
@@ -1592,8 +1592,10 @@ extension UITest {
         await shot(hint, "account-5-app-password")
         answer(hint, "No")
         let servers = await waitFor(20) { window("form").flatMap { $0.title == "Add Mail Account" ? $0 : nil } }
-        let imap = servers.flatMap { (find("form.field.4", in: $0) as NSTextField?)?.stringValue }
-        let smtp = servers.flatMap { (find("form.field.7", in: $0) as NSTextField?)?.stringValue }
+        let imap = servers.flatMap { (find("form.field.5", in: $0) as NSTextField?)?.stringValue }
+        let smtp = servers.flatMap { (find("form.field.8", in: $0) as NSTextField?)?.stringValue }
+        let gmailName = servers.flatMap { (find("form.field.0", in: $0) as NSTextField?)?.stringValue }
+        check(gmailName == "Gmail", "a Gmail address's Account name starts as Gmail (\(gmailName ?? ""))")
         check(imap == "imap.gmail.com" && smtp == "smtp.gmail.com", "its servers were found")
         await shot(servers, "account-6-gmail")
         press(servers.flatMap { find("form.cancel", in: $0) })
@@ -1611,14 +1613,16 @@ extension UITest {
             throw Failed(description: "no server settings form")
         }
         let field = { (index: Int) -> NSTextField? in self.find("form.field.\(index)", in: second) }
-        type("testuser2", into: field(2))
-        type("not-the-password", into: field(3))
-        type("127.0.0.1", into: field(4))
-        type(secondPort("imap"), into: field(5))
-        (find("form.field.6", in: second) as NSPopUpButton?)?.selectItem(at: 2)
-        type("127.0.0.1", into: field(7))
-        type(secondPort("smtp"), into: field(8))
-        (find("form.field.9", in: second) as NSPopUpButton?)?.selectItem(at: 1)
+        // the folder list names it Work too
+        type("Work", into: field(0))
+        type("testuser2", into: field(3))
+        type("not-the-password", into: field(4))
+        type("127.0.0.1", into: field(5))
+        type(secondPort("imap"), into: field(6))
+        (find("form.field.7", in: second) as NSPopUpButton?)?.selectItem(at: 2)
+        type("127.0.0.1", into: field(8))
+        type(secondPort("smtp"), into: field(9))
+        (find("form.field.10", in: second) as NSPopUpButton?)?.selectItem(at: 1)
         press(find("form.ok", in: second))
         if let warning = await waitWindow("alert", 10) {
             answer(warning, "Yes")
@@ -1714,6 +1718,137 @@ extension UITest {
             return first == 0 && other == 0
         },
               "Mark All Read marks both Inboxes read on the servers")
+    }
+
+    // ---- All Inboxes by account ----
+
+    /// the cell of the folder tree's row `row`
+    func folderCell(_ row: Int) -> FolderCell? {
+        tree.view(atColumn: 0, row: row, makeIfNecessary: true) as? FolderCell
+    }
+
+    /// each account's Inbox under All Inboxes, named as the account is; an account's name set in its Properties; the
+    /// account's right-click menu
+    func allInboxesByAccount() async throws {
+        step("All Inboxes by account")
+        // unread mail in both Inboxes and in a folder of the first account besides its Inbox
+        try await addMessage("From: Sam Lee <sam@example.org>\r\nTo: testuser@inboxclassic.test\r\n"
+            + "Subject: Lunch on Thursday\r\nDate: \(rfc2822(Date()))\r\n"
+            + "Message-ID: <lunch-thursday@example.org>\r\n\r\nAre we still on for lunch on Thursday?\r\n")
+        try await addMessage("From: Sam Lee <sam@example.org>\r\nTo: testuser@inboxclassic.test\r\n"
+            + "Subject: Old receipts\r\nDate: \(rfc2822(Date(timeIntervalSinceNow: -3600)))\r\n"
+            + "Message-ID: <old-receipts@example.org>\r\n\r\nThe receipts from last year.\r\n", to: "Archive")
+        try await addMessage("From: Priya Shah <priya@work.example>\r\nTo: testuser2@inboxclassic.test\r\n"
+            + "Subject: Budget review\r\nDate: \(rfc2822(Date()))\r\n"
+            + "Message-ID: <budget-review@work.example>\r\n\r\nThe budget review moved to Monday.\r\n", at: secondRest)
+        command(.sync)
+        let archive = folder(ofAccount: 0, named: "Archive")
+        _ = await waitUntil(30) {
+            (inbox(ofAccount: 0)?.unread ?? 0) >= 1 && (inbox(ofAccount: 1)?.unread ?? 0) >= 1
+                && main.mailbox.core.folderCounts(archive).unread >= 1
+        }
+        guard let first = inbox(ofAccount: 0), let second = inbox(ofAccount: 1),
+              let all = tree.item(atRow: 0) as? Mailbox.AllInboxesNode else {
+            check(false, "both accounts have an Inbox, and All Inboxes is at the top")
+            return
+        }
+        let accounts = main.mailbox.core.accounts()
+        if !tree.isItemExpanded(all) {
+            tree.expandItem(all)
+        }
+        let rows = [1, 2].map { tree.item(atRow: $0) as? Mailbox.InboxAliasNode }
+        check(rows.map { $0?.folder } == [first.id, second.id] && rows.map { $0?.name } == accounts.map(\.title)
+              && tree.level(forRow: 1) == 1 && tree.level(forRow: 2) == 1,
+              "All Inboxes has a row for each account under it, in the accounts' order, named as the account is (\(rows.map { $0?.name ?? "" }))")
+        check(await waitUntil(10) {
+            self.folderCell(1)?.unreadShown == first.unread && self.folderCell(2)?.unreadShown == second.unread
+                && self.folderCell(1)?.isBold == true && self.folderCell(0)?.unreadShown == 0
+        }, "each row shows its Inbox's unread count, All Inboxes open shows none of its own (\(folderCell(1)?.unreadShown ?? 0), \(folderCell(2)?.unreadShown ?? 0))")
+        let spoken = folderCell(2)?.accessibilityLabel() ?? ""
+        check(spoken.hasPrefix("Inbox, Work"), "a screen reader hears the folder and the account (\(spoken))")
+        tree.collapseItem(all)
+        check(await waitUntil(5) { self.folderCell(0)?.unreadShown == main.mailbox.core.inboxUnread },
+              "closed, All Inboxes shows the unread messages of every Inbox (\(folderCell(0)?.unreadShown ?? 0))")
+        tree.expandItem(all)
+
+        tree.selectRowIndexes(IndexSet(integer: 2), byExtendingSelection: false)
+        check(await waitUntil(10) { main.mailbox.folder == second.id && main.mailbox.total == second.total },
+              "the second account's row lists its Inbox (\(main.mailbox.total) of \(second.total))")
+        let folders = Set((0..<list.numberOfRows).compactMap { main.mailbox.row($0)?.folder })
+        check(folders == [second.id], "the first account's mail is not in it")
+        check(main.mailbox.selectedName == "Inbox - Work" && main.window.title == "Inbox - Work",
+              "the title names the Inbox and the account (\(main.window.title))")
+        await selectRow(0)
+        await shot(main.window, "all-inboxes-3-accounts")
+
+        // a message of the first account's Inbox shown from outside the tree (a notification) keeps the selection
+        // under All Inboxes
+        tree.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        let both = first.total + second.total
+        check(await waitUntil(10) { main.mailbox.total == both }, "All Inboxes again lists both accounts' Inboxes (\(main.mailbox.total) of \(both))")
+        let firstMessage = (0..<list.numberOfRows).compactMap { main.mailbox.row($0) }.first { $0.folder == first.id }
+        tree.selectRowIndexes(IndexSet(integer: 2), byExtendingSelection: false)
+        _ = await waitUntil(10) { main.mailbox.folder == second.id }
+        if let firstMessage {
+            main.showMessage(folder: first.id, uid: firstMessage.uid)
+            check(await waitUntil(10) { main.mailbox.folder == first.id && tree.selectedRow == 1 },
+                  "a message of the first Inbox opened from outside the tree selects its row under All Inboxes (row \(tree.selectedRow))")
+        }
+        tree.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+
+        step("the account name")
+        command(.accounts)
+        guard let window = await waitWindow("accounts", 10) else { throw Failed(description: "no Accounts window") }
+        let table: NSTableView? = find("accounts.list", in: window)
+        table?.selectRowIndexes(IndexSet(integer: 1), byExtendingSelection: false)
+        press(find("accounts.properties", in: window))
+        guard let form = await waitFor(10, { self.window("form").flatMap { $0.title == "Properties" ? $0 : nil } }) else {
+            throw Failed(description: "no Properties form")
+        }
+        let name: NSTextField? = find("form.field.0", in: form)
+        check(name?.stringValue == "Work", "the second account's Properties has its Account name first (\(name?.stringValue ?? ""))")
+        type("Second", into: name)
+        press(find("form.ok", in: form))
+        if let ask = await waitWindow("alert", 3) {
+            answer(ask, "Yes")
+        }
+        _ = await waitUntil(10) { !form.isVisible }
+        press(find("accounts.close", in: window))
+        _ = await waitUntil(10) { !window.isVisible }
+        let secondHeading = { (0..<self.tree.numberOfRows).compactMap { self.tree.item(atRow: $0) as? Mailbox.AccountNode }
+            .first { $0.account.id == accounts[1].id } }
+        check(await waitUntil(10) {
+            secondHeading()?.account.title == "Second" && (self.tree.item(atRow: 2) as? Mailbox.InboxAliasNode)?.name == "Second"
+        }, "set to Second, the account's heading and its row under All Inboxes say Second (\(secondHeading()?.account.title ?? ""))")
+
+        step("the account's menu")
+        let menu = main.mailbox.accountMenu(accounts[0].id)
+        let titles = menu.items.filter { !$0.isSeparatorItem }.map(\.title)
+        check(titles == ["Send and Receive", "Mark All Read", "New Folder…", "Properties…"]
+              && menu.items.filter(\.isSeparatorItem).count == 2,
+              "the first account's right-click menu has Send and Receive, Mark All Read, New Folder and Properties (\(titles))")
+        check(menu.items.first { $0.title == "Mark All Read" }?.isEnabled == true, "Mark All Read is on, with unread mail in the account")
+        let markRead = menu.indexOfItem(withTitle: "Mark All Read")
+        if markRead >= 0 {
+            onMain { menu.performActionForItem(at: markRead) }
+        }
+        check(await waitUntil(30) {
+            let inbox = await unreadOnServer()
+            let archived = await messages("Archive").filter { !(($0["flags"] as? [String]) ?? []).contains("\\Seen") }.count
+            return inbox == 0 && archived == 0
+        }, "its Mark All Read marks every folder of the first account read on the server")
+        check(await unreadOnServer(at: secondRest) >= 1, "the second account's mail stays unread")
+        check(await waitUntil(10) { !main.mailbox.accountMenu(accounts[0].id).items.contains { $0.title == "Mark All Read" && $0.isEnabled } },
+              "with nothing unread, the account's Mark All Read is off")
+        await shot(main.window, "account-menu")
+        let properties = main.mailbox.accountMenu(accounts[0].id)
+        onMain { properties.performActionForItem(at: properties.indexOfItem(withTitle: "Properties…")) }
+        let own = await waitFor(10) { self.window("form").flatMap { $0.title == "Properties" ? $0 : nil } }
+        let ownName = own.flatMap { (find("form.field.0", in: $0) as NSTextField?)?.stringValue }
+        check(own != nil && ownName == accounts[0].accountName,
+              "its Properties opens that account's Properties (\(ownName ?? ""))")
+        press(own.flatMap { find("form.cancel", in: $0) })
+        _ = await waitUntil(10) { own?.isVisible != true }
     }
 
     // ---- moving between accounts ----

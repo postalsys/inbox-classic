@@ -374,13 +374,16 @@ enum Waiting {
                                     action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
         cancelButton.keyEquivalent = "\u{1b}"
         let row = NSStackView(views: [spinner, label])
-        row.alignment = .top
+        // the spinner beside the middle of the text, not at its top
+        row.alignment = .centerY
         let stack = NSStackView(views: [row, cancelButton])
         stack.orientation = .vertical
         stack.alignment = .trailing
         stack.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 16, right: 20)
         label.widthAnchor.constraint(equalToConstant: 300).isActive = true
         window.contentView = stack
+        // as tall as what it says, no empty space under Cancel
+        window.setContentSize(stack.fittingSize)
         window.center()
         // the event may have come before the window is shown
         if !done {

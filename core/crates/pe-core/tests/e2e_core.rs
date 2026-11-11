@@ -741,6 +741,34 @@ fn all_inboxes_list_and_mark_every_account() {
     };
     assert_eq!(subjects(), ["First's"], "the Archive is not an Inbox");
 
+    // the rows under All Inboxes: each account's Inbox, in the accounts' order, named as the tree names the account
+    let inbox1 = s
+        .core
+        .folders(first)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let rows = s.core.special_folders(pe_core::SpecialFolderKind::Inbox).unwrap();
+    assert_eq!(
+        rows.iter().map(|r| (r.account, r.folder, r.unread)).collect::<Vec<_>>(),
+        [(first, inbox1, 1), (second, inbox2, 0)]
+    );
+    let email = settings(&s.server).email;
+    let accounts = s.core.accounts().unwrap();
+    assert_eq!(
+        accounts[0].account_name,
+        pe_core::default_account_name(&email),
+        "a new account is named by its provider or domain"
+    );
+    s.core.set_account_name(first, "Work").unwrap();
+    let rows = s.core.special_folders(pe_core::SpecialFolderKind::Inbox).unwrap();
+    assert_eq!(
+        (rows[0].name.as_str(), rows[0].title.as_str()),
+        ("Work", "Inbox - Work")
+    );
+
     // mail arriving in the second account's Inbox is listed, newest first, and opens the window
     let newest = other_server.add_message("INBOX", &dated("Second's", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
     s.core.sync(second).unwrap();
@@ -776,6 +804,36 @@ fn all_inboxes_list_and_mark_every_account() {
     }
     assert!(all_seen(&s.server) && all_seen(&other_server));
     assert_eq!(s.server.messages("Archive")[0]["flags"], json!([]), "only the Inboxes");
+
+    // the account's Mark All Read: every folder of that account, no other account's
+    other_server.add_message("INBOX", &dated("Second's again", "Wed, 8 Oct 2025 11:00:00 +0000"), &[]);
+    s.core.sync(second).unwrap();
+    // the message itself in the store, not just a change of that Inbox (the marking above makes some too)
+    for _ in 0..400 {
+        if s.core.count_search(&all).unwrap() == (3, 1) {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    s.core.mark_account_read(first).unwrap();
+    let archive_seen = || {
+        s.server.messages("Archive")[0]["flags"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("\\Seen"))
+    };
+    for _ in 0..200 {
+        if archive_seen() {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    assert!(archive_seen(), "the first account's Archive is read");
+    assert_eq!(
+        s.core.count_search(&all).unwrap(),
+        (3, 1),
+        "the second account's new message is still unread"
+    );
 }
 
 #[test]
@@ -1862,6 +1920,9 @@ fn messages_become_files() {
     s.core.sync(account).unwrap();
     s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     s.server.expunge("INBOX", &[gone]);
+    // the worker's session hears of the expunge first: until then a server may still answer for the message
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let files = s
         .core
         .export_messages(

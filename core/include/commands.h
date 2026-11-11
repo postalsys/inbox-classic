@@ -79,8 +79,16 @@ inline bool CommandNeedsOne(unsigned id) {
 // whether a command acts on one or several messages: off with none selected
 inline bool CommandNeedsSome(unsigned id) {
     switch (id) {
+    case IDM_MARK_READ:
+    case IDM_MARK_UNREAD:
     case IDM_FORWARD:
+    case IDM_DELETE:
+    case IDM_MOVE:
+    case IDM_COPY:
+    case IDM_FLAG:
     case IDM_SAVE_AS:
+    case IDM_JUNK:
+    case IDM_NOT_JUNK:
     case IDM_WATCH_CONVERSATION:
     case IDM_IGNORE_CONVERSATION:
         return true;

@@ -17,16 +17,17 @@ use crate::app::{shell, spawn};
 use crate::ui::{self, Field, Form, TITLE};
 
 /// The fields of the server form, in order
-const NAME: usize = 0;
-const EMAIL: usize = 1;
-const USERNAME: usize = 2;
-const PASSWORD: usize = 3;
-const IMAP_HOST: usize = 4;
-const IMAP_PORT: usize = 5;
-const IMAP_SECURITY: usize = 6;
-const SMTP_HOST: usize = 7;
-const SMTP_PORT: usize = 8;
-const SMTP_SECURITY: usize = 9;
+const ACCOUNT_NAME: usize = 0;
+const NAME: usize = 1;
+const EMAIL: usize = 2;
+const USERNAME: usize = 3;
+const PASSWORD: usize = 4;
+const IMAP_HOST: usize = 5;
+const IMAP_PORT: usize = 6;
+const IMAP_SECURITY: usize = 7;
+const SMTP_HOST: usize = 8;
+const SMTP_PORT: usize = 9;
+const SMTP_SECURITY: usize = 10;
 
 fn security_of(index: Option<usize>) -> Security {
     match index {
@@ -64,10 +65,11 @@ fn validate(fields: &[Field]) -> Result<(), String> {
     Ok(())
 }
 
-/// The fields of the server form, filled with `settings`
-fn server_fields(settings: &AccountSettings) -> Vec<Field> {
+/// The fields of the server form, filled with `settings` and the account's own name for the folder list
+fn server_fields(settings: &AccountSettings, account_name: &str) -> Vec<Field> {
     let security = || vec!["SSL/TLS".to_string(), "STARTTLS".into(), t!(UiSecurityNone)];
     vec![
+        Field::text(&t!(UiFieldAccountName), account_name),
         Field::text(&t!(UiFieldName), &settings.name),
         Field::text(&t!(UiFieldEmail), &settings.email),
         Field::text(&t!(UiFieldUser), &settings.username),
@@ -187,6 +189,7 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
     let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
     content.set_margin_start(18);
     content.set_margin_end(18);
+    content.set_margin_top(12);
     content.set_margin_bottom(18);
     let intro = ui::wrapped_label(&offer.intro);
     intro.set_widget_name("start-intro");
@@ -547,12 +550,14 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
             .map_or(Security::Tls, |f| server_security(f.smtp.security)),
         auth: Auth::Password,
     };
-    // the name and address were typed already: the password is next
+    // the name and address were typed already: the password is next; the account named by its provider or domain to
+    // begin with
+    let account_name = pe_core::default_account_name(&start.email);
     let form = Form::new(
         &parent,
         &t!(UiAddAccountTitle),
         &found_intro(found.as_ref()),
-        server_fields(&start),
+        server_fields(&start, &account_name),
         &t!(UiFinish),
         PASSWORD,
     );
@@ -565,6 +570,7 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
         }
         match shell().core.add_account(&settings, &form.value(PASSWORD)) {
             Ok(account) => {
+                let _ = shell().core.set_account_name(account, &form.value(ACCOUNT_NAME));
                 form.close();
                 return account;
             }
@@ -603,33 +609,37 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     let Ok(stored) = core.account(account) else {
         return false;
     };
+    let account_name = stored.account_name;
     let stored = stored.settings;
     if let Some(with) = signs_in_with {
-        // a browser sign-in account: the name only, the rest is the provider's
+        // a browser sign-in account: the names only, the rest is the provider's
         let intro = t!(UiSignsInWith, app = &with);
         let form = Form::new(
             parent,
             &crate::words::plain(crate::words::Text::UiProperties),
             &intro,
-            vec![Field::text(&t!(UiFieldName), &stored.name)],
+            vec![
+                Field::text(&t!(UiFieldAccountName), &account_name),
+                Field::text(&t!(UiFieldName), &stored.name),
+            ],
             &t!(UiOk),
             0,
         );
         form.widget().set_widget_name("account-properties");
         let ok = form.run().await;
-        let name = form.value(0);
+        let (named, name) = (form.value(0), form.value(1));
         form.close();
         if !ok {
             return false;
         }
         let settings = AccountSettings { name, ..stored };
-        return core.update_account(account, &settings).is_ok();
+        return core.update_account(account, &settings).is_ok() && core.set_account_name(account, &named).is_ok();
     }
     let form = Form::new(
         parent,
         &crate::words::plain(crate::words::Text::UiProperties),
         &t!(UiKeepPassword),
-        server_fields(&stored),
+        server_fields(&stored, &account_name),
         &t!(UiOk),
         0,
     );
@@ -673,6 +683,7 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
             .await;
             continue;
         }
+        let _ = core.set_account_name(account, &form.value(ACCOUNT_NAME));
         let password = form.value(PASSWORD);
         if !password.is_empty() {
             core.set_password(account, &password);
@@ -684,11 +695,23 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     saved
 }
 
+/// An account's Properties from the folder tree's menu for it; true when it changed
+pub async fn account_properties(parent: &impl IsA<gtk::Widget>, account: i64) -> bool {
+    let core = &shell().core;
+    let Ok(stored) = core.account(account) else {
+        return false;
+    };
+    let with = SignInWith::of_auth_kind(&stored.settings.auth)
+        .is_some()
+        .then(|| core.sign_in_name(&stored.settings.auth))
+        .flatten();
+    properties(parent.as_ref(), account, with).await
+}
+
 /// A row of the accounts list: its name, then its address and incoming server (or the provider's sign-in)
 struct AccountRow {
     id: i64,
     name: String,
-    signs_in_with: Option<String>,
 }
 
 fn fill_accounts(list: &gtk::ListBox, rows: &RefCell<Vec<AccountRow>>, select: usize) {
@@ -697,7 +720,9 @@ fn fill_accounts(list: &gtk::ListBox, rows: &RefCell<Vec<AccountRow>>, select: u
     }
     let core = &shell().core;
     let mut kept = Vec::new();
-    for account in core.accounts().unwrap_or_default() {
+    let accounts = core.accounts().unwrap_or_default();
+    let titles = pe_core::account_titles(&accounts);
+    for (account, title) in accounts.iter().zip(titles) {
         let s = &account.settings;
         let oauth = SignInWith::of_auth_kind(&s.auth).is_some();
         let server = if oauth {
@@ -706,14 +731,13 @@ fn fill_accounts(list: &gtk::ListBox, rows: &RefCell<Vec<AccountRow>>, select: u
             s.imap_host.clone()
         };
         let row = adw::ActionRow::builder()
-            .title(glib::markup_escape_text(&s.name))
+            .title(glib::markup_escape_text(&title))
             .subtitle(glib::markup_escape_text(&format!("{}  \u{00B7}  {server}", s.email)))
             .build();
         list.append(&row);
         kept.push(AccountRow {
             id: account.id,
             name: s.name.clone(),
-            signs_in_with: if oauth { core.sign_in_name(&s.auth) } else { None },
         });
     }
     let last = kept.len().saturating_sub(1);
@@ -780,10 +804,7 @@ pub async fn accounts_dialog(parent: &impl IsA<gtk::Widget>) -> bool {
     let host = dialog.clone().upcast::<gtk::Widget>();
     while let Ok(click) = clicks.recv().await {
         let index = list.selected_row().map_or(0, |row| row.index().max(0) as usize);
-        let chosen = rows
-            .borrow()
-            .get(index)
-            .map(|r| (r.id, r.name.clone(), r.signs_in_with.clone()));
+        let chosen = rows.borrow().get(index).map(|r| (r.id, r.name.clone()));
         match (click, chosen) {
             ("close", _) => break,
             ("add", _) => {
@@ -792,16 +813,16 @@ pub async fn accounts_dialog(parent: &impl IsA<gtk::Widget>) -> bool {
                     fill_accounts(&list, &rows, usize::MAX);
                 }
             }
-            ("properties", Some((id, _, with))) => {
-                if properties(&host, id, with).await {
+            ("properties", Some((id, _))) => {
+                if account_properties(&host, id).await {
                     changed = true;
                     fill_accounts(&list, &rows, index);
                 }
             }
-            ("signature", Some((id, name, _))) => {
+            ("signature", Some((id, name))) => {
                 crate::compose::edit_signature(&host, id, &name).await;
             }
-            ("remove", Some((id, _, _))) => {
+            ("remove", Some((id, _))) => {
                 if ui::confirm(&host, &t!(UiRemoveAccount), &t!(UiRemoveAccountAsk), true).await {
                     let _ = shell().core.remove_account(id);
                     changed = true;
@@ -825,14 +846,17 @@ mod tests {
 
     #[test]
     fn the_server_form_is_checked() {
-        let mut fields = server_fields(&AccountSettings {
-            email: "ann@example.com".into(),
-            imap_host: "imap.example.com".into(),
-            imap_port: 993,
-            smtp_host: "smtp.example.com".into(),
-            smtp_port: 465,
-            ..Default::default()
-        });
+        let mut fields = server_fields(
+            &AccountSettings {
+                email: "ann@example.com".into(),
+                imap_host: "imap.example.com".into(),
+                imap_port: 993,
+                smtp_host: "smtp.example.com".into(),
+                smtp_port: 465,
+                ..Default::default()
+            },
+            "example.com",
+        );
         assert_eq!(validate(&fields), Ok(()));
         fields[IMAP_PORT].value = "70000".into();
         assert_eq!(validate(&fields), Err("Ports are numbers from 1 to 65535.".into()));

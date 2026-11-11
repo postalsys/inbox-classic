@@ -1170,7 +1170,7 @@ void BookMenu(Book* book, POINT screen) {
     UINT on = HasTarget(book) ? MF_ENABLED : MF_GRAYED;
     HMENU menu = CreatePopupMenu();
     AppendMenuW(menu, MF_STRING | on, IDC_BOOK_WRITE_TO, MenuItem(PE_TEXT_UI_MENU_WRITE_TO).c_str());
-    AppendMenuW(menu, MF_STRING | on, IDC_BOOK_PROPERTIES, MenuItem(PE_TEXT_UI_PROPERTIES).c_str());
+    AppendMenuW(menu, MF_STRING | on, IDC_BOOK_PROPERTIES, DialogMenuItem(PE_TEXT_UI_PROPERTIES).c_str());
     AppendMenuW(menu, MF_STRING | on, IDC_BOOK_DELETE, MenuItem(PE_TEXT_UI_MENU_DELETE).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDC_BOOK_NEW_CONTACT, MenuItem(PE_TEXT_UI_MENU_NEW_CONTACT).c_str());

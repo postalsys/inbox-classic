@@ -170,6 +170,11 @@ typedef enum PeThreadMark {
   PE_THREAD_MARK_IGNORE = 2,
 } PeThreadMark;
 
+// A special use whose folders the folder list gathers from every account
+typedef enum PeSpecialFolderKind {
+  PE_SPECIAL_FOLDER_KIND_INBOX,
+} PeSpecialFolderKind;
+
 // What a link clicked in the reading pane is to the app
 typedef enum PeReaderLink {
   // A link of the message: the browser opens it, as before
@@ -366,6 +371,9 @@ typedef struct PeSignInAppList PeSignInAppList;
 
 // The presets; free with `pe_sign_in_preset_list_free`
 typedef struct PeSignInPresetList PeSignInPresetList;
+
+// The list of `pe_special_folders`
+typedef struct PeSpecialFolderList PeSpecialFolderList;
 
 // The rows of the Move and Copy window; free with `pe_target_list_free`
 typedef struct PeTargetList PeTargetList;
@@ -569,8 +577,11 @@ typedef struct PeAccount {
   // "Name <address>", or the address alone when the name is empty or the same: how From and the account menus
   // show the account
   const char *label;
-  // What the folder tree calls it: its name, with its address too when another account has the same name
+  // What the folder tree calls it: its account name (`account_name`), or the name on its mail, with its address
+  // too when another account is called the same
   const char *title;
+  // The account's own name for the folder list ("Gmail"), empty for none: the Account name field of Properties
+  const char *account_name;
 } PeAccount;
 
 // Someone (or a group of the address book) to complete an address with
@@ -658,6 +669,17 @@ typedef struct PeMessage {
   // column's place
   bool bounce;
 } PeMessage;
+
+// An account's folder of a special use: a row under All Inboxes
+typedef struct PeSpecialFolder {
+  int64_t account;
+  int64_t folder;
+  // The account's title, as `PeAccount` `title` has it
+  const char *name;
+  // The folder told apart by its account, for the folder bar and the window's title: "Inbox - Gmail"
+  const char *title;
+  uint64_t unread;
+} PeSpecialFolder;
 
 // Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
 // day, short (`time` true), in the reader's locale and time zone, or as written when `floating` (the seconds are
@@ -1448,6 +1470,22 @@ char *pe_account_signature(const struct PeCore *core,
 // `core` must be a live handle, `html` NULL or a NUL-terminated string.
 bool pe_account_set_signature(const struct PeCore *core, int64_t account, const char *html);
 
+// Sets the account's own name for the folder list ("Gmail"): the Account name field of its Properties; empty for the
+// name on its mail
+//
+// # Safety
+// `core` must be a live handle, `name` NULL or a NUL-terminated string.
+bool pe_account_set_name(const struct PeCore *core,
+                         int64_t account,
+                         const char *name);
+
+// The account name a new account at `email` starts with ("Gmail", or the address's domain), for Add Mail Account to
+// show before it is added. Free with `pe_string_free`.
+//
+// # Safety
+// `email` must be NULL or a NUL-terminated string.
+char *pe_default_account_name(const char *email);
+
 // What a new message, reply or forward from an account starts with in the editor: an empty line, then the signature
 // in a block the editor can swap for another account's; an empty string without a signature. Free with
 // `pe_string_free`.
@@ -1700,6 +1738,35 @@ bool pe_folder_mark_all_read(const struct PeCore *core,
 // # Safety
 // `core` must be a live handle.
 bool pe_mark_all_inboxes_read(const struct PeCore *core);
+
+// Marks every message of every folder of an account read (the account's Mark All Read)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_account_mark_all_read(const struct PeCore *core, int64_t account);
+
+// Each account's folder of a special use (its Inbox), in the accounts' order, for the rows under All Inboxes; NULL on
+// failure. Free with `pe_special_folder_list_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeSpecialFolderList *pe_special_folders(const struct PeCore *core,
+                                               enum PeSpecialFolderKind kind);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+size_t pe_special_folder_list_count(const struct PeSpecialFolderList *list);
+
+// The row at `index`, NULL past the end; it lives as long as the list
+//
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+const struct PeSpecialFolder *pe_special_folder_list_get(const struct PeSpecialFolderList *list,
+                                                         size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_special_folder_list_free(struct PeSpecialFolderList *list);
 
 // Creates the folder `name` (UTF-8) in `parent`, or at the top of the account when `parent` is 0:
 // `FoldersChanged` follows once the server has it. False with the reason in `error` (NULL or a pointer to a

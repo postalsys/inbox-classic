@@ -38,8 +38,10 @@ private final class QuestionWindow: NSObject {
     private(set) var buttons: [NSButton] = []
     private var chosen = -1
 
-    /// `answers` from left to right; `safe` is the one Return and Escape give
-    init(title: String, heading: String, detail: String, id: String, accessory: NSView, answers: [(String, String)], safe: Int) {
+    /// `answers` from left to right; `safe` is the one Return and Escape give; the first `apart` stand at the far left,
+    /// as a third answer of an alert does
+    init(title: String, heading: String, detail: String, id: String, accessory: NSView, answers: [(String, String)], safe: Int,
+         apart: Int = 0) {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 560, height: 200), styleMask: [.titled], backing: .buffered,
                           defer: true)
         window.autorecalculatesKeyViewLoop = true
@@ -74,7 +76,10 @@ private final class QuestionWindow: NSObject {
             }
             buttons.append(button)
         }
-        let row = buttonRow(buttons)
+        let row = buttonRow(Array(buttons[apart...]))
+        for button in buttons[..<apart].reversed() {
+            row.insertArrangedSubview(button, at: 0)
+        }
         let content = NSStackView(views: [top, row])
         content.orientation = .vertical
         content.spacing = 18
@@ -267,11 +272,11 @@ private func sendQuestion(core: Core, request: UInt64) {
     }
     let question = QuestionWindow(title: Text.uiSendMessageAsk.text, heading: text(send.title), detail: text(send.detail),
                                   id: "agent.send", accessory: stack,
-                                  answers: [(Text.uiEditFirst.text, "agent.compose"), (Text.uiDontSend.text, "agent.dontSend"),
-                                            (Text.uiTbSend.text, "agent.sendButton")],
-                                  safe: 1)
+                                  answers: [(Text.uiEditFirst.text, "agent.compose"), (Text.uiTbSend.text, "agent.sendButton"),
+                                            (Text.uiDontSend.text, "agent.dontSend")],
+                                  safe: 2, apart: 1)
     // Send comes on after a moment, so a key pressed for another window does not send
-    let sendButton = question.buttons[2]
+    let sendButton = question.buttons[1]
     sendButton.isEnabled = false
     // in the common modes: the window runs modally, where a timer of the default mode never fires
     let timer = Timer(timeInterval: 1.5, repeats: false) { _ in
@@ -281,7 +286,7 @@ private func sendQuestion(core: Core, request: UInt64) {
     let account = send.account
     let answer: PeAgentSendAnswer
     switch question.run() {
-    case 2: answer = PE_AGENT_SEND_ANSWER_SEND
+    case 1: answer = PE_AGENT_SEND_ANSWER_SEND
     case 0: answer = PE_AGENT_SEND_ANSWER_COMPOSE
     default: answer = PE_AGENT_SEND_ANSWER_DONT_SEND
     }

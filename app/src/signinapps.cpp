@@ -182,7 +182,7 @@ void OnEditorCommand(HWND dialog, EditorState& state, int id, int code) {
         if (!said.empty()) {
             std::wstring text = usable ? core::T(PE_TEXT_UI_ISSUER_USABLE) + L"\n\n" + said
                                        : core::T(PE_TEXT_UI_ISSUER_UNUSABLE, {{"reason", said}});
-            MessageBoxW(dialog, text.c_str(), core::Plain(PE_TEXT_UI_CHECK).c_str(), MB_OK | (usable ? MB_ICONINFORMATION : MB_ICONWARNING));
+            MessageBoxW(dialog, text.c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | (usable ? MB_ICONINFORMATION : MB_ICONWARNING));
         }
         return;
     }

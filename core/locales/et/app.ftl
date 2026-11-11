@@ -191,6 +191,7 @@ ui-signature = Allkiri
 ui-signature-hint = Lisatakse sellelt kontolt saadetavatele uutele kirjadele, vastustele ja edastatud kirjadele.
 ui-signature-not-saved = Allkirja ei saanud salvestada.
 ui-all-inboxes = Kõik sisendkaustad
+# review: changed
 ui-all-folders = Kõik kaustad
 ui-the-account = konto
 ui-folder-name = Kausta nimi:
@@ -243,7 +244,8 @@ ui-add-account-title = Lisa meilikonto
 ui-accounts-title = Kontod
 ui-security-none = Puudub (krüptimata)
 ui-field-required = { $field } on kohustuslik.
-ui-email-invalid = Meiliaadress pole kehtiv.
+# review: changed
+ui-email-invalid = E-posti aadress pole kehtiv.
 ui-ports-invalid = Pordid on arvud 1 kuni 65535.
 ui-looking-up = Otsitakse domeeni { $domain } sätteid...
 ui-found-none = Sisestage oma meiliteenuse pakkujalt saadud kontoandmed.
@@ -262,7 +264,10 @@ ui-turned-off = { $name } on selles arvutis välja lülitatud.
 ui-off-here = Selles arvutis välja lülitatud.
 ui-why = Miks?
 ui-more-sign-in = Muud sisselogimisviisid...
-ui-other-account = Muu meilikonto lisamiseks sisestage oma meiliaadress ja nimi, mida näevad kirjade saajad. Järgmises sammus otsitakse serveri sätteid.
+# review: changed
+ui-other-account = Muu meilikonto lisamiseks sisestage oma e-posti aadress ja nimi, mida näevad kirjade saajad. Järgmises sammus otsitakse serveri sätteid.
+# review: new
+ui-field-account-name = Konto nimi:
 ui-field-name = Kuvatav nimi:
 ui-field-email = E-posti aadress:
 ui-field-user = Kasutajanimi:
@@ -346,6 +351,10 @@ ui-new-folder-title = Uus kaust
 ui-rename-folder-title = Muuda kausta nime
 ui-delete-folder-question = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
 ui-properties = &Atribuudid
+# review: new
+ui-account-sync = Saada ja võta &vastu
+# review: new
+ui-account-properties = Atri&buudid...
 ui-menu-open = &Ava
 ui-menu-flag = L&ipp
 ui-menu-view-source = Vaata &lähtekoodi

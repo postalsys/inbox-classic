@@ -196,7 +196,8 @@ impl Form {
         let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
         content.set_margin_start(18);
         content.set_margin_end(18);
-        content.set_margin_top(6);
+        // apart from the header bar, as the sides are from the edges
+        content.set_margin_top(12);
         content.set_margin_bottom(18);
         if !intro.is_empty() {
             let label = wrapped_label(intro);
@@ -246,7 +247,7 @@ impl Form {
                 None => None,
             };
             match error {
-                Some(error) => alert(&self.dialog, TITLE, &error).await,
+                Some(error) => alert(&self.dialog, TITLE, &pe_core::sentence(&error)).await,
                 None => return true,
             }
         }
@@ -443,6 +444,8 @@ pub fn text_dialog_sized(
 ) -> adw::Dialog {
     let view = gtk::TextView::new();
     view.set_editable(false);
+    // read only: no caret blinking in it, the mouse still selects and copies
+    view.set_cursor_visible(false);
     view.set_monospace(true);
     view.set_wrap_mode(if wrap {
         gtk::WrapMode::WordChar
@@ -504,36 +507,20 @@ pub async fn wait_for_request(
     // the request's event sends true (the main window hands it on), Cancel and closing false
     let (send, answers) = async_channel::bounded::<bool>(2);
     shell().watch_request(request, send.clone());
-    let label = wrapped_label(text);
-    label.set_widget_name("wait-text");
+    // GNOME's alert: the title and what is going on centered, the spinner under them, Cancel the answer
     let spinner = adw::Spinner::new();
     spinner.set_size_request(32, 32);
-    let cancel_button = gtk::Button::with_label(&t!(UiCancel));
-    cancel_button.set_widget_name("wait-cancel");
-    cancel_button.set_halign(gtk::Align::End);
-    let row = gtk::Box::new(gtk::Orientation::Horizontal, 12);
-    row.append(&spinner);
-    row.append(&label);
-    let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
-    content.set_margin_start(18);
-    content.set_margin_end(18);
-    content.set_margin_bottom(18);
-    content.append(&row);
-    content.append(&cancel_button);
-    let view = adw::ToolbarView::new();
-    view.add_top_bar(&adw::HeaderBar::new());
-    view.set_content(Some(&content));
-    let dialog = adw::Dialog::builder()
-        .title(title)
-        .content_width(380)
-        .child(&view)
-        .build();
+    spinner.set_halign(gtk::Align::Center);
+    let dialog = adw::AlertDialog::new(Some(title), Some(text));
+    dialog.set_extra_child(Some(&spinner));
+    dialog.add_response("cancel", &t!(UiCancel));
+    dialog.set_close_response("cancel");
     dialog.set_widget_name("wait-dialog");
     let on_close = send.clone();
     dialog.connect_closed(move |_| {
         let _ = on_close.try_send(false);
     });
-    cancel_button.connect_clicked(move |_| {
+    dialog.connect_response(None, move |_, _| {
         let _ = send.try_send(false);
     });
     dialog.present(Some(parent.as_ref()));
@@ -542,7 +529,8 @@ pub async fn wait_for_request(
     if !finished {
         cancel(request);
     }
-    dialog.close();
+    // gone without an answer of its own when the work is done
+    dialog.force_close();
     finished
 }
 

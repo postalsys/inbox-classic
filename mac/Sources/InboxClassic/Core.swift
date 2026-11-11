@@ -181,6 +181,15 @@ final class Core {
 
     var inboxUnread: UInt64 { pe_inbox_unread(handle) }
 
+    /// each account's Inbox, in the accounts' order, named as the account is: the rows under All Inboxes
+    func inboxes() -> [SpecialFolder] {
+        guard let list = pe_special_folders(handle, PE_SPECIAL_FOLDER_KIND_INBOX) else { return [] }
+        defer { pe_special_folder_list_free(list) }
+        return (0..<pe_special_folder_list_count(list)).compactMap {
+            pe_special_folder_list_get(list, $0).map { SpecialFolder($0.pointee) }
+        }
+    }
+
     // ---- the message list ----
 
     /// the counts of a folder from its indexes
@@ -432,6 +441,8 @@ struct Account {
     let label: String
     /// what the folder tree shows for it
     let title: String
+    /// its own name for the folder list ("Gmail"), empty for none: the Account name of its Properties
+    let accountName: String
 
     init(_ account: PeAccount) {
         id = account.id
@@ -443,6 +454,25 @@ struct Account {
         imapHost = text(account.imap_host)
         label = text(account.label)
         title = text(account.title)
+        accountName = text(account.account_name)
+    }
+}
+
+/// An account's folder of a special use (its Inbox), with the account's title and the folder's unread messages
+struct SpecialFolder {
+    let account: Int64
+    let folder: Int64
+    let name: String
+    /// "Inbox - Gmail", for the folder bar and the title
+    let title: String
+    let unread: UInt64
+
+    init(_ row: PeSpecialFolder) {
+        account = row.account
+        folder = row.folder
+        name = text(row.name)
+        title = text(row.title)
+        unread = row.unread
     }
 }
 

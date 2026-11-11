@@ -46,6 +46,25 @@ use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, S
 pub use pe_store::{MessageRef, Scope, Search, Show, ThreadMark};
 pub use selection::{Action, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
+
+/// A special use whose folders the folder list gathers from every account (`Core::special_folders`); All Sent and All
+/// Drafts would add theirs
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SpecialFolderKind {
+    Inbox,
+}
+
+/// An account's folder of a special use: a row under All Inboxes
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SpecialFolder {
+    pub account: AccountId,
+    pub folder: FolderId,
+    /// The account's title, as the folder tree's heading for it has it
+    pub name: String,
+    /// The folder told apart by its account, for the folder bar and the window's title: "Inbox - Gmail"
+    pub title: String,
+    pub unread: u64,
+}
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
@@ -62,8 +81,9 @@ pub use sign_in_apps::{
     SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_text, register_hint,
 };
 pub use text::{
-    HiddenUnread, ReaderState, account_label, account_title, downloading_text, folder_kind, folder_name, format_size,
-    hidden_unread, list_counts, messages, reader_page, retry_note, saved_text,
+    HiddenUnread, ReaderState, account_label, account_shown_name, account_title, account_titles, default_account_name,
+    downloading_text, folder_kind, folder_name, format_size, hidden_unread, list_counts, messages, reader_page,
+    retry_note, saved_text, sentence,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -455,6 +475,9 @@ impl Core {
     /// Adds an account, its password kept as the [`Options`] say
     pub fn add_account(&self, settings: &AccountSettings, password: &str) -> Result<AccountId> {
         let id = self.store().add_account(settings)?;
+        // named by its provider or domain to begin with ("Gmail"), the folder list's name for it
+        self.store()
+            .set_account_name(id, &default_account_name(&settings.email))?;
         // an account removed before may have had this id: its password goes, whatever happens to this one
         self.secrets.remove(id);
         self.keep_password(id, password);
@@ -501,6 +524,44 @@ impl Core {
     /// ([`pe_html::signature_block`]); empty without one
     pub fn signature_block(&self, account: AccountId) -> Result<String> {
         Ok(pe_html::signature_block(&self.signature(account)?))
+    }
+
+    /// Sets the account's own name for the folder list ("Gmail"); empty for the name on its mail
+    pub fn set_account_name(&self, account: AccountId, name: &str) -> Result<()> {
+        Ok(self.store().set_account_name(account, name)?)
+    }
+
+    /// Each account's folder of a special use (its Inbox), in the accounts' order, with the account's title and the
+    /// folder's unread count: the rows under All Inboxes. An account without that folder yet has no row
+    pub fn special_folders(&self, special: SpecialFolderKind) -> Result<Vec<SpecialFolder>> {
+        let store = self.store();
+        let accounts = store.accounts()?;
+        let titles = account_titles(&accounts);
+        let folders = match special {
+            // the store's own rule, the one All Inboxes' list uses
+            SpecialFolderKind::Inbox => store.inboxes()?,
+        };
+        let mut found = Vec::new();
+        for folder in folders {
+            let folder = store.folder(folder)?;
+            let Some(at) = accounts.iter().position(|a| a.id == folder.account_id) else {
+                continue;
+            };
+            // one row an account, should a server have two that match
+            if found.iter().any(|f: &SpecialFolder| f.account == folder.account_id) {
+                continue;
+            }
+            found.push(SpecialFolder {
+                account: folder.account_id,
+                folder: folder.id,
+                title: format!("{} - {}", text::folder_name(&folder.info), titles[at]),
+                name: titles[at].clone(),
+                unread: folder.unread,
+            });
+        }
+        // in the accounts' order
+        found.sort_by_key(|f| accounts.iter().position(|a| a.id == f.account));
+        Ok(found)
     }
 
     /// Changes the settings of an account; how it signs in stays, only signing in again changes that
@@ -695,16 +756,16 @@ impl Core {
     /// after a blank line, "Go to Archive, the next folder with unread messages?"
     pub fn next_unread_question(&self, from: FolderId, to: FolderId) -> Result<String> {
         let store = self.store();
-        let several = store.accounts()?.len() > 1;
+        let accounts = store.accounts()?;
+        let titles = account_titles(&accounts);
         let name = |id: FolderId| -> Result<String> {
             let folder = store.folder(id)?;
             let mut name = crate::text::folder_name(&folder.info);
-            if several {
-                let account = store.account(folder.account_id)?;
-                name = format!(
-                    "{name} ({})",
-                    crate::text::account_label(&account.settings.name, &account.settings.email)
-                );
+            // with several accounts, which one's: as the folder list calls it
+            if accounts.len() > 1
+                && let Some(at) = accounts.iter().position(|a| a.id == folder.account_id)
+            {
+                name = format!("{name} ({})", titles[at]);
             }
             Ok(name)
         };
@@ -1402,6 +1463,15 @@ impl Core {
                 on: true,
             },
         )
+    }
+
+    /// Marks every message of every folder of an account read, as [`Core::mark_all_read`] marks one folder
+    pub fn mark_account_read(&self, account: AccountId) -> Result<()> {
+        let folders = self.store().folders(account)?;
+        for folder in folders.iter().filter(|f| f.unread > 0) {
+            self.mark_all_read(folder.id)?;
+        }
+        Ok(())
     }
 
     /// Marks every message of every account's Inbox read, as [`Core::mark_all_read`] marks one folder

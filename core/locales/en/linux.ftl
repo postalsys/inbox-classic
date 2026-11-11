@@ -106,6 +106,7 @@ gtk-plain-warning =
     Without encryption, anyone who intercepts your network traffic can read your password and messages. Only use this connection with a server on your own computer or local network.
 
     Continue?
+gtk-account-name-title = Account name
 gtk-display-name-title = Display name
 gtk-turned-off-why = The “{ $button }” option is disabled on this computer. { $reason }
 gtk-turned-off-why-long =
@@ -160,5 +161,7 @@ gtk-preferences = Preferences
 gtk-language = Language
 gtk-language-subtitle = Language of the app and help
 gtk-new-mail-group = New mail
+# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
+gtk-notify-new-mail = Notify of new mail
 gtk-notify-subtitle = A notification when new messages arrive while the window is in the background
 gtk-restart-to-change = Inbox Classic restarts to change the language.

@@ -272,6 +272,10 @@ $preferencesKey = 'HKCU:\Software\Postal Systems\InboxClassic'
 $savedLanguage = (Get-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue).Language
 # and Group messages by conversation, left out for the run so it is on, as it is out of the box
 $savedGrouping = (Get-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue).GroupByConversation
+# and the folder tree's closed rows, left out so every row starts open
+$savedClosedRows = (Get-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -ErrorAction SilentlyContinue).ClosedFolderRows
+# and the sign-in codes in notifications, left out so they are off, as out of the box
+$savedCodes = (Get-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue).CodesInNotifications
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
 Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Out 'result.txt')
 Start-Transcript -Path (Join-Path $Out 'log.txt') -Force | Out-Null
@@ -421,6 +425,14 @@ function Command([IntPtr]$window, [int]$id) {
 function Key([IntPtr]$window, [int]$vk) {
     [void][Native.Win]::PostMessage($window, $WM_KEYDOWN, [IntPtr]$vk, [IntPtr]::Zero)
     [void][Native.Win]::PostMessage($window, $WM_KEYUP, [IntPtr]$vk, [IntPtr]::Zero)
+}
+# an account's Properties form, titled "<account> Properties", or 0
+function PropertiesForm() {
+    $w = [IntPtr]::Zero
+    while (($w = [Native.Win]::FindWindowEx([IntPtr]::Zero, $w, 'InboxClassicForm', [NullString]::Value)) -ne [IntPtr]::Zero) {
+        if ((WindowText $w) -match 'Properties$') { return $w }
+    }
+    return [IntPtr]::Zero
 }
 # a top-level window of a class (and title), once it is there
 function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) {
@@ -612,6 +624,8 @@ try {
     $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"",
         '--sign-in-page-file', "`"$signInPage`"", '--test-hooks')
     Remove-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
     # the first page of Add Mail Account, with the address fields when $fields, else the page that offers a
@@ -623,7 +637,9 @@ try {
         } $seconds
     }
 
-    # both steps of the form: the name and address, then the servers with the password; on the second server
+    # both steps of the form: the name and address, then the servers with the password; on the second server. The
+    # second step's fields are 100 + their place (Field in accounts.cpp): Account name, Your name, E-mail address,
+    # User name, Password, the incoming server, port and security, the outgoing server, port and security
     function AddAccount([string]$name, [string]$user, [string]$password, [bool]$shots, [bool]$onSecond = $false) {
         $on = if ($onSecond) { $ports.second } else { $ports }
         $first = StartPage $true
@@ -644,21 +660,25 @@ try {
         # the lookup finds nothing for this domain: the second form comes with the usual names to correct
         $second = WaitFor {
             $f = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
-            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
         } 40
         Check ($null -ne $second) 'the server settings form follows the lookup'
         if (-not $second) { Shot $first "account-failed-$user"; throw 'no server settings form' }
-        Check ((GetText $second 104) -eq 'imap.inboxclassic.test') 'the lookup guessed the IMAP server'
-        Check ((GetText $second 100) -eq $name) 'the server form keeps the name typed first'
-        SetText $second 102 $user
-        SetText $second 103 $password
-        SetText $second 104 '127.0.0.1'
-        SetText $second 105 "$($on.imap)"
-        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 106), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
-        SetText $second 107 '127.0.0.1'
-        SetText $second 108 "$($on.smtp)"
+        Check ((GetText $second 105) -eq 'imap.inboxclassic.test') 'the lookup guessed the IMAP server'
+        Check ((GetText $second 101) -eq $name) 'the server form keeps the name typed first'
+        Check ((GetText $second 100) -eq 'inboxclassic.test') "the Account name starts as the address's domain ($(GetText $second 100))"
+        # the first account keeps the name offered; the second is named as the test calls it ("Work"), so the folder
+        # tree and the Account column say that
+        if ($onSecond) { SetText $second 100 $name }
+        SetText $second 103 $user
+        SetText $second 104 $password
+        SetText $second 105 '127.0.0.1'
+        SetText $second 106 "$($on.imap)"
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 107), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
+        SetText $second 108 '127.0.0.1'
+        SetText $second 109 "$($on.smtp)"
         # ImapKit's SMTP server takes a password only after STARTTLS
-        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 109), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($second, 110), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
         if ($shots) { Shot $second 'account-3-servers' }
         Click $second 1
         $warning = WaitWindow '#32770' 'Add Mail Account'
@@ -680,12 +700,16 @@ try {
     $FOLDER_COLUMNS = 5
     $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
     Check ($null -ne $folders) "the folders of the account are in the tree ($folders)"
-    # the first account's item: the first at the top of the tree with folders under it (All Inboxes, above the
-    # accounts while there are two, has none)
+    # the first account's item: the first at the top of the tree, or the one after All Inboxes (above the accounts
+    # while there are two), whose first row is named as the account after it (or which has none, before the accounts'
+    # Inboxes are known)
     function FirstAccountItem {
         $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
-        if ([Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $item) -eq [IntPtr]::Zero) {
-            $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
+        $next = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
+        $child = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $item)
+        $bare = { param($i) ([Native.Win]::RemoteTreeText($tree, $i)) -replace ' \(\d+\)$', '' }
+        if ($next -ne [IntPtr]::Zero -and ($child -eq [IntPtr]::Zero -or (& $bare $child) -eq (& $bare $next))) {
+            $item = $next
         }
         $item
     }
@@ -790,7 +814,7 @@ try {
         $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
         $labels = [Native.Win]::MenuLabels($hmenu)
         Check (($labels -contains 'Reply to Sender') -and ($labels -contains 'Mark as Unread') -and ($labels -contains 'Move to Folder...') -and
-            ($labels -contains 'View Source') -and ($labels -contains 'Properties')) "with the message's actions ($($labels -join ', '))"
+            ($labels -contains 'View Source') -and ($labels -contains 'Properties...')) "with the message's actions ($($labels -join ', '))"
         Check ($labels -notcontains 'Mark as Read') 'a read message offers Mark as Unread, not Mark as Read'
         Shot $main 'read-14-menu' $menu
         $sourceAt = [array]::IndexOf($labels, 'View Source')
@@ -1140,17 +1164,21 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
     }
     Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'https://example.com/second*') { $t } } 10)) 'and changes it'
-    # its menu: Open Link, Edit Link and Remove Link first (a picture for the feature map)
+    # its menu, the app's own: Open Link, Edit Link and Remove Link first, then the editing commands
     $point = [IntPtr]((12 -shl 16) -bor 20)
     [void][Native.Win]::PostMessage($input, 0x0204, [IntPtr]2, $point)
     [void][Native.Win]::PostMessage($input, 0x0205, [IntPtr]::Zero, $point)
-    Start-Sleep -Seconds 1
-    $rect = New-Object Native.Win+RECT
-    [void][Native.Win]::GetWindowRect($compose, [ref]$rect)
-    $bitmap = New-Object System.Drawing.Bitmap ($rect.Right - $rect.Left), ($rect.Bottom - $rect.Top)
-    CopyScreen $bitmap $rect.Left $rect.Top
-    $bitmap.Save((Join-Path $Out 'write-16-link-menu.png'), [System.Drawing.Imaging.ImageFormat]::Png)
-    Key $input $VK_ESCAPE
+    $linkMenu = WaitWindow '#32768' $null 10
+    Check ($null -ne $linkMenu) 'a link in the editor has a right-click menu of the app'
+    if ($linkMenu) {
+        $labels = @([Native.Win]::MenuLabels([Native.Win]::SendMessage($linkMenu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)))
+        Check (($labels[0] -eq 'Open Link') -and ($labels -contains 'Edit Link...') -and ($labels -contains 'Remove Link') -and
+            ($labels -contains 'Copy') -and ($labels -contains 'Paste') -and ($labels -contains 'Select All') -and
+            ($labels -notcontains 'Emoji')) "with Open Link, Edit Link and Remove Link, then Cut, Copy, Paste ($($labels -join ', '))"
+        Shot $compose 'write-16-link-menu' $linkMenu
+        Key $linkMenu $VK_ESCAPE
+        [void](WaitFor { -not [Native.Win]::IsWindow($linkMenu) } 5)
+    }
     Start-Sleep -Milliseconds 500
     # emptied, the address takes the link off and leaves its text; the mouse off the text, so the status bar says
     # nothing of a link under it
@@ -1172,7 +1200,7 @@ public static class Dragger {
     $raw = if ($linked) { RawText $linked } else { '' }
     Check ($raw -match 'https://example\.com/first' -and $raw -notmatch 'href' -and $raw -notmatch 'example\.com/second') 'the link text went, without the link'
 
-    # a server out of reach, as when offline: its port (105 the incoming, 108 the outgoing) changed in Accounts >
+    # a server out of reach, as when offline: its port (106 the incoming, 109 the outgoing) changed in Accounts >
     # Properties, and back
     function SetPort([int]$field, [string]$port) {
         Command $main $IDM_ACCOUNTS
@@ -1183,8 +1211,8 @@ public static class Dragger {
         }
         Click $list 402
         $form = WaitFor {
-            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
-            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+            $f = PropertiesForm
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
         }
         if (-not $form) {
             ShowAppWindows $list 'properties-missing'
@@ -1201,7 +1229,7 @@ public static class Dragger {
         Click $list 404
         [void](WaitFor { -not [Native.Win]::IsWindow($list) })
     }
-    function SetSmtpPort([string]$port) { SetPort 108 $port }
+    function SetSmtpPort([string]$port) { SetPort 109 $port }
 
     Step 'a message that is not downloaded yet'
     $IDC_RETRY = 214
@@ -1217,7 +1245,7 @@ public static class Dragger {
     # a server that takes the connection and says nothing: the download waits
     $silent = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, 0)
     $silent.Start()
-    SetPort 105 "$($silent.LocalEndpoint.Port)"
+    SetPort 106 "$($silent.LocalEndpoint.Port)"
     SelectRow 0
     $header = Statics $main
     Check ($header -like '*Waiting on the server*' -and $header -like '*Hal Example*') 'the header shows the message''s sender and subject at once'
@@ -1228,7 +1256,7 @@ public static class Dragger {
     Check ([bool](WaitFor { Visible $main $IDC_RETRY } 30)) 'a message that can not be downloaded says why, with Try Again'
     Shot $main 'read-12-not-downloaded'
     # the server back: the account syncs, and the message is tried again by itself
-    SetPort 105 "$($ports.imap)"
+    SetPort 106 "$($ports.imap)"
     Check ([bool](WaitFor { -not (Visible $main $IDC_RETRY) -and (Find 'Archive' $waiting).flags -contains '\Seen' } 40)) "once the account is back the message shows by itself (Try Again $(Visible $main $IDC_RETRY), flags $((Find 'Archive' $waiting).flags -join ' '))"
     SelectFolder 0
 
@@ -1369,8 +1397,8 @@ public static class Dragger {
     $IDC_SEARCH_BAR = 208; $IDC_SEARCH_CLEAR = 209
     $searchBar = { WindowText ([Native.Win]::GetDlgItem($main, $IDC_SEARCH_BAR)) }
     Check ([bool](WaitFor { (Visible $main $IDC_SEARCH_BAR) -and (& $searchBar) -match '^1 result for .lunch. in all folders' } 5)) "the search bar says what was found for what ($(& $searchBar))"
-    Check ([bool](WaitFor { (& $folderBar) -eq ' All folders' } 5)) "the folder bar says where ($(& $folderBar))"
-    Check ((WindowText $main) -match '^All folders') 'and so does the title'
+    Check ([bool](WaitFor { (& $folderBar) -eq ' All Folders' } 5)) "the folder bar says where ($(& $folderBar))"
+    Check ((WindowText $main) -match '^All Folders') 'and so does the title'
     Shot $main 'find-1-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'ann@example.com')
     Check ([bool](WaitFor { (Rows) -ge 2 })) 'the sender address is found too'
@@ -1464,7 +1492,7 @@ public static class Dragger {
     $move = WaitPicker 'Move Message'
     Check ($null -ne $move) 'Move to Folder asks where'
     if ($move) {
-        Check (PickIn $move 'Alex Morgan' 'Archive') 'Archive can be chosen'
+        Check (PickIn $move 'inboxclassic.test' 'Archive') 'Archive can be chosen'
         Shot $move 'organize-2-move'
         Click $move 1
         # the one selected after the delete: the newest, the message sent later
@@ -1829,7 +1857,7 @@ public static class Dragger {
     $move = WaitPicker 'Move 3 Messages'
     Check ($null -ne $move) 'Move to Folder asks where'
     if ($move) {
-        [void](PickIn $move 'Alex Morgan' 'Archive')
+        [void](PickIn $move 'inboxclassic.test' 'Archive')
         Click $move 1
     }
     Check ([bool](WaitFor { -not (& $onServer 'INBOX') -and (& $onServer 'Archive') -eq 3 } 20)) 'Move to Folder moves the three to Archive'
@@ -1948,7 +1976,7 @@ public static class Dragger {
     }
     $text = Join-Path $dropDir 'notes.txt'
     Set-Content -LiteralPath $text -Value 'not a message'
-    $archive = TreeRow $tree 'Alex Morgan' 'Archive'
+    $archive = TreeRow $tree 'inboxclassic.test' 'Archive'
     $effect = [Native.Win]::SendText($main, $kDropFiles, "$($archive.ToInt64())|$($dropped -join '|')")
     $inArchive = { @('Dropped one', 'Dropped two', 'Dropped three' | Where-Object { Find 'Archive' "Subject: $_" }).Count }
     Check ($effect -eq 1 -and [bool](WaitFor { (& $inArchive) -eq 3 } 20)) ".eml files dropped onto Archive in the folder tree are put in it, on the server ($effect, $(& $inArchive))"
@@ -2290,13 +2318,13 @@ public static class Dragger {
     if ($goTo) {
         $pickerTree = [Native.Win]::GetDlgItem($goTo, 102)
         $texts = @(TreeTexts $pickerTree)
-        Check (($texts -contains 'Alex Morgan') -and ($texts -contains 'Sent Items')) "it shows the folders of every account ($($texts -join ', '))"
+        Check (($texts -contains 'inboxclassic.test') -and ($texts -contains 'Sent Items')) "it shows the folders of every account ($($texts -join ', '))"
         Check (-not (Visible $goTo 103)) 'without New Folder'
         SetText $goTo 101 'sent'
         $narrowed = @(TreeTexts $pickerTree)
         Check (($narrowed -contains 'Sent Items') -and -not ($narrowed -contains 'Drafts')) "typing narrows them ($($narrowed -join ', '))"
         Shot $goTo 'read-18-go-to'
-        Check (PickIn $goTo 'Alex Morgan' 'Sent Items') 'Sent Items can be chosen'
+        Check (PickIn $goTo 'inboxclassic.test' 'Sent Items') 'Sent Items can be chosen'
         Click $goTo 1
         Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' } 10)) "choosing Sent Items shows Sent Items ($(WindowText $main))"
     }
@@ -3120,9 +3148,10 @@ public static class Dragger {
     }
     $servers = WaitFor {
         $f = [Native.Win]::FindWindow('InboxClassicForm', 'Add Mail Account')
-        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
     } 20
-    Check ($servers -and (GetText $servers 104) -eq 'imap.gmail.com' -and (GetText $servers 107) -eq 'smtp.gmail.com') 'its servers were found'
+    Check ($servers -and (GetText $servers 105) -eq 'imap.gmail.com' -and (GetText $servers 108) -eq 'smtp.gmail.com') 'its servers were found'
+    Check ($servers -and (GetText $servers 100) -eq 'Gmail') "the Account name starts as the provider's ($(if ($servers) { GetText $servers 100 }))"
     if ($servers) {
         Shot $servers 'account-6-gmail'
         Click $servers 2
@@ -3174,7 +3203,7 @@ public static class Dragger {
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     Check ([bool](WaitFor { (Rows) -ge 1 -and (StatusPart $mainStatus 2) -match "^$expected message" } 20)) "it lists the mail of both accounts' Inboxes ($(Rows) rows, $(StatusPart $mainStatus 2) of $expected)"
     $places = @(0..([Math]::Min(4, (Rows)) - 1) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_FOLDER) })
-    Check (($places -contains 'Work') -and ($places -contains 'Alex Morgan')) "newest first, the two accounts' messages among each other, the Account column naming each ($($places -join ', '))"
+    Check (($places -contains 'Work') -and ($places -contains 'inboxclassic.test')) "newest first, the two accounts' messages among each other, the Account column naming each ($($places -join ', '))"
     Check ((StatusPart $mainStatus 2) -match "^$expected message") "the status bar counts both Inboxes ($(StatusPart $mainStatus 2))"
     SelectRow 0
     Shot $main 'all-inboxes-1-list'
@@ -3225,15 +3254,15 @@ public static class Dragger {
     if ($move) {
         $pickerTree = [Native.Win]::GetDlgItem($move, 102)
         $texts = @(TreeTexts $pickerTree)
-        Check (($texts -contains 'Alex Morgan') -and ($texts -contains 'Work') -and [Native.Win]::GetDlgItem($move, 101) -ne [IntPtr]::Zero) "Move to Folder shows the folders of both accounts in a tree, with a filter box ($($texts -join ', '))"
-        $current = TreeRow $pickerTree 'Alex Morgan' 'Inbox'
+        Check (($texts -contains 'inboxclassic.test') -and ($texts -contains 'Work') -and [Native.Win]::GetDlgItem($move, 101) -ne [IntPtr]::Zero) "Move to Folder shows the folders of both accounts in a tree, with a filter box ($($texts -join ', '))"
+        $current = TreeRow $pickerTree 'inboxclassic.test' 'Inbox'
         [void][Native.Win]::SendMessage($pickerTree, $TVM_SELECTITEM, [IntPtr]9, $current)
         $ok = [Native.Win]::GetDlgItem($move, 1)
         Check (([Native.Win]::RemoteTreeText($pickerTree, $current)) -eq 'Inbox (current)' -and -not [Native.Win]::IsWindowEnabled($ok)) 'the folder the message is in is shown but can not be chosen'
         Check ((WindowText $ok) -eq '&Move') "the button says Move ($(WindowText $ok))"
         SetText $move 101 'arch'
         $narrowed = @(TreeTexts $pickerTree)
-        $others = @($narrowed | Where-Object { $_ -notmatch 'Archive' -and $_ -notin @('Recent', 'Alex Morgan', 'Work') })
+        $others = @($narrowed | Where-Object { $_ -notmatch 'Archive' -and $_ -notin @('Recent', 'inboxclassic.test', 'Work') })
         Check ($narrowed.Count -ge 2 -and $others.Count -eq 0) "typing in the filter narrows the tree to the folders that match ($($narrowed -join ', '))"
         SetText $move 101 ''
         Check (PickIn $move 'Work' 'Archive') "the second account's Archive can be chosen"
@@ -3287,6 +3316,111 @@ public static class Dragger {
     Check ($null -ne (WaitFor { (Messages 'Archive' $rest2) | Where-Object { (RawText $_) -match "Subject: $dragged" } | Select-Object -First 1 } 30)) 'a message dragged onto a folder of the second account is moved there'
     Check ([bool](WaitFor { -not (Find 'INBOX' "Subject: $dragged") } 20)) 'and out of the first account'
 
+    # ---- All Inboxes by account ----
+
+    Step 'All Inboxes by account'
+    # the account row's menu (app.h)
+    $IDM_ACCOUNT_SYNC = 910; $IDM_ACCOUNT_MARK_ALL_READ = 911; $IDM_ACCOUNT_PROPERTIES = 912
+    # unread mail in both accounts' Inboxes again, and in the first account's Archive for its Mark All Read
+    $date = [DateTime]::UtcNow.AddMinutes(14).ToString('r')
+    AddMessage "From: Priya Shah <priya@work.example>`r`nTo: testuser2@inboxclassic.test`r`nSubject: Budget for the next quarter`r`nDate: $date`r`nMessage-ID: <budget-next-quarter@work.example>`r`n`r`nThe budget is ready for a look.`r`n" @() 'INBOX' $rest2
+    AddMessage "From: Maria Lopez <maria@example.org>`r`nTo: testuser@inboxclassic.test`r`nSubject: Dinner on Friday`r`nDate: $date`r`nMessage-ID: <dinner-friday@example.org>`r`n`r`nAre you free on Friday?`r`n"
+    AddMessage "From: Maria Lopez <maria@example.org>`r`nTo: testuser@inboxclassic.test`r`nSubject: Kept for later`r`nDate: $date`r`nMessage-ID: <kept-for-later@example.org>`r`n`r`nUnread in the Archive.`r`n" @() 'Archive'
+    Command $main $IDM_SYNC
+    $top = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+    # the rows under All Inboxes, top to bottom (the tree's first row read again: a change of the accounts builds it anew)
+    function AllInboxesRows {
+        $rows = @()
+        $first = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $first)
+        while ($item -ne [IntPtr]::Zero) {
+            $rows += $item
+            $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
+        }
+        $rows
+    }
+    # an account's own row at the top level, by its name
+    function AccountRow([string]$name) {
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+        while ($item -ne [IntPtr]::Zero) {
+            if ((([Native.Win]::RemoteTreeText($tree, $item)) -replace ' \(\d+\)$', '') -eq $name) { return $item }
+            $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
+        }
+        [IntPtr]::Zero
+    }
+    # a row's name with the unread count the server has for that Inbox
+    $counted = { param($name, $server) $n = & $unreadOn $server; if ($n -gt 0) { "$name ($n)" } else { $name } }
+    $rowTexts = { @(AllInboxesRows | ForEach-Object { [Native.Win]::RemoteTreeText($tree, $_) }) }
+    $named = [bool](WaitFor {
+            $texts = & $rowTexts
+            $texts.Count -eq 2 -and $texts[0] -eq (& $counted 'inboxclassic.test' $rest) -and $texts[1] -eq (& $counted 'Work' $rest2) -and (& $unreadOn $rest2) -gt 0
+        } 30)
+    Check $named "All Inboxes has a row for each account, in their order, named as the account with its Inbox's unread count ($((& $rowTexts) -join ', '))"
+    Check (([Native.Win]::RemoteTreeText($tree, $top)) -eq 'All Inboxes') "open, All Inboxes shows no count of its own ($([Native.Win]::RemoteTreeText($tree, $top)))"
+    $workInbox = @(AllInboxesRows)[1]
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $workInbox)
+    $workCount = (Messages 'INBOX' $rest2).Count
+    $alone = [bool](WaitFor { (StatusPart $mainStatus 2) -match "^$workCount message" -and @(SubjectRows 'Budget for the next quarter').Count -eq 1 } 20)
+    Check ($alone -and @(SubjectRows 'Dinner on Friday').Count -eq 0) "the second account's row lists its Inbox alone, not the first account's message ($(StatusPart $mainStatus 2) of $workCount)"
+    Check ((& $folderBar) -eq ' Inbox - Work' -and (WindowText $main) -eq 'Inbox - Work - Inbox Classic') "the folder bar and the title name the Inbox and the account ($(& $folderBar); $(WindowText $main))"
+    # no message selected, so the second account's mail stays unread for Mark All Read below
+    Shot $main 'all-inboxes-3-accounts'
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
+    $both = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
+    Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match "^$both message" } 20)) "All Inboxes again lists both accounts' Inboxes ($(StatusPart $mainStatus 2) of $both)"
+    # the second account's Properties, from its row: the Account name first, filled with its name
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (AccountRow 'Work'))
+    Command $main $IDM_ACCOUNT_PROPERTIES
+    $properties = WaitFor {
+        $f = PropertiesForm
+        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
+    } 10
+    Check ($properties -and (GetText $properties 100) -eq 'Work' -and (GetText $properties 102) -eq 'testuser2@inboxclassic.test') "the account's Properties opens from its row, the Account name filled with its name ($(if ($properties) { GetText $properties 100 }))"
+    if ($properties) {
+        SetText $properties 100 'Second'
+        Click $properties 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)
+    }
+    $renamed = [bool](WaitFor { (AccountRow 'Second') -ne [IntPtr]::Zero -and @(& $rowTexts)[-1] -match '^Second( \(\d+\))?$' } 20)
+    Check $renamed "set to Second, the account's heading and its row under All Inboxes say Second ($((& $rowTexts) -join ', '))"
+    # the first account's right-click menu, as a right-click on its row opens it
+    $alex = AccountRow 'inboxclassic.test'
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
+    $at = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $alex.ToInt64()))
+    foreach ($button in @(0, 0x0008, 0x0010)) { [Native.Win]::Mouse($at[0], $at[1], $button) }
+    $menu = WaitWindow '#32768' $null 10
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+    Check ($null -ne $menu) 'an account has a right-click menu'
+    if ($menu) {
+        $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+        $labels = @([Native.Win]::MenuLabels($hmenu))
+        Check (($labels -join '|') -eq 'Send and Receive|Mark All Read||New Folder...||Properties...') "with Send and Receive, Mark All Read, New Folder and Properties ($($labels -join ', '))"
+        Check ((([Native.Win]::GetMenuState($hmenu, $IDM_ACCOUNT_MARK_ALL_READ, 0) -band 0x3) -eq 0)) 'Mark All Read is on while the account has unread mail'
+        Shot $main 'account-menu' $menu
+        Key $menu $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+    }
+    # the menu is for the row it was opened on, which stays selected: its commands
+    Check ((& $folderBar) -eq ' inboxclassic.test') "the right-click selected the account ($(& $folderBar))"
+    $archiveUnread = { @(Messages 'Archive' | Where-Object { $_.flags -notcontains '\Seen' }).Count }
+    $secondUnread = & $unreadOn $rest2
+    Command $main $IDM_ACCOUNT_MARK_ALL_READ
+    Check ([bool](WaitFor { (& $unreadOn $rest) -eq 0 -and (& $archiveUnread) -eq 0 } 20)) "its Mark All Read marks every folder of the first account read on the server ($(& $unreadOn $rest) in the Inbox, $(& $archiveUnread) in Archive)"
+    Check ((& $unreadOn $rest2) -eq $secondUnread -and $secondUnread -gt 0) "the second account's mail stays unread ($(& $unreadOn $rest2))"
+    Command $main $IDM_ACCOUNT_PROPERTIES
+    $properties = WaitFor {
+        $f = PropertiesForm
+        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
+    } 10
+    Check ($properties -and (GetText $properties 102) -eq 'testuser@inboxclassic.test') "its Properties opens that account's Properties ($(if ($properties) { GetText $properties 102 }))"
+    if ($properties) {
+        Click $properties 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)
+    }
+    Command $main $IDM_ACCOUNT_SYNC
+
     # ---- accounts ----
 
     Step 'accounts'
@@ -3301,13 +3435,13 @@ public static class Dragger {
         # the first account is selected when the list opens, and stays so after a change
         Click $accounts 402
         $properties = WaitFor {
-            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
-            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+            $f = PropertiesForm
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
         }
         Check ($null -ne $properties) 'Properties shows the settings'
         if ($properties) {
-            Check ((GetText $properties 105) -eq "$($ports.imap)") 'with the IMAP port as it was saved'
-            SetText $properties 100 'Alex Morgan Renamed'
+            Check ((GetText $properties 106) -eq "$($ports.imap)") 'with the IMAP port as it was saved'
+            SetText $properties 101 'Alex Morgan Renamed'
             Shot $properties 'accounts-2-properties'
             Click $properties 1
             Check ([bool](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)) 'OK closes Properties'
@@ -3320,10 +3454,10 @@ public static class Dragger {
         # read back in Properties (the text of a list entry does not cross processes)
         Click $accounts 402
         $again = WaitFor {
-            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
-            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 109) -ne [IntPtr]::Zero) { $f }
+            $f = PropertiesForm
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
         }
-        Check ($again -and (GetText $again 100) -eq 'Alex Morgan Renamed') 'the new name is saved'
+        Check ($again -and (GetText $again 101) -eq 'Alex Morgan Renamed') 'the new name is saved'
         if ($again) {
             Click $again 2
             [void](WaitFor { -not [Native.Win]::IsWindow($again) })
@@ -3410,7 +3544,7 @@ public static class Dragger {
             SetText $editor 621 "$($ports.smtp)"
             [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($editor, 622), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
             Click $editor 612
-            $found = WaitWindow '#32770' 'Check' 20
+            $found = WaitWindow '#32770' 'Sign-in App' 20
             Check ($found -and (Statics $found) -match 'can be used') "Check reads the issuer's discovery document"
             if ($found) {
                 Shot $found 'signin-3-check'
@@ -3520,7 +3654,7 @@ public static class Dragger {
         for ($row = 0; $row -lt $count -and -not $found; $row++) {
             KeyToRow $accountList $row
             Click $accounts 402
-            $properties = WaitWindow 'InboxClassicForm' 'Properties'
+            $properties = WaitFor { $f = PropertiesForm; if ($f -ne [IntPtr]::Zero) { $f } }
             if (-not $properties) { continue }
             if (WaitFor { (Statics $properties) -match 'Sign-in app: ImapKit' } 3) {
                 $found = $properties
@@ -3822,6 +3956,21 @@ public static bool HasIcon(IntPtr window) {
             }
         }
         Check ($under.Count -eq 0) "no toolbar button runs under the Find box ($($under -join ', '))"
+        # the buttons hidden for want of room are in the menu of the chevron after the others
+        $IDC_TOOLBAR_MORE = 233
+        $chevron = [Native.Win]::GetDlgItem($main, $IDC_TOOLBAR_MORE)
+        Check ($chevron -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($chevron)) 'the chevron is shown after the buttons that fit'
+        if ($chevron -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($chevron)) {
+            Click $main $IDC_TOOLBAR_MORE
+            $more = WaitWindow '#32768' $null 10
+            $hidden = if ($more) { @([Native.Win]::MenuLabels([Native.Win]::SendMessage($more, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)) | Where-Object { $_ }) } else { @() }
+            Check ($hidden.Count -gt 0 -and @($hidden | Where-Object { -not $_.StartsWith('[') }).Count -eq 0) "its menu has the hidden buttons ($($hidden -join ' | '))"
+            if ($more) {
+                Shot $main 'lang-2b-pseudo-more' $more
+                Key $more $VK_ESCAPE
+                [void](WaitFor { -not [Native.Win]::IsWindow($more) } 5)
+            }
+        }
         $folders = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)))
         Check (@($folders | Where-Object { $_.StartsWith('[') }).Count -ge 3) "the special folders and All Inboxes are pseudo ($($folders -join ', '))"
         CheckPseudo $main 'the main window' $true
@@ -3870,6 +4019,16 @@ public static bool HasIcon(IntPtr window) {
         Remove-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue
     } else {
         Set-ItemProperty -Path $preferencesKey -Name GroupByConversation -Value $savedGrouping -Type DWord
+    }
+    if ($null -eq $savedClosedRows) {
+        Remove-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -ErrorAction SilentlyContinue
+    } else {
+        Set-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -Value $savedClosedRows
+    }
+    if ($null -eq $savedCodes) {
+        Remove-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue
+    } else {
+        Set-ItemProperty -Path $preferencesKey -Name CodesInNotifications -Value $savedCodes -Type DWord
     }
     $harness.StandardInput.Close()
     if (-not $harness.WaitForExit(5000)) { $harness.Kill() }

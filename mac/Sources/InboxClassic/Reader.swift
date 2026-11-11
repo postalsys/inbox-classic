@@ -40,6 +40,9 @@ final class Reader: NSObject {
     private let findBar = FindBar()
     private let header = HeaderText(wrappingLabelWithString: "")
     private let logo = NSImageView()
+    /// the header and the line under it, shown only over a message
+    private let headerBox = NSView()
+    private let headerLine = NSBox()
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
     private let unsubscribe = NSButton(title: Text.uiUnsubscribe.text, target: nil, action: nil)
     private let pictures = InfoBar(icon: "image", link: nil)
@@ -87,7 +90,6 @@ final class Reader: NSObject {
         top.alignment = .top
         top.spacing = 10
         top.edgeInsets = NSEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
-        let headerBox = NSView()
         top.translatesAutoresizingMaskIntoConstraints = false
         headerBox.addSubview(top)
         NSLayoutConstraint.activate([
@@ -96,8 +98,7 @@ final class Reader: NSObject {
             top.topAnchor.constraint(equalTo: headerBox.topAnchor),
             top.bottomAnchor.constraint(equalTo: headerBox.bottomAnchor),
         ])
-        let line = NSBox()
-        line.boxType = .separator
+        headerLine.boxType = .separator
 
         pictures.text = Text.uiPicturesBlocked.text
         pictures.clicked = { [weak self] in self?.loadPictures() }
@@ -118,7 +119,7 @@ final class Reader: NSObject {
             guard let self else { return }
             view.window?.makeFirstResponder(preview.view)
         }
-        for part in [headerBox, line, retry, pictures, findBar, preview.view] as [NSView] {
+        for part in [headerBox, headerLine, retry, pictures, findBar, preview.view] as [NSView] {
             view.addArrangedSubview(part)
             part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         }
@@ -153,6 +154,8 @@ final class Reader: NSObject {
         downloadingTimer?.invalidate()
         retry.isHidden = true
         header.stringValue = ""
+        // no empty band over the pane's "no message" or several messages' page; a message about to load keeps it
+        showHeader(loading)
         // the bars of the message before stay while the next one loads, and go when it is there without them
         if !loading {
             attachments.isHidden = true
@@ -166,9 +169,15 @@ final class Reader: NSObject {
         preview.clear(noMessage: !loading)
     }
 
+    private func showHeader(_ shown: Bool) {
+        headerBox.isHidden = !shown
+        headerLine.isHidden = !shown
+    }
+
     /// a message asked for: its header from the list at once, and after a moment, should it not be here yet, that it is
     /// being downloaded
     func showLoading(_ row: Message) {
+        showHeader(true)
         header.attributedStringValue = headerText(from: row.from, date: row.date, to: row.recipients, cc: "", subject: row.subject)
         retry.isHidden = true
         downloadingTimer?.invalidate()
@@ -203,6 +212,7 @@ final class Reader: NSObject {
 
     func showProblem(_ problem: String) {
         downloadingTimer?.invalidate()
+        showHeader(true)
         header.stringValue = problem
         attachments.isHidden = true
         pictures.isHidden = true
@@ -212,6 +222,7 @@ final class Reader: NSObject {
     private func show(_ info: PeMessageInfo, view: MessageView, pictures allowed: Bool) {
         downloadingTimer?.invalidate()
         retry.isHidden = true
+        showHeader(true)
         header.attributedStringValue = headerText(info)
         let files = info.attachment_count
         attachments.isHidden = files == 0

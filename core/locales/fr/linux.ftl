@@ -107,6 +107,8 @@ gtk-plain-warning =
     Sans chiffrement, toute personne qui intercepte le trafic réseau peut lire votre mot de passe et vos messages. Utilisez cette connexion uniquement avec un serveur sur votre ordinateur ou votre réseau local.
 
     Continuer ?
+# review: new
+gtk-account-name-title = Nom du compte
 gtk-display-name-title = Nom affiché
 gtk-turned-off-why = L’option « { $button } » est désactivée sur cet ordinateur. { $reason }
 gtk-turned-off-why-long =
@@ -161,5 +163,8 @@ gtk-preferences = Préférences
 gtk-language = Langue
 gtk-language-subtitle = Langue de l’interface et de l’aide
 gtk-new-mail-group = Nouveau courrier
+# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
+# review: new
+gtk-notify-new-mail = M’avertir des nouveaux messages
 gtk-notify-subtitle = Recevoir une notification à l’arrivée de nouveaux messages lorsque la fenêtre est en arrière-plan
 gtk-restart-to-change = Inbox Classic redémarre pour changer de langue.

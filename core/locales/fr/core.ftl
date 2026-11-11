@@ -335,6 +335,12 @@ error-store = stockage local : { $error }
 error-not-found = introuvable
 error-closed = fermeture en cours
 error-other-account = le navigateur s'est connecté à { $email }, pas à ce compte
+# a password or sign-in the mail server refused, with the server's words
+# review: new
+failure-authentication = le serveur n'a pas accepté la connexion ({ $reason })
+# the mail server could not be reached or the connection broke, with the reason
+# review: new
+failure-network = la connexion au serveur a échoué ({ $reason })
 error-in-use = impossible de la supprimer tant que des comptes l'utilisent pour se connecter : { $accounts }
 error-turned-off = cette application de connexion est désactivée pour les nouveaux comptes
 error-folder-name = le nom du dossier doit comporter de 1 à 200 caractères, sans caractères de contrôle

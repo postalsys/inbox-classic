@@ -191,6 +191,7 @@ ui-signature = Firma
 ui-signature-hint = Se agrega a los mensajes nuevos, respuestas y reenvíos de esta cuenta.
 ui-signature-not-saved = No se pudo guardar la firma.
 ui-all-inboxes = Todas las bandejas de entrada
+# review: changed
 ui-all-folders = Todas las carpetas
 ui-the-account = la cuenta
 ui-folder-name = Nombre de la carpeta:
@@ -263,6 +264,8 @@ ui-off-here = Desactivado en este equipo.
 ui-why = ¿Por qué?
 ui-more-sign-in = Más opciones de inicio de sesión...
 ui-other-account = Para agregar otra cuenta de correo, introduzca su dirección y el nombre que verán los destinatarios. En el siguiente paso se buscará la configuración de los servidores.
+# review: new
+ui-field-account-name = Nombre de la cuenta:
 ui-field-name = Nombre para mostrar:
 ui-field-email = Dirección de correo:
 ui-field-user = Nombre de usuario:
@@ -346,6 +349,10 @@ ui-new-folder-title = Nueva carpeta
 ui-rename-folder-title = Renombrar carpeta
 ui-delete-folder-question = ¿Eliminar la carpeta «{ $folder }», todos sus mensajes y sus subcarpetas? También se eliminarán del servidor.
 ui-properties = &Propiedades
+# review: new
+ui-account-sync = &Enviar y recibir
+# review: new
+ui-account-properties = P&ropiedades...
 ui-menu-open = &Abrir
 ui-menu-flag = Marc&a
 ui-menu-view-source = Ver &código fuente

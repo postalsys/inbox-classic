@@ -133,7 +133,8 @@
         <h3>Changing or removing an account</h3>
         <p>
             <b>File &gt; Accounts</b> lists your accounts. <b>Properties</b> (or a double click) changes the name, address, servers and password of one; leave
-            the password empty to keep it. <b>Remove</b> (or the <kbd>Delete</kbd> key) takes the account out of Inbox Classic with the mail downloaded for it
+            the password empty to keep it. Its first field, <b>Account name</b>, is what the folder list calls the account (<i>Gmail</i>, <i>Work</i>): a new
+            account starts with its provider's name or its domain. <b>Display name</b> is the name the people you write to see. <b>Remove</b> (or the <kbd>Delete</kbd> key) takes the account out of Inbox Classic with the mail downloaded for it
             and its saved password; the mail on the server stays. <b>Add</b> adds another account.
         </p>
         <h3>Gmail and Outlook.com</h3>
@@ -215,9 +216,12 @@
                 With two or more accounts, <b>All Inboxes</b> at the top of the folder list shows the mail of every account's Inbox in one list, newest
                 first, with an <b>Account</b> column that names the account of each message. Reply, Forward, Move and Delete work on a message in its own
                 account, and a new message starts from the account of the selected one. <b>Mark All Read</b> on it marks every Inbox read. Its right-click menu has
-                only <b>Mark All Read</b>: folders can not be made in it or messages imported into it, as it is no folder of one account.<!--os:mac,linux--> Each
+                only <b>Mark All Read</b>: folders can not be made in it or messages imported into it, as it is no folder of one account. Under it each account's
+                Inbox has a row of its own, named as the account is, with its unread count: the same Inbox as under the account, a second way to it, which lists
+                that Inbox alone. The folder list remembers which of its rows you closed.<!--os:mac,linux--> Each
                 account's name is a heading over its folders, as in Mail: a click on it opens or closes its folders, and the folder shown stays shown while
-                they are closed.<!--/os-->
+                they are closed.<!--/os--> A right-click on an account offers <b>Send and Receive</b> (that account alone), <b>Mark All Read</b> (every folder of
+                the account), <b>New Folder</b> and <b>Properties</b>.
             </li>
             <li>
                 Unread messages are <b>bold</b> in the list. A message is marked read after it has been
