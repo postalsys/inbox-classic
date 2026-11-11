@@ -1227,6 +1227,25 @@ void OnCommand(WORD id, WORD code) {
             SyncAll();
         }
         return;
+    case IDM_ACCOUNT_SYNC:
+        // the account row's menu: that account alone
+        if (int64_t account = g_mailbox.SelectedAccount()) {
+            pe_sync(g_core.get(), account);
+        }
+        return;
+    case IDM_ACCOUNT_MARK_ALL_READ:
+        if (int64_t account = g_mailbox.SelectedAccount()) {
+            pe_account_mark_all_read(g_core.get(), account);
+        }
+        return;
+    case IDM_ACCOUNT_PROPERTIES:
+        if (int64_t account = g_mailbox.SelectedAccount(); account && AccountPropertiesDialog(g_main, g_core.get(), account)) {
+            // its new name in the tree, and in the folder bar while its row is selected
+            g_mailbox.Reload();
+            ShowFolderName();
+            pe_sync(g_core.get(), account);
+        }
+        return;
     case IDM_NEW_FOLDER:
         g_mailbox.NewFolder(g_main);
         return;

@@ -99,8 +99,9 @@ pub fn run(out: PathBuf) -> glib::ExitCode {
         certificate: Some(PathBuf::from(&driver.ports.cert)),
         memory_passwords: true,
         sign_in_page_file: Some(out.join("sign-in-page.txt")),
-        // English whatever the system or Preferences say: the checks read the English words
-        language: Some("en".into()),
+        // English whatever the system or Preferences say: the checks read the English words. PE_E2E_LANGUAGE runs it
+        // in another language for its screenshots, where the checks of English words fail
+        language: Some(std::env::var("PE_E2E_LANGUAGE").unwrap_or_else(|_| "en".into())),
         ..Default::default()
     };
     let store = out.join("store.db").to_string_lossy().into_owned();
@@ -945,6 +946,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::gmail(&d).await;
     wrong_password(&d).await;
     steps::all_inboxes(&d).await;
+    steps::all_inboxes_by_account(&d).await;
     steps::between_accounts(&d).await;
     accounts(&d).await;
     sign_in_apps(&d).await;
@@ -999,39 +1001,49 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
         d.shot(&wait, "account-2-lookup").await;
     }
     // the lookup finds nothing for this domain: the second form comes with the usual names to correct
-    let Some(second) = wait_dialog(40, "account-servers").await else {
+    let Some(servers) = wait_dialog(40, "account-servers").await else {
         d.check(false, "the server settings form follows the lookup");
         return;
     };
-    let second = second.upcast::<gtk::Widget>();
+    let servers = servers.upcast::<gtk::Widget>();
     d.check(true, "the server settings form follows the lookup");
-    let guessed = text_of(&second, "form-4");
+    let guessed = text_of(&servers, "form-5");
     d.check(
         guessed == "imap.inboxclassic.test",
         &format!("the lookup guessed the IMAP server ({guessed})"),
     );
-    let kept = text_of(&second, "form-0");
+    let kept = text_of(&servers, "form-1");
     d.check(
         kept == name,
         &format!("the server form keeps the name typed first ({kept})"),
     );
-    set_text(&second, "form-2", user);
-    set_text(&second, "form-3", password);
-    set_text(&second, "form-4", "127.0.0.1");
-    set_text(&second, "form-5", &imap.to_string());
-    if let Some(combo) = named_in(&second, "form-6").and_downcast::<adw::ComboRow>() {
+    // the account's own name for the folder list starts as its domain's, kept for the first account; the second is
+    // named as typed (Work)
+    let offered = text_of(&servers, "form-0");
+    d.check(
+        offered == "inboxclassic.test",
+        &format!("the server form offers the account name from the address ({offered})"),
+    );
+    if second {
+        set_text(&servers, "form-0", name);
+    }
+    set_text(&servers, "form-3", user);
+    set_text(&servers, "form-4", password);
+    set_text(&servers, "form-5", "127.0.0.1");
+    set_text(&servers, "form-6", &imap.to_string());
+    if let Some(combo) = named_in(&servers, "form-7").and_downcast::<adw::ComboRow>() {
         combo.set_selected(2);
     }
-    set_text(&second, "form-7", "127.0.0.1");
-    set_text(&second, "form-8", &smtp.to_string());
+    set_text(&servers, "form-8", "127.0.0.1");
+    set_text(&servers, "form-9", &smtp.to_string());
     // ImapKit's SMTP server takes a password only after STARTTLS
-    if let Some(combo) = named_in(&second, "form-9").and_downcast::<adw::ComboRow>() {
+    if let Some(combo) = named_in(&servers, "form-10").and_downcast::<adw::ComboRow>() {
         combo.set_selected(1);
     }
     if shots {
-        d.shot(&second, "account-3-servers").await;
+        d.shot(&servers, "account-3-servers").await;
     }
-    click(&second, "dialog-ok");
+    click(&servers, "dialog-ok");
     let warning = wait_alert(10).await;
     d.check(warning.is_some(), "a connection without encryption is warned about");
     if let Some(warning) = warning {
@@ -1411,7 +1423,7 @@ async fn writing(d: &Driver) {
 /// The outgoing server out of reach, as when offline: its port changed in Accounts > Properties to one nothing
 /// listens on, and back
 async fn set_smtp_port(d: &Driver, port: &str) {
-    set_port(d, "form-8", port).await;
+    set_port(d, "form-9", port).await;
 }
 
 /// A server's port (`form-5` the incoming, `form-8` the outgoing) changed in Accounts > Properties
@@ -1873,10 +1885,10 @@ async fn accounts(d: &Driver) {
     match wait_dialog(10, "account-properties").await {
         Some(form) => {
             d.check(
-                text_of(form.upcast_ref(), "form-5") == d.ports.imap.to_string(),
+                text_of(form.upcast_ref(), "form-6") == d.ports.imap.to_string(),
                 "Properties shows the settings, with the IMAP port as it was saved",
             );
-            set_text(form.upcast_ref(), "form-0", "Alex Morgan Renamed");
+            set_text(form.upcast_ref(), "form-1", "Alex Morgan Renamed");
             d.shot(&form, "accounts-2-properties").await;
             click(form.upcast_ref(), "dialog-ok");
             if let Some(question) = wait_alert(3).await {

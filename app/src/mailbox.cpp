@@ -39,6 +39,31 @@ constexpr uint64_t kPageSize = 100;
 constexpr size_t kPagesKept = 8;
 // the data of the All Inboxes item: neither a folder (positive) nor an account (a negated id)
 constexpr LPARAM kAllInboxesItem = std::numeric_limits<LPARAM>::min();
+// the data of a row under All Inboxes: its folder id with this bit, so it is told from the account's row of the folder
+static_assert(sizeof(LPARAM) == 8);
+constexpr LPARAM kUnderAllInboxes = LPARAM{1} << 62;
+// the rows of the tree the user closed, kept for the next start: "all" for All Inboxes and the ids of accounts
+const wchar_t* kClosedRowsPreference = L"ClosedFolderRows";
+
+// what a tree row is, from its data
+struct TreePlace {
+    int64_t folder = 0;
+    int64_t account = 0;
+    bool allInboxes = false;
+    bool underAllInboxes = false;
+};
+TreePlace PlaceOf(LPARAM data) {
+    TreePlace place;
+    if (data == kAllInboxesItem) {
+        place.allInboxes = true;
+    } else if (data < 0) {
+        place.account = -data;
+    } else {
+        place.underAllInboxes = (data & kUnderAllInboxes) != 0;
+        place.folder = data & ~kUnderAllInboxes;
+    }
+    return place;
+}
 std::wstring AllInboxes() {
     return core::T(PE_TEXT_UI_ALL_INBOXES);
 }
@@ -397,11 +422,15 @@ bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
 void Mailbox::Reload() {
     int64_t selected = folder_;
     bool allSelected = allInboxes_;
+    bool underSelected = underAllInboxes_;
+    int64_t accountSelected = selectedAccount_;
     // deleting the items changes the selection: not a folder the user picked
     reloading_ = true;
     TreeView_DeleteAllItems(tree_);
     reloading_ = false;
     items_.clear();
+    inboxItems_.clear();
+    inboxTitles_.clear();
     rows_.clear();
     accountItems_.clear();
     accountNames_.clear();
@@ -416,10 +445,20 @@ void Mailbox::Reload() {
     firstAccount_ = 0;
     core::AccountList accounts(pe_accounts(core_));
     size_t count = pe_account_list_count(accounts.get());
+    std::vector<int64_t> ids;
+    for (size_t i = 0; i < count; i++) {
+        ids.push_back(pe_account_list_get(accounts.get(), i)->id);
+    }
+    LoadClosedRows(ids);
     if (pe_all_inboxes_shown(count)) {
-        // above the accounts, the mail of every Inbox; its unread count as a folder's
+        // above the accounts, the mail of every Inbox, with each account's Inbox under it; its unread count is theirs,
+        // shown while it is closed as a folder's with closed subfolders
         allInboxesItem_ = InsertItem(tree_, TVI_ROOT, AllInboxes(), kAllInboxesItem, false, FOLDER_MAIL_INBOX);
-        rows_[allInboxesItem_] = {AllInboxes(), pe_inbox_unread(core_), 0};
+        rows_[allInboxesItem_] = {AllInboxes(), 0, pe_inbox_unread(core_)};
+        FillAllInboxes();
+        if (!allInboxesClosed_) {
+            TreeView_Expand(tree_, allInboxesItem_, TVE_EXPAND);
+        }
         ShowRow(allInboxesItem_);
     }
     for (size_t i = 0; i < count; i++) {
@@ -435,8 +474,10 @@ void Mailbox::Reload() {
         accountItems_[account->id] = root;
         rows_[root] = {Text(account->title), 0, 0};
         FillAccount(root, account->id);
-        // TVM_EXPAND sends no TVN_ITEMEXPANDED: the account's row is shown expanded here
-        TreeView_Expand(tree_, root, TVE_EXPAND);
+        // open unless the user closed it; TVM_EXPAND sends no TVN_ITEMEXPANDED, so the row is shown here
+        if (!closedAccounts_.contains(account->id)) {
+            TreeView_Expand(tree_, root, TVE_EXPAND);
+        }
         ShowRow(root);
     }
     // what was selected, again; All Inboxes gone with one account left: that account's Inbox (as the window starts)
@@ -452,8 +493,14 @@ void Mailbox::Reload() {
             target = items_[inbox];
             same = false;
         }
+    } else if (auto inbox = inboxItems_.find(selected); underSelected && inbox != inboxItems_.end()) {
+        target = inbox->second;
     } else if (auto item = items_.find(selected); item != items_.end()) {
         target = item->second;
+        // a row under All Inboxes gone with All Inboxes: the account's row is another place
+        same = !underSelected;
+    } else if (auto root = accountItems_.find(accountSelected); !selected && root != accountItems_.end()) {
+        target = root->second;
     }
     if (target) {
         // the same folder again is no folder the user picked; the Inbox in place of All Inboxes is shown
@@ -464,6 +511,78 @@ void Mailbox::Reload() {
         // the folder is gone
         OnFolderSelected(0);
     }
+}
+
+void Mailbox::FillAllInboxes() {
+    core::SpecialFolderList inboxes(pe_special_folders(core_, PE_SPECIAL_FOLDER_KIND_INBOX));
+    size_t count = pe_special_folder_list_count(inboxes.get());
+    for (size_t i = 0; i < count; i++) {
+        const PeSpecialFolder* inbox = pe_special_folder_list_get(inboxes.get(), i);
+        // named as the account; no subfolders here, those are under the account
+        std::wstring name = Text(inbox->name);
+        HTREEITEM item = InsertItem(tree_, allInboxesItem_, CountedLabel(name, inbox->unread), static_cast<LPARAM>(inbox->folder) | kUnderAllInboxes,
+                                    inbox->unread > 0, FOLDER_MAIL_INBOX);
+        inboxItems_[inbox->folder] = item;
+        inboxTitles_[inbox->folder] = Text(inbox->title);
+        rows_[item] = {name, inbox->unread, 0};
+    }
+}
+
+void Mailbox::LoadClosedRows(const std::vector<int64_t>& accounts) {
+    allInboxesClosed_ = false;
+    closedAccounts_.clear();
+    std::wstring kept = GetTextPreference(kClosedRowsPreference);
+    size_t start = 0;
+    bool dropped = false;
+    while (start < kept.size()) {
+        size_t end = kept.find(L',', start);
+        std::wstring part = kept.substr(start, end == std::wstring::npos ? std::wstring::npos : end - start);
+        start = end == std::wstring::npos ? kept.size() : end + 1;
+        if (part == L"all") {
+            allInboxesClosed_ = true;
+            continue;
+        }
+        int64_t id = _wcstoi64(part.c_str(), nullptr, 10);
+        // a removed account's entry is dropped
+        if (std::find(accounts.begin(), accounts.end(), id) != accounts.end()) {
+            closedAccounts_.insert(id);
+        } else {
+            dropped = true;
+        }
+    }
+    if (dropped) {
+        SaveClosedRows();
+    }
+}
+
+void Mailbox::SaveClosedRows() const {
+    std::wstring kept = allInboxesClosed_ ? L"all" : L"";
+    std::vector<int64_t> ids(closedAccounts_.begin(), closedAccounts_.end());
+    std::sort(ids.begin(), ids.end());
+    for (int64_t id : ids) {
+        kept += (kept.empty() ? L"" : L",") + std::to_wstring(id);
+    }
+    SetTextPreference(kClosedRowsPreference, kept);
+}
+
+// a row opened or closed by the user: its unread count shown again, and All Inboxes and the accounts remembered
+void Mailbox::OnRowExpanded(const NMTREEVIEWW& change) {
+    ShowRow(change.itemNew.hItem);
+    if (change.action != TVE_EXPAND && change.action != TVE_COLLAPSE) {
+        return;
+    }
+    bool closed = change.action == TVE_COLLAPSE;
+    TreePlace place = PlaceOf(change.itemNew.lParam);
+    if (place.allInboxes) {
+        allInboxesClosed_ = closed;
+    } else if (place.account && closed) {
+        closedAccounts_.insert(place.account);
+    } else if (place.account) {
+        closedAccounts_.erase(place.account);
+    } else {
+        return;
+    }
+    SaveClosedRows();
 }
 
 void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
@@ -533,6 +652,11 @@ void Mailbox::UpdateFolders(int64_t account) {
         }
         rows_[item->second] = {Text(folder->name), folder->unread, folder->unread_below};
         ShowRow(item->second);
+        // its row under All Inboxes, with the same count
+        if (auto inbox = inboxItems_.find(folder->id); inbox != inboxItems_.end()) {
+            rows_[inbox->second].own = folder->unread;
+            ShowRow(inbox->second);
+        }
     }
     auto root = accountItems_.find(account);
     if (root != accountItems_.end()) {
@@ -540,7 +664,7 @@ void Mailbox::UpdateFolders(int64_t account) {
         ShowRow(root->second);
     }
     if (allInboxesItem_) {
-        rows_[allInboxesItem_].own = pe_inbox_unread(core_);
+        rows_[allInboxesItem_].below = pe_inbox_unread(core_);
         ShowRow(allInboxesItem_);
     }
 }
@@ -1123,9 +1247,19 @@ void Mailbox::MarkAllRead() {
     }
 }
 
-void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
+HTREEITEM Mailbox::RowOf(int64_t folder) const {
+    if (allInboxes_ || underAllInboxes_) {
+        if (auto inbox = inboxItems_.find(folder); inbox != inboxItems_.end()) {
+            return inbox->second;
+        }
+    }
     auto item = items_.find(folder);
-    if (item == items_.end()) {
+    return item != items_.end() ? item->second : nullptr;
+}
+
+void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
+    HTREEITEM row = RowOf(folder);
+    if (!row) {
         return;
     }
     // All Inboxes stays when it has the message (of an Inbox), its list up to date with it
@@ -1141,7 +1275,7 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
     if (Searching() && !allInboxes_ && folder_ == folder) {
         ClearFind();
     }
-    TreeView_SelectItem(tree_, item->second);
+    TreeView_SelectItem(tree_, row);
     if (folder_ == folder) {
         SelectInList(folder, uid);
     }
@@ -1404,6 +1538,10 @@ void Mailbox::FolderMenu() {
     if (HTREEITEM item = TreeView_HitTest(tree_, &hit)) {
         TreeView_SelectItem(tree_, item);
     }
+    if (selectedAccount_ && !folder_ && !allInboxes_) {
+        AccountMenu(screen);
+        return;
+    }
     HMENU menu = CreatePopupMenu();
     // Mark All Read first, as Outlook Express has it, for a folder with unread messages
     uint64_t total = 0, unread = 0;
@@ -1429,6 +1567,21 @@ void Mailbox::FolderMenu() {
     DestroyMenu(menu);
 }
 
+void Mailbox::AccountMenu(POINT screen) {
+    // Mark All Read while some folder of the account has unread mail, as its row counts it
+    auto root = accountItems_.find(selectedAccount_);
+    bool someUnread = root != accountItems_.end() && rows_.contains(root->second) && rows_.at(root->second).below > 0;
+    HMENU menu = CreatePopupMenu();
+    AppendMenuW(menu, MF_STRING, IDM_ACCOUNT_SYNC, core::T(PE_TEXT_UI_ACCOUNT_SYNC).c_str());
+    AppendMenuW(menu, someUnread ? MF_STRING : MF_STRING | MF_GRAYED, IDM_ACCOUNT_MARK_ALL_READ, MenuItem(PE_TEXT_CMD_MARK_ALL_READ).c_str());
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(menu, MF_STRING, IDM_ACCOUNT_PROPERTIES, core::T(PE_TEXT_UI_ACCOUNT_PROPERTIES).c_str());
+    TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
+    DestroyMenu(menu);
+}
+
 std::wstring Mailbox::SelectedName() const {
     if (Searching()) {
         // where the search looks; what it found is on the search bar
@@ -1438,10 +1591,15 @@ std::wstring Mailbox::SelectedName() const {
         return AllInboxes();
     }
     if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
+        // a row under All Inboxes names its account too: "Inbox - Gmail"
+        if (auto title = inboxTitles_.find(folder_); underAllInboxes_ && title != inboxTitles_.end()) {
+            return title->second;
+        }
         return found->second.first;
     }
-    if (auto account = accountNames_.find(selectedAccount_); account != accountNames_.end()) {
-        return account->second;
+    // an account by its row's name, its Account name when it has one
+    if (auto root = accountItems_.find(selectedAccount_); root != accountItems_.end() && rows_.contains(root->second)) {
+        return rows_.at(root->second).name;
     }
     return L"";
 }
@@ -1583,8 +1741,8 @@ void Mailbox::NextUnread(HWND owner) {
         SelectInList(folder, uid);
         return;
     }
-    auto item = items_.find(folder);
-    if (step != PE_NEXT_UNREAD_ASK || !asked || item == items_.end()) {
+    HTREEITEM row = RowOf(folder);
+    if (step != PE_NEXT_UNREAD_ASK || !asked || !row) {
         Say(core::T(PE_TEXT_NO_UNREAD_LEFT));
         return;
     }
@@ -1592,7 +1750,7 @@ void Mailbox::NextUnread(HWND owner) {
     if (MessageBoxW(owner, Text(asked.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONQUESTION) != IDYES) {
         return;
     }
-    TreeView_SelectItem(tree_, item->second);
+    TreeView_SelectItem(tree_, row);
     int64_t first = folder;
     char* again = nullptr;
     step = pe_list_view_next_unread_step(core_, view_.get(), first, 0, &folder, &uid, &again);
@@ -1745,18 +1903,19 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
     if (header->hwndFrom == tree_) {
         if (header->code == TVN_SELCHANGEDW && !reloading_) {
             auto* change = reinterpret_cast<NMTREEVIEWW*>(header);
-            LPARAM item = change->itemNew.hItem ? change->itemNew.lParam : 0;
-            bool allInboxes = item == kAllInboxesItem;
+            TreePlace place = change->itemNew.hItem ? PlaceOf(change->itemNew.lParam) : TreePlace{};
             // an account has no messages of its own
-            selectedAccount_ = item < 0 && !allInboxes ? -item : 0;
-            // the folder bar and the title name what is selected: an account too, from another account's item
-            if (!OnFolderSelected(item > 0 ? item : 0, allInboxes)) {
+            selectedAccount_ = place.account;
+            underAllInboxes_ = place.underAllInboxes;
+            // the folder bar and the title name what is selected: an account too, from another account's item, and
+            // the same Inbox from its other row
+            if (!OnFolderSelected(place.folder, place.allInboxes)) {
                 SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
             }
         }
         if (header->code == TVN_ITEMEXPANDEDW) {
             // collapsed, a row shows the unread messages it hides; expanded, its folders show them again
-            ShowRow(reinterpret_cast<NMTREEVIEWW*>(header)->itemNew.hItem);
+            OnRowExpanded(*reinterpret_cast<NMTREEVIEWW*>(header));
         }
         if (header->code == NM_RCLICK) {
             FolderMenu();
@@ -2242,8 +2401,9 @@ int64_t Mailbox::DropFolder(DropFrom from, POINT screen, HTREEITEM& over) const 
     item.hItem = over;
     TreeView_GetItem(tree_, &item);
     // an account's own item (its id negated), All Inboxes, the folder they are all in, or one that holds no messages:
-    // not there. A folder of another account takes them too, the core moves them across
-    int64_t folder = static_cast<int64_t>(item.lParam);
+    // not there. A folder of another account takes them too, the core moves them across; a row under All Inboxes is
+    // that account's Inbox
+    int64_t folder = PlaceOf(item.lParam).folder;
     if (folder <= 0 || unselectable_.count(folder) || !folderAccounts_.contains(folder)) {
         return 0;
     }

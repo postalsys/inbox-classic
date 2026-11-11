@@ -14,7 +14,8 @@ std::vector<std::wstring> SecurityChoices() {
     return {L"SSL/TLS", L"STARTTLS", core::T(PE_TEXT_UI_SECURITY_NONE)};
 }
 
-enum Field { NAME, EMAIL, USERNAME, PASSWORD, IMAP_HOST, IMAP_PORT, IMAP_SECURITY, SMTP_HOST, SMTP_PORT, SMTP_SECURITY };
+// the fields of the server form and Properties, in their order (the UI test finds them by it: 100 + the field)
+enum Field { ACCOUNT_NAME, NAME, EMAIL, USERNAME, PASSWORD, IMAP_HOST, IMAP_PORT, IMAP_SECURITY, SMTP_HOST, SMTP_PORT, SMTP_SECURITY };
 
 PeSecurity SecurityOf(const std::wstring& choice) {
     std::vector<std::wstring> choices = SecurityChoices();
@@ -701,7 +702,10 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
     ExplainAppPassword(owner, info);
     using Kind = FormField::Kind;
     std::vector<std::wstring> security = SecurityChoices();
+    // the account's own name for the folder list, its provider's or its domain to start with
+    core::String suggested(pe_default_account_name(core::Narrow(email).c_str()));
     std::vector<FormField> fields = {
+        {core::T(PE_TEXT_UI_FIELD_ACCOUNT_NAME), suggested ? Text(suggested.get()) : L""},
         {core::T(PE_TEXT_UI_FIELD_NAME), name},
         {core::T(PE_TEXT_UI_FIELD_EMAIL), email},
         {core::T(PE_TEXT_UI_FIELD_USER), info ? Text(info->username) : L""},
@@ -726,6 +730,7 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
         SecureZeroMemory(password.data(), password.size());
         if (account > 0) {
             SecureZeroMemory(fields[PASSWORD].value.data(), fields[PASSWORD].value.size() * sizeof(wchar_t));
+            pe_account_set_name(core, account, core::Narrow(fields[ACCOUNT_NAME].value).c_str());
             return account;
         }
         MessageBoxW(owner, core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(),
@@ -766,8 +771,6 @@ struct AccountsState {
     PeCore* core;
     HWND list = nullptr;
     std::vector<int64_t> ids;
-    // what each signs in with through the browser, by position; empty for a password
-    std::vector<std::wstring> signsInWith;
     bool done = false;
     bool changed = false;
 };
@@ -778,32 +781,40 @@ enum AccountColumn { COL_NAME, COL_EMAIL, COL_SERVER };
 void FillAccounts(AccountsState* state, int select = 0) {
     ListView_DeleteAllItems(state->list);
     state->ids.clear();
-    state->signsInWith.clear();
     core::AccountList accounts(pe_accounts(state->core));
     for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
-        int row = AddRow(state->list, static_cast<int>(i), Text(account->name));
+        int row = AddRow(state->list, static_cast<int>(i), Text(account->title));
         bool oauth = account->oauth != PE_O_AUTH_PROVIDER_NONE;
         SetCell(state->list, row, COL_EMAIL, Text(account->email));
         SetCell(state->list, row, COL_SERVER, Text(account->imap_host) + (oauth ? L" " + core::T(PE_TEXT_WIN_BROWSER_SIGN_IN) : L""));
         state->ids.push_back(account->id);
-        state->signsInWith.push_back(oauth ? Text(account->signs_in_with) : L"");
     }
     SelectRow(state->list, select);
 }
 
 
 // the settings of an account, changed: the server form for a password account, the name for one that signs in
-// through the browser with `signsInWith` (its servers are the sign-in's); a password typed in replaces the kept one
-bool AccountProperties(HWND owner, PeCore* core, int64_t account, const std::wstring& signsInWith) {
+// through the browser (its servers are the sign-in's); a password typed in replaces the kept one
+bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
     core::AccountSettings view(pe_account_settings(core, account));
     const PeAccountSettings* stored = pe_account_settings_info(view.get());
     if (!stored) {
         return false;
     }
+    std::wstring accountName;
+    std::wstring signsInWith;
+    core::AccountList accounts(pe_accounts(core));
+    for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
+        if (const PeAccount* row = pe_account_list_get(accounts.get(), i); row->id == account) {
+            accountName = Text(row->account_name);
+            signsInWith = row->oauth != PE_O_AUTH_PROVIDER_NONE ? Text(row->signs_in_with) : L"";
+        }
+    }
     std::vector<std::wstring> security = SecurityChoices();
     using Kind = FormField::Kind;
     std::vector<FormField> fields = {
+        {core::T(PE_TEXT_UI_FIELD_ACCOUNT_NAME), accountName},
         {core::T(PE_TEXT_UI_FIELD_NAME), Text(stored->name)},
         {core::T(PE_TEXT_UI_FIELD_EMAIL), Text(stored->email)},
         {core::T(PE_TEXT_UI_FIELD_USER), Text(stored->username)},
@@ -816,16 +827,17 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account, const std::wst
         {core::T(PE_TEXT_UI_FIELD_SMTP_SECURITY), SecurityName(stored->smtp_security), Kind::Choice, security},
     };
     if (!signsInWith.empty()) {
-        // a browser sign-in account: the name only, the rest is the provider's
-        std::vector<FormField> name = {fields[NAME]};
+        // a browser sign-in account: the names only, the rest is the provider's
+        std::vector<FormField> names = {fields[ACCOUNT_NAME], fields[NAME]};
         std::wstring intro = core::T(PE_TEXT_UI_SIGNS_IN_WITH, {{"app", signsInWith}});
-        if (!FormDialog(owner, core::Title(PE_TEXT_CMD_PROPERTIES), intro, name)) {
+        if (!FormDialog(owner, core::Title(PE_TEXT_CMD_PROPERTIES), intro, names)) {
             return false;
         }
-        fields[NAME] = name[0];
+        fields[NAME] = names[1];
         std::string utf8[5];
         PeAccountSettings settings = SettingsOf(fields, utf8);
-        return pe_account_update(core, account, &settings);
+        return pe_account_update(core, account, &settings) &&
+               pe_account_set_name(core, account, core::Narrow(names[0].value).c_str());
     }
     std::wstring intro = core::T(PE_TEXT_UI_KEEP_PASSWORD);
     std::wstring imapHost = Text(stored->imap_host);
@@ -845,7 +857,8 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account, const std::wst
         }
         std::string utf8[5];
         PeAccountSettings settings = SettingsOf(fields, utf8);
-        if (!pe_account_update(core, account, &settings)) {
+        if (!pe_account_update(core, account, &settings) ||
+            !pe_account_set_name(core, account, core::Narrow(fields[ACCOUNT_NAME].value).c_str())) {
             MessageBoxW(owner, core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(), core::Title(PE_TEXT_CMD_PROPERTIES).c_str(), MB_OK | MB_ICONERROR);
             continue;
         }
@@ -866,7 +879,7 @@ void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id) {
     bool chosen = index >= 0 && static_cast<size_t>(index) < state->ids.size();
     int64_t account = chosen ? state->ids[index] : 0;
     if (id == IDC_ACCOUNT_PROPERTIES) {
-        if (chosen && AccountProperties(hwnd, state->core, account, state->signsInWith[index])) {
+        if (chosen && AccountProperties(hwnd, state->core, account)) {
             state->changed = true;
             FillAccounts(state, index);
         }
@@ -940,6 +953,10 @@ LRESULT CALLBACK AccountsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 }
 
 }  // namespace
+
+bool AccountPropertiesDialog(HWND owner, PeCore* core, int64_t account) {
+    return AccountProperties(owner, core, account);
+}
 
 bool AccountsDialog(HWND owner, PeCore* core) {
     static bool registered = false;

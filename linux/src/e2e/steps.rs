@@ -2040,8 +2040,8 @@ pub async fn gmail(d: &Driver) {
     }
     match wait_dialog(20, "account-servers").await {
         Some(servers) => {
-            let imap = text_of(servers.upcast_ref(), "form-4");
-            let smtp = text_of(servers.upcast_ref(), "form-7");
+            let imap = text_of(servers.upcast_ref(), "form-5");
+            let smtp = text_of(servers.upcast_ref(), "form-8");
             d.check(
                 imap == "imap.gmail.com" && smtp == "smtp.gmail.com",
                 &format!("its servers were found ({imap}, {smtp})"),
@@ -2126,7 +2126,7 @@ pub async fn not_downloaded(d: &Driver) {
     pause(1500).await;
     // a server that takes the connection and says nothing: the download waits
     let silent = SilentServer::start();
-    set_port(d, "form-5", &silent.port.to_string()).await;
+    set_port(d, "form-6", &silent.port.to_string()).await;
     show_found("subject:\"Waiting on the server\"").await;
     let reader = &shell().main().reader;
     let header = reader.header_text();
@@ -2151,7 +2151,7 @@ pub async fn not_downloaded(d: &Driver) {
     );
     d.shot(&main, "read-12-not-downloaded").await;
     // the server back: the account syncs, and the message is tried again by itself
-    set_port(d, "form-5", &d.ports.imap.to_string()).await;
+    set_port(d, "form-6", &d.ports.imap.to_string()).await;
     d.check(
         wait_until(30, || reader.preview.shown().contains("Here at last")).await,
         "once the account is back the message shows by itself",
@@ -2286,6 +2286,165 @@ pub async fn all_inboxes(d: &Driver) {
             unread(d.ports.second_rest)
         ),
     );
+}
+
+/// SCENARIO 42a: each account's Inbox under All Inboxes, named as the account, listing that Inbox alone; the account
+/// name set in Properties; the account's menu and its Mark All Read
+pub async fn all_inboxes_by_account(d: &Driver) {
+    use crate::folders::{ALL_INBOXES, under_all_inboxes};
+    d.step("All Inboxes by account, account names, the account's menu");
+    let main = shell().main();
+    let core = &shell().core;
+    let accounts: Vec<i64> = core.accounts().unwrap_or_default().iter().map(|a| a.id).collect();
+    let (Some(inbox), Some(second), [first_account, second_account, ..]) =
+        (folder_id("Inbox"), second_inbox(), &accounts[..])
+    else {
+        d.check(false, "two accounts, each with an Inbox");
+        return;
+    };
+    let (first_account, second_account) = (*first_account, *second_account);
+    // one unread message for each account again
+    let raw = |to: &str, subject: &str, minutes: i32| {
+        format!(
+            "From: Lena Fox <lena@example.org>\r\nTo: {to}\r\nSubject: {subject}\r\nDate: {}\r\n\
+             Message-ID: <{}@example.org>\r\n\r\nFor the rows under All Inboxes.\r\n",
+            date_now(minutes),
+            subject.replace(' ', "-")
+        )
+    };
+    let _ = d.add_message(&raw("testuser@inboxclassic.test", "Seating plan", 7), &[]);
+    let _ = d.add_message_at(
+        d.ports.second_rest,
+        &raw("testuser2@inboxclassic.test", "Budget review", 6),
+        &[],
+    );
+    command(Command::Sync);
+    let unread = |f: i64| core.folder(f).map_or(0, |f| f.unread);
+    wait_until(20, || unread(inbox) >= 1 && unread(second) >= 1).await;
+    let row = |folder: i64| main.folders.markup_of(under_all_inboxes(folder)).unwrap_or_default();
+    d.check(
+        row(inbox).contains("inboxclassic.test") && row(second).contains("Work"),
+        &format!(
+            "All Inboxes has a row for each account under it, named as the account is ({} / {})",
+            row(inbox),
+            row(second)
+        ),
+    );
+    d.check(
+        wait_until(10, || row(second).contains(&format!("({})", unread(second)))).await,
+        &format!("each row shows its Inbox's unread count ({})", row(second)),
+    );
+    main.folders.select(under_all_inboxes(second));
+    let total = core.folder(second).map_or(0, |f| f.total);
+    d.check(
+        wait_until(10, || u64::from(messages_listed()) == total).await,
+        &format!(
+            "the second account's row lists that account's Inbox alone ({} of {total})",
+            messages_listed()
+        ),
+    );
+    let name = main.selected_name();
+    d.check(
+        name == "Inbox - Work",
+        &format!("the folder bar names the Inbox and the account ({name})"),
+    );
+    d.shot(&main_window(), "all-inboxes-3-accounts").await;
+    main.folders.select(ALL_INBOXES);
+    let both = core.folder(inbox).map_or(0, |f| f.total) + total;
+    d.check(
+        wait_until(10, || u64::from(messages_listed()) == both).await,
+        "All Inboxes again lists both accounts' Inboxes",
+    );
+    // the second account's Properties: the Account name field, filled with its name
+    let parent = main.window().clone();
+    crate::app::spawn(async move {
+        if crate::accounts::account_properties(&parent, second_account).await {
+            shell().main().reload();
+        }
+    });
+    match wait_dialog(10, "account-properties").await {
+        Some(form) => {
+            let field = text_of(form.upcast_ref(), "form-0");
+            d.check(
+                field == "Work",
+                &format!("the second account's Properties has the Account name field, filled with its name ({field})"),
+            );
+            set_text(form.upcast_ref(), "form-0", "Second");
+            click(form.upcast_ref(), "dialog-ok");
+            if let Some(question) = wait_alert(3).await {
+                answer(&question, "Yes");
+            }
+            wait_gone(10, "account-properties").await;
+            let heading = || main.folders.markup_of(-second_account).unwrap_or_default();
+            d.check(
+                wait_until(10, || heading().contains("Second") && row(second).contains("Second")).await,
+                &format!(
+                    "set to Second, the account's heading and its row under All Inboxes say Second ({} / {})",
+                    heading(),
+                    row(second)
+                ),
+            );
+        }
+        None => d.check(false, "the second account's Properties opens"),
+    }
+    // back to Work for the steps after
+    let _ = core.set_account_name(second_account, "Work");
+    main.reload();
+    // the first account's menu, under its heading as a right-click there opens it
+    pause(500).await;
+    let tree: gtk::Widget = main.folders.view.clone().upcast();
+    let first_title = pe_core::account_titles(&core.accounts().unwrap_or_default())
+        .into_iter()
+        .next()
+        .unwrap_or_default();
+    let (x, y) = descendants::<gtk::TreeExpander>(&tree)
+        .into_iter()
+        .filter(|row| row.has_css_class("account-heading"))
+        .flat_map(|row| descendants::<gtk::Label>(row.upcast_ref()))
+        .find(|label| label.text() == first_title)
+        .and_then(|label| label.compute_bounds(&tree))
+        .map_or((180.0, 60.0), |b| {
+            (f64::from(b.x() + 20.0), f64::from(b.y() + b.height() / 2.0))
+        });
+    main.account_menu(&tree, x, y, first_account);
+    let labels = menu_labels(main.folder_popover.borrow().as_ref());
+    d.check(
+        labels == ["Send and Receive", "Mark All Read", "New Folder...", "Properties..."],
+        &format!(
+            "the first account's right-click menu has Send and Receive, Mark All Read, New Folder and Properties ({})",
+            labels.join(", ")
+        ),
+    );
+    d.shot(&main_window(), "account-menu").await;
+    if let Some(popover) = main.folder_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+    let _ = tree.activate_action("account.mark-all-read", None);
+    d.check(
+        wait_until(20, || d.unread_at(d.ports.rest) == 0).await && d.unread_at(d.ports.second_rest) >= 1,
+        &format!(
+            "its Mark All Read marks every folder of the first account read on the server, the second's stays unread ({} and {} unread)",
+            d.unread_at(d.ports.rest),
+            d.unread_at(d.ports.second_rest)
+        ),
+    );
+    main.account_menu(&tree, x, y, first_account);
+    if let Some(popover) = main.folder_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+    let _ = tree.activate_action("account.properties", None);
+    match wait_dialog(10, "account-properties").await {
+        Some(form) => {
+            let named = text_of(form.upcast_ref(), "form-1");
+            d.check(
+                named == "Alex Morgan",
+                &format!("its Properties opens that account's Properties ({named})"),
+            );
+            click(form.upcast_ref(), "dialog-cancel");
+            wait_gone(10, "account-properties").await;
+        }
+        None => d.check(false, "its Properties opens that account's Properties"),
+    }
 }
 
 /// SCENARIO 41: Move and Copy to Folder offer every account's folders in a tree with a filter; a message moved to the

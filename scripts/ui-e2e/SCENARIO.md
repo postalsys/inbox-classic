@@ -604,6 +604,7 @@ Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the
 
 Screenshots: `all-inboxes-3-accounts`, `account-menu`
 
+- the first account kept the account name Add Mail Account offered from its address ("inboxclassic.test"); the second was named "Work" there
 - All Inboxes has a row for each account under it, in the accounts' order, named as the account is
 - each row shows its Inbox's unread count
 - the second account's row lists that account's Inbox alone (the first account's message is not in it)

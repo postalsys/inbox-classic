@@ -32,6 +32,7 @@ using CardView = std::unique_ptr<PeCardView, Deleter<pe_card_free>>;
 using GroupList = std::unique_ptr<PeGroupList, Deleter<pe_group_list_free>>;
 using GroupView = std::unique_ptr<PeGroupView, Deleter<pe_group_free>>;
 using FolderList = std::unique_ptr<PeFolderList, Deleter<pe_folder_list_free>>;
+using SpecialFolderList = std::unique_ptr<PeSpecialFolderList, Deleter<pe_special_folder_list_free>>;
 using TargetList = std::unique_ptr<PeTargetList, Deleter<pe_target_list_free>>;
 using MessageList = std::unique_ptr<PeMessageList, Deleter<pe_message_list_free>>;
 using MessageView = std::unique_ptr<PeMessageView, Deleter<pe_message_view_free>>;

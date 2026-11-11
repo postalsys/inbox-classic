@@ -97,3 +97,6 @@ pub const GROUP_BY_CONVERSATION: &str = "GroupByConversation";
 pub const HIDE_IGNORED: &str = "HideIgnoredConversations";
 /// Whether a new message's notification names its sign-in code (the core does it), off unless chosen
 pub const CODES_IN_NOTIFICATIONS: &str = "CodesInNotifications";
+/// The top rows of the folder tree the user closed (All Inboxes, accounts by their negated ids), comma separated; the
+/// others open at the start
+pub const CLOSED_ROWS: &str = "ClosedFolderRows";
