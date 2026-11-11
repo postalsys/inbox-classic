@@ -1100,17 +1100,18 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         draw(COL_ATTACH, LIST_ATTACH);
     }
     if (row.flagged) {
-        // the flag in its colour (red when it has none); on the selected row's highlight with a white rim, so that a
-        // colour close to the highlight's (blue on blue) can still be seen
+        // the flag in its colour (red when it has none); on the selected row's highlight on a plate of the list's own
+        // background, so that a colour close to the highlight's (blue on blue) can still be seen
         RECT cell;
         ListView_GetSubItemRect(list_, index, COL_FLAG, LVIR_BOUNDS, &cell);
         int width = ListView_GetColumnWidth(list_, COL_FLAG);
         int left = cell.left + (width - iconSize_) / 2, top = cell.top + (cell.bottom - cell.top - iconSize_) / 2;
         if (selected) {
-            COLORREF rim = GetSysColor(COLOR_HIGHLIGHTTEXT);
-            for (POINT step : {POINT{-1, 0}, POINT{1, 0}, POINT{0, -1}, POINT{0, 1}}) {
-                DrawFlag(dc, left + step.x, top + step.y, iconSize_, rim);
-            }
+            HGDIOBJ oldBrush = SelectObject(dc, GetSysColorBrush(COLOR_WINDOW));
+            HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
+            RoundRect(dc, left, top, left + iconSize_ + 1, top + iconSize_ + 1, 4, 4);
+            SelectObject(dc, oldPen);
+            SelectObject(dc, oldBrush);
         }
         DrawFlag(dc, left, top, iconSize_, FlagRgb(row.flag_color ? row.flag_color : 1));
     }

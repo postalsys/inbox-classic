@@ -848,6 +848,11 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             return 0;
         }
         if (HIWORD(wParam) == EN_CHANGE && !state->filling) {
+            if (LOWORD(wParam) == IDC_SUBJECT) {
+                // the window named by its subject as it is typed, as one opened with a subject is
+                std::wstring subject = GetWindowString(state->subject);
+                SetWindowTextW(hwnd, subject.empty() ? core::Plain(PE_TEXT_UI_NEW_MESSAGE_TITLE).c_str() : subject.c_str());
+            }
             Changed(state);
             return 0;
         }

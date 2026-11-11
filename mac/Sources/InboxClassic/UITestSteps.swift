@@ -108,6 +108,7 @@ extension UITest {
         compose = draft
         type("Fay <fay@example.com>", into: field("compose.to", compose))
         type("Draft from the UI test", into: field("compose.subject", compose))
+        check(compose.title == "Draft from the UI test", "a new message's window is named by the subject typed")
         _ = await typeInEditor(compose, "Half written.")
         // closing what was written asks whether to keep it; Save saves it in Drafts
         onMain { compose.performClose(nil) }
@@ -355,6 +356,8 @@ extension UITest {
         press(unsubscribe)
         let sure = await waitWindow("alert", 10)
         check(alertText(sure).contains("127.0.0.1"), "it asks first, naming where it goes")
+        check(!alertText(sure).contains("e-mail") && hyphensKept("no e-mail") == "no e\u{2011}mail",
+              "a word with a hyphen is not wrapped at it")
         await shot(sure, "read-9-unsubscribe-ask")
         answer(sure, "Yes")
         check(await waitUntil(15) { server.received.hasPrefix("POST /u/42 ") && server.received.contains("List-Unsubscribe=One-Click") },

@@ -1008,6 +1008,7 @@ try {
     Check ($from -eq 'Alex Morgan <testuser@inboxclassic.test>') "From names the account it goes from ($from)"
     SetText $compose $IDC_TO 'dave at example.com'
     SetText $compose $IDC_SUBJECT 'Trail map for Sunday'
+    Check ((WindowText $compose) -eq 'Trail map for Sunday') "a new message's window is named by the subject typed ($(WindowText $compose))"
     Check (TypeInEditor $compose 'Hi Dave, here is the trail map for Sunday. See you at nine!') 'the editor of a new message takes typing'
     Command $compose $IDC_SEND
     $problem = WaitWindow '#32770' 'Inbox Classic' 10

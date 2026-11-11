@@ -62,14 +62,20 @@ private func makeAlert(_ text: String, title: String, style: AlertStyle) -> NSAl
     let parts = text.components(separatedBy: "\n\n")
     if parts.count > 1 {
         alert.messageText = parts[0]
-        alert.informativeText = parts.dropFirst().joined(separator: "\n\n")
+        alert.informativeText = hyphensKept(parts.dropFirst().joined(separator: "\n\n"))
     } else {
-        alert.messageText = text
+        alert.messageText = hyphensKept(text)
     }
     alert.alertStyle = style == .information ? .informational : style == .warning ? .warning : .critical
     alert.window.title = title
     alert.window.identifier = NSUserInterfaceItemIdentifier("alert")
     return alert
+}
+
+/// A word with a hyphen in it ("e-mail") kept whole on one line: AppKit wraps at a hyphen, which in an alert
+/// left "no e-" at the end of one line and "mail will be sent." on the next
+func hyphensKept(_ text: String) -> String {
+    text.replacingOccurrences(of: "(?<=\\p{L})-(?=\\p{L})", with: "\u{2011}", options: .regularExpression)
 }
 
 @MainActor

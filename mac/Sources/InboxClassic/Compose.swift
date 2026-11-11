@@ -571,6 +571,10 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         if !filling {
             changed()
         }
+        if notification.object as? NSTextField === subject {
+            // the window named by its subject as it is typed, as one opened with a subject is
+            window.title = subject.stringValue.isEmpty ? Text.uiNewMessageTitle.text : subject.stringValue
+        }
         (notification.object as? AddressField)?.typed(notification)
     }
 
