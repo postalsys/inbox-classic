@@ -89,6 +89,7 @@ win-sign-in-apps-button = Sign-in A&pps...
 win-dont-allow = &Don’t Allow
 win-col-address = Address
 win-never-written-to = Never written to
+win-book-find-label = Type a name or e-mail address:
 win-send = &Send
 win-dont-send = &Don’t Send
 win-forget-program-ask = Remove this program, its permissions and its agents’ activity history? You will be asked for permission again the next time it connects.

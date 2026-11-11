@@ -258,6 +258,7 @@ ui-found-srv = Diese Einstellungen wurden in den DNS-Einträgen Ihrer Domain gef
 ui-found-autodiscover = Diese Einstellungen wurden von Microsoft Autodiscover (Exchange) gefunden.
 ui-found-other = Diese Einstellungen wurden für diese Adresse gefunden.
 ui-app-password-needed = { $provider } nimmt Ihr normales Passwort in E-Mail-Programmen nicht an. Erstellen Sie in Ihrem Konto bei { $provider } ein App-Passwort und geben Sie es im nächsten Formular in das Feld Passwort ein.
+# review: changed
 ui-app-password-open = Die Anleitung von { $provider } im Browser öffnen?
 ui-plain-warning = Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
 ui-continue-ask = Fortfahren?

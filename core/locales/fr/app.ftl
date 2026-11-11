@@ -260,6 +260,7 @@ ui-found-srv = Ces paramètres ont été trouvés dans les enregistrements DNS d
 ui-found-autodiscover = Ces paramètres ont été trouvés à l'aide de Microsoft Autodiscover (Exchange).
 ui-found-other = Ces paramètres ont été trouvés pour cette adresse.
 ui-app-password-needed = { $provider } n'accepte pas votre mot de passe habituel dans les programmes de messagerie. Créez un mot de passe d'application dans votre compte { $provider } et tapez-le dans le champ Mot de passe du formulaire suivant.
+# review: changed
 ui-app-password-open = Ouvrir les instructions de { $provider } dans votre navigateur ?
 ui-plain-warning = Sans chiffrement, toute personne qui intercepte le trafic réseau peut lire votre mot de passe et vos messages. Utilisez cette connexion uniquement avec un serveur sur votre ordinateur ou votre réseau local.
 ui-continue-ask = Continuer ?

@@ -61,6 +61,9 @@ bounce-failed = Ihre Nachricht wurde nicht zugestellt
 bounce-delayed = Ihre Nachricht wurde noch nicht zugestellt
 bounce-delayed-note = Ihr Mailserver versucht weiterhin, sie zuzustellen. Sie müssen sie nicht erneut senden.
 bounce-show-message = Nachricht anzeigen, die nicht zugestellt wurde
+# the link of a delay's card to the message that is still on its way
+# review: new
+bounce-show-delayed = Verzögerte Nachricht anzeigen
 bounce-what-to-do = Was Sie tun können:
 bounce-delayed-do = Sie müssen vorerst nichts tun. Falls die Nachricht nicht zugestellt werden kann, erhalten Sie eine weitere Benachrichtigung.
 bounce-delayed-row-do = Sie müssen vorerst nichts tun. Ihr Mailserver versucht weiterhin, die Nachricht zuzustellen. Falls das nicht gelingt, erhalten Sie eine weitere Benachrichtigung.

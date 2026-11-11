@@ -2098,18 +2098,22 @@ final class HeadingCell: NSTableCellView {
         name.lineBreakMode = .byTruncatingTail
         name.font = nil // the setter puts the heading's own font
         name.textColor = .secondaryLabelColor
-        count.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        // the count as the folder rows have it: their font and colour, at the trailing edge
+        count.font = .systemFont(ofSize: NSFont.systemFontSize)
         count.textColor = .secondaryLabelColor
         count.alignment = .right
         let stack = NSStackView(views: [name, count])
         stack.spacing = 5
+        stack.distribution = .fill
         stack.translatesAutoresizingMaskIntoConstraints = false
         name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        name.setContentHuggingPriority(.init(1), for: .horizontal)
         count.setContentHuggingPriority(.required, for: .horizontal)
         addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            // a group row's cell reaches 14pt further than a folder's: the counts in one column
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
         textField = name
@@ -2124,6 +2128,7 @@ final class HeadingCell: NSTableCellView {
         unreadShown = unread
         name.stringValue = text
         count.stringValue = unread > 0 ? "\(unread)" : ""
+        count.isHidden = unread == 0
         setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": text, "count": unread]) : text)
     }
 }

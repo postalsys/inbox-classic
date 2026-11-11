@@ -258,6 +258,7 @@ ui-found-srv = Need sätted leiti teie domeeni DNS-kirjetest.
 ui-found-autodiscover = Need sätted leiti Microsoft Autodiscoveri (Exchange) abil.
 ui-found-other = Need sätted leiti selle aadressi jaoks.
 ui-app-password-needed = Meiliprogrammides nõuab { $provider } tavalise parooli asemel rakenduse parooli. Looge see oma teenusekontol ja sisestage järgmise sammu parooliväljale.
+# review: changed
 ui-app-password-open = Kas avada teenusepakkuja { $provider } juhised brauseris?
 ui-plain-warning = Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Kasutage seda ainult oma arvutis või kohalikus võrgus oleva serveriga.
 ui-continue-ask = Kas jätkata?

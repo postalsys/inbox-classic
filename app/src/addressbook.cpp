@@ -1304,7 +1304,7 @@ void CreateBook(Book* book) {
     AddButton(book->toolbar, IDC_BOOK_DELETE, core::T(PE_TEXT_UI_TB_DELETE).c_str(), BTNS_BUTTON, ICON_DELETE);
     AddButton(book->toolbar, 0, nullptr);
     AddButton(book->toolbar, IDC_BOOK_WRITE_TO, core::T(PE_TEXT_UI_TB_WRITE_TO).c_str(), BTNS_BUTTON, ICON_MAIL_EDIT);
-    book->findLabel = CreateChild(hwnd, L"STATIC", core::T(PE_TEXT_UI_BOOK_FIND_HINT).c_str(), SS_LEFT | SS_NOPREFIX, 0, {});
+    book->findLabel = CreateChild(hwnd, L"STATIC", core::T(PE_TEXT_WIN_BOOK_FIND_LABEL).c_str(), SS_LEFT | SS_NOPREFIX, 0, {});
     book->find = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_BOOK_FIND, {}, WS_EX_CLIENTEDGE);
     book->tree = CreateChild(hwnd, WC_TREEVIEWW, nullptr, WS_TABSTOP | TVS_SHOWSELALWAYS, IDC_BOOK_TREE, {}, WS_EX_CLIENTEDGE);
     TreeView_SetImageList(book->tree, IconList(IconSet::Folders), TVSIL_NORMAL);

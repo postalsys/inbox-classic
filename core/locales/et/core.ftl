@@ -61,6 +61,9 @@ bounce-failed = Teie kirja ei toimetatud kohale
 bounce-delayed = Teie kirja pole veel kohale toimetatud
 bounce-delayed-note = Teie meiliserver proovib seda endiselt kohale toimetada. Teil pole vaja seda uuesti saata.
 bounce-show-message = Näita tagastatud kirja
+# the link of a delay's card to the message that is still on its way
+# review: new
+bounce-show-delayed = Näita viibivat kirja
 bounce-what-to-do = Mida teha:
 bounce-delayed-do = Praegu pole vaja midagi teha. Kui kirja ei õnnestu kohale toimetada, saate uue teate.
 bounce-delayed-row-do = Praegu pole vaja midagi teha. Teie meiliserver proovib endiselt kirja kohale toimetada. Kui see ei õnnestu, saate uue teate.

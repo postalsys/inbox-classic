@@ -91,6 +91,8 @@ win-sign-in-apps-button = Aplicaciones de &inicio de sesión...
 win-dont-allow = &No permitir
 win-col-address = Dirección
 win-never-written-to = Nunca le ha escrito
+# review: new
+win-book-find-label = Escriba un nombre o una dirección de correo:
 win-send = &Enviar
 # review: changed
 win-dont-send = &No enviar

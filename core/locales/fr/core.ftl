@@ -87,6 +87,9 @@ bounce-failed = Votre message n'a pas été remis
 bounce-delayed = Votre message n'a pas encore été remis
 bounce-delayed-note = Votre serveur de messagerie essaie toujours de le remettre. Vous n'avez pas besoin de le renvoyer.
 bounce-show-message = Afficher le message non remis
+# the link of a delay's card to the message that is still on its way
+# review: new
+bounce-show-delayed = Afficher le message retardé
 bounce-what-to-do = Ce que vous pouvez faire :
 bounce-delayed-do = Vous n'avez rien à faire pour l'instant. Si le message ne peut pas être remis, vous recevrez un nouvel avis.
 bounce-delayed-row-do = Vous n'avez rien à faire pour l'instant. Votre serveur de messagerie poursuit ses tentatives de remise. Vous recevrez un nouvel avis s'il n'y parvient pas.

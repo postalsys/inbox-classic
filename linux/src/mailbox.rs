@@ -980,11 +980,12 @@ impl Mailbox {
     fn selection_shown(&self) {
         self.show_counts();
         self.update_junk_button();
-        let selected = self.refs.borrow().len();
+        // one row: one message, or a collapsed conversation, whose row stands for its first message
+        let one_row = self.list.selected_count() == 1;
         for command in Command::ALL.iter().filter(|c| c.needs_one()) {
-            self.enable(*command, selected == 1);
+            self.enable(*command, one_row);
         }
-        let any = selected > 0;
+        let any = !self.refs.borrow().is_empty();
         for command in Command::ALL.iter().filter(|c| c.needs_some()) {
             self.enable(*command, any);
         }
@@ -2837,6 +2838,8 @@ fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Label) {
     };
     let status = label("status");
     status.set_hexpand(true);
+    // ready, as the status bar says when nothing is going on (and in a window made again in another language)
+    status.set_text(&t!(UiDone));
     let outgoing = label("outgoing");
     outgoing.set_width_chars(34);
     outgoing.set_max_width_chars(48);

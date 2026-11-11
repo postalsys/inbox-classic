@@ -257,6 +257,7 @@ ui-found-srv = Esta configuración se encontró en los registros DNS de su domin
 ui-found-autodiscover = Esta configuración se encontró mediante Microsoft Autodiscover (Exchange).
 ui-found-other = Esta configuración se encontró para esta dirección.
 ui-app-password-needed = { $provider } no acepta su contraseña normal en los programas de correo. Cree una contraseña de aplicación en su cuenta de { $provider } y escríbala en el campo Contraseña del siguiente formulario.
+# review: changed
 ui-app-password-open = ¿Abrir las instrucciones de { $provider } en su navegador?
 ui-plain-warning = Sin cifrado, cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Utilice esta conexión solo con un servidor en su propio equipo o en su red local.
 ui-continue-ask = ¿Continuar?

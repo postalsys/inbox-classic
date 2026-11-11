@@ -71,7 +71,7 @@ pub async fn ask(
     close: &str,
     destructive: Option<&str>,
 ) -> String {
-    let body = question_apart(body);
+    let body = no_lone_word(&question_apart(body));
     let dialog = adw::AlertDialog::new((heading != TITLE).then_some(heading), Some(&body));
     for (id, label) in answers {
         dialog.add_response(id, label);
@@ -96,6 +96,18 @@ fn question_apart(body: &str) -> String {
         Some(at) => format!("{}\n{}", &body[..=at], &body[at + 2..]),
         None => body.to_string(),
     }
+}
+
+/// Each line of an alert's text with a no-break space between its last two words, so the last line never holds a
+/// word alone ("is not an e-mail" then "address.")
+fn no_lone_word(text: &str) -> String {
+    text.split('\n')
+        .map(|line| match line.trim_end().rfind(' ') {
+            Some(at) => format!("{}\u{a0}{}", &line[..at], &line[at + 1..]),
+            None => line.to_string(),
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// Yes or No, No the default for a question that throws something away (`destructive`)
@@ -765,6 +777,11 @@ mod tests {
         );
         assert_eq!(super::question_apart("Delete it?"), "Delete it?");
         assert_eq!(super::question_apart("It is gone. Fine."), "It is gone. Fine.");
+        assert_eq!(
+            super::no_lone_word("one two three\nfour five"),
+            "one two\u{a0}three\nfour\u{a0}five"
+        );
+        assert_eq!(super::no_lone_word("alone"), "alone");
     }
 
     use super::*;

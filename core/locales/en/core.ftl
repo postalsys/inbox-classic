@@ -66,6 +66,8 @@ bounce-delayed = Your message has not been delivered yet
 bounce-delayed-note = Your mail server is still trying to deliver it. You do not need to send it again.
 # the link to the message the notice is about, in Sent Items or another folder
 bounce-show-message = Show the message that bounced
+# the link of a delay's card to the message that is still on its way
+bounce-show-delayed = Show the delayed message
 bounce-what-to-do = What you can do:
 # what to do about a recipient the message is still on its way to: in the card of a delay, and in the card of a failure
 bounce-delayed-do = Nothing yet. If it still cannot be delivered, you will get another notice.

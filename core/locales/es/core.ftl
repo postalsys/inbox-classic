@@ -73,6 +73,9 @@ bounce-failed = Su mensaje no se entregó
 bounce-delayed = Su mensaje aún no se ha entregado
 bounce-delayed-note = Su servidor de correo sigue intentando entregarlo. No necesita enviarlo de nuevo.
 bounce-show-message = Mostrar el mensaje que no se entregó
+# the link of a delay's card to the message that is still on its way
+# review: new
+bounce-show-delayed = Mostrar el mensaje retrasado
 bounce-what-to-do = Qué puede hacer:
 bounce-delayed-do = No necesita hacer nada por ahora. Si el mensaje no se puede entregar, recibirá otro aviso.
 bounce-delayed-row-do = No necesita hacer nada por ahora. Su servidor de correo sigue intentando entregar el mensaje. Recibirá otro aviso si no lo consigue.

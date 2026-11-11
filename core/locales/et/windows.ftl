@@ -90,6 +90,8 @@ win-sign-in-apps-button = &Sisselogimisrakendused...
 win-dont-allow = Ä&ra luba
 win-col-address = Aadress
 win-never-written-to = Pole kunagi kirjutanud
+# review: new
+win-book-find-label = Sisestage nimi või e-posti aadress:
 win-send = &Saada
 # review: changed
 win-dont-send = Ä&ra saada
