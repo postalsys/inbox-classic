@@ -120,7 +120,10 @@ fn words_in_the_language_set() {
     assert!(tr_args(Text::Messages, &[("count", 3u64.into())]).starts_with("[3 "));
     // the dots off a title before the pseudo-language's padding too
     let options = title(Text::CmdOptions);
-    assert!(options.starts_with("[Ö") && options.ends_with("~]") && !options.contains("..."), "{options}");
+    assert!(
+        options.starts_with("[Ö") && options.ends_with("~]") && !options.contains("..."),
+        "{options}"
+    );
     assert_eq!(set_language("xx"), "en");
     assert_eq!(tr_args(Text::Messages, &[("count", 2u64.into())]), "2 messages");
 }
