@@ -100,7 +100,7 @@ fn question_apart(body: &str) -> String {
 
 /// Each line of an alert's text with a no-break space between its last two words, so the last line never holds a
 /// word alone ("is not an e-mail" then "address.")
-fn no_lone_word(text: &str) -> String {
+pub fn no_lone_word(text: &str) -> String {
     text.split('\n')
         .map(|line| match line.trim_end().rfind(' ') {
             Some(at) => format!("{}\u{a0}{}", &line[..at], &line[at + 1..]),

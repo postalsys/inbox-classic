@@ -96,7 +96,8 @@ fn question_dialog(
     answers: &[(&str, &str)],
     name: &str,
 ) -> adw::AlertDialog {
-    let dialog = adw::AlertDialog::new(Some(heading), Some(body));
+    // as the other message boxes: no word alone on a line
+    let dialog = adw::AlertDialog::new(Some(heading), Some(&crate::ui::no_lone_word(body)));
     for (id, label) in answers {
         dialog.add_response(id, label);
     }
