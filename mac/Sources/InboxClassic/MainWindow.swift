@@ -10,7 +10,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     let core: Core
     public let window: NSWindow
     public let mailbox: Mailbox
-    private let statusText = NSTextField(labelWithString: "")
+    private let statusText = NSTextField(labelWithString: Text.uiDone.text)  // as on Windows and Linux, until something happens
     private let outboxText = NSTextField(labelWithString: "")
     private let countsText = NSTextField(labelWithString: "")
     let searchField = NSSearchField()
