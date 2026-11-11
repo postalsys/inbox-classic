@@ -41,6 +41,8 @@ gtk-unsubscribe-failed = No se pudo cancelar la suscripción: { $problem }
 gtk-toolbar-create-mail-menu = Redactar desde una cuenta específica
 gtk-toolbar-send-recv-menu = Enviar y recibir mensajes de una cuenta específica
 gtk-main-menu = Menú principal
+# review: new
+gtk-folder-list = Lista de carpetas
 gtk-quit = Salir
 
 ## The Move and Copy window

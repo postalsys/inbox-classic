@@ -41,6 +41,7 @@ gtk-unsubscribe-failed = Could not unsubscribe: { $problem }
 gtk-toolbar-create-mail-menu = Compose from a specific account
 gtk-toolbar-send-recv-menu = Send and receive mail for a specific account
 gtk-main-menu = Main Menu
+gtk-folder-list = Folder List
 gtk-quit = Quit
 
 ## The Move and Copy window

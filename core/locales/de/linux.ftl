@@ -41,6 +41,8 @@ gtk-unsubscribe-failed = Abbestellen nicht möglich: { $problem }
 gtk-toolbar-create-mail-menu = Nachricht von einem bestimmten Konto schreiben
 gtk-toolbar-send-recv-menu = Nachrichten für ein bestimmtes Konto senden und empfangen
 gtk-main-menu = Hauptmenü
+# review: new
+gtk-folder-list = Ordnerliste
 gtk-quit = Beenden
 
 ## The Move and Copy window

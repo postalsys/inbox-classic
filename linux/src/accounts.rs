@@ -200,7 +200,10 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
     let buttons = gtk::Box::new(gtk::Orientation::Horizontal, 12);
     buttons.set_halign(gtk::Align::Center);
     for kind in &shown {
-        buttons.append(&sign_in_button(*kind, apps.on(*kind), &send));
+        let button = sign_in_button(*kind, apps.on(*kind), &send);
+        // their tops in line, a turned-off one's note under it
+        button.set_valign(gtk::Align::Start);
+        buttons.append(&button);
     }
     if !shown.is_empty() {
         content.append(&buttons);
@@ -276,10 +279,17 @@ fn sign_in_button(kind: ProviderKind, on: bool, chosen: &async_channel::Sender<S
     let image = gtk::Picture::for_resource(&format!("/com/inboxclassic/InboxClassic/brands/{picture}"));
     image.set_can_shrink(true);
     image.set_content_fit(gtk::ContentFit::Contain);
-    // as wide as the picture is at 40 pixels high (the pictures are 374 x 86 and 645 x 123)
-    image.set_size_request(if kind == ProviderKind::Microsoft { 210 } else { 174 }, 40);
-    let button = gtk::Button::builder()
+    // 40 pixels high, both: as wide as each picture is at that height (they are 374 x 86 and 645 x 123), at most, the
+    // height following from the width; a picture's own size would make each as large as its pixels
+    let width = if kind == ProviderKind::Microsoft { 210 } else { 174 };
+    image.set_size_request(width, 40);
+    let clamp = adw::Clamp::builder()
         .child(&image)
+        .maximum_size(width)
+        .tightening_threshold(width)
+        .build();
+    let button = gtk::Button::builder()
+        .child(&clamp)
         .tooltip_text(label.as_str())
         .sensitive(on)
         .build();
