@@ -89,10 +89,12 @@ win-sign-in-apps-button = Applications de &connexion...
 
 ## Agents d'IA
 
+# review: changed
 win-dont-allow = &Ne pas autoriser
 win-col-address = Adresse
 win-never-written-to = Jamais écrit
 win-send = &Envoyer
+# review: changed
 win-dont-send = &Ne pas envoyer
 # review: changed
 win-forget-program-ask = Supprimer ce programme, ses autorisations et l'historique de ses agents ? Une autorisation vous sera de nouveau demandée à la prochaine connexion.

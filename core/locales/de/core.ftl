@@ -88,6 +88,7 @@ bounce-mailbox-disabled = Das Postfach ist deaktiviert
 bounce-mailbox-disabled-why = Die Adresse existiert, aber ihr Postfach wurde abgeschaltet oder wird nicht mehr verwendet.
 bounce-mailbox-disabled-do = Kontaktieren Sie den Empfänger auf anderem Weg und fragen Sie nach seiner aktuellen E-Mail-Adresse.
 bounce-mailbox-full = Das Postfach ist voll
+# review: changed
 bounce-mailbox-full-why = Im Postfach des Empfängers ist kein Platz für neue E-Mail.
 bounce-mailbox-full-do = Senden Sie die Nachricht in ein paar Tagen erneut oder benachrichtigen Sie den Empfänger auf anderem Weg. Nachrichten mit großen Anlagen werden zuerst abgelehnt.
 bounce-spam-blocked = Als Spam abgelehnt
@@ -97,13 +98,17 @@ bounce-virus-detected = Wegen eines Virus abgelehnt
 bounce-virus-detected-why = Der empfangende Server hat in der Nachricht oder ihren Anlagen einen Virus oder andere schädliche Inhalte gefunden.
 bounce-virus-detected-do = Prüfen Sie die Anlagen mit einem Virenscanner. Manche Server lehnen jedes Programm und jedes Archiv ab; teilen Sie solche Dateien stattdessen als Link.
 bounce-ip-blocklisted = Ihr Mailserver steht auf einer Sperrliste
+# review: changed
 bounce-ip-blocklisted-why = Der empfangende Server lehnt Nachrichten von Ihrem Mailserver ab, weil dessen IP-Adresse auf einer Sperrliste steht.
 bounce-ip-blocklisted-do = Es liegt nicht an der Nachricht. Leiten Sie diesen Bericht an Ihren E-Mail-Anbieter weiter, und bitten Sie ihn, den Server von der Liste entfernen zu lassen.
 bounce-domain-blocklisted = Eine Domain steht auf einer Sperrliste
+# review: changed
 bounce-domain-blocklisted-why = Der empfangende Server lehnt die Nachricht ab, weil die Domain Ihrer Adresse oder eine Domain in den Links der Nachricht auf einer Sperrliste steht.
 bounce-domain-blocklisted-do = Wenn die Nachricht Links enthält, versuchen Sie es ohne diese Links. Falls das nicht hilft oder keine Links enthalten sind, leiten Sie diesen Bericht an den E-Mail-Administrator Ihrer Domain weiter.
+# review: changed
 bounce-policy-blocked = Aufgrund der Regeln des empfangenden Servers abgelehnt
 bounce-policy-blocked-why = Die Regeln des empfangenden Servers lassen diese Nachricht nicht durch, zum Beispiel wegen ihrer Größe, ihrer Anlagen oder ihres Absenders.
+# review: changed
 bounce-policy-blocked-do = Die Serverantwort unter „Details“ nennt häufig den Grund. Fragen Sie den Empfänger, ob er solche Nachrichten empfangen kann.
 bounce-geo-blocked = Wegen der Herkunft abgelehnt
 bounce-geo-blocked-why = Der empfangende Server nimmt keine E-Mail aus dem Land oder Netz an, in dem Ihr Mailserver steht.
@@ -113,6 +118,7 @@ bounce-relay-denied-why = Ein Server hat die Zustellung abgelehnt, oft weil ohne
 bounce-relay-denied-do = Prüfen Sie unter Datei > Konten die Einstellungen des Postausgangsservers und ob die Anmeldung am Server eingerichtet ist.
 bounce-auth-failure = Ihre Absenderadresse konnte nicht bestätigt werden
 bounce-auth-failure-why = Der empfangende Server konnte nicht bestätigen, dass die Nachricht wirklich von Ihrer Domain kommt (SPF, DKIM oder DMARC).
+# review: changed
 bounce-auth-failure-do = Leiten Sie diesen Bericht an den E-Mail-Administrator Ihrer Domain weiter, damit er die Domain-Einstellungen korrigieren kann. Bis dahin kann es helfen, über den Server Ihres Anbieters zu senden.
 bounce-rate-limited = Zu viele Nachrichten auf einmal
 bounce-rate-limited-why = Der empfangende Server begrenzt derzeit die Anzahl der Nachrichten, die er von Ihrem Mailserver annimmt.
@@ -125,6 +131,7 @@ bounce-server-error-why = Der empfangende Server war nicht erreichbar oder konnt
 bounce-server-error-do = Senden Sie die Nachricht später erneut. Wenn das Problem weiterhin auftritt, prüfen Sie den Teil der Adresse nach dem @-Zeichen auf Tippfehler.
 bounce-unknown = Nicht zugestellt
 bounce-unknown-why = Der Bericht enthält keinen eindeutigen Grund für die fehlgeschlagene Zustellung.
+# review: changed
 bounce-unknown-do = Die Serverantwort unter „Details“ enthält möglicherweise weitere Informationen. Wenn diese nicht helfen, leiten Sie den Bericht an Ihren E-Mail-Anbieter weiter.
 
 ## Several messages selected
@@ -346,6 +353,7 @@ error-no-password = kein Passwort für dieses Konto
 error-no-sign-in = keine Anmeldedaten für dieses Konto vorhanden
 error-provider-missing = diese Version kann sich nicht bei { $provider } anmelden: wurde die Anmelde-App entfernt?
 error-provider-servers = die Server dieses Kontos stimmen nicht mit denen der Anmelde-App überein
+# review: changed
 error-app-scopes = { $reason }. Der Mailserver hat das Token der Anmelde-App abgelehnt. Prüfen Sie, ob die Berechtigungen (Scopes) der App den Zugriff auf E-Mails erlauben
 error-in-folder = { $folder }: { $reason }
 

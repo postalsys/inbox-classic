@@ -220,6 +220,7 @@ ui-cannot-unsubscribe = Este mensaje no permite cancelar la suscripción.
 ui-unsubscribed = Baja confirmada. La lista indica que dejará de enviarle estos mensajes.
 ui-not-unsubscribed = No se pudo cancelar la suscripción: { $reason }
 ui-event-span = { $start } a { $end }
+# review: changed
 ui-event-floating = { $when } (hora del remitente)
 ui-invitation = Invitación: { $title }
 ui-invitation-updated = Invitación actualizada: { $title }
@@ -281,6 +282,7 @@ ui-sign-in-not-started = No se pudo iniciar la sesión en el navegador.
 ui-sign-in-in-browser = Inicie sesión en { $account } en la ventana del navegador que se abrió y luego vuelva aquí.
 ui-sign-in-failed = No se pudo iniciar sesión: { $reason }
 ui-account-not-saved = No se pudo guardar la cuenta.
+# review: changed
 ui-start-intro = Gmail, Google Workspace, Outlook.com y Microsoft 365: inicie sesión en la página de Google o de Microsoft. Su contraseña se escribe allí, nunca en Inbox Classic.
 ui-start-intro-apps = Inicie sesión en el navegador con una de sus aplicaciones de inicio de sesión (Más opciones de inicio de sesión), o agregue abajo cualquier cuenta de correo con su nombre y su dirección.
 ui-use-app-password = Usar contraseña de aplicación
@@ -341,7 +343,8 @@ ui-client-public = ID de cliente: { $client }, un cliente público (sin secreto)
 ui-no-accounts = Ninguna cuenta
 ui-remove-sign-in-app = Quitar aplicación de inicio de sesión
 ui-remove-sign-in-app-ask = ¿Quitar la aplicación de inicio de sesión { $name } y su secreto de cliente guardado?
-ui-sign-in-app-not-removed = No se quitó la aplicación de inicio de sesión: { $reason }
+# review: changed
+ui-sign-in-app-not-removed = No se quitó la aplicación de inicio de sesión. { $reason }
 ui-sign-in-apps-intro = Las aplicaciones de inicio de sesión permiten que las cuentas inicien sesión en el navegador. Una que no esté marcada no se ofrece a las cuentas nuevas; las cuentas que ya la usan siguen funcionando.
 ui-col-issuer = Emisor
 ui-col-used-by = Usada por

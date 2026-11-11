@@ -87,10 +87,12 @@ win-sign-in-apps-button = Aplicaciones de &inicio de sesión...
 
 ## Agentes de IA
 
+# review: changed
 win-dont-allow = &No permitir
 win-col-address = Dirección
 win-never-written-to = Nunca le ha escrito
 win-send = &Enviar
+# review: changed
 win-dont-send = &No enviar
 win-forget-program-ask = ¿Quitar este programa, sus permisos y el historial de sus agentes? Se le volverá a pedir autorización la próxima vez que el programa se conecte.
 win-clear-log-ask = ¿Borrar el historial de los agentes? Esto no deshará los cambios realizados.

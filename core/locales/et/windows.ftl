@@ -86,10 +86,12 @@ win-sign-in-apps-button = &Sisselogimisrakendused...
 
 ## Tehisintellekti agendid
 
+# review: changed
 win-dont-allow = Ä&ra luba
 win-col-address = Aadress
 win-never-written-to = Pole kunagi kirjutanud
 win-send = &Saada
+# review: changed
 win-dont-send = Ä&ra saada
 win-forget-program-ask = Kas eemaldada see programm koos õiguste ja agentide tegevusajalooga? Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
 win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agentide tehtud muudatusi tagasi.

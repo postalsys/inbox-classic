@@ -221,6 +221,7 @@ ui-cannot-unsubscribe = Diese Nachricht bietet keine Möglichkeit zum Abbestelle
 ui-unsubscribed = Abmeldung bestätigt. Laut Mailingliste erhalten Sie diese E-Mails künftig nicht mehr.
 ui-not-unsubscribed = Abbestellen nicht möglich: { $reason }
 ui-event-span = { $start } bis { $end }
+# review: changed
 ui-event-floating = { $when } (Zeit des Absenders)
 ui-invitation = Einladung: { $title }
 ui-invitation-updated = Geänderte Einladung: { $title }
@@ -282,6 +283,7 @@ ui-sign-in-not-started = Die Anmeldung im Browser konnte nicht gestartet werden.
 ui-sign-in-in-browser = Melden Sie sich im geöffneten Browserfenster bei { $account } an und kehren Sie dann hierher zurück.
 ui-sign-in-failed = Die Anmeldung ist fehlgeschlagen: { $reason }
 ui-account-not-saved = Das Konto konnte nicht gespeichert werden.
+# review: changed
 ui-start-intro = Gmail, Google Workspace, Outlook.com und Microsoft 365: Melden Sie sich auf der Seite von Google oder Microsoft an. Ihr Passwort geben Sie dort ein, nie in Inbox Classic.
 ui-start-intro-apps = Melden Sie sich im Browser mit einer Ihrer Anmelde-Apps an (Weitere Anmeldeoptionen), oder fügen Sie unten ein beliebiges E-Mail-Konto mit Ihrem Namen und Ihrer Adresse hinzu.
 ui-use-app-password = App-Passwort verwenden
@@ -342,7 +344,8 @@ ui-client-public = Client-ID: { $client }, ein öffentlicher Client (ohne Geheim
 ui-no-accounts = Keine Konten
 ui-remove-sign-in-app = Anmelde-App entfernen
 ui-remove-sign-in-app-ask = Die Anmelde-App { $name } und ihr gespeichertes Client-Geheimnis entfernen?
-ui-sign-in-app-not-removed = Die Anmelde-App wurde nicht entfernt: { $reason }
+# review: changed
+ui-sign-in-app-not-removed = Die Anmelde-App wurde nicht entfernt. { $reason }
 ui-sign-in-apps-intro = Anmelde-Apps ermöglichen die Anmeldung im Browser. Apps ohne Häkchen werden für neue Konten nicht angeboten. Bestehende Konten können sie weiterhin verwenden.
 ui-col-issuer = Aussteller
 ui-col-used-by = Verwendet von

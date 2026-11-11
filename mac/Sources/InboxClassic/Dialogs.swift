@@ -172,6 +172,8 @@ final class FormWindow: NSObject, NSWindowDelegate {
         window.contentView = stack
         buttons.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
         introLabel.widthAnchor.constraint(equalToConstant: 420).isActive = true
+        // as tall as what it holds, so the buttons sit 20pt under the last field
+        window.setContentSize(NSSize(width: 460, height: stack.fittingSize.height))
         window.initialFirstResponder = inputs.indices.contains(focus) ? inputs[focus] : inputs.first
     }
 

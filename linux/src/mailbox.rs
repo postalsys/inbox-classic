@@ -1364,6 +1364,8 @@ impl Mailbox {
 
     pub fn set_status(&self, text: &str) {
         self.status.set_text(text);
+        // the whole text as the tip, as a long one (an error and what happens next) is cut short
+        self.status.set_tooltip_text((!text.is_empty()).then_some(text));
     }
 
     pub fn set_outgoing(&self, text: &str) {

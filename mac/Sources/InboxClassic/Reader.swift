@@ -100,6 +100,9 @@ final class Reader: NSObject {
             top.trailingAnchor.constraint(equalTo: headerBox.trailingAnchor),
             top.topAnchor.constraint(equalTo: headerBox.topAnchor),
             top.bottomAnchor.constraint(equalTo: headerBox.bottomAnchor),
+            // the same 8pt under the text with a logo as without, and never shorter than the logo
+            header.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
+            logo.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
         ])
         headerLine.boxType = .separator
 

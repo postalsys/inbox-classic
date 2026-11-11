@@ -114,6 +114,7 @@ bounce-mailbox-disabled = La boîte aux lettres est désactivée
 bounce-mailbox-disabled-why = L'adresse existe, mais sa boîte aux lettres a été désactivée ou n'est plus utilisée.
 bounce-mailbox-disabled-do = Contactez le destinataire par un autre moyen et demandez-lui son adresse e-mail actuelle.
 bounce-mailbox-full = La boîte aux lettres est pleine
+# review: changed
 bounce-mailbox-full-why = La boîte aux lettres du destinataire n'a plus de place pour le nouveau courrier.
 bounce-mailbox-full-do = Renvoyez le message dans quelques jours ou prévenez le destinataire par un autre moyen. Les messages contenant des pièces jointes volumineuses sont refusés en premier.
 bounce-spam-blocked = Refusé comme courrier indésirable
@@ -123,13 +124,17 @@ bounce-virus-detected = Refusé en raison d'un virus
 bounce-virus-detected-why = Le serveur de réception a trouvé un virus ou un autre contenu dangereux dans le message ou ses pièces jointes.
 bounce-virus-detected-do = Vérifiez les pièces jointes avec un antivirus. Certains serveurs refusent tout programme ou toute archive : partagez plutôt ces fichiers par un lien.
 bounce-ip-blocklisted = Votre serveur de messagerie est sur une liste de blocage
+# review: changed
 bounce-ip-blocklisted-why = Le serveur de réception refuse les messages de votre serveur de messagerie, car son adresse IP figure sur une liste de blocage.
 bounce-ip-blocklisted-do = Le message n'est pas en cause. Transférez cet avis à votre fournisseur de messagerie et demandez-lui de faire retirer le serveur de la liste.
 bounce-domain-blocklisted = Un domaine est sur une liste de blocage
+# review: changed
 bounce-domain-blocklisted-why = Le serveur de réception refuse le message car le domaine de votre adresse, ou un domaine des liens du message, est sur une liste de blocage.
 bounce-domain-blocklisted-do = Si le message contient des liens, essayez de l'envoyer sans ces liens. Si cela ne résout pas le problème ou si le message ne contient pas de liens, transmettez cet avis à la personne qui gère la messagerie de votre domaine.
+# review: changed
 bounce-policy-blocked = Refusé en application des règles du serveur de réception
 bounce-policy-blocked-why = Les règles du serveur de réception ne laissent pas passer ce message, par exemple à cause de sa taille, de ses pièces jointes ou de son expéditeur.
+# review: changed
 bounce-policy-blocked-do = La réponse du serveur, dans la section Détails, indique souvent la raison du refus. Demandez au destinataire si sa messagerie accepte ce type de message.
 bounce-geo-blocked = Refusé en raison de sa provenance
 bounce-geo-blocked-why = Le serveur de réception n'accepte pas le courrier du pays ou du réseau où se trouve votre serveur de messagerie.
@@ -140,6 +145,7 @@ bounce-relay-denied-why = Un serveur a refusé de relayer le message, souvent pa
 bounce-relay-denied-do = Dans Fichier > Comptes, vérifiez les paramètres du serveur sortant et assurez-vous que l'authentification auprès de ce serveur est configurée.
 bounce-auth-failure = Votre adresse d'expéditeur n'a pas pu être vérifiée
 bounce-auth-failure-why = Le serveur de réception n'a pas pu confirmer que le message venait bien de votre domaine (SPF, DKIM ou DMARC).
+# review: changed
 bounce-auth-failure-do = Transmettez cet avis à la personne qui gère la messagerie de votre domaine pour qu'elle en corrige les paramètres. En attendant, essayez d'envoyer le message via le serveur de votre fournisseur.
 bounce-rate-limited = Trop de messages à la fois
 bounce-rate-limited-why = Le serveur de réception limite temporairement le nombre de messages acceptés en provenance de votre serveur de messagerie.
@@ -152,6 +158,7 @@ bounce-server-error-why = Le serveur de réception n'a pas pu être joint, ou n'
 bounce-server-error-do = Renvoyez le message plus tard. Si le problème persiste, vérifiez que la partie de l'adresse située après le signe @ ne contient pas de fautes de frappe.
 bounce-unknown = Non remis
 bounce-unknown-why = L'avis ne précise pas clairement la raison de l'échec.
+# review: changed
 bounce-unknown-do = La réponse du serveur, dans la section Détails, peut fournir des précisions. Si cela ne vous aide pas, transmettez cet avis à votre fournisseur de messagerie.
 
 ## Several messages selected

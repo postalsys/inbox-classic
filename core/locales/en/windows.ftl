@@ -86,11 +86,11 @@ win-sign-in-apps-button = Sign-in A&pps...
 
 ## AI agents
 
-win-dont-allow = &Don't Allow
+win-dont-allow = &Don’t Allow
 win-col-address = Address
 win-never-written-to = Never written to
 win-send = &Send
-win-dont-send = &Don't Send
+win-dont-send = &Don’t Send
 win-forget-program-ask = Remove this program, its permissions and its agents’ activity history? You will be asked for permission again the next time it connects.
 win-clear-log-ask = Clear the agents’ activity history? This will not undo changes made by the agents.
 win-agent-programs = &Programs whose agents have requested access to your mail:

@@ -220,6 +220,7 @@ ui-cannot-unsubscribe = See kiri ei sisalda tellimusest loobumise võimalust.
 ui-unsubscribed = Tellimusest loobumise taotlus võeti vastu. Meililisti kinnitusel teile enam neid kirju ei saadeta.
 ui-not-unsubscribed = Tellimusest ei saanud loobuda: { $reason }
 ui-event-span = { $start } kuni { $end }
+# review: changed
 ui-event-floating = { $when } (saatja aeg)
 ui-invitation = Kutse: { $title }
 ui-invitation-updated = Uuendatud kutse: { $title }
@@ -283,6 +284,7 @@ ui-sign-in-not-started = Brauseris sisselogimist ei saanud alustada.
 ui-sign-in-in-browser = Logige avanenud brauseriaknas sisse kontole { $account } ja tulge siis siia tagasi.
 ui-sign-in-failed = Sisselogimine ei õnnestunud: { $reason }
 ui-account-not-saved = Kontot ei saanud salvestada.
+# review: changed
 ui-start-intro = Gmail, Google Workspace, Outlook.com ja Microsoft 365: logige sisse Google'i või Microsofti enda lehel. Parool sisestatakse seal, mitte kunagi Inbox Classicusse.
 ui-start-intro-apps = Logige brauseris sisse mõne oma sisselogimisrakendusega (Muud sisselogimisviisid) või lisage allpool mis tahes meilikonto oma nime ja aadressiga.
 ui-use-app-password = Kasuta rakenduse parooli
@@ -343,7 +345,8 @@ ui-client-public = Kliendi ID: { $client }, avalik klient (saladuseta).
 ui-no-accounts = Kontosid pole
 ui-remove-sign-in-app = Eemalda sisselogimisrakendus
 ui-remove-sign-in-app-ask = Kas eemaldada sisselogimisrakendus { $name } ja selle salvestatud kliendi saladus?
-ui-sign-in-app-not-removed = Sisselogimisrakendust ei eemaldatud: { $reason }
+# review: changed
+ui-sign-in-app-not-removed = Sisselogimisrakendust ei eemaldatud. { $reason }
 ui-sign-in-apps-intro = Sisselogimisrakendused võimaldavad kontodele brauseris sisse logida. Märkimata rakendusi uutele kontodele ei pakuta. Olemasolevad kontod saavad neid endiselt kasutada.
 ui-col-issuer = Väljaandja
 ui-col-used-by = Kasutab

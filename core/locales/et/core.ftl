@@ -88,6 +88,7 @@ bounce-mailbox-disabled = Postkast on suletud
 bounce-mailbox-disabled-why = Aadress on olemas, kuid selle postkast on välja lülitatud või pole enam kasutusel.
 bounce-mailbox-disabled-do = Võtke saajaga muul viisil ühendust ja küsige tema praegust e-posti aadressi.
 bounce-mailbox-full = Postkast on täis
+# review: changed
 bounce-mailbox-full-why = Saaja postkastis pole uute kirjade jaoks ruumi.
 bounce-mailbox-full-do = Saatke kiri mõne päeva pärast uuesti või andke saajale muul viisil teada. Suurte manustega kirjad lükatakse tagasi esimesena.
 bounce-spam-blocked = Tagasi lükatud rämpspostina
@@ -97,13 +98,17 @@ bounce-virus-detected = Tagasi lükatud viiruse tõttu
 bounce-virus-detected-why = Vastuvõttev server leidis kirjast või selle manustest viiruse või muu kahjuliku sisu.
 bounce-virus-detected-do = Kontrollige manuseid viirusetõrjega. Mõni server lükkab tagasi kõik programmid ja arhiivid, nii et jagage selliseid faile lingina.
 bounce-ip-blocklisted = Teie meiliserver on blokeerimisloendis
+# review: changed
 bounce-ip-blocklisted-why = Vastuvõttev server ei võta vastu kirju serverilt, mis teie kirja saatis, sest selle serveri aadress on blokeerimisloendis.
 bounce-ip-blocklisted-do = Viga pole kirjas. Edastage see teade oma e-posti teenusepakkujale ja paluge tal server loendist eemaldada.
 bounce-domain-blocklisted = Domeen on blokeerimisloendis
+# review: changed
 bounce-domain-blocklisted-why = Vastuvõttev server lükkab kirja tagasi, sest teie aadressi domeen või mõni kirja linkides olev domeen on blokeerimisloendis.
 bounce-domain-blocklisted-do = Kui kirjas on linke, proovige saata see ilma nendeta. Kui see ei aita või linke pole, edastage see teade oma domeeni e-posti haldajale.
+# review: changed
 bounce-policy-blocked = Tagasi lükatud vastuvõtva serveri reeglite tõttu
 bounce-policy-blocked-why = Vastuvõtva serveri reeglid ei lase seda kirja läbi, näiteks selle suuruse, manuste või saatja tõttu.
+# review: changed
 bounce-policy-blocked-do = Jaotises „Üksikasjad“ olev serveri vastus selgitab sageli põhjust. Küsige saajalt, kas ta saab selliseid kirju vastu võtta.
 bounce-geo-blocked = Tagasi lükatud päritolu tõttu
 bounce-geo-blocked-why = Vastuvõttev server ei võta kirju vastu riigist või võrgust, kus teie meiliserver asub.
@@ -113,6 +118,7 @@ bounce-relay-denied-why = Server keeldus kirja edasi toimetamast, sageli seetõt
 bounce-relay-denied-do = Kontrollige menüüs Fail > Kontod väljamineva posti serveri sätteid ja veenduge, et serverisse sisselogimine on seadistatud.
 bounce-auth-failure = Teie saatja-aadressi ei saanud kinnitada
 bounce-auth-failure-why = Vastuvõttev server ei saanud kinnitada, et kiri tuli tõesti teie domeenist (SPF, DKIM või DMARC).
+# review: changed
 bounce-auth-failure-do = Edastage see teade oma domeeni e-posti haldajale, et ta saaks domeeni sätted parandada. Seni võib aidata saatmine teenusepakkuja enda serveri kaudu.
 bounce-rate-limited = Liiga palju kirju korraga
 bounce-rate-limited-why = Vastuvõttev server piirab praegu teie meiliserverilt vastuvõetavate kirjade hulka.
@@ -125,6 +131,7 @@ bounce-server-error-why = Vastuvõtva serveriga ei saanud ühendust või ei saan
 bounce-server-error-do = Saatke kiri hiljem uuesti. Kui probleem kordub, kontrollige, kas aadressi @-märgi järel olevas domeeninimes on trükivigu.
 bounce-unknown = Kohale toimetamata
 bounce-unknown-why = Teates pole kohaletoimetamise ebaõnnestumise põhjust selgelt kirjas.
+# review: changed
 bounce-unknown-do = Lisateavet võib leida jaotises „Üksikasjad“ olevast serveri vastusest. Kui sellest pole abi, edastage see teade oma meiliteenuse pakkujale.
 
 ## Several messages selected
@@ -333,6 +340,7 @@ error-no-password = selle konto jaoks pole parooli
 error-no-sign-in = selle konto sisselogimisandmed puuduvad
 error-provider-missing = see versioon ei saa teenusesse { $provider } sisse logida: kas selle sisselogimisrakendus on eemaldatud?
 error-provider-servers = konto serverid ei vasta sisselogimisrakenduse serveritele
+# review: changed
 error-app-scopes = { $reason }. Meiliserver lükkas sisselogimisrakenduse juurdepääsutõendi tagasi. Kontrollige, kas rakenduse juurdepääsuõigused (scopes) lubavad e-posti kasutada
 error-in-folder = { $folder }: { $reason }
 

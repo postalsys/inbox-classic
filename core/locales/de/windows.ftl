@@ -87,10 +87,12 @@ win-sign-in-apps-button = &Anmelde-Apps...
 
 ## KI-Agenten
 
+# review: changed
 win-dont-allow = &Nicht erlauben
 win-col-address = Adresse
 win-never-written-to = Nie angeschrieben
 win-send = &Senden
+# review: changed
 win-dont-send = &Nicht senden
 win-forget-program-ask = Dieses Programm mit seinen Berechtigungen und dem Aktivitätsverlauf seiner Agenten entfernen? Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
 win-clear-log-ask = Aktivitätsverlauf der Agenten löschen? Die vorgenommenen Änderungen werden dadurch nicht rückgängig gemacht.

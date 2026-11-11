@@ -221,6 +221,7 @@ ui-cannot-unsubscribe = Ce message ne permet pas de vous désabonner.
 ui-unsubscribed = Désabonnement confirmé. La liste indique que vous ne recevrez plus ces messages.
 ui-not-unsubscribed = Le désabonnement a échoué : { $reason }
 ui-event-span = { $start } à { $end }
+# review: changed
 ui-event-floating = { $when } (heure de l'expéditeur)
 ui-invitation = Invitation : { $title }
 ui-invitation-updated = Invitation mise à jour : { $title }
@@ -285,6 +286,7 @@ ui-sign-in-not-started = La connexion par le navigateur n'a pas pu démarrer.
 ui-sign-in-in-browser = Connectez-vous à { $account } dans la fenêtre du navigateur qui s'est ouverte, puis revenez ici.
 ui-sign-in-failed = La connexion a échoué : { $reason }
 ui-account-not-saved = Le compte n'a pas pu être enregistré.
+# review: changed
 ui-start-intro = Gmail, Google Workspace, Outlook.com et Microsoft 365 : connectez-vous sur la page de Google ou de Microsoft. Votre mot de passe y est saisi, jamais dans Inbox Classic.
 ui-start-intro-apps = Connectez-vous par le navigateur avec l'une de vos applications de connexion (Autres options de connexion), ou ajoutez ci-dessous n'importe quel compte de messagerie avec votre nom et votre adresse.
 ui-use-app-password = Utiliser un mot de passe d'application
@@ -348,7 +350,8 @@ ui-client-public = ID client : { $client }, un client public (sans secret).
 ui-no-accounts = Aucun compte
 ui-remove-sign-in-app = Supprimer l'application de connexion
 ui-remove-sign-in-app-ask = Supprimer l'application de connexion { $name } et son secret client enregistré ?
-ui-sign-in-app-not-removed = L'application de connexion n'a pas été supprimée : { $reason }
+# review: changed
+ui-sign-in-app-not-removed = L'application de connexion n'a pas été supprimée. { $reason }
 ui-sign-in-apps-intro = Les applications de connexion permettent aux comptes de se connecter par le navigateur. Une application non cochée n'est pas proposée aux nouveaux comptes ; les comptes qui l'utilisent déjà continuent de fonctionner.
 ui-col-issuer = Émetteur
 ui-col-used-by = Utilisée par

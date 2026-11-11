@@ -624,7 +624,7 @@ mod card_tests {
         };
         assert_eq!(
             when(&late),
-            "2025-12-01, 12:00 to 2025-12-02, 01:00 (the sender's time)"
+            "2025-12-01, 12:00 to 2025-12-02, 01:00 (the sender\u{2019}s time)"
         );
     }
 }

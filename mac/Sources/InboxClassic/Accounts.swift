@@ -267,9 +267,11 @@ private final class StartPage: NSObject {
             let grid = NSGridView(views: [[NSTextField(labelWithString: Text.uiFieldName.text), nameField],
                                           [NSTextField(labelWithString: Text.uiFieldEmail.text), emailField]])
             grid.column(at: 0).xPlacement = .trailing
-            grid.column(at: 1).width = 300
+            grid.column(at: 1).xPlacement = .fill
             grid.rowAlignment = .firstBaseline
             rows.append(grid)
+            // the fields end at the right margin; longer labels make them narrower
+            grid.widthAnchor.constraint(equalToConstant: width).isActive = true
         }
         let cancel = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"
@@ -297,7 +299,7 @@ private final class StartPage: NSObject {
     }
 
     private func linkButton(_ title: String, action: Selector) -> NSButton {
-        let button = NSButton(title: title, target: self, action: action)
+        let button = LinkButton(title: title, target: self, action: action)
         button.isBordered = false
         button.attributedTitle = NSAttributedString(string: title, attributes: [
             .foregroundColor: NSColor.linkColor, .underlineStyle: NSUnderlineStyle.single.rawValue,
@@ -763,4 +765,9 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         window.orderOut(nil)
         return changed
     }
+}
+
+/// a borderless link button whose text lines up with the labels: its cell draws the title 2pt in
+private final class LinkButton: NSButton {
+    override var alignmentRectInsets: NSEdgeInsets { NSEdgeInsets(top: 0, left: 2, bottom: 0, right: 0) }
 }

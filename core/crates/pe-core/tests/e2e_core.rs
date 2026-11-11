@@ -1257,7 +1257,7 @@ fn signs_in_with_a_sign_in_app() {
         unreachable!()
     };
     assert_eq!(kind, FailureKind::Authentication);
-    assert!(message.contains("check that the app's scopes"), "{message}");
+    assert!(message.contains("check that the app\u{2019}s scopes"), "{message}");
 
     // removed once nothing uses it, and its account goes first
     core.remove_account(bob).unwrap();

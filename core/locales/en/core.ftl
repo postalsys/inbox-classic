@@ -98,7 +98,7 @@ bounce-mailbox-disabled = The mailbox is closed
 bounce-mailbox-disabled-why = The address exists, but its mailbox has been switched off or is no longer used.
 bounce-mailbox-disabled-do = Reach the person another way and ask for an address they use now.
 bounce-mailbox-full = The mailbox is full
-bounce-mailbox-full-why = The recipient's mailbox has no room for new mail.
+bounce-mailbox-full-why = The recipient’s mailbox has no room for new mail.
 bounce-mailbox-full-do = Send it again in a few days, or let the person know another way. Large attachments are refused first.
 bounce-spam-blocked = Refused as spam
 bounce-spam-blocked-why = The receiving server took the message for spam.
@@ -107,14 +107,14 @@ bounce-virus-detected = Refused for a virus
 bounce-virus-detected-why = The receiving server found a virus or other harmful content in the message or its attachments.
 bounce-virus-detected-do = Check the attachments with a virus scanner. Some servers refuse every program or archive, so share such files as a link instead.
 bounce-ip-blocklisted = Your mail server is on a blocklist
-bounce-ip-blocklisted-why = The receiving server refuses mail from the server that sent yours, because that server's address is on a blocklist.
+bounce-ip-blocklisted-why = The receiving server refuses mail from the server that sent yours, because that server’s address is on a blocklist.
 bounce-ip-blocklisted-do = The message is not the problem. Forward this notice to your mail provider and ask them to have the server taken off the list.
 bounce-domain-blocklisted = A domain is on a blocklist
-bounce-domain-blocklisted-why = The receiving server refuses the message because your address's domain, or a domain in the message's links, is on a blocklist.
+bounce-domain-blocklisted-why = The receiving server refuses the message because your address’s domain, or a domain in the message’s links, is on a blocklist.
 bounce-domain-blocklisted-do = If the message has links, try it without them. Otherwise forward this notice to whoever runs mail for your domain.
-bounce-policy-blocked = Refused by the receiving server's rules
+bounce-policy-blocked = Refused by the receiving server’s rules
 bounce-policy-blocked-why = The rules of the receiving server do not let this message through, for example because of its size, its attachments or who sent it.
-bounce-policy-blocked-do = The server's own words under Details often give the reason. Ask the recipient whether they can accept such mail.
+bounce-policy-blocked-do = The server’s own words under Details often give the reason. Ask the recipient whether they can accept such mail.
 bounce-geo-blocked = Refused for where it came from
 bounce-geo-blocked-why = The receiving server does not take mail from the country or network your mail server is in.
 bounce-geo-blocked-do = Reach the person another way, or ask your mail provider about it.
@@ -123,7 +123,7 @@ bounce-relay-denied-why = A server refused to deliver the message onward, often 
 bounce-relay-denied-do = Check the outgoing server of the account in File > Accounts, and that it signs in.
 bounce-auth-failure = Your sender address could not be verified
 bounce-auth-failure-why = The receiving server could not confirm that the message really came from your domain (SPF, DKIM or DMARC).
-bounce-auth-failure-do = Forward this notice to whoever runs mail for your domain: its settings need fixing. Sending through your provider's own server may help meanwhile.
+bounce-auth-failure-do = Forward this notice to whoever runs mail for your domain: its settings need fixing. Sending through your provider’s own server may help meanwhile.
 bounce-rate-limited = Too much mail at once
 bounce-rate-limited-why = The receiving server takes fewer messages from your mail server for now.
 bounce-rate-limited-do = Wait a while and send it again. When writing to many people, send to fewer at a time.
@@ -135,7 +135,7 @@ bounce-server-error-why = The receiving server could not be reached, or could no
 bounce-server-error-do = Send it again later. If it keeps failing, check the part of the address after the @ for typing mistakes.
 bounce-unknown = Not delivered
 bounce-unknown-why = The notice does not say clearly why.
-bounce-unknown-do = The server's own words under Details may tell more. If they do not help, forward this notice to your mail provider.
+bounce-unknown-do = The server’s own words under Details may tell more. If they do not help, forward this notice to your mail provider.
 
 ## Several messages selected
 
@@ -343,7 +343,7 @@ error-no-password = no password for this account
 error-no-sign-in = no sign-in for this account
 error-provider-missing = this build can not sign in to { $provider }: is its sign-in app removed?
 error-provider-servers = this account’s servers do not match its sign-in app’s servers
-error-app-scopes = { $reason }. The mail server did not take the sign-in app's token: check that the app's scopes give access to mail
+error-app-scopes = { $reason }. The mail server did not take the sign-in app’s token: check that the app’s scopes give access to mail
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
