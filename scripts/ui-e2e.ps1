@@ -3363,6 +3363,8 @@ public static class Dragger {
     $alone = [bool](WaitFor { (StatusPart $mainStatus 2) -match "^$workCount message" -and @(SubjectRows 'Budget for the next quarter').Count -eq 1 } 20)
     Check ($alone -and @(SubjectRows 'Dinner on Friday').Count -eq 0) "the second account's row lists its Inbox alone, not the first account's message ($(StatusPart $mainStatus 2) of $workCount)"
     Check ((& $folderBar) -eq ' Inbox - Work' -and (WindowText $main) -eq 'Inbox - Work - Inbox Classic') "the folder bar and the title name the Inbox and the account ($(& $folderBar); $(WindowText $main))"
+    # no message selected, so the second account's mail stays unread for Mark All Read below
+    Shot $main 'all-inboxes-3-accounts'
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
     $both = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
     Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match "^$both message" } 20)) "All Inboxes again lists both accounts' Inboxes ($(StatusPart $mainStatus 2) of $both)"
@@ -3381,10 +3383,6 @@ public static class Dragger {
     }
     $renamed = [bool](WaitFor { (AccountRow 'Second') -ne [IntPtr]::Zero -and @(& $rowTexts)[-1] -match '^Second( \(\d+\))?$' } 20)
     Check $renamed "set to Second, the account's heading and its row under All Inboxes say Second ($((& $rowTexts) -join ', '))"
-    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, @(AllInboxesRows)[1])
-    # no message selected, so the second account's mail stays unread for Mark All Read below
-    [void](WaitFor { (& $folderBar) -eq ' Inbox - Second' } 10)
-    Shot $main 'all-inboxes-3-accounts'
     # the first account's right-click menu, as a right-click on its row opens it
     $alex = AccountRow 'inboxclassic.test'
     [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
