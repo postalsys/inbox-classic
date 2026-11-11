@@ -17,9 +17,12 @@ use crate::app::shell;
 const PAGE: u32 = 100;
 /// Pages kept while the list scrolls, the least recently used dropped first
 const PAGES_KEPT: usize = 8;
-/// The widths the Subject and Folder columns start with
-const SUBJECT_WIDTH: i32 = 320;
+/// The widths the Subject and Folder columns start with; the Subject column takes what the others leave, so in a
+/// wide window it is wider
+const SUBJECT_WIDTH: i32 = 200;
 const FOLDER_WIDTH: i32 = 130;
+/// The least the Folder column of a search leaves the Subject column
+const MIN_SUBJECT_WIDTH: i32 = 90;
 
 mod imp {
     use super::*;
@@ -153,6 +156,10 @@ pub struct MessageList {
     sort: Cell<Sort>,
     /// Sent Items and Drafts: the person column is To, with the recipients (the core says when)
     recipients: Rc<Cell<bool>>,
+    /// What the shown Folder column took of the Subject column's width, given back when it goes
+    folder_room: Cell<i32>,
+    /// A compact window's dates: the time of today's messages, the date of older ones
+    compact_dates: Rc<Cell<bool>>,
 }
 
 impl MessageList {
@@ -189,8 +196,15 @@ impl MessageList {
             }
         });
         let subject = subject_column();
-        let received = text_column(&t!(UiColReceived), 130, false, 0.0, |m| {
-            m.info.display_date().map(crate::ui::format_date).unwrap_or_default()
+        let compact_dates = Rc::new(Cell::new(false));
+        let compact = compact_dates.clone();
+        let received = text_column(&t!(UiColReceived), date_width(false), false, 0.0, move |m| {
+            let format = if compact.get() {
+                crate::ui::format_date_compact
+            } else {
+                crate::ui::format_date
+            };
+            m.info.display_date().map(format).unwrap_or_default()
         });
         let folder = text_column(&t!(UiColFolder), FOLDER_WIDTH, false, 0.0, |m| {
             shell().main().row_folder(m.folder_id)
@@ -217,6 +231,8 @@ impl MessageList {
             sorting: Cell::new(false),
             sort: Cell::new(Sort::default()),
             recipients,
+            folder_room: Cell::new(0),
+            compact_dates,
         })
     }
 
@@ -272,6 +288,37 @@ impl MessageList {
         self.sort.get()
     }
 
+    /// The From and Subject columns of a narrow window (`mailbox::narrow_layout`): as wide as the list's pane leaves
+    /// them at `width` points of window, the date as wide as ever, the Subject column taking what is left
+    pub fn narrow_widths(&self, width: i32) -> Vec<crate::mailbox::Setter> {
+        // the Subject column's least, it takes the rest; the Folder column of a search fits beside it
+        let (from, subject, folder) = if width <= 560 {
+            (100, 90, 80)
+        } else if width <= 760 {
+            (120, 100, 90)
+        } else {
+            (160, 160, 110)
+        };
+        vec![
+            (self.columns.from.clone().upcast(), "fixed-width", from.to_value()),
+            (self.columns.subject.clone().upcast(), "fixed-width", subject.to_value()),
+            (self.columns.folder.clone().upcast(), "fixed-width", folder.to_value()),
+        ]
+    }
+
+    /// The dates of a compact window (`mailbox::narrow_layout`), or the full ones: the Received column as wide as they
+    /// need, its cells written again
+    pub fn set_compact_dates(&self, compact: bool) {
+        if self.compact_dates.replace(compact) == compact {
+            return;
+        }
+        let column = &self.columns.received;
+        column.set_fixed_width(date_width(compact));
+        let factory = column.factory();
+        column.set_factory(gtk::ListItemFactory::NONE);
+        column.set_factory(factory.as_ref());
+    }
+
     /// The Folder column while the list has messages of several folders, under `title` (Account in All Inboxes): the
     /// Subject column gives it its room, and gets it back, so the list stays as wide as its pane
     pub fn show_folder_column(&self, shown: bool, title: &str) {
@@ -280,11 +327,22 @@ impl MessageList {
             return;
         }
         self.columns.folder.set_visible(shown);
-        self.columns.subject.set_fixed_width(if shown {
-            SUBJECT_WIDTH - FOLDER_WIDTH
+        // the room taken from Subject's width as it is now (a narrow window's is smaller), and given back
+        let subject = self.columns.subject.fixed_width();
+        if shown {
+            let taken = self
+                .columns
+                .folder
+                .fixed_width()
+                .min(subject - MIN_SUBJECT_WIDTH)
+                .max(0);
+            self.folder_room.set(taken);
+            self.columns.subject.set_fixed_width(subject - taken);
         } else {
-            SUBJECT_WIDTH
-        });
+            self.columns
+                .subject
+                .set_fixed_width(subject + self.folder_room.replace(0));
+        }
     }
 
     /// From, or To with the recipients when `recipients` (Sent Items and Drafts; the core sorts a From sort by the
@@ -584,6 +642,36 @@ fn text_column(
     column.set_expand(expand);
     column.set_resizable(true);
     column
+}
+
+/// The Received column as wide as the longest date the locale writes ("12/28/2026 10:58 PM" in English, US; with
+/// `compact`, the longer of "12/28/2026" and "10:58 PM"), in bold as an unread message has it, so no date is cut short
+fn date_width(compact: bool) -> i32 {
+    let longest = glib::DateTime::from_local(2026, 12, 28, 22, 58, 0.0)
+        .map(|date| date.to_unix())
+        .unwrap_or_default();
+    let texts = if compact {
+        vec![
+            crate::ui::format_time(longest),
+            glib::DateTime::from_unix_local(longest)
+                .and_then(|date| date.format("%x"))
+                .map(|text| text.to_string())
+                .unwrap_or_default(),
+        ]
+    } else {
+        vec![crate::ui::format_date(longest)]
+    };
+    let widest = texts
+        .iter()
+        .map(|text| {
+            let label = gtk::Label::new(Some(text));
+            label.add_css_class("unread");
+            label.measure(gtk::Orientation::Horizontal, -1).1
+        })
+        .max()
+        .unwrap_or_default();
+    // the cell's padding and the header's sort arrow
+    (widest + 28).max(if compact { 90 } else { 130 })
 }
 
 /// An ignored conversation's cells grey

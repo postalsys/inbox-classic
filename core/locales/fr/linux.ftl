@@ -41,6 +41,8 @@ gtk-unsubscribe-failed = Désabonnement impossible : { $problem }
 gtk-toolbar-create-mail-menu = Rédiger depuis un compte au choix
 gtk-toolbar-send-recv-menu = Envoyer et recevoir les messages d’un compte au choix
 gtk-main-menu = Menu principal
+# review: new
+gtk-folder-list = Liste des dossiers
 gtk-quit = Quitter
 
 ## The Move and Copy window

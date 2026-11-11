@@ -117,10 +117,16 @@ for size in 16 20 24 32 40 48 64 256; do
     icon_frames+=("$work/app-$size.png")
 done
 magick "${icon_frames[@]}" app/res/app.ico
+# the same icon for the Linux app's tray item (linux/src/tray.rs sends it as pixmaps: a tray host such as Omarchy's
+# looks an icon name up in the themes it read at login, so a name installed since shows as missing)
+mkdir -p linux/data/tray
+for size in 16 22 24 32 48 64; do
+    rsvg-convert -w "$size" -h "$size" app/res/app-icon.svg -o "linux/data/tray/$size.png"
+done
 
 # the sign-in buttons of Add Mail Account (app/res/brands), the providers' own artwork, unchanged: Google's PNG with
 # its transparent margin trimmed, Microsoft's SVG at three times its size; the app scales them with WIC
 magick app/res/brands/google-sign-in-source.png -trim +repage app/res/brands/google-sign-in.png
 rsvg-convert -z 3 app/res/brands/microsoft-sign-in.svg -o app/res/brands/microsoft-sign-in.png
 
-echo "toolbar strips in $OUT and app/res/toolbar.rc, order and sizes in app/src/icons.h, the app icon in app/res/app.ico"
+echo "toolbar strips in $OUT and app/res/toolbar.rc, order and sizes in app/src/icons.h, the app icon in app/res/app.ico and linux/data/tray"

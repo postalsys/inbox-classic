@@ -556,6 +556,16 @@ pub fn format_date(seconds: i64) -> String {
         .unwrap_or_default()
 }
 
+/// The short date of a compact list: the time of day for today's, the locale's date for older ones
+pub fn format_date_compact(seconds: i64) -> String {
+    let Ok(date) = glib::DateTime::from_unix_local(seconds) else {
+        return String::new();
+    };
+    let today = glib::DateTime::now_local().is_ok_and(|now| now.ymd() == date.ymd());
+    let format = if today { time_format() } else { "%x" };
+    date.format(format).map(|text| text.to_string()).unwrap_or_default()
+}
+
 /// The time of day of `seconds` since the Unix epoch, local time, without seconds
 pub fn format_time(seconds: i64) -> String {
     glib::DateTime::from_unix_local(seconds)

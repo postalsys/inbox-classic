@@ -40,6 +40,8 @@ gtk-unsubscribe-failed = Tellimusest ei õnnestunud loobuda: { $problem }
 gtk-toolbar-create-mail-menu = Koosta kiri valitud kontolt
 gtk-toolbar-send-recv-menu = Saada ja võta vastu valitud konto kirjad
 gtk-main-menu = Peamenüü
+# review: new
+gtk-folder-list = Kaustade loend
 gtk-quit = Lõpeta
 
 ## The Move and Copy window

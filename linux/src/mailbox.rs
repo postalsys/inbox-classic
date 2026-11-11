@@ -52,6 +52,10 @@ pub struct Mailbox {
     pub list: Rc<MessageList>,
     pub reader: Rc<Reader>,
     pub find: gtk::SearchEntry,
+    /// In a narrow window, the search button in place of the Find box
+    find_narrow: gtk::ToggleButton,
+    /// In a narrow window, the folder button in place of the folder list
+    folder_button: gtk::MenuButton,
     search_bar: gtk::Box,
     search_summary: gtk::Label,
     empty: gtk::Box,
@@ -125,7 +129,8 @@ impl Mailbox {
         find.set_widget_name("find");
         find.update_property(&[gtk::accessible::Property::Label(&t!(UiFindHint))]);
         let title = adw::WindowTitle::new(TITLE, "");
-        let (header, junk, create_mail, send_receive, edit_menu) = header_bar(&title, &find);
+        let parts = header_bar(&title, &find);
+        let header = parts.header.clone();
         let search_summary = gtk::Label::new(None);
         search_summary.set_xalign(0.0);
         search_summary.set_hexpand(true);
@@ -156,6 +161,8 @@ impl Mailbox {
             .position(settings.int(settings::LIST_HEIGHT, 260))
             .shrink_start_child(false)
             .shrink_end_child(false)
+            // a handle that shows, as the cursor over it does not change on every desktop (Omarchy's)
+            .wide_handle(true)
             .build();
         let tree = gtk::ScrolledWindow::builder()
             .child(&folders.view)
@@ -170,6 +177,7 @@ impl Mailbox {
             .position(settings.int(settings::TREE_WIDTH, 280))
             .shrink_start_child(false)
             .resize_start_child(false)
+            .wide_handle(true)
             .vexpand(true)
             .build();
         right.connect_position_notify(|paned| shell().settings.set_int(settings::LIST_HEIGHT, paned.position()));
@@ -180,6 +188,7 @@ impl Mailbox {
         content.append(&status_bar);
         let toolbar = adw::ToolbarView::new();
         toolbar.add_top_bar(&header);
+        toolbar.add_top_bar(&parts.search_bar);
         toolbar.set_content(Some(&content));
         let window = adw::ApplicationWindow::builder()
             .application(application)
@@ -190,6 +199,7 @@ impl Mailbox {
             .icon_name(crate::APP_ID)
             .build();
         window.set_widget_name("main-window");
+        narrow_layout(&window, &parts, &tree, &panes, &status_bar, &list);
         let mailbox = Rc::new(Mailbox {
             window,
             title,
@@ -197,6 +207,8 @@ impl Mailbox {
             list,
             reader,
             find,
+            find_narrow: parts.search.clone(),
+            folder_button: parts.folders.clone(),
             search_bar,
             search_summary,
             empty,
@@ -205,10 +217,10 @@ impl Mailbox {
             status,
             outgoing,
             counts,
-            junk,
-            edit_menu,
-            create_mail,
-            send_receive,
+            junk: parts.junk.clone(),
+            edit_menu: parts.edit_menu.clone(),
+            create_mail: parts.create_mail.clone(),
+            send_receive: parts.send_receive.clone(),
             accounts: RefCell::default(),
             folder_accounts: RefCell::default(),
             folder_names: RefCell::default(),
@@ -653,6 +665,10 @@ impl Mailbox {
             self.show_folder_name();
         }
         self.update_junk_button();
+        // a folder chosen in the narrow window's popover closes it; an account's row only opens or closes the account
+        if id >= 0 || all_inboxes {
+            self.folder_button.popdown();
+        }
     }
 
     /// Another folder (or All Inboxes) shown; false when it was already the one shown
@@ -1213,6 +1229,10 @@ impl Mailbox {
     }
 
     pub fn focus_find(&self) {
+        if !self.find.is_visible() {
+            self.find_narrow.set_active(true);
+            return;
+        }
         self.find.grab_focus();
         self.find.select_region(0, -1);
     }
@@ -2203,18 +2223,34 @@ fn popup_menu(widget: &gtk::Widget, menu: &gio::Menu, x: f64, y: f64) -> gtk::Po
     popover
 }
 
+/// The header bar and the parts of it a narrow window leaves out or adds (`narrow_layout`)
+struct HeaderParts {
+    header: adw::HeaderBar,
+    /// The folder's name in the header bar
+    title: adw::WindowTitle,
+    /// The Find box
+    find: gtk::SearchEntry,
+    junk: gtk::Button,
+    create_mail: adw::SplitButton,
+    send_receive: adw::SplitButton,
+    edit_menu: gio::Menu,
+    print: gtk::Button,
+    archive: gtk::Button,
+    reply_all: gtk::Button,
+    forward: gtk::Button,
+    /// Mark as Read and Mark as Unread
+    read_state: gtk::Box,
+    /// In a narrow window, in place of the folder list: the shown folder's name, the folder list in its popover
+    folders: gtk::MenuButton,
+    /// In a narrow window, in place of the Find box: a button for `search_bar`
+    search: gtk::ToggleButton,
+    /// In a narrow window, under the header bar: a Find box of its own, the same words
+    search_bar: gtk::SearchBar,
+}
+
 /// The header bar: the toolbar's buttons in groups as Outlook Express has them (writing, answering, the message,
 /// getting mail, read state), the folder's name, the Find box and the primary menu
-fn header_bar(
-    title: &adw::WindowTitle,
-    find: &gtk::SearchEntry,
-) -> (
-    adw::HeaderBar,
-    gtk::Button,
-    adw::SplitButton,
-    adw::SplitButton,
-    gio::Menu,
-) {
+fn header_bar(title: &adw::WindowTitle, find: &gtk::SearchEntry) -> HeaderParts {
     let header = adw::HeaderBar::new();
     header.set_title_widget(Some(title));
     let action = |command: Command| format!("win.{}", command.name());
@@ -2238,17 +2274,23 @@ fn header_bar(
         .build();
     let junk = button("ic-mail-prohibited-symbolic", &t!(UiTbJunk), Command::Junk);
     junk.set_widget_name("junk");
+    let reply_all = button("ic-arrow-reply-all-symbolic", &t!(UiTbReplyAll), Command::ReplyAll);
+    let forward = button("ic-arrow-forward-symbolic", &t!(UiTbForward), Command::Forward);
+    let print = button("ic-print-symbolic", &t!(UiTbPrint), Command::Print);
+    let archive = button("ic-archive-symbolic", &t!(UiTbArchive), Command::Archive);
+    let folders = folder_chooser(title);
     let groups: Vec<Vec<gtk::Widget>> = vec![
+        vec![folders.clone().upcast()],
         vec![create_mail.clone().upcast()],
         vec![
             button("ic-arrow-reply-symbolic", &t!(UiTbReply), Command::Reply).upcast(),
-            button("ic-arrow-reply-all-symbolic", &t!(UiTbReplyAll), Command::ReplyAll).upcast(),
-            button("ic-arrow-forward-symbolic", &t!(UiTbForward), Command::Forward).upcast(),
+            reply_all.clone().upcast(),
+            forward.clone().upcast(),
         ],
         vec![
-            button("ic-print-symbolic", &t!(UiTbPrint), Command::Print).upcast(),
+            print.clone().upcast(),
             button("ic-delete-symbolic", &t!(UiTbDelete), Command::Delete).upcast(),
-            button("ic-archive-symbolic", &t!(UiTbArchive), Command::Archive).upcast(),
+            archive.clone().upcast(),
             junk.clone().upcast(),
         ],
         vec![send_receive.clone().upcast()],
@@ -2257,6 +2299,7 @@ fn header_bar(
             button("ic-mail-unread-symbolic", &t!(UiTbMarkUnread), Command::MarkUnread).upcast(),
         ],
     ];
+    let mut read_state = None;
     for group in groups {
         let linked = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         linked.set_margin_end(6);
@@ -2264,21 +2307,218 @@ fn header_bar(
             linked.append(&widget);
         }
         header.pack_start(&linked);
+        read_state = Some(linked);
     }
+    let read_state = read_state.expect("the toolbar's groups");
     let (primary, edit_menu) = primary_menu();
+    // the submenus cascade, each a popover of its own: one sliding into the same popover would make it grow towards
+    // the screen's edge after it was placed, and a window manager that does not place it again (Hyprland) cuts it off
+    let popover = gtk::PopoverMenu::from_model_full(&primary, gtk::PopoverMenuFlags::NESTED);
+    flag_rows(&popover);
     let menu = gtk::MenuButton::builder()
         .icon_name("open-menu-symbolic")
-        .menu_model(&primary)
+        .popover(&popover)
         .primary(true)
         .tooltip_text(t!(GtkMainMenu))
         .build();
     menu.set_widget_name("primary-menu");
-    if let Some(popover) = menu.popover().and_downcast::<gtk::PopoverMenu>() {
-        flag_rows(&popover);
-    }
     header.pack_end(&menu);
     header.pack_end(find);
-    (header, junk, create_mail, send_receive, edit_menu)
+    let (search, search_bar) = narrow_search(find);
+    header.pack_end(&search);
+    HeaderParts {
+        header,
+        title: title.clone(),
+        find: find.clone(),
+        junk,
+        create_mail,
+        send_receive,
+        edit_menu,
+        print,
+        archive,
+        reply_all,
+        forward,
+        read_state,
+        folders,
+        search,
+        search_bar,
+    }
+}
+
+/// A breakpoint's setter: an object, its property and the value it has at the breakpoint
+pub type Setter = (glib::Object, &'static str, glib::Value);
+
+/// What a narrower window leaves out, in three steps, so its controls fit the width a tiling window manager gives it
+/// (half of a 1280 pixel wide screen and less) rather than being cut off. Each step keeps the commands the toolbar
+/// loses in the primary menu and on their keys:
+/// - up to 1000 points: no folder name in the title (the folder list shows it), no Print and no Mark as Read or Unread,
+///   a shorter Find box, narrower From and Subject columns;
+/// - up to 760: the folder list in the popover of a button that names the folder, the Find box in a bar under the
+///   header bar that a search button opens, no Archive and Junk, no outgoing state in the status bar;
+/// - up to 560: no Reply All and Forward either, and the dates short (today's time, older days' date).
+///
+/// The list's columns keep their date whole at each step; the Subject column takes what the others leave.
+fn narrow_layout(
+    window: &adw::ApplicationWindow,
+    parts: &HeaderParts,
+    tree: &gtk::ScrolledWindow,
+    panes: &gtk::Paned,
+    status_bar: &gtk::Box,
+    list: &Rc<MessageList>,
+) {
+    let (title, find) = (&parts.title, &parts.find);
+    let hidden = false.to_value();
+    let shown = true.to_value();
+    // the outgoing state and the separator before it
+    let outgoing: Vec<glib::Object> = status_bar
+        .first_child()
+        .and_then(|status| status.next_sibling())
+        .into_iter()
+        .flat_map(|separator| {
+            let label = separator.next_sibling();
+            std::iter::once(separator)
+                .chain(label)
+                .map(|widget| widget.upcast::<glib::Object>())
+        })
+        .collect();
+    // a step's setters but the ones the next step sets its own way: the columns' widths and the Find box's
+    let carried = |setters: &[Setter]| -> Vec<Setter> {
+        setters
+            .iter()
+            .filter(|(object, property, _)| *property != "fixed-width" && object != find.upcast_ref::<glib::Object>())
+            .cloned()
+            .collect()
+    };
+    let mut medium: Vec<Setter> = vec![
+        (title.clone().upcast(), "visible", hidden.clone()),
+        (parts.print.clone().upcast(), "visible", hidden.clone()),
+        (parts.read_state.clone().upcast(), "visible", hidden.clone()),
+        (find.clone().upcast(), "width-chars", 14.to_value()),
+    ];
+    medium.extend(list.narrow_widths(1000));
+    let mut narrow = carried(&medium);
+    narrow.extend([
+        (find.clone().upcast(), "visible", hidden.clone()),
+        (parts.search.clone().upcast(), "visible", shown.clone()),
+        (parts.folders.clone().upcast(), "visible", shown.clone()),
+        (parts.archive.clone().upcast(), "visible", hidden.clone()),
+        (parts.junk.clone().upcast(), "visible", hidden.clone()),
+    ]);
+    narrow.extend(outgoing.into_iter().map(|widget| (widget, "visible", hidden.clone())));
+    // the counts as wide as their words, not the room kept for longer ones
+    if let Some(counts) = status_bar.last_child() {
+        narrow.push((counts.upcast(), "width-chars", (-1).to_value()));
+    }
+    narrow.extend(list.narrow_widths(760));
+    let mut compact = carried(&narrow);
+    compact.push((find.clone().upcast(), "visible", hidden.clone()));
+    compact.extend(list.narrow_widths(560));
+    compact.extend([
+        (parts.reply_all.clone().upcast(), "visible", hidden.clone()),
+        (parts.forward.clone().upcast(), "visible", hidden),
+    ]);
+    // the last of the breakpoints that hold is the one that applies
+    let mut narrow_steps = Vec::new();
+    for (width, setters) in [(1000, medium), (760, narrow), (560, compact)] {
+        let condition = adw::BreakpointCondition::parse(&format!("max-width: {width}sp")).expect("a condition");
+        let breakpoint = adw::Breakpoint::new(condition);
+        for (widget, property, value) in &setters {
+            breakpoint.add_setter(widget, property, Some(value));
+        }
+        if width <= 760 {
+            narrow_steps.push(breakpoint.clone());
+        }
+        if width <= 560 {
+            // the compact step's dates: the time of today's messages, the date of older ones
+            let shown = list.clone();
+            breakpoint.connect_apply(move |_| shown.set_compact_dates(true));
+            let shown = list.clone();
+            breakpoint.connect_unapply(move |_| shown.set_compact_dates(false));
+        }
+        window.add_breakpoint(breakpoint);
+    }
+    // the folder list in the folder button's popover at the narrow steps, beside the messages at the others
+    let popover = parts.folders.popover().expect("the folder button's popover");
+    let (tree, panes, search) = (tree.clone(), panes.clone(), parts.search.clone());
+    window.connect_current_breakpoint_notify(move |window| {
+        let narrow = window
+            .current_breakpoint()
+            .is_some_and(|current| narrow_steps.contains(&current));
+        let in_popover = tree.is_ancestor(&popover);
+        if !narrow {
+            search.set_active(false);
+        }
+        if narrow == in_popover {
+            return;
+        }
+        if narrow {
+            panes.set_start_child(gtk::Widget::NONE);
+            tree.set_propagate_natural_height(true);
+            tree.set_max_content_height(480);
+            tree.set_size_request(260, -1);
+            popover.set_child(Some(&tree));
+        } else {
+            popover.set_child(gtk::Widget::NONE);
+            tree.set_propagate_natural_height(false);
+            tree.set_size_request(-1, -1);
+            panes.set_start_child(Some(&tree));
+        }
+    });
+}
+
+/// The folder button of a narrow window: the folder's name as the title has it, the folder list in its popover
+/// (`narrow_layout` moves the list there)
+fn folder_chooser(title: &adw::WindowTitle) -> gtk::MenuButton {
+    let name = gtk::Label::builder()
+        .ellipsize(gtk::pango::EllipsizeMode::End)
+        .max_width_chars(16)
+        .build();
+    title.bind_property("title", &name, "label").sync_create().build();
+    let content = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+    content.append(&gtk::Image::from_icon_name("ic-folder-symbolic"));
+    content.append(&name);
+    let popover = gtk::Popover::new();
+    popover.set_widget_name("folder-list-popover");
+    let button = gtk::MenuButton::builder()
+        .child(&content)
+        .always_show_arrow(true)
+        .tooltip_text(t!(GtkFolderList))
+        .popover(&popover)
+        .visible(false)
+        .build();
+    button.set_widget_name("folder-list-button");
+    button.update_property(&[gtk::accessible::Property::Label(&t!(GtkFolderList))]);
+    button
+}
+
+/// The search of a narrow window: a button that opens a bar under the header bar, across the window, with a Find
+/// box of its own that has the main one's words, both ways, so the main one (hidden) searches as before
+fn narrow_search(find: &gtk::SearchEntry) -> (gtk::ToggleButton, gtk::SearchBar) {
+    let entry = gtk::SearchEntry::builder()
+        .placeholder_text(t!(UiFindHint))
+        .hexpand(true)
+        .build();
+    entry.set_widget_name("find-narrow");
+    entry.update_property(&[gtk::accessible::Property::Label(&t!(UiFindHint))]);
+    find.bind_property("text", &entry, "text")
+        .bidirectional()
+        .sync_create()
+        .build();
+    let bar = gtk::SearchBar::builder().child(&entry).show_close_button(true).build();
+    bar.connect_entry(&entry);
+    bar.set_widget_name("find-narrow-bar");
+    let button = gtk::ToggleButton::builder()
+        .icon_name("ic-search-symbolic")
+        .tooltip_text(t!(UiFindHint))
+        .visible(false)
+        .build();
+    button.set_widget_name("find-narrow-button");
+    button
+        .bind_property("active", &bar, "search-mode-enabled")
+        .bidirectional()
+        .sync_create()
+        .build();
+    (button, bar)
 }
 
 /// The primary menu: the commands of the table by their menu (File, Edit, View, Tools, Message, Help), Quit last;

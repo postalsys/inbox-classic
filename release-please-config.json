@@ -16,6 +16,10 @@
                 {
                     "type": "generic",
                     "path": "linux/Cargo.toml"
+                },
+                {
+                    "type": "generic",
+                    "path": "linux/arch/PKGBUILD"
                 }
             ],
             "bump-minor-pre-major": true
