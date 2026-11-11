@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.2](https://github.com/postalsys/inbox-classic/compare/v0.12.1...v0.12.2) (2026-11-11)
+
+
+### Bug Fixes
+
+* a further review of every view, forwarding keeps the attachments ([4af7f91](https://github.com/postalsys/inbox-classic/commit/4af7f9120e5461a2082fa90c4894f74bbed2e08b))
+* **linux:** the AI agent's question keeps its last two words together, as the other message boxes ([687ee1c](https://github.com/postalsys/inbox-classic/commit/687ee1ce8dcd39396b12296030c1caf9ca5668cb))
+* **mac:** the status bar says Done from the start, as on Windows and Linux ([43fe65d](https://github.com/postalsys/inbox-classic/commit/43fe65d4ac7935c3502f047c7c9dd2a54607af7d))
+* review rounds 4 to 6 of every view on all three apps ([c648a14](https://github.com/postalsys/inbox-classic/commit/c648a1477a14cbef4f8a2fe24e9495fda3de8054))
+* the verification pass, apostrophes one, issuers and recipients shown whole ([e548e21](https://github.com/postalsys/inbox-classic/commit/e548e21a7a5822a8debe7d5c1afaf1b7fd8ee3e9))
+* verification pass 2: the search bar's link beside its words, underline in links ([ff953e4](https://github.com/postalsys/inbox-classic/commit/ff953e4cac640395065b92c4d60a4552cd4168f0))
+* verification pass 3: print dates, icons, status text and alignments ([25ec362](https://github.com/postalsys/inbox-classic/commit/25ec36215f2a0f041312943fd52c817174721d6c))
+* verification pass 4: delays are not bounces, counts and labels in line ([0dcbb51](https://github.com/postalsys/inbox-classic/commit/0dcbb513fd6e8b1d2115612e9645a745680394a4))
+* verification pass 5: the compose title follows the subject, flags on a selection, hyphens kept whole ([6614717](https://github.com/postalsys/inbox-classic/commit/66147170599cd28fa5ddf53272c963224c8958c9))
+
 ## [0.12.1](https://github.com/postalsys/inbox-classic/compare/v0.12.0...v0.12.1) (2026-11-11)
 
 
