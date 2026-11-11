@@ -463,7 +463,7 @@ void Mailbox::Reload() {
     }
     for (size_t i = 0; i < count; i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
-        accountNames_[account->id] = Text(account->name);
+        accountNames_[account->id] = Text(account->title);
         accountEmails_[account->id] = Text(account->email);
         accountSignIns_[account->id] = {account->oauth, account->app};
         if (!firstAccount_) {
@@ -1040,7 +1040,7 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     RECT cell = SubjectCell(index);
     bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
     bool active = GetFocus() == list_;
-    int back = !selected ? COLOR_WINDOW : active ? COLOR_HIGHLIGHT : COLOR_BTNFACE;
+    int back = !selected ? COLOR_WINDOW : SelectionColor();
     int fore = selected ? (active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT) : row.dimmed ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT;
     FillRect(dc, &cell, GetSysColorBrush(back));
     RECT box = ThreadBox(cell);
@@ -1073,6 +1073,10 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
 // the paper clip (or a bounce's mark) and the flag of a row, drawn over the row as the list painted it:
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
 void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
+    bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
+    if (selected) {
+        FillRowStart(dc, index);
+    }
     auto draw = [&](int column, int icon) {
         RECT cell;
         ListView_GetSubItemRect(list_, index, column, LVIR_BOUNDS, &cell);
@@ -1088,16 +1092,37 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         draw(COL_ATTACH, LIST_ATTACH);
     }
     if (row.flagged) {
-        // the flag in its colour (red when it has none); white on the selected row's highlight, as the Mac shows it,
-        // where a colour (blue on blue) could not be seen
+        // the flag in its colour (red when it has none); on the selected row's highlight with a white rim, so that a
+        // colour close to the highlight's (blue on blue) can still be seen
         RECT cell;
         ListView_GetSubItemRect(list_, index, COL_FLAG, LVIR_BOUNDS, &cell);
         int width = ListView_GetColumnWidth(list_, COL_FLAG);
-        bool selected = ListView_GetItemState(list_, index, LVIS_SELECTED) != 0;
-        COLORREF rgb = selected ? GetSysColor(COLOR_HIGHLIGHTTEXT) : FlagRgb(row.flag_color ? row.flag_color : 1);
-        DrawFlag(dc, cell.left + (width - iconSize_) / 2, cell.top + (cell.bottom - cell.top - iconSize_) / 2, iconSize_,
-                 rgb);
+        int left = cell.left + (width - iconSize_) / 2, top = cell.top + (cell.bottom - cell.top - iconSize_) / 2;
+        if (selected) {
+            COLORREF rim = GetSysColor(COLOR_HIGHLIGHTTEXT);
+            for (POINT step : {POINT{-1, 0}, POINT{1, 0}, POINT{0, -1}, POINT{0, 1}}) {
+                DrawFlag(dc, left + step.x, top + step.y, iconSize_, rim);
+            }
+        }
+        DrawFlag(dc, left, top, iconSize_, FlagRgb(row.flag_color ? row.flag_color : 1));
     }
+}
+
+// the list highlights a selected row from where the first column's text would start, after the room it keeps for an
+// icon: the rest of the row highlighted too, as Outlook Express shows it
+void Mailbox::FillRowStart(HDC dc, int index) const {
+    RECT row = {LVIR_BOUNDS}, highlighted = {LVIR_LABEL};
+    SendMessageW(list_, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&row));
+    SendMessageW(list_, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&highlighted));
+    row.right = highlighted.left;
+    if (row.right > row.left) {
+        FillRect(dc, &row, GetSysColorBrush(SelectionColor()));
+    }
+}
+
+// the colour of a selected row: the highlight while the list has the keyboard, grey without it
+int Mailbox::SelectionColor() const {
+    return GetFocus() == list_ ? COLOR_HIGHLIGHT : COLOR_BTNFACE;
 }
 
 // ---- the reading pane ----
@@ -2221,7 +2246,7 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING | (SelectedCount() > 1 ? MF_GRAYED : 0), IDM_ADD_SENDER_TO_BOOK, MenuItem(PE_TEXT_CMD_ADD_SENDER_TO_BOOK).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_VIEW_SOURCE, MenuItem(PE_TEXT_UI_MENU_VIEW_SOURCE).c_str());
-    AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, MenuItem(PE_TEXT_UI_PROPERTIES).c_str());
+    AppendMenuW(menu, MF_STRING, IDM_PROPERTIES, DialogMenuItem(PE_TEXT_UI_PROPERTIES).c_str());
     lastMenu_ = menu;
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     lastMenu_ = nullptr;

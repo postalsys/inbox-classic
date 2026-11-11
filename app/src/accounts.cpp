@@ -101,18 +101,22 @@ bool WaitForRequest(HWND owner, PeCore* core, uint64_t request, void (*cancel)(c
     HWND root = GetAncestor(owner, GA_ROOT);
     RECT ownerRect;
     GetWindowRect(root, &ownerRect);
-    int width = Scale(360);
-    // the words wrap; a longer text makes the window taller
-    int textHeight = std::max(Scale(40), static_cast<int>(MeasureText(text, width - Scale(36)).cy));
-    int height = Scale(90) + textHeight;
+    // sized by its client area: the words, wrapped, then Cancel at the bottom right, the same margin all round
+    int width = Scale(360), margin = Scale(12);
+    int textHeight = static_cast<int>(MeasureText(text, width - 2 * margin).cy);
     std::wstring cancelLabel = core::T(PE_TEXT_UI_CANCEL);
     int buttonWidth = ButtonWidth({cancelLabel}, 84);
-    HWND wait = CreateWindowExW(WS_EX_DLGMODALFRAME, kWaitClass, title.c_str(), WS_POPUP | WS_CAPTION | WS_SYSMENU,
-                                (ownerRect.left + ownerRect.right - width) / 2, (ownerRect.top + ownerRect.bottom - height) / 2,
-                                width, height, root, nullptr, GetModuleHandleW(nullptr), nullptr);
-    CreateChild(wait, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {Scale(12), Scale(12), width - Scale(24), Scale(12) + textHeight});
+    int buttonTop = margin + textHeight + Scale(14), buttonBottom = buttonTop + Scale(23);
+    RECT frame = {0, 0, width, buttonBottom + margin};
+    DWORD style = WS_POPUP | WS_CAPTION | WS_SYSMENU;
+    AdjustWindowRectEx(&frame, style, FALSE, WS_EX_DLGMODALFRAME);
+    int frameWidth = frame.right - frame.left, frameHeight = frame.bottom - frame.top;
+    HWND wait = CreateWindowExW(WS_EX_DLGMODALFRAME, kWaitClass, title.c_str(), style,
+                                (ownerRect.left + ownerRect.right - frameWidth) / 2, (ownerRect.top + ownerRect.bottom - frameHeight) / 2,
+                                frameWidth, frameHeight, root, nullptr, GetModuleHandleW(nullptr), nullptr);
+    CreateChild(wait, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {margin, margin, width - margin, margin + textHeight});
     CreateChild(wait, L"BUTTON", cancelLabel.c_str(), WS_TABSTOP, IDCANCEL,
-                {width - Scale(16) - buttonWidth, Scale(18) + textHeight, width - Scale(16), Scale(43) + textHeight});
+                {width - margin - buttonWidth, buttonTop, width - margin, buttonBottom});
     bool wasEnabled = IsWindowEnabled(root);
     EnableWindow(root, FALSE);
     ShowWindow(wait, SW_SHOW);
@@ -804,11 +808,16 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
     }
     std::wstring accountName;
     std::wstring signsInWith;
+    // "Gmail Properties", the account as the folder tree names it, as Outlook Express titles it
+    std::wstring title = core::Title(PE_TEXT_CMD_PROPERTIES);
     core::AccountList accounts(pe_accounts(core));
     for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
         if (const PeAccount* row = pe_account_list_get(accounts.get(), i); row->id == account) {
             accountName = Text(row->account_name);
             signsInWith = row->oauth != PE_O_AUTH_PROVIDER_NONE ? Text(row->signs_in_with) : L"";
+            if (std::wstring shown = Text(row->title); !shown.empty()) {
+                title = core::T(PE_TEXT_UI_PROPERTIES_OF, {{"subject", shown}});
+            }
         }
     }
     std::vector<std::wstring> security = SecurityChoices();
@@ -830,7 +839,7 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
         // a browser sign-in account: the names only, the rest is the provider's
         std::vector<FormField> names = {fields[ACCOUNT_NAME], fields[NAME]};
         std::wstring intro = core::T(PE_TEXT_UI_SIGNS_IN_WITH, {{"app", signsInWith}});
-        if (!FormDialog(owner, core::Title(PE_TEXT_CMD_PROPERTIES), intro, names)) {
+        if (!FormDialog(owner, title, intro, names)) {
             return false;
         }
         fields[NAME] = names[1];
@@ -845,7 +854,7 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
     PeSecurity imapSecurity = stored->imap_security;
     PeSecurity smtpSecurity = stored->smtp_security;
     bool saved = false;
-    while (FormDialog(owner, core::Title(PE_TEXT_CMD_PROPERTIES), intro, fields, Validate)) {
+    while (FormDialog(owner, title, intro, fields, Validate)) {
         // warned for a side without encryption, unless it was so already to the same server: not each time such an
         // account is saved, but when the password would go readable somewhere new
         auto newlyPlain = [&](Field security, Field host, PeSecurity was, const std::wstring& wasHost) {

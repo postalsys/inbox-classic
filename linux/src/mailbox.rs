@@ -976,21 +976,19 @@ impl Mailbox {
         }
     }
 
-    /// What follows the selection: the counts in the status bar, Junk or Not Junk, the commands for one message off
-    /// while several are selected; Move and Copy with any selected
+    /// What follows the selection: the counts in the status bar, Junk or Not Junk, the commands for one message on
+    /// with exactly one selected, those for messages with any
     fn selection_shown(&self) {
         self.show_counts();
         self.update_junk_button();
-        let several = self.several();
+        let selected = self.refs.borrow().len();
         for command in Command::ALL.iter().filter(|c| c.needs_one()) {
-            self.enable(*command, !several);
+            self.enable(*command, selected == 1);
         }
-        let any = !self.refs.borrow().is_empty();
+        let any = selected > 0;
         for command in Command::ALL.iter().filter(|c| c.needs_some()) {
             self.enable(*command, any);
         }
-        self.enable(Command::Move, any);
-        self.enable(Command::Copy, any);
         self.enable(Command::Archive, self.can_archive());
         self.update_flag_actions();
         let summary = self.summary.borrow();

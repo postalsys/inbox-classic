@@ -1019,6 +1019,8 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     };
     let servers = servers.upcast::<gtk::Widget>();
     d.check(true, "the server settings form follows the lookup");
+    // filled as it shows, which a slow machine may see a moment later
+    wait_until(10, || !text_of(&servers, "form-5").is_empty()).await;
     let guessed = text_of(&servers, "form-5");
     d.check(
         guessed == "imap.inboxclassic.test",

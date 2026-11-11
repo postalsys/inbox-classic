@@ -196,7 +196,8 @@ impl Form {
         let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
         content.set_margin_start(18);
         content.set_margin_end(18);
-        content.set_margin_top(6);
+        // apart from the header bar, as the sides are from the edges
+        content.set_margin_top(12);
         content.set_margin_bottom(18);
         if !intro.is_empty() {
             let label = wrapped_label(intro);

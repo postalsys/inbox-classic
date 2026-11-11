@@ -534,7 +534,10 @@ void Reader::ShowLogo(bool wanted) {
         logoBitmap_ = nullptr;
     }
     logoRequest_ = 0;
-    ShowWindow(logo_, SW_HIDE);
+    // the header back over the logo's place, which would stay empty beside it
+    if (ShowWindow(logo_, SW_HIDE)) {
+        Layout();
+    }
     if (wanted) {
         logoSize_ = Scale(48);
         logoRequest_ = pe_logo_start(core_, folder_, uid_, static_cast<uint32_t>(logoSize_));

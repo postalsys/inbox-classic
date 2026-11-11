@@ -41,7 +41,8 @@ cmd-outbox = &Postausgang...
 cmd-properties = &Eigenschaften
 cmd-mark-all-read = Alle als gelesen &markieren
 cmd-junk = Als &Junk markieren
-cmd-not-junk = Als kein J&unk markieren
+# review: changed
+cmd-not-junk = Als Nicht-J&unk markieren
 cmd-archive = A&rchivieren
 cmd-watch-conversation = Unterhaltung &beobachten
 cmd-ignore-conversation = Unterhaltung &ignorieren

@@ -165,6 +165,6 @@ gtk-language-subtitle = Langue de l’interface et de l’aide
 gtk-new-mail-group = Nouveau courrier
 # the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
 # review: new
-gtk-notify-new-mail = Signaler les nouveaux messages
+gtk-notify-new-mail = M’avertir des nouveaux messages
 gtk-notify-subtitle = Recevoir une notification à l’arrivée de nouveaux messages lorsque la fenêtre est en arrière-plan
 gtk-restart-to-change = Inbox Classic redémarre pour changer de langue.

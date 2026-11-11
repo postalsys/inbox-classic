@@ -817,6 +817,14 @@ std::wstring MenuItem(PeText text, std::wstring_view keys) {
     return keys.empty() ? item : item + L"\t" + Shortcut(keys);
 }
 
+std::wstring DialogMenuItem(PeText text, std::wstring_view keys) {
+    std::wstring item = core::T(text);
+    if (!item.ends_with(L"...") && !item.ends_with(L"\u2026")) {
+        item += L"...";
+    }
+    return keys.empty() ? item : item + L"\t" + Shortcut(keys);
+}
+
 std::wstring ReasonText(char* reason, PeText fallback) {
     core::String why(reason);
     return why ? Text(why.get()) : core::T(fallback);

@@ -426,6 +426,14 @@ function Key([IntPtr]$window, [int]$vk) {
     [void][Native.Win]::PostMessage($window, $WM_KEYDOWN, [IntPtr]$vk, [IntPtr]::Zero)
     [void][Native.Win]::PostMessage($window, $WM_KEYUP, [IntPtr]$vk, [IntPtr]::Zero)
 }
+# an account's Properties form, titled "<account> Properties", or 0
+function PropertiesForm() {
+    $w = [IntPtr]::Zero
+    while (($w = [Native.Win]::FindWindowEx([IntPtr]::Zero, $w, 'InboxClassicForm', [NullString]::Value)) -ne [IntPtr]::Zero) {
+        if ((WindowText $w) -match 'Properties$') { return $w }
+    }
+    return [IntPtr]::Zero
+}
 # a top-level window of a class (and title), once it is there
 function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) {
     $t = if ($title) { $title } else { [NullString]::Value }
@@ -806,7 +814,7 @@ try {
         $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
         $labels = [Native.Win]::MenuLabels($hmenu)
         Check (($labels -contains 'Reply to Sender') -and ($labels -contains 'Mark as Unread') -and ($labels -contains 'Move to Folder...') -and
-            ($labels -contains 'View Source') -and ($labels -contains 'Properties')) "with the message's actions ($($labels -join ', '))"
+            ($labels -contains 'View Source') -and ($labels -contains 'Properties...')) "with the message's actions ($($labels -join ', '))"
         Check ($labels -notcontains 'Mark as Read') 'a read message offers Mark as Unread, not Mark as Read'
         Shot $main 'read-14-menu' $menu
         $sourceAt = [array]::IndexOf($labels, 'View Source')
@@ -1156,17 +1164,21 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
     }
     Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'https://example.com/second*') { $t } } 10)) 'and changes it'
-    # its menu: Open Link, Edit Link and Remove Link first (a picture for the feature map)
+    # its menu, the app's own: Open Link, Edit Link and Remove Link first, then the editing commands
     $point = [IntPtr]((12 -shl 16) -bor 20)
     [void][Native.Win]::PostMessage($input, 0x0204, [IntPtr]2, $point)
     [void][Native.Win]::PostMessage($input, 0x0205, [IntPtr]::Zero, $point)
-    Start-Sleep -Seconds 1
-    $rect = New-Object Native.Win+RECT
-    [void][Native.Win]::GetWindowRect($compose, [ref]$rect)
-    $bitmap = New-Object System.Drawing.Bitmap ($rect.Right - $rect.Left), ($rect.Bottom - $rect.Top)
-    CopyScreen $bitmap $rect.Left $rect.Top
-    $bitmap.Save((Join-Path $Out 'write-16-link-menu.png'), [System.Drawing.Imaging.ImageFormat]::Png)
-    Key $input $VK_ESCAPE
+    $linkMenu = WaitWindow '#32768' $null 10
+    Check ($null -ne $linkMenu) 'a link in the editor has a right-click menu of the app'
+    if ($linkMenu) {
+        $labels = @([Native.Win]::MenuLabels([Native.Win]::SendMessage($linkMenu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)))
+        Check (($labels[0] -eq 'Open Link') -and ($labels -contains 'Edit Link...') -and ($labels -contains 'Remove Link') -and
+            ($labels -contains 'Copy') -and ($labels -contains 'Paste') -and ($labels -contains 'Select All') -and
+            ($labels -notcontains 'Emoji')) "with Open Link, Edit Link and Remove Link, then Cut, Copy, Paste ($($labels -join ', '))"
+        Shot $compose 'write-16-link-menu' $linkMenu
+        Key $linkMenu $VK_ESCAPE
+        [void](WaitFor { -not [Native.Win]::IsWindow($linkMenu) } 5)
+    }
     Start-Sleep -Milliseconds 500
     # emptied, the address takes the link off and leaves its text; the mouse off the text, so the status bar says
     # nothing of a link under it
@@ -1199,7 +1211,7 @@ public static class Dragger {
         }
         Click $list 402
         $form = WaitFor {
-            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
+            $f = PropertiesForm
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
         }
         if (-not $form) {
@@ -1385,8 +1397,8 @@ public static class Dragger {
     $IDC_SEARCH_BAR = 208; $IDC_SEARCH_CLEAR = 209
     $searchBar = { WindowText ([Native.Win]::GetDlgItem($main, $IDC_SEARCH_BAR)) }
     Check ([bool](WaitFor { (Visible $main $IDC_SEARCH_BAR) -and (& $searchBar) -match '^1 result for .lunch. in all folders' } 5)) "the search bar says what was found for what ($(& $searchBar))"
-    Check ([bool](WaitFor { (& $folderBar) -eq ' All folders' } 5)) "the folder bar says where ($(& $folderBar))"
-    Check ((WindowText $main) -match '^All folders') 'and so does the title'
+    Check ([bool](WaitFor { (& $folderBar) -eq ' All Folders' } 5)) "the folder bar says where ($(& $folderBar))"
+    Check ((WindowText $main) -match '^All Folders') 'and so does the title'
     Shot $main 'find-1-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'ann@example.com')
     Check ([bool](WaitFor { (Rows) -ge 2 })) 'the sender address is found too'
@@ -3358,7 +3370,7 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (AccountRow 'Work'))
     Command $main $IDM_ACCOUNT_PROPERTIES
     $properties = WaitFor {
-        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
+        $f = PropertiesForm
         if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
     } 10
     Check ($properties -and (GetText $properties 100) -eq 'Work' -and (GetText $properties 102) -eq 'testuser2@inboxclassic.test') "the account's Properties opens from its row, the Account name filled with its name ($(if ($properties) { GetText $properties 100 }))"
@@ -3401,7 +3413,7 @@ public static class Dragger {
     Check ((& $unreadOn $rest2) -eq $secondUnread -and $secondUnread -gt 0) "the second account's mail stays unread ($(& $unreadOn $rest2))"
     Command $main $IDM_ACCOUNT_PROPERTIES
     $properties = WaitFor {
-        $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
+        $f = PropertiesForm
         if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
     } 10
     Check ($properties -and (GetText $properties 102) -eq 'testuser@inboxclassic.test') "its Properties opens that account's Properties ($(if ($properties) { GetText $properties 102 }))"
@@ -3425,7 +3437,7 @@ public static class Dragger {
         # the first account is selected when the list opens, and stays so after a change
         Click $accounts 402
         $properties = WaitFor {
-            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
+            $f = PropertiesForm
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
         }
         Check ($null -ne $properties) 'Properties shows the settings'
@@ -3444,7 +3456,7 @@ public static class Dragger {
         # read back in Properties (the text of a list entry does not cross processes)
         Click $accounts 402
         $again = WaitFor {
-            $f = [Native.Win]::FindWindow('InboxClassicForm', 'Properties')
+            $f = PropertiesForm
             if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 110) -ne [IntPtr]::Zero) { $f }
         }
         Check ($again -and (GetText $again 101) -eq 'Alex Morgan Renamed') 'the new name is saved'
@@ -3534,7 +3546,7 @@ public static class Dragger {
             SetText $editor 621 "$($ports.smtp)"
             [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($editor, 622), $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
             Click $editor 612
-            $found = WaitWindow '#32770' 'Check' 20
+            $found = WaitWindow '#32770' 'Sign-in App' 20
             Check ($found -and (Statics $found) -match 'can be used') "Check reads the issuer's discovery document"
             if ($found) {
                 Shot $found 'signin-3-check'
@@ -3644,7 +3656,7 @@ public static class Dragger {
         for ($row = 0; $row -lt $count -and -not $found; $row++) {
             KeyToRow $accountList $row
             Click $accounts 402
-            $properties = WaitWindow 'InboxClassicForm' 'Properties'
+            $properties = WaitFor { $f = PropertiesForm; if ($f -ne [IntPtr]::Zero) { $f } }
             if (-not $properties) { continue }
             if (WaitFor { (Statics $properties) -match 'Sign-in app: ImapKit' } 3) {
                 $found = $properties
@@ -3946,6 +3958,21 @@ public static bool HasIcon(IntPtr window) {
             }
         }
         Check ($under.Count -eq 0) "no toolbar button runs under the Find box ($($under -join ', '))"
+        # the buttons hidden for want of room are in the menu of the chevron after the others
+        $IDC_TOOLBAR_MORE = 233
+        $chevron = [Native.Win]::GetDlgItem($main, $IDC_TOOLBAR_MORE)
+        Check ($chevron -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($chevron)) 'the chevron is shown after the buttons that fit'
+        if ($chevron -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($chevron)) {
+            Click $main $IDC_TOOLBAR_MORE
+            $more = WaitWindow '#32768' $null 10
+            $hidden = if ($more) { @([Native.Win]::MenuLabels([Native.Win]::SendMessage($more, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)) | Where-Object { $_ }) } else { @() }
+            Check ($hidden.Count -gt 0 -and @($hidden | Where-Object { -not $_.StartsWith('[') }).Count -eq 0) "its menu has the hidden buttons ($($hidden -join ' | '))"
+            if ($more) {
+                Shot $main 'lang-2b-pseudo-more' $more
+                Key $more $VK_ESCAPE
+                [void](WaitFor { -not [Native.Win]::IsWindow($more) } 5)
+            }
+        }
         $folders = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)))
         Check (@($folders | Where-Object { $_.StartsWith('[') }).Count -ge 3) "the special folders and All Inboxes are pseudo ($($folders -join ', '))"
         CheckPseudo $main 'the main window' $true

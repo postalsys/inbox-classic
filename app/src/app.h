@@ -101,6 +101,8 @@ std::wstring MenuText(std::wstring text);
 std::wstring Shortcut(std::wstring_view keys);
 // MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P") is "&Drucken...\tStrg+P" in German
 std::wstring MenuItem(PeText text, std::wstring_view keys = {});
+// a menu item that opens a dialog, with the ellipsis that says so where the catalog's word has none
+std::wstring DialogMenuItem(PeText text, std::wstring_view keys = {});
 // a flat toolbar, a child of `hwnd`; `style` adds CCS_* and TBSTYLE_* styles. Its icons (icons.h): the big ones with
 // the label under them (main and compose windows), or the small ones of the format bar, the label as the tooltip
 enum class BarIcons { Big, Small };
@@ -659,6 +661,8 @@ private:
     // the conversation `thread` opened or closed, the list shown again
     void SetThreadExpanded(int64_t thread, bool open);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
+    void FillRowStart(HDC dc, int index) const;
+    int SelectionColor() const;
     void DisplayInfo(NMLVDISPINFOW* info);
     bool OnListNotify(NMHDR* header, LRESULT& result);
 
@@ -863,6 +867,8 @@ enum ControlId : WORD {
     IDC_MESSAGE_TOOLBAR = 230,
     IDC_PREVIOUS,
     IDC_NEXT,
+    // the » after the main toolbar's buttons when some do not fit: a menu of those
+    IDC_TOOLBAR_MORE,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag

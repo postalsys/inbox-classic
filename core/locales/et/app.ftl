@@ -244,7 +244,8 @@ ui-add-account-title = Lisa meilikonto
 ui-accounts-title = Kontod
 ui-security-none = Puudub (krüptimata)
 ui-field-required = { $field } on kohustuslik.
-ui-email-invalid = Meiliaadress pole kehtiv.
+# review: changed
+ui-email-invalid = E-posti aadress pole kehtiv.
 ui-ports-invalid = Pordid on arvud 1 kuni 65535.
 ui-looking-up = Otsitakse domeeni { $domain } sätteid...
 ui-found-none = Sisestage oma meiliteenuse pakkujalt saadud kontoandmed.
@@ -263,7 +264,8 @@ ui-turned-off = { $name } on selles arvutis välja lülitatud.
 ui-off-here = Selles arvutis välja lülitatud.
 ui-why = Miks?
 ui-more-sign-in = Muud sisselogimisviisid...
-ui-other-account = Muu meilikonto lisamiseks sisestage oma meiliaadress ja nimi, mida näevad kirjade saajad. Järgmises sammus otsitakse serveri sätteid.
+# review: changed
+ui-other-account = Muu meilikonto lisamiseks sisestage oma e-posti aadress ja nimi, mida näevad kirjade saajad. Järgmises sammus otsitakse serveri sätteid.
 # review: new
 ui-field-account-name = Konto nimi:
 ui-field-name = Kuvatav nimi:

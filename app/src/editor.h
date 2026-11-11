@@ -64,6 +64,10 @@ private:
     void Script(const std::wstring& code);
     static std::vector<std::wstring> DroppedFiles(ICoreWebView2WebMessageReceivedEventArgs* args);
     void LinkMenu();
+    void ShowMenu();
+    // the right-click menu WebView2 asked for, until it is shown
+    Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuRequestedEventArgs> menuArgs_;
+    Microsoft::WRL::ComPtr<ICoreWebView2Deferral> menuDeferral_;
     std::wstring caretLink_;
     std::wstring hoverLink_;
     static LRESULT CALLBACK HostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

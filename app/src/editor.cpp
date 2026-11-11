@@ -12,6 +12,8 @@ using Microsoft::WRL::ComPtr;
 namespace {
 
 const wchar_t* kHostClass = L"InboxClassicEditor";
+// the right-click menu, shown after WebView2's event asked for it
+constexpr UINT WM_EDITOR_MENU = WM_APP + 40;
 // where the page is served from memory (webview.h); .invalid never resolves, nothing else is served for it
 const wchar_t* kPageUrl = L"https://compose.inboxclassic.invalid/";
 
@@ -43,6 +45,10 @@ LRESULT CALLBACK Editor::HostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM
     // the keys are the editor's once it is there; before (or when WebView2 could not start) Tab and Esc are the window's
     if (message == WM_GETDLGCODE && editor && editor->controller_) {
         return DLGC_WANTALLKEYS;
+    }
+    if (message == WM_EDITOR_MENU && editor) {
+        editor->ShowMenu();
+        return 0;
     }
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
@@ -158,74 +164,146 @@ void Editor::Configure() {
 }
 
 void Editor::LinkMenu() {
-    // the right-click menu: what does nothing in the editor (it opens no window and goes nowhere) taken out, and on a
-    // link Open Link, Edit Link and Remove Link first
+    // the right-click menu is the app's own, as the rest of the window's: WebView2's would bring its own look, words
+    // and browser items. The menu shows once the event is done with (WM_EDITOR_MENU), not inside WebView2's call
     Microsoft::WRL::ComPtr<ICoreWebView2_11> view;
-    Microsoft::WRL::ComPtr<ICoreWebView2Environment9> environment;
-    if (FAILED(view_.As(&view)) || FAILED(environment_.As(&environment))) {
+    if (FAILED(view_.As(&view))) {
         return;
     }
     view->add_ContextMenuRequested(
-        Callback<ICoreWebView2ContextMenuRequestedEventHandler>([this, environment](ICoreWebView2*, ICoreWebView2ContextMenuRequestedEventArgs* args) {
-            Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItemCollection> items;
-            args->get_MenuItems(&items);
-            UINT32 count = 0;
-            items->get_Count(&count);
-            static const wchar_t* kUseless[] = {L"openLinkInNewWindow", L"openLinkInNewTab", L"saveLinkAs", L"saveAs", L"print", L"share",
-                                                L"reload", L"back", L"forward", L"inspectElement", L"webCapture", L"screenshot",
-                                                L"readAloud", L"openLinkInNewWindowInProfile", L"addToCollections", L"searchWeb"};
-            for (UINT32 i = count; i-- > 0;) {
-                Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItem> item;
-                LPWSTR name = nullptr;
-                if (FAILED(items->GetValueAtIndex(i, &item)) || FAILED(item->get_Name(&name)) || !name) {
-                    continue;
-                }
-                for (const wchar_t* useless : kUseless) {
-                    if (wcscmp(name, useless) == 0) {
-                        items->RemoveValueAtIndex(i);
-                        break;
-                    }
-                }
-                CoTaskMemFree(name);
-            }
-            Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuTarget> target;
-            BOOL onLink = FALSE;
-            if (FAILED(args->get_ContextMenuTarget(&target)) || FAILED(target->get_HasLinkUri(&onLink)) || !onLink) {
+        Callback<ICoreWebView2ContextMenuRequestedEventHandler>([this](ICoreWebView2*, ICoreWebView2ContextMenuRequestedEventArgs* args) {
+            Microsoft::WRL::ComPtr<ICoreWebView2Deferral> deferral;
+            if (menuArgs_ || FAILED(args->GetDeferral(&deferral))) {
                 return S_OK;
             }
-            LPWSTR uri = nullptr;
-            target->get_LinkUri(&uri);
-            std::wstring link = uri ? uri : L"";
-            CoTaskMemFree(uri);
-            struct Command {
-                std::wstring label;
-                std::function<void()> run;
-            };
-            Command commands[] = {
-                {core::Plain(PE_TEXT_UI_OPEN_LINK), [link] { webview::OpenExternally(link.c_str()); }},
-                {core::Plain(PE_TEXT_UI_EDIT_LINK), [this] { handlers_.editLink(); }},
-                {core::Plain(PE_TEXT_UI_REMOVE_LINK), [this] { Link(L""); }},
-            };
-            UINT32 at = 0;
-            for (const Command& command : commands) {
-                Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItem> item;
-                if (FAILED(environment->CreateContextMenuItem(command.label.c_str(), nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_COMMAND, &item))) {
-                    continue;
-                }
-                item->add_CustomItemSelected(Callback<ICoreWebView2CustomItemSelectedEventHandler>([run = command.run](ICoreWebView2ContextMenuItem*, IUnknown*) {
-                                                 run();
-                                                 return S_OK;
-                                             }).Get(),
-                                             nullptr);
-                items->InsertValueAtIndex(at++, item.Get());
-            }
-            Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItem> separator;
-            if (SUCCEEDED(environment->CreateContextMenuItem(L"", nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_SEPARATOR, &separator))) {
-                items->InsertValueAtIndex(at, separator.Get());
-            }
+            args->put_Handled(TRUE);
+            menuArgs_ = args;
+            menuDeferral_ = deferral;
+            PostMessageW(host_, WM_EDITOR_MENU, 0, 0);
             return S_OK;
         }).Get(),
         nullptr);
+}
+
+namespace {
+
+enum MenuId : UINT { MENU_OPEN_LINK = 1, MENU_EDIT_LINK, MENU_REMOVE_LINK, MENU_FIRST_PAGE_ITEM = 100 };
+
+// WebView2's own items the menu keeps, by their names: the spelling suggestions, then the editing commands in the
+// app's words
+struct PageItem {
+    INT32 id;
+    std::wstring label;
+    bool enabled;
+};
+
+std::wstring EditLabel(const std::wstring& name) {
+    if (name == L"cut") {
+        return core::T(PE_TEXT_MAC_CUT);
+    }
+    if (name == L"copy") {
+        return core::T(PE_TEXT_UI_BUTTON_COPY);
+    }
+    if (name == L"paste") {
+        return core::T(PE_TEXT_MAC_PASTE);
+    }
+    if (name == L"selectAll") {
+        return core::T(PE_TEXT_CMD_SELECT_ALL);
+    }
+    return L"";
+}
+
+void PageItems(ICoreWebView2ContextMenuItemCollection* items, std::vector<PageItem>& spelling, std::vector<PageItem>& editing) {
+    UINT32 count = 0;
+    items->get_Count(&count);
+    for (UINT32 i = 0; i < count; i++) {
+        Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItem> item;
+        LPWSTR name = nullptr;
+        if (FAILED(items->GetValueAtIndex(i, &item)) || FAILED(item->get_Name(&name)) || !name) {
+            continue;
+        }
+        std::wstring kind = name;
+        CoTaskMemFree(name);
+        PageItem page = {};
+        BOOL enabled = FALSE;
+        item->get_CommandId(&page.id);
+        item->get_IsEnabled(&enabled);
+        page.enabled = enabled != FALSE;
+        if (kind == L"spellCheck") {
+            LPWSTR label = nullptr;
+            if (SUCCEEDED(item->get_Label(&label)) && label) {
+                page.label = label;
+                CoTaskMemFree(label);
+                spelling.push_back(page);
+            }
+        } else if (page.label = EditLabel(kind); !page.label.empty()) {
+            editing.push_back(page);
+        }
+    }
+}
+
+void AppendPageItems(HMENU menu, const std::vector<PageItem>& items, std::vector<INT32>& ids) {
+    for (const PageItem& item : items) {
+        UINT id = MENU_FIRST_PAGE_ITEM + static_cast<UINT>(ids.size());
+        AppendMenuW(menu, MF_STRING | (item.enabled ? 0 : MF_GRAYED), id, item.label.c_str());
+        ids.push_back(item.id);
+    }
+}
+
+}  // namespace
+
+void Editor::ShowMenu() {
+    Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuRequestedEventArgs> args = std::move(menuArgs_);
+    Microsoft::WRL::ComPtr<ICoreWebView2Deferral> deferral = std::move(menuDeferral_);
+    if (!args || !deferral) {
+        return;
+    }
+    Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuItemCollection> items;
+    std::vector<PageItem> spelling, editing;
+    if (SUCCEEDED(args->get_MenuItems(&items)) && items) {
+        PageItems(items.Get(), spelling, editing);
+    }
+    // on a link Open Link, Edit Link and Remove Link first
+    Microsoft::WRL::ComPtr<ICoreWebView2ContextMenuTarget> target;
+    BOOL onLink = FALSE;
+    std::wstring link;
+    if (SUCCEEDED(args->get_ContextMenuTarget(&target)) && SUCCEEDED(target->get_HasLinkUri(&onLink)) && onLink) {
+        LPWSTR uri = nullptr;
+        target->get_LinkUri(&uri);
+        link = uri ? uri : L"";
+        CoTaskMemFree(uri);
+    }
+    HMENU menu = CreatePopupMenu();
+    if (onLink) {
+        AppendMenuW(menu, MF_STRING, MENU_OPEN_LINK, core::T(PE_TEXT_UI_OPEN_LINK).c_str());
+        AppendMenuW(menu, MF_STRING, MENU_EDIT_LINK, core::T(PE_TEXT_UI_EDIT_LINK).c_str());
+        AppendMenuW(menu, MF_STRING, MENU_REMOVE_LINK, core::T(PE_TEXT_UI_REMOVE_LINK).c_str());
+    }
+    std::vector<INT32> ids;
+    for (const std::vector<PageItem>* group : {&spelling, &editing}) {
+        if (!group->empty() && GetMenuItemCount(menu) > 0) {
+            AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+        }
+        AppendPageItems(menu, *group, ids);
+    }
+    POINT at = {};
+    args->get_Location(&at);
+    ClientToScreen(host_, &at);
+    UINT chosen = GetMenuItemCount(menu) > 0
+                      ? TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, at.x, at.y, 0, GetAncestor(host_, GA_ROOT), nullptr)
+                      : 0;
+    DestroyMenu(menu);
+    if (chosen >= MENU_FIRST_PAGE_ITEM && chosen - MENU_FIRST_PAGE_ITEM < ids.size()) {
+        args->put_SelectedCommandId(ids[chosen - MENU_FIRST_PAGE_ITEM]);
+    }
+    deferral->Complete();
+    if (chosen == MENU_OPEN_LINK) {
+        webview::OpenExternally(link.c_str());
+    } else if (chosen == MENU_EDIT_LINK) {
+        handlers_.editLink();
+    } else if (chosen == MENU_REMOVE_LINK) {
+        Link(L"");
+    }
 }
 
 std::vector<std::wstring> Editor::DroppedFiles(ICoreWebView2WebMessageReceivedEventArgs* args) {

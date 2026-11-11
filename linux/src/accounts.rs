@@ -189,6 +189,7 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
     let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
     content.set_margin_start(18);
     content.set_margin_end(18);
+    content.set_margin_top(12);
     content.set_margin_bottom(18);
     let intro = ui::wrapped_label(&offer.intro);
     intro.set_widget_name("start-intro");

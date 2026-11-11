@@ -488,7 +488,6 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         case .archive: return mailbox.canArchive
         case _ where command.needsOne: return mailbox.hasOne
         case _ where command.needsSome: return mailbox.hasSelection
-        case .delete, .junk, .markRead, .markUnread: return mailbox.hasSelection
         default: return true
         }
     }
