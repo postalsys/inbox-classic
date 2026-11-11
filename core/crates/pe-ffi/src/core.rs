@@ -1457,6 +1457,8 @@ pub struct PeSpecialFolder {
     pub folder: i64,
     /// The account's title, as `PeAccount` `title` has it
     pub name: *const c_char,
+    /// The folder told apart by its account, for the folder bar and the window's title: "Inbox - Gmail"
+    pub title: *const c_char,
     pub unread: u64,
 }
 
@@ -1486,6 +1488,7 @@ pub unsafe extern "C" fn pe_special_folders(
                 account: f.account,
                 folder: f.folder,
                 name: strings.add(&f.name),
+                title: strings.add(&f.title),
                 unread: f.unread,
             })))
         })

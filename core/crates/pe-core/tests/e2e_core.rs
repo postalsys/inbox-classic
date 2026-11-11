@@ -764,7 +764,10 @@ fn all_inboxes_list_and_mark_every_account() {
     );
     s.core.set_account_name(first, "Work").unwrap();
     let rows = s.core.special_folders(pe_core::SpecialFolderKind::Inbox).unwrap();
-    assert_eq!(rows[0].name, "Work");
+    assert_eq!(
+        (rows[0].name.as_str(), rows[0].title.as_str()),
+        ("Work", "Inbox - Work")
+    );
 
     // mail arriving in the second account's Inbox is listed, newest first, and opens the window
     let newest = other_server.add_message("INBOX", &dated("Second's", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
@@ -1916,6 +1919,9 @@ fn messages_become_files() {
     s.core.sync(account).unwrap();
     s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     s.server.expunge("INBOX", &[gone]);
+    // the worker's session hears of the expunge first: until then a server may still answer for the message
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let files = s
         .core
         .export_messages(

@@ -61,6 +61,8 @@ pub struct SpecialFolder {
     pub folder: FolderId,
     /// The account's title, as the folder tree's heading for it has it
     pub name: String,
+    /// The folder told apart by its account, for the folder bar and the window's title: "Inbox - Gmail"
+    pub title: String,
     pub unread: u64,
 }
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
@@ -535,21 +537,30 @@ impl Core {
         let store = self.store();
         let accounts = store.accounts()?;
         let titles = account_titles(&accounts);
+        let folders = match special {
+            // the store's own rule, the one All Inboxes' list uses
+            SpecialFolderKind::Inbox => store.inboxes()?,
+        };
         let mut found = Vec::new();
-        for (account, title) in accounts.iter().zip(titles) {
-            let folder = match special {
-                // the store's own rule, the one All Inboxes' list uses
-                SpecialFolderKind::Inbox => store.find_folder(account.id, "INBOX")?,
+        for folder in folders {
+            let folder = store.folder(folder)?;
+            let Some(at) = accounts.iter().position(|a| a.id == folder.account_id) else {
+                continue;
             };
-            if let Some(folder) = folder {
-                found.push(SpecialFolder {
-                    account: account.id,
-                    folder: folder.id,
-                    name: title,
-                    unread: folder.unread,
-                });
+            // one row an account, should a server have two that match
+            if found.iter().any(|f: &SpecialFolder| f.account == folder.account_id) {
+                continue;
             }
+            found.push(SpecialFolder {
+                account: folder.account_id,
+                folder: folder.id,
+                title: format!("{} - {}", text::folder_name(&folder.info), titles[at]),
+                name: titles[at].clone(),
+                unread: folder.unread,
+            });
         }
+        // in the accounts' order
+        found.sort_by_key(|f| accounts.iter().position(|a| a.id == f.account));
         Ok(found)
     }
 

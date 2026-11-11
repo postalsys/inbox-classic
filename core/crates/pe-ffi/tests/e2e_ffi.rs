@@ -246,6 +246,8 @@ fn reads_mail_through_the_c_api() {
     let row = unsafe { &*pe_special_folder_list_get(specials, 0) };
     assert_eq!((row.folder, row.unread), (inbox, 1));
     assert!(!unsafe { CStr::from_ptr(row.name) }.to_str().unwrap().is_empty());
+    let title = unsafe { CStr::from_ptr(row.title) }.to_str().unwrap();
+    assert!(title.starts_with("Inbox - "), "{title}");
     let row_account = row.account;
     unsafe { pe_special_folder_list_free(specials) };
     // an account name of its own is the account's title

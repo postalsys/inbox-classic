@@ -676,6 +676,8 @@ typedef struct PeSpecialFolder {
   int64_t folder;
   // The account's title, as `PeAccount` `title` has it
   const char *name;
+  // The folder told apart by its account, for the folder bar and the window's title: "Inbox - Gmail"
+  const char *title;
   uint64_t unread;
 } PeSpecialFolder;
 

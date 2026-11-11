@@ -129,7 +129,7 @@ pub fn account_titles(accounts: &[pe_store::Account]) -> Vec<String> {
 pub fn default_account_name(email: &str) -> String {
     let domain = email
         .rsplit_once('@')
-        .map(|(_, domain)| domain.trim().to_lowercase())
+        .map(|(_, domain)| domain.trim().trim_end_matches('.').to_lowercase())
         .unwrap_or_default();
     let first = domain.split('.').next().unwrap_or_default();
     let provider = match domain.as_str() {
@@ -410,6 +410,7 @@ mod tests {
         assert_eq!(default_account_name("ann@gmx.net"), "GMX");
         assert_eq!(default_account_name("ann@web.de"), "WEB.DE");
         assert_eq!(default_account_name("andris@postalsys.com"), "postalsys.com");
+        assert_eq!(default_account_name("ann@Gmail.com."), "Gmail");
         assert_eq!(default_account_name("weird"), "");
     }
 
