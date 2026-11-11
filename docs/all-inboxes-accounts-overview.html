@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All Inboxes Accounts</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d66; --line: #dddad2;
+  --accent: #2456a6; --accent-soft: #e6eefb; --warn: #9a5b00; --warn-soft: #fdf2df;
+  --good: #1f6b3a; --good-soft: #e3f3e8; --code: #f0eee8; --sel: #316ac5; --seltext: #ffffff; --alias: #e9eef8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+    --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+    --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31; --sel: #3d6fc4; --seltext: #ffffff; --alias: #23304a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+  --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+  --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31; --sel: #3d6fc4; --seltext: #ffffff; --alias: #23304a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 1000px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; margin: 48px 0 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.05rem; margin: 20px 0 6px; }
+.lede { color: var(--muted); font-size: 1.08rem; margin-top: 4px; max-width: 70ch; }
+p, li { max-width: 75ch; }
+code { font: 0.86em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.good { border-left-color: var(--good); background: var(--good-soft); }
+.trees { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 20px 0; }
+.tree { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 0; font-size: 0.93rem; }
+.tree .cap { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 0 14px 8px; }
+.row { display: flex; align-items: center; gap: 8px; padding: 3px 14px; }
+.row .ex { width: 12px; color: var(--muted); font-size: 0.75rem; text-align: center; }
+.row .ic { width: 18px; text-align: center; color: var(--muted); }
+.row .n { flex: 1; min-width: 0; }
+.row .c { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+.row.l1 { padding-left: 34px; }
+.row.l2 { padding-left: 54px; }
+.row.head .n { font-weight: 650; }
+.row.alias { background: var(--alias); }
+.row.sel { background: var(--sel); color: var(--seltext); }
+.row.sel .c, .row.sel .ic, .row.sel .ex { color: var(--seltext); }
+.legend { font-size: 0.85rem; color: var(--muted); margin: -8px 0 16px; }
+.legend span { display: inline-block; width: 12px; height: 12px; background: var(--alias); border: 1px solid var(--line); vertical-align: -1px; margin-right: 4px; }
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.decisions div { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--good); border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; }
+.decisions div.ask { border-left-color: var(--warn); }
+.decisions b { display: block; }
+.tw { overflow-x: auto; margin: 12px 0; border-radius: 10px; border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; background: var(--panel); font-size: 0.92rem; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--code); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+.pill { display: inline-block; font-size: 0.74rem; font-weight: 650; padding: 1px 8px; border-radius: 99px; white-space: nowrap; }
+.S { background: var(--good-soft); color: var(--good); }
+.M { background: var(--accent-soft); color: var(--accent); }
+.L { background: var(--warn-soft); color: var(--warn); }
+ol.steps { padding-left: 1.2em; }
+ol.steps li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>All Inboxes by account, account names, the account menu</h1>
+<p class="lede">All Inboxes gets a row per account, as Apple Mail has: the same Inbox the account section has, a second way to it. Accounts get a short name of their own ("Gmail", "Postal Support") in place of "Your Name (address)", and the account's row a right-click menu worth having. Plan: <code>docs/all-inboxes-accounts-plan.md</code>.</p>
+
+<h2>The folder list, before and after</h2>
+<div class="trees">
+  <div class="tree">
+    <div class="cap">Now</div>
+    <div class="row head"><span class="ex"></span><span class="ic">▣</span><span class="n">All Inboxes</span><span class="c">12</span></div>
+    <div class="row head"><span class="ex">▾</span><span class="ic"></span><span class="n">Andris Reinman (andris@gmail.com)</span></div>
+    <div class="row l1"><span class="ic">▣</span><span class="n">Inbox</span><span class="c">9</span></div>
+    <div class="row l1"><span class="ic">➤</span><span class="n">Sent Items</span></div>
+    <div class="row head"><span class="ex">▾</span><span class="ic"></span><span class="n">Andris Reinman (andris@postalsys.com)</span></div>
+    <div class="row l1"><span class="ic">▣</span><span class="n">Inbox</span><span class="c">3</span></div>
+    <div class="row l1"><span class="ic">➤</span><span class="n">Sent Items</span></div>
+  </div>
+  <div class="tree">
+    <div class="cap">Planned</div>
+    <div class="row head"><span class="ex">▾</span><span class="ic">▣</span><span class="n">All Inboxes</span><span class="c"></span></div>
+    <div class="row l1 alias sel"><span class="ic">▣</span><span class="n">Gmail</span><span class="c">9</span></div>
+    <div class="row l1 alias"><span class="ic">▣</span><span class="n">Postal Support</span><span class="c">3</span></div>
+    <div class="row head"><span class="ex">▾</span><span class="ic"></span><span class="n">Gmail</span></div>
+    <div class="row l1"><span class="ic">▣</span><span class="n">Inbox</span><span class="c">9</span></div>
+    <div class="row l1"><span class="ic">➤</span><span class="n">Sent Items</span></div>
+    <div class="row head"><span class="ex">▾</span><span class="ic"></span><span class="n">Postal Support</span></div>
+    <div class="row l1"><span class="ic">▣</span><span class="n">Inbox</span><span class="c">3</span></div>
+    <div class="row l1"><span class="ic">➤</span><span class="n">Sent Items</span></div>
+  </div>
+</div>
+<p class="legend"><span></span>a row under All Inboxes: the account's own Inbox, reached from a second place. The selected row lists Gmail's Inbox only; the folder bar reads "Inbox - Gmail".</p>
+
+<h2>How each row behaves</h2>
+<div class="tw"><table>
+<tr><th>Selected</th><th>The list</th><th>Folder bar and title</th><th>Unread count shown</th></tr>
+<tr><td>All Inboxes</td><td>Every account's Inbox, with the Folder column naming the account (as now)</td><td>All Inboxes</td><td>The sum, while All Inboxes is closed; nothing on it while it is open (its rows show theirs)</td></tr>
+<tr><td>Gmail, under All Inboxes</td><td>Gmail's Inbox alone, no Folder column</td><td>Inbox - Gmail</td><td>Gmail's Inbox</td></tr>
+<tr><td>Inbox, under Gmail</td><td>The same list as the row above</td><td>Inbox</td><td>The same count as the row above</td></tr>
+</table></div>
+
+<h2>Account names</h2>
+<div class="trees">
+  <div class="tree" style="padding:14px 16px">
+    <div class="cap" style="padding:0 0 8px">Properties, General</div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:0.92rem">
+      <span style="color:var(--muted)">Account name</span><span><b>Gmail</b></span>
+      <span style="color:var(--muted)">Your name</span><span>Andris Reinman</span>
+      <span style="color:var(--muted)">E-mail address</span><span>andris@gmail.com</span>
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin:10px 0 0">The account name is how the app names the account; Your name is what recipients see on mail sent.</p>
+  </div>
+  <div class="tree" style="padding:14px 16px">
+    <div class="cap" style="padding:0 0 8px">Where it shows</div>
+    <ul style="margin:0;padding-left:1.1em;font-size:0.92rem">
+      <li>The account's heading and its row under All Inboxes</li>
+      <li>All Inboxes' Account column, the folder bar and title ("Inbox - Gmail")</li>
+      <li>File &gt; Accounts, Go to Folder, Move to Folder</li>
+      <li>Not the From of a new message: that stays "Your name &lt;address&gt;"</li>
+    </ul>
+  </div>
+</div>
+<div class="tw"><table>
+<tr><th>Account</th><th>Its name</th></tr>
+<tr><td>A new account at gmail.com, outlook.com, hotmail.com, icloud.com, yahoo.com ...</td><td>The provider: Gmail, Outlook.com, iCloud, Yahoo</td></tr>
+<tr><td>A new account at a company domain (also a Google or Microsoft sign-in)</td><td>The domain: postalsys.com</td></tr>
+<tr><td>Add Mail Account, second step</td><td>The field, filled in, to change before Finish</td></tr>
+<tr><td>An account added before this change</td><td>Today's label until its name is set</td></tr>
+<tr><td>Two accounts with the same name</td><td>The address added to both, so they differ</td></tr>
+</table></div>
+
+<h2>The account's right-click menu</h2>
+<div class="trees">
+  <div class="tree" style="max-width:280px">
+    <div class="cap">Right-click on an account</div>
+    <div class="row"><span class="n">Send and Receive</span></div>
+    <div class="row"><span class="n">Mark All Read</span></div>
+    <div class="row" style="border-top:1px solid var(--line);margin-top:4px;padding-top:6px"><span class="n">New Folder...</span></div>
+    <div class="row" style="border-top:1px solid var(--line);margin-top:4px;padding-top:6px"><span class="n">Properties...</span></div>
+  </div>
+  <div>
+    <ul style="font-size:0.92rem">
+      <li><b>Send and Receive</b>: this account's server only.</li>
+      <li><b>Mark All Read</b>: every folder of the account; off when nothing in it is unread.</li>
+      <li><b>New Folder...</b>: as now.</li>
+      <li><b>Properties...</b>: the account's Properties, the dialog and the word of File &gt; Accounts.</li>
+      <li>Remove Account stays in File &gt; Accounts, where its confirmation is.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Decisions</h2>
+<div class="decisions">
+  <div><b>A row has a place</b>Each tree row is <code>(folder, under All Inboxes)</code>, not only a folder id, in all three apps.</div>
+  <div><b>Where an outside selection goes</b>A notification's message, Next Unread, the message window and the start pick the row under All Inboxes when the selection was already there; the account's row otherwise.</div>
+  <div><b>Counts</b>Each row its Inbox's count; All Inboxes the sum only while closed, the rule the tree has for closed folders.</div>
+  <div><b>Commands</b>The row is the Inbox: Mark All Read, Properties, dropping messages moves them to that Inbox. No Rename or Delete, as for any Inbox.</div>
+  <div><b>Two accounts or more</b>As All Inboxes now; with one account it is not shown.</div>
+  <div><b>One Inbox rule, in the core</b><code>pe_special_folders(core, use)</code> gives each account's Inbox (Sent and Drafts later), name and count; the apps stop deciding it from special use.</div>
+  <div><b>Open rows remembered</b>All Inboxes and each account stay open or closed between starts, in each app's preferences.</div>
+</div>
+
+<h2>Improvements beyond the request</h2>
+<ul>
+<li><b>One Inbox rule</b> fixes a quiet mismatch: the store finds Inboxes by path (<code>INBOX</code>), the Windows and Mac trees by special use.</li>
+<li><b>All Sent, All Drafts, Flagged</b> later, Apple's next rows, on the same place model and the same <code>pe_special_folders</code>.</li>
+<li><b>The narrow Linux window</b> shows the same rows in its folder popover; its button reads "Inbox - Gmail".</li>
+<li><b>Screen readers</b> hear "Inbox, Gmail", not only "Gmail".</li>
+</ul>
+
+<h2>Where the work is</h2>
+<div class="tw"><table>
+<tr><th>Part</th><th>Change</th><th>Size</th></tr>
+<tr><td>Core</td><td><code>Core::special_folders(use)</code> and <code>pe_special_folders</code> (rows of account, folder, name, unread), tests. The list needs nothing new: a single Inbox is the folder scope it already has.</td><td><span class="pill S">small</span></td></tr>
+<tr><td>Windows</td><td>All Inboxes with children; a place bit in the children's <code>LPARAM</code>; <code>inboxItems_</code> beside <code>items_</code>; <code>ShowMessage</code>, Next Unread, Go to Folder and the closed-row sum.</td><td><span class="pill M">medium</span></td></tr>
+<tr><td>Mac</td><td><code>InboxAliasNode</code> under <code>AllInboxesNode</code>, its own map beside <code>folderNodes</code>; selection, show message, go to folder, drops.</td><td><span class="pill M">medium</span></td></tr>
+<tr><td>Linux</td><td><code>FolderItem</code> gets its place; <code>items</code> and <code>parents</code> keyed by <code>(id, place)</code>; <code>select</code> takes the place; title and folder button.</td><td><span class="pill M">medium</span></td></tr>
+<tr><td>Account names and the menu</td><td>A migration and <code>account_name</code> in the account settings and the C API; <code>default_account_name</code>; <code>mark_account_read</code>; the field in Properties and Add Mail Account in all three; each app's account row menu.</td><td><span class="pill M">medium</span></td></tr>
+<tr><td>Tests and help</td><td>SCENARIO 44: a row per account, one row lists one Inbox, All Inboxes both, a notification keeps the place. Feature map entry, help section, homepage shot.</td><td><span class="pill M">medium</span></td></tr>
+</table></div>
+
+<h2>Settled with you</h2>
+<div class="decisions">
+  <div><b>Account name</b>The field's name, first in Properties.</div>
+  <div><b>Defaults</b>New accounts get their provider's name or domain; existing ones keep today's label until set.</div>
+  <div><b>Properties...</b>The menu item's name, as in File &gt; Accounts.</div>
+  <div><b>Send and Receive, Mark All Read</b>On the account's menu; Remove Account stays in File &gt; Accounts.</div>
+  <div><b>Row names</b>The account name alone ("Gmail"); screen readers hear "Inbox, Gmail".</div>
+  <div><b>Outside selections</b>Stay under All Inboxes when the selection was there.</div>
+  <div><b>Open rows</b>Remembered between starts, in this change.</div>
+  <div><b>Core call</b>The general <code>pe_special_folders</code>; All Sent and All Drafts later on it.</div>
+</div>
+
+</main>
+</body>
+</html>
