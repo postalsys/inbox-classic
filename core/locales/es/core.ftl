@@ -50,7 +50,8 @@ reader-failed-network = No se pudo conectar con el servidor de correo ({ $reason
 reader-failed-sign-in = El servidor de correo no aceptó el inicio de sesión ({ $reason }). Compruebe la contraseña o vuelva a iniciar sesión en Archivo > Cuentas.
 reader-failed-security = No se pudo establecer una conexión segura con el servidor de correo ({ $reason }).
 reader-failed-other = El servidor de correo respondió: { $reason }.
-reader-retry-note = El mensaje no se ha descargado. Se volverá a intentar cuando se restablezca la conexión con la cuenta.
+# review: changed
+reader-retry-note = Se volverá a intentar cuando se restablezca la conexión con la cuenta, o ahora con Reintentar.
 reader-unreadable = Este mensaje no se puede mostrar: { $error }
 message-source-title = Formato original del mensaje: { $subject }
 message-source-untitled = Formato original del mensaje

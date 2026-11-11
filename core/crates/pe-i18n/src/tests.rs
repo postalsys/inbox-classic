@@ -114,10 +114,18 @@ fn words_in_the_language_set() {
     assert_eq!(title(Text::CmdImport), "Import Messages");
     assert_eq!(title(Text::CmdReply), "Reply to Sender");
     assert_eq!(set_language("de-CH"), "de");
+    assert_eq!(
+        localized_picture("brands/google-sign-in.png"),
+        "brands/google-sign-in.de.png"
+    );
     assert_eq!(language(), "de");
     assert_eq!(tr_args(Text::Messages, &[("count", 3u64.into())]), "3 Nachrichten");
     set_language("qps");
     assert!(tr_args(Text::Messages, &[("count", 3u64.into())]).starts_with("[3 "));
+    assert_eq!(
+        localized_picture("brands/google-sign-in.png"),
+        "brands/google-sign-in.png"
+    );
     // the dots off a title before the pseudo-language's padding too
     let options = title(Text::CmdOptions);
     assert!(

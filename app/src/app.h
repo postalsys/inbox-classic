@@ -161,9 +161,8 @@ void SourceDialog(HWND owner, const std::wstring& title, const std::wstring& tex
 void TextDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& text);
 // a PNG picture of the exe's resources (RCDATA, app.rc) as a bitmap `height` pixels high over `background`, as wide
 // (`width`) as that keeps its proportions; NULL, and `width` left as it was, when it can not be made
-constexpr int IDR_GOOGLE_SIGN_IN = 3;
-constexpr int IDR_MICROSOFT_SIGN_IN = 4;
-HBITMAP LoadPicture(int resource, int height, COLORREF background, int& width);
+// the PNG resource named `resource` at `height`, on `background`; `width` its width then
+HBITMAP LoadPicture(const wchar_t* resource, int height, COLORREF background, int& width);
 // registers a window class of a dialog (button face background, arrow cursor) once
 void RegisterDialogClass(const wchar_t* name, WNDPROC proc);
 // the app's icon (app.rc): the small one of the title bar, or the large one of Alt+Tab

@@ -62,7 +62,8 @@ reader-failed-network = Le serveur de messagerie est inaccessible ({ $reason }).
 reader-failed-sign-in = Le serveur de messagerie a refusé la connexion ({ $reason }). Vérifiez le mot de passe ou reconnectez-vous dans Fichier > Comptes.
 reader-failed-security = Impossible d’établir une connexion sécurisée au serveur de messagerie ({ $reason }).
 reader-failed-other = Le serveur de messagerie a répondu : { $reason }.
-reader-retry-note = Message non téléchargé. Une nouvelle tentative aura lieu dès que la connexion au compte sera rétablie.
+# review: changed
+reader-retry-note = Une nouvelle tentative aura lieu dès que la connexion au compte sera rétablie, ou maintenant avec Réessayer.
 reader-unreadable = Ce message ne peut pas être affiché : { $error }
 message-source-title = Code source du message : { $subject }
 message-source-untitled = Code source du message

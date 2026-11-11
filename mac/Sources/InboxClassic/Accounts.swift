@@ -242,6 +242,8 @@ private final class StartPage: NSObject {
         emailField.placeholderString = "name@example.com"
 
         var rows: [NSView] = [wrappingLabel(offer.intro)]
+        // the rows as wide as the buttons need, whose words are longer in some languages
+        var width: CGFloat = 440
         // the buttons, side by side; none when every one of them is off
         let shown = signInButtons.filter { offer.providers.contains($0.provider) }
         if shown.contains(where: { apps.on($0.provider) }) {
@@ -249,6 +251,7 @@ private final class StartPage: NSObject {
             buttons.alignment = .top
             buttons.spacing = 12
             rows.append(buttons)
+            width = max(width, ceil(buttons.fittingSize.width))
         }
         if offer.more {
             let more = linkButton(Text.macMoreSignInOptions.text, action: #selector(chooseMore(_:)))
@@ -285,10 +288,11 @@ private final class StartPage: NSObject {
         stack.spacing = 14
         stack.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         for row in rows where row is NSBox || row === rows[0] {
-            row.widthAnchor.constraint(equalToConstant: 440).isActive = true
+            row.widthAnchor.constraint(equalToConstant: width).isActive = true
         }
         window.contentView = stack
         buttons.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
+        window.setContentSize(NSSize(width: width + 40, height: stack.fittingSize.height))
         window.initialFirstResponder = offer.fields ? nameField : nil
     }
 
@@ -307,7 +311,7 @@ private final class StartPage: NSObject {
         let button = NSButton(title: "", target: self, action: #selector(signInClicked(_:)))
         button.isBordered = false
         button.imagePosition = .imageOnly
-        button.image = Icons.picture(sign.picture).map { picture in
+        button.image = Icons.localizedPicture(sign.picture).map { picture in
             let height: CGFloat = 40
             picture.size = NSSize(width: picture.size.width * height / max(picture.size.height, 1), height: height)
             return picture

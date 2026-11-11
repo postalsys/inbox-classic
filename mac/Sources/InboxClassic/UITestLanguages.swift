@@ -45,6 +45,19 @@ extension UITest {
         check(folder(ofAccount: 0, named: "Posteingang") != 0 && folder(ofAccount: 0, named: "Archiv") != 0,
               "the special folders are in German, Archive among them")
         await shot(main.window, "lang-1-german")
+        // the sign-in buttons say it in the language, French's words the longest
+        for (language, name) in [("de", "lang-1b-german-form"), ("fr", "lang-1c-french-form")] {
+            if language != "de" { await startIn(language) }
+            command(.newAccount)
+            if let form = await waitWindow("account.start", 10) {
+                await pause(0.5)
+                await shot(form, name)
+                NSApp.stopModal()
+                _ = await waitUntil { !form.isVisible }
+            } else {
+                check(false, "File > New Account opens the form in \(language)")
+            }
+        }
 
         step("the windows in the pseudo-language")
         await startIn("qps")

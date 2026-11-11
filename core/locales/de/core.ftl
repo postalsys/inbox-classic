@@ -38,7 +38,8 @@ reader-failed-network = Der Mailserver war nicht erreichbar ({ $reason }).
 reader-failed-sign-in = Der Mailserver hat die Anmeldung nicht angenommen ({ $reason }). Prüfen Sie das Passwort oder melden Sie sich unter Datei > Konten erneut an.
 reader-failed-security = Es konnte keine sichere Verbindung zum Mailserver hergestellt werden ({ $reason }).
 reader-failed-other = Der Mailserver antwortete: { $reason }.
-reader-retry-note = Noch nicht heruntergeladen. Der Download wird erneut versucht, sobald die Verbindung zum Konto wiederhergestellt ist.
+# review: changed
+reader-retry-note = Es wird erneut versucht, sobald die Verbindung zum Konto wiederhergestellt ist, oder jetzt mit Erneut versuchen.
 reader-unreadable = Diese Nachricht kann nicht angezeigt werden: { $error }
 message-source-title = Nachrichtenquelltext: { $subject }
 message-source-untitled = Nachrichten-Quelltext

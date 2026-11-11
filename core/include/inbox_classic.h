@@ -2856,6 +2856,13 @@ char *pe_resolve_language(const char *const *preferred,
 // The code of the language in use (`en` before one was set). Free with `pe_string_free`.
 char *pe_language(void);
 
+// A picture with words in it in the language in use (`brands/google-sign-in.png` as `brands/google-sign-in.de.png` in
+// German), its name as the app keeps it; NULL for a name that is not UTF-8. Free with `pe_string_free`.
+//
+// # Safety
+// `name` must be a NUL-terminated string.
+char *pe_localized_picture(const char *name);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus

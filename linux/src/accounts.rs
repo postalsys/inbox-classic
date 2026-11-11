@@ -279,12 +279,18 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
 /// a line under it that says so and Why?
 fn sign_in_button(kind: ProviderKind, on: bool, chosen: &async_channel::Sender<Start>) -> gtk::Widget {
     let (id, label, picture) = provider_button(kind);
-    let image = gtk::Picture::for_resource(&format!("/com/inboxclassic/InboxClassic/brands/{picture}"));
+    // in the language in use, its words in it (the core picks the file)
+    let resource = format!(
+        "/com/inboxclassic/InboxClassic/{}",
+        pe_core::i18n::localized_picture(&format!("brands/{picture}"))
+    );
+    let texture = gtk::gdk::Texture::from_resource(&resource);
+    let image = gtk::Picture::for_paintable(&texture);
     image.set_can_shrink(true);
     image.set_content_fit(gtk::ContentFit::Contain);
-    // 40 pixels high, both: as wide as each picture is at that height (they are 374 x 86 and 645 x 123), at most, the
-    // height following from the width; a picture's own size would make each as large as its pixels
-    let width = if kind == ProviderKind::Microsoft { 210 } else { 174 };
+    // 40 pixels high, both: as wide as each picture is at that height, at most, the height following from the width; a
+    // picture's own size would make each as large as its pixels
+    let width = texture.width() * 40 / texture.height().max(1);
     image.set_size_request(width, 40);
     let clamp = adw::Clamp::builder()
         .child(&image)

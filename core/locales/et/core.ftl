@@ -38,7 +38,8 @@ reader-failed-network = Meiliserveriga ei saanud ühendust ({ $reason }).
 reader-failed-sign-in = Meiliserver lükkas sisselogimise tagasi ({ $reason }). Kontrollige parooli või logige uuesti sisse menüüs Fail > Kontod.
 reader-failed-security = Meiliserveriga ei saanud luua turvalist ühendust ({ $reason }).
 reader-failed-other = Meiliserver vastas: { $reason }.
-reader-retry-note = Kiri on alla laadimata. Allalaadimist proovitakse uuesti, kui ühendus kontoga taastub.
+# review: changed
+reader-retry-note = Seda proovitakse uuesti, kui ühendus kontoga taastub, või kohe nupuga Proovi uuesti.
 reader-unreadable = Seda kirja ei saa kuvada: { $error }
 message-source-title = Kirja lähtekood: { $subject }
 message-source-untitled = Kirja lähtekood

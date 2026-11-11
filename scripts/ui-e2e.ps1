@@ -3928,6 +3928,16 @@ public static bool HasIcon(IntPtr window) {
         $status = [Native.Win]::FindDescendants($main, 'msctls_statusbar32') | Select-Object -First 1
         Write-Host "   status bar: $(StatusPart $status 0) | $(StatusPart $status 1)"
         Shot $main 'lang-1-german'
+        # the sign-in buttons say it in German, and the form is as wide as they are
+        Command $main $IDM_NEW_ACCOUNT
+        $form = WaitShown 'InboxClassicAccountStart' 10
+        Check ($null -ne $form) 'Add Mail Account opens in German'
+        if ($form) {
+            Start-Sleep -Milliseconds 500
+            Shot $form 'lang-1b-german-form'
+            Click $form 2
+        }
+        Start-Sleep -Milliseconds 500
         Quit $main 'German'
     }
     Remove-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue

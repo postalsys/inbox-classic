@@ -233,6 +233,16 @@ pub fn without_mnemonic(label: &str) -> String {
     out
 }
 
+/// A picture with words in it, in the language in use: `brands/google-sign-in.png` is `brands/google-sign-in.de.png` in
+/// German (`scripts/build-sign-in-buttons.sh` makes them), the English one in English and the pseudo-language
+pub fn localized_picture(name: &str) -> String {
+    let language = language();
+    match name.rsplit_once('.') {
+        Some((stem, extension)) if language != "en" && language != PSEUDO => format!("{stem}.{language}.{extension}"),
+        _ => name.to_string(),
+    }
+}
+
 /// Command `text` as the title of the window it opens: without its mnemonic mark and the dots that say it asks for
 /// more ("&Import Messages..." is titled "Import Messages")
 pub fn title(text: Text) -> String {

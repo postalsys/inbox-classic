@@ -622,9 +622,9 @@ std::wstring FolderDialog(HWND owner, const wchar_t* title) {
 namespace {
 
 // the first frame of a PNG resource, decoded by WIC
-Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> PictureFrame(IWICImagingFactory* factory, int resource) {
+Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> PictureFrame(IWICImagingFactory* factory, const wchar_t* resource) {
     HMODULE module = GetModuleHandleW(nullptr);
-    HRSRC found = FindResourceW(module, MAKEINTRESOURCEW(resource), MAKEINTRESOURCEW(10));  // RT_RCDATA
+    HRSRC found = FindResourceW(module, resource, MAKEINTRESOURCEW(10));  // RT_RCDATA
     HGLOBAL loaded = found ? LoadResource(module, found) : nullptr;
     auto* data = static_cast<BYTE*>(loaded ? LockResource(loaded) : nullptr);
     Microsoft::WRL::ComPtr<IWICStream> stream;
@@ -641,7 +641,7 @@ Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> PictureFrame(IWICImagingFactory* f
 
 }  // namespace
 
-HBITMAP LoadPicture(int resource, int height, COLORREF background, int& width) {
+HBITMAP LoadPicture(const wchar_t* resource, int height, COLORREF background, int& width) {
     Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
     CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
     auto frame = factory ? PictureFrame(factory.Get(), resource) : nullptr;
