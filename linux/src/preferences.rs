@@ -52,7 +52,7 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     words.add(&language);
 
     let notify = adw::SwitchRow::builder()
-        .title(plain(Text::CmdNotify))
+        .title(t!(GtkNotifyNewMail))
         .subtitle(t!(GtkNotifySubtitle))
         .active(app.notify.get())
         .build();
@@ -102,7 +102,8 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     let dialog = adw::PreferencesDialog::builder()
         .title(t!(GtkPreferences))
         .content_width(600)
-        .content_height(360)
+        // every row in view, none cut off at the bottom
+        .content_height(480)
         .build();
     dialog.set_widget_name("preferences-dialog");
     dialog.add(&page);

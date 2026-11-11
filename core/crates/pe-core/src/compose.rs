@@ -398,7 +398,8 @@ pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Dr
         (None, None) => String::new(),
     };
     let (to, cc) = (text_addresses(&message.to), text_addresses(&message.cc));
-    let sent = date.map(pe_smtp::message::format_date).unwrap_or_default();
+    // in the reader's words, as the list and the reading pane say it, not as the header has it
+    let sent = date.map(crate::calendar::local_date_time).unwrap_or_default();
     let header = [
         (tr(Text::HeaderFrom), text_addresses(from)),
         (tr(Text::HeaderTo), to),
@@ -572,7 +573,11 @@ mod tests {
             "{}",
             reply.quote
         );
-        assert!(reply.quote.contains("<b>Sent:</b> Mon, 06 Oct 2025 10:00:00 +0000"));
+        assert!(
+            reply.quote.contains("<b>Sent:</b> 2025-10-06, 10:00"),
+            "{}",
+            reply.quote
+        );
         assert!(reply.quote_folded);
         assert_eq!(reply.in_reply_to.as_deref(), Some("<m2@example.com>"));
         assert_eq!(reply.references, ["<m1@example.com>", "<m2@example.com>"]);

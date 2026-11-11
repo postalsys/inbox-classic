@@ -1555,7 +1555,8 @@ pub(crate) unsafe fn refused<T>(
         Ok(value) => Some(value),
         Err(reason) => {
             if !error.is_null() {
-                let text = reason.map_or_else(|| fallback.to_string(), |e| e.to_string());
+                // shown alone, in an alert
+                let text = pe_core::sentence(&reason.map_or_else(|| fallback.to_string(), |e| e.to_string()));
                 // SAFETY: the caller gave a valid pointer
                 unsafe { *error = into_c_string(text) };
             }

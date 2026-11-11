@@ -156,7 +156,6 @@ impl Book {
         // Tab goes on to the next control, not through every row (the arrow keys move between them)
         view.set_tab_behavior(gtk::ListTabBehavior::Item);
         view.add_css_class("message-list");
-        view.set_show_column_separators(true);
         view.append_column(&text_column(&t!(UiColName), 220, true, |p| &p.name));
         view.append_column(&text_column(&t!(UiColEmail), 240, true, |p| &p.address));
         view.append_column(&text_column(&t!(UiColPhone), 150, false, |p| &p.phone));
@@ -601,7 +600,7 @@ impl Book {
             .map(|p| p.address.clone())
             .collect();
         if let Err(error) = core.delete_from_book(self.selected_group(), &cards, &typed) {
-            ui::alert(&self.window, TITLE, &error.to_string()).await;
+            ui::alert(&self.window, TITLE, &pe_core::sentence(&error.to_string())).await;
         }
         self.reload();
         // the next one selected, where the first deleted was

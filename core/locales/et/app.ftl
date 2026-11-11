@@ -191,6 +191,7 @@ ui-signature = Allkiri
 ui-signature-hint = Lisatakse sellelt kontolt saadetavatele uutele kirjadele, vastustele ja edastatud kirjadele.
 ui-signature-not-saved = Allkirja ei saanud salvestada.
 ui-all-inboxes = Kõik sisendkaustad
+# review: changed
 ui-all-folders = Kõik kaustad
 ui-the-account = konto
 ui-folder-name = Kausta nimi:

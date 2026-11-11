@@ -384,7 +384,6 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         grid.addRow(with: [label(Text.uiFieldSubject.text), subject])
         grid.addRow(with: [label(Text.uiFieldAttach.text), attached])
         grid.column(at: 0).xPlacement = .trailing
-        grid.column(at: 0).width = 64
         grid.rowAlignment = .firstBaseline
         grid.rowSpacing = 6
         grid.row(at: 2).isHidden = !showCc
@@ -948,7 +947,8 @@ final class SignatureEditor: NSObject, NSWindowDelegate {
     private init(core: Core, account: Int64, name: String, current: String) {
         self.core = core
         self.account = account
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 640, height: 360), styleMask: [.titled, .resizable], backing: .buffered,
+        // wide enough for the whole format bar
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 720, height: 360), styleMask: [.titled, .resizable], backing: .buffered,
                           defer: true)
         window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiSignatureOf.text(["account": name])
@@ -996,6 +996,8 @@ final class SignatureEditor: NSObject, NSWindowDelegate {
         NSLayoutConstraint.activate([
             formatBar.view.topAnchor.constraint(equalTo: content.topAnchor, constant: 10),
             formatBar.view.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 10),
+            // the window is never made narrower than the bar
+            formatBar.view.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -10),
             editor.view.topAnchor.constraint(equalTo: formatBar.view.bottomAnchor, constant: 6),
             editor.view.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 10),
             editor.view.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -10),

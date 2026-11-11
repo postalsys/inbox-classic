@@ -29,8 +29,7 @@ fn pick_rows(root: &gtk::Widget, list: &str) -> Vec<String> {
             .iter()
             .map(|l| l.text().to_string())
             .collect();
-        // descendants come last first
-        rows.push(words.into_iter().rev().collect::<Vec<_>>().join(" "));
+        rows.push(words.join(" "));
         index += 1;
     }
     rows

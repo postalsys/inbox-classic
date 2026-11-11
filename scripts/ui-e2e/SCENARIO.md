@@ -21,6 +21,7 @@ Screenshots: `account-1-form`, `account-2-lookup`, `account-3-servers`, `account
 - the lookup guessed the IMAP server
 - the server form keeps the name typed first
 - a connection without encryption is warned about
+- the window that waits while the lookup runs is shown on a lookup that never ends (the real one is over too soon for a picture, `account-2-lookup`), and Cancel ends it (Linux; the others shoot the real one when it lasts)
 
 ## 3. Syncing
 
@@ -689,6 +690,7 @@ Screenshots: `options-1-language`, `lang-1-german`, `lang-2-pseudo-main`, `lang-
 - and the special folders, Archive among them (Posteingang, Archiv)
 - started in the pseudo-language, nothing in the main window, the compose window and the account form is left in English
 - and nothing is cut off
+- in each language of the catalogs (de, es, et, fr), the main window, a new message, Add Mail Account, the accounts and Preferences, nothing cut off in them: `tour-<language>-<n>-<view>` (Linux)
 
 ## 47. About
 

@@ -308,6 +308,12 @@ error-store = lokaler Speicher: { $error }
 error-not-found = nicht gefunden
 error-closed = wird beendet
 error-other-account = der Browser hat sich bei { $email } angemeldet, nicht bei diesem Konto
+# a password or sign-in the mail server refused, with the server's words
+# review: new
+failure-authentication = der Server hat die Anmeldung nicht angenommen ({ $reason })
+# the mail server could not be reached or the connection broke, with the reason
+# review: new
+failure-network = die Verbindung zum Server ist fehlgeschlagen ({ $reason })
 error-in-use = die App kann nicht entfernt werden, da folgende Konten sie verwenden: { $accounts }
 error-turned-off = diese Anmelde-App ist für neue Konten ausgeschaltet
 error-folder-name = der Ordnername muss 1 bis 200 Zeichen lang sein und darf keine Steuerzeichen enthalten

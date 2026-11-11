@@ -808,12 +808,13 @@ fn all_inboxes_list_and_mark_every_account() {
     // the account's Mark All Read: every folder of that account, no other account's
     other_server.add_message("INBOX", &dated("Second's again", "Wed, 8 Oct 2025 11:00:00 +0000"), &[]);
     s.core.sync(second).unwrap();
-    s.wait(|e| {
-        *e == Event::FolderChanged {
-            account: second,
-            folder: inbox2,
+    // the message itself in the store, not just a change of that Inbox (the marking above makes some too)
+    for _ in 0..400 {
+        if s.core.count_search(&all).unwrap() == (3, 1) {
+            break;
         }
-    });
+        std::thread::sleep(Duration::from_millis(25));
+    }
     s.core.mark_account_read(first).unwrap();
     let archive_seen = || {
         s.server.messages("Archive")[0]["flags"]

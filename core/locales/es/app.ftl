@@ -191,6 +191,7 @@ ui-signature = Firma
 ui-signature-hint = Se agrega a los mensajes nuevos, respuestas y reenvíos de esta cuenta.
 ui-signature-not-saved = No se pudo guardar la firma.
 ui-all-inboxes = Todas las bandejas de entrada
+# review: changed
 ui-all-folders = Todas las carpetas
 ui-the-account = la cuenta
 ui-folder-name = Nombre de la carpeta:

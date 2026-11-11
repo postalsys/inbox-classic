@@ -319,6 +319,12 @@ error-store = almacén local: { $error }
 error-not-found = no encontrado
 error-closed = cerrándose
 error-other-account = el navegador inició sesión en { $email }, no en esta cuenta
+# a password or sign-in the mail server refused, with the server's words
+# review: new
+failure-authentication = el servidor no aceptó el inicio de sesión ({ $reason })
+# the mail server could not be reached or the connection broke, with the reason
+# review: new
+failure-network = la conexión con el servidor falló ({ $reason })
 error-in-use = no se puede quitar mientras haya cuentas que inician sesión con ella: { $accounts }
 error-turned-off = esta aplicación de inicio de sesión está desactivada para cuentas nuevas
 error-folder-name = el nombre de la carpeta debe tener entre 1 y 200 caracteres, sin caracteres de control

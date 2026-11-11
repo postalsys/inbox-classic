@@ -456,6 +456,15 @@ fn instant(seconds: i64, floating: bool, part: InstantPart) -> String {
     }
 }
 
+/// A moment as the reader's day and time: "Tuesday, 1 December 2026, 12:00" (the Sent line of a quoted message)
+pub(crate) fn local_date_time(seconds: i64) -> String {
+    format!(
+        "{}, {}",
+        instant(seconds, false, InstantPart::Date),
+        instant(seconds, false, InstantPart::Time)
+    )
+}
+
 /// `2026-12-01` or `12:00`, in UTC
 fn iso_instant(seconds: i64, part: InstantPart) -> String {
     let (days, rest) = (seconds.div_euclid(86400), seconds.rem_euclid(86400));

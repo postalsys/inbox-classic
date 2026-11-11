@@ -37,7 +37,6 @@ const TEXT_KEYS: [Command; 3] = [Command::Delete, Command::SelectAll, Command::U
 #[derive(Clone)]
 struct AccountInfo {
     id: i64,
-    name: String,
     email: String,
     label: String,
     /// What the folder tree calls it
@@ -197,7 +196,8 @@ impl Mailbox {
         let window = adw::ApplicationWindow::builder()
             .application(application)
             .title(TITLE)
-            .default_width(1100)
+            // room for the folder's name in the header bar in every language ("Boîte de réception")
+            .default_width(1200)
             .default_height(760)
             .content(&toolbar)
             .icon_name(crate::APP_ID)
@@ -522,7 +522,6 @@ impl Mailbox {
             let s = &account.settings;
             infos.push(AccountInfo {
                 id: account.id,
-                name: s.name.clone(),
                 email: s.email.clone(),
                 label: pe_core::account_label(&s.name, &s.email),
                 title: title.clone(),
@@ -727,7 +726,7 @@ impl Mailbox {
     }
 
     pub fn account_name(&self, account: i64) -> String {
-        self.account(account).map_or_else(|| t!(UiTheAccount), |a| a.name)
+        self.account(account).map_or_else(|| t!(UiTheAccount), |a| a.title)
     }
 
     pub fn account_email(&self, account: i64) -> String {
@@ -1496,7 +1495,7 @@ impl Mailbox {
             }
             Err(error) => {
                 let window = self.window.clone();
-                spawn(async move { ui::alert(&window, TITLE, &error.to_string()).await });
+                spawn(async move { ui::alert(&window, TITLE, &pe_core::sentence(&error.to_string())).await });
             }
         }
     }
@@ -1681,7 +1680,7 @@ impl Mailbox {
                 self.undone.set(true);
                 self.select_restored();
             }
-            Err(error) => ui::alert(&self.window, TITLE, &error.to_string()).await,
+            Err(error) => ui::alert(&self.window, TITLE, &pe_core::sentence(&error.to_string())).await,
         }
     }
 

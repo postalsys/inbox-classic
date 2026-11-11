@@ -315,7 +315,7 @@ impl MessageWindow {
             }
             Err(error) => {
                 let window = self.window.clone();
-                spawn(async move { ui::alert(&window, TITLE, &error.to_string()).await });
+                spawn(async move { ui::alert(&window, TITLE, &pe_core::sentence(&error.to_string())).await });
             }
         }
     }

@@ -162,5 +162,8 @@ gtk-preferences = Einstellungen
 gtk-language = Sprache
 gtk-language-subtitle = Sprache der Benutzeroberfläche und der Hilfe
 gtk-new-mail-group = Neue E-Mail
+# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
+# review: new
+gtk-notify-new-mail = Bei neuer E-Mail benachrichtigen
 gtk-notify-subtitle = Bei neuen Nachrichten benachrichtigen, wenn das Fenster im Hintergrund ist
 gtk-restart-to-change = Inbox Classic startet neu, um die Sprache zu ändern.

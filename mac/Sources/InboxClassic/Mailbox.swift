@@ -387,7 +387,7 @@ public final class Mailbox: NSObject {
     }
 
     func accountName(_ account: Int64) -> String {
-        accountInfo[account]?.name ?? Text.uiTheAccount.text
+        accountInfo[account]?.title ?? Text.uiTheAccount.text
     }
 
     func accountEmail(_ account: Int64) -> String {
@@ -856,9 +856,11 @@ public final class Mailbox: NSObject {
             return
         }
         clearReader(loading: newUid != 0)
+        if newUid != 0 {
+            reader.open(folder: newFolder, uid: newUid, account: folderAccount(newFolder), row: row)
+        }
+        // after the message is the reader's: Reply and Print ask for it
         selectionChanged()
-        guard newUid != 0 else { return }
-        reader.open(folder: newFolder, uid: newUid, account: folderAccount(newFolder), row: row)
     }
 
     /// whether the folder `id` is an account's Inbox

@@ -119,10 +119,36 @@ impl From<pe_imap::Error> for Failure {
             ErrorKind::Authentication => FailureKind::Authentication,
             _ => FailureKind::Other,
         };
-        Failure {
-            kind,
-            message: error.to_string(),
-        }
+        Failure::said(kind, error.to_string())
+    }
+}
+
+impl Failure {
+    /// A failure in words for the status bar: a refused sign-in and a broken connection said plainly, with the
+    /// server's or the system's own words after it, the rest as they came
+    fn said(kind: FailureKind, detail: String) -> Failure {
+        // "Connection refused (os error 111)": the number says nothing to anyone reading it
+        let detail = match detail.rfind(" (os error ") {
+            Some(at) if detail.ends_with(')') => detail[..at].to_string(),
+            _ => detail,
+        };
+        // the network's own errors are the system's words ("Connection refused"); those of the IMAP and SMTP clients
+        // say what happened already ("the connection is closed")
+        let system_words = detail.starts_with(char::is_uppercase);
+        let text = match kind {
+            FailureKind::Authentication => Some(Text::FailureAuthentication),
+            FailureKind::Network if system_words => Some(Text::FailureNetwork),
+            _ => None,
+        };
+        let message = match text {
+            Some(text) => {
+                // "authentication failed: <the server's words>": the server's words alone after ours
+                let reason = detail.strip_prefix("authentication failed: ").unwrap_or(&detail);
+                tr_args(text, &[("reason", reason.into())])
+            }
+            None => detail,
+        };
+        Failure { kind, message }
     }
 }
 
@@ -165,10 +191,7 @@ impl From<pe_smtp::Error> for Failure {
             pe_smtp::ErrorKind::Authentication => FailureKind::Authentication,
             _ => FailureKind::Other,
         };
-        Failure {
-            kind,
-            message: error.to_string(),
-        }
+        Failure::said(kind, error.to_string())
     }
 }
 
@@ -188,6 +211,29 @@ impl From<pe_store::Error> for Failure {
 }
 
 type Outcome = Result<(), Failure>;
+
+#[cfg(test)]
+mod failure_tests {
+    use super::*;
+
+    #[test]
+    fn failures_are_said_plainly() {
+        let said = |kind, detail: &str| Failure::said(kind, detail.into()).message;
+        assert_eq!(
+            said(FailureKind::Authentication, "authentication failed: Login failed"),
+            "the server did not accept the sign-in (Login failed)"
+        );
+        assert_eq!(
+            said(FailureKind::Network, "Connection refused (os error 111)"),
+            "the connection to the server failed (Connection refused)"
+        );
+        assert_eq!(
+            said(FailureKind::Network, "the connection is closed"),
+            "the connection is closed"
+        );
+        assert_eq!(said(FailureKind::Other, "the server refused X"), "the server refused X");
+    }
+}
 
 /// Builds a message from an account with `compose` (its attachments read now, off the threads that run the network)
 async fn build(

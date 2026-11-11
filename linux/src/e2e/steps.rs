@@ -2409,7 +2409,13 @@ pub async fn all_inboxes_by_account(d: &Driver) {
     main.account_menu(&tree, x, y, first_account);
     let labels = menu_labels(main.folder_popover.borrow().as_ref());
     d.check(
-        labels == ["Send and Receive", "Mark All Read", "New Folder...", "Properties..."],
+        labels
+            == [
+                "Send and Receive",
+                "Mark All Read",
+                "New Folder\u{2026}",
+                "Properties\u{2026}",
+            ],
         &format!(
             "the first account's right-click menu has Send and Receive, Mark All Read, New Folder and Properties ({})",
             labels.join(", ")
@@ -2872,6 +2878,88 @@ pub async fn languages(d: &Driver) {
             wait_gone(10, "account-start").await;
         }
         None => d.check(false, "File > New Account opens in the pseudo-language"),
+    }
+    in_language("en").await;
+}
+
+/// The dialog shown while the network is asked (the lookup of an address's servers, a browser sign-in): one that
+/// never ends, as the real lookup is over too soon for a picture, then Cancel
+pub async fn waiting(d: &Driver) {
+    d.step("waiting for the network");
+    let parent = main_window();
+    crate::app::spawn(async move {
+        let text = t!(UiLookingUp, domain = "example.com");
+        crate::ui::wait_for_request(&parent, u64::MAX - 1, |_| {}, &text, &t!(UiAddAccountTitle)).await;
+    });
+    let Some(wait) = wait_dialog(5, "wait-dialog").await else {
+        d.check(false, "the lookup of an address's servers shows that it waits");
+        return;
+    };
+    d.check(true, "the lookup of an address's servers shows that it waits");
+    d.shot(&wait, "account-2-lookup").await;
+    let answered = wait
+        .downcast_ref::<adw::AlertDialog>()
+        .is_some_and(|alert| answer(alert, "Cancel"));
+    d.check(
+        answered && wait_gone(5, "wait-dialog").await,
+        "and Cancel ends the wait",
+    );
+}
+
+/// The main window, a new message, Add Mail Account, the accounts and Preferences in each language of the catalogs
+/// (`tour-<language>-<n>-<view>`), for a look at each, and nothing cut off in them
+pub async fn language_tour(d: &Driver) {
+    for language in ["de", "es", "et", "fr"] {
+        d.step(&format!("the windows in {language}"));
+        in_language(language).await;
+        let cut_off = |root: &gtk::Widget| -> Vec<String> {
+            shown_words(root)
+                .into_iter()
+                .filter(|(_, cut)| *cut)
+                .map(|(text, _)| text)
+                .collect()
+        };
+        let check_cut = |view: &str, root: &gtk::Widget| {
+            let cut = cut_off(root);
+            d.check(
+                cut.is_empty(),
+                &format!("{language}: nothing in {view} is cut off ({cut:?})"),
+            );
+        };
+        let main = main_window();
+        check_cut("the main window", main.upcast_ref());
+        d.shot(&main, &format!("tour-{language}-1-main")).await;
+
+        command(Command::NewMail);
+        if let Some(c) = wait_compose(10).await {
+            check_cut("a new message", c.window.upcast_ref());
+            d.shot(&c.window, &format!("tour-{language}-2-compose")).await;
+            close_compose(&c).await;
+        }
+
+        command(Command::NewAccount);
+        if let Some(form) = wait_dialog(10, "account-start").await {
+            check_cut("Add Mail Account", form.upcast_ref());
+            d.shot(&form, &format!("tour-{language}-3-account")).await;
+            form.close();
+            wait_gone(10, "account-start").await;
+        }
+
+        command(Command::Accounts);
+        if let Some(list) = wait_dialog(10, "accounts-dialog").await {
+            check_cut("the accounts", list.upcast_ref());
+            d.shot(&list, &format!("tour-{language}-4-accounts")).await;
+            list.close();
+            wait_gone(10, "accounts-dialog").await;
+        }
+
+        command(Command::Options);
+        if let Some(preferences) = wait_dialog(10, "preferences-dialog").await {
+            check_cut("Preferences", preferences.upcast_ref());
+            d.shot(&preferences, &format!("tour-{language}-5-preferences")).await;
+            preferences.close();
+            wait_gone(10, "preferences-dialog").await;
+        }
     }
     in_language("en").await;
 }

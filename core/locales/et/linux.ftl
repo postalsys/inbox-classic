@@ -162,5 +162,8 @@ gtk-preferences = Eelistused
 gtk-language = Keel
 gtk-language-subtitle = Rakenduse ja spikri keel
 gtk-new-mail-group = Uus post
+# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
+# review: new
+gtk-notify-new-mail = Teavita uuest postist
 gtk-notify-subtitle = Teavita uute kirjade saabumisest, kui aken on taustal
 gtk-restart-to-change = Inbox Classic taaskäivitub, et keelt muuta.

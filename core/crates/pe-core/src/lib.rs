@@ -83,7 +83,7 @@ pub use sign_in_apps::{
 pub use text::{
     HiddenUnread, ReaderState, account_label, account_shown_name, account_title, account_titles, default_account_name,
     downloading_text, folder_kind, folder_name, format_size, hidden_unread, list_counts, messages, reader_page,
-    retry_note, saved_text,
+    retry_note, saved_text, sentence,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -756,16 +756,16 @@ impl Core {
     /// after a blank line, "Go to Archive, the next folder with unread messages?"
     pub fn next_unread_question(&self, from: FolderId, to: FolderId) -> Result<String> {
         let store = self.store();
-        let several = store.accounts()?.len() > 1;
+        let accounts = store.accounts()?;
+        let titles = account_titles(&accounts);
         let name = |id: FolderId| -> Result<String> {
             let folder = store.folder(id)?;
             let mut name = crate::text::folder_name(&folder.info);
-            if several {
-                let account = store.account(folder.account_id)?;
-                name = format!(
-                    "{name} ({})",
-                    crate::text::account_label(&account.settings.name, &account.settings.email)
-                );
+            // with several accounts, which one's: as the folder list calls it
+            if accounts.len() > 1
+                && let Some(at) = accounts.iter().position(|a| a.id == folder.account_id)
+            {
+                name = format!("{name} ({})", titles[at]);
             }
             Ok(name)
         };

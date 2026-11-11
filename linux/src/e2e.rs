@@ -612,7 +612,8 @@ fn popover_origin(popover: &gtk::Popover, window: &gtk::Window) -> Option<graphe
     Some(graphene::Point::new(left, top))
 }
 
-/// Every widget of type `T` under `root`, popovers' children included
+/// Every widget of type `T` under `root`, popovers' children included, in the order they are drawn (a dialog opened
+/// over another after it)
 fn descendants<T: IsA<gtk::Widget>>(root: &gtk::Widget) -> Vec<T> {
     let mut found = Vec::new();
     let mut stack = vec![root.clone()];
@@ -620,10 +621,11 @@ fn descendants<T: IsA<gtk::Widget>>(root: &gtk::Widget) -> Vec<T> {
         if let Some(typed) = widget.downcast_ref::<T>() {
             found.push(typed.clone());
         }
-        let mut child = widget.first_child();
+        // the last child pushed first, so the first is taken first
+        let mut child = widget.last_child();
         while let Some(c) = child {
             stack.push(c.clone());
-            child = c.next_sibling();
+            child = c.prev_sibling();
         }
     }
     found
@@ -689,8 +691,10 @@ fn has_focus_in(widget: &impl IsA<gtk::Widget>) -> bool {
 }
 
 fn named_in(root: &gtk::Widget, name: &str) -> Option<gtk::Widget> {
+    // the one drawn last: a dialog opened again over one still closing
     descendants::<gtk::Widget>(root)
         .into_iter()
+        .rev()
         .find(|w| w.widget_name() == name && w.is_mapped())
 }
 
@@ -767,11 +771,12 @@ fn label_of(root: &gtk::Widget, name: &str) -> String {
 }
 
 /// The message box open, when there is one
+/// A message box that asks or tells something; not the one that only says the app waits for the network
 fn alert() -> Option<adw::AlertDialog> {
     windows()
         .iter()
-        .flat_map(|w| descendants::<adw::AlertDialog>(w.upcast_ref()))
-        .find(|d| d.is_mapped())
+        .flat_map(|w| descendants::<adw::AlertDialog>(w.upcast_ref()).into_iter().rev())
+        .find(|d| d.is_mapped() && d.widget_name() != "wait-dialog")
 }
 
 fn alert_text(dialog: &adw::AlertDialog) -> String {
@@ -780,6 +785,14 @@ fn alert_text(dialog: &adw::AlertDialog) -> String {
 
 /// Answers the message box with the button that reads `label`
 fn answer(dialog: &adw::AlertDialog, label: &str) -> bool {
+    // in another language the answer named in English by its id ("No" is "no"), as the dialog labels it
+    let id = label.to_lowercase();
+    let label = if dialog.has_response(&id) {
+        dialog.response_label(&id).to_string()
+    } else {
+        label.to_string()
+    };
+    let label = label.as_str();
     let button = descendants::<gtk::Button>(dialog.upcast_ref()).into_iter().find(|b| {
         b.label().as_deref() == Some(label)
             || b.child()
@@ -912,6 +925,7 @@ fn command(command: Command) {
 
 async fn scenario(d: Rc<Driver>) {
     add_account(&d, "Alex Morgan", "testuser", "testpass", true, false).await;
+    steps::waiting(&d).await;
     reading(&d).await;
     writing(&d).await;
     steps::not_downloaded(&d).await;
@@ -951,6 +965,7 @@ async fn scenario(d: Rc<Driver>) {
     accounts(&d).await;
     sign_in_apps(&d).await;
     steps::languages(&d).await;
+    steps::language_tour(&d).await;
     about_and_help(&d).await;
     printing(&d).await;
     steps::closing(&d).await;
@@ -997,9 +1012,6 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
         d.shot(&first, "account-1-form").await;
     }
     click(&first, "dialog-ok");
-    if shots && let Some(wait) = wait_dialog(5, "wait-dialog").await {
-        d.shot(&wait, "account-2-lookup").await;
-    }
     // the lookup finds nothing for this domain: the second form comes with the usual names to correct
     let Some(servers) = wait_dialog(40, "account-servers").await else {
         d.check(false, "the server settings form follows the lookup");
@@ -1650,7 +1662,7 @@ async fn finding(d: &Driver) {
     );
     let title = mailbox.window().title().unwrap_or_default();
     d.check(
-        title.starts_with("All folders"),
+        title.starts_with("All Folders"),
         &format!("the title says where ({title})"),
     );
     d.shot(&main, "find-1-results").await;

@@ -90,6 +90,21 @@ pub(crate) fn new_mail_words(count: usize, from: &str, subject: &str, watched: b
     }
 }
 
+/// A reason the core gives, written to follow "Work: " in the status bar ("the Inbox and the special folders can not
+/// be renamed or deleted"), as a sentence of its own for an alert: its first letter capital, a full stop at its end
+pub fn sentence(reason: &str) -> String {
+    let reason = reason.trim();
+    let mut chars = reason.chars();
+    let Some(first) = chars.next() else {
+        return String::new();
+    };
+    let mut text: String = first.to_uppercase().chain(chars).collect();
+    if !text.ends_with(['.', '!', '?', '\u{2026}']) {
+        text.push('.');
+    }
+    text
+}
+
 /// "Name <address>", the address alone when the name is empty or the same: how From and the account menus show an
 /// account
 pub fn account_label(name: &str, email: &str) -> String {
@@ -398,6 +413,21 @@ mod tests {
             account_titles(&same),
             ["Work (ann@work.example)", "Work (ann@other.example)"]
         );
+    }
+
+    #[test]
+    fn a_reason_becomes_a_sentence() {
+        assert_eq!(
+            sentence("the Inbox and the special folders can not be renamed or deleted"),
+            "The Inbox and the special folders can not be renamed or deleted."
+        );
+        assert_eq!(
+            sentence("\"x\" is not an e-mail address"),
+            "\"x\" is not an e-mail address."
+        );
+        assert_eq!(sentence("Already one."), "Already one.");
+        assert_eq!(sentence("ärger?"), "Ärger?");
+        assert_eq!(sentence("  "), "");
     }
 
     #[test]
