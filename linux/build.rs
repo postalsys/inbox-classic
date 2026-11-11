@@ -29,16 +29,16 @@ fn main() {
         )
         .unwrap();
     }
-    for (alias, file) in [
-        ("brands/google-sign-in.png", "app/res/brands/google-sign-in.png"),
-        ("brands/microsoft-sign-in.png", "app/res/brands/microsoft-sign-in.png"),
-        (
-            "icons/scalable/apps/com.inboxclassic.InboxClassic.svg",
-            "app/res/app-icon.svg",
-        ),
-    ] {
-        writeln!(xml, "    <file alias=\"{alias}\">{file}</file>").unwrap();
+    // the sign-in buttons, in English and each language with its own words (scripts/build-sign-in-buttons.sh)
+    for language in ["", ".de", ".es", ".et", ".fr"] {
+        for provider in ["google", "microsoft"] {
+            let name = format!("brands/{provider}-sign-in{language}.png");
+            writeln!(xml, "    <file alias=\"{name}\">app/res/{name}</file>").unwrap();
+        }
     }
+    xml.push_str(
+        "    <file alias=\"icons/scalable/apps/com.inboxclassic.InboxClassic.svg\">app/res/app-icon.svg</file>\n",
+    );
     xml.push_str("  </gresource>\n</gresources>\n");
     let manifest = out.join("inbox-classic.gresource.xml");
     std::fs::write(&manifest, xml).expect("the resource list");

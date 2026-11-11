@@ -106,4 +106,9 @@ enum Icons {
     static func picture(_ name: String) -> NSImage? {
         NSImage(contentsOf: resources.appendingPathComponent(name))
     }
+
+    /// a picture with words in it, in the language of the windows (the core picks the file), the English one otherwise
+    static func localizedPicture(_ name: String) -> NSImage? {
+        name.withCString { taken(pe_localized_picture($0)) }.flatMap(picture) ?? picture(name)
+    }
 }

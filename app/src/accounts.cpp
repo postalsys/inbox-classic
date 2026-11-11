@@ -5,6 +5,7 @@
 #include <shellapi.h>
 
 #include <algorithm>
+#include <cctype>
 #include <span>
 
 namespace {
@@ -257,16 +258,36 @@ enum StartId : int {
 struct SignInButton {
     PeOAuthProvider provider;
     int id;
-    int picture;
+    // its file, in English; PictureResource gives the one of the language in use
+    const char* picture;
     PeText label;
     const wchar_t* company;
     int why;
 };
 const SignInButton kSignIns[] = {
-    {PE_O_AUTH_PROVIDER_GOOGLE, IDC_SIGN_IN_GOOGLE, IDR_GOOGLE_SIGN_IN, PE_TEXT_WIN_SIGN_IN_GOOGLE, L"Google", IDC_WHY_GOOGLE},
-    {PE_O_AUTH_PROVIDER_MICROSOFT, IDC_SIGN_IN_MICROSOFT, IDR_MICROSOFT_SIGN_IN, PE_TEXT_WIN_SIGN_IN_MICROSOFT, L"Microsoft",
-     IDC_WHY_MICROSOFT},
+    {PE_O_AUTH_PROVIDER_GOOGLE, IDC_SIGN_IN_GOOGLE, "brands/google-sign-in.png", PE_TEXT_WIN_SIGN_IN_GOOGLE, L"Google",
+     IDC_WHY_GOOGLE},
+    {PE_O_AUTH_PROVIDER_MICROSOFT, IDC_SIGN_IN_MICROSOFT, "brands/microsoft-sign-in.png", PE_TEXT_WIN_SIGN_IN_MICROSOFT,
+     L"Microsoft", IDC_WHY_MICROSOFT},
 };
+
+// the resource of picture `file` in the language in use, as app.rc names it: brands/google-sign-in.de.png is
+// GOOGLE_SIGN_IN_DE
+std::wstring PictureResource(const char* file) {
+    core::String localized(pe_localized_picture(file));
+    std::string name = localized ? localized.get() : file;
+    if (name.starts_with("brands/")) {
+        name.erase(0, 7);
+    }
+    if (name.ends_with(".png")) {
+        name.resize(name.size() - 4);
+    }
+    std::wstring resource;
+    for (char c : name) {
+        resource += (c == '-' || c == '.') ? L'_' : static_cast<wchar_t>(std::toupper(static_cast<unsigned char>(c)));
+    }
+    return resource;
+}
 
 // the button of the command `id` (its own or its "Why?"), or of `provider`
 const SignInButton* SignInOf(int id, PeOAuthProvider provider = PE_O_AUTH_PROVIDER_NONE) {
@@ -504,8 +525,6 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     int pad = Scale(10), width = Scale(440), rowHeight = Scale(22);
     // the labels and the texts measured: longer words make the column and the rows grow, not get cut
     int labelWidth = LabelWidth({nameLabel, emailLabel}, 110);
-    int introHeight = std::max(Scale(30), static_cast<int>(MeasureText(offer.intro, width - 2 * pad).cy) + Scale(4));
-    int otherTextHeight = std::max(Scale(30), static_cast<int>(MeasureText(other, width - 2 * pad).cy) + Scale(4));
     int buttonHeight = Scale(40), gap = Scale(12), reasonHeight = Scale(18), linkHeight = Scale(20);
     // the buttons centered, each as wide as its picture is at this height; under one that is off, its words wrap
     // beside Why? (the row as tall as the longest of them)
@@ -515,13 +534,18 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     int whyWidth = static_cast<int>(MeasureText(why).cx) + Scale(8);
     for (const SignInButton* button : shown) {
         int buttonWidth = Scale(200);
-        pictures.push_back(LoadPicture(button->picture, buttonHeight, GetSysColor(COLOR_BTNFACE), buttonWidth));
+        pictures.push_back(LoadPicture(PictureResource(button->picture).c_str(), buttonHeight, GetSysColor(COLOR_BTNFACE),
+                                       buttonWidth));
         widths.push_back(buttonWidth);
         total += buttonWidth + gap;
         if (!apps.On(button->provider)) {
             reasonHeight = std::max(reasonHeight, static_cast<int>(MeasureText(off, buttonWidth - whyWidth - Scale(2)).cy) + Scale(2));
         }
     }
+    // wide enough for the buttons, whose words are longer in some languages
+    width = std::max(width, total + 2 * pad);
+    int introHeight = std::max(Scale(30), static_cast<int>(MeasureText(offer.intro, width - 2 * pad).cy) + Scale(4));
+    int otherTextHeight = std::max(Scale(30), static_cast<int>(MeasureText(other, width - 2 * pad).cy) + Scale(4));
     int buttonsHeight = shown.empty() ? 0 : buttonHeight + (anyOff ? reasonHeight : 0) + Scale(8);
     int moreHeight = offer.more ? linkHeight + Scale(6) : 0;
     int otherHeight = offer.fields ? Scale(12) + otherTextHeight + 2 * (rowHeight + Scale(6)) : 0;

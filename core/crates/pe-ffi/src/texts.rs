@@ -167,6 +167,20 @@ pub extern "C" fn pe_language() -> *mut c_char {
     guard(|| into_c_string(pe_i18n::language().to_string())).unwrap_or(null_mut())
 }
 
+/// A picture with words in it in the language in use (`brands/google-sign-in.png` as `brands/google-sign-in.de.png` in
+/// German), its name as the app keeps it; NULL for a name that is not UTF-8. Free with `pe_string_free`.
+///
+/// # Safety
+/// `name` must be a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_localized_picture(name: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(name) = (unsafe { arg(name) }) else {
+        return null_mut();
+    };
+    guard(|| into_c_string(pe_i18n::localized_picture(name))).unwrap_or(null_mut())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

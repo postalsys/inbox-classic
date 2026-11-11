@@ -58,7 +58,8 @@ for svg in app/res/icons/*.svg; do
     name=$(basename "$svg" .svg)
     rsvg-convert -f pdf "$svg" -o "$APP/Contents/Resources/icons/$name.pdf"
 done
-cp app/res/brands/google-sign-in.png app/res/brands/microsoft-sign-in.png "$APP/Contents/Resources/brands/"
+# the sign-in buttons, in English and each language with its own words (scripts/build-sign-in-buttons.sh)
+cp app/res/brands/{google,microsoft}-sign-in.png app/res/brands/{google,microsoft}-sign-in.??.png "$APP/Contents/Resources/brands/"
 cp LICENSE "$APP/Contents/Resources/LICENSE.txt"
 if [ -f dist/mac/THIRD-PARTY-NOTICES.txt ]; then
     cp dist/mac/THIRD-PARTY-NOTICES.txt "$APP/Contents/Resources/"

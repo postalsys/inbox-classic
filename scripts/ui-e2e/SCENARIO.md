@@ -681,13 +681,14 @@ Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not ye
 
 ## 46. Options and the language
 
-Screenshots: `options-1-language`, `lang-1-german`, `lang-2-pseudo-main`, `lang-3-pseudo-form`
+Screenshots: `options-1-language`, `lang-1-german`, `lang-1b-german-form`, `lang-1c-french-form`, `lang-2-pseudo-main`, `lang-3-pseudo-form`
 
 - Tools > Options (Settings on the Mac, Preferences on Linux) has Language and Notify of New Mail
 - Language lists System default, with the language it is now, and English, Deutsch, Eesti, Español and Français by their own names
 - a language chosen says the app starts again to change it, with Restart Now and Later
 - started in German, the menus, the toolbar and the status bar are in German
 - and the special folders, Archive among them (Posteingang, Archiv)
+- Add Mail Account in German (and French on the Mac): the Google and Microsoft sign-in buttons say it in the language, the form as wide as they are
 - started in the pseudo-language, nothing in the main window, the compose window and the account form is left in English
 - and nothing is cut off
 - in each language of the catalogs (de, es, et, fr), the main window, a new message, Add Mail Account, the accounts and Preferences, nothing cut off in them: `tour-<language>-<n>-<view>` (Linux)
