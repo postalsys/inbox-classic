@@ -335,14 +335,22 @@ pub fn reopen(source: &[u8]) -> (Draft, Vec<(String, Vec<u8>)>) {
         message_id: message.message_id.as_deref().and_then(draft_id),
         ..Default::default()
     };
-    // the pictures of the HTML are in the body already
-    let files = message
+    (draft, attached(message))
+}
+
+/// The files of a message (name to save each under, content), not the pictures of its HTML, which go with its body
+fn attached(message: parser::Message) -> Vec<(String, Vec<u8>)> {
+    message
         .attachments
         .into_iter()
         .filter(|a| !a.related)
         .map(|a| (a.safe_filename(), a.content))
-        .collect();
-    (draft, files)
+        .collect()
+}
+
+/// The files a forward of `source` sends along, as [`reopen`] gives a draft's
+pub fn forwarded_files(source: &[u8]) -> Vec<(String, Vec<u8>)> {
+    parser::parse(source).map(attached).unwrap_or_default()
 }
 
 /// An address list to edit: what parses back into the same addresses. A name with anything but letters, digits
@@ -463,6 +471,23 @@ pub fn address_label(name: &str, address: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_forward_takes_the_files_not_the_pictures_of_the_html() {
+        let source = b"From: Ann <ann@example.com>\r\nTo: me@example.com\r\nSubject: Report\r\n\
+            Content-Type: multipart/mixed; boundary=m\r\n\r\n\
+            --m\r\nContent-Type: multipart/related; boundary=r\r\n\r\n\
+            --r\r\nContent-Type: text/html\r\n\r\n<p>Hi <img src=\"cid:logo@x\"></p>\r\n\
+            --r\r\nContent-Type: image/png\r\nContent-ID: <logo@x>\r\nContent-Transfer-Encoding: base64\r\n\r\niVBORw==\r\n\
+            --r--\r\n\
+            --m\r\nContent-Type: application/pdf; name=\"q3.pdf\"\r\nContent-Disposition: attachment; filename=\"q3.pdf\"\r\n\
+            Content-Transfer-Encoding: base64\r\n\r\nJVBERg==\r\n--m--\r\n";
+        let files = forwarded_files(source);
+        assert_eq!(files.len(), 1, "{:?}", files.iter().map(|(n, _)| n).collect::<Vec<_>>());
+        assert_eq!(files[0].0, "q3.pdf");
+        assert_eq!(files[0].1, b"%PDF");
+        assert!(forwarded_files(b"not a message at all").is_empty());
+    }
 
     #[test]
     fn labels_an_address_for_a_field() {

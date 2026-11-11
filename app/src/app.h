@@ -645,7 +645,7 @@ private:
     // the selected messages in numbers (summary_), as the core knows them now
     void RefreshSummary();
     // the text of an ignored conversation's row grey, unless the row is selected
-    void GreyIgnored(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const;
+    void RowColors(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const;
     // the Subject cell of a list grouped by conversation, drawn whole: a conversation's + or - box, the subject indented
     // under its first message, and how many messages it has
     void DrawSubject(HDC dc, int index, const PeMessage& row);
@@ -660,7 +660,8 @@ private:
     // the conversation `thread` opened or closed, the list shown again
     void SetThreadExpanded(int64_t thread, bool open);
     void DrawRowIcons(HDC dc, int index, const PeMessage& row);
-    void FillRowStart(HDC dc, int index) const;
+    void FillRowStart(HDC dc, int index, bool selected) const;
+    void RepaintRows(int from, int to) const;
     int SelectionColor() const;
     void DisplayInfo(NMLVDISPINFOW* info);
     bool OnListNotify(NMHDR* header, LRESULT& result);

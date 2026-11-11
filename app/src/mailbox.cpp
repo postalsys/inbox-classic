@@ -187,7 +187,12 @@ LRESULT CALLBACK ListProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
     if (reinterpret_cast<Mailbox*>(data)->OnListInput(message, wParam, lParam)) {
         return 0;
     }
-    return DefSubclassProc(hwnd, message, wParam, lParam);
+    LRESULT result = DefSubclassProc(hwnd, message, wParam, lParam);
+    // the selected rows change colour with the focus, the start of their first column too
+    if (message == WM_SETFOCUS || message == WM_KILLFOCUS) {
+        InvalidateRect(hwnd, nullptr, FALSE);
+    }
+    return result;
 }
 
 // a column that shows an icon of the list strip in its header (the paper clip, the flag, the glasses) and nothing else
@@ -928,12 +933,12 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
         // unread messages in bold, as Outlook Express shows them; the icons once the row is painted. Grouped by
         // conversation, the Subject cell is drawn here, the font then chosen for each cell
         const PeMessage* row = Row(index);
-        result = CDRF_NOTIFYPOSTPAINT | (Grouped() ? CDRF_NOTIFYSUBITEMDRAW : 0);
+        result = CDRF_NOTIFYPOSTPAINT | CDRF_NOTIFYSUBITEMDRAW;
         if (row && row->bold) {
             SelectObject(draw->nmcd.hdc, bold_);
             result |= CDRF_NEWFONT;
         }
-        GreyIgnored(draw, index, row);
+        RowColors(draw, index, row);
     } else if (draw->nmcd.dwDrawStage == (CDDS_ITEMPREPAINT | CDDS_SUBITEM)) {
         const PeMessage* row = Row(index);
         if (row && draw->iSubItem == COL_SUBJECT) {
@@ -942,7 +947,7 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
             return;
         }
         SelectObject(draw->nmcd.hdc, row ? RowFont(*row) : normal_);
-        GreyIgnored(draw, index, row);
+        RowColors(draw, index, row);
         result = CDRF_NEWFONT;
     } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT) {
         if (const PeMessage* row = Row(index)) {
@@ -1010,11 +1015,16 @@ HBITMAP FlagBitmap(int color, bool checked) {
 
 } // namespace
 
-// an ignored conversation's row in grey, but where it is selected: the highlight's own colours there
-void Mailbox::GreyIgnored(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const {
-    if (row && row->dimmed && !(ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED)) {
-        draw->clrText = GetSysColor(COLOR_GRAYTEXT);
-    }
+// every cell's colours from whether the row is selected now: the state custom draw hands over can be stale for a
+// list of owner data. The list then paints no highlight of its own; an ignored conversation's row in grey
+void Mailbox::RowColors(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const {
+    bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
+    bool active = GetFocus() == list_;
+    draw->nmcd.uItemState &= ~CDIS_SELECTED;
+    draw->clrTextBk = GetSysColor(selected ? SelectionColor() : COLOR_WINDOW);
+    draw->clrText = GetSysColor(selected               ? (active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT)
+                                : row && row->dimmed ? COLOR_GRAYTEXT
+                                                     : COLOR_WINDOWTEXT);
 }
 
 HFONT Mailbox::RowFont(const PeMessage& row) const {
@@ -1074,9 +1084,7 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
 void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
     bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
-    if (selected) {
-        FillRowStart(dc, index);
-    }
+    FillRowStart(dc, index, selected);
     auto draw = [&](int column, int icon) {
         RECT cell;
         ListView_GetSubItemRect(list_, index, column, LVIR_BOUNDS, &cell);
@@ -1109,14 +1117,28 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
 }
 
 // the list highlights a selected row from where the first column's text would start, after the room it keeps for an
-// icon: the rest of the row highlighted too, as Outlook Express shows it
-void Mailbox::FillRowStart(HDC dc, int index) const {
+// icon: the rest of the row highlighted too, as Outlook Express shows it, and plain again when it is not
+void Mailbox::FillRowStart(HDC dc, int index, bool selected) const {
     RECT row = {LVIR_BOUNDS}, highlighted = {LVIR_LABEL};
     SendMessageW(list_, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&row));
     SendMessageW(list_, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&highlighted));
     row.right = highlighted.left;
     if (row.right > row.left) {
-        FillRect(dc, &row, GetSysColorBrush(SelectionColor()));
+        FillRect(dc, &row, GetSysColorBrush(selected ? SelectionColor() : COLOR_WINDOW));
+    }
+}
+
+// the list repaints only the text of a row whose selection changed: the whole row, the start of the first column too
+void Mailbox::RepaintRows(int from, int to) const {
+    if (from < 0) {
+        InvalidateRect(list_, nullptr, FALSE);
+        return;
+    }
+    RECT first = {LVIR_BOUNDS}, last = {LVIR_BOUNDS};
+    if (SendMessageW(list_, LVM_GETITEMRECT, from, reinterpret_cast<LPARAM>(&first)) &&
+        SendMessageW(list_, LVM_GETITEMRECT, to, reinterpret_cast<LPARAM>(&last))) {
+        UnionRect(&first, &first, &last);
+        InvalidateRect(list_, &first, FALSE);
     }
 }
 
@@ -1964,17 +1986,25 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
     case NM_CUSTOMDRAW:
         CustomDraw(reinterpret_cast<NMLVCUSTOMDRAW*>(header), result);
         return true;
-    case LVN_ITEMCHANGED:
-        if (!reloading_ && (reinterpret_cast<NMLISTVIEW*>(header)->uChanged & LVIF_STATE)) {
+    case LVN_ITEMCHANGED: {
+        auto* changed = reinterpret_cast<NMLISTVIEW*>(header);
+        if ((changed->uChanged & LVIF_STATE) && ((changed->uOldState ^ changed->uNewState) & LVIS_SELECTED)) {
+            RepaintRows(changed->iItem, changed->iItem);
+        }
+        if (!reloading_ && (changed->uChanged & LVIF_STATE)) {
             ScheduleSelection();
         }
         return true;
-    case LVN_ODSTATECHANGED:
+    }
+    case LVN_ODSTATECHANGED: {
         // a range of rows selected at once (Shift+click) in the list of owner data
+        auto* range = reinterpret_cast<NMLVODSTATECHANGE*>(header);
+        RepaintRows(range->iFrom, range->iTo);
         if (!reloading_) {
             ScheduleSelection();
         }
         return true;
+    }
     case LVN_BEGINDRAG:
         BeginDrag(reinterpret_cast<NMLISTVIEW*>(header)->iItem);
         return true;

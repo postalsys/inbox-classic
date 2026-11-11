@@ -116,7 +116,8 @@ ui-unknown-reason = tundmatu põhjus
 ui-checking = Kontrollitakse konto { $account } uusi kirju...
 ui-done = Valmis
 ui-sent-at = { $subject } saadetud kell { $time }
-ui-draft-saved = Kiri salvestati mustanditesse.
+# review: changed
+ui-draft-saved = Kiri salvestati mustanditesse
 ui-draft-not-saved = Kirja ei salvestatud mustanditesse: { $reason }
 ui-about-core = Tuum { $version }
 ui-add-account-first = Lisage kõigepealt meilikonto.

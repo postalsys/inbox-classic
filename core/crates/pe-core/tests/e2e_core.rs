@@ -2095,7 +2095,7 @@ fn creates_renames_and_deletes_folders() {
     ));
     assert!(matches!(s.core.delete_folder(sent), Err(pe_core::Error::Folder(_))));
     let refused = s.core.create_folder(account, None, "a/b").unwrap_err();
-    assert!(refused.to_string().contains("\"/\""), "{refused}");
+    assert!(refused.to_string().contains("\u{201c}/\u{201d}"), "{refused}");
 }
 
 #[test]

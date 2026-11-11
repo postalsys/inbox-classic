@@ -117,7 +117,8 @@ ui-unknown-reason = unbekannter Grund
 ui-checking = Neue Nachrichten von { $account } werden abgerufen...
 ui-done = Fertig
 ui-sent-at = { $subject } um { $time } gesendet
-ui-draft-saved = Nachricht im Ordner „Entwürfe“ gespeichert.
+# review: changed
+ui-draft-saved = Nachricht im Ordner „Entwürfe“ gespeichert
 ui-draft-not-saved = Die Nachricht wurde nicht im Ordner „Entwürfe“ gespeichert: { $reason }
 ui-about-core = Kern { $version }
 ui-add-account-first = Fügen Sie zuerst ein E-Mail-Konto hinzu.

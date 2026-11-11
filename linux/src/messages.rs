@@ -320,12 +320,31 @@ impl MessageList {
     }
 
     /// The Folder column while the list has messages of several folders, under `title` (Account in All Inboxes): the
-    /// Subject column gives it its room, and gets it back, so the list stays as wide as its pane
-    pub fn show_folder_column(&self, shown: bool, title: &str) {
+    /// Subject column gives it its room, and gets it back, so the list stays as wide as its pane. As wide as the
+    /// longest of `values` in bold, as an unread row draws it, when they are known (the accounts' names)
+    pub fn show_folder_column(&self, shown: bool, title: &str, values: &[String]) {
         self.columns.folder.set_title(Some(title));
+        let widest = values
+            .iter()
+            .map(|value| bold_width(self.view.upcast_ref(), value) + 24)
+            .max()
+            .unwrap_or(0);
+        let width = FOLDER_WIDTH.max(widest);
         if self.columns.folder.is_visible() == shown {
+            // shown already, under another title: the width of what it shows now, from Subject's room
+            if shown && self.columns.folder.fixed_width() != width {
+                let more = width - self.columns.folder.fixed_width();
+                let subject = self.columns.subject.fixed_width();
+                let more = more.min(subject - MIN_SUBJECT_WIDTH);
+                self.columns.subject.set_fixed_width(subject - more);
+                self.folder_room.set(self.folder_room.get() + more);
+                self.columns
+                    .folder
+                    .set_fixed_width(self.columns.folder.fixed_width() + more);
+            }
             return;
         }
+        self.columns.folder.set_fixed_width(width);
         self.columns.folder.set_visible(shown);
         // the room taken from Subject's width as it is now (a narrow window's is smaller), and given back
         let subject = self.columns.subject.fixed_width();
@@ -605,6 +624,15 @@ fn flag_column() -> gtk::ColumnViewColumn {
 }
 
 /// A column of words, bold for an unread message
+/// The width `text` takes in bold in `widget`'s font
+fn bold_width(widget: &gtk::Widget, text: &str) -> i32 {
+    let layout = widget.create_pango_layout(Some(text));
+    let attributes = gtk::pango::AttrList::new();
+    attributes.insert(gtk::pango::AttrInt::new_weight(gtk::pango::Weight::Bold));
+    layout.set_attributes(Some(&attributes));
+    layout.pixel_size().0
+}
+
 fn text_column(
     title: &str,
     width: i32,

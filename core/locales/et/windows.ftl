@@ -66,6 +66,7 @@ win-click-to-retry = Uuesti proovimiseks klõpsake siin.
 win-save-attachments = &Salvesta manused...
 win-files-not-saved = { $count } failist { $failed } ei saanud salvestada.
 win-new-folder-in-highlighted = Uus kaust luuakse valitud kausta alamkaustana.
+# review: changed
 win-delete-folder-ask = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
 win-rename = &Nimeta ümber...
 win-messages-not-saved = Kirju ei saanud salvestada.

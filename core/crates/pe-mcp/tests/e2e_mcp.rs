@@ -220,7 +220,7 @@ fn an_agent_works_on_the_mailbox() {
         agent.call("mark_read", json!({ "folder": inbox, "uids": [lunch] })).await.unwrap();
         assert!(eventually(10, || server.flags("INBOX", lunch).iter().any(|f| f == "\\Seen")));
         let log = core.agent_log(10).unwrap();
-        assert_eq!(log[0].entry.summary, "Marked read \"Lunch\"");
+        assert_eq!(log[0].entry.summary, "Marked read \u{201c}Lunch\u{201d}");
         core.agent_undo(log[0].id).unwrap();
         assert!(eventually(10, || !server.flags("INBOX", lunch).iter().any(|f| f == "\\Seen")));
 
@@ -256,7 +256,7 @@ fn an_agent_works_on_the_mailbox() {
             .await
             .unwrap();
         assert!(eventually(10, || server.subjects("Archive").contains(&"News".to_string())));
-        assert_eq!(core.agent_log(1).unwrap()[0].entry.summary, "Archived \"News\"");
+        assert_eq!(core.agent_log(1).unwrap()[0].entry.summary, "Archived \u{201c}News\u{201d}");
         let archived = core.agent_log(1).unwrap()[0].id;
         core.agent_undo(archived).unwrap();
         assert!(eventually(10, || server.subjects("INBOX").contains(&"News".to_string())));

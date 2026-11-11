@@ -39,7 +39,7 @@ reader-failed-sign-in = Der Mailserver hat die Anmeldung nicht angenommen ({ $re
 reader-failed-security = Es konnte keine sichere Verbindung zum Mailserver hergestellt werden ({ $reason }).
 reader-failed-other = Der Mailserver antwortete: { $reason }.
 # review: changed
-reader-retry-note = Es wird erneut versucht, sobald die Verbindung zum Konto wiederhergestellt ist, oder jetzt mit Erneut versuchen.
+reader-retry-note = Es wird erneut versucht, sobald die Verbindung zum Konto wiederhergestellt ist.
 reader-unreadable = Diese Nachricht kann nicht angezeigt werden: { $error }
 message-source-title = Nachrichtenquelltext: { $subject }
 message-source-untitled = Nachrichten-Quelltext
@@ -318,9 +318,11 @@ failure-network = die Verbindung zum Server ist fehlgeschlagen ({ $reason })
 error-in-use = die App kann nicht entfernt werden, da folgende Konten sie verwenden: { $accounts }
 error-turned-off = diese Anmelde-App ist für neue Konten ausgeschaltet
 error-folder-name = der Ordnername muss 1 bis 200 Zeichen lang sein und darf keine Steuerzeichen enthalten
+# review: changed
 error-folder-separator = ein Ordnername darf auf diesem Server kein „{ $separator }“ enthalten
 error-folder-special = der Posteingang und die Spezialordner können nicht umbenannt oder gelöscht werden
 error-no-recipients = die Nachricht hat keine Empfänger
+# review: changed
 error-bad-address = „{ $address }“ ist keine E-Mail-Adresse
 error-attachment = { $path } konnte nicht gelesen werden: { $error }
 error-no-drafts = das Konto hat keinen Entwürfe-Ordner, in dem die Nachricht gespeichert werden kann
@@ -439,20 +441,35 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Diese Nachricht kann nicht gelesen werden.
+# review: changed
 agent-log-composed = „{ $subject }“ in einer neuen Nachricht zum Fertigstellen geöffnet
+# review: changed
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet
+# review: changed
 agent-log-sent = „{ $subject }“ an { $to } gesendet
+# review: changed
 agent-log-draft = Entwurf „{ $subject }“ gespeichert
+# review: changed
 agent-log-read = „{ $subject }“ als gelesen markiert
+# review: changed
 agent-log-unread = „{ $subject }“ als ungelesen markiert
+# review: changed
 agent-log-flagged = „{ $subject }“ gekennzeichnet
+# review: changed
 agent-log-unflagged = Kennzeichnung von „{ $subject }“ entfernt
+# review: changed
 agent-log-deleted = „{ $subject }“ gelöscht
+# review: changed
 agent-log-moved = „{ $subject }“ nach { $folder } verschoben
+# review: changed
 agent-log-junk = „{ $subject }“ als Junk markiert
+# review: changed
 agent-log-not-junk = „{ $subject }“ als Nicht-Junk markiert
+# review: changed
 agent-log-archived = „{ $subject }“ archiviert
+# review: changed
 agent-log-folder = Ordner „{ $name }“ erstellt
+# review: changed
 agent-log-unsubscribed = Mailingliste der Nachricht „{ $subject }“ abbestellt
 
 ## Keys

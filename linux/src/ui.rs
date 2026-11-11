@@ -53,9 +53,11 @@ pub fn load_style() {
 
 // ---- message boxes ----
 
-/// A message box with OK. `heading` is the caption, left out when it is only the app's name
+/// A message box with OK. `heading` is the caption, left out when it is only the app's name; `body` a sentence even
+/// when it is a reason of the core's, written to follow "Work: " in the status bar
 pub async fn alert(parent: &impl IsA<gtk::Widget>, heading: &str, body: &str) {
-    ask(parent, heading, body, &[("ok", t!(UiOk).as_str())], "ok", "ok", None).await;
+    let body = pe_core::sentence(body);
+    ask(parent, heading, &body, &[("ok", t!(UiOk).as_str())], "ok", "ok", None).await;
 }
 
 /// A message box with the given answers (id, label); the id of the one chosen, `close` for Esc. `destructive`

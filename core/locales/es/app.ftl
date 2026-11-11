@@ -116,7 +116,8 @@ ui-unknown-reason = motivo desconocido
 ui-checking = Buscando mensajes nuevos en { $account }...
 ui-done = Listo
 ui-sent-at = { $subject } enviado a las { $time }
-ui-draft-saved = Mensaje guardado en Borradores.
+# review: changed
+ui-draft-saved = Mensaje guardado en Borradores
 ui-draft-not-saved = El mensaje no se guardó en Borradores: { $reason }
 ui-about-core = Núcleo { $version }
 ui-add-account-first = Agregue primero una cuenta de correo.

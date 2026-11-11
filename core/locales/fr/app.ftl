@@ -116,7 +116,8 @@ ui-unknown-reason = raison inconnue
 ui-checking = Recherche de nouveaux messages sur { $account }...
 ui-done = Terminé
 ui-sent-at = { $subject } envoyé à { $time }
-ui-draft-saved = Message enregistré dans le dossier Brouillons.
+# review: changed
+ui-draft-saved = Message enregistré dans le dossier Brouillons
 ui-draft-not-saved = Le message n'a pas été enregistré dans le dossier Brouillons : { $reason }
 ui-about-core = Noyau { $version }
 ui-add-account-first = Ajoutez d'abord un compte de messagerie.
@@ -213,7 +214,8 @@ ui-not-downloaded = Le message n'est pas encore téléchargé.
 ui-leave-list = Quitter cette liste de diffusion ?
 ui-leave-one-click = Inbox Classic envoie une demande de désabonnement à { $target }, sans ouvrir de page web ni envoyer d'e-mail.
 ui-leave-mail = Pour vous désabonner, vous devez envoyer un e-mail à { $target }. Inbox Classic le prépare pour vous. Envoyez-le pour confirmer votre désabonnement.
-ui-leave-web = La page de désabonnement de la liste va s’ouvrir dans votre navigateur ({ $target }).
+# review: changed
+ui-leave-web = La page de désabonnement de la liste va s'ouvrir dans votre navigateur ({ $target }).
 ui-unsubscribing = Désabonnement de { $target }...
 ui-cannot-unsubscribe = Ce message ne permet pas de vous désabonner.
 ui-unsubscribed = Désabonnement confirmé. La liste indique que vous ne recevrez plus ces messages.
@@ -248,11 +250,13 @@ ui-email-invalid = L'adresse e-mail n'est pas valide.
 ui-ports-invalid = Les ports sont des nombres de 1 à 65535.
 ui-looking-up = Recherche des paramètres de { $domain }...
 ui-found-none = Saisissez les paramètres de compte fournis par votre service de messagerie.
-ui-found-change = Modifiez ces paramètres si votre fournisseur vous en a indiqué d’autres.
+# review: changed
+ui-found-change = Modifiez ces paramètres si votre fournisseur vous en a indiqué d'autres.
 ui-found-guess = Aucun paramètre n'a été trouvé pour cette adresse. Les noms de serveurs proposés sont des suppositions. Vérifiez-les auprès de votre fournisseur.
 ui-found-mx = Inbox Classic a identifié votre fournisseur de messagerie et renseigné les serveurs correspondants.
 ui-found-srv = Ces paramètres ont été trouvés dans les enregistrements DNS de votre domaine.
-ui-found-autodiscover = Ces paramètres ont été trouvés à l’aide de Microsoft Autodiscover (Exchange).
+# review: changed
+ui-found-autodiscover = Ces paramètres ont été trouvés à l'aide de Microsoft Autodiscover (Exchange).
 ui-found-other = Ces paramètres ont été trouvés pour cette adresse.
 ui-app-password-needed = { $provider } n'accepte pas votre mot de passe habituel dans les programmes de messagerie. Créez un mot de passe d'application dans votre compte { $provider } et tapez-le dans le champ Mot de passe du formulaire suivant.
 ui-app-password-open = Ouvrir les instructions de { $provider } dans votre navigateur ?
@@ -263,7 +267,8 @@ ui-turned-off = La connexion avec { $name } est désactivée sur cet ordinateur.
 ui-off-here = Désactivé sur cet ordinateur.
 ui-why = Pourquoi ?
 ui-more-sign-in = Autres options de connexion...
-ui-other-account = Pour ajouter un autre compte de messagerie, saisissez votre adresse e-mail et le nom à afficher pour vos destinataires. Les paramètres des serveurs seront recherchés à l’étape suivante.
+# review: changed
+ui-other-account = Pour ajouter un autre compte de messagerie, saisissez votre adresse e-mail et le nom à afficher pour vos destinataires. Les paramètres des serveurs seront recherchés à l'étape suivante.
 # review: new
 ui-field-account-name = Nom du compte :
 ui-field-name = Nom affiché :
@@ -289,7 +294,8 @@ ui-provider-intro-apps = Connectez-vous au compte { $email } sur le site de { $p
 ui-finish = Terminer
 ui-logon = Connexion
 ui-enter-password = Saisissez le mot de passe de { $account }.
-ui-signs-in-with = Application de connexion : { $app }. La connexion s’effectue dans le navigateur et le compte utilise les serveurs de cette application.
+# review: changed
+ui-signs-in-with = Application de connexion : { $app }. La connexion s'effectue dans le navigateur et le compte utilise les serveurs de cette application.
 ui-keep-password = Laissez le champ du mot de passe vide pour conserver le mot de passe actuel.
 ui-remove-account = Supprimer le compte
 ui-remove-account-ask = Supprimer ce compte d'Inbox Classic ? Son courrier reste sur le serveur ; la copie sur cet ordinateur et le mot de passe enregistré sont supprimés.
@@ -331,9 +337,11 @@ ui-scopes = Autorisations (scopes) :
 ui-imap-server = Serveur IMAP :
 ui-smtp-server = Serveur SMTP :
 ui-redirect-uri = Adresse de redirection :
-ui-sign-in-app-intro = Une application de connexion est un client OAuth enregistré auprès de votre fournisseur pour vous connecter dans le navigateur. Choisissez un fournisseur pour préremplir les paramètres, puis ajoutez l’ID client et le secret client, si votre fournisseur en a attribué un.
+# review: changed
+ui-sign-in-app-intro = Une application de connexion est un client OAuth enregistré auprès de votre fournisseur pour vous connecter dans le navigateur. Choisissez un fournisseur pour préremplir les paramètres, puis ajoutez l'ID client et le secret client, si votre fournisseur en a attribué un.
 ui-remove-secret = Un secret client est enregistré. Saisissez-en un nouveau pour le remplacer ou supprimez celui qui est enregistré
-ui-register-it = Enregistrer l’application auprès du fournisseur
+# review: changed
+ui-register-it = Enregistrer l'application auprès du fournisseur
 ui-built-in-note = { $name } est une application intégrée. Vous pouvez uniquement choisir de la proposer ou non aux nouveaux comptes.
 ui-client-with-secret = ID client : { $client }, avec un secret client.
 ui-client-public = ID client : { $client }, un client public (sans secret).
@@ -377,7 +385,8 @@ ui-dont-send = Ne pas envoyer
 ui-edit-first = &Modifier d'abord
 ui-new-address = Nouvelle adresse
 ui-turn-away = &Refuser
-ui-clear-agent-log = Effacer l’historique des agents ?
+# review: changed
+ui-clear-agent-log = Effacer l'historique des agents ?
 ui-clear-agent-log-detail = Les modifications effectuées par les agents ne seront pas annulées.
 ui-let-agents-connect = &Laisser les agents d'IA se connecter à Inbox Classic
 ui-change-button = Modifier…

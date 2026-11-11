@@ -341,7 +341,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         subject.delegate = self
         attached.setAccessibilityIdentifier("compose.attached")
         attached.delegate = self
-        attached.tokenStyle = .rounded
+        // the rounded style keeps an empty slot before the name; squared chips start with it
+        attached.tokenStyle = .squared
         attached.isEditable = true
         // every attached file in sight: the row grows a line for what does not fit, as a forward of several has
         attached.usesSingleLineMode = false
@@ -384,6 +385,9 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         grid.addRow(with: [label(Text.uiFieldSubject.text), subject])
         grid.addRow(with: [label(Text.uiFieldAttach.text), attached])
         grid.column(at: 0).xPlacement = .trailing
+        // as wide as its widest label from the start, so the fields stay put when Attachments or Cc shows
+        grid.column(at: 0).width = (0..<grid.numberOfRows)
+            .compactMap { grid.cell(atColumnIndex: 0, rowIndex: $0).contentView?.fittingSize.width }.max() ?? 0
         grid.rowAlignment = .firstBaseline
         grid.rowSpacing = 6
         grid.row(at: 2).isHidden = !showCc

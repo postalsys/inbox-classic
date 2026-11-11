@@ -61,6 +61,8 @@ public final class Mailbox: NSObject {
     private let searchBar = InfoBar(icon: "search", link: Text.uiClearSearch.text)
     private let emptyTitle = NSTextField(labelWithString: "")
     private let emptyMore = NSTextField(wrappingLabelWithString: "")
+    private lazy var emptyMoreWidth = emptyMore.widthAnchor.constraint(equalToConstant: Mailbox.emptyTextWidth)
+    private static let emptyTextWidth: CGFloat = 420
     private let rightSplit = NSSplitView()
 
     /// the counts or the folder changed (the main window shows them)
@@ -462,6 +464,12 @@ public final class Mailbox: NSObject {
 
     var picturesBlocked: Bool { reader.picturesBlocked }
 
+    /// the one message selected could not be downloaded: there is nothing to print, reply to or forward
+    var shownFailed: Bool { hasOne && reader.showsFailure }
+
+    /// Reply, Reply All, Forward and Print need the message's body
+    static let needsBody: Set<Command> = [.reply, .replyAll, .forward, .print]
+
     // ---- the message list ----
 
     /// words typed search every folder of every account (in: narrows that); without, the list is the folder's, or
@@ -740,6 +748,9 @@ public final class Mailbox: NSObject {
         emptyMore.textColor = .secondaryLabelColor
         emptyMore.alignment = .center
         emptyMore.isSelectable = false
+        // the lines as long as one another, set in updateEmptyText; the scroll's width still wins when narrower
+        emptyMoreWidth.priority = .defaultHigh
+        emptyMoreWidth.isActive = true
         let stack = NSStackView(views: [emptyTitle, emptyMore])
         stack.orientation = .vertical
         stack.spacing = 8
@@ -777,6 +788,28 @@ public final class Mailbox: NSObject {
         emptyMore.stringValue = more
         emptyTitle.isHidden = title.isEmpty
         emptyMore.isHidden = more.isEmpty
+        emptyMoreWidth.constant = evenWidth(more, font: emptyMore.font, widest: Mailbox.emptyTextWidth)
+        // the stripes of empty rows would run through the text
+        list.usesAlternatingRowBackgroundColors = total != 0
+    }
+
+    /// the narrowest width that wraps `text` into as few lines as `widest` does, so no line is left with a lone word
+    private func evenWidth(_ text: String, font: NSFont?, widest: CGFloat) -> CGFloat {
+        guard !text.isEmpty else { return widest }
+        let attributed = NSAttributedString(string: text, attributes: [.font: font ?? NSFont.systemFont(ofSize: 13)])
+        func height(_ width: CGFloat) -> CGFloat {
+            attributed.boundingRect(with: NSSize(width: width, height: .greatestFiniteMagnitude),
+                                    options: [.usesLineFragmentOrigin, .usesFontLeading]).height.rounded(.up)
+        }
+        let lines = height(widest)
+        var low: CGFloat = 40
+        var high = widest
+        while high - low > 2 {
+            let middle = (low + high) / 2
+            if height(middle) > lines { low = middle } else { high = middle }
+        }
+        // a little room, as the field's own insets wrap a hair sooner than the measure
+        return min(widest, high.rounded(.up) + 8)
     }
 
     // ---- searching ----

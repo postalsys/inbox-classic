@@ -1748,7 +1748,7 @@ public static class Dragger {
         Check ([Native.Win]::RemoteListText($hosts, 0, 0) -eq 'My AI agent' -and [Native.Win]::RemoteListText($hosts, 0, 1) -match '^Read, organize and send with your yes') "it lists the program and what it may do ($([Native.Win]::RemoteListText($hosts, 0, 1)))"
         $newest = { [Native.Win]::RemoteListText($log, 0, 2) }
         [void](WaitFor { (& $newest) -match '^Sent' } 10)
-        Check ((& $newest) -match '^Sent "Lunch on Friday\?" to pat@example.net' -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') "and what its agent did, newest first ($(& $newest); $([Native.Win]::RemoteListText($log, 1, 2)))"
+        Check ((& $newest) -match "^Sent $([char]0x201C)Lunch on Friday\?$([char]0x201D) to pat@example.net" -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') "and what its agent did, newest first ($(& $newest); $([Native.Win]::RemoteListText($log, 1, 2)))"
         Shot $agents 'agents-6-window'
         # the newest, the message sent, is selected: Undo takes it out of the Outbox before it goes
         Click $agents $IDC_AGENTS_UNDO

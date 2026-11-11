@@ -51,7 +51,7 @@ reader-failed-sign-in = El servidor de correo no aceptó el inicio de sesión ({
 reader-failed-security = No se pudo establecer una conexión segura con el servidor de correo ({ $reason }).
 reader-failed-other = El servidor de correo respondió: { $reason }.
 # review: changed
-reader-retry-note = Se volverá a intentar cuando se restablezca la conexión con la cuenta, o ahora con Reintentar.
+reader-retry-note = Se volverá a intentar cuando se restablezca la conexión con la cuenta.
 reader-unreadable = Este mensaje no se puede mostrar: { $error }
 message-source-title = Formato original del mensaje: { $subject }
 message-source-untitled = Formato original del mensaje
@@ -329,10 +329,12 @@ failure-network = la conexión con el servidor falló ({ $reason })
 error-in-use = no se puede quitar mientras haya cuentas que inician sesión con ella: { $accounts }
 error-turned-off = esta aplicación de inicio de sesión está desactivada para cuentas nuevas
 error-folder-name = el nombre de la carpeta debe tener entre 1 y 200 caracteres, sin caracteres de control
-error-folder-separator = un nombre de carpeta no puede contener "{ $separator }" en este servidor
+# review: changed
+error-folder-separator = un nombre de carpeta no puede contener «{ $separator }» en este servidor
 error-folder-special = la Bandeja de entrada y las carpetas especiales no se pueden renombrar ni eliminar
 error-no-recipients = el mensaje no tiene destinatarios
-error-bad-address = "{ $address }" no es una dirección de correo electrónico
+# review: changed
+error-bad-address = «{ $address }» no es una dirección de correo electrónico
 error-attachment = no se pudo leer { $path }: { $error }
 error-no-drafts = la cuenta no tiene una carpeta Borradores donde guardar el mensaje
 error-draft-attachment = no se pudo conservar un archivo adjunto del borrador: { $error }
@@ -450,20 +452,35 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Este mensaje no se puede leer.
+# review: changed
 agent-log-composed = Se abrió «{ $subject }» en un mensaje nuevo para que lo termine
+# review: changed
 agent-log-refused = No envió «{ $subject }»
+# review: changed
 agent-log-sent = Se envió «{ $subject }» a { $to }
+# review: changed
 agent-log-draft = Se guardó el borrador «{ $subject }»
+# review: changed
 agent-log-read = «{ $subject }» marcado como leído
+# review: changed
 agent-log-unread = «{ $subject }» marcado como no leído
+# review: changed
 agent-log-flagged = Se añadió una marca a «{ $subject }»
+# review: changed
 agent-log-unflagged = Se quitó la marca de «{ $subject }»
+# review: changed
 agent-log-deleted = Se eliminó «{ $subject }»
+# review: changed
 agent-log-moved = «{ $subject }» movido a { $folder }
+# review: changed
 agent-log-junk = «{ $subject }» marcado como correo no deseado
+# review: changed
 agent-log-not-junk = «{ $subject }» marcado como correo deseado
+# review: changed
 agent-log-archived = Se archivó «{ $subject }»
+# review: changed
 agent-log-folder = Se creó la carpeta «{ $name }»
+# review: changed
 agent-log-unsubscribed = Suscripción cancelada a la lista que envió «{ $subject }»
 
 ## Keys

@@ -39,7 +39,7 @@ reader-failed-sign-in = Meiliserver lükkas sisselogimise tagasi ({ $reason }). 
 reader-failed-security = Meiliserveriga ei saanud luua turvalist ühendust ({ $reason }).
 reader-failed-other = Meiliserver vastas: { $reason }.
 # review: changed
-reader-retry-note = Seda proovitakse uuesti, kui ühendus kontoga taastub, või kohe nupuga Proovi uuesti.
+reader-retry-note = Seda proovitakse uuesti, kui ühendus kontoga taastub.
 reader-unreadable = Seda kirja ei saa kuvada: { $error }
 message-source-title = Kirja lähtekood: { $subject }
 message-source-untitled = Kirja lähtekood
@@ -305,9 +305,11 @@ failure-network = ühendus serveriga ebaõnnestus ({ $reason })
 error-in-use = rakendust ei saa eemaldada, sest seda kasutavad järgmised kontod: { $accounts }
 error-turned-off = see sisselogimisrakendus on uute kontode jaoks välja lülitatud
 error-folder-name = kausta nimi peab olema 1 kuni 200 märki pikk ega tohi sisaldada juhtmärke
+# review: changed
 error-folder-separator = kausta nimes ei tohi selles serveris olla märki „{ $separator }“
 error-folder-special = sisendkausta ja erikaustu ei saa ümber nimetada ega kustutada
 error-no-recipients = kirjal pole adressaate
+# review: changed
 error-bad-address = „{ $address }“ pole e-posti aadress
 error-attachment = faili { $path } ei saanud lugeda: { $error }
 error-no-drafts = kontol pole mustandite kausta, kuhu kirja salvestada
@@ -426,20 +428,35 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Seda kirja ei saa lugeda.
+# review: changed
 agent-log-composed = „{ $subject }“ avati uues kirjas, et saaksite selle lõpetada
+# review: changed
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
+# review: changed
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
+# review: changed
 agent-log-draft = Mustand „{ $subject }“ salvestati
+# review: changed
 agent-log-read = „{ $subject }“ märgiti loetuks
+# review: changed
 agent-log-unread = „{ $subject }“ märgiti lugemata kirjaks
+# review: changed
 agent-log-flagged = „{ $subject }“ märgiti lipuga
+# review: changed
 agent-log-unflagged = Kirjalt „{ $subject }“ eemaldati lipp
+# review: changed
 agent-log-deleted = „{ $subject }“ kustutati
+# review: changed
 agent-log-moved = „{ $subject }“ teisaldati kausta { $folder }
+# review: changed
 agent-log-junk = „{ $subject }“ märgiti rämpspostiks
+# review: changed
 agent-log-not-junk = „{ $subject }“ märgiti tavapostiks
+# review: changed
 agent-log-archived = „{ $subject }“ arhiveeriti
+# review: changed
 agent-log-folder = Loodi kaust „{ $name }“
+# review: changed
 agent-log-unsubscribed = Loobuti kirja „{ $subject }“ saatnud meililisti tellimusest
 
 ## Keys

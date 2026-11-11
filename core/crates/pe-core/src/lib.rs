@@ -1426,13 +1426,31 @@ impl Core {
         Ok(())
     }
 
-    /// A reply, a reply to all or a forward of a message whose source is in the store
+    /// A reply, a reply to all or a forward of a message whose source is in the store; a forward with the message's
+    /// files, written out as a reopened draft's are ([`Core::reopen_draft`]), to be attached
     pub fn draft(&self, folder: FolderId, uid: u64, kind: DraftKind) -> Result<Option<Draft>> {
-        let store = self.store();
-        let account = store.account(store.folder(folder)?.account_id)?;
-        let date = store.message(folder, uid)?.and_then(|m| m.info.display_date());
-        let source = store.source(folder, uid)?;
-        Ok(source.map(|source| compose::draft(&source, kind, &account.settings.email, date)))
+        let (source, email, date) = {
+            let store = self.store();
+            let account = store.account(store.folder(folder)?.account_id)?;
+            let date = store.message(folder, uid)?.and_then(|m| m.info.display_date());
+            (store.source(folder, uid)?, account.settings.email, date)
+        };
+        let Some(source) = source else {
+            return Ok(None);
+        };
+        let mut draft = compose::draft(&source, kind, &email, date);
+        if kind == DraftKind::Forward {
+            let files = compose::forwarded_files(&source);
+            if !files.is_empty() {
+                draft.attachments = write_out(&format!("forward-{folder}-{uid}"), files).map_err(|error| {
+                    Error::Unavailable(tr_args(
+                        Text::ErrorDraftAttachment,
+                        &[("error", (&error.to_string()).into())],
+                    ))
+                })?;
+            }
+        }
+        Ok(Some(draft))
     }
 
     /// Marks a message read or unread: in the store now, on the server in the background

@@ -127,7 +127,7 @@ extension UITest {
         else { throw Failed(description: "the draft did not open") }
         compose = reopened
         check(field("compose.to", compose)?.stringValue.contains("fay@example.com") == true, "opening the draft has its recipient")
-        _ = await typeInEditor(compose, " Now finished.")
+        _ = await typeInEditor(compose, " Now finished.", atEnd: true)
         await shot(compose, "write-9-draft-reopened")
         // saved again: one draft, the new one
         onMain { _ = ComposeWindow.open.last?.window.toolbar?.items.first { $0.itemIdentifier.rawValue == "save" }.map { item in
@@ -2096,7 +2096,7 @@ extension UITest {
             }
             check(cell(hosts, 0, 0) == "My AI agent" && cell(hosts, 1, 0).hasPrefix("Read, organize and send with your yes"),
                   "it lists the program and what it may do (\(cell(hosts, 1, 0)))")
-            check(cell(log, 2, 0).hasPrefix("Sent \"Lunch on Friday?\" to pat@example.net") && cell(log, 2, 1).hasPrefix("Marked read"),
+            check(cell(log, 2, 0).hasPrefix("Sent “Lunch on Friday?” to pat@example.net") && cell(log, 2, 1).hasPrefix("Marked read"),
                   "and what its agent did, newest first")
             await shot(agents, "agents-6-window")
             press(find("agents.undo", in: agents))

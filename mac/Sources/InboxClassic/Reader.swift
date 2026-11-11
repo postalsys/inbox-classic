@@ -62,6 +62,8 @@ final class Reader: NSObject {
         header.isSelectable = true
         header.setAccessibilityIdentifier("reader.header")
         header.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        // below the stack's own 250, so it takes the free width and the files sit at the trailing edge
+        header.setContentHuggingPriority(.init(249), for: .horizontal)
         header.maximumNumberOfLines = 6
         logo.imageScaling = .scaleProportionallyUpOrDown
         logo.isHidden = true
@@ -86,6 +88,7 @@ final class Reader: NSObject {
         let right = NSStackView(views: [attachments, unsubscribe])
         right.orientation = .vertical
         right.alignment = .trailing
+        right.setContentHuggingPriority(.required, for: .horizontal)
         let top = NSStackView(views: [logo, header, right])
         top.alignment = .top
         top.spacing = 10

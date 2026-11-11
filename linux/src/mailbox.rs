@@ -834,14 +834,13 @@ impl Mailbox {
         self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
         self.list
             .show_person_column(view.lists_recipients(core).unwrap_or(false));
-        self.list.show_folder_column(
-            several,
-            &if self.searching() {
-                t!(UiColFolder)
-            } else {
-                t!(UiColAccount)
-            },
-        );
+        let (title, values) = if self.searching() {
+            (t!(UiColFolder), Vec::new())
+        } else {
+            let names = self.accounts.borrow().iter().map(|a| a.title.clone()).collect();
+            (t!(UiColAccount), names)
+        };
+        self.list.show_folder_column(several, &title, &values);
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let positions: Vec<u64> = if !keep_selection {
             Vec::new()

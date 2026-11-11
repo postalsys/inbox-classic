@@ -464,6 +464,16 @@ void ShowAddresses(HWND dialog, const ContactState& state, int select) {
     FillListBox(GetDlgItem(dialog, IDC_CONTACT_ADDRESSES), lines, select);
 }
 
+// Remove only with a number to remove; the focus to the list when it leaves the button off
+void UpdatePhoneRemove(HWND dialog) {
+    HWND list = GetDlgItem(dialog, IDC_CONTACT_PHONES), remove = GetDlgItem(dialog, IDC_CONTACT_PHONE_REMOVE);
+    bool any = ListView_GetNextItem(list, -1, LVNI_SELECTED) >= 0;
+    if (!any && GetFocus() == remove) {
+        SetFocus(list);
+    }
+    EnableWindow(remove, any);
+}
+
 void ShowPhones(HWND dialog, const ContactState& state, int select) {
     HWND list = GetDlgItem(dialog, IDC_CONTACT_PHONES);
     ListView_DeleteAllItems(list);
@@ -472,6 +482,7 @@ void ShowPhones(HWND dialog, const ContactState& state, int select) {
         SetCell(list, row, 1, state.phones[i].number);
     }
     SelectRow(list, select);
+    UpdatePhoneRemove(dialog);
 }
 
 // the address typed (if any) into the list; false when it is not an address, which was said
@@ -646,6 +657,11 @@ bool RemoveContactItem(HWND dialog, ContactState& state, HWND list) {
 }
 
 LRESULT CALLBACK ContactProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    if (message == WM_NOTIFY && reinterpret_cast<NMHDR*>(lParam)->idFrom == IDC_CONTACT_PHONES &&
+        reinterpret_cast<NMHDR*>(lParam)->code == LVN_ITEMCHANGED) {
+        UpdatePhoneRemove(hwnd);
+        return 0;
+    }
     return DialogProc<ContactState>(hwnd, message, wParam, lParam, OnContactCommand, RemoveContactItem);
 }
 
