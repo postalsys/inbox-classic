@@ -1196,6 +1196,12 @@ public final class Mailbox: NSObject {
     /// the text of the rows of an ignored conversation: grey, as what is turned off is
     static let ignoredColor = NSColor.tertiaryLabelColor
 
+    /// a row's text colour; on the accent of a selected row a grey one is white, dimmed a little, so it can be read
+    static func rowColor(grey: Bool, style: NSView.BackgroundStyle) -> NSColor {
+        guard grey else { return .labelColor }
+        return style == .emphasized ? NSColor.alternateSelectedControlTextColor.withAlphaComponent(0.7) : ignoredColor
+    }
+
     func markJunk(_ junk: Bool) {
         guard hasSelection else { return }
         actAndRemove(junk ? PE_ACTION_JUNK : PE_ACTION_NOT_JUNK)
@@ -2137,8 +2143,10 @@ final class FolderCell: NSTableCellView {
         count.alignment = .right
         let stack = NSStackView(views: [icon, name, count])
         stack.spacing = 5
+        stack.distribution = .fill
         stack.translatesAutoresizingMaskIntoConstraints = false
         name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        name.setContentHuggingPriority(.init(1), for: .horizontal)
         count.setContentHuggingPriority(.required, for: .horizontal)
         addSubview(stack)
         NSLayoutConstraint.activate([
@@ -2165,6 +2173,8 @@ final class FolderCell: NSTableCellView {
         name.stringValue = text
         name.font = bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
         count.stringValue = unread > 0 ? "\(unread)" : ""
+        // without a count the name has the row up to its trailing edge
+        count.isHidden = unread == 0
         icon.image = image
         let label = spoken ?? text
         setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": label, "count": unread]) : label)
@@ -2242,6 +2252,14 @@ final class IconHeaderCell: NSTableHeaderCell {
 
 final class TextCell: NSTableCellView {
     private let label = NSTextField(labelWithString: "")
+    /// the row is of an ignored conversation, whatever colour the selection gives it
+    private(set) var grey = false {
+        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+    }
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+    }
 
     init(_ id: NSUserInterfaceItemIdentifier) {
         super.init(frame: .zero)
@@ -2264,7 +2282,7 @@ final class TextCell: NSTableCellView {
     func show(_ value: String, bold: Bool, grey: Bool = false) {
         label.stringValue = value
         label.font = bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
-        label.textColor = grey ? Mailbox.ignoredColor : .labelColor
+        self.grey = grey
     }
 }
 
@@ -2273,6 +2291,13 @@ final class TextCell: NSTableCellView {
 final class SubjectCell: NSTableCellView {
     private let label = NSTextField(labelWithString: "")
     let disclosure = NSButton()
+    private var grey = false {
+        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+    }
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+    }
     private var indent: NSLayoutConstraint!
     /// the triangle clicked: open (true) or close the conversation
     var toggled: (Bool) -> Void = { _ in }
@@ -2316,7 +2341,7 @@ final class SubjectCell: NSTableCellView {
         // the count is a number alone, which needs no words of a language
         label.stringValue = message.opens ? "\(message.subject) (\(message.threadCount))" : message.subject
         label.font = message.bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
-        label.textColor = message.dimmed ? Mailbox.ignoredColor : .labelColor
+        grey = message.dimmed
         disclosure.isHidden = !message.opens
         disclosure.state = message.threadExpanded ? .on : .off
         indent.constant = !grouped ? SubjectCell.inset : SubjectCell.glyph + CGFloat(message.threadDepth) * SubjectCell.step

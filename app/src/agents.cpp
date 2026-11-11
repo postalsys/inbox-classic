@@ -288,7 +288,8 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
     AddColumn(list, 0, L"", 40);
     AddColumn(list, 1, core::T(PE_TEXT_WIN_COL_ADDRESS).c_str(), 230);
     AddColumn(list, 2, core::T(PE_TEXT_UI_COL_NAME).c_str(), 160);
-    AddColumn(list, 3, L"", 120);
+    // which of them are new: the red line above names one, not which of several
+    AddColumn(list, 3, core::T(PE_TEXT_UI_COL_STATUS).c_str(), 120);
     for (int i = 0; i < recipients; i++) {
         const PeAgentRecipient* recipient = pe_agent_send_recipient(info.get(), static_cast<size_t>(i));
         int row = AddRow(list, i, Text(recipient->field) + L":");

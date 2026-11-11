@@ -808,6 +808,13 @@ extension UITest {
         return (list.view(atColumn: column, row: index, makeIfNecessary: true) as? NSTableCellView)?.textField?.textColor
     }
 
+    /// the From of a row is drawn as an ignored conversation's (grey, or dimmed white on the selection)
+    func fromGrey(_ index: Int) -> Bool {
+        let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("from"))
+        guard column >= 0 else { return false }
+        return (list.view(atColumn: column, row: index, makeIfNecessary: true) as? TextCell)?.grey == true
+    }
+
     func watchAndIgnore() async throws {
         step("watch and ignore a conversation")
         selectFolder(named: "Inbox")
@@ -893,7 +900,7 @@ extension UITest {
         }
         check(await waitUntil(20) {
             guard let row = partyRow(), row.message.mark == PE_THREAD_MARK_IGNORE, contextChecked(.ignoreConversation),
-                  fromColor(row.index) == Mailbox.ignoredColor else { return false }
+                  fromGrey(row.index) else { return false }
             return await partyServerSeen()
         }, "Ignore Conversation greys the row and marks its messages read on the server (K in the list)")
         check(menuItem(.ignoreConversation)?.state == .on, "and checks Message > Ignore Conversation")
@@ -919,7 +926,7 @@ extension UITest {
             (0..<self.list.numberOfRows).filter { self.main.mailbox.row($0)?.subject.hasSuffix(partySubject) == true }.count == 3
         }
         let partyRows = (0..<list.numberOfRows).filter { main.mailbox.row($0)?.subject.hasSuffix(partySubject) == true }
-        check(partyRows.count == 3 && partyRows.allSatisfy { fromColor($0) == Mailbox.ignoredColor },
+        check(partyRows.count == 3 && partyRows.allSatisfy { fromGrey($0) },
               "every message of the ignored conversation is grey")
         if let newest = partyRows.last {
             await selectRow(newest)

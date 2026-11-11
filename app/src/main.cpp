@@ -69,8 +69,10 @@ void OnCoreEvent(void* context, const PeEvent* event) noexcept {
     }
 }
 
+// a status that is over (a search found, a download done) leaves "Done", never an empty pane
 void SetStatus(const std::wstring& text) {
-    SendMessageW(g_status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
+    std::wstring shown = text.empty() ? core::T(PE_TEXT_UI_DONE) : text;
+    SendMessageW(g_status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(shown.c_str()));
 }
 
 std::wstring StatusText(int part = 0) {
@@ -461,7 +463,7 @@ void OnEvent(const UiEvent& event) {
         g_lastSent = core::T(PE_TEXT_UI_SENT_AT, {{"subject", Quoted(event.message)}, {"time", TimeNow()}});
         // a draft saved earlier is gone once sent: the status bar no longer says it is in Drafts
         if (StatusText() == core::T(PE_TEXT_UI_DRAFT_SAVED)) {
-            SetStatus(L"");
+            SetStatus(core::T(PE_TEXT_UI_DONE));
         }
         break;
     case PE_EVENT_KIND_DRAFT_SAVED:

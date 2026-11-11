@@ -789,8 +789,11 @@ void ShowMembers(HWND dialog, const GroupState& state, int select) {
         lines.push_back(member.label.empty() ? (member.name.empty() ? member.address : member.name) : member.label);
     }
     FillListBox(GetDlgItem(dialog, IDC_GROUP_MEMBERS), lines, select);
-    SetDlgItemTextW(dialog, IDC_GROUP_COUNT,
-                    core::T(PE_TEXT_UI_GROUP_MEMBERS_COUNT, {{"count", std::to_wstring(state.members.size())}}).c_str());
+    // the list's label says how many, so the word is not said twice; "Members:" while there are none
+    std::wstring heading = state.members.empty()
+                               ? core::T(PE_TEXT_UI_GROUP_MEMBERS)
+                               : core::T(PE_TEXT_UI_GROUP_MEMBERS_COUNT, {{"count", std::to_wstring(state.members.size())}});
+    SetDlgItemTextW(dialog, IDC_GROUP_COUNT, heading.c_str());
 }
 
 // members as the core reads them; the strings they point to in `strings`, which must not move meanwhile
@@ -942,11 +945,8 @@ int64_t GroupProperties(HWND owner, PeCore* core, int64_t id) {
 
     int buttonWidth = ButtonWidth({core::T(PE_TEXT_UI_GROUP_SELECT_MEMBERS), core::T(PE_TEXT_UI_REMOVE), core::T(PE_TEXT_UI_CONTACT_ADD)}, 90);
     int buttonLeft = width - pad - buttonWidth;
-    std::wstring membersLabel = core::T(PE_TEXT_UI_GROUP_MEMBERS);
-    int membersLabelWidth = LabelWidth({membersLabel}, 40);
-    MakeLabel(dialog, membersLabel, {pad, y, pad + membersLabelWidth, y + labelHeight});
-    // how many, beside the label
-    CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_GROUP_COUNT, {pad + membersLabelWidth, y, buttonLeft - gap, y + labelHeight});
+    // the label of the list, with how many (ShowMembers)
+    CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_GROUP_COUNT, {pad, y, buttonLeft - gap, y + labelHeight});
     y += labelHeight;
     MakeListBox(dialog, IDC_GROUP_MEMBERS, {pad, y, buttonLeft - gap, y + membersHeight});
     MakeButton(dialog, PE_TEXT_UI_GROUP_SELECT_MEMBERS, IDC_GROUP_SELECT, buttonLeft, y, buttonWidth);
@@ -1036,11 +1036,11 @@ void ShowGroup(Book* book, int64_t id) {
 void Reload(Book* book, int64_t group, int64_t selectCard = 0) {
     book->filling = true;
     TreeView_DeleteAllItems(book->tree);
-    book->all = InsertItem(book->tree, TVI_ROOT, core::T(PE_TEXT_UI_BOOK_ALL_CONTACTS), 0, false, FOLDER_MAILBOX);
+    book->all = InsertItem(book->tree, TVI_ROOT, core::T(PE_TEXT_UI_BOOK_ALL_CONTACTS), 0, false, FOLDER_BOOK_CONTACTS);
     HTREEITEM chosen = book->all;
     book->groups = Groups(book->core);
     for (const Entry& entry : book->groups) {
-        HTREEITEM item = InsertItem(book->tree, TVI_ROOT, entry.name, static_cast<LPARAM>(entry.id), false, FOLDER_MAIL_MULTIPLE);
+        HTREEITEM item = InsertItem(book->tree, TVI_ROOT, entry.name, static_cast<LPARAM>(entry.id), false, FOLDER_PEOPLE);
         if (entry.id == group) {
             chosen = item;
         }

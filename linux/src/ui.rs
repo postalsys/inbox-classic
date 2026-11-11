@@ -71,7 +71,8 @@ pub async fn ask(
     close: &str,
     destructive: Option<&str>,
 ) -> String {
-    let dialog = adw::AlertDialog::new((heading != TITLE).then_some(heading), Some(body));
+    let body = question_apart(body);
+    let dialog = adw::AlertDialog::new((heading != TITLE).then_some(heading), Some(&body));
     for (id, label) in answers {
         dialog.add_response(id, label);
     }
@@ -83,6 +84,18 @@ pub async fn ask(
         dialog.set_response_appearance(answers[answers.len() - 1].0, adw::ResponseAppearance::Suggested);
     }
     dialog.choose_future(Some(parent.as_ref())).await.to_string()
+}
+
+/// The question at the end of what an alert says on a line of its own ("This message will be deleted for good.",
+/// then "Delete it?"), not wrapped in after the sentence before it with a word left alone
+fn question_apart(body: &str) -> String {
+    if !body.ends_with('?') || body.contains('\n') {
+        return body.to_string();
+    }
+    match body.trim_end_matches('?').rfind(". ") {
+        Some(at) => format!("{}\n{}", &body[..=at], &body[at + 2..]),
+        None => body.to_string(),
+    }
 }
 
 /// Yes or No, No the default for a question that throws something away (`destructive`)
@@ -744,6 +757,16 @@ pub fn icon_button(icon: &str, tooltip: &str) -> gtk::Button {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn the_question_on_a_line_of_its_own() {
+        assert_eq!(
+            super::question_apart("This message will be deleted for good. Delete it?"),
+            "This message will be deleted for good.\nDelete it?"
+        );
+        assert_eq!(super::question_apart("Delete it?"), "Delete it?");
+        assert_eq!(super::question_apart("It is gone. Fine."), "It is gone. Fine.");
+    }
+
     use super::*;
 
     #[test]

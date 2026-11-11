@@ -291,6 +291,8 @@ func textDialog(title: String, intro: String?, text: String, ok: String = Text.u
     let view = scroll.documentView as! NSTextView
     view.isEditable = false
     view.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+    // the text starts where the words over it do
+    view.textContainer?.lineFragmentPadding = 0
     view.string = text
     view.setAccessibilityIdentifier("text.body")
     let ok = NSButton(title: ok, target: NSApp, action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))
