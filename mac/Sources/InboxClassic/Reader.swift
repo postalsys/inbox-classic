@@ -62,6 +62,8 @@ final class Reader: NSObject {
         header.isSelectable = true
         header.setAccessibilityIdentifier("reader.header")
         header.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        // below the stack's own 250, so it takes the free width and the files sit at the trailing edge
+        header.setContentHuggingPriority(.init(249), for: .horizontal)
         header.maximumNumberOfLines = 6
         logo.imageScaling = .scaleProportionallyUpOrDown
         logo.isHidden = true
@@ -86,6 +88,7 @@ final class Reader: NSObject {
         let right = NSStackView(views: [attachments, unsubscribe])
         right.orientation = .vertical
         right.alignment = .trailing
+        right.setContentHuggingPriority(.required, for: .horizontal)
         let top = NSStackView(views: [logo, header, right])
         top.alignment = .top
         top.spacing = 10
@@ -97,6 +100,9 @@ final class Reader: NSObject {
             top.trailingAnchor.constraint(equalTo: headerBox.trailingAnchor),
             top.topAnchor.constraint(equalTo: headerBox.topAnchor),
             top.bottomAnchor.constraint(equalTo: headerBox.bottomAnchor),
+            // the same 8pt under the text with a logo as without, and never shorter than the logo
+            header.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
+            logo.bottomAnchor.constraint(lessThanOrEqualTo: headerBox.bottomAnchor, constant: -8),
         ])
         headerLine.boxType = .separator
 
@@ -617,13 +623,21 @@ final class InfoBar: NSView {
         words.alignment = .leading
         words.spacing = 1
         var views: [NSView] = [image, words]
+        // takes what is left: a button goes to the trailing edge, a link right after the words
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        spacer.setContentCompressionResistancePriority(.init(1), for: .horizontal)
         if let action {
             action.target = self
             action.action = #selector(fire)
-            views.append(action)
             action.setContentHuggingPriority(.required, for: .horizontal)
+            action.setContentCompressionResistancePriority(.required, for: .horizontal)
+            // a long text gives way in its middle, never under the link
+            textLabel.lineBreakMode = .byTruncatingMiddle
+            views += button != nil ? [spacer, action] : [action, spacer]
         }
         let stack = NSStackView(views: views)
+        stack.distribution = .fill
         stack.spacing = 8
         stack.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
         stack.translatesAutoresizingMaskIntoConstraints = false

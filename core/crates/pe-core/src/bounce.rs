@@ -256,7 +256,14 @@ pub(crate) fn card(bounce: &Bounce, linked: bool) -> BounceCard {
             Text::BounceFailed
         }),
         lines,
-        link: linked.then(|| tr(Text::BounceShowMessage)),
+        // nothing bounced while the message is only on its way: the button names it as what it is
+        link: linked.then(|| {
+            tr(if delayed {
+                Text::BounceShowDelayed
+            } else {
+                Text::BounceShowMessage
+            })
+        }),
         advice_label: tr(Text::BounceWhatToDo),
         reasons: reasons(bounce),
         details_label: tr(Text::BounceDetails),

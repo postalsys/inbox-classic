@@ -50,8 +50,23 @@
     document.execCommand('defaultParagraphSeparator', false, 'div');
 
     let last = '';
+    // underlined by the user, not by being a link: the browser counts a link's own underline as Underline on
+    const underlined = () => {
+        const selection = window.getSelection();
+        const node = selection.rangeCount ? selection.getRangeAt(0).commonAncestorContainer : null;
+        const link = linkAt(node);
+        if (!link) {
+            return document.queryCommandState('underline');
+        }
+        for (let element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement; element && element !== body; element = element.parentElement) {
+            if (element.tagName === 'U' || element.style.textDecoration.includes('underline')) {
+                return true;
+            }
+        }
+        return false;
+    };
     const report = () => {
-        const flags = STATE.map(command => (document.queryCommandState(command) ? '1' : '0')).join('');
+        const flags = STATE.map(command => ((command === 'underline' ? underlined() : document.queryCommandState(command)) ? '1' : '0')).join('');
         if (flags !== last) {
             last = flags;
             post('state:' + flags);

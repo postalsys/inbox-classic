@@ -65,6 +65,8 @@ enum FolderIcon : int {
     FOLDER_ARCHIVE = 7,
     FOLDER_FLAG = 8,
     FOLDER_MAIL_MULTIPLE = 9,
+    FOLDER_BOOK_CONTACTS = 10,
+    FOLDER_PEOPLE = 11,
 };
 
 enum ListIcon : int {

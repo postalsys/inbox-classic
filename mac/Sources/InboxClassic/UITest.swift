@@ -691,10 +691,12 @@ final class UITest {
     }
 
     /// types into the editor of a compose window, as typing does
-    func typeInEditor(_ compose: NSWindow, _ text: String) async -> Bool {
+    /// `text` typed where the cursor is, or (`atEnd`) after what is written, as someone finishing a draft would
+    func typeInEditor(_ compose: NSWindow, _ text: String, atEnd: Bool = false) async -> Bool {
         guard let editor: EditorView = views(EditorView.self, in: compose.contentView).first else { return false }
         _ = await waitUntil(10) { (try? await editor.evaluateJavaScript("!!window.pe")) as? Bool == true }
-        let script = "document.getElementById('body').focus();document.execCommand('insertText',false,\(jsString(text)));"
+        let end = atEnd ? "getSelection().selectAllChildren(document.getElementById('body'));getSelection().collapseToEnd();" : ""
+        let script = "document.getElementById('body').focus();" + end + "document.execCommand('insertText',false,\(jsString(text)));"
             + "document.getElementById('body').innerText"
         let body = try? await editor.evaluateJavaScript(script) as? String
         return body?.contains(text) == true

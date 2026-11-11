@@ -134,8 +134,16 @@ bool OptionsDialog(HWND owner, bool& notify, bool& threads, bool& codes) {
     std::wstring ok = core::T(PE_TEXT_UI_OK), cancel = core::T(PE_TEXT_UI_CANCEL);
     int pad = Scale(12), row = Scale(22);
     int labelWidth = static_cast<int>(MeasureText(label).cx) + Scale(8);
-    // wide enough for the longest language name and the check boxes' words
-    int inner = std::max({Scale(360), labelWidth + Scale(200), static_cast<int>(MeasureText(notifyText).cx) + Scale(24),
+    // the first item follows Windows, and says which language that is now
+    std::wstring systemItem = core::T(PE_TEXT_UI_OPTIONS_SYSTEM_DEFAULT, {{"language", nameOf(system)}});
+    // the list as wide as its longest entry, with room for its arrow
+    int longest = static_cast<int>(MeasureText(systemItem).cx);
+    for (const Language& language : languages) {
+        longest = std::max(longest, static_cast<int>(MeasureText(language.name).cx));
+    }
+    int comboWidth = std::max(Scale(200), longest + GetSystemMetrics(SM_CXVSCROLL) + Scale(12));
+    // wide enough for the language list and the check boxes' words
+    int inner = std::max({Scale(360), labelWidth + comboWidth, static_cast<int>(MeasureText(notifyText).cx) + Scale(24),
                           static_cast<int>(MeasureText(threadsText).cx) + Scale(24),
                           static_cast<int>(MeasureText(codesText).cx) + Scale(48)});
     int width = 2 * pad + inner;
@@ -150,8 +158,6 @@ bool OptionsDialog(HWND owner, bool& notify, bool& threads, bool& codes) {
     CreateChild(dialog, L"STATIC", label.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + labelWidth, y + row});
     HWND combo = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, IDC_OPTIONS_LANGUAGE,
                              {left + labelWidth, y, right, y + Scale(200)});
-    // the first item follows Windows, and says which language that is now
-    std::wstring systemItem = core::T(PE_TEXT_UI_OPTIONS_SYSTEM_DEFAULT, {{"language", nameOf(system)}});
     SendMessageW(combo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(systemItem.c_str()));
     int selected = 0;
     for (size_t i = 0; i < languages.size(); i++) {

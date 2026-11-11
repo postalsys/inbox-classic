@@ -3,8 +3,10 @@
 
 ## La fenêtre principale
 
-win-still-running-detail = Inbox Classic continue de relever le courrier en arrière-plan. Cliquez sur son icône pour l’ouvrir. Pour quitter l’application, ouvrez le menu de l’icône avec le bouton droit.
-win-default-app-not-installed = Inbox Classic n’est pas installé et ne figure donc pas dans la liste des applications de messagerie de Windows. Installez-le pour le choisir comme application par défaut.
+# review: changed
+win-still-running-detail = Inbox Classic continue de relever le courrier en arrière-plan. Cliquez sur son icône pour l'ouvrir. Pour quitter l'application, ouvrez le menu de l'icône avec le bouton droit.
+# review: changed
+win-default-app-not-installed = Inbox Classic n'est pas installé et ne figure donc pas dans la liste des applications de messagerie de Windows. Installez-le pour le choisir comme application par défaut.
 win-default-app-settings = Windows ouvre les paramètres des applications par défaut. Choisissez Inbox Classic pour ouvrir les liens MAILTO.
 win-no-unread = Aucun message non lu
 win-unread-messages = { $count ->
@@ -67,6 +69,7 @@ win-click-to-retry = Cliquez ici pour réessayer.
 win-save-attachments = &Enregistrer les pièces jointes...
 win-files-not-saved = Fichiers non enregistrés : { $failed } sur { $count }.
 win-new-folder-in-highlighted = Le nouveau dossier sera créé dans le dossier sélectionné.
+# review: changed
 win-delete-folder-ask = Supprimer le dossier « { $folder } », tous ses messages et ses sous-dossiers ? Ils seront également supprimés du serveur.
 win-rename = &Renommer...
 win-messages-not-saved = Les messages n'ont pas pu être enregistrés.
@@ -86,13 +89,19 @@ win-sign-in-apps-button = Applications de &connexion...
 
 ## Agents d'IA
 
+# review: changed
 win-dont-allow = &Ne pas autoriser
 win-col-address = Adresse
 win-never-written-to = Jamais écrit
+# review: new
+win-book-find-label = Tapez un nom ou une adresse e-mail :
 win-send = &Envoyer
+# review: changed
 win-dont-send = &Ne pas envoyer
-win-forget-program-ask = Supprimer ce programme, ses autorisations et l’historique de ses agents ? Une autorisation vous sera de nouveau demandée à la prochaine connexion.
-win-clear-log-ask = Effacer l’historique des agents ? Les modifications effectuées ne seront pas annulées.
+# review: changed
+win-forget-program-ask = Supprimer ce programme, ses autorisations et l'historique de ses agents ? Une autorisation vous sera de nouveau demandée à la prochaine connexion.
+# review: changed
+win-clear-log-ask = Effacer l'historique des agents ? Les modifications effectuées ne seront pas annulées.
 win-agent-programs = &Programmes dont les agents ont demandé à utiliser votre courrier :
 win-change = &Modifier...
 win-what-agents-did = &Historique des agents :

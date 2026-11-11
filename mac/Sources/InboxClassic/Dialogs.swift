@@ -62,14 +62,20 @@ private func makeAlert(_ text: String, title: String, style: AlertStyle) -> NSAl
     let parts = text.components(separatedBy: "\n\n")
     if parts.count > 1 {
         alert.messageText = parts[0]
-        alert.informativeText = parts.dropFirst().joined(separator: "\n\n")
+        alert.informativeText = hyphensKept(parts.dropFirst().joined(separator: "\n\n"))
     } else {
-        alert.messageText = text
+        alert.messageText = hyphensKept(text)
     }
     alert.alertStyle = style == .information ? .informational : style == .warning ? .warning : .critical
     alert.window.title = title
     alert.window.identifier = NSUserInterfaceItemIdentifier("alert")
     return alert
+}
+
+/// A word with a hyphen in it ("e-mail") kept whole on one line: AppKit wraps at a hyphen, which in an alert
+/// left "no e-" at the end of one line and "mail will be sent." on the next
+func hyphensKept(_ text: String) -> String {
+    text.replacingOccurrences(of: "(?<=\\p{L})-(?=\\p{L})", with: "\u{2011}", options: .regularExpression)
 }
 
 @MainActor
@@ -172,6 +178,8 @@ final class FormWindow: NSObject, NSWindowDelegate {
         window.contentView = stack
         buttons.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
         introLabel.widthAnchor.constraint(equalToConstant: 420).isActive = true
+        // as tall as what it holds, so the buttons sit 20pt under the last field
+        window.setContentSize(NSSize(width: 460, height: stack.fittingSize.height))
         window.initialFirstResponder = inputs.indices.contains(focus) ? inputs[focus] : inputs.first
     }
 
@@ -289,6 +297,8 @@ func textDialog(title: String, intro: String?, text: String, ok: String = Text.u
     let view = scroll.documentView as! NSTextView
     view.isEditable = false
     view.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+    // the text starts where the words over it do
+    view.textContainer?.lineFragmentPadding = 0
     view.string = text
     view.setAccessibilityIdentifier("text.body")
     let ok = NSButton(title: ok, target: NSApp, action: #selector(NSApplication.stopModal as (NSApplication) -> () -> Void))

@@ -128,6 +128,8 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         redirectGrid.column(at: 1).width = 380
         redirectGrid.cell(atColumnIndex: 1, rowIndex: 0).xPlacement = .fill
         redirectGrid.rowAlignment = .firstBaseline
+        // its label in the form's label column, right-aligned like the others
+        redirectGrid.column(at: 0).xPlacement = .trailing
         let cancel = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"
         let ok = NSButton(title: Text.uiOk.text, target: self, action: #selector(okClicked))
@@ -143,6 +145,8 @@ private final class SignInAppEditor: NSObject, NSTextFieldDelegate {
         register.widthAnchor.constraint(equalToConstant: 500).isActive = true
         line.widthAnchor.constraint(equalToConstant: 500).isActive = true
         buttons.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
+        // in one stack now, so the two grids can share the label column
+        redirectRow.leadingAnchor.constraint(equalTo: name.leadingAnchor).isActive = true
         return stack
     }
 

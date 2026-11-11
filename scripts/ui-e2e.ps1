@@ -264,7 +264,7 @@ $IDM_ABOUT = 106; $IDM_NEW_MAIL = 107; $IDM_REPLY = 108; $IDM_REPLY_ALL = 109; $
 $IDM_DELETE = 112; $IDM_MOVE = 113; $IDM_FLAG = 114; $IDM_NEW_FOLDER = 115; $IDM_RENAME_FOLDER = 116; $IDM_DELETE_FOLDER = 117; $IDM_ACCOUNTS = 118; $IDM_SAVE_AS = 121; $IDM_PRINT = 122; $IDM_IMPORT = 123; $IDM_OUTBOX = 124; $IDM_PROPERTIES = 125; $IDC_SAVE = 309;
 $LB_GETTEXT = 0x0189; $LB_GETCOUNT = 0x018B; $LB_SETCURSEL = 0x0186; $CB_SELECTSTRING = 0x014D
 $IDC_TREE = 200; $IDC_LIST = 201; $IDC_ATTACHMENTS = 202; $IDC_PICTURES = 203
-$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_SHOW_CC = 311; $IDC_SHOW_BCC = 312; $IDC_BCC = 304; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330; $IDF_LINK = 341
+$IDC_SEND = 300; $IDC_ATTACH = 301; $IDC_FILES = 307; $IDC_FROM = 310; $IDC_SHOW_CC = 311; $IDC_SHOW_BCC = 312; $IDC_BCC = 304; $IDC_TO = 302; $IDC_CC = 303; $IDC_SUBJECT = 305; $IDC_BODY = 306; $IDF_BOLD = 330; $IDF_UNDERLINE = 332; $IDF_LINK = 341
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
 # the app's preferences, where Options keeps the language: the one of whoever runs the test is put back at the end
@@ -1008,6 +1008,7 @@ try {
     Check ($from -eq 'Alex Morgan <testuser@inboxclassic.test>') "From names the account it goes from ($from)"
     SetText $compose $IDC_TO 'dave at example.com'
     SetText $compose $IDC_SUBJECT 'Trail map for Sunday'
+    Check ((WindowText $compose) -eq 'Trail map for Sunday') "a new message's window is named by the subject typed ($(WindowText $compose))"
     Check (TypeInEditor $compose 'Hi Dave, here is the trail map for Sunday. See you at nine!') 'the editor of a new message takes typing'
     Command $compose $IDC_SEND
     $problem = WaitWindow '#32770' 'Inbox Classic' 10
@@ -1152,6 +1153,8 @@ public static class Dragger {
     Key $input 0x25
     Key $input 0x25
     Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'https://example.com/first*Ctrl+click to open*') { $t } } 10)) 'with the cursor in a link, the status bar shows its address'
+    # a link is underlined by its own style, not by Underline: the button stays up
+    Check (-not (Pressed $compose $IDF_UNDERLINE)) 'with the cursor in a link, Underline is not pressed'
     Shot $compose 'write-14-link-status'
     # the Link button on a link: its address to change
     Command $compose $IDF_LINK
@@ -1748,7 +1751,7 @@ public static class Dragger {
         Check ([Native.Win]::RemoteListText($hosts, 0, 0) -eq 'My AI agent' -and [Native.Win]::RemoteListText($hosts, 0, 1) -match '^Read, organize and send with your yes') "it lists the program and what it may do ($([Native.Win]::RemoteListText($hosts, 0, 1)))"
         $newest = { [Native.Win]::RemoteListText($log, 0, 2) }
         [void](WaitFor { (& $newest) -match '^Sent' } 10)
-        Check ((& $newest) -match '^Sent "Lunch on Friday\?" to pat@example.net' -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') "and what its agent did, newest first ($(& $newest); $([Native.Win]::RemoteListText($log, 1, 2)))"
+        Check ((& $newest) -match "^Sent $([char]0x201C)Lunch on Friday\?$([char]0x201D) to pat@example.net" -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') "and what its agent did, newest first ($(& $newest); $([Native.Win]::RemoteListText($log, 1, 2)))"
         Shot $agents 'agents-6-window'
         # the newest, the message sent, is selected: Undo takes it out of the Outbox before it goes
         Click $agents $IDC_AGENTS_UNDO

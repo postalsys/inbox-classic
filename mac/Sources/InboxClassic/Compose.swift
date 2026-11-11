@@ -341,7 +341,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         subject.delegate = self
         attached.setAccessibilityIdentifier("compose.attached")
         attached.delegate = self
-        attached.tokenStyle = .rounded
+        // the rounded style keeps an empty slot before the name; squared chips start with it
+        attached.tokenStyle = .squared
         attached.isEditable = true
         // every attached file in sight: the row grows a line for what does not fit, as a forward of several has
         attached.usesSingleLineMode = false
@@ -369,21 +370,30 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         // To, Cc and Bcc are buttons that open Select Recipients, as in Outlook Express
         let pick = { (text: String, index: Int, id: String) -> NSButton in
             let button = NSButton(title: text, target: self, action: #selector(self.pickRecipients(_:)))
+            // the regular size, so its words match the labels of the same column
             button.bezelStyle = .push
-            button.controlSize = .small
-            button.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
             button.tag = index
             button.toolTip = Text.uiPickTip.text
             button.setAccessibilityIdentifier(id)
             return button
         }
+        let picks = [pick(Text.uiFieldTo.text, 0, "compose.pick.to"), pick(Text.uiFieldCc.text, 1, "compose.pick.cc"),
+                     pick(Text.uiFieldBcc.text, 2, "compose.pick.bcc")]
+        // one width, so their edges line up
+        let pickWidth = picks.map(\.fittingSize.width).max() ?? 0
+        for button in picks {
+            button.widthAnchor.constraint(equalToConstant: pickWidth).isActive = true
+        }
         grid.addRow(with: [label(Text.uiFieldFrom.text), from])
-        grid.addRow(with: [pick(Text.uiFieldTo.text, 0, "compose.pick.to"), toRow])
-        grid.addRow(with: [pick(Text.uiFieldCc.text, 1, "compose.pick.cc"), cc])
-        grid.addRow(with: [pick(Text.uiFieldBcc.text, 2, "compose.pick.bcc"), bcc])
+        grid.addRow(with: [picks[0], toRow])
+        grid.addRow(with: [picks[1], cc])
+        grid.addRow(with: [picks[2], bcc])
         grid.addRow(with: [label(Text.uiFieldSubject.text), subject])
         grid.addRow(with: [label(Text.uiFieldAttach.text), attached])
         grid.column(at: 0).xPlacement = .trailing
+        // as wide as its widest label from the start, so the fields stay put when Attachments or Cc shows
+        grid.column(at: 0).width = (0..<grid.numberOfRows)
+            .compactMap { grid.cell(atColumnIndex: 0, rowIndex: $0).contentView?.fittingSize.width }.max() ?? 0
         grid.rowAlignment = .firstBaseline
         grid.rowSpacing = 6
         grid.row(at: 2).isHidden = !showCc
@@ -560,6 +570,10 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     func controlTextDidChange(_ notification: Notification) {
         if !filling {
             changed()
+        }
+        if notification.object as? NSTextField === subject {
+            // the window named by its subject as it is typed, as one opened with a subject is
+            window.title = subject.stringValue.isEmpty ? Text.uiNewMessageTitle.text : subject.stringValue
         }
         (notification.object as? AddressField)?.typed(notification)
     }

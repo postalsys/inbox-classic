@@ -166,6 +166,30 @@ void Changed(Compose* state) {
     state->dirty = true;
 }
 
+// a file of the Attach row, its name after the margin the edit fields keep before their text
+void DrawFile(const Compose* state, const DRAWITEMSTRUCT& item) {
+    if (item.itemID == static_cast<UINT>(-1)) {
+        return;
+    }
+    bool selected = (item.itemState & ODS_SELECTED) != 0;
+    FillRect(item.hDC, &item.rcItem, GetSysColorBrush(selected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
+    size_t length = static_cast<size_t>(SendMessageW(item.hwndItem, LB_GETTEXTLEN, item.itemID, 0));
+    std::wstring label(length + 1, L'\0');
+    SendMessageW(item.hwndItem, LB_GETTEXT, item.itemID, reinterpret_cast<LPARAM>(label.data()));
+    label.resize(length);
+    RECT text = item.rcItem;
+    // where the Subject field's text starts inside its border: its formatting rectangle, margin included
+    RECT field = {};
+    SendMessageW(state->subject, EM_GETRECT, 0, reinterpret_cast<LPARAM>(&field));
+    text.left += field.left;
+    SetBkMode(item.hDC, TRANSPARENT);
+    SetTextColor(item.hDC, GetSysColor(selected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
+    DrawTextW(item.hDC, label.c_str(), -1, &text, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+    if (item.itemState & ODS_FOCUS) {
+        DrawFocusRect(item.hDC, &item.rcItem);
+    }
+}
+
 // the columns of the Attach row narrower as there are more files, down to a readable width
 void FitFiles(Compose* state) {
     RECT row;
@@ -678,8 +702,11 @@ void CreateFields(HWND hwnd, Compose* state) {
     }
     state->subject = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_SUBJECT, {}, WS_EX_CLIENTEDGE);
     // the files side by side; Delete or a right-click takes one off
-    state->attached = CreateChild(hwnd, L"LISTBOX", L"", WS_TABSTOP | LBS_MULTICOLUMN | LBS_NOINTEGRALHEIGHT | LBS_WANTKEYBOARDINPUT,
+    // drawn here (DrawFile), so its names start where the text of the fields above does
+    state->attached = CreateChild(hwnd, L"LISTBOX", L"",
+                                  WS_TABSTOP | LBS_MULTICOLUMN | LBS_NOINTEGRALHEIGHT | LBS_WANTKEYBOARDINPUT | LBS_OWNERDRAWFIXED | LBS_HASSTRINGS,
                                   IDC_FILES, {}, WS_EX_CLIENTEDGE);
+    SendMessageW(state->attached, LB_SETITEMHEIGHT, 0, MeasureText(L"Ag").cy);
     CreateFormatBar(hwnd, state);
 }
 
@@ -821,6 +848,11 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             return 0;
         }
         if (HIWORD(wParam) == EN_CHANGE && !state->filling) {
+            if (LOWORD(wParam) == IDC_SUBJECT) {
+                // the window named by its subject as it is typed, as one opened with a subject is
+                std::wstring subject = GetWindowString(state->subject);
+                SetWindowTextW(hwnd, subject.empty() ? core::Plain(PE_TEXT_UI_NEW_MESSAGE_TITLE).c_str() : subject.c_str());
+            }
             Changed(state);
             return 0;
         }
@@ -852,6 +884,12 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             return -2;
         }
         return -1;
+    case WM_DRAWITEM:
+        if (state && wParam == IDC_FILES) {
+            DrawFile(state, *reinterpret_cast<DRAWITEMSTRUCT*>(lParam));
+            return TRUE;
+        }
+        break;
     case WM_CONTEXTMENU:
         if (state && reinterpret_cast<HWND>(wParam) == state->attached) {
             FileMenu(hwnd, state, lParam);

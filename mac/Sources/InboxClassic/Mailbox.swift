@@ -61,6 +61,8 @@ public final class Mailbox: NSObject {
     private let searchBar = InfoBar(icon: "search", link: Text.uiClearSearch.text)
     private let emptyTitle = NSTextField(labelWithString: "")
     private let emptyMore = NSTextField(wrappingLabelWithString: "")
+    private lazy var emptyMoreWidth = emptyMore.widthAnchor.constraint(equalToConstant: Mailbox.emptyTextWidth)
+    private static let emptyTextWidth: CGFloat = 420
     private let rightSplit = NSSplitView()
 
     /// the counts or the folder changed (the main window shows them)
@@ -462,6 +464,12 @@ public final class Mailbox: NSObject {
 
     var picturesBlocked: Bool { reader.picturesBlocked }
 
+    /// the one message selected could not be downloaded: there is nothing to print, reply to or forward
+    var shownFailed: Bool { hasOne && reader.showsFailure }
+
+    /// Reply, Reply All, Forward and Print need the message's body
+    static let needsBody: Set<Command> = [.reply, .replyAll, .forward, .print]
+
     // ---- the message list ----
 
     /// words typed search every folder of every account (in: narrows that); without, the list is the folder's, or
@@ -740,6 +748,9 @@ public final class Mailbox: NSObject {
         emptyMore.textColor = .secondaryLabelColor
         emptyMore.alignment = .center
         emptyMore.isSelectable = false
+        // the lines as long as one another, set in updateEmptyText; the scroll's width still wins when narrower
+        emptyMoreWidth.priority = .defaultHigh
+        emptyMoreWidth.isActive = true
         let stack = NSStackView(views: [emptyTitle, emptyMore])
         stack.orientation = .vertical
         stack.spacing = 8
@@ -777,6 +788,28 @@ public final class Mailbox: NSObject {
         emptyMore.stringValue = more
         emptyTitle.isHidden = title.isEmpty
         emptyMore.isHidden = more.isEmpty
+        emptyMoreWidth.constant = evenWidth(more, font: emptyMore.font, widest: Mailbox.emptyTextWidth)
+        // the stripes of empty rows would run through the text
+        list.usesAlternatingRowBackgroundColors = total != 0
+    }
+
+    /// the narrowest width that wraps `text` into as few lines as `widest` does, so no line is left with a lone word
+    private func evenWidth(_ text: String, font: NSFont?, widest: CGFloat) -> CGFloat {
+        guard !text.isEmpty else { return widest }
+        let attributed = NSAttributedString(string: text, attributes: [.font: font ?? NSFont.systemFont(ofSize: 13)])
+        func height(_ width: CGFloat) -> CGFloat {
+            attributed.boundingRect(with: NSSize(width: width, height: .greatestFiniteMagnitude),
+                                    options: [.usesLineFragmentOrigin, .usesFontLeading]).height.rounded(.up)
+        }
+        let lines = height(widest)
+        var low: CGFloat = 40
+        var high = widest
+        while high - low > 2 {
+            let middle = (low + high) / 2
+            if height(middle) > lines { low = middle } else { high = middle }
+        }
+        // a little room, as the field's own insets wrap a hair sooner than the measure
+        return min(widest, high.rounded(.up) + 8)
     }
 
     // ---- searching ----
@@ -1162,6 +1195,12 @@ public final class Mailbox: NSObject {
 
     /// the text of the rows of an ignored conversation: grey, as what is turned off is
     static let ignoredColor = NSColor.tertiaryLabelColor
+
+    /// a row's text colour; on the accent of a selected row a grey one is white, dimmed a little, so it can be read
+    static func rowColor(grey: Bool, style: NSView.BackgroundStyle) -> NSColor {
+        guard grey else { return .labelColor }
+        return style == .emphasized ? NSColor.alternateSelectedControlTextColor.withAlphaComponent(0.7) : ignoredColor
+    }
 
     func markJunk(_ junk: Bool) {
         guard hasSelection else { return }
@@ -2039,29 +2078,42 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
 
 /// An account's heading in the tree: its name, small and grey as Mail's sidebar headings are, and while it is closed
 /// the count of the unread messages of its folders
+/// an account heading's name: the source list restyles a group row's text field as it redraws, so the font is fixed
+/// here to look the same always, as the section headings of Mail
+final class HeadingName: NSTextField {
+    override var font: NSFont? {
+        get { super.font }
+        set { super.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold) }
+    }
+}
+
 final class HeadingCell: NSTableCellView {
     static let identifier = NSUserInterfaceItemIdentifier("heading")
-    private let name = NSTextField(labelWithString: "")
+    private let name = HeadingName(labelWithString: "")
     private let count = NSTextField(labelWithString: "")
 
     init() {
         super.init(frame: .zero)
         identifier = HeadingCell.identifier
         name.lineBreakMode = .byTruncatingTail
-        name.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
+        name.font = nil // the setter puts the heading's own font
         name.textColor = .secondaryLabelColor
-        count.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        // the count as the folder rows have it: their font and colour, at the trailing edge
+        count.font = .systemFont(ofSize: NSFont.systemFontSize)
         count.textColor = .secondaryLabelColor
         count.alignment = .right
         let stack = NSStackView(views: [name, count])
         stack.spacing = 5
+        stack.distribution = .fill
         stack.translatesAutoresizingMaskIntoConstraints = false
         name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        name.setContentHuggingPriority(.init(1), for: .horizontal)
         count.setContentHuggingPriority(.required, for: .horizontal)
         addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            // a group row's cell reaches 14pt further than a folder's: the counts in one column
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
         textField = name
@@ -2076,6 +2128,7 @@ final class HeadingCell: NSTableCellView {
         unreadShown = unread
         name.stringValue = text
         count.stringValue = unread > 0 ? "\(unread)" : ""
+        count.isHidden = unread == 0
         setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": text, "count": unread]) : text)
     }
 }
@@ -2095,8 +2148,10 @@ final class FolderCell: NSTableCellView {
         count.alignment = .right
         let stack = NSStackView(views: [icon, name, count])
         stack.spacing = 5
+        stack.distribution = .fill
         stack.translatesAutoresizingMaskIntoConstraints = false
         name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        name.setContentHuggingPriority(.init(1), for: .horizontal)
         count.setContentHuggingPriority(.required, for: .horizontal)
         addSubview(stack)
         NSLayoutConstraint.activate([
@@ -2123,6 +2178,8 @@ final class FolderCell: NSTableCellView {
         name.stringValue = text
         name.font = bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
         count.stringValue = unread > 0 ? "\(unread)" : ""
+        // without a count the name has the row up to its trailing edge
+        count.isHidden = unread == 0
         icon.image = image
         let label = spoken ?? text
         setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": label, "count": unread]) : label)
@@ -2200,6 +2257,14 @@ final class IconHeaderCell: NSTableHeaderCell {
 
 final class TextCell: NSTableCellView {
     private let label = NSTextField(labelWithString: "")
+    /// the row is of an ignored conversation, whatever colour the selection gives it
+    private(set) var grey = false {
+        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+    }
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+    }
 
     init(_ id: NSUserInterfaceItemIdentifier) {
         super.init(frame: .zero)
@@ -2222,7 +2287,7 @@ final class TextCell: NSTableCellView {
     func show(_ value: String, bold: Bool, grey: Bool = false) {
         label.stringValue = value
         label.font = bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
-        label.textColor = grey ? Mailbox.ignoredColor : .labelColor
+        self.grey = grey
     }
 }
 
@@ -2231,6 +2296,13 @@ final class TextCell: NSTableCellView {
 final class SubjectCell: NSTableCellView {
     private let label = NSTextField(labelWithString: "")
     let disclosure = NSButton()
+    private var grey = false {
+        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+    }
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet { label.textColor = Mailbox.rowColor(grey: grey, style: backgroundStyle) }
+    }
     private var indent: NSLayoutConstraint!
     /// the triangle clicked: open (true) or close the conversation
     var toggled: (Bool) -> Void = { _ in }
@@ -2274,7 +2346,7 @@ final class SubjectCell: NSTableCellView {
         // the count is a number alone, which needs no words of a language
         label.stringValue = message.opens ? "\(message.subject) (\(message.threadCount))" : message.subject
         label.font = message.bold ? .boldSystemFont(ofSize: NSFont.systemFontSize) : .systemFont(ofSize: NSFont.systemFontSize)
-        label.textColor = message.dimmed ? Mailbox.ignoredColor : .labelColor
+        grey = message.dimmed
         disclosure.isHidden = !message.opens
         disclosure.state = message.threadExpanded ? .on : .off
         indent.constant = !grouped ? SubjectCell.inset : SubjectCell.glyph + CGFloat(message.threadDepth) * SubjectCell.step

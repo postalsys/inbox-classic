@@ -77,6 +77,13 @@ pub fn builtin_off_text(kind: ProviderKind) -> String {
     }
 }
 
+/// An issuer as the list shows it, as the built-in ones show their host: `https://` and a last `/` left out, `http://`
+/// kept, as it says the sign-in is not encrypted
+fn shown_issuer(issuer: &str) -> String {
+    let issuer = issuer.trim_end_matches('/');
+    issuer.strip_prefix("https://").unwrap_or(issuer).to_string()
+}
+
 /// A sign-in app as the manager lists it
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignInAppEntry {
@@ -263,7 +270,7 @@ impl Core {
             entries.push(SignInAppEntry {
                 with,
                 name: stored.app.name.clone(),
-                issuer: stored.app.issuer.clone(),
+                issuer: shown_issuer(&stored.app.issuer),
                 enabled: stored.app.enabled,
                 used_by: used_by(with),
                 app: Some(stored.app),
@@ -503,6 +510,16 @@ mod tests {
         assert_eq!(app_provider(&app, Some("s".into())).client_secret, None);
         app.issuer = "https://accounts.google.com".into();
         assert_eq!(app_provider(&app, None).kind, ProviderKind::Google);
+    }
+
+    #[test]
+    fn issuers_listed_as_hosts() {
+        assert_eq!(shown_issuer("https://login.example.com/"), "login.example.com");
+        assert_eq!(
+            shown_issuer("https://idp.example.com/realms/mail"),
+            "idp.example.com/realms/mail"
+        );
+        assert_eq!(shown_issuer("http://127.0.0.1:60837"), "http://127.0.0.1:60837");
     }
 
     #[test]

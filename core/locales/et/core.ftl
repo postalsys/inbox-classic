@@ -39,7 +39,7 @@ reader-failed-sign-in = Meiliserver lükkas sisselogimise tagasi ({ $reason }). 
 reader-failed-security = Meiliserveriga ei saanud luua turvalist ühendust ({ $reason }).
 reader-failed-other = Meiliserver vastas: { $reason }.
 # review: changed
-reader-retry-note = Seda proovitakse uuesti, kui ühendus kontoga taastub, või kohe nupuga Proovi uuesti.
+reader-retry-note = Seda proovitakse uuesti, kui ühendus kontoga taastub.
 reader-unreadable = Seda kirja ei saa kuvada: { $error }
 message-source-title = Kirja lähtekood: { $subject }
 message-source-untitled = Kirja lähtekood
@@ -61,6 +61,9 @@ bounce-failed = Teie kirja ei toimetatud kohale
 bounce-delayed = Teie kirja pole veel kohale toimetatud
 bounce-delayed-note = Teie meiliserver proovib seda endiselt kohale toimetada. Teil pole vaja seda uuesti saata.
 bounce-show-message = Näita tagastatud kirja
+# the link of a delay's card to the message that is still on its way
+# review: new
+bounce-show-delayed = Näita viibivat kirja
 bounce-what-to-do = Mida teha:
 bounce-delayed-do = Praegu pole vaja midagi teha. Kui kirja ei õnnestu kohale toimetada, saate uue teate.
 bounce-delayed-row-do = Praegu pole vaja midagi teha. Teie meiliserver proovib endiselt kirja kohale toimetada. Kui see ei õnnestu, saate uue teate.
@@ -88,6 +91,7 @@ bounce-mailbox-disabled = Postkast on suletud
 bounce-mailbox-disabled-why = Aadress on olemas, kuid selle postkast on välja lülitatud või pole enam kasutusel.
 bounce-mailbox-disabled-do = Võtke saajaga muul viisil ühendust ja küsige tema praegust e-posti aadressi.
 bounce-mailbox-full = Postkast on täis
+# review: changed
 bounce-mailbox-full-why = Saaja postkastis pole uute kirjade jaoks ruumi.
 bounce-mailbox-full-do = Saatke kiri mõne päeva pärast uuesti või andke saajale muul viisil teada. Suurte manustega kirjad lükatakse tagasi esimesena.
 bounce-spam-blocked = Tagasi lükatud rämpspostina
@@ -97,13 +101,17 @@ bounce-virus-detected = Tagasi lükatud viiruse tõttu
 bounce-virus-detected-why = Vastuvõttev server leidis kirjast või selle manustest viiruse või muu kahjuliku sisu.
 bounce-virus-detected-do = Kontrollige manuseid viirusetõrjega. Mõni server lükkab tagasi kõik programmid ja arhiivid, nii et jagage selliseid faile lingina.
 bounce-ip-blocklisted = Teie meiliserver on blokeerimisloendis
+# review: changed
 bounce-ip-blocklisted-why = Vastuvõttev server ei võta vastu kirju serverilt, mis teie kirja saatis, sest selle serveri aadress on blokeerimisloendis.
 bounce-ip-blocklisted-do = Viga pole kirjas. Edastage see teade oma e-posti teenusepakkujale ja paluge tal server loendist eemaldada.
 bounce-domain-blocklisted = Domeen on blokeerimisloendis
+# review: changed
 bounce-domain-blocklisted-why = Vastuvõttev server lükkab kirja tagasi, sest teie aadressi domeen või mõni kirja linkides olev domeen on blokeerimisloendis.
 bounce-domain-blocklisted-do = Kui kirjas on linke, proovige saata see ilma nendeta. Kui see ei aita või linke pole, edastage see teade oma domeeni e-posti haldajale.
+# review: changed
 bounce-policy-blocked = Tagasi lükatud vastuvõtva serveri reeglite tõttu
 bounce-policy-blocked-why = Vastuvõtva serveri reeglid ei lase seda kirja läbi, näiteks selle suuruse, manuste või saatja tõttu.
+# review: changed
 bounce-policy-blocked-do = Jaotises „Üksikasjad“ olev serveri vastus selgitab sageli põhjust. Küsige saajalt, kas ta saab selliseid kirju vastu võtta.
 bounce-geo-blocked = Tagasi lükatud päritolu tõttu
 bounce-geo-blocked-why = Vastuvõttev server ei võta kirju vastu riigist või võrgust, kus teie meiliserver asub.
@@ -113,6 +121,7 @@ bounce-relay-denied-why = Server keeldus kirja edasi toimetamast, sageli seetõt
 bounce-relay-denied-do = Kontrollige menüüs Fail > Kontod väljamineva posti serveri sätteid ja veenduge, et serverisse sisselogimine on seadistatud.
 bounce-auth-failure = Teie saatja-aadressi ei saanud kinnitada
 bounce-auth-failure-why = Vastuvõttev server ei saanud kinnitada, et kiri tuli tõesti teie domeenist (SPF, DKIM või DMARC).
+# review: changed
 bounce-auth-failure-do = Edastage see teade oma domeeni e-posti haldajale, et ta saaks domeeni sätted parandada. Seni võib aidata saatmine teenusepakkuja enda serveri kaudu.
 bounce-rate-limited = Liiga palju kirju korraga
 bounce-rate-limited-why = Vastuvõttev server piirab praegu teie meiliserverilt vastuvõetavate kirjade hulka.
@@ -125,6 +134,7 @@ bounce-server-error-why = Vastuvõtva serveriga ei saanud ühendust või ei saan
 bounce-server-error-do = Saatke kiri hiljem uuesti. Kui probleem kordub, kontrollige, kas aadressi @-märgi järel olevas domeeninimes on trükivigu.
 bounce-unknown = Kohale toimetamata
 bounce-unknown-why = Teates pole kohaletoimetamise ebaõnnestumise põhjust selgelt kirjas.
+# review: changed
 bounce-unknown-do = Lisateavet võib leida jaotises „Üksikasjad“ olevast serveri vastusest. Kui sellest pole abi, edastage see teade oma meiliteenuse pakkujale.
 
 ## Several messages selected
@@ -305,9 +315,11 @@ failure-network = ühendus serveriga ebaõnnestus ({ $reason })
 error-in-use = rakendust ei saa eemaldada, sest seda kasutavad järgmised kontod: { $accounts }
 error-turned-off = see sisselogimisrakendus on uute kontode jaoks välja lülitatud
 error-folder-name = kausta nimi peab olema 1 kuni 200 märki pikk ega tohi sisaldada juhtmärke
+# review: changed
 error-folder-separator = kausta nimes ei tohi selles serveris olla märki „{ $separator }“
 error-folder-special = sisendkausta ja erikaustu ei saa ümber nimetada ega kustutada
 error-no-recipients = kirjal pole adressaate
+# review: changed
 error-bad-address = „{ $address }“ pole e-posti aadress
 error-attachment = faili { $path } ei saanud lugeda: { $error }
 error-no-drafts = kontol pole mustandite kausta, kuhu kirja salvestada
@@ -331,6 +343,7 @@ error-no-password = selle konto jaoks pole parooli
 error-no-sign-in = selle konto sisselogimisandmed puuduvad
 error-provider-missing = see versioon ei saa teenusesse { $provider } sisse logida: kas selle sisselogimisrakendus on eemaldatud?
 error-provider-servers = konto serverid ei vasta sisselogimisrakenduse serveritele
+# review: changed
 error-app-scopes = { $reason }. Meiliserver lükkas sisselogimisrakenduse juurdepääsutõendi tagasi. Kontrollige, kas rakenduse juurdepääsuõigused (scopes) lubavad e-posti kasutada
 error-in-folder = { $folder }: { $reason }
 
@@ -426,20 +439,35 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Seda kirja ei saa lugeda.
+# review: changed
 agent-log-composed = „{ $subject }“ avati uues kirjas, et saaksite selle lõpetada
+# review: changed
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
+# review: changed
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
+# review: changed
 agent-log-draft = Mustand „{ $subject }“ salvestati
+# review: changed
 agent-log-read = „{ $subject }“ märgiti loetuks
+# review: changed
 agent-log-unread = „{ $subject }“ märgiti lugemata kirjaks
+# review: changed
 agent-log-flagged = „{ $subject }“ märgiti lipuga
+# review: changed
 agent-log-unflagged = Kirjalt „{ $subject }“ eemaldati lipp
+# review: changed
 agent-log-deleted = „{ $subject }“ kustutati
+# review: changed
 agent-log-moved = „{ $subject }“ teisaldati kausta { $folder }
+# review: changed
 agent-log-junk = „{ $subject }“ märgiti rämpspostiks
+# review: changed
 agent-log-not-junk = „{ $subject }“ märgiti tavapostiks
+# review: changed
 agent-log-archived = „{ $subject }“ arhiveeriti
+# review: changed
 agent-log-folder = Loodi kaust „{ $name }“
+# review: changed
 agent-log-unsubscribed = Loobuti kirja „{ $subject }“ saatnud meililisti tellimusest
 
 ## Keys

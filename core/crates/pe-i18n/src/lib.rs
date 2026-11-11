@@ -162,9 +162,38 @@ pub fn tr_args(text: Text, args: &[(&str, Arg)]) -> String {
             None => ("en", english().clone()),
         }
     };
+    if code == PSEUDO {
+        return pseudo_args(&bundle, text, args);
+    }
     let formatted = format(&bundle, text.id(), args).or_else(|| format(english(), text.id(), args));
-    let formatted = formatted.unwrap_or_else(|| text.id().to_string());
-    if code == PSEUDO { pseudo(&formatted) } else { formatted }
+    formatted.unwrap_or_else(|| text.id().to_string())
+}
+
+/// `text` in the pseudo-language: its own words accented and padded, what goes into them (a name, an address, a
+/// subject) as it is, so the windows show the user's data unchanged. Each string value is a marker while the words are
+/// made over, then put back.
+fn pseudo_args(bundle: &Bundle, text: Text, args: &[(&str, Arg)]) -> String {
+    let markers: Vec<String> = (0..args.len())
+        .map(|index| format!("\u{E000}{index}\u{E001}"))
+        .collect();
+    let stand_ins: Vec<(&str, Arg)> = args
+        .iter()
+        .zip(&markers)
+        .map(|((name, value), marker)| match value {
+            Arg::Str(_) => (*name, Arg::Str(marker)),
+            Arg::Num(n) => (*name, Arg::Num(*n)),
+        })
+        .collect();
+    let formatted = format(bundle, text.id(), &stand_ins)
+        .or_else(|| format(english(), text.id(), &stand_ins))
+        .unwrap_or_else(|| text.id().to_string());
+    let mut out = pseudo(&formatted);
+    for ((_, value), marker) in args.iter().zip(&markers) {
+        if let Arg::Str(value) = value {
+            out = out.replace(marker.as_str(), value);
+        }
+    }
+    out
 }
 
 fn format(bundle: &Bundle, id: &str, args: &[(&str, Arg)]) -> Option<String> {

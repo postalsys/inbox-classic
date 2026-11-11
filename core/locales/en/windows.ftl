@@ -67,7 +67,7 @@ win-click-to-retry = Click here to try again.
 win-save-attachments = &Save Attachments...
 win-files-not-saved = { $failed } of the { $count } files could not be saved.
 win-new-folder-in-highlighted = The new folder will be created inside the selected folder.
-win-delete-folder-ask = Delete the folder "{ $folder }" with its messages and the folders in it? It is deleted on the server too.
+win-delete-folder-ask = Delete the folder “{ $folder }” with its messages and the folders in it? It is deleted on the server too.
 win-rename = &Rename...
 win-messages-not-saved = The messages could not be saved.
 win-messages-not-forwarded = The messages could not be forwarded.
@@ -86,11 +86,12 @@ win-sign-in-apps-button = Sign-in A&pps...
 
 ## AI agents
 
-win-dont-allow = &Don't Allow
+win-dont-allow = &Don’t Allow
 win-col-address = Address
 win-never-written-to = Never written to
+win-book-find-label = Type a name or e-mail address:
 win-send = &Send
-win-dont-send = &Don't Send
+win-dont-send = &Don’t Send
 win-forget-program-ask = Remove this program, its permissions and its agents’ activity history? You will be asked for permission again the next time it connects.
 win-clear-log-ask = Clear the agents’ activity history? This will not undo changes made by the agents.
 win-agent-programs = &Programs whose agents have requested access to your mail:

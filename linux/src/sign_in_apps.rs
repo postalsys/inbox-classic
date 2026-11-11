@@ -582,7 +582,7 @@ pub async fn sign_in_apps_dialog(parent: &impl IsA<gtk::Widget>) {
                     continue;
                 }
                 if let Err(reason) = shell().core.remove_sign_in_app(id) {
-                    let text = t!(UiSignInAppNotRemoved, reason = &reason.to_string());
+                    let text = t!(UiSignInAppNotRemoved, reason = &pe_core::sentence(&reason.to_string()));
                     ui::alert(&host, &t!(UiRemoveSignInApp), &text).await;
                     continue;
                 }

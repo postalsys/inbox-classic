@@ -122,7 +122,7 @@ gtk-accounts-add = Agregar...
 gtk-accounts-properties = Propiedades...
 gtk-accounts-signature = Firma...
 # review: changed
-gtk-accounts-sign-in-apps = Apps de inicio de sesión...
+gtk-accounts-sign-in-apps = Aplicaciones de inicio de sesión...
 
 ## Sign-in apps
 
@@ -167,5 +167,6 @@ gtk-new-mail-group = Correo nuevo
 # the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
 # review: new
 gtk-notify-new-mail = Avisar de correo nuevo
-gtk-notify-subtitle = Recibir una notificación cuando lleguen mensajes nuevos y la ventana esté en segundo plano
+# review: changed
+gtk-notify-subtitle = Recibir un aviso cuando lleguen mensajes nuevos y la ventana esté en segundo plano
 gtk-restart-to-change = Inbox Classic se reinicia para cambiar el idioma.

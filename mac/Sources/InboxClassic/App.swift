@@ -571,6 +571,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         if command.needsOne && !main.mailbox.hasOne || command.needsSome && !main.mailbox.hasSelection {
             return false
         }
+        if Mailbox.needsBody.contains(command) && main.mailbox.shownFailed {
+            return false
+        }
         switch command {
         case .delete: return !typing && main.mailbox.hasSelection
         case .markRead, .markUnread, .flag: return main.mailbox.hasSelection

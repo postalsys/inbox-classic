@@ -779,8 +779,9 @@ fn alert() -> Option<adw::AlertDialog> {
         .find(|d| d.is_mapped() && d.widget_name() != "wait-dialog")
 }
 
+/// What a message box says, its no-break spaces (`ui::no_lone_word`) read as spaces
 fn alert_text(dialog: &adw::AlertDialog) -> String {
-    format!("{} {}", dialog.heading().unwrap_or_default(), dialog.body())
+    format!("{} {}", dialog.heading().unwrap_or_default(), dialog.body()).replace('\u{a0}', " ")
 }
 
 /// Answers the message box with the button that reads `label`

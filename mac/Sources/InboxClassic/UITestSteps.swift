@@ -108,6 +108,7 @@ extension UITest {
         compose = draft
         type("Fay <fay@example.com>", into: field("compose.to", compose))
         type("Draft from the UI test", into: field("compose.subject", compose))
+        check(compose.title == "Draft from the UI test", "a new message's window is named by the subject typed")
         _ = await typeInEditor(compose, "Half written.")
         // closing what was written asks whether to keep it; Save saves it in Drafts
         onMain { compose.performClose(nil) }
@@ -127,7 +128,7 @@ extension UITest {
         else { throw Failed(description: "the draft did not open") }
         compose = reopened
         check(field("compose.to", compose)?.stringValue.contains("fay@example.com") == true, "opening the draft has its recipient")
-        _ = await typeInEditor(compose, " Now finished.")
+        _ = await typeInEditor(compose, " Now finished.", atEnd: true)
         await shot(compose, "write-9-draft-reopened")
         // saved again: one draft, the new one
         onMain { _ = ComposeWindow.open.last?.window.toolbar?.items.first { $0.itemIdentifier.rawValue == "save" }.map { item in
@@ -355,6 +356,8 @@ extension UITest {
         press(unsubscribe)
         let sure = await waitWindow("alert", 10)
         check(alertText(sure).contains("127.0.0.1"), "it asks first, naming where it goes")
+        check(!alertText(sure).contains("e-mail") && hyphensKept("no e-mail") == "no e\u{2011}mail",
+              "a word with a hyphen is not wrapped at it")
         await shot(sure, "read-9-unsubscribe-ask")
         answer(sure, "Yes")
         check(await waitUntil(15) { server.received.hasPrefix("POST /u/42 ") && server.received.contains("List-Unsubscribe=One-Click") },
@@ -758,9 +761,11 @@ extension UITest {
         onMain { options.grouping.state = .off; options.groupingChanged() }
         check(await waitUntil(5) { tripRows().count == 3 && tripRows().allSatisfy { $0.message.thread == 0 } },
               "turned off, the three messages are each a row of their own")
-        // the list from its top, the main window in front
+        check(main.mailbox.selectedRow?.uid == main.mailbox.reader.uid && main.mailbox.reader.uid != 0,
+              "and the message the pane shows is still selected (\(main.mailbox.selectedRow?.subject ?? "none"))")
+        // the list at that row, the main window in front
         onMain {
-            self.list.scrollRowToVisible(0)
+            self.list.scrollRowToVisible(self.list.selectedRow)
             self.main.window.makeKeyAndOrderFront(nil)
         }
         await shot(main.window, "threads-3-options-off")
@@ -804,6 +809,13 @@ extension UITest {
         let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("from"))
         guard column >= 0 else { return nil }
         return (list.view(atColumn: column, row: index, makeIfNecessary: true) as? NSTableCellView)?.textField?.textColor
+    }
+
+    /// the From of a row is drawn as an ignored conversation's (grey, or dimmed white on the selection)
+    func fromGrey(_ index: Int) -> Bool {
+        let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("from"))
+        guard column >= 0 else { return false }
+        return (list.view(atColumn: column, row: index, makeIfNecessary: true) as? TextCell)?.grey == true
     }
 
     func watchAndIgnore() async throws {
@@ -891,7 +903,7 @@ extension UITest {
         }
         check(await waitUntil(20) {
             guard let row = partyRow(), row.message.mark == PE_THREAD_MARK_IGNORE, contextChecked(.ignoreConversation),
-                  fromColor(row.index) == Mailbox.ignoredColor else { return false }
+                  fromGrey(row.index) else { return false }
             return await partyServerSeen()
         }, "Ignore Conversation greys the row and marks its messages read on the server (K in the list)")
         check(menuItem(.ignoreConversation)?.state == .on, "and checks Message > Ignore Conversation")
@@ -917,7 +929,7 @@ extension UITest {
             (0..<self.list.numberOfRows).filter { self.main.mailbox.row($0)?.subject.hasSuffix(partySubject) == true }.count == 3
         }
         let partyRows = (0..<list.numberOfRows).filter { main.mailbox.row($0)?.subject.hasSuffix(partySubject) == true }
-        check(partyRows.count == 3 && partyRows.allSatisfy { fromColor($0) == Mailbox.ignoredColor },
+        check(partyRows.count == 3 && partyRows.allSatisfy { fromGrey($0) },
               "every message of the ignored conversation is grey")
         if let newest = partyRows.last {
             await selectRow(newest)
@@ -2096,7 +2108,7 @@ extension UITest {
             }
             check(cell(hosts, 0, 0) == "My AI agent" && cell(hosts, 1, 0).hasPrefix("Read, organize and send with your yes"),
                   "it lists the program and what it may do (\(cell(hosts, 1, 0)))")
-            check(cell(log, 2, 0).hasPrefix("Sent \"Lunch on Friday?\" to pat@example.net") && cell(log, 2, 1).hasPrefix("Marked read"),
+            check(cell(log, 2, 0).hasPrefix("Sent “Lunch on Friday?” to pat@example.net") && cell(log, 2, 1).hasPrefix("Marked read"),
                   "and what its agent did, newest first")
             await shot(agents, "agents-6-window")
             press(find("agents.undo", in: agents))

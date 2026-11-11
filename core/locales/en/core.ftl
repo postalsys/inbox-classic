@@ -43,7 +43,7 @@ reader-failed-network = The mail server could not be reached ({ $reason }).
 reader-failed-sign-in = The mail server did not accept the sign-in ({ $reason }). Check the password or sign in again in File > Accounts.
 reader-failed-security = The connection to the mail server could not be made secure ({ $reason }).
 reader-failed-other = The mail server answered: { $reason }.
-reader-retry-note = It will be tried again when the account reconnects, or now with Try Again.
+reader-retry-note = It will be tried again when the account reconnects.
 reader-unreadable = This message can not be shown: { $error }
 message-source-title = Message Source: { $subject }
 message-source-untitled = Message Source
@@ -66,6 +66,8 @@ bounce-delayed = Your message has not been delivered yet
 bounce-delayed-note = Your mail server is still trying to deliver it. You do not need to send it again.
 # the link to the message the notice is about, in Sent Items or another folder
 bounce-show-message = Show the message that bounced
+# the link of a delay's card to the message that is still on its way
+bounce-show-delayed = Show the delayed message
 bounce-what-to-do = What you can do:
 # what to do about a recipient the message is still on its way to: in the card of a delay, and in the card of a failure
 bounce-delayed-do = Nothing yet. If it still cannot be delivered, you will get another notice.
@@ -98,7 +100,7 @@ bounce-mailbox-disabled = The mailbox is closed
 bounce-mailbox-disabled-why = The address exists, but its mailbox has been switched off or is no longer used.
 bounce-mailbox-disabled-do = Reach the person another way and ask for an address they use now.
 bounce-mailbox-full = The mailbox is full
-bounce-mailbox-full-why = The recipient's mailbox has no room for new mail.
+bounce-mailbox-full-why = The recipient’s mailbox has no room for new mail.
 bounce-mailbox-full-do = Send it again in a few days, or let the person know another way. Large attachments are refused first.
 bounce-spam-blocked = Refused as spam
 bounce-spam-blocked-why = The receiving server took the message for spam.
@@ -107,14 +109,14 @@ bounce-virus-detected = Refused for a virus
 bounce-virus-detected-why = The receiving server found a virus or other harmful content in the message or its attachments.
 bounce-virus-detected-do = Check the attachments with a virus scanner. Some servers refuse every program or archive, so share such files as a link instead.
 bounce-ip-blocklisted = Your mail server is on a blocklist
-bounce-ip-blocklisted-why = The receiving server refuses mail from the server that sent yours, because that server's address is on a blocklist.
+bounce-ip-blocklisted-why = The receiving server refuses mail from the server that sent yours, because that server’s address is on a blocklist.
 bounce-ip-blocklisted-do = The message is not the problem. Forward this notice to your mail provider and ask them to have the server taken off the list.
 bounce-domain-blocklisted = A domain is on a blocklist
-bounce-domain-blocklisted-why = The receiving server refuses the message because your address's domain, or a domain in the message's links, is on a blocklist.
+bounce-domain-blocklisted-why = The receiving server refuses the message because your address’s domain, or a domain in the message’s links, is on a blocklist.
 bounce-domain-blocklisted-do = If the message has links, try it without them. Otherwise forward this notice to whoever runs mail for your domain.
-bounce-policy-blocked = Refused by the receiving server's rules
+bounce-policy-blocked = Refused by the receiving server’s rules
 bounce-policy-blocked-why = The rules of the receiving server do not let this message through, for example because of its size, its attachments or who sent it.
-bounce-policy-blocked-do = The server's own words under Details often give the reason. Ask the recipient whether they can accept such mail.
+bounce-policy-blocked-do = The server’s own words under Details often give the reason. Ask the recipient whether they can accept such mail.
 bounce-geo-blocked = Refused for where it came from
 bounce-geo-blocked-why = The receiving server does not take mail from the country or network your mail server is in.
 bounce-geo-blocked-do = Reach the person another way, or ask your mail provider about it.
@@ -123,7 +125,7 @@ bounce-relay-denied-why = A server refused to deliver the message onward, often 
 bounce-relay-denied-do = Check the outgoing server of the account in File > Accounts, and that it signs in.
 bounce-auth-failure = Your sender address could not be verified
 bounce-auth-failure-why = The receiving server could not confirm that the message really came from your domain (SPF, DKIM or DMARC).
-bounce-auth-failure-do = Forward this notice to whoever runs mail for your domain: its settings need fixing. Sending through your provider's own server may help meanwhile.
+bounce-auth-failure-do = Forward this notice to whoever runs mail for your domain: its settings need fixing. Sending through your provider’s own server may help meanwhile.
 bounce-rate-limited = Too much mail at once
 bounce-rate-limited-why = The receiving server takes fewer messages from your mail server for now.
 bounce-rate-limited-do = Wait a while and send it again. When writing to many people, send to fewer at a time.
@@ -135,7 +137,7 @@ bounce-server-error-why = The receiving server could not be reached, or could no
 bounce-server-error-do = Send it again later. If it keeps failing, check the part of the address after the @ for typing mistakes.
 bounce-unknown = Not delivered
 bounce-unknown-why = The notice does not say clearly why.
-bounce-unknown-do = The server's own words under Details may tell more. If they do not help, forward this notice to your mail provider.
+bounce-unknown-do = The server’s own words under Details may tell more. If they do not help, forward this notice to your mail provider.
 
 ## Several messages selected
 
@@ -317,10 +319,10 @@ failure-network = the connection to the server failed ({ $reason })
 error-in-use = it can not be removed while accounts sign in with it: { $accounts }
 error-turned-off = this sign-in app is turned off for new accounts
 error-folder-name = the folder name must be 1 to 200 characters long and cannot contain control characters
-error-folder-separator = a folder name can not have "{ $separator }" in it on this server
+error-folder-separator = a folder name can not have “{ $separator }” in it on this server
 error-folder-special = the Inbox and the special folders can not be renamed or deleted
 error-no-recipients = the message has no recipients
-error-bad-address = "{ $address }" is not an e-mail address
+error-bad-address = “{ $address }” is not an e-mail address
 error-attachment = { $path } could not be read: { $error }
 error-no-drafts = the account has no Drafts folder to save the message in
 error-draft-attachment = an attachment of the draft could not be kept: { $error }
@@ -343,7 +345,7 @@ error-no-password = no password for this account
 error-no-sign-in = no sign-in for this account
 error-provider-missing = this build can not sign in to { $provider }: is its sign-in app removed?
 error-provider-servers = this account’s servers do not match its sign-in app’s servers
-error-app-scopes = { $reason }. The mail server did not take the sign-in app's token: check that the app's scopes give access to mail
+error-app-scopes = { $reason }. The mail server did not take the sign-in app’s token: check that the app’s scopes give access to mail
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
@@ -442,21 +444,21 @@ agent-accounts = { $count ->
 # "Read and organize; 1 account"
 agent-access = { $can }; { $accounts }
 agent-unreadable = This message can not be read.
-agent-log-composed = Opened "{ $subject }" in a new message for you to finish
-agent-log-refused = You did not send "{ $subject }"
-agent-log-sent = Sent "{ $subject }" to { $to }
-agent-log-draft = Saved the draft "{ $subject }"
-agent-log-read = Marked read "{ $subject }"
-agent-log-unread = Marked unread "{ $subject }"
-agent-log-flagged = Flagged "{ $subject }"
-agent-log-unflagged = Took the flag off "{ $subject }"
-agent-log-deleted = Deleted "{ $subject }"
-agent-log-moved = Moved "{ $subject }" to { $folder }
-agent-log-junk = Marked "{ $subject }" as junk
-agent-log-not-junk = Marked "{ $subject }" as not junk
-agent-log-archived = Archived "{ $subject }"
-agent-log-folder = Made the folder "{ $name }"
-agent-log-unsubscribed = Unsubscribed from the list of "{ $subject }"
+agent-log-composed = Opened “{ $subject }” in a new message for you to finish
+agent-log-refused = You did not send “{ $subject }”
+agent-log-sent = Sent “{ $subject }” to { $to }
+agent-log-draft = Saved the draft “{ $subject }”
+agent-log-read = Marked read “{ $subject }”
+agent-log-unread = Marked unread “{ $subject }”
+agent-log-flagged = Flagged “{ $subject }”
+agent-log-unflagged = Took the flag off “{ $subject }”
+agent-log-deleted = Deleted “{ $subject }”
+agent-log-moved = Moved “{ $subject }” to { $folder }
+agent-log-junk = Marked “{ $subject }” as junk
+agent-log-not-junk = Marked “{ $subject }” as not junk
+agent-log-archived = Archived “{ $subject }”
+agent-log-folder = Made the folder “{ $name }”
+agent-log-unsubscribed = Unsubscribed from the list of “{ $subject }”
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

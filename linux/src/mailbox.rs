@@ -834,14 +834,13 @@ impl Mailbox {
         self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
         self.list
             .show_person_column(view.lists_recipients(core).unwrap_or(false));
-        self.list.show_folder_column(
-            several,
-            &if self.searching() {
-                t!(UiColFolder)
-            } else {
-                t!(UiColAccount)
-            },
-        );
+        let (title, values) = if self.searching() {
+            (t!(UiColFolder), Vec::new())
+        } else {
+            let names = self.accounts.borrow().iter().map(|a| a.title.clone()).collect();
+            (t!(UiColAccount), names)
+        };
+        self.list.show_folder_column(several, &title, &values);
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let positions: Vec<u64> = if !keep_selection {
             Vec::new()
@@ -981,11 +980,12 @@ impl Mailbox {
     fn selection_shown(&self) {
         self.show_counts();
         self.update_junk_button();
-        let selected = self.refs.borrow().len();
+        // one row: one message, or a collapsed conversation, whose row stands for its first message
+        let one_row = self.list.selected_count() == 1;
         for command in Command::ALL.iter().filter(|c| c.needs_one()) {
-            self.enable(*command, selected == 1);
+            self.enable(*command, one_row);
         }
-        let any = selected > 0;
+        let any = !self.refs.borrow().is_empty();
         for command in Command::ALL.iter().filter(|c| c.needs_some()) {
             self.enable(*command, any);
         }
@@ -1365,6 +1365,8 @@ impl Mailbox {
 
     pub fn set_status(&self, text: &str) {
         self.status.set_text(text);
+        // the whole text as the tip, as a long one (an error and what happens next) is cut short
+        self.status.set_tooltip_text((!text.is_empty()).then_some(text));
     }
 
     pub fn set_outgoing(&self, text: &str) {
@@ -2836,6 +2838,8 @@ fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Label) {
     };
     let status = label("status");
     status.set_hexpand(true);
+    // ready, as the status bar says when nothing is going on (and in a window made again in another language)
+    status.set_text(&t!(UiDone));
     let outgoing = label("outgoing");
     outgoing.set_width_chars(34);
     outgoing.set_max_width_chars(48);

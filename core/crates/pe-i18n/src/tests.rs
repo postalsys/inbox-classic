@@ -122,6 +122,12 @@ fn words_in_the_language_set() {
     assert_eq!(tr_args(Text::Messages, &[("count", 3u64.into())]), "3 Nachrichten");
     set_language("qps");
     assert!(tr_args(Text::Messages, &[("count", 3u64.into())]).starts_with("[3 "));
+    // the words made over, not what goes into them: an account's name stays as the user wrote it
+    let asked = tr_args(Text::UiEnterPassword, &[("account", "inboxclassic.test".into())]);
+    assert!(
+        asked.contains("inboxclassic.test") && asked.starts_with("[Éñ"),
+        "{asked}"
+    );
     assert_eq!(
         localized_picture("brands/google-sign-in.png"),
         "brands/google-sign-in.png"

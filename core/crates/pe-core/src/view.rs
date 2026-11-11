@@ -119,7 +119,11 @@ pub(crate) fn build_unless(
         text_addresses(&message.cc),
     );
     let subject = message.subject.clone().unwrap_or_default();
-    let date = message.timestamp.map(pe_smtp::message::format_date).unwrap_or_default();
+    // in the reader's day and time, as the list and the reading pane say it, not as the header has it
+    let date = message
+        .timestamp
+        .map(crate::calendar::local_date_time)
+        .unwrap_or_default();
     // for a printout: on screen the window shows these above the message
     use pe_i18n::{Text, tr};
     let names = [

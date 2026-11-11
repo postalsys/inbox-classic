@@ -66,6 +66,7 @@ win-click-to-retry = Uuesti proovimiseks klõpsake siin.
 win-save-attachments = &Salvesta manused...
 win-files-not-saved = { $count } failist { $failed } ei saanud salvestada.
 win-new-folder-in-highlighted = Uus kaust luuakse valitud kausta alamkaustana.
+# review: changed
 win-delete-folder-ask = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
 win-rename = &Nimeta ümber...
 win-messages-not-saved = Kirju ei saanud salvestada.
@@ -85,10 +86,14 @@ win-sign-in-apps-button = &Sisselogimisrakendused...
 
 ## Tehisintellekti agendid
 
+# review: changed
 win-dont-allow = Ä&ra luba
 win-col-address = Aadress
 win-never-written-to = Pole kunagi kirjutanud
+# review: new
+win-book-find-label = Sisestage nimi või e-posti aadress:
 win-send = &Saada
+# review: changed
 win-dont-send = Ä&ra saada
 win-forget-program-ask = Kas eemaldada see programm koos õiguste ja agentide tegevusajalooga? Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
 win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agentide tehtud muudatusi tagasi.

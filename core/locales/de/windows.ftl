@@ -67,6 +67,7 @@ win-click-to-retry = Klicken Sie hier, um es erneut zu versuchen.
 win-save-attachments = Anlagen &speichern...
 win-files-not-saved = Nicht gespeicherte Dateien: { $failed } von { $count }.
 win-new-folder-in-highlighted = Der neue Ordner wird im ausgewählten Ordner angelegt.
+# review: changed
 win-delete-folder-ask = Den Ordner „{ $folder }“ mit allen Nachrichten und Unterordnern löschen? Diese werden auch auf dem Server gelöscht.
 win-rename = &Umbenennen...
 win-messages-not-saved = Die Nachrichten konnten nicht gespeichert werden.
@@ -86,10 +87,14 @@ win-sign-in-apps-button = &Anmelde-Apps...
 
 ## KI-Agenten
 
+# review: changed
 win-dont-allow = &Nicht erlauben
 win-col-address = Adresse
 win-never-written-to = Nie angeschrieben
+# review: new
+win-book-find-label = Namen oder E-Mail-Adresse eingeben:
 win-send = &Senden
+# review: changed
 win-dont-send = &Nicht senden
 win-forget-program-ask = Dieses Programm mit seinen Berechtigungen und dem Aktivitätsverlauf seiner Agenten entfernen? Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
 win-clear-log-ask = Aktivitätsverlauf der Agenten löschen? Die vorgenommenen Änderungen werden dadurch nicht rückgängig gemacht.

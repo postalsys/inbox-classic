@@ -413,10 +413,9 @@ pub async fn agent(d: &Driver) {
             );
             let entries = subtitles(&agents, "agents-entry");
             d.check(
-                entries
-                    .first()
-                    .is_some_and(|(what, _)| what.starts_with("Sent \"Lunch on Friday?\" to pat@example.net"))
-                    && entries.get(1).is_some_and(|(what, _)| what.starts_with("Marked read")),
+                entries.first().is_some_and(|(what, _)| {
+                    what.starts_with("Sent \u{201c}Lunch on Friday?\u{201d} to pat@example.net")
+                }) && entries.get(1).is_some_and(|(what, _)| what.starts_with("Marked read")),
                 &format!("and what its agent did, newest first ({entries:?})"),
             );
             d.shot(&agents, "agents-6-window").await;

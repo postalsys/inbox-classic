@@ -1257,7 +1257,7 @@ fn signs_in_with_a_sign_in_app() {
         unreachable!()
     };
     assert_eq!(kind, FailureKind::Authentication);
-    assert!(message.contains("check that the app's scopes"), "{message}");
+    assert!(message.contains("check that the app\u{2019}s scopes"), "{message}");
 
     // removed once nothing uses it, and its account goes first
     core.remove_account(bob).unwrap();
@@ -2095,7 +2095,7 @@ fn creates_renames_and_deletes_folders() {
     ));
     assert!(matches!(s.core.delete_folder(sent), Err(pe_core::Error::Folder(_))));
     let refused = s.core.create_folder(account, None, "a/b").unwrap_err();
-    assert!(refused.to_string().contains("\"/\""), "{refused}");
+    assert!(refused.to_string().contains("\u{201c}/\u{201d}"), "{refused}");
 }
 
 #[test]

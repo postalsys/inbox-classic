@@ -464,6 +464,16 @@ void ShowAddresses(HWND dialog, const ContactState& state, int select) {
     FillListBox(GetDlgItem(dialog, IDC_CONTACT_ADDRESSES), lines, select);
 }
 
+// Remove only with a number to remove; the focus to the list when it leaves the button off
+void UpdatePhoneRemove(HWND dialog) {
+    HWND list = GetDlgItem(dialog, IDC_CONTACT_PHONES), remove = GetDlgItem(dialog, IDC_CONTACT_PHONE_REMOVE);
+    bool any = ListView_GetNextItem(list, -1, LVNI_SELECTED) >= 0;
+    if (!any && GetFocus() == remove) {
+        SetFocus(list);
+    }
+    EnableWindow(remove, any);
+}
+
 void ShowPhones(HWND dialog, const ContactState& state, int select) {
     HWND list = GetDlgItem(dialog, IDC_CONTACT_PHONES);
     ListView_DeleteAllItems(list);
@@ -472,6 +482,7 @@ void ShowPhones(HWND dialog, const ContactState& state, int select) {
         SetCell(list, row, 1, state.phones[i].number);
     }
     SelectRow(list, select);
+    UpdatePhoneRemove(dialog);
 }
 
 // the address typed (if any) into the list; false when it is not an address, which was said
@@ -646,6 +657,11 @@ bool RemoveContactItem(HWND dialog, ContactState& state, HWND list) {
 }
 
 LRESULT CALLBACK ContactProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    if (message == WM_NOTIFY && reinterpret_cast<NMHDR*>(lParam)->idFrom == IDC_CONTACT_PHONES &&
+        reinterpret_cast<NMHDR*>(lParam)->code == LVN_ITEMCHANGED) {
+        UpdatePhoneRemove(hwnd);
+        return 0;
+    }
     return DialogProc<ContactState>(hwnd, message, wParam, lParam, OnContactCommand, RemoveContactItem);
 }
 
@@ -773,8 +789,11 @@ void ShowMembers(HWND dialog, const GroupState& state, int select) {
         lines.push_back(member.label.empty() ? (member.name.empty() ? member.address : member.name) : member.label);
     }
     FillListBox(GetDlgItem(dialog, IDC_GROUP_MEMBERS), lines, select);
-    SetDlgItemTextW(dialog, IDC_GROUP_COUNT,
-                    core::T(PE_TEXT_UI_GROUP_MEMBERS_COUNT, {{"count", std::to_wstring(state.members.size())}}).c_str());
+    // the list's label says how many, so the word is not said twice; "Members:" while there are none
+    std::wstring heading = state.members.empty()
+                               ? core::T(PE_TEXT_UI_GROUP_MEMBERS)
+                               : core::T(PE_TEXT_UI_GROUP_MEMBERS_COUNT, {{"count", std::to_wstring(state.members.size())}});
+    SetDlgItemTextW(dialog, IDC_GROUP_COUNT, heading.c_str());
 }
 
 // members as the core reads them; the strings they point to in `strings`, which must not move meanwhile
@@ -926,11 +945,8 @@ int64_t GroupProperties(HWND owner, PeCore* core, int64_t id) {
 
     int buttonWidth = ButtonWidth({core::T(PE_TEXT_UI_GROUP_SELECT_MEMBERS), core::T(PE_TEXT_UI_REMOVE), core::T(PE_TEXT_UI_CONTACT_ADD)}, 90);
     int buttonLeft = width - pad - buttonWidth;
-    std::wstring membersLabel = core::T(PE_TEXT_UI_GROUP_MEMBERS);
-    int membersLabelWidth = LabelWidth({membersLabel}, 40);
-    MakeLabel(dialog, membersLabel, {pad, y, pad + membersLabelWidth, y + labelHeight});
-    // how many, beside the label
-    CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_GROUP_COUNT, {pad + membersLabelWidth, y, buttonLeft - gap, y + labelHeight});
+    // the label of the list, with how many (ShowMembers)
+    CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_GROUP_COUNT, {pad, y, buttonLeft - gap, y + labelHeight});
     y += labelHeight;
     MakeListBox(dialog, IDC_GROUP_MEMBERS, {pad, y, buttonLeft - gap, y + membersHeight});
     MakeButton(dialog, PE_TEXT_UI_GROUP_SELECT_MEMBERS, IDC_GROUP_SELECT, buttonLeft, y, buttonWidth);
@@ -1020,11 +1036,11 @@ void ShowGroup(Book* book, int64_t id) {
 void Reload(Book* book, int64_t group, int64_t selectCard = 0) {
     book->filling = true;
     TreeView_DeleteAllItems(book->tree);
-    book->all = InsertItem(book->tree, TVI_ROOT, core::T(PE_TEXT_UI_BOOK_ALL_CONTACTS), 0, false, FOLDER_MAILBOX);
+    book->all = InsertItem(book->tree, TVI_ROOT, core::T(PE_TEXT_UI_BOOK_ALL_CONTACTS), 0, false, FOLDER_BOOK_CONTACTS);
     HTREEITEM chosen = book->all;
     book->groups = Groups(book->core);
     for (const Entry& entry : book->groups) {
-        HTREEITEM item = InsertItem(book->tree, TVI_ROOT, entry.name, static_cast<LPARAM>(entry.id), false, FOLDER_MAIL_MULTIPLE);
+        HTREEITEM item = InsertItem(book->tree, TVI_ROOT, entry.name, static_cast<LPARAM>(entry.id), false, FOLDER_PEOPLE);
         if (entry.id == group) {
             chosen = item;
         }
@@ -1288,7 +1304,7 @@ void CreateBook(Book* book) {
     AddButton(book->toolbar, IDC_BOOK_DELETE, core::T(PE_TEXT_UI_TB_DELETE).c_str(), BTNS_BUTTON, ICON_DELETE);
     AddButton(book->toolbar, 0, nullptr);
     AddButton(book->toolbar, IDC_BOOK_WRITE_TO, core::T(PE_TEXT_UI_TB_WRITE_TO).c_str(), BTNS_BUTTON, ICON_MAIL_EDIT);
-    book->findLabel = CreateChild(hwnd, L"STATIC", core::T(PE_TEXT_UI_BOOK_FIND_HINT).c_str(), SS_LEFT | SS_NOPREFIX, 0, {});
+    book->findLabel = CreateChild(hwnd, L"STATIC", core::T(PE_TEXT_WIN_BOOK_FIND_LABEL).c_str(), SS_LEFT | SS_NOPREFIX, 0, {});
     book->find = CreateChild(hwnd, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL, IDC_BOOK_FIND, {}, WS_EX_CLIENTEDGE);
     book->tree = CreateChild(hwnd, WC_TREEVIEWW, nullptr, WS_TABSTOP | TVS_SHOWSELALWAYS, IDC_BOOK_TREE, {}, WS_EX_CLIENTEDGE);
     TreeView_SetImageList(book->tree, IconList(IconSet::Folders), TVSIL_NORMAL);

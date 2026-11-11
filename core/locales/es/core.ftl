@@ -51,7 +51,7 @@ reader-failed-sign-in = El servidor de correo no aceptó el inicio de sesión ({
 reader-failed-security = No se pudo establecer una conexión segura con el servidor de correo ({ $reason }).
 reader-failed-other = El servidor de correo respondió: { $reason }.
 # review: changed
-reader-retry-note = Se volverá a intentar cuando se restablezca la conexión con la cuenta, o ahora con Reintentar.
+reader-retry-note = Se volverá a intentar cuando se restablezca la conexión con la cuenta.
 reader-unreadable = Este mensaje no se puede mostrar: { $error }
 message-source-title = Formato original del mensaje: { $subject }
 message-source-untitled = Formato original del mensaje
@@ -73,6 +73,9 @@ bounce-failed = Su mensaje no se entregó
 bounce-delayed = Su mensaje aún no se ha entregado
 bounce-delayed-note = Su servidor de correo sigue intentando entregarlo. No necesita enviarlo de nuevo.
 bounce-show-message = Mostrar el mensaje que no se entregó
+# the link of a delay's card to the message that is still on its way
+# review: new
+bounce-show-delayed = Mostrar el mensaje retrasado
 bounce-what-to-do = Qué puede hacer:
 bounce-delayed-do = No necesita hacer nada por ahora. Si el mensaje no se puede entregar, recibirá otro aviso.
 bounce-delayed-row-do = No necesita hacer nada por ahora. Su servidor de correo sigue intentando entregar el mensaje. Recibirá otro aviso si no lo consigue.
@@ -100,6 +103,7 @@ bounce-mailbox-disabled = El buzón está desactivado
 bounce-mailbox-disabled-why = La dirección existe, pero su buzón se ha desactivado o ya no se usa.
 bounce-mailbox-disabled-do = Contacte con el destinatario por otro medio y pídale su dirección de correo actual.
 bounce-mailbox-full = El buzón está lleno
+# review: changed
 bounce-mailbox-full-why = El buzón del destinatario no tiene espacio para correo nuevo.
 bounce-mailbox-full-do = Vuelva a enviar el mensaje dentro de unos días o avise al destinatario por otro medio. Los mensajes con archivos adjuntos grandes son los primeros en rechazarse.
 bounce-spam-blocked = Rechazado como correo no deseado
@@ -109,13 +113,17 @@ bounce-virus-detected = Rechazado por un virus
 bounce-virus-detected-why = El servidor receptor encontró un virus u otro contenido dañino en el mensaje o en sus archivos adjuntos.
 bounce-virus-detected-do = Analice los archivos adjuntos con un antivirus. Algunos servidores rechazan todos los programas y archivos comprimidos. En ese caso, comparta los archivos mediante un enlace.
 bounce-ip-blocklisted = Su servidor de correo está en una lista de bloqueo
+# review: changed
 bounce-ip-blocklisted-why = El servidor receptor rechaza los mensajes de su servidor de correo porque su dirección IP figura en una lista de bloqueo.
 bounce-ip-blocklisted-do = El problema no está en el mensaje. Reenvíe este aviso a su proveedor de correo y pídale que solicite la retirada del servidor de la lista.
 bounce-domain-blocklisted = Un dominio está en una lista de bloqueo
+# review: changed
 bounce-domain-blocklisted-why = El servidor receptor rechaza el mensaje porque el dominio de su dirección de correo, o alguno de los dominios de los enlaces del mensaje, figura en una lista de bloqueo.
 bounce-domain-blocklisted-do = Si el mensaje contiene enlaces, intente enviarlo sin ellos. Si el problema persiste o el mensaje no contiene enlaces, reenvíe este aviso a quien gestione el correo de su dominio.
+# review: changed
 bounce-policy-blocked = Rechazado por las reglas del servidor receptor
 bounce-policy-blocked-why = Las reglas del servidor receptor no dejan pasar este mensaje, por ejemplo por su tamaño, sus archivos adjuntos o quién lo envió.
+# review: changed
 bounce-policy-blocked-do = La respuesta del servidor, en la sección Detalles, suele indicar el motivo. Pregunte al destinatario si su servicio de correo admite ese tipo de mensajes.
 bounce-geo-blocked = Rechazado por su procedencia
 bounce-geo-blocked-why = El servidor receptor no acepta correo del país o la red donde está su servidor de correo.
@@ -125,6 +133,7 @@ bounce-relay-denied-why = Un servidor se negó a entregar el mensaje, a menudo p
 bounce-relay-denied-do = En Archivo > Cuentas, revise la configuración del servidor saliente y compruebe que el inicio de sesión en ese servidor esté configurado.
 bounce-auth-failure = No se pudo verificar su dirección de remitente
 bounce-auth-failure-why = El servidor receptor no pudo confirmar que el mensaje viniera realmente de su dominio (SPF, DKIM o DMARC).
+# review: changed
 bounce-auth-failure-do = Reenvíe este aviso a quien gestione el correo de su dominio para que corrija la configuración. Mientras tanto, puede intentar enviar el mensaje a través del servidor de su proveedor.
 bounce-rate-limited = Demasiados mensajes a la vez
 bounce-rate-limited-why = El servidor receptor está limitando temporalmente la cantidad de mensajes que acepta de su servidor de correo.
@@ -137,6 +146,7 @@ bounce-server-error-why = No se pudo contactar con el servidor receptor, o no pu
 bounce-server-error-do = Vuelva a enviar el mensaje más tarde. Si el problema persiste, compruebe que no haya errores en la parte de la dirección situada después del signo @.
 bounce-unknown = No entregado
 bounce-unknown-why = El aviso no indica claramente por qué no se pudo entregar el mensaje.
+# review: changed
 bounce-unknown-do = La respuesta del servidor, en la sección Detalles, puede ofrecer más información. Si no le resulta útil, reenvíe este aviso a su proveedor de correo.
 
 ## Several messages selected
@@ -329,10 +339,12 @@ failure-network = la conexión con el servidor falló ({ $reason })
 error-in-use = no se puede quitar mientras haya cuentas que inician sesión con ella: { $accounts }
 error-turned-off = esta aplicación de inicio de sesión está desactivada para cuentas nuevas
 error-folder-name = el nombre de la carpeta debe tener entre 1 y 200 caracteres, sin caracteres de control
-error-folder-separator = un nombre de carpeta no puede contener "{ $separator }" en este servidor
+# review: changed
+error-folder-separator = un nombre de carpeta no puede contener «{ $separator }» en este servidor
 error-folder-special = la Bandeja de entrada y las carpetas especiales no se pueden renombrar ni eliminar
 error-no-recipients = el mensaje no tiene destinatarios
-error-bad-address = "{ $address }" no es una dirección de correo electrónico
+# review: changed
+error-bad-address = «{ $address }» no es una dirección de correo electrónico
 error-attachment = no se pudo leer { $path }: { $error }
 error-no-drafts = la cuenta no tiene una carpeta Borradores donde guardar el mensaje
 error-draft-attachment = no se pudo conservar un archivo adjunto del borrador: { $error }
@@ -355,6 +367,7 @@ error-no-password = no hay contraseña para esta cuenta
 error-no-sign-in = no hay datos de inicio de sesión guardados para esta cuenta
 error-provider-missing = esta versión no puede iniciar sesión en { $provider }: ¿se quitó su aplicación de inicio de sesión?
 error-provider-servers = los servidores de esta cuenta no coinciden con los de la aplicación de inicio de sesión
+# review: changed
 error-app-scopes = { $reason }. El servidor de correo rechazó el token de la aplicación de inicio de sesión. Compruebe que sus permisos (scopes) permiten acceder al correo
 error-in-folder = { $folder }: { $reason }
 
@@ -450,20 +463,35 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Este mensaje no se puede leer.
+# review: changed
 agent-log-composed = Se abrió «{ $subject }» en un mensaje nuevo para que lo termine
+# review: changed
 agent-log-refused = No envió «{ $subject }»
+# review: changed
 agent-log-sent = Se envió «{ $subject }» a { $to }
+# review: changed
 agent-log-draft = Se guardó el borrador «{ $subject }»
+# review: changed
 agent-log-read = «{ $subject }» marcado como leído
+# review: changed
 agent-log-unread = «{ $subject }» marcado como no leído
+# review: changed
 agent-log-flagged = Se añadió una marca a «{ $subject }»
+# review: changed
 agent-log-unflagged = Se quitó la marca de «{ $subject }»
+# review: changed
 agent-log-deleted = Se eliminó «{ $subject }»
+# review: changed
 agent-log-moved = «{ $subject }» movido a { $folder }
+# review: changed
 agent-log-junk = «{ $subject }» marcado como correo no deseado
+# review: changed
 agent-log-not-junk = «{ $subject }» marcado como correo deseado
+# review: changed
 agent-log-archived = Se archivó «{ $subject }»
+# review: changed
 agent-log-folder = Se creó la carpeta «{ $name }»
+# review: changed
 agent-log-unsubscribed = Suscripción cancelada a la lista que envió «{ $subject }»
 
 ## Keys

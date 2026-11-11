@@ -10,7 +10,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     let core: Core
     public let window: NSWindow
     public let mailbox: Mailbox
-    private let statusText = NSTextField(labelWithString: "")
+    private let statusText = NSTextField(labelWithString: Text.uiDone.text)  // as on Windows and Linux, until something happens
     private let outboxText = NSTextField(labelWithString: "")
     private let countsText = NSTextField(labelWithString: "")
     let searchField = NSSearchField()
@@ -486,6 +486,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         guard let id = Item(rawValue: item.itemIdentifier.rawValue), let command = command(of: id) else { return true }
         switch command {
         case .archive: return mailbox.canArchive
+        case _ where Mailbox.needsBody.contains(command) && mailbox.shownFailed: return false
         case _ where command.needsOne: return mailbox.hasOne
         case _ where command.needsSome: return mailbox.hasSelection
         default: return true

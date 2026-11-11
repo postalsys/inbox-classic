@@ -116,7 +116,8 @@ ui-unknown-reason = motivo desconocido
 ui-checking = Buscando mensajes nuevos en { $account }...
 ui-done = Listo
 ui-sent-at = { $subject } enviado a las { $time }
-ui-draft-saved = Mensaje guardado en Borradores.
+# review: changed
+ui-draft-saved = Mensaje guardado en Borradores
 ui-draft-not-saved = El mensaje no se guardó en Borradores: { $reason }
 ui-about-core = Núcleo { $version }
 ui-add-account-first = Agregue primero una cuenta de correo.
@@ -219,6 +220,7 @@ ui-cannot-unsubscribe = Este mensaje no permite cancelar la suscripción.
 ui-unsubscribed = Baja confirmada. La lista indica que dejará de enviarle estos mensajes.
 ui-not-unsubscribed = No se pudo cancelar la suscripción: { $reason }
 ui-event-span = { $start } a { $end }
+# review: changed
 ui-event-floating = { $when } (hora del remitente)
 ui-invitation = Invitación: { $title }
 ui-invitation-updated = Invitación actualizada: { $title }
@@ -255,6 +257,7 @@ ui-found-srv = Esta configuración se encontró en los registros DNS de su domin
 ui-found-autodiscover = Esta configuración se encontró mediante Microsoft Autodiscover (Exchange).
 ui-found-other = Esta configuración se encontró para esta dirección.
 ui-app-password-needed = { $provider } no acepta su contraseña normal en los programas de correo. Cree una contraseña de aplicación en su cuenta de { $provider } y escríbala en el campo Contraseña del siguiente formulario.
+# review: changed
 ui-app-password-open = ¿Abrir las instrucciones de { $provider } en su navegador?
 ui-plain-warning = Sin cifrado, cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Utilice esta conexión solo con un servidor en su propio equipo o en su red local.
 ui-continue-ask = ¿Continuar?
@@ -280,6 +283,7 @@ ui-sign-in-not-started = No se pudo iniciar la sesión en el navegador.
 ui-sign-in-in-browser = Inicie sesión en { $account } en la ventana del navegador que se abrió y luego vuelva aquí.
 ui-sign-in-failed = No se pudo iniciar sesión: { $reason }
 ui-account-not-saved = No se pudo guardar la cuenta.
+# review: changed
 ui-start-intro = Gmail, Google Workspace, Outlook.com y Microsoft 365: inicie sesión en la página de Google o de Microsoft. Su contraseña se escribe allí, nunca en Inbox Classic.
 ui-start-intro-apps = Inicie sesión en el navegador con una de sus aplicaciones de inicio de sesión (Más opciones de inicio de sesión), o agregue abajo cualquier cuenta de correo con su nombre y su dirección.
 ui-use-app-password = Usar contraseña de aplicación
@@ -340,7 +344,8 @@ ui-client-public = ID de cliente: { $client }, un cliente público (sin secreto)
 ui-no-accounts = Ninguna cuenta
 ui-remove-sign-in-app = Quitar aplicación de inicio de sesión
 ui-remove-sign-in-app-ask = ¿Quitar la aplicación de inicio de sesión { $name } y su secreto de cliente guardado?
-ui-sign-in-app-not-removed = No se quitó la aplicación de inicio de sesión: { $reason }
+# review: changed
+ui-sign-in-app-not-removed = No se quitó la aplicación de inicio de sesión. { $reason }
 ui-sign-in-apps-intro = Las aplicaciones de inicio de sesión permiten que las cuentas inicien sesión en el navegador. Una que no esté marcada no se ofrece a las cuentas nuevas; las cuentas que ya la usan siguen funcionando.
 ui-col-issuer = Emisor
 ui-col-used-by = Usada por

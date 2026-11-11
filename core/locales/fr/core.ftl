@@ -56,14 +56,16 @@ folder-archive = Archives
 
 reader-no-message = Aucun message n'est sélectionné.
 reader-downloading = Téléchargement du message…
-reader-downloading-detail = Le message s’affichera ici une fois le téléchargement terminé.
+# review: changed
+reader-downloading-detail = Le message s'affichera ici une fois le téléchargement terminé.
 reader-failed = Le message n'a pas pu être téléchargé
 reader-failed-network = Le serveur de messagerie est inaccessible ({ $reason }).
 reader-failed-sign-in = Le serveur de messagerie a refusé la connexion ({ $reason }). Vérifiez le mot de passe ou reconnectez-vous dans Fichier > Comptes.
-reader-failed-security = Impossible d’établir une connexion sécurisée au serveur de messagerie ({ $reason }).
+# review: changed
+reader-failed-security = Impossible d'établir une connexion sécurisée au serveur de messagerie ({ $reason }).
 reader-failed-other = Le serveur de messagerie a répondu : { $reason }.
 # review: changed
-reader-retry-note = Une nouvelle tentative aura lieu dès que la connexion au compte sera rétablie, ou maintenant avec Réessayer.
+reader-retry-note = Une nouvelle tentative aura lieu dès que la connexion au compte sera rétablie.
 reader-unreadable = Ce message ne peut pas être affiché : { $error }
 message-source-title = Code source du message : { $subject }
 message-source-untitled = Code source du message
@@ -85,6 +87,9 @@ bounce-failed = Votre message n'a pas été remis
 bounce-delayed = Votre message n'a pas encore été remis
 bounce-delayed-note = Votre serveur de messagerie essaie toujours de le remettre. Vous n'avez pas besoin de le renvoyer.
 bounce-show-message = Afficher le message non remis
+# the link of a delay's card to the message that is still on its way
+# review: new
+bounce-show-delayed = Afficher le message retardé
 bounce-what-to-do = Ce que vous pouvez faire :
 bounce-delayed-do = Vous n'avez rien à faire pour l'instant. Si le message ne peut pas être remis, vous recevrez un nouvel avis.
 bounce-delayed-row-do = Vous n'avez rien à faire pour l'instant. Votre serveur de messagerie poursuit ses tentatives de remise. Vous recevrez un nouvel avis s'il n'y parvient pas.
@@ -112,6 +117,7 @@ bounce-mailbox-disabled = La boîte aux lettres est désactivée
 bounce-mailbox-disabled-why = L'adresse existe, mais sa boîte aux lettres a été désactivée ou n'est plus utilisée.
 bounce-mailbox-disabled-do = Contactez le destinataire par un autre moyen et demandez-lui son adresse e-mail actuelle.
 bounce-mailbox-full = La boîte aux lettres est pleine
+# review: changed
 bounce-mailbox-full-why = La boîte aux lettres du destinataire n'a plus de place pour le nouveau courrier.
 bounce-mailbox-full-do = Renvoyez le message dans quelques jours ou prévenez le destinataire par un autre moyen. Les messages contenant des pièces jointes volumineuses sont refusés en premier.
 bounce-spam-blocked = Refusé comme courrier indésirable
@@ -121,22 +127,28 @@ bounce-virus-detected = Refusé en raison d'un virus
 bounce-virus-detected-why = Le serveur de réception a trouvé un virus ou un autre contenu dangereux dans le message ou ses pièces jointes.
 bounce-virus-detected-do = Vérifiez les pièces jointes avec un antivirus. Certains serveurs refusent tout programme ou toute archive : partagez plutôt ces fichiers par un lien.
 bounce-ip-blocklisted = Votre serveur de messagerie est sur une liste de blocage
+# review: changed
 bounce-ip-blocklisted-why = Le serveur de réception refuse les messages de votre serveur de messagerie, car son adresse IP figure sur une liste de blocage.
 bounce-ip-blocklisted-do = Le message n'est pas en cause. Transférez cet avis à votre fournisseur de messagerie et demandez-lui de faire retirer le serveur de la liste.
 bounce-domain-blocklisted = Un domaine est sur une liste de blocage
+# review: changed
 bounce-domain-blocklisted-why = Le serveur de réception refuse le message car le domaine de votre adresse, ou un domaine des liens du message, est sur une liste de blocage.
 bounce-domain-blocklisted-do = Si le message contient des liens, essayez de l'envoyer sans ces liens. Si cela ne résout pas le problème ou si le message ne contient pas de liens, transmettez cet avis à la personne qui gère la messagerie de votre domaine.
+# review: changed
 bounce-policy-blocked = Refusé en application des règles du serveur de réception
 bounce-policy-blocked-why = Les règles du serveur de réception ne laissent pas passer ce message, par exemple à cause de sa taille, de ses pièces jointes ou de son expéditeur.
+# review: changed
 bounce-policy-blocked-do = La réponse du serveur, dans la section Détails, indique souvent la raison du refus. Demandez au destinataire si sa messagerie accepte ce type de message.
 bounce-geo-blocked = Refusé en raison de sa provenance
 bounce-geo-blocked-why = Le serveur de réception n'accepte pas le courrier du pays ou du réseau où se trouve votre serveur de messagerie.
-bounce-geo-blocked-do = Contactez le destinataire par un autre moyen ou demandez de l’aide à votre fournisseur de messagerie.
+# review: changed
+bounce-geo-blocked-do = Contactez le destinataire par un autre moyen ou demandez de l'aide à votre fournisseur de messagerie.
 bounce-relay-denied = Le serveur a refusé de relayer le message
 bounce-relay-denied-why = Un serveur a refusé de relayer le message, souvent parce qu'il a été envoyé sans authentification ou par un serveur qui ne prend pas en charge ce destinataire.
 bounce-relay-denied-do = Dans Fichier > Comptes, vérifiez les paramètres du serveur sortant et assurez-vous que l'authentification auprès de ce serveur est configurée.
 bounce-auth-failure = Votre adresse d'expéditeur n'a pas pu être vérifiée
 bounce-auth-failure-why = Le serveur de réception n'a pas pu confirmer que le message venait bien de votre domaine (SPF, DKIM ou DMARC).
+# review: changed
 bounce-auth-failure-do = Transmettez cet avis à la personne qui gère la messagerie de votre domaine pour qu'elle en corrige les paramètres. En attendant, essayez d'envoyer le message via le serveur de votre fournisseur.
 bounce-rate-limited = Trop de messages à la fois
 bounce-rate-limited-why = Le serveur de réception limite temporairement le nombre de messages acceptés en provenance de votre serveur de messagerie.
@@ -149,6 +161,7 @@ bounce-server-error-why = Le serveur de réception n'a pas pu être joint, ou n'
 bounce-server-error-do = Renvoyez le message plus tard. Si le problème persiste, vérifiez que la partie de l'adresse située après le signe @ ne contient pas de fautes de frappe.
 bounce-unknown = Non remis
 bounce-unknown-why = L'avis ne précise pas clairement la raison de l'échec.
+# review: changed
 bounce-unknown-do = La réponse du serveur, dans la section Détails, peut fournir des précisions. Si cela ne vous aide pas, transmettez cet avis à votre fournisseur de messagerie.
 
 ## Several messages selected
@@ -326,7 +339,8 @@ import-put = { $count ->
     [one] { $messages } placé dans { $folder }
    *[other] { $messages } placés dans { $folder }
 }
-import-not-put = Les messages suivants n’ont pas pu être importés :
+# review: changed
+import-not-put = Les messages suivants n'ont pas pu être importés :
 
     { $problems }
 
@@ -345,15 +359,18 @@ failure-network = la connexion au serveur a échoué ({ $reason })
 error-in-use = impossible de la supprimer tant que des comptes l'utilisent pour se connecter : { $accounts }
 error-turned-off = cette application de connexion est désactivée pour les nouveaux comptes
 error-folder-name = le nom du dossier doit comporter de 1 à 200 caractères, sans caractères de contrôle
+# review: changed
 error-folder-separator = un nom de dossier ne peut pas contenir « { $separator } » sur ce serveur
 error-folder-special = la Boîte de réception et les dossiers spéciaux ne peuvent pas être renommés ni supprimés
 error-no-recipients = le message n'a aucun destinataire
+# review: changed
 error-bad-address = « { $address } » n'est pas une adresse de messagerie
 error-attachment = { $path } n'a pas pu être lu : { $error }
 error-no-drafts = le compte n'a pas de dossier Brouillons où enregistrer le message
 error-draft-attachment = une pièce jointe du brouillon n'a pas pu être conservée : { $error }
 error-password-not-saved = le mot de passe n'a pas pu être enregistré pour le prochain démarrage : { $error }
-error-sign-in-not-saved = les nouvelles informations de connexion n’ont pas pu être enregistrées pour le prochain démarrage : { $error }
+# review: changed
+error-sign-in-not-saved = les nouvelles informations de connexion n'ont pas pu être enregistrées pour le prochain démarrage : { $error }
 error-import-unreadable = { $path } ne peut pas être lu : { $error }
 error-import-too-large = { $path } dépasse 50 Mo
 error-import-not-mail = { $path } n'est pas un message électronique
@@ -370,24 +387,31 @@ error-sent-no-copy = aucune copie n'a pu être enregistrée dans Éléments envo
 error-no-password = aucun mot de passe pour ce compte
 error-no-sign-in = aucune information de connexion enregistrée pour ce compte
 error-provider-missing = cette version ne peut pas se connecter à { $provider } : son application de connexion a-t-elle été supprimée ?
-error-provider-servers = les serveurs de ce compte ne correspondent pas à ceux de l’application de connexion
-error-app-scopes = { $reason }. Le serveur de messagerie a refusé le jeton de l’application de connexion. Vérifiez que ses autorisations (scopes) permettent l’accès à la messagerie
+# review: changed
+error-provider-servers = les serveurs de ce compte ne correspondent pas à ceux de l'application de connexion
+# review: changed
+error-app-scopes = { $reason }. Le serveur de messagerie a refusé le jeton de l'application de connexion. Vérifiez que ses autorisations (scopes) permettent l'accès à la messagerie
 error-in-folder = { $folder } : { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google n'a pas encore validé Inbox Classic. Seuls les utilisateurs de test peuvent donc se connecter avec l’application intégrée. Utilisez votre propre application de connexion Google ou un mot de passe d'application. Si vous êtes un utilisateur de test, vous pouvez activer l’application intégrée dans Applications de connexion (Fichier > Comptes).
+# review: changed
+sign-in-off-google = Google n'a pas encore validé Inbox Classic. Seuls les utilisateurs de test peuvent donc se connecter avec l'application intégrée. Utilisez votre propre application de connexion Google ou un mot de passe d'application. Si vous êtes un utilisateur de test, vous pouvez activer l'application intégrée dans Applications de connexion (Fichier > Comptes).
 sign-in-off-other = Elle a été désactivée dans Applications de connexion (Fichier > Comptes), où vous pouvez la réactiver.
 sign-in-app-no-name = l'application de connexion a besoin d'un nom
 sign-in-app-no-client = l'ID client est manquant
-sign-in-app-no-scopes = l’application de connexion doit disposer des autorisations (scopes) d’accès à la messagerie
-sign-in-app-bad-host = l’adresse du serveur { $server } est manquante ou n’est pas un nom d’hôte valide
+# review: changed
+sign-in-app-no-scopes = l'application de connexion doit disposer des autorisations (scopes) d'accès à la messagerie
+# review: changed
+sign-in-app-bad-host = l'adresse du serveur { $server } est manquante ou n'est pas un nom d'hôte valide
 sign-in-app-plain = le serveur { $server } doit utiliser SSL/TLS ou STARTTLS
 sign-in-app-not-checked = l'émetteur n'a pas encore été vérifié
 sign-in-app-issuer-changed = l'émetteur a changé : saisissez à nouveau le secret client, ou supprimez-le
-sign-in-register-google = Dans Google Cloud Console, créez un client OAuth de type Application de bureau, avec l’autorisation (scope) https://mail.google.com/ sur son écran de consentement. Tant que l'application est en test, seuls ses utilisateurs test peuvent se connecter.
+# review: changed
+sign-in-register-google = Dans Google Cloud Console, créez un client OAuth de type Application de bureau, avec l'autorisation (scope) https://mail.google.com/ sur son écran de consentement. Tant que l'application est en test, seuls ses utilisateurs test peuvent se connecter.
 sign-in-register-microsoft = Dans Microsoft Entra, inscrivez une application avec la plateforme Applications mobiles et de bureau, l'adresse de redirection http://localhost, les flux de clients publics autorisés et les autorisations déléguées IMAP.AccessAsUser.All, SMTP.Send et offline_access. Pour votre organisation uniquement, utilisez https://login.microsoftonline.com/<ID du locataire>/v2.0 comme émetteur.
-sign-in-register-other = Inscrivez un client natif (public) avec l'adresse de redirection ci-dessous ; le fournisseur doit y autoriser n'importe quel port (RFC 8252). Ajoutez l’autorisation (scope) prévue par le fournisseur pour accéder à la messagerie.
+# review: changed
+sign-in-register-other = Inscrivez un client natif (public) avec l'adresse de redirection ci-dessous ; le fournisseur doit y autoriser n'importe quel port (RFC 8252). Ajoutez l'autorisation (scope) prévue par le fournisseur pour accéder à la messagerie.
 
 ## Calendar invitations
 
@@ -439,10 +463,12 @@ agent-forward-of = Transfert de « { $subject } »
 agent-never-written-one = Vous n'avez jamais écrit à { $address }.
 agent-never-written-many = Vous n'avez jamais écrit à { $count } de ces adresses.
 agent-send-title = { $program } souhaite envoyer ce message
-agent-send-detail = Vérifiez les destinataires et le contenu du message. Après votre confirmation, il reste { $seconds } secondes dans la Boîte d’envoi, où vous pouvez encore le supprimer.
+# review: changed
+agent-send-detail = Vérifiez les destinataires et le contenu du message. Après votre confirmation, il reste { $seconds } secondes dans la Boîte d'envoi, où vous pouvez encore le supprimer.
 agent-change-title = Ce que { $program } peut faire
 agent-change-allowed = Modifiez ce que les agents d'IA de ce programme peuvent faire avec votre courrier.
-agent-change-refused = Vous avez refusé l’accès à ce programme. Autorisez-le pour que ses agents puissent à nouveau accéder à votre courrier.
+# review: changed
+agent-change-refused = Vous avez refusé l'accès à ce programme. Autorisez-le pour que ses agents puissent à nouveau accéder à votre courrier.
 agent-log-taken-back = { $entry } (annulé)
 agent-files = Fichiers : { $files }
 agent-undo-refused = Impossible d'annuler.
@@ -451,7 +477,8 @@ agent-undo-impossible = cela ne peut pas être annulé
 agent-undo-not-in-folder = le message n'est plus dans ce dossier
 agent-undo-not-arrived = le message n'est pas (encore) dans son dossier de destination
 agent-undo-sent = le message a déjà été envoyé
-agent-original-not-downloaded = le message d’origine n’est pas encore téléchargé. Ouvrez-le d’abord
+# review: changed
+agent-original-not-downloaded = le message d'origine n'est pas encore téléchargé. Ouvrez-le d'abord
 agent-turned-away = Refusé
 agent-can-nothing = Rien
 agent-can-read = lire
@@ -466,20 +493,35 @@ agent-accounts = { $count ->
 }
 agent-access = { $can } ; { $accounts }
 agent-unreadable = Ce message ne peut pas être lu.
+# review: changed
 agent-log-composed = « { $subject } » ouvert dans un nouveau message à compléter
+# review: changed
 agent-log-refused = Vous n'avez pas envoyé « { $subject } »
+# review: changed
 agent-log-sent = « { $subject } » envoyé à { $to }
+# review: changed
 agent-log-draft = Brouillon « { $subject } » enregistré
+# review: changed
 agent-log-read = « { $subject } » marqué comme lu
+# review: changed
 agent-log-unread = « { $subject } » marqué comme non lu
+# review: changed
 agent-log-flagged = Indicateur ajouté à « { $subject } »
+# review: changed
 agent-log-unflagged = Indicateur retiré de « { $subject } »
+# review: changed
 agent-log-deleted = « { $subject } » supprimé
+# review: changed
 agent-log-moved = « { $subject } » déplacé vers { $folder }
+# review: changed
 agent-log-junk = « { $subject } » marqué comme indésirable
+# review: changed
 agent-log-not-junk = « { $subject } » marqué comme non indésirable
+# review: changed
 agent-log-archived = « { $subject } » archivé
+# review: changed
 agent-log-folder = Dossier « { $name } » créé
+# review: changed
 agent-log-unsubscribed = Désabonnement de la liste ayant envoyé « { $subject } »
 
 ## Keys

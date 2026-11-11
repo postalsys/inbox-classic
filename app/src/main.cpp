@@ -69,8 +69,18 @@ void OnCoreEvent(void* context, const PeEvent* event) noexcept {
     }
 }
 
+// a status that is over (a search found, a download done) leaves "Done", never an empty pane
 void SetStatus(const std::wstring& text) {
-    SendMessageW(g_status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
+    std::wstring shown = text.empty() ? core::T(PE_TEXT_UI_DONE) : text;
+    SendMessageW(g_status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(shown.c_str()));
+}
+
+std::wstring StatusText(int part = 0) {
+    size_t length = LOWORD(SendMessageW(g_status, SB_GETTEXTLENGTHW, part, 0));
+    std::wstring text(length + 1, L'\0');
+    SendMessageW(g_status, SB_GETTEXTW, part, reinterpret_cast<LPARAM>(text.data()));
+    text.resize(length);
+    return text;
 }
 
 // the selected folder in the folder bar and the title: "Inbox - Inbox Classic"
@@ -97,6 +107,7 @@ HWND g_chevron = nullptr;
 // while the chevron's menu is open: drawn pressed
 bool g_chevronDown = false;
 void Layout();
+void LayoutStatus();
 
 void UpdateJunkButton() {
     if (!SetJunkButton(g_toolbar, g_mailbox.InJunk())) {
@@ -192,6 +203,7 @@ void UpdateMenu(HMENU menu) {
 void ShowCounts() {
     std::wstring counts = g_mailbox.Counts();
     SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
+    LayoutStatus();
     // the folder bar says how many a search found
     ShowFolderName();
 }
@@ -449,6 +461,10 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_MESSAGE_SENT:
         // shown by the OutboxChanged that follows it
         g_lastSent = core::T(PE_TEXT_UI_SENT_AT, {{"subject", Quoted(event.message)}, {"time", TimeNow()}});
+        // a draft saved earlier is gone once sent: the status bar no longer says it is in Drafts
+        if (StatusText() == core::T(PE_TEXT_UI_DRAFT_SAVED)) {
+            SetStatus(core::T(PE_TEXT_UI_DONE));
+        }
         break;
     case PE_EVENT_KIND_DRAFT_SAVED:
         // the window that saved it says so; one that closed after saving leaves it to the status bar
@@ -820,9 +836,25 @@ void Layout() {
     RECT list = {right, area.top, area.right, area.top + panes.listHeight};
     RECT reader = {right, list.bottom + gap, area.right, area.bottom};
     g_mailbox.Layout(tree, list, reader);
-    int width = static_cast<int>(area.right - area.left);
-    // the status, the outgoing mail (wide enough for a subject), the counts
-    int parts[] = {std::max(0, width - Scale(560)), std::max(0, width - Scale(220)), -1};
+    LayoutStatus();
+}
+
+// the status, the outgoing mail (wide enough for a subject), the counts as wide as they are (longer translated)
+void LayoutStatus() {
+    RECT bar;
+    GetClientRect(g_status, &bar);
+    int width = static_cast<int>(bar.right - bar.left);
+    // measured in the status bar's own font, with room for the pane's borders and the size grip
+    std::wstring counts = StatusText(2);
+    HDC dc = GetDC(g_status);
+    HGDIOBJ font = reinterpret_cast<HGDIOBJ>(SendMessageW(g_status, WM_GETFONT, 0, 0));
+    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    SIZE text = {};
+    GetTextExtentPoint32W(dc, counts.c_str(), static_cast<int>(counts.size()), &text);
+    SelectObject(dc, old);
+    ReleaseDC(g_status, dc);
+    int countsWidth = std::max(Scale(220), static_cast<int>(text.cx) + Scale(12) + GetSystemMetrics(SM_CXVSCROLL));
+    int parts[] = {std::max(0, width - countsWidth - Scale(340)), std::max(0, width - countsWidth), -1};
     SendMessageW(g_status, SB_SETPARTS, 3, reinterpret_cast<LPARAM>(parts));
 }
 

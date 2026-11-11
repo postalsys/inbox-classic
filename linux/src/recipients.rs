@@ -71,18 +71,23 @@ fn item_row(item: &Item, name: &str) -> gtk::ListBoxRow {
     content.set_margin_top(4);
     content.set_margin_bottom(4);
     content.append(&gtk::Image::from_icon_name(item.icon()));
+    // the name, and the address under it, smaller: the lists on the right are narrow for both side by side
+    let words = gtk::Box::new(gtk::Orientation::Vertical, 0);
+    words.set_valign(gtk::Align::Center);
+    words.set_hexpand(true);
     let title = gtk::Label::new(Some(&item.name));
     title.set_xalign(0.0);
     title.set_ellipsize(gtk::pango::EllipsizeMode::End);
-    content.append(&title);
+    words.append(&title);
     if !item.address.is_empty() && item.address != item.name {
         let address = gtk::Label::new(Some(&item.address));
         address.set_xalign(0.0);
-        address.set_hexpand(true);
         address.set_ellipsize(gtk::pango::EllipsizeMode::End);
         address.add_css_class("dim-label");
-        content.append(&address);
+        address.add_css_class("caption");
+        words.append(&address);
     }
+    content.append(&words);
     let row = gtk::ListBoxRow::new();
     row.set_child(Some(&content));
     row.set_widget_name(name);
