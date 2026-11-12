@@ -238,6 +238,7 @@ jobs:
             - name: The .deb
               run: |
                   node ../scripts/notices.mjs --linux ../build/linux-notices
+                  cargo run --release --locked --example yelp-help -- ../build/linux-help
                   cargo deb --no-build --locked --output ../dist/InboxClassic-amd64.deb
                   dpkg-deb --info ../dist/InboxClassic-amd64.deb
                   target/release/inbox-classic --version

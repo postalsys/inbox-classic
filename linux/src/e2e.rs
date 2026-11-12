@@ -2036,11 +2036,100 @@ async fn about_and_help(d: &Driver) {
     command(Command::Help);
     let help = wait_for(10, || windows().into_iter().find(|w| w.widget_name() == "help-window")).await;
     d.check(help.is_some(), "F1 opens the help");
-    if let Some(help) = help {
-        pause(3000).await;
-        d.shot(&help, "help-2-contents").await;
+    let viewer = crate::help::viewer();
+    if let (Some(help), Some(viewer)) = (help, viewer) {
+        help_viewer(d, &help, &viewer).await;
         help.close();
+        wait_until(10, || crate::help::viewer().is_none()).await;
     }
+    // a dialog's own topic: F1 in Preferences
+    command(Command::Options);
+    if let Some(preferences) = wait_dialog(10, "preferences-dialog").await {
+        let _ = preferences.activate_action(&format!("win.{}", Command::Help.name()), None);
+        let shown = wait_for(10, || crate::help::viewer().and_then(|v| v.shown())).await;
+        d.check(
+            shown.as_deref() == Some(pe_html::help_context("options")),
+            "F1 in Preferences opens its topic",
+        );
+        crate::help::close();
+        preferences.close();
+        wait_gone(10, "preferences-dialog").await;
+    }
+}
+
+/// The help viewer: the contents with the main window's topic, a search, a link followed and Back
+async fn help_viewer(d: &Driver, help: &gtk::Window, viewer: &crate::help::Help) {
+    let language = pe_core::i18n::language();
+    let sections: Vec<String> = pe_html::help_contents(pe_html::Platform::Linux, language)
+        .into_iter()
+        .map(|s| s.title)
+        .collect();
+    d.check(
+        !sections.is_empty() && viewer.sections() == sections,
+        "the help's contents list every section",
+    );
+    let main_topic = pe_html::help_context("main");
+    d.check(
+        viewer.shown().as_deref() == Some(main_topic) && viewer.list.selected_row().is_some(),
+        "F1 in the main window shows its topic, selected in the contents",
+    );
+    let main_title = pe_html::help_contents(pe_html::Platform::Linux, language)
+        .into_iter()
+        .flat_map(|s| s.topics)
+        .find(|t| t.id == main_topic)
+        .map(|t| t.title)
+        .unwrap_or_default();
+    wait_until(10, || viewer.view.shown().contains(&format!("<h1>{main_title}</h1>"))).await;
+    pause(2000).await;
+    d.shot(help, "help-2-contents").await;
+
+    d.step("help search");
+    viewer.search.set_text("junk");
+    let found = wait_until(10, || {
+        let topics = viewer.topics();
+        !topics.is_empty() && viewer.sections().is_empty()
+    })
+    .await;
+    let expected: Vec<String> = pe_html::help_search("junk", pe_html::Platform::Linux, language)
+        .into_iter()
+        .map(|t| t.id)
+        .collect();
+    d.check(
+        found && viewer.topics() == expected,
+        "searching the help for junk lists the topics with it",
+    );
+    pause(500).await;
+    d.shot(help, "help-3-search").await;
+    viewer.search.set_text("qqxyzzy");
+    let none = wait_until(10, || viewer.lists.visible_child_name().as_deref() == Some("none")).await;
+    d.check(none, "a search that finds nothing says so");
+    viewer.search.set_text("");
+    wait_until(10, || !viewer.sections().is_empty()).await;
+
+    d.step("help link");
+    let before = viewer.view.shown();
+    let followed = viewer.follow("topic:find-messages");
+    wait_until(10, || viewer.view.shown() != before).await;
+    d.check(
+        followed && viewer.shown().as_deref() == Some("find-messages"),
+        "a topic: link in the page opens that topic",
+    );
+    d.check(
+        !viewer.follow("https://inboxclassic.com/"),
+        "a web link is not a topic: the browser opens it",
+    );
+    pause(1500).await;
+    d.shot(help, "help-4-topic").await;
+    viewer.step(false);
+    d.check(
+        viewer.shown().as_deref() == Some(main_topic),
+        "Back returns to the topic before",
+    );
+    viewer.step(true);
+    d.check(
+        viewer.shown().as_deref() == Some("find-messages"),
+        "Forward goes to it again",
+    );
 }
 
 async fn printing(d: &Driver) {

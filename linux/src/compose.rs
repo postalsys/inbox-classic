@@ -777,7 +777,7 @@ impl Compose {
         ));
         self.window.add_controller(shortcuts);
         let help = gio::SimpleAction::new(Command::Help.name(), None);
-        help.connect_activate(|_, _| crate::help::open());
+        help.connect_activate(|_, _| crate::help::show("compose"));
         self.window.add_action(&help);
         let weak = Rc::downgrade(self);
         self.window.connect_close_request(move |_| {

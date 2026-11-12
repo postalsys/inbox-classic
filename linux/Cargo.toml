@@ -62,6 +62,8 @@ assets = [
     ["data/com.inboxclassic.InboxClassic.metainfo.xml", "usr/share/metainfo/", "644"],
     ["../app/res/app-icon.svg", "usr/share/icons/hicolor/scalable/apps/com.inboxclassic.InboxClassic.svg", "644"],
     ["../build/linux-notices/THIRD-PARTY-NOTICES.txt", "usr/share/doc/inbox-classic/", "644"],
+    # the help for Yelp (examples/yelp-help.rs), /usr/share/help/<language>/inbox-classic/
+    ["../build/linux-help/**/*", "usr/share/help/", "644"],
     # the apt source of apt.inboxclassic.com, with the release key in it, which debian/postinst installs
     ["data/inboxclassic.sources", "usr/share/inbox-classic/", "644"],
 ]
