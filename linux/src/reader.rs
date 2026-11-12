@@ -43,9 +43,12 @@ pub struct Reader {
     /// The paper clip with the files of the message
     pub attachments: gtk::MenuButton,
     attachments_label: gtk::Label,
-    /// The bar that says pictures from the internet are blocked; its button shows them
+    /// The bar that says pictures from the internet are blocked; its button shows them, its menu beside it trusts
+    /// the sender, or its second line says why it cannot
     pictures: gtk::Box,
     pub download_pictures: gtk::Button,
+    pictures_always: gtk::MenuButton,
+    pictures_unconfirmed: gtk::Label,
     /// The bar over a message that could not be downloaded; its button tries again
     retry: gtk::Box,
     pub try_again: gtk::Button,
@@ -64,6 +67,8 @@ pub struct Reader {
     account: Cell<i64>,
     folder: Cell<i64>,
     uid: Cell<u64>,
+    /// A message file shown (a message window opened for a .eml), in place of a message of a folder
+    file: RefCell<Option<std::path::PathBuf>>,
     /// Its view once the core built it, with its pictures from the internet when `remote_images`
     view: RefCell<Option<MessageView>>,
     remote_images: Cell<bool>,
@@ -173,22 +178,7 @@ impl Reader {
         header.append(&text);
         header.append(&attachments);
 
-        let blocked = gtk::Label::new(Some(&t!(GtkPicturesBlocked)));
-        blocked.set_xalign(0.0);
-        blocked.set_hexpand(true);
-        // the whole sentence on more lines in a narrow window, not cut off
-        blocked.set_wrap(true);
-        blocked.set_wrap_mode(gtk::pango::WrapMode::WordChar);
-        let download_pictures = gtk::Button::with_label(&t!(GtkDownloadPictures));
-        download_pictures.set_widget_name("reader-download-pictures");
-        download_pictures.set_valign(gtk::Align::Center);
-        let pictures = gtk::Box::new(gtk::Orientation::Horizontal, 10);
-        pictures.add_css_class("info-bar");
-        pictures.set_widget_name("reader-pictures");
-        pictures.append(&gtk::Image::from_icon_name("ic-image-symbolic"));
-        pictures.append(&blocked);
-        pictures.append(&download_pictures);
-        pictures.set_visible(false);
+        let (pictures, download_pictures, pictures_always, pictures_unconfirmed) = pictures_bar();
 
         let note_retry = gtk::Label::new(Some(&pe_core::retry_note()));
         note_retry.set_xalign(0.0);
@@ -231,6 +221,8 @@ impl Reader {
             attachments_label,
             pictures,
             download_pictures,
+            pictures_always,
+            pictures_unconfirmed,
             retry,
             try_again,
             preview,
@@ -243,6 +235,7 @@ impl Reader {
             account: Cell::new(0),
             folder: Cell::new(0),
             uid: Cell::new(0),
+            file: RefCell::default(),
             view: RefCell::default(),
             remote_images: Cell::new(false),
             view_request: Cell::new(0),
@@ -327,6 +320,16 @@ impl Reader {
         });
         group.add_action(&save);
         group.add_action(&all);
+        for (name, domain) in [("always-sender", false), ("always-domain", true)] {
+            let always = gio::SimpleAction::new(name, None);
+            let this = Rc::downgrade(self);
+            always.connect_activate(move |_, _| {
+                if let Some(this) = this.upgrade() {
+                    spawn(async move { this.trust_sender(domain).await });
+                }
+            });
+            group.add_action(&always);
+        }
         self.widget.insert_action_group("reader", Some(&group));
         self.connect_find();
     }
@@ -386,7 +389,7 @@ impl Reader {
     /// Find in This Message (F3): the find bar opened with its words selected to type over; F3 again, with words in
     /// it, goes to the next place they are
     pub fn find_in_message(&self) {
-        if self.uid.get() == 0 {
+        if !self.shows_message() {
             return;
         }
         if self.find_bar.is_search_mode() && !self.find_entry.text().is_empty() {
@@ -425,6 +428,11 @@ impl Reader {
             folder: self.folder.get(),
             uid: self.uid.get(),
         })
+    }
+
+    /// Whether a message (of a folder, or a file) is shown or asked for
+    fn shows_message(&self) -> bool {
+        self.uid.get() != 0 || self.file.borrow().is_some()
     }
 
     /// Whether the message is on screen, not only asked for
@@ -542,10 +550,59 @@ impl Reader {
 
     /// Download Pictures: the message again, with its pictures from the internet
     pub fn load_pictures(&self) {
-        if self.uid.get() != 0 && self.has_view() && !self.remote_images.get() {
+        if self.shows_message() && self.has_view() && !self.remote_images.get() {
             self.remote_images.set(true);
-            self.start_view();
+            self.view_again();
         }
+    }
+
+    /// The view of the message shown built again (its pictures allowed now): a file's at once, a folder's message's
+    /// on a worker
+    fn view_again(&self) {
+        let file = self.file.borrow().clone();
+        match file {
+            Some(path) => {
+                if let Ok(view) = shell().core.file_view(&path, self.remote_images.get()) {
+                    self.show_file_view(view);
+                }
+            }
+            None => self.start_view(),
+        }
+    }
+
+    /// The message file `path` (a .eml) shown, its pictures blocked until asked for; why not when the core could not
+    /// read it as a message
+    pub fn open_file(&self, path: &std::path::Path) -> Result<(), String> {
+        let view = shell().core.file_view(path, false).map_err(|e| e.to_string())?;
+        self.clear(true);
+        *self.file.borrow_mut() = Some(path.to_path_buf());
+        self.show_file_view(view);
+        Ok(())
+    }
+
+    /// A file's view on screen. Its attachments are no folder's, so the paper clip, which saves a folder's, is not
+    /// offered
+    fn show_file_view(&self, view: MessageView) {
+        self.show(&view, self.remote_images.get());
+        self.attachments.set_visible(false);
+        *self.view.borrow_mut() = Some(view);
+    }
+
+    /// The pictures bar's Always: the sender's address, or with `domain` everyone at their domain, trusted; the
+    /// message again, its pictures now loading by themselves
+    async fn trust_sender(&self, domain: bool) {
+        let sender = self.view.borrow().as_ref().and_then(|v| v.sender.clone());
+        let Some(sender) = sender.filter(|s| s.verified) else {
+            return;
+        };
+        let value = if domain { &sender.domain } else { &sender.address };
+        if let Err(error) = shell().core.trust_sender(value, domain) {
+            if let Some(window) = self.window() {
+                ui::alert(&window, TITLE, &error.to_string()).await;
+            }
+            return;
+        }
+        self.view_again();
     }
 
     /// Try Again, or the account synced again after the message could not be downloaded
@@ -559,7 +616,7 @@ impl Reader {
 
     /// The message as it is shown, with the pictures the user allowed, through the print dialog over `window`
     pub fn print(&self, window: &impl IsA<gtk::Window>) {
-        if self.uid.get() == 0 || !self.has_view() {
+        if !self.shows_message() || !self.has_view() {
             return;
         }
         let operation = webkit::PrintOperation::new(&self.preview.view);
@@ -575,6 +632,7 @@ impl Reader {
         self.account.set(0);
         self.folder.set(0);
         self.uid.set(0);
+        self.file.borrow_mut().take();
         self.remote_images.set(false);
         self.view.borrow_mut().take();
         self.logo_request.set(0);
@@ -700,9 +758,29 @@ impl Reader {
         self.to.set_text(&to);
         self.unsubscribe.set_visible(view.unsubscribe.is_some());
         self.show_attachments(view);
-        self.preview.show(&view.document, remote_images);
-        // offered only for a message with pictures on the internet, until they are shown
-        self.pictures.set_visible(view.remote_images && !remote_images);
+        // shown when asked for, or by themselves (a trusted sender, or every message's)
+        self.preview.show(&view.document, remote_images || view.pictures_loaded);
+        self.show_pictures_bar(view);
+    }
+
+    /// The pictures bar, offered only for a message with pictures on the internet, until they are shown: Always for
+    /// a sender the provider confirmed, otherwise the line that says why not (the core's words)
+    fn show_pictures_bar(&self, view: &MessageView) {
+        self.pictures.set_visible(view.remote_images && !view.pictures_loaded);
+        let words = view
+            .sender
+            .as_ref()
+            .map(pe_core::pictures::bar_words)
+            .unwrap_or_default();
+        let menu = gio::Menu::new();
+        if !words.always_sender.is_empty() {
+            menu.append(Some(&words.always_sender), Some("reader.always-sender"));
+            menu.append(Some(&words.always_domain), Some("reader.always-domain"));
+        }
+        self.pictures_always.set_menu_model(Some(&menu));
+        self.pictures_always.set_visible(menu.n_items() > 0);
+        self.pictures_unconfirmed.set_text(&words.unconfirmed);
+        self.pictures_unconfirmed.set_visible(!words.unconfirmed.is_empty());
     }
 
     /// The paper clip: how many files, a menu item to save each (the name the sender gave, its size), then all of
@@ -763,6 +841,37 @@ impl Reader {
     #[cfg(feature = "e2e")]
     pub fn pictures_blocked(&self) -> bool {
         self.pictures.is_visible()
+    }
+
+    /// What the pictures bar offers beside Download Pictures (its menu's items), and its second line
+    #[cfg(feature = "e2e")]
+    pub fn pictures_choices(&self) -> (Vec<String>, String) {
+        let mut items = Vec::new();
+        if let Some(menu) = self
+            .pictures_always
+            .menu_model()
+            .filter(|_| self.pictures_always.is_visible())
+        {
+            for at in 0..menu.n_items() {
+                let label = menu.item_attribute_value(at, "label", Some(glib::VariantTy::STRING));
+                items.extend(label.and_then(|l| l.get::<String>()));
+            }
+        }
+        let line = self
+            .pictures_unconfirmed
+            .is_visible()
+            .then(|| self.pictures_unconfirmed.text().to_string());
+        (items, line.unwrap_or_default())
+    }
+
+    /// The pictures bar's menu opened, or closed (the UI test's picture of it)
+    #[cfg(feature = "e2e")]
+    pub fn open_pictures_menu(&self, open: bool) {
+        if open {
+            self.pictures_always.popup();
+        } else {
+            self.pictures_always.popdown();
+        }
     }
 
     pub fn hide_logo(&self) {
@@ -882,6 +991,51 @@ impl Reader {
             Some(problem) => t!(GtkUnsubscribeFailed, problem = problem),
         }
     }
+}
+
+/// The bar over a message whose pictures on the internet are blocked: what it says (and, for a sender who could not
+/// be confirmed, why their pictures do not load by themselves), Download Pictures and beside it the menu of Always
+fn pictures_bar() -> (gtk::Box, gtk::Button, gtk::MenuButton, gtk::Label) {
+    let wrapping = |text: &str| {
+        let label = gtk::Label::new(Some(text));
+        label.set_xalign(0.0);
+        // the whole sentence on more lines in a narrow window, not cut off
+        label.set_wrap(true);
+        label.set_wrap_mode(gtk::pango::WrapMode::WordChar);
+        label
+    };
+    let unconfirmed = wrapping("");
+    unconfirmed.add_css_class("caption");
+    unconfirmed.add_css_class("dim-label");
+    unconfirmed.set_widget_name("reader-pictures-unconfirmed");
+    unconfirmed.set_visible(false);
+    let text = gtk::Box::new(gtk::Orientation::Vertical, 2);
+    text.set_hexpand(true);
+    text.set_valign(gtk::Align::Center);
+    text.append(&wrapping(&t!(GtkPicturesBlocked)));
+    text.append(&unconfirmed);
+    let download = gtk::Button::with_label(&t!(GtkDownloadPictures));
+    download.set_widget_name("reader-download-pictures");
+    let always = gtk::MenuButton::builder()
+        .icon_name("pan-down-symbolic")
+        .tooltip_text(t!(GtkDownloadPictures))
+        .build();
+    always.set_widget_name("reader-pictures-always");
+    always.set_visible(false);
+    // Download Pictures and its arrow as one button
+    let buttons = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+    buttons.add_css_class("linked");
+    buttons.set_valign(gtk::Align::Center);
+    buttons.append(&download);
+    buttons.append(&always);
+    let bar = gtk::Box::new(gtk::Orientation::Horizontal, 10);
+    bar.add_css_class("info-bar");
+    bar.set_widget_name("reader-pictures");
+    bar.append(&gtk::Image::from_icon_name("ic-image-symbolic"));
+    bar.append(&text);
+    bar.append(&buttons);
+    bar.set_visible(false);
+    (bar, download, always, unconfirmed)
 }
 
 /// An instant as the reader's local time, or as written (floating: in no zone the invitation defines)

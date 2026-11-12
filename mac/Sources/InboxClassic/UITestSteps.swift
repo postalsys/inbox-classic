@@ -1652,14 +1652,14 @@ extension UITest {
               "with the right password typed, the account syncs")
     }
 
-    /// the second account's mail on its own server, for All Inboxes: unread, dated a little ahead so it is the newest in
-    /// the list (over what the steps before added), around the first account's message of the step
+    /// the second account's mail on its own server, for All Inboxes: unread, dated now and a minute before, so it is the
+    /// newest in the list (over what the steps before added); a date ahead would be listed at its arrival anyway
     func seedSecond() async throws {
         for (from, subject, body, minutes) in [
             ("Priya Shah <priya@work.example>", "Contract renewal for next year",
-             "The renewal is ready to sign. Could you look it over before Friday?", 10.0),
+             "The renewal is ready to sign. Could you look it over before Friday?", 0.0),
             ("Tom Becker <tom@work.example>", "Offsite agenda",
-             "Here is the agenda for the offsite. Add anything you want to talk about.", 8.0),
+             "Here is the agenda for the offsite. Add anything you want to talk about.", -1.0),
         ] {
             try await addMessage("From: \(from)\r\nTo: testuser2@inboxclassic.test\r\nSubject: \(subject)\r\n"
                 + "Date: \(rfc2822(Date(timeIntervalSinceNow: minutes * 60)))\r\n"
@@ -1682,7 +1682,7 @@ extension UITest {
         step("All Inboxes")
         // a new message for the first account too, so both have unread mail
         try await addMessage("From: Maria Lopez <maria@example.org>\r\nTo: testuser@inboxclassic.test\r\n"
-            + "Subject: Photos from the trip\r\nDate: \(rfc2822(Date(timeIntervalSinceNow: 540)))\r\n"
+            + "Subject: Photos from the trip\r\nDate: \(rfc2822(Date()))\r\n"
             + "Message-ID: <trip-photos@example.org>\r\n\r\nThe photos from the trip are in the shared album.\r\n")
         command(.sync)
         _ = await waitUntil(20) { (inbox(ofAccount: 0)?.unread ?? 0) >= 1 }
@@ -1790,7 +1790,9 @@ extension UITest {
         check(folders == [second.id], "the first account's mail is not in it")
         check(main.mailbox.selectedName == "Inbox - Work" && main.window.title == "Inbox - Work",
               "the title names the Inbox and the account (\(main.window.title))")
-        await selectRow(0)
+        // a message read already, so the account's unread mail stays unread for the account's menu below
+        let readRow = (0..<list.numberOfRows).first { main.mailbox.row($0)?.seen == true } ?? 0
+        await selectRow(readRow)
         await shot(main.window, "all-inboxes-3-accounts")
 
         // a message of the first account's Inbox shown from outside the tree (a notification) keeps the selection

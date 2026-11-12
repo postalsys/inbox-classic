@@ -4,6 +4,7 @@
 // system's per-app language setting (System Settings > General > Language & Region > Applications) is the same choice.
 import AppKit
 import CInboxClassic
+import UniformTypeIdentifiers
 
 @MainActor
 enum Languages {
@@ -73,8 +74,9 @@ enum Languages {
     }
 }
 
-/// Inbox Classic > Settings: the language of the windows, Notify of New Mail and Group messages by conversation. As Mac settings windows do, a
-/// change counts at once; a language counts once the app starts again, which it offers to do.
+/// Inbox Classic > Settings: the language of the windows, Notify of New Mail, Group messages by conversation, the
+/// pictures of every message and the trusted senders, and .eml files. As Mac settings windows do, a change counts at
+/// once; a language counts once the app starts again, which it offers to do.
 @MainActor
 final class SettingsWindow: NSObject, NSWindowDelegate {
     private static var shown: SettingsWindow?
@@ -83,6 +85,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let notify: NSButton
     let grouping: NSButton
     let signInCodes: NSButton
+    let pictures: NSButton
+    private let core: Core
     /// the codes of the popup's items, nil for System default
     private var codes: [String?] = []
 
@@ -91,7 +95,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             shown.window.makeKeyAndOrderFront(nil)
             return
         }
-        let settings = SettingsWindow()
+        let settings = SettingsWindow(core: core)
         shown = settings
         settings.window.center()
         settings.window.makeKeyAndOrderFront(nil)
@@ -100,13 +104,15 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     /// the open window, for the UI test
     static var current: SettingsWindow? { shown }
 
-    private override init() {
+    private init(core: Core) {
+        self.core = core
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 440, height: 160), styleMask: [.titled, .closable],
                           backing: .buffered, defer: false)
         window.autorecalculatesKeyViewLoop = true
         notify = NSButton(checkboxWithTitle: Text.macNotifyNewMail.text, target: nil, action: nil)
         grouping = NSButton(checkboxWithTitle: Text.uiGroupByConversation.text, target: nil, action: nil)
         signInCodes = NSButton(checkboxWithTitle: Text.uiCodesInNotifications.text, target: nil, action: nil)
+        pictures = NSButton(checkboxWithTitle: Text.uiPicturesAlwaysOption.text, target: nil, action: nil)
         super.init()
         window.title = Text.macSettingsTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("settings")
@@ -149,6 +155,22 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         let indented = NSStackView(views: [signInCodes])
         indented.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
 
+        // reading: the pictures of every message, with what that tells senders under it, and the senders trusted
+        pictures.state = core.alwaysLoadPictures ? .on : .off
+        pictures.target = self
+        pictures.action = #selector(picturesChanged)
+        pictures.setAccessibilityIdentifier("settings.pictures")
+        let warning = NSTextField(wrappingLabelWithString: Text.uiPicturesAlwaysWarning.text)
+        warning.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        warning.textColor = .secondaryLabelColor
+        let warned = NSStackView(views: [warning])
+        warned.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
+        let trusted = NSButton(title: Text.uiTrustedSendersButton.text.replacingOccurrences(of: "...", with: "…"), target: self,
+                               action: #selector(trustedSendersClicked))
+        trusted.setAccessibilityIdentifier("settings.trusted")
+        let eml = NSButton(title: Text.uiEmlDefault.text, target: self, action: #selector(emlDefaultClicked))
+        eml.setAccessibilityIdentifier("settings.eml")
+
         let label = NSTextField(labelWithString: Text.macLanguageLabel.text)
         label.alignment = .right
         let grid = NSGridView(views: [
@@ -157,11 +179,17 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             [NSGridCell.emptyContentView, notify],
             [NSGridCell.emptyContentView, indented],
             [NSGridCell.emptyContentView, grouping],
+            [NSGridCell.emptyContentView, pictures],
+            [NSGridCell.emptyContentView, warned],
+            [NSGridCell.emptyContentView, trusted],
+            [NSGridCell.emptyContentView, eml],
         ])
         grid.rowSpacing = 8
         grid.columnSpacing = 8
         grid.column(at: 0).xPlacement = .trailing
         grid.row(at: 2).topPadding = 8
+        grid.row(at: 7).topPadding = 4
+        grid.row(at: 8).topPadding = 8
         // the label on the pop-up's text line, as the other forms have it
         grid.row(at: 0).rowAlignment = .firstBaseline
         grid.translatesAutoresizingMaskIntoConstraints = false
@@ -179,6 +207,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             help.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
             help.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
             hint.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
+            warning.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
         ])
         window.contentView = content
         window.setContentSize(content.fittingSize)
@@ -200,6 +229,34 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         AppDelegate.shared?.groupByConversation = grouping.state == .on
     }
 
+    @objc func picturesChanged() {
+        core.alwaysLoadPictures = pictures.state == .on
+        // the message shown now as the setting has it
+        AppDelegate.shared?.main?.mailbox.reader.reload()
+    }
+
+    @objc func trustedSendersClicked() {
+        TrustedSendersSheet(core: core).run(on: window)
+    }
+
+    /// Open .eml Files with Inbox Classic: the app made the one for message files, as the system lets it
+    @objc func emlDefaultClicked() {
+        let bundle = Bundle.main.bundleURL
+        guard bundle.pathExtension == "app", let type = UTType("com.apple.mail.email") else {
+            inform(Text.macNotBundle.text)
+            return
+        }
+        NSWorkspace.shared.setDefaultApplication(at: bundle, toOpen: type) { error in
+            Task { @MainActor in
+                if let error {
+                    inform(Text.uiEmlDefaultFailed.text(["reason": error.localizedDescription]), style: .warning)
+                } else {
+                    inform(Text.uiEmlDefaultDone.text)
+                }
+            }
+        }
+    }
+
     @objc func languageChosen() {
         let index = language.indexOfSelectedItem
         guard codes.indices.contains(index) else { return }
@@ -212,5 +269,159 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
                style: .information) {
             AppDelegate.shared?.restart()
         }
+    }
+}
+
+/// Settings > Trusted Senders: the senders whose pictures load by themselves (when their provider confirms the
+/// message), in a table with the standard remove button under it
+@MainActor
+final class TrustedSendersSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate {
+    private static var shown: TrustedSendersSheet?
+    let window: NSWindow
+    private let core: Core
+    let table = NSTableView()
+    let remove = NSSegmentedControl()
+    private let empty = NSTextField(labelWithString: Text.uiTrustedSendersEmpty.text)
+    private(set) var senders: [(id: Int64, label: String)] = []
+
+    /// the open sheet, for the UI test
+    static var current: TrustedSendersSheet? { shown }
+
+    init(core: Core) {
+        self.core = core
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 420, height: 320), styleMask: [.titled], backing: .buffered,
+                          defer: true)
+        super.init()
+        window.title = Text.uiTrustedSendersTitle.text
+        window.identifier = NSUserInterfaceItemIdentifier("trusted")
+
+        let title = NSTextField(labelWithString: Text.uiTrustedSendersTitle.text)
+        title.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
+        let note = wrappingLabel(Text.uiTrustedSendersNote.text)
+        note.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        note.textColor = .secondaryLabelColor
+
+        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("label"))
+        column.resizingMask = .autoresizingMask
+        table.addTableColumn(column)
+        table.headerView = nil
+        table.style = .fullWidth
+        table.usesAlternatingRowBackgroundColors = true
+        table.allowsMultipleSelection = true
+        table.dataSource = self
+        table.delegate = self
+        table.setAccessibilityIdentifier("trusted.list")
+        let scroll = NSScrollView()
+        scroll.documentView = table
+        scroll.hasVerticalScroller = true
+        scroll.borderType = .bezelBorder
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        empty.textColor = .secondaryLabelColor
+        empty.translatesAutoresizingMaskIntoConstraints = false
+        empty.setAccessibilityIdentifier("trusted.empty")
+
+        // the − under the table's corner, as the system's lists have it
+        remove.segmentStyle = .smallSquare
+        remove.trackingMode = .momentary
+        remove.segmentCount = 1
+        remove.setImage(NSImage(named: NSImage.removeTemplateName), forSegment: 0)
+        remove.setWidth(24, forSegment: 0)
+        remove.target = self
+        remove.action = #selector(removeClicked)
+        remove.setAccessibilityIdentifier("trusted.remove")
+        remove.setToolTip(Text.uiRemove.text, forSegment: 0)
+        remove.setAccessibilityLabel(Text.uiRemove.text)
+
+        let done = NSButton(title: Text.uiDone.text, target: self, action: #selector(doneClicked))
+        done.keyEquivalent = "\r"
+        done.setAccessibilityIdentifier("trusted.done")
+
+        let content = NSView()
+        for view in [title, note, scroll, remove, done] as [NSView] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            content.addSubview(view)
+        }
+        content.addSubview(empty)
+        NSLayoutConstraint.activate([
+            title.topAnchor.constraint(equalTo: content.topAnchor, constant: 20),
+            title.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20),
+            note.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 6),
+            note.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20),
+            note.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
+            note.widthAnchor.constraint(equalToConstant: 380),
+            scroll.topAnchor.constraint(equalTo: note.bottomAnchor, constant: 12),
+            scroll.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20),
+            scroll.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
+            scroll.heightAnchor.constraint(equalToConstant: 180),
+            remove.topAnchor.constraint(equalTo: scroll.bottomAnchor, constant: -1),
+            remove.leadingAnchor.constraint(equalTo: scroll.leadingAnchor),
+            empty.centerXAnchor.constraint(equalTo: scroll.centerXAnchor),
+            empty.centerYAnchor.constraint(equalTo: scroll.centerYAnchor),
+            done.topAnchor.constraint(equalTo: remove.bottomAnchor, constant: 16),
+            done.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
+            done.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
+        ])
+        window.contentView = content
+        reload()
+    }
+
+    func run(on parent: NSWindow?) {
+        TrustedSendersSheet.shown = self
+        runSheet(window, on: parent)
+        TrustedSendersSheet.shown = nil
+    }
+
+    private func reload() {
+        senders = core.trustedSenders()
+        table.reloadData()
+        empty.isHidden = !senders.isEmpty
+        updateRemove()
+    }
+
+    private func updateRemove() {
+        remove.setEnabled(!table.selectedRowIndexes.isEmpty, forSegment: 0)
+    }
+
+    /// the selected senders no longer trusted
+    @objc func removeClicked() {
+        for row in table.selectedRowIndexes where senders.indices.contains(row) {
+            pe_untrust_sender(core.handle, senders[row].id)
+        }
+        reload()
+        // the message shown now as the list has it
+        AppDelegate.shared?.main?.mailbox.reader.reload()
+    }
+
+    @objc private func doneClicked() {
+        NSApp.stopModal()
+    }
+
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        senders.count
+    }
+
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        let id = NSUserInterfaceItemIdentifier("trusted.cell")
+        let cell = tableView.makeView(withIdentifier: id, owner: nil) as? NSTableCellView ?? {
+            let made = NSTableCellView()
+            made.identifier = id
+            let label = NSTextField(labelWithString: "")
+            label.lineBreakMode = .byTruncatingTail
+            label.translatesAutoresizingMaskIntoConstraints = false
+            made.addSubview(label)
+            made.textField = label
+            NSLayoutConstraint.activate([
+                label.leadingAnchor.constraint(equalTo: made.leadingAnchor, constant: 4),
+                label.trailingAnchor.constraint(lessThanOrEqualTo: made.trailingAnchor, constant: -4),
+                label.centerYAnchor.constraint(equalTo: made.centerYAnchor),
+            ])
+            return made
+        }()
+        cell.textField?.stringValue = senders.indices.contains(row) ? senders[row].label : ""
+        return cell
+    }
+
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        updateRemove()
     }
 }

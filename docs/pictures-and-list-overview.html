@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pictures and List</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d66; --line: #dddad2;
+  --accent: #2456a6; --accent-soft: #e6eefb; --warn: #9a5b00; --warn-soft: #fdf2df;
+  --good: #1f6b3a; --good-soft: #e3f3e8; --code: #f0eee8; --sel: #316ac5; --seltext: #ffffff; --alias: #e9eef8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+    --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+    --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31; --sel: #3d6fc4; --seltext: #ffffff; --alias: #23304a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+  --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+  --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31; --sel: #3d6fc4; --seltext: #ffffff; --alias: #23304a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 1000px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; margin: 48px 0 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.05rem; margin: 20px 0 6px; }
+.lede { color: var(--muted); font-size: 1.08rem; margin-top: 4px; max-width: 70ch; }
+p, li { max-width: 75ch; }
+code { font: 0.86em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.good { border-left-color: var(--good); background: var(--good-soft); }
+.trees { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 20px 0; }
+.tree { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 0; font-size: 0.93rem; }
+.tree .cap { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 0 14px 8px; }
+.row { display: flex; align-items: center; gap: 8px; padding: 3px 14px; }
+.row .ex { width: 12px; color: var(--muted); font-size: 0.75rem; text-align: center; }
+.row .ic { width: 18px; text-align: center; color: var(--muted); }
+.row .n { flex: 1; min-width: 0; }
+.row .c { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+.row.l1 { padding-left: 34px; }
+.row.l2 { padding-left: 54px; }
+.row.head .n { font-weight: 650; }
+.row.alias { background: var(--alias); }
+.row.sel { background: var(--sel); color: var(--seltext); }
+.row.sel .c, .row.sel .ic, .row.sel .ex { color: var(--seltext); }
+.legend { font-size: 0.85rem; color: var(--muted); margin: -8px 0 16px; }
+.legend span { display: inline-block; width: 12px; height: 12px; background: var(--alias); border: 1px solid var(--line); vertical-align: -1px; margin-right: 4px; }
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.decisions div { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--good); border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; }
+.decisions div.ask { border-left-color: var(--warn); }
+.decisions b { display: block; }
+.tw { overflow-x: auto; margin: 12px 0; border-radius: 10px; border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; background: var(--panel); font-size: 0.92rem; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--code); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+.pill { display: inline-block; font-size: 0.74rem; font-weight: 650; padding: 1px 8px; border-radius: 99px; white-space: nowrap; }
+.S { background: var(--good-soft); color: var(--good); }
+.M { background: var(--accent-soft); color: var(--accent); }
+.L { background: var(--warn-soft); color: var(--warn); }
+ol.steps { padding-left: 1.2em; }
+ol.steps li { margin: 6px 0; }
+.help { display: grid; grid-template-columns: 210px 1fr; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); font-size: 0.9rem; margin: 16px 0; }
+.help .side { border-right: 1px solid var(--line); padding: 10px 0; background: var(--code); }
+.help .side .s { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 8px 12px 2px; }
+.help .side .t { padding: 2px 12px 2px 20px; }
+.help .side .t.on { background: var(--sel); color: var(--seltext); }
+.help .side input { margin: 0 10px 6px; width: calc(100% - 20px); font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); color: var(--ink); }
+.help .page { padding: 14px 20px; }
+.help .page h4 { margin: 0 0 6px; font-size: 1.1rem; }
+.help .bar { grid-column: 1 / -1; border-bottom: 1px solid var(--line); padding: 6px 12px; color: var(--muted); font-size: 0.82rem; }
+kbd { font: 0.82em ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--code); }
+</style>
+</head>
+<body>
+<main>
+<h1>Trusted senders' pictures, unread only, badges, .eml files and future dates</h1>
+<p class="lede">Five changes in all three apps: pictures that load for senders you trust (only when the provider confirms the sender) or always, an unread-only filter for the list, an unread badge on the Windows taskbar, .eml files opened from Finder and File Explorer, and future-dated spam no longer on top. Plan: <code>docs/pictures-and-list-plan.md</code>.</p>
+
+<h2>Your decisions</h2>
+<div class="decisions">
+  <div><b>Address or domain</b>The pictures bar offers both; one list in Options with Remove.</div>
+  <div><b>Only when verified</b>DKIM or DMARC must confirm the From domain; a forged sender still asks. Never in Junk E-mail.</div>
+  <div><b>Contacts not trusted</b>The Address Book fills itself, so only the list counts.</div>
+  <div><b>Always: off by default</b>An Options checkbox with a line on what it tells senders.</div>
+  <div><b>Unread only: all folders</b>One remembered toggle; a message read stays until you leave the folder.</div>
+  <div><b>.eml: register and offer default</b>Open With everywhere; Options sets the default where the system allows.</div>
+  <div><b>Future dates capped</b>Sorted and shown by its own date, never later than its arrival.</div>
+  <div><b>Windows taskbar badge</b>The unread count on the taskbar button; the Mac and Ubuntu docks already have it.</div>
+</div>
+
+<h2>1. Pictures from trusted senders, or always</h2>
+<div class="help">
+  <div class="bar">The reading pane</div>
+  <div class="page" style="grid-column:1/-1">
+    <div class="note" style="margin:0 0 10px">Some pictures have been blocked to help prevent the sender from identifying your computer. &nbsp; <b>[Download Pictures]</b> <b>[&#9662;]</b></div>
+    <p style="margin:4px 0 0 18px">&#9662; menu: <b>Always from ann@shop.com</b> &middot; <b>Always from everyone at shop.com</b></p>
+    <div class="note warn" style="margin:12px 0 0">Unverified: &ldquo;Inbox Classic cannot confirm this message is from shop.com.&rdquo; Only <b>[Download Pictures]</b>.</div>
+  </div>
+</div>
+<div class="tw"><table>
+<tr><th>Where</th><th>What changes</th><th>Size</th></tr>
+<tr><td>Core</td><td><code>trusted_senders</code> table and <code>always_load_pictures</code> setting; one decision in <code>view.rs</code>: this message, or always, or trusted <b>and</b> verified (<code>authres::from_verified</code>), never in Junk; the bar's words and choices in <code>MessageView</code>; C API <code>pe_trust_sender</code>, <code>pe_untrust_sender</code>, <code>pe_trusted_senders</code>.</td><td><span class="pill M">M</span></td></tr>
+<tr><td>Apps</td><td>The bar's drop-down (Windows) or menu button (Mac, Linux); Options: "Download pictures in all messages" and "Trusted senders&hellip;" with Remove.</td><td><span class="pill M">M</span></td></tr>
+</table></div>
+
+<h2>2. Unread only</h2>
+<div class="tw"><table>
+<tr><th>Platform</th><th>Where the toggle is</th></tr>
+<tr><td>Windows</td><td>View &gt; Hide Read Messages (Outlook Express's name) and a toolbar button with a filter icon</td></tr>
+<tr><td>Mac</td><td>The toolbar's filter button (<code>line.3.horizontal.decrease.circle</code>, filled when on), as Mail has it, and the View menu</td></tr>
+<tr><td>Linux</td><td>A toggle in the header bar (<code>funnel-symbolic</code>) and the primary menu</td></tr>
+</table></div>
+<p>The core filters folders, All Inboxes, searches and conversations, keeps a message read under the filter until you leave the folder, and gives the counts and "No unread messages".</p>
+
+<h2>3. The Windows taskbar badge</h2>
+<p><code>ITaskbarList3::SetOverlayIcon</code> with the unread count drawn as a small red badge (99+ past 99), cleared at none, from the count the tray already gets. Windows' setting to hide badges still applies.</p>
+
+<h2>4. Opening .eml files</h2>
+<div class="tw"><table>
+<tr><th>Platform</th><th>Registered</th><th>"Open .eml files with Inbox Classic"</th></tr>
+<tr><td>Windows</td><td>The installer: ProgID, <code>OpenWithProgids</code>, <code>Capabilities\FileAssociations</code> (per user)</td><td>Opens Default Apps at Inbox Classic (Windows lets no program set itself)</td></tr>
+<tr><td>Mac</td><td><code>CFBundleDocumentTypes</code> for <code>com.apple.mail.email</code></td><td><code>NSWorkspace.setDefaultApplication</code></td></tr>
+<tr><td>Linux</td><td>The desktop file's <code>message/rfc822</code> (there already)</td><td><code>xdg-mime default</code></td></tr>
+</table></div>
+<p>A file opens in the same message window as a double-click in the list (handed to the running app), with Reply, Forward, Print and Save As; moving, flags and deleting are off, as it is in no mailbox.</p>
+
+<h2>5. Future dates</h2>
+<div class="tw"><table>
+<tr><th>Message</th><th>Date header</th><th>Arrived</th><th>Listed at</th></tr>
+<tr><td>Honest mail</td><td>10:04</td><td>10:05</td><td>10:04</td></tr>
+<tr><td>Future-dated spam</td><td>next year</td><td>10:06</td><td>10:06</td></tr>
+</table></div>
+<p>Sort and shown date: <code>MIN(COALESCE(date, internal_date), internal_date)</code>, a virtual generated column with its indexes, so the list stays on indexes; conversations likewise. The reading pane keeps the message's own Date.</p>
+
+<h2>Every change</h2>
+<ol class="steps">
+<li>Core tests (and <code>e2e_core</code>/<code>e2e_ffi</code>), <code>cargo fmt</code>, <code>clippy -D warnings</code>.</li>
+<li>Scenario steps and each platform's UI end-to-end test with screenshots; feature map entries.</li>
+<li>The help topics in all five languages, translations marked for review.</li>
+<li><code>/simplify</code> and <code>/security-review</code>, findings fixed.</li>
+<li>Commit, push, a pull request a feature, CI watched until green, merged.</li>
+</ol>
+
+<h2>Order of work</h2>
+<ol class="steps">
+<li>Future dates <span class="pill S">S</span></li>
+<li>Unread only <span class="pill M">M</span></li>
+<li>Pictures from trusted senders, or always <span class="pill L">L</span></li>
+<li>Opening .eml files <span class="pill M">M</span></li>
+<li>The Windows taskbar badge <span class="pill S">S</span></li>
+</ol>
+
+<h2>Risks</h2>
+<div class="note warn">Verification depends on the account's provider adding Authentication-Results; without them no sender is verified and the bar says so.</div>
+<div class="note warn">Windows 10 and 11 let no program make itself a default: the button can only open Default Apps.</div>
+</main>
+</body>
+</html>

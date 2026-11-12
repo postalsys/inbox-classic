@@ -22,6 +22,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     /// the last message sent, as the outgoing pane says it once the Outbox is empty
     private var lastSent = ""
     private var junkItem: NSToolbarItem?
+    private var unreadOnlyItem: NSToolbarItem?
 
     init(core: Core) {
         self.core = core
@@ -390,7 +391,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     // ---- the toolbar ----
 
     private enum Item: String, CaseIterable {
-        case createMail, reply, replyAll, forward, print, delete, archive, junk, sync, markRead, markUnread, search
+        case createMail, reply, replyAll, forward, print, delete, archive, junk, sync, markRead, markUnread, unreadOnly, search
     }
 
     private func command(of item: Item) -> Command? {
@@ -406,6 +407,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         case .sync: return .sync
         case .markRead: return .markRead
         case .markUnread: return .markUnread
+        case .unreadOnly: return .hideRead
         case .search: return nil
         }
     }
@@ -414,7 +416,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         let id = { (item: Item) in NSToolbarItem.Identifier(item.rawValue) }
         // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state
         return [id(.createMail), .space, id(.reply), id(.replyAll), id(.forward), .space, id(.print), id(.delete), id(.archive), id(.junk),
-                .space, id(.sync), .space, id(.markRead), id(.markUnread), .flexibleSpace, id(.search)]
+                .space, id(.sync), .space, id(.markRead), id(.markUnread), .flexibleSpace, id(.unreadOnly), id(.search)]
     }
 
     public func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
@@ -446,6 +448,19 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             searchField.setAccessibilityIdentifier("find")
             search.preferredWidthForSearchField = 260
             return search
+        }
+        if item == .unreadOnly {
+            // the list's filter, as Mail has it beside its search: filled while on
+            let filter = NSToolbarItem(itemIdentifier: identifier)
+            filter.label = Text.uiToolUnreadOnly.text
+            filter.paletteLabel = filter.label
+            filter.toolTip = Command.hideRead.label
+            filter.target = self
+            filter.action = #selector(toolbarClicked(_:))
+            filter.isBordered = true
+            unreadOnlyItem = filter
+            unreadOnlyChanged()
+            return filter
         }
         let (label, icon) = labels[item]!
         let toolbarItem: NSToolbarItem
@@ -491,6 +506,18 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         case _ where command.needsSome: return mailbox.hasSelection
         default: return true
         }
+    }
+
+    /// the Unread filter drawn on or off, as View > Hide Read Messages is
+    func unreadOnlyChanged() {
+        let on = AppDelegate.shared?.hideRead ?? false
+        let name = on ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle"
+        var image = NSImage(systemSymbolName: name, accessibilityDescription: Text.uiToolUnreadOnly.text)
+        if on {
+            // in the accent colour while on, as Mail's filter button: the lines white in the filled circle
+            image = image?.withSymbolConfiguration(.init(paletteColors: [.white, .controlAccentColor]))
+        }
+        unreadOnlyItem?.image = image
     }
 
     /// Junk, or Not Junk for a message in a Junk folder

@@ -153,6 +153,29 @@ final class Core {
 
     static var version: String { text(pe_version()) }
 
+    // ---- pictures ----
+
+    /// the senders whose pictures load by themselves, as Settings lists them (an address, or "Everyone at shop.com")
+    func trustedSenders() -> [(id: Int64, label: String)] {
+        guard let list = pe_trusted_senders(handle) else { return [] }
+        defer { pe_trusted_sender_list_free(list) }
+        return (0..<pe_trusted_sender_list_count(list)).compactMap { index in
+            pe_trusted_sender_list_get(list, index).map { ($0.pointee.id, text($0.pointee.label)) }
+        }
+    }
+
+    /// trusts `value`, an address or (`domain`) a whole domain; false for a value that is neither
+    @discardableResult
+    func trustSender(_ value: String, domain: Bool) -> Bool {
+        value.withCString { pe_trust_sender(handle, $0, domain) }
+    }
+
+    /// Settings' "Download pictures in all messages"
+    var alwaysLoadPictures: Bool {
+        get { pe_always_load_pictures(handle) }
+        set { pe_set_always_load_pictures(handle, newValue) }
+    }
+
     // ---- accounts ----
 
     func accounts() -> [Account] {
@@ -394,6 +417,11 @@ final class ListView {
 
     func setHideIgnored(_ hide: Bool) {
         pe_list_view_set_hide_ignored(handle, hide)
+    }
+
+    /// View > Hide Read Messages: the unread messages only, a message read staying listed until the folder changes
+    func setUnreadOnly(_ on: Bool) {
+        pe_list_view_set_show(handle, on ? PE_SHOW_UNREAD : PE_SHOW_ALL)
     }
 
     var searching: Bool { pe_list_view_searching(handle) }

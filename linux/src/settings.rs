@@ -100,3 +100,5 @@ pub const CODES_IN_NOTIFICATIONS: &str = "CodesInNotifications";
 /// The top rows of the folder tree the user closed (All Inboxes, accounts by their negated ids), comma separated; the
 /// others open at the start
 pub const CLOSED_ROWS: &str = "ClosedFolderRows";
+/// View > Hide Read Messages, for every folder (off when not set)
+pub const HIDE_READ: &str = "HideReadMessages";

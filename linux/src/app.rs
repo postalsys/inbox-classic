@@ -215,8 +215,13 @@ async fn open_arguments(arguments: Arguments) {
     if let Some(link) = &arguments.mailto {
         shell.open_mailto(link).await;
     }
+    // a message file (.eml) opens in a window of its own; another file is offered to the selected folder
     for file in &arguments.files {
-        shell.main().import_file(file).await;
+        if pe_core::is_message_file(file) {
+            crate::message_window::open_file(file).await;
+        } else {
+            shell.main().import_file(file).await;
+        }
     }
 }
 
@@ -648,6 +653,7 @@ pub fn run_command(command: Command) {
         Command::WatchConversation => main.mark_conversations(false),
         Command::IgnoreConversation => main.mark_conversations(true),
         Command::HideIgnored => main.set_hide_ignored(!crate::mailbox::hide_ignored()),
+        Command::HideRead => main.set_hide_read(!crate::mailbox::hide_read()),
         Command::Notify => shell.set_notify(!shell.notify.get()),
         Command::Open => shell.show_main(),
         Command::DefaultApp => spawn(make_default_mail_app()),

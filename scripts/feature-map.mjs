@@ -339,6 +339,31 @@ const sections = [
                 checked: ['It shows the header and every part', 'The window names the message', 'Save As in it saves the message', 'Close closes it']
             },
             {
+                shot: 'pictures-2-trusted',
+                name: 'Pictures from trusted senders',
+                what: "The pictures bar's menu offers to always download pictures from the sender, or from everyone at their domain. They then load by themselves, but only when the account's provider confirms the message comes from that domain (DKIM or DMARC in its Authentication-Results), so a forged sender still asks and says why. Nothing loads by itself in Junk E-mail.",
+                how: 'The arrow beside Download Pictures in the pictures bar.',
+                checked: [
+                    'A confirmed sender is offered Always from the address and from the domain',
+                    'A forged one is told it could not be confirmed',
+                    "Trusted, the confirmed one's pictures load without the bar; the forged one still asks"
+                ]
+            },
+            {
+                shot: 'pictures-3-options',
+                name: 'Trusted senders and pictures in every message',
+                what: 'Options lists the trusted senders with Remove, and has "Download pictures in all messages", off out of the box, with what it tells senders.',
+                how: 'Options (Settings on the Mac, Preferences on Linux), the reading part.',
+                checked: ['The trusted sender is listed and can be removed', "With the setting on, every message's pictures load"]
+            },
+            {
+                shot: 'list-unread-only',
+                name: 'Unread only',
+                what: "The list's unread messages only, in every folder, remembered: View > Hide Read Messages, or the toolbar's filter button. A message read stays listed until you go to another folder, so it does not vanish while you read it.",
+                how: 'View > Hide Read Messages, or the filter button in the toolbar.',
+                checked: ['Only the unread messages are listed', 'One read stays until the folder changes', 'Turned off, every message is back']
+            },
+            {
                 shot: 'read-1-html',
                 name: 'HTML messages, with pictures sent inside them',
                 what: 'HTML mail is cleaned (no scripts, no forms, no tracking) and shown with its layout. Pictures that travel inside the message are shown at once. Showing a message for a second marks it read, on the server too.',
@@ -767,6 +792,13 @@ const sections = [
                 what: 'Files dropped from the desktop or a file window onto a folder in the tree (or onto the message list, for the folder shown) are put in that folder as Import Messages does, on the server too. Files that are not messages are turned away.',
                 how: 'Drag .eml files onto a folder in the tree.',
                 checked: ['.eml files dropped onto Archive are in it, on the server', 'A file that is not a message is turned away']
+            },
+            {
+                shot: 'files-4-open-eml',
+                name: 'Opening .eml files',
+                what: 'A message file opened from Finder, File Explorer or the file manager opens in a message window, the same as a message of the list, with Reply, Reply All, Forward, Print and Save As. Options can make Inbox Classic the app for .eml files (on Windows through its Default Apps).',
+                how: 'Double-click an .eml file, or Open With Inbox Classic.',
+                checked: ['The file opens in a message window with its subject', 'Reply from it opens a reply']
             },
             {
                 shot: 'files-3-print',

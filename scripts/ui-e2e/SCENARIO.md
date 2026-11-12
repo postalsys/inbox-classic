@@ -492,6 +492,27 @@ Screenshots: `threads-4-watch`, `threads-5-ignore`
 - a new reply to it is put into the Inbox on the server: it arrives read on the server, without a notification
 - View > Hide Ignored Conversations leaves the ignored conversation out of the list; turned off again, it is back
 
+## 34g2. Pictures from trusted senders
+
+Screenshots: `pictures-2-trusted`, `pictures-3-options`
+
+Two HTML messages with a picture on the internet from news@shop.example: one whose Authentication-Results (from the
+account's provider) say DKIM and DMARC passed for shop.example, one whose say they failed:
+
+- the confirmed one's pictures bar offers Always from news@shop.example and from everyone at shop.example; the other's
+  says the sender could not be confirmed
+- Always from everyone at shop.example: the confirmed one shows its pictures without the bar, the forged one still has it
+- Options lists the trusted sender; Remove takes it out
+- "Download pictures in all messages" on: the forged one's pictures load; off again
+
+## 34g3. Unread only
+
+Screenshot: `list-unread-only`
+
+- View > Hide Read Messages (or the toolbar's filter button) in a folder with read and unread mail: only the unread
+- a message opened, and so read, stays in the list; another folder and back: it is gone
+- turned off, every message is back
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
@@ -734,6 +755,14 @@ Screenshots: `files-3-print-missing`, `files-3-print`
 - Print opens the print preview in a window over the app
 - as wide as the app
 - and closing it prints nothing
+
+## 49a. Opening a message file
+
+Screenshot: `files-4-open-eml`
+
+- a second start with the path of an .eml file (as Finder, File Explorer or the file manager starts the app) hands it
+  to the running app, which opens it in a message window with its subject
+- Reply in that window opens a reply to it
 
 ## 50. The tray
 

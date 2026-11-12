@@ -139,6 +139,18 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
     private var hidingIgnored = Preference("HideIgnored", default: false)
+    /// View > Hide Read Messages and the toolbar's Unread filter, for every folder, off unless turned on
+    var hideRead: Bool {
+        get { hidingRead.value }
+        set {
+            hidingRead.value = newValue
+            main?.mailbox.hideReadChanged()
+            main?.unreadOnlyChanged()
+        }
+    }
+    private var hidingRead = Preference("HideRead", default: false)
+    /// message files (and links) the system asked to open before the window was there
+    private var pending: [URL] = []
     /// the app ends after the compose windows that are saving have closed
     var quitAfterCompose = false
     /// Restart Now was chosen: a new copy starts once this one has ended
@@ -204,6 +216,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             if let link = arguments.mailto {
                 main.openMailto(link)
             }
+            let waiting = pending
+            pending = []
+            application(NSApp, open: waiting)
         }
     }
 
@@ -256,6 +271,26 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     }
 
     // ---- links and notifications ----
+
+    /// message files (.eml) opened from the Finder, each in a message window of its own; a mailto: link as openURL
+    /// takes one
+    public func application(_ application: NSApplication, open urls: [URL]) {
+        guard let core, let main else {
+            // before the app has started: once it has
+            pending += urls
+            return
+        }
+        for url in urls {
+            if url.isFileURL {
+                if let reason = MessageWindow.open(core: core, mailbox: main.mailbox, file: url) {
+                    inform(reason, style: .warning)
+                }
+            } else if url.scheme?.lowercased() == "mailto" {
+                main.show()
+                main.openMailto(url.absoluteString)
+            }
+        }
+    }
 
     @objc func openURL(_ event: NSAppleEventDescriptor, reply: NSAppleEventDescriptor) {
         guard let link = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue,
@@ -468,6 +503,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .watchConversation: main.mailbox.markConversations(PE_ACTION_WATCH)
         case .ignoreConversation: main.mailbox.markConversations(PE_ACTION_IGNORE)
         case .hideIgnored: hideIgnored.toggle()
+        case .hideRead: hideRead.toggle()
         case .notify: notify.toggle()
         case .open: main.show()
         case .defaultApp: main.makeDefaultMailApp()
@@ -535,7 +571,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             item.state = .off
             if let message = MessageWindow.key {
                 item.state = item.action == #selector(flagColor(_:)) && Int(message.flagColor) == item.tag ? .on : .off
-                return item.action == #selector(flagColor(_:)) || message.flagged
+                return message.file == nil && (item.action == #selector(flagColor(_:)) || message.flagged)
             }
             guard let main, core != nil, main.mailbox.hasSelection else { return false }
             let summary = main.mailbox.summary
@@ -552,6 +588,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         if command == .hideIgnored {
             item.state = hideIgnored ? .on : .off
+        }
+        if command == .hideRead {
+            item.state = hideRead ? .on : .off
         }
         guard let main, core != nil else { return command == .exit || command == .about || command == .help }
         // checked while the conversation of every message they are about has the mark, which choosing it again takes away

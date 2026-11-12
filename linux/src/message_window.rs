@@ -1,9 +1,12 @@
 //! A message in a window of its own, as Outlook Express opens one with a double-click: a reading pane of its own (the
 //! Reader the main window has under its list) under a header bar with what can be done to that one message, and
 //! Previous and Next through the list it was opened from. Several can be open; opening a message whose window is
-//! open brings that window to the front. What it shows and what it does come from the core.
+//! open brings that window to the front. A message file (.eml) opened with the app shows in one too: it can be
+//! answered, printed and saved, but it is no folder's, so it cannot be moved, flagged or deleted. What it shows and
+//! what it does come from the core.
 
 use std::cell::{Cell, RefCell};
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use adw::prelude::*;
@@ -32,7 +35,20 @@ pub struct MessageWindow {
     neighbours: Cell<(Option<MessageRef>, Option<MessageRef>)>,
     /// The message in numbers: whether it can be archived, is in a Junk folder, goes for good when deleted
     summary: RefCell<Summary>,
+    /// The message file shown, None for a message of a folder
+    file: Option<PathBuf>,
 }
+
+/// What a message window can do only to a message of a folder
+const FOLDER_ONLY: [Command; 7] = [
+    Command::Delete,
+    Command::Archive,
+    Command::Junk,
+    Command::NotJunk,
+    Command::PreviousMessage,
+    Command::NextMessage,
+    Command::NextUnread,
+];
 
 thread_local! {
     static WINDOWS: RefCell<Vec<Rc<MessageWindow>>> = const { RefCell::new(Vec::new()) };
@@ -51,10 +67,46 @@ pub fn open(message: MessageRef, mut view: ListView) {
         open.window.present();
         return;
     }
-    let window = MessageWindow::new(message, view);
+    let window = MessageWindow::new(message, view, None);
     WINDOWS.with(|windows| windows.borrow_mut().push(window.clone()));
     window.window.present();
     window.show(message);
+}
+
+/// The message file `path` (a .eml opened with the app) in a window of its own; the window that shows it already
+/// brought to the front. A file that is no message is said over the main window.
+pub async fn open_file(path: &Path) {
+    if let Some(open) = windows().into_iter().find(|w| w.file.as_deref() == Some(path)) {
+        open.window.present();
+        return;
+    }
+    let window = MessageWindow::new(
+        MessageRef { folder: 0, uid: 0 },
+        ListView::new(),
+        Some(path.to_path_buf()),
+    );
+    if let Err(why) = window.reader.open_file(path) {
+        window.window.destroy();
+        ui::alert(shell().main().window(), TITLE, &why).await;
+        return;
+    }
+    WINDOWS.with(|windows| windows.borrow_mut().push(window.clone()));
+    let subject = window
+        .reader
+        .subject()
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| t!(UiNoSubject));
+    window.window.set_title(Some(&subject));
+    window.title.set_title(&subject);
+    let name = path
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    window.title.set_subtitle(&name);
+    for command in FOLDER_ONLY {
+        window.enable(command.name(), false);
+    }
+    window.window.present();
 }
 
 /// The core's events, for every message window
@@ -75,10 +127,10 @@ pub fn unsubscribed(request: u64, problem: Option<&str>) -> String {
 }
 
 impl MessageWindow {
-    fn new(message: MessageRef, view: ListView) -> Rc<MessageWindow> {
+    fn new(message: MessageRef, view: ListView, file: Option<PathBuf>) -> Rc<MessageWindow> {
         let reader = Reader::new();
         let title = adw::WindowTitle::new("", "");
-        let (header, junk) = header_bar(&title);
+        let (header, junk) = header_bar(&title, file.is_some());
         let toolbar = adw::ToolbarView::new();
         toolbar.add_top_bar(&header);
         let toasts = adw::ToastOverlay::new();
@@ -102,6 +154,7 @@ impl MessageWindow {
             view,
             neighbours: Cell::new((None, None)),
             summary: RefCell::default(),
+            file,
         });
         this.install_actions();
         this.connect();
@@ -126,6 +179,10 @@ impl MessageWindow {
         add(Command::ReplyAll.name(), |this| this.reply(DraftKind::ReplyAll));
         add(Command::Forward.name(), |this| this.reply(DraftKind::Forward));
         add(Command::Print.name(), |this| this.reader.print(&this.window));
+        add(Command::SaveAs.name(), |this| {
+            let this = this.clone();
+            spawn(async move { this.save_file_as().await });
+        });
         add(Command::Delete.name(), |this| {
             let this = this.clone();
             spawn(async move { this.delete().await });
@@ -274,6 +331,10 @@ impl MessageWindow {
 
     /// A reply, a reply to all or a forward of the message, from its account
     fn reply(&self, kind: DraftKind) {
+        if let Some(path) = &self.file {
+            self.reply_to_file(path, kind);
+            return;
+        }
         let message = self.message.get();
         match shell().core.draft(message.folder, message.uid, kind) {
             Ok(Some(draft)) => crate::compose::open(shell().main().folder_account(message.folder), Some(draft)),
@@ -281,6 +342,42 @@ impl MessageWindow {
                 let window = self.window.clone();
                 spawn(async move { ui::alert(&window, TITLE, &t!(UiNotDownloaded)).await });
             }
+        }
+    }
+
+    /// A reply, a reply to all or a forward of the message file, from the account of what the main window shows
+    /// (the first account when it shows none)
+    fn reply_to_file(&self, path: &Path, kind: DraftKind) {
+        let account = shell().main().current_account();
+        let draft = match account {
+            0 => Err(t!(UiAddAccountFirst)),
+            _ => shell().core.file_draft(path, account, kind).map_err(|e| e.to_string()),
+        };
+        match draft {
+            Ok(draft) => crate::compose::open(account, Some(draft)),
+            Err(why) => {
+                let window = self.window.clone();
+                spawn(async move { ui::alert(&window, TITLE, &why).await });
+            }
+        }
+    }
+
+    /// Save As for a message file: the file as it is, copied where the user says (a message of a folder is saved from
+    /// the main window)
+    async fn save_file_as(&self) {
+        let Some(path) = &self.file else { return };
+        let window = self.window.clone().upcast::<gtk::Window>();
+        let name = path
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        let kind = t!(UiFilterMessages);
+        let patterns = Some((kind.as_str(), &["*.eml"][..]));
+        let Some(to) = ui::save_file(&window, &t!(UiSaveMessageAs), &name, patterns).await else {
+            return;
+        };
+        if to != *path && std::fs::copy(path, &to).is_err() {
+            ui::alert(&window, TITLE, &t!(UiNotSaved)).await;
         }
     }
 
@@ -322,8 +419,9 @@ impl MessageWindow {
 }
 
 /// The header bar: answering (Reply, Reply All, Forward) and the message (Print, Delete, Archive, Junk) at the start,
-/// as the main window has them; Previous and Next at the end
-fn header_bar(title: &adw::WindowTitle) -> (adw::HeaderBar, gtk::Button) {
+/// as the main window has them; Previous and Next at the end. A message `file` has Print and Save As, nothing that
+/// needs a folder
+fn header_bar(title: &adw::WindowTitle, file: bool) -> (adw::HeaderBar, gtk::Button) {
     let header = adw::HeaderBar::new();
     header.set_title_widget(Some(title));
     let button = |icon: &str, tooltip: &str, action: &str| {
@@ -345,12 +443,23 @@ fn header_bar(title: &adw::WindowTitle) -> (adw::HeaderBar, gtk::Button) {
             ),
             button("ic-arrow-forward-symbolic", &t!(UiTbForward), Command::Forward.name()),
         ],
-        vec![
-            button("ic-print-symbolic", &t!(UiTbPrint), Command::Print.name()),
-            button("ic-delete-symbolic", &t!(UiTbDelete), Command::Delete.name()),
-            button("ic-archive-symbolic", &t!(UiTbArchive), Command::Archive.name()),
-            junk.clone(),
-        ],
+        if file {
+            vec![
+                button("ic-print-symbolic", &t!(UiTbPrint), Command::Print.name()),
+                button(
+                    "ic-save-symbolic",
+                    &crate::words::title(crate::words::Text::CmdSaveAs),
+                    Command::SaveAs.name(),
+                ),
+            ]
+        } else {
+            vec![
+                button("ic-print-symbolic", &t!(UiTbPrint), Command::Print.name()),
+                button("ic-delete-symbolic", &t!(UiTbDelete), Command::Delete.name()),
+                button("ic-archive-symbolic", &t!(UiTbArchive), Command::Archive.name()),
+                junk.clone(),
+            ]
+        },
     ];
     for group in groups {
         let linked = gtk::Box::new(gtk::Orientation::Horizontal, 0);
@@ -359,6 +468,9 @@ fn header_bar(title: &adw::WindowTitle) -> (adw::HeaderBar, gtk::Button) {
             linked.append(&widget);
         }
         header.pack_start(&linked);
+    }
+    if file {
+        return (header, junk);
     }
     // flat as the other buttons of the bar, not a linked pair, which GNOME draws raised
     let steps = gtk::Box::new(gtk::Orientation::Horizontal, 0);
