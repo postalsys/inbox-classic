@@ -19,6 +19,7 @@ mod fold;
 mod list_view;
 pub mod mailto;
 pub mod otp;
+pub mod pictures;
 mod requests;
 mod search;
 mod secrets;
@@ -529,6 +530,30 @@ impl Core {
     /// Sets the account's own name for the folder list ("Gmail"); empty for the name on its mail
     pub fn set_account_name(&self, account: AccountId, name: &str) -> Result<()> {
         Ok(self.store().set_account_name(account, name)?)
+    }
+
+    /// Trusts the sender `value` (an address, or with `domain` a whole domain): their pictures load by themselves
+    /// when the provider confirms the message is theirs
+    pub fn trust_sender(&self, value: &str, domain: bool) -> Result<()> {
+        Ok(self.store().trust_sender(value, domain)?)
+    }
+
+    pub fn untrust_sender(&self, id: i64) -> Result<()> {
+        Ok(self.store().untrust_sender(id)?)
+    }
+
+    /// The trusted senders, for Options' list
+    pub fn trusted_senders(&self) -> Result<Vec<pe_store::TrustedSender>> {
+        Ok(self.store().trusted_senders()?)
+    }
+
+    /// Options' "Download pictures in all messages"
+    pub fn always_load_pictures(&self) -> Result<bool> {
+        Ok(self.store().always_load_pictures()?)
+    }
+
+    pub fn set_always_load_pictures(&self, on: bool) -> Result<()> {
+        Ok(self.store().set_always_load_pictures(on)?)
     }
 
     /// Puts `account` at `index` in the accounts' order (0 first), which the folder list and All Inboxes' rows follow
@@ -1102,12 +1127,19 @@ impl Core {
             place.info.special_use.as_deref(),
             Some("\\Junk" | "\\Sent" | "\\Drafts")
         );
+        // pictures load by themselves for the senders the user trusts, or every message's; never in Junk E-mail
+        let junk = place.info.special_use.as_deref() == Some("\\Junk");
+        let always_pictures = store.always_load_pictures()?;
+        let trusted_senders = store.trusted_senders()?;
         Ok(store.source(folder, uid)?.map(|source| ViewSource {
             source,
             received,
             marked,
             trusted,
             codes,
+            junk,
+            always_pictures,
+            trusted_senders,
             account,
             folder,
             uid,
@@ -2115,6 +2147,10 @@ struct ViewSource {
     trusted: Vec<String>,
     /// The folder may show the card of a one-time code
     codes: bool,
+    /// The folder is Junk E-mail, where no pictures load by themselves
+    junk: bool,
+    always_pictures: bool,
+    trusted_senders: Vec<pe_store::TrustedSender>,
     account: AccountId,
     folder: FolderId,
     uid: u64,
@@ -2141,6 +2177,11 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     let trust = view::Trust {
         domains: &found.trusted,
         codes: found.codes,
+        pictures: pictures::Rules {
+            always: found.always_pictures,
+            junk: found.junk,
+            senders: &found.trusted_senders,
+        },
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
     // without a Date header, the date the list shows: when the server got it

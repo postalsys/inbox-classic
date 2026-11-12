@@ -22,6 +22,7 @@ mod selection;
 mod sign_in_apps;
 pub(crate) mod threads;
 mod transfers;
+mod trusted;
 
 use std::path::Path;
 
@@ -42,6 +43,7 @@ pub use selection::{MessageRef, Picked};
 pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
 pub use threads::{MAX_REFERENCES, ThreadPlace, parse_references};
 pub use transfers::Transfer;
+pub use trusted::TrustedSender;
 
 pub type Result<T> = std::result::Result<T, Error>;
 

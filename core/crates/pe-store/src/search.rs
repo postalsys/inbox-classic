@@ -647,8 +647,21 @@ mod tests {
             text: "old".into(),
             threads: None,
             hide_ignored: false,
+            keep: Vec::new(),
         };
         assert_eq!(found(&store, &search), [9]);
+        // a message kept although read: still listed with the unread
+        let read: i64 = store
+            .db
+            .query_row("SELECT id FROM messages WHERE seen = 1 LIMIT 1", [], |row| row.get(0))
+            .unwrap();
+        let kept = Search {
+            scope: Scope::Everywhere,
+            show: Show::Unread,
+            keep: vec![read],
+            ..Default::default()
+        };
+        assert_eq!(found(&store, &kept).len(), 3);
     }
 
     #[test]

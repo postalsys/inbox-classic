@@ -361,6 +361,15 @@ CREATE INDEX messages_by_date ON messages (folder_id, COALESCE(MIN(date, interna
 DROP INDEX messages_all_by_date;
 CREATE INDEX messages_all_by_date ON messages (COALESCE(MIN(date, internal_date), date, internal_date), uid, id);
 "#,
+    // the senders whose pictures load without asking (trusted.rs): an address or a whole domain, in lower case
+    r#"
+CREATE TABLE trusted_senders (
+    id INTEGER PRIMARY KEY,
+    value TEXT NOT NULL UNIQUE,
+    domain INTEGER NOT NULL,
+    added INTEGER NOT NULL
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

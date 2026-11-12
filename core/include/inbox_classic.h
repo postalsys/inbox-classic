@@ -384,6 +384,9 @@ typedef struct PeTargetList PeTargetList;
 // Texts (file names, paths); free with `pe_text_list_free`
 typedef struct PeTextList PeTextList;
 
+// The list of `pe_trusted_senders`
+typedef struct PeTrustedSenderList PeTrustedSenderList;
+
 // A program that wants to connect
 typedef struct PeAgentConnect {
   // Its file
@@ -750,6 +753,17 @@ typedef struct PeMessageInfo {
   // The one-time code of the card at the top of `document`, empty without one: what its Copy (`pe_reader_link`
   // says `PE_READER_LINK_COPY_CODE`) puts on the clipboard
   const char *otp_code;
+  // Its pictures on the internet are shown (asked for, or loaded by themselves: Options' setting, a trusted
+  // sender the provider confirmed): no pictures bar then
+  bool pictures_loaded;
+  // The sender's address and domain in lower case, empty for a From that is no single address
+  const char *sender;
+  const char *sender_domain;
+  // The pictures bar's choices: "Always download pictures from ann@shop.com" and "... from everyone at shop.com"
+  // (`pe_trust_sender`), empty when the provider did not confirm the sender; then `pictures_unconfirmed` says why
+  const char *pictures_always_sender;
+  const char *pictures_always_domain;
+  const char *pictures_unconfirmed;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -906,6 +920,16 @@ typedef struct PeSignInPreset {
   uint16_t smtp_port;
   enum PeSecurity smtp_security;
 } PeSignInPreset;
+
+// A sender whose pictures load by themselves
+typedef struct PeTrustedSender {
+  int64_t id;
+  // The address or the domain
+  const char *value;
+  bool domain;
+  // How Options lists it: the address, or "Everyone at shop.com"
+  const char *label;
+} PeTrustedSender;
 
 // A topic of the contents or of a search
 typedef struct PeHelpRow {
@@ -2265,6 +2289,50 @@ char *pe_sign_in_redirect_uri(const char *issuer);
 // # Safety
 // `issuer` must be NULL or a NUL-terminated string.
 char *pe_sign_in_register_hint(const char *issuer);
+
+// Trusts `value`, an address or (with `domain`) a whole domain: their pictures load by themselves when the
+// provider confirms the message is theirs. False for a value that is no address (or no domain).
+//
+// # Safety
+// `core` must be a live handle, `value` NULL or a NUL-terminated string.
+bool pe_trust_sender(const struct PeCore *core,
+                     const char *value,
+                     bool domain);
+
+// # Safety
+// `core` must be a live handle.
+bool pe_untrust_sender(const struct PeCore *core, int64_t id);
+
+// The trusted senders, in alphabetical order; NULL on failure. Free with `pe_trusted_sender_list_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeTrustedSenderList *pe_trusted_senders(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+size_t pe_trusted_sender_list_count(const struct PeTrustedSenderList *list);
+
+// The row at `index`, NULL past the end; it lives as long as the list
+//
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+const struct PeTrustedSender *pe_trusted_sender_list_get(const struct PeTrustedSenderList *list,
+                                                         size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_trusted_sender_list_free(struct PeTrustedSenderList *list);
+
+// Options' "Download pictures in all messages" (never in Junk E-mail)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_always_load_pictures(const struct PeCore *core);
+
+// # Safety
+// `core` must be a live handle.
+bool pe_set_always_load_pictures(const struct PeCore *core, bool on);
 
 // The contents: every topic in order, with its section's title. Free with `pe_help_list_free`.
 //

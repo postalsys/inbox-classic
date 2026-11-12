@@ -490,3 +490,23 @@ ui-codes-in-notifications = Anmeldecodes in Benachrichtigungen über neue E-Mail
 ui-tool-unread-only = Ungelesen
 # review: new
 ui-no-unread = Hier gibt es keine ungelesenen Nachrichten.
+# review: new
+ui-pictures-always-sender = Bilder von { $sender } immer herunterladen
+# review: new
+ui-pictures-always-domain = Bilder von allen bei { $domain } immer herunterladen
+# review: new
+ui-pictures-unconfirmed = Der Absender konnte nicht als { $domain } bestätigt werden, daher werden seine Bilder nicht von selbst heruntergeladen.
+# review: new
+ui-pictures-always-option = Bilder in allen Nachrichten herunterladen
+# review: new
+ui-pictures-always-warning = Absender sehen dann, wann Sie ihre Nachrichten lesen.
+# review: new
+ui-trusted-senders-button = Vertrauenswürdige Absender...
+# review: new
+ui-trusted-senders-title = Vertrauenswürdige Absender
+# review: new
+ui-trusted-senders-note = Bilder dieser Absender werden heruntergeladen, wenn ihr E-Mail-Anbieter bestätigt, dass die Nachricht von ihnen stammt.
+# review: new
+ui-trusted-everyone-at = Alle bei { $domain }
+# review: new
+ui-trusted-senders-empty = Noch keinem Absender wird vertraut.

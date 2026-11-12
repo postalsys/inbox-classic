@@ -3028,3 +3028,66 @@ fn bounces_are_marked_and_explained() {
     assert!(!view.bounce && !view.document.contains("pe-bounce-"));
     assert_eq!(marked("is:bounce"), [report, plain]);
 }
+
+/// A trusted sender's pictures load by themselves when the provider confirms the message is theirs; a forged one
+/// from the same address asks; Options' setting loads every message's
+#[test]
+fn a_trusted_senders_pictures_load_when_confirmed() {
+    let Some(s) = setup() else { return };
+    let body = "Content-Type: text/html\r\n\r\n<p>Sale!</p><img src=\"https://shop.example/pixel.png\">\r\n";
+    let confirmed = s.server.add_message(
+        "INBOX",
+        &format!(
+            "Authentication-Results: mx.example.com; dkim=pass header.d=shop.example; dmarc=pass header.from=shop.example\r\n\
+             From: Shop <news@shop.example>\r\nTo: you@example.com\r\nSubject: Confirmed\r\nMIME-Version: 1.0\r\n{body}"
+        ),
+        &[],
+    );
+    let forged = s.server.add_message(
+        "INBOX",
+        &format!(
+            "Authentication-Results: mx.example.com; dkim=fail header.d=shop.example; dmarc=fail header.from=shop.example\r\n\
+             From: Shop <news@shop.example>\r\nTo: you@example.com\r\nSubject: Forged\r\nMIME-Version: 1.0\r\n{body}"
+        ),
+        &[],
+    );
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    for uid in [confirmed, forged] {
+        s.core.open_message(inbox, uid).unwrap();
+        s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    }
+    let view = |uid| s.core.message_view(inbox, uid, false).unwrap().unwrap();
+
+    let before = view(confirmed);
+    assert!(before.remote_images && !before.pictures_loaded, "blocked until trusted");
+    let sender = before.sender.clone().unwrap();
+    assert_eq!(
+        (sender.address.as_str(), sender.domain.as_str(), sender.verified),
+        ("news@shop.example", "shop.example", true)
+    );
+    assert!(!pe_core::pictures::bar_words(&sender).always_domain.is_empty());
+
+    s.core.trust_sender("shop.example", true).unwrap();
+    assert!(view(confirmed).pictures_loaded, "trusted and confirmed");
+    let forged_view = view(forged);
+    assert!(!forged_view.pictures_loaded, "a forged sender still asks");
+    let words = pe_core::pictures::bar_words(forged_view.sender.as_ref().unwrap());
+    assert!(words.always_sender.is_empty() && !words.unconfirmed.is_empty());
+
+    s.core.set_always_load_pictures(true).unwrap();
+    assert!(view(forged).pictures_loaded, "every message's with the setting");
+    let trusted = s.core.trusted_senders().unwrap();
+    s.core.untrust_sender(trusted[0].id).unwrap();
+    s.core.set_always_load_pictures(false).unwrap();
+    assert!(!view(confirmed).pictures_loaded);
+}

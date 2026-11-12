@@ -491,3 +491,23 @@ ui-codes-in-notifications = Näita uue kirja teadetes sisselogimiskoode
 ui-tool-unread-only = Lugemata
 # review: new
 ui-no-unread = Siin pole lugemata kirju.
+# review: new
+ui-pictures-always-sender = Laadi saatjalt { $sender } pildid alati alla
+# review: new
+ui-pictures-always-domain = Laadi kõigilt domeenis { $domain } pildid alati alla
+# review: new
+ui-pictures-unconfirmed = Saatjat ei õnnestunud kinnitada kui { $domain }, seega tema pilte ise alla ei laadita.
+# review: new
+ui-pictures-always-option = Laadi pildid alla kõigis kirjades
+# review: new
+ui-pictures-always-warning = Saatjad näevad siis, millal te nende kirju loete.
+# review: new
+ui-trusted-senders-button = Usaldusväärsed saatjad...
+# review: new
+ui-trusted-senders-title = Usaldusväärsed saatjad
+# review: new
+ui-trusted-senders-note = Nende saatjate pildid laaditakse alla, kui nende meiliteenuse pakkuja kinnitab, et kiri on nende oma.
+# review: new
+ui-trusted-everyone-at = Kõik domeenis { $domain }
+# review: new
+ui-trusted-senders-empty = Ühtegi saatjat veel ei usaldata.

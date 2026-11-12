@@ -497,3 +497,23 @@ ui-codes-in-notifications = Afficher les codes de connexion dans les notificatio
 ui-tool-unread-only = Non lus
 # review: new
 ui-no-unread = Il n'y a aucun message non lu ici.
+# review: new
+ui-pictures-always-sender = Toujours télécharger les images de { $sender }
+# review: new
+ui-pictures-always-domain = Toujours télécharger les images de tous chez { $domain }
+# review: new
+ui-pictures-unconfirmed = L'expéditeur n'a pas pu être confirmé comme { $domain } : ses images ne sont donc pas téléchargées d'elles-mêmes.
+# review: new
+ui-pictures-always-option = Télécharger les images de tous les messages
+# review: new
+ui-pictures-always-warning = Les expéditeurs peuvent alors savoir quand vous lisez leurs messages.
+# review: new
+ui-trusted-senders-button = Expéditeurs de confiance...
+# review: new
+ui-trusted-senders-title = Expéditeurs de confiance
+# review: new
+ui-trusted-senders-note = Les images de ces expéditeurs sont téléchargées quand leur fournisseur de messagerie confirme que le message vient d'eux.
+# review: new
+ui-trusted-everyone-at = Tous chez { $domain }
+# review: new
+ui-trusted-senders-empty = Aucun expéditeur n'est encore approuvé.

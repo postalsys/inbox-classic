@@ -489,3 +489,23 @@ ui-codes-in-notifications = Mostrar los códigos de inicio de sesión en los avi
 ui-tool-unread-only = No leídos
 # review: new
 ui-no-unread = Aquí no hay mensajes sin leer.
+# review: new
+ui-pictures-always-sender = Descargar siempre las imágenes de { $sender }
+# review: new
+ui-pictures-always-domain = Descargar siempre las imágenes de todos en { $domain }
+# review: new
+ui-pictures-unconfirmed = No se pudo confirmar que el remitente sea { $domain }, así que sus imágenes no se descargan por sí solas.
+# review: new
+ui-pictures-always-option = Descargar las imágenes de todos los mensajes
+# review: new
+ui-pictures-always-warning = Los remitentes podrán saber cuándo lee sus mensajes.
+# review: new
+ui-trusted-senders-button = Remitentes de confianza...
+# review: new
+ui-trusted-senders-title = Remitentes de confianza
+# review: new
+ui-trusted-senders-note = Las imágenes de estos remitentes se descargan cuando su proveedor de correo confirma que el mensaje es suyo.
+# review: new
+ui-trusted-everyone-at = Todos en { $domain }
+# review: new
+ui-trusted-senders-empty = Aún no hay remitentes de confianza.
