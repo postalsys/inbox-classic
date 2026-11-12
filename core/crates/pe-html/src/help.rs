@@ -170,7 +170,17 @@ fn source(language: &str, id: &str) -> Option<&'static str> {
 fn words(language: &str, id: &str) -> String {
     let text = pe_i18n::message_in(language, id).unwrap_or_else(|| id.to_string());
     let text = text.replace("&&", "\u{0}").replace('&', "").replace('\u{0}', "&");
-    escape(text.trim_end_matches("...").trim_end_matches('\u{2026}'))
+    // GTK's labels mark their access key with _
+    let text = if id.starts_with("gtk-") {
+        text.replace('_', "")
+    } else {
+        text
+    };
+    escape(
+        text.trim_end_matches("...")
+            .trim_end_matches('\u{2026}')
+            .trim_end_matches(':'),
+    )
 }
 
 fn escape(text: &str) -> String {
@@ -373,6 +383,19 @@ fn old_keys(html: &str, platform: Platform, language: &str) -> String {
         .replace("<kbd>Shift</kbd>", &key("key-shift"))
 }
 
+/// The catalog message a platform's menu names the command `id` by: the Mac's and Linux's own words for Quit,
+/// Settings and Preferences, `cmd-<id>` for the rest
+fn command_label(id: &str, platform: Platform) -> String {
+    match (platform, id) {
+        (Platform::Mac, "exit") => "mac-quit".into(),
+        (Platform::Mac, "options") => "mac-settings".into(),
+        (Platform::Mac, "help") => "ui-help-title".into(),
+        (Platform::Linux, "exit") => "gtk-quit".into(),
+        (Platform::Linux, "options") => "gtk-preferences".into(),
+        _ => format!("cmd-{}", id.replace('_', "-")),
+    }
+}
+
 /// Every command with a key on the platform, by menu, as a table
 fn shortcuts_table(platform: Platform, language: &str) -> String {
     let mut html = String::new();
@@ -382,7 +405,7 @@ fn shortcuts_table(platform: Platform, language: &str) -> String {
             .filter(|(_, m, ..)| *m == menu)
             .filter_map(|(id, ..)| {
                 let key = command_key(id, platform, language);
-                let label = words(language, &format!("cmd-{}", id.replace('_', "-")));
+                let label = words(language, &command_label(id, platform));
                 (!key.is_empty()).then(|| format!("<tr><td>{label}</td><td>{key}</td></tr>"))
             })
             .collect();
@@ -499,7 +522,7 @@ fn style(platform: Platform) -> String {
         }
     };
     format!(
-        "body{{margin:16px 24px;line-height:1.5}}main,body>*{{max-width:42em}}h1{{font-size:1.6em;margin:0 0 4px}}\
+        "body{{margin:16px 24px;line-height:1.5}}body>:not(.web),main{{max-width:42em}}h1{{font-size:1.6em;margin:0 0 4px}}\
          h2{{font-size:1.2em;margin:1.4em 0 .4em}}p.summary{{font-size:1.05em;opacity:.8;margin-top:0}}\
          ol,ul{{padding-left:1.6em}}li{{margin:.3em 0}}table{{border-collapse:collapse;margin:.6em 0}}\
          th,td{{text-align:left;padding:4px 12px 4px 0;border-bottom:1px solid color-mix(in srgb,currentColor 18%,transparent);vertical-align:top}}\
@@ -574,6 +597,56 @@ mod tests {
         );
         assert_eq!(topic_link("find-messages", HelpTarget::Viewer), "topic:find-messages");
         assert_eq!(topic_link("find-messages", HelpTarget::Web), "find-messages.html");
+    }
+
+    /// Every topic of every language: in topics.toml, with a title and a summary, its keys, words and links found
+    #[test]
+    fn every_topic_resolves() {
+        let listed: Vec<&str> = all_topics().collect();
+        for (language, id, html) in TOPICS {
+            assert!(listed.contains(id), "{language}/{id}.html is not in topics.toml");
+            assert!(
+                html.trim_start().starts_with("<h1>"),
+                "{language}/{id}: starts with its <h1>"
+            );
+            assert!(html.contains("<p class=\"summary\">"), "{language}/{id}: has a summary");
+            for command in between_all(html, "data-command=\"", "\"") {
+                assert!(
+                    COMMANDS.iter().any(|(c, ..)| *c == command),
+                    "{language}/{id}: no command {command}"
+                );
+            }
+            for message in between_all(html, "data-text=\"", "\"") {
+                assert!(
+                    pe_i18n::message_in("en", message).is_some(),
+                    "{language}/{id}: no message {message}"
+                );
+            }
+            for link in between_all(html, "href=\"topic:", "\"") {
+                assert!(listed.contains(&link), "{language}/{id}: no topic {link}");
+            }
+            assert!(
+                !html.contains('\u{2014}') && !html.contains('\u{2013}'),
+                "{language}/{id}: a dash"
+            );
+        }
+        for id in &listed {
+            assert!(source("en", id).is_some(), "en/{id}.html is missing");
+            for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
+                let page = help_topic(id, platform, "en").unwrap();
+                assert!(
+                    !page.contains("data-text") && !page.contains("data-command"),
+                    "{id}: left unfilled"
+                );
+            }
+        }
+    }
+
+    fn between_all<'a>(text: &'a str, start: &str, end: &str) -> Vec<&'a str> {
+        text.split(start)
+            .skip(1)
+            .filter_map(|rest| rest.split(end).next())
+            .collect()
     }
 
     #[test]

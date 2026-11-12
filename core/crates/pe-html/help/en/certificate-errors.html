@@ -1,0 +1,13 @@
+<h1>Certificate errors</h1>
+<p class="summary">What to do when Inbox Classic cannot confirm that it is talking to the real mail server.</p>
+<p>You may see “TLS error: …” in the status bar, or in the reading pane: “The connection to the mail server could not be made secure (…).”</p>
+<p>Inbox Classic could not confirm that the server is the one it claims to be, so it did not send your password.</p>
+<p>To fix it:</p>
+<ol>
+    <li>Open the account’s properties in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Check the server names. They must be the names the server’s certificate is made for. That is often your provider’s name, such as <code>imap.provider.com</code>, not your own domain.</li>
+    <li>Check that your computer’s date and time are right.</li>
+</ol>
+<p>On a network that inspects encrypted traffic, such as some office or school networks, ask its administrator.</p>
+<aside class="note">There is no switch to accept any certificate. Accepting a false one would let someone on the network read your password and mail.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>

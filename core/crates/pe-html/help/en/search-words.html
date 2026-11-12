@@ -1,0 +1,28 @@
+<h1>Search words</h1>
+<p class="summary">The words and signs the search box understands, to find exactly the messages you want.</p>
+<p>The search box takes the same words as Gmail’s. Combine as many as you like: a message must match all of them. Point at the search box to see a short list.</p>
+<table>
+    <tr><th>Type</th><th>Finds</th></tr>
+    <tr><td><code>budget</code></td><td>Messages with a word that starts with <i>budget</i>, anywhere in them</td></tr>
+    <tr><td><code>"exact phrase"</code></td><td>These words, in this order</td></tr>
+    <tr><td><code>-word</code></td><td>Messages without the word. A minus works before any search word, such as <code>-is:unread</code></td></tr>
+    <tr><td><code>this OR that</code></td><td>Messages with either word. Write <code>OR</code> in capitals</td></tr>
+    <tr><td><code>from:ann</code></td><td>Mail from Ann</td></tr>
+    <tr><td><code>to:ann</code>, <code>cc:</code>, <code>bcc:</code></td><td>Mail to Ann, in any recipient line</td></tr>
+    <tr><td><code>subject:lunch</code></td><td>The word in the subject</td></tr>
+    <tr><td><code>filename:pdf</code></td><td>The word in the name of an attached file</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Messages with files</td></tr>
+    <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Unread or read messages</td></tr>
+    <tr><td><code>is:starred</code> or <code>is:flagged</code></td><td>Flagged messages</td></tr>
+    <tr><td><code>is:answered</code></td><td>Messages you replied to</td></tr>
+    <tr><td><code>is:bounce</code></td><td>Notices of messages that were not delivered or are delayed</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Only that folder, in every account</td></tr>
+    <tr><td><code>in:projects</code></td><td>Only the folder with that name</td></tr>
+    <tr><td><code>in:anywhere</code></td><td>Every folder</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Mail before or after a day. <code>2025-01-31</code> works too</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Mail older or newer than days (<code>d</code>), months (<code>m</code>) or years (<code>y</code>)</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Mail larger or smaller than a size, in bytes or with <code>K</code>, <code>M</code> or <code>G</code></td></tr>
+</table>
+<p>Accents and capital letters do not matter. A search word Inbox Classic does not know is searched for as a word.</p>
+<p>The list shows no sizes. To see how big a message is, choose <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

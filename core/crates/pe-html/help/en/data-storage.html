@@ -1,0 +1,9 @@
+<h1>Where your mail and passwords are kept</h1>
+<p class="summary">What Inbox Classic keeps on your computer, and where.</p>
+<ul>
+    <li><b>Downloaded mail and account settings</b> are in <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Your mail stays on the server too. The copy here is for reading quickly and offline, and for search.</li>
+    <li><b>Passwords</b>, browser sign-ins and the secrets of sign-in apps are in <!--os:windows-->the Windows Credential Manager, under <i>Inbox Classic</i>, encrypted for your Windows account.<!--/os--><!--os:mac-->your login keychain, under <i>InboxClassic</i>, encrypted for your Mac account. Keychain Access shows them.<!--/os--><!--os:linux-->your keyring (GNOME Keyring), under <i>InboxClassic</i>, encrypted for your login. Without a keyring, they are kept only until Inbox Classic quits.<!--/os--> They are never in the mail store.</li>
+</ul>
+<p>The search, the explanation of bounced messages, the grouping into conversations and the finding of sign-in codes all run on your computer. Nothing of your mail is sent anywhere for them.</p>
+<p>AI agents see your mail only when you let them in, and only the accounts you choose. See <a href="topic:agents-permissions"></a>.</p>
+<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav>
