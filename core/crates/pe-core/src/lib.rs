@@ -1334,12 +1334,6 @@ impl Core {
         Ok(view::attachment(&source, index))
     }
 
-    /// [`Core::attachment_with_type`] of a message file
-    pub fn file_attachment_with_type(&self, path: &Path, index: usize) -> Result<Option<(String, String, Vec<u8>)>> {
-        let (source, _) = read_message_file(path)?;
-        Ok(view::attachment_with_type(&source, index))
-    }
-
     /// [`Core::save_attachments`] of a message file
     pub fn file_save_attachments(&self, path: &Path, dir: &Path) -> Result<(usize, usize)> {
         let (source, _) = read_message_file(path)?;

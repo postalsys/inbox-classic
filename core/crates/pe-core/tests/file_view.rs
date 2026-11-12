@@ -43,8 +43,6 @@ fn a_message_file_opens_and_can_be_answered() {
         ("map.txt", b"the trail".as_slice())
     );
     assert!(core.file_attachment(&with_file, 1).unwrap().is_none());
-    let (_, kind, _) = core.file_attachment_with_type(&with_file, 0).unwrap().unwrap();
-    assert!(kind.starts_with("text/plain"));
     let out = dir.path().join("saved");
     std::fs::create_dir(&out).unwrap();
     assert_eq!(core.file_save_attachments(&with_file, &out).unwrap(), (1, 1));
