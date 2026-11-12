@@ -323,6 +323,9 @@ void TrayCreate(HWND main);
 void TrayRemove(HWND main);
 // how many messages are unread in the Inboxes: the icon's tooltip and a count on the taskbar button
 void TrayCount(HWND main, uint64_t unread);
+// for the UI test: the count the taskbar button's overlay shows (0 for none), -1 before the button is there, -2 when
+// Windows refused the overlay
+int64_t TrayBadge();
 // a Windows notification from the icon; a click on it asks for the message `uid` of `folder` (Open)
 void TrayNotify(HWND main, const std::wstring& title, const std::wstring& text, int64_t folder, uint64_t uid);
 // a message of the main window that may be the tray's: what it asks for; for Open, the message of a clicked
@@ -344,7 +347,7 @@ void SetTextPreference(const wchar_t* name, const std::wstring& value);
 void StartLanguage(const std::wstring& forced);
 // Tools > Options: the language, the new mail notifications (`notify`) and the list grouped by conversation
 // (`threads`), these two changed when OK is clicked. True when the user chose to restart now for a new language
-bool OptionsDialog(HWND owner, bool& notify, bool& threads, bool& codes);
+bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes);
 
 // ---- addressbook.cpp ----
 
@@ -395,6 +398,10 @@ struct MessageListOrder {
 // (`row`: its row of the list, for the header until the message is there; NULL for none)
 void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrder order, int64_t folder, uint64_t uid,
                        const PeMessage* row);
+// a message file (.eml) opened from File Explorer in a window of its own: Reply, Reply All and Forward (from the
+// account the main window has), Print and Save As; it is no folder's, so it can not be moved, flagged or deleted.
+// Brought to the front when it is open already; false with what to say over `main` for a file that is no message.
+bool OpenMessageFile(HWND main, PeCore* core, Mailbox* mailbox, const std::wstring& path, std::wstring& error);
 // an event of the core for the open message windows: their message ready or failed, gone from its folder
 void MessageWindowsEvent(const UiEvent& event);
 // a key in a message window that is one of its shortcuts (Esc, Delete, Ctrl+R, Ctrl+Shift+R, Ctrl+F, Ctrl+P): true when
@@ -597,6 +604,10 @@ public:
     // View > Hide Ignored Conversations, kept for the next start, and turning it on or off
     bool HideIgnored() const { return hideIgnored_; }
     void SetHideIgnored(bool on);
+    // View > Hide Read Messages and the toolbar's Unread: every folder's unread messages only, kept for the next
+    // start; a message read stays listed until the list shows another folder (the core keeps it)
+    bool UnreadOnly() const { return unreadOnly_; }
+    void SetUnreadOnly(bool on);
     // the list subclassed for the conversations: Right and Left, and a click on a + or - box; true when handled
     bool OnListInput(UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -852,6 +863,8 @@ private:
     core::ListView view_{pe_list_view_new()};
     // View > Hide Ignored Conversations, as the view has it
     bool hideIgnored_ = false;
+    // View > Hide Read Messages, as the view has it
+    bool unreadOnly_ = false;
     // the order of the list, as the view has it: the column sorted by, and which way
     PeSortField sort_ = PE_SORT_FIELD_DATE;
     bool ascending_ = false;
@@ -911,6 +924,8 @@ enum ControlId : WORD {
     IDC_NEXT,
     // the » after the main toolbar's buttons when some do not fit: a menu of those
     IDC_TOOLBAR_MORE,
+    // the drop-down arrow at the right end of the blocked pictures' bar: Always from this sender or domain
+    IDC_PICTURES_MENU,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
@@ -962,6 +977,15 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_THREADS,
     // under the notifications: whether they name a message's sign-in code
     IDC_OPTIONS_CODES,
+    // pictures in every message, its warning, the Trusted Senders window; Open .eml Files with Inbox Classic
+    IDC_OPTIONS_PICTURES,
+    IDC_OPTIONS_PICTURES_NOTE,
+    IDC_OPTIONS_TRUSTED,
+    IDC_OPTIONS_EML,
+    // the Trusted Senders window: its list, Remove, and what it says with none
+    IDC_TRUSTED_LIST,
+    IDC_TRUSTED_REMOVE,
+    IDC_TRUSTED_EMPTY,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them

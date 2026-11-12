@@ -147,6 +147,7 @@ public final class Mailbox: NSObject {
         super.init()
         listView.setGrouped(AppDelegate.shared?.groupByConversation ?? true)
         listView.setHideIgnored(AppDelegate.shared?.hideIgnored ?? false)
+        listView.setUnreadOnly(AppDelegate.shared?.hideRead ?? false)
         listView.setSort(sort, ascending: ascending)
         view.isVertical = true
         view.dividerStyle = .thin
@@ -783,7 +784,7 @@ public final class Mailbox: NSObject {
                     more += "\n\n" + Text.macStillIndexingMore.text(["count": left])
                 }
             } else if folder != 0 || allInboxes {
-                title = Text.uiNoItems.text
+                title = AppDelegate.shared?.hideRead == true ? Text.uiNoUnread.text : Text.uiNoItems.text
             } else if selectedAccount != 0 {
                 title = Text.uiChooseFolder.text
             }
@@ -1046,6 +1047,13 @@ public final class Mailbox: NSObject {
     /// View > Hide Ignored Conversations turned on or off
     func hideIgnoredChanged() {
         listView.setHideIgnored(AppDelegate.shared?.hideIgnored ?? false)
+        reloadList(keepSelection: true)
+        changed()
+    }
+
+    /// View > Hide Read Messages or the toolbar's Unread filter turned on or off
+    func hideReadChanged() {
+        listView.setUnreadOnly(AppDelegate.shared?.hideRead ?? false)
         reloadList(keepSelection: true)
         changed()
     }

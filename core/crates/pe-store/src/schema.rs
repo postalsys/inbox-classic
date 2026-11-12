@@ -353,6 +353,32 @@ ALTER TABLE accounts ADD COLUMN account_name TEXT NOT NULL DEFAULT '';
 ALTER TABLE accounts ADD COLUMN position INTEGER NOT NULL DEFAULT 0;
 UPDATE accounts SET position = id;
 "#,
+    // the Date order by the Date header but never later than the arrival (messages.rs LIST_DATE): a message dated in
+    // the future no longer stays on top of the list
+    r#"
+DROP INDEX messages_by_date;
+CREATE INDEX messages_by_date ON messages (folder_id, COALESCE(MIN(date, internal_date), date, internal_date), uid);
+DROP INDEX messages_all_by_date;
+CREATE INDEX messages_all_by_date ON messages (COALESCE(MIN(date, internal_date), date, internal_date), uid, id);
+"#,
+    // the senders whose pictures load without asking (trusted.rs): an address or a whole domain, in lower case
+    r#"
+CREATE TABLE trusted_senders (
+    id INTEGER PRIMARY KEY,
+    value TEXT NOT NULL UNIQUE,
+    domain INTEGER NOT NULL,
+    added INTEGER NOT NULL
+);
+"#,
+    // when a message became read, here or on the server: View > Hide Read Messages keeps those read since it was
+    // turned on (search.rs Search::read_since), so a message does not leave the list the moment it is read
+    r#"
+ALTER TABLE messages ADD COLUMN seen_at INTEGER;
+CREATE TRIGGER messages_seen_at AFTER UPDATE OF seen ON messages WHEN NEW.seen = 1 AND OLD.seen = 0
+BEGIN
+    UPDATE messages SET seen_at = CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER) WHERE id = NEW.id;
+END;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

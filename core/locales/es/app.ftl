@@ -57,6 +57,8 @@ cmd-expand-all-threads = &Expandir todas las conversaciones
 cmd-collapse-all-threads = &Contraer todas las conversaciones
 ui-group-by-conversation = &Agrupar los mensajes por conversación
 cmd-hide-ignored = &Ocultar las conversaciones ignoradas
+# review: new
+cmd-hide-read = Ocultar los mensajes &leídos
 cmd-notify = &Avisar de correo nuevo
 cmd-open = &Abrir Inbox Classic
 cmd-default-app = Usar como programa de correo &predeterminado...
@@ -483,3 +485,33 @@ ui-book-not-exported = No se pudo guardar la libreta de direcciones: { $reason }
 ui-code-copied = Código copiado
 # review: new
 ui-codes-in-notifications = Mostrar los códigos de inicio de sesión en los avisos de correo nuevo
+# review: new
+ui-tool-unread-only = No leídos
+# review: new
+ui-no-unread = Aquí no hay mensajes sin leer.
+# review: new
+ui-pictures-always-sender = Descargar siempre las imágenes de { $sender }
+# review: new
+ui-pictures-always-domain = Descargar siempre las imágenes de todos en { $domain }
+# review: new
+ui-pictures-unconfirmed = No se pudo confirmar que el remitente sea { $domain }, así que sus imágenes no se descargan por sí solas.
+# review: new
+ui-pictures-always-option = Descargar las imágenes de todos los mensajes
+# review: new
+ui-pictures-always-warning = Los remitentes podrán saber cuándo lee sus mensajes.
+# review: new
+ui-trusted-senders-button = Remitentes de confianza...
+# review: new
+ui-trusted-senders-title = Remitentes de confianza
+# review: new
+ui-trusted-senders-note = Las imágenes de estos remitentes se descargan cuando su proveedor de correo confirma que el mensaje es suyo.
+# review: new
+ui-trusted-everyone-at = Todos en { $domain }
+# review: new
+ui-trusted-senders-empty = Aún no hay remitentes de confianza.
+# review: new
+ui-eml-default = Abrir los archivos .eml con Inbox Classic
+# review: new
+ui-eml-default-done = Inbox Classic abre ahora los archivos .eml.
+# review: new
+ui-eml-default-failed = No se pudo hacer de Inbox Classic la aplicación para los archivos .eml: { $reason }

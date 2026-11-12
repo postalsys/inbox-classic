@@ -10,7 +10,7 @@ WIN_COPY=${WIN_DIR_FWD##*/}-src
 
 # copies the working tree (not the build outputs) to the Windows machine
 win_sync() {
-    ssh -n "$WIN_HOST" "if not exist $WIN_DIR mkdir $WIN_DIR"
+    ssh -n "$WIN_HOST" "if not exist $WIN_DIR\\core mkdir $WIN_DIR\\core"
     # as a file, copied with scp and unpacked there: a tar piped into ssh can hang once the remote end is done
     local archive
     archive=$(mktemp -t inbox-classic-src).tgz

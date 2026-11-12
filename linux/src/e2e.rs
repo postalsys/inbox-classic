@@ -31,6 +31,12 @@ mod contacts;
 /// Step 34g: Watch and Ignore Conversation
 mod watch;
 
+/// View > Hide Read Messages
+mod hide_read;
+
+/// Pictures from trusted senders, and in every message
+mod pictures;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
@@ -951,10 +957,14 @@ async fn scenario(d: Rc<Driver>) {
     steps::conversations(&d).await;
     steps::bounces(&d).await;
     steps::one_time_codes(&d).await;
+    hide_read::hide_read(&d).await;
+    pictures::trusted(&d).await;
+    pictures::options(&d).await;
     watch::watch_and_ignore(&d).await;
     steps::folders(&d).await;
     steps::closing_a_message(&d).await;
     steps::mailto(&d).await;
+    steps::open_eml(&d).await;
     steps::completing(&d).await;
     steps::signature(&d).await;
     contacts::address_book(&d).await;

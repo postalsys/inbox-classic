@@ -118,6 +118,11 @@ void UpdateJunkButton() {
     Layout();
 }
 
+// the toolbar's Unread pressed while the list shows unread messages only
+void UpdateUnreadOnlyButton() {
+    SendMessageW(g_toolbar, TB_CHECKBUTTON, IDM_HIDE_READ, MAKELONG(g_mailbox.UnreadOnly() ? TRUE : FALSE, 0));
+}
+
 // whether a command on messages can run with this many selected; -1 for a command that is not on messages
 int CommandFitsSelection(unsigned id) {
     size_t selected = g_mailbox.SelectedCount();
@@ -182,6 +187,8 @@ void UpdateMenu(HMENU menu) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.Grouped() ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_HIDE_IGNORED) {
             CheckMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.HideIgnored() ? MF_CHECKED : MF_UNCHECKED));
+        } else if (id == IDM_HIDE_READ) {
+            CheckMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.UnreadOnly() ? MF_CHECKED : MF_UNCHECKED));
         } else if (id == IDM_EMPTY_FOLDER) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanEmptyFolder() ? MF_ENABLED : MF_GRAYED));
         }
@@ -571,6 +578,7 @@ HMENU BuildMenu() {
     AppendMenuW(view, MF_STRING, IDM_COLLAPSE_ALL_THREADS, MenuItem(PE_TEXT_CMD_COLLAPSE_ALL_THREADS).c_str());
     // checked once the list has read the setting (CreateChildren)
     AppendMenuW(view, MF_STRING, IDM_HIDE_IGNORED, MenuItem(PE_TEXT_CMD_HIDE_IGNORED).c_str());
+    AppendMenuW(view, MF_STRING, IDM_HIDE_READ, MenuItem(PE_TEXT_CMD_HIDE_READ).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_PICTURES, MenuItem(PE_TEXT_CMD_PICTURES).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
@@ -656,6 +664,8 @@ void CreateToolbar(HWND hwnd) {
         {0, PE_TEXT_MENU_FILE, 0},
         {IDM_MARK_READ, PE_TEXT_UI_TB_MARK_READ, ICON_MAIL_READ},
         {IDM_MARK_UNREAD, PE_TEXT_UI_TB_MARK_UNREAD, ICON_MAIL_UNREAD},
+        // pressed while on (UpdateUnreadOnlyButton)
+        {IDM_HIDE_READ, PE_TEXT_UI_TOOL_UNREAD_ONLY, ICON_FILTER},
     };
     for (const Button& button : buttons) {
         std::wstring label = button.id ? core::T(button.text) : std::wstring();
@@ -717,7 +727,8 @@ void ShowHiddenButtons() {
         std::wstring label(static_cast<size_t>(SendMessageW(g_toolbar, TB_GETBUTTONTEXTW, button.idCommand, 0)), L'\0');
         SendMessageW(g_toolbar, TB_GETBUTTONTEXTW, button.idCommand, reinterpret_cast<LPARAM>(label.data()));
         bool enabled = (button.fsState & TBSTATE_ENABLED) != 0;
-        AppendMenuW(menu, MF_STRING | (enabled ? 0 : MF_GRAYED), button.idCommand, label.c_str());
+        bool checked = (button.fsState & TBSTATE_CHECKED) != 0;
+        AppendMenuW(menu, MF_STRING | (enabled ? 0 : MF_GRAYED) | (checked ? MF_CHECKED : 0), button.idCommand, label.c_str());
     }
     RECT at;
     GetWindowRect(g_chevron, &at);
@@ -906,6 +917,8 @@ struct Arguments {
     bool version = false;
     // a mailto: link Windows hands the default mail program, a new message to write
     std::wstring mailto;
+    // a message file (.eml) File Explorer opens with the app: its full path, shown in a message window
+    std::wstring file;
     // --mcp: relay an AI agent's MCP connection to the app that is running (started when it is not), no window
     bool mcp = false;
     // --background: started for an agent (by --mcp), in the tray without its window
@@ -967,6 +980,15 @@ void ReadArguments() {
     auto keep = [](const std::wstring& arg) { g_arguments.restart += L" " + QuoteArgument(arg); };
     for (int i = 1; argv && i < count; i++) {
         std::wstring arg = argv[i];
+        // what is no option is a file to open (the installer registers "exe" "%1"), not passed on to a restart
+        if (!arg.starts_with(L"--")) {
+            if (g_arguments.file.empty()) {
+                wchar_t full[MAX_PATH * 4] = L"";
+                DWORD length = GetFullPathNameW(arg.c_str(), static_cast<DWORD>(std::size(full)), full, nullptr);
+                g_arguments.file = length > 0 && length < std::size(full) ? full : arg;
+            }
+            continue;
+        }
         if (arg == L"--language" && i + 1 < count) {
             g_arguments.language = argv[++i];
             continue;
@@ -1044,6 +1066,7 @@ void CreateChildren(HWND hwnd) {
     g_status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS, 0, 0, 0, 0, hwnd, nullptr,
                                GetModuleHandleW(nullptr), nullptr);
     g_mailbox.Create(hwnd, g_core.get());
+    UpdateUnreadOnlyButton();
 }
 
 void AddAccount() {
@@ -1101,8 +1124,9 @@ namespace {
 
 // the window property that names the mail store a main window has open, so another start for it hands over to it
 const wchar_t* kStoreProperty = L"InboxClassic.Store";
-// WM_COPYDATA from another start: a mailto: link to write, or empty to show the window
+// WM_COPYDATA from another start: a mailto: link to write, or empty to show the window; a message file to open
 constexpr ULONG_PTR kCopyMailto = 1;
+constexpr ULONG_PTR kCopyFile = 2;
 // with --test-hooks only: the selected messages dragged into a folder (its path), files dropped onto a tree item
 // ("<item>|<path>|<path>..."); the result is what the message returns. kTestNotification: 1 when the heading of the
 // last new mail notification since the last ask is the text (empty: none was shown), which is then forgotten
@@ -1112,9 +1136,23 @@ constexpr ULONG_PTR kTestNotification = 0x4E4F5445;
 // with --test-hooks only: a link of the message shown followed as a click on it would be; 1 when it was the
 // document's own (a card's)
 constexpr ULONG_PTR kTestLink = 0x4C494E4B;
+// with --test-hooks only: what the taskbar button's overlay shows (TrayBadge), plus 10 so a refused one is no 0
+constexpr ULONG_PTR kTestBadge = 0x42414447;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
+// the message file it handed over, likewise
+constexpr UINT WM_OPEN_FILE = WM_APP + 62;
+std::wstring g_pendingFile;
+
+// a message file in a message window, or why it can not be shown
+void OpenFileWindow(const std::wstring& path) {
+    std::wstring error;
+    if (!OpenMessageFile(g_main, g_core.get(), &g_mailbox, path, error)) {
+        std::wstring text = core::T(PE_TEXT_UI_NOT_SHOWN) + (error.empty() ? L"" : L"\n\n" + error);
+        MessageBoxW(g_main, text.c_str(), kTitle, MB_OK | MB_ICONERROR);
+    }
+}
 
 HANDLE StoreTag() {
     std::wstring store = g_arguments.store.empty() ? StorePath() : g_arguments.store;
@@ -1152,8 +1190,9 @@ bool HandOver() {
     DWORD process = 0;
     GetWindowThreadProcessId(running, &process);
     AllowSetForegroundWindow(process);
-    COPYDATASTRUCT data = {kCopyMailto, static_cast<DWORD>(g_arguments.mailto.size() * sizeof(wchar_t)),
-                           const_cast<wchar_t*>(g_arguments.mailto.c_str())};
+    const std::wstring& handed = g_arguments.file.empty() ? g_arguments.mailto : g_arguments.file;
+    COPYDATASTRUCT data = {g_arguments.file.empty() ? kCopyMailto : kCopyFile, static_cast<DWORD>(handed.size() * sizeof(wchar_t)),
+                           const_cast<wchar_t*>(handed.c_str())};
     SendMessageTimeoutW(running, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&data), SMTO_ABORTIFHUNG, 5000, nullptr);
     return true;
 }
@@ -1308,7 +1347,7 @@ void OnCommand(WORD id, WORD code) {
         bool notify = g_notify;
         bool threads = g_mailbox.Grouped();
         bool codes = pe_codes_in_notifications();
-        bool restart = OptionsDialog(g_main, notify, threads, codes);
+        bool restart = OptionsDialog(g_main, g_core.get(), notify, threads, codes);
         SetNotify(notify);
         SetPreference(kCodesPreference, codes ? 1 : 0);
         pe_set_codes_in_notifications(codes);
@@ -1432,6 +1471,10 @@ void OnCommand(WORD id, WORD code) {
     case IDM_HIDE_IGNORED:
         g_mailbox.SetHideIgnored(!g_mailbox.HideIgnored());
         return;
+    case IDM_HIDE_READ:
+        g_mailbox.SetUnreadOnly(!g_mailbox.UnreadOnly());
+        UpdateUnreadOnlyButton();
+        return;
     case IDM_FIND_IN_MESSAGE:
         // F3 again finds the next place; the menu asks for the words
         g_mailbox.FindInMessage(g_main, code == 1);
@@ -1501,6 +1544,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_COPYDATA: {
         auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lParam);
+        if (g_arguments.testHooks && data->dwData == kTestBadge) {
+            return static_cast<LRESULT>(TrayBadge() + 10);
+        }
         if (g_arguments.testHooks && data->dwData == kTestLink && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring uri(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
             return g_mailbox.TestLink(uri) ? 1 : 0;
@@ -1526,6 +1572,13 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             auto item = reinterpret_cast<HTREEITEM>(static_cast<INT_PTR>(_wtoi64(parts[0].c_str())));
             return g_mailbox.TestDropFiles(item, std::vector<std::wstring>(parts.begin() + 1, parts.end()));
         }
+        if (data->dwData == kCopyFile && data->cbData > 0 && data->cbData % sizeof(wchar_t) == 0 &&
+            data->cbData <= 32 * 1024 * sizeof(wchar_t)) {
+            // opened after this message returns, as a link is; the main window stays where it is
+            g_pendingFile.assign(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            PostMessageW(hwnd, WM_OPEN_FILE, 0, 0);
+            return TRUE;
+        }
         if (data->dwData != kCopyMailto || data->cbData % sizeof(wchar_t) != 0 || data->cbData > 64 * 1024 * sizeof(wchar_t)) {
             return FALSE;
         }
@@ -1540,6 +1593,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_OPEN_MAILTO:
         OpenMailto(std::exchange(g_pendingMailto, {}));
+        return 0;
+    case WM_OPEN_FILE:
+        OpenFileWindow(std::exchange(g_pendingFile, {}));
         return 0;
     case WM_QUERYENDSESSION:
         // Windows is shutting down or signing out: the app ends with it
@@ -1801,6 +1857,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     }
     if (!g_arguments.mailto.empty()) {
         OpenMailto(g_arguments.mailto);
+    }
+    if (!g_arguments.file.empty()) {
+        OpenFileWindow(g_arguments.file);
     }
 
     MSG msg;

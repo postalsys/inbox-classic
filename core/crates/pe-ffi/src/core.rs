@@ -785,6 +785,30 @@ pub unsafe extern "C" fn pe_invitation_file(
     }
 }
 
+/// [`pe_invitation_file`] of a message file a window shows (`pe_file_view`), its path UTF-8
+///
+/// # Safety
+/// `core` must be a live handle, `path` and `dir` NUL-terminated strings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_invitation_file(
+    core: *const PeCore,
+    path: *const c_char,
+    dir: *const c_char,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let (Some(path), Some(dir)) = (unsafe { arg(path) }, unsafe { arg(dir) }) else {
+        return null_mut();
+    };
+    let (path, dir) = (std::path::PathBuf::from(path), std::path::PathBuf::from(dir));
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.file_invitation_file(&path, &dir) {
+            Ok(Some(written)) => into_c_string(written.to_string_lossy().into_owned()),
+            _ => null_mut(),
+        })
+    }
+}
+
 /// Draws the BIMI logo of a message (`has_logo`) `size` pixels square in the background: `LogoReady` follows with
 /// the request this returns; 0 for a message without one
 ///
@@ -1751,6 +1775,17 @@ pub struct PeMessageInfo {
     /// The one-time code of the card at the top of `document`, empty without one: what its Copy (`pe_reader_link`
     /// says `PE_READER_LINK_COPY_CODE`) puts on the clipboard
     pub otp_code: *const c_char,
+    /// Its pictures on the internet are shown (asked for, or loaded by themselves: Options' setting, a trusted
+    /// sender the provider confirmed): no pictures bar then
+    pub pictures_loaded: bool,
+    /// The sender's address and domain in lower case, empty for a From that is no single address
+    pub sender: *const c_char,
+    pub sender_domain: *const c_char,
+    /// The pictures bar's choices: "Always download pictures from ann@shop.com" and "... from everyone at shop.com"
+    /// (`pe_trust_sender`), empty when the provider did not confirm the sender; then `pictures_unconfirmed` says why
+    pub pictures_always_sender: *const c_char,
+    pub pictures_always_domain: *const c_char,
+    pub pictures_unconfirmed: *const c_char,
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
@@ -1801,6 +1836,11 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         Some(Unsubscribe::Mail { link }) => (PeUnsubscribe::Mail, link.as_str()),
         Some(Unsubscribe::Web { url }) => (PeUnsubscribe::Web, url.as_str()),
     };
+    let words = view
+        .sender
+        .as_ref()
+        .map(pe_core::pictures::bar_words)
+        .unwrap_or_default();
     let info = PeMessageInfo {
         subject: strings.add(&view.subject),
         from: strings.add(&view.from),
@@ -1821,6 +1861,12 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         bounced_folder: view.bounced_message.map_or(0, |m| m.folder),
         bounced_uid: view.bounced_message.map_or(0, |m| m.uid),
         otp_code: strings.add(view.otp_code.as_deref().unwrap_or_default()),
+        pictures_loaded: view.pictures_loaded,
+        sender: strings.add(view.sender.as_ref().map_or("", |s| s.address.as_str())),
+        sender_domain: strings.add(view.sender.as_ref().map_or("", |s| s.domain.as_str())),
+        pictures_always_sender: strings.add(&words.always_sender),
+        pictures_always_domain: strings.add(&words.always_domain),
+        pictures_unconfirmed: strings.add(&words.unconfirmed),
     };
     handed(PeMessageView {
         info,
@@ -2113,6 +2159,82 @@ pub unsafe extern "C" fn pe_attachment_data(
         *filename = into_c_string(name);
     }
     Box::into_raw(data).cast()
+}
+
+/// [`pe_attachment_data`] of a message file a window shows (`pe_file_view`), its path UTF-8
+///
+/// # Safety
+/// `core` must be a live handle, `path` NULL or a NUL-terminated string; `len` and `filename` must be valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_attachment_data(
+    core: *const PeCore,
+    path: *const c_char,
+    index: usize,
+    len: *mut usize,
+    filename: *mut *mut c_char,
+) -> *mut u8 {
+    if len.is_null() || filename.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let Some(path) = (unsafe { arg(path) }).map(str::to_string) else {
+        return null_mut();
+    };
+    // SAFETY: as the caller guarantees
+    let found = unsafe {
+        with(core, None, |core| {
+            core.file_attachment(std::path::Path::new(&path), index).ok().flatten()
+        })
+    };
+    let Some((name, data)) = found else {
+        return null_mut();
+    };
+    let data = data.into_boxed_slice();
+    // SAFETY: the caller gave valid pointers
+    unsafe {
+        *len = data.len();
+        *filename = into_c_string(name);
+    }
+    Box::into_raw(data).cast()
+}
+
+/// [`pe_save_attachments`] of a message file; false for a file that can not be read
+///
+/// # Safety
+/// `core` must be a live handle, `path` and `dir` NULL or NUL-terminated strings, `saved` and `total` NULL or valid
+/// pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_save_attachments(
+    core: *const PeCore,
+    path: *const c_char,
+    dir: *const c_char,
+    saved: *mut usize,
+    total: *mut usize,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let (Some(path), Some(dir)) = (unsafe { arg(path) }, unsafe { arg(dir) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    let counts = unsafe {
+        with(core, None, |core| {
+            core.file_save_attachments(std::path::Path::new(path), std::path::Path::new(dir))
+                .ok()
+        })
+    };
+    let Some((done, all)) = counts else {
+        return false;
+    };
+    // SAFETY: the caller gave NULL or valid pointers
+    unsafe {
+        if let Some(saved) = saved.as_mut() {
+            *saved = done;
+        }
+        if let Some(total) = total.as_mut() {
+            *total = all;
+        }
+    }
+    true
 }
 
 /// The header block of a message for File > Properties, as text to show (line breaks `\r\n`, no control characters);
@@ -2512,6 +2634,67 @@ pub unsafe extern "C" fn pe_message_draft(
         with(core, null_mut(), |core| match core.draft(folder, uid, kind) {
             Ok(Some(draft)) => draft_handle(&draft),
             _ => null_mut(),
+        })
+    }
+}
+
+/// The view of a message file (`.eml`) opened from Finder or File Explorer, for a message window of no folder; NULL
+/// with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) for a file that can not
+/// be read, is not a message or is too large. Free with `pe_message_view_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_view(
+    core: *const PeCore,
+    path: *const c_char,
+    allow_remote_images: bool,
+    error: *mut *mut c_char,
+) -> *mut PeMessageView {
+    // SAFETY: as the caller guarantees
+    let path = unsafe { arg(path) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            match core.file_view(std::path::Path::new(&path), allow_remote_images) {
+                Ok(view) => view_handle(view),
+                Err(failure) => {
+                    if !error.is_null() {
+                        *error = into_c_string(failure.to_string());
+                    }
+                    null_mut()
+                }
+            }
+        })
+    }
+}
+
+/// A reply, a reply to all or a forward of a message file, from `account`; NULL for a file that can not be read or
+/// is no message. Free with `pe_draft_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `path` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_draft(
+    core: *const PeCore,
+    path: *const c_char,
+    account: i64,
+    kind: PeDraftKind,
+) -> *mut PeDraft {
+    let kind = match kind {
+        PeDraftKind::Reply => DraftKind::Reply,
+        PeDraftKind::ReplyAll => DraftKind::ReplyAll,
+        PeDraftKind::Forward => DraftKind::Forward,
+    };
+    // SAFETY: as the caller guarantees
+    let path = unsafe { arg(path) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            match core.file_draft(std::path::Path::new(&path), account, kind) {
+                Ok(draft) => draft_handle(&draft),
+                Err(_) => null_mut(),
+            }
         })
     }
 }
@@ -3268,4 +3451,110 @@ pub unsafe extern "C" fn pe_sign_in_register_hint(issuer: *const c_char) -> *mut
     // SAFETY: as the caller guarantees
     let issuer = unsafe { arg(issuer) }.unwrap_or_default().to_string();
     guard(move || into_c_string(pe_core::register_hint(issuer.trim()))).unwrap_or(null_mut())
+}
+
+// ---- trusted senders ----
+
+/// A sender whose pictures load by themselves
+#[repr(C)]
+pub struct PeTrustedSender {
+    pub id: i64,
+    /// The address or the domain
+    pub value: *const c_char,
+    pub domain: bool,
+    /// How Options lists it: the address, or "Everyone at shop.com"
+    pub label: *const c_char,
+}
+
+/// The list of `pe_trusted_senders`
+pub struct PeTrustedSenderList(Rows<PeTrustedSender>);
+
+/// Trusts `value`, an address or (with `domain`) a whole domain: their pictures load by themselves when the
+/// provider confirms the message is theirs. False for a value that is no address (or no domain).
+///
+/// # Safety
+/// `core` must be a live handle, `value` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_trust_sender(core: *const PeCore, value: *const c_char, domain: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    let value = unsafe { arg(value) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.trust_sender(&value, domain).is_ok()) }
+}
+
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_untrust_sender(core: *const PeCore, id: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.untrust_sender(id).is_ok()) }
+}
+
+/// The trusted senders, in alphabetical order; NULL on failure. Free with `pe_trusted_sender_list_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_trusted_senders(core: *const PeCore) -> *mut PeTrustedSenderList {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(found) = core.trusted_senders() else {
+                return null_mut();
+            };
+            handed(PeTrustedSenderList(Rows::new(&found, |t, strings| PeTrustedSender {
+                id: t.id,
+                value: strings.add(&t.value),
+                domain: t.domain,
+                label: strings.add(&pe_core::pictures::trusted_label(t)),
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_trusted_sender_list_count(list: *const PeTrustedSenderList) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// The row at `index`, NULL past the end; it lives as long as the list
+///
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_trusted_sender_list_get(
+    list: *const PeTrustedSenderList,
+    index: usize,
+) -> *const PeTrustedSender {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_trusted_sender_list_free(list: *mut PeTrustedSenderList) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+/// Options' "Download pictures in all messages" (never in Junk E-mail)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_always_load_pictures(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.always_load_pictures().unwrap_or(false)) }
+}
+
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_always_load_pictures(core: *const PeCore, on: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_always_load_pictures(on).is_ok()) }
 }

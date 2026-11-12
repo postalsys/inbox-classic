@@ -956,7 +956,8 @@ impl Mailbox {
             }
             (t!(UiNoMatch, words = &*self.find_text()), more)
         } else if self.folder.get() != 0 || self.all_inboxes.get() {
-            (t!(UiNoItems), String::new())
+            let none = if hide_read() { t!(UiNoUnread) } else { t!(UiNoItems) };
+            (none, String::new())
         } else if self.selected_account.get() != 0 {
             (t!(UiChooseFolder), String::new())
         } else {
@@ -1588,6 +1589,15 @@ impl Mailbox {
         shell().settings.set_bool(settings::HIDE_IGNORED, on);
         self.set_toggled(Command::HideIgnored, on);
         self.view.borrow_mut().set_hide_ignored(on);
+        self.reload_list(true);
+    }
+
+    /// View > Hide Read Messages turned on or off, for every folder: kept, and the list again (a message read while
+    /// it is on stays listed until the folder changes, the core keeps it)
+    pub fn set_hide_read(&self, on: bool) {
+        shell().settings.set_bool(settings::HIDE_READ, on);
+        self.set_toggled(Command::HideRead, on);
+        self.view.borrow_mut().set_show(show_for(on));
         self.reload_list(true);
     }
 
@@ -2301,7 +2311,22 @@ fn start_view(sort: pe_store::Sort) -> pe_core::ListView {
     view.set_sort(sort);
     view.set_grouped(grouped());
     view.set_hide_ignored(hide_ignored());
+    view.set_show(show_for(hide_read()));
     view
+}
+
+/// View > Hide Read Messages, off unless turned on
+pub fn hide_read() -> bool {
+    shell().settings.bool(settings::HIDE_READ, false)
+}
+
+/// What the list shows with Hide Read Messages `on` or off
+fn show_for(on: bool) -> pe_store::Show {
+    if on {
+        pe_store::Show::Unread
+    } else {
+        pe_store::Show::All
+    }
 }
 
 /// The command of a letter in the message list, as in Thunderbird: A archives, N goes to the next unread message, W
@@ -2329,6 +2354,7 @@ fn toggled(command: Command) -> bool {
     match command {
         Command::Notify => shell().notify.get(),
         Command::HideIgnored => hide_ignored(),
+        Command::HideRead => hide_read(),
         _ => false,
     }
 }
@@ -2487,6 +2513,7 @@ fn header_bar(title: &adw::WindowTitle, find: &gtk::SearchEntry) -> HeaderParts 
     menu.set_widget_name("primary-menu");
     header.pack_end(&menu);
     header.pack_end(find);
+    header.pack_end(&unread_only_button());
     let (search, search_bar) = narrow_search(find);
     header.pack_end(&search);
     HeaderParts {
@@ -2506,6 +2533,21 @@ fn header_bar(title: &adw::WindowTitle, find: &gtk::SearchEntry) -> HeaderParts 
         search,
         search_bar,
     }
+}
+
+/// The header bar's filter beside Find: on, the list shows the unread messages only (View > Hide Read Messages, the
+/// same action, so the two follow each other)
+fn unread_only_button() -> gtk::ToggleButton {
+    // the app's Fluent filter, else the system's
+    let icon = gio::ThemedIcon::from_names(&["ic-filter-symbolic", "funnel-symbolic", "view-filter-symbolic"]);
+    let button = gtk::ToggleButton::builder()
+        .child(&gtk::Image::from_gicon(&icon))
+        .tooltip_text(t!(UiToolUnreadOnly))
+        .action_name(format!("win.{}", Command::HideRead.name()))
+        .build();
+    button.update_property(&[gtk::accessible::Property::Label(&t!(UiToolUnreadOnly))]);
+    button.set_widget_name("hide-read");
+    button
 }
 
 /// The top rows of the folder tree the user closed, from the settings

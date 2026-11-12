@@ -27,6 +27,11 @@ pub struct MessageView {
     pub document: String,
     /// The message has pictures on the internet (shown or not, as the view was asked for)
     pub remote_images: bool,
+    /// Its pictures on the internet are shown: asked for, or loaded by themselves (the setting, a trusted sender);
+    /// the reading pane then shows no pictures bar
+    pub pictures_loaded: bool,
+    /// The sender as the pictures bar names them, None for a From that is no single address
+    pub sender: Option<crate::pictures::Sender>,
     pub attachments: Vec<AttachmentView>,
     /// How the message lets its reader leave its mailing list, None when it does not say
     pub unsubscribe: Option<crate::unsubscribe::Unsubscribe>,
@@ -49,6 +54,8 @@ pub struct MessageView {
 pub(crate) struct Trust<'a> {
     pub domains: &'a [String],
     pub codes: bool,
+    /// Whether pictures load without the user's click (pictures.rs)
+    pub pictures: crate::pictures::Rules<'a>,
 }
 
 /// Finds a message of the account by its Message-ID, for the link of a bounce's card
@@ -90,10 +97,10 @@ pub(crate) fn build_unless(
     dropped: &dyn Fn() -> bool,
     find: FindMessage,
 ) -> Option<MessageView> {
-    let options = RenderOptions { allow_remote_images };
     let message = match parser::parse(source) {
         Ok(message) => message,
         Err(error) => {
+            let options = RenderOptions { allow_remote_images };
             let text = pe_i18n::tr_args(
                 pe_i18n::Text::ReaderUnreadable,
                 &[("error", (&error.to_string()).into())],
@@ -104,6 +111,10 @@ pub(crate) fn build_unless(
             });
         }
     };
+    // a trusted sender the provider confirmed, or every message's when the user said so: the pictures load
+    let sender = crate::pictures::sender(&message, trust.domains);
+    let allow_remote_images = allow_remote_images || crate::pictures::load(&trust.pictures, sender.as_ref());
+    let options = RenderOptions { allow_remote_images };
     let images = crate::compose::inline_images(&message);
     if dropped() {
         return None;
@@ -177,6 +188,8 @@ pub(crate) fn build_unless(
         date: message.timestamp,
         document: rendered.document,
         remote_images: rendered.remote_images,
+        pictures_loaded: allow_remote_images,
+        sender,
         attachments: listed(&message.attachments)
             .map(|a| AttachmentView {
                 safe_filename: a.safe_filename(),

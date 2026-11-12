@@ -1,8 +1,12 @@
-//! Preferences (the main menu, Ctrl+,): the language of the windows, Group messages by conversation and Notify of New
-//! Mail, in a libadwaita preferences dialog as GNOME apps have it. A language chosen is saved in settings.ini and used
+//! Preferences (the main menu, Ctrl+,): the language of the windows, Group messages by conversation, the pictures of
+//! messages (every message's, the trusted senders), Notify of New Mail and the app for .eml files, in a libadwaita
+//! preferences dialog as GNOME apps have it. A language chosen is saved in settings.ini and used
 //! from the next start; the app offers to start again in it at once.
 
+use std::ffi::OsStr;
+
 use adw::prelude::*;
+use gtk::{gio, glib};
 
 use crate::app::{shell, spawn};
 use crate::settings;
@@ -98,7 +102,9 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     let page = adw::PreferencesPage::new();
     page.add(&words);
     page.add(&list);
+    page.add(&pictures_group());
     page.add(&mail);
+    page.add(&files_group());
     let dialog = adw::PreferencesDialog::builder()
         .title(t!(GtkPreferences))
         .content_width(600)
@@ -123,6 +129,140 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
         spawn(async move { ask_restart(&dialog).await });
     });
     dialog.present(Some(parent.as_ref()));
+}
+
+/// Reading: Download pictures in all messages (with what it tells senders), and the trusted senders on a page of their
+/// own
+fn pictures_group() -> adw::PreferencesGroup {
+    let core = &shell().core;
+    let always = adw::SwitchRow::builder()
+        .title(plain(Text::UiPicturesAlwaysOption))
+        .subtitle(plain(Text::UiPicturesAlwaysWarning))
+        .active(core.always_load_pictures().unwrap_or(false))
+        .build();
+    always.set_widget_name("preferences-pictures-always");
+    always.connect_active_notify(|row| {
+        let _ = shell().core.set_always_load_pictures(row.is_active());
+    });
+    let trusted = adw::ActionRow::builder()
+        .title(plain(Text::UiTrustedSendersTitle))
+        .activatable(true)
+        .build();
+    trusted.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
+    trusted.set_widget_name("preferences-trusted-senders");
+    trusted.connect_activated(|row| {
+        if let Some(dialog) = row
+            .ancestor(adw::PreferencesDialog::static_type())
+            .and_downcast::<adw::PreferencesDialog>()
+        {
+            dialog.push_subpage(&trusted_senders_page());
+        }
+    });
+    let group = adw::PreferencesGroup::new();
+    group.add(&always);
+    group.add(&trusted);
+    group
+}
+
+/// The trusted senders, each with a button that removes it; what the list is for above it
+fn trusted_senders_page() -> adw::NavigationPage {
+    let group = adw::PreferencesGroup::builder()
+        .description(plain(Text::UiTrustedSendersNote))
+        .build();
+    fill_trusted_senders(&group);
+    let page = adw::PreferencesPage::new();
+    page.add(&group);
+    let toolbar = adw::ToolbarView::new();
+    toolbar.add_top_bar(&adw::HeaderBar::new());
+    toolbar.set_content(Some(&page));
+    let title = plain(Text::UiTrustedSendersTitle);
+    let subpage = adw::NavigationPage::new(&toolbar, &title);
+    subpage.set_widget_name("trusted-senders");
+    subpage
+}
+
+/// The row that says no sender is trusted
+fn no_trusted_senders() -> adw::ActionRow {
+    let none = adw::ActionRow::builder()
+        .title(plain(Text::UiTrustedSendersEmpty))
+        .build();
+    none.add_css_class("dim-label");
+    none.set_widget_name("trusted-senders-empty");
+    none
+}
+
+/// The rows of the trusted senders put in `group`, or a row that says there are none
+fn fill_trusted_senders(group: &adw::PreferencesGroup) {
+    let senders = shell().core.trusted_senders().unwrap_or_default();
+    if senders.is_empty() {
+        group.add(&no_trusted_senders());
+        return;
+    }
+    for sender in senders {
+        let row = adw::ActionRow::builder()
+            .title(glib::markup_escape_text(&pe_core::pictures::trusted_label(&sender)))
+            .build();
+        row.set_widget_name("trusted-sender");
+        let remove = gtk::Button::builder()
+            .icon_name("user-trash-symbolic")
+            .tooltip_text(plain(Text::UiRemove))
+            .valign(gtk::Align::Center)
+            .build();
+        remove.add_css_class("flat");
+        remove.set_widget_name("trusted-sender-remove");
+        let (id, group_of_row, shown) = (sender.id, group.clone(), row.clone());
+        remove.connect_clicked(move |_| {
+            if shell().core.untrust_sender(id).is_ok() {
+                group_of_row.remove(&shown);
+                if shell().core.trusted_senders().is_ok_and(|left| left.is_empty()) {
+                    group_of_row.add(&no_trusted_senders());
+                }
+            }
+        });
+        row.add_suffix(&remove);
+        group.add(&row);
+    }
+}
+
+/// Files: make the app the one that opens .eml files (xdg-mime), said in a toast or, when it could not, an alert
+fn files_group() -> adw::PreferencesGroup {
+    let eml = adw::ButtonRow::builder().title(plain(Text::UiEmlDefault)).build();
+    eml.set_widget_name("preferences-eml-default");
+    eml.connect_activated(|row| {
+        let Some(dialog) = row
+            .ancestor(adw::PreferencesDialog::static_type())
+            .and_downcast::<adw::PreferencesDialog>()
+        else {
+            return;
+        };
+        spawn(async move { make_eml_default(&dialog).await });
+    });
+    let group = adw::PreferencesGroup::new();
+    group.add(&eml);
+    group
+}
+
+/// `xdg-mime default` names the app's desktop file for message/rfc822
+async fn make_eml_default(dialog: &adw::PreferencesDialog) {
+    let desktop = format!("{}.desktop", crate::APP_ID);
+    match run_program(&["xdg-mime", "default", &desktop, "message/rfc822"]).await {
+        Ok(()) => dialog.add_toast(adw::Toast::new(&plain(Text::UiEmlDefaultDone))),
+        Err(reason) => ui::alert(dialog, TITLE, &t!(UiEmlDefaultFailed, reason = &*reason)).await,
+    }
+}
+
+/// Runs `argv` to its end; why not when it could not start or failed (what it wrote to standard error)
+async fn run_program(argv: &[&str]) -> Result<(), String> {
+    let argv: Vec<&OsStr> = argv.iter().map(OsStr::new).collect();
+    let process = gio::Subprocess::newv(&argv, gio::SubprocessFlags::STDERR_PIPE).map_err(|e| e.to_string())?;
+    let (_, error) = process.communicate_utf8_future(None).await.map_err(|e| e.to_string())?;
+    if process.is_successful() {
+        return Ok(());
+    }
+    Err(error
+        .map(|e| e.trim().to_string())
+        .filter(|e| !e.is_empty())
+        .unwrap_or_else(|| format!("{} {}", argv[0].to_string_lossy(), process.exit_status())))
 }
 
 /// The names of the languages in full: "System default (Deutsch)" is not cut off as the row's own labels would

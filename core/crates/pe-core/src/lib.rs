@@ -19,6 +19,7 @@ mod fold;
 mod list_view;
 pub mod mailto;
 pub mod otp;
+pub mod pictures;
 mod requests;
 mod search;
 mod secrets;
@@ -529,6 +530,30 @@ impl Core {
     /// Sets the account's own name for the folder list ("Gmail"); empty for the name on its mail
     pub fn set_account_name(&self, account: AccountId, name: &str) -> Result<()> {
         Ok(self.store().set_account_name(account, name)?)
+    }
+
+    /// Trusts the sender `value` (an address, or with `domain` a whole domain): their pictures load by themselves
+    /// when the provider confirms the message is theirs
+    pub fn trust_sender(&self, value: &str, domain: bool) -> Result<()> {
+        Ok(self.store().trust_sender(value, domain)?)
+    }
+
+    pub fn untrust_sender(&self, id: i64) -> Result<()> {
+        Ok(self.store().untrust_sender(id)?)
+    }
+
+    /// The trusted senders, for Options' list
+    pub fn trusted_senders(&self) -> Result<Vec<pe_store::TrustedSender>> {
+        Ok(self.store().trusted_senders()?)
+    }
+
+    /// Options' "Download pictures in all messages"
+    pub fn always_load_pictures(&self) -> Result<bool> {
+        Ok(self.store().always_load_pictures()?)
+    }
+
+    pub fn set_always_load_pictures(&self, on: bool) -> Result<()> {
+        Ok(self.store().set_always_load_pictures(on)?)
     }
 
     /// Puts `account` at `index` in the accounts' order (0 first), which the folder list and All Inboxes' rows follow
@@ -1102,12 +1127,23 @@ impl Core {
             place.info.special_use.as_deref(),
             Some("\\Junk" | "\\Sent" | "\\Drafts")
         );
+        // pictures load by themselves for the senders the user trusts, or every message's; never in Junk E-mail
+        let junk = place.info.special_use.as_deref() == Some("\\Junk");
+        let always_pictures = store.always_load_pictures()?;
+        // the list matters only where it can load pictures
+        let trusted_senders = match junk || always_pictures {
+            true => Vec::new(),
+            false => store.trusted_senders()?,
+        };
         Ok(store.source(folder, uid)?.map(|source| ViewSource {
             source,
             received,
             marked,
             trusted,
             codes,
+            junk,
+            always_pictures,
+            trusted_senders,
             account,
             folder,
             uid,
@@ -1261,34 +1297,9 @@ impl Core {
     }
 
     pub fn import_message(&self, folder: FolderId, path: &std::path::Path) -> Result<()> {
-        const LIMIT: u64 = 50 * 1024 * 1024;
         let account = self.store().folder(folder)?.account_id;
-        let shown = path.display().to_string();
-        let not_one = |text: Text, error: &str| {
-            Error::Unavailable(tr_args(text, &[("path", (&shown).into()), ("error", error.into())]))
-        };
-        // opened once, read up to just past the limit: a file that grows meanwhile is still refused
-        let file = std::fs::File::open(path).map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
-        let mut raw = Vec::new();
-        std::io::Read::read_to_end(&mut std::io::Read::take(file, LIMIT + 1), &mut raw)
-            .map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
-        if raw.len() as u64 > LIMIT {
-            return Err(not_one(Text::ErrorImportTooLarge, ""));
-        }
-        let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one(Text::ErrorImportNotMail, ""))?;
-        // a message has headers a mail program wrote; a text file parsed as one has none of these
-        let looks_like_one = parsed.from.is_some() || parsed.message_id.is_some() || parsed.timestamp.is_some();
-        if !looks_like_one {
-            return Err(not_one(Text::ErrorImportNotMail, ""));
-        }
-        self.send_command(
-            account,
-            Command::Append {
-                folder,
-                raw,
-                date: parsed.timestamp,
-            },
-        )
+        let (raw, date) = read_message_file(path)?;
+        self.send_command(account, Command::Append { folder, raw, date })
     }
 
     /// The content of the `index`th attachment of [`MessageView::attachments`], with the name to
@@ -1313,32 +1324,35 @@ impl Core {
     /// Saves every attachment of a message into `dir` (a folder the user chose), each under its safe name; a file of
     /// that name there is kept and the new one numbered. How many were saved; None when the message is not here yet.
     pub fn save_attachments(&self, folder: FolderId, uid: u64, dir: &Path) -> Result<Option<(usize, usize)>> {
-        let Some(source) = self.store().source(folder, uid)? else {
-            return Ok(None);
-        };
-        let files = view::attachments(&source);
-        let saved = files
-            .iter()
-            .filter(|(name, content)| view::write_new(dir, name, content).is_ok())
-            .count();
-        Ok(Some((saved, files.len())))
+        let source = self.store().source(folder, uid)?;
+        Ok(source.map(|source| save_all(&source, dir)))
+    }
+
+    /// [`Core::attachment`] of a message file a window shows (`file_view`)
+    pub fn file_attachment(&self, path: &Path, index: usize) -> Result<Option<(String, Vec<u8>)>> {
+        let (source, _) = read_message_file(path)?;
+        Ok(view::attachment(&source, index))
+    }
+
+    /// [`Core::save_attachments`] of a message file
+    pub fn file_save_attachments(&self, path: &Path, dir: &Path) -> Result<(usize, usize)> {
+        let (source, _) = read_message_file(path)?;
+        Ok(save_all(&source, dir))
     }
 
     /// The calendar part of a message written to `dir` as `invitation.ics` (a number added when that is taken), for
     /// the calendar program to open; its path, None when the message has none or is not downloaded yet
     pub fn invitation_file(&self, folder: FolderId, uid: u64, dir: &Path) -> Result<Option<PathBuf>> {
-        let Some(source) = self.store().source(folder, uid)? else {
-            return Ok(None);
-        };
-        let Ok(message) = pe_mime::parser::parse(&source) else {
-            return Ok(None);
-        };
-        let Some(part) = view::calendar_part(&message.attachments) else {
-            return Ok(None);
-        };
-        // its bytes as they came, whatever their charset
-        let written = std::fs::create_dir_all(dir).and_then(|_| view::write_new(dir, "invitation.ics", &part.content));
-        written.map(Some).map_err(|error| Error::Unavailable(error.to_string()))
+        match self.store().source(folder, uid)? {
+            Some(source) => write_invitation(&source, dir),
+            None => Ok(None),
+        }
+    }
+
+    /// [`Core::invitation_file`] of a message file a window shows (`file_view`)
+    pub fn file_invitation_file(&self, path: &Path, dir: &Path) -> Result<Option<PathBuf>> {
+        let (source, _) = read_message_file(path)?;
+        write_invitation(&source, dir)
     }
 
     /// Sends a message from an account in the background, through the Outbox: [`Event::MessageSent`] follows, or
@@ -1456,6 +1470,41 @@ impl Core {
             }
         }
         Ok(Some(draft))
+    }
+
+    /// A message file opened from Finder or File Explorer (or the command line), for a message window: its view, as
+    /// a message of no folder (no account's provider vouches for it, so no trusted sender's pictures load; only the
+    /// user's click, or Options' setting, loads them)
+    pub fn file_view(&self, path: &std::path::Path, allow_remote_images: bool) -> Result<MessageView> {
+        let (source, _) = read_message_file(path)?;
+        let always = self.store().always_load_pictures()?;
+        let trust = view::Trust {
+            pictures: pictures::Rules {
+                always,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        Ok(view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default())
+    }
+
+    /// Reply, Reply All or Forward to a message file, from `account`
+    pub fn file_draft(&self, path: &std::path::Path, account: AccountId, kind: DraftKind) -> Result<Draft> {
+        let (source, date) = read_message_file(path)?;
+        let email = self.store().account(account)?.settings.email;
+        let mut draft = compose::draft(&source, kind, &email, date);
+        if kind == DraftKind::Forward {
+            let files = compose::forwarded_files(&source);
+            if !files.is_empty() {
+                draft.attachments = write_out("forward-file", files).map_err(|error| {
+                    Error::Unavailable(tr_args(
+                        Text::ErrorDraftAttachment,
+                        &[("error", (&error.to_string()).into())],
+                    ))
+                })?;
+            }
+        }
+        Ok(draft)
     }
 
     /// Marks a message read or unread: in the store now, on the server in the background
@@ -2115,9 +2164,62 @@ struct ViewSource {
     trusted: Vec<String>,
     /// The folder may show the card of a one-time code
     codes: bool,
+    /// The folder is Junk E-mail, where no pictures load by themselves
+    junk: bool,
+    always_pictures: bool,
+    trusted_senders: Vec<pe_store::TrustedSender>,
     account: AccountId,
     folder: FolderId,
     uid: u64,
+}
+
+/// The calendar part of `source` written into `dir` as invitation.ics (numbered when that is taken), its bytes as they
+/// came whatever their charset; None for a message without one
+fn write_invitation(source: &[u8], dir: &Path) -> Result<Option<PathBuf>> {
+    let Ok(message) = pe_mime::parser::parse(source) else {
+        return Ok(None);
+    };
+    let Some(part) = view::calendar_part(&message.attachments) else {
+        return Ok(None);
+    };
+    let written = std::fs::create_dir_all(dir).and_then(|_| view::write_new(dir, "invitation.ics", &part.content));
+    written.map(Some).map_err(|error| Error::Unavailable(error.to_string()))
+}
+
+/// Every attachment of `source` written into `dir` under its safe name, a file there kept and the new one numbered: how
+/// many were saved, of how many
+fn save_all(source: &[u8], dir: &Path) -> (usize, usize) {
+    let files = view::attachments(source);
+    let saved = files
+        .iter()
+        .filter(|(name, content)| view::write_new(dir, name, content).is_ok())
+        .count();
+    (saved, files.len())
+}
+
+/// A message file (.eml) read whole, up to 50 MB, refused when it is no mail: for Import and for opening a file in a
+/// message window; with the date of its Date header
+fn read_message_file(path: &std::path::Path) -> Result<(Vec<u8>, Option<i64>)> {
+    const LIMIT: u64 = 50 * 1024 * 1024;
+    let shown = path.display().to_string();
+    let not_one = |text: Text, error: &str| {
+        Error::Unavailable(tr_args(text, &[("path", (&shown).into()), ("error", error.into())]))
+    };
+    // opened once, read up to just past the limit: a file that grows meanwhile is still refused
+    let file = std::fs::File::open(path).map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
+    let mut raw = Vec::new();
+    std::io::Read::read_to_end(&mut std::io::Read::take(file, LIMIT + 1), &mut raw)
+        .map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
+    if raw.len() as u64 > LIMIT {
+        return Err(not_one(Text::ErrorImportTooLarge, ""));
+    }
+    let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one(Text::ErrorImportNotMail, ""))?;
+    // a message has headers a mail program wrote; a text file parsed as one has none of these
+    let looks_like_one = parsed.from.is_some() || parsed.message_id.is_some() || parsed.timestamp.is_some();
+    if !looks_like_one {
+        return Err(not_one(Text::ErrorImportNotMail, ""));
+    }
+    Ok((raw, parsed.timestamp))
 }
 
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
@@ -2141,6 +2243,11 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     let trust = view::Trust {
         domains: &found.trusted,
         codes: found.codes,
+        pictures: pictures::Rules {
+            always: found.always_pictures,
+            junk: found.junk,
+            senders: &found.trusted_senders,
+        },
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
     // without a Date header, the date the list shows: when the server got it

@@ -46,6 +46,9 @@ pub struct Search {
     pub threads: Option<Vec<i64>>,
     /// View > Hide Ignored Conversations: the messages of ignored conversations left out
     pub hide_ignored: bool,
+    /// With `show` Unread, the messages read since this time (milliseconds since the epoch) stay in the list: those read
+    /// since the list was turned to unread only, so a message does not leave it the moment it is read
+    pub read_since: Option<i64>,
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
@@ -125,6 +128,7 @@ impl Search {
         // the Show choice is a term like the one typed for it
         query.terms.extend(match self.show {
             Show::All => None,
+            Show::Unread if self.read_since.is_some() => None,
             Show::Unread => Some(Term::Seen(false)),
             Show::Flagged => Some(Term::Flagged(true)),
             Show::WithAttachments => Some(Term::Attachment(true)),
@@ -144,10 +148,17 @@ impl Search {
             Scope::AllInboxes => parts.push(format!("folder_id IN ({INBOXES})")),
             Scope::Everywhere => {}
         }
+        // unread, or read since the list was turned to unread only
+        if let (Show::Unread, Some(since)) = (self.show, self.read_since) {
+            parts.push(format!(
+                "(seen = 0 OR seen_at >= {})",
+                value(&mut values, Value::Integer(since))
+            ));
+        }
         let flagged = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
         let answered = "instr(' ' || flags || ' ', ' \\Answered ') > 0";
         let mut words: Vec<String> = Vec::new();
-        let date = "COALESCE(date, internal_date)";
+        let date = crate::messages::LIST_DATE;
         for term in &query.terms {
             match term {
                 Term::Text { any_of, negated } => match (fts_term(any_of), negated) {
@@ -638,8 +649,34 @@ mod tests {
             text: "old".into(),
             threads: None,
             hide_ignored: false,
+            read_since: None,
         };
         assert_eq!(found(&store, &search), [9]);
+        // a message read since: still listed with the unread ones, by the time the store noted (in milliseconds)
+        let since = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as i64
+            - 100;
+        store
+            .db
+            .execute(
+                "UPDATE messages SET seen = 1 WHERE id = (SELECT id FROM messages WHERE seen = 0 LIMIT 1)",
+                [],
+            )
+            .unwrap();
+        let kept = Search {
+            scope: Scope::Everywhere,
+            show: Show::Unread,
+            read_since: Some(since),
+            ..Default::default()
+        };
+        assert_eq!(found(&store, &kept).len(), 2, "the one read stays");
+        let later = Search {
+            read_since: Some(since + 3_600_000),
+            ..kept
+        };
+        assert_eq!(found(&store, &later).len(), 1, "read before the list began: gone");
     }
 
     #[test]
@@ -662,7 +699,7 @@ mod tests {
             ..message(uid, "Hello", "Ann", flags)
         };
         store
-            .add_messages(inbox, &[dated(1, 100, 400, &[]), dated(2, 300, 200, &["\\Seen"])])
+            .add_messages(inbox, &[dated(1, 100, 400, &[]), dated(2, 300, 350, &["\\Seen"])])
             .unwrap();
         store.add_messages(inbox2, &[dated(7, 200, 300, &[])]).unwrap();
         store.add_messages(archive, &[dated(5, 500, 500, &[])]).unwrap();
@@ -684,7 +721,7 @@ mod tests {
                 .collect()
         };
         assert_eq!(listed(&all, crate::SortField::Date), [2, 7, 1]);
-        assert_eq!(listed(&all, crate::SortField::Received), [1, 7, 2]);
+        assert_eq!(listed(&all, crate::SortField::Received), [1, 2, 7]);
         assert_eq!(store.count_search(&all).unwrap(), (3, 2));
         assert_eq!(store.inboxes().unwrap(), [inbox, inbox2]);
         let newest = Sort {

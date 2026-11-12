@@ -33,6 +33,7 @@ void ShowRefusal(HWND owner, char* reason, PeText fallback) {
 const wchar_t* kThreadsPreference = L"GroupByConversation";
 // View > Hide Ignored Conversations (off unless turned on)
 const wchar_t* kHideIgnoredPreference = L"HideIgnoredConversations";
+const wchar_t* kUnreadOnlyPreference = L"HideReadMessages";
 
 constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
@@ -236,6 +237,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     pe_list_view_set_grouped(view_.get(), GetPreference(kThreadsPreference, 1) != 0);
     hideIgnored_ = GetPreference(kHideIgnoredPreference, 0) != 0;
     pe_list_view_set_hide_ignored(view_.get(), hideIgnored_);
+    unreadOnly_ = GetPreference(kUnreadOnlyPreference, 0) != 0;
+    pe_list_view_set_show(view_.get(), unreadOnly_ ? PE_SHOW_UNREAD : PE_SHOW_ALL);
     // the icons of the list: for the headers of the paper clip and flag columns, and drawn on the rows in CustomDraw
     listIcons_ = IconList(IconSet::List);
     ImageList_GetIconSize(listIcons_, &iconSize_, &iconSize_);
@@ -1903,6 +1906,8 @@ void Mailbox::DrawEmptyList(HDC dc) const {
         if (uint64_t left = pe_search_unindexed_count(core_)) {
             more += L"\n\n" + core::T(PE_TEXT_WIN_NO_MATCH_INDEXING, {{"count", std::to_wstring(left)}});
         }
+    } else if ((folder_ || allInboxes_) && unreadOnly_) {
+        title = core::T(PE_TEXT_UI_NO_UNREAD);
     } else if (folder_ || allInboxes_) {
         title = core::T(PE_TEXT_UI_NO_ITEMS);
     } else if (selectedAccount_) {
@@ -2110,6 +2115,17 @@ void Mailbox::SetHideIgnored(bool on) {
     hideIgnored_ = on;
     FlushSelection();
     pe_list_view_set_hide_ignored(view_.get(), on);
+    ReloadList(true);
+}
+
+void Mailbox::SetUnreadOnly(bool on) {
+    if (on == unreadOnly_) {
+        return;
+    }
+    SetPreference(kUnreadOnlyPreference, on ? 1 : 0);
+    unreadOnly_ = on;
+    FlushSelection();
+    pe_list_view_set_show(view_.get(), on ? PE_SHOW_UNREAD : PE_SHOW_ALL);
     ReloadList(true);
 }
 

@@ -109,8 +109,11 @@ void Reader::Create(HWND parent, PeCore* core) {
     std::wstring blocked = L" " + core::T(PE_TEXT_UI_PICTURES_BLOCKED);
     pictures_ = CreateChild(parent, L"STATIC", blocked.c_str(),
                             SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER, IDC_PICTURES, {});
+    // its drop-down arrow at its right end, as Outlook's bar has: the Always choices
+    picturesMenu_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | SS_NOTIFY | WS_BORDER, IDC_PICTURES_MENU, {});
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
+    ShowWindow(picturesMenu_, SW_HIDE);
     // the same bar over a message that could not be downloaded: a click tries again
     core::String note(pe_retry_note());
     std::wstring retry = L" " + Text(note.get()) + L" " + core::T(PE_TEXT_WIN_CLICK_TO_RETRY);
@@ -118,7 +121,7 @@ void Reader::Create(HWND parent, PeCore* core) {
                          IDC_RETRY, {});
     ShowWindow(retry_, SW_HIDE);
     // the links of the pane: Tab reaches them, Enter clicks them
-    for (HWND link : {unsubscribe_, pictures_, retry_}) {
+    for (HWND link : {unsubscribe_, pictures_, picturesMenu_, retry_}) {
         KeyboardLink(link);
     }
     // the message itself is a Tab stop too: its host hands the keyboard to the WebView2
@@ -178,7 +181,7 @@ bool Reader::FollowLink(const wchar_t* uri) {
 }
 
 const PeMessageInfo* Reader::Info() const {
-    return uid_ ? pe_message_view_info(view_.get()) : nullptr;
+    return uid_ || !file_.empty() ? pe_message_view_info(view_.get()) : nullptr;
 }
 
 // the paper clip and the information bar shown or not, the pane laid out again only when that changes
@@ -186,6 +189,7 @@ void Reader::ShowBars(bool files, bool pictures) {
     bool changed = (IsWindowVisible(attachments_) != FALSE) != files || (IsWindowVisible(pictures_) != FALSE) != pictures;
     ShowWindow(attachments_, files ? SW_SHOW : SW_HIDE);
     ShowWindow(pictures_, pictures ? SW_SHOW : SW_HIDE);
+    ShowWindow(picturesMenu_, pictures ? SW_SHOW : SW_HIDE);
     if (changed || files) {
         Layout();
     }
@@ -199,7 +203,7 @@ void Reader::ShowRetry(bool shown) {
 }
 
 bool Reader::OnSetCursor(HWND window) const {
-    if (window != pictures_ && window != retry_ && window != unsubscribe_) {
+    if (window != pictures_ && window != picturesMenu_ && window != retry_ && window != unsubscribe_) {
         return false;
     }
     // the information bar is clicked like a link
@@ -270,7 +274,10 @@ void Reader::Layout() {
     }
     if (IsWindowVisible(pictures_)) {
         int barHeight = Scale(22);
-        MoveWindow(pictures_, reader.left, top, width, barHeight, TRUE);
+        // the arrow's border over the bar's right one
+        int arrowWidth = Scale(22);
+        MoveWindow(pictures_, reader.left, top, width - arrowWidth + 1, barHeight, TRUE);
+        MoveWindow(picturesMenu_, reader.left + width - arrowWidth, top, arrowWidth, barHeight, TRUE);
         top += barHeight + Scale(2);
     }
     MoveWindow(previewHost_, reader.left, top, width, std::max(0L, reader.bottom - top), TRUE);
@@ -288,6 +295,7 @@ void Reader::Clear(bool loading) {
     folder_ = 0;
     account_ = 0;
     remoteImages_ = false;
+    file_.clear();
     view_.reset();
     KillTimer(parent_, TIMER_DOWNLOADING);
     ShowRetry(false);
@@ -331,7 +339,28 @@ void Reader::Retry() {
     pe_message_open(core_, folder_, uid_);
 }
 
+bool Reader::OpenFile(const std::wstring& path, std::wstring& error) {
+    file_ = path;
+    char* reason = nullptr;
+    view_.reset(pe_file_view(core_, core::Narrow(path).c_str(), remoteImages_, &reason));
+    core::String why(reason);
+    if (!view_) {
+        error = Text(why.get());
+        return false;
+    }
+    ShowInfo();
+    return true;
+}
+
 void Reader::StartView() {
+    // a message file is read right here: it is no larger than an import takes
+    if (!file_.empty()) {
+        std::wstring error;
+        if (!OpenFile(file_, error)) {
+            SetWindowTextW(header_, (L" " + core::T(PE_TEXT_UI_NOT_SHOWN)).c_str());
+        }
+        return;
+    }
     // parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
@@ -345,7 +374,12 @@ void Reader::StartView() {
 void Reader::ShowView() {
     view_.reset(pe_message_view_result(core_, viewRequest_));
     viewRequest_ = 0;
+    ShowInfo();
+}
+
+void Reader::ShowInfo() {
     const PeMessageInfo* info = pe_message_view_info(view_.get());
+    bool file = !file_.empty();
     if (!info) {
         SetWindowTextW(header_, (L" " + core::T(PE_TEXT_UI_NOT_SHOWN)).c_str());
         ShowBars(false, false);
@@ -353,16 +387,16 @@ void Reader::ShowView() {
     }
     ShowHeader(info);
     // a mailing list that says how to leave it
-    unsubscribeKind_ = info->unsubscribe;
+    unsubscribeKind_ = file ? PE_UNSUBSCRIBE_NONE : info->unsubscribe;
     unsubscribeLink_ = Text(info->unsubscribe_link);
     unsubscribeTarget_ = Text(info->unsubscribe_target);
     ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
-    ShowLogo(info->has_logo);
+    ShowLogo(info->has_logo && !file);
     Layout();
     InvalidateRect(unsubscribe_, nullptr, TRUE);
-    preview_.Show(Text(info->document), remoteImages_);
-    // offered only for a message with pictures on the internet, until they are shown
-    ShowBars(info->attachment_count > 0, info->remote_images && !remoteImages_);
+    preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_);
+    // offered only for a message with pictures on the internet, until they are shown (asked for, or by themselves)
+    ShowBars(info->attachment_count > 0, info->remote_images && !info->pictures_loaded && !remoteImages_);
     if (onShown) {
         onShown();
     }
@@ -413,7 +447,7 @@ void Reader::ChooseAttachment() {
     }
     size_t length = 0;
     char* name = nullptr;
-    uint8_t* data = pe_attachment_data(core_, folder_, uid_, static_cast<size_t>(chosen - 1), &length, &name);
+    uint8_t* data = AttachmentData(static_cast<size_t>(chosen - 1), length, name);
     core::String safeName(name);
     if (!data) {
         MessageBoxW(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
@@ -430,6 +464,21 @@ void Reader::ChooseAttachment() {
     pe_bytes_free(data, length);
 }
 
+// the files of the message shown, of its folder or of the message file
+uint8_t* Reader::AttachmentData(size_t index, size_t& length, char*& name) const {
+    if (!file_.empty()) {
+        return pe_file_attachment_data(core_, core::Narrow(file_).c_str(), index, &length, &name);
+    }
+    return pe_attachment_data(core_, folder_, uid_, index, &length, &name);
+}
+
+bool Reader::SaveAttachments(const std::string& dir, size_t& saved, size_t& total) const {
+    if (!file_.empty()) {
+        return pe_file_save_attachments(core_, core::Narrow(file_).c_str(), dir.c_str(), &saved, &total);
+    }
+    return pe_save_attachments(core_, folder_, uid_, dir.c_str(), &saved, &total);
+}
+
 void Reader::SaveAllAttachments() {
     std::wstring folder = FolderDialog(parent_, core::Title(PE_TEXT_WIN_SAVE_ATTACHMENTS).c_str());
     if (folder.empty()) {
@@ -439,7 +488,7 @@ void Reader::SaveAllAttachments() {
     size_t saved = 0;
     size_t total = 0;
     std::string dir = core::Narrow(folder);
-    if (!pe_save_attachments(core_, folder_, uid_, dir.c_str(), &saved, &total)) {
+    if (!SaveAttachments(dir, saved, total)) {
         MessageBoxW(parent_, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     } else if (saved < total) {
         std::wstring text =
@@ -469,20 +518,70 @@ void Reader::FindInMessage(HWND owner, bool again) {
 }
 
 void Reader::LoadPictures() {
-    if (uid_ && view_ && !remoteImages_) {
+    if ((uid_ || !file_.empty()) && view_ && !remoteImages_) {
         remoteImages_ = true;
         StartView();
     }
 }
 
-void Reader::Print(HWND owner) {
-    if (const PeMessageInfo* info = Info()) {
-        // the message as it is shown, with the pictures the user allowed
-        OpenPrintWindow(owner, preview_.Environment(), info->document, remoteImages_, Text(info->subject));
+bool Reader::PicturesShown() const {
+    const PeMessageInfo* info = Info();
+    return remoteImages_ || (info && info->pictures_loaded);
+}
+
+void Reader::ChoosePictures() {
+    const PeMessageInfo* info = Info();
+    if (!info) {
+        return;
+    }
+    enum : UINT { kSender = 1, kDomain, kDownload };
+    std::string sender = info->sender ? info->sender : "";
+    std::string domain = info->sender_domain ? info->sender_domain : "";
+    std::wstring alwaysSender = Text(info->pictures_always_sender), alwaysDomain = Text(info->pictures_always_domain);
+    std::wstring unconfirmed = Text(info->pictures_unconfirmed);
+    HMENU menu = CreatePopupMenu();
+    if (!alwaysSender.empty()) {
+        AppendMenuW(menu, MF_STRING, kSender, MenuText(alwaysSender).c_str());
+    }
+    if (!alwaysDomain.empty()) {
+        AppendMenuW(menu, MF_STRING, kDomain, MenuText(alwaysDomain).c_str());
+    }
+    // a sender the provider did not confirm: why there is no Always
+    if (alwaysSender.empty() && alwaysDomain.empty() && !unconfirmed.empty()) {
+        AppendMenuW(menu, MF_STRING | MF_GRAYED, 0, MenuText(unconfirmed).c_str());
+    }
+    if (GetMenuItemCount(menu) > 0) {
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    }
+    AppendMenuW(menu, MF_STRING, kDownload, MenuItem(PE_TEXT_CMD_PICTURES).c_str());
+    RECT arrow;
+    GetWindowRect(picturesMenu_, &arrow);
+    UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_RIGHTALIGN | TPM_TOPALIGN, arrow.right, arrow.bottom, 0, parent_, nullptr);
+    DestroyMenu(menu);
+    if (chosen == kDownload) {
+        LoadPictures();
+    } else if (chosen == kSender || chosen == kDomain) {
+        bool whole = chosen == kDomain;
+        // shown again: the core now loads them by itself, as it will for the sender's next messages
+        if (pe_trust_sender(core_, (whole ? domain : sender).c_str(), whole) && (uid_ || !file_.empty())) {
+            StartView();
+        } else {
+            LoadPictures();
+        }
     }
 }
 
-core::Draft Reader::DraftOf(PeDraftKind kind) const {
+void Reader::Print(HWND owner) {
+    if (const PeMessageInfo* info = Info()) {
+        // the message as it is shown, with the pictures the user allowed or the core loaded
+        OpenPrintWindow(owner, preview_.Environment(), info->document, PicturesShown(), Text(info->subject));
+    }
+}
+
+core::Draft Reader::DraftOf(PeDraftKind kind, int64_t account) const {
+    if (!file_.empty() && view_) {
+        return core::Draft(pe_file_draft(core_, core::Narrow(file_).c_str(), account, kind));
+    }
     if (!uid_ || !view_) {
         return core::Draft();
     }
@@ -549,7 +648,9 @@ void Reader::OpenInCalendar() {
     wchar_t temp[MAX_PATH] = L"";
     GetTempPathW(MAX_PATH, temp);
     std::wstring dir = std::wstring(temp) + L"InboxClassic\\Invitations";
-    core::String path(pe_invitation_file(core_, folder_, uid_, core::Narrow(dir).c_str()));
+    std::string target = core::Narrow(dir);
+    core::String path(file_.empty() ? pe_invitation_file(core_, folder_, uid_, target.c_str())
+                                    : pe_file_invitation_file(core_, core::Narrow(file_).c_str(), target.c_str()));
     if (!path) {
         MessageBoxW(parent_, core::T(PE_TEXT_UI_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
@@ -562,6 +663,21 @@ void Reader::OpenInCalendar() {
 }
 
 bool Reader::OnDrawItem(const DRAWITEMSTRUCT& item) {
+    if (item.hwndItem == picturesMenu_) {
+        // a small arrow down on the bar's color, as a drop-down button's
+        FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_INFOBK));
+        int cx = (item.rcItem.left + item.rcItem.right) / 2, cy = (item.rcItem.top + item.rcItem.bottom) / 2;
+        int half = Scale(4);
+        POINT points[] = {{cx - half, cy - half / 2}, {cx + half + 1, cy - half / 2}, {cx, cy + half / 2 + 1}};
+        HBRUSH ink = CreateSolidBrush(GetSysColor(COLOR_INFOTEXT));
+        HGDIOBJ oldBrush = SelectObject(item.hDC, ink);
+        HGDIOBJ oldPen = SelectObject(item.hDC, GetStockObject(NULL_PEN));
+        Polygon(item.hDC, points, 3);
+        SelectObject(item.hDC, oldPen);
+        SelectObject(item.hDC, oldBrush);
+        DeleteObject(ink);
+        return true;
+    }
     if (item.hwndItem == logo_) {
         // the logo, its own transparency kept, in the middle of its place beside the header
         FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
@@ -596,6 +712,9 @@ bool Reader::OnCommand(WORD id, WORD) {
         return true;
     case IDC_PICTURES:
         LoadPictures();
+        return true;
+    case IDC_PICTURES_MENU:
+        ChoosePictures();
         return true;
     case IDC_RETRY:
         Retry();

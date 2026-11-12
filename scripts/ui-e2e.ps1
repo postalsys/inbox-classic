@@ -256,7 +256,7 @@ public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr par
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
 $WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $CB_GETCOUNT = 0x0146; $CB_GETLBTEXT = 0x0148; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
-$VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
+$VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_UP = 0x26; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_EXIT = 101; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_VIEW_SOURCE = 132; $IDM_AI_AGENTS = 133
@@ -276,6 +276,8 @@ $savedGrouping = (Get-ItemProperty -Path $preferencesKey -Name GroupByConversati
 $savedClosedRows = (Get-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -ErrorAction SilentlyContinue).ClosedFolderRows
 # and the sign-in codes in notifications, left out so they are off, as out of the box
 $savedCodes = (Get-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue).CodesInNotifications
+# and View > Hide Read Messages, left out so every message is listed, as out of the box
+$savedHideRead = (Get-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue).HideReadMessages
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
 Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Out 'result.txt')
 Start-Transcript -Path (Join-Path $Out 'log.txt') -Force | Out-Null
@@ -557,7 +559,16 @@ function RawText($message) {
 function Find([string]$mailbox, [string]$pattern) { (Messages $mailbox) | Where-Object { (RawText $_) -match $pattern } | Select-Object -First 1 }
 function Seen([string]$pattern) { (Find 'INBOX' $pattern).flags -contains '\Seen' }
 function AddMessage([string]$raw, [string[]]$flags = @(), [string]$mailbox = 'INBOX', [string]$server = $rest) {
-    $body = @{ raw = $raw; flags = $flags } | ConvertTo-Json
+    $body = @{ raw = $raw; flags = $flags }
+    # a message dated ahead, so it lists above what came before it, arrives at its date: the list shows no date
+    # later than the arrival
+    if ($raw -match '(?m)^Date: ([^\r\n]+)') {
+        $dated = [DateTime]::MinValue
+        if ([DateTime]::TryParse($Matches[1], [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AdjustToUniversal, [ref]$dated) -and $dated -gt [DateTime]::UtcNow) {
+            $body.internaldate = $dated.ToString("dd-MMM-yyyy HH:mm:ss '+0000'", [Globalization.CultureInfo]::InvariantCulture)
+        }
+    }
+    $body = $body | ConvertTo-Json
     [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body "$server/$mailbox/messages")
 }
 
@@ -626,6 +637,7 @@ try {
     Remove-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
     # the first page of Add Mail Account, with the address fields when $fields, else the page that offers a
@@ -2568,6 +2580,48 @@ public static class Dragger {
     Command $main $IDM_SYNC
     [void](WaitFor { (SubjectRows $topic).Count -eq 0 } 20)
 
+    # ---- unread messages only ----
+
+    Step 'unread messages only'
+    $IDM_HIDE_READ = 154; $TB_ISBUTTONCHECKED = 0x040A
+    # two unread messages and one read, each a conversation of its own
+    $unreadOnly = @('Unread only: still to read', 'Unread only: read in the list', 'Unread only: read before')
+    $unreadAt = [DateTime]::UtcNow
+    for ($i = 0; $i -lt 3; $i++) {
+        AddMessage ("From: Ivy <ivy@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $($unreadOnly[$i])`r`n" +
+            "Message-ID: <unread-only-$i@example.com>`r`nDate: $($unreadAt.AddMinutes(-$i).ToString('r'))`r`n`r`nA message for the filter.`r`n") @(if ($i -eq 2) { '\Seen' })
+    }
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    $listed = { param($subject) (SubjectRows $subject).Count -eq 1 }
+    Check ([bool](WaitFor { @($unreadOnly | Where-Object { & $listed $_ }).Count -eq 3 } 30)) 'three messages for the filter are in the Inbox, one of them read'
+    $allRows = Rows
+    Command $main $IDM_HIDE_READ
+    Check ([bool](WaitFor { (& $listed $unreadOnly[0]) -and (& $listed $unreadOnly[1]) -and -not (& $listed $unreadOnly[2]) } 10)) "View > Hide Read Messages lists the unread ones only ($allRows rows before, $(Rows) now)"
+    Check (MenuChecked 2 $IDM_HIDE_READ) 'and is checked in the View menu'
+    Check ([int][Native.Win]::SendMessage($toolbar, $TB_ISBUTTONCHECKED, [IntPtr]$IDM_HIDE_READ, [IntPtr]::Zero) -ne 0) "the toolbar's Unread button is pressed"
+    Check ((Get-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue).HideReadMessages -eq 1) 'and that is kept for the next start'
+    # one read in the reading pane stays in the list until the folder changes
+    SelectRow (& $rowOf $unreadOnly[1])
+    Check ([bool](WaitFor { Seen "Subject: $([regex]::Escape($unreadOnly[1]))" } 20)) 'reading one marks it read on the server'
+    Start-Sleep -Seconds 1
+    Check (& $listed $unreadOnly[1]) 'and it stays in the list while the folder is shown'
+    Shot $main 'list-unread-only'
+    SelectFolder 1
+    Start-Sleep -Seconds 1
+    SelectFolder 0
+    Check ([bool](WaitFor { (& $listed $unreadOnly[0]) -and -not (& $listed $unreadOnly[1]) } 10)) 'another folder and back: the one read is gone, the unread one is there'
+    Command $main $IDM_HIDE_READ
+    Check ([bool](WaitFor { @($unreadOnly | Where-Object { & $listed $_ }).Count -eq 3 } 10)) 'turned off, every message is listed again'
+    Check (-not (MenuChecked 2 $IDM_HIDE_READ)) 'and the menu item is no longer checked'
+    Check ([int][Native.Win]::SendMessage($toolbar, $TB_ISBUTTONCHECKED, [IntPtr]$IDM_HIDE_READ, [IntPtr]::Zero) -eq 0) 'and the button is up'
+    for ($i = 0; $i -lt 3; $i++) {
+        $m = Find 'INBOX' "Message-ID: <unread-only-$i@example.com>"
+        if ($m) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($m.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { @($unreadOnly | Where-Object { & $listed $_ }).Count -eq 0 } 20)
+
     # ---- a message that bounced ----
 
     Step 'a message that bounced'
@@ -2733,6 +2787,123 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     [void](WaitFor { @($codeSubjects | Where-Object { $null -ne (& $rowOf $_) }).Count -eq 0 } 20)
+
+    # ---- pictures from trusted senders ----
+
+    Step 'pictures from trusted senders'
+    $IDC_PICTURES_MENU = 234; $IDM_OPTIONS = 137; $IDC_OPTIONS_PICTURES = 665; $IDC_OPTIONS_TRUSTED = 667
+    $IDC_TRUSTED_LIST = 669; $IDC_TRUSTED_REMOVE = 670; $IDC_TRUSTED_EMPTY = 671; $BM_SETCHECK = 0x00F1; $BM_GETCHECK = 0x00F0
+    # a shop's newsletter with a picture on the internet: one the provider says shop.example signed, one it does not
+    $shopMessage = {
+        param([string]$verdict, [string]$subject, [string]$id)
+        "Authentication-Results: mx.inboxclassic.test; dkim=$verdict header.d=shop.example; dmarc=$verdict header.from=shop.example`r`n" +
+            "From: Shop Example <news@shop.example>`r`nTo: testuser@inboxclassic.test`r`nSubject: $subject`r`n" +
+            "Date: $($now.AddHours(-4).ToString('r'))`r`nMessage-ID: <$id@shop.example>`r`nMIME-Version: 1.0`r`n" +
+            "Content-Type: text/html; charset=utf-8`r`n`r`n<p>Our autumn sale starts today.</p>" +
+            '<p><img src="https://nodemailer.com/img/nm_logo_200x136.png" width="200" height="136" alt="Sale"></p>' + "`r`n"
+    }
+    $shopSubjects = @('Autumn sale', 'Autumn sale, forged')
+    AddMessage (& $shopMessage 'pass' $shopSubjects[0] 'sale-signed') @('\Seen')
+    AddMessage (& $shopMessage 'fail' $shopSubjects[1] 'sale-forged') @('\Seen')
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    Check ([bool](WaitFor { @($shopSubjects | Where-Object { $null -ne (& $rowOf $_) }).Count -eq 2 } 30)) "two shop newsletters are in the Inbox"
+    # a message shown, and whether the pictures bar is over it once it is there
+    $showShop = {
+        param($subject)
+        SelectRow (& $rowOf $subject)
+        Start-Sleep -Seconds 2
+        Visible $main $IDC_PICTURES
+    }
+    # the bar's arrow menu: its labels, then the item $choose (by its label, none for Esc) chosen with the keys
+    $pictureMenu = {
+        param([string]$choose, [string]$shot)
+        Command $main $IDC_PICTURES_MENU
+        $menu = WaitWindow '#32768' $null 10
+        if (-not $menu) { return @() }
+        $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+        $labels = @([Native.Win]::MenuLabels($hmenu))
+        if ($shot) { Shot $main $shot $menu }
+        $at = if ($choose) { [array]::IndexOf($labels, $choose) } else { -1 }
+        if ($at -lt 0) {
+            Key $menu $VK_ESCAPE
+        } else {
+            for ($i = 0; $i -le $at; $i++) { if ($labels[$i]) { Key $menu $VK_DOWN } }
+            Key $menu $VK_RETURN
+        }
+        if (-not (WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 3)) {
+            # where the menu does not take posted keys: real keystrokes, the app in front
+            [void][Native.Win]::SetForegroundWindow($main)
+            $keys = if ($at -lt 0) { '{ESC}' } else { ('{DOWN}' * @($labels[0..$at] | Where-Object { $_ }).Count) + '{ENTER}' }
+            [System.Windows.Forms.SendKeys]::SendWait($keys)
+            [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+        }
+        $labels
+    }
+    $alwaysSender = 'Always download pictures from news@shop.example'
+    $alwaysDomain = 'Always download pictures from everyone at shop.example'
+    Check (& $showShop $shopSubjects[0]) 'a signed newsletter has its pictures blocked at first'
+    Check (Visible $main $IDC_PICTURES_MENU) "and the bar has its arrow"
+    $labels = & $pictureMenu $alwaysDomain 'pictures-2-trusted'
+    Check (($labels -contains $alwaysSender) -and ($labels -contains $alwaysDomain) -and ($labels -contains 'Download Pictures')) "the arrow offers Always for the sender and their domain, and Download Pictures ($($labels -join ', '))"
+    Check ([bool](WaitFor { -not (Visible $main $IDC_PICTURES) } 10)) 'Always from everyone at shop.example shows the pictures, and the bar goes'
+    Check (& $showShop $shopSubjects[1]) 'a forged one from the same domain still has the bar'
+    $labels = & $pictureMenu $null $null
+    Check ((@($labels | Where-Object { $_ -like 'Always*' }).Count -eq 0) -and (@($labels | Where-Object { $_ -match 'could not be confirmed' }).Count -eq 1)) "its arrow has no Always, but says why ($($labels -join ', '))"
+    Check (-not (& $showShop $shopSubjects[0])) 'the signed one shows its pictures by itself when opened again'
+    # Options lists the domain, and Remove takes it away
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    Check ($null -ne $o) 'Tools > Options opens'
+    if ($o) {
+        $always = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PICTURES)
+        Check ($always -ne [IntPtr]::Zero -and [int][Native.Win]::SendMessage($always, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'Options can download pictures in all messages, off at first'
+        Click $o $IDC_OPTIONS_TRUSTED
+        $trusted = WaitShown 'InboxClassicTrustedSenders' 10
+        Check ($null -ne $trusted) 'Trusted Senders... opens the list'
+        if ($trusted) {
+            $senders = [Native.Win]::GetDlgItem($trusted, $IDC_TRUSTED_LIST)
+            Check ((ListCount $senders) -eq 1 -and [Native.Win]::RemoteListText($senders, 0, 0) -eq 'Everyone at shop.example') "with the domain chosen ($([Native.Win]::RemoteListText($senders, 0, 0)))"
+            Shot $trusted 'pictures-3-options'
+            # a click on its row, as the mouse would, then Remove
+            $point = [IntPtr]((8 -shl 16) -bor 30)
+            [void][Native.Win]::PostMessage($senders, 0x0201, [IntPtr]1, $point)
+            [void][Native.Win]::PostMessage($senders, 0x0202, [IntPtr]::Zero, $point)
+            [void](WaitFor { [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($trusted, $IDC_TRUSTED_REMOVE)) } 5)
+            Click $trusted $IDC_TRUSTED_REMOVE
+            Check ([bool](WaitFor { (Visible $trusted $IDC_TRUSTED_EMPTY) -and -not (Visible $trusted $IDC_TRUSTED_LIST) } 5)) "Remove takes it away, and the window says nobody is trusted ($(GetText $trusted $IDC_TRUSTED_EMPTY))"
+            Click $trusted 1
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($trusted) } 5)) 'Close closes it'
+        }
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+    }
+    Check (& $showShop $shopSubjects[0]) 'removed, the signed one asks again'
+    # every message's pictures
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PICTURES), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+    }
+    Check (-not (& $showShop $shopSubjects[1])) 'with pictures in all messages on, the forged one shows them too'
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        $always = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PICTURES)
+        Check ([int][Native.Win]::SendMessage($always, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1) 'Options shows it on'
+        [void][Native.Win]::SendMessage($always, $BM_SETCHECK, [IntPtr]0, [IntPtr]::Zero)
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+    }
+    Check (& $showShop $shopSubjects[0]) 'turned off, pictures are blocked again'
+    foreach ($id in @('sale-signed', 'sale-forged')) {
+        $added = Find 'INBOX' "Message-ID: <$id@shop.example>"
+        if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { @($shopSubjects | Where-Object { $null -ne (& $rowOf $_) }).Count -eq 0 } 20)
 
     # ---- folders ----
 
@@ -3916,6 +4087,63 @@ public static class Dragger {
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($print) } 10)) 'and closing it prints nothing'
     }
 
+    Step 'opening a message file'
+    # a .eml file opened from File Explorer: a second start with its path hands it to the app that runs
+    $emlSubject = 'A message file to open'
+    $emlFile = Join-Path (Resolve-Path $Out) 'opened.eml'
+    Set-Content -LiteralPath $emlFile -Encoding ASCII -Value ("From: Pat Example <pat@example.com>`r`nTo: testuser@inboxclassic.test`r`n" +
+        "Subject: $emlSubject`r`nDate: $([DateTime]::UtcNow.AddDays(-2).ToString('r'))`r`nMessage-ID: <opened-file@example.com>`r`n" +
+        "MIME-Version: 1.0`r`nContent-Type: multipart/mixed; boundary=`"eml-boundary`"`r`n`r`n" +
+        "--eml-boundary`r`nContent-Type: text/plain; charset=utf-8`r`n`r`nThis message was saved as a file and opened from it.`r`n" +
+        "--eml-boundary`r`nContent-Type: text/plain; charset=utf-8`r`nContent-Disposition: attachment; filename=`"file-notes.txt`"`r`n`r`n" +
+        "notes that came in the message file`r`n--eml-boundary--`r`n")
+    $second = Start-Process -FilePath $Exe -ArgumentList @('--store', "`"$store`"", "`"$emlFile`"") -PassThru
+    $started += $second
+    $fileWindow = WaitWindow 'InboxClassicMessage' "$emlSubject - Inbox Classic" 20
+    Check ($null -ne $fileWindow) 'a message window opens with the message of the file'
+    Check ([bool](WaitFor { $second.HasExited } 10)) 'and the second start hands it over and ends'
+    if ($fileWindow) {
+        $fileBar = [Native.Win]::FindDescendants($fileWindow, 'ToolbarWindow32') | Select-Object -First 1
+        $hasButton = { param($id) [int][Native.Win]::SendMessage($fileBar, $TB_COMMANDTOINDEX, [IntPtr]$id, [IntPtr]::Zero) -ge 0 }
+        Check ((& $hasButton $IDM_REPLY) -and (& $hasButton $IDM_PRINT) -and (& $hasButton $IDM_SAVE_AS) -and -not (& $hasButton $IDM_DELETE)) 'its toolbar answers, prints and saves it, and has no Delete (it is no folder''s)'
+        Start-Sleep -Seconds 2
+        Check ([bool](WaitFor { Visible $fileWindow $IDC_ATTACHMENTS } 10)) 'the file''s message shows the paper clip of its attachment'
+        Shot $fileWindow 'files-4-open-eml'
+        # Save Attachments of the paper clip's menu (its last item) into a folder, as for a folder's message
+        $emlSaveDir = Join-Path (Resolve-Path $Out) 'eml-attachments'
+        Remove-Item -Recurse -Force -LiteralPath $emlSaveDir -ErrorAction SilentlyContinue
+        [void](New-Item -ItemType Directory -Path $emlSaveDir)
+        Command $fileWindow $IDC_ATTACHMENTS
+        $menu = WaitWindow '#32768' $null 10
+        Check ($null -ne $menu) 'its paper clip offers the file'
+        if ($menu) {
+            Start-Sleep -Milliseconds 500
+            $menu = [Native.Win]::FindWindow('#32768', [NullString]::Value)
+            if ($menu -ne [IntPtr]::Zero) {
+                Key $menu $VK_UP
+                Key $menu $VK_RETURN
+            }
+            if (-not (WaitWindow '#32770' 'Save Attachments' 5)) {
+                # where the menu does not take posted keys: real keystrokes, the window in front
+                [void][Native.Win]::SetForegroundWindow($fileWindow)
+                [System.Windows.Forms.SendKeys]::SendWait('{UP}{ENTER}')
+            }
+            Check (AnswerFolderDialog 'Save Attachments' $emlSaveDir) 'Save Attachments asks for a folder'
+            $emlSaved = WaitFor { $f = Join-Path $emlSaveDir 'file-notes.txt'; if (Test-Path $f) { Get-Content -Raw $f } } 10
+            Check ($emlSaved -and $emlSaved.TrimEnd() -eq 'notes that came in the message file') "and saves the file's attachment there ($emlSaved)"
+        }
+        Command $fileWindow $IDM_REPLY
+        $compose = WaitCompose
+        Check ($null -ne $compose) 'Reply opens a new message'
+        if ($compose) {
+            $replySubject = GetText $compose $IDC_SUBJECT
+            Check ($replySubject -eq "Re: $emlSubject") "answering the file's message ($replySubject)"
+            CloseCompose $compose
+        }
+        [void][Native.Win]::PostMessage($fileWindow, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($fileWindow) } 10)) 'and the window closes'
+    }
+
     Step 'the tray'
     Add-Type -Namespace Native -Name Tray -MemberDefinition @'
 [StructLayout(LayoutKind.Sequential)] public struct NOTIFYICONIDENTIFIER { public int cbSize; public IntPtr hWnd; public uint uID; public Guid guidItem; }
@@ -3947,6 +4175,11 @@ public static bool HasIcon(IntPtr window) {
     # the taskbar button counts what is unread in the Inbox
     Start-Sleep -Seconds 1
     Shot $desktop 'tray-2-taskbar'
+    # the count as an overlay on the taskbar button: what the app set, through its test hook (TrayBadge, plus 10)
+    $badge = WaitFor { $b = [Native.Win]::SendText($main, 0x42414447, '') - 10; if ($b -gt 0) { $b } } 10
+    Check ($null -ne $badge) "the taskbar button shows the unread count as an overlay ($([Native.Win]::SendText($main, 0x42414447, '') - 10))"
+    $taskbar = [Native.Win]::FindWindow('Shell_TrayWnd', [NullString]::Value)
+    if ($taskbar -ne [IntPtr]::Zero) { Shot $taskbar 'tray-3-badge' }
 
     Step 'closing'
     # a message being written is asked about first: Cancel keeps the app and the message, No lets both go
@@ -4165,6 +4398,11 @@ public static bool HasIcon(IntPtr window) {
         Remove-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue
     } else {
         Set-ItemProperty -Path $preferencesKey -Name CodesInNotifications -Value $savedCodes -Type DWord
+    }
+    if ($null -eq $savedHideRead) {
+        Remove-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue
+    } else {
+        Set-ItemProperty -Path $preferencesKey -Name HideReadMessages -Value $savedHideRead -Type DWord
     }
     $harness.StandardInput.Close()
     if (-not $harness.WaitForExit(5000)) { $harness.Kill() }

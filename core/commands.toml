@@ -325,6 +325,14 @@ windows = 153
 menu = "view"
 toggle = true
 
+# the list's unread messages only (Outlook Express's View > Current View > Hide Read Messages); a message read stays
+# listed until the folder changes (pe-core list_view.rs)
+[[command]]
+id = "hide_read"
+windows = 154
+menu = "view"
+toggle = true
+
 [[command]]
 id = "ai_agents"
 windows = 133

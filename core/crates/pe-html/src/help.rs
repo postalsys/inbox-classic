@@ -563,7 +563,7 @@ fn page(
          <meta http-equiv=\"Content-Security-Policy\" content=\"{csp}\">\n{head}<title>{}</title>\n<style>{}</style>\n\
          </head>\n<body class=\"{}\">\n{}{anchor}{body}{}</body>\n</html>\n",
         escape(title),
-        style(platform),
+        style(platform) + if target == HelpTarget::Web { WEB_STYLE } else { "" },
         platform.name(),
         around.0,
         around.1
@@ -610,6 +610,21 @@ fn web_bar(platform: Platform, language: &str, page: &str) -> String {
          <span class=\"platforms\">{platforms}</span><span class=\"languages\">{languages}</span></header>\n"
     )
 }
+
+/// The website's help in the homepage's look: its colors and type, the page centered, the contents beside the topic
+/// as the reader scrolls (inboxclassic.com/help)
+const WEB_STYLE: &str = "body.windows,body.mac,body.linux{font:16px/1.6 system-ui,-apple-system,'Segoe UI',sans-serif;\
+     margin:0;background:#f7f7fb;color:#1f2330}header.bar{max-width:1180px;margin:0 auto;padding:14px 24px;\
+     border-bottom:1px solid #e3e3ee}header.bar .brand{color:#3d4aa8;font-size:1.1em}header.bar a{color:#3d4aa8}\
+     .web{max-width:1180px;margin:0 auto;padding:24px}.web main{background:#fff;border-radius:12px;padding:28px 36px;\
+     box-shadow:0 1px 3px rgba(20,20,60,.08)}.web .side{position:sticky;top:16px;align-self:flex-start;\
+     max-height:calc(100vh - 32px);overflow:auto}.web .side a{color:#30395e;text-decoration:none}\
+     .web .side a:hover,.web main a{color:#3d4aa8}h1,h2{color:#1f2330}h2{border-bottom:none}\
+     aside.note,aside.warning{background:#f1f2fb;border:1px solid #e0e2f5;border-radius:10px}\
+     @media(prefers-color-scheme:dark){body.windows,body.mac,body.linux{background:#14151c;color:#e6e7ef}\
+     .web main{background:#1d1f29;box-shadow:none}header.bar{border-color:#2c2f3d}.web .side a{color:#c5c9e6}\
+     h1,h2{color:#e6e7ef}aside.note,aside.warning{background:#232637;border-color:#30344a}\
+     header.bar a,header.bar .brand,.web main a,.web .side a:hover{color:#9aa6ff}}";
 
 /// The page's style: Tahoma and the classic colors on Windows, the system's font and colors (light and dark) on the
 /// Mac and Linux; a line of about 75 characters on all

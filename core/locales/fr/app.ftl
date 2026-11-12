@@ -57,6 +57,8 @@ cmd-expand-all-threads = &Développer toutes les conversations
 cmd-collapse-all-threads = Ré&duire toutes les conversations
 ui-group-by-conversation = &Regrouper les messages par conversation
 cmd-hide-ignored = &Masquer les conversations ignorées
+# review: new
+cmd-hide-read = Masquer les messages &lus
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...
@@ -491,3 +493,33 @@ ui-book-not-exported = Le carnet d'adresses n'a pas pu être enregistré : { $re
 ui-code-copied = Code copié
 # review: new
 ui-codes-in-notifications = Afficher les codes de connexion dans les notifications de nouveau courrier
+# review: new
+ui-tool-unread-only = Non lus
+# review: new
+ui-no-unread = Il n'y a aucun message non lu ici.
+# review: new
+ui-pictures-always-sender = Toujours télécharger les images de { $sender }
+# review: new
+ui-pictures-always-domain = Toujours télécharger les images de tous chez { $domain }
+# review: new
+ui-pictures-unconfirmed = L'expéditeur n'a pas pu être confirmé comme { $domain } : ses images ne sont donc pas téléchargées d'elles-mêmes.
+# review: new
+ui-pictures-always-option = Télécharger les images de tous les messages
+# review: new
+ui-pictures-always-warning = Les expéditeurs peuvent alors savoir quand vous lisez leurs messages.
+# review: new
+ui-trusted-senders-button = Expéditeurs de confiance...
+# review: new
+ui-trusted-senders-title = Expéditeurs de confiance
+# review: new
+ui-trusted-senders-note = Les images de ces expéditeurs sont téléchargées quand leur fournisseur de messagerie confirme que le message vient d'eux.
+# review: new
+ui-trusted-everyone-at = Tous chez { $domain }
+# review: new
+ui-trusted-senders-empty = Aucun expéditeur n'est encore approuvé.
+# review: new
+ui-eml-default = Ouvrir les fichiers .eml avec Inbox Classic
+# review: new
+ui-eml-default-done = Inbox Classic ouvre maintenant les fichiers .eml.
+# review: new
+ui-eml-default-failed = Inbox Classic n'a pas pu devenir l'application des fichiers .eml : { $reason }

@@ -35,6 +35,7 @@ enum ToolbarIcon : int {
     ICON_PEOPLE_ADD = 18,
     ICON_CONTACT_CARD = 19,
     ICON_MAIL_EDIT = 20,
+    ICON_FILTER = 21,
 };
 
 enum FormatIcon : int {

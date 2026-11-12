@@ -1,8 +1,10 @@
 // A message in a window of its own, as Outlook Express opens one with a double-click or Enter: a Reader (Reader.swift),
 // the same as the main window's reading pane, under a toolbar of the message's actions, with Previous and Next through
-// the list it was opened from. Several can be open at once; the core's events reach each of them.
+// the list it was opened from. Several can be open at once; the core's events reach each of them. A message file
+// (.eml) opened from the Finder has one too, of no folder: it can be answered, printed and saved, nothing else.
 import AppKit
 import CInboxClassic
+import UniformTypeIdentifiers
 
 /// The window of a message: Esc closes it, as Cmd+W does
 final class MessageFrame: NSWindow {
@@ -36,6 +38,8 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     private let listView: ListView?
     /// the folder that list showed (0 for All Inboxes)
     private let listFolder: Int64
+    /// the message file shown, nil for a message of a folder
+    let file: URL?
     /// the message shown
     private(set) var folder: Int64 = 0
     private(set) var uid: UInt64 = 0
@@ -67,6 +71,28 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         return made
     }
 
+    /// opens the message file `file` (.eml) in a window, or brings its window to the front; nil when it is shown,
+    /// otherwise why it is not (the core's words: no message, too large, not readable)
+    static func open(core: Core, mailbox: Mailbox, file: URL) -> String? {
+        if let shown = open.first(where: { $0.file?.standardizedFileURL == file.standardizedFileURL }) {
+            shown.window.makeKeyAndOrderFront(nil)
+            return nil
+        }
+        let made = MessageWindow(core: core, mailbox: mailbox, file: file)
+        if let reason = made.reader.open(file: file.path) {
+            return reason
+        }
+        if let last = open.last?.window {
+            made.window.setFrameTopLeftPoint(made.window.cascadeTopLeft(from: NSPoint(x: last.frame.minX, y: last.frame.maxY)))
+        } else if TestHooks.testing || !made.window.setFrameUsingName("Message") {
+            made.window.center()
+        }
+        open.append(made)
+        made.window.makeKeyAndOrderFront(nil)
+        NSApp.activate()
+        return nil
+    }
+
     /// the message window in front, which the menu commands act on
     static var key: MessageWindow? { open.first { $0.window.isKeyWindow } }
 
@@ -82,10 +108,12 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         open.lazy.compactMap { $0.reader.unsubscribed(request, problem: problem) }.first
     }
 
-    private init(core: Core, mailbox: Mailbox) {
+    private init(core: Core, mailbox: Mailbox, file: URL? = nil) {
         self.core = core
         self.mailbox = mailbox
-        listView = mailbox.listCopy()
+        self.file = file
+        // a file is of no list: no Previous and Next
+        listView = file == nil ? mailbox.listCopy() : nil
         listFolder = mailbox.folder
         reader = Reader(core: core)
         window = MessageFrame(contentRect: NSRect(x: 0, y: 0, width: 820, height: 680),
@@ -107,6 +135,11 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         window.toolbar = toolbar
         window.toolbarStyle = .expanded
         window.contentView = reader.view
+        if let file {
+            // the file's name under the subject, and its icon in the title bar, as a document window has
+            window.subtitle = file.lastPathComponent
+            window.representedURL = file
+        }
         reader.status = { [weak mailbox] in mailbox?.status($0) }
         reader.openMailto = { [weak mailbox] in mailbox?.openMailto($0) }
         // the message that bounced, in the main window
@@ -204,8 +237,17 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
 
     // ---- what it does ----
 
+    /// the commands about a message that a file has nothing to do with: no folder, flags or list
+    private static let notForFiles: Set<Command> = [
+        .delete, .archive, .junk, .notJunk, .markRead, .markUnread, .flag, .watchConversation, .ignoreConversation,
+        .nextMessage, .previousMessage, .nextUnread, .properties, .viewSource, .addSenderToBook, .move, .copy, .selectAll,
+    ]
+
     /// what the menus do with this window in front; false for a command that is not about the message
     func perform(_ command: Command) -> Bool {
+        if file != nil {
+            return performForFile(command)
+        }
         switch command {
         case .reply: reply(PE_DRAFT_KIND_REPLY)
         case .replyAll: reply(PE_DRAFT_KIND_REPLY_ALL)
@@ -234,9 +276,34 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         return true
     }
 
+    /// a message file in front: answered, printed, saved and its pictures shown; the commands of a folder's message
+    /// do nothing (they are off)
+    private func performForFile(_ command: Command) -> Bool {
+        switch command {
+        case .reply: reply(PE_DRAFT_KIND_REPLY)
+        case .replyAll: reply(PE_DRAFT_KIND_REPLY_ALL)
+        case .forward: reply(PE_DRAFT_KIND_FORWARD)
+        case .print: reader.print()
+        case .pictures: reader.loadPictures()
+        case .findInMessage: reader.findCommand()
+        case .saveAs: saveFileAs()
+        case _ where MessageWindow.notForFiles.contains(command): break
+        default: return false
+        }
+        return true
+    }
+
     /// whether a command of the menus is on with this window in front; nil for one that is not about the message
     func validate(_ command: Command) -> Bool? {
         let shown = reader.messageView != nil
+        if file != nil {
+            switch command {
+            case .reply, .replyAll, .forward, .print, .saveAs, .findInMessage: return shown
+            case .pictures: return reader.picturesBlocked
+            case _ where MessageWindow.notForFiles.contains(command): return false
+            default: return nil
+            }
+        }
         switch command {
         case .reply, .replyAll, .forward, .print: return shown
         case .delete, .markRead, .markUnread, .flag, .saveAs, .properties, .viewSource, .addSenderToBook,
@@ -257,6 +324,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
 
     /// a flag in a colour (1 red to 7 gray), or none (0)
     func flag(color: UInt8) {
+        guard file == nil else { return }
         act(color == 0 ? PE_ACTION_UNFLAG : PE_ACTION_FLAG_COLOR, to: Int64(color))
     }
 
@@ -266,8 +334,25 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     var flagged: Bool { summary.flagged > 0 }
 
     private func reply(_ kind: PeDraftKind) {
-        guard let draft = reader.draft(kind) else { return }
-        ComposeWindow.open(core: core, account: mailbox?.folderAccount(folder) ?? 0, draft: draft)
+        // a file's answer goes from the account the main window is in
+        let account = file == nil ? mailbox?.folderAccount(folder) ?? 0 : mailbox?.currentAccount ?? 0
+        guard account != 0 else {
+            inform(Text.uiAddAccountFirst.text)
+            return
+        }
+        guard let draft = reader.draft(kind, account: account) else { return }
+        ComposeWindow.open(core: core, account: account, draft: draft)
+    }
+
+    /// Save As of a message file: a copy where the user chooses
+    private func saveFileAs() {
+        guard let file else { return }
+        guard let url = saveFilePanel(name: file.lastPathComponent, title: Text.uiSaveMessageAs.text, types: [.emailMessage]),
+              url.standardizedFileURL != file.standardizedFileURL else { return }
+        guard let data = try? Data(contentsOf: file), writeDownloaded(data, to: url) else {
+            inform(Text.uiNotSaved.text, style: .error)
+            return
+        }
     }
 
     /// `action` on the message, what was done in the main window's status bar, or why not
@@ -347,7 +432,11 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         let id = { (item: Item) in NSToolbarItem.Identifier(item.rawValue) }
-        // as the main window groups them: answering, the message, then moving through the list
+        // as the main window groups them: answering, the message, then moving through the list; a file only answered
+        // and printed
+        if file != nil {
+            return [id(.reply), id(.replyAll), id(.forward), .space, id(.print)]
+        }
         return [id(.reply), id(.replyAll), id(.forward), .space, id(.print), id(.delete), id(.archive), id(.junk), .space,
                 id(.previous), id(.next)]
     }

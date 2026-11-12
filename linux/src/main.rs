@@ -52,7 +52,8 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// The command line. Options for test runs: --store <file> uses another mail store, --memory-passwords keeps passwords
 /// for this run only, --pin-certificate <file> trusts only that server certificate, --sign-in-page-file <file> writes
 /// the page of a browser sign-in there for the test to open instead of the browser. A mailto: link (and what follows
-/// it) is a new message to write; a file is a message to put into the selected folder.
+/// it) is a new message to write; a message file (.eml) opens in a window of its own, another file is a message to put
+/// into the selected folder.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Arguments {
     pub store: Option<PathBuf>,
@@ -204,7 +205,11 @@ pub fn run(arguments: Arguments, argv: Vec<String>) -> glib::ExitCode {
             Some(arguments) => app::start(application, arguments),
             // another start for this store: what it was for, here; one in the background (for an agent) finds it running
             None => {
-                let arguments = Arguments::parse(&args);
+                let mut arguments = Arguments::parse(&args);
+                // a file named from where that start ran, not from here
+                if let Some(cwd) = command_line.cwd() {
+                    arguments.files = arguments.files.iter().map(|file| cwd.join(file)).collect();
+                }
                 if !arguments.background {
                     app::hand_over(arguments);
                 }

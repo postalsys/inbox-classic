@@ -28,7 +28,9 @@ final class Reader: NSObject {
     private var account: Int64 = 0
     /// the core's view of the message once it is shown
     private(set) var messageView: MessageView?
-    /// its pictures from the internet are shown
+    /// a message file (.eml) shown, of no folder, instead of a message of the store
+    private(set) var file: String?
+    /// its pictures from the internet were asked for
     private(set) var remoteImages = false
     /// a download asked for and not answered yet: MessageReady or MessageFailed for it is this reader's
     private var waiting = false
@@ -46,6 +48,11 @@ final class Reader: NSObject {
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
     private let unsubscribe = NSButton(title: Text.uiUnsubscribe.text, target: nil, action: nil)
     private let pictures = InfoBar(icon: "image", link: nil)
+    private lazy var picturesHeight = pictures.heightAnchor.constraint(equalToConstant: 28)
+    /// the bar's Download Pictures with its menu of the Always choices, for a sender the provider confirmed
+    let picturesChoices = NSComboButton()
+    /// the bar's Download Pictures alone, for a sender it did not
+    let picturesDownload = NSButton()
     /// over a message that could not be downloaded: Try Again
     private let retry = InfoBar(icon: "arrow_sync", link: nil, button: Text.uiTryAgain.text)
     /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
@@ -109,6 +116,7 @@ final class Reader: NSObject {
         pictures.text = Text.uiPicturesBlocked.text
         pictures.clicked = { [weak self] in self?.loadPictures() }
         pictures.setAccessibilityIdentifier("reader.pictures")
+        setUpPicturesButtons()
         retry.text = taken(pe_retry_note()) ?? ""
         retry.clicked = { [weak self] in self?.retryDownload() }
         retry.setAccessibilityIdentifier("reader.retry")
@@ -131,7 +139,7 @@ final class Reader: NSObject {
         }
         view.setHuggingPriority(.defaultLow, for: .vertical)
         preview.view.setContentHuggingPriority(.defaultLow, for: .vertical)
-        pictures.heightAnchor.constraint(equalToConstant: 26).isActive = true
+        picturesHeight.isActive = true
         retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
         findBar.heightAnchor.constraint(equalToConstant: 36).isActive = true
         clearView(loading: false)
@@ -225,7 +233,7 @@ final class Reader: NSObject {
         picturesOffered = false
     }
 
-    private func show(_ info: PeMessageInfo, view: MessageView, pictures allowed: Bool) {
+    private func show(_ info: PeMessageInfo, view: MessageView) {
         downloadingTimer?.invalidate()
         retry.isHidden = true
         showHeader(true)
@@ -237,12 +245,76 @@ final class Reader: NSObject {
         attachments.addItem(withTitle: Text.macFiles.text(["count": files]))
         attachments.item(at: 0)?.image = Icons.list("attach")
         // a mailing list that says how to leave it
-        unsubscribe.isHidden = info.unsubscribe == PE_UNSUBSCRIBE_NONE
+        unsubscribe.isHidden = info.unsubscribe == PE_UNSUBSCRIBE_NONE || file != nil
+        // asked for, or loaded by themselves (Settings, a trusted sender the provider confirmed): the core says
+        let allowed = info.pictures_loaded || remoteImages
         preview.show(text(info.document), pictures: allowed)
         // offered only for a message with pictures on the internet, until they are shown
         picturesOffered = info.remote_images && !allowed
         pictures.isHidden = !picturesOffered
+        if picturesOffered {
+            offerPictures(info)
+        }
     }
+
+    // ---- the pictures bar ----
+
+    private func setUpPicturesButtons() {
+        let label = Command.pictures.label
+        picturesChoices.title = label
+        picturesChoices.style = .split
+        picturesChoices.controlSize = .small
+        // the combo button keeps the regular font at the small size: the plain button's, so the two match
+        picturesChoices.font = .systemFont(ofSize: NSFont.systemFontSize(for: .small))
+        picturesChoices.target = self
+        picturesChoices.action = #selector(downloadClicked)
+        picturesChoices.menu = NSMenu()
+        picturesChoices.setAccessibilityIdentifier("reader.pictures.choices")
+        picturesDownload.title = label
+        picturesDownload.bezelStyle = .push
+        picturesDownload.controlSize = .small
+        picturesDownload.target = self
+        picturesDownload.action = #selector(downloadClicked)
+        picturesDownload.setAccessibilityIdentifier("reader.pictures.download")
+        pictures.setAccessories([picturesChoices, picturesDownload])
+    }
+
+    /// the bar for this message: Download Pictures with Always from the sender and from everyone at their domain when
+    /// the provider confirmed them; otherwise Download Pictures alone, and the line that says why
+    private func offerPictures(_ info: PeMessageInfo) {
+        let always = [(text(info.pictures_always_sender), "sender"), (text(info.pictures_always_domain), "domain")]
+            .filter { !$0.0.isEmpty }
+        let unconfirmed = text(info.pictures_unconfirmed)
+        picturesChoices.menu.removeAllItems()
+        for (title, kind) in always {
+            let item = NSMenuItem(title: title, action: #selector(alwaysChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = kind == "domain" ? 1 : 0
+            item.setAccessibilityIdentifier("pictures.always.\(kind)")
+            picturesChoices.menu.addItem(item)
+        }
+        picturesChoices.isHidden = always.isEmpty
+        picturesDownload.isHidden = !always.isEmpty
+        pictures.note = always.isEmpty ? unconfirmed : ""
+        picturesHeight.constant = pictures.note.isEmpty ? 28 : 40
+    }
+
+    @objc private func downloadClicked() {
+        loadPictures()
+    }
+
+    /// Always download pictures from the sender (tag 0) or from everyone at their domain (tag 1): the sender
+    /// trusted, and this message's pictures shown
+    @objc private func alwaysChosen(_ sender: NSMenuItem) {
+        guard let info = messageView?.info?.pointee else { return }
+        let domain = sender.tag == 1
+        let value = text(domain ? info.sender_domain : info.sender)
+        guard !value.isEmpty, core.trustSender(value, domain: domain) else { return }
+        loadPictures()
+    }
+
+    /// the menu of the bar's Always choices, for the UI test
+    var picturesMenu: NSMenu? { picturesChoices.isHidden ? nil : picturesChoices.menu }
 
     private func headerText(_ info: PeMessageInfo) -> NSAttributedString {
         headerText(from: text(info.from), date: info.has_date ? info.date : nil, to: text(info.to), cc: text(info.cc),
@@ -297,6 +369,7 @@ final class Reader: NSObject {
         waiting = false
         remoteImages = false
         messageView = nil
+        file = nil
         logoRequest = 0
         clearView(loading: loading)
     }
@@ -325,13 +398,48 @@ final class Reader: NSObject {
 
     /// the pictures from the internet shown, as the user asked
     func loadPictures() {
-        if uid != 0 && messageView != nil && !remoteImages {
-            remoteImages = true
+        guard showsMessage && !remoteImages else { return }
+        remoteImages = true
+        reload()
+    }
+
+    var picturesBlocked: Bool { showsMessage && !remoteImages && picturesOffered }
+
+    /// the message shown made again: Settings' pictures or trusted senders changed
+    func reload() {
+        guard showsMessage else { return }
+        if file != nil {
+            _ = showFile()
+        } else {
             makeView()
         }
     }
 
-    var picturesBlocked: Bool { uid != 0 && messageView != nil && !remoteImages && picturesOffered }
+    /// a message is shown, of a folder or a file
+    private var showsMessage: Bool { (uid != 0 || file != nil) && messageView != nil }
+
+    /// the message file at `path` (.eml, opened from the Finder) shown; nil when it is, otherwise why not
+    func open(file path: String) -> String? {
+        clear(loading: true)
+        file = path
+        return showFile()
+    }
+
+    /// the core reads the file into a view at once: it is the user's own, on their disk
+    private func showFile() -> String? {
+        guard let file else { return nil }
+        var error: UnsafeMutablePointer<CChar>?
+        let made = MessageView(file.withCString { pe_file_view(core.handle, $0, remoteImages, &error) })
+        let reason = taken(error)
+        guard let made, let info = made.info else {
+            clear(loading: false)
+            return reason ?? Text.uiNotShown.text
+        }
+        messageView = made
+        show(info.pointee, view: made)
+        shownHandler()
+        return nil
+    }
 
     /// parsing, folding and sanitizing a large message takes a while: on a worker, ViewReady follows
     private func makeView() {
@@ -351,7 +459,7 @@ final class Reader: NSObject {
             showProblem(Text.uiNotShown.text)
             return
         }
-        show(info.pointee, view: messageView, pictures: remoteImages)
+        show(info.pointee, view: messageView)
         if info.pointee.has_logo {
             logoRequest = pe_logo_start(core.handle, folder, uid, UInt32(logoPixels))
         }
@@ -430,16 +538,20 @@ final class Reader: NSObject {
         bouncedHandler(info.bounced_folder, info.bounced_uid)
     }
 
-    /// a reply, a reply to all or a forward of the message shown
-    func draft(_ kind: PeDraftKind) -> Draft? {
-        guard uid != 0, messageView != nil else { return nil }
+    /// a reply, a reply to all or a forward of the message shown; of a message file from `account`
+    func draft(_ kind: PeDraftKind, account from: Int64 = 0) -> Draft? {
+        guard showsMessage else { return nil }
+        if let file {
+            return file.withCString { Draft(pe_file_draft(core.handle, $0, from, kind)) }
+        }
         return Draft(pe_message_draft(core.handle, folder, uid, kind))
     }
 
-    /// the message as it is shown, with the pictures the user allowed
+    /// the message as it is shown, with the pictures it shows
     func print() {
-        guard uid != 0, let info = messageView?.info else { return }
-        Printer.print(text(info.pointee.document), pictures: remoteImages, title: text(info.pointee.subject), owner: view.window)
+        guard showsMessage, let info = messageView?.info else { return }
+        Printer.print(text(info.pointee.document), pictures: info.pointee.pictures_loaded || remoteImages,
+                      title: text(info.pointee.subject), owner: view.window)
     }
 
     // ---- Find in This Message ----
@@ -486,7 +598,11 @@ final class Reader: NSObject {
     @objc private func saveAttachment(_ sender: NSMenuItem) {
         var length = 0
         var name: UnsafeMutablePointer<CChar>?
-        let data = takenBytes(pe_attachment_data(core.handle, folder, uid, sender.tag, &length, &name), length)
+        // the core reads it from the store, or from the message file shown
+        let bytes = file.map { path in
+            path.withCString { pe_file_attachment_data(core.handle, $0, sender.tag, &length, &name) }
+        } ?? pe_attachment_data(core.handle, folder, uid, sender.tag, &length, &name)
+        let data = takenBytes(bytes, length)
         let safeName = taken(name) ?? "attachment"
         guard let data else {
             inform(Text.uiAttachmentNotRead.text, style: .error)
@@ -502,7 +618,11 @@ final class Reader: NSObject {
         // the core saves them all from one reading of the message, a file already there kept and the new one numbered
         var saved = 0
         var total = 0
-        if !into.path.withCString({ pe_save_attachments(core.handle, folder, uid, $0, &saved, &total) }) {
+        let done = into.path.withCString { dir in
+            file.map { path in path.withCString { pe_file_save_attachments(core.handle, $0, dir, &saved, &total) } }
+                ?? pe_save_attachments(core.handle, folder, uid, dir, &saved, &total)
+        }
+        if !done {
             inform(Text.uiNotDownloaded.text)
         } else if saved < total {
             inform(Text.macFilesNotSaved.text(["failed": total - saved, "count": total]), style: .error)
@@ -512,7 +632,12 @@ final class Reader: NSObject {
     /// the calendar part as a file of its own (the core writes it, and only it), for the calendar app
     func openInCalendar() {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("InboxClassic/Invitations").path
-        guard let path = dir.withCString({ taken(pe_invitation_file(core.handle, folder, uid, $0)) }) else {
+        // the core reads it from the store, or from the message file shown
+        let written = dir.withCString { dir in
+            file.map { path in path.withCString { pe_file_invitation_file(core.handle, $0, dir) } }
+                ?? pe_invitation_file(core.handle, folder, uid, dir)
+        }
+        guard let path = taken(written) else {
             inform(Text.uiInvitationNotRead.text, style: .error)
             return
         }
@@ -580,7 +705,18 @@ final class InfoBar: NSView {
     var heightConstraint: NSLayoutConstraint?
     private let titleLabel = NSTextField(labelWithString: "")
     private let textLabel = NSTextField(labelWithString: "")
+    private let noteLabel = NSTextField(labelWithString: "")
     private let action: NSButton?
+    private var row: NSStackView?
+
+    /// a smaller line under the text, none when empty
+    var note: String {
+        get { noteLabel.stringValue }
+        set {
+            noteLabel.stringValue = newValue
+            noteLabel.isHidden = newValue.isEmpty
+        }
+    }
 
     var title: String {
         get { titleLabel.stringValue }
@@ -618,10 +754,19 @@ final class InfoBar: NSView {
         textLabel.textColor = .labelColor
         titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         textLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        let words = NSStackView(views: [titleLabel, textLabel])
+        noteLabel.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        noteLabel.textColor = .secondaryLabelColor
+        noteLabel.lineBreakMode = .byTruncatingTail
+        noteLabel.isHidden = true
+        noteLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        noteLabel.setAccessibilityIdentifier("infobar.note")
+        let words = NSStackView(views: [titleLabel, textLabel, noteLabel])
         words.orientation = .vertical
         words.alignment = .leading
         words.spacing = 1
+        words.detachesHiddenViews = true
+        // as tall as its lines, in the middle of the bar beside taller buttons
+        words.setHuggingPriority(.required, for: .vertical)
         var views: [NSView] = [image, words]
         // takes what is left: a button goes to the trailing edge, a link right after the words
         let spacer = NSView()
@@ -637,6 +782,7 @@ final class InfoBar: NSView {
             views += button != nil ? [spacer, action] : [action, spacer]
         }
         let stack = NSStackView(views: views)
+        row = stack
         stack.distribution = .fill
         stack.spacing = 8
         stack.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
@@ -654,6 +800,21 @@ final class InfoBar: NSView {
     }
 
     required init?(coder: NSCoder) { fatalError() }
+
+    /// controls at the trailing edge of a bar without a link or button of its own (the rest of it is still clicked as
+    /// a whole)
+    func setAccessories(_ views: [NSView]) {
+        guard let row, action == nil else { return }
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        spacer.setContentCompressionResistancePriority(.init(1), for: .horizontal)
+        row.addArrangedSubview(spacer)
+        for view in views {
+            view.setContentHuggingPriority(.required, for: .horizontal)
+            view.setContentCompressionResistancePriority(.required, for: .horizontal)
+            row.addArrangedSubview(view)
+        }
+    }
 
     override func updateLayer() {
         layer?.backgroundColor = NSColor(name: nil) { appearance in

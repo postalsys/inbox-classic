@@ -30,6 +30,11 @@ public:
     // the message `uid` of `folder` (of `account`) asked for: the header at once from its row of the list (NULL when
     // there is none), the message once the core has it (MessageReady), or why it can not (MessageFailed)
     void Open(int64_t folder, uint64_t uid, int64_t account, const PeMessage* row);
+    // a message file (.eml) opened from File Explorer, of no folder: false with why in `error` for a file that is no
+    // message the core can read. Its files are saved as a folder's message's are; it has no logo and no Unsubscribe.
+    bool OpenFile(const std::wstring& path, std::wstring& error);
+    // the message file shown, empty for a message of a folder
+    const std::wstring& File() const { return file_; }
     // emptied; with "There is no message selected." in it unless a message is `loading`
     void Clear(bool loading = false);
     // a page of the core's in place of a message (how many are selected)
@@ -40,10 +45,14 @@ public:
     const PeMessageInfo* Info() const;
     // its pictures from the internet loaded, once asked
     void LoadPictures();
+    // whether the message shown shows its pictures from the internet: asked for, or loaded by themselves (Options'
+    // setting, a trusted sender the provider confirmed)
+    bool PicturesShown() const;
     // the message as it is shown, with the pictures the user allowed, in the Print window over `owner`
     void Print(HWND owner);
-    // a reply, reply to all or forward of the message shown, empty while it is not shown
-    core::Draft DraftOf(PeDraftKind kind) const;
+    // a reply, reply to all or forward of the message shown, empty while it is not shown; of a message file, from
+    // `account`
+    core::Draft DraftOf(PeDraftKind kind, int64_t account = 0) const;
     // the Unsubscribe link, after asking over `owner`: what the status bar says; a mailto: link to write a message to
     // in `mailto` when the list wants one
     std::wstring Unsubscribe(HWND owner, std::wstring& mailto);
@@ -78,8 +87,13 @@ private:
     // asks the core for the view of the message, built on a worker; ShowView() shows it when it comes
     void StartView();
     void ShowView();
+    // the view in view_ shown: its header, bars and document
+    void ShowInfo();
     void ShowHeader(const PeMessageInfo* info);
     void ShowBars(bool files, bool pictures);
+    // the menu of the pictures bar's arrow: Always from the sender or from everyone at their domain (only when the
+    // provider confirmed the sender, else why not), and Download Pictures
+    void ChoosePictures();
     // the bar over a message that could not be downloaded, shown or not
     void ShowRetry(bool shown);
     // Try Again, or the account synced again after the message could not be downloaded
@@ -88,6 +102,9 @@ private:
     void OpenInCalendar();
     void ChooseAttachment();
     void SaveAllAttachments();
+    // the core's calls for the files of the message shown, from its folder or from the message file
+    uint8_t* AttachmentData(size_t index, size_t& length, char*& name) const;
+    bool SaveAttachments(const std::string& dir, size_t& saved, size_t& total) const;
 
     PeCore* core_ = nullptr;
     HWND parent_ = nullptr;
@@ -96,6 +113,7 @@ private:
     // the paper clip button (a toolbar of one), the information bar of blocked pictures, the one of a failed download
     HWND attachments_ = nullptr;
     HWND pictures_ = nullptr;
+    HWND picturesMenu_ = nullptr;
     HWND retry_ = nullptr;
     HWND previewHost_ = nullptr;
     HFONT bold_ = nullptr;
@@ -117,6 +135,8 @@ private:
     int64_t folder_ = 0;
     int64_t account_ = 0;
     bool remoteImages_ = false;
+    // the message file shown in place of a folder's message
+    std::wstring file_;
     core::MessageView view_;
     // the view being built, 0 for none
     uint64_t viewRequest_ = 0;

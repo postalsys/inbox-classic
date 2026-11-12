@@ -508,6 +508,9 @@ final class UITest {
         try await allInboxesByAccount()
         try await accountOrder()
         try await betweenAccounts()
+        try await unreadOnly()
+        try await trustedPictures()
+        try await openEml()
         try await accountsAndHelp()
         try await languages()
     }

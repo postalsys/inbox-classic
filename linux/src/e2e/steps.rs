@@ -13,6 +13,16 @@ async fn show_found(query: &str) -> bool {
     one
 }
 
+/// The rows the list shows, from `offset` on, as the list has them (grouped by conversation, a row is not a message's
+/// place in the folder)
+pub(super) fn list_rows(offset: u64, limit: u64) -> Vec<pe_store::Message> {
+    shell()
+        .main()
+        .list_view()
+        .rows(&shell().core, offset, limit)
+        .unwrap_or_default()
+}
+
 /// The time now (and `minutes` later) as a Date header writes it
 pub(super) fn date_now(minutes: i32) -> String {
     glib::DateTime::now_utc()
@@ -23,7 +33,7 @@ pub(super) fn date_now(minutes: i32) -> String {
 }
 
 /// The id of a folder of the first account by the name the tree gives it
-fn folder_id(name: &str) -> Option<i64> {
+pub(super) fn folder_id(name: &str) -> Option<i64> {
     folder_of(0, name)
 }
 
@@ -471,8 +481,9 @@ pub async fn mark_all_read(d: &Driver) {
 
 pub async fn dragging(d: &Driver) {
     d.step("dragging a message onto a folder");
-    // Drag me the newest, Copy me a minute older: the first two rows
-    for (subject, minutes) in [("Drag me", 3), ("Copy me", 2)] {
+    // Drag me the newest, Copy me a minute older: the first two rows (dated now, as a later date is listed at the
+    // message's arrival)
+    for (subject, minutes) in [("Drag me", 0), ("Copy me", -1)] {
         let raw = format!(
             "From: Dana <dana@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\nDate: {}\r\n\
              Message-ID: <{}@example.com>\r\n\r\nDragged in the UI test.\r\n",
@@ -516,10 +527,9 @@ pub async fn dragging(d: &Driver) {
         "and out of the Inbox",
     );
     d.check(wait_until(10, || rows() == in_inbox - 1).await, "and out of the list");
-    main.list.select(0);
-    pause(500).await;
+    select_subject("Copy me").await;
     if let Some((_, message)) = main.list.selected() {
-        d.check(message.info.subject == "Copy me", "the next one is the first row");
+        d.check(message.info.subject == "Copy me", "the other one is still listed");
         // with Ctrl held
         main.drop_message(&payload(&message), archive, true);
         d.check(
@@ -686,11 +696,9 @@ pub async fn messages_as_files(d: &Driver) {
         "a message not downloaded yet is in the list",
     );
     // the one added and the two after it in the list
-    let position = folder_id("Inbox").and_then(|inbox| {
-        listed_in_folder(inbox, 0, 200)
-            .iter()
-            .position(|m| m.info.subject == "Not opened yet")
-    });
+    let position = list_rows(0, 200)
+        .iter()
+        .position(|m| m.info.subject == "Not opened yet");
     let first = position.unwrap_or(0) as u32;
     let first = first.min(rows().saturating_sub(3));
     // a neighbour first: the one added selected alone would be opened, and downloaded, by the reading pane
@@ -879,11 +887,7 @@ pub async fn messages_as_files(d: &Driver) {
     select_folder("Archive");
     wait_until(20, || rows() >= 3).await;
     // one of them shown, as it came
-    let dropped_at = folder_id("Archive").and_then(|archive| {
-        listed_in_folder(archive, 0, 200)
-            .iter()
-            .position(|m| m.info.subject == "Dropped three")
-    });
+    let dropped_at = list_rows(0, 200).iter().position(|m| m.info.subject == "Dropped three");
     select_row(dropped_at.unwrap_or(0) as u32).await;
     d.shot(main.window(), "files-6-drop-in").await;
     select_folder("Inbox");
@@ -914,7 +918,8 @@ pub async fn flag_colors(d: &Driver) {
         d.check(false, "the tree has the Inbox");
         return;
     };
-    let listing = || listed_in_folder(inbox, 0, 200);
+    // the list's own rows: grouped by conversation, a row is not a message's place in the folder
+    let listing = || main.list_view().rows(core, 0, 200).unwrap_or_default();
     // the flags the list draws, by the colour each says
     let drawn = || -> Vec<String> {
         let view: gtk::Widget = main.list.view.clone().upcast();
@@ -1097,7 +1102,7 @@ pub async fn junk(d: &Driver) {
             .unwrap_or_default()
     };
     d.check(junk_button() == "win.junk", "the header bar has Junk in the Inbox");
-    select_row(0).await;
+    select_subject("Copy me").await;
     run_command(Command::Junk);
     let junked = wait_for(20, || d.find("Junk", "Subject: Copy me")).await;
     d.check(junked.is_some(), "Junk moves the message to Junk E-mail");
@@ -1129,18 +1134,28 @@ pub async fn junk(d: &Driver) {
     archive(d).await;
 }
 
+/// The row of the message with `subject` selected, by the list's own rows (grouped by conversation, a row is not a
+/// message's place in the folder); the first row when it is not listed
+async fn select_subject(subject: &str) {
+    let row = wait_for(20, || {
+        shell()
+            .main()
+            .list_view()
+            .rows(&shell().core, 0, 100)
+            .ok()?
+            .iter()
+            .position(|m| m.info.subject == subject)
+    })
+    .await;
+    select_row(row.unwrap_or(0) as u32).await;
+}
+
 /// Archive: the message into the Archive folder, then back with Undo
 async fn archive(d: &Driver) {
     d.step("archive");
     let main = shell().main();
     wait_until(20, || rows() >= 3).await;
-    let row = wait_for(20, || {
-        listed_in_folder(folder_id("Inbox")?, 0, 50)
-            .iter()
-            .position(|m| m.info.subject == "Copy me")
-    })
-    .await;
-    select_row(row.unwrap_or(0) as u32).await;
+    select_subject("Copy me").await;
     d.check(main.can_archive(), "Archive is on for a message of the Inbox");
     run_command(Command::Archive);
     let archived = wait_for(20, || d.find("Archive", "Subject: Copy me")).await;
@@ -1194,6 +1209,7 @@ pub async fn message_window(d: &Driver) {
     let main = shell().main();
     select_folder("Inbox");
     wait_until(20, || rows() >= 3).await;
+    // the window goes through the folder message by message (not by conversation, as the list may)
     let subjects: Vec<String> = folder_id("Inbox")
         .map(|inbox| listed_in_folder(inbox, 0, 3))
         .unwrap_or_default()
@@ -1204,13 +1220,17 @@ pub async fn message_window(d: &Driver) {
         d.check(false, "the Inbox has three messages to go through");
         return;
     };
-    // the second row, with a message before and after it, unread so opening it has something to mark
-    select_row(1).await;
+    // the second message, with a message before and after it, unread so opening it has something to mark
+    let row = list_rows(0, 50)
+        .iter()
+        .position(|m| m.info.subject == *first)
+        .unwrap_or(1) as u32;
+    select_row(row).await;
     main.mark_selected(false);
     let on_server = format!("Subject: {first}");
     let seen = || d.flags("INBOX", &on_server).iter().any(|f| f == "\\Seen");
     wait_until(20, || !seen()).await;
-    main.list.view.emit_by_name::<()>("activate", &[&1u32]);
+    main.list.view.emit_by_name::<()>("activate", &[&row]);
     let window = wait_for(10, || crate::message_window::windows().into_iter().next()).await;
     let Some(window) = window else {
         d.check(false, "Enter opens the message in a window of its own");
@@ -1289,7 +1309,7 @@ pub async fn keyboard_reading(d: &Driver) {
     let inbox = folder_id("Inbox").unwrap_or(0);
     let _ = core.mark_all_read(inbox);
     wait_until(10, || core.folder(inbox).is_ok_and(|f| f.unread == 0)).await;
-    let third = listed_in_folder(inbox, 2, 1).into_iter().next();
+    let third = list_rows(2, 1).into_iter().next();
     let Some(third) = third else {
         d.check(false, "the Inbox has a third message");
         return;
@@ -1446,19 +1466,19 @@ pub async fn conversations(d: &Driver) {
     let first = format!(
         "From: Pat Doe <pat@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\n\
          Message-ID: <trip1@example.com>\r\nDate: {}\r\n\r\nShall we take the early train?\r\n",
-        date_now(0)
+        date_now(-2)
     );
     let second = format!(
         "From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: {subject}\r\n\
          Message-ID: <trip2@example.com>\r\nIn-Reply-To: <trip1@example.com>\r\nReferences: <trip1@example.com>\r\n\
          Date: {}\r\n\r\nThe early one, yes.\r\n",
-        date_now(1)
+        date_now(-1)
     );
     let third = format!(
         "From: Pat Doe <pat@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Re: {subject}\r\n\
          Message-ID: <trip3@example.com>\r\nIn-Reply-To: <trip2@example.com>\r\n\
          References: <trip1@example.com> <trip2@example.com>\r\nDate: {}\r\n\r\nTickets bought.\r\n",
-        date_now(2)
+        date_now(0)
     );
     // the first one read, the replies not
     let added = d.add_message_in(d.ports.rest, "INBOX", &first, &["\\Seen"]).is_ok()
@@ -1647,7 +1667,7 @@ fn delay_report(date: &str, sent: &str, until: &str) -> String {
 }
 
 /// The text of a document, its tags left out, to look for words in it
-fn document_text(document: &str) -> String {
+pub(super) fn document_text(document: &str) -> String {
     let mut text = String::new();
     let mut inside = false;
     for c in document.chars() {
@@ -1662,7 +1682,7 @@ fn document_text(document: &str) -> String {
 }
 
 /// The row of the message of `folder` with `subject` selected in the list (the folder shown), and its view there
-async fn open_by_subject(folder: i64, subject: &str) -> bool {
+pub(super) async fn open_by_subject(folder: i64, subject: &str) -> bool {
     let main = shell().main();
     // the list's own rows: grouped by conversation, a row is not a message's place in the folder
     let found = main
@@ -1922,6 +1942,101 @@ pub async fn mailto(d: &Driver) {
     }
 }
 
+/// The attachment of the message file opened with the app
+const TRIP_NOTES: &str = "Day one: the harbour. Day two: the hills.";
+
+/// A message file opened with the app: a second start with its path hands it to the running app, which shows it in a
+/// message window that can answer it
+pub async fn open_eml(d: &Driver) {
+    d.step("a message file opened with the app");
+    let eml = d.out.join("opened-message.eml");
+    let written = std::fs::write(
+        &eml,
+        format!(
+            "From: Ivy Chen <ivy@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Notes from the trip\r\n\
+             Date: {}\r\nMessage-ID: <opened-message@example.com>\r\nMIME-Version: 1.0\r\n\
+             Content-Type: multipart/mixed; boundary=\"trip\"\r\n\r\n\
+             --trip\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe notes, as promised.\r\n\
+             --trip\r\nContent-Type: text/plain; name=\"trip-notes.txt\"\r\n\
+             Content-Disposition: attachment; filename=\"trip-notes.txt\"\r\n\r\n{TRIP_NOTES}\r\n--trip--\r\n",
+            date_now(-60)
+        ),
+    );
+    let store = d.out.join("store.db").to_string_lossy().into_owned();
+    let exe = std::env::current_exe().unwrap_or_default();
+    let second = Process::new(exe)
+        .args([
+            "--store",
+            &store,
+            "--memory-passwords",
+            "--pin-certificate",
+            &d.ports.cert,
+        ])
+        .arg(&eml)
+        .spawn();
+    let ended = match second {
+        Ok(mut child) => wait_until(15, || child.try_wait().ok().flatten().is_some()).await,
+        Err(_) => false,
+    };
+    d.check(
+        written.is_ok() && ended,
+        "a second start with a .eml file hands it over and ends",
+    );
+    let subject = "Notes from the trip";
+    let window = wait_for(15, || {
+        crate::message_window::windows()
+            .into_iter()
+            .find(|w| w.window.title().as_deref() == Some(subject))
+    })
+    .await;
+    let Some(window) = window else {
+        d.check(false, "the running app opens the file in a message window");
+        return;
+    };
+    d.check(
+        window.reader.has_view(),
+        "the running app opens the file in a message window titled with its subject",
+    );
+    d.check(
+        !window
+            .window
+            .lookup_action(Command::Delete.name())
+            .is_some_and(|a| a.is_enabled()),
+        "a file cannot be deleted from it",
+    );
+    d.check(
+        wait_until(5, || window.reader.attachments.is_visible()).await,
+        "its paper clip lists the file's attachment",
+    );
+    d.shot(&window.window, "files-4-open-eml").await;
+    let dir = d.out.join("eml-attachments");
+    let _ = std::fs::remove_dir_all(&dir);
+    let _ = std::fs::create_dir_all(&dir);
+    FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![dir.clone()]));
+    let _ = WidgetExt::activate_action(&window.reader.widget, "reader.save-all", None);
+    let saved = wait_for(10, || std::fs::read_to_string(dir.join("trip-notes.txt")).ok()).await;
+    d.check(
+        saved.as_deref() == Some(TRIP_NOTES),
+        "Save All writes the file's attachment as it was sent",
+    );
+    click(window.window.upcast_ref(), "message-reply");
+    match wait_compose(10).await {
+        Some(c) => {
+            d.check(
+                c.subject.text() == format!("Re: {subject}") && c.to.text().contains("ivy@example.com"),
+                &format!("Reply in it opens a reply to the file's sender ({})", c.subject.text()),
+            );
+            close_compose(&c).await;
+        }
+        None => d.check(false, "Reply in it opens a compose window"),
+    }
+    window.window.close();
+    d.check(
+        wait_until(10, || crate::message_window::windows().is_empty()).await,
+        "the window closes",
+    );
+}
+
 pub async fn completing(d: &Driver) {
     d.step("completing an address");
     run_command(Command::NewMail);
@@ -2160,21 +2275,21 @@ pub async fn not_downloaded(d: &Driver) {
     select_folder("Inbox");
 }
 
-/// The second account's mail on its own server, for All Inboxes: unread, dated a little ahead so it is the newest in
-/// the list (over what the steps before added), around the first account's message of the step
+/// The second account's mail on its own server, for All Inboxes: unread, dated now (a later date is listed at the
+/// message's arrival), so it is among the newest in the list
 pub fn seed_second(d: &Driver) {
     for (from, subject, body, minutes) in [
         (
             "Priya Shah <priya@work.example>",
             "Contract renewal for next year",
             "The renewal is ready to sign. Could you look it over before Friday?",
-            10,
+            0,
         ),
         (
             "Tom Becker <tom@work.example>",
             "Offsite agenda",
             "Here is the agenda for the offsite. Add anything you want to talk about.",
-            8,
+            -2,
         ),
     ] {
         let raw = format!(
@@ -2206,7 +2321,7 @@ pub async fn all_inboxes(d: &Driver) {
     let raw = format!(
         "From: Maria Lopez <maria@example.org>\r\nTo: testuser@inboxclassic.test\r\nSubject: Photos from the trip\r\n\
          Date: {}\r\nMessage-ID: <trip-photos@example.org>\r\n\r\nThe photos from the trip are in the shared album.\r\n",
-        date_now(9)
+        date_now(0)
     );
     let _ = d.add_message(&raw, &[]);
     command(Command::Sync);
@@ -2260,7 +2375,9 @@ pub async fn all_inboxes(d: &Driver) {
     if let Some(popover) = main.folder_popover.borrow().as_ref() {
         popover.popdown();
     }
-    if let Some(index) = folders.iter().position(|f| *f == second) {
+    // the list's own rows: grouped by conversation, a row is not a message's place in the folder
+    let rows = main.list_view().rows(&shell().core, 0, 50).unwrap_or_default();
+    if let Some(index) = rows.iter().position(|m| m.folder_id == second) {
         select_row(index as u32).await;
     }
     run_command(Command::Reply);
@@ -2563,9 +2680,9 @@ pub async fn between_accounts(d: &Driver) {
     };
     let on_first = |mailbox: &str, subject: &str| d.find(mailbox, &format!("Subject: {subject}"));
     for (subject, minutes, flags) in [
-        ("Quarterly figures", 13, &["\\Flagged"][..]),
-        ("Board minutes", 12, &[][..]),
-        ("Travel booking", 11, &[][..]),
+        ("Quarterly figures", 0, &["\\Flagged"][..]),
+        ("Board minutes", -1, &[][..]),
+        ("Travel booking", -2, &[][..]),
     ] {
         let raw = format!(
             "From: Nina Berg <nina@example.org>\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\nDate: {}\r\n\
@@ -2577,10 +2694,15 @@ pub async fn between_accounts(d: &Driver) {
     }
     command(Command::Sync);
     select_folder("Inbox");
+    // the list's own rows: grouped by conversation, a row is not a message's place in the folder
     let listed = |subject: &str| {
-        listed_in_folder(inbox, 0, 100)
+        shell()
+            .main()
+            .list_view()
+            .rows(&shell().core, 0, 100)
+            .unwrap_or_default()
             .iter()
-            .position(|m| m.info.subject == subject)
+            .position(|m| m.folder_id == inbox && m.info.subject == subject)
     };
     wait_until(30, || listed("Travel booking").is_some()).await;
     // selects the message with `subject`, and waits until the window has taken it
