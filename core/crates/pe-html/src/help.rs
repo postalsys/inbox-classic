@@ -476,7 +476,10 @@ fn page(
         HelpTarget::Web => (
             String::new(),
             (
-                format!("<div class=\"web\"><aside class=\"side\">{contents}</aside><main>\n"),
+                format!(
+                    "{}<div class=\"web\"><aside class=\"side\">{contents}</aside><main>\n",
+                    web_bar(platform, language, anchor)
+                ),
                 "</main></div>\n".to_string(),
             ),
         ),
@@ -496,6 +499,39 @@ fn page(
         platform.name(),
         around.0,
         around.1
+    )
+}
+
+/// The bar over a page of the website's help (help/<language>/<platform>/<page>.html): the homepage, and the same page
+/// for the other platforms and in the other languages
+fn web_bar(platform: Platform, language: &str, page: &str) -> String {
+    let file = format!("{page}.html");
+    let platforms = [
+        (Platform::Windows, "Windows"),
+        (Platform::Mac, "Mac"),
+        (Platform::Linux, "Linux"),
+    ]
+    .iter()
+    .map(|(other, name)| match *other == platform {
+        true => format!("<b>{name}</b>"),
+        false => format!("<a href=\"../{}/{file}\">{name}</a>", other.name()),
+    })
+    .collect::<Vec<_>>()
+    .join(" ");
+    let languages = pe_i18n::LANGUAGES
+        .iter()
+        .map(|(code, name)| match *code == language {
+            true => format!("<b>{name}</b>"),
+            false => format!(
+                "<a href=\"../../{code}/{}/{file}\" hreflang=\"{code}\">{name}</a>",
+                platform.name()
+            ),
+        })
+        .collect::<Vec<_>>()
+        .join(" ");
+    format!(
+        "<header class=\"bar\"><a class=\"brand\" href=\"/\">Inbox Classic</a>\
+         <span class=\"platforms\">{platforms}</span><span class=\"languages\">{languages}</span></header>\n"
     )
 }
 
@@ -531,7 +567,9 @@ fn style(platform: Platform) -> String {
          aside.warning{{border-left:4px solid #c60}}img.picture{{max-width:100%;height:auto;margin:.6em 0;\
          border:1px solid color-mix(in srgb,currentColor 18%,transparent)}}nav.related{{margin-top:1.6em;padding-top:.6em;\
          border-top:1px solid color-mix(in srgb,currentColor 18%,transparent)}}nav.related a{{margin-right:1.2em}}\
-         p.home{{margin:0 0 1em;font-size:.9em}}.web{{display:flex;gap:32px}}.web .side{{flex:0 0 240px;font-size:.92em}}\
+         p.home{{margin:0 0 1em;font-size:.9em}}header.bar{{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;\
+         max-width:none;padding:0 0 12px;margin:0 0 20px;border-bottom:1px solid color-mix(in srgb,currentColor 18%,transparent)}}\
+         header.bar .brand{{font-weight:700;text-decoration:none;margin-right:auto}}header.bar a,header.bar b{{margin-right:10px}}.web{{display:flex;gap:32px}}.web .side{{flex:0 0 240px;font-size:.92em}}\
          .web main{{flex:1;min-width:0}}@media(max-width:700px){{.web{{display:block}}.web .side{{display:none}}}}\
          {platform_style}"
     )

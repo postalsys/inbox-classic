@@ -153,7 +153,9 @@ cp "$HOMEPAGE/appcast.xml" "$appcast/" 2>/dev/null || true
 sed -i '' "s|releases/download/${TAG}/InboxClassic-${VERSION}.dmg|releases/download/${TAG}/InboxClassic.dmg|" "$appcast/appcast.xml"
 cp "$appcast/appcast.xml" "$HOMEPAGE/appcast.xml"
 rm -rf "$appcast"
-git -C "$HOMEPAGE" add appcast.xml
-git -C "$HOMEPAGE" commit -q -m "Inbox Classic ${VERSION} for the Mac updater"
+# the help of the release on the website
+scripts/homepage-help.sh
+git -C "$HOMEPAGE" add appcast.xml help
+git -C "$HOMEPAGE" commit -q -m "Inbox Classic ${VERSION} for the Mac updater, and its help"
 git -C "$HOMEPAGE" push -q
 echo "The appcast of ${VERSION} is on the homepage"
