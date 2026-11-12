@@ -616,6 +616,15 @@ Screenshots: `all-inboxes-3-accounts`, `account-menu`
 - its Mark All Read marks every folder of the first account read on the server, the second account's mail stays unread
 - its Properties opens that account's Properties
 
+## 42b. Omarchy's title bar (Linux)
+
+Screenshot: `omarchy-1-floating`
+
+A Hyprland of the test's own (its two sockets, the main window in its list of windows):
+
+- with the main window tagged as Omarchy tags a window on a floating workspace, whose title bar has its own close, maximize and minimize buttons, the header bar shows no window buttons of its own
+- told the window was tiled again (an event, then a list without the tag), the header bar has its buttons back
+
 ## 43. Moving between accounts
 
 Screenshots: `move-1-dialog`, `move-2-accounts`
