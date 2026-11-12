@@ -5,7 +5,7 @@
 use pe_mime::parser::{Message, ParsedAddress};
 use pe_store::TrustedSender;
 
-use crate::authres::{passes, registrable, tag, verdict};
+use crate::authres::{passes, tag, verdict};
 
 /// What decides the pictures of a message of a folder
 #[derive(Default)]
@@ -44,18 +44,29 @@ pub(crate) fn sender(message: &Message, trusted: &[String]) -> Option<Sender> {
     })
 }
 
-/// Whether the provider's Authentication-Results (from a `trusted` authserv-id) confirm `domain` sent the message:
-/// DMARC passed for it as the From domain, or DKIM passed for a signature of it or of its organization (relaxed
-/// alignment, as DMARC counts it)
+/// Whether the provider's Authentication-Results confirm `domain` sent the message: DMARC passed for it as the From
+/// domain, or DKIM passed for a signature of that domain or of a domain it is under (`news.shop.com` signed by
+/// `shop.com`; never a sibling, so `evil.me.uk` does not vouch for `shop.me.uk`). Only the topmost
+/// Authentication-Results counts, and only when it is the provider's (a `trusted` authserv-id): one the sender wrote
+/// into the message sits below the provider's, or is the only one where the provider adds none.
 pub(crate) fn from_verified(headers: &[pe_mime::parser::Header], trusted: &[String], domain: &str) -> bool {
-    let Some(results) = verdict(headers, trusted) else {
+    let Some(topmost) = headers
+        .iter()
+        .find(|h| h.key.eq_ignore_ascii_case("authentication-results"))
+    else {
         return false;
+    };
+    let Some(results) = verdict(std::slice::from_ref(topmost), trusted) else {
+        return false;
+    };
+    let under = |signer: &str| {
+        let signer = signer.to_ascii_lowercase();
+        signer.contains('.') && (signer == domain || domain.ends_with(&format!(".{signer}")))
     };
     results.iter().any(|result| {
         let dmarc =
             passes(result, "dmarc") && tag(result, "header.from").is_some_and(|d| d.eq_ignore_ascii_case(domain));
-        let dkim = passes(result, "dkim")
-            && tag(result, "header.d").is_some_and(|d| registrable(&d.to_ascii_lowercase()) == registrable(domain));
+        let dkim = passes(result, "dkim") && tag(result, "header.d").is_some_and(under);
         dmarc || dkim
     })
 }
@@ -168,6 +179,26 @@ mod tests {
                 .unwrap()
                 .verified,
             "a verdict of a provider not the account's"
+        );
+        let sibling = message("news@shop.me.uk", "dkim=pass header.d=evil.me.uk");
+        assert!(
+            !super::sender(&sibling, &providers).unwrap().verified,
+            "a sibling domain vouches for nobody"
+        );
+        let parent = message("news@mail.shop.com", "dkim=pass header.d=shop.com");
+        assert!(
+            super::sender(&parent, &providers).unwrap().verified,
+            "the domain it is under signed it"
+        );
+        let planted = pe_mime::parser::parse(
+            b"Authentication-Results: mx.provider.example; dkim=fail header.d=shop.com\r\n\
+              Authentication-Results: mx.provider.example; dmarc=pass header.from=shop.com\r\n\
+              From: news@shop.com\r\nSubject: hi\r\n\r\nbody",
+        )
+        .unwrap();
+        assert!(
+            !super::sender(&planted, &providers).unwrap().verified,
+            "only the topmost verdict counts"
         );
         let other_signer = message("news@shop.com", "dkim=pass header.d=bulk-mailer.net");
         assert!(
