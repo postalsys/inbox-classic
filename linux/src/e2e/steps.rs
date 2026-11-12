@@ -3178,3 +3178,68 @@ pub async fn one_time_codes(d: &Driver) {
         "an unsigned message has no card: the provider did not say the domain signed it",
     );
 }
+
+/// Omarchy's floating workspace, played by a Hyprland of the test's own: its two sockets, the list of windows with the
+/// main window tagged as Omarchy tags it, and an event when that changes
+pub async fn omarchy_title_bar(d: &Driver) {
+    use std::os::unix::net::UnixListener;
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicBool, Ordering};
+    d.step("Omarchy's title bar on a floating workspace");
+    let dir = d.out.join("hypr");
+    let _ = std::fs::remove_dir_all(&dir);
+    let _ = std::fs::create_dir_all(&dir);
+    let (Ok(requests), Ok(events)) = (
+        UnixListener::bind(dir.join(".socket.sock")),
+        UnixListener::bind(dir.join(".socket2.sock")),
+    ) else {
+        return d.check(false, "the test's Hyprland sockets");
+    };
+    let main = main_window();
+    let title = main
+        .downcast_ref::<gtk::Window>()
+        .and_then(|window| window.title())
+        .map(|title| title.to_string())
+        .unwrap_or_default();
+    let floating = Arc::new(AtomicBool::new(true));
+    let tagged = floating.clone();
+    std::thread::spawn(move || {
+        for mut stream in requests.incoming().flatten() {
+            let mut request = [0u8; 64];
+            let _ = stream.read(&mut request);
+            let tags = if tagged.load(Ordering::SeqCst) {
+                r#""omarchy-floating-workspace*""#
+            } else {
+                ""
+            };
+            let title = serde_json::to_string(&title).unwrap_or_default();
+            let _ = write!(
+                stream,
+                r#"[{{"pid": {}, "title": {title}, "tags": [{tags}]}}]"#,
+                std::process::id()
+            );
+        }
+    });
+    let (changed, change) = std::sync::mpsc::channel::<()>();
+    std::thread::spawn(move || {
+        let Ok((mut stream, _)) = events.accept() else { return };
+        while change.recv().is_ok() {
+            let _ = stream.write_all(b"changefloatingmode>>5a5a,0\n");
+        }
+    });
+    crate::hyprland::watch_in(&dir);
+    let Some(header) = descendants::<adw::HeaderBar>(&main).into_iter().next() else {
+        return d.check(false, "the main window has a header bar");
+    };
+    d.check(
+        wait_until(5, || header.decoration_layout().as_deref() == Some(":")).await,
+        "on a floating workspace the header bar leaves the window's buttons to Omarchy's title bar",
+    );
+    d.shot(&main, "omarchy-1-floating").await;
+    floating.store(false, Ordering::SeqCst);
+    let _ = changed.send(());
+    d.check(
+        wait_until(5, || header.decoration_layout().is_none()).await,
+        "tiled again, the header bar has its own buttons back",
+    );
+}

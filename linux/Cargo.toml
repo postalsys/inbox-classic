@@ -32,8 +32,8 @@ zbus = { version = "5", default-features = false, features = ["blocking-api", "a
 # the core's events from its worker threads to the window thread, and a request's answer to the window waiting
 async-channel = "2"
 futures-channel = "0.3"
-# the e2e driver's checks over ImapKit's REST API
-serde_json = { version = "1", optional = true }
+# Hyprland's list of windows (hyprland.rs) and the e2e driver's checks over ImapKit's REST API
+serde_json = "1"
 base64 = { version = "0.22", optional = true }
 
 [build-dependencies]
@@ -41,7 +41,7 @@ glib-build-tools = "0.22"
 
 [features]
 # the in-process driver of the UI end-to-end test (scripts/linux-ui-e2e.sh); never in a release
-e2e = ["dep:serde_json", "dep:base64"]
+e2e = ["dep:base64"]
 
 # the .deb (scripts/linux-package.sh, cargo-deb): the libraries it needs come from dpkg-shlibdeps
 [package.metadata.deb]

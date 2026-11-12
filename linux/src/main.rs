@@ -20,6 +20,7 @@ mod editor;
 mod files;
 mod folders;
 mod help;
+mod hyprland;
 mod mailbox;
 mod message_window;
 mod messages;
@@ -188,6 +189,7 @@ pub fn run(arguments: Arguments, argv: Vec<String>) -> glib::ExitCode {
         gio::resources_register_include!("inbox-classic.gresource").expect("the app's resources");
         ui::load_style();
         reader::set_instant_format();
+        hyprland::watch();
     });
     let first = std::cell::RefCell::new(Some(arguments));
     application.connect_command_line(move |application, command_line| {
