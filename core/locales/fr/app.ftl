@@ -517,3 +517,9 @@ ui-trusted-senders-note = Les images de ces expéditeurs sont téléchargées qu
 ui-trusted-everyone-at = Tous chez { $domain }
 # review: new
 ui-trusted-senders-empty = Aucun expéditeur n'est encore approuvé.
+# review: new
+ui-eml-default = Ouvrir les fichiers .eml avec Inbox Classic
+# review: new
+ui-eml-default-done = Inbox Classic ouvre maintenant les fichiers .eml.
+# review: new
+ui-eml-default-failed = Inbox Classic n'a pas pu devenir l'application des fichiers .eml : { $reason }

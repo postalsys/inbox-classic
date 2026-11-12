@@ -2538,6 +2538,67 @@ pub unsafe extern "C" fn pe_message_draft(
     }
 }
 
+/// The view of a message file (`.eml`) opened from Finder or File Explorer, for a message window of no folder; NULL
+/// with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) for a file that can not
+/// be read, is not a message or is too large. Free with `pe_message_view_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_view(
+    core: *const PeCore,
+    path: *const c_char,
+    allow_remote_images: bool,
+    error: *mut *mut c_char,
+) -> *mut PeMessageView {
+    // SAFETY: as the caller guarantees
+    let path = unsafe { arg(path) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            match core.file_view(std::path::Path::new(&path), allow_remote_images) {
+                Ok(view) => view_handle(view),
+                Err(failure) => {
+                    if !error.is_null() {
+                        *error = into_c_string(failure.to_string());
+                    }
+                    null_mut()
+                }
+            }
+        })
+    }
+}
+
+/// A reply, a reply to all or a forward of a message file, from `account`; NULL for a file that can not be read or
+/// is no message. Free with `pe_draft_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `path` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_draft(
+    core: *const PeCore,
+    path: *const c_char,
+    account: i64,
+    kind: PeDraftKind,
+) -> *mut PeDraft {
+    let kind = match kind {
+        PeDraftKind::Reply => DraftKind::Reply,
+        PeDraftKind::ReplyAll => DraftKind::ReplyAll,
+        PeDraftKind::Forward => DraftKind::Forward,
+    };
+    // SAFETY: as the caller guarantees
+    let path = unsafe { arg(path) }.unwrap_or_default().to_string();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            match core.file_draft(std::path::Path::new(&path), account, kind) {
+                Ok(draft) => draft_handle(&draft),
+                Err(_) => null_mut(),
+            }
+        })
+    }
+}
+
 /// A new message from a `mailto:` link (RFC 6068): its addresses, subject and body; NULL for what is no such link.
 /// Free with `pe_draft_free`.
 ///

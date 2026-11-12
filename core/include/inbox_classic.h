@@ -2059,6 +2059,27 @@ struct PeDraft *pe_message_draft(const struct PeCore *core,
                                  uint64_t uid,
                                  enum PeDraftKind kind);
 
+// The view of a message file (`.eml`) opened from Finder or File Explorer, for a message window of no folder; NULL
+// with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) for a file that can not
+// be read, is not a message or is too large. Free with `pe_message_view_free`.
+//
+// # Safety
+// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+struct PeMessageView *pe_file_view(const struct PeCore *core,
+                                   const char *path,
+                                   bool allow_remote_images,
+                                   char **error);
+
+// A reply, a reply to all or a forward of a message file, from `account`; NULL for a file that can not be read or
+// is no message. Free with `pe_draft_free`.
+//
+// # Safety
+// `core` must be a live handle, `path` a NUL-terminated string.
+struct PeDraft *pe_file_draft(const struct PeCore *core,
+                              const char *path,
+                              int64_t account,
+                              enum PeDraftKind kind);
+
 // A new message from a `mailto:` link (RFC 6068): its addresses, subject and body; NULL for what is no such link.
 // Free with `pe_draft_free`.
 //

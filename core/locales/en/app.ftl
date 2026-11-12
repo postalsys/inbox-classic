@@ -487,3 +487,6 @@ ui-trusted-senders-title = Trusted senders
 ui-trusted-senders-note = Pictures from these senders are downloaded when their mail provider confirms the message is theirs.
 ui-trusted-everyone-at = Everyone at { $domain }
 ui-trusted-senders-empty = No senders are trusted yet.
+ui-eml-default = Open .eml Files with Inbox Classic
+ui-eml-default-done = Inbox Classic now opens .eml files.
+ui-eml-default-failed = Inbox Classic could not be made the app for .eml files: { $reason }

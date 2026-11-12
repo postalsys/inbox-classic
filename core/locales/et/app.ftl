@@ -511,3 +511,9 @@ ui-trusted-senders-note = Nende saatjate pildid laaditakse alla, kui nende meili
 ui-trusted-everyone-at = Kõik domeenis { $domain }
 # review: new
 ui-trusted-senders-empty = Ühtegi saatjat veel ei usaldata.
+# review: new
+ui-eml-default = Ava .eml-failid Inbox Classicuga
+# review: new
+ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.
+# review: new
+ui-eml-default-failed = Inbox Classicut ei õnnestunud .eml-failide rakenduseks määrata: { $reason }

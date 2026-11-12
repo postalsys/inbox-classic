@@ -1293,34 +1293,9 @@ impl Core {
     }
 
     pub fn import_message(&self, folder: FolderId, path: &std::path::Path) -> Result<()> {
-        const LIMIT: u64 = 50 * 1024 * 1024;
         let account = self.store().folder(folder)?.account_id;
-        let shown = path.display().to_string();
-        let not_one = |text: Text, error: &str| {
-            Error::Unavailable(tr_args(text, &[("path", (&shown).into()), ("error", error.into())]))
-        };
-        // opened once, read up to just past the limit: a file that grows meanwhile is still refused
-        let file = std::fs::File::open(path).map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
-        let mut raw = Vec::new();
-        std::io::Read::read_to_end(&mut std::io::Read::take(file, LIMIT + 1), &mut raw)
-            .map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
-        if raw.len() as u64 > LIMIT {
-            return Err(not_one(Text::ErrorImportTooLarge, ""));
-        }
-        let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one(Text::ErrorImportNotMail, ""))?;
-        // a message has headers a mail program wrote; a text file parsed as one has none of these
-        let looks_like_one = parsed.from.is_some() || parsed.message_id.is_some() || parsed.timestamp.is_some();
-        if !looks_like_one {
-            return Err(not_one(Text::ErrorImportNotMail, ""));
-        }
-        self.send_command(
-            account,
-            Command::Append {
-                folder,
-                raw,
-                date: parsed.timestamp,
-            },
-        )
+        let (raw, date) = read_message_file(path)?;
+        self.send_command(account, Command::Append { folder, raw, date })
     }
 
     /// The content of the `index`th attachment of [`MessageView::attachments`], with the name to
@@ -1488,6 +1463,41 @@ impl Core {
             }
         }
         Ok(Some(draft))
+    }
+
+    /// A message file opened from Finder or File Explorer (or the command line), for a message window: its view, as
+    /// a message of no folder (no account's provider vouches for it, so no trusted sender's pictures load; only the
+    /// user's click, or Options' setting, loads them)
+    pub fn file_view(&self, path: &std::path::Path, allow_remote_images: bool) -> Result<MessageView> {
+        let (source, _) = read_message_file(path)?;
+        let always = self.store().always_load_pictures()?;
+        let trust = view::Trust {
+            pictures: pictures::Rules {
+                always,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        Ok(view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default())
+    }
+
+    /// Reply, Reply All or Forward to a message file, from `account`
+    pub fn file_draft(&self, path: &std::path::Path, account: AccountId, kind: DraftKind) -> Result<Draft> {
+        let (source, date) = read_message_file(path)?;
+        let email = self.store().account(account)?.settings.email;
+        let mut draft = compose::draft(&source, kind, &email, date);
+        if kind == DraftKind::Forward {
+            let files = compose::forwarded_files(&source);
+            if !files.is_empty() {
+                draft.attachments = write_out("forward-file", files).map_err(|error| {
+                    Error::Unavailable(tr_args(
+                        Text::ErrorDraftAttachment,
+                        &[("error", (&error.to_string()).into())],
+                    ))
+                })?;
+            }
+        }
+        Ok(draft)
     }
 
     /// Marks a message read or unread: in the store now, on the server in the background
@@ -2154,6 +2164,31 @@ struct ViewSource {
     account: AccountId,
     folder: FolderId,
     uid: u64,
+}
+
+/// A message file (.eml) read whole, up to 50 MB, refused when it is no mail: for Import and for opening a file in a
+/// message window; with the date of its Date header
+fn read_message_file(path: &std::path::Path) -> Result<(Vec<u8>, Option<i64>)> {
+    const LIMIT: u64 = 50 * 1024 * 1024;
+    let shown = path.display().to_string();
+    let not_one = |text: Text, error: &str| {
+        Error::Unavailable(tr_args(text, &[("path", (&shown).into()), ("error", error.into())]))
+    };
+    // opened once, read up to just past the limit: a file that grows meanwhile is still refused
+    let file = std::fs::File::open(path).map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
+    let mut raw = Vec::new();
+    std::io::Read::read_to_end(&mut std::io::Read::take(file, LIMIT + 1), &mut raw)
+        .map_err(|e| not_one(Text::ErrorImportUnreadable, &e.to_string()))?;
+    if raw.len() as u64 > LIMIT {
+        return Err(not_one(Text::ErrorImportTooLarge, ""));
+    }
+    let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one(Text::ErrorImportNotMail, ""))?;
+    // a message has headers a mail program wrote; a text file parsed as one has none of these
+    let looks_like_one = parsed.from.is_some() || parsed.message_id.is_some() || parsed.timestamp.is_some();
+    if !looks_like_one {
+        return Err(not_one(Text::ErrorImportNotMail, ""));
+    }
+    Ok((raw, parsed.timestamp))
 }
 
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
