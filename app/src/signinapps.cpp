@@ -501,6 +501,7 @@ LRESULT CALLBACK AppsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 }  // namespace
 
 void SignInAppsDialog(HWND owner, PeCore* core) {
+    HelpScope help("sign-in-apps");
     RegisterDialogClass(kAppsClass, AppsProc);
     int pad = Scale(10), width = Scale(640), height = Scale(300);
     HWND dialog = CreateModalWindow(owner, kAppsClass, core::Plain(PE_TEXT_UI_SIGN_IN_APPS).c_str(), width, height);

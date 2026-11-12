@@ -3747,12 +3747,83 @@ public static class Dragger {
     }
 
     Step 'help'
+    # app/src/app.h: the help window's controls
+    $IDC_HELP_PANE = 810; $IDC_HELP_BACK = 811; $IDC_HELP_FORWARD = 812; $IDC_HELP_HOME = 813; $IDC_HELP_PRINT = 814
+    $IDC_HELP_TABS = 820; $IDC_HELP_TREE = 821; $IDC_HELP_QUERY = 822; $IDC_HELP_SEARCH = 823; $IDC_HELP_RESULTS = 824
+    $TCM_GETCURSEL = 0x130B; $LBN_SELCHANGE = 1; $VK_F1 = 0x70
     Command $main $IDM_HELP
     $help = WaitWindow 'InboxClassicHelp'
-    Check ($null -ne $help) 'F1 opens the help'
+    Check ($null -ne $help) 'Help opens the help window'
     if ($help) {
+        $helpTree = [Native.Win]::GetDlgItem($help, $IDC_HELP_TREE)
+        # the row selected in the contents: the topic shown
+        function HelpShown {
+            $item = [Native.Win]::SendMessage($helpTree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero)
+            if ($item -ne [IntPtr]::Zero) { [Native.Win]::RemoteTreeText($helpTree, $item) } else { '' }
+        }
+        # the sections (the rows at the top) and how many topics each has
+        $sections = @()
+        $topics = 0
+        $helpTitles = @()
+        $section = [Native.Win]::SendMessage($helpTree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+        while ($section -ne [IntPtr]::Zero) {
+            $sections += [Native.Win]::RemoteTreeText($helpTree, $section)
+            $child = [Native.Win]::SendMessage($helpTree, $TVM_GETNEXTITEM, [IntPtr]4, $section)
+            $count = 0
+            while ($child -ne [IntPtr]::Zero) { $count++; $helpTitles += [Native.Win]::RemoteTreeText($helpTree, $child); $child = [Native.Win]::SendMessage($helpTree, $TVM_GETNEXTITEM, [IntPtr]1, $child) }
+            Check ($count -gt 0) "the section '$($sections[-1])' has its topics"
+            $topics += $count
+            $section = [Native.Win]::SendMessage($helpTree, $TVM_GETNEXTITEM, [IntPtr]1, $section)
+        }
+        Check ($sections.Count -ge 8 -and $topics -ge 40) "the contents list the sections and their topics ($($sections.Count) sections, $topics topics)"
+        Check ([int][Native.Win]::SendMessage($helpTree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq ($sections.Count + $topics)) 'the tree has nothing else'
+        $helpHome = WaitFor { $t = HelpShown; if ($t) { $t } }
+        Check ([bool]$helpHome) "the help opens at the main window's topic, selected in the contents ($helpHome)"
+        # the words of a button of the help's toolbar
+        $helpBar = [Native.Win]::GetDlgItem($help, 800)
+        function HelpButton([int]$id) { [Native.Win]::RemoteText($helpBar, 0x044B, [IntPtr]$id) }
+        foreach ($button in $IDC_HELP_PANE, $IDC_HELP_BACK, $IDC_HELP_FORWARD, $IDC_HELP_HOME, $IDC_HELP_PRINT) {
+            Check ([bool](HelpButton $button)) "the help's toolbar has button $button"
+        }
+        # Hide takes the left pane away and is Show then, which brings it back
+        $hideText = HelpButton $IDC_HELP_PANE
+        $tabs = [Native.Win]::GetDlgItem($help, $IDC_HELP_TABS)
+        Command $help $IDC_HELP_PANE
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindowVisible($tabs) } 5)) 'Hide hides the left pane'
+        Check ((HelpButton $IDC_HELP_PANE) -ne $hideText) 'and the button is Show then'
+        Command $help $IDC_HELP_PANE
+        Check ([bool](WaitFor { [Native.Win]::IsWindowVisible($tabs) } 5)) 'Show brings the pane back'
         Start-Sleep -Seconds 3
         Shot $help 'help-2-contents'
+
+        # Search: the topics with the words, listed by their titles
+        SetText $help $IDC_HELP_QUERY 'junk'
+        Click $help $IDC_HELP_SEARCH
+        $results = [Native.Win]::GetDlgItem($help, $IDC_HELP_RESULTS)
+        Check ([bool](WaitFor { (ListBoxCount $results) -gt 0 } 5)) 'a search for "junk" finds topics'
+        Check ([int][Native.Win]::SendMessage($tabs, $TCM_GETCURSEL, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1) 'on the Search tab'
+        $found = @(0..((ListBoxCount $results) - 1) | ForEach-Object { ListBoxText $results $_ })
+        Check (@($found | Where-Object { $helpTitles -notcontains $_ }).Count -eq 0) "every topic found is one of the contents ($($found -join ', '))"
+        Start-Sleep -Seconds 1
+        Shot $help 'help-3-search'
+
+        # a topic found opened, then Back to the one before and Forward again
+        $row = [Math]::Max(0, [array]::IndexOf($found, @($found | Where-Object { $_ -ne $helpHome })[0]))
+        [void][Native.Win]::SendMessage($results, $LB_SETCURSEL, [IntPtr]$row, [IntPtr]::Zero)
+        [void][Native.Win]::PostMessage($help, $WM_COMMAND, [IntPtr](($LBN_SELCHANGE -shl 16) -bor $IDC_HELP_RESULTS), $results)
+        Check ([bool](WaitFor { (HelpShown) -eq $found[$row] } 5)) "a topic found opens, and the contents follow it ($($found[$row]))"
+        Start-Sleep -Seconds 2
+        Shot $help 'help-4-topic'
+        Command $help $IDC_HELP_BACK
+        Check ([bool](WaitFor { (HelpShown) -eq $helpHome } 5)) 'Back shows the topic before'
+        Command $help $IDC_HELP_FORWARD
+        Check ([bool](WaitFor { (HelpShown) -eq $found[$row] } 5)) 'Forward the one after'
+        # F1 in the main window: the help, already open, at the main window's topic
+        Key $main $VK_F1
+        Check ([bool](WaitFor { (HelpShown) -eq $helpHome } 5)) "F1 in the main window shows its topic in the open help"
+        $helpWindows = 0; $w = [IntPtr]::Zero
+        while (($w = [Native.Win]::FindWindowEx([IntPtr]::Zero, $w, 'InboxClassicHelp', [NullString]::Value)) -ne [IntPtr]::Zero) { $helpWindows++ }
+        Check ($helpWindows -eq 1) 'in the one help window'
         [void][Native.Win]::PostMessage($help, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
     }
 

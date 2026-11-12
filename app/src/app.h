@@ -277,9 +277,28 @@ void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const ch
 
 // ---- help.cpp ----
 
-// opens the help window, or brings it to the front
-void OpenHelp();
+// opens the help window at the topic of `context` (pe_help_context: `main`, `account-form`, `options`...), or brings
+// it to the front and shows that topic there
+void OpenHelp(const char* context = "main");
 void CloseHelp();
+// F1 in `window`: the help at the topic of its context, or of the window that owns it (the main window's when none has
+// one); nothing in the help itself
+void HelpKey(HWND window);
+// the windows CreateModalWindow makes while it lives have the help context `context` (a string literal), which F1 in
+// them and in the windows they own opens
+class HelpScope {
+public:
+    explicit HelpScope(const char* context);
+    ~HelpScope();
+    HelpScope(const HelpScope&) = delete;
+    HelpScope& operator=(const HelpScope&) = delete;
+
+private:
+    const char* previous_;
+};
+// CreateModalWindow and RunModal: the context of the scope given to a new dialog, taken away before it is destroyed
+void SetHelpContext(HWND window);
+void ClearHelpContext(HWND window);
 
 // ---- compose.cpp ----
 
@@ -965,6 +984,24 @@ enum BookControlId : WORD {
     IDC_PICK_TO_LIST = 780,
     IDC_PICK_CC_LIST,
     IDC_PICK_BCC_LIST,
+};
+
+// the controls of the help window (help.cpp), which the UI test finds by them
+enum HelpControlId : WORD {
+    // the toolbar and its buttons: Hide or Show (the left pane), Back, Forward, Home and Print
+    IDC_HELP_TOOLBAR = 800,
+    IDC_HELP_PANE = 810,
+    IDC_HELP_BACK,
+    IDC_HELP_FORWARD,
+    IDC_HELP_HOME,
+    IDC_HELP_PRINT,
+    // the Contents and Search tabs, the contents' tree, and the search's box, button, topics found and "none found"
+    IDC_HELP_TABS = 820,
+    IDC_HELP_TREE,
+    IDC_HELP_QUERY,
+    IDC_HELP_SEARCH,
+    IDC_HELP_RESULTS,
+    IDC_HELP_NONE,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

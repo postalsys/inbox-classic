@@ -137,7 +137,11 @@ void Editor::Configure() {
             args->get_KeyEventKind(&kind);
             args->get_VirtualKey(&key);
             bool control = GetKeyState(VK_CONTROL) & 0x8000;
-            if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == VK_RETURN) {
+            if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && key == VK_F1) {
+                // the compose window's help, as F1 in its fields opens it (the message loop takes the key)
+                args->put_Handled(TRUE);
+                PostMessageW(GetAncestor(host_, GA_ROOT), WM_KEYDOWN, VK_F1, 0);
+            } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == VK_RETURN) {
                 args->put_Handled(TRUE);
                 handlers_.send();
             } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == 'S') {

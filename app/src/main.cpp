@@ -1800,9 +1800,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
 
     MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
-        // F1 is the help from every window
+        // F1 is the help from every window, at the topic of the window it is pressed in
         if (msg.message == WM_KEYDOWN && msg.wParam == VK_F1) {
-            OpenHelp();
+            HelpKey(msg.hwnd);
             continue;
         }
         // the main window's shortcuts in the main window only: Ctrl+F in a compose window is not Forward
