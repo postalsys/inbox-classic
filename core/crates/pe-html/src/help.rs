@@ -4,6 +4,7 @@
 //! out, the links to other topics with their titles. The apps' help viewers ask for the contents, a topic's page and
 //! a search; `help_export` writes the pages for the Mac's Help Book, for Yelp and for the website.
 
+use crate::editor::text as escape;
 use crate::platform::{Platform, REVIEW_END, REVIEW_START, filter_platform};
 use base64::Engine as _;
 
@@ -90,22 +91,21 @@ pub fn help_search(query: &str, platform: Platform, language: &str) -> Vec<HelpT
     if words.is_empty() {
         return Vec::new();
     }
-    let mut found: Vec<(usize, HelpTopic)> = all_topics()
-        .filter_map(|id| {
-            let body = topic_body(id, platform, language, HelpTarget::Viewer)?;
-            let text = plain_text(&body).to_lowercase();
-            let topic = entry(id, platform, language)?;
+    let mut found: Vec<(usize, HelpTopic)> = index(platform, language)
+        .iter()
+        .filter_map(|indexed| {
+            let topic = &indexed.topic;
             let (title, summary) = (topic.title.to_lowercase(), topic.summary.to_lowercase());
             let mut score = 0;
             for word in &words {
-                if !text.contains(word.as_str()) {
+                if !indexed.text.contains(word.as_str()) {
                     return None;
                 }
                 score += 5 * usize::from(title.contains(word.as_str()))
                     + 3 * usize::from(summary.contains(word.as_str()))
-                    + text.matches(word.as_str()).count().min(5);
+                    + indexed.text.matches(word.as_str()).count().min(5);
             }
-            Some((score, topic))
+            Some((score, topic.clone()))
         })
         .collect();
     found.sort_by_key(|(score, _)| std::cmp::Reverse(*score));
@@ -184,20 +184,52 @@ fn words(language: &str, id: &str) -> String {
     )
 }
 
-fn escape(text: &str) -> String {
-    text.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;")
+/// A topic as the contents and the search read it: its title and summary, and its words in lower case
+struct Indexed {
+    topic: HelpTopic,
+    text: String,
 }
 
-/// A topic's title and summary for the contents and the search
+/// Every topic of `platform` in `language` read once: the contents and each search (Linux's on every key typed) look
+/// them up here rather than making each page again
+fn index(platform: Platform, language: &str) -> std::sync::Arc<Vec<Indexed>> {
+    type Indexes = Vec<((Platform, String), std::sync::Arc<Vec<Indexed>>)>;
+    static INDEXES: std::sync::OnceLock<std::sync::Mutex<Indexes>> = std::sync::OnceLock::new();
+    let mut indexes = INDEXES
+        .get_or_init(Default::default)
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    if let Some((_, made)) = indexes.iter().find(|(key, _)| key.0 == platform && key.1 == language) {
+        return made.clone();
+    }
+    // the website's form of a page: its pictures named, not encoded, which adds nothing to read
+    let made: Vec<Indexed> = all_topics()
+        .filter_map(|id| {
+            let body = topic_body(id, platform, language, HelpTarget::Web)?;
+            let topic = HelpTopic {
+                id: id.to_string(),
+                title: title_of(&body),
+                summary: between(&body, "<p class=\"summary\">", "</p>")
+                    .map(plain_text)
+                    .unwrap_or_default(),
+            };
+            Some(Indexed {
+                topic,
+                text: plain_text(&body).to_lowercase(),
+            })
+        })
+        .collect();
+    let made = std::sync::Arc::new(made);
+    indexes.push(((platform, language.to_string()), made.clone()));
+    made
+}
+
+/// A topic's title and summary for the contents
 fn entry(id: &str, platform: Platform, language: &str) -> Option<HelpTopic> {
-    let body = topic_body(id, platform, language, HelpTarget::Viewer)?;
-    Some(HelpTopic {
-        id: id.to_string(),
-        title: title_of(&body),
-        summary: between(&body, "<p class=\"summary\">", "</p>")
-            .map(plain_text)
-            .unwrap_or_default(),
-    })
+    index(platform, language)
+        .iter()
+        .find(|indexed| indexed.topic.id == id)
+        .map(|indexed| indexed.topic.clone())
 }
 
 fn title_of(body: &str) -> String {
