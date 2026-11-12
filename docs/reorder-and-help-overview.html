@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account Order and Help</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d66; --line: #dddad2;
+  --accent: #2456a6; --accent-soft: #e6eefb; --warn: #9a5b00; --warn-soft: #fdf2df;
+  --good: #1f6b3a; --good-soft: #e3f3e8; --code: #f0eee8; --sel: #316ac5; --seltext: #ffffff; --alias: #e9eef8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+    --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+    --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31; --sel: #3d6fc4; --seltext: #ffffff; --alias: #23304a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+  --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+  --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31; --sel: #3d6fc4; --seltext: #ffffff; --alias: #23304a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 1000px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; margin: 48px 0 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.05rem; margin: 20px 0 6px; }
+.lede { color: var(--muted); font-size: 1.08rem; margin-top: 4px; max-width: 70ch; }
+p, li { max-width: 75ch; }
+code { font: 0.86em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.good { border-left-color: var(--good); background: var(--good-soft); }
+.trees { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 20px 0; }
+.tree { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 0; font-size: 0.93rem; }
+.tree .cap { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 0 14px 8px; }
+.row { display: flex; align-items: center; gap: 8px; padding: 3px 14px; }
+.row .ex { width: 12px; color: var(--muted); font-size: 0.75rem; text-align: center; }
+.row .ic { width: 18px; text-align: center; color: var(--muted); }
+.row .n { flex: 1; min-width: 0; }
+.row .c { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+.row.l1 { padding-left: 34px; }
+.row.l2 { padding-left: 54px; }
+.row.head .n { font-weight: 650; }
+.row.alias { background: var(--alias); }
+.row.sel { background: var(--sel); color: var(--seltext); }
+.row.sel .c, .row.sel .ic, .row.sel .ex { color: var(--seltext); }
+.legend { font-size: 0.85rem; color: var(--muted); margin: -8px 0 16px; }
+.legend span { display: inline-block; width: 12px; height: 12px; background: var(--alias); border: 1px solid var(--line); vertical-align: -1px; margin-right: 4px; }
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.decisions div { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--good); border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; }
+.decisions div.ask { border-left-color: var(--warn); }
+.decisions b { display: block; }
+.tw { overflow-x: auto; margin: 12px 0; border-radius: 10px; border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; background: var(--panel); font-size: 0.92rem; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--code); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+.pill { display: inline-block; font-size: 0.74rem; font-weight: 650; padding: 1px 8px; border-radius: 99px; white-space: nowrap; }
+.S { background: var(--good-soft); color: var(--good); }
+.M { background: var(--accent-soft); color: var(--accent); }
+.L { background: var(--warn-soft); color: var(--warn); }
+ol.steps { padding-left: 1.2em; }
+ol.steps li { margin: 6px 0; }
+.help { display: grid; grid-template-columns: 210px 1fr; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); font-size: 0.9rem; margin: 16px 0; }
+.help .side { border-right: 1px solid var(--line); padding: 10px 0; background: var(--code); }
+.help .side .s { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 8px 12px 2px; }
+.help .side .t { padding: 2px 12px 2px 20px; }
+.help .side .t.on { background: var(--sel); color: var(--seltext); }
+.help .side input { margin: 0 10px 6px; width: calc(100% - 20px); font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); color: var(--ink); }
+.help .page { padding: 14px 20px; }
+.help .page h4 { margin: 0 0 6px; font-size: 1.1rem; }
+.help .bar { grid-column: 1 / -1; border-bottom: 1px solid var(--line); padding: 6px 12px; color: var(--muted); font-size: 0.82rem; }
+kbd { font: 0.82em ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--code); }
+</style>
+</head>
+<body>
+<main>
+<h1>Account order and a new help</h1>
+<p class="lede">Accounts get an order you set by dragging their rows, the same in All Inboxes and in the folder list. The help becomes short topics with contents and search, shown the way each platform shows help, and also on inboxclassic.com. Plan: <code>docs/reorder-and-help-plan.md</code>.</p>
+
+<h2>Your decisions</h2>
+<div class="decisions">
+  <div><b>One account order</b>Dragging an Inbox under All Inboxes or an account's row reorders the accounts everywhere. Move Up and Move Down on the account's menu for the keyboard.</div>
+  <div><b>Windows: in-app viewer</b>The tri-pane look of classic Windows help: Contents and Search on the left. Not .chm (Internet Explorer engine).</div>
+  <div><b>Mac: Apple Help Book</b>Help Viewer, and the Help menu's search finds the topics. The help window goes.</div>
+  <div><b>Linux: Yelp when there</b>Pages installed for Yelp; without Yelp (Omarchy, Arch) the app's own libadwaita viewer.</div>
+  <div><b>On the website too</b>inboxclassic.com/help, per language and platform, made at release time.</div>
+  <div><b>A few pictures</b>From the UI tests' screenshots, per platform.</div>
+  <div><b>All five languages</b>Retranslated, marked for native review.</div>
+</div>
+
+<h2>Part 0: a message's title shown as its first line</h2>
+<p>A Stripe payout notice (<code>~/Downloads/payout.eml</code>) has <code>&lt;title&gt;Your &euro;1,910.91 payout for EmailEngine is on the way&lt;/title&gt;</code> in its head, and the reading pane shows that sentence above the message. Other mail clients do not.</p>
+<div class="note"><b>Cause.</b> <code>mail_builder()</code> (<code>pe-html/src/lib.rs</code>) drops the <code>title</code> tag but ammonia keeps its text, as only <code>script</code> and <code>style</code> are cleaned with their content, and we take <code>style</code> out to keep style elements: <code>&lt;head&gt;&lt;title&gt;TITLE TEXT&lt;/title&gt;&lt;style&gt;p{}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;p&gt;body&lt;/p&gt;</code> comes out as <code>TITLE TEXT&lt;style&gt;p{}&lt;/style&gt;&lt;p&gt;body&lt;/p&gt;</code>.</div>
+<ol class="steps">
+<li><code>.add_clean_content_tags(["title", "template", "noembed", "noframes"])</code>: content browsers never show. None is an allowed tag (ammonia panics on a tag in both sets); <code>style</code> stays as it is.</li>
+<li>Check the other users of <code>mail_builder()</code>: the editor's document, sending (<code>outgoing_html</code>) and the plain-or-not comparison in <code>editor.rs</code>. A title has no place in a body we send.</li>
+<li>Tests in <code>pe-html</code>: a full document with a title renders without its text, body and style elements kept; the same for the other three.</li>
+<li><code>cargo test</code>, <code>clippy</code> and <code>fmt</code> in <code>core/</code>; then <code>payout.eml</code> opened in the app.</li>
+</ol>
+<div class="tw"><table><tr><th>Where</th><th>What changes</th><th>Size</th></tr>
+<tr><td>Core (pe-html)</td><td>One builder line and tests. No C API, command or window change, so the three apps need no edits.</td><td><span class="pill S">S</span></td></tr></table></div>
+
+<h2>Part 1: account order</h2>
+<div class="trees">
+  <div class="tree">
+    <div class="cap">Now: the order they were added</div>
+    <div class="row head"><span class="ex">&#9662;</span><span class="ic">&#9993;</span><span class="n">All Inboxes</span><span class="c">4</span></div>
+    <div class="row l1 alias"><span class="ic">&#9993;</span><span class="n">Postal Support</span><span class="c">1</span></div>
+    <div class="row l1 alias"><span class="ic">&#9993;</span><span class="n">Gmail</span><span class="c">3</span></div>
+    <div class="row head"><span class="ex">&#9656;</span><span class="ic"></span><span class="n">Postal Support</span></div>
+    <div class="row head"><span class="ex">&#9656;</span><span class="ic"></span><span class="n">Gmail</span></div>
+  </div>
+  <div class="tree">
+    <div class="cap">Gmail dragged above</div>
+    <div class="row head"><span class="ex">&#9662;</span><span class="ic">&#9993;</span><span class="n">All Inboxes</span><span class="c">4</span></div>
+    <div class="row l1 sel"><span class="ic">&#9993;</span><span class="n">Gmail</span><span class="c">3</span></div>
+    <div class="row l1 alias"><span class="ic">&#9993;</span><span class="n">Postal Support</span><span class="c">1</span></div>
+    <div class="row head"><span class="ex">&#9656;</span><span class="ic"></span><span class="n">Gmail</span></div>
+    <div class="row head"><span class="ex">&#9656;</span><span class="ic"></span><span class="n">Postal Support</span></div>
+  </div>
+</div>
+<p class="legend"><span></span>a row under All Inboxes. Dragging it, or the account's own row, moves the account; a line between rows shows where it lands.</p>
+<div class="tw"><table>
+<tr><th>Where</th><th>What changes</th><th>Size</th></tr>
+<tr><td>Core</td><td>A <code>position</code> column (a migration keeping today's order), accounts and All Inboxes' rows ordered by it, <code>Core::move_account</code>, <code>pe_account_move</code>, tests.</td><td><span class="pill S">S</span></td></tr>
+<tr><td>Commands</td><td><code>account_move_up</code>, <code>account_move_down</code> on the account's menu, greyed at the ends; two strings in five languages.</td><td><span class="pill S">S</span></td></tr>
+<tr><td>Windows</td><td>TreeView drag with an insert mark between rows of the same level; messages dropped on folders work as before.</td><td><span class="pill M">M</span></td></tr>
+<tr><td>Mac</td><td>NSOutlineView drag and drop between rows (the gap line AppKit draws).</td><td><span class="pill S">S</span></td></tr>
+<tr><td>Linux</td><td>DragSource and DropTarget on the rows, an insertion line.</td><td><span class="pill M">M</span></td></tr>
+<tr><td>Tests</td><td>A scenario step on all three: drag the second account first, check both lists, Move Down back; the feature map entry.</td><td><span class="pill S">S</span></td></tr>
+</table></div>
+
+<h2>Part 2: the help</h2>
+<h3>What the review found</h3>
+<div class="note warn"><b>Wrong keys on the Mac today.</b> The shared text writes <kbd>Ctrl</kbd>+<kbd>Q</kbd> for Mark as Read, which the Mac page turns into <kbd>&#8984;Q</kbd>, Quit. <kbd>Ctrl</kbd>+<kbd>F</kbd> for Forward becomes <kbd>&#8984;F</kbd>, Find. The new help writes no key by hand: each comes from <code>commands.toml</code>.</div>
+<ul>
+<li>One page of about 880 lines; "Reading mail" alone is one list of about 140 lines (reading, search, conversations, delete, move, junk, flags, archive, folders, undo). The contents list has no links.</li>
+<li>Internals inside the steps: Thunderbird's ISPDB, Autodiscover, UIDPLUS, <code>$Junk</code>, DKIM, RFC 8058.</li>
+<li>Names unlike the app's ("Mark Read" for "Mark as Read", "Create Mail" and "New Message"), straight apostrophes in 38 lines, "colour", "grey", "Bin".</li>
+<li>Missing or buried: Check for Updates, the Linux main menu, the spell-check language, conversation keys, what the app connects to.</li>
+<li>Form: Tahoma at about 115 characters a line on every platform, no dark mode, no navigation or search; F1 always opens the top.</li>
+</ul>
+
+<h3>The Windows viewer</h3>
+<div class="help">
+  <div class="bar">Hide &nbsp; Back &nbsp; Forward &nbsp; Home &nbsp; Print</div>
+  <div class="side">
+    <input value="Contents | Search" readonly>
+    <div class="s">Get started</div><div class="t">Add your first account</div><div class="t">The main window</div>
+    <div class="s">Everyday tasks</div><div class="t">Read messages</div><div class="t on">Find messages</div><div class="t">Organize mail</div><div class="t">Write a message</div>
+    <div class="s">Reference</div><div class="t">Keyboard shortcuts</div>
+  </div>
+  <div class="page"><h4>Find messages</h4><p>To find a message in every folder:</p><ol><li>Click the search box, or press <kbd>Ctrl+Shift+F</kbd>.</li><li>Type a word from the message. The list shows what matches, with the folder each message is in.</li></ol><p>To search one folder only, choose <b>This Folder</b>&hellip;</p><p style="color:var(--muted)">Related: Search words &middot; Conversations</p></div>
+</div>
+<p class="legend">The Mac shows the same topics in Help Viewer (Help menu search lists them); Linux in Yelp, or this layout in libadwaita with a search entry over the sidebar.</p>
+
+<h3>One source, three viewers and the web</h3>
+<div class="tw"><table>
+<tr><th>Piece</th><th>What it does</th><th>Size</th></tr>
+<tr><td>Topics</td><td><code>pe-html/help/&lt;lang&gt;/&lt;topic&gt;.html</code> in a small HTML subset, <code>topics.toml</code> for order and sections. Keys from <code>commands.toml</code> (<code>data-command</code>), control names from the catalogs (<code>data-text</code>); a test checks every link, key and name resolves in every language.</td><td><span class="pill M">M</span></td></tr>
+<tr><td>Core API</td><td><code>pe_help_topics</code>, <code>pe_help_topic</code>, <code>pe_help_search</code>; per-platform style (Tahoma on Windows, the system font and dark mode on the Mac and Linux).</td><td><span class="pill M">M</span></td></tr>
+<tr><td>Windows</td><td>Tri-pane help window: Contents tree, Search, WebView2, Back, Forward, Home, Print. Context help from dialogs.</td><td><span class="pill L">L</span></td></tr>
+<tr><td>Mac</td><td><code>InboxClassic.help</code> written by the build, indexed with <code>hiutil</code>, Info.plist keys, <code>openHelpAnchor</code> from Help and the dialogs.</td><td><span class="pill M">M</span></td></tr>
+<tr><td>Linux</td><td>Mallard pages installed by the deb and Arch packages, Yelp when present; otherwise an <code>AdwNavigationSplitView</code> viewer with search.</td><td><span class="pill L">L</span></td></tr>
+<tr><td>Website</td><td><code>release.sh</code> exports the topics to <code>inboxclassic.com/help/&lt;lang&gt;/&lt;platform&gt;/</code> with a platform switcher, sitemap and a Help link.</td><td><span class="pill M">M</span></td></tr>
+<tr><td>Content</td><td>The rewrite in English to the style guide, pictures from the UI tests, then the four translations, marked for review.</td><td><span class="pill L">L</span></td></tr>
+</table></div>
+
+<h3>New structure</h3>
+<div class="tw"><table>
+<tr><th>Section</th><th>Topics</th></tr>
+<tr><td>Get started</td><td>Add your first account &middot; Gmail and Outlook.com &middot; The main window</td></tr>
+<tr><td>Everyday tasks</td><td>Read messages &middot; Find messages &middot; Conversations &middot; Organize mail &middot; Delete and undo &middot; Folders &middot; Write a message &middot; Reply and forward &middot; Attachments &middot; Drafts, the Outbox and sending &middot; Signatures &middot; The Address Book &middot; Save, print and import &middot; New mail and notifications</td></tr>
+<tr><td>Several accounts</td><td>All Inboxes and several accounts &middot; Manage accounts</td></tr>
+<tr><td>Message features</td><td>Sign-in codes &middot; Delivery problems &middot; Calendar invitations &middot; Unsubscribe &middot; Brand logos</td></tr>
+<tr><td>Settings</td><td>Options and language &middot; Account security settings &middot; Default mail program &middot; Updates</td></tr>
+<tr><td>AI agents</td><td>Connect an agent &middot; What an agent may do &middot; Sending with an agent</td></tr>
+<tr><td>Reference</td><td>Keyboard shortcuts (from commands.toml) &middot; Search words</td></tr>
+<tr><td>Troubleshooting</td><td>Password not accepted &middot; Certificate and TLS errors &middot; Encryption errors &middot; No connection &middot; A message that cannot be shown</td></tr>
+<tr><td>Privacy and security</td><td>Pictures and tracking &middot; Links and scripts &middot; Where your mail and passwords are kept &middot; What Inbox Classic connects to &middot; Removing Inbox Classic</td></tr>
+<tr><td>Advanced</td><td>Your own sign-in app &middot; Command-line options</td></tr>
+</table></div>
+
+<h3>Style guide</h3>
+<ol class="steps">
+<li>One task or one idea a topic, under about 300 words.</li>
+<li>A task starts with "To &hellip;", then numbered steps: one action each, then what happens.</li>
+<li>Sentences under 25 words; you, active, present tense.</li>
+<li>Controls in bold, by the app's own names (from the catalogs).</li>
+<li>Keys only from <code>commands.toml</code>.</li>
+<li>Protocols and RFCs only under Privacy and security or Advanced.</li>
+<li>The app's typography: &rsquo; and &ldquo; &rdquo;, "cannot", US spelling, Trash on the Mac.</li>
+<li>Warnings in a note before the step.</li>
+<li>Tables for reference only.</li>
+<li>Up to three related topics at the end.</li>
+</ol>
+
+<h2>Order of work</h2>
+<ol class="steps" start="0">
+<li><b>The title fix</b>: one small PR, first.</li>
+<li><b>Account order</b>: one PR, all three apps.</li>
+<li><b>Help engine</b>: topics, keys and names from the sources, search, the export, the three viewers, context help, with today's text cut into topics.</li>
+<li><b>Help content</b>: the rewrite, pictures, four translations, then screenshot reviews (MDN editor, Windows, Mac and GNOME help, four languages) until a pass is clean.</li>
+<li><b>Website help</b>: the export on inboxclassic.com, after 3.</li>
+</ol>
+<div class="note good"><b>Before each commit:</b> <code>/simplify</code> and <code>/security-review</code> on the change, with what they find fixed; prettier, <code>cargo fmt</code> and the tests. Then commit, push, open the pull request and watch CI until it passes.</div>
+
+<h2>Risks</h2>
+<div class="note warn">Help Viewer on the Mac caches books and can be slow to pick up a new one; the build bumps the book's version. It can not be driven by the UI test, so the test checks the bundle and its index.</div>
+<div class="note warn">Mallard is a second output to keep right: the export is its only writer, validated with <code>yelp-check</code> in the Linux container.</div>
+<div class="note warn">A classic TreeView has no built-in reorder: the insert mark and auto-scroll while dragging are hand-made.</div>
+</main>
+</body>
+</html>

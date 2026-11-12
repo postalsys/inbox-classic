@@ -59,6 +59,8 @@ pub(crate) fn mail_builder() -> ammonia::Builder<'static> {
     let mut builder = ammonia::Builder::default();
     builder
         .rm_clean_content_tags(["style"])
+        // elements whose text a browser never shows: removed with it, or a title would read as the body's first line
+        .add_clean_content_tags(["title", "template", "noembed", "noframes", "iframe"])
         .add_tags(["style", "font", "center"])
         .add_generic_attributes([
             "style",
@@ -386,6 +388,21 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A whole document's title (a Stripe payout notice's "Your €1,910.91 payout ... is on the way") is not the
+    /// body's first line: the text of an element a browser never shows goes with it, the body and its styles stay
+    #[test]
+    fn a_title_is_not_shown_as_the_first_line() {
+        let html = "<html><head><title>TITLE TEXT</title><style>p{color:red}</style></head>\
+                    <body><p>body</p><template>TEMPLATE</template><noembed>NOEMBED</noembed>\
+                    <noframes>NOFRAMES</noframes><iframe>IFRAME</iframe></body></html>";
+        let clean = sanitize(html);
+        for hidden in ["TITLE TEXT", "TEMPLATE", "NOEMBED", "NOFRAMES", "IFRAME"] {
+            assert!(!clean.contains(hidden), "{clean}");
+        }
+        assert!(clean.contains("<style>p{color:red}</style>"), "{clean}");
+        assert!(clean.contains("<p>body</p>"), "{clean}");
+    }
 
     /// The "..." of a folded quote has its dots in the middle of its pill, as the editor's button has them: a 17 pixel
     /// box with a 13 pixel line left them at the top
