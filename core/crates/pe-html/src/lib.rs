@@ -33,7 +33,7 @@ pub use help::{
     help_search, help_topic,
 };
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
-pub use platform::{DOCUMENT_SCHEME, Platform, help_page, help_page_in, status_page, webkit_content_rules};
+pub use platform::{DOCUMENT_SCHEME, Platform, status_page, webkit_content_rules};
 pub use visible::visible_html;
 
 /// An image a message carries for its HTML, referenced as `cid:` (multipart/related)

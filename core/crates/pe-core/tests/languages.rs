@@ -90,13 +90,16 @@ fn the_core_speaks_the_language_set() {
     assert_eq!(pe_core::downloading_text(2), "2 Nachrichten werden heruntergeladen...");
 
     // the help in the language, its keys as its keyboards name them; English for a language without one
-    i18n::set_language("de");
-    let help = pe_html::help_page(pe_html::Platform::Windows);
+    let help = pe_html::help_topic("find-messages", pe_html::Platform::Windows, "de").unwrap();
     assert!(help.contains("<kbd>Strg</kbd>"), "keys named for a German keyboard");
     assert!(!help.contains("<kbd>Ctrl</kbd>"));
-    let mac = pe_html::help_page(pe_html::Platform::Mac);
-    assert!(mac.contains("<kbd>\u{2318}</kbd>") && !mac.contains("Strg"));
-    assert!(pe_html::help_page_in(pe_html::Platform::Linux, "pt").contains("<h2>Contents</h2>"));
+    let mac = pe_html::help_topic("find-messages", pe_html::Platform::Mac, "de").unwrap();
+    assert!(mac.contains("\u{2318}") && !mac.contains("Strg"));
+    assert!(
+        pe_html::help_topic("find-messages", pe_html::Platform::Linux, "pt")
+            .unwrap()
+            .contains("Find messages")
+    );
 
     // back to English, which the pseudo-language is made from
     i18n::set_language("qps");
