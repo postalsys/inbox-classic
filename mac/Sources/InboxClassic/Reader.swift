@@ -325,7 +325,6 @@ final class Reader: NSObject {
         label.maximumNumberOfLines = 3
         label.lineBreakMode = .byTruncatingTail
         label.preferredMaxLayoutWidth = 320
-        label.toolTip = note
         let size = label.sizeThatFits(NSSize(width: 320, height: 1000))
         let box = NSView(frame: NSRect(x: 0, y: 0, width: ceil(size.width) + 28, height: ceil(size.height) + 6))
         label.frame = NSRect(x: 14, y: 3, width: ceil(size.width), height: ceil(size.height))
