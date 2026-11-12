@@ -768,6 +768,14 @@ fn all_inboxes_list_and_mark_every_account() {
         (rows[0].name.as_str(), rows[0].title.as_str()),
         ("Work", "Inbox - Work")
     );
+    // the second account dragged first: the accounts and All Inboxes' rows in that order; then back
+    s.core.move_account(second, 0).unwrap();
+    let order = |core: &pe_core::Core| core.accounts().unwrap().iter().map(|a| a.id).collect::<Vec<_>>();
+    assert_eq!(order(&s.core), [second, first]);
+    let rows = s.core.special_folders(pe_core::SpecialFolderKind::Inbox).unwrap();
+    assert_eq!(rows.iter().map(|r| r.account).collect::<Vec<_>>(), [second, first]);
+    s.core.move_account(second, 1).unwrap();
+    assert_eq!(order(&s.core), [first, second]);
 
     // mail arriving in the second account's Inbox is listed, newest first, and opens the window
     let newest = other_server.add_message("INBOX", &dated("Second's", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);

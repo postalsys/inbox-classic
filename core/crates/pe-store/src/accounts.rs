@@ -156,8 +156,8 @@ fn settings_params<'a>(a: &'a AccountSettings, auth: &'a String) -> [&'a dyn rus
 impl Store {
     pub fn add_account(&self, account: &AccountSettings) -> Result<AccountId> {
         self.db.execute(
-            "INSERT INTO accounts (name, email, username, imap_host, imap_port, imap_security, smtp_host, smtp_port, smtp_security, auth) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+            "INSERT INTO accounts (name, email, username, imap_host, imap_port, imap_security, smtp_host, smtp_port, smtp_security, auth, position) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, (SELECT COALESCE(MAX(position), 0) + 1 FROM accounts))",
             settings_params(account, &account.auth.to_sql()).as_slice(),
         )?;
         Ok(self.db.last_insert_rowid())
@@ -206,6 +206,31 @@ impl Store {
         Ok(())
     }
 
+    /// Puts the account `id` at `index` in the accounts' order (0 first; past the end, last), the others keeping
+    /// theirs around it
+    pub fn move_account(&mut self, id: AccountId, index: usize) -> Result<()> {
+        self.transaction(|store| {
+            let mut order: Vec<AccountId> = store
+                .db
+                .prepare("SELECT id FROM accounts ORDER BY position, id")?
+                .query_map([], |row| row.get(0))?
+                .collect::<Result<_>>()?;
+            let at = order
+                .iter()
+                .position(|&account| account == id)
+                .ok_or(rusqlite::Error::QueryReturnedNoRows)?;
+            order.remove(at);
+            order.insert(index.min(order.len()), id);
+            for (position, account) in order.iter().enumerate() {
+                store.db.execute(
+                    "UPDATE accounts SET position = ?2 WHERE id = ?1",
+                    params![account, position + 1],
+                )?;
+            }
+            Ok(())
+        })
+    }
+
     pub fn remove_account(&self, id: AccountId) -> Result<()> {
         self.db.execute("DELETE FROM accounts WHERE id = ?1", [id])?;
         Ok(())
@@ -214,7 +239,7 @@ impl Store {
     pub fn accounts(&self) -> Result<Vec<Account>> {
         let mut statement = self
             .db
-            .prepare(&format!("SELECT {COLUMNS} FROM accounts ORDER BY id"))?;
+            .prepare(&format!("SELECT {COLUMNS} FROM accounts ORDER BY position, id"))?;
         statement.query_map([], from_row)?.collect()
     }
 
@@ -227,6 +252,30 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn accounts_keep_the_order_they_are_moved_to() {
+        let mut store = Store::open_in_memory().unwrap();
+        let ids: Vec<AccountId> = ["a", "b", "c"]
+            .iter()
+            .map(|name| {
+                store
+                    .add_account(&AccountSettings::example(&format!("{name}@example.com")))
+                    .unwrap()
+            })
+            .collect();
+        let order = |store: &Store| store.accounts().unwrap().iter().map(|a| a.id).collect::<Vec<_>>();
+        assert_eq!(order(&store), ids);
+        store.move_account(ids[2], 0).unwrap();
+        assert_eq!(order(&store), vec![ids[2], ids[0], ids[1]]);
+        store.move_account(ids[2], 99).unwrap();
+        assert_eq!(order(&store), ids);
+        // a new account comes last
+        let d = store.add_account(&AccountSettings::example("d@example.com")).unwrap();
+        store.move_account(ids[0], 1).unwrap();
+        assert_eq!(order(&store), vec![ids[1], ids[0], ids[2], d]);
+        assert!(store.move_account(999, 0).is_err());
+    }
 
     #[test]
     fn accounts_round_trip() {
