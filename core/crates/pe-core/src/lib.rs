@@ -531,6 +531,11 @@ impl Core {
         Ok(self.store().set_account_name(account, name)?)
     }
 
+    /// Puts `account` at `index` in the accounts' order (0 first), which the folder list and All Inboxes' rows follow
+    pub fn move_account(&self, account: AccountId, index: usize) -> Result<()> {
+        Ok(self.store().move_account(account, index)?)
+    }
+
     /// Each account's folder of a special use (its Inbox), in the accounts' order, with the account's title and the
     /// folder's unread count: the rows under All Inboxes. An account without that folder yet has no row
     pub fn special_folders(&self, special: SpecialFolderKind) -> Result<Vec<SpecialFolder>> {

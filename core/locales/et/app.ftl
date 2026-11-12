@@ -360,6 +360,10 @@ ui-properties = &Atribuudid
 ui-account-sync = Saada ja võta &vastu
 # review: new
 ui-account-properties = Atri&buudid...
+# review: new
+ui-account-move-up = Liiguta ü&les
+# review: new
+ui-account-move-down = Liiguta a&lla
 ui-menu-open = &Ava
 ui-menu-flag = L&ipp
 ui-menu-view-source = Vaata &lähtekoodi

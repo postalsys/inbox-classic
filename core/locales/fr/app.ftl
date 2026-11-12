@@ -365,6 +365,10 @@ ui-properties = &Propriétés
 ui-account-sync = &Envoyer et recevoir
 # review: new
 ui-account-properties = &Propriétés...
+# review: new
+ui-account-move-up = &Monter
+# review: new
+ui-account-move-down = &Descendre
 ui-menu-open = &Ouvrir
 ui-menu-flag = Indi&cateur
 ui-menu-view-source = Afficher la &source
