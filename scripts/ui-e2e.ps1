@@ -3803,7 +3803,11 @@ public static class Dragger {
     $help = WaitWindow 'InboxClassicHelp'
     Check ($null -ne $help) 'Help opens the help window'
     if ($help) {
-        $helpTree = [Native.Win]::GetDlgItem($help, $IDC_HELP_TREE)
+        # the window is found as soon as it is made: its contents, once they are there
+        $helpTree = WaitFor {
+            $t = [Native.Win]::GetDlgItem($help, $IDC_HELP_TREE)
+            if ($t -ne [IntPtr]::Zero -and [int][Native.Win]::SendMessage($t, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -gt 0) { $t }
+        } 15
         # the row selected in the contents: the topic shown
         function HelpShown {
             $item = [Native.Win]::SendMessage($helpTree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero)
@@ -3838,7 +3842,7 @@ public static class Dragger {
         $tabs = [Native.Win]::GetDlgItem($help, $IDC_HELP_TABS)
         Command $help $IDC_HELP_PANE
         Check ([bool](WaitFor { -not [Native.Win]::IsWindowVisible($tabs) } 5)) 'Hide hides the left pane'
-        Check ((HelpButton $IDC_HELP_PANE) -ne $hideText) 'and the button is Show then'
+        Check ([bool](WaitFor { (HelpButton $IDC_HELP_PANE) -ne $hideText } 5)) 'and the button is Show then'
         Command $help $IDC_HELP_PANE
         Check ([bool](WaitFor { [Native.Win]::IsWindowVisible($tabs) } 5)) 'Show brings the pane back'
         Start-Sleep -Seconds 3
