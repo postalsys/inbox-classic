@@ -851,18 +851,6 @@ impl Mailbox {
         self.view.borrow().text().to_string()
     }
 
-    /// Hide Read Messages: the window's view lists its rows once, so it keeps them (the core's view keeps what it
-    /// listed until the folder changes) and a message read meanwhile stays in the list. The list pages through copies
-    /// of the view, whose rows the window's would not know.
-    fn keep_listed(&self, core: &pe_core::Core) {
-        /// More unread messages than this in one folder: those past it may leave the list when read
-        const KEPT: u64 = 5000;
-        let view = self.view.borrow();
-        if view.show() == pe_store::Show::Unread {
-            let _ = view.rows(core, 0, KEPT);
-        }
-    }
-
     /// What the list shows, as it is now: a copy of its view
     pub fn list_view(&self) -> pe_core::ListView {
         self.view.borrow().clone()
@@ -870,7 +858,6 @@ impl Mailbox {
 
     fn reload_list(&self, keep_selection: bool) {
         let core = &shell().core;
-        self.keep_listed(core);
         let view = self.list_view();
         let several = view.several_folders();
         // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored

@@ -46,9 +46,9 @@ pub struct Search {
     pub threads: Option<Vec<i64>>,
     /// View > Hide Ignored Conversations: the messages of ignored conversations left out
     pub hide_ignored: bool,
-    /// With `show` Unread, the messages (by row id) kept in the list although read: those it showed, so a message
-    /// does not leave the list the moment it is read
-    pub keep: Vec<i64>,
+    /// With `show` Unread, the messages read since this time (milliseconds since the epoch) stay in the list: those read
+    /// since the list was turned to unread only, so a message does not leave it the moment it is read
+    pub read_since: Option<i64>,
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
@@ -128,7 +128,7 @@ impl Search {
         // the Show choice is a term like the one typed for it
         query.terms.extend(match self.show {
             Show::All => None,
-            Show::Unread if !self.keep.is_empty() => None,
+            Show::Unread if self.read_since.is_some() => None,
             Show::Unread => Some(Term::Seen(false)),
             Show::Flagged => Some(Term::Flagged(true)),
             Show::WithAttachments => Some(Term::Attachment(true)),
@@ -148,10 +148,12 @@ impl Search {
             Scope::AllInboxes => parts.push(format!("folder_id IN ({INBOXES})")),
             Scope::Everywhere => {}
         }
-        // unread, or read since the list showed it: ids of the store's own rows, written as numbers
-        if self.show == Show::Unread && !self.keep.is_empty() {
-            let kept: Vec<String> = self.keep.iter().map(i64::to_string).collect();
-            parts.push(format!("(seen = 0 OR id IN ({}))", kept.join(",")));
+        // unread, or read since the list was turned to unread only
+        if let (Show::Unread, Some(since)) = (self.show, self.read_since) {
+            parts.push(format!(
+                "(seen = 0 OR seen_at >= {})",
+                value(&mut values, Value::Integer(since))
+            ));
         }
         let flagged = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
         let answered = "instr(' ' || flags || ' ', ' \\Answered ') > 0";
@@ -647,21 +649,34 @@ mod tests {
             text: "old".into(),
             threads: None,
             hide_ignored: false,
-            keep: Vec::new(),
+            read_since: None,
         };
         assert_eq!(found(&store, &search), [9]);
-        // a message kept although read: still listed with the unread
-        let read: i64 = store
+        // a message read since: still listed with the unread ones, by the time the store noted (in milliseconds)
+        let since = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as i64
+            - 1;
+        store
             .db
-            .query_row("SELECT id FROM messages WHERE seen = 1 LIMIT 1", [], |row| row.get(0))
+            .execute(
+                "UPDATE messages SET seen = 1 WHERE id = (SELECT id FROM messages WHERE seen = 0 LIMIT 1)",
+                [],
+            )
             .unwrap();
         let kept = Search {
             scope: Scope::Everywhere,
             show: Show::Unread,
-            keep: vec![read],
+            read_since: Some(since),
             ..Default::default()
         };
-        assert_eq!(found(&store, &kept).len(), 3);
+        assert_eq!(found(&store, &kept).len(), 2, "the one read stays");
+        let later = Search {
+            read_since: Some(since + 3_600_000),
+            ..kept
+        };
+        assert_eq!(found(&store, &later).len(), 1, "read before the list began: gone");
     }
 
     #[test]

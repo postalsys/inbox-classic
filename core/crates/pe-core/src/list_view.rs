@@ -13,6 +13,13 @@ use pe_store::{FolderId, Message, MessageRef, Scope, Search, Show, Sort};
 
 use crate::{Action, Core, NextUnread, Result, Summary};
 
+/// The time now in milliseconds since the epoch, as the store notes when a message became read
+fn now_ms() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_millis() as i64)
+}
+
 /// A message list's view: see the module's comment
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ListView {
@@ -29,9 +36,9 @@ pub struct ListView {
     hide_ignored: bool,
     /// The open conversations of a grouped list
     expanded: BTreeSet<i64>,
-    /// With Show Unread: the messages the list has shown (store row ids), which stay in it when read, until another
-    /// folder, other words or another Show
-    shown: std::cell::RefCell<BTreeSet<i64>>,
+    /// With Show Unread: when this list began (milliseconds since the epoch); the messages read since stay in it, until
+    /// another folder, other words or another Show
+    since: i64,
 }
 
 impl ListView {
@@ -53,7 +60,7 @@ impl ListView {
         }
         self.scope = scope;
         self.expanded.clear();
-        self.shown.borrow_mut().clear();
+        self.since = now_ms();
         true
     }
 
@@ -69,7 +76,7 @@ impl ListView {
         }
         self.text = text.to_string();
         self.expanded.clear();
-        self.shown.borrow_mut().clear();
+        self.since = now_ms();
         true
     }
 
@@ -96,7 +103,7 @@ impl ListView {
     /// What the list shows by the messages' state; with Unread a message read stays until the list changes
     pub fn set_show(&mut self, show: Show) {
         if self.show != show {
-            self.shown.borrow_mut().clear();
+            self.since = now_ms();
         }
         self.show = show;
     }
@@ -211,10 +218,7 @@ impl ListView {
             text: self.text.clone(),
             threads: self.grouped.then(|| self.expanded.iter().copied().collect()),
             hide_ignored: self.hide_ignored,
-            keep: match self.show {
-                Show::Unread => self.shown.borrow().iter().copied().collect(),
-                _ => Vec::new(),
-            },
+            read_since: (self.show == Show::Unread).then_some(self.since),
         })
     }
 
@@ -228,11 +232,7 @@ impl ListView {
 
     /// A page of the list's rows, from `offset` on
     pub fn rows(&self, core: &Core, offset: u64, limit: u64) -> Result<Vec<Message>> {
-        let rows = self.listed(Vec::new(), |search| core.search(search, self.sort, offset, limit))?;
-        if self.show == Show::Unread {
-            self.shown.borrow_mut().extend(rows.iter().map(|row| row.id));
-        }
-        Ok(rows)
+        self.listed(Vec::new(), |search| core.search(search, self.sort, offset, limit))
     }
 
     /// How many rows the list has: grouped, one a conversation and the other messages of the open ones
@@ -431,6 +431,7 @@ mod tests {
         assert_eq!(view.counts(&core).unwrap(), (2, 1));
 
         // another folder and back: only the unread one
+        std::thread::sleep(std::time::Duration::from_millis(5));
         view.set_scope(Some(Scope::AllInboxes));
         view.set_scope(Some(Scope::Folder(inbox)));
         assert_eq!(view.row_count(&core).unwrap(), 1);

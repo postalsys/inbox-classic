@@ -370,6 +370,15 @@ CREATE TABLE trusted_senders (
     added INTEGER NOT NULL
 );
 "#,
+    // when a message became read, here or on the server: View > Hide Read Messages keeps those read since it was
+    // turned on (search.rs Search::read_since), so a message does not leave the list the moment it is read
+    r#"
+ALTER TABLE messages ADD COLUMN seen_at INTEGER;
+CREATE TRIGGER messages_seen_at AFTER UPDATE OF seen ON messages WHEN NEW.seen = 1 AND OLD.seen = 0
+BEGIN
+    UPDATE messages SET seen_at = CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER) WHERE id = NEW.id;
+END;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
