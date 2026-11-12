@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.13.0](https://github.com/postalsys/inbox-classic/compare/v0.12.2...v0.13.0) (2026-11-12)
+
+
+### Features
+
+* a new help, in topics, shown the way each platform shows help ([273e537](https://github.com/postalsys/inbox-classic/commit/273e5376c0113db3cb80b137406bdf333b742a8a))
+* **core:** the accounts' order, set by moving an account ([e10a2a2](https://github.com/postalsys/inbox-classic/commit/e10a2a255e41397914f4d7b1ee7c652b685f41b9))
+* **help:** the English help as 45 topics ([f59e0b9](https://github.com/postalsys/inbox-classic/commit/f59e0b90e46734234bf1ff0a2d03192b4f48e415))
+* **help:** the help in German, Spanish, Estonian and French ([d80f1b5](https://github.com/postalsys/inbox-classic/commit/d80f1b599eabd5fc5f28469ad94fb23915ab75d3))
+* **help:** the help on the website ([314e2d2](https://github.com/postalsys/inbox-classic/commit/314e2d2a8b1e9adff7789fef92582734715ee8ad))
+* **help:** topics, keys and names from the sources, search and export ([4e7c627](https://github.com/postalsys/inbox-classic/commit/4e7c6275b17a9a6593ec195d9d453121edfd9d5b))
+* **linux:** the help in a viewer of its own, or in Yelp ([6d01c6b](https://github.com/postalsys/inbox-classic/commit/6d01c6ba0163168c74c18833356c4f931da75f8f))
+* **mac:** the help as an Apple Help Book ([52ec3a2](https://github.com/postalsys/inbox-classic/commit/52ec3a2e8109742348776834dd8f1d862c1df99d))
+* reorder accounts by dragging them, or Move Up and Move Down ([c439505](https://github.com/postalsys/inbox-classic/commit/c439505a26f77cd66de22d7e717fce5cdfe28c92))
+* reorder accounts by dragging them, or Move Up and Move Down ([553968a](https://github.com/postalsys/inbox-classic/commit/553968a503320871fbf7ac246303dca762fda672))
+* **windows:** the help in the classic tri-pane window ([705220b](https://github.com/postalsys/inbox-classic/commit/705220b769b3dfd1a0f90d6e9d14cc98400c1b4f))
+
+
+### Bug Fixes
+
+* **help:** pictures, the website's sidebar, the Mac's app menu, keys in every language ([fb88e79](https://github.com/postalsys/inbox-classic/commit/fb88e799c62bcbad84697626e8804ccac900e7cb))
+* **help:** the English topics reviewed: Mac menu names, steps and sentences ([97309b7](https://github.com/postalsys/inbox-classic/commit/97309b73464cc5492d8a274566e7e8c6d96d8cdb))
+* **html:** a message's title is no longer shown as its first line ([9e0655f](https://github.com/postalsys/inbox-classic/commit/9e0655fed5d5ed5659ad49f76363feeac1facbe7))
+* **html:** a message's title is no longer shown as its first line ([4509d59](https://github.com/postalsys/inbox-classic/commit/4509d59c1ba3ebecfc456cd158af877e0ddb8617))
+* **linux:** no second close button under Omarchy's title bar ([51a03e4](https://github.com/postalsys/inbox-classic/commit/51a03e4884b05c1dd86dcb08819d8b17a3a3be21))
+* **linux:** no second close button under Omarchy's title bar ([a98ac8b](https://github.com/postalsys/inbox-classic/commit/a98ac8b76fe71d02d5ea43d3d896c6311f42369e))
+* **scripts:** homepage Linux dialog crops for the wider window ([a599504](https://github.com/postalsys/inbox-classic/commit/a599504fb0da57b7dfaec361087851da6739996c))
+* **scripts:** the homepage's Linux dialogs cropped where the wider window has them ([9b2dae9](https://github.com/postalsys/inbox-classic/commit/9b2dae99699fefa924d662c82f0a05c204a3d692))
+* **scripts:** win-ui-e2e.sh goes on when no app of its directory is running ([d920ebe](https://github.com/postalsys/inbox-classic/commit/d920ebead942bf37b9d5ec20353b3de60bee7e01))
+
 ## [0.12.2](https://github.com/postalsys/inbox-classic/compare/v0.12.1...v0.12.2) (2026-11-11)
 
 
