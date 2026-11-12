@@ -396,7 +396,7 @@ void Reader::ShowInfo() {
     InvalidateRect(unsubscribe_, nullptr, TRUE);
     preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_);
     // offered only for a message with pictures on the internet, until they are shown (asked for, or by themselves)
-    ShowBars(info->attachment_count > 0 && !file, info->remote_images && !info->pictures_loaded && !remoteImages_);
+    ShowBars(info->attachment_count > 0, info->remote_images && !info->pictures_loaded && !remoteImages_);
     if (onShown) {
         onShown();
     }
@@ -447,7 +447,7 @@ void Reader::ChooseAttachment() {
     }
     size_t length = 0;
     char* name = nullptr;
-    uint8_t* data = pe_attachment_data(core_, folder_, uid_, static_cast<size_t>(chosen - 1), &length, &name);
+    uint8_t* data = AttachmentData(static_cast<size_t>(chosen - 1), length, name);
     core::String safeName(name);
     if (!data) {
         MessageBoxW(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
@@ -464,6 +464,21 @@ void Reader::ChooseAttachment() {
     pe_bytes_free(data, length);
 }
 
+// the files of the message shown, of its folder or of the message file
+uint8_t* Reader::AttachmentData(size_t index, size_t& length, char*& name) const {
+    if (!file_.empty()) {
+        return pe_file_attachment_data(core_, core::Narrow(file_).c_str(), index, &length, &name);
+    }
+    return pe_attachment_data(core_, folder_, uid_, index, &length, &name);
+}
+
+bool Reader::SaveAttachments(const std::string& dir, size_t& saved, size_t& total) const {
+    if (!file_.empty()) {
+        return pe_file_save_attachments(core_, core::Narrow(file_).c_str(), dir.c_str(), &saved, &total);
+    }
+    return pe_save_attachments(core_, folder_, uid_, dir.c_str(), &saved, &total);
+}
+
 void Reader::SaveAllAttachments() {
     std::wstring folder = FolderDialog(parent_, core::Title(PE_TEXT_WIN_SAVE_ATTACHMENTS).c_str());
     if (folder.empty()) {
@@ -473,7 +488,7 @@ void Reader::SaveAllAttachments() {
     size_t saved = 0;
     size_t total = 0;
     std::string dir = core::Narrow(folder);
-    if (!pe_save_attachments(core_, folder_, uid_, dir.c_str(), &saved, &total)) {
+    if (!SaveAttachments(dir, saved, total)) {
         MessageBoxW(parent_, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     } else if (saved < total) {
         std::wstring text =
@@ -633,7 +648,9 @@ void Reader::OpenInCalendar() {
     wchar_t temp[MAX_PATH] = L"";
     GetTempPathW(MAX_PATH, temp);
     std::wstring dir = std::wstring(temp) + L"InboxClassic\\Invitations";
-    core::String path(pe_invitation_file(core_, folder_, uid_, core::Narrow(dir).c_str()));
+    std::string target = core::Narrow(dir);
+    core::String path(file_.empty() ? pe_invitation_file(core_, folder_, uid_, target.c_str())
+                                    : pe_file_invitation_file(core_, core::Narrow(file_).c_str(), target.c_str()));
     if (!path) {
         MessageBoxW(parent_, core::T(PE_TEXT_UI_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;

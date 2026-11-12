@@ -31,7 +31,7 @@ public:
     // there is none), the message once the core has it (MessageReady), or why it can not (MessageFailed)
     void Open(int64_t folder, uint64_t uid, int64_t account, const PeMessage* row);
     // a message file (.eml) opened from File Explorer, of no folder: false with why in `error` for a file that is no
-    // message the core can read. Its files can not be saved from here, it has no logo and no Unsubscribe.
+    // message the core can read. Its files are saved as a folder's message's are; it has no logo and no Unsubscribe.
     bool OpenFile(const std::wstring& path, std::wstring& error);
     // the message file shown, empty for a message of a folder
     const std::wstring& File() const { return file_; }
@@ -102,6 +102,9 @@ private:
     void OpenInCalendar();
     void ChooseAttachment();
     void SaveAllAttachments();
+    // the core's calls for the files of the message shown, from its folder or from the message file
+    uint8_t* AttachmentData(size_t index, size_t& length, char*& name) const;
+    bool SaveAttachments(const std::string& dir, size_t& saved, size_t& total) const;
 
     PeCore* core_ = nullptr;
     HWND parent_ = nullptr;

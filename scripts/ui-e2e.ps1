@@ -256,7 +256,7 @@ public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr par
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
 $WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $CB_GETCOUNT = 0x0146; $CB_GETLBTEXT = 0x0148; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
 $TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
-$VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
+$VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_UP = 0x26; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_EXIT = 101; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
 $IDM_VIEW_SOURCE = 132; $IDM_AI_AGENTS = 133
@@ -4092,8 +4092,11 @@ public static class Dragger {
     $emlSubject = 'A message file to open'
     $emlFile = Join-Path (Resolve-Path $Out) 'opened.eml'
     Set-Content -LiteralPath $emlFile -Encoding ASCII -Value ("From: Pat Example <pat@example.com>`r`nTo: testuser@inboxclassic.test`r`n" +
-        "Subject: $emlSubject`r`nDate: $([DateTime]::UtcNow.AddDays(-2).ToString('r'))`r`nMessage-ID: <opened-file@example.com>`r`n`r`n" +
-        "This message was saved as a file and opened from it.`r`n")
+        "Subject: $emlSubject`r`nDate: $([DateTime]::UtcNow.AddDays(-2).ToString('r'))`r`nMessage-ID: <opened-file@example.com>`r`n" +
+        "MIME-Version: 1.0`r`nContent-Type: multipart/mixed; boundary=`"eml-boundary`"`r`n`r`n" +
+        "--eml-boundary`r`nContent-Type: text/plain; charset=utf-8`r`n`r`nThis message was saved as a file and opened from it.`r`n" +
+        "--eml-boundary`r`nContent-Type: text/plain; charset=utf-8`r`nContent-Disposition: attachment; filename=`"file-notes.txt`"`r`n`r`n" +
+        "notes that came in the message file`r`n--eml-boundary--`r`n")
     $second = Start-Process -FilePath $Exe -ArgumentList @('--store', "`"$store`"", "`"$emlFile`"") -PassThru
     $started += $second
     $fileWindow = WaitWindow 'InboxClassicMessage' "$emlSubject - Inbox Classic" 20
@@ -4104,7 +4107,31 @@ public static class Dragger {
         $hasButton = { param($id) [int][Native.Win]::SendMessage($fileBar, $TB_COMMANDTOINDEX, [IntPtr]$id, [IntPtr]::Zero) -ge 0 }
         Check ((& $hasButton $IDM_REPLY) -and (& $hasButton $IDM_PRINT) -and (& $hasButton $IDM_SAVE_AS) -and -not (& $hasButton $IDM_DELETE)) 'its toolbar answers, prints and saves it, and has no Delete (it is no folder''s)'
         Start-Sleep -Seconds 2
+        Check ([bool](WaitFor { Visible $fileWindow $IDC_ATTACHMENTS } 10)) 'the file''s message shows the paper clip of its attachment'
         Shot $fileWindow 'files-4-open-eml'
+        # Save Attachments of the paper clip's menu (its last item) into a folder, as for a folder's message
+        $emlSaveDir = Join-Path (Resolve-Path $Out) 'eml-attachments'
+        Remove-Item -Recurse -Force -LiteralPath $emlSaveDir -ErrorAction SilentlyContinue
+        [void](New-Item -ItemType Directory -Path $emlSaveDir)
+        Command $fileWindow $IDC_ATTACHMENTS
+        $menu = WaitWindow '#32768' $null 10
+        Check ($null -ne $menu) 'its paper clip offers the file'
+        if ($menu) {
+            Start-Sleep -Milliseconds 500
+            $menu = [Native.Win]::FindWindow('#32768', [NullString]::Value)
+            if ($menu -ne [IntPtr]::Zero) {
+                Key $menu $VK_UP
+                Key $menu $VK_RETURN
+            }
+            if (-not (WaitWindow '#32770' 'Save Attachments' 5)) {
+                # where the menu does not take posted keys: real keystrokes, the window in front
+                [void][Native.Win]::SetForegroundWindow($fileWindow)
+                [System.Windows.Forms.SendKeys]::SendWait('{UP}{ENTER}')
+            }
+            Check (AnswerFolderDialog 'Save Attachments' $emlSaveDir) 'Save Attachments asks for a folder'
+            $emlSaved = WaitFor { $f = Join-Path $emlSaveDir 'file-notes.txt'; if (Test-Path $f) { Get-Content -Raw $f } } 10
+            Check ($emlSaved -and $emlSaved.TrimEnd() -eq 'notes that came in the message file') "and saves the file's attachment there ($emlSaved)"
+        }
         Command $fileWindow $IDM_REPLY
         $compose = WaitCompose
         Check ($null -ne $compose) 'Reply opens a new message'
