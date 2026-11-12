@@ -9,6 +9,7 @@
 mod agents;
 mod book;
 mod core;
+mod help;
 mod list_view;
 mod selection;
 mod texts;
@@ -82,23 +83,6 @@ pub unsafe extern "C" fn pe_html_render(html: *const u8, len: usize, allow_remot
         into_c_string(pe_html::render_document(&String::from_utf8_lossy(bytes), &options))
     })
     .unwrap_or(null_mut())
-}
-
-/// The user help for `platform` (`windows`, `mac` or `linux`; NULL is the platform this was built for): one page
-/// for every platform, with the parts of the others left out. Free with `pe_string_free`.
-///
-/// # Safety
-/// `platform` must be NULL or a NUL-terminated string.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_help_page(platform: *const c_char) -> *mut c_char {
-    let platform = if platform.is_null() {
-        pe_html::Platform::current()
-    } else {
-        // SAFETY: as the caller guarantees
-        let name = unsafe { std::ffi::CStr::from_ptr(platform) }.to_string_lossy();
-        pe_html::Platform::from_name(&name).unwrap_or_else(pe_html::Platform::current)
-    };
-    guard(|| into_c_string(pe_html::help_page(platform))).unwrap_or(null_mut())
 }
 
 /// The WebKit content rules (WKContentRuleList JSON) of a web view that shows the core's documents: every load

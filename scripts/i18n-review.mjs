@@ -3,7 +3,7 @@
 // changed when its English or its translation is not, as a pair, in the catalogs of the commit in
 // core/locales/REVIEWED (the last native review; a message moved to another id or file counts as reviewed). Such a
 // message carries `# review: new` or `# review: changed` on the line above it; a new or changed passage of a help page
-// (core/crates/pe-html/src/help.<lang>.html) sits between <!--review--> and <!--/review-->.
+// (core/crates/pe-html/help/<lang>/*.html) sits between <!--review--> and <!--/review-->.
 //
 //   node scripts/i18n-review.mjs                       lists what waits for a review, by language
 //   node scripts/i18n-review.mjs --html out.html       the same as a page, English and the draft side by side
@@ -36,7 +36,7 @@ const htmlOut = htmlAt >= 0 ? args[htmlAt + 1] : null;
 const reviewed = readFileSync(join(locales, 'REVIEWED'), 'utf8').trim();
 
 function git(...rest) {
-    return execFileSync('git', rest, { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    return execFileSync('git', rest, { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
 }
 
 // the messages of a catalog: id, its text (with its continuation lines and attributes), and its review mark
@@ -133,15 +133,25 @@ for (const language of languages) {
 // a help page: its lines that are not in the reviewed page must be inside review marks
 const helpWaiting = [];
 const helpUnmarked = [];
+// the help: the topics of core/crates/pe-html/help/<lang>/ (and the one-page help.<lang>.html while there is one)
+const helpPages = [];
 for (const language of languages) {
-    const path = join(helpDir, `help.${language}.html`);
-    if (!existsSync(path)) {
+    helpPages.push({ language, path: `core/crates/pe-html/src/help.${language}.html`, name: `help.${language}.html` });
+    const topics = join(root, 'core/crates/pe-html/help', language);
+    if (existsSync(topics)) {
+        for (const file of readdirSync(topics).filter(f => f.endsWith('.html')).sort()) {
+            helpPages.push({ language, path: `core/crates/pe-html/help/${language}/${file}`, name: `help/${language}/${file}` });
+        }
+    }
+}
+for (const { language, path, name } of helpPages) {
+    if (!existsSync(join(root, path))) {
         continue;
     }
-    const page = readFileSync(path, 'utf8');
+    const page = readFileSync(join(root, path), 'utf8');
     let before = '';
     try {
-        before = git('show', `${reviewed}:core/crates/pe-html/src/help.${language}.html`);
+        before = git('show', `${reviewed}:${path}`);
     } catch {
         // a help page the review did not have: every line of it is new
     }
@@ -166,7 +176,7 @@ for (const language of languages) {
             .replace(/<[^>]*>/g, '')
             .replace(/[\s,.;:()]/g, '');
         if (!inside && words && !known.has(bare)) {
-            helpUnmarked.push({ language, line: index + 1, text: bare });
+            helpUnmarked.push({ language, name, line: index + 1, text: bare });
         }
         if (closes) {
             inside = false;
@@ -184,7 +194,7 @@ if (checking) {
         console.error(`${u.language}/${u.file}: ${u.id} is ${u.kind} since ${reviewed} but has no "# review: ${u.kind}" mark`);
     }
     for (const u of helpUnmarked) {
-        console.error(`help.${u.language}.html:${u.line}: new since ${reviewed} outside <!--review--> marks: ${u.text.slice(0, 80)}`);
+        console.error(`${u.name}:${u.line}: new since ${reviewed} outside <!--review--> marks: ${u.text.slice(0, 80)}`);
     }
     const bad = unmarked.length + helpUnmarked.length;
     console.log(`${waiting.length} messages and ${helpWaiting.length} help passages wait for a review; ${bad} new or changed without a mark`);

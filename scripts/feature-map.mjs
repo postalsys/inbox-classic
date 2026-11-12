@@ -1009,9 +1009,13 @@ const sections = [
             {
                 shot: 'help-2-contents',
                 name: 'Help',
-                what: 'A help window built into the program: adding accounts (with Gmail and Outlook.com app passwords), reading, pictures and attachments, writing, getting mail, keyboard shortcuts, troubleshooting by error message, and where mail and passwords are kept.',
-                how: 'F1 or Help > Contents.',
-                checked: ['F1 opens it']
+                what: "The help in short topics, in the platform's own way: on Windows a help window with Contents and Search beside the topic, Back, Forward and Print; on the Mac a Help Book in Help Viewer, whose topics the Help menu's search finds; on Linux Yelp where it is installed, otherwise a help window with a search over the contents. Every key and control name comes from the app itself, so the help names them as the app does, in the language in use. F1 (Command-? on the Mac) in a window or dialog opens its own topic. The same help is on inboxclassic.com/help.",
+                how: 'F1 or Help > Contents; Command-? on the Mac.',
+                checked: [
+                    'The help opens at the topic of the window it was asked in',
+                    'The contents list the sections and topics',
+                    'A search lists the topics with every word, a link opens a topic, Back returns'
+                ]
             },
             {
                 shot: 'options-1-language',

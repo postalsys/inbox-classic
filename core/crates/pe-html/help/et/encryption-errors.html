@@ -1,0 +1,16 @@
+<!--review-->
+<h1>Krüptimisvead</h1>
+<p class="summary">Mida teha, kui server ei paku krüptimist või nõuab seda seal, kus see on välja lülitatud.</p>
+<h2>„the server does not offer STARTTLS“</h2>
+<p>Konto on seatud kasutama STARTTLS-i, kuid server ei pakkunud krüptimist. Inbox Classic peatus, seega teie parooli ei saadetud.</p>
+<ol>
+    <li>Avage konto atribuudid menüüst <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Seadke turbeks SSL/TLS, sissetuleva posti jaoks pordiga 993 või väljuva posti jaoks pordiga 465.</li>
+    <li>Klõpsake nuppu <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Kui miski muu ei tööta, ei saa serverit turvaliselt kasutada.</p>
+<h2>„the server takes the password only over an encrypted connection“</h2>
+<p>Väljuva posti server on seatud valikule <b data-text="ui-security-none"></b>. Teie parool on korras. Muutke sätte <b data-text="ui-field-smtp-security"></b> väärtuseks STARTTLS pordiga 587 või SSL/TLS pordiga 465.</p>
+<h2>Hoiatus krüptimata ühenduse kohta</h2>
+<p>Kui valite valiku <b data-text="ui-security-none"></b>, hoiatab Inbox Classic, et igaüks, kes teie võrguliiklust pealt kuulab, saab lugeda teie parooli ja kirju. Jätkake ainult oma arvutis või kohtvõrgus oleva serveri puhul.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->

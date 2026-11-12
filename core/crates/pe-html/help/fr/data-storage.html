@@ -1,0 +1,10 @@
+<!--review-->
+<h1>Où sont conservés votre courrier et vos mots de passe</h1>
+<p class="summary">Ce qu'Inbox Classic conserve sur votre ordinateur, et à quel endroit.</p>
+<ul>
+    <li><b>Le courrier téléchargé et les paramètres des comptes</b> se trouvent dans <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Votre courrier reste aussi sur le serveur. La copie locale sert à lire rapidement et hors connexion, ainsi qu'à la recherche.</li>
+    <li><b>Les mots de passe</b>, les connexions via le navigateur et les secrets des applications de connexion se trouvent dans <!--os:windows-->le Gestionnaire d'identification Windows, sous <i>InboxClassic</i>, chiffrés pour votre compte Windows.<!--/os--><!--os:mac-->votre trousseau de session, sous <i>InboxClassic</i>, chiffrés pour votre compte Mac. Trousseaux d'accès les affiche.<!--/os--><!--os:linux-->votre trousseau (GNOME Keyring), sous <i>InboxClassic</i>, chiffrés pour votre session. Sans trousseau, ils ne sont conservés que jusqu'à la fermeture d'Inbox Classic.<!--/os--> Ils ne sont jamais dans le stockage du courrier.</li>
+</ul>
+<p>La recherche, l'explication des messages non remis, le regroupement en conversations et la détection des codes de connexion s'effectuent tous sur votre ordinateur. Rien de votre courrier n'est envoyé ailleurs pour cela.</p>
+<p>Les agents d'IA ne voient votre courrier que si vous les laissez entrer, et seulement les comptes que vous choisissez. Voir <a href="topic:agents-permissions"></a>.</p>
+<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav><!--/review-->

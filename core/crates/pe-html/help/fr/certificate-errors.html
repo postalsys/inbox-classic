@@ -1,0 +1,18 @@
+<!--review-->
+<h1>Erreurs de certificat</h1>
+<p class="summary">Que faire quand Inbox Classic ne peut pas confirmer qu'il communique avec le vrai serveur de messagerie.</p>
+<p>Vous pouvez voir l'un de ces messages :</p>
+<ul>
+    <li>Dans la barre d'état : « TLS error: … »</li>
+    <li>Dans le volet de lecture : « Impossible d'établir une connexion sécurisée au serveur de messagerie (…). »</li>
+</ul>
+<p>Inbox Classic n'a pas pu confirmer que le serveur est bien celui qu'il prétend être, il n'a donc pas envoyé votre mot de passe.</p>
+<p>Pour corriger le problème :</p>
+<ol>
+    <li>Ouvrez les propriétés du compte dans <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Vérifiez les noms des serveurs. Ce doivent être les noms pour lesquels le certificat du serveur a été établi. C'est souvent le nom de votre fournisseur, par exemple <code>imap.fournisseur.fr</code>, et non votre propre domaine.</li>
+    <li>Vérifiez que la date et l'heure de votre ordinateur sont justes.</li>
+</ol>
+<p>Sur un réseau qui inspecte le trafic chiffré, comme certains réseaux d'entreprise ou d'école, adressez-vous à son administrateur.</p>
+<aside class="note">Aucun réglage ne permet d'accepter n'importe quel certificat. Accepter un faux certificat permettrait à quelqu'un sur le réseau de lire votre mot de passe et votre courrier.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav><!--/review-->

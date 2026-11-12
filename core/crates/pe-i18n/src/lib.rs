@@ -99,6 +99,35 @@ pub fn language() -> &'static str {
         .map_or("en", |l| l.code)
 }
 
+/// A language's catalog, made once for [`message_in`]
+type Loaded = (&'static str, Arc<Bundle>);
+
+/// The message `id` of the catalog of `language` (English for a message or language it has not), without its
+/// placeables filled: what the help names a control by. None for an id no catalog has.
+pub fn message_in(language: &str, id: &str) -> Option<String> {
+    static BUNDLES: OnceLock<std::sync::Mutex<Vec<Loaded>>> = OnceLock::new();
+    let code = supported(language).filter(|code| *code != PSEUDO).unwrap_or("en");
+    let bundle = {
+        let mut bundles = BUNDLES
+            .get_or_init(Default::default)
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        match bundles.iter().find(|(c, _)| *c == code) {
+            Some((_, bundle)) => bundle.clone(),
+            None => {
+                let made = if code == "en" {
+                    english().clone()
+                } else {
+                    Arc::new(bundle(code))
+                };
+                bundles.push((code, made.clone()));
+                made
+            }
+        }
+    };
+    format(&bundle, id, &[]).or_else(|| format(english(), id, &[]))
+}
+
 /// A value for a placeable of a message: a name, or a number (plurals are chosen by it)
 #[derive(Debug, Clone, PartialEq)]
 pub enum Arg<'a> {

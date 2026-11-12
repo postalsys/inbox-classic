@@ -94,7 +94,11 @@ void Preview::Configure() {
             UINT key = 0;
             args->get_KeyEventKind(&kind);
             args->get_VirtualKey(&key);
-            if (keys_ && kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && keys_(key)) {
+            if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && key == VK_F1) {
+                // the help of the window, as F1 in any of its controls opens it (the message loop takes the key)
+                args->put_Handled(TRUE);
+                PostMessageW(GetAncestor(parent_, GA_ROOT), WM_KEYDOWN, VK_F1, 0);
+            } else if (keys_ && kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && keys_(key)) {
                 args->put_Handled(TRUE);
             }
             return S_OK;
@@ -182,6 +186,13 @@ void Preview::Focus(FocusFrom from) {
 void Preview::SetVisible(bool visible) {
     if (controller_) {
         controller_->put_IsVisible(visible ? TRUE : FALSE);
+    }
+}
+
+void Preview::Print() {
+    ComPtr<ICoreWebView2_16> printing;
+    if (view_ && SUCCEEDED(view_.As(&printing))) {
+        printing->ShowPrintUI(COREWEBVIEW2_PRINT_DIALOG_KIND_BROWSER);
     }
 }
 

@@ -1,0 +1,29 @@
+<!--review-->
+<h1>Mots de recherche</h1>
+<p class="summary">Les mots et les signes que comprend le champ de recherche, pour trouver exactement les messages que vous voulez.</p>
+<p>Le champ de recherche accepte les mêmes mots que celui de Gmail. Combinez-en autant que vous voulez : un message doit correspondre à tous. Pointez sur le champ de recherche pour en voir une courte liste.</p>
+<table>
+    <tr><th>Tapez</th><th>Trouve</th></tr>
+    <tr><td><code>budget</code></td><td>Les messages contenant, n'importe où, un mot qui commence par <i>budget</i></td></tr>
+    <tr><td><code>"expression exacte"</code></td><td>Ces mots, dans cet ordre</td></tr>
+    <tr><td><code>-mot</code></td><td>Les messages sans ce mot. Le signe moins fonctionne devant n'importe quel mot de recherche, par exemple <code>-is:unread</code></td></tr>
+    <tr><td><code>ceci OR cela</code></td><td>Les messages contenant l'un ou l'autre mot. Écrivez <code>OR</code> en majuscules</td></tr>
+    <tr><td><code>from:anne</code></td><td>Le courrier d'Anne</td></tr>
+    <tr><td><code>to:anne</code>, <code>cc:</code>, <code>bcc:</code></td><td>Le courrier adressé à Anne, dans n'importe quelle ligne de destinataires</td></tr>
+    <tr><td><code>subject:déjeuner</code></td><td>Le mot dans l'objet</td></tr>
+    <tr><td><code>filename:pdf</code></td><td>Le mot dans le nom d'un fichier joint</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Les messages avec des fichiers</td></tr>
+    <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Les messages non lus ou lus</td></tr>
+    <tr><td><code>is:starred</code> ou <code>is:flagged</code></td><td>Les messages avec un indicateur</td></tr>
+    <tr><td><code>is:answered</code></td><td>Les messages auxquels vous avez répondu</td></tr>
+    <tr><td><code>is:bounce</code></td><td>Les avis de messages non remis ou retardés</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Seulement ce dossier, dans tous les comptes</td></tr>
+    <tr><td><code>in:projets</code></td><td>Seulement le dossier qui porte ce nom</td></tr>
+    <tr><td><code>in:anywhere</code></td><td>Tous les dossiers</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Le courrier antérieur ou postérieur à un jour. <code>2025-01-31</code> fonctionne aussi</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Le courrier plus ancien ou plus récent qu'un nombre de jours (<code>d</code>), de mois (<code>m</code>) ou d'années (<code>y</code>)</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Le courrier plus grand ou plus petit qu'une taille, en octets ou avec <code>K</code>, <code>M</code> ou <code>G</code></td></tr>
+</table>
+<p>Les accents et les majuscules ne comptent pas. Un mot de recherche qu'Inbox Classic ne connaît pas est recherché comme un mot ordinaire.</p>
+<p>La liste n'affiche pas les tailles. Pour connaître la taille d'un message, choisissez <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav><!--/review-->

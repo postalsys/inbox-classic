@@ -141,3 +141,13 @@ fn words_in_the_language_set() {
     assert_eq!(set_language("xx"), "en");
     assert_eq!(tr_args(Text::Messages, &[("count", 2u64.into())]), "2 messages");
 }
+
+#[test]
+fn a_message_by_its_id_in_a_language() {
+    assert_eq!(
+        message_in("de", "cmd-mark-read").as_deref(),
+        Some("Als &gelesen markieren")
+    );
+    assert_eq!(message_in("xx", "cmd-mark-read").as_deref(), Some("Mark as &Read"));
+    assert_eq!(message_in("en", "no-such-message"), None);
+}

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Builds the Mac app, build/mac/Inbox Classic.app, on this Mac: the Rust core as a static library (cargo, in core/ so
 # it reads core/.cargo/config.toml), the Swift package in mac/ against it, then the bundle with its icons (the Fluent
-# SVGs of app/res/icons as PDFs, the app icon from app/res/app-icon.svg), the sign-in buttons and Info.plist.
+# SVGs of app/res/icons as PDFs, the app icon from app/res/app-icon.svg), the sign-in buttons, the help (a Help Book)
+# and Info.plist.
 #
 #   scripts/mac-build.sh            a release build, signed ad hoc to run here
 #   CONFIG=debug scripts/mac-build.sh
@@ -61,6 +62,58 @@ done
 # the sign-in buttons, in English and each language with its own words (scripts/build-sign-in-buttons.sh)
 cp app/res/brands/{google,microsoft}-sign-in.png app/res/brands/{google,microsoft}-sign-in.??.png "$APP/Contents/Resources/brands/"
 cp LICENSE "$APP/Contents/Resources/LICENSE.txt"
+
+# the help, a Help Book for Help Viewer: the core's topics as pages (pe-html's help-export), a folder a language with
+# its search index, which the Help menu's search field uses too. Help Viewer keeps a copy of each book it has shown
+# and takes a new one only for another CFBundleVersion, hence the build's time in it.
+HELP="$APP/Contents/Resources/InboxClassic.help"
+help_pages=$(mktemp -d)
+(cd core && CARGO_TARGET_DIR=../build/cargo cargo run -q --locked -p pe-html --example help-export -- mac helpbook "$help_pages")
+mkdir -p "$HELP/Contents/Resources"
+cat > "$HELP/Contents/Info.plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.inboxclassic.InboxClassic.help</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Inbox Classic Help</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>${VERSION}</string>
+	<key>CFBundleVersion</key>
+	<string>$(date -u +%Y%m%d%H%M)</string>
+	<key>HPDBookAccessPath</key>
+	<string>index.html</string>
+	<key>HPDBookIndexPath</key>
+	<string>InboxClassic.cshelpindex</string>
+	<key>HPDBookTitle</key>
+	<string>Inbox Classic Help</string>
+	<key>HPDBookType</key>
+	<string>3</string>
+</dict>
+</plist>
+EOF
+for dir in "$help_pages"/*/; do
+    code=$(basename "$dir")
+    lproj="$HELP/Contents/Resources/$code.lproj"
+    ditto "$dir" "$lproj"
+    # the book's title in the language, as its contents page has it
+    title=$(sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$lproj/index.html" | head -1 | sed 's/&amp;/\&/g; s/"/\\"/g')
+    printf '"HPDBookTitle" = "%s";\n' "$title" > "$lproj/InfoPlist.strings"
+    # the search index, with the anchors openHelpAnchor opens, and the built-in stop words where there are some
+    stopwords=""
+    case "$code" in en | de | es | fr) stopwords="-s $code" ;; esac
+    # shellcheck disable=SC2086
+    hiutil -I corespotlight -Ca $stopwords -l "$code" -f "$lproj/InboxClassic.cshelpindex" "$lproj"
+done
+rm -rf "$help_pages"
 if [ -f dist/mac/THIRD-PARTY-NOTICES.txt ]; then
     cp dist/mac/THIRD-PARTY-NOTICES.txt "$APP/Contents/Resources/"
 fi

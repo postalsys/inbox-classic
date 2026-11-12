@@ -1,0 +1,15 @@
+<h1>Encryption errors</h1>
+<p class="summary">What to do when a server does not offer encryption, or wants it where it is off.</p>
+<h2>“the server does not offer STARTTLS”</h2>
+<p>The account is set to STARTTLS, but the server did not offer encryption. Inbox Classic stopped, so your password was not sent.</p>
+<ol>
+    <li>Open the account’s properties in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Set the security to SSL/TLS, with port 993 for incoming mail or 465 for outgoing mail.</li>
+    <li>Click <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>If nothing else works, the server cannot be used safely.</p>
+<h2>“the server takes the password only over an encrypted connection”</h2>
+<p>The outgoing server is set to <b data-text="ui-security-none"></b>. Your password is fine. Change <b data-text="ui-field-smtp-security"></b> to STARTTLS with port 587, or SSL/TLS with port 465.</p>
+<h2>The warning about a connection without encryption</h2>
+<p>When you choose <b data-text="ui-security-none"></b>, Inbox Classic warns that anyone who intercepts your network traffic can read your password and messages. Continue only for a server on your own computer or local network.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>

@@ -137,7 +137,7 @@ impl MessageWindow {
         add(Command::NextMessage.name(), |this| this.step(true));
         add(Command::NextUnread.name(), |this| this.next_unread());
         add(Command::FindInMessage.name(), |this| this.reader.find_in_message());
-        add(Command::Help.name(), |_| crate::help::open());
+        add(Command::Help.name(), |_| crate::help::show("main"));
     }
 
     /// Esc and Ctrl+W close the window, Delete deletes the message; closing lets go of the window

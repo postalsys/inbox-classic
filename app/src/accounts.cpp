@@ -682,6 +682,7 @@ int64_t AddSignedIn(HWND owner, PeCore* core, SignInChoice with, const std::wstr
 }  // namespace
 
 int64_t NewAccountDialog(HWND owner, PeCore* core) {
+    HelpScope help("account-form");
     std::wstring name, email;
     SignInChoice chosen;
     SignInApps apps(core);
@@ -988,10 +989,12 @@ LRESULT CALLBACK AccountsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 }  // namespace
 
 bool AccountPropertiesDialog(HWND owner, PeCore* core, int64_t account) {
+    HelpScope help("account-properties");
     return AccountProperties(owner, core, account);
 }
 
 bool AccountsDialog(HWND owner, PeCore* core) {
+    HelpScope help("account-properties");
     static bool registered = false;
     if (!registered) {
         WNDCLASSEXW windowClass = {sizeof(windowClass)};

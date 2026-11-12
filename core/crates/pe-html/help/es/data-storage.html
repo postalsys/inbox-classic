@@ -1,0 +1,10 @@
+<!--review-->
+<h1>Dónde se guardan su correo y sus contraseñas</h1>
+<p class="summary">Qué guarda Inbox Classic en su equipo y dónde.</p>
+<ul>
+    <li><b>El correo descargado y la configuración de las cuentas</b> están en <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Su correo también permanece en el servidor. La copia local sirve para leer con rapidez y sin conexión, y para la búsqueda.</li>
+    <li><b>Las contraseñas</b>, los inicios de sesión por navegador y los secretos de las aplicaciones de inicio de sesión están en <!--os:windows-->el Administrador de credenciales de Windows, con el nombre <i>InboxClassic</i>, cifrados para su cuenta de Windows.<!--/os--><!--os:mac-->su llavero de inicio de sesión, con el nombre <i>InboxClassic</i>, cifrados para su cuenta del Mac. Acceso a Llaveros los muestra.<!--/os--><!--os:linux-->su llavero (GNOME Keyring), con el nombre <i>InboxClassic</i>, cifrados para su sesión. Sin un llavero, solo se guardan hasta que se cierra Inbox Classic.<!--/os--> Nunca están en el almacén de correo.</li>
+</ul>
+<p>La búsqueda, la explicación de los mensajes devueltos, la agrupación en conversaciones y la detección de códigos de inicio de sesión se ejecutan en su equipo. Nada de su correo se envía a ningún sitio para ello.</p>
+<p>Los agentes de IA solo ven su correo cuando usted les deja entrar, y solo las cuentas que usted elige. Consulte <a href="topic:agents-permissions"></a>.</p>
+<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav><!--/review-->

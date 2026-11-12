@@ -1,0 +1,68 @@
+# The help's sections and topics in order: each topic is help/<language>/<id>.html, each section's title the catalog
+# message help-section-<id> (core/locales/<language>/help.ftl). `context` names the topic a window's help opens.
+
+[[section]]
+id = "get-started"
+topics = ["add-account", "gmail-outlook", "main-window"]
+
+[[section]]
+id = "everyday"
+topics = [
+    "read-messages",
+    "find-messages",
+    "conversations",
+    "organize-mail",
+    "delete-and-undo",
+    "folders",
+    "write-message",
+    "reply-forward",
+    "attachments",
+    "drafts-outbox",
+    "signatures",
+    "address-book",
+    "save-print-import",
+    "new-mail",
+]
+
+[[section]]
+id = "accounts"
+topics = ["all-inboxes", "manage-accounts"]
+
+[[section]]
+id = "message-features"
+topics = ["sign-in-codes", "delivery-problems", "invitations", "unsubscribe", "brand-logos"]
+
+[[section]]
+id = "settings"
+topics = ["options-language", "account-security", "default-mail-program", "updates"]
+
+[[section]]
+id = "agents"
+topics = ["agents-connect", "agents-permissions", "agents-sending"]
+
+[[section]]
+id = "reference"
+topics = ["keyboard-shortcuts", "search-words"]
+
+[[section]]
+id = "troubleshooting"
+topics = ["password-not-accepted", "certificate-errors", "encryption-errors", "no-connection", "message-not-shown"]
+
+[[section]]
+id = "privacy"
+topics = ["pictures-tracking", "links-scripts", "data-storage", "connections", "removing"]
+
+[[section]]
+id = "advanced"
+topics = ["sign-in-apps", "command-line"]
+
+# the topic a window's own help (F1 in it, or its help button) opens
+[context]
+main = "main-window"
+account-form = "add-account"
+account-properties = "manage-accounts"
+options = "options-language"
+sign-in-apps = "sign-in-apps"
+agents = "agents-connect"
+address-book = "address-book"
+compose = "write-message"

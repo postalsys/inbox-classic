@@ -1,0 +1,16 @@
+<h1>Command-line options</h1>
+<p class="summary">Options for starting Inbox Classic from a terminal, for testing and for AI agents.</p>
+<p>Start the program <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> with these options:</p>
+<table>
+    <tr><th>Option</th><th>Does</th></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>Uses another mail store, such as one for testing</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Keeps passwords for this run only, never in the system’s password store</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Accepts only the server certificate in this file (PEM or DER), for a test server with a self-signed certificate</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Writes the page of a browser sign-in to this file instead of opening the browser</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>Shows the windows in this language for this run, such as <code>de</code></td></tr>
+    <tr><td><code>--background</code></td><td>Starts without its window</td></tr>
+    <tr><td><code>--mcp</code></td><td>Connects an AI agent to Inbox Classic. The agent’s program starts this, not you</td></tr>
+    <tr><td><code>--version</code></td><td>Prints the version and ends</td></tr>
+</table>
+<p>A <code>mailto:</code> link given as the argument opens a new message, as an e-mail link does.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>

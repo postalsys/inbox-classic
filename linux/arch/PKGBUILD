@@ -40,6 +40,9 @@ build() {
   cargo build --frozen --release
   mkdir -p "$srcdir/notices"
   CARGO_NET_OFFLINE=true node ../scripts/notices.mjs --linux "$srcdir/notices"
+  # the help for Yelp, <language>/inbox-classic/ (English as C)
+  rm -rf "$srcdir/help"
+  cargo run --frozen --release --example yelp-help -- "$srcdir/help"
 }
 
 package() {
@@ -50,4 +53,5 @@ package() {
   install -Dm644 app/res/app-icon.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/com.inboxclassic.InboxClassic.svg"
   install -Dm644 "$srcdir/notices/THIRD-PARTY-NOTICES.txt" -t "$pkgdir/usr/share/doc/$pkgname"
   install -Dm644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname"
+  (cd "$srcdir/help" && find . -type f -exec install -Dm644 {} "$pkgdir/usr/share/help/{}" \;)
 }

@@ -115,11 +115,12 @@ struct FormField {
 }
 
 /// A modal form: a label and an input for each field, OK and Cancel; the fields with their values when OK was
-/// pressed, nil when cancelled. `validate` gets the values and returns an error to show, nil to accept them.
+/// pressed, nil when cancelled. `validate` gets the values and returns an error to show, nil to accept them. `help`:
+/// the topic of the form's help button (help/topics.toml [context]), none without it.
 @MainActor
 func formDialog(title: String, intro: String, fields: [FormField], ok: String = Text.uiOk.text, focus: Int = 0,
-                validate: (([FormField]) -> String?)? = nil) -> [FormField]? {
-    let form = FormWindow(title: title, intro: intro, fields: fields, ok: ok, focus: focus, validate: validate)
+                help: String? = nil, validate: (([FormField]) -> String?)? = nil) -> [FormField]? {
+    let form = FormWindow(title: title, intro: intro, fields: fields, ok: ok, focus: focus, help: help, validate: validate)
     return form.run()
 }
 
@@ -131,7 +132,8 @@ final class FormWindow: NSObject, NSWindowDelegate {
     private let validate: (([FormField]) -> String?)?
     private var accepted = false
 
-    init(title: String, intro: String, fields: [FormField], ok: String, focus: Int, validate: (([FormField]) -> String?)?) {
+    init(title: String, intro: String, fields: [FormField], ok: String, focus: Int, help: String?,
+         validate: (([FormField]) -> String?)?) {
         self.fields = fields
         self.validate = validate
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 200), styleMask: [.titled], backing: .buffered,
@@ -167,7 +169,7 @@ final class FormWindow: NSObject, NSWindowDelegate {
         let okButton = NSButton(title: ok, target: self, action: #selector(accept))
         okButton.keyEquivalent = "\r"
         okButton.setAccessibilityIdentifier("form.ok")
-        let buttons = buttonRow([cancelButton, okButton])
+        let buttons = buttonRow([cancelButton, okButton], help: help)
 
         let stack = NSStackView(views: [introLabel, grid, buttons])
         stack.orientation = .vertical
@@ -260,13 +262,13 @@ func refused(_ reason: UnsafeMutablePointer<CChar>?, _ fallback: String) {
     inform(taken(reason) ?? fallback, style: .warning)
 }
 
-/// The buttons of a window in a row at its right, the default last, as Mac windows have them; as wide as its window
-/// once given that width
+/// The buttons of a window in a row at its right, the default last, as Mac windows have them, and the help button of
+/// the topic `help` at its left; as wide as its window once given that width
 @MainActor
-func buttonRow(_ buttons: [NSButton]) -> NSStackView {
+func buttonRow(_ buttons: [NSButton], help: String? = nil) -> NSStackView {
     let spacer = NSView()
     spacer.setContentHuggingPriority(.init(1), for: .horizontal)
-    let row = NSStackView(views: [spacer] + buttons)
+    let row = NSStackView(views: (help.map { [HelpButton($0)] } ?? []) + [spacer] + buttons)
     row.spacing = 12
     for button in buttons {
         button.widthAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
@@ -422,6 +424,8 @@ enum TestHooks {
     static var folder: (() -> URL?)?
     /// a notification's title and text, as the system would show it
     static var notified: ((String, String) -> Void)?
+    /// the anchor of the help topic asked for, in place of Help Viewer, which runs in a process of its own
+    static var help: ((String) -> Void)?
 }
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled

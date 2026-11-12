@@ -1,0 +1,16 @@
+<!--review-->
+<h1>Errores de cifrado</h1>
+<p class="summary">Qué hacer cuando un servidor no ofrece cifrado, o lo exige donde está desactivado.</p>
+<h2>«the server does not offer STARTTLS»</h2>
+<p>La cuenta está configurada con STARTTLS, pero el servidor no ofreció cifrado. Inbox Classic se detuvo, de modo que su contraseña no se envió.</p>
+<ol>
+    <li>Abra las propiedades de la cuenta en <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Cambie la seguridad a SSL/TLS, con el puerto 993 para el correo entrante o el 465 para el saliente.</li>
+    <li>Haga clic en <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Si nada de esto funciona, el servidor no se puede usar de forma segura.</p>
+<h2>«the server takes the password only over an encrypted connection»</h2>
+<p>El servidor de salida está configurado con <b data-text="ui-security-none"></b>. Su contraseña es correcta. Cambie <b data-text="ui-field-smtp-security"></b> a STARTTLS con el puerto 587, o a SSL/TLS con el puerto 465.</p>
+<h2>El aviso sobre una conexión sin cifrado</h2>
+<p>Cuando elige <b data-text="ui-security-none"></b>, Inbox Classic avisa de que cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Continúe solo con un servidor de su propio equipo o de su red local.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->

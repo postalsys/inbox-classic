@@ -918,8 +918,11 @@ HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* titl
     int height = frame.bottom - frame.top;
     int x = ownerRect.left + (ownerRect.right - ownerRect.left - width) / 2;
     int y = ownerRect.top + (ownerRect.bottom - ownerRect.top - height) / 2;
-    return CreateWindowExW(WS_EX_DLGMODALFRAME | WS_EX_CONTROLPARENT, className, title, style, x, y, width, height, root, nullptr,
-                           GetModuleHandleW(nullptr), nullptr);
+    HWND dialog = CreateWindowExW(WS_EX_DLGMODALFRAME | WS_EX_CONTROLPARENT, className, title, style, x, y, width, height, root, nullptr,
+                                  GetModuleHandleW(nullptr), nullptr);
+    // F1 in it opens the help of the dialog that made it (HelpScope)
+    SetHelpContext(dialog);
+    return dialog;
 }
 
 namespace {
@@ -975,6 +978,11 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     }
     MSG msg = {};
     while (!done && GetMessageW(&msg, nullptr, 0, 0) > 0) {
+        // F1 is the help of the window it is pressed in, as in the main loop
+        if (msg.message == WM_KEYDOWN && msg.wParam == VK_F1) {
+            HelpKey(msg.hwnd);
+            continue;
+        }
         // Enter on an owner-drawn button clicks it: it can not be the default button, so the dialog would take IDOK
         if (msg.message == WM_KEYDOWN && msg.wParam == VK_RETURN && IsChild(dialog, msg.hwnd) &&
             (GetWindowLongPtrW(msg.hwnd, GWL_STYLE) & BS_TYPEMASK) == BS_OWNERDRAW) {
@@ -997,6 +1005,7 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     EnableWindow(root, wasEnabled);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, 0);
     RemoveWindowSubclass(dialog, ModalProc, 0);
+    ClearHelpContext(dialog);
     DestroyWindow(dialog);
     if (wasEnabled) {
         SetActiveWindow(root);

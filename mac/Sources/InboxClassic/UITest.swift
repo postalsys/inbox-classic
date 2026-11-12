@@ -896,13 +896,7 @@ final class UITest {
         }
         await pause(0.5)
 
-        step("the help")
-        command(.help)
-        let help = await waitWindow("help", 10)
-        check(help != nil, "Help opens the help")
-        await pause(1.5)
-        await shot(help, "help-2-contents")
-        help?.close()
+        try await helpBook()
         command(.about)
         await pause(1)
         let about = NSApp.windows.first { $0.isVisible && $0.className.contains("About") || ($0.isVisible && $0.title.isEmpty && $0.frame.width < 400) }

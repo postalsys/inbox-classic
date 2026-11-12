@@ -445,7 +445,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .reply: main.reply(PE_DRAFT_KIND_REPLY)
         case .replyAll: main.reply(PE_DRAFT_KIND_REPLY_ALL)
         case .forward: main.reply(PE_DRAFT_KIND_FORWARD)
-        case .help: HelpWindow.open()
+        case .help: Help.open(for: NSApp.keyWindow)
         case .delete: main.mailbox.deleteSelected()
         case .move: main.mailbox.moveSelected()
         case .copy: main.mailbox.moveSelected(copy: true)

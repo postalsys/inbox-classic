@@ -1486,6 +1486,7 @@ dependencies = [
  "getrandom 0.4.3",
  "pe-i18n",
  "serde_json",
+ "toml",
 ]
 
 [[package]]

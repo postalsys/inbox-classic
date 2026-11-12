@@ -247,6 +247,8 @@ impl Book {
         add(Command::ExportAddressBook.name(), |this| {
             spawn(async move { export(this.window.upcast_ref()).await })
         });
+        // F1, as in every window
+        add(Command::Help.name(), |_| crate::help::show("address-book"));
     }
 
     fn connect(self: &Rc<Self>) {

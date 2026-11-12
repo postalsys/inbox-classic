@@ -213,41 +213,55 @@ final class Preview: NSObject {
 
 // ---- the help ----
 
-/// The help window: the core's help page for the Mac, shown like a message
+/// The help: the Help Book in the bundle (Contents/Resources/InboxClassic.help, which scripts/mac-build.sh makes of
+/// the core's topics), shown by Help Viewer, whose search the Help menu has too
 @MainActor
-final class HelpWindow: NSObject, NSWindowDelegate {
-    static var shared: HelpWindow?
-    let window: NSWindow
-    private let preview = Preview()
+enum Help {
+    /// the windows with a topic of their own (help/topics.toml [context]); every other one opens the main window's
+    static let contexts = [
+        "account.start": "account-form", "accounts": "account-properties", "settings": "options",
+        "signin.apps": "sign-in-apps", "signin.editor": "sign-in-apps", "agents": "agents", "addressbook": "address-book",
+        "contact": "address-book", "group": "address-book", "pick": "address-book", "compose": "compose",
+    ]
 
-    static func open() {
-        if shared == nil {
-            shared = HelpWindow()
+    /// opens the help at the topic of `context` (`main`, `account-form`, `options`, ...)
+    static func open(_ context: String) {
+        let anchor = taken(pe_help_context(context)) ?? "main-window"
+        if let asked = TestHooks.help {
+            asked(anchor)
+            return
         }
-        shared?.window.makeKeyAndOrderFront(nil)
+        let book = Bundle.main.object(forInfoDictionaryKey: "CFBundleHelpBookName") as? String
+        NSHelpManager.shared.openHelpAnchor(anchor, inBook: book)
     }
 
-    private override init() {
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 640),
-                          styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
-        window.autorecalculatesKeyViewLoop = true
-        window.title = Text.uiHelpTitle.text
-        window.identifier = NSUserInterfaceItemIdentifier("help")
-        window.isReleasedWhenClosed = false
-        super.init()
-        window.delegate = self
-        window.contentView = preview.view
-        if !TestHooks.testing {
-            window.setFrameAutosaveName("Help")
-        }
-        if TestHooks.testing || !window.setFrameUsingName("Help") {
-            window.center()
-        }
-        preview.show(taken(pe_help_page("mac")) ?? "<p>" + Text.uiHelpMissing.text + "</p>")
+    /// Help in the menu (⌘?): the topic of the window in front
+    static func open(for window: NSWindow?) {
+        open(contexts[window?.identifier?.rawValue ?? ""] ?? "main")
+    }
+}
+
+/// The round help button of a window, which opens the window's topic
+@MainActor
+final class HelpButton: NSButton {
+    private var context = ""
+
+    convenience init(_ context: String) {
+        self.init(frame: .zero)
+        self.context = context
+        bezelStyle = .helpButton
+        title = ""
+        target = self
+        action = #selector(clicked)
+        setAccessibilityIdentifier("help.\(context)")
+        // AppKit's own name for it is English
+        setAccessibilityLabel(Text.menuHelp.text)
+        toolTip = Text.menuHelp.text
+        setContentHuggingPriority(.required, for: .horizontal)
     }
 
-    func windowWillClose(_ notification: Notification) {
-        HelpWindow.shared = nil
+    @objc private func clicked() {
+        Help.open(context)
     }
 }
 

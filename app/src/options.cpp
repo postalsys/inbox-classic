@@ -118,6 +118,7 @@ void StartLanguage(const std::wstring& forced) {
 }
 
 bool OptionsDialog(HWND owner, bool& notify, bool& threads, bool& codes) {
+    HelpScope help("options");
     RegisterDialogClass(kOptionsClass, OptionsProc);
     std::vector<Language> languages = Languages();
     std::wstring chosen = GetTextPreference(kLanguagePreference);

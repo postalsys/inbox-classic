@@ -500,7 +500,8 @@ key-ctrl = Ctrl
 key-alt = Alt
 key-shift = Mayús
 key-del = Supr
-key-enter = Entrar
+# review: changed
+key-enter = Intro
 
 ## Signing in and passwords
 

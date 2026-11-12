@@ -396,7 +396,7 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         let log = section(Text.uiWhatAgentsDid.text, logScroll, [undo, clear])
         hostScroll.heightAnchor.constraint(equalToConstant: 120).isActive = true
         logScroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 180).isActive = true
-        let bottom = NSStackView(views: [setup, NSView(), close])
+        let bottom = NSStackView(views: [HelpButton("agents"), setup, NSView(), close])
         let content = NSStackView(views: [enabled, programs, log, bottom])
         content.orientation = .vertical
         content.alignment = .leading

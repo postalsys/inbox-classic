@@ -1,26 +1,6 @@
-//! What the windows of each platform take from here alike: the help, filtered for the platform it is shown on, and
-//! the content rules the WebKit web views (the Mac's WKWebView, Linux's WebKitGTK) block every load with, as WebView2's
+//! What the windows of each platform take from here alike: the parts of a help topic for the platform it is shown
+//! on (help.rs), and the content rules the WebKit web views (the Mac's WKWebView, Linux's WebKitGTK) block every load with, as WebView2's
 //! request filter does on Windows.
-
-/// The user help, one source for every platform in each language: `<!--os:mac-->` (or `os:windows,linux`, any list)
-/// starts a part only those platforms show and `<!--/os-->` ends it. Keys are written `<kbd>Ctrl</kbd>` in every
-/// language; the page names them as the keyboards of its language do.
-const HELP: &str = include_str!("help.html");
-const HELPS: &[(&str, &str)] = &[
-    ("en", HELP),
-    ("de", include_str!("help.de.html")),
-    ("et", include_str!("help.et.html")),
-    ("es", include_str!("help.es.html")),
-    ("fr", include_str!("help.fr.html")),
-];
-
-/// The help of `language`, English for one there is none of
-fn help_source(language: &str) -> &'static str {
-    HELPS
-        .iter()
-        .find(|(code, _)| *code == language)
-        .map_or(HELP, |(_, page)| page)
-}
 
 /// A platform the windows run on
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -41,7 +21,7 @@ impl Platform {
         }
     }
 
-    fn name(self) -> &'static str {
+    pub(crate) fn name(self) -> &'static str {
         match self {
             Platform::Windows => "windows",
             Platform::Mac => "mac",
@@ -61,47 +41,16 @@ impl Platform {
     }
 }
 
-/// The help page for `platform` in the language in use: the parts of other platforms left out, and the keys named as
-/// the keyboard names them (on the Mac Ctrl is Command and Alt is Option; on a German keyboard Ctrl is Strg)
-pub fn help_page(platform: Platform) -> String {
-    help_page_in(platform, pe_i18n::language())
-}
-
-/// [`help_page`] in `language` (English for one there is no help of)
-pub fn help_page_in(platform: Platform, language: &str) -> String {
-    use pe_i18n::{Text, tr};
-    let filtered = filter_platform(help_source(language), platform)
-        .replace(REVIEW_START, "")
-        .replace(REVIEW_END, "");
-    match platform {
-        Platform::Mac => filtered
-            .replace("<kbd>Ctrl</kbd>", "<kbd>\u{2318}</kbd>")
-            .replace("<kbd>Alt</kbd>", "<kbd>\u{2325}</kbd>")
-            .replace("<kbd>Shift</kbd>", "<kbd>\u{21E7}</kbd>")
-            .replace("<kbd>Del</kbd>", "<kbd>\u{232B}</kbd>")
-            .replace("<kbd>Delete</kbd>", "<kbd>\u{232B}</kbd>"),
-        _ => {
-            let key = |text: Text| format!("<kbd>{}</kbd>", crate::editor::text(&tr(text)));
-            filtered
-                .replace("<kbd>Ctrl</kbd>", &key(Text::KeyCtrl))
-                .replace("<kbd>Alt</kbd>", &key(Text::KeyAlt))
-                .replace("<kbd>Shift</kbd>", &key(Text::KeyShift))
-                .replace("<kbd>Del</kbd>", &key(Text::KeyDel))
-                .replace("<kbd>Enter</kbd>", &key(Text::KeyEnter))
-        }
-    }
-}
-
 /// The marks around a translated passage that waits for a native review (`scripts/i18n-review.mjs` lists them); the
 /// page shows the passage without them
-const REVIEW_START: &str = "<!--review-->";
-const REVIEW_END: &str = "<!--/review-->";
+pub(crate) const REVIEW_START: &str = "<!--review-->";
+pub(crate) const REVIEW_END: &str = "<!--/review-->";
 
 const PART_START: &str = "<!--os:";
 const PART_END: &str = "<!--/os-->";
 
 /// `html` without the parts marked for other platforms. Parts do not nest; one that is not closed runs to the end.
-fn filter_platform(html: &str, platform: Platform) -> String {
+pub(crate) fn filter_platform(html: &str, platform: Platform) -> String {
     let mut out = String::with_capacity(html.len());
     let mut rest = html;
     while let Some(at) = rest.find(PART_START) {
@@ -155,42 +104,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn every_help_has_the_english_one_s_shape() {
-        // a translation keeps every platform part, key, item, heading and row of the English page, and the house
-        // style of no en or em dashes
-        let shape = |page: &str| {
-            [
-                "<!--os:",
-                "<!--/os-->",
-                "<kbd>",
-                "<li>",
-                "<h2>",
-                "<h3>",
-                "<tr>",
-                "<table>",
-                "<div class=\"note\">",
-            ]
-            .map(|mark| page.matches(mark).count())
-        };
-        let english = shape(HELP);
-        for (code, page) in HELPS {
-            assert_eq!(
-                shape(page),
-                english,
-                "the help in {code} is not shaped as the English one"
-            );
-            assert!(!page.contains(['\u{2013}', '\u{2014}']), "a dash in the help in {code}");
-            assert!(
-                page.contains(&format!("<html lang=\"{code}\">")) || *code == "en",
-                "{code}"
-            );
-            for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
-                assert!(!help_page_in(platform, code).contains("<!--os"), "{code}");
-            }
-        }
-    }
-
-    #[test]
     fn parts_of_other_platforms_are_left_out() {
         let html = "a<!--os:windows-->W<!--/os-->b<!--os:mac,linux-->ML<!--/os-->c<!--os:linux-->L<!--/os-->d";
         assert_eq!(filter_platform(html, Platform::Windows), "aWbcd");
@@ -205,7 +118,7 @@ mod tests {
     fn review_marks_are_left_out() {
         for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
             for language in ["en", "de", "et", "es", "fr"] {
-                let page = help_page_in(platform, language);
+                let page = crate::help_topic("find-messages", platform, language).unwrap();
                 assert!(
                     !page.contains("<!--review") && !page.contains("<!--/review"),
                     "{language}"
@@ -216,23 +129,17 @@ mod tests {
 
     #[test]
     fn the_help_of_each_platform() {
+        let page = |platform| crate::help_topic("data-storage", platform, "en").unwrap();
         for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
-            let page = help_page(platform);
-            assert!(page.contains("<title>Inbox Classic Help</title>"));
             assert!(
-                !page.contains(PART_START) && !page.contains(PART_END),
+                !page(platform).contains(PART_START) && !page(platform).contains(PART_END),
                 "no markers left"
             );
         }
-        let mac = help_page(Platform::Mac);
-        assert!(!mac.contains("<kbd>Ctrl</kbd>") && mac.contains("<kbd>\u{2318}</kbd>"));
-        assert!(!mac.contains("Credential Manager") && !mac.contains("Explorer"));
-        let linux = help_page(Platform::Linux);
-        assert!(linux.contains("<kbd>Ctrl</kbd>"));
+        let (windows, mac, linux) = (page(Platform::Windows), page(Platform::Mac), page(Platform::Linux));
+        assert!(windows.contains("Credential Manager") && !windows.contains("~/Library"));
+        assert!(!mac.contains("Credential Manager") && mac.contains("~/Library"));
         assert!(!linux.contains("Credential Manager") && !linux.contains("%LOCALAPPDATA%"));
-        let windows = help_page(Platform::Windows);
-        assert!(windows.contains("Credential Manager") && windows.contains("%LOCALAPPDATA%"));
-        assert!(!windows.contains("keychain") && !windows.contains("~/Library"));
     }
 
     #[test]

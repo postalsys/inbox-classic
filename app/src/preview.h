@@ -29,6 +29,8 @@ public:
     // closes the WebView2 and lets go of it, before COM is shut down
     void Close();
     void Resize(const RECT& bounds);
+    // WebView2's print preview of the document shown, over the view (the help's Print)
+    void Print();
     // WebView2 stops drawing while its window is hidden, the page tells it when it is on screen again
     void SetVisible(bool visible);
     // the keys that do not type (Esc, Delete, those with Ctrl or Alt) pressed while it has the keyboard, for its window:

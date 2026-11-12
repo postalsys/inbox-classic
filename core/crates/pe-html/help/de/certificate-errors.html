@@ -1,0 +1,18 @@
+<!--review-->
+<h1>Zertifikatfehler</h1>
+<p class="summary">Was Sie tun können, wenn Inbox Classic nicht bestätigen kann, dass es mit dem echten Mailserver verbunden ist.</p>
+<p>Sie sehen vielleicht eine dieser Meldungen:</p>
+<ul>
+    <li>In der Statusleiste: „TLS error: …“</li>
+    <li>Im Lesebereich: „Es konnte keine sichere Verbindung zum Mailserver hergestellt werden (…).“</li>
+</ul>
+<p>Inbox Classic konnte nicht bestätigen, dass der Server der ist, der er zu sein vorgibt, und hat Ihr Passwort deshalb nicht gesendet.</p>
+<p>So beheben Sie das:</p>
+<ol>
+    <li>Öffnen Sie die Eigenschaften des Kontos unter <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Prüfen Sie die Servernamen. Es müssen die Namen sein, für die das Zertifikat des Servers ausgestellt ist. Das ist oft der Name Ihres Anbieters, etwa <code>imap.anbieter.de</code>, nicht Ihre eigene Domäne.</li>
+    <li>Prüfen Sie, ob Datum und Uhrzeit Ihres Computers stimmen.</li>
+</ol>
+<p>In einem Netzwerk, das verschlüsselten Datenverkehr untersucht, etwa in manchen Firmen- oder Schulnetzwerken, fragen Sie dessen Administrator.</p>
+<aside class="note">Es gibt keinen Schalter, um jedes beliebige Zertifikat zu akzeptieren. Würde ein falsches akzeptiert, könnte jemand im Netzwerk Ihr Passwort und Ihre E-Mails lesen.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav><!--/review-->

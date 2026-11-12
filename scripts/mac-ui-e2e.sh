@@ -8,6 +8,6 @@ cd "$(dirname "$0")/.."
 if [ -z "${NO_BUILD:-}" ]; then
     TEST=1 scripts/mac-build.sh
 fi
-(cd core/e2e && [ -d node_modules ] || npm ci --no-audit --no-fund --silent)
+(cd core/e2e && [ -d node_modules/imapkit ] || npm ci --no-audit --no-fund --silent)
 mkdir -p build/ui-e2e-mac
 PE_REPO="$PWD" "build/mac/Inbox Classic.app/Contents/MacOS/InboxClassicUITest" --out "$PWD/build/ui-e2e-mac"

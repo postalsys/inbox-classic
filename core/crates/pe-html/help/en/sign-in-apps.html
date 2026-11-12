@@ -1,0 +1,16 @@
+<h1>Sign-in apps</h1>
+<p class="summary">Register your own sign-in app with Google, Microsoft or any OpenID Connect provider, to sign in through the browser.</p>
+<p>Signing in through the browser uses an OAuth client that is registered with the provider. Inbox Classic has its own for Google and Microsoft. Google lets only test users use Inbox Classic’s client until it has verified the app, so <b data-text="win-sign-in-google"></b> is off at first. You can register a client of your own: in your Google Cloud project, in your Microsoft Entra tenant, or with any OpenID Connect provider.</p>
+<p>To add a sign-in app:</p>
+<ol>
+    <li>Choose <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Click <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, then <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Next to <b data-text="ui-fill-in-for"></b>, click Google or Microsoft to fill in the issuer, scopes and servers. For another provider, type them.</li>
+    <li>Register the client with the provider as the box at the bottom explains. Register the <b data-text="ui-redirect-uri"></b> shown there.</li>
+    <li>Type the <b data-text="ui-client-id"></b>, and the <b data-text="ui-client-secret"></b> if the provider gave you one. The secret is kept in <!--os:windows-->the Windows Credential Manager<!--/os--><!--os:mac-->your login keychain<!--/os--><!--os:linux-->your keyring<!--/os--> and never shown again.</li>
+    <li>Click <b data-text="ui-check"></b> to see that the issuer is right, then <b data-text="ui-ok"></b>.</li>
+    <li>Add the account with <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> on the first page of <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>In <b data-text="ui-sign-in-apps"></b>, <!--os:windows,mac-->the check box of each app<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> says whether it is offered for new accounts, the built-in ones included. The accounts that already use an app keep working. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> changes an app, and <b data-text="ui-remove"></b> removes one once no account uses it.</p>
+<p>If the mail server refuses the app’s token, check that its scopes give access to mail.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>

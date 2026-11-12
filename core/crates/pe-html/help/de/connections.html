@@ -1,0 +1,14 @@
+<!--review-->
+<h1>Die Verbindungen von Inbox Classic</h1>
+<p class="summary">Wohin Inbox Classic Verbindungen aufbaut und warum, für technisch Interessierte.</p>
+<ul>
+    <li><b>Ihre Mailserver</b>, über IMAP zum Lesen und SMTP zum Senden von E-Mails. Die Verbindungen sind mit TLS verschlüsselt, und das Zertifikat jedes Servers wird anhand der Zertifikate geprüft, denen Ihr System vertraut. Inbox Classic lehnt einen Server ohne Verschlüsselung ab, es sei denn, Sie wählen <b data-text="ui-security-none"></b> und bestätigen das.</li>
+    <li><b>Beim Hinzufügen eines Kontos</b>, um seine Server zu finden. Inbox Classic liest die DNS-Einträge Ihrer Domäne über DNS over HTTPS (Cloudflare, dann Google), nie über unverschlüsseltes DNS. Außerdem versucht es die Autoconfig-Datei Ihres Anbieters und die Anbieterliste von Thunderbird (ISPDB). Für Exchange fragt es Microsoft Autodiscover, das Ihr Passwort nur erhält, wenn es über HTTPS danach fragt. Ein Server ohne Verschlüsselung wird nie gewählt.</li>
+    <li><b>Anmeldung über den Browser</b>, mit OAuth 2.0 und PKCE, bei Google, Microsoft oder dem Anbieter Ihrer Anmelde-App. Der Browser kehrt nur zu Inbox Classic auf diesem Computer zurück.</li>
+    <li><b>Markenlogos</b> (BIMI), von der HTTPS-Adresse der Marke, wenn die Nachricht das Logo nicht mitbringt, einmal pro Start von Inbox Classic. Das geschieht nur, wenn Ihr Mailserver die DMARC-Prüfung der Nachricht bestanden und das Logo freigegeben hat.</li>
+    <li><b>Bilder aus dem Internet</b>, nur wenn Sie sie anfordern.</li>
+    <li><b>Abbestellen</b>, nur wenn Sie darauf klicken. Eine Ein-Klick-Anfrage (RFC 8058) wird nur gesendet, wenn die Liste die Nachricht mit DKIM signiert hat.</li>
+    <!--os:mac--><li><b>Updates</b>, von inboxclassic.com, um zu sehen, ob eine neue Version erschienen ist.</li><!--/os-->
+</ul>
+<p>Anmeldecodes werden nur angeboten, wenn die Kopfzeile Authentication-Results Ihres Anbieters besagt, dass die Domäne die Nachricht signiert hat (DKIM). Dafür ist keine eigene Verbindung nötig.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->

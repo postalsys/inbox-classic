@@ -1,0 +1,14 @@
+<!--review-->
+<h1>Inbox Classicu loodavad ühendused</h1>
+<p class="summary">Kuhu Inbox Classic ühendub ja miks, tehnilistest üksikasjadest huvitatutele.</p>
+<ul>
+    <li><b>Teie meiliserverid</b>, IMAP-i kaudu posti lugemiseks ja SMTP kaudu selle saatmiseks. Ühendused on krüptitud TLS-iga ja iga serveri sertifikaati kontrollitakse teie süsteemi usaldatud sertifikaatide abil. Inbox Classic keeldub krüptimata serverist, kui te ei vali valikut <b data-text="ui-security-none"></b> ega kinnita seda.</li>
+    <li><b>Konto lisamisel</b>, selle serverite otsimiseks. Inbox Classic loeb teie domeeni DNS-kirjeid DNS over HTTPS-i kaudu (Cloudflare, seejärel Google), mitte kunagi tavalise DNS-i kaudu. See proovib ka teie teenusepakkuja autoconfig-faili ja Thunderbirdi teenusepakkujate loendit (ISPDB). Exchange'i puhul küsib see Microsoft Autodiscoverilt, mis saab teie parooli ainult siis, kui ta seda HTTPS-i kaudu küsib. Krüptimata serverit ei valita kunagi.</li>
+    <li><b>Brauseri kaudu sisselogimine</b>, OAuth 2.0 ja PKCE-ga, Google'isse, Microsofti või teie sisselogimisrakenduse teenusepakkuja juurde. Brauser naaseb ainult selles arvutis olevasse Inbox Classicusse.</li>
+    <li><b>Kaubamärkide logod</b> (BIMI), kaubamärgi HTTPS-aadressilt, kui kiri logo kaasas ei kanna, üks kord iga Inbox Classicu käivituse kohta. See juhtub ainult siis, kui teie meiliserver kinnitas kirja DMARC-kontrolli ja kiitis logo heaks.</li>
+    <li><b>Pildid Internetist</b>, ainult siis, kui te neid küsite.</li>
+    <li><b>Tellimusest loobumine</b>, ainult siis, kui seda klõpsate. Ühe klõpsuga päring (RFC 8058) saadetakse ainult siis, kui postiloend allkirjastas kirja DKIM-iga.</li>
+    <!--os:mac--><li><b>Uuendused</b>, saidilt inboxclassic.com, et näha, kas uus versioon on ilmunud.</li><!--/os-->
+</ul>
+<p>Sisselogimiskoode pakutakse ainult siis, kui teie teenusepakkuja päis Authentication-Results ütleb, et domeen allkirjastas kirja (DKIM). Selleks pole eraldi ühendust vaja.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->

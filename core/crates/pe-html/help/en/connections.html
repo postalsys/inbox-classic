@@ -1,0 +1,13 @@
+<h1>The connections Inbox Classic makes</h1>
+<p class="summary">Where Inbox Classic connects, and why, for the technically curious.</p>
+<ul>
+    <li><b>Your mail servers</b>, over IMAP to read mail and SMTP to send it. Connections are encrypted with TLS, and each server’s certificate is checked against those your system trusts. Inbox Classic refuses a server without encryption, unless you choose <b data-text="ui-security-none"></b> and confirm.</li>
+    <li><b>When you add an account</b>, to look up its servers. Inbox Classic reads your domain’s DNS records through DNS over HTTPS (Cloudflare, then Google), never plain DNS. It also tries your provider’s autoconfig file and Thunderbird’s list of providers (ISPDB). For Exchange, it asks Microsoft Autodiscover, which gets your password only when it asks for it over HTTPS. A server without encryption is never picked.</li>
+    <li><b>Browser sign-in</b>, with OAuth 2.0 and PKCE, to Google, Microsoft or the provider of your sign-in app. The browser returns to Inbox Classic on this computer only.</li>
+    <li><b>Brand logos</b> (BIMI), from the brand’s HTTPS address when the message does not carry the logo, once each time Inbox Classic runs. This happens only when your mail server passed the message’s DMARC check and approved the logo.</li>
+    <li><b>Pictures from the internet</b>, only when you ask for them.</li>
+    <li><b>Unsubscribe</b>, only when you click it. A one-click request (RFC 8058) is sent only when the list signed the message with DKIM.</li>
+    <!--os:mac--><li><b>Updates</b>, from inboxclassic.com, to see whether a new version is out.</li><!--/os-->
+</ul>
+<p>Sign-in codes are offered only when your provider’s Authentication-Results header says the domain signed the message (DKIM). This needs no connection of its own.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>

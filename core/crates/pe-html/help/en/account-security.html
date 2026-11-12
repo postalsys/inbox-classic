@@ -1,0 +1,13 @@
+<h1>Account security settings</h1>
+<p class="summary">The security settings of an account’s servers, and what each one means.</p>
+<p>Each account has <b data-text="ui-field-imap-security"></b> for the incoming server and <b data-text="ui-field-smtp-security"></b> for the outgoing one. Inbox Classic fills them in when it finds your provider’s settings. To change them, open the account’s properties in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Setting</th><th>Meaning</th></tr>
+    <tr><td>SSL/TLS</td><td>The connection is encrypted from the start. Usually port 993 for incoming mail and 465 for outgoing mail.</td></tr>
+    <tr><td>STARTTLS</td><td>The connection is encrypted right after it opens. Usually port 143 for incoming mail and 587 for outgoing mail. Inbox Classic stops if the server does not offer encryption.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Your password and mail travel readable by anyone on the network.</td></tr>
+</table>
+<aside class="warning">Use <b data-text="ui-security-none"></b> only for a server on your own computer or local network. Inbox Classic warns you before it uses it.</aside>
+<p>Inbox Classic checks that every server is the one it claims to be, against the certificates your system trusts. There is no switch to accept any certificate.</p>
+<p>Your password is kept in <!--os:windows-->the Windows Credential Manager<!--/os--><!--os:mac-->your login keychain<!--/os--><!--os:linux-->your keyring<!--/os-->, never in the mail store. An account that signs in through the browser keeps no password at all.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>

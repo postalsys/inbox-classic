@@ -6,6 +6,10 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
 	<string>Inbox Classic</string>
+	<key>CFBundleHelpBookFolder</key>
+	<string>InboxClassic.help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>com.inboxclassic.InboxClassic.help</string>
 	<key>CFBundleExecutable</key>
 	<string>Inbox Classic</string>
 	<key>CFBundleIconFile</key>

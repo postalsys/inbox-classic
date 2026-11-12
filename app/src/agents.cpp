@@ -557,6 +557,7 @@ void AgentsChanged() {
 }
 
 void AgentsDialog(HWND owner, PeCore* core) {
+    HelpScope help("agents");
     RegisterDialogClass(kAgentsClass, AgentsProc);
     int pad = Scale(12);
     int width = Scale(680);

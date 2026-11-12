@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Sisselogimisrakendused</h1>
+<p class="summary">Registreerige oma sisselogimisrakendus Google'is, Microsoftis või mis tahes OpenID Connecti teenusepakkuja juures, et logida sisse brauseri kaudu.</p>
+<p>Brauseri kaudu sisselogimine kasutab teenusepakkuja juures registreeritud OAuth-klienti. Inbox Classicul on oma kliendid Google'i ja Microsofti jaoks. Google lubab Inbox Classicu klienti kasutada ainult testkasutajatel, kuni ta on rakenduse kinnitanud, seetõttu on nupp <b data-text="win-sign-in-google"></b> algselt välja lülitatud. Saate registreerida oma kliendi: oma Google Cloudi projektis, oma Microsoft Entra rentnikus või mis tahes OpenID Connecti teenusepakkuja juures.</p>
+<p>Sisselogimisrakenduse lisamiseks tehke järgmist.</p>
+<ol>
+    <li>Valige <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Klõpsake nuppu <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os--> ja seejärel nuppu <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Klõpsake sildi <b data-text="ui-fill-in-for"></b> kõrval nuppu Google või Microsoft, et täita väljaandja, juurdepääsuõigused ja serverid. Muu teenusepakkuja puhul sisestage need ise.</li>
+    <li>Registreerige klient teenusepakkuja juures nii, nagu all olev kast selgitab. Registreerige seal näidatud väärtus <b data-text="ui-redirect-uri"></b>.</li>
+    <li>Sisestage väärtus <b data-text="ui-client-id"></b> ja, kui teenusepakkuja selle andis, väärtus <b data-text="ui-client-secret"></b>. Saladust hoitakse <!--os:windows-->Windowsi mandaadihalduris<!--/os--><!--os:mac-->teie sisselogimise võtmehoidjas<!--/os--><!--os:linux-->teie võtmehoidjas<!--/os--> ja seda ei näidata enam kunagi.</li>
+    <li>Klõpsake nuppu <b data-text="ui-check"></b>, et näha, kas väljaandja on õige, ja seejärel nuppu <b data-text="ui-ok"></b>.</li>
+    <li>Lisage konto nupuga <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> akna <b data-text="ui-add-account-title"></b> esimesel lehel.</li>
+</ol>
+<p>Aknas <b data-text="ui-sign-in-apps"></b> näitab <!--os:windows,mac-->iga rakenduse märkeruut<!--/os--><!--os:linux-->lüliti <b data-text="gtk-offered-for-new"></b><!--/os-->, kas rakendust pakutakse uutele kontodele, ka sisseehitatud rakenduste puhul. Kontod, mis rakendust juba kasutavad, töötavad edasi. Nupp <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> muudab rakendust ja nupp <b data-text="ui-remove"></b> eemaldab selle, kui ükski konto seda enam ei kasuta.</p>
+<p>Kui meiliserver lükkab rakenduse juurdepääsutõendi tagasi, kontrollige, et selle juurdepääsuõigused (scopes) annavad juurdepääsu postile.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav><!--/review-->

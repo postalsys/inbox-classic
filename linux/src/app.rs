@@ -617,7 +617,7 @@ pub fn run_command(command: Command) {
             spawn(async move { main.forward_selected().await });
         }
         Command::Forward => shell.reply(DraftKind::Forward),
-        Command::Help => crate::help::open(),
+        Command::Help => crate::help::show_for_main(),
         Command::Delete => spawn(async move { main.delete_selected().await }),
         Command::Move => spawn(async move { main.move_selected(false).await }),
         Command::Copy => spawn(async move { main.move_selected(true).await }),
