@@ -41,7 +41,7 @@ impl Platform {
         }
     }
 
-    fn name(self) -> &'static str {
+    pub(crate) fn name(self) -> &'static str {
         match self {
             Platform::Windows => "windows",
             Platform::Mac => "mac",
@@ -94,14 +94,14 @@ pub fn help_page_in(platform: Platform, language: &str) -> String {
 
 /// The marks around a translated passage that waits for a native review (`scripts/i18n-review.mjs` lists them); the
 /// page shows the passage without them
-const REVIEW_START: &str = "<!--review-->";
-const REVIEW_END: &str = "<!--/review-->";
+pub(crate) const REVIEW_START: &str = "<!--review-->";
+pub(crate) const REVIEW_END: &str = "<!--/review-->";
 
 const PART_START: &str = "<!--os:";
 const PART_END: &str = "<!--/os-->";
 
 /// `html` without the parts marked for other platforms. Parts do not nest; one that is not closed runs to the end.
-fn filter_platform(html: &str, platform: Platform) -> String {
+pub(crate) fn filter_platform(html: &str, platform: Platform) -> String {
     let mut out = String::with_capacity(html.len());
     let mut rest = html;
     while let Some(at) = rest.find(PART_START) {

@@ -345,6 +345,9 @@ typedef struct PeGroupList PeGroupList;
 // One group for its Properties: a handle whose `PeGroup` comes from `pe_group_info`; free with `pe_group_free`
 typedef struct PeGroupView PeGroupView;
 
+// The list of `pe_help_contents` and `pe_help_search`
+typedef struct PeHelpList PeHelpList;
+
 // The languages; free with `pe_language_list_free`
 typedef struct PeLanguageList PeLanguageList;
 
@@ -903,6 +906,17 @@ typedef struct PeSignInPreset {
   uint16_t smtp_port;
   enum PeSecurity smtp_security;
 } PeSignInPreset;
+
+// A topic of the contents or of a search
+typedef struct PeHelpRow {
+  // The section's title in the contents (the same for each of its topics); empty in a search
+  const char *section;
+  // The topic's id, for `pe_help_topic`
+  const char *topic;
+  const char *title;
+  // One sentence of what the topic is about
+  const char *summary;
+} PeHelpRow;
 
 // The selected messages in numbers (those gone meanwhile are not counted)
 typedef struct PeSelectionSummary {
@@ -2249,6 +2263,53 @@ char *pe_sign_in_redirect_uri(const char *issuer);
 // # Safety
 // `issuer` must be NULL or a NUL-terminated string.
 char *pe_sign_in_register_hint(const char *issuer);
+
+// The contents: every topic in order, with its section's title. Free with `pe_help_list_free`.
+//
+// # Safety
+// `platform` must be NULL or a NUL-terminated string.
+struct PeHelpList *pe_help_contents(const char *platform_name);
+
+// The topics that have every word of `query`, the best first. Free with `pe_help_list_free`.
+//
+// # Safety
+// `platform` and `query` must be NULL or NUL-terminated strings.
+struct PeHelpList *pe_help_search(const char *platform_name, const char *query);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+size_t pe_help_list_count(const struct PeHelpList *list);
+
+// The row at `index`, NULL past the end; it lives as long as the list
+//
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+const struct PeHelpRow *pe_help_list_get(const struct PeHelpList *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_help_list_free(struct PeHelpList *list);
+
+// The page of the topic `topic` for the help viewer, its links to other topics `topic:<id>` (see
+// `pe_help_link_topic`); NULL for no such topic. Free with `pe_string_free`.
+//
+// # Safety
+// `platform` and `topic` must be NULL or NUL-terminated strings.
+char *pe_help_topic(const char *platform_name, const char *topic);
+
+// The topic a window's help opens (`main`, `account-form`, `account-properties`, `options`, `sign-in-apps`,
+// `agents`, `address-book`, `compose`). Free with `pe_string_free`.
+//
+// # Safety
+// `window` must be NULL or a NUL-terminated string.
+char *pe_help_context(const char *window);
+
+// The topic a link of a help page opens (`topic:find-messages`), NULL for a link that is no topic (one to open in
+// the browser). Free with `pe_string_free`.
+//
+// # Safety
+// `url` must be NULL or a NUL-terminated string.
+char *pe_help_link_topic(const char *url);
 
 // A new view: no folder (it lists nothing until one is set), every message shown, newest first by Date, one row a
 // message, ignored conversations shown. NULL on failure.

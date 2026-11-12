@@ -16,6 +16,7 @@ mod bounce;
 mod card;
 mod editor;
 mod event;
+mod help;
 mod otp;
 mod platform;
 mod visible;
@@ -27,6 +28,10 @@ pub use editor::{
     picture_uri, quote_html, quote_parts, signature_block, signature_html,
 };
 pub use event::{EventCard, OPEN_CALENDAR_LINK, event_card, is_open_calendar_link};
+pub use help::{
+    HELP_TOPIC_SCHEME, HelpSection, HelpTarget, HelpTopic, help_contents, help_context, help_export, help_link_topic,
+    help_search, help_topic,
+};
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, help_page, help_page_in, status_page, webkit_content_rules};
 pub use visible::visible_html;

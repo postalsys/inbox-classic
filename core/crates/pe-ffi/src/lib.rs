@@ -9,6 +9,7 @@
 mod agents;
 mod book;
 mod core;
+mod help;
 mod list_view;
 mod selection;
 mod texts;
