@@ -215,7 +215,7 @@ jobs:
                   apt-get install -y --no-install-recommends \
                       build-essential pkg-config ca-certificates curl xz-utils git dpkg-dev \
                       libgtk-4-dev libadwaita-1-dev libwebkitgtk-6.0-dev libdbus-1-dev \
-                      xvfb xauth dbus dbus-x11 at-spi2-core gnome-keyring libsecret-tools \
+                      xvfb xauth dbus dbus-x11 at-spi2-core gnome-keyring libsecret-tools gdb \
                       fonts-dejavu-core fonts-cantarell adwaita-icon-theme
             - uses: actions/checkout@v6
             - uses: dtolnay/rust-toolchain@stable
@@ -254,7 +254,7 @@ jobs:
             - name: UI end-to-end test
               run: |
                   cargo build --locked --features e2e
-                  ../scripts/linux-ui-e2e-run.sh target/debug/inbox-classic ../build/ui-e2e-linux
+                  PE_E2E_GDB=1 ../scripts/linux-ui-e2e-run.sh target/debug/inbox-classic ../build/ui-e2e-linux
             - name: Every feature shown
               working-directory: .
               run: node scripts/feature-map.mjs build/ui-e2e-linux --check linux
@@ -291,7 +291,7 @@ jobs:
                   pacman -Syu --noconfirm --needed \
                       base-devel git rust nodejs npm namcap pkgconf \
                       gtk4 libadwaita webkitgtk-6.0 glib2-devel \
-                      xorg-server-xvfb xorg-xauth dbus at-spi2-core gnome-keyring libsecret \
+                      xorg-server-xvfb xorg-xauth dbus at-spi2-core gnome-keyring libsecret gdb \
                       ttf-dejavu cantarell-fonts adwaita-icon-theme
             - uses: actions/checkout@v6
             - uses: Swatinem/rust-cache@v2
@@ -304,7 +304,7 @@ jobs:
             - name: UI end-to-end test
               run: |
                   cargo build --locked --features e2e
-                  ../scripts/linux-ui-e2e-run.sh target/debug/inbox-classic ../build/ui-e2e-arch
+                  PE_E2E_GDB=1 ../scripts/linux-ui-e2e-run.sh target/debug/inbox-classic ../build/ui-e2e-arch
             - name: Every feature shown
               working-directory: .
               run: node scripts/feature-map.mjs build/ui-e2e-arch --check linux
