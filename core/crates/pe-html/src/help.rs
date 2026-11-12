@@ -408,13 +408,25 @@ fn old_keys(html: &str, platform: Platform, language: &str) -> String {
         return html
             .replace("<kbd>Ctrl</kbd>", "<kbd>\u{2318}</kbd>")
             .replace("<kbd>Alt</kbd>", "<kbd>\u{2325}</kbd>")
-            .replace("<kbd>Shift</kbd>", "<kbd>\u{21E7}</kbd>");
+            .replace("<kbd>Shift</kbd>", "<kbd>\u{21E7}</kbd>")
+            .replace("<kbd>Delete</kbd>", "<kbd>\u{232B}</kbd>")
+            .replace("<kbd>Enter</kbd>", "<kbd>\u{21A9}</kbd>")
+            .replace("<kbd>Return</kbd>", "<kbd>\u{21A9}</kbd>");
     }
     let key = |id: &str| format!("<kbd>{}</kbd>", words(language, id));
     html.replace("<kbd>Ctrl</kbd>", &key("key-ctrl"))
         .replace("<kbd>Alt</kbd>", &key("key-alt"))
         .replace("<kbd>Shift</kbd>", &key("key-shift"))
+        .replace("<kbd>Delete</kbd>", &key("key-del"))
+        .replace("<kbd>Enter</kbd>", &key("key-enter"))
 }
+
+/// Key names a translation must not write itself: the topics name keys in English (`<kbd>Shift</kbd>`), which the
+/// page then writes for the keyboard of the language and the platform
+#[cfg(test)]
+const LOCAL_KEYS: &[&str] = &[
+    "Strg", "Umschalt", "Entf", "Eingabe", "Mayús", "Supr", "Intro", "Entrar", "Maj", "Suppr", "Entrée",
+];
 
 /// The catalog message a platform's menu names the command `id` by: the Mac's and Linux's own words for Quit,
 /// Settings and Preferences, `cmd-<id>` for the rest
@@ -432,10 +444,10 @@ fn command_label(id: &str, platform: Platform) -> String {
 /// Every command with a key on the platform, by menu, as a table
 fn shortcuts_table(platform: Platform, language: &str) -> String {
     let mut html = String::new();
-    for menu in ["file", "edit", "view", "message", "tools", "help"] {
+    for menu in ["app", "file", "edit", "view", "message", "tools", "help"] {
         let rows: Vec<String> = COMMANDS
             .iter()
-            .filter(|(_, m, ..)| *m == menu)
+            .filter(|(id, m, ..)| menu_of(id, m, platform) == menu)
             .filter_map(|(id, ..)| {
                 let key = command_key(id, platform, language);
                 let label = words(language, &command_label(id, platform));
@@ -445,15 +457,27 @@ fn shortcuts_table(platform: Platform, language: &str) -> String {
         if rows.is_empty() {
             continue;
         }
+        // the Mac's app menu has the app's name
+        let title = match menu {
+            "app" => "Inbox Classic".to_string(),
+            _ => words(language, &format!("menu-{menu}")),
+        };
         html.push_str(&format!(
-            "<h2>{}</h2>\n<table>\n<tr><th>{}</th><th>{}</th></tr>\n{}\n</table>\n",
-            words(language, &format!("menu-{menu}")),
+            "<h2>{title}</h2>\n<table>\n<tr><th>{}</th><th>{}</th></tr>\n{}\n</table>\n",
             words(language, "help-column-command"),
             words(language, "help-column-keys"),
             rows.join("\n")
         ));
     }
     html
+}
+
+/// The menu a command is in on a platform: on the Mac Quit and Settings are in the app's menu
+fn menu_of<'a>(id: &str, menu: &'a str, platform: Platform) -> &'a str {
+    match (platform, id) {
+        (Platform::Mac, "exit" | "options") => "app",
+        _ => menu,
+    }
 }
 
 /// The contents as a list of sections and links, for the exported pages
@@ -507,25 +531,23 @@ fn page(
                     escape(&summary).replace('"', "&quot;")
                 )
             },
-            (
-                format!("<p class=\"home\"><a href=\"index.html\">{help}</a></p>\n"),
-                String::new(),
-            ),
+            (home_link(&help, anchor), String::new()),
         ),
-        HelpTarget::Yelp => (
-            String::new(),
-            (
-                format!("<p class=\"home\"><a href=\"index.html\">{help}</a></p>\n"),
-                String::new(),
-            ),
-        ),
+        HelpTarget::Yelp => (String::new(), (home_link(&help, anchor), String::new())),
         HelpTarget::Web => (
             String::new(),
             (
-                format!(
-                    "{}<div class=\"web\"><aside class=\"side\">{contents}</aside><main>\n",
-                    web_bar(platform, language, anchor)
-                ),
+                match anchor {
+                    "index" => format!("{}<div class=\"web\"><main>\n", web_bar(platform, language, anchor)),
+                    _ => format!(
+                        "{}<div class=\"web\"><nav class=\"side\">{}</nav><main>\n",
+                        web_bar(platform, language, anchor),
+                        contents.replace(
+                            &format!("href=\"{anchor}.html\""),
+                            &format!("href=\"{anchor}.html\" aria-current=\"page\"")
+                        )
+                    ),
+                },
                 "</main></div>\n".to_string(),
             ),
         ),
@@ -546,6 +568,14 @@ fn page(
         around.0,
         around.1
     )
+}
+
+/// The link back to the contents at the top of a page of the Help Book or Yelp, none on the contents themselves
+fn home_link(help: &str, page: &str) -> String {
+    match page {
+        "index" => String::new(),
+        _ => format!("<p class=\"home\"><a href=\"index.html\">{help}</a></p>\n"),
+    }
 }
 
 /// The bar over a page of the website's help (help/<language>/<platform>/<page>.html): the homepage, and the same page
@@ -588,19 +618,19 @@ fn style(platform: Platform) -> String {
         Platform::Windows => {
             "body{font:10pt Tahoma,Arial,sans-serif;color:#000;background:#fff}\
              h1,h2{color:#036}h2{border-bottom:1px solid #9ab}a{color:#03c}\
-             aside{background:#ffffe1;border:1px solid #c9c9a0}kbd{background:#f4f4f4;border-color:#999}"
+             aside.note,aside.warning{background:#ffffe1;border:1px solid #c9c9a0}kbd{background:#f4f4f4;border-color:#999}"
         }
         Platform::Mac => {
             ":root{color-scheme:light dark}\
              body{font:13px -apple-system,BlinkMacSystemFont,sans-serif;color:CanvasText;background:Canvas}\
-             a{color:LinkText}aside{background:color-mix(in srgb,CanvasText 6%,Canvas);border-radius:8px}\
+             a{color:LinkText}aside.note,aside.warning{background:color-mix(in srgb,CanvasText 6%,Canvas);border-radius:8px}\
              kbd{font-family:-apple-system,sans-serif}"
         }
         Platform::Linux => {
             ":root{color-scheme:light dark}\
              body{font:11pt system-ui,'Adwaita Sans',Cantarell,sans-serif;color:CanvasText;background:Canvas}\
              a{color:#1c71d8}@media(prefers-color-scheme:dark){a{color:#78aeed}}\
-             aside{background:color-mix(in srgb,CanvasText 6%,Canvas);border-radius:12px}"
+             aside.note,aside.warning{background:color-mix(in srgb,CanvasText 6%,Canvas);border-radius:12px}"
         }
     };
     format!(
@@ -609,13 +639,13 @@ fn style(platform: Platform) -> String {
          ol,ul{{padding-left:1.6em}}li{{margin:.3em 0}}table{{border-collapse:collapse;margin:.6em 0}}\
          th,td{{text-align:left;padding:4px 12px 4px 0;border-bottom:1px solid color-mix(in srgb,currentColor 18%,transparent);vertical-align:top}}\
          kbd{{font-size:.9em;border:1px solid color-mix(in srgb,currentColor 35%,transparent);border-bottom-width:2px;\
-         border-radius:4px;padding:0 4px;white-space:nowrap}}aside{{padding:8px 12px;margin:.8em 0}}\
+         border-radius:4px;padding:0 4px;white-space:nowrap}}aside{{padding:8px 12px;margin:.8em 0}}.side a[aria-current]{{font-weight:700;text-decoration:none}}\
          aside.warning{{border-left:4px solid #c60}}img.picture{{max-width:100%;height:auto;margin:.6em 0;\
          border:1px solid color-mix(in srgb,currentColor 18%,transparent)}}nav.related{{margin-top:1.6em;padding-top:.6em;\
          border-top:1px solid color-mix(in srgb,currentColor 18%,transparent)}}nav.related a{{margin-right:1.2em}}\
          p.home{{margin:0 0 1em;font-size:.9em}}header.bar{{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;\
          max-width:none;padding:0 0 12px;margin:0 0 20px;border-bottom:1px solid color-mix(in srgb,currentColor 18%,transparent)}}\
-         header.bar .brand{{font-weight:700;text-decoration:none;margin-right:auto}}header.bar a,header.bar b{{margin-right:10px}}.web{{display:flex;gap:32px}}.web .side{{flex:0 0 240px;font-size:.92em}}\
+         header.bar .brand{{font-weight:700;text-decoration:none;margin-right:auto}}header.bar a,header.bar b{{margin-right:10px}}.web{{display:flex;gap:32px}}.web .side{{flex:0 0 240px;font-size:.92em}}.web .side ul{{padding-left:1.1em}}\
          .web main{{flex:1;min-width:0}}@media(max-width:700px){{.web{{display:block}}.web .side{{display:none}}}}\
          {platform_style}"
     )
@@ -711,6 +741,12 @@ mod tests {
                 !html.contains('\u{2014}') && !html.contains('\u{2013}'),
                 "{language}/{id}: a dash"
             );
+            for name in LOCAL_KEYS {
+                assert!(
+                    !html.contains(&format!("<kbd>{name}</kbd>")),
+                    "{language}/{id}: <kbd>{name}</kbd>, write it in English"
+                );
+            }
         }
         for id in &listed {
             assert!(source("en", id).is_some(), "en/{id}.html is missing");
