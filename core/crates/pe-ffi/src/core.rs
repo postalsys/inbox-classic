@@ -2137,6 +2137,82 @@ pub unsafe extern "C" fn pe_attachment_data(
     Box::into_raw(data).cast()
 }
 
+/// [`pe_attachment_data`] of a message file a window shows (`pe_file_view`), its path UTF-8
+///
+/// # Safety
+/// `core` must be a live handle, `path` NULL or a NUL-terminated string; `len` and `filename` must be valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_attachment_data(
+    core: *const PeCore,
+    path: *const c_char,
+    index: usize,
+    len: *mut usize,
+    filename: *mut *mut c_char,
+) -> *mut u8 {
+    if len.is_null() || filename.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let Some(path) = (unsafe { arg(path) }).map(str::to_string) else {
+        return null_mut();
+    };
+    // SAFETY: as the caller guarantees
+    let found = unsafe {
+        with(core, None, |core| {
+            core.file_attachment(std::path::Path::new(&path), index).ok().flatten()
+        })
+    };
+    let Some((name, data)) = found else {
+        return null_mut();
+    };
+    let data = data.into_boxed_slice();
+    // SAFETY: the caller gave valid pointers
+    unsafe {
+        *len = data.len();
+        *filename = into_c_string(name);
+    }
+    Box::into_raw(data).cast()
+}
+
+/// [`pe_save_attachments`] of a message file; false for a file that can not be read
+///
+/// # Safety
+/// `core` must be a live handle, `path` and `dir` NULL or NUL-terminated strings, `saved` and `total` NULL or valid
+/// pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_save_attachments(
+    core: *const PeCore,
+    path: *const c_char,
+    dir: *const c_char,
+    saved: *mut usize,
+    total: *mut usize,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let (Some(path), Some(dir)) = (unsafe { arg(path) }, unsafe { arg(dir) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    let counts = unsafe {
+        with(core, None, |core| {
+            core.file_save_attachments(std::path::Path::new(path), std::path::Path::new(dir))
+                .ok()
+        })
+    };
+    let Some((done, all)) = counts else {
+        return false;
+    };
+    // SAFETY: the caller gave NULL or valid pointers
+    unsafe {
+        if let Some(saved) = saved.as_mut() {
+            *saved = done;
+        }
+        if let Some(total) = total.as_mut() {
+            *total = all;
+        }
+    }
+    true
+}
+
 /// The header block of a message for File > Properties, as text to show (line breaks `\r\n`, no control characters);
 /// NULL when it is not in the store yet. Free with `pe_string_free`.
 ///

@@ -1956,6 +1956,27 @@ uint8_t *pe_attachment_data(const struct PeCore *core,
                             size_t *len,
                             char **filename);
 
+// [`pe_attachment_data`] of a message file a window shows (`pe_file_view`), its path UTF-8
+//
+// # Safety
+// `core` must be a live handle, `path` NULL or a NUL-terminated string; `len` and `filename` must be valid pointers.
+uint8_t *pe_file_attachment_data(const struct PeCore *core,
+                                 const char *path,
+                                 size_t index,
+                                 size_t *len,
+                                 char **filename);
+
+// [`pe_save_attachments`] of a message file; false for a file that can not be read
+//
+// # Safety
+// `core` must be a live handle, `path` and `dir` NULL or NUL-terminated strings, `saved` and `total` NULL or valid
+// pointers.
+bool pe_file_save_attachments(const struct PeCore *core,
+                              const char *path,
+                              const char *dir,
+                              size_t *saved,
+                              size_t *total);
+
 // The header block of a message for File > Properties, as text to show (line breaks `\r\n`, no control characters);
 // NULL when it is not in the store yet. Free with `pe_string_free`.
 //

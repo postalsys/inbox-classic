@@ -1324,15 +1324,26 @@ impl Core {
     /// Saves every attachment of a message into `dir` (a folder the user chose), each under its safe name; a file of
     /// that name there is kept and the new one numbered. How many were saved; None when the message is not here yet.
     pub fn save_attachments(&self, folder: FolderId, uid: u64, dir: &Path) -> Result<Option<(usize, usize)>> {
-        let Some(source) = self.store().source(folder, uid)? else {
-            return Ok(None);
-        };
-        let files = view::attachments(&source);
-        let saved = files
-            .iter()
-            .filter(|(name, content)| view::write_new(dir, name, content).is_ok())
-            .count();
-        Ok(Some((saved, files.len())))
+        let source = self.store().source(folder, uid)?;
+        Ok(source.map(|source| save_all(&source, dir)))
+    }
+
+    /// [`Core::attachment`] of a message file a window shows (`file_view`)
+    pub fn file_attachment(&self, path: &Path, index: usize) -> Result<Option<(String, Vec<u8>)>> {
+        let (source, _) = read_message_file(path)?;
+        Ok(view::attachment(&source, index))
+    }
+
+    /// [`Core::attachment_with_type`] of a message file
+    pub fn file_attachment_with_type(&self, path: &Path, index: usize) -> Result<Option<(String, String, Vec<u8>)>> {
+        let (source, _) = read_message_file(path)?;
+        Ok(view::attachment_with_type(&source, index))
+    }
+
+    /// [`Core::save_attachments`] of a message file
+    pub fn file_save_attachments(&self, path: &Path, dir: &Path) -> Result<(usize, usize)> {
+        let (source, _) = read_message_file(path)?;
+        Ok(save_all(&source, dir))
     }
 
     /// The calendar part of a message written to `dir` as `invitation.ics` (a number added when that is taken), for
@@ -2168,6 +2179,17 @@ struct ViewSource {
     account: AccountId,
     folder: FolderId,
     uid: u64,
+}
+
+/// Every attachment of `source` written into `dir` under its safe name, a file there kept and the new one numbered: how
+/// many were saved, of how many
+fn save_all(source: &[u8], dir: &Path) -> (usize, usize) {
+    let files = view::attachments(source);
+    let saved = files
+        .iter()
+        .filter(|(name, content)| view::write_new(dir, name, content).is_ok())
+        .count();
+    (saved, files.len())
 }
 
 /// A message file (.eml) read whole, up to 50 MB, refused when it is no mail: for Import and for opening a file in a

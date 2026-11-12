@@ -26,6 +26,30 @@ fn a_message_file_opens_and_can_be_answered() {
     );
     assert!(core.file_view(&file, true).unwrap().pictures_loaded);
 
+    // its attachments: one by one and all at once, as a message of a folder's
+    let with_file = dir.path().join("with-file.eml");
+    std::fs::write(
+        &with_file,
+        "From: Ann <ann@example.com>\r\nTo: you@example.com\r\nSubject: A file\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/mixed; boundary=b\r\n\r\n--b\r\nContent-Type: text/plain\r\n\r\nSee the map.\r\n\
+         --b\r\nContent-Type: text/plain; name=map.txt\r\nContent-Disposition: attachment; filename=map.txt\r\n\r\n\
+         the trail\r\n--b--\r\n",
+    )
+    .unwrap();
+    assert_eq!(core.file_view(&with_file, false).unwrap().attachments.len(), 1);
+    let (name, content) = core.file_attachment(&with_file, 0).unwrap().unwrap();
+    assert_eq!(
+        (name.as_str(), content.as_slice()),
+        ("map.txt", b"the trail".as_slice())
+    );
+    assert!(core.file_attachment(&with_file, 1).unwrap().is_none());
+    let (_, kind, _) = core.file_attachment_with_type(&with_file, 0).unwrap().unwrap();
+    assert!(kind.starts_with("text/plain"));
+    let out = dir.path().join("saved");
+    std::fs::create_dir(&out).unwrap();
+    assert_eq!(core.file_save_attachments(&with_file, &out).unwrap(), (1, 1));
+    assert_eq!(std::fs::read(out.join("map.txt")).unwrap(), b"the trail");
+
     let text = dir.path().join("notes.txt");
     std::fs::write(&text, "just some notes\n").unwrap();
     assert!(
