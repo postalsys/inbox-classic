@@ -701,9 +701,12 @@ Screenshots: `help-1-about`
 
 ## 48. Help
 
-Screenshots: `help-2-contents`
+Screenshots: `help-2-contents`, `help-3-search` (Windows, Linux), `help-4-topic`
 
-- F1 opens the help
+- F1 (Command-? on the Mac) opens the help at the main window's topic; a dialog's F1 or help button opens its own
+- the contents list the sections and their topics (Windows, Linux: in the help window; the Mac: the Help Book's first page, whose bundle has every language's pages and search index)
+- a search for "junk" lists the topics with that word (Windows, Linux)
+- a link to another topic opens it, and Back returns to the one before
 
 ## 49. Printing
 
