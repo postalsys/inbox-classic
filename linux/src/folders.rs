@@ -2,7 +2,9 @@
 //! A heading opens and closes (a click, Enter) and is never selected, so it is not taken for a mailbox; All Inboxes,
 //! above them, is a row like the folders, with each account's Inbox again under it (the same folder, a second row:
 //! [`under_all_inboxes`]). A folder with unread messages is bold with their count, as in Outlook Express. Messages
-//! dragged from the list are dropped onto a folder here. Which of the top rows are open is the window's to keep.
+//! dragged from the list are dropped onto a folder here. An account's heading, and its Inbox's row under All Inboxes,
+//! are dragged among the rows of their kind to put the accounts in another order. Which of the top rows are open is the
+//! window's to keep.
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -126,6 +128,7 @@ type Dropped = Box<dyn Fn(&[MessageRef], i64, bool)>;
 type FilesDropped = Box<dyn Fn(i64, Vec<std::path::PathBuf>)>;
 type Menu = Box<dyn Fn(&gtk::Widget, f64, f64, i64)>;
 type Opened = Box<dyn Fn(i64, bool)>;
+type Moved = Box<dyn Fn(i64, i64, bool)>;
 
 /// What the tree tells the window: a folder (or an account, negated) chosen, and messages dropped onto a folder
 pub struct Handlers {
@@ -141,7 +144,15 @@ pub struct Handlers {
     pub menu: Menu,
     /// A top row (All Inboxes or an account's heading) opened or closed by the user, for the window to keep
     pub opened: Opened,
+    /// An account's row dragged onto another of its kind: the row dragged, the row it was dropped on, and whether
+    /// below it (else above)
+    pub moved: Moved,
 }
+
+/// An account's row dragged inside the tree, by its id: a type of its own, so no other program or row takes it
+#[derive(Clone, Copy, Debug, PartialEq, Eq, glib::Boxed)]
+#[boxed_type(name = "InboxClassicAccountRow")]
+pub struct DraggedRow(pub i64);
 
 pub struct FolderTree {
     pub view: gtk::ListView,
@@ -457,6 +468,34 @@ impl FolderTree {
         self.selection.n_items()
     }
 
+    /// Row `dragged` dropped above or below row `onto`, as a drag with the mouse does it, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn drop_row(&self, dragged: i64, onto: i64, below: bool) -> bool {
+        if !same_kind(dragged, onto) {
+            return false;
+        }
+        moved_later(&self.handlers, dragged, onto, below);
+        true
+    }
+
+    /// The line a drag shows above or below row `id` (None: no line), for the e2e driver; false without the row
+    #[cfg(feature = "e2e")]
+    pub fn show_drop_line(&self, id: i64, below: Option<bool>) -> bool {
+        let expander = crate::e2e::descendants::<gtk::TreeExpander>(self.view.upcast_ref())
+            .into_iter()
+            .find(|expander| {
+                expander
+                    .list_row()
+                    .and_then(|row| row.item())
+                    .and_downcast::<FolderItem>()
+                    .is_some_and(|item| item.id() == id)
+            });
+        expander.is_some_and(|expander| {
+            mark_drop(expander.upcast_ref(), below);
+            true
+        })
+    }
+
     fn tree_model(&self) -> Option<gtk::TreeListModel> {
         self.selection.model().and_downcast::<gtk::TreeListModel>()
     }
@@ -465,6 +504,27 @@ impl FolderTree {
 /// Whether item `id` is an account's heading (an account's id negated), not a folder or All Inboxes
 fn is_heading(id: i64) -> bool {
     id < 0 && id != ALL_INBOXES
+}
+
+/// Whether row `id` can be dragged to put its account elsewhere: an account's heading, an Inbox's row under All Inboxes
+fn movable(id: i64) -> bool {
+    is_heading(id) || is_under_all_inboxes(id)
+}
+
+/// Whether row `dragged` may be dropped beside row `onto`: headings among headings, rows under All Inboxes among
+/// themselves, not onto itself
+fn same_kind(dragged: i64, onto: i64) -> bool {
+    dragged != onto && movable(dragged) && movable(onto) && is_heading(dragged) == is_heading(onto)
+}
+
+/// The window told of a row moved once the drop is over, as it builds the tree, and the row dropped, again
+fn moved_later(handlers: &Rc<RefCell<Option<Handlers>>>, dragged: i64, onto: i64, below: bool) {
+    let handlers = handlers.clone();
+    glib::idle_add_local_once(move || {
+        if let Some(handlers) = &*handlers.borrow() {
+            (handlers.moved)(dragged, onto, below);
+        }
+    });
 }
 
 /// The rows: the expander, the icon and the name; a drop target for messages, the right-click menu. An account's row
@@ -499,6 +559,8 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactor
             .chain_property::<FolderItem>("icon")
             .bind(&icon, "icon-name", gtk::Widget::NONE);
         add_drop_target(&expander, item, handlers.clone());
+        add_drag_source(&expander, item);
+        add_row_drop_target(&expander, item, handlers.clone());
         let click = gtk::GestureClick::new();
         click.set_button(gtk::gdk::BUTTON_SECONDARY);
         let weak_item = item.downgrade();
@@ -664,4 +726,103 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         true
     });
     widget.add_controller(target);
+}
+
+/// An account's heading or its Inbox's row under All Inboxes, dragged to put the account elsewhere; the row itself is
+/// the picture that follows the mouse
+fn add_drag_source(widget: &gtk::TreeExpander, item: &gtk::ListItem) {
+    let source = gtk::DragSource::new();
+    source.set_actions(gtk::gdk::DragAction::MOVE);
+    let item = item.downgrade();
+    source.connect_prepare(move |_, _, _| {
+        let id = item.upgrade().map_or(0, |item| item_id(&item));
+        movable(id).then(|| gtk::gdk::ContentProvider::for_value(&DraggedRow(id).to_value()))
+    });
+    let row = widget.downgrade();
+    source.connect_drag_begin(move |source, _| {
+        if let Some(row) = row.upgrade() {
+            source.set_icon(Some(&gtk::WidgetPaintable::new(Some(&row))), 0, row.height() / 2);
+        }
+    });
+    widget.add_controller(source);
+}
+
+/// What is dropped onto an account's row: another account's row of its kind, put above or below it by the half of
+/// the row the mouse is over, with a line there while it is held over it
+fn add_row_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: Rc<RefCell<Option<Handlers>>>) {
+    let target = gtk::DropTarget::new(DraggedRow::static_type(), gtk::gdk::DragAction::MOVE);
+    target.set_preload(true);
+    let onto = {
+        let item = item.downgrade();
+        move || item.upgrade().map_or(0, |item| item_id(&item))
+    };
+    let below = |target: &gtk::DropTarget, y: f64| target.widget().is_some_and(|w| y > f64::from(w.height()) / 2.0);
+    let dragged = |target: &gtk::DropTarget| target.value().and_then(|v| v.get::<DraggedRow>().ok());
+    let over = onto.clone();
+    target.connect_motion(move |target, _, y| {
+        let Some(widget) = target.widget() else {
+            return gtk::gdk::DragAction::empty();
+        };
+        let takes = dragged(target).is_some_and(|row| same_kind(row.0, over()));
+        mark_drop(&widget, takes.then(|| below(target, y)));
+        if takes {
+            gtk::gdk::DragAction::MOVE
+        } else {
+            gtk::gdk::DragAction::empty()
+        }
+    });
+    target.connect_leave(|target| {
+        if let Some(widget) = target.widget() {
+            mark_drop(&widget, None);
+        }
+    });
+    target.connect_drop(move |target, value, _, y| {
+        if let Some(widget) = target.widget() {
+            mark_drop(&widget, None);
+        }
+        let (Ok(row), id) = (value.get::<DraggedRow>(), onto()) else {
+            return false;
+        };
+        if !same_kind(row.0, id) {
+            return false;
+        }
+        moved_later(&handlers, row.0, id, below(target, y));
+        true
+    });
+    widget.add_controller(target);
+}
+
+/// The line where a dragged row would go, above or below the row of `widget` (its list row, whose full width it
+/// takes), or none
+fn mark_drop(widget: &gtk::Widget, below: Option<bool>) {
+    let Some(row) = widget.parent() else { return };
+    for (class, shown) in [
+        ("drop-above", below == Some(false)),
+        ("drop-below", below == Some(true)),
+    ] {
+        if shown {
+            row.add_css_class(class);
+        } else {
+            row.remove_css_class(class);
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn account_rows_go_among_their_kind() {
+        // headings among headings, rows under All Inboxes among themselves
+        assert!(same_kind(-1, -2));
+        assert!(same_kind(under_all_inboxes(10), under_all_inboxes(20)));
+        assert!(!same_kind(-1, under_all_inboxes(20)));
+        assert!(!same_kind(under_all_inboxes(10), -2));
+        // not onto itself, a folder or All Inboxes; a folder is not dragged
+        assert!(!same_kind(-1, -1));
+        assert!(!same_kind(-1, 20));
+        assert!(!same_kind(under_all_inboxes(10), ALL_INBOXES));
+        assert!(!same_kind(10, 20));
+    }
 }

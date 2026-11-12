@@ -616,6 +616,16 @@ Screenshots: `all-inboxes-3-accounts`, `account-menu`
 - its Mark All Read marks every folder of the first account read on the server, the second account's mail stays unread
 - its Properties opens that account's Properties
 
+## 42c. The accounts' order
+
+Screenshot: `all-inboxes-4-reorder`
+
+With the two accounts of 42a:
+
+- the second account dragged above the first (or Move Up on its menu): All Inboxes lists its row first, and its folders come first in the tree
+- Move Down on its menu puts it back: the first account first again in both places
+- Move Up is greyed for the first account, Move Down for the last
+
 ## 43. Moving between accounts
 
 Screenshots: `move-1-dialog`, `move-2-accounts`

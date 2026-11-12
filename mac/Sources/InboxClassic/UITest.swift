@@ -506,6 +506,7 @@ final class UITest {
         try await accountTrouble()
         try await allInboxes()
         try await allInboxesByAccount()
+        try await accountOrder()
         try await betweenAccounts()
         try await accountsAndHelp()
         try await languages()
@@ -903,6 +904,39 @@ final class UITest {
         about?.close()
         await shot(main.window, "main-2-end")
     }
+}
+
+/// A drag over the folder tree as AppKit hands one to its data source, its pasteboard written with what the data source
+/// gives for the dragged row
+@MainActor
+final class TestDrag: NSObject, NSDraggingInfo {
+    let draggingPasteboard = NSPasteboard(name: NSPasteboard.Name("com.inboxclassic.test-drag"))
+    let view: NSView
+
+    init(_ writer: NSPasteboardWriting?, in view: NSView) {
+        self.view = view
+        draggingPasteboard.clearContents()
+        if let writer {
+            draggingPasteboard.writeObjects([writer])
+        }
+    }
+
+    var draggingSource: Any? { view }
+    var draggingDestinationWindow: NSWindow? { view.window }
+    var draggingSourceOperationMask: NSDragOperation { .every }
+    var draggingLocation: NSPoint { .zero }
+    var draggedImageLocation: NSPoint { .zero }
+    var draggedImage: NSImage? { nil }
+    var draggingSequenceNumber: Int { 0 }
+    var draggingFormation: NSDraggingFormation = .default
+    var animatesToDestination = false
+    var numberOfValidItemsForDrop = 1
+    var springLoadingHighlight: NSSpringLoadingHighlight { .none }
+    func slideDraggedImage(to screenPoint: NSPoint) {}
+    func resetSpringLoading() {}
+    func enumerateDraggingItems(options enumOpts: NSDraggingItemEnumerationOptions = [], for view: NSView?, classes classArray: [AnyClass],
+                                searchOptions: [NSPasteboard.ReadingOptionKey: Any] = [:],
+                                using block: (NSDraggingItem, Int, UnsafeMutablePointer<ObjCBool>) -> Void) {}
 }
 
 extension ComposeWindow {

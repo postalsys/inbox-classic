@@ -38,6 +38,9 @@ const STYLE: &str = "
 .flag-row:hover { background-color: alpha(@view_fg_color, 0.08); }
 .account-heading { margin-top: 6px; }
 .account-heading label { font-size: 0.85em; font-weight: bold; color: alpha(@view_fg_color, 0.6); }
+row.drop-above, row.drop-below { background-image: linear-gradient(@accent_color, @accent_color); background-repeat: no-repeat; background-size: calc(100% - 12px) 2px; }
+row.drop-above { background-position: center top; }
+row.drop-below { background-position: center bottom; }
 .new-address { font-size: 0.8em; font-weight: bold; color: white; background-color: @error_bg_color; border-radius: 4px; padding: 1px 6px; }
 ";
 

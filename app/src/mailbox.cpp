@@ -431,6 +431,7 @@ void Mailbox::Reload() {
     int64_t accountSelected = selectedAccount_;
     // deleting the items changes the selection: not a folder the user picked
     reloading_ = true;
+    treeBuilds_++;
     TreeView_DeleteAllItems(tree_);
     reloading_ = false;
     items_.clear();
@@ -1611,6 +1612,11 @@ void Mailbox::FolderMenu() {
             AppendMenuW(menu, CanEmptyFolder() ? MF_STRING : MF_STRING | MF_GRAYED, IDM_EMPTY_FOLDER, MenuItem(PE_TEXT_CMD_EMPTY_FOLDER).c_str());
         }
     }
+    // an Inbox under All Inboxes stands for its account there: its place in the accounts' order
+    if (underAllInboxes_) {
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+        AppendMoveItems(menu);
+    }
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     DestroyMenu(menu);
 }
@@ -1625,9 +1631,245 @@ void Mailbox::AccountMenu(POINT screen) {
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMoveItems(menu);
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_ACCOUNT_PROPERTIES, core::T(PE_TEXT_UI_ACCOUNT_PROPERTIES).c_str());
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     DestroyMenu(menu);
+}
+
+// ---- the accounts' order ----
+
+namespace {
+
+// no place to drop at
+constexpr size_t kNoGap = std::numeric_limits<size_t>::max();
+// while an account is dragged: a moment to scroll the tree when held at its top or bottom edge
+constexpr UINT_PTR kDragScrollTimer = 0x41434354;
+
+// the data of a tree row
+LPARAM RowData(HWND tree, HTREEITEM item) {
+    TVITEMW data = {};
+    data.mask = TVIF_PARAM;
+    data.hItem = item;
+    return TreeView_GetItem(tree, &data) ? data.lParam : 0;
+}
+
+}  // namespace
+
+int64_t Mailbox::AccountOfRow(LPARAM data) const {
+    TreePlace place = PlaceOf(data);
+    if (place.account) {
+        return place.account;
+    }
+    return place.underAllInboxes ? AccountOf(place.folder) : 0;
+}
+
+std::vector<HTREEITEM> Mailbox::SiblingRows(HTREEITEM item) const {
+    std::vector<HTREEITEM> rows;
+    HTREEITEM parent = TreeView_GetParent(tree_, item);
+    for (HTREEITEM row = parent ? TreeView_GetChild(tree_, parent) : TreeView_GetRoot(tree_); row; row = TreeView_GetNextSibling(tree_, row)) {
+        if (row != allInboxesItem_) {
+            rows.push_back(row);
+        }
+    }
+    return rows;
+}
+
+std::vector<int64_t> Mailbox::AccountOrder() const {
+    std::vector<int64_t> order;
+    for (HTREEITEM row = TreeView_GetRoot(tree_); row; row = TreeView_GetNextSibling(tree_, row)) {
+        if (int64_t account = PlaceOf(RowData(tree_, row)).account) {
+            order.push_back(account);
+        }
+    }
+    return order;
+}
+
+void Mailbox::AppendMoveItems(HMENU menu) const {
+    std::vector<int64_t> order = AccountOrder();
+    int64_t account = selectedAccount_ ? selectedAccount_ : AccountOf(folder_);
+    auto at = std::find(order.begin(), order.end(), account);
+    bool up = at != order.end() && at != order.begin();
+    bool down = at != order.end() && at + 1 != order.end();
+    AppendMenuW(menu, up ? MF_STRING : MF_STRING | MF_GRAYED, IDM_ACCOUNT_MOVE_UP, core::T(PE_TEXT_UI_ACCOUNT_MOVE_UP).c_str());
+    AppendMenuW(menu, down ? MF_STRING : MF_STRING | MF_GRAYED, IDM_ACCOUNT_MOVE_DOWN, core::T(PE_TEXT_UI_ACCOUNT_MOVE_DOWN).c_str());
+}
+
+void Mailbox::MoveAccount(int step) {
+    HTREEITEM selected = TreeView_GetSelection(tree_);
+    LPARAM row = selected ? RowData(tree_, selected) : 0;
+    int64_t account = selected ? AccountOfRow(row) : 0;
+    std::vector<int64_t> order = AccountOrder();
+    auto at = std::find(order.begin(), order.end(), account);
+    if (at == order.end()) {
+        return;
+    }
+    ptrdiff_t index = (at - order.begin()) + step;
+    if (index < 0 || index >= static_cast<ptrdiff_t>(order.size())) {
+        return;
+    }
+    PlaceAccount(account, static_cast<size_t>(index), row);
+}
+
+void Mailbox::PlaceAccount(int64_t account, size_t index, LPARAM row) {
+    if (!pe_account_move(core_, account, static_cast<uint32_t>(index))) {
+        return;
+    }
+    Reload();
+    // the row moved selected (it may have been another), and in view
+    TreePlace place = PlaceOf(row);
+    auto& rows = place.account ? accountItems_ : inboxItems_;
+    auto found = rows.find(place.account ? place.account : place.folder);
+    if (found != rows.end()) {
+        TreeView_SelectItem(tree_, found->second);
+        TreeView_EnsureVisible(tree_, found->second);
+    }
+}
+
+size_t Mailbox::DropGap(const std::vector<HTREEITEM>& rows, POINT client) const {
+    // before the first row whose middle is below the pointer: over an account's folders, after that account
+    size_t gap = 0;
+    for (HTREEITEM row : rows) {
+        RECT rect;
+        if (!TreeView_GetItemRect(tree_, row, &rect, FALSE) || client.y < (rect.top + rect.bottom) / 2) {
+            break;
+        }
+        gap++;
+    }
+    return gap;
+}
+
+void Mailbox::ShowGap(const std::vector<HTREEITEM>& rows, size_t gap) {
+    if (gap == kNoGap) {
+        TreeView_SetInsertMark(tree_, nullptr, FALSE);
+    } else if (gap < rows.size()) {
+        TreeView_SetInsertMark(tree_, rows[gap], FALSE);
+    } else {
+        // after the last row and the folders open under it
+        HTREEITEM last = rows.back();
+        while (TreeView_GetItemState(tree_, last, TVIS_EXPANDED) & TVIS_EXPANDED) {
+            HTREEITEM child = TreeView_GetChild(tree_, last);
+            if (!child) {
+                break;
+            }
+            while (HTREEITEM next = TreeView_GetNextSibling(tree_, child)) {
+                child = next;
+            }
+            last = child;
+        }
+        TreeView_SetInsertMark(tree_, last, TRUE);
+    }
+}
+
+void Mailbox::DragAccount(const NMTREEVIEWW& drag) {
+    HTREEITEM item = drag.itemNew.hItem;
+    LPARAM data = RowData(tree_, item);
+    int64_t account = AccountOfRow(data);
+    std::vector<HTREEITEM> rows = account ? SiblingRows(item) : std::vector<HTREEITEM>{};
+    size_t from = std::find(rows.begin(), rows.end(), item) - rows.begin();
+    if (rows.size() < 2 || from == rows.size()) {
+        return;
+    }
+    uint64_t builds = treeBuilds_;
+    size_t gap = kNoGap;
+    ULONGLONG edgeSince = 0;
+    ULONGLONG scrolled = 0;
+    // where the pointer is now: the gap it would drop in (none where the row would stay), the cursor saying so
+    auto follow = [&] {
+        POINT client;
+        GetCursorPos(&client);
+        ScreenToClient(tree_, &client);
+        RECT bounds;
+        GetClientRect(tree_, &bounds);
+        bool inside = PtInRect(&bounds, client);
+        size_t now = inside ? DropGap(rows, client) : kNoGap;
+        if (now == from || now == from + 1) {
+            now = kNoGap;
+        }
+        SetCursor(LoadCursorW(nullptr, inside ? IDC_ARROW : IDC_NO));
+        if (now != gap) {
+            gap = now;
+            ShowGap(rows, gap);
+        }
+        return client;
+    };
+    // held at the top or bottom edge, the tree scrolls a line at a time to the rows out of view
+    auto scroll = [&](POINT client) {
+        RECT bounds;
+        GetClientRect(tree_, &bounds);
+        int edge = Scale(16);
+        bool inside = client.x >= bounds.left && client.x < bounds.right;
+        bool up = client.y < bounds.top + edge;
+        bool down = client.y >= bounds.bottom - edge;
+        ULONGLONG now = GetTickCount64();
+        if (!inside || (!up && !down)) {
+            edgeSince = 0;
+        } else if (!edgeSince) {
+            edgeSince = now;
+        } else if (now - edgeSince > 400 && now - scrolled > 100) {
+            SendMessageW(tree_, WM_VSCROLL, up ? SB_LINEUP : SB_LINEDOWN, 0);
+            scrolled = now;
+            follow();
+        }
+    };
+    SetCapture(tree_);
+    SetTimer(tree_, kDragScrollTimer, 50, nullptr);
+    follow();
+    bool drop = false;
+    MSG msg;
+    // a loop of its own until the button is let go, as DoDragDrop has: the rows stay as they are under it
+    while (GetCapture() == tree_) {
+        if (!GetMessageW(&msg, nullptr, 0, 0)) {
+            PostQuitMessage(static_cast<int>(msg.wParam));
+            break;
+        }
+        if (msg.message == WM_LBUTTONUP) {
+            drop = true;
+            break;
+        }
+        if ((msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE) || msg.message == WM_RBUTTONDOWN) {
+            break;
+        }
+        if (msg.message == WM_MOUSEMOVE) {
+            scroll(follow());
+            continue;
+        }
+        if (msg.message == WM_TIMER && msg.hwnd == tree_ && msg.wParam == kDragScrollTimer) {
+            POINT client;
+            GetCursorPos(&client);
+            ScreenToClient(tree_, &client);
+            scroll(client);
+            continue;
+        }
+        TranslateMessage(&msg);
+        DispatchMessageW(&msg);
+        // the tree built again meanwhile (the accounts or their folders changed): its rows are gone, the drag too
+        if (treeBuilds_ != builds) {
+            break;
+        }
+    }
+    KillTimer(tree_, kDragScrollTimer);
+    if (GetCapture() == tree_) {
+        ReleaseCapture();
+    }
+    if (treeBuilds_ != builds) {
+        return;
+    }
+    TreeView_SetInsertMark(tree_, nullptr, FALSE);
+    if (!drop || gap == kNoGap) {
+        return;
+    }
+    // the account goes before the account of the row at the gap, or after the last one's
+    std::vector<int64_t> order = AccountOrder();
+    std::erase(order, account);
+    bool after = gap == rows.size();
+    int64_t neighbour = AccountOfRow(RowData(tree_, rows[after ? rows.size() - 1 : gap]));
+    auto at = std::find(order.begin(), order.end(), neighbour);
+    if (at == order.end()) {
+        return;
+    }
+    PlaceAccount(account, static_cast<size_t>(at - order.begin()) + (after ? 1 : 0), data);
 }
 
 std::wstring Mailbox::SelectedName() const {
@@ -1964,6 +2206,9 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
         if (header->code == TVN_ITEMEXPANDEDW) {
             // collapsed, a row shows the unread messages it hides; expanded, its folders show them again
             OnRowExpanded(*reinterpret_cast<NMTREEVIEWW*>(header));
+        }
+        if (header->code == TVN_BEGINDRAGW) {
+            DragAccount(*reinterpret_cast<NMTREEVIEWW*>(header));
         }
         if (header->code == NM_RCLICK) {
             FolderMenu();
@@ -2452,14 +2697,10 @@ int64_t Mailbox::DropFolder(DropFrom from, POINT screen, HTREEITEM& over) const 
         over = nullptr;
         return 0;
     }
-    TVITEMW item = {};
-    item.mask = TVIF_PARAM;
-    item.hItem = over;
-    TreeView_GetItem(tree_, &item);
     // an account's own item (its id negated), All Inboxes, the folder they are all in, or one that holds no messages:
     // not there. A folder of another account takes them too, the core moves them across; a row under All Inboxes is
     // that account's Inbox
-    int64_t folder = PlaceOf(item.lParam).folder;
+    int64_t folder = PlaceOf(RowData(tree_, over)).folder;
     if (folder <= 0 || unselectable_.count(folder) || !folderAccounts_.contains(folder)) {
         return 0;
     }

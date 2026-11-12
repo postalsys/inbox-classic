@@ -1836,9 +1836,9 @@ extension UITest {
         step("the account's menu")
         let menu = main.mailbox.accountMenu(accounts[0].id)
         let titles = menu.items.filter { !$0.isSeparatorItem }.map(\.title)
-        check(titles == ["Send and Receive", "Mark All Read", "New Folder…", "Properties…"]
-              && menu.items.filter(\.isSeparatorItem).count == 2,
-              "the first account's right-click menu has Send and Receive, Mark All Read, New Folder and Properties (\(titles))")
+        check(titles == ["Send and Receive", "Mark All Read", "New Folder…", "Move Up", "Move Down", "Properties…"]
+              && menu.items.filter(\.isSeparatorItem).count == 3,
+              "the first account's right-click menu has Send and Receive, Mark All Read, New Folder, Move Up, Move Down and Properties (\(titles))")
         check(menu.items.first { $0.title == "Mark All Read" }?.isEnabled == true, "Mark All Read is on, with unread mail in the account")
         let markRead = menu.indexOfItem(withTitle: "Mark All Read")
         if markRead >= 0 {
@@ -1861,6 +1861,68 @@ extension UITest {
               "its Properties opens that account's Properties (\(ownName ?? ""))")
         press(own.flatMap { find("form.cancel", in: $0) })
         _ = await waitUntil(10) { own?.isVisible != true }
+    }
+
+    // ---- the accounts' order ----
+
+    /// the accounts of the tree's headings and of the rows under All Inboxes, top to bottom
+    func treeOrder() -> (headings: [Int64], inboxes: [Int64]) {
+        let items = (0..<tree.numberOfRows).map { tree.item(atRow: $0) }
+        return (items.compactMap { ($0 as? Mailbox.AccountNode)?.account.id }, items.compactMap { ($0 as? Mailbox.InboxAliasNode)?.account })
+    }
+
+    /// the second account's row under All Inboxes dragged above the first's: both lists follow and the row stays
+    /// selected; Move Down on its menu puts it back, Move Up and Move Down off at the ends
+    func accountOrder() async throws {
+        step("the accounts' order")
+        let ids = main.mailbox.core.accounts().map(\.id)
+        guard ids.count == 2, let all = tree.item(atRow: 0) as? Mailbox.AllInboxesNode, let second = inbox(ofAccount: 1) else {
+            check(false, "two accounts and All Inboxes")
+            return
+        }
+        if !tree.isItemExpanded(all) {
+            tree.expandItem(all)
+        }
+        func accountItem(_ account: Int64, _ title: String) -> NSMenuItem? {
+            main.mailbox.accountMenu(account).items.first { $0.title == title }
+        }
+        check(accountItem(ids[0], "Move Up")?.isEnabled == false && accountItem(ids[0], "Move Down")?.isEnabled == true
+              && accountItem(ids[1], "Move Down")?.isEnabled == false,
+              "Move Up is off for the first account, Move Down for the last")
+        tree.selectRowIndexes(IndexSet(integer: 2), byExtendingSelection: false)
+        _ = await waitUntil(10) { main.mailbox.folder == second.id }
+
+        let heading = (0..<tree.numberOfRows).compactMap { tree.item(atRow: $0) as? Mailbox.AccountNode }.first
+        let headingDrag = TestDrag(heading.flatMap { main.mailbox.outlineView(tree, pasteboardWriterForItem: $0) }, in: tree)
+        check(main.mailbox.outlineView(tree, validateDrop: headingDrag, proposedItem: all, proposedChildIndex: 2) == []
+              && main.mailbox.outlineView(tree, validateDrop: headingDrag, proposedItem: nil, proposedChildIndex: 3) == .move,
+              "an account's heading drops between the headings, not among All Inboxes' rows")
+        guard let row = tree.item(atRow: 2) as? Mailbox.InboxAliasNode else {
+            check(false, "the second account's row under All Inboxes")
+            return
+        }
+        let drag = TestDrag(main.mailbox.outlineView(tree, pasteboardWriterForItem: row), in: tree)
+        check(main.mailbox.outlineView(tree, validateDrop: drag, proposedItem: nil, proposedChildIndex: 1) == []
+              && main.mailbox.outlineView(tree, validateDrop: drag, proposedItem: all, proposedChildIndex: 2) == []
+              && main.mailbox.outlineView(tree, validateDrop: drag, proposedItem: all, proposedChildIndex: 0) == .move,
+              "a row under All Inboxes drops between those rows only, and only where it moves")
+        let dropped = main.mailbox.outlineView(tree, acceptDrop: drag, item: all, childIndex: 0)
+        check(dropped && treeOrder().headings == [ids[1], ids[0]] && treeOrder().inboxes == [ids[1], ids[0]]
+              && main.mailbox.core.accounts().map(\.id) == [ids[1], ids[0]],
+              "dropped above the first, the second account is first under All Inboxes and in the tree (\(treeOrder()))")
+        check(tree.selectedRow == 1 && main.mailbox.folder == second.id,
+              "the moved row stays selected (row \(tree.selectedRow))")
+        await selectRow(0)
+        await shot(main.window, "all-inboxes-4-reorder")
+
+        let menu = main.mailbox.accountMenu(ids[1])
+        check(accountItem(ids[1], "Move Up")?.isEnabled == false, "first now, its Move Up is off")
+        let down = menu.indexOfItem(withTitle: "Move Down")
+        if down >= 0 {
+            onMain { menu.performActionForItem(at: down) }
+        }
+        check(await waitUntil(10) { self.treeOrder().headings == ids && self.treeOrder().inboxes == ids },
+              "Move Down on its menu puts it back below the first (\(treeOrder()))")
     }
 
     // ---- moving between accounts ----

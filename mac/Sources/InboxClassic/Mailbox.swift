@@ -8,6 +8,10 @@ import UniformTypeIdentifiers
 /// The pasteboard type of a message dragged from the list onto a folder: "<folder> <uid>"
 let messagePasteboardType = NSPasteboard.PasteboardType("com.inboxclassic.message")
 
+/// The pasteboard type of an account dragged in the folder tree to a new place in the accounts' order: "heading <id>"
+/// for its heading, "inbox <id>" for its row under All Inboxes
+let accountPasteboardType = NSPasteboard.PasteboardType("com.inboxclassic.account")
+
 /// A file the Finder can drop that is a message, as the core takes them
 func isMessageFile(_ url: URL) -> Bool {
     url.path.withCString { pe_is_message_file($0) }
@@ -1301,17 +1305,21 @@ public final class Mailbox: NSObject {
     }
 
     /// the menu of an account's heading (a right-click on it): Send and Receive and Mark All Read of that account, New
-    /// Folder at its top, its Properties
+    /// Folder at its top, Move Up and Move Down in the accounts' order, its Properties
     func accountMenu(_ account: Int64) -> NSMenu {
         let menu = NSMenu()
         menu.autoenablesItems = false
         // the count its row is drawn with: nothing unread, nothing to mark
         let someUnread = accounts.first { $0.account.id == account }.map { $0.unread > 0 } ?? false
+        let place = accounts.firstIndex { $0.account.id == account } ?? 0
         let items: [(String, Selector, Bool)?] = [
             (Text.uiAccountSync.text, #selector(accountMenuSync(_:)), true),
             (Command.markAllRead.label, #selector(accountMenuMarkRead(_:)), someUnread),
             nil,
             (Command.newFolder.label, #selector(accountMenuNewFolder(_:)), true),
+            nil,
+            (Text.uiAccountMoveUp.text, #selector(accountMenuMoveUp(_:)), place > 0),
+            (Text.uiAccountMoveDown.text, #selector(accountMenuMoveDown(_:)), place < accounts.count - 1),
             nil,
             (Text.uiAccountProperties.text.replacingOccurrences(of: "...", with: "…"), #selector(accountMenuProperties(_:)), true),
         ]
@@ -1343,6 +1351,27 @@ public final class Mailbox: NSObject {
 
     @objc private func accountMenuNewFolder(_ sender: NSMenuItem) {
         newFolder(in: menuAccount(sender), under: 0)
+    }
+
+    @objc private func accountMenuMoveUp(_ sender: NSMenuItem) {
+        moveAccount(menuAccount(sender), by: -1)
+    }
+
+    @objc private func accountMenuMoveDown(_ sender: NSMenuItem) {
+        moveAccount(menuAccount(sender), by: 1)
+    }
+
+    /// the account one place up (-1) or down (1) in the accounts' order
+    private func moveAccount(_ account: Int64, by step: Int) {
+        guard let place = accounts.firstIndex(where: { $0.account.id == account }) else { return }
+        moveAccount(account, to: place + step)
+    }
+
+    /// the account put at `place` in the accounts' order, which the tree and All Inboxes' rows then follow; the
+    /// selection stays where it was
+    func moveAccount(_ account: Int64, to place: Int) {
+        guard place >= 0, place < accounts.count, pe_account_move(core.handle, account, UInt32(place)) else { return }
+        reload()
     }
 
     @objc private func accountMenuProperties(_ sender: NSMenuItem) {
@@ -1925,8 +1954,29 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         }
     }
 
+    /// an account's heading or its row under All Inboxes is dragged to a new place in the accounts' order
+    public func outlineView(_ outlineView: NSOutlineView, pasteboardWriterForItem item: Any) -> NSPasteboardWriting? {
+        let value: String
+        switch item {
+        case let account as AccountNode: value = "heading \(account.account.id)"
+        case let alias as InboxAliasNode: value = "inbox \(alias.account)"
+        default: return nil
+        }
+        let writer = NSPasteboardItem()
+        writer.setString(value, forType: accountPasteboardType)
+        return writer
+    }
+
     public func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem item: Any?,
                             proposedChildIndex index: Int) -> NSDragOperation {
+        if let drag = draggedAccount(info) {
+            // dropped on a row of its kind: the gap above it, which the line shows
+            if index == NSOutlineViewDropOnItemIndex, let target = accountDropTarget(drag, onto: item) {
+                outlineView.setDropItem(target.item, dropChildIndex: target.index)
+                return accountPlace(drag, item: target.item, index: target.index) != nil ? .move : []
+            }
+            return accountPlace(drag, item: item, index: index) != nil ? .move : []
+        }
         // .eml files from the Finder go into the folder they are dropped on
         let item = folderItem(item)
         let files = droppedFiles(info)
@@ -1942,6 +1992,11 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
     }
 
     public func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
+        if let drag = draggedAccount(info) {
+            guard let place = accountPlace(drag, item: item, index: index) else { return false }
+            moveAccount(drag.id, to: place)
+            return true
+        }
         let item = folderItem(item)
         let files = droppedFiles(info)
         if !files.isEmpty {
@@ -1978,6 +2033,45 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
     /// the files on a drag's pasteboard
     func droppedFiles(_ info: NSDraggingInfo) -> [URL] {
         info.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
+    }
+
+    /// the account on the pasteboard, and whether it was dragged by its heading (or by its row under All Inboxes)
+    private func draggedAccount(_ info: NSDraggingInfo) -> (heading: Bool, id: Int64)? {
+        guard let parts = info.draggingPasteboard.string(forType: accountPasteboardType)?.split(separator: " "),
+              parts.count == 2, let id = Int64(parts[1]) else { return nil }
+        return (parts[0] == "heading", id)
+    }
+
+    /// the gap above `item`, when it is a row of the dragged account's kind
+    private func accountDropTarget(_ drag: (heading: Bool, id: Int64), onto item: Any?) -> (item: Any?, index: Int)? {
+        if drag.heading, let account = item as? AccountNode, let index = topNodes.firstIndex(where: { $0 as AnyObject === account }) {
+            return (nil, index)
+        }
+        if !drag.heading, let alias = item as? InboxAliasNode, let all = allInboxesNode,
+           let index = all.children.firstIndex(where: { $0 === alias }) {
+            return (all, index)
+        }
+        return nil
+    }
+
+    /// the place in the accounts' order of an account dropped into the gap `index` among the children of `item`: only
+    /// between account headings for a heading, between the rows under All Inboxes for one of those; nil anywhere else
+    /// or where it would not move
+    private func accountPlace(_ drag: (heading: Bool, id: Int64), item: Any?, index: Int) -> Int? {
+        let ids = accounts.map(\.account.id)
+        guard index >= 0, let from = ids.firstIndex(of: drag.id) else { return nil }
+        var gap: Int?
+        if drag.heading {
+            let first = allInboxesNode == nil ? 0 : 1
+            gap = item == nil && index >= first ? index - first : nil
+        } else if let all = item as? AllInboxesNode, all === allInboxesNode {
+            // above a row is above its account; below the last, below the last's
+            let rows = all.children.map(\.account)
+            gap = index < rows.count ? ids.firstIndex(of: rows[index]) : rows.last.flatMap { ids.firstIndex(of: $0) }.map { $0 + 1 }
+        }
+        guard let gap else { return nil }
+        let place = gap > from ? gap - 1 : gap
+        return place == from ? nil : place
     }
 
     /// the messages on the pasteboard, one item each
@@ -2391,7 +2485,7 @@ public final class FolderOutline: NSOutlineView {
         autoresizesOutlineColumn = false
         columnAutoresizingStyle = .uniformColumnAutoresizingStyle
         column.resizingMask = .autoresizingMask
-        registerForDraggedTypes([messagePasteboardType, .fileURL])
+        registerForDraggedTypes([messagePasteboardType, accountPasteboardType, .fileURL])
         draggingDestinationFeedbackStyle = .sourceList
         setAccessibilityIdentifier("tree")
     }

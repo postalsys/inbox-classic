@@ -200,6 +200,16 @@ const sections = [
                 ]
             },
             {
+                shot: 'all-inboxes-4-reorder',
+                name: 'Reorder accounts',
+                what: "The accounts have an order of your own: drag an account, or its Inbox under All Inboxes, above or below another, and a line shows where it lands. The rows under All Inboxes and the accounts' folders below follow the same order. Move Up and Move Down on the account's menu do the same from the keyboard.",
+                how: 'Drag an account or its row under All Inboxes; or right-click it and choose Move Up or Move Down.',
+                checked: [
+                    'Moving the second account first puts it first under All Inboxes and in the folder tree',
+                    "Move Down on the account's menu puts it back"
+                ]
+            },
+            {
                 shot: 'move-1-dialog',
                 name: 'Move and Copy to Folder',
                 what: 'Move to Folder and Copy to Folder show the folders of every account in a tree, with a filter box at the top (type part of a name to narrow it), the last folders used under Recent, and New Folder. The folder the messages are in is shown but can not be chosen, and the button says what it does: Move or Copy.',
@@ -425,7 +435,11 @@ const sections = [
                 name: 'Why a message bounced',
                 what: "A delivery notice opened in the reading pane gets a card above it: not delivered (or not delivered yet), each recipient with the reason in plain words (the address does not exist, the mailbox is full, blocked as spam, a blocklist, and so on) and what you can do, the server's own words under Details. The reasons are told by a neural network built into the app (bounce-classifier), nothing is sent anywhere. Show the message that bounced selects it in Sent Items.",
                 how: 'Open a delivery notice.',
-                checked: ['The card names the recipient and the reason', "Details show the server's words", 'Show the message that bounced selects it in Sent Items']
+                checked: [
+                    'The card names the recipient and the reason',
+                    "Details show the server's words",
+                    'Show the message that bounced selects it in Sent Items'
+                ]
             },
             {
                 shot: 'bounce-2-delayed',
@@ -478,7 +492,7 @@ const sections = [
             {
                 shot: 'read-16-window',
                 name: 'A message in a window of its own',
-                what: "Double-click (or Enter) opens a message in a window of its own, as in Outlook Express: its header, pictures, files and text as the reading pane shows them, with Reply, Reply All, Forward, Print, Delete, Archive and Junk, and Previous and Next through the list it came from. Several can be open at once. A draft opens to be finished instead.",
+                what: 'Double-click (or Enter) opens a message in a window of its own, as in Outlook Express: its header, pictures, files and text as the reading pane shows them, with Reply, Reply All, Forward, Print, Delete, Archive and Junk, and Previous and Next through the list it came from. Several can be open at once. A draft opens to be finished instead.',
                 how: 'Double-click a message in the list, or select it and press Enter.',
                 checked: [
                     'Enter opens the message in its own window, titled with its subject, marked read',
@@ -645,7 +659,11 @@ const sections = [
                 name: 'Unread mail in a collapsed account',
                 what: 'A collapsed account, or a collapsed folder with folders in it, shows the unread messages of the folders it hides, so new mail is not out of sight. Junk E-mail and Deleted Items do not count. Expanded, each folder shows its own again. On the Mac and Linux an account is a heading over its folders, as in Mail: a click opens or closes it, it is never selected, and the folder listed stays listed while its account is closed.',
                 how: 'Click an account (on Windows its arrow) or the arrow beside a folder to collapse it.',
-                checked: ['Collapsed, the account shows the unread messages of its folders', 'The account is a heading that can not be selected (Mac, Linux)', 'Expanded, the count is back on the Inbox alone']
+                checked: [
+                    'Collapsed, the account shows the unread messages of its folders',
+                    'The account is a heading that can not be selected (Mac, Linux)',
+                    'Expanded, the count is back on the Inbox alone'
+                ]
             }
         ]
     },
