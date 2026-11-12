@@ -48,7 +48,6 @@ pub struct Reader {
     pictures: gtk::Box,
     pub download_pictures: gtk::Button,
     pictures_always: gtk::MenuButton,
-    pictures_unconfirmed: gtk::Label,
     /// The bar over a message that could not be downloaded; its button tries again
     retry: gtk::Box,
     pub try_again: gtk::Button,
@@ -178,7 +177,7 @@ impl Reader {
         header.append(&text);
         header.append(&attachments);
 
-        let (pictures, download_pictures, pictures_always, pictures_unconfirmed) = pictures_bar();
+        let (pictures, download_pictures, pictures_always) = pictures_bar();
 
         let note_retry = gtk::Label::new(Some(&pe_core::retry_note()));
         note_retry.set_xalign(0.0);
@@ -222,7 +221,6 @@ impl Reader {
             pictures,
             download_pictures,
             pictures_always,
-            pictures_unconfirmed,
             retry,
             try_again,
             preview,
@@ -761,8 +759,9 @@ impl Reader {
         self.show_pictures_bar(view);
     }
 
-    /// The pictures bar, offered only for a message with pictures on the internet, until they are shown: Always for
-    /// a sender the provider confirmed, otherwise the line that says why not (the core's words)
+    /// The pictures bar, offered only for a message with pictures on the internet, until they are shown. With a
+    /// sender, Download Pictures has its menu: Always for a sender the provider confirmed, otherwise a dimmed item
+    /// that says why not (the core's words), as the Windows app does
     fn show_pictures_bar(&self, view: &MessageView) {
         self.pictures.set_visible(view.remote_images && !view.pictures_loaded);
         let words = view
@@ -774,11 +773,18 @@ impl Reader {
         if !words.always_sender.is_empty() {
             menu.append(Some(&words.always_sender), Some("reader.always-sender"));
             menu.append(Some(&words.always_domain), Some("reader.always-domain"));
+        } else if !words.unconfirmed.is_empty() {
+            let item = gio::MenuItem::new(None, None);
+            item.set_attribute_value("custom", Some(&"unconfirmed".to_variant()));
+            menu.append_item(&item);
         }
         self.pictures_always.set_menu_model(Some(&menu));
         self.pictures_always.set_visible(menu.n_items() > 0);
-        self.pictures_unconfirmed.set_text(&words.unconfirmed);
-        self.pictures_unconfirmed.set_visible(!words.unconfirmed.is_empty());
+        if !words.unconfirmed.is_empty()
+            && let Some(popover) = self.pictures_always.popover().and_downcast::<gtk::PopoverMenu>()
+        {
+            popover.add_child(&unconfirmed_note(&words.unconfirmed), "unconfirmed");
+        }
     }
 
     /// The paper clip: how many files, a menu item to save each (the name the sender gave, its size), then all of
@@ -841,7 +847,7 @@ impl Reader {
         self.pictures.is_visible()
     }
 
-    /// What the pictures bar offers beside Download Pictures (its menu's items), and its second line
+    /// What the pictures bar offers beside Download Pictures: its menu's items, and the dimmed note in it
     #[cfg(feature = "e2e")]
     pub fn pictures_choices(&self) -> (Vec<String>, String) {
         let mut items = Vec::new();
@@ -855,11 +861,24 @@ impl Reader {
                 items.extend(label.and_then(|l| l.get::<String>()));
             }
         }
-        let line = self
-            .pictures_unconfirmed
-            .is_visible()
-            .then(|| self.pictures_unconfirmed.text().to_string());
-        (items, line.unwrap_or_default())
+        let note = self
+            .pictures_always
+            .popover()
+            .filter(|_| self.pictures_always.is_visible())
+            .and_then(|popover| {
+                labels_in(popover.upcast_ref()).find(|l| l.widget_name() == "reader-pictures-unconfirmed")
+            })
+            .map(|l| l.text().to_string());
+        (items, note.unwrap_or_default())
+    }
+
+    /// The texts of the pictures bar itself (its menu not included)
+    #[cfg(feature = "e2e")]
+    pub fn pictures_bar_texts(&self) -> Vec<String> {
+        labels_in(self.pictures.upcast_ref())
+            .filter(|l| l.is_visible())
+            .map(|l| l.text().to_string())
+            .collect()
     }
 
     /// The pictures bar's menu opened, or closed (the UI test's picture of it)
@@ -1021,27 +1040,50 @@ impl Reader {
     }
 }
 
-/// The bar over a message whose pictures on the internet are blocked: what it says (and, for a sender who could not
-/// be confirmed, why their pictures do not load by themselves), Download Pictures and beside it the menu of Always
-fn pictures_bar() -> (gtk::Box, gtk::Button, gtk::MenuButton, gtk::Label) {
-    let wrapping = |text: &str| {
-        let label = gtk::Label::new(Some(text));
-        label.set_xalign(0.0);
-        // the whole sentence on more lines in a narrow window, not cut off
-        label.set_wrap(true);
-        label.set_wrap_mode(gtk::pango::WrapMode::WordChar);
-        label
-    };
-    let unconfirmed = wrapping("");
-    unconfirmed.add_css_class("caption");
-    unconfirmed.add_css_class("dim-label");
-    unconfirmed.set_widget_name("reader-pictures-unconfirmed");
-    unconfirmed.set_visible(false);
-    let text = gtk::Box::new(gtk::Orientation::Vertical, 2);
+/// Every label under `root`
+#[cfg(feature = "e2e")]
+fn labels_in(root: &gtk::Widget) -> impl Iterator<Item = gtk::Label> {
+    let mut found = Vec::new();
+    let mut stack = vec![root.clone()];
+    while let Some(widget) = stack.pop() {
+        let mut child = widget.first_child();
+        while let Some(c) = child {
+            child = c.next_sibling();
+            stack.push(c);
+        }
+        found.extend(widget.downcast::<gtk::Label>().ok());
+    }
+    found.into_iter()
+}
+
+/// A label that wraps: the whole sentence on more lines in a narrow window, not cut off
+fn wrapping(text: &str) -> gtk::Label {
+    let label = gtk::Label::new(Some(text));
+    label.set_xalign(0.0);
+    label.set_wrap(true);
+    label.set_wrap_mode(gtk::pango::WrapMode::WordChar);
+    label
+}
+
+/// The dimmed item of the pictures menu for a sender the provider did not confirm: why there is no Always
+fn unconfirmed_note(text: &str) -> gtk::Label {
+    let note = wrapping(text);
+    note.set_widget_name("reader-pictures-unconfirmed");
+    note.set_max_width_chars(40);
+    note.set_sensitive(false);
+    note.set_margin_top(6);
+    note.set_margin_bottom(6);
+    note.set_margin_start(12);
+    note.set_margin_end(12);
+    note
+}
+
+/// The bar over a message whose pictures on the internet are blocked: what it says, Download Pictures and beside it
+/// its menu (Always, or why not)
+fn pictures_bar() -> (gtk::Box, gtk::Button, gtk::MenuButton) {
+    let text = wrapping(&t!(GtkPicturesBlocked));
     text.set_hexpand(true);
     text.set_valign(gtk::Align::Center);
-    text.append(&wrapping(&t!(GtkPicturesBlocked)));
-    text.append(&unconfirmed);
     let download = gtk::Button::with_label(&t!(GtkDownloadPictures));
     download.set_widget_name("reader-download-pictures");
     let always = gtk::MenuButton::builder()
@@ -1063,7 +1105,7 @@ fn pictures_bar() -> (gtk::Box, gtk::Button, gtk::MenuButton, gtk::Label) {
     bar.append(&text);
     bar.append(&buttons);
     bar.set_visible(false);
-    (bar, download, always, unconfirmed)
+    (bar, download, always)
 }
 
 /// An instant as the reader's local time, or as written (floating: in no zone the invitation defines)

@@ -1,5 +1,5 @@
-//! Pictures from trusted senders: the pictures bar's Always for a sender the provider confirmed, the line for one it
-//! did not, and Preferences' trusted senders and Download pictures in all messages
+//! Pictures from trusted senders: the pictures bar's Always for a sender the provider confirmed, the dimmed note in
+//! its menu for one it did not, and Preferences' trusted senders and Download pictures in all messages
 
 use super::steps::{date_now, folder_id, open_by_subject};
 use super::*;
@@ -69,12 +69,12 @@ pub async fn trusted(d: &Driver) {
         verified: true,
     };
     let words = pe_core::pictures::bar_words(&sender);
-    let (choices, line) = reader.pictures_choices();
+    let (choices, note) = reader.pictures_choices();
     d.check(
         reader.pictures_blocked() && choices == [words.always_sender.clone(), words.always_domain.clone()],
         &format!("the bar offers Always for the sender the provider confirmed ({choices:?})"),
     );
-    d.check(line.is_empty(), "and says nothing against them");
+    d.check(note.is_empty(), "and says nothing against them");
     reader.open_pictures_menu(true);
     d.shot(main.window(), "pictures-2-trusted").await;
     reader.open_pictures_menu(false);
@@ -85,11 +85,19 @@ pub async fn trusted(d: &Driver) {
         ..sender.clone()
     })
     .unconfirmed;
-    let (choices, line) = reader.pictures_choices();
+    let (choices, note) = reader.pictures_choices();
     d.check(
-        reader.pictures_blocked() && choices.is_empty() && line == unconfirmed,
-        &format!("a forged message has Download Pictures only, and says why ({line})"),
+        reader.pictures_blocked() && choices.is_empty() && note == unconfirmed,
+        &format!("a forged message's menu has no Always, only a dimmed note that says why ({note})"),
     );
+    let texts = reader.pictures_bar_texts();
+    d.check(
+        !texts.contains(&unconfirmed),
+        &format!("and the bar itself does not say it ({texts:?})"),
+    );
+    reader.open_pictures_menu(true);
+    d.shot(main.window(), "pictures-2-unconfirmed").await;
+    reader.open_pictures_menu(false);
 
     show(inbox, CONFIRMED).await;
     let _ = reader.widget.activate_action("reader.always-domain", None);

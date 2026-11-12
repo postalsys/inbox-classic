@@ -494,13 +494,13 @@ Screenshots: `threads-4-watch`, `threads-5-ignore`
 
 ## 34g2. Pictures from trusted senders
 
-Screenshots: `pictures-2-trusted`, `pictures-3-options`
+Screenshots: `pictures-2-trusted`, `pictures-2-unconfirmed` (Mac, Linux), `pictures-3-options`
 
 Two HTML messages with a picture on the internet from news@shop.example: one whose Authentication-Results (from the
 account's provider) say DKIM and DMARC passed for shop.example, one whose say they failed:
 
 - the confirmed one's pictures bar offers Always from news@shop.example and from everyone at shop.example; the other's
-  says the sender could not be confirmed
+  menu says, greyed, that the sender could not be confirmed, and its bar has no second line
 - Always from everyone at shop.example: the confirmed one shows its pictures without the bar, the forged one still has it
 - Options lists the trusted sender; Remove takes it out
 - "Download pictures in all messages" on: the forged one's pictures load; off again
