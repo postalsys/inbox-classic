@@ -551,6 +551,9 @@ public:
     int64_t CurrentAccount() const;
     // the account whose own row is selected in the tree (the account row's menu is for it), 0 when another row is
     int64_t SelectedAccount() const { return selectedAccount_; }
+    // the selected account row, or the selected Inbox under All Inboxes, moved `step` places in the accounts' order (-1
+    // up, 1 down): the account menu's Move Up and Move Down
+    void MoveAccount(int step);
     // the account `folder` is in, 0 when it is not known
     int64_t AccountOf(int64_t folder) const;
     // whether `folder` is the Inbox of its account
@@ -592,6 +595,24 @@ private:
     HTREEITEM RowOf(int64_t folder) const;
     // the right-click menu of an account's own row
     void AccountMenu(POINT screen);
+    // Move Up and Move Down in `menu` for the selected account row or Inbox under All Inboxes, greyed at the ends
+    void AppendMoveItems(HMENU menu) const;
+    // the accounts' order: an account's own row, or its Inbox under All Inboxes, dragged above or below another of
+    // the same level (TVN_BEGINDRAG); an insert mark shows where it goes, Esc or a right click cancels
+    void DragAccount(const NMTREEVIEWW& drag);
+    // the rows a drag of `item` moves it among: the accounts' own rows, or the Inboxes under All Inboxes
+    std::vector<HTREEITEM> SiblingRows(HTREEITEM item) const;
+    // the account of a row's data: an account's own row or its Inbox under All Inboxes; 0 for another row
+    int64_t AccountOfRow(LPARAM data) const;
+    // the account ids in their order, as the tree shows them
+    std::vector<int64_t> AccountOrder() const;
+    // where among `rows` a drop at `client` (the tree's pixels) puts the row: before the row at that index, or after
+    // the last one at rows.size()
+    size_t DropGap(const std::vector<HTREEITEM>& rows, POINT client) const;
+    // the insert mark at the gap `gap` among `rows`, none for kNoGap
+    void ShowGap(const std::vector<HTREEITEM>& rows, size_t gap);
+    // `account` put at `index` of the accounts' order, the tree built again with the row of data `row` selected
+    void PlaceAccount(int64_t account, size_t index, LPARAM row);
     // which rows are closed (All Inboxes, accounts by id), kept for the next start; read in Reload, written when a
     // row is opened or closed
     void LoadClosedRows(const std::vector<int64_t>& accounts);
@@ -819,6 +840,8 @@ private:
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's
     bool reloading_ = false;
+    // how many times the tree was built: a drag of an account ends when its rows are built again under it
+    uint64_t treeBuilds_ = 0;
     // SelectStart has run: later showings of the window keep what is selected
     bool started_ = false;
     // the text of the list cells, kept until the list asks for the next one
@@ -874,10 +897,14 @@ enum ControlId : WORD {
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
 constexpr WORD IDM_FLAG_COLOR = 900;
 constexpr WORD IDM_FLAG_CLEAR = 908;
-// the account row's menu in the folder tree: Send and Receive of that account, its Mark All Read, its Properties
+// the account row's menu in the folder tree: Send and Receive of that account, its Mark All Read, its Properties, its
+// place in the accounts' order
 constexpr WORD IDM_ACCOUNT_SYNC = 910;
 constexpr WORD IDM_ACCOUNT_MARK_ALL_READ = 911;
 constexpr WORD IDM_ACCOUNT_PROPERTIES = 912;
+// Move Up and Move Down of the account row's menu, and of the menu of its Inbox under All Inboxes
+constexpr WORD IDM_ACCOUNT_MOVE_UP = 913;
+constexpr WORD IDM_ACCOUNT_MOVE_DOWN = 914;
 
 // what the message list tells the main window with WM_COMMAND of IDC_LIST: its selection was taken (the buttons and
 // counts follow it), or an action on messages was done (Mailbox::Said for the status bar)

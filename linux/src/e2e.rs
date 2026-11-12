@@ -614,7 +614,7 @@ fn popover_origin(popover: &gtk::Popover, window: &gtk::Window) -> Option<graphe
 
 /// Every widget of type `T` under `root`, popovers' children included, in the order they are drawn (a dialog opened
 /// over another after it)
-fn descendants<T: IsA<gtk::Widget>>(root: &gtk::Widget) -> Vec<T> {
+pub(crate) fn descendants<T: IsA<gtk::Widget>>(root: &gtk::Widget) -> Vec<T> {
     let mut found = Vec::new();
     let mut stack = vec![root.clone()];
     while let Some(widget) = stack.pop() {
@@ -962,6 +962,7 @@ async fn scenario(d: Rc<Driver>) {
     wrong_password(&d).await;
     steps::all_inboxes(&d).await;
     steps::all_inboxes_by_account(&d).await;
+    steps::reorder_accounts(&d).await;
     steps::between_accounts(&d).await;
     accounts(&d).await;
     sign_in_apps(&d).await;

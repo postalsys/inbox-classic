@@ -473,6 +473,7 @@ impl Mailbox {
         let dropped = Rc::downgrade(self);
         let imported = Rc::downgrade(self);
         let menu = Rc::downgrade(self);
+        let moved = Rc::downgrade(self);
         self.folders.set_handlers(Handlers {
             selected: Box::new(move |id| {
                 if let Some(this) = selected.upgrade() {
@@ -492,6 +493,11 @@ impl Mailbox {
                 }
             }),
             opened: Box::new(remember_opened),
+            moved: Box::new(move |dragged, onto, below| {
+                if let Some(this) = moved.upgrade() {
+                    this.move_row(dragged, onto, below);
+                }
+            }),
             menu: Box::new(move |widget, x, y, id| {
                 if let Some(this) = menu.upgrade() {
                     if id < 0 && id != crate::folders::ALL_INBOXES {
@@ -632,6 +638,40 @@ impl Mailbox {
             });
         }
         (entries, hidden.account)
+    }
+
+    /// The account of a row of the tree: an account's heading, or its Inbox's row under All Inboxes
+    fn account_of_row(&self, id: i64) -> Option<i64> {
+        if is_under_all_inboxes(id) {
+            self.folder_accounts.borrow().get(&folder_of(id)).copied()
+        } else {
+            (id < 0 && id != ALL_INBOXES).then_some(-id)
+        }
+    }
+
+    /// Row `dragged` dropped above or below row `onto`: its account put before or after that row's account
+    fn move_row(&self, dragged: i64, onto: i64, below: bool) {
+        let (Some(account), Some(beside)) = (self.account_of_row(dragged), self.account_of_row(onto)) else {
+            return;
+        };
+        // the index among the other accounts, as the core counts it with the account taken out
+        let others: Vec<i64> = self
+            .accounts
+            .borrow()
+            .iter()
+            .map(|a| a.id)
+            .filter(|&id| id != account)
+            .collect();
+        if let Some(at) = others.iter().position(|&id| id == beside) {
+            self.move_account(account, at + usize::from(below));
+        }
+    }
+
+    /// Puts `account` at `index` among the accounts (0 first), the tree built again in that order, the selection kept
+    pub fn move_account(&self, account: i64, index: usize) {
+        if shell().core.move_account(account, index).is_ok() {
+            self.reload();
+        }
     }
 
     /// The labels and bold states of the folders of an account; a folder the tree does not have yet builds it again
@@ -1724,7 +1764,7 @@ impl Mailbox {
     }
 
     /// An account's right-click menu: Send and Receive (its server alone), Mark All Read (every folder of it), New
-    /// Folder, Properties
+    /// Folder, Move Up and Move Down (turned off at the ends), Properties
     pub fn account_menu(self: &Rc<Self>, widget: &gtk::Widget, x: f64, y: f64, account: i64) {
         use crate::words::{Text, plain};
         let group = gio::SimpleActionGroup::new();
@@ -1759,6 +1799,18 @@ impl Mailbox {
             true,
             Box::new(move |this| spawn(async move { this.new_folder_in(account, 0).await })),
         );
+        let place = self.accounts.borrow().iter().position(|a| a.id == account).unwrap_or(0);
+        let count = self.accounts.borrow().len();
+        add(
+            "move-up",
+            place > 0,
+            Box::new(move |this| this.move_account(account, place.saturating_sub(1))),
+        );
+        add(
+            "move-down",
+            place + 1 < count,
+            Box::new(move |this| this.move_account(account, place + 1)),
+        );
         add(
             "properties",
             true,
@@ -1778,6 +1830,10 @@ impl Mailbox {
         let second = gio::Menu::new();
         second.append(Some(&plain(Text::CmdNewFolder)), Some("account.new"));
         menu.append_section(None, &second);
+        let order = gio::Menu::new();
+        order.append(Some(&plain(Text::UiAccountMoveUp)), Some("account.move-up"));
+        order.append(Some(&plain(Text::UiAccountMoveDown)), Some("account.move-down"));
+        menu.append_section(None, &order);
         let third = gio::Menu::new();
         third.append(Some(&plain(Text::UiAccountProperties)), Some("account.properties"));
         menu.append_section(None, &third);

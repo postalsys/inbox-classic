@@ -3399,8 +3399,9 @@ public static class Dragger {
     if ($menu) {
         $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
         $labels = @([Native.Win]::MenuLabels($hmenu))
-        Check (($labels -join '|') -eq 'Send and Receive|Mark All Read||New Folder...||Properties...') "with Send and Receive, Mark All Read, New Folder and Properties ($($labels -join ', '))"
+        Check (($labels -join '|') -eq 'Send and Receive|Mark All Read||New Folder...||Move Up|Move Down||Properties...') "with Send and Receive, Mark All Read, New Folder, Move Up, Move Down and Properties ($($labels -join ', '))"
         Check ((([Native.Win]::GetMenuState($hmenu, $IDM_ACCOUNT_MARK_ALL_READ, 0) -band 0x3) -eq 0)) 'Mark All Read is on while the account has unread mail'
+        Check ((([Native.Win]::GetMenuState($hmenu, 913, 0) -band 0x3) -ne 0) -and (([Native.Win]::GetMenuState($hmenu, 914, 0) -band 0x3) -eq 0)) 'for the first account Move Up is greyed, Move Down is not'
         Shot $main 'account-menu' $menu
         Key $menu $VK_ESCAPE
         [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
@@ -3423,6 +3424,53 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($properties) } 10)
     }
     Command $main $IDM_ACCOUNT_SYNC
+
+    # ---- the accounts' order ----
+
+    Step 'the accounts in another order'
+    $IDM_ACCOUNT_MOVE_UP = 913; $IDM_ACCOUNT_MOVE_DOWN = 914
+    $bare = { param($text) $text -replace ' \(\d+\)$', '' }
+    # the accounts' own rows below All Inboxes, then the rows under All Inboxes, by name: "a,b|a,b"
+    function AccountOrder {
+        $roots = @()
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+        while ($item -ne [IntPtr]::Zero) {
+            $roots += & $bare ([Native.Win]::RemoteTreeText($tree, $item))
+            $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
+        }
+        $inboxes = @(AllInboxesRows | ForEach-Object { & $bare ([Native.Win]::RemoteTreeText($tree, $_)) })
+        "$($roots -join ',')|$($inboxes -join ',')"
+    }
+    $added = 'inboxclassic.test,Second|inboxclassic.test,Second'
+    $swapped = 'Second,inboxclassic.test|Second,inboxclassic.test'
+    Check ((AccountOrder) -eq $added) "the accounts are in the order they were added ($(AccountOrder))"
+    # Move Up on the second account's row, as its menu would
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (AccountRow 'Second'))
+    Command $main $IDM_ACCOUNT_MOVE_UP
+    Check ([bool](WaitFor { (AccountOrder) -eq $swapped } 10)) "Move Up puts the second account first, above the other and under All Inboxes ($(AccountOrder))"
+    Check ((& $folderBar) -eq ' Second') "and its row stays selected ($(& $folderBar))"
+    Shot $main 'all-inboxes-4-reorder'
+    Command $main $IDM_ACCOUNT_MOVE_DOWN
+    Check ([bool](WaitFor { (AccountOrder) -eq $added } 10)) "Move Down puts it back ($(AccountOrder))"
+    # dragged: the second account's Inbox under All Inboxes above the first one's, the insert mark shown on the way
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
+    $inboxRows = @(AllInboxesRows)
+    $from = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $inboxRows[1].ToInt64()))
+    $toRect = [Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $inboxRows[0].ToInt64())
+    $to = @($from[0], ($toRect.Top + 2))
+    [Native.Win]::MouseDragTo($from[0], $from[1], $to[0], $to[1])
+    Shot $main 'all-inboxes-5-drag'
+    [Native.Win]::Mouse($to[0], $to[1], 0x0004)
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+    Check ([bool](WaitFor { (AccountOrder) -eq $swapped } 10)) "an Inbox dragged above the other under All Inboxes moves its account first in both places ($(AccountOrder))"
+    Check ((& $folderBar) -eq ' Inbox - Second') "and the row dragged is selected ($(& $folderBar))"
+    # from the Inbox's menu under All Inboxes too
+    Command $main $IDM_ACCOUNT_MOVE_DOWN
+    Check ([bool](WaitFor { (AccountOrder) -eq $added } 10)) "its Move Down puts it back ($(AccountOrder))"
+    Check ((& $folderBar) -eq ' Inbox - Second') "with the Inbox's row still selected ($(& $folderBar))"
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (AccountRow 'inboxclassic.test'))
 
     # ---- accounts ----
 
