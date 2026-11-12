@@ -2413,10 +2413,12 @@ pub async fn all_inboxes_by_account(d: &Driver) {
                 "Send and Receive",
                 "Mark All Read",
                 "New Folder\u{2026}",
+                "Move Up",
+                "Move Down",
                 "Properties\u{2026}",
             ],
         &format!(
-            "the first account's right-click menu has Send and Receive, Mark All Read, New Folder and Properties ({})",
+            "the first account's right-click menu has Send and Receive, Mark All Read, New Folder, Move Up, Move Down and Properties ({})",
             labels.join(", ")
         ),
     );
@@ -2450,6 +2452,93 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         }
         None => d.check(false, "its Properties opens that account's Properties"),
     }
+}
+
+/// SCENARIO 42b: the second account's row under All Inboxes dragged above the first's puts the accounts in that order,
+/// its heading too, the row staying selected; Move Down from its menu puts it back
+pub async fn reorder_accounts(d: &Driver) {
+    use crate::folders::under_all_inboxes;
+    d.step("accounts reordered by dragging and by Move Down");
+    let main = shell().main();
+    let core = &shell().core;
+    let accounts: Vec<i64> = core.accounts().unwrap_or_default().iter().map(|a| a.id).collect();
+    let (Some(inbox), Some(second), [first_account, second_account, ..]) =
+        (folder_id("Inbox"), second_inbox(), &accounts[..])
+    else {
+        d.check(false, "two accounts, each with an Inbox");
+        return;
+    };
+    let (first_account, second_account) = (*first_account, *second_account);
+    let at = |id: i64| main.folders.position_of(id).unwrap_or(u32::MAX);
+    // whether the second account is above the first: its heading, its row under All Inboxes, and in the core
+    let second_first = || {
+        (
+            at(-second_account) < at(-first_account),
+            at(under_all_inboxes(second)) < at(under_all_inboxes(inbox)),
+            core.accounts().unwrap_or_default().first().map(|a| a.id) == Some(second_account),
+        )
+    };
+    main.folders.select(under_all_inboxes(second));
+    d.check(
+        main.folders.show_drop_line(under_all_inboxes(inbox), Some(false)),
+        "held over the first account's row under All Inboxes, a drag shows a line above it",
+    );
+    d.shot(&main_window(), "all-inboxes-4-drag").await;
+    main.folders.show_drop_line(under_all_inboxes(inbox), None);
+    d.check(
+        !main.folders.drop_row(under_all_inboxes(second), -first_account, false),
+        "a row under All Inboxes is not taken by an account's heading",
+    );
+    d.check(
+        main.folders
+            .drop_row(under_all_inboxes(second), under_all_inboxes(inbox), false),
+        "the second account's row under All Inboxes is dropped above the first's",
+    );
+    d.check(
+        wait_until(10, || second_first() == (true, true, true)).await,
+        &format!(
+            "the second account comes first: its heading, its row under All Inboxes and the accounts ({:?})",
+            second_first()
+        ),
+    );
+    d.check(
+        main.folders.selected() == under_all_inboxes(second),
+        "the row moved stays selected",
+    );
+    d.shot(&main_window(), "all-inboxes-4-reorder").await;
+    // its menu: Move Up turned off, first as it is; Move Down puts it back
+    let tree: gtk::Widget = main.folders.view.clone().upcast();
+    main.account_menu(&tree, 120.0, 40.0, second_account);
+    pause(300).await;
+    let popover: Option<gtk::Widget> = main.folder_popover.borrow().clone().map(|p| p.upcast());
+    // an item is turned off with its action: its label is then insensitive
+    let enabled = |text: &str| {
+        popover
+            .iter()
+            .flat_map(descendants::<gtk::Label>)
+            .find(|label| label.text() == text)
+            .is_some_and(|label| label.is_sensitive())
+    };
+    d.check(
+        !enabled("Move Up") && enabled("Move Down"),
+        &format!(
+            "the first account's menu has Move Up turned off and Move Down on ({} / {})",
+            enabled("Move Up"),
+            enabled("Move Down")
+        ),
+    );
+    if let Some(popover) = main.folder_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+    let _ = tree.activate_action("account.move-down", None);
+    d.check(
+        wait_until(10, || second_first() == (false, false, false)).await,
+        &format!(
+            "Move Down puts the second account back below the first ({:?})",
+            second_first()
+        ),
+    );
+    main.folders.select(crate::folders::ALL_INBOXES);
 }
 
 /// SCENARIO 41: Move and Copy to Folder offer every account's folders in a tree with a filter; a message moved to the

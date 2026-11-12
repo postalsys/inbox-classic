@@ -1389,6 +1389,11 @@ void OnCommand(WORD id, WORD code) {
             pe_sync(g_core.get(), account);
         }
         return;
+    case IDM_ACCOUNT_MOVE_UP:
+    case IDM_ACCOUNT_MOVE_DOWN:
+        // the account of the selected row a place up or down, its row still selected
+        g_mailbox.MoveAccount(id == IDM_ACCOUNT_MOVE_UP ? -1 : 1);
+        return;
     case IDM_NEW_FOLDER:
         g_mailbox.NewFolder(g_main);
         return;

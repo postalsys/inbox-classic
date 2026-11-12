@@ -347,6 +347,12 @@ CREATE INDEX messages_of_thread ON messages (thread_id);
     r#"
 ALTER TABLE accounts ADD COLUMN account_name TEXT NOT NULL DEFAULT '';
 "#,
+    // the accounts' order, set by dragging their rows (accounts.rs move_account); to begin with, the order they were
+    // added in
+    r#"
+ALTER TABLE accounts ADD COLUMN position INTEGER NOT NULL DEFAULT 0;
+UPDATE accounts SET position = id;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

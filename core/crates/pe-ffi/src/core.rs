@@ -521,6 +521,17 @@ pub unsafe extern "C" fn pe_account_set_name(core: *const PeCore, account: i64, 
     unsafe { with(core, false, |core| core.set_account_name(account, &name).is_ok()) }
 }
 
+/// Puts `account` at `index` in the accounts' order (0 first, past the end last), which `pe_accounts`, the folder list
+/// and `pe_special_folders` follow. False when there is no such account.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_move(core: *const PeCore, account: i64, index: u32) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.move_account(account, index as usize).is_ok()) }
+}
+
 /// The account name a new account at `email` starts with ("Gmail", or the address's domain), for Add Mail Account to
 /// show before it is added. Free with `pe_string_free`.
 ///

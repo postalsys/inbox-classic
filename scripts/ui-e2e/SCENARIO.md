@@ -625,6 +625,16 @@ A Hyprland of the test's own (its two sockets, the main window in its list of wi
 - with the main window tagged as Omarchy tags a window on a floating workspace, whose title bar has its own close, maximize and minimize buttons, the header bar shows no window buttons of its own
 - told the window was tiled again (an event, then a list without the tag), the header bar has its buttons back
 
+## 42c. The accounts' order
+
+Screenshot: `all-inboxes-4-reorder`
+
+With the two accounts of 42a:
+
+- the second account dragged above the first (or Move Up on its menu): All Inboxes lists its row first, and its folders come first in the tree
+- Move Down on its menu puts it back: the first account first again in both places
+- Move Up is greyed for the first account, Move Down for the last
+
 ## 43. Moving between accounts
 
 Screenshots: `move-1-dialog`, `move-2-accounts`

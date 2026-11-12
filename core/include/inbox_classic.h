@@ -1479,6 +1479,15 @@ bool pe_account_set_name(const struct PeCore *core,
                          int64_t account,
                          const char *name);
 
+// Puts `account` at `index` in the accounts' order (0 first, past the end last), which `pe_accounts`, the folder list
+// and `pe_special_folders` follow. False when there is no such account.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_account_move(const struct PeCore *core,
+                     int64_t account,
+                     uint32_t index);
+
 // The account name a new account at `email` starts with ("Gmail", or the address's domain), for Add Mail Account to
 // show before it is added. Free with `pe_string_free`.
 //
