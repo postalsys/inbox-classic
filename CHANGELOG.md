@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.14.0](https://github.com/postalsys/inbox-classic/compare/v0.13.0...v0.14.0) (2026-11-12)
+
+
+### Features
+
+* **core:** a message file opened in a window of its own, and answered ([b9be469](https://github.com/postalsys/inbox-classic/commit/b9be4693db87c95da53c9b6ddbc3589a50800a3d))
+* **core:** a message file's invitation opened in the calendar ([411e68d](https://github.com/postalsys/inbox-classic/commit/411e68dff3dc8e1adcf2b3ebbdaca92001b28c49))
+* **core:** pictures from trusted senders, or in every message ([439b663](https://github.com/postalsys/inbox-classic/commit/439b663c89058a698ae9cec6528b92d9597a55c2))
+* **core:** the attachments of a message file ([92eea3a](https://github.com/postalsys/inbox-classic/commit/92eea3ab21b10d5dff6f9a7f3d504091dd36b032))
+* **core:** the list's unread messages only, a message read staying listed ([05ee333](https://github.com/postalsys/inbox-classic/commit/05ee333e147f11bdee0bf70023decddbbc0cb6ec))
+* **help:** the website's help in the homepage's look ([46e108b](https://github.com/postalsys/inbox-classic/commit/46e108b0a1d8ed29b06bd68cbcf37c1507e29e13))
+* **mac, linux:** a message file's attachments saved and its invitation opened ([9e5c80c](https://github.com/postalsys/inbox-classic/commit/9e5c80c7f7381749e73a1f064e55e7cfc31600f5))
+* **mac, linux:** pictures from trusted senders, unread only, .eml files ([c244133](https://github.com/postalsys/inbox-classic/commit/c2441337a4845fcb100226475db36f80b896c28c))
+* trusted senders' pictures, unread only, .eml files, future dates ([1570819](https://github.com/postalsys/inbox-classic/commit/1570819d99ff5983dbd0b306a4a0526f6b7b2e50))
+* **windows:** a message file's attachments saved and its invitation opened ([c9716d5](https://github.com/postalsys/inbox-classic/commit/c9716d58f95a97da1e50fb20f7d757e97151ca48))
+* **windows:** pictures from trusted senders, unread only, .eml files, the badge ([d028ed3](https://github.com/postalsys/inbox-classic/commit/d028ed39b0c51364a8b8cd3082e03643fa0765a7))
+
+
+### Bug Fixes
+
+* **core:** a trusted sender is confirmed only by the provider's topmost verdict, for its own domain ([e8cd3c1](https://github.com/postalsys/inbox-classic/commit/e8cd3c183507f04f4e39afb2ed20d2fee83a0545))
+* **core:** unread only allows for SQLite's clock lagging behind on Windows ([be64360](https://github.com/postalsys/inbox-classic/commit/be64360433ae21732afad481ee9b50e944d6849b))
+* **store:** a message dated in the future is listed at its arrival ([911e35c](https://github.com/postalsys/inbox-classic/commit/911e35c07bd2bea828c55f85a7e45facd5605109))
+
 ## [0.13.0](https://github.com/postalsys/inbox-classic/compare/v0.12.2...v0.13.0) (2026-11-12)
 
 
