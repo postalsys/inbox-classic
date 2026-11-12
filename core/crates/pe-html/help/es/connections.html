@@ -1,0 +1,14 @@
+<!--review-->
+<h1>Las conexiones que hace Inbox Classic</h1>
+<p class="summary">Adónde se conecta Inbox Classic y por qué, para los curiosos de la técnica.</p>
+<ul>
+    <li><b>Sus servidores de correo</b>, por IMAP para leer el correo y por SMTP para enviarlo. Las conexiones se cifran con TLS, y el certificado de cada servidor se comprueba con los certificados en los que confía su sistema. Inbox Classic rechaza un servidor sin cifrado, salvo que usted elija <b data-text="ui-security-none"></b> y lo confirme.</li>
+    <li><b>Al agregar una cuenta</b>, para buscar sus servidores. Inbox Classic lee los registros DNS de su dominio mediante DNS sobre HTTPS (Cloudflare y, después, Google), nunca mediante DNS sin cifrar. También prueba el archivo autoconfig de su proveedor y la lista de proveedores de Thunderbird (ISPDB). Para Exchange, consulta Microsoft Autodiscover, que solo recibe su contraseña cuando la pide por HTTPS. Nunca se elige un servidor sin cifrado.</li>
+    <li><b>El inicio de sesión por navegador</b>, con OAuth 2.0 y PKCE, en Google, Microsoft o el proveedor de su aplicación de inicio de sesión. El navegador vuelve a Inbox Classic solo en este equipo.</li>
+    <li><b>Los logotipos de marca</b> (BIMI), desde la dirección HTTPS de la marca cuando el mensaje no incluye el logotipo, una vez cada vez que se ejecuta Inbox Classic. Solo ocurre cuando su servidor de correo ha dado por buena la comprobación DMARC del mensaje y ha aprobado el logotipo.</li>
+    <li><b>Las imágenes de internet</b>, solo cuando usted las pide.</li>
+    <li><b>La cancelación de suscripciones</b>, solo cuando usted hace clic en ella. Una solicitud de un solo clic (RFC 8058) se envía solo cuando la lista firmó el mensaje con DKIM.</li>
+    <!--os:mac--><li><b>Las actualizaciones</b>, desde inboxclassic.com, para ver si hay una versión nueva.</li><!--/os-->
+</ul>
+<p>Los códigos de inicio de sesión solo se ofrecen cuando el encabezado Authentication-Results de su proveedor indica que el dominio firmó el mensaje (DKIM). Esto no necesita ninguna conexión propia.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->

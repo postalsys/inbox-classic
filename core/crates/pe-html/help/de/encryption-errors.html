@@ -1,0 +1,16 @@
+<!--review-->
+<h1>Verschlüsselungsfehler</h1>
+<p class="summary">Was Sie tun können, wenn ein Server keine Verschlüsselung anbietet oder sie verlangt, wo sie ausgeschaltet ist.</p>
+<h2>„the server does not offer STARTTLS“</h2>
+<p>Das Konto ist auf STARTTLS eingestellt, aber der Server hat keine Verschlüsselung angeboten. Inbox Classic hat abgebrochen, Ihr Passwort wurde also nicht gesendet.</p>
+<ol>
+    <li>Öffnen Sie die Eigenschaften des Kontos unter <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Stellen Sie die Sicherheit auf SSL/TLS, mit Port 993 für eingehende oder 465 für ausgehende E-Mails.</li>
+    <li>Klicken Sie auf <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Wenn nichts anderes funktioniert, lässt sich der Server nicht sicher verwenden.</p>
+<h2>„the server takes the password only over an encrypted connection“</h2>
+<p>Der Postausgangsserver ist auf <b data-text="ui-security-none"></b> eingestellt. Ihr Passwort ist in Ordnung. Ändern Sie <b data-text="ui-field-smtp-security"></b> auf STARTTLS mit Port 587 oder SSL/TLS mit Port 465.</p>
+<h2>Die Warnung vor einer Verbindung ohne Verschlüsselung</h2>
+<p>Wenn Sie <b data-text="ui-security-none"></b> wählen, warnt Inbox Classic, dass jeder, der Ihren Netzwerkverkehr abfängt, Ihr Passwort und Ihre Nachrichten lesen kann. Fahren Sie nur bei einem Server auf Ihrem eigenen Computer oder in Ihrem lokalen Netzwerk fort.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->

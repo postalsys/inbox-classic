@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Aplicaciones de inicio de sesión</h1>
+<p class="summary">Registre su propia aplicación de inicio de sesión en Google, Microsoft o cualquier proveedor de OpenID Connect para iniciar sesión a través del navegador.</p>
+<p>El inicio de sesión a través del navegador usa un cliente OAuth registrado en el proveedor. Inbox Classic tiene el suyo propio para Google y Microsoft. Google solo permite a los usuarios de prueba usar el cliente de Inbox Classic hasta que haya verificado la aplicación, por lo que <b data-text="win-sign-in-google"></b> está desactivado al principio. Puede registrar un cliente propio: en su proyecto de Google Cloud, en su inquilino de Microsoft Entra o en cualquier proveedor de OpenID Connect.</p>
+<p>Para agregar una aplicación de inicio de sesión:</p>
+<ol>
+    <li>Elija <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Haga clic en <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os--> y, después, en <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Junto a <b data-text="ui-fill-in-for"></b>, haga clic en Google o Microsoft para rellenar el emisor, los ámbitos y los servidores. Para otro proveedor, escríbalos.</li>
+    <li>Registre el cliente en el proveedor como explica el cuadro de la parte inferior. Registre la <b data-text="ui-redirect-uri"></b> que se muestra allí.</li>
+    <li>Escriba el <b data-text="ui-client-id"></b> y, si el proveedor le dio uno, el <b data-text="ui-client-secret"></b>. El secreto se guarda en <!--os:windows-->el Administrador de credenciales de Windows<!--/os--><!--os:mac-->su llavero de inicio de sesión<!--/os--><!--os:linux-->su llavero<!--/os--> y no se vuelve a mostrar.</li>
+    <li>Haga clic en <b data-text="ui-check"></b> para comprobar que el emisor es correcto y, después, en <b data-text="ui-ok"></b>.</li>
+    <li>Agregue la cuenta con <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> en la primera página de <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>En <b data-text="ui-sign-in-apps"></b>, <!--os:windows,mac-->la casilla de cada aplicación<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> indica si se ofrece para cuentas nuevas, incluidas las integradas. Las cuentas que ya usan una aplicación siguen funcionando. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> modifica una aplicación, y <b data-text="ui-remove"></b> la quita cuando ya no la usa ninguna cuenta.</p>
+<p>Si el servidor de correo rechaza el token de la aplicación, compruebe que sus ámbitos den acceso al correo.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav><!--/review-->

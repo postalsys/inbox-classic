@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Anmelde-Apps</h1>
+<p class="summary">Registrieren Sie eine eigene Anmelde-App bei Google, Microsoft oder einem beliebigen OpenID Connect-Anbieter, um sich über den Browser anzumelden.</p>
+<p>Die Anmeldung über den Browser verwendet einen OAuth-Client, der beim Anbieter registriert ist. Inbox Classic hat eigene Clients für Google und Microsoft. Google lässt nur Testbenutzer den Client von Inbox Classic verwenden, bis Google die App überprüft hat, daher ist <b data-text="win-sign-in-google"></b> anfangs ausgeschaltet. Sie können einen eigenen Client registrieren: in Ihrem Google Cloud-Projekt, in Ihrem Microsoft Entra-Mandanten oder bei einem beliebigen OpenID Connect-Anbieter.</p>
+<p>So fügen Sie eine Anmelde-App hinzu:</p>
+<ol>
+    <li>Wählen Sie <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Klicken Sie auf <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os--> und dann auf <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Klicken Sie neben <b data-text="ui-fill-in-for"></b> auf Google oder Microsoft, um Aussteller, Berechtigungen und Server einzutragen. Für einen anderen Anbieter geben Sie sie ein.</li>
+    <li>Registrieren Sie den Client beim Anbieter, wie es das Feld unten erklärt. Registrieren Sie dabei die dort angezeigte <b data-text="ui-redirect-uri"></b>.</li>
+    <li>Geben Sie die <b data-text="ui-client-id"></b> ein, und das <b data-text="ui-client-secret"></b>, falls der Anbieter Ihnen eines gegeben hat. Das Geheimnis wird <!--os:windows-->in der Windows-Anmeldeinformationsverwaltung<!--/os--><!--os:mac-->in Ihrem Schlüsselbund „Anmeldung“<!--/os--><!--os:linux-->in Ihrem Schlüsselbund<!--/os--> aufbewahrt und nie wieder angezeigt.</li>
+    <li>Klicken Sie auf <b data-text="ui-check"></b>, um zu sehen, ob der Aussteller stimmt, und dann auf <b data-text="ui-ok"></b>.</li>
+    <li>Fügen Sie das Konto mit <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> auf der ersten Seite von <b data-text="ui-add-account-title"></b> hinzu.</li>
+</ol>
+<p>In <b data-text="ui-sign-in-apps"></b> gibt <!--os:windows,mac-->das Kontrollkästchen jeder App<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> an, ob sie für neue Konten angeboten wird, auch bei den eingebauten. Die Konten, die eine App bereits verwenden, funktionieren weiter. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> ändert eine App, und <b data-text="ui-remove"></b> entfernt eine, sobald kein Konto sie mehr verwendet.</p>
+<p>Lehnt der Mailserver das Token der App ab, prüfen Sie, ob ihre Berechtigungen (Scopes) Zugriff auf E-Mails geben.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav><!--/review-->

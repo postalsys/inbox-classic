@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Applications de connexion</h1>
+<p class="summary">Enregistrez votre propre application de connexion auprès de Google, de Microsoft ou de tout fournisseur OpenID Connect, pour vous connecter via le navigateur.</p>
+<p>La connexion via le navigateur utilise un client OAuth enregistré auprès du fournisseur. Inbox Classic a les siens pour Google et Microsoft. Google ne laisse que les utilisateurs de test utiliser le client d'Inbox Classic tant qu'il n'a pas vérifié l'application : c'est pourquoi <b data-text="win-sign-in-google"></b> est désactivé au départ. Vous pouvez enregistrer votre propre client : dans votre projet Google Cloud, dans votre locataire Microsoft Entra ou auprès de tout fournisseur OpenID Connect.</p>
+<p>Pour ajouter une application de connexion :</p>
+<ol>
+    <li>Choisissez <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Cliquez sur <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, puis sur <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>À côté de <b data-text="ui-fill-in-for"></b>, cliquez sur Google ou Microsoft pour remplir l'émetteur, les autorisations et les serveurs. Pour un autre fournisseur, tapez-les.</li>
+    <li>Enregistrez le client auprès du fournisseur comme l'explique la zone du bas. Enregistrez l'<b data-text="ui-redirect-uri"></b> qui y est indiquée.</li>
+    <li>Tapez l'<b data-text="ui-client-id"></b>, et le <b data-text="ui-client-secret"></b> si le fournisseur vous en a donné un. Le secret est conservé dans <!--os:windows-->le Gestionnaire d'identification Windows<!--/os--><!--os:mac-->votre trousseau de session<!--/os--><!--os:linux-->votre trousseau<!--/os--> et n'est plus jamais affiché.</li>
+    <li>Cliquez sur <b data-text="ui-check"></b> pour vérifier que l'émetteur est correct, puis sur <b data-text="ui-ok"></b>.</li>
+    <li>Ajoutez le compte avec <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> sur la première page de la fenêtre <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>Dans <b data-text="ui-sign-in-apps"></b>, <!--os:windows,mac-->la case de chaque application<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> indique si elle est proposée pour les nouveaux comptes, applications intégrées comprises. Les comptes qui utilisent déjà une application continuent de fonctionner. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> modifie une application, et <b data-text="ui-remove"></b> en supprime une dès qu'aucun compte ne l'utilise.</p>
+<p>Si le serveur de messagerie refuse le jeton de l'application, vérifiez que ses autorisations (scopes) donnent accès à la messagerie.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav><!--/review-->

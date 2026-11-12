@@ -179,7 +179,8 @@ fn words(language: &str, id: &str) -> String {
     escape(
         text.trim_end_matches("...")
             .trim_end_matches('\u{2026}')
-            .trim_end_matches(':'),
+            .trim_end_matches(':')
+            .trim_end(),
     )
 }
 
@@ -643,10 +644,8 @@ mod tests {
         let listed: Vec<&str> = all_topics().collect();
         for (language, id, html) in TOPICS {
             assert!(listed.contains(id), "{language}/{id}.html is not in topics.toml");
-            assert!(
-                html.trim_start().starts_with("<h1>"),
-                "{language}/{id}: starts with its <h1>"
-            );
+            let start = html.trim_start().trim_start_matches(REVIEW_START).trim_start();
+            assert!(start.starts_with("<h1>"), "{language}/{id}: starts with its <h1>");
             assert!(html.contains("<p class=\"summary\">"), "{language}/{id}: has a summary");
             for command in between_all(html, "data-command=\"", "\"") {
                 assert!(

@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Options de la ligne de commande</h1>
+<p class="summary">Les options pour démarrer Inbox Classic depuis un terminal, pour les tests et pour les agents d'IA.</p>
+<p>Démarrez le programme <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> avec ces options :</p>
+<table>
+    <tr><th>Option</th><th>Effet</th></tr>
+    <tr><td><code>--store &lt;fichier&gt;</code></td><td>Utilise un autre stockage du courrier, par exemple pour des tests</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Ne garde les mots de passe que pendant cette session, jamais dans le stockage des mots de passe du système</td></tr>
+    <tr><td><code>--pin-certificate &lt;fichier&gt;</code></td><td>N'accepte que le certificat de serveur de ce fichier (PEM ou DER), pour un serveur de test au certificat auto-signé</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;fichier&gt;</code></td><td>Écrit la page d'une connexion via le navigateur dans ce fichier au lieu d'ouvrir le navigateur</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>Affiche les fenêtres dans cette langue pour cette session, par exemple <code>de</code></td></tr>
+    <tr><td><code>--background</code></td><td>Démarre sans fenêtre</td></tr>
+    <tr><td><code>--mcp</code></td><td>Connecte un agent d'IA à Inbox Classic. C'est le programme de l'agent qui lance cette option, pas vous</td></tr>
+    <tr><td><code>--version</code></td><td>Affiche la version et quitte</td></tr>
+</table>
+<p>Un lien <code>mailto:</code> passé en argument ouvre un nouveau message, comme un lien de messagerie.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav><!--/review-->

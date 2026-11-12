@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Befehlszeilenoptionen</h1>
+<p class="summary">Optionen zum Starten von Inbox Classic aus einem Terminal, für Tests und für KI-Agenten.</p>
+<p>Starten Sie das Programm <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> mit diesen Optionen:</p>
+<table>
+    <tr><th>Option</th><th>Wirkung</th></tr>
+    <tr><td><code>--store &lt;datei&gt;</code></td><td>Verwendet einen anderen E-Mail-Speicher, etwa einen zum Testen</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Behält Passwörter nur für diesen Lauf, nie im Passwortspeicher des Systems</td></tr>
+    <tr><td><code>--pin-certificate &lt;datei&gt;</code></td><td>Akzeptiert nur das Serverzertifikat in dieser Datei (PEM oder DER), für einen Testserver mit selbstsigniertem Zertifikat</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;datei&gt;</code></td><td>Schreibt die Seite einer Browser-Anmeldung in diese Datei, statt den Browser zu öffnen</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>Zeigt die Fenster für diesen Lauf in dieser Sprache, etwa <code>de</code></td></tr>
+    <tr><td><code>--background</code></td><td>Startet ohne Fenster</td></tr>
+    <tr><td><code>--mcp</code></td><td>Verbindet einen KI-Agenten mit Inbox Classic. Das Programm des Agenten startet dies, nicht Sie</td></tr>
+    <tr><td><code>--version</code></td><td>Gibt die Version aus und beendet sich</td></tr>
+</table>
+<p>Ein als Argument übergebener <code>mailto:</code>-Link öffnet eine neue Nachricht, wie es ein E-Mail-Link tut.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav><!--/review-->

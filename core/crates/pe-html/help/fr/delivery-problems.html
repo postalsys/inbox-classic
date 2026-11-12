@@ -1,0 +1,21 @@
+<!--review-->
+<h1>Messages non remis</h1>
+<p class="summary">Quand un message que vous avez envoyé revient ou est retardé, Inbox Classic explique pourquoi et ce que vous pouvez faire.</p>
+<p>Un avis de non-remise porte une marque de non-distribution dans la liste des messages. Quand vous l'ouvrez, une carte au-dessus indique si votre message n'a pas été remis ou s'il est seulement retardé.</p>
+<img src="picture:bounce-1-failed" alt="Un avis de non-remise avec une carte indiquant que le message n'a pas été remis, le destinataire, la raison et ce qu'il faut faire">
+<p>La carte liste chaque destinataire, avec la raison en termes simples et ce que vous pouvez faire. <b data-text="bounce-details"></b> affiche les propres termes du serveur de réception.</p>
+<ul>
+    <li><b data-text="bounce-show-message"></b> sélectionne le message que vous avez envoyé.</li>
+    <li>En cas de retard, <b data-text="bounce-show-delayed"></b> le sélectionne. Votre serveur de messagerie continue d'essayer, vous n'avez donc pas besoin de le renvoyer.</li>
+</ul>
+<p>Quelques raisons courantes :</p>
+<table>
+    <tr><th>La carte indique</th><th>Que faire</th></tr>
+    <tr><td><b data-text="bounce-user-unknown"></b></td><td>Vérifiez l'orthographe de l'adresse, ou demandez à la personne celle qu'elle utilise maintenant.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Renvoyez le message dans quelques jours, ou contactez la personne autrement.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Renvoyez-le sans ce qui ressemble à du courrier indésirable, comme de nombreux liens ou une pièce jointe volumineuse.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Transférez l'avis à votre fournisseur de messagerie. Le message n'est pas en cause.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Rien. Le message est généralement remis dans l'heure.</td></tr>
+</table>
+<p>Pour trouver tous les avis de non-remise, recherchez <code>is:bounce</code>. La raison est déterminée sur votre ordinateur, et rien n'est envoyé nulle part.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav><!--/review-->

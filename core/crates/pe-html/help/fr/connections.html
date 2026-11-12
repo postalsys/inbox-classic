@@ -1,0 +1,14 @@
+<!--review-->
+<h1>Les connexions établies par Inbox Classic</h1>
+<p class="summary">Où Inbox Classic se connecte, et pourquoi, pour les curieux de technique.</p>
+<ul>
+    <li><b>Vos serveurs de messagerie</b>, en IMAP pour lire le courrier et en SMTP pour l'envoyer. Les connexions sont chiffrées avec TLS, et le certificat de chaque serveur est vérifié d'après ceux auxquels votre système fait confiance. Inbox Classic refuse un serveur sans chiffrement, sauf si vous choisissez <b data-text="ui-security-none"></b> et confirmez.</li>
+    <li><b>Quand vous ajoutez un compte</b>, pour trouver ses serveurs. Inbox Classic lit les enregistrements DNS de votre domaine par DNS over HTTPS (Cloudflare, puis Google), jamais en DNS ordinaire. Il essaie aussi le fichier autoconfig de votre fournisseur et la liste de fournisseurs de Thunderbird (ISPDB). Pour Exchange, il interroge Microsoft Autodiscover, qui ne reçoit votre mot de passe que s'il le demande en HTTPS. Un serveur sans chiffrement n'est jamais choisi.</li>
+    <li><b>La connexion via le navigateur</b>, avec OAuth 2.0 et PKCE, auprès de Google, de Microsoft ou du fournisseur de votre application de connexion. Le navigateur revient vers Inbox Classic sur cet ordinateur uniquement.</li>
+    <li><b>Les logos des marques</b> (BIMI), depuis l'adresse HTTPS de la marque quand le message ne contient pas le logo, une fois par session d'Inbox Classic. Cela n'arrive que si le message a passé le contrôle DMARC de votre serveur de messagerie et que celui-ci a approuvé le logo.</li>
+    <li><b>Les images d'Internet</b>, seulement quand vous les demandez.</li>
+    <li><b>Le désabonnement</b>, seulement quand vous cliquez dessus. Une demande en un clic (RFC 8058) n'est envoyée que si la liste a signé le message avec DKIM.</li>
+    <!--os:mac--><li><b>Les mises à jour</b>, depuis inboxclassic.com, pour savoir si une nouvelle version est disponible.</li><!--/os-->
+</ul>
+<p>Les codes de connexion ne sont proposés que si l'en-tête Authentication-Results de votre fournisseur indique que le domaine a signé le message (DKIM). Cela ne demande aucune connexion particulière.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->

@@ -1,0 +1,16 @@
+<!--review-->
+<h1>Erreurs de chiffrement</h1>
+<p class="summary">Que faire quand un serveur ne propose pas de chiffrement, ou l'exige alors qu'il est désactivé.</p>
+<h2>« the server does not offer STARTTLS »</h2>
+<p>Le compte est réglé sur STARTTLS, mais le serveur n'a pas proposé de chiffrement. Inbox Classic s'est arrêté, votre mot de passe n'a donc pas été envoyé.</p>
+<ol>
+    <li>Ouvrez les propriétés du compte dans <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Réglez la sécurité sur SSL/TLS, avec le port 993 pour le courrier entrant ou 465 pour le courrier sortant.</li>
+    <li>Cliquez sur <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Si rien d'autre ne fonctionne, le serveur ne peut pas être utilisé en toute sécurité.</p>
+<h2>« the server takes the password only over an encrypted connection »</h2>
+<p>Le serveur sortant est réglé sur <b data-text="ui-security-none"></b>. Votre mot de passe est correct. Réglez <b data-text="ui-field-smtp-security"></b> sur STARTTLS avec le port 587, ou sur SSL/TLS avec le port 465.</p>
+<h2>L'avertissement concernant une connexion sans chiffrement</h2>
+<p>Quand vous choisissez <b data-text="ui-security-none"></b>, Inbox Classic vous avertit que quiconque intercepte votre trafic réseau peut lire votre mot de passe et vos messages. Ne continuez que pour un serveur installé sur votre propre ordinateur ou votre réseau local.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->
