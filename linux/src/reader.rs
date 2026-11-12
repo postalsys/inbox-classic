@@ -616,7 +616,19 @@ impl Reader {
             return;
         }
         let operation = webkit::PrintOperation::new(&self.preview.view);
+        // WebKit destroys its print dialog when run_dialog returns, holding no reference of its own; closed with its
+        // close button or Escape, GTK has destroyed it already and it may be freed. Held here until then
+        let toplevels = gtk::Window::toplevels();
+        let held: Rc<RefCell<Vec<gtk::PrintUnixDialog>>> = Rc::default();
+        let kept = held.clone();
+        let added = toplevels.connect_items_changed(move |list, position, _, count| {
+            let dialogs =
+                (position..position + count).filter_map(|i| list.item(i).and_downcast::<gtk::PrintUnixDialog>());
+            kept.borrow_mut().extend(dialogs);
+        });
         operation.run_dialog(Some(window));
+        toplevels.disconnect(added);
+        drop(held);
     }
 
     /// Emptied; saying there is no message selected unless one is `loading`. The bars of the message before stay

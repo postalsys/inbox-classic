@@ -2162,11 +2162,18 @@ async fn printing(d: &Driver) {
     if let Some(dialog) = dialog {
         pause(2000).await;
         d.shot(&dialog, "files-3-print").await;
-        // closed: the same as Cancel
+        // closed with its close button, not Cancel: GTK destroys it, and with no reference left here only the app's
+        // keeps it alive until WebKit has done with it
+        let closed = dialog.downgrade();
         dialog.close();
+        drop(dialog);
         d.check(
-            wait_until(10, || !dialog.is_visible()).await,
+            wait_until(10, || closed.upgrade().is_none_or(|w| !w.is_visible())).await,
             "and closing it prints nothing",
+        );
+        d.check(
+            wait_until(10, || closed.upgrade().is_none()).await,
+            "and the closed dialog is freed, not kept",
         );
     }
 }
