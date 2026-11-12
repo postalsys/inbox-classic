@@ -286,6 +286,13 @@ const sections = [
                 ]
             },
             {
+                shot: 'tray-3-badge',
+                name: 'The unread count on the taskbar',
+                what: "The taskbar button carries the number of unread messages in the Inboxes as a small red badge (99+ past 99), gone when there are none, as the Mac's Dock and Linux docks show it.",
+                how: 'It is there by itself while the app runs.',
+                checked: ['The taskbar button shows the unread count']
+            },
+            {
                 shot: 'tray-2-taskbar',
                 name: 'The tray and new mail notifications',
                 what: "The Inbox of each account is watched (IMAP IDLE), so new mail comes in as it arrives. Closing the window keeps the app in the notification area, still checking mail; the icon's tooltip and a count on the taskbar button say how many messages are unread in the Inboxes. New unread mail shows a Windows notification while the window is not in front; a click opens the message. Tools > Notify of New Mail turns them off.",
@@ -1119,6 +1126,7 @@ const notYet = {
         'files-1-save-as',
         'files-2-import',
         'tray-2-taskbar',
+        'tray-3-badge',
         // steps of ui-e2e.ps1 the test does not take yet
         'account-5b-browser-sign-in',
         'signin-3-check',
@@ -1143,6 +1151,7 @@ const notYet = {
         'files-1-save-as',
         'files-2-import',
         'tray-2-taskbar',
+        'tray-3-badge',
         // steps of ui-e2e.ps1 the test does not take yet
         'account-5b-browser-sign-in',
         'signin-4-editor',

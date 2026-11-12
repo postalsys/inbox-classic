@@ -6,6 +6,8 @@
 #include "icons.h"
 
 #include <algorithm>
+#include <functional>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -32,6 +34,8 @@ struct MessageWindow {
     int64_t nextFolder = 0;
     uint64_t nextUid = 0;
     std::wstring subject;
+    // the message file it shows in place of a folder's message (OpenMessageFile), empty for none
+    std::wstring file;
     HWND toolbar = nullptr;
     // the etched line between the toolbar and the message
     HWND rule = nullptr;
@@ -186,12 +190,29 @@ void Act(MessageWindow* state, PeAction action) {
 }
 
 void Reply(MessageWindow* state, PeDraftKind kind) {
-    core::Draft draft = state->reader.DraftOf(kind);
+    // a message file is answered from the account the main window has
+    int64_t account = state->file.empty() ? state->mailbox->AccountOf(state->folder) : state->mailbox->CurrentAccount();
+    if (!state->file.empty() && !account) {
+        MessageBoxW(state->hwnd, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    core::Draft draft = state->reader.DraftOf(kind, account);
     if (!draft) {
         MessageBoxW(state->hwnd, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
-    OpenCompose(state->main, state->core, state->mailbox->AccountOf(state->folder), pe_draft_info(draft.get()));
+    OpenCompose(state->main, state->core, account, pe_draft_info(draft.get()));
+}
+
+// Save As of a message file: a copy of it where the user says
+void SaveFileAs(MessageWindow* state) {
+    size_t slash = state->file.find_last_of(L"\\/");
+    std::wstring name = slash == std::wstring::npos ? state->file : state->file.substr(slash + 1);
+    std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}});
+    std::wstring path = SaveFileDialog(state->hwnd, name, core::Plain(PE_TEXT_UI_SAVE_MESSAGE_AS).c_str(), filter.c_str(), L"eml");
+    if (!path.empty() && !CopyFileW(state->file.c_str(), path.c_str(), FALSE)) {
+        MessageBoxW(state->hwnd, core::T(PE_TEXT_UI_NOT_SAVED).c_str(), kTitle, MB_OK | MB_ICONERROR);
+    }
 }
 
 // the Unsubscribe link: asked first; what it did in the main window's status bar, a message to write for a mailto:
@@ -246,7 +267,30 @@ WPARAM KeyCommand(UINT key) {
     return ShortcutCommand(key);
 }
 
+// what a message file's window does: no list to go through, no folder to move it from
+bool OnFileCommand(MessageWindow* state, WORD id) {
+    switch (id) {
+    case IDC_PREVIOUS:
+    case IDC_NEXT:
+    case IDM_PREVIOUS_MESSAGE:
+    case IDM_NEXT_MESSAGE:
+    case IDM_NEXT_UNREAD:
+    case IDM_DELETE:
+    case IDM_ARCHIVE:
+    case IDM_JUNK:
+    case IDM_NOT_JUNK:
+        return true;
+    case IDM_SAVE_AS:
+        SaveFileAs(state);
+        return true;
+    }
+    return false;
+}
+
 bool OnCommand(MessageWindow* state, WORD id, WORD code) {
+    if (!state->file.empty() && OnFileCommand(state, id)) {
+        return true;
+    }
     switch (id) {
     case IDCANCEL:
         PostMessageW(state->hwnd, WM_CLOSE, 0, 0);
@@ -370,6 +414,15 @@ void CreateToolbar(MessageWindow* state) {
         PeText text;
         int icon;
     };
+    // a message file's: answering it, printing and saving it
+    const Button fileButtons[] = {
+        {IDM_REPLY, PE_TEXT_UI_TB_REPLY, ICON_ARROW_REPLY},
+        {IDM_REPLY_ALL, PE_TEXT_UI_TB_REPLY_ALL, ICON_ARROW_REPLY_ALL},
+        {IDM_FORWARD, PE_TEXT_UI_TB_FORWARD, ICON_ARROW_FORWARD},
+        {0, PE_TEXT_MENU_FILE, 0},
+        {IDM_PRINT, PE_TEXT_UI_TB_PRINT, ICON_PRINT},
+        {IDM_SAVE_AS, PE_TEXT_UI_TB_SAVE, ICON_SAVE},
+    };
     // in groups as Outlook Express has them: answering, the message, going through the list (0 separates)
     const Button buttons[] = {
         {IDM_REPLY, PE_TEXT_UI_TB_REPLY, ICON_ARROW_REPLY},
@@ -385,7 +438,7 @@ void CreateToolbar(MessageWindow* state) {
         {IDC_PREVIOUS, PE_TEXT_UI_TB_PREVIOUS, ICON_ARROW_UP},
         {IDC_NEXT, PE_TEXT_UI_TB_NEXT, ICON_ARROW_DOWN},
     };
-    for (const Button& button : buttons) {
+    for (const Button& button : state->file.empty() ? std::span<const Button>(buttons) : std::span<const Button>(fileButtons)) {
         std::wstring label = button.id ? core::T(button.text) : std::wstring();
         AddButton(state->toolbar, button.id, button.id ? label.c_str() : nullptr, BTNS_BUTTON, button.icon);
     }
@@ -402,19 +455,25 @@ std::vector<HWND> MessageWindows() {
 
 }  // namespace
 
-void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrder order, int64_t folder, uint64_t uid,
-                       const PeMessage* row) {
-    // open already: brought to the front
+namespace {
+
+// the message window that shows what `shows` says, brought to the front: false when there is none
+bool BringOpen(const std::function<bool(const MessageWindow&)>& shows) {
     for (HWND hwnd : g_messageWindows) {
         MessageWindow* state = StateOf(hwnd);
-        if (state && state->folder == folder && state->uid == uid) {
+        if (state && shows(*state)) {
             if (IsIconic(hwnd)) {
                 ShowWindow(hwnd, SW_RESTORE);
             }
             SetForegroundWindow(hwnd);
-            return;
+            return true;
         }
     }
+    return false;
+}
+
+// a new message window with its toolbar and reading pane, not shown yet; nullptr when it could not be made
+MessageWindow* CreateMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, const std::wstring& file) {
     static bool registered = false;
     if (!registered) {
         WNDCLASSEXW windowClass = {sizeof(windowClass)};
@@ -431,14 +490,14 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrd
     HWND hwnd = CreateWindowExW(WS_EX_CONTROLPARENT | WS_EX_APPWINDOW, kMessageClass, kTitle, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
                                 CW_USEDEFAULT, CW_USEDEFAULT, Scale(800), Scale(640), nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!hwnd) {
-        return;
+        return nullptr;
     }
     auto* state = new MessageWindow;
     state->hwnd = hwnd;
     state->main = main;
     state->core = core;
     state->mailbox = mailbox;
-    state->order = std::move(order);
+    state->file = file;
     CreateToolbar(state);
     state->reader.Create(hwnd, core);
     // what the window does on a key also while the message has the keyboard
@@ -470,11 +529,48 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrd
     };
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
     g_messageWindows.push_back(hwnd);
-    Show(state, folder, uid, row);
-    ShowWindow(hwnd, SW_SHOW);
-    SetForegroundWindow(hwnd);
+    return state;
+}
+
+void ShowOpened(MessageWindow* state) {
+    ShowWindow(state->hwnd, SW_SHOW);
+    SetForegroundWindow(state->hwnd);
     // the keyboard in the message, to scroll it and Tab through its links
     state->reader.FocusBody();
+}
+
+}  // namespace
+
+void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrder order, int64_t folder, uint64_t uid,
+                       const PeMessage* row) {
+    // open already: brought to the front
+    if (BringOpen([&](const MessageWindow& open) { return open.file.empty() && open.folder == folder && open.uid == uid; })) {
+        return;
+    }
+    MessageWindow* state = CreateMessageWindow(main, core, mailbox, L"");
+    if (!state) {
+        return;
+    }
+    state->order = std::move(order);
+    Show(state, folder, uid, row);
+    ShowOpened(state);
+}
+
+bool OpenMessageFile(HWND main, PeCore* core, Mailbox* mailbox, const std::wstring& path, std::wstring& error) {
+    if (BringOpen([&](const MessageWindow& open) { return !open.file.empty() && _wcsicmp(open.file.c_str(), path.c_str()) == 0; })) {
+        return true;
+    }
+    MessageWindow* state = CreateMessageWindow(main, core, mailbox, path);
+    if (!state) {
+        return false;
+    }
+    if (!state->reader.OpenFile(path, error)) {
+        DestroyWindow(state->hwnd);
+        return false;
+    }
+    Layout(state);
+    ShowOpened(state);
+    return true;
 }
 
 void MessageWindowsEvent(const UiEvent& event) {
@@ -484,6 +580,10 @@ void MessageWindowsEvent(const UiEvent& event) {
             continue;
         }
         state->reader.OnEvent(event);
+        // a message file is no folder's: nothing in the mailbox changes it
+        if (!state->file.empty()) {
+            continue;
+        }
         switch (event.kind) {
         case PE_EVENT_KIND_UNSUBSCRIBED:
             if (std::wstring said = state->reader.Unsubscribed(event.uid, event.message); !said.empty()) {

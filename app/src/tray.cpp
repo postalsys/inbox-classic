@@ -19,6 +19,8 @@ UINT g_taskbarCreated = 0;
 UINT g_buttonCreated = 0;
 Microsoft::WRL::ComPtr<ITaskbarList3> g_taskbar;
 HICON g_badge = nullptr;
+// what SetOverlayIcon said the last time
+HRESULT g_badgeResult = S_OK;
 uint64_t g_unread = 0;
 // the message a click on the last notification opens
 int64_t g_noteFolder = 0;
@@ -46,9 +48,9 @@ std::wstring UnreadText(uint64_t unread) {
     return core::T(PE_TEXT_WIN_UNREAD_MESSAGES, {{"count", std::to_wstring(unread)}});
 }
 
-// the count, white on a red disc, for the taskbar button
-HICON Badge(uint64_t count) {
-    int size = GetSystemMetrics(SM_CXSMICON);
+// the count, white on a red disc, for the taskbar button: a small icon of the window's DPI (16 pixels at 100%)
+HICON Badge(HWND main, uint64_t count) {
+    int size = GetSystemMetricsForDpi(SM_CXSMICON, GetDpiForWindow(main));
     BITMAPINFO info = {};
     info.bmiHeader = {sizeof(BITMAPINFOHEADER), size, -size, 1, 32, BI_RGB};
     void* bits = nullptr;
@@ -116,9 +118,10 @@ void ShowBadge(HWND main) {
         g_badge = nullptr;
     }
     if (g_unread > 0) {
-        g_badge = Badge(g_unread);
+        g_badge = Badge(main, g_unread);
     }
-    g_taskbar->SetOverlayIcon(main, g_badge, g_unread > 0 ? UnreadText(g_unread).c_str() : L"");
+    // none clears it; the description is what a screen reader says of the button
+    g_badgeResult = g_taskbar->SetOverlayIcon(main, g_badge, g_unread > 0 ? UnreadText(g_unread).c_str() : L"");
 }
 
 }  // namespace
@@ -148,6 +151,16 @@ void TrayCount(HWND main, uint64_t unread) {
     SetTip(data);
     Shell_NotifyIconW(NIM_MODIFY, &data);
     ShowBadge(main);
+}
+
+int64_t TrayBadge() {
+    if (!g_taskbar) {
+        return -1;
+    }
+    if (FAILED(g_badgeResult)) {
+        return -2;
+    }
+    return g_badge ? static_cast<int64_t>(g_unread) : 0;
 }
 
 void TrayNotify(HWND main, const std::wstring& title, const std::wstring& text, int64_t folder, uint64_t uid) {

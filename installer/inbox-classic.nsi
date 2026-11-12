@@ -41,6 +41,8 @@ SetCompressor /SOLID lzma
 ; Mail App opens that page)
 !define CLIENTKEY "Software\Clients\Mail\${PRODUCT}"
 !define MAILTOCLASS "InboxClassic.mailto"
+; .eml files, listed in Open With and in Default Apps
+!define EMLCLASS "InboxClassic.eml"
 ; forward slashes work for makensis on every platform, and for the shell that runs the signing script
 !define ROOT "${__FILEDIR__}/.."
 
@@ -275,7 +277,16 @@ Section "Install"
     WriteRegStr HKCU "${CLIENTKEY}\Capabilities" "ApplicationIcon" "$INSTDIR\${EXE},0"
     WriteRegStr HKCU "${CLIENTKEY}\Capabilities\URLAssociations" "mailto" "${MAILTOCLASS}"
     WriteRegStr HKCU "${CLIENTKEY}\shell\open\command" "" '"$INSTDIR\${EXE}"'
+    ; .eml files: a message window of the file (app/src/main.cpp), in Open With and, should the user choose it, by
+    ; default; never taken over from the program that opens them now
+    WriteRegStr HKCU "Software\Classes\${EMLCLASS}" "" "E-mail Message"
+    WriteRegStr HKCU "Software\Classes\${EMLCLASS}\DefaultIcon" "" "$INSTDIR\${EXE},0"
+    WriteRegStr HKCU "Software\Classes\${EMLCLASS}\shell\open\command" "" '"$INSTDIR\${EXE}" "%1"'
+    WriteRegStr HKCU "Software\Classes\.eml\OpenWithProgids" "${EMLCLASS}" ""
+    WriteRegStr HKCU "${CLIENTKEY}\Capabilities\FileAssociations" ".eml" "${EMLCLASS}"
     WriteRegStr HKCU "Software\RegisteredApplications" "${PRODUCT}" "${CLIENTKEY}\Capabilities"
+    ; Explorer reads the associations again
+    System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 SectionEnd
 
 Section "Uninstall"
@@ -290,6 +301,11 @@ Section "Uninstall"
     DeleteRegValue HKCU "Software\RegisteredApplications" "${PRODUCT}"
     DeleteRegKey HKCU "${CLIENTKEY}"
     DeleteRegKey HKCU "Software\Classes\${MAILTOCLASS}"
+    DeleteRegValue HKCU "Software\Classes\.eml\OpenWithProgids" "${EMLCLASS}"
+    DeleteRegKey /ifempty HKCU "Software\Classes\.eml\OpenWithProgids"
+    DeleteRegKey /ifempty HKCU "Software\Classes\.eml"
+    DeleteRegKey HKCU "Software\Classes\${EMLCLASS}"
+    System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
     DeleteRegKey HKCU "${UNINSTKEY}"
     DeleteRegKey HKCU "${REGKEY}"
     DeleteRegKey /ifempty HKCU "Software\Postal Systems"
