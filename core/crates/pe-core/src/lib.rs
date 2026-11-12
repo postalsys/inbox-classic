@@ -1130,7 +1130,11 @@ impl Core {
         // pictures load by themselves for the senders the user trusts, or every message's; never in Junk E-mail
         let junk = place.info.special_use.as_deref() == Some("\\Junk");
         let always_pictures = store.always_load_pictures()?;
-        let trusted_senders = store.trusted_senders()?;
+        // the list matters only where it can load pictures
+        let trusted_senders = match junk || always_pictures {
+            true => Vec::new(),
+            false => store.trusted_senders()?,
+        };
         Ok(store.source(folder, uid)?.map(|source| ViewSource {
             source,
             received,

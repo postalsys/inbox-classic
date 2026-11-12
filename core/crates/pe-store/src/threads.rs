@@ -459,7 +459,7 @@ impl Store {
         let (condition, mut values) = search.condition(false);
         let marks = id_list(&mut values, &threads);
         let mut statement = self.db.prepare(&format!(
-            "SELECT thread_id, MAX(COALESCE(MIN(date, internal_date), date, internal_date)), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
+            "SELECT thread_id, MAX({WHEN}), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
              GROUP BY thread_id"
         ))?;
         let newest: HashMap<i64, (Option<i64>, Option<i64>)> = statement
