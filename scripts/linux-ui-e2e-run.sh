@@ -15,13 +15,7 @@ export NO_AT_BRIDGE=1
 export GTK_A11Y=none
 export LANG=${LANG:-C.UTF-8}
 status=0
-# PE_E2E_GDB=1 (CI): under gdb, so a crash leaves the stacks of every thread in the log
-run=("$binary" --e2e "$out")
-if [ "${PE_E2E_GDB:-}" = 1 ] && command -v gdb >/dev/null; then
-    run=(gdb -q -batch -return-child-result -ex "handle all nostop noprint pass" -ex "handle SIGSEGV SIGABRT SIGBUS stop print nopass" \
-        -ex run -ex "thread apply all bt 30" --args "$binary" --e2e "$out")
-fi
-xvfb-run -a -s "-screen 0 1600x1100x24" dbus-run-session -- "${run[@]}" || status=$?
+xvfb-run -a -s "-screen 0 1600x1100x24" dbus-run-session -- "$binary" --e2e "$out" || status=$?
 cat "$out/result.txt" 2>/dev/null || echo "no result"
 echo
 exit $status
