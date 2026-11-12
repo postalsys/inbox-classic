@@ -2338,3 +2338,68 @@ extension UITest {
 
     func core() -> Core { main.core }
 }
+
+extension UITest {
+    // ---- the help ----
+
+    /// The help, a Help Book Help Viewer shows: the test can not drive Help Viewer, so it checks what the app asks it
+    /// for (the topic of the main window for Help, a dialog's own for its help button), that the bundle has the book in
+    /// each language with the pages of those topics and a search index, and takes pictures of two of its pages
+    func helpBook() async throws {
+        step("the help")
+        var asked: [String] = []
+        TestHooks.help = { asked.append($0) }
+        defer { TestHooks.help = nil }
+        onMain { self.main.window.makeKeyAndOrderFront(nil) }
+        await pause(0.3)
+        command(.help)
+        check(await waitUntil(5) { asked == ["main-window"] }, "Help asks Help Viewer for the main window's topic (\(asked))")
+        command(.options)
+        if let settings = await waitWindow("settings", 10) {
+            let button: HelpButton? = find("help.options", in: settings)
+            check(button?.bezelStyle == .helpButton, "Settings has the round help button")
+            press(button)
+            check(await waitUntil(5) { asked.last == "options-language" }, "which opens the topic of Settings (\(asked))")
+            onMain { settings.close() }
+        } else {
+            check(false, "Settings opens")
+        }
+
+        let info = Bundle.main.infoDictionary ?? [:]
+        let folder = info["CFBundleHelpBookFolder"] as? String ?? ""
+        let book = Bundle.main.resourceURL?.appendingPathComponent(folder)
+        let bookInfo = book.flatMap { NSDictionary(contentsOf: $0.appendingPathComponent("Contents/Info.plist")) }
+        check(folder == "InboxClassic.help" && bookInfo?["CFBundleIdentifier"] as? String == info["CFBundleHelpBookName"] as? String
+              && bookInfo?["HPDBookAccessPath"] as? String == "index.html",
+              "Info.plist names the Help Book in the bundle (\(folder))")
+        // the topics the app opens: the main window's and each window's own
+        let anchors = Set((["main"] + Help.contexts.values).compactMap { taken(pe_help_context($0)) })
+        for (code, _) in Languages.all {
+            guard let pages = book?.appendingPathComponent("Contents/Resources/\(code).lproj") else { continue }
+            let missing = (["index", "find-messages"] + anchors).filter {
+                !FileManager.default.fileExists(atPath: pages.appendingPathComponent("\($0).html").path)
+            }
+            let index = (try? pages.appendingPathComponent("InboxClassic.cshelpindex").resourceValues(forKeys: [.fileSizeKey]))?.fileSize ?? 0
+            check(missing.isEmpty && index > 0, "the help in \(code): its contents, the topics the app opens and a search index"
+                  + (missing.isEmpty ? "" : " (missing \(missing.joined(separator: ", ")))"))
+        }
+
+        // two of its pages as Help Viewer shows them, in a web view of the test's own
+        guard let pages = book?.appendingPathComponent("Contents/Resources/en.lproj") else { return }
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 720, height: 640), styleMask: [.titled, .closable],
+                              backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let web = WKWebView(frame: .zero)
+        window.contentView = web
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        for (page, name) in [("index", "help-2-contents"), ("find-messages", "help-4-topic")] {
+            window.title = page + ".html"
+            web.loadFileURL(pages.appendingPathComponent(page + ".html"), allowingReadAccessTo: pages)
+            check(await waitUntil(10) { !web.isLoading && web.url?.lastPathComponent == page + ".html" }, "the help's \(page).html loads")
+            await pause(0.5)
+            await shot(window, name)
+        }
+        window.close()
+    }
+}

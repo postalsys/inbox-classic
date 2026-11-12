@@ -337,12 +337,16 @@ private final class SignInAppsWindow: NSObject, NSTableViewDataSource, NSTableVi
         let intro = wrappingLabel(Text.uiSignInAppsIntro.text)
         let middle = NSStackView(views: [scroll, side])
         middle.alignment = .top
-        let stack = NSStackView(views: [intro, middle, note])
+        // the note on the app selected, the help button at its right
+        let bottom = NSStackView(views: [note, HelpButton("sign-in-apps")])
+        bottom.alignment = .top
+        note.setContentHuggingPriority(.init(1), for: .horizontal)
+        let stack = NSStackView(views: [intro, middle, bottom])
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.edgeInsets = NSEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
         intro.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -32).isActive = true
-        note.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -32).isActive = true
+        bottom.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -32).isActive = true
         middle.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -32).isActive = true
         scroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 180).isActive = true
         side.heightAnchor.constraint(equalTo: scroll.heightAnchor).isActive = true

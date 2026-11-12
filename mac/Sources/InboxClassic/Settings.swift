@@ -165,13 +165,19 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         // the label on the pop-up's text line, as the other forms have it
         grid.row(at: 0).rowAlignment = .firstBaseline
         grid.translatesAutoresizingMaskIntoConstraints = false
+        // the help button in the bottom right corner, as the system's settings have it
+        let help = HelpButton("options")
+        help.translatesAutoresizingMaskIntoConstraints = false
         let content = NSView()
         content.addSubview(grid)
+        content.addSubview(help)
         NSLayoutConstraint.activate([
             grid.topAnchor.constraint(equalTo: content.topAnchor, constant: 20),
             grid.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20),
-            grid.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -20),
+            grid.trailingAnchor.constraint(lessThanOrEqualTo: help.leadingAnchor, constant: -12),
             grid.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
+            help.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
+            help.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
             hint.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
         ])
         window.contentView = content

@@ -281,7 +281,7 @@ private final class StartPage: NSObject {
         if offer.fields {
             next.keyEquivalent = "\r"
         }
-        let buttons = buttonRow([cancel, next])
+        let buttons = buttonRow([cancel, next], help: "account-form")
         rows.append(buttons)
 
         let stack = NSStackView(views: rows)
@@ -524,7 +524,8 @@ func newAccountDialog(core: Core) -> Int64 {
         smtpSecurity: info?.smtp_security ?? PE_SECURITY_TLS)
     // the name and address were typed already: the password is next
     while let filled = formDialog(title: Text.uiAddAccountTitle.text, intro: foundIntro(info), fields: fields,
-                                  ok: Text.uiFinish.text, focus: Field.password.rawValue, validate: validate) {
+                                  ok: Text.uiFinish.text, focus: Field.password.rawValue, help: "account-form",
+                                  validate: validate) {
         fields = filled
         guard acceptPlain(fields, title: Text.uiAddAccountTitle.text) else { continue }
         let strings = CStrings()
@@ -578,7 +579,8 @@ private func accountProperties(core: Core, account: Int64, accountName: String, 
         // a browser sign-in account: the names only, the rest is the provider's
         guard let names = formDialog(title: Text.uiProperties.text,
                                      intro: Text.uiSignsInWith.text(["app": signsInWith]),
-                                     fields: [fields[Field.accountName.rawValue], fields[Field.name.rawValue]]) else { return false }
+                                     fields: [fields[Field.accountName.rawValue], fields[Field.name.rawValue]],
+                                     help: "account-properties") else { return false }
         fields[Field.accountName.rawValue] = names[0]
         fields[Field.name.rawValue] = names[1]
         let strings = CStrings()
@@ -589,7 +591,7 @@ private func accountProperties(core: Core, account: Int64, accountName: String, 
     }
     let was = (imap: stored.imap_security, imapHost: text(stored.imap_host), smtp: stored.smtp_security, smtpHost: text(stored.smtp_host))
     while let filled = formDialog(title: Text.uiProperties.text, intro: Text.uiKeepPassword.text, fields: fields,
-                                  validate: validate) {
+                                  help: "account-properties", validate: validate) {
         fields = filled
         // warned for a side without encryption, unless it was so already to the same server
         let newlyPlain = { (security: Field, host: Field, before: PeSecurity, beforeHost: String) in
@@ -670,7 +672,8 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
         buttons.alignment = .leading
         let close = button(Text.uiClose.text, #selector(closeClicked), "accounts.close")
         close.keyEquivalent = "\r"
-        let side = NSStackView(views: [buttons, NSView(), close])
+        // the help button over Close, at the bottom of the column
+        let side = NSStackView(views: [buttons, NSView(), HelpButton("account-properties"), close])
         side.orientation = .vertical
         side.alignment = .leading
         for view in buttons.arrangedSubviews + [close] {

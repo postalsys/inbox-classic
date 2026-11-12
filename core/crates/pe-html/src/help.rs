@@ -461,7 +461,20 @@ fn page(
     let (head, around) = match target {
         HelpTarget::Viewer => (String::new(), (String::new(), String::new())),
         HelpTarget::HelpBook => (
-            format!("<meta name=\"AppleTitle\" content=\"{help}\">\n<meta name=\"description\" content=\"\">\n"),
+            {
+                // the book's title on its first page only; each topic's summary for Help Viewer's search results
+                let title = match anchor {
+                    "index" => format!("<meta name=\"AppleTitle\" content=\"{help}\">\n"),
+                    _ => String::new(),
+                };
+                let summary = between(body, "<p class=\"summary\">", "</p>")
+                    .map(plain_text)
+                    .unwrap_or_default();
+                format!(
+                    "{title}<meta name=\"description\" content=\"{}\">\n",
+                    escape(&summary).replace('"', "&quot;")
+                )
+            },
             (
                 format!("<p class=\"home\"><a href=\"index.html\">{help}</a></p>\n"),
                 String::new(),
