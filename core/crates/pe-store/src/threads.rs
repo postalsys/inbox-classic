@@ -281,9 +281,9 @@ enum RowRefs {
     Conversation(i64),
 }
 
-/// When a message was written, by its Date header (the server's arrival time when it has none): what the list orders
+/// When a message was written, by its Date header but never later than its arrival (the arrival when it has none): what the list orders
 /// conversations by when sorted by Date, by their newest message, as it orders messages without conversations
-const WHEN: &str = "COALESCE(date, internal_date)";
+const WHEN: &str = crate::messages::LIST_DATE;
 
 /// When a message arrived, by the server's internal date (its Date header when the server gave none): what orders the
 /// messages of a conversation, and so picks its first message, whose row stands for the collapsed conversation. Not
@@ -459,7 +459,7 @@ impl Store {
         let (condition, mut values) = search.condition(false);
         let marks = id_list(&mut values, &threads);
         let mut statement = self.db.prepare(&format!(
-            "SELECT thread_id, MAX(date), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
+            "SELECT thread_id, MAX(COALESCE(MIN(date, internal_date), date, internal_date)), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
              GROUP BY thread_id"
         ))?;
         let newest: HashMap<i64, (Option<i64>, Option<i64>)> = statement

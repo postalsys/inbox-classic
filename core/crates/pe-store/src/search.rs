@@ -147,7 +147,7 @@ impl Search {
         let flagged = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
         let answered = "instr(' ' || flags || ' ', ' \\Answered ') > 0";
         let mut words: Vec<String> = Vec::new();
-        let date = "COALESCE(date, internal_date)";
+        let date = crate::messages::LIST_DATE;
         for term in &query.terms {
             match term {
                 Term::Text { any_of, negated } => match (fts_term(any_of), negated) {
@@ -662,7 +662,7 @@ mod tests {
             ..message(uid, "Hello", "Ann", flags)
         };
         store
-            .add_messages(inbox, &[dated(1, 100, 400, &[]), dated(2, 300, 200, &["\\Seen"])])
+            .add_messages(inbox, &[dated(1, 100, 400, &[]), dated(2, 300, 350, &["\\Seen"])])
             .unwrap();
         store.add_messages(inbox2, &[dated(7, 200, 300, &[])]).unwrap();
         store.add_messages(archive, &[dated(5, 500, 500, &[])]).unwrap();
@@ -684,7 +684,7 @@ mod tests {
                 .collect()
         };
         assert_eq!(listed(&all, crate::SortField::Date), [2, 7, 1]);
-        assert_eq!(listed(&all, crate::SortField::Received), [1, 7, 2]);
+        assert_eq!(listed(&all, crate::SortField::Received), [1, 2, 7]);
         assert_eq!(store.count_search(&all).unwrap(), (3, 2));
         assert_eq!(store.inboxes().unwrap(), [inbox, inbox2]);
         let newest = Sort {

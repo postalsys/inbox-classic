@@ -135,10 +135,14 @@ impl MessageInfo {
         }
     }
 
-    /// The date the list shows: the Date header, the received date when there is none (the
-    /// Date order sorts the same way)
+    /// The date the list shows: the Date header, but never later than when the server received the message (a
+    /// message dated in the future would otherwise stay on top of the list), the received date when there is none.
+    /// The Date order sorts the same way ([`LIST_DATE`]).
     pub fn display_date(&self) -> Option<i64> {
-        self.date.or(self.internal_date)
+        match (self.date, self.internal_date) {
+            (Some(date), Some(received)) => Some(date.min(received)),
+            (date, received) => date.or(received),
+        }
     }
 }
 
@@ -199,7 +203,7 @@ impl Sort {
     /// The ORDER BY, each matching an index of the schema
     pub(crate) fn order_by(self) -> String {
         let column = match self.field {
-            SortField::Date => "COALESCE(date, internal_date)",
+            SortField::Date => LIST_DATE,
             SortField::Received => "internal_date",
             SortField::From => "(CASE from_name WHEN '' THEN from_address ELSE from_name END) COLLATE NOCASE",
             SortField::To => "recipients COLLATE NOCASE",
@@ -233,6 +237,10 @@ pub(crate) fn split_flags(flags: &str) -> Vec<String> {
 fn is_seen(canonical: &str) -> bool {
     canonical.split(' ').any(|f| f.eq_ignore_ascii_case("\\Seen"))
 }
+
+/// [`Message::display_date`] in SQL: the Date header, never later than the arrival; what the Date order and its
+/// indexes (schema.rs) sort by
+pub(crate) const LIST_DATE: &str = "COALESCE(MIN(date, internal_date), date, internal_date)";
 
 pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_date, date, size, subject, from_name, \
      from_address, recipients, message_id, in_reply_to, has_attachments, \
@@ -579,6 +587,49 @@ mod tests {
         store.set_folders(account, &[inbox]).unwrap();
         let folder = store.folders(account).unwrap()[0].id;
         (store, folder)
+    }
+
+    /// A message dated in the future (spam that wants to stay on top) is listed at its arrival; one sent a minute
+    /// before it arrived keeps its own date
+    #[test]
+    fn a_future_date_is_listed_at_the_arrival() {
+        let at = |date, received| MessageInfo {
+            date,
+            internal_date: received,
+            ..Default::default()
+        };
+        assert_eq!(at(Some(9_000_000_000), Some(1_000)).display_date(), Some(1_000));
+        assert_eq!(at(Some(940), Some(1_000)).display_date(), Some(940));
+        assert_eq!(at(None, Some(1_000)).display_date(), Some(1_000));
+        assert_eq!(at(Some(940), None).display_date(), Some(940));
+
+        let (store, inbox) = setup();
+        let dated = |uid, date, received| MessageInfo {
+            internal_date: Some(received),
+            date: Some(date),
+            ..message(uid, "Hi", "Ann", date, &[])
+        };
+        store
+            .add_messages(
+                inbox,
+                &[
+                    dated(1, 9_000_000_000, 1_000),
+                    dated(2, 1_900, 2_000),
+                    dated(3, 2_900, 3_000),
+                ],
+            )
+            .unwrap();
+        let sort = crate::Sort {
+            field: crate::SortField::Date,
+            ascending: false,
+        };
+        let uids: Vec<u64> = store
+            .messages(inbox, sort, 0, 10)
+            .unwrap()
+            .iter()
+            .map(|m| m.info.uid)
+            .collect();
+        assert_eq!(uids, [3, 2, 1], "the future-dated message last, at its arrival");
     }
 
     fn flags(list: &[&str]) -> Vec<String> {

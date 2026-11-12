@@ -353,6 +353,14 @@ ALTER TABLE accounts ADD COLUMN account_name TEXT NOT NULL DEFAULT '';
 ALTER TABLE accounts ADD COLUMN position INTEGER NOT NULL DEFAULT 0;
 UPDATE accounts SET position = id;
 "#,
+    // the Date order by the Date header but never later than the arrival (messages.rs LIST_DATE): a message dated in
+    // the future no longer stays on top of the list
+    r#"
+DROP INDEX messages_by_date;
+CREATE INDEX messages_by_date ON messages (folder_id, COALESCE(MIN(date, internal_date), date, internal_date), uid);
+DROP INDEX messages_all_by_date;
+CREATE INDEX messages_all_by_date ON messages (COALESCE(MIN(date, internal_date), date, internal_date), uid, id);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
