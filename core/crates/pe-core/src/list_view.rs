@@ -13,11 +13,14 @@ use pe_store::{FolderId, Message, MessageRef, Scope, Search, Show, Sort};
 
 use crate::{Action, Core, NextUnread, Result, Summary};
 
-/// The time now in milliseconds since the epoch, as the store notes when a message became read
+/// When a list begins, in milliseconds since the epoch, as the store notes when a message became read: a tenth of a
+/// second early, as SQLite's clock (`seen_at`) can lag behind this one (on Windows by a tick of about 16 ms)
 fn now_ms() -> i64 {
+    const SLACK: i64 = 100;
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_or(0, |d| d.as_millis() as i64)
+        - SLACK
 }
 
 /// A message list's view: see the module's comment
@@ -431,7 +434,7 @@ mod tests {
         assert_eq!(view.counts(&core).unwrap(), (2, 1));
 
         // another folder and back: only the unread one
-        std::thread::sleep(std::time::Duration::from_millis(5));
+        std::thread::sleep(std::time::Duration::from_millis(250));
         view.set_scope(Some(Scope::AllInboxes));
         view.set_scope(Some(Scope::Folder(inbox)));
         assert_eq!(view.row_count(&core).unwrap(), 1);
