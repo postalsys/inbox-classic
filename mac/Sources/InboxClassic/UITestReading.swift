@@ -118,9 +118,19 @@ extension UITest {
 
         await showShopMessage("Your shop account")
         check(await waitUntil(15) { bar?.isHidden == false }, "the forged message has the bar too")
-        check(choices?.isHidden == true && download?.isHidden == false && bar?.note.contains("shop.example") == true
-              && main.mailbox.reader.picturesMenu == nil,
-              "but only Download Pictures, and the line that says the sender could not be confirmed (\(bar?.note ?? ""))")
+        let forged = main.mailbox.reader.picturesMenu?.items ?? []
+        let note = forged.first { $0.accessibilityIdentifier() == "pictures.unconfirmed" }
+        // the bar's own words: Some pictures have been blocked, no second line
+        func labels(_ view: NSView) -> [String] {
+            ((view as? NSTextField).map { [$0.stringValue] } ?? []) + view.subviews.flatMap(labels)
+        }
+        let barWords = bar.map(labels) ?? []
+        check(choices?.isHidden == false && download?.isHidden == true
+              && forged.first?.title == Command.pictures.label && forged.first?.isEnabled == true
+              && note?.isEnabled == false && note?.title.contains("shop.example") == true && note?.toolTip == note?.title
+              && !forged.contains { $0.tag == 1 } && !barWords.contains { $0.contains("shop.example") },
+              "but its menu has only Download Pictures and the greyed line that says the sender could not be confirmed, "
+                  + "not in the bar (\(forged.map(\.title)))")
         await shot(main.window, "pictures-2-unconfirmed")
 
         await showShopMessage("Autumn sale at the shop")

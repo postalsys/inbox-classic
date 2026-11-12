@@ -48,10 +48,10 @@ final class Reader: NSObject {
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
     private let unsubscribe = NSButton(title: Text.uiUnsubscribe.text, target: nil, action: nil)
     private let pictures = InfoBar(icon: "image", link: nil)
-    private lazy var picturesHeight = pictures.heightAnchor.constraint(equalToConstant: 28)
-    /// the bar's Download Pictures with its menu of the Always choices, for a sender the provider confirmed
+    /// the bar's Download Pictures with its menu: the Always choices for a sender the provider confirmed, the
+    /// greyed line that says why there are none for one it did not
     let picturesChoices = NSComboButton()
-    /// the bar's Download Pictures alone, for a sender it did not
+    /// the bar's Download Pictures alone, for a message without a single sender
     let picturesDownload = NSButton()
     /// over a message that could not be downloaded: Try Again
     private let retry = InfoBar(icon: "arrow_sync", link: nil, button: Text.uiTryAgain.text)
@@ -139,7 +139,7 @@ final class Reader: NSObject {
         }
         view.setHuggingPriority(.defaultLow, for: .vertical)
         preview.view.setContentHuggingPriority(.defaultLow, for: .vertical)
-        picturesHeight.isActive = true
+        pictures.heightAnchor.constraint(equalToConstant: 28).isActive = true
         retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
         findBar.heightAnchor.constraint(equalToConstant: 36).isActive = true
         clearView(loading: false)
@@ -279,24 +279,61 @@ final class Reader: NSObject {
         pictures.setAccessories([picturesChoices, picturesDownload])
     }
 
-    /// the bar for this message: Download Pictures with Always from the sender and from everyone at their domain when
-    /// the provider confirmed them; otherwise Download Pictures alone, and the line that says why
+    /// the bar for this message, as on Windows: Download Pictures with a menu when there is a sender, of Always from
+    /// them and from everyone at their domain when the provider confirmed them, otherwise of Download Pictures and
+    /// the greyed line that says why there is no Always; without a sender Download Pictures alone
     private func offerPictures(_ info: PeMessageInfo) {
         let always = [(text(info.pictures_always_sender), "sender"), (text(info.pictures_always_domain), "domain")]
             .filter { !$0.0.isEmpty }
         let unconfirmed = text(info.pictures_unconfirmed)
-        picturesChoices.menu.removeAllItems()
+        let menu = picturesChoices.menu
+        menu.removeAllItems()
         for (title, kind) in always {
             let item = NSMenuItem(title: title, action: #selector(alwaysChosen(_:)), keyEquivalent: "")
             item.target = self
             item.tag = kind == "domain" ? 1 : 0
             item.setAccessibilityIdentifier("pictures.always.\(kind)")
-            picturesChoices.menu.addItem(item)
+            menu.addItem(item)
         }
-        picturesChoices.isHidden = always.isEmpty
-        picturesDownload.isHidden = !always.isEmpty
-        pictures.note = always.isEmpty ? unconfirmed : ""
-        picturesHeight.constant = pictures.note.isEmpty ? 28 : 40
+        if always.isEmpty && !unconfirmed.isEmpty {
+            let download = NSMenuItem(title: Command.pictures.label, action: #selector(downloadClicked),
+                                      keyEquivalent: "")
+            download.target = self
+            download.setAccessibilityIdentifier("pictures.download")
+            menu.addItem(download)
+            menu.addItem(.separator())
+            menu.addItem(unconfirmedItem(unconfirmed))
+        }
+        let split = !text(info.sender).isEmpty && menu.numberOfItems > 0
+        picturesChoices.isHidden = !split
+        picturesDownload.isHidden = split
+    }
+
+    /// the greyed line of the menu that says why the sender could not be confirmed: wrapped at a menu's width, its
+    /// whole text as its tooltip
+    private func unconfirmedItem(_ note: String) -> NSMenuItem {
+        let item = NSMenuItem(title: note, action: nil, keyEquivalent: "")
+        item.isEnabled = false
+        item.toolTip = note
+        let style = NSMutableParagraphStyle()
+        style.lineBreakMode = .byWordWrapping
+        let font = NSFont.menuFont(ofSize: NSFont.smallSystemFontSize)
+        let attributed = NSAttributedString(string: note, attributes: [
+            .font: font, .foregroundColor: NSColor.disabledControlTextColor, .paragraphStyle: style,
+        ])
+        let label = NSTextField(labelWithAttributedString: attributed)
+        label.maximumNumberOfLines = 3
+        label.lineBreakMode = .byTruncatingTail
+        label.preferredMaxLayoutWidth = 320
+        label.toolTip = note
+        let size = label.sizeThatFits(NSSize(width: 320, height: 1000))
+        let box = NSView(frame: NSRect(x: 0, y: 0, width: ceil(size.width) + 28, height: ceil(size.height) + 6))
+        label.frame = NSRect(x: 14, y: 3, width: ceil(size.width), height: ceil(size.height))
+        box.addSubview(label)
+        box.toolTip = note
+        item.view = box
+        item.setAccessibilityIdentifier("pictures.unconfirmed")
+        return item
     }
 
     @objc private func downloadClicked() {
@@ -313,7 +350,7 @@ final class Reader: NSObject {
         loadPictures()
     }
 
-    /// the menu of the bar's Always choices, for the UI test
+    /// the menu of the bar's Download Pictures, for the UI test
     var picturesMenu: NSMenu? { picturesChoices.isHidden ? nil : picturesChoices.menu }
 
     private func headerText(_ info: PeMessageInfo) -> NSAttributedString {
@@ -705,18 +742,8 @@ final class InfoBar: NSView {
     var heightConstraint: NSLayoutConstraint?
     private let titleLabel = NSTextField(labelWithString: "")
     private let textLabel = NSTextField(labelWithString: "")
-    private let noteLabel = NSTextField(labelWithString: "")
     private let action: NSButton?
     private var row: NSStackView?
-
-    /// a smaller line under the text, none when empty
-    var note: String {
-        get { noteLabel.stringValue }
-        set {
-            noteLabel.stringValue = newValue
-            noteLabel.isHidden = newValue.isEmpty
-        }
-    }
 
     var title: String {
         get { titleLabel.stringValue }
@@ -754,13 +781,7 @@ final class InfoBar: NSView {
         textLabel.textColor = .labelColor
         titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         textLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        noteLabel.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        noteLabel.textColor = .secondaryLabelColor
-        noteLabel.lineBreakMode = .byTruncatingTail
-        noteLabel.isHidden = true
-        noteLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        noteLabel.setAccessibilityIdentifier("infobar.note")
-        let words = NSStackView(views: [titleLabel, textLabel, noteLabel])
+        let words = NSStackView(views: [titleLabel, textLabel])
         words.orientation = .vertical
         words.alignment = .leading
         words.spacing = 1
