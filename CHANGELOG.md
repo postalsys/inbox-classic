@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.1](https://github.com/postalsys/inbox-classic/compare/v0.14.0...v0.14.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* **mac, linux:** an unconfirmed sender's note is in the pictures menu, not under the bar ([72d8215](https://github.com/postalsys/inbox-classic/commit/72d82152ea25779e2f6b1be9a58c91142eb60111))
+* **mac, linux:** an unconfirmed sender's note is in the pictures menu, not under the bar ([29bf1bf](https://github.com/postalsys/inbox-classic/commit/29bf1bfe548b771828e1a33dc2cb679be4d04cab))
+
 ## [0.14.0](https://github.com/postalsys/inbox-classic/compare/v0.13.0...v0.14.0) (2026-11-12)
 
 
