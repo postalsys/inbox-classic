@@ -46,6 +46,9 @@ pub struct Search {
     pub threads: Option<Vec<i64>>,
     /// View > Hide Ignored Conversations: the messages of ignored conversations left out
     pub hide_ignored: bool,
+    /// With `show` Unread, the messages (by row id) kept in the list although read: those it showed, so a message
+    /// does not leave the list the moment it is read
+    pub keep: Vec<i64>,
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
@@ -125,6 +128,7 @@ impl Search {
         // the Show choice is a term like the one typed for it
         query.terms.extend(match self.show {
             Show::All => None,
+            Show::Unread if !self.keep.is_empty() => None,
             Show::Unread => Some(Term::Seen(false)),
             Show::Flagged => Some(Term::Flagged(true)),
             Show::WithAttachments => Some(Term::Attachment(true)),
@@ -143,6 +147,11 @@ impl Search {
             Scope::AllInboxes if in_order => parts.push(format!("+folder_id IN ({INBOXES})")),
             Scope::AllInboxes => parts.push(format!("folder_id IN ({INBOXES})")),
             Scope::Everywhere => {}
+        }
+        // unread, or read since the list showed it: ids of the store's own rows, written as numbers
+        if self.show == Show::Unread && !self.keep.is_empty() {
+            let kept: Vec<String> = self.keep.iter().map(i64::to_string).collect();
+            parts.push(format!("(seen = 0 OR id IN ({}))", kept.join(",")));
         }
         let flagged = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
         let answered = "instr(' ' || flags || ' ', ' \\Answered ') > 0";

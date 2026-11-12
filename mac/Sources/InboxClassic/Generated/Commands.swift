@@ -50,6 +50,7 @@ enum Command: Int, CaseIterable {
     case expandAllThreads = 145
     case collapseAllThreads = 146
     case hideIgnored = 153
+    case hideRead = 154
     case aiAgents = 133
     case options = 137
     case addressBook = 147
@@ -107,6 +108,7 @@ enum Command: Int, CaseIterable {
         case .expandAllThreads: return "view"
         case .collapseAllThreads: return "view"
         case .hideIgnored: return "view"
+        case .hideRead: return "view"
         case .aiAgents: return "tools"
         case .options: return "tools"
         case .addressBook: return "tools"
@@ -171,6 +173,7 @@ enum Command: Int, CaseIterable {
         case .expandAllThreads: return .cmdExpandAllThreads
         case .collapseAllThreads: return .cmdCollapseAllThreads
         case .hideIgnored: return .cmdHideIgnored
+        case .hideRead: return .cmdHideRead
         case .aiAgents: return .cmdAiAgents
         case .options: return .cmdOptions
         case .addressBook: return .cmdAddressBook
@@ -230,6 +233,7 @@ enum Command: Int, CaseIterable {
         case .expandAllThreads: return nil
         case .collapseAllThreads: return nil
         case .hideIgnored: return nil
+        case .hideRead: return nil
         case .aiAgents: return nil
         case .options: return (",", [.command])
         case .addressBook: return ("b", [.command, .shift])
@@ -289,6 +293,7 @@ enum Command: Int, CaseIterable {
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
         case .hideIgnored: return true
+        case .hideRead: return true
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false
@@ -348,6 +353,7 @@ enum Command: Int, CaseIterable {
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
         case .hideIgnored: return false
+        case .hideRead: return false
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false
@@ -407,6 +413,7 @@ enum Command: Int, CaseIterable {
         case .expandAllThreads: return false
         case .collapseAllThreads: return false
         case .hideIgnored: return false
+        case .hideRead: return false
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false

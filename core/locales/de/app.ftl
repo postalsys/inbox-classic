@@ -58,6 +58,8 @@ cmd-expand-all-threads = Alle Unterhaltungen &erweitern
 cmd-collapse-all-threads = Alle Unterhaltungen &reduzieren
 ui-group-by-conversation = Nachrichten nach &Unterhaltung gruppieren
 cmd-hide-ignored = &Ignorierte Unterhaltungen ausblenden
+# review: new
+cmd-hide-read = &Gelesene Nachrichten ausblenden
 cmd-notify = Bei neuer E-Mail be&nachrichtigen
 cmd-open = Inbox Classic ö&ffnen
 cmd-default-app = Als &Standard-E-Mail-Programm festlegen...
@@ -484,3 +486,7 @@ ui-book-not-exported = Das Adressbuch konnte nicht gespeichert werden: { $reason
 ui-code-copied = Code kopiert
 # review: new
 ui-codes-in-notifications = Anmeldecodes in Benachrichtigungen über neue E-Mails anzeigen
+# review: new
+ui-tool-unread-only = Ungelesen
+# review: new
+ui-no-unread = Hier gibt es keine ungelesenen Nachrichten.

@@ -57,6 +57,8 @@ cmd-expand-all-threads = &Expandir todas las conversaciones
 cmd-collapse-all-threads = &Contraer todas las conversaciones
 ui-group-by-conversation = &Agrupar los mensajes por conversación
 cmd-hide-ignored = &Ocultar las conversaciones ignoradas
+# review: new
+cmd-hide-read = Ocultar los mensajes &leídos
 cmd-notify = &Avisar de correo nuevo
 cmd-open = &Abrir Inbox Classic
 cmd-default-app = Usar como programa de correo &predeterminado...
@@ -483,3 +485,7 @@ ui-book-not-exported = No se pudo guardar la libreta de direcciones: { $reason }
 ui-code-copied = Código copiado
 # review: new
 ui-codes-in-notifications = Mostrar los códigos de inicio de sesión en los avisos de correo nuevo
+# review: new
+ui-tool-unread-only = No leídos
+# review: new
+ui-no-unread = Aquí no hay mensajes sin leer.

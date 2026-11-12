@@ -29,6 +29,9 @@ pub struct ListView {
     hide_ignored: bool,
     /// The open conversations of a grouped list
     expanded: BTreeSet<i64>,
+    /// With Show Unread: the messages the list has shown (store row ids), which stay in it when read, until another
+    /// folder, other words or another Show
+    shown: std::cell::RefCell<BTreeSet<i64>>,
 }
 
 impl ListView {
@@ -50,6 +53,7 @@ impl ListView {
         }
         self.scope = scope;
         self.expanded.clear();
+        self.shown.borrow_mut().clear();
         true
     }
 
@@ -65,6 +69,7 @@ impl ListView {
         }
         self.text = text.to_string();
         self.expanded.clear();
+        self.shown.borrow_mut().clear();
         true
     }
 
@@ -88,7 +93,11 @@ impl ListView {
         self.show
     }
 
+    /// What the list shows by the messages' state; with Unread a message read stays until the list changes
     pub fn set_show(&mut self, show: Show) {
+        if self.show != show {
+            self.shown.borrow_mut().clear();
+        }
         self.show = show;
     }
 
@@ -202,6 +211,10 @@ impl ListView {
             text: self.text.clone(),
             threads: self.grouped.then(|| self.expanded.iter().copied().collect()),
             hide_ignored: self.hide_ignored,
+            keep: match self.show {
+                Show::Unread => self.shown.borrow().iter().copied().collect(),
+                _ => Vec::new(),
+            },
         })
     }
 
@@ -215,7 +228,11 @@ impl ListView {
 
     /// A page of the list's rows, from `offset` on
     pub fn rows(&self, core: &Core, offset: u64, limit: u64) -> Result<Vec<Message>> {
-        self.listed(Vec::new(), |search| core.search(search, self.sort, offset, limit))
+        let rows = self.listed(Vec::new(), |search| core.search(search, self.sort, offset, limit))?;
+        if self.show == Show::Unread {
+            self.shown.borrow_mut().extend(rows.iter().map(|row| row.id));
+        }
+        Ok(rows)
     }
 
     /// How many rows the list has: grouped, one a conversation and the other messages of the open ones
@@ -389,6 +406,36 @@ mod tests {
         assert!(view.collapse(4) && !view.collapse(4));
         assert!(view.collapse_all() && !view.collapse_all());
         assert_eq!(view.expanded().count(), 0);
+    }
+
+    /// View > Hide Read Messages: the unread messages, and one read since stays until the list changes, so it does not
+    /// vanish from under the user the moment the reading pane marks it read
+    #[test]
+    fn unread_only_keeps_a_message_read_until_the_list_changes() {
+        let dir = pe_testkit::TempDir::new("core-list-view-unread");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        thread(&core, inbox, 1);
+        let mut view = ListView::new();
+        view.set_scope(Some(Scope::Folder(inbox)));
+        let all = view.rows(&core, 0, 10).unwrap();
+        let (first, second) = (all[0].info.uid, all[1].info.uid);
+        core.set_seen(inbox, first, false).unwrap();
+        core.set_seen(inbox, second, false).unwrap();
+
+        view.set_show(Show::Unread);
+        let shown: Vec<u64> = view.rows(&core, 0, 10).unwrap().iter().map(|m| m.info.uid).collect();
+        assert_eq!(shown.len(), 2, "the unread ones only");
+        core.set_seen(inbox, first, true).unwrap();
+        assert_eq!(view.row_count(&core).unwrap(), 2, "the one read stays");
+        assert_eq!(view.counts(&core).unwrap(), (2, 1));
+
+        // another folder and back: only the unread one
+        view.set_scope(Some(Scope::AllInboxes));
+        view.set_scope(Some(Scope::Folder(inbox)));
+        assert_eq!(view.row_count(&core).unwrap(), 1);
+        view.set_show(Show::All);
+        assert_eq!(view.row_count(&core).unwrap(), all.len() as u64);
     }
 
     #[test]

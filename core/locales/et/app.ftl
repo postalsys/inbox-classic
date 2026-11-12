@@ -57,6 +57,8 @@ cmd-expand-all-threads = &Laienda kõik vestlused
 cmd-collapse-all-threads = &Ahenda kõik vestlused
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
 cmd-hide-ignored = Peida &ignoreeritud vestlused
+# review: new
+cmd-hide-read = Peida &loetud kirjad
 cmd-notify = Teavita &uuest postist
 cmd-open = &Ava Inbox Classic
 cmd-default-app = Määra &vaikimisi meiliprogrammiks...
@@ -485,3 +487,7 @@ ui-book-not-exported = Aadressiraamatut ei saanud salvestada: { $reason }
 ui-code-copied = Kood kopeeriti
 # review: new
 ui-codes-in-notifications = Näita uue kirja teadetes sisselogimiskoode
+# review: new
+ui-tool-unread-only = Lugemata
+# review: new
+ui-no-unread = Siin pole lugemata kirju.

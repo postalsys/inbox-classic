@@ -57,6 +57,8 @@ cmd-expand-all-threads = &Développer toutes les conversations
 cmd-collapse-all-threads = Ré&duire toutes les conversations
 ui-group-by-conversation = &Regrouper les messages par conversation
 cmd-hide-ignored = &Masquer les conversations ignorées
+# review: new
+cmd-hide-read = Masquer les messages &lus
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...
@@ -491,3 +493,7 @@ ui-book-not-exported = Le carnet d'adresses n'a pas pu être enregistré : { $re
 ui-code-copied = Code copié
 # review: new
 ui-codes-in-notifications = Afficher les codes de connexion dans les notifications de nouveau courrier
+# review: new
+ui-tool-unread-only = Non lus
+# review: new
+ui-no-unread = Il n'y a aucun message non lu ici.
