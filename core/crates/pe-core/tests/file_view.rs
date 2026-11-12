@@ -50,6 +50,26 @@ fn a_message_file_opens_and_can_be_answered() {
     assert_eq!(core.file_save_attachments(&with_file, &out).unwrap(), (1, 1));
     assert_eq!(std::fs::read(out.join("map.txt")).unwrap(), b"the trail");
 
+    // an invitation in a file opens in the calendar as one in a folder does
+    let invite = dir.path().join("invite.eml");
+    std::fs::write(
+        &invite,
+        "From: Ann <ann@example.com>\r\nTo: you@example.com\r\nSubject: Lunch\r\nMIME-Version: 1.0\r\n\
+         Content-Type: text/calendar; method=REQUEST\r\n\r\nBEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\n\
+         SUMMARY:Lunch\r\nDTSTART:20261201T120000Z\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n",
+    )
+    .unwrap();
+    let ics = core
+        .file_invitation_file(&invite, &dir.path().join("calendar"))
+        .unwrap()
+        .unwrap();
+    assert!(std::fs::read_to_string(ics).unwrap().contains("SUMMARY:Lunch"));
+    assert!(
+        core.file_invitation_file(&file, &dir.path().join("calendar"))
+            .unwrap()
+            .is_none()
+    );
+
     let text = dir.path().join("notes.txt");
     std::fs::write(&text, "just some notes\n").unwrap();
     assert!(

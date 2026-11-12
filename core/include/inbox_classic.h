@@ -1600,6 +1600,12 @@ char *pe_invitation_file(const struct PeCore *core,
                          uint64_t uid,
                          const char *dir);
 
+// [`pe_invitation_file`] of a message file a window shows (`pe_file_view`), its path UTF-8
+//
+// # Safety
+// `core` must be a live handle, `path` and `dir` NUL-terminated strings.
+char *pe_file_invitation_file(const struct PeCore *core, const char *path, const char *dir);
+
 // Draws the BIMI logo of a message (`has_logo`) `size` pixels square in the background: `LogoReady` follows with
 // the request this returns; 0 for a message without one
 //

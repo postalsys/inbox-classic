@@ -785,6 +785,30 @@ pub unsafe extern "C" fn pe_invitation_file(
     }
 }
 
+/// [`pe_invitation_file`] of a message file a window shows (`pe_file_view`), its path UTF-8
+///
+/// # Safety
+/// `core` must be a live handle, `path` and `dir` NUL-terminated strings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_invitation_file(
+    core: *const PeCore,
+    path: *const c_char,
+    dir: *const c_char,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let (Some(path), Some(dir)) = (unsafe { arg(path) }, unsafe { arg(dir) }) else {
+        return null_mut();
+    };
+    let (path, dir) = (std::path::PathBuf::from(path), std::path::PathBuf::from(dir));
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.file_invitation_file(&path, &dir) {
+            Ok(Some(written)) => into_c_string(written.to_string_lossy().into_owned()),
+            _ => null_mut(),
+        })
+    }
+}
+
 /// Draws the BIMI logo of a message (`has_logo`) `size` pixels square in the background: `LogoReady` follows with
 /// the request this returns; 0 for a message without one
 ///
