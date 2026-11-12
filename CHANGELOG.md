@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.2](https://github.com/postalsys/inbox-classic/compare/v0.14.1...v0.14.2) (2026-11-12)
+
+
+### Bug Fixes
+
+* **linux:** closing the print dialog with its close button no longer crashes ([1144004](https://github.com/postalsys/inbox-classic/commit/114400459436b2b483dfa811f63c28a563f894b4))
+* **linux:** closing the print dialog with its close button no longer crashes ([24fdcd3](https://github.com/postalsys/inbox-classic/commit/24fdcd3f36b4288c45873dec84eb317bee55e9a9))
+
 ## [0.14.1](https://github.com/postalsys/inbox-classic/compare/v0.14.0...v0.14.1) (2026-11-12)
 
 
