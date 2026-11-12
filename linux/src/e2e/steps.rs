@@ -1942,6 +1942,9 @@ pub async fn mailto(d: &Driver) {
     }
 }
 
+/// The attachment of the message file opened with the app
+const TRIP_NOTES: &str = "Day one: the harbour. Day two: the hills.";
+
 /// A message file opened with the app: a second start with its path hands it to the running app, which shows it in a
 /// message window that can answer it
 pub async fn open_eml(d: &Driver) {
@@ -1951,7 +1954,11 @@ pub async fn open_eml(d: &Driver) {
         &eml,
         format!(
             "From: Ivy Chen <ivy@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Notes from the trip\r\n\
-             Date: {}\r\nMessage-ID: <opened-message@example.com>\r\n\r\nThe notes, as promised.\r\n",
+             Date: {}\r\nMessage-ID: <opened-message@example.com>\r\nMIME-Version: 1.0\r\n\
+             Content-Type: multipart/mixed; boundary=\"trip\"\r\n\r\n\
+             --trip\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe notes, as promised.\r\n\
+             --trip\r\nContent-Type: text/plain; name=\"trip-notes.txt\"\r\n\
+             Content-Disposition: attachment; filename=\"trip-notes.txt\"\r\n\r\n{TRIP_NOTES}\r\n--trip--\r\n",
             date_now(-60)
         ),
     );
@@ -1997,7 +2004,21 @@ pub async fn open_eml(d: &Driver) {
             .is_some_and(|a| a.is_enabled()),
         "a file cannot be deleted from it",
     );
+    d.check(
+        wait_until(5, || window.reader.attachments.is_visible()).await,
+        "its paper clip lists the file's attachment",
+    );
     d.shot(&window.window, "files-4-open-eml").await;
+    let dir = d.out.join("eml-attachments");
+    let _ = std::fs::remove_dir_all(&dir);
+    let _ = std::fs::create_dir_all(&dir);
+    FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![dir.clone()]));
+    let _ = WidgetExt::activate_action(&window.reader.widget, "reader.save-all", None);
+    let saved = wait_for(10, || std::fs::read_to_string(dir.join("trip-notes.txt")).ok()).await;
+    d.check(
+        saved.as_deref() == Some(TRIP_NOTES),
+        "Save All writes the file's attachment as it was sent",
+    );
     click(window.window.upcast_ref(), "message-reply");
     match wait_compose(10).await {
         Some(c) => {

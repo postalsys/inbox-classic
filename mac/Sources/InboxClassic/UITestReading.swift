@@ -181,9 +181,14 @@ extension UITest {
                   && $0["CFBundleTypeRole"] as? String == "Viewer" && $0["LSHandlerRank"] as? String == "Alternate" },
               "the app says it opens .eml files (Open With), without taking them over")
         let eml = out.appendingPathComponent("open-me.eml")
+        let notes = "notes that came in a message file\n"
         try ("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: A message from a file\r\n"
-            + "Date: Tue, 3 Nov 2026 10:00:00 +0000\r\nMessage-ID: <from-a-file@example.com>\r\n\r\n"
-            + "This message was opened from a file.\r\n").write(to: eml, atomically: true, encoding: .utf8)
+            + "Date: Tue, 3 Nov 2026 10:00:00 +0000\r\nMessage-ID: <from-a-file@example.com>\r\nMIME-Version: 1.0\r\n"
+            + "Content-Type: multipart/mixed; boundary=\"file\"\r\n\r\n"
+            + "--file\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThis message was opened from a file.\r\n"
+            + "--file\r\nContent-Type: text/plain; name=\"notes.txt\"\r\n"
+            + "Content-Disposition: attachment; filename=\"notes.txt\"\r\nContent-Transfer-Encoding: base64\r\n\r\n"
+            + Data(notes.utf8).base64EncodedString() + "\r\n--file--\r\n").write(to: eml, atomically: true, encoding: .utf8)
         // as the Finder hands one over
         onMain { AppDelegate.shared.application(NSApp, open: [eml]) }
         guard let shown = await waitFor(10, { window("message").flatMap { $0.title == "A message from a file" ? $0 : nil } }),
@@ -196,8 +201,23 @@ extension UITest {
               "it can be answered, printed and saved")
         check([Command.delete, .move, .flag, .junk, .markUnread, .nextMessage, .previousMessage].allSatisfy { opened.validate($0) == false },
               "but not moved, flagged, deleted or marked: it is in no folder")
+        let clip: NSPopUpButton? = find("reader.attachments", in: shown)
+        check(clip?.isHidden == false, "its paper clip is there, as for a folder's message")
+        let menu = opened.reader.attachmentMenu()
+        check(menu.items.first?.title.hasPrefix("notes.txt") == true,
+              "and lists the file's attachment (\(menu.items.first?.title ?? "none"))")
         await pause(1)
         await shot(shown, "files-4-open-eml")
+        if let all = menu.items.last, let action = all.action {
+            let into = emptyFolder("saved-from-file")
+            TestHooks.folder = { into }
+            onMain { NSApp.sendAction(action, to: all.target, from: all) }
+            let saved = await waitFor(10) { try? String(contentsOf: into.appendingPathComponent("notes.txt"), encoding: .utf8) }
+            TestHooks.folder = nil
+            check(saved == notes, "Save All writes it into the folder chosen, as it was sent (\(saved ?? "nothing"))")
+        } else {
+            check(false, "the attachment menu ends with Save All")
+        }
         opened.press("reply")
         guard let compose = await waitCompose() else { throw Failed(description: "Reply to the file opened nothing") }
         check(field("compose.subject", compose)?.stringValue == "Re: A message from a file"

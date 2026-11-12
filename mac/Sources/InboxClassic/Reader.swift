@@ -239,8 +239,7 @@ final class Reader: NSObject {
         showHeader(true)
         header.attributedStringValue = headerText(info)
         let files = info.attachment_count
-        // the files of a message file are saved by forwarding it: the core reads them from the store
-        attachments.isHidden = files == 0 || file != nil
+        attachments.isHidden = files == 0
         attachments.removeAllItems()
         // the title item of a pull-down button: the paper clip and how many files there are
         attachments.addItem(withTitle: Text.macFiles.text(["count": files]))
@@ -599,7 +598,11 @@ final class Reader: NSObject {
     @objc private func saveAttachment(_ sender: NSMenuItem) {
         var length = 0
         var name: UnsafeMutablePointer<CChar>?
-        let data = takenBytes(pe_attachment_data(core.handle, folder, uid, sender.tag, &length, &name), length)
+        // the core reads it from the store, or from the message file shown
+        let bytes = file.map { path in
+            path.withCString { pe_file_attachment_data(core.handle, $0, sender.tag, &length, &name) }
+        } ?? pe_attachment_data(core.handle, folder, uid, sender.tag, &length, &name)
+        let data = takenBytes(bytes, length)
         let safeName = taken(name) ?? "attachment"
         guard let data else {
             inform(Text.uiAttachmentNotRead.text, style: .error)
@@ -615,7 +618,11 @@ final class Reader: NSObject {
         // the core saves them all from one reading of the message, a file already there kept and the new one numbered
         var saved = 0
         var total = 0
-        if !into.path.withCString({ pe_save_attachments(core.handle, folder, uid, $0, &saved, &total) }) {
+        let done = into.path.withCString { dir in
+            file.map { path in path.withCString { pe_file_save_attachments(core.handle, $0, dir, &saved, &total) } }
+                ?? pe_save_attachments(core.handle, folder, uid, dir, &saved, &total)
+        }
+        if !done {
             inform(Text.uiNotDownloaded.text)
         } else if saved < total {
             inform(Text.macFilesNotSaved.text(["failed": total - saved, "count": total]), style: .error)
@@ -625,7 +632,12 @@ final class Reader: NSObject {
     /// the calendar part as a file of its own (the core writes it, and only it), for the calendar app
     func openInCalendar() {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("InboxClassic/Invitations").path
-        guard let path = dir.withCString({ taken(pe_invitation_file(core.handle, folder, uid, $0)) }) else {
+        // the core reads it from the store, or from the message file shown
+        let written = dir.withCString { dir in
+            file.map { path in path.withCString { pe_file_invitation_file(core.handle, $0, dir) } }
+                ?? pe_invitation_file(core.handle, folder, uid, dir)
+        }
+        guard let path = taken(written) else {
             inform(Text.uiInvitationNotRead.text, style: .error)
             return
         }

@@ -580,11 +580,9 @@ impl Reader {
         Ok(())
     }
 
-    /// A file's view on screen. Its attachments are no folder's, so the paper clip, which saves a folder's, is not
-    /// offered
+    /// A file's view on screen, its paper clip saving the file's attachments as a folder's message saves its own
     fn show_file_view(&self, view: MessageView) {
         self.show(&view, self.remote_images.get());
-        self.attachments.set_visible(false);
         *self.view.borrow_mut() = Some(view);
     }
 
@@ -895,9 +893,33 @@ impl Reader {
 impl Reader {
     // ---- the files, the calendar and unsubscribing ----
 
+    /// The attachment `index` of the message shown, its name and bytes, from the message file shown or from the
+    /// folder's message; None when it could not be read
+    fn attachment(&self, index: usize) -> Option<(String, Vec<u8>)> {
+        let core = &shell().core;
+        match self.file.borrow().as_deref() {
+            Some(path) => core.file_attachment(path, index),
+            None => core.attachment(self.folder.get(), self.uid.get(), index),
+        }
+        .ok()
+        .flatten()
+    }
+
+    /// Every attachment of the message shown saved into `dir`: how many of how many, None when it could not be read
+    fn save_attachments_to(&self, dir: &std::path::Path) -> Option<(usize, usize)> {
+        let core = &shell().core;
+        match self.file.borrow().as_deref() {
+            Some(path) => core.file_save_attachments(path, dir).ok(),
+            None => core
+                .save_attachments(self.folder.get(), self.uid.get(), dir)
+                .ok()
+                .flatten(),
+        }
+    }
+
     async fn save_attachment(&self, index: usize) {
         let Some(window) = self.window() else { return };
-        let Ok(Some((name, data))) = shell().core.attachment(self.folder.get(), self.uid.get(), index) else {
+        let Some((name, data)) = self.attachment(index) else {
             ui::alert(&window, TITLE, &t!(UiAttachmentNotRead)).await;
             return;
         };
@@ -916,21 +938,27 @@ impl Reader {
         let Some(dir) = ui::choose_folder(&window, &t!(UiSaveAttachments)).await else {
             return;
         };
-        match shell().core.save_attachments(self.folder.get(), self.uid.get(), &dir) {
-            Ok(Some((saved, total))) if saved < total => {
+        match self.save_attachments_to(&dir) {
+            Some((saved, total)) if saved < total => {
                 let text = t!(GtkFilesNotSaved, failed = total - saved, total = total);
                 ui::alert(&window, TITLE, &text).await;
             }
-            Ok(Some(_)) => {}
+            Some(_) => {}
             _ => ui::alert(&window, TITLE, &t!(UiNotDownloaded)).await,
         }
     }
 
-    /// The calendar part as a file of its own (the core writes it, and only it), for the calendar program
+    /// The calendar part as a file of its own (the core writes it, and only it, from the message file shown or the
+    /// folder's message), for the calendar program
     async fn open_in_calendar(&self) {
         let Some(window) = self.window() else { return };
         let dir = glib::tmp_dir().join("InboxClassic").join("Invitations");
-        let Ok(Some(path)) = shell().core.invitation_file(self.folder.get(), self.uid.get(), &dir) else {
+        let core = &shell().core;
+        let written = match self.file.borrow().as_deref() {
+            Some(file) => core.file_invitation_file(file, &dir),
+            None => core.invitation_file(self.folder.get(), self.uid.get(), &dir),
+        };
+        let Ok(Some(path)) = written else {
             ui::alert(&window, TITLE, &t!(UiInvitationNotRead)).await;
             return;
         };

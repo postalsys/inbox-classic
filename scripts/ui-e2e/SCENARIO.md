@@ -762,6 +762,7 @@ Screenshot: `files-4-open-eml`
 
 - a second start with the path of an .eml file (as Finder, File Explorer or the file manager starts the app) hands it
   to the running app, which opens it in a message window with its subject
+- the file's attachment is listed in that window, as a folder's message's is, and Save All writes it as it was sent
 - Reply in that window opens a reply to it
 
 ## 50. The tray
