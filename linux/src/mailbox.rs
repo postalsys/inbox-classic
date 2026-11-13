@@ -896,6 +896,13 @@ impl Mailbox {
         self.view.borrow().clone()
     }
 
+    /// Preferences' senders' pictures in the Columns list turned on or off: kept, and the rows again
+    pub fn set_list_pictures(&self, on: bool) {
+        shell().settings.set_bool(settings::LIST_PICTURES, on);
+        self.list.set_pictures(on);
+        self.reload_list(true);
+    }
+
     fn reload_list(&self, keep_selection: bool) {
         let core = &shell().core;
         let view = self.list_view();
@@ -1525,6 +1532,7 @@ impl Mailbox {
                 }
             }
             Event::SyncFinished { .. } => self.show_folder_name(),
+            Event::PictureReady { request } => crate::row_pictures::ready(*request),
             _ => {}
         }
     }

@@ -21,6 +21,7 @@ const STYLE: &str = "
 .message-row .sender { font-weight: 600; }
 .message-row .row-detail { font-size: 0.9em; }
 .message-rows > row { border-bottom: 1px solid alpha(@borders, 0.5); }
+.row-initials { font-size: 12px; font-weight: 600; color: alpha(currentColor, 0.6); }
 .unread-dot { min-width: 8px; min-height: 8px; border-radius: 4px; background-color: @accent_bg_color; }
 .sort-button { margin: 2px 4px; }
 .sort-button label { font-weight: normal; }

@@ -44,6 +44,8 @@ pub struct RowContext {
     pub recipients: Rc<Cell<bool>>,
     pub several_folders: Rc<Cell<bool>>,
     pub clock: Rc<Cell<Clock>>,
+    /// Whether the rows show the senders' pictures
+    pub pictures: Rc<Cell<bool>>,
 }
 
 mod imp {
@@ -86,6 +88,7 @@ struct Parts {
     snippet: gtk::Label,
     count: gtk::Label,
     expander: gtk::Image,
+    picture: crate::row_pictures::RowPicture,
 }
 
 /// A label of one line, cut short with an ellipsis
@@ -159,7 +162,11 @@ impl Parts {
             .build();
         row.add_css_class("message-row");
         row.set_hexpand(true);
+        // the sender's picture between the dot and the words, a little apart from the words
+        let picture = crate::row_pictures::RowPicture::new();
+        picture.widget.set_margin_end(8);
         row.append(&gutter);
+        row.append(&picture.widget);
         row.append(&text);
         let parts = Parts {
             dot,
@@ -173,6 +180,7 @@ impl Parts {
             snippet,
             count,
             expander,
+            picture,
         };
         (row, parts)
     }
@@ -242,6 +250,7 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
         parts.folder.set_text(&shell().main().row_folder(m.folder_id));
     }
     bind_marks(parts, m);
+    bind_picture(parts, m, context.pictures.get());
     let snippet = m.snippet.as_deref().unwrap_or_default();
     parts.snippet.set_text(snippet);
     bind_thread(parts, m);
@@ -253,6 +262,38 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
     };
     let label = format!("{unread}{who}, {}, {date}, {snippet}", m.info.subject);
     row.update_property(&[gtk::accessible::Property::Label(&label)]);
+}
+
+/// The sender's picture (a brand's logo the provider confirmed), else their initials; none when Preferences turned
+/// the pictures off
+fn bind_picture(parts: &Parts, m: &Message, shown: bool) {
+    parts.picture.widget.set_visible(shown);
+    if shown {
+        let (_, key) = pe_core::senders::picture(m);
+        parts
+            .picture
+            .show(key, &pe_core::initials(&m.info.from_name, &m.info.from_address));
+    }
+}
+
+/// Whether a row on screen shows a drawn picture, not initials (for the UI test)
+#[cfg(feature = "e2e")]
+pub fn picture_drawn(row: &RowWidget) -> bool {
+    row.imp()
+        .parts
+        .borrow()
+        .as_ref()
+        .is_some_and(|parts| parts.picture.widget.is_visible() && parts.picture.drawn())
+}
+
+/// Whether a row on screen shows its picture at all (for the UI test)
+#[cfg(feature = "e2e")]
+pub fn picture_shown(row: &RowWidget) -> bool {
+    row.imp()
+        .parts
+        .borrow()
+        .as_ref()
+        .is_some_and(|parts| parts.picture.widget.is_visible())
 }
 
 /// The marks at the right of the subject: the paper clip (a bounce's own mark in its place) and the flag in its colour,
