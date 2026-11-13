@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the Mac app, build/mac/Inbox Classic.app, on this Mac: the Rust core as a static library (cargo, in core/ so
 # it reads core/.cargo/config.toml), the Swift package in mac/ against it, then the bundle with its icons (the Fluent
-# SVGs of app/res/icons as PDFs, the app icon from app/res/app-icon.svg), the sign-in buttons, the help (a Help Book)
+# SVGs of app/res/icons as PDFs, the app icon from app/res/app-icon-mac.svg), the sign-in buttons, the help (a Help Book)
 # and Info.plist.
 #
 #   scripts/mac-build.sh            a release build, signed ad hoc to run here
@@ -118,12 +118,12 @@ if [ -f dist/mac/THIRD-PARTY-NOTICES.txt ]; then
     cp dist/mac/THIRD-PARTY-NOTICES.txt "$APP/Contents/Resources/"
 fi
 
-# the app icon: the sizes of an .icns, drawn from the SVG
+# the app icon: the sizes of an .icns, drawn from the SVG on Apple's grid, with the margin of the Mac's other icons
 iconset=$(mktemp -d)/AppIcon.iconset
 mkdir -p "$iconset"
 for size in 16 32 128 256 512; do
-    rsvg-convert -w "$size" -h "$size" app/res/app-icon.svg -o "$iconset/icon_${size}x${size}.png"
-    rsvg-convert -w $((size * 2)) -h $((size * 2)) app/res/app-icon.svg -o "$iconset/icon_${size}x${size}@2x.png"
+    rsvg-convert -w "$size" -h "$size" app/res/app-icon-mac.svg -o "$iconset/icon_${size}x${size}.png"
+    rsvg-convert -w $((size * 2)) -h $((size * 2)) app/res/app-icon-mac.svg -o "$iconset/icon_${size}x${size}@2x.png"
 done
 iconutil -c icns "$iconset" -o "$APP/Contents/Resources/AppIcon.icns"
 rm -rf "$(dirname "$iconset")"
