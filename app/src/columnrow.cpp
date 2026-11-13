@@ -13,6 +13,16 @@ constexpr int kRowPadding = 5;
 constexpr int kLineGap = 2;
 constexpr int kRowMargin = 8;
 constexpr int kGutter = 14;
+// the sender's picture: its side, and the room between it and the text
+constexpr int kPicture = 32;
+constexpr int kPictureGap = 10;
+
+// a colour `part` of the way from `from` to `to`, out of 255
+COLORREF Mix(COLORREF from, COLORREF to, int part) {
+    auto channel = [&](int a, int b) { return static_cast<BYTE>(a + (b - a) * part / 255); };
+    return RGB(channel(GetRValue(from), GetRValue(to)), channel(GetGValue(from), GetGValue(to)),
+               channel(GetBValue(from), GetBValue(to)));
+}
 
 // seconds east of UTC of the user's time zone, now
 int64_t LocalOffset() {
@@ -250,8 +260,13 @@ void Mailbox::DrawColumnsRow(HDC dc, int index, const PeMessage& row) {
     FillRect(dc, &rule, GetSysColorBrush(COLOR_BTNFACE));
     SetBkMode(dc, TRANSPARENT);
     int line = (area.bottom - area.top - 2 * Scale(kRowPadding)) / 3;
-    // a conversation's other messages under its first, indented; step 4 puts the sender's picture before the text
+    // a conversation's other messages under its first, indented; the sender's picture before the text
     int left = area.left + Scale(kGutter) + (row.thread_depth > 0 ? Scale(16) : 0);
+    if (listPictures_) {
+        int size = Scale(kPicture), top = area.top + (area.bottom - area.top - size) / 2;
+        DrawRowPicture(dc, {left, top, left + size, top + size}, row, selected);
+        left += size + Scale(kPictureGap);
+    }
     RowPaint paint = {dc, left, area.right - Scale(kRowMargin), area.top + Scale(kRowPadding), line};
     if (row.bold) {
         DrawDot(dc, area.left + Scale(kGutter) / 2, paint.top + line / 2, Scale(7), selected ? fore : GetSysColor(COLOR_HOTLIGHT));
@@ -408,4 +423,66 @@ void Mailbox::DrawSortButton(const DRAWITEMSTRUCT& item) const {
         InflateRect(&focus, -2, -2);
         DrawFocusRect(item.hDC, &focus);
     }
+}
+
+// ---- the senders' pictures ----
+
+void Mailbox::DrawRowPicture(HDC dc, const RECT& box, const PeMessage& row, bool selected) {
+    int size = box.right - box.left;
+    if (HBITMAP bitmap = pictures_.Get(row.picture, size)) {
+        // the logo's own transparency kept, over the row
+        HDC source = CreateCompatibleDC(dc);
+        HGDIOBJ old = SelectObject(source, bitmap);
+        BLENDFUNCTION blend = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
+        AlphaBlend(dc, box.left, box.top, size, size, source, 0, 0, size, size, blend);
+        SelectObject(source, old);
+        DeleteDC(source);
+        // a hairline in the initials' grey, so a logo on white keeps its square's edge on a white row
+        FrameRect(dc, &box, GetSysColorBrush(COLOR_BTNFACE));
+        return;
+    }
+    // the initials, quiet: one grey for everyone, on a square a shade off the row's background
+    COLORREF back = GetSysColor(selected ? SelectionColor() : COLOR_WINDOW);
+    COLORREF ink = GetSysColor(!selected ? COLOR_GRAYTEXT : GetFocus() == list_ ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT);
+    SetDCBrushColor(dc, Mix(back, selected ? ink : GetSysColor(COLOR_BTNFACE), selected ? 40 : 255));
+    RECT square = box;
+    FillRect(dc, &square, static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
+    std::wstring initials = Text(row.initials);
+    if (initials.empty()) {
+        return;
+    }
+    HGDIOBJ old = SelectObject(dc, bold_);
+    SetTextColor(dc, ink);
+    DrawTextW(dc, initials.c_str(), static_cast<int>(initials.size()), &square, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+    SelectObject(dc, old);
+}
+
+void Mailbox::PictureReady(uint64_t request) {
+    uint64_t key = pictures_.Ready(request);
+    if (!key || !columns_ || !listPictures_) {
+        return;
+    }
+    // only the rows shown with that picture
+    int top = ListView_GetTopIndex(list_), shown = ListView_GetCountPerPage(list_) + 1;
+    for (int index = top; index < top + shown; index++) {
+        const PeMessage* row = Row(index);
+        if (row && row->picture == key) {
+            ListView_RedrawItems(list_, index, index);
+        }
+    }
+}
+
+int Mailbox::TestRowPicture(const std::wstring& subject) {
+    int count = ListView_GetItemCount(list_);
+    for (int index = 0; index < count; index++) {
+        const PeMessage* row = Row(index);
+        if (!row || Text(row->subject) != subject) {
+            continue;
+        }
+        if (!columns_ || !listPictures_) {
+            return 10;
+        }
+        return pictures_.Get(row->picture, Scale(kPicture)) ? 12 : 11;
+    }
+    return 0;
 }

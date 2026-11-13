@@ -70,6 +70,7 @@ struct OptionsState {
     HWND threadsCheck = nullptr;
     HWND codesCheck = nullptr;
     HWND picturesCheck = nullptr;
+    HWND listPicturesCheck = nullptr;
     HWND aheadCombo = nullptr;
     HWND limitCombo = nullptr;
     HWND layoutCombo = nullptr;
@@ -80,6 +81,7 @@ struct OptionsState {
     bool notify = false;
     bool threads = false;
     bool codes = false;
+    bool listPictures = true;
     bool pictures = false;
 };
 
@@ -230,6 +232,7 @@ LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             state->ahead = static_cast<int>(SendMessageW(state->aheadCombo, CB_GETCURSEL, 0, 0));
             state->limit = static_cast<int>(SendMessageW(state->limitCombo, CB_GETCURSEL, 0, 0));
             state->layout = static_cast<int>(SendMessageW(state->layoutCombo, CB_GETCURSEL, 0, 0));
+            state->listPictures = Button_GetCheck(state->listPicturesCheck) == BST_CHECKED;
         }
         state->done = true;
         return 0;
@@ -279,7 +282,7 @@ void StartLanguage(const std::wstring& forced) {
     core::SetLanguage(code);
 }
 
-bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes, int& layout) {
+bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes, int& layout, bool& listPictures) {
     HelpScope help("options");
     RegisterDialogClass(kOptionsClass, OptionsProc);
     std::vector<Language> languages = Languages();
@@ -298,6 +301,7 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     std::vector<std::wstring> layoutItems = {core::Plain(PE_TEXT_CMD_LAYOUT_AUTOMATIC), core::Plain(PE_TEXT_CMD_LAYOUT_CLASSIC),
                                              core::Plain(PE_TEXT_CMD_LAYOUT_COLUMNS)};
     std::wstring codesText = core::T(PE_TEXT_UI_CODES_IN_NOTIFICATIONS);
+    std::wstring listPicturesText = core::T(PE_TEXT_UI_LIST_PICTURES), listPicturesNote = core::T(PE_TEXT_UI_LIST_PICTURES_NOTE);
     std::wstring picturesText = core::T(PE_TEXT_UI_PICTURES_ALWAYS_OPTION), warning = core::T(PE_TEXT_UI_PICTURES_ALWAYS_WARNING);
     std::wstring trustedText = core::T(PE_TEXT_UI_TRUSTED_SENDERS_BUTTON), emlText = core::T(PE_TEXT_UI_EML_DEFAULT);
     std::wstring ok = core::T(PE_TEXT_UI_OK), cancel = core::T(PE_TEXT_UI_CANCEL);
@@ -337,17 +341,20 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
                           static_cast<int>(MeasureText(threadsText).cx) + Scale(24),
                           static_cast<int>(MeasureText(codesText).cx) + Scale(48),
                           static_cast<int>(MeasureText(picturesText).cx) + Scale(24),
+                          static_cast<int>(MeasureText(listPicturesText).cx) + Scale(24),
                           ButtonWidth({trustedText}) + Scale(6) + ButtonWidth({emlText}), comboLabel + downloadListWidth});
     int width = 2 * pad + inner;
     int noteHeight = std::max(Scale(16), static_cast<int>(MeasureText(note, inner - labelWidth).cy));
     int warningHeight = std::max(Scale(16), static_cast<int>(MeasureText(warning, inner - Scale(17)).cy));
+    int listNoteHeight = std::max(Scale(16), static_cast<int>(MeasureText(listPicturesNote, inner - Scale(17)).cy));
     int downloadNoteHeight = std::max(Scale(16), static_cast<int>(MeasureText(downloadNote, inner).cy));
     // the language and its note, a line, the notifications (with their codes under them) and the conversations, a
     // line, reading: pictures with their warning, Trusted Senders and .eml files; the buttons
     int reading = Scale(12) + 2 + Scale(12) + row + warningHeight + Scale(8) + Scale(25);
     // a line, then downloading: the two lists and the note
     int downloading = Scale(12) + 2 + Scale(12) + 2 * row + 2 * Scale(4) + downloadNoteHeight;
-    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 4 * row + 3 * Scale(4) + reading + downloading +
+    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 5 * row + 3 * Scale(4) + Scale(8) + listNoteHeight +
+                 reading + downloading +
                  Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
     OptionsState state;
@@ -392,7 +399,15 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
         SendMessageW(layoutCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
     }
     SendMessageW(layoutCombo, CB_SETCURSEL, std::clamp(layout, 0, 2), 0);
-    y += row + Scale(12);
+    y += row + Scale(8);
+    // the senders' pictures of the Columns list, and what they are under the check box's words
+    HWND listPicturesCheck = CreateChild(dialog, L"BUTTON", listPicturesText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX,
+                                         IDC_OPTIONS_LIST_PICTURES, {left, y, right, y + row});
+    Button_SetCheck(listPicturesCheck, listPictures ? BST_CHECKED : BST_UNCHECKED);
+    y += row;
+    CreateChild(dialog, L"STATIC", listPicturesNote.c_str(), SS_LEFT | SS_NOPREFIX, IDC_OPTIONS_LIST_PICTURES_NOTE,
+                {left + Scale(17), y, right, y + listNoteHeight});
+    y += listNoteHeight + Scale(12);
     CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {left, y, right, y + 2});
     y += 2 + Scale(12);
     HWND picturesCheck = CreateChild(dialog, L"BUTTON", picturesText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_OPTIONS_PICTURES,
@@ -438,6 +453,7 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     state.aheadCombo = aheadCombo;
     state.limitCombo = limitCombo;
     state.layoutCombo = layoutCombo;
+    state.listPicturesCheck = listPicturesCheck;
     state.core = core;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     RunModal(dialog, combo, state.done);
@@ -450,6 +466,7 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     if (state.layout >= 0) {
         layout = state.layout;
     }
+    listPictures = state.listPictures;
     pe_set_always_load_pictures(core, state.pictures);
     if (state.ahead >= 0) {
         pe_set_download_ahead(core, static_cast<PeDownloadAhead>(state.ahead));
