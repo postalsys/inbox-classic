@@ -197,6 +197,8 @@ pub struct Client {
     bye: Option<String>,
     closed: bool,
     events: UnboundedSender<Event>,
+    /// When the first response to the last command came
+    answered: Option<std::time::Instant>,
 }
 
 impl Client {
@@ -226,6 +228,7 @@ impl Client {
             bye: None,
             closed: false,
             events,
+            answered: None,
         };
         client.start_session().await?;
         Ok((client, receiver))
@@ -345,6 +348,11 @@ impl Client {
 
     pub fn is_closed(&self) -> bool {
         self.closed
+    }
+
+    /// When the first response to the last command came: a FETCH's first byte, for timing what the user waits for
+    pub fn answered_at(&self) -> Option<std::time::Instant> {
+        self.answered
     }
 
     pub async fn noop(&mut self) -> Result<(), Error> {
@@ -492,11 +500,13 @@ impl Client {
         mut continuation: Option<ContinuationHandler<'_>>,
     ) -> Result<Completion, Error> {
         let (tag, mut segments) = self.send(name, args).await?;
+        self.answered = None;
         let mut collected = Vec::new();
         loop {
             let response = self
                 .read_response(Some(&tag), Some(self.config.timeouts.response))
                 .await?;
+            self.answered.get_or_insert_with(std::time::Instant::now);
             if response.is_continuation() {
                 let data = match (segments.next(), continuation.as_mut()) {
                     (Some(segment), _) => segment,

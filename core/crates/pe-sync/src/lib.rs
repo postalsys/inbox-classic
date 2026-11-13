@@ -450,6 +450,12 @@ pub async fn fetch_texts(
     Ok(found)
 }
 
+/// Selects a folder of the store unless it is the selected one
+pub async fn select_folder(client: &mut Client, store: &mut Store, folder: FolderId) -> Result<()> {
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await
+}
+
 /// Selects a folder unless it is the selected one
 async fn ensure_selected(client: &mut Client, path: &str) -> Result<()> {
     if client.selected().is_none_or(|selected| selected.path != path) {
