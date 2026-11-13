@@ -44,7 +44,7 @@ pub use list_view::ListView;
 use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
-pub use pe_store::{Ahead, FlagColor};
+pub use pe_store::{Ahead, DEFAULT_LIMIT_MB, FlagColor};
 pub use pe_store::{MessageRef, Scope, Search, Show, ThreadMark};
 pub use selection::{Action, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
@@ -89,9 +89,6 @@ pub use text::{
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
-
-/// The smallest limit of downloaded messages: the messages opened while the app runs are kept anyway
-pub const MIN_DOWNLOAD_LIMIT_MB: u64 = 50;
 
 /// The version of the core, which the About boxes show
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -593,8 +590,7 @@ impl Core {
 
     /// Changes the limit; the oldest sources go past it with the next batch of the background workers
     pub fn set_download_limit_mb(&self, megabytes: u64) -> Result<()> {
-        self.store()
-            .set_download_limit_mb(megabytes.max(MIN_DOWNLOAD_LIMIT_MB))?;
+        self.store().set_download_limit_mb(megabytes)?;
         self.more_to_download();
         Ok(())
     }
@@ -1935,7 +1931,9 @@ impl Core {
                 .iter()
                 .map(|&uid| Ok(store.message(folder, uid)?.ok_or(Error::NotFound)?.info))
                 .collect::<Result<Vec<_>>>()?;
-            store.remove_messages(folder, uids)?;
+            // their sources kept until the command is done: an archived message keeps its own, a failed command
+            // puts them back
+            store.remove_moving_messages(folder, uids)?;
             (account, removed)
         };
         self.post(Event::FolderChanged { account, folder })?;

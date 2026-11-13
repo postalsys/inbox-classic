@@ -3425,3 +3425,26 @@ fn a_text_batch_the_server_refuses_is_fetched_one_message_at_a_time() {
     let rules = s.server.request("GET", "/v1/script/rules", None);
     assert!(rules[0]["hits"].as_u64().unwrap() >= 1, "{rules}");
 }
+
+#[test]
+fn an_archived_message_keeps_its_downloaded_source() {
+    let Some(s) = setup() else { return };
+    let (account, inbox, uids) = synced_with(&s, &["One"]);
+    open(&s, inbox, uids[0]);
+    s.core.archive_messages(inbox, &uids).unwrap();
+    let archive = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "Archive")
+        .unwrap()
+        .id;
+    eventually(
+        || {
+            let archived = s.core.messages(archive, Sort::default(), 0, 10).unwrap();
+            archived.len() == 1 && downloaded(&s, archive, archived[0].info.uid)
+        },
+        "the source with the message in the Archive",
+    );
+}

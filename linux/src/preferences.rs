@@ -166,56 +166,66 @@ fn pictures_group() -> adw::PreferencesGroup {
     group
 }
 
-/// A label of the other platforms' forms as a row's title: without its colon, as GNOME has them
-fn row_title(text: Text) -> String {
-    plain(text).trim_end_matches(':').trim_end().to_string()
+/// A row choosing one of `choices`, the one chosen under its title, where a long one has room in every language;
+/// `chosen` is called with the place of a new choice
+fn choice_row(
+    title: Text,
+    choices: &[String],
+    name: &str,
+    selected: usize,
+    chosen: impl Fn(usize) + 'static,
+) -> adw::ComboRow {
+    let row = adw::ComboRow::builder()
+        .title(crate::words::field_title(title))
+        .use_subtitle(true)
+        .model(&gtk::StringList::new(
+            &choices.iter().map(String::as_str).collect::<Vec<_>>(),
+        ))
+        .build();
+    row.set_widget_name(name);
+    row.set_selected(selected as u32);
+    row.connect_selected_notify(move |row| chosen(row.selected() as usize));
+    row
 }
 
 /// Downloading: what is downloaded before it is opened, how much each account keeps, and what that means
 fn download_group() -> adw::PreferencesGroup {
     let core = &shell().core;
-    // in the order of pe_core::Ahead's choices below
+    // in the order of the words below
     let aheads = [pe_core::Ahead::Recent, pe_core::Ahead::All, pe_core::Ahead::Never];
     let names = [
         plain(Text::UiDownloadAheadRecent),
         plain(Text::UiDownloadAheadAll),
         plain(Text::UiDownloadAheadNever),
     ];
-    // the choice under the title, where a long one has room in every language
-    let ahead = adw::ComboRow::builder()
-        .title(row_title(Text::UiDownloadAhead))
-        .use_subtitle(true)
-        .model(&gtk::StringList::new(
-            &names.iter().map(String::as_str).collect::<Vec<_>>(),
-        ))
-        .build();
-    ahead.set_widget_name("preferences-download-ahead");
     let now = core.download_ahead().unwrap_or_default();
-    ahead.set_selected(aheads.iter().position(|a| *a == now).unwrap_or(0) as u32);
-    ahead.connect_selected_notify(move |row| {
-        if let Some(chosen) = aheads.get(row.selected() as usize) {
-            let _ = shell().core.set_download_ahead(*chosen);
-        }
-    });
+    let ahead = choice_row(
+        Text::UiDownloadAhead,
+        &names,
+        "preferences-download-ahead",
+        aheads.iter().position(|a| *a == now).unwrap_or(0),
+        move |at| {
+            if let Some(chosen) = aheads.get(at) {
+                let _ = shell().core.set_download_ahead(*chosen);
+            }
+        },
+    );
     let limits: Vec<String> = pe_core::DOWNLOAD_LIMITS_MB
         .iter()
         .map(|megabytes| pe_core::download_limit_text(*megabytes))
         .collect();
-    let limit = adw::ComboRow::builder()
-        .title(row_title(Text::UiDownloadLimit))
-        .use_subtitle(true)
-        .model(&gtk::StringList::new(
-            &limits.iter().map(String::as_str).collect::<Vec<_>>(),
-        ))
-        .build();
-    limit.set_widget_name("preferences-download-limit");
-    let kept = core.download_limit_mb().unwrap_or(pe_core::DOWNLOAD_LIMITS_MB[2]);
-    limit.set_selected(pe_core::download_limit_index(kept) as u32);
-    limit.connect_selected_notify(|row| {
-        if let Some(megabytes) = pe_core::DOWNLOAD_LIMITS_MB.get(row.selected() as usize) {
-            let _ = shell().core.set_download_limit_mb(*megabytes);
-        }
-    });
+    let kept = core.download_limit_mb().unwrap_or(pe_core::DEFAULT_LIMIT_MB);
+    let limit = choice_row(
+        Text::UiDownloadLimit,
+        &limits,
+        "preferences-download-limit",
+        pe_core::download_limit_index(kept),
+        |at| {
+            if let Some(megabytes) = pe_core::DOWNLOAD_LIMITS_MB.get(at) {
+                let _ = shell().core.set_download_limit_mb(*megabytes);
+            }
+        },
+    );
     let group = adw::PreferencesGroup::builder()
         .title(plain(Text::UiDownloadHeading))
         .description(plain(Text::UiDownloadNote))

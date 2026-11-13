@@ -244,10 +244,10 @@ impl Worker {
         self.emit(Event::MessageReady { folder, uid });
         // the search finds it by what the parser reads in it from now on, after the window has it
         if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
-            // where a panic is caught: a message the parser can not read does not end the worker
-            if let Ok(text) = tokio::task::spawn_blocking(move || crate::search::index_text(&source)).await {
+            match crate::search::read_index_text(&source) {
                 // its index row replaced at once, never missing for a search meanwhile
-                store.transaction(|store| store.set_indexed(message.id, &text))?;
+                Some(text) => store.transaction(|store| store.set_indexed(message.id, &text))?,
+                None => store.mark_fetch_failed(message.id)?,
             }
         }
         Ok(())

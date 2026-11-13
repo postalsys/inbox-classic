@@ -3,6 +3,8 @@
 
 use rusqlite::{OptionalExtension, params};
 
+use crate::messages::list_date;
+
 use crate::{AccountId, FolderId, Result, Store};
 
 const AHEAD: &str = "download.ahead";
@@ -49,10 +51,6 @@ pub const DEFAULT_LIMIT_MB: u64 = 1024;
 /// again)
 const NOT_AHEAD: &str = "COALESCE(f.special_use, '') NOT IN ('\\Junk', '\\Trash', '\\All')";
 
-/// The Date order of the list ([`crate::messages`]' LIST_DATE), of the messages `n` and `m`
-const LIST_DATE_N: &str = "COALESCE(MIN(n.date, n.internal_date), n.date, n.internal_date)";
-const LIST_DATE_M: &str = "COALESCE(MIN(m.date, m.internal_date), m.date, m.internal_date)";
-
 /// Which messages are downloaded next
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct AheadRule {
@@ -64,8 +62,26 @@ pub struct AheadRule {
     pub newer_than: Option<i64>,
 }
 
+impl AheadRule {
+    /// The one bound on the arrival date the index of a folder's messages by arrival can use: after it
+    fn after(&self) -> i64 {
+        let since = self.since.map(|since| since - 1);
+        since.max(self.newer_than).unwrap_or(i64::MIN)
+    }
+}
+
 /// A message to download: (message id, UID, size)
 pub type ToDownload = (i64, u64, u64);
+
+/// The sources of an account: how many bytes they take, and when the oldest of them arrived
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct Downloaded {
+    pub bytes: u64,
+    pub oldest: Option<i64>,
+}
+
+/// How many of an account's oldest sources [`Store::remove_oldest_sources`] looks at a time
+const OLDEST_CHUNK: i64 = 100;
 
 impl Store {
     /// Options' and Settings' "Download messages ahead"
@@ -79,7 +95,7 @@ impl Store {
         self.set_text_setting(AHEAD, ahead.key())
     }
 
-    /// "Keep at most [n] MB of downloaded messages for each account"
+    /// "Downloaded messages kept for each account"
     pub fn download_limit_mb(&self) -> Result<u64> {
         Ok(self
             .text_setting(LIMIT)?
@@ -91,23 +107,19 @@ impl Store {
         self.set_text_setting(LIMIT, &megabytes.to_string())
     }
 
-    /// How many bytes the downloaded sources of an account take
-    pub fn downloaded_size(&self, account: AccountId) -> Result<u64> {
+    /// How much the downloaded sources of an account take, and when the oldest arrived (from `body_sizes`, without
+    /// reading a source)
+    pub fn downloaded(&self, account: AccountId) -> Result<Downloaded> {
         self.db.query_row(
-            "SELECT COALESCE(SUM(b.size), 0) FROM bodies b JOIN messages m ON m.id = b.message_id \
-             JOIN folders f ON f.id = m.folder_id WHERE f.account_id = ?1",
+            "SELECT COALESCE(SUM(s.size), 0), MIN(m.internal_date) FROM body_sizes s \
+             JOIN messages m ON m.id = s.message_id JOIN folders f ON f.id = m.folder_id WHERE f.account_id = ?1",
             params![account],
-            |row| row.get(0),
-        )
-    }
-
-    /// When the oldest message of an account whose source is kept arrived
-    pub fn oldest_downloaded(&self, account: AccountId) -> Result<Option<i64>> {
-        self.db.query_row(
-            "SELECT MIN(m.internal_date) FROM bodies b JOIN messages m ON m.id = b.message_id \
-             JOIN folders f ON f.id = m.folder_id WHERE f.account_id = ?1",
-            params![account],
-            |row| row.get(0),
+            |row| {
+                Ok(Downloaded {
+                    bytes: row.get(0)?,
+                    oldest: row.get(1)?,
+                })
+            },
         )
     }
 
@@ -127,20 +139,19 @@ impl Store {
             ))?
             .query_map(params![account], |row| row.get(0))?
             .collect::<rusqlite::Result<_>>()?;
+        // newest first along the index by arrival, which the one bound on the date keeps short
         let mut statement = self.db.prepare_cached(
-            "SELECT m.id, m.uid, COALESCE(m.size, 0) FROM messages m \
-             WHERE m.folder_id = ?1 AND m.fetch_failed = 0 \
+            "SELECT m.id, m.uid, COALESCE(m.size, 0) FROM messages m INDEXED BY messages_by_received \
+             WHERE m.folder_id = ?1 AND m.internal_date > ?2 AND m.fetch_failed = 0 AND COALESCE(m.size, 0) <= ?3 \
              AND NOT EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = m.id) \
-             AND (?2 IS NULL OR m.internal_date >= ?2) AND (?3 IS NULL OR COALESCE(m.size, 0) <= ?3) \
-             AND (?4 IS NULL OR m.internal_date > ?4) \
              ORDER BY m.internal_date DESC, m.uid DESC LIMIT 200",
         )?;
+        let largest = rule.max_size.map_or(i64::MAX, |size| size as i64);
         for folder in folders {
             let rows: Vec<ToDownload> = statement
-                .query_map(
-                    params![folder, rule.since, rule.max_size.map(|s| s as i64), rule.newer_than],
-                    |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
-                )?
+                .query_map(params![folder, rule.after(), largest], |row| {
+                    Ok((row.get(0)?, row.get(1)?, row.get(2)?))
+                })?
                 .collect::<rusqlite::Result<_>>()?;
             if rows.is_empty() {
                 continue;
@@ -159,8 +170,7 @@ impl Store {
         Ok(None)
     }
 
-    /// Messages that could not be downloaded ahead, or whose source the parser could not read: not tried again in the
-    /// background (opening one still tries)
+    /// Messages that could not be downloaded or read: not tried again in the background (opening one still tries)
     pub fn mark_fetch_failed(&self, message: i64) -> Result<()> {
         self.db
             .execute("UPDATE messages SET fetch_failed = 1 WHERE id = ?1", params![message])?;
@@ -168,75 +178,69 @@ impl Store {
     }
 
     /// Removes the sources of an account's oldest messages until they take at most `limit` bytes; never those of
-    /// Drafts, nor those `spare` names (opened since the app started). How many bytes that freed.
+    /// Drafts, nor those `spare` names (opened since the app started)
     pub fn remove_oldest_sources(
         &self,
         account: AccountId,
         limit: u64,
         spare: &dyn Fn(FolderId, u64) -> bool,
-    ) -> Result<u64> {
-        let mut over = self.downloaded_size(account)?.saturating_sub(limit);
-        if over == 0 {
-            return Ok(0);
-        }
-        let oldest: Vec<(i64, FolderId, u64, u64)> = self
-            .db
-            .prepare_cached(
-                "SELECT b.message_id, m.folder_id, m.uid, b.size FROM bodies b JOIN messages m ON m.id = b.message_id \
-                 JOIN folders f ON f.id = m.folder_id \
-                 WHERE f.account_id = ?1 AND COALESCE(f.special_use, '') <> '\\Drafts' \
-                 ORDER BY COALESCE(m.internal_date, m.date), m.id",
-            )?
-            .query_map(params![account], |row| {
-                Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?))
-            })?
-            .collect::<rusqlite::Result<_>>()?;
+    ) -> Result<()> {
+        let mut over = self.downloaded(account)?.bytes.saturating_sub(limit);
+        let mut oldest = self.db.prepare_cached(
+            "SELECT s.message_id, m.folder_id, m.uid, s.size FROM body_sizes s JOIN messages m ON m.id = s.message_id \
+             JOIN folders f ON f.id = m.folder_id \
+             WHERE f.account_id = ?1 AND COALESCE(f.special_use, '') <> '\\Drafts' \
+             ORDER BY m.internal_date, m.id LIMIT ?2 OFFSET ?3",
+        )?;
         let mut remove = self.db.prepare_cached("DELETE FROM bodies WHERE message_id = ?1")?;
-        let mut freed = 0;
-        for (message, folder, uid, size) in oldest {
-            if over == 0 {
+        // the spared ones stay, and are passed over by the next chunk
+        let mut spared = 0;
+        while over > 0 {
+            let chunk: Vec<(i64, FolderId, u64, u64)> = oldest
+                .query_map(params![account, OLDEST_CHUNK, spared], |row| {
+                    Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?))
+                })?
+                .collect::<rusqlite::Result<_>>()?;
+            if chunk.is_empty() {
                 break;
             }
-            if spare(folder, uid) {
-                continue;
+            for (message, folder, uid, size) in chunk {
+                if over == 0 {
+                    break;
+                }
+                if spare(folder, uid) {
+                    spared += 1;
+                    continue;
+                }
+                remove.execute(params![message])?;
+                over = over.saturating_sub(size);
             }
-            remove.execute(params![message])?;
-            freed += size;
-            over = over.saturating_sub(size);
         }
-        Ok(freed)
+        Ok(())
     }
 
     /// The messages next to one in its folder's list by date, the one above and the one below, those not downloaded
     /// yet nor failed: what Next and Previous open after it. (UID, size)
     pub fn neighbors_to_download(&self, folder: FolderId, uid: u64) -> Result<Vec<(u64, u64)>> {
+        let (n, m) = (list_date("n"), list_date("m"));
         let mut found = Vec::new();
         for (compare, order) in [(">", "ASC"), ("<", "DESC")] {
-            let next: Option<(u64, u64)> = self
+            let next: Option<(u64, u64, bool)> = self
                 .db
                 .prepare_cached(&format!(
-                    "SELECT n.uid, COALESCE(n.size, 0) FROM messages n, messages m \
-                     WHERE m.folder_id = ?1 AND m.uid = ?2 AND n.folder_id = ?1 \
-                     AND ({LIST_DATE_N}, n.uid) {compare} ({LIST_DATE_M}, m.uid) \
-                     ORDER BY {LIST_DATE_N} {order}, n.uid {order} LIMIT 1"
+                    "SELECT n.uid, COALESCE(n.size, 0), \
+                     n.fetch_failed = 0 AND NOT EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = n.id) \
+                     FROM messages n, messages m WHERE m.folder_id = ?1 AND m.uid = ?2 AND n.folder_id = ?1 \
+                     AND ({n}, n.uid) {compare} ({m}, m.uid) ORDER BY {n} {order}, n.uid {order} LIMIT 1"
                 ))?
-                .query_row(params![folder, uid], |row| Ok((row.get(0)?, row.get(1)?)))
+                .query_row(params![folder, uid], |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))
                 .optional()?;
-            found.extend(next);
+            found.extend(
+                next.filter(|(_, _, pending)| *pending)
+                    .map(|(uid, size, _)| (uid, size)),
+            );
         }
-        let mut wanted = Vec::new();
-        for (uid, size) in found {
-            let pending: bool = self.db.query_row(
-                "SELECT fetch_failed = 0 AND NOT EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id) \
-                 FROM messages WHERE folder_id = ?1 AND uid = ?2",
-                params![folder, uid],
-                |row| row.get(0),
-            )?;
-            if pending {
-                wanted.push((uid, size));
-            }
-        }
-        Ok(wanted)
+        Ok(found)
     }
 
     /// Removes messages on their way to another folder of the account, their sources kept for the rows they become
@@ -257,56 +261,31 @@ impl Store {
     /// from COPYUID); those of `uids` that found none are dropped
     pub fn adopt_moved_sources(&self, from: FolderId, to: FolderId, uids: &[u64], moved: &[(u64, u64)]) -> Result<()> {
         let mut adopt = self.db.prepare_cached(
-            "INSERT OR REPLACE INTO bodies (message_id, source, size) \
-             SELECT m.id, s.source, length(s.source) FROM moving_sources s, messages m \
+            "INSERT OR REPLACE INTO bodies (message_id, source) \
+             SELECT m.id, s.source FROM moving_sources s, messages m \
              WHERE s.folder_id = ?1 AND s.uid = ?2 AND m.folder_id = ?3 AND m.uid = ?4",
         )?;
         for (uid, became) in moved {
             adopt.execute(params![from, uid, to, became])?;
         }
-        self.forget_moved_sources(from, uids)
-    }
-
-    /// The sources of messages whose move failed, back with their rows
-    pub fn restore_moved_sources(&self, folder: FolderId, uids: &[u64]) -> Result<()> {
-        let mut restore = self.db.prepare_cached(
-            "INSERT OR REPLACE INTO bodies (message_id, source, size) \
-             SELECT m.id, s.source, length(s.source) FROM moving_sources s, messages m \
-             WHERE s.folder_id = ?1 AND s.uid = ?2 AND m.folder_id = ?1 AND m.uid = ?2",
-        )?;
-        for uid in uids {
-            restore.execute(params![folder, uid])?;
-        }
-        self.forget_moved_sources(folder, uids)
-    }
-
-    fn forget_moved_sources(&self, folder: FolderId, uids: &[u64]) -> Result<()> {
         let mut forget = self
             .db
             .prepare_cached("DELETE FROM moving_sources WHERE folder_id = ?1 AND uid = ?2")?;
         for uid in uids {
-            forget.execute(params![folder, uid])?;
+            forget.execute(params![from, uid])?;
         }
         Ok(())
+    }
+
+    /// The sources of messages whose move failed, back with their rows
+    pub fn restore_moved_sources(&self, folder: FolderId, uids: &[u64]) -> Result<()> {
+        let same: Vec<(u64, u64)> = uids.iter().map(|uid| (*uid, *uid)).collect();
+        self.adopt_moved_sources(folder, folder, uids, &same)
     }
 
     /// Drops what moves left when the app last ended in the middle of one: called once at start
     pub fn clear_moving_sources(&self) -> Result<()> {
         self.db.execute("DELETE FROM moving_sources", [])?;
-        Ok(())
-    }
-
-    pub(crate) fn text_setting(&self, key: &str) -> Result<Option<String>> {
-        self.db
-            .query_row("SELECT value FROM settings WHERE key = ?1", [key], |row| row.get(0))
-            .optional()
-    }
-
-    pub(crate) fn set_text_setting(&self, key: &str, value: &str) -> Result<()> {
-        self.db.execute(
-            "INSERT INTO settings (key, value) VALUES (?1, ?2) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
-            (key, value),
-        )?;
         Ok(())
     }
 }
@@ -376,9 +355,8 @@ mod tests {
         assert_eq!(folder, inbox);
         assert_eq!(batch.iter().map(|m| m.1).collect::<Vec<_>>(), [2, 3, 1]);
         // the Inbox done: the Archive, never Junk
-        for (id, uid, _) in batch {
+        for (_, uid, _) in batch {
             store.set_source(inbox, uid, b"x").unwrap();
-            let _ = id;
         }
         let (folder, _) = store.messages_to_download(account, &rule, 1000).unwrap().unwrap();
         assert_eq!(folder, archive);
@@ -461,8 +439,9 @@ mod tests {
         assert_eq!(store.source(archive, 7).unwrap().as_deref(), Some(&b"first"[..]));
         assert_eq!(
             store
-                .downloaded_size(store.folder(archive).unwrap().account_id)
-                .unwrap(),
+                .downloaded(store.folder(archive).unwrap().account_id)
+                .unwrap()
+                .bytes,
             5
         );
         // a move that failed: back with its row
@@ -490,15 +469,21 @@ mod tests {
                 .unwrap();
             store.set_source(inbox, uid, &[0; 100]).unwrap();
         }
-        assert_eq!(store.downloaded_size(account).unwrap(), 500);
-        assert_eq!(store.oldest_downloaded(account).unwrap(), Some(1));
+        assert_eq!(
+            store.downloaded(account).unwrap(),
+            Downloaded {
+                bytes: 500,
+                oldest: Some(1)
+            }
+        );
         // under the limit: nothing goes
-        assert_eq!(store.remove_oldest_sources(account, 500, &|_, _| false).unwrap(), 0);
-        // the oldest Inbox message was opened: the next one goes in its place; Drafts stay
-        let freed = store
+        store.remove_oldest_sources(account, 500, &|_, _| false).unwrap();
+        assert_eq!(store.downloaded(account).unwrap().bytes, 500);
+        // the oldest Inbox message was opened: the next ones go in its place; Drafts stay
+        store
             .remove_oldest_sources(account, 300, &|folder, uid| folder == inbox && uid == 1)
             .unwrap();
-        assert_eq!(freed, 200);
+        assert_eq!(store.downloaded(account).unwrap().bytes, 300);
         assert!(store.has_source(drafts, 1).unwrap());
         assert!(store.has_source(inbox, 1).unwrap());
         assert!(!store.has_source(inbox, 2).unwrap() && !store.has_source(inbox, 3).unwrap());

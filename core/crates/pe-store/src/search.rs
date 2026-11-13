@@ -452,7 +452,7 @@ impl Store {
     pub fn messages_to_index(&self, account: AccountId, limit: usize) -> Result<Vec<(i64, FolderId, u64)>> {
         let mut statement = self.db.prepare_cached(
             "SELECT m.id, m.folder_id, m.uid FROM messages m INDEXED BY messages_text_unindexed \
-             JOIN folders f ON f.id = m.folder_id WHERE m.text_indexed = 0 AND f.account_id = ?1 \
+             JOIN folders f ON f.id = m.folder_id WHERE m.text_indexed = 0 AND m.fetch_failed = 0 AND f.account_id = ?1 \
              ORDER BY COALESCE(m.date, m.internal_date) DESC LIMIT ?2",
         )?;
         statement

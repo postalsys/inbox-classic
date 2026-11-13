@@ -3,8 +3,9 @@
 //! batches of about [`BATCH_BYTES`], until the account keeps the limit the user set; then the oldest go first. The
 //! reader fetches the messages next to the one opened.
 //!
-//! What is downloaded ahead is untrusted mail parsed without the user opening it: the parser runs where a panic is
-//! caught, and a message it can not read is marked and not tried again in the background.
+//! What is downloaded ahead is untrusted mail parsed without the user opening it: a panic of the parser is caught
+//! ([`crate::search::read_index_text`]), and a message it can not read is marked and not tried again in the
+//! background.
 
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
@@ -36,28 +37,18 @@ impl Worker {
             return Ok(0);
         }
         let limit = store.download_limit_mb()?.saturating_mul(MB);
-        let full = store.downloaded_size(self.account)? >= limit;
+        let kept = store.downloaded(self.account)?;
         let rule = AheadRule {
             since: (ahead == Ahead::Recent).then(|| unix_now() - pe_store::RECENT_DAYS * 86_400),
             max_size: max_size(ahead),
             // full: only what is newer than the oldest kept, which goes to make room for it
-            newer_than: if full {
-                store.oldest_downloaded(self.account)?
-            } else {
-                None
-            },
+            newer_than: if kept.bytes >= limit { kept.oldest } else { None },
         };
         let Some((folder, batch)) = store.messages_to_download(self.account, &rule, BATCH_BYTES)? else {
             return Ok(0);
         };
         let uids: Vec<u64> = batch.iter().map(|(_, uid, _)| *uid).collect();
         self.download_many(store, folder, &uids).await?;
-        // what the server did not give is not asked for again
-        for (message, uid, _) in &batch {
-            if !store.has_source(folder, *uid)? {
-                store.mark_fetch_failed(*message)?;
-            }
-        }
         self.keep_under_limit(store, limit)?;
         Ok(batch.len())
     }
@@ -88,48 +79,38 @@ impl Worker {
         self.keep_under_limit(store, store.download_limit_mb()?.saturating_mul(MB))
     }
 
-    /// Downloads messages of a folder in one FETCH and keeps each with its search text
+    /// Downloads messages of a folder in one FETCH and keeps each with its search text, in one transaction. One the
+    /// server does not give, or the parser can not read, is marked and not tried again in the background.
     async fn download_many(&mut self, store: &mut Store, folder: FolderId, uids: &[u64]) -> Result<(), Failure> {
-        let fetched = pe_sync::fetch_sources(self.client(store).await?, store, folder, uids).await?;
-        for (uid, source) in fetched {
-            keep_source(store, folder, uid, source).await?;
-        }
+        let mut fetched = pe_sync::fetch_sources(self.client(store).await?, store, folder, uids).await?;
+        let texts: Vec<_> = fetched
+            .iter()
+            .map(|(_, source)| crate::search::read_index_text(source))
+            .collect();
+        store.transaction(|store| {
+            for &uid in uids {
+                let Some(message) = store.message(folder, uid)? else {
+                    continue;
+                };
+                let at = fetched.iter().position(|(found, _)| *found == uid);
+                match at.and_then(|at| texts[at].as_ref().map(|text| (at, text))) {
+                    Some((at, text)) => {
+                        store.set_source(folder, uid, &std::mem::take(&mut fetched[at].1))?;
+                        store.set_indexed(message.id, text)?;
+                    }
+                    None => store.mark_fetch_failed(message.id)?,
+                }
+            }
+            Ok(())
+        })?;
         Ok(())
     }
 
-    /// The oldest sources of the account removed until they take at most `limit`; never those opened since the app
-    /// started
+    /// The oldest sources of the account removed until they take at most `limit`; never those of messages opened
+    /// since the app started
     fn keep_under_limit(&self, store: &Store, limit: u64) -> Result<(), Failure> {
-        let opened = self.ctx.opened.lock().unwrap_or_else(|p| p.into_inner()).clone();
+        let opened = self.ctx.opened.lock().unwrap_or_else(|p| p.into_inner());
         store.remove_oldest_sources(self.account, limit, &|folder, uid| opened.contains(&(folder, uid)))?;
         Ok(())
     }
-}
-
-/// Keeps a message's source and the text the search finds it by, in one transaction. The parser runs where a panic
-/// is caught: a message it can not read is marked (not tried again in the background) and not kept. Whether it was
-/// kept.
-pub(super) async fn keep_source(
-    store: &mut Store,
-    folder: FolderId,
-    uid: u64,
-    source: Vec<u8>,
-) -> Result<bool, Failure> {
-    let Some(message) = store.message(folder, uid)? else {
-        return Ok(false);
-    };
-    let parsed = tokio::task::spawn_blocking(move || {
-        let text = crate::search::index_text(&source);
-        (source, text)
-    })
-    .await;
-    let Ok((source, text)) = parsed else {
-        store.mark_fetch_failed(message.id)?;
-        return Ok(false);
-    };
-    store.transaction(|store| {
-        store.set_source(folder, uid, &source)?;
-        store.set_indexed(message.id, &text)
-    })?;
-    Ok(true)
 }

@@ -483,7 +483,8 @@ impl Worker {
                     self.archived_labels.insert(id, labels);
                 }
             }
-            return Ok(());
+            // they stay in All Mail, which is not downloaded ahead: their sources go
+            return Ok(store.adopt_moved_sources(folder, folder, uids, &[])?);
         }
         let (path, made) = pe_sync::archive_folder(client, store, account).await?;
         let path = path.map_err(|refusal| Failure {
@@ -499,8 +500,11 @@ impl Worker {
                 message: tr(Text::NotArchivedHere),
             });
         };
-        pe_sync::move_message(self.client(store).await?, store, folder, uids, to.id).await?;
-        self.sync_one(store, to.id).await
+        let became = pe_sync::move_message(self.client(store).await?, store, folder, uids, to.id).await?;
+        // the messages show up in the Archive, with their sources when they were downloaded
+        let synced = self.sync_one(store, to.id).await;
+        store.adopt_moved_sources(folder, to.id, uids, &became)?;
+        synced
     }
 
     /// Takes back an archive on Gmail: the labels the messages lost put back on them in All Mail, found there by
@@ -571,7 +575,8 @@ impl Worker {
                     removed.push(message.info);
                 }
             }
-            store.remove_messages(m.to, &uids)?;
+            // their sources go with them, as a move's do
+            store.remove_moving_messages(m.to, &uids)?;
             self.emit(Event::FolderChanged {
                 account: self.account,
                 folder: m.to,
@@ -582,8 +587,10 @@ impl Worker {
                     .map_err(Failure::from),
                 Err(failure) => Err(failure),
             };
-            self.restore_on_failure(store, m.to, &removed, moved.map(|_| ()))?;
-            self.sync_one(store, m.from).await?;
+            let became = self.restore_on_failure(store, m.to, &removed, moved)?;
+            let synced = self.sync_one(store, m.from).await;
+            store.adopt_moved_sources(m.to, m.from, &uids, &became)?;
+            synced?;
         }
         Ok(())
     }
@@ -834,16 +841,21 @@ impl Worker {
             .map(|(message, _, uid)| (*message, *uid))
             .collect();
         let uids: Vec<u64> = messages.iter().map(|(_, uid)| *uid).collect();
+        let mut refused = Vec::new();
         let texts = match self.fetch_texts(store, folder, &uids).await {
             Ok(texts) => texts,
             // the server refused the batch: one at a time, so one message it will not give does not hold up the rest
-            // for ever (it is indexed without its text)
+            // for ever (it is marked, and left out of the batches after)
             Err(failure) if failure.kind == FailureKind::Other && uids.len() > 1 => {
                 let mut texts = Vec::new();
-                for uid in &uids {
+                for (message, uid) in &messages {
                     match self.fetch_texts(store, folder, &[*uid]).await {
                         Ok(found) => texts.extend(found),
-                        Err(failure) if failure.kind == FailureKind::Other => {}
+                        // passed over in the background from now on, as a message not downloaded ahead is
+                        Err(failure) if failure.kind == FailureKind::Other => {
+                            store.mark_fetch_failed(*message)?;
+                            refused.push(*message);
+                        }
                         Err(failure) => return Err(failure),
                     }
                 }
@@ -852,7 +864,7 @@ impl Worker {
             Err(failure) => return Err(failure),
         };
         store.transaction(|store| {
-            for (message, uid) in &messages {
+            for (message, uid) in messages.iter().filter(|(message, _)| !refused.contains(message)) {
                 let body = texts
                     .iter()
                     .find(|(found, _)| found == uid)
@@ -955,14 +967,7 @@ impl Worker {
                         .map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                let became = match moved {
-                    Ok(became) => became,
-                    Err(failure) => {
-                        let outcome = self.restore_on_failure(store, folder, &removed, Err(failure));
-                        store.restore_moved_sources(folder, &uids)?;
-                        return outcome;
-                    }
-                };
+                let became = self.restore_on_failure(store, folder, &removed, moved)?;
                 // the message shows up in the folder it went to, with its source when it was downloaded
                 let synced = self.sync_one(store, to).await;
                 store.adopt_moved_sources(folder, to, &uids, &became)?;
@@ -985,7 +990,9 @@ impl Worker {
                         .map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                self.restore_on_failure(store, folder, &removed, expunged)
+                self.restore_on_failure(store, folder, &removed, expunged)?;
+                // gone for good: their sources too
+                Ok(store.adopt_moved_sources(folder, folder, &uids, &[])?)
             }
             Command::Append { folder, raw, date } => {
                 let path = store.folder(folder)?.info.path;
@@ -1026,15 +1033,18 @@ impl Worker {
 
     /// A message the windows took out of a folder before the server moved or deleted it: back in when the server did
     /// not (offline, refused), so it is not lost from view while it is still on the server
-    fn restore_on_failure(
+    /// The rows taken out of the store for a command back in it, with their sources, when the command failed
+    fn restore_on_failure<T>(
         &mut self,
         store: &mut Store,
         folder: FolderId,
         removed: &[pe_store::MessageInfo],
-        outcome: Outcome,
-    ) -> Outcome {
+        outcome: Result<T, Failure>,
+    ) -> Result<T, Failure> {
         if outcome.is_err() {
             store.add_messages(folder, removed)?;
+            let uids: Vec<u64> = removed.iter().map(|m| m.uid).collect();
+            store.restore_moved_sources(folder, &uids)?;
             self.emit(Event::FolderChanged {
                 account: self.account,
                 folder,

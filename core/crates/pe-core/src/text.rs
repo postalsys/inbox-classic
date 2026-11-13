@@ -3,7 +3,6 @@
 
 use pe_i18n::{Text, tr, tr_args};
 
-/// A size as the windows show it: `512 bytes`, `13 KB` (rounded up, as Explorer does), `2.4 MB`
 /// The limits of downloaded messages Settings offers, in megabytes
 pub const DOWNLOAD_LIMITS_MB: [u64; 6] = [250, 500, 1024, 2048, 5120, 10240];
 
@@ -24,6 +23,7 @@ pub fn download_limit_index(megabytes: u64) -> usize {
         .unwrap_or(0)
 }
 
+/// A size as the windows show it: `512 bytes`, `13 KB` (rounded up, as Explorer does), `2.4 MB`
 pub fn format_size(bytes: u64) -> String {
     if bytes < 1024 {
         tr_args(Text::SizeBytes, &[("count", bytes.into())])

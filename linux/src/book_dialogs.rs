@@ -22,13 +22,11 @@ fn phone_kind_names() -> Vec<String> {
     vec![t!(UiPhoneHome), t!(UiPhoneWork), t!(UiPhoneMobile), t!(UiPhoneOther)]
 }
 
-/// A field's title without the colon the catalogs give it ("First name:")
-fn title_of(text: Text) -> String {
-    words::plain(text).trim_end_matches(':').to_string()
-}
-
 fn entry_row(text: Text, value: &str, name: &str) -> adw::EntryRow {
-    let row = adw::EntryRow::builder().title(title_of(text)).text(value).build();
+    let row = adw::EntryRow::builder()
+        .title(words::field_title(text))
+        .text(value)
+        .build();
     row.set_widget_name(name);
     row
 }
@@ -44,7 +42,7 @@ fn row_button(icon: &str, tooltip: &str, name: &str) -> gtk::Button {
 
 /// The "+" button of a row or a group's header that adds what was typed (or a row)
 fn add_button(name: &str) -> gtk::Button {
-    let button = row_button("list-add-symbolic", &title_of(Text::UiContactAdd), name);
+    let button = row_button("list-add-symbolic", &words::field_title(Text::UiContactAdd), name);
     button.set_valign(gtk::Align::Center);
     button
 }
@@ -129,7 +127,7 @@ impl Addresses {
             } else {
                 let star = row_button(
                     "non-starred-symbolic",
-                    &title_of(Text::UiContactSetDefault),
+                    &words::field_title(Text::UiContactSetDefault),
                     &format!("contact-default-{index}"),
                 );
                 let this = Rc::downgrade(self);
@@ -145,7 +143,7 @@ impl Addresses {
             }
             let remove = row_button(
                 "ic-dismiss-symbolic",
-                &title_of(Text::UiRemove),
+                &words::field_title(Text::UiRemove),
                 &format!("contact-remove-{index}"),
             );
             let this = Rc::downgrade(self);
@@ -209,7 +207,7 @@ impl Phones {
         kinds.add_css_class("flat");
         kinds.set_widget_name(&format!("contact-phone-kind-{index}"));
         let row = adw::EntryRow::builder()
-            .title(title_of(Text::UiColPhone))
+            .title(words::field_title(Text::UiColPhone))
             .text(number)
             .build();
         row.set_input_purpose(gtk::InputPurpose::Phone);
@@ -217,7 +215,7 @@ impl Phones {
         row.add_suffix(&kinds);
         let remove = row_button(
             "ic-dismiss-symbolic",
-            &title_of(Text::UiRemove),
+            &words::field_title(Text::UiRemove),
             &format!("contact-phone-remove-{index}"),
         );
         let this = Rc::downgrade(self);
@@ -325,7 +323,7 @@ fn follow_names(names: &Names, card: &Card) {
 
 fn addresses_section(card: &Card, dialog: &glib::WeakRef<adw::Dialog>) -> Rc<Addresses> {
     let new = adw::EntryRow::builder()
-        .title(title_of(Text::UiContactAddressHint))
+        .title(words::field_title(Text::UiContactAddressHint))
         .input_purpose(gtk::InputPurpose::Email)
         .build();
     new.set_widget_name("contact-new-address");
@@ -333,7 +331,7 @@ fn addresses_section(card: &Card, dialog: &glib::WeakRef<adw::Dialog>) -> Rc<Add
     new.add_suffix(&add);
     let addresses = Rc::new(Addresses {
         group: adw::PreferencesGroup::builder()
-            .title(title_of(Text::UiContactAddresses))
+            .title(words::field_title(Text::UiContactAddresses))
             .build(),
         rows: RefCell::default(),
         new: new.clone(),
@@ -364,7 +362,7 @@ fn addresses_section(card: &Card, dialog: &glib::WeakRef<adw::Dialog>) -> Rc<Add
 
 fn phones_section(card: &Card) -> Rc<Phones> {
     let group = adw::PreferencesGroup::builder()
-        .title(title_of(Text::UiContactPhones))
+        .title(words::field_title(Text::UiContactPhones))
         .build();
     let add = add_button("contact-add-phone");
     group.set_header_suffix(Some(&add));
@@ -389,7 +387,7 @@ fn phones_section(card: &Card) -> Rc<Phones> {
 
 fn notes_section(card: &Card) -> (adw::PreferencesGroup, gtk::TextView) {
     let group = adw::PreferencesGroup::builder()
-        .title(title_of(Text::UiContactNotes))
+        .title(words::field_title(Text::UiContactNotes))
         .build();
     let notes = gtk::TextView::new();
     notes.set_wrap_mode(gtk::WrapMode::WordChar);
@@ -511,7 +509,7 @@ impl Members {
             row.add_prefix(&gtk::Image::from_icon_name(icon));
             let remove = row_button(
                 "ic-dismiss-symbolic",
-                &title_of(Text::UiRemove),
+                &words::field_title(Text::UiRemove),
                 &format!("group-member-remove-{index}"),
             );
             let this = Rc::downgrade(self);
@@ -577,7 +575,7 @@ pub async fn group(parent: &impl IsA<gtk::Widget>, id: GroupId) -> Option<GroupI
     names.add(&name);
 
     let member_group = adw::PreferencesGroup::builder()
-        .title(title_of(Text::UiGroupMembers))
+        .title(words::field_title(Text::UiGroupMembers))
         .build();
     let select =
         gtk::Button::with_mnemonic(&pe_core::i18n::gtk_mnemonic(&t!(UiGroupSelectMembers)).replace("...", "…"));
@@ -593,7 +591,7 @@ pub async fn group(parent: &impl IsA<gtk::Widget>, id: GroupId) -> Option<GroupI
 
     let typed_group = adw::PreferencesGroup::new();
     let new = adw::EntryRow::builder()
-        .title(title_of(Text::UiGroupNewMember))
+        .title(words::field_title(Text::UiGroupNewMember))
         .input_purpose(gtk::InputPurpose::Email)
         .build();
     new.set_widget_name("group-new-member");
