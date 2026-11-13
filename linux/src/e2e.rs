@@ -943,6 +943,8 @@ fn command(command: Command) {
 async fn scenario(d: Rc<Driver>) {
     // the steps that open messages see them downloaded when opened; the step of Preferences checks the choices
     let _ = shell().core.set_download_ahead(pe_core::Ahead::Never);
+    // the brand logos of the list's pictures come from a server of the test, on the loopback address
+    pe_core::bimi::allow_loopback_logos(true);
     // the Classic layout, whatever the window's width, so the screenshots of every step are of it; the layout steps
     // choose the others
     shell().settings.set_text(crate::settings::LAYOUT, Some("classic"));
@@ -976,6 +978,7 @@ async fn scenario(d: Rc<Driver>) {
     hide_read::hide_read(&d).await;
     layout::folder_list(&d).await;
     layout::columns(&d).await;
+    layout::list_pictures(&d).await;
     pictures::trusted(&d).await;
     pictures::options(&d).await;
     watch::watch_and_ignore(&d).await;

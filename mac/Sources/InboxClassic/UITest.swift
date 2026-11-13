@@ -429,6 +429,10 @@ final class UITest {
         // the classic layout, whatever the window's width, so the screenshots are those of the steps; the column
         // layout's own steps choose it
         delegate.layoutMode = PE_LAYOUT_MODE_CLASSIC
+        // a brand logo the test serves on the loopback address over plain http counts, for the list's pictures
+        if TestHooks.testing {
+            pe_allow_loopback_logos_for_tests(true)
+        }
     }
 
     var tree: FolderOutline { main.mailbox.tree }
@@ -517,6 +521,7 @@ final class UITest {
         try await unreadOnly()
         try await folderList()
         try await columnLayout()
+        try await listPictures()
         try await trustedPictures()
         try await openEml()
         try await accountsAndHelp()

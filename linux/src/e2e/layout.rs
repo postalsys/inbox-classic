@@ -309,3 +309,119 @@ async fn automatic(d: &Driver) {
     window.set_default_size(width, height);
     wait_until(10, || window.width() == width).await;
 }
+
+const LOGO_SUBJECT: &str = "Autumn offers from the brand";
+const PLAIN_SUBJECT: &str = "Notes from the meeting";
+
+/// A brand's server for the test: every request answered with its logo
+fn logo_server() -> u16 {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("a socket for the logo");
+    let port = listener.local_addr().map(|a| a.port()).unwrap_or(0);
+    std::thread::spawn(move || {
+        let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\" \
+                   viewBox=\"0 0 100 100\"><title>Brand</title><rect width=\"100\" height=\"100\" fill=\"#0a5bd3\"/>\
+                   <circle cx=\"50\" cy=\"50\" r=\"26\" fill=\"#ffffff\"/></svg>";
+        for stream in listener.incoming() {
+            let Ok(mut stream) = stream else { break };
+            let mut buffer = [0u8; 2048];
+            let _ = stream.read(&mut buffer);
+            let answer = format!(
+                "HTTP/1.0 200 OK\r\nContent-Type: image/svg+xml\r\nContent-Length: {}\r\n\r\n{svg}",
+                svg.len()
+            );
+            let _ = stream.write_all(answer.as_bytes());
+        }
+    });
+    port
+}
+
+/// The row of the Columns list on screen whose subject is `subject`
+fn row_on_screen(subject: &str) -> Option<crate::rows::RowWidget> {
+    let view: gtk::Widget = shell().main().list.rows_view.clone().upcast();
+    descendants::<gtk::Widget>(&view)
+        .into_iter()
+        .filter(|w| w.is_mapped())
+        .filter_map(|w| w.downcast::<crate::rows::RowWidget>().ok())
+        .find(|row| crate::rows::shown(row).is_some_and(|(_, s, _, _)| s == subject))
+}
+
+/// A message from a brand whose provider passed its logo, and a plain one, both in the Inbox with their verdicts read
+async fn add_picture_messages(d: &Driver, inbox: i64) -> bool {
+    let port = logo_server();
+    let branded = format!(
+        "Authentication-Results: mx.inboxclassic.test; dmarc=pass header.from=brand.example; bimi=pass \
+         header.d=brand.example\r\nBIMI-Location: v=BIMI1; l=http://127.0.0.1:{port}/logo.svg\r\n\
+         From: Brand <news@brand.example>\r\nTo: testuser@inboxclassic.test\r\nSubject: {LOGO_SUBJECT}\r\n\
+         Date: {}\r\nMessage-ID: <pictures-1@brand.example>\r\n\r\nThree offers for the autumn.\r\n",
+        super::steps::date_now(-2)
+    );
+    let plain = format!(
+        "From: Ida Berg <ida@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {PLAIN_SUBJECT}\r\n\
+         Date: {}\r\nMessage-ID: <pictures-2@example.com>\r\n\r\nThe notes are attached below.\r\n",
+        super::steps::date_now(-1)
+    );
+    let added = d.add_message(&branded, &[]).is_ok() && d.add_message(&plain, &[]).is_ok();
+    run_command(Command::Sync);
+    let read = wait_until(60, || {
+        let listed = listed_in_folder(inbox, 0, 500);
+        listed.iter().any(|m| m.info.subject == PLAIN_SUBJECT)
+            && listed
+                .iter()
+                .any(|m| m.info.subject == LOGO_SUBJECT && m.logo.is_some())
+    })
+    .await;
+    added && read
+}
+
+/// The senders' pictures in the Columns list: a brand's logo the provider passed, initials for the rest, and
+/// Preferences turning them off and on
+pub async fn list_pictures(d: &Driver) {
+    let main = shell().main();
+    let Some(inbox) = super::steps::folder_id("Inbox") else {
+        d.check(false, "the tree has the Inbox");
+        return;
+    };
+    d.step("the senders' pictures in the column layout");
+    select_folder("Inbox");
+    wait_until(10, || main.selected_name() == "Inbox").await;
+    d.check(
+        add_picture_messages(d, inbox).await,
+        "a message whose provider passed the brand's logo, and a plain one, are in the Inbox",
+    );
+    command(Command::LayoutColumns);
+    wait_until(10, side_by_side).await;
+    main.list.select(0);
+    d.check(
+        wait_until(20, || {
+            row_on_screen(LOGO_SUBJECT).is_some_and(|r| crate::rows::picture_drawn(&r))
+        })
+        .await,
+        "the brand's row shows its logo",
+    );
+    d.check(
+        row_on_screen(PLAIN_SUBJECT).is_some_and(|r| crate::rows::picture_shown(&r) && !crate::rows::picture_drawn(&r)),
+        "a sender without one has their initials",
+    );
+    pause(500).await;
+    d.shot(main.window(), "pictures-4-list").await;
+    main.set_list_pictures(false);
+    d.check(
+        wait_until(10, || {
+            row_on_screen(LOGO_SUBJECT).is_some_and(|r| !crate::rows::picture_shown(&r))
+                && row_on_screen(PLAIN_SUBJECT).is_some_and(|r| !crate::rows::picture_shown(&r))
+        })
+        .await
+            && !shell().settings.bool(crate::settings::LIST_PICTURES, true),
+        "turned off in Preferences, the rows have no pictures, and that is kept",
+    );
+    main.set_list_pictures(true);
+    d.check(
+        wait_until(10, || {
+            row_on_screen(LOGO_SUBJECT).is_some_and(|r| crate::rows::picture_drawn(&r))
+        })
+        .await,
+        "turned on again, the logo is back without asking the core again",
+    );
+    command(Command::LayoutClassic);
+    wait_until(10, || main.layout() == pe_core::layout::Layout::Classic).await;
+}

@@ -197,6 +197,81 @@ extension UITest {
         main.mailbox.placeDividers()
     }
 
+    // ---- the senders' pictures of the column layout ----
+
+    /// An HTTP server on this Mac that answers every GET with one SVG, until the test ends: a brand's BIMI-Location
+    final class LogoServer: @unchecked Sendable {
+        let port: UInt16
+        private let socket: Int32
+
+        init?(svg: String) {
+            guard let (fd, port) = UITest.loopbackListener(backlog: 4) else { return nil }
+            socket = fd
+            self.port = port
+            let answer = "HTTP/1.0 200 OK\r\nContent-Type: image/svg+xml\r\nContent-Length: \(svg.utf8.count)\r\n\r\n\(svg)"
+            Thread.detachNewThread {
+                while true {
+                    let client = accept(fd, nil, nil)
+                    if client < 0 { return }
+                    var buffer = [UInt8](repeating: 0, count: 4096)
+                    _ = Darwin.read(client, &buffer, buffer.count)
+                    _ = answer.withCString { Darwin.write(client, $0, strlen($0)) }
+                    close(client)
+                }
+            }
+        }
+
+        deinit {
+            shutdown(socket, SHUT_RDWR)
+            close(socket)
+        }
+    }
+
+    /// a brand whose logo the provider passed (its BIMI-Location on a server of the test) and a person without one
+    func listPictures() async throws {
+        step("the senders' pictures in the column layout")
+        let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\" viewBox=\"0 0 100 100\"><title>Brand News</title>"
+            + "<rect width=\"100\" height=\"100\" fill=\"#d4380d\"/><path d=\"M30 28h26c12 0 20 6 20 16 0 6-4 10-9 12 7 2 11 7 11 14 0 11-8 17-22 17H30z"
+            + "M44 40v12h10c5 0 8-2 8-6s-3-6-8-6zm0 23v13h12c5 0 8-2 8-7s-3-6-8-6z\" fill=\"#ffffff\"/></svg>"
+        guard let server = LogoServer(svg: svg) else { throw Failed(description: "no logo server") }
+        let now = rfc2822(Date())
+        try await addMessage("Authentication-Results: mx.inboxclassic.test; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example\r\n"
+            + "BIMI-Location: v=BIMI1; l=http://127.0.0.1:\(server.port)/logo.svg\r\nFrom: Brand News <news@brand.example>\r\n"
+            + "To: testuser@inboxclassic.test\r\nSubject: Autumn collection\r\nDate: \(now)\r\nMessage-ID: <list-logo@brand.example>\r\n\r\nNew in this week.\r\n",
+            flags: ["\\Seen"])
+        try await addMessage("From: Nora Reed <nora@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Book club\r\n"
+            + "Date: \(now)\r\nMessage-ID: <list-initials@example.com>\r\n\r\nThursday at seven.\r\n", flags: ["\\Seen"])
+        selectFolder(named: "Inbox")
+        command(.sync)
+        command(.layoutColumns)
+        let brand = { self.listedRow("Autumn collection") }
+        let person = { self.listedRow("Book club") }
+        check(await waitUntil(40) {
+            brand() >= 0 && person() >= 0 && main.mailbox.row(brand())?.pictureKind == PE_PICTURE_KIND_LOGO
+        }, "the provider passed the brand's logo: its row has a logo to draw")
+        check(main.mailbox.row(brand())?.picture != 0, "and the key the core draws it by")
+        check(main.mailbox.row(person())?.pictureKind == PE_PICTURE_KIND_NONE, "a sender without a logo has none")
+        list.scrollRowToVisible(max(brand(), person()))
+        check(await waitUntil(10) {
+            let cell = rowCell(person())
+            return cell?.picture.isHidden == false && cell?.picture.initials == "NR" && cell?.picture.image == nil
+        }, "its row shows the sender's initials in a quiet circle")
+        check(await waitUntil(20) {
+            list.scrollRowToVisible(brand())
+            return rowCell(brand())?.picture.image != nil
+        }, "the brand's row shows the logo the core drew from its BIMI-Location")
+        check(rowCell(person())?.picture.isAccessibilityElement() == false, "the picture is no element of its own for VoiceOver")
+        await shot(main.window, "pictures-4-list")
+
+        withExtendedLifetime(server) {}
+        AppDelegate.shared.listPictures = false
+        check(await waitUntil(10) { rowCell(person())?.picture.isHidden == true }, "the setting off: no pictures in the rows")
+        AppDelegate.shared.listPictures = true
+        check(await waitUntil(10) { rowCell(person())?.picture.isHidden == false }, "on again: the pictures are back")
+        command(.layoutClassic)
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_CLASSIC }, "Classic again")
+    }
+
     // ---- pictures from trusted senders ----
 
     /// a newsletter from the shop with a picture on the internet; `verified`: the provider's Authentication-Results

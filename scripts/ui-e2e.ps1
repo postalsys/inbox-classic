@@ -283,7 +283,8 @@ $savedFolderList = (Get-ItemProperty -Path $preferencesKey -Name FolderList -Err
 # and View > Layout, Classic during the test so every screenshot but the layout's own is as before; the list's width
 # in Columns and whether the columns note was shown, left out as out of the box
 $savedLayout = @{}
-foreach ($name in 'Layout', 'ListWidth', 'ColumnsNoteShown') {
+# and the senders' pictures of the list, left out so they are shown, as out of the box
+foreach ($name in 'Layout', 'ListWidth', 'ColumnsNoteShown', 'ListPictures') {
     $savedLayout[$name] = (Get-ItemProperty -Path $preferencesKey -Name $name -ErrorAction SilentlyContinue).$name
 }
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
@@ -649,6 +650,7 @@ try {
     Remove-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name ListWidth -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name ColumnsNoteShown -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $preferencesKey -Name ListPictures -ErrorAction SilentlyContinue
     # the classic layout for every step but the column layout's (a fresh machine has no key yet)
     if (-not (Test-Path $preferencesKey)) { New-Item -Path $preferencesKey -Force | Out-Null }
     Set-ItemProperty -Path $preferencesKey -Name Layout -Value 1 -Type DWord
@@ -2743,6 +2745,61 @@ public static class Dragger {
     } else {
         Check $false 'the conversation has one row'
     }
+    # the senders' pictures beside the rows: a brand's logo the provider passed (from a server of the test on the
+    # loopback address, which the app takes with --test-hooks; downloaded once, when its row is drawn), or the initials
+    # on a quiet square; the Options box takes them away and brings them back
+    $kRowPicture = 0x50494354; $IDM_OPTIONS = 137; $IDC_OPTIONS_LIST_PICTURES = 676
+    $rowPicture = { param($subject) [int][Native.Win]::SendText($main, $kRowPicture, $subject) }
+    $brandSvg = '<svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny-ps" viewBox="0 0 100 100"><title>Brand</title>' +
+        '<rect width="100" height="100" fill="#1f6b3a"/><path d="M28 72V28h24c10 0 17 6 17 14s-6 13-14 14l16 16H58L44 57h-4v15z' +
+        'M40 47h11c4 0 6-2 6-5s-2-5-6-5H40z" fill="#fff"/></svg>'
+    $logoServer = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, 0)
+    $logoServer.Start()
+    $logoPort = $logoServer.LocalEndpoint.Port
+    $script:logoAccepted = $logoServer.AcceptTcpClientAsync()
+    $script:logoServed = 0
+    # a request that came answered with the logo, by hand: an HTTP/1.1 reply that closes
+    $serveLogo = {
+        if (-not $script:logoAccepted.IsCompleted) { return }
+        $client = $script:logoAccepted.Result
+        $stream = $client.GetStream()
+        $buffer = New-Object byte[] 4096
+        [void]$stream.Read($buffer, 0, $buffer.Length)
+        $body = [Text.Encoding]::UTF8.GetBytes($brandSvg)
+        $head = [Text.Encoding]::ASCII.GetBytes("HTTP/1.1 200 OK`r`nContent-Type: image/svg+xml`r`nContent-Length: $($body.Length)`r`nConnection: close`r`n`r`n")
+        $stream.Write($head, 0, $head.Length)
+        $stream.Write($body, 0, $body.Length)
+        $client.Close()
+        $script:logoServed++
+        $script:logoAccepted = $logoServer.AcceptTcpClientAsync()
+    }
+    $branded = 'Autumn collection'
+    AddMessage ("Authentication-Results: mx.inboxclassic.test; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example`r`n" +
+        "BIMI-Location: v=BIMI1; l=http://127.0.0.1:$logoPort/logo.svg`r`nFrom: Northwind <news@brand.example>`r`n" +
+        "To: testuser@inboxclassic.test`r`nSubject: $branded`r`nMessage-ID: <autumn@brand.example>`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`n`r`nThe new collection is here.`r`n")
+    Command $main $IDM_SYNC
+    Check ([bool](WaitFor { (SubjectRows $branded).Count -eq 1 } 30)) 'a message whose provider passed its brand logo is in the Inbox'
+    Check ([bool](WaitFor { & $serveLogo; (& $rowPicture $branded) -eq 12 } 40)) "its row shows the brand's logo ($(& $rowPicture $branded), downloaded $script:logoServed times)"
+    Check ((& $rowPicture 'Ferry times') -eq 11) "a sender without a logo has the initials beside the row ($(& $rowPicture 'Ferry times'))"
+    $ferryRow = @(SubjectRows 'Ferry times')
+    if ($ferryRow.Count -eq 1) { SelectRow ([int]$ferryRow[0]) }
+    Shot $main 'pictures-4-list'
+    function SetListPictures([bool]$on) {
+        Command $main $IDM_OPTIONS
+        $o = WaitShown 'InboxClassicOptions' 10
+        if (-not $o) { return $false }
+        $box = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_LIST_PICTURES)
+        $was = [int][Native.Win]::SendMessage($box, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void][Native.Win]::SendMessage($box, $BM_SETCHECK, [IntPtr]([int]$on), [IntPtr]::Zero)
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+        $box -ne [IntPtr]::Zero -and $was -eq [int](-not $on)
+    }
+    Check (SetListPictures $false) 'Options shows the senders'' pictures, on at first, and turns them off'
+    Check ((& $rowPicture 'Ferry times') -eq 10 -and (Get-ItemProperty -Path $preferencesKey -Name ListPictures -ErrorAction SilentlyContinue).ListPictures -eq 0) 'off: the rows have none, and that is kept'
+    Check (SetListPictures $true) 'and turns them on again'
+    Check ((& $rowPicture 'Ferry times') -eq 11) 'on: the initials are back'
     # Automatic: Columns in a wide window, Classic in a narrow one
     $kept = New-Object Native.Win+RECT
     [void][Native.Win]::GetWindowRect($main, [ref]$kept)
@@ -2755,7 +2812,8 @@ public static class Dragger {
     Command $main $IDM_LAYOUT_CLASSIC
     [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, $kept.Left, $kept.Top, $kept.Right - $kept.Left, $kept.Bottom - $kept.Top, 0x0014)
     Check ([bool](WaitFor { -not (& $columnsShown) } 5)) 'Classic again: the list over the reading pane'
-    foreach ($id in $ferry) {
+    $logoServer.Stop()
+    foreach ($id in $ferry + @('autumn@brand.example')) {
         $m = Find 'INBOX' "Message-ID: <$([regex]::Escape($id))>"
         if ($m) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($m.uid)") }
     }
