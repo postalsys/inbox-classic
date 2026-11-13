@@ -26,9 +26,11 @@ mod background;
 mod download;
 mod reader;
 mod transfer;
+mod upload;
 
 pub(crate) use background::{Nudges, nudge};
 pub(crate) use download::Opened;
+pub(crate) use reader::Opening;
 
 pub(crate) use reader::{Synced, tell_woke, watch_sleep};
 
@@ -48,6 +50,14 @@ pub(crate) enum Command {
     /// between its commands, and says whether there is more
     Background {
         reply: tokio::sync::oneshot::Sender<bool>,
+    },
+    /// A folder synced: an upload put a message in it (upload.rs)
+    SyncFolder {
+        folder: FolderId,
+    },
+    /// An upload the uploader could not do, done by the main worker (upload.rs)
+    Upload {
+        upload: Box<upload::Upload>,
     },
     SetFlag {
         folder: FolderId,
@@ -332,6 +342,9 @@ impl Role {
 
 /// How long the server may take to start answering a command the user waits for, on a connection made before
 pub(crate) const ANSWER_LIMIT: Duration = Duration::from_secs(8);
+/// How long a connection made for some work (the background worker's, a second reader's, the uploader's) stays open
+/// without it
+pub(crate) const IDLE_FOR: Duration = Duration::from_secs(5 * 60);
 /// How long after a server refused one more connection the reader and the background worker do without one
 const LIMITED_FOR: Duration = Duration::from_secs(15 * 60);
 /// How long the reader and the background worker wait for the main worker's first sync before they connect anyway
@@ -356,6 +369,8 @@ pub(crate) struct Context {
     pub(crate) nudges: Arc<Nudges>,
     /// The messages opened since the app started, kept whatever the limit of downloaded messages
     pub(crate) opened: Opened,
+    /// The opens under way, which background work steps aside for, and the size of what each reader downloads now
+    pub(crate) opening: Arc<Opening>,
 }
 
 pub(crate) struct Worker {
@@ -374,6 +389,12 @@ pub(crate) struct Worker {
     archived_labels: HashMap<String, Vec<String>>,
     /// The main worker, for a reader the server refuses a connection of its own: the opens go there
     pub(crate) fallback: Option<UnboundedSender<Command>>,
+    /// The main worker's own commands, kept without keeping it running: what its uploader sends back (upload.rs)
+    pub(crate) main: Option<tokio::sync::mpsc::WeakUnboundedSender<Command>>,
+    /// The main worker's uploader, made with the first upload
+    uploader: Option<upload::Uploader>,
+    /// A second reader, made when a click comes during a large download, closed when idle
+    pub(crate) spare: bool,
     /// When the server last refused a connection because too many are open
     limited: Option<Instant>,
     /// When the server last took a connection and closed it, or refused one more
@@ -417,6 +438,9 @@ impl Worker {
             worked: false,
             archived_labels: HashMap::new(),
             fallback: None,
+            main: None,
+            uploader: None,
+            spare: false,
             limited: None,
             connect_failed: None,
             last_used: Instant::now(),
@@ -942,6 +966,14 @@ impl Worker {
                 Ok(())
             }
             Command::Connect => Ok(()),
+            Command::SyncFolder { folder } => self.sync_one(store, folder).await,
+            Command::Upload { upload } => {
+                // boxed: not part of every command's future
+                let outcome = Box::pin(self.upload(store, &upload)).await;
+                self.uploaded(&upload, &outcome);
+                outcome?;
+                self.sync_one(store, upload.folder()).await
+            }
             Command::Background { reply } => {
                 let _ = reply.send(self.background_slice(store).await);
                 Ok(())
@@ -1116,21 +1148,28 @@ impl Worker {
         Worker::new(account, Role::Main, self.ctx.clone())
     }
 
-    /// Saves a draft in the Drafts folder, in place of the copy saved before, and says how that went to the window it
-    /// came from ([`Event::DraftSaved`])
+    /// Saves a draft in the Drafts folder, in place of the copy saved before, through the uploader (upload.rs), which
+    /// says how that went to the window it came from ([`Event::DraftSaved`])
     async fn save_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
         let message_id = outgoing.message_id.clone().unwrap_or_default();
-        let saved = self.store_draft(store, outgoing).await;
-        self.emit(Event::DraftSaved {
-            account: self.account,
-            message_id,
-            problem: saved.as_ref().err().map(|failure| failure.message.clone()),
-        });
-        self.sync_one(store, saved?).await
+        match self.draft_upload(store, outgoing).await {
+            Ok(upload) => {
+                self.upload_apart(upload);
+                Ok(())
+            }
+            Err(failure) => {
+                self.emit(Event::DraftSaved {
+                    account: self.account,
+                    message_id,
+                    problem: Some(failure.message.clone()),
+                });
+                Err(failure)
+            }
+        }
     }
 
-    /// Puts a draft in the Drafts folder on the server; the id of that folder
-    async fn store_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Result<FolderId, Failure> {
+    /// A draft built for the Drafts folder
+    async fn draft_upload(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Result<upload::Upload, Failure> {
         let drafts = crate::compose::drafts_folder(store, self.account)?.ok_or_else(|| Failure {
             kind: FailureKind::Other,
             message: tr(Text::ErrorNoDrafts),
@@ -1145,19 +1184,27 @@ impl Worker {
             crate::compose::draft_message,
         )
         .await?;
-        let client = self.client(store).await?;
-        pe_sync::save_draft(client, store, drafts.id, &built.raw, &message_id, time).await?;
-        // saved here: the copy in the Drafts of the account it went from before goes
-        if let Some(from) = moved_from {
-            self.remove_draft_of(store, from, &message_id).await;
-        }
-        Ok(drafts.id)
+        Ok(upload::Upload::Draft {
+            drafts: drafts.id,
+            raw: built.raw,
+            message_id,
+            time,
+            moved_from,
+        })
     }
 
+    /// Removes the drafts of a message sent: after a save of theirs that the uploader has yet to do, in its queue
     async fn remove_drafts(&mut self, store: &mut Store, message_id: &str) -> Outcome {
         let Some(drafts) = crate::compose::drafts_folder(store, self.account)? else {
             return Ok(());
         };
+        if self.uploader.as_ref().is_some_and(|uploader| !uploader.is_closed()) {
+            self.upload_apart(upload::Upload::RemoveDrafts {
+                drafts: drafts.id,
+                message_id: message_id.to_string(),
+            });
+            return Ok(());
+        }
         let client = self.client(store).await?;
         pe_sync::remove_drafts(client, store, drafts.id, message_id).await?;
         self.sync_one(store, drafts.id).await
@@ -1219,7 +1266,7 @@ impl Worker {
                             &[("error", (&error.to_string()).into())],
                         ));
                     }
-                    if let Err(failure) = self.save_sent(store, &raw, message.created).await {
+                    if let Err(failure) = self.save_sent(store, raw, message.created) {
                         self.sent_but(tr_args(Text::ErrorSentNoCopy, &[("reason", (&failure.message).into())]));
                     }
                 }
@@ -1243,13 +1290,16 @@ impl Worker {
         }
     }
 
-    async fn save_sent(&mut self, store: &mut Store, raw: &[u8], date: i64) -> Outcome {
-        let Some(sent) = store.special_folder(self.account, "\\Sent")? else {
-            return Ok(());
-        };
-        let client = self.client(store).await?;
-        client.append(&sent.info.path, raw, &["\\Seen"], Some(date)).await?;
-        self.sync_one(store, sent.id).await
+    /// The copy of a message sent, in Sent Items, through the uploader (upload.rs)
+    fn save_sent(&mut self, store: &Store, raw: Vec<u8>, date: i64) -> Outcome {
+        if let Some(sent) = store.special_folder(self.account, "\\Sent")? {
+            self.upload_apart(upload::Upload::Sent {
+                sent: sent.id,
+                raw,
+                date,
+            });
+        }
+        Ok(())
     }
 
     /// The password of the account, as credentials for IMAP and SMTP

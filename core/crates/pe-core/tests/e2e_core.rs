@@ -2319,7 +2319,11 @@ fn drafts_are_saved_reopened_and_gone_once_sent() {
     s.core.save_draft(account, reopened.clone()).unwrap();
     s.core.send(account, reopened).unwrap();
     s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
-    assert!(s.server.subjects("Drafts").is_empty());
+    // the drafts go through the uploader's queue, after the save of theirs
+    eventually(
+        || s.server.subjects("Drafts").is_empty(),
+        "the drafts gone once it is sent",
+    );
     assert_eq!(s.server.subjects("INBOX"), ["Plans"]);
     let sent = pe_testkit::raw_text(&s.server.messages("INBOX")[0]);
     // the Bcc of the draft is not in what was sent
@@ -3447,4 +3451,70 @@ fn an_archived_message_keeps_its_downloaded_source() {
         },
         "the source with the message in the Archive",
     );
+}
+
+// ---- the user goes first (phase 4) ----
+
+#[test]
+fn a_draft_is_uploaded_on_a_connection_of_its_own() {
+    // the server takes its time with every upload
+    let Some(s) = setup_with(json!({ "script": { "on": "command", "command": "APPEND", "delay": 3000 } })) else {
+        return;
+    };
+    let (account, inbox, uids) = synced_with(&s, &["One"]);
+    let outgoing = pe_core::Outgoing {
+        subject: "Plans".into(),
+        html: Some("<p>first</p>".into()),
+        ..Default::default()
+    };
+    let message_id = s.core.save_draft(account, outgoing.clone()).unwrap();
+    // saved again while the first is on its way: queued, not waited for
+    let again = pe_core::Outgoing {
+        message_id: Some(message_id),
+        html: Some("<p>second</p>".into()),
+        ..outgoing
+    };
+    s.core.save_draft(account, again).unwrap();
+    // meanwhile the main worker does what the user asks at once
+    std::thread::sleep(Duration::from_millis(500));
+    let started = std::time::Instant::now();
+    s.core.set_seen(inbox, uids[0], true).unwrap();
+    eventually(
+        || s.server.flags("INBOX", uids[0]).contains(&"\\Seen".to_string()),
+        "read on the server",
+    );
+    assert!(started.elapsed() < Duration::from_secs(2), "{:?}", started.elapsed());
+    for _ in 0..2 {
+        let saved = s.wait(|e| matches!(e, Event::DraftSaved { .. }));
+        assert!(matches!(saved, Event::DraftSaved { problem: None, .. }), "{saved:?}");
+    }
+    // the second in place of the first
+    eventually(|| s.server.subjects("Drafts") == ["Plans"], "one draft on the server");
+}
+
+#[test]
+fn a_click_during_a_large_download_is_answered_first() {
+    // the first download of the whole message waits at the server
+    let Some(s) = setup_with(json!({ "script": {
+        "on": "command", "match": "BODY\\.PEEK\\[\\]", "delay": 4000, "times": 1
+    } })) else {
+        return;
+    };
+    let big = s
+        .server
+        .add_message("INBOX", &rfc822("Big", &"x".repeat(600 * 1024)), &[]);
+    let (_, inbox, uids) = synced_with(&s, &["Small"]);
+    eventually(|| reader_session(&s.server).is_some(), "the reader connects");
+    s.core.open_message(inbox, big).unwrap();
+    std::thread::sleep(Duration::from_millis(500));
+    let started = std::time::Instant::now();
+    open(&s, inbox, uids[0]);
+    assert!(started.elapsed() < Duration::from_secs(3), "{:?}", started.elapsed());
+    // and the large one still comes
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: big,
+        }
+    });
 }
