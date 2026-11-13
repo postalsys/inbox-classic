@@ -655,6 +655,7 @@ pub fn run_command(command: Command) {
         Command::IgnoreConversation => main.mark_conversations(true),
         Command::HideIgnored => main.set_hide_ignored(!crate::mailbox::hide_ignored()),
         Command::HideRead => main.set_hide_read(!crate::mailbox::hide_read()),
+        Command::FolderList => main.set_folder_list(!crate::mailbox::folder_list_shown()),
         Command::Notify => shell.set_notify(!shell.notify.get()),
         Command::Open => shell.show_main(),
         Command::DefaultApp => spawn(make_default_mail_app()),

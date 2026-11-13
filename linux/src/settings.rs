@@ -102,3 +102,5 @@ pub const CODES_IN_NOTIFICATIONS: &str = "CodesInNotifications";
 pub const CLOSED_ROWS: &str = "ClosedFolderRows";
 /// View > Hide Read Messages, for every folder (off when not set)
 pub const HIDE_READ: &str = "HideReadMessages";
+/// View > Folder List: the folder list beside the messages (on when not set), else in the folder button's popover
+pub const FOLDER_LIST: &str = "FolderList";

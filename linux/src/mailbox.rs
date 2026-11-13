@@ -53,8 +53,8 @@ pub struct Mailbox {
     pub find: gtk::SearchEntry,
     /// In a narrow window, the search button in place of the Find box
     find_narrow: gtk::ToggleButton,
-    /// In a narrow window, the folder button in place of the folder list
-    folder_button: gtk::MenuButton,
+    /// Where the folder list is: beside the messages, or in the folder button's popover
+    folder_place: Rc<FolderPlace>,
     /// The folder shown was chosen by its row under All Inboxes (an account's Inbox there), not its account's
     under_all_inboxes: Cell<bool>,
     search_bar: gtk::Box,
@@ -203,7 +203,16 @@ impl Mailbox {
             .icon_name(crate::APP_ID)
             .build();
         window.set_widget_name("main-window");
-        narrow_layout(&window, &parts, &tree, &panes, &status_bar, &list);
+        let folder_place = Rc::new(FolderPlace {
+            tree: tree.clone(),
+            panes: panes.clone(),
+            button: parts.folders.clone(),
+            name: parts.folder_name.clone(),
+            sidebar: parts.sidebar.clone(),
+            narrow: Cell::new(false),
+        });
+        narrow_layout(&window, &parts, &folder_place, &status_bar, &list);
+        folder_place.update();
         let mailbox = Rc::new(Mailbox {
             window,
             title,
@@ -212,7 +221,7 @@ impl Mailbox {
             reader,
             find,
             find_narrow: parts.search.clone(),
-            folder_button: parts.folders.clone(),
+            folder_place,
             under_all_inboxes: Cell::new(false),
             search_bar,
             search_summary,
@@ -740,7 +749,7 @@ impl Mailbox {
         self.update_junk_button();
         // a folder chosen in the narrow window's popover closes it; an account's row only opens or closes the account
         if id >= 0 || all_inboxes {
-            self.folder_button.popdown();
+            self.folder_place.button.popdown();
         }
     }
 
@@ -1601,6 +1610,14 @@ impl Mailbox {
         self.reload_list(true);
     }
 
+    /// View > Folder List turned on or off: kept, and the folder list beside the messages or in the folder button's
+    /// popover
+    pub fn set_folder_list(&self, on: bool) {
+        shell().settings.set_bool(settings::FOLDER_LIST, on);
+        self.set_toggled(Command::FolderList, on);
+        self.folder_place.update();
+    }
+
     /// The selected messages junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     pub fn mark_junk(&self, junk: bool) {
         self.act(Action::Junk(junk));
@@ -2344,6 +2361,11 @@ pub fn list_key(key: gdk::Key, modifiers: gdk::ModifierType) -> Option<Command> 
     }
 }
 
+/// View > Folder List: the folder list beside the messages
+pub fn folder_list_shown() -> bool {
+    shell().settings.bool(settings::FOLDER_LIST, true)
+}
+
 /// View > Hide Ignored Conversations
 pub fn hide_ignored() -> bool {
     shell().settings.bool(settings::HIDE_IGNORED, false)
@@ -2355,6 +2377,7 @@ fn toggled(command: Command) -> bool {
         Command::Notify => shell().notify.get(),
         Command::HideIgnored => hide_ignored(),
         Command::HideRead => hide_read(),
+        Command::FolderList => folder_list_shown(),
         _ => false,
     }
 }
@@ -2431,6 +2454,10 @@ struct HeaderParts {
     read_state: gtk::Box,
     /// In a narrow window, in place of the folder list: the shown folder's name, the folder list in its popover
     folders: gtk::MenuButton,
+    /// The folder's name on the folder button, which the title has in a wide window
+    folder_name: gtk::Label,
+    /// The sidebar button at the start: View > Folder List
+    sidebar: gtk::ToggleButton,
     /// In a narrow window, in place of the Find box: a button for `search_bar`
     search: gtk::ToggleButton,
     /// In a narrow window, under the header bar: a Find box of its own, the same words
@@ -2467,9 +2494,10 @@ fn header_bar(title: &adw::WindowTitle, find: &gtk::SearchEntry) -> HeaderParts 
     let forward = button("ic-arrow-forward-symbolic", &t!(UiTbForward), Command::Forward);
     let print = button("ic-print-symbolic", &t!(UiTbPrint), Command::Print);
     let archive = button("ic-archive-symbolic", &t!(UiTbArchive), Command::Archive);
-    let folders = folder_chooser(title);
+    let (folders, folder_name) = folder_chooser(title);
+    let sidebar = folder_list_button();
     let groups: Vec<Vec<gtk::Widget>> = vec![
-        vec![folders.clone().upcast()],
+        vec![sidebar.clone().upcast(), folders.clone().upcast()],
         vec![create_mail.clone().upcast()],
         vec![
             button("ic-arrow-reply-symbolic", &t!(UiTbReply), Command::Reply).upcast(),
@@ -2530,23 +2558,42 @@ fn header_bar(title: &adw::WindowTitle, find: &gtk::SearchEntry) -> HeaderParts 
         forward,
         read_state,
         folders,
+        folder_name,
+        sidebar,
         search,
         search_bar,
     }
+}
+
+/// The header bar's sidebar button, at its start as GNOME's apps have it: View > Folder List
+fn folder_list_button() -> gtk::ToggleButton {
+    let icons = ["ic-panel-left-symbolic", "sidebar-show-symbolic"];
+    command_toggle(
+        &icons,
+        Command::FolderList.label(),
+        Command::FolderList,
+        "folder-list-toggle",
+    )
 }
 
 /// The header bar's filter beside Find: on, the list shows the unread messages only (View > Hide Read Messages, the
 /// same action, so the two follow each other)
 fn unread_only_button() -> gtk::ToggleButton {
     // the app's Fluent filter, else the system's
-    let icon = gio::ThemedIcon::from_names(&["ic-filter-symbolic", "funnel-symbolic", "view-filter-symbolic"]);
+    let icons = ["ic-filter-symbolic", "funnel-symbolic", "view-filter-symbolic"];
+    command_toggle(&icons, &t!(UiToolUnreadOnly), Command::HideRead, "hide-read")
+}
+
+/// A header bar button that turns a toggle of the menus on and off (the same action, so the two follow each other),
+/// with the first of `icons` the theme has
+fn command_toggle(icons: &[&str], label: &str, command: Command, name: &str) -> gtk::ToggleButton {
     let button = gtk::ToggleButton::builder()
-        .child(&gtk::Image::from_gicon(&icon))
-        .tooltip_text(t!(UiToolUnreadOnly))
-        .action_name(format!("win.{}", Command::HideRead.name()))
+        .child(&gtk::Image::from_gicon(&gio::ThemedIcon::from_names(icons)))
+        .tooltip_text(label)
+        .action_name(format!("win.{}", command.name()))
         .build();
-    button.update_property(&[gtk::accessible::Property::Label(&t!(UiToolUnreadOnly))]);
-    button.set_widget_name("hide-read");
+    button.update_property(&[gtk::accessible::Property::Label(label)]);
+    button.set_widget_name(name);
     button
 }
 
@@ -2591,8 +2638,7 @@ pub type Setter = (glib::Object, &'static str, glib::Value);
 fn narrow_layout(
     window: &adw::ApplicationWindow,
     parts: &HeaderParts,
-    tree: &gtk::ScrolledWindow,
-    panes: &gtk::Paned,
+    folder_place: &Rc<FolderPlace>,
     status_bar: &gtk::Box,
     list: &Rc<MessageList>,
 ) {
@@ -2630,7 +2676,6 @@ fn narrow_layout(
     narrow.extend([
         (find.clone().upcast(), "visible", hidden.clone()),
         (parts.search.clone().upcast(), "visible", shown.clone()),
-        (parts.folders.clone().upcast(), "visible", shown.clone()),
         (parts.archive.clone().upcast(), "visible", hidden.clone()),
         (parts.junk.clone().upcast(), "visible", hidden.clone()),
     ]);
@@ -2667,38 +2712,67 @@ fn narrow_layout(
         }
         window.add_breakpoint(breakpoint);
     }
-    // the folder list in the folder button's popover at the narrow steps, beside the messages at the others
-    let popover = parts.folders.popover().expect("the folder button's popover");
-    let (tree, panes, search) = (tree.clone(), panes.clone(), parts.search.clone());
+    // the folder list in the folder button's popover at the narrow steps, beside the messages at the others (unless
+    // View > Folder List put it there)
+    let (place, search) = (folder_place.clone(), parts.search.clone());
     window.connect_current_breakpoint_notify(move |window| {
         let narrow = window
             .current_breakpoint()
             .is_some_and(|current| narrow_steps.contains(&current));
-        let in_popover = tree.is_ancestor(&popover);
         if !narrow {
             search.set_active(false);
         }
-        if narrow == in_popover {
+        place.narrow.set(narrow);
+        place.update();
+    });
+}
+
+/// Where the folder list is: beside the messages, or in the popover of the folder button, in a narrow window and while
+/// View > Folder List is off. The header bar's sidebar button turns the list on and off; a narrow window has the
+/// folder button in its place
+struct FolderPlace {
+    tree: gtk::ScrolledWindow,
+    panes: gtk::Paned,
+    /// The folder button, its popover holding the list while it is not beside the messages
+    button: gtk::MenuButton,
+    /// The folder's name on it
+    name: gtk::Label,
+    sidebar: gtk::ToggleButton,
+    /// A narrow step of `narrow_layout` holds
+    narrow: Cell<bool>,
+}
+
+impl FolderPlace {
+    fn update(&self) {
+        let narrow = self.narrow.get();
+        let in_popover = narrow || !folder_list_shown();
+        self.sidebar.set_visible(!narrow);
+        self.button.set_visible(in_popover);
+        // the title names the folder in a wide window: the button shows the folder's name only where the title does
+        // not
+        self.name.set_visible(narrow);
+        let Some(popover) = self.button.popover() else { return };
+        if in_popover == self.tree.is_ancestor(&popover) {
             return;
         }
-        if narrow {
-            panes.set_start_child(gtk::Widget::NONE);
-            tree.set_propagate_natural_height(true);
-            tree.set_max_content_height(480);
-            tree.set_size_request(260, -1);
-            popover.set_child(Some(&tree));
+        if in_popover {
+            self.panes.set_start_child(gtk::Widget::NONE);
+            self.tree.set_propagate_natural_height(true);
+            self.tree.set_max_content_height(480);
+            self.tree.set_size_request(260, -1);
+            popover.set_child(Some(&self.tree));
         } else {
             popover.set_child(gtk::Widget::NONE);
-            tree.set_propagate_natural_height(false);
-            tree.set_size_request(-1, -1);
-            panes.set_start_child(Some(&tree));
+            self.tree.set_propagate_natural_height(false);
+            self.tree.set_size_request(-1, -1);
+            self.panes.set_start_child(Some(&self.tree));
         }
-    });
+    }
 }
 
 /// The folder button of a narrow window: the folder's name as the title has it, the folder list in its popover
 /// (`narrow_layout` moves the list there)
-fn folder_chooser(title: &adw::WindowTitle) -> gtk::MenuButton {
+fn folder_chooser(title: &adw::WindowTitle) -> (gtk::MenuButton, gtk::Label) {
     let name = gtk::Label::builder()
         .ellipsize(gtk::pango::EllipsizeMode::End)
         .max_width_chars(16)
@@ -2718,7 +2792,7 @@ fn folder_chooser(title: &adw::WindowTitle) -> gtk::MenuButton {
         .build();
     button.set_widget_name("folder-list-button");
     button.update_property(&[gtk::accessible::Property::Label(&t!(GtkFolderList))]);
-    button
+    (button, name)
 }
 
 /// The search of a narrow window: a button that opens a bar under the header bar, across the window, with a Find
