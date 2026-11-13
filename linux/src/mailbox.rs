@@ -897,6 +897,11 @@ impl Mailbox {
     }
 
     /// Preferences' senders' pictures in the Columns list turned on or off: kept, and the rows again
+    /// A contact's picture changed in the Address Book: the list draws its senders again (their keys change with it)
+    pub fn senders_changed(&self) {
+        self.reload_list(true);
+    }
+
     pub fn set_list_pictures(&self, on: bool) {
         shell().settings.set_bool(settings::LIST_PICTURES, on);
         self.list.set_pictures(on);

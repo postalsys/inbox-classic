@@ -23,6 +23,10 @@ const STYLE: &str = "
 .message-rows > row { border-bottom: 1px solid alpha(@borders, 0.5); }
 .row-picture { border-radius: 16px; background-color: alpha(currentColor, 0.09); }
 .row-initials { font-size: 12px; font-weight: 600; color: alpha(currentColor, 0.6); }
+.card-picture { border-radius: 32px; background-color: alpha(currentColor, 0.09); }
+.card-initials { font-size: 22px; font-weight: 600; color: alpha(currentColor, 0.6); }
+.card-picture.drop-target { box-shadow: inset 0 0 0 2px @accent_bg_color; }
+.reader-contact { border-radius: 24px; }
 .unread-dot { min-width: 8px; min-height: 8px; border-radius: 4px; background-color: @accent_bg_color; }
 .sort-button { margin: 2px 4px; }
 .sort-button label { font-weight: normal; }
@@ -746,6 +750,18 @@ pub async fn open_files(parent: &gtk::Window, title: &str, patterns: Option<(&st
         .filter_map(|i| files.item(i).and_downcast::<gio::File>())
         .filter_map(|file| file.path())
         .collect()
+}
+
+/// The file chosen in an Open dialog of one file, None when cancelled
+pub async fn open_file(parent: &gtk::Window, title: &str, patterns: Option<(&str, &[&str])>) -> Option<PathBuf> {
+    if let Some(answer) = test_answer() {
+        return answer.into_iter().next();
+    }
+    let dialog = gtk::FileDialog::builder().title(title).modal(true).build();
+    if let Some((label, patterns)) = patterns {
+        dialog.set_filters(Some(&filter(label, patterns)));
+    }
+    dialog.open_future(Some(parent)).await.ok()?.path()
 }
 
 /// A folder chosen, None when cancelled
