@@ -301,6 +301,7 @@ unsafe fn card_of(card: *const PeCard) -> Option<Card> {
                 Some((p.kind.name().to_string(), field(p.number)?))
             })?,
             extra: String::new(),
+            picture: None,
         })
     }
 }
@@ -789,4 +790,88 @@ pub unsafe extern "C" fn pe_address_is_mailbox(address: *const c_char) -> bool {
         return false;
     };
     guard(|| pe_core::book::is_mailbox(address)).unwrap_or(false)
+}
+
+/// Gives card `card` the picture of the file at `path` (PNG or JPEG, read and kept as the core's own square picture,
+/// never the file as it is): true when it is set. False with the reason in `error` (NULL or a pointer to a string to
+/// free with `pe_string_free`), in words for the user: the file is no PNG or JPEG picture, or it is too large.
+///
+/// # Safety
+/// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_set_picture(
+    core: *const PeCore,
+    card: i64,
+    path: *const c_char,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let path = unsafe { arg(path) }.map(std::path::PathBuf::from);
+    // SAFETY: as the caller guarantees
+    let outcome = unsafe {
+        with(core, Err(String::new()), |core| match &path {
+            Some(path) => core.set_card_picture(card, path),
+            None => Err(String::new()),
+        })
+    };
+    match outcome {
+        Ok(()) => true,
+        Err(reason) => {
+            if !error.is_null() {
+                let reason = if reason.is_empty() {
+                    pe_core::card_pictures::Refused::NotPicture.text()
+                } else {
+                    reason
+                };
+                // SAFETY: the caller gave a valid pointer
+                unsafe { *error = into_c_string(pe_core::sentence(&reason)) };
+            }
+            false
+        }
+    }
+}
+
+/// Takes card `card`'s picture away
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_remove_picture(core: *const PeCore, card: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.remove_card_picture(card).is_ok()) }
+}
+
+/// Whether card `card` has a picture
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_has_picture(core: *const PeCore, card: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.card_has_picture(card)) }
+}
+
+/// Card `card`'s picture for its Properties: `size` x `size` BGRA with the alpha multiplied in (`size` 16 to 512),
+/// `len` bytes; NULL when it has none. Free with `pe_bytes_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `len` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_picture(core: *const PeCore, card: i64, size: u32, len: *mut usize) -> *mut u8 {
+    // SAFETY: as the caller guarantees
+    let Some(len) = (unsafe { len.as_mut() }) else {
+        return null_mut();
+    };
+    *len = 0;
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.card_picture(card, size) {
+            Some(pixels) => {
+                let pixels = pixels.into_boxed_slice();
+                *len = pixels.len();
+                Box::into_raw(pixels).cast()
+            }
+            None => null_mut(),
+        })
+    }
 }

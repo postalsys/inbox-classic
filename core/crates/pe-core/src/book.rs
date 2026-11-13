@@ -384,6 +384,38 @@ impl Core {
         Ok(self.store().import_cards(&cards)?)
     }
 
+    /// A card's picture from the picture file at `path` (PNG or JPEG), kept as the core's own: refused with what the
+    /// window says when the file is no such picture or too large (or can not be read)
+    pub fn set_card_picture(&self, card: CardId, path: &Path) -> std::result::Result<(), String> {
+        let too_large = std::fs::metadata(path)
+            .map(|m| m.len() > crate::card_pictures::MAX_FILE as u64)
+            .map_err(|error| error.to_string())?;
+        if too_large {
+            return Err(crate::card_pictures::Refused::TooLarge.text());
+        }
+        let bytes = std::fs::read(path).map_err(|error| error.to_string())?;
+        let png = crate::card_pictures::normalize(&bytes).map_err(|refused| refused.text())?;
+        self.store()
+            .set_card_picture(card, &png)
+            .map_err(|error| error.to_string())
+    }
+
+    /// Takes a card's picture away
+    pub fn remove_card_picture(&self, card: CardId) -> Result<()> {
+        Ok(self.store().remove_card_picture(card)?)
+    }
+
+    /// A card's picture as `size` x `size` BGRA pixels (the alpha multiplied in), for its Properties; None without one
+    pub fn card_picture(&self, card: CardId, size: u32) -> Option<Vec<u8>> {
+        let (png, _) = self.store().card_picture(card).ok()??;
+        crate::card_pictures::bgra(&png, size)
+    }
+
+    /// Whether a card has a picture
+    pub fn card_has_picture(&self, card: CardId) -> bool {
+        matches!(self.store().card_picture(card), Ok(Some(_)))
+    }
+
     /// Writes cards (`ids`, or every card when it is empty) to a vCard file
     pub fn export_cards(&self, ids: &[CardId], path: &Path) -> Result<u64> {
         let cards: Vec<Card> = if ids.is_empty() {
@@ -393,6 +425,14 @@ impl Core {
                 .filter_map(|&id| self.store().card(id).transpose())
                 .collect::<pe_store::Result<_>>()?
         };
+        // their pictures go with them
+        let cards: Vec<Card> = cards
+            .into_iter()
+            .map(|card| Card {
+                picture: self.store().card_picture(card.id).ok().flatten().map(|(png, _)| png),
+                ..card
+            })
+            .collect();
         std::fs::write(path, crate::vcard::write_vcards(&cards))
             .map_err(|error| Error::Unavailable(error.to_string()))?;
         Ok(cards.len() as u64)

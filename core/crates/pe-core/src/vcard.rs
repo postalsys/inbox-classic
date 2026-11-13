@@ -1,6 +1,9 @@
 //! vCard (RFC 2426, 3.0, and RFC 6350, 4.0) and CSV files of address books, read into cards and written out again.
-//! What a card here does not edit (birthdays, postal addresses, photos, ...) is kept as its vCard lines and written out
-//! as it came; nothing a file names is fetched (a PHOTO given by URL stays a line of text).
+//! What a card here does not edit (birthdays, postal addresses, ...) is kept as its vCard lines and written out as it
+//! came; nothing a file names is fetched (a PHOTO given by URL stays a line of text). A PHOTO the file carries (base64,
+//! or a data: URI) becomes the card's picture, read as a picture file the user chose is (card_pictures.rs).
+
+use base64::Engine;
 
 use pe_store::Card;
 
@@ -70,6 +73,13 @@ pub fn read_vcards(text: &str) -> Vec<Card> {
             }
             _ => {
                 let Some(card) = card.as_mut() else { continue };
+                // a picture the file carries; one it names by its address stays a line, never fetched
+                if name == "PHOTO"
+                    && let Some(bytes) = embedded_photo(&parameters, value)
+                {
+                    card.picture = crate::card_pictures::normalize(&bytes).ok();
+                    continue;
+                }
                 match name.as_str() {
                     "FN" => card.name = unescape(value),
                     "N" => {
@@ -108,6 +118,26 @@ pub fn read_vcards(text: &str) -> Vec<Card> {
         }
     }
     cards
+}
+
+/// The picture of a PHOTO line that carries it: base64 with ENCODING=b (vCard 3.0), or a data: URI (4.0); None for a
+/// PHOTO that names an address, or one that does not decode
+fn embedded_photo(parameters: &[(String, String)], value: &str) -> Option<Vec<u8>> {
+    let encoded = parameters
+        .iter()
+        .any(|(key, v)| key == "ENCODING" && (v.eq_ignore_ascii_case("b") || v.eq_ignore_ascii_case("base64")));
+    let data = if encoded {
+        value
+    } else {
+        let (head, data) = value.split_once(',')?;
+        let head = head.to_ascii_lowercase();
+        if !head.starts_with("data:") || !head.ends_with(";base64") {
+            return None;
+        }
+        data
+    };
+    let compact: String = data.chars().filter(|c| !c.is_whitespace()).collect();
+    base64::engine::general_purpose::STANDARD.decode(compact).ok()
 }
 
 /// A vCard line, folded at 75 bytes as the standard has it (a fold never inside a character)
@@ -157,6 +187,10 @@ pub fn write_vcards(cards: &[Card]) -> String {
         }
         if !card.notes.is_empty() {
             out.push_str(&folded(&format!("NOTE:{}", escape(&card.notes))));
+        }
+        if let Some(png) = &card.picture {
+            let encoded = base64::engine::general_purpose::STANDARD.encode(png);
+            out.push_str(&folded(&format!("PHOTO;ENCODING=b;TYPE=PNG:{encoded}")));
         }
         for line in card.extra.lines().filter(|l| !l.is_empty()) {
             let line: String = line.chars().filter(|c| !c.is_control()).collect();
@@ -289,6 +323,36 @@ pub fn read_csv(text: &str) -> Vec<Card> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reads_and_writes_photos_it_carries() {
+        let png = crate::card_pictures::tests::png(40, 30);
+        let encoded = base64::engine::general_purpose::STANDARD.encode(&png);
+        // 3.0's base64, folded; 4.0's data: URI; one named by an address stays a line; a broken one is left out
+        let text = format!(
+            "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Ann\r\nEMAIL:ann@example.com\r\nPHOTO;ENCODING=b;TYPE=PNG:{}\r\n {}\r\nEND:VCARD\r\n\
+             BEGIN:VCARD\r\nVERSION:4.0\r\nFN:Bo\r\nEMAIL:bo@example.com\r\nPHOTO:data:image/png;base64,{encoded}\r\nEND:VCARD\r\n\
+             BEGIN:VCARD\r\nVERSION:4.0\r\nFN:Cy\r\nEMAIL:cy@example.com\r\nPHOTO:https://tracker.example/c.png\r\nEND:VCARD\r\n\
+             BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Di\r\nEMAIL:di@example.com\r\nPHOTO;ENCODING=b:bm90IGEgcGljdHVyZQ==\r\nEND:VCARD\r\n",
+            &encoded[..40],
+            &encoded[40..]
+        );
+        let cards = read_vcards(&text);
+        assert_eq!(cards.len(), 4);
+        let kept = cards[0].picture.as_ref().expect("Ann's picture");
+        let picture = image::load_from_memory(kept).unwrap();
+        assert_eq!(
+            (picture.width(), picture.height()),
+            (256, 256),
+            "kept as the core's own square"
+        );
+        assert!(cards[1].picture.is_some(), "a data: URI");
+        assert!(cards[2].picture.is_none() && cards[2].extra.contains("PHOTO:https://tracker.example/c.png"));
+        assert!(cards[3].picture.is_none() && !cards[3].extra.contains("PHOTO"));
+        // written out and read again: the same picture
+        let again = read_vcards(&write_vcards(&cards[..1]));
+        assert_eq!(again[0].picture.as_deref(), Some(kept.as_slice()));
+    }
 
     #[test]
     fn reads_vcards_of_other_programs() {

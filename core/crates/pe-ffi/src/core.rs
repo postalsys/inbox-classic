@@ -1837,6 +1837,10 @@ pub struct PeMessageInfo {
     pub invitation: *const PeInvitation,
     /// The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
     pub has_logo: bool,
+    /// Without a logo: the picture of the Address Book's card with the sender's address (a key of the list's,
+    /// `pe_picture_start` draws it), when the provider confirmed the sender or gives no verdict, never in Junk E-mail;
+    /// 0 for none. The reading pane shows it where it shows a logo
+    pub picture: u64,
     /// A notice that a message was not delivered, or not yet: `document` starts with a card that explains it
     pub bounce: bool,
     /// The message the bounce returns is in the account (Sent Items first), at `bounced_folder` and `bounced_uid`:
@@ -1929,6 +1933,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         unsubscribe_target: strings.add(&view.unsubscribe.as_ref().map(Unsubscribe::target).unwrap_or_default()),
         invitation: invitation.as_deref().map_or(null(), |i| i as *const PeInvitation),
         has_logo: view.has_logo,
+        picture: view.picture,
         bounce: view.bounce,
         has_bounced_message: view.bounced_message.is_some(),
         bounced_folder: view.bounced_message.map_or(0, |m| m.folder),

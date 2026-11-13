@@ -39,6 +39,12 @@ pub struct MessageView {
     pub invitation: Option<crate::calendar::Invitation>,
     /// The brand has a BIMI logo the receiving server passed ([`crate::Core::logo_start`] draws it)
     pub has_logo: bool,
+    /// Without a logo: the picture of the Address Book's card with the sender's address, as the list's key
+    /// ([`crate::Core::picture_start`] draws it), when the provider confirmed the From domain or gives no verdict at
+    /// all, never in a Junk folder; 0 for none
+    pub picture: u64,
+    /// The provider confirmed the From domain or gives no verdict: a contact's picture may show
+    pub(crate) sender_confirmed: bool,
     /// It is a bounce, a notice that a message was not delivered or not yet: the document starts with its card
     pub bounce: bool,
     /// The message the bounce returns, found in the account by its Message-ID (Sent Items first): the card links to
@@ -114,6 +120,8 @@ pub(crate) fn build_unless(
     // a trusted sender the provider confirmed, or every message's when the user said so: the pictures load
     let sender = crate::pictures::sender(&message, trust.domains);
     let allow_remote_images = allow_remote_images || crate::pictures::load(&trust.pictures, sender.as_ref());
+    let sender_confirmed = sender.as_ref().is_some_and(|s| s.verified)
+        || crate::authres::verdict(&message.headers, trust.domains).is_none();
     let options = RenderOptions { allow_remote_images };
     let images = crate::compose::inline_images(&message);
     if dropped() {
@@ -200,6 +208,8 @@ pub(crate) fn build_unless(
             .collect(),
         unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
+        picture: 0,
+        sender_confirmed,
         invitation,
         bounce: bounce.is_some(),
         bounced_message,

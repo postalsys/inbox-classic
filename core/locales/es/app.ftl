@@ -578,3 +578,11 @@ ui-row-messages = { $count ->
 ui-list-pictures = Mostrar las imágenes de los remitentes en la lista de mensajes
 # review: new
 ui-list-pictures-note = Logotipos de marcas que el proveedor de correo confirmó; si no, las iniciales del remitente. Los logotipos se descargan una vez por marca, nunca por mensaje.
+# review: new
+ui-card-picture = Imagen:
+# review: new
+ui-card-picture-choose = &Elegir...
+# review: new
+ui-picture-not-picture = Este archivo no es una imagen PNG ni JPEG.
+# review: new
+ui-picture-too-large = Esta imagen es demasiado grande. Elija una de menos de 10 MB y 8000 píxeles de ancho.

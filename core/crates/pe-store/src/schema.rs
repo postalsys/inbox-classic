@@ -438,6 +438,15 @@ CREATE INDEX messages_auth_pending ON messages (id) WHERE auth_headers IS NOT NU
 CREATE INDEX messages_auth_unknown ON messages (COALESCE(date, internal_date) DESC)
     WHERE sender_auth IS NULL AND auth_headers IS NULL AND fetch_failed = 0;
 "#,
+    // a contact's picture (pe-core card_pictures.rs): the core's own PNG, 256 pixels square, and a revision that grows
+    // each time it is set, so the windows' picture keys change with it
+    r#"
+CREATE TABLE card_pictures (
+    card_id INTEGER PRIMARY KEY REFERENCES cards(id) ON DELETE CASCADE,
+    png BLOB NOT NULL,
+    changed INTEGER NOT NULL
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

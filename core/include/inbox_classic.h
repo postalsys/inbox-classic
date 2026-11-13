@@ -792,6 +792,10 @@ typedef struct PeMessageInfo {
   const struct PeInvitation *invitation;
   // The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
   bool has_logo;
+  // Without a logo: the picture of the Address Book's card with the sender's address (a key of the list's,
+  // `pe_picture_start` draws it), when the provider confirmed the sender or gives no verdict, never in Junk E-mail;
+  // 0 for none. The reading pane shows it where it shows a logo
+  uint64_t picture;
   // A notice that a message was not delivered, or not yet: `document` starts with a card that explains it
   bool bounce;
   // The message the bounce returns is in the account (Sent Items first), at `bounced_folder` and `bounced_uid`:
@@ -1503,6 +1507,39 @@ char *pe_address_field_add(const char *field,
 // # Safety
 // `address` must be NULL or a NUL-terminated string.
 bool pe_address_is_mailbox(const char *address);
+
+// Gives card `card` the picture of the file at `path` (PNG or JPEG, read and kept as the core's own square picture,
+// never the file as it is): true when it is set. False with the reason in `error` (NULL or a pointer to a string to
+// free with `pe_string_free`), in words for the user: the file is no PNG or JPEG picture, or it is too large.
+//
+// # Safety
+// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+bool pe_card_set_picture(const struct PeCore *core,
+                         int64_t card,
+                         const char *path,
+                         char **error);
+
+// Takes card `card`'s picture away
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_card_remove_picture(const struct PeCore *core, int64_t card);
+
+// Whether card `card` has a picture
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_card_has_picture(const struct PeCore *core, int64_t card);
+
+// Card `card`'s picture for its Properties: `size` x `size` BGRA with the alpha multiplied in (`size` 16 to 512),
+// `len` bytes; NULL when it has none. Free with `pe_bytes_free`.
+//
+// # Safety
+// `core` must be a live handle, `len` a valid pointer.
+uint8_t *pe_card_picture(const struct PeCore *core,
+                         int64_t card,
+                         uint32_t size,
+                         size_t *len);
 
 // Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
 // the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
