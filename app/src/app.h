@@ -32,6 +32,10 @@ std::wstring GetWindowString(HWND window);
 std::wstring Text(const char* utf8);
 // a date in seconds since the Unix epoch in the user's short date and time format, local time
 std::wstring FormatDate(int64_t seconds);
+// the date of `local` in the user's short date format
+std::wstring FormatDay(const SYSTEMTIME& local);
+// seconds since the Unix epoch, now
+int64_t UnixNow();
 // a time of day as the user's settings write it, without seconds: of `local`, or now
 std::wstring FormatTime(const SYSTEMTIME& local);
 // the event cards of the core word their days and times as the windows show dates
@@ -115,6 +119,12 @@ HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPAR
 // the colour of a flag (1 red to 7 gray, Apple Mail's), and a flag of `size` pixels in it at `left`, `top`
 COLORREF FlagRgb(int color);
 void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb);
+// a row's flag in its colour (red for none, 0), on a selected row on a plate of the list's background so that a
+// colour close to the highlight's can still be seen
+void DrawFlagMark(HDC dc, int left, int top, int size, bool selected, int color);
+// the field of a View > Sort By item, and the item of a field (columnrow.cpp)
+PeSortField SortFieldOfItem(WORD id);
+WORD SortItemOf(PeSortField field);
 // one glyph of the Marlett font (the symbols of the system's own buttons: "r" a close box, "6" a down arrow) centered
 // in `box`, `height` pixels high
 void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORREF color);
@@ -752,8 +762,16 @@ private:
     void DisplayInfo(NMLVDISPINFOW* info);
     // the Columns layout (columnrow.cpp): a row drawn whole, its + or - box, what a screen reader says for it, its date
     void DrawColumnsRow(HDC dc, int index, const PeMessage& row);
-    RECT ColumnsThreadBox(int index) const;
+    // the whole width of row `index`, and where its + or - box is in such a row
+    RECT ColumnsRowRect(int index) const;
+    static RECT ColumnsThreadBox(const RECT& row);
     std::wstring ColumnsRowText(const PeMessage& row) const;
+    // a paint of the list starts: the time and the time zone its dates are written for, once a paint
+    void ColumnsPaintStarts();
+    // who a row is for: the sender, or "To:" and the recipients in Sent Items and Drafts
+    std::wstring RowPerson(const PeMessage& row) const;
+    // the system colour of a row's text: selected (with the keyboard or not), grey for an ignored conversation
+    int RowTextColor(int index, const PeMessage* row) const;
     // the row height of the Columns list: three lines and their padding
     int ColumnsRowHeight() const;
     // the list sorted as sort_ and ascending_ say, its heading's arrow and the "Sorted by" button following
@@ -762,6 +780,9 @@ private:
     std::wstring SortedByText() const;
     void DrawSortButton(const DRAWITEMSTRUCT& item) const;
     void ShowSortMenu();
+    // the "Sorted by" button's words and width after the order changed, and that width
+    void UpdateSortButton();
+    int SortButtonWidth() const;
     bool OnListNotify(NMHDR* header, LRESULT& result);
 
     PeCore* core_ = nullptr;
@@ -919,6 +940,11 @@ private:
     bool columns_ = false;
     HIMAGELIST rowSpacer_ = nullptr;
     HWND sortButton_ = nullptr;
+    // the widths of the columns but Subject while Columns has them out of the way, to give back in Classic
+    std::vector<int> classicWidths_;
+    // the time and the time zone (seconds east of UTC) of the paint under way, for the rows' dates
+    int64_t paintNow_ = 0;
+    int64_t paintOffset_ = 0;
     // the pages of the list, the most recently used last
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's

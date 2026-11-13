@@ -7,6 +7,13 @@
 
 namespace {
 
+// the geometry of a row, at 96 DPI: the room above and below its three lines, between two lines, its text's right
+// margin, and its gutter for the unread dot
+constexpr int kRowPadding = 5;
+constexpr int kLineGap = 2;
+constexpr int kRowMargin = 8;
+constexpr int kGutter = 14;
+
 // seconds east of UTC of the user's time zone, now
 int64_t LocalOffset() {
     TIME_ZONE_INFORMATION zone = {};
@@ -20,13 +27,6 @@ int64_t LocalOffset() {
     return -static_cast<int64_t>(bias) * 60;
 }
 
-int64_t UnixNow() {
-    FILETIME now;
-    GetSystemTimeAsFileTime(&now);
-    ULARGE_INTEGER ticks = {{now.dwLowDateTime, now.dwHighDateTime}};
-    return static_cast<int64_t>(ticks.QuadPart / 10000000ULL) - 11644473600LL;
-}
-
 // a date in the user's format: `flags` of GetDateFormatEx, or the `picture`
 std::wstring DatePart(const SYSTEMTIME& time, DWORD flags, const wchar_t* picture) {
     wchar_t text[96] = L"";
@@ -34,14 +34,14 @@ std::wstring DatePart(const SYSTEMTIME& time, DWORD flags, const wchar_t* pictur
     return text;
 }
 
-// a date as the Columns list writes it (pe_date_style): today's time, the weekday this week, the day and month this
-// year, the whole date before
-std::wstring ShortDate(int64_t seconds) {
+// a date as the Columns list writes it (pe_date_style), seen at `now` in a zone `offset` seconds east of UTC: today's
+// time, the weekday this week, the day and month this year, the whole date before
+std::wstring ShortDate(int64_t seconds, int64_t now, int64_t offset) {
     SYSTEMTIME local;
     if (!UnixToSystemTime(seconds, true, local)) {
         return {};
     }
-    switch (pe_date_style(seconds, UnixNow(), LocalOffset())) {
+    switch (pe_date_style(seconds, now, offset)) {
     case PE_DATE_STYLE_TIME:
         return FormatTime(local);
     case PE_DATE_STYLE_WEEKDAY:
@@ -53,7 +53,7 @@ std::wstring ShortDate(int64_t seconds) {
         return DatePart(local, 0, L"d MMM");
 #endif
     default:
-        return DatePart(local, DATE_SHORTDATE, nullptr);
+        return FormatDay(local);
     }
 }
 
@@ -65,28 +65,7 @@ struct RowPaint {
     int right;
     int top;
     int line;
-    COLORREF fore;
-    // the colour of what says less: the date, the folder, the snippet
-    COLORREF faint;
 };
-
-// one line of text from `left` to `right` on line `n` (0 to 2) in `font`, cut short with an ellipsis; aligned right
-// with `flush`. How wide it was drawn
-int DrawLine(const RowPaint& paint, int n, int left, int right, const std::wstring& text, HFONT font, COLORREF color,
-             bool flush = false) {
-    if (text.empty() || right <= left) {
-        return 0;
-    }
-    HGDIOBJ old = SelectObject(paint.dc, font);
-    SetTextColor(paint.dc, color);
-    RECT place = {left, paint.top + n * paint.line, right, paint.top + (n + 1) * paint.line};
-    RECT measured = place;
-    UINT flags = DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_VCENTER;
-    DrawTextW(paint.dc, text.c_str(), static_cast<int>(text.size()), &measured, flags | DT_CALCRECT);
-    DrawTextW(paint.dc, text.c_str(), static_cast<int>(text.size()), &place, flags | (flush ? DT_RIGHT : DT_LEFT));
-    SelectObject(paint.dc, old);
-    return std::min(static_cast<int>(measured.right - measured.left), right - left);
-}
 
 // how wide `text` is in `font`
 int Width(HDC dc, HFONT font, const std::wstring& text) {
@@ -97,17 +76,40 @@ int Width(HDC dc, HFONT font, const std::wstring& text) {
     return size.cx;
 }
 
-// the unread dot in the gutter, centred on `x`, `y`
+// one line of text from `left` to `right` on line `n` (0 to 2) in `font`, cut short with an ellipsis; aligned right
+// with `flush`
+void DrawLine(const RowPaint& paint, int n, int left, int right, const std::wstring& text, HFONT font, COLORREF color,
+              bool flush = false) {
+    if (text.empty() || right <= left) {
+        return;
+    }
+    HGDIOBJ old = SelectObject(paint.dc, font);
+    SetTextColor(paint.dc, color);
+    RECT place = {left, paint.top + n * paint.line, right, paint.top + (n + 1) * paint.line};
+    UINT flags = DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_VCENTER | (flush ? DT_RIGHT : DT_LEFT);
+    DrawTextW(paint.dc, text.c_str(), static_cast<int>(text.size()), &place, flags);
+    SelectObject(paint.dc, old);
+}
+
+// `text` at the right end of line `n`, ending at `right`, at most `widest` wide; how wide it took
+int DrawRight(const RowPaint& paint, int n, int right, int widest, const std::wstring& text, HFONT font, COLORREF color) {
+    if (text.empty()) {
+        return 0;
+    }
+    int width = std::min(Width(paint.dc, font, text), std::max(0, widest));
+    DrawLine(paint, n, right - width, right, text, font, color, true);
+    return width;
+}
+
+// the unread dot in the gutter, centred on `x`, `y`, in the device context's own brush and pen
 void DrawDot(HDC dc, int x, int y, int size, COLORREF color) {
-    HBRUSH brush = CreateSolidBrush(color);
-    HPEN pen = CreatePen(PS_SOLID, 1, color);
-    HGDIOBJ oldBrush = SelectObject(dc, brush);
-    HGDIOBJ oldPen = SelectObject(dc, pen);
+    HGDIOBJ oldBrush = SelectObject(dc, GetStockObject(DC_BRUSH));
+    HGDIOBJ oldPen = SelectObject(dc, GetStockObject(DC_PEN));
+    SetDCBrushColor(dc, color);
+    SetDCPenColor(dc, color);
     Ellipse(dc, x - size / 2, y - size / 2, x - size / 2 + size, y - size / 2 + size);
     SelectObject(dc, oldPen);
     SelectObject(dc, oldBrush);
-    DeleteObject(pen);
-    DeleteObject(brush);
 }
 
 // the marks of the second line from the right: the conversation's mark (watched or ignored), the flag in its colour,
@@ -135,22 +137,40 @@ int DrawMarks(const RowPaint& paint, const PeMessage& row, bool selected, HIMAGE
         if (icon >= 0) {
             ImageList_Draw(strip, icon, paint.dc, x, top, ILD_TRANSPARENT);
         } else {
-            if (selected) {
-                // a plate of the list's own background under the flag, as the classic row has it
-                HGDIOBJ oldBrush = SelectObject(paint.dc, GetSysColorBrush(COLOR_WINDOW));
-                HGDIOBJ oldPen = SelectObject(paint.dc, GetStockObject(NULL_PEN));
-                RoundRect(paint.dc, x, top, x + iconSize + 1, top + iconSize + 1, 4, 4);
-                SelectObject(paint.dc, oldPen);
-                SelectObject(paint.dc, oldBrush);
-            }
-            DrawFlag(paint.dc, x, top, iconSize, FlagRgb(row.flag_color ? row.flag_color : 1));
+            DrawFlagMark(paint.dc, x, top, iconSize, selected, row.flag_color);
         }
         x -= gap;
     }
     return icons.empty() ? 0 : paint.right - x - gap;
 }
 
+// the items of View > Sort By and the fields they sort by, Date for the dates
+constexpr std::pair<WORD, PeSortField> kSortItems[] = {
+    {IDM_SORT_DATE, PE_SORT_FIELD_DATE},
+    {IDM_SORT_FROM, PE_SORT_FIELD_FROM},
+    {IDM_SORT_SUBJECT, PE_SORT_FIELD_SUBJECT},
+    {IDM_SORT_SIZE, PE_SORT_FIELD_SIZE},
+};
+
 }  // namespace
+
+PeSortField SortFieldOfItem(WORD id) {
+    for (const auto& [item, field] : kSortItems) {
+        if (item == id) {
+            return field;
+        }
+    }
+    return PE_SORT_FIELD_DATE;
+}
+
+WORD SortItemOf(PeSortField field) {
+    for (const auto& [item, sorted] : kSortItems) {
+        if (sorted == field) {
+            return item;
+        }
+    }
+    return IDM_SORT_DATE;
+}
 
 int Mailbox::ColumnsRowHeight() const {
     HDC dc = GetDC(list_);
@@ -159,18 +179,34 @@ int Mailbox::ColumnsRowHeight() const {
     GetTextMetricsW(dc, &metrics);
     SelectObject(dc, old);
     ReleaseDC(list_, dc);
-    return 3 * (metrics.tmHeight + Scale(2)) + Scale(10);
+    return 3 * (metrics.tmHeight + Scale(kLineGap)) + 2 * Scale(kRowPadding);
 }
 
-RECT Mailbox::ColumnsThreadBox(int index) const {
+void Mailbox::ColumnsPaintStarts() {
+    paintNow_ = UnixNow();
+    paintOffset_ = LocalOffset();
+}
+
+RECT Mailbox::ColumnsRowRect(int index) const {
     RECT area = {LVIR_BOUNDS};
     SendMessageW(list_, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&area));
     RECT client;
     GetClientRect(list_, &client);
+    // the whole width: the columns under it are only for the list's own hit testing
+    area.left = client.left;
+    area.right = client.right;
+    return area;
+}
+
+RECT Mailbox::ColumnsThreadBox(const RECT& row) {
     // odd, so that the + and - are in its middle; in the middle of the third line, at the right
-    int size = Scale(9) | 1, line = (area.bottom - area.top - Scale(10)) / 3;
-    int right = client.right - Scale(8), middle = area.top + Scale(5) + 2 * line + line / 2;
+    int size = Scale(9) | 1, line = (row.bottom - row.top - 2 * Scale(kRowPadding)) / 3;
+    int right = row.right - Scale(kRowMargin), middle = row.top + Scale(kRowPadding) + 2 * line + line / 2;
     return {right - size, middle - size / 2, right, middle - size / 2 + size};
+}
+
+std::wstring Mailbox::RowPerson(const PeMessage& row) const {
+    return recipientsColumn_ ? core::T(PE_TEXT_UI_COL_TO) + L": " + Text(row.recipients) : Text(row.from);
 }
 
 std::wstring Mailbox::ColumnsRowText(const PeMessage& row) const {
@@ -178,7 +214,7 @@ std::wstring Mailbox::ColumnsRowText(const PeMessage& row) const {
     if (row.bold) {
         parts.push_back(core::T(PE_TEXT_UI_ROW_UNREAD));
     }
-    parts.push_back(recipientsColumn_ ? core::T(PE_TEXT_UI_COL_TO) + L": " + Text(row.recipients) : Text(row.from));
+    parts.push_back(RowPerson(row));
     parts.push_back(Text(row.subject));
     if (row.has_date) {
         parts.push_back(FormatDate(row.date));
@@ -203,51 +239,41 @@ std::wstring Mailbox::ColumnsRowText(const PeMessage& row) const {
 }
 
 void Mailbox::DrawColumnsRow(HDC dc, int index, const PeMessage& row) {
-    RECT area = {LVIR_BOUNDS};
-    SendMessageW(list_, LVM_GETITEMRECT, index, reinterpret_cast<LPARAM>(&area));
-    RECT client;
-    GetClientRect(list_, &client);
-    area.left = client.left;
-    area.right = client.right;
+    RECT area = ColumnsRowRect(index);
     bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
     bool active = GetFocus() == list_;
-    COLORREF fore = GetSysColor(selected ? (active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT) : row.dimmed ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT);
+    COLORREF fore = GetSysColor(RowTextColor(index, &row));
     COLORREF faint = selected ? fore : GetSysColor(COLOR_GRAYTEXT);
     FillRect(dc, &area, GetSysColorBrush(selected ? SelectionColor() : COLOR_WINDOW));
     // a hairline between the rows, which are tall
     RECT rule = {area.left, area.bottom - 1, area.right, area.bottom};
     FillRect(dc, &rule, GetSysColorBrush(COLOR_BTNFACE));
     SetBkMode(dc, TRANSPARENT);
-    int line = (area.bottom - area.top - Scale(10)) / 3;
+    int line = (area.bottom - area.top - 2 * Scale(kRowPadding)) / 3;
     // a conversation's other messages under its first, indented; step 4 puts the sender's picture before the text
-    int left = area.left + Scale(14) + (row.thread_depth > 0 ? Scale(16) : 0);
-    RowPaint paint = {dc, left, area.right - Scale(8), area.top + Scale(5), line, fore, faint};
+    int left = area.left + Scale(kGutter) + (row.thread_depth > 0 ? Scale(16) : 0);
+    RowPaint paint = {dc, left, area.right - Scale(kRowMargin), area.top + Scale(kRowPadding), line};
     if (row.bold) {
-        DrawDot(dc, area.left + Scale(7), paint.top + line / 2, Scale(7), selected ? fore : GetSysColor(COLOR_HOTLIGHT));
+        DrawDot(dc, area.left + Scale(kGutter) / 2, paint.top + line / 2, Scale(7), selected ? fore : GetSysColor(COLOR_HOTLIGHT));
     }
     HFONT font = RowFont(row);
     // who and when
-    std::wstring date = row.has_date ? ShortDate(row.date) : L"";
-    int dateWidth = DrawLine(paint, 0, paint.left, paint.right, date, normal_, faint, true);
-    std::wstring who = recipientsColumn_ ? core::T(PE_TEXT_UI_COL_TO) + L": " + Text(row.recipients) : Text(row.from);
-    DrawLine(paint, 0, paint.left, paint.right - dateWidth - Scale(10), who, font, fore);
+    std::wstring date = row.has_date ? ShortDate(row.date, paintNow_, paintOffset_) : L"";
+    int dateWidth = DrawRight(paint, 0, paint.right, paint.right - paint.left, date, normal_, faint);
+    DrawLine(paint, 0, paint.left, paint.right - dateWidth - Scale(10), RowPerson(row), font, fore);
     // the subject, the marks at the right (the folder before them in a list of several folders)
     int marks = DrawMarks(paint, row, selected, listIcons_, iconSize_);
     int folderRight = paint.right - marks - (marks ? Scale(6) : 0);
-    int folderWidth = 0;
-    if (SeveralFolders()) {
-        std::wstring folder = RowFolder(row.folder);
-        int widest = (folderRight - paint.left) * 2 / 5;
-        int start = std::max(folderRight - Width(dc, normal_, folder), folderRight - widest);
-        folderWidth = DrawLine(paint, 1, start, folderRight, folder, normal_, faint, true);
-    }
+    int folderWidth = SeveralFolders()
+                          ? DrawRight(paint, 1, folderRight, (folderRight - paint.left) * 2 / 5, RowFolder(row.folder), normal_, faint)
+                          : 0;
     DrawLine(paint, 1, paint.left, folderRight - folderWidth - (folderWidth ? Scale(10) : 0), Text(row.subject), font, fore);
     // the first words, and a conversation's count and box
     int threadRight = paint.right;
     if (row.thread_opens) {
-        RECT box = ColumnsThreadBox(index);
+        RECT box = ColumnsThreadBox(area);
         DrawThreadBox(dc, box, row.thread_collapsed);
-        int count = DrawLine(paint, 2, paint.left, box.left - Scale(4), std::to_wstring(row.thread_count), normal_, faint, true);
+        int count = DrawRight(paint, 2, box.left - Scale(4), box.left - paint.left, std::to_wstring(row.thread_count), normal_, faint);
         threadRight = box.left - Scale(4) - count - Scale(8);
     }
     if (row.snippet && *row.snippet) {
@@ -302,38 +328,36 @@ void Mailbox::SetAscending(bool ascending) {
 void Mailbox::ApplySort() {
     pe_list_view_set_sort(view_.get(), sort_, ascending_);
     ReloadList(true);
-    if (columns_) {
-        LayoutList();
-    }
+    UpdateSortButton();
 }
 
-namespace {
-
-// the Sort By item of a field, Date for the dates
-WORD SortItem(PeSortField field) {
-    switch (field) {
-    case PE_SORT_FIELD_FROM:
-        return IDM_SORT_FROM;
-    case PE_SORT_FIELD_SUBJECT:
-        return IDM_SORT_SUBJECT;
-    case PE_SORT_FIELD_SIZE:
-        return IDM_SORT_SIZE;
-    default:
-        return IDM_SORT_DATE;
-    }
+void Mailbox::UpdateSortButton() {
+    // its words are also its name for screen readers
+    SetWindowTextW(sortButton_, SortedByText().c_str());
+    RECT now;
+    GetWindowRect(sortButton_, &now);
+    int width = std::min(SortButtonWidth(), static_cast<int>(listArea_.right - listArea_.left));
+    SetWindowPos(sortButton_, nullptr, 0, 0, width, now.bottom - now.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    InvalidateRect(sortButton_, nullptr, TRUE);
 }
 
-}  // namespace
+int Mailbox::SortButtonWidth() const {
+    HDC dc = GetDC(sortButton_);
+    int width = Width(dc, normal_, SortedByText());
+    ReleaseDC(sortButton_, dc);
+    // the words, their margin and the arrow after them
+    return width + Scale(30);
+}
 
 std::wstring Mailbox::SortedByText() const {
-    PeText field = CommandText(static_cast<PeCommandId>(SortItem(sort_)));
+    PeText field = CommandText(static_cast<PeCommandId>(SortItemOf(sort_)));
     return core::T(PE_TEXT_UI_SORTED_BY, {{"field", core::Plain(field)}});
 }
 
 HMENU Mailbox::SortMenu() {
     HMENU menu = CreatePopupMenu();
-    for (WORD id : {IDM_SORT_DATE, IDM_SORT_FROM, IDM_SORT_SUBJECT, IDM_SORT_SIZE}) {
-        AppendMenuW(menu, MF_STRING, id, MenuItem(CommandText(static_cast<PeCommandId>(id))).c_str());
+    for (const auto& item : kSortItems) {
+        AppendMenuW(menu, MF_STRING, item.first, MenuItem(CommandText(static_cast<PeCommandId>(item.first))).c_str());
     }
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_SORT_ASCENDING, MenuItem(PE_TEXT_CMD_SORT_ASCENDING).c_str());
@@ -342,7 +366,7 @@ HMENU Mailbox::SortMenu() {
 }
 
 void Mailbox::UpdateSortMenu(HMENU menu) const {
-    CheckMenuRadioItem(menu, IDM_SORT_DATE, IDM_SORT_SIZE, SortItem(sort_), MF_BYCOMMAND);
+    CheckMenuRadioItem(menu, IDM_SORT_DATE, IDM_SORT_SIZE, SortItemOf(sort_), MF_BYCOMMAND);
     CheckMenuRadioItem(menu, IDM_SORT_ASCENDING, IDM_SORT_DESCENDING, ascending_ ? IDM_SORT_ASCENDING : IDM_SORT_DESCENDING,
                        MF_BYCOMMAND);
 }

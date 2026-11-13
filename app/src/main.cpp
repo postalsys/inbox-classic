@@ -1449,20 +1449,6 @@ void Reply(PeDraftKind kind) {
     OpenCompose(g_main, g_core.get(), g_mailbox.CurrentAccount(), pe_draft_info(draft.get()));
 }
 
-// the field of a Sort By item
-PeSortField SortFieldOf(WORD id) {
-    switch (id) {
-    case IDM_SORT_FROM:
-        return PE_SORT_FIELD_FROM;
-    case IDM_SORT_SUBJECT:
-        return PE_SORT_FIELD_SUBJECT;
-    case IDM_SORT_SIZE:
-        return PE_SORT_FIELD_SIZE;
-    default:
-        return PE_SORT_FIELD_DATE;
-    }
-}
-
 void OnCommand(WORD id, WORD code) {
     // a colour of the Flag submenu, or Clear Flag
     if (id > IDM_FLAG_COLOR && id <= IDM_FLAG_CLEAR) {
@@ -1719,7 +1705,7 @@ void OnCommand(WORD id, WORD code) {
     case IDM_SORT_FROM:
     case IDM_SORT_SUBJECT:
     case IDM_SORT_SIZE:
-        g_mailbox.SortBy(SortFieldOf(id));
+        g_mailbox.SortBy(SortFieldOfItem(id));
         return;
     case IDM_SORT_ASCENDING:
     case IDM_SORT_DESCENDING:

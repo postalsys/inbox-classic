@@ -227,9 +227,20 @@ std::wstring Text(const char* utf8) {
     return utf8 ? core::Widen(utf8) : std::wstring();
 }
 
+namespace {
+// seconds from 1601, where FILETIME counts from, to 1970
+constexpr int64_t kFrom1601 = 11644473600LL;
+}  // namespace
+
+int64_t UnixNow() {
+    FILETIME now;
+    GetSystemTimeAsFileTime(&now);
+    ULARGE_INTEGER ticks = {{now.dwLowDateTime, now.dwHighDateTime}};
+    return static_cast<int64_t>(ticks.QuadPart / 10000000ULL) - kFrom1601;
+}
+
 bool UnixToSystemTime(int64_t seconds, bool local, SYSTEMTIME& time) {
     // the dates FILETIME holds, 1601 to 30827; a sender can write any date
-    constexpr int64_t kFrom1601 = 11644473600LL;
     constexpr int64_t kLast = 910692730085LL;
     if (seconds < -kFrom1601 || seconds > kLast) {
         return false;
@@ -254,9 +265,13 @@ std::wstring FormatDate(int64_t seconds) {
     if (!UnixToSystemTime(seconds, true, local)) {
         return {};
     }
+    return FormatDay(local) + L" " + FormatTime(local);
+}
+
+std::wstring FormatDay(const SYSTEMTIME& local) {
     wchar_t date[64] = L"";
     GetDateFormatEx(LOCALE_NAME_USER_DEFAULT, DATE_SHORTDATE, &local, nullptr, date, 64, nullptr);
-    return std::wstring(date) + L" " + FormatTime(local);
+    return date;
 }
 
 std::wstring FormatTime(const SYSTEMTIME& local) {

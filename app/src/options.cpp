@@ -322,8 +322,8 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
         longest = std::max(longest, static_cast<int>(MeasureText(language.name).cx));
     }
     int comboWidth = std::max(Scale(200), longest + GetSystemMetrics(SM_CXVSCROLL) + Scale(12));
-    // the download lists: their labels in a column, the lists as wide as their longest entry
-    int downloadLabel = static_cast<int>(std::max({MeasureText(aheadText).cx, MeasureText(limitText).cx, MeasureText(layoutText).cx})) +
+    // the layout and download lists: their labels in a column, the lists as wide as their longest entry
+    int comboLabel = static_cast<int>(std::max({MeasureText(aheadText).cx, MeasureText(limitText).cx, MeasureText(layoutText).cx})) +
                         Scale(8);
     int downloadListWidth = 0;
     for (const auto* items : {&aheadItems, &limitItems}) {
@@ -337,7 +337,7 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
                           static_cast<int>(MeasureText(threadsText).cx) + Scale(24),
                           static_cast<int>(MeasureText(codesText).cx) + Scale(48),
                           static_cast<int>(MeasureText(picturesText).cx) + Scale(24),
-                          ButtonWidth({trustedText}) + Scale(6) + ButtonWidth({emlText}), downloadLabel + downloadListWidth});
+                          ButtonWidth({trustedText}) + Scale(6) + ButtonWidth({emlText}), comboLabel + downloadListWidth});
     int width = 2 * pad + inner;
     int noteHeight = std::max(Scale(16), static_cast<int>(MeasureText(note, inner - labelWidth).cy));
     int warningHeight = std::max(Scale(16), static_cast<int>(MeasureText(warning, inner - Scale(17)).cy));
@@ -385,9 +385,9 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     Button_SetCheck(threadsCheck, threads ? BST_CHECKED : BST_UNCHECKED);
     y += row + Scale(4);
     // the layout of the main window, as View > Layout has it
-    CreateChild(dialog, L"STATIC", layoutText.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + downloadLabel, y + row});
+    CreateChild(dialog, L"STATIC", layoutText.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + comboLabel, y + row});
     HWND layoutCombo = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, IDC_OPTIONS_LAYOUT,
-                                   {left + downloadLabel, y, right, y + Scale(200)});
+                                   {left + comboLabel, y, right, y + Scale(200)});
     for (const std::wstring& item : layoutItems) {
         SendMessageW(layoutCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
     }
@@ -411,9 +411,9 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {left, y, right, y + 2});
     y += 2 + Scale(12);
     auto addDownloadList = [&](const std::wstring& text, int id, const std::vector<std::wstring>& items, int selected) {
-        CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + downloadLabel, y + row});
+        CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + comboLabel, y + row});
         HWND list = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, id,
-                                {left + downloadLabel, y, right, y + Scale(200)});
+                                {left + comboLabel, y, right, y + Scale(200)});
         for (const std::wstring& item : items) {
             SendMessageW(list, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
         }

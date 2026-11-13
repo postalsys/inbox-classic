@@ -275,7 +275,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
         SendMessageW(tip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tool));
     }
     // the Columns layout's "Sorted by" over the list (SetColumns shows it)
-    sortButton_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW, IDC_SORT_BUTTON, {});
+    sortButton_ = CreateChild(parent, L"BUTTON", SortedByText().c_str(), WS_TABSTOP | BS_OWNERDRAW, IDC_SORT_BUTTON, {});
     ShowWindow(sortButton_, SW_HIDE);
     IconColumn(list_, COL_ATTACH, LIST_ATTACH);
     IconColumn(list_, COL_FLAG, LIST_FLAG);
@@ -367,9 +367,8 @@ void Mailbox::LayoutList() {
     // the Columns list has no headings: "Sorted by" over it says the order, and changes it
     ShowWindow(sortButton_, columns_ ? SW_SHOW : SW_HIDE);
     if (columns_) {
-        SetWindowTextW(sortButton_, SortedByText().c_str());
-        int height = Scale(20), buttonWidth = TextWidth(sortButton_, normal_) + Scale(30);
-        MoveWindow(sortButton_, list.left, list.top, std::min(width, buttonWidth), height, TRUE);
+        int height = Scale(20);
+        MoveWindow(sortButton_, list.left, list.top, std::min(width, SortButtonWidth()), height, TRUE);
         list.top += height + Scale(2);
     }
     MoveWindow(list_, list.left, list.top, width, list.bottom - list.top, TRUE);
@@ -382,6 +381,28 @@ void Mailbox::FitSubjectColumn() {
     GetClientRect(list_, &client);
     HWND header = ListView_GetHeader(list_);
     int count = Header_GetItemCount(header);
+    // the Columns rows are drawn whole: the other columns out of the way (their widths kept for Classic), Subject the
+    // width of the list, so a click anywhere on a row is on it and nothing scrolls sideways
+    if (columns_ || !classicWidths_.empty()) {
+        classicWidths_.resize(std::max(classicWidths_.size(), static_cast<size_t>(count)), 0);
+        for (int column = 0; column < count; column++) {
+            int width = ListView_GetColumnWidth(list_, column);
+            if (column == COL_SUBJECT) {
+                continue;
+            }
+            if (columns_ && width > 0) {
+                classicWidths_[column] = width;
+                ListView_SetColumnWidth(list_, column, 0);
+            } else if (!columns_ && classicWidths_[column] > 0) {
+                ListView_SetColumnWidth(list_, column, classicWidths_[column]);
+            }
+        }
+        if (columns_) {
+            ListView_SetColumnWidth(list_, COL_SUBJECT, static_cast<int>(client.right));
+            return;
+        }
+        classicWidths_.clear();
+    }
     int others = 0;
     for (int column = 0; column < count; column++) {
         if (column != COL_SUBJECT) {
@@ -955,6 +976,9 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
     int index = static_cast<int>(draw->nmcd.dwItemSpec);
     if (draw->nmcd.dwDrawStage == CDDS_PREPAINT) {
         result = CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;
+        if (columns_) {
+            ColumnsPaintStarts();
+        }
     } else if (draw->nmcd.dwDrawStage == CDDS_POSTPAINT) {
         if (ListView_GetItemCount(list_) == 0) {
             DrawEmptyList(draw->nmcd.hdc);
@@ -1017,6 +1041,17 @@ void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb) {
     DeleteObject(fill);
 }
 
+void DrawFlagMark(HDC dc, int left, int top, int size, bool selected, int color) {
+    if (selected) {
+        HGDIOBJ oldBrush = SelectObject(dc, GetSysColorBrush(COLOR_WINDOW));
+        HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
+        RoundRect(dc, left, top, left + size + 1, top + size + 1, 4, 4);
+        SelectObject(dc, oldPen);
+        SelectObject(dc, oldBrush);
+    }
+    DrawFlag(dc, left, top, size, FlagRgb(color ? color : 1));
+}
+
 namespace {
 
 // a menu picture in `color` on the menu's background, made once: its flag, or (`checked`) a check mark in it, the mark
@@ -1055,12 +1090,17 @@ HBITMAP FlagBitmap(int color, bool checked) {
 // list of owner data. The list then paints no highlight of its own; an ignored conversation's row in grey
 void Mailbox::RowColors(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const {
     bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
-    bool active = GetFocus() == list_;
     draw->nmcd.uItemState &= ~CDIS_SELECTED;
     draw->clrTextBk = GetSysColor(selected ? SelectionColor() : COLOR_WINDOW);
-    draw->clrText = GetSysColor(selected               ? (active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT)
-                                : row && row->dimmed ? COLOR_GRAYTEXT
-                                                     : COLOR_WINDOWTEXT);
+    draw->clrText = GetSysColor(RowTextColor(index, row));
+}
+
+int Mailbox::RowTextColor(int index, const PeMessage* row) const {
+    bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
+    if (selected) {
+        return GetFocus() == list_ ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT;
+    }
+    return row && row->dimmed ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT;
 }
 
 HFONT Mailbox::RowFont(const PeMessage& row) const {
@@ -1085,9 +1125,8 @@ RECT Mailbox::ThreadBox(const RECT& cell) {
 void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     RECT cell = SubjectCell(index);
     bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
-    bool active = GetFocus() == list_;
     int back = !selected ? COLOR_WINDOW : SelectionColor();
-    int fore = selected ? (active ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT) : row.dimmed ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT;
+    int fore = RowTextColor(index, &row);
     FillRect(dc, &cell, GetSysColorBrush(back));
     RECT box = ThreadBox(cell);
     if (row.thread_opens) {
@@ -1147,14 +1186,7 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         ListView_GetSubItemRect(list_, index, COL_FLAG, LVIR_BOUNDS, &cell);
         int width = ListView_GetColumnWidth(list_, COL_FLAG);
         int left = cell.left + (width - iconSize_) / 2, top = cell.top + (cell.bottom - cell.top - iconSize_) / 2;
-        if (selected) {
-            HGDIOBJ oldBrush = SelectObject(dc, GetSysColorBrush(COLOR_WINDOW));
-            HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
-            RoundRect(dc, left, top, left + iconSize_ + 1, top + iconSize_ + 1, 4, 4);
-            SelectObject(dc, oldPen);
-            SelectObject(dc, oldBrush);
-        }
-        DrawFlag(dc, left, top, iconSize_, FlagRgb(row.flag_color ? row.flag_color : 1));
+        DrawFlagMark(dc, left, top, iconSize_, selected, row.flag_color);
     }
 }
 
@@ -2198,7 +2230,7 @@ bool Mailbox::OnThreadClick(POINT at) {
         hit.pt = at;
         int index = ListView_HitTest(list_, &hit);
         const PeMessage* row = Row(index);
-        RECT box = index >= 0 ? ColumnsThreadBox(index) : RECT{};
+        RECT box = index >= 0 ? ColumnsThreadBox(ColumnsRowRect(index)) : RECT{};
         InflateRect(&box, Scale(4), Scale(4));
         if (!row || !row->thread_opens || !PtInRect(&box, at)) {
             return false;
