@@ -307,7 +307,7 @@ void Reader::Clear(bool loading) {
     SetWindowTextW(header_, L"");
     unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
     ShowWindow(unsubscribe_, SW_HIDE);
-    ShowLogo(false);
+    ShowLogo(false, 0);
     // says so rather than a blank pane, unless a message is about to be shown
     preview_.Clear(!loading);
 }
@@ -397,7 +397,7 @@ void Reader::ShowInfo() {
     unsubscribeLink_ = Text(info->unsubscribe_link);
     unsubscribeTarget_ = Text(info->unsubscribe_target);
     ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
-    ShowLogo(info->has_logo && !file);
+    ShowLogo(info->has_logo && !file, file ? 0 : info->picture);
     Layout();
     InvalidateRect(unsubscribe_, nullptr, TRUE);
     preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_);
@@ -635,8 +635,9 @@ std::wstring Reader::Unsubscribed(uint64_t request, const std::wstring& problem)
     return problem.empty() ? core::T(PE_TEXT_UI_UNSUBSCRIBED) : core::T(PE_TEXT_UI_NOT_UNSUBSCRIBED, {{"reason", problem}});
 }
 
-// the logo is asked for when the message has one the server passed, and shown once it is drawn (LogoReady)
-void Reader::ShowLogo(bool wanted) {
+// the logo is asked for when the message has one the server passed, and shown once it is drawn (LogoReady); without
+// one, the sender's picture of the Address Book in its place (PictureReady)
+void Reader::ShowLogo(bool logo, uint64_t picture) {
     if (logoBitmap_) {
         DeleteObject(logoBitmap_);
         logoBitmap_ = nullptr;
@@ -646,9 +647,25 @@ void Reader::ShowLogo(bool wanted) {
     if (ShowWindow(logo_, SW_HIDE)) {
         Layout();
     }
-    if (wanted) {
-        logoSize_ = Scale(48);
+    logoSize_ = Scale(48);
+    contactPicture_ = !logo && picture;
+    if (logo) {
         logoRequest_ = pe_logo_start(core_, folder_, uid_, static_cast<uint32_t>(logoSize_));
+    } else if (picture) {
+        logoRequest_ = pe_picture_start(core_, picture, static_cast<uint32_t>(logoSize_));
+    }
+}
+
+// the logo's or the picture's pixels from the core, BGRA with the alpha multiplied in, beside the header
+void Reader::ShowDrawn(uint8_t* pixels, size_t length) {
+    logoBitmap_ = PremultipliedBitmap(pixels, length, logoSize_);
+    if (logoBitmap_) {
+        ShowWindow(logo_, SW_SHOW);
+        Layout();
+        InvalidateRect(logo_, nullptr, TRUE);
+    }
+    if (pixels) {
+        pe_bytes_free(pixels, length);
     }
 }
 
@@ -775,20 +792,13 @@ void Reader::OnEvent(const UiEvent& event) {
         }
         break;
     case PE_EVENT_KIND_LOGO_READY:
-        if (logoRequest_ && event.uid == logoRequest_) {
+    case PE_EVENT_KIND_PICTURE_READY:
+        // the request is the one asked for, of its kind (the list's pictures have requests of their own)
+        if (logoRequest_ && event.uid == logoRequest_ && (event.kind == PE_EVENT_KIND_PICTURE_READY) == contactPicture_) {
             logoRequest_ = 0;
             size_t length = 0;
-            uint8_t* pixels = pe_logo_result(core_, event.uid, &length);
-            // the core's pixels, BGRA with the alpha multiplied in, as AlphaBlend takes them
-            logoBitmap_ = PremultipliedBitmap(pixels, length, logoSize_);
-            if (logoBitmap_) {
-                ShowWindow(logo_, SW_SHOW);
-                Layout();
-                InvalidateRect(logo_, nullptr, TRUE);
-            }
-            if (pixels) {
-                pe_bytes_free(pixels, length);
-            }
+            uint8_t* pixels = contactPicture_ ? pe_picture_result(core_, event.uid, &length) : pe_logo_result(core_, event.uid, &length);
+            ShowDrawn(pixels, length);
         }
         break;
     default:
