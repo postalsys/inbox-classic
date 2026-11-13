@@ -1107,15 +1107,20 @@ impl Core {
         }
     }
 
-    /// A card's picture drawn `size` square for the list or the reading pane, as [`Core::picture_start`] draws one
+    /// A card's picture drawn `size` square for the list or the reading pane, as [`Core::picture_start`] draws one: its
+    /// PNG read and drawn off the window thread, on the views' store connection; [`Event::PictureReady`] without
+    /// pixels when the card has no picture (any more)
     fn contact_picture_start(&self, card: pe_store::CardId, size: u32) -> Result<u64> {
-        let (png, _) = self.store().card_picture(card)?.ok_or(Error::NotFound)?;
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let (path, view_store) = (self.path.clone(), self.view_store.clone());
         let work = async move {
-            tokio::task::spawn_blocking(move || card_pictures::bgra(&png, size))
-                .await
-                .ok()
-                .flatten()
+            tokio::task::spawn_blocking(move || {
+                let (png, _) = OpenStore::open(&view_store, &path)?.card_picture(card).ok()??;
+                card_pictures::bgra(&png, size)
+            })
+            .await
+            .ok()
+            .flatten()
         };
         self.pictures
             .start(self.runtime()?, request, work, self.events.clone(), |request| {

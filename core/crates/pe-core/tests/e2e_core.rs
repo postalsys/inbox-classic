@@ -3010,6 +3010,10 @@ fn rows_of_a_confirmed_contact_get_its_picture() {
         pe_core::senders::picture(&row("Confirmed")).0,
         pe_core::senders::PictureKind::None
     );
+    // a key a window kept from before: drawn as nothing
+    let request = s.core.picture_start(key, 32).unwrap();
+    s.wait(|e| *e == Event::PictureReady { request });
+    assert_eq!(s.core.picture_result(request), None);
 }
 
 /// A message the server can not give says so, for the reading pane, and opening it again tries again: an account
