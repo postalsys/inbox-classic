@@ -430,13 +430,11 @@ void Mailbox::DrawSortButton(const DRAWITEMSTRUCT& item) const {
 void Mailbox::DrawRowPicture(HDC dc, const RECT& box, const PeMessage& row, bool selected) {
     int size = box.right - box.left;
     if (HBITMAP bitmap = pictures_.Get(row.picture, size)) {
-        // the logo's own transparency kept, over the row
-        HDC source = CreateCompatibleDC(dc);
-        HGDIOBJ old = SelectObject(source, bitmap);
-        BLENDFUNCTION blend = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
-        AlphaBlend(dc, box.left, box.top, size, size, source, 0, 0, size, size, blend);
-        SelectObject(source, old);
-        DeleteDC(source);
+        // the logo's own transparency kept, over the row, through the one memory DC of the list's pictures
+        if (!pictureDc_) {
+            pictureDc_ = CreateCompatibleDC(dc);
+        }
+        DrawPremultiplied(dc, box.left, box.top, bitmap, size, pictureDc_);
         // a hairline in the initials' grey, so a logo on white keeps its square's edge on a white row
         FrameRect(dc, &box, GetSysColorBrush(COLOR_BTNFACE));
         return;

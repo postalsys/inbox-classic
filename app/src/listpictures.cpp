@@ -3,31 +3,13 @@
 // a row shows its initials (columnrow.cpp).
 #include "app.h"
 
-#include <algorithm>
-
 namespace {
 
 // how many pictures are kept; past it the ones used longest ago go
 constexpr size_t kKept = 256;
 
-// `pixels` (size x size BGRA, the alpha multiplied in, as AlphaBlend takes them) as a bitmap, nullptr when they are
-// not that
-HBITMAP Bitmap(const uint8_t* pixels, size_t length, int size) {
-    size_t expected = static_cast<size_t>(size) * size * 4;
-    if (!pixels || length != expected) {
-        return nullptr;
-    }
-    BITMAPINFO info = {};
-    info.bmiHeader = {sizeof(BITMAPINFOHEADER), size, -size, 1, 32, BI_RGB};
-    void* bits = nullptr;
-    HBITMAP bitmap = CreateDIBSection(nullptr, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
-    if (bitmap && bits) {
-        memcpy(bits, pixels, expected);
-    }
-    return bitmap;
-}
-
 }  // namespace
+
 
 ListPictures::~ListPictures() {
     Clear();
@@ -59,6 +41,7 @@ HBITMAP ListPictures::Get(uint64_t key, int size) {
     // asked once; a key the core names no picture for stays without one
     if (uint64_t request = pe_picture_start(core_, key, static_cast<uint32_t>(size))) {
         requests_[request] = at;
+        picture.pending = true;
     }
     return nullptr;
 }
@@ -72,7 +55,7 @@ uint64_t ListPictures::Ready(uint64_t request) {
     requests_.erase(found);
     size_t length = 0;
     uint8_t* pixels = pe_picture_result(core_, request, &length);
-    HBITMAP bitmap = Bitmap(pixels, length, at.second);
+    HBITMAP bitmap = PremultipliedBitmap(pixels, length, at.second);
     if (pixels) {
         pe_bytes_free(pixels, length);
     }
@@ -85,6 +68,7 @@ uint64_t ListPictures::Ready(uint64_t request) {
         return 0;
     }
     picture->second.bitmap = bitmap;
+    picture->second.pending = false;
     return bitmap ? at.first : 0;
 }
 
@@ -93,8 +77,7 @@ void ListPictures::Trim() {
     while (pictures_.size() >= kKept) {
         auto oldest = pictures_.end();
         for (auto it = pictures_.begin(); it != pictures_.end(); ++it) {
-            bool pending = std::any_of(requests_.begin(), requests_.end(), [&](const auto& r) { return r.second == it->first; });
-            if (!pending && (oldest == pictures_.end() || it->second.used < oldest->second.used)) {
+            if (!it->second.pending && (oldest == pictures_.end() || it->second.used < oldest->second.used)) {
                 oldest = it;
             }
         }

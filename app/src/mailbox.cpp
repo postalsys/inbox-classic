@@ -324,6 +324,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
 }
 
 void Mailbox::Destroy() {
+    if (pictureDc_) {
+        DeleteDC(std::exchange(pictureDc_, nullptr));
+    }
+    pictures_.Clear();
     if (rowSpacer_) {
         // the list lets go of it first: it would destroy the image list it has when it goes
         ListView_SetImageList(list_, listIcons_, LVSIL_SMALL);

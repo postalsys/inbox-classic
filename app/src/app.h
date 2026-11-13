@@ -129,6 +129,12 @@ WORD SortItemOf(PeSortField field);
 // one glyph of the Marlett font (the symbols of the system's own buttons: "r" a close box, "6" a down arrow) centered
 // in `box`, `height` pixels high
 void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORREF color);
+// the core's pixels of a picture (`size` x `size` BGRA with the alpha multiplied in, `length` bytes) as a bitmap;
+// nullptr when they are not that
+HBITMAP PremultipliedBitmap(const uint8_t* pixels, size_t length, int size);
+// such a bitmap drawn at `x`, `y` with its own transparency, through `memory` when given (a DC kept for many
+// pictures), else one made for it
+void DrawPremultiplied(HDC dc, int x, int y, HBITMAP bitmap, int size, HDC memory = nullptr);
 // a tooltip of `text` over the child `tool` of `owner`
 void AddTip(HWND owner, HWND tool, const std::wstring& text);
 // how wide the words of a control are in `font` (the dialog font when NULL), its & left out
@@ -485,6 +491,8 @@ public:
 private:
     struct Picture {
         HBITMAP bitmap = nullptr;
+        // the core is drawing it: not let go of
+        bool pending = false;
         // when it was last drawn, for letting go of the oldest
         uint64_t used = 0;
     };
@@ -986,6 +994,8 @@ private:
     // the senders' pictures beside the Columns rows, and whether they are shown
     ListPictures pictures_;
     bool listPictures_ = true;
+    // a memory DC the rows' pictures are drawn through, kept for the run
+    HDC pictureDc_ = nullptr;
     // the time and the time zone (seconds east of UTC) of the paint under way, for the rows' dates
     int64_t paintNow_ = 0;
     int64_t paintOffset_ = 0;
