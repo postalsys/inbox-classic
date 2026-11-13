@@ -420,6 +420,13 @@ const sections = [
                 checked: ['A confirmed logo in its row', 'Initials for the rest', 'The setting turns them off']
             },
             {
+                shot: 'pictures-5-contact',
+                name: "Contacts' pictures in the list and the reading pane",
+                what: "Mail from a contact with a picture shows it in the column layout's row and beside the message, when the provider confirmed the sender's domain.",
+                how: 'Give a contact a picture in the Address Book; the column layout shows it.',
+                checked: ['In the row', 'In the reading pane']
+            },
+            {
                 shot: 'layout-5-conversation',
                 name: 'Conversations in the column layout',
                 what: 'A conversation is one row with its count; opened, its messages follow it, indented.',
@@ -1079,6 +1086,13 @@ const sections = [
                     'The group and the contact go to To, each address once',
                     "Typing the group's name completes to its members"
                 ]
+            },
+            {
+                shot: 'contacts-6-picture',
+                name: "A contact's picture",
+                what: "Contact Properties takes a picture (PNG or JPEG, chosen or dropped on it), kept as the app's own small copy. It shows in the column layout's rows and the reading pane for that contact's mail, but only when the mail provider confirms the message comes from that domain, so a forged sender never gets a real person's face. A brand's logo comes first; vCard files carry the picture in and out.",
+                how: 'Tools > Address Book, a contact, Properties: Choose or Remove beside the picture.',
+                checked: ['The picture is kept', 'Shown for confirmed mail', 'A forged sender gets the initials', 'Removed again']
             },
             {
                 shot: 'contacts-5-import',
