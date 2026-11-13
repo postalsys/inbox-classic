@@ -271,6 +271,117 @@ extension UITest {
         check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_CLASSIC }, "Classic again")
     }
 
+    // ---- a contact's picture ----
+
+    /// a small PNG for a contact: a green square with a lighter circle in it
+    func contactPNG() throws -> URL {
+        let url = out.appendingPathComponent("contact-picture.png")
+        let side = 160
+        guard let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: side, pixelsHigh: side, bitsPerSample: 8,
+                                            samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
+                                            bytesPerRow: 0, bitsPerPixel: 0) else { throw Failed(description: "no bitmap") }
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmap)
+        NSColor(calibratedRed: 0.18, green: 0.5, blue: 0.36, alpha: 1).setFill()
+        NSRect(x: 0, y: 0, width: side, height: side).fill()
+        NSColor(calibratedRed: 0.95, green: 0.85, blue: 0.7, alpha: 1).setFill()
+        NSBezierPath(ovalIn: NSRect(x: 45, y: 70, width: 70, height: 70)).fill()
+        NSBezierPath(ovalIn: NSRect(x: 20, y: -40, width: 120, height: 100)).fill()
+        NSGraphicsContext.restoreGraphicsState()
+        guard let png = bitmap.representation(using: .png, properties: [:]) else { throw Failed(description: "no PNG") }
+        try png.write(to: url)
+        return url
+    }
+
+    /// Contact Properties' picture, and that picture in the list and the reading pane for a confirmed sender
+    func contactPicture() async throws {
+        step("a contact's picture")
+        let file = try contactPNG()
+        command(.addressBook)
+        guard let bookWindow = await waitWindow("addressbook", 10), let book = AddressBookWindow.shown else {
+            throw Failed(description: "no Address Book")
+        }
+        onMain { book.newContact() }
+        guard let person = await waitWindow("contact", 10) else { throw Failed(description: "no Contact Properties") }
+        let well: PictureWell? = find("contact.picture", in: person)
+        let remove: NSButton? = find("contact.picture.remove", in: person)
+        check(well != nil && well?.image == nil && remove?.isHidden == true,
+              "Contact Properties has an empty picture well, and no Remove yet")
+        type("Ivy", into: find("contact.first", in: person))
+        type("Lane", into: find("contact.last", in: person))
+        type("ivy@pictures.example", into: find("contact.address", in: person))
+        press(find("contact.add", in: person))
+        TestHooks.open = { _ in [file] }
+        press(find("contact.picture.choose", in: person))
+        check(await waitUntil(5) { well?.image != nil && remove?.isHidden == false },
+              "Choose puts the picture in the well, and Remove appears")
+        TestHooks.open = nil
+        await shot(person, "contacts-6-picture")
+        press(find("contact.ok", in: person))
+        check(await waitUntil(10) { !person.isVisible }, "OK saves the contact")
+        let ivy = core().bookCards().first { $0.address == "ivy@pictures.example" }?.card ?? 0
+        check(ivy != 0 && pe_card_has_picture(core().handle, ivy), "and the core keeps the picture with the card")
+        bookWindow.orderOut(nil)
+
+        // from her address: one the provider confirms, and one it says is forged
+        let now = rfc2822(Date())
+        for (subject, verdict, id) in [("Trip photos", "pass", "ivy-confirmed"), ("Urgent invoice", "fail", "ivy-forged")] {
+            try await addMessage("Authentication-Results: mx.inboxclassic.test; dmarc=\(verdict) header.from=pictures.example\r\n"
+                + "From: Ivy Lane <ivy@pictures.example>\r\nTo: testuser@inboxclassic.test\r\nSubject: \(subject)\r\n"
+                + "Date: \(now)\r\nMessage-ID: <\(id)@pictures.example>\r\n\r\nThe pictures are in.\r\n", flags: ["\\Seen"])
+        }
+        main.window.makeKeyAndOrderFront(nil)
+        selectFolder(named: "Inbox")
+        command(.sync)
+        command(.layoutColumns)
+        let confirmed = { self.listedRow("Trip photos") }
+        let forged = { self.listedRow("Urgent invoice") }
+        check(await waitUntil(40) {
+            confirmed() >= 0 && forged() >= 0 && main.mailbox.row(confirmed())?.picture ?? 0 != 0
+        }, "the confirmed sender's row has her contact picture to draw")
+        check(main.mailbox.row(forged())?.picture == 0, "the forged one from the same address has none")
+        check(await waitUntil(20) {
+            list.scrollRowToVisible(confirmed())
+            return rowCell(confirmed())?.picture.image != nil
+        }, "the confirmed row shows her picture")
+        check(await waitUntil(10) {
+            list.scrollRowToVisible(forged())
+            let cell = rowCell(forged())
+            return cell?.picture.image == nil && cell?.picture.initials == "IL"
+        }, "the forged row shows her initials only")
+        await selectRow(confirmed())
+        let shown = views(NSImageView.self, in: main.mailbox.reader.view).first { $0.frame.width == 48 }
+        check(await waitUntil(15) { shown?.isHidden == false && shown?.image != nil },
+              "the reading pane shows her picture where a brand's logo goes")
+        await shot(main.window, "pictures-5-contact")
+
+        // taken away again
+        command(.addressBook)
+        guard let again = AddressBookWindow.shown, await waitWindow("addressbook", 10) != nil else {
+            throw Failed(description: "no Address Book")
+        }
+        again.find("ivy")
+        await pause(0.3)
+        again.people.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        onMain { again.properties(groupFirst: false) }
+        guard let edit = await waitWindow("contact", 10) else { throw Failed(description: "no Contact Properties") }
+        let editWell: PictureWell? = find("contact.picture", in: edit)
+        check(editWell?.image != nil, "her Properties show the picture kept")
+        press(find("contact.picture.remove", in: edit))
+        press(find("contact.ok", in: edit))
+        check(await waitUntil(10) { !edit.isVisible && !pe_card_has_picture(core().handle, ivy) },
+              "Remove and OK take the picture away")
+        again.find("")
+        again.window.orderOut(nil)
+        main.window.makeKeyAndOrderFront(nil)
+        check(await waitUntil(20) {
+            main.mailbox.reloadList(keepSelection: true)
+            return main.mailbox.row(confirmed())?.picture == 0
+        }, "and her rows show her initials again")
+        command(.layoutClassic)
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_CLASSIC }, "Classic again")
+    }
+
     // ---- pictures from trusted senders ----
 
     /// a newsletter from the shop with a picture on the internet; `verified`: the provider's Authentication-Results
