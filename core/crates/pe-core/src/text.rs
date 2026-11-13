@@ -23,7 +23,6 @@ pub fn download_limit_index(megabytes: u64) -> usize {
         .unwrap_or(0)
 }
 
-/// A size as the windows show it: `512 bytes`, `13 KB` (rounded up, as Explorer does), `2.4 MB`
 /// The initials the list shows for a sender without a picture: the first letters of the first and the last word of
 /// the name ("Ann Lee", "Lee, Ann" and "Ann B. Lee" give AL), one for a name of one word (a Chinese name gives its first
 /// character), else the first letter of the address; empty when there is no letter (an emoji for a name)
@@ -60,6 +59,7 @@ pub fn initials(name: &str, address: &str) -> String {
     chosen.into_iter().filter_map(|c| c.to_uppercase().next()).collect()
 }
 
+/// A size as the windows show it: `512 bytes`, `13 KB` (rounded up, as Explorer does), `2.4 MB`
 pub fn format_size(bytes: u64) -> String {
     if bytes < 1024 {
         tr_args(Text::SizeBytes, &[("count", bytes.into())])

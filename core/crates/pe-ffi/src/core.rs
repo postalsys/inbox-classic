@@ -1427,6 +1427,7 @@ pub struct PeMessageList(Rows<PeMessage>);
 pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList {
     handed(PeMessageList(Rows::new(messages, |m, strings| {
         let info = &m.info;
+        let (picture_kind, picture) = pe_core::senders::picture(m);
         PeMessage {
             folder: m.folder_id,
             uid: info.uid,
@@ -1454,8 +1455,8 @@ pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList
             mark: m.mark.into(),
             dimmed: m.dimmed(),
             snippet: strings.add(m.snippet.as_deref().unwrap_or_default()),
-            picture_kind: pe_core::senders::picture(m).0.into(),
-            picture: pe_core::senders::picture(m).1,
+            picture_kind: picture_kind.into(),
+            picture,
             initials: strings.add(&pe_core::initials(&info.from_name, &info.from_address)),
         }
     })))

@@ -95,16 +95,9 @@ impl Store {
         let mut new_logo = false;
         let logo = match logo_url {
             Some(url) => {
-                new_logo = self
-                    .db
-                    .prepare_cached("INSERT OR IGNORE INTO logos (url) VALUES (?1)")?
-                    .execute([url])?
-                    > 0;
-                Some(
-                    self.db
-                        .prepare_cached("SELECT id FROM logos WHERE url = ?1")?
-                        .query_row([url], |row| row.get::<_, i64>(0))?,
-                )
+                let (id, new) = self.logo_id(url)?;
+                new_logo = new;
+                Some(id)
             }
             None => None,
         };
@@ -112,6 +105,20 @@ impl Store {
             .prepare_cached("UPDATE messages SET sender_auth = ?2, logo_id = ?3, auth_headers = NULL WHERE id = ?1")?
             .execute(params![message, bits, logo])?;
         Ok(new_logo)
+    }
+
+    /// The row of the logo at `url`, made when there is none; whether it is new
+    pub fn logo_id(&self, url: &str) -> Result<(i64, bool)> {
+        let new = self
+            .db
+            .prepare_cached("INSERT OR IGNORE INTO logos (url) VALUES (?1)")?
+            .execute([url])?
+            > 0;
+        let id = self
+            .db
+            .prepare_cached("SELECT id FROM logos WHERE url = ?1")?
+            .query_row([url], |row| row.get(0))?;
+        Ok((id, new))
     }
 
     /// A logo by its row

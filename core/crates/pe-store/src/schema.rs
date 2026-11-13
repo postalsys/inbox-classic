@@ -436,7 +436,7 @@ CREATE TABLE logos (
 -- what the core has yet to read, and the mail stored before, whose verdicts are fetched again, newest first
 CREATE INDEX messages_auth_pending ON messages (id) WHERE auth_headers IS NOT NULL;
 CREATE INDEX messages_auth_unknown ON messages (COALESCE(date, internal_date) DESC)
-    WHERE sender_auth IS NULL AND auth_headers IS NULL;
+    WHERE sender_auth IS NULL AND auth_headers IS NULL AND fetch_failed = 0;
 "#,
 ];
 

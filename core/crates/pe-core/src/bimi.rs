@@ -53,6 +53,15 @@ pub fn allow_loopback_logos(on: bool) {
     LOOPBACK.store(on, std::sync::atomic::Ordering::Relaxed);
 }
 
+/// The SVG at a logo's address (a BIMI-Location): fetched without cookies, at most [`MAX_SVG`]; None when the brand's
+/// server gives none
+pub(crate) async fn fetch_svg(url: &str) -> Option<Vec<u8>> {
+    match pe_net::http::get(url, std::time::Duration::from_secs(15)).await {
+        Ok(response) if response.status == 200 && response.body.len() <= MAX_SVG => Some(response.body),
+        _ => None,
+    }
+}
+
 /// An SVG logo as `size` x `size` pixels, BGRA with the alpha multiplied in (as Windows draws them), the logo
 /// centered in it; None for what is no logo BIMI allows: too large, compressed, scripted, or reaching for anything
 /// outside itself
