@@ -112,6 +112,9 @@ void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON, 
 
 // a tree row with its text, data, boldness and icon of the folder strip, last under `parent`
 HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPARAM data, bool bold, int icon);
+// the colour of a flag (1 red to 7 gray, Apple Mail's), and a flag of `size` pixels in it at `left`, `top`
+COLORREF FlagRgb(int color);
+void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb);
 // one glyph of the Marlett font (the symbols of the system's own buttons: "r" a close box, "6" a down arrow) centered
 // in `box`, `height` pixels high
 void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORREF color);
@@ -350,9 +353,9 @@ void SetTextPreference(const wchar_t* name, const std::wstring& value);
 // the language of the windows, before the first window reads a word: `forced` (--language), else the one chosen in
 // Options, else the first of Windows' display languages there is a catalog of
 void StartLanguage(const std::wstring& forced);
-// Tools > Options: the language, the new mail notifications (`notify`) and the list grouped by conversation
-// (`threads`), these two changed when OK is clicked. True when the user chose to restart now for a new language
-bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes);
+// Tools > Options: the language, the new mail notifications (`notify`), the list grouped by conversation
+// (`threads`) and the layout (`layout`, a PeLayoutMode), these changed when OK is clicked. True when the user chose to restart now for a new language
+bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes, int& layout);
 
 // ---- addressbook.cpp ----
 
@@ -630,6 +633,17 @@ public:
     void SetUnreadOnly(bool on);
     // the list subclassed for the conversations: Right and Left, and a click on a + or - box; true when handled
     bool OnListInput(UINT message, WPARAM wParam, LPARAM lParam);
+    // the Columns layout (`on`): the list a row of three lines a message, without column headings, "Sorted by" over
+    // it; or the classic columns. The selection, the open conversations and the row in view stay
+    void SetColumns(bool on);
+    bool Columns() const { return columns_; }
+    // View > Sort By: by `field` (starting its own way when it is another field), and which way
+    void SortBy(PeSortField field);
+    void SetAscending(bool ascending);
+    // the Sort By menu, for the View menu and the "Sorted by" button (owned by the menu it is put in), and its check
+    // marks as the list is sorted now
+    static HMENU SortMenu();
+    void UpdateSortMenu(HMENU menu) const;
 
 private:
     struct Page {
@@ -723,6 +737,7 @@ private:
     // the Subject cell of the row `index`, and where the + or - box is in such a cell
     RECT SubjectCell(int index) const;
     static RECT ThreadBox(const RECT& cell);
+    static void DrawThreadBox(HDC dc, const RECT& box, bool collapsed);
     // a click at `at` on a + or - box, and Right (`right`) or Left on the focused row; true when handled
     bool OnThreadClick(POINT at);
     bool OnThreadArrow(bool right);
@@ -735,6 +750,18 @@ private:
     void RepaintRows(int from, int to) const;
     int SelectionColor() const;
     void DisplayInfo(NMLVDISPINFOW* info);
+    // the Columns layout (columnrow.cpp): a row drawn whole, its + or - box, what a screen reader says for it, its date
+    void DrawColumnsRow(HDC dc, int index, const PeMessage& row);
+    RECT ColumnsThreadBox(int index) const;
+    std::wstring ColumnsRowText(const PeMessage& row) const;
+    // the row height of the Columns list: three lines and their padding
+    int ColumnsRowHeight() const;
+    // the list sorted as sort_ and ascending_ say, its heading's arrow and the "Sorted by" button following
+    void ApplySort();
+    // "Sorted by Date"
+    std::wstring SortedByText() const;
+    void DrawSortButton(const DRAWITEMSTRUCT& item) const;
+    void ShowSortMenu();
     bool OnListNotify(NMHDR* header, LRESULT& result);
 
     PeCore* core_ = nullptr;
@@ -888,6 +915,10 @@ private:
     // the order of the list, as the view has it: the column sorted by, and which way
     PeSortField sort_ = PE_SORT_FIELD_DATE;
     bool ascending_ = false;
+    // the Columns layout: rows of three lines, a dummy image list making them that tall, the "Sorted by" button
+    bool columns_ = false;
+    HIMAGELIST rowSpacer_ = nullptr;
+    HWND sortButton_ = nullptr;
     // the pages of the list, the most recently used last
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's
@@ -951,6 +982,8 @@ enum ControlId : WORD {
     // "Folders" over the folder list, and its button: the close box, or the drop-down's pushpin
     IDC_FOLDER_CAPTION,
     IDC_FOLDER_CAPTION_BUTTON,
+    // over the list in the Columns layout, in place of the column headings: "Sorted by Date", a menu of the orders
+    IDC_SORT_BUTTON,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
@@ -1015,6 +1048,8 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_DOWNLOAD_AHEAD,
     IDC_OPTIONS_DOWNLOAD_LIMIT,
     IDC_OPTIONS_DOWNLOAD_NOTE,
+    // the main window's layout (View > Layout)
+    IDC_OPTIONS_LAYOUT,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them

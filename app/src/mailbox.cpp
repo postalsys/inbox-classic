@@ -274,6 +274,9 @@ void Mailbox::Create(HWND parent, PeCore* core) {
         tool.uId = reinterpret_cast<UINT_PTR>(window);
         SendMessageW(tip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tool));
     }
+    // the Columns layout's "Sorted by" over the list (SetColumns shows it)
+    sortButton_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW, IDC_SORT_BUTTON, {});
+    ShowWindow(sortButton_, SW_HIDE);
     IconColumn(list_, COL_ATTACH, LIST_ATTACH);
     IconColumn(list_, COL_FLAG, LIST_FLAG);
     AddColumn(list_, COL_FROM, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
@@ -317,6 +320,12 @@ void Mailbox::Create(HWND parent, PeCore* core) {
 }
 
 void Mailbox::Destroy() {
+    if (rowSpacer_) {
+        // the list lets go of it first: it would destroy the image list it has when it goes
+        ListView_SetImageList(list_, listIcons_, LVSIL_SMALL);
+        ImageList_Destroy(rowSpacer_);
+        rowSpacer_ = nullptr;
+    }
     RevokeDropSite(tree_, treeTarget_);
     RevokeDropSite(list_, listTarget_);
     reader_.Destroy();
@@ -353,6 +362,14 @@ void Mailbox::LayoutList() {
         int linkWidth = LinkWidth(searchClear_) + Scale(16);
         MoveWindow(searchClear_, list.right - edge - linkWidth, list.top + edge, linkWidth, height - 2 * edge, TRUE);
         SetWindowPos(searchClear_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        list.top += height + Scale(2);
+    }
+    // the Columns list has no headings: "Sorted by" over it says the order, and changes it
+    ShowWindow(sortButton_, columns_ ? SW_SHOW : SW_HIDE);
+    if (columns_) {
+        SetWindowTextW(sortButton_, SortedByText().c_str());
+        int height = Scale(20), buttonWidth = TextWidth(sortButton_, normal_) + Scale(30);
+        MoveWindow(sortButton_, list.left, list.top, std::min(width, buttonWidth), height, TRUE);
         list.top += height + Scale(2);
     }
     MoveWindow(list_, list.left, list.top, width, list.bottom - list.top, TRUE);
@@ -910,6 +927,12 @@ void Mailbox::DisplayInfo(NMLVDISPINFOW* info) {
     cell_.clear();
     if (row) {
         switch (info->item.iSubItem) {
+        case COL_ATTACH:
+            // in the Columns layout the row as a screen reader says it: the list has its first column only for that
+            if (columns_) {
+                cell_ = ColumnsRowText(*row);
+            }
+            break;
         case COL_FROM:
             cell_ = Text(recipientsColumn_ ? row->recipients : row->from);
             break;
@@ -936,6 +959,12 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
         if (ListView_GetItemCount(list_) == 0) {
             DrawEmptyList(draw->nmcd.hdc);
         }
+    } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT && columns_) {
+        // the Columns layout: the row drawn whole, three lines (columnrow.cpp)
+        if (const PeMessage* row = Row(index)) {
+            DrawColumnsRow(draw->nmcd.hdc, index, *row);
+        }
+        result = CDRF_SKIPDEFAULT;
     } else if (draw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT) {
         // unread messages in bold, as Outlook Express shows them; the icons once the row is painted. Grouped by
         // conversation, the Subject cell is drawn here, the font then chosen for each cell
@@ -963,8 +992,6 @@ void Mailbox::CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result) {
     }
 }
 
-namespace {
-
 // the colours of the flags, close to Windows' own palette: red, orange, yellow, green, blue, purple, gray
 COLORREF FlagRgb(int color) {
     static const COLORREF colors[] = {RGB(232, 17, 35),  RGB(247, 99, 12),  RGB(234, 168, 0),  RGB(16, 137, 62),
@@ -989,6 +1016,8 @@ void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb) {
     DeleteObject(line);
     DeleteObject(fill);
 }
+
+namespace {
 
 // a menu picture in `color` on the menu's background, made once: its flag, or (`checked`) a check mark in it, the mark
 // a menu item with a picture of its own would otherwise not show
@@ -1062,15 +1091,7 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     FillRect(dc, &cell, GetSysColorBrush(back));
     RECT box = ThreadBox(cell);
     if (row.thread_opens) {
-        FillRect(dc, &box, GetSysColorBrush(COLOR_WINDOW));
-        FrameRect(dc, &box, GetSysColorBrush(COLOR_BTNSHADOW));
-        int middleX = (box.left + box.right) / 2, middleY = (box.top + box.bottom) / 2, arm = (box.right - box.left) / 2 - Scale(2);
-        RECT across = {middleX - arm, middleY, middleX + arm + 1, middleY + 1};
-        FillRect(dc, &across, GetSysColorBrush(COLOR_WINDOWTEXT));
-        if (row.thread_collapsed) {
-            RECT down = {middleX, middleY - arm, middleX + 1, middleY + arm + 1};
-            FillRect(dc, &down, GetSysColorBrush(COLOR_WINDOWTEXT));
-        }
+        DrawThreadBox(dc, box, row.thread_collapsed);
     }
     // the replies of an open conversation under its first message's subject
     RECT text = cell;
@@ -1085,6 +1106,19 @@ void Mailbox::DrawSubject(HDC dc, int index, const PeMessage& row) {
     SetTextColor(dc, GetSysColor(fore));
     DrawTextW(dc, words.c_str(), -1, &text, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
     SelectObject(dc, old);
+}
+
+// the small box of a conversation, with a + (closed, `collapsed`) or a - (open), as Outlook Express draws it
+void Mailbox::DrawThreadBox(HDC dc, const RECT& box, bool collapsed) {
+    FillRect(dc, &box, GetSysColorBrush(COLOR_WINDOW));
+    FrameRect(dc, &box, GetSysColorBrush(COLOR_BTNSHADOW));
+    int middleX = (box.left + box.right) / 2, middleY = (box.top + box.bottom) / 2, arm = (box.right - box.left) / 2 - Scale(2);
+    RECT across = {middleX - arm, middleY, middleX + arm + 1, middleY + 1};
+    FillRect(dc, &across, GetSysColorBrush(COLOR_WINDOWTEXT));
+    if (collapsed) {
+        RECT down = {middleX, middleY - arm, middleX + 1, middleY + arm + 1};
+        FillRect(dc, &down, GetSysColorBrush(COLOR_WINDOWTEXT));
+    }
 }
 
 // the paper clip (or a bounce's mark) and the flag of a row, drawn over the row as the list painted it:
@@ -2159,6 +2193,20 @@ bool Mailbox::OnListInput(UINT message, WPARAM wParam, LPARAM lParam) {
 
 // a click on a + or - box (or left of it) opens or closes the conversation, the selection as it was
 bool Mailbox::OnThreadClick(POINT at) {
+    if (columns_) {
+        LVHITTESTINFO hit = {};
+        hit.pt = at;
+        int index = ListView_HitTest(list_, &hit);
+        const PeMessage* row = Row(index);
+        RECT box = index >= 0 ? ColumnsThreadBox(index) : RECT{};
+        InflateRect(&box, Scale(4), Scale(4));
+        if (!row || !row->thread_opens || !PtInRect(&box, at)) {
+            return false;
+        }
+        SetFocus(list_);
+        SetThreadExpanded(row->thread, row->thread_collapsed);
+        return true;
+    }
     LVHITTESTINFO hit = {};
     hit.pt = at;
     if (ListView_SubItemHitTest(list_, &hit) < 0 || hit.iSubItem != COL_SUBJECT) {
@@ -2311,11 +2359,12 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
         return true;
     case LVN_COLUMNCLICK: {
         PeSortField sort = SortOf(reinterpret_cast<NMLISTVIEW*>(header)->iSubItem);
-        // the same column again turns the order around; dates and sizes start with the largest
-        ascending_ = sort == sort_ ? !ascending_ : sort != PE_SORT_FIELD_DATE && sort != PE_SORT_FIELD_SIZE;
-        sort_ = sort;
-        pe_list_view_set_sort(view_.get(), sort_, ascending_);
-        ReloadList(true);
+        // the same column again turns the order around; another starts its own way (dates and sizes the largest first)
+        if (sort == sort_) {
+            SetAscending(!ascending_);
+        } else {
+            SortBy(sort);
+        }
         return true;
     }
     }
@@ -2593,6 +2642,10 @@ bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
     if (reader_.OnDrawItem(item)) {
         return true;
     }
+    if (item.hwndItem == sortButton_) {
+        DrawSortButton(item);
+        return true;
+    }
     if (item.hwndItem == searchBar_) {
         // the magnifier, then what was found, on the information bar's yellow
         RECT area = item.rcItem;
@@ -2649,6 +2702,10 @@ bool Mailbox::ClearFind() {
 }
 
 bool Mailbox::OnCommand(WORD id, WORD code) {
+    if (id == IDC_SORT_BUTTON) {
+        ShowSortMenu();
+        return true;
+    }
     if (id == IDC_FIND) {
         if (code == EN_CHANGE) {
             // a moment after the last key, not for each

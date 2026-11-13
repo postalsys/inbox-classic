@@ -48,6 +48,11 @@ int g_listHeight = 260;
 // bar's drop-down; kept for the next start
 bool g_folderList = true;
 HWND g_folderCaption = nullptr;
+// View > Layout: what the user chose (kept, "Layout"), and what the window shows now (pe_layout_for); the list's width
+// beside the reading pane in Columns, at 96 DPI, kept as the others
+PeLayoutMode g_layoutMode = PE_LAYOUT_MODE_AUTOMATIC;
+PeLayout g_layout = PE_LAYOUT_CLASSIC;
+int g_listWidth = 360;
 constexpr int kGap = 4;
 // the splitter being dragged: 0 none, 1 between the tree and the rest, 2 between the list and the reading pane
 int g_dragging = 0;
@@ -113,6 +118,7 @@ HWND g_chevron = nullptr;
 bool g_chevronDown = false;
 void Layout();
 void LayoutStatus();
+void ColumnsNote();
 
 void UpdateJunkButton() {
     if (!SetJunkButton(g_toolbar, g_mailbox.InJunk())) {
@@ -182,6 +188,16 @@ void UpdateMenu(HMENU menu) {
     // the Flag submenu as it opens; the menu it is in is updated as any other
     if (HasOwnItem(menu, IDM_FLAG_CLEAR)) {
         g_mailbox.UpdateFlagMenu(menu);
+        return;
+    }
+    // View > Layout and View > Sort By (also the menu of "Sorted by"): the one in use checked
+    if (HasOwnItem(menu, IDM_LAYOUT_AUTOMATIC)) {
+        CheckMenuRadioItem(menu, IDM_LAYOUT_AUTOMATIC, IDM_LAYOUT_COLUMNS, IDM_LAYOUT_AUTOMATIC + static_cast<UINT>(g_layoutMode),
+                           MF_BYCOMMAND);
+        return;
+    }
+    if (HasOwnItem(menu, IDM_SORT_DATE)) {
+        g_mailbox.UpdateSortMenu(menu);
         return;
     }
     for (int i = 0, count = GetMenuItemCount(menu); i < count; i++) {
@@ -577,8 +593,14 @@ HMENU BuildMenu() {
     AppendMenuW(edit, MF_STRING, IDM_COPY, MenuItem(PE_TEXT_CMD_COPY).c_str());
     AppendMenuW(edit, MF_STRING, IDM_DELETE, MenuItem(PE_TEXT_CMD_DELETE, L"Del").c_str());
     HMENU view = CreatePopupMenu();
-    // checked as the menu opens (UpdateMenu)
+    // checked as the menus open (UpdateMenu)
+    HMENU layout = CreatePopupMenu();
+    AppendMenuW(layout, MF_STRING, IDM_LAYOUT_AUTOMATIC, MenuItem(PE_TEXT_CMD_LAYOUT_AUTOMATIC).c_str());
+    AppendMenuW(layout, MF_STRING, IDM_LAYOUT_CLASSIC, MenuItem(PE_TEXT_CMD_LAYOUT_CLASSIC).c_str());
+    AppendMenuW(layout, MF_STRING, IDM_LAYOUT_COLUMNS, MenuItem(PE_TEXT_CMD_LAYOUT_COLUMNS).c_str());
+    AppendMenuW(view, MF_POPUP, reinterpret_cast<UINT_PTR>(layout), MenuItem(PE_TEXT_MENU_LAYOUT).c_str());
     AppendMenuW(view, MF_STRING, IDM_FOLDER_LIST, MenuItem(PE_TEXT_CMD_FOLDER_LIST, L"F9").c_str());
+    AppendMenuW(view, MF_POPUP, reinterpret_cast<UINT_PTR>(Mailbox::SortMenu()), MenuItem(PE_TEXT_MENU_SORT_BY).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_NEXT_MESSAGE, MenuItem(PE_TEXT_CMD_NEXT_MESSAGE, L"Ctrl+.").c_str());
     AppendMenuW(view, MF_STRING, IDM_PREVIOUS_MESSAGE, MenuItem(PE_TEXT_CMD_PREVIOUS_MESSAGE, L"Ctrl+,").c_str());
@@ -775,6 +797,8 @@ struct Panes {
     int treeWidth;
     int listHeight;
     int right;
+    // the list's width beside the reading pane in Columns
+    int listWidth;
 };
 
 Panes Measure() {
@@ -784,7 +808,9 @@ Panes Measure() {
     int treeWidth = std::clamp(Scale(g_treeWidth), Scale(80), std::max(Scale(80), width - Scale(200)));
     int listHeight = std::clamp(Scale(g_listHeight), Scale(60), std::max(Scale(60), height - Scale(120)));
     int right = g_folderList ? area.left + treeWidth + Scale(kGap) : area.left;
-    return {area, treeWidth, listHeight, right};
+    // at least 280, at most half of what the folders leave: the reading pane takes what the window gains
+    int listWidth = std::clamp(Scale(g_listWidth), Scale(280), std::max(Scale(280), static_cast<int>(area.right - right) / 2));
+    return {area, treeWidth, listHeight, right, listWidth};
 }
 
 // how many buttons end before `right`, from the end without every button past it and a separator that would be last
@@ -844,6 +870,25 @@ void FitToolbar(const RECT& bar) {
     PlaceChevron(buttons);
 }
 
+// the layout for the window's width now (pe_layout_for), the list drawn as it has it; Automatic turning to Columns
+// says how to change it, once
+void DecideLayout() {
+    RECT client = {};
+    if (!g_main || !GetClientRect(g_main, &client)) {
+        return;
+    }
+    int width = MulDiv(client.right, 96, static_cast<int>(GetDpiForWindow(g_main)));
+    PeLayout layout = pe_layout_for(g_layoutMode, static_cast<uint32_t>(std::max(0, width)), g_layout);
+    if (layout == g_layout && g_mailbox.Columns() == (layout == PE_LAYOUT_COLUMNS)) {
+        return;
+    }
+    g_layout = layout;
+    g_mailbox.SetColumns(layout == PE_LAYOUT_COLUMNS);
+    if (layout == PE_LAYOUT_COLUMNS && g_layoutMode == PE_LAYOUT_MODE_AUTOMATIC) {
+        ColumnsNote();
+    }
+}
+
 void Layout() {
     SendMessageW(g_toolbar, TB_AUTOSIZE, 0, 0);
     RECT bar;
@@ -854,6 +899,7 @@ void Layout() {
     GetClientRect(g_toolbar, &bar);
     MoveWindow(g_folderBar, 0, bar.bottom, bar.right, FolderBarHeight(), TRUE);
     SendMessageW(g_status, WM_SIZE, 0, 0);
+    DecideLayout();
     Panes panes = Measure();
     const RECT& area = panes.area;
     int gap = Scale(kGap);
@@ -861,8 +907,11 @@ void Layout() {
     int captionHeight = FolderCaptionHeight();
     MoveWindow(g_folderCaption, area.left, area.top, panes.treeWidth, captionHeight, TRUE);
     RECT tree = g_folderList ? RECT{area.left, area.top + captionHeight, area.left + panes.treeWidth, area.bottom} : RECT{};
-    RECT list = {right, area.top, area.right, area.top + panes.listHeight};
-    RECT reader = {right, list.bottom + gap, area.right, area.bottom};
+    // Classic: the list above the reading pane; Columns: beside it
+    bool columns = g_layout == PE_LAYOUT_COLUMNS;
+    RECT list = columns ? RECT{right, area.top, right + panes.listWidth, area.bottom}
+                        : RECT{right, area.top, area.right, area.top + panes.listHeight};
+    RECT reader = columns ? RECT{list.right + gap, area.top, area.right, area.bottom} : RECT{right, list.bottom + gap, area.right, area.bottom};
     g_mailbox.Layout(tree, list, reader);
     LayoutStatus();
 }
@@ -890,13 +939,20 @@ void LayoutStatus() {
 int SplitterAt(POINT point) {
     Panes panes = Measure();
     int gap = Scale(kGap);
+    // Columns: the second one is between the list and the reading pane, from top to bottom
+    if (g_layout == PE_LAYOUT_COLUMNS && point.y >= panes.area.top && point.y < panes.area.bottom) {
+        int listRight = panes.right + panes.listWidth;
+        if (point.x >= listRight && point.x < listRight + gap) {
+            return 2;
+        }
+    }
     int treeRight = panes.area.left + panes.treeWidth;
     if (g_folderList && point.y >= panes.area.top && point.y < panes.area.bottom && point.x >= treeRight &&
         point.x < treeRight + gap) {
         return 1;
     }
     int listBottom = panes.area.top + panes.listHeight;
-    if (point.x >= panes.right && point.y >= listBottom && point.y < listBottom + gap) {
+    if (g_layout == PE_LAYOUT_CLASSIC && point.x >= panes.right && point.y >= listBottom && point.y < listBottom + gap) {
         return 2;
     }
     return 0;
@@ -907,6 +963,8 @@ void DragSplitter(POINT point) {
     int dpi = static_cast<int>(GetDpiForWindow(g_main));
     if (g_dragging == 1) {
         g_treeWidth = std::max(80, MulDiv(point.x - area.left, 96, dpi));
+    } else if (g_layout == PE_LAYOUT_COLUMNS) {
+        g_listWidth = std::max(280, MulDiv(point.x - Measure().right, 96, dpi));
     } else {
         g_listHeight = std::max(60, MulDiv(point.y - area.top, 96, dpi));
     }
@@ -1081,6 +1139,7 @@ void SavePanes() {
     }
     SetPreference(L"TreeWidth", static_cast<DWORD>(g_treeWidth));
     SetPreference(L"ListHeight", static_cast<DWORD>(g_listHeight));
+    SetPreference(L"ListWidth", static_cast<DWORD>(g_listWidth));
     WINDOWPLACEMENT place = {sizeof(place)};
     if (GetWindowPlacement(g_main, &place)) {
         const RECT& r = place.rcNormalPosition;
@@ -1099,11 +1158,13 @@ void ShowFolderPane() {
 void LoadPanes() {
     g_folderList = GetPreference(L"FolderList", 1) != 0;
     ShowFolderPane();
+    g_layoutMode = static_cast<PeLayoutMode>(std::min<DWORD>(GetPreference(L"Layout", PE_LAYOUT_MODE_AUTOMATIC), PE_LAYOUT_MODE_COLUMNS));
     if (g_arguments.testHooks) {
         return;
     }
     g_treeWidth = static_cast<int>(std::clamp<DWORD>(GetPreference(L"TreeWidth", 200), 80, 2000));
     g_listHeight = static_cast<int>(std::clamp<DWORD>(GetPreference(L"ListHeight", 260), 60, 2000));
+    g_listWidth = static_cast<int>(std::clamp<DWORD>(GetPreference(L"ListWidth", 360), 280, 2000));
 }
 
 // the window where it was last time, on a screen that is still there; maximized again when it was (`show`)
@@ -1129,6 +1190,22 @@ void RestorePlace(HWND hwnd, int& show) {
     if (maximized && (show == SW_SHOWNORMAL || show == SW_SHOWDEFAULT)) {
         show = SW_SHOWMAXIMIZED;
     }
+}
+
+// Automatic turned to Columns: the status bar says how to change it, the first time (not in the UI test)
+void ColumnsNote() {
+    if (g_arguments.testHooks || GetPreference(L"ColumnsNoteShown", 0) != 0) {
+        return;
+    }
+    SetPreference(L"ColumnsNoteShown", 1);
+    SetStatus(core::T(PE_TEXT_UI_COLUMNS_NOTE));
+}
+
+// View > Layout or Options: what the user chose, kept, and the window laid out for it
+void SetLayoutMode(PeLayoutMode mode) {
+    g_layoutMode = mode;
+    SetPreference(L"Layout", static_cast<DWORD>(mode));
+    Layout();
 }
 
 // View > Folder List on or off: the tree and its caption beside the messages, or hidden with the keyboard moved to
@@ -1372,6 +1449,20 @@ void Reply(PeDraftKind kind) {
     OpenCompose(g_main, g_core.get(), g_mailbox.CurrentAccount(), pe_draft_info(draft.get()));
 }
 
+// the field of a Sort By item
+PeSortField SortFieldOf(WORD id) {
+    switch (id) {
+    case IDM_SORT_FROM:
+        return PE_SORT_FIELD_FROM;
+    case IDM_SORT_SUBJECT:
+        return PE_SORT_FIELD_SUBJECT;
+    case IDM_SORT_SIZE:
+        return PE_SORT_FIELD_SIZE;
+    default:
+        return PE_SORT_FIELD_DATE;
+    }
+}
+
 void OnCommand(WORD id, WORD code) {
     // a colour of the Flag submenu, or Clear Flag
     if (id > IDM_FLAG_COLOR && id <= IDM_FLAG_CLEAR) {
@@ -1484,7 +1575,11 @@ void OnCommand(WORD id, WORD code) {
         bool notify = g_notify;
         bool threads = g_mailbox.Grouped();
         bool codes = pe_codes_in_notifications();
-        bool restart = OptionsDialog(g_main, g_core.get(), notify, threads, codes);
+        int layout = static_cast<int>(g_layoutMode);
+        bool restart = OptionsDialog(g_main, g_core.get(), notify, threads, codes, layout);
+        if (layout != static_cast<int>(g_layoutMode)) {
+            SetLayoutMode(static_cast<PeLayoutMode>(layout));
+        }
         SetNotify(notify);
         SetPreference(kCodesPreference, codes ? 1 : 0);
         pe_set_codes_in_notifications(codes);
@@ -1614,6 +1709,21 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_FOLDER_LIST:
         SetFolderList(!g_folderList);
+        return;
+    case IDM_LAYOUT_AUTOMATIC:
+    case IDM_LAYOUT_CLASSIC:
+    case IDM_LAYOUT_COLUMNS:
+        SetLayoutMode(static_cast<PeLayoutMode>(id - IDM_LAYOUT_AUTOMATIC));
+        return;
+    case IDM_SORT_DATE:
+    case IDM_SORT_FROM:
+    case IDM_SORT_SUBJECT:
+    case IDM_SORT_SIZE:
+        g_mailbox.SortBy(SortFieldOf(id));
+        return;
+    case IDM_SORT_ASCENDING:
+    case IDM_SORT_DESCENDING:
+        g_mailbox.SetAscending(id == IDM_SORT_ASCENDING);
         return;
     case IDC_FOLDER_BAR:
         if (code == STN_CLICKED && !g_folderList) {
@@ -1769,7 +1879,8 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         ScreenToClient(hwnd, &point);
         int splitter = reinterpret_cast<HWND>(wParam) == hwnd ? SplitterAt(point) : 0;
         if (splitter) {
-            SetCursor(LoadCursorW(nullptr, splitter == 1 ? IDC_SIZEWE : IDC_SIZENS));
+            bool across = splitter == 1 || g_layout == PE_LAYOUT_COLUMNS;
+            SetCursor(LoadCursorW(nullptr, across ? IDC_SIZEWE : IDC_SIZENS));
             return TRUE;
         }
         break;
