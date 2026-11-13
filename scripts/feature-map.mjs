@@ -364,6 +364,13 @@ const sections = [
                 checked: ['The trusted sender is listed and can be removed', "With the setting on, every message's pictures load"]
             },
             {
+                shot: 'download-1-options',
+                name: 'Messages downloaded before they are opened',
+                what: 'New mail is downloaded as it arrives, so it opens at once, and the messages above and below the one opened are fetched for Next and Previous. Options says what is downloaded ahead (recent messages up to 1 MB out of the box, all of them, or only when opened) and how much each account keeps; past it, the oldest are removed and downloaded again when opened. Junk E-mail, Deleted Items and Gmail’s All Mail are downloaded only when opened.',
+                how: 'Options (Settings on the Mac, Preferences on Linux), the downloading part.',
+                checked: ['What is downloaded ahead and 1 GB kept for each account are shown', 'A choice is kept']
+            },
+            {
                 shot: 'list-unread-only',
                 name: 'Unread only',
                 what: "The list's unread messages only, in every folder, remembered: View > Hide Read Messages, or the toolbar's filter button. A message read stays listed until you go to another folder, so it does not vanish while you read it.",

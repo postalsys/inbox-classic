@@ -931,6 +931,8 @@ fn command(command: Command) {
 // ---- the scenario ----
 
 async fn scenario(d: Rc<Driver>) {
+    // the steps that open messages see them downloaded when opened; the step of Preferences checks the choices
+    let _ = shell().core.set_download_ahead(pe_core::Ahead::Never);
     add_account(&d, "Alex Morgan", "testuser", "testpass", true, false).await;
     steps::waiting(&d).await;
     reading(&d).await;

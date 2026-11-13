@@ -1,6 +1,7 @@
 //! The background worker: what the user does not wait for, on a connection of its own (docs/open-speed-plan.md,
-//! phase 3). The conversations of mail stored before they were kept, and the text of the mail for the search, a batch
-//! at a time, so the main worker stays on the Inbox (IDLE) and the user's commands.
+//! phase 3). Messages downloaded before they are opened (download.rs), the conversations of mail stored before they
+//! were kept, and the text of the mail for the search, a batch at a time, so the main worker stays on the Inbox
+//! (IDLE) and the user's commands.
 //!
 //! - It starts once the main worker's first sync is done, and works whenever the main worker stored new mail
 //!   ([`Nudges`]) until nothing is left; its connection is closed after [`IDLE_FOR`] without work.
@@ -104,9 +105,12 @@ impl Worker {
         }
     }
 
-    /// One batch of what is done in the background: conversations first, then the search text. Whether there may
-    /// be more.
+    /// One batch of what is done in the background: messages downloaded ahead first (with their search text), then
+    /// conversations, then the search text of the rest. Whether there may be more.
     async fn background_batch(&mut self, store: &mut Store) -> Result<bool, Failure> {
+        if self.download_ahead(store).await? > 0 {
+            return Ok(true);
+        }
         if self.thread_stored(store).await? > 0 {
             return Ok(true);
         }

@@ -70,7 +70,11 @@ struct OptionsState {
     HWND threadsCheck = nullptr;
     HWND codesCheck = nullptr;
     HWND picturesCheck = nullptr;
+    HWND aheadCombo = nullptr;
+    HWND limitCombo = nullptr;
     int picked = 0;
+    int ahead = 0;
+    int limit = 0;
     bool notify = false;
     bool threads = false;
     bool codes = false;
@@ -221,6 +225,8 @@ LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             state->threads = Button_GetCheck(state->threadsCheck) == BST_CHECKED;
             state->codes = Button_GetCheck(state->codesCheck) == BST_CHECKED;
             state->pictures = Button_GetCheck(state->picturesCheck) == BST_CHECKED;
+            state->ahead = static_cast<int>(SendMessageW(state->aheadCombo, CB_GETCURSEL, 0, 0));
+            state->limit = static_cast<int>(SendMessageW(state->limitCombo, CB_GETCURSEL, 0, 0));
         }
         state->done = true;
         return 0;
@@ -288,6 +294,17 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     std::wstring picturesText = core::T(PE_TEXT_UI_PICTURES_ALWAYS_OPTION), warning = core::T(PE_TEXT_UI_PICTURES_ALWAYS_WARNING);
     std::wstring trustedText = core::T(PE_TEXT_UI_TRUSTED_SENDERS_BUTTON), emlText = core::T(PE_TEXT_UI_EML_DEFAULT);
     std::wstring ok = core::T(PE_TEXT_UI_OK), cancel = core::T(PE_TEXT_UI_CANCEL);
+    // Downloading: two lists with their labels, and what they mean under them
+    std::wstring aheadText = core::T(PE_TEXT_UI_DOWNLOAD_AHEAD), limitText = core::T(PE_TEXT_UI_DOWNLOAD_LIMIT);
+    std::wstring downloadNote = core::T(PE_TEXT_UI_DOWNLOAD_NOTE);
+    // in the order of PeDownloadAhead
+    std::vector<std::wstring> aheadItems = {core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_RECENT), core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_ALL),
+                                            core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_NEVER)};
+    std::vector<std::wstring> limitItems;
+    for (size_t i = 0; i < pe_download_limit_count(); i++) {
+        core::String text(pe_download_limit_text(i));
+        limitItems.push_back(text ? Text(text.get()) : L"");
+    }
     int pad = Scale(12), row = Scale(22);
     int labelWidth = static_cast<int>(MeasureText(label).cx) + Scale(8);
     // the first item follows Windows, and says which language that is now
@@ -298,19 +315,32 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
         longest = std::max(longest, static_cast<int>(MeasureText(language.name).cx));
     }
     int comboWidth = std::max(Scale(200), longest + GetSystemMetrics(SM_CXVSCROLL) + Scale(12));
+    // the download lists: their labels in a column, the lists as wide as their longest entry
+    int downloadLabel = static_cast<int>(std::max(MeasureText(aheadText).cx, MeasureText(limitText).cx)) + Scale(8);
+    int downloadListWidth = 0;
+    for (const auto* items : {&aheadItems, &limitItems}) {
+        for (const std::wstring& item : *items) {
+            downloadListWidth = std::max(downloadListWidth, static_cast<int>(MeasureText(item).cx));
+        }
+    }
+    downloadListWidth += GetSystemMetrics(SM_CXVSCROLL) + Scale(12);
     // wide enough for the language list and the check boxes' words
     int inner = std::max({Scale(360), labelWidth + comboWidth, static_cast<int>(MeasureText(notifyText).cx) + Scale(24),
                           static_cast<int>(MeasureText(threadsText).cx) + Scale(24),
                           static_cast<int>(MeasureText(codesText).cx) + Scale(48),
                           static_cast<int>(MeasureText(picturesText).cx) + Scale(24),
-                          ButtonWidth({trustedText}) + Scale(6) + ButtonWidth({emlText})});
+                          ButtonWidth({trustedText}) + Scale(6) + ButtonWidth({emlText}), downloadLabel + downloadListWidth});
     int width = 2 * pad + inner;
     int noteHeight = std::max(Scale(16), static_cast<int>(MeasureText(note, inner - labelWidth).cy));
     int warningHeight = std::max(Scale(16), static_cast<int>(MeasureText(warning, inner - Scale(17)).cy));
+    int downloadNoteHeight = std::max(Scale(16), static_cast<int>(MeasureText(downloadNote, inner).cy));
     // the language and its note, a line, the notifications (with their codes under them) and the conversations, a
     // line, reading: pictures with their warning, Trusted Senders and .eml files; the buttons
     int reading = Scale(12) + 2 + Scale(12) + row + warningHeight + Scale(8) + Scale(25);
-    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 3 * row + 2 * Scale(4) + reading + Scale(16) + Scale(25) + pad;
+    // a line, then downloading: the two lists and the note
+    int downloading = Scale(12) + 2 + Scale(12) + 2 * row + 2 * Scale(4) + downloadNoteHeight;
+    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 3 * row + 2 * Scale(4) + reading + downloading +
+                 Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
     OptionsState state;
 
@@ -360,6 +390,24 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     CreateChild(dialog, L"BUTTON", trustedText.c_str(), WS_TABSTOP, IDC_OPTIONS_TRUSTED, {left, y, left + trustedWidth, y + Scale(25)});
     CreateChild(dialog, L"BUTTON", emlText.c_str(), WS_TABSTOP, IDC_OPTIONS_EML,
                 {left + trustedWidth + Scale(6), y, left + trustedWidth + Scale(6) + emlWidth, y + Scale(25)});
+    y += Scale(25) + Scale(12);
+    CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {left, y, right, y + 2});
+    y += 2 + Scale(12);
+    auto addDownloadList = [&](const std::wstring& text, int id, const std::vector<std::wstring>& items, int selected) {
+        CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + downloadLabel, y + row});
+        HWND list = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, id,
+                                {left + downloadLabel, y, right, y + Scale(200)});
+        for (const std::wstring& item : items) {
+            SendMessageW(list, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
+        }
+        SendMessageW(list, CB_SETCURSEL, selected, 0);
+        y += row + Scale(4);
+        return list;
+    };
+    HWND aheadCombo = addDownloadList(aheadText, IDC_OPTIONS_DOWNLOAD_AHEAD, aheadItems, static_cast<int>(pe_download_ahead(core)));
+    HWND limitCombo = addDownloadList(limitText, IDC_OPTIONS_DOWNLOAD_LIMIT, limitItems, static_cast<int>(pe_download_limit_index(core)));
+    CreateChild(dialog, L"STATIC", downloadNote.c_str(), SS_LEFT | SS_NOPREFIX, IDC_OPTIONS_DOWNLOAD_NOTE,
+                {left, y, right, y + downloadNoteHeight});
     int buttonWidth = ButtonWidth({ok, cancel}), buttonTop = height - pad - Scale(25);
     CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
                 {width - pad - 2 * buttonWidth - Scale(6), buttonTop, width - pad - buttonWidth - Scale(6), buttonTop + Scale(25)});
@@ -370,6 +418,8 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     state.threadsCheck = threadsCheck;
     state.codesCheck = codesCheck;
     state.picturesCheck = picturesCheck;
+    state.aheadCombo = aheadCombo;
+    state.limitCombo = limitCombo;
     state.core = core;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     RunModal(dialog, combo, state.done);
@@ -380,6 +430,12 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     threads = state.threads;
     codes = state.codes;
     pe_set_always_load_pictures(core, state.pictures);
+    if (state.ahead >= 0) {
+        pe_set_download_ahead(core, static_cast<PeDownloadAhead>(state.ahead));
+    }
+    if (state.limit >= 0) {
+        pe_set_download_limit_index(core, static_cast<size_t>(state.limit));
+    }
     int picked = state.picked;
     std::wstring code = picked > 0 && static_cast<size_t>(picked) <= languages.size() ? languages[picked - 1].code : L"";
     if (code == chosen) {

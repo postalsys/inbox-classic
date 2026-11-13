@@ -13,6 +13,8 @@ size-bytes = { $count ->
 }
 size-kb = { $size } KB
 size-mb = { $size } MB
+# review: new
+size-gb = { $size } GB
 list-counts = { $messages }, { $unread } lugemata
 list-counts-selected = { $messages }, { $unread } lugemata, { $selected } valitud
 list-counts-found = { $found } leitud, { $unread } lugemata

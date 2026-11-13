@@ -500,6 +500,20 @@ ui-pictures-always-option = Descargar las imágenes de todos los mensajes
 # review: new
 ui-pictures-always-warning = Los remitentes podrán saber cuándo lee sus mensajes.
 # review: new
+ui-download-heading = Descarga
+# review: new
+ui-download-ahead = Descargar mensajes por adelantado:
+# review: new
+ui-download-ahead-recent = Mensajes recientes de hasta 1 MB
+# review: new
+ui-download-ahead-all = Todos los mensajes
+# review: new
+ui-download-ahead-never = Solo al abrirlos
+# review: new
+ui-download-limit = Mensajes descargados que se guardan por cuenta:
+# review: new
+ui-download-note = Los mensajes descargados por adelantado se abren al instante. Por encima del límite, se quitan los más antiguos y se vuelven a descargar al abrirlos.
+# review: new
 ui-trusted-senders-button = Remitentes de confianza...
 # review: new
 ui-trusted-senders-title = Remitentes de confianza

@@ -34,7 +34,7 @@ topics = ["sign-in-codes", "delivery-problems", "invitations", "unsubscribe", "b
 
 [[section]]
 id = "settings"
-topics = ["options-language", "account-security", "default-mail-program", "updates"]
+topics = ["options-language", "download-ahead", "account-security", "default-mail-program", "updates"]
 
 [[section]]
 id = "agents"

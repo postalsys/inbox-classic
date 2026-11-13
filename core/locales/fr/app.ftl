@@ -508,6 +508,20 @@ ui-pictures-always-option = Télécharger les images de tous les messages
 # review: new
 ui-pictures-always-warning = Les expéditeurs peuvent alors savoir quand vous lisez leurs messages.
 # review: new
+ui-download-heading = Téléchargement
+# review: new
+ui-download-ahead = Télécharger les messages à l’avance :
+# review: new
+ui-download-ahead-recent = Messages récents jusqu’à 1 Mo
+# review: new
+ui-download-ahead-all = Tous les messages
+# review: new
+ui-download-ahead-never = Seulement à l’ouverture
+# review: new
+ui-download-limit = Messages téléchargés conservés par compte :
+# review: new
+ui-download-note = Les messages téléchargés à l’avance s’ouvrent aussitôt. Au-delà de la limite, les plus anciens sont supprimés et téléchargés de nouveau à l’ouverture.
+# review: new
 ui-trusted-senders-button = Expéditeurs de confiance...
 # review: new
 ui-trusted-senders-title = Expéditeurs de confiance

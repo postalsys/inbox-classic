@@ -501,6 +501,20 @@ ui-pictures-always-option = Bilder in allen Nachrichten herunterladen
 # review: new
 ui-pictures-always-warning = Absender sehen dann, wann Sie ihre Nachrichten lesen.
 # review: new
+ui-download-heading = Herunterladen
+# review: new
+ui-download-ahead = Nachrichten vorab herunterladen:
+# review: new
+ui-download-ahead-recent = Neuere Nachrichten bis 1 MB
+# review: new
+ui-download-ahead-all = Alle Nachrichten
+# review: new
+ui-download-ahead-never = Erst beim Öffnen
+# review: new
+ui-download-limit = Heruntergeladene Nachrichten je Konto höchstens:
+# review: new
+ui-download-note = Vorab heruntergeladene Nachrichten öffnen sich sofort. Über der Grenze werden die ältesten entfernt und beim Öffnen erneut heruntergeladen.
+# review: new
 ui-trusted-senders-button = Vertrauenswürdige Absender...
 # review: new
 ui-trusted-senders-title = Vertrauenswürdige Absender

@@ -16,6 +16,7 @@ size-bytes = { $count ->
 }
 size-kb = { $size } KB
 size-mb = { $size } MB
+size-gb = { $size } GB
 # the status bar: "12 messages, 3 unread"
 list-counts = { $messages }, { $unread } unread
 list-counts-selected = { $messages }, { $unread } unread, { $selected } selected

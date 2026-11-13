@@ -23,10 +23,12 @@ use pe_i18n::{Text, tr, tr_args};
 use crate::{Event, EventSink, FailureKind, Secrets};
 
 mod background;
+mod download;
 mod reader;
 mod transfer;
 
-pub(crate) use background::Nudges;
+pub(crate) use background::{Nudges, nudge};
+pub(crate) use download::Opened;
 
 pub(crate) use reader::{Synced, tell_woke, watch_sleep};
 
@@ -352,6 +354,8 @@ pub(crate) struct Context {
     pub(crate) synced: Arc<Synced>,
     /// Wakes the background workers: new mail was stored
     pub(crate) nudges: Arc<Nudges>,
+    /// The messages opened since the app started, kept whatever the limit of downloaded messages
+    pub(crate) opened: Opened,
 }
 
 pub(crate) struct Worker {
@@ -578,7 +582,7 @@ impl Worker {
                     .map_err(Failure::from),
                 Err(failure) => Err(failure),
             };
-            self.restore_on_failure(store, m.to, &removed, moved)?;
+            self.restore_on_failure(store, m.to, &removed, moved.map(|_| ()))?;
             self.sync_one(store, m.from).await?;
         }
         Ok(())
@@ -829,27 +833,51 @@ impl Worker {
             .filter(|(_, f, _)| *f == folder)
             .map(|(message, _, uid)| (*message, *uid))
             .collect();
-        {
-            let uids: Vec<u64> = messages.iter().map(|(_, uid)| *uid).collect();
-            let client = self.client(store).await?;
-            let texts = pe_sync::fetch_texts(client, store, folder, &uids, crate::search::PART_LIMIT).await?;
-            store.transaction(|store| {
-                for (message, uid) in &messages {
-                    let body = texts
-                        .iter()
-                        .find(|(found, _)| found == uid)
-                        .map(|(_, parts)| crate::search::parts_text(parts))
-                        .unwrap_or_default();
-                    let text = pe_store::IndexText {
-                        body,
-                        ..Default::default()
-                    };
-                    store.set_indexed(*message, &text)?;
+        let uids: Vec<u64> = messages.iter().map(|(_, uid)| *uid).collect();
+        let texts = match self.fetch_texts(store, folder, &uids).await {
+            Ok(texts) => texts,
+            // the server refused the batch: one at a time, so one message it will not give does not hold up the rest
+            // for ever (it is indexed without its text)
+            Err(failure) if failure.kind == FailureKind::Other && uids.len() > 1 => {
+                let mut texts = Vec::new();
+                for uid in &uids {
+                    match self.fetch_texts(store, folder, &[*uid]).await {
+                        Ok(found) => texts.extend(found),
+                        Err(failure) if failure.kind == FailureKind::Other => {}
+                        Err(failure) => return Err(failure),
+                    }
                 }
-                Ok(())
-            })?;
-        }
+                texts
+            }
+            Err(failure) => return Err(failure),
+        };
+        store.transaction(|store| {
+            for (message, uid) in &messages {
+                let body = texts
+                    .iter()
+                    .find(|(found, _)| found == uid)
+                    .map(|(_, parts)| crate::search::parts_text(parts))
+                    .unwrap_or_default();
+                let text = pe_store::IndexText {
+                    body,
+                    ..Default::default()
+                };
+                store.set_indexed(*message, &text)?;
+            }
+            Ok(())
+        })?;
         Ok(messages.len())
+    }
+
+    /// The text parts of messages of a folder, for the search
+    async fn fetch_texts(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        uids: &[u64],
+    ) -> Result<Vec<(u64, Vec<pe_sync::TextPart>)>, Failure> {
+        let client = self.client(store).await?;
+        Ok(pe_sync::fetch_texts(client, store, folder, uids, crate::search::PART_LIMIT).await?)
     }
 
     fn emit(&self, event: Event) {
@@ -927,9 +955,18 @@ impl Worker {
                         .map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                self.restore_on_failure(store, folder, &removed, moved)?;
-                // the message shows up in the folder it went to
-                self.sync_one(store, to).await
+                let became = match moved {
+                    Ok(became) => became,
+                    Err(failure) => {
+                        let outcome = self.restore_on_failure(store, folder, &removed, Err(failure));
+                        store.restore_moved_sources(folder, &uids)?;
+                        return outcome;
+                    }
+                };
+                // the message shows up in the folder it went to, with its source when it was downloaded
+                let synced = self.sync_one(store, to).await;
+                store.adopt_moved_sources(folder, to, &uids, &became)?;
+                synced
             }
             Command::UndoMoves { moves } => self.undo_moves(store, moves).await,
             Command::Archive { folder, uids, removed } => {

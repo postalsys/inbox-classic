@@ -75,7 +75,7 @@ enum Languages {
 }
 
 /// Inbox Classic > Settings: the language of the windows, Notify of New Mail, Group messages by conversation, the
-/// pictures of every message and the trusted senders, and .eml files. As Mac settings windows do, a change counts at
+/// pictures of every message and the trusted senders, .eml files, and what is downloaded before it is opened. As Mac settings windows do, a change counts at
 /// once; a language counts once the app starts again, which it offers to do.
 @MainActor
 final class SettingsWindow: NSObject, NSWindowDelegate {
@@ -86,6 +86,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let grouping: NSButton
     let signInCodes: NSButton
     let pictures: NSButton
+    let downloadAhead = NSPopUpButton()
+    let downloadLimit = NSPopUpButton()
     private let core: Core
     /// the codes of the popup's items, nil for System default
     private var codes: [String?] = []
@@ -171,6 +173,31 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         let eml = NSButton(title: Text.uiEmlDefault.text, target: self, action: #selector(emlDefaultClicked))
         eml.setAccessibilityIdentifier("settings.eml")
 
+        // downloading: what is downloaded ahead (in the order of PeDownloadAhead), how much each account keeps, and
+        // what that means under them
+        for item in [Text.uiDownloadAheadRecent, Text.uiDownloadAheadAll, Text.uiDownloadAheadNever] {
+            downloadAhead.addItem(withTitle: item.text)
+        }
+        downloadAhead.selectItem(at: Int(core.downloadAhead.rawValue))
+        downloadAhead.target = self
+        downloadAhead.action = #selector(downloadAheadChosen)
+        downloadAhead.setAccessibilityIdentifier("settings.downloadAhead")
+        downloadLimit.addItems(withTitles: Core.downloadLimits)
+        downloadLimit.selectItem(at: core.downloadLimitIndex)
+        downloadLimit.target = self
+        downloadLimit.action = #selector(downloadLimitChosen)
+        downloadLimit.setAccessibilityIdentifier("settings.downloadLimit")
+        let downloadNote = NSTextField(wrappingLabelWithString: Text.uiDownloadNote.text)
+        downloadNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        downloadNote.textColor = .secondaryLabelColor
+        // each label beside its pop-up, under the other settings: the language's label keeps the left column narrow
+        let aheadRow = NSStackView(views: [NSTextField(labelWithString: Text.uiDownloadAhead.text), downloadAhead])
+        let limitRow = NSStackView(views: [NSTextField(labelWithString: Text.uiDownloadLimit.text), downloadLimit])
+        for row in [aheadRow, limitRow] {
+            row.alignment = .firstBaseline
+            row.spacing = 8
+        }
+
         let label = NSTextField(labelWithString: Text.macLanguageLabel.text)
         label.alignment = .right
         let grid = NSGridView(views: [
@@ -183,6 +210,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             [NSGridCell.emptyContentView, warned],
             [NSGridCell.emptyContentView, trusted],
             [NSGridCell.emptyContentView, eml],
+            [NSGridCell.emptyContentView, aheadRow],
+            [NSGridCell.emptyContentView, limitRow],
+            [NSGridCell.emptyContentView, downloadNote],
         ])
         grid.rowSpacing = 8
         grid.columnSpacing = 8
@@ -190,6 +220,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.row(at: 2).topPadding = 8
         grid.row(at: 7).topPadding = 4
         grid.row(at: 8).topPadding = 8
+        grid.row(at: 9).topPadding = 12
         // the label on the pop-up's text line, as the other forms have it
         grid.row(at: 0).rowAlignment = .firstBaseline
         grid.translatesAutoresizingMaskIntoConstraints = false
@@ -208,6 +239,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             help.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
             hint.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
             warning.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
+            downloadNote.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
         ])
         window.contentView = content
         window.setContentSize(content.fittingSize)
@@ -233,6 +265,15 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         core.alwaysLoadPictures = pictures.state == .on
         // the message shown now as the setting has it
         AppDelegate.shared?.main?.mailbox.reader.reload()
+    }
+
+    @objc func downloadAheadChosen() {
+        // the items are in the order of PeDownloadAhead
+        core.downloadAhead = PeDownloadAhead(rawValue: UInt32(max(downloadAhead.indexOfSelectedItem, 0)))
+    }
+
+    @objc func downloadLimitChosen() {
+        core.downloadLimitIndex = downloadLimit.indexOfSelectedItem
     }
 
     @objc func trustedSendersClicked() {

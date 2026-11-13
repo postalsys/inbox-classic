@@ -1,5 +1,6 @@
 //! Preferences (the main menu, Ctrl+,): the language of the windows, Group messages by conversation, the pictures of
-//! messages (every message's, the trusted senders), Notify of New Mail and the app for .eml files, in a libadwaita
+//! messages (every message's, the trusted senders), Notify of New Mail, the app for .eml files and what is downloaded
+//! before it is opened, in a libadwaita
 //! preferences dialog as GNOME apps have it. A language chosen is saved in settings.ini and used
 //! from the next start; the app offers to start again in it at once.
 
@@ -105,11 +106,12 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     page.add(&pictures_group());
     page.add(&mail);
     page.add(&files_group());
+    page.add(&download_group());
     let dialog = adw::PreferencesDialog::builder()
         .title(t!(GtkPreferences))
         .content_width(600)
         // every row in view, none cut off at the bottom
-        .content_height(480)
+        .content_height(700)
         .build();
     dialog.set_widget_name("preferences-dialog");
     dialog.add(&page);
@@ -161,6 +163,65 @@ fn pictures_group() -> adw::PreferencesGroup {
     let group = adw::PreferencesGroup::new();
     group.add(&always);
     group.add(&trusted);
+    group
+}
+
+/// A label of the other platforms' forms as a row's title: without its colon, as GNOME has them
+fn row_title(text: Text) -> String {
+    plain(text).trim_end_matches(':').trim_end().to_string()
+}
+
+/// Downloading: what is downloaded before it is opened, how much each account keeps, and what that means
+fn download_group() -> adw::PreferencesGroup {
+    let core = &shell().core;
+    // in the order of pe_core::Ahead's choices below
+    let aheads = [pe_core::Ahead::Recent, pe_core::Ahead::All, pe_core::Ahead::Never];
+    let names = [
+        plain(Text::UiDownloadAheadRecent),
+        plain(Text::UiDownloadAheadAll),
+        plain(Text::UiDownloadAheadNever),
+    ];
+    // the choice under the title, where a long one has room in every language
+    let ahead = adw::ComboRow::builder()
+        .title(row_title(Text::UiDownloadAhead))
+        .use_subtitle(true)
+        .model(&gtk::StringList::new(
+            &names.iter().map(String::as_str).collect::<Vec<_>>(),
+        ))
+        .build();
+    ahead.set_widget_name("preferences-download-ahead");
+    let now = core.download_ahead().unwrap_or_default();
+    ahead.set_selected(aheads.iter().position(|a| *a == now).unwrap_or(0) as u32);
+    ahead.connect_selected_notify(move |row| {
+        if let Some(chosen) = aheads.get(row.selected() as usize) {
+            let _ = shell().core.set_download_ahead(*chosen);
+        }
+    });
+    let limits: Vec<String> = pe_core::DOWNLOAD_LIMITS_MB
+        .iter()
+        .map(|megabytes| pe_core::download_limit_text(*megabytes))
+        .collect();
+    let limit = adw::ComboRow::builder()
+        .title(row_title(Text::UiDownloadLimit))
+        .use_subtitle(true)
+        .model(&gtk::StringList::new(
+            &limits.iter().map(String::as_str).collect::<Vec<_>>(),
+        ))
+        .build();
+    limit.set_widget_name("preferences-download-limit");
+    let kept = core.download_limit_mb().unwrap_or(pe_core::DOWNLOAD_LIMITS_MB[2]);
+    limit.set_selected(pe_core::download_limit_index(kept) as u32);
+    limit.connect_selected_notify(|row| {
+        if let Some(megabytes) = pe_core::DOWNLOAD_LIMITS_MB.get(row.selected() as usize) {
+            let _ = shell().core.set_download_limit_mb(*megabytes);
+        }
+    });
+    let group = adw::PreferencesGroup::builder()
+        .title(plain(Text::UiDownloadHeading))
+        .description(plain(Text::UiDownloadNote))
+        .build();
+    group.add(&ahead);
+    group.add(&limit);
     group
 }
 

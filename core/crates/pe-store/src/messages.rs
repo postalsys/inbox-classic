@@ -501,8 +501,8 @@ impl Store {
     /// Caches the source of a message; false when the folder has no message with this UID
     pub fn set_source(&self, folder: FolderId, uid: u64, source: &[u8]) -> Result<bool> {
         let changed = self.db.execute(
-            "INSERT OR REPLACE INTO bodies (message_id, source) \
-             SELECT id, ?3 FROM messages WHERE folder_id = ?1 AND uid = ?2",
+            "INSERT OR REPLACE INTO bodies (message_id, source, size) \
+             SELECT id, ?3, length(?3) FROM messages WHERE folder_id = ?1 AND uid = ?2",
             params![folder, uid, source],
         )?;
         Ok(changed > 0)

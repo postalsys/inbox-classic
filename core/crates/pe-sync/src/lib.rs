@@ -357,6 +357,36 @@ pub async fn fetch_raw(client: &mut Client, store: &mut Store, folder: FolderId,
         .ok_or(Error::MessageGone)
 }
 
+/// The sources of these messages of a folder, as the server keeps them, in one FETCH, without keeping them in the
+/// store (the caller does, one at a time): (UID, source). A message the server no longer has is left out.
+pub async fn fetch_sources(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uids: &[u64],
+) -> Result<Vec<(u64, Vec<u8>)>> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(Vec::new());
+    };
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let query = FetchQuery {
+        source: true,
+        ..Default::default()
+    };
+    let mut found = Vec::with_capacity(uids.len());
+    client
+        .fetch_each(&Messages::Uids(set), &query, &mut |message| {
+            if let (Some(uid), Some(source)) = (message.uid, message.source)
+                && uids.contains(&uid)
+            {
+                found.push((uid, source));
+            }
+        })
+        .await?;
+    Ok(found)
+}
+
 /// Whether `folder` on the server has a message with this Message-ID
 pub async fn has_message_id(
     client: &mut Client,
@@ -526,21 +556,31 @@ fn keeps_flag(permanent: &[String], flag: &str) -> bool {
 }
 
 /// Moves a message to another folder of the account on the server (MOVE, or COPY and expunge where the server has
-/// no MOVE). The store is the caller's to change; the folder it went to is the caller's to sync.
+/// no MOVE). The store is the caller's to change; the folder it went to is the caller's to sync. Returns the UIDs the
+/// messages got there, by the UIDs they had, where the server says (UIDPLUS).
 pub async fn move_message(
     client: &mut Client,
     store: &mut Store,
     folder: FolderId,
     uids: &[u64],
     to: FolderId,
-) -> Result<()> {
+) -> Result<Vec<(u64, u64)>> {
     let Some(set) = SequenceSet::from_numbers(uids) else {
-        return Ok(());
+        return Ok(Vec::new());
     };
     let (from, to) = (store.folder(folder)?.info.path, store.folder(to)?.info.path);
     ensure_selected(client, &from).await?;
-    client.move_messages(&Messages::Uids(set), &to).await?;
-    Ok(())
+    let copied = client.move_messages(&Messages::Uids(set), &to).await?;
+    Ok(copied.map(|copied| moved_pairs(&copied)).unwrap_or_default())
+}
+
+/// The UIDs messages had and the UIDs they got (COPYUID, in the order of the source UIDs); nothing when the two
+/// sets do not match
+fn moved_pairs(copied: &pe_imap::client::CopyUid) -> Vec<(u64, u64)> {
+    match (copied.source.expand(u64::MAX), copied.destination.expand(u64::MAX)) {
+        (Some(from), Some(to)) if from.len() == to.len() => from.into_iter().zip(to).collect(),
+        _ => Vec::new(),
+    }
 }
 
 /// Copies messages to another folder of the account on the server (UID COPY); the folder they went to is the

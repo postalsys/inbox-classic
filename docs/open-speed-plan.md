@@ -146,21 +146,23 @@ Core only: no change to the C API or the apps.
 - **The search text comes with it.** For a message that is downloaded ahead (recent, under the limit, in such a
   folder), the whole source is fetched and indexed as an opened message is. For the rest, and when the setting is "Only
   when opened", `index_texts` fetches the text parts as it does now.
-- **The neighbors of the message opened.** After the reader has the message the user asked for, it fetches the one
-  above and the one below it in the list (Next and Previous, the arrow keys), if they are under the limit and not here.
-  The core takes them from the list view the window shows, so `open_message` and the apps do not change.
+- **The neighbors of the message opened.** After the reader has the message the user asked for, and no other click
+  waits, it fetches the one above and the one below it in its folder by date (Next and Previous, the arrow keys, in the
+  list's usual order), if the setting downloads them ahead, they are under its size and not here. The apps do not
+  change: the core has no list view of theirs to read.
 - **A moved message keeps its source**: for a move the app made, the server's COPYUID says which message in the target
   folder it became, and the source goes with it. Never matched by Message-ID, which the sender chooses.
 - **A message that can not be had is passed over**: its parsing runs where a panic is caught (`spawn_blocking`, or
   `catch_unwind`), and a message whose download or parsing failed is marked and not tried again in the background (a
   new column, a migration). Opening it still tries.
-- **A setting for the whole app**, in Settings on the Mac and Linux and Options on Windows, under a new "Downloading"
-  heading:
-    - "Download messages ahead: (o) Recent messages up to 1 MB ( ) All messages ( ) Only when opened". Default: recent
+- **A setting for the whole app**, in Settings on the Mac, Preferences on Linux (a "Downloading" group) and Options on
+  Windows (a section under a line):
+    - "Download messages ahead: [Recent messages up to 1 MB | All messages | Only when opened]". Default: recent
       messages (the last 30 days) up to 1 MB.
-    - "Keep at most [1] GB of downloaded messages for each account".
+    - "Downloaded messages kept for each account: [250 MB | 500 MB | 1 GB | 2 GB | 5 GB | 10 GB]", 1 GB to begin with.
     - Kept in the store's app settings, as `pictures.always` is (`download.ahead`, `download.limit_mb`), with C API
-      getters and setters for Windows and the Mac.
+      getters and setters for Windows and the Mac (`pe_download_ahead`, `pe_download_limit_index`, and the choices'
+      words from `pe_download_limit_text`).
 - **The storage limit wins, and the oldest mail goes first**:
     - Past the limit, the sources of an account's oldest messages (by date) are removed, never those of Drafts and the
       Outbox, nor a message opened since the app started. They download again when opened.

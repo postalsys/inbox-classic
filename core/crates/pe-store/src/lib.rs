@@ -11,6 +11,7 @@ mod agents;
 mod bounces;
 mod cards;
 mod contacts;
+mod download;
 mod folders;
 mod marks;
 mod messages;
@@ -32,6 +33,7 @@ pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_prov
 pub use agents::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry, NewLogEntry};
 pub use cards::{Card, CardId, Group, GroupId, Member, MemberRow, display_name};
 pub use contacts::Contact;
+pub use download::{Ahead, AheadRule, DEFAULT_LIMIT_MB, RECENT_DAYS, RECENT_MAX_SIZE, ToDownload};
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use marks::{Conversation, ThreadMark};
 pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Sort, SortField};

@@ -502,6 +502,20 @@ ui-pictures-always-option = Laadi pildid alla kõigis kirjades
 # review: new
 ui-pictures-always-warning = Saatjad näevad siis, millal te nende kirju loete.
 # review: new
+ui-download-heading = Allalaadimine
+# review: new
+ui-download-ahead = Laadi kirjad ette alla:
+# review: new
+ui-download-ahead-recent = Hiljutised kirjad kuni 1 MB
+# review: new
+ui-download-ahead-all = Kõik kirjad
+# review: new
+ui-download-ahead-never = Alles avamisel
+# review: new
+ui-download-limit = Igale kontole hoitakse alla laaditud kirju kuni:
+# review: new
+ui-download-note = Ette alla laaditud kirjad avanevad kohe. Üle piiri eemaldatakse vanimad ja need laaditakse avamisel uuesti alla.
+# review: new
 ui-trusted-senders-button = Usaldusväärsed saatjad...
 # review: new
 ui-trusted-senders-title = Usaldusväärsed saatjad

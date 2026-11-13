@@ -986,6 +986,10 @@ enum OptionsControlId : WORD {
     IDC_TRUSTED_LIST,
     IDC_TRUSTED_REMOVE,
     IDC_TRUSTED_EMPTY,
+    // Downloading: what is downloaded ahead, the limit of downloaded messages of each account, and what that means
+    IDC_OPTIONS_DOWNLOAD_AHEAD,
+    IDC_OPTIONS_DOWNLOAD_LIMIT,
+    IDC_OPTIONS_DOWNLOAD_NOTE,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them

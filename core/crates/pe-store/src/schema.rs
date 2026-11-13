@@ -379,6 +379,21 @@ BEGIN
     UPDATE messages SET seen_at = CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER) WHERE id = NEW.id;
 END;
 "#,
+    // downloading ahead (download.rs): the size of each source, so an account's total is had without reading them, and
+    // a mark on the messages that could not be downloaded or read, not tried again in the background
+    r#"
+ALTER TABLE bodies ADD COLUMN size INTEGER NOT NULL DEFAULT 0;
+UPDATE bodies SET size = length(source);
+ALTER TABLE messages ADD COLUMN fetch_failed INTEGER NOT NULL DEFAULT 0;
+-- the sources of messages on their way to another folder of the account, given to the rows they become there
+-- (COPYUID), or back to theirs when the move fails
+CREATE TABLE moving_sources (
+    folder_id INTEGER NOT NULL,
+    uid INTEGER NOT NULL,
+    source BLOB NOT NULL,
+    PRIMARY KEY (folder_id, uid)
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

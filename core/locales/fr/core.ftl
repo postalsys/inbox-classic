@@ -13,6 +13,8 @@ size-bytes = { $count ->
 }
 size-kb = { $size } Ko
 size-mb = { $size } Mo
+# review: new
+size-gb = { $size } Go
 list-counts = { $messages }, { $unread ->
     [one] { $unread } non lu
    *[other] { $unread } non lus

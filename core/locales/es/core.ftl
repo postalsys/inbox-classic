@@ -13,6 +13,8 @@ size-bytes = { $count ->
 }
 size-kb = { $size } KB
 size-mb = { $size } MB
+# review: new
+size-gb = { $size } GB
 list-counts = { $messages }, { $unread } sin leer
 list-counts-selected = { $messages }, { $unread } sin leer, { $selected ->
     [one] { $selected } seleccionado

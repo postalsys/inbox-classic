@@ -505,6 +505,17 @@ account's provider) say DKIM and DMARC passed for shop.example, one whose say th
 - Options lists the trusted sender; Remove takes it out
 - "Download pictures in all messages" on: the forged one's pictures load; off again
 
+## 34g2a. Messages downloaded ahead
+
+Screenshot: `download-1-options`
+
+The test turns downloading ahead off at its start (Only when opened, before the first account), so the
+steps that open messages see them downloaded then; the core's own tests check what is downloaded ahead.
+
+- Options (Settings on the Mac, Preferences on Linux) has Download messages ahead, at Only when opened, and
+  Downloaded messages kept for each account, at 1 GB, with what they mean under them
+- Recent messages up to 1 MB chosen is still chosen when Options opens again; Only when opened is chosen again after
+
 ## 34g3. Unread only
 
 Screenshot: `list-unread-only`
