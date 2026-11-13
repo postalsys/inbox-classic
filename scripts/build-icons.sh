@@ -110,10 +110,14 @@ kind list 40 "$WINDOW" kListStrips ListIcon LIST "${SMALL_SIZES[@]}" -- "${LIST[
     cat "$work/tables"
     cat "$work/enums"
 } > app/src/icons.h
-# the app's own icon (app/res/app-icon.svg, the mark of inboxclassic.com): every size Windows asks for, with alpha
+# the app's own icon (app/res/app-icon.svg, from design/logo): every size Windows asks for, with alpha; 32 pixels and
+# below from app-icon-small.svg, whose thicker lines stay sharp where the full icon's would blur
+app_icon() {
+    if [ "$1" -le 32 ]; then echo app/res/app-icon-small.svg; else echo app/res/app-icon.svg; fi
+}
 icon_frames=()
 for size in 16 20 24 32 40 48 64 256; do
-    rsvg-convert -w "$size" -h "$size" app/res/app-icon.svg -o "$work/app-$size.png"
+    rsvg-convert -w "$size" -h "$size" "$(app_icon "$size")" -o "$work/app-$size.png"
     icon_frames+=("$work/app-$size.png")
 done
 magick "${icon_frames[@]}" app/res/app.ico
@@ -121,7 +125,7 @@ magick "${icon_frames[@]}" app/res/app.ico
 # looks an icon name up in the themes it read at login, so a name installed since shows as missing)
 mkdir -p linux/data/tray
 for size in 16 22 24 32 48 64; do
-    rsvg-convert -w "$size" -h "$size" app/res/app-icon.svg -o "linux/data/tray/$size.png"
+    rsvg-convert -w "$size" -h "$size" "$(app_icon "$size")" -o "linux/data/tray/$size.png"
 done
 
 # the sign-in buttons of Add Mail Account (app/res/brands), the providers' own artwork, unchanged: Google's PNG with
