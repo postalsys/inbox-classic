@@ -848,6 +848,15 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     let phoneList = BookTable()
     private let removePhone = NSButton(title: Text.uiRemove.text, target: nil, action: nil)
     private let notes = NSTextView()
+    /// the picture, set or taken away once OK saved the card (Cancel leaves it as it was)
+    let picture = PictureWell()
+    private let removePictureButton = NSButton(title: Text.uiRemove.text, target: nil, action: nil)
+    /// a file chosen or dropped, given to the core on OK
+    private var pendingPicture: URL?
+    /// Remove was clicked for the picture the card has
+    private var pictureRemoved = false
+    /// the card has a picture in the store
+    private var storedPicture = false
     /// the name shown follows the first and last name until it is typed in
     private var displayFollows: Bool
     private var saved: Int64 = 0
@@ -885,7 +894,63 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         phoneKind.setAccessibilityIdentifier("contact.phone.kind")
         window.contentView = layout()
         window.initialFirstResponder = first
+        showStoredPicture()
         updateButtons()
+    }
+
+    // ---- the picture ----
+
+    /// the card's picture as the core keeps it, drawn for the well
+    private func showStoredPicture() {
+        guard card.id != 0, pe_card_has_picture(core.handle, card.id) else { return }
+        storedPicture = true
+        let side = Int(PictureWell.size * (NSScreen.main?.backingScaleFactor ?? 2))
+        var length = 0
+        let pixels = takenBytes(pe_card_picture(core.handle, card.id, UInt32(side), &length), length)
+        picture.image = pixelImage(pixels, side: side, points: PictureWell.size)
+    }
+
+    /// a file chosen or dropped: shown now, given to the core on OK (which says whether it is a picture it takes)
+    func choosePicture(_ url: URL) {
+        pendingPicture = url
+        pictureRemoved = false
+        picture.image = NSImage(contentsOf: url)
+        updatePictureButtons()
+    }
+
+    @objc func choosePictureClicked() {
+        let title = Text.uiCardPictureChoose.text.replacingOccurrences(of: "...", with: "")
+        if let url = openFilesPanel(title: title, types: [.png, .jpeg], multiple: false).first {
+            choosePicture(url)
+        }
+    }
+
+    @objc func removePictureClicked() {
+        pendingPicture = nil
+        pictureRemoved = storedPicture
+        picture.image = nil
+        updatePictureButtons()
+    }
+
+    private func updatePictureButtons() {
+        removePictureButton.isHidden = picture.image == nil
+    }
+
+    /// the picture as OK leaves it, on the card saved as `id`; the core's reason when it took no file
+    private func applyPicture(to id: Int64) -> String? {
+        if let url = pendingPicture {
+            var error: UnsafeMutablePointer<CChar>?
+            let set = url.path.withCString { pe_card_set_picture(core.handle, id, $0, &error) }
+            let reason = taken(error)
+            guard set else { return reason ?? Text.uiPictureNotPicture.text }
+            pendingPicture = nil
+            storedPicture = true
+        } else if pictureRemoved {
+            pe_card_remove_picture(core.handle, id)
+            pictureRemoved = false
+            storedPicture = false
+        }
+        return nil
     }
 
     private func layout() -> NSView {
@@ -944,6 +1009,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         notesScroll.heightAnchor.constraint(equalToConstant: 64).isActive = true
 
         let names = NSGridView(views: [
+            [formLabel(Text.uiCardPicture.text), pictureRow()],
             [formLabel(Text.uiContactFirst.text), first],
             [formLabel(Text.uiContactLast.text), last],
             [formLabel(Text.uiContactDisplay.text), display],
@@ -970,6 +1036,10 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
                 grid.cell(atColumnIndex: 1, rowIndex: row).xPlacement = .fill
             }
         }
+        // the picture's row: its label level with the middle of the well
+        names.row(at: 0).rowAlignment = .none
+        names.row(at: 0).yPlacement = .center
+        names.row(at: 0).bottomPadding = 4
         for boxRow in [1, 3] {
             more.row(at: boxRow).rowAlignment = .none
             more.row(at: boxRow).yPlacement = .top
@@ -997,6 +1067,28 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         line.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
         buttons.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
         return stack
+    }
+
+    /// the well with Choose and Remove beside it, Remove only while there is a picture
+    private func pictureRow() -> NSView {
+        let choose = NSButton(title: Text.uiCardPictureChoose.text.replacingOccurrences(of: "...", with: "\u{2026}"),
+                              target: self, action: #selector(choosePictureClicked))
+        choose.setAccessibilityIdentifier("contact.picture.choose")
+        removePictureButton.target = self
+        removePictureButton.action = #selector(removePictureClicked)
+        removePictureButton.setAccessibilityIdentifier("contact.picture.remove")
+        picture.dropped = { [weak self] in self?.choosePicture($0) }
+        let buttons = NSStackView(views: [choose, removePictureButton])
+        // one width, as the form's other buttons beside their lists (once both are in the stack)
+        removePictureButton.widthAnchor.constraint(equalTo: choose.widthAnchor).isActive = true
+        buttons.orientation = .vertical
+        buttons.alignment = .leading
+        buttons.spacing = 6
+        let row = NSStackView(views: [picture, buttons, NSView()])
+        row.alignment = .centerY
+        row.spacing = 14
+        updatePictureButtons()
+        return row
     }
 
     // ---- the lists ----
@@ -1120,7 +1212,13 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         card.notes = notes.string
         switch core.saveBookCard(card) {
         case .success(let id):
+            // saved: OK again updates it, with another picture or none
+            card.id = id
             saved = id
+            if let reason = applyPicture(to: id) {
+                inform(reason, title: window.title, style: .warning)
+                return
+            }
             NSApp.stopModal()
         case .failure(let refusal):
             inform(Text.uiContactNotSaved.text(["reason": refusal.reason]), title: window.title, style: .warning)
@@ -1541,5 +1639,79 @@ final class PeoplePicker: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     func run(on parent: NSWindow?) -> [[BookEntry]]? {
         runSheet(window, on: parent)
         return accepted ? chosen : nil
+    }
+}
+
+/// The picture of Contact Properties: round, as the list shows people, the picture or a quiet fill with a person in
+/// it; a PNG or JPEG file dropped on it is chosen, as Choose does
+final class PictureWell: NSView {
+    static let size: CGFloat = 64
+
+    var image: NSImage? {
+        didSet {
+            needsDisplay = true
+            setAccessibilityValue(image == nil ? nil : Text.uiCardPicture.text)
+        }
+    }
+    /// a file dropped on it
+    var dropped: (URL) -> Void = { _ in }
+
+    override var isFlipped: Bool { true }
+
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        translatesAutoresizingMaskIntoConstraints = false
+        widthAnchor.constraint(equalToConstant: Self.size).isActive = true
+        heightAnchor.constraint(equalToConstant: Self.size).isActive = true
+        registerForDraggedTypes([.fileURL])
+        setAccessibilityElement(true)
+        setAccessibilityRole(.image)
+        setAccessibilityLabel(Text.uiCardPicture.text.trimmingCharacters(in: CharacterSet(charactersIn: ":\u{a0} ")))
+        setAccessibilityIdentifier("contact.picture")
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let circle = NSBezierPath(ovalIn: bounds.insetBy(dx: 0.5, dy: 0.5))
+        if let image {
+            NSGraphicsContext.saveGraphicsState()
+            circle.addClip()
+            image.draw(in: bounds)
+            NSGraphicsContext.restoreGraphicsState()
+        } else {
+            NSColor.quaternaryLabelColor.setFill()
+            circle.fill()
+            let symbol = NSImage(systemSymbolName: "person.fill", accessibilityDescription: nil)?
+                .withSymbolConfiguration(.init(pointSize: 28, weight: .regular)
+                    .applying(.init(paletteColors: [.tertiaryLabelColor])))
+            if let symbol {
+                let size = symbol.size
+                symbol.draw(in: NSRect(x: (bounds.width - size.width) / 2, y: (bounds.height - size.height) / 2,
+                                       width: size.width, height: size.height))
+            }
+        }
+        NSColor.separatorColor.setStroke()
+        circle.lineWidth = 0.5
+        circle.stroke()
+    }
+
+    /// a PNG or JPEG file
+    private func pictureFile(_ sender: NSDraggingInfo) -> URL? {
+        let urls = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true])
+        guard let url = (urls as? [URL])?.first,
+              let type = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType,
+              type.conforms(to: .png) || type.conforms(to: .jpeg) else { return nil }
+        return url
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        pictureFile(sender) == nil ? [] : .copy
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let url = pictureFile(sender) else { return false }
+        dropped(url)
+        return true
     }
 }

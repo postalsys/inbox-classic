@@ -38,6 +38,8 @@ final class Reader: NSObject {
     private var waiting = false
     private var viewRequest: UInt64 = 0
     private var logoRequest: UInt64 = 0
+    /// without a logo, the sender's picture from the Address Book drawn for the logo's place
+    private var pictureRequest: UInt64 = 0
     private var unsubscribeRequest: UInt64 = 0
     private let preview = Preview()
     /// Find in This Message: a bar over the message, as Safari and Mail have
@@ -377,9 +379,10 @@ final class Reader: NSObject {
         return out
     }
 
-    func showLogo(_ pixels: Data?) {
+    /// the brand's logo as it is, or a person's picture `round` as the list shows it
+    func showLogo(_ pixels: Data?, round: Bool = false) {
         guard let image = pixelImage(pixels, side: logoPixels, points: 48) else { return }
-        logo.image = image
+        logo.image = round ? roundImage(image) : image
         logo.isHidden = false
     }
 
@@ -403,6 +406,7 @@ final class Reader: NSObject {
         messageView = nil
         file = nil
         logoRequest = 0
+        pictureRequest = 0
         clearView(loading: loading)
     }
 
@@ -494,6 +498,8 @@ final class Reader: NSObject {
         show(info.pointee, view: messageView)
         if info.pointee.has_logo {
             logoRequest = pe_logo_start(core.handle, folder, uid, UInt32(logoPixels))
+        } else if info.pointee.picture != 0 {
+            pictureRequest = pe_picture_start(core.handle, info.pointee.picture, UInt32(logoPixels))
         }
         shownHandler()
     }
@@ -524,6 +530,12 @@ final class Reader: NSObject {
                 logoRequest = 0
                 var length = 0
                 showLogo(takenBytes(pe_logo_result(core.handle, event.uid, &length), length))
+            }
+        case PE_EVENT_KIND_PICTURE_READY:
+            if pictureRequest != 0 && event.uid == pictureRequest {
+                pictureRequest = 0
+                var length = 0
+                showLogo(takenBytes(pe_picture_result(core.handle, event.uid, &length), length), round: true)
             }
         case PE_EVENT_KIND_SYNC_FINISHED:
             // the account is back: a message it could not give is tried again

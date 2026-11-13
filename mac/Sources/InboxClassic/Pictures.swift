@@ -17,6 +17,15 @@ func pixelImage(_ pixels: Data?, side: Int, points: CGFloat) -> NSImage? {
     return NSImage(cgImage: image, size: NSSize(width: points, height: points))
 }
 
+/// `image` clipped to a circle, as a person's picture is shown
+func roundImage(_ image: NSImage) -> NSImage {
+    NSImage(size: image.size, flipped: false) { bounds in
+        NSBezierPath(ovalIn: bounds).addClip()
+        image.draw(in: bounds)
+        return true
+    }
+}
+
 /// The pictures of the list's rows, asked of the core once a key and size, kept for the run
 @MainActor
 final class ListPictures {
