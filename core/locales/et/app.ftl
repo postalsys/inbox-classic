@@ -516,6 +516,8 @@ ui-download-limit = Igale kontole hoitakse alla laaditud kirju kuni:
 # review: new
 ui-download-note = Ette alla laaditud kirjad avanevad kohe. Üle piiri eemaldatakse vanimad ja need laaditakse avamisel uuesti alla.
 # review: new
+ui-attachment-downloading = Selle kirja ülejäänud osa laaditakse veel alla. Proovige uuesti, kui see on käes.
+# review: new
 ui-trusted-senders-button = Usaldusväärsed saatjad...
 # review: new
 ui-trusted-senders-title = Usaldusväärsed saatjad

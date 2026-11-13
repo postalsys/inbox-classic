@@ -364,6 +364,13 @@ const sections = [
                 checked: ['The trusted sender is listed and can be removed', "With the setting on, every message's pictures load"]
             },
             {
+                shot: 'large-1-text-first',
+                name: 'Large messages show their text first',
+                what: 'A message over 1 MB shows its text and the pictures in it first, fetched by part, with its attachments listed; the rest follows in the background, and the status bar says how far it is. Its attachments, Save As, View Source and Forward wait until it is all here.',
+                how: 'Open a large message.',
+                checked: ['The text is shown before the rest is here', 'The status bar says how far it is, then that it is all here']
+            },
+            {
                 shot: 'download-1-options',
                 name: 'Messages downloaded before they are opened',
                 what: 'New mail is downloaded as it arrives, so it opens at once, and the messages above and below the one opened are fetched for Next and Previous. Options says what is downloaded ahead (recent messages up to 1 MB out of the box, all of them, or only when opened) and how much each account keeps; past it, the oldest are removed and downloaded again when opened. Junk E-mail, Deleted Items and Gmail’s All Mail are downloaded only when opened.',

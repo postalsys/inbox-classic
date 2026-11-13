@@ -3518,3 +3518,77 @@ fn a_click_during_a_large_download_is_answered_first() {
         }
     });
 }
+
+// ---- large messages show their text first (phase 5) ----
+
+#[test]
+fn a_large_message_shows_its_text_before_its_attachment() {
+    // the whole message comes slowly: a pause before each range of it
+    let Some(s) = setup_with(json!({ "script": {
+        "on": "command", "match": "BODY\\.PEEK\\[\\]<", "delay": 1500, "times": 2
+    } })) else {
+        return;
+    };
+    use base64::Engine;
+    let pdf = base64::engine::general_purpose::STANDARD.encode(vec![7u8; 3 * 1024 * 1024]);
+    let lines: Vec<&str> = pdf
+        .as_bytes()
+        .chunks(76)
+        .map(|c| std::str::from_utf8(c).unwrap())
+        .collect();
+    let raw = format!(
+        "From: Ann <ann@example.com>\r\nSubject: The report\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/mixed; boundary=\"b1\"\r\n\r\n\
+         --b1\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe numbers are attached.\r\n\
+         --b1\r\nContent-Type: application/pdf; name=\"report.pdf\"\r\n\
+         Content-Disposition: attachment; filename=\"report.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\n\
+         {}\r\n--b1--\r\n",
+        lines.join("\r\n")
+    );
+    let big = s.server.add_message("INBOX", &raw, &[]);
+    let (_, inbox, _) = synced_with(&s, &[]);
+    s.core.open_message(inbox, big).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: big,
+        }
+    });
+    // its text, while the rest is on its way: never stored
+    assert!(s.core.message_downloading(inbox, big));
+    assert!(s.core.message_source(inbox, big).unwrap().is_none());
+    let view = s.core.message_view(inbox, big, false).unwrap().unwrap();
+    assert!(view.document.contains("The numbers are attached."), "{}", view.document);
+    assert_eq!(view.attachments.len(), 1);
+    assert_eq!(view.attachments[0].filename, "report.pdf");
+    let size = view.attachments[0].size;
+    assert!(size > 3_000_000 && size < 3_300_000, "{size}");
+    // how far it is, then the whole message
+    let progress = s.wait(|e| matches!(e, Event::MessageProgress { .. }));
+    assert!(
+        matches!(&progress, Event::MessageProgress { text, .. } if text.starts_with("Downloading")),
+        "{progress:?}"
+    );
+    loop {
+        let event = s
+            .events
+            .recv_timeout(Duration::from_secs(20))
+            .expect("the whole message");
+        if event
+            == (Event::MessageReady {
+                folder: inbox,
+                uid: big,
+            })
+        {
+            break;
+        }
+    }
+    assert!(!s.core.message_downloading(inbox, big));
+    let (_, source) = s.core.message_source(inbox, big).unwrap().unwrap();
+    assert_eq!(
+        source.len(),
+        s.server.messages("INBOX")[0]["size"].as_u64().unwrap() as usize
+    );
+    let view = s.core.message_view(inbox, big, false).unwrap().unwrap();
+    assert_eq!(view.attachments[0].size, 3 * 1024 * 1024);
+}

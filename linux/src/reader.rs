@@ -951,7 +951,15 @@ impl Reader {
     async fn save_attachment(&self, index: usize) {
         let Some(window) = self.window() else { return };
         let Some((name, data)) = self.attachment(index) else {
-            ui::alert(&window, TITLE, &t!(UiAttachmentNotRead)).await;
+            // a large message shows its text before the rest of it is here
+            let downloading =
+                self.file.borrow().is_none() && shell().core.message_downloading(self.folder.get(), self.uid.get());
+            let why = if downloading {
+                t!(UiAttachmentDownloading)
+            } else {
+                t!(UiAttachmentNotRead)
+            };
+            ui::alert(&window, TITLE, &why).await;
             return;
         };
         let Some(path) = ui::save_file(&window, &t!(UiSaveAttachmentAs), &name, None).await else {

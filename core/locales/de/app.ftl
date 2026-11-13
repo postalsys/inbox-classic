@@ -515,6 +515,8 @@ ui-download-limit = Heruntergeladene Nachrichten je Konto höchstens:
 # review: new
 ui-download-note = Vorab heruntergeladene Nachrichten öffnen sich sofort. Über der Grenze werden die ältesten entfernt und beim Öffnen erneut heruntergeladen.
 # review: new
+ui-attachment-downloading = Der Rest dieser Nachricht wird noch heruntergeladen. Versuchen Sie es erneut, sobald er da ist.
+# review: new
 ui-trusted-senders-button = Vertrauenswürdige Absender...
 # review: new
 ui-trusted-senders-title = Vertrauenswürdige Absender

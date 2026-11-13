@@ -496,6 +496,7 @@ final class UITest {
         try await reading()
         try await writing()
         try await notDownloaded()
+        try await largeMessage()
         try await outboxAndDrafts()
         try await searching()
         try await files()

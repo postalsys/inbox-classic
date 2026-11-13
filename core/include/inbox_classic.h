@@ -130,6 +130,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_TRANSFERRING = 20,
   // The folder `folder` of `account` made with `pe_folder_create` is there (to choose it in the window that made it)
   PE_EVENT_KIND_FOLDER_CREATED = 21,
+  // How far the download of a large message opened is: `message`, for the status bar, about `folder`/`uid`
+  PE_EVENT_KIND_MESSAGE_PROGRESS = 22,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -2011,6 +2013,15 @@ char *pe_message_source_text(const struct PeCore *core,
                              int64_t folder,
                              uint64_t uid,
                              char **title);
+
+// Whether `folder`/`uid` shows its text before the rest of it, which is still being downloaded: its attachments,
+// Save As, View Source and Forward wait for it (a `MessageReady` follows once it is here)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_message_downloading(const struct PeCore *core,
+                            int64_t folder,
+                            uint64_t uid);
 
 // The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).
 // `len` gets its length and `filename` a name to save it under made from its subject (`.eml`; free it with

@@ -641,7 +641,12 @@ final class Reader: NSObject {
         let data = takenBytes(bytes, length)
         let safeName = taken(name) ?? "attachment"
         guard let data else {
-            inform(Text.uiAttachmentNotRead.text, style: .error)
+            // a large message shows its text before the rest of it is here
+            if file == nil && pe_message_downloading(core.handle, folder, uid) {
+                inform(Text.uiAttachmentDownloading.text)
+            } else {
+                inform(Text.uiAttachmentNotRead.text, style: .error)
+            }
             return
         }
         if let url = saveFilePanel(name: safeName), !writeDownloaded(data, to: url) {

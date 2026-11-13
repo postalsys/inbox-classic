@@ -1275,6 +1275,30 @@ public static class Dragger {
     Check ([bool](WaitFor { -not (Visible $main $IDC_RETRY) -and (Find 'Archive' $waiting).flags -contains '\Seen' } 40)) "once the account is back the message shows by itself (Try Again $(Visible $main $IDC_RETRY), flags $((Find 'Archive' $waiting).flags -join ' '))"
     SelectFolder 0
 
+    Step 'a large message shows its text first'
+    # SCENARIO 17a: the rest of it comes slowly, a pause before each of its first two ranges
+    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' "http://127.0.0.1:$($ports.rest)/v1/script/rules" -Body (@{
+        on = 'command'; match = 'BODY\.PEEK\[\]<'; delay = 2500; times = 2 } | ConvertTo-Json))
+    $large = 'Subject: The quarterly report'
+    $pdf = (@('A' * 76) * [int](3 * 1024 * 1024 / 57)) -join "`r`n"
+    # in Archive, dated ahead of the one before, so it is the first row there
+    AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`n$large`r`n" +
+        "Message-ID: <quarterly@example.com>`r`nDate: $([DateTime]::UtcNow.AddMinutes(10).ToString('r'))`r`nMIME-Version: 1.0`r`n" +
+        "Content-Type: multipart/mixed; boundary=`"q`"`r`n`r`n--q`r`nContent-Type: text/plain; charset=utf-8`r`n`r`n" +
+        "The figures are attached.`r`n--q`r`nContent-Type: application/pdf; name=`"report.pdf`"`r`n" +
+        "Content-Disposition: attachment; filename=`"report.pdf`"`r`nContent-Transfer-Encoding: base64`r`n`r`n" +
+        "$pdf`r`n--q--`r`n") @() 'Archive'
+    Command $main $IDM_SYNC
+    [void](WaitFor { Find 'Archive' $large } 30)
+    SelectFolder 3
+    Start-Sleep -Seconds 2
+    SelectRow 0
+    $status = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    Check ($null -ne (WaitFor { $t = WindowText $status; if ($t -like 'Downloading*') { $t } } 15)) "the status bar says how far the rest of a large message is ($(WindowText $status))"
+    Shot $main 'large-1-text-first'
+    Check ($null -ne (WaitFor { $t = WindowText $status; if ($t -like 'Downloaded*') { $t } } 30)) "then that it is all here ($(WindowText $status))"
+    SelectFolder 0
+
     Step 'the Outbox: a send that can not go'
     SetSmtpPort '1'
     Command $main $IDM_NEW_MAIL

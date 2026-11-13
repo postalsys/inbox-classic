@@ -134,6 +134,8 @@ pub enum PeEventKind {
     Transferring = 20,
     /// The folder `folder` of `account` made with `pe_folder_create` is there (to choose it in the window that made it)
     FolderCreated = 21,
+    /// How far the download of a large message opened is: `message`, for the status bar, about `folder`/`uid`
+    MessageProgress = 22,
 }
 
 #[repr(C)]
@@ -229,6 +231,7 @@ impl Callback {
             Event::AgentLogChanged => (PeEventKind::AgentLogChanged, 0, 0, 0),
             Event::Transferring { .. } => (PeEventKind::Transferring, 0, 0, 0),
             Event::FolderCreated { account, folder } => (PeEventKind::FolderCreated, *account, *folder, 0),
+            Event::MessageProgress { folder, uid, .. } => (PeEventKind::MessageProgress, 0, *folder, *uid),
         };
         let count = if let Event::NewMail { count, .. } = &event {
             *count as u64
@@ -245,7 +248,9 @@ impl Callback {
             Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
             Event::MessageFailed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
             Event::SyncFinished { failure, .. } => (failure.map_or(PeFailureKind::None, Into::into), None, None),
-            Event::Transferring { text } => (PeFailureKind::None, Some(c_string(text)), None),
+            Event::Transferring { text } | Event::MessageProgress { text, .. } => {
+                (PeFailureKind::None, Some(c_string(text)), None)
+            }
             _ => (PeFailureKind::None, None, None),
         };
         let event = PeEvent {
@@ -2277,6 +2282,17 @@ pub unsafe extern "C" fn pe_message_source_text(
     // SAFETY: the caller gave a valid pointer
     unsafe { *title = into_c_string(name) };
     into_c_string(text)
+}
+
+/// Whether `folder`/`uid` shows its text before the rest of it, which is still being downloaded: its attachments,
+/// Save As, View Source and Forward wait for it (a `MessageReady` follows once it is here)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_downloading(core: *const PeCore, folder: i64, uid: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.message_downloading(folder, uid)) }
 }
 
 /// The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).

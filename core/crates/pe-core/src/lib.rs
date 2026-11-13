@@ -140,10 +140,17 @@ pub enum Event {
         account: AccountId,
         folder: FolderId,
     },
-    /// The source of a message is in the store, [`Core::message_view`] can show it
+    /// The source of a message is in the store, [`Core::message_view`] can show it; for a large message, first its
+    /// text alone ([`Core::message_downloading`] says so), then again once the whole message is here
     MessageReady {
         folder: FolderId,
         uid: u64,
+    },
+    /// How far the download of a large message opened is: "Downloading 4.2 MB of 15.0 MB", for the status bar
+    MessageProgress {
+        folder: FolderId,
+        uid: u64,
+        text: String,
     },
     /// The message opened ([`Core::open_message`]) could not be downloaded: `kind` and `message` say why. Opening it
     /// again tries again
@@ -389,6 +396,8 @@ pub struct Core {
     opened: worker::Opened,
     /// The opens under way, and what each reader downloads now
     opening: Arc<worker::Opening>,
+    /// The text shown first of the large messages being downloaded
+    partials: worker::Partials,
     /// The second readers: a click during a large download goes to one (`worker::Worker::spare`)
     spares: Workers,
     /// The access token of each OAuth account, which its worker and its reader share
@@ -486,6 +495,7 @@ impl Core {
             nudges: Arc::default(),
             opened: worker::Opened::default(),
             opening: Arc::default(),
+            partials: worker::Partials::default(),
             spares: Mutex::default(),
             tokens: worker::Tokens::default(),
             timings: timing::Timings::default(),
@@ -1218,6 +1228,15 @@ impl Core {
         )
     }
 
+    /// Whether a message's text is shown before the rest of it, which is still being downloaded: its attachments,
+    /// Save As, View Source and Forward wait for it
+    pub fn message_downloading(&self, folder: FolderId, uid: u64) -> bool {
+        self.partials
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .contains_key(&(folder, uid))
+    }
+
     /// How long the last messages opened took, oldest first ([`timing::KEPT`] at most)
     pub fn open_timings(&self) -> Vec<timing::OpenTiming> {
         self.timings.all()
@@ -1246,8 +1265,22 @@ impl Core {
             true => Vec::new(),
             false => store.trusted_senders()?,
         };
-        Ok(store.source(folder, uid)?.map(|source| ViewSource {
+        // the text of a large message being downloaded, shown before the rest (worker/large.rs)
+        let (source, sizes) = match store.source(folder, uid)? {
+            Some(source) => (Some(source), None),
+            None => match self
+                .partials
+                .lock()
+                .unwrap_or_else(|p| p.into_inner())
+                .get(&(folder, uid))
+            {
+                Some(first) => (Some(first.source.clone()), Some(first.sizes.clone())),
+                None => (None, None),
+            },
+        };
+        Ok(source.map(|source| ViewSource {
             source,
+            sizes,
             received,
             marked,
             trusted,
@@ -2036,6 +2069,7 @@ impl Core {
             nudges: self.nudges.clone(),
             opened: self.opened.clone(),
             opening: self.opening.clone(),
+            partials: self.partials.clone(),
         }
     }
 
@@ -2334,6 +2368,8 @@ impl std::ops::Deref for OpenStore<'_> {
 /// verdicts its account trusts, and where it is
 struct ViewSource {
     source: Vec<u8>,
+    /// The sizes of the attachments of a large message's text shown first, which has them without content
+    sizes: Option<Vec<u64>>,
     received: Option<i64>,
     marked: bool,
     trusted: Vec<String>,
@@ -2425,6 +2461,12 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
         },
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
+    // a large message's text first: its attachments without content, their sizes from its structure
+    if let Some(sizes) = &found.sizes {
+        for (attachment, size) in view.attachments.iter_mut().filter(|a| a.size == 0).zip(sizes) {
+            attachment.size = *size;
+        }
+    }
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(found.received);
     if view.bounce

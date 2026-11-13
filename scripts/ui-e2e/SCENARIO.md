@@ -173,6 +173,17 @@ Screenshots: `read-13-downloading`, `read-12-not-downloaded`
 - once the account is back the message shows by itself
 - and Try Again goes
 
+## 17a. A large message shows its text first
+
+Screenshot: `large-1-text-first`
+
+A message of 3 MB with a line of text and a PDF attached, whose download ImapKit holds back (a pause before each of
+its first two ranges):
+
+- opened, the pane shows its text before the rest of it is here
+- the status bar says how far the rest is ("Downloading 1.0 MB of 4.1 MB"), then that it is all here ("Downloaded
+  4.1 MB")
+
 ## 18. The Outbox: a send that can not go
 
 Screenshots: `write-7-outbox`

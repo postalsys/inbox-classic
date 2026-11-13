@@ -360,15 +360,19 @@ impl Worker {
         pe_sync::select_folder(client, store, folder).await?;
         clock.timing.selected = Some(clock.now());
         // a click meanwhile on a large one goes to a second reader (Core::open_message)
+        let size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
         let _large = match role == Role::Reader && !self.spare {
-            true => {
-                let size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
-                self.ctx.opening.downloading(self.account, size)
-            }
+            true => self.ctx.opening.downloading(self.account, size),
             false => None,
         };
+        let source = if role == Role::Reader && size > super::large::TEXT_FIRST_OVER {
+            // its text first, the rest after (large.rs)
+            self.download_large(store, folder, uid, size).await?
+        } else {
+            let (client, _) = self.connection.as_mut().expect("connected");
+            pe_sync::fetch_raw(client, store, folder, uid).await?
+        };
         let (client, _) = self.connection.as_mut().expect("connected");
-        let source = pe_sync::fetch_raw(client, store, folder, uid).await?;
         clock.timing.first_byte = client.answered_at().map(|at| clock.at(at));
         clock.timing.last_byte = Some(clock.now());
         clock.timing.size = source.len() as u64;

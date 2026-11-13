@@ -4,6 +4,9 @@
 #![forbid(unsafe_code)]
 
 mod summary;
+mod text_first;
+
+pub use text_first::{SHOWN_FIRST_LIMIT, TextFirst, fetch_text_first};
 
 use std::collections::HashSet;
 use std::fmt;
@@ -338,6 +341,30 @@ pub async fn fetch_source(client: &mut Client, store: &mut Store, folder: Folder
     let source = fetch_raw(client, store, folder, uid).await?;
     store.set_source(folder, uid, &source)?;
     Ok(source)
+}
+
+/// `length` bytes of a message as the server keeps it, from `from` on (fewer at its end); None when the server no
+/// longer has it
+pub async fn fetch_range(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uid: u64,
+    from: u64,
+    length: u64,
+) -> Result<Vec<u8>> {
+    select_folder(client, store, folder).await?;
+    let query = FetchQuery {
+        source: true,
+        source_range: Some((from, length)),
+        ..Default::default()
+    };
+    let fetched = client.fetch(&Messages::uid(uid), &query).await?;
+    fetched
+        .into_iter()
+        .find(|m| m.uid == Some(uid))
+        .and_then(|m| m.source)
+        .ok_or(Error::MessageGone)
 }
 
 /// A message as the server keeps it, fetched without keeping it in the store (one on its way to another account,
