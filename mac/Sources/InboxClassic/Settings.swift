@@ -86,6 +86,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let grouping: NSButton
     let signInCodes: NSButton
     let pictures: NSButton
+    let listPictures: NSButton
     let downloadAhead = NSPopUpButton()
     let downloadLimit = NSPopUpButton()
     /// Automatic, Classic, Columns: View > Layout's choice
@@ -117,6 +118,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grouping = NSButton(checkboxWithTitle: Text.uiGroupByConversation.text, target: nil, action: nil)
         signInCodes = NSButton(checkboxWithTitle: Text.uiCodesInNotifications.text, target: nil, action: nil)
         pictures = NSButton(checkboxWithTitle: Text.uiPicturesAlwaysOption.text, target: nil, action: nil)
+        listPictures = NSButton(checkboxWithTitle: Text.uiListPictures.text, target: nil, action: nil)
         super.init()
         window.title = Text.macSettingsTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("settings")
@@ -154,6 +156,17 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grouping.target = self
         grouping.action = #selector(groupingChanged)
         grouping.setAccessibilityIdentifier("settings.grouping")
+
+        // the senders' pictures of the column layout's list, with what is shown and downloaded under it
+        listPictures.state = AppDelegate.shared?.listPictures ?? true ? .on : .off
+        listPictures.target = self
+        listPictures.action = #selector(listPicturesChanged)
+        listPictures.setAccessibilityIdentifier("settings.listPictures")
+        let listNote = NSTextField(wrappingLabelWithString: Text.uiListPicturesNote.text)
+        listNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        listNote.textColor = .secondaryLabelColor
+        let listNoted = NSStackView(views: [listNote])
+        listNoted.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
 
         // under the notifications, as a choice of theirs
         let indented = NSStackView(views: [signInCodes])
@@ -220,6 +233,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             [NSGridCell.emptyContentView, notify],
             [NSGridCell.emptyContentView, indented],
             [NSGridCell.emptyContentView, grouping],
+            [NSGridCell.emptyContentView, listPictures],
+            [NSGridCell.emptyContentView, listNoted],
             [NSGridCell.emptyContentView, pictures],
             [NSGridCell.emptyContentView, warned],
             [NSGridCell.emptyContentView, trusted],
@@ -233,9 +248,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.column(at: 0).xPlacement = .trailing
         grid.row(at: 2).topPadding = 8
         grid.row(at: 3).topPadding = 8
-        grid.row(at: 8).topPadding = 4
-        grid.row(at: 9).topPadding = 8
-        grid.row(at: 10).topPadding = 12
+        grid.row(at: 8).topPadding = 8
+        grid.row(at: 10).topPadding = 4
+        grid.row(at: 11).topPadding = 8
+        grid.row(at: 12).topPadding = 12
         // the labels on the pop-ups' text lines, as the other forms have them
         grid.row(at: 0).rowAlignment = .firstBaseline
         grid.row(at: 2).rowAlignment = .firstBaseline
@@ -279,6 +295,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
     @objc func groupingChanged() {
         AppDelegate.shared?.groupByConversation = grouping.state == .on
+    }
+
+    @objc func listPicturesChanged() {
+        AppDelegate.shared?.listPictures = listPictures.state == .on
     }
 
     @objc func picturesChanged() {

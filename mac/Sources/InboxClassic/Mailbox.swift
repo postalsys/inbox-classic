@@ -72,6 +72,8 @@ public final class Mailbox: NSObject {
     private var treePane: NSScrollView!
     /// what the panes show: the list above the reader, or beside it (MainWindow.updateLayout decides)
     private(set) var layout = PE_LAYOUT_CLASSIC
+    /// the senders' pictures of the column layout's rows
+    let pictures: ListPictures
     /// the one column of the column layout's rows, and what Classic has in its place while it is shown
     private let rowColumn = NSTableColumn(identifier: MessageRowCell.identifier)
     private var classicColumns: [NSTableColumn] = []
@@ -165,7 +167,9 @@ public final class Mailbox: NSObject {
         self.core = core
         view = NSSplitView()
         reader = Reader(core: core)
+        pictures = ListPictures(core: core)
         super.init()
+        pictures.arrived = { [weak self] picture in self?.pictureArrived(picture) }
         listView.setGrouped(AppDelegate.shared?.groupByConversation ?? true)
         listView.setHideIgnored(AppDelegate.shared?.hideIgnored ?? false)
         listView.setUnreadOnly(AppDelegate.shared?.hideRead ?? false)
@@ -869,6 +873,23 @@ public final class Mailbox: NSObject {
         restorePending = false
         list.selectRowIndexes(rows, byExtendingSelection: false)
         list.scrollRowToVisible(first)
+    }
+
+    /// a sender's picture is drawn: the rows on screen that show it get it, the list is not loaded again
+    private func pictureArrived(_ picture: UInt64) {
+        guard layout == PE_LAYOUT_COLUMNS else { return }
+        let shown = list.rows(in: list.visibleRect)
+        let rows = IndexSet((shown.location..<shown.location + shown.length).filter { row($0)?.picture == picture })
+        if !rows.isEmpty {
+            list.reloadData(forRowIndexes: rows, columnIndexes: IndexSet(integer: 0))
+        }
+    }
+
+    /// Settings' list pictures turned on or off: the rows drawn again
+    func listPicturesChanged() {
+        if layout == PE_LAYOUT_COLUMNS {
+            list.reloadData()
+        }
     }
 
     func row(_ index: Int) -> Message? {
@@ -1981,6 +2002,8 @@ public final class Mailbox: NSObject {
 
     func onEvent(_ event: CoreEvent) {
         switch event.kind {
+        case PE_EVENT_KIND_PICTURE_READY:
+            _ = pictures.ready(event.uid, points: SenderPicture.size)
         case PE_EVENT_KIND_FOLDERS_CHANGED:
             reload()
         case PE_EVENT_KIND_FOLDER_CHANGED:
@@ -2352,6 +2375,9 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
         let who = recipientsColumn ? Text.headerTo.text + ": " + message.recipients : message.from
         cell.show(message, who: who, date: message.date.map { shortDate($0, at: dateClock) } ?? "",
                   folder: severalFolders ? rowFolder(message.folder) : "")
+        let scale = tableView.window?.backingScaleFactor ?? 2
+        cell.showPicture(pictures.image(message.picture, points: SenderPicture.size, scale: scale),
+                         initials: message.initials, shown: AppDelegate.shared?.listPictures ?? true)
         return cell
     }
 
@@ -2711,6 +2737,8 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
     static let height: CGFloat = 62
 
     private let dot = NSView()
+    let picture = SenderPicture()
+    private var pictureShown = true
     private let who = MessageRowCell.label(13)
     private let date = MessageRowCell.label(12)
     private let subject = MessageRowCell.label(12)
@@ -2785,9 +2813,17 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
             line.widthAnchor.constraint(equalTo: text.widthAnchor).isActive = true
         }
         addSubview(dot)
+        addSubview(picture)
         addSubview(text)
-        indent = text.leadingAnchor.constraint(equalTo: leadingAnchor, constant: MessageRowCell.gutter)
+        picture.translatesAutoresizingMaskIntoConstraints = false
+        indent = picture.leadingAnchor.constraint(equalTo: leadingAnchor, constant: MessageRowCell.gutter)
+        textAfterPicture = text.leadingAnchor.constraint(equalTo: picture.trailingAnchor, constant: MessageRowCell.pictureGap)
+        textWithoutPicture = text.leadingAnchor.constraint(equalTo: picture.leadingAnchor)
         NSLayoutConstraint.activate([
+            picture.widthAnchor.constraint(equalToConstant: SenderPicture.size),
+            picture.heightAnchor.constraint(equalToConstant: SenderPicture.size),
+            picture.centerYAnchor.constraint(equalTo: centerYAnchor),
+            textAfterPicture,
             dot.widthAnchor.constraint(equalToConstant: 7),
             dot.heightAnchor.constraint(equalToConstant: 7),
             dot.centerXAnchor.constraint(equalTo: leadingAnchor, constant: MessageRowCell.gutter / 2 + 1),
@@ -2806,9 +2842,27 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         !dot.isHidden && subject.font?.fontDescriptor.symbolicTraits.contains(.bold) == true
     }
 
-    /// the room of the unread dot before the text, and how much further the messages of an open conversation are in
+    /// the room of the unread dot before the picture (or the text), how much further the messages of an open
+    /// conversation are in, and the room between the picture and the text
     static let gutter: CGFloat = 18
     static let step: CGFloat = 16
+    static let pictureGap: CGFloat = 10
+    private var textAfterPicture: NSLayoutConstraint!
+    private var textWithoutPicture: NSLayoutConstraint!
+
+    /// the sender's picture beside the text (`shown`: Settings' list pictures on): `image` when the core has drawn
+    /// one, else the initials
+    func showPicture(_ image: NSImage?, initials: String, shown: Bool) {
+        picture.isHidden = !shown
+        picture.image = image
+        picture.initials = initials
+        if shown != pictureShown {
+            pictureShown = shown
+            // one constraint off before the other on, so the two never hold at once
+            (shown ? textWithoutPicture : textAfterPicture).isActive = false
+            (shown ? textAfterPicture : textWithoutPicture).isActive = true
+        }
+    }
 
     /// `who`: the sender, or the recipients in Sent Items and Drafts; `folder`: the folder's name in a list of several
     func show(_ message: Message, who name: String, date when: String, folder place: String) {
@@ -2858,6 +2912,7 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
             label.textColor = secondary
         }
         dot.layer?.backgroundColor = (selected ? NSColor.alternateSelectedControlTextColor : .controlAccentColor).cgColor
+        picture.onSelection = selected
         flag.image = selected ? (flags.selected ?? flags.plain) : flags.plain
         attach.contentTintColor = selected ? .alternateSelectedControlTextColor : nil
     }

@@ -591,6 +591,11 @@ struct Message {
     /// the first words of what the sender wrote, empty until the core has read them (text from the sender: shown as
     /// text only)
     let snippet: String
+    /// the sender's picture in the column layout: its kind and the key the core draws it by (0 for none), and the
+    /// initials shown without one
+    let pictureKind: PePictureKind
+    let picture: UInt64
+    let initials: String
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -618,6 +623,9 @@ struct Message {
         mark = message.mark
         dimmed = message.dimmed
         snippet = text(message.snippet)
+        pictureKind = message.picture_kind
+        picture = message.picture
+        initials = text(message.initials)
     }
 }
 
