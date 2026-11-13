@@ -303,6 +303,13 @@ impl Store {
         Ok(())
     }
 
+    /// Whether a card has a picture, without reading it
+    pub fn has_card_picture(&self, card: CardId) -> Result<bool> {
+        self.db
+            .prepare_cached("SELECT 1 FROM card_pictures WHERE card_id = ?1")?
+            .exists([card])
+    }
+
     /// The card with a picture that has `address`, and its picture's revision: (card, revision); None when no card
     /// with a picture has it
     pub fn picture_of_address(&self, address: &str) -> Result<Option<(CardId, i64)>> {

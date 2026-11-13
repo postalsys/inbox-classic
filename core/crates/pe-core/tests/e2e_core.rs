@@ -2933,8 +2933,12 @@ fn rows_of_a_confirmed_contact_get_its_picture() {
                      From: Fay Friend <fay@friend.example>\r\nSubject: Confirmed\r\n\r\nHi.\r\n";
     let forged = "Authentication-Results: mx.example.com; dmarc=fail header.from=friend.example\r\n\
                   From: Fay Friend <fay@friend.example>\r\nSubject: Forged\r\n\r\nHi.\r\n";
+    // a provider that gives no verdict of its own (as Microsoft's, without an authserv-id): anyone could write it
+    let unjudged = "Authentication-Results: dkim=pass header.d=friend.example; dmarc=pass header.from=friend.example\r\n\
+                    From: Fay Friend <fay@friend.example>\r\nSubject: Unjudged\r\n\r\nHi.\r\n";
     let uid = s.server.add_message("INBOX", confirmed, &[]);
     s.server.add_message("INBOX", forged, &[]);
+    s.server.add_message("INBOX", unjudged, &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
     s.core.sync(account).unwrap();
     s.wait(|e| *e == Event::SyncFinished { account, failure: None });
@@ -2959,9 +2963,12 @@ fn rows_of_a_confirmed_contact_get_its_picture() {
     image::RgbaImage::from_pixel(90, 60, image::Rgba([255, 0, 0, 255]))
         .save(&file)
         .unwrap();
-    s.core.set_card_picture(card, &file).unwrap();
+    // prepared first (a window shows it), set once the user says OK
+    let png = pe_core::card_pictures::prepare(&file).unwrap();
+    s.core.set_card_picture_png(card, &png).unwrap();
     std::fs::write(&file, b"not a picture").unwrap();
-    assert!(s.core.set_card_picture(card, &file).is_err(), "no picture refused");
+    assert!(pe_core::card_pictures::prepare(&file).is_err(), "no picture refused");
+    assert!(s.core.set_card_picture_png(card, b"not one of the core's").is_err());
     let _ = std::fs::remove_file(&file);
     assert!(s.core.card_has_picture(card));
     assert_eq!(s.core.card_picture(card, 64).map(|p| p.len()), Some(64 * 64 * 4));
@@ -2985,6 +2992,16 @@ fn rows_of_a_confirmed_contact_get_its_picture() {
         pe_core::senders::picture(&row("Forged")).0,
         pe_core::senders::PictureKind::None
     );
+    // no verdict of the provider's: the initials, not the face
+    while row("Unjudged").sender_auth == 0 {
+        assert!(std::time::Instant::now() < deadline, "no verdict on the row");
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    assert_ne!(row("Unjudged").sender_auth & pe_core::senders::NO_VERDICT, 0);
+    assert_eq!(
+        pe_core::senders::picture(&row("Unjudged")).0,
+        pe_core::senders::PictureKind::None
+    );
     let request = s.core.picture_start(key, 32).unwrap();
     s.wait(|e| *e == Event::PictureReady { request });
     let pixels = s.core.picture_result(request).expect("the contact's picture");
@@ -3002,7 +3019,8 @@ fn rows_of_a_confirmed_contact_get_its_picture() {
     image::RgbaImage::from_pixel(40, 40, image::Rgba([0, 0, 255, 255]))
         .save(&file)
         .unwrap();
-    s.core.set_card_picture(card, &file).unwrap();
+    let png = pe_core::card_pictures::prepare(&file).unwrap();
+    s.core.set_card_picture_png(card, &png).unwrap();
     let _ = std::fs::remove_file(&file);
     assert_ne!(pe_core::senders::picture(&row("Confirmed")).1, key);
     s.core.remove_card_picture(card).unwrap();

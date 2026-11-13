@@ -384,20 +384,13 @@ impl Core {
         Ok(self.store().import_cards(&cards)?)
     }
 
-    /// A card's picture from the picture file at `path` (PNG or JPEG), kept as the core's own: refused with what the
-    /// window says when the file is no such picture or too large (or can not be read)
-    pub fn set_card_picture(&self, card: CardId, path: &Path) -> std::result::Result<(), String> {
-        let too_large = std::fs::metadata(path)
-            .map(|m| m.len() > crate::card_pictures::MAX_FILE as u64)
-            .map_err(|error| error.to_string())?;
-        if too_large {
-            return Err(crate::card_pictures::Refused::TooLarge.text());
+    /// Sets a card's picture to `png`, one [`crate::card_pictures::prepare`] made (a window prepares it, shows it, and
+    /// sets it once the user says OK); refused for anything else
+    pub fn set_card_picture_png(&self, card: CardId, png: &[u8]) -> Result<()> {
+        if !crate::card_pictures::is_kept(png) {
+            return Err(Error::Unavailable(crate::card_pictures::Refused::NotPicture.text()));
         }
-        let bytes = std::fs::read(path).map_err(|error| error.to_string())?;
-        let png = crate::card_pictures::normalize(&bytes).map_err(|refused| refused.text())?;
-        self.store()
-            .set_card_picture(card, &png)
-            .map_err(|error| error.to_string())
+        Ok(self.store().set_card_picture(card, png)?)
     }
 
     /// Takes a card's picture away
@@ -413,26 +406,28 @@ impl Core {
 
     /// Whether a card has a picture
     pub fn card_has_picture(&self, card: CardId) -> bool {
-        matches!(self.store().card_picture(card), Ok(Some(_)))
+        self.store().has_card_picture(card).unwrap_or(false)
     }
 
     /// Writes cards (`ids`, or every card when it is empty) to a vCard file
     pub fn export_cards(&self, ids: &[CardId], path: &Path) -> Result<u64> {
-        let cards: Vec<Card> = if ids.is_empty() {
-            self.store().cards("")?
+        let store = self.store();
+        let listed: Vec<Card> = if ids.is_empty() {
+            store.cards("")?
         } else {
             ids.iter()
-                .filter_map(|&id| self.store().card(id).transpose())
+                .filter_map(|&id| store.card(id).transpose())
                 .collect::<pe_store::Result<_>>()?
         };
-        // their pictures go with them
-        let cards: Vec<Card> = cards
+        // with their pictures
+        let cards = listed
             .into_iter()
-            .map(|card| Card {
-                picture: self.store().card_picture(card.id).ok().flatten().map(|(png, _)| png),
-                ..card
+            .map(|card| {
+                let picture = store.card_picture(card.id)?.map(|(png, _)| png);
+                Ok(Card { picture, ..card })
             })
-            .collect();
+            .collect::<pe_store::Result<Vec<Card>>>()?;
+        drop(store);
         std::fs::write(path, crate::vcard::write_vcards(&cards))
             .map_err(|error| Error::Unavailable(error.to_string()))?;
         Ok(cards.len() as u64)

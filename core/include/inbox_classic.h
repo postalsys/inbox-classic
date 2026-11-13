@@ -1508,16 +1508,37 @@ char *pe_address_field_add(const char *field,
 // `address` must be NULL or a NUL-terminated string.
 bool pe_address_is_mailbox(const char *address);
 
-// Gives card `card` the picture of the file at `path` (PNG or JPEG, read and kept as the core's own square picture,
-// never the file as it is): true when it is set. False with the reason in `error` (NULL or a pointer to a string to
-// free with `pe_string_free`), in words for the user: the file is no PNG or JPEG picture, or it is too large.
+// The picture file at `path` (PNG or JPEG) as the core keeps a contact's picture: read and turned into the core's
+// own 256 pixel square PNG, `len` bytes, to show (`pe_png_bgra`) and to set once the user says OK
+// (`pe_card_set_picture_png`). Needs no core and touches no store: call it off the window thread. NULL with the
+// reason in `error` (NULL or a pointer to a string to free with `pe_string_free`), in words for the user: the file
+// is no PNG or JPEG picture, it is too large, or it can not be read. Free the bytes with `pe_bytes_free`.
 //
 // # Safety
-// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
-bool pe_card_set_picture(const struct PeCore *core,
-                         int64_t card,
-                         const char *path,
-                         char **error);
+// `path` must be a NUL-terminated string, `len` a valid pointer, `error` NULL or a valid pointer.
+uint8_t *pe_card_picture_prepare(const char *path,
+                                 size_t *len,
+                                 char **error);
+
+// Sets card `card`'s picture to `png` (`len` bytes), one `pe_card_picture_prepare` made; false for anything else
+//
+// # Safety
+// `core` must be a live handle, `png` `len` readable bytes.
+bool pe_card_set_picture_png(const struct PeCore *core,
+                             int64_t card,
+                             const uint8_t *png,
+                             size_t len);
+
+// A picture `pe_card_picture_prepare` made (`png`, `len` bytes) as `size` x `size` BGRA with the alpha multiplied in
+// (`size` 16 to 512), `out_len` bytes, for the window to show it before it is set; NULL for anything else. Needs no
+// core. Free with `pe_bytes_free`.
+//
+// # Safety
+// `png` must be `len` readable bytes, `out_len` a valid pointer.
+uint8_t *pe_png_bgra(const uint8_t *png,
+                     size_t len,
+                     uint32_t size,
+                     size_t *out_len);
 
 // Takes card `card`'s picture away
 //

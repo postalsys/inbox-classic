@@ -792,42 +792,87 @@ pub unsafe extern "C" fn pe_address_is_mailbox(address: *const c_char) -> bool {
     guard(|| pe_core::book::is_mailbox(address)).unwrap_or(false)
 }
 
-/// Gives card `card` the picture of the file at `path` (PNG or JPEG, read and kept as the core's own square picture,
-/// never the file as it is): true when it is set. False with the reason in `error` (NULL or a pointer to a string to
-/// free with `pe_string_free`), in words for the user: the file is no PNG or JPEG picture, or it is too large.
+/// Bytes handed to C, `len` set to their length; free with `pe_bytes_free`
+fn handed_bytes(bytes: Vec<u8>, len: &mut usize) -> *mut u8 {
+    let bytes = bytes.into_boxed_slice();
+    *len = bytes.len();
+    Box::into_raw(bytes).cast()
+}
+
+/// The picture file at `path` (PNG or JPEG) as the core keeps a contact's picture: read and turned into the core's
+/// own 256 pixel square PNG, `len` bytes, to show (`pe_png_bgra`) and to set once the user says OK
+/// (`pe_card_set_picture_png`). Needs no core and touches no store: call it off the window thread. NULL with the
+/// reason in `error` (NULL or a pointer to a string to free with `pe_string_free`), in words for the user: the file
+/// is no PNG or JPEG picture, it is too large, or it can not be read. Free the bytes with `pe_bytes_free`.
 ///
 /// # Safety
-/// `core` must be a live handle, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+/// `path` must be a NUL-terminated string, `len` a valid pointer, `error` NULL or a valid pointer.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_card_set_picture(
-    core: *const PeCore,
-    card: i64,
+pub unsafe extern "C" fn pe_card_picture_prepare(
     path: *const c_char,
+    len: *mut usize,
     error: *mut *mut c_char,
-) -> bool {
+) -> *mut u8 {
+    // SAFETY: as the caller guarantees
+    let Some(len) = (unsafe { len.as_mut() }) else {
+        return null_mut();
+    };
+    *len = 0;
     // SAFETY: as the caller guarantees
     let path = unsafe { arg(path) }.map(std::path::PathBuf::from);
-    // SAFETY: as the caller guarantees
-    let outcome = unsafe {
-        with(core, Err(String::new()), |core| match &path {
-            Some(path) => core.set_card_picture(card, path),
-            None => Err(String::new()),
-        })
-    };
+    let outcome = guard(|| match &path {
+        Some(path) => pe_core::card_pictures::prepare(path),
+        None => Err(pe_core::card_pictures::Refused::NotPicture),
+    })
+    .unwrap_or(Err(pe_core::card_pictures::Refused::NotPicture));
     match outcome {
-        Ok(()) => true,
-        Err(reason) => {
+        Ok(png) => handed_bytes(png, len),
+        Err(refused) => {
             if !error.is_null() {
-                let reason = if reason.is_empty() {
-                    pe_core::card_pictures::Refused::NotPicture.text()
-                } else {
-                    reason
-                };
                 // SAFETY: the caller gave a valid pointer
-                unsafe { *error = into_c_string(pe_core::sentence(&reason)) };
+                unsafe { *error = into_c_string(pe_core::sentence(&refused.text())) };
             }
-            false
+            null_mut()
         }
+    }
+}
+
+/// Sets card `card`'s picture to `png` (`len` bytes), one `pe_card_picture_prepare` made; false for anything else
+///
+/// # Safety
+/// `core` must be a live handle, `png` `len` readable bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_set_picture_png(core: *const PeCore, card: i64, png: *const u8, len: usize) -> bool {
+    if png.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let png = unsafe { std::slice::from_raw_parts(png, len) };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_card_picture_png(card, png).is_ok()) }
+}
+
+/// A picture `pe_card_picture_prepare` made (`png`, `len` bytes) as `size` x `size` BGRA with the alpha multiplied in
+/// (`size` 16 to 512), `out_len` bytes, for the window to show it before it is set; NULL for anything else. Needs no
+/// core. Free with `pe_bytes_free`.
+///
+/// # Safety
+/// `png` must be `len` readable bytes, `out_len` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_png_bgra(png: *const u8, len: usize, size: u32, out_len: *mut usize) -> *mut u8 {
+    // SAFETY: as the caller guarantees
+    let Some(out_len) = (unsafe { out_len.as_mut() }) else {
+        return null_mut();
+    };
+    *out_len = 0;
+    if png.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let png = unsafe { std::slice::from_raw_parts(png, len) };
+    match guard(|| pe_core::card_pictures::bgra(png, size)).flatten() {
+        Some(pixels) => handed_bytes(pixels, out_len),
+        None => null_mut(),
     }
 }
 
@@ -866,11 +911,7 @@ pub unsafe extern "C" fn pe_card_picture(core: *const PeCore, card: i64, size: u
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| match core.card_picture(card, size) {
-            Some(pixels) => {
-                let pixels = pixels.into_boxed_slice();
-                *len = pixels.len();
-                Box::into_raw(pixels).cast()
-            }
+            Some(pixels) => handed_bytes(pixels, len),
             None => null_mut(),
         })
     }

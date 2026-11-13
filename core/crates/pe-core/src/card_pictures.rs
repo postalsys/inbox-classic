@@ -15,22 +15,59 @@ pub const MAX_SIDE: u32 = 8000;
 pub const SIDE: u32 = 256;
 
 /// Why a picture was refused
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Refused {
     /// Not a PNG or JPEG picture, or a broken one
     NotPicture,
     /// A file or a picture larger than [`MAX_FILE`] or [`MAX_SIDE`]
     TooLarge,
+    /// The file could not be read: the system's words
+    Unreadable(String),
 }
 
 impl Refused {
     /// What the window says of it, in the language in use
-    pub fn text(self) -> String {
+    pub fn text(&self) -> String {
         match self {
             Refused::NotPicture => pe_i18n::tr(pe_i18n::Text::UiPictureNotPicture),
             Refused::TooLarge => pe_i18n::tr(pe_i18n::Text::UiPictureTooLarge),
+            Refused::Unreadable(reason) => reason.clone(),
         }
     }
+}
+
+/// The picture file at `path` as the core keeps it ([`normalize`]): read once, no more of it than [`MAX_FILE`]. Pure,
+/// for any thread: the windows prepare it off theirs, show it, and hand it to the core's `set_card_picture_png` only
+/// once the user says OK
+pub fn prepare(path: &std::path::Path) -> Result<Vec<u8>, Refused> {
+    use std::io::Read;
+    let file = std::fs::File::open(path).map_err(|e| Refused::Unreadable(e.to_string()))?;
+    let mut bytes = Vec::new();
+    file.take(MAX_FILE as u64 + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|e| Refused::Unreadable(e.to_string()))?;
+    normalize(&bytes)
+}
+
+/// Whether `png` is a picture as the core keeps them ([`SIDE`] square PNG): what a window hands back to be set
+pub fn is_kept(png: &[u8]) -> bool {
+    image::load_from_memory_with_format(png, ImageFormat::Png)
+        .is_ok_and(|picture| picture.width() == SIDE && picture.height() == SIDE)
+}
+
+/// RGBA pixels as the windows draw them: BGRA with the alpha multiplied in; `premultiplied` when it is in already (a
+/// tiny-skia pixmap's)
+pub(crate) fn to_bgra(mut rgba: Vec<u8>, premultiplied: bool) -> Vec<u8> {
+    for pixel in rgba.as_chunks_mut::<4>().0 {
+        if !premultiplied {
+            let alpha = u16::from(pixel[3]);
+            for channel in &mut pixel[..3] {
+                *channel = ((u16::from(*channel) * alpha + 127) / 255) as u8;
+            }
+        }
+        pixel.swap(0, 2);
+    }
+    rgba
 }
 
 /// `bytes` of a picture as the core keeps it: its middle square, turned upright as its EXIF says, [`SIDE`] pixels
@@ -89,13 +126,7 @@ pub fn bgra(png: &[u8], size: u32) -> Option<Vec<u8>> {
     }
     let picture = image::load_from_memory_with_format(png, ImageFormat::Png).ok()?;
     let scaled = picture.resize_exact(size, size, FilterType::Lanczos3).into_rgba8();
-    let mut out = Vec::with_capacity((size * size * 4) as usize);
-    for pixel in scaled.pixels() {
-        let [r, g, b, a] = pixel.0;
-        let premultiply = |c: u8| ((u16::from(c) * u16::from(a) + 127) / 255) as u8;
-        out.extend_from_slice(&[premultiply(b), premultiply(g), premultiply(r), a]);
-    }
-    Some(out)
+    Some(to_bgra(scaled.into_raw(), false))
 }
 
 #[cfg(test)]
@@ -167,6 +198,25 @@ pub(crate) mod tests {
         assert!(normalize(&header).is_err());
         let wide = png(MAX_SIDE + 1, 1);
         assert_eq!(normalize(&wide), Err(Refused::TooLarge));
+    }
+
+    #[test]
+    fn prepared_from_a_file_and_checked_when_handed_back() {
+        let path = std::env::temp_dir().join(format!("pe-prepare-{}.png", std::process::id()));
+        std::fs::write(&path, png(80, 40)).unwrap();
+        let kept = prepare(&path).unwrap();
+        assert!(is_kept(&kept));
+        assert!(!is_kept(&png(80, 40)), "not one of the core's");
+        std::fs::write(&path, b"text").unwrap();
+        assert_eq!(prepare(&path), Err(Refused::NotPicture));
+        let _ = std::fs::remove_file(&path);
+        assert!(matches!(prepare(&path), Err(Refused::Unreadable(_))));
+    }
+
+    #[test]
+    fn premultiplied_bgra() {
+        assert_eq!(to_bgra(vec![200, 100, 50, 128], false), vec![25, 50, 100, 128]);
+        assert_eq!(to_bgra(vec![200, 100, 50, 128], true), vec![50, 100, 200, 128]);
     }
 
     #[test]

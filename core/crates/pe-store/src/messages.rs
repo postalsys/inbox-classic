@@ -167,8 +167,8 @@ pub struct Message {
     pub sender_auth: u8,
     /// Its brand's logo (a row of `logos`), when its verdicts allow one; never in a Junk folder
     pub logo: Option<i64>,
-    /// The picture of the Address Book's card with its sender's address, (card, revision), when there is one: the
-    /// core shows it only for a confirmed sender ([`Message::sender_auth`]); never in a Junk folder
+    /// The picture of the Address Book's card with its sender's address, (card, its picture's revision), when there is
+    /// one: the core shows it only for a confirmed sender ([`Message::sender_auth`]); never in a Junk folder
     pub contact: Option<(i64, i64)>,
 }
 
@@ -265,14 +265,17 @@ pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_da
      EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id), sender_people, recipient_people, \
      attachment_names, attachment_count, refs, thread_id, bounce, \
      COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0), snippet, \
-     COALESCE(sender_auth, 0), \
-     CASE WHEN (SELECT special_use FROM folders f WHERE f.id = messages.folder_id) = '\\Junk' THEN NULL ELSE logo_id END, \
-     (SELECT p.card_id * 1048576 + p.changed % 1048576 FROM card_addresses a JOIN card_pictures p ON p.card_id = a.card_id \
+     COALESCE(sender_auth, 0), logo_id, \
+     (SELECT special_use FROM folders f WHERE f.id = messages.folder_id) IS '\\Junk', \
+     (SELECT a.card_id FROM card_addresses a JOIN card_pictures p ON p.card_id = a.card_id \
       WHERE a.address = messages.from_address COLLATE NOCASE AND messages.from_address != '' \
-      AND (SELECT special_use FROM folders f WHERE f.id = messages.folder_id) IS NOT '\\Junk' \
+      ORDER BY a.card_id LIMIT 1), \
+     (SELECT p.changed FROM card_addresses a JOIN card_pictures p ON p.card_id = a.card_id \
+      WHERE a.address = messages.from_address COLLATE NOCASE AND messages.from_address != '' \
       ORDER BY a.card_id LIMIT 1)";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
+    let junk: bool = row.get(27)?;
     Ok(Message {
         id: row.get(0)?,
         folder_id: row.get(1)?,
@@ -281,8 +284,12 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
         mark: crate::ThreadMark::of(row.get(23)?),
         snippet: row.get(24)?,
         sender_auth: row.get(25)?,
-        logo: row.get(26)?,
-        contact: row.get::<_, Option<i64>>(27)?.map(|v| (v >> 20, v & 0xF_FFFF)),
+        // neither picture in a Junk folder
+        logo: row.get::<_, Option<i64>>(26)?.filter(|_| !junk),
+        contact: match (row.get::<_, Option<i64>>(28)?, row.get::<_, Option<i64>>(29)?) {
+            (Some(card), Some(changed)) if !junk => Some((card, changed)),
+            _ => None,
+        },
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,
