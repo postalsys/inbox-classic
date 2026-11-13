@@ -363,6 +363,12 @@ pub struct Core {
     nudges: Arc<worker::Nudges>,
     /// The messages opened since the app started
     opened: worker::Opened,
+    /// The opens under way, and what each reader downloads now
+    opening: Arc<worker::Opening>,
+    /// Each account's turn to upload
+    uploads: Arc<worker::Uploads>,
+    /// The second readers: a click during a large download goes to one (`worker::Worker::spare`)
+    spares: Workers,
     /// The access token of each OAuth account, which its worker and its reader share
     tokens: worker::Tokens,
     /// How long opening messages took
@@ -454,6 +460,9 @@ impl Core {
             backgrounds: Mutex::default(),
             nudges: Arc::default(),
             opened: worker::Opened::default(),
+            opening: Arc::default(),
+            uploads: Arc::default(),
+            spares: Mutex::default(),
             tokens: worker::Tokens::default(),
             timings: timing::Timings::default(),
             secrets,
@@ -1169,8 +1178,13 @@ impl Core {
     /// [`Event::MessageFailed`] when it can not be downloaded
     pub fn open_message(&self, folder: FolderId, uid: u64) -> Result<()> {
         let account = self.store().folder(folder)?.account_id;
+        // a large download under way is not waited for: the click goes to a second reader
+        let readers = match self.opening.large_download(account) {
+            true => &self.spares,
+            false => &self.readers,
+        };
         self.send_to(
-            &self.readers,
+            readers,
             Role::Reader,
             account,
             Command::FetchSource {
@@ -1998,6 +2012,8 @@ impl Core {
             synced: self.synced.clone(),
             nudges: self.nudges.clone(),
             opened: self.opened.clone(),
+            opening: self.opening.clone(),
+            uploads: self.uploads.clone(),
         }
     }
 
@@ -2036,24 +2052,30 @@ impl Core {
         self.store().account(account).map_err(|_| Error::NotFound)?;
         // taken before the readers' lock, as it takes the workers'
         let fallback = match role {
-            Role::Reader | Role::Background => Some(self.worker_of(&self.workers, Role::Main, account)?),
+            Role::Reader | Role::Background | Role::Upload => {
+                Some(self.worker_of(&self.workers, Role::Main, account)?)
+            }
             Role::Main => None,
         };
+        let spare = std::ptr::eq(workers, &self.spares);
         let mut workers = workers.lock().unwrap_or_else(|p| p.into_inner());
         if let Some(sender) = live(&workers, account) {
             return Ok(sender);
         }
         let (sender, receiver) = unbounded_channel();
         let mut worker = Worker::new(account, role, self.worker_context());
+        // the main worker for the work the server leaves it, and kept for an upload's sync (its own, too)
+        worker.main = fallback.as_ref().unwrap_or(&sender).downgrade().into();
         worker.fallback = fallback;
+        worker.spare = spare;
         let task = self.runtime()?.spawn(worker.run(receiver));
         workers.insert(account, (sender.clone(), task.abort_handle()));
         Ok(sender)
     }
 
     /// The workers of every kind
-    fn all_workers(&self) -> [&Workers; 3] {
-        [&self.workers, &self.readers, &self.backgrounds]
+    fn all_workers(&self) -> [&Workers; 4] {
+        [&self.workers, &self.readers, &self.backgrounds, &self.spares]
     }
 
     fn stop_worker(&self, account: AccountId) {

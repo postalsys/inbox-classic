@@ -39,6 +39,61 @@ pub(crate) fn mark_synced(synced: &Synced, account: AccountId) {
     synced.send_if_modified(|accounts| accounts.insert(account));
 }
 
+/// A download over this size under way sends the next click to a second reader, not to wait for it
+pub(crate) const LARGE_DOWNLOAD: u64 = 256 * 1024;
+/// How long a second reader without an open keeps its connection
+const SPARE_IDLE: Duration = Duration::from_secs(5 * 60);
+
+/// The opens under way, which the background work steps aside for, and the size of what each account's reader
+/// downloads now
+#[derive(Default)]
+pub(crate) struct Opening {
+    count: std::sync::atomic::AtomicUsize,
+    done: tokio::sync::Notify,
+    downloading: std::sync::Mutex<std::collections::HashMap<AccountId, u64>>,
+}
+
+impl Opening {
+    /// An open starts; it ends when what this returns is dropped
+    fn start(self: &Arc<Self>) -> OpenUnderWay {
+        self.count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        OpenUnderWay(self.clone())
+    }
+
+    /// Until no open is under way
+    pub(crate) async fn quiet(&self) {
+        loop {
+            let done = self.done.notified();
+            if self.count.load(std::sync::atomic::Ordering::SeqCst) == 0 {
+                return;
+            }
+            done.await;
+        }
+    }
+
+    /// Whether the reader of `account` is downloading a message over [`LARGE_DOWNLOAD`]
+    pub(crate) fn large_download(&self, account: AccountId) -> bool {
+        self.downloads()
+            .get(&account)
+            .is_some_and(|size| *size > LARGE_DOWNLOAD)
+    }
+
+    fn downloads(&self) -> std::sync::MutexGuard<'_, std::collections::HashMap<AccountId, u64>> {
+        self.downloading.lock().unwrap_or_else(|p| p.into_inner())
+    }
+}
+
+/// An open under way, see [`Opening::start`]
+struct OpenUnderWay(Arc<Opening>);
+
+impl Drop for OpenUnderWay {
+    fn drop(&mut self) {
+        if self.0.count.fetch_sub(1, std::sync::atomic::Ordering::SeqCst) == 1 {
+            self.0.done.notify_waiters();
+        }
+    }
+}
+
 /// What ended the reader's wait
 enum Woke {
     Command(Option<Command>),
@@ -48,6 +103,8 @@ enum Woke {
     Synced,
     /// The computer woke from sleep
     Slept,
+    /// A second reader without opens for a while: its connection goes
+    Idle,
 }
 
 impl Worker {
@@ -63,7 +120,8 @@ impl Worker {
             let first_wait = first_sync.is_some() && warm && !connected;
             let woke = tokio::select! {
                 command = commands.recv() => Woke::Command(command),
-                () = tokio::time::sleep_until(keep_alive), if connected => Woke::KeepAlive,
+                () = tokio::time::sleep_until(keep_alive), if connected && !self.spare => Woke::KeepAlive,
+                () = tokio::time::sleep(SPARE_IDLE), if connected && self.spare => Woke::Idle,
                 true = async {
                     match first_sync.as_mut() {
                         Some(wait) => {
@@ -102,6 +160,7 @@ impl Worker {
                     }
                 }
                 Woke::KeepAlive => self.keep_alive(store).await,
+                Woke::Idle => self.log_out().await,
                 Woke::Synced => {
                     first_sync = None;
                     self.connect_reader(store).await;
@@ -169,6 +228,7 @@ impl Worker {
             return false;
         }
         let started = Instant::now();
+        let _under_way = self.ctx.opening.start();
         let Err(failure) = self.open_message(store, folder, uid, asked).await else {
             return true;
         };
@@ -263,7 +323,7 @@ impl Worker {
     ) -> Result<Vec<u8>, Failure> {
         clock.timing.served = match self.role {
             Role::Reader => Served::Reader,
-            Role::Main | Role::Background => Served::Main,
+            Role::Main | Role::Background | Role::Upload => Served::Main,
         };
         let quiet = self.last_used.elapsed() > QUIET;
         let role = self.role;
@@ -287,7 +347,18 @@ impl Worker {
         }
         pe_sync::select_folder(client, store, folder).await?;
         clock.timing.selected = Some(clock.now());
-        let source = pe_sync::fetch_raw(client, store, folder, uid).await?;
+        // a click meanwhile on a large one goes to a second reader (Core::open_message)
+        let tracked = role == Role::Reader && !self.spare;
+        if tracked {
+            let size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
+            self.ctx.opening.downloads().insert(self.account, size);
+        }
+        let (client, _) = self.connection.as_mut().expect("connected");
+        let fetched = pe_sync::fetch_raw(client, store, folder, uid).await;
+        if tracked {
+            self.ctx.opening.downloads().remove(&self.account);
+        }
+        let source = fetched?;
         clock.timing.first_byte = client.answered_at().map(|at| clock.at(at));
         clock.timing.last_byte = Some(clock.now());
         clock.timing.size = source.len() as u64;
@@ -340,6 +411,26 @@ mod tests {
         assert!(!slept(tick, Duration::from_secs(80)));
         assert!(slept(tick, Duration::from_secs(91)));
         assert!(slept(tick, Duration::from_secs(3600)));
+    }
+
+    #[tokio::test]
+    async fn background_work_waits_while_a_message_is_opened() {
+        let opening = Arc::new(Opening::default());
+        // nothing under way: no wait
+        opening.quiet().await;
+        let first = opening.start();
+        let second = opening.start();
+        let waiting = opening.clone();
+        let wait = tokio::spawn(async move { waiting.quiet().await });
+        tokio::task::yield_now().await;
+        drop(first);
+        tokio::task::yield_now().await;
+        assert!(!wait.is_finished(), "one still under way");
+        drop(second);
+        tokio::time::timeout(Duration::from_secs(1), wait)
+            .await
+            .unwrap()
+            .unwrap();
     }
 
     #[tokio::test]

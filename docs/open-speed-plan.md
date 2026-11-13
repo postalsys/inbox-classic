@@ -175,19 +175,19 @@ Core only: no change to the C API or the apps.
 
 ### Phase 4: the user goes first (causes 5, 6, 7)
 
-- **A second reader connection.** When a click comes while a download is under way and that download has more than
-  256 KB left, the next message goes to a second reader connection (made on demand, closed after 5 idle minutes)
-  instead of waiting. The first download finishes and is kept. Refused: the click waits, as now.
-- **Background work steps aside.** A shared count of opens under way (`AtomicUsize` in the core). The background worker
-  (or the main worker's loop, without one) checks it before each batch and waits while it is above zero, so the line is
-  the user's.
+- **A second reader connection.** When a click comes while the reader downloads a message over 256 KB, the click goes
+  to a second reader (made on demand, its connection closed after 5 idle minutes) instead of waiting. The first
+  download finishes and is kept. Refused: the click waits, as before.
+- **Background work steps aside.** A shared count of opens under way (`worker::Opening`). The background worker
+  waits before each batch while it is above zero, so the line is the user's. Text batches are of 16 messages (about
+  1 MB at most), so a move, delete or flag the main worker does in their place starts within a moment.
 - **Uploads on a connection of their own.** Saving a draft and the copy in Sent Items (APPEND, often megabytes) go over
-  a connection made for that one upload and closed after it, so the main worker stays on the Inbox and the user's
-  commands. Refused or failed before the upload began: the main worker uploads, as now. An upload that failed halfway
-  is not repeated blindly: the folder is checked for the message first (by its Message-ID, as `save_draft` does).
-- **The view first, the store after**, only if phase 1 shows the store write costs time worth it: the core keeps the
-  source the reader just downloaded in memory for `view_source`, `MessageReady` stays as it is, and the store is written
-  afterwards.
+  a connection made for that one upload, in a task of its own, so the main worker stays on the Inbox and the user's
+  commands; the main worker syncs the folder after. One upload of an account at a time, and removing drafts (once a
+  message is sent) waits for an upload under way. When that connection can not be made, the main worker uploads, as
+  before. An upload that failed is told and not repeated (the next save of a draft replaces it by its Message-ID).
+- **The view first, the store after**: not built. Phase 1's numbers show the window told 1 to 10 ms after the last
+  byte, the store write included.
 
 ### Phase 5: large messages show their text first (cause 4)
 

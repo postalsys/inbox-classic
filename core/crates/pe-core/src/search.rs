@@ -16,7 +16,7 @@ const BATCH: usize = 25;
 pub(crate) const PART_LIMIT: u64 = 64 * 1024;
 
 /// How many messages a worker fetches the text of at a time, between its other work
-pub(crate) const TEXT_BATCH: usize = 50;
+pub(crate) const TEXT_BATCH: usize = 16;
 
 /// A header value from BODYSTRUCTURE as the parser's input: only what a type, charset or encoding name has in it, so
 /// nothing a server sends can make another header of it
