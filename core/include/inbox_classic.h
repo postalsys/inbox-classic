@@ -130,6 +130,8 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_TRANSFERRING = 20,
   // The folder `folder` of `account` made with `pe_folder_create` is there (to choose it in the window that made it)
   PE_EVENT_KIND_FOLDER_CREATED = 21,
+  // The picture `uid` of `pe_picture_start` (a row's sender) is drawn, or there was none: `pe_picture_result`
+  PE_EVENT_KIND_PICTURE_READY = 22,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -169,6 +171,13 @@ typedef enum PeThreadMark {
   PE_THREAD_MARK_WATCH = 1,
   PE_THREAD_MARK_IGNORE = 2,
 } PeThreadMark;
+
+// What picture a row of the list has: none (the apps draw the initials), a brand's logo, or a contact's picture
+typedef enum PePictureKind {
+  PE_PICTURE_KIND_NONE = 0,
+  PE_PICTURE_KIND_LOGO = 1,
+  PE_PICTURE_KIND_CONTACT = 2,
+} PePictureKind;
 
 // A special use whose folders the folder list gathers from every account
 typedef enum PeSpecialFolderKind {
@@ -706,9 +715,15 @@ typedef struct PeMessage {
   // column's place
   bool bounce;
   // The first words of what the sender wrote, for the Columns list's third line: empty while the core has not read
-  // its text yet, or when it has none. A collapsed conversation's row has its newest message's. Text from the
-  // sender: shown as text, never as markup
+  // its text yet, or when it has none. A collapsed conversation's row has its own (its first message's). Text
+  // from the sender: shown as text, never as markup
   const char *snippet;
+  // The sender's picture in the Columns list: its kind, and the key `pe_picture_start` draws it by (0 for none,
+  // the same key for every row of one picture, so the apps keep its pixels by it). Never one in a Junk folder
+  enum PePictureKind picture_kind;
+  uint64_t picture;
+  // One or two letters for a sender without a picture ("AL" for Ann Lee), empty when there is no letter
+  const char *initials;
 } PeMessage;
 
 // An account's folder of a special use: a row under All Inboxes
@@ -1641,6 +1656,24 @@ char *pe_invitation_file(const struct PeCore *core,
 // # Safety
 // `core` must be a live handle, `path` and `dir` NUL-terminated strings.
 char *pe_file_invitation_file(const struct PeCore *core, const char *path, const char *dir);
+
+// Draws the picture of a row of the list (its `picture` key) `size` pixels square in the background: `PictureReady`
+// follows with the request this returns; 0 for a key that names no picture
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_picture_start(const struct PeCore *core,
+                          uint64_t key,
+                          uint32_t size);
+
+// The pixels of a drawn picture: `size` x `size` BGRA with the alpha multiplied in, `len` bytes; NULL when there was
+// none. Taken once; free with `pe_bytes_free`.
+//
+// # Safety
+// `core` must be a live handle, `len` a valid pointer.
+uint8_t *pe_picture_result(const struct PeCore *core,
+                           uint64_t request,
+                           size_t *len);
 
 // Draws the BIMI logo of a message (`has_logo`) `size` pixels square in the background: `LogoReady` follows with
 // the request this returns; 0 for a message without one

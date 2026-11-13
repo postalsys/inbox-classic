@@ -117,6 +117,8 @@ mod tests {
             thread: None,
             mark,
             snippet: None,
+            sender_auth: 0,
+            logo: None,
         }
     }
 

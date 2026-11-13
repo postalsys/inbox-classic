@@ -56,8 +56,9 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         .map(|a| (a.name.clone(), a.address.clone()))
         .collect();
     let from = envelope.from.into_iter().next().unwrap_or_default();
-    // the ids it answers, from the References header fetched with it
+    // the ids it answers, from the References header fetched with it, and the provider's verdicts
     let references = message.headers.as_deref().map(references_of).unwrap_or_default();
+    let auth_headers = message.headers.as_deref().map(auth_fields);
     Some(MessageInfo {
         uid,
         modseq: message.modseq,
@@ -81,7 +82,55 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         gmail_thread: message.thread_id,
         thread_id: None,
         bounce,
+        auth_headers,
     })
+}
+
+/// The header fields of the provider's verdicts on the sender: Authentication-Results (DMARC, DKIM, BIMI), and
+/// BIMI-Location with the logo's address, which the receiving server adds (BIMI-Indicator, the logo itself, is left
+/// out: it is large)
+const AUTH_FIELDS: [&str; 3] = ["Authentication-Results", "BIMI-Location", "BIMI-Selector"];
+
+/// The most of those fields kept for a message: a provider's results fit in far less
+const AUTH_LIMIT: usize = 4 * 1024;
+
+/// `fields` and the verdict fields, for a FETCH of header fields
+pub(crate) fn with_auth_fields(mut fields: Vec<String>) -> Vec<String> {
+    fields.extend(AUTH_FIELDS.iter().map(|field| field.to_string()));
+    fields
+}
+
+/// The verdict fields of a header block, in their order, folded lines kept, whole fields only up to [`AUTH_LIMIT`]
+pub(crate) fn auth_fields(header: &[u8]) -> String {
+    let text = String::from_utf8_lossy(header);
+    let mut kept = String::new();
+    let mut field = String::new();
+    let mut inside = false;
+    let flush = |field: &mut String, kept: &mut String| {
+        if !field.is_empty() && kept.len() + field.len() <= AUTH_LIMIT {
+            kept.push_str(field);
+        }
+        field.clear();
+    };
+    for line in text.lines() {
+        if line.starts_with([' ', '\t']) {
+            if inside {
+                field.push_str(line);
+                field.push_str("\r\n");
+            }
+            continue;
+        }
+        flush(&mut field, &mut kept);
+        inside = line
+            .split_once(':')
+            .is_some_and(|(name, _)| AUTH_FIELDS.iter().any(|known| name.trim().eq_ignore_ascii_case(known)));
+        if inside {
+            field.push_str(line);
+            field.push_str("\r\n");
+        }
+    }
+    flush(&mut field, &mut kept);
+    kept
 }
 
 /// The Message-IDs of the References field of a header block (folded or not)
@@ -117,6 +166,23 @@ mod tests {
             name: name.into(),
             address: address.into(),
         }
+    }
+
+    #[test]
+    fn keeps_the_verdict_fields() {
+        let header = b"References: <a@x>\r\nAuthentication-Results: mx.example.com;\r\n\tdmarc=pass header.from=shop.example\r\n\
+                       BIMI-Location: v=BIMI1;\r\n l=https://shop.example/logo.svg\r\nX-Other: no\r\n\r\n";
+        let kept = auth_fields(header);
+        assert_eq!(
+            kept,
+            "Authentication-Results: mx.example.com;\r\n\tdmarc=pass header.from=shop.example\r\n\
+             BIMI-Location: v=BIMI1;\r\n l=https://shop.example/logo.svg\r\n"
+        );
+        assert_eq!(auth_fields(b"References: <a@x>\r\n\r\n"), "");
+        // whole fields only, at most the limit
+        let long = format!("Authentication-Results: {}\r\n", "x".repeat(AUTH_LIMIT));
+        let header = format!("Authentication-Results: first\r\n{long}");
+        assert_eq!(auth_fields(header.as_bytes()), "Authentication-Results: first\r\n");
     }
 
     #[test]

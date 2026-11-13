@@ -25,6 +25,7 @@ mod requests;
 mod search;
 mod secrets;
 mod selection;
+pub mod senders;
 mod sign_in_apps;
 mod snippet;
 mod targets;
@@ -87,7 +88,7 @@ pub use sign_in_apps::{
 pub use text::{
     DOWNLOAD_LIMITS_MB, HiddenUnread, ReaderState, account_label, account_shown_name, account_title, account_titles,
     default_account_name, download_limit_index, download_limit_text, downloading_text, folder_kind, folder_name,
-    format_size, hidden_unread, list_counts, messages, reader_page, retry_note, saved_text, sentence,
+    format_size, hidden_unread, initials, list_counts, messages, reader_page, retry_note, saved_text, sentence,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -158,6 +159,11 @@ pub enum Event {
     },
     /// The logo `request` ([`Core::logo_start`]) is drawn, or there was none: [`Core::logo_result`]
     LogoReady {
+        request: u64,
+    },
+    /// The picture `request` of a row of the list ([`Core::picture_start`]) is drawn, or there was none:
+    /// [`Core::picture_result`]
+    PictureReady {
         request: u64,
     },
     /// The one-click unsubscribe `request` ([`Core::unsubscribe`]) is done, or failed for `problem`
@@ -418,6 +424,10 @@ pub struct Core {
     logos: Requests<Option<Vec<u8>>>,
     /// The SVGs fetched from BIMI-Location for this run, by address (None: there was none to have)
     logo_svgs: Arc<std::sync::Mutex<HashMap<String, Option<Vec<u8>>>>>,
+    /// The pictures of the list's rows being drawn, as pixels once done
+    pictures: Requests<Option<Vec<u8>>>,
+    /// The logos being downloaded for the list, by their row: rows asking at once share one download
+    logo_downloads: LogoDownloads,
     /// Message views built off the window thread: parsing, folding and sanitizing a large message takes a while
     views: Requests<Option<MessageView>>,
     /// The view request the reading pane waits for; an older one gives up
@@ -508,6 +518,8 @@ impl Core {
             autoconfig: Requests::default(),
             logos: Requests::default(),
             logo_svgs: Arc::default(),
+            pictures: Requests::default(),
+            logo_downloads: Arc::default(),
             views: Requests::default(),
             newest_view: Arc::default(),
             view_store: Arc::default(),
@@ -1077,6 +1089,39 @@ impl Core {
     /// none to draw or it is not done
     pub fn logo_result(&self, request: u64) -> Option<Vec<u8>> {
         self.logos.take(request).flatten()
+    }
+
+    /// The picture of a row of the list (its key, [`senders::picture`]) drawn `size` pixels square, in the background:
+    /// [`Event::PictureReady`] follows with the request this returns. A brand's logo is downloaded once and kept
+    /// ([`pe_store::LOGO_KEPT_MS`]; a failure is not tried again for [`pe_store::LOGO_RETRY_MS`]), never a message at
+    /// a time. Refused for a key that names no picture.
+    pub fn picture_start(&self, key: u64, size: u32) -> Result<u64> {
+        let Some((senders::PictureKind::Logo, id)) = senders::picture_of(key) else {
+            return Err(Error::NotFound);
+        };
+        let logo = self.store().logo(id)?.ok_or(Error::NotFound)?;
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let (path, view_store, downloads) = (self.path.clone(), self.view_store.clone(), self.logo_downloads.clone());
+        let work = async move {
+            let now = list_view::now_ms();
+            let svg = match logo.fresh_svg(now) {
+                Some(svg) => Some(svg.to_vec()),
+                None if logo.download_due(now) => download_logo(&downloads, id, &logo.url, path, view_store).await,
+                None => None,
+            };
+            svg.and_then(|svg| bimi::render(&svg, size))
+        };
+        self.pictures
+            .start(self.runtime()?, request, work, self.events.clone(), |request| {
+                Event::PictureReady { request }
+            });
+        Ok(request)
+    }
+
+    /// The pixels of a drawn picture (BGRA, the alpha multiplied in, `size` x `size`), taken once; None when there was
+    /// none to draw or it is not done
+    pub fn picture_result(&self, request: u64) -> Option<Vec<u8>> {
+        self.pictures.take(request).flatten()
     }
 
     /// Stops a lookup the user no longer waits for, and forgets it
@@ -2330,6 +2375,47 @@ impl Drop for Core {
             runtime.shutdown_timeout(SHUTDOWN_GRACE);
         }
     }
+}
+
+/// The logos being downloaded for the list, by their row
+type LogoDownloads = Arc<Mutex<HashMap<i64, Arc<tokio::sync::OnceCell<Option<Vec<u8>>>>>>>;
+
+/// The SVG of the logo `id` at `url`, downloaded once however many rows ask at the same time, and kept in the store
+/// (or its failure, so it is not tried again for a day); None when there is none to have
+async fn download_logo(
+    downloads: &LogoDownloads,
+    id: i64,
+    url: &str,
+    path: PathBuf,
+    view_store: ViewStore,
+) -> Option<Vec<u8>> {
+    let cell = downloads
+        .lock()
+        .unwrap_or_else(|p| p.into_inner())
+        .entry(id)
+        .or_default()
+        .clone();
+    let svg = cell
+        .get_or_init(|| async {
+            let svg = match pe_net::http::get(url, std::time::Duration::from_secs(15)).await {
+                Ok(response) if response.status == 200 && response.body.len() <= bimi::MAX_SVG => Some(response.body),
+                _ => None,
+            };
+            let kept = svg.clone();
+            let now = list_view::now_ms();
+            let _ = tokio::task::spawn_blocking(move || {
+                if let Some(store) = OpenStore::open(&view_store, &path) {
+                    let _ = store.set_logo_download(id, kept.as_deref(), now);
+                }
+            })
+            .await;
+            svg
+        })
+        .await
+        .clone();
+    // the next ask reads the store
+    downloads.lock().unwrap_or_else(|p| p.into_inner()).remove(&id);
+    svg
 }
 
 /// The store connection of the views built in the background (a connection of its own, opened only for a bounce, to

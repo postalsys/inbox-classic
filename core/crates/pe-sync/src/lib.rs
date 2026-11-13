@@ -269,8 +269,9 @@ fn summary_query() -> FetchQuery {
         internal_date: true,
         size: true,
         modseq: true,
-        // the ids it answers, and Gmail's conversation, for conversations
-        headers: Some(vec!["References".into()]),
+        // the ids it answers, and Gmail's conversation, for conversations; the provider's verdicts on the sender,
+        // for its picture in the list
+        headers: Some(summary::with_auth_fields(vec!["References".into()])),
         gmail_thread: true,
         ..Default::default()
     }
@@ -633,6 +634,31 @@ pub async fn fetch_references(
         .await?
         .into_iter()
         .filter_map(|m| Some((m.uid?, summary::references_of(m.headers.as_deref().unwrap_or_default()))))
+        .collect())
+}
+
+/// The provider's verdicts on the senders of messages of `folder` stored before they were fetched with the summary,
+/// by UID: one FETCH of those header fields; a message without any has an empty text
+pub async fn fetch_auth_headers(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uids: &[u64],
+) -> Result<Vec<(u64, String)>> {
+    let Some(set) = SequenceSet::from_numbers(uids) else {
+        return Ok(Vec::new());
+    };
+    let path = store.folder(folder)?.info.path;
+    ensure_selected(client, &path).await?;
+    let query = FetchQuery {
+        headers: Some(summary::with_auth_fields(Vec::new())),
+        ..Default::default()
+    };
+    Ok(client
+        .fetch(&Messages::Uids(set), &query)
+        .await?
+        .into_iter()
+        .filter_map(|m| Some((m.uid?, summary::auth_fields(m.headers.as_deref().unwrap_or_default()))))
         .collect())
 }
 

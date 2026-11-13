@@ -44,6 +44,10 @@ pub struct MessageInfo {
     /// A delivery failure or delay notice: its BODYSTRUCTURE is a delivery report, or the core found it to be one
     /// when it was opened ([`Store::mark_bounce`])
     pub bounce: bool,
+    /// The provider's verdicts on it as the server gave them with the summary (Authentication-Results, BIMI-Location
+    /// and BIMI-Selector), for the core to read once (`set_sender_auth`); None when they were not fetched. Written by
+    /// `add_messages` for a message new to the store, never read back with the message
+    pub auth_headers: Option<String>,
 }
 
 /// The colour of a flag, as Apple Mail keeps it: `\\Flagged` with three keyword bits, `$MailFlagBit0` to
@@ -159,6 +163,10 @@ pub struct Message {
     pub mark: crate::ThreadMark,
     /// The first words of what the sender wrote; None until the core has read its text
     pub snippet: Option<String>,
+    /// What the provider's verdicts say of its sender (pe-core senders.rs bits), 0 while not known
+    pub sender_auth: u8,
+    /// Its brand's logo (a row of `logos`), when its verdicts allow one; never in a Junk folder
+    pub logo: Option<i64>,
 }
 
 impl Message {
@@ -253,7 +261,9 @@ pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_da
      from_address, recipients, message_id, in_reply_to, has_attachments, \
      EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id), sender_people, recipient_people, \
      attachment_names, attachment_count, refs, thread_id, bounce, \
-     COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0), snippet";
+     COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0), snippet, \
+     COALESCE(sender_auth, 0), \
+     CASE WHEN (SELECT special_use FROM folders f WHERE f.id = messages.folder_id) = '\\Junk' THEN NULL ELSE logo_id END";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     Ok(Message {
@@ -263,6 +273,8 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
         thread: None,
         mark: crate::ThreadMark::of(row.get(23)?),
         snippet: row.get(24)?,
+        sender_auth: row.get(25)?,
+        logo: row.get(26)?,
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,
@@ -286,6 +298,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             gmail_thread: None,
             thread_id: row.get(21)?,
             bounce: row.get(22)?,
+            auth_headers: None,
         },
     })
 }
@@ -307,8 +320,8 @@ impl Store {
         let mut statement = self.db.prepare_cached(
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
-             attachment_names, attachment_count, refs, bounce) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21) \
+             attachment_names, attachment_count, refs, bounce, auth_headers) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
@@ -339,7 +352,8 @@ impl Store {
                 m.attachment_names,
                 m.attachment_count,
                 m.references.join(" "),
-                m.bounce
+                m.bounce,
+                m.auth_headers
             ])?;
             // a message new to the store goes into its conversation at once (one already here keeps its own)
             if new {
