@@ -112,6 +112,11 @@ void AddButton(HWND bar, int id, const wchar_t* text, BYTE style = BTNS_BUTTON, 
 
 // a tree row with its text, data, boldness and icon of the folder strip, last under `parent`
 HTREEITEM InsertItem(HWND tree, HTREEITEM parent, const std::wstring& text, LPARAM data, bool bold, int icon);
+// one glyph of the Marlett font (the symbols of the system's own buttons: "r" a close box, "6" a down arrow) centered
+// in `box`, `height` pixels high
+void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORREF color);
+// a tooltip of `text` over the child `tool` of `owner`
+void AddTip(HWND owner, HWND tool, const std::wstring& text);
 // how wide the words of a control are in `font` (the dialog font when NULL), its & left out
 int TextWidth(HWND control, HFONT font);
 
@@ -410,6 +415,20 @@ bool MessageWindowKey(const MSG& msg);
 // the message windows, gone, before the core and the mailbox they use are
 void DestroyMessageWindows();
 
+// ---- folderpane.cpp ----
+
+// the height of the "Folders" caption over the folder list
+int FolderCaptionHeight();
+// the caption, a child of `parent`, in `font`: its button the close box (View > Folder List off), or with `pin` the
+// drop-down's pushpin (View > Folder List on again). The button posts IDM_FOLDER_LIST to the main window
+HWND CreateFolderCaption(HWND parent, bool pin, HFONT font);
+// while the folder list is hidden: the folder `tree` (a child of `owner`) in a drop-down under the screen rectangle
+// `under`, `width` by `height`; it closes when a folder is clicked, with Enter or Esc, or a click elsewhere, the tree
+// then back in `owner`, hidden
+void OpenFolderDrop(HWND owner, HWND tree, const RECT& under, int width, int height);
+void CloseFolderDrop();
+bool FolderDropOpen();
+
 // ---- main.cpp ----
 
 // the main window back from the tray (or the taskbar), in front
@@ -479,6 +498,7 @@ public:
     // the message list's right-click menu at `screen`, or at the selected row for (-1, -1) (the menu key)
     void MessageMenu(POINT screen);
     HWND List() const { return list_; }
+    HWND Tree() const { return tree_; }
     // the right-click menu while it is open, for the UI test
     HMENU OpenMenu() const { return lastMenu_; }
     void Import(HWND owner);
@@ -926,6 +946,11 @@ enum ControlId : WORD {
     IDC_TOOLBAR_MORE,
     // the drop-down arrow at the right end of the blocked pictures' bar: Always from this sender or domain
     IDC_PICTURES_MENU,
+    // the band under the toolbar with the folder's name: while the folder list is hidden, a click drops the list down
+    IDC_FOLDER_BAR,
+    // "Folders" over the folder list, and its button: the close box, or the drop-down's pushpin
+    IDC_FOLDER_CAPTION,
+    IDC_FOLDER_CAPTION_BUTTON,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
