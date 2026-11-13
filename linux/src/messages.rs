@@ -147,7 +147,13 @@ pub struct Columns {
 }
 
 pub struct MessageList {
+    /// The Classic layout's list: one line a row, in columns
     pub view: gtk::ColumnView,
+    /// The Columns layout's list: rows of three lines over the same model and selection (rows.rs)
+    pub rows_view: gtk::ListView,
+    /// The two, one of them shown, the Columns one under its Sorted by button
+    pub widget: gtk::Stack,
+    sort_button: gtk::MenuButton,
     pub selection: gtk::MultiSelection,
     model: MessageModel,
     pub columns: Columns,
@@ -160,6 +166,8 @@ pub struct MessageList {
     folder_room: Cell<i32>,
     /// A compact window's dates: the time of today's messages, the date of older ones
     compact_dates: Rc<Cell<bool>>,
+    /// The list has messages of several folders (its rows of three lines name the folder)
+    several_folders: Rc<Cell<bool>>,
 }
 
 impl MessageList {
@@ -218,8 +226,24 @@ impl MessageList {
         }
         view.sort_by_column(Some(&received), gtk::SortType::Descending);
         view.add_controller(file_drop_target());
+        let several_folders = Rc::new(Cell::new(false));
+        let context = crate::rows::RowContext {
+            recipients: recipients.clone(),
+            several_folders: several_folders.clone(),
+        };
+        let rows_view = gtk::ListView::new(Some(selection.clone()), Some(crate::rows::factory(context)));
+        rows_view.add_css_class("message-list");
+        rows_view.add_css_class("message-rows");
+        rows_view.set_widget_name("message-rows");
+        rows_view.set_tab_behavior(gtk::ListTabBehavior::Item);
+        rows_view.add_controller(file_drop_target());
+        let sort_button = sort_button();
+        let widget = list_stack(&view, &rows_view, &sort_button);
         Rc::new(MessageList {
             view,
+            rows_view,
+            widget,
+            sort_button,
             selection,
             model,
             columns: Columns {
@@ -233,7 +257,70 @@ impl MessageList {
             recipients,
             folder_room: Cell::new(0),
             compact_dates,
+            several_folders,
         })
+    }
+
+    /// The Columns layout's list (`on`), or the Classic one
+    pub fn set_columns(&self, on: bool) {
+        self.widget
+            .set_visible_child_name(if on { "columns" } else { "classic" });
+    }
+
+    /// Whether the Columns layout's list is the one shown
+    pub fn columns_shown(&self) -> bool {
+        self.widget.visible_child_name().as_deref() == Some("columns")
+    }
+
+    /// The list shown
+    pub fn shown(&self) -> gtk::Widget {
+        if self.columns_shown() {
+            self.rows_view.clone().upcast()
+        } else {
+            self.view.clone().upcast()
+        }
+    }
+
+    /// Both lists, for what each of them does alike (keys, activation)
+    pub fn views(&self) -> [gtk::Widget; 2] {
+        [self.view.clone().upcast(), self.rows_view.clone().upcast()]
+    }
+
+    /// The keyboard to the list shown
+    pub fn focus(&self) {
+        self.shown().grab_focus();
+    }
+
+    /// The list shown scrolled to the row `index`, with `flags` (the focus on it)
+    pub fn scroll_to(&self, index: u32, flags: gtk::ListScrollFlags) {
+        if self.columns_shown() {
+            self.rows_view.scroll_to(index, flags, None);
+        } else {
+            self.view.scroll_to(index, None, flags, None);
+        }
+    }
+
+    /// The order shown: the headers of the Classic list (without telling `connect_sort`), and the Sorted by button
+    pub fn show_sort(&self, sort: Sort) {
+        self.sorting.set(true);
+        let order = if sort.ascending {
+            gtk::SortType::Ascending
+        } else {
+            gtk::SortType::Descending
+        };
+        self.view.sort_by_column(Some(&self.column_of(sort.field)), order);
+        self.sorting.set(false);
+        self.sort.set(sort);
+        self.show_sort_button(sort.field);
+    }
+
+    /// "Sorted by Date" on the Columns list's button
+    fn show_sort_button(&self, field: SortField) {
+        let name = sort_command(field).label();
+        let words = t!(UiSortedBy, field = name);
+        self.sort_button.set_label(&words);
+        self.sort_button
+            .update_property(&[gtk::accessible::Property::Label(&words)]);
     }
 
     /// `changed` once the user clicked a column header: the order is the one now
@@ -255,6 +342,7 @@ impl MessageList {
                 list.sorting.set(false);
             }
             list.sort.set(list.sort_now());
+            list.show_sort_button(list.sort.get().field);
             changed();
         });
     }
@@ -323,6 +411,7 @@ impl MessageList {
     /// Subject column gives it its room, and gets it back, so the list stays as wide as its pane. As wide as the
     /// longest of `values` in bold, as an unread row draws it, when they are known (the accounts' names)
     pub fn show_folder_column(&self, shown: bool, title: &str, values: &[String]) {
+        self.several_folders.set(shown);
         self.columns.folder.set_title(Some(title));
         let widest = values
             .iter()
@@ -412,8 +501,13 @@ impl MessageList {
             if rows == 0 || first >= rows {
                 return;
             }
-            let Some(adjustment) = list.view.vadjustment() else {
-                list.view.scroll_to(first, None, gtk::ListScrollFlags::NONE, None);
+            let adjustment = list
+                .shown()
+                .dynamic_cast::<gtk::Scrollable>()
+                .ok()
+                .and_then(|s| s.vadjustment());
+            let Some(adjustment) = adjustment else {
+                list.scroll_to(first, gtk::ListScrollFlags::NONE);
                 return;
             };
             let row = adjustment.upper() / f64::from(rows);
@@ -421,7 +515,7 @@ impl MessageList {
             if row <= 0.0 || f64::from(last.min(rows - 1) + 1) * row <= page {
                 adjustment.set_value(0.0);
             } else if f64::from(first) * row < top || f64::from(first + 1) * row > top + page {
-                list.view.scroll_to(first, None, gtk::ListScrollFlags::NONE, None);
+                list.scroll_to(first, gtk::ListScrollFlags::NONE);
             }
         });
     }
@@ -495,13 +589,73 @@ impl MessageList {
     pub fn select(&self, index: u32) {
         if index < self.model.n_items() {
             self.selection.select_item(index, true);
-            self.view.scroll_to(index, None, gtk::ListScrollFlags::FOCUS, None);
+            self.scroll_to(index, gtk::ListScrollFlags::FOCUS);
         }
     }
 
     pub fn select_all(&self) {
         self.selection.select_all();
     }
+}
+
+/// The command of View > Sort By that sorts by `field`
+pub fn sort_command(field: SortField) -> crate::commands::Command {
+    use crate::commands::Command;
+    match field {
+        SortField::From | SortField::To => Command::SortFrom,
+        SortField::Subject => Command::SortSubject,
+        SortField::Size => Command::SortSize,
+        SortField::Date | SortField::Received => Command::SortDate,
+    }
+}
+
+/// The Columns list's "Sorted by" button, its menu the items of View > Sort By, in place of the column headers
+fn sort_button() -> gtk::MenuButton {
+    let menu = gio::Menu::new();
+    let mut fields = gio::Menu::new();
+    for &command in crate::commands::Command::ALL
+        .iter()
+        .filter(|c| c.submenu() == Some("sort_by"))
+    {
+        // the fields, then the directions, each a section
+        if command == crate::commands::Command::SortAscending {
+            menu.append_section(None, &fields);
+            fields = gio::Menu::new();
+        }
+        fields.append(Some(command.label()), Some(&format!("win.{}", command.name())));
+    }
+    menu.append_section(None, &fields);
+    let button = gtk::MenuButton::builder()
+        .menu_model(&menu)
+        .always_show_arrow(true)
+        .halign(gtk::Align::Start)
+        .build();
+    button.add_css_class("flat");
+    button.add_css_class("sort-button");
+    button.set_widget_name("sort-button");
+    button
+}
+
+/// The two lists in a stack: the Classic one, and the Columns one under its Sorted by button
+fn list_stack(view: &gtk::ColumnView, rows: &gtk::ListView, sort: &gtk::MenuButton) -> gtk::Stack {
+    let scrolled = |child: &gtk::Widget| {
+        gtk::ScrolledWindow::builder()
+            .child(child)
+            .vexpand(true)
+            .hscrollbar_policy(gtk::PolicyType::Never)
+            .build()
+    };
+    let columns = gtk::Box::new(gtk::Orientation::Vertical, 0);
+    columns.append(sort);
+    columns.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
+    columns.append(&scrolled(rows.upcast_ref()));
+    let classic = gtk::ScrolledWindow::builder().child(view).vexpand(true).build();
+    let stack = gtk::Stack::new();
+    stack.add_named(&classic, Some("classic"));
+    stack.add_named(&columns, Some("columns"));
+    stack.set_visible_child_name("classic");
+    stack.set_vexpand(true);
+    stack
 }
 
 /// The mark of a notice that a message was not delivered (or not yet): Fluent's envelope with an exclamation mark, as
@@ -812,7 +966,7 @@ fn subject_column() -> gtk::ColumnViewColumn {
 /// Rows dragged out of the list: a selected row brings the whole selection, another row itself alone. Onto a folder of
 /// the tree they move (Ctrl copies); onto a file manager or another program they become .eml files there. Several
 /// show how many on the drag icon.
-fn add_drag_source(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
+pub(crate) fn add_drag_source(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
     add_menu(widget, item);
     let source = gtk::DragSource::new();
     source.set_actions(gdk::DragAction::MOVE | gdk::DragAction::COPY);

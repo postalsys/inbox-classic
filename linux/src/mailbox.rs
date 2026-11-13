@@ -20,6 +20,7 @@ use crate::messages::MessageList;
 use crate::reader::{Loaded, Reader};
 use crate::settings;
 use crate::ui::{self, TITLE};
+use pe_core::layout::{Layout, LayoutMode};
 
 /// What the Find box takes, shown when the mouse rests on it: the words of the catalogs, then the syntax, which is
 /// the same in every language
@@ -55,6 +56,10 @@ pub struct Mailbox {
     find_narrow: gtk::ToggleButton,
     /// Where the folder list is: beside the messages, or in the folder button's popover
     folder_place: Rc<FolderPlace>,
+    /// The list and the reading pane, one above the other (Classic) or side by side (Columns)
+    right: gtk::Paned,
+    /// The layout shown
+    layout: Cell<Layout>,
     /// The folder shown was chosen by its row under All Inboxes (an account's Inbox there), not its account's
     under_all_inboxes: Cell<bool>,
     search_bar: gtk::Box,
@@ -149,9 +154,8 @@ impl Mailbox {
         search_bar.append(&clear);
         search_bar.set_visible(false);
         let (empty, empty_title, empty_more) = empty_list();
-        let scrolled = gtk::ScrolledWindow::builder().child(&list.view).vexpand(true).build();
         let overlay = gtk::Overlay::new();
-        overlay.set_child(Some(&scrolled));
+        overlay.set_child(Some(&list.widget));
         overlay.add_overlay(&empty);
         let list_pane = gtk::Box::new(gtk::Orientation::Vertical, 0);
         list_pane.append(&search_bar);
@@ -183,7 +187,15 @@ impl Mailbox {
             .wide_handle(true)
             .vexpand(true)
             .build();
-        right.connect_position_notify(|paned| shell().settings.set_int(settings::LIST_HEIGHT, paned.position()));
+        // the list's height in Classic, its width in Columns, each kept for its layout
+        right.connect_position_notify(|paned| {
+            let key = if paned.orientation() == gtk::Orientation::Horizontal {
+                settings::LIST_WIDTH
+            } else {
+                settings::LIST_HEIGHT
+            };
+            shell().settings.set_int(key, paned.position());
+        });
         panes.connect_position_notify(|paned| shell().settings.set_int(settings::TREE_WIDTH, paned.position()));
         let (status_bar, status, outgoing, counts) = status_bar();
         let content = gtk::Box::new(gtk::Orientation::Vertical, 0);
@@ -223,6 +235,8 @@ impl Mailbox {
             find,
             find_narrow: parts.search.clone(),
             folder_place,
+            right: right.clone(),
+            layout: Cell::new(Layout::Classic),
             under_all_inboxes: Cell::new(false),
             search_bar,
             search_summary,
@@ -265,6 +279,7 @@ impl Mailbox {
         });
         mailbox.install_actions(application);
         mailbox.connect(&clear);
+        mailbox.connect_layout(&panes);
         mailbox.update_undo();
         mailbox.reload();
         mailbox.reload_list(false);
@@ -375,9 +390,12 @@ impl Mailbox {
         });
         self.list.selection.connect_selection_changed(move |_, _, _| changed());
         let activated = on(|this| this.open_selected());
+        let activated_row = activated.clone();
         self.list.view.connect_activate(move |_, _| activated());
+        self.list.rows_view.connect_activate(move |_, _| activated_row());
         let sorted = on(|this| {
             this.view.borrow_mut().set_sort(this.list.sort());
+            this.show_sort_checks();
             this.reload_list(true);
         });
         self.list.connect_sort(sorted);
@@ -420,21 +438,9 @@ impl Mailbox {
         }
         self.window.add_controller(shortcuts);
         // Delete in the list, as on Windows
-        let keys = gtk::EventControllerKey::new();
-        keys.connect_key_pressed(|_, key, _, modifiers| {
-            if key == gdk::Key::Delete && modifiers.is_empty() {
-                run_command(Command::Delete);
-                return glib::Propagation::Stop;
-            }
-            match list_key(key, modifiers) {
-                Some(command) => {
-                    run_command(command);
-                    glib::Propagation::Stop
-                }
-                None => glib::Propagation::Proceed,
-            }
-        });
-        self.list.view.add_controller(keys);
+        for view in self.list.views() {
+            view.add_controller(list_keys());
+        }
         self.connect_thread_keys();
         self.window.connect_close_request(|_| {
             shell().close_main();
@@ -444,6 +450,12 @@ impl Mailbox {
 
     /// Right and Left in the message list open and close a conversation, before the list moves the focus with them
     fn connect_thread_keys(self: &Rc<Self>) {
+        for view in self.list.views() {
+            view.add_controller(self.thread_keys());
+        }
+    }
+
+    fn thread_keys(self: &Rc<Self>) -> gtk::EventControllerKey {
         let keys = gtk::EventControllerKey::new();
         keys.set_propagation_phase(gtk::PropagationPhase::Capture);
         let this = Rc::downgrade(self);
@@ -458,11 +470,17 @@ impl Mailbox {
                 _ => glib::Propagation::Proceed,
             }
         });
-        self.list.view.add_controller(keys);
+        keys
     }
 
     /// The menu key and Shift+F10 in the message list open the selected message's menu, as a right click does
     fn connect_menu_key(self: &Rc<Self>) {
+        for view in self.list.views() {
+            view.add_controller(self.menu_keys());
+        }
+    }
+
+    fn menu_keys(self: &Rc<Self>) -> gtk::EventControllerKey {
         let keys = gtk::EventControllerKey::new();
         let this = Rc::downgrade(self);
         keys.connect_key_pressed(move |controller, key, _, modifiers| {
@@ -474,7 +492,7 @@ impl Mailbox {
             }
             glib::Propagation::Proceed
         });
-        self.list.view.add_controller(keys);
+        keys
     }
 
     fn connect_tree(self: &Rc<Self>) {
@@ -942,7 +960,7 @@ impl Mailbox {
         self.undone.set(false);
         self.list.select_positions(&positions);
         if let Ok(first) = u32::try_from(first) {
-            self.list.view.scroll_to(first, None, gtk::ListScrollFlags::FOCUS, None);
+            self.list.scroll_to(first, gtk::ListScrollFlags::FOCUS);
         }
         // the focus on the first, then only as much scrolling as they need
         self.list.reveal(&positions);
@@ -1215,7 +1233,7 @@ impl Mailbox {
             return false;
         };
         self.list.select(index);
-        self.list.view.grab_focus();
+        self.list.focus();
         true
     }
 
@@ -1282,7 +1300,7 @@ impl Mailbox {
         // a reply's row goes with it: the selection follows its message onto its conversation's row
         self.set_thread_expanded(place.thread, open);
         if let Some((at, _)) = self.list.selected() {
-            self.list.view.scroll_to(at, None, gtk::ListScrollFlags::FOCUS, None);
+            self.list.scroll_to(at, gtk::ListScrollFlags::FOCUS);
         }
         true
     }
@@ -1344,7 +1362,7 @@ impl Mailbox {
         self.reset_find();
         self.reload_list(true);
         self.show_folder_name();
-        self.list.view.grab_focus();
+        self.list.focus();
         true
     }
 
@@ -1619,6 +1637,149 @@ impl Mailbox {
         self.folder_place.update();
     }
 
+    /// The layout decided again as the window's width changes: the outer panes' greatest position follows it
+    fn connect_layout(self: &Rc<Self>, panes: &gtk::Paned) {
+        let this = Rc::downgrade(self);
+        panes.connect_max_position_notify(move |_| {
+            if let Some(this) = this.upgrade() {
+                this.apply_layout();
+            }
+        });
+        self.show_layout_checks();
+        self.show_sort_checks();
+        self.list.show_sort(self.list.sort());
+    }
+
+    /// View > Layout chosen: kept, its check mark, and the layout it gives now
+    pub fn set_layout_mode(&self, mode: LayoutMode) {
+        let name = match mode {
+            LayoutMode::Automatic => None,
+            LayoutMode::Classic => Some("classic"),
+            LayoutMode::Columns => Some("columns"),
+        };
+        shell().settings.set_text(settings::LAYOUT, name);
+        self.show_layout_checks();
+        self.apply_layout();
+    }
+
+    fn show_layout_checks(&self) {
+        let mode = layout_mode();
+        self.set_toggled(Command::LayoutAutomatic, mode == LayoutMode::Automatic);
+        self.set_toggled(Command::LayoutClassic, mode == LayoutMode::Classic);
+        self.set_toggled(Command::LayoutColumns, mode == LayoutMode::Columns);
+    }
+
+    /// The layout the mode and the window's width give, shown when it is not the one shown
+    fn apply_layout(&self) {
+        let width = u32::try_from(self.window.width()).unwrap_or(0);
+        if width == 0 {
+            return;
+        }
+        let now = pe_core::layout::layout_for(layout_mode(), width, self.layout.get());
+        if now == self.layout.get() {
+            return;
+        }
+        self.switch_layout(now);
+        if now == Layout::Columns && layout_mode() == LayoutMode::Automatic {
+            self.note_columns();
+        }
+    }
+
+    /// The first time the window turns to Columns by itself, the status bar says where to change it
+    fn note_columns(&self) {
+        let settings = &shell().settings;
+        if !settings.bool(settings::COLUMNS_NOTE, false) {
+            settings.set_bool(settings::COLUMNS_NOTE, true);
+            self.set_status(&t!(UiColumnsNote));
+        }
+    }
+
+    /// The list beside the reading pane (Columns) or above it (Classic), each at the size it had in that layout; the
+    /// selection, the open conversations and the keyboard stay, the selected rows in sight
+    fn switch_layout(&self, layout: Layout) {
+        let had_focus = self.list.shown().has_focus() || self.list.shown().focus_child().is_some();
+        let columns = layout == Layout::Columns;
+        let settings = &shell().settings;
+        let position = if columns {
+            settings.int(settings::LIST_WIDTH, LIST_WIDTH).max(MIN_LIST_WIDTH)
+        } else {
+            settings.int(settings::LIST_HEIGHT, 260)
+        };
+        self.layout.set(layout);
+        self.list.set_columns(columns);
+        self.list
+            .widget
+            .set_size_request(if columns { MIN_LIST_WIDTH } else { -1 }, -1);
+        self.right.set_orientation(if columns {
+            gtk::Orientation::Horizontal
+        } else {
+            gtk::Orientation::Vertical
+        });
+        // the list keeps its width as the window grows in Columns; in Classic both share the height as before
+        self.right.set_resize_start_child(!columns);
+        self.right.set_position(position);
+        if had_focus {
+            self.list.focus();
+        }
+        let selected: Vec<u64> = self
+            .list
+            .selected_ranges()
+            .into_iter()
+            .flat_map(|(start, end)| start..end)
+            .collect();
+        if let Some(&first) = selected.first()
+            && let Ok(first) = u32::try_from(first)
+        {
+            self.list.scroll_to(first, gtk::ListScrollFlags::NONE);
+        }
+    }
+
+    /// The layout shown, for the UI test
+    #[cfg(feature = "e2e")]
+    pub fn layout(&self) -> Layout {
+        self.layout.get()
+    }
+
+    /// View > Sort By, a field: the list sorted by it, starting its own way when it is another field than now
+    pub fn sort_by(&self, field: pe_store::SortField) {
+        let before = self.list.sort();
+        let ascending = if before.field == field {
+            before.ascending
+        } else {
+            pe_core::layout::sort_starts_ascending(field)
+        };
+        self.set_sort(pe_store::Sort { field, ascending });
+    }
+
+    /// View > Sort By, Sort Ascending or Sort Descending
+    pub fn sort_direction(&self, ascending: bool) {
+        let field = self.list.sort().field;
+        self.set_sort(pe_store::Sort { field, ascending });
+    }
+
+    fn set_sort(&self, sort: pe_store::Sort) {
+        self.list.show_sort(sort);
+        self.view.borrow_mut().set_sort(sort);
+        self.show_sort_checks();
+        self.reload_list(true);
+    }
+
+    /// The check marks of View > Sort By: the field and the direction of the order now
+    fn show_sort_checks(&self) {
+        let sort = self.list.sort();
+        let field = crate::messages::sort_command(sort.field);
+        for command in [
+            Command::SortDate,
+            Command::SortFrom,
+            Command::SortSubject,
+            Command::SortSize,
+        ] {
+            self.set_toggled(command, command == field);
+        }
+        self.set_toggled(Command::SortAscending, sort.ascending);
+        self.set_toggled(Command::SortDescending, !sort.ascending);
+    }
+
     /// The selected messages junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
     pub fn mark_junk(&self, junk: bool) {
         self.act(Action::Junk(junk));
@@ -1728,14 +1889,14 @@ impl Mailbox {
         if let Some(folder) = crate::move_dialog::choose(&self.window, request).await
             && self.folders.select(folder)
         {
-            self.list.view.grab_focus();
+            self.list.focus();
         }
     }
 
     /// Edit > Select All: every message of the list
     pub fn select_all(&self) {
         self.list.select_all();
-        self.list.view.grab_focus();
+        self.list.focus();
     }
 
     /// Edit > Undo: the last move, delete or junk taken back
@@ -2333,6 +2494,38 @@ fn start_view(sort: pe_store::Sort) -> pe_core::ListView {
     view
 }
 
+/// The message list's width in the Columns layout at first, and the least it can be
+const LIST_WIDTH: i32 = 360;
+const MIN_LIST_WIDTH: i32 = 280;
+
+/// View > Layout: what the user chose, Automatic unless they chose otherwise
+pub fn layout_mode() -> LayoutMode {
+    match shell().settings.text(settings::LAYOUT).as_deref() {
+        Some("classic") => LayoutMode::Classic,
+        Some("columns") => LayoutMode::Columns,
+        _ => LayoutMode::Automatic,
+    }
+}
+
+/// The keys of the message list: Delete, as on Windows, and the reading keys (`list_key`)
+fn list_keys() -> gtk::EventControllerKey {
+    let keys = gtk::EventControllerKey::new();
+    keys.connect_key_pressed(|_, key, _, modifiers| {
+        if key == gdk::Key::Delete && modifiers.is_empty() {
+            run_command(Command::Delete);
+            return glib::Propagation::Stop;
+        }
+        match list_key(key, modifiers) {
+            Some(command) => {
+                run_command(command);
+                glib::Propagation::Stop
+            }
+            None => glib::Propagation::Proceed,
+        }
+    });
+    keys
+}
+
 /// View > Hide Read Messages, off unless turned on
 pub fn hide_read() -> bool {
     shell().settings.bool(settings::HIDE_READ, false)
@@ -2379,6 +2572,9 @@ fn toggled(command: Command) -> bool {
         Command::HideIgnored => hide_ignored(),
         Command::HideRead => hide_read(),
         Command::FolderList => folder_list_shown(),
+        Command::LayoutAutomatic => layout_mode() == LayoutMode::Automatic,
+        Command::LayoutClassic => layout_mode() == LayoutMode::Classic,
+        Command::LayoutColumns => layout_mode() == LayoutMode::Columns,
         _ => false,
     }
 }
@@ -2870,7 +3066,20 @@ fn command_menu(id: &str) -> gio::Menu {
     let submenu = gio::Menu::new();
     // Quit and Preferences have the places GNOME gives them, at the end
     let elsewhere = [Command::Exit, Command::Options];
+    let mut grouped: Vec<(&'static str, gio::Menu)> = Vec::new();
     for command in Command::ALL.iter().filter(|c| c.menu() == id && !elsewhere.contains(c)) {
+        // the commands of a submenu (View > Layout) in it, where its first one would be
+        if let Some(group) = command.submenu() {
+            if let Some((_, menu)) = grouped.iter().find(|(name, _)| *name == group) {
+                menu.append_item(&menu_item(command.label(), *command));
+                continue;
+            }
+            let menu = gio::Menu::new();
+            menu.append_item(&menu_item(command.label(), *command));
+            submenu.append_submenu(Some(&submenu_label(group)), &menu);
+            grouped.push((group, menu));
+            continue;
+        }
         submenu.append_item(&menu_item(command.label(), *command));
         // the colours beside the flag
         if *command == Command::Flag {
@@ -2966,6 +3175,16 @@ fn flag_row(color: FlagColor) -> gtk::Button {
 
 /// An item of the primary menu for `command`, under `label`; the keys of Select All and Undo shown as the others'
 /// are, as they are no application accelerators (TEXT_KEYS)
+/// A submenu's label: the catalog's menu-<submenu>
+fn submenu_label(submenu: &str) -> String {
+    use crate::words::{Text, plain};
+    match submenu {
+        "layout" => plain(Text::MenuLayout),
+        "sort_by" => plain(Text::MenuSortBy),
+        other => other.to_string(),
+    }
+}
+
 fn menu_item(label: &str, command: Command) -> gio::MenuItem {
     let item = gio::MenuItem::new(Some(label), Some(&format!("win.{}", command.name())));
     if TEXT_KEYS.contains(&command)

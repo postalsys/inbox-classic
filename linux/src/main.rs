@@ -30,6 +30,7 @@ mod outbox;
 mod preferences;
 mod reader;
 mod recipients;
+mod rows;
 mod settings;
 mod sign_in_apps;
 mod tray;

@@ -89,6 +89,12 @@ pub const NOTIFY: &str = "NewMailNotifications";
 pub const TRAY_NOTE: &str = "TrayNoteShown";
 pub const TREE_WIDTH: &str = "TreeWidth";
 pub const LIST_HEIGHT: &str = "ListHeight";
+/// The message list's width in the Columns layout
+pub const LIST_WIDTH: &str = "ListWidth";
+/// View > Layout: automatic (when not set), classic or columns
+pub const LAYOUT: &str = "Layout";
+/// The status bar said once that the window turned to the column layout by itself
+pub const COLUMNS_NOTE: &str = "ColumnsNoteShown";
 /// The language of the windows chosen in Preferences ("de"); not set for the system's
 pub const LANGUAGE: &str = "Language";
 /// Preferences > Group messages by conversation (on when not set)
