@@ -2721,6 +2721,10 @@ public static class Dragger {
     Check ((& $sortText) -match 'Date') "it says the list is sorted by date ($(& $sortText))"
     $first = @(SubjectRows 'Ferry times')
     if ($first.Count -eq 1) { SelectRow ([int]$first[0]) }
+    # the top row right under "Sorted by": no header window, nothing of its room left above the rows
+    $kListTop = 0x4C544F50
+    $listTop = { [int][Native.Win]::SendText($main, $kListTop, '') }
+    Check ((& $listTop) -ge 1000 -and (& $listTop) -le 1003) "the rows start at the top of the list, no header's room above them ($(& $listTop))"
     Shot $main 'layout-1-columns'
     # sorted by subject from the menu of "Sorted by" (the View menu's Sort By), A to Z, and back to the dates
     Command $main $IDM_SORT_SUBJECT
@@ -3523,6 +3527,80 @@ public static class Dragger {
         [void][Native.Win]::PostMessage($book, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($book) } 10)) 'the Address Book closes'
     }
+
+    # ---- a contact's picture ----
+
+    Step "a contact's picture"
+    $IDC_CONTACT_PICTURE = 736; $IDC_CONTACT_PICTURE_CHOOSE = 737; $IDC_CONTACT_PICTURE_REMOVE = 738; $IDC_LOGO = 213
+    $face = Join-Path (Resolve-Path $Out) 'contact-face.png'
+    [IO.File]::WriteAllBytes($face, [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAAe0lEQVR42u3XUQ2AMAyE4QqbCJ5RMhEoQcnkIAEMbMlKVm7jT07Al/ThrlbyJhUDBAgQoFVAVzm/Bz2IWqJBDcpLlo3T+Ew2VOMwTQ5yaHpNgFYGuTVdJk4GKBZEdczY9op7SHExim5q3iARUNqPyAACBAgQIECAfga6AVZYJmMqfvr9AAAAAElFTkSuQmCC'))
+    # Contact Properties of Mary Smith, from the Address Book
+    function MaryProperties {
+        Command $main $IDM_ADDRESS_BOOK
+        $b = WaitShown 'InboxClassicAddressBook' 10
+        if (-not $b) { return $null }
+        $l = [Native.Win]::GetDlgItem($b, $IDC_BOOK_LIST)
+        [void](WaitFor { (Names $l) -contains 'Mary Smith' } 5)
+        $at = [array]::IndexOf(@(Names $l), 'Mary Smith')
+        if ($at -lt 0) { return $null }
+        Key $l $VK_HOME
+        for ($i = 0; $i -lt $at; $i++) { Key $l $VK_DOWN }
+        Start-Sleep -Milliseconds 300
+        Click $b $IDC_BOOK_PROPERTIES
+        $c = WaitShown 'InboxClassicContact' 10
+        @($b, $c)
+    }
+    $removeEnabled = { param($c) [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($c, $IDC_CONTACT_PICTURE_REMOVE)) }
+    $opened = MaryProperties
+    if ($opened -and $opened[1]) {
+        $contact = $opened[1]
+        Check ((Visible $contact $IDC_CONTACT_PICTURE) -and -not (& $removeEnabled $contact)) 'Contact Properties has a picture well, its initials until a picture is chosen, Remove off'
+        Click $contact $IDC_CONTACT_PICTURE_CHOOSE
+        Check (AnswerFileDialog 'Choose' $face $null) 'Choose... asks for a picture file'
+        Check ([bool](WaitFor { & $removeEnabled $contact } 10)) 'the well has the picture, and Remove is on'
+        Shot $contact 'contacts-6-picture'
+        Click $contact 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($contact) } 10)
+        [void][Native.Win]::PostMessage($opened[0], $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($opened[0]) } 10)
+    } else {
+        Check $false 'Contact Properties of Mary Smith opens'
+    }
+    # her messages: the provider confirmed one comes from her domain, the other is forged; the column layout shows her
+    # picture beside the confirmed one only, and the reading pane beside its header
+    $confirmed = 'Lunch with Mary'; $forged = 'Mary asks for your password'
+    foreach ($m in @(@($confirmed, 'pass', 'confirmed'), @($forged, 'fail', 'forged'))) {
+        AddMessage ("Authentication-Results: mx.inboxclassic.test; dmarc=$($m[1]) header.from=example.com`r`n" +
+            "From: Mary Smith <mary@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $($m[0])`r`n" +
+            "Message-ID: <$($m[2])@example.com>`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`n`r`nSee you at noon.`r`n")
+    }
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    Command $main $IDM_LAYOUT_COLUMNS
+    Check ([bool](WaitFor { (SubjectRows $confirmed).Count -eq 1 -and (SubjectRows $forged).Count -eq 1 } 30)) 'two messages from her address are in the Inbox'
+    Check ([bool](WaitFor { (& $rowPicture $confirmed) -eq 13 } 40)) "the one the provider confirmed shows her picture ($(& $rowPicture $confirmed))"
+    Check ((& $rowPicture $forged) -eq 11) "the forged one shows initials ($(& $rowPicture $forged))"
+    $maryRow = @(SubjectRows $confirmed)
+    if ($maryRow.Count -eq 1) { SelectRow ([int]$maryRow[0]) }
+    Check ([bool](WaitFor { Visible $main $IDC_LOGO } 15)) 'the reading pane shows her picture beside the header'
+    Check ((& $listTop) -ge 1000 -and (& $listTop) -le 1003) "switched to Columns again, the rows still start at the top ($(& $listTop))"
+    Shot $main 'pictures-5-contact'
+    $opened = MaryProperties
+    if ($opened -and $opened[1]) {
+        Click $opened[1] $IDC_CONTACT_PICTURE_REMOVE
+        Check ([bool](WaitFor { -not (& $removeEnabled $opened[1]) } 10)) 'Remove takes the picture away'
+        Click $opened[1] 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($opened[1]) } 10)
+        [void][Native.Win]::PostMessage($opened[0], $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($opened[0]) } 10)
+    }
+    Check ([bool](WaitFor { (& $rowPicture $confirmed) -eq 11 } 20)) "and her row has initials again ($(& $rowPicture $confirmed))"
+    Command $main $IDM_LAYOUT_CLASSIC
+    foreach ($id in @('confirmed', 'forged')) {
+        $m = Find 'INBOX' "Message-ID: <$id@example.com>"
+        if ($m) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($m.uid)") }
+    }
+    Command $main $IDM_SYNC
 
     Step 'a Gmail address'
     Command $main $IDM_NEW_ACCOUNT

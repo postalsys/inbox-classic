@@ -384,15 +384,50 @@ impl Core {
         Ok(self.store().import_cards(&cards)?)
     }
 
+    /// Sets a card's picture to `png`, one [`crate::card_pictures::prepare`] made (a window prepares it, shows it, and
+    /// sets it once the user says OK); refused for anything else
+    pub fn set_card_picture_png(&self, card: CardId, png: &[u8]) -> Result<()> {
+        if !crate::card_pictures::is_kept(png) {
+            return Err(Error::Unavailable(crate::card_pictures::Refused::NotPicture.text()));
+        }
+        Ok(self.store().set_card_picture(card, png)?)
+    }
+
+    /// Takes a card's picture away
+    pub fn remove_card_picture(&self, card: CardId) -> Result<()> {
+        Ok(self.store().remove_card_picture(card)?)
+    }
+
+    /// A card's picture as `size` x `size` BGRA pixels (the alpha multiplied in), for its Properties; None without one
+    pub fn card_picture(&self, card: CardId, size: u32) -> Option<Vec<u8>> {
+        let (png, _) = self.store().card_picture(card).ok()??;
+        crate::card_pictures::bgra(&png, size)
+    }
+
+    /// Whether a card has a picture
+    pub fn card_has_picture(&self, card: CardId) -> bool {
+        self.store().has_card_picture(card).unwrap_or(false)
+    }
+
     /// Writes cards (`ids`, or every card when it is empty) to a vCard file
     pub fn export_cards(&self, ids: &[CardId], path: &Path) -> Result<u64> {
-        let cards: Vec<Card> = if ids.is_empty() {
-            self.store().cards("")?
+        let store = self.store();
+        let listed: Vec<Card> = if ids.is_empty() {
+            store.cards("")?
         } else {
             ids.iter()
-                .filter_map(|&id| self.store().card(id).transpose())
+                .filter_map(|&id| store.card(id).transpose())
                 .collect::<pe_store::Result<_>>()?
         };
+        // with their pictures
+        let cards = listed
+            .into_iter()
+            .map(|card| {
+                let picture = store.card_picture(card.id)?.map(|(png, _)| png);
+                Ok(Card { picture, ..card })
+            })
+            .collect::<pe_store::Result<Vec<Card>>>()?;
+        drop(store);
         std::fs::write(path, crate::vcard::write_vcards(&cards))
             .map_err(|error| Error::Unavailable(error.to_string()))?;
         Ok(cards.len() as u64)

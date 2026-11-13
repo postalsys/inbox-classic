@@ -81,11 +81,33 @@ pub fn picture_of(key: u64) -> Option<(PictureKind, i64)> {
     }
 }
 
-/// The picture of a row of the list: its kind and key
+/// The picture of a row of the list, and of the reading pane: its kind and key. The brand's logo first; else the
+/// picture of the Address Book's card with the sender's address, only when the provider confirmed the From domain:
+/// without a verdict (a provider whose Authentication-Results name no authserv-id, as Microsoft's) a forged colleague
+/// would get the real face, so the initials show; never in a Junk folder (the store leaves both out there)
 pub fn picture(message: &pe_store::Message) -> (PictureKind, u64) {
-    match message.logo {
-        Some(logo) => (PictureKind::Logo, picture_key(PictureKind::Logo, logo)),
-        None => (PictureKind::None, 0),
+    if let Some(logo) = message.logo {
+        return (PictureKind::Logo, picture_key(PictureKind::Logo, logo));
+    }
+    match message.contact {
+        Some((card, revision)) if message.sender_auth & VERIFIED != 0 => {
+            (PictureKind::Contact, contact_key(card, revision))
+        }
+        _ => (PictureKind::None, 0),
+    }
+}
+
+/// The key of a card's picture: the card and its picture's revision, so a picture set again has a key of its own and
+/// no window shows the old one from its cache
+pub fn contact_key(card: i64, revision: i64) -> u64 {
+    picture_key(PictureKind::Contact, (card << 20) | (revision & 0xF_FFFF))
+}
+
+/// The card a contact picture's key is of
+pub fn contact_card(key: u64) -> Option<i64> {
+    match picture_of(key)? {
+        (PictureKind::Contact, id) => Some(id >> 20),
+        _ => None,
     }
 }
 
@@ -179,5 +201,60 @@ mod tests {
         let key = picture_key(PictureKind::Contact, 7);
         assert_eq!(picture_of(key), Some((PictureKind::Contact, 7)));
         assert_ne!(picture_key(PictureKind::Logo, 7), key);
+    }
+
+    fn row(sender_auth: u8, logo: Option<i64>, contact: Option<(i64, i64)>) -> pe_store::Message {
+        pe_store::Message {
+            id: 1,
+            folder_id: 1,
+            info: Default::default(),
+            cached: false,
+            thread: None,
+            mark: pe_store::ThreadMark::None,
+            snippet: None,
+            sender_auth,
+            logo,
+            contact,
+        }
+    }
+
+    #[test]
+    fn the_logo_then_the_contact_of_a_confirmed_sender() {
+        let contact = Some((7, 3));
+        // the brand's logo comes first
+        assert_eq!(picture(&row(VERIFIED | LOGO, Some(42), contact)).0, PictureKind::Logo);
+        // a confirmed sender: the contact's picture
+        assert_eq!(
+            picture(&row(VERIFIED, None, contact)),
+            (PictureKind::Contact, contact_key(7, 3))
+        );
+        // no verdict: the initials, as anyone can write that address
+        assert_eq!(picture(&row(NO_VERDICT, None, contact)), (PictureKind::None, 0));
+        // a sender the provider did not confirm (a forged From), or one not judged yet: the initials
+        assert_eq!(picture(&row(0, None, contact)), (PictureKind::None, 0));
+        // no card picture (the store leaves it out in Junk too)
+        assert_eq!(picture(&row(VERIFIED, None, None)), (PictureKind::None, 0));
+    }
+
+    #[test]
+    fn microsofts_results_without_an_authserv_id_confirm_nobody() {
+        // Outlook.com and Microsoft 365 write Authentication-Results without an authserv-id: a forged colleague's
+        // message says dmarc=pass as well as a real one, and no verdict is the provider's
+        let headers = "Authentication-Results: spf=pass smtp.mailfrom=contoso.example; dkim=pass \
+                       header.d=contoso.example; dmarc=pass action=none header.from=contoso.example;\r\n";
+        let judged = judge(headers, "boss@contoso.example", &trusted());
+        assert_eq!(judged.bits & VERIFIED, 0);
+        assert_eq!(picture(&row(judged.bits, None, Some((7, 1)))), (PictureKind::None, 0));
+    }
+
+    #[test]
+    fn a_picture_set_again_has_a_key_of_its_own() {
+        assert_ne!(contact_key(7, 3), contact_key(7, 4));
+        assert_eq!(contact_card(contact_key(7, 4)), Some(7));
+        assert_eq!(contact_card(picture_key(PictureKind::Logo, 7)), None);
+        assert_eq!(
+            picture_of(contact_key(7, 4)).map(|(kind, _)| kind),
+            Some(PictureKind::Contact)
+        );
     }
 }

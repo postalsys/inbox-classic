@@ -580,3 +580,11 @@ ui-row-messages = { $count ->
 ui-list-pictures = Näita kirjade loendis saatjate pilte
 # review: new
 ui-list-pictures-note = E-posti teenusepakkuja kinnitatud brändilogod, muidu saatja initsiaalid. Logod laaditakse alla üks kord iga brändi kohta, mitte iga kirja kohta.
+# review: new
+ui-card-picture = Pilt:
+# review: new
+ui-card-picture-choose = &Vali...
+# review: new
+ui-picture-not-picture = See fail ei ole PNG- ega JPEG-pilt.
+# review: new
+ui-picture-too-large = See pilt on liiga suur. Valige pilt, mis on alla 10 MB ja kuni 8000 pikslit lai.

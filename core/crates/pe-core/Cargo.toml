@@ -24,6 +24,8 @@ pe-store = { path = "../pe-store" }
 pe-sync = { path = "../pe-sync" }
 # BIMI logos (SVG Tiny PS) to pixels: no text (no system fonts read), no raster images
 resvg = { version = "0.49", default-features = false }
+# contacts' pictures (card_pictures.rs): PNG and JPEG only, read and written again as the core's own PNG
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "macros"] }
 # folder names found whatever their accents (the Move and Copy window's filter)
 unicode-normalization = "0.1.26"

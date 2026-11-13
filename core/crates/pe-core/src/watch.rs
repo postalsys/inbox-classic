@@ -119,6 +119,7 @@ mod tests {
             snippet: None,
             sender_auth: 0,
             logo: None,
+            contact: None,
         }
     }
 

@@ -2924,6 +2924,116 @@ fn rows_get_their_senders_pictures() {
     assert_eq!(served.load(std::sync::atomic::Ordering::Relaxed), 1);
 }
 
+/// A contact's picture: the Address Book's card with a picture shows it on the rows of a sender the provider
+/// confirmed, and in the reading pane where a logo would be; a forged message from the same address gets the initials
+#[test]
+fn rows_of_a_confirmed_contact_get_its_picture() {
+    let Some(s) = setup() else { return };
+    let confirmed = "Authentication-Results: mx.example.com; dmarc=pass header.from=friend.example\r\n\
+                     From: Fay Friend <fay@friend.example>\r\nSubject: Confirmed\r\n\r\nHi.\r\n";
+    let forged = "Authentication-Results: mx.example.com; dmarc=fail header.from=friend.example\r\n\
+                  From: Fay Friend <fay@friend.example>\r\nSubject: Forged\r\n\r\nHi.\r\n";
+    // a provider that gives no verdict of its own (as Microsoft's, without an authserv-id): anyone could write it
+    let unjudged = "Authentication-Results: dkim=pass header.d=friend.example; dmarc=pass header.from=friend.example\r\n\
+                    From: Fay Friend <fay@friend.example>\r\nSubject: Unjudged\r\n\r\nHi.\r\n";
+    let uid = s.server.add_message("INBOX", confirmed, &[]);
+    s.server.add_message("INBOX", forged, &[]);
+    s.server.add_message("INBOX", unjudged, &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    // the card, its picture from a PNG file: a wide red picture, its middle square kept
+    let card = s
+        .core
+        .save_card(&pe_store::Card {
+            name: "Fay Friend".into(),
+            addresses: vec!["fay@friend.example".into()],
+            ..Default::default()
+        })
+        .unwrap();
+    let file = std::env::temp_dir().join(format!("pe-card-{}.png", std::process::id()));
+    image::RgbaImage::from_pixel(90, 60, image::Rgba([255, 0, 0, 255]))
+        .save(&file)
+        .unwrap();
+    // prepared first (a window shows it), set once the user says OK
+    let png = pe_core::card_pictures::prepare(&file).unwrap();
+    s.core.set_card_picture_png(card, &png).unwrap();
+    std::fs::write(&file, b"not a picture").unwrap();
+    assert!(pe_core::card_pictures::prepare(&file).is_err(), "no picture refused");
+    assert!(s.core.set_card_picture_png(card, b"not one of the core's").is_err());
+    let _ = std::fs::remove_file(&file);
+    assert!(s.core.card_has_picture(card));
+    assert_eq!(s.core.card_picture(card, 64).map(|p| p.len()), Some(64 * 64 * 4));
+    let row = |subject: &str| {
+        s.core
+            .messages(inbox, Sort::default(), 0, 10)
+            .unwrap()
+            .into_iter()
+            .find(|m| m.info.subject == subject)
+            .unwrap()
+    };
+    // the background worker reads the verdicts after the sync
+    let deadline = std::time::Instant::now() + Duration::from_secs(20);
+    while row("Confirmed").sender_auth == 0 {
+        assert!(std::time::Instant::now() < deadline, "no verdict on the row");
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    let (kind, key) = pe_core::senders::picture(&row("Confirmed"));
+    assert_eq!(kind, pe_core::senders::PictureKind::Contact);
+    assert_eq!(
+        pe_core::senders::picture(&row("Forged")).0,
+        pe_core::senders::PictureKind::None
+    );
+    // no verdict of the provider's: the initials, not the face
+    while row("Unjudged").sender_auth == 0 {
+        assert!(std::time::Instant::now() < deadline, "no verdict on the row");
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    assert_ne!(row("Unjudged").sender_auth & pe_core::senders::NO_VERDICT, 0);
+    assert_eq!(
+        pe_core::senders::picture(&row("Unjudged")).0,
+        pe_core::senders::PictureKind::None
+    );
+    let request = s.core.picture_start(key, 32).unwrap();
+    s.wait(|e| *e == Event::PictureReady { request });
+    let pixels = s.core.picture_result(request).expect("the contact's picture");
+    assert_eq!(pixels.len(), 32 * 32 * 4);
+    // red, BGRA
+    assert_eq!(&pixels[(16 * 32 + 16) * 4..][..4], &[0, 0, 255, 255]);
+    // the reading pane: the same picture where a logo would be
+    s.core.open_message(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    let view = s.core.message_view(inbox, uid, false).unwrap().unwrap();
+    assert!(!view.has_logo);
+    assert_eq!(view.picture, key);
+    // set again: a key of its own, so no window shows the old picture
+    let file = std::env::temp_dir().join(format!("pe-card-{}-2.png", std::process::id()));
+    image::RgbaImage::from_pixel(40, 40, image::Rgba([0, 0, 255, 255]))
+        .save(&file)
+        .unwrap();
+    let png = pe_core::card_pictures::prepare(&file).unwrap();
+    s.core.set_card_picture_png(card, &png).unwrap();
+    let _ = std::fs::remove_file(&file);
+    assert_ne!(pe_core::senders::picture(&row("Confirmed")).1, key);
+    s.core.remove_card_picture(card).unwrap();
+    assert_eq!(
+        pe_core::senders::picture(&row("Confirmed")).0,
+        pe_core::senders::PictureKind::None
+    );
+    // a key a window kept from before: drawn as nothing
+    let request = s.core.picture_start(key, 32).unwrap();
+    s.wait(|e| *e == Event::PictureReady { request });
+    assert_eq!(s.core.picture_result(request), None);
+}
+
 /// A message the server can not give says so, for the reading pane, and opening it again tries again: an account
 /// whose server is out of reach (its port changed to one nothing listens on), and back
 #[test]

@@ -523,3 +523,7 @@ ui-row-messages = { $count ->
 }
 ui-list-pictures = Show senders' pictures in the message list
 ui-list-pictures-note = Brand logos the mail provider confirmed, else the sender's initials. Logos are downloaded once for each brand, never for each message.
+ui-card-picture = Picture:
+ui-card-picture-choose = C&hoose...
+ui-picture-not-picture = This file is not a PNG or JPEG picture.
+ui-picture-too-large = This picture is too large. Choose one under 10 MB and 8000 pixels wide.

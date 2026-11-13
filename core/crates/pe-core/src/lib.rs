@@ -12,6 +12,7 @@ pub mod bimi;
 pub mod book;
 mod bounce;
 pub mod calendar;
+pub mod card_pictures;
 mod compose;
 mod contentline;
 mod export;
@@ -1076,6 +1077,9 @@ impl Core {
     /// ([`pe_store::LOGO_KEPT_MS`]; a failure is not tried again for [`pe_store::LOGO_RETRY_MS`]), never a message at
     /// a time. Refused for a key that names no picture.
     pub fn picture_start(&self, key: u64, size: u32) -> Result<u64> {
+        if let Some(card) = senders::contact_card(key) {
+            return self.contact_picture_start(card, size);
+        }
         let Some((senders::PictureKind::Logo, id)) = senders::picture_of(key) else {
             return Err(Error::NotFound);
         };
@@ -1101,6 +1105,28 @@ impl Core {
             view_store: self.view_store.clone(),
             downloads: self.logo_downloads.clone(),
         }
+    }
+
+    /// A card's picture drawn `size` square for the list or the reading pane, as [`Core::picture_start`] draws one: its
+    /// PNG read and drawn off the window thread, on the views' store connection; [`Event::PictureReady`] without
+    /// pixels when the card has no picture (any more)
+    fn contact_picture_start(&self, card: pe_store::CardId, size: u32) -> Result<u64> {
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let (path, view_store) = (self.path.clone(), self.view_store.clone());
+        let work = async move {
+            tokio::task::spawn_blocking(move || {
+                let (png, _) = OpenStore::open(&view_store, &path)?.card_picture(card).ok()??;
+                card_pictures::bgra(&png, size)
+            })
+            .await
+            .ok()
+            .flatten()
+        };
+        self.pictures
+            .start(self.runtime()?, request, work, self.events.clone(), |request| {
+                Event::PictureReady { request }
+            });
+        Ok(request)
     }
 
     /// The pixels of a drawn picture (BGRA, the alpha multiplied in, `size` x `size`), taken once; None when there was
@@ -2564,6 +2590,13 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     }
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(found.received);
+    // without a logo, the contact's picture the list's row has: one decision for both, so they never differ
+    if !view.has_logo
+        && let Some(row) = store().and_then(|store| store.message(found.folder, found.uid).ok().flatten())
+        && let (senders::PictureKind::Contact, key) = senders::picture(&row)
+    {
+        view.picture = key;
+    }
     if view.bounce
         && !found.marked
         && store().is_some_and(|store| store.mark_bounce(found.folder, found.uid).unwrap_or(false))

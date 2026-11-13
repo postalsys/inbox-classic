@@ -579,3 +579,11 @@ ui-row-messages = { $count ->
 ui-list-pictures = Bilder der Absender in der Nachrichtenliste anzeigen
 # review: new
 ui-list-pictures-note = Markenlogos, die der E-Mail-Anbieter bestätigt hat, sonst die Initialen des Absenders. Logos werden einmal je Marke heruntergeladen, nie je Nachricht.
+# review: new
+ui-card-picture = Bild:
+# review: new
+ui-card-picture-choose = Aus&wählen...
+# review: new
+ui-picture-not-picture = Diese Datei ist kein PNG- oder JPEG-Bild.
+# review: new
+ui-picture-too-large = Dieses Bild ist zu groß. Wählen Sie eines unter 10 MB und 8000 Pixel Breite.

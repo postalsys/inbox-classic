@@ -979,6 +979,7 @@ async fn scenario(d: Rc<Driver>) {
     layout::folder_list(&d).await;
     layout::columns(&d).await;
     layout::list_pictures(&d).await;
+    layout::contact_picture(&d).await;
     pictures::trusted(&d).await;
     pictures::options(&d).await;
     watch::watch_and_ignore(&d).await;

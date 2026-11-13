@@ -586,3 +586,11 @@ ui-row-messages = { $count ->
 ui-list-pictures = Afficher les images des expéditeurs dans la liste des messages
 # review: new
 ui-list-pictures-note = Les logos de marques confirmés par le fournisseur de messagerie, sinon les initiales de l'expéditeur. Les logos sont téléchargés une fois par marque, jamais pour chaque message.
+# review: new
+ui-card-picture = Image :
+# review: new
+ui-card-picture-choose = &Choisir...
+# review: new
+ui-picture-not-picture = Ce fichier n'est pas une image PNG ou JPEG.
+# review: new
+ui-picture-too-large = Cette image est trop grande. Choisissez-en une de moins de 10 Mo et 8000 pixels de large.

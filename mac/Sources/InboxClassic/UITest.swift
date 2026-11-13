@@ -522,6 +522,7 @@ final class UITest {
         try await folderList()
         try await columnLayout()
         try await listPictures()
+        try await contactPicture()
         try await trustedPictures()
         try await openEml()
         try await accountsAndHelp()

@@ -99,7 +99,10 @@ private:
     void ShowDownloading();
     // Try Again, or the account synced again after the message could not be downloaded
     void Retry();
-    void ShowLogo(bool wanted);
+    // the brand's logo when `logo`, else the sender's picture of the Address Book (`picture`, a key of the core's, 0
+    // for none), beside the header once drawn
+    void ShowLogo(bool logo, uint64_t picture);
+    void ShowDrawn(uint8_t* pixels, size_t length);
     void OpenInCalendar();
     void ChooseAttachment();
     void SaveAllAttachments();
@@ -129,6 +132,8 @@ private:
     HWND logo_ = nullptr;
     HBITMAP logoBitmap_ = nullptr;
     uint64_t logoRequest_ = 0;
+    // the request is the contact's picture (PictureReady), not the logo (LogoReady)
+    bool contactPicture_ = false;
     int logoSize_ = 0;
     Preview preview_;
     // the message shown, its folder and the account of that, 0 for none

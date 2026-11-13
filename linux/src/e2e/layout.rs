@@ -425,3 +425,214 @@ pub async fn list_pictures(d: &Driver) {
     command(Command::LayoutClassic);
     wait_until(10, || main.layout() == pe_core::layout::Layout::Classic).await;
 }
+
+const CONTACT_CONFIRMED: &str = "Photos from the studio";
+const CONTACT_FORGED: &str = "Your studio invoice";
+const CONTACT_ADDRESS: &str = "rita@studio.example";
+
+/// A picture of a person for the Address Book, as a camera's would be: a PNG of a soft gradient with a round face
+fn contact_png() -> Option<std::path::PathBuf> {
+    let size = 96usize;
+    let mut pixels = Vec::with_capacity(size * size * 4);
+    for y in 0..size {
+        for x in 0..size {
+            let (dx, dy) = (x as f64 - 48.0, y as f64 - 40.0);
+            let face = dx * dx + dy * dy < 22.0 * 22.0;
+            let shoulders = y > 68 && (x as f64 - 48.0).abs() < 36.0 - (96.0 - y as f64) * 0.4;
+            let (r, g, b) = if face || shoulders {
+                (236, 200, 170)
+            } else {
+                (40 + (y as u8) / 2, 110 + (x as u8) / 3, 160)
+            };
+            pixels.extend_from_slice(&[b, g, r, 255]);
+        }
+    }
+    let texture = gtk::gdk::MemoryTexture::new(
+        size as i32,
+        size as i32,
+        gtk::gdk::MemoryFormat::B8g8r8a8Premultiplied,
+        &glib::Bytes::from_owned(pixels),
+        size * 4,
+    );
+    let path = std::env::temp_dir().join("inbox-classic-contact.png");
+    std::fs::write(&path, texture.save_to_png_bytes()).ok()?;
+    Some(path)
+}
+
+/// Opens Contact Properties of `card` as the Address Book's Properties does; the dialog once shown
+async fn open_contact(card: pe_store::CardId) -> Option<adw::Dialog> {
+    let window = main_window();
+    glib::spawn_future_local(async move {
+        crate::book_dialogs::contact(&window, card).await;
+    });
+    wait_dialog(10, "contact-dialog").await
+}
+
+/// A message from the contact whose provider confirmed the From domain, and a forged one from the same address
+async fn add_contact_messages(d: &Driver, inbox: i64) -> bool {
+    let message = |subject: &str, id: &str, verdict: &str| {
+        format!(
+            "Authentication-Results: mx.inboxclassic.test; {verdict}\r\nFrom: Rita Lund <{CONTACT_ADDRESS}>\r\n\
+             To: testuser@inboxclassic.test\r\nSubject: {subject}\r\nDate: {}\r\nMessage-ID: <{id}@studio.example>\r\n\
+             \r\nThe pictures from Saturday are ready.\r\n",
+            super::steps::date_now(0)
+        )
+    };
+    let confirmed = message(
+        CONTACT_CONFIRMED,
+        "contact-1",
+        "dkim=pass header.d=studio.example; dmarc=pass header.from=studio.example",
+    );
+    let forged = message(
+        CONTACT_FORGED,
+        "contact-2",
+        "dkim=fail header.d=studio.example; dmarc=fail header.from=studio.example",
+    );
+    let added = d.add_message(&confirmed, &[]).is_ok() && d.add_message(&forged, &[]).is_ok();
+    run_command(Command::Sync);
+    let read = wait_until(60, || {
+        let listed = listed_in_folder(inbox, 0, 500);
+        listed.iter().any(|m| m.info.subject == CONTACT_FORGED)
+            && listed.iter().any(|m| {
+                m.info.subject == CONTACT_CONFIRMED
+                    && pe_core::senders::picture(m).0 == pe_core::senders::PictureKind::Contact
+            })
+    })
+    .await;
+    added && read
+}
+
+/// A contact's picture: chosen in Contact Properties, shown in the Columns list and the reading pane for a message the
+/// provider confirmed comes from the contact's domain, initials for a forged one, gone once removed
+pub async fn contact_picture(d: &Driver) {
+    d.step("a contact's picture");
+    let main = shell().main();
+    let core = &shell().core;
+    let (Some(inbox), Some(png)) = (super::steps::folder_id("Inbox"), contact_png()) else {
+        d.check(false, "the Inbox, and a picture file for the contact");
+        return;
+    };
+    let card = pe_store::Card {
+        name: "Rita Lund".into(),
+        first: "Rita".into(),
+        last: "Lund".into(),
+        addresses: vec![CONTACT_ADDRESS.into()],
+        ..Default::default()
+    };
+    let Ok(id) = core.save_card(&card) else {
+        d.check(false, "a contact to give a picture");
+        return;
+    };
+    let Some(form) = open_contact(id).await else {
+        d.check(false, "Contact Properties opens");
+        return;
+    };
+    let f: gtk::Widget = form.clone().upcast();
+    d.check(
+        !crate::book_dialogs::contact_shows_picture()
+            && named_in(&f, "contact-picture-remove").is_none()
+            && named_in(&f, "contact-picture-choose").is_some(),
+        "Contact Properties shows the contact's initials, with Choose and no Remove",
+    );
+    crate::ui::FILE_ANSWERS.with(|answers| answers.borrow_mut().push_back(vec![png.clone()]));
+    click(&f, "contact-picture-choose");
+    d.check(
+        wait_until(10, crate::book_dialogs::contact_shows_picture).await
+            && named_in(&f, "contact-picture-remove").is_some()
+            && !core.card_has_picture(id),
+        "Choose shows the picture and offers Remove, and the contact has it only once OK saves it",
+    );
+    // an answer the dialog did not take would be the next file dialog's
+    crate::ui::FILE_ANSWERS.with(|answers| answers.borrow_mut().clear());
+    pause(400).await;
+    d.shot(&form, "contacts-6-picture").await;
+    click(&f, "dialog-ok");
+    wait_gone(10, "contact-dialog").await;
+    d.check(core.card_has_picture(id), "OK gives the contact the picture");
+
+    select_folder("Inbox");
+    wait_until(10, || main.selected_name() == "Inbox").await;
+    d.check(
+        add_contact_messages(d, inbox).await,
+        "a confirmed message and a forged one from the contact are in the Inbox",
+    );
+    command(Command::LayoutColumns);
+    wait_until(10, side_by_side).await;
+    // the newest first, the list at its top: the two new messages on screen
+    main.list.select(0);
+    pause(500).await;
+    d.check(
+        wait_until(20, || {
+            row_on_screen(CONTACT_CONFIRMED).is_some_and(|r| crate::rows::picture_drawn(&r))
+        })
+        .await,
+        "the confirmed message's row shows the contact's picture",
+    );
+    // once the core has read its verdict, which comes in the background
+    d.check(
+        wait_until(20, || {
+            row_on_screen(CONTACT_FORGED)
+                .is_some_and(|r| crate::rows::picture_shown(&r) && !crate::rows::picture_drawn(&r))
+        })
+        .await,
+        "the forged one from the same address shows initials",
+    );
+    if let Some(uid) = listed_in_folder(inbox, 0, 500)
+        .iter()
+        .find(|m| m.info.subject == CONTACT_CONFIRMED)
+        .map(|m| m.info.uid)
+    {
+        main.show_message(inbox, uid);
+    }
+    d.check(
+        wait_until(20, || main.reader.logo_shown()).await,
+        "the reading pane shows the contact's picture beside the header",
+    );
+    pause(500).await;
+    d.shot(main.window(), "pictures-5-contact").await;
+
+    // Remove then Cancel keeps it; Remove then OK takes it away
+    if let Some(form) = open_contact(id).await {
+        let f: gtk::Widget = form.clone().upcast();
+        click(&f, "contact-picture-remove");
+        let shown = wait_until(10, || !crate::book_dialogs::contact_shows_picture()).await;
+        click(&f, "dialog-cancel");
+        wait_gone(10, "contact-dialog").await;
+        d.check(
+            shown && core.card_has_picture(id),
+            "Remove shows the initials, and Cancel keeps the contact's picture",
+        );
+    }
+    if let Some(form) = open_contact(id).await {
+        let f: gtk::Widget = form.clone().upcast();
+        click(&f, "contact-picture-remove");
+        let shown = wait_until(10, || {
+            !crate::book_dialogs::contact_shows_picture() && named_in(&f, "contact-picture-remove").is_none()
+        })
+        .await;
+        click(&f, "dialog-ok");
+        wait_gone(10, "contact-dialog").await;
+        d.check(
+            shown && !core.card_has_picture(id),
+            "Remove and OK take the picture away",
+        );
+    }
+    d.check(
+        wait_until(20, || {
+            row_on_screen(CONTACT_CONFIRMED)
+                .is_some_and(|r| crate::rows::picture_shown(&r) && !crate::rows::picture_drawn(&r))
+        })
+        .await,
+        "and the list shows the contact's initials again",
+    );
+    // as the steps after this one expect: the Address Book empty, the messages read, the classic layout
+    let _ = core.delete_cards(&[id]);
+    for message in listed_in_folder(inbox, 0, 500) {
+        if [CONTACT_CONFIRMED, CONTACT_FORGED].contains(&message.info.subject.as_str()) {
+            let _ = core.set_seen(inbox, message.info.uid, true);
+        }
+    }
+    command(Command::LayoutClassic);
+    wait_until(10, || main.layout() == pe_core::layout::Layout::Classic).await;
+    let _ = std::fs::remove_file(png);
+}

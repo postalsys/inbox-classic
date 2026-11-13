@@ -29,6 +29,9 @@ pub struct Card {
     /// The lines of a vCard read in that are not edited here (birthday, postal address, ...), written out again on
     /// export as they came
     pub extra: String,
+    /// Its picture as the core keeps it (pe-core card_pictures.rs), for a vCard read in or written out only: a card
+    /// read from the store has None, and saving a card leaves its picture as it is
+    pub picture: Option<Vec<u8>>,
 }
 
 /// Someone in a group: a card, or an address of no card
@@ -101,6 +104,7 @@ fn card_row(row: &rusqlite::Row) -> rusqlite::Result<Card> {
         phones: phones_of(&phones),
         extra: row.get(8)?,
         addresses: Vec::new(),
+        picture: None,
     })
 }
 
@@ -181,7 +185,10 @@ impl Store {
                 skipped += 1;
                 continue;
             }
-            self.write_card(card)?;
+            let id = self.write_card(card)?;
+            if let Some(png) = &card.picture {
+                self.set_card_picture(id, png)?;
+            }
             added += 1;
         }
         tx.commit()?;
@@ -282,6 +289,57 @@ impl Store {
             )?;
         }
         Ok(id)
+    }
+
+    /// Sets a card's picture: `png` is the core's own encoding (pe-core card_pictures.rs), never a file as it came; its
+    /// revision grows so the windows' picture keys change with it
+    pub fn set_card_picture(&self, card: CardId, png: &[u8]) -> Result<()> {
+        self.db
+            .prepare_cached(
+                "INSERT INTO card_pictures (card_id, png, changed) VALUES (?1, ?2, 1) \
+                 ON CONFLICT (card_id) DO UPDATE SET png = excluded.png, changed = card_pictures.changed + 1",
+            )?
+            .execute(params![card, png])?;
+        Ok(())
+    }
+
+    /// Whether a card has a picture, without reading it
+    pub fn has_card_picture(&self, card: CardId) -> Result<bool> {
+        self.db
+            .prepare_cached("SELECT 1 FROM card_pictures WHERE card_id = ?1")?
+            .exists([card])
+    }
+
+    /// The card with a picture that has `address`, and its picture's revision: (card, revision); None when no card
+    /// with a picture has it
+    pub fn picture_of_address(&self, address: &str) -> Result<Option<(CardId, i64)>> {
+        let address = address.trim();
+        if address.is_empty() {
+            return Ok(None);
+        }
+        self.db
+            .prepare_cached(
+                "SELECT p.card_id, p.changed FROM card_addresses a JOIN card_pictures p ON p.card_id = a.card_id \
+                 WHERE a.address = ?1 COLLATE NOCASE ORDER BY a.card_id LIMIT 1",
+            )?
+            .query_row([address], |row| Ok((row.get(0)?, row.get(1)?)))
+            .optional()
+    }
+
+    /// Takes a card's picture away
+    pub fn remove_card_picture(&self, card: CardId) -> Result<()> {
+        self.db
+            .prepare_cached("DELETE FROM card_pictures WHERE card_id = ?1")?
+            .execute([card])?;
+        Ok(())
+    }
+
+    /// A card's picture (its PNG) and its revision, None when it has none
+    pub fn card_picture(&self, card: CardId) -> Result<Option<(Vec<u8>, i64)>> {
+        self.db
+            .prepare_cached("SELECT png, changed FROM card_pictures WHERE card_id = ?1")?
+            .query_row([card], |row| Ok((row.get(0)?, row.get(1)?)))
+            .optional()
     }
 
     /// Deletes cards (from the groups they are in too)

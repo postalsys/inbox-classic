@@ -647,6 +647,16 @@ Screenshots: `contacts-1-book`, `contacts-2-person`, `contacts-3-group`, `contac
 - with Mary Smith, John Doe and Sender in it
 - Delete in the Address Book asks first, then removes the selected contact
 
+## 39b. A contact's picture
+
+Screenshots: `contacts-6-picture`, `pictures-5-contact`
+
+- Contact Properties has a picture well with Choose; a PNG chosen shows in it, and Remove appears
+- a message from that contact's address, which the provider confirms comes from its domain, shows the contact's picture
+  in its row of the column layout and in the reading pane
+- a forged message from the same address (the provider's check failed) shows the initials, not the picture
+- Remove takes the picture away again
+
 ## 40. A Gmail address
 
 Screenshots: `account-5-app-password`, `account-6-gmail`

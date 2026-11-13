@@ -252,4 +252,51 @@ mod tests {
         assert_eq!(kept.fresh_svg(now + LOGO_KEPT_MS), None);
         assert!(kept.download_due(now + LOGO_KEPT_MS));
     }
+
+    #[test]
+    fn contacts_pictures_on_their_rows() {
+        let (store, _, inbox, junk) = setup();
+        store.add_messages(inbox, &[message(1, 100, None)]).unwrap();
+        store.add_messages(junk, &[message(1, 200, None)]).unwrap();
+        assert_eq!(store.message(inbox, 1).unwrap().unwrap().contact, None);
+        let card = store
+            .save_card(&crate::Card {
+                name: "Shop News".into(),
+                addresses: vec!["NEWS@shop.example".into()],
+                ..Default::default()
+            })
+            .unwrap();
+        // a card without a picture gives none
+        assert_eq!(store.message(inbox, 1).unwrap().unwrap().contact, None);
+        assert_eq!(store.picture_of_address("news@shop.example").unwrap(), None);
+        store.set_card_picture(card, b"png one").unwrap();
+        assert_eq!(store.message(inbox, 1).unwrap().unwrap().contact, Some((card, 1)));
+        assert_eq!(store.picture_of_address("News@Shop.Example").unwrap(), Some((card, 1)));
+        // never in Junk E-mail
+        assert_eq!(store.message(junk, 1).unwrap().unwrap().contact, None);
+        // set again: its revision grows; saving the card leaves the picture
+        store.set_card_picture(card, b"png two").unwrap();
+        assert_eq!(store.card_picture(card).unwrap(), Some((b"png two".to_vec(), 2)));
+        let saved = store.card(card).unwrap().unwrap();
+        assert_eq!(saved.picture, None, "read from the store without it");
+        store.save_card(&saved).unwrap();
+        assert_eq!(store.message(inbox, 1).unwrap().unwrap().contact, Some((card, 2)));
+        // taken away, and gone with its card
+        store.remove_card_picture(card).unwrap();
+        assert_eq!(store.message(inbox, 1).unwrap().unwrap().contact, None);
+        store.set_card_picture(card, b"png three").unwrap();
+        store.delete_cards(&[card]).unwrap();
+        assert_eq!(store.card_picture(card).unwrap(), None);
+        // imported with a picture
+        let (added, _) = store
+            .import_cards(&[crate::Card {
+                name: "Bo".into(),
+                addresses: vec!["bo@example.com".into()],
+                picture: Some(b"bo's png".to_vec()),
+                ..Default::default()
+            }])
+            .unwrap();
+        assert_eq!(added, 1);
+        assert!(store.picture_of_address("bo@example.com").unwrap().is_some());
+    }
 }

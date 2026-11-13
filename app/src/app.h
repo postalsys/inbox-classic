@@ -132,6 +132,8 @@ void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORR
 // the core's pixels of a picture (`size` x `size` BGRA with the alpha multiplied in, `length` bytes) as a bitmap;
 // nullptr when they are not that
 HBITMAP PremultipliedBitmap(const uint8_t* pixels, size_t length, int size);
+// PremultipliedBitmap of pixels the core handed over, which are freed here (pe_bytes_free), NULL taken as none
+HBITMAP CoreBitmap(uint8_t* pixels, size_t length, int size);
 // such a bitmap drawn at `x`, `y` with its own transparency, through `memory` when given (a DC kept for many
 // pictures), else one made for it
 void DrawPremultiplied(HDC dc, int x, int y, HBITMAP bitmap, int size, HDC memory = nullptr);
@@ -198,6 +200,8 @@ void SetAppIcons(WNDCLASSEXW& windowClass);
 std::wstring FolderDialog(HWND owner, const wchar_t* title);
 // the files chosen in an Open dialog that takes several, none when cancelled
 std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter = nullptr);
+// the one file chosen in an Open dialog, empty when cancelled
+std::wstring OpenFileDialog(HWND owner, const wchar_t* title, const wchar_t* filter);
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
 // marks a saved file (an attachment, a message) as from the internet, for SmartScreen and Office's Protected View
 void MarkFromInternet(const std::wstring& path);
@@ -453,6 +457,8 @@ bool FolderDropOpen();
 
 // the main window back from the tray (or the taskbar), in front
 void ShowMain();
+// a card's picture was set or taken away (Contact Properties): the list's rows of its address show it again
+void ContactPictureChanged();
 // a new message from a mailto: link (the core reads it), from `account`, or from the account of what the main window
 // shows when 0
 void OpenMailto(const std::wstring& link, int64_t account = 0);
@@ -559,6 +565,8 @@ public:
     void OnEvent(const UiEvent& event);
     // the accounts changed: builds the tree again
     void Reload();
+    // a contact's picture changed: the rows (and their picture keys) read again, the selection kept
+    void ReloadRows() { ReloadList(true); }
     // what the last action on messages did, for the status bar (IDC_LIST, kSaid)
     const std::wstring& Said() const { return said_; }
     // the selected messages read or unread
@@ -692,6 +700,9 @@ public:
     // the UI test's look at the row of the message `subject`: 12 its picture drawn, 11 its initials, 10 neither, 0 no
     // such row shown
     int TestRowPicture(const std::wstring& subject);
+    // the UI test's look at where the list's top row starts: 1000 plus its top in the list's client area (the header's
+    // room above it, if any); 0 for an empty list
+    int TestListTop() const;
     // View > Sort By: by `field` (starting its own way when it is another field), and which way
     void SortBy(PeSortField field);
     void SetAscending(bool ascending);
@@ -1164,6 +1175,10 @@ enum BookControlId : WORD {
     IDC_CONTACT_PHONES,
     IDC_CONTACT_PHONE_REMOVE,
     IDC_CONTACT_NOTES,
+    // the card's picture at the top left, and Choose... and Remove under it
+    IDC_CONTACT_PICTURE,
+    IDC_CONTACT_PICTURE_CHOOSE,
+    IDC_CONTACT_PICTURE_REMOVE,
     // Group Properties
     IDC_GROUP_NAME = 750,
     IDC_GROUP_MEMBERS,

@@ -301,6 +301,7 @@ unsafe fn card_of(card: *const PeCard) -> Option<Card> {
                 Some((p.kind.name().to_string(), field(p.number)?))
             })?,
             extra: String::new(),
+            picture: None,
         })
     }
 }
@@ -789,4 +790,148 @@ pub unsafe extern "C" fn pe_address_is_mailbox(address: *const c_char) -> bool {
         return false;
     };
     guard(|| pe_core::book::is_mailbox(address)).unwrap_or(false)
+}
+
+/// Bytes handed to C, `len` set to their length; free with `pe_bytes_free`
+fn handed_bytes(bytes: Vec<u8>, len: &mut usize) -> *mut u8 {
+    let bytes = bytes.into_boxed_slice();
+    *len = bytes.len();
+    Box::into_raw(bytes).cast()
+}
+
+/// The picture file at `path` (PNG or JPEG) as the core keeps a contact's picture: read and turned into the core's
+/// own 256 pixel square PNG, `len` bytes, to show (`pe_png_bgra`) and to set once the user says OK
+/// (`pe_card_set_picture_png`). Needs no core and touches no store: call it off the window thread. NULL with the
+/// reason in `error` (NULL or a pointer to a string to free with `pe_string_free`), in words for the user: the file
+/// is no PNG or JPEG picture, it is too large, or it can not be read. Free the bytes with `pe_bytes_free`.
+///
+/// # Safety
+/// `path` must be a NUL-terminated string, `len` a valid pointer, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_picture_prepare(
+    path: *const c_char,
+    len: *mut usize,
+    error: *mut *mut c_char,
+) -> *mut u8 {
+    // SAFETY: as the caller guarantees
+    let Some(len) = (unsafe { len.as_mut() }) else {
+        return null_mut();
+    };
+    *len = 0;
+    // SAFETY: as the caller guarantees
+    let path = unsafe { arg(path) }.map(std::path::PathBuf::from);
+    let outcome = guard(|| match &path {
+        Some(path) => pe_core::card_pictures::prepare(path),
+        None => Err(pe_core::card_pictures::Refused::NotPicture),
+    })
+    .unwrap_or(Err(pe_core::card_pictures::Refused::NotPicture));
+    match outcome {
+        Ok(png) => handed_bytes(png, len),
+        Err(refused) => {
+            if !error.is_null() {
+                // SAFETY: the caller gave a valid pointer
+                unsafe { *error = into_c_string(pe_core::sentence(&refused.text())) };
+            }
+            null_mut()
+        }
+    }
+}
+
+/// Sets card `card`'s picture to `png` (`len` bytes), one `pe_card_picture_prepare` made; false for anything else
+///
+/// # Safety
+/// `core` must be a live handle, `png` `len` readable bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_set_picture_png(core: *const PeCore, card: i64, png: *const u8, len: usize) -> bool {
+    if png.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let png = unsafe { std::slice::from_raw_parts(png, len) };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_card_picture_png(card, png).is_ok()) }
+}
+
+/// A picture `pe_card_picture_prepare` made (`png`, `len` bytes) as `size` x `size` BGRA with the alpha multiplied in
+/// (`size` 16 to 512), `out_len` bytes, for the window to show it before it is set; NULL for anything else. Needs no
+/// core. Free with `pe_bytes_free`.
+///
+/// # Safety
+/// `png` must be `len` readable bytes, `out_len` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_png_bgra(png: *const u8, len: usize, size: u32, out_len: *mut usize) -> *mut u8 {
+    // SAFETY: as the caller guarantees
+    let Some(out_len) = (unsafe { out_len.as_mut() }) else {
+        return null_mut();
+    };
+    *out_len = 0;
+    if png.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let png = unsafe { std::slice::from_raw_parts(png, len) };
+    match guard(|| pe_core::card_pictures::bgra(png, size)).flatten() {
+        Some(pixels) => handed_bytes(pixels, out_len),
+        None => null_mut(),
+    }
+}
+
+/// Takes card `card`'s picture away
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_remove_picture(core: *const PeCore, card: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.remove_card_picture(card).is_ok()) }
+}
+
+/// Whether card `card` has a picture
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_has_picture(core: *const PeCore, card: i64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.card_has_picture(card)) }
+}
+
+/// Card `card`'s picture for its Properties: `size` x `size` BGRA with the alpha multiplied in (`size` 16 to 512),
+/// `len` bytes; NULL when it has none. Free with `pe_bytes_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `len` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_card_picture(core: *const PeCore, card: i64, size: u32, len: *mut usize) -> *mut u8 {
+    // SAFETY: as the caller guarantees
+    let Some(len) = (unsafe { len.as_mut() }) else {
+        return null_mut();
+    };
+    *len = 0;
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.card_picture(card, size) {
+            Some(pixels) => handed_bytes(pixels, len),
+            None => null_mut(),
+        })
+    }
+}
+
+/// One or two initials of a person, as the message list shows them (`pe_core::initials`): from `name`, else from
+/// `address`; empty for neither. Either may be NULL. Free with `pe_string_free`.
+///
+/// # Safety
+/// `name` and `address` must each be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_initials(name: *const c_char, address: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let text = |p: *const c_char| {
+        if p.is_null() {
+            String::new()
+        } else {
+            unsafe { std::ffi::CStr::from_ptr(p) }.to_string_lossy().into_owned()
+        }
+    };
+    let (name, address) = (text(name), text(address));
+    crate::guard(|| pe_core::initials(&name, &address)).map_or(std::ptr::null_mut(), crate::into_c_string)
 }

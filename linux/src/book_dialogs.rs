@@ -4,10 +4,11 @@
 //! brought that the form does not show stays.
 
 use std::cell::{Cell, RefCell};
+use std::path::PathBuf;
 use std::rc::Rc;
 
 use adw::prelude::*;
-use gtk::glib;
+use gtk::{gdk, gio, glib};
 use pe_store::{Card, CardId, Group, GroupId, Member};
 
 use crate::app::shell;
@@ -428,6 +429,193 @@ fn card_from_form(card: &Card, names: &Names, addresses: &Addresses, phones: &Ph
     }
 }
 
+// ---- the contact's picture ----
+
+/// The picture's size in the form, in points
+const PICTURE_SIZE: i32 = 64;
+
+/// The picture file kinds Choose offers
+const PICTURE_PATTERNS: [&str; 6] = ["*.png", "*.jpg", "*.jpeg", "*.PNG", "*.JPG", "*.JPEG"];
+
+/// What the form will do to the card's picture once OK saves it: nothing, set the PNG the core prepared from the file
+/// chosen, or take it away
+enum Choice {
+    Kept,
+    Set(Vec<u8>),
+    Removed,
+}
+
+/// The picture well at the top of Contact Properties: the card's picture (the core reads, keeps and draws it), else
+/// its initials on the quiet fill, round as the list draws senders; Choose... and Remove under it, and a picture file
+/// dropped on it. What is chosen is prepared by the core off the window's thread and shown, and written only once OK
+/// saves the card; Cancel leaves the card's picture as it was.
+struct PictureWell {
+    group: adw::PreferencesGroup,
+    frame: gtk::Box,
+    image: gtk::Image,
+    initials: gtk::Label,
+    remove: gtk::Button,
+    card: CardId,
+    choice: RefCell<Choice>,
+}
+
+impl PictureWell {
+    fn new(card: &Card) -> Rc<PictureWell> {
+        let image = gtk::Image::builder().pixel_size(PICTURE_SIZE).build();
+        let frame = gtk::Box::builder()
+            .width_request(PICTURE_SIZE)
+            .height_request(PICTURE_SIZE)
+            .overflow(gtk::Overflow::Hidden)
+            .build();
+        frame.add_css_class("card-picture");
+        frame.append(&image);
+        let address = card.addresses.first().map(String::as_str).unwrap_or_default();
+        let initials = gtk::Label::new(Some(&pe_core::initials(&card.name, address)));
+        initials.add_css_class("card-initials");
+        let well = gtk::Overlay::builder().halign(gtk::Align::Center).build();
+        well.set_child(Some(&frame));
+        well.add_overlay(&initials);
+        well.set_widget_name("contact-picture");
+        well.update_property(&[gtk::accessible::Property::Label(&words::field_title(
+            Text::UiCardPicture,
+        ))]);
+        let choose =
+            gtk::Button::with_mnemonic(&pe_core::i18n::gtk_mnemonic(&t!(UiCardPictureChoose)).replace("...", "…"));
+        choose.set_widget_name("contact-picture-choose");
+        let remove = gtk::Button::with_mnemonic(&pe_core::i18n::gtk_mnemonic(&t!(UiRemove)));
+        remove.set_widget_name("contact-picture-remove");
+        let buttons = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+        buttons.set_halign(gtk::Align::Center);
+        buttons.append(&choose);
+        buttons.append(&remove);
+        let column = gtk::Box::new(gtk::Orientation::Vertical, 10);
+        column.set_margin_top(6);
+        column.append(&well);
+        column.append(&buttons);
+        let group = adw::PreferencesGroup::new();
+        group.add(&column);
+        let this = Rc::new(PictureWell {
+            group,
+            frame,
+            image,
+            initials,
+            remove,
+            card: card.id,
+            choice: RefCell::new(Choice::Kept),
+        });
+        this.connect(&choose, &well);
+        this.refresh();
+        this
+    }
+
+    fn connect(self: &Rc<Self>, choose: &gtk::Button, well: &gtk::Overlay) {
+        let this = Rc::downgrade(self);
+        choose.connect_clicked(move |_| {
+            if let Some(this) = this.upgrade() {
+                glib::spawn_future_local(async move { this.choose().await });
+            }
+        });
+        let this = Rc::downgrade(self);
+        self.remove.connect_clicked(move |_| {
+            if let Some(this) = this.upgrade() {
+                *this.choice.borrow_mut() = Choice::Removed;
+                this.refresh();
+            }
+        });
+        // a picture file dragged onto the well, as Choose takes one
+        let drop = gtk::DropTarget::new(gdk::FileList::static_type(), gdk::DragAction::COPY);
+        let this = Rc::downgrade(self);
+        drop.connect_drop(move |_, value, _, _| {
+            let path = value
+                .get::<gdk::FileList>()
+                .ok()
+                .and_then(|files| files.files().into_iter().next())
+                .and_then(|file| file.path());
+            match (this.upgrade(), path) {
+                (Some(this), Some(path)) => {
+                    glib::spawn_future_local(async move { this.take(path).await });
+                    true
+                }
+                _ => false,
+            }
+        });
+        let frame = self.frame.clone();
+        drop.connect_enter(move |_, _, _| {
+            frame.add_css_class("drop-target");
+            gdk::DragAction::COPY
+        });
+        let frame = self.frame.clone();
+        drop.connect_leave(move |_| frame.remove_css_class("drop-target"));
+        well.add_controller(drop);
+    }
+
+    /// Choose...: a PNG or JPEG file
+    async fn choose(self: Rc<Self>) {
+        // the dialog is presented after the well is made: found from the well itself
+        let Some(window) = self.group.root().and_downcast::<gtk::Window>() else {
+            return;
+        };
+        let title = words::field_title(Text::UiCardPicture);
+        let pictures = t!(UiFilterPictures);
+        if let Some(path) = ui::open_file(&window, &title, Some((&pictures, &PICTURE_PATTERNS))).await {
+            self.take(path).await;
+        }
+    }
+
+    /// The picture of the file at `path`, prepared by the core off the window's thread and shown; a file the core
+    /// refuses is said over the dialog
+    async fn take(&self, path: PathBuf) {
+        let prepared = gio::spawn_blocking(move || pe_core::card_pictures::prepare(&path)).await;
+        match prepared {
+            Ok(Ok(png)) => {
+                *self.choice.borrow_mut() = Choice::Set(png);
+                self.refresh();
+            }
+            Ok(Err(refused)) => self.say(refused.text()),
+            Err(_) => self.say(pe_core::card_pictures::Refused::NotPicture.text()),
+        }
+    }
+
+    /// `why` said over the dialog the well is in
+    fn say(&self, why: String) {
+        let dialog = glib::WeakRef::new();
+        let ancestor = self.group.ancestor(adw::Dialog::static_type());
+        dialog.set(ancestor.and_downcast::<adw::Dialog>().as_ref());
+        say_later(&dialog, why);
+    }
+
+    /// The picture as it would be after OK, else the initials; Remove only with a picture
+    fn refresh(&self) {
+        let size = PICTURE_SIZE * self.image.scale_factor().max(1);
+        let pixels = match &*self.choice.borrow() {
+            Choice::Set(png) => pe_core::card_pictures::bgra(png, size as u32),
+            Choice::Removed => None,
+            Choice::Kept if self.card != 0 => shell().core.card_picture(self.card, size as u32),
+            Choice::Kept => None,
+        };
+        let texture = pixels.and_then(|pixels| ui::bgra_texture(pixels, size));
+        self.image.set_paintable(texture.as_ref());
+        self.image.set_visible(texture.is_some());
+        self.initials.set_visible(texture.is_none());
+        self.remove.set_visible(texture.is_some());
+    }
+
+    /// OK saved the card as `id`: what was chosen is its picture now; whether that changed it
+    fn saved(&self, id: CardId) -> bool {
+        let core = &shell().core;
+        match std::mem::replace(&mut *self.choice.borrow_mut(), Choice::Kept) {
+            Choice::Set(png) => core.set_card_picture_png(id, &png).is_ok(),
+            Choice::Removed if self.card != 0 => core.remove_card_picture(id).is_ok(),
+            _ => false,
+        }
+    }
+
+    #[cfg(feature = "e2e")]
+    fn shows_picture(&self) -> bool {
+        self.image.is_visible()
+    }
+}
+
 /// Contact Properties of card `id`, or New Contact for 0; the card's id once OK saved it, None for Cancel
 pub async fn contact(parent: &impl IsA<gtk::Widget>, id: CardId) -> Option<CardId> {
     let core = &shell().core;
@@ -443,31 +631,72 @@ pub async fn contact(parent: &impl IsA<gtk::Widget>, id: CardId) -> Option<CardI
     };
     let names = names_section(&card);
     let dialog_ref = glib::WeakRef::<adw::Dialog>::new();
+    let picture = PictureWell::new(&card);
     let addresses = addresses_section(&card, &dialog_ref);
     let phones = phones_section(&card);
     let (notes_group, notes) = notes_section(&card);
-    let content = page(&[&names.group, &addresses.group, &phones.group, &notes_group]);
+    let content = page(&[
+        &picture.group,
+        &names.group,
+        &addresses.group,
+        &phones.group,
+        &notes_group,
+    ]);
     let (dialog, clicks) = present(parent, &title, &content, "contact-dialog", 680);
     dialog_ref.set(Some(&dialog));
     names.first.grab_focus();
+    #[cfg(feature = "e2e")]
+    CONTACT_PICTURE.with(|open| *open.borrow_mut() = Some(picture.clone()));
+    contact_answers(&card, &dialog, &clicks, &names, &addresses, &phones, &notes, &picture).await
+}
+
+#[cfg(feature = "e2e")]
+thread_local! {
+    /// The picture well of the Contact Properties open last, for the UI test
+    static CONTACT_PICTURE: RefCell<Option<Rc<PictureWell>>> = RefCell::default();
+}
+
+/// Whether the Contact Properties open last shows a picture (not the initials)
+#[cfg(feature = "e2e")]
+pub fn contact_shows_picture() -> bool {
+    CONTACT_PICTURE.with(|open| open.borrow().as_ref().is_some_and(|well| well.shows_picture()))
+}
+
+/// OK and Cancel of Contact Properties until one of them ends it: the card's id once OK saved it
+#[allow(clippy::too_many_arguments)]
+async fn contact_answers(
+    card: &Card,
+    dialog: &adw::Dialog,
+    clicks: &async_channel::Receiver<bool>,
+    names: &Names,
+    addresses: &Rc<Addresses>,
+    phones: &Phones,
+    notes: &gtk::TextView,
+    picture: &PictureWell,
+) -> Option<CardId> {
+    let core = &shell().core;
     while let Ok(ok) = clicks.recv().await {
         if !ok {
             return None;
         }
         // an address typed and not added yet goes with the rest
         if let Err(why) = addresses.take_typed() {
-            ui::alert(&dialog, TITLE, &why).await;
+            ui::alert(dialog, TITLE, &why).await;
             continue;
         }
         // the core refuses a contact without a name or an address, and says why
-        match core.save_card(&card_from_form(&card, &names, &addresses, &phones, &notes)) {
+        match core.save_card(&card_from_form(card, names, addresses, phones, notes)) {
             Ok(id) => {
+                // a picture set or taken away: the list draws its senders again (their keys change with it)
+                if picture.saved(id) {
+                    shell().main().senders_changed();
+                }
                 dialog.close();
                 return Some(id);
             }
             Err(error) => {
                 let said = t!(UiContactNotSaved, reason = &error.to_string());
-                ui::alert(&dialog, TITLE, &said).await;
+                ui::alert(dialog, TITLE, &said).await;
             }
         }
     }

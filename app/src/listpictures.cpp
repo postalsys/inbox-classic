@@ -55,10 +55,7 @@ uint64_t ListPictures::Ready(uint64_t request) {
     requests_.erase(found);
     size_t length = 0;
     uint8_t* pixels = pe_picture_result(core_, request, &length);
-    HBITMAP bitmap = PremultipliedBitmap(pixels, length, at.second);
-    if (pixels) {
-        pe_bytes_free(pixels, length);
-    }
+    HBITMAP bitmap = CoreBitmap(pixels, length, at.second);
     auto picture = pictures_.find(at);
     if (picture == pictures_.end()) {
         // let go of meanwhile

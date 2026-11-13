@@ -106,12 +106,8 @@ pub fn render(svg: &[u8], size: u32) -> Option<Vec<u8>> {
     );
     let transform = resvg::tiny_skia::Transform::from_scale(scale, scale).post_translate(dx, dy);
     resvg::render(&tree, transform, &mut pixmap.as_mut());
-    // RGBA to BGRA, the alpha multiplied in already
-    let mut pixels = pixmap.take();
-    for pixel in pixels.as_chunks_mut::<4>().0 {
-        pixel.swap(0, 2);
-    }
-    Some(pixels)
+    // the alpha multiplied in already
+    Some(crate::card_pictures::to_bgra(pixmap.take(), true))
 }
 
 #[cfg(test)]

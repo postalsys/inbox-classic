@@ -39,6 +39,10 @@ pub struct MessageView {
     pub invitation: Option<crate::calendar::Invitation>,
     /// The brand has a BIMI logo the receiving server passed ([`crate::Core::logo_start`] draws it)
     pub has_logo: bool,
+    /// Without a logo: the picture of the Address Book's card with the sender's address, the list's key for the
+    /// message decided as the list decides it ([`crate::senders::picture`]: a confirmed sender only, never in a Junk
+    /// folder); [`crate::Core::picture_start`] draws it. 0 for none
+    pub picture: u64,
     /// It is a bounce, a notice that a message was not delivered or not yet: the document starts with its card
     pub bounce: bool,
     /// The message the bounce returns, found in the account by its Message-ID (Sent Items first): the card links to
@@ -200,6 +204,7 @@ pub(crate) fn build_unless(
             .collect(),
         unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
+        picture: 0,
         invitation,
         bounce: bounce.is_some(),
         bounced_message,

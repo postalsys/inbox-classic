@@ -5,12 +5,17 @@
 #include "app.h"
 #include "icons.h"
 
+#include <commdlg.h>
+#include <shellapi.h>
 #include <shlwapi.h>
 #include <windowsx.h>
 
 #include <algorithm>
 #include <memory>
+#include <mutex>
+#include <thread>
 #include <tuple>
+#include <vector>
 
 namespace {
 
@@ -422,6 +427,16 @@ struct ContactState {
     bool displayTyped = false;
     // the display name is being set to follow them: not the user typing
     bool following = false;
+    // the picture the well shows: the card's, or one chosen since; what OK does to the card's picture (nothing, a
+    // picture the core prepared, or none), Cancel nothing; a file being prepared on a worker thread
+    HBITMAP picture = nullptr;
+    enum class Change { None, Set, Remove } change = Change::None;
+    std::vector<uint8_t> png;
+    bool preparing = false;
+    // the files being prepared, shared with their worker threads (PictureJobs)
+    std::shared_ptr<struct PictureJobs> jobs;
+    // the bold font of the well's initials, made once
+    HFONT wellFont = nullptr;
     int64_t saved = 0;
     bool done = false;
 };
@@ -522,6 +537,220 @@ std::wstring WithoutCr(std::wstring text) {
     return text;
 }
 
+// ---- the card's picture ----
+
+// the side of the picture well, at 96 DPI
+constexpr int kWell = 64;
+
+// the initials of a contact for an empty well, as the list's rows have them (the core's): from the name, else the
+// first address
+std::wstring ContactInitials(HWND dialog, const ContactState& state) {
+    std::wstring name = ItemText(dialog, IDC_CONTACT_DISPLAY);
+    if (name.empty()) {
+        name = Trimmed(ItemText(dialog, IDC_CONTACT_FIRST) + L" " + ItemText(dialog, IDC_CONTACT_LAST));
+    }
+    std::string address = state.addresses.empty() ? std::string() : core::Narrow(state.addresses.front());
+    core::String initials(pe_initials(core::Narrow(name).c_str(), address.c_str()));
+    return initials ? Text(initials.get()) : L"";
+}
+
+// a file prepared for the well on a worker thread (pe_card_picture_prepare), posted to the dialog: lParam a
+// PreparedPicture it takes over
+constexpr UINT WM_PICTURE_PREPARED = WM_APP + 41;
+struct PreparedPicture {
+    uint8_t* png = nullptr;
+    size_t length = 0;
+    char* error = nullptr;
+};
+
+void FreePrepared(PreparedPicture* prepared) {
+    if (prepared->png) {
+        pe_bytes_free(prepared->png, prepared->length);
+    }
+    pe_string_free(prepared->error);
+    delete prepared;
+}
+
+// the dialog's side of its worker threads: once it is closing, a result is freed where it is made rather than posted
+// to a window that would drop it; posting and closing hold the lock, so none slips in between
+struct PictureJobs {
+    std::mutex lock;
+    HWND dialog = nullptr;
+    bool closed = false;
+};
+const wchar_t* kPictureJobs = L"InboxClassicPictureJobs";
+
+// the dialog closing (WM_DESTROY): no more results posted, those waiting in the queue freed
+void ClosePictureJobs(HWND dialog) {
+    auto* jobs = static_cast<PictureJobs*>(RemovePropW(dialog, kPictureJobs));
+    if (!jobs) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> held(jobs->lock);
+        jobs->closed = true;
+    }
+    MSG waiting;
+    while (PeekMessageW(&waiting, dialog, WM_PICTURE_PREPARED, WM_PICTURE_PREPARED, PM_REMOVE)) {
+        FreePrepared(reinterpret_cast<PreparedPicture*>(waiting.lParam));
+    }
+}
+
+// the well showing `bitmap` (taken over), none for nullptr; Remove with a picture to remove
+void ShowWell(HWND dialog, ContactState& state, HBITMAP bitmap) {
+    if (state.picture) {
+        DeleteObject(state.picture);
+    }
+    state.picture = bitmap;
+    HWND remove = GetDlgItem(dialog, IDC_CONTACT_PICTURE_REMOVE);
+    if (!bitmap && GetFocus() == remove) {
+        SetFocus(GetDlgItem(dialog, IDC_CONTACT_PICTURE_CHOOSE));
+    }
+    EnableWindow(remove, bitmap != nullptr);
+    InvalidateRect(GetDlgItem(dialog, IDC_CONTACT_PICTURE), nullptr, TRUE);
+}
+
+// BGRA pixels of the core, `length` bytes, as the well's bitmap (freed here)
+HBITMAP WellBitmap(uint8_t* pixels, size_t length) {
+    return CoreBitmap(pixels, length, Scale(kWell));
+}
+
+// the card's own picture, as the dialog opens
+void LoadWellPicture(HWND dialog, ContactState& state) {
+    size_t length = 0;
+    uint8_t* pixels = state.id ? pe_card_picture(state.core, state.id, static_cast<uint32_t>(Scale(kWell)), &length) : nullptr;
+    ShowWell(dialog, state, WellBitmap(pixels, length));
+}
+
+// Choose... and OK off while a file is prepared (OK would save without it), on again once it is there or refused
+void SetPreparing(HWND dialog, ContactState& state, bool preparing) {
+    state.preparing = preparing;
+    EnableWindow(GetDlgItem(dialog, IDC_CONTACT_PICTURE_CHOOSE), !preparing);
+    EnableWindow(GetDlgItem(dialog, IDOK), !preparing);
+}
+
+// a picture file read and made the core's own square PNG on a worker thread, so a large photo does not hold up the
+// window; the result posted back (WM_PICTURE_PREPARED), or freed when the dialog is closing
+void PreparePicture(HWND dialog, ContactState& state, const std::wstring& path) {
+    if (!state.jobs) {
+        state.jobs = std::make_shared<PictureJobs>();
+        state.jobs->dialog = dialog;
+        SetPropW(dialog, kPictureJobs, state.jobs.get());
+    }
+    SetPreparing(dialog, state, true);
+    std::thread([jobs = state.jobs, file = core::Narrow(path)] {
+        auto* prepared = new PreparedPicture;
+        prepared->png = pe_card_picture_prepare(file.c_str(), &prepared->length, &prepared->error);
+        std::lock_guard<std::mutex> held(jobs->lock);
+        if (jobs->closed || !PostMessageW(jobs->dialog, WM_PICTURE_PREPARED, 0, reinterpret_cast<LPARAM>(prepared))) {
+            FreePrepared(prepared);
+        }
+    }).detach();
+}
+
+// the prepared picture in the well, set on OK; a refusal said
+void TakePrepared(HWND dialog, ContactState& state, PreparedPicture* prepared) {
+    std::unique_ptr<PreparedPicture> owned(prepared);
+    SetPreparing(dialog, state, false);
+    if (!prepared->png) {
+        Warn(dialog, ReasonText(prepared->error, PE_TEXT_UI_PICTURE_NOT_PICTURE));
+        return;
+    }
+    pe_string_free(prepared->error);
+    state.png.assign(prepared->png, prepared->png + prepared->length);
+    pe_bytes_free(prepared->png, prepared->length);
+    state.change = ContactState::Change::Set;
+    size_t length = 0;
+    uint8_t* pixels = pe_png_bgra(state.png.data(), state.png.size(), static_cast<uint32_t>(Scale(kWell)), &length);
+    ShowWell(dialog, state, WellBitmap(pixels, length));
+}
+
+// what Choose... and Remove did, done to card `card` once it is saved; the list's rows show it then
+void ApplyPicture(PeCore* core, const ContactState& state, int64_t card) {
+    bool done = false;
+    if (state.change == ContactState::Change::Set) {
+        done = pe_card_set_picture_png(core, card, state.png.data(), state.png.size());
+    } else if (state.change == ContactState::Change::Remove) {
+        done = pe_card_remove_picture(core, card);
+    }
+    if (done) {
+        ContactPictureChanged();
+    }
+}
+
+void ChoosePicture(HWND dialog, ContactState& state) {
+    std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_FILTER_PICTURES), L"*.png;*.jpg;*.jpeg"}});
+    std::wstring title = core::Title(PE_TEXT_UI_CARD_PICTURE_CHOOSE);
+    std::wstring path = OpenFileDialog(dialog, title.c_str(), filter.c_str());
+    if (!path.empty()) {
+        PreparePicture(dialog, state, path);
+    }
+}
+
+void RemovePicture(HWND dialog, ContactState& state) {
+    state.change = ContactState::Change::Remove;
+    state.png.clear();
+    ShowWell(dialog, state, nullptr);
+}
+
+// the boxes' font, bold and sized for a well `size` pixels square: made the first time, kept with the dialog
+HFONT WellFont(HWND dialog, ContactState& state, int size) {
+    if (!state.wellFont) {
+        auto boxes = reinterpret_cast<HFONT>(SendDlgItemMessageW(dialog, IDC_CONTACT_FIRST, WM_GETFONT, 0, 0));
+        LOGFONTW face = {};
+        GetObjectW(boxes ? boxes : static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT)), sizeof(face), &face);
+        face.lfHeight = -size * 3 / 8;
+        face.lfWeight = FW_BOLD;
+        state.wellFont = CreateFontIndirectW(&face);
+    }
+    return state.wellFont;
+}
+
+// the well: the picture in a hairline frame, as the list's rows have it, else the initials on a quiet square
+void DrawWell(const DRAWITEMSTRUCT& item, ContactState& state, HWND dialog) {
+    RECT box = item.rcItem;
+    int size = box.right - box.left;
+    if (state.picture) {
+        DrawPremultiplied(item.hDC, box.left, box.top, state.picture, size);
+        FrameRect(item.hDC, &box, GetSysColorBrush(COLOR_BTNSHADOW));
+        return;
+    }
+    FillRect(item.hDC, &box, GetSysColorBrush(COLOR_WINDOW));
+    RECT inside = box;
+    InflateRect(&inside, -1, -1);
+    FillRect(item.hDC, &inside, GetSysColorBrush(COLOR_BTNFACE));
+    FrameRect(item.hDC, &box, GetSysColorBrush(COLOR_BTNSHADOW));
+    std::wstring initials = ContactInitials(dialog, state);
+    if (initials.empty()) {
+        return;
+    }
+    HGDIOBJ old = SelectObject(item.hDC, WellFont(dialog, state, size));
+    SetBkMode(item.hDC, TRANSPARENT);
+    SetTextColor(item.hDC, GetSysColor(COLOR_GRAYTEXT));
+    DrawTextW(item.hDC, initials.c_str(), static_cast<int>(initials.size()), &box, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+    SelectObject(item.hDC, old);
+}
+
+// a picture file dropped on the well; dropped elsewhere on the window it is not taken
+bool DropPicture(HWND dialog, ContactState& state, HDROP drop) {
+    POINT at = {};
+    DragQueryPoint(drop, &at);
+    RECT well;
+    GetWindowRect(GetDlgItem(dialog, IDC_CONTACT_PICTURE), &well);
+    MapWindowPoints(nullptr, dialog, reinterpret_cast<POINT*>(&well), 2);
+    std::wstring path;
+    bool taken = !state.preparing && PtInRect(&well, at) && DragQueryFileW(drop, 0xFFFFFFFF, nullptr, 0) > 0;
+    if (taken) {
+        path.assign(DragQueryFileW(drop, 0, nullptr, 0), L'\0');
+        DragQueryFileW(drop, 0, path.data(), static_cast<UINT>(path.size() + 1));
+    }
+    DragFinish(drop);
+    if (taken) {
+        PreparePicture(dialog, state, path);
+    }
+    return taken;
+}
+
 // the card as typed, saved in the core; false when it could not be, which was said (the core says why)
 bool SaveContact(HWND dialog, ContactState& state) {
     if (!AddAddress(dialog, state)) {
@@ -574,6 +803,7 @@ bool SaveContact(HWND dialog, ContactState& state) {
     }
     core::String unused(error);
     state.saved = saved;
+    ApplyPicture(state.core, state, saved);
     return true;
 }
 
@@ -597,6 +827,10 @@ void OnContactCommand(HWND dialog, ContactState& state, WORD id, WORD code) {
     if (code == EN_CHANGE) {
         if (id == IDC_CONTACT_FIRST || id == IDC_CONTACT_LAST || id == IDC_CONTACT_DISPLAY) {
             OnNameChanged(dialog, state, id);
+            // the initials of an empty well follow the name
+            if (!state.picture) {
+                InvalidateRect(GetDlgItem(dialog, IDC_CONTACT_PICTURE), nullptr, FALSE);
+            }
         }
         return;
     }
@@ -604,6 +838,10 @@ void OnContactCommand(HWND dialog, ContactState& state, WORD id, WORD code) {
     bool hasAddress = address >= 0 && static_cast<size_t>(address) < state.addresses.size();
     switch (id) {
     case IDOK: {
+        // not while a picture is prepared (OK is off then): it would be saved without it
+        if (state.preparing) {
+            return;
+        }
         // Enter in the address or phone box adds what was typed there; elsewhere it saves the card
         HWND focus = GetFocus();
         if (focus == GetDlgItem(dialog, IDC_CONTACT_ADDRESS) && !ItemText(dialog, IDC_CONTACT_ADDRESS).empty()) {
@@ -636,6 +874,12 @@ void OnContactCommand(HWND dialog, ContactState& state, WORD id, WORD code) {
     case IDC_CONTACT_PHONE_ADD:
         AddPhone(dialog, state);
         return;
+    case IDC_CONTACT_PICTURE_CHOOSE:
+        ChoosePicture(dialog, state);
+        return;
+    case IDC_CONTACT_PICTURE_REMOVE:
+        RemovePicture(dialog, state);
+        return;
     case IDC_CONTACT_PHONE_REMOVE: {
         int phone = ListView_GetNextItem(GetDlgItem(dialog, IDC_CONTACT_PHONES), -1, LVNI_SELECTED);
         if (phone >= 0 && static_cast<size_t>(phone) < state.phones.size()) {
@@ -657,18 +901,38 @@ bool RemoveContactItem(HWND dialog, ContactState& state, HWND list) {
 }
 
 LRESULT CALLBACK ContactProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    if (message == WM_DESTROY) {
+        ClosePictureJobs(hwnd);
+    }
     if (message == WM_NOTIFY && reinterpret_cast<NMHDR*>(lParam)->idFrom == IDC_CONTACT_PHONES &&
         reinterpret_cast<NMHDR*>(lParam)->code == LVN_ITEMCHANGED) {
         UpdatePhoneRemove(hwnd);
         return 0;
+    }
+    if (auto* state = reinterpret_cast<ContactState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA))) {
+        if (message == WM_DRAWITEM && wParam == IDC_CONTACT_PICTURE) {
+            DrawWell(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam), *state, hwnd);
+            return TRUE;
+        }
+        if (message == WM_DROPFILES) {
+            DropPicture(hwnd, *state, reinterpret_cast<HDROP>(wParam));
+            return 0;
+        }
+        if (message == WM_PICTURE_PREPARED) {
+            TakePrepared(hwnd, *state, reinterpret_cast<PreparedPicture*>(lParam));
+            return 0;
+        }
     }
     return DialogProc<ContactState>(hwnd, message, wParam, lParam, OnContactCommand, RemoveContactItem);
 }
 
 // how Contact Properties is laid out, at the DPI
 struct ContactLayout {
-    int width = Scale(470);
     int pad = Scale(10);
+    // the picture well and its buttons at the top left, beside the names
+    int well = Scale(kWell);
+    int wellColumn = std::max(well, ButtonWidth({core::Plain(PE_TEXT_UI_CARD_PICTURE_CHOOSE), core::Plain(PE_TEXT_UI_REMOVE)}, kWell));
+    int width = Scale(470) + wellColumn + pad;
     int gap = Scale(6);
     int row = Scale(22);
     int label = Scale(18);
@@ -685,7 +949,22 @@ struct ContactLayout {
     }
 };
 
-// the names, nickname and company, a label and a box each; the top of what follows
+// the picture well at the top left with Choose... and Remove under it (made after the names, so Tab reaches the names
+// first)
+void BuildPicture(HWND dialog, ContactState& state, const ContactLayout& at) {
+    int left = at.pad + (at.wellColumn - at.well) / 2;
+    std::wstring name = core::Plain(PE_TEXT_UI_CARD_PICTURE);
+    HWND well = CreateChild(dialog, L"STATIC", name.c_str(), SS_OWNERDRAW, IDC_CONTACT_PICTURE,
+                            {left, at.pad, left + at.well, at.pad + at.well});
+    SetAccessibleDescription(well, core::Plain(PE_TEXT_UI_CARD_PICTURE_CHOOSE));
+    int y = at.pad + at.well + at.gap;
+    MakeButton(dialog, PE_TEXT_UI_CARD_PICTURE_CHOOSE, IDC_CONTACT_PICTURE_CHOOSE, at.pad, y, at.wellColumn);
+    MakeButton(dialog, PE_TEXT_UI_REMOVE, IDC_CONTACT_PICTURE_REMOVE, at.pad, y + at.button + at.gap, at.wellColumn, true);
+    DragAcceptFiles(dialog, TRUE);
+    LoadWellPicture(dialog, state);
+}
+
+// the names, nickname and company, a label and a box each, beside the picture well; the top of what follows
 int BuildNames(HWND dialog, const ContactState& state, const ContactLayout& at, int y) {
     int labelWidth = LabelWidth({core::T(PE_TEXT_UI_CONTACT_FIRST), core::T(PE_TEXT_UI_CONTACT_LAST), core::T(PE_TEXT_UI_CONTACT_DISPLAY),
                                  core::T(PE_TEXT_UI_CONTACT_NICKNAME), core::T(PE_TEXT_UI_CONTACT_COMPANY)},
@@ -695,9 +974,10 @@ int BuildNames(HWND dialog, const ContactState& state, const ContactLayout& at, 
         {PE_TEXT_UI_CONTACT_DISPLAY, IDC_CONTACT_DISPLAY, &state.display}, {PE_TEXT_UI_CONTACT_NICKNAME, IDC_CONTACT_NICKNAME, &state.nickname},
         {PE_TEXT_UI_CONTACT_COMPANY, IDC_CONTACT_COMPANY, &state.company},
     };
+    int left = at.pad + at.wellColumn + at.pad;
     for (const auto& [label, id, value] : fields) {
-        MakeLabel(dialog, core::T(label), {at.pad, y + Scale(3), at.pad + labelWidth, y + at.row});
-        MakeEdit(dialog, id, *value, {at.pad + labelWidth, y, at.width - at.pad, y + at.row});
+        MakeLabel(dialog, core::T(label), {left, y + Scale(3), left + labelWidth, y + at.row});
+        MakeEdit(dialog, id, *value, {left + labelWidth, y, at.width - at.pad, y + at.row});
         y += at.row + at.gap;
     }
     return y;
@@ -762,6 +1042,7 @@ int64_t ContactProperties(HWND owner, PeCore* core, int64_t id) {
     HWND dialog = CreateModalWindow(owner, kContactClass, title.c_str(), at.width, height);
     // the boxes are filled as they are made, before their changes reach the window
     int y = BuildNames(dialog, state, at, at.pad);
+    BuildPicture(dialog, state, at);
     y = BuildAddresses(dialog, at, y);
     y = BuildPhones(dialog, at, y);
     BuildNotes(dialog, state, at, y);
@@ -770,6 +1051,12 @@ int64_t ContactProperties(HWND owner, PeCore* core, int64_t id) {
     ShowAddresses(dialog, state, 0);
     ShowPhones(dialog, state, 0);
     RunModal(dialog, GetDlgItem(dialog, IDC_CONTACT_FIRST), state.done);
+    if (state.picture) {
+        DeleteObject(state.picture);
+    }
+    if (state.wellFont) {
+        DeleteObject(state.wellFont);
+    }
     return state.saved;
 }
 

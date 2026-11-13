@@ -30,7 +30,7 @@ pub enum Loaded {
 pub struct Reader {
     pub widget: gtk::Box,
     header: gtk::Box,
-    logo: gtk::Picture,
+    logo: gtk::Image,
     subject: gtk::Label,
     fields: gtk::Grid,
     from: gtk::Label,
@@ -76,6 +76,8 @@ pub struct Reader {
     /// The view and the logo being made for it, and the one-click unsubscribe on the way; 0 for none
     view_request: Cell<u64>,
     logo_request: Cell<u64>,
+    /// Without a logo, the sender's picture from the Address Book being drawn; 0 for none
+    picture_request: Cell<u64>,
     unsubscribe_request: Cell<u64>,
 }
 
@@ -159,11 +161,21 @@ impl Reader {
         text.append(&top);
         text.append(&fields);
         text.append(&note);
-        let logo = gtk::Picture::new();
-        logo.set_size_request(48, 48);
-        logo.set_valign(gtk::Align::Center);
+        // always 48 points, the drawn pixels scaled into them
+        let logo = gtk::Image::builder().pixel_size(48).build();
         logo.set_widget_name("reader-logo");
         logo.set_visible(false);
+        // round for a contact's picture (reader-contact), as the list draws senders; a brand's logo square
+        let logo_frame = gtk::Box::builder()
+            .width_request(48)
+            .height_request(48)
+            .halign(gtk::Align::Start)
+            .valign(gtk::Align::Center)
+            .hexpand(false)
+            .overflow(gtk::Overflow::Hidden)
+            .visible(false)
+            .build();
+        logo_frame.append(&logo);
         let attachments_label = gtk::Label::new(Some("1 file"));
         let clip = gtk::Box::new(gtk::Orientation::Horizontal, 6);
         clip.append(&gtk::Image::from_icon_name("ic-attach-symbolic"));
@@ -176,7 +188,7 @@ impl Reader {
         attachments.set_visible(false);
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 12);
         header.add_css_class("reader-header");
-        header.append(&logo);
+        header.append(&logo_frame);
         header.append(&text);
         header.append(&attachments);
 
@@ -242,6 +254,7 @@ impl Reader {
             remote_images: Cell::new(false),
             view_request: Cell::new(0),
             logo_request: Cell::new(0),
+            picture_request: Cell::new(0),
             unsubscribe_request: Cell::new(0),
         };
         let reader = Rc::new(reader);
@@ -512,6 +525,14 @@ impl Reader {
                 self.show_logo(shell().core.logo_result(*request), LOGO_SIZE);
                 None
             }
+            Event::PictureReady { request }
+                if self.picture_request.get() != 0 && *request == self.picture_request.get() =>
+            {
+                self.picture_request.set(0);
+                self.show_logo(shell().core.picture_result(*request), LOGO_SIZE);
+                self.set_round(true);
+                None
+            }
             _ => None,
         }
     }
@@ -545,6 +566,10 @@ impl Reader {
                 .logo_start(self.folder.get(), self.uid.get(), LOGO_SIZE as u32)
                 .unwrap_or(0);
             self.logo_request.set(request);
+        } else if view.picture != 0 {
+            // the sender's picture from the Address Book, where a brand's logo would be
+            let request = core.picture_start(view.picture, LOGO_SIZE as u32).unwrap_or(0);
+            self.picture_request.set(request);
         }
         *self.view.borrow_mut() = Some(view);
         true
@@ -648,6 +673,7 @@ impl Reader {
         self.remote_images.set(false);
         self.view.borrow_mut().take();
         self.logo_request.set(0);
+        self.picture_request.set(0);
         // what was looked for is not in the next message
         self.find_bar.set_search_mode(false);
         self.summary.borrow_mut().take();
@@ -658,7 +684,7 @@ impl Reader {
         self.unsubscribe.set_visible(false);
         self.retry.set_visible(false);
         self.stop_downloading_note();
-        self.logo.set_visible(false);
+        self.set_logo_shown(false);
         self.subject.set_text("");
         self.fields.set_visible(false);
         self.note.set_visible(false);
@@ -839,9 +865,9 @@ impl Reader {
         match pixels.and_then(|pixels| crate::ui::bgra_texture(pixels, size)) {
             Some(texture) => {
                 self.logo.set_paintable(Some(&texture));
-                self.logo.set_visible(true);
+                self.set_logo_shown(true);
             }
-            None => self.logo.set_visible(false),
+            None => self.set_logo_shown(false),
         }
     }
 
@@ -901,7 +927,27 @@ impl Reader {
     }
 
     pub fn hide_logo(&self) {
-        self.logo.set_visible(false);
+        self.set_logo_shown(false);
+        self.set_round(false);
+    }
+
+    /// The picture beside the header shown or not, with the frame that sizes and rounds it
+    fn set_logo_shown(&self, shown: bool) {
+        self.logo.set_visible(shown);
+        if let Some(frame) = self.logo.parent() {
+            frame.set_visible(shown);
+        }
+    }
+
+    /// The picture beside the header round (a contact's) or square (a brand's logo)
+    fn set_round(&self, round: bool) {
+        if let Some(frame) = self.logo.parent() {
+            if round {
+                frame.add_css_class("reader-contact");
+            } else {
+                frame.remove_css_class("reader-contact");
+            }
+        }
     }
 
     /// What the e2e driver checks: the header's words

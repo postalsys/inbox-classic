@@ -268,6 +268,11 @@ void SetNotify(bool on) {
 
 }  // namespace
 
+// a contact's picture changed: the list's rows read again
+void ContactPictureChanged() {
+    g_mailbox.ReloadRows();
+}
+
 // the window back from the tray (or the taskbar), in front
 void ShowMain() {
     if (IsIconic(g_main)) {
@@ -1356,6 +1361,8 @@ constexpr ULONG_PTR kTestBadge = 0x42414447;
 constexpr ULONG_PTR kTestFromStore = 0x53544F52;
 // with --test-hooks only: the picture of the list's row of the message whose subject is the text (TestRowPicture)
 constexpr ULONG_PTR kTestRowPicture = 0x50494354;
+// with --test-hooks only: where the list's top row starts, and whether its header is shown (TestListTop)
+constexpr ULONG_PTR kTestListTop = 0x4C544F50;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1800,6 +1807,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (g_arguments.testHooks && data->dwData == kTestLink && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring uri(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
             return g_mailbox.TestLink(uri) ? 1 : 0;
+        }
+        if (g_arguments.testHooks && data->dwData == kTestListTop) {
+            return g_mailbox.TestListTop();
         }
         if (g_arguments.testHooks && data->dwData == kTestRowPicture && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring subject(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
