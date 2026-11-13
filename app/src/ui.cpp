@@ -153,6 +153,14 @@ void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORR
     DeleteObject(font);
 }
 
+HBITMAP CoreBitmap(uint8_t* pixels, size_t length, int size) {
+    HBITMAP bitmap = PremultipliedBitmap(pixels, length, size);
+    if (pixels) {
+        pe_bytes_free(pixels, length);
+    }
+    return bitmap;
+}
+
 HBITMAP PremultipliedBitmap(const uint8_t* pixels, size_t length, int size) {
     size_t expected = static_cast<size_t>(size) * size * 4;
     if (!pixels || size <= 0 || length != expected) {
@@ -1084,6 +1092,18 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     if (wasEnabled) {
         SetActiveWindow(root);
     }
+}
+
+std::wstring OpenFileDialog(HWND owner, const wchar_t* title, const wchar_t* filter) {
+    wchar_t path[MAX_PATH] = L"";
+    OPENFILENAMEW dialog = {sizeof(dialog)};
+    dialog.hwndOwner = owner;
+    dialog.lpstrFilter = filter;
+    dialog.lpstrFile = path;
+    dialog.nMaxFile = MAX_PATH;
+    dialog.lpstrTitle = title;
+    dialog.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+    return GetOpenFileNameW(&dialog) ? std::wstring(path) : std::wstring();
 }
 
 std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter) {

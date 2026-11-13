@@ -526,17 +526,10 @@ void DropOnText(Compose* state, const std::vector<std::wstring>& paths) {
 }
 
 void InsertPicture(HWND hwnd, Writing* state) {
-    wchar_t path[MAX_PATH] = L"";
-    OPENFILENAMEW dialog = {sizeof(dialog)};
-    dialog.hwndOwner = hwnd;
     std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_FILTER_PICTURES), L"*.png;*.jpg;*.jpeg;*.gif"}});
     std::wstring title = core::Plain(PE_TEXT_UI_INSERT_PICTURE);
-    dialog.lpstrFilter = filter.c_str();
-    dialog.lpstrFile = path;
-    dialog.nMaxFile = MAX_PATH;
-    dialog.lpstrTitle = title.c_str();
-    dialog.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-    if (!GetOpenFileNameW(&dialog)) {
+    std::wstring path = OpenFileDialog(hwnd, title.c_str(), filter.c_str());
+    if (path.empty()) {
         return;
     }
     if (!InsertPictureFile(state, path)) {

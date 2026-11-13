@@ -268,11 +268,12 @@ void SetNotify(bool on) {
 
 }  // namespace
 
-// the window back from the tray (or the taskbar), in front
+// a contact's picture changed: the list's rows read again
 void ContactPictureChanged() {
     g_mailbox.ReloadRows();
 }
 
+// the window back from the tray (or the taskbar), in front
 void ShowMain() {
     if (IsIconic(g_main)) {
         ShowWindow(g_main, SW_RESTORE);

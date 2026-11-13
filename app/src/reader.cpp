@@ -658,14 +658,11 @@ void Reader::ShowLogo(bool logo, uint64_t picture) {
 
 // the logo's or the picture's pixels from the core, BGRA with the alpha multiplied in, beside the header
 void Reader::ShowDrawn(uint8_t* pixels, size_t length) {
-    logoBitmap_ = PremultipliedBitmap(pixels, length, logoSize_);
+    logoBitmap_ = CoreBitmap(pixels, length, logoSize_);
     if (logoBitmap_) {
         ShowWindow(logo_, SW_SHOW);
         Layout();
         InvalidateRect(logo_, nullptr, TRUE);
-    }
-    if (pixels) {
-        pe_bytes_free(pixels, length);
     }
 }
 

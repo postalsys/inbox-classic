@@ -132,6 +132,8 @@ void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORR
 // the core's pixels of a picture (`size` x `size` BGRA with the alpha multiplied in, `length` bytes) as a bitmap;
 // nullptr when they are not that
 HBITMAP PremultipliedBitmap(const uint8_t* pixels, size_t length, int size);
+// PremultipliedBitmap of pixels the core handed over, which are freed here (pe_bytes_free), NULL taken as none
+HBITMAP CoreBitmap(uint8_t* pixels, size_t length, int size);
 // such a bitmap drawn at `x`, `y` with its own transparency, through `memory` when given (a DC kept for many
 // pictures), else one made for it
 void DrawPremultiplied(HDC dc, int x, int y, HBITMAP bitmap, int size, HDC memory = nullptr);
@@ -198,6 +200,8 @@ void SetAppIcons(WNDCLASSEXW& windowClass);
 std::wstring FolderDialog(HWND owner, const wchar_t* title);
 // the files chosen in an Open dialog that takes several, none when cancelled
 std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, const wchar_t* filter = nullptr);
+// the one file chosen in an Open dialog, empty when cancelled
+std::wstring OpenFileDialog(HWND owner, const wchar_t* title, const wchar_t* filter);
 bool WriteFileBytes(const std::wstring& path, const uint8_t* data, size_t size);
 // marks a saved file (an attachment, a message) as from the internet, for SmartScreen and Office's Protected View
 void MarkFromInternet(const std::wstring& path);
