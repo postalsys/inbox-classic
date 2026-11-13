@@ -25,6 +25,7 @@ mod search;
 mod secrets;
 mod selection;
 mod sign_in_apps;
+mod snippet;
 mod targets;
 mod text;
 pub mod timing;

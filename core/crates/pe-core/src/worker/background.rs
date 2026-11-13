@@ -107,7 +107,8 @@ impl Worker {
     }
 
     /// One batch of what is done in the background: messages downloaded ahead first (with their search text), then
-    /// conversations, then the search text of the rest. Whether there may be more.
+    /// conversations, then the search text of the rest, then the snippets of mail indexed before there were any.
+    /// Whether there may be more.
     async fn background_batch(&mut self, store: &mut Store) -> Result<bool, Failure> {
         if self.download_ahead(store).await? > 0 {
             return Ok(true);
@@ -115,6 +116,9 @@ impl Worker {
         if self.thread_stored(store).await? > 0 {
             return Ok(true);
         }
-        Ok(self.index_texts(store).await? > 0)
+        if self.index_texts(store, Store::messages_to_index).await? > 0 {
+            return Ok(true);
+        }
+        Ok(self.index_texts(store, Store::messages_without_snippet).await? > 0)
     }
 }

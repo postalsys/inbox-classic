@@ -455,7 +455,8 @@ impl Store {
         Ok(lists)
     }
 
-    /// A collapsed conversation's row shows the dates of its newest message, as the list places it by them. Its own
+    /// A collapsed conversation's row shows the dates of its newest message, as the list places it by them (its
+    /// snippet stays its own, the first message's, which selecting the row opens, beside its sender and subject). Its own
     /// small query on the conversations' index rather than a MAX in [`groups`]: with a MAX there besides the MIN, SQLite
     /// would no longer take the key sorts' bare column (`k`) from the first message's row.
     fn date_collapsed(&self, search: &Search, rows: &mut [Message]) -> Result<()> {
@@ -881,9 +882,22 @@ mod tests {
             .unwrap();
         let list = Search::folder(inbox);
         let newest = Sort::default();
+        for (uid, words) in [(1, "first words"), (4, "newest words")] {
+            let id = store.message(inbox, uid).unwrap().unwrap().id;
+            let text = crate::IndexText {
+                snippet: words.into(),
+                ..Default::default()
+            };
+            store.set_indexed(id, &text).unwrap();
+        }
 
         // collapsed: a's conversation (newest message 400) above d's (200); a stands for b and c
         let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
+        assert_eq!(
+            rows[0].snippet.as_deref(),
+            Some("first words"),
+            "collapsed: its own snippet, of the message selecting it opens"
+        );
         assert_eq!(subjects(&rows), [("a@x".into(), 0), ("d@x".into(), 0)]);
         assert_eq!(
             rows[0].info.date,

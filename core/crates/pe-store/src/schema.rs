@@ -407,6 +407,16 @@ CREATE TABLE moving_sources (
     PRIMARY KEY (folder_id, uid)
 );
 "#,
+    // the first words of what the sender wrote, for the message list's rows of three lines (pe-core snippet.rs): NULL
+    // until the core has read the message's text, empty for a message without any
+    r#"
+ALTER TABLE messages ADD COLUMN snippet TEXT;
+-- what the search indexed before there was a snippet, newest first: fetched again in the background
+CREATE INDEX messages_snippet_missing ON messages (COALESCE(date, internal_date) DESC)
+    WHERE snippet IS NULL AND text_indexed = 1;
+-- the sources kept are read again where they are, for theirs (pe-core search.rs index_pending)
+UPDATE bodies SET indexed = 0;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

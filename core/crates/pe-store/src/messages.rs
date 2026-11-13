@@ -157,6 +157,8 @@ pub struct Message {
     pub thread: Option<crate::ThreadPlace>,
     /// Its conversation's mark (Watch or Ignore Conversation): the list's Watch column, and an ignored one's row grey
     pub mark: crate::ThreadMark,
+    /// The first words of what the sender wrote; None until the core has read its text
+    pub snippet: Option<String>,
 }
 
 impl Message {
@@ -251,7 +253,7 @@ pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_da
      from_address, recipients, message_id, in_reply_to, has_attachments, \
      EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id), sender_people, recipient_people, \
      attachment_names, attachment_count, refs, thread_id, bounce, \
-     COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0)";
+     COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0), snippet";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     Ok(Message {
@@ -260,6 +262,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
         cached: row.get(15)?,
         thread: None,
         mark: crate::ThreadMark::of(row.get(23)?),
+        snippet: row.get(24)?,
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,

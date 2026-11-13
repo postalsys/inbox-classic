@@ -108,10 +108,12 @@ the folder bar and the popover show them.
   white space folded, the invisible padding of marketing mail (zero width characters, runs of `&nbsp;`) removed, cut at
   a word to at most 200 characters.
 - **Mail stored before**: its text is in the search index, which cannot be read back. Messages with a downloaded
-  source are done from it, locally; the rest are fetched again by the background worker (text parts only, as before),
-  the folder on screen first, newest first, after everything `open-speed-plan.md` gives it to do. Until then a row's
-  third line is empty.
-- `PeMessage` gains `snippet`. A conversation's head row carries its newest message's.
+  source are done from it, locally (a migration marks the sources to be read again at the next start); the rest are
+  fetched again by the background worker (text parts only, as before), each account's newest first, after everything
+  `open-speed-plan.md` gives it to do. Until then a row's third line is empty. (Built: newest first across the account,
+  not the folder on screen first, which would need the worker to know what the windows show.)
+- `PeMessage` gains `snippet`. A conversation's head row carries its own (the first message's, which selecting it
+  opens, beside its sender and subject), while its date is the newest message's as before.
 
 ### Sender pictures
 
@@ -247,8 +249,8 @@ Decided with Andris on 2026-11-13:
 5. **The placeholder is quiet initials**: one muted tone for everyone, no color per sender.
 6. **Rows in Columns always have three lines.** No setting for the text line.
 7. **Classic rows get no pictures.** Classic stays as it is.
-8. **Mail stored before is filled in by a background pass over all of it**: the folder on screen first, newest first,
-   after the worker's other work.
+8. **Mail stored before is filled in by a background pass over all of it**: newest first, after the worker's other
+   work.
 
 Still open, to settle by trying it: the numbers (1320 up, 1200 down, 900 as the floor of an explicit Columns).
 

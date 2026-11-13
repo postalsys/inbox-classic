@@ -855,11 +855,12 @@ impl Worker {
         Ok(batch.len())
     }
 
-    /// Fetches the text parts of the newest messages the search index does not have the text of, and indexes them;
-    /// how many messages that was (0: all are indexed). A message with no text part is indexed without text.
-    async fn index_texts(&mut self, store: &mut Store) -> Result<usize, Failure> {
+    /// Fetches the text parts of the newest messages `pending` gives (those the search index does not have the text
+    /// of, or then those indexed before the store kept snippets), and indexes them; how many messages that was (0: none
+    /// is left). A message with no text part is indexed without text.
+    async fn index_texts(&mut self, store: &mut Store, pending: PendingTexts) -> Result<usize, Failure> {
         // the newest message's folder, so a batch selects one folder
-        let batch = store.messages_to_index(self.account, crate::search::TEXT_BATCH)?;
+        let batch = pending(store, self.account, crate::search::TEXT_BATCH)?;
         let Some(&(_, folder, _)) = batch.first() else {
             return Ok(0);
         };
@@ -891,18 +892,28 @@ impl Worker {
             }
             Err(failure) => return Err(failure),
         };
-        store.transaction(|store| {
-            for (message, uid) in messages.iter().filter(|(message, _)| !refused.contains(message)) {
+        // read before the transaction, which holds the store
+        let indexed: Vec<(i64, pe_store::IndexText)> = messages
+            .iter()
+            .filter(|(message, _)| !refused.contains(message))
+            .map(|(message, uid)| {
                 let body = texts
                     .iter()
                     .find(|(found, _)| found == uid)
                     .map(|(_, parts)| crate::search::parts_text(parts))
                     .unwrap_or_default();
+                let snippet = crate::snippet::of(&body);
                 let text = pe_store::IndexText {
                     body,
+                    snippet,
                     ..Default::default()
                 };
-                store.set_indexed(*message, &text)?;
+                (*message, text)
+            })
+            .collect();
+        store.transaction(|store| {
+            for (message, text) in &indexed {
+                store.set_indexed(*message, text)?;
             }
             Ok(())
         })?;
@@ -1600,3 +1611,7 @@ impl Worker {
         Ok(&mut self.connection.as_mut().expect("connected").0)
     }
 }
+
+/// Which messages [`Worker::index_texts`] fetches the text of: the store's `messages_to_index` or
+/// `messages_without_snippet` for an account, a batch at most
+pub(crate) type PendingTexts = fn(&Store, AccountId, usize) -> pe_store::Result<Vec<(i64, FolderId, u64)>>;
