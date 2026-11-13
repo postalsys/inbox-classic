@@ -10,6 +10,8 @@ menu-view = &View
 menu-tools = &Tools
 menu-message = &Message
 menu-help = &Help
+menu-layout = &Layout
+menu-sort-by = Sort &By
 menu-folder = F&older
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
@@ -59,6 +61,15 @@ cmd-expand-all-threads = &Expand All Conversations
 cmd-collapse-all-threads = C&ollapse All Conversations
 ui-group-by-conversation = &Group messages by conversation
 cmd-folder-list = &Folder List
+cmd-layout-automatic = &Automatic
+cmd-layout-classic = &Classic
+cmd-layout-columns = C&olumns
+cmd-sort-date = &Date
+cmd-sort-from = &From
+cmd-sort-subject = &Subject
+cmd-sort-size = Si&ze
+cmd-sort-ascending = Sort &Ascending
+cmd-sort-descending = Sort Desce&nding
 cmd-hide-ignored = &Hide Ignored Conversations
 cmd-hide-read = Hide &Read Messages
 cmd-notify = &Notify of New Mail
@@ -500,3 +511,13 @@ ui-eml-default = Open .eml Files with Inbox Classic
 ui-eml-default-done = Inbox Classic now opens .eml files.
 ui-eml-default-failed = Inbox Classic could not be made the app for .eml files: { $reason }
 ui-folders = Folders
+ui-sorted-by = Sorted by { $field }
+ui-layout-label = Layout:
+ui-columns-note = The window is wide enough for the column layout. View > Layout changes it.
+ui-row-unread = Unread
+ui-row-flagged = Flagged
+ui-row-attachments = Has attachments
+ui-row-messages = { $count ->
+    [one] { $count } message
+   *[other] { $count } messages
+}

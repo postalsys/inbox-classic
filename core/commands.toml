@@ -15,6 +15,8 @@
 #   toggle   a menu item with a check mark
 #   one      acts on one message only: off while several are selected
 #   some     acts on one or several messages: off with none selected
+#   submenu  the submenu of its menu it is in (layout: View > Layout), labelled by the catalog's menu-<submenu>; its
+#            items one after another here
 
 [[command]]
 id = "new_account"
@@ -60,7 +62,30 @@ windows = 104
 menu = "edit"
 some = true
 
-# the folder list shown beside the messages, or hidden (its folder then chosen from the folder bar on Windows, from
+# View > Layout: Automatic follows the window's width (pe_layout_for), Classic and Columns hold; the one chosen
+# checked. The same choice as in Options
+[[command]]
+id = "layout_automatic"
+windows = 156
+menu = "view"
+submenu = "layout"
+toggle = true
+
+[[command]]
+id = "layout_classic"
+windows = 157
+menu = "view"
+submenu = "layout"
+toggle = true
+
+[[command]]
+id = "layout_columns"
+windows = 158
+menu = "view"
+submenu = "layout"
+toggle = true
+
+# the folder list shown beside, or hidden (its folder then chosen from the folder bar on Windows, from
 # the folder button on Linux, with Go to Folder on the Mac); a setting each app keeps. F9, and the Mac's Show Sidebar
 [[command]]
 id = "folder_list"
@@ -69,6 +94,50 @@ menu = "view"
 toggle = true
 key = "F9"
 mac = "Ctrl+Mod+S"
+
+# View > Sort By: the list's order, by a field (the one in use checked; a new field starts its own way,
+# pe_sort_starts_ascending) and which way. Also the column headings of Classic; the Columns list has none
+[[command]]
+id = "sort_date"
+windows = 159
+menu = "view"
+submenu = "sort_by"
+toggle = true
+
+[[command]]
+id = "sort_from"
+windows = 160
+menu = "view"
+submenu = "sort_by"
+toggle = true
+
+[[command]]
+id = "sort_subject"
+windows = 161
+menu = "view"
+submenu = "sort_by"
+toggle = true
+
+[[command]]
+id = "sort_size"
+windows = 162
+menu = "view"
+submenu = "sort_by"
+toggle = true
+
+[[command]]
+id = "sort_ascending"
+windows = 163
+menu = "view"
+submenu = "sort_by"
+toggle = true
+
+[[command]]
+id = "sort_descending"
+windows = 164
+menu = "view"
+submenu = "sort_by"
+toggle = true
 
 [[command]]
 id = "pictures"

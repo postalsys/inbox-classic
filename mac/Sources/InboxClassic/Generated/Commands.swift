@@ -10,7 +10,16 @@ enum Command: Int, CaseIterable {
     case selectAll = 134
     case markRead = 103
     case markUnread = 104
+    case layoutAutomatic = 156
+    case layoutClassic = 157
+    case layoutColumns = 158
     case folderList = 155
+    case sortDate = 159
+    case sortFrom = 160
+    case sortSubject = 161
+    case sortSize = 162
+    case sortAscending = 163
+    case sortDescending = 164
     case pictures = 105
     case about = 106
     case newMail = 107
@@ -69,7 +78,16 @@ enum Command: Int, CaseIterable {
         case .selectAll: return "edit"
         case .markRead: return "edit"
         case .markUnread: return "edit"
+        case .layoutAutomatic: return "view"
+        case .layoutClassic: return "view"
+        case .layoutColumns: return "view"
         case .folderList: return "view"
+        case .sortDate: return "view"
+        case .sortFrom: return "view"
+        case .sortSubject: return "view"
+        case .sortSize: return "view"
+        case .sortAscending: return "view"
+        case .sortDescending: return "view"
         case .pictures: return "view"
         case .about: return "help"
         case .newMail: return "message"
@@ -135,7 +153,16 @@ enum Command: Int, CaseIterable {
         case .selectAll: return .cmdSelectAll
         case .markRead: return .cmdMarkRead
         case .markUnread: return .cmdMarkUnread
+        case .layoutAutomatic: return .cmdLayoutAutomatic
+        case .layoutClassic: return .cmdLayoutClassic
+        case .layoutColumns: return .cmdLayoutColumns
         case .folderList: return .cmdFolderList
+        case .sortDate: return .cmdSortDate
+        case .sortFrom: return .cmdSortFrom
+        case .sortSubject: return .cmdSortSubject
+        case .sortSize: return .cmdSortSize
+        case .sortAscending: return .cmdSortAscending
+        case .sortDescending: return .cmdSortDescending
         case .pictures: return .cmdPictures
         case .about: return .cmdAbout
         case .newMail: return .cmdNewMail
@@ -196,7 +223,16 @@ enum Command: Int, CaseIterable {
         case .selectAll: return ("a", [.command])
         case .markRead: return ("u", [.command, .shift])
         case .markUnread: return nil
+        case .layoutAutomatic: return nil
+        case .layoutClassic: return nil
+        case .layoutColumns: return nil
         case .folderList: return ("s", [.control, .command])
+        case .sortDate: return nil
+        case .sortFrom: return nil
+        case .sortSubject: return nil
+        case .sortSize: return nil
+        case .sortAscending: return nil
+        case .sortDescending: return nil
         case .pictures: return nil
         case .about: return nil
         case .newMail: return ("n", [.command])
@@ -257,7 +293,16 @@ enum Command: Int, CaseIterable {
         case .selectAll: return false
         case .markRead: return false
         case .markUnread: return false
+        case .layoutAutomatic: return true
+        case .layoutClassic: return true
+        case .layoutColumns: return true
         case .folderList: return true
+        case .sortDate: return true
+        case .sortFrom: return true
+        case .sortSubject: return true
+        case .sortSize: return true
+        case .sortAscending: return true
+        case .sortDescending: return true
         case .pictures: return false
         case .about: return false
         case .newMail: return false
@@ -318,7 +363,16 @@ enum Command: Int, CaseIterable {
         case .selectAll: return false
         case .markRead: return true
         case .markUnread: return true
+        case .layoutAutomatic: return false
+        case .layoutClassic: return false
+        case .layoutColumns: return false
         case .folderList: return false
+        case .sortDate: return false
+        case .sortFrom: return false
+        case .sortSubject: return false
+        case .sortSize: return false
+        case .sortAscending: return false
+        case .sortDescending: return false
         case .pictures: return false
         case .about: return false
         case .newMail: return false
@@ -379,7 +433,16 @@ enum Command: Int, CaseIterable {
         case .selectAll: return false
         case .markRead: return false
         case .markUnread: return false
+        case .layoutAutomatic: return false
+        case .layoutClassic: return false
+        case .layoutColumns: return false
         case .folderList: return false
+        case .sortDate: return false
+        case .sortFrom: return false
+        case .sortSubject: return false
+        case .sortSize: return false
+        case .sortAscending: return false
+        case .sortDescending: return false
         case .pictures: return true
         case .about: return false
         case .newMail: return false
@@ -427,6 +490,76 @@ enum Command: Int, CaseIterable {
         case .addSenderToBook: return true
         case .importAddressBook: return false
         case .exportAddressBook: return false
+        }
+    }
+
+    /// The submenu of its menu it is in ("layout"), labelled by the catalog's menu-<submenu>; nil for none
+    var submenu: String? {
+        switch self {
+        case .newAccount: return nil
+        case .exit: return nil
+        case .sync: return nil
+        case .undo: return nil
+        case .selectAll: return nil
+        case .markRead: return nil
+        case .markUnread: return nil
+        case .layoutAutomatic: return "layout"
+        case .layoutClassic: return "layout"
+        case .layoutColumns: return "layout"
+        case .folderList: return nil
+        case .sortDate: return "sort_by"
+        case .sortFrom: return "sort_by"
+        case .sortSubject: return "sort_by"
+        case .sortSize: return "sort_by"
+        case .sortAscending: return "sort_by"
+        case .sortDescending: return "sort_by"
+        case .pictures: return nil
+        case .about: return nil
+        case .newMail: return nil
+        case .reply: return nil
+        case .replyAll: return nil
+        case .forward: return nil
+        case .help: return nil
+        case .delete: return nil
+        case .move: return nil
+        case .copy: return nil
+        case .flag: return nil
+        case .newFolder: return nil
+        case .renameFolder: return nil
+        case .deleteFolder: return nil
+        case .nextMessage: return nil
+        case .previousMessage: return nil
+        case .nextUnread: return nil
+        case .goToFolder: return nil
+        case .findInMessage: return nil
+        case .emptyFolder: return nil
+        case .accounts: return nil
+        case .find: return nil
+        case .saveAs: return nil
+        case .print: return nil
+        case .import: return nil
+        case .outbox: return nil
+        case .properties: return nil
+        case .markAllRead: return nil
+        case .junk: return nil
+        case .notJunk: return nil
+        case .archive: return nil
+        case .watchConversation: return nil
+        case .ignoreConversation: return nil
+        case .notify: return nil
+        case .open: return nil
+        case .defaultApp: return nil
+        case .viewSource: return nil
+        case .expandAllThreads: return nil
+        case .collapseAllThreads: return nil
+        case .hideIgnored: return nil
+        case .hideRead: return nil
+        case .aiAgents: return nil
+        case .options: return nil
+        case .addressBook: return nil
+        case .addSenderToBook: return nil
+        case .importAddressBook: return nil
+        case .exportAddressBook: return nil
         }
     }
 }

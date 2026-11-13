@@ -42,6 +42,11 @@ pub(crate) fn body(message: &Message) -> String {
         Representation::Html => shown.clone(),
         Representation::Text => text_to_html(shown),
     });
+    // plain text in lines of a length that reads well, however wide the reading pane; HTML keeps its own widths
+    let body = match representation {
+        Representation::Html => body,
+        Representation::Text => format!("<div class=\"pe-plain\">{body}</div>"),
+    };
     *last() = Some((key, body.clone()));
     body
 }

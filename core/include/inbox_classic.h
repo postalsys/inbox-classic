@@ -245,13 +245,27 @@ typedef enum PeDownloadAhead {
   PE_DOWNLOAD_AHEAD_NEVER = 2,
 } PeDownloadAhead;
 
-// Which messages the message list shows by their state (`pe_list_view_set_show`)
-typedef enum PeShow {
-  PE_SHOW_ALL = 0,
-  PE_SHOW_UNREAD = 1,
-  PE_SHOW_FLAGGED = 2,
-  PE_SHOW_WITH_ATTACHMENTS = 3,
-} PeShow;
+// What the window shows: the message list above the reading pane, or the two side by side
+typedef enum PeLayout {
+  PE_LAYOUT_CLASSIC = 0,
+  PE_LAYOUT_COLUMNS = 1,
+} PeLayout;
+
+// View > Layout: what the user chose (only ever made by the apps)
+typedef enum PeLayoutMode {
+  PE_LAYOUT_MODE_AUTOMATIC = 0,
+  PE_LAYOUT_MODE_CLASSIC = 1,
+  PE_LAYOUT_MODE_COLUMNS = 2,
+} PeLayoutMode;
+
+// How a row of the Columns list writes its date: the time, the weekday, the day and month, or the whole date, each
+// in the system's own format
+typedef enum PeDateStyle {
+  PE_DATE_STYLE_TIME = 0,
+  PE_DATE_STYLE_WEEKDAY = 1,
+  PE_DATE_STYLE_DAY_MONTH = 2,
+  PE_DATE_STYLE_FULL = 3,
+} PeDateStyle;
 
 typedef enum PeSortField {
   // The Date header, the received date without one
@@ -261,6 +275,14 @@ typedef enum PeSortField {
   PE_SORT_FIELD_SUBJECT = 3,
   PE_SORT_FIELD_SIZE = 4,
 } PeSortField;
+
+// Which messages the message list shows by their state (`pe_list_view_set_show`)
+typedef enum PeShow {
+  PE_SHOW_ALL = 0,
+  PE_SHOW_UNREAD = 1,
+  PE_SHOW_FLAGGED = 2,
+  PE_SHOW_WITH_ATTACHMENTS = 3,
+} PeShow;
 
 // What Next Unread does next, see `pe_list_view_next_unread_step`
 typedef enum PeNextUnread {
@@ -683,6 +705,10 @@ typedef struct PeMessage {
   // A notice that a message was not delivered, or not yet (a bounce): the list shows its icon in the attachment
   // column's place
   bool bounce;
+  // The first words of what the sender wrote, for the Columns list's third line: empty while the core has not read
+  // its text yet, or when it has none. A collapsed conversation's row has its newest message's. Text from the
+  // sender: shown as text, never as markup
+  const char *snippet;
 } PeMessage;
 
 // An account's folder of a special use: a row under All Inboxes
@@ -2482,6 +2508,22 @@ char *pe_help_context(const char *window);
 // # Safety
 // `url` must be NULL or a NUL-terminated string.
 char *pe_help_link_topic(const char *url);
+
+// The layout of a window `width` wide (96 DPI pixels, points or sp) that shows `current` now, for `mode`: Automatic
+// turns to Columns at 1320 and back to Classic below 1200; Columns chosen holds down to 900
+enum PeLayout pe_layout_for(enum PeLayoutMode mode,
+                            uint32_t width,
+                            enum PeLayout current);
+
+// How the Columns list writes `date` seen at `now` (seconds since the Unix epoch) in a time zone `offset` seconds east
+// of UTC
+enum PeDateStyle pe_date_style(int64_t date,
+                               int64_t now,
+                               int64_t offset);
+
+// Whether a list newly sorted by `field` starts with the smallest first (names and subjects), or the newest and
+// largest (dates and sizes)
+bool pe_sort_starts_ascending(enum PeSortField field);
 
 // A new view: no folder (it lists nothing until one is set), every message shown, newest first by Date, one row a
 // message, ignored conversations shown. NULL on failure.

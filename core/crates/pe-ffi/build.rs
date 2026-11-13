@@ -30,6 +30,8 @@ struct Command {
     one: bool,
     #[serde(default)]
     some: bool,
+    /// The submenu of its menu it is in (View > Layout), labelled by the catalog's `menu-<submenu>`
+    submenu: Option<String>,
 }
 
 const MENUS: [&str; 7] = ["file", "edit", "view", "tools", "message", "help", "tray"];
@@ -56,6 +58,14 @@ fn main() {
             "{}: core/locales/en/app.ftl has no {id}, its label",
             command.id
         );
+        if let Some(submenu) = &command.submenu {
+            let id = format!("menu-{}", submenu.replace('_', "-"));
+            assert!(
+                ids.contains(&id),
+                "{}: the catalog has no {id}, its submenu's label",
+                command.id
+            );
+        }
     }
     write(&root.join("core/include/texts.h"), &texts_c(&ids));
     write(
@@ -442,6 +452,17 @@ fn swift(table: &Table) -> String {
         )
         .unwrap();
     }
+    out.push_str(
+        "        }\n    }\n\n    /// The submenu of its menu it is in (\"layout\"), labelled by the catalog's menu-<submenu>; nil for none\n    \
+         var submenu: String? {\n        switch self {\n",
+    );
+    for command in &table.command {
+        let submenu = command
+            .submenu
+            .as_ref()
+            .map_or("nil".to_string(), |s| format!("\"{s}\""));
+        writeln!(out, "        case .{}: return {submenu}", camel(&command.id, false)).unwrap();
+    }
     out.push_str("        }\n    }\n}\n");
     out
 }
@@ -547,6 +568,17 @@ fn rust(table: &Table) -> String {
             command.one
         )
         .unwrap();
+    }
+    out.push_str(
+        "        }\n    }\n\n    /// The submenu of its menu it is in (\"layout\"), labelled by the catalog's menu-<submenu>\n    \
+         pub fn submenu(self) -> Option<&'static str> {\n        match self {\n",
+    );
+    for command in &table.command {
+        let submenu = command
+            .submenu
+            .as_ref()
+            .map_or("None".to_string(), |s| format!("Some(\"{s}\")"));
+        writeln!(out, "            Command::{} => {submenu},", camel(&command.id, true)).unwrap();
     }
     out.push_str("        }\n    }\n}\n");
     out

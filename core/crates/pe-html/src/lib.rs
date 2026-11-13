@@ -87,7 +87,9 @@ pub(crate) fn mail_builder() -> ammonia::Builder<'static> {
         // the folds of earlier messages (pe-core fold.rs), styled by the preview document
         .add_allowed_classes("details", ["pe-fold"])
         // the signature in a message being written, which the editor swaps for another account's
-        .add_allowed_classes("div", ["pe-signature"]);
+        .add_allowed_classes("div", ["pe-signature"])
+        // a plain text message (pe-core fold.rs), its lines kept to a length that reads well in a wide reading pane
+        .add_allowed_classes("div", ["pe-plain"]);
     builder
 }
 
@@ -373,6 +375,7 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
          <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
          <meta name=\"color-scheme\" content=\"light\">\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
+         div.pe-plain{{max-width:46em}}\
          details.pe-fold{{margin:6px 0}}\
          details.pe-fold>summary{{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;\
          list-style:none;font:bold 9pt Arial,sans-serif;letter-spacing:1px;\
@@ -567,6 +570,15 @@ mod tests {
         assert!(out.contains("<style>p{color:red}</style>"));
         assert!(out.contains("bgcolor=\"#fff\""));
         assert!(out.contains("style=\"padding:4px\""));
+    }
+
+    #[test]
+    fn plain_text_keeps_a_line_length() {
+        let out = sanitize("<div class=\"pe-plain\">a line</div><div class=\"other\">b</div>");
+        assert!(out.contains("<div class=\"pe-plain\">a line</div>"), "{out}");
+        assert!(!out.contains("other"), "{out}");
+        let document = render_message("<div class=\"pe-plain\">a line</div>", &RenderOptions::default(), &[]);
+        assert!(document.contains("div.pe-plain{max-width:46em}"));
     }
 
     #[test]

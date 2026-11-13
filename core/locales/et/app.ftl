@@ -8,6 +8,10 @@ menu-view = &Vaade
 menu-tools = &Tööriistad
 menu-message = &Kiri
 menu-help = &Spikker
+# review: new
+menu-layout = Pai&gutus
+# review: new
+menu-sort-by = Sor&teeri
 menu-folder = K&aust
 
 ## The commands
@@ -58,6 +62,24 @@ cmd-collapse-all-threads = &Ahenda kõik vestlused
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
 # review: new
 cmd-folder-list = &Kaustade loend
+# review: new
+cmd-layout-automatic = &Automaatne
+# review: new
+cmd-layout-classic = &Klassikaline
+# review: new
+cmd-layout-columns = &Veerud
+# review: new
+cmd-sort-date = &Kuupäev
+# review: new
+cmd-sort-from = &Saatja
+# review: new
+cmd-sort-subject = &Teema
+# review: new
+cmd-sort-size = Su&urus
+# review: new
+cmd-sort-ascending = Sorteeri kas&vavalt
+# review: new
+cmd-sort-descending = Sorteeri kaha&nevalt
 cmd-hide-ignored = Peida &ignoreeritud vestlused
 # review: new
 cmd-hide-read = Peida &loetud kirjad
@@ -537,3 +559,20 @@ ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.
 ui-eml-default-failed = Inbox Classicut ei õnnestunud .eml-failide rakenduseks määrata: { $reason }
 # review: new
 ui-folders = Kaustad
+# review: new
+ui-sorted-by = Järjestus: { $field }
+# review: new
+ui-layout-label = Paigutus:
+# review: new
+ui-columns-note = Aken on veergudega paigutuse jaoks piisavalt lai. Seda muudab Vaade > Paigutus.
+# review: new
+ui-row-unread = Lugemata
+# review: new
+ui-row-flagged = Lipuga
+# review: new
+ui-row-attachments = Manustega
+# review: new
+ui-row-messages = { $count ->
+    [one] { $count } kiri
+   *[other] { $count } kirja
+}
