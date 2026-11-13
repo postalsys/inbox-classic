@@ -110,3 +110,6 @@ win-options-language-label = &Show Inbox Classic in:
 win-options-restart-note = Restart Inbox Classic to change the language.
 win-options-notify = &Notify me when new mail arrives
 win-restart-ask = Inbox Classic shows { $language } once it restarts. Restart now?
+win-folders-hide = Hide the folder list
+win-folders-pin = Keep the folder list beside the messages
+win-folders-show = Show the folders

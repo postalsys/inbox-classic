@@ -9,7 +9,8 @@
 #   windows  the Win32 command id, which scripts/ui-e2e.ps1 posts as the menu would
 #   menu     file, edit, view, tools, message, help, or tray (the tray icon's menu only)
 #   (label)  not here: the catalog's cmd-<id> in core/locales/en/app.ftl, in every language, & marking the menu letter
-#   key      the shortcut: Mod is Ctrl on Windows and Linux and Command on the Mac; Shift, Alt (Option on the Mac);
+#   key      the shortcut: Mod is Ctrl on Windows and Linux and Command on the Mac; Shift, Alt (Option on the Mac),
+#            Ctrl (the Mac's Control, for a mac override);
 #            a letter, F1 to F12, Enter, Delete. mac and linux override it where those platforms differ.
 #   toggle   a menu item with a check mark
 #   one      acts on one message only: off while several are selected
@@ -58,6 +59,16 @@ id = "mark_unread"
 windows = 104
 menu = "edit"
 some = true
+
+# the folder list shown beside the messages, or hidden (its folder then chosen from the folder bar on Windows, from
+# the folder button on Linux, with Go to Folder on the Mac); a setting each app keeps. F9, and the Mac's Show Sidebar
+[[command]]
+id = "folder_list"
+windows = 155
+menu = "view"
+toggle = true
+key = "F9"
+mac = "Ctrl+Mod+S"
 
 [[command]]
 id = "pictures"

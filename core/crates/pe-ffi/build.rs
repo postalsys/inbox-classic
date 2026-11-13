@@ -165,13 +165,21 @@ fn check(table: &Table) {
             command.id,
             command.menu
         );
-        for key in [Some(&command.key), command.mac.as_ref(), command.linux.as_ref()]
-            .into_iter()
-            .flatten()
-        {
-            if !key.is_empty() {
-                Key::parse(key).unwrap_or_else(|| panic!("{}: can not read the key {key}", command.id));
-            }
+        for (key, mac) in [
+            (Some(&command.key), false),
+            (command.mac.as_ref(), true),
+            (command.linux.as_ref(), false),
+        ] {
+            let Some(key) = key.filter(|key| !key.is_empty()) else {
+                continue;
+            };
+            let parsed = Key::parse(key).unwrap_or_else(|| panic!("{}: can not read the key {key}", command.id));
+            // Mod already is Control on Windows and Linux
+            assert!(
+                mac || !parsed.control,
+                "{}: Ctrl is for a mac key only ({key})",
+                command.id
+            );
         }
     }
 }
@@ -244,6 +252,8 @@ fn c_header(table: &Table) -> String {
 /// A shortcut: modifiers and one key
 struct Key {
     command: bool,
+    /// Control on the Mac (Ctrl+Mod+S is Control-Command-S); on Windows and Linux Mod already is Control
+    control: bool,
     shift: bool,
     alt: bool,
     key: String,
@@ -253,6 +263,7 @@ impl Key {
     fn parse(text: &str) -> Option<Key> {
         let mut key = Key {
             command: false,
+            control: false,
             shift: false,
             alt: false,
             key: String::new(),
@@ -260,6 +271,7 @@ impl Key {
         for part in text.split('+') {
             match part {
                 "Mod" => key.command = true,
+                "Ctrl" => key.control = true,
                 "Shift" => key.shift = true,
                 "Alt" => key.alt = true,
                 "" => return None,
@@ -301,6 +313,9 @@ impl Key {
             other => other.to_lowercase(),
         };
         let mut flags = Vec::new();
+        if self.control {
+            flags.push(".control");
+        }
         if self.command {
             flags.push(".command");
         }
@@ -316,6 +331,9 @@ impl Key {
     /// The GTK accelerator (`<Primary><Shift>r`)
     fn gtk(&self) -> String {
         let mut out = String::new();
+        if self.control {
+            out.push_str("<Control>");
+        }
         if self.command {
             out.push_str("<Primary>");
         }
