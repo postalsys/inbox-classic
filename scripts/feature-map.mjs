@@ -413,6 +413,13 @@ const sections = [
                 checked: ['The order changes', 'The button says what the list is sorted by']
             },
             {
+                shot: 'pictures-4-list',
+                name: "Senders' pictures in the message list",
+                what: "In the column layout each row has the sender's picture: the brand's logo when the mail provider confirmed it, else the sender's initials on a quiet fill. A logo is downloaded once for each brand, never for each message, so no sender learns who opened what.",
+                how: "The column layout (View > Layout > Columns). Options turns them off: Show senders' pictures in the message list.",
+                checked: ['A confirmed logo in its row', 'Initials for the rest', 'The setting turns them off']
+            },
+            {
                 shot: 'layout-5-conversation',
                 name: 'Conversations in the column layout',
                 what: 'A conversation is one row with its count; opened, its messages follow it, indented.',

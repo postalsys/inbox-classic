@@ -560,6 +560,15 @@ The test pins View > Layout > Classic at its start, so every other step's screen
   says the column layout note once
 - View > Layout > Classic: back as before
 
+## 34g6. Senders' pictures in the column layout
+
+Screenshot: `pictures-4-list`
+
+- in the column layout, a message whose provider confirmed the brand's logo (BIMI and DMARC pass) shows the logo in
+  its row; a message without one shows the sender's initials on a quiet fill
+- the logo is downloaded once, when a row first shows it
+- Options' "Show senders' pictures in the message list" off: the rows have no pictures; on again
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`
