@@ -283,7 +283,7 @@ pub fn picture_drawn(row: &RowWidget) -> bool {
         .parts
         .borrow()
         .as_ref()
-        .is_some_and(|parts| parts.picture.widget.is_visible() && parts.picture.drawn())
+        .is_some_and(|parts| parts.picture.widget.is_visible() && parts.picture.has_picture())
 }
 
 /// Whether a row on screen shows its picture at all (for the UI test)

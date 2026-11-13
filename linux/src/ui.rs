@@ -21,6 +21,7 @@ const STYLE: &str = "
 .message-row .sender { font-weight: 600; }
 .message-row .row-detail { font-size: 0.9em; }
 .message-rows > row { border-bottom: 1px solid alpha(@borders, 0.5); }
+.row-picture { border-radius: 16px; background-color: alpha(currentColor, 0.09); }
 .row-initials { font-size: 12px; font-weight: 600; color: alpha(currentColor, 0.6); }
 .unread-dot { min-width: 8px; min-height: 8px; border-radius: 4px; background-color: @accent_bg_color; }
 .sort-button { margin: 2px 4px; }
@@ -785,6 +786,23 @@ pub fn icon_button(icon: &str, tooltip: &str) -> gtk::Button {
     let button = gtk::Button::from_icon_name(icon);
     button.set_tooltip_text(Some(tooltip));
     button
+}
+
+/// A picture the core drew, `size` pixels square, BGRA with the alpha multiplied in, as a texture; None when the pixels
+/// are not that many
+pub fn bgra_texture(pixels: Vec<u8>, size: i32) -> Option<gtk::gdk::MemoryTexture> {
+    let stride = size as usize * 4;
+    if size <= 0 || pixels.len() != stride * size as usize {
+        return None;
+    }
+    let bytes = gtk::glib::Bytes::from_owned(pixels);
+    Some(gtk::gdk::MemoryTexture::new(
+        size,
+        size,
+        gtk::gdk::MemoryFormat::B8g8r8a8Premultiplied,
+        &bytes,
+        stride,
+    ))
 }
 
 #[cfg(test)]
