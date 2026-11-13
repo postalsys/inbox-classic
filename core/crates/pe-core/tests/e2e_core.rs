@@ -3193,10 +3193,26 @@ fn a_dead_reader_connection_is_replaced_within_seconds() {
     s.server.request(
         "POST",
         "/v1/script/rules",
-        Some(json!({ "on": "command", "session": reader, "drop": true })),
+        // what an open sends; the sign-in may still be finishing (ID, ENABLE), which the reader waits for
+        Some(json!({
+            "on": "command", "session": reader, "command": ["SELECT", "EXAMINE", "UID FETCH"], "drop": true
+        })),
     );
     let started = std::time::Instant::now();
-    open(&s, inbox, uids[0]);
+    s.core.open_message(inbox, uids[0]).unwrap();
+    // the answer limit and a new connection: more than the 10 seconds of Setup::wait on a slow machine
+    loop {
+        let event = s.events.recv_timeout(Duration::from_secs(20)).expect("the message");
+        if event
+            == (Event::MessageReady {
+                folder: inbox,
+                uid: uids[0],
+            })
+        {
+            break;
+        }
+        assert!(!matches!(event, Event::MessageFailed { .. }), "{event:?}");
+    }
     let took = started.elapsed();
     let timing = s.core.open_timings().pop().unwrap();
     assert_eq!(timing.link, Link::Retried, "{timing:?}");
