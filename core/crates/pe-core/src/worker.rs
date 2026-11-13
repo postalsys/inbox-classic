@@ -24,12 +24,14 @@ use crate::{Event, EventSink, FailureKind, Secrets};
 
 mod background;
 mod download;
+mod large;
 mod reader;
 mod transfer;
 mod upload;
 
 pub(crate) use background::{Nudges, nudge};
 pub(crate) use download::Opened;
+pub(crate) use large::Partials;
 pub(crate) use reader::Opening;
 
 pub(crate) use reader::{Synced, tell_woke, watch_sleep};
@@ -371,6 +373,8 @@ pub(crate) struct Context {
     pub(crate) opened: Opened,
     /// The opens under way, which background work steps aside for, and the size of what each reader downloads now
     pub(crate) opening: Arc<Opening>,
+    /// The text shown first of the large messages being downloaded (large.rs)
+    pub(crate) partials: Partials,
 }
 
 pub(crate) struct Worker {

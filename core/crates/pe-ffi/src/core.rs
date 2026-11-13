@@ -2279,6 +2279,17 @@ pub unsafe extern "C" fn pe_message_source_text(
     into_c_string(text)
 }
 
+/// Whether `folder`/`uid` shows its text before the rest of it, which is still being downloaded: its attachments,
+/// Save As, View Source and Forward wait for it (a `MessageReady` follows once it is here)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_downloading(core: *const PeCore, folder: i64, uid: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.message_downloading(folder, uid)) }
+}
+
 /// The source of a message for File > Save As, NULL when it is not in the store yet (after `MessageReady` it is).
 /// `len` gets its length and `filename` a name to save it under made from its subject (`.eml`; free it with
 /// `pe_string_free`). Free the bytes with `pe_bytes_free`.

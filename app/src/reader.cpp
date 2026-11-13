@@ -450,7 +450,10 @@ void Reader::ChooseAttachment() {
     uint8_t* data = AttachmentData(static_cast<size_t>(chosen - 1), length, name);
     core::String safeName(name);
     if (!data) {
-        MessageBoxW(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        // a large message shows its text before the rest of it is here
+        bool downloading = file_.empty() && pe_message_downloading(core_, folder_, uid_);
+        std::wstring why = core::T(downloading ? PE_TEXT_UI_ATTACHMENT_DOWNLOADING : PE_TEXT_UI_ATTACHMENT_NOT_READ);
+        MessageBoxW(parent_, why.c_str(), L"Inbox Classic", MB_OK | (downloading ? MB_ICONINFORMATION : MB_ICONERROR));
         return;
     }
     std::wstring path = SaveFileDialog(parent_, Text(safeName.get()));

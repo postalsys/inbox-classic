@@ -321,6 +321,7 @@ impl Shell {
             }
             Event::AgentLogChanged => crate::agents::refresh(),
             // messages going to another account: how far, and what was done
+            // messages going to another account, a large message opened: how far, and what was done
             Event::Transferring { text } => main.set_status(text),
             Event::FolderCreated { folder, .. } => crate::move_dialog::folder_created(*folder),
             Event::Failed { account, kind, message } => {

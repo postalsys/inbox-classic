@@ -292,6 +292,10 @@ saved-to = { $count ->
     [one] { $messages } salvestati kausta { $folder }
    *[other] { $messages } salvestati kausta { $folder }
 }
+# review: new
+download-progress = Alla laaditud { $done } / { $total }
+# review: new
+download-done = Alla laaditud { $size }
 downloading-messages = { $count ->
    *[other] Allalaadimine: { $messages }...
 }

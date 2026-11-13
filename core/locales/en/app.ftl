@@ -489,6 +489,7 @@ ui-download-ahead-all = All messages
 ui-download-ahead-never = Only when opened
 ui-download-limit = Downloaded messages kept for each account:
 ui-download-note = Messages downloaded ahead open at once. Past the limit, the oldest are removed and downloaded again when opened.
+ui-attachment-downloading = The rest of this message is still downloading. Try again when it is here.
 ui-trusted-senders-button = Trusted Senders...
 ui-trusted-senders-title = Trusted senders
 ui-trusted-senders-note = Pictures from these senders are downloaded when their mail provider confirms the message is theirs.

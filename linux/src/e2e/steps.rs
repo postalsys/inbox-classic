@@ -2275,6 +2275,62 @@ pub async fn not_downloaded(d: &Driver) {
     select_folder("Inbox");
 }
 
+/// A message of 3 MB: a line of text and a PDF attached
+pub(super) fn large_message_raw() -> String {
+    let line = "A".repeat(76);
+    let pdf = vec![line.as_str(); 3 * 1024 * 1024 / 57].join("\r\n");
+    format!(
+        "From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: The quarterly report\r\n\
+         Date: {}\r\nMessage-ID: <quarterly@example.com>\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/mixed; boundary=\"q\"\r\n\r\n\
+         --q\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe figures are attached.\r\n\
+         --q\r\nContent-Type: application/pdf; name=\"report.pdf\"\r\n\
+         Content-Disposition: attachment; filename=\"report.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\n\
+         {pdf}\r\n--q--\r\n",
+        date_now(0)
+    )
+}
+
+/// A large message shows its text first, its attachment after, and the status bar says how far it is
+/// (SCENARIO 17a)
+pub async fn large_message(d: &Driver) {
+    d.step("a large message shows its text first");
+    let main = main_window();
+    // the whole message comes slowly: in pieces of 256 KB, 300 ms apart
+    let rule = serde_json::json!({
+        "on": "response", "command": "UID FETCH", "untagged": true, "match": "BODY\\[\\] ",
+        "chunk": 262144, "chunkDelay": 300
+    });
+    let _ = super::http(d.ports.rest, "POST", "/v1/script/rules", Some(&rule.to_string()));
+    // in Archive: the steps after read the Inbox from the server whole, sources and all
+    let _ = d.add_message_to("Archive", &large_message_raw());
+    run_command(Command::Sync);
+    select_folder("Archive");
+    wait_for(20, || d.find("Archive", "Subject: The quarterly report")).await;
+    pause(1000).await;
+    show_found("subject:\"The quarterly report\"").await;
+    let reader = &shell().main().reader;
+    d.check(
+        wait_until(15, || {
+            document_text(&reader.preview.shown()).contains("The figures are attached")
+        })
+        .await,
+        "a large message shows its text before the rest of it is here",
+    );
+    let said = || shell().main().status_texts().0;
+    d.check(
+        wait_until(10, || said().starts_with("Downloading")).await,
+        &format!("the status bar says how far the rest is ({})", said()),
+    );
+    d.shot(&main, "large-1-text-first").await;
+    d.check(
+        wait_until(30, || said().starts_with("Downloaded")).await,
+        &format!("then that it is all here ({})", said()),
+    );
+    search("").await;
+    select_folder("Inbox");
+}
+
 /// The second account's mail on its own server, for All Inboxes: unread, dated now (a later date is listed at the
 /// message's arrival), so it is among the newest in the list
 pub fn seed_second(d: &Driver) {

@@ -75,6 +75,47 @@ extension UITest {
         selectFolder(named: "Inbox")
     }
 
+    /// a large message shows its text first, its attachment after, and the status bar says how far it is (SCENARIO 17a)
+    func largeMessage() async throws {
+        step("a large message shows its text first")
+        // the whole message comes slowly: in pieces of 256 KB, 300 ms apart
+        var rule = URLRequest(url: URL(string: rest.replacingOccurrences(of: "/mailboxes", with: "/script/rules"))!)
+        rule.httpMethod = "POST"
+        rule.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        rule.httpBody = try JSONSerialization.data(withJSONObject: [
+            "on": "response", "command": "UID FETCH", "untagged": true, "match": "BODY\\[\\] ",
+            "chunk": 262144, "chunkDelay": 300,
+        ])
+        _ = try await URLSession.shared.data(for: rule)
+        let line = String(repeating: "A", count: 76)
+        let pdf = Array(repeating: line, count: 3 * 1024 * 1024 / 57).joined(separator: "\r\n")
+        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: The quarterly report\r\n"
+            + "Date: \(rfc2822(Date()))\r\nMessage-ID: <quarterly@example.com>\r\nMIME-Version: 1.0\r\n"
+            + "Content-Type: multipart/mixed; boundary=\"q\"\r\n\r\n"
+            + "--q\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe figures are attached.\r\n"
+            + "--q\r\nContent-Type: application/pdf; name=\"report.pdf\"\r\n"
+            + "Content-Disposition: attachment; filename=\"report.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\n"
+            + pdf + "\r\n--q--\r\n", to: "Archive")
+        command(.sync)
+        // in Archive: the steps after read the Inbox from the server whole, sources and all
+        selectFolder(named: "Archive")
+        _ = await waitFor(20) { await findMessage("Archive", "Subject: The quarterly report") }
+        await pause(1)
+        search("subject:\"The quarterly report\"")
+        _ = await waitUntil(20) { list.numberOfRows == 1 }
+        await selectRow(0)
+        check(await waitUntil(15) { await readerText().contains("The figures are attached") },
+              "a large message shows its text before the rest of it is here")
+        let said: NSTextField? = find("status.text", in: main.window)
+        check(await waitUntil(10) { said?.stringValue.hasPrefix("Downloading") == true },
+              "the status bar says how far the rest is (\(said?.stringValue ?? ""))")
+        await shot(main.window, "large-1-text-first")
+        check(await waitUntil(30) { said?.stringValue.hasPrefix("Downloaded") == true },
+              "then that it is all here (\(said?.stringValue ?? ""))")
+        search("")
+        selectFolder(named: "Inbox")
+    }
+
     func outboxAndDrafts() async throws {
         step("the Outbox: a send that can not go")
         try await setSmtpPort("1")

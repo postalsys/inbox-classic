@@ -514,6 +514,8 @@ ui-download-limit = Mensajes descargados que se guardan por cuenta:
 # review: new
 ui-download-note = Los mensajes descargados por adelantado se abren al instante. Por encima del límite, se quitan los más antiguos y se vuelven a descargar al abrirlos.
 # review: new
+ui-attachment-downloading = El resto de este mensaje aún se está descargando. Vuelva a intentarlo cuando haya llegado.
+# review: new
 ui-trusted-senders-button = Remitentes de confianza...
 # review: new
 ui-trusted-senders-title = Remitentes de confianza

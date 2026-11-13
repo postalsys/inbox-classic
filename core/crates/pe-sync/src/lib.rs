@@ -4,6 +4,9 @@
 #![forbid(unsafe_code)]
 
 mod summary;
+mod text_first;
+
+pub use text_first::{TextFirst, fetch_text_first};
 
 use std::collections::HashSet;
 use std::fmt;
@@ -349,12 +352,20 @@ pub async fn fetch_raw(client: &mut Client, store: &mut Store, folder: FolderId,
         source: true,
         ..Default::default()
     };
-    let fetched = client.fetch(&Messages::uid(uid), &query).await?;
-    fetched
-        .into_iter()
-        .find(|m| m.uid == Some(uid))
+    fetch_one(client, uid, &query)
+        .await?
         .and_then(|m| m.source)
         .ok_or(Error::MessageGone)
+}
+
+/// What one FETCH brings of the message `uid` of the folder selected, None when the server no longer has it
+pub(crate) async fn fetch_one(
+    client: &mut Client,
+    uid: u64,
+    query: &FetchQuery,
+) -> Result<Option<pe_imap::client::FetchedMessage>> {
+    let fetched = client.fetch(&Messages::uid(uid), query).await?;
+    Ok(fetched.into_iter().find(|m| m.uid == Some(uid)))
 }
 
 /// The sources of these messages of a folder, as the server keeps them, in one FETCH, without keeping them in the

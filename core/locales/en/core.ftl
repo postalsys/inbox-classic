@@ -296,6 +296,8 @@ export-not-attached = the messages could not be attached: { $error }
 saved-to = { $count ->
    *[other] Saved { $messages } to { $folder }
 }
+download-progress = Downloading { $done } of { $total }
+download-done = Downloaded { $size }
 downloading-messages = { $count ->
    *[other] Downloading { $messages }...
 }

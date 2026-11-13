@@ -56,6 +56,22 @@ pub fn saved_text(count: u64, place: &std::path::Path) -> String {
     )
 }
 
+/// What the status bar says while a large message opened is downloaded: "Downloading 4.2 MB of 15.0 MB"
+pub fn download_progress_text(done: u64, total: u64) -> String {
+    tr_args(
+        Text::DownloadProgress,
+        &[
+            ("done", (&format_size(done)).into()),
+            ("total", (&format_size(total)).into()),
+        ],
+    )
+}
+
+/// What the status bar says once a large message opened is all here: "Downloaded 15.0 MB"
+pub fn download_done_text(size: u64) -> String {
+    tr_args(Text::DownloadDone, &[("size", (&format_size(size)).into())])
+}
+
 /// What the status bar says while messages not downloaded yet come for files or a forward: "Downloading 3 messages..."
 pub fn downloading_text(count: u64) -> String {
     tr_args(

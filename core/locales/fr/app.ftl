@@ -522,6 +522,8 @@ ui-download-limit = Messages téléchargés conservés par compte :
 # review: new
 ui-download-note = Les messages téléchargés à l’avance s’ouvrent aussitôt. Au-delà de la limite, les plus anciens sont supprimés et téléchargés de nouveau à l’ouverture.
 # review: new
+ui-attachment-downloading = La suite de ce message est encore en cours de téléchargement. Réessayez quand elle sera arrivée.
+# review: new
 ui-trusted-senders-button = Expéditeurs de confiance...
 # review: new
 ui-trusted-senders-title = Expéditeurs de confiance

@@ -303,6 +303,10 @@ saved-to = { $count ->
     [one] { $messages } in { $folder } gespeichert
    *[other] { $messages } in { $folder } gespeichert
 }
+# review: new
+download-progress = { $done } von { $total } heruntergeladen
+# review: new
+download-done = { $size } heruntergeladen
 downloading-messages = { $count ->
     [one] { $messages } wird heruntergeladen...
    *[other] { $messages } werden heruntergeladen...
