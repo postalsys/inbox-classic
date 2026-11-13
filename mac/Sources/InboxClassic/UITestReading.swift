@@ -93,6 +93,110 @@ extension UITest {
               "the toolbar's sidebar button shows it again, at its width")
     }
 
+    // ---- the column layout ----
+
+    /// the cell of the column layout's row `index`
+    func rowCell(_ index: Int) -> MessageRowCell? {
+        list.view(atColumn: 0, row: index, makeIfNecessary: true) as? MessageRowCell
+    }
+
+    /// the words of the "Sorted by" pull-down over the column layout's list
+    func sortedBy() -> String {
+        (find("list.sortBy", in: main.window) as NSPopUpButton?)?.item(at: 0)?.title ?? ""
+    }
+
+    func columnLayout() async throws {
+        step("the column layout")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil { list.numberOfRows > 0 }
+        await selectRow(0)
+        command(.layoutColumns)
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_COLUMNS }, "View > Layout > Columns shows the column layout")
+        check(menuItem(.layoutColumns)?.state == .on && menuItem(.layoutAutomatic)?.state == .off,
+              "and Columns is checked in View > Layout")
+        let readerLeft = main.mailbox.reader.view.convert(main.mailbox.reader.view.bounds, to: nil).minX
+        let listRight = list.convert(list.bounds, to: nil).maxX
+        check(readerLeft >= listRight - 1, "the list is beside the reading pane (\(listRight), \(readerLeft))")
+        check(list.headerView == nil && list.rowHeight >= 50 && list.numberOfColumns == 1,
+              "the list has one column of rows three lines high, without headings")
+        check(list.selectedRow == 0, "the message selected stays selected")
+        // the first words of a message, read by the core when its text was fetched for the search
+        let withWords = await waitFor(20) {
+            (0..<list.numberOfRows).first { main.mailbox.row($0)?.snippet.isEmpty == false }
+        }
+        if let withWords, let message = main.mailbox.row(withWords) {
+            let said = rowCell(withWords)?.accessibilityLabel() ?? ""
+            check(said.contains(message.snippet) && said.contains(message.subject),
+                  "a row shows its sender, subject and first words (\(said))")
+        } else {
+            check(false, "a row has the first words of its message")
+        }
+        check(sortedBy() == "Sorted by Date", "over the list: \(sortedBy())")
+        // one unread, so the screenshot shows the dot and the bold subject; read again after
+        command(.markUnread)
+        check(await waitUntil(10) {
+            main.mailbox.row(0)?.bold == true && rowCell(0)?.unreadShown == true
+                && rowCell(0)?.accessibilityLabel()?.hasPrefix(Text.uiRowUnread.text) == true
+        }, "an unread row has its dot and its subject in bold, and says Unread first")
+        await shot(main.window, "layout-1-columns")
+        command(.markRead)
+        check(await waitUntil(10) { main.mailbox.row(0)?.bold == false && rowCell(0)?.unreadShown == false },
+              "read again, the dot goes and the subject is regular")
+
+        step("sorting the column layout")
+        command(.sortSubject)
+        let subjects = { (0..<min(4, self.list.numberOfRows)).compactMap { self.main.mailbox.row($0)?.subject.lowercased() } }
+        check(await waitUntil(10) { sortedBy() == "Sorted by Subject" }, "View > Sort By > Subject: \(sortedBy())")
+        check(subjects() == subjects().sorted() && menuItem(.sortAscending)?.state == .on,
+              "the list is in the order of its subjects, A to Z (\(subjects()))")
+        await shot(main.window, "layout-4-sort")
+        command(.sortDate)
+        check(await waitUntil(10) { sortedBy() == "Sorted by Date" } && menuItem(.sortDescending)?.state == .on,
+              "back to Date, the newest first")
+
+        step("a conversation in the column layout")
+        let opener = await waitFor(10) { (0..<list.numberOfRows).first { main.mailbox.row($0)?.opens == true } }
+        if let opener, let cell = rowCell(opener) {
+            onMain { cell.disclosure.performClick(nil) }
+            check(await waitUntil(10) { main.mailbox.row(opener + 1)?.threadDepth == 1 },
+                  "its triangle opens the conversation, the messages under it")
+            await selectRow(opener + 1)
+            await shot(main.window, "layout-5-conversation")
+            if let cell = rowCell(opener) {
+                onMain { cell.disclosure.performClick(nil) }
+            }
+            check(await waitUntil(10) { main.mailbox.row(opener + 1)?.threadDepth != 1 }, "and closes it again")
+        } else {
+            check(false, "the Inbox has a conversation")
+        }
+
+        step("the layout by the window's width")
+        command(.layoutAutomatic)
+        let status: NSTextField? = find("status.text", in: main.window)
+        onMain { self.main.window.setContentSize(NSSize(width: 1100, height: 720)) }
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_CLASSIC }, "Automatic in a window 1100 wide: Classic")
+        onMain { self.main.window.setContentSize(NSSize(width: 1500, height: 720)) }
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_COLUMNS }, "1500 wide: Columns")
+        check(status?.stringValue == Text.uiColumnsNote.text, "the status bar says where to change it (\(status?.stringValue ?? ""))")
+        await shot(main.window, "layout-2-automatic")
+        onMain { self.main.window.setContentSize(NSSize(width: 1250, height: 720)) }
+        await pause(0.5)
+        check(main.mailbox.layout == PE_LAYOUT_COLUMNS, "1250 wide, between the two widths: still Columns")
+        onMain { self.main.window.setContentSize(NSSize(width: 1100, height: 720)) }
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_CLASSIC }, "1100 wide again: Classic")
+        main.setStatus("")
+        onMain { self.main.window.setContentSize(NSSize(width: 1500, height: 720)) }
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_COLUMNS } && status?.stringValue == "",
+              "Columns again, the note said only once")
+
+        command(.layoutClassic)
+        onMain { self.main.window.setContentSize(NSSize(width: 1100, height: 720)) }
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_CLASSIC && list.headerView != nil },
+              "View > Layout > Classic: the list above the message again, with its columns")
+        main.window.center()
+        main.mailbox.placeDividers()
+    }
+
     // ---- pictures from trusted senders ----
 
     /// a newsletter from the shop with a picture on the internet; `verified`: the provider's Authentication-Results

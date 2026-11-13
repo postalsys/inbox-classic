@@ -392,6 +392,34 @@ const sections = [
                 checked: ['Only the unread messages are listed', 'One read stays until the folder changes', 'Turned off, every message is back']
             },
             {
+                shot: 'layout-1-columns',
+                name: 'The column layout',
+                what: 'Folders, messages and the message side by side, for a wide screen. Each message is a row of three lines: who and when, the subject with its marks, and the first words the sender wrote (without the quoted reply). Classic stays as it was.',
+                how: 'View > Layout > Columns, or the same choice in Options (Settings on the Mac, Preferences on Linux).',
+                checked: ['The list stands beside the reading pane', 'Rows of three lines with the first words', 'Back to Classic as before']
+            },
+            {
+                shot: 'layout-2-automatic',
+                name: 'The layout chosen by the width',
+                what: 'Automatic, the default: a window 1320 wide or wider shows the column layout, one narrower than 1200 the classic one, and in between it keeps what it has, so dragging the edge does not make it flicker. The first time, the status bar says where to change it.',
+                how: 'View > Layout > Automatic, then make the window wider or narrower.',
+                checked: ['Wide: Columns', 'Narrow: Classic', 'The status bar says so once']
+            },
+            {
+                shot: 'layout-4-sort',
+                name: 'Sort By',
+                what: 'View > Sort By orders the list by date, sender, subject or size, ascending or descending, in both layouts. The column layout has no column headings: the Sorted by button above the list opens the same choices.',
+                how: 'View > Sort By, the Sorted by button in the column layout, or a column heading in the classic one.',
+                checked: ['The order changes', 'The button says what the list is sorted by']
+            },
+            {
+                shot: 'layout-5-conversation',
+                name: 'Conversations in the column layout',
+                what: 'A conversation is one row with its count; opened, its messages follow it, indented.',
+                how: 'Click the count at the right of a conversation, or press Right and Left.',
+                checked: ['A conversation opens and closes', 'Its messages are indented']
+            },
+            {
                 shot: 'layout-3-folders-hidden',
                 name: 'Hiding the folder list',
                 what: 'More room for the messages: View > Folder List (F9, Control-Command-S on the Mac) hides the folder list and brings it back, remembered. While it is hidden, a folder is chosen from the folder bar (Windows), the folder button (Linux) or Go to Folder.',

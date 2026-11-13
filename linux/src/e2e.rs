@@ -943,6 +943,9 @@ fn command(command: Command) {
 async fn scenario(d: Rc<Driver>) {
     // the steps that open messages see them downloaded when opened; the step of Preferences checks the choices
     let _ = shell().core.set_download_ahead(pe_core::Ahead::Never);
+    // the Classic layout, whatever the window's width, so the screenshots of every step are of it; the layout steps
+    // choose the others
+    shell().settings.set_text(crate::settings::LAYOUT, Some("classic"));
     add_account(&d, "Alex Morgan", "testuser", "testpass", true, false).await;
     steps::waiting(&d).await;
     reading(&d).await;
@@ -972,6 +975,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::one_time_codes(&d).await;
     hide_read::hide_read(&d).await;
     layout::folder_list(&d).await;
+    layout::columns(&d).await;
     pictures::trusted(&d).await;
     pictures::options(&d).await;
     watch::watch_and_ignore(&d).await;

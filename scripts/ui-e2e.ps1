@@ -30,6 +30,7 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern IntPtr GetDesktopWindow();
 [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr hwnd);
+[DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr hwnd, int index);
 [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern IntPtr GetWindow(IntPtr hwnd, uint cmd);
@@ -280,6 +281,12 @@ $savedCodes = (Get-ItemProperty -Path $preferencesKey -Name CodesInNotifications
 $savedHideRead = (Get-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue).HideReadMessages
 # and View > Folder List, left out so the folder list is shown, as out of the box
 $savedFolderList = (Get-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue).FolderList
+# and View > Layout, Classic during the test so every screenshot but the layout's own is as before; the list's width
+# in Columns and whether the columns note was shown, left out as out of the box
+$savedLayout = @{}
+foreach ($name in 'Layout', 'ListWidth', 'ColumnsNoteShown') {
+    $savedLayout[$name] = (Get-ItemProperty -Path $preferencesKey -Name $name -ErrorAction SilentlyContinue).$name
+}
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
 Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Out 'result.txt')
 Start-Transcript -Path (Join-Path $Out 'log.txt') -Force | Out-Null
@@ -641,6 +648,9 @@ try {
     Remove-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $preferencesKey -Name ListWidth -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $preferencesKey -Name ColumnsNoteShown -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $preferencesKey -Name Layout -Value 1 -Type DWord
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
     # the first page of Add Mail Account, with the address fields when $fields, else the page that offers a
@@ -2675,6 +2685,82 @@ public static class Dragger {
     Check ([bool](WaitFor { (Visible $main $IDC_TREE) -and (Visible $main $IDC_FOLDER_CAPTION) } 5)) 'turned on, the folder list is back beside the messages'
     Check ((Get-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue).FolderList -eq 1) 'and that is kept'
 
+    # ---- the column layout ----
+
+    Step 'the column layout'
+    $IDM_LAYOUT_AUTOMATIC = 156; $IDM_LAYOUT_CLASSIC = 157; $IDM_LAYOUT_COLUMNS = 158
+    $IDM_SORT_DATE = 159; $IDM_SORT_SUBJECT = 161; $IDC_SORT_BUTTON = 238
+    $GWL_STYLE = -16; $LVS_NOCOLUMNHEADER = 0x4000
+    $columnsShown = { (([Native.Win]::GetWindowLong($list, $GWL_STYLE) -band $LVS_NOCOLUMNHEADER) -ne 0) -and (Visible $main $IDC_SORT_BUTTON) }
+    $listRect = New-Object Native.Win+RECT; $mainRect = New-Object Native.Win+RECT
+    # the list beside the reading pane: as tall as the panes, in the left part of the window
+    $beside = {
+        [void][Native.Win]::GetWindowRect($list, [ref]$listRect); [void][Native.Win]::GetWindowRect($main, [ref]$mainRect)
+        ($listRect.Bottom - $listRect.Top) -gt ($mainRect.Bottom - $mainRect.Top) / 2 -and
+            ($listRect.Right - $mainRect.Left) -lt ($mainRect.Right - $mainRect.Left) * 0.7
+    }
+    # a conversation of two, for the conversation's row
+    $ferry = @('ferry1@example.com', 'ferry2@example.com')
+    $ferryAt = [DateTime]::UtcNow
+    AddMessage ("From: Petra Holm <petra@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Ferry times`r`n" +
+        "Message-ID: <$($ferry[0])>`r`nDate: $($ferryAt.ToString('r'))`r`n`r`nThe first ferry leaves at nine, the last one at six.`r`n")
+    AddMessage ("From: Jaan Kask <jaan@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Re: Ferry times`r`n" +
+        "Message-ID: <$($ferry[1])>`r`nIn-Reply-To: <$($ferry[0])>`r`nReferences: <$($ferry[0])>`r`n" +
+        "Date: $($ferryAt.AddMinutes(1).ToString('r'))`r`n`r`nNine works for me.`r`n")
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    Check ([bool](WaitFor { (SubjectRows 'Ferry times').Count -eq 1 } 30)) 'a conversation of two is in the Inbox'
+    Check (-not (& $columnsShown)) 'the test starts in Classic, the list over the reading pane'
+    Command $main $IDM_LAYOUT_COLUMNS
+    Check ([bool](WaitFor { (& $columnsShown) -and (& $beside) } 5)) 'View > Layout > Columns puts the list beside the reading pane, without headings, "Sorted by" over it'
+    Check ((Get-ItemProperty -Path $preferencesKey -Name Layout -ErrorAction SilentlyContinue).Layout -eq 2) 'and that is kept for the next start'
+    $sortText = { GetText $main $IDC_SORT_BUTTON }
+    Check ((& $sortText) -match 'Date') "it says the list is sorted by date ($(& $sortText))"
+    $first = @(SubjectRows 'Ferry times')
+    if ($first.Count -eq 1) { SelectRow ([int]$first[0]) }
+    Shot $main 'layout-1-columns'
+    # sorted by subject from the menu of "Sorted by" (the View menu's Sort By), A to Z, and back to the dates
+    Command $main $IDM_SORT_SUBJECT
+    Check ([bool](WaitFor { (& $sortText) -match 'Subject' } 5)) "Sort By Subject: the button says so ($(& $sortText))"
+    $subjects = @(0..([Math]::Min(4, (Rows) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) })
+    $inOrder = $true
+    for ($i = 1; $i -lt $subjects.Count; $i++) { if ([string]::Compare($subjects[$i - 1], $subjects[$i], $true) -gt 0) { $inOrder = $false } }
+    Check $inOrder "the rows are in the order of their subjects ($($subjects -join ' | '))"
+    Shot $main 'layout-4-sort'
+    Command $main $IDM_SORT_DATE
+    Check ([bool](WaitFor { (& $sortText) -match 'Date' } 5)) 'and back to the dates'
+    # a conversation opened in Columns: its message under it, indented
+    $head = @(SubjectRows 'Ferry times')
+    if ($head.Count -eq 1) {
+        $rowsBefore = Rows
+        SelectRow ([int]$head[0])
+        Key $list $VK_RIGHT
+        Check ([bool](WaitFor { (Rows) -eq $rowsBefore + 1 } 10)) "Right opens the conversation in Columns too ($(Rows) rows)"
+        Shot $main 'layout-5-conversation'
+        Key $list $VK_LEFT
+        [void](WaitFor { (Rows) -eq $rowsBefore } 10)
+    } else {
+        Check $false 'the conversation has one row'
+    }
+    # Automatic: Columns in a wide window, Classic in a narrow one
+    $kept = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($main, [ref]$kept)
+    Command $main $IDM_LAYOUT_AUTOMATIC
+    [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, 0, 0, 1500, 900, 0x0016)
+    Check ([bool](WaitFor { (& $columnsShown) -and (& $beside) } 5)) 'Automatic: a window 1500 wide shows Columns'
+    Shot $main 'layout-2-automatic'
+    [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, 0, 0, 1100, 760, 0x0016)
+    Check ([bool](WaitFor { -not (& $columnsShown) } 5)) 'and one 1100 wide Classic'
+    Command $main $IDM_LAYOUT_CLASSIC
+    [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, $kept.Left, $kept.Top, $kept.Right - $kept.Left, $kept.Bottom - $kept.Top, 0x0014)
+    Check ([bool](WaitFor { -not (& $columnsShown) } 5)) 'Classic again: the list over the reading pane'
+    foreach ($id in $ferry) {
+        $m = Find 'INBOX' "Message-ID: <$([regex]::Escape($id))>"
+        if ($m) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($m.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { (SubjectRows 'Ferry times').Count -eq 0 } 20)
+
     # ---- a message that bounced ----
 
     Step 'a message that bounced'
@@ -4513,6 +4599,13 @@ public static bool HasIcon(IntPtr window) {
         Remove-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue
     } else {
         Set-ItemProperty -Path $preferencesKey -Name FolderList -Value $savedFolderList -Type DWord
+    }
+    foreach ($name in $savedLayout.Keys) {
+        if ($null -eq $savedLayout[$name]) {
+            Remove-ItemProperty -Path $preferencesKey -Name $name -ErrorAction SilentlyContinue
+        } else {
+            Set-ItemProperty -Path $preferencesKey -Name $name -Value $savedLayout[$name] -Type DWord
+        }
     }
     $harness.StandardInput.Close()
     if (-not $harness.WaitForExit(5000)) { $harness.Kill() }
