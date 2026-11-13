@@ -4190,6 +4190,38 @@ public static class Dragger {
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($fileWindow) } 10)) 'and the window closes'
     }
 
+    Step 'a message downloaded ahead opens at once'
+    # SCENARIO 49b, near the end: everything recent is downloaded from now on, which the steps before do not expect
+    $IDC_OPTIONS_DOWNLOAD_AHEAD = 672; $CB_SETCURSEL = 0x014E
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+    }
+    $before = 'Subject: Here before you'
+    # in Archive, dated ahead of the others there, so it is the first row
+    AddMessage ("From: Kim Example <kim@example.com>`r`nTo: testuser@inboxclassic.test`r`n$before`r`n" +
+        "Message-ID: <here-before@example.com>`r`nDate: $([DateTime]::UtcNow.AddMinutes(20).ToString('r'))`r`n`r`nDownloaded before it was opened.`r`n") @() 'Archive'
+    Command $main $IDM_SYNC
+    [void](WaitFor { Find 'Archive' $before } 30)
+    # time for the background to download it: nothing on the screen says when
+    Start-Sleep -Seconds 10
+    SelectFolder 3
+    Start-Sleep -Seconds 2
+    SelectRow 0
+    Check ([bool](WaitFor { [Native.Win]::SendText($main, 0x53544F52, '') -eq 11 } 10)) 'a new message downloaded ahead opens from the store, without a download'
+    Shot $main 'open-1-from-store'
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+    }
+    SelectFolder 0
+
     Step 'the tray'
     Add-Type -Namespace Native -Name Tray -MemberDefinition @'
 [StructLayout(LayoutKind.Sequential)] public struct NOTIFYICONIDENTIFIER { public int cbSize; public IntPtr hWnd; public uint uID; public Guid guidItem; }

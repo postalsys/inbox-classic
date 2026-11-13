@@ -787,6 +787,15 @@ Screenshot: `files-4-open-eml`
 - the file's attachment is listed in that window, as a folder's message's is, and Save All writes it as it was sent
 - Reply in that window opens a reply to it
 
+## 49b. A message downloaded ahead
+
+Screenshot: `open-1-from-store`
+
+Near the end, as everything recent is downloaded from then on:
+
+- with Download messages ahead at Recent messages up to 1 MB, a new message is downloaded before it is opened
+- opened, it shows from the store, without a download (the core's record of the open says so)
+
 ## 50. The tray
 
 Screenshots: `tray-1-notification`, `tray-2-taskbar` (not yet on the Mac, not yet on Linux)

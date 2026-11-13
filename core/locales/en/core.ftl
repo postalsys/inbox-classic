@@ -39,6 +39,7 @@ folder-archive = Archive
 reader-no-message = There is no message selected.
 reader-downloading = Downloading the message…
 reader-downloading-detail = The message will appear here once the download is complete.
+reader-downloading-size = The message is { $size }. It will appear here once it is downloaded.
 reader-failed = The message could not be downloaded
 reader-failed-network = The mail server could not be reached ({ $reason }).
 reader-failed-sign-in = The mail server did not accept the sign-in ({ $reason }). Check the password or sign in again in File > Accounts.

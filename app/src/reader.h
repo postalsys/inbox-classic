@@ -96,6 +96,7 @@ private:
     void ChoosePictures();
     // the bar over a message that could not be downloaded, shown or not
     void ShowRetry(bool shown);
+    void ShowDownloading();
     // Try Again, or the account synced again after the message could not be downloaded
     void Retry();
     void ShowLogo(bool wanted);

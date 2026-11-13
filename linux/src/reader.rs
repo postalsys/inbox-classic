@@ -77,10 +77,10 @@ pub struct Reader {
     unsubscribe_request: Cell<u64>,
 }
 
-/// The pane says the message is being downloaded, without Try Again
-fn show_downloading(preview: &DocumentView, retry: &gtk::Box) {
+/// The pane says the message is being downloaded, and how large it is, without Try Again
+fn show_downloading(preview: &DocumentView, retry: &gtk::Box, folder: i64, uid: u64) {
     retry.set_visible(false);
-    preview.show(&pe_core::reader_page(pe_core::ReaderState::Downloading), false);
+    preview.show(&shell().core.downloading_page(folder, uid), false);
 }
 
 /// The find bar over the message: a box to type in, closed with its button or Esc
@@ -699,9 +699,10 @@ impl Reader {
         self.to.set_text(&message.recipients);
         self.stop_downloading_note();
         let (preview, retry, timer) = (self.preview.clone(), self.retry.clone(), self.downloading.clone());
+        let (folder, uid) = (self.folder.get(), self.uid.get());
         let id = glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
             timer.borrow_mut().take();
-            show_downloading(&preview, &retry);
+            show_downloading(&preview, &retry, folder, uid);
         });
         self.downloading.replace(Some(id));
     }
@@ -716,7 +717,7 @@ impl Reader {
     /// The message is being downloaded
     pub fn downloading(&self) {
         self.stop_downloading_note();
-        show_downloading(&self.preview, &self.retry);
+        show_downloading(&self.preview, &self.retry, self.folder.get(), self.uid.get());
     }
 
     /// The message could not be downloaded: why, in the pane, and Try Again over it

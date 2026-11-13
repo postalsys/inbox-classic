@@ -309,6 +309,18 @@ pub enum ReaderState<'a> {
     Failed { kind: crate::FailureKind, reason: &'a str },
 }
 
+/// The reading pane's page while a message of `size` is downloaded: how large it is, when that is known
+pub fn downloading_page(size: Option<u64>) -> String {
+    match size {
+        Some(size) => pe_html::status_page(
+            &tr(Text::ReaderDownloading),
+            &tr_args(Text::ReaderDownloadingSize, &[("size", (&format_size(size)).into())]),
+            true,
+        ),
+        None => reader_page(ReaderState::Downloading),
+    }
+}
+
 /// The page of the reading pane for `state` (pe_html::status_page): the same words on every platform. A failure says
 /// what happened; the windows put [`retry_note`] and Try Again over it, and try again on their own once the account
 /// syncs.

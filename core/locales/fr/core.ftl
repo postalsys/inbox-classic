@@ -60,6 +60,8 @@ reader-no-message = Aucun message n'est sélectionné.
 reader-downloading = Téléchargement du message…
 # review: changed
 reader-downloading-detail = Le message s'affichera ici une fois le téléchargement terminé.
+# review: new
+reader-downloading-size = Le message fait { $size }. Il apparaîtra ici une fois téléchargé.
 reader-failed = Le message n'a pas pu être téléchargé
 reader-failed-network = Le serveur de messagerie est inaccessible ({ $reason }).
 reader-failed-sign-in = Le serveur de messagerie a refusé la connexion ({ $reason }). Vérifiez le mot de passe ou reconnectez-vous dans Fichier > Comptes.

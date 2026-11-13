@@ -330,12 +330,18 @@ void Reader::Open(int64_t folder, uint64_t uid, int64_t account, const PeMessage
     pe_message_open(core_, folder, uid);
 }
 
+// the pane says the message is being downloaded, and how large it is
+void Reader::ShowDownloading() {
+    core::String page(pe_message_downloading_page(core_, folder_, uid_));
+    preview_.Show(page ? core::Widen(page.get()) : L"");
+}
+
 void Reader::Retry() {
     if (!uid_) {
         return;
     }
     ShowRetry(false);
-    preview_.ShowState(PE_READER_STATE_DOWNLOADING);
+    ShowDownloading();
     pe_message_open(core_, folder_, uid_);
 }
 
@@ -740,7 +746,7 @@ bool Reader::OnTimer(UINT_PTR id) {
         return false;
     }
     KillTimer(parent_, TIMER_DOWNLOADING);
-    preview_.ShowState(PE_READER_STATE_DOWNLOADING);
+    ShowDownloading();
     return true;
 }
 

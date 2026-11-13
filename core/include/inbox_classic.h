@@ -2012,6 +2012,19 @@ char *pe_message_source_text(const struct PeCore *core,
                              uint64_t uid,
                              char **title);
 
+// The reading pane's page while `folder`/`uid` is downloaded, with its size: shown in place of
+// `pe_reader_page(PE_READER_STATE_DOWNLOADING)`. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_message_downloading_page(const struct PeCore *core, int64_t folder, uint64_t uid);
+
+// Whether the last message opened came from the store, with no connection used (downloaded ahead): for the UI tests
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_last_open_from_store(const struct PeCore *core);
+
 // Whether `folder`/`uid` shows its text before the rest of it, which is still being downloaded: its attachments,
 // Save As, View Source and Forward wait for it (a `MessageReady` follows once it is here)
 //

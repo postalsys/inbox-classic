@@ -1223,6 +1223,25 @@ impl Core {
         )
     }
 
+    /// The reading pane's page while a message is downloaded, with its size from the list
+    pub fn downloading_page(&self, folder: FolderId, uid: u64) -> String {
+        let size = self
+            .store()
+            .message(folder, uid)
+            .ok()
+            .flatten()
+            .and_then(|m| m.info.size);
+        text::downloading_page(size)
+    }
+
+    /// Whether the last message opened came from the store, with no connection used: downloaded ahead
+    pub fn last_open_from_store(&self) -> bool {
+        self.timings
+            .all()
+            .last()
+            .is_some_and(|timing| timing.served == timing::Served::Store)
+    }
+
     /// Whether a message's text is shown before the rest of it, which is still being downloaded: its attachments,
     /// Save As, View Source and Forward wait for it
     pub fn message_downloading(&self, folder: FolderId, uid: u64) -> bool {

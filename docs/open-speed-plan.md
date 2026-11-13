@@ -192,20 +192,23 @@ Core only: no change to the C API or the apps.
 
 ### Phase 5: large messages show their text first (cause 4)
 
-- For a message over 1 MB that is not here, the reader fetches its structure (`BODYSTRUCTURE`) and its text and HTML
-  parts and inline pictures first (`BODY.PEEK[1]`, `BODY.PEEK[1.2]`...), builds the view from them with the
-  attachments listed from the structure, and shows it. The whole source follows in the background, and Save As, View
-  Source, Forward and opening an attachment wait for it with a progress bar.
-- The parts are never written to `bodies`: they are held in memory (or a table of their own) until the whole source is
-  here, so nothing takes a partial message for a whole one.
-- While the whole message is downloaded, the pane says how much: "Downloading 4.2 of 15 MB" in place of the spinner.
+- For a message over 1 MB that is not here, the reader fetches its structure (`BODYSTRUCTURE`), its header, every
+  part's MIME header and the content of the parts that are no attachment (the text, the HTML, the pictures shown in
+  it), by the rules of the parser (`BodyStructure::attachments`). It puts them together as a message the view reads as
+  the whole one, its attachments named but without content and their sizes from the structure, and shows it
+  (`MessageReady`). That is held in memory, never stored (`pe-sync/src/text_first.rs`, `worker/large.rs`).
+- The whole source follows in one FETCH; pe-imap tells how many bytes came (`Client::on_received`), and the status
+  bar says how far it is every megabyte ("Downloading 4.2 MB of 15.0 MB"), then "Downloaded 15.0 MB" once it is
+  stored. Save As, View Source, Forward and the attachments read the store, so they work once it is all here; an
+  attachment opened before says the rest is still downloading.
 
 ### Phase 6: what the user sees while waiting
 
-- The pane already shows the header from the list at once, and the spinner after 250 ms on Windows. The same delay on
-  the Mac and Linux; after 1 s, the size ("Downloading this 2.3 MB message").
-- The UI tests check it by the timing record: a message from a prefetched Inbox opens from the store, with no
-  connection used.
+- The pane already shows the header from the list at once, and the downloading page after 250 ms, on all three
+  platforms. That page now says how large the message is ("The message is 2.3 MB. It will appear here once it is
+  downloaded."), from the first moment it shows rather than after a second.
+- The UI tests check that a new message downloaded ahead opens from the store, with no download, by the core's record
+  of the open (`pe_last_open_from_store`; on Windows through a test hook).
 
 ## Tests
 

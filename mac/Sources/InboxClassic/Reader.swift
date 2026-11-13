@@ -209,7 +209,8 @@ final class Reader: NSObject {
     func showDownloading() {
         downloadingTimer?.invalidate()
         retry.isHidden = true
-        preview.showState(PE_READER_STATE_DOWNLOADING)
+        // how large it is, too
+        preview.show(taken(pe_message_downloading_page(core.handle, folder, uid)) ?? "")
     }
 
     /// the message could not be downloaded: why, in the pane, and Try Again over it

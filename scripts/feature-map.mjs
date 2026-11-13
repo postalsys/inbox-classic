@@ -364,6 +364,13 @@ const sections = [
                 checked: ['The trusted sender is listed and can be removed', "With the setting on, every message's pictures load"]
             },
             {
+                shot: 'open-1-from-store',
+                name: 'A message downloaded ahead opens at once',
+                what: 'New mail is downloaded as it arrives, so opening it shows it from this computer at once, with no download. While a message is downloaded, the pane says how large it is.',
+                how: 'Open a message that came in since the app started.',
+                checked: ['A new message is downloaded before it is opened', 'It opens from the store, without a download']
+            },
+            {
                 shot: 'large-1-text-first',
                 name: 'Large messages show their text first',
                 what: 'A message over 1 MB shows its text and the pictures in it first, fetched by part, with its attachments listed; the rest follows in the background, and the status bar says how far it is. Its attachments, Save As, View Source and Forward wait until it is all here.',

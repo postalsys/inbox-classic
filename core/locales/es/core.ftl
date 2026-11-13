@@ -47,6 +47,8 @@ folder-archive = Archivo
 reader-no-message = No hay ningún mensaje seleccionado.
 reader-downloading = Descargando el mensaje…
 reader-downloading-detail = El mensaje se mostrará aquí cuando finalice la descarga.
+# review: new
+reader-downloading-size = El mensaje ocupa { $size }. Aparecerá aquí cuando se haya descargado.
 reader-failed = No se pudo descargar el mensaje
 reader-failed-network = No se pudo conectar con el servidor de correo ({ $reason }).
 reader-failed-sign-in = El servidor de correo no aceptó el inicio de sesión ({ $reason }). Compruebe la contraseña o vuelva a iniciar sesión en Archivo > Cuentas.
