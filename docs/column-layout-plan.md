@@ -122,9 +122,10 @@ One picture a row, chosen by the core in this order:
 1. **The brand's logo (BIMI)**, when the provider's own Authentication-Results say `bimi=pass` and `dmarc=pass`: the
    rule the reading pane uses today (`bimi::of`).
 2. **The contact's picture**, when the sender's address is in the Address Book with a picture **and** the message is
-   confirmed to come from that domain (`pictures::from_verified`, the rule of trusted senders), or the account's
-   provider adds no Authentication-Results at all. Never in Junk E-mail. A forged "boss@company.com" does not get the
-   boss's face.
+   confirmed to come from that domain (`pictures::from_verified`, the rule of trusted senders). Never in Junk E-mail.
+   A forged "boss@company.com" does not get the boss's face. (Built without the first draft's fallback for a provider
+   that gives no verdict: Microsoft's Authentication-Results carry no authserv-id, so every message there, forged ones
+   too, would have had no verdict and shown the face.)
 3. **The placeholder**: one or two initials (from the name, else the address; worked out in the core, Unicode aware) in
    the secondary text color on a faint neutral fill. One quiet tone for everyone, no color per sender, so real logos
    and pictures are what the eye finds.
@@ -243,8 +244,7 @@ Decided with Andris on 2026-11-13:
    says once "The window is wide enough for the column layout. View > Layout changes it.", and View > Layout > Classic
    brings the old look back for good.
 2. **The name is Columns**: View > Layout > Automatic, Classic, Columns.
-3. **A contact's picture shows for confirmed senders only** (or where the provider checks nothing at all), never in
-   Junk E-mail.
+3. **A contact's picture shows for confirmed senders only**, never in Junk E-mail.
 4. **The logo comes before the contact's picture**; the contact's picture is used where there is no logo.
 5. **The placeholder is quiet initials**: one muted tone for everyone, no color per sender.
 6. **Rows in Columns always have three lines.** No setting for the text line.
