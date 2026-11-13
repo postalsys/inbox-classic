@@ -851,8 +851,8 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     /// the picture, set or taken away once OK saved the card (Cancel leaves it as it was)
     let picture = PictureWell()
     private let removePictureButton = NSButton(title: Text.uiRemove.text, target: nil, action: nil)
-    /// a file chosen or dropped, given to the core on OK
-    private var pendingPicture: URL?
+    /// the core's PNG of a file chosen or dropped, set on OK
+    private var pendingPicture: Data?
     /// Remove was clicked for the picture the card has
     private var pictureRemoved = false
     /// the card has a picture in the store
@@ -910,11 +910,33 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         picture.image = pixelImage(pixels, side: side, points: PictureWell.size)
     }
 
-    /// a file chosen or dropped: shown now, given to the core on OK (which says whether it is a picture it takes)
+    /// a file chosen or dropped: the core reads it off the main thread into its own PNG (or says why not), which is
+    /// shown now and set on OK; the window decodes nothing
     func choosePicture(_ url: URL) {
-        pendingPicture = url
+        let path = url.path
+        Task.detached { [weak self] in
+            var length = 0
+            var error: UnsafeMutablePointer<CChar>?
+            let png = takenBytes(path.withCString { pe_card_picture_prepare($0, &length, &error) }, length)
+            let reason = taken(error)
+            onMain { self?.picturePrepared(png, reason: reason) }
+        }
+    }
+
+    /// what the core made of a file: its PNG shown and kept for OK, or the reason it took none
+    private func picturePrepared(_ png: Data?, reason: String?) {
+        guard let png else {
+            inform(reason ?? Text.uiPictureNotPicture.text, title: window.title, style: .warning)
+            return
+        }
+        let side = Int(PictureWell.size * (window.backingScaleFactor > 0 ? window.backingScaleFactor : 2))
+        var length = 0
+        let pixels = png.withUnsafeBytes { bytes in
+            takenBytes(pe_png_bgra(bytes.bindMemory(to: UInt8.self).baseAddress, png.count, UInt32(side), &length), length)
+        }
+        pendingPicture = png
         pictureRemoved = false
-        picture.image = NSImage(contentsOf: url)
+        picture.image = pixelImage(pixels, side: side, points: PictureWell.size)
         updatePictureButtons()
     }
 
@@ -936,13 +958,13 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         removePictureButton.isHidden = picture.image == nil
     }
 
-    /// the picture as OK leaves it, on the card saved as `id`; the core's reason when it took no file
+    /// the picture as OK leaves it, on the card saved as `id`; a reason when the core took none
     private func applyPicture(to id: Int64) -> String? {
-        if let url = pendingPicture {
-            var error: UnsafeMutablePointer<CChar>?
-            let set = url.path.withCString { pe_card_set_picture(core.handle, id, $0, &error) }
-            let reason = taken(error)
-            guard set else { return reason ?? Text.uiPictureNotPicture.text }
+        if let png = pendingPicture {
+            let set = png.withUnsafeBytes { bytes in
+                pe_card_set_picture_png(core.handle, id, bytes.bindMemory(to: UInt8.self).baseAddress, png.count)
+            }
+            guard set else { return Text.uiPictureNotPicture.text }
             pendingPicture = nil
             storedPicture = true
         } else if pictureRemoved {

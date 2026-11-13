@@ -330,16 +330,22 @@ extension UITest {
                 + "From: Ivy Lane <ivy@pictures.example>\r\nTo: testuser@inboxclassic.test\r\nSubject: \(subject)\r\n"
                 + "Date: \(now)\r\nMessage-ID: <\(id)@pictures.example>\r\n\r\nThe pictures are in.\r\n", flags: ["\\Seen"])
         }
+        // and one the provider says nothing about: not confirmed either
+        try await addMessage("From: Ivy Lane <ivy@pictures.example>\r\nTo: testuser@inboxclassic.test\r\nSubject: No verdict\r\n"
+            + "Date: \(now)\r\nMessage-ID: <ivy-unknown@pictures.example>\r\n\r\nNothing checked.\r\n", flags: ["\\Seen"])
         main.window.makeKeyAndOrderFront(nil)
         selectFolder(named: "Inbox")
         command(.sync)
         command(.layoutColumns)
         let confirmed = { self.listedRow("Trip photos") }
         let forged = { self.listedRow("Urgent invoice") }
+        let unknown = { self.listedRow("No verdict") }
         check(await waitUntil(40) {
             confirmed() >= 0 && forged() >= 0 && main.mailbox.row(confirmed())?.picture ?? 0 != 0
         }, "the confirmed sender's row has her contact picture to draw")
         check(main.mailbox.row(forged())?.picture == 0, "the forged one from the same address has none")
+        check(await waitUntil(10) { unknown() >= 0 } && main.mailbox.row(unknown())?.picture == 0,
+              "nor one the provider gave no verdict on: only a confirmed sender gets the contact's picture")
         check(await waitUntil(20) {
             list.scrollRowToVisible(confirmed())
             return rowCell(confirmed())?.picture.image != nil
