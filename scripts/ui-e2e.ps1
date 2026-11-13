@@ -30,7 +30,6 @@ Add-Type -Namespace Native -Name Win -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern IntPtr GetDesktopWindow();
 [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr hwnd);
-[DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr hwnd, int index);
 [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr hwnd);
 [DllImport("user32.dll")] public static extern IntPtr GetWindow(IntPtr hwnd, uint cmd);
