@@ -3,7 +3,7 @@
 
 [[section]]
 id = "get-started"
-topics = ["add-account", "gmail-outlook", "main-window"]
+topics = ["add-account", "gmail-outlook", "main-window", "layouts"]
 
 [[section]]
 id = "everyday"

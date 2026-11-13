@@ -61,6 +61,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         mailbox.openMailto = { [weak self] in self?.openMailto($0) }
         showOutbox()
         showCounts()
+        updateLayout()
         syncTimer = Timer.scheduledTimer(withTimeInterval: 10 * 60, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.core.syncAll() }
         }
@@ -119,6 +120,34 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             notifyUser(title: Text.uiStillRunning.text, text: Text.macStillRunningDetail.text, folder: 0, uid: 0)
         }
         return false
+    }
+
+    // ---- the layout ----
+
+    /// the window's width tells Automatic which layout; Classic and Columns hold
+    public func windowDidResize(_ notification: Notification) {
+        updateLayout()
+    }
+
+    /// the panes as View > Layout and the window's width say: the core decides, the same way on every platform. The
+    /// first time Automatic turns to Columns the status bar says where to change it
+    func updateLayout() {
+        guard let mode = AppDelegate.shared?.layoutMode else { return }
+        let width = UInt32(max(0, window.contentLayoutRect.width))
+        let wanted = pe_layout_for(mode, width, mailbox.layout)
+        guard wanted != mailbox.layout else { return }
+        mailbox.setLayout(wanted)
+        if wanted == PE_LAYOUT_COLUMNS && mode == PE_LAYOUT_MODE_AUTOMATIC && !MainWindow.columnsNoteShown {
+            MainWindow.columnsNoteShown = true
+            setStatus(Text.uiColumnsNote.text)
+        }
+    }
+
+    /// whether the note of Automatic's columns was shown; kept in memory under test
+    private static var noteShown = Preference("ColumnsNoteShown", default: false)
+    static var columnsNoteShown: Bool {
+        get { noteShown.value }
+        set { noteShown.value = newValue }
     }
 
     // ---- the status bar ----

@@ -426,6 +426,9 @@ final class UITest {
         self.delegate = delegate
         NSApp.delegate = delegate
         delegate.applicationDidFinishLaunching(Notification(name: NSApplication.didFinishLaunchingNotification))
+        // the classic layout, whatever the window's width, so the screenshots are those of the steps; the column
+        // layout's own steps choose it
+        delegate.layoutMode = PE_LAYOUT_MODE_CLASSIC
     }
 
     var tree: FolderOutline { main.mailbox.tree }
@@ -513,6 +516,7 @@ final class UITest {
         try await betweenAccounts()
         try await unreadOnly()
         try await folderList()
+        try await columnLayout()
         try await trustedPictures()
         try await openEml()
         try await accountsAndHelp()

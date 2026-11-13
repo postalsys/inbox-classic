@@ -87,8 +87,8 @@ the folder bar and the popover show them.
   go with the classic look).
 - **Dates are short**: the time today, the weekday in the last six days, day and month this year, the full date
   before. The apps keep formatting dates in the system's own format as they do; the rule is the same on all three.
-- **Conversations**: the head row is the newest message with the count; opened, its messages follow as rows of two
-  lines (who and date, the text), indented to the picture's edge, without a picture.
+- **Conversations**: the head row has the count, the newest message's date and its own first words; opened, its messages
+  follow as rows of the same height, indented. (Built so: one row height keeps every list virtual on all three.)
 - **The height is fixed** (three lines even while the text line is still empty), so the lists stay virtual and fast and
   nothing jumps when the text arrives.
 - **"Sorted by Date ▾"** above the list, beside the search box's row: Date, From, Subject, Size, Flag, Attachment, then

@@ -8,6 +8,10 @@ menu-view = &Ansicht
 menu-tools = E&xtras
 menu-message = &Nachricht
 menu-help = &Hilfe
+# review: new
+menu-layout = &Layout
+# review: new
+menu-sort-by = &Sortieren nach
 menu-folder = &Ordner
 
 ## The commands
@@ -59,6 +63,24 @@ cmd-collapse-all-threads = Alle Unterhaltungen &reduzieren
 ui-group-by-conversation = Nachrichten nach &Unterhaltung gruppieren
 # review: new
 cmd-folder-list = &Ordnerliste
+# review: new
+cmd-layout-automatic = &Automatisch
+# review: new
+cmd-layout-classic = &Klassisch
+# review: new
+cmd-layout-columns = &Spalten
+# review: new
+cmd-sort-date = &Datum
+# review: new
+cmd-sort-from = &Von
+# review: new
+cmd-sort-subject = &Betreff
+# review: new
+cmd-sort-size = &Größe
+# review: new
+cmd-sort-ascending = &Aufsteigend sortieren
+# review: new
+cmd-sort-descending = Ab&steigend sortieren
 cmd-hide-ignored = &Ignorierte Unterhaltungen ausblenden
 # review: new
 cmd-hide-read = &Gelesene Nachrichten ausblenden
@@ -536,3 +558,20 @@ ui-eml-default-done = Inbox Classic öffnet jetzt .eml-Dateien.
 ui-eml-default-failed = Inbox Classic konnte nicht als App für .eml-Dateien festgelegt werden: { $reason }
 # review: new
 ui-folders = Ordner
+# review: new
+ui-sorted-by = Sortiert nach { $field }
+# review: new
+ui-layout-label = Layout:
+# review: new
+ui-columns-note = Das Fenster ist breit genug für das Spaltenlayout. Ansicht > Layout ändert es.
+# review: new
+ui-row-unread = Ungelesen
+# review: new
+ui-row-flagged = Gekennzeichnet
+# review: new
+ui-row-attachments = Mit Anlagen
+# review: new
+ui-row-messages = { $count ->
+    [one] { $count } Nachricht
+   *[other] { $count } Nachrichten
+}

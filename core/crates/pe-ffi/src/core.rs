@@ -1331,6 +1331,10 @@ pub struct PeMessage {
     /// A notice that a message was not delivered, or not yet (a bounce): the list shows its icon in the attachment
     /// column's place
     pub bounce: bool,
+    /// The first words of what the sender wrote, for the Columns list's third line: empty while the core has not read
+    /// its text yet, or when it has none. A collapsed conversation's row has its newest message's. Text from the
+    /// sender: shown as text, never as markup
+    pub snippet: *const c_char,
 }
 
 /// A conversation's mark (Message > Watch Conversation, Ignore Conversation)
@@ -1385,6 +1389,7 @@ pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList
             bounce: info.bounce,
             mark: m.mark.into(),
             dimmed: m.dimmed(),
+            snippet: strings.add(m.snippet.as_deref().unwrap_or_default()),
         }
     })))
 }

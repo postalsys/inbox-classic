@@ -588,6 +588,9 @@ struct Message {
     let mark: PeThreadMark
     /// the row grey, its conversation ignored (the core decides)
     let dimmed: Bool
+    /// the first words of what the sender wrote, empty until the core has read them (text from the sender: shown as
+    /// text only)
+    let snippet: String
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -614,6 +617,7 @@ struct Message {
         bounce = message.bounce
         mark = message.mark
         dimmed = message.dimmed
+        snippet = text(message.snippet)
     }
 }
 
@@ -662,11 +666,48 @@ func formatSize(_ bytes: UInt64) -> String {
     taken(pe_format_size(bytes)) ?? Text.sizeBytes.text(["count": bytes])
 }
 
-/// A date as the user's settings write it, short date and time
-func formatDate(_ seconds: Int64) -> String {
+/// A date formatter made once: `setUp` gives it its style
+@MainActor
+private func formatter(_ setUp: (DateFormatter) -> Void) -> DateFormatter {
     let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .short
+    setUp(formatter)
+    return formatter
+}
+
+@MainActor private let dateAndTime = formatter { $0.dateStyle = .short; $0.timeStyle = .short }
+
+/// A date as the user's settings write it, short date and time
+@MainActor
+func formatDate(_ seconds: Int64) -> String {
+    dateAndTime.string(from: Date(timeIntervalSince1970: TimeInterval(seconds)))
+}
+
+/// What the column list's dates are seen from: now and the time zone's offset, taken once for a page of rows
+struct DateClock {
+    let now: Int64
+    let offset: Int64
+
+    init() {
+        let date = Date()
+        now = Int64(date.timeIntervalSince1970)
+        offset = Int64(TimeZone.current.secondsFromGMT(for: date))
+    }
+}
+
+/// the formats of the column list's dates, one each of PeDateStyle's
+@MainActor private let shortFormats: [UInt32: DateFormatter] = [
+    PE_DATE_STYLE_TIME.rawValue: formatter { $0.timeStyle = .short },
+    PE_DATE_STYLE_WEEKDAY.rawValue: formatter { $0.setLocalizedDateFormatFromTemplate("EEEE") },
+    PE_DATE_STYLE_DAY_MONTH.rawValue: formatter { $0.setLocalizedDateFormatFromTemplate("dMMM") },
+    PE_DATE_STYLE_FULL.rawValue: formatter { $0.dateStyle = .short },
+]
+
+/// A date of the column list's rows, short as the core says for its age seen at `clock`: the time today, the weekday
+/// this week, the day and month this year, the date before
+@MainActor
+func shortDate(_ seconds: Int64, at clock: DateClock) -> String {
+    let style = pe_date_style(seconds, clock.now, clock.offset)
+    let formatter = shortFormats[style.rawValue] ?? dateAndTime
     return formatter.string(from: Date(timeIntervalSince1970: TimeInterval(seconds)))
 }
 

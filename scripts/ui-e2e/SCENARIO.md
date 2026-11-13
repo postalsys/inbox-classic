@@ -546,6 +546,20 @@ Screenshot: `layout-3-folders-hidden`
   button's popover on Linux, Go to Folder on the Mac
 - the toolbar's sidebar button (the Mac and Linux) or View > Folder List brings it back
 
+## 34g5. The column layout
+
+Screenshots: `layout-1-columns`, `layout-4-sort`, `layout-5-conversation`, `layout-2-automatic`
+
+The test pins View > Layout > Classic at its start, so every other step's screenshot is of the classic layout.
+
+- View > Layout > Columns: the message list stands beside the reading pane; its rows have three lines (who and when,
+  the subject and its marks, the first words of the message), and a message whose text is known shows its first words
+- View > Sort By > Subject: the Sorted by button above the list says Subject and the order changes; Date again
+- a conversation opened in the column layout: its messages follow it, indented
+- View > Layout > Automatic: a window 1500 wide shows the column layout, 1100 wide the classic one; the status bar
+  says the column layout note once
+- View > Layout > Classic: back as before
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`

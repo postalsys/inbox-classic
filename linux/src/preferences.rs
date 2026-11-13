@@ -98,6 +98,7 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
         }
     });
     let list = adw::PreferencesGroup::new();
+    list.add(&layout_row());
     list.add(&grouped);
 
     let page = adw::PreferencesPage::new();
@@ -164,6 +165,28 @@ fn pictures_group() -> adw::PreferencesGroup {
     group.add(&always);
     group.add(&trusted);
     group
+}
+
+/// Layout: Automatic, Classic or Columns, as View > Layout chooses
+fn layout_row() -> adw::ComboRow {
+    use crate::commands::Command;
+    use pe_core::layout::LayoutMode;
+    let modes = [LayoutMode::Automatic, LayoutMode::Classic, LayoutMode::Columns];
+    let names: Vec<String> = [Command::LayoutAutomatic, Command::LayoutClassic, Command::LayoutColumns]
+        .iter()
+        .map(|command| command.label().to_string())
+        .collect();
+    let at = modes
+        .iter()
+        .position(|mode| *mode == shell().main().layout_mode())
+        .unwrap_or(0);
+    choice_row(Text::UiLayoutLabel, &names, "preferences-layout", at, move |chosen| {
+        if let Some(&mode) = modes.get(chosen)
+            && mode != shell().main().layout_mode()
+        {
+            shell().main().set_layout_mode(mode);
+        }
+    })
 }
 
 /// A row choosing one of `choices`, the one chosen under its title, where a long one has room in every language;

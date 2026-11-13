@@ -16,6 +16,7 @@ mod compose;
 mod contentline;
 mod export;
 mod fold;
+pub mod layout;
 mod list_view;
 pub mod mailto;
 pub mod otp;

@@ -17,6 +17,13 @@ pub const TITLE: &str = "Inbox Classic";
 const STYLE: &str = "
 .unread { font-weight: bold; }
 .message-list { font-feature-settings: 'tnum'; }
+.message-row { padding: 7px 22px 7px 0; }
+.message-row .sender { font-weight: 600; }
+.message-row .row-detail { font-size: 0.9em; }
+.message-rows > row { border-bottom: 1px solid alpha(@borders, 0.5); }
+.unread-dot { min-width: 8px; min-height: 8px; border-radius: 4px; background-color: @accent_bg_color; }
+.sort-button { margin: 2px 4px; }
+.sort-button label { font-weight: normal; }
 .info-bar { background-color: alpha(@accent_bg_color, 0.14); padding: 6px 10px; }
 .info-bar .title { font-weight: bold; }
 .reader-header { padding: 8px 10px; background-color: @headerbar_bg_color; border-bottom: 1px solid alpha(@borders, 0.6); }
@@ -43,6 +50,15 @@ row.drop-above { background-position: center top; }
 row.drop-below { background-position: center bottom; }
 .new-address { font-size: 0.8em; font-weight: bold; color: white; background-color: @error_bg_color; border-radius: 4px; padding: 1px 6px; }
 ";
+
+/// The CSS class `class` on `widget` or off it
+pub fn set_class(widget: &impl IsA<gtk::Widget>, class: &str, on: bool) {
+    if on {
+        widget.add_css_class(class);
+    } else {
+        widget.remove_css_class(class);
+    }
+}
 
 pub fn load_style() {
     let provider = gtk::CssProvider::new();

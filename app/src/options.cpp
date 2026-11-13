@@ -72,7 +72,9 @@ struct OptionsState {
     HWND picturesCheck = nullptr;
     HWND aheadCombo = nullptr;
     HWND limitCombo = nullptr;
+    HWND layoutCombo = nullptr;
     int picked = 0;
+    int layout = 0;
     int ahead = 0;
     int limit = 0;
     bool notify = false;
@@ -227,6 +229,7 @@ LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             state->pictures = Button_GetCheck(state->picturesCheck) == BST_CHECKED;
             state->ahead = static_cast<int>(SendMessageW(state->aheadCombo, CB_GETCURSEL, 0, 0));
             state->limit = static_cast<int>(SendMessageW(state->limitCombo, CB_GETCURSEL, 0, 0));
+            state->layout = static_cast<int>(SendMessageW(state->layoutCombo, CB_GETCURSEL, 0, 0));
         }
         state->done = true;
         return 0;
@@ -276,7 +279,7 @@ void StartLanguage(const std::wstring& forced) {
     core::SetLanguage(code);
 }
 
-bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes) {
+bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes, int& layout) {
     HelpScope help("options");
     RegisterDialogClass(kOptionsClass, OptionsProc);
     std::vector<Language> languages = Languages();
@@ -290,6 +293,10 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     std::wstring label = core::T(PE_TEXT_WIN_OPTIONS_LANGUAGE_LABEL), note = core::T(PE_TEXT_WIN_OPTIONS_RESTART_NOTE);
     std::wstring notifyText = core::T(PE_TEXT_WIN_OPTIONS_NOTIFY);
     std::wstring threadsText = core::T(PE_TEXT_UI_GROUP_BY_CONVERSATION);
+    // View > Layout's three, in the order of PeLayoutMode
+    std::wstring layoutText = core::T(PE_TEXT_UI_LAYOUT_LABEL);
+    std::vector<std::wstring> layoutItems = {core::Plain(PE_TEXT_CMD_LAYOUT_AUTOMATIC), core::Plain(PE_TEXT_CMD_LAYOUT_CLASSIC),
+                                             core::Plain(PE_TEXT_CMD_LAYOUT_COLUMNS)};
     std::wstring codesText = core::T(PE_TEXT_UI_CODES_IN_NOTIFICATIONS);
     std::wstring picturesText = core::T(PE_TEXT_UI_PICTURES_ALWAYS_OPTION), warning = core::T(PE_TEXT_UI_PICTURES_ALWAYS_WARNING);
     std::wstring trustedText = core::T(PE_TEXT_UI_TRUSTED_SENDERS_BUTTON), emlText = core::T(PE_TEXT_UI_EML_DEFAULT);
@@ -315,8 +322,9 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
         longest = std::max(longest, static_cast<int>(MeasureText(language.name).cx));
     }
     int comboWidth = std::max(Scale(200), longest + GetSystemMetrics(SM_CXVSCROLL) + Scale(12));
-    // the download lists: their labels in a column, the lists as wide as their longest entry
-    int downloadLabel = static_cast<int>(std::max(MeasureText(aheadText).cx, MeasureText(limitText).cx)) + Scale(8);
+    // the layout and download lists: their labels in a column, the lists as wide as their longest entry
+    int comboLabel = static_cast<int>(std::max({MeasureText(aheadText).cx, MeasureText(limitText).cx, MeasureText(layoutText).cx})) +
+                        Scale(8);
     int downloadListWidth = 0;
     for (const auto* items : {&aheadItems, &limitItems}) {
         for (const std::wstring& item : *items) {
@@ -329,7 +337,7 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
                           static_cast<int>(MeasureText(threadsText).cx) + Scale(24),
                           static_cast<int>(MeasureText(codesText).cx) + Scale(48),
                           static_cast<int>(MeasureText(picturesText).cx) + Scale(24),
-                          ButtonWidth({trustedText}) + Scale(6) + ButtonWidth({emlText}), downloadLabel + downloadListWidth});
+                          ButtonWidth({trustedText}) + Scale(6) + ButtonWidth({emlText}), comboLabel + downloadListWidth});
     int width = 2 * pad + inner;
     int noteHeight = std::max(Scale(16), static_cast<int>(MeasureText(note, inner - labelWidth).cy));
     int warningHeight = std::max(Scale(16), static_cast<int>(MeasureText(warning, inner - Scale(17)).cy));
@@ -339,7 +347,7 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     int reading = Scale(12) + 2 + Scale(12) + row + warningHeight + Scale(8) + Scale(25);
     // a line, then downloading: the two lists and the note
     int downloading = Scale(12) + 2 + Scale(12) + 2 * row + 2 * Scale(4) + downloadNoteHeight;
-    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 3 * row + 2 * Scale(4) + reading + downloading +
+    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 4 * row + 3 * Scale(4) + reading + downloading +
                  Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
     OptionsState state;
@@ -375,6 +383,15 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     HWND threadsCheck = CreateChild(dialog, L"BUTTON", threadsText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_OPTIONS_THREADS,
                                     {left, y, right, y + row});
     Button_SetCheck(threadsCheck, threads ? BST_CHECKED : BST_UNCHECKED);
+    y += row + Scale(4);
+    // the layout of the main window, as View > Layout has it
+    CreateChild(dialog, L"STATIC", layoutText.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + comboLabel, y + row});
+    HWND layoutCombo = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, IDC_OPTIONS_LAYOUT,
+                                   {left + comboLabel, y, right, y + Scale(200)});
+    for (const std::wstring& item : layoutItems) {
+        SendMessageW(layoutCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
+    }
+    SendMessageW(layoutCombo, CB_SETCURSEL, std::clamp(layout, 0, 2), 0);
     y += row + Scale(12);
     CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {left, y, right, y + 2});
     y += 2 + Scale(12);
@@ -394,9 +411,9 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {left, y, right, y + 2});
     y += 2 + Scale(12);
     auto addDownloadList = [&](const std::wstring& text, int id, const std::vector<std::wstring>& items, int selected) {
-        CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + downloadLabel, y + row});
+        CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + comboLabel, y + row});
         HWND list = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, id,
-                                {left + downloadLabel, y, right, y + Scale(200)});
+                                {left + comboLabel, y, right, y + Scale(200)});
         for (const std::wstring& item : items) {
             SendMessageW(list, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
         }
@@ -420,6 +437,7 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     state.picturesCheck = picturesCheck;
     state.aheadCombo = aheadCombo;
     state.limitCombo = limitCombo;
+    state.layoutCombo = layoutCombo;
     state.core = core;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     RunModal(dialog, combo, state.done);
@@ -429,6 +447,9 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     notify = state.notify;
     threads = state.threads;
     codes = state.codes;
+    if (state.layout >= 0) {
+        layout = state.layout;
+    }
     pe_set_always_load_pictures(core, state.pictures);
     if (state.ahead >= 0) {
         pe_set_download_ahead(core, static_cast<PeDownloadAhead>(state.ahead));

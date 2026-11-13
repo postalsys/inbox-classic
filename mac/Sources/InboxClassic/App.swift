@@ -78,19 +78,20 @@ public func runApp(_ arguments: Arguments = Arguments(CommandLine.arguments)) ->
 /// A setting of the app in the user defaults; the UI test keeps it in memory, so a run never changes the setting of
 /// whoever runs it
 @MainActor
-private struct Preference {
+struct Preference<Value> {
     let key: String
-    private var testValue: Bool
-    private let fallback: Bool
+    private var testValue: Value
+    private let fallback: Value
 
-    init(_ key: String, default fallback: Bool) {
+    init(_ key: String, default fallback: Value) {
         self.key = key
         self.fallback = fallback
         testValue = fallback
     }
 
-    var value: Bool {
-        get { TestHooks.testing ? testValue : UserDefaults.standard.object(forKey: key) as? Bool ?? fallback }
+    /// a Bool, Int or Double, as the user defaults keep them
+    var value: Value {
+        get { TestHooks.testing ? testValue : UserDefaults.standard.object(forKey: key) as? Value ?? fallback }
         set {
             if TestHooks.testing {
                 testValue = newValue
@@ -158,6 +159,19 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
     private var showingFolders = Preference("FolderList", default: true)
+    /// View > Layout and Settings: Automatic (the window's width decides), Classic or Columns; in memory under test
+    var layoutMode: PeLayoutMode {
+        get { PeLayoutMode(rawValue: UInt32(clamping: max(0, min(2, layoutChoice.value)))) }
+        set {
+            layoutChoice.value = Int(newValue.rawValue)
+            main?.updateLayout()
+        }
+    }
+    private var layoutChoice = Preference("Layout", default: 0)
+    /// the View > Layout command of each choice
+    static let layoutModes: [Command: PeLayoutMode] = [
+        .layoutAutomatic: PE_LAYOUT_MODE_AUTOMATIC, .layoutClassic: PE_LAYOUT_MODE_CLASSIC, .layoutColumns: PE_LAYOUT_MODE_COLUMNS,
+    ]
     /// message files (and links) the system asked to open before the window was there
     private var pending: [URL] = []
     /// the app ends after the compose windows that are saving have closed
@@ -322,7 +336,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
 
     // ---- the menus ----
 
-    private func item(for command: Command, title: String? = nil) -> NSMenuItem {
+    /// a menu item that runs `command`, checked and turned off by validateMenuItem as the menus open
+    func item(for command: Command, title: String? = nil) -> NSMenuItem {
         let item = NSMenuItem(title: title ?? command.label, action: #selector(runCommand(_:)), keyEquivalent: "")
         if let (key, modifiers) = command.key {
             item.keyEquivalent = key
@@ -332,6 +347,33 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         item.target = self
         item.setAccessibilityIdentifier("command.\(command)")
         return item
+    }
+
+    /// the View menu's items, those of a submenu (Layout, Sort By) together in it where the first of them is
+    private func viewItems(_ commands: [Command]) -> [NSMenuItem] {
+        var items: [NSMenuItem] = []
+        var submenus: [String: NSMenu] = [:]
+        for command in commands {
+            guard let name = command.submenu else {
+                items.append(item(for: command))
+                continue
+            }
+            if submenus[name] == nil {
+                let title = name == "layout" ? Text.menuLayout.text : Text.menuSortBy.text
+                let menu = NSMenu(title: title)
+                let holder = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+                holder.submenu = menu
+                holder.setAccessibilityIdentifier("menu.\(name)")
+                submenus[name] = menu
+                items.append(holder)
+            }
+            // the direction after the fields, apart from them
+            if command == .sortAscending {
+                submenus[name]?.addItem(.separator())
+            }
+            submenus[name]?.addItem(item(for: command))
+        }
+        return items
     }
 
     private func buildMenu() -> NSMenu {
@@ -398,7 +440,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             item(for: .move), item(for: .delete),
         ]
         _ = submenu(Text.menuEdit.text, edit)
-        _ = submenu(Text.menuView.text, commands("view").map { item(for: $0) })
+        _ = submenu(Text.menuView.text, viewItems(commands("view")))
         _ = submenu(Text.menuMessage.text, [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
                                 separator(), item(for: .flag), flagMenu(), separator(), item(for: .watchConversation),
                                 item(for: .ignoreConversation), separator(), item(for: .archive), item(for: .junk),
@@ -514,6 +556,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .hideIgnored: hideIgnored.toggle()
         case .hideRead: hideRead.toggle()
         case .folderList: folderList.toggle()
+        case .layoutAutomatic, .layoutClassic, .layoutColumns: layoutMode = Self.layoutModes[command] ?? layoutMode
+        case .sortDate, .sortFrom, .sortSubject, .sortSize:
+            if let field = Mailbox.sortFields[command] { main.mailbox.sortBy(field) }
+        case .sortAscending: main.mailbox.setAscending(true)
+        case .sortDescending: main.mailbox.setAscending(false)
         case .notify: notify.toggle()
         case .open: main.show()
         case .defaultApp: main.makeDefaultMailApp()
@@ -604,6 +651,12 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         if command == .folderList {
             item.state = folderList ? .on : .off
+        }
+        if let mode = Self.layoutModes[command] {
+            item.state = layoutMode == mode ? .on : .off
+        }
+        if let main, let state = main.mailbox.sortState(command) {
+            item.state = state ? .on : .off
         }
         guard let main, core != nil else { return command == .exit || command == .about || command == .help }
         // checked while the conversation of every message they are about has the mark, which choosing it again takes away

@@ -8,6 +8,10 @@ menu-view = &Ver
 menu-tools = &Herramientas
 menu-message = &Mensaje
 menu-help = Ay&uda
+# review: new
+menu-layout = &Diseño
+# review: new
+menu-sort-by = Ordenar &por
 menu-folder = Carpe&ta
 
 ## The commands
@@ -58,6 +62,24 @@ cmd-collapse-all-threads = &Contraer todas las conversaciones
 ui-group-by-conversation = &Agrupar los mensajes por conversación
 # review: new
 cmd-folder-list = Lis&ta de carpetas
+# review: new
+cmd-layout-automatic = &Automático
+# review: new
+cmd-layout-classic = &Clásico
+# review: new
+cmd-layout-columns = C&olumnas
+# review: new
+cmd-sort-date = &Fecha
+# review: new
+cmd-sort-from = &De
+# review: new
+cmd-sort-subject = &Asunto
+# review: new
+cmd-sort-size = &Tamaño
+# review: new
+cmd-sort-ascending = Orden as&cendente
+# review: new
+cmd-sort-descending = Orden desce&ndente
 cmd-hide-ignored = &Ocultar las conversaciones ignoradas
 # review: new
 cmd-hide-read = Ocultar los mensajes &leídos
@@ -535,3 +557,20 @@ ui-eml-default-done = Inbox Classic abre ahora los archivos .eml.
 ui-eml-default-failed = No se pudo hacer de Inbox Classic la aplicación para los archivos .eml: { $reason }
 # review: new
 ui-folders = Carpetas
+# review: new
+ui-sorted-by = Ordenado por { $field }
+# review: new
+ui-layout-label = Diseño:
+# review: new
+ui-columns-note = La ventana es lo bastante ancha para el diseño en columnas. Ver > Diseño lo cambia.
+# review: new
+ui-row-unread = No leído
+# review: new
+ui-row-flagged = Marcado
+# review: new
+ui-row-attachments = Con archivos adjuntos
+# review: new
+ui-row-messages = { $count ->
+    [one] { $count } mensaje
+   *[other] { $count } mensajes
+}
