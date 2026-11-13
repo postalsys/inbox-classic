@@ -127,7 +127,7 @@ write("svg/app-icon.svg", square_icon(1024, 0, 1024, 1024 * 0.2, "a"))
 write("svg/app-icon-macos.svg", square_icon(1024, 100, 824, 185.4, "b"))
 
 # 5. Favicon for 16 to 48 pixels: frame and coral V only, thicker strokes.
-fav = rrect(0, 0, 32, 32, 6.5, BLUE)
+fav = rrect(0, 0, 32, 32, 7, BLUE)
 fw, fh, fs = 24.0, 17.0, 2.75
 fx, fy = 4.0, 7.5
 fav += (
