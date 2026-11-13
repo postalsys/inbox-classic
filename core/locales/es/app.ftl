@@ -574,3 +574,7 @@ ui-row-messages = { $count ->
     [one] { $count } mensaje
    *[other] { $count } mensajes
 }
+# review: new
+ui-list-pictures = Mostrar las imágenes de los remitentes en la lista de mensajes
+# review: new
+ui-list-pictures-note = Logotipos de marcas que el proveedor de correo confirmó; si no, las iniciales del remitente. Los logotipos se descargan una vez por marca, nunca por mensaje.

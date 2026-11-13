@@ -576,3 +576,7 @@ ui-row-messages = { $count ->
     [one] { $count } kiri
    *[other] { $count } kirja
 }
+# review: new
+ui-list-pictures = Näita kirjade loendis saatjate pilte
+# review: new
+ui-list-pictures-note = E-posti teenusepakkuja kinnitatud brändilogod, muidu saatja initsiaalid. Logod laaditakse alla üks kord iga brändi kohta, mitte iga kirja kohta.
