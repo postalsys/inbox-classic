@@ -196,8 +196,9 @@ impl Mailbox {
         let window = adw::ApplicationWindow::builder()
             .application(application)
             .title(TITLE)
-            // room for the folder's name in the header bar in every language ("Boîte de réception")
-            .default_width(1200)
+            // room for the folder's name in the header bar in every language ("Boîte de réception", "Bandeja de
+            // entrada"), beside the sidebar button
+            .default_width(1260)
             .default_height(760)
             .content(&toolbar)
             .icon_name(crate::APP_ID)
